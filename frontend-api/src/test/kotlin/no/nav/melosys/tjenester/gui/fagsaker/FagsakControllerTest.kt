@@ -630,19 +630,20 @@ internal class FagsakControllerTest {
         fun `skal sortere fagsaker på endretDato når toggle er aktivert`() {
             // Opprett tre fagsaker med forskjellige endretDato
             val nyesteFagsak = Fagsak.forTest {
-                saksnummer = "SAK-001"
+                saksnummer = "MEL-2"
                 medBruker()
                 endretDato = Instant.ofEpochMilli(3000000000000)
             }
 
             val midtereFagsak = Fagsak.forTest {
-                saksnummer = "SAK-002"
+                saksnummer = "MEL-1"
                 medBruker()
                 endretDato = Instant.ofEpochMilli(2000000000000)
             }
 
+
             val eldsteFagsak = Fagsak.forTest {
-                saksnummer = "SAK-003"
+                saksnummer = "MEL-3"
                 medBruker()
                 endretDato = Instant.ofEpochMilli(1000000000000)
             }
@@ -650,7 +651,6 @@ internal class FagsakControllerTest {
             // Returner fagsaker i tilfeldig rekkefølge
             every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, FagsakTestFactory.BRUKER_AKTØR_ID) } returns
                 listOf(eldsteFagsak, nyesteFagsak, midtereFagsak)
-            every { persondataFasade.hentSammensattNavn(any()) } returns "Joe Moe"
 
             // Aktiver toggle for sortering
             every { unleash.isEnabled(ToggleName.MELOSYS_SORTER_SOK_PA_REDIGERINGSDATO) } returns true
@@ -659,9 +659,9 @@ internal class FagsakControllerTest {
 
             // Verifiser at fagsaker returneres sortert synkende på endretDato (nyeste først)
             performSokAndExpectOk(fagsakSokDto)
-                .andExpect(jsonPath("$[0].saksnummer", equalTo("SAK-001")))
-                .andExpect(jsonPath("$[1].saksnummer", equalTo("SAK-002")))
-                .andExpect(jsonPath("$[2].saksnummer", equalTo("SAK-003")))
+                .andExpect(jsonPath("$[0].saksnummer", equalTo("MEL-2")))
+                .andExpect(jsonPath("$[1].saksnummer", equalTo("MEL-1")))
+                .andExpect(jsonPath("$[2].saksnummer", equalTo("MEL-3")))
         }
 
         @Test
@@ -671,25 +671,16 @@ internal class FagsakControllerTest {
                 medGsakSaksnummer()
                 behandling {
                     id = 1L
-                    tema = Behandlingstema.YRKESAKTIV
-                    type = Behandlingstyper.FØRSTEGANG
-                    status = Behandlingsstatus.AVSLUTTET
                     registrertDato = Instant.now()
                     endretDato = Instant.ofEpochMilli(1000000000000)
                 }
                 behandling {
                     id = 2L
-                    tema = Behandlingstema.YRKESAKTIV
-                    type = Behandlingstyper.NY_VURDERING
-                    status = Behandlingsstatus.AVSLUTTET
                     registrertDato = Instant.now()
                     endretDato = Instant.ofEpochMilli(2000000000000)
                 }
                 behandling {
                     id = 3L
-                    tema = Behandlingstema.YRKESAKTIV
-                    type = Behandlingstyper.HENVENDELSE
-                    status = Behandlingsstatus.AVSLUTTET
                     registrertDato = Instant.now()
                     endretDato = Instant.ofEpochMilli(3000000000000)
                 }
@@ -714,9 +705,9 @@ internal class FagsakControllerTest {
 
         @Test
         fun `skal ikke sortere fagsaker på endretDato når toggle er deaktivert`() {
-            // SAK-001 har nyest endretDato men eldst registrertDato
+            // MEL-1 har nyest endretDato men eldst registrertDato
             val fagsak1 = Fagsak.forTest {
-                saksnummer = "SAK-001"
+                saksnummer = "MEL-1"
                 medBruker()
                 behandling {
                     id = 10L
@@ -727,9 +718,9 @@ internal class FagsakControllerTest {
                 endretDato = Instant.ofEpochMilli(1000000000000)
             }
 
-            // SAK-002 har eldst endretDato men nyest registrertDato
+            // MEL-2 har eldst endretDato men nyest registrertDato
             val fagsak2 = Fagsak.forTest {
-                saksnummer = "SAK-002"
+                saksnummer = "MEL-2"
                 medBruker()
                 behandling {
                     id = 20L
@@ -746,14 +737,13 @@ internal class FagsakControllerTest {
 
             // Mock service til å returnere fagsak1 og fagsak2 i rekkefølge. Dersom toggle er på, vil testen feile med denne rekkefølgen.
             every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, FagsakTestFactory.BRUKER_AKTØR_ID) } returns listOf(fagsak1, fagsak2)
-            every { persondataFasade.hentSammensattNavn(any()) } returns "Joe Moe"
 
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
             // Toggle er deaktivert, så ingen sortering skal skje - samme rekkefølge som fra service
             performSokAndExpectOk(fagsakSokDto)
-                .andExpect(jsonPath("$[0].saksnummer", equalTo("SAK-001")))
-                .andExpect(jsonPath("$[1].saksnummer", equalTo("SAK-002")))
+                .andExpect(jsonPath("$[0].saksnummer", equalTo("MEL-1")))
+                .andExpect(jsonPath("$[1].saksnummer", equalTo("MEL-2")))
         }
 
         private fun performSokAndExpectOk(fagsakSokDto: FagsakSokDto): ResultActions {
