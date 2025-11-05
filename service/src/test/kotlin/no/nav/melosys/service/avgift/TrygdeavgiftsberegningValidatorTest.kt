@@ -8,7 +8,9 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
@@ -17,11 +19,13 @@ import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningValidator.BEHANDLING_IKKE_AKTIV
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningValidator.INNTEKTSPERIODER_EMPTY
@@ -66,7 +70,7 @@ class TrygdeavgiftsberegningValidatorTest {
         }
 
         @Test
-        fun shouldThrowFunksjonellExceptionWhenMedlemskapsPerioderIsEmpty() {
+        fun shouldThrowFunksjonellExceptionWhenAvgiftspliktigperioderIsEmpty() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
             val behandling = Behandling.forTest {
                 status = Behandlingsstatus.OPPRETTET
@@ -74,7 +78,7 @@ class TrygdeavgiftsberegningValidatorTest {
             }
             every { behandlingsresultatMock.behandling } returns behandling
             every { behandlingsresultatMock.hentBehandling() } returns behandling
-            every { behandlingsresultatMock.medlemskapsperioder } returns mutableSetOf()
+            every { behandlingsresultatMock.avgiftspliktigPerioder() } returns listOf()
             every { behandlingsresultatMock.utledAvgiftspliktigperioderFom() } returns LocalDate.now()
 
             val skatteforholdsPerioder = listOf(
@@ -167,7 +171,7 @@ class TrygdeavgiftsberegningValidatorTest {
         }
 
         @Test
-        fun shouldThrowFunksjonellExceptionWhenUtledMedlemskapsperiodeFomIsNull() {
+        fun shouldThrowFunksjonellExceptionWhenUtledAvgiftspliktigperiodeFomIsNull() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
             val behandling = Behandling.forTest {
                 status = Behandlingsstatus.OPPRETTET
@@ -178,6 +182,7 @@ class TrygdeavgiftsberegningValidatorTest {
             every { behandlingsresultatMock.medlemskapsperioder } returns mutableSetOf(Medlemskapsperiode().apply {
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
             })
+            every { behandlingsresultatMock.avgiftspliktigPerioder() } returns (behandlingsresultatMock.medlemskapsperioder as MutableSet<AvgiftspliktigPeriode>).toList()
             every { behandlingsresultatMock.utledAvgiftspliktigperioderFom() } returns null
             every { behandlingsresultatMock.årsavregning } returns Årsavregning.forTest()
 
@@ -195,7 +200,7 @@ class TrygdeavgiftsberegningValidatorTest {
         }
 
         @Test
-        fun shouldThrowFunksjonellExceptionWhenUtledMedlemskapsperiodeTomIsNull() {
+        fun shouldThrowFunksjonellExceptionWhenUtledAvgiftspliktigperiodeTomIsNull() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
             val behandling = Behandling.forTest {
                 status = Behandlingsstatus.OPPRETTET
@@ -206,6 +211,7 @@ class TrygdeavgiftsberegningValidatorTest {
             every { behandlingsresultatMock.medlemskapsperioder } returns mutableSetOf(Medlemskapsperiode().apply {
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
             })
+            every { behandlingsresultatMock.avgiftspliktigPerioder() } returns (behandlingsresultatMock.medlemskapsperioder as MutableSet<AvgiftspliktigPeriode>).toList()
             every { behandlingsresultatMock.utledAvgiftspliktigperioderFom() } returns LocalDate.now()
             every { behandlingsresultatMock.utledAvgiftspliktigperioderTom() } returns null
             every { behandlingsresultatMock.årsavregning } returns Årsavregning.forTest()
@@ -1118,6 +1124,18 @@ class TrygdeavgiftsberegningValidatorTest {
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 })
+            this.behandling = behandling
+            årsavregning = Årsavregning.forTest()
+        }
+
+
+        private fun lagGyldigBehandlingsresultatForLovvalg() = Behandlingsresultat().apply {
+            val behandling = Behandling.forTest {
+                status = Behandlingsstatus.OPPRETTET
+                fagsak?.type = Sakstyper.EU_EOS
+                fagsak?.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+
             this.behandling = behandling
             årsavregning = Årsavregning.forTest()
         }

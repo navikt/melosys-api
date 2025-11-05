@@ -56,6 +56,29 @@ class TrygdeavgiftperiodeErstatterTest() {
         medlemskap.trygdeavgiftsperioder shouldContainExactly nyeTrygdeavgiftsperioder.toSet()
     }
 
+
+    @Test
+    fun `erstatter eksisterende Trygdeavgiftsperioder for lovvalgsperioder`() {
+        val medlId = 3L
+
+        val eksisterendeTrygdeavgiftsperiode = lagTrygdeavgiftsperioder(medlId, 1L).single()
+        val nyTrygdeavgiftsperiode = lagTrygdeavgiftsperioder(medlId, 2L).single()
+
+        val medlemskap = lagMedlemskap(medlId, listOf(eksisterendeTrygdeavgiftsperiode))
+        val behandlingsresultat = lagBehandlingsresultat(medlemskap)
+
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+
+        val nyeTrygdeavgiftsperioder = listOf(nyTrygdeavgiftsperiode)
+
+        // Act
+        trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
+
+        // Assert
+        behandlingsresultat.trygdeavgiftType.shouldNotBeNull() shouldBeEqual Trygdeavgift_typer.FORELØPIG
+        medlemskap.trygdeavgiftsperioder shouldContainExactly nyeTrygdeavgiftsperioder.toSet()
+    }
+
     @Test
     fun `erstatter eksisterende Trygdeavgiftsperioder for EØS pensjonist`() {
         val helseutgiftDekkesPeriodeId = 3L

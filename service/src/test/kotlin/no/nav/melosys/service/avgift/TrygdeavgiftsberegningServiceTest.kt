@@ -297,7 +297,6 @@ internal class TrygdeavgiftsberegningServiceTest {
                 behandlingsresultat.trygdeavgiftsperioder.shouldNotBeEmpty()
             }
 
-
             @Test
             fun `TRYGDEAVTALE_LOVVALG, pliktig medlem skal beregne og lagre trygdeavgift`() {
                 val notSoRandomUuid = UUID.randomUUID()
@@ -437,6 +436,152 @@ internal class TrygdeavgiftsberegningServiceTest {
                         innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                         medlemskapstype = Medlemskapstyper.PLIKTIG
                         bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
+                    }
+                }
+
+                every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
+
+                every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
+                    listOf(
+                        TrygdeavgiftsberegningResponse(
+                            TrygdeavgiftsperiodeDto(
+                                DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(0.0), NOK)
+                            ), TrygdeavgiftsgrunnlagDto(
+                                idToUUid(behandlingsresultat.avgiftspliktigPerioder().first().hentId()),
+                                notSoRandomUuid,
+                                notSoRandomUuid
+                            )
+                        )
+                    )
+                )
+                every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
+
+
+                val trygdeavgiftsperioder =
+                    trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+                        BEHANDLING_ID,
+                        skatteforholdsperioder = listOf(
+                            skatteforhold { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG }
+                        ),
+                        inntektsperioder = listOf(
+                            inntekt {
+                                type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                                arbeidsgiversavgiftBetalesTilSkatt = true
+                                avgiftspliktigMndInntekt = Penger(BigDecimal.ZERO)
+                            }
+                        )
+                    )
+
+
+                trygdeavgiftsperioder.shouldNotBeEmpty()
+                trygdeavgiftsperioder.shouldHaveSize(1)
+                trygdeavgiftsperioder.forEach {
+                    it.trygdesats.shouldBe(BigDecimal.ZERO)
+                    it.trygdeavgiftsbeløpMd.shouldBe(Penger(0.0))
+                }
+            }
+
+            @Test
+            fun `TRYGDEAVTALE_LOVVALG, skal ikke betale trygdeavgift til NAV - returnerer periode med beløp 0`() {
+                val notSoRandomUuid = UUID.randomUUID()
+                mockkStatic(UUID::class)
+                every { UUID.randomUUID() } returns notSoRandomUuid
+
+                val behandlingsresultat = Behandlingsresultat.forTest {
+                    id = 1L
+                    behandling {
+                        tema = Behandlingstema.ARBEID_KUN_NORGE
+                        type = Behandlingstyper.NY_VURDERING
+                        fagsak {
+                            medBruker()
+                            type = Sakstyper.TRYGDEAVTALE
+                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                        }
+                    }
+                    type = Behandlingsresultattyper.IKKE_FASTSATT
+
+                    lovvalgsperiode {
+                        id = 1L
+                        fom = FOM
+                        tom = TOM
+                        dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                        medlemskapstype = Medlemskapstyper.PLIKTIG
+                        bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
+                    }
+                }
+
+                every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
+
+                every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
+                    listOf(
+                        TrygdeavgiftsberegningResponse(
+                            TrygdeavgiftsperiodeDto(
+                                DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(0.0), NOK)
+                            ), TrygdeavgiftsgrunnlagDto(
+                                idToUUid(behandlingsresultat.avgiftspliktigPerioder().first().hentId()),
+                                notSoRandomUuid,
+                                notSoRandomUuid
+                            )
+                        )
+                    )
+                )
+                every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
+
+
+                val trygdeavgiftsperioder =
+                    trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+                        BEHANDLING_ID,
+                        skatteforholdsperioder = listOf(
+                            skatteforhold { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG }
+                        ),
+                        inntektsperioder = listOf(
+                            inntekt {
+                                type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                                arbeidsgiversavgiftBetalesTilSkatt = true
+                                avgiftspliktigMndInntekt = Penger(BigDecimal.ZERO)
+                            }
+                        )
+                    )
+
+
+                trygdeavgiftsperioder.shouldNotBeEmpty()
+                trygdeavgiftsperioder.shouldHaveSize(1)
+                trygdeavgiftsperioder.forEach {
+                    it.trygdesats.shouldBe(BigDecimal.ZERO)
+                    it.trygdeavgiftsbeløpMd.shouldBe(Penger(0.0))
+                }
+            }
+
+            @Test
+            fun `EU_EØS_LOVVALG, skal ikke betale trygdeavgift til NAV - returnerer periode med beløp 0`() {
+                val notSoRandomUuid = UUID.randomUUID()
+                mockkStatic(UUID::class)
+                every { UUID.randomUUID() } returns notSoRandomUuid
+
+                val behandlingsresultat = Behandlingsresultat.forTest {
+                    id = 1L
+                    behandling {
+                        tema = Behandlingstema.ARBEID_KUN_NORGE
+                        type = Behandlingstyper.NY_VURDERING
+                        fagsak {
+                            medBruker()
+                            type = Sakstyper.EU_EOS
+                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                        }
+                    }
+                    type = Behandlingsresultattyper.IKKE_FASTSATT
+
+                    lovvalgsperiode {
+                        id = 1L
+                        fom = FOM
+                        tom = TOM
+                        dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                        medlemskapstype = Medlemskapstyper.PLIKTIG
+                        bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
                     }
                 }
 
