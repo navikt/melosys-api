@@ -97,6 +97,9 @@ spring:
 stsPolicy:
   url: classpath:stsPolicy.xml
 unleash:
-  token: faketoken
+  url: http://localhost:4242/api
+  token: "*:development.unleash-insecure-client-api-token"
+  app-name: melosys-api-local
+  environment: development
 utbetaling_rest:
   url: https://sokos-utbetaldata.dev.intern.nav.no/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern
