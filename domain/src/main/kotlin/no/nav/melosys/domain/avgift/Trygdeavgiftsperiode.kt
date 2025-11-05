@@ -42,7 +42,7 @@ class Trygdeavgiftsperiode(
     var grunnlagHelseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = null,
 
     @ManyToOne
-    @JoinColumn(name = "lovvalgsperiode_id")
+    @JoinColumn(name = "lovvalg_periode_id")
     var grunnlagLovvalgsPeriode: Lovvalgsperiode? = null,
 
     @ManyToOne(cascade = [CascadeType.ALL])

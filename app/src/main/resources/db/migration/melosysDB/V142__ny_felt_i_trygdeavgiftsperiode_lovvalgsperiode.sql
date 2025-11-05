@@ -1,5 +1,5 @@
 ALTER TABLE trygdeavgiftsperiode
-ADD lovvalgsperiode_id NUMBER(19);
+ADD lovvalg_periode_id NUMBER(19);
 
 ALTER TABLE trygdeavgiftsperiode
-ADD CONSTRAINT fk_trygdeavgiftsperiode_lovvalgsperiode FOREIGN KEY (lovvalgsperiode_id) REFERENCES lovvalgsperiode;
+ADD CONSTRAINT fk_trygdeavgiftsperiode_lovvalg_periode FOREIGN KEY (lovvalg_periode_id) REFERENCES lovvalg_periode;
