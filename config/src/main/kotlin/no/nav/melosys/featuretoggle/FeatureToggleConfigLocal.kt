@@ -29,7 +29,7 @@ class FeatureToggleConfigLocal {
 
     @Bean
     fun unleash(): Unleash {
-        // If Unleash URL is configured, use real Unleash server with default-enabled wrapper
+        // Hvis Unleash URL er konfigurert, bruk ekte Unleash-server med default-enabled wrapper
         return if (unleashUrl.isNotBlank() && unleashToken.isNotBlank()) {
             val config = UnleashConfig.builder()
                 .appName(unleashAppName)
@@ -41,16 +41,16 @@ class FeatureToggleConfigLocal {
 
             val defaultUnleash = DefaultUnleash(config)
 
-            // Wrap with DefaultEnabledUnleash to default unknown toggles to enabled
+            // Wrapper med DefaultEnabledUnleash for å defaulte ukjente toggles til enabled
             DefaultEnabledUnleash(defaultUnleash).also {
-                log.info { "FeatureToggleConfigLocal: Using DefaultEnabledUnleash wrapping Unleash server at $unleashUrl" }
+                log.info { "FeatureToggleConfigLocal: Bruker DefaultEnabledUnleash som wrapper for Unleash-server på $unleashUrl" }
             }
         } else {
-            // Fallback to LocalUnleash if Unleash server not configured
+            // Fallback til LocalUnleash hvis Unleash-server ikke er konfigurert
             LocalUnleash().apply {
                 enableAllExcept(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
             }.also {
-                log.info { "FeatureToggleConfigLocal: Using LocalUnleash (no Unleash server configured)" }
+                log.info { "FeatureToggleConfigLocal: Bruker LocalUnleash (ingen Unleash-server konfigurert)" }
             }
         }
     }

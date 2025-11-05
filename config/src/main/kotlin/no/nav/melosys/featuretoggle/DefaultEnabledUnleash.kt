@@ -6,16 +6,16 @@ import mu.KotlinLogging
 private val log = KotlinLogging.logger {}
 
 /**
- * Unleash implementation that wraps DefaultUnleash and provides default-enabled behavior
- * for unknown/unconfigured feature toggles.
+ * Unleash-implementasjon som wrapper DefaultUnleash og gir default-enabled oppførsel
+ * for ukjente/ukonfigurerte feature toggles.
  *
- * This is useful for local development with Unleash running in Docker Compose where not all
- * feature flags may be configured. Unknown flags will default to ENABLED, allowing new features
- * to work immediately without manual Unleash configuration.
+ * Dette er nyttig for lokal utvikling med Unleash i Docker Compose hvor ikke alle
+ * feature flags er konfigurert. Ukjente flags blir ENABLED som standard, slik at nye funksjoner
+ * fungerer umiddelbart uten manuell Unleash-konfigurasjon.
  *
- * For flags that ARE configured in Unleash, their explicit enable/disable state is respected.
+ * For flags som ER konfigurert i Unleash, respekteres deres eksplisitte enable/disable-status.
  *
- * @param delegate The actual DefaultUnleash instance to delegate to
+ * @param delegate Den faktiske DefaultUnleash-instansen som delegeres til
  */
 class DefaultEnabledUnleash(private val delegate: Unleash) : Unleash by delegate {
 
@@ -24,17 +24,17 @@ class DefaultEnabledUnleash(private val delegate: Unleash) : Unleash by delegate
     }
 
     override fun isEnabled(toggleName: String, defaultSetting: Boolean): Boolean {
-        // Check if this toggle is defined/registered in Unleash
+        // Sjekk om denne togglen er definert/registrert i Unleash
         val toggleDefinition = delegate.more().getFeatureToggleDefinition(toggleName)
 
         return if (toggleDefinition.isPresent) {
-            // Toggle is defined - use actual Unleash state
+            // Toggle er definert - bruk faktisk Unleash-status
             val enabled = delegate.isEnabled(toggleName, defaultSetting)
-            log.debug { "Toggle '$toggleName' is defined in Unleash: enabled=$enabled" }
+            log.debug { "Toggle '$toggleName' er definert i Unleash: enabled=$enabled" }
             enabled
         } else {
-            // Toggle is NOT defined - default to enabled for local development
-            log.debug { "Toggle '$toggleName' is NOT defined in Unleash, defaulting to ENABLED" }
+            // Toggle er IKKE definert - default til enabled for lokal utvikling
+            log.debug { "Toggle '$toggleName' er IKKE definert i Unleash, defaulter til ENABLED" }
             true
         }
     }
@@ -44,22 +44,22 @@ class DefaultEnabledUnleash(private val delegate: Unleash) : Unleash by delegate
     }
 
     override fun isEnabled(toggleName: String, context: UnleashContext, defaultSetting: Boolean): Boolean {
-        // Check if this toggle is defined/registered in Unleash
+        // Sjekk om denne togglen er definert/registrert i Unleash
         val toggleDefinition = delegate.more().getFeatureToggleDefinition(toggleName)
 
         return if (toggleDefinition.isPresent) {
-            // Toggle is defined - use actual Unleash state
+            // Toggle er definert - bruk faktisk Unleash-status
             val enabled = delegate.isEnabled(toggleName, context, defaultSetting)
-            log.debug { "Toggle '$toggleName' (with context) is defined in Unleash: enabled=$enabled" }
+            log.debug { "Toggle '$toggleName' (med context) er definert i Unleash: enabled=$enabled" }
             enabled
         } else {
-            // Toggle is NOT defined - default to enabled for local development
-            log.debug { "Toggle '$toggleName' (with context) is NOT defined in Unleash, defaulting to ENABLED" }
+            // Toggle er IKKE definert - default til enabled for lokal utvikling
+            log.debug { "Toggle '$toggleName' (med context) er IKKE definert i Unleash, defaulter til ENABLED" }
             true
         }
     }
 
-    // Override BiPredicate variant to ensure proper delegation
+    // Override BiPredicate-variant for å sikre korrekt delegering
     override fun isEnabled(
         toggleName: String,
         fallbackAction: java.util.function.BiPredicate<String, UnleashContext>
@@ -67,9 +67,9 @@ class DefaultEnabledUnleash(private val delegate: Unleash) : Unleash by delegate
         return delegate.isEnabled(toggleName, fallbackAction)
     }
 
-    // Override default methods to ensure they delegate properly
-    // (These methods are not currently used in the codebase, but we override them
-    // to silence the IntelliJ warning about Java default methods not being delegated)
+    // Override default-metoder for å sikre at de delegerer korrekt
+    // (Disse metodene brukes ikke i kodebasen, men vi overrider dem
+    // for å unngå IntelliJ-varsel om Java default-metoder som ikke blir delegert)
 
     override fun getVariant(toggleName: String): Variant {
         return delegate.getVariant(toggleName)
