@@ -22,7 +22,7 @@ class TrygdeavgiftsberegningTransformer() : ResponseTransformerV2 {
         }
 
         val requestBody = mapper.readTree(serveEvent.request?.bodyAsString)
-        val medlemskapsperioderUuid = requestBody["medlemskapsperioder"][0]["id"].asText()
+        val avgiftspliktigperiuodeUuid = requestBody["avgiftspliktigperioder"][0]["id"].asText()
         val skatteforholdsperioderUuid = requestBody["skatteforholdsperioder"][0]["id"].asText()
         val inntektsperioderUuid = requestBody["inntektsperioder"][0]["id"].asText()
         val skatteforholdÅr = requestBody["skatteforholdsperioder"][0]["periode"]["fom"][0].asInt()
@@ -41,7 +41,7 @@ class TrygdeavgiftsberegningTransformer() : ResponseTransformerV2 {
                     månedsavgift
                 ),
                 TrygdeavgiftsgrunnlagDto(
-                    UUID.fromString(medlemskapsperioderUuid),
+                    UUID.fromString(avgiftspliktigperiuodeUuid),
                     UUID.fromString(skatteforholdsperioderUuid),
                     UUID.fromString(inntektsperioderUuid)
                 )
