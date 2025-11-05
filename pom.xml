@@ -106,7 +106,7 @@
         <scala.version>2.13.9</scala.version>
         <testcontainers.version>1.17.1</testcontainers.version>
         <jna.version>5.11.0</jna.version>
-        <graphql.java.extended.scalars.version>21.0</graphql.java.extended.scalars.version>
+        <graphql.java.extended.scalars.version>24.0</graphql.java.extended.scalars.version>
         <ulid-java>5.2.3</ulid-java>
         <!-- Spring-data-envers, hibernate, antlr4 Downgraded due to: https://hibernate.atlassian.net/browse/HHH-17612 and compatability-->
         <spring-data-envers.version>3.3.1</spring-data-envers.version>
