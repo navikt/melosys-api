@@ -99,7 +99,7 @@
         <jetbrains.annotations.version>21.0.1</jetbrains.annotations.version>
         <snappy.java.version>1.1.10.8</snappy.java.version>
         <mockito.inline.version>5.2.0</mockito.inline.version>
-        <springmockk.version>3.1.1</springmockk.version>
+        <springmockk.version>4.0.2</springmockk.version>
         <httpclient5.version>5.5.1</httpclient5.version>
         <commons.beanutils.version>1.11.0</commons.beanutils.version>
         <commons-cli.version>1.10.0</commons-cli.version>
