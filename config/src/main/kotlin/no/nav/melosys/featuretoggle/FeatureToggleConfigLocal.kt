@@ -29,7 +29,7 @@ class FeatureToggleConfigLocal {
 
     @Bean
     fun unleash(): Unleash {
-        // If Unleash URL is configured, use real Unleash server
+        // If Unleash URL is configured, use real Unleash server with default-enabled wrapper
         return if (unleashUrl.isNotBlank() && unleashToken.isNotBlank()) {
             val config = UnleashConfig.builder()
                 .appName(unleashAppName)
@@ -39,8 +39,11 @@ class FeatureToggleConfigLocal {
                 .environment(unleashEnvironment)
                 .build()
 
-            DefaultUnleash(config).also {
-                log.info { "FeatureToggleConfigLocal: Using Unleash server at $unleashUrl" }
+            val defaultUnleash = DefaultUnleash(config)
+
+            // Wrap with DefaultEnabledUnleash to default unknown toggles to enabled
+            DefaultEnabledUnleash(defaultUnleash).also {
+                log.info { "FeatureToggleConfigLocal: Using DefaultEnabledUnleash wrapping Unleash server at $unleashUrl" }
             }
         } else {
             // Fallback to LocalUnleash if Unleash server not configured
