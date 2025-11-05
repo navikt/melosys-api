@@ -73,7 +73,7 @@ class TrygdeavgiftsberegningService(
         if (erPliktigMedlemskapSkattepliktig(
                 skatteforholdsperioder,
                 inntektsperioder,
-                behandlingsresultat.medlemskapsperioder
+                behandlingsresultat.avgiftspliktigPerioder()
             )
         ) {
             require(behandlingsresultat.avgiftspliktigPerioder().size == 1 && skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en avgiftspliktig- og skatteforholdsperiode når perioden er pliktig og skattepliktig" }

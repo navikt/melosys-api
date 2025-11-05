@@ -84,7 +84,7 @@ melosysdokgen:
   v1:
     url: http://localhost:8094/api/v1
 melosystrygdeavgift:
-  url: http://localhost:8094/api
+  url: http://localhost:8095/api
 microsoft:
   graph:
     rest:
