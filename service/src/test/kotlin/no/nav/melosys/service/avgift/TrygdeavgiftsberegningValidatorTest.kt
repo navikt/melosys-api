@@ -75,7 +75,7 @@ class TrygdeavgiftsberegningValidatorTest {
             every { behandlingsresultatMock.behandling } returns behandling
             every { behandlingsresultatMock.hentBehandling() } returns behandling
             every { behandlingsresultatMock.medlemskapsperioder } returns mutableSetOf()
-            every { behandlingsresultatMock.utledMedlemskapsperiodeFom() } returns LocalDate.now()
+            every { behandlingsresultatMock.utledAvgiftspliktigperioderFom() } returns LocalDate.now()
 
             val skatteforholdsPerioder = listOf(
                 SkatteforholdTilNorge().apply {
@@ -92,7 +92,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     emptyList(),
                     unleash
                 )
-            }.message shouldBe TrygdeavgiftsberegningValidator.MEDLEMSKAPSPERIODER_EMPTY
+            }.message shouldBe TrygdeavgiftsberegningValidator.AVGIFTSPLIKTIGPERIODER_EMPTY
         }
 
         @Test
@@ -178,7 +178,7 @@ class TrygdeavgiftsberegningValidatorTest {
             every { behandlingsresultatMock.medlemskapsperioder } returns mutableSetOf(Medlemskapsperiode().apply {
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
             })
-            every { behandlingsresultatMock.utledMedlemskapsperiodeFom() } returns null
+            every { behandlingsresultatMock.utledAvgiftspliktigperioderFom() } returns null
             every { behandlingsresultatMock.årsavregning } returns Årsavregning.forTest()
 
             val skatteforholdsPerioder = listOf(
@@ -191,7 +191,7 @@ class TrygdeavgiftsberegningValidatorTest {
 
             shouldThrow<FunksjonellException> {
                 TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsPerioder, listOf(), unleash)
-            }.message shouldBe TrygdeavgiftsberegningValidator.UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER
+            }.message shouldBe TrygdeavgiftsberegningValidator.UTLED_AVGIFTSPLIKTIGPERIODE_FOM_MANGLER
         }
 
         @Test
@@ -206,8 +206,8 @@ class TrygdeavgiftsberegningValidatorTest {
             every { behandlingsresultatMock.medlemskapsperioder } returns mutableSetOf(Medlemskapsperiode().apply {
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
             })
-            every { behandlingsresultatMock.utledMedlemskapsperiodeFom() } returns LocalDate.now()
-            every { behandlingsresultatMock.utledMedlemskapsperiodeTom() } returns null
+            every { behandlingsresultatMock.utledAvgiftspliktigperioderFom() } returns LocalDate.now()
+            every { behandlingsresultatMock.utledAvgiftspliktigperioderTom() } returns null
             every { behandlingsresultatMock.årsavregning } returns Årsavregning.forTest()
 
             val skatteforholdsPerioder = listOf(
@@ -220,7 +220,7 @@ class TrygdeavgiftsberegningValidatorTest {
 
             shouldThrow<FunksjonellException> {
                 TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsPerioder, listOf(), unleash)
-            }.message shouldBe TrygdeavgiftsberegningValidator.UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER
+            }.message shouldBe TrygdeavgiftsberegningValidator.UTLED_AVGIFTPLIKTIGPERIODE_TOM_MANGLER
         }
 
         @ParameterizedTest

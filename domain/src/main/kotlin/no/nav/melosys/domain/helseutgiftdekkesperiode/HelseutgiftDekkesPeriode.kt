@@ -4,6 +4,7 @@ import jakarta.persistence.*
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
@@ -67,6 +68,8 @@ class HelseutgiftDekkesPeriode(
 
     override fun erPliktig(): Boolean = true
     override fun hentId(): Long = id ?: throw FunksjonellException("HelseutgiftDekkesPeriode mangler ID.")
+    override fun erOpphørt(): Boolean = false
+
     fun hentMedlemskapstype(): Medlemskapstyper = Medlemskapstyper.PLIKTIG
 
     override fun hentTrygdedekning(): Trygdedekninger =

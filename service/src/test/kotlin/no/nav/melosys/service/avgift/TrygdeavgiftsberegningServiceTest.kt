@@ -18,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.ereg.EregFasade
@@ -193,6 +194,127 @@ internal class TrygdeavgiftsberegningServiceTest {
                         innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                         medlemskapstype = Medlemskapstyper.PLIKTIG
                         bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
+                    }
+                }
+
+                every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
+                every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
+                every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
+                    listOf(
+                        TrygdeavgiftsberegningResponse(
+                            TrygdeavgiftsperiodeDto(
+                                DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
+                            ), TrygdeavgiftsgrunnlagDto(
+                                idToUUid(behandlingsresultat.avgiftspliktigPerioder().first().hentId()),
+                                notSoRandomUuid,
+                                notSoRandomUuid
+                            )
+                        )
+                    )
+                )
+                every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
+                val trygdeavgiftsperioder = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+                    BEHANDLING_ID,
+                    skatteforholdsperioder = listOf(
+                        skatteforhold { skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG }
+                    ),
+                    inntektsperioder = listOf(
+                        inntekt {
+                            fomDato = FOM
+                            tomDato = TOM
+                            type = Inntektskildetype.ARBEIDSINNTEKT
+                            arbeidsgiversavgiftBetalesTilSkatt = false
+                            avgiftspliktigMndInntekt = Penger(BigDecimal(10000.0))
+                        }
+                    )
+                )
+
+
+                trygdeavgiftsperioder.shouldNotBeEmpty()
+                verify { trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
+                verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
+                behandlingsresultat.trygdeavgiftsperioder.shouldNotBeEmpty()
+            }
+
+            @Test
+            fun `EU_EØS_LOVVALG, pliktig medlem skal beregne og lagre trygdeavgift`() {
+                val notSoRandomUuid = UUID.randomUUID()
+                mockkStatic(UUID::class)
+                every { UUID.randomUUID() } returns notSoRandomUuid
+
+                val behandlingsresultat = defaultBehandlingsresultat {
+                    behandling?.fagsak?.type = Sakstyper.EU_EOS
+                    behandling?.fagsak?.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                    lovvalgsperiode {
+                        id = 1L
+                        fom = FOM
+                        tom = TOM
+                        dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                        medlemskapstype = Medlemskapstyper.PLIKTIG
+                        bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
+                    }
+                }
+
+                every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
+                every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
+                every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
+                    listOf(
+                        TrygdeavgiftsberegningResponse(
+                            TrygdeavgiftsperiodeDto(
+                                DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
+                            ), TrygdeavgiftsgrunnlagDto(
+                                idToUUid(behandlingsresultat.avgiftspliktigPerioder().first().hentId()),
+                                notSoRandomUuid,
+                                notSoRandomUuid
+                            )
+                        )
+                    )
+                )
+                every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
+                val trygdeavgiftsperioder = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+                    BEHANDLING_ID,
+                    skatteforholdsperioder = listOf(
+                        skatteforhold { skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG }
+                    ),
+                    inntektsperioder = listOf(
+                        inntekt {
+                            fomDato = FOM
+                            tomDato = TOM
+                            type = Inntektskildetype.ARBEIDSINNTEKT
+                            arbeidsgiversavgiftBetalesTilSkatt = false
+                            avgiftspliktigMndInntekt = Penger(BigDecimal(10000.0))
+                        }
+                    )
+                )
+
+
+                trygdeavgiftsperioder.shouldNotBeEmpty()
+                verify { trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
+                verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
+                behandlingsresultat.trygdeavgiftsperioder.shouldNotBeEmpty()
+            }
+
+
+            @Test
+            fun `TRYGDEAVTALE_LOVVALG, pliktig medlem skal beregne og lagre trygdeavgift`() {
+                val notSoRandomUuid = UUID.randomUUID()
+                mockkStatic(UUID::class)
+                every { UUID.randomUUID() } returns notSoRandomUuid
+
+                val behandlingsresultat = defaultBehandlingsresultat {
+                    behandling?.fagsak?.type = Sakstyper.TRYGDEAVTALE
+                    behandling?.fagsak?.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                    lovvalgsperiode {
+                        id = 1L
+                        fom = FOM
+                        tom = TOM
+                        dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                        medlemskapstype = Medlemskapstyper.PLIKTIG
+                        bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
                     }
                 }
 

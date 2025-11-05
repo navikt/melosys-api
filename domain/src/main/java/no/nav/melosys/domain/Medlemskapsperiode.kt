@@ -84,7 +84,7 @@ class Medlemskapsperiode : HarBestemmelse<Bestemmelse?>, AvgiftspliktigPeriode {
 
     override fun erInnvilget(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.INNVILGET
 
-    fun erOpphørt(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.OPPHØRT
+    override fun erOpphørt(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.OPPHØRT
 
     fun erAvslaatt(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.AVSLAATT
 

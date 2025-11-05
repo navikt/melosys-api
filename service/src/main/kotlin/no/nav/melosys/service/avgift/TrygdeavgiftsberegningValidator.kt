@@ -22,10 +22,10 @@ import java.time.LocalDate
 
 object TrygdeavgiftsberegningValidator {
     const val BEHANDLING_IKKE_AKTIV = "Kan ikke beregne trygdeavgift på avsluttet behandling"
-    const val MEDLEMSKAPSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten medlemskapsperioder"
-    const val UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER = "Det kreves en innvilget medlemskapsperiode med startdato"
-    const val UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER =
-        "Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato"
+    const val AVGIFTSPLIKTIGPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten avgiftspliktigperioder"
+    const val UTLED_AVGIFTSPLIKTIGPERIODE_FOM_MANGLER = "Det kreves en innvilget avgiftspliktigperiode med startdato"
+    const val UTLED_AVGIFTPLIKTIGPERIODE_TOM_MANGLER =
+        "Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når avgiftspliktigperiode ikke har sluttdato"
     const val MEDLEMSKAPSPERIODER_HAR_FORSKJELLIGE_BESTEMMELSER = "Det er ikke lov med forskjellige bestemmelser"
 
     const val INNTEKTSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten inntektsperioder"
@@ -75,7 +75,7 @@ object TrygdeavgiftsberegningValidator {
         if (erSkattepliktigOgPensjonUføreMedKildeskatt(skatteforholdsperioder, inntektsperioder))
             throw FunksjonellException(SKATTEPLIKTIG_OG_PENSJON_UFORETRYGD_MED_KILDESKATT)
 
-        validerMedlemskapsperioder(behandlingsresultat, unleash)
+        validerAvgiftspliktigperioder(behandlingsresultat, unleash)
 
         val innvilgedeAvgiftspliktigeperioder = behandlingsresultat.avgiftspliktigPerioder().filter { it.erInnvilget() }
 
@@ -195,20 +195,20 @@ object TrygdeavgiftsberegningValidator {
         return skatteforholdsPerioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
     }
 
-    private fun validerMedlemskapsperioder(behandlingsresultat: Behandlingsresultat, unleash: Unleash) {
-        if (behandlingsresultat.medlemskapsperioder.isEmpty()) {
-            throw FunksjonellException(MEDLEMSKAPSPERIODER_EMPTY)
+    private fun validerAvgiftspliktigperioder(behandlingsresultat: Behandlingsresultat, unleash: Unleash) {
+        if (behandlingsresultat.avgiftspliktigPerioder().isEmpty()) {
+            throw FunksjonellException(AVGIFTSPLIKTIGPERIODER_EMPTY)
         }
         if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && behandlingsresultat.årsavregning != null) {
             alleMedlemskapsperioderHarSammeBestemmelse(behandlingsresultat.medlemskapsperioder)
             medlemskapsperioderHarOpphold(behandlingsresultat.medlemskapsperioder)
         }
 
-        behandlingsresultat.utledMedlemskapsperiodeFom()
-            ?: throw FunksjonellException(UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER)
+        behandlingsresultat.utledAvgiftspliktigperioderFom()
+            ?: throw FunksjonellException(UTLED_AVGIFTSPLIKTIGPERIODE_FOM_MANGLER)
 
-        behandlingsresultat.utledMedlemskapsperiodeTom()
-            ?: throw FunksjonellException(UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER)
+        behandlingsresultat.utledAvgiftspliktigperioderTom()
+            ?: throw FunksjonellException(UTLED_AVGIFTPLIKTIGPERIODE_TOM_MANGLER)
     }
 
     private fun medlemskapsperioderHarOpphold(medlemskapsperioder: Collection<Medlemskapsperiode>) {

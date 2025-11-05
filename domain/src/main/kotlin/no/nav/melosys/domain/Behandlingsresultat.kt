@@ -156,7 +156,7 @@ open class Behandlingsresultat : RegistreringsInfo() {
 
     fun utledSkatteplikttype(): Skatteplikttype {
         val trygdeavgiftsperiode = trygdeavgiftsperioder.firstOrNull()
-        val erÅpenSluttdato = utledMedlemskapsperiodeTom() == null
+        val erÅpenSluttdato = utledAvgiftspliktigperioderTom() == null
         if (trygdeavgiftsperiode == null && erÅpenSluttdato) {
             return Skatteplikttype.SKATTEPLIKTIG
         } else if (trygdeavgiftsperiode == null) {
@@ -167,20 +167,20 @@ open class Behandlingsresultat : RegistreringsInfo() {
             ?: error("grunnlagSkatteforholdTilNorge er påkrevd for Trygdeavgiftsperiode")
     }
 
-    fun utledMedlemskapsperiodeFom(): LocalDate? =
-        medlemskapsperioder
+    fun utledAvgiftspliktigperioderFom(): LocalDate? =
+        avgiftspliktigPerioder()
             .filter { it.erInnvilget() }
             .mapNotNull { it.fom }
             .minOrNull()
 
-    fun utledMedlemskapsperiodeTom(): LocalDate? =
-        medlemskapsperioder
+    fun utledAvgiftspliktigperioderTom(): LocalDate? =
+        avgiftspliktigPerioder()
             .filter { it.erInnvilget() }
             .mapNotNull { it.tom }
             .maxOrNull()
 
     fun utledOpphørtDato(): LocalDate? =
-        medlemskapsperioder
+        avgiftspliktigPerioder()
             .filter { it.erOpphørt() }
             .mapNotNull { it.fom }
             .minOrNull()

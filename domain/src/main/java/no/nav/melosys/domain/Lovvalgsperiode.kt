@@ -143,6 +143,7 @@ class Lovvalgsperiode : PeriodeOmLovvalg, AvgiftspliktigPeriode {
 
     override fun erInnvilget(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.INNVILGET
     override fun erPliktig(): Boolean = medlemskapstype == Medlemskapstyper.PLIKTIG
+    override fun erOpphørt(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.OPPHØRT
 
     fun erAvslått(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.AVSLAATT
 

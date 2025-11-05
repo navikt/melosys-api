@@ -8,4 +8,5 @@ interface AvgiftspliktigPeriode : ErPeriode {
     fun hentTrygdedekning(): Trygdedekninger
     fun erInnvilget(): Boolean
     fun erPliktig(): Boolean
+    fun erOpphørt(): Boolean
 }
