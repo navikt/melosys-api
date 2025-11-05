@@ -15,7 +15,9 @@ import no.nav.melosys.domain.kodeverk.Sakstyper.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ÅRSAVREGNING
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.util.MottatteOpplysningerUtils
+import io.getunleash.Unleash
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
@@ -51,6 +53,7 @@ class FagsakController(
     private val organisasjonOppslagService: OrganisasjonOppslagService,
     private val opprettBehandlingForSak: OpprettBehandlingForSak,
     private val ferdigbehandleService: FerdigbehandleService,
+    private val unleash: Unleash,
 ) {
     private val log = KotlinLogging.logger { }
     private val UKJENT_NAVN = "UKJENT"
@@ -205,9 +208,20 @@ class FagsakController(
 
 
     private fun tilFagsakOppsummeringDtoer(saker: List<Fagsak>, aktiveBehandlinger: Boolean): List<FagsakOppsummeringDto> {
-        return saker.map { fagsak ->
-            val fagsakBehandlinger = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()
+        val sorterteFagsaker = if (unleash.isEnabled(ToggleName.MELOSYS_SORTER_SOK_PA_REDIGERINGSDATO)) {
+            saker.sortedByDescending { it.endretDato }
+        } else {
+            saker
+        }
+
+        return sorterteFagsaker.map { fagsak ->
             val saksopplysninger = hentSaksopplysninger(fagsak, aktiveBehandlinger)
+
+            val sorterteFagsakBehandlinger = if (unleash.isEnabled(ToggleName.MELOSYS_SORTER_SOK_PA_REDIGERINGSDATO)) {
+                fagsak.behandlinger.sortedByDescending { it.endretDato }
+            } else {
+                fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()
+            }
 
             FagsakOppsummeringDto(
                 saksnummer = fagsak.saksnummer,
@@ -216,8 +230,8 @@ class FagsakController(
                 saksstatus = fagsak.status,
                 opprettetDato = fagsak.getRegistrertDato(),
                 hovedpartRolle = fagsak.hovedpartRolle,
-                navn = hentNavn(fagsakBehandlinger),
-                behandlingOversikter = fagsakBehandlinger.mapNotNull { tilBehandlingOversiktDto(it) },
+                navn = hentNavn(sorterteFagsakBehandlinger),
+                behandlingOversikter = sorterteFagsakBehandlinger.mapNotNull { tilBehandlingOversiktDto(it) },
                 land = saksopplysninger.saksgrunnlagsbehandlingId?.let { hentLand(saksopplysninger, fagsak) } ?: SoeknadslandDto(),
                 periode = saksopplysninger.saksgrunnlagsbehandlingId?.let { hentPeriode(saksopplysninger, fagsak, it) } ?: PeriodeDto()
             )
