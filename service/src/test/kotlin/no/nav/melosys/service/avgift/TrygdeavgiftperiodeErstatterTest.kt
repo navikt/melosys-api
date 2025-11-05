@@ -10,11 +10,13 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -147,6 +149,35 @@ class TrygdeavgiftperiodeErstatterTest() {
         behandlingsresultat.trygdeavgiftType shouldBe Trygdeavgift_typer.FORELØPIG
     }
 
+    @Test
+    fun `erstatter flere eksisterende Trygdeavgiftsperioder for flere lovvalgsperioder`() {
+        val medlId1 = 1L
+        val medlId2 = 2L
+
+        val eksisterendeTrygdeavgiftsperioder1 = lagTrygdeavgiftsperioderForLovvalg(medlId1, 101L, 102L)
+        val eksisterendeTrygdeavgiftsperioder2 = lagTrygdeavgiftsperioderForLovvalg(medlId2, 103L, 104L)
+
+        val nyTrygdeavgiftsperioder1 = lagTrygdeavgiftsperioderForLovvalg(medlId1, 201L, 202L)
+        val nyTrygdeavgiftsperioder2 = lagTrygdeavgiftsperioderForLovvalg(medlId2, 203L, 204L)
+
+        val medlemskap1 = lagMedlemskapLovvalg(medlId1, eksisterendeTrygdeavgiftsperioder1)
+        val medlemskap2 = lagMedlemskapLovvalg(medlId2, eksisterendeTrygdeavgiftsperioder2)
+
+        val behandlingsresultat = lagBehandlingsresultatMedLovvalgsperioder(medlemskap1, medlemskap2)
+
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+
+        val nyeTrygdeavgiftsperioder = nyTrygdeavgiftsperioder1 + nyTrygdeavgiftsperioder2
+
+        // Act
+        trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
+
+        // Assert
+        medlemskap1.trygdeavgiftsperioder shouldContainExactly nyTrygdeavgiftsperioder1.toSet()
+        medlemskap2.trygdeavgiftsperioder shouldContainExactly nyTrygdeavgiftsperioder2.toSet()
+        behandlingsresultat.trygdeavgiftType shouldBe Trygdeavgift_typer.FORELØPIG
+    }
+
 
     private fun lagTrygdeavgiftsperioder(grunnlagPeriodeId: Long, vararg ids: Long, erEøsPensjonist: Boolean = false): List<Trygdeavgiftsperiode> {
         if (erEøsPensjonist) {
@@ -165,6 +196,15 @@ class TrygdeavgiftperiodeErstatterTest() {
         }
     }
 
+    private fun lagTrygdeavgiftsperioderForLovvalg(grunnlagPeriodeId: Long, vararg ids: Long): List<Trygdeavgiftsperiode> {
+        return ids.map { periodeId ->
+            mockk<Trygdeavgiftsperiode>(relaxed = true).apply {
+                every { id } returns periodeId
+                every { grunnlagLovvalgsPeriode?.id } returns grunnlagPeriodeId
+            }
+        }
+    }
+
     private fun lagMedlemskap(
         medlemskapId: Long,
         trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
@@ -174,6 +214,17 @@ class TrygdeavgiftperiodeErstatterTest() {
             trygdeavgiftsperioder.forEach { addTrygdeavgiftsperiode(it) }
         }
     }
+
+    private fun lagMedlemskapLovvalg(
+        medlemskapId: Long,
+        trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
+    ): Lovvalgsperiode {
+        return Lovvalgsperiode().apply {
+            id = medlemskapId
+            trygdeavgiftsperioder.forEach { addTrygdeavgiftsperiode(it) }
+        }
+    }
+
 
     private fun lagHelseutgiftDekkesPeriode(
         behandlingsresultat: Behandlingsresultat,
@@ -212,6 +263,20 @@ class TrygdeavgiftperiodeErstatterTest() {
                 fagsak?.type = Sakstyper.FTRL
             }
             this.medlemskapsperioder = medlemskapsperioder.filterNotNull().toMutableSet()
+        }
+    }
+
+
+    private fun lagBehandlingsresultatMedLovvalgsperioder(
+        vararg lovvalgsperioder: Lovvalgsperiode? = emptyArray(),
+    ): Behandlingsresultat {
+
+        return Behandlingsresultat().apply {
+            behandling = Behandling.forTest {
+                fagsak?.type = Sakstyper.EU_EOS
+                fagsak?.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+            this.lovvalgsperioder = lovvalgsperioder.filterNotNull().toMutableSet()
         }
     }
 }
