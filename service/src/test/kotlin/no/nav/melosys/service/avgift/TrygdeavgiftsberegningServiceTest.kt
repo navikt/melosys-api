@@ -1136,7 +1136,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             }
 
             @Test
-            fun `mangler medlemskapsperioder skal kaste feil`() {
+            fun `mangler avgiftspliktigperioder skal kaste feil`() {
                 val behandlingsresultat = Behandlingsresultat.forTest {
                     id = 1L
                     behandling {
@@ -1163,7 +1163,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                             }
                         )
                     )
-                }.message.shouldContain("Kan ikke beregne trygdeavgift uten medlemskapsperioder")
+                }.message.shouldContain("Kan ikke beregne trygdeavgift uten avgiftspliktigperioder")
             }
 
             @Test
@@ -1245,12 +1245,13 @@ internal class TrygdeavgiftsberegningServiceTest {
             }
 
             @Test
-            fun `mangler startdato på medlemskap skal kaste feil`() {
+            fun `mangler startdato på avgiftspliktigperiode skal kaste feil`() {
                 val behandlingsresultat = Behandlingsresultat.forTest {
                     id = 1L
                     behandling {
                         tema = Behandlingstema.YRKESAKTIV
                         type = Behandlingstyper.NY_VURDERING
+                        fagsak?.type = Sakstyper.FTRL
                     }
                     type = Behandlingsresultattyper.IKKE_FASTSATT
 
@@ -1291,7 +1292,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                             }
                         )
                     )
-                }.message.shouldContain("Det kreves en innvilget medlemskapsperiode med startdato")
+                }.message.shouldContain(TrygdeavgiftsberegningValidator.UTLED_AVGIFTSPLIKTIGPERIODE_FOM_MANGLER)
             }
 
             @Test
