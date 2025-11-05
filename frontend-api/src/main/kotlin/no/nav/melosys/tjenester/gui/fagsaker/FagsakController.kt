@@ -255,7 +255,7 @@ class FagsakController(
         val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id)
             .takeIf { it.isPresent }?.get()
 
-        return Saksopplysninger(fagsak.type, behandling.id, sedOpplysninger, mottatteOpplysninger)
+        return Saksopplysninger(fagsak.type, behandling.id, sedOpplysninger, mottatteOpplysninger, behandling)
     }
 
     private fun hentSisteBehandlingMedFattetVedtakIkkeÅrsavregning(fagsak: Fagsak): Behandling? =
@@ -293,13 +293,13 @@ class FagsakController(
             }
 
             TRYGDEAVGIFT ->
-                saksOpplysninger.mottatteOpplysninger?.behandling
-                    ?.takeIf { it.erEøsPensjonist() }
-                    ?.let {
-                        hentSistHelseutgiftDekkesPeriode(fagsak)?.let { helseutgiftDekkesPeriode ->
-                            return SoeknadslandDto(listOf(helseutgiftDekkesPeriode.bostedLandkode.kode))
-                        }
+                if (saksOpplysninger.behandling?.erEøsPensjonist() == true) {
+                    hentSistHelseutgiftDekkesPeriode(fagsak)?.let { helseutgiftDekkesPeriode ->
+                        return SoeknadslandDto(listOf(helseutgiftDekkesPeriode.bostedLandkode.kode))
                     }
+                } else {
+                    null
+                }
         }
 
         return soeknadslandDto ?: SoeknadslandDto()
@@ -323,17 +323,13 @@ class FagsakController(
             }
 
             TRYGDEAVTALE, EU_EOS -> {
-                if (sakstema == TRYGDEAVGIFT) {
-                    saksOpplysninger.mottatteOpplysninger?.behandling?.let { behandling ->
-                        if (behandling.erEøsPensjonist()) {
-                            val helseutgiftDekkesPeriode = hentSistHelseutgiftDekkesPeriode(fagsak) ?: return PeriodeDto()
+                if (sakstema == TRYGDEAVGIFT && saksOpplysninger.behandling?.erEøsPensjonist() == true) {
+                    val helseutgiftDekkesPeriode = hentSistHelseutgiftDekkesPeriode(fagsak) ?: return PeriodeDto()
 
-                            return PeriodeDto(
-                                helseutgiftDekkesPeriode.fomDato,
-                                helseutgiftDekkesPeriode.tomDato
-                            )
-                        }
-                    }
+                    return PeriodeDto(
+                        helseutgiftDekkesPeriode.fomDato,
+                        helseutgiftDekkesPeriode.tomDato
+                    )
                 }
 
                 behandlingsresultat.finnLovvalgsperiode().getOrNull()?.let {
@@ -393,4 +389,5 @@ data class Saksopplysninger(
     val saksgrunnlagsbehandlingId: Long? = null,
     val sedDokument: SedDokument? = null,
     val mottatteOpplysninger: MottatteOpplysninger? = null,
+    val behandling: Behandling? = null,
 )
