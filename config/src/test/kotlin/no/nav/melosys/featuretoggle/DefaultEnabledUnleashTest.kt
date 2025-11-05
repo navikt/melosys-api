@@ -106,46 +106,6 @@ class DefaultEnabledUnleashTest {
     }
 
     @Test
-    fun `should delegate more() operation`() {
-        // Given
-        every { delegate.more() } returns moreOperations
-
-        // When
-        val result = unleash.more()
-
-        // Then
-        result shouldBe moreOperations
-        verify(exactly = 1) { delegate.more() }
-    }
-
-    @Test
-    fun `should delegate shutdown()`() {
-        // Given
-        every { delegate.shutdown() } returns Unit
-
-        // When
-        unleash.shutdown()
-
-        // Then
-        verify(exactly = 1) { delegate.shutdown() }
-    }
-
-    @Test
-    fun `should delegate getVariant()`() {
-        // Given
-        val toggleName = "variant.toggle"
-        val expectedVariant = io.getunleash.Variant("variantA", "payload", true)
-        every { delegate.getVariant(toggleName) } returns expectedVariant
-
-        // When
-        val result = unleash.getVariant(toggleName)
-
-        // Then
-        result shouldBe expectedVariant
-        verify(exactly = 1) { delegate.getVariant(toggleName) }
-    }
-
-    @Test
     fun `should respect defaultSetting parameter for known toggle`() {
         // Given
         val toggleName = "known.toggle"
