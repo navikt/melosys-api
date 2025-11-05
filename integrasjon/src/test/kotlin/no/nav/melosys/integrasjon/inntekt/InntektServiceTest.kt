@@ -71,7 +71,7 @@ class InntektServiceTest {
                 fom = YearMonth.of(2012, 1),
                 tom = YearMonth.of(2014, 12)
             )
-        verify { inntektRestConsumer.hentInntektListe(any()) wasNot Called }
+        verify(exactly = 0) { inntektRestConsumer.hentInntektListe(any()) }
 
         saksopplysning.kilder.shouldNotBeEmpty()
         saksopplysning.kilder.iterator().next().mottattDokument.shouldNotBeNull()
