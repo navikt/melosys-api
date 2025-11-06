@@ -48,7 +48,9 @@ object FagsakTestFactory {
         var status: Saksstatuser = SAKSSTATUS,
         var betalingsvalg: Betalingstype? = null,
         var aktører: MutableSet<Aktoer> = mutableSetOf(),
-        var behandlinger: MutableList<Behandling> = mutableListOf()
+        var behandlinger: MutableList<Behandling> = mutableListOf(),
+        var registrertDato: Instant = Instant.now(),
+        var endretDato: Instant = Instant.now()
     ) {
         fun saksnummer(saksnummer: String) = apply { this.saksnummer = saksnummer }
         fun gsakSaksnummer(gsakSaksnummer: Long?) = apply { this.gsakSaksnummer = gsakSaksnummer }
@@ -59,6 +61,8 @@ object FagsakTestFactory {
         fun aktører(aktører: Set<Aktoer>) = apply { this.aktører = aktører.toMutableSet() }
         fun aktører(aktører: Aktoer) = apply { this.aktører = mutableSetOf(aktører) }
         fun betalingsvalg(betalingsvalg: Betalingstype) = apply { this.betalingsvalg = betalingsvalg }
+        fun registrertDato(registrertDato: Instant) = apply { this.registrertDato = registrertDato }
+        fun endretDato(endretDato: Instant) = apply { this.endretDato = endretDato }
 
         fun medBruker() = medBruker {}  // trengs for bakoverkompatibilitet med java
 
@@ -106,8 +110,8 @@ object FagsakTestFactory {
             )
             fagsak.behandlinger.forEach { it.fagsak = fagsak }
             fagsak.aktører.forEach { it.fagsak = fagsak }
-            fagsak.registrertDato = Instant.now()
-            fagsak.endretDato = Instant.now()
+            fagsak.registrertDato = registrertDato
+            fagsak.endretDato = endretDato
             return fagsak
         }
     }

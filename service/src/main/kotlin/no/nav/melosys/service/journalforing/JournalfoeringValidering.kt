@@ -208,16 +208,16 @@ class JournalfoeringValidering(
         if (!journalfoeringDto.brukerID.isNullOrEmpty() && !journalfoeringDto.virksomhetOrgnr.isNullOrEmpty()) {
             throw FunksjonellException("Både BrukerID og VirksomhetOrgnr finnes. Dette kan skape problemer. Velg én å journalføre dokumentet på.")
         }
-        if (journalfoeringDto.hoveddokument.dokumentID.isNullOrEmpty()) {
+        if (journalfoeringDto.hoveddokument.dokumentID.isNullOrBlank()) {
             throw FunksjonellException("DokumentID til hoveddokument mangler")
         }
-        if (journalfoeringDto.hoveddokument.tittel.isNullOrEmpty()) {
+        if (journalfoeringDto.hoveddokument.tittel.isNullOrBlank()) {
             throw FunksjonellException("Hoveddokument mangler tittel")
         }
-        if (journalfoeringDto.vedlegg.any { it.dokumentID.isNullOrEmpty() }) {
+        if (journalfoeringDto.vedlegg.any { it.dokumentID.isNullOrBlank() }) {
             throw FunksjonellException("DokumentID mangler for et vedlegg")
         }
-        if (journalfoeringDto.vedlegg.any { it.tittel.isNullOrEmpty() }) {
+        if (journalfoeringDto.vedlegg.any { it.tittel.isNullOrBlank() }) {
             throw FunksjonellException("Tittel mangler for et vedlegg")
         }
     }
