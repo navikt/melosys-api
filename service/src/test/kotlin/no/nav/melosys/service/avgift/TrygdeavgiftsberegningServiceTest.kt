@@ -250,7 +250,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                         id = 1L
                         fom = FOM
                         tom = TOM
-                        dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+                        dekning = Trygdedekninger.FULL_DEKNING_EOSFO
                         innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                         medlemskapstype = Medlemskapstyper.PLIKTIG
                         bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
@@ -310,7 +310,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                         id = 1L
                         fom = FOM
                         tom = TOM
-                        dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+                        dekning = Trygdedekninger.FULL_DEKNING_EOSFO
                         innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                         medlemskapstype = Medlemskapstyper.PLIKTIG
                         bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
@@ -505,7 +505,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                         id = 1L
                         fom = FOM
                         tom = TOM
-                        dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+                        dekning = Trygdedekninger.FULL_DEKNING_EOSFO
                         innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                         medlemskapstype = Medlemskapstyper.PLIKTIG
                         bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
@@ -578,7 +578,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                         id = 1L
                         fom = FOM
                         tom = TOM
-                        dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+                        dekning = Trygdedekninger.FULL_DEKNING_EOSFO
                         innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                         medlemskapstype = Medlemskapstyper.PLIKTIG
                         bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
