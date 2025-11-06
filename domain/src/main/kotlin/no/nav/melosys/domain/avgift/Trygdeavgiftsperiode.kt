@@ -57,8 +57,10 @@ class Trygdeavgiftsperiode(
     val forskuddsvisFaktura: Boolean = true
 ) : ErPeriode {
 
-    val grunnlagMedlemskapsperiodeNotNull: Medlemskapsperiode
-        get() = grunnlagMedlemskapsperiode ?: throw IllegalStateException("grunnlagMedlemskapsperiode er null")
+    val grunnlagAvgiftspliktigperiodeNotNull: AvgiftspliktigPeriode
+        get() = {
+            grunnlagMedlemskapsperiode ?: grunnlagLovvalgsPeriode ?: throw IllegalStateException("Grunnlag avgiftspliktigperiode er null")
+        } as AvgiftspliktigPeriode
 
     fun hentGrunnlagInntekstperiode(): Inntektsperiode =
         grunnlagInntekstperiode ?: error("grunnlagInntekstperiode er påkrevd for Trygdeavgiftsperiode")
