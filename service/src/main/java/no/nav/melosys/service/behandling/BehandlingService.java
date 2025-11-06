@@ -86,7 +86,7 @@ public class BehandlingService {
         Behandling behandling = Optional.ofNullable(behandlingRepository.findWithSaksopplysningerById(behandlingId))
             .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
         // Initialize fagsak proxy while still in transaction to prevent LazyInitializationException
-        behandling.getFagsak().getType();
+        behandling.getFagsak().getType(); //TODO Vurder å endre Fagsak til Eager Loading så slipper vi denne hacken
         return behandling;
     }
 
