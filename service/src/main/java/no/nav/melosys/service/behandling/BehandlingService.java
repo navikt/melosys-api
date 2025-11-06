@@ -81,9 +81,13 @@ public class BehandlingService {
             .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
     }
 
+    @Transactional(readOnly = true)
     public Behandling hentBehandlingMedSaksopplysninger(long behandlingId) {
-        return Optional.ofNullable(behandlingRepository.findWithSaksopplysningerById(behandlingId))
+        Behandling behandling = Optional.ofNullable(behandlingRepository.findWithSaksopplysningerById(behandlingId))
             .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
+        // Initialize fagsak proxy while still in transaction to prevent LazyInitializationException
+        behandling.getFagsak().getType();
+        return behandling;
     }
 
     @Transactional
