@@ -123,7 +123,7 @@
         <joda-time.version>2.14.0</joda-time.version>
         <woodstox.version>6.6.1</woodstox.version>
         <woodstox.stax2.version>4.2.2</woodstox.stax2.version>
-        <xmlsec.version>3.0.4</xmlsec.version>
+        <xmlsec.version>4.0.4</xmlsec.version>
         <wiremock-standalone.version>3.13.1</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
     </properties>
