@@ -2,11 +2,14 @@ package no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig.ÅrsavregningIkkeSkattepliktigeProsessGenerator.SakMedBehandlinger
+import no.nav.melosys.service.sak.FagsakService
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -16,9 +19,14 @@ private val log = KotlinLogging.logger {}
 
 @Component
 class ÅrsavregningIkkeSkattepliktigeFinner(
-    private val ikkeSkattepliktigeRepository: ÅrsavregningIkkeSkattepliktigeRepository
+    private val ikkeSkattepliktigeRepository: ÅrsavregningIkkeSkattepliktigeRepository,
+    private val årsavregningService: ÅrsavregningService,
+    private val fagsakService: FagsakService
 ) {
+
+    @Transactional(readOnly = true)
     fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate, onSakerMedFastsetting: () -> Unit = {}): List<SakMedBehandlinger> {
+        val år = fomDato.year
 
         val sakerMedFastsetting = ikkeSkattepliktigeRepository
             .finnBehandlingerMedTidligereÅrsavregningOgFastsetting(
@@ -32,74 +40,77 @@ class ÅrsavregningIkkeSkattepliktigeFinner(
                 onSakerMedFastsetting()
             }
 
-        return ikkeSkattepliktigeRepository.finnFTRLBehandlinger(fomDato, tomDato)
-            .filterNot {
-                sakerMedFastsetting[it.fagsak.saksnummer]?.let { behandlinger ->
-                    log.info { "Ekskluderer sak ${it.fagsak.saksnummer} pga behandlinger: ${behandlinger.map { b -> b.id }}" }
-                    true
-                } ?: false
-            }
-            .groupBy { it.fagsak }
-            .map { (fagsak, behandlinger) ->
-                SakMedBehandlinger(fagsak, behandlinger.sortedByDescending { it.endretDato })
-            }
+        val kandidatSaksnumre = ikkeSkattepliktigeRepository.finnFTRLSaksnumre(fomDato, tomDato)
+
+        return kandidatSaksnumre.mapNotNull { saksnummer ->
+            val gjeldendeBehandlingsresultater = årsavregningService
+                .hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år)
+                ?: return@mapNotNull null
+
+            val behandlinger = listOfNotNull(
+                gjeldendeBehandlingsresultater.sisteBehandlingsresultatMedAvgiftspliktigPeriode?.hentBehandling(),
+                gjeldendeBehandlingsresultater.sisteBehandlingsresultatMedAvgift?.hentBehandling()
+            ).distinct().sortedByDescending { it.endretDato }
+
+            if (behandlinger.isEmpty()) return@mapNotNull null
+
+            val fagsak = fagsakService.hentFagsak(saksnummer)
+            SakMedBehandlinger(fagsak, behandlinger)
+        }.also {
+            println("STØRRELSE: ${it.size}, sakerMedFastsetting=${sakerMedFastsetting.size}")
+            log.info { "Totalt fant ${it.size} saker for årsavregning ikke skattepliktig" }
+        }
     }
 }
 
 interface ÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behandling, Long> {
     @Query(
         """
-        select distinct b
-        FROM Behandlingsresultat br
-        JOIN br.behandling b
-        JOIN br.medlemskapsperioder mp
-        JOIN br.vedtakMetadata vm
-        JOIN b.fagsak f
+        SELECT DISTINCT f.saksnummer
+        FROM Fagsak f
         WHERE f.type = 'FTRL'
-            and f.status = 'LOVVALG_AVKLART'
-            and b.status = 'AVSLUTTET'
-            and br.type = 'MEDLEM_I_FOLKETRYGDEN'
-            and mp.fom <= :tomDato
-            and mp.tom >= :fomDato
-            and EXISTS (
-                SELECT 1 FROM mp.trygdeavgiftsperioder tap
-                JOIN tap.grunnlagSkatteforholdTilNorge stn
-                WHERE stn.skatteplikttype = 'IKKE_SKATTEPLIKTIG'
+            AND f.status = 'LOVVALG_AVKLART'
+            AND NOT EXISTS (
+                SELECT 1 FROM Behandling b
+                JOIN Behandlingsresultat br ON b.id = br.behandling.id
+                JOIN br.årsavregning a
+                WHERE b.fagsak = f
+                    AND b.type = 'ÅRSAVREGNING'
+                    AND a.aar = EXTRACT(YEAR FROM :fomDato)
             )
-            and NOT EXISTS (
-                SELECT 1 FROM Behandling b2
-                JOIN Behandlingsresultat br2 ON b2.id = br2.behandling.id
-                JOIN br2.årsavregning a
-                WHERE b2.fagsak = f
-                    and b2.type = 'ÅRSAVREGNING'
-                    and a.aar = EXTRACT(YEAR FROM :fomDato)
-            )
-            and NOT EXISTS (
-                SELECT 1 FROM Behandling b3
-                JOIN Behandlingsresultat br3 ON b3.id = br3.behandling.id
-                JOIN br3.medlemskapsperioder mp3
-                JOIN mp3.trygdeavgiftsperioder tap3
-                JOIN tap3.grunnlagSkatteforholdTilNorge stn3
-                WHERE b3.fagsak = f
-                    and stn3.skatteplikttype = 'SKATTEPLIKTIG'
-                    and mp3.fom <= :tomDato
-                    and mp3.tom >= :fomDato
-                    and b3.id = (
-                        SELECT MAX(b4.id)
-                        FROM Behandling b4
-                        JOIN Behandlingsresultat br4 ON b4.id = br4.behandling.id
-                        JOIN br4.medlemskapsperioder mp4
-                        WHERE b4.fagsak = f
-                            and mp4.fom <= :tomDato
-                            and mp4.tom >= :fomDato
+            AND NOT EXISTS (
+                SELECT 1 FROM Behandling b
+                JOIN Behandlingsresultat br ON b.id = br.behandling.id
+                WHERE b.fagsak = f
+                    AND b.status = 'AVSLUTTET'
+                    AND br.type = 'OPPHØRT'
+                    AND b.id = (
+                        SELECT MAX(b2.id)
+                        FROM Behandling b2
+                        JOIN Behandlingsresultat br2 ON b2.id = br2.behandling.id
+                        WHERE b2.fagsak = f
+                            AND b2.status = 'AVSLUTTET'
                     )
             )
-            """
+            AND EXISTS (
+                SELECT 1 FROM Behandling b
+                JOIN Behandlingsresultat br ON b.id = br.behandling.id
+                JOIN br.medlemskapsperioder mp
+                JOIN mp.trygdeavgiftsperioder tap
+                JOIN tap.grunnlagSkatteforholdTilNorge stn
+                WHERE b.fagsak = f
+                    AND b.status = 'AVSLUTTET'
+                    AND br.type = 'MEDLEM_I_FOLKETRYGDEN'
+                    AND stn.skatteplikttype = 'IKKE_SKATTEPLIKTIG'
+                    AND tap.periodeFra <= :tomDato
+                    AND tap.periodeTil >= :fomDato
+            )
+        """
     )
-    fun finnFTRLBehandlinger(
+    fun finnFTRLSaksnumre(
         @Param("fomDato") fomDato: LocalDate,
         @Param("tomDato") tomDato: LocalDate,
-    ): List<Behandling>
+    ): List<String>
 
     @Query(
         """

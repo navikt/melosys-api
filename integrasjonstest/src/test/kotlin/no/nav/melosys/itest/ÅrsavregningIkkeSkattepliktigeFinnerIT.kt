@@ -54,6 +54,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
         lagBehandlingsresultat {
             behandling {
                 type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     saksnummer = sakOppfyllerIkkeKrav
                     type = Sakstyper.FTRL
@@ -65,6 +66,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         lagBehandlingsresultat {
             behandling {
+                status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     saksnummer = sakOppfyllerIkkeKrav
                     type = Sakstyper.FTRL
@@ -89,6 +91,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
         lagBehandlingsresultat {
             behandling {
                 type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     saksnummer = sakOppfyllerIkkeKrav
                     type = Sakstyper.FTRL
@@ -116,6 +119,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
         lagBehandlingsresultat {
             behandling {
                 type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     saksnummer = sakOppfyllerIkkeKrav
                     type = Sakstyper.FTRL
@@ -514,10 +518,6 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
             utfallRegistreringUnntak = Utfallregistreringunntak.IKKE_GODKJENT
             trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
 
-            behandling {
-                status = Behandlingsstatus.AVSLUTTET
-            }
-
             vedtakMetadata {
                 vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
             }
@@ -530,6 +530,8 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
                 trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                 trygdeavgiftsperiode {
+                    periodeFra = FOM
+                    periodeTil = TOM
                     trygdeavgiftsbeløpMd = BigDecimal(500.0)
                     trygdesats = BigDecimal(50)
                     grunnlagSkatteforholdTilNorge {
@@ -539,7 +541,10 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
             }
             block()
         }.also {
-            fagsakRepository.save(it.hentBehandling().fagsak)
+            val fagsak = it.hentBehandling().fagsak
+            it.hentBehandling().fagsak.behandlinger.clear()
+
+            fagsakRepository.save(fagsak)
             addCleanUpAction { slettSakMedAvhengigheter(it.hentBehandling().fagsak.saksnummer) }
             behandlingsresultatRepository.save(it)
         }
