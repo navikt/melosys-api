@@ -160,7 +160,7 @@ class ÅrsavregningVedtakMapper(
 
     private fun harPliktigMedlemskap(avgiftspliktigPerioder: List<AvgiftsperiodeForAvgift>?): Boolean {
         return avgiftspliktigPerioder?.takeIf { it.isNotEmpty() }
-            ?.all { when(it) {
+            ?.all { when (it) {
                 is MedlemskapsperiodeForAvgift -> it.medlemskapstyper == Medlemskapstyper.PLIKTIG
                 else -> throw FunksjonellException("Ukjent periodetype: ${it.javaClass.simpleName}")
             } } == true
