@@ -24,16 +24,13 @@ class DefaultEnabledUnleash(private val delegate: Unleash) : Unleash by delegate
     }
 
     override fun isEnabled(toggleName: String, defaultSetting: Boolean): Boolean {
-        // Sjekk om denne togglen er definert/registrert i Unleash
         val toggleDefinition = delegate.more().getFeatureToggleDefinition(toggleName)
 
         return if (toggleDefinition.isPresent) {
-            // Toggle er definert - bruk faktisk Unleash-status
             val enabled = delegate.isEnabled(toggleName, defaultSetting)
             log.debug { "Toggle '$toggleName' er definert i Unleash: enabled=$enabled" }
             enabled
         } else {
-            // Toggle er IKKE definert - default til enabled for lokal utvikling
             log.debug { "Toggle '$toggleName' er IKKE definert i Unleash, defaulter til ENABLED" }
             true
         }
@@ -44,16 +41,13 @@ class DefaultEnabledUnleash(private val delegate: Unleash) : Unleash by delegate
     }
 
     override fun isEnabled(toggleName: String, context: UnleashContext, defaultSetting: Boolean): Boolean {
-        // Sjekk om denne togglen er definert/registrert i Unleash
         val toggleDefinition = delegate.more().getFeatureToggleDefinition(toggleName)
 
         return if (toggleDefinition.isPresent) {
-            // Toggle er definert - bruk faktisk Unleash-status
             val enabled = delegate.isEnabled(toggleName, context, defaultSetting)
             log.debug { "Toggle '$toggleName' (med context) er definert i Unleash: enabled=$enabled" }
             enabled
         } else {
-            // Toggle er IKKE definert - default til enabled for lokal utvikling
             log.debug { "Toggle '$toggleName' (med context) er IKKE definert i Unleash, defaulter til ENABLED" }
             true
         }
