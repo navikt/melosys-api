@@ -53,6 +53,7 @@ class ÅrsavregningIkkeSkattepliktigeFinner(
             ).distinct().sortedByDescending { it.endretDato }
 
             if (behandlinger.isEmpty()) return@mapNotNull null
+            if(sakerMedFastsetting.contains(saksnummer)) return@mapNotNull null
 
             val fagsak = fagsakService.hentFagsak(saksnummer)
             SakMedBehandlinger(fagsak, behandlinger)
