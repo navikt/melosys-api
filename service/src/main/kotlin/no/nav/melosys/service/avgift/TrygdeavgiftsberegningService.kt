@@ -204,13 +204,13 @@ class TrygdeavgiftsberegningService(
 
         when (behandlingsresultat.avgiftspliktigPerioder().firstOrNull()) {
             is Medlemskapsperiode -> trygdeavgiftsperiode.apply {
-                grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.avgiftspliktigperiodeId } ?: throw IllegalStateException("Fant ikke medlemskapsperiode $response.grunnlag.medlemskapsperiodeId")
+                grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.avgiftspliktigperiodeId } ?: throw IllegalStateException("Fant ikke medlemskapsperiode ${response.grunnlag.avgiftspliktigperiodeId}")
             }
             is HelseutgiftDekkesPeriode -> trygdeavgiftsperiode.apply {
-                grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.hentHelseutgiftDekkesPeriode().takeIf { idToUUid(it.hentId()) == response.grunnlag.avgiftspliktigperiodeId } ?: throw IllegalStateException("Fant ikke helseutgiftdekket periode $response.grunnlag.helseutgiftDekkesPeriodeId")
+                grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.hentHelseutgiftDekkesPeriode().takeIf { idToUUid(it.hentId()) == response.grunnlag.avgiftspliktigperiodeId } ?: throw IllegalStateException("Fant ikke helseutgiftdekket periode ${response.grunnlag.avgiftspliktigperiodeId}")
             }
             is Lovvalgsperiode -> trygdeavgiftsperiode.apply {
-                grunnlagLovvalgsPeriode = behandlingsresultat.lovvalgsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.avgiftspliktigperiodeId } ?: throw IllegalStateException("Fant ikke lovvalgsperiode $response.grunnlag.lovvalgsperiodeId")
+                grunnlagLovvalgsPeriode = behandlingsresultat.lovvalgsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.avgiftspliktigperiodeId } ?: throw IllegalStateException("Fant ikke lovvalgsperiode ${response.grunnlag.avgiftspliktigperiodeId}")
             }
             else -> throw FunksjonellException("Ukjent avgiftspliktigperiode: ${behandlingsresultat.avgiftspliktigPerioder().firstOrNull()}")
         }
