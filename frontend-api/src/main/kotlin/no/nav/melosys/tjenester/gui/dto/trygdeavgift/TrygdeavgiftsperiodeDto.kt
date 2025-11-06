@@ -17,7 +17,13 @@ data class TrygdeavgiftsperiodeDto(
         this(
             trygdeavgiftsperiode.periodeFra,
             trygdeavgiftsperiode.periodeTil,
-            trygdeavgiftsperiode.grunnlagMedlemskapsperiodeNotNull.hentTrygdedekning(),
+            trygdedekning = if (trygdeavgiftsperiode.grunnlagMedlemskapsperiode != null) {
+                trygdeavgiftsperiode.grunnlagMedlemskapsperiodeNotNull.hentTrygdedekning()
+            } else if (trygdeavgiftsperiode.grunnlagLovvalgsPeriode != null) {
+                 trygdeavgiftsperiode.grunnlagLovvalgsPeriodeNotNull.hentTrygdedekning()
+            } else {
+                throw IllegalStateException("Mangler grunnlag for trygdedekning")
+            },
             trygdeavgiftsperiode.grunnlagInntekstperiode?.type,
             trygdeavgiftsperiode.trygdesats.toDouble(),
             trygdeavgiftsperiode.trygdeavgiftsbeløpMd.hentVerdi().toInt()
