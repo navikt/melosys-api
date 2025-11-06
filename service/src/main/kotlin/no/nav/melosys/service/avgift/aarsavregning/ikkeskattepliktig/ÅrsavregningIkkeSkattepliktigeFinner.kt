@@ -2,6 +2,7 @@ package no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig.ÅrsavregningIkkeSkattepliktigeProsessGenerator.SakMedBehandlinger
 import no.nav.melosys.service.sak.FagsakService
@@ -47,6 +48,17 @@ class ÅrsavregningIkkeSkattepliktigeFinner(
                 .hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år)
                 ?: return@mapNotNull null
 
+            // Sjekk om nyeste behandling har SKATTEPLIKTIG perioder
+            val sisteBehandlingsresultat = gjeldendeBehandlingsresultater.sisteBehandlingsresultatMedAvgiftspliktigPeriode
+            val harSkattepliktig = sisteBehandlingsresultat?.trygdeavgiftsperioder
+                ?.any { it.grunnlagSkatteforholdTilNorge?.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+                ?: false
+
+            if (harSkattepliktig) {
+                log.debug { "Ekskluderer sak $saksnummer: nyeste behandling har SKATTEPLIKTIG periode" }
+                return@mapNotNull null
+            }
+
             val behandlinger = listOfNotNull(
                 gjeldendeBehandlingsresultater.sisteBehandlingsresultatMedAvgiftspliktigPeriode?.hentBehandling(),
                 gjeldendeBehandlingsresultater.sisteBehandlingsresultatMedAvgift?.hentBehandling()
@@ -58,7 +70,6 @@ class ÅrsavregningIkkeSkattepliktigeFinner(
             val fagsak = fagsakService.hentFagsak(saksnummer)
             SakMedBehandlinger(fagsak, behandlinger)
         }.also {
-            println("STØRRELSE: ${it.size}, sakerMedFastsetting=${sakerMedFastsetting.size}")
             log.info { "Totalt fant ${it.size} saker for årsavregning ikke skattepliktig" }
         }
     }
