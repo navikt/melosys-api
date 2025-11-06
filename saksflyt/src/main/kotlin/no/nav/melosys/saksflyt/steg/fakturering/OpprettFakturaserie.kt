@@ -215,7 +215,7 @@ class OpprettFakturaserie(
             return DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL
         }
 
-        return trygdeavgiftsperiode.grunnlagAvgiftspliktigperiodeNotNull.hentTrygdedekning().beskrivelse
+        return trygdeavgiftsperiode.grunnlagMedlemskapsperiodeNotNull.hentTrygdedekning().beskrivelse
     }
 
     companion object {
