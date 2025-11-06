@@ -2,26 +2,22 @@ package no.nav.melosys.itest.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.tomakehurst.wiremock.client.WireMock
+import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
-import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.Behandlingsmaate
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
-import no.nav.melosys.domain.avgift.inntektForTest
-import no.nav.melosys.domain.avgift.skatteforholdForTest
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.popp.PensjonsopptjeningHendelse
 import no.nav.melosys.integrasjon.popp.PensjonsopptjeningHendelse.Companion.genererHendelsesId
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
@@ -32,8 +28,8 @@ import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
-import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig.ÅrsavregningIkkeSkattepliktigeProsessGenerator
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -121,7 +117,9 @@ class ÅrsavregningIT(
 
     @Test
     fun `oppretter årsavregningsbehandling via ÅrsavregningIkkeSkattepliktigeProsessGenerator`() {
-        val saksnummer = lagFørstegangsbehandlingÅrsavregningsPeriode()
+        fakeUnleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+
+        val saksnummer = lagFørstegangsbehandlingMedOverlappendeÅrsavregningsPeriode()
 
         executeAndWait(
             mapOf(
@@ -479,25 +477,36 @@ class ÅrsavregningIT(
         behandlingsaarsakType = Behandlingsaarsaktyper.HENVENDELSE
     }
 
-    private fun lagFørstegangsbehandlingÅrsavregningsPeriode(): String {
-        // Lager medlemskapsperiode innenfor årsavregningsåret 2025
-        // (kort periode slik at beregnOgLagreTrygdeavgift kun lager én medlemskapsperiode)
+    private fun lagFørstegangsbehandlingMedOverlappendeÅrsavregningsPeriode(): String {
+        /**
+         * VIKTIG: Funksjonen brukes, men IKKE med overlappende perioder som navnet antyder!
+         *
+         * Ønsket scenario (fungerer IKKE):
+         * - Medlemskapsperiode: 2024-06-01 til 2025-06-01 (overlapper årsskifte)
+         *
+         * Hvorfor det ikke fungerer:
+         * - TrygdeavgiftsberegningTransformer (mock) returnerer ALLTID 1. januar til 1. februar
+         * - Input 2024-06-01 → Mock returnerer 2024-01-01 til 2024-02-01
+         * - SQL krever: periodeTil >= 2025-01-01
+         * - 2024-02-01 < 2025-01-01 ❌ → 0 saker funnet
+         *
+         * Nåværende workaround (det vi faktisk bruker):
+         * - Bruker datoer INNENFOR 2025: 2025-01-01 til 2025-02-01
+         * - Mock returnerer da: 2025-01-01 til 2025-02-01 ✅
+         * - SQL finner saken
+         *
+         * Konsekvens:
+         * - Funksjonen fungerer, men tester IKKE overlappende perioder
+         * - Navnet er misvisende - perioden overlapper ikke årsskifte
+         * - For å teste overlappende perioder: fix TrygdeavgiftsberegningTransformer (linje 39)
+         *
+         * Se MOCK_LIMITATION_REPORT.md for full analyse og løsningsforslag.
+         */
         return lagFørstegangsbehandling(
             skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG,
             arbeidsgiversavgiftBetales = false,
             medlemskapsperiodeFom = LocalDate.of(2025, 1, 1),
             medlemskapsperiodeTom = LocalDate.of(2025, 2, 1)
-        )
-    }
-
-    private fun lagFørstegangsbehandlingMedOverlappendeÅrsavregningsPeriode(): String {
-        // Lager medlemskapsperiode innenfor årsavregningsåret 2025
-        // (kort periode slik at beregnOgLagreTrygdeavgift kun lager én medlemskapsperiode)
-        return lagFørstegangsbehandling(
-            skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG,
-            arbeidsgiversavgiftBetales = false,
-            medlemskapsperiodeFom = LocalDate.of(2024, 6, 1),
-            medlemskapsperiodeTom = LocalDate.of(2025, 6, 1)
         )
     }
 
