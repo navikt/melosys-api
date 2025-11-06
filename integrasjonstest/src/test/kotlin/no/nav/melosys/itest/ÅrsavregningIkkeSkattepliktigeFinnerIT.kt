@@ -84,10 +84,20 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
             .shouldBeEmpty()
     }
 
+    /**
+     * Scenario: En sak har to vurderinger (behandlinger):
+     *   1. Første behandling: IKKE_SKATTEPLIKTIG (eldre)
+     *   2. Andre behandling: SKATTEPLIKTIG (nyere)
+     *
+     * Forventet: Saken skal IKKE inkluderes i årsavregning fordi den nyeste
+     * vurderingen har skattepliktig status. Årsavregning for ikke-skattepliktige
+     * skal kun gjelde for saker hvor den gjeldende statusen er ikke-skattepliktig.
+     */
     @Test
-    fun `skal ikke finne registert sak hvor vi har ny vurdering som forandrer til skattepliktig`() {
+    fun `skal ikke finne registert sak hvor vi har ny vurdering som foandrer til skattepliktig`() {
         val sakOppfyllerIkkeKrav = "MEL-OPPFYLLER-IKKE-KRAV"
 
+        // Første vurdering: IKKE_SKATTEPLIKTIG
         lagBehandlingsresultat {
             behandling {
                 type = Behandlingstyper.FØRSTEGANG
@@ -116,6 +126,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
         }
 
+        // Andre vurdering: SKATTEPLIKTIG (nyere - denne gjelder nå)
         lagBehandlingsresultat {
             behandling {
                 type = Behandlingstyper.FØRSTEGANG
@@ -147,16 +158,25 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         val sakerMedBehandlinger = årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(FOM, TOM)
 
-
+        // Verifiser at saken IKKE ble funnet
         sakerMedBehandlinger.filter { it.sak.saksnummer == sakOppfyllerIkkeKrav }
             .shouldBeEmpty()
     }
 
+    /**
+     * Scenario: En sak har to vurderinger (behandlinger):
+     *   1. Første behandling: SKATTEPLIKTIG (eldre)
+     *   2. Andre behandling: IKKE_SKATTEPLIKTIG (nyere)
+     *
+     * Forventet: Saken skal inkluderes i årsavregning fordi den nyeste vurderingen
+     * har ikke-skattepliktig status. Dette demonstrerer at logikken kun sjekker
+     * gjeldende status, ikke historikk.
+     */
     @Test
-    fun `skal finne registert sak hvor vi har ny ny vurdering som forandrer til ikke skattepliktig`() {
+    fun `skal finne registert sak hvor vi har ny ny vurdering som foandrer til ikke skattepliktig`() {
         val sakOppfyllerKrav = "MEL-OPPFYLLER-KRAV"
 
-
+        // Første vurdering: SKATTEPLIKTIG (eldre)
         lagBehandlingsresultat {
             behandling {
                 status = Behandlingsstatus.AVSLUTTET
@@ -185,6 +205,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
         }
 
+        // Andre vurdering: IKKE_SKATTEPLIKTIG (nyere - denne gjelder nå)
         lagBehandlingsresultat {
             behandling {
                 status = Behandlingsstatus.AVSLUTTET
@@ -215,7 +236,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         val sakerMedBehandlinger = årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(FOM, TOM)
 
-
+        // Verifiser at saken ble funnet
         sakerMedBehandlinger.filter { it.sak.saksnummer == sakOppfyllerKrav }
             .shouldHaveSize(1)
             .single()
@@ -542,6 +563,8 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
             block()
         }.also {
             val fagsak = it.hentBehandling().fagsak
+            // Clear bidirectional relationship to prevent Hibernate cascade conflicts
+            // when saving Fagsak and Behandlingsresultat separately
             it.hentBehandling().fagsak.behandlinger.clear()
 
             fagsakRepository.save(fagsak)

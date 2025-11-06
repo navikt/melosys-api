@@ -39,15 +39,13 @@ class ÅrsavregningIkkeSkattepliktigeFinner(
         return kandidatSaksnumre.mapNotNull { saksnummer ->
             val gjeldendeBehandlingsresultater = årsavregningService
                 .hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år)
-                ?: return@mapNotNull null
+                ?: run {
+                    log.debug { "Ingen gjeldende behandlingsresultater for sak $saksnummer, år $år" }
+                    return@mapNotNull null
+                }
 
             // Sjekk om nyeste behandling har SKATTEPLIKTIG perioder
-            val sisteBehandlingsresultat = gjeldendeBehandlingsresultater.sisteBehandlingsresultatMedAvgiftspliktigPeriode
-            val harSkattepliktig = sisteBehandlingsresultat?.trygdeavgiftsperioder
-                ?.any { it.grunnlagSkatteforholdTilNorge?.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
-                ?: false
-
-            if (harSkattepliktig) {
+            if (harSkattepliktigPeriode(gjeldendeBehandlingsresultater.sisteBehandlingsresultatMedAvgiftspliktigPeriode)) {
                 log.debug { "Ekskluderer sak $saksnummer: nyeste behandling har SKATTEPLIKTIG periode" }
                 return@mapNotNull null
             }
@@ -57,13 +55,26 @@ class ÅrsavregningIkkeSkattepliktigeFinner(
                 gjeldendeBehandlingsresultater.sisteBehandlingsresultatMedAvgift?.hentBehandling()
             ).distinct().sortedByDescending { it.endretDato }
 
-            if (behandlinger.isEmpty()) return@mapNotNull null
+            if (behandlinger.isEmpty()) {
+                log.debug { "Ingen behandlinger funnet for sak $saksnummer" }
+                return@mapNotNull null
+            }
 
             val fagsak = fagsakService.hentFagsak(saksnummer)
             SakMedBehandlinger(fagsak, behandlinger)
         }.also {
             log.info { "Totalt fant ${it.size} saker for årsavregning ikke skattepliktig" }
         }
+    }
+
+    /**
+     * Sjekker om behandlingsresultatet inneholder minst én trygdeavgiftsperiode med SKATTEPLIKTIG status.
+     * Returnerer false hvis behandlingsresultatet er null eller ikke har noen skattepliktige perioder.
+     */
+    private fun harSkattepliktigPeriode(behandlingsresultat: no.nav.melosys.domain.Behandlingsresultat?): Boolean {
+        return behandlingsresultat?.trygdeavgiftsperioder
+            ?.any { it.grunnlagSkatteforholdTilNorge?.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+            ?: false
     }
 }
 
