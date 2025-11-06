@@ -1,13 +1,13 @@
 package no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig
 
 import mu.KotlinLogging
-import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig.ÅrsavregningIkkeSkattepliktigeProsessGenerator.SakMedBehandlinger
 import no.nav.melosys.service.sak.FagsakService
 import org.springframework.data.jpa.repository.Query
-import org.springframework.data.repository.CrudRepository
+import org.springframework.data.repository.Repository
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -67,7 +67,7 @@ class ÅrsavregningIkkeSkattepliktigeFinner(
     }
 }
 
-interface ÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behandling, Long> {
+interface ÅrsavregningIkkeSkattepliktigeRepository : Repository<Fagsak, String> {
     @Query(
         """
         SELECT DISTINCT f.saksnummer
