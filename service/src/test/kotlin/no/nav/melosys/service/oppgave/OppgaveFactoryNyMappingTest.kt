@@ -74,7 +74,7 @@ internal class OppgaveFactoryNyMappingTest {
 
                 withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
                     oppgave.beskrivelse.shouldBe("")
-                    verify { behandling.hentSedDokument() wasNot called }
+                    verify(exactly = 0) { behandling.hentSedDokument() }
                 }
             }
     }
@@ -92,7 +92,7 @@ internal class OppgaveFactoryNyMappingTest {
 
                 withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
                     oppgave.beskrivelse.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR.beskrivelse)
-                    verify { behandling.hentSedDokument() wasNot called }
+                    verify(exactly = 0) { behandling.hentSedDokument() }
                 }
             }
     }
