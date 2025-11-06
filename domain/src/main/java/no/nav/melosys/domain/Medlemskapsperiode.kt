@@ -90,7 +90,7 @@ class Medlemskapsperiode : HarBestemmelse<Bestemmelse?>, AvgiftspliktigPeriode {
 
     fun erFrivillig(): Boolean = medlemskapstype == Medlemskapstyper.FRIVILLIG
 
-    override fun erPliktig(): Boolean = medlemskapstype == Medlemskapstyper.PLIKTIG
+    override fun erPliktigMedlemskap(): Boolean = medlemskapstype == Medlemskapstyper.PLIKTIG
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

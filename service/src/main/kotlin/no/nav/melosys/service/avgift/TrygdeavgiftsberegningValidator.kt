@@ -108,7 +108,7 @@ object TrygdeavgiftsberegningValidator {
             )
         }
 
-        val erPliktigMedlem = innvilgedeAvgiftspliktigeperioder.all { it.erPliktig() }
+        val erPliktigMedlem = innvilgedeAvgiftspliktigeperioder.all { it.erPliktigMedlemskap() }
         val erSkattepliktigIHelePerioden = skatteforholdsperioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
 
         if (!(erPliktigMedlem && erSkattepliktigIHelePerioden) && !skalValiderePerioderForNyVurderingOgManglendeInnbetaling) {

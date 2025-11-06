@@ -23,7 +23,7 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
         nullstillTrygdeavgiftsperioder(behandlingsresultat)
 
         behandlingsresultat.avgiftspliktigPerioder().forEach { avgiftspliktigperiode ->
-            when(avgiftspliktigperiode) {
+            when (avgiftspliktigperiode) {
                 is Medlemskapsperiode -> trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
                     if (trygdeavgiftsperiode.grunnlagMedlemskapsperiode?.id == avgiftspliktigperiode.id) {
                         avgiftspliktigperiode.addTrygdeavgiftsperiode(trygdeavgiftsperiode)

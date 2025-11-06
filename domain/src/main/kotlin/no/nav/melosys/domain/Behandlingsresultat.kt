@@ -108,7 +108,7 @@ open class Behandlingsresultat : RegistreringsInfo() {
     fun avgiftspliktigPerioder(): List<AvgiftspliktigPeriode> {
         return (if (behandling?.erEøsPensjonist() == true && helseutgiftDekkesPeriode != null) {
             listOf(hentHelseutgiftDekkesPeriode())
-        } else if (behandling?.erLovvalg() == true) {
+        } else if (behandling?.fagsak?.erLovvalg() == true) {
             lovvalgsperioder.toList()
         }
         else {
@@ -194,7 +194,7 @@ open class Behandlingsresultat : RegistreringsInfo() {
                 return eøsPensjonistTrygdeavgiftsperioder
             }
 
-            if (behandling?.erLovvalg() == true) {
+            if (behandling?.fagsak?.erLovvalg() == true) {
                 return lovvalgsperioder.flatMap { it.trygdeavgiftsperioder }.toSet()
             }
 

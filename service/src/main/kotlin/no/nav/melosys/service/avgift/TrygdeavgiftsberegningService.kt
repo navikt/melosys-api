@@ -19,7 +19,6 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningRespons
 import no.nav.melosys.service.avgift.model.InntektsperiodeModel
 import no.nav.melosys.service.avgift.model.SkatteforholdTilNorgeModel
 import no.nav.melosys.service.avgift.model.TrygdeavgiftsgrunnlagModel
-import no.nav.melosys.service.avgift.tilMedlemskapsperiodeDtoSet
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -125,7 +124,7 @@ class TrygdeavgiftsberegningService(
     ): Boolean {
         val erPliktig = avgiftspliktigePerioder
             .filter { it.erInnvilget() }
-            .all { it.erPliktig() }
+            .all { it.erPliktigMedlemskap() }
 
         val inntektskilderErTomt = inntektsPerioder.isEmpty()
         val alleSkatteforholdErSkattepliktige =
@@ -223,7 +222,7 @@ class TrygdeavgiftsberegningService(
         behandlingsresultatID: Long,
         avgiftspliktigperioder: List<AvgiftspliktigPeriode>
     ): LocalDate? {
-        if (avgiftspliktigperioder.any { it.erPliktig() }) {
+        if (avgiftspliktigperioder.any { it.erPliktigMedlemskap() }) {
             val fagsak = behandlingService.hentBehandling(behandlingsresultatID).fagsak
             return persondataService.hentPerson(fagsak.hentBrukersAktørID()).fødselsdato
         }

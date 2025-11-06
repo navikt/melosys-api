@@ -8,7 +8,7 @@ interface AvgiftspliktigPeriode : ErPeriode {
     fun hentId(): Long
     fun hentTrygdedekning(): Trygdedekninger
     fun erInnvilget(): Boolean
-    fun erPliktig(): Boolean
+    fun erPliktigMedlemskap(): Boolean
     fun erOpphørt(): Boolean
     fun hentMedlemskapstype(): Medlemskapstyper
 }
