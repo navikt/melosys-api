@@ -26,22 +26,15 @@ class ÅrsavregningIkkeSkattepliktigeFinner(
 ) {
 
     @Transactional(readOnly = true)
-    fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate, onSakerMedFastsetting: () -> Unit = {}): List<SakMedBehandlinger> {
+    fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate): List<SakMedBehandlinger> {
         val år = fomDato.year
 
-        val sakerMedFastsetting = ikkeSkattepliktigeRepository
-            .finnBehandlingerMedTidligereÅrsavregningOgFastsetting(
-                fomDato.atStartOfDay(ZoneId.systemDefault()).toInstant(),
-                tomDato.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant()
-            )
-            .groupBy { it.fagsak.saksnummer }
-            .mapValues { it.value.sortedByDescending { b -> b.endretDato } }
-            .also {
-                log.info { "Fant ${it.size} saker med tidligere årsavregning med fastsetting" }
-                onSakerMedFastsetting()
-            }
-
-        val kandidatSaksnumre = ikkeSkattepliktigeRepository.finnFTRLSaksnumre(fomDato, tomDato)
+        val kandidatSaksnumre = ikkeSkattepliktigeRepository.finnFTRLSaksnumre(
+            fomDato,
+            tomDato,
+            fomDato.atStartOfDay(ZoneId.systemDefault()).toInstant(),
+            tomDato.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant()
+        )
 
         return kandidatSaksnumre.mapNotNull { saksnummer ->
             val gjeldendeBehandlingsresultater = årsavregningService
@@ -65,7 +58,6 @@ class ÅrsavregningIkkeSkattepliktigeFinner(
             ).distinct().sortedByDescending { it.endretDato }
 
             if (behandlinger.isEmpty()) return@mapNotNull null
-            if(sakerMedFastsetting.contains(saksnummer)) return@mapNotNull null
 
             val fagsak = fagsakService.hentFagsak(saksnummer)
             SakMedBehandlinger(fagsak, behandlinger)
@@ -104,6 +96,14 @@ interface ÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behandling,
                             AND b2.status = 'AVSLUTTET'
                     )
             )
+            AND NOT EXISTS (
+                SELECT 1 FROM Behandling b
+                JOIN Behandlingsresultat br ON b.id = br.behandling.id
+                WHERE b.fagsak = f
+                    AND b.type = 'ÅRSAVREGNING'
+                    AND br.type = 'FASTSATT_TRYGDEAVGIFT'
+                    AND br.registrertDato between :fomInstant and :tomInstant
+            )
             AND EXISTS (
                 SELECT 1 FROM Behandling b
                 JOIN Behandlingsresultat br ON b.id = br.behandling.id
@@ -122,22 +122,7 @@ interface ÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behandling,
     fun finnFTRLSaksnumre(
         @Param("fomDato") fomDato: LocalDate,
         @Param("tomDato") tomDato: LocalDate,
+        @Param("fomInstant") fomInstant: Instant,
+        @Param("tomInstant") tomInstant: Instant
     ): List<String>
-
-    @Query(
-        """
-        select distinct b
-        FROM Behandlingsresultat br
-        JOIN br.behandling b
-        JOIN b.fagsak f
-        WHERE f.type = 'FTRL'
-            and b.type = 'ÅRSAVREGNING'
-            and br.type = 'FASTSATT_TRYGDEAVGIFT'
-            and br.registrertDato between :fomDato and :tomDato
-        """
-    )
-    fun finnBehandlingerMedTidligereÅrsavregningOgFastsetting(
-        @Param("fomDato") fomDato: Instant,
-        @Param("tomDato") tomDato: Instant,
-    ): List<Behandling>
 }

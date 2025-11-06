@@ -96,12 +96,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
     }
 
     private fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate): List<SakMedBehandlinger> =
-        årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(fomDato = fomDato, tomDato = tomDato) {
-            // Callback for å oppdatere når DB-spørringen er ferdig
-            jobMonitor.stats.finnSakerMedTidligereÅrsavregningQueryStoppedAt = LocalDateTime.now()
-        }.also {
-            jobMonitor.stats.finnBehandlingerdbQueryStoppedAt = LocalDateTime.now()
-        }
+        årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(fomDato = fomDato, tomDato = tomDato)
 
     private fun <T> runAsSystem(prosessSteg: String = "finnSakerHvorÅrsavregningSkalOpprettes", block: () -> T): T {
         val processId = UUID.randomUUID()
