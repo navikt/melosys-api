@@ -121,7 +121,7 @@ class ÅrsavregningIT(
 
     @Test
     fun `oppretter årsavregningsbehandling via ÅrsavregningIkkeSkattepliktigeProsessGenerator`() {
-        val saksnummer = lagFørstegangsbehandlingMedOverlappendeÅrsavregningsPeriode()
+        val saksnummer = lagFørstegangsbehandlingÅrsavregningsPeriode()
 
         executeAndWait(
             mapOf(
@@ -479,8 +479,20 @@ class ÅrsavregningIT(
         behandlingsaarsakType = Behandlingsaarsaktyper.HENVENDELSE
     }
 
+    private fun lagFørstegangsbehandlingÅrsavregningsPeriode(): String {
+        // Lager medlemskapsperiode innenfor årsavregningsåret 2025
+        // (kort periode slik at beregnOgLagreTrygdeavgift kun lager én medlemskapsperiode)
+        return lagFørstegangsbehandling(
+            skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG,
+            arbeidsgiversavgiftBetales = false,
+            medlemskapsperiodeFom = LocalDate.of(2025, 1, 1),
+            medlemskapsperiodeTom = LocalDate.of(2025, 2, 1)
+        )
+    }
+
     private fun lagFørstegangsbehandlingMedOverlappendeÅrsavregningsPeriode(): String {
-        // Lager medlemskapsperiode som starter året før årsavregningsåret (2024) men overlapper inn i 2025
+        // Lager medlemskapsperiode innenfor årsavregningsåret 2025
+        // (kort periode slik at beregnOgLagreTrygdeavgift kun lager én medlemskapsperiode)
         return lagFørstegangsbehandling(
             skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG,
             arbeidsgiversavgiftBetales = false,
@@ -601,7 +613,7 @@ class ÅrsavregningIT(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
         ).single().hentId()
 
-        val medlemskapsperiode = medlemskapsperiodeService.oppdaterMedlemskapsperiode(
+        medlemskapsperiodeService.oppdaterMedlemskapsperiode(
             behandlingId,
             medlemskapsperiodeId,
             medlemskapsperiodeFom,
@@ -630,34 +642,6 @@ class ÅrsavregningIT(
         )
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingId, skattefordholdsperioder, inntektsforholdsperioder)
-
-
-        val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
-            fomDato = medlemskapsperiodeFom
-            tomDato = medlemskapsperiodeTom
-            this@apply.skatteplikttype = skatteplikttype
-        }
-
-        val inntektsperiode = Inntektsperiode().apply {
-            fomDato = medlemskapsperiodeFom
-            tomDato = medlemskapsperiodeTom
-            type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-            isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetales
-            avgiftspliktigMndInntekt = Penger(10000.toBigDecimal(), "nok")
-        }
-
-        medlemskapsperiode.trygdeavgiftsperioder =
-            mutableSetOf(
-                Trygdeavgiftsperiode(
-                    periodeFra = medlemskapsperiodeFom,
-                    periodeTil = medlemskapsperiodeTom,
-                    trygdesats = 6.8.toBigDecimal(),
-                    trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal(), "nok"),
-                    grunnlagMedlemskapsperiode = medlemskapsperiode,
-                    grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,
-                    grunnlagInntekstperiode = inntektsperiode
-                )
-            )
     }
 
     companion object {
