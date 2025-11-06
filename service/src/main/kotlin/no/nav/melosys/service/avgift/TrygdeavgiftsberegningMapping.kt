@@ -51,7 +51,7 @@ fun List<Lovvalgsperiode>.tilLovvalgsperiodeDtoSet(): Set<AvgiftspliktigperiodeD
         AvgiftspliktigperiodeDto(
             idToUUid(it.hentId()),
             DatoPeriodeDto(it.hentFom(), it.hentTom()),
-            AvgiftsdekningerFraTrygdedekning.avgiftsdekningerFraTrygdedekning(it.hentTrygdedekning()),
+            AvgiftsdekningerFraTrygdedekning.avgiftsdekningerFraTrygdedekningForLovvalg(it.hentTrygdedekning()),
             it.hentMedlemskapstype()
         )
     }.toSet()
