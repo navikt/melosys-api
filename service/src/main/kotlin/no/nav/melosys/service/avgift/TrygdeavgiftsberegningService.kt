@@ -19,6 +19,7 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningRespons
 import no.nav.melosys.service.avgift.model.InntektsperiodeModel
 import no.nav.melosys.service.avgift.model.SkatteforholdTilNorgeModel
 import no.nav.melosys.service.avgift.model.TrygdeavgiftsgrunnlagModel
+import no.nav.melosys.service.avgift.tilMedlemskapsperiodeDtoSet
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -152,7 +153,7 @@ class TrygdeavgiftsberegningService(
 
         val beregnetTrygdeavgiftList = trygdeavgiftConsumer.beregnTrygdeavgift(
             TrygdeavgiftsberegningRequest(
-                innvilgedeAvgiftspliktigperioder.tilAvgiftspliktigperiodeDtoSet(),
+                innvilgedeAvgiftspliktigperioder.tilMedlemskapsperiodeDtoSet(),
                 skatteforholdsperiodeDtoSet,
                 inntektsperiodeDtoList,
                 foedselDato
@@ -204,13 +205,13 @@ class TrygdeavgiftsberegningService(
 
         when (behandlingsresultat.avgiftspliktigPerioder().firstOrNull()) {
             is Medlemskapsperiode -> trygdeavgiftsperiode.apply {
-                grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.avgiftspliktigperiodeId } ?: throw IllegalStateException("Fant ikke medlemskapsperiode ${response.grunnlag.avgiftspliktigperiodeId}")
+                grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId } ?: throw IllegalStateException("Fant ikke medlemskapsperiode ${response.grunnlag.medlemskapsperiodeId}")
             }
             is HelseutgiftDekkesPeriode -> trygdeavgiftsperiode.apply {
-                grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.hentHelseutgiftDekkesPeriode().takeIf { idToUUid(it.hentId()) == response.grunnlag.avgiftspliktigperiodeId } ?: throw IllegalStateException("Fant ikke helseutgiftdekket periode ${response.grunnlag.avgiftspliktigperiodeId}")
+                grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.hentHelseutgiftDekkesPeriode().takeIf { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId } ?: throw IllegalStateException("Fant ikke helseutgiftdekket periode ${response.grunnlag.medlemskapsperiodeId}")
             }
             is Lovvalgsperiode -> trygdeavgiftsperiode.apply {
-                grunnlagLovvalgsPeriode = behandlingsresultat.lovvalgsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.avgiftspliktigperiodeId } ?: throw IllegalStateException("Fant ikke lovvalgsperiode ${response.grunnlag.avgiftspliktigperiodeId}")
+                grunnlagLovvalgsPeriode = behandlingsresultat.lovvalgsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId } ?: throw IllegalStateException("Fant ikke lovvalgsperiode ${response.grunnlag.medlemskapsperiodeId}")
             }
             else -> throw FunksjonellException("Ukjent avgiftspliktigperiode: ${behandlingsresultat.avgiftspliktigPerioder().firstOrNull()}")
         }

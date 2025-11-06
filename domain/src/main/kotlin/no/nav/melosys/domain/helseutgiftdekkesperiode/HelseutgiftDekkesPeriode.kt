@@ -70,7 +70,7 @@ class HelseutgiftDekkesPeriode(
     override fun hentId(): Long = id ?: throw FunksjonellException("HelseutgiftDekkesPeriode mangler ID.")
     override fun erOpphørt(): Boolean = false
 
-    fun hentMedlemskapstype(): Medlemskapstyper = Medlemskapstyper.PLIKTIG
+    override fun hentMedlemskapstype(): Medlemskapstyper = Medlemskapstyper.PLIKTIG
 
     override fun hentTrygdedekning(): Trygdedekninger =
         // TODO: Bruker FULL_DEKNING inntil fag finner et mer passende verdi

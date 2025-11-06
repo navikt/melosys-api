@@ -7,51 +7,17 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
-import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.trygdeavgift.AvgiftsdekningerFraTrygdedekning
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
 import java.util.*
 
-fun List<AvgiftspliktigPeriode>.tilAvgiftspliktigperiodeDtoSet(): Set<AvgiftspliktigperiodeDto> {
-    return flatMap { periode: AvgiftspliktigPeriode ->
-        when (periode) {
-            is Medlemskapsperiode -> listOf(periode).tilMedlemskapsperiodeDtoSet()
-            is HelseutgiftDekkesPeriode -> listOf(periode).tilHelseutgiftDekkesPeriodeDtoSet()
-            is Lovvalgsperiode -> listOf(periode).tilLovvalgsperiodeDtoSet()
-            else -> throw FunksjonellException("Ukjent type '${periode.javaClass}'")
-        }
-    }.toSet()
-}
-
-fun List<Medlemskapsperiode>.tilMedlemskapsperiodeDtoSet(): Set<AvgiftspliktigperiodeDto> {
+fun List<AvgiftspliktigPeriode>.tilMedlemskapsperiodeDtoSet(): Set<MedlemskapsperiodeDto> {
     return map {
-        AvgiftspliktigperiodeDto(
+        MedlemskapsperiodeDto(
             idToUUid(it.hentId()),
-            DatoPeriodeDto(it.hentFom(), it.hentTom()),
+            DatoPeriodeDto(it.fom, it.tom),
             AvgiftsdekningerFraTrygdedekning.avgiftsdekningerFraTrygdedekning(it.hentTrygdedekning()),
-            it.hentMedlemskapstype()
-        )
-    }.toSet()
-}
-
-fun List<HelseutgiftDekkesPeriode>.tilHelseutgiftDekkesPeriodeDtoSet(): Set<AvgiftspliktigperiodeDto> {
-    return map {
-        AvgiftspliktigperiodeDto(
-            idToUUid(it.hentId()),
-            DatoPeriodeDto(it.fomDato, it.tomDato),
-            AvgiftsdekningerFraTrygdedekning.avgiftsdekningerFraTrygdedekning(it.hentTrygdedekning()),
-            it.hentMedlemskapstype()
-        )
-    }.toSet()
-}
-
-fun List<Lovvalgsperiode>.tilLovvalgsperiodeDtoSet(): Set<AvgiftspliktigperiodeDto> {
-    return map {
-        AvgiftspliktigperiodeDto(
-            idToUUid(it.hentId()),
-            DatoPeriodeDto(it.hentFom(), it.hentTom()),
-            AvgiftsdekningerFraTrygdedekning.avgiftsdekningerFraTrygdedekningForLovvalg(it.hentTrygdedekning()),
             it.hentMedlemskapstype()
         )
     }.toSet()

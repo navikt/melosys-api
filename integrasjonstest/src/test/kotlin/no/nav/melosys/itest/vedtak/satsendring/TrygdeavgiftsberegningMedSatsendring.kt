@@ -21,7 +21,7 @@ class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
         .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 
 
-    private val kallPerAvgiftspliktigperiode = ConcurrentHashMap<String, Int>()
+    private val kallPerMedlemskapsperiode = ConcurrentHashMap<String, Int>()
 
     override fun transform(response: Response?, serveEvent: ServeEvent): Response {
         require(serveEvent.request?.url == "/api/v2/beregn") {
@@ -39,10 +39,10 @@ class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
     }
 
     private fun createResponseBody(requestBody: JsonNode): String {
-        val periodeString = avgiftspliktigperioderStringFrom(requestBody)
-        val antallKall = kallPerAvgiftspliktigperiode.getOrDefault(periodeString, 0) + 1
-        kallPerAvgiftspliktigperiode[periodeString] = antallKall
-        logger.debug { "Kall per avgiftspliktigperiode: $periodeString -> $antallKall" }
+        val periodeString = medlemskapsperiodeStringFrom(requestBody)
+        val antallKall = kallPerMedlemskapsperiode.getOrDefault(periodeString, 0) + 1
+        kallPerMedlemskapsperiode[periodeString] = antallKall
+        logger.debug { "Kall per medlemskapsperiode: $periodeString -> $antallKall" }
 
         val skatteforhold = requestBody["skatteforholdsperioder"][0]["skatteforhold"].asText()
         val sats = bestemSats(skatteforhold, periodeString, antallKall)
@@ -56,7 +56,7 @@ class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
                     PengerDto(månedsavgift.toBigDecimal(), NOK)
                 ),
                 TrygdeavgiftsgrunnlagDto(
-                    UUID.fromString(requestBody["avgiftspliktigperioder"][0]["id"].asText()),
+                    UUID.fromString(requestBody["medlemskapsperioder"][0]["id"].asText()),
                     UUID.fromString(requestBody["skatteforholdsperioder"][0]["id"].asText()),
                     UUID.fromString(requestBody["inntektsperioder"][0]["id"].asText())
                 )
@@ -79,14 +79,14 @@ class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
         }
     }
 
-    private fun avgiftspliktigperioderStringFrom(requestBody: JsonNode): String {
+    private fun medlemskapsperiodeStringFrom(requestBody: JsonNode): String {
         val fom = localDateFromRequest("fom", requestBody)
         val tom = localDateFromRequest("tom", requestBody)
         return "$fom / $tom"
     }
 
     private fun localDateFromRequest(datoID: String, requestBody: JsonNode): LocalDate =
-        requestBody["avgiftspliktigperioder"][0]["periode"][datoID]
+        requestBody["medlemskapsperioder"][0]["periode"][datoID]
             .map { it.asInt() }
             .let { (year, month, day) -> LocalDate.of(year, month, day) }
 

@@ -5,7 +5,7 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import java.util.*
 
 
-data class AvgiftspliktigperiodeDto(
+data class MedlemskapsperiodeDto(
     val id: UUID,
     val periode: DatoPeriodeDto,
     val avgiftsdekninger: Set<Avgiftsdekning>,

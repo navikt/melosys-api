@@ -93,7 +93,7 @@ class Lovvalgsperiode : PeriodeOmLovvalg, AvgiftspliktigPeriode {
         trygdeavgiftsperioder.clear()
     }
 
-    fun hentMedlemskapstype(): Medlemskapstyper = medlemskapstype ?: throw FunksjonellException("Lovvalgsperiode mangler medlemskapstype.")
+    override fun hentMedlemskapstype(): Medlemskapstyper = medlemskapstype ?: throw FunksjonellException("Lovvalgsperiode mangler medlemskapstype.")
     override fun hentId(): Long = id ?: throw FunksjonellException("Lovvalgsperiode mangler ID.")
     override fun getDekning(): Trygdedekninger? = dekning
 
