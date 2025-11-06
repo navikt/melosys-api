@@ -38,13 +38,14 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
         validerInntektsperioder(inntektsperioder, skatteforholdsperioder)
         validerSkatteforholdsperioder(skatteforholdsperioder)
 
-        val skalValiderePerioderForNyVurderingOgManglendeInnbetaling = behandlingsresultat.hentBehandling().type in listOf(
+        val harIkkeTidligerePerioderValidering = behandlingsresultat.hentBehandling().type in listOf(
             Behandlingstyper.NY_VURDERING,
-            Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
+            Behandlingstyper.FØRSTEGANG
         ) && unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
 
-        if (skalValiderePerioderForNyVurderingOgManglendeInnbetaling) {
-            validerNyVurderingOgManglendeInnbetaling(skatteforholdsperioder, inntektsperioder, helseutgiftDekkesPeriode, dagensDato)
+        if (harIkkeTidligerePerioderValidering) {
+            validerIkkeTidligerePerioder(skatteforholdsperioder, inntektsperioder, helseutgiftDekkesPeriode, dagensDato)
         } else {
             validerPerioderDekkerSammenlignetPeriode(
                 kanOverlappe = false,
@@ -61,7 +62,7 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
         }
 
         val erSkattepliktigIHelePerioden = skatteforholdsperioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
-        if (!erSkattepliktigIHelePerioden && !skalValiderePerioderForNyVurderingOgManglendeInnbetaling) {
+        if (!erSkattepliktigIHelePerioden && !harIkkeTidligerePerioderValidering) {
             validerPerioderDekkerSammenlignetPeriode(
                 kanOverlappe = true,
                 inntektsperioder,
@@ -72,7 +73,7 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
 
     }
 
-    private fun validerNyVurderingOgManglendeInnbetaling(
+    private fun validerIkkeTidligerePerioder(
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsperioder: List<Inntektsperiode>,
         helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode,
