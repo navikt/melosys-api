@@ -36,7 +36,7 @@ med `DefaultEnabledUnleash` som gjør ukjente/ukonfigurerte toggles **enabled** 
 utvikle nye funksjoner uten å måtte konfigurere hver toggle manuelt i Unleash.
 
 For fullstendig dokumentasjon om feature toggles, inkludert oppsett av Unleash lokalt, løsningsvalg og best practices,
-se [config/FEATURE_TOGGLES.md](config/FEATURE_TOGGLES.md).
+se [FEATURE_TOGGLES.md](config/src/main/kotlin/no/nav/melosys/featuretoggle/FEATURE_TOGGLES.md)
 
 ## Arkitektur
 

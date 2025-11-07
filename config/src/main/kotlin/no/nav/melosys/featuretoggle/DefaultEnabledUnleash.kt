@@ -13,7 +13,7 @@ private val log = KotlinLogging.logger {}
  * eksplisitte enable/disable-status. Denne oppførselen gjelder kun i lokal utvikling
  * (!nais & !test profiler).
  *
- * Se [FEATURE_TOGGLES.md](../../../FEATURE_TOGGLES.md) for fullstendig dokumentasjon
+ * Se [FEATURE_TOGGLES.md](FEATURE_TOGGLES.md) for fullstendig dokumentasjon
  * om løsningsvalg, oppsett og bruk.
  *
  * @param wrappedUnleash Den faktiske DefaultUnleash-instansen som delegeres til
