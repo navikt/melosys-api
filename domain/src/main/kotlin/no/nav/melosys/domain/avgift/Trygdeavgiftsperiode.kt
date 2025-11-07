@@ -122,10 +122,32 @@ class Trygdeavgiftsperiode(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Trygdeavgiftsperiode) return false
-        return id != null && id == other.id
+
+        return periodeFra == other.periodeFra &&
+            periodeTil == other.periodeTil &&
+            trygdeavgiftsbeløpMd == other.trygdeavgiftsbeløpMd &&
+            trygdesats.compareTo(other.trygdesats) == 0 &&
+            grunnlagInntekstperiode == other.grunnlagInntekstperiode &&
+            grunnlagMedlemskapsperiode == other.grunnlagMedlemskapsperiode &&
+            grunnlagLovvalgsPeriode == other.grunnlagLovvalgsPeriode &&
+            grunnlagSkatteforholdTilNorge == other.grunnlagSkatteforholdTilNorge &&
+            forskuddsvisFaktura == other.forskuddsvisFaktura
     }
 
-    override fun hashCode(): Int = javaClass.hashCode()
+    override fun hashCode(): Int {
+        return listOf(
+            periodeFra,
+            periodeTil,
+            trygdeavgiftsbeløpMd,
+            trygdesats.stripTrailingZeros(),
+            grunnlagInntekstperiode,
+            grunnlagMedlemskapsperiode,
+            grunnlagHelseutgiftDekkesPeriode,
+            grunnlagLovvalgsPeriode,
+            grunnlagSkatteforholdTilNorge,
+            forskuddsvisFaktura
+        ).hashCode()
+    }
 
     companion object // Tom - muliggjør utvidelsefunksjoner i tester
 }
