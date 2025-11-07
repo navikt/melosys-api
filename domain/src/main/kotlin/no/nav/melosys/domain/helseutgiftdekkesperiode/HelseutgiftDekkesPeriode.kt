@@ -66,7 +66,6 @@ class HelseutgiftDekkesPeriode(
 
     override fun erInnvilget(): Boolean = true
 
-    override fun erPliktigMedlemskap(): Boolean = true
     override fun hentId(): Long = id ?: throw FunksjonellException("HelseutgiftDekkesPeriode mangler ID.")
     override fun erOpphørt(): Boolean = false
 
