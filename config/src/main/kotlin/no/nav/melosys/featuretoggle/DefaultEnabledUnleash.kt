@@ -7,13 +7,14 @@ private val log = KotlinLogging.logger {}
 
 /**
  * Unleash-implementasjon som wrapper DefaultUnleash og gir default-enabled oppførsel
- * for ukjente/ukonfigurerte feature toggles.
+ * for ukjente/ukonfigurerte feature toggles i lokal utvikling.
  *
- * Dette er nyttig for lokal utvikling med Unleash i Docker Compose hvor ikke alle
- * feature flags er konfigurert. Ukjente flags blir ENABLED som standard, slik at nye funksjoner
- * fungerer umiddelbart uten manuell Unleash-konfigurasjon.
+ * Ukjente flags blir ENABLED som standard, mens konfigurerte flags respekterer sin
+ * eksplisitte enable/disable-status. Denne oppførselen gjelder kun i lokal utvikling
+ * (!nais & !test profiler).
  *
- * For flags som ER konfigurert i Unleash, respekteres deres eksplisitte enable/disable-status.
+ * Se [FEATURE_TOGGLES.md](../../../FEATURE_TOGGLES.md) for fullstendig dokumentasjon
+ * om løsningsvalg, oppsett og bruk.
  *
  * @param wrappedUnleash Den faktiske DefaultUnleash-instansen som delegeres til
  */
