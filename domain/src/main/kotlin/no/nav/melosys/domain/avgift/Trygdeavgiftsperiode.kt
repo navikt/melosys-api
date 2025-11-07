@@ -5,6 +5,7 @@ import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
+import no.nav.melosys.exception.FunksjonellException
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -113,6 +114,16 @@ class Trygdeavgiftsperiode(
             grunnlagHelseutgiftDekkesPeriode == other.grunnlagHelseutgiftDekkesPeriode &&
             grunnlagLovvalgsPeriode == other.grunnlagLovvalgsPeriode &&
             grunnlagSkatteforholdTilNorge == other.grunnlagSkatteforholdTilNorge
+
+
+    fun addGrunnlag(avgiftspliktigperiode: AvgiftspliktigPeriode) {
+        when (avgiftspliktigperiode) {
+            is Medlemskapsperiode -> grunnlagMedlemskapsperiode = avgiftspliktigperiode
+            is HelseutgiftDekkesPeriode -> grunnlagHelseutgiftDekkesPeriode = avgiftspliktigperiode
+            is Lovvalgsperiode -> grunnlagLovvalgsPeriode = avgiftspliktigperiode
+            else -> throw FunksjonellException("Ukjent type: ${avgiftspliktigperiode::class.java.simpleName}")
+        }
+    }
 
     override fun toString(): String {
         return "Trygdeavgiftsperiode(id=$id, periodeFra=$periodeFra, periodeTil=$periodeTil, " +

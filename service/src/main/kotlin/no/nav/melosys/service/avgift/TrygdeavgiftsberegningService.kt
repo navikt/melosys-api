@@ -107,12 +107,7 @@ class TrygdeavgiftsberegningService(
             }
         )
 
-        when (avgiftspliktigperiode) {
-            is Medlemskapsperiode -> trygdeavgiftsperiode.apply { grunnlagMedlemskapsperiode = avgiftspliktigperiode }
-            is HelseutgiftDekkesPeriode -> trygdeavgiftsperiode.apply { grunnlagHelseutgiftDekkesPeriode = avgiftspliktigperiode }
-            is Lovvalgsperiode -> trygdeavgiftsperiode.apply { grunnlagLovvalgsPeriode = avgiftspliktigperiode }
-            else -> throw FunksjonellException("Ukjent avgiftspliktigperiode: ${avgiftspliktigperiode::class.java.simpleName}")
-        }
+        trygdeavgiftsperiode.addGrunnlag(avgiftspliktigperiode)
 
         return trygdeavgiftsperiode
     }

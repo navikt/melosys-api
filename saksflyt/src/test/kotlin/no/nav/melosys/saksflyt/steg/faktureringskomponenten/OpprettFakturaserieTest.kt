@@ -122,9 +122,9 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     betalingsvalg = Betalingstype.FAKTURA
                     medBruker()
-                    type = Sakstyper.FTRL
                 }
             }
         }
@@ -364,9 +364,9 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     betalingsvalg = Betalingstype.FAKTURA
                     medBruker()
-                    type = Sakstyper.FTRL
                 }
             }
         }
@@ -428,9 +428,9 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     betalingsvalg = Betalingstype.FAKTURA
                     medBruker()
-                    type = Sakstyper.FTRL
                 }
             }
         }
@@ -930,9 +930,9 @@ class OpprettFakturaserieTest {
                 id = OPPRINNELIG_BEHANDLING_ID
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     betalingsvalg = Betalingstype.FAKTURA
                     medBruker()
-                    type = Sakstyper.FTRL
                 }
             }
             medlemskapsperiode {
@@ -1069,9 +1069,9 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     betalingsvalg = Betalingstype.FAKTURA
                     medBruker()
-                    type = Sakstyper.FTRL
                 }
             }
         }
@@ -1127,9 +1127,9 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     betalingsvalg = Betalingstype.FAKTURA
                     medBruker()
-                    type = Sakstyper.FTRL
                 }
             }
         }
@@ -1245,8 +1245,8 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
-                    betalingsvalg = Betalingstype.FAKTURA
                     type = Sakstyper.FTRL
+                    betalingsvalg = Betalingstype.FAKTURA
                     aktører(
                         setOf(
                             Aktoer().apply {
@@ -1319,8 +1319,8 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
-                    betalingsvalg = Betalingstype.FAKTURA
                     type = Sakstyper.FTRL
+                    betalingsvalg = Betalingstype.FAKTURA
                     aktører(
                         setOf(
                             Aktoer().apply {
@@ -1491,9 +1491,9 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     betalingsvalg = Betalingstype.FAKTURA
                     medBruker()
-                    type = Sakstyper.FTRL
                 }
             }
             medlemskapsperiode {
@@ -1589,9 +1589,9 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     betalingsvalg = Betalingstype.FAKTURA
                     medBruker()
-                    type = Sakstyper.FTRL
                 }
             }
             medlemskapsperiode {

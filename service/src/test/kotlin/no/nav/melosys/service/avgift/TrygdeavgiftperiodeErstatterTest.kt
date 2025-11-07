@@ -63,11 +63,11 @@ class TrygdeavgiftperiodeErstatterTest() {
     fun `erstatter eksisterende Trygdeavgiftsperioder for lovvalgsperioder`() {
         val medlId = 3L
 
-        val eksisterendeTrygdeavgiftsperiode = lagTrygdeavgiftsperioder(medlId, 1L).single()
-        val nyTrygdeavgiftsperiode = lagTrygdeavgiftsperioder(medlId, 2L).single()
+        val eksisterendeTrygdeavgiftsperiode = lagTrygdeavgiftsperioderForLovvalg(medlId, 1L).single()
+        val nyTrygdeavgiftsperiode = lagTrygdeavgiftsperioderForLovvalg(medlId, 2L).single()
 
-        val medlemskap = lagMedlemskap(medlId, listOf(eksisterendeTrygdeavgiftsperiode))
-        val behandlingsresultat = lagBehandlingsresultat(medlemskap)
+        val lovvalgsperiode = lagLovvalgsperiode(medlId, listOf(eksisterendeTrygdeavgiftsperiode))
+        val behandlingsresultat = lagBehandlingsresultatMedLovvalgsperioder(lovvalgsperiode)
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
 
@@ -78,7 +78,7 @@ class TrygdeavgiftperiodeErstatterTest() {
 
         // Assert
         behandlingsresultat.trygdeavgiftType.shouldNotBeNull() shouldBeEqual Trygdeavgift_typer.FORELØPIG
-        medlemskap.trygdeavgiftsperioder shouldContainExactly nyeTrygdeavgiftsperioder.toSet()
+        lovvalgsperiode.trygdeavgiftsperioder shouldContainExactly nyeTrygdeavgiftsperioder.toSet()
     }
 
     @Test
@@ -160,8 +160,8 @@ class TrygdeavgiftperiodeErstatterTest() {
         val nyTrygdeavgiftsperioder1 = lagTrygdeavgiftsperioderForLovvalg(medlId1, 201L, 202L)
         val nyTrygdeavgiftsperioder2 = lagTrygdeavgiftsperioderForLovvalg(medlId2, 203L, 204L)
 
-        val medlemskap1 = lagMedlemskapLovvalg(medlId1, eksisterendeTrygdeavgiftsperioder1)
-        val medlemskap2 = lagMedlemskapLovvalg(medlId2, eksisterendeTrygdeavgiftsperioder2)
+        val medlemskap1 = lagLovvalgsperiode(medlId1, eksisterendeTrygdeavgiftsperioder1)
+        val medlemskap2 = lagLovvalgsperiode(medlId2, eksisterendeTrygdeavgiftsperioder2)
 
         val behandlingsresultat = lagBehandlingsresultatMedLovvalgsperioder(medlemskap1, medlemskap2)
 
@@ -215,12 +215,12 @@ class TrygdeavgiftperiodeErstatterTest() {
         }
     }
 
-    private fun lagMedlemskapLovvalg(
-        medlemskapId: Long,
+    private fun lagLovvalgsperiode(
+        lovvalgsperiodeId: Long,
         trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
     ): Lovvalgsperiode {
         return Lovvalgsperiode().apply {
-            id = medlemskapId
+            id = lovvalgsperiodeId
             trygdeavgiftsperioder.forEach { addTrygdeavgiftsperiode(it) }
         }
     }
