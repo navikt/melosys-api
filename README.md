@@ -29,6 +29,15 @@ Man henter ut disse verdiene fra melosys-api-q1 poden på dev-fss ved å kjøre:
 `env | grep AZURE_APP_CLIENT_ID` og `env | grep AZURE_APP_CLIENT_SECRET`<br>
 `melosysDB.password` og `systemuser.password` finner man i [vault](https://vault.adeo.no/ui/vault/secrets/kv%2Fpreprod%2Ffss/show/melosys-q1/teammelosys)
 
+## Feature Toggles
+
+Melosys-api bruker [Unleash](https://www.getunleash.io/) for feature toggles. I lokal utvikling er systemet konfigurert
+med `DefaultEnabledUnleash` som gjør ukjente/ukonfigurerte toggles **enabled** som standard. Dette gjør det enkelt å
+utvikle nye funksjoner uten å måtte konfigurere hver toggle manuelt i Unleash.
+
+For fullstendig dokumentasjon om feature toggles, inkludert oppsett av Unleash lokalt, løsningsvalg og best practices,
+se [FEATURE_TOGGLES.md](config/src/main/kotlin/no/nav/melosys/featuretoggle/FEATURE_TOGGLES.md)
+
 ## Arkitektur
 
 Melosys-api har en lagdelt arkitektur og bruker primært spring-boot som rammeverk:
