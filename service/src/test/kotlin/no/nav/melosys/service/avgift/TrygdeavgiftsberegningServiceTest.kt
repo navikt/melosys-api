@@ -3,7 +3,11 @@ package no.nav.melosys.service.avgift
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.collections.*
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -155,8 +159,8 @@ internal class TrygdeavgiftsberegningServiceTest {
 
 
                 trygdeavgiftperidoer
-                    .shouldNotBeEmpty()
-                    .shouldContainExactly(
+                    .single()
+                    .shouldBeEqualToIgnoringFields(
                         Trygdeavgiftsperiode(
                             id = null,
                             periodeFra = FOM,
@@ -168,7 +172,9 @@ internal class TrygdeavgiftsberegningServiceTest {
                             grunnlagHelseutgiftDekkesPeriode = null,
                             grunnlagSkatteforholdTilNorge = skatteforhold { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG },
                             forskuddsvisFaktura = true
-                        )
+                        ),
+                        ignorePrivateFields = false,
+                        property = Trygdeavgiftsperiode::id
                     )
                 verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
 
@@ -493,8 +499,8 @@ internal class TrygdeavgiftsberegningServiceTest {
 
 
                 trygdeavgift
-                    .shouldNotBeEmpty()
-                    .shouldContainExactly(
+                    .single()
+                    .shouldBeEqualToIgnoringFields(
                         Trygdeavgiftsperiode(
                             id = null,
                             periodeFra = fomIFjor,
@@ -506,7 +512,9 @@ internal class TrygdeavgiftsberegningServiceTest {
                             grunnlagHelseutgiftDekkesPeriode = null,
                             grunnlagSkatteforholdTilNorge = skatteforhold,
                             forskuddsvisFaktura = false
-                        )
+                        ),
+                        ignorePrivateFields = false,
+                        property = Trygdeavgiftsperiode::id
                     )
 
 
@@ -583,8 +591,8 @@ internal class TrygdeavgiftsberegningServiceTest {
 
 
                 trygdeavgiftsperioder
-                    .shouldNotBeEmpty()
-                    .shouldContainExactly(
+                    .single()
+                    .shouldBeEqualToIgnoringFields(
                         Trygdeavgiftsperiode(
                             id = null,
                             periodeFra = fomIFjor,
@@ -596,7 +604,9 @@ internal class TrygdeavgiftsberegningServiceTest {
                             grunnlagHelseutgiftDekkesPeriode = null,
                             grunnlagSkatteforholdTilNorge = skatteforhold,
                             forskuddsvisFaktura = true
-                        )
+                        ),
+                        ignorePrivateFields = false,
+                        property = Trygdeavgiftsperiode::id
                     )
 
 
@@ -1601,12 +1611,12 @@ internal class TrygdeavgiftsberegningServiceTest {
     companion object {
         private val FOM: LocalDate = LocalDate.now()
         private val TOM: LocalDate = LocalDate.now().plusMonths(2)
-        private val BEHANDLING_ID: Long = 1L
-        private val FULLMEKTIGAKTØR_ID: String = "123456789"
-        private val FULLMEKTIG_NAVN: String = "Herr Fullmektig"
-        private val FULLMEKTIG_ORGNR: String = "888888888"
-        private val FULLMEKTIG_ORG_NAVN: String = "Aksjeselskap AS"
-        private val BRUKER_NAVN: String = "Bruker Etternavn"
+        private const val BEHANDLING_ID: Long = 1L
+        private const val FULLMEKTIGAKTØR_ID: String = "123456789"
+        private const val FULLMEKTIG_NAVN: String = "Herr Fullmektig"
+        private const val FULLMEKTIG_ORGNR: String = "888888888"
+        private const val FULLMEKTIG_ORG_NAVN: String = "Aksjeselskap AS"
+        private const val BRUKER_NAVN: String = "Bruker Etternavn"
         private val FØDSELSDATO: LocalDate = LocalDate.of(2020, 1, 1)
 
     }
