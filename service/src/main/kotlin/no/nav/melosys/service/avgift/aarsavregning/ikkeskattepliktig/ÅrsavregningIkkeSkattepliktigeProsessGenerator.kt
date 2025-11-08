@@ -38,7 +38,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
         .valueToTree<JsonNode>(sakerFunnet.map { it.toMap() }).toPrettyString()
 
     @Async("taskExecutor")
-    @Transactional(readOnly = true)
+    @Transactional
     fun finnSakerOgLagProsessinstanserAsynkront(
         dryrun: Boolean,
         antallFeilFørStopAvJob: Int,
