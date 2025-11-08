@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -28,8 +29,14 @@ import java.time.LocalDate;
  * Initialiserer forhåndsdefinerte test-saker i Oracle-databasen ved oppstart.
  * Kjører kun i local-mock profil.
  * <p>
- * MATCHER NØYAKTIG testdataUtils.ts - 5 metoder, 6 saker.
- * MEL-6 krever spesialhåndtering (2 behandlinger: avsluttet + årsavregning).
+ * MATCHER NØYAKTIG testdataUtils.ts - 56 saker.
+ * Hver e2e-test får sin egen dedikerte sak for full isolasjon.
+ * <p>
+ * MEL-1001 til MEL-1012: opprettAvtalelandSak (12 saker)
+ * MEL-1013 til MEL-1022: opprettUtenforAvtalelandSak (10 saker)
+ * MEL-1023 til MEL-1050: opprettUtenforAvtalelandSakMedAarsavregning (28 årsavregning-saker)
+ * MEL-1051 til MEL-1053: opprettEUEOSSak IKKE_YRKESAKTIV (3 saker)
+ * MEL-1054 til MEL-1056: opprettEøsPensjonistSakMedTrygdeavgift (3 saker)
  */
 @Component
 @Profile("local-mock")
@@ -40,13 +47,16 @@ public class TestDataInitializer implements ApplicationRunner {
 
     private final FagsakRepository fagsakRepository;
     private final BehandlingService behandlingService;
+    private final OppgaveService oppgaveService;
     private final TransactionTemplate transactionTemplate;
 
     public TestDataInitializer(FagsakRepository fagsakRepository,
                                BehandlingService behandlingService,
+                               OppgaveService oppgaveService,
                                PlatformTransactionManager transactionManager) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
+        this.oppgaveService = oppgaveService;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
@@ -55,25 +65,73 @@ public class TestDataInitializer implements ApplicationRunner {
         log.info("Initialiserer test-saker (matcher testdataUtils.ts)...");
 
         try {
-            // MEL-1001: opprettAvtalelandSak
+            // MEL-1001 til MEL-1012: opprettAvtalelandSak (12 saker)
             transactionTemplate.executeWithoutResult(status -> opprettAvtalelandSak("MEL-1001"));
+            transactionTemplate.executeWithoutResult(status -> opprettAvtalelandSak("MEL-1002"));
+            transactionTemplate.executeWithoutResult(status -> opprettAvtalelandSak("MEL-1003"));
+            transactionTemplate.executeWithoutResult(status -> opprettAvtalelandSak("MEL-1004"));
+            transactionTemplate.executeWithoutResult(status -> opprettAvtalelandSak("MEL-1005"));
+            transactionTemplate.executeWithoutResult(status -> opprettAvtalelandSak("MEL-1006"));
+            transactionTemplate.executeWithoutResult(status -> opprettAvtalelandSak("MEL-1007"));
+            transactionTemplate.executeWithoutResult(status -> opprettAvtalelandSak("MEL-1008"));
+            transactionTemplate.executeWithoutResult(status -> opprettAvtalelandSak("MEL-1009"));
+            transactionTemplate.executeWithoutResult(status -> opprettAvtalelandSak("MEL-1010"));
+            transactionTemplate.executeWithoutResult(status -> opprettAvtalelandSak("MEL-1011"));
+            transactionTemplate.executeWithoutResult(status -> opprettAvtalelandSak("MEL-1012"));
 
-            // MEL-1002: opprettUtenforAvtalelandSak
-            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSak("MEL-1002"));
+            // MEL-1013 til MEL-1022: opprettUtenforAvtalelandSak (10 saker)
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSak("MEL-1013"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSak("MEL-1014"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSak("MEL-1015"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSak("MEL-1016"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSak("MEL-1017"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSak("MEL-1018"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSak("MEL-1019"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSak("MEL-1020"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSak("MEL-1021"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSak("MEL-1022"));
 
-            // MEL-1003: opprettEøsPensjonistSakMedTrygdeavgift
-            transactionTemplate.executeWithoutResult(status -> opprettEøsPensjonistSakMedTrygdeavgift("MEL-1003"));
+            // MEL-1023 til MEL-1047: opprettUtenforAvtalelandSakMedAarsavregning (25 saker for årsavregning-testene)
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1023"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1024"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1025"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1026"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1027"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1028"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1029"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1030"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1031"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1032"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1033"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1034"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1035"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1036"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1037"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1038"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1039"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1040"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1041"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1042"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1043"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1044"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1045"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1046"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1047"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1048"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1049"));
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1050"));
 
-            // MEL-1004: opprettEUEOSSak (default: Ikke yrkesaktiv)
-            transactionTemplate.executeWithoutResult(status -> opprettEUEOSSak("MEL-1004", Behandlingstema.IKKE_YRKESAKTIV));
+            // MEL-1051 til MEL-1053: opprettEUEOSSak (3 saker)
+            transactionTemplate.executeWithoutResult(status -> opprettEUEOSSak("MEL-1051", Behandlingstema.IKKE_YRKESAKTIV));
+            transactionTemplate.executeWithoutResult(status -> opprettEUEOSSak("MEL-1052", Behandlingstema.IKKE_YRKESAKTIV));
+            transactionTemplate.executeWithoutResult(status -> opprettEUEOSSak("MEL-1053", Behandlingstema.IKKE_YRKESAKTIV));
 
-            // MEL-1005: opprettEUEOSSak (variant: Pensjonist)
-            transactionTemplate.executeWithoutResult(status -> opprettEUEOSSak("MEL-1005", Behandlingstema.PENSJONIST));
+            // MEL-1054 til MEL-1056: opprettEøsPensjonistSakMedTrygdeavgift (3 saker)
+            transactionTemplate.executeWithoutResult(status -> opprettEøsPensjonistSakMedTrygdeavgift("MEL-1054"));
+            transactionTemplate.executeWithoutResult(status -> opprettEøsPensjonistSakMedTrygdeavgift("MEL-1055"));
+            transactionTemplate.executeWithoutResult(status -> opprettEøsPensjonistSakMedTrygdeavgift("MEL-1056"));
 
-            // MEL-1006: opprettUtenforAvtalelandSakMedAarsavregning
-            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1006"));
-
-            log.info("✅ Suksessfullt initialisert 6 test-saker (MEL-1001 til MEL-1006)");
+            log.info("✅ Suksessfullt initialisert 56 test-saker (MEL-1001 til MEL-1056)");
             log.info("Test-saker tilgjengelig for fnr: {}", TEST_FNR);
         } catch (Exception e) {
             log.error("❌ Feil ved initialisering av test-saker: {}", e.getMessage(), e);
@@ -279,14 +337,10 @@ public class TestDataInitializer implements ApplicationRunner {
     /**
      * testdataUtils.ts: opprettUtenforAvtalelandSakMedAarsavregning()
      * <p>
-     * Oppretter en FTRL-sak med:
-     * 1. Førstegangsbehandling (AVSLUTTET med vedtak "Søknaden er innvilget")
-     * 2. Årsavregning (OPPRETTET)
+     * Oppretter en FTRL-sak med kun en årsavregning-behandling (OPPRETTET) med oppgave.
      * <p>
-     * Dette matcher frontend-logikken:
-     * - opprettUtenforAvtalelandSak()
-     * - avsluttBehandling(sak, "Søknaden er innvilget")
-     * - opprett Årsavregning på samme sak
+     * Forenklet versjon - testene trenger ikke historisk førstegangsbehandling,
+     * bare en åpen årsavregning å teste mot.
      */
     private void opprettUtenforAvtalelandSakMedAarsavregning(String saksnummer) {
         if (fagsakRepository.existsById(saksnummer)) {
@@ -315,32 +369,27 @@ public class TestDataInitializer implements ApplicationRunner {
 
         Fagsak savedFagsak = fagsakRepository.save(fagsak);
 
-        // 2. Opprett Førstegangsbehandling (med status AVSLUTTET fra start)
-        // Dette er en forenklet tilnærming for testdata - i prod ville behandlingen
-        // først vært OPPRETTET, deretter avsluttet via BehandlingService
-        behandlingService.nyBehandling(
-            savedFagsak,
-            Behandlingsstatus.AVSLUTTET,  // Direkte avsluttet for testdata
-            Behandlingstyper.FØRSTEGANG,
-            Behandlingstema.YRKESAKTIV,
-            null, null,
-            LocalDate.now().minusDays(30), // Opprettet 30 dager siden
-            Behandlingsaarsaktyper.SØKNAD,
-            null
-        );
-
-        // 3. Opprett Årsavregning-behandling (åpen)
-        behandlingService.nyBehandling(
+        // 2. Opprett Årsavregning-behandling (åpen)
+        Behandling aarsavregning = behandlingService.nyBehandling(
             savedFagsak,
             Behandlingsstatus.OPPRETTET,
             Behandlingstyper.ÅRSAVREGNING,
             Behandlingstema.YRKESAKTIV,
             null, null,
-            LocalDate.now().minusDays(28),
+            LocalDate.now(),
             Behandlingsaarsaktyper.SØKNAD,
             null
         );
 
-        log.info("✅ {}: opprettUtenforAvtalelandSakMedAarsavregning (2 behandlinger: avsluttet + årsavregning)", saksnummer);
+        // 3. Opprett oppgave for årsavregningen (påkrevd for at behandlingen skal være tilgjengelig)
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
+            aarsavregning,
+            null,  // journalpostID
+            TEST_AKTOR_ID,  // aktørID
+            null,  // tilordnetRessurs (ikke tildelt noen saksbehandler)
+            null   // orgnr
+        );
+
+        log.info("✅ {}: opprettUtenforAvtalelandSakMedAarsavregning (1 årsavregning med oppgave)", saksnummer);
     }
 }
