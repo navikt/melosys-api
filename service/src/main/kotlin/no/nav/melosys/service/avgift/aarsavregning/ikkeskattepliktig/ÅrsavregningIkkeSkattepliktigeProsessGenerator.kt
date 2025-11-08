@@ -50,7 +50,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
     }
 
     @Synchronized
-    @Transactional(readOnly = true)
+    @Transactional
     fun finnSakerOgLagProsessinstanser(
         dryrun: Boolean,
         antallFeilFørStopAvJob: Int = 0,
@@ -81,6 +81,8 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
                     sakerFunnet.add(it)
                     antallProsessert++
                     if (dryrun) return@forEach
+                    log.info { "#####################################################" }
+                    log.info { "Oppretter prosessinstans for sak ${it.sak.saksnummer}" }
                     prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
                         it.sak.saksnummer,
                         år,
