@@ -28,7 +28,8 @@ import java.time.LocalDate;
  * Initialiserer forhåndsdefinerte test-saker i Oracle-databasen ved oppstart.
  * Kjører kun i local-mock profil.
  * <p>
- * MATCHER NØYAKTIG testdataUtils.ts - 5 metoder, 5 saker.
+ * MATCHER NØYAKTIG testdataUtils.ts - 5 metoder, 6 saker.
+ * MEL-6 krever spesialhåndtering (2 behandlinger: avsluttet + årsavregning).
  */
 @Component
 @Profile("local-mock")
@@ -54,22 +55,25 @@ public class TestDataInitializer implements ApplicationRunner {
         log.info("Initialiserer test-saker (matcher testdataUtils.ts)...");
 
         try {
-            // MEL-1: opprettAvtalelandSak
-            transactionTemplate.executeWithoutResult(status -> opprettAvtalelandSak("MEL-1"));
+            // MEL-1001: opprettAvtalelandSak
+            transactionTemplate.executeWithoutResult(status -> opprettAvtalelandSak("MEL-1001"));
 
-            // MEL-2: opprettUtenforAvtalelandSak
-            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSak("MEL-2"));
+            // MEL-1002: opprettUtenforAvtalelandSak
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSak("MEL-1002"));
 
-            // MEL-3: opprettEøsPensjonistSakMedTrygdeavgift
-            transactionTemplate.executeWithoutResult(status -> opprettEøsPensjonistSakMedTrygdeavgift("MEL-3"));
+            // MEL-1003: opprettEøsPensjonistSakMedTrygdeavgift
+            transactionTemplate.executeWithoutResult(status -> opprettEøsPensjonistSakMedTrygdeavgift("MEL-1003"));
 
-            // MEL-4: opprettEUEOSSak (default)
-            transactionTemplate.executeWithoutResult(status -> opprettEUEOSSak("MEL-4"));
+            // MEL-1004: opprettEUEOSSak (default: Ikke yrkesaktiv)
+            transactionTemplate.executeWithoutResult(status -> opprettEUEOSSak("MEL-1004", Behandlingstema.IKKE_YRKESAKTIV));
 
-            // MEL-5: opprettEUEOSSak (variant)
-            transactionTemplate.executeWithoutResult(status -> opprettEUEOSSak("MEL-5"));
+            // MEL-1005: opprettEUEOSSak (variant: Pensjonist)
+            transactionTemplate.executeWithoutResult(status -> opprettEUEOSSak("MEL-1005", Behandlingstema.PENSJONIST));
 
-            log.info("✅ Suksessfullt initialisert 5 test-saker");
+            // MEL-1006: opprettUtenforAvtalelandSakMedAarsavregning
+            transactionTemplate.executeWithoutResult(status -> opprettUtenforAvtalelandSakMedAarsavregning("MEL-1006"));
+
+            log.info("✅ Suksessfullt initialisert 6 test-saker (MEL-1001 til MEL-1006)");
             log.info("Test-saker tilgjengelig for fnr: {}", TEST_FNR);
         } catch (Exception e) {
             log.error("❌ Feil ved initialisering av test-saker: {}", e.getMessage(), e);
@@ -228,11 +232,11 @@ public class TestDataInitializer implements ApplicationRunner {
      * <p>
      * velgSakstype("EU/EØS-land")
      * velgSakstema("Medlemskap og lovvalg")
-     * velgBehandlingstema(behandlingstema) // default: "Ikke yrkesaktiv"
+     * velgBehandlingstema(behandlingstema) // parameterisert
      * velgBehandlingstype("Førstegangsbehandling")
      * velgBehandlingsaarsak("Søknad")
      */
-    private void opprettEUEOSSak(String saksnummer) {
+    private void opprettEUEOSSak(String saksnummer, Behandlingstema behandlingstema) {
         if (fagsakRepository.existsById(saksnummer)) {
             log.debug("Sak {} eksisterer allerede", saksnummer);
             return;
@@ -262,13 +266,81 @@ public class TestDataInitializer implements ApplicationRunner {
             savedFagsak,
             Behandlingsstatus.OPPRETTET,
             Behandlingstyper.FØRSTEGANG,
-            Behandlingstema.IKKE_YRKESAKTIV,
+            behandlingstema,
             null, null,
             LocalDate.now(),
             Behandlingsaarsaktyper.SØKNAD,
             null
         );
 
-        log.info("✅ {}: opprettEUEOSSak", saksnummer);
+        log.info("✅ {}: opprettEUEOSSak ({})", saksnummer, behandlingstema);
+    }
+
+    /**
+     * testdataUtils.ts: opprettUtenforAvtalelandSakMedAarsavregning()
+     * <p>
+     * Oppretter en FTRL-sak med:
+     * 1. Førstegangsbehandling (AVSLUTTET med vedtak "Søknaden er innvilget")
+     * 2. Årsavregning (OPPRETTET)
+     * <p>
+     * Dette matcher frontend-logikken:
+     * - opprettUtenforAvtalelandSak()
+     * - avsluttBehandling(sak, "Søknaden er innvilget")
+     * - opprett Årsavregning på samme sak
+     */
+    private void opprettUtenforAvtalelandSakMedAarsavregning(String saksnummer) {
+        if (fagsakRepository.existsById(saksnummer)) {
+            log.debug("Sak {} eksisterer allerede", saksnummer);
+            return;
+        }
+
+        // 1. Opprett FTRL-sak
+        Fagsak fagsak = new Fagsak(
+            saksnummer,
+            null,
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Saksstatuser.OPPRETTET,
+            null,
+            new java.util.HashSet<>(),
+            new java.util.ArrayList<>()
+        );
+
+        Aktoer bruker = new Aktoer();
+        bruker.setFagsak(fagsak);
+        bruker.setPersonIdent(TEST_FNR);
+        bruker.setAktørId(TEST_AKTOR_ID);
+        bruker.setRolle(Aktoersroller.BRUKER);
+        fagsak.leggTilAktør(bruker);
+
+        Fagsak savedFagsak = fagsakRepository.save(fagsak);
+
+        // 2. Opprett Førstegangsbehandling (med status AVSLUTTET fra start)
+        // Dette er en forenklet tilnærming for testdata - i prod ville behandlingen
+        // først vært OPPRETTET, deretter avsluttet via BehandlingService
+        behandlingService.nyBehandling(
+            savedFagsak,
+            Behandlingsstatus.AVSLUTTET,  // Direkte avsluttet for testdata
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstema.YRKESAKTIV,
+            null, null,
+            LocalDate.now().minusDays(30), // Opprettet 30 dager siden
+            Behandlingsaarsaktyper.SØKNAD,
+            null
+        );
+
+        // 3. Opprett Årsavregning-behandling (åpen)
+        behandlingService.nyBehandling(
+            savedFagsak,
+            Behandlingsstatus.OPPRETTET,
+            Behandlingstyper.ÅRSAVREGNING,
+            Behandlingstema.YRKESAKTIV,
+            null, null,
+            LocalDate.now().minusDays(28),
+            Behandlingsaarsaktyper.SØKNAD,
+            null
+        );
+
+        log.info("✅ {}: opprettUtenforAvtalelandSakMedAarsavregning (2 behandlinger: avsluttet + årsavregning)", saksnummer);
     }
 }
