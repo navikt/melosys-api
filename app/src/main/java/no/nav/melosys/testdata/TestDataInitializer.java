@@ -220,8 +220,8 @@ public class TestDataInitializer implements ApplicationRunner {
             null
         );
 
-        // Opprett oppgave tilordnet test-saksbehandler for redigerbare behandlinger
-        if (status == Behandlingsstatus.UNDER_BEHANDLING) {
+        // Opprett oppgave for OPPRETTET og UNDER_BEHANDLING (ikke for AVSLUTTET)
+        if (status != Behandlingsstatus.AVSLUTTET) {
             oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null);
         }
 
@@ -488,7 +488,8 @@ public class TestDataInitializer implements ApplicationRunner {
             null
         );
 
-        if (status == Behandlingsstatus.UNDER_BEHANDLING) {
+        // Opprett oppgave for OPPRETTET og UNDER_BEHANDLING (ikke for AVSLUTTET)
+        if (status != Behandlingsstatus.AVSLUTTET) {
             oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null);
         }
 
@@ -540,7 +541,8 @@ public class TestDataInitializer implements ApplicationRunner {
             null
         );
 
-        if (status == Behandlingsstatus.UNDER_BEHANDLING) {
+        // Opprett oppgave for OPPRETTET og UNDER_BEHANDLING (ikke for AVSLUTTET)
+        if (status != Behandlingsstatus.AVSLUTTET) {
             oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null);
         }
 
@@ -592,7 +594,8 @@ public class TestDataInitializer implements ApplicationRunner {
             null
         );
 
-        if (status == Behandlingsstatus.UNDER_BEHANDLING) {
+        // Opprett oppgave for OPPRETTET og UNDER_BEHANDLING (ikke for AVSLUTTET)
+        if (status != Behandlingsstatus.AVSLUTTET) {
             oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null);
         }
 
