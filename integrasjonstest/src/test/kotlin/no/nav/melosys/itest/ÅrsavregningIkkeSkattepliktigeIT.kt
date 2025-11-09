@@ -31,7 +31,7 @@ class ÅrsavregningIkkeSkattepliktigeIT(
 ) : MockServerTestBaseWithProsessManager() {
 
     @Test
-    fun `skal finne registrert sak som oppfyller krav`() {
+    fun `skal finne registrert sak som oppfyller krav - og lage opprette OPPRETT_NY_BEHANDLING_AARSAVREGNING prosessinstans`() {
         val sakOppfyllerKrav = "MEL-OPPFYLLER-KRAV"
 
         lagBehandlingsresultat {
