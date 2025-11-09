@@ -26,7 +26,7 @@ import java.util.UUID;
  * Initialiserer forhåndsdefinerte test-saker i Oracle-databasen ved oppstart.
  * Kjører kun i local-mock profil.
  * <p>
- * 69 prepopulerte test-saker - hver e2e-test får sin egen dedikerte sak for full isolasjon.
+ * 71 prepopulerte test-saker - hver e2e-test får sin egen dedikerte sak for full isolasjon.
  * <p>
  * MEL-1001 til MEL-1012: opprettAvtalelandSak (12 saker - UNDER_BEHANDLING)
  * MEL-1013 til MEL-1022: opprettUtenforAvtalelandSak (10 saker - UNDER_BEHANDLING)
@@ -36,6 +36,8 @@ import java.util.UUID;
  * MEL-1057 til MEL-1062: OPPRETTET saker for "knytt til eksisterende" tester (6 saker)
  * MEL-1063 til MEL-1068: AVSLUTTET saker for "knytt til eksisterende" tester (6 saker)
  * MEL-1069: Avtaleland med åpen behandling for varselmelding-test (1 sak - UNDER_BEHANDLING)
+ * MEL-1070: Utenfor avtaleland AVSLUTTET for behandlingstype-tilgjengelighet test (1 sak - AVSLUTTET)
+ * MEL-1071: EU_EOS IKKE_YRKESAKTIV for regresjon-state-ved-saksbytting test (1 sak - UNDER_BEHANDLING)
  */
 @Component
 @Profile("local-mock")
@@ -158,7 +160,13 @@ public class TestDataInitializer implements ApplicationRunner {
             // MEL-1069: Avtaleland med åpen behandling for test av varselmelding
             opprettAvtalelandSak("MEL-1069");
 
-            log.info("✅ Suksessfullt initialisert 69 test-saker for fnr: {}", TEST_FNR);
+            // MEL-1070: Utenfor avtaleland AVSLUTTET for behandlingstype-tilgjengelighet test
+            opprettUtenforAvtalelandSakAvsluttet("MEL-1070");
+
+            // MEL-1071: EU_EOS IKKE_YRKESAKTIV for regresjon-state-ved-saksbytting test
+            opprettEUEOSSak("MEL-1071", Behandlingstema.IKKE_YRKESAKTIV);
+
+            log.info("✅ Suksessfullt initialisert 71 test-saker for fnr: {}", TEST_FNR);
         } catch (Exception e) {
             log.error("❌ Feil ved initialisering av test-saker: {}", e.getMessage(), e);
         } finally {
