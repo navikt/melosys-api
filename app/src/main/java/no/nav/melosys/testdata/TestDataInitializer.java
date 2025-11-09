@@ -26,14 +26,15 @@ import java.util.UUID;
  * Initialiserer forhåndsdefinerte test-saker i Oracle-databasen ved oppstart.
  * Kjører kun i local-mock profil.
  * <p>
- * MATCHER NØYAKTIG testdataUtils.ts - 56 saker.
- * Hver e2e-test får sin egen dedikerte sak for full isolasjon.
+ * 68 prepopulerte test-saker - hver e2e-test får sin egen dedikerte sak for full isolasjon.
  * <p>
- * MEL-1001 til MEL-1012: opprettAvtalelandSak (12 saker)
- * MEL-1013 til MEL-1022: opprettUtenforAvtalelandSak (10 saker)
- * MEL-1023 til MEL-1050: opprettUtenforAvtalelandSakMedAarsavregning (28 årsavregning-saker)
- * MEL-1051 til MEL-1053: opprettEUEOSSak IKKE_YRKESAKTIV (3 saker)
- * MEL-1054 til MEL-1056: opprettEøsPensjonistSakMedTrygdeavgift (3 saker)
+ * MEL-1001 til MEL-1012: opprettAvtalelandSak (12 saker - UNDER_BEHANDLING)
+ * MEL-1013 til MEL-1022: opprettUtenforAvtalelandSak (10 saker - UNDER_BEHANDLING)
+ * MEL-1023 til MEL-1050: opprettUtenforAvtalelandSakMedAarsavregning (28 saker - UNDER_BEHANDLING)
+ * MEL-1051 til MEL-1053: opprettEUEOSSak IKKE_YRKESAKTIV (3 saker - UNDER_BEHANDLING)
+ * MEL-1054 til MEL-1056: opprettEøsPensjonistSakMedTrygdeavgift (3 saker - UNDER_BEHANDLING)
+ * MEL-1057 til MEL-1062: OPPRETTET saker for "knytt til eksisterende" tester (6 saker)
+ * MEL-1063 til MEL-1068: AVSLUTTET saker for "knytt til eksisterende" tester (6 saker)
  */
 @Component
 @Profile("local-mock")
@@ -60,8 +61,8 @@ public class TestDataInitializer implements ApplicationRunner {
         log.info("🔄 Initialiserer test-saker (matcher testdataUtils.ts)...");
 
         // Sjekk om testdata allerede eksisterer (idempotent)
-        if (fagsakRepository.existsById("MEL-1001")) {
-            log.info("⏭️  Test-saker eksisterer allerede (MEL-1001 funnet) - hopper over initialisering");
+        if (fagsakRepository.existsById("MEL-1068")) {
+            log.info("⏭️  Test-saker eksisterer allerede (MEL-1068 funnet) - hopper over initialisering");
             return;
         }
 
@@ -137,7 +138,23 @@ public class TestDataInitializer implements ApplicationRunner {
             opprettEøsPensjonistSakMedTrygdeavgift("MEL-1055");
             opprettEøsPensjonistSakMedTrygdeavgift("MEL-1056");
 
-            log.info("✅ Suksessfullt initialisert 56 test-saker (MEL-1001 til MEL-1056)");
+            // MEL-1057 til MEL-1062: OPPRETTET saker for "knytt til eksisterende" tester
+            opprettAvtalelandSakOpprettet("MEL-1057");
+            opprettAvtalelandSakOpprettet("MEL-1058");
+            opprettUtenforAvtalelandSakOpprettet("MEL-1059");
+            opprettUtenforAvtalelandSakOpprettet("MEL-1060");
+            opprettEUEOSSakOpprettet("MEL-1061");
+            opprettEøsPensjonistSakMedTrygdeavgiftOpprettet("MEL-1062");
+
+            // MEL-1063 til MEL-1068: AVSLUTTET saker for "knytt til eksisterende" tester
+            opprettAvtalelandSakAvsluttet("MEL-1063");
+            opprettAvtalelandSakAvsluttet("MEL-1064");
+            opprettUtenforAvtalelandSakAvsluttet("MEL-1065");
+            opprettUtenforAvtalelandSakAvsluttet("MEL-1066");
+            opprettEUEOSSakAvsluttet("MEL-1067");
+            opprettEøsPensjonistSakMedTrygdeavgiftAvsluttet("MEL-1068");
+
+            log.info("✅ Suksessfullt initialisert 68 test-saker (MEL-1001 til MEL-1068)");
             log.info("Test-saker tilgjengelig for fnr: {}", TEST_FNR);
         } catch (Exception e) {
             log.error("❌ Feil ved initialisering av test-saker: {}", e.getMessage(), e);
@@ -420,5 +437,167 @@ public class TestDataInitializer implements ApplicationRunner {
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null);
 
         log.info("✅ {}: opprettUtenforAvtalelandSakMedAarsavregning (1 årsavregning)", saksnummer);
+    }
+
+    // ===== Helper-metoder for OPPRETTET og AVSLUTTET saker =====
+
+    private void opprettUtenforAvtalelandSakOpprettet(String saksnummer) {
+        opprettUtenforAvtalelandSakMedStatus(saksnummer, Behandlingsstatus.OPPRETTET);
+    }
+
+    private void opprettUtenforAvtalelandSakAvsluttet(String saksnummer) {
+        opprettUtenforAvtalelandSakMedStatus(saksnummer, Behandlingsstatus.AVSLUTTET);
+    }
+
+    private void opprettAvtalelandSakAvsluttet(String saksnummer) {
+        opprettAvtalelandSakMedStatus(saksnummer, Behandlingsstatus.AVSLUTTET);
+    }
+
+    private void opprettUtenforAvtalelandSakMedStatus(String saksnummer, Behandlingsstatus status) {
+        if (fagsakRepository.existsById(saksnummer)) {
+            log.debug("Sak {} eksisterer allerede", saksnummer);
+            return;
+        }
+
+        Fagsak fagsak = new Fagsak(
+            saksnummer,
+            null,
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Saksstatuser.OPPRETTET,
+            null,
+            new java.util.HashSet<>(),
+            new java.util.ArrayList<>()
+        );
+
+        Aktoer bruker = new Aktoer();
+        bruker.setFagsak(fagsak);
+        bruker.setPersonIdent(TEST_FNR);
+        bruker.setAktørId(TEST_AKTOR_ID);
+        bruker.setRolle(Aktoersroller.BRUKER);
+        fagsak.leggTilAktør(bruker);
+
+        Fagsak savedFagsak = fagsakRepository.save(fagsak);
+
+        Behandling behandling = behandlingService.nyBehandling(
+            savedFagsak,
+            status,
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstema.YRKESAKTIV,
+            null, null,
+            LocalDate.now(),
+            Behandlingsaarsaktyper.SØKNAD,
+            null
+        );
+
+        if (status == Behandlingsstatus.UNDER_BEHANDLING) {
+            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null);
+        }
+
+        log.info("✅ {}: opprettUtenforAvtalelandSak (status: {})", saksnummer, status);
+    }
+
+    private void opprettEUEOSSakOpprettet(String saksnummer) {
+        opprettEUEOSSakMedStatus(saksnummer, Behandlingstema.IKKE_YRKESAKTIV, Behandlingsstatus.OPPRETTET);
+    }
+
+    private void opprettEUEOSSakAvsluttet(String saksnummer) {
+        opprettEUEOSSakMedStatus(saksnummer, Behandlingstema.IKKE_YRKESAKTIV, Behandlingsstatus.AVSLUTTET);
+    }
+
+    private void opprettEUEOSSakMedStatus(String saksnummer, Behandlingstema behandlingstema, Behandlingsstatus status) {
+        if (fagsakRepository.existsById(saksnummer)) {
+            log.debug("Sak {} eksisterer allerede", saksnummer);
+            return;
+        }
+
+        Fagsak fagsak = new Fagsak(
+            saksnummer,
+            null,
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Saksstatuser.OPPRETTET,
+            null,
+            new java.util.HashSet<>(),
+            new java.util.ArrayList<>()
+        );
+
+        Aktoer bruker = new Aktoer();
+        bruker.setFagsak(fagsak);
+        bruker.setPersonIdent(TEST_FNR);
+        bruker.setAktørId(TEST_AKTOR_ID);
+        bruker.setRolle(Aktoersroller.BRUKER);
+        fagsak.leggTilAktør(bruker);
+
+        Fagsak savedFagsak = fagsakRepository.save(fagsak);
+
+        Behandling behandling = behandlingService.nyBehandling(
+            savedFagsak,
+            status,
+            Behandlingstyper.FØRSTEGANG,
+            behandlingstema,
+            null, null,
+            LocalDate.now(),
+            Behandlingsaarsaktyper.SØKNAD,
+            null
+        );
+
+        if (status == Behandlingsstatus.UNDER_BEHANDLING) {
+            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null);
+        }
+
+        log.info("✅ {}: opprettEUEOSSak (status: {}, tema: {})", saksnummer, status, behandlingstema);
+    }
+
+    private void opprettEøsPensjonistSakMedTrygdeavgiftOpprettet(String saksnummer) {
+        opprettEøsPensjonistSakMedTrygdeavgiftMedStatus(saksnummer, Behandlingsstatus.OPPRETTET);
+    }
+
+    private void opprettEøsPensjonistSakMedTrygdeavgiftAvsluttet(String saksnummer) {
+        opprettEøsPensjonistSakMedTrygdeavgiftMedStatus(saksnummer, Behandlingsstatus.AVSLUTTET);
+    }
+
+    private void opprettEøsPensjonistSakMedTrygdeavgiftMedStatus(String saksnummer, Behandlingsstatus status) {
+        if (fagsakRepository.existsById(saksnummer)) {
+            log.debug("Sak {} eksisterer allerede", saksnummer);
+            return;
+        }
+
+        Fagsak fagsak = new Fagsak(
+            saksnummer,
+            null,
+            Sakstyper.EU_EOS,
+            Sakstemaer.TRYGDEAVGIFT,
+            Saksstatuser.OPPRETTET,
+            null,
+            new java.util.HashSet<>(),
+            new java.util.ArrayList<>()
+        );
+
+        Aktoer bruker = new Aktoer();
+        bruker.setFagsak(fagsak);
+        bruker.setPersonIdent(TEST_FNR);
+        bruker.setAktørId(TEST_AKTOR_ID);
+        bruker.setRolle(Aktoersroller.BRUKER);
+        fagsak.leggTilAktør(bruker);
+
+        Fagsak savedFagsak = fagsakRepository.save(fagsak);
+
+        Behandling behandling = behandlingService.nyBehandling(
+            savedFagsak,
+            status,
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstema.PENSJONIST,
+            null, null,
+            LocalDate.now(),
+            Behandlingsaarsaktyper.SØKNAD,
+            null
+        );
+
+        if (status == Behandlingsstatus.UNDER_BEHANDLING) {
+            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null);
+        }
+
+        log.info("✅ {}: opprettEøsPensjonistSakMedTrygdeavgift (status: {})", saksnummer, status);
     }
 }
