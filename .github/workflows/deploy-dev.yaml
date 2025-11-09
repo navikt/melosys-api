@@ -134,3 +134,28 @@ jobs:
           body: ${{ env.CHANGE_LOG }}
           draft: true
           prerelease: false
+
+  trigger-e2e-tests:
+    name: Trigger E2E tests
+    runs-on: ubuntu-latest
+    needs: [ build, deploy ]
+    if: always() && (needs.deploy.result == 'success' || needs.deploy.result == 'skipped')
+    steps:
+        -   name: Checkout latest code
+            uses: actions/checkout@v5
+        -   name: Get commit message
+            run: echo "COMMIT_MSG=$(git log --format=%s -n 1)" >> $GITHUB_ENV
+        -   name: Trigger E2E tests in melosys-e2e-tests
+            uses: peter-evans/repository-dispatch@v4
+            with:
+                token: ${{ secrets.E2E_TRIGGER_PAT }}
+                repository: navikt/melosys-e2e-tests
+                event-type: melosys-api-published
+                client-payload: |
+                    {
+                      "repository": "melosys-api",
+                      "image_tag": "${{ github.sha }}",
+                      "commit_sha": "${{ github.sha }}",
+                      "commit_message": "${{ env.COMMIT_MSG }}",
+                      "actor": "${{ github.actor }}"
+                    }
