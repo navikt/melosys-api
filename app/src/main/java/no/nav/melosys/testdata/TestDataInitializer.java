@@ -57,12 +57,20 @@ public class TestDataInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        log.info("Initialiserer test-saker (matcher testdataUtils.ts)...");
+        log.info("🔄 Initialiserer test-saker (matcher testdataUtils.ts)...");
+
+        // Sjekk om testdata allerede eksisterer (idempotent)
+        if (fagsakRepository.existsById("MEL-1001")) {
+            log.info("⏭️  Test-saker eksisterer allerede (MEL-1001 funnet) - hopper over initialisering");
+            return;
+        }
 
         // Sett ThreadLocalAccessInfo context til test-saksbehandler Z123456
         UUID processId = UUID.randomUUID();
         try {
             ThreadLocalAccessInfo.beforeExecuteProcess(processId, "TestDataInitializer", TEST_SAKSBEHANDLER, "Test Saksbehandler");
+            log.info("📝 Oppretter 56 test-saker (MEL-1001 til MEL-1056)...");
+
             // MEL-1001 til MEL-1012: opprettAvtalelandSak (12 saker)
             opprettAvtalelandSak("MEL-1001");
             opprettAvtalelandSak("MEL-1002");
