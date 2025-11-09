@@ -146,7 +146,8 @@ public class TestDataInitializer implements ApplicationRunner {
             opprettEøsPensjonistSakMedTrygdeavgiftOpprettet("MEL-1062");
 
             // MEL-1063 til MEL-1068: AVSLUTTET saker for "knytt til eksisterende" tester
-            opprettAvtalelandSakAvsluttet("MEL-1063");
+            // MEL-1063 er HENLAGT
+            opprettAvtalelandSakMedStatus("MEL-1063", Behandlingsstatus.AVSLUTTET, Saksstatuser.HENLAGT);
             opprettAvtalelandSakAvsluttet("MEL-1064");
             opprettUtenforAvtalelandSakAvsluttet("MEL-1065");
             opprettUtenforAvtalelandSakAvsluttet("MEL-1066");
@@ -184,15 +185,14 @@ public class TestDataInitializer implements ApplicationRunner {
     }
 
     private void opprettAvtalelandSakMedStatus(String saksnummer, Behandlingsstatus status) {
+        opprettAvtalelandSakMedStatus(saksnummer, status, Saksstatuser.OPPRETTET);
+    }
+
+    private void opprettAvtalelandSakMedStatus(String saksnummer, Behandlingsstatus status, Saksstatuser saksstatus) {
         if (fagsakRepository.existsById(saksnummer)) {
             log.debug("Sak {} eksisterer allerede", saksnummer);
             return;
         }
-
-        // Sett saksstatus basert på behandlingsstatus
-        Saksstatuser saksstatus = status == Behandlingsstatus.AVSLUTTET
-            ? Saksstatuser.HENLAGT
-            : Saksstatuser.OPPRETTET;
 
         Fagsak fagsak = new Fagsak(
             saksnummer,
@@ -462,17 +462,12 @@ public class TestDataInitializer implements ApplicationRunner {
             return;
         }
 
-        // Sett saksstatus basert på behandlingsstatus
-        Saksstatuser saksstatus = status == Behandlingsstatus.AVSLUTTET
-            ? Saksstatuser.HENLAGT
-            : Saksstatuser.OPPRETTET;
-
         Fagsak fagsak = new Fagsak(
             saksnummer,
             null,
             Sakstyper.FTRL,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
-            saksstatus,
+            Saksstatuser.OPPRETTET,
             null,
             new java.util.HashSet<>(),
             new java.util.ArrayList<>()
@@ -520,17 +515,12 @@ public class TestDataInitializer implements ApplicationRunner {
             return;
         }
 
-        // Sett saksstatus basert på behandlingsstatus
-        Saksstatuser saksstatus = status == Behandlingsstatus.AVSLUTTET
-            ? Saksstatuser.HENLAGT
-            : Saksstatuser.OPPRETTET;
-
         Fagsak fagsak = new Fagsak(
             saksnummer,
             null,
             Sakstyper.EU_EOS,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
-            saksstatus,
+            Saksstatuser.OPPRETTET,
             null,
             new java.util.HashSet<>(),
             new java.util.ArrayList<>()
@@ -578,17 +568,12 @@ public class TestDataInitializer implements ApplicationRunner {
             return;
         }
 
-        // Sett saksstatus basert på behandlingsstatus
-        Saksstatuser saksstatus = status == Behandlingsstatus.AVSLUTTET
-            ? Saksstatuser.HENLAGT
-            : Saksstatuser.OPPRETTET;
-
         Fagsak fagsak = new Fagsak(
             saksnummer,
             null,
             Sakstyper.EU_EOS,
             Sakstemaer.TRYGDEAVGIFT,
-            saksstatus,
+            Saksstatuser.OPPRETTET,
             null,
             new java.util.HashSet<>(),
             new java.util.ArrayList<>()
