@@ -189,12 +189,17 @@ public class TestDataInitializer implements ApplicationRunner {
             return;
         }
 
+        // Sett saksstatus basert på behandlingsstatus
+        Saksstatuser saksstatus = status == Behandlingsstatus.AVSLUTTET
+            ? Saksstatuser.HENLAGT
+            : Saksstatuser.OPPRETTET;
+
         Fagsak fagsak = new Fagsak(
             saksnummer,
             null,
             Sakstyper.TRYGDEAVTALE,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Saksstatuser.OPPRETTET,
+            saksstatus,
             null,
             new java.util.HashSet<>(),
             new java.util.ArrayList<>()
@@ -457,12 +462,17 @@ public class TestDataInitializer implements ApplicationRunner {
             return;
         }
 
+        // Sett saksstatus basert på behandlingsstatus
+        Saksstatuser saksstatus = status == Behandlingsstatus.AVSLUTTET
+            ? Saksstatuser.HENLAGT
+            : Saksstatuser.OPPRETTET;
+
         Fagsak fagsak = new Fagsak(
             saksnummer,
             null,
             Sakstyper.FTRL,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Saksstatuser.OPPRETTET,
+            saksstatus,
             null,
             new java.util.HashSet<>(),
             new java.util.ArrayList<>()
@@ -510,12 +520,17 @@ public class TestDataInitializer implements ApplicationRunner {
             return;
         }
 
+        // Sett saksstatus basert på behandlingsstatus
+        Saksstatuser saksstatus = status == Behandlingsstatus.AVSLUTTET
+            ? Saksstatuser.HENLAGT
+            : Saksstatuser.OPPRETTET;
+
         Fagsak fagsak = new Fagsak(
             saksnummer,
             null,
             Sakstyper.EU_EOS,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Saksstatuser.OPPRETTET,
+            saksstatus,
             null,
             new java.util.HashSet<>(),
             new java.util.ArrayList<>()
@@ -563,12 +578,17 @@ public class TestDataInitializer implements ApplicationRunner {
             return;
         }
 
+        // Sett saksstatus basert på behandlingsstatus
+        Saksstatuser saksstatus = status == Behandlingsstatus.AVSLUTTET
+            ? Saksstatuser.HENLAGT
+            : Saksstatuser.OPPRETTET;
+
         Fagsak fagsak = new Fagsak(
             saksnummer,
             null,
             Sakstyper.EU_EOS,
             Sakstemaer.TRYGDEAVGIFT,
-            Saksstatuser.OPPRETTET,
+            saksstatus,
             null,
             new java.util.HashSet<>(),
             new java.util.ArrayList<>()
