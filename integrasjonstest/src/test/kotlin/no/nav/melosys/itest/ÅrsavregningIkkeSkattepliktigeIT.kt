@@ -1,7 +1,10 @@
 package no.nav.melosys.itest
 
+import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.*
@@ -81,6 +84,22 @@ class ÅrsavregningIkkeSkattepliktigeIT(
             )
             ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
         }
+
+        fagsakRepository.findBySaksnummer(sakOppfyllerKrav)
+            .shouldBePresent().run {
+                withClue("Skal ha både førstegangsbehandling og årsavregning") {
+                    behandlinger.shouldHaveSize(2)
+                }
+
+                val årsavregningsbehandling = behandlinger
+                    .firstOrNull { it.type == Behandlingstyper.ÅRSAVREGNING }
+                    .shouldNotBeNull()
+
+                behandlingsresultatRepository.findById(årsavregningsbehandling.id)
+                    .shouldBePresent()
+                    .årsavregning.shouldNotBeNull()
+                    .aar shouldBe 2025
+            }
     }
 
 
