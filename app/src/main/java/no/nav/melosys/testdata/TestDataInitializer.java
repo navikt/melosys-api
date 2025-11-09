@@ -58,19 +58,18 @@ public class TestDataInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        log.info("🔄 Initialiserer test-saker (matcher testdataUtils.ts)...");
-
         // Sjekk om testdata allerede eksisterer (idempotent)
         if (fagsakRepository.existsById("MEL-1068")) {
-            log.info("⏭️  Test-saker eksisterer allerede (MEL-1068 funnet) - hopper over initialisering");
+            log.info("⏭️  Test-saker eksisterer allerede - hopper over initialisering");
             return;
         }
+
+        log.info("🔄 Initialiserer 68 test-saker (MEL-1001 til MEL-1068)...");
 
         // Sett ThreadLocalAccessInfo context til test-saksbehandler Z123456
         UUID processId = UUID.randomUUID();
         try {
             ThreadLocalAccessInfo.beforeExecuteProcess(processId, "TestDataInitializer", TEST_SAKSBEHANDLER, "Test Saksbehandler");
-            log.info("📝 Oppretter 56 test-saker (MEL-1001 til MEL-1056)...");
 
             // MEL-1001 til MEL-1012: opprettAvtalelandSak (12 saker)
             opprettAvtalelandSak("MEL-1001");
@@ -154,8 +153,7 @@ public class TestDataInitializer implements ApplicationRunner {
             opprettEUEOSSakAvsluttet("MEL-1067");
             opprettEøsPensjonistSakMedTrygdeavgiftAvsluttet("MEL-1068");
 
-            log.info("✅ Suksessfullt initialisert 68 test-saker (MEL-1001 til MEL-1068)");
-            log.info("Test-saker tilgjengelig for fnr: {}", TEST_FNR);
+            log.info("✅ Suksessfullt initialisert 68 test-saker for fnr: {}", TEST_FNR);
         } catch (Exception e) {
             log.error("❌ Feil ved initialisering av test-saker: {}", e.getMessage(), e);
         } finally {
@@ -227,7 +225,7 @@ public class TestDataInitializer implements ApplicationRunner {
             oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null);
         }
 
-        log.info("✅ {}: opprettAvtalelandSak (status: {})", saksnummer, status);
+        log.debug("✅ {}: opprettAvtalelandSak (status: {})", saksnummer, status);
     }
 
     /**
@@ -279,7 +277,7 @@ public class TestDataInitializer implements ApplicationRunner {
         // Opprett oppgave tilordnet test-saksbehandler
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null);
 
-        log.info("✅ {}: opprettUtenforAvtalelandSak", saksnummer);
+        log.debug("✅ {}: opprettUtenforAvtalelandSak", saksnummer);
     }
 
     /**
@@ -331,7 +329,7 @@ public class TestDataInitializer implements ApplicationRunner {
         // Opprett oppgave tilordnet test-saksbehandler
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null);
 
-        log.info("✅ {}: opprettEøsPensjonistSakMedTrygdeavgift", saksnummer);
+        log.debug("✅ {}: opprettEøsPensjonistSakMedTrygdeavgift", saksnummer);
     }
 
     /**
@@ -383,7 +381,7 @@ public class TestDataInitializer implements ApplicationRunner {
         // Opprett oppgave tilordnet test-saksbehandler
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null);
 
-        log.info("✅ {}: opprettEUEOSSak ({})", saksnummer, behandlingstema);
+        log.debug("✅ {}: opprettEUEOSSak ({})", saksnummer, behandlingstema);
     }
 
     /**
@@ -436,7 +434,7 @@ public class TestDataInitializer implements ApplicationRunner {
         // 3. Opprett oppgave tilordnet test-saksbehandler
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null);
 
-        log.info("✅ {}: opprettUtenforAvtalelandSakMedAarsavregning (1 årsavregning)", saksnummer);
+        log.debug("✅ {}: opprettUtenforAvtalelandSakMedAarsavregning (1 årsavregning)", saksnummer);
     }
 
     // ===== Helper-metoder for OPPRETTET og AVSLUTTET saker =====
@@ -494,7 +492,7 @@ public class TestDataInitializer implements ApplicationRunner {
             oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null);
         }
 
-        log.info("✅ {}: opprettUtenforAvtalelandSak (status: {})", saksnummer, status);
+        log.debug("✅ {}: opprettUtenforAvtalelandSak (status: {})", saksnummer, status);
     }
 
     private void opprettEUEOSSakOpprettet(String saksnummer) {
@@ -546,7 +544,7 @@ public class TestDataInitializer implements ApplicationRunner {
             oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null);
         }
 
-        log.info("✅ {}: opprettEUEOSSak (status: {}, tema: {})", saksnummer, status, behandlingstema);
+        log.debug("✅ {}: opprettEUEOSSak (status: {}, tema: {})", saksnummer, status, behandlingstema);
     }
 
     private void opprettEøsPensjonistSakMedTrygdeavgiftOpprettet(String saksnummer) {
@@ -598,6 +596,6 @@ public class TestDataInitializer implements ApplicationRunner {
             oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null);
         }
 
-        log.info("✅ {}: opprettEøsPensjonistSakMedTrygdeavgift (status: {})", saksnummer, status);
+        log.debug("✅ {}: opprettEøsPensjonistSakMedTrygdeavgift (status: {})", saksnummer, status);
     }
 }
