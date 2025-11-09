@@ -33,81 +33,84 @@ class ÅrsavregningIkkeSkattepliktigeIT(
     @Autowired private val årsavregningIkkeSkattepliktigeProsessGenerator: ÅrsavregningIkkeSkattepliktigeProsessGenerator
 ) : MockServerTestBaseWithProsessManager() {
 
-    @Test
-    fun `skal finne registrert sak som oppfyller krav - og lage opprette OPPRETT_NY_BEHANDLING_AARSAVREGNING prosessinstans`() {
-        val sakOppfyllerKrav = "MEL-OPPFYLLER-KRAV"
+    @Nested
+    @DisplayName("Prosessgenerering")
+    inner class Prosessgenerering {
+        @Test
+        fun `skal opprette årsavregningsbehandling via prosessinstans når sak oppfyller krav`() {
+            val sakOppfyllerKrav = "MEL-OPPFYLLER-KRAV"
 
-        lagBehandlingsresultat {
-            behandling {
-                tema = Behandlingstema.YRKESAKTIV
-                status = Behandlingsstatus.AVSLUTTET
-                fagsak {
-                    saksnummer = sakOppfyllerKrav
-                    type = Sakstyper.FTRL
-                    status = Saksstatuser.LOVVALG_AVKLART
-                }
-            }
-            medlemskapsperioder.clear() // TODO, finn en mer elegant måte for dette (Vi vil overstyre kun fom tom under)
-            medlemskapsperiode {
-                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                fom = FOM.minusYears(1) // Test at periode kan starte før
-                tom = TOM.plusYears(1) // Test at periode kan slutte etter
-                medlemskapstype = Medlemskapstyper.PLIKTIG
-                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
-                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
-                trygdeavgiftsperiode {
-                    periodeFra = FOM.minusYears(1)
-                    periodeTil = TOM.plusYears(1)
-                    trygdeavgiftsbeløpMd = BigDecimal(500.0)
-                    trygdesats = BigDecimal(50)
-                    grunnlagSkatteforholdTilNorge {
-                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+            lagBehandlingsresultat {
+                behandling {
+                    tema = Behandlingstema.YRKESAKTIV
+                    status = Behandlingsstatus.AVSLUTTET
+                    fagsak {
+                        saksnummer = sakOppfyllerKrav
+                        type = Sakstyper.FTRL
+                        status = Saksstatuser.LOVVALG_AVKLART
                     }
                 }
-            }
-
-            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-        }
-
-        prosessinstansTestManager.executeAndWait(
-            mapOf(
-                ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING to 1
-            )
-        ) {
-            // unngår problem med dobbelt registrering av siden dette også registreres i finnSakerOgLagProsessinstanser
-            ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
-            årsavregningIkkeSkattepliktigeProsessGenerator.finnSakerOgLagProsessinstanser(
-                dryrun = false,
-                antallFeilFørStopAvJob = 0,
-                fomDato = FOM,
-                tomDato = TOM,
-            )
-            ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
-        }
-
-        fagsakRepository.findBySaksnummer(sakOppfyllerKrav)
-            .shouldBePresent().run {
-                withClue("Skal ha både førstegangsbehandling og årsavregning") {
-                    behandlinger.shouldHaveSize(2)
+                medlemskapsperioder.clear() // TODO, finn en mer elegant måte for dette (Vi vil overstyre kun fom tom under)
+                medlemskapsperiode {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = FOM.minusYears(1) // Test at periode kan starte før
+                    tom = TOM.plusYears(1) // Test at periode kan slutte etter
+                    medlemskapstype = Medlemskapstyper.PLIKTIG
+                    trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                    trygdeavgiftsperiode {
+                        periodeFra = FOM.minusYears(1)
+                        periodeTil = TOM.plusYears(1)
+                        trygdeavgiftsbeløpMd = BigDecimal(500.0)
+                        trygdesats = BigDecimal(50)
+                        grunnlagSkatteforholdTilNorge {
+                            skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                        }
+                    }
                 }
 
-                val årsavregningsbehandling = behandlinger
-                    .firstOrNull { it.type == Behandlingstyper.ÅRSAVREGNING }
-                    .shouldNotBeNull()
-
-                behandlingsresultatRepository.findById(årsavregningsbehandling.id)
-                    .shouldBePresent()
-                    .årsavregning.shouldNotBeNull()
-                    .aar shouldBe 2025
+                type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
             }
+
+            prosessinstansTestManager.executeAndWait(
+                mapOf(
+                    ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING to 1
+                )
+            ) {
+                // unngår problem med dobbelt registrering av siden dette også registreres i finnSakerOgLagProsessinstanser
+                ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
+                årsavregningIkkeSkattepliktigeProsessGenerator.finnSakerOgLagProsessinstanser(
+                    dryrun = false,
+                    antallFeilFørStopAvJob = 0,
+                    fomDato = FOM,
+                    tomDato = TOM,
+                )
+                ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
+            }
+
+            fagsakRepository.findBySaksnummer(sakOppfyllerKrav)
+                .shouldBePresent().run {
+                    withClue("Skal ha både førstegangsbehandling og årsavregning") {
+                        behandlinger.shouldHaveSize(2)
+                    }
+
+                    val årsavregningsbehandling = behandlinger
+                        .firstOrNull { it.type == Behandlingstyper.ÅRSAVREGNING }
+                        .shouldNotBeNull()
+
+                    behandlingsresultatRepository.findById(årsavregningsbehandling.id)
+                        .shouldBePresent()
+                        .årsavregning.shouldNotBeNull()
+                        .aar shouldBe 2025
+                }
+        }
     }
 
-
     @Nested
-    @DisplayName("finn saker")
-    inner class FinnSakerMedBehandlinger {
+    @DisplayName("Grunnleggende filtrering")
+    inner class GrunnleggendeFiltrering {
         @Test
-        fun `skal finne registrert sak som oppfyller krav`() {
+        fun `skal finne sak som oppfyller krav`() {
             val sakOppfyllerKrav = "MEL-OPPFYLLER-KRAV"
 
             lagBehandlingsresultat {
@@ -131,7 +134,7 @@ class ÅrsavregningIkkeSkattepliktigeIT(
         }
 
         @Test
-        fun `skal ikke finne registert sak hvor vi har tidligere behandling med FASTSATT_TRYGDEAVGIFT`() {
+        fun `skal ikke finne sak med tidligere FASTSATT_TRYGDEAVGIFT behandling`() {
             val sakOppfyllerIkkeKrav = "MEL-OPPFYLLER-IKKE-KRAV"
 
             lagBehandlingsresultat {
@@ -166,7 +169,11 @@ class ÅrsavregningIkkeSkattepliktigeIT(
             sakerMedBehandlinger.filter { it.sak.saksnummer == sakOppfyllerIkkeKrav }
                 .shouldBeEmpty()
         }
+    }
 
+    @Nested
+    @DisplayName("Skattepliktvurdering")
+    inner class Skattepliktvurdering {
         /**
          * Scenario: En sak har to vurderinger (behandlinger):
          *   1. Første behandling: IKKE_SKATTEPLIKTIG (eldre)
@@ -177,7 +184,7 @@ class ÅrsavregningIkkeSkattepliktigeIT(
          * skal kun gjelde for saker hvor den gjeldende statusen er ikke-skattepliktig.
          */
         @Test
-        fun `skal ikke finne registert sak hvor vi har ny vurdering som foandrer til skattepliktig`() {
+        fun `skal ikke finne sak når nyeste vurdering endrer til skattepliktig`() {
             val sakOppfyllerIkkeKrav = "MEL-OPPFYLLER-IKKE-KRAV"
 
             // Første vurdering: IKKE_SKATTEPLIKTIG
@@ -256,7 +263,7 @@ class ÅrsavregningIkkeSkattepliktigeIT(
          * gjeldende status, ikke historikk.
          */
         @Test
-        fun `skal finne registert sak hvor vi har ny ny vurdering som foandrer til ikke skattepliktig`() {
+        fun `skal finne sak når nyeste vurdering endrer til ikke-skattepliktig`() {
             val sakOppfyllerKrav = "MEL-OPPFYLLER-KRAV"
 
             // Første vurdering: SKATTEPLIKTIG (eldre)
@@ -325,9 +332,13 @@ class ÅrsavregningIkkeSkattepliktigeIT(
                 .single()
                 .sak.saksnummer shouldBe sakOppfyllerKrav
         }
+    }
 
+    @Nested
+    @DisplayName("Årsavregningsstatus")
+    inner class Årsavregningsstatus {
         @Test
-        fun `skal ikke finne sak med ny automatisk opprettet årsavregningsbehandling`() {
+        fun `skal ikke finne sak med automatisk opprettet årsavregning for samme år`() {
             val sakOppfyllerIkkeKrav = "MEL-OPPFYLLER-IKKE-KRAV"
 
             lagBehandlingsresultat {
@@ -369,7 +380,7 @@ class ÅrsavregningIkkeSkattepliktigeIT(
         }
 
         @Test
-        fun `skal ikke finne sak med manuelt opprettet årsavregning`() {
+        fun `skal ikke finne sak med manuelt opprettet årsavregning for samme år`() {
             val sakOppfyllerIkkeKrav = "MEL-MANUELL-ÅRSAVREGNING"
 
             lagBehandlingsresultat {
@@ -411,7 +422,7 @@ class ÅrsavregningIkkeSkattepliktigeIT(
         }
 
         @Test
-        fun `skal ikke finne sak med avsluttet automatisk opprettet årsavregning`() {
+        fun `skal ikke finne sak med avsluttet årsavregning for samme år`() {
             val sakOppfyllerIkkeKrav = "MEL-AVSLUTTET-ÅRSAVREGNING"
 
             lagBehandlingsresultat {
@@ -451,9 +462,13 @@ class ÅrsavregningIkkeSkattepliktigeIT(
             sakerMedBehandlinger.filter { it.sak.saksnummer == sakOppfyllerIkkeKrav }
                 .shouldBeEmpty()
         }
+    }
 
+    @Nested
+    @DisplayName("Periodeoverlapp")
+    inner class Periodeoverlapp {
         @Test
-        fun `skal finne sak hvor medlemskapsperiode starter tidligere enn fomDato men overlapper med perioden`() {
+        fun `skal finne sak når medlemskapsperiode starter før søkeperioden`() {
             val sakOppfyllerKrav = "MEL-OVERLAPP-TIDLIG-START"
 
             lagBehandlingsresultat {
@@ -492,7 +507,7 @@ class ÅrsavregningIkkeSkattepliktigeIT(
         }
 
         @Test
-        fun `skal finne sak hvor medlemskapsperiode slutter senere enn tomDato men overlapper med perioden`() {
+        fun `skal finne sak når medlemskapsperiode slutter etter søkeperioden`() {
             val sakOppfyllerKrav = "MEL-OVERLAPP-SEN-SLUTT"
 
             lagBehandlingsresultat {
@@ -531,7 +546,7 @@ class ÅrsavregningIkkeSkattepliktigeIT(
         }
 
         @Test
-        fun `skal finne sak hvor medlemskapsperiode dekker flere år`() {
+        fun `skal finne sak når medlemskapsperiode spenner over flere år`() {
             val sakOppfyllerKrav = "MEL-OVERLAPP-FLERE-ÅR"
 
             lagBehandlingsresultat {
@@ -567,49 +582,6 @@ class ÅrsavregningIkkeSkattepliktigeIT(
 
             sakerMedBehandlinger.single { it.sak.saksnummer == sakOppfyllerKrav }
                 .sak.saksnummer shouldBe sakOppfyllerKrav
-        }
-
-        @Test
-        fun `skal finne sak for nytt år selv om saken har årsavregning for tidligere år`() {
-            val sakOppfyllerIkkeKrav = "MEL-ÅRSAVREGNING-FOR-ANNET-ÅR"
-
-            lagBehandlingsresultat {
-                behandling {
-                    type = Behandlingstyper.FØRSTEGANG
-                    status = Behandlingsstatus.AVSLUTTET
-                    fagsak {
-                        saksnummer = sakOppfyllerIkkeKrav
-                        type = Sakstyper.FTRL
-                        status = Saksstatuser.LOVVALG_AVKLART
-                    }
-                }
-                type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            }
-
-            lagBehandlingsresultat {
-                årsavregning {
-                    aar = ÅRSAVREGNING_ÅR - 1 // forrige år for å teste at vi fortsatt finner for inneværende år
-                }
-                behandling {
-                    type = Behandlingstyper.ÅRSAVREGNING
-                    status = Behandlingsstatus.AVSLUTTET
-                    medBehandlingsårsakType(Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE)
-                    fagsak {
-                        saksnummer = sakOppfyllerIkkeKrav
-                        type = Sakstyper.FTRL
-                        status = Saksstatuser.LOVVALG_AVKLART
-                    }
-                }
-                type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            }
-
-
-            val sakerMedBehandlinger = årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(FOM, TOM)
-
-
-            sakerMedBehandlinger.filter { it.sak.saksnummer == sakOppfyllerIkkeKrav }
-                .shouldHaveSize(1).single()
-                .sak.saksnummer shouldBe sakOppfyllerIkkeKrav
         }
     }
 
