@@ -44,6 +44,25 @@ class ÅrsavregningIkkeSkattepliktigeIT(
                     status = Saksstatuser.LOVVALG_AVKLART
                 }
             }
+            medlemskapsperioder.clear() // TODO, finn en mer elegant måte for dette (Vi vil overstyre kun fom tom under)
+            medlemskapsperiode {
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                fom = FOM.minusYears(1) // Test at periode kan starte før
+                tom = TOM.plusYears(1) // Test at periode kan slutte etter
+                medlemskapstype = Medlemskapstyper.PLIKTIG
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                trygdeavgiftsperiode {
+                    periodeFra = FOM.minusYears(1)
+                    periodeTil = TOM.plusYears(1)
+                    trygdeavgiftsbeløpMd = BigDecimal(500.0)
+                    trygdesats = BigDecimal(50)
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
         }
 
