@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
 
-class ÅrsavregningIkkeSkattepliktigeFinnerIT(
+class ÅrsavregningIkkeSkattepliktigeIT(
     @Autowired private val årsavregningIkkeSkattepliktigeFinner: ÅrsavregningIkkeSkattepliktigeFinner,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
