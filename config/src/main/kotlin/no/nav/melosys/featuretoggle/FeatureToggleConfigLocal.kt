@@ -66,8 +66,7 @@ class FeatureToggleConfigLocal {
             // Fallback til LocalUnleash hvis Unleash-server ikke er konfigurert
             LocalUnleash().apply {
                 enableAllExcept(
-                    ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT,
-                    ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER
+                    *autoDisabledToggles.toTypedArray()
                 )
             }.also {
                 log.info { "FeatureToggleConfigLocal: Bruker LocalUnleash (ingen Unleash-server konfigurert)" }
