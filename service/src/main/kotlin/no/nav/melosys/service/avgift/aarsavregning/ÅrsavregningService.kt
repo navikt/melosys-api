@@ -344,12 +344,8 @@ class ÅrsavregningService(
         val sisteRelevanteBehandlinger = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år, førVedtaksdato)
 
         val sisteBehandlingsresultatMedAvgift = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
-        val sisteBehandlingsresultatMedAvgiftVedtaksDato = sisteBehandlingsresultatMedAvgift?.vedtakMetadata?.vedtaksdato
 
-        val skalFiltrereBortSisteBehandlingsresultatMedAvgiftVedtaksdato =
-            førVedtaksdato != null && sisteBehandlingsresultatMedAvgiftVedtaksDato != null && sisteBehandlingsresultatMedAvgiftVedtaksDato > førVedtaksdato
-
-        if (sisteBehandlingsresultatMedAvgift == null || sisteBehandlingsresultatMedAvgift.trygdeavgiftsperioder.isEmpty() || skalFiltrereBortSisteBehandlingsresultatMedAvgiftVedtaksdato) {
+        if (sisteBehandlingsresultatMedAvgift == null || sisteBehandlingsresultatMedAvgift.trygdeavgiftsperioder.isEmpty()) {
             return Trygdeavgiftsgrunnlag(
                 avgiftspliktigperioder = emptyList(),
                 skatteforholdsperioder = emptyList(),
