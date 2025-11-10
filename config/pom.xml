@@ -21,6 +21,14 @@
             <artifactId>sikkerhet</artifactId>
         </dependency>
         <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-domain</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-repository</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-core</artifactId>
         </dependency>
