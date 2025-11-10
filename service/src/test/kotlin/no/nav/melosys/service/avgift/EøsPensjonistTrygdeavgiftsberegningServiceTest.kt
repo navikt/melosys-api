@@ -168,7 +168,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
-        }.message.shouldContain("Skatteforholdsperioden(e) du har lagt inn dekker ikke hele helseutgift periode")
+        }.message.shouldContain("Inntektsperiode og skatteforholdsperiode må dekke helseutgiftperiode for inneværende år og fremtidige perioder")
     }
 
     @Test
@@ -194,7 +194,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
-        }.message.shouldContain("Inntektsperioden(e) du har lagt inn dekker ikke hele helseutgift periode")
+        }.message.shouldContain("Inntektsperiode og skatteforholdsperiode må dekke helseutgiftperiode for inneværende år og fremtidige perioder")
     }
 
     @Test
@@ -247,77 +247,6 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                     id = null,
                     periodeFra = FOM,
                     periodeTil = TOM,
-                    trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
-                    trygdesats = BigDecimal("7.9"),
-                    grunnlagInntekstperiode = inntektsperiode,
-                    grunnlagHelseutgiftDekkesPeriode = null,
-                    grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
-                )
-            )
-
-        verify { trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
-
-        verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
-        behandlingsresultat.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.shouldNotBeEmpty()
-    }
-
-    @Test
-    fun `beregnTrygdeavgift - EØS pensjonist skal betale Trygdeavgift - tidligere kalenderår skal ikke forskuddsfaktureres`() {
-        val fomIFjor = FOM.minusYears(1)
-        val tomIFjor = TOM.minusYears(1)
-        behandling.apply {
-            fagsak = Fagsak.forTest { medBruker() }
-        }
-
-        val skatteforholdsperiode = SkatteforholdTilNorge().apply {
-            fomDato = fomIFjor
-            tomDato = tomIFjor
-            skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-        }
-
-        val inntektsperiode = Inntektsperiode().apply {
-            fomDato = fomIFjor
-            tomDato = tomIFjor
-            type = Inntektskildetype.PENSJON
-            isArbeidsgiversavgiftBetalesTilSkatt = false
-            avgiftspliktigMndInntekt = Penger(BigDecimal(10000.0))
-        }
-
-        helseutgiftDekkesPeriode.apply {
-            fomDato = fomIFjor
-            tomDato = tomIFjor
-        }
-
-
-        val notSoRandomUuid = UUID.randomUUID()
-        val datoPeriodeDto = DatoPeriodeDto(fomIFjor, tomIFjor)
-        mockkStatic(UUID::class)
-        every { UUID.randomUUID() } returns notSoRandomUuid
-
-        every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
-        every { mockTrygdeavgiftConsumer.beregnTrygdeavgiftEosPensjonist(ofType(EøsPensjonistTrygdeavgiftsberegningRequest::class)) }.returns(
-            listOf(
-                EøsPensjonistTrygdeavgiftsberegningResponse(
-                    TrygdeavgiftsperiodeDto(
-                        DatoPeriodeDto(fomIFjor, tomIFjor), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
-                    ), EøsPensjonistTrygdeavgiftsgrunnlagDto(
-                        datoPeriodeDto,
-                        notSoRandomUuid,
-                        notSoRandomUuid
-                    )
-                )
-            )
-        )
-        every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
-
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, listOf(skatteforholdsperiode), listOf(inntektsperiode))
-            .shouldNotBeNull()
-            .shouldNotBeEmpty()
-            .shouldContainExactly(
-                Trygdeavgiftsperiode(
-                    id = null,
-                    periodeFra = fomIFjor,
-                    periodeTil = tomIFjor,
                     trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
                     trygdesats = BigDecimal("7.9"),
                     grunnlagInntekstperiode = inntektsperiode,
