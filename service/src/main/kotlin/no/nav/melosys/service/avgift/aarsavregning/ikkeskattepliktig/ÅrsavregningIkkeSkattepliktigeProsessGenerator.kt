@@ -81,8 +81,6 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
                     sakerFunnet.add(it)
                     antallProsessert++
                     if (dryrun) return@forEach
-                    log.info { "#####################################################" }
-                    log.info { "Oppretter prosessinstans for sak ${it.sak.saksnummer}" }
                     prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
                         it.sak.saksnummer,
                         år,
