@@ -71,11 +71,11 @@
         <jms-api.version>2.0.1</jms-api.version>
         <kotest.version>5.6.0</kotest.version>
         <kotlin-logging.version>3.0.5</kotlin-logging.version>
-        <mockito-kotlin.version>4.0.0</mockito-kotlin.version>
+        <mockito-kotlin.version>6.1.0</mockito-kotlin.version>
         <mockk.version>1.14.6</mockk.version>
         <micrometer-jvm-extras.version>0.2.2</micrometer-jvm-extras.version>
         <networknt.json-schema-validator.version>1.0.74</networknt.json-schema-validator.version>
-        <ojdbc.version>21.5.0.0</ojdbc.version>
+        <ojdbc.version>21.16.0.0</ojdbc.version>
         <okhttp.version>4.9.3</okhttp.version>
         <oracle.version>18</oracle.version>
         <oxmlparserv2.version>11.2.0.1.nojaxpservice</oxmlparserv2.version>
