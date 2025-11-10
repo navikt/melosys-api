@@ -8,7 +8,7 @@ import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_au
@@ -399,7 +399,7 @@ object FerdigbehandlingKontroll {
         if (kontrollData.skalIkkeHaTrygdeavgiftTidligereÅr) {
             return null
         }
-        if (kontrollData.behandlingstyper != Behandlingstyper.NY_VURDERING || kontrollData.harFattetÅrsavregningPåSak != true) {
+        if (kontrollData.behandlingstyper != NY_VURDERING || kontrollData.harFattetÅrsavregningPåSak != true) {
             return null
         }
 
@@ -423,20 +423,11 @@ object FerdigbehandlingKontroll {
         if (!kontrollData.skalIkkeHaTrygdeavgiftTidligereÅr) {
             return null
         }
-        if (kontrollData.behandlingstyper in listOf(Behandlingstyper.NY_VURDERING, Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)) {
-            return kontrollData.trygdeavgiftperiodeData?.nyeTrygdeavgiftsperioder?.any { it.fom.year < LocalDate.now().year }?.let {
-                if (it) {
-                    Kontrollfeil(Kontroll_begrunnelser.TRYGDEAVGIFT_ÅRSSKIFTE)
-                } else null
-            }
-        }
-        if (kontrollData.behandlingstyper == Behandlingstyper.FØRSTEGANG) {
+        if (kontrollData.behandlingstyper in listOf(NY_VURDERING, MANGLENDE_INNBETALING_TRYGDEAVGIFT, FØRSTEGANG)) {
             return kontrollData.trygdeavgiftperiodeData?.nyeTrygdeavgiftsperioder
-                ?.any { it.fom.year < LocalDate.now().year }?.let {
-                    if (it) {
-                        Kontrollfeil(Kontroll_begrunnelser.TRYGDEAVGIFT_ÅRSSKIFTE)
-                    } else null
-                }
+                ?.any { it.fom.year < LocalDate.now().year }
+                ?.takeIf { it }
+                ?.let { Kontrollfeil(Kontroll_begrunnelser.TRYGDEAVGIFT_ÅRSSKIFTE) }
         }
         return null
     }

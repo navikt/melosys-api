@@ -5,16 +5,14 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.forTest
 import no.nav.melosys.domain.brev.utkast.UtkastBrev
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
-import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser.DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
@@ -27,11 +25,9 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.exception.KontrolldataFeilType
-import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.*
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -40,6 +36,8 @@ class FerdigbehandlingKontrollTest {
     private val DATO: LocalDate = LocalDate.parse("2024-01-01")
     private val FOM = LocalDate.now()
     private val TOM = LocalDate.now().plusMonths(1)
+    private val inneværendeÅr = LocalDate.now().year
+    private val foregåendeÅr = inneværendeÅr - 1
 
     @Test
     internal fun utførKontroll_USA_ART5_4PeriodenErMerEnn12Måneder_kontrollfeil() {
@@ -115,15 +113,17 @@ class FerdigbehandlingKontrollTest {
     @Test
     fun `overlappende periode med forskuddsvis fakturering skal gi advarsel`() {
         val nyeTrygdeavgiftperioder = listOf(
-            lagTrygdeavgiftPeriode(
-                LocalDate.now().plusDays(2), LocalDate.now().plusDays(10)
-            )
+            Trygdeavgiftsperiode.forTest {
+                periodeFra = LocalDate.now().plusDays(2)
+                periodeTil = LocalDate.now().plusDays(10)
+            }
         )
 
         val tidligereTrygdeavgiftperioder = listOf(
-            lagTrygdeavgiftPeriode(
-                LocalDate.now(), LocalDate.now().plusDays(10)
-            )
+            Trygdeavgiftsperiode.forTest {
+                periodeFra = LocalDate.now()
+                periodeTil = LocalDate.now().plusDays(10)
+            }
         )
 
         val medlemskapDokument = MedlemskapDokument()
@@ -144,9 +144,11 @@ class FerdigbehandlingKontrollTest {
     fun `manglende fullmektig, medlem etter vertslandsavtale skal gi advarsel`() {
         val medlemskapDokument = MedlemskapDokument()
         val ikkeOverlappendeMedlemskapsperioder = listOf(
-            lagMedlemskapsperiode(
-                LocalDate.now().plusDays(5), LocalDate.now().plusDays(10)
-            ).apply { bestemmelse = DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14 }
+            medlemskapsperiodeForTest {
+                fom = LocalDate.now().plusDays(5)
+                tom = LocalDate.now().plusDays(10)
+                bestemmelse = DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14
+            }
         )
 
         val kontrollData = lagFerdigbehandlingKontrollData(
@@ -165,10 +167,17 @@ class FerdigbehandlingKontrollTest {
     fun `ikke manglende fullmektig, medlem etter vertslandsavtale skal ikke gi advarsel`() {
         val medlemskapDokument = MedlemskapDokument()
         val ikkeOverlappendeMedlemskapsperioder = listOf(
-            lagMedlemskapsperiode(
-                LocalDate.now().plusDays(5), LocalDate.now().plusDays(10)
-            ).apply { bestemmelse = DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14 }
+            medlemskapsperiodeForTest {
+                fom = LocalDate.now().plusDays(5)
+                tom = LocalDate.now().plusDays(10)
+                bestemmelse = DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14
+            }
         )
+
+        Fagsak.forTest {
+            medBruker { }
+        }
+
 
         val kontrollData = lagFerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapDokument,
@@ -195,9 +204,10 @@ class FerdigbehandlingKontrollTest {
             )
         }
         val ikkeOverlappendeMedlemskapsperioder = listOf(
-            lagMedlemskapsperiode(
-                LocalDate.now().plusDays(5), LocalDate.now().plusDays(10)
-            )
+            medlemskapsperiodeForTest {
+                fom = LocalDate.now().plusDays(5)
+                tom = LocalDate.now().plusDays(10)
+            }
         )
         val kontrollData = lagFerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsDokument,
@@ -298,9 +308,11 @@ class FerdigbehandlingKontrollTest {
             )
         }
         val overlappendeMedlemskapsperioder = listOf(
-            lagMedlemskapsperiode(
-                LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)
-            )
+            medlemskapsperiodeForTest {
+                fom = LocalDate.now().plusDays(1)
+                tom = LocalDate.now().plusDays(10)
+                bestemmelse = DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14
+            }
         )
         val kontrollData = lagFerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsDokument,
@@ -329,14 +341,17 @@ class FerdigbehandlingKontrollTest {
             )
         }
         val overlappendeMedlemskapsperioder = listOf(
-            lagMedlemskapsperiode(
-                LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)
-            )
+            medlemskapsperiodeForTest {
+                fom = LocalDate.now().plusDays(1)
+                tom = LocalDate.now().plusDays(10)
+            }
         )
         val tidligereMedlemskapsperioder = listOf(
-            lagMedlemskapsperiode(
-                LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)
-            ).apply { medlPeriodeID = 12345 }
+            medlemskapsperiodeForTest {
+                fom = LocalDate.now().plusDays(1)
+                tom = LocalDate.now().plusDays(10)
+                medlPeriodeID = 12345
+            }
         )
         val kontrollData = lagFerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsDokument,
@@ -363,15 +378,17 @@ class FerdigbehandlingKontrollTest {
         }
 
         val nyeTrygdeavgiftperioder = listOf(
-            lagTrygdeavgiftPeriode(
-                LocalDate.now().plusDays(2), LocalDate.now().plusDays(10)
-            )
+            Trygdeavgiftsperiode.forTest {
+                periodeFra = LocalDate.now().plusDays(2)
+                periodeTil = LocalDate.now().plusDays(10)
+            }
         )
 
         val tidligereTrygdeavgiftperioder = listOf(
-            lagTrygdeavgiftPeriode(
-                LocalDate.now(), LocalDate.now().plusDays(1)
-            )
+            Trygdeavgiftsperiode.forTest {
+                periodeFra = LocalDate.now()
+                periodeTil = LocalDate.now().plusDays(1)
+            }
         )
 
         val kontrollData = lagFerdigbehandlingKontrollData(
@@ -390,16 +407,17 @@ class FerdigbehandlingKontrollTest {
 
     @Test
     fun `tidligere trygdeavgiftsperioder som ikke avsluttes dagen før en ny trygdeavgiftsperiode, skal ikke gi kontrollfeil`() {
-        val nyeTrygdeavgiftperioder = listOf(
-            lagTrygdeavgiftPeriode(
-                LocalDate.now().plusDays(3), LocalDate.now().plusDays(10)
-            )
+        val nyeTrygdeavgiftperioder = listOf(Trygdeavgiftsperiode.forTest {
+            periodeFra = LocalDate.now().plusDays(3)
+            periodeTil = LocalDate.now().plusDays(10)
+        }
         )
 
         val tidligereTrygdeavgiftperioder = listOf(
-            lagTrygdeavgiftPeriode(
-                LocalDate.now(), LocalDate.now().plusDays(1)
-            )
+            Trygdeavgiftsperiode.forTest {
+                periodeFra = LocalDate.now()
+                periodeTil = LocalDate.now().plusDays(1)
+            }
         )
 
         val kontrollData = lagFerdigbehandlingKontrollData(
@@ -423,16 +441,22 @@ class FerdigbehandlingKontrollTest {
                 }
             )
         }
+
         val overlappendeMedlemskapsperioder = listOf(
-            lagMedlemskapsperiode(
-                LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)
-            )
+            medlemskapsperiodeForTest {
+                fom = LocalDate.now().plusDays(1)
+                tom = LocalDate.now().plusDays(10)
+            }
         )
+
         val tidligereMedlemskapsperioder = listOf(
-            lagMedlemskapsperiode(
-                LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)
-            ).apply { medlPeriodeID = 666 }
+            medlemskapsperiodeForTest {
+                fom = LocalDate.now().plusDays(1)
+                tom = LocalDate.now().plusDays(10)
+                medlPeriodeID = 666
+            }
         )
+
         val kontrollData = lagFerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsDokument,
             medlemskapsperiodeData = MedlemskapsperiodeData(overlappendeMedlemskapsperioder, tidligereMedlemskapsperioder),
@@ -458,11 +482,14 @@ class FerdigbehandlingKontrollTest {
                 }
             )
         }
+
         val overlappendeMedlemskapsperioder = listOf(
-            lagMedlemskapsperiode(
-                LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)
-            )
+            medlemskapsperiodeForTest {
+                fom = LocalDate.now().plusDays(1)
+                tom = LocalDate.now().plusDays(10)
+            }
         )
+
         val lovvalgsperiode = Lovvalgsperiode().apply {
             id = 1
             fom = LocalDate.now()
@@ -698,6 +725,7 @@ class FerdigbehandlingKontrollTest {
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART16_3
         }
+
         val kontrollData = lagFerdigbehandlingKontrollData(
             lovvalgsperiode = lovvalgsperiode,
         )
@@ -743,18 +771,20 @@ class FerdigbehandlingKontrollTest {
         kontrollfeil.shouldBeNull()
     }
 
-
     @Test
-    fun `ny vurdering på FTRL med endret trygdeavgiftsperioder tilbake i tid skal gi feil`() {
+    fun `Trygdeavgift med NY_VURDERING og årsavregning skal gi kontrollfeil ved endring tilbake i tid`() {
         val trygdeavgiftsperiode = listOf(
-            lagTrygdeavgiftPeriode(
-                LocalDate.now().withDayOfMonth(1).minusYears(1), LocalDate.now().withDayOfMonth(10)
-            )
+            Trygdeavgiftsperiode.forTest {
+                periodeFra = LocalDate.of(foregåendeÅr, 1, 1)
+                periodeTil = LocalDate.of(inneværendeÅr, 1, 1)
+            }
         )
+
         val trygdeavgiftsperiodeTidligere = listOf(
-            lagTrygdeavgiftPeriode(
-                LocalDate.now().withDayOfMonth(2).minusYears(1), LocalDate.now().withDayOfMonth(20)
-            )
+            Trygdeavgiftsperiode.forTest {
+                periodeFra = LocalDate.of(foregåendeÅr, 6, 1)
+                periodeTil = LocalDate.of(inneværendeÅr, 1, 1)
+            }
         )
 
         val kontrollData = lagFerdigbehandlingKontrollData(
@@ -764,46 +794,53 @@ class FerdigbehandlingKontrollTest {
             harFattetÅrsavregningPåSak = true
         )
 
+
         FerdigbehandlingKontroll.behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData)
             .shouldNotBeNull()
             .kode.shouldBe(Kontroll_begrunnelser.TRYGDEAVGIFT_ENDRET)
     }
 
     @Test
-    fun `ny vurdering på FTRL med endret trygdeavgiftsperioder uten årsavregning skal ikke gi kontrollfeil`() {
+    fun `Trygdeavgift med NY_VURDERING kan endres hvis det ikke er en årsavregning på saken`() {
         val trygdeavgiftsperiode = listOf(
-            lagTrygdeavgiftPeriode(
-                LocalDate.now().withDayOfMonth(1).minusYears(1), LocalDate.now().withDayOfMonth(10)
-            )
+            Trygdeavgiftsperiode.forTest {
+                periodeFra = LocalDate.of(foregåendeÅr, 1, 1)
+                periodeTil = LocalDate.of(inneværendeÅr, 1, 1)
+            }
         )
+
         val trygdeavgiftsperiodeTidligere = listOf(
-            lagTrygdeavgiftPeriode(
-                LocalDate.now().withDayOfMonth(2).minusYears(1), LocalDate.now().withDayOfMonth(20)
-            )
+            Trygdeavgiftsperiode.forTest {
+                periodeFra = LocalDate.of(foregåendeÅr, 6, 1)
+                periodeTil = LocalDate.of(inneværendeÅr, 1, 1)
+            }
         )
 
         val kontrollData = lagFerdigbehandlingKontrollData(
             behandlingstyper = Behandlingstyper.NY_VURDERING,
             trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(trygdeavgiftsperiode, emptyList()),
             trygdeavgiftsperioderTidligereBehandling = trygdeavgiftsperiodeTidligere,
+            harFattetÅrsavregningPåSak = false
         )
 
-        FerdigbehandlingKontroll.behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData)
-            .shouldBeNull()
+
+        FerdigbehandlingKontroll.behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData).shouldBeNull()
     }
 
     @Test
-    fun `FTRL skal ikke kontrollere hvis type er ulik NY_VURDERING`() {
+    fun `Trygdeavgift med årsavregning kan endres for tidligere år hvis behandling ikke er NY_VURDERING`() {
         val trygdeavgiftsperiode = listOf(
-            lagTrygdeavgiftPeriode(
-                LocalDate.now().withDayOfMonth(1).minusYears(1), LocalDate.now().withDayOfMonth(10)
-            )
+            Trygdeavgiftsperiode.forTest {
+                periodeFra = LocalDate.of(foregåendeÅr, 1, 1)
+                periodeTil = LocalDate.of(inneværendeÅr, 1, 1)
+            }
         )
 
         val trygdeavgiftsperiodeTidligere = listOf(
-            lagTrygdeavgiftPeriode(
-                LocalDate.now().withDayOfMonth(1).minusYears(1), LocalDate.now().withDayOfMonth(20)
-            )
+            Trygdeavgiftsperiode.forTest {
+                periodeFra = LocalDate.of(foregåendeÅr, 6, 1)
+                periodeTil = LocalDate.of(inneværendeÅr, 1, 1)
+            }
         )
 
         val kontrollData = lagFerdigbehandlingKontrollData(
@@ -819,22 +856,24 @@ class FerdigbehandlingKontrollTest {
 
     @Test
     fun `EØS Pensjonist med overlappende helseutgift dekkes periode skal gi kontrollfeil`() {
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(
-                this,
-                FOM,
-                TOM
-            )
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            helseutgiftDekkesPeriode {
+                fomDato = FOM
+                tomDato = TOM
+            }
         }
 
-        val tidligereHelseutgiftDekkesPeriode = listOf<HelseutgiftDekkesPeriode>(
-            lagHelseutgiftDekkesPeriode(lagBehandlingsresultat(), FOM, TOM)
-        )
+        val behandlingsresultatForTidligereHelsedekkesPeriode = Behandlingsresultat.forTest {
+            helseutgiftDekkesPeriode {
+                fomDato = FOM
+                tomDato = TOM
+            }
+        }
 
         val kontrollData = lagFerdigbehandlingKontrollData(
             helseutgiftDekkesPeriodeData = HelseutgiftDekkesPeriodeData(
                 behandlingsresultat.hentHelseutgiftDekkesPeriode(),
-                tidligereHelseutgiftDekkesPeriode
+                listOf(behandlingsresultatForTidligereHelsedekkesPeriode.hentHelseutgiftDekkesPeriode())
             ),
         )
 
@@ -857,14 +896,12 @@ class FerdigbehandlingKontrollTest {
                     })
             }
 
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(
-                this,
-                FOM,
-                TOM
-            )
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            helseutgiftDekkesPeriode {
+                fomDato = FOM
+                tomDato = TOM
+            }
         }
-
 
         val kontrollData = lagFerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsDokument,
@@ -880,20 +917,31 @@ class FerdigbehandlingKontrollTest {
 
     @Test
     fun `EØS Pensjonist når trygdeavgiftperiode(r) overlapper med trygdeavgiftperiode(r) fra perioder i MEDL skal gi advarsel`() {
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(
-                this,
-                FOM,
-                TOM
-            ).apply {
-                trygdeavgiftsperioder = mutableSetOf<Trygdeavgiftsperiode>(
-                    lagTrygdeavgiftPeriode(FOM, TOM)
-                )
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
+                tema = Behandlingstema.PENSJONIST
+                fagsak {
+                    saksnummer = "test"
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    status = Saksstatuser.OPPRETTET
+                    type = Sakstyper.EU_EOS
+                }
+            }
+            helseutgiftDekkesPeriode {
+                fomDato = FOM
+                tomDato = TOM
+                trygdeavgiftsperiode {
+                    periodeFra = FOM
+                    periodeTil = TOM
+                }
             }
         }
 
-        val tidligereTrygdeavgiftsperioderIkkeEøsPensjonist = listOf<Trygdeavgiftsperiode>(
-            lagTrygdeavgiftPeriode(FOM, TOM.plusDays(7))
+        val tidligereTrygdeavgiftsperioderIkkeEøsPensjonist = listOf(
+            Trygdeavgiftsperiode.forTest {
+                periodeFra = FOM
+                periodeTil = TOM
+            }
         )
 
         val kontrollData = lagFerdigbehandlingKontrollData(
@@ -914,20 +962,22 @@ class FerdigbehandlingKontrollTest {
     @Test
     fun `Trygdeavgiftsperioder fra tidliger kalenderår og ny vurdering skal gi kontrollfeil`() {
         val fomTidligereKalenderår = FOM.minusYears(1)
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(
-                this,
-                fomTidligereKalenderår,
-                TOM
-            ).apply {
-                trygdeavgiftsperioder = mutableSetOf<Trygdeavgiftsperiode>(
-                    lagTrygdeavgiftPeriode(fomTidligereKalenderår, TOM)
-                )
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            helseutgiftDekkesPeriode {
+                fomDato = fomTidligereKalenderår
+                tomDato = TOM
+                trygdeavgiftsperiode {
+                    periodeFra = fomTidligereKalenderår
+                    periodeTil = TOM
+                }
             }
         }
 
-        val tidligereTrygdeavgiftsperioderIkkeEøsPensjonist = listOf<Trygdeavgiftsperiode>(
-            lagTrygdeavgiftPeriode(fomTidligereKalenderår, TOM.plusDays(7))
+        val tidligereTrygdeavgiftsperioderIkkeEøsPensjonist = listOf(
+            Trygdeavgiftsperiode.forTest {
+                periodeFra = FOM
+                periodeTil = TOM
+            }
         )
 
         val kontrollData = lagFerdigbehandlingKontrollData(
@@ -944,26 +994,6 @@ class FerdigbehandlingKontrollTest {
 
 
         kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.TRYGDEAVGIFT_ÅRSSKIFTE)
-    }
-
-    @Test
-    fun `Trygdeavgiftsperioder fra tidliger kalenderår som ikke skal faktureres skal ikke gi kontrollfeil`() {
-        val fomTidligereKalenderår = FOM.minusYears(1)
-
-
-        val kontrollData = lagFerdigbehandlingKontrollData(
-            trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(
-                nyeTrygdeavgiftsperioder = emptyList()
-            ),
-            behandlingstyper = Behandlingstyper.FØRSTEGANG,
-            skalIkkeHaTrygdeavgiftTidligereÅr = true
-        )
-
-
-        val kontrollfeil = FerdigbehandlingKontroll.harTrygdeavgiftForTidligereÅr(kontrollData)
-
-
-        kontrollfeil.shouldBeNull()
     }
 
     private fun lagAktoerFullmektigOrganisasjon(): Aktoer {
@@ -1019,54 +1049,6 @@ class FerdigbehandlingKontrollTest {
         val mottatteOpplysningerData = MottatteOpplysningerData()
         mottatteOpplysningerData.soeknadsland = Soeknadsland(listOf("AT"), false)
         return mottatteOpplysningerData
-    }
-
-    private fun lagMedlemskapsperiode(fraOgMed: LocalDate, tilOgMed: LocalDate): Medlemskapsperiode {
-        val medlemskapsperiode = Medlemskapsperiode().apply {
-            id = 1L
-            fom = fraOgMed
-            tom = tilOgMed
-            innvilgelsesresultat = InnvilgelsesResultat.DELVIS_INNVILGET
-            medlemskapstype = Medlemskapstyper.FRIVILLIG
-            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
-            behandlingsresultat = Behandlingsresultat().apply {
-                behandling = Behandling.forTest {
-                    fagsak = Fagsak(saksnummer = "test", tema = Sakstemaer.MEDLEMSKAP_LOVVALG, status = Saksstatuser.OPPRETTET, type = Sakstyper.FTRL)
-                }
-            }
-        }
-        return medlemskapsperiode
-    }
-
-    private fun lagBehandlingsresultat(): Behandlingsresultat {
-        return Behandlingsresultat().apply {
-            behandling = Behandling.forTest {
-                fagsak = Fagsak(saksnummer = "test", tema = Sakstemaer.TRYGDEAVGIFT, status = Saksstatuser.OPPRETTET, type = Sakstyper.EU_EOS)
-                tema = Behandlingstema.PENSJONIST
-            }
-        }
-    }
-
-    private fun lagTrygdeavgiftPeriode(fraOgMed: LocalDate, tilOgMed: LocalDate): Trygdeavgiftsperiode {
-        return Trygdeavgiftsperiode(
-            periodeFra = fraOgMed,
-            periodeTil = tilOgMed,
-            trygdeavgiftsbeløpMd = Penger(BigDecimal(1000), NOK.kode),
-            trygdesats = BigDecimal(5),
-            grunnlagInntekstperiode = Inntektsperiode(),
-        )
-    }
-
-    private fun lagHelseutgiftDekkesPeriode(
-        behandlingsresultat: Behandlingsresultat,
-        fraOgMed: LocalDate,
-        tilOgMed: LocalDate
-    ) = HelseutgiftDekkesPeriode.forTest {
-        this.behandlingsresultat = behandlingsresultat
-        fomDato = fraOgMed
-        tomDato = tilOgMed
-        id = 1L
-        trygdeavgiftsperioder = mutableSetOf()
     }
 
 
