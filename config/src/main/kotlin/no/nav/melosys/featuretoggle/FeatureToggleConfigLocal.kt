@@ -27,10 +27,27 @@ class FeatureToggleConfigLocal {
     @Value("\${unleash.environment:development}")
     private lateinit var unleashEnvironment: String
 
+    @Value("\${unleash.admin-token:}")
+    private lateinit var unleashAdminToken: String
+
+    @Value("\${unleash.project-id:default}")
+    private lateinit var unleashProjectId: String
+
+    /**
+     * Toggles som skal være disabled ved automatisk opprettelse.
+     * Disse kan enablees manuelt i Unleash UI etter behov.
+     */
+    private val autoDisabledToggles = setOf(
+        ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT,
+    )
+
     @Bean
     fun unleash(): Unleash {
         // Hvis Unleash URL er konfigurert, bruk ekte Unleash-server med default-enabled wrapper
         return if (unleashUrl.isNotBlank() && unleashToken.isNotBlank()) {
+            // Synkroniser alle toggles til Unleash før vi oppretter Unleash bean
+            syncTogglesToUnleash()
+
             val config = UnleashConfig.builder()
                 .appName(unleashAppName)
                 .instanceId("$unleashAppName-instance")
@@ -48,10 +65,32 @@ class FeatureToggleConfigLocal {
         } else {
             // Fallback til LocalUnleash hvis Unleash-server ikke er konfigurert
             LocalUnleash().apply {
-                enableAllExcept(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+                enableAllExcept(
+                    ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT,
+                    ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER
+                )
             }.also {
                 log.info { "FeatureToggleConfigLocal: Bruker LocalUnleash (ingen Unleash-server konfigurert)" }
             }
+        }
+    }
+
+    /**
+     * Synkroniserer alle toggles fra ToggleName til Unleash server.
+     * Kjøres automatisk ved oppstart hvis Unleash er konfigurert.
+     */
+    private fun syncTogglesToUnleash() {
+        try {
+            val syncService = UnleashToggleSyncService(
+                unleashUrl = unleashUrl,
+                unleashAdminToken = unleashAdminToken,
+                projectId = unleashProjectId,
+                environment = unleashEnvironment,
+                autoDisabledToggles = autoDisabledToggles
+            )
+            syncService.syncAllToggles()
+        } catch (e: Exception) {
+            log.warn(e) { "Kunne ikke synkronisere toggles til Unleash, fortsetter uansett" }
         }
     }
 }

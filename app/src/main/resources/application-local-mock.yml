@@ -141,7 +141,9 @@ tilgangsmaskinen:
 unleash:
   url: ${UNLEASH_URL:http://localhost:4242/api}
   token: ${UNLEASH_TOKEN:*:development.unleash-insecure-client-api-token}
+  admin-token: ${UNLEASH_ADMIN_TOKEN:*:*.unleash-insecure-api-token}
   app-name: ${UNLEASH_APP_NAME:melosys-api}
   environment: ${UNLEASH_ENVIRONMENT:development}
+  project-id: ${UNLEASH_PROJECT_ID:default}
 utbetaling_rest:
   url: http://localhost:8083/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern
