@@ -2,11 +2,7 @@ package no.nav.melosys.domain
 
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeTestFactory
-import no.nav.melosys.domain.kodeverk.Bestemmelse
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.*
 import java.time.LocalDate
 
 fun medlemskapsperiodeForTest(init: MedlemskapsperiodeTestFactory.Builder.() -> Unit = {}): Medlemskapsperiode =
@@ -34,9 +30,15 @@ object MedlemskapsperiodeTestFactory {
         val trygdeavgiftsperioder = mutableListOf<Trygdeavgiftsperiode>()
 
         fun trygdeavgiftsperiode(init: TrygdeavgiftsperiodeTestFactory.Builder.() -> Unit) {
-            trygdeavgiftsperioder.add(
-                TrygdeavgiftsperiodeTestFactory.Builder().apply(init).build()
-            )
+            val nyPeriode = TrygdeavgiftsperiodeTestFactory.Builder().apply(init).build()
+            val finnesDuplikat = trygdeavgiftsperioder.any { eksisterende ->
+                eksisterende.id == null && nyPeriode.id == null &&
+                    eksisterende.erLikForSatsendring(nyPeriode)
+            }
+            require(!finnesDuplikat) {
+                "Duplisert trygdeavgiftsperiode (id=${nyPeriode.id} fom=${nyPeriode.periodeFra}, tom=${nyPeriode.periodeTil}, beløp=${nyPeriode.trygdeavgiftsbeløpMd.verdi}) forsøkt lagt til."
+            }
+            trygdeavgiftsperioder.add(nyPeriode)
         }
 
         fun build(): Medlemskapsperiode = Medlemskapsperiode().apply {
