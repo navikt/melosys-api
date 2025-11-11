@@ -11,4 +11,6 @@ interface AvgiftspliktigPeriode : ErPeriode {
     fun erOpphørt(): Boolean
     fun hentMedlemskapstype(): Medlemskapstyper
     fun erPliktigMedlemskap() = hentMedlemskapstype() == Medlemskapstyper.PLIKTIG
+    fun clearTrygdeavgiftsperioder()
+    fun addTrygdeavgiftsperiode(trygdeavgiftsperiode: Trygdeavgiftsperiode)
 }

@@ -105,15 +105,13 @@ open class Behandlingsresultat : RegistreringsInfo() {
     fun harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år: Int): Boolean =
         avgiftspliktigPerioder().any { it.erInnvilget() && it.overlapperMedÅr(år) }
 
-    fun avgiftspliktigPerioder(): List<AvgiftspliktigPeriode> {
-        return (if (behandling?.erEøsPensjonist() == true && helseutgiftDekkesPeriode != null) {
+    fun avgiftspliktigPerioder(): List<AvgiftspliktigPeriode> = when {
+        behandling?.erEøsPensjonist() == true && helseutgiftDekkesPeriode != null ->
             listOf(hentHelseutgiftDekkesPeriode())
-        } else if (behandling?.fagsak?.erLovvalg() == true) {
+        behandling?.fagsak?.erLovvalg() == true ->
             lovvalgsperioder.toList()
-        }
-        else {
+        else ->
             medlemskapsperioder.toList()
-        })
     }
 
     fun addMedlemskapsperiode(medlemskapsperiode: Medlemskapsperiode) {

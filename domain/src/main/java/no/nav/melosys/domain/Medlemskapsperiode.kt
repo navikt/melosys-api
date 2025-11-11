@@ -111,7 +111,7 @@ class Medlemskapsperiode : HarBestemmelse<Bestemmelse?>, AvgiftspliktigPeriode {
         ", medlPeriodeID=" + medlPeriodeID +
         '}'
 
-    fun addTrygdeavgiftsperiode(trygdeavgiftsperiode: Trygdeavgiftsperiode) {
+    override fun addTrygdeavgiftsperiode(trygdeavgiftsperiode: Trygdeavgiftsperiode) {
         trygdeavgiftsperiode.grunnlagMedlemskapsperiode = this
         trygdeavgiftsperioder.add(trygdeavgiftsperiode)
     }
@@ -128,7 +128,7 @@ class Medlemskapsperiode : HarBestemmelse<Bestemmelse?>, AvgiftspliktigPeriode {
         }
     }
 
-    fun clearTrygdeavgiftsperioder() {
+    override fun clearTrygdeavgiftsperioder() {
         trygdeavgiftsperioder.forEach { it.grunnlagMedlemskapsperiode = null }
         trygdeavgiftsperioder.clear()
     }

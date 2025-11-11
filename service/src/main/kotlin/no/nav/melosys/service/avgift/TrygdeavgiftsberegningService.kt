@@ -77,7 +77,8 @@ class TrygdeavgiftsberegningService(
             )
         ) {
             require(behandlingsresultat.avgiftspliktigPerioder().size == 1 && skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en avgiftspliktig- og skatteforholdsperiode når perioden er pliktig og skattepliktig" }
-            return skattepliktigTrygdeavgiftsperioderAvAvgiftspliktigperioder(behandlingsresultat.avgiftspliktigPerioder().filter { it.erInnvilget() })
+            return skattepliktigTrygdeavgiftsperioderAvAvgiftspliktigperioder(
+                behandlingsresultat.avgiftspliktigPerioder().filter { it.erInnvilget() })
         }
 
         val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
@@ -199,14 +200,23 @@ class TrygdeavgiftsberegningService(
 
         when (behandlingsresultat.avgiftspliktigPerioder().firstOrNull()) {
             is Medlemskapsperiode -> trygdeavgiftsperiode.apply {
-                grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId } ?: throw IllegalStateException("Fant ikke medlemskapsperiode ${response.grunnlag.medlemskapsperiodeId}")
+                grunnlagMedlemskapsperiode =
+                    behandlingsresultat.medlemskapsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId }
+                        ?: throw IllegalStateException("Fant ikke medlemskapsperiode ${response.grunnlag.medlemskapsperiodeId}")
             }
+
             is HelseutgiftDekkesPeriode -> trygdeavgiftsperiode.apply {
-                grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.hentHelseutgiftDekkesPeriode().takeIf { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId } ?: throw IllegalStateException("Fant ikke helseutgiftdekket periode ${response.grunnlag.medlemskapsperiodeId}")
+                grunnlagHelseutgiftDekkesPeriode =
+                    behandlingsresultat.hentHelseutgiftDekkesPeriode().takeIf { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId }
+                        ?: throw IllegalStateException("Fant ikke helseutgiftdekket periode ${response.grunnlag.medlemskapsperiodeId}")
             }
+
             is Lovvalgsperiode -> trygdeavgiftsperiode.apply {
-                grunnlagLovvalgsPeriode = behandlingsresultat.lovvalgsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId } ?: throw IllegalStateException("Fant ikke lovvalgsperiode ${response.grunnlag.medlemskapsperiodeId}")
+                grunnlagLovvalgsPeriode =
+                    behandlingsresultat.lovvalgsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId }
+                        ?: throw IllegalStateException("Fant ikke lovvalgsperiode ${response.grunnlag.medlemskapsperiodeId}")
             }
+
             else -> throw FunksjonellException("Ukjent avgiftspliktigperiode: ${behandlingsresultat.avgiftspliktigPerioder().firstOrNull()}")
         }
 

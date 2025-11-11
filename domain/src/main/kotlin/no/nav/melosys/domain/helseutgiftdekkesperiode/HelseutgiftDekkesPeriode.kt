@@ -50,12 +50,12 @@ class HelseutgiftDekkesPeriode(
         return id?.hashCode() ?: 0
     }
 
-    fun clearTrygdeavgiftsperioder() {
+    override fun clearTrygdeavgiftsperioder() {
         trygdeavgiftsperioder.forEach { it.grunnlagHelseutgiftDekkesPeriode = null }
         trygdeavgiftsperioder.clear()
     }
 
-    fun addTrygdeavgiftsperiode(trygdeavgiftsperiode: Trygdeavgiftsperiode) {
+    override fun addTrygdeavgiftsperiode(trygdeavgiftsperiode: Trygdeavgiftsperiode) {
         trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode = this
         trygdeavgiftsperioder.add(trygdeavgiftsperiode)
     }

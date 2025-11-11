@@ -88,7 +88,7 @@ class Lovvalgsperiode : PeriodeOmLovvalg, AvgiftspliktigPeriode {
     @OneToMany(mappedBy = "grunnlagLovvalgsPeriode", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
     var trygdeavgiftsperioder: MutableSet<Trygdeavgiftsperiode> = HashSet(1)
 
-    fun clearTrygdeavgiftsperioder() {
+    override fun clearTrygdeavgiftsperioder() {
         trygdeavgiftsperioder.forEach { it.grunnlagLovvalgsPeriode = null }
         trygdeavgiftsperioder.clear()
     }
@@ -110,7 +110,7 @@ class Lovvalgsperiode : PeriodeOmLovvalg, AvgiftspliktigPeriode {
         this.medlPeriodeID = medlPeriodeID
     }
 
-    fun addTrygdeavgiftsperiode(trygdeavgiftsperiode: Trygdeavgiftsperiode) {
+    override fun addTrygdeavgiftsperiode(trygdeavgiftsperiode: Trygdeavgiftsperiode) {
         trygdeavgiftsperiode.grunnlagLovvalgsPeriode = this
         trygdeavgiftsperioder.add(trygdeavgiftsperiode)
     }
