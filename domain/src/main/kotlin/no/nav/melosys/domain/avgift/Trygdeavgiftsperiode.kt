@@ -65,7 +65,8 @@ class Trygdeavgiftsperiode(
         get() = grunnlagLovvalgsPeriode ?: throw IllegalStateException("grunnlagMedlemskapsperiode er null")
 
     val grunnlagAvgiftsperiodeNotNull: AvgiftspliktigPeriode
-        get() = grunnlagMedlemskapsperiode ?: grunnlagHelseutgiftDekkesPeriode ?: grunnlagLovvalgsPeriode ?: throw IllegalStateException("grunnlagAvgiftsperiode er null")
+        get() = grunnlagMedlemskapsperiode ?: grunnlagHelseutgiftDekkesPeriode ?: grunnlagLovvalgsPeriode
+        ?: error("grunnlagAvgiftsperiode er null")
 
     fun hentGrunnlagInntekstperiode(): Inntektsperiode =
         grunnlagInntekstperiode ?: error("grunnlagInntekstperiode er påkrevd for Trygdeavgiftsperiode")

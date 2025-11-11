@@ -202,19 +202,19 @@ class TrygdeavgiftsberegningService(
             is Medlemskapsperiode -> trygdeavgiftsperiode.apply {
                 grunnlagMedlemskapsperiode =
                     behandlingsresultat.medlemskapsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId }
-                        ?: throw IllegalStateException("Fant ikke medlemskapsperiode ${response.grunnlag.medlemskapsperiodeId}")
+                        ?: error("Fant ikke medlemskapsperiode ${response.grunnlag.medlemskapsperiodeId}")
             }
 
             is HelseutgiftDekkesPeriode -> trygdeavgiftsperiode.apply {
                 grunnlagHelseutgiftDekkesPeriode =
                     behandlingsresultat.hentHelseutgiftDekkesPeriode().takeIf { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId }
-                        ?: throw IllegalStateException("Fant ikke helseutgiftdekket periode ${response.grunnlag.medlemskapsperiodeId}")
+                        ?: error("Fant ikke helseutgiftdekket periode ${response.grunnlag.medlemskapsperiodeId}")
             }
 
             is Lovvalgsperiode -> trygdeavgiftsperiode.apply {
                 grunnlagLovvalgsPeriode =
                     behandlingsresultat.lovvalgsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId }
-                        ?: throw IllegalStateException("Fant ikke lovvalgsperiode ${response.grunnlag.medlemskapsperiodeId}")
+                        ?: error("Fant ikke lovvalgsperiode ${response.grunnlag.medlemskapsperiodeId}")
             }
 
             else -> throw FunksjonellException("Ukjent avgiftspliktigperiode: ${behandlingsresultat.avgiftspliktigPerioder().firstOrNull()}")
