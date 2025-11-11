@@ -98,9 +98,6 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
                 aar = 2023
                 this.tidligereBehandlingsresultat = behandlingsresultatFørstegangsbehandling
             }
-            vedtakMetadata {
-                vedtaksdato = LocalDate.now().minusDays(5).atStartOfDay().toInstant(ZoneOffset.UTC)
-            }
             registrertDato = LocalDate.now().minusDays(5).atStartOfDay().toInstant(ZoneOffset.UTC)
         }
 
@@ -120,7 +117,7 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
             vedtakMetadata {
                 vedtaksdato = LocalDate.now().minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
-            registrertDato = LocalDate.now().minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultatFørstegangsbehandling

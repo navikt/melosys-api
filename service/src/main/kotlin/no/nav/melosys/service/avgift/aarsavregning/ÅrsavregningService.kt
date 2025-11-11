@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
+import mu.KotlinLogging
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.*
@@ -20,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
+
+private val log = KotlinLogging.logger { }
 
 @Service
 class ÅrsavregningService(
@@ -243,12 +246,16 @@ class ÅrsavregningService(
         return ÅrsavregningModel(
             årsavregningID = årsavregning.id,
             år = år,
-            tidligereTrygdeavgiftsGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
+            tidligereTrygdeavgiftsGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(
+                år,
+                årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer,
+                vedtaksDato
+            ),
             sisteGjeldendeAvgiftspliktigPerioder = hentSisteGjeldendeAvgiftspliktigePerioder(
                 år,
                 årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer
             ),
-            tidligereAvgift = hentTidligereAvgift(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
+            tidligereAvgift = hentTidligereAvgift(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer, vedtaksDato),
             nyttTrygdeavgiftsGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
             endeligAvgift = årsavregning.hentBehandlingsresultat.trygdeavgiftsperioder.toList(),
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
@@ -268,10 +275,13 @@ class ÅrsavregningService(
      * Henter siste relevante behandlingsresultater for årsavregning.
      * Returnerer separate behandlinger for medlemskapsperiode og avgiftsgrunnlag,
      * siden disse kan komme fra forskjellige behandlinger i noen tilfeller.
+     *
+     * førVedtaksdato: Filtrer bort behandlingsresultater som er innvilget etter denne datoen. Dette er nødvendig for å vise hva tidlgiere grunnlag var for en årsavregning som allerede er vedtatt.
      */
     fun hentGjeldendeBehandlingsresultaterForÅrsavregning(
         saksnummer: String,
         år: Int,
+        førVedtaksdato: Instant? = null
     ): GjeldendeBehandlingsresultaterForÅrsavregning? {
         val fagsak = fagsakService.hentFagsak(saksnummer)
 
@@ -290,7 +300,8 @@ class ÅrsavregningService(
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.type in behandlingsresultattyper }
             .filter { it.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
-            .sortedBy { it.vedtakMetadata!!.vedtaksdato }
+            .filter { førVedtaksdato == null || it.hentVedtakMetadata().vedtaksdato < førVedtaksdato }
+            .sortedBy { it.hentVedtakMetadata().vedtaksdato }
 
 
         if (behandlingsresultater.isEmpty()) {
@@ -304,13 +315,13 @@ class ÅrsavregningService(
         val sisteBehandlingsresultatMedAvgiftsgrunnlag = behandlingsresultater
             .filter { it.harTrygdeavgiftsperioderSomOverlapperMedÅr(år) }
             .sortedBy {
-                it.vedtakMetadata!!.vedtaksdato
+                it.hentVedtakMetadata().vedtaksdato
             }
 
         val sisteÅrsavregning = behandlingsresultater
             .filter { it.type == Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT }
             .filter { it.årsavregning != null && it.hentÅrsavregning().aar == år }
-            .maxByOrNull { it.vedtakMetadata!!.vedtaksdato }
+            .maxByOrNull { it.hentVedtakMetadata().vedtaksdato }
 
         return GjeldendeBehandlingsresultaterForÅrsavregning(
             sisteBehandlingsresultatMedAvgiftspliktigPeriode = sisteBehandlingsresultatMedAvgiftspliktigPeriode,
@@ -322,12 +333,18 @@ class ÅrsavregningService(
     private fun harManueltSattAvgift(it: Behandlingsresultat, år: Int) =
         it.årsavregning != null && it.hentÅrsavregning().manueltAvgiftBeloep != null && it.hentÅrsavregning().aar == år
 
-    private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, saksnummer: String?): Trygdeavgiftsgrunnlag? {
+    /**
+     * Henter tidligere trygdeavgiftsgrunnlag for gitt år og saksnummer.
+     *
+     * førVedtaksdato: Filtrer bort behandlingsresultater som er innvilget etter denne datoen. Dette er nødvendig for å vise hva tidlgiere grunnlag var for en årsavregning som allerede er vedtatt.
+     */
+    private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, saksnummer: String?, førVedtaksdato: Instant? = null): Trygdeavgiftsgrunnlag? {
         if (saksnummer == null) return null
 
-        val sisteRelevanteBehandlinger = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år)
+        val sisteRelevanteBehandlinger = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år, førVedtaksdato)
 
         val sisteBehandlingsresultatMedAvgift = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
+
         if (sisteBehandlingsresultatMedAvgift == null || sisteBehandlingsresultatMedAvgift.trygdeavgiftsperioder.isEmpty()) {
             return Trygdeavgiftsgrunnlag(
                 avgiftspliktigperioder = emptyList(),
@@ -372,10 +389,10 @@ class ÅrsavregningService(
             }
     }
 
-    private fun hentTidligereAvgift(år: Int, saksnummer: String?): List<Trygdeavgiftsperiode> {
+    private fun hentTidligereAvgift(år: Int, saksnummer: String?, førVedtaksdato: Instant? = null): List<Trygdeavgiftsperiode> {
         if (saksnummer == null) return emptyList()
 
-        val sisteRelevanteBehandlinger = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år)
+        val sisteRelevanteBehandlinger = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år, førVedtaksdato)
 
         val behandlingsresultat = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
             ?: return emptyList()
@@ -391,11 +408,13 @@ class ÅrsavregningService(
             return null
         }
         return Trygdeavgiftsgrunnlag(
-            avgiftspliktigperioder = behandlingsresultat.avgiftspliktigPerioder().map { when (it) {
-                is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(it)
-                is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(it)
-                else -> throw FunksjonellException("Ukjent periodetype: ${it.javaClass.simpleName}")
-            } },
+            avgiftspliktigperioder = behandlingsresultat.avgiftspliktigPerioder().map {
+                when (it) {
+                    is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(it)
+                    is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(it)
+                    else -> throw FunksjonellException("Ukjent periodetype: ${it.javaClass.simpleName}")
+                }
+            },
             skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().map(::SkatteforholdTilNorgeForAvgift),
             innteksperioder = behandlingsresultat.hentInntektsperioder().map(::InntektsperioderForAvgift)
         )
