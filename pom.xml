@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.11</version>
+        <version>3.5.7</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -37,11 +37,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>17</java.version>
-        <kotlin.version>2.2.10</kotlin.version>
+        <kotlin.version>2.2.21</kotlin.version>
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.324</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.326-77cdab1</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.154-midlertidig</melosys.brev.version>
 
         <!-- NAV -->
@@ -52,30 +52,30 @@
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
 
         <!-- Versjoner av eksterne biblioteker -->
-        <archunit.version>1.1.0</archunit.version>
+        <archunit.version>1.4.1</archunit.version>
         <apache-httpclients.version>4.5.13</apache-httpclients.version>
-        <caffeine.version>3.0.6</caffeine.version>
-        <cxf.version>4.0.7</cxf.version>
-        <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-lang3.version>3.18.0</commons-lang3.version>
-        <commons-lang.version>2.2</commons-lang.version>
-        <commons-text.version>1.10.0</commons-text.version>
+        <caffeine.version>3.2.3</caffeine.version>
+        <cxf.version>4.1.3</cxf.version>
+        <commons-collections4.version>4.5.0</commons-collections4.version>
+        <commons-lang3.version>3.19.0</commons-lang3.version>
+        <commons-lang.version>2.6</commons-lang.version>
+        <commons-text.version>1.14.0</commons-text.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
         <guava.version>31.1-jre</guava.version>
         <graphql-java.version>21.5</graphql-java.version>
-        <logback.version>1.5.12</logback.version>
+        <logback.version>1.5.20</logback.version>
         <logstash.version>8.1</logstash.version>
         <hikaricp.version>5.0.1</hikaricp.version>
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
-        <json-smart.version>2.4.9</json-smart.version>
+        <json-smart.version>2.6.0</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
         <kotest.version>5.6.0</kotest.version>
-        <kotlin-logging.version>3.0.0</kotlin-logging.version>
-        <mockito-kotlin.version>4.0.0</mockito-kotlin.version>
-        <mockk.version>1.12.5</mockk.version>
+        <kotlin-logging.version>3.0.5</kotlin-logging.version>
+        <mockito-kotlin.version>6.1.0</mockito-kotlin.version>
+        <mockk.version>1.14.6</mockk.version>
         <micrometer-jvm-extras.version>0.2.2</micrometer-jvm-extras.version>
         <networknt.json-schema-validator.version>1.0.74</networknt.json-schema-validator.version>
-        <ojdbc.version>21.5.0.0</ojdbc.version>
+        <ojdbc.version>21.16.0.0</ojdbc.version>
         <okhttp.version>4.9.3</okhttp.version>
         <oracle.version>18</oracle.version>
         <oxmlparserv2.version>11.2.0.1.nojaxpservice</oxmlparserv2.version>
@@ -83,47 +83,48 @@
         <easy-random.version>5.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
         <shedlock.version>4.35.0</shedlock.version>
-        <slf4j.version>2.0.3</slf4j.version>
+        <slf4j.version>2.0.17</slf4j.version>
         <springfox.version>3.0.0</springfox.version>
         <swagger.version>1.5.21</swagger.version>
         <unleash.version>8.3.0</unleash.version>
         <bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
+        <bouncycastle-jdk18on.version>1.78.1</bouncycastle-jdk18on.version>
         <nimbus-jose-jwt.version>9.37.4</nimbus-jose-jwt.version>
-        <neethi.version>3.1.1</neethi.version>
+        <neethi.version>3.2.1</neethi.version>
         <jakarta.jaxb.version>3.0.1</jakarta.jaxb.version>
         <javaparser.version>1.0.11</javaparser.version>
-        <google.errorprone.version>2.13.1</google.errorprone.version>
-        <checkerframework.version>3.22.0</checkerframework.version>
-        <threeten.version>1.7.2</threeten.version>
+        <google.errorprone.version>2.43.0</google.errorprone.version>
+        <checkerframework.version>3.52.0</checkerframework.version>
+        <threeten.version>1.8.0</threeten.version>
         <jetbrains.annotations.version>21.0.1</jetbrains.annotations.version>
-        <snappy.java.version>1.1.10.4</snappy.java.version>
+        <snappy.java.version>1.1.10.8</snappy.java.version>
         <mockito.inline.version>5.2.0</mockito.inline.version>
-        <springmockk.version>3.1.1</springmockk.version>
-        <httpclient5.version>5.2</httpclient5.version>
+        <springmockk.version>4.0.2</springmockk.version>
+        <httpclient5.version>5.5.1</httpclient5.version>
         <commons.beanutils.version>1.11.0</commons.beanutils.version>
-        <commons-cli.version>1.5.0</commons-cli.version>
+        <commons-cli.version>1.10.0</commons-cli.version>
         <graphql-spring-boot-starter.version>15.1.0</graphql-spring-boot-starter.version>
-        <scala.version>2.13.9</scala.version>
+        <scala.version>2.13.17</scala.version>
         <testcontainers.version>1.17.1</testcontainers.version>
-        <jna.version>5.11.0</jna.version>
-        <graphql.java.extended.scalars.version>21.0</graphql.java.extended.scalars.version>
+        <jna.version>5.18.1</jna.version>
+        <graphql.java.extended.scalars.version>24.0</graphql.java.extended.scalars.version>
         <ulid-java>5.2.3</ulid-java>
         <!-- Spring-data-envers, hibernate, antlr4 Downgraded due to: https://hibernate.atlassian.net/browse/HHH-17612 and compatability-->
-        <spring-data-envers.version>3.3.1</spring-data-envers.version>
+        <spring-data-envers.version>3.5.5</spring-data-envers.version>
         <hibernate.version>6.2.4.Final</hibernate.version>
-        <antlr4.version>4.10.1</antlr4.version>
-        <springdoc-openapi.version>2.6.0</springdoc-openapi.version>
+        <antlr4.version>4.13.2</antlr4.version>
+        <springdoc-openapi.version>2.8.14</springdoc-openapi.version>
 
         <!-- Bump JUnit versjon for å kunne bruke argumentSetName, denne kan muligens fjernes når vi bumper spring neste gang -->
         <junit-jupiter.version>5.11.3</junit-jupiter.version>
 
         <!-- Transitive avhengigheter -->
-        <asm.version>9.6</asm.version>
-        <joda-time.version>2.10.14</joda-time.version>
+        <asm.version>9.9</asm.version>
+        <joda-time.version>2.14.0</joda-time.version>
         <woodstox.version>6.6.1</woodstox.version>
         <woodstox.stax2.version>4.2.2</woodstox.stax2.version>
-        <xmlsec.version>3.0.4</xmlsec.version>
-        <wiremock-standalone.version>3.0.1</wiremock-standalone.version>
+        <xmlsec.version>4.0.4</xmlsec.version>
+        <wiremock-standalone.version>3.13.1</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
     </properties>
 
@@ -449,6 +450,16 @@
 
             <!-- Transitive avhengigheter med konflikter -->
             <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bouncycastle-jdk18on.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk18on</artifactId>
+                <version>${bouncycastle-jdk18on.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.google.code.javaparser</groupId>
                 <artifactId>javaparser</artifactId>
                 <version>${javaparser.version}</version>
@@ -691,7 +702,7 @@
             </dependency>
             <dependency>
                 <groupId>io.mockk</groupId>
-                <artifactId>mockk</artifactId>
+                <artifactId>mockk-jvm</artifactId>
                 <version>${mockk.version}</version>
                 <scope>test</scope>
             </dependency>

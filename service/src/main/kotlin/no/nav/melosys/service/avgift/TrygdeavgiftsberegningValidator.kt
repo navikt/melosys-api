@@ -246,9 +246,24 @@ object TrygdeavgiftsberegningValidator {
         }
 
         val sorterteKildeperioder = kildeperioder.map { LocalDateRange.of(it.fom, it.tom) }.sortedBy { it.start }
+
         sorterteKildeperioder.windowed(2).forEach { (current, next) ->
-            if (kanOverlappe && current.end.plusDays(1) < next.start) {
-                throw FunksjonellException(feilmelding)
+            val harGap = current.end.plusDays(1) < next.start
+
+            if (kanOverlappe && harGap) {
+                // Det er gap mellom current og next - sjekk om gapet dekkes av en annen periode
+                val gapStart = current.end.plusDays(1)
+                val gapEnd = next.start.minusDays(1)
+
+                val gapDekkes = sorterteKildeperioder.any { periode ->
+                    val periodeStarterFørEllerVedGapStart = periode.start <= gapStart
+                    val periodeSlutterEtterEllerVedGapEnd = periode.end >= gapEnd
+                    periodeStarterFørEllerVedGapStart && periodeSlutterEtterEllerVedGapEnd
+                }
+
+                if (!gapDekkes) {
+                    throw FunksjonellException(feilmelding)
+                }
             }
 
             if (!kanOverlappe && current.end.plusDays(1) != next.start) {

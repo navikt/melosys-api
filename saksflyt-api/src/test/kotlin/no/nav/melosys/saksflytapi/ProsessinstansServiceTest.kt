@@ -798,7 +798,7 @@ class ProsessinstansServiceTest {
 
     private fun settInnloggetSaksbehandler(): String {
         val saksbehandler = "Z123456"
-        val subjectHandler = mockk<SpringSubjectHandler>()
+        val subjectHandler = mockk<SpringSubjectHandler>(relaxed = true)
         SubjectHandler.set(subjectHandler)
         every { subjectHandler.userID } returns saksbehandler
         every { subjectHandler.userName } returns saksbehandler

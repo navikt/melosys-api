@@ -43,7 +43,8 @@ data class ValideringInput(
     val medlemskapsperioder: List<Medlemskapsperiode>,
     val skatteforholdsperioder: List<SkatteforholdTilNorge>,
     val inntektsperioder: List<Inntektsperiode>,
-    val feilmelding: String
+    val feilmelding: String,
+    val beskrivelse: String = ""
 ) {
     constructor(
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
@@ -52,7 +53,17 @@ data class ValideringInput(
     ) : this(emptyList<Medlemskapsperiode>(), skatteforholdsperioder, inntektsperioder, feilmelding)
 
     override fun toString(): String {
-        return feilmelding
+        if (beskrivelse.isNotEmpty()) return beskrivelse
+        if (feilmelding.isNotEmpty()) return feilmelding
+
+        val medlemskapInfo = if (medlemskapsperioder.isNotEmpty()) {
+            "Medlemskap: ${medlemskapsperioder.size} periode(r) ${medlemskapsperioder.first().fom}→${medlemskapsperioder.last().tom}"
+        } else "Ingen medlemskap"
+
+        val skatteInfo = "Skatt: ${skatteforholdsperioder.size} periode(r)"
+        val inntektInfo = "Inntekt: ${inntektsperioder.size} periode(r)"
+
+        return "$medlemskapInfo, $skatteInfo, $inntektInfo"
     }
 }
 
@@ -325,7 +336,7 @@ class TrygdeavgiftsberegningValidatorTest {
             }
         }
 
-        @ParameterizedTest
+        @ParameterizedTest(name = "[{index}] {0}")
         @MethodSource("valideringsDataPerioderDekkesScenarios")
         fun shouldBeValidPeriodeWhenInntektsperioderDekkerHelePerioden(valideringInput: ValideringInput) {
             val behandlingsresultat = Behandlingsresultat().apply {
@@ -514,6 +525,52 @@ class TrygdeavgiftsberegningValidatorTest {
                     tomDato = LocalDate.now().plusDays(5)
                     type = Inntektskildetype.ARBEIDSINNTEKT
                 }), TrygdeavgiftsberegningValidator.INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
+            ),
+            ValideringInput(
+                listOf(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = LocalDate.of(2019, 1, 1)
+                    tom = LocalDate.of(2029, 1, 1)
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
+                }),
+                listOf(
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.of(2019, 1, 1)
+                        tomDato = LocalDate.of(2024, 3, 31)
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    },
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.of(2024, 4, 1)
+                        tomDato = LocalDate.of(2029, 1, 1)
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                ), listOf(
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(2019, 1, 1)
+                        tomDato = LocalDate.of(2026, 1, 30)
+                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                        avgiftspliktigMndInntekt = Penger(10000.0)
+                    },
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(2026, 2, 1)
+                        tomDato = LocalDate.of(2029, 1, 1)
+                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                        avgiftspliktigMndInntekt = Penger(10000.0)
+                    },
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(2019, 1, 1)
+                        tomDato = LocalDate.of(2019, 12, 31)
+                        type = Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(3000.0)
+                    },
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(2021, 1, 1)
+                        tomDato = LocalDate.of(2021, 1, 31)
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        isArbeidsgiversavgiftBetalesTilSkatt = true
+                        avgiftspliktigMndInntekt = Penger(3000.0)
+                    }
+                ), TrygdeavgiftsberegningValidator.INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN, "Fire perioder med gap på 2026-01-31 (ikke dekket)"
             ),
             ValideringInput(                                                       // Skatteforhold dekker ikke hele perioden kaster exception
                 listOf(Medlemskapsperiode().apply {
@@ -1069,7 +1126,93 @@ class TrygdeavgiftsberegningValidatorTest {
                         tomDato = LocalDate.of(2023, 1, 8)
                         type = Inntektskildetype.ARBEIDSINNTEKT
                     }
-                ), "")
+                ), ""),
+
+            ValideringInput(
+                listOf(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = LocalDate.of(2019, 1, 1)
+                    tom = LocalDate.of(2029, 1, 1)
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
+                }),
+                listOf(
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.of(2019, 1, 1)
+                        tomDato = LocalDate.of(2024, 3, 31)
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    },
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.of(2024, 4, 1)
+                        tomDato = LocalDate.of(2029, 1, 1)
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                ), listOf(
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(2019, 1, 1)
+                        tomDato = LocalDate.of(2029, 1, 1)
+                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                        avgiftspliktigMndInntekt = Penger(10000.0)
+                    },
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(2019, 1, 1)
+                        tomDato = LocalDate.of(2019, 12, 31)
+                        type = Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(3000.0)
+                    },
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(2021, 1, 1)
+                        tomDato = LocalDate.of(2021, 1, 31)
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        isArbeidsgiversavgiftBetalesTilSkatt = true
+                        avgiftspliktigMndInntekt = Penger(3000.0)
+                    }
+                ), "", "En periode dekker alt, gap mellom andre perioder OK"),
+
+            ValideringInput(
+                listOf(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = LocalDate.of(2019, 1, 1)
+                    tom = LocalDate.of(2029, 1, 1)
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
+                }),
+                listOf(
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.of(2019, 1, 1)
+                        tomDato = LocalDate.of(2024, 3, 31)
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    },
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.of(2024, 4, 1)
+                        tomDato = LocalDate.of(2029, 1, 1)
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                ), listOf(
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(2019, 1, 1)
+                        tomDato = LocalDate.of(2026, 2, 1)
+                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                        avgiftspliktigMndInntekt = Penger(10000.0)
+                    },
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(2026, 2, 1)
+                        tomDato = LocalDate.of(2029, 1, 1)
+                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                        avgiftspliktigMndInntekt = Penger(10000.0)
+                    },
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(2019, 1, 1)
+                        tomDato = LocalDate.of(2019, 12, 31)
+                        type = Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(3000.0)
+                    },
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(2021, 1, 1)
+                        tomDato = LocalDate.of(2021, 1, 31)
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        isArbeidsgiversavgiftBetalesTilSkatt = true
+                        avgiftspliktigMndInntekt = Penger(3000.0)
+                    }
+                ), "", "Fire perioder med overlapp på 2026-02-01 (begge inkluderer denne dagen)")
         )
 
         fun valideringsData(): List<ValideringInput> = listOf(
