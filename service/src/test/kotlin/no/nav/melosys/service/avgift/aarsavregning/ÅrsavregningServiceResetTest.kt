@@ -137,56 +137,60 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
 
         val result: ÅrsavregningModel = årsavregningService.resetEksisterendeÅrsavregning(2L).shouldNotBeNull()
 
-        // Verify scalar fields
-        result.årsavregningID shouldBe 113L
-        result.år shouldBe 2023
-        result.nyttTrygdeavgiftsGrunnlag shouldBe null
-        result.endeligAvgift shouldBe emptyList()
-        result.tidligereFakturertBeloep shouldBe BigDecimal.valueOf(4500000, 2)
-        result.beregnetAvgiftBelop shouldBe null
-        result.tilFaktureringBeloep shouldBe null
-        result.harTrygdeavgiftFraAvgiftssystemet shouldBe null
-        result.trygdeavgiftFraAvgiftssystemet shouldBe null
-        result.endeligAvgiftValg shouldBe EndeligAvgiftValg.OPPLYSNINGER_ENDRET
-        result.manueltAvgiftBeloep shouldBe null
-        result.tidligereTrygdeavgiftFraAvgiftssystemet shouldBe null
-        result.tidligereÅrsavregningmanueltAvgiftBeloep shouldBe null
-        result.harSkjoennsfastsattInntektsgrunnlag shouldBe false
+        val expected = ÅrsavregningModel(
+            årsavregningID = 113L,
+            år = 2023,
+            tidligereTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(
+                listOf(
+                    MedlemskapsperiodeForAvgift(
+                        fom = LocalDate.of(2023, 1, 1),
+                        tom = LocalDate.of(2023, 9, 30),
+                        dekning = Trygdedekninger.FULL_DEKNING_FTRL,
+                        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD,
+                        medlemskapstyper = Medlemskapstyper.FRIVILLIG,
+                        InnvilgelsesResultat.INNVILGET
+                    )
+                ),
+                listOf(
+                    SkatteforholdTilNorgeForAvgift(lagSkatteforholdTilNorge("2023-01-01", "2023-09-30"))
+                ),
+                listOf(
+                    InntektsperioderForAvgift(Inntektsperiode().apply {
+                        fomDato = LocalDate.parse("2023-01-01")
+                        tomDato = LocalDate.parse("2023-09-30")
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                    })
+                )
+            ),
+            sisteGjeldendeAvgiftspliktigPerioder = listOf(
+                MedlemskapsperiodeForAvgift(
+                    fom = LocalDate.of(2023, 1, 1),
+                    tom = LocalDate.of(2023, 9, 30),
+                    dekning = Trygdedekninger.FULL_DEKNING_FTRL,
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD,
+                    medlemskapstyper = Medlemskapstyper.FRIVILLIG,
+                    InnvilgelsesResultat.INNVILGET
+                )
+            ),
+            tidligereAvgift = result.tidligereAvgift, // Use actual value (avoids bidirectional relationship comparison)
+            nyttTrygdeavgiftsGrunnlag = null,
+            endeligAvgift = emptyList(),
+            tidligereFakturertBeloep = BigDecimal.valueOf(4500000, 2),
+            beregnetAvgiftBelop = null,
+            tilFaktureringBeloep = null,
+            harTrygdeavgiftFraAvgiftssystemet = null,
+            trygdeavgiftFraAvgiftssystemet = null,
+            endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
+            manueltAvgiftBeloep = null,
+            tidligereTrygdeavgiftFraAvgiftssystemet = null,
+            tidligereÅrsavregningmanueltAvgiftBeloep = null,
+            harSkjoennsfastsattInntektsgrunnlag = false
+        )
 
-        // Verify tidligereTrygdeavgiftsGrunnlag
-        result.tidligereTrygdeavgiftsGrunnlag.shouldNotBeNull().run {
-            avgiftspliktigperioder.shouldHaveSize(1).single().let { it as MedlemskapsperiodeForAvgift }.run {
-                fom shouldBe LocalDate.of(2023, 1, 1)
-                tom shouldBe LocalDate.of(2023, 9, 30)
-                dekning shouldBe Trygdedekninger.FULL_DEKNING_FTRL
-                bestemmelse shouldBe Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
-                medlemskapstyper shouldBe Medlemskapstyper.FRIVILLIG
-                innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
-            }
-            skatteforholdsperioder.shouldHaveSize(1).single().run {
-                fom shouldBe LocalDate.parse("2023-01-01")
-                tom shouldBe LocalDate.parse("2023-09-30")
-                skatteplikttype shouldBe Skatteplikttype.IKKE_SKATTEPLIKTIG
-            }
-            innteksperioder.shouldHaveSize(1).single().run {
-                fom shouldBe LocalDate.parse("2023-01-01")
-                tom shouldBe LocalDate.parse("2023-09-30")
-                avgiftspliktigInntekt shouldBe Penger(5000.0)
-                type shouldBe Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
-            }
-        }
+        result shouldBe expected
 
-        // Verify sisteGjeldendeAvgiftspliktigPerioder
-        result.sisteGjeldendeAvgiftspliktigPerioder.shouldHaveSize(1).single().let { it as MedlemskapsperiodeForAvgift }.run {
-            fom shouldBe LocalDate.of(2023, 1, 1)
-            tom shouldBe LocalDate.of(2023, 9, 30)
-            dekning shouldBe Trygdedekninger.FULL_DEKNING_FTRL
-            bestemmelse shouldBe Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
-            medlemskapstyper shouldBe Medlemskapstyper.FRIVILLIG
-            innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
-        }
-
-        // Verify tidligereAvgift
+        // Verify tidligereAvgift separately (since we used actual value above)
         result.tidligereAvgift.shouldHaveSize(1).single().run {
             periodeFra shouldBe LocalDate.of(2023, 1, 1)
             periodeTil shouldBe LocalDate.of(2023, 9, 30)
