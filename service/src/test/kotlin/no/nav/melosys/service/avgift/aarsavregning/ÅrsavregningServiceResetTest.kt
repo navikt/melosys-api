@@ -155,13 +155,13 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
 
         // Verify tidligereTrygdeavgiftsGrunnlag
         result.tidligereTrygdeavgiftsGrunnlag.shouldNotBeNull().run {
-            avgiftspliktigperioder.shouldHaveSize(1).single().run {
+            avgiftspliktigperioder.shouldHaveSize(1).single().let { it as MedlemskapsperiodeForAvgift }.run {
                 fom shouldBe LocalDate.of(2023, 1, 1)
                 tom shouldBe LocalDate.of(2023, 9, 30)
                 dekning shouldBe Trygdedekninger.FULL_DEKNING_FTRL
                 bestemmelse shouldBe Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
                 medlemskapstyper shouldBe Medlemskapstyper.FRIVILLIG
-                innvilgelsesResultat shouldBe InnvilgelsesResultat.INNVILGET
+                innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
             }
             skatteforholdsperioder.shouldHaveSize(1).single().run {
                 fom shouldBe LocalDate.parse("2023-01-01")
@@ -177,13 +177,13 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
         }
 
         // Verify sisteGjeldendeAvgiftspliktigPerioder
-        result.sisteGjeldendeAvgiftspliktigPerioder.shouldHaveSize(1).single().run {
+        result.sisteGjeldendeAvgiftspliktigPerioder.shouldHaveSize(1).single().let { it as MedlemskapsperiodeForAvgift }.run {
             fom shouldBe LocalDate.of(2023, 1, 1)
             tom shouldBe LocalDate.of(2023, 9, 30)
             dekning shouldBe Trygdedekninger.FULL_DEKNING_FTRL
             bestemmelse shouldBe Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
             medlemskapstyper shouldBe Medlemskapstyper.FRIVILLIG
-            innvilgelsesResultat shouldBe InnvilgelsesResultat.INNVILGET
+            innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
         }
 
         // Verify tidligereAvgift
