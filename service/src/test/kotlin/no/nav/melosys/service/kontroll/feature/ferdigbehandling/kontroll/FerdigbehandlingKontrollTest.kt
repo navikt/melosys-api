@@ -174,9 +174,6 @@ class FerdigbehandlingKontrollTest {
             }
         )
 
-        Fagsak.forTest {
-            medBruker { }
-        }
 
 
         val kontrollData = lagFerdigbehandlingKontrollData(
