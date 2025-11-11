@@ -300,8 +300,8 @@ class ÅrsavregningService(
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.type in behandlingsresultattyper }
             .filter { it.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
-            .filter { førVedtaksdato == null || it.vedtakMetadata!!.vedtaksdato < førVedtaksdato }
-            .sortedBy { it.vedtakMetadata!!.vedtaksdato }
+            .filter { førVedtaksdato == null || it.hentVedtakMetadata().vedtaksdato < førVedtaksdato }
+            .sortedBy { it.hentVedtakMetadata().vedtaksdato }
 
 
         if (behandlingsresultater.isEmpty()) {
@@ -315,13 +315,13 @@ class ÅrsavregningService(
         val sisteBehandlingsresultatMedAvgiftsgrunnlag = behandlingsresultater
             .filter { it.harTrygdeavgiftsperioderSomOverlapperMedÅr(år) }
             .sortedBy {
-                it.vedtakMetadata!!.vedtaksdato
+                it.hentVedtakMetadata().vedtaksdato
             }
 
         val sisteÅrsavregning = behandlingsresultater
             .filter { it.type == Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT }
             .filter { it.årsavregning != null && it.hentÅrsavregning().aar == år }
-            .maxByOrNull { it.vedtakMetadata!!.vedtaksdato }
+            .maxByOrNull { it.hentVedtakMetadata().vedtaksdato }
 
         return GjeldendeBehandlingsresultaterForÅrsavregning(
             sisteBehandlingsresultatMedAvgiftspliktigPeriode = sisteBehandlingsresultatMedAvgiftspliktigPeriode,
