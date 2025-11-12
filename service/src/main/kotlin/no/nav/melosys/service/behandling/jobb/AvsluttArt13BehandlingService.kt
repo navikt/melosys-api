@@ -57,9 +57,11 @@ class AvsluttArt13BehandlingService(
             throw FunksjonellException(
                 "Behandling skal ikke avsluttes automatisk da perioden er av bestemmelse ${lovvalgsperiode.bestemmelse}"
             )
-        } else if (lovvalgsperiode.medlPeriodeID == null) {
+        }
+
+        if (lovvalgsperiode.medlPeriodeID == null) {
             throw FunksjonellException(
-                "Behandling $behandlingId har en lovvalgsperiode som ikke er registrert i medl. " +
+                "Behandling $behandlingId har en lovvalgsperiode som ikke er registrert i Medl. " +
                         "Kan ikke avslutte art13 behandling automatisk"
             )
         }
