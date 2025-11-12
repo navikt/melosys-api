@@ -486,6 +486,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
                 id = 1
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     saksnummer = "123456"
                 }
             }
@@ -546,6 +547,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
                 id = 1
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     saksnummer = "123456"
                 }
             }
