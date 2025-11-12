@@ -112,7 +112,7 @@
         <!-- Spring-data-envers, hibernate, antlr4 Downgraded due to: https://hibernate.atlassian.net/browse/HHH-17612 and compatability-->
         <spring-data-envers.version>3.5.5</spring-data-envers.version>
         <hibernate.version>6.2.4.Final</hibernate.version>
-        <antlr4.version>4.13.2</antlr4.version>
+        <antlr4.version>4.10.1</antlr4.version>
         <springdoc-openapi.version>2.8.14</springdoc-openapi.version>
 
         <!-- Bump JUnit versjon for å kunne bruke argumentSetName, denne kan muligens fjernes når vi bumper spring neste gang -->
