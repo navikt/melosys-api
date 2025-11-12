@@ -32,13 +32,16 @@ class AvsluttArt13BehandlingService(
         val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
-        if (toMndHarPassertSidenSaksbehandling(behandling, behandlingsresultat)) {
-            avsluttBehandling(behandling, behandlingsresultat)
+        if (!toMndHarPassertSidenSaksbehandling(behandling, behandlingsresultat)) {
+            log.info { "To måneder har ikke passert for behandling $behandlingID, avslutter ikke" }
+            return
         }
+
+        avsluttBehandling(behandling, behandlingsresultat)
     }
 
     private fun avsluttBehandling(behandling: Behandling, behandlingsresultat: Behandlingsresultat) {
-        log.info { "To måneder har passert siden saksbehandling for behandling ${behandling.id}. Forsøker å avslutte den" }
+        log.info { "To måneder har passert siden saksbehandling for behandling ${behandling.id}. Avslutter behandlingen" }
         val lovvalgsperiode = hentLovvalgsperiode(behandlingsresultat)
 
         if (!lovvalgsperiode.erArtikkel13()) {
@@ -78,21 +81,19 @@ class AvsluttArt13BehandlingService(
         return datoEldreEnn2Mnd(behandlingsresultat.endretDato)
     }
 
-    private fun hentLovvalgsperiode(behandlingsresultat: Behandlingsresultat): Lovvalgsperiode {
-        return if (erUtpekingUtenVedtak(behandlingsresultat)) {
+    private fun hentLovvalgsperiode(behandlingsresultat: Behandlingsresultat): Lovvalgsperiode =
+        if (erUtpekingUtenVedtak(behandlingsresultat)) {
             opprettLovvalgsperiode(behandlingsresultat.id!!, behandlingsresultat.hentValidertUtpekingsperiode())
         } else {
             behandlingsresultat.hentLovvalgsperiode()
         }
-    }
 
-    private fun erUtpekingUtenVedtak(behandlingsresultat: Behandlingsresultat): Boolean {
-        return behandlingsresultat.utpekingsperioder.isNotEmpty() && !behandlingsresultat.harVedtak()
-    }
+    private fun erUtpekingUtenVedtak(behandlingsresultat: Behandlingsresultat): Boolean =
+        behandlingsresultat.utpekingsperioder.isNotEmpty() && !behandlingsresultat.harVedtak()
 
-    private fun opprettLovvalgsperiode(behandlingID: Long, utpekingsperiode: Utpekingsperiode): Lovvalgsperiode {
-        return lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, setOf(Lovvalgsperiode.av(utpekingsperiode)))
-            .firstOrNull() ?: throw IllegalStateException("Feil ved lagring av lovvalgsperiode")
-    }
+    private fun opprettLovvalgsperiode(behandlingID: Long, utpekingsperiode: Utpekingsperiode): Lovvalgsperiode =
+        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, setOf(Lovvalgsperiode.av(utpekingsperiode)))
+            .firstOrNull()
+            ?: throw IllegalStateException("Feil ved lagring av lovvalgsperiode for behandling $behandlingID")
 }
 
