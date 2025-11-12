@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Utpekingsperiode
 import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -33,7 +34,7 @@ class AvsluttArt13BehandlingService(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
         if (!erGyldigForAutomatiskAvslutting(behandling)) {
-            log.info { "Behandling $behandlingID har ugyldig saksstatus ${behandling.fagsak.status}, avslutter ikke" }
+            log.info { "Behandling $behandlingID er ikke gyldig for automatisk avslutting" }
             return
         }
 
@@ -45,15 +46,43 @@ class AvsluttArt13BehandlingService(
         avsluttBehandling(behandling, behandlingsresultat)
     }
 
-    /**
-     * Validerer at saken er gyldig for automatisk avslutting.
-     * Dette forhindrer f.eks. at avviste MEDL-perioder blir gjort gyldige igjen.
-     *
-     * Kun saker med status OPPRETTET skal automatisk avsluttes av cron-jobben.
-     * Hvis saksstatus er noe annet enn OPPRETTET, betyr det at saken allerede er håndtert.
-     */
     private fun erGyldigForAutomatiskAvslutting(behandling: Behandling): Boolean =
-        behandling.fagsak.status == Saksstatuser.OPPRETTET
+        erFagsakStatusGyldigForAutomatiskAvslutting(behandling) && !finnesNyereRelevantLovvalgBehandling(behandling)
+
+    /**
+     * Kun saker med status OPPRETTET skal automatisk avsluttes av jobben.
+     * Hvis saksstatus er noe annet enn OPPRETTET, betyr det at saken allerede er håndtert.
+     *
+     * Dette forhindrer f.eks. at avviste MEDL-perioder blir gjort gyldige igjen.
+     */
+    private fun erFagsakStatusGyldigForAutomatiskAvslutting(behandling: Behandling): Boolean =
+        if (behandling.fagsak.status == Saksstatuser.OPPRETTET) {
+            true
+        } else {
+            log.info { "Avslutter ikke behandling ${behandling.id} med saksstatus ${behandling.fagsak.status} (krever OPPRETTET)" }
+            false
+        }
+
+    /**
+     * Returnerer true hvis det finnes en nyere behandling som er relevant for lovvalg og derfor
+     * skal hindre automatisk avslutting av behandlingen som sjekkes.
+     *
+     * En nyere behandling anses som relevant hvis:
+     * - Den er av en relevant type,
+     * - Den er inaktiv (status = AVSLUTTET eller MIDLERTIDIG_LOVVALGSBESLUTNING)
+     * - Den har resultert i et vedtak eller unntaksregistrering (utfallRegistreringUnntak)
+     *
+     * Ignorerer f.eks. HENVENDELSE eller andre typer som ikke endrer lovvalgsperioden.
+     */
+    private fun finnesNyereRelevantLovvalgBehandling(behandling: Behandling): Boolean =
+        behandling.fagsak.behandlinger.filter { it.id != behandling.id }
+            .filter { it.erInaktiv() }
+            .filter { it.registrertDato.isAfter(behandling.registrertDato) }
+            .filter { it.type in setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING) }
+            .any { kandidat ->
+                val resultat = behandlingsresultatService.hentBehandlingsresultat(kandidat.id)
+                resultat.harVedtak() || resultat.utfallRegistreringUnntak != null
+            }
 
     private fun avsluttBehandling(behandling: Behandling, behandlingsresultat: Behandlingsresultat) {
         log.info { "To måneder har passert siden saksbehandling for behandling ${behandling.id}. Avslutter behandlingen" }
