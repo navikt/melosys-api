@@ -2,7 +2,11 @@ package no.nav.melosys.domain
 
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeTestFactory
-import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.Bestemmelse
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
+import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import java.time.LocalDate
 
 fun medlemskapsperiodeForTest(init: MedlemskapsperiodeTestFactory.Builder.() -> Unit = {}): Medlemskapsperiode =
