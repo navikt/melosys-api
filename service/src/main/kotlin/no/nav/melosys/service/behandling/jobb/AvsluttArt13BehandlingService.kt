@@ -44,21 +44,25 @@ class AvsluttArt13BehandlingService(
         log.info { "To måneder har passert siden saksbehandling for behandling ${behandling.id}. Avslutter behandlingen" }
         val lovvalgsperiode = hentLovvalgsperiode(behandlingsresultat)
 
+        validerLovvalgsperiodeKanAvsluttes(behandling.id, lovvalgsperiode)
+
+        fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART)
+        medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode)
+
+        log.info { "Behandling ${behandling.id} avsluttet og satt til endelig i Medl" }
+    }
+
+    private fun validerLovvalgsperiodeKanAvsluttes(behandlingId: Long, lovvalgsperiode: Lovvalgsperiode) {
         if (!lovvalgsperiode.erArtikkel13()) {
             throw FunksjonellException(
                 "Behandling skal ikke avsluttes automatisk da perioden er av bestemmelse ${lovvalgsperiode.bestemmelse}"
             )
         } else if (lovvalgsperiode.medlPeriodeID == null) {
             throw FunksjonellException(
-                "Behandling ${behandling.id} har en lovvalgsperiode som ikke er registrert i medl. " +
+                "Behandling $behandlingId har en lovvalgsperiode som ikke er registrert i medl. " +
                         "Kan ikke avslutte art13 behandling automatisk"
             )
         }
-
-        fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART)
-
-        medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode)
-        log.info { "Behandling ${behandling.id} avsluttet og satt til endelig i Medl" }
     }
 
     private fun toMndHarPassertSidenSaksbehandling(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean {
