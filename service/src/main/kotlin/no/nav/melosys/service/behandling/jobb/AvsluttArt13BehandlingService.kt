@@ -57,10 +57,10 @@ class AvsluttArt13BehandlingService(
         fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART)
         medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode)
 
-        log.info { "Behandling ${behandling.id} avsluttet og satt til endelig i Medl" }
+        log.info { "Behandling ${behandling.id} avsluttet og satt til endelig i Medl." }
     }
 
-    private fun validerLovvalgsperiodeKanAvsluttes(behandlingId: Long, lovvalgsperiode: Lovvalgsperiode) {
+    private fun validerLovvalgsperiodeKanAvsluttes(behandlingID: Long, lovvalgsperiode: Lovvalgsperiode) {
         if (!lovvalgsperiode.erArtikkel13()) {
             throw FunksjonellException(
                 "Behandling skal ikke avsluttes automatisk da perioden er av bestemmelse ${lovvalgsperiode.bestemmelse}"
@@ -69,7 +69,7 @@ class AvsluttArt13BehandlingService(
 
         if (lovvalgsperiode.medlPeriodeID == null) {
             throw FunksjonellException(
-                "Behandling $behandlingId har en lovvalgsperiode som ikke er registrert i Medl. " +
+                "Behandling $behandlingID har en lovvalgsperiode som ikke er registrert i Medl. " +
                         "Kan ikke avslutte art13 behandling automatisk"
             )
         }
