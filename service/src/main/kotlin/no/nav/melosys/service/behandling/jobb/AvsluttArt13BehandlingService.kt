@@ -1,110 +1,98 @@
-package no.nav.melosys.service.behandling.jobb;
+package no.nav.melosys.service.behandling.jobb
 
-import java.util.Collections;
+import mu.KotlinLogging
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.Utpekingsperiode
+import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.service.LovvalgsperiodeService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.kontroll.regler.PeriodeRegler.datoEldreEnn2Mnd
+import no.nav.melosys.service.medl.MedlPeriodeService
+import no.nav.melosys.service.sak.FagsakService
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.Utpekingsperiode;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.medl.MedlPeriodeService;
-import no.nav.melosys.service.sak.FagsakService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import static no.nav.melosys.service.kontroll.regler.PeriodeRegler.datoEldreEnn2Mnd;
+private val log = KotlinLogging.logger { }
 
 @Service
-public class AvsluttArt13BehandlingService {
-    private static final Logger log = LoggerFactory.getLogger(AvsluttArt13BehandlingService.class);
-
-    private final BehandlingService behandlingService;
-    private final FagsakService fagsakService;
-    private final BehandlingsresultatService behandlingsresultatService;
-    private final MedlPeriodeService medlPeriodeService;
-    private final LovvalgsperiodeService lovvalgsperiodeService;
-
-    public AvsluttArt13BehandlingService(BehandlingService behandlingService,
-                                         FagsakService fagsakService,
-                                         BehandlingsresultatService behandlingsresultatService,
-                                         MedlPeriodeService medlPeriodeService,
-                                         LovvalgsperiodeService lovvalgsperiodeService) {
-        this.behandlingService = behandlingService;
-        this.fagsakService = fagsakService;
-        this.behandlingsresultatService = behandlingsresultatService;
-        this.medlPeriodeService = medlPeriodeService;
-        this.lovvalgsperiodeService = lovvalgsperiodeService;
-    }
+class AvsluttArt13BehandlingService(
+    private val behandlingService: BehandlingService,
+    private val fagsakService: FagsakService,
+    private val behandlingsresultatService: BehandlingsresultatService,
+    private val medlPeriodeService: MedlPeriodeService,
+    private val lovvalgsperiodeService: LovvalgsperiodeService
+) {
 
     @Transactional
-    public void avsluttBehandlingHvisToMndPassert(long behandlingID) {
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+    fun avsluttBehandlingHvisToMndPassert(behandlingID: Long) {
+        val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
         if (toMndHarPassertSidenSaksbehandling(behandling, behandlingsresultat)) {
-            avsluttBehandling(behandling, behandlingsresultat);
+            avsluttBehandling(behandling, behandlingsresultat)
         }
     }
 
-    private void avsluttBehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) {
-
-        log.info("To måneder har passert siden saksbehandling for behandling {}. Forsøker å avslutte den", behandling.getId());
-        Lovvalgsperiode lovvalgsperiode = hentLovvalgsperiode(behandlingsresultat);
+    private fun avsluttBehandling(behandling: Behandling, behandlingsresultat: Behandlingsresultat) {
+        log.info { "To måneder har passert siden saksbehandling for behandling ${behandling.id}. Forsøker å avslutte den" }
+        val lovvalgsperiode = hentLovvalgsperiode(behandlingsresultat)
 
         if (!lovvalgsperiode.erArtikkel13()) {
-            throw new FunksjonellException("Behandling skal ikke avsluttes automatisk da perioden er av bestemmelse"
-                + lovvalgsperiode.getBestemmelse());
-        } else if (lovvalgsperiode.getMedlPeriodeID() == null) {
-            throw new FunksjonellException("Behandling " + behandling.getId()
-                + " har en lovvalgsperiode som ikke er registrert i medl. Kan ikke avslutte art13 behandling automatisk");
+            throw FunksjonellException(
+                "Behandling skal ikke avsluttes automatisk da perioden er av bestemmelse ${lovvalgsperiode.bestemmelse}"
+            )
+        } else if (lovvalgsperiode.medlPeriodeID == null) {
+            throw FunksjonellException(
+                "Behandling ${behandling.id} har en lovvalgsperiode som ikke er registrert i medl. " +
+                        "Kan ikke avslutte art13 behandling automatisk"
+            )
         }
 
-        fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), behandling, Saksstatuser.LOVVALG_AVKLART);
+        fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART)
 
-        medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode);
-        log.info("Behandling {} avsluttet og satt til endelig i Medl", behandling.getId());
+        medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode)
+        log.info { "Behandling ${behandling.id} avsluttet og satt til endelig i Medl" }
     }
 
-
-    private boolean toMndHarPassertSidenSaksbehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) {
-        log.info("Sjekker om 2 måneder har passert siden saksbehandling for behandling {}", behandling.getId());
-        var behandlingKanResultereIVedtak = behandling.kanResultereIVedtak();
-        log.info("Behandling {} kan resultere i vedtak: {}", behandling.getId(), behandlingKanResultereIVedtak);
-        var erUtpekingUtenVedtak = erUtpekingUtenVedtak(behandlingsresultat);
-        log.info("Behandling {} er utpeking uten vedtak: {}", behandling.getId(), erUtpekingUtenVedtak);
+    private fun toMndHarPassertSidenSaksbehandling(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean {
+        log.info { "Sjekker om 2 måneder har passert siden saksbehandling for behandling ${behandling.id}" }
+        val behandlingKanResultereIVedtak = behandling.kanResultereIVedtak()
+        log.info { "Behandling ${behandling.id} kan resultere i vedtak: $behandlingKanResultereIVedtak" }
+        val erUtpekingUtenVedtak = erUtpekingUtenVedtak(behandlingsresultat)
+        log.info { "Behandling ${behandling.id} er utpeking uten vedtak: $erUtpekingUtenVedtak" }
 
         if (behandlingKanResultereIVedtak && !erUtpekingUtenVedtak) {
-
             if (!behandlingsresultat.harVedtak()) { //TODO dette kommer aldri til å skje
-                throw new FunksjonellException("Behandling " + behandling.getId() +
-                    " har ikke et vedtak og status kan da ikke settes til AVSLUTTET");
+                throw FunksjonellException(
+                    "Behandling ${behandling.id} har ikke et vedtak og status kan da ikke settes til AVSLUTTET"
+                )
             }
 
-            return datoEldreEnn2Mnd(behandlingsresultat.getVedtakMetadata().getVedtaksdato());
+            return datoEldreEnn2Mnd(behandlingsresultat.vedtakMetadata!!.vedtaksdato)
         }
 
-        return datoEldreEnn2Mnd(behandlingsresultat.getEndretDato());
+        return datoEldreEnn2Mnd(behandlingsresultat.endretDato)
     }
 
-    private Lovvalgsperiode hentLovvalgsperiode(Behandlingsresultat behandlingsresultat) {
-        return erUtpekingUtenVedtak(behandlingsresultat)
-            ? opprettLovvalgsperiode(behandlingsresultat.getId(), behandlingsresultat.hentValidertUtpekingsperiode())
-            : behandlingsresultat.hentLovvalgsperiode();
+    private fun hentLovvalgsperiode(behandlingsresultat: Behandlingsresultat): Lovvalgsperiode {
+        return if (erUtpekingUtenVedtak(behandlingsresultat)) {
+            opprettLovvalgsperiode(behandlingsresultat.id!!, behandlingsresultat.hentValidertUtpekingsperiode())
+        } else {
+            behandlingsresultat.hentLovvalgsperiode()
+        }
     }
 
-    private boolean erUtpekingUtenVedtak(Behandlingsresultat behandlingsresultat) {
-        return !behandlingsresultat.getUtpekingsperioder().isEmpty() && !behandlingsresultat.harVedtak();
+    private fun erUtpekingUtenVedtak(behandlingsresultat: Behandlingsresultat): Boolean {
+        return behandlingsresultat.utpekingsperioder.isNotEmpty() && !behandlingsresultat.harVedtak()
     }
 
-
-    private Lovvalgsperiode opprettLovvalgsperiode(long behandlingID, Utpekingsperiode utpekingsperiode) {
-        return lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, Collections.singleton(Lovvalgsperiode.av(utpekingsperiode)))
-            .stream().findFirst().orElseThrow(() -> new IllegalStateException("Feil ved lagring av lovvalgsperiode"));
+    private fun opprettLovvalgsperiode(behandlingID: Long, utpekingsperiode: Utpekingsperiode): Lovvalgsperiode {
+        return lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, setOf(Lovvalgsperiode.av(utpekingsperiode)))
+            .firstOrNull() ?: throw IllegalStateException("Feil ved lagring av lovvalgsperiode")
     }
 }
+
