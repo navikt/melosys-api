@@ -131,12 +131,12 @@ class AvsluttArt13BehandlingServiceTest {
         behandlingsresultat.vedtakMetadata = null
 
 
-        val exception = shouldThrow<FunksjonellException> {
+        val exception = shouldThrow<IllegalArgumentException> {
             avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
         }
 
 
-        exception.message shouldContain "har ikke et vedtak og status kan da ikke settes til AVSLUTTET"
+        exception.message shouldContain "skal ha vedtak men mangler vedtak. Status kan ikke settes til AVSLUTTET"
     }
 
     @Test
@@ -173,6 +173,19 @@ class AvsluttArt13BehandlingServiceTest {
         verify { lovvalgsperiodeService.lagreLovvalgsperioder(eq(behandlingID), any()) }
         verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
         verify { medlPeriodeService.oppdaterPeriodeEndelig(any()) }
+    }
+
+    @Test
+    fun `avsluttBehandlingHvisToMndPassert skal ikke avslutte behandling hvis saksstatus ikke er OPPRETTET`() {
+        vedtakMetadata.vedtaksdato = månederOgDagerSiden(2, 1)
+        fagsak.status = Saksstatuser.ANNULLERT
+
+
+        avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
+
+
+        verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any(), any()) }
+        verify(exactly = 0) { medlPeriodeService.oppdaterPeriodeEndelig(any()) }
     }
 
     private fun månederOgDagerSiden(mnd: Long, dager: Long): Instant =

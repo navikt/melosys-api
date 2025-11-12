@@ -32,6 +32,11 @@ class AvsluttArt13BehandlingService(
         val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
+        if (!erGyldigForAutomatiskAvslutting(behandling)) {
+            log.info { "Behandling $behandlingID har ugyldig saksstatus ${behandling.fagsak.status}, avslutter ikke" }
+            return
+        }
+
         if (!toMndHarPassertSidenSaksbehandling(behandling, behandlingsresultat)) {
             log.info { "To måneder har ikke passert for behandling $behandlingID, avslutter ikke" }
             return
@@ -39,6 +44,9 @@ class AvsluttArt13BehandlingService(
 
         avsluttBehandling(behandling, behandlingsresultat)
     }
+
+    private fun erGyldigForAutomatiskAvslutting(behandling: Behandling): Boolean =
+        behandling.fagsak.status == Saksstatuser.OPPRETTET
 
     private fun avsluttBehandling(behandling: Behandling, behandlingsresultat: Behandlingsresultat) {
         log.info { "To måneder har passert siden saksbehandling for behandling ${behandling.id}. Avslutter behandlingen" }
@@ -104,4 +112,3 @@ class AvsluttArt13BehandlingService(
             .firstOrNull()
             ?: throw IllegalStateException("Feil ved lagring av lovvalgsperiode for behandling $behandlingID")
 }
-
