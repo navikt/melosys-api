@@ -74,27 +74,3 @@ fun Trygdeavgiftsperiode.setGrunnlagByUUID(
 
     addGrunnlag(grunnlag)
 }
-
-/**
- * Returnerer grunnlaget (avgiftspliktig periode) for denne trygdeavgiftsperioden.
- * Sjekker alle mulige grunnlagstyper.
- *
- * @return Avgiftspliktig periode som denne trygdeavgiftsperioden er basert på
- * @throws IllegalStateException hvis ingen grunnlag er satt
- */
-fun Trygdeavgiftsperiode.hentGrunnlag(): AvgiftspliktigPeriode {
-    return grunnlagMedlemskapsperiode
-        ?: grunnlagLovvalgsPeriode
-        ?: grunnlagHelseutgiftDekkesPeriode
-        ?: throw IllegalStateException("Ingen grunnlag satt på trygdeavgiftsperiode med id $id")
-}
-
-/**
- * Knytter denne trygdeavgiftsperioden til riktig avgiftspliktig periode basert på eksisterende grunnlag.
- * Denne metoden forutsetter at grunnlag allerede er satt på trygdeavgiftsperioden.
- *
- * @return Denne trygdeavgiftsperioden (for chaining)
- */
-fun Trygdeavgiftsperiode.addToGrunnlag(): Trygdeavgiftsperiode = apply {
-    hentGrunnlag().addTrygdeavgiftsperiode(this)
-}
