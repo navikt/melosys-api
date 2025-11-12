@@ -197,7 +197,7 @@ class SatsendringFinnerTest {
     }
 
     @Test
-    fun `AvgiftSatsendringInfo behandlingUtenSatsendring når trygdeavgift for året som sjekkes er likt, men et annet år er forskjellig`() {
+    fun `AvgiftSatsendringInfo, ingen satsendring når trygdeavgift for året som sjekkes er likt, mens et annet år er forskjellig`() {
         val år = 2024
         val fagsak = Fagsak.forTest {
             behandling {
@@ -219,7 +219,10 @@ class SatsendringFinnerTest {
             id = 1L
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
             medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS), lagTrygdeavgiftsperiode(OPPRINNELIG_SATS, 2024)).toMutableSet()
+                trygdeavgiftsperioder = setOf(
+                    lagTrygdeavgiftsperiode(id = 1, sats = OPPRINNELIG_SATS, år = 2023),
+                    lagTrygdeavgiftsperiode(id = 2, sats = OPPRINNELIG_SATS, år = 2024)
+                ).toMutableSet()
             })
         }
         val behandlingsresultatNyVurdering = lagBehandlingsresultat(2, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))

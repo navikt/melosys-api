@@ -1,6 +1,5 @@
 package no.nav.melosys
 
-import io.kotest.assertions.AssertionFailedError
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContain
@@ -17,6 +16,7 @@ import no.nav.melosys.exception.TekniskException
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.untilNotNull
 import org.junit.jupiter.api.Test
+import org.opentest4j.AssertionFailedError
 import java.time.Duration
 
 
@@ -141,7 +141,7 @@ class AwaitUtilTest {
                 .waitUntil { i++.toString() == "hei" }
         }.message.shouldBe(
             "tall kan ikke være 1 - Condition with Lambda expression in no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
-                "expected:<\"hei\"> but was:<\"1\">"
+                "expected:<hei> but was:<1>"
         )
     }
 
@@ -162,7 +162,7 @@ class AwaitUtilTest {
                     i++ == 10
                 }
         }.message.shouldBe(
-            "waitUntil was aborted\nexpected:<\"bar\"> but was:<\"foo\">"
+            "waitUntil was aborted\nexpected:<bar> but was:<foo>"
         )
     }
 }
