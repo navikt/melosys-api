@@ -807,7 +807,7 @@ class ReplikerBehandlingsresultatServiceTest {
         )
 
         val trygdeavgiftsperiode2 = Trygdeavgiftsperiode(
-            id = 1L,
+            id = 2L,
             periodeFra = LocalDate.of(inneværendeÅr, 1, 1),
             periodeTil = LocalDate.of(inneværendeÅr, 12, 31),
             trygdeavgiftsbeløpMd = Penger(1000.0),
@@ -1234,7 +1234,7 @@ class ReplikerBehandlingsresultatServiceTest {
         )
         // Trygdeavgiftsperiode som går fra forrige år til neste år
         val trygdeavgiftsperiodeIÅr = Trygdeavgiftsperiode(
-            id = 1L,
+            id = 2L,
             periodeFra = LocalDate.of(inneværendeÅr, 1, 1),
             periodeTil = LocalDate.of(inneværendeÅr, 12, 31),
             trygdeavgiftsbeløpMd = Penger(2000.0),
@@ -1244,9 +1244,9 @@ class ReplikerBehandlingsresultatServiceTest {
         )
 
         val trygdeavgiftsperiodeNesteÅr = Trygdeavgiftsperiode(
-            id = 1L,
-            periodeFra = LocalDate.of(inneværendeÅr + 1, 1, 1),
-            periodeTil = LocalDate.of(inneværendeÅr + 1, 12, 31),
+            id = 3L,
+            periodeFra = LocalDate.of(inneværendeÅr+1 , 1, 1),
+            periodeTil = LocalDate.of(inneværendeÅr+1, 12, 31),
             trygdeavgiftsbeløpMd = Penger(2000.0),
             trygdesats = BigDecimal("8.2"),
             grunnlagMedlemskapsperiode = medlemskapsperiode,

@@ -3,9 +3,9 @@ package no.nav.melosys.service.avgift
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -245,9 +245,8 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, listOf(skatteforholdsperiode), listOf(inntektsperiode))
-            .shouldNotBeNull()
-            .shouldNotBeEmpty()
-            .shouldContainExactly(
+            .single()
+            .shouldBeEqualToIgnoringFields(
                 Trygdeavgiftsperiode(
                     id = null,
                     periodeFra = FOM,
@@ -255,10 +254,12 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                     trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
                     trygdesats = BigDecimal("7.9"),
                     grunnlagInntekstperiode = inntektsperiode,
-                    grunnlagHelseutgiftDekkesPeriode = null,
+                    grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode,
                     grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
                     forskuddsvisFaktura = true
-                )
+                ),
+                ignorePrivateFields = false,
+                property = Trygdeavgiftsperiode::grunnlagMedlemskapsperiodeNotNull
             )
 
         verify { trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
@@ -322,20 +323,21 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, listOf(skatteforholdsperiode), listOf(inntektsperiode))
-            .shouldNotBeNull()
-            .shouldNotBeEmpty()
-            .shouldContainExactly(
-                Trygdeavgiftsperiode(
+            .single()
+            .shouldBeEqualToIgnoringFields(
+                other = Trygdeavgiftsperiode(
                     id = null,
                     periodeFra = fomIFjor,
                     periodeTil = tomIFjor,
                     trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
                     trygdesats = BigDecimal("7.9"),
                     grunnlagInntekstperiode = inntektsperiode,
-                    grunnlagHelseutgiftDekkesPeriode = null,
+                    grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode,
                     grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
                     forskuddsvisFaktura = false
-                )
+                ),
+                ignorePrivateFields = false,
+                property = Trygdeavgiftsperiode::grunnlagMedlemskapsperiodeNotNull
             )
 
         verify { trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
@@ -400,20 +402,20 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, listOf(skatteforholdsperiode), listOf(inntektsperiode))
-            .shouldNotBeNull()
-            .shouldNotBeEmpty()
-            .shouldContainExactly(
-                Trygdeavgiftsperiode(
+            .single().shouldBeEqualToIgnoringFields(
+                other = Trygdeavgiftsperiode(
                     id = null,
                     periodeFra = fomIFjor,
                     periodeTil = tomIFjor,
                     trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
                     trygdesats = BigDecimal("7.9"),
                     grunnlagInntekstperiode = inntektsperiode,
-                    grunnlagHelseutgiftDekkesPeriode = null,
+                    grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode,
                     grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
                     forskuddsvisFaktura = true
-                )
+                ),
+                ignorePrivateFields = false,
+                property = Trygdeavgiftsperiode::grunnlagMedlemskapsperiodeNotNull
             )
 
         verify { trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
