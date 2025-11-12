@@ -109,6 +109,5 @@ class AvsluttArt13BehandlingService(
 
     private fun opprettLovvalgsperiode(behandlingID: Long, utpekingsperiode: Utpekingsperiode): Lovvalgsperiode =
         lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, setOf(Lovvalgsperiode.av(utpekingsperiode)))
-            .firstOrNull()
-            ?: throw IllegalStateException("Feil ved lagring av lovvalgsperiode for behandling $behandlingID")
+            .single()
 }
