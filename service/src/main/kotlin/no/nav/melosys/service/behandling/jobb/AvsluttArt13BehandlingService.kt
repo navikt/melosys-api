@@ -45,6 +45,13 @@ class AvsluttArt13BehandlingService(
         avsluttBehandling(behandling, behandlingsresultat)
     }
 
+    /**
+     * Validerer at saken er gyldig for automatisk avslutting.
+     * Dette forhindrer f.eks. at avviste MEDL-perioder blir gjort gyldige igjen.
+     *
+     * Kun saker med status OPPRETTET skal automatisk avsluttes av cron-jobben.
+     * Hvis saksstatus er noe annet enn OPPRETTET, betyr det at saken allerede er håndtert.
+     */
     private fun erGyldigForAutomatiskAvslutting(behandling: Behandling): Boolean =
         behandling.fagsak.status == Saksstatuser.OPPRETTET
 
