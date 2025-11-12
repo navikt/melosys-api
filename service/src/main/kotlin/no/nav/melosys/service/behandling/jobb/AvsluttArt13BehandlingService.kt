@@ -79,10 +79,8 @@ class AvsluttArt13BehandlingService(
         }
 
         if (skalHaVedtak) {
-            if (!behandlingsresultat.harVedtak()) { //TODO dette kommer aldri til å skje
-                throw FunksjonellException(
-                    "Behandling ${behandling.id} har ikke et vedtak og status kan da ikke settes til AVSLUTTET"
-                )
+            require(behandlingsresultat.harVedtak()) {
+                "Behandling ${behandling.id} skal ha vedtak men mangler vedtak. Status kan ikke settes til AVSLUTTET"
             }
 
             return datoEldreEnn2Mnd(behandlingsresultat.vedtakMetadata!!.vedtaksdato)
