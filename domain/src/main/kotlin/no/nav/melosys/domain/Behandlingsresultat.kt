@@ -103,9 +103,9 @@ open class Behandlingsresultat : RegistreringsInfo() {
     var trygdeavgiftType: Trygdeavgift_typer? = null
 
     fun harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år: Int): Boolean =
-        avgiftspliktigPerioder().any { it.erInnvilget() && it.overlapperMedÅr(år) }
+        finnAvgiftspliktigPerioder().any { it.erInnvilget() && it.overlapperMedÅr(år) }
 
-    fun avgiftspliktigPerioder(): List<AvgiftspliktigPeriode> = when {
+    fun finnAvgiftspliktigPerioder(): List<AvgiftspliktigPeriode> = when {
         behandling?.erEøsPensjonist() == true && helseutgiftDekkesPeriode != null ->
             listOf(hentHelseutgiftDekkesPeriode())
         behandling?.fagsak?.erLovvalg() == true ->
@@ -166,19 +166,19 @@ open class Behandlingsresultat : RegistreringsInfo() {
     }
 
     fun utledAvgiftspliktigperioderFom(): LocalDate? =
-        avgiftspliktigPerioder()
+        finnAvgiftspliktigPerioder()
             .filter { it.erInnvilget() }
             .mapNotNull { it.fom }
             .minOrNull()
 
     fun utledAvgiftspliktigperioderTom(): LocalDate? =
-        avgiftspliktigPerioder()
+        finnAvgiftspliktigPerioder()
             .filter { it.erInnvilget() }
             .mapNotNull { it.tom }
             .maxOrNull()
 
     fun utledOpphørtDato(): LocalDate? =
-        avgiftspliktigPerioder()
+        finnAvgiftspliktigPerioder()
             .filter { it.erOpphørt() }
             .mapNotNull { it.fom }
             .minOrNull()

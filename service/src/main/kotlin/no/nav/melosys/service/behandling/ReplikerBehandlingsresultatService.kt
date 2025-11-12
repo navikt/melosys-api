@@ -104,7 +104,7 @@ class ReplikerBehandlingsresultatService(
         val inntektsperioderReplika = cloneOgJusterInntektsperioder(trygdeavgiftsperioderTilReplikering)
         val skatteforholdTilNorgeReplika = cloneOgJusterSkatteforhold(trygdeavgiftsperioderTilReplikering)
 
-        behandlingsresultatReplika.avgiftspliktigPerioder().forEach { avgiftspliktigperiodeReplika ->
+        behandlingsresultatReplika.finnAvgiftspliktigPerioder().forEach { avgiftspliktigperiodeReplika ->
             when (avgiftspliktigperiodeReplika) {
                 is Medlemskapsperiode -> avgiftspliktigperiodeReplika.trygdeavgiftsperioder = HashSet()
                 is Lovvalgsperiode -> avgiftspliktigperiodeReplika.trygdeavgiftsperioder = HashSet()
@@ -122,7 +122,7 @@ class ReplikerBehandlingsresultatService(
                     ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),
             )
 
-            when (behandlingsresultatReplika.avgiftspliktigPerioder().first()) {
+            when (behandlingsresultatReplika.finnAvgiftspliktigPerioder().first()) {
                 is Medlemskapsperiode -> trygdeavgiftsperiodeReplika.apply {
                     grunnlagMedlemskapsperiode = behandlingsresultatReplika.medlemskapsperioder
                         .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode?.id }

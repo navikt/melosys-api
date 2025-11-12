@@ -59,10 +59,10 @@ class Trygdeavgiftsperiode(
 ) : ErPeriode {
 
     val grunnlagMedlemskapsperiodeNotNull: Medlemskapsperiode
-        get() = grunnlagMedlemskapsperiode ?: throw IllegalStateException("grunnlagMedlemskapsperiode er null")
+        get() = grunnlagMedlemskapsperiode ?: error("grunnlagMedlemskapsperiode er null")
 
     val grunnlagLovvalgsPeriodeNotNull: Lovvalgsperiode
-        get() = grunnlagLovvalgsPeriode ?: throw IllegalStateException("grunnlagMedlemskapsperiode er null")
+        get() = grunnlagLovvalgsPeriode ?: error("grunnlagMedlemskapsperiode er null")
 
     val grunnlagAvgiftsperiodeNotNull: AvgiftspliktigPeriode
         get() = grunnlagMedlemskapsperiode ?: grunnlagHelseutgiftDekkesPeriode ?: grunnlagLovvalgsPeriode
@@ -121,6 +121,16 @@ class Trygdeavgiftsperiode(
 
 
     fun addGrunnlag(avgiftspliktigperiode: AvgiftspliktigPeriode) {
+        val existingGrunnlagCount = listOfNotNull(
+            grunnlagMedlemskapsperiode,
+            grunnlagHelseutgiftDekkesPeriode,
+            grunnlagLovvalgsPeriode
+        ).size
+
+        if (existingGrunnlagCount > 0) {
+            error("Trygdeavgiftsperiode har allerede et grunnlag satt. Kan ikke ha flere grunnlag samtidig.")
+        }
+
         when (avgiftspliktigperiode) {
             is Medlemskapsperiode -> grunnlagMedlemskapsperiode = avgiftspliktigperiode
             is HelseutgiftDekkesPeriode -> grunnlagHelseutgiftDekkesPeriode = avgiftspliktigperiode

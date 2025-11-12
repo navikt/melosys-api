@@ -50,10 +50,10 @@ class TrygdeavgiftperiodeErstatterTest() {
 
         val nyeTrygdeavgiftsperioder = listOf(nyTrygdeavgiftsperiode)
 
-        // Act
+
         trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
 
-        // Assert
+
         behandlingsresultat.trygdeavgiftType.shouldNotBeNull() shouldBeEqual Trygdeavgift_typer.FORELØPIG
         medlemskap.trygdeavgiftsperioder shouldContainExactly nyeTrygdeavgiftsperioder.toSet()
     }
@@ -73,10 +73,10 @@ class TrygdeavgiftperiodeErstatterTest() {
 
         val nyeTrygdeavgiftsperioder = listOf(nyTrygdeavgiftsperiode)
 
-        // Act
+
         trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
 
-        // Assert
+
         behandlingsresultat.trygdeavgiftType.shouldNotBeNull() shouldBeEqual Trygdeavgift_typer.FORELØPIG
         lovvalgsperiode.trygdeavgiftsperioder shouldContainExactly nyeTrygdeavgiftsperioder.toSet()
     }
@@ -109,10 +109,10 @@ class TrygdeavgiftperiodeErstatterTest() {
 
         val nyeTrygdeavgiftsperioder = listOf(nyTrygdeavgiftsperiode)
 
-        // Act
+
         trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
 
-        // Assert
+
         nyeTrygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
             trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode?.id?.shouldBeEqual(helseutgiftDekkesPeriodeId)
         }
@@ -140,10 +140,10 @@ class TrygdeavgiftperiodeErstatterTest() {
 
         val nyeTrygdeavgiftsperioder = nyTrygdeavgiftsperioder1 + nyTrygdeavgiftsperioder2
 
-        // Act
+
         trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
 
-        // Assert
+
         medlemskap1.trygdeavgiftsperioder shouldContainExactly nyTrygdeavgiftsperioder1.toSet()
         medlemskap2.trygdeavgiftsperioder shouldContainExactly nyTrygdeavgiftsperioder2.toSet()
         behandlingsresultat.trygdeavgiftType shouldBe Trygdeavgift_typer.FORELØPIG
@@ -169,10 +169,10 @@ class TrygdeavgiftperiodeErstatterTest() {
 
         val nyeTrygdeavgiftsperioder = nyTrygdeavgiftsperioder1 + nyTrygdeavgiftsperioder2
 
-        // Act
+
         trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
 
-        // Assert
+
         medlemskap1.trygdeavgiftsperioder shouldContainExactly nyTrygdeavgiftsperioder1.toSet()
         medlemskap2.trygdeavgiftsperioder shouldContainExactly nyTrygdeavgiftsperioder2.toSet()
         behandlingsresultat.trygdeavgiftType shouldBe Trygdeavgift_typer.FORELØPIG

@@ -73,12 +73,12 @@ class TrygdeavgiftsberegningService(
         if (erPliktigMedlemskapSkattepliktig(
                 skatteforholdsperioder,
                 inntektsperioder,
-                behandlingsresultat.avgiftspliktigPerioder()
+                behandlingsresultat.finnAvgiftspliktigPerioder()
             )
         ) {
-            require(behandlingsresultat.avgiftspliktigPerioder().size == 1 && skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en avgiftspliktig- og skatteforholdsperiode når perioden er pliktig og skattepliktig" }
+            require(behandlingsresultat.finnAvgiftspliktigPerioder().size == 1 && skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en avgiftspliktig- og skatteforholdsperiode når perioden er pliktig og skattepliktig" }
             return skattepliktigTrygdeavgiftsperioderAvAvgiftspliktigperioder(
-                behandlingsresultat.avgiftspliktigPerioder().filter { it.erInnvilget() })
+                behandlingsresultat.finnAvgiftspliktigPerioder().filter { it.erInnvilget() })
         }
 
         val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
@@ -140,7 +140,7 @@ class TrygdeavgiftsberegningService(
         val inntektsperioderMedUUID = inntektsperioder.map { UUID.randomUUID() to it }
         val skatteforholdsperioderMedUUID = skatteforholdsperioder.map { UUID.randomUUID() to it }
 
-        val innvilgedeAvgiftspliktigperioder = behandlingsresultat.avgiftspliktigPerioder().filter { it.erInnvilget() }
+        val innvilgedeAvgiftspliktigperioder = behandlingsresultat.finnAvgiftspliktigPerioder().filter { it.erInnvilget() }
         val skatteforholdsperiodeDtoSet =
             skatteforholdsperioderMedUUID.map { it.second.tilSkatteforholdDto(it.first) }.toSet()
         val inntektsperiodeDtoList = inntektsperioderMedUUID.map { it.second.tilInntektsperiodeDto(it.first) }
@@ -198,7 +198,7 @@ class TrygdeavgiftsberegningService(
             }
         )
 
-        when (behandlingsresultat.avgiftspliktigPerioder().firstOrNull()) {
+        when (behandlingsresultat.finnAvgiftspliktigPerioder().firstOrNull()) {
             is Medlemskapsperiode -> trygdeavgiftsperiode.apply {
                 grunnlagMedlemskapsperiode =
                     behandlingsresultat.medlemskapsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId }
@@ -217,7 +217,7 @@ class TrygdeavgiftsberegningService(
                         ?: error("Fant ikke lovvalgsperiode ${response.grunnlag.medlemskapsperiodeId}")
             }
 
-            else -> throw FunksjonellException("Ukjent avgiftspliktigperiode: ${behandlingsresultat.avgiftspliktigPerioder().firstOrNull()}")
+            else -> throw FunksjonellException("Ukjent avgiftspliktigperiode: ${behandlingsresultat.finnAvgiftspliktigPerioder().firstOrNull()}")
         }
 
         return trygdeavgiftsperiode

@@ -77,7 +77,7 @@ object TrygdeavgiftsberegningValidator {
 
         validerAvgiftspliktigperioder(behandlingsresultat, unleash)
 
-        val innvilgedeAvgiftspliktigeperioder = behandlingsresultat.avgiftspliktigPerioder().filter { it.erInnvilget() }
+        val innvilgedeAvgiftspliktigeperioder = behandlingsresultat.finnAvgiftspliktigPerioder().filter { it.erInnvilget() }
 
         harOverlapp(skatteforholdsperioder, SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE)
 
@@ -196,7 +196,7 @@ object TrygdeavgiftsberegningValidator {
     }
 
     private fun validerAvgiftspliktigperioder(behandlingsresultat: Behandlingsresultat, unleash: Unleash) {
-        if (behandlingsresultat.avgiftspliktigPerioder().isEmpty()) {
+        if (behandlingsresultat.finnAvgiftspliktigPerioder().isEmpty()) {
             throw FunksjonellException(AVGIFTSPLIKTIGPERIODER_EMPTY)
         }
         if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && behandlingsresultat.årsavregning != null) {
