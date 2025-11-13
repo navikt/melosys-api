@@ -2,15 +2,11 @@ package no.nav.melosys.service.avgift
 
 import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.*
-import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
@@ -26,7 +22,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 @Service
 class TrygdeavgiftsberegningService(
@@ -193,7 +189,12 @@ class TrygdeavgiftsberegningService(
             grunnlagInntekstperiode = grunnlagInntekstperiode,
         )
 
-        trygdeavgiftsperiode.setGrunnlagByUUID(behandlingsresultat, response.grunnlag.medlemskapsperiodeId, ::idToUUid)
+        // Finn riktig grunnlagsperiode basert på UUID - finnAvgiftspliktigPerioder() garanterer kun 1 type
+        val grunnlag = behandlingsresultat.finnAvgiftspliktigPerioder()
+            .find { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId }
+            ?: error("Fant ingen avgiftspliktig periode med UUID ${response.grunnlag.medlemskapsperiodeId}")
+
+        trygdeavgiftsperiode.addGrunnlag(grunnlag)
 
         return trygdeavgiftsperiode
     }

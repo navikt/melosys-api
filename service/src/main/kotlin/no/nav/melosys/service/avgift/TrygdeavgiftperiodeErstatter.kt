@@ -2,10 +2,7 @@ package no.nav.melosys.service.avgift
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.springframework.stereotype.Component
@@ -22,24 +19,17 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatId)
         nullstillTrygdeavgiftsperioder(behandlingsresultat)
 
+        // Bruk finnAvgiftspliktigPerioder() som garanterer kun 1 type, så vi kan matche direkte på ID
+        // Her må vi matche på ID-feltene direkte fordi trygdeavgiftsperiodene kan ha mock-grunnlag
         behandlingsresultat.finnAvgiftspliktigPerioder().forEach { avgiftspliktigperiode ->
-            when (avgiftspliktigperiode) {
-                is Medlemskapsperiode -> trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
-                    if (trygdeavgiftsperiode.grunnlagMedlemskapsperiode?.id == avgiftspliktigperiode.id) {
-                        avgiftspliktigperiode.addTrygdeavgiftsperiode(trygdeavgiftsperiode)
-                    }
+            trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
+                val erMatch = trygdeavgiftsperiode.grunnlagMedlemskapsperiode?.id == avgiftspliktigperiode.hentId() ||
+                        trygdeavgiftsperiode.grunnlagLovvalgsPeriode?.id == avgiftspliktigperiode.hentId() ||
+                        trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode?.id == avgiftspliktigperiode.hentId()
+
+                if (erMatch) {
+                    avgiftspliktigperiode.addTrygdeavgiftsperiode(trygdeavgiftsperiode)
                 }
-                is HelseutgiftDekkesPeriode -> trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
-                    if (trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode?.id == avgiftspliktigperiode.id) {
-                        avgiftspliktigperiode.addTrygdeavgiftsperiode(trygdeavgiftsperiode)
-                    }
-                }
-                is Lovvalgsperiode -> trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
-                    if (trygdeavgiftsperiode.grunnlagLovvalgsPeriode?.id == avgiftspliktigperiode.id) {
-                        avgiftspliktigperiode.addTrygdeavgiftsperiode(trygdeavgiftsperiode)
-                    }
-                }
-                else -> throw IllegalArgumentException("Ukjent avgiftspliktigperiode: ${avgiftspliktigperiode::class.java.simpleName}")
             }
         }
         behandlingsresultatService.lagre(behandlingsresultat)
