@@ -148,21 +148,16 @@ class OpprettFakturaserie(
             intervall = hentBetalingsIntervall(prosessinstans),
             referanseBruker = if (erEøsPensjonist) "Informasjon om trygdeavgift datert $vedtaksdato" else "Vedtak om medlemskap datert $vedtaksdato",
             perioder = if (erEøsPensjonist)
-                mapFakturaseriePeriodeDtoEosPensjonist(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.filter { it.harAvgift() && it.forskuddsvisFaktura })
+                mapFakturaseriePeriodeDtoEosPensjonist(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.filter { it.harAvgift() })
             else
-                mapFakturaseriePeriodeDto(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() && it.forskuddsvisFaktura })
+                mapFakturaseriePeriodeDto(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() })
         )
     }
 
-    private fun skalFaktureres(behandlingsresultat: Behandlingsresultat): Boolean {
-        val kanFaktureres = !behandlingsresultat.hentBehandling().erPensjonist() ||
+    private fun skalFaktureres(behandlingsresultat: Behandlingsresultat): Boolean =
+        !behandlingsresultat.hentBehandling().erPensjonist() ||
             behandlingsresultat.hentBehandling().fagsak.betalingsvalg == Betalingstype.FAKTURA
 
-        val harFakturerbarePerioder = behandlingsresultat.trygdeavgiftsperioder.any { it.forskuddsvisFaktura } ||
-            behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.any { it.forskuddsvisFaktura }
-
-        return kanFaktureres && harFakturerbarePerioder
-    }
 
     private fun harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling: Behandling): Boolean =
         behandling.opprinneligBehandling?.let {

@@ -11,7 +11,6 @@ import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -47,6 +46,7 @@ class EøsPensjonistIverksettIT(
     EøsPensjonistTrygdeavgiftsberegningTransformer()
 ) {
     override val fakturaserieReferanse: String = "01J17B5NTTDYKFB5DZTSSQEHJ0"
+    private val inneværendeÅr = LocalDate.now().year
 
     @AfterEach
     fun afterEach() {
@@ -100,8 +100,8 @@ class EøsPensjonistIverksettIT(
 
         helseutgiftDekkesPeriodeService.opprettHelseutgiftDekkesPeriode(
             behandling.id,
-            LocalDate.of(2023, 1, 1),
-            LocalDate.of(2023, 2, 1),
+            LocalDate.of(inneværendeÅr, 1, 1),
+            LocalDate.of(inneværendeÅr, 2, 1),
             Land_iso2.DK
         )
 
@@ -127,7 +127,7 @@ class EøsPensjonistIverksettIT(
 
     private fun setupTrygdeavgiftBeregning(behandlingId: Long, skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean) {
 
-        val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
+        val periode = DatoPeriodeDto(LocalDate.of(inneværendeÅr, 1, 1), LocalDate.of(inneværendeÅr, 2, 1))
 
         val skattefordholdsperioder = listOf(
             SkatteforholdTilNorge().apply {
@@ -148,34 +148,5 @@ class EøsPensjonistIverksettIT(
         )
 
         eøsPensjonistTrygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingId, skattefordholdsperioder, inntektsforholdsperioder)
-
-
-        val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
-            fomDato = LocalDate.of(2023, 1, 1)
-            tomDato = LocalDate.of(2023, 2, 1)
-            this@apply.skatteplikttype = skatteplikttype
-        }
-
-        val inntektsperiode = Inntektsperiode().apply {
-            fomDato = LocalDate.of(2023, 1, 1)
-            tomDato = LocalDate.of(2023, 2, 1)
-            type = Inntektskildetype.PENSJON_UFØRETRYGD
-            isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetales
-            avgiftspliktigMndInntekt = Penger(10000.toBigDecimal(), "nok")
-        }
-
-        val trygdeavgiftsperioder = HashSet<Trygdeavgiftsperiode>()
-        trygdeavgiftsperioder.add(
-            Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2023, 1, 1),
-                periodeTil = LocalDate.of(2023, 2, 1),
-                trygdesats = 6.8.toBigDecimal(),
-                trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal(), "nok"),
-                grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,
-                grunnlagInntekstperiode = inntektsperiode
-            )
-        )
-        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandlingId)!!
-        helseutgiftDekkesPeriode.trygdeavgiftsperioder = trygdeavgiftsperioder
     }
 }
