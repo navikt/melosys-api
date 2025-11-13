@@ -1,13 +1,16 @@
 package no.nav.melosys.domain
 
 import jakarta.persistence.*
+import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer
 import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.exception.FunksjonellException
 import java.time.LocalDate
 
 @Entity
 @Table(name = "lovvalg_periode")
-class Lovvalgsperiode : PeriodeOmLovvalg {
+class Lovvalgsperiode : PeriodeOmLovvalg, AvgiftspliktigPeriode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
@@ -82,6 +85,16 @@ class Lovvalgsperiode : PeriodeOmLovvalg {
     @Column(name = "trygde_dekning")
     private var dekning: Trygdedekninger? = null
 
+    @OneToMany(mappedBy = "grunnlagLovvalgsPeriode", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
+    var trygdeavgiftsperioder: MutableSet<Trygdeavgiftsperiode> = HashSet(1)
+
+    override fun clearTrygdeavgiftsperioder() {
+        trygdeavgiftsperioder.forEach { it.grunnlagLovvalgsPeriode = null }
+        trygdeavgiftsperioder.clear()
+    }
+
+    override fun hentMedlemskapstype(): Medlemskapstyper = medlemskapstype ?: throw FunksjonellException("Lovvalgsperiode mangler medlemskapstype.")
+    override fun hentId(): Long = id ?: throw FunksjonellException("Lovvalgsperiode mangler ID.")
     override fun getDekning(): Trygdedekninger? = dekning
 
     fun setDekning(dekning: Trygdedekninger?) {
@@ -95,6 +108,11 @@ class Lovvalgsperiode : PeriodeOmLovvalg {
 
     fun setMedlPeriodeID(medlPeriodeID: Long?) {
         this.medlPeriodeID = medlPeriodeID
+    }
+
+    override fun addTrygdeavgiftsperiode(trygdeavgiftsperiode: Trygdeavgiftsperiode) {
+        trygdeavgiftsperiode.grunnlagLovvalgsPeriode = this
+        trygdeavgiftsperioder.add(trygdeavgiftsperiode)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -119,7 +137,12 @@ class Lovvalgsperiode : PeriodeOmLovvalg {
         "medlPeriodeID=$medlPeriodeID" +
         ")"
 
-    fun erInnvilget(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.INNVILGET
+    override fun hentTrygdedekning(): Trygdedekninger {
+        return dekning ?: throw FunksjonellException("Lovvalgsperiode mangler dekning.")
+    }
+
+    override fun erInnvilget(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.INNVILGET
+    override fun erOpphørt(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.OPPHØRT
 
     fun erAvslått(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.AVSLAATT
 

@@ -103,14 +103,15 @@ open class Behandlingsresultat : RegistreringsInfo() {
     var trygdeavgiftType: Trygdeavgift_typer? = null
 
     fun harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år: Int): Boolean =
-        avgiftspliktigPerioder().any { it.erInnvilget() && it.overlapperMedÅr(år) }
+        finnAvgiftspliktigPerioder().any { it.erInnvilget() && it.overlapperMedÅr(år) }
 
-    fun avgiftspliktigPerioder(): List<AvgiftspliktigPeriode> {
-        return (if (behandling?.erEøsPensjonist() == true && helseutgiftDekkesPeriode != null) {
+    fun finnAvgiftspliktigPerioder(): List<AvgiftspliktigPeriode> = when {
+        behandling?.erEøsPensjonist() == true && helseutgiftDekkesPeriode != null ->
             listOf(hentHelseutgiftDekkesPeriode())
-        } else {
+        behandling?.fagsak?.erLovvalg() == true ->
+            lovvalgsperioder.toList()
+        else ->
             medlemskapsperioder.toList()
-        })
     }
 
     fun addMedlemskapsperiode(medlemskapsperiode: Medlemskapsperiode) {
@@ -153,7 +154,7 @@ open class Behandlingsresultat : RegistreringsInfo() {
 
     fun utledSkatteplikttype(): Skatteplikttype {
         val trygdeavgiftsperiode = trygdeavgiftsperioder.firstOrNull()
-        val erÅpenSluttdato = utledMedlemskapsperiodeTom() == null
+        val erÅpenSluttdato = utledAvgiftspliktigperioderTom() == null
         if (trygdeavgiftsperiode == null && erÅpenSluttdato) {
             return Skatteplikttype.SKATTEPLIKTIG
         } else if (trygdeavgiftsperiode == null) {
@@ -164,20 +165,20 @@ open class Behandlingsresultat : RegistreringsInfo() {
             ?: error("grunnlagSkatteforholdTilNorge er påkrevd for Trygdeavgiftsperiode")
     }
 
-    fun utledMedlemskapsperiodeFom(): LocalDate? =
-        medlemskapsperioder
+    fun utledAvgiftspliktigperioderFom(): LocalDate? =
+        finnAvgiftspliktigPerioder()
             .filter { it.erInnvilget() }
             .mapNotNull { it.fom }
             .minOrNull()
 
-    fun utledMedlemskapsperiodeTom(): LocalDate? =
-        medlemskapsperioder
+    fun utledAvgiftspliktigperioderTom(): LocalDate? =
+        finnAvgiftspliktigPerioder()
             .filter { it.erInnvilget() }
             .mapNotNull { it.tom }
             .maxOrNull()
 
     fun utledOpphørtDato(): LocalDate? =
-        medlemskapsperioder
+        finnAvgiftspliktigPerioder()
             .filter { it.erOpphørt() }
             .mapNotNull { it.fom }
             .minOrNull()
@@ -189,6 +190,10 @@ open class Behandlingsresultat : RegistreringsInfo() {
         get() {
             if (behandling?.erEøsPensjonist() == true) {
                 return eøsPensjonistTrygdeavgiftsperioder
+            }
+
+            if (behandling?.fagsak?.erLovvalg() == true) {
+                return lovvalgsperioder.flatMap { it.trygdeavgiftsperioder }.toSet()
             }
 
             return medlemskapsperioder.flatMap { it.trygdeavgiftsperioder }.toSet()

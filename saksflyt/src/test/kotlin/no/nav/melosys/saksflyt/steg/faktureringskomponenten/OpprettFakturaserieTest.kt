@@ -122,6 +122,7 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     betalingsvalg = Betalingstype.FAKTURA
                     medBruker()
                 }
@@ -293,6 +294,7 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     betalingsvalg = Betalingstype.FAKTURA
                     medBruker()
                 }
@@ -356,6 +358,7 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     betalingsvalg = Betalingstype.FAKTURA
                     medBruker()
                 }
@@ -857,6 +860,7 @@ class OpprettFakturaserieTest {
                 id = OPPRINNELIG_BEHANDLING_ID
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     betalingsvalg = Betalingstype.FAKTURA
                     medBruker()
                 }
@@ -995,9 +999,9 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     betalingsvalg = Betalingstype.FAKTURA
                     medBruker()
-
                 }
             }
         }
@@ -1053,9 +1057,9 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     betalingsvalg = Betalingstype.FAKTURA
                     medBruker()
-
                 }
             }
         }
@@ -1171,6 +1175,7 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     betalingsvalg = Betalingstype.FAKTURA
                     aktører(
                         setOf(
@@ -1244,6 +1249,7 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     betalingsvalg = Betalingstype.FAKTURA
                     aktører(
                         setOf(
@@ -1313,9 +1319,9 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
-                    type = Sakstyper.EU_EOS
-                    tema = Sakstemaer.TRYGDEAVGIFT
                     betalingsvalg = Betalingstype.FAKTURA
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.EU_EOS
                     medBruker()
                 }
             }
@@ -1415,9 +1421,9 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     betalingsvalg = Betalingstype.FAKTURA
                     medBruker()
-
                 }
             }
             medlemskapsperiode {
@@ -1513,9 +1519,9 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
+                    type = Sakstyper.FTRL
                     betalingsvalg = Betalingstype.FAKTURA
                     medBruker()
-
                 }
             }
             medlemskapsperiode {

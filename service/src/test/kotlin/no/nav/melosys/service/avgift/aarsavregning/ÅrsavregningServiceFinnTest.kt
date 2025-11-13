@@ -69,6 +69,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     saksnummer = "123456"
+                    type = Sakstyper.FTRL
                 }
             }
             registrertDato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)

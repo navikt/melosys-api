@@ -5,5 +5,5 @@ import java.util.*
 data class TrygdeavgiftsgrunnlagDto(
     val medlemskapsperiodeId: UUID,
     val skatteforholdsperiodeId: UUID,
-    val inntektsperiodeId: UUID
+    val inntektsperiodeId: UUID,
 )

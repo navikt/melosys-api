@@ -2,15 +2,15 @@ package no.nav.melosys.service.avgift
 
 import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.*
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
@@ -73,11 +73,12 @@ class TrygdeavgiftsberegningService(
         if (erPliktigMedlemskapSkattepliktig(
                 skatteforholdsperioder,
                 inntektsperioder,
-                behandlingsresultat.medlemskapsperioder
+                behandlingsresultat.finnAvgiftspliktigPerioder()
             )
         ) {
-            require(behandlingsresultat.medlemskapsperioder.size == 1 && skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en medlem- og skatteforholdsperiode når medlemskapet er pliktig og skattepliktig" }
-            return skattepliktigTrygdeavgiftsperioderAvMedlemskapsperioder(behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() })
+            require(behandlingsresultat.finnAvgiftspliktigPerioder().size == 1 && skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en avgiftspliktig- og skatteforholdsperiode når perioden er pliktig og skattepliktig" }
+            return skattepliktigTrygdeavgiftsperioderAvAvgiftspliktigperioder(
+                behandlingsresultat.finnAvgiftspliktigPerioder().filter { it.erInnvilget() })
         }
 
         val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
@@ -90,40 +91,42 @@ class TrygdeavgiftsberegningService(
         Vi kan benytte medlemskapsperioden til å opprette trygdeavgiftsperiode med et skatteforhold med samme periode som medlemskapet
         når det er pliktig medlemskap og Skattepliktig Ja.
     */
-    private fun skattepliktigTrygdeavgiftsperioderAvMedlemskapsperioder(
-        medlemskapsperioder: Collection<Medlemskapsperiode>
-    ): List<Trygdeavgiftsperiode> = medlemskapsperioder.map { mp -> opprettSkattepliktigTrygdeavgiftsperiode(mp) }
+    private fun skattepliktigTrygdeavgiftsperioderAvAvgiftspliktigperioder(
+        avgiftspliktigperioder: Collection<AvgiftspliktigPeriode>
+    ): List<Trygdeavgiftsperiode> = avgiftspliktigperioder.map { mp -> opprettSkattepliktigTrygdeavgiftsperiode(mp) }
 
-    private fun opprettSkattepliktigTrygdeavgiftsperiode(medlemskapsperiode: Medlemskapsperiode): Trygdeavgiftsperiode {
-        return Trygdeavgiftsperiode(
-            periodeFra = medlemskapsperiode.hentFom(),
-            periodeTil = medlemskapsperiode.hentTom(),
+    private fun opprettSkattepliktigTrygdeavgiftsperiode(avgiftspliktigperiode: AvgiftspliktigPeriode): Trygdeavgiftsperiode {
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
+            periodeFra = avgiftspliktigperiode.fom,
+            periodeTil = avgiftspliktigperiode.tom,
             trygdesats = BigDecimal.ZERO,
             trygdeavgiftsbeløpMd = Penger(BigDecimal.ZERO),
-            grunnlagMedlemskapsperiode = medlemskapsperiode,
             grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
-                fomDato = medlemskapsperiode.fom
-                tomDato = medlemskapsperiode.tom
+                fomDato = avgiftspliktigperiode.fom
+                tomDato = avgiftspliktigperiode.tom
                 skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
             }
-
         )
+
+        trygdeavgiftsperiode.addGrunnlag(avgiftspliktigperiode)
+
+        return trygdeavgiftsperiode
     }
 
     private fun erPliktigMedlemskapSkattepliktig(
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsPerioder: List<Inntektsperiode>,
-        medlemskapsperioder: Collection<Medlemskapsperiode>
+        avgiftspliktigePerioder: Collection<AvgiftspliktigPeriode>
     ): Boolean {
-        val erPliktigMedlemskap = medlemskapsperioder
+        val erPliktig = avgiftspliktigePerioder
             .filter { it.erInnvilget() }
-            .all { it.erPliktig() }
+            .all { it.erPliktigMedlemskap() }
 
         val inntektskilderErTomt = inntektsPerioder.isEmpty()
         val alleSkatteforholdErSkattepliktige =
             skatteforholdsperioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
 
-        return erPliktigMedlemskap && inntektskilderErTomt && alleSkatteforholdErSkattepliktige
+        return erPliktig && inntektskilderErTomt && alleSkatteforholdErSkattepliktige
     }
 
     @Transactional(readOnly = true, noRollbackFor = [Throwable::class])
@@ -137,15 +140,15 @@ class TrygdeavgiftsberegningService(
         val inntektsperioderMedUUID = inntektsperioder.map { UUID.randomUUID() to it }
         val skatteforholdsperioderMedUUID = skatteforholdsperioder.map { UUID.randomUUID() to it }
 
-        val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }
+        val innvilgedeAvgiftspliktigperioder = behandlingsresultat.finnAvgiftspliktigPerioder().filter { it.erInnvilget() }
         val skatteforholdsperiodeDtoSet =
             skatteforholdsperioderMedUUID.map { it.second.tilSkatteforholdDto(it.first) }.toSet()
         val inntektsperiodeDtoList = inntektsperioderMedUUID.map { it.second.tilInntektsperiodeDto(it.first) }
-        val foedselDato = hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultat.hentId(), innvilgedeMedlemskapsperioder)
+        val foedselDato = hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultat.hentId(), innvilgedeAvgiftspliktigperioder)
 
         val beregnetTrygdeavgiftList = trygdeavgiftConsumer.beregnTrygdeavgift(
             TrygdeavgiftsberegningRequest(
-                innvilgedeMedlemskapsperioder.tilMedlemskapsperiodeDtoSet(),
+                innvilgedeAvgiftspliktigperioder.tilMedlemskapsperiodeDtoSet(),
                 skatteforholdsperiodeDtoSet,
                 inntektsperiodeDtoList,
                 foedselDato
@@ -170,14 +173,8 @@ class TrygdeavgiftsberegningService(
         behandlingsresultat: Behandlingsresultat,
         dagensDato: LocalDate = LocalDate.now()
     ): Trygdeavgiftsperiode {
-        val medlemskapsperiodeID = response.grunnlag.medlemskapsperiodeId
         val skatteforholdsperiodeID = response.grunnlag.skatteforholdsperiodeId
         val inntektsperiodeID = response.grunnlag.inntektsperiodeId
-
-
-        val grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder
-            .firstOrNull { idToUUid(it.hentId()) == medlemskapsperiodeID }
-            ?: throw IllegalStateException("Fant ikke medlemskapsperiode $medlemskapsperiodeID")
 
         val grunnlagSkatteforholdTilNorge = skatteforholdsperioderMedUUID
             .find { it.first == skatteforholdsperiodeID }?.second
@@ -187,22 +184,45 @@ class TrygdeavgiftsberegningService(
             .find { it.first == inntektsperiodeID }?.second
             ?: throw IllegalStateException("Fant ikke inntektsperiode $inntektsperiodeID")
 
-        return Trygdeavgiftsperiode(
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
             periodeFra = response.beregnetPeriode.periode.fom,
             periodeTil = response.beregnetPeriode.periode.tom,
             trygdesats = response.beregnetPeriode.sats,
             trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger(),
-            grunnlagMedlemskapsperiode = grunnlagMedlemskapsperiode,
             grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
             grunnlagInntekstperiode = grunnlagInntekstperiode,
         )
+
+        when (behandlingsresultat.finnAvgiftspliktigPerioder().firstOrNull()) {
+            is Medlemskapsperiode -> trygdeavgiftsperiode.apply {
+                grunnlagMedlemskapsperiode =
+                    behandlingsresultat.medlemskapsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId }
+                        ?: error("Fant ikke medlemskapsperiode ${response.grunnlag.medlemskapsperiodeId}")
+            }
+
+            is HelseutgiftDekkesPeriode -> trygdeavgiftsperiode.apply {
+                grunnlagHelseutgiftDekkesPeriode =
+                    behandlingsresultat.hentHelseutgiftDekkesPeriode().takeIf { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId }
+                        ?: error("Fant ikke helseutgiftdekket periode ${response.grunnlag.medlemskapsperiodeId}")
+            }
+
+            is Lovvalgsperiode -> trygdeavgiftsperiode.apply {
+                grunnlagLovvalgsPeriode =
+                    behandlingsresultat.lovvalgsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId }
+                        ?: error("Fant ikke lovvalgsperiode ${response.grunnlag.medlemskapsperiodeId}")
+            }
+
+            else -> throw FunksjonellException("Ukjent avgiftspliktigperiode: ${behandlingsresultat.finnAvgiftspliktigPerioder().firstOrNull()}")
+        }
+
+        return trygdeavgiftsperiode
     }
 
     private fun hentFødselsdatoOmViHarTjenstligBehov(
         behandlingsresultatID: Long,
-        medlemskapsperioder: List<Medlemskapsperiode>
+        avgiftspliktigperioder: List<AvgiftspliktigPeriode>
     ): LocalDate? {
-        if (medlemskapsperioder.any { it.erPliktig() }) {
+        if (avgiftspliktigperioder.any { it.erPliktigMedlemskap() }) {
             val fagsak = behandlingService.hentBehandling(behandlingsresultatID).fagsak
             return persondataService.hentPerson(fagsak.hentBrukersAktørID()).fødselsdato
         }

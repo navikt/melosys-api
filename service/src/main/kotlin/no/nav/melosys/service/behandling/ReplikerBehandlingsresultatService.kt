@@ -104,16 +104,16 @@ class ReplikerBehandlingsresultatService(
         val inntektsperioderReplika = cloneOgJusterInntektsperioder(trygdeavgiftsperioderTilReplikering)
         val skatteforholdTilNorgeReplika = cloneOgJusterSkatteforhold(trygdeavgiftsperioderTilReplikering)
 
-        behandlingsresultatReplika.medlemskapsperioder.forEach { medlemskapsperiodeReplika ->
-            medlemskapsperiodeReplika.trygdeavgiftsperioder = HashSet()
+        behandlingsresultatReplika.finnAvgiftspliktigPerioder().forEach { avgiftspliktigperiodeReplika ->
+            when (avgiftspliktigperiodeReplika) {
+                is Medlemskapsperiode -> avgiftspliktigperiodeReplika.trygdeavgiftsperioder = HashSet()
+                is Lovvalgsperiode -> avgiftspliktigperiodeReplika.trygdeavgiftsperioder = HashSet()
+            }
         }
 
         trygdeavgiftsperioderTilReplikering.forEach { trygdeavgiftsperiodeOriginal ->
             val trygdeavgiftsperiodeReplika = trygdeavgiftsperiodeOriginal.copyEntity(
                 id = trygdeavgiftsperiodeOriginal.id,
-                grunnlagMedlemskapsperiode = behandlingsresultatReplika.medlemskapsperioder
-                    .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode?.id }
-                    ?: throw IllegalStateException("Medlemskapsperiode ikke funnet"),
                 // I de tilfellene bruker ikke skal betale avgift til Nav, er det ikke krav om at inntektsperioder må være satt.
                 grunnlagInntekstperiode = inntektsperioderReplika
                     .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode?.id },
@@ -122,9 +122,25 @@ class ReplikerBehandlingsresultatService(
                     ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),
             )
 
+            when (behandlingsresultatReplika.finnAvgiftspliktigPerioder().first()) {
+                is Medlemskapsperiode -> trygdeavgiftsperiodeReplika.apply {
+                    grunnlagMedlemskapsperiode = behandlingsresultatReplika.medlemskapsperioder
+                        .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode?.id }
+                        ?: throw IllegalStateException("Medlemskapsperiode ikke funnet")
+                }
+
+                is Lovvalgsperiode -> trygdeavgiftsperiodeReplika.apply {
+                    grunnlagLovvalgsPeriode = behandlingsresultatReplika.lovvalgsperioder
+                        .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagLovvalgsPeriode?.id }
+                        ?: throw IllegalStateException("Lovvalgsperiode ikke funnet")
+                }
+            }
+
             trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode?.run {
                 trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
-            } ?: throw IllegalStateException("Medlemskapsperiode ikke funnet (dette skal ikke kunne skje)")
+            } ?: trygdeavgiftsperiodeReplika.grunnlagLovvalgsPeriode?.run {
+                trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
+            } ?: throw IllegalStateException("Medlemskapsperiode eller lovvalgsperiode ikke funnet")
         }
 
         behandlingsresultatReplika.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeReplika ->

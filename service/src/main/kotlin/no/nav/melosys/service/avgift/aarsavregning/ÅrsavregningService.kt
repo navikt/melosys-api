@@ -309,7 +309,7 @@ class ÅrsavregningService(
         }
 
         // Finner siste behandling med medlemskapsperioder (brukes for gjeldende medlemskap)
-        val sisteBehandlingsresultatMedAvgiftspliktigPeriode = behandlingsresultater.lastOrNull { it.avgiftspliktigPerioder().isNotEmpty() }
+        val sisteBehandlingsresultatMedAvgiftspliktigPeriode = behandlingsresultater.lastOrNull { it.finnAvgiftspliktigPerioder().isNotEmpty() }
 
         // Finner siste behandling med trygdeavgiftsperioder (brukes for avgiftsgrunnlag)
         val sisteBehandlingsresultatMedAvgiftsgrunnlag = behandlingsresultater
@@ -354,7 +354,7 @@ class ÅrsavregningService(
         }
 
         return Trygdeavgiftsgrunnlag(
-            avgiftspliktigperioder = sisteBehandlingsresultatMedAvgift.avgiftspliktigPerioder()
+            avgiftspliktigperioder = sisteBehandlingsresultatMedAvgift.finnAvgiftspliktigPerioder()
                 .filter { it.erInnvilget() && it.overlapperMedÅr(år) }
                 .map { periode ->
                     when (periode) {
@@ -378,7 +378,7 @@ class ÅrsavregningService(
             return emptyList()
         }
 
-        return gjeldendeBehandlingsresultater.sisteBehandlingsresultatMedAvgiftspliktigPeriode.avgiftspliktigPerioder()
+        return gjeldendeBehandlingsresultater.sisteBehandlingsresultatMedAvgiftspliktigPeriode.finnAvgiftspliktigPerioder()
             .filter { it.erInnvilget() && it.overlapperMedÅr(år) }
             .map {
                 when (it) {
@@ -408,7 +408,7 @@ class ÅrsavregningService(
             return null
         }
         return Trygdeavgiftsgrunnlag(
-            avgiftspliktigperioder = behandlingsresultat.avgiftspliktigPerioder().map {
+            avgiftspliktigperioder = behandlingsresultat.finnAvgiftspliktigPerioder().map {
                 when (it) {
                     is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(it)
                     is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(it)
