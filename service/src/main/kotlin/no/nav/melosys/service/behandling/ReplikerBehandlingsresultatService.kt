@@ -127,17 +127,7 @@ class ReplikerBehandlingsresultatService(
             )
 
             // Finn riktig grunnlagsperiode basert på original sin ID - finnAvgiftspliktigPerioder() garanterer kun 1 type
-            // Sjekk først om original har grunnlag satt
-            val originalGrunnlagId = when {
-                trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode != null ->
-                    trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode?.id
-                trygdeavgiftsperiodeOriginal.grunnlagLovvalgsPeriode != null ->
-                    trygdeavgiftsperiodeOriginal.grunnlagLovvalgsPeriode?.id
-                trygdeavgiftsperiodeOriginal.grunnlagHelseutgiftDekkesPeriode != null ->
-                    trygdeavgiftsperiodeOriginal.grunnlagHelseutgiftDekkesPeriode?.id
-                else -> error("Ingen grunnlag satt på original trygdeavgiftsperiode med id ${trygdeavgiftsperiodeOriginal.id}")
-            }
-
+            val originalGrunnlagId = trygdeavgiftsperiodeOriginal.hentGrunnlagId()
             val grunnlag = behandlingsresultatReplika.finnAvgiftspliktigPerioder()
                 .find { it.hentId() == originalGrunnlagId }
                 ?: error("Grunnlagsperiode med id $originalGrunnlagId ikke funnet")

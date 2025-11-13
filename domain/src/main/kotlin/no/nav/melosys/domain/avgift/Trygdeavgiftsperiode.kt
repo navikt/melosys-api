@@ -1,7 +1,6 @@
 package no.nav.melosys.domain.avgift
 
 import jakarta.persistence.*
-import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
@@ -58,6 +57,12 @@ import java.time.LocalDate
 
     fun hentGrunnlagAvgiftsperiode(): AvgiftspliktigPeriode =
         grunnlagMedlemskapsperiode ?: grunnlagHelseutgiftDekkesPeriode ?: grunnlagLovvalgsPeriode ?: error("grunnlagAvgiftsperiode er null")
+
+    fun hentGrunnlagId(): Long {
+        val grunnlag = grunnlagMedlemskapsperiode ?: grunnlagHelseutgiftDekkesPeriode ?: grunnlagLovvalgsPeriode
+            ?: error("Ingen grunnlag satt på trygdeavgiftsperiode med id $id")
+        return grunnlag.hentId()
+    }
 
     fun hentGrunnlagInntekstperiode(): Inntektsperiode =
         grunnlagInntekstperiode ?: error("grunnlagInntekstperiode er påkrevd for Trygdeavgiftsperiode")
