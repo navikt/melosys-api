@@ -8,13 +8,12 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
@@ -47,12 +46,35 @@ class TrygdeavgiftperiodeErstatterTest() {
 
         val nyeTrygdeavgiftsperioder = listOf(nyTrygdeavgiftsperiode)
 
-        // Act
+
         trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
 
-        // Assert
+
         behandlingsresultat.trygdeavgiftType.shouldNotBeNull() shouldBeEqual Trygdeavgift_typer.FORELØPIG
         medlemskap.trygdeavgiftsperioder shouldContainExactly nyeTrygdeavgiftsperioder.toSet()
+    }
+
+
+    @Test
+    fun `erstatter eksisterende Trygdeavgiftsperioder for lovvalgsperioder`() {
+        val medlId = 3L
+
+        val eksisterendeTrygdeavgiftsperiode = lagTrygdeavgiftsperioderForLovvalg(medlId, 1L).single()
+        val nyTrygdeavgiftsperiode = lagTrygdeavgiftsperioderForLovvalg(medlId, 2L).single()
+
+        val lovvalgsperiode = lagLovvalgsperiode(medlId, listOf(eksisterendeTrygdeavgiftsperiode))
+        val behandlingsresultat = lagBehandlingsresultatMedLovvalgsperioder(lovvalgsperiode)
+
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+
+        val nyeTrygdeavgiftsperioder = listOf(nyTrygdeavgiftsperiode)
+
+
+        trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
+
+
+        behandlingsresultat.trygdeavgiftType.shouldNotBeNull() shouldBeEqual Trygdeavgift_typer.FORELØPIG
+        lovvalgsperiode.trygdeavgiftsperioder shouldContainExactly nyeTrygdeavgiftsperioder.toSet()
     }
 
     @Test
@@ -83,10 +105,10 @@ class TrygdeavgiftperiodeErstatterTest() {
 
         val nyeTrygdeavgiftsperioder = listOf(nyTrygdeavgiftsperiode)
 
-        // Act
+
         trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
 
-        // Assert
+
         nyeTrygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
             trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode?.id?.shouldBeEqual(helseutgiftDekkesPeriodeId)
         }
@@ -114,10 +136,39 @@ class TrygdeavgiftperiodeErstatterTest() {
 
         val nyeTrygdeavgiftsperioder = nyTrygdeavgiftsperioder1 + nyTrygdeavgiftsperioder2
 
-        // Act
+
         trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
 
-        // Assert
+
+        medlemskap1.trygdeavgiftsperioder shouldContainExactly nyTrygdeavgiftsperioder1.toSet()
+        medlemskap2.trygdeavgiftsperioder shouldContainExactly nyTrygdeavgiftsperioder2.toSet()
+        behandlingsresultat.trygdeavgiftType shouldBe Trygdeavgift_typer.FORELØPIG
+    }
+
+    @Test
+    fun `erstatter flere eksisterende Trygdeavgiftsperioder for flere lovvalgsperioder`() {
+        val medlId1 = 1L
+        val medlId2 = 2L
+
+        val eksisterendeTrygdeavgiftsperioder1 = lagTrygdeavgiftsperioderForLovvalg(medlId1, 101L, 102L)
+        val eksisterendeTrygdeavgiftsperioder2 = lagTrygdeavgiftsperioderForLovvalg(medlId2, 103L, 104L)
+
+        val nyTrygdeavgiftsperioder1 = lagTrygdeavgiftsperioderForLovvalg(medlId1, 201L, 202L)
+        val nyTrygdeavgiftsperioder2 = lagTrygdeavgiftsperioderForLovvalg(medlId2, 203L, 204L)
+
+        val medlemskap1 = lagLovvalgsperiode(medlId1, eksisterendeTrygdeavgiftsperioder1)
+        val medlemskap2 = lagLovvalgsperiode(medlId2, eksisterendeTrygdeavgiftsperioder2)
+
+        val behandlingsresultat = lagBehandlingsresultatMedLovvalgsperioder(medlemskap1, medlemskap2)
+
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+
+        val nyeTrygdeavgiftsperioder = nyTrygdeavgiftsperioder1 + nyTrygdeavgiftsperioder2
+
+
+        trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
+
+
         medlemskap1.trygdeavgiftsperioder shouldContainExactly nyTrygdeavgiftsperioder1.toSet()
         medlemskap2.trygdeavgiftsperioder shouldContainExactly nyTrygdeavgiftsperioder2.toSet()
         behandlingsresultat.trygdeavgiftType shouldBe Trygdeavgift_typer.FORELØPIG
@@ -141,6 +192,15 @@ class TrygdeavgiftperiodeErstatterTest() {
         }
     }
 
+    private fun lagTrygdeavgiftsperioderForLovvalg(grunnlagPeriodeId: Long, vararg ids: Long): List<Trygdeavgiftsperiode> {
+        return ids.map { periodeId ->
+            mockk<Trygdeavgiftsperiode>(relaxed = true).apply {
+                every { id } returns periodeId
+                every { grunnlagLovvalgsPeriode?.id } returns grunnlagPeriodeId
+            }
+        }
+    }
+
     private fun lagMedlemskap(
         medlemskapId: Long,
         trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
@@ -150,6 +210,17 @@ class TrygdeavgiftperiodeErstatterTest() {
             trygdeavgiftsperioder.forEach { addTrygdeavgiftsperiode(it) }
         }
     }
+
+    private fun lagLovvalgsperiode(
+        lovvalgsperiodeId: Long,
+        trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
+    ): Lovvalgsperiode {
+        return Lovvalgsperiode().apply {
+            id = lovvalgsperiodeId
+            trygdeavgiftsperioder.forEach { addTrygdeavgiftsperiode(it) }
+        }
+    }
+
 
     private fun lagHelseutgiftDekkesPeriode(
         behandlingsresultat: Behandlingsresultat,
@@ -175,15 +246,39 @@ class TrygdeavgiftperiodeErstatterTest() {
         helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = null
     ): Behandlingsresultat {
         helseutgiftDekkesPeriode?.let {
-            return Behandlingsresultat().apply {
-                behandling = Behandling.forTest()
-                this.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
+            return Behandlingsresultat.forTest {
+                behandling {
+                    fagsak {
+                        type = Sakstyper.FTRL
+                    }
+
+                }.also {
+                    it.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
+                }
             }
         }
 
-        return Behandlingsresultat().apply {
-            behandling = Behandling.forTest()
-            this.medlemskapsperioder = medlemskapsperioder.filterNotNull().toMutableSet()
+        return Behandlingsresultat.forTest {
+            behandling {
+                fagsak {
+                    type = Sakstyper.FTRL
+                }
+            }
+        }.also {
+            it.medlemskapsperioder = medlemskapsperioder.filterNotNull().toMutableSet()
         }
+    }
+
+    private fun lagBehandlingsresultatMedLovvalgsperioder(
+        vararg lovvalgsperioder: Lovvalgsperiode? = emptyArray(),
+    ) = Behandlingsresultat.forTest {
+        behandling {
+            fagsak {
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+        }
+    }.also {
+        it.lovvalgsperioder = lovvalgsperioder.filterNotNull().toMutableSet()
     }
 }

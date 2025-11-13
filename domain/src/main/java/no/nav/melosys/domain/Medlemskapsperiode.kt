@@ -72,10 +72,10 @@ class Medlemskapsperiode : HarBestemmelse<Bestemmelse?>, AvgiftspliktigPeriode {
         this.bestemmelse = bestemmelse
     }
 
-    fun hentId() = id ?: error("id er påkrevd for Medlemskapsperiode")
+    override fun hentId() = id ?: error("id er påkrevd for Medlemskapsperiode")
     fun hentBehandlingsresultat() = behandlingsresultat ?: error("behandlingsresultat er påkrevd for Medlemskapsperiode")
     fun hentInnvilgelsesresultat() = innvilgelsesresultat ?: error("innvilgelsesresultat er påkrevd for Medlemskapsperiode")
-    fun hentMedlemskapstype() = medlemskapstype ?: error("medlemskapstype er påkrevd for Medlemskapsperiode")
+    override fun hentMedlemskapstype() = medlemskapstype ?: error("medlemskapstype er påkrevd for Medlemskapsperiode")
     override fun hentTrygdedekning() = trygdedekning ?: error("trygdedekning er påkrevd for Medlemskapsperiode")
     fun hentBestemmelse() = bestemmelse ?: error("bestemmelse er påkrevd for Medlemskapsperiode")
     fun hentFom() = fom ?: error("fom er påkrevd for Medlemskapsperiode")
@@ -84,13 +84,13 @@ class Medlemskapsperiode : HarBestemmelse<Bestemmelse?>, AvgiftspliktigPeriode {
 
     override fun erInnvilget(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.INNVILGET
 
-    fun erOpphørt(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.OPPHØRT
+    override fun erOpphørt(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.OPPHØRT
 
     fun erAvslaatt(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.AVSLAATT
 
     fun erFrivillig(): Boolean = medlemskapstype == Medlemskapstyper.FRIVILLIG
 
-    fun erPliktig(): Boolean = medlemskapstype == Medlemskapstyper.PLIKTIG
+    override fun erPliktigMedlemskap(): Boolean = medlemskapstype == Medlemskapstyper.PLIKTIG
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -111,7 +111,7 @@ class Medlemskapsperiode : HarBestemmelse<Bestemmelse?>, AvgiftspliktigPeriode {
         ", medlPeriodeID=" + medlPeriodeID +
         '}'
 
-    fun addTrygdeavgiftsperiode(trygdeavgiftsperiode: Trygdeavgiftsperiode) {
+    override fun addTrygdeavgiftsperiode(trygdeavgiftsperiode: Trygdeavgiftsperiode) {
         trygdeavgiftsperiode.grunnlagMedlemskapsperiode = this
         trygdeavgiftsperioder.add(trygdeavgiftsperiode)
     }
@@ -128,7 +128,7 @@ class Medlemskapsperiode : HarBestemmelse<Bestemmelse?>, AvgiftspliktigPeriode {
         }
     }
 
-    fun clearTrygdeavgiftsperioder() {
+    override fun clearTrygdeavgiftsperioder() {
         trygdeavgiftsperioder.forEach { it.grunnlagMedlemskapsperiode = null }
         trygdeavgiftsperioder.clear()
     }

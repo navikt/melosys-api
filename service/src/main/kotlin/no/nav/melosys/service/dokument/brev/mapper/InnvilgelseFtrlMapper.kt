@@ -172,8 +172,8 @@ class InnvilgelseFtrlMapper(
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingNonNull().id)
         val søknadsland = behandlingsresultat.hentBehandling().hentMottatteOpplysninger().mottatteOpplysningerData.soeknadsland
         val medlemskapsperiode = Periode(
-            behandlingsresultat.utledMedlemskapsperiodeFom(),
-            behandlingsresultat.utledMedlemskapsperiodeTom()
+            behandlingsresultat.utledAvgiftspliktigperioderFom(),
+            behandlingsresultat.utledAvgiftspliktigperioderTom()
         )
         val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.hentBehandling().id)
 
