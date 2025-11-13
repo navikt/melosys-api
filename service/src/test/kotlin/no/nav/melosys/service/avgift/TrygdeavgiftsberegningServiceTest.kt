@@ -250,8 +250,13 @@ internal class TrygdeavgiftsberegningServiceTest {
                 every { UUID.randomUUID() } returns notSoRandomUuid
 
                 val behandlingsresultat = defaultBehandlingsresultat {
-                    behandling?.fagsak?.type = Sakstyper.EU_EOS
-                    behandling?.fagsak?.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                    behandling {
+                        fagsak {
+                            medBruker()
+                            type = Sakstyper.EU_EOS
+                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                        }
+                    }
                     lovvalgsperiode {
                         id = 1L
                         fom = FOM
@@ -310,8 +315,13 @@ internal class TrygdeavgiftsberegningServiceTest {
                 every { UUID.randomUUID() } returns notSoRandomUuid
 
                 val behandlingsresultat = defaultBehandlingsresultat {
-                    behandling?.fagsak?.type = Sakstyper.TRYGDEAVTALE
-                    behandling?.fagsak?.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                    behandling {
+                        fagsak {
+                            medBruker()
+                            type = Sakstyper.TRYGDEAVTALE
+                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                        }
+                    }
                     lovvalgsperiode {
                         id = 1L
                         fom = FOM
@@ -717,7 +727,9 @@ internal class TrygdeavgiftsberegningServiceTest {
                 val behandlingsresultat = defaultBehandlingsresultat {
                     behandling {
                         type = Behandlingstyper.FØRSTEGANG
-                        fagsak?.type = Sakstyper.FTRL
+                        fagsak {
+                            type = Sakstyper.FTRL
+                        }
                     }
                     medlemskapsperiode {
                         id = 1L
@@ -897,7 +909,9 @@ internal class TrygdeavgiftsberegningServiceTest {
                     behandling {
                         tema = Behandlingstema.YRKESAKTIV
                         type = Behandlingstyper.NY_VURDERING
-                        fagsak?.type = Sakstyper.FTRL
+                        fagsak {
+                            type = Sakstyper.FTRL
+                        }
                     }
                     type = Behandlingsresultattyper.IKKE_FASTSATT
 
@@ -947,7 +961,9 @@ internal class TrygdeavgiftsberegningServiceTest {
                     behandling {
                         tema = Behandlingstema.YRKESAKTIV
                         type = Behandlingstyper.NY_VURDERING
-                        fagsak?.type = Sakstyper.FTRL
+                        fagsak {
+                            type = Sakstyper.FTRL
+                        }
                     }
                     type = Behandlingsresultattyper.IKKE_FASTSATT
 
@@ -1261,7 +1277,9 @@ internal class TrygdeavgiftsberegningServiceTest {
                     behandling {
                         tema = Behandlingstema.YRKESAKTIV
                         type = Behandlingstyper.NY_VURDERING
-                        fagsak?.type = Sakstyper.FTRL
+                        fagsak {
+                            type = Sakstyper.FTRL
+                        }
                     }
                     type = Behandlingsresultattyper.IKKE_FASTSATT
 
@@ -1457,7 +1475,9 @@ internal class TrygdeavgiftsberegningServiceTest {
                 val opprinneligBehandling = Behandling.forTest {
                     id = 99L
                     tema = Behandlingstema.YRKESAKTIV
-                    fagsak?.type = Sakstyper.FTRL
+                    fagsak {
+                        type = Sakstyper.FTRL
+                    }
                 }
 
                 val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
@@ -1523,7 +1543,9 @@ internal class TrygdeavgiftsberegningServiceTest {
                 val opprinneligBehandling = Behandling.forTest {
                     id = 99L
                     tema = Behandlingstema.YRKESAKTIV
-                    fagsak?.type = Sakstyper.FTRL
+                    fagsak {
+                        type = Sakstyper.FTRL
+                    }
                 }
 
                 val inneværendeÅr = LocalDate.now().year
@@ -1647,7 +1669,9 @@ internal class TrygdeavgiftsberegningServiceTest {
                 val opprinneligBehandling = Behandling.forTest {
                     id = 99L
                     tema = Behandlingstema.YRKESAKTIV
-                    fagsak?.type = Sakstyper.FTRL
+                    fagsak {
+                        type = Sakstyper.FTRL
+                    }
                 }
 
                 val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
@@ -1711,7 +1735,9 @@ internal class TrygdeavgiftsberegningServiceTest {
                 val opprinneligBehandling = Behandling.forTest {
                     id = 99L
                     tema = Behandlingstema.YRKESAKTIV
-                    fagsak?.type = Sakstyper.FTRL
+                    fagsak {
+                        type = Sakstyper.FTRL
+                    }
                 }
 
                 val inneværendeÅr = LocalDate.now().year

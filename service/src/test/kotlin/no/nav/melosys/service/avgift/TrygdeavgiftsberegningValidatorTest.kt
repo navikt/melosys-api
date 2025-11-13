@@ -14,6 +14,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
@@ -83,7 +84,9 @@ class TrygdeavgiftsberegningValidatorTest {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
             val behandling = Behandling.forTest {
                 status = Behandlingsstatus.OPPRETTET
-                fagsak?.type = Sakstyper.FTRL
+                fagsak {
+                    type = Sakstyper.FTRL
+                }
             }
             every { behandlingsresultatMock.behandling } returns behandling
             every { behandlingsresultatMock.hentBehandling() } returns behandling
@@ -184,7 +187,9 @@ class TrygdeavgiftsberegningValidatorTest {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
             val behandling = Behandling.forTest {
                 status = Behandlingsstatus.OPPRETTET
-                fagsak?.type = Sakstyper.FTRL
+                fagsak {
+                    type = Sakstyper.FTRL
+                }
             }
             every { behandlingsresultatMock.behandling } returns behandling
             every { behandlingsresultatMock.hentBehandling() } returns behandling
@@ -213,7 +218,9 @@ class TrygdeavgiftsberegningValidatorTest {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
             val behandling = Behandling.forTest {
                 status = Behandlingsstatus.OPPRETTET
-                fagsak?.type = Sakstyper.FTRL
+                fagsak {
+                    type = Sakstyper.FTRL
+                }
             }
             every { behandlingsresultatMock.behandling } returns behandling
             every { behandlingsresultatMock.hentBehandling() } returns behandling
@@ -246,7 +253,9 @@ class TrygdeavgiftsberegningValidatorTest {
                     tema = Behandlingstema.PENSJONIST
                     status = Behandlingsstatus.OPPRETTET
                     type = Behandlingstyper.FØRSTEGANG
-                    fagsak?.type = Sakstyper.FTRL
+                    fagsak {
+                        type = Sakstyper.FTRL
+                    }
                 }
                 medlemskapsperioder = valideringsInput.medlemskapsperioder.toMutableSet()
                 årsavregning = Årsavregning.forTest()
@@ -270,7 +279,9 @@ class TrygdeavgiftsberegningValidatorTest {
                     tema = Behandlingstema.PENSJONIST
                     status = Behandlingsstatus.OPPRETTET
                     type = Behandlingstyper.NY_VURDERING
-                    fagsak?.type = Sakstyper.FTRL
+                    fagsak {
+                        type = Sakstyper.FTRL
+                    }
                 }
                 medlemskapsperioder = valideringsInput.medlemskapsperioder.toMutableSet()
                 årsavregning = Årsavregning.forTest()
@@ -318,7 +329,9 @@ class TrygdeavgiftsberegningValidatorTest {
                     tema = Behandlingstema.PENSJONIST
                     status = Behandlingsstatus.OPPRETTET
                     type = Behandlingstyper.NY_VURDERING
-                    fagsak?.type = Sakstyper.FTRL
+                    fagsak {
+                        type = Sakstyper.FTRL
+                    }
                 }
                 medlemskapsperioder = valideringInput.medlemskapsperioder.toMutableSet()
                 årsavregning = Årsavregning.forTest()
@@ -341,7 +354,9 @@ class TrygdeavgiftsberegningValidatorTest {
                 behandling = Behandling.forTest {
                     tema = Behandlingstema.ARBEID_KUN_NORGE
                     status = Behandlingsstatus.OPPRETTET
-                    fagsak?.type = Sakstyper.FTRL
+                    fagsak {
+                        type = Sakstyper.FTRL
+                    }
                 }
                 medlemskapsperioder = valideringInput.medlemskapsperioder.toMutableSet()
             }
@@ -483,7 +498,9 @@ class TrygdeavgiftsberegningValidatorTest {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
             val behandling = Behandling.forTest {
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak?.type = Sakstyper.FTRL
+                fagsak {
+                    type = Sakstyper.FTRL
+                }
             }
             every { behandlingsresultatMock.behandling } returns behandling
             every { behandlingsresultatMock.hentBehandling() } returns behandling
@@ -1255,7 +1272,9 @@ class TrygdeavgiftsberegningValidatorTest {
         private fun lagGyldigBehandlingsresultat() = Behandlingsresultat().apply {
             val behandling = Behandling.forTest {
                 status = Behandlingsstatus.OPPRETTET
-                fagsak?.type = Sakstyper.FTRL
+                fagsak {
+                    type = Sakstyper.FTRL
+                }
             }
             medlemskapsperioder = mutableSetOf(
                 Medlemskapsperiode(
@@ -1273,8 +1292,10 @@ class TrygdeavgiftsberegningValidatorTest {
         private fun lagGyldigBehandlingsresultatForLovvalg() = Behandlingsresultat().apply {
             val behandling = Behandling.forTest {
                 status = Behandlingsstatus.OPPRETTET
-                fagsak?.type = Sakstyper.EU_EOS
-                fagsak?.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                fagsak {
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                }
             }
 
             this.behandling = behandling

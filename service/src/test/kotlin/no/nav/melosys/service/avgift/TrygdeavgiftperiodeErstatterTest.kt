@@ -8,12 +8,8 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -250,33 +246,40 @@ class TrygdeavgiftperiodeErstatterTest() {
         helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = null
     ): Behandlingsresultat {
         helseutgiftDekkesPeriode?.let {
-            return Behandlingsresultat().apply {
-                behandling = Behandling.forTest {
-                    fagsak?.type = Sakstyper.FTRL
+            return Behandlingsresultat.forTest {
+                behandling {
+                    fagsak {
+                        type = Sakstyper.FTRL
+                    }
+
+                }.also {
+                    it.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
                 }
-                this.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
             }
         }
 
-        return Behandlingsresultat().apply {
-            behandling = Behandling.forTest {
-                fagsak?.type = Sakstyper.FTRL
+        return Behandlingsresultat.forTest {
+            behandling {
+                fagsak {
+                    type = Sakstyper.FTRL
+                }
             }
-            this.medlemskapsperioder = medlemskapsperioder.filterNotNull().toMutableSet()
+        }.also {
+            it.medlemskapsperioder = medlemskapsperioder.filterNotNull().toMutableSet()
         }
     }
 
 
     private fun lagBehandlingsresultatMedLovvalgsperioder(
         vararg lovvalgsperioder: Lovvalgsperiode? = emptyArray(),
-    ): Behandlingsresultat {
-
-        return Behandlingsresultat().apply {
-            behandling = Behandling.forTest {
-                fagsak?.type = Sakstyper.EU_EOS
-                fagsak?.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+    ) = Behandlingsresultat().apply {
+        behandling = Behandling.forTest {
+            fagsak {
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
             }
-            this.lovvalgsperioder = lovvalgsperioder.filterNotNull().toMutableSet()
         }
+    }.also {
+        it.lovvalgsperioder = lovvalgsperioder.filterNotNull().toMutableSet()
     }
 }
