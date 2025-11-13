@@ -17,7 +17,7 @@ data class TrygdeavgiftsperiodeDto(
         this(
             trygdeavgiftsperiode.periodeFra,
             trygdeavgiftsperiode.periodeTil,
-            trygdedekning = trygdeavgiftsperiode.grunnlagAvgiftsperiodeNotNull.hentTrygdedekning(),
+            trygdedekning = trygdeavgiftsperiode.hentGrunnlagAvgiftsperiode().hentTrygdedekning(),
             trygdeavgiftsperiode.grunnlagInntekstperiode?.type,
             trygdeavgiftsperiode.trygdesats.toDouble(),
             trygdeavgiftsperiode.trygdeavgiftsbeløpMd.hentVerdi().toInt()
