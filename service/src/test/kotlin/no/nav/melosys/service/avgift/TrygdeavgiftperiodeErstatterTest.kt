@@ -269,11 +269,10 @@ class TrygdeavgiftperiodeErstatterTest() {
         }
     }
 
-
     private fun lagBehandlingsresultatMedLovvalgsperioder(
         vararg lovvalgsperioder: Lovvalgsperiode? = emptyArray(),
-    ) = Behandlingsresultat().apply {
-        behandling = Behandling.forTest {
+    ) = Behandlingsresultat.forTest {
+        behandling {
             fagsak {
                 type = Sakstyper.EU_EOS
                 tema = Sakstemaer.MEDLEMSKAP_LOVVALG
