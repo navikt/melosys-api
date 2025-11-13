@@ -20,25 +20,32 @@ class AvsluttArt13BehandlingJobb(
     @Scheduled(cron = "0 0 0 * * *")
     @SchedulerLock(name = "avsluttBehandlingArt13Jobb", lockAtLeastFor = "10m")
     fun avsluttBehandlingArt13() {
-        val processId = UUID.randomUUID()
-        ThreadLocalAccessInfo.beforeExecuteProcess(processId, "AvsluttArt13BehandlingJobb")
+        val processID = UUID.randomUUID()
+        ThreadLocalAccessInfo.beforeExecuteProcess(processID, "AvsluttArt13BehandlingJobb")
         try {
-            log.info { "Starter avsluttBehandlingArt13Jobb" }
-            val behandlingIder = behandlingService.hentBehandlingIderMedStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING)
-            log.info { "Antall behandlinger med status MIDLERTIDIG_LOVVALGSBESLUTNING: ${behandlingIder.size}" }
-            behandlingIder.forEach { avsluttHvis2MndHarPassert(it) }
+            avsluttBehandlingerMedMidlertidigLovvalgsbeslutning()
         } catch (e: Exception) {
             log.error(e) { "Feil ved kjøring av avsluttBehandlingArt13Jobb" }
         } finally {
-            ThreadLocalAccessInfo.afterExecuteProcess(processId)
+            ThreadLocalAccessInfo.afterExecuteProcess(processID)
         }
     }
 
-    private fun avsluttHvis2MndHarPassert(behandlingID: Long) {
-        try {
-            log.info { "Starter avsluttBehandlingArt13Jobb for behandling $behandlingID" }
+    private fun avsluttBehandlingerMedMidlertidigLovvalgsbeslutning() {
+        log.info { "Starter avsluttBehandlingArt13Jobb" }
+        val behandlingIDer = behandlingService.hentBehandlingIderMedStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING)
+        log.info { "Fant ${behandlingIDer.size} behandling(er) med status MIDLERTIDIG_LOVVALGSBESLUTNING" }
+
+        behandlingIDer.forEach { behandlingID ->
+            avsluttBehandlingHvisToMndHarPassert(behandlingID)
+        }
+    }
+
+    private fun avsluttBehandlingHvisToMndHarPassert(behandlingID: Long) {
+        runCatching {
+            log.info { "Sjekker om behandling $behandlingID skal avsluttes" }
             avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
-        } catch (e: Exception) {
+        }.onFailure { e ->
             log.error(e) { "Feil ved avslutting av behandling $behandlingID" }
         }
     }
