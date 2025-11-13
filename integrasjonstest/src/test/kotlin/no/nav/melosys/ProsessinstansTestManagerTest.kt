@@ -129,9 +129,9 @@ class ProsessinstansTestManagerTest {
                 )
             ) {
             }
-        }.message shouldBe "Values differed at keys \n" +
-            "wait for {JFR_KNYTT=1} processes to start\n" +
+        }.message shouldBe "wait for {JFR_KNYTT=1} processes to start\n" +
             "waitUntil timed out\n" +
+            "Values differed at keys \n" +
             "expected:<{\n" +
             "  JFR_KNYTT = 1\n" +
             "}> but was:<{}>"
@@ -154,9 +154,9 @@ class ProsessinstansTestManagerTest {
                 )
             ) {
             }
-        }.message shouldBe "Values differed at keys IVERKSETT_VEDTAK_EOS\n" +
-            "wait for {JFR_KNYTT=1} processes to start\n" +
+        }.message shouldBe "wait for {JFR_KNYTT=1} processes to start\n" +
             "waitUntil timed out\n" +
+            "Values differed at keys IVERKSETT_VEDTAK_EOS\n" +
             "expected:<{\n" +
             "  JFR_KNYTT = 1\n" +
             "}> but was:<{\n" +
@@ -181,9 +181,9 @@ class ProsessinstansTestManagerTest {
                 )
             ) {
             }
-        }.message shouldBe "Values differed at keys \n" +
-            "wait for {JFR_KNYTT=1, IVERKSETT_VEDTAK_EOS=1} processes to start\n" +
+        }.message shouldBe "wait for {JFR_KNYTT=1, IVERKSETT_VEDTAK_EOS=1} processes to start\n" +
             "waitUntil timed out\n" +
+            "Values differed at keys \n" +
             "expected:<{\n" +
             "  JFR_KNYTT = 1,\n" +
             "  IVERKSETT_VEDTAK_EOS = 1\n" +
@@ -330,9 +330,9 @@ class ProsessinstansTestManagerTest {
                 ) {
                 }
             }.message.shouldBe(
-                "Values differed at keys JFR_KNYTT\n" +
-                    "wait for {JFR_KNYTT=2, MOTTAK_SED=1} processes to start\n" +
+                "wait for {JFR_KNYTT=2, MOTTAK_SED=1} processes to start\n" +
                     "waitUntil was aborted because because the number of created process instances (4) >  exceeds the expected total (3)\n" +
+                    "Values differed at keys JFR_KNYTT\n" +
                     "expected:<{\n" +
                     "  JFR_KNYTT = 2,\n" +
                     "  MOTTAK_SED = 1\n" +

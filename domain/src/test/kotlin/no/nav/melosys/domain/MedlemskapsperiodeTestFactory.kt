@@ -34,9 +34,15 @@ object MedlemskapsperiodeTestFactory {
         val trygdeavgiftsperioder = mutableListOf<Trygdeavgiftsperiode>()
 
         fun trygdeavgiftsperiode(init: TrygdeavgiftsperiodeTestFactory.Builder.() -> Unit) {
-            trygdeavgiftsperioder.add(
-                TrygdeavgiftsperiodeTestFactory.Builder().apply(init).build()
-            )
+            val nyPeriode = TrygdeavgiftsperiodeTestFactory.Builder().apply(init).build()
+            val finnesDuplikat = trygdeavgiftsperioder.any { eksisterende ->
+                eksisterende.id == null && nyPeriode.id == null &&
+                    eksisterende.erLikForSatsendring(nyPeriode)
+            }
+            require(!finnesDuplikat) {
+                "Duplisert trygdeavgiftsperiode (id=${nyPeriode.id} fom=${nyPeriode.periodeFra}, tom=${nyPeriode.periodeTil}, beløp=${nyPeriode.trygdeavgiftsbeløpMd.verdi}) forsøkt lagt til."
+            }
+            trygdeavgiftsperioder.add(nyPeriode)
         }
 
         fun build(): Medlemskapsperiode = Medlemskapsperiode().apply {
