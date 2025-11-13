@@ -1,6 +1,8 @@
 package no.nav.melosys.service.avgift
 
+import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
@@ -10,11 +12,11 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
 import java.util.*
 
-fun List<Medlemskapsperiode>.tilMedlemskapsperiodeDtoSet(): Set<MedlemskapsperiodeDto> {
+fun List<AvgiftspliktigPeriode>.tilMedlemskapsperiodeDtoSet(): Set<MedlemskapsperiodeDto> {
     return map {
         MedlemskapsperiodeDto(
             idToUUid(it.hentId()),
-            DatoPeriodeDto(it.hentFom(), it.hentTom()),
+            DatoPeriodeDto(it.fom, it.tom),
             AvgiftsdekningerFraTrygdedekning.avgiftsdekningerFraTrygdedekning(it.hentTrygdedekning()),
             it.hentMedlemskapstype()
         )

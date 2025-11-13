@@ -60,7 +60,9 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
 
     @Test
     fun `når ny vurdering har blitt vedtatt før årsavregning, resettes åpne årsavregninger med info fra ny vurdering - refaktorert`() {
-        val fagsak = Fagsak.forTest { }
+        val fagsak = Fagsak.forTest {
+            type = Sakstyper.FTRL
+        }
 
         val behandlingsresultatFørstegangsbehandling = lagTidligereBehandlingsresultat {
             id = 1L

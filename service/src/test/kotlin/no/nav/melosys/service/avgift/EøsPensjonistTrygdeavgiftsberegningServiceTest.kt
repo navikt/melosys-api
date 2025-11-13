@@ -200,7 +200,12 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     @Test
     fun `beregnTrygdeavgift - EØS pensjonist skal betale Trygdeavgift`() {
         behandling.apply {
-            fagsak = Fagsak.forTest { medBruker() }
+            fagsak = Fagsak.forTest {
+                medBruker()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+            tema = Behandlingstema.PENSJONIST
         }
 
         val skatteforholdsperiode = SkatteforholdTilNorge().apply {
@@ -268,7 +273,12 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         val fomIFjor = FOM.minusYears(1)
         val tomIFjor = TOM.minusYears(1)
         behandling.apply {
-            fagsak = Fagsak.forTest { medBruker() }
+            fagsak = Fagsak.forTest {
+                medBruker()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+            tema = Behandlingstema.PENSJONIST
         }
 
         val skatteforholdsperiode = SkatteforholdTilNorge().apply {
@@ -342,7 +352,12 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         val fomIFjor = FOM.minusYears(1)
         val tomIFjor = TOM.minusYears(1)
         behandling.apply {
-            fagsak = Fagsak.forTest { medBruker() }
+            fagsak = Fagsak.forTest {
+                medBruker()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+            tema = Behandlingstema.PENSJONIST
         }
 
         val skatteforholdsperiode = SkatteforholdTilNorge().apply {
@@ -417,7 +432,12 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         val datoPeriodeDto = DatoPeriodeDto(FOM, TOM)
 
         behandling.apply {
-            fagsak = Fagsak.forTest { medBruker() }
+            fagsak = Fagsak.forTest {
+                medBruker()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+            tema = Behandlingstema.PENSJONIST
         }
 
         behandlingsresultat.hentHelseutgiftDekkesPeriode()
@@ -481,7 +501,12 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     @Test
     fun `beregnTrygdeavgift - Feiler fordi alle skatteforholdsperioder har samme skatteplikttype`() {
         behandling.apply {
-            fagsak = Fagsak.forTest { medBruker() }
+            fagsak = Fagsak.forTest {
+                medBruker()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+            tema = Behandlingstema.PENSJONIST
         }
 
         behandlingsresultat.hentHelseutgiftDekkesPeriode()
@@ -534,7 +559,12 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         val datoPeriodeDto = DatoPeriodeDto(FOM, TOM)
 
         behandling.apply {
-            fagsak = Fagsak.forTest { medBruker() }
+            fagsak = Fagsak.forTest {
+                medBruker()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+            tema = Behandlingstema.PENSJONIST
         }
 
         behandlingsresultat.hentHelseutgiftDekkesPeriode()
@@ -630,7 +660,12 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     @Test
     fun `finnFakturamottaker - Har ikke fullmektig - Mottaker er bruker`() {
         behandling.apply {
-            fagsak = Fagsak.forTest { medBruker() }
+            fagsak = Fagsak.forTest {
+                medBruker()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+            tema = Behandlingstema.PENSJONIST
         }
         trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(BRUKER_NAVN)
     }

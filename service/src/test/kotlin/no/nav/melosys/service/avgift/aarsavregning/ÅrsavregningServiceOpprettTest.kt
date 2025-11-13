@@ -56,6 +56,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.OPPRETTET
             }
+            tema = Sakstemaer.UNNTAK
         }
 
         // Første behandling med medlemskap og avgift (NY_VURDERING)
@@ -143,6 +144,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                 registrertDato = LocalDate.now().plusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
                 status = Behandlingsstatus.OPPRETTET
             }
+            tema = Sakstemaer.UNNTAK
         }
         val behandlingsresultatÅrsavregningEksisterende = Behandlingsresultat.forTest {
             id = 1L

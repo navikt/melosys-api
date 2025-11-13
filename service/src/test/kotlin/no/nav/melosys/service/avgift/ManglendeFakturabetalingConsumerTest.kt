@@ -51,7 +51,7 @@ class ManglendeFakturabetalingConsumerTest {
         }
 
         val medlemskapsperiode = mockk<Medlemskapsperiode>()
-        every { medlemskapsperiode.erPliktig() } returns true
+        every { medlemskapsperiode.erPliktigMedlemskap() } returns true
 
         val behandlingsresultat = Behandlingsresultat().apply {
             this.behandling = behandling
@@ -137,7 +137,7 @@ class ManglendeFakturabetalingConsumerTest {
         }
 
         val medlemskapsperiode = mockk<Medlemskapsperiode>()
-        every { medlemskapsperiode.erPliktig() } returns false
+        every { medlemskapsperiode.erPliktigMedlemskap() } returns false
 
         val behandlingsresultat = Behandlingsresultat().apply {
             this.behandling = behandling

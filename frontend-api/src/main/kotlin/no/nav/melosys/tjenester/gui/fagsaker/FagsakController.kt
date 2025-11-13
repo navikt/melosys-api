@@ -317,8 +317,8 @@ class FagsakController(
                 if (medlemskapsperioder.isEmpty()) return hentSoknadsperiode(behandlingId)
 
                 return PeriodeDto(
-                    behandlingsresultat.utledMedlemskapsperiodeFom(),
-                    behandlingsresultat.utledMedlemskapsperiodeTom()
+                    behandlingsresultat.utledAvgiftspliktigperioderFom(),
+                    behandlingsresultat.utledAvgiftspliktigperioderTom()
                 )
             }
 

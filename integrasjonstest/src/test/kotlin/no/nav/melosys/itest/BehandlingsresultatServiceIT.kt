@@ -106,7 +106,7 @@ class BehandlingsresultatServiceIT(
     }
 
     private fun lagFagsakMedBehandlinger(): Behandlinger {
-        Fagsak("MEL-test", null, Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG, Saksstatuser.LOVVALG_AVKLART)
+        Fagsak("MEL-test", null, Sakstyper.FTRL, Sakstemaer.MEDLEMSKAP_LOVVALG, Saksstatuser.LOVVALG_AVKLART)
             .apply { leggTilRegisteringInfo() }
             .also { fsak ->
                 fagsakRepository.save(fsak)
