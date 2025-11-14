@@ -76,7 +76,12 @@ class LovvalgsperiodeService(
         val behandlingsresultat = behandlingsresultatRepo.findById(behandlingsid)
             .orElseThrow { IllegalStateException("Behandling med id $behandlingsid fins ikke.") }
 
-        lovvalgsperiodeRepo.deleteByBehandlingsresultatId(behandlingsresultat.hentId())
+        val eksisterende = lovvalgsperiodeRepo.findByBehandlingsresultatId(behandlingsresultat.hentId())
+        if (eksisterende.isNotEmpty()) {
+            eksisterende.forEach { it.clearTrygdeavgiftsperioder() }
+            lovvalgsperiodeRepo.deleteAll(eksisterende)
+            lovvalgsperiodeRepo.flush()
+        }
         val lovvalgsperioderKopi = lovvalgsperioder.map { kopierLovvalgsperiodeMedBehandlingsResultat(it, behandlingsresultat) }
 
         return lovvalgsperiodeRepo.saveAllAndFlush(lovvalgsperioderKopi)
