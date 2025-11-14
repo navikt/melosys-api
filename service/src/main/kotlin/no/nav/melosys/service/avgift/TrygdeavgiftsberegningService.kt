@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 @Service
 class TrygdeavgiftsberegningService(
@@ -189,7 +189,6 @@ class TrygdeavgiftsberegningService(
             grunnlagInntekstperiode = grunnlagInntekstperiode,
         )
 
-        // Finn riktig grunnlagsperiode basert på UUID - finnAvgiftspliktigPerioder() garanterer kun 1 type
         val grunnlag = behandlingsresultat.finnAvgiftspliktigPerioder()
             .find { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId }
             ?: error("Fant ingen avgiftspliktig periode med UUID ${response.grunnlag.medlemskapsperiodeId}")
