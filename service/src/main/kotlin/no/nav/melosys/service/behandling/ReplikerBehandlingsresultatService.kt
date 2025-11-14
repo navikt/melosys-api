@@ -120,7 +120,8 @@ class ReplikerBehandlingsresultatService(
                 grunnlagSkatteforholdTilNorge = skatteforholdTilNorgeReplika
                     .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge?.id }
                     ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),
-                // Nullstill grunnlag så setGrunnlagFromReplica kan sette dem på nytt
+                // Dette sikrer at replika ikke kobles til originale perioder.
+                // Og addGrunnlag() validerer at ingen grunnlag er satt fra før.
                 grunnlagMedlemskapsperiode = null,
                 grunnlagLovvalgsPeriode = null,
                 grunnlagHelseutgiftDekkesPeriode = null
