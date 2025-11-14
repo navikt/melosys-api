@@ -127,7 +127,7 @@ class ReplikerBehandlingsresultatService(
             )
 
             // Finn riktig grunnlagsperiode basert på original sin ID - finnAvgiftspliktigPerioder() garanterer kun 1 type
-            val originalGrunnlagId = trygdeavgiftsperiodeOriginal.hentGrunnlagId()
+            val originalGrunnlagId = trygdeavgiftsperiodeOriginal.hentGrunnlagAvgiftsperiode().hentId()
             val grunnlag = behandlingsresultatReplika.finnAvgiftspliktigPerioder()
                 .find { it.hentId() == originalGrunnlagId }
                 ?: error("Grunnlagsperiode med id $originalGrunnlagId ikke funnet")

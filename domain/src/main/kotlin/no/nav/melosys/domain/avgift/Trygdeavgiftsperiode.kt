@@ -11,7 +11,7 @@ import java.time.LocalDate
 
 @Entity
 @Table(name = "trygdeavgiftsperiode")
-    class Trygdeavgiftsperiode(
+class Trygdeavgiftsperiode(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
@@ -57,12 +57,6 @@ import java.time.LocalDate
 
     fun hentGrunnlagAvgiftsperiode(): AvgiftspliktigPeriode =
         grunnlagMedlemskapsperiode ?: grunnlagHelseutgiftDekkesPeriode ?: grunnlagLovvalgsPeriode ?: error("grunnlagAvgiftsperiode er null")
-
-    fun hentGrunnlagId(): Long {
-        val grunnlag = grunnlagMedlemskapsperiode ?: grunnlagHelseutgiftDekkesPeriode ?: grunnlagLovvalgsPeriode
-            ?: error("Ingen grunnlag satt på trygdeavgiftsperiode med id $id")
-        return grunnlag.hentId()
-    }
 
     fun hentGrunnlagInntekstperiode(): Inntektsperiode =
         grunnlagInntekstperiode ?: error("grunnlagInntekstperiode er påkrevd for Trygdeavgiftsperiode")
