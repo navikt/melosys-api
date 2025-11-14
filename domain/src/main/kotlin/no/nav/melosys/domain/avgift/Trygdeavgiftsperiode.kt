@@ -50,13 +50,7 @@ class Trygdeavgiftsperiode(
     @JoinColumn(name = "skatteforhold_id")
     val grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = null,
 
-    /**
-     * Hvis dette er false vil det ikke opprettes faktura for denne perioden ved kjøring av OpprettFaktura. Den settes til false for perioder i
-     * tidligere kalenderår, men default til true for å være bakoverkompatibel.
-     */
-    @Column(name = "forskuddsvis_faktureres", nullable = false)
-    val forskuddsvisFaktura: Boolean = true
-) : ErPeriode {
+    ) : ErPeriode {
 
     val grunnlagMedlemskapsperiodeNotNull: Medlemskapsperiode
         get() = grunnlagMedlemskapsperiode ?: error("grunnlagMedlemskapsperiode er null")
@@ -89,7 +83,6 @@ class Trygdeavgiftsperiode(
         grunnlagHelseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = this.grunnlagHelseutgiftDekkesPeriode,
         grunnlagLovvalgsPeriode: Lovvalgsperiode? = this.grunnlagLovvalgsPeriode,
         grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = this.grunnlagSkatteforholdTilNorge,
-        skalForskuddsvisFaktureres: Boolean = this.forskuddsvisFaktura
     ) = Trygdeavgiftsperiode(
         id = id,
         periodeFra = periodeFra,
@@ -101,7 +94,6 @@ class Trygdeavgiftsperiode(
         grunnlagHelseutgiftDekkesPeriode = grunnlagHelseutgiftDekkesPeriode,
         grunnlagLovvalgsPeriode = grunnlagLovvalgsPeriode,
         grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
-        forskuddsvisFaktura = skalForskuddsvisFaktureres
     )
 
     fun erLikForSatsendring(other: Trygdeavgiftsperiode): Boolean =
@@ -137,7 +129,7 @@ class Trygdeavgiftsperiode(
 
     override fun toString(): String {
         return "Trygdeavgiftsperiode(id=$id, periodeFra=$periodeFra, periodeTil=$periodeTil, " +
-            "trygdeavgiftsbeløpMd=$trygdeavgiftsbeløpMd, trygdesats=$trygdesats, skalForskuddsvisFaktureres=$forskuddsvisFaktura)"
+            "trygdeavgiftsbeløpMd=$trygdeavgiftsbeløpMd, trygdesats=$trygdesats)"
     }
 
     override fun equals(other: Any?): Boolean {

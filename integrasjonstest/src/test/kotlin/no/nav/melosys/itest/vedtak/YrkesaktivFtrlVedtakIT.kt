@@ -46,7 +46,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
-import kotlin.test.Ignore
 
 class YrkesaktivFtrlVedtakIT(
     @Autowired private val avklartefaktaService: AvklartefaktaService,
@@ -74,25 +73,6 @@ class YrkesaktivFtrlVedtakIT(
         melosysHendelseKafkaConsumer.clear()
     }
 
-
-    @Test
-    @Ignore("Denne funksjonaliteten skal fjernes og lager problemer med testoppsett nå")
-    fun `Trygdeavgiftsperioder fra beregning fra tidligere kalenderår skal ikke forskuddsfaktureres`() {
-        val saksnummer = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false, 2024)
-
-        fagsakRepository.findBySaksnummer(saksnummer)
-            .get()
-            .behandlinger
-            .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
-            .shouldHaveSize(1)
-            .single()
-            .let { medlemskapsperiodeService.hentMedlemskapsperioder(it.hentId()) }
-            .single()
-            .trygdeavgiftsperioder
-            .shouldHaveSize(1)
-            .single()
-            .forskuddsvisFaktura shouldBe false
-    }
 
     @Test
     fun `Yrkesaktiv vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og kanseller fakturaserie i ny vurdering`() {

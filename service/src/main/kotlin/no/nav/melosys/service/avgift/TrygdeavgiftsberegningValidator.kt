@@ -81,13 +81,14 @@ object TrygdeavgiftsberegningValidator {
 
         harOverlapp(skatteforholdsperioder, SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE)
 
-        val skalValiderePerioderForNyVurderingOgManglendeInnbetaling = behandlingsresultat.hentBehandling().type in listOf(
+        val harIkkeTidligerePerioderValidering = behandlingsresultat.hentBehandling().type in listOf(
             Behandlingstyper.NY_VURDERING,
-            Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
+            Behandlingstyper.FØRSTEGANG
         ) && unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
 
-        if (skalValiderePerioderForNyVurderingOgManglendeInnbetaling) {
-            validerNyVurderingOgManglendeInnbetaling(
+        if (harIkkeTidligerePerioderValidering) {
+            validerIkkeTidligerePerioder(
                 skatteforholdsperioder,
                 inntektsperioder,
                 innvilgedeAvgiftspliktigeperioder,
@@ -111,7 +112,7 @@ object TrygdeavgiftsberegningValidator {
         val erPliktigMedlem = innvilgedeAvgiftspliktigeperioder.all { it.erPliktigMedlemskap() }
         val erSkattepliktigIHelePerioden = skatteforholdsperioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
 
-        if (!(erPliktigMedlem && erSkattepliktigIHelePerioden) && !skalValiderePerioderForNyVurderingOgManglendeInnbetaling) {
+        if (!(erPliktigMedlem && erSkattepliktigIHelePerioden) && !harIkkeTidligerePerioderValidering) {
             validerPerioderDekkerSammenlignetPeriode(
                 kanOverlappe = true,
                 inntektsperioder,
@@ -121,7 +122,7 @@ object TrygdeavgiftsberegningValidator {
         }
     }
 
-    private fun validerNyVurderingOgManglendeInnbetaling(
+    private fun validerIkkeTidligerePerioder(
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsperioder: List<Inntektsperiode>,
         innvilgedeAvgiftspliktigeperioder: List<AvgiftspliktigPeriode>,
