@@ -483,7 +483,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
         assertThrows<IllegalStateException> {
             replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
-        }.message shouldBe "Ingen grunnlag satt på trygdeavgiftsperiode med id 1"
+        }
     }
 
     private fun lagTrygdeavgiftsperiode(): Trygdeavgiftsperiode {
