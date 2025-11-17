@@ -120,7 +120,8 @@ internal class LovvalgsperiodeServiceTest {
         val lagretBehandlingsresultat = Behandlingsresultat().apply { id = BEH_ID }
 
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(BEH_ID) } returns listOf(eksisterende)
-        every { lovvalgsperiodeRepository.deleteAll(any<List<Lovvalgsperiode>>()) } just Runs
+        every { lovvalgsperiodeRepository.save(any<Lovvalgsperiode>()) } answers { firstArg() }
+        every { lovvalgsperiodeRepository.deleteAllInBatch(any<List<Lovvalgsperiode>>()) } just Runs
         every { lovvalgsperiodeRepository.flush() } just Runs
         every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.of(lagretBehandlingsresultat)
         every { lovvalgsperiodeRepository.saveAllAndFlush(any<List<Lovvalgsperiode>>()) } answers { firstArg() }
@@ -128,6 +129,7 @@ internal class LovvalgsperiodeServiceTest {
         lovvalgsperiodeService.lagreLovvalgsperioder(BEH_ID, listOf(Lovvalgsperiode()))
 
         verify { eksisterende.clearTrygdeavgiftsperioder() }
+        verify { lovvalgsperiodeRepository.save(eksisterende) }
         verify { lovvalgsperiodeRepository.flush() }
     }
 

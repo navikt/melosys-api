@@ -79,9 +79,9 @@ class LovvalgsperiodeService(
         val eksisterende = lovvalgsperiodeRepo.findByBehandlingsresultatId(behandlingsresultat.hentId())
         if (eksisterende.isNotEmpty()) {
             // 1: Fjern trygdeavgiftsperioder og persister endringen
-            eksisterende.forEach { periode ->
-                periode.clearTrygdeavgiftsperioder()
-                lovvalgsperiodeRepo.save(periode) 
+            eksisterende.forEach { lovvalgsperiode ->
+                lovvalgsperiode.clearTrygdeavgiftsperioder()
+                lovvalgsperiodeRepo.save(lovvalgsperiode)
             }
             lovvalgsperiodeRepo.flush()
 
