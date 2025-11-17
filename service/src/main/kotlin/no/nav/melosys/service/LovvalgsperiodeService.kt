@@ -78,10 +78,18 @@ class LovvalgsperiodeService(
 
         val eksisterende = lovvalgsperiodeRepo.findByBehandlingsresultatId(behandlingsresultat.hentId())
         if (eksisterende.isNotEmpty()) {
-            eksisterende.forEach { it.clearTrygdeavgiftsperioder() }
-            lovvalgsperiodeRepo.deleteAll(eksisterende)
+            // 1: Fjern trygdeavgiftsperioder og persister endringen
+            eksisterende.forEach { periode ->
+                periode.clearTrygdeavgiftsperioder()
+                lovvalgsperiodeRepo.save(periode) 
+            }
+            lovvalgsperiodeRepo.flush()
+
+            // 2: Slett selve periodene etter at children er slettet
+            lovvalgsperiodeRepo.deleteAllInBatch(eksisterende)
             lovvalgsperiodeRepo.flush()
         }
+
         val lovvalgsperioderKopi = lovvalgsperioder.map { kopierLovvalgsperiodeMedBehandlingsResultat(it, behandlingsresultat) }
 
         return lovvalgsperiodeRepo.saveAllAndFlush(lovvalgsperioderKopi)
