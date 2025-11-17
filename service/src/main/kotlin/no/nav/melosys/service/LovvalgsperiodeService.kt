@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.TidligereMedlemsperiode
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca
@@ -77,6 +78,8 @@ class LovvalgsperiodeService(
             .orElseThrow { IllegalStateException("Behandling med id $behandlingsid fins ikke.") }
 
         val eksisterende = lovvalgsperiodeRepo.findByBehandlingsresultatId(behandlingsresultat.hentId())
+        val lovvalgsperioderKopi = lovvalgsperioder.map { kopierLovvalgsperiodeMedBehandlingsResultat(it, behandlingsresultat) }
+
         if (eksisterende.isNotEmpty()) {
             // 1: Fjern trygdeavgiftsperioder og persister endringen
             eksisterende.forEach { lovvalgsperiode ->
@@ -89,8 +92,6 @@ class LovvalgsperiodeService(
             lovvalgsperiodeRepo.deleteAllInBatch(eksisterende)
             lovvalgsperiodeRepo.flush()
         }
-
-        val lovvalgsperioderKopi = lovvalgsperioder.map { kopierLovvalgsperiodeMedBehandlingsResultat(it, behandlingsresultat) }
 
         return lovvalgsperiodeRepo.saveAllAndFlush(lovvalgsperioderKopi)
     }
@@ -152,9 +153,10 @@ class LovvalgsperiodeService(
 
     private fun kopierLovvalgsperiodeMedBehandlingsResultat(
         lovvalgsperiode: Lovvalgsperiode,
-        behandlingsresultat: Behandlingsresultat
+        behandlingsresultat: Behandlingsresultat,
     ): Lovvalgsperiode {
         val kopi = BeanUtils.cloneBean(lovvalgsperiode) as Lovvalgsperiode
+        kopi.trygdeavgiftsperioder.addAll(behandlingsresultat.trygdeavgiftsperioder)
         kopi.behandlingsresultat = behandlingsresultat
         return kopi
     }
