@@ -150,12 +150,14 @@ object TrygdeavgiftsberegningValidator {
             INNTEKT_OG_SKATT_MÅ_DEKKE_MEDLEMSKAPSPERIODE_FOR_INNVÆRENDE_OG_FREMTIDIG
         )
 
-        validerPerioderDekkerSammenlignetPeriode(
-            kanOverlappe = true,
-            inntektsperioder,
-            avgiftspliktigeperioderIDetteOgFremtidigeÅr,
-            INNTEKT_OG_SKATT_MÅ_DEKKE_MEDLEMSKAPSPERIODE_FOR_INNVÆRENDE_OG_FREMTIDIG
-        )
+        if (!erAllePerioderSkattepliktige(skatteforholdsperioder)) {
+            validerPerioderDekkerSammenlignetPeriode(
+                kanOverlappe = true,
+                inntektsperioder,
+                avgiftspliktigeperioderIDetteOgFremtidigeÅr,
+                INNTEKT_OG_SKATT_MÅ_DEKKE_MEDLEMSKAPSPERIODE_FOR_INNVÆRENDE_OG_FREMTIDIG
+            )
+        }
     }
 
     private fun erSkattepliktigOgPensjonUføreMedKildeskatt(
