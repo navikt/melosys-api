@@ -19,13 +19,11 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatId)
         nullstillTrygdeavgiftsperioder(behandlingsresultat)
 
-        // Bruk finnAvgiftspliktigPerioder() som garanterer kun 1 type, så vi kan matche direkte på ID
-        // Her må vi matche på ID-feltene direkte fordi trygdeavgiftsperiodene kan ha mock-grunnlag
         behandlingsresultat.finnAvgiftspliktigPerioder().forEach { avgiftspliktigperiode ->
             trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
                 val erMatch = trygdeavgiftsperiode.grunnlagMedlemskapsperiode?.id == avgiftspliktigperiode.hentId() ||
-                        trygdeavgiftsperiode.grunnlagLovvalgsPeriode?.id == avgiftspliktigperiode.hentId() ||
-                        trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode?.id == avgiftspliktigperiode.hentId()
+                    trygdeavgiftsperiode.grunnlagLovvalgsPeriode?.id == avgiftspliktigperiode.hentId() ||
+                    trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode?.id == avgiftspliktigperiode.hentId()
 
                 if (erMatch) {
                     avgiftspliktigperiode.addTrygdeavgiftsperiode(trygdeavgiftsperiode)
