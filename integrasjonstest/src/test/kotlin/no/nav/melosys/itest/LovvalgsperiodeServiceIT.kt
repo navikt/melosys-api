@@ -1,14 +1,13 @@
 package no.nav.melosys.itest
 
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.RegistreringsInfo
-import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.forTest
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
@@ -86,13 +85,13 @@ class LovvalgsperiodeServiceIT(
     }
 
     private fun lagreBehandlingsresultatMedLovvalgsperiodeSomHarTrygdeavgift(): Behandlingsresultat {
-        val behandling = lagreBehandling()
+        val lagretBehandling = lagreBehandling()
 
-        val behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = behandling
-            behandlingsmåte = Behandlingsmaate.MANUELT
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling = lagretBehandling
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            leggTilRegisteringInfo()
+        }.also {
+            it.leggTilRegisteringInfo()
         }
 
         val lagretBehandlingsresultat = behandlingsresultatRepository.saveAndFlush(behandlingsresultat)
@@ -102,66 +101,65 @@ class LovvalgsperiodeServiceIT(
     }
 
     private fun lagreBehandling(): Behandling {
-        val fagsak = Fagsak(
-            "MEL-${UUID.randomUUID()}",
-            null,
-            Sakstyper.EU_EOS,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Saksstatuser.OPPRETTET
-        ).apply {
-            leggTilRegisteringInfo()
+        val fagsak = Fagsak.forTest {
+            saksnummer = "MEL-${UUID.randomUUID()}"
+            type = Sakstyper.EU_EOS
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            status = Saksstatuser.OPPRETTET
+        }.also {
+            it.leggTilRegisteringInfo()
         }
 
         val lagretFagsak = fagsakRepository.save(fagsak)
 
-        val behandling = Behandling(
-            id = 0,
-            fagsak = lagretFagsak,
-            status = Behandlingsstatus.UNDER_BEHANDLING,
-            type = Behandlingstyper.FØRSTEGANG,
-            tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
+        val behandling = Behandling.forTest {
+            id = 0
+            this.fagsak = lagretFagsak
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            type = Behandlingstyper.FØRSTEGANG
+            tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
             behandlingsfrist = LocalDate.now().plusMonths(6)
-        ).apply {
-            leggTilRegisteringInfo()
+        }.also {
+            it.leggTilRegisteringInfo()
         }
 
         return behandlingRepository.save(behandling)
     }
 
-    private fun lagreLovvalgsperiodeMedTrygdeavgiftsperiode(behandlingsresultat: Behandlingsresultat) {
-        val lovvalgsperiode = Lovvalgsperiode().apply {
-            setBehandlingsresultat(behandlingsresultat)
-            setFom(LocalDate.now().minusMonths(6))
-            setTom(LocalDate.now().minusMonths(3))
-            setLovvalgsland(Land_iso2.NO)
-            setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E)
+    private fun lagreLovvalgsperiodeMedTrygdeavgiftsperiode(lagretBehandlingsresultat: Behandlingsresultat) {
+        val lovvalgsperiode = Lovvalgsperiode.forTest {
+            behandlingsresultat = lagretBehandlingsresultat
+            fom = LocalDate.now().minusMonths(6)
+            tom = LocalDate.now().minusMonths(3)
+            lovvalgsland = Land_iso2.NO
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             medlemskapstype = Medlemskapstyper.PLIKTIG
-            setDekning(Trygdedekninger.FULL_DEKNING)
-            setMedlPeriodeID(123L)
+            dekning = Trygdedekninger.FULL_DEKNING
+            medlPeriodeID = 123L
+        }.apply {
+            addTrygdeavgiftsperiode(
+                Trygdeavgiftsperiode.forTest {
+                    periodeFra = LocalDate.now().minusMonths(6)
+                    periodeTil = LocalDate.now().minusMonths(5)
+                    trygdeavgiftsbeløpMd = BigDecimal.valueOf(1000)
+                    trygdesats = BigDecimal.ONE
+                }
+            )
         }
-
-        lovvalgsperiode.addTrygdeavgiftsperiode(
-            Trygdeavgiftsperiode.forTest {
-                periodeFra = LocalDate.now().minusMonths(6)
-                periodeTil = LocalDate.now().minusMonths(5)
-                trygdeavgiftsbeløpMd = BigDecimal.valueOf(1000)
-                trygdesats = BigDecimal.ONE
-            }
-        )
 
         lovvalgsperiodeRepository.saveAndFlush(lovvalgsperiode)
     }
 
-    private fun nyLovvalgsperiodeUtenTrygdeavgift() = Lovvalgsperiode().apply {
-        setFom(LocalDate.now())
-        setTom(LocalDate.now().plusMonths(6))
-        setLovvalgsland(Land_iso2.NO)
-        setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E)
+    private fun nyLovvalgsperiodeUtenTrygdeavgift() = Lovvalgsperiode.forTest {
+        fom = LocalDate.now()
+        tom = LocalDate.now().plusMonths(6)
+        lovvalgsland = Land_iso2.NO
+        bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E
         innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         medlemskapstype = Medlemskapstyper.FRIVILLIG
-        setDekning(Trygdedekninger.FULL_DEKNING)
-        setMedlPeriodeID(999L)
+        dekning = Trygdedekninger.FULL_DEKNING
+        medlPeriodeID = 999L
     }
 
     private fun RegistreringsInfo.leggTilRegisteringInfo() {
