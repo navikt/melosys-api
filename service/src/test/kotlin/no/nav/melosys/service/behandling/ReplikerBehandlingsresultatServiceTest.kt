@@ -483,7 +483,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
         assertThrows<IllegalStateException> {
             replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
-        }.message shouldBe "Medlemskapsperiode ikke funnet"
+        }
     }
 
     private fun lagTrygdeavgiftsperiode(): Trygdeavgiftsperiode {

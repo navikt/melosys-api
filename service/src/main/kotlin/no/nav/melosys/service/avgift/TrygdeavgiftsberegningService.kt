@@ -2,15 +2,11 @@ package no.nav.melosys.service.avgift
 
 import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.*
-import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
@@ -193,27 +189,11 @@ class TrygdeavgiftsberegningService(
             grunnlagInntekstperiode = grunnlagInntekstperiode,
         )
 
-        when (behandlingsresultat.finnAvgiftspliktigPerioder().firstOrNull()) {
-            is Medlemskapsperiode -> trygdeavgiftsperiode.apply {
-                grunnlagMedlemskapsperiode =
-                    behandlingsresultat.medlemskapsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId }
-                        ?: error("Fant ikke medlemskapsperiode ${response.grunnlag.medlemskapsperiodeId}")
-            }
+        val grunnlag = behandlingsresultat.finnAvgiftspliktigPerioder()
+            .find { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId }
+            ?: error("Fant ingen avgiftspliktig periode med UUID ${response.grunnlag.medlemskapsperiodeId}")
 
-            is HelseutgiftDekkesPeriode -> trygdeavgiftsperiode.apply {
-                grunnlagHelseutgiftDekkesPeriode =
-                    behandlingsresultat.hentHelseutgiftDekkesPeriode().takeIf { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId }
-                        ?: error("Fant ikke helseutgiftdekket periode ${response.grunnlag.medlemskapsperiodeId}")
-            }
-
-            is Lovvalgsperiode -> trygdeavgiftsperiode.apply {
-                grunnlagLovvalgsPeriode =
-                    behandlingsresultat.lovvalgsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId }
-                        ?: error("Fant ikke lovvalgsperiode ${response.grunnlag.medlemskapsperiodeId}")
-            }
-
-            else -> throw FunksjonellException("Ukjent avgiftspliktigperiode: ${behandlingsresultat.finnAvgiftspliktigPerioder().firstOrNull()}")
-        }
+        trygdeavgiftsperiode.addGrunnlag(grunnlag)
 
         return trygdeavgiftsperiode
     }

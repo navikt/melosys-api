@@ -120,27 +120,20 @@ class ReplikerBehandlingsresultatService(
                 grunnlagSkatteforholdTilNorge = skatteforholdTilNorgeReplika
                     .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge?.id }
                     ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),
+                // Dette sikrer at replika ikke kobles til originale perioder.
+                // Og addGrunnlag() validerer at ingen grunnlag er satt fra før.
+                grunnlagMedlemskapsperiode = null,
+                grunnlagLovvalgsPeriode = null,
+                grunnlagHelseutgiftDekkesPeriode = null
             )
 
-            when (behandlingsresultatReplika.finnAvgiftspliktigPerioder().first()) {
-                is Medlemskapsperiode -> trygdeavgiftsperiodeReplika.apply {
-                    grunnlagMedlemskapsperiode = behandlingsresultatReplika.medlemskapsperioder
-                        .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode?.id }
-                        ?: throw IllegalStateException("Medlemskapsperiode ikke funnet")
-                }
+            val originalGrunnlagId = trygdeavgiftsperiodeOriginal.hentGrunnlagAvgiftsperiode().hentId()
+            val grunnlag = behandlingsresultatReplika.finnAvgiftspliktigPerioder()
+                .find { it.hentId() == originalGrunnlagId }
+                ?: error("Grunnlagsperiode med id $originalGrunnlagId ikke funnet")
 
-                is Lovvalgsperiode -> trygdeavgiftsperiodeReplika.apply {
-                    grunnlagLovvalgsPeriode = behandlingsresultatReplika.lovvalgsperioder
-                        .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagLovvalgsPeriode?.id }
-                        ?: throw IllegalStateException("Lovvalgsperiode ikke funnet")
-                }
-            }
-
-            trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode?.run {
-                trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
-            } ?: trygdeavgiftsperiodeReplika.grunnlagLovvalgsPeriode?.run {
-                trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
-            } ?: throw IllegalStateException("Medlemskapsperiode eller lovvalgsperiode ikke funnet")
+            trygdeavgiftsperiodeReplika.addGrunnlag(grunnlag)
+            grunnlag.addTrygdeavgiftsperiode(trygdeavgiftsperiodeReplika)
         }
 
         behandlingsresultatReplika.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeReplika ->
