@@ -4,6 +4,8 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.TidligereMedlemsperiode
+import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
@@ -156,8 +158,35 @@ class LovvalgsperiodeService(
         behandlingsresultat: Behandlingsresultat,
     ): Lovvalgsperiode {
         val kopi = BeanUtils.cloneBean(lovvalgsperiode) as Lovvalgsperiode
-        kopi.trygdeavgiftsperioder.addAll(behandlingsresultat.trygdeavgiftsperioder)
-        kopi.behandlingsresultat = behandlingsresultat
+        kopi.trygdeavgiftsperioder = mutableSetOf()
+        behandlingsresultat.trygdeavgiftsperioder
+            .map { kopierTrygdeavgiftsperiode(it) }
+            .forEach(kopi::addTrygdeavgiftsperiode)
+        kopi.setBehandlingsresultat(behandlingsresultat)
         return kopi
     }
+
+    private fun kopierTrygdeavgiftsperiode(
+        trygdeavgiftsperiode: Trygdeavgiftsperiode,
+    ): Trygdeavgiftsperiode =
+        trygdeavgiftsperiode.copyEntity(
+            id = null,
+            grunnlagInntekstperiode = klonInntektsperiode(trygdeavgiftsperiode.grunnlagInntekstperiode),
+            grunnlagLovvalgsPeriode = null,
+            grunnlagSkatteforholdTilNorge = klonSkatteforhold(trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge),
+        )
+
+    private fun klonInntektsperiode(inntektsperiode: Inntektsperiode?): Inntektsperiode? =
+        inntektsperiode?.let {
+            val kopi = BeanUtils.cloneBean(it) as Inntektsperiode
+            kopi.id = null
+            kopi
+        }
+
+    private fun klonSkatteforhold(skatteforholdTilNorge: SkatteforholdTilNorge?): SkatteforholdTilNorge? =
+        skatteforholdTilNorge?.let {
+            val kopi = BeanUtils.cloneBean(it) as SkatteforholdTilNorge
+            kopi.id = null
+            kopi
+        }
 }
