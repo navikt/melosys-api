@@ -68,7 +68,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
     private val unleash = FakeUnleash()
     @BeforeEach
     fun setup() {
-        unleash.enableAll()
+        unleash.resetAll()
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
             mockAvklarteVirksomheterService,
