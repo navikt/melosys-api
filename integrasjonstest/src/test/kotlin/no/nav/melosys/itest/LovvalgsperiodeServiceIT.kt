@@ -1,5 +1,10 @@
 package no.nav.melosys.itest
 
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
@@ -26,7 +31,6 @@ import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.LovvalgsperiodeRepository
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository
 import no.nav.melosys.service.LovvalgsperiodeService
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -62,7 +66,7 @@ class LovvalgsperiodeServiceIT(
 
     @Test
     fun `lagreLovvalgsperioder erstatter periode selv om eksisterende har trygdeavgift`() {
-        val behandlingsresultat = lagreBehandlingsresultatMedLovvalgsperiodeSomHarTrygdeavgift()
+        val (behandlingsresultat, _) = lagreBehandlingsresultatMedLovvalgsperiodeSomHarTrygdeavgift()
         val nyLovvalgsperiode = nyLovvalgsperiodeUtenTrygdeavgift().apply {
             setLovvalgsland(Land_iso2.SE)
             setMedlPeriodeID(321L)
@@ -73,26 +77,23 @@ class LovvalgsperiodeServiceIT(
             listOf(nyLovvalgsperiode)
         )
 
-        assertThat(resultat).hasSize(1)
+        resultat shouldHaveSize 1
         val lagret = resultat.single()
-        assertThat(lagret.lovvalgsland).isEqualTo(Land_iso2.SE)
-        assertThat(lagret.medlPeriodeID).isEqualTo(321L)
+        lagret.lovvalgsland shouldBe Land_iso2.SE
+        lagret.medlPeriodeID shouldBe 321L
 
         val lagredeFraRepo = lovvalgsperiodeRepository.findByBehandlingsresultatId(behandlingsresultat.hentId())
-        assertThat(lagredeFraRepo).hasSize(1)
-        assertThat(lagredeFraRepo.single().lovvalgsland).isEqualTo(Land_iso2.SE)
-        assertThat(lagredeFraRepo.single().trygdeavgiftsperioder).isEmpty()
+        lagredeFraRepo shouldHaveSize 1
+        lagredeFraRepo.single().lovvalgsland shouldBe Land_iso2.SE
+        lagredeFraRepo.single().trygdeavgiftsperioder shouldHaveSize 1
     }
 
     @Test
     fun `lagreLovvalgsperioder kopierer trygdeavgiftsperioder med skatteforhold og inntektsperiode`() {
-        val behandlingsresultat = lagreBehandlingsresultatMedLovvalgsperiodeSomHarTrygdeavgift(
+        val (behandlingsresultat, originalLovvalgsperiode) = lagreBehandlingsresultatMedLovvalgsperiodeSomHarTrygdeavgift(
             Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
         )
 
-        val originalLovvalgsperiode = lovvalgsperiodeRepository
-            .findByBehandlingsresultatId(behandlingsresultat.hentId())
-            .single()
         val originalTrygdeavgift = originalLovvalgsperiode.trygdeavgiftsperioder.single()
 
         val originalTrygdeavgiftId = originalTrygdeavgift.id
@@ -104,7 +105,7 @@ class LovvalgsperiodeServiceIT(
             listOf(nyLovvalgsperiodeUtenTrygdeavgift())
         )
 
-        assertThat(resultat).hasSize(1)
+        resultat shouldHaveSize 1
 
         val lagretLovvalgsperiode = lovvalgsperiodeRepository
             .findByBehandlingsresultatId(behandlingsresultat.hentId())
@@ -112,23 +113,19 @@ class LovvalgsperiodeServiceIT(
 
         val lagretTrygdeavgift = lagretLovvalgsperiode.trygdeavgiftsperioder.single()
 
-        assertThat(lagretTrygdeavgift.id).isNotEqualTo(originalTrygdeavgiftId)
-        assertThat(lagretTrygdeavgift.grunnlagLovvalgsPeriode).isEqualTo(lagretLovvalgsperiode)
+        lagretTrygdeavgift.id shouldNotBe originalTrygdeavgiftId
+        lagretTrygdeavgift.grunnlagLovvalgsPeriode shouldBe lagretLovvalgsperiode
 
-        assertThat(lagretTrygdeavgift.grunnlagSkatteforholdTilNorge).isNotNull
-        assertThat(lagretTrygdeavgift.grunnlagSkatteforholdTilNorge?.id)
-            .isNotNull()
-            .isNotEqualTo(originalSkatteforholdId)
+        lagretTrygdeavgift.grunnlagSkatteforholdTilNorge.shouldNotBeNull()
+            .id shouldNotBe originalSkatteforholdId
 
-        assertThat(lagretTrygdeavgift.grunnlagInntekstperiode).isNotNull
-        assertThat(lagretTrygdeavgift.grunnlagInntekstperiode?.id)
-            .isNotNull()
-            .isNotEqualTo(originalInntektsperiodeId)
+        lagretTrygdeavgift.grunnlagInntekstperiode.shouldNotBeNull()
+            .id shouldNotBe originalInntektsperiodeId
     }
 
     private fun lagreBehandlingsresultatMedLovvalgsperiodeSomHarTrygdeavgift(
         behandlingstema: Behandlingstema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
-    ): Behandlingsresultat {
+    ): LagretLovvalgsperiodeMedResultat {
         val lagretBehandling = lagreBehandling(behandlingstema)
 
         val behandlingsresultat = Behandlingsresultat.forTest {
@@ -139,9 +136,13 @@ class LovvalgsperiodeServiceIT(
         }
 
         val lagretBehandlingsresultat = behandlingsresultatRepository.saveAndFlush(behandlingsresultat)
-        lagreLovvalgsperiodeMedTrygdeavgiftsperiode(lagretBehandlingsresultat)
+        val lagretLovvalgsperiode = lagreLovvalgsperiodeMedTrygdeavgiftsperiode(lagretBehandlingsresultat)
+        lagretBehandlingsresultat.lovvalgsperioder.add(lagretLovvalgsperiode)
 
-        return lagretBehandlingsresultat
+        return LagretLovvalgsperiodeMedResultat(
+            behandlingsresultat = lagretBehandlingsresultat,
+            lovvalgsperiode = lagretLovvalgsperiode
+        )
     }
 
     private fun lagreBehandling(
@@ -172,17 +173,19 @@ class LovvalgsperiodeServiceIT(
         return behandlingRepository.save(behandling)
     }
 
-    private fun lagreLovvalgsperiodeMedTrygdeavgiftsperiode(lagretBehandlingsresultat: Behandlingsresultat) {
-        val lovvalgsperiode = Lovvalgsperiode().apply {
-            setBehandlingsresultat(lagretBehandlingsresultat)
-            setFom(LocalDate.now().minusMonths(6))
-            setTom(LocalDate.now().minusMonths(3))
-            setLovvalgsland(Land_iso2.NO)
-            setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E)
+    private fun lagreLovvalgsperiodeMedTrygdeavgiftsperiode(
+        lagretBehandlingsresultat: Behandlingsresultat
+    ): Lovvalgsperiode {
+        val lovvalgsperiode = Lovvalgsperiode.forTest {
+            behandlingsresultat = lagretBehandlingsresultat
+            fom = LocalDate.now().minusMonths(6)
+            tom = LocalDate.now().minusMonths(3)
+            lovvalgsland = Land_iso2.NO
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             medlemskapstype = Medlemskapstyper.PLIKTIG
-            setDekning(Trygdedekninger.FULL_DEKNING)
-            setMedlPeriodeID(123L)
+            dekning = Trygdedekninger.FULL_DEKNING
+            medlPeriodeID = 123L
         }.apply {
             addTrygdeavgiftsperiode(
                 Trygdeavgiftsperiode.forTest {
@@ -194,18 +197,18 @@ class LovvalgsperiodeServiceIT(
             )
         }
 
-        lovvalgsperiodeRepository.saveAndFlush(lovvalgsperiode)
+        return lovvalgsperiodeRepository.saveAndFlush(lovvalgsperiode)
     }
 
-    private fun nyLovvalgsperiodeUtenTrygdeavgift() = Lovvalgsperiode().apply {
-        setFom(LocalDate.now())
-        setTom(LocalDate.now().plusMonths(6))
-        setLovvalgsland(Land_iso2.NO)
-        setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E)
+    private fun nyLovvalgsperiodeUtenTrygdeavgift() = Lovvalgsperiode.forTest {
+        fom = LocalDate.now()
+        tom = LocalDate.now().plusMonths(6)
+        lovvalgsland = Land_iso2.NO
+        bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E
         innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         medlemskapstype = Medlemskapstyper.FRIVILLIG
-        setDekning(Trygdedekninger.FULL_DEKNING)
-        setMedlPeriodeID(999L)
+        dekning = Trygdedekninger.FULL_DEKNING
+        medlPeriodeID = 999L
     }
 
     private fun RegistreringsInfo.leggTilRegisteringInfo() {
@@ -214,4 +217,9 @@ class LovvalgsperiodeServiceIT(
         registrertAv = "test"
         endretAv = "test"
     }
+
+    private data class LagretLovvalgsperiodeMedResultat(
+        val behandlingsresultat: Behandlingsresultat,
+        val lovvalgsperiode: Lovvalgsperiode
+    )
 }
