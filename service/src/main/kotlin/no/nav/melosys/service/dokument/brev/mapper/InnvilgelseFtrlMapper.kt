@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+import io.getunleash.Unleash
 import jakarta.transaction.Transactional
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
@@ -13,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser.TILLEGGSAVTA
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.dokgen.dto.*
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
@@ -32,13 +34,15 @@ class InnvilgelseFtrlMapper(
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
+    private val unleash: Unleash
 ) {
 
     @Transactional
     internal fun mapPensjonistFrivillig(brevbestilling: DokgenBrevbestilling): InnvilgelseFtrlPensjonistFrivillig {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val søknadsland = behandlingsresultat.hentBehandling().hentMottatteOpplysninger().mottatteOpplysningerData.soeknadsland
-        val søknadNorgeEllerUtenforEØS = behandlingsresultat.hentBehandling().hentMottatteOpplysninger().mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+        val søknadNorgeEllerUtenforEØS =
+            behandlingsresultat.hentBehandling().hentMottatteOpplysninger().mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
         val trygdedekning = søknadNorgeEllerUtenforEØS.trygdedekning
         val avslåttMedlemskapsIPensjonsdel =
             avslåttMedlemskapsMedFørsteLeddBPensjon(behandlingsresultat)
@@ -106,6 +110,13 @@ class InnvilgelseFtrlMapper(
         )
     }
 
+    private fun utledTrygdeavgiftsmottaker(behandlingsresultat: Behandlingsresultat): Trygdeavgiftmottaker? {
+        if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER) && behandlingsresultat.trygdeavgiftsperioder.isEmpty()) {
+            return null
+        }
+        return trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat)
+    }
+
 
     @Transactional
     internal fun mapYrkesaktivFrivillig(brevbestilling: InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling): InnvilgelseFtrlYrkesaktivFrivillig {
@@ -125,7 +136,7 @@ class InnvilgelseFtrlMapper(
             bestemmelse = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().hentBestemmelse(),
             avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
             avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = avslåttMedlemskapsperiodeFørMottaksdatoFullDekning,
-            trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat),
+            trygdeavgiftMottaker = utledTrygdeavgiftsmottaker(behandlingsresultat),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.hentBehandling()),
             skatteplikttype = behandlingsresultat.utledSkatteplikttype(),
             begrunnelse = hentBegrunnelse(behandlingsresultat.vilkaarsresultater),
@@ -139,7 +150,14 @@ class InnvilgelseFtrlMapper(
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
             betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(behandlingsresultat),
-            ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode
+            ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
+            harMedlemskapsperioderIForegåendeÅr = if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
+                behandlingsresultat.utledAvgiftspliktigperioderFom()?.let { fom ->
+                    fom.year < LocalDate.now().year
+                } ?: false
+            } else {
+                false
+            }
         )
     }
 
@@ -211,7 +229,7 @@ class InnvilgelseFtrlMapper(
             bestemmelse = medlemskapsperiode.hentBestemmelse(),
             harLavSatsPgaAlder = harLavSatsPgaAlder,
             arbeidssituasjontype = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.ARBEIDSSITUASJON),
-            trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat),
+            trygdeavgiftMottaker = utledTrygdeavgiftsmottaker(behandlingsresultat),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandling),
             skatteplikttype = behandlingsresultat.utledSkatteplikttype(),
             begrunnelse = hentBegrunnelse(behandlingsresultat.vilkaarsresultater),
@@ -225,7 +243,14 @@ class InnvilgelseFtrlMapper(
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
             betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(behandlingsresultat),
-            ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode
+            ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
+            harMedlemskapsperioderIForegåendeÅr = if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
+                behandlingsresultat.utledAvgiftspliktigperioderFom()?.let { fom ->
+                    fom.year < LocalDate.now().year
+                } ?: false
+            } else {
+                false
+            }
         )
     }
 
@@ -277,7 +302,7 @@ class InnvilgelseFtrlMapper(
             return emptyList()
         }
 
-        return behandlingsresultat.trygdeavgiftsperioder.map {
+        val trygdeavgiftsperioder: List<AvgiftsperiodeDto> = behandlingsresultat.trygdeavgiftsperioder.map {
             AvgiftsperiodeDto(
                 it.periodeFra,
                 it.periodeTil,
@@ -287,6 +312,11 @@ class InnvilgelseFtrlMapper(
                 it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
             )
         }.sortedByDescending { it.fom }
+        // Hvis toggle er på, filtrer bort perioder før inneværende år og returnerer kun den første perioden i inneværende år eller senere
+        if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
+            return trygdeavgiftsperioder.lastOrNull() { it.fom.year >= LocalDate.now().year }?.let { listOf(it) } ?: emptyList()
+        }
+        return trygdeavgiftsperioder
     }
 
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodePensjonist> {
