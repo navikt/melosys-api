@@ -64,6 +64,20 @@ public class SkatteforholdTilNorge implements ErPeriode {
         return trygdeavgiftsperioder;
     }
 
+    public SkatteforholdTilNorge copyEntity(
+        Long id,
+        LocalDate fomDato,
+        LocalDate tomDato,
+        Skatteplikttype skatteplikttype
+    ) {
+        SkatteforholdTilNorge copy = new SkatteforholdTilNorge();
+        copy.id = id;
+        copy.fomDato = fomDato;
+        copy.tomDato = tomDato;
+        copy.skatteplikttype = skatteplikttype;
+        return copy;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -115,6 +115,32 @@ class Lovvalgsperiode : PeriodeOmLovvalg, AvgiftspliktigPeriode {
         trygdeavgiftsperioder.add(trygdeavgiftsperiode)
     }
 
+    fun copyEntity(
+        id: Long? = this.id,
+        behandlingsresultat: Behandlingsresultat? = this.behandlingsresultat,
+        fom: LocalDate? = this.fom,
+        tom: LocalDate? = this.tom,
+        lovvalgsland: Land_iso2? = this.lovvalgsland,
+        bestemmelse: LovvalgBestemmelse? = this.bestemmelse,
+        tilleggsbestemmelse: LovvalgBestemmelse? = this.tilleggsbestemmelse,
+        innvilgelsesresultat: InnvilgelsesResultat? = this.innvilgelsesresultat,
+        medlemskapstype: Medlemskapstyper? = this.medlemskapstype,
+        dekning: Trygdedekninger? = this.dekning,
+        medlPeriodeID: Long? = this.medlPeriodeID,
+    ) = Lovvalgsperiode().apply {
+        this.id = id
+        this.behandlingsresultat = behandlingsresultat
+        this.fom = fom
+        this.tom = tom
+        this.lovvalgsland = lovvalgsland
+        this.bestemmelse = bestemmelse
+        this.tilleggsbestemmelse = tilleggsbestemmelse
+        this.innvilgelsesresultat = innvilgelsesresultat
+        this.medlemskapstype = medlemskapstype
+        this.dekning = dekning
+        this.medlPeriodeID = medlPeriodeID
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Lovvalgsperiode) return false

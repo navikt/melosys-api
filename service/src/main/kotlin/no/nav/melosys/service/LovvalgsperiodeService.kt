@@ -19,7 +19,6 @@ import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.LovvalgsperiodeRepository
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository
-import org.apache.commons.beanutils.BeanUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.jvm.optionals.getOrNull
@@ -157,12 +156,14 @@ class LovvalgsperiodeService(
         lovvalgsperiode: Lovvalgsperiode,
         behandlingsresultat: Behandlingsresultat,
     ): Lovvalgsperiode {
-        val kopi = BeanUtils.cloneBean(lovvalgsperiode) as Lovvalgsperiode
+        val kopi = lovvalgsperiode.copyEntity(
+            id = null,
+            behandlingsresultat = behandlingsresultat
+        )
         kopi.trygdeavgiftsperioder = mutableSetOf()
         behandlingsresultat.trygdeavgiftsperioder
             .map { kopierTrygdeavgiftsperiode(it) }
             .forEach(kopi::addTrygdeavgiftsperiode)
-        kopi.setBehandlingsresultat(behandlingsresultat)
         return kopi
     }
 
@@ -171,22 +172,27 @@ class LovvalgsperiodeService(
     ): Trygdeavgiftsperiode =
         trygdeavgiftsperiode.copyEntity(
             id = null,
-            grunnlagInntekstperiode = klonInntektsperiode(trygdeavgiftsperiode.grunnlagInntekstperiode),
+            grunnlagInntekstperiode = kopierInntektsperiode(trygdeavgiftsperiode.grunnlagInntekstperiode),
             grunnlagLovvalgsPeriode = null,
-            grunnlagSkatteforholdTilNorge = klonSkatteforhold(trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge),
+            grunnlagSkatteforholdTilNorge = kopierSkatteforhold(trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge),
         )
 
-    private fun klonInntektsperiode(inntektsperiode: Inntektsperiode?): Inntektsperiode? =
-        inntektsperiode?.let {
-            val kopi = BeanUtils.cloneBean(it) as Inntektsperiode
-            kopi.id = null
-            kopi
-        }
+    private fun kopierInntektsperiode(original: Inntektsperiode?): Inntektsperiode? =
+        original?.copyEntity(
+            null,
+            original.fomDato,
+            original.tomDato,
+            original.type,
+            original.avgiftspliktigMndInntekt,
+            original.avgiftspliktigTotalinntekt,
+            original.isArbeidsgiversavgiftBetalesTilSkatt
+        )
 
-    private fun klonSkatteforhold(skatteforholdTilNorge: SkatteforholdTilNorge?): SkatteforholdTilNorge? =
-        skatteforholdTilNorge?.let {
-            val kopi = BeanUtils.cloneBean(it) as SkatteforholdTilNorge
-            kopi.id = null
-            kopi
-        }
+    private fun kopierSkatteforhold(original: SkatteforholdTilNorge?): SkatteforholdTilNorge? =
+        original?.copyEntity(
+            null,
+            original.fomDato,
+            original.tomDato,
+            original.skatteplikttype
+        )
 }
