@@ -312,7 +312,7 @@ class InnvilgelseFtrlMapper(
                 it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
             )
         }.sortedByDescending { it.fom }
-        // Hvis toggle er på, filtrer bort perioder før inneværende år og returnerer kun den første perioden i inneværende år eller senere
+        // Returnerer kun den første (tidligste) perioden fra inneværende år eller senere, eller tom liste hvis ingen slike perioder finnes
         if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
             return trygdeavgiftsperioder.lastOrNull() { it.fom.year >= LocalDate.now().year }?.let { listOf(it) } ?: emptyList()
         }
