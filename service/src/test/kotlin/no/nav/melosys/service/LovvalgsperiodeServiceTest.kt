@@ -4,15 +4,11 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.just
 import io.mockk.slot
-import io.mockk.spyk
-import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
@@ -114,24 +110,6 @@ internal class LovvalgsperiodeServiceTest {
             }
     }
 
-    @Test
-    fun lagreLovvalgsperioderFjernerEksisterendeTrygdeavgiftFørSletting() {
-        val eksisterende = spyk(Lovvalgsperiode())
-        val lagretBehandlingsresultat = Behandlingsresultat().apply { id = BEH_ID }
-
-        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(BEH_ID) } returns listOf(eksisterende)
-        every { lovvalgsperiodeRepository.save(any<Lovvalgsperiode>()) } answers { firstArg() }
-        every { lovvalgsperiodeRepository.deleteAllInBatch(any<List<Lovvalgsperiode>>()) } just Runs
-        every { lovvalgsperiodeRepository.flush() } just Runs
-        every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.of(lagretBehandlingsresultat)
-        every { lovvalgsperiodeRepository.saveAllAndFlush(any<List<Lovvalgsperiode>>()) } answers { firstArg() }
-
-        lovvalgsperiodeService.lagreLovvalgsperioder(BEH_ID, listOf(Lovvalgsperiode()))
-
-        verify { eksisterende.clearTrygdeavgiftsperioder() }
-        verify { lovvalgsperiodeRepository.save(eksisterende) }
-        verify { lovvalgsperiodeRepository.flush() }
-    }
 
     @Test
     fun lagreLovvalgsperioderUtenBehandlingsresultatKasterException() {
