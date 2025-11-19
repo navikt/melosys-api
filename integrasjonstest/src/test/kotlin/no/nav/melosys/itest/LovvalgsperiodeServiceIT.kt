@@ -1,35 +1,19 @@
 package no.nav.melosys.itest
 
-import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.RegistreringsInfo
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.forTest
-import no.nav.melosys.domain.forTest
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
-import no.nav.melosys.domain.kodeverk.Land_iso2
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
-import no.nav.melosys.domain.kodeverk.Sakstemaer
-import no.nav.melosys.domain.kodeverk.Sakstyper
-import no.nav.melosys.domain.kodeverk.Saksstatuser
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
-import no.nav.melosys.repository.BehandlingRepository
-import no.nav.melosys.repository.BehandlingsresultatRepository
-import no.nav.melosys.repository.FagsakRepository
-import no.nav.melosys.repository.LovvalgsperiodeRepository
-import no.nav.melosys.repository.TidligereMedlemsperiodeRepository
+import no.nav.melosys.repository.*
 import no.nav.melosys.service.LovvalgsperiodeService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -37,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 class LovvalgsperiodeServiceIT(
     @Autowired
@@ -165,7 +149,7 @@ class LovvalgsperiodeServiceIT(
             status = Behandlingsstatus.UNDER_BEHANDLING
             type = Behandlingstyper.FØRSTEGANG
             tema = behandlingstema
-            behandlingsfrist = LocalDate.now().plusMonths(6)
+            behandlingsfrist = BEHANDLINGSFRIST
         }.also {
             it.leggTilRegisteringInfo()
         }
@@ -178,8 +162,8 @@ class LovvalgsperiodeServiceIT(
     ): Lovvalgsperiode {
         val lovvalgsperiode = Lovvalgsperiode.forTest {
             behandlingsresultat = lagretBehandlingsresultat
-            fom = LocalDate.now().minusMonths(6)
-            tom = LocalDate.now().minusMonths(3)
+            fom = EKSISTERENDE_LOVVALGSPERIODE_FOM
+            tom = EKSISTERENDE_LOVVALGSPERIODE_TOM
             lovvalgsland = Land_iso2.NO
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
@@ -189,8 +173,8 @@ class LovvalgsperiodeServiceIT(
         }.apply {
             addTrygdeavgiftsperiode(
                 Trygdeavgiftsperiode.forTest {
-                    periodeFra = LocalDate.now().minusMonths(6)
-                    periodeTil = LocalDate.now().minusMonths(5)
+                    periodeFra = TRYGDEAVGIFTSPERIODE_FOM
+                    periodeTil = TRYGDEAVGIFTSPERIODE_TOM
                     trygdeavgiftsbeløpMd = BigDecimal.valueOf(1000)
                     trygdesats = BigDecimal.ONE
                 }
@@ -201,8 +185,8 @@ class LovvalgsperiodeServiceIT(
     }
 
     private fun nyLovvalgsperiodeUtenTrygdeavgift() = Lovvalgsperiode.forTest {
-        fom = LocalDate.now()
-        tom = LocalDate.now().plusMonths(6)
+        fom = NY_LOVVALGSPERIODE_FOM
+        tom = NY_LOVVALGSPERIODE_TOM
         lovvalgsland = Land_iso2.NO
         bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E
         innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
@@ -214,12 +198,23 @@ class LovvalgsperiodeServiceIT(
     private fun RegistreringsInfo.leggTilRegisteringInfo() {
         registrertDato = Instant.now()
         endretDato = Instant.now()
-        registrertAv = "test"
-        endretAv = "test"
+        registrertAv = TEST_BRUKER
+        endretAv = TEST_BRUKER
     }
 
     private data class LagretLovvalgsperiodeMedResultat(
         val behandlingsresultat: Behandlingsresultat,
         val lovvalgsperiode: Lovvalgsperiode
     )
+
+    companion object {
+        private val NY_LOVVALGSPERIODE_FOM = LocalDate.of(2024, 1, 1)
+        private val NY_LOVVALGSPERIODE_TOM = LocalDate.of(2024, 6, 30)
+        private val TRYGDEAVGIFTSPERIODE_FOM = LocalDate.of(2024, 1, 1)
+        private val TRYGDEAVGIFTSPERIODE_TOM = LocalDate.of(2024, 1, 31)
+        private val EKSISTERENDE_LOVVALGSPERIODE_FOM = LocalDate.of(2023, 7, 1)
+        private val EKSISTERENDE_LOVVALGSPERIODE_TOM = LocalDate.of(2023, 10, 1)
+        private val BEHANDLINGSFRIST = LocalDate.of(2024, 12, 31)
+        private const val TEST_BRUKER = "test"
+    }
 }
