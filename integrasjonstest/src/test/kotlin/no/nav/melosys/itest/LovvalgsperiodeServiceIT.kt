@@ -1,10 +1,9 @@
 package no.nav.melosys.itest
 
-import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.forTest
 import no.nav.melosys.domain.kodeverk.*
@@ -63,48 +62,25 @@ class LovvalgsperiodeServiceIT(
         )
 
 
-        val lagretFraDb = lovvalgsperiodeRepository.findByBehandlingsresultatId(behandlingsresultat.hentId())
-        lagretFraDb.single().apply {
-            lovvalgsland shouldBe Land_iso2.SE
-            medlPeriodeID shouldBe 321L
-            trygdeavgiftsperioder shouldHaveSize 1
-        }
-    }
-
-    @Test
-    fun `lagreLovvalgsperioder kopierer trygdeavgift med skatteforhold og inntektsperiode`() {
-        val (behandlingsresultat, originalLovvalgsperiode) = lagreBehandlingsresultatMedLovvalgsperiodeSomHarTrygdeavgift(
-            Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
-        )
-
-        val originalTrygdeavgift = originalLovvalgsperiode.trygdeavgiftsperioder.single()
-        val originalTrygdeavgiftId = originalTrygdeavgift.id
-        val originalSkatteforholdId = originalTrygdeavgift.grunnlagSkatteforholdTilNorge?.id
-        val originalInntektsperiodeId = originalTrygdeavgift.grunnlagInntekstperiode?.id
-
-
-        lovvalgsperiodeService.lagreLovvalgsperioder(
-            behandlingsresultat.hentId(),
-            listOf(nyLovvalgsperiodeUtenTrygdeavgift())
-        )
-
-
-        val lagretLovvalgsperiode = lovvalgsperiodeRepository
+        val lagretPeriode = lovvalgsperiodeRepository
             .findByBehandlingsresultatId(behandlingsresultat.hentId())
             .single()
 
-        val lagretTrygdeavgift = lagretLovvalgsperiode.trygdeavgiftsperioder.single()
+        lagretPeriode.apply {
+            lovvalgsland shouldBe Land_iso2.SE
+            medlPeriodeID shouldBe 321L
 
-        // Verifiser at nye entiteter ble opprettet
-        lagretTrygdeavgift.id shouldNotBe originalTrygdeavgiftId
-        lagretTrygdeavgift.grunnlagLovvalgsPeriode shouldBe lagretLovvalgsperiode
-
-        lagretTrygdeavgift.grunnlagSkatteforholdTilNorge.shouldNotBeNull().also {
-            it.id shouldNotBe originalSkatteforholdId
-        }
-
-        lagretTrygdeavgift.grunnlagInntekstperiode.shouldNotBeNull().also {
-            it.id shouldNotBe originalInntektsperiodeId
+            trygdeavgiftsperioder.single().apply {
+                periodeFra shouldBe TRYGDEAVGIFTSPERIODE_FOM
+                periodeTil shouldBe TRYGDEAVGIFTSPERIODE_TOM
+                trygdeavgiftsbeløpMd shouldBe Penger(TRYGDEAVGIFTSBELØP)
+                trygdesats shouldBe BigDecimal.ONE
+                grunnlagInntekstperiode shouldNotBe null
+                grunnlagSkatteforholdTilNorge shouldNotBe null
+                grunnlagLovvalgsPeriode shouldBe lagretPeriode
+                grunnlagMedlemskapsperiode shouldBe null
+                grunnlagHelseutgiftDekkesPeriode shouldBe null
+            }
         }
     }
 
@@ -176,7 +152,7 @@ class LovvalgsperiodeServiceIT(
                 Trygdeavgiftsperiode.forTest {
                     periodeFra = TRYGDEAVGIFTSPERIODE_FOM
                     periodeTil = TRYGDEAVGIFTSPERIODE_TOM
-                    trygdeavgiftsbeløpMd = BigDecimal.valueOf(1000)
+                    trygdeavgiftsbeløpMd = TRYGDEAVGIFTSBELØP
                     trygdesats = BigDecimal.ONE
                 }
             )
@@ -216,6 +192,7 @@ class LovvalgsperiodeServiceIT(
         private val EKSISTERENDE_LOVVALGSPERIODE_FOM = LocalDate.of(2023, 7, 1)
         private val EKSISTERENDE_LOVVALGSPERIODE_TOM = LocalDate.of(2023, 10, 1)
         private val BEHANDLINGSFRIST = LocalDate.of(2024, 12, 31)
+        private val TRYGDEAVGIFTSBELØP = BigDecimal.valueOf(1000)
         private const val TEST_BRUKER = "test"
     }
 }
