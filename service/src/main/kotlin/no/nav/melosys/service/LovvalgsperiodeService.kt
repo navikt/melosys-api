@@ -78,7 +78,7 @@ class LovvalgsperiodeService(
         val behandlingsresultat = behandlingsresultatRepo.findById(behandlingID)
             .orElseThrow { IllegalStateException("Behandling med id $behandlingID fins ikke.") }
 
-        // Må kopiere FØR sletting siden trygdeavgiftsperioder hentes fra eksisterende lovvalgsperioder
+        // Må kopiere FØR sletting siden trygdeavgiftsperioder kopieres fra eksisterende lovvalgsperioder
         val nyePerioder = lovvalgsperioder.map {
             kopierLovvalgsperiodeSamtEksisterendeTrygdeavgift(it, behandlingsresultat)
         }
