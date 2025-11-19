@@ -49,47 +49,45 @@ class LovvalgsperiodeServiceIT(
     }
 
     @Test
-    fun `lagreLovvalgsperioder erstatter periode selv om eksisterende har trygdeavgift`() {
+    fun `lagreLovvalgsperioder erstatter eksisterende periode med trygdeavgift`() {
         val (behandlingsresultat, _) = lagreBehandlingsresultatMedLovvalgsperiodeSomHarTrygdeavgift()
         val nyLovvalgsperiode = nyLovvalgsperiodeUtenTrygdeavgift().apply {
             setLovvalgsland(Land_iso2.SE)
             setMedlPeriodeID(321L)
         }
 
-        val resultat = lovvalgsperiodeService.lagreLovvalgsperioder(
+
+        lovvalgsperiodeService.lagreLovvalgsperioder(
             behandlingsresultat.hentId(),
             listOf(nyLovvalgsperiode)
         )
 
-        resultat shouldHaveSize 1
-        val lagret = resultat.single()
-        lagret.lovvalgsland shouldBe Land_iso2.SE
-        lagret.medlPeriodeID shouldBe 321L
 
-        val lagredeFraRepo = lovvalgsperiodeRepository.findByBehandlingsresultatId(behandlingsresultat.hentId())
-        lagredeFraRepo shouldHaveSize 1
-        lagredeFraRepo.single().lovvalgsland shouldBe Land_iso2.SE
-        lagredeFraRepo.single().trygdeavgiftsperioder shouldHaveSize 1
+        val lagretFraDb = lovvalgsperiodeRepository.findByBehandlingsresultatId(behandlingsresultat.hentId())
+        lagretFraDb.single().apply {
+            lovvalgsland shouldBe Land_iso2.SE
+            medlPeriodeID shouldBe 321L
+            trygdeavgiftsperioder shouldHaveSize 1
+        }
     }
 
     @Test
-    fun `lagreLovvalgsperioder kopierer trygdeavgiftsperioder med skatteforhold og inntektsperiode`() {
+    fun `lagreLovvalgsperioder kopierer trygdeavgift med skatteforhold og inntektsperiode`() {
         val (behandlingsresultat, originalLovvalgsperiode) = lagreBehandlingsresultatMedLovvalgsperiodeSomHarTrygdeavgift(
             Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
         )
 
         val originalTrygdeavgift = originalLovvalgsperiode.trygdeavgiftsperioder.single()
-
         val originalTrygdeavgiftId = originalTrygdeavgift.id
         val originalSkatteforholdId = originalTrygdeavgift.grunnlagSkatteforholdTilNorge?.id
         val originalInntektsperiodeId = originalTrygdeavgift.grunnlagInntekstperiode?.id
 
-        val resultat = lovvalgsperiodeService.lagreLovvalgsperioder(
+
+        lovvalgsperiodeService.lagreLovvalgsperioder(
             behandlingsresultat.hentId(),
             listOf(nyLovvalgsperiodeUtenTrygdeavgift())
         )
 
-        resultat shouldHaveSize 1
 
         val lagretLovvalgsperiode = lovvalgsperiodeRepository
             .findByBehandlingsresultatId(behandlingsresultat.hentId())
@@ -97,14 +95,17 @@ class LovvalgsperiodeServiceIT(
 
         val lagretTrygdeavgift = lagretLovvalgsperiode.trygdeavgiftsperioder.single()
 
+        // Verifiser at nye entiteter ble opprettet
         lagretTrygdeavgift.id shouldNotBe originalTrygdeavgiftId
         lagretTrygdeavgift.grunnlagLovvalgsPeriode shouldBe lagretLovvalgsperiode
 
-        lagretTrygdeavgift.grunnlagSkatteforholdTilNorge.shouldNotBeNull()
-            .id shouldNotBe originalSkatteforholdId
+        lagretTrygdeavgift.grunnlagSkatteforholdTilNorge.shouldNotBeNull().also {
+            it.id shouldNotBe originalSkatteforholdId
+        }
 
-        lagretTrygdeavgift.grunnlagInntekstperiode.shouldNotBeNull()
-            .id shouldNotBe originalInntektsperiodeId
+        lagretTrygdeavgift.grunnlagInntekstperiode.shouldNotBeNull().also {
+            it.id shouldNotBe originalInntektsperiodeId
+        }
     }
 
     private fun lagreBehandlingsresultatMedLovvalgsperiodeSomHarTrygdeavgift(
