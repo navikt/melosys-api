@@ -106,6 +106,26 @@ public class Inntektsperiode implements ErPeriode {
         return trygdeavgiftsperioder;
     }
 
+    public Inntektsperiode copyEntity(
+        Long id,
+        LocalDate fomDato,
+        LocalDate tomDato,
+        Inntektskildetype type,
+        Penger avgiftspliktigMndInntekt,
+        Penger avgiftspliktigTotalinntekt,
+        boolean arbeidsgiversavgiftBetalesTilSkatt
+    ) {
+        Inntektsperiode copy = new Inntektsperiode();
+        copy.id = id;
+        copy.fomDato = fomDato;
+        copy.tomDato = tomDato;
+        copy.type = type;
+        copy.avgiftspliktigMndInntekt = avgiftspliktigMndInntekt;
+        copy.avgiftspliktigTotalinntekt = avgiftspliktigTotalinntekt;
+        copy.arbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetalesTilSkatt;
+        return copy;
+    }
+
     @Override
     public LocalDate getFom() {
         return getFomDato();

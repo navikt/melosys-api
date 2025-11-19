@@ -4,6 +4,9 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.TidligereMedlemsperiode
+import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca
@@ -16,7 +19,6 @@ import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.LovvalgsperiodeRepository
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository
-import org.apache.commons.beanutils.BeanUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.jvm.optionals.getOrNull
@@ -70,16 +72,34 @@ class LovvalgsperiodeService(
 
     @Transactional
     fun lagreLovvalgsperioder(
-        behandlingsid: Long,
+        behandlingID: Long,
         lovvalgsperioder: Collection<Lovvalgsperiode>
     ): Collection<Lovvalgsperiode> {
-        val behandlingsresultat = behandlingsresultatRepo.findById(behandlingsid)
-            .orElseThrow { IllegalStateException("Behandling med id $behandlingsid fins ikke.") }
+        val behandlingsresultat = behandlingsresultatRepo.findById(behandlingID)
+            .orElseThrow { IllegalStateException("Behandling med id $behandlingID fins ikke.") }
 
-        lovvalgsperiodeRepo.deleteByBehandlingsresultatId(behandlingsresultat.hentId())
-        val lovvalgsperioderKopi = lovvalgsperioder.map { kopierLovvalgsperiodeMedBehandlingsResultat(it, behandlingsresultat) }
+        // Må kopiere FØR sletting siden trygdeavgiftsperioder kopieres fra eksisterende lovvalgsperioder
+        val nyePerioder = lovvalgsperioder.map {
+            kopierLovvalgsperiodeSamtEksisterendeTrygdeavgift(it, behandlingsresultat)
+        }
 
-        return lovvalgsperiodeRepo.saveAllAndFlush(lovvalgsperioderKopi)
+        slettEksisterendeLovvalgsperioder(behandlingsresultat)
+
+        return lovvalgsperiodeRepo.saveAllAndFlush(nyePerioder)
+    }
+
+    private fun slettEksisterendeLovvalgsperioder(behandlingsresultat: Behandlingsresultat) {
+        val eksisterende = lovvalgsperiodeRepo.findByBehandlingsresultatId(behandlingsresultat.hentId())
+        if (eksisterende.isEmpty()) {
+            return
+        }
+
+        // 1: Fjern trygdeavgiftsperioder og persister endringen
+        eksisterende.forEach { it.clearTrygdeavgiftsperioder() }
+        lovvalgsperiodeRepo.saveAllAndFlush(eksisterende)
+
+        // 2: Slett selve periodene etter at children er slettet
+        lovvalgsperiodeRepo.deleteAllInBatch(eksisterende)
     }
 
     fun hentTidligereLovvalgsperioder(behandling: Behandling): Collection<Lovvalgsperiode> {
@@ -137,12 +157,49 @@ class LovvalgsperiodeService(
             else -> false
         }
 
-    private fun kopierLovvalgsperiodeMedBehandlingsResultat(
+    private fun kopierLovvalgsperiodeSamtEksisterendeTrygdeavgift(
         lovvalgsperiode: Lovvalgsperiode,
-        behandlingsresultat: Behandlingsresultat
+        behandlingsresultat: Behandlingsresultat,
     ): Lovvalgsperiode {
-        val kopi = BeanUtils.cloneBean(lovvalgsperiode) as Lovvalgsperiode
-        kopi.behandlingsresultat = behandlingsresultat
-        return kopi
+        val nyLovvalgsperiode = lovvalgsperiode.copyEntity(
+            id = null,
+            behandlingsresultat = behandlingsresultat
+        )
+
+        nyLovvalgsperiode.trygdeavgiftsperioder = mutableSetOf()
+        behandlingsresultat.trygdeavgiftsperioder
+            .map { kopierTrygdeavgiftsperiode(it) }
+            .forEach(nyLovvalgsperiode::addTrygdeavgiftsperiode)
+
+        return nyLovvalgsperiode
     }
+
+    private fun kopierTrygdeavgiftsperiode(
+        trygdeavgiftsperiode: Trygdeavgiftsperiode,
+    ): Trygdeavgiftsperiode =
+        trygdeavgiftsperiode.copyEntity(
+            id = null,
+            grunnlagInntekstperiode = kopierInntektsperiode(trygdeavgiftsperiode.grunnlagInntekstperiode),
+            grunnlagLovvalgsPeriode = null,
+            grunnlagSkatteforholdTilNorge = kopierSkatteforhold(trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge),
+        )
+
+    private fun kopierInntektsperiode(original: Inntektsperiode?): Inntektsperiode? =
+        original?.copyEntity(
+            null,
+            original.fomDato,
+            original.tomDato,
+            original.type,
+            original.avgiftspliktigMndInntekt,
+            original.avgiftspliktigTotalinntekt,
+            original.isArbeidsgiversavgiftBetalesTilSkatt
+        )
+
+    private fun kopierSkatteforhold(original: SkatteforholdTilNorge?): SkatteforholdTilNorge? =
+        original?.copyEntity(
+            null,
+            original.fomDato,
+            original.tomDato,
+            original.skatteplikttype
+        )
 }

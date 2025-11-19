@@ -530,7 +530,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     SkatteforholdTilNorge().apply {
                         fomDato = LocalDate.now()
                         tomDato = LocalDate.now().plusDays(5)
-                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
                     }
                 ), listOf(Inntektsperiode().apply {
                     fomDato = LocalDate.now()
@@ -671,7 +671,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     SkatteforholdTilNorge().apply {
                         fomDato = LocalDate.now()
                         tomDato = LocalDate.now().plusDays(1)
-                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
                     }
                 ),
                 listOf(Inntektsperiode().apply {
@@ -747,7 +747,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     SkatteforholdTilNorge().apply {
                         fomDato = LocalDate.now().plusDays(0)
                         tomDato = LocalDate.now().plusDays(3)
-                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
                     }
                 ), listOf(Inntektsperiode().apply {
                     fomDato = LocalDate.now()
@@ -771,7 +771,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     SkatteforholdTilNorge().apply {
                         fomDato = LocalDate.now().withMonth(1).withDayOfMonth(1)
                         tomDato = LocalDate.now().plusDays(5)
-                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
                     }
                 ), listOf(Inntektsperiode().apply {
                     fomDato = LocalDate.now().withMonth(1).withDayOfMonth(1)

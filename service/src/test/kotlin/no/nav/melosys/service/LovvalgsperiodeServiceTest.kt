@@ -4,12 +4,10 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.just
 import io.mockk.slot
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
@@ -100,7 +98,7 @@ internal class LovvalgsperiodeServiceTest {
     @Test
     fun lagreLovvalgsperioderReturnererLovvalgsperiodeMedBehandlingsresultat() {
         val lagretBehandlingsresultat = Behandlingsresultat().apply { id = BEH_ID }
-        every { lovvalgsperiodeRepository.deleteByBehandlingsresultatId(BEH_ID) } just Runs
+        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(BEH_ID) } returns emptyList()
         every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.of(lagretBehandlingsresultat)
         every { lovvalgsperiodeRepository.saveAllAndFlush(any<List<Lovvalgsperiode>>()) } answers { firstArg() }
 
@@ -111,6 +109,7 @@ internal class LovvalgsperiodeServiceTest {
                 harBehandlingsResultatMedRiktigId(this) shouldBe true
             }
     }
+
 
     @Test
     fun lagreLovvalgsperioderUtenBehandlingsresultatKasterException() {
