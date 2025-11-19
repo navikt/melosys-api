@@ -72,27 +72,35 @@ class LovvalgsperiodeService(
 
     @Transactional
     fun lagreLovvalgsperioder(
-        behandlingsid: Long,
+        behandlingID: Long,
         lovvalgsperioder: Collection<Lovvalgsperiode>
     ): Collection<Lovvalgsperiode> {
-        val behandlingsresultat = behandlingsresultatRepo.findById(behandlingsid)
-            .orElseThrow { IllegalStateException("Behandling med id $behandlingsid fins ikke.") }
+        val behandlingsresultat = behandlingsresultatRepo.findById(behandlingID)
+            .orElseThrow { IllegalStateException("Behandling med id $behandlingID fins ikke.") }
 
-        val eksisterende = lovvalgsperiodeRepo.findByBehandlingsresultatId(behandlingsresultat.hentId())
-        val lovvalgsperioderKopi = lovvalgsperioder.map { kopierLovvalgsperiodeMedBehandlingsResultat(it, behandlingsresultat) }
-
-        if (eksisterende.isNotEmpty()) {
-            // 1: Fjern trygdeavgiftsperioder og persister endringen
-            eksisterende.forEach { lovvalgsperiode ->
-                lovvalgsperiode.clearTrygdeavgiftsperioder()
-                lovvalgsperiodeRepo.saveAndFlush(lovvalgsperiode)
-            }
-
-            // 2: Slett selve periodene etter at children er slettet
-            lovvalgsperiodeRepo.deleteAllInBatch(eksisterende)
+        val nyePerioder = lovvalgsperioder.map {
+            kopierLovvalgsperiodeMedBehandlingsResultat(it, behandlingsresultat)
         }
 
-        return lovvalgsperiodeRepo.saveAllAndFlush(lovvalgsperioderKopi)
+        slettEksisterendeLovvalgsperioder(behandlingsresultat)
+
+        return lovvalgsperiodeRepo.saveAllAndFlush(nyePerioder)
+    }
+
+    private fun slettEksisterendeLovvalgsperioder(behandlingsresultat: Behandlingsresultat) {
+        val eksisterende = lovvalgsperiodeRepo.findByBehandlingsresultatId(behandlingsresultat.hentId())
+        if (eksisterende.isEmpty()) {
+            return
+        }
+
+        // 1: Fjern trygdeavgiftsperioder og persister endringen
+        eksisterende.forEach { periode ->
+            periode.clearTrygdeavgiftsperioder()
+            lovvalgsperiodeRepo.saveAndFlush(periode)
+        }
+
+        // 2: Slett selve periodene etter at children er slettet
+        lovvalgsperiodeRepo.deleteAllInBatch(eksisterende)
     }
 
     fun hentTidligereLovvalgsperioder(behandling: Behandling): Collection<Lovvalgsperiode> {
