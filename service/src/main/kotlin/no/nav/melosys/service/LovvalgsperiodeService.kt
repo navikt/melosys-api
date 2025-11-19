@@ -95,10 +95,8 @@ class LovvalgsperiodeService(
         }
 
         // 1: Fjern trygdeavgiftsperioder og persister endringen
-        eksisterende.forEach { periode ->
-            periode.clearTrygdeavgiftsperioder()
-            lovvalgsperiodeRepo.saveAndFlush(periode)
-        }
+        eksisterende.forEach { it.clearTrygdeavgiftsperioder() }
+        lovvalgsperiodeRepo.saveAllAndFlush(eksisterende)
 
         // 2: Slett selve periodene etter at children er slettet
         lovvalgsperiodeRepo.deleteAllInBatch(eksisterende)
