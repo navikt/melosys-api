@@ -31,7 +31,7 @@ class BehandlingsresultatService(
                 clearMedlemskapsperioder()
                 clearTrygdevgiftPåHelseutgiftDekkesPeriode()
                 if (!erEøsPensjonist()) avklartefakta.clear()
-                lovvalgsperioder.clear()
+                clearLovvalgsperioder()
                 vilkaarsresultater.clear()
                 utfallRegistreringUnntak = null
                 begrunnelseFritekst = null

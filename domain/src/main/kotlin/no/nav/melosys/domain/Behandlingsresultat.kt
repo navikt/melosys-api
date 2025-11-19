@@ -144,6 +144,12 @@ open class Behandlingsresultat : RegistreringsInfo() {
         medlemskapsperioder.clear()
     }
 
+    fun clearLovvalgsperioder() {
+        lovvalgsperioder.forEach { it.setBehandlingsresultat(null) }
+        lovvalgsperioder.forEach(Lovvalgsperiode::clearTrygdeavgiftsperioder)
+        lovvalgsperioder.clear()
+    }
+
     fun clearTrygdevgiftPåHelseutgiftDekkesPeriode() {
         helseutgiftDekkesPeriode?.clearTrygdeavgiftsperioder()
     }
