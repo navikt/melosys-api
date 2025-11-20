@@ -28,11 +28,12 @@ class TrygdeavgiftMottakerService(private val behandlingsresultatService: Behand
         return getTrygdeavgiftMottaker(trygdeavgiftsperioder)
     }
 
-    fun getTrygdeavgiftMottaker(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>) =
-        getTrygdeavgiftMottaker(
+    fun getTrygdeavgiftMottaker(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): Trygdeavgiftmottaker {
+        return getTrygdeavgiftMottaker(
             trygdeavgiftsperioder.mapNotNull { it.grunnlagSkatteforholdTilNorge }.toSet(),
             trygdeavgiftsperioder.mapNotNull { it.grunnlagInntekstperiode }.toSet()
         )
+    }
 
     @Deprecated("Behøver kun trygdeavgiftsperioder")
     fun getTrygdeavgiftMottaker(behandlingsresultat: Behandlingsresultat) =

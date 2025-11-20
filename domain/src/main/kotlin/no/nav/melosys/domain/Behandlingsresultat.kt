@@ -158,13 +158,13 @@ open class Behandlingsresultat : RegistreringsInfo() {
         behandling?.erEøsPensjonist() ?: false
 
 
-    fun utledSkatteplikttype(): Skatteplikttype {
+    fun utledSkatteplikttype(): Skatteplikttype? {
         val trygdeavgiftsperiode = trygdeavgiftsperioder.firstOrNull()
         val erÅpenSluttdato = utledAvgiftspliktigperioderTom() == null
         if (trygdeavgiftsperiode == null && erÅpenSluttdato) {
             return Skatteplikttype.SKATTEPLIKTIG
         } else if (trygdeavgiftsperiode == null) {
-            throw RuntimeException("Trygdeavgiftsperiode ikke funnet, og det er ikke åpen sluttdato, id = $id")
+            return null
         }
 
         return trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge?.skatteplikttype
