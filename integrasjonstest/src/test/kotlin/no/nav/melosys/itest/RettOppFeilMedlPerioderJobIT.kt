@@ -2,6 +2,7 @@ package no.nav.melosys.itest
 
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.BehandlingsresultatTestFactory
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -27,7 +28,7 @@ class RettOppFeilMedlPerioderJobIT(
         fun `skal finne behandling med LOVVALG_AVKLART, HENLEGGELSE og BESLUTNING_LOVVALG_ANNET_LAND`() {
             val saksnummer = "MEL-FEIL-STATUS"
 
-            lagBehandlingsresultat(saksnummer, Saksstatuser.LOVVALG_AVKLART)
+            lagBehandlingsresultat(saksnummer)
 
             val behandlinger = rettOppFeilMedlPerioderRepository.finnBehandlingerMedFeilStatus()
 
@@ -39,7 +40,13 @@ class RettOppFeilMedlPerioderJobIT(
         fun `skal ikke finne behandling med korrekt ANNULLERT status`() {
             val saksnummer = "MEL-KORREKT-STATUS"
 
-            lagBehandlingsresultat(saksnummer, Saksstatuser.ANNULLERT)
+            lagBehandlingsresultat(saksnummer) {
+                behandling {
+                    fagsak {
+                        status = Saksstatuser.ANNULLERT
+                    }
+                }
+            }
 
             val behandlinger = rettOppFeilMedlPerioderRepository.finnBehandlingerMedFeilStatus()
 
@@ -51,7 +58,11 @@ class RettOppFeilMedlPerioderJobIT(
         fun `skal ikke finne behandling med annet tema enn BESLUTNING_LOVVALG_ANNET_LAND`() {
             val saksnummer = "MEL-ANNET-TEMA"
 
-            lagBehandlingsresultatMedTema(saksnummer, Behandlingstema.BESLUTNING_LOVVALG_NORGE)
+            lagBehandlingsresultat(saksnummer) {
+                behandling {
+                    tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+                }
+            }
 
             val behandlinger = rettOppFeilMedlPerioderRepository.finnBehandlingerMedFeilStatus()
 
@@ -63,7 +74,9 @@ class RettOppFeilMedlPerioderJobIT(
         fun `skal ikke finne behandling med annet behandlingsresultat enn HENLEGGELSE`() {
             val saksnummer = "MEL-IKKE-HENLEGGELSE"
 
-            lagBehandlingsresultatMedType(saksnummer, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND)
+            lagBehandlingsresultat(saksnummer) {
+                type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            }
 
             val behandlinger = rettOppFeilMedlPerioderRepository.finnBehandlingerMedFeilStatus()
 
@@ -72,67 +85,27 @@ class RettOppFeilMedlPerioderJobIT(
         }
     }
 
-
     private fun lagBehandlingsresultat(
         saksnummer: String,
-        fagsakStatus: Saksstatuser
-    ): Behandlingsresultat {
-        return Behandlingsresultat.forTest {
-            behandling {
-                tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
-                status = Behandlingsstatus.AVSLUTTET
-                fagsak {
-                    this.saksnummer = saksnummer
-                    type = Sakstyper.EU_EOS
-                    status = fagsakStatus
-                }
+        block: BehandlingsresultatTestFactory.Builder.() -> Unit = {}
+    ) = Behandlingsresultat.forTest {
+        behandling {
+            tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
+            status = Behandlingsstatus.AVSLUTTET
+            fagsak {
+                this.saksnummer = saksnummer
+                type = Sakstyper.EU_EOS
+                status = Saksstatuser.LOVVALG_AVKLART
             }
-            type = Behandlingsresultattyper.HENLEGGELSE
-        }.also { saveBehandlingsresultat(it, saksnummer) }
-    }
-
-    private fun lagBehandlingsresultatMedTema(
-        saksnummer: String,
-        behandlingstema: Behandlingstema
-    ): Behandlingsresultat {
-        return Behandlingsresultat.forTest {
-            behandling {
-                tema = behandlingstema
-                status = Behandlingsstatus.AVSLUTTET
-                fagsak {
-                    this.saksnummer = saksnummer
-                    type = Sakstyper.EU_EOS
-                    status = Saksstatuser.LOVVALG_AVKLART
-                }
-            }
-            type = Behandlingsresultattyper.HENLEGGELSE
-        }.also { saveBehandlingsresultat(it, saksnummer) }
-    }
-
-    private fun lagBehandlingsresultatMedType(
-        saksnummer: String,
-        resultatType: Behandlingsresultattyper
-    ): Behandlingsresultat {
-        return Behandlingsresultat.forTest {
-            behandling {
-                tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
-                status = Behandlingsstatus.AVSLUTTET
-                fagsak {
-                    this.saksnummer = saksnummer
-                    type = Sakstyper.EU_EOS
-                    status = Saksstatuser.LOVVALG_AVKLART
-                }
-            }
-            type = resultatType
-        }.also { saveBehandlingsresultat(it, saksnummer) }
-    }
-
-    private fun saveBehandlingsresultat(br: Behandlingsresultat, saksnummer: String) {
-        val fagsak = br.hentBehandling().fagsak
-        br.hentBehandling().fagsak.behandlinger.clear()
+        }
+        type = Behandlingsresultattyper.HENLEGGELSE
+        block()
+    }.also {
+        val fagsak = it.hentBehandling().fagsak
+        it.hentBehandling().fagsak.behandlinger.clear()
 
         fagsakRepository.save(fagsak)
         addCleanUpAction { slettSakMedAvhengigheter(saksnummer) }
-        behandlingsresultatRepository.save(br)
+        behandlingsresultatRepository.save(it)
     }
 }
