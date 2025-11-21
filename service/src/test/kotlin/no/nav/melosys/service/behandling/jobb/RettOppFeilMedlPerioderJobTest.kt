@@ -9,7 +9,6 @@ import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.BucInformasjon
 import no.nav.melosys.domain.eessi.SedInformasjon
 import no.nav.melosys.domain.kodeverk.Saksstatuser
-import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.sed.EessiService
 import no.nav.melosys.service.medl.MedlPeriodeService
@@ -23,7 +22,6 @@ class RettOppFeilMedlPerioderJobTest {
     private val repository = mockk<RettOppFeilMedlPerioderRepository>()
     private val eessiService = mockk<EessiService>()
     private val fagsakService = mockk<FagsakService>()
-    private val behandlingService = mockk<BehandlingService>()
     private val behandlingsresultatService = mockk<BehandlingsresultatService>()
     private val medlPeriodeService = mockk<MedlPeriodeService>()
 
@@ -35,7 +33,6 @@ class RettOppFeilMedlPerioderJobTest {
             repository,
             eessiService,
             fagsakService,
-            behandlingService,
             behandlingsresultatService,
             medlPeriodeService
         )
