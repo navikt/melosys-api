@@ -99,6 +99,7 @@
         <jetbrains.annotations.version>21.0.1</jetbrains.annotations.version>
         <snappy.java.version>1.1.10.8</snappy.java.version>
         <mockito.inline.version>5.2.0</mockito.inline.version>
+        <jacoco.version>0.8.14</jacoco.version>
         <springmockk.version>4.0.2</springmockk.version>
         <httpclient5.version>5.5.1</httpclient5.version>
         <commons.beanutils.version>1.11.0</commons.beanutils.version>
@@ -793,9 +794,36 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
                     <configuration>
-                        <argLine>-Xms256m -Dfile.encoding=UTF-8</argLine>
+                        <argLine>@{argLine} -Xms256m -Dfile.encoding=UTF-8</argLine>
                         <trimStackTrace>false</trimStackTrace>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.version}</version>
+                    <executions>
+                        <execution>
+                            <id>prepare-agent</id>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>report</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                            <configuration>
+                                <formats>
+                                    <format>HTML</format>
+                                    <format>CSV</format>
+                                    <format>XML</format>
+                                </formats>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -829,6 +857,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
