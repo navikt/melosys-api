@@ -15,12 +15,12 @@ import org.springframework.data.repository.CrudRepository
 interface RettOppFeilMedlPerioderRepository : CrudRepository<Behandling, Long> {
 
     @Query("""
-        SELECT b FROM Behandling b
-        JOIN FETCH b.fagsak f
-        JOIN b.behandlingsresultat br
-        WHERE f.status = no.nav.melosys.domain.kodeverk.Saksstatuser.LOVVALG_AVKLART
-        AND br.type = no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.HENLEGGELSE
-        AND b.behandlingsTema = no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
+        SELECT b FROM Behandlingsresultat br
+        JOIN br.behandling b
+        JOIN b.fagsak f
+        WHERE f.status = 'LOVVALG_AVKLART'
+        AND br.type = 'HENLEGGELSE'
+        AND b.tema = 'BESLUTNING_LOVVALG_ANNET_LAND'
         ORDER BY b.endretDato DESC
     """)
     fun finnBehandlingerMedFeilStatus(): List<Behandling>
