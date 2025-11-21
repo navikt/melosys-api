@@ -3,10 +3,7 @@ package no.nav.melosys.service.behandling.jobb
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Saksstatuser
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.service.JobMonitor
-import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.sed.EessiService
 import no.nav.melosys.service.medl.MedlPeriodeService
@@ -15,8 +12,7 @@ import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 private val log = KotlinLogging.logger { }
 
@@ -35,7 +31,6 @@ class RettOppFeilMedlPerioderJob(
     private val rettOppFeilMedlPerioderRepository: RettOppFeilMedlPerioderRepository,
     private val eessiService: EessiService,
     private val fagsakService: FagsakService,
-    private val behandlingService: BehandlingService,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val medlPeriodeService: MedlPeriodeService
 ) {
@@ -77,14 +72,14 @@ class RettOppFeilMedlPerioderJob(
         val saksnummer = behandling.fagsak.saksnummer
         val arkivsakID = behandling.fagsak.gsakSaksnummer
 
-        // Sjekk om behandlingen faktisk ble invalidert av X008
+        // Sjekk om behandlingen faktisk ble invalidert (X006/X008)
         if (arkivsakID == null) {
             log.warn { "Sak $saksnummer mangler gsakSaksnummer, hopper over" }
             manglerArkivsakId++
             return
         }
 
-        val erInvalidert = erBehandlingInvalidertAvX008(behandling, arkivsakID)
+        val erInvalidert = erSedInvalidertIEessi(behandling, arkivsakID)
 
         if (!erInvalidert) {
             log.info { "Behandling ${behandling.id} (sak $saksnummer) er ikke invalidert i EESSI, hopper over" }
@@ -101,7 +96,7 @@ class RettOppFeilMedlPerioderJob(
         }
     }
 
-    private fun erBehandlingInvalidertAvX008(behandling: Behandling, arkivsakID: Long): Boolean {
+    private fun erSedInvalidertIEessi(behandling: Behandling, arkivsakID: Long): Boolean {
         val sedDokument = behandling.finnSedDokument()
         if (sedDokument.isEmpty) {
             log.debug { "Behandling ${behandling.id} har ingen SED-dokument" }
@@ -159,7 +154,7 @@ class RettOppFeilMedlPerioderJob(
 
     fun stopp() = jobMonitor.stop()
 
-    inner class JobStatus(
+    class JobStatus(
         @Volatile var antallFunnet: Int = 0,
         @Volatile var manglerArkivsakId: Int = 0,
         @Volatile var ikkeInvalidertIEessi: Int = 0,
