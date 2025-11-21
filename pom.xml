@@ -819,6 +819,7 @@
                                 <formats>
                                     <format>HTML</format>
                                     <format>CSV</format>
+                                    <format>XML</format>
                                 </formats>
                             </configuration>
                         </execution>
