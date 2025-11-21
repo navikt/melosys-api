@@ -156,12 +156,7 @@ class FtrlVedtakService(
             return oppdaterBehandlingsresultatForOpphørt(behandling.id, request)
         }
 
-        val erDelvisOpphør = behandlingsresultat.medlemskapsperioder.any { it.erOpphørt() }
-        behandlingsresultat.type = if (erDelvisOpphør) {
-            Behandlingsresultattyper.DELVIS_OPPHØRT
-        } else {
-            Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-        }
+        behandlingsresultat.type = utledBehandlingsresultatType(behandlingsresultat, request)
         behandlingsresultat.settVedtakMetadata(request.vedtakstype, LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong()))
         behandlingsresultat.nyVurderingBakgrunn = request.nyVurderingBakgrunn
         behandlingsresultat.begrunnelseFritekst = request.begrunnelseFritekst
@@ -170,6 +165,23 @@ class FtrlVedtakService(
         behandlingsresultat.fastsattAvLand = Land_iso2.NO
 
         return behandlingsresultatService.lagre(behandlingsresultat)
+    }
+
+    private fun utledBehandlingsresultatType(
+        behandlingsresultat: Behandlingsresultat,
+        request: FattVedtakRequest
+    ): Behandlingsresultattyper {
+        // AVSLAG_MANGLENDE_OPPL er eksplisitt valg av saksbehandler
+        if (request.behandlingsresultatTypeKode == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
+            return Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL
+        }
+
+        val erDelvisOpphør = behandlingsresultat.medlemskapsperioder.any { it.erOpphørt() }
+        return if (erDelvisOpphør) {
+            Behandlingsresultattyper.DELVIS_OPPHØRT
+        } else {
+            Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+        }
     }
 
     private fun oppdaterBehandlingsresultatForOpphørt(behandlingID: Long, request: FattVedtakRequest): Behandlingsresultat {

@@ -440,19 +440,21 @@ class FtrlVedtakServiceTest {
     }
 
     @Test
-    fun fattVedtak_opphørt_manglerAvklartFakta_kasterFeil() {
-        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns Behandlingsresultat()
-        val request = lagFattVedtakRequest(
-            type = Behandlingsresultattyper.OPPHØRT,
-            begrunnelseFritekst = "fritekst for begrunnelse",
-            opphørtDato = LocalDate.now()
-        )
-        val behandling = lagBehandling()
+    fun `fattVedtak uten avklartefakta eller opphørte perioder gir MEDLEM_I_FOLKETRYGDEN`() {
+        val behandlingsresultat = Behandlingsresultat().apply {
+            medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
+                medlemskapstype = Medlemskapstyper.PLIKTIG
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            })
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
+        every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
+        val request = lagFattVedtakRequest(type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, begrunnelseFritekst = "fritekst for begrunnelse")
 
+        ftrlVedtakService.fattVedtak(lagBehandling(), request)
 
-        shouldThrow<FunksjonellException> {
-            ftrlVedtakService.fattVedtak(behandling, request)
-        }.shouldHaveMessage("Forventer at fullstendigManglendeInnbetaling er satt ved fatting av vedtak for behandlingstype OPPHØRT")
+        verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
+        behandlingsresultatSlot.captured.type shouldBe Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
     }
 
     @Test
