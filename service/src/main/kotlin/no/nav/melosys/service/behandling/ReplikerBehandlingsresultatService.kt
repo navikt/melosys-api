@@ -36,7 +36,7 @@ class ReplikerBehandlingsresultatService(
         behandlingsresultatReplika.utfallRegistreringUnntak = null
         behandlingsresultatReplika.utfallUtpeking = null
         behandlingsresultatReplika.behandlingsmåte = Behandlingsmaate.MANUELT
-        behandlingsresultatReplika.type = Behandlingsresultattyper.IKKE_FASTSATT
+        behandlingsresultatReplika.type = behandlingsresultatOriginal.type
 
         replikerAvklartefakta(behandlingsresultatOriginal, behandlingsresultatReplika)
         replikerLovvalgsperioder(behandlingsresultatOriginal, behandlingsresultatReplika)
