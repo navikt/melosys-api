@@ -34,7 +34,7 @@ class FtrlVedtakService(
         val behandlingID = behandling.id
         log.info("Fatter vedtak for (FTRL) sak: ${behandling.fagsak.saksnummer} behandling: $behandlingID")
 
-        val behandlingsresultat = oppdaterBehandlingsresultat(behandlingID, request)
+        val behandlingsresultat = oppdaterBehandlingsresultat(behandling, request)
 
         validerRequest(behandlingsresultat, request)
 
@@ -43,7 +43,7 @@ class FtrlVedtakService(
         }
 
         val nyStatus =
-            if (request.behandlingsresultatTypeKode == Behandlingsresultattyper.OPPHØRT) Saksstatuser.OPPHØRT else Saksstatuser.LOVVALG_AVKLART
+            if (behandlingsresultat.type == Behandlingsresultattyper.OPPHØRT) Saksstatuser.OPPHØRT else Saksstatuser.LOVVALG_AVKLART
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK)
         prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(behandling, request.tilVedtakRequest(), nyStatus)
         dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request, behandling, behandlingsresultat))
@@ -146,14 +146,22 @@ class FtrlVedtakService(
             bestillersId = request.bestillersId
         }
 
-    private fun oppdaterBehandlingsresultat(behandlingID: Long, request: FattVedtakRequest): Behandlingsresultat {
-        if (request.behandlingsresultatTypeKode == Behandlingsresultattyper.OPPHØRT) {
-            return oppdaterBehandlingsresultatForOpphørt(behandlingID, request)
+    private fun oppdaterBehandlingsresultat(behandling: Behandling, request: FattVedtakRequest): Behandlingsresultat {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
+
+        val erFullstendigOpphør = behandlingsresultat.avklartefakta.any {
+            it.type == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
+        }
+        if (erFullstendigOpphør) {
+            return oppdaterBehandlingsresultatForOpphørt(behandling.id, request)
         }
 
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-
-        behandlingsresultat.type = request.behandlingsresultatTypeKode
+        val erDelvisOpphør = behandlingsresultat.medlemskapsperioder.any { it.erOpphørt() }
+        behandlingsresultat.type = if (erDelvisOpphør) {
+            Behandlingsresultattyper.DELVIS_OPPHØRT
+        } else {
+            Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+        }
         behandlingsresultat.settVedtakMetadata(request.vedtakstype, LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong()))
         behandlingsresultat.nyVurderingBakgrunn = request.nyVurderingBakgrunn
         behandlingsresultat.begrunnelseFritekst = request.begrunnelseFritekst
