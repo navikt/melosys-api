@@ -97,7 +97,7 @@ class RettOppFeilMedlPerioderJobTest {
             every { medlPeriodeID } returns 999L
         }
         val behandlingsresultat = mockk<Behandlingsresultat> {
-            every { lovvalgsperioder } returns setOf(lovvalgsperiode)
+            every { lovvalgsperioder } returns mutableSetOf(lovvalgsperiode)
         }
         val behandling = mockk<Behandling> {
             every { id } returns 1L
