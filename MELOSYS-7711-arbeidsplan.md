@@ -244,8 +244,35 @@ service/src/main/kotlin/no/nav/melosys/service/behandling/jobb/
    - Dry-run: Kun logg hva som ville blitt endret
    - Prod: Utfør endringer
 
+### EESSI-integrasjon for validering
+
+For å bekrefte at en behandling ble ugyldiggjort av X008, må vi kalle melosys-eessi:
+
+**Eksisterende kode å bruke:**
+- `EessiService.hentTilknyttedeBucer(arkivsakID, statuser)` - henter BUC-info
+- `SedInformasjon.erAvbrutt()` - sjekker om SED er invalidert
+- Se `AdminInnvalideringSedRuter.erAktivBehandlingInvalidert()` for mønster
+
+**Valideringsflyt:**
+```kotlin
+fun erBehandlingInvalidertAvX008(behandling: Behandling): Boolean {
+    val arkivsakID = behandling.fagsak.gsakSaksnummer
+    val sedDokument = behandling.finnSedDokument() ?: return false
+
+    return eessiService.hentTilknyttedeBucer(arkivsakID, emptyList())
+        .filter { it.id == sedDokument.rinaSaksnummer }
+        .flatMap { it.seder }
+        .filter { it.sedId == sedDokument.rinaDokumentID }
+        .any { it.erAvbrutt() }
+}
+```
+
+**X008 = AD_BUC_06 Invalidate SED** (ugyldiggjør en SED)
+**X006 = AD_BUC_04 Remove participant** (fjerner deltaker)
+
 ### Neste steg
 - [ ] Implementer `RettOppFeilMedlPerioderJob.kt`
 - [ ] Implementer repository-metode
+- [ ] Implementer EESSI-validering (bruk eksisterende `EessiService`)
 - [ ] Implementer controller
 - [ ] Skriv tester
