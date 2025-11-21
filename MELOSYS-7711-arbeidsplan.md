@@ -270,9 +270,26 @@ fun erBehandlingInvalidertAvX008(behandling: Behandling): Boolean {
 **X008 = AD_BUC_06 Invalidate SED** (ugyldiggjør en SED)
 **X006 = AD_BUC_04 Remove participant** (fjerner deltaker)
 
-### Neste steg
-- [ ] Implementer `RettOppFeilMedlPerioderJob.kt`
-- [ ] Implementer repository-metode
-- [ ] Implementer EESSI-validering (bruk eksisterende `EessiService`)
-- [ ] Implementer controller
-- [ ] Skriv tester
+### Implementert ✓
+- [x] `RettOppFeilMedlPerioderJob.kt` - Asynkron job med JobMonitor
+- [x] `RettOppFeilMedlPerioderRepository.kt` - JPQL query for berørte behandlinger
+- [x] EESSI-validering via `EessiService.hentTilknyttedeBucer()`
+- [x] `RettOppFeilMedlPerioderController.kt` - REST API
+- [x] Unit tester (mockk)
+
+### Bruk
+
+**Dry-run (anbefalt først):**
+```bash
+curl -X POST "https://melosys-api/admin/rett-opp-feil-medl-perioder/kjør?dryRun=true"
+```
+
+**Sjekk status:**
+```bash
+curl "https://melosys-api/admin/rett-opp-feil-medl-perioder/status"
+```
+
+**Kjør med faktiske endringer:**
+```bash
+curl -X POST "https://melosys-api/admin/rett-opp-feil-medl-perioder/kjør?dryRun=false"
+```
