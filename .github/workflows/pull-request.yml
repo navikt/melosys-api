@@ -52,3 +52,63 @@ jobs:
         with:
           check_name: 'Unit Tests'
           report_paths: '**/target/surefire-reports/TEST-*.xml'
+
+      - name: Code Coverage Report
+        uses: madrapps/jacoco-report@v1.7.2
+        if: success() || failure()
+        with:
+          paths: '**/target/site/jacoco/jacoco.xml'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 0
+          min-coverage-changed-files: 0
+          title: '📊 Code Coverage'
+          update-comment: true
+
+      - name: Module Coverage Summary
+        if: success() || failure()
+        run: |
+          echo "## 📊 Coverage per Module" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Module | Lines | Branches |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|----------|" >> $GITHUB_STEP_SUMMARY
+
+          total_line_covered=0
+          total_line_missed=0
+          total_branch_covered=0
+          total_branch_missed=0
+
+          for csv_file in */target/site/jacoco/jacoco.csv; do
+            if [ -f "$csv_file" ]; then
+              module=$(dirname $(dirname $(dirname $(dirname "$csv_file"))))
+
+              line_covered=$(awk -F',' 'NR>1 {sum+=$9} END {print sum+0}' "$csv_file")
+              line_missed=$(awk -F',' 'NR>1 {sum+=$8} END {print sum+0}' "$csv_file")
+              branch_covered=$(awk -F',' 'NR>1 {sum+=$7} END {print sum+0}' "$csv_file")
+              branch_missed=$(awk -F',' 'NR>1 {sum+=$6} END {print sum+0}' "$csv_file")
+
+              if [ $((line_covered + line_missed)) -gt 0 ]; then
+                line_pct=$(awk "BEGIN {printf \"%.1f\", ($line_covered / ($line_covered + $line_missed)) * 100}")
+              else
+                line_pct="N/A"
+              fi
+
+              if [ $((branch_covered + branch_missed)) -gt 0 ]; then
+                branch_pct=$(awk "BEGIN {printf \"%.1f\", ($branch_covered / ($branch_covered + $branch_missed)) * 100}")
+              else
+                branch_pct="N/A"
+              fi
+
+              echo "| $module | ${line_pct}% | ${branch_pct}% |" >> $GITHUB_STEP_SUMMARY
+
+              total_line_covered=$((total_line_covered + line_covered))
+              total_line_missed=$((total_line_missed + line_missed))
+              total_branch_covered=$((total_branch_covered + branch_covered))
+              total_branch_missed=$((total_branch_missed + branch_missed))
+            fi
+          done
+
+          if [ $((total_line_covered + total_line_missed)) -gt 0 ]; then
+            total_line_pct=$(awk "BEGIN {printf \"%.1f\", ($total_line_covered / ($total_line_covered + $total_line_missed)) * 100}")
+            total_branch_pct=$(awk "BEGIN {printf \"%.1f\", ($total_branch_covered / ($total_branch_covered + $total_branch_missed)) * 100}")
+            echo "| **TOTAL** | **${total_line_pct}%** | **${total_branch_pct}%** |" >> $GITHUB_STEP_SUMMARY
+          fi
