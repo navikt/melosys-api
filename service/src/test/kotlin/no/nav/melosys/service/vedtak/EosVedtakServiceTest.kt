@@ -392,6 +392,37 @@ class EosVedtakServiceKtTest {
         behandlingsresultat.lovvalgsperioder = mutableSetOf(lovvalgsperiode)
     }
 
+    @Test
+    fun `fattVedtak skal passere Behandling-objekt til kontroll for å unngå entity reload`() {
+        // Given - Mock setup for innvilgelse case
+        mockBehandlingsresultat()
+        mockEessiReady()
+        leggTilLovvalgsperiode(InnvilgelsesResultat.INNVILGET)
+
+        // When
+        vedtakService.fattVedtak(
+            behandling,
+            lagRequest(
+                Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+                Vedtakstyper.FØRSTEGANGSVEDTAK,
+                BEHANDLINGSRESULTAT_FRITEKST,
+                null,
+                setOf("AB:CDEF123")
+            )
+        )
+
+        // Then - Verify kontrollerVedtakMedRegisteropplysninger receives Behandling object
+        // This is critical to prevent race condition from entity reload after registeropplysninger update
+        verify(exactly = 1) {
+            ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
+                eq(behandling),  // Verify actual Behandling object is passed, not just ID
+                eq(Sakstyper.EU_EOS),
+                eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND),
+                isNull()
+            )
+        }
+    }
+
     private fun lagRequest(
         behandlingsresultattype: Behandlingsresultattyper,
         vedtakstype: Vedtakstyper,
