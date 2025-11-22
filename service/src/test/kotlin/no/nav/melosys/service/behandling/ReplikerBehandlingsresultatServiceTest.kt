@@ -129,7 +129,7 @@ class ReplikerBehandlingsresultatServiceTest {
             .matches { it.behandling == behandlingReplika }
             .matches { it.id == null }
             .matches { it.behandlingsmåte == behandlingsresultatOriginal.behandlingsmåte }
-            .matches { it.type == Behandlingsresultattyper.IKKE_FASTSATT }
+            .matches { it.type == behandlingsresultatOriginal.type }
             .matches { it.vedtakMetadata == null }
 
         Assertions.assertThat(behandlingsresultatReplika.lovvalgsperioder)
