@@ -102,11 +102,11 @@ class EosVedtakRaceConditionIT(
                     behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
                     behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
                 },
-                mapOf(
+                mapOf<ProsessType, Int>(
                     ProsessType.JFR_NY_SAK_BRUKER to 1,
                     ProsessType.JFR_JOURNALPOST to 1
                 )
-            )
+            ).behandling.shouldNotBeNull()
 
             // Setup behandling data
             mottatteOpplysningerService.oppfriskMottatteOpplysninger(
