@@ -75,6 +75,19 @@ class Kontroll(
     ): Collection<Kontrollfeil> =
         utførKontroller(behandlingID, sakstype, behandlingsresultattype).filter { skalViseFeil(it, kontrollerSomSkalIgnoreres, behandlingID) }
 
+    /**
+     * Overload that accepts Behandling object directly to avoid unnecessary entity reload.
+     * This prevents race conditions where registeropplysninger updates trigger Hibernate
+     * synchronization conflicts on subsequent entity loads.
+     */
+    internal fun kontrollerVedtak(
+        behandling: Behandling,
+        sakstype: Sakstyper,
+        behandlingsresultattype: Behandlingsresultattyper?,
+        kontrollerSomSkalIgnoreres: Set<Kontroll_begrunnelser>
+    ): Collection<Kontrollfeil> =
+        utførKontroller(behandling, sakstype, behandlingsresultattype).filter { skalViseFeil(it, kontrollerSomSkalIgnoreres, behandling.id) }
+
 
     private fun skalViseFeil(
         kontrollfeil: Kontrollfeil,
@@ -95,6 +108,23 @@ class Kontroll(
     ): Collection<Kontrollfeil> {
         val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)
 
+        if (behandlingsresultattype in listOf(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, Behandlingsresultattyper.HENLEGGELSE)) {
+            return utførKontrollerForAvslagOgHenleggelse(behandling)
+        }
+
+        return utførKontroller(behandling, sakstype)
+    }
+
+    /**
+     * Overload that accepts Behandling object directly to avoid entity reload.
+     * Used when Behandling has already been loaded with saksopplysninger to prevent
+     * Hibernate optimistic locking conflicts from registeropplysninger updates.
+     */
+    private fun utførKontroller(
+        behandling: Behandling,
+        sakstype: Sakstyper,
+        behandlingsresultattype: Behandlingsresultattyper?
+    ): Collection<Kontrollfeil> {
         if (behandlingsresultattype in listOf(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, Behandlingsresultattyper.HENLEGGELSE)) {
             return utførKontrollerForAvslagOgHenleggelse(behandling)
         }
