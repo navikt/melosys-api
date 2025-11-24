@@ -165,10 +165,7 @@ class FtrlVedtakService(
     }
 
     private fun Behandlingsresultat.erFullstendigOpphør(): Boolean =
-        avklartefakta.any {
-            it.type == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING &&
-                it.referanse == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode
-        }
+        avklartefakta.any { it.type == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING }
 
     private fun utledBehandlingsresultatType(
         behandlingsresultat: Behandlingsresultat,
@@ -191,7 +188,7 @@ class FtrlVedtakService(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
         val fullstendigManglendeInnbetaling = behandlingsresultat.avklartefakta
-            .firstOrNull { Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode == it.referanse && Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING == it.type }
+            .firstOrNull { it.type == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING }
             ?: throw FunksjonellException("Forventer at fullstendigManglendeInnbetaling er satt ved fatting av vedtak for behandlingstype OPPHØRT")
 
         val opphørteMedlemskapsperioder = behandlingsresultat.medlemskapsperioder

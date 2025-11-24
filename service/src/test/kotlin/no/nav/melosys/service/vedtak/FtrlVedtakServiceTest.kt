@@ -458,31 +458,6 @@ class FtrlVedtakServiceTest {
     }
 
     @Test
-    fun `fattVedtak med ugyldig fullstendigManglendeInnbetaling avklartefakta gir ikke OPPHØRT`() {
-        val behandlingsresultat = Behandlingsresultat().apply {
-            avklartefakta = mutableSetOf(Avklartefakta().apply {
-                type = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
-                referanse = "FEIL_REFERANSE" // Feil referanse - skal ikke matche
-            })
-            medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
-                medlemskapstype = Medlemskapstyper.PLIKTIG
-                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-            })
-        }
-        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
-        every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
-        val request = lagFattVedtakRequest(type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
-
-        ftrlVedtakService.fattVedtak(lagBehandling(), request)
-
-        // Skal ikke behandles som OPPHØRT siden referanse er feil
-        verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
-        behandlingsresultatSlot.captured.type shouldBe Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-        // Verifiser at oppdaterBehandlingsresultatForOpphørt IKKE ble kalt
-        verify(exactly = 0) { vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultat(any()) }
-    }
-
-    @Test
     fun `oppdaterBehandlingsresultatForOpphørt kaster feil hvis fullstendigManglendeInnbetaling mangler`() {
         // Simulerer race condition: avklartefakta finnes ved første kall,
         // men er borte ved andre kall (f.eks. slettet av annen tråd)
