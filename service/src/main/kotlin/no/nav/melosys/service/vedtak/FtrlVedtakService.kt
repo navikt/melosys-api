@@ -149,7 +149,7 @@ class FtrlVedtakService(
     private fun oppdaterBehandlingsresultat(behandling: Behandling, request: FattVedtakRequest): Behandlingsresultat {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
-        if (behandlingsresultat.erFullstendigOpphør()) {
+        if (behandlingsresultat.harFullstendigManglendeInnbetaling()) {
             return oppdaterBehandlingsresultatForOpphørt(behandling.id, request)
         }
 
@@ -164,7 +164,7 @@ class FtrlVedtakService(
         }.let { behandlingsresultatService.lagre(it) }
     }
 
-    private fun Behandlingsresultat.erFullstendigOpphør(): Boolean =
+    private fun Behandlingsresultat.harFullstendigManglendeInnbetaling(): Boolean =
         avklartefakta.any { it.type == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING }
 
     private fun utledBehandlingsresultatType(
