@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.fagsaker
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
+import io.getunleash.Unleash
 import io.mockk.every
 import io.mockk.verify
 import no.nav.melosys.domain.*
@@ -22,6 +23,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ÅRSAVREGNIN
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
@@ -50,6 +52,9 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Primary
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
@@ -104,12 +109,26 @@ internal class FagsakControllerTest {
     @MockkBean(relaxed = true)
     lateinit var ferdigbehandleService: FerdigbehandleService
 
+    @MockkBean(relaxed = true)
+    lateinit var unleash: Unleash
+
+    @TestConfiguration
+    class TestConfig {
+        @Bean
+        @Primary
+        fun testUnleash(unleash: Unleash): Unleash = unleash
+    }
+
     lateinit var behandling: Behandling
 
     lateinit var fagsak: Fagsak
 
     @BeforeEach
     fun setUp() {
+        // Default: alle toggles er på, bortsett fra MELOSYS_SORTER_SOK_PA_REDIGERINGSDATO (relaxed mock returnerer false som default)
+        every { unleash.isEnabled(any()) } returns true
+        every { unleash.isEnabled(ToggleName.MELOSYS_SORTER_SOK_PA_REDIGERINGSDATO) } returns false
+
         random = EasyRandom(
             EasyRandomParameters()
                 .overrideDefaultInitialization(true)
@@ -605,6 +624,126 @@ internal class FagsakControllerTest {
 
             performSokAndExpectOk(fagsakSokDto)
                 .andExpect(jsonPath("$.length()", equalTo(0)))
+        }
+
+        @Test
+        fun `skal sortere fagsaker på endretDato når toggle er aktivert`() {
+            // Opprett tre fagsaker med forskjellige endretDato
+            val nyesteFagsak = Fagsak.forTest {
+                saksnummer = "MEL-2"
+                medBruker()
+                endretDato = Instant.ofEpochMilli(3000000000000)
+            }
+
+            val midtereFagsak = Fagsak.forTest {
+                saksnummer = "MEL-1"
+                medBruker()
+                endretDato = Instant.ofEpochMilli(2000000000000)
+            }
+
+
+            val eldsteFagsak = Fagsak.forTest {
+                saksnummer = "MEL-3"
+                medBruker()
+                endretDato = Instant.ofEpochMilli(1000000000000)
+            }
+
+            // Returner fagsaker i tilfeldig rekkefølge
+            every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, FagsakTestFactory.BRUKER_AKTØR_ID) } returns
+                listOf(eldsteFagsak, nyesteFagsak, midtereFagsak)
+
+            // Aktiver toggle for sortering
+            every { unleash.isEnabled(ToggleName.MELOSYS_SORTER_SOK_PA_REDIGERINGSDATO) } returns true
+
+            val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
+
+            // Verifiser at fagsaker returneres sortert synkende på endretDato (nyeste først)
+            performSokAndExpectOk(fagsakSokDto)
+                .andExpect(jsonPath("$[0].saksnummer", equalTo("MEL-2")))
+                .andExpect(jsonPath("$[1].saksnummer", equalTo("MEL-1")))
+                .andExpect(jsonPath("$[2].saksnummer", equalTo("MEL-3")))
+        }
+
+        @Test
+        fun `skal sortere behandlinger på endretDato når toggle er aktivert`() {
+            val fagsak = Fagsak.forTest {
+                medBruker()
+                medGsakSaksnummer()
+                behandling {
+                    id = 1L
+                    registrertDato = Instant.now()
+                    endretDato = Instant.ofEpochMilli(1000000000000)
+                }
+                behandling {
+                    id = 2L
+                    registrertDato = Instant.now()
+                    endretDato = Instant.ofEpochMilli(2000000000000)
+                }
+                behandling {
+                    id = 3L
+                    registrertDato = Instant.now()
+                    endretDato = Instant.ofEpochMilli(3000000000000)
+                }
+            }
+
+            mockBehandlingsresultat(lagDefaultBehandlingResultat().apply { id = 1L })
+            mockBehandlingsresultat(lagDefaultBehandlingResultat().apply { id = 2L })
+            mockBehandlingsresultat(lagDefaultBehandlingResultat().apply { id = 3L })
+            mockFagsakController(fagsak)
+
+            // Aktiver toggle for sortering
+            every { unleash.isEnabled(ToggleName.MELOSYS_SORTER_SOK_PA_REDIGERINGSDATO) } returns true
+
+            val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
+
+            // Verifiser at behandlinger returneres sortert synkende på endretDato (nyeste først)
+            performSokAndExpectOk(fagsakSokDto)
+                .andExpect(jsonPath("$[0].behandlingOversikter[0].behandlingID", equalTo(3)))
+                .andExpect(jsonPath("$[0].behandlingOversikter[1].behandlingID", equalTo(2)))
+                .andExpect(jsonPath("$[0].behandlingOversikter[2].behandlingID", equalTo(1)))
+        }
+
+        @Test
+        fun `skal ikke sortere fagsaker på endretDato når toggle er deaktivert`() {
+            // MEL-1 har nyest endretDato men eldst registrertDato
+            val fagsak1 = Fagsak.forTest {
+                saksnummer = "MEL-1"
+                medBruker()
+                behandling {
+                    id = 10L
+                    registrertDato = Instant.ofEpochMilli(1000000000000)
+                    registrertDato = Instant.ofEpochMilli(1000000000000)
+                }
+                registrertDato = Instant.ofEpochMilli(1000000000000)
+                endretDato = Instant.ofEpochMilli(1000000000000)
+            }
+
+            // MEL-2 har eldst endretDato men nyest registrertDato
+            val fagsak2 = Fagsak.forTest {
+                saksnummer = "MEL-2"
+                medBruker()
+                behandling {
+                    id = 20L
+                    registrertDato = Instant.ofEpochMilli(2000000000000)
+                    endretDato = Instant.ofEpochMilli(2000000000000)
+                }
+                registrertDato = Instant.ofEpochMilli(2000000000000)
+                endretDato = Instant.ofEpochMilli(2000000000000)
+            }
+
+            // Mock behandlingsresultat for behandlingene
+            mockBehandlingsresultat(lagDefaultBehandlingResultat().apply { id = 10L })
+            mockBehandlingsresultat(lagDefaultBehandlingResultat().apply { id = 20L })
+
+            // Mock service til å returnere fagsak1 og fagsak2 i rekkefølge. Dersom toggle er på, vil testen feile med denne rekkefølgen.
+            every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, FagsakTestFactory.BRUKER_AKTØR_ID) } returns listOf(fagsak1, fagsak2)
+
+            val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
+
+            // Toggle er deaktivert, så ingen sortering skal skje - samme rekkefølge som fra service
+            performSokAndExpectOk(fagsakSokDto)
+                .andExpect(jsonPath("$[0].saksnummer", equalTo("MEL-1")))
+                .andExpect(jsonPath("$[1].saksnummer", equalTo("MEL-2")))
         }
 
         private fun performSokAndExpectOk(fagsakSokDto: FagsakSokDto): ResultActions {

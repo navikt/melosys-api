@@ -30,6 +30,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.*
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Person
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoVirksomhet
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.attest.*
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.InnvilgelseTrygdeavtale
@@ -677,6 +678,8 @@ internal class DokgenMalMapperTest {
             trygdeavtaleLand = emptyList(),
             betalerArbeidsgiveravgift = true,
             ukjentSluttdatoMedlemskapsperiode = true,
+            harMedlemskapsperioderIForegåendeÅr = false
+
         )
     }
 
@@ -684,7 +687,7 @@ internal class DokgenMalMapperTest {
         return InnvilgelseYrkesaktivPliktigFtrl(
             brevbestilling = lagInnvilgelseFtrlYrkesaktivPliktig(),
             behandlingstype = Behandlingstyper.FØRSTEGANG,
-            avgiftsperioder = emptyList(),
+            avgiftsperioder = emptyList<AvgiftsperiodeDto>(),
             datoMottatt = LocalDate.now(),
             medlemskapsperiode = MedlemskapsperiodeDto(
                 LocalDate.now(),
@@ -705,11 +708,12 @@ internal class DokgenMalMapperTest {
             arbeidsgivere = listOf("Egon Olsen AS"),
             flereLandUkjentHvilke = false,
             land = listOf(Land_iso2.US.kode),
-            trygdeavtaleLand = emptyList(),
+            trygdeavtaleLand = emptyList<String>(),
             betalerArbeidsgiveravgift = true,
             harLavSatsPgaAlder = false,
             arbeidssituasjontype = null,
             ukjentSluttdatoMedlemskapsperiode = true,
+            harMedlemskapsperioderIForegåendeÅr = false
         )
     }
 

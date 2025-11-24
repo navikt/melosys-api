@@ -120,6 +120,8 @@ class Fagsak(
      */
     fun hentUnikArbeidsgiver(): Aktoer? = hentAktørMedRolleType(Aktoersroller.ARBEIDSGIVER)
 
+    fun erLovvalg(): Boolean = (Sakstyper.EU_EOS == type || Sakstyper.TRYGDEAVTALE == type) && tema == Sakstemaer.MEDLEMSKAP_LOVVALG
+
     fun finnVirksomhet(): Aktoer? = hentAktørMedRolleType(Aktoersroller.VIRKSOMHET)
 
     fun hentVirksomhet(): Aktoer = finnVirksomhet() ?: throw FunksjonellException("Fant ikke virksomhet for sak $saksnummer")

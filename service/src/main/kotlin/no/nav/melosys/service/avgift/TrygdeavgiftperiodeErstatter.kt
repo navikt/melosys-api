@@ -19,10 +19,14 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatId)
         nullstillTrygdeavgiftsperioder(behandlingsresultat)
 
-        behandlingsresultat.medlemskapsperioder.forEach { medlemskapsperiode ->
+        behandlingsresultat.finnAvgiftspliktigPerioder().forEach { avgiftspliktigperiode ->
             trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
-                if (trygdeavgiftsperiode.grunnlagMedlemskapsperiode?.id == medlemskapsperiode.id) {
-                    medlemskapsperiode.addTrygdeavgiftsperiode(trygdeavgiftsperiode)
+                val erMatch = trygdeavgiftsperiode.grunnlagMedlemskapsperiode?.id == avgiftspliktigperiode.hentId() ||
+                    trygdeavgiftsperiode.grunnlagLovvalgsPeriode?.id == avgiftspliktigperiode.hentId() ||
+                    trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode?.id == avgiftspliktigperiode.hentId()
+
+                if (erMatch) {
+                    avgiftspliktigperiode.addTrygdeavgiftsperiode(trygdeavgiftsperiode)
                 }
             }
         }
@@ -45,7 +49,7 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
 
     private fun nullstillTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat) {
         behandlingsresultat.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
-        behandlingsresultat.medlemskapsperioder.forEach {
+        behandlingsresultat.finnAvgiftspliktigPerioder().forEach {
             it.clearTrygdeavgiftsperioder()
         }
     }

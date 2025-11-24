@@ -9,7 +9,6 @@ import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -61,7 +60,9 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
 
     @Test
     fun `når ny vurdering har blitt vedtatt før årsavregning, resettes åpne årsavregninger med info fra ny vurdering - refaktorert`() {
-        val fagsak = Fagsak.forTest { }
+        val fagsak = Fagsak.forTest {
+            type = Sakstyper.FTRL
+        }
 
         val behandlingsresultatFørstegangsbehandling = lagTidligereBehandlingsresultat {
             id = 1L
@@ -99,9 +100,6 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
                 aar = 2023
                 this.tidligereBehandlingsresultat = behandlingsresultatFørstegangsbehandling
             }
-            vedtakMetadata {
-                vedtaksdato = LocalDate.now().minusDays(5).atStartOfDay().toInstant(ZoneOffset.UTC)
-            }
             registrertDato = LocalDate.now().minusDays(5).atStartOfDay().toInstant(ZoneOffset.UTC)
         }
 
@@ -114,14 +112,14 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
                 status = Behandlingsstatus.AVSLUTTET
                 this.fagsak = fagsak
             }
-            medlemskapsperiode("2023-01-01", "2023-09-30") {
+            medlemskapsperiode("2023-01-01", "2023-09-30", medTrygdeavgift = false) {
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
                 trygdeavgiftsperiode("2023-01-01", "2023-09-30")
             }
             vedtakMetadata {
                 vedtaksdato = LocalDate.now().minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
-            registrertDato = LocalDate.now().minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultatFørstegangsbehandling
@@ -164,7 +162,7 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
                     })
                 )
             ),
-            sisteGjeldendeMedlemskapsperioder = listOf(
+            sisteGjeldendeAvgiftspliktigPerioder = listOf(
                 MedlemskapsperiodeForAvgift(
                     fom = LocalDate.of(2023, 1, 1),
                     tom = LocalDate.of(2023, 9, 30),

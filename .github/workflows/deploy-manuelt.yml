@@ -44,7 +44,7 @@ jobs:
     if: needs.check_docker_image_exists.outputs.exists != 'true'
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Setup Maven
         uses: actions/cache@v4
         with:
@@ -63,14 +63,18 @@ jobs:
         uses: nais/docker-build-push@v0
         with:
           team: teammelosys
-          tag: ${{ github.sha }}
+          tag: |
+            type=raw,value=manual,priority=9001
+            type=raw,value=${{ github.sha }},priority=9000
+          platforms: linux/amd64,linux/arm64
+          salsa: true
 
   deploy:
     runs-on: ubuntu-latest-8-cores
     needs: [build, check_docker_image_exists]
     if: always() && (needs.build.result == 'success' || needs.build.result == 'skipped')
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: deploy new Unleash Apikey to ${{github.event.inputs.environment}}

@@ -41,6 +41,7 @@ class InnvilgelseFtrlYrkesaktivFrivillig(
     val trygdeavtaleLand: List<String>,
     val betalerArbeidsgiveravgift: Boolean,
     val ukjentSluttdatoMedlemskapsperiode: Boolean,
+    val harMedlemskapsperioderIForegåendeÅr: Boolean
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
@@ -53,7 +54,7 @@ class InnvilgelseFtrlYrkesaktivFrivillig(
         avslåttMedlemskapsperiodeFørMottaksdatoFullDekning: Boolean,
         trygdeavgiftMottaker: Trygdeavgiftmottaker?,
         fullmektigTrygdeavgift: String?,
-        skatteplikttype: Skatteplikttype,
+        skatteplikttype: Skatteplikttype?,
         begrunnelse: Kodeverk?,
         begrunnelseAnnenGrunnFritekst: String?,
         nyVurderingBakgrunn: String?,
@@ -65,7 +66,8 @@ class InnvilgelseFtrlYrkesaktivFrivillig(
         land: List<String>,
         trygdeavtaleLand: List<String>,
         betalerArbeidsgiveravgift: Boolean,
-        ukjentSluttdatoMedlemskapsperiode: Boolean
+        ukjentSluttdatoMedlemskapsperiode: Boolean,
+        harMedlemskapsperioderIForegåendeÅr: Boolean
     ) : this(
         brevbestilling,
         behandlingstype,
@@ -89,6 +91,7 @@ class InnvilgelseFtrlYrkesaktivFrivillig(
         land,
         trygdeavtaleLand,
         betalerArbeidsgiveravgift,
-        ukjentSluttdatoMedlemskapsperiode
+        ukjentSluttdatoMedlemskapsperiode,
+        harMedlemskapsperioderIForegåendeÅr
     )
 }

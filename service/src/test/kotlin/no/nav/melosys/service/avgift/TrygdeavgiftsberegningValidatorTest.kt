@@ -9,14 +9,18 @@ import io.mockk.mockk
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -38,7 +42,8 @@ data class ValideringInput(
     val medlemskapsperioder: List<Medlemskapsperiode>,
     val skatteforholdsperioder: List<SkatteforholdTilNorge>,
     val inntektsperioder: List<Inntektsperiode>,
-    val feilmelding: String
+    val feilmelding: String,
+    val beskrivelse: String = ""
 ) {
     constructor(
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
@@ -47,13 +52,24 @@ data class ValideringInput(
     ) : this(emptyList<Medlemskapsperiode>(), skatteforholdsperioder, inntektsperioder, feilmelding)
 
     override fun toString(): String {
-        return feilmelding
+        if (beskrivelse.isNotEmpty()) return beskrivelse
+        if (feilmelding.isNotEmpty()) return feilmelding
+
+        val medlemskapInfo = if (medlemskapsperioder.isNotEmpty()) {
+            "Medlemskap: ${medlemskapsperioder.size} periode(r) ${medlemskapsperioder.first().fom}→${medlemskapsperioder.last().tom}"
+        } else "Ingen medlemskap"
+
+        val skatteInfo = "Skatt: ${skatteforholdsperioder.size} periode(r)"
+        val inntektInfo = "Inntekt: ${inntektsperioder.size} periode(r)"
+
+        return "$medlemskapInfo, $skatteInfo, $inntektInfo"
     }
 }
 
 class TrygdeavgiftsberegningValidatorTest {
 
     val unleash: FakeUnleash = FakeUnleash()
+    val inneværendeÅr = LocalDate.now().year
 
     @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -65,13 +81,18 @@ class TrygdeavgiftsberegningValidatorTest {
         }
 
         @Test
-        fun shouldThrowFunksjonellExceptionWhenMedlemskapsPerioderIsEmpty() {
+        fun shouldThrowFunksjonellExceptionWhenAvgiftspliktigperioderIsEmpty() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
-            val behandling = Behandling.forTest { status = Behandlingsstatus.OPPRETTET }
+            val behandling = Behandling.forTest {
+                status = Behandlingsstatus.OPPRETTET
+                fagsak {
+                    type = Sakstyper.FTRL
+                }
+            }
             every { behandlingsresultatMock.behandling } returns behandling
             every { behandlingsresultatMock.hentBehandling() } returns behandling
-            every { behandlingsresultatMock.medlemskapsperioder } returns mutableSetOf()
-            every { behandlingsresultatMock.utledMedlemskapsperiodeFom() } returns LocalDate.now()
+            every { behandlingsresultatMock.finnAvgiftspliktigPerioder() } returns listOf()
+            every { behandlingsresultatMock.utledAvgiftspliktigperioderFom() } returns LocalDate.now()
 
             val skatteforholdsPerioder = listOf(
                 SkatteforholdTilNorge().apply {
@@ -88,7 +109,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     emptyList(),
                     unleash
                 )
-            }.message shouldBe TrygdeavgiftsberegningValidator.MEDLEMSKAPSPERIODER_EMPTY
+            }.message shouldBe TrygdeavgiftsberegningValidator.AVGIFTSPLIKTIGPERIODER_EMPTY
         }
 
         @Test
@@ -163,15 +184,21 @@ class TrygdeavgiftsberegningValidatorTest {
         }
 
         @Test
-        fun shouldThrowFunksjonellExceptionWhenUtledMedlemskapsperiodeFomIsNull() {
+        fun shouldThrowFunksjonellExceptionWhenUtledAvgiftspliktigperiodeFomIsNull() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
-            val behandling = Behandling.forTest { status = Behandlingsstatus.OPPRETTET }
+            val behandling = Behandling.forTest {
+                status = Behandlingsstatus.OPPRETTET
+                fagsak {
+                    type = Sakstyper.FTRL
+                }
+            }
             every { behandlingsresultatMock.behandling } returns behandling
             every { behandlingsresultatMock.hentBehandling() } returns behandling
             every { behandlingsresultatMock.medlemskapsperioder } returns mutableSetOf(Medlemskapsperiode().apply {
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
             })
-            every { behandlingsresultatMock.utledMedlemskapsperiodeFom() } returns null
+            every { behandlingsresultatMock.finnAvgiftspliktigPerioder() } returns (behandlingsresultatMock.medlemskapsperioder as MutableSet<AvgiftspliktigPeriode>).toList()
+            every { behandlingsresultatMock.utledAvgiftspliktigperioderFom() } returns null
             every { behandlingsresultatMock.årsavregning } returns Årsavregning.forTest()
 
             val skatteforholdsPerioder = listOf(
@@ -184,20 +211,26 @@ class TrygdeavgiftsberegningValidatorTest {
 
             shouldThrow<FunksjonellException> {
                 TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsPerioder, listOf(), unleash)
-            }.message shouldBe TrygdeavgiftsberegningValidator.UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER
+            }.message shouldBe TrygdeavgiftsberegningValidator.UTLED_AVGIFTSPLIKTIGPERIODE_FOM_MANGLER
         }
 
         @Test
-        fun shouldThrowFunksjonellExceptionWhenUtledMedlemskapsperiodeTomIsNull() {
+        fun shouldThrowFunksjonellExceptionWhenUtledAvgiftspliktigperiodeTomIsNull() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
-            val behandling = Behandling.forTest { status = Behandlingsstatus.OPPRETTET }
+            val behandling = Behandling.forTest {
+                status = Behandlingsstatus.OPPRETTET
+                fagsak {
+                    type = Sakstyper.FTRL
+                }
+            }
             every { behandlingsresultatMock.behandling } returns behandling
             every { behandlingsresultatMock.hentBehandling() } returns behandling
             every { behandlingsresultatMock.medlemskapsperioder } returns mutableSetOf(Medlemskapsperiode().apply {
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
             })
-            every { behandlingsresultatMock.utledMedlemskapsperiodeFom() } returns LocalDate.now()
-            every { behandlingsresultatMock.utledMedlemskapsperiodeTom() } returns null
+            every { behandlingsresultatMock.finnAvgiftspliktigPerioder() } returns (behandlingsresultatMock.medlemskapsperioder as MutableSet<AvgiftspliktigPeriode>).toList()
+            every { behandlingsresultatMock.utledAvgiftspliktigperioderFom() } returns LocalDate.now()
+            every { behandlingsresultatMock.utledAvgiftspliktigperioderTom() } returns null
             every { behandlingsresultatMock.årsavregning } returns Årsavregning.forTest()
 
             val skatteforholdsPerioder = listOf(
@@ -210,7 +243,7 @@ class TrygdeavgiftsberegningValidatorTest {
 
             shouldThrow<FunksjonellException> {
                 TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsPerioder, listOf(), unleash)
-            }.message shouldBe TrygdeavgiftsberegningValidator.UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER
+            }.message shouldBe TrygdeavgiftsberegningValidator.UTLED_AVGIFTPLIKTIGPERIODE_TOM_MANGLER
         }
 
         @ParameterizedTest
@@ -221,6 +254,9 @@ class TrygdeavgiftsberegningValidatorTest {
                     tema = Behandlingstema.PENSJONIST
                     status = Behandlingsstatus.OPPRETTET
                     type = Behandlingstyper.FØRSTEGANG
+                    fagsak {
+                        type = Sakstyper.FTRL
+                    }
                 }
                 medlemskapsperioder = valideringsInput.medlemskapsperioder.toMutableSet()
                 årsavregning = Årsavregning.forTest()
@@ -244,6 +280,9 @@ class TrygdeavgiftsberegningValidatorTest {
                     tema = Behandlingstema.PENSJONIST
                     status = Behandlingsstatus.OPPRETTET
                     type = Behandlingstyper.NY_VURDERING
+                    fagsak {
+                        type = Sakstyper.FTRL
+                    }
                 }
                 medlemskapsperioder = valideringsInput.medlemskapsperioder.toMutableSet()
                 årsavregning = Årsavregning.forTest()
@@ -291,6 +330,9 @@ class TrygdeavgiftsberegningValidatorTest {
                     tema = Behandlingstema.PENSJONIST
                     status = Behandlingsstatus.OPPRETTET
                     type = Behandlingstyper.NY_VURDERING
+                    fagsak {
+                        type = Sakstyper.FTRL
+                    }
                 }
                 medlemskapsperioder = valideringInput.medlemskapsperioder.toMutableSet()
                 årsavregning = Årsavregning.forTest()
@@ -306,13 +348,16 @@ class TrygdeavgiftsberegningValidatorTest {
             }
         }
 
-        @ParameterizedTest
+        @ParameterizedTest(name = "[{index}] {0}")
         @MethodSource("valideringsDataPerioderDekkesScenarios")
         fun shouldBeValidPeriodeWhenInntektsperioderDekkerHelePerioden(valideringInput: ValideringInput) {
             val behandlingsresultat = Behandlingsresultat().apply {
                 behandling = Behandling.forTest {
                     tema = Behandlingstema.ARBEID_KUN_NORGE
                     status = Behandlingsstatus.OPPRETTET
+                    fagsak {
+                        type = Sakstyper.FTRL
+                    }
                 }
                 medlemskapsperioder = valideringInput.medlemskapsperioder.toMutableSet()
             }
@@ -452,7 +497,12 @@ class TrygdeavgiftsberegningValidatorTest {
         @Test
         fun shouldThrowExceptionWhenBehandlingInaktiv() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
-            val behandling = Behandling.forTest { status = Behandlingsstatus.AVSLUTTET }
+            val behandling = Behandling.forTest {
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak {
+                    type = Sakstyper.FTRL
+                }
+            }
             every { behandlingsresultatMock.behandling } returns behandling
             every { behandlingsresultatMock.hentBehandling() } returns behandling
             val skatteforholdsperioder = emptyList<SkatteforholdTilNorge>()
@@ -480,7 +530,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     SkatteforholdTilNorge().apply {
                         fomDato = LocalDate.now()
                         tomDato = LocalDate.now().plusDays(5)
-                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
                     }
                 ), listOf(Inntektsperiode().apply {
                     fomDato = LocalDate.now()
@@ -490,7 +540,53 @@ class TrygdeavgiftsberegningValidatorTest {
                     fomDato = LocalDate.now().plusDays(4)
                     tomDato = LocalDate.now().plusDays(5)
                     type = Inntektskildetype.ARBEIDSINNTEKT
-                }), TrygdeavgiftsberegningValidator.INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
+                }), TrygdeavgiftsberegningValidator.INNTEKT_OG_SKATT_MÅ_DEKKE_MEDLEMSKAPSPERIODE_FOR_INNVÆRENDE_OG_FREMTIDIG
+            ),
+            ValideringInput(
+                listOf(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = LocalDate.of(2019, 1, 1)
+                    tom = LocalDate.of(2029, 1, 1)
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
+                }),
+                listOf(
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.of(2019, 1, 1)
+                        tomDato = LocalDate.of(2024, 3, 31)
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    },
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.of(2024, 4, 1)
+                        tomDato = LocalDate.of(2029, 1, 1)
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                ), listOf(
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(2019, 1, 1)
+                        tomDato = LocalDate.of(2026, 1, 30)
+                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                        avgiftspliktigMndInntekt = Penger(10000.0)
+                    },
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(2026, 2, 1)
+                        tomDato = LocalDate.of(2029, 1, 1)
+                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                        avgiftspliktigMndInntekt = Penger(10000.0)
+                    },
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(2019, 1, 1)
+                        tomDato = LocalDate.of(2019, 12, 31)
+                        type = Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(3000.0)
+                    },
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(2021, 1, 1)
+                        tomDato = LocalDate.of(2021, 1, 31)
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        isArbeidsgiversavgiftBetalesTilSkatt = true
+                        avgiftspliktigMndInntekt = Penger(3000.0)
+                    }
+                ), TrygdeavgiftsberegningValidator.INNTEKT_OG_SKATT_IKKE_TIDLIGERE_ÅR, "Fire perioder med gap på 2026-01-31 (ikke dekket)"
             ),
             ValideringInput(                                                       // Skatteforhold dekker ikke hele perioden kaster exception
                 listOf(Medlemskapsperiode().apply {
@@ -514,7 +610,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     fomDato = LocalDate.now()
                     tomDato = LocalDate.now().plusDays(5)
                     type = Inntektskildetype.ARBEIDSINNTEKT
-                }), TrygdeavgiftsberegningValidator.SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
+                }), TrygdeavgiftsberegningValidator.INNTEKT_OG_SKATT_MÅ_DEKKE_MEDLEMSKAPSPERIODE_FOR_INNVÆRENDE_OG_FREMTIDIG
             ),
             ValideringInput(                                                               // skatteforhold overlapper samme dag
                 listOf(Medlemskapsperiode().apply {
@@ -575,7 +671,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     SkatteforholdTilNorge().apply {
                         fomDato = LocalDate.now()
                         tomDato = LocalDate.now().plusDays(1)
-                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
                     }
                 ),
                 listOf(Inntektsperiode().apply {
@@ -584,7 +680,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     type = Inntektskildetype.ARBEIDSINNTEKT
                     isArbeidsgiversavgiftBetalesTilSkatt = true
                     avgiftspliktigMndInntekt = mockk<Penger>()
-                }), TrygdeavgiftsberegningValidator.INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE
+                }), TrygdeavgiftsberegningValidator.INNTEKT_OG_SKATT_MÅ_DEKKE_MEDLEMSKAPSPERIODE_FOR_INNVÆRENDE_OG_FREMTIDIG
             ),
 
             ValideringInput(                                                               // Bestemmelser kan ikke være ulike for medlemskapsperioder
@@ -635,7 +731,9 @@ class TrygdeavgiftsberegningValidatorTest {
                     }
                 ), listOf(Inntektsperiode().apply {
                     type = Inntektskildetype.ARBEIDSINNTEKT
-                }), TrygdeavgiftsberegningValidator.SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
+                    fomDato = LocalDate.now()
+                    tomDato = LocalDate.now().plusDays(3)
+                }), TrygdeavgiftsberegningValidator.INNTEKT_OG_SKATT_MÅ_DEKKE_MEDLEMSKAPSPERIODE_FOR_INNVÆRENDE_OG_FREMTIDIG
             ),
 
             ValideringInput(                                                               // Inntektsperioder dekker ikke hele perioden
@@ -649,7 +747,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     SkatteforholdTilNorge().apply {
                         fomDato = LocalDate.now().plusDays(0)
                         tomDato = LocalDate.now().plusDays(3)
-                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
                     }
                 ), listOf(Inntektsperiode().apply {
                     fomDato = LocalDate.now()
@@ -657,7 +755,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     type = Inntektskildetype.ARBEIDSINNTEKT
                     isArbeidsgiversavgiftBetalesTilSkatt = true
                     avgiftspliktigMndInntekt = mockk<Penger>()
-                }), TrygdeavgiftsberegningValidator.INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
+                }), TrygdeavgiftsberegningValidator.INNTEKT_OG_SKATT_MÅ_DEKKE_MEDLEMSKAPSPERIODE_FOR_INNVÆRENDE_OG_FREMTIDIG
             ),
         )
 
@@ -673,7 +771,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     SkatteforholdTilNorge().apply {
                         fomDato = LocalDate.now().withMonth(1).withDayOfMonth(1)
                         tomDato = LocalDate.now().plusDays(5)
-                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
                     }
                 ), listOf(Inntektsperiode().apply {
                     fomDato = LocalDate.now().withMonth(1).withDayOfMonth(1)
@@ -882,29 +980,29 @@ class TrygdeavgiftsberegningValidatorTest {
             ValideringInput(
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                    fom = LocalDate.of(2023, 3, 3)
-                    tom = LocalDate.of(2023, 3, 5)
+                    fom = LocalDate.of(inneværendeÅr, 3, 3)
+                    tom = LocalDate.of(inneværendeÅr, 3, 5)
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                 }),
                 listOf(
                     SkatteforholdTilNorge().apply {
-                        fomDato = LocalDate.of(2023, 3, 3)
-                        tomDato = LocalDate.of(2023, 3, 3)
+                        fomDato = LocalDate.of(inneværendeÅr, 3, 3)
+                        tomDato = LocalDate.of(inneværendeÅr, 3, 3)
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     }, SkatteforholdTilNorge().apply {
-                        fomDato = LocalDate.of(2023, 3, 4)
-                        tomDato = LocalDate.of(2023, 3, 5)
+                        fomDato = LocalDate.of(inneværendeÅr, 3, 4)
+                        tomDato = LocalDate.of(inneværendeÅr, 3, 5)
                         skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
                     }
                 ), listOf(Inntektsperiode().apply {
-                    fomDato = LocalDate.of(2023, 3, 3)
-                    tomDato = LocalDate.of(2023, 3, 4)
+                    fomDato = LocalDate.of(inneværendeÅr, 3, 3)
+                    tomDato = LocalDate.of(inneværendeÅr, 3, 4)
                     type = Inntektskildetype.ARBEIDSINNTEKT
                     isArbeidsgiversavgiftBetalesTilSkatt = true
                     avgiftspliktigMndInntekt = mockk<Penger>()
                 }, Inntektsperiode().apply {
-                    fomDato = LocalDate.of(2023, 3, 5)
-                    tomDato = LocalDate.of(2023, 3, 5)
+                    fomDato = LocalDate.of(inneværendeÅr, 3, 5)
+                    tomDato = LocalDate.of(inneværendeÅr, 3, 5)
                     type = Inntektskildetype.ARBEIDSINNTEKT
                     isArbeidsgiversavgiftBetalesTilSkatt = true
                     avgiftspliktigMndInntekt = mockk<Penger>()
@@ -914,25 +1012,25 @@ class TrygdeavgiftsberegningValidatorTest {
             ValideringInput(
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                    fom = LocalDate.of(2023, 1, 1)
-                    tom = LocalDate.of(2023, 1, 8)
+                    fom = LocalDate.of(inneværendeÅr, 1, 1)
+                    tom = LocalDate.of(inneværendeÅr, 1, 8)
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                 }),
                 listOf(
                     SkatteforholdTilNorge().apply {
-                        fomDato = LocalDate.of(2023, 1, 1)
-                        tomDato = LocalDate.of(2023, 1, 8)
+                        fomDato = LocalDate.of(inneværendeÅr, 1, 1)
+                        tomDato = LocalDate.of(inneværendeÅr, 1, 8)
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     }
                 ), listOf(Inntektsperiode().apply {
-                    fomDato = LocalDate.of(2023, 1, 1)
-                    tomDato = LocalDate.of(2023, 1, 4)
+                    fomDato = LocalDate.of(inneværendeÅr, 1, 1)
+                    tomDato = LocalDate.of(inneværendeÅr, 1, 4)
                     type = Inntektskildetype.ARBEIDSINNTEKT
                     isArbeidsgiversavgiftBetalesTilSkatt = true
                     avgiftspliktigMndInntekt = mockk<Penger>()
                 }, Inntektsperiode().apply {
-                    fomDato = LocalDate.of(2023, 1, 5)
-                    tomDato = LocalDate.of(2023, 1, 8)
+                    fomDato = LocalDate.of(inneværendeÅr, 1, 5)
+                    tomDato = LocalDate.of(inneværendeÅr, 1, 8)
                     type = Inntektskildetype.ARBEIDSINNTEKT
                     isArbeidsgiversavgiftBetalesTilSkatt = true
                     avgiftspliktigMndInntekt = mockk<Penger>()
@@ -941,112 +1039,198 @@ class TrygdeavgiftsberegningValidatorTest {
 
             ValideringInput(                                                               // SammePeriodeForAllePerioder
                 listOf(Medlemskapsperiode().apply {
-                    fom = LocalDate.of(2023, 1, 1)
-                    tom = LocalDate.of(2023, 1, 8)
+                    fom = LocalDate.of(inneværendeÅr, 1, 1)
+                    tom = LocalDate.of(inneværendeÅr, 1, 8)
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                 }),
                 listOf(
                     SkatteforholdTilNorge().apply {
-                        fomDato = LocalDate.of(2023, 1, 1)
-                        tomDato = LocalDate.of(2023, 1, 8)
+                        fomDato = LocalDate.of(inneværendeÅr, 1, 1)
+                        tomDato = LocalDate.of(inneværendeÅr, 1, 8)
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     }
                 ), listOf(
                     Inntektsperiode().apply {
-                        fomDato = LocalDate.of(2023, 1, 1)
-                        tomDato = LocalDate.of(2023, 1, 8)
+                        fomDato = LocalDate.of(inneværendeÅr, 1, 1)
+                        tomDato = LocalDate.of(inneværendeÅr, 1, 8)
                         type = Inntektskildetype.ARBEIDSINNTEKT
                     }
                 ), ""),
 
             ValideringInput(                                                               // EnMedlemskapOgInntektPeriodeToSkatteforholdPerioder
                 listOf(Medlemskapsperiode().apply {
-                    fom = LocalDate.of(2023, 1, 1)
-                    tom = LocalDate.of(2023, 1, 8)
+                    fom = LocalDate.of(inneværendeÅr, 1, 1)
+                    tom = LocalDate.of(inneværendeÅr, 1, 8)
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                 }),
                 listOf(
                     SkatteforholdTilNorge().apply {
-                        fomDato = LocalDate.of(2023, 1, 1)
-                        tomDato = LocalDate.of(2023, 1, 4)
+                        fomDato = LocalDate.of(inneværendeÅr, 1, 1)
+                        tomDato = LocalDate.of(inneværendeÅr, 1, 4)
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     },
                     SkatteforholdTilNorge().apply {
-                        fomDato = LocalDate.of(2023, 1, 5)
-                        tomDato = LocalDate.of(2023, 1, 8)
+                        fomDato = LocalDate.of(inneværendeÅr, 1, 5)
+                        tomDato = LocalDate.of(inneværendeÅr, 1, 8)
                         skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
                     }
                 ), listOf(
                     Inntektsperiode().apply {
-                        fomDato = LocalDate.of(2023, 1, 1)
-                        tomDato = LocalDate.of(2023, 1, 8)
+                        fomDato = LocalDate.of(inneværendeÅr, 1, 1)
+                        tomDato = LocalDate.of(inneværendeÅr, 1, 8)
                         type = Inntektskildetype.ARBEIDSINNTEKT
                     }
                 ), ""),
 
             ValideringInput(                                                               // EnMedlemskapOgSkatteforholdPeriodeToInntektsperioder
                 listOf(Medlemskapsperiode().apply {
-                    fom = LocalDate.of(2023, 1, 1)
-                    tom = LocalDate.of(2023, 1, 8)
+                    fom = LocalDate.of(inneværendeÅr, 1, 1)
+                    tom = LocalDate.of(inneværendeÅr, 1, 8)
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                 }),
                 listOf(
                     SkatteforholdTilNorge().apply {
-                        fomDato = LocalDate.of(2023, 1, 1)
-                        tomDato = LocalDate.of(2023, 1, 8)
+                        fomDato = LocalDate.of(inneværendeÅr, 1, 1)
+                        tomDato = LocalDate.of(inneværendeÅr, 1, 8)
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     }
                 ), listOf(
                     Inntektsperiode().apply {
-                        fomDato = LocalDate.of(2023, 1, 1)
-                        tomDato = LocalDate.of(2023, 1, 4)
+                        fomDato = LocalDate.of(inneværendeÅr, 1, 1)
+                        tomDato = LocalDate.of(inneværendeÅr, 1, 4)
                         type = Inntektskildetype.ARBEIDSINNTEKT
                     },
                     Inntektsperiode().apply {
-                        fomDato = LocalDate.of(2023, 1, 5)
-                        tomDato = LocalDate.of(2023, 1, 8)
+                        fomDato = LocalDate.of(inneværendeÅr, 1, 5)
+                        tomDato = LocalDate.of(inneværendeÅr, 1, 8)
                         type = Inntektskildetype.ARBEIDSINNTEKT
                     }
                 ), ""),
 
             ValideringInput(                                                               // ToMedlemskapOgToSkatteforholdPeriodeOgToInntektsperioder
                 listOf(Medlemskapsperiode().apply {
-                    fom = LocalDate.of(2023, 1, 1)
-                    tom = LocalDate.of(2023, 1, 4)
+                    fom = LocalDate.of(inneværendeÅr, 1, 1)
+                    tom = LocalDate.of(inneværendeÅr, 1, 4)
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                 }, Medlemskapsperiode().apply {
-                    fom = LocalDate.of(2023, 1, 5)
-                    tom = LocalDate.of(2023, 1, 8)
+                    fom = LocalDate.of(inneværendeÅr, 1, 5)
+                    tom = LocalDate.of(inneværendeÅr, 1, 8)
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                 }),
                 listOf(
                     SkatteforholdTilNorge().apply {
-                        fomDato = LocalDate.of(2023, 1, 1)
-                        tomDato = LocalDate.of(2023, 1, 4)
+                        fomDato = LocalDate.of(inneværendeÅr, 1, 1)
+                        tomDato = LocalDate.of(inneværendeÅr, 1, 4)
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     },
                     SkatteforholdTilNorge().apply {
-                        fomDato = LocalDate.of(2023, 1, 5)
-                        tomDato = LocalDate.of(2023, 1, 8)
+                        fomDato = LocalDate.of(inneværendeÅr, 1, 5)
+                        tomDato = LocalDate.of(inneværendeÅr, 1, 8)
                         skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
                     }
                 ), listOf(
                     Inntektsperiode().apply {
-                        fomDato = LocalDate.of(2023, 1, 1)
-                        tomDato = LocalDate.of(2023, 1, 4)
+                        fomDato = LocalDate.of(inneværendeÅr, 1, 1)
+                        tomDato = LocalDate.of(inneværendeÅr, 1, 4)
                         type = Inntektskildetype.ARBEIDSINNTEKT
                     },
                     Inntektsperiode().apply {
-                        fomDato = LocalDate.of(2023, 1, 5)
-                        tomDato = LocalDate.of(2023, 1, 8)
+                        fomDato = LocalDate.of(inneværendeÅr, 1, 5)
+                        tomDato = LocalDate.of(inneværendeÅr, 1, 8)
                         type = Inntektskildetype.ARBEIDSINNTEKT
                     }
-                ), "")
+                ), ""),
+
+            ValideringInput(
+                listOf(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = LocalDate.of(inneværendeÅr, 1, 1)
+                    tom = LocalDate.of(inneværendeÅr + 10, 1, 1)
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
+                }),
+                listOf(
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.of(inneværendeÅr, 1, 1)
+                        tomDato = LocalDate.of(inneværendeÅr + 5, 3, 31)
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    },
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.of(inneværendeÅr + 5, 4, 1)
+                        tomDato = LocalDate.of(inneværendeÅr + 10, 1, 1)
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                ), listOf(
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(inneværendeÅr, 1, 1)
+                        tomDato = LocalDate.of(inneværendeÅr + 10, 1, 1)
+                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                        avgiftspliktigMndInntekt = Penger(10000.0)
+                    },
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(inneværendeÅr, 1, 1)
+                        tomDato = LocalDate.of(inneværendeÅr, 12, 31)
+                        type = Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(3000.0)
+                    },
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(inneværendeÅr + 2, 1, 1)
+                        tomDato = LocalDate.of(inneværendeÅr + 2, 1, 31)
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        isArbeidsgiversavgiftBetalesTilSkatt = true
+                        avgiftspliktigMndInntekt = Penger(3000.0)
+                    }
+                ), "", "En periode dekker alt, gap mellom andre perioder OK"),
+
+            ValideringInput(
+                listOf(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = LocalDate.of(inneværendeÅr, 1, 1)
+                    tom = LocalDate.of(inneværendeÅr + 10, 1, 1)
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
+                }),
+                listOf(
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.of(inneværendeÅr, 1, 1)
+                        tomDato = LocalDate.of(inneværendeÅr + 5, 3, 31)
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    },
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.of(inneværendeÅr + 5, 4, 1)
+                        tomDato = LocalDate.of(inneværendeÅr + 10, 1, 1)
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                ), listOf(
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(inneværendeÅr, 1, 1)
+                        tomDato = LocalDate.of(inneværendeÅr + 7, 2, 1)
+                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                        avgiftspliktigMndInntekt = Penger(10000.0)
+                    },
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(inneværendeÅr + 7, 2, 1)
+                        tomDato = LocalDate.of(inneværendeÅr + 10, 1, 1)
+                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                        avgiftspliktigMndInntekt = Penger(10000.0)
+                    },
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(inneværendeÅr, 1, 1)
+                        tomDato = LocalDate.of(inneværendeÅr, 12, 31)
+                        type = Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(3000.0)
+                    },
+                    Inntektsperiode().apply {
+                        fomDato = LocalDate.of(inneværendeÅr + 2, 1, 1)
+                        tomDato = LocalDate.of(inneværendeÅr + 2, 1, 31)
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        isArbeidsgiversavgiftBetalesTilSkatt = true
+                        avgiftspliktigMndInntekt = Penger(3000.0)
+                    }
+                ), "", "Fire perioder med overlapp på 2026-02-01 (begge inkluderer denne dagen)")
         )
 
         fun valideringsData(): List<ValideringInput> = listOf(
@@ -1089,7 +1273,12 @@ class TrygdeavgiftsberegningValidatorTest {
         )
 
         private fun lagGyldigBehandlingsresultat() = Behandlingsresultat().apply {
-            val behandling = Behandling.forTest { status = Behandlingsstatus.OPPRETTET }
+            val behandling = Behandling.forTest {
+                status = Behandlingsstatus.OPPRETTET
+                fagsak {
+                    type = Sakstyper.FTRL
+                }
+            }
             medlemskapsperioder = mutableSetOf(
                 Medlemskapsperiode(
                 ).apply {
@@ -1098,6 +1287,20 @@ class TrygdeavgiftsberegningValidatorTest {
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 })
+            this.behandling = behandling
+            årsavregning = Årsavregning.forTest()
+        }
+
+
+        private fun lagGyldigBehandlingsresultatForLovvalg() = Behandlingsresultat().apply {
+            val behandling = Behandling.forTest {
+                status = Behandlingsstatus.OPPRETTET
+                fagsak {
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                }
+            }
+
             this.behandling = behandling
             årsavregning = Årsavregning.forTest()
         }

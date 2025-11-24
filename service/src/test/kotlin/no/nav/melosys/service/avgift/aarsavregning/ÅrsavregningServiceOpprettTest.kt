@@ -56,6 +56,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.OPPRETTET
             }
+            tema = Sakstemaer.UNNTAK
         }
 
         // Første behandling med medlemskap og avgift (NY_VURDERING)
@@ -101,14 +102,14 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
 
             // Verifiser at tidligere grunnlag er hentet fra NY_VURDERING
             tidligereTrygdeavgiftsGrunnlag.shouldNotBeNull().run {
-                medlemskapsperioder.shouldHaveSize(1).single().run {
+                avgiftspliktigperioder.shouldHaveSize(1).single().run {
                     fom shouldBe LocalDate.of(2023, 1, 1)
                     tom shouldBe LocalDate.of(2023, 12, 31)
                 }
             }
 
             // Verifiser at gjeldende medlemskapsperioder også er satt
-            sisteGjeldendeMedlemskapsperioder.shouldHaveSize(1).single().run {
+            sisteGjeldendeAvgiftspliktigPerioder.shouldHaveSize(1).single().run {
                 fom shouldBe LocalDate.of(2023, 1, 1)
                 tom shouldBe LocalDate.of(2023, 12, 31)
             }
@@ -143,6 +144,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                 registrertDato = LocalDate.now().plusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
                 status = Behandlingsstatus.OPPRETTET
             }
+            tema = Sakstemaer.UNNTAK
         }
         val behandlingsresultatÅrsavregningEksisterende = Behandlingsresultat.forTest {
             id = 1L
@@ -219,7 +221,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                     type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
                 }))
             ),
-            sisteGjeldendeMedlemskapsperioder = listOf(
+            sisteGjeldendeAvgiftspliktigPerioder = listOf(
                 MedlemskapsperiodeForAvgift(
                     fom = LocalDate.of(2023, 1, 1),
                     tom = LocalDate.of(2023, 5, 31),

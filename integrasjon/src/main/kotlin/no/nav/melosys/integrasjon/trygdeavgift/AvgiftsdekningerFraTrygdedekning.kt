@@ -6,8 +6,12 @@ import no.nav.melosys.exception.FunksjonellException
 
 class AvgiftsdekningerFraTrygdedekning {
     companion object {
+
         fun avgiftsdekningerFraTrygdedekning(trygdedekning: Trygdedekninger): Set<Avgiftsdekning> {
             return when (trygdedekning) {
+                Trygdedekninger.FULL_DEKNING_EOSFO ->
+                    setOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER, Avgiftsdekning.PENSJONSDEL_MED_YRKESSKADETRYGD)
+
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE ->
                     setOf(Avgiftsdekning.HELSEDEL_UTEN_SYKEPENGER)
 

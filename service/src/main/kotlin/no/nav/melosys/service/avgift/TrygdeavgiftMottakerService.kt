@@ -25,18 +25,15 @@ class TrygdeavgiftMottakerService(private val behandlingsresultatService: Behand
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         var trygdeavgiftsperioder = behandlingsresultat.trygdeavgiftsperioder.toList()
 
-        if(behandlingsresultat.hentBehandling().erEøsPensjonist()){
-            trygdeavgiftsperioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toList()
-        }
-
         return getTrygdeavgiftMottaker(trygdeavgiftsperioder)
     }
 
-    fun getTrygdeavgiftMottaker(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>) =
-        getTrygdeavgiftMottaker(
+    fun getTrygdeavgiftMottaker(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): Trygdeavgiftmottaker {
+        return getTrygdeavgiftMottaker(
             trygdeavgiftsperioder.mapNotNull { it.grunnlagSkatteforholdTilNorge }.toSet(),
             trygdeavgiftsperioder.mapNotNull { it.grunnlagInntekstperiode }.toSet()
         )
+    }
 
     @Deprecated("Behøver kun trygdeavgiftsperioder")
     fun getTrygdeavgiftMottaker(behandlingsresultat: Behandlingsresultat) =

@@ -38,7 +38,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
         .valueToTree<JsonNode>(sakerFunnet.map { it.toMap() }).toPrettyString()
 
     @Async("taskExecutor")
-    @Transactional(readOnly = true)
+    @Transactional
     fun finnSakerOgLagProsessinstanserAsynkront(
         dryrun: Boolean,
         antallFeilFørStopAvJob: Int,
@@ -50,7 +50,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
     }
 
     @Synchronized
-    @Transactional(readOnly = true)
+    @Transactional
     fun finnSakerOgLagProsessinstanser(
         dryrun: Boolean,
         antallFeilFørStopAvJob: Int = 0,
@@ -96,12 +96,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
     }
 
     private fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate): List<SakMedBehandlinger> =
-        årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(fomDato = fomDato, tomDato = tomDato) {
-            // Callback for å oppdatere når DB-spørringen er ferdig
-            jobMonitor.stats.finnSakerMedTidligereÅrsavregningQueryStoppedAt = LocalDateTime.now()
-        }.also {
-            jobMonitor.stats.finnBehandlingerdbQueryStoppedAt = LocalDateTime.now()
-        }
+        årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(fomDato = fomDato, tomDato = tomDato)
 
     private fun <T> runAsSystem(prosessSteg: String = "finnSakerHvorÅrsavregningSkalOpprettes", block: () -> T): T {
         val processId = UUID.randomUUID()

@@ -64,10 +64,11 @@ class PensjonistFtrlVedtakIT(
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
-) : AvgiftFaktureringTestBase(TrygdeavgiftsberegningTransformer(LocalDate.now().withYear(2023))) {
+) : AvgiftFaktureringTestBase(TrygdeavgiftsberegningTransformer()) {
 
     private val kafkaTopic = "teammelosys.manglende-fakturabetaling-local"
     override val fakturaserieReferanse: String = "01J17B5NTTDYKFB5DZTSSQEHJ0"
+    private val inneværendeÅr = LocalDate.now().year
 
     @AfterEach
     fun afterEach() {
@@ -89,7 +90,7 @@ class PensjonistFtrlVedtakIT(
             )
         }.hentBehandling.id
 
-        val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
+        val periode = DatoPeriodeDto(LocalDate.of(inneværendeÅr, 1, 1), LocalDate.of(inneværendeÅr, 2, 1))
 
 
         val skattefordholdsperioder = listOf(
@@ -113,7 +114,7 @@ class PensjonistFtrlVedtakIT(
             behandlingsId,
             skattefordholdsperioder,
             inntektsforholdsperioder,
-            LocalDate.of(2023, 4, 4)
+            LocalDate.of(inneværendeÅr, 4, 4)
         )
 
 
@@ -163,8 +164,8 @@ class PensjonistFtrlVedtakIT(
                     vedtakstype = Vedtakstyper.ENDRINGSVEDTAK,
                     medlemskapsperioder = listOf(
                         no.nav.melosys.integrasjon.hendelser.Periode(
-                            LocalDate.of(2023, 1, 1),
-                            LocalDate.of(2023, 2, 1),
+                            LocalDate.of(inneværendeÅr, 1, 1),
+                            LocalDate.of(inneværendeÅr, 2, 1),
                             InnvilgelsesResultat.INNVILGET
                         )
                     ),
@@ -200,7 +201,7 @@ class PensjonistFtrlVedtakIT(
             val kafkaMelding = ManglendeFakturabetalingMelding(
                 fakturaserieReferanse = fakturaserieReferanse,
                 betalingsstatus = Betalingsstatus.IKKE_BETALT,
-                datoMottatt = LocalDate.of(2023, 12, 13),
+                datoMottatt = LocalDate.of(inneværendeÅr, 12, 13),
                 fakturanummer = "23004119"
             )
             manglendeFakturabetalingMeldingTemplate.send(kafkaTopic, kafkaMelding)
@@ -272,8 +273,8 @@ class PensjonistFtrlVedtakIT(
                         .shouldBeInstanceOf<SøknadNorgeEllerUtenforEØS>()
                         .apply {
                             periode = Periode(
-                                LocalDate.of(2023, 1, 1),
-                                LocalDate.of(2023, 2, 1),
+                                LocalDate.of(inneværendeÅr, 1, 1),
+                                LocalDate.of(inneværendeÅr, 2, 1),
                             )
                             soeknadsland = Soeknadsland(listOf("AF"), false)
                             trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
@@ -317,10 +318,10 @@ class PensjonistFtrlVedtakIT(
         }, VilkaarDto().apply {
             vilkaar = Vilkaar.FTRL_2_8_PENSJONIST_TRETTI_ÅR_TRYGDETID.kode
             isOppfylt = true
-        },VilkaarDto().apply {
+        }, VilkaarDto().apply {
             vilkaar = Vilkaar.FTRL_2_8_PENSJON_UFØRETRYGD_FOLKETRYGDEN.kode
             isOppfylt = true
-        },VilkaarDto().apply {
+        }, VilkaarDto().apply {
             vilkaar = Vilkaar.FTRL_2_8_PENSJONIST_TI_ÅR_TRYGDETID_FØR_SØKNADSTIDSPUNKT.kode
             isOppfylt = true
         })
@@ -360,13 +361,13 @@ class PensjonistFtrlVedtakIT(
         val medlemskapsperiode = medlemskapsperiodeService.oppdaterMedlemskapsperiode(
             behandlingId,
             medlemskapsperiodeId,
-            LocalDate.of(2023, 1, 1),
-            LocalDate.of(2023, 2, 1),
+            LocalDate.of(inneværendeÅr, 1, 1),
+            LocalDate.of(inneværendeÅr, 2, 1),
             InnvilgelsesResultat.INNVILGET,
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D
         )
-        val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
+        val periode = DatoPeriodeDto(LocalDate.of(inneværendeÅr, 1, 1), LocalDate.of(inneværendeÅr, 2, 1))
         val skattefordholdsperioder = listOf(
             SkatteforholdTilNorge().apply {
                 fomDato = periode.fom
@@ -389,19 +390,19 @@ class PensjonistFtrlVedtakIT(
             behandlingId,
             skattefordholdsperioder,
             inntektsforholdsperioder,
-            LocalDate.of(2023, 4, 4)
+            LocalDate.of(inneværendeÅr, 4, 4)
         )
 
 
         val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
-            fomDato = LocalDate.of(2023, 1, 1)
-            tomDato = LocalDate.of(2023, 2, 1)
+            fomDato = LocalDate.of(inneværendeÅr, 1, 1)
+            tomDato = LocalDate.of(inneværendeÅr, 2, 1)
             this@apply.skatteplikttype = skatteplikttype
         }
 
         val inntektsperiode = Inntektsperiode().apply {
-            fomDato = LocalDate.of(2023, 1, 1)
-            tomDato = LocalDate.of(2023, 2, 1)
+            fomDato = LocalDate.of(inneværendeÅr, 1, 1)
+            tomDato = LocalDate.of(inneværendeÅr, 2, 1)
             type = Inntektskildetype.PENSJON_UFØRETRYGD
             isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetales
             avgiftspliktigMndInntekt = Penger(10000.toBigDecimal(), "nok")
@@ -410,8 +411,8 @@ class PensjonistFtrlVedtakIT(
         val trygdeavgiftsperioder = HashSet<Trygdeavgiftsperiode>()
         trygdeavgiftsperioder.add(
             Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2023, 1, 1),
-                periodeTil = LocalDate.of(2023, 2, 1),
+                periodeFra = LocalDate.of(inneværendeÅr, 1, 1),
+                periodeTil = LocalDate.of(inneværendeÅr, 2, 1),
                 trygdesats = 6.8.toBigDecimal(),
                 trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal(), "nok"),
                 grunnlagMedlemskapsperiode = medlemskapsperiode,

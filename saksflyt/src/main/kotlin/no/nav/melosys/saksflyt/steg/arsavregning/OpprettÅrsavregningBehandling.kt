@@ -51,7 +51,7 @@ class OpprettÅrsavregningBehandling(
         // Bruker sisteBehandlingsresultatMedMedlemskapsperiode for å sikre at vi får behandlingen
         // med den relevante medlemskapsperioden som overlapper med årsavregningsperioden,
         // ikke bare behandlingen med avgiftsgrunnlag
-        val trygdeavgiftsBehandlingtMedRelevantPeriode = gjeldendeBehandlingsresultater?.sisteBehandlingsresultatMedMedlemskapsperiode?.behandling
+        val trygdeavgiftsBehandlingtMedRelevantPeriode = gjeldendeBehandlingsresultater?.sisteBehandlingsresultatMedAvgiftspliktigPeriode?.behandling
             ?: throw TekniskException("Fant ingen behandling med innvilget medlemskapsperiode og avgiftsgrunnlag for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderÅr")
 
         val behandling = behandlingService.nyBehandling(

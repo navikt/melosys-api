@@ -1,10 +1,7 @@
 package no.nav.melosys.domain
 
 import jakarta.persistence.*
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.*
@@ -105,6 +102,18 @@ open class Behandlingsresultat : RegistreringsInfo() {
     @Enumerated(EnumType.STRING)
     var trygdeavgiftType: Trygdeavgift_typer? = null
 
+    fun harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år: Int): Boolean =
+        finnAvgiftspliktigPerioder().any { it.erInnvilget() && it.overlapperMedÅr(år) }
+
+    fun finnAvgiftspliktigPerioder(): List<AvgiftspliktigPeriode> = when {
+        behandling?.erEøsPensjonist() == true && helseutgiftDekkesPeriode != null ->
+            listOf(hentHelseutgiftDekkesPeriode())
+        behandling?.fagsak?.erLovvalg() == true ->
+            lovvalgsperioder.toList()
+        else ->
+            medlemskapsperioder.toList()
+    }
+
     fun addMedlemskapsperiode(medlemskapsperiode: Medlemskapsperiode) {
         medlemskapsperioder.add(medlemskapsperiode)
         medlemskapsperiode.behandlingsresultat = this
@@ -135,6 +144,12 @@ open class Behandlingsresultat : RegistreringsInfo() {
         medlemskapsperioder.clear()
     }
 
+    fun clearLovvalgsperioder() {
+        lovvalgsperioder.forEach { it.setBehandlingsresultat(null) }
+        lovvalgsperioder.forEach(Lovvalgsperiode::clearTrygdeavgiftsperioder)
+        lovvalgsperioder.clear()
+    }
+
     fun clearTrygdevgiftPåHelseutgiftDekkesPeriode() {
         helseutgiftDekkesPeriode?.clearTrygdeavgiftsperioder()
     }
@@ -143,33 +158,33 @@ open class Behandlingsresultat : RegistreringsInfo() {
         behandling?.erEøsPensjonist() ?: false
 
 
-    fun utledSkatteplikttype(): Skatteplikttype {
+    fun utledSkatteplikttype(): Skatteplikttype? {
         val trygdeavgiftsperiode = trygdeavgiftsperioder.firstOrNull()
-        val erÅpenSluttdato = utledMedlemskapsperiodeTom() == null
+        val erÅpenSluttdato = utledAvgiftspliktigperioderTom() == null
         if (trygdeavgiftsperiode == null && erÅpenSluttdato) {
             return Skatteplikttype.SKATTEPLIKTIG
         } else if (trygdeavgiftsperiode == null) {
-            throw RuntimeException("Trygdeavgiftsperiode ikke funnet, og det er ikke åpen sluttdato, id = $id")
+            return null
         }
 
         return trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge?.skatteplikttype
             ?: error("grunnlagSkatteforholdTilNorge er påkrevd for Trygdeavgiftsperiode")
     }
 
-    fun utledMedlemskapsperiodeFom(): LocalDate? =
-        medlemskapsperioder
+    fun utledAvgiftspliktigperioderFom(): LocalDate? =
+        finnAvgiftspliktigPerioder()
             .filter { it.erInnvilget() }
             .mapNotNull { it.fom }
             .minOrNull()
 
-    fun utledMedlemskapsperiodeTom(): LocalDate? =
-        medlemskapsperioder
+    fun utledAvgiftspliktigperioderTom(): LocalDate? =
+        finnAvgiftspliktigPerioder()
             .filter { it.erInnvilget() }
             .mapNotNull { it.tom }
             .maxOrNull()
 
     fun utledOpphørtDato(): LocalDate? =
-        medlemskapsperioder
+        finnAvgiftspliktigPerioder()
             .filter { it.erOpphørt() }
             .mapNotNull { it.fom }
             .minOrNull()
@@ -178,7 +193,17 @@ open class Behandlingsresultat : RegistreringsInfo() {
         medlemskapsperioder.any { it.overlapperMedÅr(år) && it.erInnvilget() }
 
     val trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>
-        get() = medlemskapsperioder.flatMap { it.trygdeavgiftsperioder }.toSet()
+        get() {
+            if (behandling?.erEøsPensjonist() == true) {
+                return eøsPensjonistTrygdeavgiftsperioder
+            }
+
+            if (behandling?.fagsak?.erLovvalg() == true) {
+                return lovvalgsperioder.flatMap { it.trygdeavgiftsperioder }.toSet()
+            }
+
+            return medlemskapsperioder.flatMap { it.trygdeavgiftsperioder }.toSet()
+        }
 
     val eøsPensjonistTrygdeavgiftsperioder: Set<Trygdeavgiftsperiode>
         get() {
@@ -208,9 +233,7 @@ open class Behandlingsresultat : RegistreringsInfo() {
             .toSet()
 
     fun harTrygdeavgiftsperioderSomOverlapperMedÅr(år: Int): Boolean {
-        return medlemskapsperioder
-            .flatMap { medlemskapsperiode -> medlemskapsperiode.trygdeavgiftsperioder }
-            .any { periode -> periode.overlapperMedÅr(år) && (periode.forskuddsvisFaktura || this.årsavregning != null) }
+        return trygdeavgiftsperioder.any { periode -> periode.overlapperMedÅr(år) }
     }
 
     override fun equals(other: Any?): Boolean {

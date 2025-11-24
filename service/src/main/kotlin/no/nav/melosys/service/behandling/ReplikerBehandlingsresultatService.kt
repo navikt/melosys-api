@@ -104,27 +104,36 @@ class ReplikerBehandlingsresultatService(
         val inntektsperioderReplika = cloneOgJusterInntektsperioder(trygdeavgiftsperioderTilReplikering)
         val skatteforholdTilNorgeReplika = cloneOgJusterSkatteforhold(trygdeavgiftsperioderTilReplikering)
 
-        behandlingsresultatReplika.medlemskapsperioder.forEach { medlemskapsperiodeReplika ->
-            medlemskapsperiodeReplika.trygdeavgiftsperioder = HashSet()
+        behandlingsresultatReplika.finnAvgiftspliktigPerioder().forEach { avgiftspliktigperiodeReplika ->
+            when (avgiftspliktigperiodeReplika) {
+                is Medlemskapsperiode -> avgiftspliktigperiodeReplika.trygdeavgiftsperioder = HashSet()
+                is Lovvalgsperiode -> avgiftspliktigperiodeReplika.trygdeavgiftsperioder = HashSet()
+            }
         }
 
         trygdeavgiftsperioderTilReplikering.forEach { trygdeavgiftsperiodeOriginal ->
             val trygdeavgiftsperiodeReplika = trygdeavgiftsperiodeOriginal.copyEntity(
                 id = trygdeavgiftsperiodeOriginal.id,
-                grunnlagMedlemskapsperiode = behandlingsresultatReplika.medlemskapsperioder
-                    .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode?.id }
-                    ?: throw IllegalStateException("Medlemskapsperiode ikke funnet"),
                 // I de tilfellene bruker ikke skal betale avgift til Nav, er det ikke krav om at inntektsperioder må være satt.
                 grunnlagInntekstperiode = inntektsperioderReplika
                     .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode?.id },
                 grunnlagSkatteforholdTilNorge = skatteforholdTilNorgeReplika
                     .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge?.id }
                     ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),
+                // Dette sikrer at replika ikke kobles til originale perioder.
+                // Og addGrunnlag() validerer at ingen grunnlag er satt fra før.
+                grunnlagMedlemskapsperiode = null,
+                grunnlagLovvalgsPeriode = null,
+                grunnlagHelseutgiftDekkesPeriode = null
             )
 
-            trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode?.run {
-                trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
-            } ?: throw IllegalStateException("Medlemskapsperiode ikke funnet (dette skal ikke kunne skje)")
+            val originalGrunnlagId = trygdeavgiftsperiodeOriginal.hentGrunnlagAvgiftsperiode().hentId()
+            val grunnlag = behandlingsresultatReplika.finnAvgiftspliktigPerioder()
+                .find { it.hentId() == originalGrunnlagId }
+                ?: error("Grunnlagsperiode med id $originalGrunnlagId ikke funnet")
+
+            trygdeavgiftsperiodeReplika.addGrunnlag(grunnlag)
+            grunnlag.addTrygdeavgiftsperiode(trygdeavgiftsperiodeReplika)
         }
 
         behandlingsresultatReplika.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeReplika ->

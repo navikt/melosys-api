@@ -4,6 +4,7 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeTestFactory
 import no.nav.melosys.domain.avgift.forTest
 import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak
@@ -27,6 +28,10 @@ fun BehandlingsresultatTestFactory.Builder.vedtakMetadata(init: VedtakMetadata.(
 
 fun BehandlingsresultatTestFactory.Builder.årsavregning(init: ÅrsavregningTestFactory.Builder.() -> Unit) = apply {
     this.årsavregning = Årsavregning.forTest(init)
+}
+
+fun BehandlingsresultatTestFactory.Builder.helseutgiftDekkesPeriode(init: HelseutgiftDekkesPeriodeTestFactory.Builder.() -> Unit) = apply {
+    this.helseutgiftDekkesPeriode = HelseutgiftDekkesPeriode.forTest(init)
 }
 
 fun BehandlingsresultatTestFactory.Builder.medlemskapsperiode(init: MedlemskapsperiodeTestFactory.Builder.() -> Unit) = apply {
@@ -76,6 +81,7 @@ object BehandlingsresultatTestFactory {
 
         var vedtakMetadata: VedtakMetadata? = null
         var årsavregning: Årsavregning? = null
+        var helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = null
 
         val medlemskapsperioder: MutableSet<Medlemskapsperiode> = mutableSetOf()
         val lovvalgsperioder: MutableSet<Lovvalgsperiode> = mutableSetOf()
@@ -110,6 +116,12 @@ object BehandlingsresultatTestFactory {
             // Sett opp relasjoner for årsavregning
             this@Builder.årsavregning?.let {
                 behandlingsresultat.årsavregning = it
+                it.behandlingsresultat = behandlingsresultat
+            }
+
+            // Sett opp relasjoner for helseutgiftDekkesPeriode
+            this@Builder.helseutgiftDekkesPeriode?.let {
+                behandlingsresultat.helseutgiftDekkesPeriode = it
                 it.behandlingsresultat = behandlingsresultat
             }
 

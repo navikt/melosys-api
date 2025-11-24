@@ -7,8 +7,11 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import java.time.LocalDate
 
-fun lovvalgsperiodeForTest(init: LovvalgsperiodeTestFactory.Builder.() -> Unit = {}): Lovvalgsperiode =
+fun Lovvalgsperiode.Companion.forTest(init: LovvalgsperiodeTestFactory.Builder.() -> Unit = {}): Lovvalgsperiode =
     LovvalgsperiodeTestFactory.Builder().apply(init).build()
+
+fun lovvalgsperiodeForTest(init: LovvalgsperiodeTestFactory.Builder.() -> Unit = {}): Lovvalgsperiode =
+    Lovvalgsperiode.forTest(init)
 
 object LovvalgsperiodeTestFactory {
     val FOM: LocalDate = LocalDate.now()

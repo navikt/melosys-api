@@ -1,9 +1,11 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+import io.getunleash.FakeUnleash
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.*
-import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.collections.shouldContainOnly
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -25,8 +27,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begr
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
-import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -65,8 +65,10 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
 
     private lateinit var innvilgelseFtrlMapper: InnvilgelseFtrlMapper
 
+    private val unleash = FakeUnleash()
     @BeforeEach
     fun setup() {
+        unleash.resetAll()
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
             mockAvklarteVirksomheterService,
@@ -74,6 +76,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
             mockDokgenMapperDatahenter,
             trygdeavgiftMottakerService,
             trygdeavgiftsberegningService,
+            unleash
         )
     }
 

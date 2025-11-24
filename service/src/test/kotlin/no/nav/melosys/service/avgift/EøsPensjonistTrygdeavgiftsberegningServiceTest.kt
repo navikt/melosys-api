@@ -3,9 +3,9 @@ package no.nav.melosys.service.avgift
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -168,7 +168,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
-        }.message.shouldContain("Skatteforholdsperioden(e) du har lagt inn dekker ikke hele helseutgift periode")
+        }.message.shouldContain("Inntektsperiode og skatteforholdsperiode må dekke helseutgiftperiode for inneværende år og fremtidige perioder")
     }
 
     @Test
@@ -194,13 +194,18 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
-        }.message.shouldContain("Inntektsperioden(e) du har lagt inn dekker ikke hele helseutgift periode")
+        }.message.shouldContain("Inntektsperiode og skatteforholdsperiode må dekke helseutgiftperiode for inneværende år og fremtidige perioder")
     }
 
     @Test
     fun `beregnTrygdeavgift - EØS pensjonist skal betale Trygdeavgift`() {
         behandling.apply {
-            fagsak = Fagsak.forTest { medBruker() }
+            fagsak = Fagsak.forTest {
+                medBruker()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+            tema = Behandlingstema.PENSJONIST
         }
 
         val skatteforholdsperiode = SkatteforholdTilNorge().apply {
@@ -240,9 +245,8 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, listOf(skatteforholdsperiode), listOf(inntektsperiode))
-            .shouldNotBeNull()
-            .shouldNotBeEmpty()
-            .shouldContainExactly(
+            .single()
+            .shouldBeEqualToIgnoringFields(
                 Trygdeavgiftsperiode(
                     id = null,
                     periodeFra = FOM,
@@ -250,82 +254,11 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                     trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
                     trygdesats = BigDecimal("7.9"),
                     grunnlagInntekstperiode = inntektsperiode,
-                    grunnlagHelseutgiftDekkesPeriode = null,
+                    grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode,
                     grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
-                    forskuddsvisFaktura = true
-                )
-            )
-
-        verify { trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
-
-        verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
-        behandlingsresultat.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.shouldNotBeEmpty()
-    }
-
-    @Test
-    fun `beregnTrygdeavgift - EØS pensjonist skal betale Trygdeavgift - tidligere kalenderår skal ikke forskuddsfaktureres`() {
-        val fomIFjor = FOM.minusYears(1)
-        val tomIFjor = TOM.minusYears(1)
-        behandling.apply {
-            fagsak = Fagsak.forTest { medBruker() }
-        }
-
-        val skatteforholdsperiode = SkatteforholdTilNorge().apply {
-            fomDato = fomIFjor
-            tomDato = tomIFjor
-            skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-        }
-
-        val inntektsperiode = Inntektsperiode().apply {
-            fomDato = fomIFjor
-            tomDato = tomIFjor
-            type = Inntektskildetype.PENSJON
-            isArbeidsgiversavgiftBetalesTilSkatt = false
-            avgiftspliktigMndInntekt = Penger(BigDecimal(10000.0))
-        }
-
-        helseutgiftDekkesPeriode.apply {
-            fomDato = fomIFjor
-            tomDato = tomIFjor
-        }
-
-
-        val notSoRandomUuid = UUID.randomUUID()
-        val datoPeriodeDto = DatoPeriodeDto(fomIFjor, tomIFjor)
-        mockkStatic(UUID::class)
-        every { UUID.randomUUID() } returns notSoRandomUuid
-
-        every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
-        every { mockTrygdeavgiftConsumer.beregnTrygdeavgiftEosPensjonist(ofType(EøsPensjonistTrygdeavgiftsberegningRequest::class)) }.returns(
-            listOf(
-                EøsPensjonistTrygdeavgiftsberegningResponse(
-                    TrygdeavgiftsperiodeDto(
-                        DatoPeriodeDto(fomIFjor, tomIFjor), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
-                    ), EøsPensjonistTrygdeavgiftsgrunnlagDto(
-                        datoPeriodeDto,
-                        notSoRandomUuid,
-                        notSoRandomUuid
-                    )
-                )
-            )
-        )
-        every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
-
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, listOf(skatteforholdsperiode), listOf(inntektsperiode))
-            .shouldNotBeNull()
-            .shouldNotBeEmpty()
-            .shouldContainExactly(
-                Trygdeavgiftsperiode(
-                    id = null,
-                    periodeFra = fomIFjor,
-                    periodeTil = tomIFjor,
-                    trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
-                    trygdesats = BigDecimal("7.9"),
-                    grunnlagInntekstperiode = inntektsperiode,
-                    grunnlagHelseutgiftDekkesPeriode = null,
-                    grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
-                    forskuddsvisFaktura = false
-                )
+                ),
+                ignorePrivateFields = false,
+                property = Trygdeavgiftsperiode::grunnlagMedlemskapsperiodeNotNull
             )
 
         verify { trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
@@ -340,7 +273,12 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         val fomIFjor = FOM.minusYears(1)
         val tomIFjor = TOM.minusYears(1)
         behandling.apply {
-            fagsak = Fagsak.forTest { medBruker() }
+            fagsak = Fagsak.forTest {
+                medBruker()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+            tema = Behandlingstema.PENSJONIST
         }
 
         val skatteforholdsperiode = SkatteforholdTilNorge().apply {
@@ -385,20 +323,19 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, listOf(skatteforholdsperiode), listOf(inntektsperiode))
-            .shouldNotBeNull()
-            .shouldNotBeEmpty()
-            .shouldContainExactly(
-                Trygdeavgiftsperiode(
+            .single().shouldBeEqualToIgnoringFields(
+                other = Trygdeavgiftsperiode(
                     id = null,
                     periodeFra = fomIFjor,
                     periodeTil = tomIFjor,
                     trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
                     trygdesats = BigDecimal("7.9"),
                     grunnlagInntekstperiode = inntektsperiode,
-                    grunnlagHelseutgiftDekkesPeriode = null,
+                    grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode,
                     grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
-                    forskuddsvisFaktura = true
-                )
+                ),
+                ignorePrivateFields = false,
+                property = Trygdeavgiftsperiode::grunnlagMedlemskapsperiodeNotNull
             )
 
         verify { trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
@@ -415,7 +352,12 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         val datoPeriodeDto = DatoPeriodeDto(FOM, TOM)
 
         behandling.apply {
-            fagsak = Fagsak.forTest { medBruker() }
+            fagsak = Fagsak.forTest {
+                medBruker()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+            tema = Behandlingstema.PENSJONIST
         }
 
         behandlingsresultat.hentHelseutgiftDekkesPeriode()
@@ -479,7 +421,12 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     @Test
     fun `beregnTrygdeavgift - Feiler fordi alle skatteforholdsperioder har samme skatteplikttype`() {
         behandling.apply {
-            fagsak = Fagsak.forTest { medBruker() }
+            fagsak = Fagsak.forTest {
+                medBruker()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+            tema = Behandlingstema.PENSJONIST
         }
 
         behandlingsresultat.hentHelseutgiftDekkesPeriode()
@@ -532,7 +479,12 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         val datoPeriodeDto = DatoPeriodeDto(FOM, TOM)
 
         behandling.apply {
-            fagsak = Fagsak.forTest { medBruker() }
+            fagsak = Fagsak.forTest {
+                medBruker()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+            tema = Behandlingstema.PENSJONIST
         }
 
         behandlingsresultat.hentHelseutgiftDekkesPeriode()
@@ -628,7 +580,12 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     @Test
     fun `finnFakturamottaker - Har ikke fullmektig - Mottaker er bruker`() {
         behandling.apply {
-            fagsak = Fagsak.forTest { medBruker() }
+            fagsak = Fagsak.forTest {
+                medBruker()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+            tema = Behandlingstema.PENSJONIST
         }
         trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(BRUKER_NAVN)
     }

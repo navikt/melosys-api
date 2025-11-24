@@ -9,7 +9,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -44,7 +43,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             årsavregningID shouldBe 112
             år shouldBe 2023
             tidligereTrygdeavgiftsGrunnlag shouldBe Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
-            sisteGjeldendeMedlemskapsperioder.shouldBeEmpty()
+            sisteGjeldendeAvgiftspliktigPerioder.shouldBeEmpty()
             tidligereAvgift.shouldBeEmpty()
             nyttTrygdeavgiftsGrunnlag shouldBe null
             endeligAvgift.shouldBeEmpty()
@@ -63,12 +62,14 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
     @Test
     fun `finnÅrsavregning for ny årsavregning, grunnlag finnes i Melosys`() {
         val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat {
+            id = 99L
             // Setup tidligere behandling for henting av avgiftsgrunnlag
             behandling {
                 id = 99L
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     saksnummer = "123456"
+                    type = Sakstyper.FTRL
                 }
             }
             registrertDato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
@@ -79,6 +80,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
         val fagsak = tidligereBehandlingsresultat.hentBehandling().fagsak
 
         val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
             behandling {
                 id = 1L
                 type = Behandlingstyper.ÅRSAVREGNING
@@ -104,14 +106,14 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             år shouldBe 2023
 
             tidligereTrygdeavgiftsGrunnlag.shouldNotBeNull().run {
-                medlemskapsperioder.shouldHaveSize(1)
-                medlemskapsperioder.elementAt(0).fom shouldBe LocalDate.of(2023, 1, 1)
-                medlemskapsperioder.elementAt(0).tom shouldBe LocalDate.of(2023, 5, 31)
+                avgiftspliktigperioder.shouldHaveSize(1)
+                avgiftspliktigperioder.elementAt(0).fom shouldBe LocalDate.of(2023, 1, 1)
+                avgiftspliktigperioder.elementAt(0).tom shouldBe LocalDate.of(2023, 5, 31)
             }
 
             tidligereAvgift.shouldNotBeEmpty()
 
-            sisteGjeldendeMedlemskapsperioder.shouldHaveSize(1)
+            sisteGjeldendeAvgiftspliktigPerioder.shouldHaveSize(1)
                 .single() shouldBe MedlemskapsperiodeForAvgift(
                 fom = LocalDate.of(2023, 1, 1),
                 tom = LocalDate.of(2023, 5, 31),
@@ -284,7 +286,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             årsavregningID shouldBe 112
             år shouldBe 2023
             tidligereTrygdeavgiftsGrunnlag shouldBe Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
-            sisteGjeldendeMedlemskapsperioder.shouldBeEmpty()
+            sisteGjeldendeAvgiftspliktigPerioder.shouldBeEmpty()
             tidligereAvgift.shouldBeEmpty()
             nyttTrygdeavgiftsGrunnlag shouldBe null
             endeligAvgift.shouldBeEmpty()
@@ -368,7 +370,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             årsavregningID shouldBe 112
             år shouldBe 2023
             tidligereTrygdeavgiftsGrunnlag shouldBe Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
-            sisteGjeldendeMedlemskapsperioder.shouldBeEmpty()
+            sisteGjeldendeAvgiftspliktigPerioder.shouldBeEmpty()
             tidligereAvgift.shouldBeEmpty()
             nyttTrygdeavgiftsGrunnlag shouldBe null
             endeligAvgift.shouldBeEmpty()

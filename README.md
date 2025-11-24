@@ -29,6 +29,15 @@ Man henter ut disse verdiene fra melosys-api-q1 poden på dev-fss ved å kjøre:
 `env | grep AZURE_APP_CLIENT_ID` og `env | grep AZURE_APP_CLIENT_SECRET`<br>
 `melosysDB.password` og `systemuser.password` finner man i [vault](https://vault.adeo.no/ui/vault/secrets/kv%2Fpreprod%2Ffss/show/melosys-q1/teammelosys)
 
+## Feature Toggles
+
+Melosys-api bruker [Unleash](https://www.getunleash.io/) for feature toggles. I lokal utvikling er systemet konfigurert
+med `DefaultEnabledUnleash` som gjør ukjente/ukonfigurerte toggles **enabled** som standard. Dette gjør det enkelt å
+utvikle nye funksjoner uten å måtte konfigurere hver toggle manuelt i Unleash.
+
+For fullstendig dokumentasjon om feature toggles, inkludert oppsett av Unleash lokalt, løsningsvalg og best practices,
+se [FEATURE_TOGGLES.md](config/src/main/kotlin/no/nav/melosys/featuretoggle/FEATURE_TOGGLES.md)
+
 ## Arkitektur
 
 Melosys-api har en lagdelt arkitektur og bruker primært spring-boot som rammeverk:
@@ -56,6 +65,24 @@ Vi har besluttet at versjon for en ny migrering i melosysDB skal være siste ver
 Ny migrering for Datavarehus skal være siste versjon + desimal, slik at man slippe å titte i mappen di_dvh når man oppretter
 ny migrering i melosysDB.
 
-## Komponent tester
+## Testing og Coverage
+
+### Kjøre tester
+```bash
+make test              # Kjør alle tester
+make test-integration  # Kjør integrasjonstester
+make coverage          # Kjør tester med coverage og vis oppsummering
+```
+
+### Coverage-rapporter
+Prosjektet bruker JaCoCo for kodedekning. Hver modul genererer sin egen rapport:
+```bash
+make coverage-summary  # Vis én-linje-per-modul oppsummering
+```
+
+Detaljerte HTML-rapporter finnes i `<modul>/target/site/jacoco/index.html` etter kjøring av tester.
+Se [docs/COVERAGE.md](docs/COVERAGE.md) for fullstendig dokumentasjon.
+
+### Komponent tester
 
 Noen komponenttester er avhengig av oracle databasen. Den kjøres opp automatisk med testcontainer. Men siden det ikke finnes et oracle image som støtter arm arkitektur må de som bruker m1 mac sette en enviroment variabel: `USE-LOCAL-DB=true`. Da kobler testene seg til en kjørende database på maskinen. Se dokumentajon [her](https://github.com/navikt/melosys-docker-compose) for mer info

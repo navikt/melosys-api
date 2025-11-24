@@ -2,8 +2,10 @@ package no.nav.melosys.domain.avgift
 
 import jakarta.persistence.*
 import no.nav.melosys.domain.ErPeriode
+import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
+import no.nav.melosys.exception.FunksjonellException
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -40,20 +42,21 @@ class Trygdeavgiftsperiode(
     @JoinColumn(name = "helseutgift_dekkes_periode_id")
     var grunnlagHelseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = null,
 
+    @ManyToOne
+    @JoinColumn(name = "lovvalg_periode_id")
+    var grunnlagLovvalgsPeriode: Lovvalgsperiode? = null,
+
     @ManyToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "skatteforhold_id")
     val grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = null,
 
-    /**
-     * Hvis dette er false vil det ikke opprettes faktura for denne perioden ved kjøring av OpprettFaktura. Den settes til false for perioder i
-     * tidligere kalenderår, men default til true for å være bakoverkompatibel.
-     */
-    @Column(name = "forskuddsvis_faktureres", nullable = false)
-    val forskuddsvisFaktura: Boolean = true
-) : ErPeriode {
+    ) : ErPeriode {
 
     val grunnlagMedlemskapsperiodeNotNull: Medlemskapsperiode
-        get() = grunnlagMedlemskapsperiode ?: throw IllegalStateException("grunnlagMedlemskapsperiode er null")
+        get() = grunnlagMedlemskapsperiode ?: error("grunnlagMedlemskapsperiode er null")
+
+    fun hentGrunnlagAvgiftsperiode(): AvgiftspliktigPeriode =
+        grunnlagMedlemskapsperiode ?: grunnlagHelseutgiftDekkesPeriode ?: grunnlagLovvalgsPeriode ?: error("grunnlagAvgiftsperiode er null")
 
     fun hentGrunnlagInntekstperiode(): Inntektsperiode =
         grunnlagInntekstperiode ?: error("grunnlagInntekstperiode er påkrevd for Trygdeavgiftsperiode")
@@ -78,8 +81,8 @@ class Trygdeavgiftsperiode(
         grunnlagInntekstperiode: Inntektsperiode? = this.grunnlagInntekstperiode,
         grunnlagMedlemskapsperiode: Medlemskapsperiode? = this.grunnlagMedlemskapsperiode,
         grunnlagHelseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = this.grunnlagHelseutgiftDekkesPeriode,
+        grunnlagLovvalgsPeriode: Lovvalgsperiode? = this.grunnlagLovvalgsPeriode,
         grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = this.grunnlagSkatteforholdTilNorge,
-        skalForskuddsvisFaktureres: Boolean = this.forskuddsvisFaktura
     ) = Trygdeavgiftsperiode(
         id = id,
         periodeFra = periodeFra,
@@ -89,8 +92,8 @@ class Trygdeavgiftsperiode(
         grunnlagInntekstperiode = grunnlagInntekstperiode,
         grunnlagMedlemskapsperiode = grunnlagMedlemskapsperiode,
         grunnlagHelseutgiftDekkesPeriode = grunnlagHelseutgiftDekkesPeriode,
+        grunnlagLovvalgsPeriode = grunnlagLovvalgsPeriode,
         grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
-        forskuddsvisFaktura = skalForskuddsvisFaktureres
     )
 
     fun erLikForSatsendring(other: Trygdeavgiftsperiode): Boolean =
@@ -100,39 +103,42 @@ class Trygdeavgiftsperiode(
             trygdesats.compareTo(other.trygdesats) == 0 &&
             grunnlagInntekstperiode == other.grunnlagInntekstperiode &&
             grunnlagMedlemskapsperiode == other.grunnlagMedlemskapsperiode &&
+            grunnlagHelseutgiftDekkesPeriode == other.grunnlagHelseutgiftDekkesPeriode &&
+            grunnlagLovvalgsPeriode == other.grunnlagLovvalgsPeriode &&
             grunnlagSkatteforholdTilNorge == other.grunnlagSkatteforholdTilNorge
+
+
+    fun addGrunnlag(avgiftspliktigperiode: AvgiftspliktigPeriode) {
+        val existingGrunnlagCount = listOfNotNull(
+            grunnlagMedlemskapsperiode,
+            grunnlagHelseutgiftDekkesPeriode,
+            grunnlagLovvalgsPeriode
+        ).size
+
+        if (existingGrunnlagCount > 0) {
+            error("Trygdeavgiftsperiode har allerede et grunnlag satt. Kan ikke ha flere grunnlag samtidig.")
+        }
+
+        when (avgiftspliktigperiode) {
+            is Medlemskapsperiode -> grunnlagMedlemskapsperiode = avgiftspliktigperiode
+            is HelseutgiftDekkesPeriode -> grunnlagHelseutgiftDekkesPeriode = avgiftspliktigperiode
+            is Lovvalgsperiode -> grunnlagLovvalgsPeriode = avgiftspliktigperiode
+            else -> throw FunksjonellException("Ukjent type: ${avgiftspliktigperiode::class.java.simpleName}")
+        }
+    }
 
     override fun toString(): String {
         return "Trygdeavgiftsperiode(id=$id, periodeFra=$periodeFra, periodeTil=$periodeTil, " +
-            "trygdeavgiftsbeløpMd=$trygdeavgiftsbeløpMd, trygdesats=$trygdesats, skalForskuddsvisFaktureres=$forskuddsvisFaktura)"
+            "trygdeavgiftsbeløpMd=$trygdeavgiftsbeløpMd, trygdesats=$trygdesats)"
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Trygdeavgiftsperiode) return false
-
-        return periodeFra == other.periodeFra &&
-            periodeTil == other.periodeTil &&
-            trygdeavgiftsbeløpMd == other.trygdeavgiftsbeløpMd &&
-            trygdesats.compareTo(other.trygdesats) == 0 &&
-            grunnlagInntekstperiode == other.grunnlagInntekstperiode &&
-            grunnlagMedlemskapsperiode == other.grunnlagMedlemskapsperiode &&
-            grunnlagSkatteforholdTilNorge == other.grunnlagSkatteforholdTilNorge &&
-            forskuddsvisFaktura == other.forskuddsvisFaktura
+        return id != null && id == other.id
     }
 
-    override fun hashCode(): Int {
-        return listOf(
-            periodeFra,
-            periodeTil,
-            trygdeavgiftsbeløpMd,
-            trygdesats.stripTrailingZeros(),
-            grunnlagInntekstperiode,
-            grunnlagMedlemskapsperiode,
-            grunnlagSkatteforholdTilNorge,
-            forskuddsvisFaktura
-        ).hashCode()
-    }
+    override fun hashCode(): Int = javaClass.hashCode()
 
     companion object // Tom - muliggjør utvidelsefunksjoner i tester
 }

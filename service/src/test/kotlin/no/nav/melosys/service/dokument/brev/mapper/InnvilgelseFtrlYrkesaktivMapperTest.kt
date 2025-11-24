@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+import io.getunleash.FakeUnleash
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.*
@@ -10,10 +11,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.VilkaarBegrunnelse
-import no.nav.melosys.domain.Vilkaarsresultat
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
@@ -44,7 +42,7 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 @ExtendWith(MockKExtension::class)
-internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
+internal class InnvilgelseFtrlYrkesaktivMapperTest {
 
     @MockK
     private lateinit var mockAvklarteVirksomheterService: AvklarteVirksomheterService
@@ -65,8 +63,11 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
 
     private lateinit var innvilgelseFtrlMapper: InnvilgelseFtrlMapper
 
+    private val unleash = FakeUnleash()
+
     @BeforeEach
     fun setup() {
+        unleash.resetAll()
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
             mockAvklarteVirksomheterService,
@@ -74,6 +75,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             mockDokgenMapperDatahenter,
             trygdeavgiftMottakerService,
             trygdeavgiftsberegningService,
+            unleash
         )
     }
 
@@ -119,6 +121,159 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
                 betalerArbeidsgiveravgift.shouldBeTrue()
                 ukjentSluttdatoMedlemskapsperiode.shouldBeTrue()
             }
+    }
+
+    @Test
+    fun mapYrkesaktivFrivillig_InnvilgetKunNorskInntektInnvilget_populererFelter_toggle_på() {
+        unleash.enableAll()
+
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1
+            medlemskapsperiode {
+                fom = LocalDate.now().minusYears(1).withDayOfYear(1)
+                tom = LocalDate.now().withMonth(12).withDayOfMonth(31)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.now().minusYears(1).withDayOfYear(1)
+                    periodeTil = LocalDate.now().withMonth(6).withDayOfMonth(30)
+                    trygdesats = BigDecimal(0.05)
+                    trygdeavgiftsbeløpMd = BigDecimal(500)
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    }
+                    grunnlagInntekstperiode {
+                        arbeidsgiversavgiftBetalesTilSkatt = true
+                    }
+                }
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.now().withMonth(7).withDayOfMonth(1)
+                    periodeTil = LocalDate.now().withMonth(12).withDayOfMonth(31)
+                    trygdesats = BigDecimal.ZERO
+                    trygdeavgiftsbeløpMd = BigDecimal.ZERO
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    }
+                    grunnlagInntekstperiode {
+                        arbeidsgiversavgiftBetalesTilSkatt = true
+                    }
+                }
+            }
+        }.apply {
+            behandling = DokgenTestData.lagBehandling()
+            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply {
+                vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
+                begrunnelser = setOf(lagVilkaarBegrunnelse(this, Case.paragraf_2_8))
+            })
+        }
+
+        mockHappyCase(Case.paragraf_2_8, behandlingsresultat)
+
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).shouldNotBeNull().apply {
+            behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
+            nyVurderingBakgrunn.shouldBe("NYE_OPPLYSNINGER")
+            saksbehandlerNavn.shouldBe(SAKSBEHANDLER_NAVN)
+            saksinfo.shouldBeInstanceOf<SaksinfoBruker>().apply {
+                fnr.shouldBe(DokgenTestData.FNR_BRUKER)
+                saksnummer().shouldBe(SAKSNUMMER)
+                navnBruker().shouldBe(DokgenTestData.SAMMENSATT_NAVN_BRUKER)
+            }
+            dagensDato.truncatedTo(ChronoUnit.DAYS).shouldBe(Instant.now().truncatedTo(ChronoUnit.DAYS))
+            mottaker.apply {
+                adresselinjer().shouldNotBeEmpty()
+                postnr().shouldBe(DokgenTestData.POSTNR_BRUKER)
+                poststed().shouldBe(DokgenTestData.POSTSTED_BRUKER)
+            }
+
+            datoMottatt.shouldBe(LocalDate.EPOCH)
+            innledningFritekst.shouldBeNull()
+            begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
+            trygdeavgiftFritekst.shouldBe(TRYGDEAVGIFT_FRITEKST)
+            avgiftsperioder.shouldHaveSize(1)
+            medlemskapsperioder.shouldHaveSize(1).first().apply {
+                innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+            }
+            bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)
+            avslåttMedlemskapsperiodeFørMottaksdatoHelsedel.shouldBe(false)
+            avslåttMedlemskapsperiodeFørMottaksdatoFullDekning.shouldBe(false)
+            skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
+            begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN)
+            begrunnelseAnnenGrunnFritekst.shouldBe("<p>Vilkårresultat begrunnelse fritekst</p>")
+            arbeidsgivere.shouldHaveSize(1).first().shouldBe(ARBEIDSGIVER_NAVN)
+            flereLandUkjentHvilke.shouldBeFalse()
+            land.shouldContainOnly(Landkoder.AT.beskrivelse)
+            trygdeavtaleLand.shouldBeEmpty()
+            betalerArbeidsgiveravgift.shouldBeTrue()
+            ukjentSluttdatoMedlemskapsperiode.shouldBeTrue()
+            harMedlemskapsperioderIForegåendeÅr.shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun mapYrkesaktivFrivillig_InnvilgetKunNorskInntektInnvilget_ingen_trygdeavgiftsperioder_toggle_på() {
+        unleash.enableAll()
+
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1
+            medlemskapsperiode {
+                fom = LocalDate.now().minusYears(1).withDayOfYear(1)
+                tom = LocalDate.now().withMonth(12).withDayOfMonth(31)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+            }
+        }.apply {
+            behandling = DokgenTestData.lagBehandling()
+            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply {
+                vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
+                begrunnelser = setOf(lagVilkaarBegrunnelse(this, Case.paragraf_2_8))
+            })
+        }
+
+        mockHappyCase(Case.paragraf_2_8, behandlingsresultat)
+
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).shouldNotBeNull().apply {
+            behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
+            nyVurderingBakgrunn.shouldBe("NYE_OPPLYSNINGER")
+            saksbehandlerNavn.shouldBe(SAKSBEHANDLER_NAVN)
+            saksinfo.shouldBeInstanceOf<SaksinfoBruker>().apply {
+                fnr.shouldBe(DokgenTestData.FNR_BRUKER)
+                saksnummer().shouldBe(SAKSNUMMER)
+                navnBruker().shouldBe(DokgenTestData.SAMMENSATT_NAVN_BRUKER)
+            }
+            dagensDato.truncatedTo(ChronoUnit.DAYS).shouldBe(Instant.now().truncatedTo(ChronoUnit.DAYS))
+            mottaker.apply {
+                adresselinjer().shouldNotBeEmpty()
+                postnr().shouldBe(DokgenTestData.POSTNR_BRUKER)
+                poststed().shouldBe(DokgenTestData.POSTSTED_BRUKER)
+            }
+
+            datoMottatt.shouldBe(LocalDate.EPOCH)
+            innledningFritekst.shouldBeNull()
+            begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
+            trygdeavgiftFritekst.shouldBe(TRYGDEAVGIFT_FRITEKST)
+            avgiftsperioder.shouldHaveSize(0)
+            medlemskapsperioder.shouldHaveSize(1).first().apply {
+                innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+            }
+            bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)
+            avslåttMedlemskapsperiodeFørMottaksdatoHelsedel.shouldBe(false)
+            avslåttMedlemskapsperiodeFørMottaksdatoFullDekning.shouldBe(false)
+            skatteplikttype.shouldBeNull()
+            trygdeavgiftMottaker.shouldBeNull()
+            begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN)
+            begrunnelseAnnenGrunnFritekst.shouldBe("<p>Vilkårresultat begrunnelse fritekst</p>")
+            arbeidsgivere.shouldHaveSize(1).first().shouldBe(ARBEIDSGIVER_NAVN)
+            flereLandUkjentHvilke.shouldBeFalse()
+            land.shouldContainOnly(Landkoder.AT.beskrivelse)
+            trygdeavtaleLand.shouldBeEmpty()
+            betalerArbeidsgiveravgift.shouldBeTrue()
+            ukjentSluttdatoMedlemskapsperiode.shouldBeTrue()
+            harMedlemskapsperioderIForegåendeÅr.shouldBeTrue()
+        }
     }
 
     @Test
@@ -560,8 +715,8 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             avgiftspliktigMndInntekt = Penger(0.0)
         }
 
-    private fun mockHappyCase(paragraf: Case) {
-        val behandlingsresultat = lagBehandlingsResultat(paragraf)
+    private fun mockHappyCase(paragraf: Case, behandlingsresultat: Behandlingsresultat? = null) {
+        val behandlingsresultat = behandlingsresultat ?: lagBehandlingsResultat(paragraf)
         every { mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(ofType()) } returns lagAvklarteVirksomheter()
         every { mockAvklarteVirksomheterService.hentUtenlandskeVirksomheter(ofType()) } returns emptyList()
         every { mockAvklarteVirksomheterService.hentNorskeSelvstendigeForetak(ofType()) } returns emptyList()

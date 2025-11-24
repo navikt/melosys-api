@@ -28,3 +28,7 @@ local-q2.env
 .serena
 .m2
 .mvn
+
+# JaCoCo coverage
+*.exec
+jacoco-report/
