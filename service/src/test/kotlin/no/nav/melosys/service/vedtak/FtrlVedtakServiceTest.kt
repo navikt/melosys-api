@@ -10,6 +10,7 @@ import io.kotest.matchers.throwable.shouldHaveMessage
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.*
@@ -74,7 +75,8 @@ class FtrlVedtakServiceTest {
             prosessinstansService,
             oppgaveService,
             dokgenService,
-            vilkaarsresultatService
+            vilkaarsresultatService,
+            mockk(relaxed = true)
         )
         behandlingsresultatSlot.clear()
         behandlingSlot.clear()

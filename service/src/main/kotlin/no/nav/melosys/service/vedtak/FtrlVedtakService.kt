@@ -1,5 +1,6 @@
 package no.nav.melosys.service.vedtak
 
+import jakarta.persistence.EntityManager
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.kodeverk.*
@@ -26,7 +27,8 @@ class FtrlVedtakService(
     val prosessinstansService: ProsessinstansService,
     val oppgaveService: OppgaveService,
     val dokgenService: DokgenService,
-    val vilkaarsresultatService: VilkaarsresultatService
+    val vilkaarsresultatService: VilkaarsresultatService,
+    val entityManager: EntityManager
 ) : FattVedtakInterface {
     private val log = LoggerFactory.getLogger(FtrlVedtakService::class.java)
 
@@ -154,14 +156,22 @@ class FtrlVedtakService(
         }
 
         return behandlingsresultat.apply {
-            type = utledBehandlingsresultatType(this, request)
+            val beregnetType = utledBehandlingsresultatType(this, request)
+            log.info("🔍 DEBUG: Setter behandlingsresultat.type fra $type til $beregnetType for behandling ${behandling.id}")
+            type = beregnetType
             settVedtakMetadata(request.vedtakstype, LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong()))
             nyVurderingBakgrunn = request.nyVurderingBakgrunn
             begrunnelseFritekst = request.begrunnelseFritekst
             innledningFritekst = request.innledningFritekst
             trygdeavgiftFritekst = request.trygdeavgiftFritekst
             fastsattAvLand = Land_iso2.NO
-        }.let { behandlingsresultatService.lagre(it) }
+        }.let {
+            log.info("🔍 DEBUG: Lagret behandlingsresultat med type=${it.type} for behandling ${behandling.id}")
+            // VIKTIG: Tving Hibernate til å skrive til DB
+            entityManager.flush()
+            log.info("🔍 DEBUG: Flushed til database")
+            behandlingsresultatService.lagre(it)
+        }
     }
 
     private fun Behandlingsresultat.harFullstendigManglendeInnbetaling(): Boolean =
