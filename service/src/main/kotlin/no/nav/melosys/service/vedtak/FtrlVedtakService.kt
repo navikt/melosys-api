@@ -133,7 +133,7 @@ class FtrlVedtakService(
             bestillersId = request.bestillersId
         }
 
-    private fun lagInnvilgelsePensjonist(request: FattVedtakRequest,  produserbaredokument: Produserbaredokumenter): BrevbestillingDto =
+    private fun lagInnvilgelsePensjonist(request: FattVedtakRequest, produserbaredokument: Produserbaredokumenter): BrevbestillingDto =
         BrevbestillingDto().apply {
             produserbardokument = produserbaredokument
             mottaker = Mottakerroller.BRUKER
@@ -149,24 +149,26 @@ class FtrlVedtakService(
     private fun oppdaterBehandlingsresultat(behandling: Behandling, request: FattVedtakRequest): Behandlingsresultat {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
-        val erFullstendigOpphør = behandlingsresultat.avklartefakta.any {
-            it.type == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING &&
-            it.referanse == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode
-        }
-        if (erFullstendigOpphør) {
+        if (behandlingsresultat.erFullstendigOpphør()) {
             return oppdaterBehandlingsresultatForOpphørt(behandling.id, request)
         }
 
-        behandlingsresultat.type = utledBehandlingsresultatType(behandlingsresultat, request)
-        behandlingsresultat.settVedtakMetadata(request.vedtakstype, LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong()))
-        behandlingsresultat.nyVurderingBakgrunn = request.nyVurderingBakgrunn
-        behandlingsresultat.begrunnelseFritekst = request.begrunnelseFritekst
-        behandlingsresultat.innledningFritekst = request.innledningFritekst
-        behandlingsresultat.trygdeavgiftFritekst = request.trygdeavgiftFritekst
-        behandlingsresultat.fastsattAvLand = Land_iso2.NO
-
-        return behandlingsresultatService.lagre(behandlingsresultat)
+        return behandlingsresultat.apply {
+            type = utledBehandlingsresultatType(this, request)
+            settVedtakMetadata(request.vedtakstype, LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong()))
+            nyVurderingBakgrunn = request.nyVurderingBakgrunn
+            begrunnelseFritekst = request.begrunnelseFritekst
+            innledningFritekst = request.innledningFritekst
+            trygdeavgiftFritekst = request.trygdeavgiftFritekst
+            fastsattAvLand = Land_iso2.NO
+        }.let { behandlingsresultatService.lagre(it) }
     }
+
+    private fun Behandlingsresultat.erFullstendigOpphør(): Boolean =
+        avklartefakta.any {
+            it.type == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING &&
+                it.referanse == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode
+        }
 
     private fun utledBehandlingsresultatType(
         behandlingsresultat: Behandlingsresultat,
