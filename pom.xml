@@ -41,7 +41,7 @@
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.326-77cdab1</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.328-1c79e4b</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.154-midlertidig</melosys.brev.version>
 
         <!-- NAV -->
@@ -55,9 +55,9 @@
         <archunit.version>1.4.1</archunit.version>
         <apache-httpclients.version>4.5.13</apache-httpclients.version>
         <caffeine.version>3.2.3</caffeine.version>
-        <cxf.version>4.1.3</cxf.version>
+        <cxf.version>4.1.4</cxf.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
-        <commons-lang3.version>3.19.0</commons-lang3.version>
+        <commons-lang3.version>3.20.0</commons-lang3.version>
         <commons-lang.version>2.6</commons-lang.version>
         <commons-text.version>1.14.0</commons-text.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
@@ -69,7 +69,7 @@
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
         <json-smart.version>2.6.0</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
-        <kotest.version>6.0.4</kotest.version>
+        <kotest.version>6.0.5</kotest.version>
         <kotlin-logging.version>3.0.5</kotlin-logging.version>
         <mockito-kotlin.version>6.1.0</mockito-kotlin.version>
         <mockk.version>1.14.6</mockk.version>
@@ -103,9 +103,9 @@
         <springmockk.version>4.0.2</springmockk.version>
         <httpclient5.version>5.5.1</httpclient5.version>
         <commons.beanutils.version>1.11.0</commons.beanutils.version>
-        <commons-cli.version>1.10.0</commons-cli.version>
+        <commons-cli.version>1.11.0</commons-cli.version>
         <graphql-spring-boot-starter.version>15.1.0</graphql-spring-boot-starter.version>
-        <scala.version>2.13.17</scala.version>
+        <scala.version>2.13.18</scala.version>
         <testcontainers.version>2.0.2</testcontainers.version>
         <jna.version>5.18.1</jna.version>
         <graphql.java.extended.scalars.version>24.0</graphql.java.extended.scalars.version>
@@ -113,7 +113,7 @@
         <!-- Spring-data-envers, hibernate, antlr4 Downgraded due to: https://hibernate.atlassian.net/browse/HHH-17612 and compatability-->
         <spring-data-envers.version>3.5.5</spring-data-envers.version>
         <hibernate.version>6.2.4.Final</hibernate.version>
-        <antlr4.version>4.10.1</antlr4.version>
+        <antlr4.version>4.13.2</antlr4.version>
         <springdoc-openapi.version>2.8.14</springdoc-openapi.version>
 
         <!-- Bump JUnit versjon for å kunne bruke argumentSetName, denne kan muligens fjernes når vi bumper spring neste gang -->
@@ -125,7 +125,7 @@
         <woodstox.version>6.6.1</woodstox.version>
         <woodstox.stax2.version>4.2.2</woodstox.stax2.version>
         <xmlsec.version>4.0.4</xmlsec.version>
-        <wiremock-standalone.version>3.13.1</wiremock-standalone.version>
+        <wiremock-standalone.version>3.13.2</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
     </properties>
 
