@@ -102,13 +102,15 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
             helseutgiftDekkesPeriodeIDetteOgFremtidigÅr,
             INNTEKT_OG_SKATT_MÅ_DEKKE_HELSEUTGIFTPERIODE_FOR_INNEVÆRENDE_OG_FREMTIDIG
         )
-
-        validerPerioderDekkerSammenlignetPeriode(
-            kanOverlappe = true,
-            inntektsperioder,
-            helseutgiftDekkesPeriodeIDetteOgFremtidigÅr,
-            INNTEKT_OG_SKATT_MÅ_DEKKE_HELSEUTGIFTPERIODE_FOR_INNEVÆRENDE_OG_FREMTIDIG
-        )
+        val erSkattepliktigIHelePerioden = skatteforholdsperioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+        if (!erSkattepliktigIHelePerioden) {
+            validerPerioderDekkerSammenlignetPeriode(
+                kanOverlappe = true,
+                inntektsperioder,
+                helseutgiftDekkesPeriodeIDetteOgFremtidigÅr,
+                INNTEKT_OG_SKATT_MÅ_DEKKE_HELSEUTGIFTPERIODE_FOR_INNEVÆRENDE_OG_FREMTIDIG
+            )
+        }
     }
 
     private fun validerInntektsperioderErIkkeUtenforMedlemskapPeriode(
