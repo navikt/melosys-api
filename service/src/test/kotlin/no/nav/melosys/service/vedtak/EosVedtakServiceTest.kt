@@ -412,7 +412,7 @@ class EosVedtakServiceKtTest {
         )
 
         // Then - Verify kontrollerVedtakMedRegisteropplysninger receives Behandling object
-        // This is critical to prevent race condition from entity reload after registeropplysninger update
+        // This is critical to prevent race condition from entity reload after registeropplysninger updates
         verify(exactly = 1) {
             ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
                 eq(behandling),  // Verify actual Behandling object is passed, not just ID
