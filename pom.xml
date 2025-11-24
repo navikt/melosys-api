@@ -89,7 +89,7 @@
         <unleash.version>8.3.0</unleash.version>
         <bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
         <bouncycastle-jdk18on.version>1.82</bouncycastle-jdk18on.version>
-        <nimbus-jose-jwt.version>9.37.4</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>10.6</nimbus-jose-jwt.version>
         <neethi.version>3.2.1</neethi.version>
         <jakarta.jaxb.version>3.0.1</jakarta.jaxb.version>
         <javaparser.version>1.0.11</javaparser.version>
