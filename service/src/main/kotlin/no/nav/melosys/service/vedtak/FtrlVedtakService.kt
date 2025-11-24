@@ -176,12 +176,20 @@ class FtrlVedtakService(
             return Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL
         }
 
-        val erDelvisOpphør = behandlingsresultat.medlemskapsperioder.any { it.erOpphørt() }
-        return if (erDelvisOpphør) {
-            Behandlingsresultattyper.DELVIS_OPPHØRT
-        } else {
-            Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+        val opphørtePerioder = behandlingsresultat.medlemskapsperioder.filter { it.erOpphørt() }
+
+        if (opphørtePerioder.isNotEmpty()) {
+            // Hvis alle perioder er opphørt, burde dette vært fanget av harFullstendigManglendeInnbetaling()
+            if (opphørtePerioder.size == behandlingsresultat.medlemskapsperioder.size) {
+                throw FunksjonellException(
+                    "Alle medlemskapsperioder er opphørt, men FULLSTENDIG_MANGLENDE_INNBETALING mangler. " +
+                    "Dette er en inkonsistent tilstand."
+                )
+            }
+            return Behandlingsresultattyper.DELVIS_OPPHØRT
         }
+
+        return Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
     }
 
     private fun oppdaterBehandlingsresultatForOpphørt(behandlingID: Long, request: FattVedtakRequest): Behandlingsresultat {

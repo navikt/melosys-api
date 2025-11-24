@@ -320,10 +320,17 @@ class FtrlVedtakServiceTest {
     fun fattVedtak_delvis_opphørt_fatterVedtak() {
         every { behandlingsresultatService.lagre(any()) } returnsArgument 0
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns Behandlingsresultat().apply {
-            medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
-                innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
-                fom = LocalDate.now()
-            })
+            medlemskapsperioder = mutableSetOf(
+                Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                    fom = LocalDate.now()
+                },
+                Medlemskapsperiode().apply {
+                    medlemskapstype = Medlemskapstyper.PLIKTIG
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = LocalDate.now().plusMonths(6)
+                }
+            )
         }
         val request = lagFattVedtakRequest(
             type = Behandlingsresultattyper.DELVIS_OPPHØRT,
@@ -487,6 +494,32 @@ class FtrlVedtakServiceTest {
         shouldThrow<FunksjonellException> {
             ftrlVedtakService.fattVedtak(lagBehandling(), request)
         }.shouldHaveMessage("Forventer at fullstendigManglendeInnbetaling er satt ved fatting av vedtak for behandlingstype OPPHØRT")
+    }
+
+    @Test
+    fun `utledBehandlingsresultatType kaster feil hvis alle medlemskapsperioder er opphørt uten FULLSTENDIG_MANGLENDE_INNBETALING`() {
+        // Alle perioder er opphørt, men ingen FULLSTENDIG_MANGLENDE_INNBETALING - inkonsistent tilstand
+        val behandlingsresultat = Behandlingsresultat().apply {
+            medlemskapsperioder = mutableSetOf(
+                Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                    fom = LocalDate.now()
+                },
+                Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                    fom = LocalDate.now().minusMonths(1)
+                }
+            )
+            // Mangler FULLSTENDIG_MANGLENDE_INNBETALING avklartefakta
+            avklartefakta = mutableSetOf()
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
+        val request = lagFattVedtakRequest(type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
+
+        shouldThrow<FunksjonellException> {
+            ftrlVedtakService.fattVedtak(lagBehandling(), request)
+        }.shouldHaveMessage("Alle medlemskapsperioder er opphørt, men FULLSTENDIG_MANGLENDE_INNBETALING mangler. Dette er en inkonsistent tilstand.")
     }
 
     @Test
