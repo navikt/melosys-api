@@ -24,6 +24,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
@@ -88,6 +90,125 @@ class OpprettFakturaserieTest {
             unleash
         )
     }
+
+
+    @Test
+    fun `Opprett betalingsplan med riktige verdier for behandling med lovvalgsperioder som har trygdeavgiftsperioder_TOGGLE_AV`() {
+        unleash.disableAll()
+
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = BEHANDLING_ID
+            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            lovvalgsperiode {
+                dekning = Trygdedekninger.FULL_DEKNING_EOSFO
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                fom = LocalDate.of(2022, 1, 1)
+                tom = LocalDate.of(2023, 5, 31)
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E
+                trygdeavgiftsperiode {
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+            vedtakMetadata {
+                vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
+                vedtaksdato = Instant.now().minus(3, ChronoUnit.DAYS)
+            }
+            behandling {
+                id = BEHANDLING_ID
+                tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak {
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                    betalingsvalg = Betalingstype.FAKTURA
+                    medBruker()
+                }
+            }
+        }
+
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
+            medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
+            medBehandling(behandlingsresultat.behandling)
+        }
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+        verify(exactly = 0) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+    }
+
+    @Test
+    fun `Opprett betalingsplan med riktige verdier for behandling med lovvalgsperioder som har trygdeavgiftsperioder`() {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = BEHANDLING_ID
+            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            lovvalgsperiode {
+                dekning = Trygdedekninger.FULL_DEKNING_EOSFO
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                fom = LocalDate.of(2022, 1, 1)
+                tom = LocalDate.of(2023, 5, 31)
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E
+                trygdeavgiftsperiode {
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+            vedtakMetadata {
+                vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
+                vedtaksdato = Instant.now().minus(3, ChronoUnit.DAYS)
+            }
+            behandling {
+                id = BEHANDLING_ID
+                tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak {
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                    betalingsvalg = Betalingstype.FAKTURA
+                    medBruker()
+                }
+            }
+        }
+
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
+            medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
+            medBehandling(behandlingsresultat.behandling)
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandlingsresultat.behandling
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
+        every { pdlService.finnFolkeregisterident(BRUKER_AKTØR_ID) } returns Optional.of(BRUKER_AKTØRID)
+
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        slotFakturaserieDto.captured.shouldNotBeNull().run {
+            referanseBruker.shouldContain("Vedtak om medlemskap datert ")
+            fakturaserieReferanse.shouldBeNull()
+        }
+    }
+
 
     @Test
     fun `Opprett betalingsplan med riktige verdier`() {

@@ -42,6 +42,11 @@ class OpprettFakturaserie(
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandling = prosessinstans.hentBehandling
+
+        if(!unleash.isEnabled(ToggleName.MELOSYS_EOS_FAKTURERING_AV_TRYGDEAVGIFT) && behandling.fagsak.erLovvalg()) {
+            return
+        }
+
         val behandlingID = behandling.id
         val saksbehandlerIdent = prosessinstans.hentData(ProsessDataKey.SAKSBEHANDLER)
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
@@ -138,6 +143,7 @@ class OpprettFakturaserie(
         val vedtaksdato =
             DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault()).format(behandlingsresultat.hentVedtakMetadata().vedtaksdato)
         val erEøsPensjonist = behandling.erEøsPensjonist()
+        val erLovvalg = fagsak.erLovvalg()
 
         return FakturaserieDto(
             fodselsnummer = foedselsNr,
@@ -147,8 +153,8 @@ class OpprettFakturaserie(
             fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
             intervall = hentBetalingsIntervall(prosessinstans),
             referanseBruker = if (erEøsPensjonist) "Informasjon om trygdeavgift datert $vedtaksdato" else "Vedtak om medlemskap datert $vedtaksdato",
-            perioder = if (erEøsPensjonist)
-                mapFakturaseriePeriodeDtoEosPensjonist(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.filter { it.harAvgift() })
+            perioder = if (erEøsPensjonist || erLovvalg)
+                mapFakturaseriePeriodeDtoUtenDekning(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.filter { it.harAvgift() })
             else
                 mapFakturaseriePeriodeDto(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() })
         )
@@ -191,7 +197,7 @@ class OpprettFakturaserie(
         }
     }
 
-    private fun mapFakturaseriePeriodeDtoEosPensjonist(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
+    private fun mapFakturaseriePeriodeDtoUtenDekning(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
         return trygdeavgiftsperioder.map {
             FakturaseriePeriodeDto(
                 it.trygdeavgiftsbeløpMd.hentVerdi(),
@@ -210,7 +216,7 @@ class OpprettFakturaserie(
             return DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL
         }
 
-        return trygdeavgiftsperiode.grunnlagMedlemskapsperiodeNotNull.hentTrygdedekning().beskrivelse
+        return trygdeavgiftsperiode.hentGrunnlagMedlemskapsperiodeNotNull().hentTrygdedekning().beskrivelse
     }
 
     companion object {

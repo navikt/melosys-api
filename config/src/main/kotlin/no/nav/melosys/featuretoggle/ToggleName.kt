@@ -14,4 +14,5 @@ object ToggleName {
     const val MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER = "melosys.faktureringskomponenten.ikke-tidligere-perioder"
     const val MELOSYS_SEND_POPP_HENDELSE = "melosys.send_popp_hendelse"
     const val MELOSYS_SORTER_SOK_PA_REDIGERINGSDATO = "melosys.sorter_sok_pa_redigeringsdato"
+    const val MELOSYS_EOS_FAKTURERING_AV_TRYGDEAVGIFT  = "melosys.eos_fakturering_av_trygdeavgift"
 }

@@ -5,7 +5,6 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
-import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
@@ -18,7 +17,6 @@ import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
 import no.nav.melosys.integrasjon.dokgen.dto.ÅrsavregningVedtaksbrev
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.aarsavregning.AvgiftsperiodeForAvgift
-import no.nav.melosys.service.avgift.aarsavregning.HelseutgiftDekkesPeriodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningKonstanter
@@ -120,7 +118,7 @@ class ÅrsavregningVedtakMapper(
                 avgiftPerMd = trygdeavgiftsperiode.trygdeavgiftsbeløpMd.hentVerdi(),
                 avgiftspliktigInntektPerMd = grunnlagsInntektsperiode.kalkulertMndInntekt(),
                 inntektskilde = grunnlagsInntektsperiode.type.beskrivelse,
-                trygdedekning = trygdeavgiftsperiode.grunnlagMedlemskapsperiodeNotNull.hentTrygdedekning().beskrivelse,
+                trygdedekning = trygdeavgiftsperiode.hentGrunnlagMedlemskapsperiodeNotNull().hentTrygdedekning().beskrivelse,
                 arbeidsgiveravgiftBetalt = arbeidsGiverAvgiftBetalesTilSkatt(
                     medlemskapsTypePliktig,
                     grunnlagsInntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
