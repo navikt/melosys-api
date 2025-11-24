@@ -150,7 +150,8 @@ class FtrlVedtakService(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
         val erFullstendigOpphør = behandlingsresultat.avklartefakta.any {
-            it.type == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
+            it.type == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING &&
+            it.referanse == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode
         }
         if (erFullstendigOpphør) {
             return oppdaterBehandlingsresultatForOpphørt(behandling.id, request)
