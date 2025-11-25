@@ -7,12 +7,13 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.throwable.shouldHaveMessage
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import org.springframework.context.ApplicationEventPublisher
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.kodeverk.*
@@ -23,6 +24,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.saksflytapi.StartProsessinstansEtterCommitEvent
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
@@ -61,9 +63,13 @@ class FtrlVedtakServiceTest {
     @RelaxedMockK
     private lateinit var vilkaarsresultatService: VilkaarsresultatService
 
+    @RelaxedMockK
+    private lateinit var applicationEventPublisher: ApplicationEventPublisher
+
     private var behandlingsresultatSlot = slot<Behandlingsresultat>()
     private var behandlingSlot = slot<Behandling>()
     private var brevbestillingRequestSlot = slot<BrevbestillingDto>()
+    private var eventSlot = slot<StartProsessinstansEtterCommitEvent>()
 
     private lateinit var ftrlVedtakService: FtrlVedtakService
 
@@ -76,11 +82,12 @@ class FtrlVedtakServiceTest {
             oppgaveService,
             dokgenService,
             vilkaarsresultatService,
-            mockk(relaxed = true)
+            applicationEventPublisher
         )
         behandlingsresultatSlot.clear()
         behandlingSlot.clear()
         brevbestillingRequestSlot.clear()
+        eventSlot.clear()
         SpringSubjectHandler.set(TestSubjectHandler())
     }
 
@@ -108,9 +115,15 @@ class FtrlVedtakServiceTest {
 
         verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
-        verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.LOVVALG_AVKLART) }
+        verify { applicationEventPublisher.publishEvent(capture(eventSlot)) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEH_ID) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
+
+        eventSlot.captured.shouldBeInstanceOf<StartProsessinstansEtterCommitEvent.IverksettVedtakFtrl>().run {
+            behandlingId.shouldBe(BEH_ID)
+            saksstatus.shouldBe(Saksstatuser.LOVVALG_AVKLART)
+            vedtakRequest.shouldBe(request.tilVedtakRequest())
+        }
 
         behandlingsresultatSlot.captured.shouldNotBeNull().run {
             type.shouldBe(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
@@ -299,9 +312,13 @@ class FtrlVedtakServiceTest {
 
         verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
-        verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.LOVVALG_AVKLART) }
+        verify { applicationEventPublisher.publishEvent(capture(eventSlot)) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEH_ID) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
+
+        (eventSlot.captured as StartProsessinstansEtterCommitEvent.IverksettVedtakFtrl).run {
+            saksstatus.shouldBe(Saksstatuser.LOVVALG_AVKLART)
+        }
 
         behandlingsresultatSlot.captured.shouldNotBeNull().run {
             type.shouldBe(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
@@ -346,10 +363,14 @@ class FtrlVedtakServiceTest {
 
         verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
-        verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.LOVVALG_AVKLART) }
+        verify { applicationEventPublisher.publishEvent(capture(eventSlot)) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEH_ID) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
         verify(exactly = 0) { vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultat(any()) }
+
+        (eventSlot.captured as StartProsessinstansEtterCommitEvent.IverksettVedtakFtrl).run {
+            saksstatus.shouldBe(Saksstatuser.LOVVALG_AVKLART)
+        }
 
         behandlingsresultatSlot.captured.shouldNotBeNull().run {
             type.shouldBe(Behandlingsresultattyper.DELVIS_OPPHØRT)
@@ -410,10 +431,14 @@ class FtrlVedtakServiceTest {
 
         verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
-        verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.OPPHØRT) }
+        verify { applicationEventPublisher.publishEvent(capture(eventSlot)) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEH_ID) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
         verify { vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultat(capture(behandlingsresultatSlot)) }
+
+        (eventSlot.captured as StartProsessinstansEtterCommitEvent.IverksettVedtakFtrl).run {
+            saksstatus.shouldBe(Saksstatuser.OPPHØRT)
+        }
 
         behandlingsresultatSlot.captured.shouldNotBeNull().run {
             type.shouldBe(Behandlingsresultattyper.OPPHØRT)

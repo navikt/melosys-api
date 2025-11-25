@@ -1,6 +1,5 @@
 package no.nav.melosys.service.vedtak
 
-import jakarta.persistence.EntityManager
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.kodeverk.*
@@ -10,7 +9,9 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.saksflytapi.StartProsessinstansEtterCommitEvent
 import no.nav.melosys.service.behandling.BehandlingService
+import org.springframework.context.ApplicationEventPublisher
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.dokument.DokgenService
@@ -28,7 +29,7 @@ class FtrlVedtakService(
     val oppgaveService: OppgaveService,
     val dokgenService: DokgenService,
     val vilkaarsresultatService: VilkaarsresultatService,
-    val entityManager: EntityManager
+    val applicationEventPublisher: ApplicationEventPublisher
 ) : FattVedtakInterface {
     private val log = LoggerFactory.getLogger(FtrlVedtakService::class.java)
 
@@ -47,7 +48,18 @@ class FtrlVedtakService(
         val nyStatus =
             if (behandlingsresultat.type == Behandlingsresultattyper.OPPHØRT) Saksstatuser.OPPHØRT else Saksstatuser.LOVVALG_AVKLART
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK)
-        prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(behandling, request.tilVedtakRequest(), nyStatus)
+
+        // Publiser event som starter prosessen ETTER at transaksjonen har committet.
+        // Dette sikrer at all data (behandlingsresultat.type, vedtakMetadata, etc.) er synlig
+        // i databasen når prosessen starter og leser dataen.
+        applicationEventPublisher.publishEvent(
+            StartProsessinstansEtterCommitEvent.IverksettVedtakFtrl(
+                behandlingId = behandling.id,
+                vedtakRequest = request.tilVedtakRequest(),
+                saksstatus = nyStatus
+            )
+        )
+
         dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request, behandling, behandlingsresultat))
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id)
     }
@@ -157,7 +169,7 @@ class FtrlVedtakService(
 
         return behandlingsresultat.apply {
             val beregnetType = utledBehandlingsresultatType(this, request)
-            log.info("🔍 DEBUG: Setter behandlingsresultat.type fra $type til $beregnetType for behandling ${behandling.id}")
+            log.debug("Setter behandlingsresultat.type fra {} til {} for behandling {}", type, beregnetType, behandling.id)
             type = beregnetType
             settVedtakMetadata(request.vedtakstype, LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong()))
             nyVurderingBakgrunn = request.nyVurderingBakgrunn
@@ -166,10 +178,6 @@ class FtrlVedtakService(
             trygdeavgiftFritekst = request.trygdeavgiftFritekst
             fastsattAvLand = Land_iso2.NO
         }.let {
-            log.info("🔍 DEBUG: Lagret behandlingsresultat med type=${it.type} for behandling ${behandling.id}")
-            // VIKTIG: Tving Hibernate til å skrive til DB
-            entityManager.flush()
-            log.info("🔍 DEBUG: Flushed til database")
             behandlingsresultatService.lagre(it)
         }
     }
