@@ -34,7 +34,7 @@ class FtrlVedtakService(
         val behandlingID = behandling.id
         log.info("Fatter vedtak for (FTRL) sak: ${behandling.fagsak.saksnummer} behandling: $behandlingID")
 
-        val behandlingsresultat = oppdaterBehandlingsresultat(behandlingID, request)
+        val behandlingsresultat = oppdaterBehandlingsresultat(behandling, request)
 
         validerRequest(behandlingsresultat, request)
 
@@ -43,7 +43,7 @@ class FtrlVedtakService(
         }
 
         val nyStatus =
-            if (request.behandlingsresultatTypeKode == Behandlingsresultattyper.OPPHØRT) Saksstatuser.OPPHØRT else Saksstatuser.LOVVALG_AVKLART
+            if (behandlingsresultat.type == Behandlingsresultattyper.OPPHØRT) Saksstatuser.OPPHØRT else Saksstatuser.LOVVALG_AVKLART
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK)
         prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(behandling, request.tilVedtakRequest(), nyStatus)
         dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request, behandling, behandlingsresultat))
@@ -133,7 +133,7 @@ class FtrlVedtakService(
             bestillersId = request.bestillersId
         }
 
-    private fun lagInnvilgelsePensjonist(request: FattVedtakRequest,  produserbaredokument: Produserbaredokumenter): BrevbestillingDto =
+    private fun lagInnvilgelsePensjonist(request: FattVedtakRequest, produserbaredokument: Produserbaredokumenter): BrevbestillingDto =
         BrevbestillingDto().apply {
             produserbardokument = produserbaredokument
             mottaker = Mottakerroller.BRUKER
@@ -146,29 +146,57 @@ class FtrlVedtakService(
             bestillersId = request.bestillersId
         }
 
-    private fun oppdaterBehandlingsresultat(behandlingID: Long, request: FattVedtakRequest): Behandlingsresultat {
-        if (request.behandlingsresultatTypeKode == Behandlingsresultattyper.OPPHØRT) {
-            return oppdaterBehandlingsresultatForOpphørt(behandlingID, request)
+    private fun oppdaterBehandlingsresultat(behandling: Behandling, request: FattVedtakRequest): Behandlingsresultat {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
+
+        if (behandlingsresultat.harFullstendigManglendeInnbetaling()) {
+            return oppdaterBehandlingsresultatForOpphørt(behandling.id, request)
         }
 
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        return behandlingsresultat.apply {
+            type = utledBehandlingsresultatType(this, request)
+            settVedtakMetadata(request.vedtakstype, LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong()))
+            nyVurderingBakgrunn = request.nyVurderingBakgrunn
+            begrunnelseFritekst = request.begrunnelseFritekst
+            innledningFritekst = request.innledningFritekst
+            trygdeavgiftFritekst = request.trygdeavgiftFritekst
+            fastsattAvLand = Land_iso2.NO
+        }.let { behandlingsresultatService.lagre(it) }
+    }
 
-        behandlingsresultat.type = request.behandlingsresultatTypeKode
-        behandlingsresultat.settVedtakMetadata(request.vedtakstype, LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong()))
-        behandlingsresultat.nyVurderingBakgrunn = request.nyVurderingBakgrunn
-        behandlingsresultat.begrunnelseFritekst = request.begrunnelseFritekst
-        behandlingsresultat.innledningFritekst = request.innledningFritekst
-        behandlingsresultat.trygdeavgiftFritekst = request.trygdeavgiftFritekst
-        behandlingsresultat.fastsattAvLand = Land_iso2.NO
+    private fun Behandlingsresultat.harFullstendigManglendeInnbetaling(): Boolean =
+        avklartefakta.any { it.type == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING }
 
-        return behandlingsresultatService.lagre(behandlingsresultat)
+    private fun utledBehandlingsresultatType(
+        behandlingsresultat: Behandlingsresultat,
+        request: FattVedtakRequest
+    ): Behandlingsresultattyper {
+        // AVSLAG_MANGLENDE_OPPL er eksplisitt valg av saksbehandler
+        if (request.behandlingsresultatTypeKode == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
+            return Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL
+        }
+
+        val opphørtePerioder = behandlingsresultat.medlemskapsperioder.filter { it.erOpphørt() }
+
+        if (opphørtePerioder.isNotEmpty()) {
+            // Hvis alle perioder er opphørt, burde dette vært fanget av harFullstendigManglendeInnbetaling()
+            if (opphørtePerioder.size == behandlingsresultat.medlemskapsperioder.size) {
+                throw FunksjonellException(
+                    "Alle medlemskapsperioder er opphørt, men FULLSTENDIG_MANGLENDE_INNBETALING mangler. " +
+                    "Dette er en inkonsistent tilstand."
+                )
+            }
+            return Behandlingsresultattyper.DELVIS_OPPHØRT
+        }
+
+        return Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
     }
 
     private fun oppdaterBehandlingsresultatForOpphørt(behandlingID: Long, request: FattVedtakRequest): Behandlingsresultat {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
         val fullstendigManglendeInnbetaling = behandlingsresultat.avklartefakta
-            .firstOrNull { Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode == it.referanse && Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING == it.type }
+            .firstOrNull { it.type == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING }
             ?: throw FunksjonellException("Forventer at fullstendigManglendeInnbetaling er satt ved fatting av vedtak for behandlingstype OPPHØRT")
 
         val opphørteMedlemskapsperioder = behandlingsresultat.medlemskapsperioder
