@@ -110,6 +110,10 @@ class StartProsessinstansEtterCommitListener(
     private val prosessinstansService: ProsessinstansService,
     private val behandlingService: BehandlingService
 ) {
+    // VIKTIG: Må bruke REQUIRES_NEW for å starte ny transaksjon.
+    // @TransactionalEventListener med AFTER_COMMIT kjører utenfor transaksjon,
+    // så uten REQUIRES_NEW vil ikke påfølgende AFTER_COMMIT events trigges.
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     fun opprettProsessinstansEtterCommit(event: StartProsessinstansEtterCommitEvent) {
         val behandling = behandlingService.hentBehandling(event.behandlingId)

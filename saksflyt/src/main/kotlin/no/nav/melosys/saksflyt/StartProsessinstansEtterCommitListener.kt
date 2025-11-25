@@ -5,6 +5,8 @@ import no.nav.melosys.saksflytapi.StartProsessinstansEtterCommitEvent
 import no.nav.melosys.service.behandling.BehandlingService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.event.TransactionPhase
 import org.springframework.transaction.event.TransactionalEventListener
 
@@ -29,6 +31,7 @@ class StartProsessinstansEtterCommitListener(
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     fun opprettProsessinstansEtterCommit(event: StartProsessinstansEtterCommitEvent) {
         log.info(
