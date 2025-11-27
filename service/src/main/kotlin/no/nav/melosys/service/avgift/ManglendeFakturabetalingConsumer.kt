@@ -39,7 +39,7 @@ class ManglendeFakturabetalingConsumer(
                     throw FunksjonellException("Finner ikke behandlingsresultat med fakturaserie-referanse: $fakturaserieReferanse")
                 }.first()
 
-            if (sisteResultatMedReferanse.hentBehandling().erEøsPensjonist() || sisteResultatMedReferanse.medlemskapsperioder.isNotEmpty() && sisteResultatMedReferanse.medlemskapsperioder.all { it.erPliktigMedlemskap() }) {
+            if (sisteResultatMedReferanse.hentBehandling().erEøsPensjonist() || sisteResultatMedReferanse.finnAvgiftspliktigPerioder().isNotEmpty() && sisteResultatMedReferanse.finnAvgiftspliktigPerioder().all { it.erPliktigMedlemskap() }) {
                 prosessinstansService.opprettProsessManglendeInnbetalingVarselBrev(
                     sisteResultatMedReferanse.behandling,
                     manglendeFakturebetalingMelding
