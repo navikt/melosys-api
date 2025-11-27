@@ -1,14 +1,15 @@
 package no.nav.melosys.service.behandling.jobb
 
 import mu.KotlinLogging
-import no.nav.security.token.support.core.api.Protected
+import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 private val log = KotlinLogging.logger { }
 
-@Protected
+@Unprotected
 @RestController
 @RequestMapping("/admin/rett-opp-feil-medl-perioder")
 class RettOppFeilMedlPerioderController(
@@ -54,4 +55,12 @@ class RettOppFeilMedlPerioderController(
         rettOppFeilMedlPerioderJob.stopp()
         return ResponseEntity.ok(mapOf("melding" to "Stoppforespørsel sendt"))
     }
+
+    /**
+     * Henter JSON-rapport med detaljert info om alle behandlede saker.
+     * Denne rapporten kan brukes lokalt for analyse og feilsøking.
+     */
+    @GetMapping("/rapport", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun jsonRapport(): ResponseEntity<String> =
+        ResponseEntity(rettOppFeilMedlPerioderJob.sakerFunnetJsonString(), HttpStatus.OK)
 }
