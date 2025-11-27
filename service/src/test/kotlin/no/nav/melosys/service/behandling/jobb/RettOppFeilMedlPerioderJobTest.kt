@@ -8,7 +8,11 @@ import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.BucInformasjon
 import no.nav.melosys.domain.eessi.SedInformasjon
-import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.eessi.SedType
+import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.sed.EessiService
 import no.nav.melosys.service.medl.MedlPeriodeService
@@ -52,7 +56,7 @@ class RettOppFeilMedlPerioderJobTest {
         val sedDokument = mockk<SedDokument> {
             every { rinaSaksnummer } returns "RINA-789"
             every { rinaDokumentID } returns "DOC-001"
-            every { sedType } returns SedTyper.A001
+            every { sedType } returns SedType.A001
         }
         val lovvalgsperiode = mockk<Lovvalgsperiode> {
             every { medlPeriodeID } returns 999L
@@ -67,7 +71,7 @@ class RettOppFeilMedlPerioderJobTest {
             every { this@mockk.fagsak } returns fagsak
             every { finnSedDokument() } returns Optional.of(sedDokument)
             every { type } returns Behandlingstyper.UTSENDING
-            every { status } returns Behandlingsstatuser.LUKKET
+            every { status } returns Behandlingsstatus.LUKKET
             every { registrertDato } returns Instant.now()
             every { endretDato } returns Instant.now()
         }
@@ -109,7 +113,7 @@ class RettOppFeilMedlPerioderJobTest {
         val sedDokument = mockk<SedDokument> {
             every { rinaSaksnummer } returns "RINA-789"
             every { rinaDokumentID } returns "DOC-001"
-            every { sedType } returns SedTyper.A001
+            every { sedType } returns SedType.A001
         }
         val lovvalgsperiode = mockk<Lovvalgsperiode> {
             every { medlPeriodeID } returns 999L
@@ -124,7 +128,7 @@ class RettOppFeilMedlPerioderJobTest {
             every { this@mockk.fagsak } returns fagsak
             every { finnSedDokument() } returns Optional.of(sedDokument)
             every { type } returns Behandlingstyper.UTSENDING
-            every { status } returns Behandlingsstatuser.LUKKET
+            every { status } returns Behandlingsstatus.LUKKET
             every { registrertDato } returns Instant.now()
             every { endretDato } returns Instant.now()
         }
@@ -168,14 +172,14 @@ class RettOppFeilMedlPerioderJobTest {
         val sedDokument = mockk<SedDokument> {
             every { rinaSaksnummer } returns "RINA-789"
             every { rinaDokumentID } returns "DOC-001"
-            every { sedType } returns SedTyper.A001
+            every { sedType } returns SedType.A001
         }
         val behandling = mockk<Behandling> {
             every { id } returns 1L
             every { this@mockk.fagsak } returns fagsak
             every { finnSedDokument() } returns Optional.of(sedDokument)
             every { type } returns Behandlingstyper.UTSENDING
-            every { status } returns Behandlingsstatuser.LUKKET
+            every { status } returns Behandlingsstatus.LUKKET
             every { registrertDato } returns Instant.now()
             every { endretDato } returns Instant.now()
         }
