@@ -349,7 +349,7 @@ class InnvilgelseFtrlMapper(
                     avgiftPerMd = it.trygdeavgiftsbeløpMd.hentVerdi(),
                     inntektskilde = it.hentGrunnlagInntekstperiode().type.beskrivelse,
                     inntektskildetype = it.hentGrunnlagInntekstperiode().type.name,
-                    trygdedekning = it.hentGrunnlagMedlemskapsperiodeNotNull().hentTrygdedekning().beskrivelse,
+                    trygdedekning = it.hentGrunnlagMedlemskapsperiode().hentTrygdedekning().beskrivelse,
                     avgiftspliktigInntektPerMd = it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
                     arbeidsgiveravgiftBetalt = SvarAlternativ.IKKE_RELEVANT,
                     skatteplikt = it.hentGrunnlagSkatteforholdTilNorge().skatteplikttype == Skatteplikttype.SKATTEPLIKTIG

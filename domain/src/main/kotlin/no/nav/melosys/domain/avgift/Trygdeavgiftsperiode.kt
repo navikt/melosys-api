@@ -52,7 +52,7 @@ class Trygdeavgiftsperiode(
 
     ) : ErPeriode {
 
-    fun hentGrunnlagMedlemskapsperiodeNotNull(): Medlemskapsperiode = grunnlagMedlemskapsperiode ?: error("grunnlagMedlemskapsperiode er null")
+    fun hentGrunnlagMedlemskapsperiode(): Medlemskapsperiode = grunnlagMedlemskapsperiode ?: error("grunnlagMedlemskapsperiode er null")
 
     fun hentGrunnlagAvgiftsperiode(): AvgiftspliktigPeriode =
         grunnlagMedlemskapsperiode ?: grunnlagHelseutgiftDekkesPeriode ?: grunnlagLovvalgsPeriode ?: error("grunnlagAvgiftsperiode er null")
