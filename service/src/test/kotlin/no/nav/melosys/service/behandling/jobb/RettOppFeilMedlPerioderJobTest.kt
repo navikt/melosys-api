@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.sed.EessiService
 import no.nav.melosys.service.medl.MedlPeriodeService
+import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -30,6 +31,7 @@ class RettOppFeilMedlPerioderJobTest {
     private val fagsakService = mockk<FagsakService>()
     private val behandlingsresultatService = mockk<BehandlingsresultatService>()
     private val medlPeriodeService = mockk<MedlPeriodeService>()
+    private val persondataFasade = mockk<PersondataFasade>()
 
     private lateinit var job: RettOppFeilMedlPerioderJob
 
@@ -40,7 +42,8 @@ class RettOppFeilMedlPerioderJobTest {
             eessiService,
             fagsakService,
             behandlingsresultatService,
-            medlPeriodeService
+            medlPeriodeService,
+            persondataFasade
         )
     }
 
@@ -52,6 +55,7 @@ class RettOppFeilMedlPerioderJobTest {
             every { gsakSaksnummer } returns 456L
             every { status } returns Saksstatuser.LOVVALG_AVKLART
             every { type } returns Sakstyper.EU_EOS
+            every { finnBrukersAktørID() } returns "AKTØR-123"
         }
         val sedDokument = mockk<SedDokument> {
             every { rinaSaksnummer } returns "RINA-789"
@@ -62,6 +66,8 @@ class RettOppFeilMedlPerioderJobTest {
             every { medlPeriodeID } returns 999L
             every { fom } returns LocalDate.of(2024, 1, 1)
             every { tom } returns LocalDate.of(2024, 12, 31)
+            every { lovvalgsland } returns null
+            every { bestemmelse } returns null
         }
         val behandlingsresultat = mockk<Behandlingsresultat> {
             every { lovvalgsperioder } returns mutableSetOf(lovvalgsperiode)
@@ -77,16 +83,24 @@ class RettOppFeilMedlPerioderJobTest {
         }
         val sedInfo = mockk<SedInformasjon> {
             every { sedId } returns "DOC-001"
+            every { sedType } returns "A001"
+            every { status } returns "SENT"
+            every { opprettetDato } returns LocalDate.of(2024, 1, 1)
             every { erAvbrutt() } returns true
         }
         val bucInfo = mockk<BucInformasjon> {
             every { id } returns "RINA-789"
+            every { bucType } returns "LA_BUC_01"
             every { seder } returns listOf(sedInfo)
         }
 
         every { repository.finnBehandlingerMedFeilStatus() } returns listOf(behandling)
         every { eessiService.hentTilknyttedeBucer(456L, emptyList()) } returns listOf(bucInfo)
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+        every { persondataFasade.hentFolkeregisterident("AKTØR-123") } returns "12345678901"
+        every { medlPeriodeService.hentPeriodeListe(any(), any(), any()) } returns mockk {
+            every { dokument } returns null
+        }
 
         // Act
         job.kjør(dryRun = true)
@@ -109,6 +123,7 @@ class RettOppFeilMedlPerioderJobTest {
             every { gsakSaksnummer } returns 456L
             every { status } returns Saksstatuser.LOVVALG_AVKLART
             every { type } returns Sakstyper.EU_EOS
+            every { finnBrukersAktørID() } returns "AKTØR-123"
         }
         val sedDokument = mockk<SedDokument> {
             every { rinaSaksnummer } returns "RINA-789"
@@ -119,6 +134,8 @@ class RettOppFeilMedlPerioderJobTest {
             every { medlPeriodeID } returns 999L
             every { fom } returns LocalDate.of(2024, 1, 1)
             every { tom } returns LocalDate.of(2024, 12, 31)
+            every { lovvalgsland } returns null
+            every { bestemmelse } returns null
         }
         val behandlingsresultat = mockk<Behandlingsresultat> {
             every { lovvalgsperioder } returns mutableSetOf(lovvalgsperiode)
@@ -134,10 +151,14 @@ class RettOppFeilMedlPerioderJobTest {
         }
         val sedInfo = mockk<SedInformasjon> {
             every { sedId } returns "DOC-001"
+            every { sedType } returns "A001"
+            every { status } returns "SENT"
+            every { opprettetDato } returns LocalDate.of(2024, 1, 1)
             every { erAvbrutt() } returns true
         }
         val bucInfo = mockk<BucInformasjon> {
             every { id } returns "RINA-789"
+            every { bucType } returns "LA_BUC_01"
             every { seder } returns listOf(sedInfo)
         }
 
@@ -146,6 +167,10 @@ class RettOppFeilMedlPerioderJobTest {
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { fagsakService.oppdaterStatus(fagsak, Saksstatuser.ANNULLERT) } just runs
         every { medlPeriodeService.avvisPeriode(999L) } just runs
+        every { persondataFasade.hentFolkeregisterident("AKTØR-123") } returns "12345678901"
+        every { medlPeriodeService.hentPeriodeListe(any(), any(), any()) } returns mockk {
+            every { dokument } returns null
+        }
 
         // Act
         job.kjør(dryRun = false)
@@ -168,11 +193,22 @@ class RettOppFeilMedlPerioderJobTest {
             every { gsakSaksnummer } returns 456L
             every { status } returns Saksstatuser.LOVVALG_AVKLART
             every { type } returns Sakstyper.EU_EOS
+            every { finnBrukersAktørID() } returns "AKTØR-123"
         }
         val sedDokument = mockk<SedDokument> {
             every { rinaSaksnummer } returns "RINA-789"
             every { rinaDokumentID } returns "DOC-001"
             every { sedType } returns SedType.A001
+        }
+        val lovvalgsperiode = mockk<Lovvalgsperiode> {
+            every { medlPeriodeID } returns 999L
+            every { fom } returns LocalDate.of(2024, 1, 1)
+            every { tom } returns LocalDate.of(2024, 12, 31)
+            every { lovvalgsland } returns null
+            every { bestemmelse } returns null
+        }
+        val behandlingsresultat = mockk<Behandlingsresultat> {
+            every { lovvalgsperioder } returns mutableSetOf(lovvalgsperiode)
         }
         val behandling = mockk<Behandling> {
             every { id } returns 1L
@@ -185,15 +221,24 @@ class RettOppFeilMedlPerioderJobTest {
         }
         val sedInfo = mockk<SedInformasjon> {
             every { sedId } returns "DOC-001"
+            every { sedType } returns "A001"
+            every { status } returns "SENT"
+            every { opprettetDato } returns LocalDate.of(2024, 1, 1)
             every { erAvbrutt() } returns false // Ikke invalidert
         }
         val bucInfo = mockk<BucInformasjon> {
             every { id } returns "RINA-789"
+            every { bucType } returns "LA_BUC_01"
             every { seder } returns listOf(sedInfo)
         }
 
         every { repository.finnBehandlingerMedFeilStatus() } returns listOf(behandling)
         every { eessiService.hentTilknyttedeBucer(456L, emptyList()) } returns listOf(bucInfo)
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+        every { persondataFasade.hentFolkeregisterident("AKTØR-123") } returns "12345678901"
+        every { medlPeriodeService.hentPeriodeListe(any(), any(), any()) } returns mockk {
+            every { dokument } returns null
+        }
 
         // Act
         job.kjør(dryRun = false)
