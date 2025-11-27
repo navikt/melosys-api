@@ -16,6 +16,7 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
+import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -44,9 +45,9 @@ class OpprettFakturaserie(
         val behandling = prosessinstans.hentBehandling
         val behandlingID = behandling.id
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-        val skalOppretteFakturaSerie = unleash.isEnabled(ToggleName.MELOSYS_EØS_FAKTURERING_AV_TRYGDEAVGIFT) && behandling.fagsak.erLovvalg() && behandlingsresultat.trygdeavgiftsperioder.isNotEmpty()
+        val erLovvalgMedTrygdeavgiftsperiode = unleash.isEnabled(ToggleName.MELOSYS_EØS_FAKTURERING_AV_TRYGDEAVGIFT) && behandling.fagsak.erLovvalg() && behandlingsresultat.trygdeavgiftsperioder.isNotEmpty()
 
-        if (!skalOppretteFakturaSerie) {
+        if (!erLovvalgMedTrygdeavgiftsperiode && prosessinstans.type == ProsessType.IVERKSETT_VEDTAK_EOS) {
             return
         }
 
