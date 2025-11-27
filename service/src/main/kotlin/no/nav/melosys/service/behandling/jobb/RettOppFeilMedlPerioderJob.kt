@@ -286,8 +286,7 @@ class RettOppFeilMedlPerioderJob(
                 lovvalgsland = lovvalgsperiode.lovvalgsland?.name,
                 bestemmelse = lovvalgsperiode.bestemmelse?.kode
             ),
-            matchendeMedlPeriodeFraRegister = matchendeMedlPeriode,
-            alleMedlPerioderFraRegister = medlPerioderFraRegister
+            matchendeMedlPeriodeFraRegister = matchendeMedlPeriode
         )
     }
 
@@ -437,11 +436,10 @@ class RettOppFeilMedlPerioderJob(
         val bestemmelse: String?
     )
 
-    /** Sammenligning mellom lovvalgsperiode fra behandling og MEDL-perioder fra registeret */
+    /** Sammenligning mellom lovvalgsperiode fra behandling og MEDL-periode fra registeret */
     data class MedlSammenligningInfo(
         val lovvalgsperiodeFraBehandling: LovvalgsperiodeInfo,
-        val matchendeMedlPeriodeFraRegister: MedlRegisterPeriode?,
-        val alleMedlPerioderFraRegister: List<MedlRegisterPeriode>
+        val matchendeMedlPeriodeFraRegister: MedlRegisterPeriode?
     )
 
     enum class RapportUtfall {
