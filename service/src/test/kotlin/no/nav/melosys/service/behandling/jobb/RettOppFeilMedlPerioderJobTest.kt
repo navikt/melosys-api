@@ -95,6 +95,7 @@ class RettOppFeilMedlPerioderJobTest {
         }
 
         every { repository.finnBehandlingerMedFeilStatus() } returns listOf(behandling)
+        every { repository.finnBehandlingerMedPotensielleNyVurderingFeil() } returns emptyList()
         every { eessiService.hentTilknyttedeBucer(456L, emptyList()) } returns listOf(bucInfo)
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { persondataFasade.hentFolkeregisterident("AKTØR-123") } returns "12345678901"
@@ -163,6 +164,7 @@ class RettOppFeilMedlPerioderJobTest {
         }
 
         every { repository.finnBehandlingerMedFeilStatus() } returns listOf(behandling)
+        every { repository.finnBehandlingerMedPotensielleNyVurderingFeil() } returns emptyList()
         every { eessiService.hentTilknyttedeBucer(456L, emptyList()) } returns listOf(bucInfo)
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { fagsakService.oppdaterStatus(fagsak, Saksstatuser.ANNULLERT) } just runs
@@ -233,6 +235,7 @@ class RettOppFeilMedlPerioderJobTest {
         }
 
         every { repository.finnBehandlingerMedFeilStatus() } returns listOf(behandling)
+        every { repository.finnBehandlingerMedPotensielleNyVurderingFeil() } returns emptyList()
         every { eessiService.hentTilknyttedeBucer(456L, emptyList()) } returns listOf(bucInfo)
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { persondataFasade.hentFolkeregisterident("AKTØR-123") } returns "12345678901"

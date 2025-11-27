@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.sed.EessiService
@@ -67,9 +68,10 @@ class RettOppFeilMedlPerioderJob(
         jobMonitor.execute(antallFeilFørStopp) {
             log.info { "Starter RettOppFeilMedlPerioderJob (dryRun=$dryRun)" }
 
+            // ===== Scenario 1: X008/X006 invaliderte SEDer =====
             val berørteBehandlinger = rettOppFeilMedlPerioderRepository.finnBehandlingerMedFeilStatus()
             antallFunnet = berørteBehandlinger.size
-            log.info { "Fant $antallFunnet potensielt berørte behandlinger" }
+            log.info { "Scenario 1: Fant $antallFunnet potensielt berørte behandlinger (X008/X006)" }
 
             berørteBehandlinger.forEach { behandling ->
                 if (jobMonitor.shouldStop) return@execute
@@ -78,6 +80,22 @@ class RettOppFeilMedlPerioderJob(
                     behandleEnSak(behandling, dryRun)
                 }.onFailure { e ->
                     log.error(e) { "Feil ved behandling av sak ${behandling.fagsak.saksnummer}" }
+                    jobMonitor.registerException(e)
+                }
+            }
+
+            // ===== Scenario 2: Ny vurdering potensielt overskrevet =====
+            val nyVurderingBehandlinger = rettOppFeilMedlPerioderRepository.finnBehandlingerMedPotensielleNyVurderingFeil()
+            nyVurderingSakerFunnet = nyVurderingBehandlinger.size
+            log.info { "Scenario 2: Fant $nyVurderingSakerFunnet potensielle ny vurdering-saker" }
+
+            nyVurderingBehandlinger.forEach { behandling ->
+                if (jobMonitor.shouldStop) return@execute
+
+                runCatching {
+                    behandleNyVurderingSak(behandling)
+                }.onFailure { e ->
+                    log.error(e) { "Feil ved behandling av ny vurdering-sak ${behandling.fagsak.saksnummer}" }
                     jobMonitor.registerException(e)
                 }
             }
@@ -124,6 +142,7 @@ class RettOppFeilMedlPerioderJob(
                     alleSederFraEessi = emptyList(),
                     medlPerioder = emptyList(),
                     medlSammenligningInfo = null,
+                    nyVurderingInfo = null,
                     utfall = RapportUtfall.MANGLER_ARKIVSAK_ID,
                     feilmelding = null,
                     rettetOpp = false
@@ -152,6 +171,7 @@ class RettOppFeilMedlPerioderJob(
                     alleSederFraEessi = alleSederFraEessi,
                     medlPerioder = emptyList(),
                     medlSammenligningInfo = medlSammenligningInfo,
+                    nyVurderingInfo = null,
                     utfall = RapportUtfall.IKKE_INVALIDERT_I_EESSI,
                     feilmelding = null,
                     rettetOpp = false
@@ -195,6 +215,7 @@ class RettOppFeilMedlPerioderJob(
                 alleSederFraEessi = alleSederFraEessi,
                 medlPerioder = medlPerioder,
                 medlSammenligningInfo = medlSammenligningInfo,
+                nyVurderingInfo = null,
                 utfall = RapportUtfall.SKAL_RETTES_OPP,
                 feilmelding = null,
                 rettetOpp = !dryRun
@@ -334,6 +355,115 @@ class RettOppFeilMedlPerioderJob(
         }
     }
 
+    // ===================== Scenario 2: Ny vurdering =====================
+
+    /**
+     * Behandler Scenario 2: Sjekker om førstegangsbehandlingens MEDL-periode har overskrevet
+     * en nyere ny vurdering-periode.
+     */
+    private fun JobStatus.behandleNyVurderingSak(foerstegangsbehandling: Behandling) {
+        val fagsak = foerstegangsbehandling.fagsak
+        val saksnummer = fagsak.saksnummer
+
+        // Hent MEDL-periode fra førstegangsbehandlingen
+        val foerstegangResultat = behandlingsresultatService.hentBehandlingsresultat(foerstegangsbehandling.id)
+        val foerstegangPeriode = foerstegangResultat.lovvalgsperioder.firstOrNull()
+
+        // Finn ny vurdering-behandlinger på samme sak som er nyere enn førstegangsbehandlingen
+        val nyVurderinger = fagsak.behandlinger
+            .filter { it.type == Behandlingstyper.NY_VURDERING }
+            .filter { it.registrertDato?.isAfter(foerstegangsbehandling.registrertDato) == true }
+            .filter { it.erInaktiv() }
+            .sortedByDescending { it.registrertDato }
+
+        if (nyVurderinger.isEmpty()) {
+            log.debug { "Ingen ny vurdering funnet for sak $saksnummer etter førstegangsbehandling ${foerstegangsbehandling.id}" }
+            return
+        }
+
+        // Hent MEDL-periode info fra ny vurdering-behandlinger
+        val nyVurderingDetaljer = nyVurderinger.map { nyVurdering ->
+            val nyVurderingResultat = behandlingsresultatService.hentBehandlingsresultat(nyVurdering.id)
+            val nyVurderingPeriode = nyVurderingResultat.lovvalgsperioder.firstOrNull()
+            NyVurderingDetaljer(
+                behandlingId = nyVurdering.id,
+                registrertDato = nyVurdering.registrertDato,
+                status = nyVurdering.status.name,
+                medlPeriodeId = nyVurderingPeriode?.medlPeriodeID,
+                fom = nyVurderingPeriode?.fom,
+                tom = nyVurderingPeriode?.tom
+            )
+        }
+
+        // Hent MEDL-info fra registeret for å sammenligne
+        val medlSammenligningInfo = hentOgSammenlignMedlPerioder(foerstegangsbehandling)
+        val medlPeriodeFraRegister = medlSammenligningInfo?.matchendeMedlPeriodeFraRegister
+
+        // Sjekk om MEDL-perioden i registeret matcher førstegangsbehandlingen eller ny vurdering
+        val newestNyVurdering = nyVurderingDetaljer.firstOrNull()
+        val matcherFoerstegang = medlPeriodeFraRegister != null &&
+            foerstegangPeriode?.medlPeriodeID != null &&
+            medlPeriodeFraRegister.unntakId == foerstegangPeriode.medlPeriodeID
+
+        val matcherNyVurdering = medlPeriodeFraRegister != null &&
+            newestNyVurdering?.medlPeriodeId != null &&
+            medlPeriodeFraRegister.unntakId == newestNyVurdering.medlPeriodeId
+
+        // Bestem om ny vurdering ble overskrevet:
+        // Hvis MEDL-perioden matcher førstegangsbehandlingen OG det finnes en nyere ny vurdering med annen periode
+        val erOverskrevet = matcherFoerstegang && !matcherNyVurdering &&
+            newestNyVurdering?.medlPeriodeId != null &&
+            newestNyVurdering.medlPeriodeId != foerstegangPeriode?.medlPeriodeID
+
+        val nyVurderingInfo = NyVurderingInfo(
+            foerstegangsbehandlingId = foerstegangsbehandling.id,
+            foerstegangsbehandlingMedlPeriodeId = foerstegangPeriode?.medlPeriodeID,
+            foerstegangsbehandlingFom = foerstegangPeriode?.fom,
+            foerstegangsbehandlingTom = foerstegangPeriode?.tom,
+            nyVurderinger = nyVurderingDetaljer,
+            medlPeriodeFraRegisterMatcherFoerstegang = matcherFoerstegang,
+            medlPeriodeFraRegisterMatcherNyVurdering = matcherNyVurdering
+        )
+
+        val utfall = if (erOverskrevet) {
+            nyVurderingOverskrevet++
+            log.warn { "Sak $saksnummer: Ny vurdering ble overskrevet av førstegangsbehandling!" }
+            RapportUtfall.NY_VURDERING_OVERSKREVET
+        } else {
+            nyVurderingIkkeOverskrevet++
+            log.info { "Sak $saksnummer: Ny vurdering er ikke overskrevet" }
+            RapportUtfall.NY_VURDERING_IKKE_OVERSKREVET
+        }
+
+        sakerFunnet.add(
+            FeilMedlPeriodeRapportEntry(
+                saksnummer = saksnummer,
+                gsakSaksnummer = fagsak.gsakSaksnummer,
+                saksstatus = fagsak.status.name,
+                sakstype = fagsak.type.name,
+                behandlingId = foerstegangsbehandling.id,
+                behandlingType = foerstegangsbehandling.type.name,
+                behandlingStatus = foerstegangsbehandling.status.name,
+                registrertDato = foerstegangsbehandling.registrertDato,
+                endretDato = foerstegangsbehandling.endretDato,
+                sedInfo = null,
+                alleSederFraEessi = emptyList(),
+                medlPerioder = listOfNotNull(foerstegangPeriode?.let {
+                    MedlPeriodeInfo(
+                        medlPeriodeId = it.medlPeriodeID,
+                        fom = it.fom,
+                        tom = it.tom
+                    )
+                }),
+                medlSammenligningInfo = medlSammenligningInfo,
+                nyVurderingInfo = nyVurderingInfo,
+                utfall = utfall,
+                feilmelding = null,
+                rettetOpp = false
+            )
+        )
+    }
+
     private fun <T> runAsSystem(block: () -> T): T {
         val processId = UUID.randomUUID()
         ThreadLocalAccessInfo.beforeExecuteProcess(processId, "RettOppFeilMedlPerioderJob")
@@ -349,11 +479,16 @@ class RettOppFeilMedlPerioderJob(
     fun stopp() = jobMonitor.stop()
 
     class JobStatus(
+        // Scenario 1 (X008/X006)
         @Volatile var antallFunnet: Int = 0,
         @Volatile var manglerArkivsakId: Int = 0,
         @Volatile var ikkeInvalidertIEessi: Int = 0,
         @Volatile var skalRettesOpp: Int = 0,
-        @Volatile var rettetOpp: Int = 0
+        @Volatile var rettetOpp: Int = 0,
+        // Scenario 2 (Ny vurdering)
+        @Volatile var nyVurderingSakerFunnet: Int = 0,
+        @Volatile var nyVurderingIkkeOverskrevet: Int = 0,
+        @Volatile var nyVurderingOverskrevet: Int = 0
     ) : JobMonitor.Stats {
         override fun reset() {
             antallFunnet = 0
@@ -361,6 +496,9 @@ class RettOppFeilMedlPerioderJob(
             ikkeInvalidertIEessi = 0
             skalRettesOpp = 0
             rettetOpp = 0
+            nyVurderingSakerFunnet = 0
+            nyVurderingIkkeOverskrevet = 0
+            nyVurderingOverskrevet = 0
         }
 
         override fun asMap(): Map<String, Any?> = mapOf(
@@ -368,7 +506,10 @@ class RettOppFeilMedlPerioderJob(
             "manglerArkivsakId" to manglerArkivsakId,
             "ikkeInvalidertIEessi" to ikkeInvalidertIEessi,
             "skalRettesOpp" to skalRettesOpp,
-            "rettetOpp" to rettetOpp
+            "rettetOpp" to rettetOpp,
+            "nyVurderingSakerFunnet" to nyVurderingSakerFunnet,
+            "nyVurderingIkkeOverskrevet" to nyVurderingIkkeOverskrevet,
+            "nyVurderingOverskrevet" to nyVurderingOverskrevet
         )
     }
 
@@ -386,6 +527,7 @@ class RettOppFeilMedlPerioderJob(
         val alleSederFraEessi: List<EessiSedInfo>,
         val medlPerioder: List<MedlPeriodeInfo>,
         val medlSammenligningInfo: MedlSammenligningInfo?,
+        val nyVurderingInfo: NyVurderingInfo?,
         val utfall: RapportUtfall,
         val feilmelding: String?,
         val rettetOpp: Boolean
@@ -442,9 +584,34 @@ class RettOppFeilMedlPerioderJob(
         val matchendeMedlPeriodeFraRegister: MedlRegisterPeriode?
     )
 
+    /** Info om ny vurdering-behandlinger på samme sak (Scenario 2) */
+    data class NyVurderingInfo(
+        val foerstegangsbehandlingId: Long?,
+        val foerstegangsbehandlingMedlPeriodeId: Long?,
+        val foerstegangsbehandlingFom: LocalDate?,
+        val foerstegangsbehandlingTom: LocalDate?,
+        val nyVurderinger: List<NyVurderingDetaljer>,
+        val medlPeriodeFraRegisterMatcherFoerstegang: Boolean?,
+        val medlPeriodeFraRegisterMatcherNyVurdering: Boolean?
+    )
+
+    data class NyVurderingDetaljer(
+        val behandlingId: Long?,
+        val registrertDato: Instant?,
+        val status: String?,
+        val medlPeriodeId: Long?,
+        val fom: LocalDate?,
+        val tom: LocalDate?
+    )
+
     enum class RapportUtfall {
+        // Scenario 1 (X008/X006)
         MANGLER_ARKIVSAK_ID,
         IKKE_INVALIDERT_I_EESSI,
-        SKAL_RETTES_OPP
+        SKAL_RETTES_OPP,
+
+        // Scenario 2 (Ny vurdering)
+        NY_VURDERING_IKKE_OVERSKREVET,
+        NY_VURDERING_OVERSKREVET
     }
 }
