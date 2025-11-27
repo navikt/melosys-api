@@ -42,14 +42,14 @@ class OpprettFakturaserie(
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandling = prosessinstans.hentBehandling
+        val behandlingID = behandling.id
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
-        if(!unleash.isEnabled(ToggleName.MELOSYS_EOS_FAKTURERING_AV_TRYGDEAVGIFT) && behandling.fagsak.erLovvalg()) {
+        if (!unleash.isEnabled(ToggleName.MELOSYS_EOS_FAKTURERING_AV_TRYGDEAVGIFT) && behandling.fagsak.erLovvalg() && behandlingsresultat.trygdeavgiftsperioder.isNotEmpty()) {
             return
         }
 
-        val behandlingID = behandling.id
         val saksbehandlerIdent = prosessinstans.hentData(ProsessDataKey.SAKSBEHANDLER)
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
         if (behandlingsresultat.erOpphørt() || andregangsvurderingHarFjernetTrygdeavgift(behandling, behandlingsresultat)) {
             val opprinneligFakturaserieReferanse =
@@ -154,7 +154,7 @@ class OpprettFakturaserie(
             intervall = hentBetalingsIntervall(prosessinstans),
             referanseBruker = if (erEøsPensjonist) "Informasjon om trygdeavgift datert $vedtaksdato" else "Vedtak om medlemskap datert $vedtaksdato",
             perioder = if (erEøsPensjonist || erLovvalg)
-                mapFakturaseriePeriodeDtoUtenDekning(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.filter { it.harAvgift() })
+                mapFakturaseriePeriodeDtoUtenDekning(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() })
             else
                 mapFakturaseriePeriodeDto(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() })
         )
