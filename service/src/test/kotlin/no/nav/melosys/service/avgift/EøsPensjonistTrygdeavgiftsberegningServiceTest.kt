@@ -258,7 +258,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                     grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
                 ),
                 ignorePrivateFields = false,
-                property = Trygdeavgiftsperiode::grunnlagMedlemskapsperiodeNotNull
+                property = Trygdeavgiftsperiode::grunnlagMedlemskapsperiode
             )
 
         verify { trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
@@ -335,7 +335,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                     grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
                 ),
                 ignorePrivateFields = false,
-                property = Trygdeavgiftsperiode::grunnlagMedlemskapsperiodeNotNull
+                property = Trygdeavgiftsperiode::grunnlagMedlemskapsperiode
             )
 
         verify { trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
