@@ -17,12 +17,16 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.*;
 
 @Service
 public class LandvelgerService {
+
+    private static final Logger log = LoggerFactory.getLogger(LandvelgerService.class);
 
     private final AvklartefaktaService avklartefaktaService;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -134,8 +138,15 @@ public class LandvelgerService {
             mottatteOpplysninger.getMottatteOpplysningerData().hentUtenlandskeArbeidsgivereLandkode().stream()
         ).map(Land_iso2::valueOf).filter(landkoderMedMarginaltArbeid::contains);
 
+        behandlingsresultat.getUtpekingsperioder().stream()
+            .filter(utpekingsperiode -> utpekingsperiode.getLovvalgsland() == null)
+            .forEach(utpekingsperiode -> log.warn(
+                "Utpekingsperiode med id {} har null lovvalgsland for behandlingsresultat {}",
+                utpekingsperiode.getId(), behandlingID));
+
         Stream<Land_iso2> utpektLovvalgsland = behandlingsresultat.getUtpekingsperioder().stream()
             .map(Utpekingsperiode::getLovvalgsland)
+            .filter(Objects::nonNull)
             .map(landkoder -> Land_iso2.valueOf(landkoder.getKode()));
 
         return Streams.concat(
