@@ -11,6 +11,7 @@ import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.sed.EessiService
 import no.nav.melosys.service.medl.MedlPeriodeService
+import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
@@ -38,7 +39,8 @@ class RettOppFeilMedlPerioderJob(
     private val eessiService: EessiService,
     private val fagsakService: FagsakService,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val medlPeriodeService: MedlPeriodeService
+    private val medlPeriodeService: MedlPeriodeService,
+    private val persondataFasade: PersondataFasade
 ) {
     val sakerFunnet: MutableList<FeilMedlPeriodeRapportEntry> = mutableListOf()
 
@@ -87,15 +89,21 @@ class RettOppFeilMedlPerioderJob(
         val arkivsakID = behandling.fagsak.gsakSaksnummer
         val fagsak = behandling.fagsak
 
-        // Hent SED-info for rapporten
+        // Hent SED-info fra databasen (for bakoverkompatibilitet)
         val sedDokument = behandling.finnSedDokument()
-        val sedInfo = if (sedDokument.isPresent) {
+        val sedInfoFraDb = if (sedDokument.isPresent) {
             SedInfo(
                 rinaSaksnummer = sedDokument.get().rinaSaksnummer,
                 rinaDokumentID = sedDokument.get().rinaDokumentID,
                 sedType = sedDokument.get().sedType?.name
             )
         } else null
+
+        // Hent alle SEDer fra EESSI for å få mer oversikt (inkl. X006/X008)
+        val alleSederFraEessi = hentAlleSederFraEessi(arkivsakID, sedDokument.orElse(null)?.rinaSaksnummer)
+
+        // Hent MEDL-perioder fra MEDL-registeret og sammenlign med lovvalgsperiode fra behandling
+        val medlSammenligningInfo = hentOgSammenlignMedlPerioder(behandling)
 
         // Sjekk om behandlingen faktisk ble invalidert (X006/X008)
         if (arkivsakID == null) {
@@ -112,8 +120,10 @@ class RettOppFeilMedlPerioderJob(
                     behandlingStatus = behandling.status.name,
                     registrertDato = behandling.registrertDato,
                     endretDato = behandling.endretDato,
-                    sedInfo = sedInfo,
+                    sedInfo = sedInfoFraDb,
+                    alleSederFraEessi = emptyList(),
                     medlPerioder = emptyList(),
+                    medlSammenligningInfo = null,
                     utfall = RapportUtfall.MANGLER_ARKIVSAK_ID,
                     feilmelding = null,
                     rettetOpp = false
@@ -138,8 +148,10 @@ class RettOppFeilMedlPerioderJob(
                     behandlingStatus = behandling.status.name,
                     registrertDato = behandling.registrertDato,
                     endretDato = behandling.endretDato,
-                    sedInfo = sedInfo,
+                    sedInfo = sedInfoFraDb,
+                    alleSederFraEessi = alleSederFraEessi,
                     medlPerioder = emptyList(),
+                    medlSammenligningInfo = medlSammenligningInfo,
                     utfall = RapportUtfall.IKKE_INVALIDERT_I_EESSI,
                     feilmelding = null,
                     rettetOpp = false
@@ -151,7 +163,7 @@ class RettOppFeilMedlPerioderJob(
         log.info { "Behandling ${behandling.id} (sak $saksnummer) er invalidert - ${if (dryRun) "ville rettet opp" else "retter opp"}" }
         skalRettesOpp++
 
-        // Hent MEDL-periode info
+        // Hent MEDL-periode info fra behandlingsresultat
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
         val medlPerioder = behandlingsresultat.lovvalgsperioder
             .filter { it.medlPeriodeID != null }
@@ -179,12 +191,103 @@ class RettOppFeilMedlPerioderJob(
                 behandlingStatus = behandling.status.name,
                 registrertDato = behandling.registrertDato,
                 endretDato = behandling.endretDato,
-                sedInfo = sedInfo,
+                sedInfo = sedInfoFraDb,
+                alleSederFraEessi = alleSederFraEessi,
                 medlPerioder = medlPerioder,
+                medlSammenligningInfo = medlSammenligningInfo,
                 utfall = RapportUtfall.SKAL_RETTES_OPP,
                 feilmelding = null,
                 rettetOpp = !dryRun
             )
+        )
+    }
+
+    /**
+     * Henter alle SEDer fra EESSI for en gitt arkivsak og BUC.
+     * Dette gir oversikt over alle dokumenter inkludert X006/X008 invaliderings-SEDer.
+     */
+    private fun hentAlleSederFraEessi(arkivsakID: Long?, rinaSaksnummer: String?): List<EessiSedInfo> {
+        if (arkivsakID == null) return emptyList()
+
+        return try {
+            eessiService.hentTilknyttedeBucer(arkivsakID, emptyList())
+                .filter { rinaSaksnummer == null || it.id == rinaSaksnummer }
+                .flatMap { buc ->
+                    buc.seder.map { sed ->
+                        EessiSedInfo(
+                            bucId = buc.id,
+                            bucType = buc.bucType,
+                            sedId = sed.sedId,
+                            sedType = sed.sedType,
+                            status = sed.status,
+                            opprettetDato = sed.opprettetDato,
+                            erAvbrutt = sed.erAvbrutt()
+                        )
+                    }
+                }
+        } catch (e: Exception) {
+            log.warn(e) { "Kunne ikke hente alle SEDer fra EESSI for arkivsak $arkivsakID" }
+            emptyList()
+        }
+    }
+
+    /**
+     * Henter MEDL-perioder fra MEDL-registeret og sammenligner med lovvalgsperiode fra behandlingen.
+     */
+    private fun hentOgSammenlignMedlPerioder(behandling: Behandling): MedlSammenligningInfo? {
+        val fagsak = behandling.fagsak
+        val brukerAktørId = fagsak.finnBrukersAktørID() ?: return null
+
+        // Hent lovvalgsperiode fra behandlingen
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
+        val lovvalgsperiode = behandlingsresultat.lovvalgsperioder.firstOrNull() ?: return null
+
+        val fnr = try {
+            persondataFasade.hentFolkeregisterident(brukerAktørId)
+        } catch (e: Exception) {
+            log.warn(e) { "Kunne ikke hente fnr for aktørId $brukerAktørId" }
+            return null
+        }
+
+        // Hent MEDL-perioder fra MEDL-registeret for å sammenligne
+        val medlPerioderFraRegister = try {
+            val saksopplysning = medlPeriodeService.hentPeriodeListe(
+                fnr,
+                lovvalgsperiode.fom?.minusYears(1),
+                lovvalgsperiode.tom?.plusYears(1)
+            )
+            val medlemskapDokument = saksopplysning.dokument as? no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
+            medlemskapDokument?.medlemsperiode?.map { periode ->
+                MedlRegisterPeriode(
+                    unntakId = periode.id,
+                    fom = periode.periode?.fom,
+                    tom = periode.periode?.tom,
+                    status = periode.status,
+                    lovvalg = periode.lovvalg,
+                    lovvalgsland = periode.land,
+                    dekning = periode.trygdedekning
+                )
+            } ?: emptyList()
+        } catch (e: Exception) {
+            log.warn(e) { "Kunne ikke hente MEDL-perioder fra register for fnr" }
+            emptyList()
+        }
+
+        // Finn matchende periode i MEDL basert på medlPeriodeID
+        val matchendeMedlPeriode = lovvalgsperiode.medlPeriodeID?.let { medlId ->
+            medlPerioderFraRegister.find { it.unntakId == medlId }
+        }
+
+        return MedlSammenligningInfo(
+            lovvalgsperiodeFraBehandling = LovvalgsperiodeInfo(
+                fom = lovvalgsperiode.fom,
+                tom = lovvalgsperiode.tom,
+                medlPeriodeId = lovvalgsperiode.medlPeriodeID,
+                lovvalgsland = lovvalgsperiode.lovvalgsland?.name,
+                bestemmelse = lovvalgsperiode.bestemmelse?.kode
+            ),
+            matchendeMedlPeriodeFraRegister = matchendeMedlPeriode,
+            alleMedlPerioderFraRegister = medlPerioderFraRegister
         )
     }
 
@@ -281,22 +384,64 @@ class RettOppFeilMedlPerioderJob(
         val registrertDato: Instant?,
         val endretDato: Instant?,
         val sedInfo: SedInfo?,
+        val alleSederFraEessi: List<EessiSedInfo>,
         val medlPerioder: List<MedlPeriodeInfo>,
+        val medlSammenligningInfo: MedlSammenligningInfo?,
         val utfall: RapportUtfall,
         val feilmelding: String?,
         val rettetOpp: Boolean
     )
 
+    /** SED-info fra databasen (behandlingens SED-dokument) */
     data class SedInfo(
         val rinaSaksnummer: String?,
         val rinaDokumentID: String?,
         val sedType: String?
     )
 
+    /** SED-info hentet direkte fra EESSI */
+    data class EessiSedInfo(
+        val bucId: String?,
+        val bucType: String?,
+        val sedId: String?,
+        val sedType: String?,
+        val status: String?,
+        val opprettetDato: LocalDate?,
+        val erAvbrutt: Boolean
+    )
+
+    /** MEDL-periode info fra behandlingsresultat */
     data class MedlPeriodeInfo(
         val medlPeriodeId: Long?,
         val fom: LocalDate?,
         val tom: LocalDate?
+    )
+
+    /** MEDL-periode hentet direkte fra MEDL-registeret */
+    data class MedlRegisterPeriode(
+        val unntakId: Long?,
+        val fom: LocalDate?,
+        val tom: LocalDate?,
+        val status: String?,
+        val lovvalg: String?,
+        val lovvalgsland: String?,
+        val dekning: String?
+    )
+
+    /** Lovvalgsperiode fra behandlingen */
+    data class LovvalgsperiodeInfo(
+        val fom: LocalDate?,
+        val tom: LocalDate?,
+        val medlPeriodeId: Long?,
+        val lovvalgsland: String?,
+        val bestemmelse: String?
+    )
+
+    /** Sammenligning mellom lovvalgsperiode fra behandling og MEDL-perioder fra registeret */
+    data class MedlSammenligningInfo(
+        val lovvalgsperiodeFraBehandling: LovvalgsperiodeInfo,
+        val matchendeMedlPeriodeFraRegister: MedlRegisterPeriode?,
+        val alleMedlPerioderFraRegister: List<MedlRegisterPeriode>
     )
 
     enum class RapportUtfall {
