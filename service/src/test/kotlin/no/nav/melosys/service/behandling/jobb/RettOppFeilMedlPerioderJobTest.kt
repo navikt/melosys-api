@@ -70,8 +70,8 @@ class RettOppFeilMedlPerioderJobTest {
             every { id } returns 1L
             every { this@mockk.fagsak } returns fagsak
             every { finnSedDokument() } returns Optional.of(sedDokument)
-            every { type } returns Behandlingstyper.UTSENDING
-            every { status } returns Behandlingsstatus.LUKKET
+            every { type } returns Behandlingstyper.FØRSTEGANG
+            every { status } returns Behandlingsstatus.AVSLUTTET
             every { registrertDato } returns Instant.now()
             every { endretDato } returns Instant.now()
         }
@@ -127,8 +127,8 @@ class RettOppFeilMedlPerioderJobTest {
             every { id } returns 1L
             every { this@mockk.fagsak } returns fagsak
             every { finnSedDokument() } returns Optional.of(sedDokument)
-            every { type } returns Behandlingstyper.UTSENDING
-            every { status } returns Behandlingsstatus.LUKKET
+            every { type } returns Behandlingstyper.FØRSTEGANG
+            every { status } returns Behandlingsstatus.AVSLUTTET
             every { registrertDato } returns Instant.now()
             every { endretDato } returns Instant.now()
         }
@@ -178,8 +178,8 @@ class RettOppFeilMedlPerioderJobTest {
             every { id } returns 1L
             every { this@mockk.fagsak } returns fagsak
             every { finnSedDokument() } returns Optional.of(sedDokument)
-            every { type } returns Behandlingstyper.UTSENDING
-            every { status } returns Behandlingsstatus.LUKKET
+            every { type } returns Behandlingstyper.FØRSTEGANG
+            every { status } returns Behandlingsstatus.AVSLUTTET
             every { registrertDato } returns Instant.now()
             every { endretDato } returns Instant.now()
         }
