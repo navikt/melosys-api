@@ -149,7 +149,8 @@ class ÅrsavregningController(
                         bestemmelse = it.bestemmelse,
                         innvilgelsesResultat = it.innvilgelsesresultat,
                         trygdedekning = it.dekning,
-                        medlemskapstype = it.medlemskapstyper
+                        medlemskapstype = it.medlemskapstyper,
+                        type = it.type
                     )
 
                     is HelseutgiftDekkesPeriodeForAvgift -> AvgiftspliktigPeriodeDto(
@@ -160,6 +161,7 @@ class ÅrsavregningController(
                         innvilgelsesResultat = null,
                         trygdedekning = null,
                         medlemskapstype = null,
+                        type = it.type
                     )
 
                     else -> throw IllegalArgumentException("Ukjent type for siste gjeldende avgiftspliktig periode")
@@ -238,7 +240,8 @@ class ÅrsavregningController(
                         bestemmelse = it.bestemmelse,
                         innvilgelsesResultat = it.innvilgelsesresultat,
                         trygdedekning = it.dekning,
-                        medlemskapstype = it.medlemskapstyper
+                        medlemskapstype = it.medlemskapstyper,
+                        type = it.type
                     )
 
                     is HelseutgiftDekkesPeriodeForAvgift -> AvgiftspliktigPeriodeDto(
@@ -249,6 +252,7 @@ class ÅrsavregningController(
                         innvilgelsesResultat = null,
                         trygdedekning = null,
                         medlemskapstype = null,
+                        type = it.type
                     )
 
                     else -> throw IllegalArgumentException("Ukjent type for siste gjeldende avgiftspliktig periode")
