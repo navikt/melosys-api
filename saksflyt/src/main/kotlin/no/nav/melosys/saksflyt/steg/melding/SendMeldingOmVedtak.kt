@@ -34,10 +34,11 @@ class SendMeldingOmVedtak(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
+        val behandling = prosessinstans.hentBehandling
+        log.info { "[STEP-START] SendMeldingOmVedtak behandlingId=${behandling.id}" }
         if (!unleash.isEnabled(ToggleName.MELOSYS_SEND_MELDING_OM_VEDTAK)) {
             return
         }
-        val behandling = prosessinstans.hentBehandling
 
         val fagsak = behandling.fagsak
         val brukersAktørID = fagsak.hentBrukersAktørID()
@@ -49,6 +50,7 @@ class SendMeldingOmVedtak(
         }
 
         val behandlingsresultat: Behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
+        log.info { "[STEP-LOADED] SendMeldingOmVedtak behandlingId=${behandling.id} type=${behandlingsresultat.type}" }
         val behandligsresultatType: Behandlingsresultattyper = behandlingsresultat.hentType()
         val vedtakstype = behandlingsresultat.vedtakMetadata?.vedtakstype
 

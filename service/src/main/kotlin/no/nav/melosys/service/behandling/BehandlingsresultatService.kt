@@ -55,9 +55,20 @@ class BehandlingsresultatService(
     fun finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år: Int): List<Behandlingsresultat> =
         behandlingsresultatRepository.findAllWithVedtakMetadataAndMedlemskapsperiodeOverlappingYear(år)
 
-    fun hentBehandlingsresultat(behandlingsid: Long): Behandlingsresultat =
-        behandlingsresultatRepository.findById(behandlingsid)
+    fun hentBehandlingsresultat(behandlingsid: Long): Behandlingsresultat {
+        val result = behandlingsresultatRepository.findById(behandlingsid)
             .orElseThrowIkkeFunnetException(behandlingsid)
+        log.info {
+            """
+            [LOAD-BEHANDLINGSRESULTAT]
+              id: ${result.id}
+              type: ${result.type}
+              thread: ${Thread.currentThread().name}
+              caller: ${Thread.currentThread().stackTrace[2]}
+            """.trimIndent()
+        }
+        return result
+    }
 
     fun hentBehandlingsresultatMedAnmodningsperioder(behandlingsid: Long): Behandlingsresultat =
         behandlingsresultatRepository.findWithAnmodningsperioderById(behandlingsid)
@@ -75,7 +86,22 @@ class BehandlingsresultatService(
         behandlingsresultatRepository.findWithAvklartefaktaById(behandlingsid)
             .orElseThrowIkkeFunnetException(behandlingsid)
 
-    fun lagre(resultat: Behandlingsresultat): Behandlingsresultat = behandlingsresultatRepository.save(resultat)
+    fun lagre(resultat: Behandlingsresultat): Behandlingsresultat {
+        val stack = Thread.currentThread().stackTrace
+            .drop(2).take(10)
+            .joinToString("\n      ") { "${it.className}.${it.methodName}:${it.lineNumber}" }
+        log.info {
+            """
+            [SAVE-BEHANDLINGSRESULTAT]
+              id: ${resultat.id}
+              type: ${resultat.type}
+              thread: ${Thread.currentThread().name}
+              stack:
+                $stack
+            """.trimIndent()
+        }
+        return behandlingsresultatRepository.save(resultat)
+    }
 
     fun lagreOgFlush(resultat: Behandlingsresultat): Behandlingsresultat = behandlingsresultatRepository.saveAndFlush(resultat)
 

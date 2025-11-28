@@ -44,7 +44,9 @@ class OpprettFakturaserie(
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandling = prosessinstans.hentBehandling
         val behandlingID = behandling.id
+        log.info("[STEP-START] OpprettFakturaserie behandlingId=$behandlingID")
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        log.info("[STEP-LOADED] OpprettFakturaserie behandlingId=$behandlingID type=${behandlingsresultat.type}")
         val erLovvalgMedTrygdeavgiftsperiode = unleash.isEnabled(ToggleName.MELOSYS_EØS_FAKTURERING_AV_TRYGDEAVGIFT) && behandling.fagsak.erLovvalg() && behandlingsresultat.trygdeavgiftsperioder.isNotEmpty()
 
         if (!erLovvalgMedTrygdeavgiftsperiode && prosessinstans.type == ProsessType.IVERKSETT_VEDTAK_EOS) {

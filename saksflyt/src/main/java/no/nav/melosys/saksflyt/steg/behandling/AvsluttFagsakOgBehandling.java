@@ -50,7 +50,9 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         final Behandling behandling = prosessinstans.getBehandling();
         final long behandlingID = behandling.getId();
+        log.info("[STEP-START] AvsluttFagsakOgBehandling behandlingId={}", behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        log.info("[STEP-LOADED] AvsluttFagsakOgBehandling behandlingId={} type={}", behandlingID, behandlingsresultat.getType());
         Fagsak fagsak = fagsakService.hentFagsak(prosessinstans.getBehandling().getFagsak().getSaksnummer());
 
         if (behandlingsresultat.erGodkjenningEllerInnvilgelseArt13() && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandlingsresultat.getBehandling())) {

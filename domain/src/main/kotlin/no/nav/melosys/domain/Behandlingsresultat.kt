@@ -1,5 +1,6 @@
 package no.nav.melosys.domain
 
+import mu.KotlinLogging
 import jakarta.persistence.*
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
@@ -18,7 +19,7 @@ import java.util.*
 
 @Entity
 @Table(name = "behandlingsresultat")
-@EntityListeners(AuditingEntityListener::class)
+@EntityListeners(AuditingEntityListener::class, BehandlingsresultatEntityListener::class)
 open class Behandlingsresultat : RegistreringsInfo() {
 
     // Populeres av Hibernate med behandling.id
@@ -37,6 +38,24 @@ open class Behandlingsresultat : RegistreringsInfo() {
     @Enumerated(EnumType.STRING)
     @Column(name = "resultat_type", nullable = false)
     var type: Behandlingsresultattyper? = null
+        set(value) {
+            if (field != value) {
+                val stack = Thread.currentThread().stackTrace
+                    .drop(2).take(8)
+                    .joinToString("\n    ") { "${it.className}.${it.methodName}:${it.lineNumber}" }
+                log.info {
+                    """
+                    [TYPE-CHANGE] Behandlingsresultat id=$id
+                      from: $field
+                      to: $value
+                      thread: ${Thread.currentThread().name}
+                      stack:
+                        $stack
+                    """.trimIndent()
+                }
+            }
+            field = value
+        }
 
     @Enumerated(EnumType.STRING)
     @Column(name = "fastsatt_av_land")
@@ -407,5 +426,7 @@ open class Behandlingsresultat : RegistreringsInfo() {
 
     override fun toString(): String = "Behandlingsresultat{id=$id, type=$type}"
 
-    companion object // Tom - muliggjør utvidelsefunksjoner i tester
+    companion object {
+        private val log = KotlinLogging.logger {}
+    }
 }
