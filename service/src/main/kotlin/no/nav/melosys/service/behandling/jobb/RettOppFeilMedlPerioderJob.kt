@@ -50,10 +50,17 @@ class RettOppFeilMedlPerioderJob(
         stats = JobStatus()
     )
 
-    fun sakerFunnetJsonString(): String = jacksonObjectMapper()
-        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        .registerModule(JavaTimeModule())
-        .valueToTree<JsonNode>(sakerFunnet).toPrettyString()
+    fun sakerFunnetJsonString(): String {
+        // Grupper etter saksnummer og sorter etter registrertDato
+        val gruppertOgSortert = sakerFunnet
+            .sortedWith(compareBy({ it.saksnummer }, { it.registrertDato }))
+            .groupBy { it.saksnummer }
+
+        return jacksonObjectMapper()
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            .registerModule(JavaTimeModule())
+            .valueToTree<JsonNode>(gruppertOgSortert).toPrettyString()
+    }
 
     @Async("taskExecutor")
     @Transactional
@@ -399,21 +406,34 @@ class RettOppFeilMedlPerioderJob(
         val medlSammenligningInfo = hentOgSammenlignMedlPerioder(foerstegangsbehandling)
         val medlPeriodeFraRegister = medlSammenligningInfo?.matchendeMedlPeriodeFraRegister
 
-        // Sjekk om MEDL-perioden i registeret matcher førstegangsbehandlingen eller ny vurdering
+        // Sjekk om MEDL-periodens fom/tom matcher førstegangsbehandlingen eller ny vurdering
         val newestNyVurdering = nyVurderingDetaljer.firstOrNull()
-        val matcherFoerstegang = medlPeriodeFraRegister != null &&
-            foerstegangPeriode?.medlPeriodeID != null &&
-            medlPeriodeFraRegister.unntakId == foerstegangPeriode.medlPeriodeID
 
-        val matcherNyVurdering = medlPeriodeFraRegister != null &&
-            newestNyVurdering?.medlPeriodeId != null &&
-            medlPeriodeFraRegister.unntakId == newestNyVurdering.medlPeriodeId
+        // Sammenlign basert på fom/tom-datoer (ikke bare ID)
+        val matcherFoerstegangPeriode = medlPeriodeFraRegister != null &&
+            foerstegangPeriode != null &&
+            medlPeriodeFraRegister.fom == foerstegangPeriode.fom &&
+            medlPeriodeFraRegister.tom == foerstegangPeriode.tom
+
+        val matcherNyVurderingPeriode = medlPeriodeFraRegister != null &&
+            newestNyVurdering != null &&
+            medlPeriodeFraRegister.fom == newestNyVurdering.fom &&
+            medlPeriodeFraRegister.tom == newestNyVurdering.tom
+
+        // Bestem hvilken periode som gjelder i MEDL
+        val gjeldendePeriodeType = when {
+            matcherNyVurderingPeriode -> "NY_VURDERING"
+            matcherFoerstegangPeriode -> "FØRSTEGANG"
+            medlPeriodeFraRegister != null -> "UKJENT"
+            else -> null
+        }
 
         // Bestem om ny vurdering ble overskrevet:
-        // Hvis MEDL-perioden matcher førstegangsbehandlingen OG det finnes en nyere ny vurdering med annen periode
-        val erOverskrevet = matcherFoerstegang && !matcherNyVurdering &&
-            newestNyVurdering?.medlPeriodeId != null &&
-            newestNyVurdering.medlPeriodeId != foerstegangPeriode?.medlPeriodeID
+        // Overskrevet hvis MEDL-perioden matcher førstegangsbehandlingen men IKKE ny vurdering
+        // og periodene er forskjellige (ny vurdering har endret perioden)
+        val perioderErForskjellige = foerstegangPeriode != null && newestNyVurdering != null &&
+            (foerstegangPeriode.fom != newestNyVurdering.fom || foerstegangPeriode.tom != newestNyVurdering.tom)
+        val erOverskrevet = matcherFoerstegangPeriode && !matcherNyVurderingPeriode && perioderErForskjellige
 
         val nyVurderingInfo = NyVurderingInfo(
             foerstegangsbehandlingId = foerstegangsbehandling.id,
@@ -421,8 +441,9 @@ class RettOppFeilMedlPerioderJob(
             foerstegangsbehandlingFom = foerstegangPeriode?.fom,
             foerstegangsbehandlingTom = foerstegangPeriode?.tom,
             nyVurderinger = nyVurderingDetaljer,
-            medlPeriodeFraRegisterMatcherFoerstegang = matcherFoerstegang,
-            medlPeriodeFraRegisterMatcherNyVurdering = matcherNyVurdering
+            medlPeriodeMatcherFoerstegangPeriode = matcherFoerstegangPeriode,
+            medlPeriodeMatcherNyVurderingPeriode = matcherNyVurderingPeriode,
+            gjeldendePeriodeType = gjeldendePeriodeType
         )
 
         val utfall = if (erOverskrevet) {
@@ -591,8 +612,12 @@ class RettOppFeilMedlPerioderJob(
         val foerstegangsbehandlingFom: LocalDate?,
         val foerstegangsbehandlingTom: LocalDate?,
         val nyVurderinger: List<NyVurderingDetaljer>,
-        val medlPeriodeFraRegisterMatcherFoerstegang: Boolean?,
-        val medlPeriodeFraRegisterMatcherNyVurdering: Boolean?
+        /** True hvis MEDL-periodenes fom/tom matcher førstegangsbehandlingens periode */
+        val medlPeriodeMatcherFoerstegangPeriode: Boolean?,
+        /** True hvis MEDL-periodenes fom/tom matcher nyeste ny vurdering-periode */
+        val medlPeriodeMatcherNyVurderingPeriode: Boolean?,
+        /** Oppsummering: Hvilken periode gjelder i MEDL? */
+        val gjeldendePeriodeType: String?
     )
 
     data class NyVurderingDetaljer(
