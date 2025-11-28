@@ -173,6 +173,7 @@ object ProsessflytDefinisjon {
             AVKLAR_MYNDIGHET,
             AVKLAR_ARBEIDSGIVER,
             LAGRE_LOVVALGSPERIODE_MEDL,
+            OPPRETT_FAKTURASERIE,
             SEND_VEDTAKSBREV_INNLAND,
             SEND_VEDTAK_UTLAND,
             DISTRIBUER_JOURNALPOST_UTLAND,
