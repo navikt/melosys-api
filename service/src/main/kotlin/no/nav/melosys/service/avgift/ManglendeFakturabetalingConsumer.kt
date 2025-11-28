@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avgift
 
+import io.getunleash.Unleash
 import jakarta.transaction.Transactional
 import mu.KotlinLogging
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
@@ -16,7 +17,8 @@ import org.springframework.stereotype.Service
 @Profile("!local-q1 & !local-q2")
 class ManglendeFakturabetalingConsumer(
     @Autowired private val prosessinstansService: ProsessinstansService,
-    @Autowired private val behandlingsresultatService: BehandlingsresultatService
+    @Autowired private val behandlingsresultatService: BehandlingsresultatService,
+    private val unleash: Unleash
 ) {
     private val log = KotlinLogging.logger { }
 
