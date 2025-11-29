@@ -50,6 +50,7 @@ class RettOppFeilMedlPerioderJob(
         stats = JobStatus()
     )
 
+    @Synchronized
     fun sakerFunnetJsonString(): String {
         // Grupper etter saksnummer og sorter etter registrertDato
         val gruppertOgSortert = sakerFunnet
@@ -59,9 +60,11 @@ class RettOppFeilMedlPerioderJob(
         return objectMapper.valueToTree<JsonNode>(gruppertOgSortert).toPrettyString()
     }
 
-    fun rapportSize(): Int = sakerFunnet.size
+    @Synchronized
+    fun rapportStørrelse(): Int = sakerFunnet.size
 
-    fun clearRapport() {
+    @Synchronized
+    fun tømRapport() {
         sakerFunnet.clear()
     }
 
@@ -117,6 +120,9 @@ class RettOppFeilMedlPerioderJob(
         val arkivsakID = behandling.fagsak.gsakSaksnummer
         val fagsak = behandling.fagsak
 
+        // Hent behandlingsresultat én gang for gjenbruk
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
+
         // Hent SED-info fra databasen (for bakoverkompatibilitet)
         val sedDokument = behandling.finnSedDokument()
         val sedInfoFraDb = if (sedDokument.isPresent) {
@@ -131,7 +137,7 @@ class RettOppFeilMedlPerioderJob(
         val alleSederFraEessi = hentAlleSederFraEessi(arkivsakID, sedDokument.orElse(null)?.rinaSaksnummer)
 
         // Hent MEDL-perioder fra MEDL-registeret og sammenlign med lovvalgsperiode fra behandling
-        val medlSammenligningInfo = hentOgSammenlignMedlPerioder(behandling)
+        val medlSammenligningInfo = hentOgSammenlignMedlPerioder(behandling, behandlingsresultat)
 
         // Sjekk om behandlingen faktisk ble invalidert (X006/X008)
         if (arkivsakID == null) {
@@ -194,7 +200,6 @@ class RettOppFeilMedlPerioderJob(
         skalRettesOpp++
 
         // Hent MEDL-periode info fra behandlingsresultat
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
         val medlPerioder = behandlingsresultat.lovvalgsperioder
             .filter { it.medlPeriodeID != null }
             .map { periode ->
@@ -265,12 +270,13 @@ class RettOppFeilMedlPerioderJob(
     /**
      * Henter MEDL-perioder fra MEDL-registeret og sammenligner med lovvalgsperiode fra behandlingen.
      */
-    private fun hentOgSammenlignMedlPerioder(behandling: Behandling): MedlSammenligningInfo? {
+    private fun hentOgSammenlignMedlPerioder(
+        behandling: Behandling,
+        behandlingsresultat: no.nav.melosys.domain.Behandlingsresultat
+    ): MedlSammenligningInfo? {
         val fagsak = behandling.fagsak
         val brukerAktørId = fagsak.finnBrukersAktørID() ?: return null
 
-        // Hent lovvalgsperiode fra behandlingen
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
         val lovvalgsperiode = behandlingsresultat.lovvalgsperioder.firstOrNull() ?: return null
 
         val fnr = try {
@@ -406,7 +412,7 @@ class RettOppFeilMedlPerioderJob(
         }
 
         // Hent MEDL-info fra registeret for å sammenligne
-        val medlSammenligningInfo = hentOgSammenlignMedlPerioder(foerstegangsbehandling)
+        val medlSammenligningInfo = hentOgSammenlignMedlPerioder(foerstegangsbehandling, foerstegangResultat)
         val medlPeriodeFraRegister = medlSammenligningInfo?.matchendeMedlPeriodeFraRegister
 
         // Sjekk om MEDL-periodens fom/tom matcher førstegangsbehandlingen eller ny vurdering

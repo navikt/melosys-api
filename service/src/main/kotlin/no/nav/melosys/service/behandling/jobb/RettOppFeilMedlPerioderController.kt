@@ -65,21 +65,21 @@ class RettOppFeilMedlPerioderController(
         ResponseEntity(rettOppFeilMedlPerioderJob.sakerFunnetJsonString(), HttpStatus.OK)
 
     /**
-     * Returns the number of entries in the rapport without fetching all the data.
+     * Returnerer antall oppføringer i rapporten uten å laste alle data.
      */
-    @GetMapping("/rapport/size")
-    fun rapportSize(): ResponseEntity<Map<String, Int>> =
-        ResponseEntity.ok(mapOf("size" to rettOppFeilMedlPerioderJob.rapportSize()))
+    @GetMapping("/rapport/størrelse")
+    fun rapportStørrelse(): ResponseEntity<Map<String, Int>> =
+        ResponseEntity.ok(mapOf("størrelse" to rettOppFeilMedlPerioderJob.rapportStørrelse()))
 
     /**
-     * Clears the rapport to free memory.
-     * Should be called after retrieving the rapport if the data is no longer needed.
+     * Tømmer rapporten for å frigjøre minne.
+     * Bør kalles etter at rapporten er hentet hvis dataene ikke lenger trengs.
      */
     @DeleteMapping("/rapport")
-    fun clearRapport(): ResponseEntity<Map<String, String>> {
-        val size = rettOppFeilMedlPerioderJob.rapportSize()
-        rettOppFeilMedlPerioderJob.clearRapport()
-        log.info { "Cleared rapport with $size entries" }
-        return ResponseEntity.ok(mapOf("melding" to "Rapport cleared ($size entries)"))
+    fun tømRapport(): ResponseEntity<Map<String, String>> {
+        val størrelse = rettOppFeilMedlPerioderJob.rapportStørrelse()
+        rettOppFeilMedlPerioderJob.tømRapport()
+        log.info { "Tømte rapport med $størrelse oppføringer" }
+        return ResponseEntity.ok(mapOf("melding" to "Rapport tømt ($størrelse oppføringer)"))
     }
 }
