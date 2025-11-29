@@ -2,7 +2,6 @@ package no.nav.melosys.service.behandling.jobb
 
 import mu.KotlinLogging
 import no.nav.security.token.support.core.api.Protected
-import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -10,7 +9,7 @@ import org.springframework.web.bind.annotation.*
 
 private val log = KotlinLogging.logger { }
 
-@Unprotected
+@Protected
 @RestController
 @RequestMapping("/admin/rett-opp-feil-medl-perioder")
 class RettOppFeilMedlPerioderController(
