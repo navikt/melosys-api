@@ -69,9 +69,9 @@ class RettOppFeilMedlPerioderController(
     /**
      * Returnerer antall oppføringer i rapporten uten å laste alle data.
      */
-    @GetMapping("/rapport/størrelse")
+    @GetMapping("/rapport/stoerrelse")
     fun rapportStørrelse(): ResponseEntity<Map<String, Int>> =
-        ResponseEntity.ok(mapOf("størrelse" to rettOppFeilMedlPerioderJob.rapportStørrelse()))
+        ResponseEntity.ok(mapOf("stoerrelse" to rettOppFeilMedlPerioderJob.rapportStørrelse()))
 
     /**
      * Tømmer rapporten for å frigjøre minne.
