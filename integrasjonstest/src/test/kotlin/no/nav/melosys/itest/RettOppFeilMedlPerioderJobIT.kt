@@ -112,7 +112,7 @@ class RettOppFeilMedlPerioderJobIT(
             // Sett opp EESSI mock med invalidert SED
             setupEessiMock(gsakSaksnummer, rinaSaksnummer, rinaDokumentID, sedStatus = "AVBRUTT")
 
-            // Kjør jobb i dryRun modus (må clearce ThreadLocalAccessInfo først, og re-registrere etterpå)
+            // Kjør jobb i dryRun modus (må clear ThreadLocalAccessInfo først, og re-registrere etterpå)
             ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
             rettOppFeilMedlPerioderJob.kjør(dryRun = true)
             ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "Test")
