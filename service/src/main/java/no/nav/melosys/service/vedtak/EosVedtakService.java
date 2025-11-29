@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -41,6 +42,7 @@ public class EosVedtakService implements FattVedtakInterface {
 
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final BehandlingsresultatRepository behandlingsresultatRepository;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
     private final EessiService eessiService;
@@ -51,12 +53,14 @@ public class EosVedtakService implements FattVedtakInterface {
     private final SaksbehandlingRegler saksbehandlingRegler;
 
     public EosVedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
+                            BehandlingsresultatRepository behandlingsresultatRepository,
                             OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
                             EessiService eessiService, LandvelgerService landvelgerService,
                             AvklartefaktaService avklartefaktaService, ApplicationEventMulticaster melosysEventMulticaster,
                             FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade, SaksbehandlingRegler saksbehandlingRegler) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.eessiService = eessiService;
@@ -119,6 +123,12 @@ public class EosVedtakService implements FattVedtakInterface {
         }
 
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
+
+        // RACE CONDITION FIX: Final targeted UPDATE ensures type is correct.
+        // This runs as the LAST operation, overriding any concurrent stale flushes.
+        // See: docs/debugging/2025-11-29-REFINED-PLAN-FINAL-UPDATE.md
+        log.debug("[RACE-FIX] Final update type={} for behandling {}", request.getBehandlingsresultatTypeKode(), behandlingID);
+        behandlingsresultatRepository.finalUpdateType(behandlingID, request.getBehandlingsresultatTypeKode());
     }
 
     private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat,

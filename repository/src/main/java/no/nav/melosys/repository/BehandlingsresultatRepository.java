@@ -4,11 +4,26 @@ import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface BehandlingsresultatRepository extends JpaRepository<Behandlingsresultat, Long> {
+
+    /**
+     * Final targeted UPDATE for type field to ensure correct value after concurrent operations.
+     * This should be called as the LAST operation in fattVedtak transactions to override
+     * any stale data that may have been flushed by concurrent requests.
+     *
+     * @see docs/debugging/2025-11-29-REFINED-PLAN-FINAL-UPDATE.md
+     */
+    @Modifying
+    @Query("UPDATE Behandlingsresultat b SET b.type = :type WHERE b.id = :id")
+    void finalUpdateType(@Param("id") Long id, @Param("type") Behandlingsresultattyper type);
+
     @EntityGraph(attributePaths = {"avklartefakta"}, type = EntityGraph.EntityGraphType.LOAD)
     Optional<Behandlingsresultat> findWithAvklartefaktaById(Long behandlingID);
 

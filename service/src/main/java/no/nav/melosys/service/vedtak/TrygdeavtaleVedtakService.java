@@ -20,6 +20,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.featuretoggle.ToggleName;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -41,6 +42,7 @@ public class TrygdeavtaleVedtakService implements FattVedtakInterface {
     private static final Logger log = LoggerFactory.getLogger(TrygdeavtaleVedtakService.class);
 
     private final BehandlingsresultatService behandlingsresultatService;
+    private final BehandlingsresultatRepository behandlingsresultatRepository;
     private final BehandlingService behandlingService;
     private final ProsessinstansService prosessinstansService;
     private final OppgaveService oppgaveService;
@@ -51,6 +53,7 @@ public class TrygdeavtaleVedtakService implements FattVedtakInterface {
 
 
     public TrygdeavtaleVedtakService(BehandlingsresultatService behandlingsresultatService,
+                                     BehandlingsresultatRepository behandlingsresultatRepository,
                                      BehandlingService behandlingService,
                                      ProsessinstansService prosessinstansService,
                                      OppgaveService oppgaveService,
@@ -59,6 +62,7 @@ public class TrygdeavtaleVedtakService implements FattVedtakInterface {
                                      SaksbehandlingRegler saksbehandlingRegler,
                                      Unleash unleash) {
         this.behandlingsresultatService = behandlingsresultatService;
+        this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.behandlingService = behandlingService;
         this.prosessinstansService = prosessinstansService;
         this.oppgaveService = oppgaveService;
@@ -110,6 +114,12 @@ public class TrygdeavtaleVedtakService implements FattVedtakInterface {
         }
 
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingID);
+
+        // RACE CONDITION FIX: Final targeted UPDATE ensures type is correct.
+        // This runs as the LAST operation, overriding any concurrent stale flushes.
+        // See: docs/debugging/2025-11-29-REFINED-PLAN-FINAL-UPDATE.md
+        log.debug("[RACE-FIX] Final update type={} for behandling {}", request.getBehandlingsresultatTypeKode(), behandlingID);
+        behandlingsresultatRepository.finalUpdateType(behandlingID, request.getBehandlingsresultatTypeKode());
     }
 
     private BrevbestillingDto lagBrevbestilling(Behandling behandling, FattVedtakRequest request) {

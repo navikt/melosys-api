@@ -27,6 +27,7 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.TRYGDEAVTALE_G
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.featuretoggle.ToggleName
+import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -48,6 +49,9 @@ class TrygdeavtaleVedtakServiceTest {
 
     @RelaxedMockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
+
+    @RelaxedMockK
+    private lateinit var behandlingsresultatRepository: BehandlingsresultatRepository
 
     @RelaxedMockK
     private lateinit var behandlingService: BehandlingService
@@ -75,6 +79,7 @@ class TrygdeavtaleVedtakServiceTest {
     fun setup() {
         trygdeavtaleVedtakService = TrygdeavtaleVedtakService(
             behandlingsresultatService,
+            behandlingsresultatRepository,
             behandlingService,
             prosessinstansService,
             oppgaveService,

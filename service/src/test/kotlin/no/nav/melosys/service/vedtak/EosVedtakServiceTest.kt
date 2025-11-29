@@ -18,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.LandvelgerService
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
@@ -43,6 +44,9 @@ class EosVedtakServiceKtTest {
 
     @RelaxedMockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
+
+    @RelaxedMockK
+    private lateinit var behandlingsresultatRepository: BehandlingsresultatRepository
 
     @RelaxedMockK
     private lateinit var oppgaveService: OppgaveService
@@ -79,6 +83,7 @@ class EosVedtakServiceKtTest {
         vedtakService = EosVedtakService(
             behandlingService,
             behandlingsresultatService,
+            behandlingsresultatRepository,
             oppgaveService,
             prosessinstansService,
             eessiService,
