@@ -43,7 +43,7 @@ class RettOppFeilMedlPerioderJob(
     private val medlPeriodeService: MedlPeriodeService,
     private val persondataFasade: PersondataFasade
 ) {
-    val sakerFunnet: MutableList<FeilMedlPeriodeRapportEntry> = mutableListOf()
+    private val sakerFunnet: MutableList<FeilMedlPeriodeRapportEntry> = mutableListOf()
 
     private val jobMonitor = JobMonitor(
         jobName = "RettOppFeilMedlPerioder",
@@ -56,20 +56,24 @@ class RettOppFeilMedlPerioderJob(
             .sortedWith(compareBy({ it.saksnummer }, { it.registrertDato }))
             .groupBy { it.saksnummer }
 
-        return jacksonObjectMapper()
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-            .registerModule(JavaTimeModule())
-            .valueToTree<JsonNode>(gruppertOgSortert).toPrettyString()
+        return objectMapper.valueToTree<JsonNode>(gruppertOgSortert).toPrettyString()
+    }
+
+    fun rapportSize(): Int = sakerFunnet.size
+
+    fun clearRapport() {
+        sakerFunnet.clear()
     }
 
     @Async("taskExecutor")
     @Transactional
     fun kjørAsynkront(dryRun: Boolean, antallFeilFørStopp: Int) {
+        // @Transactional must be here because kjør() is called internally (self-invocation),
+        // which bypasses the Spring proxy and would not apply kjør()'s @Transactional.
         kjør(dryRun, antallFeilFørStopp)
     }
 
     @Synchronized
-    @Transactional
     fun kjør(dryRun: Boolean, antallFeilFørStopp: Int = 0) = runAsSystem {
         sakerFunnet.clear()
         jobMonitor.execute(antallFeilFørStopp) {
@@ -638,5 +642,11 @@ class RettOppFeilMedlPerioderJob(
         // Scenario 2 (Ny vurdering)
         NY_VURDERING_IKKE_OVERSKREVET,
         NY_VURDERING_OVERSKREVET
+    }
+
+    companion object {
+        private val objectMapper = jacksonObjectMapper()
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            .registerModule(JavaTimeModule())
     }
 }
