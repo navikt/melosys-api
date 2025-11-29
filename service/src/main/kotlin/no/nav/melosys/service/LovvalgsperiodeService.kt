@@ -1,5 +1,7 @@
 package no.nav.melosys.service
 
+import jakarta.persistence.EntityManager
+import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Lovvalgsperiode
@@ -23,12 +25,15 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.jvm.optionals.getOrNull
 
+private val log = KotlinLogging.logger {}
+
 @Service
 class LovvalgsperiodeService(
     private val behandlingsresultatRepo: BehandlingsresultatRepository,
     private val lovvalgsperiodeRepo: LovvalgsperiodeRepository,
     private val tidligereMedlemsperiodeRepository: TidligereMedlemsperiodeRepository,
-    private val behandlingRepository: BehandlingRepository
+    private val behandlingRepository: BehandlingRepository,
+    private val entityManager: EntityManager
 ) {
     fun hentLovvalgsperioder(behandlingsid: Long): Collection<Lovvalgsperiode> =
         lovvalgsperiodeRepo.findByBehandlingsresultatId(behandlingsid)
@@ -79,9 +84,19 @@ class LovvalgsperiodeService(
             .orElseThrow { IllegalStateException("Behandling med id $behandlingID fins ikke.") }
 
         // Må kopiere FØR sletting siden trygdeavgiftsperioder kopieres fra eksisterende lovvalgsperioder
+        // NB: This triggers lazy loading of behandlingsresultat.trygdeavgiftsperioder
         val nyePerioder = lovvalgsperioder.map {
             kopierLovvalgsperiodeSamtEksisterendeTrygdeavgift(it, behandlingsresultat)
         }
+
+        // RACE CONDITION FIX: Detach behandlingsresultat AFTER all lazy loading is complete.
+        // This entity is only read here, never written. Without detach, JPA dirty-checking
+        // may flush it at transaction commit with stale data, overwriting concurrent changes
+        // to the 'type' field made by fattVedtak in EosVedtakService.
+        // The detach MUST be after the map operation because it accesses lazy-loaded collections.
+        // See: docs/debugging/2025-11-29-BACKEND-FIX-DETACH-ENTITY-REPORT.md
+        log.debug { "[RACE-FIX] Detaching behandlingsresultat id=$behandlingID, type=${behandlingsresultat.type}" }
+        entityManager.detach(behandlingsresultat)
 
         slettEksisterendeLovvalgsperioder(behandlingsresultat)
 

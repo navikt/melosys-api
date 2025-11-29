@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import jakarta.persistence.EntityManager
 import no.nav.melosys.repository.*
 import no.nav.melosys.service.LovvalgsperiodeService
 import org.junit.jupiter.api.BeforeEach
@@ -32,7 +33,9 @@ class LovvalgsperiodeServiceIT(
     @Autowired
     private val behandlingRepository: BehandlingRepository,
     @Autowired
-    private val fagsakRepository: FagsakRepository
+    private val fagsakRepository: FagsakRepository,
+    @Autowired
+    private val entityManager: EntityManager
 ) : DataJpaTestBase() {
 
     private lateinit var lovvalgsperiodeService: LovvalgsperiodeService
@@ -43,7 +46,8 @@ class LovvalgsperiodeServiceIT(
             behandlingsresultatRepository,
             lovvalgsperiodeRepository,
             tidligereMedlemsperiodeRepository,
-            behandlingRepository
+            behandlingRepository,
+            entityManager
         )
     }
 

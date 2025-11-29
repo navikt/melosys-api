@@ -9,15 +9,23 @@ class BehandlingsresultatEntityListener {
 
     @PreUpdate
     fun preUpdate(entity: Behandlingsresultat) {
-        val stack = Thread.currentThread().stackTrace
-            .drop(2).take(5)
-            .joinToString("\n      ") { "${it.className}.${it.methodName}:${it.lineNumber}" }
-        log.info {
+        val stackFrames = Thread.currentThread().stackTrace.drop(2).take(12)
+        val stack = stackFrames.joinToString("\n      ") { "${it.className}.${it.methodName}:${it.lineNumber}" }
+
+        // Detect if this update is coming from LovvalgsperiodeService (should NOT happen after fix)
+        val fromLovvalgsperiodeService = stackFrames.any {
+            it.className.contains("LovvalgsperiodeService")
+        }
+
+        val marker = if (fromLovvalgsperiodeService) "[RACE-CONDITION-SUSPECT]" else ""
+
+        log.warn {
             """
-            [JPA-PRE-UPDATE] Behandlingsresultat
+            [JPA-PRE-UPDATE] $marker Behandlingsresultat
               id: ${entity.id}
               type: ${entity.type}
               thread: ${Thread.currentThread().name}
+              fromLovvalgsperiodeService: $fromLovvalgsperiodeService
               stack:
                 $stack
             """.trimIndent()
@@ -26,6 +34,6 @@ class BehandlingsresultatEntityListener {
 
     @PostLoad
     fun postLoad(entity: Behandlingsresultat) {
-        log.info { "[JPA-POST-LOAD] Behandlingsresultat id=${entity.id} type=${entity.type} thread=${Thread.currentThread().name}" }
+        log.debug { "[JPA-POST-LOAD] Behandlingsresultat id=${entity.id} type=${entity.type} thread=${Thread.currentThread().name}" }
     }
 }
