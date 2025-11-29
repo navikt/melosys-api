@@ -154,11 +154,6 @@ server:
   forward-headers-strategy: native
   shutdown: graceful
 spring:
-  profiles:
-    group:
-      local-mock-testdata:
-        - local-mock
-        - local-mock-testdata
   cache:
     cache-names: aktoerID,folkeregisterIdent,kodeverk,tilgangsmaskinen
     caffeine:

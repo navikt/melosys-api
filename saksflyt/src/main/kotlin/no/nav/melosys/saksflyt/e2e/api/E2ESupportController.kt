@@ -39,7 +39,8 @@ private val log = KotlinLogging.logger { }
 class E2ESupportController(
     private val cacheManager: CacheManager?,
     private val prosessinstansRepository: ProsessinstansRepository,
-    @Qualifier("saksflytThreadPoolTaskExecutor") private val taskExecutor: ThreadPoolTaskExecutor
+    @Qualifier("saksflytThreadPoolTaskExecutor") private val taskExecutor: ThreadPoolTaskExecutor,
+    private val e2eTestDataService: E2ETestDataService
 ) {
     @PersistenceContext
     private lateinit var entityManager: EntityManager
@@ -287,6 +288,40 @@ class E2ESupportController(
             put("message", "Error while waiting: ${e.message}")
             put("elapsedSeconds", Duration.between(startTime, Instant.now()).seconds)
         })
+
+    @PostMapping("/testdata/init")
+    @Operation(
+        summary = "Initialize test data for Playwright e2e tests",
+        description = "Creates predefined test cases (MEL-1001 to MEL-1071) for frontend e2e tests. " +
+            "Idempotent - skips cases that already exist."
+    )
+    fun initTestData(): ResponseEntity<Map<String, Any>> {
+        log.info { "Received request to initialize e2e test data" }
+
+        return try {
+            val result = e2eTestDataService.initializeTestData()
+
+            ResponseEntity.ok(buildMap {
+                put("status", "OK")
+                put("created", result.created)
+                put("skipped", result.skipped)
+                put("alreadyExisted", result.alreadyExisted)
+                put("testFnr", E2ETestDataService.TEST_FNR)
+                put("caseRange", "${E2ETestDataService.FIRST_CASE_ID} to ${E2ETestDataService.LAST_CASE_ID}")
+                put("message", if (result.alreadyExisted) {
+                    "Test data already existed - no changes made"
+                } else {
+                    "Successfully initialized ${result.created} test cases"
+                })
+            })
+        } catch (e: Exception) {
+            log.error(e) { "Failed to initialize test data" }
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(buildMap {
+                put("status", "ERROR")
+                put("message", "Failed to initialize test data: ${e.message}")
+            })
+        }
+    }
 
     private data class ProcessStatus(
         val activeThreads: Int,
