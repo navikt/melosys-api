@@ -16,6 +16,7 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
+import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -43,8 +44,14 @@ class OpprettFakturaserie(
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandling = prosessinstans.hentBehandling
         val behandlingID = behandling.id
-        val saksbehandlerIdent = prosessinstans.hentData(ProsessDataKey.SAKSBEHANDLER)
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        val erLovvalgMedTrygdeavgiftsperiode = unleash.isEnabled(ToggleName.MELOSYS_EØS_FAKTURERING_AV_TRYGDEAVGIFT) && behandling.fagsak.erLovvalg() && behandlingsresultat.trygdeavgiftsperioder.isNotEmpty()
+
+        if (!erLovvalgMedTrygdeavgiftsperiode && prosessinstans.type == ProsessType.IVERKSETT_VEDTAK_EOS) {
+            return
+        }
+
+        val saksbehandlerIdent = prosessinstans.hentData(ProsessDataKey.SAKSBEHANDLER)
 
         if (behandlingsresultat.erOpphørt() || andregangsvurderingHarFjernetTrygdeavgift(behandling, behandlingsresultat)) {
             val opprinneligFakturaserieReferanse =
@@ -138,6 +145,7 @@ class OpprettFakturaserie(
         val vedtaksdato =
             DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault()).format(behandlingsresultat.hentVedtakMetadata().vedtaksdato)
         val erEøsPensjonist = behandling.erEøsPensjonist()
+        val erLovvalg = fagsak.erLovvalg()
 
         return FakturaserieDto(
             fodselsnummer = foedselsNr,
@@ -147,8 +155,8 @@ class OpprettFakturaserie(
             fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
             intervall = hentBetalingsIntervall(prosessinstans),
             referanseBruker = if (erEøsPensjonist) "Informasjon om trygdeavgift datert $vedtaksdato" else "Vedtak om medlemskap datert $vedtaksdato",
-            perioder = if (erEøsPensjonist)
-                mapFakturaseriePeriodeDtoEosPensjonist(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.filter { it.harAvgift() })
+            perioder = if (erEøsPensjonist || erLovvalg)
+                mapFakturaseriePeriodeDtoUtenDekning(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() })
             else
                 mapFakturaseriePeriodeDto(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() })
         )
@@ -191,7 +199,7 @@ class OpprettFakturaserie(
         }
     }
 
-    private fun mapFakturaseriePeriodeDtoEosPensjonist(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
+    private fun mapFakturaseriePeriodeDtoUtenDekning(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
         return trygdeavgiftsperioder.map {
             FakturaseriePeriodeDto(
                 it.trygdeavgiftsbeløpMd.hentVerdi(),
@@ -210,7 +218,7 @@ class OpprettFakturaserie(
             return DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL
         }
 
-        return trygdeavgiftsperiode.grunnlagMedlemskapsperiodeNotNull.hentTrygdedekning().beskrivelse
+        return trygdeavgiftsperiode.hentGrunnlagMedlemskapsperiode().hentTrygdedekning().beskrivelse
     }
 
     companion object {

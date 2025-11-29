@@ -119,7 +119,7 @@ class EøsPensjonistTrygdeavgiftsberegningValidatorTest {
                 skatteforhold {
                     fomDato = LocalDate.now().withMonth(1).withDayOfMonth(1)
                     tomDato = LocalDate.now().plusDays(5)
-                    skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
                 }
                 inntektsperioder {
                     periode {

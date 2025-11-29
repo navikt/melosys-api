@@ -13,7 +13,7 @@ jobs:
       IMAGE: europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-api:${{ github.sha }}
     runs-on: ubuntu-latest-8-cores
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Login to NAIS registry
