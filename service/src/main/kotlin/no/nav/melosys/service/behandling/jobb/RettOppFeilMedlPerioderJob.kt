@@ -397,8 +397,8 @@ class RettOppFeilMedlPerioderJob(
                 registrertDato = nyVurdering.registrertDato,
                 status = nyVurdering.status.name,
                 medlPeriodeId = nyVurderingPeriode?.medlPeriodeID,
-                fom = nyVurderingPeriode?.fom,
-                tom = nyVurderingPeriode?.tom
+                lovvalgsperiodeFom = nyVurderingPeriode?.fom,
+                lovvalgsperiodeTom = nyVurderingPeriode?.tom
             )
         }
 
@@ -417,8 +417,8 @@ class RettOppFeilMedlPerioderJob(
 
         val matcherNyVurderingPeriode = medlPeriodeFraRegister != null &&
             newestNyVurdering != null &&
-            medlPeriodeFraRegister.fom == newestNyVurdering.fom &&
-            medlPeriodeFraRegister.tom == newestNyVurdering.tom
+            medlPeriodeFraRegister.fom == newestNyVurdering.lovvalgsperiodeFom &&
+            medlPeriodeFraRegister.tom == newestNyVurdering.lovvalgsperiodeTom
 
         // Bestem hvilken periode som gjelder i MEDL
         val gjeldendePeriodeType = when {
@@ -432,17 +432,17 @@ class RettOppFeilMedlPerioderJob(
         // Overskrevet hvis MEDL-perioden matcher førstegangsbehandlingen men IKKE ny vurdering
         // og periodene er forskjellige (ny vurdering har endret perioden)
         val perioderErForskjellige = foerstegangPeriode != null && newestNyVurdering != null &&
-            (foerstegangPeriode.fom != newestNyVurdering.fom || foerstegangPeriode.tom != newestNyVurdering.tom)
+            (foerstegangPeriode.fom != newestNyVurdering.lovvalgsperiodeFom || foerstegangPeriode.tom != newestNyVurdering.lovvalgsperiodeTom)
         val erOverskrevet = matcherFoerstegangPeriode && !matcherNyVurderingPeriode && perioderErForskjellige
 
         val nyVurderingInfo = NyVurderingInfo(
             foerstegangsbehandlingId = foerstegangsbehandling.id,
             foerstegangsbehandlingMedlPeriodeId = foerstegangPeriode?.medlPeriodeID,
-            foerstegangsbehandlingFom = foerstegangPeriode?.fom,
-            foerstegangsbehandlingTom = foerstegangPeriode?.tom,
+            foerstegangsbehandlingLovvalgsperiodeFom = foerstegangPeriode?.fom,
+            foerstegangsbehandlingLovvalgsperiodeTom = foerstegangPeriode?.tom,
             nyVurderinger = nyVurderingDetaljer,
-            medlPeriodeMatcherFoerstegangPeriode = matcherFoerstegangPeriode,
-            medlPeriodeMatcherNyVurderingPeriode = matcherNyVurderingPeriode,
+            medlPeriodeLikFoerstegang = matcherFoerstegangPeriode,
+            medlPeriodeLikNyVurdering = matcherNyVurderingPeriode,
             gjeldendePeriodeType = gjeldendePeriodeType
         )
 
@@ -609,13 +609,13 @@ class RettOppFeilMedlPerioderJob(
     data class NyVurderingInfo(
         val foerstegangsbehandlingId: Long?,
         val foerstegangsbehandlingMedlPeriodeId: Long?,
-        val foerstegangsbehandlingFom: LocalDate?,
-        val foerstegangsbehandlingTom: LocalDate?,
+        val foerstegangsbehandlingLovvalgsperiodeFom: LocalDate?,
+        val foerstegangsbehandlingLovvalgsperiodeTom: LocalDate?,
         val nyVurderinger: List<NyVurderingDetaljer>,
-        /** True hvis MEDL-periodenes fom/tom matcher førstegangsbehandlingens periode */
-        val medlPeriodeMatcherFoerstegangPeriode: Boolean?,
-        /** True hvis MEDL-periodenes fom/tom matcher nyeste ny vurdering-periode */
-        val medlPeriodeMatcherNyVurderingPeriode: Boolean?,
+        /** True hvis MEDL-periodens fom/tom er lik førstegangsbehandlingens lovvalgsperiode */
+        val medlPeriodeLikFoerstegang: Boolean?,
+        /** True hvis MEDL-periodens fom/tom er lik nyeste ny vurdering sin lovvalgsperiode */
+        val medlPeriodeLikNyVurdering: Boolean?,
         /** Oppsummering: Hvilken periode gjelder i MEDL? */
         val gjeldendePeriodeType: String?
     )
@@ -625,8 +625,8 @@ class RettOppFeilMedlPerioderJob(
         val registrertDato: Instant?,
         val status: String?,
         val medlPeriodeId: Long?,
-        val fom: LocalDate?,
-        val tom: LocalDate?
+        val lovvalgsperiodeFom: LocalDate?,
+        val lovvalgsperiodeTom: LocalDate?
     )
 
     enum class RapportUtfall {
