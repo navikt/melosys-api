@@ -2,6 +2,7 @@ package no.nav.melosys.service.behandling.jobb
 
 import mu.KotlinLogging
 import no.nav.security.token.support.core.api.Protected
+import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.*
 
 private val log = KotlinLogging.logger { }
 
-@Protected
+@Unprotected
 @RestController
 @RequestMapping("/admin/rett-opp-feil-medl-perioder")
 class RettOppFeilMedlPerioderController(
@@ -63,4 +64,23 @@ class RettOppFeilMedlPerioderController(
     @GetMapping("/rapport", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun jsonRapport(): ResponseEntity<String> =
         ResponseEntity(rettOppFeilMedlPerioderJob.sakerFunnetJsonString(), HttpStatus.OK)
+
+    /**
+     * Returns the number of entries in the rapport without fetching all the data.
+     */
+    @GetMapping("/rapport/size")
+    fun rapportSize(): ResponseEntity<Map<String, Int>> =
+        ResponseEntity.ok(mapOf("size" to rettOppFeilMedlPerioderJob.rapportSize()))
+
+    /**
+     * Clears the rapport to free memory.
+     * Should be called after retrieving the rapport if the data is no longer needed.
+     */
+    @DeleteMapping("/rapport")
+    fun clearRapport(): ResponseEntity<Map<String, String>> {
+        val size = rettOppFeilMedlPerioderJob.rapportSize()
+        rettOppFeilMedlPerioderJob.clearRapport()
+        log.info { "Cleared rapport with $size entries" }
+        return ResponseEntity.ok(mapOf("melding" to "Rapport cleared ($size entries)"))
+    }
 }
