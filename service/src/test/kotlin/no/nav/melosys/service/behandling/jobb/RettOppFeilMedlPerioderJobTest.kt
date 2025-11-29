@@ -1,5 +1,6 @@
 package no.nav.melosys.service.behandling.jobb
 
+import io.kotest.matchers.shouldBe
 import io.mockk.*
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
@@ -108,9 +109,9 @@ class RettOppFeilMedlPerioderJobTest {
 
         // Assert
         val status = job.status()
-        assert(status["antallFunnet"] == 1)
-        assert(status["skalRettesOpp"] == 1)
-        assert(status["rettetOpp"] == 0) // Dry run, så ingen faktiske endringer
+        status["antallFunnet"] shouldBe 1
+        status["skalRettesOpp"] shouldBe 1
+        status["rettetOpp"] shouldBe 0 // Dry run, så ingen faktiske endringer
 
         verify(exactly = 0) { fagsakService.oppdaterStatus(any(), any()) }
         verify(exactly = 0) { medlPeriodeService.avvisPeriode(any()) }
@@ -179,9 +180,9 @@ class RettOppFeilMedlPerioderJobTest {
 
         // Assert
         val status = job.status()
-        assert(status["antallFunnet"] == 1)
-        assert(status["skalRettesOpp"] == 1)
-        assert(status["rettetOpp"] == 1)
+        status["antallFunnet"] shouldBe 1
+        status["skalRettesOpp"] shouldBe 1
+        status["rettetOpp"] shouldBe 1
 
         verify(exactly = 1) { fagsakService.oppdaterStatus(fagsak, Saksstatuser.ANNULLERT) }
         verify(exactly = 1) { medlPeriodeService.avvisPeriode(999L) }
@@ -248,9 +249,9 @@ class RettOppFeilMedlPerioderJobTest {
 
         // Assert
         val status = job.status()
-        assert(status["antallFunnet"] == 1)
-        assert(status["ikkeInvalidertIEessi"] == 1)
-        assert(status["skalRettesOpp"] == 0)
+        status["antallFunnet"] shouldBe 1
+        status["ikkeInvalidertIEessi"] shouldBe 1
+        status["skalRettesOpp"] shouldBe 0
 
         verify(exactly = 0) { fagsakService.oppdaterStatus(any(), any()) }
     }
