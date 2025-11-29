@@ -68,12 +68,11 @@ class RettOppFeilMedlPerioderJob(
     @Async("taskExecutor")
     @Transactional
     fun kjørAsynkront(dryRun: Boolean, antallFeilFørStopp: Int) {
-        // @Transactional must be here because kjør() is called internally (self-invocation),
-        // which bypasses the Spring proxy and would not apply kjør()'s @Transactional.
         kjør(dryRun, antallFeilFørStopp)
     }
 
     @Synchronized
+    @Transactional
     fun kjør(dryRun: Boolean, antallFeilFørStopp: Int = 0) = runAsSystem {
         sakerFunnet.clear()
         jobMonitor.execute(antallFeilFørStopp) {
