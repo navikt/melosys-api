@@ -263,6 +263,7 @@ class RettOppFeilMedlPerioderJob(
                 }
         } catch (e: Exception) {
             log.warn(e) { "Kunne ikke hente alle SEDer fra EESSI for arkivsak $arkivsakID" }
+            jobMonitor.registerException(e)
             emptyList()
         }
     }
@@ -283,6 +284,7 @@ class RettOppFeilMedlPerioderJob(
             persondataFasade.hentFolkeregisterident(brukerAktørId)
         } catch (e: Exception) {
             log.warn(e) { "Kunne ikke hente fnr for aktørId $brukerAktørId" }
+            jobMonitor.registerException(e)
             return null
         }
 
@@ -307,6 +309,7 @@ class RettOppFeilMedlPerioderJob(
             } ?: emptyList()
         } catch (e: Exception) {
             log.warn(e) { "Kunne ikke hente MEDL-perioder fra register for fnr" }
+            jobMonitor.registerException(e)
             emptyList()
         }
 
