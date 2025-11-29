@@ -211,7 +211,7 @@ class RettOppFeilMedlPerioderJob(
             }
 
         if (!dryRun) {
-            rettOppSak(behandling)
+            rettOppSak(behandling, behandlingsresultat)
             rettetOpp++
         }
 
@@ -352,9 +352,11 @@ class RettOppFeilMedlPerioderJob(
         }
     }
 
-    private fun rettOppSak(behandling: Behandling) {
+    private fun rettOppSak(
+        behandling: Behandling,
+        behandlingsresultat: no.nav.melosys.domain.Behandlingsresultat
+    ) {
         val fagsak = behandling.fagsak
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
         // Sett saksstatus tilbake til ANNULLERT
         fagsakService.oppdaterStatus(fagsak, Saksstatuser.ANNULLERT)
