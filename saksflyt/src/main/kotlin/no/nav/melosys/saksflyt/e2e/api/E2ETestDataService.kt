@@ -100,7 +100,7 @@ class E2ETestDataService(
         val saksnummerIn = saksnummerListe.joinToString(",") { "'$it'" }
 
         // Slett oppgaver fra oppgave-mock først (eksterne oppgaver)
-        slettOppgaverFraMock(saksnummerListe)
+        slettAlleOppgaverFraMock()
 
         // Finn behandling-IDer for test-sakene
         @Suppress("UNCHECKED_CAST")
@@ -213,22 +213,17 @@ class E2ETestDataService(
     /**
      * Sletter oppgaver fra oppgave-mock-tjenesten for gitte saksnummer.
      */
-    private fun slettOppgaverFraMock(saksnummerListe: List<String>) {
+    private fun slettAlleOppgaverFraMock() {
         try {
-            val saksreferanserParam = saksnummerListe.joinToString(",")
             val response = oppgaveWebClient.delete()
-                .uri { uriBuilder ->
-                    uriBuilder.path("/oppgaver")
-                        .queryParam("saksreferanser", saksnummerListe)
-                        .build()
-                }
+                .uri("/oppgaver")
                 .retrieve()
                 .bodyToMono(Map::class.java)
                 .block()
 
-            log.info { "Slettet oppgaver fra mock: $response" }
+            log.info { "Slettet alle oppgaver fra mock: $response" }
         } catch (e: Exception) {
-            log.warn(e) { "Kunne ikke slette oppgaver fra mock (ignorerer): ${e.message}" }
+            log.warn(e) { "Kunne ikke slette alle oppgaver fra mock (ignorerer): ${e.message}" }
         }
     }
 
