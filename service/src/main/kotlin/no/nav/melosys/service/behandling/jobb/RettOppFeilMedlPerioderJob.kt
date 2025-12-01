@@ -591,7 +591,8 @@ class RettOppFeilMedlPerioderJob(
             "nyVurderingIkkeOverskrevet" to nyVurderingIkkeOverskrevet,
             "nyVurderingOverskrevet" to nyVurderingOverskrevet,
             "sisteBehandledeIdScenario1" to sisteBehandledeIdScenario1,
-            "sisteBehandledeIdScenario2" to sisteBehandledeIdScenario2
+            "sisteBehandledeIdScenario2" to sisteBehandledeIdScenario2,
+            "nesteStartFraBehandlingId" to maxOf(sisteBehandledeIdScenario1 ?: 0, sisteBehandledeIdScenario2 ?: 0)
         )
     }
 
