@@ -211,7 +211,7 @@ class E2ETestDataService(
     }
 
     /**
-     * Sletter oppgaver fra oppgave-mock-tjenesten for gitte saksnummer.
+     * Sletter alle oppgaver fra oppgave-mock-tjenesten.
      */
     private fun slettAlleOppgaverFraMock() {
         try {
