@@ -304,7 +304,7 @@ public final class Oppgave {
     }
 
     public boolean erAktiv() {
-        return status != null && List.of("OPPRETTET", "AAPNET", "UNDER_BEHANDLING").contains(status);
+        return List.of("OPPRETTET", "AAPNET", "UNDER_BEHANDLING").contains(status);
     }
 
     @Override
