@@ -57,14 +57,10 @@ class E2ETestDataService(
     fun resetTestData(): ResetResult {
         log.info { "Resetter test-saker ($FIRST_CASE_ID til $LAST_CASE_ID)..." }
 
-        // Sletting av testdata gjøres nå fra TypeScript (DatabaseHelper) for å unngå SQL i prod-kode
         val initResult = initializeTestData()
-
-        // Hent full metadata for alle saker
-        val metadata = hentFullMetadata()
-
         log.info { "Reset fullført: opprettet ${initResult.created}" }
 
+        val metadata = hentFullMetadata()
         return ResetResult(
             cleared = 0,
             created = initResult.created,
