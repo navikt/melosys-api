@@ -2,6 +2,7 @@ package no.nav.melosys.service.behandling.jobb
 
 import mu.KotlinLogging
 import no.nav.security.token.support.core.api.Protected
+import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -45,6 +46,31 @@ class RettOppFeilMedlPerioderController(
                 "startFraBehandlingId" to startFraBehandlingId
             )
         )
+    }
+
+    /**
+     * Kjører EN batch og returnerer resultatene direkte.
+     * Dette er en stateless endpoint - hvert kall er uavhengig og frigjør minne etter respons.
+     *
+     * Brukes av Python-script (scripts/rett_opp_batch_runner.py) for batch-prosessering
+     * uten å akkumulere data i minnet. API-nøkkel kreves fortsatt via X-MELOSYS-ADMIN-APIKEY header.
+     *
+     * @param dryRun Hvis true, vil bare analysere uten å gjøre endringer. Default true.
+     * @param batchStørrelse Maks antall behandlinger å prosessere i denne batchen. Default 10 (pga 30s NAIS timeout).
+     * @param startFraBehandlingId Start fra behandlinger med id > denne verdien. Bruk nextStartFraBehandlingId fra forrige respons.
+     */
+    @PostMapping("/kjor-en-batch")
+    @Unprotected // Kjøres via pyton script - API-nøkkel kreves fortsatt via ApiKeyInterceptor
+    fun kjørEnBatch(
+        @RequestParam(required = false, defaultValue = "true") dryRun: Boolean,
+        @RequestParam(required = false, defaultValue = "10") batchStørrelse: Int,
+        @RequestParam(required = false, defaultValue = "0") startFraBehandlingId: Long
+    ): ResponseEntity<RettOppFeilMedlPerioderJob.BatchResultat> {
+        log.info { "Kjører én batch (dryRun=$dryRun, batchStørrelse=$batchStørrelse, startFraBehandlingId=$startFraBehandlingId)" }
+
+        val resultat = rettOppFeilMedlPerioderJob.kjørEnBatch(dryRun, batchStørrelse, startFraBehandlingId)
+
+        return ResponseEntity.ok(resultat)
     }
 
     /**

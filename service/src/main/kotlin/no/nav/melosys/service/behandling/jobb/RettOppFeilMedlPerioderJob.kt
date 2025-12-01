@@ -157,6 +157,311 @@ class RettOppFeilMedlPerioderJob(
         }
     }
 
+    /**
+     * Kjører EN batch og returnerer resultatene direkte.
+     * Dette er en stateless metode - hvert kall er uavhengig og frigjør minne etter respons.
+     * Brukes av Python-script for batch-prosessering uten å akkumulere data i minnet.
+     */
+    @Transactional
+    fun kjørEnBatch(dryRun: Boolean, batchStørrelse: Int, startFraBehandlingId: Long): BatchResultat = runAsSystem {
+        log.info { "Kjører én batch (dryRun=$dryRun, batchStørrelse=$batchStørrelse, startFraBehandlingId=$startFraBehandlingId)" }
+
+        // Lokale variabler - frigjøres etter metoden returnerer
+        val batchRapport = mutableListOf<FeilMedlPeriodeRapportEntry>()
+        var scenario1SisteId: Long? = null
+        var scenario2SisteId: Long? = null
+
+        val pageable = PageRequest.of(0, batchStørrelse)
+
+        // ===== Scenario 1: X008/X006 invaliderte SEDer =====
+        val scenario1Ider = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(startFraBehandlingId, pageable)
+        log.info { "Scenario 1: Hentet ${scenario1Ider.size} behandlinger" }
+
+        scenario1Ider.forEach { behandlingId ->
+            runCatching {
+                val behandling = rettOppFeilMedlPerioderRepository.findById(behandlingId).orElse(null)
+                if (behandling != null) {
+                    val entry = behandleEnSakForBatch(behandling, dryRun)
+                    batchRapport.add(entry)
+                }
+            }.onFailure { e ->
+                log.error(e) { "Feil ved behandling av behandlingId $behandlingId" }
+            }
+            scenario1SisteId = behandlingId
+        }
+
+        // ===== Scenario 2: Ny vurdering potensielt overskrevet =====
+        val scenario2Ider = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedPotensielleNyVurderingFeil(startFraBehandlingId, pageable)
+        log.info { "Scenario 2: Hentet ${scenario2Ider.size} behandlinger" }
+
+        scenario2Ider.forEach { behandlingId ->
+            runCatching {
+                val behandling = rettOppFeilMedlPerioderRepository.findById(behandlingId).orElse(null)
+                if (behandling != null) {
+                    val entry = behandleNyVurderingSakForBatch(behandling)
+                    if (entry != null) {
+                        batchRapport.add(entry)
+                    }
+                }
+            }.onFailure { e ->
+                log.error(e) { "Feil ved behandling av ny vurdering behandlingId $behandlingId" }
+            }
+            scenario2SisteId = behandlingId
+        }
+
+        val nesteStartId = maxOf(scenario1SisteId ?: 0, scenario2SisteId ?: 0)
+        val harMerData = scenario1Ider.size == batchStørrelse || scenario2Ider.size == batchStørrelse
+
+        BatchResultat(
+            batchInfo = BatchInfo(
+                startFraBehandlingId = startFraBehandlingId,
+                batchStørrelse = batchStørrelse,
+                dryRun = dryRun
+            ),
+            scenario1 = ScenarioStatus(
+                hentetDenneBatch = scenario1Ider.size,
+                sisteBehandledeId = scenario1SisteId
+            ),
+            scenario2 = ScenarioStatus(
+                hentetDenneBatch = scenario2Ider.size,
+                sisteBehandledeId = scenario2SisteId
+            ),
+            nextStartFraBehandlingId = nesteStartId,
+            hasMoreItems = harMerData,
+            rapport = batchRapport
+        )
+    }
+
+    /**
+     * Behandler én sak (Scenario 1) og returnerer rapport-entry.
+     * Stateless versjon av behandleEnSak for bruk i batch-modus.
+     */
+    private fun behandleEnSakForBatch(behandling: Behandling, dryRun: Boolean): FeilMedlPeriodeRapportEntry {
+        val saksnummer = behandling.fagsak.saksnummer
+        val arkivsakID = behandling.fagsak.gsakSaksnummer
+        val fagsak = behandling.fagsak
+
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
+        val sedDokument = behandling.finnSedDokument()
+        val sedInfoFraDb = if (sedDokument.isPresent) {
+            SedInfo(
+                rinaSaksnummer = sedDokument.get().rinaSaksnummer,
+                rinaDokumentID = sedDokument.get().rinaDokumentID,
+                sedType = sedDokument.get().sedType?.name
+            )
+        } else null
+
+        val alleSederFraEessi = hentAlleSederFraEessi(arkivsakID, sedDokument.orElse(null)?.rinaSaksnummer)
+        val medlSammenligningInfo = hentOgSammenlignMedlPerioder(behandling, behandlingsresultat)
+
+        if (arkivsakID == null) {
+            return FeilMedlPeriodeRapportEntry(
+                saksnummer = saksnummer,
+                gsakSaksnummer = null,
+                saksstatus = fagsak.status.name,
+                sakstype = fagsak.type.name,
+                behandlingId = behandling.id,
+                behandlingType = behandling.type.name,
+                behandlingStatus = behandling.status.name,
+                registrertDato = behandling.registrertDato,
+                endretDato = behandling.endretDato,
+                sedInfo = sedInfoFraDb,
+                alleSederFraEessi = emptyList(),
+                medlPerioder = emptyList(),
+                medlSammenligningInfo = null,
+                nyVurderingInfo = null,
+                utfall = RapportUtfall.MANGLER_ARKIVSAK_ID,
+                feilmelding = null,
+                rettetOpp = false
+            )
+        }
+
+        val erInvalidert = erSedInvalidertIEessi(behandling, arkivsakID)
+
+        if (!erInvalidert) {
+            return FeilMedlPeriodeRapportEntry(
+                saksnummer = saksnummer,
+                gsakSaksnummer = arkivsakID,
+                saksstatus = fagsak.status.name,
+                sakstype = fagsak.type.name,
+                behandlingId = behandling.id,
+                behandlingType = behandling.type.name,
+                behandlingStatus = behandling.status.name,
+                registrertDato = behandling.registrertDato,
+                endretDato = behandling.endretDato,
+                sedInfo = sedInfoFraDb,
+                alleSederFraEessi = alleSederFraEessi,
+                medlPerioder = emptyList(),
+                medlSammenligningInfo = medlSammenligningInfo,
+                nyVurderingInfo = null,
+                utfall = RapportUtfall.IKKE_INVALIDERT_I_EESSI,
+                feilmelding = null,
+                rettetOpp = false
+            )
+        }
+
+        val medlPerioder = behandlingsresultat.lovvalgsperioder
+            .filter { it.medlPeriodeID != null }
+            .map { periode ->
+                MedlPeriodeInfo(
+                    medlPeriodeId = periode.medlPeriodeID,
+                    fom = periode.fom,
+                    tom = periode.tom
+                )
+            }
+
+        // I dryRun gjør vi ingen endringer
+        val rettetOpp = if (!dryRun) {
+            rettOppSak(behandling, behandlingsresultat)
+            true
+        } else false
+
+        return FeilMedlPeriodeRapportEntry(
+            saksnummer = saksnummer,
+            gsakSaksnummer = arkivsakID,
+            saksstatus = fagsak.status.name,
+            sakstype = fagsak.type.name,
+            behandlingId = behandling.id,
+            behandlingType = behandling.type.name,
+            behandlingStatus = behandling.status.name,
+            registrertDato = behandling.registrertDato,
+            endretDato = behandling.endretDato,
+            sedInfo = sedInfoFraDb,
+            alleSederFraEessi = alleSederFraEessi,
+            medlPerioder = medlPerioder,
+            medlSammenligningInfo = medlSammenligningInfo,
+            nyVurderingInfo = null,
+            utfall = RapportUtfall.SKAL_RETTES_OPP,
+            feilmelding = null,
+            rettetOpp = rettetOpp
+        )
+    }
+
+    /**
+     * Behandler én ny vurdering-sak (Scenario 2) og returnerer rapport-entry.
+     * Stateless versjon av behandleNyVurderingSak for bruk i batch-modus.
+     */
+    private fun behandleNyVurderingSakForBatch(foerstegangsbehandling: Behandling): FeilMedlPeriodeRapportEntry? {
+        val fagsak = foerstegangsbehandling.fagsak
+        val saksnummer = fagsak.saksnummer
+
+        val foerstegangResultat = behandlingsresultatService.hentBehandlingsresultat(foerstegangsbehandling.id)
+        val foerstegangPeriode = foerstegangResultat.lovvalgsperioder.firstOrNull()
+
+        val nyVurderinger = fagsak.behandlinger
+            .filter { it.type == Behandlingstyper.NY_VURDERING }
+            .filter { it.registrertDato?.isAfter(foerstegangsbehandling.registrertDato) == true }
+            .filter { it.erInaktiv() }
+            .sortedByDescending { it.registrertDato }
+
+        if (nyVurderinger.isEmpty()) {
+            return null
+        }
+
+        val nyVurderingDetaljer = nyVurderinger.map { nyVurdering ->
+            val nyVurderingResultat = behandlingsresultatService.hentBehandlingsresultat(nyVurdering.id)
+            val nyVurderingPeriode = nyVurderingResultat.lovvalgsperioder.firstOrNull()
+            NyVurderingDetaljer(
+                behandlingId = nyVurdering.id,
+                registrertDato = nyVurdering.registrertDato,
+                status = nyVurdering.status.name,
+                medlPeriodeId = nyVurderingPeriode?.medlPeriodeID,
+                lovvalgsperiodeFom = nyVurderingPeriode?.fom,
+                lovvalgsperiodeTom = nyVurderingPeriode?.tom
+            )
+        }
+
+        val medlSammenligningInfo = hentOgSammenlignMedlPerioder(foerstegangsbehandling, foerstegangResultat)
+        val medlPeriodeFraRegister = medlSammenligningInfo?.matchendeMedlPeriodeFraRegister
+
+        val newestNyVurdering = nyVurderingDetaljer.firstOrNull()
+
+        val matcherFoerstegangPeriode = medlPeriodeFraRegister != null &&
+            foerstegangPeriode != null &&
+            medlPeriodeFraRegister.fom == foerstegangPeriode.fom &&
+            medlPeriodeFraRegister.tom == foerstegangPeriode.tom
+
+        val matcherNyVurderingPeriode = medlPeriodeFraRegister != null &&
+            newestNyVurdering != null &&
+            medlPeriodeFraRegister.fom == newestNyVurdering.lovvalgsperiodeFom &&
+            medlPeriodeFraRegister.tom == newestNyVurdering.lovvalgsperiodeTom
+
+        val gjeldendePeriodeType = when {
+            matcherNyVurderingPeriode -> "NY_VURDERING"
+            matcherFoerstegangPeriode -> "FØRSTEGANG"
+            medlPeriodeFraRegister != null -> "UKJENT"
+            else -> null
+        }
+
+        val perioderErForskjellige = foerstegangPeriode != null && newestNyVurdering != null &&
+            (foerstegangPeriode.fom != newestNyVurdering.lovvalgsperiodeFom || foerstegangPeriode.tom != newestNyVurdering.lovvalgsperiodeTom)
+        val erOverskrevet = matcherFoerstegangPeriode && !matcherNyVurderingPeriode && perioderErForskjellige
+
+        val nyVurderingInfo = NyVurderingInfo(
+            foerstegangsbehandlingId = foerstegangsbehandling.id,
+            foerstegangsbehandlingMedlPeriodeId = foerstegangPeriode?.medlPeriodeID,
+            foerstegangsbehandlingLovvalgsperiodeFom = foerstegangPeriode?.fom,
+            foerstegangsbehandlingLovvalgsperiodeTom = foerstegangPeriode?.tom,
+            nyVurderinger = nyVurderingDetaljer,
+            medlPeriodeLikFoerstegang = matcherFoerstegangPeriode,
+            medlPeriodeLikNyVurdering = matcherNyVurderingPeriode,
+            gjeldendePeriodeType = gjeldendePeriodeType
+        )
+
+        val utfall = if (erOverskrevet) {
+            RapportUtfall.NY_VURDERING_OVERSKREVET
+        } else {
+            RapportUtfall.NY_VURDERING_IKKE_OVERSKREVET
+        }
+
+        return FeilMedlPeriodeRapportEntry(
+            saksnummer = saksnummer,
+            gsakSaksnummer = fagsak.gsakSaksnummer,
+            saksstatus = fagsak.status.name,
+            sakstype = fagsak.type.name,
+            behandlingId = foerstegangsbehandling.id,
+            behandlingType = foerstegangsbehandling.type.name,
+            behandlingStatus = foerstegangsbehandling.status.name,
+            registrertDato = foerstegangsbehandling.registrertDato,
+            endretDato = foerstegangsbehandling.endretDato,
+            sedInfo = null,
+            alleSederFraEessi = emptyList(),
+            medlPerioder = listOfNotNull(foerstegangPeriode?.let {
+                MedlPeriodeInfo(
+                    medlPeriodeId = it.medlPeriodeID,
+                    fom = it.fom,
+                    tom = it.tom
+                )
+            }),
+            medlSammenligningInfo = medlSammenligningInfo,
+            nyVurderingInfo = nyVurderingInfo,
+            utfall = utfall,
+            feilmelding = null,
+            rettetOpp = false
+        )
+    }
+
+    // Data classes for batch response
+    data class BatchResultat(
+        val batchInfo: BatchInfo,
+        val scenario1: ScenarioStatus,
+        val scenario2: ScenarioStatus,
+        val nextStartFraBehandlingId: Long,
+        val hasMoreItems: Boolean,
+        val rapport: List<FeilMedlPeriodeRapportEntry>
+    )
+
+    data class BatchInfo(
+        val startFraBehandlingId: Long,
+        val batchStørrelse: Int,
+        val dryRun: Boolean
+    )
+
+    data class ScenarioStatus(
+        val hentetDenneBatch: Int,
+        val sisteBehandledeId: Long?
+    )
+
     private fun JobStatus.behandleEnSak(behandling: Behandling, dryRun: Boolean) {
         val saksnummer = behandling.fagsak.saksnummer
         val arkivsakID = behandling.fagsak.gsakSaksnummer
