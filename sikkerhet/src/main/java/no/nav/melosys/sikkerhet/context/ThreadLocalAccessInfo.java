@@ -63,9 +63,10 @@ public class ThreadLocalAccessInfo {
     public static void afterControllerRequest(String requestUri) {
         log.debug("After a controller request:  {}", threadLocalStorage.get());
 
-        if (!threadLocalStorage.get().requestUri.equals(requestUri)) {
+        String storedUri = threadLocalStorage.get().requestUri;
+        if (!requestUri.equals(storedUri)) {
             throw new IllegalStateException("start and end request should be equal \n"
-                + threadLocalStorage.get().requestUri + " != " + requestUri);
+                + storedUri + " != " + requestUri);
         }
         threadLocalStorage.remove();
     }
