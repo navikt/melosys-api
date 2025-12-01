@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException
 import org.springframework.web.servlet.resource.NoResourceFoundException
 import java.io.IOException
 
@@ -61,6 +62,13 @@ class ExceptionMapper {
         } else {
             håndter(e, request, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR)
         }
+    }
+
+    @ExceptionHandler(AsyncRequestNotUsableException::class)
+    fun håndter(e: AsyncRequestNotUsableException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {
+        // Klienten avbrøt requesten før respons var ferdig - ikke logg stacktrace
+        log.debug { "Klient avbrøt request: ${request.requestURI}" }
+        return ResponseEntity(HttpStatus.SERVICE_UNAVAILABLE)
     }
 
     @ExceptionHandler(Exception::class)
