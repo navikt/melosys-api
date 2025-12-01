@@ -42,6 +42,9 @@ interface RettOppFeilMedlPerioderRepository : CrudRepository<Behandling, Long> {
      * Scenario 1: Finner behandlinger der SED ble invalidert (X008/X006) men MEDL-periode ble satt til endelig.
      * Returnerer kun ID-er for å unngå OOM ved lasting av mange entiteter.
      * Sortert etter id ASC for stabil paginering.
+     *
+     * @param startFraBehandlingId Hent kun behandlinger med id > denne verdien (for paginering). Bruk 0 for å starte fra begynnelsen.
+     * @param pageable Begrenser antall resultater (kun size brukes, offset ignoreres)
      */
     @Query(
         """
@@ -51,10 +54,11 @@ interface RettOppFeilMedlPerioderRepository : CrudRepository<Behandling, Long> {
         WHERE f.status = 'LOVVALG_AVKLART'
         AND br.type = 'HENLEGGELSE'
         AND b.tema = 'BESLUTNING_LOVVALG_ANNET_LAND'
+        AND b.id > :startFraBehandlingId
         ORDER BY b.id ASC
     """
     )
-    fun finnBehandlingIderMedFeilStatus(pageable: Pageable): List<Long>
+    fun finnBehandlingIderMedFeilStatus(startFraBehandlingId: Long, pageable: Pageable): List<Long>
 
     // ==================== Scenario 2: Ny vurdering ====================
 
@@ -91,6 +95,9 @@ interface RettOppFeilMedlPerioderRepository : CrudRepository<Behandling, Long> {
      * - FØRSTEGANG-behandling er AVSLUTTET
      * - Behandlingstema er BESLUTNING_LOVVALG_ANNET_LAND eller BESLUTNING_NORSK_LOVVALG
      * - Det finnes en NY_VURDERING på samme fagsak som ble registrert etter førstegangsbehandlingen
+     *
+     * @param startFraBehandlingId Hent kun behandlinger med id > denne verdien (for paginering). Bruk 0 for å starte fra begynnelsen.
+     * @param pageable Begrenser antall resultater (kun size brukes, offset ignoreres)
      */
     @Query(
         """
@@ -100,6 +107,7 @@ interface RettOppFeilMedlPerioderRepository : CrudRepository<Behandling, Long> {
         AND b.type = 'FØRSTEGANG'
         AND b.status = 'AVSLUTTET'
         AND b.tema IN ('BESLUTNING_LOVVALG_ANNET_LAND', 'BESLUTNING_NORSK_LOVVALG')
+        AND b.id > :startFraBehandlingId
         AND EXISTS (
             SELECT 1 FROM Behandling nyVurdering
             WHERE nyVurdering.fagsak = f
@@ -110,5 +118,5 @@ interface RettOppFeilMedlPerioderRepository : CrudRepository<Behandling, Long> {
         ORDER BY b.id ASC
     """
     )
-    fun finnBehandlingIderMedPotensielleNyVurderingFeil(pageable: Pageable): List<Long>
+    fun finnBehandlingIderMedPotensielleNyVurderingFeil(startFraBehandlingId: Long, pageable: Pageable): List<Long>
 }
