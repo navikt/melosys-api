@@ -108,8 +108,8 @@ class RettOppFeilMedlPerioderJob(
             // Hent kun ID-er med ID-basert paginering for å unngå OOM
             val pageable = PageRequest.of(0, batchStørrelse)
             val berørteBehandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(startFraBehandlingId, pageable)
-            antallFunnet = berørteBehandlingIder.size
-            log.info { "Scenario 1: Hentet $antallFunnet behandlinger (startFraBehandlingId=$startFraBehandlingId, batchStørrelse=$batchStørrelse)" }
+            scenario1HentetDenneBatch = berørteBehandlingIder.size
+            log.info { "Scenario 1: Hentet $scenario1HentetDenneBatch behandlinger (startFraBehandlingId=$startFraBehandlingId, batchStørrelse=$batchStørrelse)" }
 
             berørteBehandlingIder.forEach { behandlingId ->
                 if (jobMonitor.shouldStop) return@execute
@@ -125,15 +125,16 @@ class RettOppFeilMedlPerioderJob(
                     log.error(e) { "Feil ved behandling av behandlingId $behandlingId" }
                     jobMonitor.registerException(e)
                 }
-                // Oppdater siste behandlede ID for scenario 1
+                // Oppdater progress for scenario 1
+                scenario1TotaltProsessert++
                 sisteBehandledeIdScenario1 = behandlingId
             }
 
             // ===== Scenario 2: Ny vurdering potensielt overskrevet =====
             // Hent kun ID-er med ID-basert paginering for å unngå OOM
             val nyVurderingBehandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedPotensielleNyVurderingFeil(startFraBehandlingId, pageable)
-            nyVurderingSakerFunnet = nyVurderingBehandlingIder.size
-            log.info { "Scenario 2: Hentet $nyVurderingSakerFunnet behandlinger (startFraBehandlingId=$startFraBehandlingId, batchStørrelse=$batchStørrelse)" }
+            scenario2HentetDenneBatch = nyVurderingBehandlingIder.size
+            log.info { "Scenario 2: Hentet $scenario2HentetDenneBatch behandlinger (startFraBehandlingId=$startFraBehandlingId, batchStørrelse=$batchStørrelse)" }
 
             nyVurderingBehandlingIder.forEach { behandlingId ->
                 if (jobMonitor.shouldStop) return@execute
@@ -149,7 +150,8 @@ class RettOppFeilMedlPerioderJob(
                     log.error(e) { "Feil ved behandling av ny vurdering behandlingId $behandlingId" }
                     jobMonitor.registerException(e)
                 }
-                // Oppdater siste behandlede ID for scenario 2
+                // Oppdater progress for scenario 2
+                scenario2TotaltProsessert++
                 sisteBehandledeIdScenario2 = behandlingId
             }
         }
@@ -555,13 +557,15 @@ class RettOppFeilMedlPerioderJob(
 
     class JobStatus(
         // Scenario 1 (X008/X006)
-        @Volatile var antallFunnet: Int = 0,
+        @Volatile var scenario1HentetDenneBatch: Int = 0,
+        @Volatile var scenario1TotaltProsessert: Int = 0,
         @Volatile var manglerArkivsakId: Int = 0,
         @Volatile var ikkeInvalidertIEessi: Int = 0,
         @Volatile var skalRettesOpp: Int = 0,
         @Volatile var rettetOpp: Int = 0,
         // Scenario 2 (Ny vurdering)
-        @Volatile var nyVurderingSakerFunnet: Int = 0,
+        @Volatile var scenario2HentetDenneBatch: Int = 0,
+        @Volatile var scenario2TotaltProsessert: Int = 0,
         @Volatile var nyVurderingIkkeOverskrevet: Int = 0,
         @Volatile var nyVurderingOverskrevet: Int = 0,
         // Paginering - siste behandlede ID for hver scenario
@@ -569,12 +573,14 @@ class RettOppFeilMedlPerioderJob(
         @Volatile var sisteBehandledeIdScenario2: Long? = null
     ) : JobMonitor.Stats {
         override fun reset() {
-            antallFunnet = 0
+            scenario1HentetDenneBatch = 0
+            scenario1TotaltProsessert = 0
             manglerArkivsakId = 0
             ikkeInvalidertIEessi = 0
             skalRettesOpp = 0
             rettetOpp = 0
-            nyVurderingSakerFunnet = 0
+            scenario2HentetDenneBatch = 0
+            scenario2TotaltProsessert = 0
             nyVurderingIkkeOverskrevet = 0
             nyVurderingOverskrevet = 0
             sisteBehandledeIdScenario1 = null
@@ -582,14 +588,19 @@ class RettOppFeilMedlPerioderJob(
         }
 
         override fun asMap(): Map<String, Any?> = mapOf(
-            "antallFunnet" to antallFunnet,
+            // Scenario 1
+            "scenario1HentetDenneBatch" to scenario1HentetDenneBatch,
+            "scenario1TotaltProsessert" to scenario1TotaltProsessert,
             "manglerArkivsakId" to manglerArkivsakId,
             "ikkeInvalidertIEessi" to ikkeInvalidertIEessi,
             "skalRettesOpp" to skalRettesOpp,
             "rettetOpp" to rettetOpp,
-            "nyVurderingSakerFunnet" to nyVurderingSakerFunnet,
+            // Scenario 2
+            "scenario2HentetDenneBatch" to scenario2HentetDenneBatch,
+            "scenario2TotaltProsessert" to scenario2TotaltProsessert,
             "nyVurderingIkkeOverskrevet" to nyVurderingIkkeOverskrevet,
             "nyVurderingOverskrevet" to nyVurderingOverskrevet,
+            // Paginering
             "sisteBehandledeIdScenario1" to sisteBehandledeIdScenario1,
             "sisteBehandledeIdScenario2" to sisteBehandledeIdScenario2,
             "nesteStartFraBehandlingId" to maxOf(sisteBehandledeIdScenario1 ?: 0, sisteBehandledeIdScenario2 ?: 0)

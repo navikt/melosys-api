@@ -110,7 +110,7 @@ class RettOppFeilMedlPerioderJobTest {
 
         // Assert
         val status = job.status()
-        status["antallFunnet"] shouldBe 1
+        status["scenario1HentetDenneBatch"] shouldBe 1
         status["skalRettesOpp"] shouldBe 1
         status["rettetOpp"] shouldBe 0 // Dry run, så ingen faktiske endringer
 
@@ -182,7 +182,7 @@ class RettOppFeilMedlPerioderJobTest {
 
         // Assert
         val status = job.status()
-        status["antallFunnet"] shouldBe 1
+        status["scenario1HentetDenneBatch"] shouldBe 1
         status["skalRettesOpp"] shouldBe 1
         status["rettetOpp"] shouldBe 1
 
@@ -252,7 +252,7 @@ class RettOppFeilMedlPerioderJobTest {
 
         // Assert
         val status = job.status()
-        status["antallFunnet"] shouldBe 1
+        status["scenario1HentetDenneBatch"] shouldBe 1
         status["ikkeInvalidertIEessi"] shouldBe 1
         status["skalRettesOpp"] shouldBe 0
 
