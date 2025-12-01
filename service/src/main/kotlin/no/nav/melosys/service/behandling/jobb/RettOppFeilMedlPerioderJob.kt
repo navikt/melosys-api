@@ -82,33 +82,45 @@ class RettOppFeilMedlPerioderJob(
             log.info { "Starter RettOppFeilMedlPerioderJob (dryRun=$dryRun)" }
 
             // ===== Scenario 1: X008/X006 invaliderte SEDer =====
-            val berørteBehandlinger = rettOppFeilMedlPerioderRepository.finnBehandlingerMedFeilStatus()
-            antallFunnet = berørteBehandlinger.size
+            // Hent kun ID-er først for å unngå OOM ved lasting av mange entiteter
+            val berørteBehandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus()
+            antallFunnet = berørteBehandlingIder.size
             log.info { "Scenario 1: Fant $antallFunnet potensielt berørte behandlinger (X008/X006)" }
 
-            berørteBehandlinger.forEach { behandling ->
+            berørteBehandlingIder.forEach { behandlingId ->
                 if (jobMonitor.shouldStop) return@execute
 
                 runCatching {
-                    behandleEnSak(behandling, dryRun)
+                    val behandling = rettOppFeilMedlPerioderRepository.findById(behandlingId).orElse(null)
+                    if (behandling != null) {
+                        behandleEnSak(behandling, dryRun)
+                    } else {
+                        log.warn { "Kunne ikke finne behandling med id $behandlingId" }
+                    }
                 }.onFailure { e ->
-                    log.error(e) { "Feil ved behandling av sak ${behandling.fagsak.saksnummer}" }
+                    log.error(e) { "Feil ved behandling av behandlingId $behandlingId" }
                     jobMonitor.registerException(e)
                 }
             }
 
             // ===== Scenario 2: Ny vurdering potensielt overskrevet =====
-            val nyVurderingBehandlinger = rettOppFeilMedlPerioderRepository.finnBehandlingerMedPotensielleNyVurderingFeil()
-            nyVurderingSakerFunnet = nyVurderingBehandlinger.size
+            // Hent kun ID-er først for å unngå OOM ved lasting av mange entiteter
+            val nyVurderingBehandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedPotensielleNyVurderingFeil()
+            nyVurderingSakerFunnet = nyVurderingBehandlingIder.size
             log.info { "Scenario 2: Fant $nyVurderingSakerFunnet potensielle ny vurdering-saker" }
 
-            nyVurderingBehandlinger.forEach { behandling ->
+            nyVurderingBehandlingIder.forEach { behandlingId ->
                 if (jobMonitor.shouldStop) return@execute
 
                 runCatching {
-                    behandleNyVurderingSak(behandling)
+                    val behandling = rettOppFeilMedlPerioderRepository.findById(behandlingId).orElse(null)
+                    if (behandling != null) {
+                        behandleNyVurderingSak(behandling)
+                    } else {
+                        log.warn { "Kunne ikke finne behandling med id $behandlingId" }
+                    }
                 }.onFailure { e ->
-                    log.error(e) { "Feil ved behandling av ny vurdering-sak ${behandling.fagsak.saksnummer}" }
+                    log.error(e) { "Feil ved behandling av ny vurdering behandlingId $behandlingId" }
                     jobMonitor.registerException(e)
                 }
             }
