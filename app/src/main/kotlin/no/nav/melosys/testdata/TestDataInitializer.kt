@@ -27,7 +27,8 @@ import java.util.*
  * Hver e2e-test får sin egen dedikerte sak for full isolasjon.
  * Endringer her må synkroniseres med frontend testdataUtils.ts!
  *
- * MEL-1001 til MEL-1012: opprettAvtalelandSak (12 saker - UNDER_BEHANDLING)
+ * MEL-1001 til MEL-1011: opprettAvtalelandSak (11 saker - UNDER_BEHANDLING)
+ * MEL-1012: opprettAvtalelandSak (1 sak - OPPRETTET for behandlingstype-tilgjengelighet test)
  * MEL-1013 til MEL-1022: opprettUtenforAvtalelandSak (10 saker - UNDER_BEHANDLING)
  * MEL-1023 til MEL-1050: opprettUtenforAvtalelandSakMedAarsavregning (28 saker - UNDER_BEHANDLING)
  * MEL-1051 til MEL-1053: opprettEUEOSSak IKKE_YRKESAKTIV (3 saker - UNDER_BEHANDLING)
@@ -48,8 +49,9 @@ class TestDataInitializer(
 
     override fun run(args: ApplicationArguments) {
         // Sjekk om testdata allerede eksisterer (idempotent)
-        if (fagsakRepository.existsById("MEL-1068")) {
-            log.info("⏭️  Test-saker eksisterer allerede - hopper over initialisering")
+        // Sjekker første og siste sak i området for å fange opp både fullstendig og delvis initialisering
+        if (fagsakRepository.existsById("MEL-1001") && fagsakRepository.existsById("MEL-1071")) {
+            log.info("⏭️  Test-saker eksisterer allerede (MEL-1001 til MEL-1071) - hopper over initialisering")
             return
         }
 
@@ -60,9 +62,10 @@ class TestDataInitializer(
         try {
             ThreadLocalAccessInfo.beforeExecuteProcess(processId, "TestDataInitializer", TEST_SAKSBEHANDLER, "Test Saksbehandler")
 
-            // MEL-1001 til MEL-1012: opprettAvtalelandSak (12 saker)
+            // MEL-1001 til MEL-1011: opprettAvtalelandSak (11 saker - UNDER_BEHANDLING)
+            // MEL-1012: opprettAvtalelandSak (1 sak - OPPRETTET for behandlingstype-tilgjengelighet test)
             (1001..1011).forEach { opprettAvtalelandSak("MEL-$it") }
-            opprettAvtalelandSakOpprettet("MEL-1012") // OPPRETTET for behandlingstype-tilgjengelighet test
+            opprettAvtalelandSak("MEL-1012", Behandlingsstatus.OPPRETTET)
 
             // MEL-1013 til MEL-1022: opprettUtenforAvtalelandSak (10 saker)
             (1013..1022).forEach { opprettUtenforAvtalelandSak("MEL-$it") }
@@ -77,23 +80,23 @@ class TestDataInitializer(
             (1054..1056).forEach { opprettEøsPensjonistSakMedTrygdeavgift("MEL-$it") }
 
             // MEL-1057 til MEL-1062: OPPRETTET saker for "knytt til eksisterende" tester
-            (1057..1058).forEach { opprettAvtalelandSakOpprettet("MEL-$it") }
-            (1059..1060).forEach { opprettUtenforAvtalelandSakOpprettet("MEL-$it") }
-            opprettEUEOSSakMedStatus("MEL-1061", Behandlingstema.IKKE_YRKESAKTIV, Behandlingsstatus.OPPRETTET)
-            opprettEøsPensjonistSakMedTrygdeavgiftMedStatus("MEL-1062", Behandlingsstatus.OPPRETTET)
+            (1057..1058).forEach { opprettAvtalelandSak("MEL-$it", Behandlingsstatus.OPPRETTET) }
+            (1059..1060).forEach { opprettUtenforAvtalelandSak("MEL-$it", Behandlingsstatus.OPPRETTET) }
+            opprettEUEOSSak("MEL-1061", Behandlingstema.IKKE_YRKESAKTIV, Behandlingsstatus.OPPRETTET)
+            opprettEøsPensjonistSakMedTrygdeavgift("MEL-1062", Behandlingsstatus.OPPRETTET)
 
             // MEL-1063 til MEL-1068: AVSLUTTET saker for "knytt til eksisterende" tester
-            opprettAvtalelandSakMedStatus("MEL-1063", Behandlingsstatus.AVSLUTTET, Saksstatuser.HENLAGT) // HENLAGT
-            opprettAvtalelandSakMedStatus("MEL-1064", Behandlingsstatus.AVSLUTTET, Saksstatuser.OPPRETTET)
-            (1065..1066).forEach { opprettUtenforAvtalelandSakAvsluttet("MEL-$it") }
-            opprettEUEOSSakMedStatus("MEL-1067", Behandlingstema.IKKE_YRKESAKTIV, Behandlingsstatus.AVSLUTTET)
-            opprettEøsPensjonistSakMedTrygdeavgiftMedStatus("MEL-1068", Behandlingsstatus.AVSLUTTET)
+            opprettAvtalelandSak("MEL-1063", Behandlingsstatus.AVSLUTTET, Saksstatuser.HENLAGT)
+            opprettAvtalelandSak("MEL-1064", Behandlingsstatus.AVSLUTTET)
+            (1065..1066).forEach { opprettUtenforAvtalelandSak("MEL-$it", Behandlingsstatus.AVSLUTTET) }
+            opprettEUEOSSak("MEL-1067", Behandlingstema.IKKE_YRKESAKTIV, Behandlingsstatus.AVSLUTTET)
+            opprettEøsPensjonistSakMedTrygdeavgift("MEL-1068", Behandlingsstatus.AVSLUTTET)
 
             // MEL-1069: Avtaleland med åpen behandling for test av varselmelding
             opprettAvtalelandSak("MEL-1069")
 
             // MEL-1070: Utenfor avtaleland AVSLUTTET for behandlingstype-tilgjengelighet test
-            opprettUtenforAvtalelandSakAvsluttet("MEL-1070")
+            opprettUtenforAvtalelandSak("MEL-1070", Behandlingsstatus.AVSLUTTET)
 
             // MEL-1071: EU_EOS IKKE_YRKESAKTIV for regresjon-state-ved-saksbytting test
             opprettEUEOSSak("MEL-1071", Behandlingstema.IKKE_YRKESAKTIV)
@@ -106,47 +109,28 @@ class TestDataInitializer(
         }
     }
 
-    /**
-     * Korrelerer med frontend testdataUtils.ts: opprettAvtalelandSak()
-     *
-     * Playwright-testen bruker:
-     * - velgSakstype("Avtaleland")
-     * - velgSakstema("Medlemskap og lovvalg")
-     * - velgBehandlingstema("Yrkesaktiv")
-     * - velgBehandlingstype("Førstegangsbehandling")
-     * - velgBehandlingsaarsak("Søknad")
-     */
-    private fun opprettAvtalelandSak(saksnummer: String) {
-        opprettAvtalelandSakMedStatus(saksnummer, Behandlingsstatus.UNDER_BEHANDLING)
-    }
+    // ===== Generisk sak-opprettelse =====
 
     /**
-     * Oppretter Avtaleland-sak med OPPRETTET status (ikke redigerbar).
-     * Brukes av Playwright-tester som søker etter saker med "Behandlingen er opprettet".
+     * Generisk metode for å opprette en test-sak med førstegangsbehandling.
+     * Alle andre opprett-metoder delegerer til denne.
      */
-    private fun opprettAvtalelandSakOpprettet(saksnummer: String) {
-        opprettAvtalelandSakMedStatus(saksnummer, Behandlingsstatus.OPPRETTET)
-    }
-
-    private fun opprettAvtalelandSakMedStatus(saksnummer: String, status: Behandlingsstatus) {
-        opprettAvtalelandSakMedStatus(saksnummer, status, Saksstatuser.OPPRETTET)
-    }
-
-    private fun opprettAvtalelandSakMedStatus(
+    private fun opprettSak(
         saksnummer: String,
-        status: Behandlingsstatus,
-        saksstatus: Saksstatuser
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema,
+        behandlingsstatus: Behandlingsstatus,
+        behandlingstype: Behandlingstyper = Behandlingstyper.FØRSTEGANG,
+        saksstatus: Saksstatuser = Saksstatuser.OPPRETTET
     ) {
-        if (fagsakRepository.existsById(saksnummer)) {
-            log.debug("Sak {} eksisterer allerede", saksnummer)
-            return
-        }
+        if (sakEksisterer(saksnummer)) return
 
         val fagsak = Fagsak(
             saksnummer,
             null,
-            Sakstyper.TRYGDEAVTALE,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            sakstype,
+            sakstema,
             saksstatus,
             null,
             HashSet(),
@@ -165,9 +149,9 @@ class TestDataInitializer(
 
         val behandling = behandlingService.nyBehandling(
             savedFagsak,
-            status,
-            Behandlingstyper.FØRSTEGANG,
-            Behandlingstema.YRKESAKTIV,
+            behandlingsstatus,
+            behandlingstype,
+            behandlingstema,
             null, null,
             LocalDate.now(),
             Behandlingsaarsaktyper.SØKNAD,
@@ -175,11 +159,38 @@ class TestDataInitializer(
         )
 
         // Opprett oppgave for OPPRETTET og UNDER_BEHANDLING (ikke for AVSLUTTET)
-        if (status != Behandlingsstatus.AVSLUTTET) {
+        if (behandlingsstatus != Behandlingsstatus.AVSLUTTET) {
             oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null)
         }
 
-        log.debug("✅ {}: opprettAvtalelandSak (status: {})", saksnummer, status)
+        log.debug("✅ {}: {} / {} / {} (status: {})", saksnummer, sakstype, sakstema, behandlingstema, behandlingsstatus)
+    }
+
+    // ===== Semantiske helper-metoder =====
+
+    /**
+     * Korrelerer med frontend testdataUtils.ts: opprettAvtalelandSak()
+     *
+     * Playwright-testen bruker:
+     * - velgSakstype("Avtaleland")
+     * - velgSakstema("Medlemskap og lovvalg")
+     * - velgBehandlingstema("Yrkesaktiv")
+     * - velgBehandlingstype("Førstegangsbehandling")
+     * - velgBehandlingsaarsak("Søknad")
+     */
+    private fun opprettAvtalelandSak(
+        saksnummer: String,
+        behandlingsstatus: Behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING,
+        saksstatus: Saksstatuser = Saksstatuser.OPPRETTET
+    ) {
+        opprettSak(
+            saksnummer = saksnummer,
+            sakstype = Sakstyper.TRYGDEAVTALE,
+            sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
+            behandlingstema = Behandlingstema.YRKESAKTIV,
+            behandlingsstatus = behandlingsstatus,
+            saksstatus = saksstatus
+        )
     }
 
     /**
@@ -192,102 +203,33 @@ class TestDataInitializer(
      * - velgBehandlingstype("Førstegangsbehandling")
      * - velgBehandlingsaarsak("Søknad")
      */
-    private fun opprettUtenforAvtalelandSak(saksnummer: String) {
-        if (fagsakRepository.existsById(saksnummer)) {
-            log.debug("Sak {} eksisterer allerede", saksnummer)
-            return
-        }
-
-        val fagsak = Fagsak(
-            saksnummer,
-            null,
-            Sakstyper.FTRL,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Saksstatuser.OPPRETTET,
-            null,
-            HashSet(),
-            ArrayList()
+    private fun opprettUtenforAvtalelandSak(
+        saksnummer: String,
+        behandlingsstatus: Behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING
+    ) {
+        opprettSak(
+            saksnummer = saksnummer,
+            sakstype = Sakstyper.FTRL,
+            sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
+            behandlingstema = Behandlingstema.YRKESAKTIV,
+            behandlingsstatus = behandlingsstatus
         )
-
-        val bruker = Aktoer().apply {
-            setFagsak(fagsak)
-            personIdent = TEST_FNR
-            aktørId = TEST_AKTOR_ID
-            rolle = Aktoersroller.BRUKER
-        }
-        fagsak.leggTilAktør(bruker)
-
-        val savedFagsak = fagsakRepository.save(fagsak)
-
-        val behandling = behandlingService.nyBehandling(
-            savedFagsak,
-            Behandlingsstatus.UNDER_BEHANDLING,
-            Behandlingstyper.FØRSTEGANG,
-            Behandlingstema.YRKESAKTIV,
-            null, null,
-            LocalDate.now(),
-            Behandlingsaarsaktyper.SØKNAD,
-            null
-        )
-
-        // Opprett oppgave tilordnet test-saksbehandler
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null)
-
-        log.debug("✅ {}: opprettUtenforAvtalelandSak", saksnummer)
     }
 
     /**
-     * Korrelerer med frontend testdataUtils.ts: opprettEøsPensjonistSakMedTrygdeavgift()
+     * Korrelerer med frontend testdataUtils.ts: opprettUtenforAvtalelandSakMedAarsavregning()
      *
-     * Playwright-testen bruker:
-     * - velgSakstype("EU/EØS-land")
-     * - velgSakstema("Trygdeavgift")
-     * - velgBehandlingstema("Pensjonist/uføretrygdet")
-     * - velgBehandlingstype("Førstegangsbehandling")
-     * - velgBehandlingsaarsak("Søknad")
+     * Oppretter en FTRL-sak med kun en årsavregning-behandling.
      */
-    private fun opprettEøsPensjonistSakMedTrygdeavgift(saksnummer: String) {
-        if (fagsakRepository.existsById(saksnummer)) {
-            log.debug("Sak {} eksisterer allerede", saksnummer)
-            return
-        }
-
-        val fagsak = Fagsak(
-            saksnummer,
-            null,
-            Sakstyper.EU_EOS,
-            Sakstemaer.TRYGDEAVGIFT,
-            Saksstatuser.OPPRETTET,
-            null,
-            HashSet(),
-            ArrayList()
+    private fun opprettUtenforAvtalelandSakMedAarsavregning(saksnummer: String) {
+        opprettSak(
+            saksnummer = saksnummer,
+            sakstype = Sakstyper.FTRL,
+            sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
+            behandlingstema = Behandlingstema.YRKESAKTIV,
+            behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING,
+            behandlingstype = Behandlingstyper.ÅRSAVREGNING
         )
-
-        val bruker = Aktoer().apply {
-            setFagsak(fagsak)
-            personIdent = TEST_FNR
-            aktørId = TEST_AKTOR_ID
-            rolle = Aktoersroller.BRUKER
-        }
-        fagsak.leggTilAktør(bruker)
-
-        val savedFagsak = fagsakRepository.save(fagsak)
-
-        val behandling = behandlingService.nyBehandling(
-            savedFagsak,
-            Behandlingsstatus.UNDER_BEHANDLING,
-            Behandlingstyper.FØRSTEGANG,
-            Behandlingstema.PENSJONIST,
-            null, null,
-            LocalDate.now(),
-            Behandlingsaarsaktyper.SØKNAD,
-            null
-        )
-
-        // Opprett oppgave tilordnet test-saksbehandler
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null)
-
-        log.debug("✅ {}: opprettEøsPensjonistSakMedTrygdeavgift", saksnummer)
     }
 
     /**
@@ -300,254 +242,52 @@ class TestDataInitializer(
      * - velgBehandlingstype("Førstegangsbehandling")
      * - velgBehandlingsaarsak("Søknad")
      */
-    private fun opprettEUEOSSak(saksnummer: String, behandlingstema: Behandlingstema) {
-        if (fagsakRepository.existsById(saksnummer)) {
-            log.debug("Sak {} eksisterer allerede", saksnummer)
-            return
-        }
-
-        val fagsak = Fagsak(
-            saksnummer,
-            null,
-            Sakstyper.EU_EOS,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Saksstatuser.OPPRETTET,
-            null,
-            HashSet(),
-            ArrayList()
+    private fun opprettEUEOSSak(
+        saksnummer: String,
+        behandlingstema: Behandlingstema,
+        behandlingsstatus: Behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING
+    ) {
+        opprettSak(
+            saksnummer = saksnummer,
+            sakstype = Sakstyper.EU_EOS,
+            sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
+            behandlingstema = behandlingstema,
+            behandlingsstatus = behandlingsstatus
         )
-
-        val bruker = Aktoer().apply {
-            setFagsak(fagsak)
-            personIdent = TEST_FNR
-            aktørId = TEST_AKTOR_ID
-            rolle = Aktoersroller.BRUKER
-        }
-        fagsak.leggTilAktør(bruker)
-
-        val savedFagsak = fagsakRepository.save(fagsak)
-
-        val behandling = behandlingService.nyBehandling(
-            savedFagsak,
-            Behandlingsstatus.UNDER_BEHANDLING,
-            Behandlingstyper.FØRSTEGANG,
-            behandlingstema,
-            null, null,
-            LocalDate.now(),
-            Behandlingsaarsaktyper.SØKNAD,
-            null
-        )
-
-        // Opprett oppgave tilordnet test-saksbehandler
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null)
-
-        log.debug("✅ {}: opprettEUEOSSak ({})", saksnummer, behandlingstema)
     }
 
     /**
-     * Korrelerer med frontend testdataUtils.ts: opprettUtenforAvtalelandSakMedAarsavregning()
+     * Korrelerer med frontend testdataUtils.ts: opprettEøsPensjonistSakMedTrygdeavgift()
      *
-     * Oppretter en FTRL-sak med kun en årsavregning-behandling (OPPRETTET).
-     *
-     * Forenklet versjon - Playwright-testene trenger ikke historisk førstegangsbehandling,
-     * bare en åpen årsavregning å teste mot.
+     * Playwright-testen bruker:
+     * - velgSakstype("EU/EØS-land")
+     * - velgSakstema("Trygdeavgift")
+     * - velgBehandlingstema("Pensjonist/uføretrygdet")
+     * - velgBehandlingstype("Førstegangsbehandling")
+     * - velgBehandlingsaarsak("Søknad")
      */
-    private fun opprettUtenforAvtalelandSakMedAarsavregning(saksnummer: String) {
-        if (fagsakRepository.existsById(saksnummer)) {
-            log.debug("Sak {} eksisterer allerede", saksnummer)
-            return
-        }
-
-        // 1. Opprett FTRL-sak
-        val fagsak = Fagsak(
-            saksnummer,
-            null,
-            Sakstyper.FTRL,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Saksstatuser.OPPRETTET,
-            null,
-            HashSet(),
-            ArrayList()
-        )
-
-        val bruker = Aktoer().apply {
-            setFagsak(fagsak)
-            personIdent = TEST_FNR
-            aktørId = TEST_AKTOR_ID
-            rolle = Aktoersroller.BRUKER
-        }
-        fagsak.leggTilAktør(bruker)
-
-        val savedFagsak = fagsakRepository.save(fagsak)
-
-        // 2. Opprett Årsavregning-behandling (åpen)
-        val behandling = behandlingService.nyBehandling(
-            savedFagsak,
-            Behandlingsstatus.UNDER_BEHANDLING,
-            Behandlingstyper.ÅRSAVREGNING,
-            Behandlingstema.YRKESAKTIV,
-            null, null,
-            LocalDate.now(),
-            Behandlingsaarsaktyper.SØKNAD,
-            null
-        )
-
-        // 3. Opprett oppgave tilordnet test-saksbehandler
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null)
-
-        log.debug("✅ {}: opprettUtenforAvtalelandSakMedAarsavregning (1 årsavregning)", saksnummer)
-    }
-
-    // ===== Helper-metoder for OPPRETTET og AVSLUTTET saker =====
-
-    private fun opprettUtenforAvtalelandSakOpprettet(saksnummer: String) {
-        opprettUtenforAvtalelandSakMedStatus(saksnummer, Behandlingsstatus.OPPRETTET)
-    }
-
-    private fun opprettUtenforAvtalelandSakAvsluttet(saksnummer: String) {
-        opprettUtenforAvtalelandSakMedStatus(saksnummer, Behandlingsstatus.AVSLUTTET)
-    }
-
-    private fun opprettUtenforAvtalelandSakMedStatus(saksnummer: String, status: Behandlingsstatus) {
-        if (fagsakRepository.existsById(saksnummer)) {
-            log.debug("Sak {} eksisterer allerede", saksnummer)
-            return
-        }
-
-        val fagsak = Fagsak(
-            saksnummer,
-            null,
-            Sakstyper.FTRL,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Saksstatuser.OPPRETTET,
-            null,
-            HashSet(),
-            ArrayList()
-        )
-
-        val bruker = Aktoer().apply {
-            setFagsak(fagsak)
-            personIdent = TEST_FNR
-            aktørId = TEST_AKTOR_ID
-            rolle = Aktoersroller.BRUKER
-        }
-        fagsak.leggTilAktør(bruker)
-
-        val savedFagsak = fagsakRepository.save(fagsak)
-
-        val behandling = behandlingService.nyBehandling(
-            savedFagsak,
-            status,
-            Behandlingstyper.FØRSTEGANG,
-            Behandlingstema.YRKESAKTIV,
-            null, null,
-            LocalDate.now(),
-            Behandlingsaarsaktyper.SØKNAD,
-            null
-        )
-
-        // Opprett oppgave for OPPRETTET og UNDER_BEHANDLING (ikke for AVSLUTTET)
-        if (status != Behandlingsstatus.AVSLUTTET) {
-            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null)
-        }
-
-        log.debug("✅ {}: opprettUtenforAvtalelandSak (status: {})", saksnummer, status)
-    }
-
-    private fun opprettEUEOSSakMedStatus(
+    private fun opprettEøsPensjonistSakMedTrygdeavgift(
         saksnummer: String,
-        behandlingstema: Behandlingstema,
-        status: Behandlingsstatus
+        behandlingsstatus: Behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING
     ) {
-        if (fagsakRepository.existsById(saksnummer)) {
-            log.debug("Sak {} eksisterer allerede", saksnummer)
-            return
-        }
-
-        val fagsak = Fagsak(
-            saksnummer,
-            null,
-            Sakstyper.EU_EOS,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Saksstatuser.OPPRETTET,
-            null,
-            HashSet(),
-            ArrayList()
+        opprettSak(
+            saksnummer = saksnummer,
+            sakstype = Sakstyper.EU_EOS,
+            sakstema = Sakstemaer.TRYGDEAVGIFT,
+            behandlingstema = Behandlingstema.PENSJONIST,
+            behandlingsstatus = behandlingsstatus
         )
-
-        val bruker = Aktoer().apply {
-            setFagsak(fagsak)
-            personIdent = TEST_FNR
-            aktørId = TEST_AKTOR_ID
-            rolle = Aktoersroller.BRUKER
-        }
-        fagsak.leggTilAktør(bruker)
-
-        val savedFagsak = fagsakRepository.save(fagsak)
-
-        val behandling = behandlingService.nyBehandling(
-            savedFagsak,
-            status,
-            Behandlingstyper.FØRSTEGANG,
-            behandlingstema,
-            null, null,
-            LocalDate.now(),
-            Behandlingsaarsaktyper.SØKNAD,
-            null
-        )
-
-        // Opprett oppgave for OPPRETTET og UNDER_BEHANDLING (ikke for AVSLUTTET)
-        if (status != Behandlingsstatus.AVSLUTTET) {
-            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null)
-        }
-
-        log.debug("✅ {}: opprettEUEOSSak (status: {}, tema: {})", saksnummer, status, behandlingstema)
     }
 
-    private fun opprettEøsPensjonistSakMedTrygdeavgiftMedStatus(saksnummer: String, status: Behandlingsstatus) {
+    /**
+     * Idempotency-sjekk: returnerer true hvis saken allerede eksisterer.
+     */
+    private fun sakEksisterer(saksnummer: String): Boolean {
         if (fagsakRepository.existsById(saksnummer)) {
             log.debug("Sak {} eksisterer allerede", saksnummer)
-            return
+            return true
         }
-
-        val fagsak = Fagsak(
-            saksnummer,
-            null,
-            Sakstyper.EU_EOS,
-            Sakstemaer.TRYGDEAVGIFT,
-            Saksstatuser.OPPRETTET,
-            null,
-            HashSet(),
-            ArrayList()
-        )
-
-        val bruker = Aktoer().apply {
-            setFagsak(fagsak)
-            personIdent = TEST_FNR
-            aktørId = TEST_AKTOR_ID
-            rolle = Aktoersroller.BRUKER
-        }
-        fagsak.leggTilAktør(bruker)
-
-        val savedFagsak = fagsakRepository.save(fagsak)
-
-        val behandling = behandlingService.nyBehandling(
-            savedFagsak,
-            status,
-            Behandlingstyper.FØRSTEGANG,
-            Behandlingstema.PENSJONIST,
-            null, null,
-            LocalDate.now(),
-            Behandlingsaarsaktyper.SØKNAD,
-            null
-        )
-
-        // Opprett oppgave for OPPRETTET og UNDER_BEHANDLING (ikke for AVSLUTTET)
-        if (status != Behandlingsstatus.AVSLUTTET) {
-            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, null, TEST_AKTOR_ID, TEST_SAKSBEHANDLER, null)
-        }
-
-        log.debug("✅ {}: opprettEøsPensjonistSakMedTrygdeavgift (status: {})", saksnummer, status)
+        return false
     }
 
     companion object {
