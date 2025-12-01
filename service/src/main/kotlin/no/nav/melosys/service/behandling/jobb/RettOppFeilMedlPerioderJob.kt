@@ -75,17 +75,20 @@ class RettOppFeilMedlPerioderJob(
     fun totaltAntall(): TotaltAntall {
         val scenario1 = rettOppFeilMedlPerioderRepository.countBehandlingerMedFeilStatus()
         val scenario2 = rettOppFeilMedlPerioderRepository.countBehandlingerMedPotensielleNyVurderingFeil()
+        val begge = rettOppFeilMedlPerioderRepository.countBehandlingerMedBeggeTyperFeil()
         return TotaltAntall(
             scenario1X008X006 = scenario1,
             scenario2NyVurdering = scenario2,
-            totalt = scenario1 + scenario2
+            beggeTyperFeil = begge,
+            totaltUnike = scenario1 + scenario2 - begge
         )
     }
 
     data class TotaltAntall(
         val scenario1X008X006: Long,
         val scenario2NyVurdering: Long,
-        val totalt: Long
+        val beggeTyperFeil: Long,
+        val totaltUnike: Long
     )
 
     @Async("taskExecutor")

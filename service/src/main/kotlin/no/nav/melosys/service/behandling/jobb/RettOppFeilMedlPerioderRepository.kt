@@ -85,6 +85,31 @@ interface RettOppFeilMedlPerioderRepository : CrudRepository<Behandling, Long> {
     fun countBehandlingerMedPotensielleNyVurderingFeil(): Long
 
     /**
+     * Teller antall behandlinger som matcher BEGGE scenarioer (overlapp).
+     * Dette er behandlinger som har både X008/X006-feil OG ny vurdering-feil.
+     */
+    @Query(
+        """
+        SELECT COUNT(DISTINCT b.id) FROM Behandling b
+        JOIN b.fagsak f
+        JOIN Behandlingsresultat br ON br.behandling = b
+        WHERE f.status = 'LOVVALG_AVKLART'
+        AND br.type = 'HENLEGGELSE'
+        AND b.tema = 'BESLUTNING_LOVVALG_ANNET_LAND'
+        AND b.type = 'FØRSTEGANG'
+        AND b.status = 'AVSLUTTET'
+        AND EXISTS (
+            SELECT 1 FROM Behandling nyVurdering
+            WHERE nyVurdering.fagsak = f
+            AND nyVurdering.type = 'NY_VURDERING'
+            AND nyVurdering.status IN ('AVSLUTTET', 'MIDLERTIDIG_LOVVALGSBESLUTNING')
+            AND nyVurdering.registrertDato > b.registrertDato
+        )
+    """
+    )
+    fun countBehandlingerMedBeggeTyperFeil(): Long
+
+    /**
      * Scenario 2: Finner førstegangsbehandlinger der det finnes en nyere ny vurdering,
      * som kan ha blitt overskrevet av AvsluttArt13BehandlingJobb.
      * Returnerer kun ID-er for å unngå OOM ved lasting av mange entiteter.
