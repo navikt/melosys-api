@@ -15,6 +15,7 @@ import no.nav.melosys.service.medl.MedlPeriodeService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import org.springframework.data.domain.PageRequest
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -68,24 +69,44 @@ class RettOppFeilMedlPerioderJob(
         sakerFunnet.clear()
     }
 
+    /**
+     * Teller totalt antall behandlinger for begge scenarioer (for /totalt-antall endpoint).
+     */
+    fun totaltAntall(): TotaltAntall {
+        val scenario1 = rettOppFeilMedlPerioderRepository.countBehandlingerMedFeilStatus()
+        val scenario2 = rettOppFeilMedlPerioderRepository.countBehandlingerMedPotensielleNyVurderingFeil()
+        return TotaltAntall(
+            scenario1X008X006 = scenario1,
+            scenario2NyVurdering = scenario2,
+            totalt = scenario1 + scenario2
+        )
+    }
+
+    data class TotaltAntall(
+        val scenario1X008X006: Long,
+        val scenario2NyVurdering: Long,
+        val totalt: Long
+    )
+
     @Async("taskExecutor")
     @Transactional
-    fun kjørAsynkront(dryRun: Boolean, antallFeilFørStopp: Int) {
-        kjør(dryRun, antallFeilFørStopp)
+    fun kjørAsynkront(dryRun: Boolean, antallFeilFørStopp: Int, batchStørrelse: Int = 1000, offset: Int = 0) {
+        kjør(dryRun, antallFeilFørStopp, batchStørrelse, offset)
     }
 
     @Synchronized
     @Transactional
-    fun kjør(dryRun: Boolean, antallFeilFørStopp: Int = 0) = runAsSystem {
+    fun kjør(dryRun: Boolean, antallFeilFørStopp: Int = 0, batchStørrelse: Int = 1000, offset: Int = 0) = runAsSystem {
         sakerFunnet.clear()
         jobMonitor.execute(antallFeilFørStopp) {
-            log.info { "Starter RettOppFeilMedlPerioderJob (dryRun=$dryRun)" }
+            log.info { "Starter RettOppFeilMedlPerioderJob (dryRun=$dryRun, batchStørrelse=$batchStørrelse, offset=$offset)" }
 
             // ===== Scenario 1: X008/X006 invaliderte SEDer =====
-            // Hent kun ID-er først for å unngå OOM ved lasting av mange entiteter
-            val berørteBehandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus()
+            // Hent kun ID-er med paginering for å unngå OOM
+            val pageable = PageRequest.of(offset / batchStørrelse, batchStørrelse)
+            val berørteBehandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(pageable)
             antallFunnet = berørteBehandlingIder.size
-            log.info { "Scenario 1: Fant $antallFunnet potensielt berørte behandlinger (X008/X006)" }
+            log.info { "Scenario 1: Hentet $antallFunnet behandlinger (offset=$offset, batchStørrelse=$batchStørrelse)" }
 
             berørteBehandlingIder.forEach { behandlingId ->
                 if (jobMonitor.shouldStop) return@execute
@@ -104,10 +125,10 @@ class RettOppFeilMedlPerioderJob(
             }
 
             // ===== Scenario 2: Ny vurdering potensielt overskrevet =====
-            // Hent kun ID-er først for å unngå OOM ved lasting av mange entiteter
-            val nyVurderingBehandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedPotensielleNyVurderingFeil()
+            // Hent kun ID-er med paginering for å unngå OOM
+            val nyVurderingBehandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedPotensielleNyVurderingFeil(pageable)
             nyVurderingSakerFunnet = nyVurderingBehandlingIder.size
-            log.info { "Scenario 2: Fant $nyVurderingSakerFunnet potensielle ny vurdering-saker" }
+            log.info { "Scenario 2: Hentet $nyVurderingSakerFunnet behandlinger (offset=$offset, batchStørrelse=$batchStørrelse)" }
 
             nyVurderingBehandlingIder.forEach { behandlingId ->
                 if (jobMonitor.shouldStop) return@execute

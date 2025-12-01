@@ -22,22 +22,38 @@ class RettOppFeilMedlPerioderController(
      * @param dryRun Hvis true, vil jobben kun logge hva som ville blitt endret uten å gjøre endringer.
      *               Default er true for å unngå utilsiktede endringer.
      * @param antallFeilFørStopp Antall feil før jobben stopper. 0 = ingen grense.
+     * @param batchStørrelse Maks antall behandlinger per kjøring. Default 1000.
+     * @param offset Hvor mange behandlinger som skal hoppes over (for å fortsette fra forrige kjøring).
      */
     @PostMapping("/kjør")
     fun kjør(
         @RequestParam(required = false, defaultValue = "true") dryRun: Boolean,
-        @RequestParam(required = false, defaultValue = "10") antallFeilFørStopp: Int
+        @RequestParam(required = false, defaultValue = "10") antallFeilFørStopp: Int,
+        @RequestParam(required = false, defaultValue = "1000") batchStørrelse: Int,
+        @RequestParam(required = false, defaultValue = "0") offset: Int
     ): ResponseEntity<Map<String, Any>> {
-        log.info { "Starter RettOppFeilMedlPerioderJob (dryRun=$dryRun, antallFeilFørStopp=$antallFeilFørStopp)" }
+        log.info { "Starter RettOppFeilMedlPerioderJob (dryRun=$dryRun, antallFeilFørStopp=$antallFeilFørStopp, batchStørrelse=$batchStørrelse, offset=$offset)" }
 
-        rettOppFeilMedlPerioderJob.kjørAsynkront(dryRun, antallFeilFørStopp)
+        rettOppFeilMedlPerioderJob.kjørAsynkront(dryRun, antallFeilFørStopp, batchStørrelse, offset)
 
-        return ResponseEntity.ok(mapOf(
-            "melding" to "Job startet",
-            "dryRun" to dryRun,
-            "antallFeilFørStopp" to antallFeilFørStopp
-        ))
+        return ResponseEntity.ok(
+            mapOf(
+                "melding" to "Job startet",
+                "dryRun" to dryRun,
+                "antallFeilFørStopp" to antallFeilFørStopp,
+                "batchStørrelse" to batchStørrelse,
+                "offset" to offset
+            )
+        )
     }
+
+    /**
+     * Returnerer totalt antall behandlinger som matcher kriteriene for begge scenarioer.
+     * Brukes for å planlegge hvor mange batches som trengs.
+     */
+    @GetMapping("/totalt-antall")
+    fun totaltAntall(): ResponseEntity<RettOppFeilMedlPerioderJob.TotaltAntall> =
+        ResponseEntity.ok(rettOppFeilMedlPerioderJob.totaltAntall())
 
     /**
      * Henter status for jobben.

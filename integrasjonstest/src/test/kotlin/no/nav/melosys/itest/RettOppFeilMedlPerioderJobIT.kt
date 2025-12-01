@@ -23,6 +23,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import java.time.LocalDate
 
 class RettOppFeilMedlPerioderJobIT(
@@ -35,6 +36,8 @@ class RettOppFeilMedlPerioderJobIT(
     @Nested
     @DisplayName("Repository query")
     inner class RepositoryQuery {
+        private val defaultPageable = PageRequest.of(0, 1000)
+
         @Test
         fun `skal finne behandling med LOVVALG_AVKLART, HENLEGGELSE og BESLUTNING_LOVVALG_ANNET_LAND`() {
             val saksnummer = "MEL-FEIL-STATUS"
@@ -42,7 +45,7 @@ class RettOppFeilMedlPerioderJobIT(
             val behandlingsresultat = lagBehandlingsresultat(saksnummer)
             val behandlingId = behandlingsresultat.hentBehandling().id
 
-            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus()
+            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(defaultPageable)
 
             behandlingIder.filter { it == behandlingId }
                 .size shouldBe 1
@@ -61,7 +64,7 @@ class RettOppFeilMedlPerioderJobIT(
             }
             val behandlingId = behandlingsresultat.hentBehandling().id
 
-            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus()
+            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(defaultPageable)
 
             behandlingIder.filter { it == behandlingId }
                 .size shouldBe 0
@@ -78,7 +81,7 @@ class RettOppFeilMedlPerioderJobIT(
             }
             val behandlingId = behandlingsresultat.hentBehandling().id
 
-            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus()
+            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(defaultPageable)
 
             behandlingIder.filter { it == behandlingId }
                 .size shouldBe 0
@@ -93,7 +96,7 @@ class RettOppFeilMedlPerioderJobIT(
             }
             val behandlingId = behandlingsresultat.hentBehandling().id
 
-            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus()
+            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(defaultPageable)
 
             behandlingIder.filter { it == behandlingId }
                 .size shouldBe 0
