@@ -90,23 +90,23 @@ class RettOppFeilMedlPerioderJob(
 
     @Async("taskExecutor")
     @Transactional
-    fun kjørAsynkront(dryRun: Boolean, antallFeilFørStopp: Int, batchStørrelse: Int = 1000, offset: Int = 0) {
-        kjør(dryRun, antallFeilFørStopp, batchStørrelse, offset)
+    fun kjørAsynkront(dryRun: Boolean, antallFeilFørStopp: Int, batchStørrelse: Int = 1000, startFraBehandlingId: Long = 0) {
+        kjør(dryRun, antallFeilFørStopp, batchStørrelse, startFraBehandlingId)
     }
 
     @Synchronized
     @Transactional
-    fun kjør(dryRun: Boolean, antallFeilFørStopp: Int = 0, batchStørrelse: Int = 1000, offset: Int = 0) = runAsSystem {
+    fun kjør(dryRun: Boolean, antallFeilFørStopp: Int = 0, batchStørrelse: Int = 1000, startFraBehandlingId: Long = 0) = runAsSystem {
         sakerFunnet.clear()
         jobMonitor.execute(antallFeilFørStopp) {
-            log.info { "Starter RettOppFeilMedlPerioderJob (dryRun=$dryRun, batchStørrelse=$batchStørrelse, offset=$offset)" }
+            log.info { "Starter RettOppFeilMedlPerioderJob (dryRun=$dryRun, batchStørrelse=$batchStørrelse, startFraBehandlingId=$startFraBehandlingId)" }
 
             // ===== Scenario 1: X008/X006 invaliderte SEDer =====
-            // Hent kun ID-er med paginering for å unngå OOM
-            val pageable = PageRequest.of(offset / batchStørrelse, batchStørrelse)
-            val berørteBehandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(pageable)
+            // Hent kun ID-er med ID-basert paginering for å unngå OOM
+            val pageable = PageRequest.of(0, batchStørrelse)
+            val berørteBehandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(startFraBehandlingId, pageable)
             antallFunnet = berørteBehandlingIder.size
-            log.info { "Scenario 1: Hentet $antallFunnet behandlinger (offset=$offset, batchStørrelse=$batchStørrelse)" }
+            log.info { "Scenario 1: Hentet $antallFunnet behandlinger (startFraBehandlingId=$startFraBehandlingId, batchStørrelse=$batchStørrelse)" }
 
             berørteBehandlingIder.forEach { behandlingId ->
                 if (jobMonitor.shouldStop) return@execute
@@ -122,13 +122,15 @@ class RettOppFeilMedlPerioderJob(
                     log.error(e) { "Feil ved behandling av behandlingId $behandlingId" }
                     jobMonitor.registerException(e)
                 }
+                // Oppdater siste behandlede ID for scenario 1
+                sisteBehandledeIdScenario1 = behandlingId
             }
 
             // ===== Scenario 2: Ny vurdering potensielt overskrevet =====
-            // Hent kun ID-er med paginering for å unngå OOM
-            val nyVurderingBehandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedPotensielleNyVurderingFeil(pageable)
+            // Hent kun ID-er med ID-basert paginering for å unngå OOM
+            val nyVurderingBehandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedPotensielleNyVurderingFeil(startFraBehandlingId, pageable)
             nyVurderingSakerFunnet = nyVurderingBehandlingIder.size
-            log.info { "Scenario 2: Hentet $nyVurderingSakerFunnet behandlinger (offset=$offset, batchStørrelse=$batchStørrelse)" }
+            log.info { "Scenario 2: Hentet $nyVurderingSakerFunnet behandlinger (startFraBehandlingId=$startFraBehandlingId, batchStørrelse=$batchStørrelse)" }
 
             nyVurderingBehandlingIder.forEach { behandlingId ->
                 if (jobMonitor.shouldStop) return@execute
@@ -144,6 +146,8 @@ class RettOppFeilMedlPerioderJob(
                     log.error(e) { "Feil ved behandling av ny vurdering behandlingId $behandlingId" }
                     jobMonitor.registerException(e)
                 }
+                // Oppdater siste behandlede ID for scenario 2
+                sisteBehandledeIdScenario2 = behandlingId
             }
         }
     }
@@ -556,7 +560,10 @@ class RettOppFeilMedlPerioderJob(
         // Scenario 2 (Ny vurdering)
         @Volatile var nyVurderingSakerFunnet: Int = 0,
         @Volatile var nyVurderingIkkeOverskrevet: Int = 0,
-        @Volatile var nyVurderingOverskrevet: Int = 0
+        @Volatile var nyVurderingOverskrevet: Int = 0,
+        // Paginering - siste behandlede ID for hver scenario
+        @Volatile var sisteBehandledeIdScenario1: Long? = null,
+        @Volatile var sisteBehandledeIdScenario2: Long? = null
     ) : JobMonitor.Stats {
         override fun reset() {
             antallFunnet = 0
@@ -567,6 +574,8 @@ class RettOppFeilMedlPerioderJob(
             nyVurderingSakerFunnet = 0
             nyVurderingIkkeOverskrevet = 0
             nyVurderingOverskrevet = 0
+            sisteBehandledeIdScenario1 = null
+            sisteBehandledeIdScenario2 = null
         }
 
         override fun asMap(): Map<String, Any?> = mapOf(
@@ -577,7 +586,9 @@ class RettOppFeilMedlPerioderJob(
             "rettetOpp" to rettetOpp,
             "nyVurderingSakerFunnet" to nyVurderingSakerFunnet,
             "nyVurderingIkkeOverskrevet" to nyVurderingIkkeOverskrevet,
-            "nyVurderingOverskrevet" to nyVurderingOverskrevet
+            "nyVurderingOverskrevet" to nyVurderingOverskrevet,
+            "sisteBehandledeIdScenario1" to sisteBehandledeIdScenario1,
+            "sisteBehandledeIdScenario2" to sisteBehandledeIdScenario2
         )
     }
 

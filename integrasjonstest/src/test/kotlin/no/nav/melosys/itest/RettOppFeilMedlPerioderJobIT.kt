@@ -45,7 +45,7 @@ class RettOppFeilMedlPerioderJobIT(
             val behandlingsresultat = lagBehandlingsresultat(saksnummer)
             val behandlingId = behandlingsresultat.hentBehandling().id
 
-            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(defaultPageable)
+            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(0, defaultPageable)
 
             behandlingIder.filter { it == behandlingId }
                 .size shouldBe 1
@@ -64,7 +64,7 @@ class RettOppFeilMedlPerioderJobIT(
             }
             val behandlingId = behandlingsresultat.hentBehandling().id
 
-            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(defaultPageable)
+            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(0, defaultPageable)
 
             behandlingIder.filter { it == behandlingId }
                 .size shouldBe 0
@@ -81,7 +81,7 @@ class RettOppFeilMedlPerioderJobIT(
             }
             val behandlingId = behandlingsresultat.hentBehandling().id
 
-            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(defaultPageable)
+            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(0, defaultPageable)
 
             behandlingIder.filter { it == behandlingId }
                 .size shouldBe 0
@@ -96,7 +96,7 @@ class RettOppFeilMedlPerioderJobIT(
             }
             val behandlingId = behandlingsresultat.hentBehandling().id
 
-            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(defaultPageable)
+            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(0, defaultPageable)
 
             behandlingIder.filter { it == behandlingId }
                 .size shouldBe 0
