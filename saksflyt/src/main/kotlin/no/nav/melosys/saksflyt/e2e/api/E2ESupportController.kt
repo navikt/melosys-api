@@ -323,6 +323,41 @@ class E2ESupportController(
         }
     }
 
+    @PostMapping("/testdata/reset")
+    @Operation(
+        summary = "Reset test data for Playwright e2e tests",
+        description = "Deletes all existing test cases (MEL-1001 to MEL-1071) and recreates them. " +
+            "Returns full metadata including behandlingID for frontend to use."
+    )
+    fun resetTestData(): ResponseEntity<Map<String, Any>> {
+        log.info { "Received request to reset e2e test data" }
+
+        return try {
+            val result = e2eTestDataService.resetTestData()
+
+            ResponseEntity.ok(buildMap {
+                put("status", "OK")
+                put("cleared", result.cleared)
+                put("created", result.created)
+                put("wasReset", result.wasReset)
+                put("testFnr", E2ETestDataService.TEST_FNR)
+                put("caseRange", "${E2ETestDataService.FIRST_CASE_ID} to ${E2ETestDataService.LAST_CASE_ID}")
+                put("metadata", result.metadata)
+                put("message", if (result.wasReset) {
+                    "Successfully reset ${result.created} test cases (cleared ${result.cleared})"
+                } else {
+                    "Successfully initialized ${result.created} test cases"
+                })
+            })
+        } catch (e: Exception) {
+            log.error(e) { "Failed to reset test data" }
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(buildMap {
+                put("status", "ERROR")
+                put("message", "Failed to reset test data: ${e.message}")
+            })
+        }
+    }
+
     private data class ProcessStatus(
         val activeThreads: Int,
         val queueSize: Int,

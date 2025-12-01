@@ -81,6 +81,25 @@ class OppgaveApi(private val oppgaveRepo: OppgaveRepo) {
         oppgave.status = "AAPNET"
         return ResponseEntity.ok(oppgave)
     }
+
+    /**
+     * Sletter alle oppgaver for gitte saksreferanser (brukes av e2e-tester)
+     */
+    @DeleteMapping
+    fun slettOppgaver(
+        @RequestParam("saksreferanser") saksreferanser: List<String>
+    ): ResponseEntity<Map<String, Any>> {
+        val slettedeOppgaver = oppgaveRepo.repo.entries
+            .filter { it.value.saksreferanse in saksreferanser }
+            .map { it.key }
+
+        slettedeOppgaver.forEach { oppgaveRepo.repo.remove(it) }
+
+        return ResponseEntity.ok(mapOf(
+            "deleted" to slettedeOppgaver.size,
+            "saksreferanser" to saksreferanser
+        ))
+    }
 }
 
 
