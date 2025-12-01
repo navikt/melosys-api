@@ -53,151 +53,24 @@ class E2ETestDataService(
     @PersistenceContext
     private lateinit var entityManager: EntityManager
 
-    /**
-     * Resetter testdata: sletter eksisterende og oppretter på nytt.
-     * Returnerer full metadata inkludert behandlingID for alle saker.
-     */
     @Transactional
     fun resetTestData(): ResetResult {
         log.info { "Resetter test-saker ($FIRST_CASE_ID til $LAST_CASE_ID)..." }
 
-        val deleted = clearTestData()
+        // Sletting av testdata gjøres nå fra TypeScript (DatabaseHelper) for å unngå SQL i prod-kode
         val initResult = initializeTestData()
 
         // Hent full metadata for alle saker
         val metadata = hentFullMetadata()
 
-        log.info { "Reset fullført: slettet $deleted, opprettet ${initResult.created}" }
+        log.info { "Reset fullført: opprettet ${initResult.created}" }
 
         return ResetResult(
-            cleared = deleted,
+            cleared = 0,
             created = initResult.created,
-            wasReset = deleted > 0,
+            wasReset = false,
             metadata = metadata
         )
-    }
-
-    /**
-     * Sletter alle test-saker (MEL-1001 til MEL-1071) med tilhørende data.
-     * Bruker native SQL for å håndtere komplekse relasjoner.
-     *
-     * Tabellstruktur (verifisert mot migration-filer):
-     * - fagsak: primærnøkkel = saksnummer (VARCHAR)
-     * - behandling: primærnøkkel = id, foreign key saksnummer -> fagsak
-     * - behandlingsresultat: primærnøkkel = behandling_id (1:1 relasjon)
-     * - child-tabeller av behandlingsresultat bruker beh_resultat_id ELLER behandlingsresultat_id
-     */
-    @Transactional
-    fun clearTestData(): Int {
-        val saksnummerListe = (1001..1071).map { "MEL-$it" }
-        val saksnummerIn = saksnummerListe.joinToString(",") { "'$it'" }
-
-        // Finn behandling-IDer for test-sakene
-        @Suppress("UNCHECKED_CAST")
-        val behandlingIds = entityManager.createNativeQuery(
-            "SELECT id FROM behandling WHERE saksnummer IN ($saksnummerIn)"
-        ).resultList as List<Number>
-
-        if (behandlingIds.isEmpty()) {
-            log.info { "Ingen test-saker å slette" }
-            return 0
-        }
-
-        val behandlingIdIn = behandlingIds.joinToString(",") { it.toString() }
-
-        log.info { "Sletter ${behandlingIds.size} behandlinger med tilhørende data..." }
-
-        // Slett i riktig rekkefølge (fra barn til foreldre)
-        // behandlingsresultat.behandling_id ER primærnøkkelen, så beh_resultat_id = behandling_id
-        //
-        // VIKTIG: Rekkefølgen er kritisk pga. foreign key-constraints!
-        // Verifisert mot alle V*.sql migrations i database/src/main/resources/db/migration/
-        val deleteStatements = listOf(
-            // Nivå 1: Dypeste barn (trygdeavgiftsperiode har FK til flere tabeller)
-            // V62 + V137 + V142: FK til helseutgift_dekkes_periode, lovvalg_periode, medlemskapsperiode
-            "DELETE FROM trygdeavgiftsperiode WHERE medlemskapsperiode_id IN " +
-                "(SELECT id FROM medlemskapsperiode WHERE behandlingsresultat_id IN ($behandlingIdIn))",
-            "DELETE FROM trygdeavgiftsperiode WHERE helseutgift_dekkes_periode_id IN " +
-                "(SELECT id FROM helseutgift_dekkes_periode WHERE beh_resultat_id IN ($behandlingIdIn))",
-            "DELETE FROM trygdeavgiftsperiode WHERE lovvalg_periode_id IN " +
-                "(SELECT id FROM lovvalg_periode WHERE beh_resultat_id IN ($behandlingIdIn))",
-
-            // Nivå 2: medlemskapsperiode (V109 la til BEHANDLINGSRESULTAT_ID)
-            "DELETE FROM medlemskapsperiode WHERE behandlingsresultat_id IN ($behandlingIdIn)",
-
-            // Nivå 3: Child-tabeller av behandlingsresultat med kolonnenavn "beh_resultat_id"
-            // (V5.1_11, V4.3_02, V5.1_13, V1.0_08, V1.0_07, V1.0_09, V4.2_03, V132)
-            "DELETE FROM utpekingsperiode WHERE beh_resultat_id IN ($behandlingIdIn)",
-            "DELETE FROM anmodningsperiode WHERE beh_resultat_id IN ($behandlingIdIn)",
-            "DELETE FROM kontrollresultat WHERE beh_resultat_id IN ($behandlingIdIn)",
-            "DELETE FROM avklartefakta WHERE beh_resultat_id IN ($behandlingIdIn)",
-            "DELETE FROM lovvalg_periode WHERE beh_resultat_id IN ($behandlingIdIn)",
-            "DELETE FROM vilkaarsresultat WHERE beh_resultat_id IN ($behandlingIdIn)",
-            "DELETE FROM behandlingsres_begrunnelse WHERE beh_resultat_id IN ($behandlingIdIn)",
-            "DELETE FROM helseutgift_dekkes_periode WHERE beh_resultat_id IN ($behandlingIdIn)",
-
-            // Nivå 3: Child-tabeller av behandlingsresultat med kolonnenavn "behandlingsresultat_id"
-            // (V104, V5.1_05)
-            "DELETE FROM aarsavregning WHERE behandlingsresultat_id IN ($behandlingIdIn)",
-            "DELETE FROM vedtak_metadata WHERE behandlingsresultat_id IN ($behandlingIdIn)",
-
-            // Nivå 4: Behandlingsresultat selv (V1.0_06) - primærnøkkel er behandling_id
-            "DELETE FROM behandlingsresultat WHERE behandling_id IN ($behandlingIdIn)",
-
-            // Nivå 5: saksopplysning_kilde har FK til saksopplysning (V7.1_06)
-            "DELETE FROM saksopplysning_kilde WHERE saksopplysning_id IN " +
-                "(SELECT id FROM saksopplysning WHERE behandling_id IN ($behandlingIdIn))",
-
-            // Nivå 6: Tabeller med direkte foreign key til behandling.id
-            // (V1.0_05, V1.0_12, V38)
-            // NB: behandling_historikk ble droppet i V37
-            // NB: BEHANDLINGSGRUNNLAG ble omdøpt til MOTTATTEOPPLYSNINGER i V36
-            "DELETE FROM saksopplysning WHERE behandling_id IN ($behandlingIdIn)",
-            "DELETE FROM tidligere_medlemsperiode WHERE behandling_id IN ($behandlingIdIn)",
-            "DELETE FROM mottatteopplysninger WHERE behandling_id IN ($behandlingIdIn)",
-            "DELETE FROM behandlingsaarsak WHERE behandling_id IN ($behandlingIdIn)",
-
-            // Nivå 7: prosessinstans_hendelser -> prosessinstans -> behandling (V3.0_01)
-            // NB: FK fra prosessinstans_hendelser til prosessinstans ble droppet i V4.5_01
-            "DELETE FROM prosessinstans_hendelser WHERE prosessinstans_id IN " +
-                "(SELECT uuid FROM prosessinstans WHERE behandling_id IN ($behandlingIdIn))",
-            "DELETE FROM prosessinstans WHERE behandling_id IN ($behandlingIdIn)",
-
-            // Nivå 8: Behandling (V1.0_03)
-            "DELETE FROM behandling WHERE id IN ($behandlingIdIn)",
-
-            // Nivå 9: Aktør (V1.0_02) - foreign key til fagsak.saksnummer
-            "DELETE FROM aktoer WHERE saksnummer IN ($saksnummerIn)",
-
-            // Nivå 10: Fagsak (V1.0_01)
-            "DELETE FROM fagsak WHERE saksnummer IN ($saksnummerIn)"
-        )
-
-        var totalDeleted = 0
-        deleteStatements.forEach { sql ->
-            try {
-                val deleted = entityManager.createNativeQuery(sql).executeUpdate()
-                if (deleted > 0) {
-                    log.debug { "Slettet $deleted rader: ${sql.take(60)}..." }
-                    totalDeleted += deleted
-                }
-            } catch (e: Exception) {
-                // Ignorer "table does not exist" feil (ORA-00942) - tabellen kan ha blitt droppet
-                val message = e.cause?.cause?.message ?: e.message ?: ""
-                if (message.contains("ORA-00942")) {
-                    log.debug { "Tabell eksisterer ikke (ignorerer): ${sql.take(40)}..." }
-                } else {
-                    throw e
-                }
-            }
-        }
-
-        // Tøm caches etter sletting
-        entityManager.flush()
-        entityManager.clear()
-
-        log.info { "Slettet totalt $totalDeleted rader" }
-        return behandlingIds.size
     }
 
     /**

@@ -325,9 +325,10 @@ class E2ESupportController(
 
     @PostMapping("/testdata/reset")
     @Operation(
-        summary = "Reset test data for Playwright e2e tests",
-        description = "Deletes all existing test cases (MEL-1001 to MEL-1071) and recreates them. " +
-            "Returns full metadata including behandlingID for frontend to use."
+        summary = "Initialize test data for Playwright e2e tests",
+        description = "Creates predefined test cases (MEL-1001 to MEL-1071) for frontend e2e tests. " +
+            "Idempotent - skips cases that already exist. " +
+            "NOTE: Database cleanup must be done from TypeScript using DatabaseHelper before calling this endpoint."
     )
     fun resetTestData(): ResponseEntity<Map<String, Any>> {
         log.info { "Received request to reset e2e test data" }
@@ -343,10 +344,10 @@ class E2ESupportController(
                 put("testFnr", E2ETestDataService.TEST_FNR)
                 put("caseRange", "${E2ETestDataService.FIRST_CASE_ID} to ${E2ETestDataService.LAST_CASE_ID}")
                 put("metadata", result.metadata)
-                put("message", if (result.wasReset) {
-                    "Successfully reset ${result.created} test cases (cleared ${result.cleared})"
-                } else {
+                put("message", if (result.created > 0) {
                     "Successfully initialized ${result.created} test cases"
+                } else {
+                    "Test cases already existed - no changes made"
                 })
             })
         } catch (e: Exception) {
