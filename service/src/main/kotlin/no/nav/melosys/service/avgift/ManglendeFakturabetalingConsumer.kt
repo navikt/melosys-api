@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service
 class ManglendeFakturabetalingConsumer(
     @Autowired private val prosessinstansService: ProsessinstansService,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
-    private val unleash: Unleash
 ) {
     private val log = KotlinLogging.logger { }
 
