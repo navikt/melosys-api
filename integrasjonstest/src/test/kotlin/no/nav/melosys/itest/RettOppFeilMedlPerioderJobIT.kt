@@ -39,11 +39,12 @@ class RettOppFeilMedlPerioderJobIT(
         fun `skal finne behandling med LOVVALG_AVKLART, HENLEGGELSE og BESLUTNING_LOVVALG_ANNET_LAND`() {
             val saksnummer = "MEL-FEIL-STATUS"
 
-            lagBehandlingsresultat(saksnummer)
+            val behandlingsresultat = lagBehandlingsresultat(saksnummer)
+            val behandlingId = behandlingsresultat.hentBehandling().id
 
-            val behandlinger = rettOppFeilMedlPerioderRepository.finnBehandlingerMedFeilStatus()
+            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus()
 
-            behandlinger.filter { it.fagsak.saksnummer == saksnummer }
+            behandlingIder.filter { it == behandlingId }
                 .size shouldBe 1
         }
 
@@ -51,17 +52,18 @@ class RettOppFeilMedlPerioderJobIT(
         fun `skal ikke finne behandling med korrekt ANNULLERT status`() {
             val saksnummer = "MEL-KORREKT-STATUS"
 
-            lagBehandlingsresultat(saksnummer) {
+            val behandlingsresultat = lagBehandlingsresultat(saksnummer) {
                 behandling {
                     fagsak {
                         status = Saksstatuser.ANNULLERT
                     }
                 }
             }
+            val behandlingId = behandlingsresultat.hentBehandling().id
 
-            val behandlinger = rettOppFeilMedlPerioderRepository.finnBehandlingerMedFeilStatus()
+            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus()
 
-            behandlinger.filter { it.fagsak.saksnummer == saksnummer }
+            behandlingIder.filter { it == behandlingId }
                 .size shouldBe 0
         }
 
@@ -69,15 +71,16 @@ class RettOppFeilMedlPerioderJobIT(
         fun `skal ikke finne behandling med annet tema enn BESLUTNING_LOVVALG_ANNET_LAND`() {
             val saksnummer = "MEL-ANNET-TEMA"
 
-            lagBehandlingsresultat(saksnummer) {
+            val behandlingsresultat = lagBehandlingsresultat(saksnummer) {
                 behandling {
                     tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
                 }
             }
+            val behandlingId = behandlingsresultat.hentBehandling().id
 
-            val behandlinger = rettOppFeilMedlPerioderRepository.finnBehandlingerMedFeilStatus()
+            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus()
 
-            behandlinger.filter { it.fagsak.saksnummer == saksnummer }
+            behandlingIder.filter { it == behandlingId }
                 .size shouldBe 0
         }
 
@@ -85,13 +88,14 @@ class RettOppFeilMedlPerioderJobIT(
         fun `skal ikke finne behandling med annet behandlingsresultat enn HENLEGGELSE`() {
             val saksnummer = "MEL-IKKE-HENLEGGELSE"
 
-            lagBehandlingsresultat(saksnummer) {
+            val behandlingsresultat = lagBehandlingsresultat(saksnummer) {
                 type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
             }
+            val behandlingId = behandlingsresultat.hentBehandling().id
 
-            val behandlinger = rettOppFeilMedlPerioderRepository.finnBehandlingerMedFeilStatus()
+            val behandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus()
 
-            behandlinger.filter { it.fagsak.saksnummer == saksnummer }
+            behandlingIder.filter { it == behandlingId }
                 .size shouldBe 0
         }
     }

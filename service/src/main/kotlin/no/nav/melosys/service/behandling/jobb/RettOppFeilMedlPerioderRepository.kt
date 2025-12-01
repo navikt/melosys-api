@@ -22,21 +22,25 @@ interface RettOppFeilMedlPerioderRepository : CrudRepository<Behandling, Long> {
 
     /**
      * Scenario 1: Finner behandlinger der SED ble invalidert (X008/X006) men MEDL-periode ble satt til endelig.
+     * Returnerer kun ID-er for å unngå OOM ved lasting av mange entiteter.
      */
-    @Query("""
-        SELECT b FROM Behandlingsresultat br
+    @Query(
+        """
+        SELECT b.id FROM Behandlingsresultat br
         JOIN br.behandling b
         JOIN b.fagsak f
         WHERE f.status = 'LOVVALG_AVKLART'
         AND br.type = 'HENLEGGELSE'
         AND b.tema = 'BESLUTNING_LOVVALG_ANNET_LAND'
         ORDER BY b.endretDato DESC
-    """)
-    fun finnBehandlingerMedFeilStatus(): List<Behandling>
+    """
+    )
+    fun finnBehandlingIderMedFeilStatus(): List<Long>
 
     /**
      * Scenario 2: Finner førstegangsbehandlinger der det finnes en nyere ny vurdering,
      * som kan ha blitt overskrevet av AvsluttArt13BehandlingJobb.
+     * Returnerer kun ID-er for å unngå OOM ved lasting av mange entiteter.
      *
      * Kriterier:
      * - Fagsak har status LOVVALG_AVKLART
@@ -44,8 +48,9 @@ interface RettOppFeilMedlPerioderRepository : CrudRepository<Behandling, Long> {
      * - Behandlingstema er BESLUTNING_LOVVALG_ANNET_LAND eller BESLUTNING_NORSK_LOVVALG
      * - Det finnes en NY_VURDERING på samme fagsak som ble registrert etter førstegangsbehandlingen
      */
-    @Query("""
-        SELECT DISTINCT b FROM Behandling b
+    @Query(
+        """
+        SELECT DISTINCT b.id FROM Behandling b
         JOIN b.fagsak f
         WHERE f.status = 'LOVVALG_AVKLART'
         AND b.type = 'FØRSTEGANG'
@@ -59,6 +64,7 @@ interface RettOppFeilMedlPerioderRepository : CrudRepository<Behandling, Long> {
             AND nyVurdering.registrertDato > b.registrertDato
         )
         ORDER BY b.endretDato DESC
-    """)
-    fun finnBehandlingerMedPotensielleNyVurderingFeil(): List<Behandling>
+    """
+    )
+    fun finnBehandlingIderMedPotensielleNyVurderingFeil(): List<Long>
 }

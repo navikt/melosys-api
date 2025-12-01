@@ -95,8 +95,9 @@ class RettOppFeilMedlPerioderJobTest {
             every { seder } returns listOf(sedInfo)
         }
 
-        every { repository.finnBehandlingerMedFeilStatus() } returns listOf(behandling)
-        every { repository.finnBehandlingerMedPotensielleNyVurderingFeil() } returns emptyList()
+        every { repository.finnBehandlingIderMedFeilStatus() } returns listOf(1L)
+        every { repository.findById(1L) } returns Optional.of(behandling)
+        every { repository.finnBehandlingIderMedPotensielleNyVurderingFeil() } returns emptyList()
         every { eessiService.hentTilknyttedeBucer(456L, emptyList()) } returns listOf(bucInfo)
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { persondataFasade.hentFolkeregisterident("AKTØR-123") } returns "12345678901"
@@ -164,8 +165,9 @@ class RettOppFeilMedlPerioderJobTest {
             every { seder } returns listOf(sedInfo)
         }
 
-        every { repository.finnBehandlingerMedFeilStatus() } returns listOf(behandling)
-        every { repository.finnBehandlingerMedPotensielleNyVurderingFeil() } returns emptyList()
+        every { repository.finnBehandlingIderMedFeilStatus() } returns listOf(1L)
+        every { repository.findById(1L) } returns Optional.of(behandling)
+        every { repository.finnBehandlingIderMedPotensielleNyVurderingFeil() } returns emptyList()
         every { eessiService.hentTilknyttedeBucer(456L, emptyList()) } returns listOf(bucInfo)
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { fagsakService.oppdaterStatus(fagsak, Saksstatuser.ANNULLERT) } just runs
@@ -235,8 +237,9 @@ class RettOppFeilMedlPerioderJobTest {
             every { seder } returns listOf(sedInfo)
         }
 
-        every { repository.finnBehandlingerMedFeilStatus() } returns listOf(behandling)
-        every { repository.finnBehandlingerMedPotensielleNyVurderingFeil() } returns emptyList()
+        every { repository.finnBehandlingIderMedFeilStatus() } returns listOf(1L)
+        every { repository.findById(1L) } returns Optional.of(behandling)
+        every { repository.finnBehandlingIderMedPotensielleNyVurderingFeil() } returns emptyList()
         every { eessiService.hentTilknyttedeBucer(456L, emptyList()) } returns listOf(bucInfo)
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { persondataFasade.hentFolkeregisterident("AKTØR-123") } returns "12345678901"
