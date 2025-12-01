@@ -56,8 +56,13 @@ class E2ETestDataService(
     @PersistenceContext
     private lateinit var entityManager: EntityManager
 
-    private val oppgaveWebClient: WebClient by lazy {
-        WebClient.builder().baseUrl(oppgaveUrl).build()
+    private val mockBaseUrl: String by lazy {
+        // Ekstraherer base URL (http://localhost:8083) fra oppgaveUrl (http://localhost:8083/api/v1)
+        oppgaveUrl.substringBefore("/api/v1").ifEmpty { oppgaveUrl }
+    }
+
+    private val mockWebClient: WebClient by lazy {
+        WebClient.builder().baseUrl(mockBaseUrl).build()
     }
 
     /**
@@ -99,8 +104,8 @@ class E2ETestDataService(
         val saksnummerListe = (1001..1071).map { "MEL-$it" }
         val saksnummerIn = saksnummerListe.joinToString(",") { "'$it'" }
 
-        // Slett oppgaver fra oppgave-mock først (eksterne oppgaver)
-        slettAlleOppgaverFraMock()
+        // Slett mock-data (oppgaver, journalposter, medl) først
+        slettMockData()
 
         // Finn behandling-IDer for test-sakene
         @Suppress("UNCHECKED_CAST")
@@ -211,19 +216,19 @@ class E2ETestDataService(
     }
 
     /**
-     * Sletter alle oppgaver fra oppgave-mock-tjenesten.
+     * Sletter all mock-data (oppgaver, journalposter, medl) via /testdata/clear endepunktet.
      */
-    private fun slettAlleOppgaverFraMock() {
+    private fun slettMockData() {
         try {
-            val response = oppgaveWebClient.delete()
-                .uri("/oppgaver")
+            val response = mockWebClient.delete()
+                .uri("/testdata/clear")
                 .retrieve()
                 .bodyToMono(Map::class.java)
                 .block()
 
-            log.info { "Slettet alle oppgaver fra mock: $response" }
+            log.info { "Slettet mock-data: $response" }
         } catch (e: Exception) {
-            log.warn(e) { "Kunne ikke slette alle oppgaver fra mock (ignorerer): ${e.message}" }
+            log.warn(e) { "Kunne ikke slette mock-data (ignorerer): ${e.message}" }
         }
     }
 
