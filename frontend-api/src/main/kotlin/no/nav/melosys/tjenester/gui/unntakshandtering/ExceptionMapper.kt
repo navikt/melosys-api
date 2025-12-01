@@ -65,10 +65,9 @@ class ExceptionMapper {
     }
 
     @ExceptionHandler(AsyncRequestNotUsableException::class)
-    fun håndter(e: AsyncRequestNotUsableException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {
+    fun håndter(e: AsyncRequestNotUsableException, request: HttpServletRequest) {
         // Klienten avbrøt requesten før respons var ferdig - ikke logg stacktrace
         log.debug { "Klient avbrøt request: ${request.requestURI}" }
-        return ResponseEntity(HttpStatus.SERVICE_UNAVAILABLE)
     }
 
     @ExceptionHandler(Exception::class)
