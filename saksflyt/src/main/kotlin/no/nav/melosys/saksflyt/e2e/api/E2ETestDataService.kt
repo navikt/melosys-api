@@ -14,11 +14,9 @@ import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.reactive.function.client.WebClient
 import java.time.LocalDate
 import java.util.*
 
@@ -50,20 +48,10 @@ private val log = KotlinLogging.logger { }
 class E2ETestDataService(
     private val fagsakRepository: FagsakRepository,
     private val behandlingService: BehandlingService,
-    private val oppgaveService: OppgaveService,
-    @Value("\${OppgaveAPI_v1.url:http://localhost:8083/api/v1}") private val oppgaveUrl: String
+    private val oppgaveService: OppgaveService
 ) {
     @PersistenceContext
     private lateinit var entityManager: EntityManager
-
-    private val mockBaseUrl: String by lazy {
-        // Ekstraherer base URL (http://localhost:8083) fra oppgaveUrl (http://localhost:8083/api/v1)
-        oppgaveUrl.substringBefore("/api/v1").ifEmpty { oppgaveUrl }
-    }
-
-    private val mockWebClient: WebClient by lazy {
-        WebClient.builder().baseUrl(mockBaseUrl).build()
-    }
 
     /**
      * Resetter testdata: sletter eksisterende og oppretter på nytt.
@@ -103,9 +91,6 @@ class E2ETestDataService(
     fun clearTestData(): Int {
         val saksnummerListe = (1001..1071).map { "MEL-$it" }
         val saksnummerIn = saksnummerListe.joinToString(",") { "'$it'" }
-
-        // Slett mock-data (oppgaver, journalposter, medl) først
-        slettMockData()
 
         // Finn behandling-IDer for test-sakene
         @Suppress("UNCHECKED_CAST")
@@ -213,23 +198,6 @@ class E2ETestDataService(
 
         log.info { "Slettet totalt $totalDeleted rader" }
         return behandlingIds.size
-    }
-
-    /**
-     * Sletter all mock-data (oppgaver, journalposter, medl) via /testdata/clear endepunktet.
-     */
-    private fun slettMockData() {
-        try {
-            val response = mockWebClient.delete()
-                .uri("/testdata/clear")
-                .retrieve()
-                .bodyToMono(Map::class.java)
-                .block()
-
-            log.info { "Slettet mock-data: $response" }
-        } catch (e: Exception) {
-            log.warn(e) { "Kunne ikke slette mock-data (ignorerer): ${e.message}" }
-        }
     }
 
     /**
