@@ -153,8 +153,12 @@ class RettOppFeilMedlPerioderJob(
             )
         } else null
 
-        val alleSederFraEessi = hentAlleSederFraEessi(arkivsakID, sedDokument.orElse(null)?.rinaSaksnummer)
-        val medlSammenligningInfo = hentOgSammenlignMedlPerioder(behandling, behandlingsresultat)
+        // Sjekk om behandling er i cache - da slipper vi eksterne API-kall
+        val erICacheSomInvalidert = behandling.id in invalidertBehandlingIder
+
+        // Kun hent fra EESSI/MEDL hvis IKKE i cache (for ~71 edge cases)
+        val alleSederFraEessi = if (erICacheSomInvalidert) emptyList() else hentAlleSederFraEessi(arkivsakID, sedDokument.orElse(null)?.rinaSaksnummer)
+        val medlSammenligningInfo = if (erICacheSomInvalidert) null else hentOgSammenlignMedlPerioder(behandling, behandlingsresultat)
 
         if (arkivsakID == null) {
             log.warn { "Sak $saksnummer mangler gsakSaksnummer, hopper over" }
@@ -182,7 +186,14 @@ class RettOppFeilMedlPerioderJob(
             return
         }
 
-        val erInvalidert = erSedInvalidertIEessi(behandling, arkivsakID)
+        // Bruk cache direkte hvis tilgjengelig, ellers sjekk EESSI
+        val erInvalidert = if (erICacheSomInvalidert) {
+            log.debug { "Behandling ${behandling.id} funnet i cache som invalidert" }
+            funnetICache++
+            true
+        } else {
+            erSedInvalidertIEessi(behandling, arkivsakID)
+        }
 
         if (!erInvalidert) {
             log.info { "Behandling ${behandling.id} (sak $saksnummer) er ikke invalidert i EESSI, hopper over" }
@@ -245,7 +256,8 @@ class RettOppFeilMedlPerioderJob(
                 medlSammenligningInfo = medlSammenligningInfo,
                 utfall = RapportUtfall.SKAL_RETTES_OPP,
                 feilmelding = null,
-                rettetOpp = !dryRun
+                rettetOpp = !dryRun,
+                fraCache = erICacheSomInvalidert
             )
         )
     }
@@ -339,15 +351,11 @@ class RettOppFeilMedlPerioderJob(
         )
     }
 
+    /**
+     * Sjekker om SED er invalidert i EESSI (kalles kun for behandlinger som IKKE er i cache).
+     */
     private fun JobStatus.erSedInvalidertIEessi(behandling: Behandling, arkivsakID: Long): Boolean {
-        // Sjekk cache først - hvis behandlingId er i cache, vet vi at SED er invalidert
-        if (behandling.id in invalidertBehandlingIder) {
-            log.debug { "Behandling ${behandling.id} funnet i cache som invalidert" }
-            funnetICache++
-            return true
-        }
-
-        // Ikke i cache - logg og fall tilbake til EESSI-kall
+        // Denne metoden kalles kun for behandlinger som ikke er i cache (edge cases)
         log.warn { "Behandling ${behandling.id} ikke funnet i cache (${invalidertBehandlingIder.size} entries) - sjekker EESSI direkte" }
         ikkeICache++
 
@@ -475,7 +483,8 @@ class RettOppFeilMedlPerioderJob(
         val medlSammenligningInfo: MedlSammenligningInfo?,
         val utfall: RapportUtfall,
         val feilmelding: String?,
-        val rettetOpp: Boolean
+        val rettetOpp: Boolean,
+        val fraCache: Boolean = false  // True hvis EESSI/MEDL-data ble hoppet over pga cache
     )
 
     data class SedInfo(
