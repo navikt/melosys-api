@@ -62,6 +62,6 @@ public class VarselbrevManglendeInnbetaling extends DokgenDto {
     }
 
     public Boolean isErEøsLovvalg() {
-        return erEøsPensjonist;
+        return erEøsLovvalg;
     }
 }
