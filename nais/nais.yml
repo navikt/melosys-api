@@ -23,10 +23,10 @@ spec:
     timeout: 10
   resources:
     requests:
-      memory: "1200Mi"
-      cpu: "76m"
+      memory: "1800Mi" # for medl fix job
+      cpu: "200m"
     limits:
-      memory: "1500Mi"
+      memory: "2000Mi"
       # cpu limits are usually not needed
   azure:
     application:
