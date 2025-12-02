@@ -40,8 +40,6 @@ class HelseutgiftDekkesPeriode(
     @OneToMany(mappedBy = "grunnlagHelseutgiftDekkesPeriode", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
     var trygdeavgiftsperioder: MutableSet<Trygdeavgiftsperiode> = HashSet(1)
 
-
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is HelseutgiftDekkesPeriode) return false
@@ -72,6 +70,7 @@ class HelseutgiftDekkesPeriode(
     override fun erOpphørt(): Boolean = false
 
     override fun hentMedlemskapstype(): Medlemskapstyper = Medlemskapstyper.PLIKTIG
+
     override fun hentTrygdedekning(): Trygdedekninger =
         // TODO: Bruker FULL_DEKNING inntil fag finner et mer passende verdi
         Trygdedekninger.FULL_DEKNING
