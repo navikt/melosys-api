@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Saksstatuser
@@ -51,6 +52,30 @@ class RettOppFeilMedlPerioderJob(
         jobName = "RettOppFeilMedlPerioder",
         stats = JobStatus()
     )
+
+    /**
+     * Cache med behandlingIder som er bekreftet invalidert i EESSI fra tidligere kjøring.
+     * Lastes fra JSON-ressursfil for å unngå EESSI-kall for hvert behandling.
+     */
+    private val invalidertBehandlingIder: Set<Long> = loadInvaliderteBehandlinger()
+
+    private fun loadInvaliderteBehandlinger(): Set<Long> {
+        val resourcePath = "/rett-opp-feil-medl/invaliderte-behandlinger.json"
+        return try {
+            val resource = javaClass.getResourceAsStream(resourcePath)
+            if (resource != null) {
+                val behandlingIder: List<Long> = objectMapper.readValue(resource)
+                log.info { "Lastet ${behandlingIder.size} behandlingIder fra cache ($resourcePath)" }
+                behandlingIder.toSet()
+            } else {
+                log.warn { "Fant ikke ressursfil $resourcePath - vil bruke EESSI for alle behandlinger" }
+                emptySet()
+            }
+        } catch (e: Exception) {
+            log.error(e) { "Kunne ikke laste invaliderte behandlinger fra $resourcePath" }
+            emptySet()
+        }
+    }
 
     @Synchronized
     fun sakerFunnetJsonString(): String {
@@ -314,7 +339,18 @@ class RettOppFeilMedlPerioderJob(
         )
     }
 
-    private fun erSedInvalidertIEessi(behandling: Behandling, arkivsakID: Long): Boolean {
+    private fun JobStatus.erSedInvalidertIEessi(behandling: Behandling, arkivsakID: Long): Boolean {
+        // Sjekk cache først - hvis behandlingId er i cache, vet vi at SED er invalidert
+        if (behandling.id in invalidertBehandlingIder) {
+            log.debug { "Behandling ${behandling.id} funnet i cache som invalidert" }
+            funnetICache++
+            return true
+        }
+
+        // Ikke i cache - logg og fall tilbake til EESSI-kall
+        log.warn { "Behandling ${behandling.id} ikke funnet i cache (${invalidertBehandlingIder.size} entries) - sjekker EESSI direkte" }
+        ikkeICache++
+
         val sedDokument = behandling.finnSedDokument()
         if (sedDokument.isEmpty) {
             log.debug { "Behandling ${behandling.id} har ingen SED-dokument" }
@@ -325,11 +361,25 @@ class RettOppFeilMedlPerioderJob(
         val rinaDokumentID = sedDokument.get().rinaDokumentID
 
         return try {
-            eessiService.hentTilknyttedeBucer(arkivsakID, emptyList())
+            val bucer = eessiService.hentTilknyttedeBucer(arkivsakID, emptyList())
                 .filter { it.id == rinaSaksnummer }
+
+            // Sjekk at behandlingens SED er markert som avbrutt
+            val sedErAvbrutt = bucer
                 .flatMap { it.seder }
                 .filter { it.sedId == rinaDokumentID }
                 .any { it.erAvbrutt() }
+
+            // Sjekk at det finnes en X008 eller X006 som har invalidert SEDen
+            val harX008EllerX006 = bucer
+                .flatMap { it.seder }
+                .any { it.sedType in listOf("X008", "X006") }
+
+            if (sedErAvbrutt && !harX008EllerX006) {
+                log.warn { "Behandling ${behandling.id}: SED er avbrutt men fant ingen X008/X006 i BUC $rinaSaksnummer" }
+            }
+
+            sedErAvbrutt && harX008EllerX006
         } catch (e: Exception) {
             log.warn(e) { "Kunne ikke hente BUC-info for arkivsak $arkivsakID" }
             false
@@ -379,7 +429,10 @@ class RettOppFeilMedlPerioderJob(
         @Volatile var ikkeInvalidertIEessi: Int = 0,
         @Volatile var skalRettesOpp: Int = 0,
         @Volatile var rettetOpp: Int = 0,
-        @Volatile var sisteBehandledeId: Long? = null
+        @Volatile var sisteBehandledeId: Long? = null,
+        // Cache-statistikk
+        @Volatile var funnetICache: Int = 0,
+        @Volatile var ikkeICache: Int = 0
     ) : JobMonitor.Stats {
         override fun reset() {
             hentetDenneBatch = 0
@@ -389,6 +442,8 @@ class RettOppFeilMedlPerioderJob(
             skalRettesOpp = 0
             rettetOpp = 0
             sisteBehandledeId = null
+            funnetICache = 0
+            ikkeICache = 0
         }
 
         override fun asMap(): Map<String, Any?> = mapOf(
@@ -398,7 +453,9 @@ class RettOppFeilMedlPerioderJob(
             "ikkeInvalidertIEessi" to ikkeInvalidertIEessi,
             "skalRettesOpp" to skalRettesOpp,
             "rettetOpp" to rettetOpp,
-            "sisteBehandledeId" to sisteBehandledeId
+            "sisteBehandledeId" to sisteBehandledeId,
+            "funnetICache" to funnetICache,
+            "ikkeICache" to ikkeICache
         )
     }
 
