@@ -221,6 +221,54 @@ class ManglendeFakturabetalingConsumerTest {
         verify(exactly = 0) { prosessinstansService.opprettProsessManglendeInnbetalingVarselBrev(any(), any()) }
     }
 
+
+    @Test
+    fun `opprett prosess for manglende innbetaling behandling, pliktig medlemskap, lovvalgsperioder`() {
+
+        val behandling = Behandling.forTest {
+            id = 123
+            fagsak {
+                type = Sakstyper.FTRL
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+        }
+
+        val lovvalgsperiode = mockk<Lovvalgsperiode>()
+        every { lovvalgsperiode.erPliktigMedlemskap() } returns true
+
+        val behandlingsresultat = Behandlingsresultat().apply {
+            this.behandling = behandling
+            this.lovvalgsperioder = mutableSetOf(lovvalgsperiode)
+        }
+
+        val melding = ManglendeFakturabetalingMelding(
+            fakturaserieReferanse = FAKTURASERIE_REFERANSE,
+            betalingsstatus = Betalingsstatus.IKKE_BETALT,
+            datoMottatt = LocalDate.now(),
+            fakturanummer = FAKTURANUMMER
+        )
+
+        every {
+            behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(FAKTURASERIE_REFERANSE)
+        } returns listOf(behandlingsresultat)
+
+        every {
+            prosessinstansService.opprettProsessManglendeInnbetalingBehandling(melding)
+        } returns mockk<UUID>()
+
+
+        manglendeFakturabetalingConsumer.lesManglendeFakturabetalingMelding(
+            ConsumerRecord(
+                "topic", 1, 1, "key", melding
+            )
+        )
+
+
+        verify { prosessinstansService.opprettProsessManglendeInnbetalingBehandling(melding) }
+        verify(exactly = 0) { prosessinstansService.opprettProsessManglendeInnbetalingVarselBrev(any(), any()) }
+    }
+
+
     companion object {
         const val FAKTURASERIE_REFERANSE = "FS123456"
         const val FAKTURANUMMER = "F123456"
