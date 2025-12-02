@@ -187,12 +187,43 @@ class RettOppFeilMedlPerioderJob(
         }
 
         // Bruk cache direkte hvis tilgjengelig, ellers sjekk EESSI
-        val erInvalidert = if (erICacheSomInvalidert) {
+        val erInvalidert: Boolean? = if (erICacheSomInvalidert) {
             log.debug { "Behandling ${behandling.id} funnet i cache som invalidert" }
             funnetICache++
             true
         } else {
-            erSedInvalidertIEessi(behandling, arkivsakID)
+            try {
+                erSedInvalidertIEessi(behandling, arkivsakID)
+            } catch (e: Exception) {
+                log.error(e) { "Kunne ikke sjekke EESSI for behandling ${behandling.id} (arkivsak $arkivsakID)" }
+                eessiFeil++
+                jobMonitor.registerException(e)
+                sakerFunnet.add(
+                    FeilMedlPeriodeRapportEntry(
+                        saksnummer = saksnummer,
+                        gsakSaksnummer = arkivsakID,
+                        saksstatus = fagsak.status.name,
+                        sakstype = fagsak.type.name,
+                        behandlingId = behandling.id,
+                        behandlingType = behandling.type.name,
+                        behandlingStatus = behandling.status.name,
+                        registrertDato = behandling.registrertDato,
+                        endretDato = behandling.endretDato,
+                        sedInfo = sedInfoFraDb,
+                        alleSederFraEessi = emptyList(),
+                        medlPerioder = emptyList(),
+                        medlSammenligningInfo = null,
+                        utfall = RapportUtfall.EESSI_FEIL,
+                        feilmelding = e.message,
+                        rettetOpp = false
+                    )
+                )
+                null  // Indikerer feil
+            }
+        }
+
+        if (erInvalidert == null) {
+            return  // EESSI-feil allerede håndtert
         }
 
         if (!erInvalidert) {
@@ -368,30 +399,25 @@ class RettOppFeilMedlPerioderJob(
         val rinaSaksnummer = sedDokument.get().rinaSaksnummer
         val rinaDokumentID = sedDokument.get().rinaDokumentID
 
-        return try {
-            val bucer = eessiService.hentTilknyttedeBucer(arkivsakID, emptyList())
-                .filter { it.id == rinaSaksnummer }
+        val bucer = eessiService.hentTilknyttedeBucer(arkivsakID, emptyList())
+            .filter { it.id == rinaSaksnummer }
 
-            // Sjekk at behandlingens SED er markert som avbrutt
-            val sedErAvbrutt = bucer
-                .flatMap { it.seder }
-                .filter { it.sedId == rinaDokumentID }
-                .any { it.erAvbrutt() }
+        // Sjekk at behandlingens SED er markert som avbrutt
+        val sedErAvbrutt = bucer
+            .flatMap { it.seder }
+            .filter { it.sedId == rinaDokumentID }
+            .any { it.erAvbrutt() }
 
-            // Sjekk at det finnes en X008 eller X006 som har invalidert SEDen
-            val harX008EllerX006 = bucer
-                .flatMap { it.seder }
-                .any { it.sedType in listOf("X008", "X006") }
+        // Sjekk at det finnes en X008 eller X006 som har invalidert SEDen
+        val harX008EllerX006 = bucer
+            .flatMap { it.seder }
+            .any { it.sedType in listOf("X008", "X006") }
 
-            if (sedErAvbrutt && !harX008EllerX006) {
-                log.warn { "Behandling ${behandling.id}: SED er avbrutt men fant ingen X008/X006 i BUC $rinaSaksnummer" }
-            }
-
-            sedErAvbrutt && harX008EllerX006
-        } catch (e: Exception) {
-            log.warn(e) { "Kunne ikke hente BUC-info for arkivsak $arkivsakID" }
-            false
+        if (sedErAvbrutt && !harX008EllerX006) {
+            log.warn { "Behandling ${behandling.id}: SED er avbrutt men fant ingen X008/X006 i BUC $rinaSaksnummer" }
         }
+
+        return sedErAvbrutt && harX008EllerX006
     }
 
     private fun rettOppSak(
@@ -435,6 +461,7 @@ class RettOppFeilMedlPerioderJob(
         @Volatile var totaltProsessert: Int = 0,
         @Volatile var manglerArkivsakId: Int = 0,
         @Volatile var ikkeInvalidertIEessi: Int = 0,
+        @Volatile var eessiFeil: Int = 0,  // Feil ved EESSI-kall
         @Volatile var skalRettesOpp: Int = 0,
         @Volatile var rettetOpp: Int = 0,
         @Volatile var sisteBehandledeId: Long? = null,
@@ -447,6 +474,7 @@ class RettOppFeilMedlPerioderJob(
             totaltProsessert = 0
             manglerArkivsakId = 0
             ikkeInvalidertIEessi = 0
+            eessiFeil = 0
             skalRettesOpp = 0
             rettetOpp = 0
             sisteBehandledeId = null
@@ -459,6 +487,7 @@ class RettOppFeilMedlPerioderJob(
             "totaltProsessert" to totaltProsessert,
             "manglerArkivsakId" to manglerArkivsakId,
             "ikkeInvalidertIEessi" to ikkeInvalidertIEessi,
+            "eessiFeil" to eessiFeil,
             "skalRettesOpp" to skalRettesOpp,
             "rettetOpp" to rettetOpp,
             "sisteBehandledeId" to sisteBehandledeId,
@@ -535,6 +564,7 @@ class RettOppFeilMedlPerioderJob(
     enum class RapportUtfall {
         MANGLER_ARKIVSAK_ID,
         IKKE_INVALIDERT_I_EESSI,
+        EESSI_FEIL,  // Kunne ikke sjekke EESSI - bør kjøres på nytt
         SKAL_RETTES_OPP
     }
 
