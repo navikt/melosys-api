@@ -291,9 +291,11 @@ class E2ESupportController(
 
     @PostMapping("/testdata/init")
     @Operation(
-        summary = "Initialize test data for Playwright e2e tests",
-        description = "Creates predefined test cases (MEL-1001 to MEL-1071) for frontend e2e tests. " +
-            "Idempotent - skips cases that already exist."
+        summary = "Initialize test data for Playwright frontend integration tests",
+        description = "Creates predefined test cases (MEL-1001 to MEL-1071) for frontend integration tests. " +
+            "Idempotent - skips cases that already exist. " +
+            "NOTE: This is for melosys-web Playwright tests against melosys-api with mocks, " +
+            "not full E2E tests (see https://github.com/navikt/melosys-e2e-tests)."
     )
     fun initTestData(): ResponseEntity<Map<String, Any>> {
         log.info { "Received request to initialize e2e test data" }
@@ -308,11 +310,13 @@ class E2ESupportController(
                 put("alreadyExisted", result.alreadyExisted)
                 put("testFnr", E2ETestDataService.TEST_FNR)
                 put("caseRange", "${E2ETestDataService.FIRST_CASE_ID} to ${E2ETestDataService.LAST_CASE_ID}")
-                put("message", if (result.alreadyExisted) {
-                    "Test data already existed - no changes made"
-                } else {
-                    "Successfully initialized ${result.created} test cases"
-                })
+                put(
+                    "message", if (result.alreadyExisted) {
+                        "Test data already existed - no changes made"
+                    } else {
+                        "Successfully initialized ${result.created} test cases"
+                    }
+                )
             })
         } catch (e: Exception) {
             log.error(e) { "Failed to initialize test data" }
@@ -325,10 +329,10 @@ class E2ESupportController(
 
     @PostMapping("/testdata/reset")
     @Operation(
-        summary = "Initialize test data for Playwright e2e tests",
-        description = "Creates predefined test cases (MEL-1001 to MEL-1071) for frontend e2e tests. " +
-            "Idempotent - skips cases that already exist. " +
-            "NOTE: Database cleanup must be done from TypeScript using DatabaseHelper before calling this endpoint."
+        summary = "Reset test data for Playwright frontend integration tests",
+        description = "Resets and creates predefined test cases (MEL-1001 to MEL-1071) for frontend integration tests. " +
+            "NOTE: This is for melosys-web Playwright tests against melosys-api with mocks, " +
+            "not full E2E tests (see https://github.com/navikt/melosys-e2e-tests)."
     )
     fun resetTestData(): ResponseEntity<Map<String, Any>> {
         log.info { "Received request to reset e2e test data" }
@@ -344,11 +348,13 @@ class E2ESupportController(
                 put("testFnr", E2ETestDataService.TEST_FNR)
                 put("caseRange", "${E2ETestDataService.FIRST_CASE_ID} to ${E2ETestDataService.LAST_CASE_ID}")
                 put("metadata", result.metadata)
-                put("message", if (result.created > 0) {
-                    "Successfully initialized ${result.created} test cases"
-                } else {
-                    "Test cases already existed - no changes made"
-                })
+                put(
+                    "message", if (result.created > 0) {
+                        "Successfully initialized ${result.created} test cases"
+                    } else {
+                        "Test cases already existed - no changes made"
+                    }
+                )
             })
         } catch (e: Exception) {
             log.error(e) { "Failed to reset test data" }
