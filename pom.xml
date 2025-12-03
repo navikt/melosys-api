@@ -122,7 +122,7 @@
         <!-- Transitive avhengigheter -->
         <asm.version>9.9</asm.version>
         <joda-time.version>2.14.0</joda-time.version>
-        <woodstox.version>6.6.1</woodstox.version>
+        <woodstox.version>7.1.1</woodstox.version>
         <woodstox.stax2.version>4.2.2</woodstox.stax2.version>
         <xmlsec.version>4.0.4</xmlsec.version>
         <wiremock-standalone.version>3.13.2</wiremock-standalone.version>
