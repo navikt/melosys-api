@@ -57,6 +57,7 @@ class ReplikerBehandlingsresultatServiceTest {
         IllegalAccessException::class,
         InvocationTargetException::class
     )
+
     fun replikerBehandlingOgBehandlingsresultat_replikererBehandlingsresultatObjekterOgCollections() {
         val tidligsteInaktiveBehandling = Behandling.forTest {
             id = 1
@@ -222,6 +223,216 @@ class ReplikerBehandlingsresultatServiceTest {
             .matches { it.trygdedekning == innvilgetMedlemskapsperiodeOriginal.trygdedekning }
             .matches { it.medlPeriodeID == innvilgetMedlemskapsperiodeOriginal.medlPeriodeID }
             .matches { it.bestemmelse == innvilgetMedlemskapsperiodeOriginal.bestemmelse }
+
+        Assertions.assertThat(behandlingsresultatReplika)
+            .matches { it.id == null }
+            .matches { it.trygdeavgiftType == behandlingsresultatReplika.trygdeavgiftType }
+
+        Assertions.assertThat(behandlingsresultatReplika)
+            .matches { it.id == null }
+
+
+        val inntektsperioderOriginal = behandlingsresultatOriginal.hentInntektsperioder().toList()
+        val inntektsperioderReplika = behandlingsresultatReplika.hentInntektsperioder().toList()
+
+        inntektsperioderOriginal.forEach { originalInntektsperiode ->
+            Assertions.assertThat(inntektsperioderReplika).anyMatch { replikertInntektsperiode ->
+                replikertInntektsperiode.id == null &&
+                    replikertInntektsperiode.fomDato == originalInntektsperiode.fomDato &&
+                    replikertInntektsperiode.tomDato == originalInntektsperiode.tomDato &&
+                    replikertInntektsperiode.type == originalInntektsperiode.type &&
+                    replikertInntektsperiode.avgiftspliktigMndInntekt == originalInntektsperiode.avgiftspliktigMndInntekt &&
+                    replikertInntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt == originalInntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt
+            }.withFailMessage("Forventet matchende Inntektsperiode for: $originalInntektsperiode")
+        }
+
+        val skatteforholdTilNorgeOriginal =
+            behandlingsresultatOriginal.hentSkatteforholdTilNorge().first()
+        Assertions.assertThat(behandlingsresultatReplika.hentSkatteforholdTilNorge())
+            .singleElement()
+            .matches { it.id == null }
+            .matches { it.fomDato == skatteforholdTilNorgeOriginal.fomDato }
+            .matches { it.tomDato == skatteforholdTilNorgeOriginal.tomDato }
+            .matches { it.skatteplikttype == skatteforholdTilNorgeOriginal.skatteplikttype }
+
+
+        val trygdeavgiftsperioderOriginal = behandlingsresultatOriginal.trygdeavgiftsperioder.toList()
+        val trygdeavgiftsperioderReplika = behandlingsresultatReplika.trygdeavgiftsperioder.toList()
+
+        trygdeavgiftsperioderOriginal.forEach { originalTrygdeavgiftsperiode ->
+            Assertions.assertThat(trygdeavgiftsperioderReplika).anyMatch { replikertTrygdeavgiftsperiode ->
+                replikertTrygdeavgiftsperiode.id == null &&
+                    replikertTrygdeavgiftsperiode.periodeFra == originalTrygdeavgiftsperiode.periodeFra &&
+                    replikertTrygdeavgiftsperiode.periodeTil == originalTrygdeavgiftsperiode.periodeTil &&
+                    replikertTrygdeavgiftsperiode.trygdeavgiftsbeløpMd == originalTrygdeavgiftsperiode.trygdeavgiftsbeløpMd &&
+                    replikertTrygdeavgiftsperiode.trygdesats == originalTrygdeavgiftsperiode.trygdesats &&
+                    replikertTrygdeavgiftsperiode.grunnlagMedlemskapsperiode?.id == null &&
+                    replikertTrygdeavgiftsperiode.grunnlagMedlemskapsperiode?.trygdedekning == originalTrygdeavgiftsperiode.grunnlagMedlemskapsperiode?.trygdedekning &&
+                    replikertTrygdeavgiftsperiode.grunnlagInntekstperiode?.id == null &&
+                    replikertTrygdeavgiftsperiode.grunnlagInntekstperiode?.avgiftspliktigMndInntekt == originalTrygdeavgiftsperiode.grunnlagInntekstperiode?.avgiftspliktigMndInntekt &&
+                    replikertTrygdeavgiftsperiode.grunnlagSkatteforholdTilNorge?.id == null &&
+                    replikertTrygdeavgiftsperiode.grunnlagSkatteforholdTilNorge?.skatteplikttype == originalTrygdeavgiftsperiode.grunnlagSkatteforholdTilNorge?.skatteplikttype
+            }.withFailMessage("Forventet matchende Trygdeavgiftsperiode for: $originalTrygdeavgiftsperiode")
+        }
+    }
+
+    @Test
+    fun replikerBehandlingOgBehandlingsresultat_replikererBehandlingsresultatObjekterOgCollectionsLovvalgsperiodeMedTrygdeavgift() {
+        val tidligsteInaktiveBehandling = Behandling.forTest {
+            id = 1
+            fagsak {
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+        }
+        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+        val avklartefaktaOriginal = opprettAvklartefakta()
+        behandlingsresultatOriginal.avklartefakta.add(avklartefaktaOriginal)
+        val vilkaarsresultatOriginal = opprettVilkaarsresultat()
+        behandlingsresultatOriginal.vilkaarsresultater.add(vilkaarsresultatOriginal)
+        behandlingsresultatOriginal.behandlingsresultatBegrunnelser.add(opprettBehandlingsresultatBegrunnelse())
+        behandlingsresultatOriginal.kontrollresultater.add(opprettKontrollresultat())
+        val anmodningsperiodeOriginal = opprettAnmodningsperiode()
+        behandlingsresultatOriginal.anmodningsperioder.add(anmodningsperiodeOriginal)
+        val utpekingsperiodeOriginal = opprettUtpekingsperiode()
+        behandlingsresultatOriginal.utpekingsperioder.add(utpekingsperiodeOriginal)
+        val innvilgetLovvalgsperiode = opprettLovvalgsperiode(InnvilgelsesResultat.INNVILGET, 1L)
+        val avslaattLovvalgsperiode = opprettLovvalgsperiode(InnvilgelsesResultat.AVSLAATT, 2L)
+        val opphoertLovvalgsperiode = opprettLovvalgsperiode(InnvilgelsesResultat.OPPHØRT, 3L)
+        innvilgetLovvalgsperiode.trygdeavgiftsperioder.add(
+            lagTrygdeavgiftsperiode().copyEntity(grunnlagLovvalgsPeriode = innvilgetLovvalgsperiode)
+        )
+        innvilgetLovvalgsperiode.trygdeavgiftsperioder.add(
+            lagTrygdeavgiftsperiode().copyEntity(
+                grunnlagLovvalgsPeriode = innvilgetLovvalgsperiode,
+                grunnlagInntekstperiode = Inntektsperiode().apply {
+                    id = 2L
+                    fomDato = LocalDate.now()
+                    tomDato = LocalDate.now()
+                    type = Inntektskildetype.ARBEIDSINNTEKT
+                    avgiftspliktigMndInntekt = Penger(1000.0)
+                    isArbeidsgiversavgiftBetalesTilSkatt = false
+                })
+        )
+        innvilgetLovvalgsperiode.trygdeavgiftsperioder.add(
+            lagTrygdeavgiftsperiode().copyEntity(
+                grunnlagLovvalgsPeriode = innvilgetLovvalgsperiode,
+                grunnlagInntekstperiode = null,
+            )
+        )
+        behandlingsresultatOriginal.apply {
+            lovvalgsperioder.add(innvilgetLovvalgsperiode)
+            lovvalgsperioder.add(avslaattLovvalgsperiode)
+            lovvalgsperioder.add(opphoertLovvalgsperiode)
+        }
+        behandlingsresultatOriginal.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
+
+
+        val behandlingReplika = Behandling.forTest {
+            id = 2
+            type = Behandlingstyper.NY_VURDERING
+            fagsak {
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
+
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+
+        val behandlingsresultatReplika = slot.captured
+
+        Assertions.assertThat(behandlingsresultatReplika)
+            .matches { it.behandling == behandlingReplika }
+            .matches { it.id == null }
+            .matches { it.behandlingsmåte == behandlingsresultatOriginal.behandlingsmåte }
+            .matches { it.type == Behandlingsresultattyper.IKKE_FASTSATT }
+            .matches { it.vedtakMetadata == null }
+
+        Assertions.assertThat(behandlingsresultatReplika.anmodningsperioder)
+            .singleElement()
+            .matches { it.behandlingsresultat === behandlingsresultatReplika }
+            .matches { it.id == null }
+            .matches { it.medlPeriodeID == null }
+            .matches { !it.erSendtUtland() }
+            .matches { it.anmodningsperiodeSvar == null }
+            .matches { it.fom == anmodningsperiodeOriginal.fom }
+            .matches { it.tom == anmodningsperiodeOriginal.tom }
+            .matches { it.lovvalgsland == anmodningsperiodeOriginal.lovvalgsland }
+            .matches { it.bestemmelse === anmodningsperiodeOriginal.bestemmelse }
+            .matches { it.dekning == anmodningsperiodeOriginal.dekning }
+
+        Assertions.assertThat(behandlingsresultatReplika.utpekingsperioder)
+            .singleElement()
+            .matches { it.behandlingsresultat === behandlingsresultatReplika }
+            .matches { it.id == null }
+            .matches { it.medlPeriodeID == null }
+            .matches { it.sendtUtland == null }
+            .matches { it.fom == utpekingsperiodeOriginal.fom }
+            .matches { it.tom == utpekingsperiodeOriginal.tom }
+            .matches { it.lovvalgsland == utpekingsperiodeOriginal.lovvalgsland }
+            .matches { it.bestemmelse === utpekingsperiodeOriginal.bestemmelse }
+
+        Assertions.assertThat(behandlingsresultatReplika.avklartefakta)
+            .singleElement()
+            .matches { it.behandlingsresultat === behandlingsresultatReplika }
+            .matches { it.id == null }
+            .matches { it.fakta == avklartefaktaOriginal.fakta }
+            .matches { it.type == avklartefaktaOriginal.type }
+        Assertions.assertThat(behandlingsresultatReplika.avklartefakta.first().registreringer)
+            .singleElement()
+            .matches { it.avklartefakta == behandlingsresultatReplika.avklartefakta.first() }
+            .matches { it.id == null }
+            .matches { it.begrunnelseKode == avklartefaktaOriginal.registreringer.first().begrunnelseKode }
+
+        Assertions.assertThat(behandlingsresultatReplika.vilkaarsresultater)
+            .singleElement()
+            .matches { it.behandlingsresultat === behandlingsresultatReplika }
+            .matches { it.id == null }
+            .matches { it.begrunnelseFritekst == vilkaarsresultatOriginal.begrunnelseFritekst }
+            .matches { it.begrunnelseFritekstEessi == vilkaarsresultatOriginal.begrunnelseFritekstEessi }
+        Assertions.assertThat(behandlingsresultatReplika.vilkaarsresultater.first().begrunnelser)
+            .singleElement()
+            .matches { it.vilkaarsresultat == behandlingsresultatReplika.vilkaarsresultater.first() }
+            .matches { it.id == null }
+            .matches { it.kode == vilkaarsresultatOriginal.begrunnelser.first().kode }
+
+        Assertions.assertThat(behandlingsresultatReplika.behandlingsresultatBegrunnelser)
+            .singleElement()
+            .matches { it.behandlingsresultat === behandlingsresultatReplika }
+            .matches { it.id == null }
+            .matches { it.kode == behandlingsresultatOriginal.behandlingsresultatBegrunnelser.first().kode }
+
+        Assertions.assertThat(behandlingsresultatReplika.kontrollresultater)
+            .singleElement()
+            .matches { it.behandlingsresultat === behandlingsresultatReplika }
+            .matches { it.id == null }
+            .matches { it.begrunnelse == behandlingsresultatOriginal.kontrollresultater.first().begrunnelse }
+
+        Assertions.assertThat(behandlingsresultatReplika.utfallRegistreringUnntak).isNull()
+
+        Assertions.assertThat(behandlingsresultatReplika.utfallUtpeking).isNull()
+
+        Assertions.assertThat(behandlingsresultatReplika)
+            .matches { it == behandlingsresultatReplika }
+            .matches { it.id == null }
+
+        Assertions.assertThat(behandlingsresultatOriginal.lovvalgsperioder).hasSize(3)
+        val innvilgetLovvalgsperiodeOriginal = behandlingsresultatOriginal.lovvalgsperioder.first { it.erInnvilget() }
+        Assertions.assertThat(behandlingsresultatReplika.lovvalgsperioder)
+            .singleElement()
+            .matches { it.behandlingsresultat == behandlingsresultatReplika }
+            .matches { it.id == null }
+            .matches { it.fom == innvilgetLovvalgsperiodeOriginal.fom }
+            .matches { it.tom == innvilgetLovvalgsperiodeOriginal.tom }
+            .matches { it.medlemskapstype == innvilgetLovvalgsperiodeOriginal.medlemskapstype }
+            .matches { it.innvilgelsesresultat == innvilgetLovvalgsperiodeOriginal.innvilgelsesresultat }
+            .matches { it.dekning == innvilgetLovvalgsperiodeOriginal.dekning }
+            .matches { it.medlPeriodeID == innvilgetLovvalgsperiodeOriginal.medlPeriodeID }
+            .matches { it.bestemmelse == innvilgetLovvalgsperiodeOriginal.bestemmelse }
 
         Assertions.assertThat(behandlingsresultatReplika)
             .matches { it.id == null }
@@ -555,9 +766,10 @@ class ReplikerBehandlingsresultatServiceTest {
         return behandlingsresultat
     }
 
-    private fun opprettLovvalgsperiode(): Lovvalgsperiode {
+    private fun opprettLovvalgsperiode(innvilgelsesResultat: InnvilgelsesResultat? = InnvilgelsesResultat.INNVILGET, id: Long? = 32L): Lovvalgsperiode {
         val lovvalgsperiode = Lovvalgsperiode()
-        lovvalgsperiode.id = 32L
+        lovvalgsperiode.id = id
+        lovvalgsperiode.innvilgelsesresultat = innvilgelsesResultat
         lovvalgsperiode.behandlingsresultat = behandlingsresultatOriginal
         lovvalgsperiode.dekning = Trygdedekninger.FULL_DEKNING_EOSFO
         lovvalgsperiode.fom = LocalDate.now()
