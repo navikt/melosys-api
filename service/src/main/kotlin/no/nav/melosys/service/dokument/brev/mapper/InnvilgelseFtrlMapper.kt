@@ -302,21 +302,43 @@ class InnvilgelseFtrlMapper(
             return emptyList()
         }
 
-        val trygdeavgiftsperioder: List<AvgiftsperiodeDto> = behandlingsresultat.trygdeavgiftsperioder.map {
-            AvgiftsperiodeDto(
-                it.periodeFra,
-                it.periodeTil,
-                it.trygdesats,
-                it.trygdeavgiftsbeløpMd.hentVerdi(),
-                it.hentGrunnlagInntekstperiode().type,
-                it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
-            )
-        }.sortedByDescending { it.fom }
-        // Returnerer kun den første (tidligste) perioden fra inneværende år eller senere, eller tom liste hvis ingen slike perioder finnes
         if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
-            return trygdeavgiftsperioder.lastOrNull() { it.fom.year >= LocalDate.now().year }?.let { listOf(it) } ?: emptyList()
+            val inneværendeÅr = LocalDate.now().year
+            val gruppertePerioder = behandlingsresultat.trygdeavgiftsperioder.groupBy { it.periodeTil.year }
+            val valgtÅr = velgRelevantÅr(gruppertePerioder.keys, inneværendeÅr)
+
+            return gruppertePerioder[valgtÅr]
+                ?.map {
+                    AvgiftsperiodeDto(
+                        it.periodeFra,
+                        it.periodeTil,
+                        it.trygdesats,
+                        it.trygdeavgiftsbeløpMd.hentVerdi(),
+                        it.hentGrunnlagInntekstperiode().type,
+                        it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
+                    )
+                }?.sortedByDescending { it.fom }
+                ?: emptyList()
+        } else {
+            return behandlingsresultat.trygdeavgiftsperioder.map {
+                AvgiftsperiodeDto(
+                    it.periodeFra,
+                    it.periodeTil,
+                    it.trygdesats,
+                    it.trygdeavgiftsbeløpMd.hentVerdi(),
+                    it.hentGrunnlagInntekstperiode().type,
+                    it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
+                )
+            }.sortedByDescending { it.fom }
         }
-        return trygdeavgiftsperioder
+    }
+
+    private fun velgRelevantÅr(tilgjengeligeÅr: Set<Int>, inneværendeÅr: Int): Int {
+        return when {
+            inneværendeÅr in tilgjengeligeÅr -> inneværendeÅr
+            tilgjengeligeÅr.all { it < inneværendeÅr } -> tilgjengeligeÅr.maxOrNull() ?: inneværendeÅr
+            else -> tilgjengeligeÅr.minOrNull() ?: inneværendeÅr
+        }
     }
 
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodePensjonist> {
