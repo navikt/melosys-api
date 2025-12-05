@@ -291,21 +291,26 @@ class RettOppFeilMedlPerioderJob(
     private fun hentAlleSederFraEessi(arkivsakID: Long?, rinaSaksnummer: String?): List<EessiSedInfo> {
         if (arkivsakID == null) return emptyList()
 
+        // Kun A003, X006 og X008 er relevante for denne jobben
+        val relevanteSedTyper = setOf("A003", "X006", "X008")
+
         return try {
             eessiService.hentTilknyttedeBucer(arkivsakID, emptyList())
                 .filter { rinaSaksnummer == null || it.id == rinaSaksnummer }
                 .flatMap { buc ->
-                    buc.seder.map { sed ->
-                        EessiSedInfo(
-                            bucId = buc.id,
-                            bucType = buc.bucType,
-                            sedId = sed.sedId,
-                            sedType = sed.sedType,
-                            status = sed.status,
-                            opprettetDato = sed.opprettetDato,
-                            erAvbrutt = sed.erAvbrutt()
-                        )
-                    }
+                    buc.seder
+                        .filter { it.sedType in relevanteSedTyper }
+                        .map { sed ->
+                            EessiSedInfo(
+                                bucId = buc.id,
+                                bucType = buc.bucType,
+                                sedId = sed.sedId,
+                                sedType = sed.sedType,
+                                status = sed.status,
+                                opprettetDato = sed.opprettetDato,
+                                erAvbrutt = sed.erAvbrutt()
+                            )
+                        }
                 }
         } catch (e: Exception) {
             log.warn(e) { "Kunne ikke hente alle SEDer fra EESSI for arkivsak $arkivsakID" }
