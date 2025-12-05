@@ -142,6 +142,7 @@ class EosVedtakServiceKtTest {
             )
         }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
+        // Viktig: Behandling-objekt (ikke ID) sendes for å unngå entity reload og race condition
         verify {
             ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
                 any<Behandling>(),
