@@ -142,6 +142,7 @@ class EosVedtakServiceKtTest {
             )
         }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
+        // Viktig: Behandling-objekt (ikke ID) sendes for å unngå entity reload og race condition
         verify {
             ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
                 any<Behandling>(),
@@ -390,57 +391,6 @@ class EosVedtakServiceKtTest {
             fom = LocalDate.now()
         }
         behandlingsresultat.lovvalgsperioder = mutableSetOf(lovvalgsperiode)
-    }
-
-    @Test
-    fun `fattVedtak skal passere Behandling-objekt til kontroll for å unngå entity reload`() {
-        // This test prevents regression of a critical race condition bug (66% failure rate in production).
-        //
-        // BACKGROUND: The Problem We Fixed
-        // ================================
-        // OLD IMPLEMENTATION (caused race condition):
-        //   1. RegisteropplysningerService updates SaksopplysningKilde entities
-        //   2. Validation layer called with behandling.id
-        //   3. Deep in the stack, Kontroll.utførKontroller() reloaded entity via ID:
-        //      behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)
-        //   4. Hibernate detected stale entities during reload → StaleObjectStateException
-        //
-        // NEW IMPLEMENTATION (fixed):
-        //   - Pass Behandling object through entire chain, no reload needed
-        //   - No entity reload = no Hibernate synchronization conflicts
-        //
-        // WHAT THIS TEST VERIFIES:
-        // - The Behandling OBJECT (not just its ID) is passed to kontrollerVedtakMedRegisteropplysninger
-        // - This ensures the object is available throughout the validation chain
-        // - Prevents anyone from accidentally reverting to passing just behandling.id
-
-        // Given - Mock setup for innvilgelse case
-        mockBehandlingsresultat()
-        mockEessiReady()
-        leggTilLovvalgsperiode(InnvilgelsesResultat.INNVILGET)
-
-        // When
-        vedtakService.fattVedtak(
-            behandling,
-            lagRequest(
-                Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
-                Vedtakstyper.FØRSTEGANGSVEDTAK,
-                BEHANDLINGSRESULTAT_FRITEKST,
-                null,
-                setOf("AB:CDEF123")
-            )
-        )
-
-        // Then - Verify kontrollerVedtakMedRegisteropplysninger receives the actual Behandling object
-        // If someone changes this to pass behandling.id instead, this test will fail
-        verify(exactly = 1) {
-            ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
-                eq(behandling),  // CRITICAL: Must be object, not behandling.id
-                eq(Sakstyper.EU_EOS),
-                eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND),
-                isNull()
-            )
-        }
     }
 
     private fun lagRequest(
