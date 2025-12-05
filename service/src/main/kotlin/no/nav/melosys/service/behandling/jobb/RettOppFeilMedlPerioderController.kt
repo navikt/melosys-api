@@ -25,17 +25,20 @@ class RettOppFeilMedlPerioderController(
      * @param antallFeilFørStopp Antall feil før jobben stopper. 0 = ingen grense.
      * @param batchStørrelse Maks antall behandlinger per kjøring. Default 1000.
      * @param startFraBehandlingId Start fra behandlinger med id > denne verdien. Bruk sisteBehandledeId fra /status for å fortsette.
+     * @param brukSafeListeFilter Hvis true, prosesser kun behandlingIder fra forhåndsanalysert SAFE-liste.
      */
     @PostMapping("/kjør")
     fun kjør(
         @RequestParam(required = false, defaultValue = "true") dryRun: Boolean,
         @RequestParam(required = false, defaultValue = "10") antallFeilFørStopp: Int,
         @RequestParam(required = false, defaultValue = "1000") batchStørrelse: Int,
-        @RequestParam(required = false, defaultValue = "0") startFraBehandlingId: Long
+        @RequestParam(required = false, defaultValue = "0") startFraBehandlingId: Long,
+        @RequestParam(required = false, defaultValue = "false") brukSafeListeFilter: Boolean
     ): ResponseEntity<Map<String, Any>> {
-        log.info { "Starter RettOppFeilMedlPerioderJob (dryRun=$dryRun, antallFeilFørStopp=$antallFeilFørStopp, batchStørrelse=$batchStørrelse, startFraBehandlingId=$startFraBehandlingId)" }
+        val filter = if (brukSafeListeFilter) rettOppFeilMedlPerioderJob.knownSafeIds else null
+        log.info { "Starter RettOppFeilMedlPerioderJob (dryRun=$dryRun, antallFeilFørStopp=$antallFeilFørStopp, batchStørrelse=$batchStørrelse, startFraBehandlingId=$startFraBehandlingId, filter=${filter?.size ?: "ingen"})" }
 
-        rettOppFeilMedlPerioderJob.kjørAsynkront(dryRun, antallFeilFørStopp, batchStørrelse, startFraBehandlingId)
+        rettOppFeilMedlPerioderJob.kjørAsynkront(dryRun, antallFeilFørStopp, batchStørrelse, startFraBehandlingId, filter)
 
         return ResponseEntity.ok(
             mapOf(
@@ -43,7 +46,9 @@ class RettOppFeilMedlPerioderController(
                 "dryRun" to dryRun,
                 "antallFeilFørStopp" to antallFeilFørStopp,
                 "batchStørrelse" to batchStørrelse,
-                "startFraBehandlingId" to startFraBehandlingId
+                "startFraBehandlingId" to startFraBehandlingId,
+                "brukSafeListeFilter" to brukSafeListeFilter,
+                "filterStørrelse" to (filter?.size ?: 0)
             )
         )
     }
