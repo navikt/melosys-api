@@ -167,167 +167,82 @@ class RettOppFeilMedlPerioderJob(
     }
 
     private fun JobStatus.behandleEnSak(behandling: Behandling, dryRun: Boolean, verifiserDel1Kriterie: Boolean) {
-        val saksnummer = behandling.fagsak.saksnummer
-        val arkivsakID = behandling.fagsak.gsakSaksnummer
         val fagsak = behandling.fagsak
-
+        val arkivsakID = fagsak.gsakSaksnummer
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
         val sedDokument = behandling.finnSedDokument()
-        val sedInfoFraDb = if (sedDokument.isPresent) {
-            SedInfo(
-                rinaSaksnummer = sedDokument.get().rinaSaksnummer,
-                rinaDokumentID = sedDokument.get().rinaDokumentID,
-                sedType = sedDokument.get().sedType?.name
-            )
-        } else null
-
+        val sedInfoFraDb = sedDokument.orElse(null)?.let {
+            SedInfo(rinaSaksnummer = it.rinaSaksnummer, rinaDokumentID = it.rinaDokumentID, sedType = it.sedType?.name)
+        }
         val alleSederFraEessi = hentAlleSederFraEessi(arkivsakID, sedDokument.orElse(null)?.rinaSaksnummer)
         val medlSammenligningInfo = hentOgSammenlignMedlPerioder(behandling, behandlingsresultat)
 
+        // Opprett context med grunndata - A003/behandling-telling legges til etter arkivsak-sjekk
+        fun createContext(antallA003: Int = 0, antallBehandlinger: Int = 0) = BehandlingContext(
+            behandling = behandling,
+            arkivsakID = arkivsakID,
+            sedInfoFraDb = sedInfoFraDb,
+            alleSederFraEessi = alleSederFraEessi,
+            medlSammenligningInfo = medlSammenligningInfo,
+            antallA003 = antallA003,
+            antallBehandlinger = antallBehandlinger
+        )
+
+        // Sjekk arkivsak-ID først (før vi har A003-telling)
         if (arkivsakID == null) {
-            log.warn { "Sak $saksnummer mangler gsakSaksnummer, hopper over" }
+            log.warn { "Sak ${fagsak.saksnummer} mangler gsakSaksnummer, hopper over" }
             manglerArkivsakId++
-            sakerFunnet.add(
-                FeilMedlPeriodeRapportEntry(
-                    saksnummer = saksnummer,
-                    gsakSaksnummer = null,
-                    saksstatus = fagsak.status.name,
-                    sakstype = fagsak.type.name,
-                    behandlingId = behandling.id,
-                    behandlingType = behandling.type.name,
-                    behandlingStatus = behandling.status.name,
-                    registrertDato = behandling.registrertDato,
-                    endretDato = behandling.endretDato,
-                    sedInfo = sedInfoFraDb,
-                    alleSederFraEessi = emptyList(),
-                    medlPerioder = emptyList(),
-                    medlSammenligningInfo = null,
-                    utfall = RapportUtfall.MANGLER_ARKIVSAK_ID,
-                    feilmelding = null,
-                    rettetOpp = false
-                )
-            )
+            sakerFunnet.add(createContext().toRapportEntry(RapportUtfall.MANGLER_ARKIVSAK_ID))
             return
         }
 
-        // SAFE/UNSAFE filtering: Tell A003 vs behandlinger
+        // Beregn A003/behandling-telling
         val antallA003 = alleSederFraEessi.count { it.sedType == "A003" }
         val antallBehandlinger = fagsak.behandlinger.size
+        val ctx = createContext(antallA003, antallBehandlinger)
         val runtimeSafe = antallA003 <= antallBehandlinger
 
         // Sjekk mot forhåndsanalyserte lister
         if (runtimeSafe && behandling.id in knownUnsafeIds) {
             log.warn { "MISMATCH: Behandling ${behandling.id} er SAFE nå ($antallA003 A003 <= $antallBehandlinger beh), men var UNSAFE i forhåndsanalyse" }
             tilstandMismatch++
-            sakerFunnet.add(
-                FeilMedlPeriodeRapportEntry(
-                    saksnummer = saksnummer,
-                    gsakSaksnummer = arkivsakID,
-                    saksstatus = fagsak.status.name,
-                    sakstype = fagsak.type.name,
-                    behandlingId = behandling.id,
-                    behandlingType = behandling.type.name,
-                    behandlingStatus = behandling.status.name,
-                    registrertDato = behandling.registrertDato,
-                    endretDato = behandling.endretDato,
-                    sedInfo = sedInfoFraDb,
-                    alleSederFraEessi = alleSederFraEessi,
-                    medlPerioder = emptyList(),
-                    medlSammenligningInfo = medlSammenligningInfo,
-                    antallA003 = antallA003,
-                    antallBehandlinger = antallBehandlinger,
-                    utfall = RapportUtfall.TILSTAND_ENDRET,
-                    feilmelding = "Runtime SAFE ($antallA003 A003 <= $antallBehandlinger beh), men var UNSAFE i forhåndsanalyse. Manuell fiks?",
-                    rettetOpp = false
-                )
-            )
+            sakerFunnet.add(ctx.toRapportEntry(
+                RapportUtfall.TILSTAND_ENDRET,
+                "Runtime SAFE ($antallA003 A003 <= $antallBehandlinger beh), men var UNSAFE i forhåndsanalyse. Manuell fiks?"
+            ))
             return
         }
 
         if (!runtimeSafe && behandling.id in knownSafeIds) {
             log.warn { "MISMATCH: Behandling ${behandling.id} er UNSAFE nå ($antallA003 A003 > $antallBehandlinger beh), men var SAFE i forhåndsanalyse" }
             tilstandMismatch++
-            sakerFunnet.add(
-                FeilMedlPeriodeRapportEntry(
-                    saksnummer = saksnummer,
-                    gsakSaksnummer = arkivsakID,
-                    saksstatus = fagsak.status.name,
-                    sakstype = fagsak.type.name,
-                    behandlingId = behandling.id,
-                    behandlingType = behandling.type.name,
-                    behandlingStatus = behandling.status.name,
-                    registrertDato = behandling.registrertDato,
-                    endretDato = behandling.endretDato,
-                    sedInfo = sedInfoFraDb,
-                    alleSederFraEessi = alleSederFraEessi,
-                    medlPerioder = emptyList(),
-                    medlSammenligningInfo = medlSammenligningInfo,
-                    antallA003 = antallA003,
-                    antallBehandlinger = antallBehandlinger,
-                    utfall = RapportUtfall.TILSTAND_ENDRET,
-                    feilmelding = "Runtime UNSAFE ($antallA003 A003 > $antallBehandlinger beh), men var SAFE i forhåndsanalyse. Data endret?",
-                    rettetOpp = false
-                )
-            )
+            sakerFunnet.add(ctx.toRapportEntry(
+                RapportUtfall.TILSTAND_ENDRET,
+                "Runtime UNSAFE ($antallA003 A003 > $antallBehandlinger beh), men var SAFE i forhåndsanalyse. Data endret?"
+            ))
             return
         }
 
         // A003 ubalanse - kan ikke fikses trygt
         if (!runtimeSafe) {
-            log.info { "Behandling ${behandling.id} (sak $saksnummer) er UNSAFE: $antallA003 A003 > $antallBehandlinger behandlinger" }
+            log.info { "Behandling ${behandling.id} (sak ${ctx.saksnummer}) er UNSAFE: $antallA003 A003 > $antallBehandlinger behandlinger" }
             unsafeA003Ubalanse++
-            sakerFunnet.add(
-                FeilMedlPeriodeRapportEntry(
-                    saksnummer = saksnummer,
-                    gsakSaksnummer = arkivsakID,
-                    saksstatus = fagsak.status.name,
-                    sakstype = fagsak.type.name,
-                    behandlingId = behandling.id,
-                    behandlingType = behandling.type.name,
-                    behandlingStatus = behandling.status.name,
-                    registrertDato = behandling.registrertDato,
-                    endretDato = behandling.endretDato,
-                    sedInfo = sedInfoFraDb,
-                    alleSederFraEessi = alleSederFraEessi,
-                    medlPerioder = emptyList(),
-                    medlSammenligningInfo = medlSammenligningInfo,
-                    antallA003 = antallA003,
-                    antallBehandlinger = antallBehandlinger,
-                    utfall = RapportUtfall.UNSAFE_A003_UBALANSE,
-                    feilmelding = "A003 count ($antallA003) > behandling count ($antallBehandlinger)",
-                    rettetOpp = false
-                )
-            )
+            sakerFunnet.add(ctx.toRapportEntry(
+                RapportUtfall.UNSAFE_A003_UBALANSE,
+                "A003 count ($antallA003) > behandling count ($antallBehandlinger)"
+            ))
             return
         }
 
         // Del 1 verifisering: Krever nøyaktig 1 behandling og 1 A003
         if (verifiserDel1Kriterie && (antallBehandlinger != 1 || antallA003 != 1)) {
-            log.info { "Behandling ${behandling.id} (sak $saksnummer) oppfyller ikke Del 1 kriterier: $antallBehandlinger behandlinger, $antallA003 A003 (krever 1 av hver)" }
+            log.info { "Behandling ${behandling.id} (sak ${ctx.saksnummer}) oppfyller ikke Del 1 kriterier: $antallBehandlinger behandlinger, $antallA003 A003 (krever 1 av hver)" }
             ikkeDel1Kriterie++
-            sakerFunnet.add(
-                FeilMedlPeriodeRapportEntry(
-                    saksnummer = saksnummer,
-                    gsakSaksnummer = arkivsakID,
-                    saksstatus = fagsak.status.name,
-                    sakstype = fagsak.type.name,
-                    behandlingId = behandling.id,
-                    behandlingType = behandling.type.name,
-                    behandlingStatus = behandling.status.name,
-                    registrertDato = behandling.registrertDato,
-                    endretDato = behandling.endretDato,
-                    sedInfo = sedInfoFraDb,
-                    alleSederFraEessi = alleSederFraEessi,
-                    medlPerioder = emptyList(),
-                    medlSammenligningInfo = medlSammenligningInfo,
-                    antallA003 = antallA003,
-                    antallBehandlinger = antallBehandlinger,
-                    utfall = RapportUtfall.IKKE_DEL1_KRITERIE,
-                    feilmelding = "Del 1 krever 1 behandling og 1 A003, men fant $antallBehandlinger behandlinger og $antallA003 A003",
-                    rettetOpp = false
-                )
-            )
+            sakerFunnet.add(ctx.toRapportEntry(
+                RapportUtfall.IKKE_DEL1_KRITERIE,
+                "Del 1 krever 1 behandling og 1 A003, men fant $antallBehandlinger behandlinger og $antallA003 A003"
+            ))
             return
         }
 
@@ -338,103 +253,36 @@ class RettOppFeilMedlPerioderJob(
             log.error(e) { "Kunne ikke sjekke EESSI for behandling ${behandling.id} (arkivsak $arkivsakID)" }
             eessiFeil++
             jobMonitor.registerException(e)
-            sakerFunnet.add(
-                FeilMedlPeriodeRapportEntry(
-                    saksnummer = saksnummer,
-                    gsakSaksnummer = arkivsakID,
-                    saksstatus = fagsak.status.name,
-                    sakstype = fagsak.type.name,
-                    behandlingId = behandling.id,
-                    behandlingType = behandling.type.name,
-                    behandlingStatus = behandling.status.name,
-                    registrertDato = behandling.registrertDato,
-                    endretDato = behandling.endretDato,
-                    sedInfo = sedInfoFraDb,
-                    alleSederFraEessi = alleSederFraEessi,
-                    medlPerioder = emptyList(),
-                    medlSammenligningInfo = medlSammenligningInfo,
-                    antallA003 = antallA003,
-                    antallBehandlinger = antallBehandlinger,
-                    utfall = RapportUtfall.EESSI_FEIL,
-                    feilmelding = e.message,
-                    rettetOpp = false
-                )
-            )
+            sakerFunnet.add(ctx.toRapportEntry(RapportUtfall.EESSI_FEIL, e.message))
             null
         }
 
-        if (erInvalidert == null) {
-            return  // EESSI-feil allerede håndtert
-        }
+        if (erInvalidert == null) return  // EESSI-feil allerede håndtert
 
         if (!erInvalidert) {
-            log.info { "Behandling ${behandling.id} (sak $saksnummer) er ikke invalidert i EESSI, hopper over" }
+            log.info { "Behandling ${behandling.id} (sak ${ctx.saksnummer}) er ikke invalidert i EESSI, hopper over" }
             ikkeInvalidertIEessi++
-            sakerFunnet.add(
-                FeilMedlPeriodeRapportEntry(
-                    saksnummer = saksnummer,
-                    gsakSaksnummer = arkivsakID,
-                    saksstatus = fagsak.status.name,
-                    sakstype = fagsak.type.name,
-                    behandlingId = behandling.id,
-                    behandlingType = behandling.type.name,
-                    behandlingStatus = behandling.status.name,
-                    registrertDato = behandling.registrertDato,
-                    endretDato = behandling.endretDato,
-                    sedInfo = sedInfoFraDb,
-                    alleSederFraEessi = alleSederFraEessi,
-                    medlPerioder = emptyList(),
-                    medlSammenligningInfo = medlSammenligningInfo,
-                    antallA003 = antallA003,
-                    antallBehandlinger = antallBehandlinger,
-                    utfall = RapportUtfall.IKKE_INVALIDERT_I_EESSI,
-                    feilmelding = null,
-                    rettetOpp = false
-                )
-            )
+            sakerFunnet.add(ctx.toRapportEntry(RapportUtfall.IKKE_INVALIDERT_I_EESSI))
             return
         }
 
-        log.info { "Behandling ${behandling.id} (sak $saksnummer) er SAFE og invalidert - ${if (dryRun) "ville rettet opp" else "retter opp"}" }
+        log.info { "Behandling ${behandling.id} (sak ${ctx.saksnummer}) er SAFE og invalidert - ${if (dryRun) "ville rettet opp" else "retter opp"}" }
         skalRettesOpp++
 
         val medlPerioder = behandlingsresultat.lovvalgsperioder
             .filter { it.medlPeriodeID != null }
-            .map { periode ->
-                MedlPeriodeInfo(
-                    medlPeriodeId = periode.medlPeriodeID,
-                    fom = periode.fom,
-                    tom = periode.tom
-                )
-            }
+            .map { MedlPeriodeInfo(medlPeriodeId = it.medlPeriodeID, fom = it.fom, tom = it.tom) }
 
         if (!dryRun) {
             rettOppSak(behandling, behandlingsresultat)
             rettetOpp++
         }
 
-        sakerFunnet.add(
-            FeilMedlPeriodeRapportEntry(
-                saksnummer = saksnummer,
-                gsakSaksnummer = arkivsakID,
-                saksstatus = fagsak.status.name,
-                sakstype = fagsak.type.name,
-                behandlingId = behandling.id,
-                behandlingType = behandling.type.name,
-                behandlingStatus = behandling.status.name,
-                registrertDato = behandling.registrertDato,
-                endretDato = behandling.endretDato,
-                sedInfo = sedInfoFraDb,
-                alleSederFraEessi = alleSederFraEessi,
-                medlPerioder = medlPerioder,
-                medlSammenligningInfo = medlSammenligningInfo,
-                antallA003 = antallA003,
-                antallBehandlinger = antallBehandlinger,
-                utfall = RapportUtfall.SKAL_RETTES_OPP,
-                feilmelding = null,
-                rettetOpp = !dryRun
-            )
-        )
+        sakerFunnet.add(ctx.toRapportEntry(
+            utfall = RapportUtfall.SKAL_RETTES_OPP,
+            rettetOpp = !dryRun,
+            medlPerioder = medlPerioder
+        ))
     }
 
     /**
@@ -708,6 +556,49 @@ class RettOppFeilMedlPerioderJob(
         val lovvalgsperiodeFraBehandling: LovvalgsperiodeInfo,
         val matchendeMedlPeriodeFraRegister: MedlRegisterPeriode?
     )
+
+    /**
+     * Context-klasse som samler all informasjon som trengs for å lage rapport-entries.
+     * Brukes for å unngå duplisering av FeilMedlPeriodeRapportEntry-konstruksjon.
+     */
+    private data class BehandlingContext(
+        val behandling: Behandling,
+        val arkivsakID: Long?,
+        val sedInfoFraDb: SedInfo?,
+        val alleSederFraEessi: List<EessiSedInfo>,
+        val medlSammenligningInfo: MedlSammenligningInfo?,
+        val antallA003: Int = 0,
+        val antallBehandlinger: Int = 0
+    ) {
+        val fagsak get() = behandling.fagsak
+        val saksnummer get() = fagsak.saksnummer
+
+        fun toRapportEntry(
+            utfall: RapportUtfall,
+            feilmelding: String? = null,
+            rettetOpp: Boolean = false,
+            medlPerioder: List<MedlPeriodeInfo> = emptyList()
+        ) = FeilMedlPeriodeRapportEntry(
+            saksnummer = saksnummer,
+            gsakSaksnummer = arkivsakID,
+            saksstatus = fagsak.status.name,
+            sakstype = fagsak.type.name,
+            behandlingId = behandling.id,
+            behandlingType = behandling.type.name,
+            behandlingStatus = behandling.status.name,
+            registrertDato = behandling.registrertDato,
+            endretDato = behandling.endretDato,
+            sedInfo = sedInfoFraDb,
+            alleSederFraEessi = alleSederFraEessi,
+            medlPerioder = medlPerioder,
+            medlSammenligningInfo = medlSammenligningInfo,
+            antallA003 = antallA003,
+            antallBehandlinger = antallBehandlinger,
+            utfall = utfall,
+            feilmelding = feilmelding,
+            rettetOpp = rettetOpp
+        )
+    }
 
     enum class RapportUtfall {
         MANGLER_ARKIVSAK_ID,
