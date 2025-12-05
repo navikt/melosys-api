@@ -76,9 +76,9 @@ class Kontroll(
         utførKontroller(behandlingID, sakstype, behandlingsresultattype).filter { skalViseFeil(it, kontrollerSomSkalIgnoreres, behandlingID) }
 
     /**
-     * Overload that accepts Behandling object directly to prevent entity reload that would trigger
-     * race conditions. When registeropplysninger updates occur, reloading the entity causes Hibernate
-     * to detect version conflicts and throw StaleObjectStateException.
+     * Overload som tar Behandling-objekt direkte for å unngå entity reload som kan trigge
+     * race conditions. Når registeropplysninger oppdateres, kan entity reload føre til at Hibernate
+     * oppdager versjonskonflikt og kaster StaleObjectStateException.
      */
     internal fun kontrollerVedtak(
         behandling: Behandling,
@@ -111,7 +111,7 @@ class Kontroll(
     }
 
     /**
-     * Overload that accepts Behandling object directly to prevent race conditions from entity reload.
+     * Overload som tar Behandling-objekt direkte for å unngå race conditions fra entity reload.
      */
     private fun utførKontroller(
         behandling: Behandling,

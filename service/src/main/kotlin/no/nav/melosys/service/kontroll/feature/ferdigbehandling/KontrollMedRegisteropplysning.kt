@@ -41,7 +41,7 @@ class KontrollMedRegisteropplysning(
         if(behandling.erEøsPensjonist())
             return kontroll.kontrollerBrev(behandling)
 
-        // Pass Behandling object instead of ID to prevent entity reload and race condition
+        // Sender Behandling-objekt (ikke ID) for å unngå entity reload og race condition
         return kontroll.kontrollerVedtak(behandling, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres)
     }
 
