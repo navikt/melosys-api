@@ -25,7 +25,9 @@ class RettOppFeilMedlPerioderController(
      * @param antallFeilFørStopp Antall feil før jobben stopper. 0 = ingen grense.
      * @param batchStørrelse Maks antall behandlinger per kjøring. Default 1000.
      * @param startFraBehandlingId Start fra behandlinger med id > denne verdien. Bruk sisteBehandledeId fra /status for å fortsette.
-     * @param brukSafeListeFilter Hvis true, prosesser kun behandlingIder fra forhåndsanalysert SAFE-liste.
+     * @param brukSafeListeFilter Hvis true, prosesser kun behandlingIder fra forhåndsanalysert SAFE-liste (alle 5091).
+     * @param brukDel1ListeFilter Hvis true, prosesser kun behandlingIder fra Del 1 liste (1 behandling, 1 A003 = 2849 saker).
+     *                            Del 1 har prioritet over brukSafeListeFilter hvis begge er true.
      */
     @PostMapping("/kjør")
     fun kjør(
@@ -33,12 +35,22 @@ class RettOppFeilMedlPerioderController(
         @RequestParam(required = false, defaultValue = "10") antallFeilFørStopp: Int,
         @RequestParam(required = false, defaultValue = "1000") batchStørrelse: Int,
         @RequestParam(required = false, defaultValue = "0") startFraBehandlingId: Long,
-        @RequestParam(required = false, defaultValue = "false") brukSafeListeFilter: Boolean
+        @RequestParam(required = false, defaultValue = "false") brukSafeListeFilter: Boolean,
+        @RequestParam(required = false, defaultValue = "false") brukDel1ListeFilter: Boolean
     ): ResponseEntity<Map<String, Any>> {
-        val filter = if (brukSafeListeFilter) rettOppFeilMedlPerioderJob.knownSafeIds else null
-        log.info { "Starter RettOppFeilMedlPerioderJob (dryRun=$dryRun, antallFeilFørStopp=$antallFeilFørStopp, batchStørrelse=$batchStørrelse, startFraBehandlingId=$startFraBehandlingId, filter=${filter?.size ?: "ingen"})" }
+        val filter = when {
+            brukDel1ListeFilter -> rettOppFeilMedlPerioderJob.del1SafeIds
+            brukSafeListeFilter -> rettOppFeilMedlPerioderJob.knownSafeIds
+            else -> null
+        }
+        val filterNavn = when {
+            brukDel1ListeFilter -> "Del1"
+            brukSafeListeFilter -> "Safe"
+            else -> "ingen"
+        }
+        log.info { "Starter RettOppFeilMedlPerioderJob (dryRun=$dryRun, antallFeilFørStopp=$antallFeilFørStopp, batchStørrelse=$batchStørrelse, startFraBehandlingId=$startFraBehandlingId, filter=$filterNavn (${filter?.size ?: 0}))" }
 
-        rettOppFeilMedlPerioderJob.kjørAsynkront(dryRun, antallFeilFørStopp, batchStørrelse, startFraBehandlingId, filter)
+        rettOppFeilMedlPerioderJob.kjørAsynkront(dryRun, antallFeilFørStopp, batchStørrelse, startFraBehandlingId, filter, brukDel1ListeFilter)
 
         return ResponseEntity.ok(
             mapOf(
@@ -48,6 +60,8 @@ class RettOppFeilMedlPerioderController(
                 "batchStørrelse" to batchStørrelse,
                 "startFraBehandlingId" to startFraBehandlingId,
                 "brukSafeListeFilter" to brukSafeListeFilter,
+                "brukDel1ListeFilter" to brukDel1ListeFilter,
+                "filterNavn" to filterNavn,
                 "filterStørrelse" to (filter?.size ?: 0)
             )
         )

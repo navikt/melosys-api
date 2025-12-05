@@ -60,6 +60,12 @@ class RettOppFeilMedlPerioderJob(
     val knownSafeIds: Set<Long> = loadVerificationList("/rett-opp-feil-medl/safe-behandling-ids.json")
     private val knownUnsafeIds: Set<Long> = loadVerificationList("/rett-opp-feil-medl/unsafe-behandling-ids.json")
 
+    /**
+     * Del 1: SAFE med nøyaktig 1 behandling og 1 A003.
+     * Dette er de enkleste sakene som kan fikses automatisk.
+     */
+    val del1SafeIds: Set<Long> = loadVerificationList("/rett-opp-feil-medl/del1-safe-1-behandling-ids.json")
+
     private fun loadVerificationList(resourcePath: String): Set<Long> {
         return try {
             val resource = javaClass.getResourceAsStream(resourcePath)
@@ -106,9 +112,10 @@ class RettOppFeilMedlPerioderJob(
         antallFeilFørStopp: Int,
         batchStørrelse: Int = 1000,
         startFraBehandlingId: Long = 0,
-        behandlingIderFilter: Set<Long>? = null
+        behandlingIderFilter: Set<Long>? = null,
+        verifiserDel1Kriterie: Boolean = false
     ) {
-        kjør(dryRun, antallFeilFørStopp, batchStørrelse, startFraBehandlingId, behandlingIderFilter)
+        kjør(dryRun, antallFeilFørStopp, batchStørrelse, startFraBehandlingId, behandlingIderFilter, verifiserDel1Kriterie)
     }
 
     @Synchronized
@@ -118,11 +125,12 @@ class RettOppFeilMedlPerioderJob(
         antallFeilFørStopp: Int = 0,
         batchStørrelse: Int = 1000,
         startFraBehandlingId: Long = 0,
-        behandlingIderFilter: Set<Long>? = null
+        behandlingIderFilter: Set<Long>? = null,
+        verifiserDel1Kriterie: Boolean = false
     ) = runAsSystem {
         sakerFunnet.clear()
         jobMonitor.execute(antallFeilFørStopp) {
-            log.info { "Starter RettOppFeilMedlPerioderJob (dryRun=$dryRun, batchStørrelse=$batchStørrelse, startFraBehandlingId=$startFraBehandlingId, filter=${behandlingIderFilter?.size ?: "ingen"})" }
+            log.info { "Starter RettOppFeilMedlPerioderJob (dryRun=$dryRun, batchStørrelse=$batchStørrelse, startFraBehandlingId=$startFraBehandlingId, filter=${behandlingIderFilter?.size ?: "ingen"}, verifiserDel1Kriterie=$verifiserDel1Kriterie)" }
 
             val pageable = PageRequest.of(0, batchStørrelse)
             val berørteBehandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(startFraBehandlingId, pageable)
@@ -144,7 +152,7 @@ class RettOppFeilMedlPerioderJob(
                 runCatching {
                     val behandling = rettOppFeilMedlPerioderRepository.findById(behandlingId).orElse(null)
                     if (behandling != null) {
-                        behandleEnSak(behandling, dryRun)
+                        behandleEnSak(behandling, dryRun, verifiserDel1Kriterie)
                     } else {
                         log.warn { "Kunne ikke finne behandling med id $behandlingId" }
                     }
@@ -158,7 +166,7 @@ class RettOppFeilMedlPerioderJob(
         }
     }
 
-    private fun JobStatus.behandleEnSak(behandling: Behandling, dryRun: Boolean) {
+    private fun JobStatus.behandleEnSak(behandling: Behandling, dryRun: Boolean, verifiserDel1Kriterie: Boolean) {
         val saksnummer = behandling.fagsak.saksnummer
         val arkivsakID = behandling.fagsak.gsakSaksnummer
         val fagsak = behandling.fagsak
@@ -288,6 +296,35 @@ class RettOppFeilMedlPerioderJob(
                     antallBehandlinger = antallBehandlinger,
                     utfall = RapportUtfall.UNSAFE_A003_UBALANSE,
                     feilmelding = "A003 count ($antallA003) > behandling count ($antallBehandlinger)",
+                    rettetOpp = false
+                )
+            )
+            return
+        }
+
+        // Del 1 verifisering: Krever nøyaktig 1 behandling og 1 A003
+        if (verifiserDel1Kriterie && (antallBehandlinger != 1 || antallA003 != 1)) {
+            log.info { "Behandling ${behandling.id} (sak $saksnummer) oppfyller ikke Del 1 kriterier: $antallBehandlinger behandlinger, $antallA003 A003 (krever 1 av hver)" }
+            ikkeDel1Kriterie++
+            sakerFunnet.add(
+                FeilMedlPeriodeRapportEntry(
+                    saksnummer = saksnummer,
+                    gsakSaksnummer = arkivsakID,
+                    saksstatus = fagsak.status.name,
+                    sakstype = fagsak.type.name,
+                    behandlingId = behandling.id,
+                    behandlingType = behandling.type.name,
+                    behandlingStatus = behandling.status.name,
+                    registrertDato = behandling.registrertDato,
+                    endretDato = behandling.endretDato,
+                    sedInfo = sedInfoFraDb,
+                    alleSederFraEessi = alleSederFraEessi,
+                    medlPerioder = emptyList(),
+                    medlSammenligningInfo = medlSammenligningInfo,
+                    antallA003 = antallA003,
+                    antallBehandlinger = antallBehandlinger,
+                    utfall = RapportUtfall.IKKE_DEL1_KRITERIE,
+                    feilmelding = "Del 1 krever 1 behandling og 1 A003, men fant $antallBehandlinger behandlinger og $antallA003 A003",
                     rettetOpp = false
                 )
             )
@@ -569,6 +606,7 @@ class RettOppFeilMedlPerioderJob(
         @Volatile var eessiFeil: Int = 0,
         @Volatile var unsafeA003Ubalanse: Int = 0,
         @Volatile var tilstandMismatch: Int = 0,
+        @Volatile var ikkeDel1Kriterie: Int = 0,
         @Volatile var filtrertBort: Int = 0,
         @Volatile var skalRettesOpp: Int = 0,
         @Volatile var rettetOpp: Int = 0,
@@ -582,6 +620,7 @@ class RettOppFeilMedlPerioderJob(
             eessiFeil = 0
             unsafeA003Ubalanse = 0
             tilstandMismatch = 0
+            ikkeDel1Kriterie = 0
             filtrertBort = 0
             skalRettesOpp = 0
             rettetOpp = 0
@@ -596,6 +635,7 @@ class RettOppFeilMedlPerioderJob(
             "eessiFeil" to eessiFeil,
             "unsafeA003Ubalanse" to unsafeA003Ubalanse,
             "tilstandMismatch" to tilstandMismatch,
+            "ikkeDel1Kriterie" to ikkeDel1Kriterie,
             "filtrertBort" to filtrertBort,
             "skalRettesOpp" to skalRettesOpp,
             "rettetOpp" to rettetOpp,
@@ -675,6 +715,7 @@ class RettOppFeilMedlPerioderJob(
         EESSI_FEIL,
         UNSAFE_A003_UBALANSE,
         TILSTAND_ENDRET,
+        IKKE_DEL1_KRITERIE,     // Runtime viser at saken ikke oppfyller Del 1 kriterier (1 beh, 1 A003)
         SKAL_RETTES_OPP
     }
 
