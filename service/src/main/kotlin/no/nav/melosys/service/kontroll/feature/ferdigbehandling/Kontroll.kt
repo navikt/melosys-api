@@ -107,12 +107,7 @@ class Kontroll(
         behandlingsresultattype: Behandlingsresultattyper?
     ): Collection<Kontrollfeil> {
         val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)
-
-        if (behandlingsresultattype in listOf(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, Behandlingsresultattyper.HENLEGGELSE)) {
-            return utførKontrollerForAvslagOgHenleggelse(behandling)
-        }
-
-        return utførKontroller(behandling, sakstype)
+        return utførKontroller(behandling, sakstype, behandlingsresultattype)
     }
 
     /**
