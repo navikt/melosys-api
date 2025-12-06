@@ -113,9 +113,10 @@ class RettOppFeilMedlPerioderJob(
         batchStørrelse: Int = 1000,
         startFraBehandlingId: Long = 0,
         behandlingIderFilter: Set<Long>? = null,
-        verifiserDel1Kriterie: Boolean = false
+        verifiserDel1Kriterie: Boolean = false,
+        saksnummerFilter: String? = null
     ) {
-        kjør(dryRun, antallFeilFørStopp, batchStørrelse, startFraBehandlingId, behandlingIderFilter, verifiserDel1Kriterie)
+        kjør(dryRun, antallFeilFørStopp, batchStørrelse, startFraBehandlingId, behandlingIderFilter, verifiserDel1Kriterie, saksnummerFilter)
     }
 
     @Synchronized
@@ -126,11 +127,12 @@ class RettOppFeilMedlPerioderJob(
         batchStørrelse: Int = 1000,
         startFraBehandlingId: Long = 0,
         behandlingIderFilter: Set<Long>? = null,
-        verifiserDel1Kriterie: Boolean = false
+        verifiserDel1Kriterie: Boolean = false,
+        saksnummerFilter: String? = null
     ) = runAsSystem {
         sakerFunnet.clear()
         jobMonitor.execute(antallFeilFørStopp) {
-            log.info { "Starter RettOppFeilMedlPerioderJob (dryRun=$dryRun, batchStørrelse=$batchStørrelse, startFraBehandlingId=$startFraBehandlingId, filter=${behandlingIderFilter?.size ?: "ingen"}, verifiserDel1Kriterie=$verifiserDel1Kriterie)" }
+            log.info { "Starter RettOppFeilMedlPerioderJob (dryRun=$dryRun, batchStørrelse=$batchStørrelse, startFraBehandlingId=$startFraBehandlingId, filter=${behandlingIderFilter?.size ?: "ingen"}, verifiserDel1Kriterie=$verifiserDel1Kriterie, saksnummer=${saksnummerFilter ?: "alle"})" }
 
             val pageable = PageRequest.of(0, batchStørrelse)
             val berørteBehandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(startFraBehandlingId, pageable)
@@ -152,7 +154,7 @@ class RettOppFeilMedlPerioderJob(
                 runCatching {
                     val behandling = rettOppFeilMedlPerioderRepository.findById(behandlingId).orElse(null)
                     if (behandling != null) {
-                        behandleEnSak(behandling, dryRun, verifiserDel1Kriterie)
+                        behandleEnSak(behandling, dryRun, verifiserDel1Kriterie, saksnummerFilter)
                     } else {
                         log.warn { "Kunne ikke finne behandling med id $behandlingId" }
                     }
@@ -166,8 +168,15 @@ class RettOppFeilMedlPerioderJob(
         }
     }
 
-    private fun JobStatus.behandleEnSak(behandling: Behandling, dryRun: Boolean, verifiserDel1Kriterie: Boolean) {
+    private fun JobStatus.behandleEnSak(behandling: Behandling, dryRun: Boolean, verifiserDel1Kriterie: Boolean, saksnummerFilter: String?) {
         val fagsak = behandling.fagsak
+
+        // Filtrer på saksnummer hvis oppgitt
+        if (saksnummerFilter != null && fagsak.saksnummer != saksnummerFilter) {
+            filtrertBort++
+            return
+        }
+
         val arkivsakID = fagsak.gsakSaksnummer
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
