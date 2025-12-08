@@ -8,9 +8,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -46,58 +44,10 @@ class ManglendeFakturabetalingConsumerTest {
     }
 
     @Test
-    fun `opprett prosess for varselbrev om manglende innbetaling når alle lovvalgsperioder er pliktige`() {
-        val behandling = Behandling.forTest {
-            id = 123
-            fagsak {
-                type = Sakstyper.EU_EOS
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-            }
-        }
-
-        val lovvalgsperiode = mockk<Lovvalgsperiode>()
-        every { lovvalgsperiode.erPliktigMedlemskap() } returns true
-
-        val behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = behandling
-            this.lovvalgsperioder = mutableSetOf(lovvalgsperiode)
-        }
-
-        val melding = ManglendeFakturabetalingMelding(
-            fakturaserieReferanse = FAKTURASERIE_REFERANSE,
-            betalingsstatus = Betalingsstatus.IKKE_BETALT,
-            datoMottatt = LocalDate.now(),
-            fakturanummer = FAKTURANUMMER
-        )
-
-        every {
-            behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(FAKTURASERIE_REFERANSE)
-        } returns listOf(behandlingsresultat)
-
-        every {
-            prosessinstansService.opprettProsessManglendeInnbetalingVarselBrev(behandling, melding)
-        } returns mockk<UUID>()
-
-
-        manglendeFakturabetalingConsumer.lesManglendeFakturabetalingMelding(
-            ConsumerRecord(
-                "topic", 1, 1, "key", melding
-            )
-        )
-
-
-        verify { prosessinstansService.opprettProsessManglendeInnbetalingVarselBrev(behandling, melding) }
-        verify(exactly = 0) { prosessinstansService.opprettProsessManglendeInnbetalingBehandling(any()) }
-    }
-
-    @Test
     fun `opprett prosess for varselbrev om manglende innbetaling når alle medlemskapsperioder er pliktige`() {
         // Given
         val behandling = Behandling.forTest {
             id = 123
-            fagsak {
-                type = Sakstyper.FTRL
-            }
         }
 
         val medlemskapsperiode = mockk<Medlemskapsperiode>()

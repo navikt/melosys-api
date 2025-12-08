@@ -9,7 +9,6 @@ class VarselbrevManglendeInnbetalingBrevbestilling : DokgenBrevbestilling {
     var fullmektigForBetaling: String? = null
     var betalingsfrist: LocalDate? = null
     var erEøsPensjonist: Boolean? = null
-    var erEøsLovvalg: Boolean? = null
 
     constructor() : super()
 
@@ -19,7 +18,6 @@ class VarselbrevManglendeInnbetalingBrevbestilling : DokgenBrevbestilling {
         this.fullmektigForBetaling = builder.fullmektigForBetaling
         this.betalingsfrist = builder.betalingsfrist
         this.erEøsPensjonist = builder.erEøsPensjonist
-        this.erEøsLovvalg = builder.erEøsLovvalg
     }
 
     override fun toBuilder(): Builder = Builder(this)
@@ -30,7 +28,6 @@ class VarselbrevManglendeInnbetalingBrevbestilling : DokgenBrevbestilling {
         internal var fullmektigForBetaling: String? = null
         internal var betalingsfrist: LocalDate? = null
         internal var erEøsPensjonist: Boolean? = null
-        internal var erEøsLovvalg: Boolean? = null
 
         constructor()
 
@@ -40,7 +37,6 @@ class VarselbrevManglendeInnbetalingBrevbestilling : DokgenBrevbestilling {
             this.fullmektigForBetaling = varselbrevManglendeInnbetalingBrevbestilling.fullmektigForBetaling
             this.betalingsfrist = varselbrevManglendeInnbetalingBrevbestilling.betalingsfrist
             this.erEøsPensjonist = varselbrevManglendeInnbetalingBrevbestilling.erEøsPensjonist
-            this.erEøsLovvalg = varselbrevManglendeInnbetalingBrevbestilling.erEøsLovvalg
         }
 
         fun medFakturanummer(fakturanummer: String?) = apply { this.fakturanummer = fakturanummer }
@@ -50,8 +46,6 @@ class VarselbrevManglendeInnbetalingBrevbestilling : DokgenBrevbestilling {
         fun medFullmektigForBetaling(fullmektigForBetaling: String?) = apply { this.fullmektigForBetaling = fullmektigForBetaling }
 
         fun medErEøsPensjonist(erEøsPensjonist: Boolean) = apply { this.erEøsPensjonist = erEøsPensjonist }
-
-        fun medErEøsLovvalg(erEøsLovvalg: Boolean) = apply { this.erEøsLovvalg = erEøsLovvalg }
 
         fun medBetalingsfrist(betalingsfrist: LocalDate?) = apply { this.betalingsfrist = betalingsfrist }
 

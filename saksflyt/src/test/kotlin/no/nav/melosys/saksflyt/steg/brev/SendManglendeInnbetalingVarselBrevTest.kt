@@ -9,8 +9,6 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Mottakerroller
-import no.nav.melosys.domain.kodeverk.Sakstemaer
-import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
@@ -70,42 +68,6 @@ class SendManglendeInnbetalingVarselBrevTest {
             fakturanummer shouldBe "Fakturanummer"
             betalingsstatus shouldBe Betalingsstatus.DELVIS_BETALT
             fullmektigForBetaling shouldBe null
-        }
-    }
-
-    @Test
-    fun `utfør skal produsere dokument med korrekt data når det er EØS behanling med lovvalgsperioder`() {
-        val prosessinstans = Prosessinstans.forTest()
-        val behandling = Behandling.forTest {
-            id = 123
-            fagsak {
-                type = Sakstyper.EU_EOS
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-            }
-        }
-        prosessinstans.behandling = behandling
-        prosessinstans.setData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus.DELVIS_BETALT)
-        prosessinstans.setData(ProsessDataKey.FAKTURANUMMER, "Fakturanummer")
-        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now())
-
-        val capturedBrevbestillingDto = slot<BrevbestillingDto>()
-
-
-        sendManglendeInnbetalingVarselBrev.utfør(prosessinstans)
-
-
-        verify { dokumentServiceFasade.produserDokument(123, capture(capturedBrevbestillingDto)) }
-
-        capturedBrevbestillingDto.captured.run {
-            behandling shouldBe behandling
-            produserbardokument shouldBe Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING
-            mottaker shouldBe Mottakerroller.BRUKER
-            betalingsfrist shouldBe LocalDate.now().plusWeeks(4)
-            fakturanummer shouldBe "Fakturanummer"
-            betalingsstatus shouldBe Betalingsstatus.DELVIS_BETALT
-            fullmektigForBetaling shouldBe null
-            isErEøsPensjonist shouldBe false
-            isErEøsLovvalg shouldBe true
         }
     }
 

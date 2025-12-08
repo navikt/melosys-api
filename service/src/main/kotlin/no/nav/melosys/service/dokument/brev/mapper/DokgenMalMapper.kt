@@ -284,11 +284,11 @@ class DokgenMalMapper(
     private fun lagVarselbrevManglendeInnbetaling(brevbestilling: VarselbrevManglendeInnbetalingBrevbestilling): VarselbrevManglendeInnbetaling {
         val medlemskapstype = brevbestilling.behandlingNonNull().id.let {
             val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(it)
-            behandlingsresultat.finnAvgiftspliktigPerioder().firstOrNull()?.hentMedlemskapstype()
+            behandlingsresultat.medlemskapsperioder.firstOrNull()?.medlemskapstype
         } ?: if (brevbestilling.erEøsPensjonist == true) {
             Medlemskapstyper.IKKE_MEDLEM
         } else {
-            throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med avgiftspliktigperiode")
+            throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder")
         }
 
         return VarselbrevManglendeInnbetaling(

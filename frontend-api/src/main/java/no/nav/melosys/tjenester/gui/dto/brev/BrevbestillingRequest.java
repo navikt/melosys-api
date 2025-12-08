@@ -47,8 +47,7 @@ public record BrevbestillingRequest(
     String ytterligereInformasjon,
     LocalDate opphoerDato,
     boolean erInnvilgelse,
-    boolean erEøsPensjonist,
-    boolean erEøsLovvalg) {
+    boolean erEøsPensjonist) {
 
     public BrevbestillingDto tilBrevbestillingDto(String bestillersId) {
         return new BrevbestillingDto(
@@ -86,8 +85,7 @@ public record BrevbestillingRequest(
             null,
             this.opphoerDato,
             this.erInnvilgelse,
-            this.erEøsPensjonist,
-            this.erEøsLovvalg
+            this.erEøsPensjonist
         );
     }
 
@@ -153,7 +151,6 @@ public record BrevbestillingRequest(
             null,
             null,
             null,
-            false,
             false,
             false
         );
