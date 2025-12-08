@@ -18,7 +18,6 @@ public class VarselbrevManglendeInnbetaling extends DokgenDto {
     private final String medlemskapstype;
     private final String fullmektigForSoeknad;
     private final Boolean erEøsPensjonist;
-    private final Boolean erEøsLovvalg;
 
     public VarselbrevManglendeInnbetaling(VarselbrevManglendeInnbetalingBrevbestilling brevbestilling, Medlemskapstyper medlemskapstype, String fullmektigForSoeknad) {
         super(brevbestilling, Mottakerroller.BRUKER);
@@ -30,7 +29,6 @@ public class VarselbrevManglendeInnbetaling extends DokgenDto {
         this.medlemskapstype = medlemskapstype.name();
         this.fullmektigForSoeknad = fullmektigForSoeknad;
         this.erEøsPensjonist = brevbestilling.getErEøsPensjonist();
-        this.erEøsLovvalg = brevbestilling.getErEøsLovvalg();
     }
 
     public String getFullmektigForBetaling() {
@@ -59,9 +57,5 @@ public class VarselbrevManglendeInnbetaling extends DokgenDto {
 
     public Boolean isErEøsPensjonist() {
         return erEøsPensjonist;
-    }
-
-    public Boolean isErEøsLovvalg() {
-        return erEøsLovvalg;
     }
 }
