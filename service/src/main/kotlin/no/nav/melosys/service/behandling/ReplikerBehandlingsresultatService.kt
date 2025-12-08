@@ -338,6 +338,7 @@ private fun replikerLovvalgsperioder(
         val lovvalgsperiodeReplika = BeanUtils.cloneBean(lovvalgsperiodeOriginal) as Lovvalgsperiode
         lovvalgsperiodeReplika.behandlingsresultat = behandlingsresultatReplika
         lovvalgsperiodeReplika.id = null
+        lovvalgsperiodeReplika.trygdeavgiftsperioder = HashSet()
         behandlingsresultatReplika.lovvalgsperioder.add(lovvalgsperiodeReplika)
     }
 }
