@@ -75,6 +75,19 @@ class Kontroll(
     ): Collection<Kontrollfeil> =
         utførKontroller(behandlingID, sakstype, behandlingsresultattype).filter { skalViseFeil(it, kontrollerSomSkalIgnoreres, behandlingID) }
 
+    /**
+     * Overload som tar Behandling-objekt direkte for å unngå entity reload som kan trigge
+     * race conditions. Når registeropplysninger oppdateres, kan entity reload føre til at Hibernate
+     * oppdager versjonskonflikt og kaster StaleObjectStateException.
+     */
+    internal fun kontrollerVedtak(
+        behandling: Behandling,
+        sakstype: Sakstyper,
+        behandlingsresultattype: Behandlingsresultattyper?,
+        kontrollerSomSkalIgnoreres: Set<Kontroll_begrunnelser>
+    ): Collection<Kontrollfeil> =
+        utførKontroller(behandling, sakstype, behandlingsresultattype).filter { skalViseFeil(it, kontrollerSomSkalIgnoreres, behandling.id) }
+
 
     private fun skalViseFeil(
         kontrollfeil: Kontrollfeil,
@@ -94,7 +107,17 @@ class Kontroll(
         behandlingsresultattype: Behandlingsresultattyper?
     ): Collection<Kontrollfeil> {
         val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)
+        return utførKontroller(behandling, sakstype, behandlingsresultattype)
+    }
 
+    /**
+     * Overload som tar Behandling-objekt direkte for å unngå race conditions fra entity reload.
+     */
+    private fun utførKontroller(
+        behandling: Behandling,
+        sakstype: Sakstyper,
+        behandlingsresultattype: Behandlingsresultattyper?
+    ): Collection<Kontrollfeil> {
         if (behandlingsresultattype in listOf(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, Behandlingsresultattyper.HENLEGGELSE)) {
             return utførKontrollerForAvslagOgHenleggelse(behandling)
         }

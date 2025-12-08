@@ -41,7 +41,8 @@ class KontrollMedRegisteropplysning(
         if(behandling.erEøsPensjonist())
             return kontroll.kontrollerBrev(behandling)
 
-        return kontroll.kontrollerVedtak(behandling.id, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres)
+        // Sender Behandling-objekt (ikke ID) for å unngå entity reload og race condition
+        return kontroll.kontrollerVedtak(behandling, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres)
     }
 
     private fun hentNyeRegisteropplysninger(behandling: Behandling) {
