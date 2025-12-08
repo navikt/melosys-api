@@ -69,7 +69,7 @@
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
         <json-smart.version>2.6.0</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
-        <kotest.version>6.0.5</kotest.version>
+        <kotest.version>6.0.7</kotest.version>
         <kotlin-logging.version>3.0.5</kotlin-logging.version>
         <mockito-kotlin.version>6.1.0</mockito-kotlin.version>
         <mockk.version>1.14.6</mockk.version>
@@ -88,12 +88,12 @@
         <swagger.version>1.5.21</swagger.version>
         <unleash.version>8.3.0</unleash.version>
         <bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
-        <bouncycastle-jdk18on.version>1.82</bouncycastle-jdk18on.version>
+        <bouncycastle-jdk18on.version>1.83</bouncycastle-jdk18on.version>
         <nimbus-jose-jwt.version>10.6</nimbus-jose-jwt.version>
         <neethi.version>3.2.1</neethi.version>
         <jakarta.jaxb.version>3.0.1</jakarta.jaxb.version>
         <javaparser.version>1.0.11</javaparser.version>
-        <google.errorprone.version>2.44.0</google.errorprone.version>
+        <google.errorprone.version>2.45.0</google.errorprone.version>
         <checkerframework.version>3.52.0</checkerframework.version>
         <threeten.version>1.8.0</threeten.version>
         <jetbrains.annotations.version>21.0.1</jetbrains.annotations.version>
