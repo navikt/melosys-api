@@ -4,6 +4,7 @@ import io.getunleash.Unleash
 import jakarta.transaction.Transactional
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
@@ -302,22 +303,31 @@ class InnvilgelseFtrlMapper(
             return emptyList()
         }
 
-        val trygdeavgiftsperioder: List<AvgiftsperiodeDto> = behandlingsresultat.trygdeavgiftsperioder.map {
-            AvgiftsperiodeDto(
-                it.periodeFra,
-                it.periodeTil,
-                it.trygdesats,
-                it.trygdeavgiftsbeløpMd.hentVerdi(),
-                it.hentGrunnlagInntekstperiode().type,
-                it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
-            )
-        }.sortedByDescending { it.fom }
-        // Returnerer kun den første (tidligste) perioden fra inneværende år eller senere, eller tom liste hvis ingen slike perioder finnes
-        if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
-            return trygdeavgiftsperioder.lastOrNull() { it.fom.year >= LocalDate.now().year }?.let { listOf(it) } ?: emptyList()
+        val perioder = if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
+            val gruppertePerioder = behandlingsresultat.trygdeavgiftsperioder.groupBy { it.periodeTil.year }
+            val valgtÅr = velgRelevantÅr(gruppertePerioder.keys, LocalDate.now().year)
+            gruppertePerioder[valgtÅr] ?: emptyList()
+        } else {
+            behandlingsresultat.trygdeavgiftsperioder.toList()
         }
-        return trygdeavgiftsperioder
+
+        return perioder.map { it.toAvgiftsperiodeDto() }.sortedByDescending { it.fom }
     }
+
+    private fun velgRelevantÅr(tilgjengeligeÅr: Set<Int>, inneværendeÅr: Int): Int = when {
+        inneværendeÅr in tilgjengeligeÅr -> inneværendeÅr
+        tilgjengeligeÅr.all { it < inneværendeÅr } -> tilgjengeligeÅr.maxOrNull() ?: inneværendeÅr
+        else -> tilgjengeligeÅr.minOrNull() ?: inneværendeÅr
+    }
+
+    private fun Trygdeavgiftsperiode.toAvgiftsperiodeDto() = AvgiftsperiodeDto(
+        periodeFra,
+        periodeTil,
+        trygdesats,
+        trygdeavgiftsbeløpMd.hentVerdi(),
+        hentGrunnlagInntekstperiode().type,
+        hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
+    )
 
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodePensjonist> {
         if (behandlingsresultat.trygdeavgiftsperioder.all {
@@ -326,21 +336,10 @@ class InnvilgelseFtrlMapper(
             return emptyList()
         }
 
-        val inneværendeÅr = LocalDate.now().year
+        val gruppertePerioder = behandlingsresultat.trygdeavgiftsperioder.groupBy { it.periodeTil.year }
+        val valgtÅr = velgRelevantÅr(gruppertePerioder.keys, LocalDate.now().year)
 
-        val perioder = behandlingsresultat.trygdeavgiftsperioder
-        val grupperteÅr = perioder.groupBy { it.periodeTil.year }
-
-        val tilgjengeligeÅr = grupperteÅr.keys.sorted()
-
-        val valgtÅr = when {
-            tilgjengeligeÅr.contains(inneværendeÅr) -> inneværendeÅr
-            tilgjengeligeÅr.all { it < inneværendeÅr } -> tilgjengeligeÅr.last()
-            tilgjengeligeÅr.all { it > inneværendeÅr } -> tilgjengeligeÅr.first()
-            else -> inneværendeÅr
-        }
-
-        return grupperteÅr[valgtÅr]
+        return gruppertePerioder[valgtÅr]
             ?.map {
                 AvgiftsperiodePensjonist(
                     fom = it.periodeFra,
