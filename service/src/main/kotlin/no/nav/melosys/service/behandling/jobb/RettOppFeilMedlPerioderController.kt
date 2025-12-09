@@ -17,17 +17,24 @@ class RettOppFeilMedlPerioderController(
 ) {
 
     /**
-     * Starter jobben for å rette opp saker som ble feilaktig oppdatert av AvsluttArt13BehandlingJobb.
-     * Fokuserer på Scenario 1 (X008/X006) der det ikke finnes ny vurdering på fagsaken.
+     * Starter jobben for å rette opp Del 2 saker som ble feilaktig oppdatert av AvsluttArt13BehandlingJobb.
+     *
+     * Del 2: Fagsaker med flere behandlinger der A003 har blitt ugyldiggjort (X008/X006).
+     *
+     * Del 2a: Siste behandling har resultat REGISTRERT_UNNTAK
+     * - Saksstatus endres IKKE
+     * - Kun MEDL-perioder på HENLEGGELSE-behandlinger settes til avvist
+     *
+     * Del 2b: Alle behandlinger har resultat HENLEGGELSE
+     * - Saksstatus settes til ANNULLERT
+     * - Alle MEDL-perioder settes til avvist
      *
      * @param dryRun Hvis true, vil jobben kun logge hva som ville blitt endret uten å gjøre endringer.
      *               Default er true for å unngå utilsiktede endringer.
      * @param antallFeilFørStopp Antall feil før jobben stopper. 0 = ingen grense.
      * @param batchStørrelse Maks antall behandlinger per kjøring. Default 1000.
      * @param startFraBehandlingId Start fra behandlinger med id > denne verdien. Bruk sisteBehandledeId fra /status for å fortsette.
-     * @param brukSafeListeFilter Hvis true, prosesser kun behandlingIder fra forhåndsanalysert SAFE-liste (alle 5091).
-     * @param brukDel1ListeFilter Hvis true, prosesser kun behandlingIder fra Del 1 liste (1 behandling, 1 A003 = 2849 saker).
-     *                            Del 1 har prioritet over brukSafeListeFilter hvis begge er true.
+     * @param brukSafeListeFilter Hvis true, prosesser kun behandlingIder fra forhåndsanalysert SAFE-liste.
      * @param saksnummer Hvis oppgitt, prosesser kun behandlinger for denne fagsaken. Nyttig for testing av én sak.
      */
     @PostMapping("/kjør")
@@ -37,32 +44,23 @@ class RettOppFeilMedlPerioderController(
         @RequestParam(required = false, defaultValue = "1000") batchStørrelse: Int,
         @RequestParam(required = false, defaultValue = "0") startFraBehandlingId: Long,
         @RequestParam(required = false, defaultValue = "false") brukSafeListeFilter: Boolean,
-        @RequestParam(required = false, defaultValue = "false") brukDel1ListeFilter: Boolean,
         @RequestParam(required = false) saksnummer: String?
     ): ResponseEntity<Map<String, Any>> {
-        val filter = when {
-            brukDel1ListeFilter -> rettOppFeilMedlPerioderJob.del1SafeIds
-            brukSafeListeFilter -> rettOppFeilMedlPerioderJob.knownSafeIds
-            else -> null
-        }
-        val filterNavn = when {
-            brukDel1ListeFilter -> "Del1"
-            brukSafeListeFilter -> "Safe"
-            else -> "ingen"
-        }
-        log.info { "Starter RettOppFeilMedlPerioderJob (dryRun=$dryRun, antallFeilFørStopp=$antallFeilFørStopp, batchStørrelse=$batchStørrelse, startFraBehandlingId=$startFraBehandlingId, filter=$filterNavn (${filter?.size ?: 0}), saksnummer=${saksnummer ?: "alle"})" }
+        val filter = if (brukSafeListeFilter) rettOppFeilMedlPerioderJob.knownSafeIds else null
+        val filterNavn = if (brukSafeListeFilter) "Safe" else "ingen"
 
-        rettOppFeilMedlPerioderJob.kjørAsynkront(dryRun, antallFeilFørStopp, batchStørrelse, startFraBehandlingId, filter, brukDel1ListeFilter, saksnummer)
+        log.info { "Starter RettOppFeilMedlPerioderJob Del 2 (dryRun=$dryRun, antallFeilFørStopp=$antallFeilFørStopp, batchStørrelse=$batchStørrelse, startFraBehandlingId=$startFraBehandlingId, filter=$filterNavn (${filter?.size ?: 0}), saksnummer=${saksnummer ?: "alle"})" }
+
+        rettOppFeilMedlPerioderJob.kjørAsynkront(dryRun, antallFeilFørStopp, batchStørrelse, startFraBehandlingId, filter, saksnummer)
 
         return ResponseEntity.ok(
             mapOf(
-                "melding" to "Job startet",
+                "melding" to "Job startet (Del 2)",
                 "dryRun" to dryRun,
                 "antallFeilFørStopp" to antallFeilFørStopp,
                 "batchStørrelse" to batchStørrelse,
                 "startFraBehandlingId" to startFraBehandlingId,
                 "brukSafeListeFilter" to brukSafeListeFilter,
-                "brukDel1ListeFilter" to brukDel1ListeFilter,
                 "filterNavn" to filterNavn,
                 "filterStørrelse" to (filter?.size ?: 0),
                 "saksnummer" to (saksnummer ?: "alle")

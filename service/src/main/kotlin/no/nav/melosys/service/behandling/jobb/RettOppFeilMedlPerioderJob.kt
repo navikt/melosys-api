@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.sed.EessiService
@@ -28,14 +29,15 @@ private val log = KotlinLogging.logger { }
 /**
  * Job for å rette opp saker som ble feilaktig oppdatert av AvsluttArt13BehandlingJobb.
  *
- * Scenario 1 (X008/X006):
- * - Fagsak har status LOVVALG_AVKLART
- * - Behandlingsresultat er HENLEGGELSE (indikerer at saken ble annullert via X008/X006)
- * - Det finnes INGEN NY_VURDERING på fagsaken
+ * Feil 1 Del 2: Fagsaker med flere behandlinger der A003 har blitt ugyldiggjort (X008/X006).
  *
- * Denne jobben finner berørte saker og retter opp:
- * - Saksstatus settes tilbake til ANNULLERT
- * - MEDL-periode settes til avvist
+ * Del 2a: Siste behandling har resultat REGISTRERT_UNNTAK
+ * - Saksstatus endres IKKE (det finnes en gyldig periode fra siste behandling)
+ * - Kun MEDL-perioder på HENLEGGELSE-behandlinger settes til avvist
+ *
+ * Del 2b: Alle behandlinger har resultat HENLEGGELSE
+ * - Saksstatus settes til ANNULLERT
+ * - Alle MEDL-perioder settes til avvist
  */
 @Component
 class RettOppFeilMedlPerioderJob(
@@ -60,11 +62,8 @@ class RettOppFeilMedlPerioderJob(
     val knownSafeIds: Set<Long> = loadVerificationList("/rett-opp-feil-medl/safe-behandling-ids.json")
     private val knownUnsafeIds: Set<Long> = loadVerificationList("/rett-opp-feil-medl/unsafe-behandling-ids.json")
 
-    /**
-     * Del 1: SAFE med nøyaktig 1 behandling og 1 A003.
-     * Dette er de enkleste sakene som kan fikses automatisk.
-     */
-    val del1SafeIds: Set<Long> = loadVerificationList("/rett-opp-feil-medl/del1-safe-1-behandling-ids.json")
+    /** Holder styr på hvilke fagsaker vi allerede har prosessert i denne kjøringen */
+    private val prosesserteFagsaker = mutableSetOf<String>()
 
     private fun loadVerificationList(resourcePath: String): Set<Long> {
         return try {
@@ -113,10 +112,9 @@ class RettOppFeilMedlPerioderJob(
         batchStørrelse: Int = 1000,
         startFraBehandlingId: Long = 0,
         behandlingIderFilter: Set<Long>? = null,
-        verifiserDel1Kriterie: Boolean = false,
         saksnummerFilter: String? = null
     ) {
-        kjør(dryRun, antallFeilFørStopp, batchStørrelse, startFraBehandlingId, behandlingIderFilter, verifiserDel1Kriterie, saksnummerFilter)
+        kjør(dryRun, antallFeilFørStopp, batchStørrelse, startFraBehandlingId, behandlingIderFilter, saksnummerFilter)
     }
 
     @Synchronized
@@ -127,12 +125,12 @@ class RettOppFeilMedlPerioderJob(
         batchStørrelse: Int = 1000,
         startFraBehandlingId: Long = 0,
         behandlingIderFilter: Set<Long>? = null,
-        verifiserDel1Kriterie: Boolean = false,
         saksnummerFilter: String? = null
     ) = runAsSystem {
         sakerFunnet.clear()
+        prosesserteFagsaker.clear()
         jobMonitor.execute(antallFeilFørStopp) {
-            log.info { "Starter RettOppFeilMedlPerioderJob (dryRun=$dryRun, batchStørrelse=$batchStørrelse, startFraBehandlingId=$startFraBehandlingId, filter=${behandlingIderFilter?.size ?: "ingen"}, verifiserDel1Kriterie=$verifiserDel1Kriterie, saksnummer=${saksnummerFilter ?: "alle"})" }
+            log.info { "Starter RettOppFeilMedlPerioderJob Del 2 (dryRun=$dryRun, batchStørrelse=$batchStørrelse, startFraBehandlingId=$startFraBehandlingId, filter=${behandlingIderFilter?.size ?: "ingen"}, saksnummer=${saksnummerFilter ?: "alle"})" }
 
             val pageable = PageRequest.of(0, batchStørrelse)
             val berørteBehandlingIder = rettOppFeilMedlPerioderRepository.finnBehandlingIderMedFeilStatus(startFraBehandlingId, pageable)
@@ -154,7 +152,7 @@ class RettOppFeilMedlPerioderJob(
                 runCatching {
                     val behandling = rettOppFeilMedlPerioderRepository.findById(behandlingId).orElse(null)
                     if (behandling != null) {
-                        behandleEnSak(behandling, dryRun, verifiserDel1Kriterie, saksnummerFilter)
+                        behandleEnSak(behandling, dryRun, saksnummerFilter)
                     } else {
                         log.warn { "Kunne ikke finne behandling med id $behandlingId" }
                     }
@@ -168,7 +166,7 @@ class RettOppFeilMedlPerioderJob(
         }
     }
 
-    private fun JobStatus.behandleEnSak(behandling: Behandling, dryRun: Boolean, verifiserDel1Kriterie: Boolean, saksnummerFilter: String?) {
+    private fun JobStatus.behandleEnSak(behandling: Behandling, dryRun: Boolean, saksnummerFilter: String?) {
         val fagsak = behandling.fagsak
 
         // Filtrer på saksnummer hvis oppgitt
@@ -177,121 +175,287 @@ class RettOppFeilMedlPerioderJob(
             return
         }
 
-        val arkivsakID = fagsak.gsakSaksnummer
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
-
-        val sedDokument = behandling.finnSedDokument()
-        val sedInfoFraDb = sedDokument.orElse(null)?.let {
-            SedInfo(rinaSaksnummer = it.rinaSaksnummer, rinaDokumentID = it.rinaDokumentID, sedType = it.sedType?.name)
+        // Unngå å prosessere samme fagsak flere ganger (kan ha flere HENLEGGELSE-behandlinger)
+        if (fagsak.saksnummer in prosesserteFagsaker) {
+            log.debug { "Fagsak ${fagsak.saksnummer} er allerede prosessert i denne kjøringen, hopper over" }
+            filtrertBort++
+            return
         }
-        val alleSederFraEessi = hentAlleSederFraEessi(arkivsakID, sedDokument.orElse(null)?.rinaSaksnummer)
-        val medlSammenligningInfo = hentOgSammenlignMedlPerioder(behandling, behandlingsresultat)
+        prosesserteFagsaker.add(fagsak.saksnummer)
 
-        // Opprett context med grunndata - A003/behandling-telling legges til etter arkivsak-sjekk
-        fun createContext(antallA003: Int = 0, antallBehandlinger: Int = 0) = BehandlingContext(
-            behandling = behandling,
-            arkivsakID = arkivsakID,
-            sedInfoFraDb = sedInfoFraDb,
-            alleSederFraEessi = alleSederFraEessi,
-            medlSammenligningInfo = medlSammenligningInfo,
-            antallA003 = antallA003,
-            antallBehandlinger = antallBehandlinger
-        )
+        val arkivsakID = fagsak.gsakSaksnummer
 
-        // Sjekk arkivsak-ID først (før vi har A003-telling)
+        // Sjekk arkivsak-ID først
         if (arkivsakID == null) {
             log.warn { "Sak ${fagsak.saksnummer} mangler gsakSaksnummer, hopper over" }
             manglerArkivsakId++
-            sakerFunnet.add(createContext().toRapportEntry(RapportUtfall.MANGLER_ARKIVSAK_ID))
+            sakerFunnet.add(createBasicRapportEntry(behandling, RapportUtfall.MANGLER_ARKIVSAK_ID))
             return
         }
 
-        // Beregn A003/behandling-telling
+        // Hent SEDer fra EESSI for å telle A003
+        val sedDokument = behandling.finnSedDokument()
+        val alleSederFraEessi = hentAlleSederFraEessi(arkivsakID, sedDokument.orElse(null)?.rinaSaksnummer)
         val antallA003 = alleSederFraEessi.count { it.sedType == "A003" }
         val antallBehandlinger = fagsak.behandlinger.size
-        val ctx = createContext(antallA003, antallBehandlinger)
-        val runtimeSafe = antallA003 <= antallBehandlinger
 
-        // Sjekk mot forhåndsanalyserte lister
-        if (runtimeSafe && behandling.id in knownUnsafeIds) {
-            log.warn { "MISMATCH: Behandling ${behandling.id} er SAFE nå ($antallA003 A003 <= $antallBehandlinger beh), men var UNSAFE i forhåndsanalyse" }
-            tilstandMismatch++
-            sakerFunnet.add(ctx.toRapportEntry(
-                RapportUtfall.TILSTAND_ENDRET,
-                "Runtime SAFE ($antallA003 A003 <= $antallBehandlinger beh), men var UNSAFE i forhåndsanalyse. Manuell fiks?"
-            ))
-            return
-        }
-
-        if (!runtimeSafe && behandling.id in knownSafeIds) {
-            log.warn { "MISMATCH: Behandling ${behandling.id} er UNSAFE nå ($antallA003 A003 > $antallBehandlinger beh), men var SAFE i forhåndsanalyse" }
-            tilstandMismatch++
-            sakerFunnet.add(ctx.toRapportEntry(
-                RapportUtfall.TILSTAND_ENDRET,
-                "Runtime UNSAFE ($antallA003 A003 > $antallBehandlinger beh), men var SAFE i forhåndsanalyse. Data endret?"
-            ))
+        // Del 2 krever mer enn 1 behandling
+        if (antallBehandlinger <= 1) {
+            log.debug { "Fagsak ${fagsak.saksnummer} har kun 1 behandling, ikke Del 2 kriterie" }
+            ikkeDel2Kriterie++
+            sakerFunnet.add(createBasicRapportEntry(behandling, RapportUtfall.IKKE_DEL2_KRITERIE,
+                "Del 2 krever mer enn 1 behandling, men fant $antallBehandlinger", antallA003, antallBehandlinger))
             return
         }
 
         // A003 ubalanse - kan ikke fikses trygt
+        val runtimeSafe = antallA003 <= antallBehandlinger
         if (!runtimeSafe) {
-            log.info { "Behandling ${behandling.id} (sak ${ctx.saksnummer}) er UNSAFE: $antallA003 A003 > $antallBehandlinger behandlinger" }
+            log.info { "Fagsak ${fagsak.saksnummer} er UNSAFE: $antallA003 A003 > $antallBehandlinger behandlinger" }
             unsafeA003Ubalanse++
-            sakerFunnet.add(ctx.toRapportEntry(
-                RapportUtfall.UNSAFE_A003_UBALANSE,
-                "A003 count ($antallA003) > behandling count ($antallBehandlinger)"
-            ))
+            sakerFunnet.add(createBasicRapportEntry(behandling, RapportUtfall.UNSAFE_A003_UBALANSE,
+                "A003 count ($antallA003) > behandling count ($antallBehandlinger)", antallA003, antallBehandlinger))
             return
         }
 
-        // Del 1 verifisering: Krever nøyaktig 1 behandling og 1 A003
-        if (verifiserDel1Kriterie && (antallBehandlinger != 1 || antallA003 != 1)) {
-            log.info { "Behandling ${behandling.id} (sak ${ctx.saksnummer}) oppfyller ikke Del 1 kriterier: $antallBehandlinger behandlinger, $antallA003 A003 (krever 1 av hver)" }
-            ikkeDel1Kriterie++
-            sakerFunnet.add(ctx.toRapportEntry(
-                RapportUtfall.IKKE_DEL1_KRITERIE,
-                "Del 1 krever 1 behandling og 1 A003, men fant $antallBehandlinger behandlinger og $antallA003 A003"
-            ))
+        // Hent behandlingsresultat for alle behandlinger på fagsaken
+        val alleBehandlingerMedResultat = fagsak.behandlinger
+            .map { beh ->
+                val resultat = try {
+                    behandlingsresultatService.hentBehandlingsresultat(beh.id)
+                } catch (e: Exception) {
+                    log.warn { "Kunne ikke hente behandlingsresultat for behandling ${beh.id}: ${e.message}" }
+                    null
+                }
+                beh to resultat
+            }
+            .filter { it.second != null }
+            .map { it.first to it.second!! }
+            .sortedBy { it.first.registrertDato }
+
+        if (alleBehandlingerMedResultat.isEmpty()) {
+            log.warn { "Fagsak ${fagsak.saksnummer} har ingen behandlinger med resultat" }
             return
         }
 
-        // Sjekk EESSI invalidering med feilhåndtering
-        val erInvalidert: Boolean? = try {
-            erSedInvalidertIEessi(behandling, arkivsakID)
-        } catch (e: Exception) {
-            log.error(e) { "Kunne ikke sjekke EESSI for behandling ${behandling.id} (arkivsak $arkivsakID)" }
-            eessiFeil++
-            jobMonitor.registerException(e)
-            sakerFunnet.add(ctx.toRapportEntry(RapportUtfall.EESSI_FEIL, e.message))
-            null
+        // Finn siste behandling og kategoriser
+        val sisteBehandling = alleBehandlingerMedResultat.last()
+        val sisteResultatType = sisteBehandling.second.type
+
+        val henleggelseBehandlinger = alleBehandlingerMedResultat.filter { it.second.type == Behandlingsresultattyper.HENLEGGELSE }
+        val alleErHenleggelse = alleBehandlingerMedResultat.all { it.second.type == Behandlingsresultattyper.HENLEGGELSE }
+        val sisteErRegistrertUnntak = sisteResultatType == Behandlingsresultattyper.REGISTRERT_UNNTAK
+
+        log.info { "Fagsak ${fagsak.saksnummer}: ${alleBehandlingerMedResultat.size} behandlinger, " +
+            "${henleggelseBehandlinger.size} HENLEGGELSE, siste resultat=$sisteResultatType" }
+
+        // Kategoriser og prosesser
+        when {
+            sisteErRegistrertUnntak -> {
+                // Del 2a: Siste behandling er REGISTRERT_UNNTAK
+                prosesserDel2a(fagsak.saksnummer, henleggelseBehandlinger, arkivsakID, dryRun, antallA003, antallBehandlinger)
+            }
+            alleErHenleggelse -> {
+                // Del 2b: Alle behandlinger er HENLEGGELSE
+                prosesserDel2b(fagsak.saksnummer, fagsak, alleBehandlingerMedResultat, arkivsakID, dryRun, antallA003, antallBehandlinger)
+            }
+            else -> {
+                // Del 2 Annet: Blandet resultat - manuell vurdering
+                log.info { "Fagsak ${fagsak.saksnummer} har blandet resultat - krever manuell vurdering" }
+                del2Annet++
+                sakerFunnet.add(createBasicRapportEntry(behandling, RapportUtfall.DEL2_ANNET,
+                    "Blandet resultat: siste=$sisteResultatType, ${henleggelseBehandlinger.size} HENLEGGELSE av ${alleBehandlingerMedResultat.size}",
+                    antallA003, antallBehandlinger))
+            }
+        }
+    }
+
+    /**
+     * Del 2a: Siste behandling har REGISTRERT_UNNTAK.
+     * - Saksstatus endres IKKE
+     * - Kun MEDL-perioder på HENLEGGELSE-behandlinger avvises
+     */
+    private fun JobStatus.prosesserDel2a(
+        saksnummer: String,
+        henleggelseBehandlinger: List<Pair<Behandling, no.nav.melosys.domain.Behandlingsresultat>>,
+        arkivsakID: Long,
+        dryRun: Boolean,
+        antallA003: Int,
+        antallBehandlinger: Int
+    ) {
+        log.info { "Del 2a: Fagsak $saksnummer - siste behandling er REGISTRERT_UNNTAK, prosesserer ${henleggelseBehandlinger.size} HENLEGGELSE-behandlinger" }
+
+        henleggelseBehandlinger.forEach { (beh, resultat) ->
+            // Sjekk at denne behandlingens SED er invalidert i EESSI
+            val erInvalidert = try {
+                erSedInvalidertIEessi(beh, arkivsakID)
+            } catch (e: Exception) {
+                log.error(e) { "Kunne ikke sjekke EESSI for behandling ${beh.id}" }
+                eessiFeil++
+                jobMonitor.registerException(e)
+                sakerFunnet.add(createBasicRapportEntry(beh, RapportUtfall.EESSI_FEIL, e.message, antallA003, antallBehandlinger))
+                return@forEach
+            }
+
+            if (!erInvalidert) {
+                log.info { "Behandling ${beh.id} på sak $saksnummer er ikke invalidert i EESSI, hopper over" }
+                ikkeInvalidertIEessi++
+                sakerFunnet.add(createBasicRapportEntry(beh, RapportUtfall.IKKE_INVALIDERT_I_EESSI, null, antallA003, antallBehandlinger))
+                return@forEach
+            }
+
+            val medlPerioder = resultat.lovvalgsperioder
+                .filter { it.medlPeriodeID != null }
+                .map { MedlPeriodeInfo(medlPeriodeId = it.medlPeriodeID, fom = it.fom, tom = it.tom) }
+
+            if (medlPerioder.isEmpty()) {
+                log.info { "Behandling ${beh.id} på sak $saksnummer har ingen MEDL-perioder å avvise" }
+                return@forEach
+            }
+
+            skalRettesOpp++
+            log.info { "Del 2a: Behandling ${beh.id} (sak $saksnummer) skal avvise ${medlPerioder.size} MEDL-perioder (saksstatus endres IKKE)" }
+
+            if (!dryRun) {
+                rettOppBehandling(resultat, endreStatus = false, saksnummer = saksnummer)
+                rettetOpp++
+            }
+
+            sakerFunnet.add(createBasicRapportEntry(beh, RapportUtfall.DEL2A_RETTET, null, antallA003, antallBehandlinger, !dryRun, medlPerioder))
+        }
+    }
+
+    /**
+     * Del 2b: Alle behandlinger er HENLEGGELSE.
+     * - Saksstatus settes til ANNULLERT
+     * - Alle MEDL-perioder avvises
+     */
+    private fun JobStatus.prosesserDel2b(
+        saksnummer: String,
+        fagsak: no.nav.melosys.domain.Fagsak,
+        alleBehandlingerMedResultat: List<Pair<Behandling, no.nav.melosys.domain.Behandlingsresultat>>,
+        arkivsakID: Long,
+        dryRun: Boolean,
+        antallA003: Int,
+        antallBehandlinger: Int
+    ) {
+        log.info { "Del 2b: Fagsak $saksnummer - alle ${alleBehandlingerMedResultat.size} behandlinger er HENLEGGELSE" }
+
+        // Sjekk at minst én behandling er invalidert i EESSI
+        val invalidertBehandlinger = mutableListOf<Pair<Behandling, no.nav.melosys.domain.Behandlingsresultat>>()
+
+        alleBehandlingerMedResultat.forEach { (beh, resultat) ->
+            val erInvalidert = try {
+                erSedInvalidertIEessi(beh, arkivsakID)
+            } catch (e: Exception) {
+                log.error(e) { "Kunne ikke sjekke EESSI for behandling ${beh.id}" }
+                eessiFeil++
+                jobMonitor.registerException(e)
+                false
+            }
+
+            if (erInvalidert) {
+                invalidertBehandlinger.add(beh to resultat)
+            } else {
+                log.info { "Behandling ${beh.id} på sak $saksnummer er ikke invalidert i EESSI" }
+                ikkeInvalidertIEessi++
+                sakerFunnet.add(createBasicRapportEntry(beh, RapportUtfall.IKKE_INVALIDERT_I_EESSI, null, antallA003, antallBehandlinger))
+            }
         }
 
-        if (erInvalidert == null) return  // EESSI-feil allerede håndtert
-
-        if (!erInvalidert) {
-            log.info { "Behandling ${behandling.id} (sak ${ctx.saksnummer}) er ikke invalidert i EESSI, hopper over" }
-            ikkeInvalidertIEessi++
-            sakerFunnet.add(ctx.toRapportEntry(RapportUtfall.IKKE_INVALIDERT_I_EESSI))
+        if (invalidertBehandlinger.isEmpty()) {
+            log.info { "Ingen behandlinger på fagsak $saksnummer er invalidert i EESSI, hopper over" }
             return
         }
 
-        log.info { "Behandling ${behandling.id} (sak ${ctx.saksnummer}) er SAFE og invalidert - ${if (dryRun) "ville rettet opp" else "retter opp"}" }
+        // Samle alle MEDL-perioder som skal avvises
+        val alleMedlPerioder = invalidertBehandlinger.flatMap { (_, resultat) ->
+            resultat.lovvalgsperioder
+                .filter { it.medlPeriodeID != null }
+                .map { MedlPeriodeInfo(medlPeriodeId = it.medlPeriodeID, fom = it.fom, tom = it.tom) }
+        }
+
         skalRettesOpp++
-
-        val medlPerioder = behandlingsresultat.lovvalgsperioder
-            .filter { it.medlPeriodeID != null }
-            .map { MedlPeriodeInfo(medlPeriodeId = it.medlPeriodeID, fom = it.fom, tom = it.tom) }
+        log.info { "Del 2b: Fagsak $saksnummer skal settes til ANNULLERT og avvise ${alleMedlPerioder.size} MEDL-perioder" }
 
         if (!dryRun) {
-            rettOppSak(behandling, behandlingsresultat)
+            // Først sett saksstatus til ANNULLERT
+            fagsakService.oppdaterStatus(fagsak, Saksstatuser.ANNULLERT)
+            log.info { "Satt saksstatus til ANNULLERT for sak $saksnummer" }
+
+            // Avvis alle MEDL-perioder
+            invalidertBehandlinger.forEach { (_, resultat) ->
+                rettOppBehandling(resultat, endreStatus = false, saksnummer = saksnummer)
+            }
             rettetOpp++
         }
 
-        sakerFunnet.add(ctx.toRapportEntry(
-            utfall = RapportUtfall.SKAL_RETTES_OPP,
-            rettetOpp = !dryRun,
-            medlPerioder = medlPerioder
-        ))
+        // Legg til rapport-entry for første behandling med alle MEDL-perioder
+        val førsteBehandling = invalidertBehandlinger.first().first
+        sakerFunnet.add(createBasicRapportEntry(førsteBehandling, RapportUtfall.DEL2B_RETTET,
+            "Alle ${invalidertBehandlinger.size} behandlinger er HENLEGGELSE, saksstatus→ANNULLERT",
+            antallA003, antallBehandlinger, !dryRun, alleMedlPerioder))
+    }
+
+    /**
+     * Avviser MEDL-perioder for en behandling.
+     */
+    private fun rettOppBehandling(
+        behandlingsresultat: no.nav.melosys.domain.Behandlingsresultat,
+        endreStatus: Boolean,
+        saksnummer: String
+    ) {
+        behandlingsresultat.lovvalgsperioder.forEach { periode ->
+            if (periode.medlPeriodeID != null) {
+                try {
+                    medlPeriodeService.avvisPeriode(periode.medlPeriodeID)
+                    log.info { "Avvist MEDL-periode ${periode.medlPeriodeID} for sak $saksnummer" }
+                } catch (e: Exception) {
+                    log.error(e) { "Kunne ikke avvise MEDL-periode ${periode.medlPeriodeID}" }
+                    throw e
+                }
+            }
+        }
+    }
+
+    /**
+     * Lager en enkel rapport-entry for en behandling.
+     */
+    private fun createBasicRapportEntry(
+        behandling: Behandling,
+        utfall: RapportUtfall,
+        feilmelding: String? = null,
+        antallA003: Int = 0,
+        antallBehandlinger: Int = 0,
+        rettetOpp: Boolean = false,
+        medlPerioder: List<MedlPeriodeInfo> = emptyList()
+    ): FeilMedlPeriodeRapportEntry {
+        val fagsak = behandling.fagsak
+        val sedDokument = behandling.finnSedDokument()
+        val sedInfoFraDb = sedDokument.orElse(null)?.let {
+            SedInfo(rinaSaksnummer = it.rinaSaksnummer, rinaDokumentID = it.rinaDokumentID, sedType = it.sedType?.name)
+        }
+
+        return FeilMedlPeriodeRapportEntry(
+            saksnummer = fagsak.saksnummer,
+            gsakSaksnummer = fagsak.gsakSaksnummer,
+            saksstatus = fagsak.status.name,
+            sakstype = fagsak.type.name,
+            behandlingId = behandling.id,
+            behandlingType = behandling.type.name,
+            behandlingStatus = behandling.status.name,
+            registrertDato = behandling.registrertDato,
+            endretDato = behandling.endretDato,
+            sedInfo = sedInfoFraDb,
+            alleSederFraEessi = emptyList(),
+            medlPerioder = medlPerioder,
+            medlSammenligningInfo = null,
+            antallA003 = antallA003,
+            antallBehandlinger = antallBehandlinger,
+            utfall = utfall,
+            feilmelding = feilmelding,
+            rettetOpp = rettetOpp
+        )
     }
 
     /**
@@ -326,66 +490,6 @@ class RettOppFeilMedlPerioderJob(
             jobMonitor.registerException(e)
             emptyList()
         }
-    }
-
-    /**
-     * Henter MEDL-perioder fra MEDL-registeret og sammenligner med lovvalgsperiode fra behandlingen.
-     */
-    private fun hentOgSammenlignMedlPerioder(
-        behandling: Behandling,
-        behandlingsresultat: no.nav.melosys.domain.Behandlingsresultat
-    ): MedlSammenligningInfo? {
-        val fagsak = behandling.fagsak
-        val brukerAktørId = fagsak.finnBrukersAktørID() ?: return null
-
-        val lovvalgsperiode = behandlingsresultat.lovvalgsperioder.firstOrNull() ?: return null
-
-        val fnr = try {
-            persondataFasade.hentFolkeregisterident(brukerAktørId)
-        } catch (e: Exception) {
-            log.warn(e) { "Kunne ikke hente fnr for aktørId $brukerAktørId" }
-            jobMonitor.registerException(e)
-            return null
-        }
-
-        val medlPerioderFraRegister = try {
-            val saksopplysning = medlPeriodeService.hentPeriodeListe(
-                fnr,
-                lovvalgsperiode.fom?.minusYears(1),
-                lovvalgsperiode.tom?.plusYears(1)
-            )
-            val medlemskapDokument = saksopplysning.dokument as? no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
-            medlemskapDokument?.medlemsperiode?.map { periode ->
-                MedlRegisterPeriode(
-                    unntakId = periode.id,
-                    fom = periode.periode?.fom,
-                    tom = periode.periode?.tom,
-                    status = periode.status,
-                    lovvalg = periode.lovvalg,
-                    lovvalgsland = periode.land,
-                    dekning = periode.trygdedekning
-                )
-            } ?: emptyList()
-        } catch (e: Exception) {
-            log.warn(e) { "Kunne ikke hente MEDL-perioder fra register for fnr" }
-            jobMonitor.registerException(e)
-            emptyList()
-        }
-
-        val matchendeMedlPeriode = lovvalgsperiode.medlPeriodeID?.let { medlId ->
-            medlPerioderFraRegister.find { it.unntakId == medlId }
-        }
-
-        return MedlSammenligningInfo(
-            lovvalgsperiodeFraBehandling = LovvalgsperiodeInfo(
-                fom = lovvalgsperiode.fom,
-                tom = lovvalgsperiode.tom,
-                medlPeriodeId = lovvalgsperiode.medlPeriodeID,
-                lovvalgsland = lovvalgsperiode.lovvalgsland?.name,
-                bestemmelse = lovvalgsperiode.bestemmelse?.kode
-            ),
-            matchendeMedlPeriodeFraRegister = matchendeMedlPeriode
-        )
     }
 
     /**
@@ -424,28 +528,6 @@ class RettOppFeilMedlPerioderJob(
         return sedErAvbrutt && harX008EllerX006
     }
 
-    private fun rettOppSak(
-        behandling: Behandling,
-        behandlingsresultat: no.nav.melosys.domain.Behandlingsresultat
-    ) {
-        val fagsak = behandling.fagsak
-
-        fagsakService.oppdaterStatus(fagsak, Saksstatuser.ANNULLERT)
-        log.info { "Satt saksstatus til ANNULLERT for sak ${fagsak.saksnummer}" }
-
-        behandlingsresultat.lovvalgsperioder.forEach { periode ->
-            if (periode.medlPeriodeID != null) {
-                try {
-                    medlPeriodeService.avvisPeriode(periode.medlPeriodeID)
-                    log.info { "Avvist MEDL-periode ${periode.medlPeriodeID} for sak ${fagsak.saksnummer}" }
-                } catch (e: Exception) {
-                    log.error(e) { "Kunne ikke avvise MEDL-periode ${periode.medlPeriodeID}" }
-                    throw e
-                }
-            }
-        }
-    }
-
     private fun <T> runAsSystem(block: () -> T): T {
         val processId = UUID.randomUUID()
         ThreadLocalAccessInfo.beforeExecuteProcess(processId, "RettOppFeilMedlPerioderJob")
@@ -467,8 +549,8 @@ class RettOppFeilMedlPerioderJob(
         @Volatile var ikkeInvalidertIEessi: Int = 0,
         @Volatile var eessiFeil: Int = 0,
         @Volatile var unsafeA003Ubalanse: Int = 0,
-        @Volatile var tilstandMismatch: Int = 0,
-        @Volatile var ikkeDel1Kriterie: Int = 0,
+        @Volatile var ikkeDel2Kriterie: Int = 0,
+        @Volatile var del2Annet: Int = 0,
         @Volatile var filtrertBort: Int = 0,
         @Volatile var skalRettesOpp: Int = 0,
         @Volatile var rettetOpp: Int = 0,
@@ -481,8 +563,8 @@ class RettOppFeilMedlPerioderJob(
             ikkeInvalidertIEessi = 0
             eessiFeil = 0
             unsafeA003Ubalanse = 0
-            tilstandMismatch = 0
-            ikkeDel1Kriterie = 0
+            ikkeDel2Kriterie = 0
+            del2Annet = 0
             filtrertBort = 0
             skalRettesOpp = 0
             rettetOpp = 0
@@ -496,8 +578,8 @@ class RettOppFeilMedlPerioderJob(
             "ikkeInvalidertIEessi" to ikkeInvalidertIEessi,
             "eessiFeil" to eessiFeil,
             "unsafeA003Ubalanse" to unsafeA003Ubalanse,
-            "tilstandMismatch" to tilstandMismatch,
-            "ikkeDel1Kriterie" to ikkeDel1Kriterie,
+            "ikkeDel2Kriterie" to ikkeDel2Kriterie,
+            "del2Annet" to del2Annet,
             "filtrertBort" to filtrertBort,
             "skalRettesOpp" to skalRettesOpp,
             "rettetOpp" to rettetOpp,
@@ -571,57 +653,15 @@ class RettOppFeilMedlPerioderJob(
         val matchendeMedlPeriodeFraRegister: MedlRegisterPeriode?
     )
 
-    /**
-     * Context-klasse som samler all informasjon som trengs for å lage rapport-entries.
-     * Brukes for å unngå duplisering av FeilMedlPeriodeRapportEntry-konstruksjon.
-     */
-    private data class BehandlingContext(
-        val behandling: Behandling,
-        val arkivsakID: Long?,
-        val sedInfoFraDb: SedInfo?,
-        val alleSederFraEessi: List<EessiSedInfo>,
-        val medlSammenligningInfo: MedlSammenligningInfo?,
-        val antallA003: Int = 0,
-        val antallBehandlinger: Int = 0
-    ) {
-        val fagsak get() = behandling.fagsak
-        val saksnummer get() = fagsak.saksnummer
-
-        fun toRapportEntry(
-            utfall: RapportUtfall,
-            feilmelding: String? = null,
-            rettetOpp: Boolean = false,
-            medlPerioder: List<MedlPeriodeInfo> = emptyList()
-        ) = FeilMedlPeriodeRapportEntry(
-            saksnummer = saksnummer,
-            gsakSaksnummer = arkivsakID,
-            saksstatus = fagsak.status.name,
-            sakstype = fagsak.type.name,
-            behandlingId = behandling.id,
-            behandlingType = behandling.type.name,
-            behandlingStatus = behandling.status.name,
-            registrertDato = behandling.registrertDato,
-            endretDato = behandling.endretDato,
-            sedInfo = sedInfoFraDb,
-            alleSederFraEessi = alleSederFraEessi,
-            medlPerioder = medlPerioder,
-            medlSammenligningInfo = medlSammenligningInfo,
-            antallA003 = antallA003,
-            antallBehandlinger = antallBehandlinger,
-            utfall = utfall,
-            feilmelding = feilmelding,
-            rettetOpp = rettetOpp
-        )
-    }
-
     enum class RapportUtfall {
         MANGLER_ARKIVSAK_ID,
         IKKE_INVALIDERT_I_EESSI,
         EESSI_FEIL,
         UNSAFE_A003_UBALANSE,
-        TILSTAND_ENDRET,
-        IKKE_DEL1_KRITERIE,     // Runtime viser at saken ikke oppfyller Del 1 kriterier (1 beh, 1 A003)
-        SKAL_RETTES_OPP
+        IKKE_DEL2_KRITERIE,     // Kun 1 behandling (Del 1 er ferdig)
+        DEL2_ANNET,             // Blandet resultat - krever manuell vurdering
+        DEL2A_RETTET,           // Siste behandling er REGISTRERT_UNNTAK - kun MEDL avvist
+        DEL2B_RETTET            // Alle behandlinger er HENLEGGELSE - saksstatus + MEDL rettet
     }
 
     companion object {
