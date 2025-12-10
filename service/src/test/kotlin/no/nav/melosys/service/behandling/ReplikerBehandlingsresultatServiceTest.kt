@@ -1499,6 +1499,55 @@ class ReplikerBehandlingsresultatServiceTest {
 
 
     @Test
+    fun `replikerLovvalgsperioder - trygdeavgiftsperioder collection er ikke delt mellom original og replika`() {
+        val tidligsteInaktiveBehandling = Behandling.forTest {
+            id = 1L
+            fagsak {
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+        }
+        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+
+        val lovvalgsperiodeOriginal = opprettLovvalgsperiode().apply {
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.PLIKTIG
+        }
+        behandlingsresultatOriginal.lovvalgsperioder.add(lovvalgsperiodeOriginal)
+
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+            fagsak {
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
+
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+
+        val behandlingsresultatReplika = slot.captured
+        val lovvalgsperiodeReplika = behandlingsresultatReplika.lovvalgsperioder.first()
+
+        // Verifiser at trygdeavgiftsperioder-samlingen IKKE er samme instans (shared reference bug fix)
+        (lovvalgsperiodeReplika.trygdeavgiftsperioder !== lovvalgsperiodeOriginal.trygdeavgiftsperioder) shouldBe true
+
+        // Verifiser at endringer i replika ikke påvirker original
+        lovvalgsperiodeReplika.trygdeavgiftsperioder.clear()
+        lovvalgsperiodeOriginal.trygdeavgiftsperioder shouldHaveSize 0 // Original var tom fra start
+
+        // Verifiser at vi kan legge til i replika uten å påvirke original
+        val nyTrygdeavgiftsperiode = lagTrygdeavgiftsperiode()
+        lovvalgsperiodeReplika.trygdeavgiftsperioder.add(nyTrygdeavgiftsperiode)
+        lovvalgsperiodeReplika.trygdeavgiftsperioder shouldHaveSize 1
+        lovvalgsperiodeOriginal.trygdeavgiftsperioder shouldHaveSize 0
+    }
+
+    @Test
     fun `replikerMedlemskapsperioderBasertPåBehandlingstype inkluderer opphørt for MANGLENDE_INNBETALING_TRYGDEAVGIFT`() {
         val inneværendeÅr = LocalDate.now().year
 

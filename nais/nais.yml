@@ -37,6 +37,7 @@ spec:
           - "NAVident"
         groups:
           - id: {{GROUP_MELOSYS_INNLOGGING}}
+          - id: {{GROUP_MELOSYS_INNLOGGING_VAKT}}
   accessPolicy:
     inbound:
       rules:

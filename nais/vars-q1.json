@@ -6,6 +6,7 @@
   "APP_NAME": "melosys-q1",
   "TENANT_URL": "trygdeetaten.no",
   "GROUP_MELOSYS_INNLOGGING": "52981246-8032-40f0-863a-2bd2844f2d57",
+  "GROUP_MELOSYS_INNLOGGING_VAKT": "fb706914-eede-490a-b9cd-2458983e24c1",
   "APP_NAME_FRONTEND": "melosys-web-q1",
   "APP_NAME_TRYGDEAVTALE": "melosys-trygdeavtale-q1",
   "APP_NAME_PDL": "pdl-api",
