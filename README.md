@@ -16,18 +16,13 @@ Som database, kafka, oauth-server samt eksterne integrasjoner. Trenger også [na
 for å koble til enkelte eksterne tjenester.<br>
 Bruk profil `local-mock`
 
-### Lokal utvikling mot q1 cluster
+### Lokal utvikling mot q1 eller q2 cluster
 Man må ha melosys-web kjørende lokalt først<br>
-Bruk profil `local-q1`<br>
-Men trenger å sette følgende env variabler
-* AZURE_APP_CLIENT_ID
-* AZURE_APP_CLIENT_SECRET
-* melosysDB.password
-* systemuser.password
-
-Man henter ut disse verdiene fra melosys-api-q1 poden på dev-fss ved å kjøre:<br>
-`env | grep AZURE_APP_CLIENT_ID` og `env | grep AZURE_APP_CLIENT_SECRET`<br>
-`melosysDB.password` og `systemuser.password` finner man i [vault](https://vault.adeo.no/ui/vault/secrets/kv%2Fpreprod%2Ffss/show/melosys-q1/teammelosys)
+Bruk profil `local-q1|q2`<br>
+Sørg for at du er logget inn på kubernetes på dev-fss clusteret.
+Men trenger å sette følgende env variabler. Verdier kan hentes fra nais console.
+* MELOSYSDB_PASSWORD
+* SRV_PASSWORD
 
 ## Feature Toggles
 
