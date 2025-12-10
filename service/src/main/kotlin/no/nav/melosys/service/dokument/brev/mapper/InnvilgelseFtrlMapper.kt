@@ -4,9 +4,9 @@ import io.getunleash.Unleash
 import jakarta.transaction.Transactional
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.Vilkaarsresultat
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Periode
@@ -65,7 +65,7 @@ class InnvilgelseFtrlMapper(
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
             ).contains(trygdedekning) && avslåttMedlemskapsIPensjonsdel,
             avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
-            trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat),
+            trygdeavgiftMottaker = utledTrygdeavgiftsmottaker(behandlingsresultat),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.hentBehandling()),
             begrunnelse = hentBegrunnelse(behandlingsresultat.vilkaarsresultater),
             begrunnelseAnnenGrunnFritekst = hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater),
@@ -78,6 +78,7 @@ class InnvilgelseFtrlMapper(
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
             ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
             betalingsvalg = hentBetalingsvalg(brevbestilling.behandlingNonNull()),
+            harMedlemskapsperioderIForegåendeÅr = utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat)
         )
     }
 
@@ -94,7 +95,7 @@ class InnvilgelseFtrlMapper(
             avgiftsperioder = mapAvgiftsperioderPensjonist(behandlingsresultat),
             medlemskapsperiode = mapMedlemskapsPerioder(behandlingsresultat).single(),
             bestemmelse = medlemskapsperiode.hentBestemmelse(),
-            trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat),
+            trygdeavgiftMottaker = utledTrygdeavgiftsmottaker(behandlingsresultat),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandling),
             begrunnelse = hentBegrunnelse(behandlingsresultat.vilkaarsresultater),
             begrunnelseAnnenGrunnFritekst = hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater),
@@ -108,6 +109,7 @@ class InnvilgelseFtrlMapper(
             ikkeYrkesaktivOppholdType = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD),
             ikkeYrkesaktivRelasjonType = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON),
             betalingsvalg = hentBetalingsvalg(behandling),
+            harMedlemskapsperioderIForegåendeÅr = utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat)
         )
     }
 
@@ -152,14 +154,18 @@ class InnvilgelseFtrlMapper(
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
             betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(behandlingsresultat),
             ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
-            harMedlemskapsperioderIForegåendeÅr = if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
-                behandlingsresultat.utledAvgiftspliktigperioderFom()?.let { fom ->
-                    fom.year < LocalDate.now().year
-                } ?: false
-            } else {
-                false
-            }
+            harMedlemskapsperioderIForegåendeÅr = utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat)
         )
+    }
+
+    private fun utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat: Behandlingsresultat): Boolean {
+        return if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
+            behandlingsresultat.utledAvgiftspliktigperioderFom()?.let { fom ->
+                fom.year < LocalDate.now().year
+            } ?: false
+        } else {
+            false
+        }
     }
 
     internal fun mapIkkeYrkesaktivFrivillig(brevbestilling: DokgenBrevbestilling): InnvilgelseFtrlIkkeYrkesaktivFrivillig {
@@ -245,13 +251,7 @@ class InnvilgelseFtrlMapper(
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
             betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(behandlingsresultat),
             ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
-            harMedlemskapsperioderIForegåendeÅr = if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
-                behandlingsresultat.utledAvgiftspliktigperioderFom()?.let { fom ->
-                    fom.year < LocalDate.now().year
-                } ?: false
-            } else {
-                false
-            }
+            harMedlemskapsperioderIForegåendeÅr = utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat)
         )
     }
 

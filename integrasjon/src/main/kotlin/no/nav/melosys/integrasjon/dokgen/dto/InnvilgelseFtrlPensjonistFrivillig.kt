@@ -39,6 +39,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
     val trygdeavtaleLand: List<String>,
     val ukjentSluttdatoMedlemskapsperiode: Boolean,
     val betalingsvalg: Betalingstype,
+    val harMedlemskapsperioderIForegåendeÅr: Boolean
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
@@ -62,7 +63,8 @@ class InnvilgelseFtrlPensjonistFrivillig(
         land: List<String>,
         trygdeavtaleLand: List<String>,
         ukjentSluttdatoMedlemskapsperiode: Boolean,
-        betalingsvalg: Betalingstype
+        betalingsvalg: Betalingstype,
+        harMedlemskapsperioderIForegåendeÅr: Boolean
     ) : this(
         brevbestilling,
         behandlingstype,
@@ -85,7 +87,8 @@ class InnvilgelseFtrlPensjonistFrivillig(
         land,
         trygdeavtaleLand,
         ukjentSluttdatoMedlemskapsperiode,
-        betalingsvalg
+        betalingsvalg,
+        harMedlemskapsperioderIForegåendeÅr
     )
 }
 
