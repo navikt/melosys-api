@@ -44,7 +44,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
 
     @BeforeEach
     fun setup() {
-        unleash.enableAll()
+        unleash.disableAll()
         informasjonTrygdeavgiftMapper = InformasjonTrygdeavgiftMapper(
             mockDokgenMapperDatahenter,
             mockHelseutgiftDekkesPeriodeService,
@@ -56,34 +56,43 @@ internal class InformasjonTrygdeavgiftMapperTest {
 
     @Test
     fun `mapInformasjonTrygdeavgift populer alle felter`() {
+        unleash.enableAll()
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
-            behandling = DokgenTestData.lagBehandling()
+            behandling {
+                id = 1L
+                tema = Behandlingstema.PENSJONIST
+                fagsak {
+                    saksnummer = "MEL-123"
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.EU_EOS
+                }
+            }
             helseutgiftDekkesPeriode {
-                fomDato = LocalDate.EPOCH.plusMonths(1)
-                tomDato = LocalDate.EPOCH.plusMonths(4)
+                fomDato = LocalDate.now().withMonth(1)
+                tomDato = LocalDate.now().withMonth(4)
                 bostedLandkode = Land_iso2.DK
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.EPOCH.plusMonths(1)
-                    periodeTil = LocalDate.EPOCH.plusMonths(4)
+                    periodeFra = LocalDate.now().withMonth(1)
+                    periodeTil = LocalDate.now().withMonth(4)
                     trygdesats = BigDecimal.ZERO
                     trygdeavgiftsbeløpMd = BigDecimal(0.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.EPOCH.plusMonths(1)
-                        tomDato = LocalDate.EPOCH.plusMonths(4)
+                        fomDato = LocalDate.now().withMonth(1)
+                        tomDato = LocalDate.now().withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     }
                 }
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.EPOCH.plusMonths(5)
-                    periodeTil = LocalDate.EPOCH.plusMonths(8)
+                    periodeFra = LocalDate.now().withMonth(5)
+                    periodeTil = LocalDate.now().withMonth(8)
                     trygdesats = BigDecimal(0.05)
                     trygdeavgiftsbeløpMd = BigDecimal(500.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.EPOCH.plusMonths(1)
-                        tomDato = LocalDate.EPOCH.plusMonths(4)
+                        fomDato = LocalDate.now().withMonth(1)
+                        tomDato = LocalDate.now().withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
@@ -111,7 +120,8 @@ internal class InformasjonTrygdeavgiftMapperTest {
     }
 
     @Test
-    fun `mapInformasjonTrygdeavgift helseutgiftdekkes tilbake i tid`() {
+    fun `mapInformasjonTrygdeavgift helseutgiftdekkes tilbake i tid TOGGLE på`() {
+        unleash.enableAll()
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
             behandling {
@@ -124,30 +134,30 @@ internal class InformasjonTrygdeavgiftMapperTest {
                 }
             }
             helseutgiftDekkesPeriode {
-                fomDato = LocalDate.EPOCH.plusMonths(1).minusYears(1)
-                tomDato = LocalDate.EPOCH.plusMonths(4)
+                fomDato = LocalDate.now().minusYears(1).withMonth(1).minusYears(1)
+                tomDato = LocalDate.now().withMonth(4)
                 bostedLandkode = Land_iso2.DK
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.EPOCH.plusMonths(1)
-                    periodeTil = LocalDate.EPOCH.plusMonths(4)
+                    periodeFra = LocalDate.now().minusYears(1).withMonth(1)
+                    periodeTil = LocalDate.now().withMonth(4)
                     trygdesats = BigDecimal.ZERO
                     trygdeavgiftsbeløpMd = BigDecimal(0.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.EPOCH.plusMonths(1)
-                        tomDato = LocalDate.EPOCH.plusMonths(4)
+                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
+                        tomDato = LocalDate.now().withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     }
                 }
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.EPOCH.plusMonths(5)
-                    periodeTil = LocalDate.EPOCH.plusMonths(8)
+                    periodeFra = LocalDate.now().minusYears(1).withMonth(5)
+                    periodeTil = LocalDate.now().withMonth(8)
                     trygdesats = BigDecimal(0.05)
                     trygdeavgiftsbeløpMd = BigDecimal(500.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.EPOCH.plusMonths(1)
-                        tomDato = LocalDate.EPOCH.plusMonths(4)
+                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
+                        tomDato = LocalDate.now().withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
@@ -175,13 +185,87 @@ internal class InformasjonTrygdeavgiftMapperTest {
     }
 
     @Test
-    fun `mapInformasjonTrygdeavgift ingen trygdeavgiftMottaker`() {
+    fun `mapInformasjonTrygdeavgift helseutgiftdekkes tilbake i tid TOGGLE av`() {
+        unleash.disableAll()
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
-            behandling = DokgenTestData.lagBehandling()
+            behandling {
+                id = 1L
+                tema = Behandlingstema.PENSJONIST
+                fagsak {
+                    saksnummer = "MEL-123"
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.EU_EOS
+                }
+            }
             helseutgiftDekkesPeriode {
-                fomDato = LocalDate.EPOCH.plusMonths(1)
-                tomDato = LocalDate.EPOCH.plusMonths(4)
+                fomDato = LocalDate.now().minusYears(1).withMonth(1).minusYears(1)
+                tomDato = LocalDate.now().withMonth(4)
+                bostedLandkode = Land_iso2.DK
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.now().minusYears(1).withMonth(1)
+                    periodeTil = LocalDate.now().withMonth(4)
+                    trygdesats = BigDecimal.ZERO
+                    trygdeavgiftsbeløpMd = BigDecimal(0.0)
+                    grunnlagInntekstperiode {
+                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
+                        tomDato = LocalDate.now().withMonth(4)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    }
+                }
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.now().minusYears(1).withMonth(5)
+                    periodeTil = LocalDate.now().withMonth(8)
+                    trygdesats = BigDecimal(0.05)
+                    trygdeavgiftsbeløpMd = BigDecimal(500.0)
+                    grunnlagInntekstperiode {
+                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
+                        tomDato = LocalDate.now().withMonth(4)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    }
+                }
+            }
+        }
+
+
+        every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(any()) } returns behandlingsresultat.helseutgiftDekkesPeriode
+        every { mockTrygdeavgiftMottakerService.getTrygdeavgiftMottaker(any<List<Trygdeavgiftsperiode>>()) } returns Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
+
+
+        informasjonTrygdeavgiftMapper.mapInformasjonTrygdeavgift(lagBrevbestilling()).shouldNotBeNull().apply {
+            fomDato shouldBe behandlingsresultat.hentHelseutgiftDekkesPeriode().fomDato
+            tomDato shouldBe behandlingsresultat.hentHelseutgiftDekkesPeriode().tomDato
+            trygdeavgiftMottaker shouldBe Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
+            betalingsvalg shouldBe Betalingstype.TREKK
+            bostedLand shouldBe "Danmark"
+            erNordisk shouldBe true
+            avgiftsperioder shouldHaveSize 2
+            harAvgiftspliktigePerioderIForegåendeÅr shouldBe false
+        }
+    }
+
+    @Test
+    fun `mapInformasjonTrygdeavgift ingen trygdeavgiftMottaker`() {
+        unleash.enableAll()
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            behandling {
+                id = 1L
+                tema = Behandlingstema.PENSJONIST
+                fagsak {
+                    saksnummer = "MEL-123"
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.EU_EOS
+                }
+            }
+            helseutgiftDekkesPeriode {
+                fomDato = LocalDate.now().withMonth(1)
+                tomDato = LocalDate.now().withMonth(4)
                 bostedLandkode = Land_iso2.DK
             }
         }
@@ -209,7 +293,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
             .medBehandling(DokgenTestData.lagBehandling())
             .medPersonDokument(DokgenTestData.lagPersondata())
             .medPersonMottaker(DokgenTestData.lagPersondata())
-            .medForsendelseMottatt(Instant.EPOCH)
+            .medForsendelseMottatt(Instant.now())
             .medSaksbehandlerNavn(SAKSBEHANDLER_NAVN)
             .build()
     }
