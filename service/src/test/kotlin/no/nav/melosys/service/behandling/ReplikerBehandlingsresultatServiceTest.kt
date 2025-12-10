@@ -3,7 +3,9 @@ package no.nav.melosys.service.behandling
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.withClue
+import io.kotest.inspectors.forAll
 import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldExist
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.nulls.shouldBeNull
@@ -227,16 +229,9 @@ class ReplikerBehandlingsresultatServiceTest {
         val inntektsperioderOriginal = behandlingsresultatOriginal.hentInntektsperioder().toList()
         val inntektsperioderReplika = behandlingsresultatReplika.hentInntektsperioder().toList()
 
-        inntektsperioderOriginal.forEach { originalInntektsperiode ->
-            withClue("Forventet matchende Inntektsperiode for: $originalInntektsperiode") {
-                inntektsperioderReplika.any { replikertInntektsperiode ->
-                    replikertInntektsperiode.id == null &&
-                        replikertInntektsperiode.fomDato == originalInntektsperiode.fomDato &&
-                        replikertInntektsperiode.tomDato == originalInntektsperiode.tomDato &&
-                        replikertInntektsperiode.type == originalInntektsperiode.type &&
-                        replikertInntektsperiode.avgiftspliktigMndInntekt == originalInntektsperiode.avgiftspliktigMndInntekt &&
-                        replikertInntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt == originalInntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt
-                } shouldBe true
+        inntektsperioderOriginal.forAll { original ->
+            withClue("Forventet matchende Inntektsperiode for: $original") {
+                inntektsperioderReplika.shouldExist { it.erReplikaAv(original) }
             }
         }
 
@@ -253,21 +248,9 @@ class ReplikerBehandlingsresultatServiceTest {
         val trygdeavgiftsperioderOriginal = behandlingsresultatOriginal.trygdeavgiftsperioder.toList()
         val trygdeavgiftsperioderReplika = behandlingsresultatReplika.trygdeavgiftsperioder.toList()
 
-        trygdeavgiftsperioderOriginal.forEach { originalTrygdeavgiftsperiode ->
-            withClue("Forventet matchende Trygdeavgiftsperiode for: $originalTrygdeavgiftsperiode") {
-                trygdeavgiftsperioderReplika.any { replikertTrygdeavgiftsperiode ->
-                    replikertTrygdeavgiftsperiode.id == null &&
-                        replikertTrygdeavgiftsperiode.periodeFra == originalTrygdeavgiftsperiode.periodeFra &&
-                        replikertTrygdeavgiftsperiode.periodeTil == originalTrygdeavgiftsperiode.periodeTil &&
-                        replikertTrygdeavgiftsperiode.trygdeavgiftsbeløpMd == originalTrygdeavgiftsperiode.trygdeavgiftsbeløpMd &&
-                        replikertTrygdeavgiftsperiode.trygdesats == originalTrygdeavgiftsperiode.trygdesats &&
-                        replikertTrygdeavgiftsperiode.grunnlagMedlemskapsperiode?.id == null &&
-                        replikertTrygdeavgiftsperiode.grunnlagMedlemskapsperiode?.trygdedekning == originalTrygdeavgiftsperiode.grunnlagMedlemskapsperiode?.trygdedekning &&
-                        replikertTrygdeavgiftsperiode.grunnlagInntekstperiode?.id == null &&
-                        replikertTrygdeavgiftsperiode.grunnlagInntekstperiode?.avgiftspliktigMndInntekt == originalTrygdeavgiftsperiode.grunnlagInntekstperiode?.avgiftspliktigMndInntekt &&
-                        replikertTrygdeavgiftsperiode.grunnlagSkatteforholdTilNorge?.id == null &&
-                        replikertTrygdeavgiftsperiode.grunnlagSkatteforholdTilNorge?.skatteplikttype == originalTrygdeavgiftsperiode.grunnlagSkatteforholdTilNorge?.skatteplikttype
-                } shouldBe true
+        trygdeavgiftsperioderOriginal.forAll { original ->
+            withClue("Forventet matchende Trygdeavgiftsperiode for: $original") {
+                trygdeavgiftsperioderReplika.shouldExist { it.erReplikaAv(original) }
             }
         }
     }
@@ -432,16 +415,9 @@ class ReplikerBehandlingsresultatServiceTest {
         val inntektsperioderOriginal = behandlingsresultatOriginal.hentInntektsperioder().toList()
         val inntektsperioderReplika = behandlingsresultatReplika.hentInntektsperioder().toList()
 
-        inntektsperioderOriginal.forEach { originalInntektsperiode ->
-            withClue("Forventet matchende Inntektsperiode for: $originalInntektsperiode") {
-                inntektsperioderReplika.any { replikertInntektsperiode ->
-                        replikertInntektsperiode.id == null &&
-                            replikertInntektsperiode.fomDato == originalInntektsperiode.fomDato &&
-                            replikertInntektsperiode.tomDato == originalInntektsperiode.tomDato &&
-                            replikertInntektsperiode.type == originalInntektsperiode.type &&
-                            replikertInntektsperiode.avgiftspliktigMndInntekt == originalInntektsperiode.avgiftspliktigMndInntekt &&
-                            replikertInntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt == originalInntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt
-                } shouldBe true
+        inntektsperioderOriginal.forAll { original ->
+            withClue("Forventet matchende Inntektsperiode for: $original") {
+                inntektsperioderReplika.shouldExist { it.erReplikaAv(original) }
             }
         }
 
@@ -458,21 +434,9 @@ class ReplikerBehandlingsresultatServiceTest {
         val trygdeavgiftsperioderOriginal = behandlingsresultatOriginal.trygdeavgiftsperioder.toList()
         val trygdeavgiftsperioderReplika = behandlingsresultatReplika.trygdeavgiftsperioder.toList()
 
-        trygdeavgiftsperioderOriginal.forEach { originalTrygdeavgiftsperiode ->
-            withClue("Forventet matchende Trygdeavgiftsperiode for: $originalTrygdeavgiftsperiode") {
-                trygdeavgiftsperioderReplika.any { replikertTrygdeavgiftsperiode ->
-                    replikertTrygdeavgiftsperiode.id == null &&
-                        replikertTrygdeavgiftsperiode.periodeFra == originalTrygdeavgiftsperiode.periodeFra &&
-                        replikertTrygdeavgiftsperiode.periodeTil == originalTrygdeavgiftsperiode.periodeTil &&
-                        replikertTrygdeavgiftsperiode.trygdeavgiftsbeløpMd == originalTrygdeavgiftsperiode.trygdeavgiftsbeløpMd &&
-                        replikertTrygdeavgiftsperiode.trygdesats == originalTrygdeavgiftsperiode.trygdesats &&
-                        replikertTrygdeavgiftsperiode.grunnlagMedlemskapsperiode?.id == null &&
-                        replikertTrygdeavgiftsperiode.grunnlagMedlemskapsperiode?.trygdedekning == originalTrygdeavgiftsperiode.grunnlagMedlemskapsperiode?.trygdedekning &&
-                        replikertTrygdeavgiftsperiode.grunnlagInntekstperiode?.id == null &&
-                        replikertTrygdeavgiftsperiode.grunnlagInntekstperiode?.avgiftspliktigMndInntekt == originalTrygdeavgiftsperiode.grunnlagInntekstperiode?.avgiftspliktigMndInntekt &&
-                        replikertTrygdeavgiftsperiode.grunnlagSkatteforholdTilNorge?.id == null &&
-                        replikertTrygdeavgiftsperiode.grunnlagSkatteforholdTilNorge?.skatteplikttype == originalTrygdeavgiftsperiode.grunnlagSkatteforholdTilNorge?.skatteplikttype
-                } shouldBe true
+        trygdeavgiftsperioderOriginal.forAll { original ->
+            withClue("Forventet matchende Trygdeavgiftsperiode for: $original") {
+                trygdeavgiftsperioderReplika.shouldExist { it.erReplikaAv(original) }
             }
         }
     }
@@ -1596,4 +1560,31 @@ class ReplikerBehandlingsresultatServiceTest {
         replikerteStatuser shouldContain InnvilgelsesResultat.OPPHØRT
         replikerteStatuser shouldNotContain InnvilgelsesResultat.AVSLAATT
     }
+
+    private fun Trygdeavgiftsperiode.erReplikaAv(original: Trygdeavgiftsperiode): Boolean =
+        id == null &&
+            periodeFra == original.periodeFra &&
+            periodeTil == original.periodeTil &&
+            trygdeavgiftsbeløpMd == original.trygdeavgiftsbeløpMd &&
+            trygdesats == original.trygdesats &&
+            grunnlagMedlemskapsperiode.erReplikaAv(original.grunnlagMedlemskapsperiode) &&
+            grunnlagInntekstperiode.erReplikaAv(original.grunnlagInntekstperiode) &&
+            grunnlagSkatteforholdTilNorge.erReplikaAv(original.grunnlagSkatteforholdTilNorge)
+
+    private fun Medlemskapsperiode?.erReplikaAv(original: Medlemskapsperiode?): Boolean =
+        this?.id == null && this?.trygdedekning == original?.trygdedekning
+
+    private fun Inntektsperiode?.erReplikaAv(original: Inntektsperiode?): Boolean =
+        this?.id == null &&
+            this?.fomDato == original?.fomDato &&
+            this?.tomDato == original?.tomDato &&
+            this?.type == original?.type &&
+            this?.avgiftspliktigMndInntekt == original?.avgiftspliktigMndInntekt &&
+            this?.isArbeidsgiversavgiftBetalesTilSkatt == original?.isArbeidsgiversavgiftBetalesTilSkatt
+
+    private fun SkatteforholdTilNorge?.erReplikaAv(original: SkatteforholdTilNorge?): Boolean =
+        this?.id == null &&
+            this?.fomDato == original?.fomDato &&
+            this?.tomDato == original?.tomDato &&
+            this?.skatteplikttype == original?.skatteplikttype
 }
