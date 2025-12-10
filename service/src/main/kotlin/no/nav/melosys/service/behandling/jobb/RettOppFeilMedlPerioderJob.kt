@@ -304,24 +304,45 @@ class RettOppFeilMedlPerioderJob(
                 return@forEach
             }
 
-            val medlPerioder = resultat.lovvalgsperioder
+            // Hent MEDL-status for hver periode og filtrer bort de som allerede er AVST
+            val medlPerioderMedStatus = resultat.lovvalgsperioder
                 .filter { it.medlPeriodeID != null }
-                .map { MedlPeriodeInfo(medlPeriodeId = it.medlPeriodeID, fom = it.fom, tom = it.tom) }
+                .map { periode ->
+                    val status = medlPeriodeService.hentPeriodeStatus(periode.medlPeriodeID)
+                    val skalRettes = status != "AVST"
+                    val grunn = if (!skalRettes) "Allerede AVST" else null
+                    MedlPeriodeInfo(
+                        medlPeriodeId = periode.medlPeriodeID,
+                        fom = periode.fom,
+                        tom = periode.tom,
+                        status = status,
+                        skalRettes = skalRettes,
+                        hoppetOverGrunn = grunn
+                    )
+                }
 
-            if (medlPerioder.isEmpty()) {
-                log.info { "Behandling ${beh.id} på sak $saksnummer har ingen MEDL-perioder å avvise" }
+            val perioderSomSkalRettes = medlPerioderMedStatus.filter { it.skalRettes }
+            val perioderHoppetOver = medlPerioderMedStatus.filter { !it.skalRettes }
+
+            if (perioderHoppetOver.isNotEmpty()) {
+                log.info { "Behandling ${beh.id} på sak $saksnummer: ${perioderHoppetOver.size} MEDL-perioder hoppet over (allerede AVST)" }
+            }
+
+            if (perioderSomSkalRettes.isEmpty()) {
+                log.info { "Behandling ${beh.id} på sak $saksnummer har ingen MEDL-perioder å avvise (alle er AVST)" }
+                sakerFunnet.add(createBasicRapportEntry(beh, RapportUtfall.DEL2A_RETTET, "Alle perioder allerede AVST", antallA003, antallBehandlinger, false, medlPerioderMedStatus))
                 return@forEach
             }
 
             skalRettesOpp++
-            log.info { "Del 2a: Behandling ${beh.id} (sak $saksnummer) skal avvise ${medlPerioder.size} MEDL-perioder (saksstatus endres IKKE)" }
+            log.info { "Del 2a: Behandling ${beh.id} (sak $saksnummer) skal avvise ${perioderSomSkalRettes.size} MEDL-perioder (saksstatus endres IKKE)" }
 
             if (!dryRun) {
-                rettOppBehandling(resultat, endreStatus = false, saksnummer = saksnummer)
+                rettOppBehandlingMedStatusSjekk(resultat, saksnummer)
                 rettetOpp++
             }
 
-            sakerFunnet.add(createBasicRapportEntry(beh, RapportUtfall.DEL2A_RETTET, null, antallA003, antallBehandlinger, !dryRun, medlPerioder))
+            sakerFunnet.add(createBasicRapportEntry(beh, RapportUtfall.DEL2A_RETTET, null, antallA003, antallBehandlinger, !dryRun, medlPerioderMedStatus))
         }
     }
 
@@ -368,24 +389,43 @@ class RettOppFeilMedlPerioderJob(
             return
         }
 
-        // Samle alle MEDL-perioder som skal avvises
-        val alleMedlPerioder = invalidertBehandlinger.flatMap { (_, resultat) ->
+        // Samle alle MEDL-perioder med status-sjekk
+        val alleMedlPerioderMedStatus = invalidertBehandlinger.flatMap { (_, resultat) ->
             resultat.lovvalgsperioder
                 .filter { it.medlPeriodeID != null }
-                .map { MedlPeriodeInfo(medlPeriodeId = it.medlPeriodeID, fom = it.fom, tom = it.tom) }
+                .map { periode ->
+                    val status = medlPeriodeService.hentPeriodeStatus(periode.medlPeriodeID)
+                    val skalRettes = status != "AVST"
+                    val grunn = if (!skalRettes) "Allerede AVST" else null
+                    MedlPeriodeInfo(
+                        medlPeriodeId = periode.medlPeriodeID,
+                        fom = periode.fom,
+                        tom = periode.tom,
+                        status = status,
+                        skalRettes = skalRettes,
+                        hoppetOverGrunn = grunn
+                    )
+                }
+        }
+
+        val perioderSomSkalRettes = alleMedlPerioderMedStatus.filter { it.skalRettes }
+        val perioderHoppetOver = alleMedlPerioderMedStatus.filter { !it.skalRettes }
+
+        if (perioderHoppetOver.isNotEmpty()) {
+            log.info { "Fagsak $saksnummer: ${perioderHoppetOver.size} MEDL-perioder hoppet over (allerede AVST)" }
         }
 
         skalRettesOpp++
-        log.info { "Del 2b: Fagsak $saksnummer skal settes til ANNULLERT og avvise ${alleMedlPerioder.size} MEDL-perioder" }
+        log.info { "Del 2b: Fagsak $saksnummer skal settes til ANNULLERT og avvise ${perioderSomSkalRettes.size} MEDL-perioder" }
 
         if (!dryRun) {
             // Først sett saksstatus til ANNULLERT
             fagsakService.oppdaterStatus(fagsak, Saksstatuser.ANNULLERT)
             log.info { "Satt saksstatus til ANNULLERT for sak $saksnummer" }
 
-            // Avvis alle MEDL-perioder
+            // Avvis alle MEDL-perioder (med status-sjekk)
             invalidertBehandlinger.forEach { (_, resultat) ->
-                rettOppBehandling(resultat, endreStatus = false, saksnummer = saksnummer)
+                rettOppBehandlingMedStatusSjekk(resultat, saksnummer)
             }
             rettetOpp++
         }
@@ -393,23 +433,27 @@ class RettOppFeilMedlPerioderJob(
         // Legg til rapport-entry for første behandling med alle MEDL-perioder
         val førsteBehandling = invalidertBehandlinger.first().first
         sakerFunnet.add(createBasicRapportEntry(førsteBehandling, RapportUtfall.DEL2B_RETTET,
-            "Alle ${invalidertBehandlinger.size} behandlinger er HENLEGGELSE, saksstatus→ANNULLERT",
-            antallA003, antallBehandlinger, !dryRun, alleMedlPerioder))
+            "Alle ${invalidertBehandlinger.size} behandlinger er HENLEGGELSE, saksstatus→ANNULLERT, ${perioderSomSkalRettes.size} perioder å rette",
+            antallA003, antallBehandlinger, !dryRun, alleMedlPerioderMedStatus))
     }
 
     /**
-     * Avviser MEDL-perioder for en behandling.
+     * Avviser MEDL-perioder for en behandling, men sjekker først at status ikke er AVST.
      */
-    private fun rettOppBehandling(
+    private fun rettOppBehandlingMedStatusSjekk(
         behandlingsresultat: no.nav.melosys.domain.Behandlingsresultat,
-        endreStatus: Boolean,
         saksnummer: String
     ) {
         behandlingsresultat.lovvalgsperioder.forEach { periode ->
             if (periode.medlPeriodeID != null) {
                 try {
+                    val status = medlPeriodeService.hentPeriodeStatus(periode.medlPeriodeID)
+                    if (status == "AVST") {
+                        log.info { "MEDL-periode ${periode.medlPeriodeID} for sak $saksnummer har allerede status AVST, hopper over" }
+                        return@forEach
+                    }
                     medlPeriodeService.avvisPeriode(periode.medlPeriodeID)
-                    log.info { "Avvist MEDL-periode ${periode.medlPeriodeID} for sak $saksnummer" }
+                    log.info { "Avvist MEDL-periode ${periode.medlPeriodeID} for sak $saksnummer (var: $status)" }
                 } catch (e: Exception) {
                     log.error(e) { "Kunne ikke avvise MEDL-periode ${periode.medlPeriodeID}" }
                     throw e
@@ -627,7 +671,10 @@ class RettOppFeilMedlPerioderJob(
     data class MedlPeriodeInfo(
         val medlPeriodeId: Long?,
         val fom: LocalDate?,
-        val tom: LocalDate?
+        val tom: LocalDate?,
+        val status: String? = null,
+        val skalRettes: Boolean = true,
+        val hoppetOverGrunn: String? = null
     )
 
     data class MedlRegisterPeriode(

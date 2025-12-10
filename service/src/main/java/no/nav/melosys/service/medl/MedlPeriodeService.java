@@ -143,6 +143,22 @@ public class MedlPeriodeService {
         avvisPeriode(medlPeriodeID, StatusaarsakMedl.AVVIST);
     }
 
+    /**
+     * Henter nåværende status for en MEDL-periode.
+     * @return status-kode (GYLD, AVST, UAVK) eller null hvis perioden ikke finnes
+     */
+    public String hentPeriodeStatus(Long medlPeriodeID) {
+        if (medlPeriodeID == null) {
+            return null;
+        }
+        try {
+            return medlService.hentPeriodeStatus(medlPeriodeID);
+        } catch (Exception e) {
+            log.warn("Kunne ikke hente status for MEDL-periode {}: {}", medlPeriodeID, e.getMessage());
+            return null;
+        }
+    }
+
     public void avvisPeriodeFeilregistrert(long medlPeriodeID) {
         log.info("Avviser MEDL-periode {} med status feilregistrert", medlPeriodeID);
         avvisPeriode(medlPeriodeID, StatusaarsakMedl.FEILREGISTRERT);

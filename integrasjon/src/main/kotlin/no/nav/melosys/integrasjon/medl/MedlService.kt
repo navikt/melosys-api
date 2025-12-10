@@ -130,6 +130,14 @@ class MedlService(
         oppdaterPeriode(lovvalgsperiode!!, LovvalgMedl.FORL, kildedokumenttypeMedl!!, PeriodestatusMedl.UAVK)
     }
 
+    /**
+     * Henter nåværende status for en MEDL-periode.
+     * @return status-kode (GYLD, AVST, UAVK) eller null hvis perioden ikke finnes
+     */
+    fun hentPeriodeStatus(medlPeriodeID: Long): String? {
+        return hentEksisterendePeriode(medlPeriodeID).status
+    }
+
     fun avvisPeriode(medlPeriodeID: Long, årsak: StatusaarsakMedl) {
         val eksisterendePeriode = hentEksisterendePeriode(medlPeriodeID)
         val request = MedlemskapsunntakForPut(
