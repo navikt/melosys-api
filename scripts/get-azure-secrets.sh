@@ -19,4 +19,9 @@ if [ -z "$SECRET_NAME" ]; then
     exit 1
 fi
 
-kubectl get secret -n "$NAMESPACE" "$SECRET_NAME" -ojsonpath='{.data.AZURE_APP_CLIENT_SECRET}' | /usr/bin/base64 -d
+# Get both client ID and secret
+AZURE_APP_CLIENT_ID=$(kubectl get secret -n "$NAMESPACE" "$SECRET_NAME" -ojsonpath='{.data.AZURE_APP_CLIENT_ID}' | /usr/bin/base64 -d)
+AZURE_APP_CLIENT_SECRET=$(kubectl get secret -n "$NAMESPACE" "$SECRET_NAME" -ojsonpath='{.data.AZURE_APP_CLIENT_SECRET}' | /usr/bin/base64 -d)
+
+# Output in format: CLIENT_ID|CLIENT_SECRET
+echo "${AZURE_APP_CLIENT_ID}|${AZURE_APP_CLIENT_SECRET}"

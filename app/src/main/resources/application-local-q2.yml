@@ -143,7 +143,7 @@ spring:
 stsPolicy:
   url: classpath:stsPolicy.xml
 systemuser:
-  password: ${systemuser.password}
+  password: ${SRV_PASSWORD}
   username: srvmelosys
 tilgangsmaskinen:
   url: https://tilgangsmaskin.intern.dev.nav.no

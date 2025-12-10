@@ -56,13 +56,13 @@ class KubernetesAzureSecretLoader : EnvironmentPostProcessor {
 
         try {
             logInfo("Laster AZURE_APP_CLIENT_SECRET fra script...")
-            val clientSecret = executeShellScript(scriptPath, kubeloginPath, kubectlPath).trim()
+            val (clientId, clientSecret) = executeShellScript(scriptPath, kubeloginPath, kubectlPath).trim().split("|")
 
             if (clientSecret.isNotBlank()) {
-                applyClientSecret(environment, clientSecret)
-                logInfo("Lastet inn AZURE_APP_CLIENT_SECRET")
+                applyClientSecret(environment, clientSecret, clientId)
+                logInfo("Lastet inn AZURE_APP_CLIENT_SECRET og AZURE_APP_CLIENT_ID")
             } else {
-                logWarn("Tom AZURE_APP_CLIENT_SECRET returnert fra script")
+                logWarn("Tom AZURE_APP_CLIENT_SECRET eller AZURE_APP_CLIENT_ID returnert fra script")
             }
         } catch (e: Exception) {
             logError("Feilet med å hente AZURE_APP_CLIENT_SECRET: ${e.message}")
@@ -70,10 +70,12 @@ class KubernetesAzureSecretLoader : EnvironmentPostProcessor {
         }
     }
 
-    private fun applyClientSecret(environment: ConfigurableEnvironment, clientSecret: String) {
+    private fun applyClientSecret(environment: ConfigurableEnvironment, clientSecret: String, clientId: String) {
         val properties = mapOf(
             "AZURE_APP_CLIENT_SECRET" to clientSecret,
+            "AZURE_APP_CLIENT_ID" to clientId,
             "azure.client.secret" to clientSecret,
+            "azure.client.id" to clientId,
             "spring.security.oauth2.client.registration.azure.client-secret" to clientSecret
         )
 
