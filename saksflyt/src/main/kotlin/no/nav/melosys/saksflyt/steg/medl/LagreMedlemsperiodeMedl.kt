@@ -22,7 +22,7 @@ class LagreMedlemsperiodeMedl(
         val behandlingID = prosessinstans.hentBehandling.id
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
-        if(behandling.erEøsPensjonist()){
+        if(behandling.erEøsPensjonist() || behandling.fagsak.erLovvalg()){
             return
         }
 

@@ -70,6 +70,14 @@ class LovvalgsperiodeService(
         lovvalgsperiodeRepo.deleteById(lovvalgsperiodeId)
     }
 
+
+    @Transactional
+    fun slettLovvalgsperioder(behandlingsresultatID: Long) {
+        val behandlingsresultat = behandlingsresultatRepo.findById(behandlingsresultatID)
+            .orElseThrow { FunksjonellException("Fant ikke behandlingsresultat med id $behandlingsresultatID") }
+        behandlingsresultat.clearLovvalgsperioder()
+    }
+
     @Transactional
     fun lagreLovvalgsperioder(
         behandlingID: Long,

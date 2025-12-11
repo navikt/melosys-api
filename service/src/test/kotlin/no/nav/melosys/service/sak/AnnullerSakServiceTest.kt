@@ -9,10 +9,12 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
@@ -32,6 +34,9 @@ class AnnullerSakServiceTest {
     lateinit var medlemskapsperiodeService: MedlemskapsperiodeService
 
     @RelaxedMockK
+    lateinit var lovvalgsperiodeService: LovvalgsperiodeService
+
+    @RelaxedMockK
     lateinit var helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService
 
     @RelaxedMockK
@@ -49,6 +54,7 @@ class AnnullerSakServiceTest {
         val behandlingId = 12L
         val fagsak = Fagsak.forTest {
             this.saksnummer = saksnummer
+            type = Sakstyper.FTRL
             behandling {
                 id = behandlingId
                 status = Behandlingsstatus.OPPRETTET
@@ -67,6 +73,37 @@ class AnnullerSakServiceTest {
 
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingId) }
         verify { medlemskapsperiodeService.slettMedlemskapsperioder(behandlingId) }
+        verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.ANNULLERT) }
+        verify { prosessinstansService.opprettAnnullerFagsakProsessflyt(fagsak.finnAktivBehandlingIkkeÅrsavregning()) }
+    }
+
+    @Test
+    fun `annuller sak - ferdigstill oppgave, slett lovvalgsperioder, oppdater behandlingsresultatstatus og opprett prosess`() {
+        val saksnummer = "78945613"
+        val behandlingId = 12L
+        val fagsak = Fagsak.forTest {
+            this.saksnummer = saksnummer
+            type = Sakstyper.EU_EOS
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            behandling {
+                id = behandlingId
+                status = Behandlingsstatus.OPPRETTET
+            }
+        }
+
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = behandlingId
+        }
+
+        every { fagsakService.hentFagsak(saksnummer) } returns fagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
+
+
+        annullerSakService.annullerSak(saksnummer)
+
+
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingId) }
+        verify { lovvalgsperiodeService.slettLovvalgsperioder(behandlingId) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.ANNULLERT) }
         verify { prosessinstansService.opprettAnnullerFagsakProsessflyt(fagsak.finnAktivBehandlingIkkeÅrsavregning()) }
     }
@@ -100,4 +137,5 @@ class AnnullerSakServiceTest {
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.ANNULLERT) }
         verify { prosessinstansService.opprettAnnullerFagsakProsessflyt(fagsak.finnAktivBehandlingIkkeÅrsavregning()) }
     }
+
 }

@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.exception.FunksjonellException
@@ -33,7 +34,8 @@ class LagreLovvalgsperiodeMedl(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
         if (erIkkeGodkjentRegistreringUnntakFraMedlemskap(behandling, behandlingsresultat.utfallRegistreringUnntak) ||
-            (erUnntakTuristSkip(behandlingsresultat) && behandling.erFørstegangsvurdering())
+            (erUnntakTuristSkip(behandlingsresultat) && behandling.erFørstegangsvurdering()) ||
+            (behandling.erEøsPensjonist() || !erBehandlingEøsEllerTrygdeavtale(behandling))
         ) {
             return
         }
@@ -47,6 +49,10 @@ class LagreLovvalgsperiodeMedl(
         oppdaterLovvalgsperiode(behandling, lovvalgsperiode)
     }
 
+    private fun erBehandlingEøsEllerTrygdeavtale(behandling: Behandling): Boolean =
+        listOf(Sakstyper.EU_EOS, Sakstyper.TRYGDEAVTALE).contains(behandling.fagsak.type)
+
+
     private fun erUnntakTuristSkip(behandlingsresultat: Behandlingsresultat): Boolean =
         behandlingsresultat.oppfyllerVilkår(Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
 
@@ -55,7 +61,7 @@ class LagreLovvalgsperiodeMedl(
         utfallregistreringunntak: Utfallregistreringunntak?
     ): Boolean =
         saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) &&
-                utfallregistreringunntak == Utfallregistreringunntak.IKKE_GODKJENT
+            utfallregistreringunntak == Utfallregistreringunntak.IKKE_GODKJENT
 
     private fun finnOpprinneligMedlPeriodeID(behandling: Behandling): Long? {
         val opprinneligBehandling = behandling.opprinneligBehandling ?: run {

@@ -82,6 +82,7 @@ object ProsessflytDefinisjon {
         ANNULLER_SAK to ProsessFlyt(
             prosessType = ANNULLER_SAK,
             LAGRE_MEDLEMSKAPSPERIODE_MEDL,
+            LAGRE_LOVVALGSPERIODE_MEDL,
             KANSELLER_FAKTURASERIE,
             AVSLUTT_SAK_OG_BEHANDLING
         ),
