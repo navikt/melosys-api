@@ -11,6 +11,7 @@ import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -400,6 +401,10 @@ class ReplikerBehandlingsresultatServiceTest {
 
         behandlingsresultatOriginal.lovvalgsperioder shouldHaveSize 3
         val innvilgetLovvalgsperiodeOriginal = behandlingsresultatOriginal.lovvalgsperioder.first { it.erInnvilget() }
+        val innvilgetLovvalgsperiodeReplika = behandlingsresultatReplika.lovvalgsperioder.first { it.erInnvilget() }
+
+        innvilgetLovvalgsperiodeReplika.trygdeavgiftsperioder shouldNotBeSameInstanceAs innvilgetLovvalgsperiodeOriginal.trygdeavgiftsperioder
+
         behandlingsresultatReplika.lovvalgsperioder.single().apply {
             behandlingsresultat shouldBe behandlingsresultatReplika
             id shouldBe null

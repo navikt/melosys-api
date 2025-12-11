@@ -340,6 +340,9 @@ private fun replikerLovvalgsperioder(
     behandlingstype: Behandlingstyper
 ) {
     behandlingsresultatReplika.lovvalgsperioder = HashSet()
+    // harTrygdeavgift er til for å sjekke om lovvalgsperiodene som blir replikert har trygdeavgiftsperioder,
+    // og bruker det for å sette lovvalgsperiode id til null eller ikke. Hvis de har trygdeavgift kan vi ikke sette
+    // null helt enda. Det gjøres etter at trygdeavgiftsperiodene er replikert.
     val harTrygdeavgift =
         behandlingsresultatOrig.trygdeavgiftsperioder.isNotEmpty() && behandlingsresultatOrig.trygdeavgiftsperioder.all { it.grunnlagLovvalgsPeriode != null }
     var filtrertLovvalgsperioderOriginal = behandlingsresultatOrig.lovvalgsperioder.toList()
@@ -352,10 +355,10 @@ private fun replikerLovvalgsperioder(
         }
     }
 
-
     for (lovvalgsperiodeOriginal in filtrertLovvalgsperioderOriginal) {
         val lovvalgsperiodeReplika = BeanUtils.cloneBean(lovvalgsperiodeOriginal) as Lovvalgsperiode
         lovvalgsperiodeReplika.behandlingsresultat = behandlingsresultatReplika
+        lovvalgsperiodeReplika.trygdeavgiftsperioder = HashSet()
         if (!harTrygdeavgift) {
             lovvalgsperiodeReplika.id = null
         }
