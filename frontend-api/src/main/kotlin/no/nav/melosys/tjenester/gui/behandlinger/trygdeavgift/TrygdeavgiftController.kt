@@ -136,6 +136,13 @@ class TrygdeavgiftController(
         return ResponseEntity.ok(FakturamottakerDto(trygdeavgiftsberegningService.finnFakturamottakerNavn(behandlingID)))
     }
 
+    @GetMapping
+    fun hentTrygdeavgiftsperioder(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<List<TrygdeavgiftsperiodeDto>> {
+        aksesskontroll.autoriser(behandlingID)
+        val trygdeavgiftsperioder = trygdeavgiftService.hentTrygdeavgiftsperioderPåBehandlingsresultat(behandlingID)
+        return ResponseEntity.ok(trygdeavgiftsperioder.map { TrygdeavgiftsperiodeDto(it) })
+    }
+
     @DeleteMapping
     fun slettTrygdeavgiftsperioder(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Unit> {
         aksesskontroll.autoriser(behandlingID)

@@ -1,6 +1,7 @@
 package no.nav.melosys.service.avgift
 
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
@@ -26,6 +27,12 @@ class TrygdeavgiftService(
         return fagsak.behandlinger.any {
             harFakturerbarTrygdeavgift(behandlingsresultatService.hentBehandlingsresultat(it.id), sjekkFakturaserie)
         }
+    }
+
+    @Transactional
+    fun hentTrygdeavgiftsperioderPåBehandlingsresultat(behandlingID: Long): Set<Trygdeavgiftsperiode> {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        return behandlingsresultat.trygdeavgiftsperioder
     }
 
     @Transactional
