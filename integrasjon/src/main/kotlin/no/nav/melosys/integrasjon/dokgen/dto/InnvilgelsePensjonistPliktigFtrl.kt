@@ -35,7 +35,8 @@ class InnvilgelsePensjonistPliktigFtrl(
     val ukjentSluttdatoMedlemskapsperiode: Boolean,
     val ikkeYrkesaktivOppholdType: String?,
     val ikkeYrkesaktivRelasjonType: String?,
-    val betalingsvalg: Betalingstype
+    val betalingsvalg: Betalingstype,
+    val harMedlemskapsperioderIForegåendeÅr: Boolean
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
@@ -57,7 +58,8 @@ class InnvilgelsePensjonistPliktigFtrl(
         ukjentSluttdatoMedlemskapsperiode: Boolean,
         ikkeYrkesaktivOppholdType: String?,
         ikkeYrkesaktivRelasjonType: String?,
-        betalingsvalg: Betalingstype
+        betalingsvalg: Betalingstype,
+        harMedlemskapsperioderIForegåendeÅr: Boolean
     ) : this(
         brevbestilling,
         behandlingstype,
@@ -78,6 +80,7 @@ class InnvilgelsePensjonistPliktigFtrl(
         ukjentSluttdatoMedlemskapsperiode,
         ikkeYrkesaktivOppholdType,
         ikkeYrkesaktivRelasjonType,
-        betalingsvalg
+        betalingsvalg,
+        harMedlemskapsperioderIForegåendeÅr
     )
 }
