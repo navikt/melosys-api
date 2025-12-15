@@ -1,6 +1,6 @@
 # Mock Container Migration Progress
 
-## Status: Planning Complete
+## Status: Phase 2 Complete
 
 **Last Updated:** 2025-12-15
 
@@ -12,10 +12,10 @@ This document tracks the progress of migrating integration tests from in-process
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| Phase 1: Add Verification Endpoints | Not Started | Requires changes to melosys-docker-compose |
-| Phase 2: Create Testcontainer Setup | Not Started | |
-| Phase 3: Update Test Infrastructure | Not Started | |
-| Phase 4: Migrate Tests | Not Started | |
+| Phase 1: Add Verification Endpoints | In Progress | Delegated to melosys-docker-compose repo |
+| Phase 2: Create Testcontainer Setup | **Complete** | Container, DTOs, and Client created |
+| Phase 3: Update Test Infrastructure | Not Started | Blocked by Phase 1 |
+| Phase 4: Migrate Tests | Not Started | Blocked by Phase 1 & 3 |
 | Phase 5: Remove Duplicate Code | Not Started | |
 
 ## Detailed Progress
@@ -23,6 +23,7 @@ This document tracks the progress of migrating integration tests from in-process
 ### Phase 1: Add Verification Endpoints to melosys-mock
 
 **Repository:** `melosys-docker-compose/mock`
+**Status:** Delegated to another agent
 
 - [ ] Create `MockVerificationApi.kt` controller
   - [ ] `GET /testdata/verification/medl` - List all MEDL perioder
@@ -48,21 +49,31 @@ This document tracks the progress of migrating integration tests from in-process
 ### Phase 2: Create Testcontainer Setup
 
 **Repository:** `melosys-api-claude`
+**Status:** Complete ✅
 
-- [ ] Add Testcontainers dependency to `integrasjonstest/pom.xml`
-- [ ] Create `MelosysMockContainer.kt`
-  - [ ] Configure Docker image from GAR
-  - [ ] Configure health check wait strategy
-  - [ ] Configure exposed ports
-- [ ] Create DTOs for verification responses
-  - [ ] `MedlemskapsunntakDto`
-  - [ ] `SakDto`
-  - [ ] `OppgaveDto`
-  - [ ] `JournalpostDto`
-- [ ] Create `MockVerificationClient.kt`
-  - [ ] Methods for each verification endpoint
-  - [ ] Clear method
-- [ ] Test container startup locally
+- [x] Add Testcontainers dependency to `integrasjonstest/pom.xml` (already present v2.0.2)
+- [x] Create `MelosysMockContainer.kt`
+  - [x] Configure Docker image from GAR
+  - [x] Configure health check wait strategy
+  - [x] Configure exposed ports
+  - [x] Add logging with Slf4j
+- [x] Create DTOs for verification responses
+  - [x] `MedlemskapsunntakVerificationDto`
+  - [x] `SakVerificationDto`
+  - [x] `OppgaveVerificationDto`
+  - [x] `JournalpostVerificationDto`
+  - [x] Supporting DTOs (SporingsinformasjonDto, CountResponse, ClearResponse)
+- [x] Create `MockVerificationClient.kt`
+  - [x] Methods for each verification endpoint (medl, saker, oppgaver, journalposter)
+  - [x] SED verification methods (sedForRinaSak, allSedRepo)
+  - [x] Clear method
+  - [x] Health check method
+- [ ] Test container startup locally (blocked until Phase 1 verification endpoints are ready)
+
+**Files Created:**
+- `integrasjonstest/src/test/kotlin/no/nav/melosys/itest/mock/MelosysMockContainer.kt`
+- `integrasjonstest/src/test/kotlin/no/nav/melosys/itest/mock/MockVerificationDtos.kt`
+- `integrasjonstest/src/test/kotlin/no/nav/melosys/itest/mock/MockVerificationClient.kt`
 
 ### Phase 3: Update Test Infrastructure
 
@@ -115,7 +126,7 @@ This document tracks the progress of migrating integration tests from in-process
 
 | Blocker | Status | Resolution |
 |---------|--------|------------|
-| None identified | - | - |
+| Phase 1 must complete first | Active | Waiting for verification endpoints in melosys-mock |
 
 ## Decisions Made
 
@@ -124,6 +135,7 @@ This document tracks the progress of migrating integration tests from in-process
 | 2025-12-15 | Use existing melosys-mock Docker image | Eliminates duplication, ensures consistency |
 | 2025-12-15 | Add verification endpoints to mock | Enables HTTP-based repo verification |
 | 2025-12-15 | Use static container with `@Container` | Faster tests by reusing container |
+| 2025-12-15 | Delegate Phase 1 to melosys-docker-compose repo | Separation of concerns |
 
 ## Open Questions
 
