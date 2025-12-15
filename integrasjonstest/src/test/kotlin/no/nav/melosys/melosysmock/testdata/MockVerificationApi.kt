@@ -42,7 +42,20 @@ class MockVerificationApi(
             lovvalgsland = medl.lovvalgsland,
             lovvalg = medl.lovvalg,
             grunnlag = medl.grunnlag,
-            medlem = medl.medlem
+            medlem = medl.medlem,
+            sporingsinformasjon = medl.sporingsinformasjon?.let { sporing ->
+                SporingsinformasjonVerificationDto(
+                    versjon = sporing.versjon,
+                    registrert = sporing.registrert,
+                    besluttet = sporing.besluttet,
+                    kilde = sporing.kilde,
+                    kildedokument = sporing.kildedokument,
+                    opprettet = sporing.opprettet,
+                    opprettetAv = sporing.opprettetAv,
+                    sistEndret = sporing.sistEndret,
+                    sistEndretAv = sporing.sistEndretAv
+                )
+            }
         )
     }
 
@@ -255,7 +268,20 @@ data class MedlVerificationDto(
     val lovvalgsland: String? = null,
     val lovvalg: String? = null,
     val grunnlag: String? = null,
-    val medlem: Boolean? = null
+    val medlem: Boolean? = null,
+    val sporingsinformasjon: SporingsinformasjonVerificationDto? = null
+)
+
+data class SporingsinformasjonVerificationDto(
+    val versjon: Int? = null,
+    val registrert: LocalDate? = null,
+    val besluttet: LocalDate? = null,
+    val kilde: String? = null,
+    val kildedokument: String? = null,
+    val opprettet: java.time.LocalDateTime? = null,
+    val opprettetAv: String? = null,
+    val sistEndret: java.time.LocalDateTime? = null,
+    val sistEndretAv: String? = null
 )
 
 data class SakVerificationDto(

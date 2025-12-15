@@ -221,7 +221,7 @@ class YrkesaktivEosVedtakIT(
                 }
             }
 
-        MedlRepo.repo.values
+        mockVerificationClient.medl()
             .shouldHaveSize(1)
             .first()
             .apply {
@@ -404,7 +404,7 @@ class YrkesaktivEosVedtakIT(
                 }
             }
 
-        MedlRepo.repo.values
+        mockVerificationClient.medl()
             .shouldHaveSize(1)
             .first()
             .run {

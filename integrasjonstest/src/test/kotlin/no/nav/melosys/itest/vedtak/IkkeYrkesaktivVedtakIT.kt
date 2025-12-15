@@ -159,7 +159,7 @@ class IkkeYrkesaktivVedtakIT(
                 }
             }
 
-        MedlRepo.repo.values
+        mockVerificationClient.medl()
             .shouldHaveSize(1)
             .first()
             .apply {
@@ -289,7 +289,7 @@ class IkkeYrkesaktivVedtakIT(
                 }
             }
 
-        MedlRepo.repo.values
+        mockVerificationClient.medl()
             .shouldHaveSize(1)
             .first()
             .apply {
@@ -396,11 +396,10 @@ class IkkeYrkesaktivVedtakIT(
                 }
             }
 
-        MedlRepo.repo.values
+        mockVerificationClient.medl()
             .shouldHaveSize(1)
             .first()
             .apply {
-                println(toJsonNode.toPrettyString())
                 fraOgMed.shouldBe(LocalDate.of(2022, 1, 1))
                 tilOgMed.shouldBe(LocalDate.of(2022, 2, 1))
                 status.shouldBe("GYLD")

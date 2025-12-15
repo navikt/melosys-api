@@ -1,6 +1,6 @@
 # Mock Container Migration Progress
 
-## Status: Option B Phase 3 Complete - Ready for Test Migration
+## Status: Phase 4 Complete - Test Migration Done
 
 **Last Updated:** 2025-12-15
 
@@ -15,7 +15,7 @@ This document tracks the progress of migrating integration tests from in-process
 | Phase 1: Add Verification Endpoints | **Complete** | Added to in-process mock |
 | Phase 2: Create Testcontainer Setup | **Complete** | Container, DTOs, and Client created |
 | Phase 3: Update Test Infrastructure | **Complete** | MockVerificationApi and ComponentTestBase updated |
-| Phase 4: Migrate Tests | Not Started | Ready to begin |
+| Phase 4: Migrate Tests | **Complete** | All verification-based tests migrated |
 | Phase 5: Remove Duplicate Code | Not Started | After container migration |
 
 ## Architecture: Option B (Hybrid/Incremental)
@@ -45,7 +45,7 @@ We're using Option B which keeps the existing in-process mocks but adds HTTP ver
 
 Created `MockVerificationApi.kt` in `integrasjonstest/src/test/kotlin/no/nav/melosys/melosysmock/testdata/`:
 
-- [x] `GET /testdata/verification/medl` - List all MEDL perioder
+- [x] `GET /testdata/verification/medl` - List all MEDL perioder (with sporingsinformasjon)
 - [x] `GET /testdata/verification/medl/count` - Count MEDL perioder
 - [x] `GET /testdata/verification/sak` - List all saker
 - [x] `GET /testdata/verification/sak/count` - Count saker
@@ -79,17 +79,31 @@ Created `MockVerificationApi.kt` in `integrasjonstest/src/test/kotlin/no/nav/mel
 - [x] `MockVerificationDtos.kt` - DTOs for verification responses
 - [x] `MockVerificationClient.kt` - HTTP client for verification endpoints
 
-### Phase 4: Migrate Tests (Next Steps)
+### Phase 4: Migrate Tests
 
-Tests to migrate from direct repo access to MockVerificationClient:
+**Status:** Complete ✅
 
-| Test File | Current Pattern | New Pattern |
-|-----------|-----------------|-------------|
-| `YrkesaktivEosVedtakIT.kt` | `MedlRepo.repo.values.shouldHaveSize(1)` | `mockVerificationClient.medl().shouldHaveSize(1)` |
-| `IkkeYrkesaktivVedtakIT.kt` | `MedlRepo.repo.values.shouldHaveSize(1)` | `mockVerificationClient.medl().shouldHaveSize(1)` |
-| `SedMottakTestIT.kt` | `MelosysEessiRepo.sedRepo[rinaId]` | `mockVerificationClient.sedForRinaSak(rinaId)` |
-| `SedMottakBehandlingsTypeIT.kt` | `OppgaveRepo.repo`, `JournalpostRepo.repo` | `mockVerificationClient.oppgaver()`, `.journalposter()` |
-| `AvsluttBehandlingArt13JobbIT.kt` | `MedlRepo.repo.values.shouldHaveSize(1)` | `mockVerificationClient.medl().shouldHaveSize(1)` |
+Migrated tests from direct repo access to MockVerificationClient:
+
+| Test File | Migration | Notes |
+|-----------|-----------|-------|
+| `YrkesaktivEosVedtakIT.kt` | ✅ Complete | 2 tests: `MedlRepo.repo.values` → `mockVerificationClient.medl()` |
+| `IkkeYrkesaktivVedtakIT.kt` | ✅ Complete | 3 tests: `MedlRepo.repo.values` → `mockVerificationClient.medl()` |
+| `SedMottakTestIT.kt` | ✅ Complete | `MelosysEessiRepo.sedRepo[rinaId]` → `mockVerificationClient.sedForRinaSak(rinaId)`, `oppgaveRepo.repo.values` → `mockVerificationClient.oppgaver()` |
+| `SedMottakBehandlingsTypeIT.kt` | ✅ Complete | `oppgaveRepo.repo.values` → `mockVerificationClient.oppgaver()`, `journalpostRepo.repo` → `mockVerificationClient.journalposter()` |
+| `AvsluttBehandlingArt13JobbIT.kt` | N/A | Uses `MedlRepo` for **setup** only, not verification - no migration needed |
+
+**Key Changes Made:**
+1. Added `sporingsinformasjon` to `MedlVerificationDto` in `MockVerificationApi.kt`
+2. Created `SporingsinformasjonVerificationDto` for MEDL sporingsinformasjon data
+3. Updated assertions to handle HTTP JSON serialization differences (e.g., `shouldBeIn(null, "")` instead of `shouldBe(null)`)
+4. Removed unused `JournalpostRepo` import/autowire from `SedMottakBehandlingsTypeIT.kt`
+
+**Test Results:**
+- `YrkesaktivEosVedtakIT`: 2 tests pass ✅
+- `IkkeYrkesaktivVedtakIT`: 3 tests pass ✅
+- `SedMottakTestIT`: 11 tests pass ✅
+- `SedMottakBehandlingTypeIT`: 2 tests pass, 1 skipped (@Disabled) ✅
 
 ### Phase 5: Future - Full Container Migration
 
@@ -104,13 +118,18 @@ After Option B is stable, we can migrate to container-based mocks:
 integrasjonstest/src/test/kotlin/no/nav/melosys/
 ├── itest/
 │   ├── ComponentTestBase.kt           # Updated: exposes mockVerificationClient
+│   ├── vedtak/
+│   │   ├── YrkesaktivEosVedtakIT.kt   # Updated: uses mockVerificationClient.medl()
+│   │   └── IkkeYrkesaktivVedtakIT.kt  # Updated: uses mockVerificationClient.medl()
+│   ├── SedMottakTestIT.kt             # Updated: uses mockVerificationClient
+│   ├── SedMottakBehandlingsTypeIT.kt  # Updated: uses mockVerificationClient
 │   └── mock/
 │       ├── MelosysMockContainer.kt    # For future container-based approach
 │       ├── MockVerificationClient.kt   # HTTP client for verification endpoints
 │       └── MockVerificationDtos.kt     # DTOs for verification responses
 └── melosysmock/
     └── testdata/
-        └── MockVerificationApi.kt      # NEW: REST API for verification
+        └── MockVerificationApi.kt      # REST API for verification (with sporingsinformasjon)
 ```
 
 ## Decisions Made
@@ -121,9 +140,12 @@ integrasjonstest/src/test/kotlin/no/nav/melosys/
 | 2025-12-15 | Add verification endpoints to in-process mock | Enables HTTP-based repo verification |
 | 2025-12-15 | Use `melosys-docker-compose-mock:latest` | Built locally, not in GAR |
 | 2025-12-15 | MockVerificationClient at localhost:8093 | Matches in-process mock server port |
+| 2025-12-15 | Handle null vs empty string in HTTP JSON | Use `shouldBeIn(null, "")` for optional fields |
+| 2025-12-15 | Keep setup code with direct repo access | Only verification needs to use HTTP client |
 
 ## Next Steps
 
-1. Migrate one test file (e.g., `YrkesaktivEosVedtakIT.kt`) as proof of concept
-2. Migrate remaining test files in Phase 4
+1. ~~Migrate test files in Phase 4~~ ✅ Complete
+2. Monitor tests for stability
 3. Consider full container migration (Phase 5) after stability is proven
+4. Remove unused direct repo imports from migrated tests (optional cleanup)

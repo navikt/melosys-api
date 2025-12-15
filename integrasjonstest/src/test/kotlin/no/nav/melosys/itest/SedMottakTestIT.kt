@@ -340,7 +340,7 @@ class SedMottakTestIT(
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id).shouldBePresent().type
                 .shouldBe(Behandlingsresultattyper.HENLEGGELSE)
         }
-        oppgaveRepo.repo.values
+        mockVerificationClient.oppgaver()
             .single()
             .run {
                 status.shouldBe("FERDIGSTILT")
@@ -499,10 +499,10 @@ class SedMottakTestIT(
             })
         }
 
-        MelosysEessiRepo.sedRepo.get(rinaSaksnummer)!!.shouldContainInOrder(
-            SedType.A012,
-            SedType.X008,
-            SedType.A004,
+        mockVerificationClient.sedForRinaSak(rinaSaksnummer).shouldContainInOrder(
+            "A012",
+            "X008",
+            "A004",
         )
         vedtaksProsessInstans.behandling.shouldNotBeNull().run {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
@@ -626,10 +626,10 @@ class SedMottakTestIT(
             artikkel.shouldBe(Lovvalgsbestemmelse.ART_11_3_a)
         }
 
-        MelosysEessiRepo.sedRepo.get(rinaSaksnummer)!!.shouldContainInOrder(
-            SedType.A004,
-            SedType.X008,
-            SedType.A012,
+        mockVerificationClient.sedForRinaSak(rinaSaksnummer).shouldContainInOrder(
+            "A004",
+            "X008",
+            "A012",
         )
         vedtaksProsessInstans.behandling.shouldNotBeNull().apply {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
