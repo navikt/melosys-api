@@ -30,12 +30,6 @@ class TrygdeavgiftService(
     }
 
     @Transactional(readOnly = true)
-    fun hentTrygdeavgiftsperioderPåBehandlingsresultat(behandlingID: Long): Set<Trygdeavgiftsperiode> {
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-        return behandlingsresultat.trygdeavgiftsperioder
-    }
-
-    @Transactional(readOnly = true)
     fun hentTrygdeavgiftsperioder(behandlingID: Long): Set<Trygdeavgiftsperiode> {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingID)
             .trygdeavgiftsperioder
