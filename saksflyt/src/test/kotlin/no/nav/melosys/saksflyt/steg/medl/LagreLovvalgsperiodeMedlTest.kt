@@ -16,6 +16,7 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflyt.TestdataFactory
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
+import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.medl.MedlPeriodeService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
@@ -35,6 +36,9 @@ internal class LagreLovvalgsperiodeMedlTest {
     @RelaxedMockK
     lateinit var saksbehandlingRegler: SaksbehandlingRegler
 
+    @RelaxedMockK
+    lateinit var lovvalgsperiodeService: LovvalgsperiodeService
+
     private lateinit var lagreLovvalgsperiodeMedl: LagreLovvalgsperiodeMedl
 
     private val behandlingID = 2434L
@@ -47,7 +51,8 @@ internal class LagreLovvalgsperiodeMedlTest {
         lagreLovvalgsperiodeMedl = LagreLovvalgsperiodeMedl(
             behandlingsresultatService,
             medlPeriodeService,
-            saksbehandlingRegler
+            saksbehandlingRegler,
+            lovvalgsperiodeService
         )
 
         behandling.apply {

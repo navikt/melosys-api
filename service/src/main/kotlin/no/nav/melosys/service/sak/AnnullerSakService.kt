@@ -2,7 +2,6 @@ package no.nav.melosys.service.sak
 
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.saksflytapi.ProsessinstansService
-import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
@@ -16,8 +15,7 @@ class AnnullerSakService(
     private val medlemskapsperiodeService: MedlemskapsperiodeService,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val oppgaveService: OppgaveService,
-    private val helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService,
-    private val lovvalgsperiodeService: LovvalgsperiodeService
+    private val helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService
 ) {
     fun annullerSak(saksnummer: String) {
         val fagsak = fagsakService.hentFagsak(saksnummer)
@@ -27,8 +25,6 @@ class AnnullerSakService(
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id)
         if (behandling.erEøsPensjonist()) {
             helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(behandlingsresultat.hentId())
-        } else if (behandling.fagsak.erLovvalg()) {
-            lovvalgsperiodeService.slettLovvalgsperioder(behandlingsresultat.hentId())
         } else {
             medlemskapsperiodeService.slettMedlemskapsperioder(behandlingsresultat.hentId())
         }

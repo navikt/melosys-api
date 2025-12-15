@@ -67,7 +67,11 @@ class LovvalgsperiodeService(
 
     @Transactional
     fun slettLovvalgsperiode(lovvalgsperiodeId: Long) {
-        lovvalgsperiodeRepo.deleteById(lovvalgsperiodeId)
+        lovvalgsperiodeRepo.findById(lovvalgsperiodeId).ifPresent { lovvalgsperiode ->
+            lovvalgsperiode.clearTrygdeavgiftsperioder()
+            lovvalgsperiode.getBehandlingsresultat()?.lovvalgsperioder?.remove(lovvalgsperiode)
+            lovvalgsperiodeRepo.delete(lovvalgsperiode)
+        }
     }
 
 
