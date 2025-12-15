@@ -6,6 +6,7 @@ import io.getunleash.FakeUnleash
 import io.getunleash.Unleash
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.Application
+import no.nav.melosys.itest.mock.MockVerificationClient
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
 import no.nav.melosys.melosysmock.sak.SakRepo
@@ -43,6 +44,21 @@ class ComponentTestBase : OracleTestContainerBase() {
 
     val fakeUnleash: FakeUnleash by lazy {
         unleash.shouldBeInstanceOf<FakeUnleash>()
+    }
+
+    /**
+     * Client for verifying mock state via HTTP endpoints.
+     * Useful for tests that want to verify what data was sent to mocks
+     * without direct repo access.
+     *
+     * Usage:
+     * ```kotlin
+     * mockVerificationClient.medl().shouldHaveSize(1)
+     * mockVerificationClient.sedForRinaSak("123456").shouldContain("A012")
+     * ```
+     */
+    protected val mockVerificationClient: MockVerificationClient by lazy {
+        MockVerificationClient("http://localhost:8093")
     }
 
     @AfterEach

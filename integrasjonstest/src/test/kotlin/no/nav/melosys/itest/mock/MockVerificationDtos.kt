@@ -7,7 +7,7 @@ import java.time.ZonedDateTime
 
 /**
  * DTOs for verification endpoint responses from melosys-mock.
- * These match the structure returned by /testdata/verification/* endpoints.
+ * These match the structure returned by /testdata/verification/ endpoints.
  */
 
 /**
@@ -169,3 +169,4 @@ data class MockSummaryDto(
     val sedRepoCount: Int = 0,
     val saksrelasjonCount: Int = 0
 )
+

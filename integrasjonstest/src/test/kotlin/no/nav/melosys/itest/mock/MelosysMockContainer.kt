@@ -21,7 +21,7 @@ import java.time.Duration
  * - PDL GraphQL mock
  * - And more...
  *
- * Verification endpoints are available at /testdata/verification/* for asserting
+ * Verification endpoints are available at /testdata/verification/ for asserting
  * what data was sent to the mocks during tests.
  */
 class MelosysMockContainer : GenericContainer<MelosysMockContainer>(
@@ -31,10 +31,10 @@ class MelosysMockContainer : GenericContainer<MelosysMockContainer>(
         private val log = LoggerFactory.getLogger(MelosysMockContainer::class.java)
 
         /**
-         * Docker image from Google Artifact Registry.
-         * Built and pushed by melosys-docker-compose CI.
+         * Docker image built locally from melosys-docker-compose repo.
+         * Build with: cd melosys-docker-compose && make build-mock
          */
-        const val IMAGE_NAME = "europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-mock:latest"
+        const val IMAGE_NAME = "melosys-docker-compose-mock:latest"
 
         /**
          * Port exposed by the mock container.
