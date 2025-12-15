@@ -1,6 +1,6 @@
 # Mock Container Migration Progress
 
-## Status: Phase 2 Complete
+## Status: Phase 2 Complete, Phase 3 Blocked on Architecture Decision
 
 **Last Updated:** 2025-12-15
 
@@ -126,7 +126,44 @@ This document tracks the progress of migrating integration tests from in-process
 
 | Blocker | Status | Resolution |
 |---------|--------|------------|
-| Phase 1 must complete first | Active | Waiting for verification endpoints in melosys-mock |
+| Phase 1 must complete first | **Resolved** | Verification endpoints deployed |
+| Architecture decision needed | **Active** | See below |
+
+### Architecture Decision Required
+
+The current integration tests use **in-process mocks** that run inside the same JVM as melosys-api:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Test JVM (port 8093)                      │
+│  ┌──────────────┐  ┌─────────────────────────────────────┐  │
+│  │  Test Code   │  │         melosys-api                 │  │
+│  │              │  │  ┌─────────────────────────────┐    │  │
+│  │ MedlRepo.    │◀─┼──│  In-Process Mocks          │    │  │
+│  │   repo       │  │  │  (MedlApi, SakApi, etc.)   │    │  │
+│  │              │  │  └─────────────────────────────┘    │  │
+│  └──────────────┘  └─────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Two migration approaches:**
+
+**Option A: Full Container Migration**
+- Add `@ConditionalOnProperty` to disable in-process mocks
+- Start melosys-mock container via Testcontainers
+- Configure integration URLs to point to container
+- Pros: Single source of truth, eliminates code duplication
+- Cons: Significant infrastructure changes, network latency
+
+**Option B: Hybrid/Incremental Approach**
+1. Add verification endpoints to in-process mock (mirror Phase 1)
+2. Tests use MockVerificationClient pointing to localhost:8093
+3. Migrate tests to use client instead of direct repo access
+4. Later switch to container-based and delete in-process mock
+- Pros: Lower risk, incremental, can be done in stages
+- Cons: Temporary code duplication
+
+**Recommendation:** Start with Option B to reduce risk, then do full container migration later.
 
 ## Decisions Made
 
