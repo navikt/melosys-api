@@ -59,7 +59,7 @@ class TrygdeavgiftControllerTest(
     @Test
     fun `skal hente trygdeavgiftsperioder`() {
         every { aksesskontroll.autoriser(any()) } returns Unit
-        every { trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(BEHANDLINGSRESULTAT_ID) } returns trygdeavgiftsperioder
+        every { trygdeavgiftService.hentTrygdeavgiftsperioder(BEHANDLINGSRESULTAT_ID) } returns trygdeavgiftsperioder
 
         mockMvc.perform(get("$BASE_URL/beregning", 1L)
             .contentType(MediaType.APPLICATION_JSON))

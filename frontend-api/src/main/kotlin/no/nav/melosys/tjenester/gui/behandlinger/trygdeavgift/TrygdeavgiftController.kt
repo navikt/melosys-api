@@ -64,7 +64,7 @@ class TrygdeavgiftController(
     fun hentBeregnetTrygdeavgift(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Any> {
         aksesskontroll.autoriser(behandlingID)
 
-        val trygdeavgiftsperiodeSet = trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(behandlingID)
+        val trygdeavgiftsperiodeSet = trygdeavgiftService.hentTrygdeavgiftsperioder(behandlingID)
 
         try {
             return ResponseEntity.ok(
@@ -83,7 +83,7 @@ class TrygdeavgiftController(
     fun hentBeregnetTrygdeavgiftForPensjonist(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Any> {
         aksesskontroll.autoriser(behandlingID)
 
-        val trygdeavgiftsperiodeSet = trygdeavgiftsberegningService.hentTrygdeavgiftsberegningForEosPensjonist(behandlingID)
+        val trygdeavgiftsperiodeSet = trygdeavgiftService.hentTrygdeavgiftsperioderForEosPensjonist(behandlingID)
 
         try {
             return ResponseEntity.ok(
