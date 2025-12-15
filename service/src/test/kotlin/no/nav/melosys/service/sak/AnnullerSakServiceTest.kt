@@ -78,7 +78,7 @@ class AnnullerSakServiceTest {
     }
 
     @Test
-    fun `annuller sak - ferdigstill oppgave, slett lovvalgsperioder, oppdater behandlingsresultatstatus og opprett prosess`() {
+    fun `annuller sak - ferdigstill oppgave, oppdater behandlingsresultatstatus og opprett prosess`() {
         val saksnummer = "78945613"
         val behandlingId = 12L
         val fagsak = Fagsak.forTest {
@@ -103,7 +103,6 @@ class AnnullerSakServiceTest {
 
 
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingId) }
-        verify { lovvalgsperiodeService.slettLovvalgsperioder(behandlingId) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.ANNULLERT) }
         verify { prosessinstansService.opprettAnnullerFagsakProsessflyt(fagsak.finnAktivBehandlingIkkeÅrsavregning()) }
     }
