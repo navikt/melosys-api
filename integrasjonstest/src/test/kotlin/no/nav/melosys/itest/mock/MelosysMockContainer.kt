@@ -38,8 +38,9 @@ class MelosysMockContainer : GenericContainer<MelosysMockContainer>(
 
         /**
          * Port exposed by the mock container.
+         * Note: melosys-mock uses 8083 internally (server.port=8083).
          */
-        const val MOCK_PORT = 8080
+        const val MOCK_PORT = 8083
     }
 
     init {

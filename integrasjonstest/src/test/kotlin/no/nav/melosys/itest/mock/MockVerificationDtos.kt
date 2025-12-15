@@ -118,3 +118,54 @@ data class ClearResponse(
     val sakCleared: String? = null,
     val melosysEessiCleared: String? = null
 )
+
+/**
+ * DTO for BUC information from melosys-eessi.
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class BucVerificationDto(
+    val id: String? = null,
+    val erAapen: Boolean? = null,
+    val bucType: String? = null,
+    val opprettetDato: LocalDate? = null,
+    val mottakerinstitusjoner: Set<String>? = null,
+    val seder: List<SedVerificationDto>? = null
+)
+
+/**
+ * DTO for SED information within a BUC.
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class SedVerificationDto(
+    val bucId: String? = null,
+    val sedId: String? = null,
+    val opprettetDato: LocalDate? = null,
+    val sistOppdatert: LocalDate? = null,
+    val sedType: String? = null,
+    val status: String? = null,
+    val rinaUrl: String? = null
+)
+
+/**
+ * DTO for saksrelasjon between GSAK and RINA.
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class SaksrelasjonVerificationDto(
+    val gsakSaksnummer: Long? = null,
+    val rinaSaksnummer: String? = null,
+    val bucType: String? = null
+)
+
+/**
+ * DTO for summary of all mock data.
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class MockSummaryDto(
+    val medlCount: Int = 0,
+    val sakCount: Int = 0,
+    val oppgaveCount: Int = 0,
+    val journalpostCount: Int = 0,
+    val bucCount: Int = 0,
+    val sedRepoCount: Int = 0,
+    val saksrelasjonCount: Int = 0
+)

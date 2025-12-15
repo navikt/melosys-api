@@ -112,6 +112,18 @@ class MockVerificationClient(
         }
     }
 
+    /**
+     * Get sak by fagsakNr.
+     */
+    fun sakByFagsakNr(fagsakNr: String): SakVerificationDto? {
+        return try {
+            restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/sak/fagsak/$fagsakNr", SakVerificationDto::class.java)
+        } catch (e: Exception) {
+            log.warn("Failed to fetch sak by fagsakNr $fagsakNr from mock: ${e.message}")
+            null
+        }
+    }
+
     // ==================== MELOSYS-EESSI ====================
 
     /**
@@ -149,6 +161,40 @@ class MockVerificationClient(
         }
     }
 
+    /**
+     * Get all BUC information stored in the mock.
+     */
+    fun bucInfo(): List<BucVerificationDto> {
+        return try {
+            restTemplate.exchange(
+                "$baseUrl$VERIFICATION_BASE_PATH/melosys-eessi/buc",
+                HttpMethod.GET,
+                null,
+                object : ParameterizedTypeReference<List<BucVerificationDto>>() {}
+            ).body ?: emptyList()
+        } catch (e: Exception) {
+            log.warn("Failed to fetch BUC data from mock: ${e.message}")
+            emptyList()
+        }
+    }
+
+    /**
+     * Get all saksrelasjoner stored in the mock.
+     */
+    fun saksrelasjoner(): List<SaksrelasjonVerificationDto> {
+        return try {
+            restTemplate.exchange(
+                "$baseUrl$VERIFICATION_BASE_PATH/melosys-eessi/saksrelasjoner",
+                HttpMethod.GET,
+                null,
+                object : ParameterizedTypeReference<List<SaksrelasjonVerificationDto>>() {}
+            ).body ?: emptyList()
+        } catch (e: Exception) {
+            log.warn("Failed to fetch saksrelasjoner from mock: ${e.message}")
+            emptyList()
+        }
+    }
+
     // ==================== OPPGAVE ====================
 
     /**
@@ -180,6 +226,23 @@ class MockVerificationClient(
         }
     }
 
+    /**
+     * Get oppgaver by type (e.g., "JFR", "BEH_SED").
+     */
+    fun oppgaverByType(oppgavetype: String): List<OppgaveVerificationDto> {
+        return try {
+            restTemplate.exchange(
+                "$baseUrl$VERIFICATION_BASE_PATH/oppgave/type/$oppgavetype",
+                HttpMethod.GET,
+                null,
+                object : ParameterizedTypeReference<List<OppgaveVerificationDto>>() {}
+            ).body ?: emptyList()
+        } catch (e: Exception) {
+            log.warn("Failed to fetch oppgaver by type $oppgavetype from mock: ${e.message}")
+            emptyList()
+        }
+    }
+
     // ==================== JOURNALPOST ====================
 
     /**
@@ -208,6 +271,50 @@ class MockVerificationClient(
         } catch (e: Exception) {
             log.warn("Failed to fetch journalpost count from mock: ${e.message}")
             0
+        }
+    }
+
+    /**
+     * Get journalpost by ID.
+     */
+    fun journalpostById(journalpostId: String): JournalpostVerificationDto? {
+        return try {
+            restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/journalpost/$journalpostId", JournalpostVerificationDto::class.java)
+        } catch (e: Exception) {
+            log.warn("Failed to fetch journalpost by id $journalpostId from mock: ${e.message}")
+            null
+        }
+    }
+
+    /**
+     * Get journalposter by saksnummer.
+     */
+    fun journalposterBySak(saksnummer: String): List<JournalpostVerificationDto> {
+        return try {
+            restTemplate.exchange(
+                "$baseUrl$VERIFICATION_BASE_PATH/journalpost/sak/$saksnummer",
+                HttpMethod.GET,
+                null,
+                object : ParameterizedTypeReference<List<JournalpostVerificationDto>>() {}
+            ).body ?: emptyList()
+        } catch (e: Exception) {
+            log.warn("Failed to fetch journalposter by sak $saksnummer from mock: ${e.message}")
+            emptyList()
+        }
+    }
+
+    // ==================== SUMMARY ====================
+
+    /**
+     * Get summary of all mock data counts.
+     */
+    fun summary(): MockSummaryDto {
+        return try {
+            restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/summary", MockSummaryDto::class.java)
+                ?: MockSummaryDto()
+        } catch (e: Exception) {
+            log.warn("Failed to fetch summary from mock: ${e.message}")
+            MockSummaryDto()
         }
     }
 
