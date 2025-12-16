@@ -102,6 +102,7 @@ open class ContainerComponentTestBase : OracleTestContainerBase() {
 
         /**
          * Docker image from Google Artifact Registry.
+         * For local development, build with same tag: make release (in melosys-docker-compose/mock)
          */
         private const val MOCK_IMAGE = "europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-docker-compose-mock:latest"
 
