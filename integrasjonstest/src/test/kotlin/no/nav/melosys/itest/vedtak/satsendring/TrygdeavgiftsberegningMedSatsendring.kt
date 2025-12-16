@@ -7,8 +7,6 @@ import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
 import mu.KotlinLogging
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
-import no.nav.melosys.itest.vedtak.satsendring.SatsendringIT.Companion.GAMMEL_SATS
-import no.nav.melosys.itest.vedtak.satsendring.SatsendringIT.Companion.NY_SATS
 import java.time.LocalDate
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -102,5 +100,7 @@ class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
         val satsendringÅr = LocalDate.now().year
         private val PERIODE_APRIL_2024 = "$satsendringÅr-04-01 / $satsendringÅr-04-30"
         private val PERIODE_MAI_2024 = "$satsendringÅr-05-01 / $satsendringÅr-05-31"
+        private const val GAMMEL_SATS = 6.7
+        private const val NY_SATS = 8.3
     }
 }
