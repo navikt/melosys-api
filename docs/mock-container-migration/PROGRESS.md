@@ -1,8 +1,8 @@
 # Mock Container Migration Progress
 
-## Status: Phase 5 Started - Container Infrastructure Ready
+## Status: Phase 5 Complete - Full Container Integration Tests Working
 
-**Last Updated:** 2025-12-15
+**Last Updated:** 2025-12-16
 
 ## Overview
 
@@ -16,7 +16,7 @@ This document tracks the progress of migrating integration tests from in-process
 | Phase 2: Create Testcontainer Setup | **Complete** | Container, DTOs, and Client created |
 | Phase 3: Update Test Infrastructure | **Complete** | MockVerificationApi and ComponentTestBase updated |
 | Phase 4: Migrate Tests | **Complete** | All verification-based tests migrated |
-| Phase 5: Container Migration | **In Progress** | Container infrastructure ready, tests pass |
+| Phase 5: Container Migration | **Complete** | Full integration tests with container working |
 
 ## Architecture: Option B (Hybrid/Incremental)
 
@@ -89,7 +89,7 @@ Migrated tests from direct repo access to MockVerificationClient:
 
 ### Phase 5: Container Migration
 
-**Status:** In Progress 🔄
+**Status:** Complete ✅
 
 #### Completed
 
@@ -112,24 +112,37 @@ Migrated tests from direct repo access to MockVerificationClient:
    - Verification endpoints accessible
    - Clear endpoint works
 
-#### Remaining Work
+5. **Full Integration Test with Container Created** ✅
+   - `ContainerComponentTestBase.kt` - Base class combining Oracle container + mock container + Spring Boot
+   - `ContainerMockServerTestBase.kt` - Adds WireMock and ProsessinstansTestManager
+   - `ContainerOpprettSakIT.kt` - Full integration test that:
+     - Creates a sak using OpprettSak service
+     - Calls PDL, SAK API, Oppgave API via the mock container
+     - Verifies results using mockVerificationClient
 
-1. **Full Integration Test with Container**
-   - Create test that uses `MelosysMockContainerTestBase` with Spring Boot
-   - Configure melosys-api to call container instead of in-process mock
-   - This is the key step to prove full container migration works
+6. **Hybrid Approach Discovered** 📝
+   - Some endpoints are NOT available in the Docker container (kodeverk, inngangsvilkaar)
+   - These continue to use the in-process mock at localhost:8093
+   - Other endpoints use the container (PDL, SAK, Oppgave, JournalpostApi, etc.)
+   - This hybrid approach works and all tests pass
 
-2. **Optional: Remove In-Process Mock Code**
-   - After proving container-based tests work
+#### Optional Future Work
+
+1. **Consider removing in-process mock code** (after stability proven)
    - Delete `melosysmock/` package
    - Update ComponentTestBase to not clear static repos
+   - Requires adding missing endpoints to melosys-docker-compose-mock
+
+2. **Add missing endpoints to container**
+   - KodeverkAPI (`/api/v1/kodeverk/...`)
+   - Inngangsvilkaar (`/api/inngangsvilkaar`)
 
 ## Files Overview
 
 ```
 integrasjonstest/src/test/kotlin/no/nav/melosys/
 ├── itest/
-│   ├── ComponentTestBase.kt              # exposes mockVerificationClient
+│   ├── ComponentTestBase.kt              # exposes mockVerificationClient (in-process mock)
 │   ├── vedtak/
 │   │   ├── YrkesaktivEosVedtakIT.kt      # uses mockVerificationClient.medl()
 │   │   └── IkkeYrkesaktivVedtakIT.kt     # uses mockVerificationClient.medl()
@@ -137,8 +150,11 @@ integrasjonstest/src/test/kotlin/no/nav/melosys/
 │   ├── SedMottakBehandlingsTypeIT.kt     # uses mockVerificationClient
 │   └── mock/
 │       ├── MelosysMockContainer.kt       # Testcontainer wrapper
-│       ├── MelosysMockContainerTestBase.kt # Base class with @DynamicPropertySource
+│       ├── MelosysMockContainerTestBase.kt # Base class for standalone container tests
 │       ├── MelosysMockContainerIT.kt     # Standalone container tests ✅ PASSES
+│       ├── ContainerComponentTestBase.kt # NEW: Full Spring Boot test base with container
+│       ├── ContainerMockServerTestBase.kt # NEW: Adds WireMock and ProsessManager
+│       ├── ContainerOpprettSakIT.kt      # NEW: Full integration test ✅ PASSES
 │       ├── MockVerificationClient.kt     # HTTP client (updated for CountResponse)
 │       └── MockVerificationDtos.kt       # DTOs for verification responses
 └── melosysmock/
@@ -156,12 +172,18 @@ integrasjonstest/src/test/kotlin/no/nav/melosys/
 | 2025-12-15 | Count endpoints return `CountResponse` | Matches Docker mock API, ensures compatibility |
 | 2025-12-15 | Handle null vs empty string in HTTP JSON | Use `shouldBeIn(null, "")` for optional fields |
 | 2025-12-15 | Keep setup code with direct repo access | Only verification needs to use HTTP client |
+| 2025-12-16 | Use hybrid approach for container + in-process mock | Container doesn't have all endpoints (kodeverk, inngangsvilkaar), so these use in-process mock |
+| 2025-12-16 | Create separate base classes for container tests | `ContainerComponentTestBase` for full Spring context, `MelosysMockContainerTestBase` for standalone |
 
-## Next Steps
+## Next Steps (Optional)
+
+All core work is complete. These are optional improvements:
 
 1. ✅ ~~Container infrastructure created and tested~~
-2. **Create full integration test using MelosysMockContainerTestBase**
-   - Test that melosys-api can call external services via container
-   - Verify business logic works with container-based mocks
-3. **Consider removing in-process mock code** (optional, after stability proven)
-4. Remove unused direct repo imports from migrated tests (optional cleanup)
+2. ✅ ~~Create full integration test using container~~
+3. **Consider removing in-process mock code** (after stability proven)
+   - Would require adding missing endpoints to melosys-docker-compose-mock
+4. **Add missing endpoints to melosys-docker-compose-mock**
+   - KodeverkAPI, Inngangsvilkaar
+5. **Migrate more tests to use ContainerComponentTestBase** (optional)
+   - Only valuable if we want to reduce test runtime or simplify the test architecture
