@@ -1,6 +1,6 @@
 # Journalføring Tests Migration to Container
 
-## Status: Phase 4 - Complete
+## Status: Phase 4 - Partially Complete
 
 **Last Updated:** 2025-12-16
 
@@ -67,6 +67,32 @@ fun lagJournalføringsoppgave(@RequestBody request: OpprettJfrOppgaveRequest): L
 | `ContainerJournalfoeringIT` | ✅ Complete | 5 tests migrated, all passing |
 | `ContainerSedMottakBehandlingsTypeIT` | ✅ Complete | 2 tests migrated (1 @Disabled), all passing |
 | `ContainerSedMottakTestIT` | ✅ Complete | 11 tests migrated, all passing |
+
+### Phase 4b: Remaining Tests (Not Yet Migrated)
+
+These tests extend `JournalfoeringBase` indirectly and still use the in-process mock:
+
+| Test | Base Class | Status |
+|------|------------|--------|
+| `SatsendringIT` | `SatsendringTestBase` | ❌ Not migrated |
+| `SatsendringAdminControllerIT` | `SatsendringTestBase` | ❌ Not migrated |
+| `PensjonistFtrlVedtakIT` | `AvgiftFaktureringTestBase` | ❌ Not migrated |
+| `YrkesaktivFtrlVedtakIT` | `AvgiftFaktureringTestBase` | ❌ Not migrated |
+| `ÅrsavregningIT` | `AvgiftFaktureringTestBase` | ❌ Not migrated |
+| `EøsPensjonistIverksettIT` | `AvgiftFaktureringTestBase` | ❌ Not migrated |
+
+**Inheritance chain:**
+```
+JournalfoeringBase
+├── SatsendringTestBase
+│   ├── SatsendringIT
+│   └── SatsendringAdminControllerIT
+└── AvgiftFaktureringTestBase
+    ├── PensjonistFtrlVedtakIT
+    ├── YrkesaktivFtrlVedtakIT
+    ├── ÅrsavregningIT
+    └── EøsPensjonistIverksettIT
+```
 
 ### Phase 5: Cleanup (Optional)
 
