@@ -66,6 +66,7 @@ fun lagJournalføringsoppgave(@RequestBody request: OpprettJfrOppgaveRequest): L
 | `ContainerYrkesaktivEosVedtakIT` | ✅ Complete | 2 tests migrated, all passing |
 | `ContainerJournalfoeringIT` | ✅ Complete | 5 tests migrated, all passing |
 | `ContainerSedMottakBehandlingsTypeIT` | ✅ Complete | 2 tests migrated (1 @Disabled), all passing |
+| `ContainerSedMottakTestIT` | 🟡 Partial | 3 tests passing, 6 @Disabled (need POST /testdata/buc in container) |
 
 ### Phase 5: Cleanup (Optional)
 
@@ -93,7 +94,8 @@ integrasjonstest/src/test/kotlin/no/nav/melosys/itest/mock/
 ├── ContainerIkkeYrkesaktivVedtakIT.kt     # ✅ 3 tests migrated
 ├── ContainerYrkesaktivEosVedtakIT.kt      # ✅ 2 tests migrated
 ├── ContainerJournalfoeringIT.kt           # ✅ 5 tests migrated
-└── ContainerSedMottakBehandlingsTypeIT.kt # ✅ 2 tests migrated (1 @Disabled)
+├── ContainerSedMottakBehandlingsTypeIT.kt # ✅ 2 tests migrated (1 @Disabled)
+└── ContainerSedMottakTestIT.kt            # 🟡 3 tests passing, 6 @Disabled
 ```
 
 ### melosys-api (original tests - kept for reference)

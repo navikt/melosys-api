@@ -42,7 +42,65 @@ The melosys-api integration tests are migrating from in-process mocks to using t
 - The mock just needs to return a valid response structure - the actual values don't matter for tests
 - The implementation should be simple and return a generic response for any kodeverk name
 
-### 2. Inngangsvilkaar API
+### 2. BUC Testdata API (NEW - for SedMottakTestIT)
+
+**Endpoint:** `POST /testdata/buc`
+
+**Purpose:** Create BUC (Business Use Case) info in the mock for test setup. This is needed for `ContainerSedMottakTestIT` tests that require BUC info to exist before processing SED messages.
+
+**Request Body:**
+```json
+{
+  "id": "12345",
+  "erAapen": true,
+  "bucType": "LA_BUC_04",
+  "opprettetDato": "2025-01-01",
+  "mottakerinstitusjoner": null,
+  "seder": [
+    {
+      "bucId": "12345",
+      "sedId": "A009",
+      "opprettetDato": "2025-01-01",
+      "sistOppdatert": "2025-01-01",
+      "sedType": "A009",
+      "status": "AVBRUTT",
+      "rinaUrl": null
+    }
+  ]
+}
+```
+
+**Response:** Returns the created BUC info (BucVerificationDto)
+```json
+{
+  "id": "12345",
+  "erAapen": true,
+  "bucType": "LA_BUC_04",
+  "opprettetDato": "2025-01-01",
+  "mottakerinstitusjoner": null,
+  "seder": [
+    {
+      "bucId": "12345",
+      "sedId": "A009",
+      "opprettetDato": "2025-01-01",
+      "sistOppdatert": "2025-01-01",
+      "sedType": "A009",
+      "status": "AVBRUTT",
+      "rinaUrl": null
+    }
+  ]
+}
+```
+
+**Implementation Notes:**
+- Should add the BUC info to `MelosysEessiRepo.repo`
+- The BUC info is used when processing SED messages (e.g., A009, X008)
+- Reference implementation in melosys-api: `integrasjonstest/src/test/kotlin/no/nav/melosys/melosysmock/testdata/MockVerificationApi.kt`
+
+**Blocked Tests:**
+- 6 tests in `ContainerSedMottakTestIT` are @Disabled until this endpoint is added
+
+### 3. Inngangsvilkaar API
 
 **Endpoint:** `POST /api/inngangsvilkaar`
 

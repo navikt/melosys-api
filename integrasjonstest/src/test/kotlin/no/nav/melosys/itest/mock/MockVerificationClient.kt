@@ -387,6 +387,50 @@ class MockVerificationClient(
             ?: throw IllegalStateException("Failed to create jfr-oppgave: no response from mock")
     }
 
+    /**
+     * Create BUC info in the mock for test setup.
+     * This is used to set up test data before running tests that expect BUC info to exist.
+     *
+     * @param id The BUC ID (RINA saksnummer)
+     * @param erAapen Whether the BUC is open (default: true)
+     * @param bucType The BUC type (e.g., "LA_BUC_04")
+     * @param opprettetDato When the BUC was created
+     * @param mottakerinstitusjoner Set of receiver institutions
+     * @param seder List of SED info
+     * @return The created BUC verification DTO
+     */
+    fun opprettBucinformasjon(
+        id: String?,
+        erAapen: Boolean = true,
+        bucType: String? = null,
+        opprettetDato: java.time.LocalDate? = null,
+        mottakerinstitusjoner: Set<String>? = null,
+        seder: List<OpprettSedRequest>? = null
+    ): BucVerificationDto {
+        val request = OpprettBucRequest(
+            id = id,
+            erAapen = erAapen,
+            bucType = bucType,
+            opprettetDato = opprettetDato,
+            mottakerinstitusjoner = mottakerinstitusjoner,
+            seder = seder
+        )
+
+        val headers = HttpHeaders().apply {
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        val response = restTemplate.exchange(
+            "$baseUrl/testdata/buc",
+            HttpMethod.POST,
+            HttpEntity(request, headers),
+            BucVerificationDto::class.java
+        )
+
+        return response.body
+            ?: throw IllegalStateException("Failed to create BUC info: no response from mock")
+    }
+
     // ==================== HEALTH ====================
 
     /**

@@ -192,3 +192,29 @@ data class OpprettJfrOppgaveRequest(
     val medLogiskVedlegg: Boolean = false
 )
 
+/**
+ * Request for creating BUC info in the mock.
+ * Used to set up test data before running tests that expect BUC info to exist.
+ */
+data class OpprettBucRequest(
+    val id: String?,
+    val erAapen: Boolean? = true,
+    val bucType: String? = null,
+    val opprettetDato: LocalDate? = null,
+    val mottakerinstitusjoner: Set<String>? = null,
+    val seder: List<OpprettSedRequest>? = null
+)
+
+/**
+ * Request for creating SED info within a BUC.
+ */
+data class OpprettSedRequest(
+    val bucId: String? = null,
+    val sedId: String? = null,
+    val opprettetDato: LocalDate? = null,
+    val sistOppdatert: LocalDate? = null,
+    val sedType: String? = null,
+    val status: String? = null,
+    val rinaUrl: String? = null
+)
+

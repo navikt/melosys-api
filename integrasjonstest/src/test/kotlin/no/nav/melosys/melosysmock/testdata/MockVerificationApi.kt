@@ -6,11 +6,15 @@ import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiApi.SaksrelasjonLager
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
 import no.nav.melosys.melosysmock.oppgave.OppgaveRepo
 import no.nav.melosys.melosysmock.sak.SakRepo
+import no.nav.melosys.domain.eessi.BucInformasjon
+import no.nav.melosys.domain.eessi.SedInformasjon
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
@@ -221,6 +225,53 @@ class MockVerificationApi(
     @GetMapping("/verification/melosys-eessi/sedrepo/count")
     fun getSedRepoCount(): Int = MelosysEessiRepo.sedRepo.size
 
+    // ========== TEST DATA CREATION ==========
+
+    /**
+     * Create BUC info in the mock for test setup.
+     * This is used to set up test data before running tests that expect BUC info to exist.
+     */
+    @PostMapping("/buc")
+    fun opprettBucinformasjon(@RequestBody request: OpprettBucRequest): BucVerificationDto {
+        val bucInformasjon = BucInformasjon(
+            id = request.id,
+            erÅpen = request.erAapen ?: true,
+            bucType = request.bucType,
+            opprettetDato = request.opprettetDato ?: LocalDate.now(),
+            mottakerinstitusjoner = request.mottakerinstitusjoner,
+            seder = request.seder?.map { sed ->
+                SedInformasjon(
+                    bucId = sed.bucId,
+                    sedId = sed.sedId,
+                    opprettetDato = sed.opprettetDato ?: LocalDate.now(),
+                    sistOppdatert = sed.sistOppdatert ?: LocalDate.now(),
+                    sedType = sed.sedType,
+                    status = sed.status,
+                    rinaUrl = sed.rinaUrl
+                )
+            } ?: emptyList()
+        )
+        MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
+        return BucVerificationDto(
+            id = bucInformasjon.id,
+            erAapen = bucInformasjon.erÅpen(),
+            bucType = bucInformasjon.bucType,
+            opprettetDato = bucInformasjon.opprettetDato,
+            mottakerinstitusjoner = bucInformasjon.mottakerinstitusjoner,
+            seder = bucInformasjon.seder.map { sed ->
+                SedVerificationDto(
+                    bucId = sed.bucId,
+                    sedId = sed.sedId,
+                    opprettetDato = sed.opprettetDato,
+                    sistOppdatert = sed.sistOppdatert,
+                    sedType = sed.sedType,
+                    status = sed.status,
+                    rinaUrl = sed.rinaUrl
+                )
+            }
+        )
+    }
+
     // ========== SUMMARY ==========
 
     @GetMapping("/verification/summary")
@@ -371,4 +422,25 @@ data class ClearResponse(
     val medlCleared: String? = null,
     val sakCleared: String? = null,
     val melosysEessiCleared: String? = null
+)
+
+// ========== Request DTOs ==========
+
+data class OpprettBucRequest(
+    val id: String?,
+    val erAapen: Boolean? = true,
+    val bucType: String? = null,
+    val opprettetDato: LocalDate? = null,
+    val mottakerinstitusjoner: Set<String>? = null,
+    val seder: List<OpprettSedRequest>? = null
+)
+
+data class OpprettSedRequest(
+    val bucId: String? = null,
+    val sedId: String? = null,
+    val opprettetDato: LocalDate? = null,
+    val sistOppdatert: LocalDate? = null,
+    val sedType: String? = null,
+    val status: String? = null,
+    val rinaUrl: String? = null
 )
