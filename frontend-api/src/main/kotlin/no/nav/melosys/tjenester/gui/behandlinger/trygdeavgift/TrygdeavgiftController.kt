@@ -64,7 +64,7 @@ class TrygdeavgiftController(
     fun hentBeregnetTrygdeavgift(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Any> {
         aksesskontroll.autoriser(behandlingID)
 
-        val trygdeavgiftsperiodeSet = trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(behandlingID)
+        val trygdeavgiftsperiodeSet = trygdeavgiftService.hentTrygdeavgiftsperioder(behandlingID)
 
         try {
             return ResponseEntity.ok(
@@ -83,7 +83,7 @@ class TrygdeavgiftController(
     fun hentBeregnetTrygdeavgiftForPensjonist(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Any> {
         aksesskontroll.autoriser(behandlingID)
 
-        val trygdeavgiftsperiodeSet = trygdeavgiftsberegningService.hentTrygdeavgiftsberegningForEosPensjonist(behandlingID)
+        val trygdeavgiftsperiodeSet = trygdeavgiftService.hentTrygdeavgiftsperioderForEosPensjonist(behandlingID)
 
         try {
             return ResponseEntity.ok(
@@ -134,6 +134,13 @@ class TrygdeavgiftController(
     fun hentFakturamottaker(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<FakturamottakerDto> {
         aksesskontroll.autoriser(behandlingID)
         return ResponseEntity.ok(FakturamottakerDto(trygdeavgiftsberegningService.finnFakturamottakerNavn(behandlingID)))
+    }
+
+    @GetMapping
+    fun hentTrygdeavgiftsperioder(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<List<TrygdeavgiftsperiodeDto>> {
+        aksesskontroll.autoriser(behandlingID)
+        val trygdeavgiftsperioder = trygdeavgiftService.hentTrygdeavgiftsperioder(behandlingID)
+        return ResponseEntity.ok(trygdeavgiftsperioder.map { TrygdeavgiftsperiodeDto(it) })
     }
 
     @DeleteMapping

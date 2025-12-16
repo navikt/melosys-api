@@ -31,6 +31,7 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
+import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
@@ -52,7 +53,12 @@ internal class TrygdeavgiftsberegningServiceTest {
     lateinit var mockBehandlingsresultatService: BehandlingsresultatService
 
     @MockK
+    private lateinit var mockFagsakService: FagsakService
+
+    @MockK
     private lateinit var mockPersondataService: PersondataService
+
+    private lateinit var trygdeavgiftService: TrygdeavgiftService
 
     private lateinit var trygdeavgiftperiodeErstatter: TrygdeavgiftperiodeErstatter
 
@@ -76,6 +82,11 @@ internal class TrygdeavgiftsberegningServiceTest {
             mockPersondataService,
             mockTrygdeavgiftConsumer,
             unleash
+        )
+        trygdeavgiftService = TrygdeavgiftService(
+            mockFagsakService,
+            mockBehandlingsresultatService,
+            trygdeavgiftMottakerService
         )
         every { mockEregFasade.hentOrganisasjonNavn(FULLMEKTIG_ORGNR) }.returns(FULLMEKTIG_ORG_NAVN)
         every { mockPersondataService.hentSammensattNavn(FULLMEKTIGAKTØR_ID) }.returns(FULLMEKTIG_NAVN)
@@ -104,7 +115,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
             every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
-            trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(BEHANDLING_ID).shouldNotBeNull().shouldBeEmpty()
+            trygdeavgiftService.hentTrygdeavgiftsperioder(BEHANDLING_ID).shouldNotBeNull().shouldBeEmpty()
         }
     }
 
@@ -181,7 +192,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 verify { trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
 
                 verify(exactly = 0) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
-                behandlingsresultat.trygdeavgiftsperioder.shouldNotBeEmpty()
+                trygdeavgiftService.hentTrygdeavgiftsperioder(BEHANDLING_ID).shouldNotBeEmpty()
             }
 
             @Test
@@ -239,7 +250,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 trygdeavgiftsperioder.shouldNotBeEmpty()
                 verify { trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
                 verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
-                behandlingsresultat.trygdeavgiftsperioder.shouldNotBeEmpty()
+                trygdeavgiftService.hentTrygdeavgiftsperioder(BEHANDLING_ID).shouldNotBeEmpty()
             }
 
             @Test
@@ -304,7 +315,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 trygdeavgiftsperioder.shouldNotBeEmpty()
                 verify { trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
                 verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
-                behandlingsresultat.trygdeavgiftsperioder.shouldNotBeEmpty()
+                trygdeavgiftService.hentTrygdeavgiftsperioder(BEHANDLING_ID).shouldNotBeEmpty()
             }
 
             @Test
@@ -369,7 +380,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 trygdeavgiftsperioder.shouldNotBeEmpty()
                 verify { trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
                 verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
-                behandlingsresultat.trygdeavgiftsperioder.shouldNotBeEmpty()
+                trygdeavgiftService.hentTrygdeavgiftsperioder(BEHANDLING_ID).shouldNotBeEmpty()
             }
 
             @Test
@@ -409,8 +420,8 @@ internal class TrygdeavgiftsberegningServiceTest {
                     trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() })
                 }
 
-                behandlingsresultat.trygdeavgiftsperioder.shouldHaveSize(1)
-                behandlingsresultat.trygdeavgiftsperioder.first().apply {
+                trygdeavgiftService.hentTrygdeavgiftsperioder(BEHANDLING_ID).shouldHaveSize(1)
+                trygdeavgiftService.hentTrygdeavgiftsperioder(BEHANDLING_ID).first().apply {
                     periodeFra.shouldBe(FOM)
                     periodeTil.shouldBe(TOM)
                     trygdesats.shouldBe(BigDecimal.ZERO)
@@ -802,7 +813,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 verify { trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
 
                 verify(exactly = 0) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
-                behandlingsresultat.trygdeavgiftsperioder.shouldNotBeEmpty()
+                trygdeavgiftService.hentTrygdeavgiftsperioder(BEHANDLING_ID).shouldNotBeEmpty()
             }
         }
 
