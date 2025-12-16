@@ -1,6 +1,6 @@
 # Journalføring Tests Migration to Container
 
-## Status: Phase 4 - Partially Complete
+## Status: Phase 4b Complete, Phase 5 Pending
 
 **Last Updated:** 2025-12-16
 
@@ -11,128 +11,134 @@ Migrate integration tests that use `JournalføringsoppgaveGenerator` to use the 
 - E2E tests (melosys-e2e-tests)
 - Integration tests (melosys-api)
 
-## Current State
+## Migration Progress
 
-### In melosys-docker-compose mock
-- `POST /testdata/jfr-oppgave` - creates journalføringsoppgave but returns `void`
-- Uses `JournalPostService` with options: `medVedlegg`, `medLogiskVedlegg`
+### Phase 4: Migrate JournalfoeringBase Tests ✅ Complete
 
-### In melosys-api in-process mock
-- `JournalføringsoppgaveGenerator.opprettJfrOppgave()` - returns `Oppgave` object
-- Uses `JournalpostFactory` (simpler, no vedlegg options)
+| Test | Tests | Status |
+|------|-------|--------|
+| `ContainerIkkeYrkesaktivVedtakIT` | 3 | ✅ Complete |
+| `ContainerYrkesaktivEosVedtakIT` | 2 | ✅ Complete |
+| `ContainerJournalfoeringIT` | 5 | ✅ Complete |
+| `ContainerSedMottakBehandlingsTypeIT` | 2 | ✅ Complete |
+| `ContainerSedMottakTestIT` | 11 | ✅ Complete |
 
-### Problem
-Tests need the created `Oppgave` back (for `id` and `journalpostId` fields)
+### Phase 4b: Migrate AvgiftFakturering & Satsendring Tests ✅ Complete
 
-## Implementation Plan
+| Test | Tests | Status |
+|------|-------|--------|
+| `ContainerSatsendringIT` | 4 | ✅ Complete |
+| `ContainerSatsendringAdminControllerIT` | 1 | ✅ Complete |
+| `ContainerPensjonistFtrlVedtakIT` | 2 | ✅ Complete |
+| `ContainerYrkesaktivFtrlVedtakIT` | 2 | ✅ Complete |
+| `ContainerÅrsavregningIT` | 5 | ✅ Complete |
+| `ContainerEøsPensjonistIverksettIT` | 1 | ✅ Complete |
 
-### Phase 1: Enhance Container Endpoint (melosys-docker-compose)
+**New base classes created:**
+- `ContainerSatsendringTestBase` (extends `ContainerJournalfoeringBase`)
+- `ContainerAvgiftFaktureringTestBase` (extends `ContainerJournalfoeringBase`)
 
-| Task | Status | Notes |
-|------|--------|-------|
-| Modify `/testdata/jfr-oppgave` to return `List<Oppgave>` | ✅ Complete | Changed in TestDataGenerator.kt |
-| Build and push new container image | ✅ Complete | Built locally for testing |
+### Phase 5: Remaining Tests ❌ Not Yet Migrated
 
-**Changes needed in `TestDataGenerator.kt`:**
-```kotlin
-@PostMapping("/jfr-oppgave")
-fun lagJournalføringsoppgave(@RequestBody request: OpprettJfrOppgaveRequest): List<Oppgave> {
-    return (0 until request.antall).map { i ->
-        val journalpostRequest = journalPostService.lagJournalPost(...)
-        val journalpostMap = journalpostApi.opprettJournalpost(journalpostRequest, false)
-        opprettJfrOppgave(journalpostRequest, journalpostMap["journalpostId"] as String, request.tilordnetRessurs)
-    }
-}
-```
+These tests use `ComponentTestBase` or other bases (not JournalfoeringBase):
 
-### Phase 2: Add Client Method (melosys-api)
+| Test | Base Class | Complexity | Priority |
+|------|------------|------------|----------|
+| `AktoerHistorikkServiceIT` | `ComponentTestBase` | Low | Medium |
+| `AvsluttBehandlingArt13JobbIT` | `ComponentTestBase` | Low | Low |
+| `OpprettÅrsavregningIT` | `ComponentTestBase` | Medium | Medium |
+| `ÅrsavregningIkkeSkattepliktigeIT` | `ComponentTestBase` | Medium | Medium |
 
-| Task | Status | Notes |
-|------|--------|-------|
-| Add `opprettJfrOppgave()` to `MockVerificationClient` | ✅ Complete | Returns OppgaveVerificationDto |
-| Add `OpprettJfrOppgaveRequest` DTO | ✅ Complete | Added to MockVerificationDtos.kt |
+These tests don't use JournalføringsoppgaveGenerator at all (may not need migration):
 
-### Phase 3: Create Container Base Class
+| Test | Notes |
+|------|-------|
+| `AdminControllerApiKeyIT` | API key testing, no mock needed |
+| `BehandlingsresultatServiceIT` | Service unit test |
+| `EessiMeldingConsumerIT` | Kafka consumer test |
+| `EndreAktoerIdIT` | Special test config |
+| `FinnSakerForÅrsavregningIT` | Query test |
+| `KafkaSkipIT` | Kafka error handling |
+| `LovvalgsperiodeServiceIT` | Service test |
+| `SaksflyThreadPoolTaskExecutorIT` | Thread pool test |
+| `SaksflytLåsreferanseIT` | Saksflyt test |
+| `SaksflytOppstartIT` | Saksflyt startup test |
+| `SedLåsMedSubProsesserIT` | SED locking test |
+| `SedLåsreferanseIT` | SED locking test |
+| `SoknadMottattConsumerIT` | Kafka consumer test |
 
-| Task | Status | Notes |
-|------|--------|-------|
-| Create `ContainerJournalfoeringBase` | ✅ Complete | Extends `ContainerMockServerTestBase` |
-
-### Phase 4: Migrate Tests
-
-| Test | Status | Notes |
-|------|--------|-------|
-| `ContainerIkkeYrkesaktivVedtakIT` | ✅ Complete | 3 tests migrated, all passing |
-| `ContainerYrkesaktivEosVedtakIT` | ✅ Complete | 2 tests migrated, all passing |
-| `ContainerJournalfoeringIT` | ✅ Complete | 5 tests migrated, all passing |
-| `ContainerSedMottakBehandlingsTypeIT` | ✅ Complete | 2 tests migrated (1 @Disabled), all passing |
-| `ContainerSedMottakTestIT` | ✅ Complete | 11 tests migrated, all passing |
-
-### Phase 4b: Remaining Tests (Not Yet Migrated)
-
-These tests extend `JournalfoeringBase` indirectly and still use the in-process mock:
-
-| Test | Base Class | Status |
-|------|------------|--------|
-| `SatsendringIT` | `SatsendringTestBase` | ❌ Not migrated |
-| `SatsendringAdminControllerIT` | `SatsendringTestBase` | ❌ Not migrated |
-| `PensjonistFtrlVedtakIT` | `AvgiftFaktureringTestBase` | ❌ Not migrated |
-| `YrkesaktivFtrlVedtakIT` | `AvgiftFaktureringTestBase` | ❌ Not migrated |
-| `ÅrsavregningIT` | `AvgiftFaktureringTestBase` | ❌ Not migrated |
-| `EøsPensjonistIverksettIT` | `AvgiftFaktureringTestBase` | ❌ Not migrated |
-
-**Inheritance chain:**
-```
-JournalfoeringBase
-├── SatsendringTestBase
-│   ├── SatsendringIT
-│   └── SatsendringAdminControllerIT
-└── AvgiftFaktureringTestBase
-    ├── PensjonistFtrlVedtakIT
-    ├── YrkesaktivFtrlVedtakIT
-    ├── ÅrsavregningIT
-    └── EøsPensjonistIverksettIT
-```
-
-### Phase 5: Cleanup (Optional)
+### Phase 6: Cleanup (After All Migrated)
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Remove `JournalføringsoppgaveGenerator` | Pending | After all tests migrated |
+| Remove `JournalføringsoppgaveGenerator` | Pending | After original tests removed |
 | Remove `JournalpostFactory` | Pending | |
-| Consider removing entire `melosysmock/` package | Pending | |
+| Remove original test files | Pending | Keep Container versions only |
+| Consider removing `melosysmock/` package | Pending | |
+
+## Inheritance Hierarchy (Container Tests)
+
+```
+ContainerMockServerTestBase
+└── ContainerJournalfoeringBase
+    ├── ContainerJournalfoeringIT
+    ├── ContainerIkkeYrkesaktivVedtakIT
+    ├── ContainerYrkesaktivEosVedtakIT
+    ├── ContainerSedMottakTestIT
+    ├── ContainerSedMottakBehandlingsTypeIT
+    ├── ContainerSatsendringTestBase
+    │   ├── ContainerSatsendringIT
+    │   └── ContainerSatsendringAdminControllerIT
+    └── ContainerAvgiftFaktureringTestBase
+        ├── ContainerPensjonistFtrlVedtakIT
+        ├── ContainerYrkesaktivFtrlVedtakIT
+        ├── ContainerÅrsavregningIT
+        └── ContainerEøsPensjonistIverksettIT
+```
 
 ## Files Overview
 
-### melosys-docker-compose (to modify)
-```
-mock/src/main/kotlin/no/nav/melosys/melosysmock/testdata/
-├── TestDataGenerator.kt       # Modify to return Oppgave
-└── JournalPostService.kt      # Already has vedlegg support
-```
-
-### melosys-api (created/modified)
+### Container Test Files (New)
 ```
 integrasjonstest/src/test/kotlin/no/nav/melosys/itest/mock/
-├── MockVerificationClient.kt              # ✅ Added opprettJfrOppgave()
-├── MockVerificationDtos.kt                # ✅ Added OpprettJfrOppgaveRequest, JournalpostVerificationDto fields
-├── ContainerJournalfoeringBase.kt         # ✅ Container version of JournalfoeringBase
-├── ContainerIkkeYrkesaktivVedtakIT.kt     # ✅ 3 tests migrated
-├── ContainerYrkesaktivEosVedtakIT.kt      # ✅ 2 tests migrated
-├── ContainerJournalfoeringIT.kt           # ✅ 5 tests migrated
-├── ContainerSedMottakBehandlingsTypeIT.kt # ✅ 2 tests migrated (1 @Disabled)
-└── ContainerSedMottakTestIT.kt            # ✅ 11 tests migrated, all passing
+├── ContainerMockServerTestBase.kt
+├── ContainerComponentTestBase.kt
+├── ContainerJournalfoeringBase.kt
+├── ContainerSatsendringTestBase.kt
+├── ContainerAvgiftFaktureringTestBase.kt
+├── ContainerJournalfoeringIT.kt
+├── ContainerIkkeYrkesaktivVedtakIT.kt
+├── ContainerYrkesaktivEosVedtakIT.kt
+├── ContainerSedMottakTestIT.kt
+├── ContainerSedMottakBehandlingsTypeIT.kt
+├── ContainerSatsendringIT.kt
+├── ContainerSatsendringAdminControllerIT.kt
+├── ContainerPensjonistFtrlVedtakIT.kt
+├── ContainerYrkesaktivFtrlVedtakIT.kt
+├── ContainerÅrsavregningIT.kt
+├── ContainerEøsPensjonistIverksettIT.kt
+└── ContainerOpprettSakIT.kt
 ```
 
-### melosys-api (original tests - kept for reference)
+### Original Test Files (To Be Deprecated)
 ```
 integrasjonstest/src/test/kotlin/no/nav/melosys/itest/
-├── JournalfoeringBase.kt                    # Original base class (in-process mock)
-├── JournalfoeringIT.kt                      # Original (in-process mock)
-├── SedMottakBehandlingsTypeIT.kt            # Original (in-process mock)
+├── JournalfoeringBase.kt
+├── JournalfoeringIT.kt
+├── SedMottakTestIT.kt
+├── SedMottakBehandlingsTypeIT.kt
+├── AvgiftFaktureringTestBase.kt
+├── SatsendringTestBase.kt
 └── vedtak/
-    ├── IkkeYrkesaktivVedtakIT.kt            # Original (in-process mock)
-    └── YrkesaktivEosVedtakIT.kt             # Original (in-process mock)
+    ├── IkkeYrkesaktivVedtakIT.kt
+    ├── YrkesaktivEosVedtakIT.kt
+    ├── PensjonistFtrlVedtakIT.kt
+    ├── YrkesaktivFtrlVedtakIT.kt
+    ├── ÅrsavregningIT.kt
+    ├── EøsPensjonistIverksettIT.kt
+    └── satsendring/
+        ├── SatsendringIT.kt
+        └── SatsendringAdminControllerIT.kt
 ```
 
 ## Benefits
@@ -142,9 +148,12 @@ integrasjonstest/src/test/kotlin/no/nav/melosys/itest/
 3. **Easier maintenance**: One mock codebase to maintain
 4. **Consistency**: Same behavior across all test environments
 
-## Decisions
+## Summary Statistics
 
-| Date | Decision | Rationale |
-|------|----------|-----------|
-| 2025-12-16 | Return `List<Oppgave>` from endpoint | Supports `antall > 1` use case, caller uses `.first()` for single |
-| 2025-12-16 | Keep vedlegg options in container | Already supported, more flexible than in-process mock |
+| Category | Count |
+|----------|-------|
+| Container tests created | 12 |
+| Total test methods migrated | 38 |
+| Remaining tests to analyze | 17 |
+| Tests needing migration | ~4 |
+| Tests not needing migration | ~13 |
