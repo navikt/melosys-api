@@ -62,7 +62,7 @@ All ComponentTestBase tests have been migrated:
 ### Task 3: Remove In-Process Mock Code
 | File/Package | Status | Notes |
 |--------------|--------|-------|
-| `melosysmock/` package | Kept | Still contains SoapConfig used by Container tests |
+| `melosysmock/` package | ✅ Removed | 39 files deleted, SoapConfig moved to itest/mock/ |
 | `TrygdeavgiftsberegningMedSatsendring.kt` | ✅ Updated | Made self-contained (removed dependency on old SatsendringIT) |
 
 ### Task 4: Verify and Clean Up
@@ -85,10 +85,12 @@ All ComponentTestBase tests have been migrated:
 - `TrygdeavgiftsberegningMedSatsendring.kt` - Added GAMMEL_SATS and NY_SATS constants to make it self-contained
 
 **Kept:**
-- `melosysmock/` package - Still needed for SoapConfig and potentially future cleanup
 - All Container test files in `itest/mock/`
 - MockVerificationClient and MockVerificationDtos (used by Container tests)
+- SoapConfig (moved to itest/mock/)
 
-## Future Work
+## Total Code Removed
 
-The `melosysmock/` package still contains the in-process mock code (MedlRepo, OppgaveRepo, etc.) that could potentially be removed in a future cleanup. However, SoapConfig is still actively used by Container tests, so the package was kept intact.
+**Phase 6 commit:** 22 files changed, 5,805 lines deleted
+**melosysmock removal:** 41 files changed, 3,248 lines deleted
+**Total:** 63 files changed, ~9,000 lines of test infrastructure removed

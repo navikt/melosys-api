@@ -17,7 +17,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.melosysmock.config.SoapConfig
+import no.nav.melosys.itest.mock.SoapConfig
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.LovvalgsperiodeService
