@@ -1,6 +1,6 @@
 # Journalføring Tests Migration to Container
 
-## Status: Phase 1 - In Progress
+## Status: Phase 4 - In Progress (Testing)
 
 **Last Updated:** 2025-12-16
 
@@ -31,7 +31,7 @@ Tests need the created `Oppgave` back (for `id` and `journalpostId` fields)
 | Task | Status | Notes |
 |------|--------|-------|
 | Modify `/testdata/jfr-oppgave` to return `List<Oppgave>` | ✅ Complete | Changed in TestDataGenerator.kt |
-| Build and push new container image | ⏳ Pending | Needs `gcloud auth login` |
+| Build and push new container image | ✅ Complete | Built locally for testing |
 
 **Changes needed in `TestDataGenerator.kt`:**
 ```kotlin
@@ -49,14 +49,14 @@ fun lagJournalføringsoppgave(@RequestBody request: OpprettJfrOppgaveRequest): L
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Add `opprettJfrOppgave()` to `MockVerificationClient` | Pending | |
-| Add `OpprettJfrOppgaveRequest` DTO | Pending | |
+| Add `opprettJfrOppgave()` to `MockVerificationClient` | ✅ Complete | Returns OppgaveVerificationDto |
+| Add `OpprettJfrOppgaveRequest` DTO | ✅ Complete | Added to MockVerificationDtos.kt |
 
 ### Phase 3: Create Container Base Class
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Create `ContainerJournalfoeringBase` | Pending | Extends `ContainerMockServerTestBase` |
+| Create `ContainerJournalfoeringBase` | ✅ Complete | Extends `ContainerMockServerTestBase` |
 
 ### Phase 4: Migrate Tests
 

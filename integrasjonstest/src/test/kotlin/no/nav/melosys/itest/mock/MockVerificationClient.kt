@@ -6,7 +6,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.web.client.RestTemplate
 
@@ -341,6 +344,47 @@ class MockVerificationClient(
             log.warn("Failed to clear mock data: ${e.message}")
             ClearResponse(message = "Error: ${e.message}")
         }
+    }
+
+    // ==================== TEST DATA CREATION ====================
+
+    /**
+     * Create a journalføringsoppgave in the mock.
+     * Returns the created Oppgave with id and journalpostId set.
+     *
+     * @param tilordnetRessurs The saksbehandler to assign the oppgave to (default: "Z123456")
+     * @param forVirksomhet Whether the oppgave is for a virksomhet (default: false)
+     * @param medVedlegg Whether to include vedlegg (default: false)
+     * @param medLogiskVedlegg Whether to include logisk vedlegg (default: false)
+     * @return The created Oppgave
+     */
+    fun opprettJfrOppgave(
+        tilordnetRessurs: String = "Z123456",
+        forVirksomhet: Boolean = false,
+        medVedlegg: Boolean = false,
+        medLogiskVedlegg: Boolean = false
+    ): OppgaveVerificationDto {
+        val request = OpprettJfrOppgaveRequest(
+            antall = 1,
+            tilordnetRessurs = tilordnetRessurs,
+            forVirksomhet = forVirksomhet,
+            medVedlegg = medVedlegg,
+            medLogiskVedlegg = medLogiskVedlegg
+        )
+
+        val headers = HttpHeaders().apply {
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        val response = restTemplate.exchange(
+            "$baseUrl/testdata/jfr-oppgave",
+            HttpMethod.POST,
+            HttpEntity(request, headers),
+            object : ParameterizedTypeReference<List<OppgaveVerificationDto>>() {}
+        )
+
+        return response.body?.firstOrNull()
+            ?: throw IllegalStateException("Failed to create jfr-oppgave: no response from mock")
     }
 
     // ==================== HEALTH ====================

@@ -170,3 +170,16 @@ data class MockSummaryDto(
     val saksrelasjonCount: Int = 0
 )
 
+// ==================== TEST DATA CREATION ====================
+
+/**
+ * Request for creating journalføringsoppgave(r) in the mock.
+ */
+data class OpprettJfrOppgaveRequest(
+    val antall: Int = 1,
+    val tilordnetRessurs: String = "Z123456",
+    val forVirksomhet: Boolean = false,
+    val medVedlegg: Boolean = false,
+    val medLogiskVedlegg: Boolean = false
+)
+
