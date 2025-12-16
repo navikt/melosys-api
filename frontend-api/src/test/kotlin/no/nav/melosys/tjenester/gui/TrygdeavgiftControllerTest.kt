@@ -126,7 +126,7 @@ class TrygdeavgiftControllerTest(
     }
 
     @Test
-    fun `Skal hente trygdeavgiftsperioder`(){
+    fun `skal hente trygdeavgiftsperioder`() {
         every { aksesskontroll.autoriser(any()) } returns Unit
         every { trygdeavgiftService.hentTrygdeavgiftsperioder(BEHANDLINGSRESULTAT_ID) } returns trygdeavgiftsperioder
 
