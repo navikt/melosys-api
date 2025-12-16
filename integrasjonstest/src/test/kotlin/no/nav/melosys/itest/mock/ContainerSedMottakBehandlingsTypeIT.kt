@@ -1,0 +1,142 @@
+package no.nav.melosys.itest.mock
+
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.collections.shouldBeIn
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import no.nav.melosys.domain.eessi.BucType
+import no.nav.melosys.domain.eessi.Periode
+import no.nav.melosys.domain.eessi.SedType
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.domain.kodeverk.Oppgavetyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.itest.EessiMeldingTestDataFactory
+import no.nav.melosys.repository.BehandlingRepository
+import no.nav.melosys.repository.FagsakRepository
+import no.nav.melosys.saksflytapi.domain.ProsessType
+import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
+import no.nav.melosys.service.sak.OpprettBehandlingForSak
+import no.nav.melosys.service.sak.OpprettSakDto
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.kafka.core.KafkaTemplate
+import java.time.LocalDate
+import java.util.*
+
+/**
+ * Container-based version of SedMottakBehandlingsTypeIT.
+ * Uses ContainerJournalfoeringBase which creates jfr-oppgaver via the mock container
+ * instead of the in-process mock.
+ */
+class ContainerSedMottakBehandlingsTypeIT(
+    @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
+    @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,
+    @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
+    @Autowired private val behandlingRepository: BehandlingRepository,
+    @Autowired private val fagsakRepository: FagsakRepository,
+) : ContainerJournalfoeringBase() {
+
+    private val kafkaTopic = "teammelosys.eessi.v1-local"
+
+    @Test
+    fun `A003 skal føre til riktig oppgave i gosys`() {
+        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_02.name
+            rinaSaksnummer = Random().nextInt(100000).toString()
+            sedType = SedType.A003.name
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
+            artikkel = "13_1_a"
+            lovvalgsland = "NO"
+        }
+
+
+        executeAndWait(
+            mapOf(
+                ProsessType.MOTTAK_SED to 1,
+                ProsessType.ARBEID_FLERE_LAND_NY_SAK to 1
+            )
+        ) {
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
+        }
+
+
+        mockVerificationClient.oppgaver()
+            .shouldHaveSize(1)
+            .first()
+            .apply {
+                behandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_NORGE_ER_UTPEKT_SOM_LOVVALGSLAND.kode)
+                behandlingstype.shouldBeIn(null, "") // can be null or empty string via HTTP JSON
+                // eksempel: --- 18.04.2023 08:22 (srvmelosys, Melosys) ---\n A003 - MEL-41\n
+                beskrivelse.shouldContain("A003")
+                oppgavetype.shouldBe(Oppgavetyper.BEH_SED.kode)
+            }
+
+    }
+
+
+    @Test
+    fun `A003 andre gangsbehandling`() {
+        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_02.name
+            rinaSaksnummer = Random().nextInt(100000).toString()
+            sedType = SedType.A003.name
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
+            artikkel = "13_1_a"
+            lovvalgsland = "NO"
+        }
+        val prosessinstansArbeidFlereLand =
+            executeAndWait(
+                mapOf(
+                    ProsessType.ARBEID_FLERE_LAND_NY_SAK to 1,
+                    ProsessType.MOTTAK_SED to 1
+                )
+            ) {
+                melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
+            }
+
+        val behandling = prosessinstansArbeidFlereLand.behandling.shouldNotBeNull()
+        behandling.status = Behandlingsstatus.AVSLUTTET
+        behandlingRepository.save(behandling)
+
+        val opprettSakDto = OpprettSakDto().apply {
+            behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+            behandlingstype = Behandlingstyper.NY_VURDERING
+            skalTilordnes = true
+            mottaksdato = LocalDate.now()
+            behandlingsaarsakType = Behandlingsaarsaktyper.SED
+        }
+
+
+        val saksnummer: String = behandling.fagsak.saksnummer
+        executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1
+            )
+        ) {
+            opprettBehandlingForSak.opprettBehandling(
+                saksnummer, opprettSakDto
+            )
+        }
+
+
+        fagsakRepository.findBySaksnummer(saksnummer).get().behandlinger
+            .shouldHaveSize(2)
+    }
+
+    @Test
+    @Disabled
+    fun `A003 lag data og skriv ut så det kan brukes i mock`() {
+        `A003 skal føre til riktig oppgave i gosys`()
+
+        println("Oppgaver:")
+        mockVerificationClient.oppgaver().forEach { println(it) }
+        println("Journalposter:")
+        mockVerificationClient.journalposter().forEach { println(it) }
+    }
+}

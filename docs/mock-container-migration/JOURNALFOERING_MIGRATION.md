@@ -1,6 +1,6 @@
 # Journalføring Tests Migration to Container
 
-## Status: Phase 4 - In Progress (Testing)
+## Status: Phase 4 - Complete
 
 **Last Updated:** 2025-12-16
 
@@ -62,12 +62,10 @@ fun lagJournalføringsoppgave(@RequestBody request: OpprettJfrOppgaveRequest): L
 
 | Test | Status | Notes |
 |------|--------|-------|
-| `ContainerIkkeYrkesaktivVedtakIT` | ✅ Complete | 1 test migrated, verified working |
-| `IkkeYrkesaktivVedtakIT` (remaining) | Pending | 2 more tests to migrate |
-| `YrkesaktivEosVedtakIT` | Pending | 2 tests |
-| `JournalfoeringIT` | Pending | |
-| `SedMottakBehandlingsTypeIT` | Pending | |
-| Other tests extending `JournalfoeringBase` | Pending | |
+| `ContainerIkkeYrkesaktivVedtakIT` | ✅ Complete | 3 tests migrated, all passing |
+| `ContainerYrkesaktivEosVedtakIT` | ✅ Complete | 2 tests migrated, all passing |
+| `ContainerJournalfoeringIT` | ✅ Complete | 5 tests migrated, all passing |
+| `ContainerSedMottakBehandlingsTypeIT` | ✅ Complete | 2 tests migrated (1 @Disabled), all passing |
 
 ### Phase 5: Cleanup (Optional)
 
@@ -86,25 +84,27 @@ mock/src/main/kotlin/no/nav/melosys/melosysmock/testdata/
 └── JournalPostService.kt      # Already has vedlegg support
 ```
 
-### melosys-api (to create/modify)
+### melosys-api (created/modified)
 ```
 integrasjonstest/src/test/kotlin/no/nav/melosys/itest/mock/
 ├── MockVerificationClient.kt              # ✅ Added opprettJfrOppgave()
-├── MockVerificationDtos.kt                # ✅ Added OpprettJfrOppgaveRequest
+├── MockVerificationDtos.kt                # ✅ Added OpprettJfrOppgaveRequest, JournalpostVerificationDto fields
 ├── ContainerJournalfoeringBase.kt         # ✅ Container version of JournalfoeringBase
-├── ContainerIkkeYrkesaktivVedtakIT.kt     # ✅ First migrated test
-└── ...
+├── ContainerIkkeYrkesaktivVedtakIT.kt     # ✅ 3 tests migrated
+├── ContainerYrkesaktivEosVedtakIT.kt      # ✅ 2 tests migrated
+├── ContainerJournalfoeringIT.kt           # ✅ 5 tests migrated
+└── ContainerSedMottakBehandlingsTypeIT.kt # ✅ 2 tests migrated (1 @Disabled)
 ```
 
-### melosys-api (tests to migrate)
+### melosys-api (original tests - kept for reference)
 ```
 integrasjonstest/src/test/kotlin/no/nav/melosys/itest/
-├── JournalfoeringBase.kt                    # Current base class (in-process mock)
-├── JournalfoeringIT.kt                      # → ContainerJournalfoeringBase
-├── SedMottakBehandlingsTypeIT.kt            # → ContainerJournalfoeringBase
+├── JournalfoeringBase.kt                    # Original base class (in-process mock)
+├── JournalfoeringIT.kt                      # Original (in-process mock)
+├── SedMottakBehandlingsTypeIT.kt            # Original (in-process mock)
 └── vedtak/
-    ├── IkkeYrkesaktivVedtakIT.kt            # → ContainerJournalfoeringBase
-    └── YrkesaktivEosVedtakIT.kt             # → ContainerJournalfoeringBase
+    ├── IkkeYrkesaktivVedtakIT.kt            # Original (in-process mock)
+    └── YrkesaktivEosVedtakIT.kt             # Original (in-process mock)
 ```
 
 ## Benefits

@@ -95,7 +95,16 @@ data class JournalpostVerificationDto(
     val tittel: String? = null,
     val arkivtema: String? = null,
     val kanal: String? = null,
-    val mottattDato: LocalDate? = null
+    val mottattDato: LocalDate? = null,
+    val sakId: String? = null,
+    val avsenderMottaker: AvsenderMottakerDto? = null
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class AvsenderMottakerDto(
+    val id: String? = null,
+    val navn: String? = null,
+    val type: String? = null
 )
 
 /**
