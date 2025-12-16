@@ -73,7 +73,6 @@ class ContainerSedMottakTestIT(
     private lateinit var utstedtA1AivenProducer: UtstedtA1AivenProducer
 
     @Test
-    @Disabled("Requires GET /api/sak/{sakId}/bucer in mock to return BUC data created via POST /testdata/buc")
     fun `A009 med etterfølgende X008 skal gi fagsak annullert`() {
         val ref = Random().nextInt(100000).toString()
 
@@ -146,7 +145,6 @@ class ContainerSedMottakTestIT(
     }
 
     @Test
-    @Disabled("Requires GET /api/sak/{sakId}/bucer in mock to return BUC data created via POST /testdata/buc")
     fun `A009 med etterfølgende X006 skal gi fagsak annullert`() {
         val ref = Random().nextInt(100000).toString()
 
@@ -272,7 +270,6 @@ class ContainerSedMottakTestIT(
     }
 
     @Test
-    @Disabled("Requires GET /api/sak/{sakId}/bucer in mock to return BUC data created via POST /testdata/buc")
     fun `A003 med etterfølgende X008 og lovvalgsland er NO skal gi manuelt behandling`() {
         val ref = Random().nextInt(100000).toString()
 
@@ -345,7 +342,6 @@ class ContainerSedMottakTestIT(
     }
 
     @Test
-    @Disabled("Requires GET /api/sak/{sakId}/bucer in mock to return BUC data created via POST /testdata/buc")
     fun `A003 med etterfølgende X008 og lovvalgsland ikke NO skal annullere saken og henlegge i melosys`() {
         val ref = Random().nextInt(100000).toString()
 
@@ -474,7 +470,7 @@ class ContainerSedMottakTestIT(
 
     @ParameterizedTest(name = "{argumentSetName} - {0}")
     @MethodSource("toggleMedForventetdResultatForA003SendBrev")
-    @Disabled("Requires GET /api/sak/{sakId}/bucer in mock to return BUC data created via POST /testdata/buc")
+    @Disabled("sedForRinaSak verification returns empty - SED recording not working in container mock")
     fun `Motta A003, godkjenne med A012, ugyldiggjøre godkjenning A012 med X008 for så å sende en A004`(forventedeProsessTyper: Pair<Boolean, Map<ProsessType, Int>>) {
         if (forventedeProsessTyper.first) fakeUnleash.enableAll() else fakeUnleash.disableAll()
 
@@ -617,7 +613,7 @@ class ContainerSedMottakTestIT(
 
     @ParameterizedTest
     @MethodSource("toggleMedForventetdResultatForA003SendBrev")
-    @Disabled("Requires GET /api/sak/{sakId}/bucer in mock to return BUC data created via POST /testdata/buc")
+    @Disabled("sedForRinaSak verification returns empty - SED recording not working in container mock")
     fun `Motta A003, avvise med A004, ugyldiggjøre avvisning A004 med X008 for så å sende en A012`(forventedeProsessTyper: Pair<Boolean, Map<ProsessType, Int>>) {
         if (forventedeProsessTyper.first) fakeUnleash.enableAll() else fakeUnleash.disableAll()
 

@@ -66,7 +66,7 @@ fun lagJournalføringsoppgave(@RequestBody request: OpprettJfrOppgaveRequest): L
 | `ContainerYrkesaktivEosVedtakIT` | ✅ Complete | 2 tests migrated, all passing |
 | `ContainerJournalfoeringIT` | ✅ Complete | 5 tests migrated, all passing |
 | `ContainerSedMottakBehandlingsTypeIT` | ✅ Complete | 2 tests migrated (1 @Disabled), all passing |
-| `ContainerSedMottakTestIT` | 🟡 Partial | 5 tests passing, 6 @Disabled (need GET /api/sak/{sakId}/bucer to return data created via POST /testdata/buc) |
+| `ContainerSedMottakTestIT` | 🟡 Partial | 9 tests passing, 2 @Disabled (sedForRinaSak verification not working in container mock) |
 
 ### Phase 5: Cleanup (Optional)
 
@@ -95,7 +95,7 @@ integrasjonstest/src/test/kotlin/no/nav/melosys/itest/mock/
 ├── ContainerYrkesaktivEosVedtakIT.kt      # ✅ 2 tests migrated
 ├── ContainerJournalfoeringIT.kt           # ✅ 5 tests migrated
 ├── ContainerSedMottakBehandlingsTypeIT.kt # ✅ 2 tests migrated (1 @Disabled)
-└── ContainerSedMottakTestIT.kt            # 🟡 5 tests passing, 6 @Disabled
+└── ContainerSedMottakTestIT.kt            # 🟡 9 tests passing, 2 @Disabled
 ```
 
 ### melosys-api (original tests - kept for reference)
