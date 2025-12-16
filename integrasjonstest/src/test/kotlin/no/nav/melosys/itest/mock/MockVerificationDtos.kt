@@ -218,3 +218,20 @@ data class OpprettSedRequest(
     val rinaUrl: String? = null
 )
 
+/**
+ * Request for creating MEDL (medlemskapsunntak) test data with a specific unntakId.
+ * Used to set up pre-existing MEDL periods for tests.
+ */
+data class OpprettMedlRequest(
+    val unntakId: Long,
+    val ident: String,
+    val fraOgMed: LocalDate? = null,
+    val tilOgMed: LocalDate? = null,
+    val status: String? = null,
+    val dekning: String? = null,
+    val lovvalgsland: String? = null,
+    val lovvalg: String? = null,
+    val grunnlag: String? = null,
+    val medlem: Boolean? = null
+)
+

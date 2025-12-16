@@ -431,6 +431,62 @@ class MockVerificationClient(
             ?: throw IllegalStateException("Failed to create BUC info: no response from mock")
     }
 
+    /**
+     * Create MEDL (medlemskapsunntak) test data in the mock.
+     * This is used to set up pre-existing MEDL periods for tests.
+     *
+     * @param unntakId The specific ID to use (required, not auto-generated)
+     * @param ident Person's fødselsnummer (required)
+     * @param fraOgMed Start date (default: today)
+     * @param tilOgMed End date (default: today + 1 year)
+     * @param status Status (default: "GODKJENT")
+     * @param dekning Coverage type (default: "FULL")
+     * @param lovvalgsland Country code (default: "NO")
+     * @param lovvalg Law choice (default: "FOROVRIG")
+     * @param grunnlag Basis (default: "ARBEID")
+     * @param medlem Member flag (default: true)
+     * @return The created MedlemskapsunntakVerificationDto
+     */
+    fun opprettMedl(
+        unntakId: Long,
+        ident: String,
+        fraOgMed: java.time.LocalDate? = null,
+        tilOgMed: java.time.LocalDate? = null,
+        status: String? = null,
+        dekning: String? = null,
+        lovvalgsland: String? = null,
+        lovvalg: String? = null,
+        grunnlag: String? = null,
+        medlem: Boolean? = null
+    ): MedlemskapsunntakVerificationDto {
+        val request = OpprettMedlRequest(
+            unntakId = unntakId,
+            ident = ident,
+            fraOgMed = fraOgMed,
+            tilOgMed = tilOgMed,
+            status = status,
+            dekning = dekning,
+            lovvalgsland = lovvalgsland,
+            lovvalg = lovvalg,
+            grunnlag = grunnlag,
+            medlem = medlem
+        )
+
+        val headers = HttpHeaders().apply {
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        val response = restTemplate.exchange(
+            "$baseUrl/testdata/medl",
+            HttpMethod.POST,
+            HttpEntity(request, headers),
+            MedlemskapsunntakVerificationDto::class.java
+        )
+
+        return response.body
+            ?: throw IllegalStateException("Failed to create MEDL data: no response from mock")
+    }
+
     // ==================== HEALTH ====================
 
     /**
