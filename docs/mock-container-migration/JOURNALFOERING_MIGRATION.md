@@ -1,6 +1,6 @@
 # Journalføring Tests Migration to Container
 
-## Status: Phase 4b Complete, Phase 5 Pending
+## Status: Phase 5 Complete, Ready for Phase 6 Cleanup
 
 **Last Updated:** 2025-12-16
 
@@ -38,36 +38,38 @@ Migrate integration tests that use `JournalføringsoppgaveGenerator` to use the 
 - `ContainerSatsendringTestBase` (extends `ContainerJournalfoeringBase`)
 - `ContainerAvgiftFaktureringTestBase` (extends `ContainerJournalfoeringBase`)
 
-### Phase 5: Remaining Tests ❌ Not Yet Migrated
+### Phase 5: Remaining ComponentTestBase Tests ✅ Complete
 
-These tests use `ComponentTestBase` or other bases (not JournalfoeringBase):
+These tests use `ComponentTestBase` or `MockServerTestBaseWithProsessManager`:
 
-| Test | Base Class | Complexity | Priority |
-|------|------------|------------|----------|
-| `AktoerHistorikkServiceIT` | `ComponentTestBase` | Low | Medium |
-| `AvsluttBehandlingArt13JobbIT` | `ComponentTestBase` | Low | Low |
-| `OpprettÅrsavregningIT` | `ComponentTestBase` | Medium | Medium |
-| `ÅrsavregningIkkeSkattepliktigeIT` | `ComponentTestBase` | Medium | Medium |
+| Test | Container Version | Status |
+|------|-------------------|--------|
+| `AktoerHistorikkServiceIT` | `ContainerAktoerHistorikkServiceIT` | ✅ Complete |
+| `AvsluttBehandlingArt13JobbIT` | `ContainerAvsluttBehandlingArt13JobbIT` | ✅ Complete |
+| `OpprettÅrsavregningIT` | `ContainerOpprettÅrsavregningIT` | ✅ Complete |
+| `ÅrsavregningIkkeSkattepliktigeIT` | `ContainerÅrsavregningIkkeSkattepliktigeIT` | ✅ Complete |
 
-These tests don't use JournalføringsoppgaveGenerator at all (may not need migration):
+### Tests Not Requiring Migration
 
-| Test | Notes |
-|------|-------|
-| `AdminControllerApiKeyIT` | API key testing, no mock needed |
-| `BehandlingsresultatServiceIT` | Service unit test |
-| `EessiMeldingConsumerIT` | Kafka consumer test |
-| `EndreAktoerIdIT` | Special test config |
-| `FinnSakerForÅrsavregningIT` | Query test |
-| `KafkaSkipIT` | Kafka error handling |
-| `LovvalgsperiodeServiceIT` | Service test |
-| `SaksflyThreadPoolTaskExecutorIT` | Thread pool test |
-| `SaksflytLåsreferanseIT` | Saksflyt test |
-| `SaksflytOppstartIT` | Saksflyt startup test |
-| `SedLåsMedSubProsesserIT` | SED locking test |
-| `SedLåsreferanseIT` | SED locking test |
-| `SoknadMottattConsumerIT` | Kafka consumer test |
+These tests don't use `ComponentTestBase` - they use `OracleTestContainerBase`, `DataJpaTestBase`, or are pure Kafka tests:
 
-### Phase 6: Cleanup (After All Migrated)
+| Test | Base Class | Notes |
+|------|------------|-------|
+| `AdminControllerApiKeyIT` | `OracleTestContainerBase` | API key testing, no external mock |
+| `BehandlingsresultatServiceIT` | `DataJpaTestBase` | Pure JPA/repository test |
+| `EessiMeldingConsumerIT` | None (embedded Kafka) | Kafka consumer test with mocked services |
+| `EndreAktoerIdIT` | `OracleTestContainerBase` | Special test config |
+| `FinnSakerForÅrsavregningIT` | `OracleTestContainerBase` | Query test, disabled |
+| `KafkaSkipIT` | None (embedded Kafka) | Kafka error handling test |
+| `LovvalgsperiodeServiceIT` | `DataJpaTestBase` | Pure JPA/repository test |
+| `SaksflyThreadPoolTaskExecutorIT` | `OracleTestContainerBase` | Thread pool test |
+| `SaksflytLåsreferanseIT` | `OracleTestContainerBase` | Saksflyt locking test |
+| `SaksflytOppstartIT` | `OracleTestContainerBase` | Saksflyt startup test |
+| `SedLåsMedSubProsesserIT` | `OracleTestContainerBase` | SED locking test |
+| `SedLåsreferanseIT` | `OracleTestContainerBase` | SED locking test |
+| `SoknadMottattConsumerIT` | None (embedded Kafka) | Kafka consumer test with mocked services |
+
+### Phase 6: Cleanup (Ready to Start)
 
 | Task | Status | Notes |
 |------|--------|-------|
@@ -117,18 +119,29 @@ integrasjonstest/src/test/kotlin/no/nav/melosys/itest/mock/
 ├── ContainerYrkesaktivFtrlVedtakIT.kt
 ├── ContainerÅrsavregningIT.kt
 ├── ContainerEøsPensjonistIverksettIT.kt
-└── ContainerOpprettSakIT.kt
+├── ContainerOpprettSakIT.kt
+├── ContainerAktoerHistorikkServiceIT.kt
+├── ContainerOpprettÅrsavregningIT.kt
+├── ContainerÅrsavregningIkkeSkattepliktigeIT.kt
+├── ContainerAvsluttBehandlingArt13JobbIT.kt
+└── MockVerificationClient.kt
 ```
 
 ### Original Test Files (To Be Deprecated)
 ```
 integrasjonstest/src/test/kotlin/no/nav/melosys/itest/
+├── ComponentTestBase.kt
+├── MockServerTestBaseWithProsessManager.kt
 ├── JournalfoeringBase.kt
 ├── JournalfoeringIT.kt
 ├── SedMottakTestIT.kt
 ├── SedMottakBehandlingsTypeIT.kt
 ├── AvgiftFaktureringTestBase.kt
 ├── SatsendringTestBase.kt
+├── AktoerHistorikkServiceIT.kt
+├── AvsluttBehandlingArt13JobbIT.kt
+├── OpprettÅrsavregningIT.kt
+├── ÅrsavregningIkkeSkattepliktigeIT.kt
 └── vedtak/
     ├── IkkeYrkesaktivVedtakIT.kt
     ├── YrkesaktivEosVedtakIT.kt
@@ -152,8 +165,7 @@ integrasjonstest/src/test/kotlin/no/nav/melosys/itest/
 
 | Category | Count |
 |----------|-------|
-| Container tests created | 12 |
-| Total test methods migrated | 38 |
-| Remaining tests to analyze | 17 |
-| Tests needing migration | ~4 |
-| Tests not needing migration | ~13 |
+| Container tests created | 16 |
+| Total test methods migrated | 55+ |
+| Tests analyzed and not needing migration | 13 |
+| Original tests ready for removal | All ComponentTestBase tests |
