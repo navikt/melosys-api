@@ -139,7 +139,7 @@ class TrygdeavgiftController(
     @GetMapping
     fun hentTrygdeavgiftsperioder(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<List<TrygdeavgiftsperiodeDto>> {
         aksesskontroll.autoriser(behandlingID)
-        val trygdeavgiftsperioder = trygdeavgiftService.hentTrygdeavgiftsperioderPåBehandlingsresultat(behandlingID)
+        val trygdeavgiftsperioder = trygdeavgiftService.hentTrygdeavgiftsperioder(behandlingID)
         return ResponseEntity.ok(trygdeavgiftsperioder.map { TrygdeavgiftsperiodeDto(it) })
     }
 
