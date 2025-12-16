@@ -37,9 +37,11 @@ class ReplikerBehandlingsresultatService(
         behandlingsresultatReplika.utfallUtpeking = null
         behandlingsresultatReplika.behandlingsmåte = Behandlingsmaate.MANUELT
         behandlingsresultatReplika.type = Behandlingsresultattyper.IKKE_FASTSATT
+        behandlingsresultatReplika.medlemskapsperioder = HashSet()
+        behandlingsresultatReplika.lovvalgsperioder = HashSet()
 
         replikerAvklartefakta(behandlingsresultatOriginal, behandlingsresultatReplika)
-        replikerLovvalgsperioder(behandlingsresultatOriginal, behandlingsresultatReplika)
+        replikerLovvalgsperioder(behandlingsresultatOriginal, behandlingsresultatReplika, behandlingReplika.type)
         replikerVilkaarsresultat(behandlingsresultatOriginal, behandlingsresultatReplika)
         replikerAnmodningsperioder(behandlingsresultatOriginal, behandlingsresultatReplika)
         replikerBehandlingsresultatBegrunnelser(behandlingsresultatOriginal, behandlingsresultatReplika)
@@ -50,6 +52,9 @@ class ReplikerBehandlingsresultatService(
             replikerHelseutgiftDekkesPeriode(behandlingsresultatOriginal, behandlingsresultatReplika)
             replikerTrygdeavgiftForPensjonist(behandlingsresultatOriginal, behandlingsresultatReplika)
             behandlingsresultatReplika.hentHelseutgiftDekkesPeriode().id = null
+        } else if (behandlingReplika.fagsak.erLovvalg() && behandlingsresultatOriginal.trygdeavgiftsperioder.isNotEmpty()) {
+            replikerTrygdeavgift(behandlingsresultatOriginal, behandlingsresultatReplika)
+            behandlingsresultatReplika.lovvalgsperioder.onEach { it.id = null }
         } else {
             replikerMedlemAvFolketrygden(behandlingsresultatOriginal, behandlingsresultatReplika, behandlingReplika.type)
         }
@@ -331,14 +336,32 @@ private fun replikerVilkaarsresultat(
 )
 private fun replikerLovvalgsperioder(
     behandlingsresultatOrig: Behandlingsresultat,
-    behandlingsresultatReplika: Behandlingsresultat
+    behandlingsresultatReplika: Behandlingsresultat,
+    behandlingstype: Behandlingstyper
 ) {
     behandlingsresultatReplika.lovvalgsperioder = HashSet()
-    for (lovvalgsperiodeOriginal in behandlingsresultatOrig.lovvalgsperioder) {
+    // harTrygdeavgift er til for å sjekke om lovvalgsperiodene som blir replikert har trygdeavgiftsperioder,
+    // og bruker det for å sette lovvalgsperiode id til null eller ikke. Hvis de har trygdeavgift kan vi ikke sette
+    // null helt enda. Det gjøres etter at trygdeavgiftsperiodene er replikert.
+    val harTrygdeavgift =
+        behandlingsresultatOrig.trygdeavgiftsperioder.isNotEmpty() && behandlingsresultatOrig.trygdeavgiftsperioder.all { it.grunnlagLovvalgsPeriode != null }
+    var filtrertLovvalgsperioderOriginal = behandlingsresultatOrig.lovvalgsperioder.toList()
+
+    if (harTrygdeavgift) {
+        filtrertLovvalgsperioderOriginal = if (behandlingstype == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) {
+            behandlingsresultatOrig.lovvalgsperioder.filter { it.erInnvilget() || it.erOpphørt() }
+        } else {
+            behandlingsresultatOrig.lovvalgsperioder.filter { it.erInnvilget() }
+        }
+    }
+
+    for (lovvalgsperiodeOriginal in filtrertLovvalgsperioderOriginal) {
         val lovvalgsperiodeReplika = BeanUtils.cloneBean(lovvalgsperiodeOriginal) as Lovvalgsperiode
         lovvalgsperiodeReplika.behandlingsresultat = behandlingsresultatReplika
-        lovvalgsperiodeReplika.id = null
         lovvalgsperiodeReplika.trygdeavgiftsperioder = HashSet()
+        if (!harTrygdeavgift) {
+            lovvalgsperiodeReplika.id = null
+        }
         behandlingsresultatReplika.lovvalgsperioder.add(lovvalgsperiodeReplika)
     }
 }
