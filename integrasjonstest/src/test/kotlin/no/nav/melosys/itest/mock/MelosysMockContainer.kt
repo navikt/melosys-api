@@ -31,10 +31,11 @@ class MelosysMockContainer : GenericContainer<MelosysMockContainer>(
         private val log = LoggerFactory.getLogger(MelosysMockContainer::class.java)
 
         /**
-         * Docker image built locally from melosys-docker-compose repo.
-         * Build with: cd melosys-docker-compose && make build-mock
+         * Docker image from Google Artifact Registry.
+         * Can also use local image: melosys-docker-compose-mock:latest
+         * Build locally with: cd melosys-docker-compose && make build-mock
          */
-        const val IMAGE_NAME = "melosys-docker-compose-mock:latest"
+        const val IMAGE_NAME = "europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-docker-compose-mock:latest"
 
         /**
          * Port exposed by the mock container.

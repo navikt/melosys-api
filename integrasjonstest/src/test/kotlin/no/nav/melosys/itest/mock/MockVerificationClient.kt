@@ -74,7 +74,9 @@ class MockVerificationClient(
      */
     fun medlCount(): Int {
         return try {
-            restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/medl/count", Int::class.java) ?: 0
+            // Docker mock returns CountResponse(count), in-process mock may return Int directly
+            val response = restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/medl/count", CountResponse::class.java)
+            response?.count ?: 0
         } catch (e: Exception) {
             log.warn("Failed to fetch MEDL count from mock: ${e.message}")
             0
@@ -105,7 +107,8 @@ class MockVerificationClient(
      */
     fun sakCount(): Int {
         return try {
-            restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/sak/count", Int::class.java) ?: 0
+            val response = restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/sak/count", CountResponse::class.java)
+            response?.count ?: 0
         } catch (e: Exception) {
             log.warn("Failed to fetch sak count from mock: ${e.message}")
             0
@@ -219,7 +222,8 @@ class MockVerificationClient(
      */
     fun oppgaveCount(): Int {
         return try {
-            restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/oppgave/count", Int::class.java) ?: 0
+            val response = restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/oppgave/count", CountResponse::class.java)
+            response?.count ?: 0
         } catch (e: Exception) {
             log.warn("Failed to fetch oppgave count from mock: ${e.message}")
             0
@@ -267,7 +271,8 @@ class MockVerificationClient(
      */
     fun journalpostCount(): Int {
         return try {
-            restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/journalpost/count", Int::class.java) ?: 0
+            val response = restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/journalpost/count", CountResponse::class.java)
+            response?.count ?: 0
         } catch (e: Exception) {
             log.warn("Failed to fetch journalpost count from mock: ${e.message}")
             0

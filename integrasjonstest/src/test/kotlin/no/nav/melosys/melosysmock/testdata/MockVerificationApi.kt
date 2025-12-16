@@ -60,7 +60,7 @@ class MockVerificationApi(
     }
 
     @GetMapping("/verification/medl/count")
-    fun getMedlCount(): Int = MedlRepo.repo.size
+    fun getMedlCount(): CountResponse = CountResponse(MedlRepo.repo.size)
 
     // ========== SAK ==========
 
@@ -76,7 +76,7 @@ class MockVerificationApi(
     }
 
     @GetMapping("/verification/sak/count")
-    fun getSakCount(): Int = SakRepo.repo.size
+    fun getSakCount(): CountResponse = CountResponse(SakRepo.repo.size)
 
     @GetMapping("/verification/sak/fagsak/{fagsakNr}")
     fun getSakByFagsakNr(@PathVariable fagsakNr: String): ResponseEntity<SakVerificationDto> {
@@ -102,7 +102,7 @@ class MockVerificationApi(
     fun getOppgave(): List<OppgaveVerificationDto> = oppgaveRepo.repo.values.map { it.toVerificationDto() }
 
     @GetMapping("/verification/oppgave/count")
-    fun getOppgaveCount(): Int = oppgaveRepo.repo.size
+    fun getOppgaveCount(): CountResponse = CountResponse(oppgaveRepo.repo.size)
 
     @GetMapping("/verification/oppgave/type/{oppgavetype}")
     fun getOppgaveByType(@PathVariable oppgavetype: String): List<OppgaveVerificationDto> =
@@ -141,7 +141,7 @@ class MockVerificationApi(
     fun getJournalpost(): List<JournalpostVerificationDto> = journalpostRepo.repo.values.map { it.toVerificationDto() }
 
     @GetMapping("/verification/journalpost/count")
-    fun getJournalpostCount(): Int = journalpostRepo.repo.size
+    fun getJournalpostCount(): CountResponse = CountResponse(journalpostRepo.repo.size)
 
     @GetMapping("/verification/journalpost/{journalpostId}")
     fun getJournalpostById(@PathVariable journalpostId: String): ResponseEntity<JournalpostVerificationDto> {
@@ -351,6 +351,8 @@ data class SaksrelasjonVerificationDto(
     val rinaSaksnummer: String? = null,
     val bucType: String? = null
 )
+
+data class CountResponse(val count: Int)
 
 data class MockSummaryDto(
     val medlCount: Int = 0,
