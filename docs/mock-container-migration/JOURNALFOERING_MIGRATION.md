@@ -62,7 +62,8 @@ fun lagJournalføringsoppgave(@RequestBody request: OpprettJfrOppgaveRequest): L
 
 | Test | Status | Notes |
 |------|--------|-------|
-| `IkkeYrkesaktivVedtakIT` | Pending | 3 tests |
+| `ContainerIkkeYrkesaktivVedtakIT` | ✅ Complete | 1 test migrated, verified working |
+| `IkkeYrkesaktivVedtakIT` (remaining) | Pending | 2 more tests to migrate |
 | `YrkesaktivEosVedtakIT` | Pending | 2 tests |
 | `JournalfoeringIT` | Pending | |
 | `SedMottakBehandlingsTypeIT` | Pending | |
@@ -88,9 +89,10 @@ mock/src/main/kotlin/no/nav/melosys/melosysmock/testdata/
 ### melosys-api (to create/modify)
 ```
 integrasjonstest/src/test/kotlin/no/nav/melosys/itest/mock/
-├── MockVerificationClient.kt        # Add opprettJfrOppgave()
-├── MockVerificationDtos.kt          # Add request DTO
-├── ContainerJournalfoeringBase.kt   # NEW: Container version of JournalfoeringBase
+├── MockVerificationClient.kt              # ✅ Added opprettJfrOppgave()
+├── MockVerificationDtos.kt                # ✅ Added OpprettJfrOppgaveRequest
+├── ContainerJournalfoeringBase.kt         # ✅ Container version of JournalfoeringBase
+├── ContainerIkkeYrkesaktivVedtakIT.kt     # ✅ First migrated test
 └── ...
 ```
 
