@@ -36,7 +36,6 @@ import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding
 import no.nav.melosys.itest.EessiMeldingTestDataFactory
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.argumentSet
@@ -470,7 +469,6 @@ class ContainerSedMottakTestIT(
 
     @ParameterizedTest(name = "{argumentSetName} - {0}")
     @MethodSource("toggleMedForventetdResultatForA003SendBrev")
-    @Disabled("sedForRinaSak verification returns empty - SED recording not working in container mock")
     fun `Motta A003, godkjenne med A012, ugyldiggjøre godkjenning A012 med X008 for så å sende en A004`(forventedeProsessTyper: Pair<Boolean, Map<ProsessType, Int>>) {
         if (forventedeProsessTyper.first) fakeUnleash.enableAll() else fakeUnleash.disableAll()
 
@@ -613,7 +611,6 @@ class ContainerSedMottakTestIT(
 
     @ParameterizedTest
     @MethodSource("toggleMedForventetdResultatForA003SendBrev")
-    @Disabled("sedForRinaSak verification returns empty - SED recording not working in container mock")
     fun `Motta A003, avvise med A004, ugyldiggjøre avvisning A004 med X008 for så å sende en A012`(forventedeProsessTyper: Pair<Boolean, Map<ProsessType, Int>>) {
         if (forventedeProsessTyper.first) fakeUnleash.enableAll() else fakeUnleash.disableAll()
 
