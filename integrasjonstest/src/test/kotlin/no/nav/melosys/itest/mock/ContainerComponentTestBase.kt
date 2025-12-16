@@ -155,11 +155,9 @@ open class ContainerComponentTestBase : OracleTestContainerBase() {
             // These match the properties in application-test.yml
 
             // REST APIs
-            // NOTE: Some APIs are NOT overridden and use the in-process mock at localhost:8093
-            // because the container doesn't have these endpoints:
-            // - KodeverkAPI_v1 (kodeverk endpoint)
-            // - Inngangsvilkaar (inngangsvilkaar endpoint)
             registry.add("DistribuerJournalpost_v1.url") { "$mockUrl/rest/v1/distribuerjournalpost" }
+            registry.add("Inngangsvilkaar.url") { "$mockUrl/api" }
+            registry.add("KodeverkAPI_v1.url") { "$mockUrl/api" }
             registry.add("JournalpostApi_v1.url") { "$mockUrl/rest/journalpostapi/v1" }
             registry.add("MelosysEessi.url") { "$mockUrl/api" }
             registry.add("OppgaveAPI_v1.url") { "$mockUrl/api/v1" }

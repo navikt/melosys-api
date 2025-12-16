@@ -1,6 +1,6 @@
 # Mock Container Migration Progress
 
-## Status: Phase 5 Complete - Full Container Integration Tests Working
+## Status: Phase 5 Complete - Full Container Approach (No Hybrid)
 
 **Last Updated:** 2025-12-16
 
@@ -120,22 +120,17 @@ Migrated tests from direct repo access to MockVerificationClient:
      - Calls PDL, SAK API, Oppgave API via the mock container
      - Verifies results using mockVerificationClient
 
-6. **Hybrid Approach Discovered** 📝
-   - Some endpoints are NOT available in the Docker container (kodeverk, inngangsvilkaar)
-   - These continue to use the in-process mock at localhost:8093
-   - Other endpoints use the container (PDL, SAK, Oppgave, JournalpostApi, etc.)
-   - This hybrid approach works and all tests pass
+6. **Full Container Approach Achieved** ✅
+   - All endpoints are now available in the Docker container
+   - KodeverkAPI and Inngangsvilkaar endpoints were added to melosys-docker-compose-mock
+   - No in-process mock is needed for container-based tests
+   - All external service calls go to the Docker container
 
 #### Optional Future Work
 
 1. **Consider removing in-process mock code** (after stability proven)
    - Delete `melosysmock/` package
    - Update ComponentTestBase to not clear static repos
-   - Requires adding missing endpoints to melosys-docker-compose-mock
-
-2. **Add missing endpoints to container**
-   - KodeverkAPI (`/api/v1/kodeverk/...`)
-   - Inngangsvilkaar (`/api/inngangsvilkaar`)
 
 ## Files Overview
 
@@ -172,8 +167,8 @@ integrasjonstest/src/test/kotlin/no/nav/melosys/
 | 2025-12-15 | Count endpoints return `CountResponse` | Matches Docker mock API, ensures compatibility |
 | 2025-12-15 | Handle null vs empty string in HTTP JSON | Use `shouldBeIn(null, "")` for optional fields |
 | 2025-12-15 | Keep setup code with direct repo access | Only verification needs to use HTTP client |
-| 2025-12-16 | Use hybrid approach for container + in-process mock | Container doesn't have all endpoints (kodeverk, inngangsvilkaar), so these use in-process mock |
 | 2025-12-16 | Create separate base classes for container tests | `ContainerComponentTestBase` for full Spring context, `MelosysMockContainerTestBase` for standalone |
+| 2025-12-16 | Full container approach achieved | Missing endpoints (kodeverk, inngangsvilkaar) added to melosys-docker-compose-mock, hybrid approach no longer needed |
 
 ## Next Steps (Optional)
 
@@ -181,9 +176,9 @@ All core work is complete. These are optional improvements:
 
 1. ✅ ~~Container infrastructure created and tested~~
 2. ✅ ~~Create full integration test using container~~
-3. **Consider removing in-process mock code** (after stability proven)
-   - Would require adding missing endpoints to melosys-docker-compose-mock
-4. **Add missing endpoints to melosys-docker-compose-mock**
-   - KodeverkAPI, Inngangsvilkaar
+3. ✅ ~~Add missing endpoints to melosys-docker-compose-mock (KodeverkAPI, Inngangsvilkaar)~~
+4. **Consider removing in-process mock code** (after stability proven)
+   - Delete `melosysmock/` package
+   - Update ComponentTestBase to not clear static repos
 5. **Migrate more tests to use ContainerComponentTestBase** (optional)
    - Only valuable if we want to reduce test runtime or simplify the test architecture
