@@ -31,7 +31,7 @@ import org.springframework.test.context.ActiveProfiles
         "teammelosys.fattetvedtak.v1-local", "teammelosys.manglende-fakturabetaling-local", "teammelosys.melosys-hendelse-local"],
     brokerProperties = ["offsets.topic.replication.factor=1", "transaction.state.log.replication.factor=1", "transaction.state.log.min.isr=1"]
 )
-@Import(KafkaTestConfig::class)
+@Import(KafkaTestConfig::class, KodeverkTestConfig::class)
 @DirtiesContext
 @EnableMockOAuth2Server
 class ComponentTestBase : OracleTestContainerBase() {

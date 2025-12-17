@@ -212,6 +212,9 @@ springdoc:
     path: /swagger-ui.html
 
 melosys:
+  kodeverk:
+    scheduler:
+      enabled: true  # Standard aktivert for produksjon
   service:
     fagsak:
       arbeidsforholdhistorikk:

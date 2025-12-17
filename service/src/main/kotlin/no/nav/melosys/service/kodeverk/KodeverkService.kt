@@ -1,15 +1,10 @@
 package no.nav.melosys.service.kodeverk
 
 import mu.KotlinLogging
-import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.integrasjon.kodeverk.Kode
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.context.event.EventListener
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.util.ObjectUtils
 import java.time.LocalDate
@@ -18,11 +13,6 @@ private val log = KotlinLogging.logger { }
 
 @Service
 class KodeverkService(private val kodeverkRegister: KodeverkRegister) {
-    @EventListener
-    fun onApplicationEvent(event: ApplicationReadyEvent?) {
-        kodeverkScheduler()
-    }
-
     fun dekod(kodeverk: FellesKodeverk, kode: String?): String {
         return dekod(kodeverk, kode, LocalDate.now())
     }
@@ -85,14 +75,14 @@ class KodeverkService(private val kodeverkRegister: KodeverkRegister) {
         return UKJENT
     }
 
-    @Scheduled(cron = "0 0 6 * * *")
-    @SchedulerLock(name = "KodeverkSchedulerJobb", lockAtLeastFor = "10m")
-    fun kodeverkScheduler() {
+    /**
+     * Laster og cacher alle kodeverk fra KodeverkRegister.
+     * Kan kalles direkte fra tester eller utløses av scheduler.
+     */
+    fun lastKodeverk() {
         log.info("Henter alle kodeverk")
-        ThreadLocalAccessInfo.executeProcess("kodeverkScheduler") {
-            for (kodeverk in FellesKodeverk.values()) {
-                hentKodeverk(kodeverk.navn)
-            }
+        for (kodeverk in FellesKodeverk.values()) {
+            hentKodeverk(kodeverk.navn)
         }
     }
 
