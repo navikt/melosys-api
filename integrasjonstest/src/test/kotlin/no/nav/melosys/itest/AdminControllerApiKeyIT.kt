@@ -1,19 +1,13 @@
 package no.nav.melosys.itest
 
 import io.kotest.matchers.shouldBe
-import no.nav.melosys.Application
+import no.nav.melosys.itest.mock.ContainerComponentTestBase
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.kafka.test.context.EmbeddedKafka
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -21,20 +15,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 /**
  * Tester for admin-kontroller autentisering som krever både API-nøkkel og bearer token.
  */
-@ActiveProfiles("test")
-@SpringBootTest(
-    classes = [Application::class],
-    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
-)
-@EmbeddedKafka
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@DirtiesContext
-@EnableMockOAuth2Server
 @AutoConfigureMockMvc
 class AdminControllerApiKeyIT(
     @Autowired var mockMvc: MockMvc,
     @Autowired var mockOAuth2Server: MockOAuth2Server
-) : OracleTestContainerBase() {
+) : ContainerComponentTestBase() {
 
     companion object {
         const val API_KEY_HEADER = "X-MELOSYS-ADMIN-APIKEY"
