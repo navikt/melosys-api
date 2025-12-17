@@ -8,21 +8,21 @@ import org.testcontainers.utility.DockerImageName
 import java.time.Duration
 
 /**
- * Testcontainer for melosys-mock Docker image.
+ * Testcontainer for melosys-mock Docker-image.
  *
- * This container runs the same mock that is used for local development and E2E tests,
- * eliminating the need for duplicate in-process mock code.
+ * Denne containeren kjører samme mock som brukes for lokal utvikling og E2E-tester,
+ * noe som eliminerer behovet for duplisert in-process mock-kode.
  *
- * The mock provides:
+ * Mocken tilbyr:
  * - MEDL API mock
  * - SAF/Joark API mock
  * - Oppgave API mock
  * - Melosys-eessi API mock
  * - PDL GraphQL mock
- * - And more...
+ * - Og mer...
  *
- * Verification endpoints are available at /testdata/verification/ for asserting
- * what data was sent to the mocks during tests.
+ * Verifikasjonsendepunkter er tilgjengelige på /testdata/verification/ for å
+ * verifisere hvilke data som ble sendt til mockene under tester.
  */
 class MelosysMockContainer : GenericContainer<MelosysMockContainer>(
     DockerImageName.parse(IMAGE_NAME)
@@ -31,15 +31,15 @@ class MelosysMockContainer : GenericContainer<MelosysMockContainer>(
         private val log = LoggerFactory.getLogger(MelosysMockContainer::class.java)
 
         /**
-         * Docker image from Google Artifact Registry.
-         * Can also use local image: melosys-docker-compose-mock:latest
-         * Build locally with: cd melosys-docker-compose && make build-mock
+         * Docker-image fra Google Artifact Registry.
+         * Kan også bruke lokalt image: melosys-docker-compose-mock:latest
+         * Bygg lokalt med: cd melosys-docker-compose && make build-mock
          */
         const val IMAGE_NAME = "europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-docker-compose-mock:latest"
 
         /**
-         * Port exposed by the mock container.
-         * Note: melosys-mock uses 8083 internally (server.port=8083).
+         * Port eksponert av mock-containeren.
+         * Merk: melosys-mock bruker 8083 internt (server.port=8083).
          */
         const val MOCK_PORT = 8083
     }
@@ -53,19 +53,19 @@ class MelosysMockContainer : GenericContainer<MelosysMockContainer>(
                 .forStatusCode(200)
                 .withStartupTimeout(Duration.ofMinutes(2))
         )
-        // Ensure Kafka bootstrap servers are configured (mock needs this even if not using Kafka)
+        // Sørg for at Kafka bootstrap servers er konfigurert (mock trenger dette selv om Kafka ikke brukes)
         withEnv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
         withEnv("SPRING_PROFILES_ACTIVE", "test")
     }
 
     /**
-     * Get the base URL for the mock container.
-     * Use this to configure integration URLs in tests.
+     * Henter base-URL for mock-containeren.
+     * Bruk denne for å konfigurere integrasjons-URLer i tester.
      */
     fun getBaseUrl(): String = "http://$host:${getMappedPort(MOCK_PORT)}"
 
     /**
-     * Get URL for a specific path.
+     * Henter URL for en spesifikk sti.
      */
     fun getUrl(path: String): String = "${getBaseUrl()}${if (path.startsWith("/")) path else "/$path"}"
 }

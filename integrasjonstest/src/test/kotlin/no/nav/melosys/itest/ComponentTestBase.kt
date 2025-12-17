@@ -26,24 +26,24 @@ import org.testcontainers.utility.DockerImageName
 import java.time.Duration
 
 /**
- * Base class for integration tests that use melosys-mock as a Docker container
- * instead of the in-process mock.
+ * Baseklasse for integrasjonstester som bruker melosys-mock som Docker-container
+ * i stedet for in-process mock.
  *
- * This class combines:
+ * Denne klassen kombinerer:
  * - OracleTestContainerBase for database
- * - Melosys-mock container for external service mocking
- * - All Spring Boot test configuration
+ * - Melosys-mock container for ekstern tjeneste-mocking
+ * - All Spring Boot test-konfigurasjon
  *
- * Key features:
- * - External service URLs point to the container (dynamic port)
- * - Mock state is cleared via HTTP endpoints, not direct repo access
- * - No in-process mock code is used
- * - KodeverkTestConfig provides stub kodeverk data
+ * Nøkkelfunksjoner:
+ * - Eksterne tjeneste-URLer peker mot containeren (dynamisk port)
+ * - Mock-tilstand tømmes via HTTP-endepunkter, ikke direkte repo-tilgang
+ * - Ingen in-process mock-kode brukes
+ * - KodeverkTestConfig tilbyr stub kodeverk-data
  *
- * Usage:
- * 1. Extend this class instead of OracleTestContainerBase
- * 2. Use mockVerificationClient to verify what was sent to mocks
- * 3. All external service calls go to the Docker container
+ * Bruk:
+ * 1. Extend denne klassen i stedet for OracleTestContainerBase
+ * 2. Bruk mockVerificationClient for å verifisere hva som ble sendt til mockene
+ * 3. Alle eksterne tjenestekall går til Docker-containeren
  */
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -73,8 +73,8 @@ open class ComponentTestBase : OracleTestContainerBase() {
     }
 
     /**
-     * Client for verifying mock state via HTTP endpoints.
-     * Points to the mock container.
+     * Klient for verifisering av mock-tilstand via HTTP-endepunkter.
+     * Peker mot mock-containeren.
      */
     protected val mockVerificationClient: MockVerificationClient by lazy {
         MockVerificationClient(getMockBaseUrl())
@@ -82,13 +82,13 @@ open class ComponentTestBase : OracleTestContainerBase() {
 
     @BeforeEach
     fun componentTestBaseBeforeEach() {
-        // Clear mock state before each test
+        // Tøm mock-tilstand før hver test
         mockVerificationClient.clear()
     }
 
     @AfterEach
     fun componentTestBaseAfterEach() {
-        // Clear mock state via HTTP (container doesn't have direct repo access)
+        // Tøm mock-tilstand via HTTP (container har ikke direkte repo-tilgang)
         mockVerificationClient.clear()
         fakeUnleash.enableAll()
     }
@@ -100,18 +100,18 @@ open class ComponentTestBase : OracleTestContainerBase() {
         private val log = LoggerFactory.getLogger(ComponentTestBase::class.java)
 
         /**
-         * Docker image from Google Artifact Registry.
-         * For local development, build with same tag: make release (in melosys-docker-compose/mock)
+         * Docker-image fra Google Artifact Registry.
+         * For lokal utvikling, bygg med samme tag: make release (i melosys-docker-compose/mock)
          */
         private const val MOCK_IMAGE = "europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-docker-compose-mock:latest"
 
         /**
-         * Internal port used by melosys-mock (server.port=8083 in the container).
+         * Intern port brukt av melosys-mock (server.port=8083 i containeren).
          */
         private const val MOCK_PORT = 8083
 
         /**
-         * The mock container instance. Shared across all tests using this base class.
+         * Mock-container-instansen. Deles mellom alle tester som bruker denne baseklassen.
          */
         val mockContainer: GenericContainer<*> = GenericContainer(DockerImageName.parse(MOCK_IMAGE))
             .withExposedPorts(MOCK_PORT)
@@ -126,7 +126,7 @@ open class ComponentTestBase : OracleTestContainerBase() {
             .withEnv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 
         /**
-         * Get the base URL for the mock container.
+         * Henter base-URL for mock-containeren.
          */
         fun getMockBaseUrl(): String {
             if (!mockContainer.isRunning) {
@@ -136,25 +136,25 @@ open class ComponentTestBase : OracleTestContainerBase() {
         }
 
         /**
-         * Configure all external service URLs to point to the mock container.
-         * This overrides the localhost:8093 URLs in application-test.yml.
+         * Konfigurerer alle eksterne tjeneste-URLer til å peke mot mock-containeren.
+         * Dette overstyrer localhost:8093 URLene i application-test.yml.
          */
         @DynamicPropertySource
         @JvmStatic
         fun configureMockAndDbProperties(registry: DynamicPropertyRegistry) {
-            // Start the mock container if not already running
+            // Start mock-containeren hvis den ikke allerede kjører
             if (!mockContainer.isRunning) {
-                log.info("Starting melosys-mock container...")
+                log.info("Starter melosys-mock container...")
                 mockContainer.start()
-                log.info("Mock container started at: ${getMockBaseUrl()}")
+                log.info("Mock-container startet på: ${getMockBaseUrl()}")
             }
 
             val mockUrl = getMockBaseUrl()
 
-            // Configure all external service URLs to point to the mock container
-            // These match the properties in application-test.yml
+            // Konfigurer alle eksterne tjeneste-URLer til å peke mot mock-containeren
+            // Disse matcher properties i application-test.yml
 
-            // REST APIs
+            // REST APIer
             registry.add("DistribuerJournalpost_v1.url") { "$mockUrl/rest/v1/distribuerjournalpost" }
             registry.add("Inngangsvilkaar.url") { "$mockUrl/api" }
             registry.add("KodeverkAPI_v1.url") { "$mockUrl/api" }
@@ -166,11 +166,11 @@ open class ComponentTestBase : OracleTestContainerBase() {
             registry.add("SAF.url") { mockUrl }
             registry.add("SakAPI_v1.url") { "$mockUrl/api/v1/saker" }
 
-            // SOAP services
+            // SOAP-tjenester
             registry.add("Dokumentproduksjon_v3.url") { "$mockUrl/soap/services/dokumentproduksjon/v3" }
             registry.add("SakOgBehandling_v1.url") { "$mockUrl/soap/services/sakOgBehandling/v1" }
 
-            // Other integrations
+            // Andre integrasjoner
             registry.add("arbeidsforhold.rest.url") { "$mockUrl/aareg-services/api/v1/arbeidstaker/arbeidsforhold" }
             registry.add("ereg.rest.url") { "$mockUrl/ereg/v2" }
             registry.add("inntekt.rest.url") { "$mockUrl/inntektskomponenten/rs/api/v1" }
@@ -179,7 +179,7 @@ open class ComponentTestBase : OracleTestContainerBase() {
             registry.add("tilgangsmaskinen.url") { "$mockUrl/tilgangsmaskinen" }
             registry.add("utbetaling_rest.url") { "$mockUrl/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern" }
 
-            log.info("Configured all external service URLs to use mock container at: $mockUrl")
+            log.info("Konfigurerte alle eksterne tjeneste-URLer til å bruke mock-container på: $mockUrl")
         }
     }
 }

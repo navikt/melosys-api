@@ -14,22 +14,22 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestTemplate
 
 /**
- * Client for calling verification endpoints on melosys-mock.
+ * Klient for å kalle verifikasjonsendepunkter på melosys-mock.
  *
- * This client provides methods to query what data was sent to the mock during tests,
- * enabling verification without direct in-process repo access.
+ * Denne klienten tilbyr metoder for å spørre hvilke data som ble sendt til mocken under tester,
+ * noe som muliggjør verifisering uten direkte in-process repo-tilgang.
  *
- * Usage:
+ * Bruk:
  * ```kotlin
  * val client = MockVerificationClient(mockContainer.getBaseUrl())
  *
- * // Verify MEDL perioder were created
+ * // Verifiser at MEDL-perioder ble opprettet
  * client.medl().shouldHaveSize(1)
  *
- * // Verify SEDs were sent
+ * // Verifiser at SEDer ble sendt
  * client.sedForRinaSak("123456").shouldContainInOrder("A012", "X008", "A004")
  *
- * // Clear all mock data between tests
+ * // Tøm alle mock-data mellom tester
  * client.clear()
  * ```
  */
@@ -56,7 +56,7 @@ class MockVerificationClient(
     // ==================== MEDL ====================
 
     /**
-     * Get all MEDL medlemskapsunntak stored in the mock.
+     * Henter alle MEDL-medlemskapsunntak lagret i mocken.
      */
     fun medl(): List<MedlemskapsunntakVerificationDto> {
         return try {
@@ -73,11 +73,11 @@ class MockVerificationClient(
     }
 
     /**
-     * Get count of MEDL medlemskapsunntak.
+     * Henter antall MEDL-medlemskapsunntak.
      */
     fun medlCount(): Int {
         return try {
-            // Docker mock returns CountResponse(count), in-process mock may return Int directly
+            // Docker-mock returnerer CountResponse(count), in-process mock kan returnere Int direkte
             val response = restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/medl/count", CountResponse::class.java)
             response?.count ?: 0
         } catch (e: Exception) {
@@ -89,7 +89,7 @@ class MockVerificationClient(
     // ==================== SAK ====================
 
     /**
-     * Get all saker stored in the mock.
+     * Henter alle saker lagret i mocken.
      */
     fun saker(): List<SakVerificationDto> {
         return try {
@@ -106,7 +106,7 @@ class MockVerificationClient(
     }
 
     /**
-     * Get count of saker.
+     * Henter antall saker.
      */
     fun sakCount(): Int {
         return try {
@@ -119,7 +119,7 @@ class MockVerificationClient(
     }
 
     /**
-     * Get sak by fagsakNr.
+     * Henter sak etter fagsakNr.
      */
     fun sakByFagsakNr(fagsakNr: String): SakVerificationDto? {
         return try {
@@ -133,8 +133,8 @@ class MockVerificationClient(
     // ==================== MELOSYS-EESSI ====================
 
     /**
-     * Get SED types sent for a specific RINA sak.
-     * Returns list of SED type strings (e.g., ["A012", "X008", "A004"]).
+     * Henter SED-typer sendt for en spesifikk RINA-sak.
+     * Returnerer liste med SED-typestrenger (f.eks. ["A012", "X008", "A004"]).
      */
     fun sedForRinaSak(rinaSaksnummer: String): List<String> {
         return try {
@@ -151,7 +151,7 @@ class MockVerificationClient(
     }
 
     /**
-     * Get all SED repo data (rinaSaksnummer -> list of SED types).
+     * Henter alle SED-repo-data (rinaSaksnummer -> liste med SED-typer).
      */
     fun allSedRepo(): Map<String, List<String>> {
         return try {
@@ -168,7 +168,7 @@ class MockVerificationClient(
     }
 
     /**
-     * Get all BUC information stored in the mock.
+     * Henter all BUC-informasjon lagret i mocken.
      */
     fun bucInfo(): List<BucVerificationDto> {
         return try {
@@ -185,7 +185,7 @@ class MockVerificationClient(
     }
 
     /**
-     * Get all saksrelasjoner stored in the mock.
+     * Henter alle saksrelasjoner lagret i mocken.
      */
     fun saksrelasjoner(): List<SaksrelasjonVerificationDto> {
         return try {
@@ -204,7 +204,7 @@ class MockVerificationClient(
     // ==================== OPPGAVE ====================
 
     /**
-     * Get all oppgaver stored in the mock.
+     * Henter alle oppgaver lagret i mocken.
      */
     fun oppgaver(): List<OppgaveVerificationDto> {
         return try {
@@ -221,7 +221,7 @@ class MockVerificationClient(
     }
 
     /**
-     * Get count of oppgaver.
+     * Henter antall oppgaver.
      */
     fun oppgaveCount(): Int {
         return try {
@@ -234,7 +234,7 @@ class MockVerificationClient(
     }
 
     /**
-     * Get oppgaver by type (e.g., "JFR", "BEH_SED").
+     * Henter oppgaver etter type (f.eks. "JFR", "BEH_SED").
      */
     fun oppgaverByType(oppgavetype: String): List<OppgaveVerificationDto> {
         return try {
@@ -253,7 +253,7 @@ class MockVerificationClient(
     // ==================== JOURNALPOST ====================
 
     /**
-     * Get all journalposter stored in the mock.
+     * Henter alle journalposter lagret i mocken.
      */
     fun journalposter(): List<JournalpostVerificationDto> {
         return try {
@@ -270,7 +270,7 @@ class MockVerificationClient(
     }
 
     /**
-     * Get count of journalposter.
+     * Henter antall journalposter.
      */
     fun journalpostCount(): Int {
         return try {
@@ -283,7 +283,7 @@ class MockVerificationClient(
     }
 
     /**
-     * Get journalpost by ID.
+     * Henter journalpost etter ID.
      */
     fun journalpostById(journalpostId: String): JournalpostVerificationDto? {
         return try {
@@ -295,7 +295,7 @@ class MockVerificationClient(
     }
 
     /**
-     * Get journalposter by saksnummer.
+     * Henter journalposter etter saksnummer.
      */
     fun journalposterBySak(saksnummer: String): List<JournalpostVerificationDto> {
         return try {
@@ -311,10 +311,10 @@ class MockVerificationClient(
         }
     }
 
-    // ==================== SUMMARY ====================
+    // ==================== OPPSUMMERING ====================
 
     /**
-     * Get summary of all mock data counts.
+     * Henter oppsummering av alle mock-data-antall.
      */
     fun summary(): MockSummaryDto {
         return try {
@@ -326,11 +326,11 @@ class MockVerificationClient(
         }
     }
 
-    // ==================== CLEAR ====================
+    // ==================== TØMMING ====================
 
     /**
-     * Clear all mock data.
-     * Should be called in @AfterEach to ensure test isolation.
+     * Tømmer alle mock-data.
+     * Bør kalles i @AfterEach for å sikre testisolasjon.
      */
     fun clear(): ClearResponse {
         return try {
@@ -346,17 +346,17 @@ class MockVerificationClient(
         }
     }
 
-    // ==================== TEST DATA CREATION ====================
+    // ==================== TESTDATA-OPPRETTELSE ====================
 
     /**
-     * Create a journalføringsoppgave in the mock.
-     * Returns the created Oppgave with id and journalpostId set.
+     * Oppretter en journalføringsoppgave i mocken.
+     * Returnerer den opprettede oppgaven med id og journalpostId satt.
      *
-     * @param tilordnetRessurs The saksbehandler to assign the oppgave to (default: "Z123456")
-     * @param forVirksomhet Whether the oppgave is for a virksomhet (default: false)
-     * @param medVedlegg Whether to include vedlegg (default: false)
-     * @param medLogiskVedlegg Whether to include logisk vedlegg (default: false)
-     * @return The created Oppgave
+     * @param tilordnetRessurs Saksbehandleren oppgaven skal tilordnes (standard: "Z123456")
+     * @param forVirksomhet Om oppgaven er for en virksomhet (standard: false)
+     * @param medVedlegg Om vedlegg skal inkluderes (standard: false)
+     * @param medLogiskVedlegg Om logisk vedlegg skal inkluderes (standard: false)
+     * @return Den opprettede oppgaven
      */
     fun opprettJfrOppgave(
         tilordnetRessurs: String = "Z123456",
@@ -388,16 +388,16 @@ class MockVerificationClient(
     }
 
     /**
-     * Create BUC info in the mock for test setup.
-     * This is used to set up test data before running tests that expect BUC info to exist.
+     * Oppretter BUC-info i mocken for testoppsett.
+     * Brukes for å sette opp testdata før kjøring av tester som forventer at BUC-info eksisterer.
      *
-     * @param id The BUC ID (RINA saksnummer)
-     * @param erAapen Whether the BUC is open (default: true)
-     * @param bucType The BUC type (e.g., "LA_BUC_04")
-     * @param opprettetDato When the BUC was created
-     * @param mottakerinstitusjoner Set of receiver institutions
-     * @param seder List of SED info
-     * @return The created BUC verification DTO
+     * @param id BUC-ID (RINA-saksnummer)
+     * @param erAapen Om BUCen er åpen (standard: true)
+     * @param bucType BUC-type (f.eks. "LA_BUC_04")
+     * @param opprettetDato Når BUCen ble opprettet
+     * @param mottakerinstitusjoner Sett med mottakerinstitusjoner
+     * @param seder Liste med SED-info
+     * @return Den opprettede BUC-verifikasjons-DTOen
      */
     fun opprettBucinformasjon(
         id: String?,
@@ -432,20 +432,20 @@ class MockVerificationClient(
     }
 
     /**
-     * Create MEDL (medlemskapsunntak) test data in the mock.
-     * This is used to set up pre-existing MEDL periods for tests.
+     * Oppretter MEDL (medlemskapsunntak) testdata i mocken.
+     * Brukes for å sette opp eksisterende MEDL-perioder for tester.
      *
-     * @param unntakId The specific ID to use (required, not auto-generated)
-     * @param ident Person's fødselsnummer (required)
-     * @param fraOgMed Start date (default: today)
-     * @param tilOgMed End date (default: today + 1 year)
-     * @param status Status (default: "GODKJENT")
-     * @param dekning Coverage type (default: "FULL")
-     * @param lovvalgsland Country code (default: "NO")
-     * @param lovvalg Law choice (default: "FOROVRIG")
-     * @param grunnlag Basis (default: "ARBEID")
-     * @param medlem Member flag (default: true)
-     * @return The created MedlemskapsunntakVerificationDto
+     * @param unntakId Den spesifikke IDen som skal brukes (påkrevd, ikke auto-generert)
+     * @param ident Personens fødselsnummer (påkrevd)
+     * @param fraOgMed Startdato (standard: i dag)
+     * @param tilOgMed Sluttdato (standard: i dag + 1 år)
+     * @param status Status (standard: "GODKJENT")
+     * @param dekning Dekningstype (standard: "FULL")
+     * @param lovvalgsland Landkode (standard: "NO")
+     * @param lovvalg Lovvalg (standard: "FOROVRIG")
+     * @param grunnlag Grunnlag (standard: "ARBEID")
+     * @param medlem Medlemsflagg (standard: true)
+     * @return Den opprettede MedlemskapsunntakVerificationDto
      */
     fun opprettMedl(
         unntakId: Long,
@@ -487,10 +487,10 @@ class MockVerificationClient(
             ?: throw IllegalStateException("Failed to create MEDL data: no response from mock")
     }
 
-    // ==================== HEALTH ====================
+    // ==================== HELSE ====================
 
     /**
-     * Check if the mock is healthy and reachable.
+     * Sjekker om mocken er sunn og tilgjengelig.
      */
     fun isHealthy(): Boolean {
         return try {

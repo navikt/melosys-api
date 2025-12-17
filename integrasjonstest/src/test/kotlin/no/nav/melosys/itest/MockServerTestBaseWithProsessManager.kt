@@ -13,10 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
 
 /**
- * Base class for integration tests that use:
- * - Melosys-mock container for external service mocking
- * - WireMock for additional stubbing (port 8094)
- * - ProsessinstansTestManager for async process management
+ * Baseklasse for integrasjonstester som bruker:
+ * - Melosys-mock container for ekstern tjeneste-mocking
+ * - WireMock for ekstra stubbing (port 8094)
+ * - ProsessinstansTestManager for asynkron prosesstyring
  */
 open class MockServerTestBaseWithProsessManager(
     extensionForWireMock: Extension? = null
@@ -37,7 +37,7 @@ open class MockServerTestBaseWithProsessManager(
 
     @BeforeEach
     fun beforeMockServerTestBaseWithProsessManager() {
-        // Set up system context for test calls
+        // Sett opp systemkontekst for testkall
         ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
         mockServer.start()
         mockServer.stubFor(

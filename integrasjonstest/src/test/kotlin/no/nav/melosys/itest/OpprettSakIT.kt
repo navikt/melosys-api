@@ -21,14 +21,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 /**
- * Integration test that uses the melosys-mock container instead of in-process mock.
+ * Integrasjonstest som bruker melosys-mock containeren i stedet for in-process mock.
  *
- * This test verifies that:
- * 1. melosys-api can call external services via the Docker container
- * 2. The container's verification endpoints work for asserting mock state
- * 3. Business logic works correctly with container-based mocks
+ * Denne testen verifiserer at:
+ * 1. melosys-api kan kalle eksterne tjenester via Docker-containeren
+ * 2. Containerens verifikasjonsendepunkter fungerer for å verifisere mock-tilstand
+ * 3. Forretningslogikk fungerer korrekt med container-baserte mocker
  *
- * This is the key test for proving Phase 5 (container migration) works.
+ * Dette er nøkkeltesten for å bevise at Fase 5 (container-migrering) fungerer.
  */
 class OpprettSakIT : MockServerTestBaseWithProsessManager() {
 
@@ -41,17 +41,17 @@ class OpprettSakIT : MockServerTestBaseWithProsessManager() {
 
     @Test
     fun `should create sak using container mock for external services`() {
-        log.info("Starting container integration test...")
-        log.info("Mock container URL: ${getMockBaseUrl()}")
+        log.info("Starter container-integrasjonstest...")
+        log.info("Mock-container URL: ${getMockBaseUrl()}")
 
-        // Verify container is healthy
+        // Verifiser at containeren er sunn
         mockVerificationClient.isHealthy() shouldBe true
-        log.info("Container health check passed")
+        log.info("Container-helsesjekk bestått")
 
-        // Create a sak using the OpprettSak service
+        // Opprett en sak ved hjelp av OpprettSak-tjenesten
         val opprettSakDto = OpprettSakDto().apply {
             hovedpart = Aktoersroller.BRUKER
-            brukerID = "30056928150" // Test person from PersonRepo
+            brukerID = "30056928150" // Testperson fra PersonRepo
             sakstype = Sakstyper.EU_EOS
             sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
             behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER
@@ -68,10 +68,10 @@ class OpprettSakIT : MockServerTestBaseWithProsessManager() {
                 )
             }
             mottaksdato = LocalDate.now()
-            skalTilordnes = false // Don't assign to avoid oppgave creation
+            skalTilordnes = false // Ikke tilordne for å unngå oppgave-opprettelse
         }
 
-        // Execute the sak creation and wait for processes to complete
+        // Utfør sak-opprettelse og vent på at prosesser fullføres
         val prosessinstans = prosessinstansTestManager.executeAndWait(
             waitForProsesses = mapOf(ProsessType.OPPRETT_SAK to 1),
             returnProsessOfType = ProsessType.OPPRETT_SAK
@@ -79,33 +79,33 @@ class OpprettSakIT : MockServerTestBaseWithProsessManager() {
             opprettSak.opprettNySakOgBehandling(opprettSakDto)
         }
 
-        // Verify sak was created
+        // Verifiser at sak ble opprettet
         prosessinstans.behandling.shouldNotBeNull()
-        log.info("Sak created with behandling ID: ${prosessinstans.behandling?.id}")
+        log.info("Sak opprettet med behandling-ID: ${prosessinstans.behandling?.id}")
 
-        // Verify that SAK API was called via the container
-        // The OpprettSak service calls the SAK API to create a fagsak
+        // Verifiser at SAK API ble kalt via containeren
+        // OpprettSak-tjenesten kaller SAK API for å opprette en fagsak
         val saker = mockVerificationClient.saker()
-        log.info("Saker in mock: ${saker.size}")
+        log.info("Saker i mock: ${saker.size}")
         saker.shouldHaveSize(1)
 
-        // Verify the sak details
+        // Verifiser sak-detaljene
         val sak = saker.first()
         sak.tema shouldBe "MED"
-        log.info("SAK verification passed: tema=${sak.tema}, id=${sak.id}")
+        log.info("SAK-verifisering bestått: tema=${sak.tema}, id=${sak.id}")
 
-        // Get summary to see all mock state
+        // Hent oppsummering for å se all mock-tilstand
         val summary = mockVerificationClient.summary()
-        log.info("Mock summary: saker=${summary.sakCount}, oppgaver=${summary.oppgaveCount}, medl=${summary.medlCount}")
+        log.info("Mock-oppsummering: saker=${summary.sakCount}, oppgaver=${summary.oppgaveCount}, medl=${summary.medlCount}")
     }
 
     @Test
     fun `should verify PDL is called via container when creating sak`() {
-        log.info("Testing PDL integration via container...")
+        log.info("Tester PDL-integrasjon via container...")
 
-        // The OpprettSak service calls PDL to get person info
-        // We can verify this by checking that the process completes successfully
-        // (PDL mock returns test data for the test person)
+        // OpprettSak-tjenesten kaller PDL for å hente personinfo
+        // Vi kan verifisere dette ved å sjekke at prosessen fullføres vellykket
+        // (PDL-mock returnerer testdata for testpersonen)
 
         val opprettSakDto = OpprettSakDto().apply {
             hovedpart = Aktoersroller.BRUKER
@@ -136,11 +136,11 @@ class OpprettSakIT : MockServerTestBaseWithProsessManager() {
             opprettSak.opprettNySakOgBehandling(opprettSakDto)
         }
 
-        // If we get here without exceptions, PDL was called successfully via the container
+        // Hvis vi kommer hit uten unntak, ble PDL kalt vellykket via containeren
         val behandling = prosessinstans.behandling.shouldNotBeNull()
-        log.info("PDL integration verified - behandling created: ${behandling.id}")
+        log.info("PDL-integrasjon verifisert - behandling opprettet: ${behandling.id}")
 
-        // The fagsak should have bruker info populated from PDL
+        // Fagsaken bør ha brukerinfo populert fra PDL
         val fagsak = behandling.fagsak.shouldNotBeNull()
         val bruker = fagsak.hentBruker().shouldNotBeNull()
         log.info("Fagsak bruker aktørId: ${bruker.aktørId}")

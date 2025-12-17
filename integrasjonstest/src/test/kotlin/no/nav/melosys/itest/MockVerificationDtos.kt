@@ -6,13 +6,13 @@ import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
 /**
- * DTOs for verification endpoint responses from melosys-mock.
- * These match the structure returned by /testdata/verification/ endpoints.
+ * DTOer for verifikasjonsendepunkt-responser fra melosys-mock.
+ * Disse matcher strukturen returnert av /testdata/verification/ endepunktene.
  */
 
 /**
- * DTO for MEDL medlemskapsunntak.
- * Matches the structure of MedlemskapsunntakForGet from the MEDL API.
+ * DTO for MEDL-medlemskapsunntak.
+ * Matcher strukturen til MedlemskapsunntakForGet fra MEDL API.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class MedlemskapsunntakVerificationDto(
@@ -43,7 +43,7 @@ data class SporingsinformasjonDto(
 )
 
 /**
- * DTO for Sak (arkivsak).
+ * DTO for sak (arkivsak).
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class SakVerificationDto(
@@ -56,7 +56,7 @@ data class SakVerificationDto(
 )
 
 /**
- * DTO for Oppgave.
+ * DTO for oppgave.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class OppgaveVerificationDto(
@@ -85,7 +85,7 @@ data class OppgaveVerificationDto(
 )
 
 /**
- * DTO for Journalpost.
+ * DTO for journalpost.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class JournalpostVerificationDto(
@@ -108,7 +108,7 @@ data class AvsenderMottakerDto(
 )
 
 /**
- * Response wrapper for count endpoints.
+ * Respons-wrapper for antall-endepunkter.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class CountResponse(
@@ -116,7 +116,7 @@ data class CountResponse(
 )
 
 /**
- * Response for clear endpoint.
+ * Respons for tømme-endepunkt.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class ClearResponse(
@@ -129,7 +129,7 @@ data class ClearResponse(
 )
 
 /**
- * DTO for BUC information from melosys-eessi.
+ * DTO for BUC-informasjon fra melosys-eessi.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class BucVerificationDto(
@@ -142,7 +142,7 @@ data class BucVerificationDto(
 )
 
 /**
- * DTO for SED information within a BUC.
+ * DTO for SED-informasjon innenfor en BUC.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class SedVerificationDto(
@@ -156,7 +156,7 @@ data class SedVerificationDto(
 )
 
 /**
- * DTO for saksrelasjon between GSAK and RINA.
+ * DTO for saksrelasjon mellom GSAK og RINA.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class SaksrelasjonVerificationDto(
@@ -166,7 +166,7 @@ data class SaksrelasjonVerificationDto(
 )
 
 /**
- * DTO for summary of all mock data.
+ * DTO for oppsummering av alle mock-data.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class MockSummaryDto(
@@ -179,10 +179,10 @@ data class MockSummaryDto(
     val saksrelasjonCount: Int = 0
 )
 
-// ==================== TEST DATA CREATION ====================
+// ==================== TESTDATA-OPPRETTELSE ====================
 
 /**
- * Request for creating journalføringsoppgave(r) in the mock.
+ * Forespørsel for å opprette journalføringsoppgave(r) i mocken.
  */
 data class OpprettJfrOppgaveRequest(
     val antall: Int = 1,
@@ -193,8 +193,8 @@ data class OpprettJfrOppgaveRequest(
 )
 
 /**
- * Request for creating BUC info in the mock.
- * Used to set up test data before running tests that expect BUC info to exist.
+ * Forespørsel for å opprette BUC-info i mocken.
+ * Brukes for å sette opp testdata før kjøring av tester som forventer at BUC-info eksisterer.
  */
 data class OpprettBucRequest(
     val id: String?,
@@ -206,7 +206,7 @@ data class OpprettBucRequest(
 )
 
 /**
- * Request for creating SED info within a BUC.
+ * Forespørsel for å opprette SED-info innenfor en BUC.
  */
 data class OpprettSedRequest(
     val bucId: String? = null,
@@ -219,8 +219,8 @@ data class OpprettSedRequest(
 )
 
 /**
- * Request for creating MEDL (medlemskapsunntak) test data with a specific unntakId.
- * Used to set up pre-existing MEDL periods for tests.
+ * Forespørsel for å opprette MEDL (medlemskapsunntak) testdata med en spesifikk unntakId.
+ * Brukes for å sette opp eksisterende MEDL-perioder for tester.
  */
 data class OpprettMedlRequest(
     val unntakId: Long,

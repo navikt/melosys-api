@@ -15,10 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 /**
- * Base class for integration tests that need journalføring functionality.
+ * Baseklasse for integrasjonstester som trenger journalføringsfunksjonalitet.
  *
- * Uses mockVerificationClient.opprettJfrOppgave() to create journalføringsoppgaver
- * in the mock container instead of in-process mock.
+ * Bruker mockVerificationClient.opprettJfrOppgave() for å opprette journalføringsoppgaver
+ * i mock-containeren i stedet for in-process mock.
  */
 open class JournalfoeringBase(
     extensionForWireMock: Extension? = null
@@ -54,8 +54,8 @@ open class JournalfoeringBase(
     )
 
     /**
-     * Create a journalføringsoppgave via the mock container.
-     * Uses mockVerificationClient instead of in-process JournalføringsoppgaveGenerator.
+     * Oppretter en journalføringsoppgave via mock-containeren.
+     * Bruker mockVerificationClient i stedet for in-process JournalføringsoppgaveGenerator.
      */
     protected fun lagJfrOppgave(
         tilordnetRessurs: String = "Z123456",

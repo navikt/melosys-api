@@ -12,16 +12,16 @@ import org.testcontainers.utility.DockerImageName
 import java.time.Duration
 
 /**
- * Integration test demonstrating melosys-mock container capabilities.
+ * Integrasjonstest som demonstrerer melosys-mock container-funksjonalitet.
  *
- * This test verifies that:
- * 1. The melosys-mock container starts successfully
- * 2. The verification endpoints are accessible
- * 3. The mock responds to API calls
+ * Denne testen verifiserer at:
+ * 1. Melosys-mock containeren starter vellykket
+ * 2. Verifikasjonsendepunktene er tilgjengelige
+ * 3. Mocken svarer på API-kall
  *
- * NOTE: This is a standalone test that only tests the container itself,
- * not the full melosys-api integration. For full integration tests with
- * the container, see MelosysMockContainerTestBase.
+ * MERK: Dette er en frittstående test som kun tester selve containeren,
+ * ikke full melosys-api integrasjon. For fulle integrasjonstester med
+ * containeren, se MelosysMockContainerTestBase.
  */
 class MelosysMockContainerIT {
 
@@ -29,9 +29,9 @@ class MelosysMockContainerIT {
         private val log = LoggerFactory.getLogger(MelosysMockContainerIT::class.java)
 
         /**
-         * Mock image from Google Artifact Registry.
-         * For local development, you can also use the local image built from melosys-docker-compose.
-         * Local: melosys-docker-compose-mock:latest
+         * Mock-image fra Google Artifact Registry.
+         * For lokal utvikling kan du også bruke det lokale imaget bygget fra melosys-docker-compose.
+         * Lokalt: melosys-docker-compose-mock:latest
          * GAR: europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-docker-compose-mock:latest
          */
         private const val MOCK_IMAGE = "europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-docker-compose-mock:latest"
@@ -39,7 +39,7 @@ class MelosysMockContainerIT {
     }
 
     /**
-     * Create a GenericContainer for melosys-mock.
+     * Oppretter en GenericContainer for melosys-mock.
      */
     private fun createMockContainer(): GenericContainer<*> {
         return GenericContainer(DockerImageName.parse(MOCK_IMAGE))
@@ -56,7 +56,7 @@ class MelosysMockContainerIT {
 
     @Test
     fun `should start mock container and access verification endpoints`() {
-        // Create and start the container (using local image)
+        // Opprett og start containeren (bruker lokalt image)
         val container = createMockContainer()
 
         container.use { mock ->
@@ -64,26 +64,26 @@ class MelosysMockContainerIT {
             val baseUrl = "http://${mock.host}:${mock.getMappedPort(MOCK_PORT)}"
             log.info("Mock container started at: $baseUrl")
 
-            // Create verification client pointing to container
+            // Opprett verifikasjonsklient som peker mot containeren
             val client = MockVerificationClient(baseUrl)
 
-            // Verify health check
+            // Verifiser helsesjekk
             client.isHealthy() shouldBe true
 
-            // Verify summary endpoint works (should return zeros for empty mock)
+            // Verifiser at oppsummerings-endepunktet fungerer (bør returnere nuller for tom mock)
             val summary = client.summary()
             summary shouldNotBe null
             summary.medlCount shouldBe 0
             summary.sakCount shouldBe 0
             summary.oppgaveCount shouldBe 0
 
-            // Verify individual verification endpoints work
+            // Verifiser at individuelle verifikasjonsendepunkter fungerer
             client.medl() shouldBe emptyList()
             client.saker() shouldBe emptyList()
             client.oppgaver() shouldBe emptyList()
             client.journalposter() shouldBe emptyList()
 
-            log.info("All verification endpoints accessible and working correctly")
+            log.info("Alle verifikasjonsendepunkter tilgjengelige og fungerer korrekt")
         }
     }
 
@@ -96,7 +96,7 @@ class MelosysMockContainerIT {
             val baseUrl = "http://${mock.host}:${mock.getMappedPort(MOCK_PORT)}"
             val client = MockVerificationClient(baseUrl)
 
-            // Clear should work even on empty mock
+            // Tømming bør fungere selv på tom mock
             val clearResponse = client.clear()
             clearResponse.message shouldNotBe null
             log.info("Clear response: ${clearResponse.message}")
@@ -104,7 +104,7 @@ class MelosysMockContainerIT {
     }
 
     @Test
-    @Disabled("Manual test - run to inspect container startup time")
+    @Disabled("Manuell test - kjør for å inspisere container-oppstartstid")
     fun `manual - measure container startup time`() {
         val startTime = System.currentTimeMillis()
         val container = createMockContainer()
