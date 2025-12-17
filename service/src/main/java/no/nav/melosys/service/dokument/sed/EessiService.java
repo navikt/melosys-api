@@ -109,10 +109,12 @@ public class EessiService {
         sedData.setYtterligereInformasjon(mapYtterligereInformasjon(ytterligereInformasjon, periodeType, behandlingsresultat));
 
         log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
-        log.info(
-            "Vedlegg filstørrelse {} MB",
-            vedlegg.stream().mapToLong(v -> v.getInnhold() != null ? v.getInnhold().length : 0).sum() / 1024 / 1024
-        );
+        if (vedlegg != null && !vedlegg.isEmpty()) {
+            log.info(
+                "Vedlegg filstørrelse {} MB",
+                vedlegg.stream().mapToLong(v -> v.getInnhold() != null ? v.getInnhold().length : 0).sum() / 1024 / 1024
+            );
+        }
 
         OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(
             sedData,
