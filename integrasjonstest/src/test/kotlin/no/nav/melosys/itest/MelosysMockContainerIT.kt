@@ -21,28 +21,21 @@ import java.time.Duration
  *
  * MERK: Dette er en frittstående test som kun tester selve containeren,
  * ikke full melosys-api integrasjon. For fulle integrasjonstester med
- * containeren, se MelosysMockContainerTestBase.
+ * containeren, bruk ComponentTestBase.
  */
 class MelosysMockContainerIT {
 
     companion object {
         private val log = LoggerFactory.getLogger(MelosysMockContainerIT::class.java)
-
-        /**
-         * Mock-image fra Google Artifact Registry.
-         * For lokal utvikling kan du også bruke det lokale imaget bygget fra melosys-docker-compose.
-         * Lokalt: melosys-docker-compose-mock:latest
-         * GAR: europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-docker-compose-mock:latest
-         */
-        private const val MOCK_IMAGE = "europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-docker-compose-mock:latest"
         private const val MOCK_PORT = 8083
     }
 
     /**
-     * Oppretter en GenericContainer for melosys-mock.
+     * Oppretter en ny GenericContainer for melosys-mock.
+     * Bruker egen container per test for isolasjon (tester container-oppstart).
      */
     private fun createMockContainer(): GenericContainer<*> {
-        return GenericContainer(DockerImageName.parse(MOCK_IMAGE))
+        return GenericContainer(DockerImageName.parse(MelosysMockContainerConfig.IMAGE_NAME))
             .withExposedPorts(MOCK_PORT)
             .withLogConsumer(Slf4jLogConsumer(log).withPrefix("melosys-mock"))
             .waitingFor(
@@ -56,7 +49,6 @@ class MelosysMockContainerIT {
 
     @Test
     fun `should start mock container and access verification endpoints`() {
-        // Opprett og start containeren (bruker lokalt image)
         val container = createMockContainer()
 
         container.use { mock ->
@@ -64,7 +56,6 @@ class MelosysMockContainerIT {
             val baseUrl = "http://${mock.host}:${mock.getMappedPort(MOCK_PORT)}"
             log.info("Mock container started at: $baseUrl")
 
-            // Opprett verifikasjonsklient som peker mot containeren
             val client = MockVerificationClient(baseUrl)
 
             // Verifiser helsesjekk

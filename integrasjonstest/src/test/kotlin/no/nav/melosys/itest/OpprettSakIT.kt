@@ -42,7 +42,7 @@ class OpprettSakIT : MockServerTestBaseWithProsessManager() {
     @Test
     fun `should create sak using container mock for external services`() {
         log.info("Starter container-integrasjonstest...")
-        log.info("Mock-container URL: ${getMockBaseUrl()}")
+        log.info("Mock-container URL: ${MelosysMockContainerConfig.getBaseUrl()}")
 
         // Verifiser at containeren er sunn
         mockVerificationClient.isHealthy() shouldBe true
