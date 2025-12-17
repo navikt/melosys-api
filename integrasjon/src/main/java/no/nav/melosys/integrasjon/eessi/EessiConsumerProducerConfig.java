@@ -33,6 +33,7 @@ public class EessiConsumerProducerConfig implements WebClientConfig {
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot eessi feilet"))
             .defaultHeaders(this::defaultHeaders)
+            .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(100 * 1024 * 1024)) // 100MB
             .build());
     }
 
