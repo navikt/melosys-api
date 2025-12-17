@@ -3,6 +3,7 @@ package no.nav.melosys.itest
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Periode
@@ -64,7 +65,7 @@ class SedMottakBehandlingTypeIT(
             .first()
             .apply {
                 behandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_NORGE_ER_UTPEKT_SOM_LOVVALGSLAND.kode)
-                behandlingstype.shouldBe(null)
+                behandlingstype.shouldBeIn(null, "") // can be null or empty string via HTTP JSON
                 // eksempel: --- 18.04.2023 08:22 (srvmelosys, Melosys) ---\n A003 - MEL-41\n
                 beskrivelse.shouldContain("A003")
                 oppgavetype.shouldBe(Oppgavetyper.BEH_SED.kode)
