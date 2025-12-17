@@ -1,47 +1,21 @@
+# Mock URL-er for eksterne tjenester konfigureres dynamisk i ComponentTestBase.kt
+# via @DynamicPropertySource. Dette støtter både testcontainers (dynamisk port)
+# og lokal docker-compose (fast port 8083).
+
 melosys:
   kodeverk:
     scheduler:
       enabled: false  # Deaktiver scheduler i integrasjonstester
 
-DistribuerJournalpost_v1:
-  url: http://localhost:8093/rest/v1/distribuerjournalpost
-Dokumentproduksjon_v3:
-  url: http://localhost:8093/soap/services/dokumentproduksjon/v3
-Inngangsvilkaar:
-  url: http://localhost:8093/api
-JournalpostApi_v1:
-  url: http://localhost:8093/rest/journalpostapi/v1
-KodeverkAPI_v1:
-  url: http://localhost:8093/api
 Melosys-admin:
   apikey: dummy
-MelosysEessi:
-  url: http://localhost:8093/api
 MelosysSoknadMottak:
   url: dummy
-OppgaveAPI_v1:
-  url: http://localhost:8093/api/v1
-PDL:
-  url: http://localhost:8093/graphql
-REST_STS:
-  url: http://localhost:8093/rest/v1/sts
-SAF:
-  url: http://localhost:8093
-SakAPI_v1:
-  url: http://localhost:8093/api/v1/saker
-SakOgBehandling_v1:
-  url: http://localhost:8093/soap/services/sakOgBehandling/v1
 UNLEASH:
   token: faketoken
-arbeidsforhold:
-  rest:
-    url: http://localhost:8093/aareg-services/api/v1/arbeidstaker/arbeidsforhold
 dokumentproduksjon:
   uten:
     token: true
-ereg:
-  rest:
-    url: http://localhost:8093/ereg/v2
 faktureringskomponenten:
   url: http://localhost:8094
 graphiql:
@@ -52,9 +26,6 @@ graphql:
     mapping: /graphql
   tools:
     schema-location-pattern: '**/*graphqls-test'
-inntekt:
-  rest:
-    url: http://localhost:8093/inntektskomponenten/rs/api/v1
 kafka:
   aiven:
     a1-utstedt:
@@ -90,10 +61,6 @@ melosysdokgen:
     url: http://localhost:8094/api/v1
 melosystrygdeavgift:
   url: http://localhost:8094/api
-microsoft:
-  graph:
-    rest:
-      url: http://localhost:8093/graph/v1.0
 'no':
   nav:
     security:
