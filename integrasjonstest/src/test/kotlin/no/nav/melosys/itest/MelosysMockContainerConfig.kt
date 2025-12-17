@@ -37,8 +37,9 @@ object MelosysMockContainerConfig {
 
     /**
      * Om testcontainer skal brukes. Sett til false for å kjøre mot lokal docker-compose.
+     * Kan overstyres med miljøvariabelen USE_TEST_CONTAINER=false.
      */
-    private const val USE_TEST_CONTAINER = true
+     private val USE_TEST_CONTAINER: Boolean = System.getenv("USE_TEST_CONTAINER")?.toBoolean() ?: true
 
     /**
      * Logger for container-output.
@@ -58,7 +59,9 @@ object MelosysMockContainerConfig {
                 .withStartupTimeout(Duration.ofMinutes(2))
         )
         .withEnv("SPRING_PROFILES_ACTIVE", "test")
-        .withEnv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+        // Kafka brukes ikke av mock-containeren, men Spring Boot krever at property er satt.
+        // Verdien ignoreres siden mocken ikke kobler til Kafka.
+        .withEnv("KAFKA_BOOTSTRAP_SERVERS", "placeholder:9092")
 
     /**
      * Starter containeren hvis den ikke allerede kjører.

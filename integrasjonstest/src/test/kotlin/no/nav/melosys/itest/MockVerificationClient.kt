@@ -32,9 +32,15 @@ import org.springframework.web.client.RestTemplate
  * // Tøm alle mock-data mellom tester
  * client.clear()
  * ```
+ *
+ * @param baseUrl Base-URL for mock-containeren
+ * @param strictMode Når true, kastes unntak ved kommunikasjonsfeil i stedet for å returnere tomme resultater.
+ *                   Anbefales for CI-miljøer for å fange opp feil tidlig. Standard: false.
+ * @param restTemplate RestTemplate-instans for HTTP-kall
  */
 class MockVerificationClient(
     private val baseUrl: String,
+    private val strictMode: Boolean = System.getenv("MOCK_VERIFICATION_STRICT_MODE")?.toBoolean() ?: false,
     private val restTemplate: RestTemplate = createRestTemplate()
 ) {
     companion object {
@@ -53,6 +59,18 @@ class MockVerificationClient(
         }
     }
 
+    /**
+     * Håndterer feil basert på strictMode-innstillingen.
+     * I strict mode kastes unntaket på nytt, ellers logges en advarsel og standardverdien returneres.
+     */
+    private fun <T> handleError(operation: String, e: Exception, defaultValue: T): T {
+        if (strictMode) {
+            throw MockVerificationException("$operation feilet: ${e.message}", e)
+        }
+        log.warn("$operation: ${e.message}")
+        return defaultValue
+    }
+
     // ==================== MEDL ====================
 
     /**
@@ -67,8 +85,7 @@ class MockVerificationClient(
                 object : ParameterizedTypeReference<List<MedlemskapsunntakVerificationDto>>() {}
             ).body ?: emptyList()
         } catch (e: Exception) {
-            log.warn("Failed to fetch MEDL data from mock: ${e.message}")
-            emptyList()
+            handleError("Henting av MEDL-data fra mock", e, emptyList())
         }
     }
 
@@ -81,8 +98,7 @@ class MockVerificationClient(
             val response = restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/medl/count", CountResponse::class.java)
             response?.count ?: 0
         } catch (e: Exception) {
-            log.warn("Failed to fetch MEDL count from mock: ${e.message}")
-            0
+            handleError("Henting av MEDL-antall fra mock", e, 0)
         }
     }
 
@@ -100,8 +116,7 @@ class MockVerificationClient(
                 object : ParameterizedTypeReference<List<SakVerificationDto>>() {}
             ).body ?: emptyList()
         } catch (e: Exception) {
-            log.warn("Failed to fetch sak data from mock: ${e.message}")
-            emptyList()
+            handleError("Henting av sak-data fra mock", e, emptyList())
         }
     }
 
@@ -113,8 +128,7 @@ class MockVerificationClient(
             val response = restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/sak/count", CountResponse::class.java)
             response?.count ?: 0
         } catch (e: Exception) {
-            log.warn("Failed to fetch sak count from mock: ${e.message}")
-            0
+            handleError("Henting av sak-antall fra mock", e, 0)
         }
     }
 
@@ -125,8 +139,7 @@ class MockVerificationClient(
         return try {
             restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/sak/fagsak/$fagsakNr", SakVerificationDto::class.java)
         } catch (e: Exception) {
-            log.warn("Failed to fetch sak by fagsakNr $fagsakNr from mock: ${e.message}")
-            null
+            handleError("Henting av sak med fagsakNr $fagsakNr fra mock", e, null)
         }
     }
 
@@ -145,8 +158,7 @@ class MockVerificationClient(
                 object : ParameterizedTypeReference<List<String>>() {}
             ).body ?: emptyList()
         } catch (e: Exception) {
-            log.warn("Failed to fetch SED data for RINA sak $rinaSaksnummer from mock: ${e.message}")
-            emptyList()
+            handleError("Henting av SED-data for RINA-sak $rinaSaksnummer fra mock", e, emptyList())
         }
     }
 
@@ -162,8 +174,7 @@ class MockVerificationClient(
                 object : ParameterizedTypeReference<Map<String, List<String>>>() {}
             ).body ?: emptyMap()
         } catch (e: Exception) {
-            log.warn("Failed to fetch all SED repo data from mock: ${e.message}")
-            emptyMap()
+            handleError("Henting av alle SED-repo-data fra mock", e, emptyMap())
         }
     }
 
@@ -179,8 +190,7 @@ class MockVerificationClient(
                 object : ParameterizedTypeReference<List<BucVerificationDto>>() {}
             ).body ?: emptyList()
         } catch (e: Exception) {
-            log.warn("Failed to fetch BUC data from mock: ${e.message}")
-            emptyList()
+            handleError("Henting av BUC-data fra mock", e, emptyList())
         }
     }
 
@@ -196,8 +206,7 @@ class MockVerificationClient(
                 object : ParameterizedTypeReference<List<SaksrelasjonVerificationDto>>() {}
             ).body ?: emptyList()
         } catch (e: Exception) {
-            log.warn("Failed to fetch saksrelasjoner from mock: ${e.message}")
-            emptyList()
+            handleError("Henting av saksrelasjoner fra mock", e, emptyList())
         }
     }
 
@@ -215,8 +224,7 @@ class MockVerificationClient(
                 object : ParameterizedTypeReference<List<OppgaveVerificationDto>>() {}
             ).body ?: emptyList()
         } catch (e: Exception) {
-            log.warn("Failed to fetch oppgave data from mock: ${e.message}")
-            emptyList()
+            handleError("Henting av oppgave-data fra mock", e, emptyList())
         }
     }
 
@@ -228,8 +236,7 @@ class MockVerificationClient(
             val response = restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/oppgave/count", CountResponse::class.java)
             response?.count ?: 0
         } catch (e: Exception) {
-            log.warn("Failed to fetch oppgave count from mock: ${e.message}")
-            0
+            handleError("Henting av oppgave-antall fra mock", e, 0)
         }
     }
 
@@ -245,8 +252,7 @@ class MockVerificationClient(
                 object : ParameterizedTypeReference<List<OppgaveVerificationDto>>() {}
             ).body ?: emptyList()
         } catch (e: Exception) {
-            log.warn("Failed to fetch oppgaver by type $oppgavetype from mock: ${e.message}")
-            emptyList()
+            handleError("Henting av oppgaver med type $oppgavetype fra mock", e, emptyList())
         }
     }
 
@@ -264,8 +270,7 @@ class MockVerificationClient(
                 object : ParameterizedTypeReference<List<JournalpostVerificationDto>>() {}
             ).body ?: emptyList()
         } catch (e: Exception) {
-            log.warn("Failed to fetch journalpost data from mock: ${e.message}")
-            emptyList()
+            handleError("Henting av journalpost-data fra mock", e, emptyList())
         }
     }
 
@@ -277,8 +282,7 @@ class MockVerificationClient(
             val response = restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/journalpost/count", CountResponse::class.java)
             response?.count ?: 0
         } catch (e: Exception) {
-            log.warn("Failed to fetch journalpost count from mock: ${e.message}")
-            0
+            handleError("Henting av journalpost-antall fra mock", e, 0)
         }
     }
 
@@ -289,8 +293,7 @@ class MockVerificationClient(
         return try {
             restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/journalpost/$journalpostId", JournalpostVerificationDto::class.java)
         } catch (e: Exception) {
-            log.warn("Failed to fetch journalpost by id $journalpostId from mock: ${e.message}")
-            null
+            handleError("Henting av journalpost med id $journalpostId fra mock", e, null)
         }
     }
 
@@ -306,8 +309,7 @@ class MockVerificationClient(
                 object : ParameterizedTypeReference<List<JournalpostVerificationDto>>() {}
             ).body ?: emptyList()
         } catch (e: Exception) {
-            log.warn("Failed to fetch journalposter by sak $saksnummer from mock: ${e.message}")
-            emptyList()
+            handleError("Henting av journalposter for sak $saksnummer fra mock", e, emptyList())
         }
     }
 
@@ -321,8 +323,7 @@ class MockVerificationClient(
             restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/summary", MockSummaryDto::class.java)
                 ?: MockSummaryDto()
         } catch (e: Exception) {
-            log.warn("Failed to fetch summary from mock: ${e.message}")
-            MockSummaryDto()
+            handleError("Henting av oppsummering fra mock", e, MockSummaryDto())
         }
     }
 
@@ -341,8 +342,7 @@ class MockVerificationClient(
                 ClearResponse::class.java
             ).body ?: ClearResponse(message = "No response")
         } catch (e: Exception) {
-            log.warn("Failed to clear mock data: ${e.message}")
-            ClearResponse(message = "Error: ${e.message}")
+            handleError("Tømming av mock-data", e, ClearResponse(message = "Error: ${e.message}"))
         }
     }
 
@@ -497,8 +497,7 @@ class MockVerificationClient(
             val response = restTemplate.getForObject("$baseUrl/actuator/health", Map::class.java)
             response?.get("status") == "UP"
         } catch (e: Exception) {
-            log.warn("Mock health check failed: ${e.message}")
-            false
+            handleError("Helsesjekk av mock", e, false)
         }
     }
 }
