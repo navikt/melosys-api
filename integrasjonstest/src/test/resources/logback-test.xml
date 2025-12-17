@@ -20,4 +20,5 @@
     <logger name="kafka" level="WARN"/>
     <logger name="springfox" level="WARN"/>
     <logger name="graphql.kickstart.tools" level="ERROR"/>
+    <logger name="melosys-mock" level="WARN"/>
 </configuration>

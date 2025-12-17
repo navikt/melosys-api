@@ -10,6 +10,7 @@ import no.nav.melosys.Application
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
@@ -115,9 +116,10 @@ class ComponentTestBase : OracleTestContainerBase() {
         /**
          * Mock-container-instansen. Deles mellom alle tester som bruker denne baseklassen.
          */
+        private val mockLog = LoggerFactory.getLogger("melosys-mock")
         val mockContainer: GenericContainer<*> = GenericContainer(DockerImageName.parse(MOCK_IMAGE))
             .withExposedPorts(MOCK_PORT)
-            .withLogConsumer(Slf4jLogConsumer(log).withPrefix("melosys-mock"))
+            .withLogConsumer(Slf4jLogConsumer(mockLog))
             .waitingFor(
                 Wait.forHttp("/actuator/health")
                     .forPort(MOCK_PORT)
