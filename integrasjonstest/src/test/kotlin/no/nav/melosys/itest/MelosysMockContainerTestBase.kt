@@ -1,22 +1,6 @@
 package no.nav.melosys.itest
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import io.getunleash.FakeUnleash
-import io.getunleash.Unleash
-import io.kotest.matchers.types.shouldBeInstanceOf
-import no.nav.melosys.Application
-import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.context.annotation.Import
-import org.springframework.kafka.test.context.EmbeddedKafka
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.GenericContainer
@@ -29,79 +13,28 @@ import java.time.Duration
  * Base class for integration tests that use melosys-mock as a Docker container
  * instead of the in-process mock.
  *
- * This class combines:
- * - OracleTestContainerBase for database
- * - Melosys-mock container for external service mocking
- * - All Spring Boot test configuration
- *
- * Key features:
- * - External service URLs point to the container (dynamic port)
- * - Mock state is cleared via HTTP endpoints, not direct repo access
- * - No in-process mock code is used
- * - KodeverkTestConfig provides stub kodeverk data
+ * This class:
+ * - Starts the melosys-mock container using Testcontainers
+ * - Configures all external service URLs to point to the container
+ * - Provides a mockVerificationClient for verifying mock state
  *
  * Usage:
  * 1. Extend this class instead of OracleTestContainerBase
  * 2. Use mockVerificationClient to verify what was sent to mocks
- * 3. All external service calls go to the Docker container
+ * 3. The container runs on a dynamic port, all URLs are configured automatically
+ *
+ * Note: Tests using this base class will NOT have the in-process mock code active.
+ * All external service calls go to the Docker container.
  */
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@SpringBootTest(
-    classes = [Application::class],
-    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
-)
-@EmbeddedKafka(
-    count = 1, controlledShutdown = true, partitions = 1,
-    topics = ["teammelosys.eessi.v1-local", "teammelosys.soknad-mottak.v1-local", "teammelosys.melosys-utstedt-a1.v1-local",
-        "teammelosys.fattetvedtak.v1-local", "teammelosys.manglende-fakturabetaling-local", "teammelosys.melosys-hendelse-local"],
-    brokerProperties = ["offsets.topic.replication.factor=1", "transaction.state.log.replication.factor=1", "transaction.state.log.min.isr=1"]
-)
-@Import(KafkaTestConfig::class, KodeverkTestConfig::class)
-@DirtiesContext
-@EnableMockOAuth2Server
-open class ComponentTestBase : OracleTestContainerBase() {
-
-    @Autowired
-    private lateinit var unleash: Unleash
-
-    @Autowired
-    protected lateinit var objectMapper: ObjectMapper
-
-    val fakeUnleash: FakeUnleash by lazy {
-        unleash.shouldBeInstanceOf<FakeUnleash>()
-    }
-
-    /**
-     * Client for verifying mock state via HTTP endpoints.
-     * Points to the mock container.
-     */
-    protected val mockVerificationClient: MockVerificationClient by lazy {
-        MockVerificationClient(getMockBaseUrl())
-    }
-
-    @BeforeEach
-    fun componentTestBaseBeforeEach() {
-        // Clear mock state before each test
-        mockVerificationClient.clear()
-    }
-
-    @AfterEach
-    fun componentTestBaseAfterEach() {
-        // Clear mock state via HTTP (container doesn't have direct repo access)
-        mockVerificationClient.clear()
-        fakeUnleash.enableAll()
-    }
-
-    val Any.toJsonNode: JsonNode
-        get() = objectMapper.valueToTree(this)
+open class MelosysMockContainerTestBase {
 
     companion object {
-        private val log = LoggerFactory.getLogger(ComponentTestBase::class.java)
+        private val log = LoggerFactory.getLogger(MelosysMockContainerTestBase::class.java)
 
         /**
          * Docker image from Google Artifact Registry.
-         * For local development, build with same tag: make release (in melosys-docker-compose/mock)
+         * Can also use local image: melosys-docker-compose-mock:latest
+         * Build locally with: cd melosys-docker-compose && make build-mock
          */
         private const val MOCK_IMAGE = "europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-docker-compose-mock:latest"
 
@@ -109,6 +42,11 @@ open class ComponentTestBase : OracleTestContainerBase() {
          * Internal port used by melosys-mock (server.port=8083 in the container).
          */
         private const val MOCK_PORT = 8083
+
+        /**
+         * Whether to use the mock container. Set to false to use in-process mock.
+         */
+        private const val USE_CONTAINER = true
 
         /**
          * The mock container instance. Shared across all tests using this base class.
@@ -123,6 +61,7 @@ open class ComponentTestBase : OracleTestContainerBase() {
                     .withStartupTimeout(Duration.ofMinutes(2))
             )
             .withEnv("SPRING_PROFILES_ACTIVE", "test")
+            // Kafka bootstrap servers not needed for mock-only tests
             .withEnv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 
         /**
@@ -141,8 +80,13 @@ open class ComponentTestBase : OracleTestContainerBase() {
          */
         @DynamicPropertySource
         @JvmStatic
-        fun configureMockAndDbProperties(registry: DynamicPropertyRegistry) {
-            // Start the mock container if not already running
+        fun configureMockProperties(registry: DynamicPropertyRegistry) {
+            if (!USE_CONTAINER) {
+                log.info("Mock container disabled, using in-process mock")
+                return
+            }
+
+            // Start the container if not already running
             if (!mockContainer.isRunning) {
                 log.info("Starting melosys-mock container...")
                 mockContainer.start()
@@ -157,8 +101,8 @@ open class ComponentTestBase : OracleTestContainerBase() {
             // REST APIs
             registry.add("DistribuerJournalpost_v1.url") { "$mockUrl/rest/v1/distribuerjournalpost" }
             registry.add("Inngangsvilkaar.url") { "$mockUrl/api" }
-            registry.add("KodeverkAPI_v1.url") { "$mockUrl/api" }
             registry.add("JournalpostApi_v1.url") { "$mockUrl/rest/journalpostapi/v1" }
+            registry.add("KodeverkAPI_v1.url") { "$mockUrl/api" }
             registry.add("MelosysEessi.url") { "$mockUrl/api" }
             registry.add("OppgaveAPI_v1.url") { "$mockUrl/api/v1" }
             registry.add("PDL.url") { "$mockUrl/graphql" }
@@ -180,6 +124,19 @@ open class ComponentTestBase : OracleTestContainerBase() {
             registry.add("utbetaling_rest.url") { "$mockUrl/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern" }
 
             log.info("Configured all external service URLs to use mock container at: $mockUrl")
+        }
+    }
+
+    /**
+     * Client for verifying mock state via HTTP endpoints.
+     * Points to the container's verification endpoints.
+     */
+    protected val mockVerificationClient: MockVerificationClient by lazy {
+        if (USE_CONTAINER && mockContainer.isRunning) {
+            MockVerificationClient(getMockBaseUrl())
+        } else {
+            // Fallback to in-process mock
+            MockVerificationClient("http://localhost:8093")
         }
     }
 }

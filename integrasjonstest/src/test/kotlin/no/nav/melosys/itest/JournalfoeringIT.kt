@@ -15,28 +15,24 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
-import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 
+/**
+ * Integration test for journalføring using container-based mock.
+ * Mock state is cleared via mockVerificationClient in base class.
+ */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JournalfoeringIT(
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
-    @Autowired private val fagsakRepository: FagsakRepository,
-    @Autowired private val journalpostRepo: JournalpostRepo
+    @Autowired private val fagsakRepository: FagsakRepository
 ) : JournalfoeringBase() {
-
-    @AfterEach
-    fun afterEach() {
-        journalpostRepo.repo.clear()
-    }
 
     @Test
     fun journalførOgOpprettSak_EU_EOS_prosesserKjørerAlleSteg() {
@@ -166,7 +162,7 @@ class JournalfoeringIT(
         val behandling = prosessinstans.behandling.shouldNotBeNull()
 
 
-        val eksisterendeJournalpostIds = journalpostRepo.repo.values.map { it.journalpostId }
+        val eksisterendeJournalpostIds = mockVerificationClient.journalposter().map { it.journalpostId }
 
         val journalfoeringTilordneDto = lagJournalfoeringOppgaveOgTilordneDto(
             saksnummer = behandling.fagsak.saksnummer,
@@ -194,12 +190,12 @@ class JournalfoeringIT(
                 type.shouldBe(Behandlingstyper.FØRSTEGANG)
             }
 
-        val tilKnyttetJournalpost = journalpostRepo.repo.values.filterNot { it.journalpostId in eksisterendeJournalpostIds }
+        val tilKnyttetJournalpost = mockVerificationClient.journalposter().filterNot { it.journalpostId in eksisterendeJournalpostIds }
 
         tilKnyttetJournalpost
             .shouldHaveSize(2)
             .onEach {
-                it.avsenderMottaker.navn.shouldNotBeNull()
+                it.avsenderMottaker?.navn.shouldNotBeNull()
                 it.sakId.shouldBe(fagsak.saksnummer)
             }
         tilKnyttetJournalpost.any {

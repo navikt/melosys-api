@@ -23,7 +23,6 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
-import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.LovvalgsperiodeService
@@ -65,7 +64,7 @@ class IkkeYrkesaktivVedtakIT(
                     .withBody(ByteArray(0))
             )
         )
-        MedlRepo.repo.clear()
+        // Mock state is cleared via mockVerificationClient in base class
     }
 
     @Test
@@ -159,7 +158,7 @@ class IkkeYrkesaktivVedtakIT(
                 }
             }
 
-        MedlRepo.repo.values
+        mockVerificationClient.medl()
             .shouldHaveSize(1)
             .first()
             .apply {
@@ -289,7 +288,7 @@ class IkkeYrkesaktivVedtakIT(
                 }
             }
 
-        MedlRepo.repo.values
+        mockVerificationClient.medl()
             .shouldHaveSize(1)
             .first()
             .apply {
@@ -396,7 +395,7 @@ class IkkeYrkesaktivVedtakIT(
                 }
             }
 
-        MedlRepo.repo.values
+        mockVerificationClient.medl()
             .shouldHaveSize(1)
             .first()
             .apply {

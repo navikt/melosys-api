@@ -18,8 +18,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.itest.JournalfoeringBase
-import no.nav.melosys.melosysmock.config.SoapConfig
-import no.nav.melosys.melosysmock.medl.MedlRepo
+import no.nav.melosys.itest.SoapConfig
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.LovvalgsperiodeService
@@ -77,13 +76,12 @@ class YrkesaktivEosVedtakIT(
         SubjectHandler.set(mockHandler)
         every { mockHandler.userID } returns "Z123456"
         every { mockHandler.userName } returns "test"
-
-        MedlRepo.repo.clear()
+        // Mock state is cleared via mockVerificationClient in base class
     }
 
     @AfterEach
     fun afterEach() {
-        MedlRepo.repo.clear()
+        // Mock state is cleared via mockVerificationClient in base class
         SubjectHandler.set(originalSubjectHandler)
     }
 
@@ -221,7 +219,7 @@ class YrkesaktivEosVedtakIT(
                 }
             }
 
-        MedlRepo.repo.values
+        mockVerificationClient.medl()
             .shouldHaveSize(1)
             .first()
             .apply {
@@ -404,7 +402,7 @@ class YrkesaktivEosVedtakIT(
                 }
             }
 
-        MedlRepo.repo.values
+        mockVerificationClient.medl()
             .shouldHaveSize(1)
             .first()
             .run {
