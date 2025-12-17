@@ -6,12 +6,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.RestClient
 
 /**
  * Klient for å kalle verifikasjonsendepunkter på melosys-mock.
@@ -36,26 +33,28 @@ import org.springframework.web.client.RestTemplate
  * @param baseUrl Base-URL for mock-containeren
  * @param strictMode Når true, kastes unntak ved kommunikasjonsfeil i stedet for å returnere tomme resultater.
  *                   Anbefales for CI-miljøer for å fange opp feil tidlig. Standard: false.
- * @param restTemplate RestTemplate-instans for HTTP-kall
+ * @param restClient RestClient-instans for HTTP-kall
  */
 class MockVerificationClient(
     private val baseUrl: String,
     private val strictMode: Boolean = System.getenv("MOCK_VERIFICATION_STRICT_MODE")?.toBoolean() ?: false,
-    private val restTemplate: RestTemplate = createRestTemplate()
+    private val restClient: RestClient = createRestClient()
 ) {
     companion object {
         private val log = LoggerFactory.getLogger(MockVerificationClient::class.java)
         private const val VERIFICATION_BASE_PATH = "/testdata/verification"
 
-        private fun createRestTemplate(): RestTemplate {
+        private fun createRestClient(): RestClient {
             val objectMapper: ObjectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
-            return RestTemplate().apply {
-                messageConverters.removeIf { it is MappingJackson2HttpMessageConverter }
-                messageConverters.add(MappingJackson2HttpMessageConverter(objectMapper))
-            }
+            return RestClient.builder()
+                .messageConverters { converters ->
+                    converters.removeIf { it is MappingJackson2HttpMessageConverter }
+                    converters.add(MappingJackson2HttpMessageConverter(objectMapper))
+                }
+                .build()
         }
     }
 
@@ -78,12 +77,11 @@ class MockVerificationClient(
      */
     fun medl(): List<MedlemskapsunntakVerificationDto> {
         return try {
-            restTemplate.exchange(
-                "$baseUrl$VERIFICATION_BASE_PATH/medl",
-                HttpMethod.GET,
-                null,
-                object : ParameterizedTypeReference<List<MedlemskapsunntakVerificationDto>>() {}
-            ).body ?: emptyList()
+            restClient.get()
+                .uri("$baseUrl$VERIFICATION_BASE_PATH/medl")
+                .retrieve()
+                .body(object : ParameterizedTypeReference<List<MedlemskapsunntakVerificationDto>>() {})
+                ?: emptyList()
         } catch (e: Exception) {
             handleError("Henting av MEDL-data fra mock", e, emptyList())
         }
@@ -94,9 +92,11 @@ class MockVerificationClient(
      */
     fun medlCount(): Int {
         return try {
-            // Docker-mock returnerer CountResponse(count), in-process mock kan returnere Int direkte
-            val response = restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/medl/count", CountResponse::class.java)
-            response?.count ?: 0
+            restClient.get()
+                .uri("$baseUrl$VERIFICATION_BASE_PATH/medl/count")
+                .retrieve()
+                .body(CountResponse::class.java)
+                ?.count ?: 0
         } catch (e: Exception) {
             handleError("Henting av MEDL-antall fra mock", e, 0)
         }
@@ -109,12 +109,11 @@ class MockVerificationClient(
      */
     fun saker(): List<SakVerificationDto> {
         return try {
-            restTemplate.exchange(
-                "$baseUrl$VERIFICATION_BASE_PATH/sak",
-                HttpMethod.GET,
-                null,
-                object : ParameterizedTypeReference<List<SakVerificationDto>>() {}
-            ).body ?: emptyList()
+            restClient.get()
+                .uri("$baseUrl$VERIFICATION_BASE_PATH/sak")
+                .retrieve()
+                .body(object : ParameterizedTypeReference<List<SakVerificationDto>>() {})
+                ?: emptyList()
         } catch (e: Exception) {
             handleError("Henting av sak-data fra mock", e, emptyList())
         }
@@ -125,8 +124,11 @@ class MockVerificationClient(
      */
     fun sakCount(): Int {
         return try {
-            val response = restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/sak/count", CountResponse::class.java)
-            response?.count ?: 0
+            restClient.get()
+                .uri("$baseUrl$VERIFICATION_BASE_PATH/sak/count")
+                .retrieve()
+                .body(CountResponse::class.java)
+                ?.count ?: 0
         } catch (e: Exception) {
             handleError("Henting av sak-antall fra mock", e, 0)
         }
@@ -137,7 +139,10 @@ class MockVerificationClient(
      */
     fun sakByFagsakNr(fagsakNr: String): SakVerificationDto? {
         return try {
-            restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/sak/fagsak/$fagsakNr", SakVerificationDto::class.java)
+            restClient.get()
+                .uri("$baseUrl$VERIFICATION_BASE_PATH/sak/fagsak/$fagsakNr")
+                .retrieve()
+                .body(SakVerificationDto::class.java)
         } catch (e: Exception) {
             handleError("Henting av sak med fagsakNr $fagsakNr fra mock", e, null)
         }
@@ -151,12 +156,11 @@ class MockVerificationClient(
      */
     fun sedForRinaSak(rinaSaksnummer: String): List<String> {
         return try {
-            restTemplate.exchange(
-                "$baseUrl$VERIFICATION_BASE_PATH/melosys-eessi/sed/$rinaSaksnummer",
-                HttpMethod.GET,
-                null,
-                object : ParameterizedTypeReference<List<String>>() {}
-            ).body ?: emptyList()
+            restClient.get()
+                .uri("$baseUrl$VERIFICATION_BASE_PATH/melosys-eessi/sed/$rinaSaksnummer")
+                .retrieve()
+                .body(object : ParameterizedTypeReference<List<String>>() {})
+                ?: emptyList()
         } catch (e: Exception) {
             handleError("Henting av SED-data for RINA-sak $rinaSaksnummer fra mock", e, emptyList())
         }
@@ -167,12 +171,11 @@ class MockVerificationClient(
      */
     fun allSedRepo(): Map<String, List<String>> {
         return try {
-            restTemplate.exchange(
-                "$baseUrl$VERIFICATION_BASE_PATH/melosys-eessi/sed",
-                HttpMethod.GET,
-                null,
-                object : ParameterizedTypeReference<Map<String, List<String>>>() {}
-            ).body ?: emptyMap()
+            restClient.get()
+                .uri("$baseUrl$VERIFICATION_BASE_PATH/melosys-eessi/sed")
+                .retrieve()
+                .body(object : ParameterizedTypeReference<Map<String, List<String>>>() {})
+                ?: emptyMap()
         } catch (e: Exception) {
             handleError("Henting av alle SED-repo-data fra mock", e, emptyMap())
         }
@@ -183,12 +186,11 @@ class MockVerificationClient(
      */
     fun bucInfo(): List<BucVerificationDto> {
         return try {
-            restTemplate.exchange(
-                "$baseUrl$VERIFICATION_BASE_PATH/melosys-eessi/buc",
-                HttpMethod.GET,
-                null,
-                object : ParameterizedTypeReference<List<BucVerificationDto>>() {}
-            ).body ?: emptyList()
+            restClient.get()
+                .uri("$baseUrl$VERIFICATION_BASE_PATH/melosys-eessi/buc")
+                .retrieve()
+                .body(object : ParameterizedTypeReference<List<BucVerificationDto>>() {})
+                ?: emptyList()
         } catch (e: Exception) {
             handleError("Henting av BUC-data fra mock", e, emptyList())
         }
@@ -199,12 +201,11 @@ class MockVerificationClient(
      */
     fun saksrelasjoner(): List<SaksrelasjonVerificationDto> {
         return try {
-            restTemplate.exchange(
-                "$baseUrl$VERIFICATION_BASE_PATH/melosys-eessi/saksrelasjoner",
-                HttpMethod.GET,
-                null,
-                object : ParameterizedTypeReference<List<SaksrelasjonVerificationDto>>() {}
-            ).body ?: emptyList()
+            restClient.get()
+                .uri("$baseUrl$VERIFICATION_BASE_PATH/melosys-eessi/saksrelasjoner")
+                .retrieve()
+                .body(object : ParameterizedTypeReference<List<SaksrelasjonVerificationDto>>() {})
+                ?: emptyList()
         } catch (e: Exception) {
             handleError("Henting av saksrelasjoner fra mock", e, emptyList())
         }
@@ -217,12 +218,11 @@ class MockVerificationClient(
      */
     fun oppgaver(): List<OppgaveVerificationDto> {
         return try {
-            restTemplate.exchange(
-                "$baseUrl$VERIFICATION_BASE_PATH/oppgave",
-                HttpMethod.GET,
-                null,
-                object : ParameterizedTypeReference<List<OppgaveVerificationDto>>() {}
-            ).body ?: emptyList()
+            restClient.get()
+                .uri("$baseUrl$VERIFICATION_BASE_PATH/oppgave")
+                .retrieve()
+                .body(object : ParameterizedTypeReference<List<OppgaveVerificationDto>>() {})
+                ?: emptyList()
         } catch (e: Exception) {
             handleError("Henting av oppgave-data fra mock", e, emptyList())
         }
@@ -233,8 +233,11 @@ class MockVerificationClient(
      */
     fun oppgaveCount(): Int {
         return try {
-            val response = restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/oppgave/count", CountResponse::class.java)
-            response?.count ?: 0
+            restClient.get()
+                .uri("$baseUrl$VERIFICATION_BASE_PATH/oppgave/count")
+                .retrieve()
+                .body(CountResponse::class.java)
+                ?.count ?: 0
         } catch (e: Exception) {
             handleError("Henting av oppgave-antall fra mock", e, 0)
         }
@@ -245,12 +248,11 @@ class MockVerificationClient(
      */
     fun oppgaverByType(oppgavetype: String): List<OppgaveVerificationDto> {
         return try {
-            restTemplate.exchange(
-                "$baseUrl$VERIFICATION_BASE_PATH/oppgave/type/$oppgavetype",
-                HttpMethod.GET,
-                null,
-                object : ParameterizedTypeReference<List<OppgaveVerificationDto>>() {}
-            ).body ?: emptyList()
+            restClient.get()
+                .uri("$baseUrl$VERIFICATION_BASE_PATH/oppgave/type/$oppgavetype")
+                .retrieve()
+                .body(object : ParameterizedTypeReference<List<OppgaveVerificationDto>>() {})
+                ?: emptyList()
         } catch (e: Exception) {
             handleError("Henting av oppgaver med type $oppgavetype fra mock", e, emptyList())
         }
@@ -263,12 +265,11 @@ class MockVerificationClient(
      */
     fun journalposter(): List<JournalpostVerificationDto> {
         return try {
-            restTemplate.exchange(
-                "$baseUrl$VERIFICATION_BASE_PATH/journalpost",
-                HttpMethod.GET,
-                null,
-                object : ParameterizedTypeReference<List<JournalpostVerificationDto>>() {}
-            ).body ?: emptyList()
+            restClient.get()
+                .uri("$baseUrl$VERIFICATION_BASE_PATH/journalpost")
+                .retrieve()
+                .body(object : ParameterizedTypeReference<List<JournalpostVerificationDto>>() {})
+                ?: emptyList()
         } catch (e: Exception) {
             handleError("Henting av journalpost-data fra mock", e, emptyList())
         }
@@ -279,8 +280,11 @@ class MockVerificationClient(
      */
     fun journalpostCount(): Int {
         return try {
-            val response = restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/journalpost/count", CountResponse::class.java)
-            response?.count ?: 0
+            restClient.get()
+                .uri("$baseUrl$VERIFICATION_BASE_PATH/journalpost/count")
+                .retrieve()
+                .body(CountResponse::class.java)
+                ?.count ?: 0
         } catch (e: Exception) {
             handleError("Henting av journalpost-antall fra mock", e, 0)
         }
@@ -291,7 +295,10 @@ class MockVerificationClient(
      */
     fun journalpostById(journalpostId: String): JournalpostVerificationDto? {
         return try {
-            restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/journalpost/$journalpostId", JournalpostVerificationDto::class.java)
+            restClient.get()
+                .uri("$baseUrl$VERIFICATION_BASE_PATH/journalpost/$journalpostId")
+                .retrieve()
+                .body(JournalpostVerificationDto::class.java)
         } catch (e: Exception) {
             handleError("Henting av journalpost med id $journalpostId fra mock", e, null)
         }
@@ -302,12 +309,11 @@ class MockVerificationClient(
      */
     fun journalposterBySak(saksnummer: String): List<JournalpostVerificationDto> {
         return try {
-            restTemplate.exchange(
-                "$baseUrl$VERIFICATION_BASE_PATH/journalpost/sak/$saksnummer",
-                HttpMethod.GET,
-                null,
-                object : ParameterizedTypeReference<List<JournalpostVerificationDto>>() {}
-            ).body ?: emptyList()
+            restClient.get()
+                .uri("$baseUrl$VERIFICATION_BASE_PATH/journalpost/sak/$saksnummer")
+                .retrieve()
+                .body(object : ParameterizedTypeReference<List<JournalpostVerificationDto>>() {})
+                ?: emptyList()
         } catch (e: Exception) {
             handleError("Henting av journalposter for sak $saksnummer fra mock", e, emptyList())
         }
@@ -320,7 +326,10 @@ class MockVerificationClient(
      */
     fun summary(): MockSummaryDto {
         return try {
-            restTemplate.getForObject("$baseUrl$VERIFICATION_BASE_PATH/summary", MockSummaryDto::class.java)
+            restClient.get()
+                .uri("$baseUrl$VERIFICATION_BASE_PATH/summary")
+                .retrieve()
+                .body(MockSummaryDto::class.java)
                 ?: MockSummaryDto()
         } catch (e: Exception) {
             handleError("Henting av oppsummering fra mock", e, MockSummaryDto())
@@ -335,12 +344,11 @@ class MockVerificationClient(
      */
     fun clear(): ClearResponse {
         return try {
-            restTemplate.exchange(
-                "$baseUrl/testdata/clear",
-                HttpMethod.DELETE,
-                null,
-                ClearResponse::class.java
-            ).body ?: ClearResponse(message = "No response")
+            restClient.delete()
+                .uri("$baseUrl/testdata/clear")
+                .retrieve()
+                .body(ClearResponse::class.java)
+                ?: ClearResponse(message = "No response")
         } catch (e: Exception) {
             handleError("Tømming av mock-data", e, ClearResponse(message = "Error: ${e.message}"))
         }
@@ -372,18 +380,14 @@ class MockVerificationClient(
             medLogiskVedlegg = medLogiskVedlegg
         )
 
-        val headers = HttpHeaders().apply {
-            contentType = MediaType.APPLICATION_JSON
-        }
+        val response = restClient.post()
+            .uri("$baseUrl/testdata/jfr-oppgave")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .retrieve()
+            .body(object : ParameterizedTypeReference<List<OppgaveVerificationDto>>() {})
 
-        val response = restTemplate.exchange(
-            "$baseUrl/testdata/jfr-oppgave",
-            HttpMethod.POST,
-            HttpEntity(request, headers),
-            object : ParameterizedTypeReference<List<OppgaveVerificationDto>>() {}
-        )
-
-        return response.body?.firstOrNull()
+        return response?.firstOrNull()
             ?: throw IllegalStateException("Failed to create jfr-oppgave: no response from mock")
     }
 
@@ -416,18 +420,14 @@ class MockVerificationClient(
             seder = seder
         )
 
-        val headers = HttpHeaders().apply {
-            contentType = MediaType.APPLICATION_JSON
-        }
+        val response = restClient.post()
+            .uri("$baseUrl/testdata/buc")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .retrieve()
+            .body(BucVerificationDto::class.java)
 
-        val response = restTemplate.exchange(
-            "$baseUrl/testdata/buc",
-            HttpMethod.POST,
-            HttpEntity(request, headers),
-            BucVerificationDto::class.java
-        )
-
-        return response.body
+        return response
             ?: throw IllegalStateException("Failed to create BUC info: no response from mock")
     }
 
@@ -472,18 +472,14 @@ class MockVerificationClient(
             medlem = medlem
         )
 
-        val headers = HttpHeaders().apply {
-            contentType = MediaType.APPLICATION_JSON
-        }
+        val response = restClient.post()
+            .uri("$baseUrl/testdata/medl")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .retrieve()
+            .body(MedlemskapsunntakVerificationDto::class.java)
 
-        val response = restTemplate.exchange(
-            "$baseUrl/testdata/medl",
-            HttpMethod.POST,
-            HttpEntity(request, headers),
-            MedlemskapsunntakVerificationDto::class.java
-        )
-
-        return response.body
+        return response
             ?: throw IllegalStateException("Failed to create MEDL data: no response from mock")
     }
 
@@ -494,7 +490,10 @@ class MockVerificationClient(
      */
     fun isHealthy(): Boolean {
         return try {
-            val response = restTemplate.getForObject("$baseUrl/actuator/health", Map::class.java)
+            val response = restClient.get()
+                .uri("$baseUrl/actuator/health")
+                .retrieve()
+                .body(object : ParameterizedTypeReference<Map<String, Any>>() {})
             response?.get("status") == "UP"
         } catch (e: Exception) {
             handleError("Helsesjekk av mock", e, false)
