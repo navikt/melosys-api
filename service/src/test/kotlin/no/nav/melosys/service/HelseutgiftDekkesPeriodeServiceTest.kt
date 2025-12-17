@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.verify
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Penger
@@ -79,6 +80,27 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
             this.tomDato shouldBe TOM_DATO
             this.bostedLandkode shouldBe BOSTEDLANDKODE
         }
+    }
+
+    @Test
+    fun `Opprett skal oppdatere eksisterende periode og bare lagre en gang`() {
+        val eksisterendePeriode = lagHelseutgiftDekkesPeriode().apply { id = 321L }
+        val lagretBehandlingsresultat = mockk<Behandlingsresultat>(relaxed = true)
+
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns lagretBehandlingsresultat
+        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns eksisterendePeriode
+        every { helseutgiftDekkesPeriodeRepository.save(any()) } answers { firstArg() }
+
+        helseutgiftDekkesPeriodeService
+            .opprettHelseutgiftDekkesPeriode(BEH_ID, NY_FOM_DATO, NY_TOM_DATO, NY_BOSTEDLANDKODE)
+            .run {
+                id shouldBe eksisterendePeriode.id
+                fomDato shouldBe NY_FOM_DATO
+                tomDato shouldBe NY_TOM_DATO
+                bostedLandkode shouldBe NY_BOSTEDLANDKODE
+            }
+
+        verify(exactly = 1) { helseutgiftDekkesPeriodeRepository.save(eksisterendePeriode) }
     }
 
     @Test
@@ -185,5 +207,8 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
         private val FOM_DATO = LocalDate.of(2025, 1, 1)
         private val TOM_DATO = LocalDate.of(2025, 1, 2)
         private val BOSTEDLANDKODE = Land_iso2.BA
+        private val NY_FOM_DATO = LocalDate.of(2025, 2, 10)
+        private val NY_TOM_DATO = LocalDate.of(2025, 2, 20)
+        private val NY_BOSTEDLANDKODE = Land_iso2.NO
     }
 }
