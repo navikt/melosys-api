@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.getunleash.FakeUnleash
 import io.getunleash.Unleash
 import io.kotest.matchers.types.shouldBeInstanceOf
+import mu.KotlinLogging
 import no.nav.melosys.Application
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
@@ -45,6 +45,8 @@ import java.time.Duration
  * 2. Bruk mockVerificationClient for å verifisere hva som ble sendt til mockene
  * 3. Alle eksterne tjenestekall går til Docker-containeren
  */
+private val log = KotlinLogging.logger { }
+
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @SpringBootTest(
@@ -60,7 +62,7 @@ import java.time.Duration
 @Import(KafkaTestConfig::class, KodeverkTestConfig::class)
 @DirtiesContext
 @EnableMockOAuth2Server
-open class ComponentTestBase : OracleTestContainerBase() {
+class ComponentTestBase : OracleTestContainerBase() {
 
     @Autowired
     private lateinit var unleash: Unleash
@@ -97,8 +99,6 @@ open class ComponentTestBase : OracleTestContainerBase() {
         get() = objectMapper.valueToTree(this)
 
     companion object {
-        private val log = LoggerFactory.getLogger(ComponentTestBase::class.java)
-
         /**
          * Docker-image fra Google Artifact Registry.
          * For lokal utvikling, bygg med samme tag: make release (i melosys-docker-compose/mock)
@@ -109,6 +109,8 @@ open class ComponentTestBase : OracleTestContainerBase() {
          * Intern port brukt av melosys-mock (server.port=8083 i containeren).
          */
         private const val MOCK_PORT = 8083
+
+        private fun useTestContainer(): Boolean = true // easy way to switch to run against local docker
 
         /**
          * Mock-container-instansen. Deles mellom alle tester som bruker denne baseklassen.
@@ -129,10 +131,14 @@ open class ComponentTestBase : OracleTestContainerBase() {
          * Henter base-URL for mock-containeren.
          */
         fun getMockBaseUrl(): String {
-            if (!mockContainer.isRunning) {
-                throw IllegalStateException("Mock container is not running")
+            return if (useTestContainer()) {
+                if (!mockContainer.isRunning) {
+                    throw IllegalStateException("Mock container is not running")
+                }
+                "http://${mockContainer.host}:${mockContainer.getMappedPort(MOCK_PORT)}"
+            } else {
+                "http://localhost:8083" // bruk mock i docker-compose lokalt
             }
-            return "http://${mockContainer.host}:${mockContainer.getMappedPort(MOCK_PORT)}"
         }
 
         /**
@@ -143,7 +149,7 @@ open class ComponentTestBase : OracleTestContainerBase() {
         @JvmStatic
         fun configureMockAndDbProperties(registry: DynamicPropertyRegistry) {
             // Start mock-containeren hvis den ikke allerede kjører
-            if (!mockContainer.isRunning) {
+            if (!mockContainer.isRunning && useTestContainer()) {
                 log.info("Starter melosys-mock container...")
                 mockContainer.start()
                 log.info("Mock-container startet på: ${getMockBaseUrl()}")
