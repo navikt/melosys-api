@@ -9,6 +9,8 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.behandling
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
@@ -41,9 +43,11 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
     fun beforeEach() {
         helseutgiftDekkesPeriodeService = HelseutgiftDekkesPeriodeService(helseutgiftDekkesPeriodeRepository, behandlingsresultatService)
 
-        behandlingsresultat = Behandlingsresultat().apply {
+        behandlingsresultat = Behandlingsresultat.forTest {
             id = BEH_ID
+            behandling { id = BEH_ID }
         }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
     }
 
     @Test
@@ -70,8 +74,12 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
 
     @Test
     fun opprettHelseutgiftDekkesPeriode() {
-        val lagretBehandlingsresultat = Behandlingsresultat().apply { id = BEH_ID }
+        val lagretBehandlingsresultat = Behandlingsresultat.forTest {
+            id = BEH_ID
+            behandling { id = BEH_ID }
+        }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns lagretBehandlingsresultat
+        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns null
         every { helseutgiftDekkesPeriodeRepository.save(any()) } answers { firstArg() }
 
         helseutgiftDekkesPeriodeService.opprettHelseutgiftDekkesPeriode(BEH_ID, FOM_DATO, TOM_DATO, BOSTEDLANDKODE).run {
