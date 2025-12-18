@@ -39,7 +39,7 @@ object MelosysMockContainerConfig {
      * Om testcontainer skal brukes. Sett til false for å kjøre mot lokal docker-compose.
      * Kan overstyres med miljøvariabelen USE_TEST_CONTAINER=false.
      */
-     private val USE_TEST_CONTAINER: Boolean = System.getenv("USE_TEST_CONTAINER")?.toBoolean() ?: true
+    private val USE_TEST_CONTAINER: Boolean = System.getenv("USE_TEST_CONTAINER")?.toBoolean() ?: true
 
     /**
      * Logger for container-output.
