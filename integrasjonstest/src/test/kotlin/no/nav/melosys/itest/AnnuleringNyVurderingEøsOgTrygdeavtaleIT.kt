@@ -41,7 +41,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import java.util.stream.Stream
 
-class AnnuleringNyVurderingEøsOgTrygdeavtale(
+class AnnuleringNyVurderingEøsOgTrygdeavtaleIT(
     @Autowired private val annullerSakService: AnnullerSakService,
     @Autowired private val behandlingService: BehandlingService,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
@@ -89,7 +89,7 @@ class AnnuleringNyVurderingEøsOgTrygdeavtale(
 
         val originalBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingSomSkalReplikeres.id)
             .apply {
-                fakturaserieReferanse = this@AnnuleringNyVurderingEøsOgTrygdeavtale.fakturaserieReferanse
+                fakturaserieReferanse = this@AnnuleringNyVurderingEøsOgTrygdeavtaleIT.fakturaserieReferanse
             }
 
         Lovvalgsperiode().apply {
@@ -137,7 +137,7 @@ class AnnuleringNyVurderingEøsOgTrygdeavtale(
 
         behandlingsresultatService.hentBehandlingsresultat(nyBehandling.id)
             .apply {
-                fakturaserieReferanse = this@AnnuleringNyVurderingEøsOgTrygdeavtale.fakturaserieReferanse
+                fakturaserieReferanse = this@AnnuleringNyVurderingEøsOgTrygdeavtaleIT.fakturaserieReferanse
             }
             .also(behandlingsresultatRepository::saveAndFlush)
 

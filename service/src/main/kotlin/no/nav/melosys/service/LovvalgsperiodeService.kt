@@ -74,7 +74,6 @@ class LovvalgsperiodeService(
         }
     }
 
-
     @Transactional
     fun slettLovvalgsperioder(behandlingsresultatID: Long) {
         val behandlingsresultat = behandlingsresultatRepo.findById(behandlingsresultatID)

@@ -129,6 +129,5 @@ class LagreLovvalgsperiodeMedl(
         } else {
             medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode)
         }
-
     }
 }

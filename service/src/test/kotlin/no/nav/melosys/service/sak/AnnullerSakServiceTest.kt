@@ -98,9 +98,7 @@ class AnnullerSakServiceTest {
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
 
-
         annullerSakService.annullerSak(saksnummer)
-
 
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingId) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.ANNULLERT) }
