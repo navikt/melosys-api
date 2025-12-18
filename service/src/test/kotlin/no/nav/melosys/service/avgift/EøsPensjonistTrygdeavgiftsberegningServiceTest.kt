@@ -378,16 +378,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             }
         )
 
-        val inntektsperioder = listOf(
-            Inntektsperiode().apply {
-                fomDato = FOM
-                tomDato = TOM
-                type = Inntektskildetype.PENSJON
-                isArbeidsgiversavgiftBetalesTilSkatt = true
-                avgiftspliktigMndInntekt = Penger(BigDecimal(0))
-            }
-        )
-
+        val inntektsperioder = emptyList<Inntektsperiode>()
 
         every { mockTrygdeavgiftConsumer.beregnTrygdeavgiftEosPensjonist(ofType(EøsPensjonistTrygdeavgiftsberegningRequest::class)) }.returns(
             listOf(
