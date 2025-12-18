@@ -1,9 +1,23 @@
 package no.nav.melosys.itest
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.JsonDeserializer
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
+
+/**
+ * Deserializer that converts blank strings to null.
+ * Handles JSON serialization inconsistencies where null may be represented as "".
+ */
+class BlankToNullStringDeserializer : JsonDeserializer<String?>() {
+    override fun deserialize(p: JsonParser, ctxt: DeserializationContext): String? {
+        return p.valueAsString?.takeIf { it.isNotBlank() }
+    }
+}
 
 /**
  * DTOer for verifikasjonsendepunkt-responser fra melosys-mock.
@@ -65,6 +79,7 @@ data class OppgaveVerificationDto(
     val aktoerId: String? = null,
     val behandlesAvApplikasjon: String? = null,
     val behandlingstema: String? = null,
+    @JsonDeserialize(using = BlankToNullStringDeserializer::class)
     val behandlingstype: String? = null,
     val beskrivelse: String? = null,
     val endretTidspunkt: LocalDateTime? = null,
