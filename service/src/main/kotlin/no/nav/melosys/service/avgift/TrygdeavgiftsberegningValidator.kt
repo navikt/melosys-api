@@ -32,15 +32,15 @@ object TrygdeavgiftsberegningValidator {
     const val SKATTEFORHOLDSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten skatteforholdTilNorge"
     const val SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER = "Alle skatteforholdsperiodene har samme svar på spørsmålet om skatteplikt"
     const val SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE = "Skatteforholdsperiodene kan ikke overlappe"
-    const val SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Skatteforholdsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)"
-    const val INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)"
-    const val INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE = "Inntektsperioden(e) du har lagt inn er utenfor medlemskapsperioden(e)"
+    const val SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Skatteforholdsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)/lovvalgsperioden(e)"
+    const val INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)/lovvalgsperioden(e)"
+    const val INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE = "Inntektsperioden(e) du har lagt inn er utenfor medlemskapsperioden(e)/lovvalgsperioden(e)"
     const val MINST_EN_ANNEN_INNTEKT_I_TILLEGG_TIL_PENSJON = "Du må oppgi minst en annen inntekt i tillegg til pensjon/uføretrygd"
     const val MEDLEMSKAPSPERIODER_HAR_OPPHOLD = "Medlemskapsperiodene kan ikke ha opphold."
     const val SKATTEPLIKTIG_OG_PENSJON_UFORETRYGD_MED_KILDESKATT =
         "Inntekstypen \"Pensjon/uføretrygd det betales kildeskatt av\"; kan ikke velges for perioder bruker er skattepliktig til Norge."
     const val INNTEKT_OG_SKATT_MÅ_DEKKE_MEDLEMSKAPSPERIODE_FOR_INNVÆRENDE_OG_FREMTIDIG =
-        "Inntektsperiode og skatteforholdsperiode må dekke medlemskapsperioden for inneværende år og fremtidige perioder"
+        "Inntektsperiode og skatteforholdsperiode må dekke medlemskapsperioden/lovvalgsperioden for inneværende år og fremtidige perioder"
     const val INNTEKT_OG_SKATT_IKKE_TIDLIGERE_ÅR = "Inntektsperiode eller skatteforholdsperiode kan ikke være i tidligere år"
 
     fun validerForTrygdeavgiftberegning(
