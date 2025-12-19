@@ -20,9 +20,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us
-import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
-import no.nav.melosys.integrasjon.medl.api.v1.Sporingsinformasjon
-import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
@@ -37,7 +34,6 @@ import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import java.util.stream.Stream
 
@@ -107,28 +103,17 @@ class AnnuleringNyVurderingEøsOgTrygdeavtaleIT(
         }
         behandlingsresultatRepository.saveAndFlush(originalBehandlingsresultat)
 
-        MedlRepo.repo[78901L] = MedlemskapsunntakForGet().apply {
-            unntakId = 78901L
-            ident = "30056928150"
-            fraOgMed = LocalDate.now().minusMonths(1)
-            tilOgMed = LocalDate.now().plusMonths(1)
-            status = "GYLD"
-            dekning = "Full"
-            lovvalg = "ENDL"
-            grunnlag = "ARBEID"
+        mockVerificationClient.opprettMedl(
+            unntakId = 78901L,
+            ident = "30056928150",
+            fraOgMed = LocalDate.now().minusMonths(1),
+            tilOgMed = LocalDate.now().plusMonths(1),
+            status = "GYLD",
+            dekning = "Full",
+            lovvalg = "ENDL",
+            grunnlag = "ARBEID",
             medlem = true
-            sporingsinformasjon = Sporingsinformasjon().apply {
-                versjon = 0
-                registrert = LocalDate.now()
-                besluttet = LocalDate.now()
-                kilde = "SRVMELOSYS"
-                kildedokument = "ANNULERING_TEST"
-                opprettet = LocalDateTime.now()
-                opprettetAv = "SRVMELOSYS"
-                sistEndret = LocalDateTime.now()
-                sistEndretAv = "SRVMELOSYS"
-            }
-        }
+        )
 
         val nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(
             behandlingSomSkalReplikeres,
@@ -162,9 +147,9 @@ class AnnuleringNyVurderingEøsOgTrygdeavtaleIT(
 
         lovvalgsperiodeRepository.findByBehandlingsresultatId(nyBehandling.id).shouldBeEmpty()
 
-        MedlRepo.repo[medlPeriodeId]!!.apply {
-            status shouldBe "AVST"
-        }
+        mockVerificationClient.medl()
+            .find { it.unntakId == medlPeriodeId }!!
+            .status shouldBe "AVST"
 
         mockServer.verify(
             1,
