@@ -195,7 +195,7 @@ class JournalfoeringIT(
         tilKnyttetJournalpost
             .shouldHaveSize(2)
             .onEach {
-                it.avsenderMottaker?.navn.shouldNotBeNull()
+                it.avsenderMottaker.shouldNotBeNull().navn.shouldNotBeNull()
                 it.sakId.shouldBe(fagsak.saksnummer)
             }
         tilKnyttetJournalpost.any {

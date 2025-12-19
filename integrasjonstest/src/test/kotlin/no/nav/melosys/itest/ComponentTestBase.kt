@@ -73,7 +73,6 @@ class ComponentTestBase : OracleTestContainerBase() {
 
     @AfterEach
     fun componentTestBaseAfterEach() {
-        mockVerificationClient.clear()
         fakeUnleash.enableAll()
     }
 

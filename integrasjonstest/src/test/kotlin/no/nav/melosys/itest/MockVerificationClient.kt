@@ -32,12 +32,12 @@ import org.springframework.web.client.RestClient
  *
  * @param baseUrl Base-URL for mock-containeren
  * @param strictMode Når true, kastes unntak ved kommunikasjonsfeil i stedet for å returnere tomme resultater.
- *                   Anbefales for CI-miljøer for å fange opp feil tidlig. Standard: false.
+ *                   Standard: true. Sett MOCK_VERIFICATION_STRICT_MODE=false for å deaktivere.
  * @param restClient RestClient-instans for HTTP-kall
  */
 class MockVerificationClient(
     private val baseUrl: String,
-    private val strictMode: Boolean = System.getenv("MOCK_VERIFICATION_STRICT_MODE")?.toBoolean() ?: false,
+    private val strictMode: Boolean = System.getenv("MOCK_VERIFICATION_STRICT_MODE")?.toBoolean() ?: true,
     private val restClient: RestClient = createRestClient()
 ) {
     companion object {
