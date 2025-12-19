@@ -76,12 +76,10 @@ class YrkesaktivEosVedtakIT(
         SubjectHandler.set(mockHandler)
         every { mockHandler.userID } returns "Z123456"
         every { mockHandler.userName } returns "test"
-        // Mock state is cleared via mockVerificationClient in base class
     }
 
     @AfterEach
     fun afterEach() {
-        // Mock state is cleared via mockVerificationClient in base class
         SubjectHandler.set(originalSubjectHandler)
     }
 

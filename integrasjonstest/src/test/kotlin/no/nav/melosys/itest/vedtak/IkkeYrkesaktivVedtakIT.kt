@@ -64,7 +64,6 @@ class IkkeYrkesaktivVedtakIT(
                     .withBody(ByteArray(0))
             )
         )
-        // Mock state is cleared via mockVerificationClient in base class
     }
 
     @Test
