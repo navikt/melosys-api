@@ -153,7 +153,7 @@ class EessiServiceTest {
         val sedDataDtoSlot = slot<SedDataDto>()
         every { eessiConsumer.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, null, "fritekst")
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), "fritekst")
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.INGEN)) }
         verify { eessiConsumer.opprettBucOgSed(any(), any(), eq(BucType.LA_BUC_03), eq(true), eq(true)) }
@@ -168,7 +168,7 @@ class EessiServiceTest {
         mockBehandling()
         mockBehandlingsresultat()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, null, null)
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, emptyList(), null)
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.ANMODNINGSPERIODE)) }
         verify { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_01), eq(true), eq(true)) }
@@ -189,7 +189,7 @@ class EessiServiceTest {
         val sedDataDtoSlot = slot<SedDataDto>()
         every { eessiConsumer.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, null, "fritekst")
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, emptyList(), "fritekst")
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.ANMODNINGSPERIODE)) }
         verify { eessiConsumer.opprettBucOgSed(any(), any(), eq(BucType.LA_BUC_01), eq(true), eq(true)) }
@@ -211,7 +211,7 @@ class EessiServiceTest {
         val sedDataDtoSlot = slot<SedDataDto>()
         every { eessiConsumer.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_04, null, "fritekst")
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_04, emptyList(), "fritekst")
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE)) }
         verify { eessiConsumer.opprettBucOgSed(any(), any(), eq(BucType.LA_BUC_04), eq(true), eq(true)) }
@@ -226,7 +226,7 @@ class EessiServiceTest {
         mockBehandling()
         mockBehandlingsresultat()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_02, null, null)
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_02, emptyList(), null)
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE)) }
         verify { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_02), eq(true), eq(true)) }
@@ -243,7 +243,7 @@ class EessiServiceTest {
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_02, null, null)
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_02, emptyList(), null)
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(behandlingsresultat), eq(PeriodeType.UTPEKINGSPERIODE)) }
         verify { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_02), eq(true), eq(true)) }
@@ -257,7 +257,7 @@ class EessiServiceTest {
         mockBehandling()
         mockBehandlingsresultat()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_04, null, null)
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_04, emptyList(), null)
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE)) }
         verify { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_04), eq(true), eq(true)) }
