@@ -3,6 +3,7 @@ package no.nav.melosys.itest
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Periode
@@ -13,7 +14,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -32,7 +32,6 @@ class SedMottakBehandlingTypeIT(
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
     @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
-    @Autowired private val journalpostRepo: JournalpostRepo,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
 ) : JournalfoeringBase() {
@@ -61,12 +60,12 @@ class SedMottakBehandlingTypeIT(
         }
 
 
-        oppgaveRepo.repo.values
+        mockVerificationClient.oppgaver()
             .shouldHaveSize(1)
             .first()
             .apply {
                 behandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_NORGE_ER_UTPEKT_SOM_LOVVALGSLAND.kode)
-                behandlingstype.shouldBe(null)
+                behandlingstype.shouldBeNull() // not applicable for SED behandlingsoppgaver
                 // eksempel: --- 18.04.2023 08:22 (srvmelosys, Melosys) ---\n A003 - MEL-41\n
                 beskrivelse.shouldContain("A003")
                 oppgavetype.shouldBe(Oppgavetyper.BEH_SED.kode)
@@ -129,10 +128,10 @@ class SedMottakBehandlingTypeIT(
     fun `A003 lag data og skriv ut så det kan brukes i mock`() {
         `A003 skal føre til riktig oppgave i gosys`()
 
-        oppgaveRepo.repo.forEach {
+        mockVerificationClient.oppgaver().forEach {
             println(it.toJsonNode.toPrettyString())
         }
-        journalpostRepo.repo.forEach {
+        mockVerificationClient.journalposter().forEach {
             println(it.toJsonNode.toPrettyString())
         }
     }
