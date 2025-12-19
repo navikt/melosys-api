@@ -137,7 +137,14 @@ public class EessiService {
 
         log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
 
-        OpprettSedDto opprettSedDto = featureToggledOpprettBucOgSed(behandling, dokumentReferanser, sedData, bucType);
+        OpprettSedDto opprettSedDto = featureToggledOpprettBucOgSed(
+            behandling,
+            dokumentReferanser,
+            sedData,
+            bucType,
+            true,
+            true
+        );
 
         log.info("Buc opprettet med id {} for behandling {}", opprettSedDto.getRinaSaksnummer(), behandling.getId());
     }
@@ -163,27 +170,37 @@ public class EessiService {
 
 
         log.info("Oppretter buc og sed for behandling {} med bucType {}", behandling.getId(), bucType);
-        return featureToggledOpprettBucOgSed(behandling, dokumentReferanser, sedDataDto, bucType).getRinaUrl();
+        return featureToggledOpprettBucOgSed(
+            behandling,
+            dokumentReferanser,
+            sedDataDto,
+            bucType,
+            false,
+            false
+        ).getRinaUrl();
     }
 
+    // Blir litt mange metodeparametere her, men heldigvis er denne bare midlertidig inntil feature-togglingen er fjernet
     private OpprettSedDto featureToggledOpprettBucOgSed(
         Behandling behandling,
         Collection<DokumentReferanse> dokumentReferanser,
         SedDataDto sedDataDto,
-        BucType bucType
+        BucType bucType,
+        Boolean sendAutomatisk,
+        Boolean oppdaterEksisterende
     ) {
         if (unleash.isEnabled(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)) {
             return eessiConsumer.opprettBucOgSedV2(new OpprettBucOgSedDtoV2(
                 bucType,
                 sedDataDto,
                 lagVedleggReferanser(behandling.getFagsak(), dokumentReferanser),
-                false,
-                false
+                sendAutomatisk,
+                oppdaterEksisterende
             ));
         }
 
         final var vedlegg = lagEessiVedlegg(behandling.getFagsak(), dokumentReferanser);
-        return eessiConsumer.opprettBucOgSed(sedDataDto, vedlegg, bucType, false, false);
+        return eessiConsumer.opprettBucOgSed(sedDataDto, vedlegg, bucType, sendAutomatisk, oppdaterEksisterende);
     }
 
     public List<Institusjon> hentEessiMottakerinstitusjoner(String bucType, Collection<String> landkoder) {
