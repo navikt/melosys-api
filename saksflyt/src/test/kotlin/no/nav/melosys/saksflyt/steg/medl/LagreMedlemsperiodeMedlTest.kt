@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -190,12 +191,19 @@ internal class LagreMedlemsperiodeMedlTest {
         Prosessinstans.forTest {
             behandling {
                 id = BEHANDLING_ID
+                fagsak {
+                    type = Sakstyper.FTRL
+                }
             }
         }
 
     private fun lagBehandlingsresultat(medlemskapsperioder: List<Medlemskapsperiode>): Behandlingsresultat {
-        val behandling = Behandling.forTest()
-        behandling.type = Behandlingstyper.FØRSTEGANG
+        val behandling = Behandling.forTest {
+            type = Behandlingstyper.FØRSTEGANG
+            fagsak {
+                type = Sakstyper.FTRL
+            }
+        }
 
         val behandlingsresultat = Behandlingsresultat()
         behandlingsresultat.type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN

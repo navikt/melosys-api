@@ -2,10 +2,13 @@ package no.nav.melosys.service.avgift
 
 import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
+import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
@@ -132,10 +135,25 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         dagensDato: LocalDate = LocalDate.now()
     ): List<Trygdeavgiftsperiode> {
 
+        if (erSkattepliktig(skatteforholdsperioder, inntektsperioder) && skatteforholdsperioder.size == 1) {
+            return skattepliktigTrygdeavgiftsperioderAvAvgiftspliktigperioder(behandlingsresultat.finnAvgiftspliktigPerioder())
+        }
+
         val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
         sjekkTrygdeavgiftSkalBetalesTilNav(nyeTrygdeavgiftsperioder)
 
         return nyeTrygdeavgiftsperioder
+    }
+
+    private fun erSkattepliktig(
+        skatteforholdsperioder: List<SkatteforholdTilNorge>,
+        inntektsPerioder: List<Inntektsperiode>,
+    ): Boolean {
+        val inntektskilderErTomt = inntektsPerioder.isEmpty()
+        val alleSkatteforholdErSkattepliktige =
+            skatteforholdsperioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+
+        return inntektskilderErTomt && alleSkatteforholdErSkattepliktige
     }
 
     private fun sjekkTrygdeavgiftSkalBetalesTilNav(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>) {
@@ -168,5 +186,27 @@ class EøsPensjonistTrygdeavgiftsberegningService(
                     return persondataService.hentSammensattNavn(it.personIdent)
                 return eregFasade.hentOrganisasjonNavn(it.orgnr)
             }
+    }
+
+    private fun skattepliktigTrygdeavgiftsperioderAvAvgiftspliktigperioder(
+        avgiftspliktigperioder: Collection<AvgiftspliktigPeriode>
+    ): List<Trygdeavgiftsperiode> = avgiftspliktigperioder.map { mp -> opprettSkattepliktigTrygdeavgiftsperiode(mp) }
+
+    private fun opprettSkattepliktigTrygdeavgiftsperiode(avgiftspliktigperiode: AvgiftspliktigPeriode): Trygdeavgiftsperiode {
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
+            periodeFra = avgiftspliktigperiode.fom,
+            periodeTil = avgiftspliktigperiode.tom,
+            trygdesats = BigDecimal.ZERO,
+            trygdeavgiftsbeløpMd = Penger(BigDecimal.ZERO),
+            grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
+                fomDato = avgiftspliktigperiode.fom
+                tomDato = avgiftspliktigperiode.tom
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
+        )
+
+        trygdeavgiftsperiode.addGrunnlag(avgiftspliktigperiode)
+
+        return trygdeavgiftsperiode
     }
 }
