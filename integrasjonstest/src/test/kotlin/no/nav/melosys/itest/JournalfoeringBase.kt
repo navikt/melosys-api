@@ -14,13 +14,7 @@ import no.nav.melosys.service.oppgave.OppgaveService
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
-/**
- * Baseklasse for integrasjonstester som trenger journalføringsfunksjonalitet.
- *
- * Bruker mockVerificationClient.opprettJfrOppgave() for å opprette journalføringsoppgaver
- * i mock-containeren i stedet for in-process mock.
- */
-open class JournalfoeringBase(
+abstract class JournalfoeringBase(
     extensionForWireMock: Extension? = null
 ) : MockServerTestBaseWithProsessManager(extensionForWireMock) {
 
@@ -53,10 +47,6 @@ open class JournalfoeringBase(
         process = process
     )
 
-    /**
-     * Oppretter en journalføringsoppgave via mock-containeren.
-     * Bruker mockVerificationClient i stedet for in-process JournalføringsoppgaveGenerator.
-     */
     protected fun lagJfrOppgave(
         tilordnetRessurs: String = "Z123456",
         forVirksomhet: Boolean = false

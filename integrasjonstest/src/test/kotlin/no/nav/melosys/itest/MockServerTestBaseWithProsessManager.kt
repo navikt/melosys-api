@@ -12,13 +12,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
 
-/**
- * Baseklasse for integrasjonstester som bruker:
- * - Melosys-mock container for ekstern tjeneste-mocking
- * - WireMock for ekstra stubbing (port 8094)
- * - ProsessinstansTestManager for asynkron prosesstyring
- */
-open class MockServerTestBaseWithProsessManager(
+abstract class MockServerTestBaseWithProsessManager(
     extensionForWireMock: Extension? = null
 ) : ComponentTestBase() {
 

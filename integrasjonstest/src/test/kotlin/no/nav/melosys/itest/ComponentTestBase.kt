@@ -19,19 +19,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 
-/**
- * Baseklasse for integrasjonstester som bruker melosys-mock som Docker-container.
- *
- * Denne klassen kombinerer:
- * - OracleTestContainerBase for database
- * - MelosysMockContainerConfig for ekstern tjeneste-mocking
- * - All Spring Boot test-konfigurasjon
- *
- * Bruk:
- * 1. Extend denne klassen i stedet for OracleTestContainerBase
- * 2. Bruk mockVerificationClient for å verifisere hva som ble sendt til mockene
- * 3. Alle eksterne tjenestekall går til Docker-containeren
- */
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @SpringBootTest(
@@ -47,7 +34,7 @@ import org.springframework.test.context.DynamicPropertySource
 @Import(KafkaTestConfig::class, KodeverkTestConfig::class)
 @DirtiesContext
 @EnableMockOAuth2Server
-class ComponentTestBase : OracleTestContainerBase() {
+abstract class ComponentTestBase : OracleTestContainerBase() {
 
     @Autowired
     private lateinit var unleash: Unleash

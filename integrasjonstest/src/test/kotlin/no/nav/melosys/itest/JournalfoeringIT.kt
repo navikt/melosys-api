@@ -23,10 +23,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 
-/**
- * Integration test for journalføring using container-based mock.
- * Mock state is cleared via mockVerificationClient in base class.
- */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JournalfoeringIT(
     @Autowired private val behandlingRepository: BehandlingRepository,
