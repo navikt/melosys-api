@@ -250,10 +250,3 @@ data class OpprettMedlRequest(
     val medlem: Boolean? = null
 )
 
-// ==================== EXCEPTIONS ====================
-
-/**
- * Unntak som kastes når MockVerificationClient er i strict mode og en operasjon feiler.
- * Brukes for å fange opp kommunikasjonsproblemer med mock-containeren i CI-miljøer.
- */
-class MockVerificationException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
