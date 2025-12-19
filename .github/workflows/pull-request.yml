@@ -35,8 +35,6 @@ jobs:
         uses: nais/login@v0
         with:
           team: teammelosys
-          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
-          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
