@@ -96,30 +96,27 @@ object MelosysMockContainerConfig {
         startIfNeeded()
         val mockUrl = getBaseUrl()
 
-        // REST APIer
+        registry.add("arbeidsforhold.rest.url") { "$mockUrl/aareg-services/api/v1/arbeidstaker/arbeidsforhold" }
         registry.add("DistribuerJournalpost_v1.url") { "$mockUrl/rest/v1/distribuerjournalpost" }
+        registry.add("ereg.rest.url") { "$mockUrl/ereg/v2" }
         registry.add("Inngangsvilkaar.url") { "$mockUrl/api" }
-        registry.add("KodeverkAPI_v1.url") { "$mockUrl/api" }
+        registry.add("inntekt.rest.url") { "$mockUrl/inntektskomponenten/rs/api/v1" }
         registry.add("JournalpostApi_v1.url") { "$mockUrl/rest/journalpostapi/v1" }
+        registry.add("KodeverkAPI_v1.url") { "$mockUrl/api" }
+        registry.add("medlemskap.rest.url") { mockUrl }
         registry.add("MelosysEessi.url") { "$mockUrl/api" }
+        registry.add("microsoft.graph.rest.url") { "$mockUrl/graph/v1.0" }
         registry.add("OppgaveAPI_v1.url") { "$mockUrl/api/v1" }
         registry.add("PDL.url") { "$mockUrl/graphql" }
         registry.add("REST_STS.url") { "$mockUrl/rest/v1/sts" }
         registry.add("SAF.url") { mockUrl }
         registry.add("SakAPI_v1.url") { "$mockUrl/api/v1/saker" }
+        registry.add("tilgangsmaskinen.url") { "$mockUrl/tilgangsmaskinen" }
+        registry.add("utbetaling_rest.url") { "$mockUrl/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern" }
 
         // SOAP-tjenester
         registry.add("Dokumentproduksjon_v3.url") { "$mockUrl/soap/services/dokumentproduksjon/v3" }
         registry.add("SakOgBehandling_v1.url") { "$mockUrl/soap/services/sakOgBehandling/v1" }
-
-        // Andre integrasjoner
-        registry.add("arbeidsforhold.rest.url") { "$mockUrl/aareg-services/api/v1/arbeidstaker/arbeidsforhold" }
-        registry.add("ereg.rest.url") { "$mockUrl/ereg/v2" }
-        registry.add("inntekt.rest.url") { "$mockUrl/inntektskomponenten/rs/api/v1" }
-        registry.add("medlemskap.rest.url") { mockUrl }
-        registry.add("microsoft.graph.rest.url") { "$mockUrl/graph/v1.0" }
-        registry.add("tilgangsmaskinen.url") { "$mockUrl/tilgangsmaskinen" }
-        registry.add("utbetaling_rest.url") { "$mockUrl/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern" }
 
         log.info { "Konfigurerte alle eksterne tjeneste-URLer til å bruke mock-container på: $mockUrl" }
     }
