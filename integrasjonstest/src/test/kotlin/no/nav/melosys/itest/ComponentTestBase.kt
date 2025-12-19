@@ -6,6 +6,8 @@ import io.getunleash.FakeUnleash
 import io.getunleash.Unleash
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.Application
+import no.nav.melosys.itest.mock.MelosysMockContainerConfig
+import no.nav.melosys.itest.mock.MockVerificationClient
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

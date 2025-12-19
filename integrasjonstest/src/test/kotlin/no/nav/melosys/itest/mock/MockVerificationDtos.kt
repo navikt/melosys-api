@@ -1,4 +1,4 @@
-package no.nav.melosys.itest
+package no.nav.melosys.itest.mock
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.core.JsonParser

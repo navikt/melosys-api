@@ -5,6 +5,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.melosys.domain.kodeverk.Avsendertyper
 import no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker
 import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.itest.mock.OppgaveVerificationDto
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.felles.dto.SoeknadslandDto

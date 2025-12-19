@@ -1,4 +1,4 @@
-package no.nav.melosys.itest
+package no.nav.melosys.itest.mock
 
 import mu.KotlinLogging
 import org.slf4j.LoggerFactory

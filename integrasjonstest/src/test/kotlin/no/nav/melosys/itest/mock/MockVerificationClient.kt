@@ -1,4 +1,4 @@
-package no.nav.melosys.itest
+package no.nav.melosys.itest.mock
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
