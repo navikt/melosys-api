@@ -614,7 +614,6 @@ class SedMottakTestIT(
 
         val datoNå = LocalDate.now()
 
-        // Use HTTP client to create BUC info instead of direct repo access
         mockVerificationClient.opprettBucinformasjon(
             id = rinaSaksnummer,
             erAapen = true,
