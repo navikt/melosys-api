@@ -34,12 +34,7 @@ open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, 
 
     override fun opprettBucOgSedV2(opprettBucOgSedDtoV2: OpprettBucOgSedDtoV2) =
         webClient.post()
-            .uri(
-                "/buc/{bucType}?sendAutomatisk={sendAutomatisk}&oppdaterEksisterende={oppdaterEksisterende}",
-                opprettBucOgSedDtoV2.bucType,
-                opprettBucOgSedDtoV2.sendAutomatisk,
-                opprettBucOgSedDtoV2.oppdaterEksisterende
-            )
+            .uri("/v2/buc")
             .bodyValue(opprettBucOgSedDtoV2)
             .retrieve()
             .bodyToMono<OpprettSedDto>()

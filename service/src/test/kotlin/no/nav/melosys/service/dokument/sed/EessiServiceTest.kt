@@ -18,7 +18,9 @@ import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.*
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis
+import no.nav.melosys.domain.eessi.sed.OpprettBucOgSedDtoV2
 import no.nav.melosys.domain.eessi.sed.SedDataDto
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
@@ -278,6 +280,74 @@ class EessiServiceTest {
         eessiService.opprettBucOgSed(BEHANDLING_ID, BucType.LA_BUC_01, listOf(mottakerBelgia1), emptyList())
 
         verify { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_01), eq(false), eq(false)) }
+    }
+
+    @Test
+    fun `opprettBucOgSed medFeatureToggle MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2 på kallerOpprettBucOgSedV2`() {
+        unleash.enable(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)
+
+        val opprettSedDto = OpprettSedDto().apply {
+            rinaUrl = "localhost:3000"
+        }
+        val behandling = lagBehandling()
+        val sedDataDto = SedDataDto()
+
+        val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
+        every { eessiConsumer.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) } returns opprettSedDto
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        every { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns sedDataDto
+        every { joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(any(), any()) } returns Unit
+        every { joarkFasade.hentJournalposterTilknyttetSak(any()) } returns emptyList()
+        mockBehandlingsresultat()
+
+        eessiService.opprettBucOgSed(BEHANDLING_ID, BucType.LA_BUC_01, listOf(mottakerBelgia1), emptyList())
+
+        verify(exactly = 1) { eessiConsumer.opprettBucOgSedV2(any<OpprettBucOgSedDtoV2>()) }
+        verify(exactly = 0) { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), any<BucType>(), any(), any()) }
+
+        val forventetOpprettBucOgSedDtoV2 = OpprettBucOgSedDtoV2(
+            bucType = BucType.LA_BUC_01,
+            sedDataDto = sedDataDto,
+            vedlegg = emptySet(),
+            sendAutomatisk = false,
+            oppdaterEksisterende = false
+        )
+        opprettBucOgSedDtoV2Slot.captured shouldBe forventetOpprettBucOgSedDtoV2
+
+        unleash.disable(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)
+    }
+
+    @Test
+    fun `opprettOgSendSed medFeatureToggle MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2 på kallerOpprettBucOgSedV2`() {
+        unleash.enable(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)
+
+        val behandling = lagBehandling()
+        val sedDataDto = SedDataDto()
+
+        val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
+        every { eessiConsumer.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) } returns OpprettSedDto()
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns sedDataDto
+        every { joarkFasade.hentJournalposterTilknyttetSak(any()) } returns emptyList()
+        mockBehandlingsresultat()
+
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf(mottakerBelgia1), BucType.LA_BUC_01, emptyList(), null)
+
+        verify(exactly = 1) { eessiConsumer.opprettBucOgSedV2(any<OpprettBucOgSedDtoV2>()) }
+        verify(exactly = 0) { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), any<BucType>(), any(), any()) }
+
+        val forventetOpprettBucOgSedDtoV2 = OpprettBucOgSedDtoV2(
+            bucType = BucType.LA_BUC_01,
+            sedDataDto = sedDataDto,
+            vedlegg = emptySet(),
+            sendAutomatisk = true,
+            oppdaterEksisterende = true
+        )
+        opprettBucOgSedDtoV2Slot.captured shouldBe forventetOpprettBucOgSedDtoV2
+
+        unleash.disable(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)
     }
 
     @Test
