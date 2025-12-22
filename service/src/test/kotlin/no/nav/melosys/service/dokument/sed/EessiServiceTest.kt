@@ -84,6 +84,7 @@ class EessiServiceTest {
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
+        unleash.disable(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)
         eessiService = EessiService(
             behandlingService,
             behandlingsresultatService,
@@ -314,8 +315,6 @@ class EessiServiceTest {
             oppdaterEksisterende = false
         )
         opprettBucOgSedDtoV2Slot.captured shouldBe forventetOpprettBucOgSedDtoV2
-
-        unleash.disable(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)
     }
 
     @Test
@@ -346,8 +345,6 @@ class EessiServiceTest {
             oppdaterEksisterende = true
         )
         opprettBucOgSedDtoV2Slot.captured shouldBe forventetOpprettBucOgSedDtoV2
-
-        unleash.disable(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)
     }
 
     @Test
