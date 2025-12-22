@@ -2,7 +2,7 @@
 
 This document tracks the progress of Claude Code skills development for melosys-api.
 
-## Existing Skills (19)
+## Existing Skills (20)
 
 | # | Skill | Status | Description | References |
 |---|-------|--------|-------------|------------|
@@ -25,6 +25,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 | 17 | `trygdeavgift` | Done | Social insurance charge calculation | beregning.md, fakturering.md, aarsavregning.md, debugging.md |
 | 18 | `lovvalg` | Done | Law determination / applicable legislation | articles.md, debugging.md |
 | 19 | `ftrl` | Done | Folketrygdloven processing flows | debugging.md |
+| 20 | `medlemskap` | Done | Membership determination (pliktig/frivillig) | types.md, periods.md, medl-sync.md, debugging.md |
 
 ## Planned Skills
 
@@ -35,7 +36,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 | 17 | `trygdeavgift` | HIGH | **Done** | Social insurance charge calculation and collection | Avgift calculation, rates, årsavregning, fakturering, OEBS integration |
 | 18 | `lovvalg` | HIGH | **Done** | Law determination / applicable legislation | Article selection (11, 12, 13, 16), LA_BUC processing, A1 attestation |
 | 19 | `ftrl` | HIGH | **Done** | Folketrygdloven processing flows | §2-5 to §2-13, yrkesaktiv/ikke-yrkesaktiv/pensjonist flows |
-| 20 | `medlemskap` | HIGH | Pending | Membership determination logic | Pliktig/frivillig membership, periods, trygdedekning |
+| 20 | `medlemskap` | HIGH | **Done** | Membership determination logic | Pliktig/frivillig membership, periods, trygdedekning |
 | 21 | `vilkaar` | HIGH | Pending | Requirements/conditions evaluation | Inngangsvilkår, vilkårsvurdering, avklartefakta |
 
 ### Priority 2: Integrations & External Systems
@@ -220,7 +221,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 - [x] trygdeavgift (Dec 2024)
 - [x] lovvalg (Dec 2024)
 - [x] ftrl (Dec 2024)
-- [ ] medlemskap
+- [x] medlemskap (Dec 2024)
 - [ ] vilkaar
 
 ### Phase 2: Integrations (Target: Q2 2025)
