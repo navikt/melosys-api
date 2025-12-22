@@ -190,6 +190,7 @@ public class EessiService {
         Boolean oppdaterEksisterende
     ) {
         if (unleash.isEnabled(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)) {
+            log.info("Oppretter buc og sed med v2-endepunkt");
             return eessiConsumer.opprettBucOgSedV2(new OpprettBucOgSedDtoV2(
                 bucType,
                 sedDataDto,
