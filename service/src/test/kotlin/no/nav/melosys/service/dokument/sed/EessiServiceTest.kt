@@ -44,6 +44,7 @@ import org.jeasy.random.EasyRandom
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import no.nav.melosys.domain.eessi.sed.VedleggReferanse
 
 class EessiServiceTest {
 
@@ -293,16 +294,26 @@ class EessiServiceTest {
         val behandling = lagBehandling()
         val sedDataDto = SedDataDto()
 
+        val journalpost = lagJournalpost(listOf(
+            lagArkivDokument("hoved"),
+            lagArkivDokument("dok1"),
+            lagArkivDokument("dok2"))
+        )
+
+        val dokumentReferanser = journalpost.vedleggListe.map {
+            DokumentReferanse(journalpost.journalpostId, it.dokumentId ?: error("dokumentId burde ikke være null her"))
+        }
+
         val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
         every { eessiConsumer.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) } returns opprettSedDto
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         every { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns sedDataDto
         every { joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(any(), any()) } returns Unit
-        every { joarkFasade.hentJournalposterTilknyttetSak(any()) } returns emptyList()
+        every { joarkFasade.hentJournalposterTilknyttetSak(any()) } returns listOf(journalpost)
         mockBehandlingsresultat()
 
-        eessiService.opprettBucOgSed(BEHANDLING_ID, BucType.LA_BUC_01, listOf(mottakerBelgia1), emptyList())
+        eessiService.opprettBucOgSed(BEHANDLING_ID, BucType.LA_BUC_01, listOf(mottakerBelgia1), dokumentReferanser)
 
         verify(exactly = 1) { eessiConsumer.opprettBucOgSedV2(any<OpprettBucOgSedDtoV2>()) }
         verify(exactly = 0) { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), any<BucType>(), any(), any()) }
@@ -310,7 +321,13 @@ class EessiServiceTest {
         val forventetOpprettBucOgSedDtoV2 = OpprettBucOgSedDtoV2(
             bucType = BucType.LA_BUC_01,
             sedDataDto = sedDataDto,
-            vedlegg = emptySet(),
+            vedlegg = journalpost.vedleggListe.map{
+                VedleggReferanse(
+                    journalpost.journalpostId,
+                    it.dokumentId ?: error("dokumentId burde ikke være null her"),
+                    it.tittel
+                )
+            },
             sendAutomatisk = false,
             oppdaterEksisterende = false
         )
@@ -324,15 +341,25 @@ class EessiServiceTest {
         val behandling = lagBehandling()
         val sedDataDto = SedDataDto()
 
+        val journalpost = lagJournalpost(listOf(
+            lagArkivDokument("hoved"),
+            lagArkivDokument("dok1"),
+            lagArkivDokument("dok2"))
+        )
+
+        val dokumentReferanser = journalpost.vedleggListe.map {
+            DokumentReferanse(journalpost.journalpostId, it.dokumentId ?: error("dokumentId burde ikke være null her"))
+        }
+
         val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
         every { eessiConsumer.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns sedDataDto
-        every { joarkFasade.hentJournalposterTilknyttetSak(any()) } returns emptyList()
+        every { joarkFasade.hentJournalposterTilknyttetSak(any()) } returns listOf(journalpost)
         mockBehandlingsresultat()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf(mottakerBelgia1), BucType.LA_BUC_01, emptyList(), null)
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf(mottakerBelgia1), BucType.LA_BUC_01, dokumentReferanser, null)
 
         verify(exactly = 1) { eessiConsumer.opprettBucOgSedV2(any<OpprettBucOgSedDtoV2>()) }
         verify(exactly = 0) { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), any<BucType>(), any(), any()) }
@@ -340,7 +367,13 @@ class EessiServiceTest {
         val forventetOpprettBucOgSedDtoV2 = OpprettBucOgSedDtoV2(
             bucType = BucType.LA_BUC_01,
             sedDataDto = sedDataDto,
-            vedlegg = emptySet(),
+            vedlegg = journalpost.vedleggListe.map{
+                VedleggReferanse(
+                    journalpost.journalpostId,
+                    it.dokumentId ?: error("dokumentId burde ikke være null her"),
+                    it.tittel
+                )
+            },
             sendAutomatisk = true,
             oppdaterEksisterende = true
         )
