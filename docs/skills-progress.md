@@ -2,7 +2,7 @@
 
 This document tracks the progress of Claude Code skills development for melosys-api.
 
-## Existing Skills (21)
+## Existing Skills (22)
 
 | # | Skill | Status | Description | References |
 |---|-------|--------|-------------|------------|
@@ -27,6 +27,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 | 19 | `ftrl` | Done | Folketrygdloven processing flows | debugging.md |
 | 20 | `medlemskap` | Done | Membership determination (pliktig/frivillig) | types.md, periods.md, medl-sync.md, debugging.md |
 | 21 | `vilkaar` | Done | Requirements/conditions evaluation | structure.md, avklartefakta.md, evaluation.md, debugging.md |
+| 22 | `eessi-eux` | Done | EUX/RINA integration for EESSI | buc-types.md, sed-types.md, api.md, debugging.md |
 
 ## Planned Skills
 
@@ -44,7 +45,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 
 | # | Skill | Priority | Description | Key Areas |
 |---|-------|----------|-------------|-----------|
-| 22 | `eessi-eux` | HIGH | EUX/RINA integration for EESSI | BUC lifecycle, SED sending/receiving, institusjonskatalog |
+| 22 | `eessi-eux` | HIGH | **Done** | EUX/RINA integration for EESSI | BUC lifecycle, SED sending/receiving, institusjonskatalog |
 | 23 | `altinn-soknad` | MEDIUM | Altinn form submissions and processing | soknad-altinn module, SoeknadMapper, form validation |
 | 24 | `sigrun` | MEDIUM | Tax information from Skatteetaten | Income lookup, skattehendelser, skatteoppgjør |
 | 25 | `statistikk` | MEDIUM | Statistics/reporting to data warehouse | DVH topics, A1 EU statistics, Kafka publishing |
@@ -226,7 +227,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 - [x] vilkaar (Dec 2024)
 
 ### Phase 2: Integrations (Target: Q2 2025)
-- [ ] eessi-eux
+- [x] eessi-eux (Dec 2024)
 - [ ] altinn-soknad
 - [ ] sigrun
 - [ ] statistikk
