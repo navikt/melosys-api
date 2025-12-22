@@ -106,7 +106,6 @@ public class EessiService {
                 journalpost.hentArkivDokument(dokumentReferanse.getDokumentID()).getTittel()
             );
         }).toList();
-
     }
 
     private Optional<Journalpost> findJournalPost(String journalpostId, List<Journalpost> journalposter) {

@@ -14,7 +14,6 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.arkiv.DokumentReferanse
 import no.nav.melosys.domain.arkiv.Journalpost
-import no.nav.melosys.domain.arkiv.Vedlegg
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.forTest
@@ -102,7 +101,6 @@ internal class VideresendSoknadTest {
             this.behandling = behandling
         }
 
-        val vedlegg = byteArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
         val dokumentReferanser = setOf(DokumentReferanse(
             behandling.initierendeJournalpostId!!,
             journalpost.hoveddokument.dokumentId!!
@@ -110,7 +108,6 @@ internal class VideresendSoknadTest {
         prosessinstans = prosessinstans.toBuilder()
             .medData(ProsessDataKey.VEDLEGG_SED, dokumentReferanser)
             .build()
-        val forventetVedlegg = Vedlegg(vedlegg, "tittel")
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
 
