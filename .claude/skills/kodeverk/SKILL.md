@@ -34,6 +34,7 @@ service/kodeverk/
 ### Core Enums
 
 **Case Level:**
+
 | Enum | Values | Description |
 |------|--------|-------------|
 | `Sakstyper` | EU_EOS, FTRL, TRYGDEAVTALE | Case type |
@@ -41,6 +42,7 @@ service/kodeverk/
 | `Saksstatuser` | UNDER_BEHANDLING, HENLAGT, AVSLUTTET, OPPHØRT, ANNULLERT | Case status |
 
 **Treatment Level:**
+
 | Enum | Values | Description |
 |------|--------|-------------|
 | `Behandlingstyper` | FØRSTEGANG, NY_VURDERING, KLAGE, HENVENDELSE, ÅRSAVREGNING | Treatment type |
@@ -48,6 +50,7 @@ service/kodeverk/
 | `Behandlingsstatus` | UNDER_BEHANDLING, AVVENT_DOK_PART, AVVENT_DOK_UTL, AVVENT_FAGLIG_AVKLARING | Treatment status |
 
 **Actor Level:**
+
 | Enum | Values | Description |
 |------|--------|-------------|
 | `Aktoersroller` | BRUKER, VIRKSOMHET | Actor role |
@@ -94,6 +97,7 @@ FTRL + TRYGDEAVGIFT → [VIRKSOMHET]
 ## Behandlingstema Reference
 
 ### EU/EØS Cases
+
 | Tema | Description |
 |------|-------------|
 | `YRKESAKTIV` | Employed person |
@@ -105,6 +109,7 @@ FTRL + TRYGDEAVGIFT → [VIRKSOMHET]
 | `ARBEID_TJENESTEPERSON_ELLER_FLY` | Civil servant or flight crew |
 
 ### Exception Handling (Art. 16)
+
 | Tema | Description |
 |------|-------------|
 | `ANMODNING_OM_UNNTAK_HOVEDREGEL` | Exception request |
@@ -113,6 +118,7 @@ FTRL + TRYGDEAVGIFT → [VIRKSOMHET]
 | `REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE` | Other exception |
 
 ### Decision/Designation
+
 | Tema | Description |
 |------|-------------|
 | `BESLUTNING_LOVVALG_NORGE` | Norway designated |
@@ -201,6 +207,7 @@ val landkoder = kodeverkService.hentGyldigeKoderForKodeverk(FellesKodeverk.LANDK
 ```
 
 ### FellesKodeverk Types
+
 | Type | Description |
 |------|-------------|
 | `LANDKODER` | Country codes |
@@ -213,6 +220,7 @@ val landkoder = kodeverkService.hentGyldigeKoderForKodeverk(FellesKodeverk.LANDK
 ## Feature Toggles
 
 Kodeverk availability controlled by toggles:
+
 | Toggle | Controls |
 |--------|----------|
 | `MELOSYS_ÅRSAVREGNING` | Årsavregning availability |
