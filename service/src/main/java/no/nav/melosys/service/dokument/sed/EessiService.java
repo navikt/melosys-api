@@ -86,7 +86,7 @@ public class EessiService {
         return vedlegg;
     }
 
-    protected Collection<VedleggReferanse> lagVedleggReferanser(Fagsak fagsak, Collection<DokumentReferanse> dokumentReferanser){
+    protected Collection<VedleggReferanse> lagVedleggReferanser(Fagsak fagsak, Collection<DokumentReferanse> dokumentReferanser) {
         if (dokumentReferanser.isEmpty()) {
             return Collections.emptySet();
         }
@@ -109,7 +109,7 @@ public class EessiService {
 
     }
 
-    private Optional<Journalpost> findJournalPost(String journalpostId, List<Journalpost> journalposter){
+    private Optional<Journalpost> findJournalPost(String journalpostId, List<Journalpost> journalposter) {
         return journalposter.stream()
             .filter(jp -> jp.getJournalpostId().equals(journalpostId))
             .findFirst();
