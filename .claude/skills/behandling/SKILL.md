@@ -1,5 +1,5 @@
 ---
-name: behandling-domain
+name: behandling
 description: |
   Expert knowledge of Behandling (case treatment) domain in melosys-api.
   Use when: (1) Understanding the behandling lifecycle and status transitions,

@@ -1,5 +1,5 @@
 ---
-name: vedtak-saga
+name: vedtak
 description: |
   Expert knowledge of vedtak (verdict) processing in melosys-api using the saksflyt saga pattern.
   Use when: (1) Debugging vedtak-related issues or failures in IVERKSETT_VEDTAK_* processes,

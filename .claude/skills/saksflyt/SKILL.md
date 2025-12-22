@@ -1,5 +1,5 @@
 ---
-name: saksflyt-saga-pattern
+name: saksflyt
 description: |
   Expert knowledge of the saksflyt saga pattern implementation in melosys-api.
   Use when: (1) Debugging or modifying process flows (Prosessinstans, ProsessType, ProsessSteg),
