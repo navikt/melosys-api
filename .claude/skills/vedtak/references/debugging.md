@@ -340,4 +340,3 @@ GET /api/internal/prometheus
 # Look for:
 # prosessinstanser_opprettet{type="IVERKSETT_VEDTAK_*"}
 # prosessinstanser_steg_utført{type="IVERKSETT_VEDTAK_*", status="success|failure"}
-```

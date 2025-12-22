@@ -143,4 +143,3 @@ grep "nyFagsakOgBehandling" application.log
 SAKER_OPPRETTET.increment()
 ```
 
-Check Prometheus/Grafana for `saker_opprettet_total` metric.

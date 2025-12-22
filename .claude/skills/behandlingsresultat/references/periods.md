@@ -191,4 +191,3 @@ JOIN lovvalgsperiode p2 ON p1.behandlingsresultat_id = p2.behandlingsresultat_id
 WHERE p1.id < p2.id
 AND p1.fom <= COALESCE(p2.tom, DATE '9999-12-31')
 AND COALESCE(p1.tom, DATE '9999-12-31') >= p2.fom;
-```

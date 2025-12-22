@@ -243,4 +243,3 @@ Published when saga completes (FERDIG). Listened to by `ProsessinstansFerdigList
 `ProsessinstansBehandler.gjenopprettProsesserSomHengerVedOppstart()`:
 - Runs on `ApplicationReadyEvent`
 - Finds active sagas unchanged for 24 hours
-- Restarts them by setting status=RESTARTET and publishing event

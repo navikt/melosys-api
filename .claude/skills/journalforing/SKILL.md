@@ -229,4 +229,3 @@ AND so.type = 'DOKUMENT';
 
 - **[Joark API](references/joark-api.md)**: Creating and updating journalposts
 - **[SAF API](references/saf.md)**: Querying and reading documents
-- **[Debugging](references/debugging.md)**: Troubleshooting guide

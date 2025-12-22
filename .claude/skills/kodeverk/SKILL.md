@@ -254,4 +254,3 @@ log.info("Valid temaer: $gyldige")
 
 - **[Enums](references/enums.md)**: Complete enum reference
 - **[Combinations](references/combinations.md)**: Legal combination tables
-- **[Debugging](references/debugging.md)**: Investigation steps

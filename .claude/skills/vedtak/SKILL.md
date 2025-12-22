@@ -178,4 +178,3 @@ T5      Set: status=AVSLUTTET      ← OptimisticLock or overwrite!
 
 - **[Vedtak Types](references/vedtak-types.md)**: Complete vedtak type reference with service mappings
 - **[Race Conditions](references/race-conditions.md)**: Vedtak-specific race conditions and mitigation
-- **[Debugging Guide](references/debugging.md)**: SQL queries, log patterns, and investigation steps

@@ -44,6 +44,7 @@ All enums are defined in the external `melosys-internt-kodeverk` library.
 ## Behandlingstema (Treatment Themes)
 
 ### Employment-Related
+
 | Value | Description |
 |-------|-------------|
 | `YRKESAKTIV` | Employed person |
@@ -56,12 +57,14 @@ All enums are defined in the external `melosys-internt-kodeverk` library.
 | `ARBEID_KUN_NORGE` | Work only in Norway |
 
 ### Membership-Related
+
 | Value | Description |
 |-------|-------------|
 | `UNNTAK_MEDLEMSKAP` | Exemption from membership |
 | `TRYGDETID` | Insurance period calculation |
 
 ### Exception/Designation
+
 | Value | Description |
 |-------|-------------|
 | `ANMODNING_OM_UNNTAK_HOVEDREGEL` | Exception request (Art. 16) |
@@ -72,6 +75,7 @@ All enums are defined in the external `melosys-internt-kodeverk` library.
 | `BESLUTNING_LOVVALG_ANNET_LAND` | Other country designated |
 
 ### Other
+
 | Value | Description |
 |-------|-------------|
 | `VIRKSOMHET` | Company-related |

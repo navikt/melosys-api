@@ -15,6 +15,7 @@
 **Trigger**: `FtrlVedtakService.fattVedtak()`
 
 **Steps**:
+
 | Order | Step | Implementation | Description |
 |-------|------|----------------|-------------|
 | 1 | LAGRE_MEDLEMSKAPSPERIODE_MEDL | `LagreMedlemsperiodeMedl` | Save membership period to MEDL |
@@ -36,6 +37,7 @@
 **Trigger**: `EosVedtakService.fattVedtak()`
 
 **Steps**:
+
 | Order | Step | Implementation | Description |
 |-------|------|----------------|-------------|
 | 1 | AVKLAR_MYNDIGHET | `AvklarMyndighet` | Clarify foreign authority |
@@ -57,6 +59,7 @@
 **Trigger**: `TrygdeavtaleVedtakService.fattVedtak()`
 
 **Steps**:
+
 | Order | Step | Implementation | Description |
 |-------|------|----------------|-------------|
 | 1 | AVKLAR_MYNDIGHET | `AvklarMyndighet` | Clarify foreign authority |
@@ -74,6 +77,7 @@
 **Trigger**: `IkkeYrkesaktivVedtakService.fattVedtak()`
 
 **Steps**:
+
 | Order | Step | Implementation | Description |
 |-------|------|----------------|-------------|
 | 1 | LAGRE_LOVVALGSPERIODE_MEDL | `LagreLovvalgsperiodeMedl` | Save law selection period |
@@ -90,6 +94,7 @@
 **Trigger**: `ÅrsavregningVedtakService.fattVedtak()`
 
 **Steps**:
+
 | Order | Step | Implementation | Description |
 |-------|------|----------------|-------------|
 | 1 | SEND_FAKTURA_AARSAVREGNING | `SendFakturaÅrsavregning` | Send annual invoice |
@@ -104,6 +109,7 @@
 **Purpose**: Execute EØS pensioner fee collection
 
 **Steps**:
+
 | Order | Step | Implementation | Description |
 |-------|------|----------------|-------------|
 | 1 | OPPRETT_FAKTURASERIE | `OpprettFakturaserie` | Create invoice series |
@@ -198,4 +204,3 @@ saksflyt/src/main/kotlin/no/nav/melosys/saksflyt/steg/
 ├── fakturering/                 # Invoice steps
 ├── behandling/                  # Case/treatment steps
 └── melding/                     # Kafka message steps
-```

@@ -167,6 +167,7 @@ if (erSensitiv) {
 ```
 
 ### Unit IDs
+
 | Unit | ID | Usage |
 |------|-----|-------|
 | Melosys | 4863 | Standard tasks |
@@ -285,4 +286,3 @@ oppgaveService.finnOppgaverMedAktørId(aktørId, arrayOf("BEH_SAK_MK", "VUR"))
 
 - **[Task Types](references/task-types.md)**: Complete oppgavetype reference
 - **[Mapping](references/mapping.md)**: OppgaveGosysMapping details
-- **[Debugging](references/debugging.md)**: SQL queries and investigation steps

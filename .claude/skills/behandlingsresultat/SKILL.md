@@ -285,4 +285,3 @@ HAVING COUNT(*) > 1;
 
 - **[Period Types](references/periods.md)**: Deep dive into period types and their relationships
 - **[Result Types](references/result-types.md)**: Complete result type reference
-- **[Trygdeavgift](references/trygdeavgift.md)**: Social insurance charge calculations

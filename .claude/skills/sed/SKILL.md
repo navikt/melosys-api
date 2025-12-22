@@ -47,6 +47,7 @@ saksflyt/steg/sed/
 ### Key SED Types
 
 **A-Series (Applicable Legislation)**:
+
 | SED | Purpose | When Used |
 |-----|---------|-----------|
 | `A001` | Request for applicable legislation | Anmodning om unntak (Art. 16) |
@@ -57,6 +58,7 @@ saksflyt/steg/sed/
 | `A012` | Information about changes | Endringsmelding |
 
 **H-Series (Healthcare)**:
+
 | SED | Purpose |
 |-----|---------|
 | `H001` | Request for healthcare coverage |
@@ -65,6 +67,7 @@ saksflyt/steg/sed/
 | `H121` | Healthcare cost claim |
 
 **X-Series (Administrative)**:
+
 | SED | Purpose |
 |-----|---------|
 | `X008` | Invalidation/cancellation |
@@ -250,6 +253,7 @@ val tilgjengelige = eessiService.kanOppretteSedTyperPåBuc(rinaSaksnummer)
 ## Saga Steps Reference
 
 ### Sending Steps
+
 | Step | Description |
 |------|-------------|
 | `SEND_VEDTAK_UTLAND` | Send A003 decision abroad |
@@ -260,6 +264,7 @@ val tilgjengelige = eessiService.kanOppretteSedTyperPåBuc(rinaSaksnummer)
 | `SEND_GODKJENNING_REGISTRERING_UNNTAK` | Send approval |
 
 ### Receiving Steps
+
 | Step | Description |
 |------|-------------|
 | `SED_MOTTAK_RUTING` | Route incoming SED |
@@ -297,4 +302,3 @@ ORDER BY pi.registrert_dato DESC;
 
 - **[SED Types](references/sed-types.md)**: Complete SED type reference
 - **[BUC Types](references/buc-types.md)**: BUC mapping and workflows
-- **[Debugging](references/debugging.md)**: SQL queries and investigation steps

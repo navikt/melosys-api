@@ -63,6 +63,7 @@ Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingstype.java`
 Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingstema.java`
 
 ### EU/EØS Themes
+
 | Theme | Description |
 |-------|-------------|
 | `UTSENDT_ARBEIDSTAKER` | Posted worker (Art. 12) |
@@ -77,6 +78,7 @@ Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingstema.java`
 | `ANMODNING_OM_UNNTAK_HOVEDREGEL` | Request for exception |
 
 ### FTRL Themes
+
 | Theme | Description |
 |-------|-------------|
 | `YRKESAKTIV` | Employed person |
@@ -84,6 +86,7 @@ Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingstema.java`
 | `PENSJONIST` | Pensioner |
 
 ### Common Themes
+
 | Theme | Description |
 |-------|-------------|
 | `TRYGDETID` | Insurance period inquiry |
@@ -97,6 +100,7 @@ Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingstema.java`
 Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingsresultattyper.java`
 
 ### Positive Outcomes
+
 | Type | Description |
 |------|-------------|
 | `MEDLEM_I_FOLKETRYGDEN` | Approved membership |
@@ -105,6 +109,7 @@ Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingsresultattyp
 | `DELVIS_GODKJENT` | Partially approved |
 
 ### Negative Outcomes
+
 | Type | Description |
 |------|-------------|
 | `AVSLAG_MANGLENDE_OPPL` | Rejected - missing info |
@@ -112,6 +117,7 @@ Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingsresultattyp
 | `UTPEKING_NORGE_AVVIST` | Norway designation rejected |
 
 ### Terminations
+
 | Type | Description |
 |------|-------------|
 | `OPPHØRT` | Membership terminated |
@@ -119,6 +125,7 @@ Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingsresultattyp
 | `ANNULLERT` | Annulled |
 
 ### Administrative
+
 | Type | Description |
 |------|-------------|
 | `FERDIGBEHANDLET` | Processed (no new verdict) |
@@ -130,6 +137,7 @@ Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingsresultattyp
 ## Sakstype and Sakstema
 
 ### Sakstype
+
 | Type | Description |
 |------|-------------|
 | `EU_EOS` | EU/EEA regulation cases |
@@ -137,6 +145,7 @@ Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingsresultattyp
 | `TRYGDEAVTALE` | Bilateral agreement cases |
 
 ### Sakstema
+
 | Tema | Description |
 |------|-------------|
 | `MEDLEMSKAP_LOVVALG` | Membership/law selection |
@@ -184,4 +193,3 @@ Cannot change sakstype/behandlingstema when:
 - behandlingsstatus = AVSLUTTET
 - behandlingsstatus = IVERKSETTER_VEDTAK
 - behandlingsstatus = MIDLERTIDIG_LOVVALGSBESLUTNING
-- anmodningsperioderErSendtUtlandet = true

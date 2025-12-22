@@ -157,4 +157,3 @@ val institusjoner = eessiService.hentMottakerinstitusjoner(
 // Returns list of institution IDs like ["SE:FK", "SE:SKV"]
 ```
 
-If empty list returned, country is not EESSI-ready for that BUC type.

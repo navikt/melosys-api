@@ -116,4 +116,3 @@ AND b.status NOT IN ('AVSLUTTET', 'LUKKET');
 SELECT * FROM fagsak_aud
 WHERE saksnummer = 'MEL-12345'
 ORDER BY rev DESC;
-```

@@ -138,4 +138,3 @@ when {
     erSedBehandling -> SED
     else -> HENV_SOKNAD
 }
-```

@@ -227,4 +227,3 @@ oppgaveService.leggTilbakeOppgave(oppgaveId)
 | `/oppgaver` | POST | Create task |
 | `/oppgaver/{id}` | PUT | Update task |
 
-**Batch limits**: 40 per request, 100k max results

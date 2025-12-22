@@ -285,4 +285,3 @@ fun hentMottaksDatoForJournalpost(journalpostId: String): LocalDate? {
         ?.find { it.datotype == Datotype.DATO_REGISTRERT }
         ?.dato?.let { LocalDate.parse(it) }
 }
-```

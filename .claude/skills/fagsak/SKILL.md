@@ -206,4 +206,3 @@ HAVING COUNT(*) > 1;
 
 - **[Actors](references/actors.md)**: Actor types, roles, and management
 - **[Status Transitions](references/status.md)**: Valid status changes and constraints
-- **[Debugging Guide](references/debugging.md)**: SQL queries and investigation steps

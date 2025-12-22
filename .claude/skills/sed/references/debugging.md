@@ -247,4 +247,3 @@ SED operations go through melosys-eessi service:
 - Generates SED XML/PDF
 - Tracks saksrelasjoner
 
-Check melosys-eessi logs for low-level RINA issues.

@@ -54,6 +54,7 @@ oppgave.erAktiv()  // true if OPPRETTET, AAPNET, or UNDER_BEHANDLING
 Extensive list of 25+ behandlingstema codes:
 
 ### EU/EØS Related
+
 | Code | Description |
 |------|-------------|
 | `ab0424` | EU_EOS_LAND |
@@ -63,6 +64,7 @@ Extensive list of 25+ behandlingstema codes:
 | `ab0482` | EU_EOS_NORGE_ER_UTPEKT_SOM_LOVVALGSLAND |
 
 ### Bilateral Treaties
+
 | Code | Description |
 |------|-------------|
 | `ab0387` | AVTALELAND |
@@ -70,12 +72,14 @@ Extensive list of 25+ behandlingstema codes:
 | `ab0476` | AVTALAND_PENSJONIST_ELLER_UFORETRYGDET |
 
 ### Outside Agreements
+
 | Code | Description |
 |------|-------------|
 | `ab0388` | UTENFOR_AVTALELAND |
 | `ab0484` | UTENFOR_AVTALAND_YRKESAKTIV |
 
 ### Exception Handling
+
 | Code | Description |
 |------|-------------|
 | `ab0460` | ANMODNING_UNNTAK |

@@ -50,6 +50,7 @@ saksflyt/steg/medl/
 ### MEDL Enums
 
 **PeriodestatusMedl** (Period Status):
+
 | Code | Meaning |
 |------|---------|
 | `GYLD` | Valid/approved |
@@ -57,6 +58,7 @@ saksflyt/steg/medl/
 | `AVST` | Ceased/terminated |
 
 **LovvalgMedl** (Law Choice):
+
 | Code | Meaning |
 |------|---------|
 | `ENDL` | Final (endelig) |
@@ -64,6 +66,7 @@ saksflyt/steg/medl/
 | `UAVK` | Under clarification |
 
 **StatusaarsakMedl** (Status Reason):
+
 | Code | Meaning |
 |------|---------|
 | `AVVIST` | Rejected |
@@ -263,4 +266,3 @@ grep "LagreMedlemsperiodeMedl\|LagreLovvalgsperiodeMedl" application.log
 
 - **[Enums](references/enums.md)**: Complete MEDL enum reference
 - **[Mapping](references/mapping.md)**: Domain to MEDL data mapping
-- **[Debugging](references/debugging.md)**: SQL queries and investigation steps

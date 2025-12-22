@@ -43,6 +43,7 @@ data class GosysMappingRow(
 ## Example Mappings
 
 ### EU/EØS Yrkesaktiv
+
 | Input | Value |
 |-------|-------|
 | Sakstype | EU_EOS |
@@ -56,6 +57,7 @@ data class GosysMappingRow(
 | Prioritet | NORM |
 
 ### Trygdeavtale Pensjonist
+
 | Input | Value |
 |-------|-------|
 | Sakstype | TRYGDEAVTALE |
@@ -69,6 +71,7 @@ data class GosysMappingRow(
 | Prioritet | NORM |
 
 ### Anmodning Unntak
+
 | Input | Value |
 |-------|-------|
 | Sakstype | EU_EOS |
@@ -143,4 +146,3 @@ val mapping = OppgaveGosysMapping.finnMapping(
 log.info("Mapping: $mapping")
 ```
 
-**Resolution**: Verify mapping table matches Confluence documentation

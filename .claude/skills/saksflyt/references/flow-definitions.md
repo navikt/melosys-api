@@ -310,6 +310,7 @@ OPPRETT_AARSAVREGNING_BEHANDLING → OPPRETT_OPPGAVE
 All steps are defined in `saksflyt-api/src/main/java/.../domain/ProsessSteg.java`.
 
 ### MEDL Steps
+
 | Step | Description |
 |------|-------------|
 | `LAGRE_LOVVALGSPERIODE_MEDL` | Save applicable law period to MEDL |
@@ -319,6 +320,7 @@ All steps are defined in `saksflyt-api/src/main/java/.../domain/ProsessSteg.java
 | `AVSLUTT_TIDLIGERE_MEDL_ANMODNINGSPERIODE` | Close previous request period |
 
 ### Case/Treatment Steps
+
 | Step | Description |
 |------|-------------|
 | `OPPRETT_SAK_OG_BEH` | Create case and treatment |
@@ -328,6 +330,7 @@ All steps are defined in `saksflyt-api/src/main/java/.../domain/ProsessSteg.java
 | `OPPRETT_MOTTATTEOPPLYSNINGER` | Create received information |
 
 ### Journaling Steps
+
 | Step | Description |
 |------|-------------|
 | `OPPRETT_ARKIVSAK` | Create archive case |
@@ -337,6 +340,7 @@ All steps are defined in `saksflyt-api/src/main/java/.../domain/ProsessSteg.java
 | `DISTRIBUER_JOURNALPOST_UTLAND` | Distribute to foreign authority |
 
 ### Letter/Communication Steps
+
 | Step | Description |
 |------|-------------|
 | `SEND_VEDTAKSBREV_INNLAND` | Send verdict letter domestically |
@@ -347,6 +351,7 @@ All steps are defined in `saksflyt-api/src/main/java/.../domain/ProsessSteg.java
 | `OPPRETT_OG_JOURNALFØR_BREV` | Create and journal letter |
 
 ### SED Steps
+
 | Step | Description |
 |------|-------------|
 | `SED_MOTTAK_RUTING` | Route incoming SED |
@@ -357,6 +362,7 @@ All steps are defined in `saksflyt-api/src/main/java/.../domain/ProsessSteg.java
 | `BESTEM_BEHANDLINGMÅTE_SED` | Determine SED handling method |
 
 ### Register/Validation Steps
+
 | Step | Description |
 |------|-------------|
 | `HENT_REGISTEROPPLYSNINGER` | Fetch register information |
@@ -366,6 +372,7 @@ All steps are defined in `saksflyt-api/src/main/java/.../domain/ProsessSteg.java
 | `AVKLAR_ARBEIDSGIVER` | Clarify Norwegian employer |
 
 ### Task Steps
+
 | Step | Description |
 |------|-------------|
 | `OPPRETT_OPPGAVE` | Create task (Gosys) |
@@ -373,6 +380,7 @@ All steps are defined in `saksflyt-api/src/main/java/.../domain/ProsessSteg.java
 | `JFR_TILDEL_BEHANDLINGSOPPGAVE` | Assign treatment task |
 
 ### Invoice Steps
+
 | Step | Description |
 |------|-------------|
 | `OPPRETT_FAKTURASERIE` | Create invoice series |

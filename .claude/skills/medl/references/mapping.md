@@ -168,4 +168,3 @@ throw TekniskException("Lovvalgsbestemmelse støttes ikke i MEDL: $bestemmelse")
 
 // Missing overgangsregler
 throw FunksjonellException("Grunnlaget $grunnlag og overgangsregler skal benyttes, men er tom")
-```

@@ -222,4 +222,3 @@ val nyPeriodeId = medlService.opprettPeriodeEndelig(...)
 
 // Update period
 medlService.oppdaterPeriodeEndelig(...)
-```

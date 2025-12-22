@@ -255,4 +255,3 @@ Before finalizing rules, verify:
 
 ## Remember
 
-The best rules are those that aren't needed because the examples and patterns make everything clear. Strive for that ideal.

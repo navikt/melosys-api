@@ -55,4 +55,3 @@ Image details:
 - Tag: europe-north1-docker.pkg.dev/.../melosys-api:TAG
 - Platforms: linux/amd64, linux/arm64
 - Manifest digest: sha256:...
-```
