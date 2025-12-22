@@ -2,7 +2,7 @@
 
 This document tracks the progress of Claude Code skills development for melosys-api.
 
-## Existing Skills (20)
+## Existing Skills (21)
 
 | # | Skill | Status | Description | References |
 |---|-------|--------|-------------|------------|
@@ -26,6 +26,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 | 18 | `lovvalg` | Done | Law determination / applicable legislation | articles.md, debugging.md |
 | 19 | `ftrl` | Done | Folketrygdloven processing flows | debugging.md |
 | 20 | `medlemskap` | Done | Membership determination (pliktig/frivillig) | types.md, periods.md, medl-sync.md, debugging.md |
+| 21 | `vilkaar` | Done | Requirements/conditions evaluation | structure.md, avklartefakta.md, evaluation.md, debugging.md |
 
 ## Planned Skills
 
@@ -37,7 +38,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 | 18 | `lovvalg` | HIGH | **Done** | Law determination / applicable legislation | Article selection (11, 12, 13, 16), LA_BUC processing, A1 attestation |
 | 19 | `ftrl` | HIGH | **Done** | Folketrygdloven processing flows | §2-5 to §2-13, yrkesaktiv/ikke-yrkesaktiv/pensjonist flows |
 | 20 | `medlemskap` | HIGH | **Done** | Membership determination logic | Pliktig/frivillig membership, periods, trygdedekning |
-| 21 | `vilkaar` | HIGH | Pending | Requirements/conditions evaluation | Inngangsvilkår, vilkårsvurdering, avklartefakta |
+| 21 | `vilkaar` | HIGH | **Done** | Requirements/conditions evaluation | Inngangsvilkår, vilkårsvurdering, avklartefakta |
 
 ### Priority 2: Integrations & External Systems
 
@@ -222,7 +223,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 - [x] lovvalg (Dec 2024)
 - [x] ftrl (Dec 2024)
 - [x] medlemskap (Dec 2024)
-- [ ] vilkaar
+- [x] vilkaar (Dec 2024)
 
 ### Phase 2: Integrations (Target: Q2 2025)
 - [ ] eessi-eux
