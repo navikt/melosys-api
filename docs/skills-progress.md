@@ -2,7 +2,7 @@
 
 This document tracks the progress of Claude Code skills development for melosys-api.
 
-## Existing Skills (26)
+## Existing Skills (27)
 
 | # | Skill | Status | Description | References |
 |---|-------|--------|-------------|------------|
@@ -32,6 +32,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 | 24 | `inntekt-skatt` | Done | Income lookup and tax events integration | debugging.md |
 | 25 | `statistikk` | Done | A1 statistics publishing to Kafka/DVH | debugging.md |
 | 26 | `trygdeavtaler` | Done | Bilateral social security agreements | debugging.md |
+| 27 | `eos-forordning` | Done | EU/EEA regulation 883/2004 and 987/2009 | debugging.md |
 
 ## Planned Skills
 
@@ -59,7 +60,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 | # | Skill | Priority | Status | Description | Key Areas |
 |---|-------|----------|--------|-------------|-----------|
 | 26 | `trygdeavtaler` | MEDIUM | **Done** | Bilateral social security agreements | AU, CA, GB, US, and 15 other countries |
-| 27 | `eos-forordning` | MEDIUM | Pending | EU/EEA regulation 883/2004 and 987/2009 | Articles, personal scope, coordination rules |
+| 27 | `eos-forordning` | MEDIUM | **Done** | EU/EEA regulation 883/2004 and 987/2009 | Articles, personal scope, coordination rules |
 
 ### Priority 4: Technical Infrastructure
 
@@ -238,7 +239,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 
 ### Phase 3: Agreements (Target: Q3 2025)
 - [x] trygdeavtaler (Dec 2024)
-- [ ] eos-forordning
+- [x] eos-forordning (Dec 2024)
 
 ### Phase 4: Technical (As needed)
 - [ ] kafka
