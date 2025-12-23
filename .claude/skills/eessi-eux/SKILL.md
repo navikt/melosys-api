@@ -1,5 +1,3 @@
-# EESSI-EUX Skill
-
 ---
 skill: eessi-eux
 description: Expert knowledge of EESSI integration via EUX/RINA for cross-border social security
@@ -20,6 +18,8 @@ references:
   - references/api.md
   - references/debugging.md
 ---
+
+# EESSI-EUX Skill
 
 ## Quick Reference
 

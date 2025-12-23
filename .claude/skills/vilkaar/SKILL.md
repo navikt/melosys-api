@@ -1,5 +1,3 @@
-# Vilkaar Skill
-
 ---
 skill: vilkaar
 description: Expert knowledge of vilkårsvurdering (requirements evaluation) for FTRL bestemmelser
@@ -20,6 +18,8 @@ references:
   - references/evaluation.md
   - references/debugging.md
 ---
+
+# Vilkaar Skill
 
 ## Quick Reference
 
