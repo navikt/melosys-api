@@ -2,7 +2,7 @@
 
 This document tracks the progress of Claude Code skills development for melosys-api.
 
-## Existing Skills (27)
+## Existing Skills (28)
 
 | # | Skill | Status | Description | References |
 |---|-------|--------|-------------|------------|
@@ -33,6 +33,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 | 25 | `statistikk` | Done | A1 statistics publishing to Kafka/DVH | debugging.md |
 | 26 | `trygdeavtaler` | Done | Bilateral social security agreements | debugging.md |
 | 27 | `eos-forordning` | Done | EU/EEA regulation 883/2004 and 987/2009 | debugging.md |
+| 28 | `kafka` | Done | Kafka event streaming patterns | debugging.md |
 
 ## Planned Skills
 
@@ -66,7 +67,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 
 | # | Skill | Priority | Status | Description | Key Areas |
 |---|-------|----------|--------|-------------|-----------|
-| 28 | `kafka` | MEDIUM | Pending | Event streaming patterns | Topics, producers, consumers, message schemas |
+| 28 | `kafka` | MEDIUM | **Done** | Event streaming patterns | Topics, producers, consumers, message schemas |
 | 29 | `testing` | MEDIUM | Pending | Testing patterns and strategies | Unit tests, integration tests (Testcontainers), ArchUnit |
 | 30 | `security` | LOW | Pending | Authentication and authorization | ABAC, Azure AD/OIDC, TokenX, STS |
 | 31 | `flyway-migration` | LOW | Pending | Database migration patterns | Versioning, rollback strategies, data migrations |
@@ -242,7 +243,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 - [x] eos-forordning (Dec 2024)
 
 ### Phase 4: Technical (As needed)
-- [ ] kafka
+- [x] kafka (Dec 2024)
 - [ ] testing
 - [ ] security
 - [ ] flyway-migration
