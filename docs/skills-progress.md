@@ -2,7 +2,7 @@
 
 This document tracks the progress of Claude Code skills development for melosys-api.
 
-## Existing Skills (22)
+## Existing Skills (23)
 
 | # | Skill | Status | Description | References |
 |---|-------|--------|-------------|------------|
@@ -28,6 +28,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 | 20 | `medlemskap` | Done | Membership determination (pliktig/frivillig) | types.md, periods.md, medl-sync.md, debugging.md |
 | 21 | `vilkaar` | Done | Requirements/conditions evaluation | structure.md, avklartefakta.md, evaluation.md, debugging.md |
 | 22 | `eessi-eux` | Done | EUX/RINA integration for EESSI | buc-types.md, sed-types.md, api.md, debugging.md |
+| 23 | `altinn-soknad` | Done | Altinn A1 application form processing | form-structure.md, mapping.md, debugging.md |
 
 ## Planned Skills
 
@@ -43,10 +44,10 @@ This document tracks the progress of Claude Code skills development for melosys-
 
 ### Priority 2: Integrations & External Systems
 
-| # | Skill | Priority | Description | Key Areas |
-|---|-------|----------|-------------|-----------|
+| # | Skill | Priority | Status | Description | Key Areas |
+|---|-------|----------|--------|-------------|-----------|
 | 22 | `eessi-eux` | HIGH | **Done** | EUX/RINA integration for EESSI | BUC lifecycle, SED sending/receiving, institusjonskatalog |
-| 23 | `altinn-soknad` | MEDIUM | Altinn form submissions and processing | soknad-altinn module, SoeknadMapper, form validation |
+| 23 | `altinn-soknad` | MEDIUM | **Done** | Altinn form submissions and processing | soknad-altinn module, SoeknadMapper, form validation |
 | 24 | `sigrun` | MEDIUM | Tax information from Skatteetaten | Income lookup, skattehendelser, skatteoppgjør |
 | 25 | `statistikk` | MEDIUM | Statistics/reporting to data warehouse | DVH topics, A1 EU statistics, Kafka publishing |
 
@@ -228,7 +229,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 
 ### Phase 2: Integrations (Target: Q2 2025)
 - [x] eessi-eux (Dec 2024)
-- [ ] altinn-soknad
+- [x] altinn-soknad (Dec 2024)
 - [ ] sigrun
 - [ ] statistikk
 
