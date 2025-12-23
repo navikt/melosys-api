@@ -2,7 +2,7 @@
 
 This document tracks the progress of Claude Code skills development for melosys-api.
 
-## Existing Skills (30)
+## Existing Skills (31)
 
 | # | Skill | Status | Description | References |
 |---|-------|--------|-------------|------------|
@@ -36,6 +36,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 | 28 | `kafka` | Done | Kafka event streaming patterns | debugging.md |
 | 29 | `testing` | Done | Testing patterns and strategies | debugging.md |
 | 30 | `security` | Done | Authentication and authorization | debugging.md |
+| 31 | `flyway-migration` | Done | Database migration patterns (Oracle) | debugging.md |
 
 ## Planned Skills
 
@@ -72,7 +73,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 | 28 | `kafka` | MEDIUM | **Done** | Event streaming patterns | Topics, producers, consumers, message schemas |
 | 29 | `testing` | MEDIUM | **Done** | Testing patterns and strategies | Unit tests, integration tests (Testcontainers), ArchUnit |
 | 30 | `security` | LOW | **Done** | Authentication and authorization | ABAC, Azure AD/OIDC, TokenX, STS |
-| 31 | `flyway-migration` | LOW | Pending | Database migration patterns | Versioning, rollback strategies, data migrations |
+| 31 | `flyway-migration` | LOW | **Done** | Database migration patterns | Versioning, rollback strategies, data migrations |
 | 32 | `frontend-api` | LOW | Pending | REST endpoint patterns | Controller patterns, DTOs, validation |
 
 ## Skill Detail Templates
@@ -248,7 +249,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 - [x] kafka (Dec 2024)
 - [x] testing (Dec 2024)
 - [x] security (Dec 2024)
-- [ ] flyway-migration
+- [x] flyway-migration (Dec 2024)
 - [ ] frontend-api
 
 ## Notes
