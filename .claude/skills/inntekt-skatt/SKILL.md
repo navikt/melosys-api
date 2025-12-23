@@ -1,15 +1,11 @@
 ---
-skill: inntekt-skatt
-description: Income lookup (Inntektskomponenten) and tax events (skattehendelser) integration
-triggers:
-  - inntekt
-  - income
-  - skattehendelser
-  - tax events
-  - skatteoppgjør
-  - Inntektskomponenten
-  - A-inntekt
-  - årsavregning inntekt
+name: inntekt-skatt
+description: |
+  Expert knowledge of income and tax integrations in melosys-api.
+  Use when: (1) Understanding Inntektskomponenten/A-inntekt lookups,
+  (2) Debugging skattehendelser Kafka processing,
+  (3) Understanding årsavregning triggered by skatteoppgjør,
+  (4) Investigating income data for trygdeavgift calculations.
 ---
 
 # Inntekt og Skatt Skill

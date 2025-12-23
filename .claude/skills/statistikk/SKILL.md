@@ -1,14 +1,11 @@
 ---
-skill: statistikk
-description: A1 certificate statistics publishing to Kafka for data warehouse (DVH)
-triggers:
-  - statistikk
-  - utstedt A1
-  - A1 statistics
-  - Kafka melding
-  - DVH
-  - data warehouse
-  - a1-utstedt topic
+name: statistikk
+description: |
+  Expert knowledge of A1 statistics publishing to data warehouse in melosys-api.
+  Use when: (1) Understanding utstedt A1 Kafka publishing,
+  (2) Debugging UtstedtA1Service or Kafka producer issues,
+  (3) Understanding DVH/data warehouse integration,
+  (4) Investigating A1 statistics message format and schema.
 ---
 
 # Statistikk Skill

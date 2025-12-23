@@ -1,22 +1,12 @@
 ---
-skill: eessi-eux
-description: Expert knowledge of EESSI integration via EUX/RINA for cross-border social security
-triggers:
-  - eessi
-  - eux
-  - rina
-  - buc
-  - sed
-  - electronic exchange
-  - social security exchange
-  - a001
-  - a003
-  - la_buc
-references:
-  - references/buc-types.md
-  - references/sed-types.md
-  - references/api.md
-  - references/debugging.md
+name: eessi-eux
+description: |
+  Expert knowledge of EESSI integration via EUX/RINA in melosys-api.
+  Use when: (1) Understanding BUC lifecycle and SED exchange,
+  (2) Debugging SED sending/receiving (A001, A003, A005, etc.),
+  (3) Understanding LA_BUC types and their purposes,
+  (4) Investigating EUX API errors or RINA synchronization,
+  (5) Understanding institution catalog lookup.
 ---
 
 # EESSI-EUX Skill

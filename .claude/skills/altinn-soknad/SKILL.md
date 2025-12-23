@@ -1,14 +1,12 @@
 ---
-skill: altinn-soknad
-description: Altinn A1 application form processing for posted workers (utsendte arbeidstakere)
-triggers:
-  - altinn søknad
-  - altinn skjema
-  - elektronisk søknad
-  - MedlemskapArbeidEOS
-  - SoeknadMapper
-  - posted workers application
-  - utsendt arbeidstaker søknad
+name: altinn-soknad
+description: |
+  Expert knowledge of Altinn A1 application processing for posted workers in melosys-api.
+  Use when: (1) Understanding Altinn søknad/skjema processing,
+  (2) Debugging MedlemskapArbeidEOS form mapping,
+  (3) Understanding SoeknadMapper transformations,
+  (4) Investigating posted worker application issues,
+  (5) Understanding the MOTTA_SOKNAD_ALTINN saga flow.
 ---
 
 # Altinn Søknad Skill

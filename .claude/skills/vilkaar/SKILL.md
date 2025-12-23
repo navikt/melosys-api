@@ -1,22 +1,11 @@
 ---
-skill: vilkaar
-description: Expert knowledge of vilkårsvurdering (requirements evaluation) for FTRL bestemmelser
-triggers:
-  - vilkår
-  - vilkaar
-  - inngangsvilkår
-  - avklarte fakta
-  - avklartefakta
-  - begrunnelse
-  - oppfylt
-  - requirements
-  - conditions
-  - eligibility
-references:
-  - references/structure.md
-  - references/avklartefakta.md
-  - references/evaluation.md
-  - references/debugging.md
+name: vilkaar
+description: |
+  Expert knowledge of vilkårsvurdering (requirements evaluation) in melosys-api.
+  Use when: (1) Understanding inngangsvilkår structure for FTRL bestemmelser,
+  (2) Debugging vilkårsvurdering results or oppfylt status,
+  (3) Understanding avklartefakta collection,
+  (4) Investigating why a vilkår fails or begrunnelse generation.
 ---
 
 # Vilkaar Skill
