@@ -2,7 +2,7 @@
 
 This document tracks the progress of Claude Code skills development for melosys-api.
 
-## Existing Skills (25)
+## Existing Skills (26)
 
 | # | Skill | Status | Description | References |
 |---|-------|--------|-------------|------------|
@@ -31,6 +31,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 | 23 | `altinn-soknad` | Done | Altinn A1 application form processing | form-structure.md, mapping.md, debugging.md |
 | 24 | `inntekt-skatt` | Done | Income lookup and tax events integration | debugging.md |
 | 25 | `statistikk` | Done | A1 statistics publishing to Kafka/DVH | debugging.md |
+| 26 | `trygdeavtaler` | Done | Bilateral social security agreements | debugging.md |
 
 ## Planned Skills
 
@@ -55,20 +56,20 @@ This document tracks the progress of Claude Code skills development for melosys-
 
 ### Priority 3: Agreements & Regulations
 
-| # | Skill | Priority | Description | Key Areas |
-|---|-------|----------|-------------|-----------|
-| 26 | `trygdeavtaler` | MEDIUM | Bilateral social security agreements | UK, Canada, Australia, USA, EFTA conventions, attestations |
-| 27 | `eos-forordning` | MEDIUM | EU/EEA regulation 883/2004 and 987/2009 | Articles, personal scope, coordination rules |
+| # | Skill | Priority | Status | Description | Key Areas |
+|---|-------|----------|--------|-------------|-----------|
+| 26 | `trygdeavtaler` | MEDIUM | **Done** | Bilateral social security agreements | AU, CA, GB, US, and 15 other countries |
+| 27 | `eos-forordning` | MEDIUM | Pending | EU/EEA regulation 883/2004 and 987/2009 | Articles, personal scope, coordination rules |
 
 ### Priority 4: Technical Infrastructure
 
-| # | Skill | Priority | Description | Key Areas |
-|---|-------|----------|-------------|-----------|
-| 28 | `kafka` | MEDIUM | Event streaming patterns | Topics, producers, consumers, message schemas |
-| 29 | `testing` | MEDIUM | Testing patterns and strategies | Unit tests, integration tests (Testcontainers), ArchUnit |
-| 30 | `security` | LOW | Authentication and authorization | ABAC, Azure AD/OIDC, TokenX, STS |
-| 31 | `flyway-migration` | LOW | Database migration patterns | Versioning, rollback strategies, data migrations |
-| 32 | `frontend-api` | LOW | REST endpoint patterns | Controller patterns, DTOs, validation |
+| # | Skill | Priority | Status | Description | Key Areas |
+|---|-------|----------|--------|-------------|-----------|
+| 28 | `kafka` | MEDIUM | Pending | Event streaming patterns | Topics, producers, consumers, message schemas |
+| 29 | `testing` | MEDIUM | Pending | Testing patterns and strategies | Unit tests, integration tests (Testcontainers), ArchUnit |
+| 30 | `security` | LOW | Pending | Authentication and authorization | ABAC, Azure AD/OIDC, TokenX, STS |
+| 31 | `flyway-migration` | LOW | Pending | Database migration patterns | Versioning, rollback strategies, data migrations |
+| 32 | `frontend-api` | LOW | Pending | REST endpoint patterns | Controller patterns, DTOs, validation |
 
 ## Skill Detail Templates
 
@@ -236,7 +237,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 - [x] statistikk (Dec 2024)
 
 ### Phase 3: Agreements (Target: Q3 2025)
-- [ ] trygdeavtaler
+- [x] trygdeavtaler (Dec 2024)
 - [ ] eos-forordning
 
 ### Phase 4: Technical (As needed)
