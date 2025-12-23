@@ -78,6 +78,7 @@ EESSI (Electronic Exchange of Social Security Information) is the EU system for 
 ### BUC Types (Business Use Cases)
 
 **LA_BUC** - Lovvalg (Applicable Legislation):
+
 | BUC | Purpose | Initiating SED |
 |-----|---------|----------------|
 | LA_BUC_01 | Art. 16 - Exception agreements | A001 |
@@ -93,6 +94,7 @@ Various H_BUC types for health benefit coordination.
 ### SED Types (Structured Electronic Documents)
 
 **A-series** (Applicable Legislation):
+
 | SED | Purpose |
 |-----|---------|
 | A001 | Request for exception (Art. 16) |
@@ -104,6 +106,7 @@ Various H_BUC types for health benefit coordination.
 | A012 | Confirmation of applicable legislation |
 
 **X-series** (Administrative):
+
 | SED | Purpose |
 |-----|---------|
 | X001 | Request for information |
