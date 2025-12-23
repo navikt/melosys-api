@@ -2,7 +2,7 @@
 
 This document tracks the progress of Claude Code skills development for melosys-api.
 
-## Existing Skills (24)
+## Existing Skills (25)
 
 | # | Skill | Status | Description | References |
 |---|-------|--------|-------------|------------|
@@ -30,6 +30,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 | 22 | `eessi-eux` | Done | EUX/RINA integration for EESSI | buc-types.md, sed-types.md, api.md, debugging.md |
 | 23 | `altinn-soknad` | Done | Altinn A1 application form processing | form-structure.md, mapping.md, debugging.md |
 | 24 | `inntekt-skatt` | Done | Income lookup and tax events integration | debugging.md |
+| 25 | `statistikk` | Done | A1 statistics publishing to Kafka/DVH | debugging.md |
 
 ## Planned Skills
 
@@ -50,7 +51,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 | 22 | `eessi-eux` | HIGH | **Done** | EUX/RINA integration for EESSI | BUC lifecycle, SED sending/receiving, institusjonskatalog |
 | 23 | `altinn-soknad` | MEDIUM | **Done** | Altinn form submissions and processing | soknad-altinn module, SoeknadMapper, form validation |
 | 24 | `inntekt-skatt` | MEDIUM | **Done** | Income lookup and tax events | Inntektskomponenten, skattehendelser, årsavregning |
-| 25 | `statistikk` | MEDIUM | Statistics/reporting to data warehouse | DVH topics, A1 EU statistics, Kafka publishing |
+| 25 | `statistikk` | MEDIUM | **Done** | A1 statistics publishing to Kafka | UtstedtA1Service, Kafka producer, DVH |
 
 ### Priority 3: Agreements & Regulations
 
@@ -232,7 +233,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 - [x] eessi-eux (Dec 2024)
 - [x] altinn-soknad (Dec 2024)
 - [x] inntekt-skatt (Dec 2024)
-- [ ] statistikk
+- [x] statistikk (Dec 2024)
 
 ### Phase 3: Agreements (Target: Q3 2025)
 - [ ] trygdeavtaler
