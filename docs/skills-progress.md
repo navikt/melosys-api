@@ -250,11 +250,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 
 ### Skill Structure Standard
 
-Each skill should have:
-1. `SKILL.md` - Main skill file with YAML frontmatter and quick reference
-2. `references/` directory with detailed documentation:
-   - `debugging.md` - SQL queries, common issues, troubleshooting
-   - Domain-specific reference files (e.g., `api.md`, `enums.md`, `flows.md`)
+We have a skill-creator skill with guidelines for creating new skills. Use this
 
 ### Creation Guidelines
 
