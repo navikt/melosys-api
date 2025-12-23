@@ -2,7 +2,7 @@
 
 This document tracks the progress of Claude Code skills development for melosys-api.
 
-## Existing Skills (31)
+## Existing Skills (32)
 
 | # | Skill | Status | Description | References |
 |---|-------|--------|-------------|------------|
@@ -37,6 +37,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 | 29 | `testing` | Done | Testing patterns and strategies | debugging.md |
 | 30 | `security` | Done | Authentication and authorization | debugging.md |
 | 31 | `flyway-migration` | Done | Database migration patterns (Oracle) | debugging.md |
+| 32 | `frontend-api` | Done | REST endpoint patterns | debugging.md |
 
 ## Planned Skills
 
@@ -74,7 +75,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 | 29 | `testing` | MEDIUM | **Done** | Testing patterns and strategies | Unit tests, integration tests (Testcontainers), ArchUnit |
 | 30 | `security` | LOW | **Done** | Authentication and authorization | ABAC, Azure AD/OIDC, TokenX, STS |
 | 31 | `flyway-migration` | LOW | **Done** | Database migration patterns | Versioning, rollback strategies, data migrations |
-| 32 | `frontend-api` | LOW | Pending | REST endpoint patterns | Controller patterns, DTOs, validation |
+| 32 | `frontend-api` | LOW | **Done** | REST endpoint patterns | Controller patterns, DTOs, validation |
 
 ## Skill Detail Templates
 
@@ -250,7 +251,7 @@ This document tracks the progress of Claude Code skills development for melosys-
 - [x] testing (Dec 2024)
 - [x] security (Dec 2024)
 - [x] flyway-migration (Dec 2024)
-- [ ] frontend-api
+- [x] frontend-api (Dec 2024)
 
 ## Notes
 
