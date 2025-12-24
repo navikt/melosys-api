@@ -50,9 +50,9 @@ class SaksopplysningEventListenerTest {
     }
 
     @Test
-    fun `lagrePersonopplysninger skal lagre personopplysning med familie når behandling er iverksatt med familie`() {
+    fun `lagrePersonopplysninger skal lagre personopplysning med familie når behandling er avsluttet med familie`() {
         val behandling = SaksbehandlingDataFactory.lagBehandling()
-        behandling.status = Behandlingsstatus.IVERKSETTER_VEDTAK
+        behandling.status = Behandlingsstatus.AVSLUTTET
 
         every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
         every { avklartefaktaService.hentAvklarteMedfølgendeBarn(any()) } returns ingenMedfolgendeFamilie()
@@ -64,7 +64,7 @@ class SaksopplysningEventListenerTest {
         every { saksopplysningerService.lagrePersonopplysninger(any(), any()) } returns Unit
         every { saksopplysningerService.lagrePersonMedHistorikk(any(), any()) } returns Unit
 
-        val event = BehandlingEndretStatusEvent(Behandlingsstatus.IVERKSETTER_VEDTAK, behandling)
+        val event = BehandlingEndretStatusEvent(Behandlingsstatus.AVSLUTTET, behandling)
         saksoppplysningEventListener.lagrePersonopplysninger(event)
 
         verify { persondataFasade.hentPerson(any(), eq(Informasjonsbehov.MED_FAMILIERELASJONER)) }
@@ -73,9 +73,9 @@ class SaksopplysningEventListenerTest {
     }
 
     @Test
-    fun `lagrePersonopplysninger skal lagre personopplysning uten familie når behandling er iverksatt uten familie`() {
+    fun `lagrePersonopplysninger skal lagre personopplysning uten familie når behandling er avsluttet uten familie`() {
         val behandling = SaksbehandlingDataFactory.lagBehandling()
-        behandling.status = Behandlingsstatus.IVERKSETTER_VEDTAK
+        behandling.status = Behandlingsstatus.AVSLUTTET
 
         every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
         every { avklartefaktaService.hentAvklarteMedfølgendeBarn(any()) } returns ingenMedfolgendeFamilie()
@@ -87,7 +87,7 @@ class SaksopplysningEventListenerTest {
         every { saksopplysningerService.lagrePersonopplysninger(any(), any()) } returns Unit
         every { saksopplysningerService.lagrePersonMedHistorikk(any(), any()) } returns Unit
 
-        val event = BehandlingEndretStatusEvent(Behandlingsstatus.IVERKSETTER_VEDTAK, behandling)
+        val event = BehandlingEndretStatusEvent(Behandlingsstatus.AVSLUTTET, behandling)
         saksoppplysningEventListener.lagrePersonopplysninger(event)
 
         verify { persondataFasade.hentPerson(any()) }
@@ -113,10 +113,10 @@ class SaksopplysningEventListenerTest {
     @Test
     fun `lagrePersonopplysning skal ikke lagre opplysninger når hovedpart er virksomhet`() {
         val behandling = SaksbehandlingDataFactory.lagBehandling().apply {
-            status = Behandlingsstatus.IVERKSETTER_VEDTAK
+            status = Behandlingsstatus.AVSLUTTET
             fagsak = Fagsak.forTest { medVirksomhet() }
         }
-        val event = BehandlingEndretStatusEvent(Behandlingsstatus.IVERKSETTER_VEDTAK, behandling)
+        val event = BehandlingEndretStatusEvent(Behandlingsstatus.AVSLUTTET, behandling)
         every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
 
         saksoppplysningEventListener.lagrePersonopplysninger(event)
