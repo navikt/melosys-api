@@ -40,7 +40,8 @@ public class SaksoppplysningEventListener {
     @Transactional
     public void lagrePersonopplysninger(BehandlingEndretStatusEvent event) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(event.getBehandling().getId());
-        if (List.of(Behandlingsstatus.AVSLUTTET, Behandlingsstatus.IVERKSETTER_VEDTAK, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING).contains(event.getBehandlingsstatus())
+        // Note: IVERKSETTER_VEDTAK is now handled by LagrePersonopplysninger saga step to avoid race condition
+        if (List.of(Behandlingsstatus.AVSLUTTET, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING).contains(event.getBehandlingsstatus())
             && behandling.getFagsak().getHovedpartRolle() == Aktoersroller.BRUKER
         ) {
             if (behandling.manglerSaksopplysningerAvType(List.of(SaksopplysningType.PDL_PERSOPL))) {
