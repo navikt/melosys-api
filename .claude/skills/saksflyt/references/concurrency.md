@@ -5,8 +5,9 @@
 2. [LåsReferanse Mechanism](#låsreferanse-mechanism)
 3. [Waiting and Release](#waiting-and-release)
 4. [Race Condition Scenarios](#race-condition-scenarios)
-5. [Known Vulnerabilities](#known-vulnerabilities)
-6. [Debugging Concurrency Issues](#debugging-concurrency-issues)
+5. [Entity-Level Race Conditions](#entity-level-race-conditions)
+6. [Known Vulnerabilities](#known-vulnerabilities)
+7. [Debugging Concurrency Issues](#debugging-concurrency-issues)
 
 ## Overview
 
@@ -167,6 +168,125 @@ T5                                  Save: status=KLAR
 T6                                  Start saga
 T7      Both now have same group active!
 ```
+
+## Entity-Level Race Conditions
+
+Beyond saga ordering, concurrent transactions can cause race conditions at the JPA entity level.
+This section documents a critical issue discovered in December 2025 and its fix.
+
+### The Behandlingsresultat.type Overwrite Bug
+
+**Issue**: MELOSYS-7718
+
+**Symptom**: After fattVedtak set `behandlingsresultat.type = MEDLEM_I_FOLKETRYGDEN`, the value
+would sometimes revert to `IKKE_FASTSATT` moments later.
+
+**Root Cause**: JPA dirty checking flushes ALL columns when an entity is modified:
+
+```
+Time    Thread A (Original saga)           Thread B (Nyvurdering fattVedtak)
+────────────────────────────────────────────────────────────────────────────────
+T1      Load BR for nyvurdering
+        (type=IKKE_FASTSATT)
+T2                                         Load BR, set type=MEDLEM
+T3                                         saveAndFlush() - commits
+T4      Modify lovvalgsperioder
+T5      Commit TX - JPA flushes
+        ALL columns including
+        stale type=IKKE_FASTSATT           ← Type overwritten!
+```
+
+The issue occurred in `OpprettFakturaserie` saga step which loads Behandlingsresultat for
+OTHER behandlinger on the same fagsak:
+
+```kotlin
+// OpprettFakturaserie.kt - problematic code path
+behandling.fagsak.behandlinger
+    .filter { it.id != behandling.id }
+    .all { behandlingsresultatService.hentBehandlingsresultat(it.id)
+           .trygdeavgiftsperioder.all { ... } }
+```
+
+When the original behandling's saga loaded the nyvurdering's Behandlingsresultat (to check
+trygdeavgiftsperioder), it created a managed entity in Thread A's persistence context. Even
+though Thread A only READ the entity, if ANY modification happened in that transaction,
+JPA would flush ALL managed entities including the nyvurdering's BR with stale values.
+
+### The Fix: @DynamicUpdate
+
+**Solution**: Add `@DynamicUpdate` annotation to `Behandlingsresultat` entity:
+
+```kotlin
+@Entity
+@Table(name = "behandlingsresultat")
+@DynamicUpdate  // Only include changed columns in UPDATE statements
+@EntityListeners(AuditingEntityListener::class)
+open class Behandlingsresultat : RegistreringsInfo() {
+```
+
+**How it works**:
+
+Without `@DynamicUpdate`:
+```sql
+UPDATE behandlingsresultat
+SET resultat_type = 'IKKE_FASTSATT',  -- Stale value!
+    behandlingsmaate = ?,
+    begrunnelse_fritekst = ?,
+    -- ... all 50+ columns
+WHERE behandling_id = ?
+```
+
+With `@DynamicUpdate`:
+```sql
+UPDATE behandlingsresultat
+SET lovvalgsperiode_fom = ?  -- Only the column that actually changed
+WHERE behandling_id = ?
+```
+
+Thread A never modified `resultat_type`, so it's not included in the UPDATE, and Thread B's
+change is preserved.
+
+### When to Use @DynamicUpdate
+
+Consider adding `@DynamicUpdate` to entities that:
+1. Have many columns (higher chance of concurrent modifications to different fields)
+2. Are accessed by multiple saga steps or services
+3. Are frequently loaded for read operations alongside write operations
+
+**Current entities with @DynamicUpdate**:
+- `Behandlingsresultat` - Critical entity modified by many services
+
+### Investigation Approach Used
+
+1. **Add debug logging** to trace entity state at key points:
+   ```kotlin
+   log.info("Before saveAndFlush - type=${entity.type}")
+   val saved = repository.saveAndFlush(entity)
+   log.info("After saveAndFlush - type=${saved.type}")
+   ```
+
+2. **Add logging in saga steps** to see what they observe:
+   ```java
+   log.info("SAGA_DEBUG: {} sees type = {}", stepName, entity.getType());
+   ```
+
+3. **Deploy with logging** and run E2E tests multiple times to capture the race
+
+4. **Download and analyze logs** from GitHub Actions artifacts:
+   ```bash
+   gh run download <run-id> -n test-summary -D /tmp/artifacts
+   grep -r "SAGA_DEBUG" /tmp/artifacts/
+   ```
+
+5. **Look for discrepancy pattern**:
+   - saveAndFlush logs correct value
+   - Saga step moments later sees different value
+   - This indicates another transaction committed a stale entity
+
+### Related Documentation
+
+- Full investigation details: `docs/race-condition-investigation-and-fix.md`
+- Integration test: `integrasjonstest/src/test/kotlin/no/nav/melosys/itest/vedtak/VedtakRaceConditionIT.kt`
 
 ## Known Vulnerabilities
 
