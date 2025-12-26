@@ -7,9 +7,9 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.behandling
 import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -47,21 +47,20 @@ class ManglendeFakturabetalingConsumerTest {
 
     @Test
     fun `opprett prosess for varselbrev om manglende innbetaling når alle lovvalgsperioder er pliktige`() {
-        val behandling = Behandling.forTest {
-            id = 123
-            fagsak {
-                type = Sakstyper.EU_EOS
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-            }
-        }
-
-        val lovvalgsperiode = mockk<Lovvalgsperiode>()
+        val lovvalgsperiode = mockk<Lovvalgsperiode>(relaxed = true)
         every { lovvalgsperiode.erPliktigMedlemskap() } returns true
 
-        val behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = behandling
-            this.lovvalgsperioder = mutableSetOf(lovvalgsperiode)
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
+                id = 123
+                fagsak {
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                }
+            }
+            lovvalgsperioder.add(lovvalgsperiode)
         }
+        val behandling = behandlingsresultat.behandling
 
         val melding = ManglendeFakturabetalingMelding(
             fakturaserieReferanse = FAKTURASERIE_REFERANSE,
@@ -93,20 +92,19 @@ class ManglendeFakturabetalingConsumerTest {
     @Test
     fun `opprett prosess for varselbrev om manglende innbetaling når alle medlemskapsperioder er pliktige`() {
         // Given
-        val behandling = Behandling.forTest {
-            id = 123
-            fagsak {
-                type = Sakstyper.FTRL
-            }
-        }
-
-        val medlemskapsperiode = mockk<Medlemskapsperiode>()
+        val medlemskapsperiode = mockk<Medlemskapsperiode>(relaxed = true)
         every { medlemskapsperiode.erPliktigMedlemskap() } returns true
 
-        val behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = behandling
-            this.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
+                id = 123
+                fagsak {
+                    type = Sakstyper.FTRL
+                }
+            }
+            medlemskapsperioder.add(medlemskapsperiode)
         }
+        val behandling = behandlingsresultat.behandling
 
         val melding = ManglendeFakturabetalingMelding(
             fakturaserieReferanse = FAKTURASERIE_REFERANSE,
@@ -138,18 +136,17 @@ class ManglendeFakturabetalingConsumerTest {
     @Test
     fun `opprett prosess for varselbrev om manglende innbetaling når det er eøs pensjonist`() {
         // Given
-        val behandling = Behandling.forTest {
-            id = 123
-            tema = Behandlingstema.PENSJONIST
-            fagsak = Fagsak.forTest {
-                type = Sakstyper.EU_EOS
-                tema = Sakstemaer.TRYGDEAVGIFT
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
+                id = 123
+                tema = Behandlingstema.PENSJONIST
+                fagsak {
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                }
             }
         }
-
-        val behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = behandling
-        }
+        val behandling = behandlingsresultat.behandling
 
         val melding = ManglendeFakturabetalingMelding(
             fakturaserieReferanse = FAKTURASERIE_REFERANSE,
@@ -182,16 +179,14 @@ class ManglendeFakturabetalingConsumerTest {
     @Test
     fun `opprett prosess for manglende innbetaling behandling, frivillig medlemskap`() {
         // Given
-        val behandling = Behandling.forTest {
-            id = 123
-        }
-
-        val medlemskapsperiode = mockk<Medlemskapsperiode>()
+        val medlemskapsperiode = mockk<Medlemskapsperiode>(relaxed = true)
         every { medlemskapsperiode.erPliktigMedlemskap() } returns false
 
-        val behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = behandling
-            this.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
+                id = 123
+            }
+            medlemskapsperioder.add(medlemskapsperiode)
         }
 
         val melding = ManglendeFakturabetalingMelding(

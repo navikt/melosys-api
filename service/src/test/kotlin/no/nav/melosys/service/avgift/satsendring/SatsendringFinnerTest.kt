@@ -7,6 +7,7 @@ import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.forTest
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -215,10 +216,10 @@ class SatsendringFinnerTest {
         }
         val behandlingMedSatsendring = fagsak.behandlinger[0]
 
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
+            medlemskapsperioder.add(medlemskapsperiodeForTest().apply {
                 trygdeavgiftsperioder = setOf(
                     lagTrygdeavgiftsperiode(id = 1, sats = OPPRINNELIG_SATS, år = 2023),
                     lagTrygdeavgiftsperiode(id = 2, sats = OPPRINNELIG_SATS, år = 2024)
@@ -582,10 +583,10 @@ class SatsendringFinnerTest {
     }
 
     private fun lagBehandlingsresultat(id: Long, trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>) =
-        Behandlingsresultat().apply {
+        Behandlingsresultat.forTest {
             this.id = id
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
+            medlemskapsperioder.add(medlemskapsperiodeForTest().apply {
                 this.trygdeavgiftsperioder = trygdeavgiftsperioder.toMutableSet()
             })
         }
@@ -603,13 +604,14 @@ class SatsendringFinnerTest {
         mockHentBehandling(fagsak.behandlinger)
     }
 
-    private fun lagTrygdeavgiftsperiode(sats: Double, år: Int = 2023, id: Long? = 1L): Trygdeavgiftsperiode = Trygdeavgiftsperiode(
-        id = id,
-        periodeFra = LocalDate.of(år, 1, 1),
-        periodeTil = LocalDate.of(år, 12, 31),
-        trygdeavgiftsbeløpMd = Penger(sats * 1000),
-        trygdesats = BigDecimal.valueOf(sats)
-    )
+    private fun lagTrygdeavgiftsperiode(sats: Double, år: Int = 2023, id: Long? = 1L): Trygdeavgiftsperiode =
+        Trygdeavgiftsperiode.forTest {
+            this.id = id
+            periodeFra = LocalDate.of(år, 1, 1)
+            periodeTil = LocalDate.of(år, 12, 31)
+            trygdeavgiftsbeløpMd = BigDecimal.valueOf(sats * 1000)
+            trygdesats = BigDecimal.valueOf(sats)
+        }
 
     companion object {
         const val OPPRINNELIG_SATS = 5.9
