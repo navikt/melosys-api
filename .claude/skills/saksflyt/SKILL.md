@@ -4,9 +4,10 @@ description: |
   Expert knowledge of the saksflyt saga pattern implementation in melosys-api.
   Use when: (1) Debugging or modifying process flows (Prosessinstans, ProsessType, ProsessSteg),
   (2) Understanding async step execution and locking mechanisms (låsReferanse),
-  (3) Investigating race conditions or concurrency issues in saksflyt,
-  (4) Adding new process types or steps, (5) Understanding how MEDL updates, SED handling,
-  or other multi-step operations are orchestrated.
+  (3) Investigating race conditions, OptimisticLockingException, or entity overwrites,
+  (4) Moving event listeners to saga steps to avoid sync/async conflicts,
+  (5) Adding new process types or steps,
+  (6) Deciding whether to use @DynamicUpdate on entities.
 ---
 
 # Saksflyt Saga Pattern
@@ -88,9 +89,21 @@ public class MyStep implements StegBehandler {
 4. **Complete/Fail**: Status set to FERDIG or FEILET, `ProsessinstansFerdigEvent` published
 5. **Release**: `ProsessinstansFerdigListener` starts next waiting saga with same lock group
 
+## Common Pitfalls
+
+The sync/async split at transaction boundaries causes race conditions. Key issues:
+
+| Issue | Symptom | Solution |
+|-------|---------|----------|
+| Event listener + saga conflict | `OptimisticLockingException` | Move listener to saga step |
+| Entity loaded across TX | Silent data corruption | Add `@DynamicUpdate` to entity |
+
+**See [Anti-Patterns](references/anti-patterns.md)** for detailed patterns and decision framework.
+
 ## Detailed Documentation
 
 - **[Architecture](references/architecture.md)**: Deep dive into component interactions
 - **[Flow Definitions](references/flow-definitions.md)**: All process types and their steps
-- **[Concurrency Control](references/concurrency.md)**: Locking mechanism and race condition handling
+- **[Concurrency Control](references/concurrency.md)**: Locking mechanism, låsReferanse, and entity-level race conditions
+- **[Anti-Patterns](references/anti-patterns.md)**: Sync/async race conditions and how to avoid them
 - **[Common Patterns](references/patterns.md)**: Debugging, adding steps, error handling
