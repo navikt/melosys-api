@@ -13,6 +13,7 @@ Type-safe Kotlin DSL for creating test data with sensible defaults and nested en
 - [@MelosysTestDsl Annotation](#melosystestdsl-annotation)
 - [Key Imports](#key-imports)
 - [Standalone Functions](#standalone-functions)
+- [Anti-Patterns](#anti-patterns)
 
 ## Core Pattern
 
@@ -395,3 +396,57 @@ object TrygdeavgiftsperiodeTestFactory {
     val TRYGDESATS = BigDecimal("6.8")
 }
 ```
+
+## Anti-Patterns
+
+### Mocking Domain Entities
+
+**Don't mock domain entities when forTest DSL can create real objects.**
+
+```kotlin
+// BAD: Mocking domain entity to control behavior
+val behandlingsresultatMock = mockk<Behandlingsresultat>()
+every { behandlingsresultatMock.behandling } returns behandling
+every { behandlingsresultatMock.finnAvgiftspliktigPerioder() } returns emptyList()
+every { behandlingsresultatMock.utledAvgiftspliktigperioderFom() } returns null
+
+// GOOD: Create real object that naturally produces the behavior
+val behandlingsresultat = Behandlingsresultat.forTest {
+    behandling { status = Behandlingsstatus.OPPRETTET }
+    // No medlemskapsperioder → finnAvgiftspliktigPerioder() returns empty
+    // No innvilget perioder → utledAvgiftspliktigperioderFom() returns null
+}
+```
+
+**Why real objects are better:**
+- Tests verify actual entity behavior, not mock assumptions
+- Mocks can create impossible states (e.g., empty periods but non-null fom)
+- Real objects catch regressions when entity logic changes
+- Cleaner, more readable test code
+
+**When mocks are still appropriate:**
+- External services (repositories, clients, APIs)
+- Complex dependencies with side effects
+- When you need to verify interactions (verify calls)
+
+### Testing Edge Cases
+
+To test edge cases like null dates, update the factory to support nullable fields:
+
+```kotlin
+// MedlemskapsperiodeTestFactory supports nullable fom/tom
+val behandlingsresultat = Behandlingsresultat.forTest {
+    behandling { }
+    medlemskapsperiode {
+        fom = null  // Tests what happens when fom is null
+        tom = LocalDate.now()
+    }
+}
+```
+
+### Mutable Object Creation
+
+See the main testing skill for patterns to avoid:
+- `Entity().apply { }` patterns
+- `lateinit var` for domain entities
+- Post-construction mutation
