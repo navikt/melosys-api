@@ -7,7 +7,8 @@ description: |
   (3) Understanding the test base classes and hierarchy,
   (4) Using ArchUnit for architecture tests,
   (5) Configuring embedded Kafka for testing,
-  (6) Understanding mock patterns and test utilities.
+  (6) Understanding mock patterns and test utilities,
+  (7) Creating test data with the forTest DSL.
 ---
 
 # Testing Skill
@@ -310,6 +311,55 @@ val fagsak = e2eTestDataService.opprettFagsak(
 )
 ```
 
+## forTest DSL
+
+Type-safe Kotlin DSL for creating test data with sensible defaults and nested entity support.
+
+**Full reference**: See [references/fortest-dsl.md](references/fortest-dsl.md)
+
+### Quick Examples
+
+```kotlin
+// Simple entity
+val fagsak = Fagsak.forTest {
+    tema = Sakstemaer.TRYGDEAVGIFT
+    type = Sakstyper.FTRL
+}
+
+// Nested entities
+val behandling = Behandling.forTest {
+    fagsak {
+        medBruker()
+        medVirksomhet()
+    }
+    mottatteOpplysninger {
+        type = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
+        soeknad { landkoder("BE", "NL") }
+    }
+}
+
+// Complex hierarchy
+val behandlingsresultat = Behandlingsresultat.forTest {
+    behandling { fagsak { type = Sakstyper.FTRL } }
+    medlemskapsperiode {
+        fom = LocalDate.of(2023, 1, 1)
+        tom = LocalDate.of(2023, 12, 31)
+        trygdeavgiftsperiode { trygdesats = 6.8.toBigDecimal() }
+    }
+}
+```
+
+### Available Factories
+
+| Entity | Factory |
+|--------|---------|
+| `Fagsak` | `FagsakTestFactory` |
+| `Behandling` | `BehandlingTestFactory` |
+| `Behandlingsresultat` | `BehandlingsresultatTestFactory` |
+| `Medlemskapsperiode` | `MedlemskapsperiodeTestFactory` |
+| `Trygdeavgiftsperiode` | `TrygdeavgiftsperiodeTestFactory` |
+| `Prosessinstans` | `ProsessinstansTestFactory` |
+
 ### KafkaOffsetChecker
 
 ```kotlin
@@ -337,22 +387,17 @@ melosys:
 
 ## Debugging Tests
 
-### Run Single Test
+**Full reference**: See [references/debugging.md](references/debugging.md)
 
+Quick commands:
 ```bash
+# Single test
 ~/.claude/scripts/run-tests.sh -pl service -Dtest=MyServiceTest#testMethodName
-```
 
-### Debug Mode
+# Debug mode (attach debugger to port 5005)
+mvn -pl service test -Dtest=MyTest -Dmaven.surefire.debug
 
-```bash
-mvn -pl integrasjonstest test -Dtest=MyIT -Dmaven.surefire.debug
-# Then attach debugger to port 5005
-```
-
-### View Full Logs
-
-```bash
+# View full logs
 cat /tmp/mvn.log
 ```
 
