@@ -4,12 +4,9 @@ import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
@@ -89,17 +86,14 @@ class TrygdeavgiftsberegningValidatorTest {
 
         @Test
         fun shouldThrowFunksjonellExceptionWhenAvgiftspliktigperioderIsEmpty() {
-            val behandlingsresultatMock = mockk<Behandlingsresultat>()
-            val behandling = Behandling.forTest {
-                status = Behandlingsstatus.OPPRETTET
-                fagsak {
-                    type = Sakstyper.FTRL
+            // Behandlingsresultat uten medlemskapsperioder gir tom finnAvgiftspliktigPerioder()
+            val behandlingsresultat = Behandlingsresultat.forTest {
+                behandling {
+                    status = Behandlingsstatus.OPPRETTET
+                    fagsak { type = Sakstyper.FTRL }
                 }
+                årsavregning { }
             }
-            every { behandlingsresultatMock.behandling } returns behandling
-            every { behandlingsresultatMock.hentBehandling() } returns behandling
-            every { behandlingsresultatMock.finnAvgiftspliktigPerioder() } returns listOf()
-            every { behandlingsresultatMock.utledAvgiftspliktigperioderFom() } returns LocalDate.now()
 
             val skatteforholdsPerioder = listOf(
                 skatteforholdForTest {
@@ -111,7 +105,7 @@ class TrygdeavgiftsberegningValidatorTest {
 
             shouldThrow<FunksjonellException> {
                 TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
-                    behandlingsresultatMock,
+                    behandlingsresultat,
                     skatteforholdsPerioder,
                     emptyList(),
                     unleash
@@ -195,22 +189,18 @@ class TrygdeavgiftsberegningValidatorTest {
 
         @Test
         fun shouldThrowFunksjonellExceptionWhenUtledAvgiftspliktigperiodeFomIsNull() {
-            val behandlingsresultatMock = mockk<Behandlingsresultat>()
-            val behandling = Behandling.forTest {
-                status = Behandlingsstatus.OPPRETTET
-                fagsak {
-                    type = Sakstyper.FTRL
+            // Medlemskapsperiode med fom = null gir utledAvgiftspliktigperioderFom() = null
+            val behandlingsresultat = Behandlingsresultat.forTest {
+                behandling {
+                    status = Behandlingsstatus.OPPRETTET
+                    fagsak { type = Sakstyper.FTRL }
                 }
+                medlemskapsperiode {
+                    fom = null
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                }
+                årsavregning { }
             }
-            val medlemskap = medlemskapsperiodeForTest {
-                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
-            }
-            every { behandlingsresultatMock.behandling } returns behandling
-            every { behandlingsresultatMock.hentBehandling() } returns behandling
-            every { behandlingsresultatMock.medlemskapsperioder } returns mutableSetOf(medlemskap)
-            every { behandlingsresultatMock.finnAvgiftspliktigPerioder() } returns (behandlingsresultatMock.medlemskapsperioder as MutableSet<AvgiftspliktigPeriode>).toList()
-            every { behandlingsresultatMock.utledAvgiftspliktigperioderFom() } returns null
-            every { behandlingsresultatMock.årsavregning } returns Årsavregning.forTest()
 
             val skatteforholdsPerioder = listOf(
                 skatteforholdForTest {
@@ -221,29 +211,25 @@ class TrygdeavgiftsberegningValidatorTest {
             )
 
             shouldThrow<FunksjonellException> {
-                TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsPerioder, listOf(), unleash)
+                TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultat, skatteforholdsPerioder, listOf(), unleash)
             }.message shouldBe TrygdeavgiftsberegningValidator.UTLED_AVGIFTSPLIKTIGPERIODE_FOM_MANGLER
         }
 
         @Test
         fun shouldThrowFunksjonellExceptionWhenUtledAvgiftspliktigperiodeTomIsNull() {
-            val behandlingsresultatMock = mockk<Behandlingsresultat>()
-            val behandling = Behandling.forTest {
-                status = Behandlingsstatus.OPPRETTET
-                fagsak {
-                    type = Sakstyper.FTRL
+            // Medlemskapsperiode med tom = null gir utledAvgiftspliktigperioderTom() = null
+            val behandlingsresultat = Behandlingsresultat.forTest {
+                behandling {
+                    status = Behandlingsstatus.OPPRETTET
+                    fagsak { type = Sakstyper.FTRL }
                 }
+                medlemskapsperiode {
+                    fom = LocalDate.now()
+                    tom = null
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                }
+                årsavregning { }
             }
-            val medlemskap = medlemskapsperiodeForTest {
-                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
-            }
-            every { behandlingsresultatMock.behandling } returns behandling
-            every { behandlingsresultatMock.hentBehandling() } returns behandling
-            every { behandlingsresultatMock.medlemskapsperioder } returns mutableSetOf(medlemskap)
-            every { behandlingsresultatMock.finnAvgiftspliktigPerioder() } returns (behandlingsresultatMock.medlemskapsperioder as MutableSet<AvgiftspliktigPeriode>).toList()
-            every { behandlingsresultatMock.utledAvgiftspliktigperioderFom() } returns LocalDate.now()
-            every { behandlingsresultatMock.utledAvgiftspliktigperioderTom() } returns null
-            every { behandlingsresultatMock.årsavregning } returns Årsavregning.forTest()
 
             val skatteforholdsPerioder = listOf(
                 skatteforholdForTest {
@@ -254,7 +240,7 @@ class TrygdeavgiftsberegningValidatorTest {
             )
 
             shouldThrow<FunksjonellException> {
-                TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsPerioder, listOf(), unleash)
+                TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultat, skatteforholdsPerioder, listOf(), unleash)
             }.message shouldBe TrygdeavgiftsberegningValidator.UTLED_AVGIFTPLIKTIGPERIODE_TOM_MANGLER
         }
 
@@ -543,21 +529,18 @@ class TrygdeavgiftsberegningValidatorTest {
 
         @Test
         fun shouldThrowExceptionWhenBehandlingInaktiv() {
-            val behandlingsresultatMock = mockk<Behandlingsresultat>()
-            val behandling = Behandling.forTest {
-                status = Behandlingsstatus.AVSLUTTET
-                fagsak {
-                    type = Sakstyper.FTRL
+            val behandlingsresultat = Behandlingsresultat.forTest {
+                behandling {
+                    status = Behandlingsstatus.AVSLUTTET
+                    fagsak { type = Sakstyper.FTRL }
                 }
             }
-            every { behandlingsresultatMock.behandling } returns behandling
-            every { behandlingsresultatMock.hentBehandling() } returns behandling
             val skatteforholdsperioder = emptyList<SkatteforholdTilNorge>()
             val inntektsperioder = emptyList<Inntektsperiode>()
 
             shouldThrow<FunksjonellException> {
                 TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
-                    behandlingsresultatMock,
+                    behandlingsresultat,
                     skatteforholdsperioder,
                     inntektsperioder,
                     unleash

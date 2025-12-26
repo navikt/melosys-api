@@ -23,8 +23,8 @@ object MedlemskapsperiodeTestFactory {
     @MelosysTestDsl
     class Builder {
         var id: Long? = null
-        var fom: LocalDate = FOM
-        var tom: LocalDate = TOM
+        var fom: LocalDate? = FOM
+        var tom: LocalDate? = TOM
         var innvilgelsesresultat: InnvilgelsesResultat = INNVILGELSESRESULTAT
         var medlemskapstype: Medlemskapstyper = MEDLEMSKAPSTYPE
         var trygdedekning: Trygdedekninger = TRYGDEDEKNING
