@@ -69,8 +69,8 @@ internal class MedfolgendeFamilieTest {
         val bruk2000 = now
         val bruk1900 = now.plusDays(1)
         return listOf(
-            Arguments.of(bruk2000.format(DateTimeFormatter.ofPattern("dd.MM.YY")), bruk2000),
-            Arguments.of(bruk1900.format(DateTimeFormatter.ofPattern("dd.MM.YY")), bruk1900.minusYears(100)),
+            Arguments.of(bruk2000.format(DateTimeFormatter.ofPattern("dd.MM.yy")), bruk2000),
+            Arguments.of(bruk1900.format(DateTimeFormatter.ofPattern("dd.MM.yy")), bruk1900.minusYears(100)),
             Arguments.of("01.02.21", LocalDate.of(2021, 2, 1))
         )
     }
