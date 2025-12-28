@@ -49,6 +49,11 @@ fun BehandlingsresultatTestFactory.Builder.begrunnelse(kode: String) = apply {
     behandlingsresultatBegrunnelser.add(nyBegrunnelse)
 }
 
+fun BehandlingsresultatTestFactory.Builder.vilkaarsresultat(init: VilkaarsresultatTestFactory.Builder.() -> Unit) = apply {
+    val nyttVilkaarsresultat = vilkaarsresultatForTest(init)
+    vilkaarsresultater.add(nyttVilkaarsresultat)
+}
+
 fun Medlemskapsperiode.trygdeavgiftsperiode(init: TrygdeavgiftsperiodeTestFactory.Builder.() -> Unit) {
     val periode = Trygdeavgiftsperiode.forTest(init).apply {
         grunnlagMedlemskapsperiode = this@trygdeavgiftsperiode
@@ -86,6 +91,7 @@ object BehandlingsresultatTestFactory {
         val medlemskapsperioder: MutableSet<Medlemskapsperiode> = mutableSetOf()
         val lovvalgsperioder: MutableSet<Lovvalgsperiode> = mutableSetOf()
         val behandlingsresultatBegrunnelser: MutableSet<BehandlingsresultatBegrunnelse> = mutableSetOf()
+        val vilkaarsresultater: MutableSet<Vilkaarsresultat> = mutableSetOf()
 
         fun build(): Behandlingsresultat {
             val behandlingsresultat = Behandlingsresultat().apply {
@@ -142,8 +148,13 @@ object BehandlingsresultatTestFactory {
                 begrunnelse.behandlingsresultat = behandlingsresultat
             }
 
+            // Sett opp relasjoner for vilkaarsresultater
+            vilkaarsresultater.forEach { vilkaarsresultat ->
+                behandlingsresultat.vilkaarsresultater.add(vilkaarsresultat)
+                vilkaarsresultat.behandlingsresultat = behandlingsresultat
+            }
+
             return behandlingsresultat
         }
     }
 }
-

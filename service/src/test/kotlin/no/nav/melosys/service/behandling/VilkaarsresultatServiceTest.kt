@@ -10,12 +10,19 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.BehandlingsresultatTestFactory
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.VilkaarsresultatTestFactory
+import no.nav.melosys.domain.begrunnelse
+import no.nav.melosys.domain.behandling
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.begrunnelser.Forutgaaende_medl_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.vilkaarsresultat
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
@@ -43,17 +50,14 @@ class VilkaarsresultatServiceTest {
 
     @Test
     fun hentVilkaar() {
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater = mutableSetOf(
-                Vilkaarsresultat().apply {
-                    vilkaar = Vilkaar.FORUTGAAENDE_MEDLEMSKAP
-                    isOppfylt = true
-                    begrunnelser =
-                        setOf(VilkaarBegrunnelse().apply { kode = Forutgaaende_medl_begrunnelser.IKKE_FOLKEREGISTRERT_ELLER_ARBEIDET_I_NORGE.kode })
-                    begrunnelseFritekst = "begrunnelse"
-                    begrunnelseFritekstEessi = "kommer ikke på hva begrunnelse er på engelsk"
-                }
-            )
+        val behandlingsresultat = lagBehandlingsresultat {
+            vilkaarsresultat {
+                vilkaar = Vilkaar.FORUTGAAENDE_MEDLEMSKAP
+                isOppfylt = true
+                begrunnelse(Forutgaaende_medl_begrunnelser.IKKE_FOLKEREGISTRERT_ELLER_ARBEIDET_I_NORGE.kode)
+                begrunnelseFritekst = "begrunnelse"
+                begrunnelseFritekstEessi = "kommer ikke på hva begrunnelse er på engelsk"
+            }
         }
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
 
@@ -73,8 +77,8 @@ class VilkaarsresultatServiceTest {
 
     @Test
     fun finnVilkaarsresultat_artikkel16_1_finnerVilkaarsresultat() {
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.FO_883_2004_ART16_1 })
+        val behandlingsresultat = lagBehandlingsresultat {
+            vilkaarsresultat { vilkaar = Vilkaar.FO_883_2004_ART16_1 }
         }
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
 
@@ -87,8 +91,8 @@ class VilkaarsresultatServiceTest {
 
     @Test
     fun finnUnntaksVilkaarsresultat_artikkel16_1_finnerVilkaarsresultat() {
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.FO_883_2004_ART16_1 })
+        val behandlingsresultat = lagBehandlingsresultat {
+            vilkaarsresultat { vilkaar = Vilkaar.FO_883_2004_ART16_1 }
         }
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
 
@@ -101,8 +105,8 @@ class VilkaarsresultatServiceTest {
 
     @Test
     fun finnUnntaksVilkaarsresultat_artikkel18_1_finnerVilkaarsresultat() {
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.KONV_EFTA_STORBRITANNIA_ART18_1 })
+        val behandlingsresultat = lagBehandlingsresultat {
+            vilkaarsresultat { vilkaar = Vilkaar.KONV_EFTA_STORBRITANNIA_ART18_1 }
         }
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
 
@@ -115,8 +119,8 @@ class VilkaarsresultatServiceTest {
 
     @Test
     fun finnUtsendingArbeidstakerVilkaarsresultat_artikkel12_1_finnerVilkaarsresultat() {
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.FO_883_2004_ART12_1 })
+        val behandlingsresultat = lagBehandlingsresultat {
+            vilkaarsresultat { vilkaar = Vilkaar.FO_883_2004_ART12_1 }
         }
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
 
@@ -129,8 +133,8 @@ class VilkaarsresultatServiceTest {
 
     @Test
     fun finnUtsendingNæringsdrivendeVilkaarsresultat_artikkel12_2_finnerVilkaarsresultat() {
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.FO_883_2004_ART12_2 })
+        val behandlingsresultat = lagBehandlingsresultat {
+            vilkaarsresultat { vilkaar = Vilkaar.FO_883_2004_ART12_2 }
         }
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
 
@@ -176,10 +180,10 @@ class VilkaarsresultatServiceTest {
 
     @Test
     fun tilbakestillVilkårsresultatFraBehandlingsresultat_OgLagre_sakstypeIkkeEøs_sletterAlleVilkår() {
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             id = BEHANDLING_ID
-            behandling = Behandling.forTest { fagsak = Fagsak.forTest() }
-            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply { id = BEHANDLING_ID })
+            behandling { fagsak { } }
+            vilkaarsresultat { id = BEHANDLING_ID }
         }
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
 
@@ -192,15 +196,15 @@ class VilkaarsresultatServiceTest {
 
     @Test
     fun tilbakestillVilkårsresultatFraBehandlingsresultat_OgLagre_sakstypeEøsMenIngenFlyt_sletterAlleVilkår() {
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             id = BEHANDLING_ID
-            behandling = Behandling.forTest {
+            behandling {
                 id = BEHANDLING_ID
-                fagsak = Fagsak.forTest()
+                fagsak { }
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.HENVENDELSE
             }
-            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply { id = BEHANDLING_ID })
+            vilkaarsresultat { id = BEHANDLING_ID }
         }
         every { saksbehandlingRegler.harIngenFlyt(behandlingsresultat.hentBehandling()) } returns true
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
@@ -214,24 +218,22 @@ class VilkaarsresultatServiceTest {
 
     @Test
     fun tilbakestillVilkårsresultatFraBehandlingsresultat_OgLagre_sakstypeEøsOgHarFlyt_sletterIkkeInngangsvilkår() {
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             id = BEHANDLING_ID
-            behandling = Behandling.forTest {
+            behandling {
                 id = BEHANDLING_ID
-                fagsak = Fagsak.forTest()
+                fagsak { }
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.FØRSTEGANG
             }
-            vilkaarsresultater = mutableSetOf(
-                Vilkaarsresultat().apply {
-                    id = BEHANDLING_ID
-                    vilkaar = Vilkaar.FO_883_2004_INNGANGSVILKAAR
-                },
-                Vilkaarsresultat().apply {
-                    id = 2L
-                    vilkaar = Vilkaar.FO_883_2004_ART12_1
-                }
-            )
+            vilkaarsresultat {
+                id = BEHANDLING_ID
+                vilkaar = Vilkaar.FO_883_2004_INNGANGSVILKAAR
+            }
+            vilkaarsresultat {
+                id = 2L
+                vilkaar = Vilkaar.FO_883_2004_ART12_1
+            }
         }
 
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
@@ -248,16 +250,15 @@ class VilkaarsresultatServiceTest {
             }
     }
 
-    private fun lagBehandlingsresultat(): Behandlingsresultat =
-        Behandlingsresultat().apply {
-            id = BEHANDLING_ID
-            behandling = Behandling.forTest {
-                fagsak = Fagsak.forTest()
-            }
-        }
+    private fun lagBehandlingsresultat(
+        init: BehandlingsresultatTestFactory.Builder.() -> Unit = {}
+    ): Behandlingsresultat = Behandlingsresultat.forTest {
+        id = BEHANDLING_ID
+        behandling { fagsak { } }
+        init()
+    }
 
     companion object {
         const val BEHANDLING_ID = 1L
     }
 }
-

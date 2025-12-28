@@ -72,6 +72,18 @@ First, read the testing skill for context:
 | Files with `lateinit var` test data | 138 |
 | Estimated files needing conversion | ~150-200 |
 
+### Conversion Summary
+| Phase | Files Converted | Tests Passing |
+|-------|-----------------|---------------|
+| Phase 1: service/avgift | 8 | 88 |
+| Phase 1: service/behandling | 7 (+1 no changes) | 116 |
+| **Total** | **15** | **204** |
+
+### New Test Factories Created
+- `VilkaarsresultatTestFactory` - Created during Phase 1 service/behandling conversion
+- Extended `BehandlingsresultatTestFactory` with `vilkaarsresultat {}` DSL builder
+- Extended `SaksopplysningTestFactory` with `kilder` property
+
 ### By Module
 
 | Module | Test Files | Priority |
@@ -149,7 +161,15 @@ val behandling = Behandling.forTest { /* config */ }
   - ÅrsavregningServiceOpprettTest.kt (3 tests)
   - SkattehendelserConsumerTest.kt (4 tests)
   - TrygdeavgiftsberegningValidatorTest.kt (41 tests)
-- [ ] service/behandling/** - 12 files
+- [x] service/behandling/** - 7 files converted (116 tests passing)
+  - BehandlingsresultatServiceTest.kt (16 tests)
+  - BehandlingServiceTest.kt (55 tests)
+  - BehandlingEventListenerTest.kt (5 tests)
+  - AngiBehandlingsresultatServiceTest.kt (10 tests)
+  - AvsluttArt13BehandlingServiceTest.kt (11 tests)
+  - ReplikerBehandlingsresultatServiceTest.kt (8 tests)
+  - VilkaarsresultatServiceTest.kt (11 tests)
+  - AvsluttArt13BehandlingJobbTest.kt (no changes needed - only mocks)
 - [ ] service/dokument/** - 25 files
 - [ ] service/eessi/** - 8 files
 - [ ] service/sak/** - 12 files
