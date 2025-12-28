@@ -1,7 +1,9 @@
 package no.nav.melosys.domain.mottatteopplysninger
 
 import no.nav.melosys.domain.MelosysTestDsl
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
+import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
 import java.time.LocalDate
 
@@ -13,8 +15,17 @@ object SoeknadTestFactory {
     class Builder {
         private val soeknadslandkoder = mutableListOf<String>()
         private val fysiskeArbeidssteder = mutableListOf<FysiskArbeidssted>()
+        private val foretakUtlandListe = mutableListOf<ForetakUtland>()
+        private val selvstendigForetakListe = mutableListOf<SelvstendigForetak>()
+        private val ekstraArbeidsgivereListe = mutableListOf<String>()
+
+        // Bosted address fields
         var bostedLandkode: String? = null
         var bostedPoststed: String? = null
+        var bostedGatenavn: String? = null
+        var bostedHusnummer: String? = null
+        var bostedPostnummer: String? = null
+
         var periodeFom: LocalDate? = null
         var periodeTom: LocalDate? = null
 
@@ -31,6 +42,36 @@ object SoeknadTestFactory {
             this.periodeTom = tom
         }
 
+        /** Add a foreign business (foretak utland) */
+        fun foretakUtland(orgnr: String) = apply {
+            foretakUtlandListe.add(ForetakUtland().apply { this.orgnr = orgnr })
+        }
+
+        /** Add a self-employed business (selvstendig foretak) */
+        fun selvstendigForetak(orgnr: String) = apply {
+            selvstendigForetakListe.add(SelvstendigForetak().apply { this.orgnr = orgnr })
+        }
+
+        /** Add an extra Norwegian employer orgnr */
+        fun ekstraArbeidsgiver(orgnr: String) = apply {
+            ekstraArbeidsgivereListe.add(orgnr)
+        }
+
+        /** Configure bosted address with all fields */
+        fun bostedAdresse(
+            landkode: String = "NO",
+            poststed: String? = null,
+            gatenavn: String? = null,
+            husnummer: String? = null,
+            postnummer: String? = null
+        ) = apply {
+            bostedLandkode = landkode
+            bostedPoststed = poststed
+            bostedGatenavn = gatenavn
+            bostedHusnummer = husnummer
+            bostedPostnummer = postnummer
+        }
+
         fun build(): Soeknad = Soeknad().apply {
             // Sett søknadsland
             soeknadslandkoder.forEach { this.soeknadsland.landkoder.add(it) }
@@ -41,11 +82,23 @@ object SoeknadTestFactory {
             // Sett bosted
             this@Builder.bostedLandkode?.let { this.bosted.oppgittAdresse.landkode = it }
             this@Builder.bostedPoststed?.let { this.bosted.oppgittAdresse.poststed = it }
+            this@Builder.bostedGatenavn?.let { this.bosted.oppgittAdresse.gatenavn = it }
+            this@Builder.bostedHusnummer?.let { this.bosted.oppgittAdresse.husnummerEtasjeLeilighet = it }
+            this@Builder.bostedPostnummer?.let { this.bosted.oppgittAdresse.postnummer = it }
 
             // Sett periode
             if (this@Builder.periodeFom != null || this@Builder.periodeTom != null) {
                 this.periode = Periode(this@Builder.periodeFom, this@Builder.periodeTom)
             }
+
+            // Sett foretak utland
+            this.foretakUtland.addAll(foretakUtlandListe)
+
+            // Sett selvstendig foretak
+            this.selvstendigArbeid.selvstendigForetak = selvstendigForetakListe
+
+            // Sett ekstra arbeidsgivere
+            this.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = ekstraArbeidsgivereListe
         }
     }
 
