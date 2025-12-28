@@ -10,13 +10,14 @@ import io.mockk.mockk
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
-import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.dokument.personDokumentForTest
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.domain.medlemskapsperiodeForTest
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
@@ -235,7 +236,7 @@ class ÅrsavregningVedtakMapperTest {
         val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
 
         // Opprett en tidligere årsavregningsbehandling
-        val tidligereÅrsavregningsBehandling = lagBehandling().apply {
+        val tidligereÅrsavregningsBehandling = Behandling.forTest {
             id = 999L
             type = Behandlingstyper.ÅRSAVREGNING
         }
@@ -321,9 +322,29 @@ class ÅrsavregningVedtakMapperTest {
         forventetVerdi: SvarAlternativ?
     ) {
         val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
-        val endeligAvgiftTrygdeavgiftsperiode = lagEndeligTrygdeavgiftsperiode().apply {
-            grunnlagInntekstperiode!!.isArbeidsgiversavgiftBetalesTilSkatt = betalesTilSkatt
-            grunnlagMedlemskapsperiode!!.medlemskapstype = medlemskapstype
+        val grunnlagMedlemskapsperiode = medlemskapsperiodeForTest {
+            fom = LocalDate.of(2023, 1, 1)
+            tom = LocalDate.of(2023, 12, 31)
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
+            trygdedekning = Trygdedekninger.FULL_DEKNING
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            this.medlemskapstype = medlemskapstype
+        }
+
+        val endeligAvgiftTrygdeavgiftsperiode = Trygdeavgiftsperiode.forTest {
+            periodeFra = LocalDate.of(2023, 1, 1)
+            periodeTil = LocalDate.of(2023, 12, 31)
+            trygdeavgiftsbeløpMd = BigDecimal(500)
+            trygdesats = BigDecimal(1000)
+            this.medlemskapsperiode = grunnlagMedlemskapsperiode
+            grunnlagInntekstperiode {
+                avgiftspliktigMndInntekt = Penger(BigDecimal(2800), NOK.kode)
+                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                arbeidsgiversavgiftBetalesTilSkatt = betalesTilSkatt
+            }
+            grunnlagSkatteforholdTilNorge {
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
         }
 
         val årsavregningModel = ÅrsavregningModel(
@@ -363,9 +384,10 @@ class ÅrsavregningVedtakMapperTest {
 
 
     private fun lagFellesTestdata(): Pair<ÅrsavregningVedtakBrevBestilling, Behandlingsresultat> {
+        val personDokument = personDokumentForTest { sammensattNavn = "Hei Test" }
         val brevbestilling = ÅrsavregningVedtakBrevBestilling.Builder()
-            .medPersonDokument(PersonDokument().apply { sammensattNavn = "Hei Test" })
-            .medPersonMottaker(PersonDokument().apply { sammensattNavn = "Hei Test" })
+            .medPersonDokument(personDokument)
+            .medPersonMottaker(personDokument)
             .medBehandling(lagBehandling())
             .build()
         val behandlingsresultat = lagBehandlingsresultat()
@@ -417,49 +439,50 @@ class ÅrsavregningVedtakMapperTest {
     }
 
     private fun lagEndeligTrygdeavgiftsperiode(): Trygdeavgiftsperiode {
-        return Trygdeavgiftsperiode(
-            periodeFra = LocalDate.of(2023, 1, 1),
-            periodeTil = LocalDate.of(2023, 12, 31),
-            trygdeavgiftsbeløpMd = Penger(BigDecimal(500)),
-            trygdesats = BigDecimal(1000),
+        val medlemskapsperiode = medlemskapsperiodeForTest {
+            fom = LocalDate.of(2023, 1, 1)
+            tom = LocalDate.of(2023, 12, 31)
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
+            trygdedekning = Trygdedekninger.FULL_DEKNING
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
 
-            grunnlagInntekstperiode = Inntektsperiode().apply {
+        return Trygdeavgiftsperiode.forTest {
+            periodeFra = LocalDate.of(2023, 1, 1)
+            periodeTil = LocalDate.of(2023, 12, 31)
+            trygdeavgiftsbeløpMd = BigDecimal(500)
+            trygdesats = BigDecimal(1000)
+            this.medlemskapsperiode = medlemskapsperiode
+            grunnlagInntekstperiode {
                 avgiftspliktigMndInntekt = Penger(BigDecimal(2800), NOK.kode)
                 type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-                isArbeidsgiversavgiftBetalesTilSkatt = true
-            },
-
-            grunnlagMedlemskapsperiode = Medlemskapsperiode().apply {
-                fom = LocalDate.of(2023, 1, 1)
-                tom = LocalDate.of(2023, 12, 31)
-                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
-                trygdedekning = Trygdedekninger.FULL_DEKNING
-                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-            },
-
-            grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
+                arbeidsgiversavgiftBetalesTilSkatt = true
+            }
+            grunnlagSkatteforholdTilNorge {
                 skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-            })
+            }
+        }
     }
 
-    private fun lagTidligereTrygdeavgiftsperiode() =
-        Trygdeavgiftsperiode(
-            periodeFra = LocalDate.of(2023, 1, 1),
-            periodeTil = LocalDate.of(2023, 12, 31),
-            trygdeavgiftsbeløpMd = Penger(BigDecimal(450)),
-            trygdesats = BigDecimal(900),
+    private fun lagTidligereTrygdeavgiftsperiode(): Trygdeavgiftsperiode {
+        val medlemskapsperiode = medlemskapsperiodeForTest {
+            trygdedekning = Trygdedekninger.FULL_DEKNING
+        }
 
-            grunnlagInntekstperiode = Inntektsperiode().apply {
+        return Trygdeavgiftsperiode.forTest {
+            periodeFra = LocalDate.of(2023, 1, 1)
+            periodeTil = LocalDate.of(2023, 12, 31)
+            trygdeavgiftsbeløpMd = BigDecimal(450)
+            trygdesats = BigDecimal(900)
+            this.medlemskapsperiode = medlemskapsperiode
+            grunnlagInntekstperiode {
                 avgiftspliktigMndInntekt = Penger(BigDecimal(2800), NOK.kode)
                 type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-                isArbeidsgiversavgiftBetalesTilSkatt = false
-            },
-
-            grunnlagMedlemskapsperiode = Medlemskapsperiode().apply {
-                trygdedekning = Trygdedekninger.FULL_DEKNING
-            },
-
-            grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
+                arbeidsgiversavgiftBetalesTilSkatt = false
+            }
+            grunnlagSkatteforholdTilNorge {
                 skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-            })
+            }
+        }
+    }
 }

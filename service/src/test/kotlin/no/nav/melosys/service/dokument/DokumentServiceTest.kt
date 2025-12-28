@@ -16,10 +16,10 @@ import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.brev.DoksysBrevbestilling
 import no.nav.melosys.domain.brev.Mottaker
-import no.nav.melosys.domain.dokument.SaksopplysningDokument
 import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
+import no.nav.melosys.domain.dokument.personDokumentForTest
 import no.nav.melosys.domain.dokument.person.KjoennsType
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.kodeverk.*
@@ -427,8 +427,8 @@ internal class DokumentServiceTest {
         husnummerEtasjeLeilighet = "1"
     }
 
-    private fun lagPersonDokument() = PersonDokument().apply {
-        kjønn = lagKjoennsType()
+    private fun lagPersonDokument() = personDokumentForTest {
+        kjønn = KjoennsType("K")
         statsborgerskap = Land(Land.BELGIA)
         fornavn = "For"
         etternavn = "Etter"
@@ -436,8 +436,6 @@ internal class DokumentServiceTest {
         fødselsdato = LocalDate.ofYearDay(1900, 1)
         bostedsadresse = lagBostedsadresse()
     }
-
-    private fun lagKjoennsType() = KjoennsType("K")
 
     private fun lagBehandling() = Behandling.forTest {
         id = BEHANDLINGSID
@@ -465,20 +463,20 @@ internal class DokumentServiceTest {
         saksopplysninger = mutableSetOf(lagSaksopplysning(SaksopplysningType.PERSOPL, lagPersonDokument()))
     }
 
-    private fun lagSaksopplysning(type: SaksopplysningType, dokument: SaksopplysningDokument) =
-        Saksopplysning().apply {
-            this.type = type
-            this.dokument = dokument
+    private fun lagSaksopplysning(saksopplysningType: SaksopplysningType, saksopplysningDokument: no.nav.melosys.domain.dokument.SaksopplysningDokument) =
+        saksopplysningForTest {
+            type = saksopplysningType
+            dokument = saksopplysningDokument
         }
 
-    private fun lagAvklarteFakta(type: Avklartefaktatyper, subjekt: String?) =
-        lagAvklarteFakta(type, "TRUE", subjekt)
+    private fun lagAvklarteFakta(avklartefaktaType: Avklartefaktatyper, avklartefaktaSubjekt: String?) =
+        lagAvklarteFakta(avklartefaktaType, "TRUE", avklartefaktaSubjekt)
 
-    private fun lagAvklarteFakta(type: Avklartefaktatyper, fakta: String, subjekt: String?) =
-        Avklartefakta().apply {
-            this.subjekt = subjekt
-            this.type = type
-            this.fakta = fakta
+    private fun lagAvklarteFakta(avklartefaktaType: Avklartefaktatyper, avklartefaktaFakta: String, avklartefaktaSubjekt: String?) =
+        avklartefaktaForTest {
+            subjekt = avklartefaktaSubjekt
+            type = avklartefaktaType
+            fakta = avklartefaktaFakta
         }
 
     private fun lagAktør(type: Aktoersroller) = Aktoer().apply {
@@ -491,7 +489,7 @@ internal class DokumentServiceTest {
         }
     }
 
-    private fun lagLovvalgsperiode() = Lovvalgsperiode().apply {
+    private fun lagLovvalgsperiode() = lovvalgsperiodeForTest {
         bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
         fom = LocalDate.now()
         tom = LocalDate.now()
@@ -499,15 +497,25 @@ internal class DokumentServiceTest {
         tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
     }
 
-    private fun lagBehandlingsresultat(faktaliste: List<Avklartefakta>): Behandlingsresultat {
-        val behandlingsresultat = Behandlingsresultat().apply {
-            avklartefakta = hashSetOf(*faktaliste.toTypedArray())
+    private fun lagBehandlingsresultat(faktaliste: List<Avklartefakta>): Behandlingsresultat =
+        Behandlingsresultat.forTest {
+            // Add each faktum using the nested DSL
+            faktaliste.forEach { faktum ->
+                avklartefakta {
+                    type = faktum.type
+                    subjekt = faktum.subjekt
+                    fakta = faktum.fakta
+                }
+            }
+            // Add lovvalgsperiode
+            lovvalgsperiode {
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+                fom = LocalDate.now()
+                tom = LocalDate.now()
+                lovvalgsland = Land_iso2.NO
+                tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
+            }
         }
-        val periode = lagLovvalgsperiode()
-        val perioder = listOf(periode)
-        behandlingsresultat.lovvalgsperioder = hashSetOf(*perioder.toTypedArray())
-        return behandlingsresultat
-    }
 
     companion object {
         private const val BEHANDLINGSID = 13L

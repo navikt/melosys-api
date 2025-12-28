@@ -9,6 +9,9 @@ import no.nav.melosys.domain.dokument.person.Sivilstand
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse
 import java.time.LocalDate
 
+fun personDokumentForTest(init: PersonDokumentTestFactory.Builder.() -> Unit = {}): PersonDokument =
+    PersonDokumentTestFactory.Builder().apply(init).build()
+
 object PersonDokumentTestFactory {
     const val FNR = "12345678901"
     const val FORNAVN = "Ola"
@@ -19,6 +22,7 @@ object PersonDokumentTestFactory {
         var fnr: String? = FNR
         var fornavn: String? = FORNAVN
         var etternavn: String? = ETTERNAVN
+        var sammensattNavn: String? = null
         var fødselsdato: LocalDate? = LocalDate.of(1990, 1, 1)
         var statsborgerskap: Land? = Land("NOR")
         var kjønn: KjoennsType? = KjoennsType("M")
@@ -38,6 +42,7 @@ object PersonDokumentTestFactory {
             ).apply {
                 this.fornavn = this@Builder.fornavn
                 this.etternavn = this@Builder.etternavn
+                this.sammensattNavn = this@Builder.sammensattNavn
             }
     }
 }

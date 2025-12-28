@@ -104,17 +104,16 @@ class EessiServiceTest {
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns lagBehandling()
     }
 
-    private fun lagBehandlingsresultat() = Behandlingsresultat().apply {
-        this.lovvalgsperioder = hashSetOf(Lovvalgsperiode().apply {
-            this.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
-            this.lovvalgsland = Land_iso2.SK
-        })
-        this.anmodningsperioder = mutableSetOf(Anmodningsperiode().apply {
-            this.anmodningsperiodeSvar = AnmodningsperiodeSvar().apply {
-                this.anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
+    private fun lagBehandlingsresultat() = Behandlingsresultat.forTest {
+        lovvalgsperiode {
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+            lovvalgsland = Land_iso2.SK
+        }
+        anmodningsperiode {
+            anmodningsperiodeSvar {
+                anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
             }
-        })
-
+        }
     }
 
     private fun mockBehandlingsresultat() {
@@ -181,9 +180,7 @@ class EessiServiceTest {
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
 
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            hentAnmodningsperiode().bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
-        }
+        val behandlingsresultat = lagBehandlingsresultatMedStorbritanniaAnmodning()
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         val sedDataDtoSlot = slot<SedDataDto>()
@@ -196,6 +193,19 @@ class EessiServiceTest {
         sedDataDtoSlot.captured.ytterligereInformasjon shouldBe "Issued under the EEA EFTA Convention. fritekst"
     }
 
+    private fun lagBehandlingsresultatMedStorbritanniaAnmodning() = Behandlingsresultat.forTest {
+        lovvalgsperiode {
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+            lovvalgsland = Land_iso2.SK
+        }
+        anmodningsperiode {
+            bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
+            anmodningsperiodeSvar {
+                anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
+            }
+        }
+    }
+
     @Test
     fun `opprettOgSendSed a009MedStorbritanniaKonv mapperKorrektYtterligereInformasjon`() {
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
@@ -203,9 +213,7 @@ class EessiServiceTest {
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
 
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            hentLovvalgsperiode().bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
-        }
+        val behandlingsresultat = lagBehandlingsresultatMedStorbritanniaLovvalg()
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         val sedDataDtoSlot = slot<SedDataDto>()
@@ -216,6 +224,18 @@ class EessiServiceTest {
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE)) }
         verify { eessiConsumer.opprettBucOgSed(any(), any(), eq(BucType.LA_BUC_04), eq(true), eq(true)) }
         sedDataDtoSlot.captured.ytterligereInformasjon shouldBe "Issued under the EEA EFTA Convention. fritekst"
+    }
+
+    private fun lagBehandlingsresultatMedStorbritanniaLovvalg() = Behandlingsresultat.forTest {
+        lovvalgsperiode {
+            bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
+            lovvalgsland = Land_iso2.SK
+        }
+        anmodningsperiode {
+            anmodningsperiodeSvar {
+                anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
+            }
+        }
     }
 
     @Test
@@ -234,9 +254,7 @@ class EessiServiceTest {
 
     @Test
     fun `opprettOgSendSed buc02MedUtpekingsperiode medlemsperiodeTypeUtpekingsperiode`() {
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            utpekingsperioder.add(Utpekingsperiode())
-        }
+        val behandlingsresultat = lagBehandlingsresultatMedUtpekingsperiode()
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
         every { eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
@@ -247,6 +265,19 @@ class EessiServiceTest {
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(behandlingsresultat), eq(PeriodeType.UTPEKINGSPERIODE)) }
         verify { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_02), eq(true), eq(true)) }
+    }
+
+    private fun lagBehandlingsresultatMedUtpekingsperiode() = Behandlingsresultat.forTest {
+        lovvalgsperiode {
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+            lovvalgsland = Land_iso2.SK
+        }
+        anmodningsperiode {
+            anmodningsperiodeSvar {
+                anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
+            }
+        }
+        utpekingsperiode { }
     }
 
     @Test
@@ -425,13 +456,11 @@ class EessiServiceTest {
     fun `sendAnmodningUnntakSvar forventKall`() {
         val behandling = Behandling.forTest {
             id = BEHANDLING_ID
+            saksopplysning {
+                type = SaksopplysningType.SEDOPPL
+                sedDokument { }
+            }
         }
-
-        val saksopplysning = Saksopplysning().apply {
-            type = SaksopplysningType.SEDOPPL
-            dokument = SedDokument()
-        }
-        behandling.saksopplysninger = mutableSetOf(saksopplysning)
 
         every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
         every { dokumentdataGrunnlagFactory.av(any(), any()) } returns mockk<SedDataGrunnlagUtenSoknad>()
@@ -454,13 +483,11 @@ class EessiServiceTest {
             fagsak {
                 medGsakSaksnummer()
             }
+            saksopplysning {
+                type = SaksopplysningType.SEDOPPL
+                sedDokument { }
+            }
         }
-
-        val saksopplysning = Saksopplysning().apply {
-            type = SaksopplysningType.SEDOPPL
-            dokument = SedDokument()
-        }
-        behandling.saksopplysninger = mutableSetOf(saksopplysning)
 
         every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
         every { behandlingService.hentBehandling(any()) } returns behandling
@@ -485,13 +512,11 @@ class EessiServiceTest {
             fagsak {
                 medGsakSaksnummer()
             }
+            saksopplysning {
+                type = SaksopplysningType.SEDOPPL
+                sedDokument { }
+            }
         }
-
-        val saksopplysning = Saksopplysning().apply {
-            type = SaksopplysningType.SEDOPPL
-            dokument = SedDokument()
-        }
-        behandling.saksopplysninger = mutableSetOf(saksopplysning)
 
         val sedInformasjon = SedInformasjon("1", "2", LocalDate.now(), LocalDate.now(), "A012", "whatever", null)
         val bucInformasjon = BucInformasjon("1", true, "LA_BUC_02", LocalDate.now(), null, listOf(sedInformasjon))
@@ -522,10 +547,10 @@ class EessiServiceTest {
             fagsak {
                 medGsakSaksnummer()
             }
-            saksopplysninger = mutableSetOf(Saksopplysning().apply {
-                this.type = SaksopplysningType.SEDOPPL
-                this.dokument = SedDokument()
-            })
+            saksopplysning {
+                type = SaksopplysningType.SEDOPPL
+                sedDokument { }
+            }
         }
 
         val sedInformasjon = SedInformasjon("1", "2", LocalDate.now(), LocalDate.now(), "A012", "whatever", null)
@@ -580,9 +605,7 @@ class EessiServiceTest {
         val sedPdfData = SedPdfData().apply {
             fritekst = "fritekst"
         }
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            hentAnmodningsperiode().bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
-        }
+        val behandlingsresultat = lagBehandlingsresultatMedStorbritanniaAnmodning()
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         val sedDataDtoSlot = slot<SedDataDto>()
@@ -604,9 +627,7 @@ class EessiServiceTest {
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
 
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            utpekingsperioder.add(Utpekingsperiode())
-        }
+        val behandlingsresultat = lagBehandlingsresultatMedUtpekingsperiode()
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         val result = eessiService.genererSedPdf(BEHANDLING_ID, SedType.A003)
@@ -624,9 +645,7 @@ class EessiServiceTest {
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
 
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            utpekingsperioder.add(Utpekingsperiode())
-        }
+        val behandlingsresultat = lagBehandlingsresultatMedUtpekingsperiode()
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         val result = eessiService.genererSedPdf(BEHANDLING_ID, SedType.A009)
@@ -666,9 +685,8 @@ class EessiServiceTest {
 
     @Test
     fun `hentSedTypeForAnmodningUnntakSvar forventA002`() {
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            hentAnmodningsperiode().anmodningsperiodeSvar.anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
-        }
+        // lagBehandlingsresultat() already has AVSLAG as default
+        val behandlingsresultat = lagBehandlingsresultat()
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         val sedType = eessiService.hentSedTypeForAnmodningUnntakSvar(BEHANDLING_ID)
@@ -678,14 +696,24 @@ class EessiServiceTest {
 
     @Test
     fun `hentSedTypeForAnmodningUnntakSvar forventA011`() {
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            hentAnmodningsperiode().anmodningsperiodeSvar.anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
-        }
+        val behandlingsresultat = lagBehandlingsresultatMedInnvilgelse()
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         val sedType = eessiService.hentSedTypeForAnmodningUnntakSvar(BEHANDLING_ID)
 
         sedType shouldBe SedType.A011
+    }
+
+    private fun lagBehandlingsresultatMedInnvilgelse() = Behandlingsresultat.forTest {
+        lovvalgsperiode {
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+            lovvalgsland = Land_iso2.SK
+        }
+        anmodningsperiode {
+            anmodningsperiodeSvar {
+                anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
+            }
+        }
     }
 
     @Test

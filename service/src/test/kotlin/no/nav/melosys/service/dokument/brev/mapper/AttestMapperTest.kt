@@ -1,18 +1,20 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
 import io.kotest.matchers.nulls.shouldNotBeNull
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper
+import no.nav.melosys.domain.lovvalgsperiode
 import no.nav.melosys.service.dokument.brev.BrevDataA1
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagMaritimtArbeidssted
 import no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon
@@ -20,35 +22,23 @@ import no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse
 import no.nav.melosys.service.dokument.brev.BrevDataVedlegg
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.jeasy.random.EasyRandom
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.Instant
 import java.time.LocalDate
 
 class AttestMapperTest {
 
-    private lateinit var mapper: AttestMapper
-    private lateinit var easyRandom: EasyRandom
-    private lateinit var behandlingsresultat: Behandlingsresultat
-    private lateinit var behandling: Behandling
-    private lateinit var brevData: BrevDataVedlegg
+    private val mapper = AttestMapper()
+    private val easyRandom: EasyRandom = EasyRandomConfigurer.randomForDokProd()
 
-    @BeforeEach
-    fun setUp() {
-        mapper = AttestMapper()
-        easyRandom = EasyRandomConfigurer.randomForDokProd()
-
-        val lovvalgsperiode = Lovvalgsperiode().apply {
-            lovvalgsland = Land_iso2.NO
-            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2
-            fom = LocalDate.now()
-            tom = LocalDate.now()
-        }
-
-        behandlingsresultat = mockk {
-            every { registrertDato } returns Instant.now()
-            every { lovvalgsperioder } returns mutableSetOf(lovvalgsperiode)
-            every { hentLovvalgsperiode() } returns lovvalgsperiode
+    @Test
+    fun `mapTilBrevXML should generate XML successfully`() {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            lovvalgsperiode {
+                lovvalgsland = Land_iso2.NO
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2
+                fom = LocalDate.now()
+                tom = LocalDate.now()
+            }
         }
 
         val boAdresse = StrukturertAdresse().apply {
@@ -60,10 +50,9 @@ class AttestMapperTest {
             landkode = Landkoder.NO.kode
         }
 
-        behandling = mockk {
-            every { registrertDato } returns Instant.now()
-            every { fagsak } returns Fagsak.forTest()
-            every { id } returns 1L
+        val behandling = Behandling.forTest {
+            id = 1L
+            fagsak { }
         }
 
         val strukturertAdresse = StrukturertAdresse().apply {
@@ -74,7 +63,6 @@ class AttestMapperTest {
             region = "Region"
             landkode = Landkoder.NO.kode
         }
-
 
         val virksomhet = AvklartVirksomhet(
             "JARLSBERG INTERNATIONAL",
@@ -108,13 +96,10 @@ class AttestMapperTest {
             bivirksomheter = mutableListOf(utenlandskVirksomhet)
         }
 
-        brevData = BrevDataVedlegg("Z1234567").apply {
+        val brevData = BrevDataVedlegg("Z1234567").apply {
             brevDataA1 = a1Data
         }
-    }
 
-    @Test
-    fun `mapTilBrevXML should generate XML successfully`() {
         val fellesType = FellesType().apply {
             fagsaksnummer = "MELTEST-1"
         }

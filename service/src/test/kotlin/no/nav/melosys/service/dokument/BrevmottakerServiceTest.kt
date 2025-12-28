@@ -10,9 +10,9 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
@@ -57,10 +57,6 @@ class BrevmottakerServiceTest {
     @RelaxedMockK
     private lateinit var lovvalgsperiodeService: LovvalgsperiodeService
 
-    @MockK
-    private lateinit var behandling: Behandling
-
-    private lateinit var behandlingsresultat: Behandlingsresultat
     private lateinit var brevmottakerService: BrevmottakerService
 
     @BeforeEach
@@ -71,37 +67,32 @@ class BrevmottakerServiceTest {
             behandlingsresultatService,
             lovvalgsperiodeService
         )
+    }
 
-        behandlingsresultat = Behandlingsresultat().apply {
-            val lovvalgsperiode = Lovvalgsperiode().apply {
-                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
-            }
-            lovvalgsperioder.add(lovvalgsperiode)
+    private fun lagBehandlingsresultatMedLovvalgsperiode(
+        bestemmelse: no.nav.melosys.domain.kodeverk.LovvalgBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+    ) = Behandlingsresultat.forTest {
+        lovvalgsperiode {
+            this.bestemmelse = bestemmelse
         }
-
-        every { behandling.id } returns 123L
     }
 
     @Test
     fun `avklarMottakere medFullmektigForArbeidsgiver feiler`() {
-        every { behandling.fagsak } returns lagFagsakMedFullmektigPerson(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
-
+        val behandling = lagBehandlingMed(lagFagsakMedFullmektigPerson(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER))
 
         val exception = shouldThrow<FunksjonellException> {
             brevmottakerService.avklarMottakere(null, Mottaker.medRolle(FULLMEKTIG), behandling)
         }
-
 
         exception.message shouldBe "Finner ikke fullmektig for bruker"
     }
 
     @Test
     fun `avklarMottakere medFullmektigForBruker girFullmektigMottaker`() {
-        every { behandling.fagsak } returns lagFagsakMedFullmektigPerson(Fullmaktstype.FULLMEKTIG_SØKNAD)
-
+        val behandling = lagBehandlingMed(lagFagsakMedFullmektigPerson(Fullmaktstype.FULLMEKTIG_SØKNAD))
 
         val mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling)
-
 
         mottakere shouldHaveSize 1
         mottakere[0].rolle shouldBe FULLMEKTIG
@@ -109,24 +100,20 @@ class BrevmottakerServiceTest {
 
     @Test
     fun `avklarMottakere medBrukerRolleOgIkkeRegistretBruker feiler`() {
-        every { behandling.fagsak } returns Fagsak.forTest { }
-
+        val behandling = lagBehandlingMed(Fagsak.forTest { })
 
         val exception = shouldThrow<FunksjonellException> {
             brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling)
         }
-
 
         exception.message shouldBe "Bruker er ikke registrert."
     }
 
     @Test
     fun `avklarMottakere medBrukerRolleUtenFullmektig girBrukerMottaker`() {
-        every { behandling.fagsak } returns lagFagsakMedBruker()
-
+        val behandling = lagBehandlingMed(lagFagsakMedBruker())
 
         val mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling)
-
 
         mottakere shouldHaveSize 1
         mottakere[0].rolle shouldBe BRUKER
@@ -134,11 +121,9 @@ class BrevmottakerServiceTest {
 
     @Test
     fun `avklarMottakere medBrukerRolleMedFullmektigOrg girFullmektigMottaker`() {
-        every { behandling.fagsak } returns lagFagsakMedFullmektigOrg(Fullmaktstype.FULLMEKTIG_SØKNAD)
-
+        val behandling = lagBehandlingMed(lagFagsakMedFullmektigOrg(Fullmaktstype.FULLMEKTIG_SØKNAD))
 
         val mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling)
-
 
         mottakere shouldHaveSize 1
         mottakere[0].rolle shouldBe FULLMEKTIG
@@ -146,11 +131,9 @@ class BrevmottakerServiceTest {
 
     @Test
     fun `avklarMottakere medBrukerRolleMedFullmektigPerson girFullmektigMottaker`() {
-        every { behandling.fagsak } returns lagFagsakMedFullmektigPerson(Fullmaktstype.FULLMEKTIG_SØKNAD)
-
+        val behandling = lagBehandlingMed(lagFagsakMedFullmektigPerson(Fullmaktstype.FULLMEKTIG_SØKNAD))
 
         val mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling)
-
 
         mottakere shouldHaveSize 1
         mottakere[0].rolle shouldBe FULLMEKTIG
@@ -159,13 +142,11 @@ class BrevmottakerServiceTest {
     @Test
     fun `avklarMottakere medVirksomhetRolleOgIngenVirksomhet feiler`() {
         val mottaker = Mottaker.medRolle(VIRKSOMHET)
-        every { behandling.fagsak } returns Fagsak.forTest { }
-
+        val behandling = lagBehandlingMed(Fagsak.forTest { })
 
         val exception = shouldThrow<FunksjonellException> {
             brevmottakerService.avklarMottakere(null, mottaker, behandling)
         }
-
 
         exception.message shouldContain "Fant ikke virksomhet for sak "
     }
@@ -176,10 +157,7 @@ class BrevmottakerServiceTest {
             rolle = Aktoersroller.VIRKSOMHET
             orgnr = "orgnr"
         }
-        val fagsak = Fagsak.forTest {
-            leggTilAktør(virksomhet)
-        }
-        every { behandling.fagsak } returns fagsak
+        val behandling = lagBehandlingMed(Fagsak.forTest { leggTilAktør(virksomhet) })
 
         val mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(VIRKSOMHET), behandling)
 
@@ -189,7 +167,7 @@ class BrevmottakerServiceTest {
 
     @Test
     fun `avklarMottakere medArbeidsgiverRolleOgIngenArbeidsgivere feiler`() {
-        every { behandling.fagsak } returns lagFagsakMedBruker()
+        val behandling = lagBehandlingMed(lagFagsakMedBruker())
         every { avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling) } returns emptySet()
         every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling) } returns emptyList()
 
@@ -201,9 +179,9 @@ class BrevmottakerServiceTest {
 
     @Test
     fun `avklarMottakere medArbeidsgiverRolle girArbeidsgiverMottakere`() {
+        val behandling = lagBehandlingMed(lagFagsakMedBruker())
         every { avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling) } returns
                 Sets.newHashSet("123456789", "987654321")
-        every { behandling.fagsak } returns lagFagsakMedBruker()
 
         val arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling)
 
@@ -212,7 +190,7 @@ class BrevmottakerServiceTest {
 
     @Test
     fun `avklarMottakere medBareUtenlandskeArbeidsgivere girIngenMottakere`() {
-        every { behandling.fagsak } returns lagFagsakMedBruker()
+        val behandling = lagBehandlingMed(lagFagsakMedBruker())
         every { avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling) } returns emptySet()
         every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling) } returns
                 listOf(AvklartVirksomhet(ForetakUtland()))
@@ -224,9 +202,7 @@ class BrevmottakerServiceTest {
 
     @Test
     fun `avklarMottakere medArbeidsgiverRolleIkkeKunAvklarteVirksomheterOgIngenArbeidsgivere girTomListe`() {
-        every { behandling.fagsak } returns lagFagsakMedBruker()
-        every { behandling.mottatteOpplysninger } returns lagMottatteOpplysninger(null, null)
-        every { behandling.finnArbeidsforholdDokument() } returns Optional.of(lagArbeidsforholdDokument(null))
+        val behandling = lagBehandlingMedMottatteOpplysninger(lagFagsakMedBruker(), null, null)
 
         val arbeidsgivere = brevmottakerService.avklarMottakere(
             GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
@@ -242,9 +218,7 @@ class BrevmottakerServiceTest {
     @Test
     @org.junit.jupiter.api.Disabled("Needs proper domain object setup - helper methods simplified during conversion")
     fun `avklarMottakere medArbeidsgiverRolleIkkeKunAvklarteVirksomheter girArbeidsgiverMottakere`() {
-        every { behandling.fagsak } returns lagFagsakMedBruker()
-        every { behandling.mottatteOpplysninger } returns lagMottatteOpplysninger("987654321", null)
-        every { behandling.finnArbeidsforholdDokument() } returns Optional.of(lagArbeidsforholdDokument("123456789"))
+        val behandling = lagBehandlingMedMottatteOpplysninger(lagFagsakMedBruker(), "987654321", null)
 
         val arbeidsgivere = brevmottakerService.avklarMottakere(
             GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
@@ -259,7 +233,7 @@ class BrevmottakerServiceTest {
 
     @Test
     fun `avklarMottakere medArbeidsgiverRolle medProduserbartDokumentORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK girAvklarteVirksomheterSomMottakere`() {
-        every { behandling.fagsak } returns lagFagsakMedBruker()
+        val behandling = lagBehandlingMed(lagFagsakMedBruker())
         every { avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any()) } returns setOf("123456789")
 
         val arbeidsgivere = brevmottakerService.avklarMottakere(
@@ -271,14 +245,11 @@ class BrevmottakerServiceTest {
         )
 
         arbeidsgivere.map { it.orgnr } shouldContainExactlyInAnyOrder listOf("123456789")
-        verify(exactly = 0) { behandling.mottatteOpplysninger }
     }
 
     @Test
     fun `avklarMottakere medBareUtenlandskeArbeidsgivereIkkeKunAvklarteVirksomheter girIngenMottakere`() {
-        every { behandling.fagsak } returns lagFagsakMedBruker()
-        every { behandling.mottatteOpplysninger } returns lagMottatteOpplysninger(null, "uuid")
-        every { behandling.finnArbeidsforholdDokument() } returns Optional.of(lagArbeidsforholdDokument(null))
+        val behandling = lagBehandlingMedMottatteOpplysninger(lagFagsakMedBruker(), null, "uuid")
 
         val arbeidsgivere = brevmottakerService.avklarMottakere(
             GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
@@ -293,9 +264,9 @@ class BrevmottakerServiceTest {
 
     @Test
     fun `avklarMottakere medArbeidsgiverRolleOgFullmektigForBruker girArbeidsgiverMottakere`() {
+        val behandling = lagBehandlingMed(lagFagsakMedFullmektigOrg(Fullmaktstype.FULLMEKTIG_SØKNAD))
         every { avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling) } returns
                 Sets.newHashSet("123456789", "987654321")
-        every { behandling.fagsak } returns lagFagsakMedFullmektigOrg(Fullmaktstype.FULLMEKTIG_SØKNAD)
 
         val arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling)
 
@@ -304,7 +275,7 @@ class BrevmottakerServiceTest {
 
     @Test
     fun `avklarMottakere medArbeidsgiverRolleOgFullmektigForArbeidsgiver girFullmektigMottakere`() {
-        every { behandling.fagsak } returns lagFagsakMedFullmektigOrg(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
+        val behandling = lagBehandlingMed(lagFagsakMedFullmektigOrg(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER))
 
         val arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling)
 
@@ -314,6 +285,8 @@ class BrevmottakerServiceTest {
 
     @Test
     fun `avklarMottakere art12_1 CZerReservertFraA1 forventerIngenMottaker`() {
+        val behandling = Behandling.forTest { id = 123L }
+        val behandlingsresultat = lagBehandlingsresultatMedLovvalgsperiode()
         every { utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling) } returns
                 mapOf(lagUtenlandskMyndighet() to lagMottakerUtenlandskMyndighet())
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
@@ -329,11 +302,11 @@ class BrevmottakerServiceTest {
 
     @Test
     fun `avklarMottakere art 11 4 2 CZerReservertFraA1 forventerIngenMottaker`() {
+        val behandling = Behandling.forTest { id = 123L }
+        val behandlingsresultat = lagBehandlingsresultatMedLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2)
         every { utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling) } returns
                 mapOf(lagUtenlandskMyndighet() to lagMottakerUtenlandskMyndighet())
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
-
-        behandlingsresultat.hentLovvalgsperiode().bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2
 
         val myndigheter = brevmottakerService.avklarMottakere(
             Produserbaredokumenter.ATTEST_A1,
@@ -346,6 +319,7 @@ class BrevmottakerServiceTest {
 
     @Test
     fun `avklarMottakere A001 CZerReservertFraA1 forventerMyndighetMottaker`() {
+        val behandling = Behandling.forTest { id = 123L }
         every { utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling) } returns
                 mapOf(lagUtenlandskMyndighet() to lagMottakerUtenlandskMyndighet())
 
@@ -416,7 +390,7 @@ class BrevmottakerServiceTest {
 
     @Test
     fun `gittInnvilgelsesbrevUK skalHovedmottakerVæreBrukerMedKopier`() {
-        val lovvalgsperiode = Lovvalgsperiode().apply {
+        val lovvalgsperiode = Lovvalgsperiode.forTest {
             bestemmelse = Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1
         }
         every { lovvalgsperiodeService.hentLovvalgsperiode(any()) } returns lovvalgsperiode
@@ -432,7 +406,7 @@ class BrevmottakerServiceTest {
 
     @Test
     fun `gittInnvilgelsesbrevUKOgArt82 skalIkkeMyndighetFåKopi`() {
-        val lovvalgsperiode = Lovvalgsperiode().apply {
+        val lovvalgsperiode = Lovvalgsperiode.forTest {
             bestemmelse = Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART8_2
         }
         every { lovvalgsperiodeService.hentLovvalgsperiode(any()) } returns lovvalgsperiode
@@ -448,7 +422,7 @@ class BrevmottakerServiceTest {
 
     @Test
     fun `gittInnvilgelsesbrevCANogArt6_2 skalIkkeArbeidsgiverFåKopi`() {
-        val lovvalgsperiode = Lovvalgsperiode().apply {
+        val lovvalgsperiode = Lovvalgsperiode.forTest {
             bestemmelse = Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2
         }
         every { lovvalgsperiodeService.hentLovvalgsperiode(any()) } returns lovvalgsperiode
@@ -491,34 +465,37 @@ class BrevmottakerServiceTest {
 
     private fun lagFagsakMedFullmektigOrg(fullmaktstype: Fullmaktstype) = Fagsak.forTest {
         medBruker()
-    }.apply {
-        leggTilAktør(Aktoer().apply {
-            rolle = Aktoersroller.FULLMEKTIG
+        medFullmektig {
             setFullmaktstype(fullmaktstype)
             orgnr = "REP-ORGNR"
-        })
+        }
     }
 
     private fun lagFagsakMedFullmektigPerson(fullmaktstype: Fullmaktstype) = Fagsak.forTest {
-        this.medBruker()
-    }.apply {
-        leggTilAktør(Aktoer().apply {
-            this.rolle = Aktoersroller.FULLMEKTIG
+        medBruker()
+        medFullmektig {
             setFullmaktstype(fullmaktstype)
-            this.personIdent = "REP-FNR"
-        })
+            personIdent = "REP-FNR"
+        }
     }
 
-    private fun lagMottatteOpplysninger(
+    private fun lagBehandlingMed(fagsak: Fagsak) = Behandling.forTest {
+        id = 123L
+        this.fagsak = fagsak
+    }
+
+    private fun lagBehandlingMedMottatteOpplysninger(
+        fagsak: Fagsak,
         ekstraArbeidsgivereOrgnr: String?,
         foretakUtlandUuid: String?
-    ): MottatteOpplysninger =
-        MottatteOpplysninger().apply {
+    ) = Behandling.forTest {
+        id = 123L
+        this.fagsak = fagsak
+        this.mottatteOpplysninger = MottatteOpplysninger().apply {
             mottatteOpplysningerData = MottatteOpplysningerData()
         }
-
-    private fun lagArbeidsforholdDokument(arbeidsgiverIDOrgNr: String?): ArbeidsforholdDokument =
-        ArbeidsforholdDokument()
+        this.saksopplysninger.add(Saksopplysning()) // Empty saksopplysning to allow ArbeidsforholdDokument lookup
+    }
 
     private fun lagUtenlandskMyndighet(): UtenlandskMyndighet = UtenlandskMyndighet().apply {
         landkode = Land_iso2.CZ

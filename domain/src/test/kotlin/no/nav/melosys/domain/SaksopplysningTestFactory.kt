@@ -3,6 +3,8 @@ package no.nav.melosys.domain
 import no.nav.melosys.domain.dokument.PersonDokumentTestFactory
 import no.nav.melosys.domain.dokument.SaksopplysningDokument
 import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.dokument.sed.SedDokument
+import no.nav.melosys.domain.kodeverk.Landkoder
 import java.time.Instant
 
 fun saksopplysningForTest(init: SaksopplysningTestFactory.Builder.() -> Unit = {}): Saksopplysning =
@@ -14,6 +16,25 @@ fun SaksopplysningTestFactory.Builder.personDokument(init: PersonDokumentTestFac
 
 fun SaksopplysningTestFactory.Builder.organisasjonDokument(init: OrganisasjonDokumentTestFactory.Builder.() -> Unit) = apply {
     this.dokument = OrganisasjonDokumentTestFactory.builder().apply(init).build()
+}
+
+fun SaksopplysningTestFactory.Builder.sedDokument(init: SedDokumentBuilder.() -> Unit) = apply {
+    this.dokument = SedDokumentBuilder().apply(init).build()
+}
+
+@MelosysTestDsl
+class SedDokumentBuilder {
+    var avsenderLandkode: Landkoder? = null
+    var rinaSaksnummer: String? = null
+    var rinaDokumentID: String? = null
+    var fnr: String? = null
+
+    fun build(): SedDokument = SedDokument().apply {
+        this.avsenderLandkode = this@SedDokumentBuilder.avsenderLandkode
+        this.rinaSaksnummer = this@SedDokumentBuilder.rinaSaksnummer
+        this.rinaDokumentID = this@SedDokumentBuilder.rinaDokumentID
+        this.fnr = this@SedDokumentBuilder.fnr
+    }
 }
 
 object SaksopplysningTestFactory {

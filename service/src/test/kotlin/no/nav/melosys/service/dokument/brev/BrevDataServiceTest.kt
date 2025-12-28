@@ -26,9 +26,10 @@ import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest
+import no.nav.melosys.domain.mottatteopplysninger.soeknad
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.UtenlandskMyndighetRepository
@@ -71,7 +72,7 @@ class BrevDataServiceTest {
             )
         )
 
-        every { behandlingsresultatRepository.findById(any()) } returns Optional.of(Behandlingsresultat())
+        every { behandlingsresultatRepository.findById(any()) } returns Optional.of(Behandlingsresultat.forTest { })
         every { saksbehandlerService.hentNavnForIdent(any()) } returns "Joe Moe"
         every { persondataFasade.hentFolkeregisterident(any()) } returns FNR
         every { persondataFasade.hentSammensattNavn(any()) } returns sammensattNavn
@@ -89,55 +90,41 @@ class BrevDataServiceTest {
         return myndighet
     }
 
-    private fun lagBehandling(mottatteOpplysningerData: MottatteOpplysningerData): Behandling {
-        val bruker = Aktoer().apply {
-            aktørId = AKTØRID
-            rolle = Aktoersroller.BRUKER
-        }
-
-        val arbeidsgiver = Aktoer().apply {
-            orgnr = ORGNR
-            rolle = Aktoersroller.ARBEIDSGIVER
-        }
-
-        val mottatteOppl = MottatteOpplysninger().apply {
-            this.mottatteOpplysningerData = mottatteOpplysningerData
-        }
-
-        return Behandling.forTest {
+    private fun lagBehandling(mottatteOpplysningerData: MottatteOpplysningerData): Behandling =
+        Behandling.forTest {
             id = 1L
             registrertDato = Instant.now()
             type = Behandlingstyper.FØRSTEGANG
-            mottatteOpplysninger = mottatteOppl
+            mottatteOpplysninger {
+                this.mottatteOpplysningerData = mottatteOpplysningerData
+            }
             fagsak {
                 medGsakSaksnummer()
-                aktører(setOf(bruker, arbeidsgiver))
+                medBruker { aktørId = AKTØRID }
+                leggTilAktør(Aktoer().apply {
+                    orgnr = ORGNR
+                    rolle = Aktoersroller.ARBEIDSGIVER
+                })
             }
         }
-    }
 
     private fun lagSøknadDokument(): Soeknad = Soeknad().apply {
         bosted.oppgittAdresse = lagStrukturertAdresse()
     }
 
-    private fun lagMottaker(rolle: Mottakerroller): Mottaker = Mottaker().apply {
-        this.rolle = rolle
-        when (rolle) {
-            Mottakerroller.BRUKER -> aktørId = AKTØRID
-            Mottakerroller.ARBEIDSGIVER, Mottakerroller.VIRKSOMHET, Mottakerroller.NORSK_MYNDIGHET -> orgnr = ORGNR
-            Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET -> institusjonID = "HR:987"
-            Mottakerroller.FULLMEKTIG -> throw IllegalArgumentException("Bruk lagMottakerFullmektig() for fullmektig mottaker")
-            else -> {}
-        }
+    private fun lagMottaker(rolle: Mottakerroller): Mottaker = when (rolle) {
+        Mottakerroller.BRUKER -> Mottaker(rolle = rolle, aktørId = AKTØRID)
+        Mottakerroller.ARBEIDSGIVER, Mottakerroller.VIRKSOMHET, Mottakerroller.NORSK_MYNDIGHET ->
+            Mottaker(rolle = rolle, orgnr = ORGNR)
+        Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET -> Mottaker(rolle = rolle, institusjonID = "HR:987")
+        Mottakerroller.FULLMEKTIG -> throw IllegalArgumentException("Bruk lagMottakerFullmektig() for fullmektig mottaker")
+        else -> Mottaker(rolle = rolle)
     }
 
-    private fun lagMottakerFullmektig(mottakerType: Aktoertype): Mottaker = Mottaker().apply {
-        rolle = Mottakerroller.FULLMEKTIG
-        when (mottakerType) {
-            Aktoertype.PERSON -> personIdent = REP_FNR
-            Aktoertype.ORGANISASJON -> orgnr = REP_ORGNR
-            else -> throw IllegalArgumentException("Mottakertype må være person eller organisasjon")
-        }
+    private fun lagMottakerFullmektig(mottakerType: Aktoertype): Mottaker = when (mottakerType) {
+        Aktoertype.PERSON -> Mottaker(rolle = Mottakerroller.FULLMEKTIG, personIdent = REP_FNR)
+        Aktoertype.ORGANISASJON -> Mottaker(rolle = Mottakerroller.FULLMEKTIG, orgnr = REP_ORGNR)
+        else -> throw IllegalArgumentException("Mottakertype må være person eller organisasjon")
     }
 
     private fun hentFullmektigOrgAktør(): Aktoer = Aktoer().apply {
@@ -186,9 +173,10 @@ class BrevDataServiceTest {
         institusjonID = INSTITUSJON_ID
     }
 
-    private fun lagMottakerMyndighet(): Mottaker = Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET).apply {
+    private fun lagMottakerMyndighet(): Mottaker = Mottaker(
+        rolle = Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET,
         institusjonID = INSTITUSJON_ID
-    }
+    )
 
     @Test
     fun `lag A1 til utenlandsk myndighet`() {
@@ -219,10 +207,10 @@ class BrevDataServiceTest {
 
     @Test
     fun `skal returnere utenlandsk myndighet når mottaker har gyldig institusjonID`() {
-        val mottaker = Mottaker().apply {
-            rolle = Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET
+        val mottaker = Mottaker(
+            rolle = Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET,
             institusjonID = "DE:TEST"
-        }
+        )
         val tyskMyndighet = UtenlandskMyndighet().apply {
             institusjonskode = "TEST"
         }
@@ -401,10 +389,7 @@ class BrevDataServiceTest {
     @Test
     fun `lagMottaker bruker riktigeVerdier`() {
         every { persondataFasade.hentPerson(AKTØRID) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
-        val mottaker = Mottaker().apply {
-            rolle = Mottakerroller.BRUKER
-            aktørId = AKTØRID
-        }
+        val mottaker = Mottaker(rolle = Mottakerroller.BRUKER, aktørId = AKTØRID)
 
         val brevMottaker = service.lagMottaker(mottaker, null)
 
@@ -422,10 +407,7 @@ class BrevDataServiceTest {
 
     @Test
     fun `lagMottaker arbeidsgiver riktigeVerdier`() {
-        val mottaker = Mottaker().apply {
-            rolle = Mottakerroller.ARBEIDSGIVER
-            orgnr = ORGNR
-        }
+        val mottaker = Mottaker(rolle = Mottakerroller.ARBEIDSGIVER, orgnr = ORGNR)
 
         val brevMottaker = service.lagMottaker(mottaker, null)
 
@@ -467,10 +449,7 @@ class BrevDataServiceTest {
 
     @Test
     fun `lagMottaker trygdemyndighetIkkeUtenlandsk riktigeVerdier`() {
-        val mottaker = Mottaker().apply {
-            rolle = Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET
-            orgnr = ORGNR
-        }
+        val mottaker = Mottaker(rolle = Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET, orgnr = ORGNR)
 
         val brevMottaker = service.lagMottaker(mottaker, null)
 
@@ -489,10 +468,7 @@ class BrevDataServiceTest {
     @Test
     fun `lagMottaker fullmektigPerson riktigeVerdier`() {
         every { persondataFasade.hentPerson(REP_FNR) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
-        val mottaker = Mottaker().apply {
-            rolle = Mottakerroller.FULLMEKTIG
-            personIdent = REP_FNR
-        }
+        val mottaker = Mottaker(rolle = Mottakerroller.FULLMEKTIG, personIdent = REP_FNR)
 
         val brevMottaker = service.lagMottaker(mottaker, null)
 
@@ -510,10 +486,7 @@ class BrevDataServiceTest {
 
     @Test
     fun `lagMottaker fullmektigOrganisasjon riktigeVerdier`() {
-        val mottaker = Mottaker().apply {
-            rolle = Mottakerroller.FULLMEKTIG
-            orgnr = REP_ORGNR
-        }
+        val mottaker = Mottaker(rolle = Mottakerroller.FULLMEKTIG, orgnr = REP_ORGNR)
 
         val brevMottaker = service.lagMottaker(mottaker, null)
 

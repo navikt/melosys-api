@@ -8,14 +8,12 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype
+import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
-import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.exception.FunksjonellException
@@ -65,43 +63,37 @@ class DokgenMapperDatahenterTest {
 
     @Test
     fun `hentFullmektigNavn fullmektig person henter sammensatt navn person`() {
-        val fullmektig = Aktoer().apply {
-            personIdent = DokgenTestData.FNR_FULLMEKTIG
-            rolle = Aktoersroller.FULLMEKTIG
-            setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD)
-        }
-        val fagsak = Fagsak.forTest {
-            aktører = mutableSetOf(fullmektig, Aktoer())
-        }
-        val brevbestilling = DokgenBrevbestilling().apply {
-            behandling = Behandling.forTest {
-                this.fagsak = fagsak
+        val behandling = Behandling.forTest {
+            fagsak {
+                medBruker()
+                medFullmektig {
+                    personIdent = FNR_FULLMEKTIG
+                    setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD)
+                }
             }
         }
-        every { persondataFasade.hentSammensattNavn(DokgenTestData.FNR_FULLMEKTIG) } returns "Etternavn, Fornavn"
+        val brevbestilling = lagBrevbestilling(behandling)
+        every { persondataFasade.hentSammensattNavn(FNR_FULLMEKTIG) } returns "Etternavn, Fornavn"
 
 
         dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD)
 
 
-        verify { persondataFasade.hentSammensattNavn(DokgenTestData.FNR_FULLMEKTIG) }
+        verify { persondataFasade.hentSammensattNavn(FNR_FULLMEKTIG) }
     }
 
     @Test
     fun `hentFullmektigNavn fullmektig org henter navn organisasjon`() {
-        val fullmektig = Aktoer().apply {
-            orgnr = ORGNR_FULLMEKTIG
-            rolle = Aktoersroller.FULLMEKTIG
-            setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD)
-        }
-        val fagsak = Fagsak.forTest {
-            aktører = mutableSetOf(fullmektig, Aktoer())
-        }
-        val brevbestilling = DokgenBrevbestilling().apply {
-            behandling = Behandling.forTest {
-                this.fagsak = fagsak
+        val behandling = Behandling.forTest {
+            fagsak {
+                medBruker()
+                medFullmektig {
+                    orgnr = ORGNR_FULLMEKTIG
+                    setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD)
+                }
             }
         }
+        val brevbestilling = lagBrevbestilling(behandling)
         every { eregFasade.hentOrganisasjonNavn(ORGNR_FULLMEKTIG) } returns "Orgnavn"
 
 
@@ -124,8 +116,11 @@ class DokgenMapperDatahenterTest {
 
     @Test
     fun `hentPersondata mottaker er virksomhet returnerer null`() {
-        val behandling = DokgenTestData.lagBehandling()
-        behandling.fagsak.aktører.forEach { it.rolle = Aktoersroller.VIRKSOMHET }
+        val behandling = Behandling.forTest {
+            fagsak {
+                medVirksomhet()
+            }
+        }
 
 
         val response = dokgenMapperDatahenter.hentPersondata(behandling)
@@ -136,7 +131,7 @@ class DokgenMapperDatahenterTest {
     }
 
     @Test
-    fun `hentPersonMottaker mottaker aktørID bruker aktørID`() {
+    fun `hentPersonMottaker mottaker aktoerID bruker aktoerID`() {
         every { persondataFasade.hentPerson(FNR_BRUKER) } returns mockk()
 
 
@@ -195,5 +190,9 @@ class DokgenMapperDatahenterTest {
         shouldThrow<FunksjonellException> {
             dokgenMapperDatahenter.hentAvklartVirksomhet(DokgenTestData.lagBehandling())
         }
+    }
+
+    private fun lagBrevbestilling(behandling: Behandling) = DokgenBrevbestilling().apply {
+        this.behandling = behandling
     }
 }

@@ -77,7 +77,8 @@ First, read the testing skill for context:
 |-------|-----------------|---------------|
 | Phase 1: service/avgift | 8 | 88 |
 | Phase 1: service/behandling | 7 (+1 no changes) | 116 |
-| **Total** | **15** | **204** |
+| Phase 1: service/dokument | 13 | 213 |
+| **Total** | **28** | **417** |
 
 ### New Test Factories Created
 - `VilkaarsresultatTestFactory` - Created during Phase 1 service/behandling conversion
@@ -170,7 +171,20 @@ val behandling = Behandling.forTest { /* config */ }
   - ReplikerBehandlingsresultatServiceTest.kt (8 tests)
   - VilkaarsresultatServiceTest.kt (11 tests)
   - AvsluttArt13BehandlingJobbTest.kt (no changes needed - only mocks)
-- [ ] service/dokument/** - 25 files
+- [x] service/dokument/** - 13 files converted (213 tests passing)
+  - BrevmottakerServiceTest.kt (31 tests)
+  - DokumentServiceTest.kt (6 tests)
+  - BrevDataServiceTest.kt (17 tests)
+  - BrevDataByggerA001Test.kt (12 tests)
+  - BrevDataByggerInnvilgelseTest.kt (12 tests)
+  - BrevDataByggerInnvilgelseFlereLandTest.kt (4 tests)
+  - A1MapperTest.kt (25 tests)
+  - AttestMapperTest.kt (1 test)
+  - AvslagYrkesaktivMapperTest.kt (3 tests)
+  - DokgenMapperDatahenterTest.kt (9 tests)
+  - ÅrsavregningVedtakMapperTest.kt (12 tests)
+  - EessiServiceTest.kt (42 tests)
+  - SedDataByggerTest.kt (39 tests)
 - [ ] service/eessi/** - 8 files
 - [ ] service/sak/** - 12 files
 - [ ] service/vedtak/** - 6 files

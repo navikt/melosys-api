@@ -87,6 +87,12 @@ object FagsakTestFactory {
             })
         }
 
+        fun medFullmektig(init: Aktoer.() -> Unit = {}) = apply {
+            leggTilAktør(Aktoer().apply {
+                rolle = Aktoersroller.FULLMEKTIG
+            }.apply(init))
+        }
+
         fun behandlinger(behandlinger: List<Behandling>) = apply { this.behandlinger = behandlinger.toMutableList() }
         fun behandlinger(behandlinger: Behandling) = apply { this.behandlinger = mutableListOf(behandlinger) }
 
