@@ -3,9 +3,7 @@ package no.nav.melosys.saksflyt.steg.brev
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.brev.Mottaker
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker
 import no.nav.melosys.domain.kodeverk.Mottakerroller.*
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD
@@ -31,22 +29,19 @@ class SendForvaltningsmeldingTest {
     @Test
     fun `utfør skal bestille forvaltningsmelding når mottaker er bruker`() {
         val behandlingID = 21432L
-        val behandling = Behandling.forTest {
-            id = behandlingID
-        }
-        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
-
         val prosessinstans = Prosessinstans.forTest {
             type = ProsessType.OPPRETT_SAK
             status = ProsessStatus.KLAR
-            this.behandling = behandling
+            behandling {
+                id = behandlingID
+            }
             medData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.BRUKER)
             medData(ProsessDataKey.SAKSBEHANDLER, "TEST")
         }
 
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns prosessinstans.behandling
 
         sendForvaltningsmelding.utfør(prosessinstans)
-
 
         verify { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) }
         verify {
@@ -56,7 +51,7 @@ class SendForvaltningsmeldingTest {
                 null,
                 "TEST",
                 null,
-                behandling
+                prosessinstans.behandling
             )
         }
     }
@@ -102,29 +97,26 @@ class SendForvaltningsmeldingTest {
     @Test
     fun `utfør skal bestille forvaltningsmelding når mottaker er avsender og avsender er annen organisasjon`() {
         val behandlingID = 21432L
-        val behandling = Behandling.forTest {
-            id = behandlingID
-        }
-        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
-
         val prosessinstans = Prosessinstans.forTest {
             type = ProsessType.OPPRETT_SAK
             status = ProsessStatus.KLAR
-            this.behandling = behandling
+            behandling {
+                id = behandlingID
+            }
             medData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.AVSENDER)
             medData(ProsessDataKey.AVSENDER_ID, ANNEN_ORG_NR)
             medData(ProsessDataKey.SAKSBEHANDLER, "TEST")
         }
 
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns prosessinstans.behandling
 
         sendForvaltningsmelding.utfør(prosessinstans)
-
 
         val forventetMottaker = Mottaker.medRolle(ANNEN_ORGANISASJON).apply {
             orgnr = ANNEN_ORG_NR
         }
         verify { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) }
-        verify { brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, listOf(forventetMottaker), null, "TEST", null, behandling) }
+        verify { brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, listOf(forventetMottaker), null, "TEST", null, prosessinstans.behandling) }
     }
 
     @Test

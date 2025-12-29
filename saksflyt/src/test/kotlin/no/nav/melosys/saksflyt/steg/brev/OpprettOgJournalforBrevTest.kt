@@ -120,7 +120,7 @@ class OpprettOgJournalforBrevTest {
             type = ProsessType.OPPRETT_SAK
             status = ProsessStatus.KLAR
             behandling {
-                fagsak = TestdataFactory.lagBehandling().fagsak
+                fagsak { }
                 type = Behandlingstyper.FØRSTEGANG
             }
         }
@@ -158,18 +158,19 @@ class OpprettOgJournalforBrevTest {
 
     @Test
     fun `utfør skal opprette og journalføre brev til virksomhet`() {
-        val virksomhet = Aktoer().apply {
-            orgnr = "orgnr"
-            rolle = Aktoersroller.VIRKSOMHET
-        }
+        val virksomhetOrgnr = "orgnr"
         val behandling = Behandling.forTest {
             fagsak {
-                aktører.add(virksomhet)
+                leggTilAktør(Aktoer().apply {
+                    orgnr = virksomhetOrgnr
+                    rolle = Aktoersroller.VIRKSOMHET
+                })
             }
             type = Behandlingstyper.FØRSTEGANG
             tema = Behandlingstema.YRKESAKTIV
             id = 1L
         }
+        val virksomhet = behandling.fagsak.hentVirksomhet()
         every { mockBehandlingService.hentBehandling(behandling.id) } returns behandling
         every { mockJoarkFasade.opprettJournalpost(capture(opprettJournalpostCaptor), any()) } returns "12234"
         every { mockDokgenService.hentDokumentInfo(any()) } returns TestdataFactory.lagDokumentInfo()
@@ -208,9 +209,7 @@ class OpprettOgJournalforBrevTest {
         every { mockJoarkFasade.opprettJournalpost(any(), any()) } returns "12234"
         every { mockEregFasade.hentOrganisasjonNavn(any()) } returns "Advokatene AS"
 
-        val mottaker = Mottaker.medRolle(Mottakerroller.FULLMEKTIG).apply {
-            orgnr = "987654321"
-        }
+        val mottaker = Mottaker(rolle = Mottakerroller.FULLMEKTIG, orgnr = "987654321")
         val brevbestilling = DokgenBrevbestilling.Builder()
             .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .build()
@@ -415,8 +414,14 @@ class OpprettOgJournalforBrevTest {
     @Test
     fun `utfør skal opprette og journalføre brev med sakstema medlemskap lovvalg`() {
         val captor = slot<OpprettJournalpost>()
-        val behandling = TestdataFactory.lagBehandling().apply {
-            fagsak.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        val behandling = Behandling.forTest {
+            fagsak {
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                medBruker()
+            }
+            type = Behandlingstyper.FØRSTEGANG
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            id = 1L
         }
         every { mockBehandlingService.hentBehandling(any()) } returns behandling
         every { mockJoarkFasade.opprettJournalpost(capture(captor), any()) } returns "12234"
@@ -439,8 +444,14 @@ class OpprettOgJournalforBrevTest {
     @Test
     fun `utfør skal opprette og journalføre brev med sakstema trygdeavgift`() {
         val captor = slot<OpprettJournalpost>()
-        val behandling = TestdataFactory.lagBehandling().apply {
-            fagsak.tema = Sakstemaer.TRYGDEAVGIFT
+        val behandling = Behandling.forTest {
+            fagsak {
+                tema = Sakstemaer.TRYGDEAVGIFT
+                medBruker()
+            }
+            type = Behandlingstyper.FØRSTEGANG
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            id = 1L
         }
         every { mockBehandlingService.hentBehandling(any()) } returns behandling
         every { mockJoarkFasade.opprettJournalpost(capture(captor), any()) } returns "12234"
@@ -463,8 +474,14 @@ class OpprettOgJournalforBrevTest {
     @Test
     fun `utfør skal opprette og journalføre brev med sakstema unntak`() {
         val captor = slot<OpprettJournalpost>()
-        val behandling = TestdataFactory.lagBehandling().apply {
-            fagsak.tema = Sakstemaer.UNNTAK
+        val behandling = Behandling.forTest {
+            fagsak {
+                tema = Sakstemaer.UNNTAK
+                medBruker()
+            }
+            type = Behandlingstyper.FØRSTEGANG
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            id = 1L
         }
         every { mockBehandlingService.hentBehandling(any()) } returns behandling
         every { mockJoarkFasade.opprettJournalpost(capture(captor), any()) } returns "12234"
@@ -707,11 +724,10 @@ class OpprettOgJournalforBrevTest {
             medData(ProsessDataKey.ORGNR, mottaker.orgnr)
         }
 
-    private fun lagMottaker(aktørID: String) = Mottaker.medRolle(Mottakerroller.BRUKER).apply {
+    private fun lagMottaker(aktørID: String) = Mottaker(
+        rolle = Mottakerroller.BRUKER,
         aktørId = aktørID
-        orgnr = null
-        institusjonID = null
-    }
+    )
 
     private fun lagJournalpost(journalpostId: String, dokumentId: String, tittel: String) =
         Journalpost(journalpostId).apply {

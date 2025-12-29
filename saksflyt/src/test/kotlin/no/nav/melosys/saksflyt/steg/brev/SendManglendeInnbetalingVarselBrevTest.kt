@@ -5,8 +5,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.*
-import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.Fullmakt
+import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -16,6 +16,7 @@ import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.behandling
 import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.dokument.DokumentServiceFasade
@@ -46,14 +47,14 @@ class SendManglendeInnbetalingVarselBrevTest {
 
     @Test
     fun `utfør skal produsere dokument med korrekt data`() {
-        val prosessinstans = Prosessinstans.forTest()
-        val behandling = Behandling.forTest {
-            id = 123
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = 123
+            }
+            medData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus.DELVIS_BETALT)
+            medData(ProsessDataKey.FAKTURANUMMER, "Fakturanummer")
+            medData(ProsessDataKey.MOTTATT_DATO, LocalDate.now())
         }
-        prosessinstans.behandling = behandling
-        prosessinstans.setData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus.DELVIS_BETALT)
-        prosessinstans.setData(ProsessDataKey.FAKTURANUMMER, "Fakturanummer")
-        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now())
 
         val capturedBrevbestillingDto = slot<BrevbestillingDto>()
 
@@ -75,18 +76,18 @@ class SendManglendeInnbetalingVarselBrevTest {
 
     @Test
     fun `utfør skal produsere dokument med korrekt data når det er EØS behanling med lovvalgsperioder`() {
-        val prosessinstans = Prosessinstans.forTest()
-        val behandling = Behandling.forTest {
-            id = 123
-            fagsak {
-                type = Sakstyper.EU_EOS
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = 123
+                fagsak {
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                }
             }
+            medData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus.DELVIS_BETALT)
+            medData(ProsessDataKey.FAKTURANUMMER, "Fakturanummer")
+            medData(ProsessDataKey.MOTTATT_DATO, LocalDate.now())
         }
-        prosessinstans.behandling = behandling
-        prosessinstans.setData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus.DELVIS_BETALT)
-        prosessinstans.setData(ProsessDataKey.FAKTURANUMMER, "Fakturanummer")
-        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now())
 
         val capturedBrevbestillingDto = slot<BrevbestillingDto>()
 
@@ -97,7 +98,6 @@ class SendManglendeInnbetalingVarselBrevTest {
         verify { dokumentServiceFasade.produserDokument(123, capture(capturedBrevbestillingDto)) }
 
         capturedBrevbestillingDto.captured.run {
-            behandling shouldBe behandling
             produserbardokument shouldBe Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING
             mottaker shouldBe Mottakerroller.BRUKER
             betalingsfrist shouldBe LocalDate.now().plusWeeks(4)
@@ -111,20 +111,19 @@ class SendManglendeInnbetalingVarselBrevTest {
 
     @Test
     fun `utfør skal produsere dokument med riktig fullmektigForBetaling`() {
-        val prosessinstans = Prosessinstans.forTest()
-        val behandling = Behandling.forTest {
-            id = 123
-            fagsak {
-                leggTilAktør(Aktoer().apply {
-                    aktørId = "123"
-                    rolle = Aktoersroller.FULLMEKTIG
-                    fullmakter = mutableSetOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
-                })
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = 123
+                fagsak {
+                    medFullmektig {
+                        aktørId = "123"
+                        fullmakter = mutableSetOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
+                    }
+                }
             }
+            medData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus.DELVIS_BETALT)
+            medData(ProsessDataKey.MOTTATT_DATO, LocalDate.now())
         }
-        prosessinstans.behandling = behandling
-        prosessinstans.setData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus.DELVIS_BETALT)
-        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now())
         every { (trygdeavgiftsberegningService.finnFakturamottakerNavn(123)) } returns "Isa Testesen"
 
         val capturedBrevbestillingDto = slot<BrevbestillingDto>()

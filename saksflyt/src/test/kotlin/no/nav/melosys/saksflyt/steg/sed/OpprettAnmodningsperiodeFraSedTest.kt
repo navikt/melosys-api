@@ -1,8 +1,11 @@
 package no.nav.melosys.saksflyt.steg.sed
 
 import java.time.LocalDate
+import java.util.Collections
 
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.dokument.medlemskap.Periode
+import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
@@ -10,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.unntak.AnmodningsperiodeService
+import no.nav.melosys.domain.forTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -41,15 +45,17 @@ class OpprettAnmodningsperiodeFraSedTest {
     }
 
     @Test
-    fun `utfor skal lagre anmodningsperiode med full dekning naar lovvalgsland er Norge`() {
-        val fom = LocalDate.now()
-        val tom = LocalDate.now().plusYears(1)
-        val prosessinstans = lagProsessinstans(
-            lovvalgslandKode = Landkoder.NO,
-            unntakFraLovvalgslandKode = Landkoder.SE,
-            fom = fom,
-            tom = tom
-        )
+    fun `utfør skal lagre anmodningsperiode med full dekning når lovvalgsland er Norge`() {
+        val saksopplysning = Saksopplysning().apply {
+            type = SaksopplysningType.SEDOPPL
+            dokument = lagSedDokument(Landkoder.NO)
+        }
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = 1L
+                saksopplysninger = mutableSetOf(saksopplysning)
+            }
+        }
 
         every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns prosessinstans.behandling
         every { anmodningsperiodeService.lagreAnmodningsperioder(any(), capture(anmodningsperiodeSlot)) } returns emptyList()
@@ -60,28 +66,21 @@ class OpprettAnmodningsperiodeFraSedTest {
 
         verify { anmodningsperiodeService.lagreAnmodningsperioder(1L, any()) }
         val lagredePerioder = anmodningsperiodeSlot.captured
-        lagredePerioder shouldContain Anmodningsperiode(
-            fom,
-            tom,
-            Land_iso2.NO,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
-            null,
-            Land_iso2.SE,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
-            Trygdedekninger.FULL_DEKNING_EOSFO
-        )
+        lagredePerioder shouldContain lagForventetAnmodningsperiode(saksopplysning.dokument as SedDokument, Trygdedekninger.FULL_DEKNING_EOSFO)
     }
 
     @Test
-    fun `utfor skal lagre anmodningsperiode uten dekning naar lovvalgsland ikke er Norge`() {
-        val fom = LocalDate.now()
-        val tom = LocalDate.now().plusYears(1)
-        val prosessinstans = lagProsessinstans(
-            lovvalgslandKode = Landkoder.DE,
-            unntakFraLovvalgslandKode = Landkoder.NO,
-            fom = fom,
-            tom = tom
-        )
+    fun `utfør skal lagre anmodningsperiode uten dekning når lovvalgsland ikke er Norge`() {
+        val saksopplysning = Saksopplysning().apply {
+            type = SaksopplysningType.SEDOPPL
+            dokument = lagSedDokument(Landkoder.DE)
+        }
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = 1L
+                saksopplysninger = mutableSetOf(saksopplysning)
+            }
+        }
 
         every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns prosessinstans.behandling
         every { anmodningsperiodeService.lagreAnmodningsperioder(any(), capture(anmodningsperiodeSlot)) } returns emptyList()
@@ -92,36 +91,28 @@ class OpprettAnmodningsperiodeFraSedTest {
 
         verify { anmodningsperiodeService.lagreAnmodningsperioder(1L, any()) }
         val lagredePerioder = anmodningsperiodeSlot.captured
-        lagredePerioder shouldContain Anmodningsperiode(
-            fom,
-            tom,
-            Land_iso2.DE,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
-            null,
-            Land_iso2.NO,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
-            Trygdedekninger.UTEN_DEKNING
-        )
+        lagredePerioder shouldContain lagForventetAnmodningsperiode(saksopplysning.dokument as SedDokument, Trygdedekninger.UTEN_DEKNING)
     }
 
-    private fun lagProsessinstans(
-        lovvalgslandKode: Landkoder,
-        unntakFraLovvalgslandKode: Landkoder,
-        fom: LocalDate,
-        tom: LocalDate
-    ) = Prosessinstans.forTest {
-        behandling {
-            id = 1L
-            saksopplysning {
-                type = SaksopplysningType.SEDOPPL
-                sedDokument {
-                    this@sedDokument.lovvalgsperiode(fom, tom)
-                    this@sedDokument.lovvalgBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
-                    this@sedDokument.lovvalgslandKode = lovvalgslandKode
-                    this@sedDokument.unntakFraLovvalgBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
-                    this@sedDokument.unntakFraLovvalgslandKode = unntakFraLovvalgslandKode
-                }
-            }
-        }
+    private fun lagSedDokument(lovvalgslandKode: Landkoder) = SedDokument().apply {
+        lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
+        lovvalgBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
+        this.lovvalgslandKode = lovvalgslandKode
+        unntakFraLovvalgBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+        unntakFraLovvalgslandKode = if (lovvalgslandKode == Landkoder.NO) Landkoder.SE else Landkoder.NO
     }
+
+    private fun lagForventetAnmodningsperiode(
+        sedDokument: SedDokument,
+        trygdedekning: Trygdedekninger
+    ) = Anmodningsperiode(
+        sedDokument.hentLovvalgsperiode().fom,
+        sedDokument.hentLovvalgsperiode().tom,
+        Land_iso2.valueOf(sedDokument.lovvalgslandKode!!.name),
+        sedDokument.lovvalgBestemmelse,
+        null,
+        Land_iso2.valueOf(sedDokument.unntakFraLovvalgslandKode!!.name),
+        sedDokument.unntakFraLovvalgBestemmelse,
+        trygdedekning
+    )
 }

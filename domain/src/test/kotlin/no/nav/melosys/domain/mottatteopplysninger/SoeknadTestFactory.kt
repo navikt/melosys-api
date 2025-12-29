@@ -52,8 +52,11 @@ object SoeknadTestFactory {
         }
 
         /** Add a foreign business (foretak utland) */
-        fun foretakUtland(orgnr: String) = apply {
-            foretakUtlandListe.add(ForetakUtland().apply { this.orgnr = orgnr })
+        fun foretakUtland(orgnr: String, selvstendig: Boolean = false) = apply {
+            foretakUtlandListe.add(ForetakUtland().apply {
+                this.orgnr = orgnr
+                this.selvstendigNæringsvirksomhet = selvstendig
+            })
         }
 
         /** Add a self-employed business (selvstendig foretak) */
