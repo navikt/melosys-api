@@ -124,12 +124,14 @@ class SedDokumentBuilder {
     var rinaSaksnummer: String? = null
     var rinaDokumentID: String? = null
     var fnr: String? = null
+    var sedType: no.nav.melosys.domain.eessi.SedType? = null
 
     fun build(): SedDokument = SedDokument().apply {
         this.avsenderLandkode = this@SedDokumentBuilder.avsenderLandkode
         this.rinaSaksnummer = this@SedDokumentBuilder.rinaSaksnummer
         this.rinaDokumentID = this@SedDokumentBuilder.rinaDokumentID
         this.fnr = this@SedDokumentBuilder.fnr
+        this.sedType = this@SedDokumentBuilder.sedType
     }
 }
 

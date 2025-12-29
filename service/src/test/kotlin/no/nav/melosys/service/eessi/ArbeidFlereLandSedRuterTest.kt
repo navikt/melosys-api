@@ -54,51 +54,62 @@ class ArbeidFlereLandSedRuterTest {
 
     private lateinit var arbeidFlereLandSedRuter: ArbeidFlereLandSedRuter
 
-    private val behandlingID = 123L
-    private val gsakSaksnummer = 1111L
-
-    private lateinit var behandling: Behandling
-    private lateinit var behandlingsresultat: Behandlingsresultat
-    private lateinit var fagsak: Fagsak
-    private lateinit var melosysEessiMelding: MelosysEessiMelding
-    private lateinit var prosessinstans: Prosessinstans
+    companion object {
+        private const val BEHANDLING_ID = 123L
+        private const val GSAK_SAKSNUMMER = 1111L
+        private const val AKTØR_ID = "aktørID"
+    }
 
     @BeforeEach
     fun setup() {
         arbeidFlereLandSedRuter = ArbeidFlereLandSedRuter(
-            prosessinstansService, fagsakService, behandlingService,
-            behandlingsresultatService, oppgaveService
+            prosessinstansService,
+            fagsakService,
+            behandlingService,
+            behandlingsresultatService,
+            oppgaveService
         )
+    }
 
-        behandling = Behandling.forTest {
-            id = behandlingID
+    private fun lagMelosysEessiMelding(
+        lovvalgsland: String? = null
+    ) = MelosysEessiMelding().apply {
+        bucType = BucType.LA_BUC_02.name
+        sedType = SedType.A003.name
+        aktoerId = AKTØR_ID
+        lovvalgsland?.let { this.lovvalgsland = it }
+    }
+
+    private fun lagFagsakMedBehandling(
+        tema: Sakstemaer = Sakstemaer.UNNTAK,
+        behandlingTema: Behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_NORGE,
+        behandlingStatus: Behandlingsstatus = Behandlingsstatus.OPPRETTET
+    ): Pair<Fagsak, Behandling> {
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            this.tema = behandlingTema
+            status = behandlingStatus
         }
-
-        fagsak = Fagsak.forTest {
+        val fagsak = Fagsak.forTest {
+            tema(tema)
             behandlinger(behandling)
         }
-
-        melosysEessiMelding = MelosysEessiMelding().apply {
-            bucType = BucType.LA_BUC_02.name
-            sedType = SedType.A003.name
-            aktoerId = "aktørID"
-        }
-        prosessinstans = Prosessinstans.forTest()
-
-        behandlingsresultat = Behandlingsresultat().apply {
-            behandling = this@ArbeidFlereLandSedRuterTest.behandling
-        }
+        return fagsak to behandling
     }
 
     @Test
     fun finnsakOgBestemRuting_utenArkivsaknummer_forventNySakRuting() {
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        val melosysEessiMelding = lagMelosysEessiMelding()
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        }
 
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, null)
 
         verify {
             prosessinstansService.opprettProsessinstansNySakArbeidFlereLand(
-                melosysEessiMelding, Sakstemaer.UNNTAK,
+                melosysEessiMelding,
+                Sakstemaer.UNNTAK,
                 Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
                 melosysEessiMelding.aktoerId
             )
@@ -107,84 +118,118 @@ class ArbeidFlereLandSedRuterTest {
 
     @Test
     fun finnsakOgBestemRuting_fagsakEksistererIkke_kasterException() {
-        val testProsessinstans = Prosessinstans.forTest()
+        val prosessinstans = Prosessinstans.forTest()
 
         every { fagsakService.finnFagsakFraArkivsakID(0L) } returns Optional.empty()
 
         val exception = shouldThrow<FunksjonellException> {
-            arbeidFlereLandSedRuter.rutSedTilBehandling(testProsessinstans, 0L)
+            arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, 0L)
         }
         exception.message shouldContain "Finner ingen sak tilknyttet"
     }
 
     @Test
     fun finnSakOgBestemRuting_norgeUtpektNyttTemaAnnetLandUtpektVedtakIkkeFattet_forventNyBehandling() {
-        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
-        melosysEessiMelding.lovvalgsland = Landkoder.SE.kode
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        val (fagsak, behandling) = lagFagsakMedBehandling(
+            behandlingTema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+        )
+        val melosysEessiMelding = lagMelosysEessiMelding(lovvalgsland = Landkoder.SE.kode)
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        }
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            this.behandling = behandling
+        }
 
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
-        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns Optional.of(fagsak)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER) } returns Optional.of(fagsak)
 
-        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer)
+        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER)
 
         verify {
             prosessinstansService.opprettProsessinstansNyBehandlingArbeidFlereLand(
-                melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, gsakSaksnummer
+                melosysEessiMelding,
+                Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
+                GSAK_SAKSNUMMER
             )
         }
     }
 
     @Test
     fun finnSakOgBestemRuting_norgeUtpektNyttTemaAnnetLandUtpektVedtakFattet_kasterException() {
-        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
-        behandlingsresultat.vedtakMetadata = VedtakMetadata()
-        melosysEessiMelding.lovvalgsland = Landkoder.SE.kode
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        val (fagsak, behandling) = lagFagsakMedBehandling(
+            behandlingTema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+        )
+        val melosysEessiMelding = lagMelosysEessiMelding(lovvalgsland = Landkoder.SE.kode)
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        }
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            this.behandling = behandling
+            vedtakMetadata { }
+        }
 
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
-        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns Optional.of(fagsak)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER) } returns Optional.of(fagsak)
 
         val exception = shouldThrow<FunksjonellException> {
-            arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer)
+            arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER)
         }
         exception.message shouldContain "Det er allerede fattet vedtak på behandling"
     }
 
     @Test
     fun finnSakOgBestemRuting_annetLandUtpektNyttTemaNorgeUtpekt_forventNyBehandling() {
-        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
-        melosysEessiMelding.lovvalgsland = Landkoder.NO.kode
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        val (fagsak, behandling) = lagFagsakMedBehandling(
+            behandlingTema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
+        )
+        val melosysEessiMelding = lagMelosysEessiMelding(lovvalgsland = Landkoder.NO.kode)
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        }
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            this.behandling = behandling
+        }
 
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
-        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns Optional.of(fagsak)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER) } returns Optional.of(fagsak)
 
-        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer)
+        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER)
 
         verify {
             prosessinstansService.opprettProsessinstansNyBehandlingArbeidFlereLand(
-                melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_NORGE, gsakSaksnummer
+                melosysEessiMelding,
+                Behandlingstema.BESLUTNING_LOVVALG_NORGE,
+                GSAK_SAKSNUMMER
             )
         }
     }
 
     @Test
     fun finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingInaktiv_forventOppgaveOpprettetOgProsessinstansNyBehandlingArbeidFlereLand() {
-        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
-        behandling.status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
-        melosysEessiMelding.lovvalgsland = Landkoder.NO.kode
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        val (fagsak, behandling) = lagFagsakMedBehandling(
+            behandlingTema = Behandlingstema.BESLUTNING_LOVVALG_NORGE,
+            behandlingStatus = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
+        )
+        val melosysEessiMelding = lagMelosysEessiMelding(lovvalgsland = Landkoder.NO.kode)
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        }
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            this.behandling = behandling
+        }
 
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
-        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns Optional.of(fagsak)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER) } returns Optional.of(fagsak)
 
-        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer)
+        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER)
 
         verify {
             oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), any(), any(), any(), any())
             prosessinstansService.opprettProsessinstansNyBehandlingArbeidFlereLand(
-                melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_NORGE, gsakSaksnummer
+                melosysEessiMelding,
+                Behandlingstema.BESLUTNING_LOVVALG_NORGE,
+                GSAK_SAKSNUMMER
             )
         }
     }
@@ -194,21 +239,28 @@ class ArbeidFlereLandSedRuterTest {
         val oppgaveID = "4231432"
         val oppgaveOppdateringSlot = slot<OppgaveOppdatering>()
 
-        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
-        melosysEessiMelding.lovvalgsland = Landkoder.NO.kode
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        val (fagsak, behandling) = lagFagsakMedBehandling(
+            behandlingTema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+        )
+        val melosysEessiMelding = lagMelosysEessiMelding(lovvalgsland = Landkoder.NO.kode)
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        }
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            this.behandling = behandling
+        }
 
         every {
             oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.saksnummer)
         } returns Optional.of(Oppgave.Builder().setOppgaveId(oppgaveID).build())
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
-        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns Optional.of(fagsak)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER) } returns Optional.of(fagsak)
         every { oppgaveService.oppdaterOppgave(any(), capture(oppgaveOppdateringSlot)) } just Runs
 
-        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer)
+        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER)
 
         verify {
-            behandlingService.endreStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT)
+            behandlingService.endreStatus(BEHANDLING_ID, Behandlingsstatus.VURDER_DOKUMENT)
             oppgaveService.oppdaterOppgave(eq(oppgaveID), any<OppgaveOppdatering>())
         }
 
@@ -217,21 +269,31 @@ class ArbeidFlereLandSedRuterTest {
 
     @Test
     fun finnSakOgBestemRuting_annetLandUtpektNyttTemaAnnetLandUtpektSammePeriode_forventIngenBehandling() {
-        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
-        val lovvalgsperiode = Lovvalgsperiode().apply {
-            fom = LocalDate.now()
-            tom = LocalDate.now().plusYears(1)
-            lovvalgsland = Land_iso2.SE
+        val periodeFom = LocalDate.now()
+        val periodeTom = LocalDate.now().plusYears(1)
+
+        val (fagsak, behandling) = lagFagsakMedBehandling(
+            behandlingTema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
+        )
+        val melosysEessiMelding = lagMelosysEessiMelding(lovvalgsland = Landkoder.SE.kode).apply {
+            periode = Periode(periodeFom, periodeTom)
         }
-        behandlingsresultat.lovvalgsperioder.add(lovvalgsperiode)
-        melosysEessiMelding.lovvalgsland = Landkoder.SE.kode
-        melosysEessiMelding.periode = Periode(lovvalgsperiode.fom, lovvalgsperiode.tom)
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        }
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            this.behandling = behandling
+            lovvalgsperiode {
+                fom = periodeFom
+                tom = periodeTom
+                lovvalgsland = Land_iso2.SE
+            }
+        }
 
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
-        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns Optional.of(fagsak)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER) } returns Optional.of(fagsak)
 
-        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer)
+        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER)
 
         verify {
             prosessinstansService.opprettProsessinstansSedJournalføring(behandling, melosysEessiMelding)
@@ -240,78 +302,92 @@ class ArbeidFlereLandSedRuterTest {
 
     @Test
     fun finnSakOgBestemRuting_annetLandUtpektNyttTemaAnnetLandUtpektEndretPeriode_forventNyBehandling() {
-        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
+        val periodeFom = LocalDate.now()
+        val periodeTom = LocalDate.now().plusYears(1)
 
-        val lovvalgsperiode = Lovvalgsperiode().apply {
-            lovvalgsland = Land_iso2.SE
-            fom = LocalDate.now()
-            tom = LocalDate.now().plusYears(1)
+        val (fagsak, behandling) = lagFagsakMedBehandling(
+            behandlingTema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
+        )
+        val melosysEessiMelding = lagMelosysEessiMelding(lovvalgsland = Landkoder.SE.kode).apply {
+            periode = Periode(periodeFom, periodeTom.plusDays(1))
         }
-        behandlingsresultat.lovvalgsperioder.add(lovvalgsperiode)
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        }
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            this.behandling = behandling
+            lovvalgsperiode {
+                fom = periodeFom
+                tom = periodeTom
+                lovvalgsland = Land_iso2.SE
+            }
+        }
 
-        melosysEessiMelding.lovvalgsland = Landkoder.SE.kode
-        melosysEessiMelding.periode = Periode(lovvalgsperiode.hentFom(), lovvalgsperiode.hentTom().plusDays(1))
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER) } returns Optional.of(fagsak)
 
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
-        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns Optional.of(fagsak)
-
-        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer)
+        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER)
 
         verify {
             prosessinstansService.opprettProsessinstansNyBehandlingArbeidFlereLand(
-                melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, gsakSaksnummer
+                melosysEessiMelding,
+                Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
+                GSAK_SAKSNUMMER
             )
         }
     }
 
     @Test
     fun finnSakOgBestemRuting_SakstemaUnntakMedNorskLovvalg_endresTilMedlemskapLovvalg() {
-        fagsak = Fagsak.forTest {
-            behandlinger(behandling)
+        val (fagsak, behandling) = lagFagsakMedBehandling(
+            behandlingTema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+        )
+        val melosysEessiMelding = lagMelosysEessiMelding(lovvalgsland = Landkoder.SE.kode)
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
         }
-        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
-        behandling.fagsak = fagsak
-        behandlingsresultat = Behandlingsresultat().apply {
-            behandling = this@ArbeidFlereLandSedRuterTest.behandling
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            this.behandling = behandling
         }
-        melosysEessiMelding.lovvalgsland = Landkoder.SE.kode
 
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
-        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns Optional.of(fagsak)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER) } returns Optional.of(fagsak)
 
-        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer)
+        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER)
 
         verify {
             prosessinstansService.opprettProsessinstansNyBehandlingArbeidFlereLand(
-                melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, gsakSaksnummer
+                melosysEessiMelding,
+                Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
+                GSAK_SAKSNUMMER
             )
         }
     }
 
     @Test
     fun finnSakOgBestemRuting_SakstemaMedlemskapLovvalgMedUtenlandskLovvalg_endresTilUnntak() {
-        fagsak = Fagsak.forTest {
-            tema(Sakstemaer.UNNTAK)
-            behandlinger(behandling)
+        val (fagsak, behandling) = lagFagsakMedBehandling(
+            tema = Sakstemaer.UNNTAK,
+            behandlingTema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
+        )
+        val melosysEessiMelding = lagMelosysEessiMelding(lovvalgsland = Landkoder.NO.kode)
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
         }
-        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
-        behandling.fagsak = fagsak
-        behandlingsresultat = Behandlingsresultat().apply {
-            behandling = this@ArbeidFlereLandSedRuterTest.behandling
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            this.behandling = behandling
         }
-        melosysEessiMelding.lovvalgsland = Landkoder.NO.kode
 
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
-        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns Optional.of(fagsak)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER) } returns Optional.of(fagsak)
 
-        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer)
+        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER)
 
         verify {
             prosessinstansService.opprettProsessinstansNyBehandlingArbeidFlereLand(
-                melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_NORGE, gsakSaksnummer
+                melosysEessiMelding,
+                Behandlingstema.BESLUTNING_LOVVALG_NORGE,
+                GSAK_SAKSNUMMER
             )
         }
     }
