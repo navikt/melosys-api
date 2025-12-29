@@ -138,18 +138,6 @@ class BrevDataByggerA001Test {
         every { ereg.hentOrganisasjon(orgnummer) } returns saksopplysning
     }
 
-    private fun lagArbeidsforhold(
-        arbDokument: ArbeidsforholdDokument = ArbeidsforholdDokument(),
-        orgnr: String,
-        fom: LocalDate,
-        tom: LocalDate
-    ): Arbeidsforhold =
-        Arbeidsforhold().apply {
-            arbeidsgiverID = orgnr
-            ansettelsesPeriode = Periode(fom, tom)
-            arbDokument.arbeidsforhold += this
-        }
-
     @Test
     fun `hent avklarte selvstendige foretak`() {
         avklarteOrganisasjoner.add(ORGNR1)
@@ -158,13 +146,7 @@ class BrevDataByggerA001Test {
             id = 123L
             fagsak { medBruker() }
             saksopplysning {
-                dokument = ArbeidsforholdDokument(
-                    arbeidsforhold = listOf(
-                        Arbeidsforhold().apply {
-                            arbeidsgiverID = ORGNR1
-                        }
-                    )
-                );
+                arbeidsforholdDokument { arbeidsgiverID = ORGNR1 }
                 type = SaksopplysningType.ARBFORH
             }
             mottatteOpplysninger {
@@ -292,21 +274,35 @@ class BrevDataByggerA001Test {
     @Test
     fun `test ansettelsesperiode`() {
         avklarteOrganisasjoner.add(ORGNR1)
-
-        val arbDokument = ArbeidsforholdDokument()
-        lagArbeidsforhold(arbDokument, ORGNR1, LocalDate.of(1976, 10, 23), LocalDate.of(1978, 10, 23))
-        val forventet = lagArbeidsforhold(arbDokument, ORGNR1, LocalDate.of(2005, 1, 11), LocalDate.of(2018, 8, 11))
-        lagArbeidsforhold(arbDokument, ORGNR2, LocalDate.of(2010, 10, 23), LocalDate.of(2017, 10, 23))
+        val forventetFom = LocalDate.of(2005, 1, 11)
+        val forventetTom = LocalDate.of(2018, 8, 11)
 
         val behandling = Behandling.forTest {
             id = 123L
             fagsak { medBruker() }
-            saksopplysning { dokument = arbDokument; type = SaksopplysningType.ARBFORH }
+            saksopplysning {
+                arbeidsforholdDokument {
+                    arbeidsforhold {
+                        arbeidsgiverID = ORGNR1
+                        ansettelsesPeriode(LocalDate.of(1976, 10, 23), LocalDate.of(1978, 10, 23))
+                    }
+                    arbeidsforhold {
+                        arbeidsgiverID = ORGNR1
+                        ansettelsesPeriode(forventetFom, forventetTom)
+                    }
+                    arbeidsforhold {
+                        arbeidsgiverID = ORGNR2
+                        ansettelsesPeriode(LocalDate.of(2010, 10, 23), LocalDate.of(2017, 10, 23))
+                    }
+                }
+                type = SaksopplysningType.ARBFORH
+            }
             mottatteOpplysninger { soeknad { } }
         }
 
         val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(behandling), SAKSBEHANDLER_ID) as BrevDataA001
-        brevDataA001.ansettelsesperiode shouldBe forventet.ansettelsesPeriode
+        brevDataA001.ansettelsesperiode?.fom shouldBe forventetFom
+        brevDataA001.ansettelsesperiode?.tom shouldBe forventetTom
     }
 
     @Test

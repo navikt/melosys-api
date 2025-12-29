@@ -2,10 +2,16 @@ package no.nav.melosys.domain
 
 import no.nav.melosys.domain.dokument.PersonDokumentTestFactory
 import no.nav.melosys.domain.dokument.SaksopplysningDokument
+import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype
+import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
+import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.kodeverk.Landkoder
 import java.time.Instant
+import java.time.LocalDate
+import java.time.OffsetDateTime
 
 fun saksopplysningForTest(init: SaksopplysningTestFactory.Builder.() -> Unit = {}): Saksopplysning =
     SaksopplysningTestFactory.Builder().apply(init).build()
@@ -20,6 +26,96 @@ fun SaksopplysningTestFactory.Builder.organisasjonDokument(init: OrganisasjonDok
 
 fun SaksopplysningTestFactory.Builder.sedDokument(init: SedDokumentBuilder.() -> Unit) = apply {
     this.dokument = SedDokumentBuilder().apply(init).build()
+}
+
+fun SaksopplysningTestFactory.Builder.arbeidsforholdDokument(init: ArbeidsforholdDokumentBuilder.() -> Unit) = apply {
+    this.dokument = ArbeidsforholdDokumentBuilder().apply(init).build()
+}
+
+@MelosysTestDsl
+class ArbeidsforholdDokumentBuilder {
+    // For single arbeidsforhold (simple pattern)
+    var arbeidsforholdID: String? = null
+    var arbeidsforholdIDnav: Long = 0
+    var ansettelsesPeriode: Periode? = null
+    var arbeidsforholdstype: String? = null
+    var arbeidsgivertype: Aktoertype? = null
+    var arbeidsgiverID: String? = null
+    var arbeidstakerID: String? = null
+    var opplysningspliktigtype: Aktoertype? = null
+    var opplysningspliktigID: String? = null
+    var arbeidsforholdInnrapportertEtterAOrdningen: Boolean? = null
+    var opprettelsestidspunkt: OffsetDateTime? = null
+    var sistBekreftet: OffsetDateTime? = null
+
+    // For multiple arbeidsforhold
+    private val arbeidsforholdListe = mutableListOf<Arbeidsforhold>()
+
+    fun ansettelsesPeriode(fom: LocalDate, tom: LocalDate? = null) {
+        ansettelsesPeriode = Periode(fom, tom)
+    }
+
+    fun arbeidsforhold(init: ArbeidsforholdBuilder.() -> Unit) {
+        arbeidsforholdListe.add(ArbeidsforholdBuilder().apply(init).build())
+    }
+
+    fun build(): ArbeidsforholdDokument = ArbeidsforholdDokument(
+        if (arbeidsforholdListe.isNotEmpty()) {
+            arbeidsforholdListe
+        } else {
+            listOf(
+                Arbeidsforhold().apply {
+                    this.arbeidsforholdID = this@ArbeidsforholdDokumentBuilder.arbeidsforholdID
+                    this.arbeidsforholdIDnav = this@ArbeidsforholdDokumentBuilder.arbeidsforholdIDnav
+                    this.ansettelsesPeriode = this@ArbeidsforholdDokumentBuilder.ansettelsesPeriode
+                    this.arbeidsforholdstype = this@ArbeidsforholdDokumentBuilder.arbeidsforholdstype
+                    this.arbeidsgivertype = this@ArbeidsforholdDokumentBuilder.arbeidsgivertype
+                    this.arbeidsgiverID = this@ArbeidsforholdDokumentBuilder.arbeidsgiverID
+                    this.arbeidstakerID = this@ArbeidsforholdDokumentBuilder.arbeidstakerID
+                    this.opplysningspliktigtype = this@ArbeidsforholdDokumentBuilder.opplysningspliktigtype
+                    this.opplysningspliktigID = this@ArbeidsforholdDokumentBuilder.opplysningspliktigID
+                    this.arbeidsforholdInnrapportertEtterAOrdningen = this@ArbeidsforholdDokumentBuilder.arbeidsforholdInnrapportertEtterAOrdningen
+                    this.opprettelsestidspunkt = this@ArbeidsforholdDokumentBuilder.opprettelsestidspunkt
+                    this.sistBekreftet = this@ArbeidsforholdDokumentBuilder.sistBekreftet
+                }
+            )
+        }
+    )
+}
+
+@MelosysTestDsl
+class ArbeidsforholdBuilder {
+    var arbeidsforholdID: String? = null
+    var arbeidsforholdIDnav: Long = 0
+    var ansettelsesPeriode: Periode? = null
+    var arbeidsforholdstype: String? = null
+    var arbeidsgivertype: Aktoertype? = null
+    var arbeidsgiverID: String? = null
+    var arbeidstakerID: String? = null
+    var opplysningspliktigtype: Aktoertype? = null
+    var opplysningspliktigID: String? = null
+    var arbeidsforholdInnrapportertEtterAOrdningen: Boolean? = null
+    var opprettelsestidspunkt: OffsetDateTime? = null
+    var sistBekreftet: OffsetDateTime? = null
+
+    fun ansettelsesPeriode(fom: LocalDate, tom: LocalDate? = null) {
+        ansettelsesPeriode = Periode(fom, tom)
+    }
+
+    fun build(): Arbeidsforhold = Arbeidsforhold().apply {
+        this.arbeidsforholdID = this@ArbeidsforholdBuilder.arbeidsforholdID
+        this.arbeidsforholdIDnav = this@ArbeidsforholdBuilder.arbeidsforholdIDnav
+        this.ansettelsesPeriode = this@ArbeidsforholdBuilder.ansettelsesPeriode
+        this.arbeidsforholdstype = this@ArbeidsforholdBuilder.arbeidsforholdstype
+        this.arbeidsgivertype = this@ArbeidsforholdBuilder.arbeidsgivertype
+        this.arbeidsgiverID = this@ArbeidsforholdBuilder.arbeidsgiverID
+        this.arbeidstakerID = this@ArbeidsforholdBuilder.arbeidstakerID
+        this.opplysningspliktigtype = this@ArbeidsforholdBuilder.opplysningspliktigtype
+        this.opplysningspliktigID = this@ArbeidsforholdBuilder.opplysningspliktigID
+        this.arbeidsforholdInnrapportertEtterAOrdningen = this@ArbeidsforholdBuilder.arbeidsforholdInnrapportertEtterAOrdningen
+        this.opprettelsestidspunkt = this@ArbeidsforholdBuilder.opprettelsestidspunkt
+        this.sistBekreftet = this@ArbeidsforholdBuilder.sistBekreftet
+    }
 }
 
 @MelosysTestDsl
