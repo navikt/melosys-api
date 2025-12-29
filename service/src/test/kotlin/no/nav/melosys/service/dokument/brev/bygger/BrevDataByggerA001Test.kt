@@ -10,8 +10,6 @@ import io.mockk.mockk
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.anmodningsperiodeForTest
 import no.nav.melosys.domain.brev.DoksysBrevbestilling
-import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
 import no.nav.melosys.domain.kodeverk.Kodeverk
@@ -24,7 +22,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_naeringsdrivende_begr
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.mottatteopplysninger.data.Bosted
 import no.nav.melosys.domain.mottatteopplysninger.soeknad
-import no.nav.melosys.domain.mottatteopplysninger.soeknadForTest
 import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.ereg.EregFasade
@@ -101,8 +98,8 @@ class BrevDataByggerA001Test {
     private fun lagMinimalBehandling() = Behandling.forTest {
         id = 123L
         fagsak { medBruker() }
-        saksopplysning { dokument = ArbeidsforholdDokument(); type = SaksopplysningType.ARBFORH }
-        mottatteOpplysninger { mottatteOpplysningerData = soeknadForTest() }
+        saksopplysning { arbeidsforholdDokument { }; type = SaksopplysningType.ARBFORH }
+        mottatteOpplysninger { soeknad { } }
     }
 
     private fun lagBrevDataGrunnlag(behandling: Behandling): BrevDataGrunnlag =
@@ -175,7 +172,7 @@ class BrevDataByggerA001Test {
         val behandling = Behandling.forTest {
             id = 123L
             fagsak { medBruker() }
-            saksopplysning { dokument = ArbeidsforholdDokument(); type = SaksopplysningType.ARBFORH }
+            saksopplysning { arbeidsforholdDokument { }; type = SaksopplysningType.ARBFORH }
             mottatteOpplysninger {
                 soeknad {
                     selvstendigForetak(ORGNR1)
@@ -197,7 +194,7 @@ class BrevDataByggerA001Test {
         val behandling = Behandling.forTest {
             id = 123L
             fagsak { medBruker() }
-            saksopplysning { dokument = ArbeidsforholdDokument(); type = SaksopplysningType.ARBFORH }
+            saksopplysning { arbeidsforholdDokument { }; type = SaksopplysningType.ARBFORH }
             mottatteOpplysninger {
                 soeknad {
                     selvstendigForetak(ORGNR1)
@@ -335,7 +332,7 @@ class BrevDataByggerA001Test {
         val behandling = Behandling.forTest {
             id = 123L
             fagsak { medBruker() }
-            saksopplysning { dokument = ArbeidsforholdDokument(); type = SaksopplysningType.ARBFORH }
+            saksopplysning { arbeidsforholdDokument { }; type = SaksopplysningType.ARBFORH }
             mottatteOpplysninger {
                 soeknad { bosted(Bosted()) }
             }
@@ -354,7 +351,7 @@ class BrevDataByggerA001Test {
         val behandling = Behandling.forTest {
             id = 123L
             fagsak { medBruker() }
-            saksopplysning { dokument = ArbeidsforholdDokument(); type = SaksopplysningType.ARBFORH }
+            saksopplysning { arbeidsforholdDokument { }; type = SaksopplysningType.ARBFORH }
             mottatteOpplysninger {
                 soeknad { bosted(Bosted()) }
             }
