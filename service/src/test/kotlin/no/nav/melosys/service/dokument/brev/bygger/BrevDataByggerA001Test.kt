@@ -24,8 +24,10 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunne
 import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_naeringsdrivende_begrunnelser.NORMALT_IKKE_DRIFT_NORGE
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.mottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.SoeknadTestFactory
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.data.Bosted
+import no.nav.melosys.domain.mottatteopplysninger.soeknadForTest
 import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.ereg.EregFasade
@@ -107,56 +109,62 @@ class BrevDataByggerA001Test {
     )
 
     /**
-     * Creates a standard behandling for A001 tests.
-     * Each test can add arbeidsforhold via the returned ArbeidsforholdDokument.
-     * Returns TestOppsett with behandling, arbDokument, and soeknad for edge case tests.
+     * DSL builder for A001 test setup.
+     *
+     * Example:
+     * ```
+     * lagBehandling {
+     *     selvstendigForetakOrgnr = listOf(ORGNR1, ORGNR2)
+     *     soeknad { bosted(Bosted()) }
+     * }
+     * ```
      */
-    private fun lagBehandling(
-        foretakUtlandOrgnr: String = ORGNR1,
-        selvstendigForetakOrgnr: List<String> = emptyList(),
-        ekstraArbeidsgivere: List<String> = emptyList()
-    ): TestOppsett {
+    @MelosysTestDsl
+    private class TestOppsettBuilder {
+        var foretakUtlandOrgnr: String = ORGNR1
+        var selvstendigForetakOrgnr: List<String> = emptyList()
+        var ekstraArbeidsgivere: List<String> = emptyList()
+
+        private var soeknadBlock: (SoeknadTestFactory.Builder.() -> Unit)? = null
+
+        fun soeknad(init: SoeknadTestFactory.Builder.() -> Unit) {
+            soeknadBlock = init
+        }
+
+        fun build(medlDokument: MedlemskapDokument, arbDokument: ArbeidsforholdDokument): TestOppsett {
+            val builder = this
+            val soeknad = soeknadForTest {
+                bostedAdresse(
+                    landkode = Landkoder.NO.kode,
+                    gatenavn = "HjemmeGata",
+                    husnummer = "23B",
+                    postnummer = "0165",
+                    poststed = "Oslo"
+                )
+                foretakUtland(builder.foretakUtlandOrgnr)
+                builder.selvstendigForetakOrgnr.forEach { selvstendigForetak(it) }
+                builder.ekstraArbeidsgivere.forEach { ekstraArbeidsgiver(it) }
+                builder.soeknadBlock?.invoke(this)
+            }
+
+            val behandling = Behandling.forTest {
+                id = 123L
+                fagsak { medBruker() }
+                saksopplysning { dokument = medlDokument; type = SaksopplysningType.MEDL }
+                saksopplysning { dokument = arbDokument; type = SaksopplysningType.ARBFORH }
+                mottatteOpplysninger { mottatteOpplysningerData = soeknad }
+            }
+
+            return TestOppsett(behandling, arbDokument, soeknad)
+        }
+    }
+
+    private fun lagBehandling(init: TestOppsettBuilder.() -> Unit = {}): TestOppsett {
         val medlDokument = MedlemskapDokument()
         val arbDokument = ArbeidsforholdDokument()
-
-        // Add default arbeidsforhold
         lagArbeidsforhold(arbDokument, ORGNR2, LocalDate.of(2005, 1, 11), LocalDate.of(2017, 8, 11))
 
-        // Create søknad separately so we can return it for edge case tests
-        val soeknad = Soeknad().apply {
-            bosted.oppgittAdresse.landkode = Landkoder.NO.kode
-            bosted.oppgittAdresse.gatenavn = "HjemmeGata"
-            bosted.oppgittAdresse.husnummerEtasjeLeilighet = "23B"
-            bosted.oppgittAdresse.postnummer = "0165"
-            bosted.oppgittAdresse.poststed = "Oslo"
-            foretakUtland.add(no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland().apply { orgnr = foretakUtlandOrgnr })
-            if (selvstendigForetakOrgnr.isNotEmpty()) {
-                selvstendigArbeid.selvstendigForetak = selvstendigForetakOrgnr.map { orgnr ->
-                    no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak().apply { this.orgnr = orgnr }
-                }.toMutableList()
-            }
-            if (ekstraArbeidsgivere.isNotEmpty()) {
-                juridiskArbeidsgiverNorge.ekstraArbeidsgivere = ekstraArbeidsgivere.toMutableList()
-            }
-        }
-
-        val behandling = Behandling.forTest {
-            id = 123L
-            fagsak { medBruker() }
-            saksopplysning {
-                dokument = medlDokument
-                type = SaksopplysningType.MEDL
-            }
-            saksopplysning {
-                dokument = arbDokument
-                type = SaksopplysningType.ARBFORH
-            }
-            mottatteOpplysninger {
-                mottatteOpplysningerData = soeknad
-            }
-        }
-
-        return TestOppsett(behandling, arbDokument, soeknad)
+        return TestOppsettBuilder().apply(init).build(medlDokument, arbDokument)
     }
 
     private fun lagBrevDataGrunnlag(behandling: Behandling): BrevDataGrunnlag =
@@ -202,9 +210,9 @@ class BrevDataByggerA001Test {
     @Test
     fun `hent avklarte selvstendige foretak`() {
         avklarteOrganisasjoner.add(ORGNR1)
-        val oppsett = lagBehandling(
+        val oppsett = lagBehandling {
             selvstendigForetakOrgnr = listOf(ORGNR1, ORGNR2)
-        )
+        }
 
         val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(oppsett.behandling), SAKSBEHANDLER_ID) as BrevDataA001
         brevDataA001.selvstendigeVirksomheter.map { it.orgnr } shouldContainExactly listOf(ORGNR1)
@@ -213,10 +221,10 @@ class BrevDataByggerA001Test {
     @Test
     fun `hent avklarte norske foretak`() {
         avklarteOrganisasjoner.add(ORGNR1)
-        val oppsett = lagBehandling(
-            selvstendigForetakOrgnr = listOf(ORGNR1),
+        val oppsett = lagBehandling {
+            selvstendigForetakOrgnr = listOf(ORGNR1)
             ekstraArbeidsgivere = listOf(ORGNR1)
-        )
+        }
 
         val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(oppsett.behandling), SAKSBEHANDLER_ID) as BrevDataA001
 
@@ -228,9 +236,9 @@ class BrevDataByggerA001Test {
 
     @Test
     fun `ingen avklarte foretak`() {
-        val oppsett = lagBehandling(
+        val oppsett = lagBehandling {
             selvstendigForetakOrgnr = listOf(ORGNR1)
-        )
+        }
 
         val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(oppsett.behandling), SAKSBEHANDLER_ID) as BrevDataA001
         brevDataA001.ansettelsesperiode shouldBe null
@@ -337,9 +345,9 @@ class BrevDataByggerA001Test {
 
     @Test
     fun `lag brevdata har ikke bostedsadresse bruker kontaktadresse`() {
-        val oppsett = lagBehandling()
-        // Clear bosted address to test fallback to kontaktadresse
-        oppsett.soeknad.bosted = Bosted()
+        val oppsett = lagBehandling {
+            soeknad { bosted(Bosted()) }
+        }
 
         val doksysBrevbestilling = DoksysBrevbestilling.Builder().medBehandling(oppsett.behandling).build()
         val personopplysninger = lagPersonopplysningerUtenBostedsadresse()
@@ -351,9 +359,9 @@ class BrevDataByggerA001Test {
 
     @Test
     fun `lag brevdata har ikke bostedsadresse eller kontaktadresse kaster feilmelding`() {
-        val oppsett = lagBehandling()
-        // Clear bosted address to test error case
-        oppsett.soeknad.bosted = Bosted()
+        val oppsett = lagBehandling {
+            soeknad { bosted(Bosted()) }
+        }
 
         val doksysBrevbestilling = DoksysBrevbestilling.Builder().medBehandling(oppsett.behandling).build()
         val personopplysninger = lagPersonopplysningerUtenBostedsadresseOgKontaktadresse()

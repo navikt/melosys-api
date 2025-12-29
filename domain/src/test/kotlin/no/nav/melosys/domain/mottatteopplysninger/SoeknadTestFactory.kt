@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.mottatteopplysninger
 
 import no.nav.melosys.domain.MelosysTestDsl
+import no.nav.melosys.domain.mottatteopplysninger.data.Bosted
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak
@@ -28,6 +29,14 @@ object SoeknadTestFactory {
 
         var periodeFom: LocalDate? = null
         var periodeTom: LocalDate? = null
+
+        // Direct bosted override (for edge case tests)
+        private var customBosted: Bosted? = null
+
+        /** Replace bosted entirely (for edge case tests like empty bosted) */
+        fun bosted(bosted: Bosted) = apply {
+            customBosted = bosted
+        }
 
         fun landkoder(vararg landkoder: String) = apply {
             soeknadslandkoder.addAll(landkoder)
@@ -79,12 +88,16 @@ object SoeknadTestFactory {
             // Sett arbeidssteder
             this.arbeidPaaLand.fysiskeArbeidssteder = this@Builder.fysiskeArbeidssteder
 
-            // Sett bosted
-            this@Builder.bostedLandkode?.let { this.bosted.oppgittAdresse.landkode = it }
-            this@Builder.bostedPoststed?.let { this.bosted.oppgittAdresse.poststed = it }
-            this@Builder.bostedGatenavn?.let { this.bosted.oppgittAdresse.gatenavn = it }
-            this@Builder.bostedHusnummer?.let { this.bosted.oppgittAdresse.husnummerEtasjeLeilighet = it }
-            this@Builder.bostedPostnummer?.let { this.bosted.oppgittAdresse.postnummer = it }
+            // Sett bosted - either custom or from individual fields
+            if (this@Builder.customBosted != null) {
+                this.bosted = this@Builder.customBosted!!
+            } else {
+                this@Builder.bostedLandkode?.let { this.bosted.oppgittAdresse.landkode = it }
+                this@Builder.bostedPoststed?.let { this.bosted.oppgittAdresse.poststed = it }
+                this@Builder.bostedGatenavn?.let { this.bosted.oppgittAdresse.gatenavn = it }
+                this@Builder.bostedHusnummer?.let { this.bosted.oppgittAdresse.husnummerEtasjeLeilighet = it }
+                this@Builder.bostedPostnummer?.let { this.bosted.oppgittAdresse.postnummer = it }
+            }
 
             // Sett periode
             if (this@Builder.periodeFom != null || this@Builder.periodeTom != null) {

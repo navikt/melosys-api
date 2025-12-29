@@ -13,6 +13,8 @@ Type-safe Kotlin DSL for creating test data with sensible defaults and nested en
 - [@MelosysTestDsl Annotation](#melosystestdsl-annotation)
 - [Key Imports](#key-imports)
 - [Standalone Functions](#standalone-functions)
+- [Helper Method Patterns](#helper-method-patterns)
+- [Composite DSL Pattern](#composite-dsl-pattern)
 - [Anti-Patterns](#anti-patterns)
 
 ## Core Pattern
@@ -407,55 +409,155 @@ val anmodningsperiode = anmodningsperiodeForTest {
 }
 ```
 
-## Complex Test Setup Patterns
+## Helper Method Patterns
 
-When tests need access to nested objects for edge case modifications, use a data class:
+### DSL Init Block Pattern (Preferred)
+
+Helper methods should accept DSL init blocks instead of individual arguments:
 
 ```kotlin
+// GOOD: Accept DSL init block
+private fun lagBehandlingsresultat(
+    init: BehandlingsresultatTestFactory.Builder.() -> Unit = {}
+): Behandlingsresultat = Behandlingsresultat.forTest {
+    id = BEHANDLING_ID
+    behandling { fagsak { } }
+    init()  // Apply caller customizations LAST
+}
+
+// Usage - clean DSL syntax
+val result = lagBehandlingsresultat {
+    type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+    medlemskapsperiode { fom = LocalDate.now() }
+}
+```
+
+```kotlin
+// BAD: Arguments passed to forTest block
+private fun lagBehandlingsresultat(
+    id: Long = 1L,
+    type: Behandlingsresultattyper = Behandlingsresultattyper.UNNTAK
+): Behandlingsresultat = Behandlingsresultat.forTest {
+    this.id = id
+    this.type = type
+}
+
+// Usage - inconsistent with DSL pattern
+val result = lagBehandlingsresultat(id = 5L, type = MEDLEM_I_FOLKETRYGDEN)
+```
+
+## Composite DSL Pattern
+
+When tests need to configure multiple objects (e.g., behandling AND søknad), use a composite DSL with encapsulated build logic.
+
+### Elegant Builder Pattern
+
+```kotlin
+/**
+ * DSL builder for test setup.
+ *
+ * Example:
+ * ```
+ * lagBehandling {
+ *     selvstendigForetakOrgnr = listOf(ORGNR1, ORGNR2)
+ *     soeknad { bosted(Bosted()) }
+ * }
+ * ```
+ */
+@MelosysTestDsl
+private class TestOppsettBuilder {
+    var foretakUtlandOrgnr: String = ORGNR1
+    var selvstendigForetakOrgnr: List<String> = emptyList()
+    var ekstraArbeidsgivere: List<String> = emptyList()
+
+    // Use existing factory builder types - not raw entity types!
+    private var soeknadBlock: (SoeknadTestFactory.Builder.() -> Unit)? = null
+
+    fun soeknad(init: SoeknadTestFactory.Builder.() -> Unit) {
+        soeknadBlock = init
+    }
+
+    fun build(medlDokument: MedlemskapDokument, arbDokument: ArbeidsforholdDokument): TestOppsett {
+        val builder = this
+        val soeknad = soeknadForTest {
+            // Defaults
+            bostedAdresse(landkode = Landkoder.NO.kode, gatenavn = "HjemmeGata")
+            foretakUtland(builder.foretakUtlandOrgnr)
+            builder.selvstendigForetakOrgnr.forEach { selvstendigForetak(it) }
+            builder.ekstraArbeidsgivere.forEach { ekstraArbeidsgiver(it) }
+            // User customizations applied INSIDE the DSL block
+            builder.soeknadBlock?.invoke(this)
+        }
+
+        val behandling = Behandling.forTest {
+            fagsak { medBruker() }
+            saksopplysning { dokument = medlDokument; type = SaksopplysningType.MEDL }
+            saksopplysning { dokument = arbDokument; type = SaksopplysningType.ARBFORH }
+            mottatteOpplysninger { mottatteOpplysningerData = soeknad }
+        }
+
+        return TestOppsett(behandling, arbDokument, soeknad)
+    }
+}
+
 private data class TestOppsett(
     val behandling: Behandling,
     val arbDokument: ArbeidsforholdDokument,
     val soeknad: Soeknad
 )
 
-private fun lagBehandling(
-    foretakUtlandOrgnr: String = ORGNR1,
-    selvstendigForetakOrgnr: List<String> = emptyList()
-): TestOppsett {
+// Clean one-liner factory function
+private fun lagBehandling(init: TestOppsettBuilder.() -> Unit = {}): TestOppsett {
+    val medlDokument = MedlemskapDokument()
     val arbDokument = ArbeidsforholdDokument()
+    lagArbeidsforhold(arbDokument, ORGNR2, LocalDate.of(2005, 1, 11), LocalDate.of(2017, 8, 11))
 
-    val soeknad = Soeknad().apply {
-        bosted.oppgittAdresse.landkode = Landkoder.NO.kode
-        // ... more setup
+    return TestOppsettBuilder().apply(init).build(medlDokument, arbDokument)
+}
+```
+
+### Key Design Principles
+
+1. **Use existing factory builder types** - `SoeknadTestFactory.Builder`, not `Soeknad`
+2. **Apply customizations INSIDE the DSL block** - No `.apply { }` after construction
+3. **Encapsulate build logic in `build()` method** - Factory function stays clean
+4. **`val builder = this`** - Capture reference for nested @MelosysTestDsl blocks
+
+### Usage - All Configuration in DSL
+
+```kotlin
+@Test
+fun `test with business data`() {
+    val oppsett = lagBehandling {
+        selvstendigForetakOrgnr = listOf(ORGNR1, ORGNR2)
     }
-
-    val behandling = Behandling.forTest {
-        fagsak { medBruker() }
-        saksopplysning {
-            dokument = arbDokument
-            type = SaksopplysningType.ARBFORH
-        }
-        mottatteOpplysninger {
-            mottatteOpplysningerData = soeknad
-        }
-    }
-
-    return TestOppsett(behandling, arbDokument, soeknad)
+    // ...
 }
 
-// Usage in test
 @Test
 fun `test edge case with empty bosted`() {
-    val oppsett = lagBehandling()
-    oppsett.soeknad.bosted = Bosted()  // Modify for edge case
-    // ... test logic
+    // Configure søknad INSIDE the DSL - no post-construction mutation!
+    val oppsett = lagBehandling {
+        soeknad { bosted = Bosted() }
+    }
+    // ...
+}
+
+@Test
+fun `test with custom behandling`() {
+    val oppsett = lagBehandling {
+        behandling { status = Behandlingsstatus.AVSLUTTET }
+        soeknad { bosted.oppgittAdresse.gatenavn = "Custom Street" }
+    }
+    // ...
 }
 ```
 
 This pattern:
-- Keeps most data immutable through DSL
-- Allows controlled modification for edge case tests
-- Makes test intent clear
+- All configuration happens inside the DSL block
+- No post-construction mutation (anti-pattern!)
+- Consistent DSL feel throughout
+- Edge cases configured declaratively
 
 ## Default Values
 
@@ -532,7 +634,95 @@ val behandlingsresultat = Behandlingsresultat.forTest {
 
 ### Mutable Object Creation
 
-See the main testing skill for patterns to avoid:
-- `Entity().apply { }` patterns
+Avoid these patterns:
+- `Entity().apply { }` patterns outside TestFactory builders
 - `lateinit var` for domain entities
 - Post-construction mutation
+
+### Post-Construction Mutation
+
+```kotlin
+// BAD: Mutating after creation
+val oppsett = lagBehandling()
+oppsett.soeknad.bosted = Bosted()  // ANTI-PATTERN!
+
+// GOOD: Configure in DSL block
+val oppsett = lagBehandling {
+    soeknad { bosted = Bosted() }
+}
+```
+
+### Argument-Based Helper Methods
+
+```kotlin
+// BAD: Arguments instead of DSL
+private fun lagBehandling(
+    id: Long = 1L,
+    status: Behandlingsstatus = Behandlingsstatus.OPPRETTET
+): Behandling = Behandling.forTest { ... }
+
+// GOOD: DSL init block
+private fun lagBehandling(
+    init: BehandlingTestFactory.BehandlingTestBuilder.() -> Unit = {}
+): Behandling = Behandling.forTest {
+    // defaults
+    init()
+}
+```
+
+### Using Raw Entity Types Instead of Factory Builders
+
+```kotlin
+// BAD: Using Soeknad.() -> Unit
+private var soeknadBlock: (Soeknad.() -> Unit)? = null
+
+fun soeknad(init: Soeknad.() -> Unit) {
+    soeknadBlock = init
+}
+
+// Requires post-construction .apply:
+val soeknad = soeknadForTest { ... }.apply { soeknadBlock?.invoke(this) }  // Awkward!
+
+// GOOD: Use existing factory builder type
+private var soeknadBlock: (SoeknadTestFactory.Builder.() -> Unit)? = null
+
+fun soeknad(init: SoeknadTestFactory.Builder.() -> Unit) {
+    soeknadBlock = init
+}
+
+// Apply INSIDE the DSL block:
+val soeknad = soeknadForTest {
+    // defaults...
+    soeknadBlock?.invoke(this)  // Clean!
+}
+```
+
+### Post-Construction .apply Patterns
+
+```kotlin
+// BAD: .apply after construction
+val soeknad = soeknadForTest {
+    // defaults
+}.apply { builder.soeknadBlock?.invoke(this) }  // Awkward post-construction!
+
+// GOOD: Apply inside the DSL block
+val soeknad = soeknadForTest {
+    // defaults
+    builder.soeknadBlock?.invoke(this)  // Clean - all in one block
+}
+```
+
+### Inconsistent Entity Creation
+
+```kotlin
+// BAD: Direct Entity().apply when forTest DSL exists
+val soeknad = Soeknad().apply {
+    bosted.oppgittAdresse.landkode = Landkoder.NO.kode
+    bosted.oppgittAdresse.gatenavn = "HjemmeGata"
+}
+
+// GOOD: Use forTest DSL consistently
+val soeknad = soeknadForTest {
+    bostedAdresse(landkode = Landkoder.NO.kode, gatenavn = "HjemmeGata")
+}
+```
