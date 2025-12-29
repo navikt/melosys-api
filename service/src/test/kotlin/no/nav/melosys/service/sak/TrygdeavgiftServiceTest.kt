@@ -42,21 +42,19 @@ class TrygdeavgiftServiceTest {
 
     private lateinit var trygdeavgiftService: TrygdeavgiftService
 
-    private lateinit var fagsak: Fagsak
-    private lateinit var behandlingsresultat: Behandlingsresultat
-
     @BeforeEach
     fun setup() {
         val trygdeavgiftMottakerService = TrygdeavgiftMottakerService(behandlingsresultatService)
         trygdeavgiftService = TrygdeavgiftService(fagsakService, behandlingsresultatService, trygdeavgiftMottakerService)
-        fagsak = Fagsak.forTest { behandling { id = BEHANDLING_ID } }
-        behandlingsresultat = Behandlingsresultat().apply { id = BEHANDLINGSRESULTAT_ID }
-        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(fagsak)
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
     }
 
     @Test
     fun `harFagsakBehandlingerMedTrygdeavgift, uten avgiftsperioder, returnerer false`() {
+        val fagsak = lagFagsak()
+        val behandlingsresultat = Behandlingsresultat.forTest { id = BEHANDLINGSRESULTAT_ID }
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
         trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeFalse()
     }
 
@@ -68,14 +66,13 @@ class TrygdeavgiftServiceTest {
             periodeFra = LocalDate.now(),
             periodeTil = LocalDate.now()
         )
-        behandlingsresultat.apply {
-            medlemskapsperioder.add(
-                Medlemskapsperiode().apply {
-                    medlemskapstype = Medlemskapstyper.PLIKTIG
-                    trygdeavgiftsperioder.add(trygdeavgiftsperiode)
-                }
-            )
-        }
+        val fagsak = lagFagsak()
+        val behandlingsresultat = lagBehandlingsresultatMedMedlemskap(
+            Medlemskapstyper.PLIKTIG,
+            trygdeavgiftsperiode
+        )
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeFalse()
     }
@@ -88,38 +85,32 @@ class TrygdeavgiftServiceTest {
             periodeFra = LocalDate.now(),
             periodeTil = LocalDate.now()
         )
-        behandlingsresultat.apply {
-            medlemskapsperioder.add(
-                Medlemskapsperiode().apply {
-                    medlemskapstype = Medlemskapstyper.PLIKTIG
-                    trygdeavgiftsperioder.add(trygdeavgiftsperiode)
-                }
-            )
-        }
+        val fagsak = lagFagsak()
+        val behandlingsresultat = lagBehandlingsresultatMedMedlemskap(
+            Medlemskapstyper.PLIKTIG,
+            trygdeavgiftsperiode
+        )
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeFalse()
     }
 
     @Test
     fun `harFagsakBehandlingerMedTrygdeavgift, fagsak har ugyldig status, returnerer false`() {
-        fagsak.apply {
-            status = Saksstatuser.HENLAGT
-        }
         val trygdeavgiftsperiode = Trygdeavgiftsperiode(
             trygdeavgiftsbeløpMd = Penger(30000.0),
             trygdesats = BigDecimal(3.56),
             periodeFra = LocalDate.now(),
             periodeTil = LocalDate.now()
         )
-        behandlingsresultat.apply {
-            medlemskapsperioder.add(
-                Medlemskapsperiode().apply {
-                    medlemskapstype = Medlemskapstyper.PLIKTIG
-                    trygdeavgiftsperioder.add(trygdeavgiftsperiode)
-                }
-            )
-        }
-
+        val fagsak = lagFagsak(Saksstatuser.HENLAGT)
+        val behandlingsresultat = lagBehandlingsresultatMedMedlemskap(
+            Medlemskapstyper.PLIKTIG,
+            trygdeavgiftsperiode
+        )
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeFalse()
     }
@@ -132,14 +123,13 @@ class TrygdeavgiftServiceTest {
             periodeFra = LocalDate.now(),
             periodeTil = LocalDate.now()
         )
-        behandlingsresultat.apply {
-            medlemskapsperioder.add(
-                Medlemskapsperiode().apply {
-                    medlemskapstype = Medlemskapstyper.PLIKTIG
-                    trygdeavgiftsperioder.add(trygdeavgiftsperiode)
-                }
-            )
-        }
+        val fagsak = lagFagsak()
+        val behandlingsresultat = lagBehandlingsresultatMedMedlemskap(
+            Medlemskapstyper.PLIKTIG,
+            trygdeavgiftsperiode
+        )
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER, true).shouldBeFalse()
     }
@@ -154,29 +144,24 @@ class TrygdeavgiftServiceTest {
             trygdeavgiftsbeløpMd = Penger(2345.56),
             trygdesats = BigDecimal(3.56)
         )
-        behandlingsresultat.apply {
-            medlemskapsperioder.add(
-                Medlemskapsperiode().apply {
-                    medlemskapstype = Medlemskapstyper.PLIKTIG
-                    trygdeavgiftsperioder.add(periodeUtenAvgift)
-                    trygdeavgiftsperioder.add(periodeMedAvgift)
-                }
-            )
-        }
+        val fagsak = lagFagsak()
+        val behandlingsresultat = lagBehandlingsresultatMedMedlemskap(
+            Medlemskapstyper.PLIKTIG,
+            periodeUtenAvgift,
+            periodeMedAvgift
+        )
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeTrue()
     }
 
     @Test
     fun `harFakturerbarTrygdeavgift, trygdeavgift + betaler til NAV, true`() {
-        behandlingsresultat.apply {
-            medlemskapsperioder.add(
-                Medlemskapsperiode().apply {
-                    medlemskapstype = Medlemskapstyper.PLIKTIG
-                    trygdeavgiftsperioder.add(lagTrygdeavgift())
-                }
-            )
-        }
+        val behandlingsresultat = lagBehandlingsresultatMedMedlemskap(
+            Medlemskapstyper.PLIKTIG,
+            lagTrygdeavgift()
+        )
 
         trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat).shouldBeTrue()
     }
@@ -189,39 +174,35 @@ class TrygdeavgiftServiceTest {
             periodeFra = LocalDate.now(),
             periodeTil = LocalDate.now()
         )
-        behandlingsresultat.apply {
-            medlemskapsperioder.add(
-                Medlemskapsperiode().apply {
-                    medlemskapstype = Medlemskapstyper.PLIKTIG
-                    trygdeavgiftsperioder.add(ingenAvgift)
-                }
-            )
-        }
+        val behandlingsresultat = lagBehandlingsresultatMedMedlemskap(
+            Medlemskapstyper.PLIKTIG,
+            ingenAvgift
+        )
 
         trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat).shouldBeFalse()
     }
 
     @Test
     fun `harFakturerbarTrygdeavgift - EØS pensjonist, trygdeavgift + betaler til NAV, true`() {
-        behandlingsresultat.apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = BEHANDLINGSRESULTAT_ID
             behandling = Behandling.forTest {
                 id = BEHANDLING_ID
                 tema = Behandlingstema.PENSJONIST
-                fagsak = Fagsak.forTest {
+                fagsak {
                     type = Sakstyper.EU_EOS
                     tema = Sakstemaer.TRYGDEAVGIFT
                 }
             }
-
-            helseutgiftDekkesPeriode = HelseutgiftDekkesPeriode(
-                behandlingsresultat = this,
-                fomDato = LocalDate.of(2023, 1, 1),
-                tomDato = LocalDate.of(2023, 5, 1),
-                bostedLandkode = Land_iso2.NO
-            )
-
-            hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.add(lagTrygdeavgift())
         }
+        behandlingsresultat.helseutgiftDekkesPeriode = HelseutgiftDekkesPeriode(
+            behandlingsresultat = behandlingsresultat,
+            fomDato = LocalDate.of(2023, 1, 1),
+            tomDato = LocalDate.of(2023, 5, 1),
+            bostedLandkode = Land_iso2.NO
+        )
+        behandlingsresultat.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.add(lagTrygdeavgift())
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSRESULTAT_ID) } returns behandlingsresultat
 
         trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat).shouldBeTrue()
     }
@@ -245,5 +226,25 @@ class TrygdeavgiftServiceTest {
         fomDato = LocalDate.of(2022, 1, 1)
         tomDato = LocalDate.of(2023, 5, 31)
         skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+    }
+
+    private fun lagFagsak(status: Saksstatuser = Saksstatuser.OPPRETTET) =
+        Fagsak.forTest {
+            this.status = status
+            behandling { id = BEHANDLING_ID }
+        }
+
+    private fun lagBehandlingsresultatMedMedlemskap(
+        type: Medlemskapstyper,
+        vararg avgiftsperioder: Trygdeavgiftsperiode
+    ): Behandlingsresultat {
+        val medlemskapsperiode = Medlemskapsperiode().apply {
+            this.medlemskapstype = type
+            avgiftsperioder.forEach { this.trygdeavgiftsperioder.add(it) }
+        }
+        return Behandlingsresultat.forTest {
+            id = BEHANDLINGSRESULTAT_ID
+            this@forTest.medlemskapsperioder.add(medlemskapsperiode)
+        }
     }
 }

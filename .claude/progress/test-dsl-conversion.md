@@ -79,7 +79,9 @@ First, read the testing skill for context:
 | Phase 1: service/behandling | 7 (+1 no changes) | 116 |
 | Phase 1: service/dokument | 13 | 213 |
 | Phase 1: service/eessi | 7 | 50 |
-| **Total** | **35** | **467** |
+| Phase 1: service/sak | 4 (+1 no changes) | 38 |
+| Phase 1: service/vedtak | 2 | 19 |
+| **Total** | **41** | **524** |
 
 ### New Test Factories Created
 - `VilkaarsresultatTestFactory` - Created during Phase 1 service/behandling conversion
@@ -196,8 +198,14 @@ val behandling = Behandling.forTest { /* config */ }
   - [x] DefaultSedRuterTest.kt (8 tests)
   - [x] AdminFjernmottakerSedRuterTest.kt (8 tests)
   - [x] ArbeidFlereLandSedRuterTest.kt (11 tests)
-- [ ] service/sak/** - 12 files
-- [ ] service/vedtak/** - 6 files
+- [x] service/sak/** - 4 files converted (+1 no changes needed) (38 tests passing)
+  - [x] AnnullerSakServiceTest.kt (3 tests)
+  - [x] EndreSakServiceTest.kt (11 tests)
+  - [x] TrygdeavgiftServiceTest.kt (9 tests)
+  - [x] FagsakServiceTest.kt (15 tests) - minimal pattern kept for complex relationship
+- [x] service/vedtak/** - 2 files converted (19 tests passing)
+  - [x] EosVedtakServiceKtTest.kt (7 tests)
+  - [x] FtrlVedtakServiceTest.kt (12 tests)
 
 ### Phase 2: Saksflyt Tests
 - [ ] saksflyt/steg/behandling/** - 12 files

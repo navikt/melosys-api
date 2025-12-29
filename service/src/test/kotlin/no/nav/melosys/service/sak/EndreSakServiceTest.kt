@@ -14,6 +14,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.anmodningsperiode
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstemaer.*
@@ -254,12 +255,7 @@ internal class EndreSakServiceTest {
         val behandling = SaksbehandlingDataFactory.lagBehandling(opprinneligFagsak)
         opprinneligFagsak.leggTilBehandling(behandling)
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns opprinneligFagsak
-        val anmodningsperiode = Anmodningsperiode().apply {
-            setSendtUtland(true)
-        }
-        val resultat = Behandlingsresultat().apply {
-            anmodningsperioder.add(anmodningsperiode)
-        }
+        val resultat = lagBehandlingsresultatMedSendtAnmodning()
         every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandling.id) } returns resultat
 
 
@@ -283,12 +279,7 @@ internal class EndreSakServiceTest {
         val behandling = SaksbehandlingDataFactory.lagBehandling(sak)
         sak.leggTilBehandling(behandling)
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns sak
-        val anmodningsperiode = Anmodningsperiode().apply {
-            setSendtUtland(true)
-        }
-        val resultat = Behandlingsresultat().apply {
-            anmodningsperioder.add(anmodningsperiode)
-        }
+        val resultat = lagBehandlingsresultatMedSendtAnmodning()
         every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandling.id) } returns resultat
 
 
@@ -466,5 +457,10 @@ internal class EndreSakServiceTest {
             type = sakstype
             tema = sakstema
             medBruker()
+        }
+
+    private fun lagBehandlingsresultatMedSendtAnmodning(): Behandlingsresultat =
+        Behandlingsresultat.forTest {
+            anmodningsperiode { sendtUtland = true }
         }
 }

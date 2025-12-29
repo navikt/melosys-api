@@ -60,9 +60,7 @@ class AnnullerSakServiceTest {
                 status = Behandlingsstatus.OPPRETTET
             }
         }
-        val behandlingsresultat = Behandlingsresultat().apply {
-            id = behandlingId
-        }
+        val behandlingsresultat = lagBehandlingsresultat(behandlingId)
 
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
@@ -91,9 +89,7 @@ class AnnullerSakServiceTest {
             }
         }
 
-        val behandlingsresultat = Behandlingsresultat().apply {
-            id = behandlingId
-        }
+        val behandlingsresultat = lagBehandlingsresultat(behandlingId)
 
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
@@ -118,9 +114,7 @@ class AnnullerSakServiceTest {
                 tema = Behandlingstema.PENSJONIST
             }
         }
-        val behandlingsresultat = Behandlingsresultat().apply {
-            id = behandlingId
-        }
+        val behandlingsresultat = lagBehandlingsresultat(behandlingId)
 
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
@@ -135,4 +129,6 @@ class AnnullerSakServiceTest {
         verify { prosessinstansService.opprettAnnullerFagsakProsessflyt(fagsak.finnAktivBehandlingIkkeÅrsavregning()) }
     }
 
+    private fun lagBehandlingsresultat(behandlingId: Long) =
+        Behandlingsresultat.forTest { id = behandlingId }
 }
