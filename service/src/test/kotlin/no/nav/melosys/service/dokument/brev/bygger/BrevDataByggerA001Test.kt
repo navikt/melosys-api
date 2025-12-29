@@ -23,6 +23,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunne
 import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_naeringsdrivende_begrunnelser.NORMALT_IKKE_DRIFT_NORGE
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.mottatteopplysninger.data.Bosted
+import no.nav.melosys.domain.mottatteopplysninger.soeknad
 import no.nav.melosys.domain.mottatteopplysninger.soeknadForTest
 import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.exception.FunksjonellException
@@ -137,7 +138,12 @@ class BrevDataByggerA001Test {
         every { ereg.hentOrganisasjon(orgnummer) } returns saksopplysning
     }
 
-    private fun lagArbeidsforhold(arbDokument: ArbeidsforholdDokument = ArbeidsforholdDokument(), orgnr: String, fom: LocalDate, tom: LocalDate): Arbeidsforhold =
+    private fun lagArbeidsforhold(
+        arbDokument: ArbeidsforholdDokument = ArbeidsforholdDokument(),
+        orgnr: String,
+        fom: LocalDate,
+        tom: LocalDate
+    ): Arbeidsforhold =
         Arbeidsforhold().apply {
             arbeidsgiverID = orgnr
             ansettelsesPeriode = Periode(fom, tom)
@@ -162,7 +168,7 @@ class BrevDataByggerA001Test {
                 type = SaksopplysningType.ARBFORH
             }
             mottatteOpplysninger {
-                mottatteOpplysningerData = soeknadForTest {
+                soeknad {
                     bostedAdresse(
                         landkode = Landkoder.NO.kode,
                         gatenavn = "HjemmeGata",
@@ -189,7 +195,7 @@ class BrevDataByggerA001Test {
             fagsak { medBruker() }
             saksopplysning { dokument = ArbeidsforholdDokument(); type = SaksopplysningType.ARBFORH }
             mottatteOpplysninger {
-                mottatteOpplysningerData = soeknadForTest {
+                soeknad {
                     selvstendigForetak(ORGNR1)
                     ekstraArbeidsgiver(ORGNR1)
                 }
@@ -211,7 +217,7 @@ class BrevDataByggerA001Test {
             fagsak { medBruker() }
             saksopplysning { dokument = ArbeidsforholdDokument(); type = SaksopplysningType.ARBFORH }
             mottatteOpplysninger {
-                mottatteOpplysningerData = soeknadForTest {
+                soeknad {
                     selvstendigForetak(ORGNR1)
                 }
             }
@@ -296,7 +302,7 @@ class BrevDataByggerA001Test {
             id = 123L
             fagsak { medBruker() }
             saksopplysning { dokument = arbDokument; type = SaksopplysningType.ARBFORH }
-            mottatteOpplysninger { mottatteOpplysningerData = soeknadForTest() }
+            mottatteOpplysninger { soeknad { } }
         }
 
         val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(behandling), SAKSBEHANDLER_ID) as BrevDataA001
@@ -335,7 +341,7 @@ class BrevDataByggerA001Test {
             fagsak { medBruker() }
             saksopplysning { dokument = ArbeidsforholdDokument(); type = SaksopplysningType.ARBFORH }
             mottatteOpplysninger {
-                mottatteOpplysningerData = soeknadForTest { bosted(Bosted()) }
+                soeknad { bosted(Bosted()) }
             }
         }
 
@@ -354,7 +360,7 @@ class BrevDataByggerA001Test {
             fagsak { medBruker() }
             saksopplysning { dokument = ArbeidsforholdDokument(); type = SaksopplysningType.ARBFORH }
             mottatteOpplysninger {
-                mottatteOpplysningerData = soeknadForTest { bosted(Bosted()) }
+                soeknad { bosted(Bosted()) }
             }
         }
 
