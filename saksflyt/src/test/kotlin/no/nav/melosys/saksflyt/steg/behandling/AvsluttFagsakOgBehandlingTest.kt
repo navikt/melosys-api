@@ -7,6 +7,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.just
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.lovvalgsperiode
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Saksstatuser
@@ -69,16 +70,16 @@ class AvsluttFagsakOgBehandlingTest {
         behandling = prosessinstans.hentBehandling
         fagsak = behandling.fagsak
 
-        lovvalgsperiode = Lovvalgsperiode().apply {
-            lovvalgsland = Land_iso2.NO
-            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-        }
-
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            lovvalgsperioder = mutableSetOf(lovvalgsperiode)
-            behandling = prosessinstans.behandling
+            this.behandling = prosessinstans.behandling
+            lovvalgsperiode {
+                lovvalgsland = Land_iso2.NO
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            }
         }
+        // Link the lovvalgsperiode for mutation tests
+        lovvalgsperiode = behandlingsresultat.lovvalgsperioder.first()
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false

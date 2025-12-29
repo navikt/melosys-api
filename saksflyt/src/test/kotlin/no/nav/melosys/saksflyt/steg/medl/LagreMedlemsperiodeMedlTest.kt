@@ -10,6 +10,7 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.medlemskapsperiodeForTest
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -89,13 +90,14 @@ internal class LagreMedlemsperiodeMedlTest {
         val innvilgetMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET)
         val medlemskapsperioder =
             listOf(lagMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT), innvilgetMedlemskapsperiode)
-        val opprinneligBehandling = Behandling.forTest()
-        opprinneligBehandling.id = 1L
-        val prosessinstans = lagProsessInstans()
-        prosessinstans.hentBehandling.type = Behandlingstyper.NY_VURDERING
-        prosessinstans.hentBehandling.opprinneligBehandling = opprinneligBehandling
-        val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder)
-        behandlingsresultat.behandling = prosessinstans.behandling
+        val opprinneligBehandling = Behandling.forTest { id = 1L }
+        val prosessinstans = lagProsessInstans().also {
+            it.hentBehandling.type = Behandlingstyper.NY_VURDERING
+            it.hentBehandling.opprinneligBehandling = opprinneligBehandling
+        }
+        val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder).also {
+            it.behandling = prosessinstans.behandling
+        }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
 
@@ -110,16 +112,14 @@ internal class LagreMedlemsperiodeMedlTest {
         val opphørtMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.OPPHØRT)
         val medlemskapsperioder = listOf(opphørtMedlemskapsperiode)
 
-        val opprinneligBehandling = Behandling.forTest {
-            id = 1L
+        val opprinneligBehandling = Behandling.forTest { id = 1L }
+        val prosessinstans = lagProsessInstans().also {
+            it.hentBehandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            it.hentBehandling.opprinneligBehandling = opprinneligBehandling
         }
-        val prosessinstans = lagProsessInstans().apply {
-            hentBehandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-            hentBehandling.opprinneligBehandling = opprinneligBehandling
-        }
-        val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder).apply {
-            this.behandling = prosessinstans.behandling
-            type = Behandlingsresultattyper.OPPHØRT
+        val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder).also {
+            it.behandling = prosessinstans.behandling
+            it.type = Behandlingsresultattyper.OPPHØRT
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
@@ -136,17 +136,15 @@ internal class LagreMedlemsperiodeMedlTest {
         val opphørtMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.OPPHØRT)
         val medlemskapsperioder = listOf(innvilgetMedlemskapsperiode, opphørtMedlemskapsperiode)
 
-        val opprinneligBehandling = Behandling.forTest()
-        opprinneligBehandling.id = 1L
-        val prosessinstans = lagProsessInstans().apply {
-            hentBehandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-            hentBehandling.opprinneligBehandling = opprinneligBehandling
+        val opprinneligBehandling = Behandling.forTest { id = 1L }
+        val prosessinstans = lagProsessInstans().also {
+            it.hentBehandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            it.hentBehandling.opprinneligBehandling = opprinneligBehandling
         }
-        val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder).apply {
-            this.behandling = prosessinstans.behandling
-            type = Behandlingsresultattyper.DELVIS_OPPHØRT
+        val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder).also {
+            it.behandling = prosessinstans.behandling
+            it.type = Behandlingsresultattyper.DELVIS_OPPHØRT
         }
-        behandlingsresultat.behandling = prosessinstans.behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
 
@@ -158,24 +156,22 @@ internal class LagreMedlemsperiodeMedlTest {
 
     @Test
     fun `Utfør skal gjøre ingenting hvis dette er EØS pensjonist sak`() {
-        val opprinneligBehandling = Behandling.forTest().apply {
+        val opprinneligBehandling = Behandling.forTest {
             id = 1L
             type = Behandlingstyper.FØRSTEGANG
             tema = Behandlingstema.PENSJONIST
         }
 
-        val prosessinstans = lagProsessInstans().apply {
-            hentBehandling.tema = Behandlingstema.PENSJONIST
-            hentBehandling.fagsak.type = Sakstyper.EU_EOS
-            hentBehandling.opprinneligBehandling = opprinneligBehandling
-
+        val prosessinstans = lagProsessInstans().also {
+            it.hentBehandling.tema = Behandlingstema.PENSJONIST
+            it.hentBehandling.fagsak.type = Sakstyper.EU_EOS
+            it.hentBehandling.opprinneligBehandling = opprinneligBehandling
         }
 
-        val behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = prosessinstans.behandling
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling = prosessinstans.behandling
         }
 
-        behandlingsresultat.behandling = prosessinstans.behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
 
@@ -197,28 +193,24 @@ internal class LagreMedlemsperiodeMedlTest {
             }
         }
 
-    private fun lagBehandlingsresultat(medlemskapsperioder: List<Medlemskapsperiode>): Behandlingsresultat {
-        val behandling = Behandling.forTest {
-            type = Behandlingstyper.FØRSTEGANG
-            fagsak {
-                type = Sakstyper.FTRL
+    private fun lagBehandlingsresultat(medlemskapsperioder: List<Medlemskapsperiode>): Behandlingsresultat =
+        Behandlingsresultat.forTest {
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+            this.behandling = Behandling.forTest {
+                type = Behandlingstyper.FØRSTEGANG
+                fagsak {
+                    type = Sakstyper.FTRL
+                }
             }
+        }.also { result ->
+            result.medlemskapsperioder = medlemskapsperioder.toMutableSet()
         }
 
-        val behandlingsresultat = Behandlingsresultat()
-        behandlingsresultat.type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-        behandlingsresultat.medlemskapsperioder = medlemskapsperioder.toMutableSet()
-        behandlingsresultat.behandling = behandling
-
-        return behandlingsresultat
-    }
-
-    private fun lagMedlemskapsperiode(innvilgelsesResultat: InnvilgelsesResultat, id: Long? = null): Medlemskapsperiode {
-        val medlemskapsperiode = Medlemskapsperiode()
-        medlemskapsperiode.id = id
-        medlemskapsperiode.innvilgelsesresultat = innvilgelsesResultat
-        return medlemskapsperiode
-    }
+    private fun lagMedlemskapsperiode(innvilgelsesResultat: InnvilgelsesResultat, id: Long? = null): Medlemskapsperiode =
+        medlemskapsperiodeForTest {
+            this.id = id
+            this.innvilgelsesresultat = innvilgelsesResultat
+        }
 
     companion object {
         const val BEHANDLING_ID: Long = 123L

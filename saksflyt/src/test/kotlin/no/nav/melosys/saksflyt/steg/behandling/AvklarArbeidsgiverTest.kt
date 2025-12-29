@@ -4,6 +4,7 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.lovvalgsperiode
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
@@ -74,16 +75,20 @@ class AvklarArbeidsgiverTest {
 
         every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns prosessinstans.behandling
 
-        lovvalgsperiode = Lovvalgsperiode().apply {
+        lovvalgsperiode = Lovvalgsperiode.forTest {
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
 
-        behandlingsresultat = Behandlingsresultat().apply {
+        behandlingsresultat = Behandlingsresultat.forTest {
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            lovvalgsperioder = setOf(lovvalgsperiode).toMutableSet()
+            lovvalgsperiode {
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            }
         }
-
+        // Link the standalone lovvalgsperiode to the behandlingsresultat for mutation tests
+        lovvalgsperiode = behandlingsresultat.lovvalgsperioder.first()
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
     }
