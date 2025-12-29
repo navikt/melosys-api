@@ -13,6 +13,8 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avklartefakta
+import no.nav.melosys.domain.medlemskapsperiode
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -84,9 +86,9 @@ class FtrlVedtakServiceTest {
 
     @Test
     fun fattVedtak_Førstegangsvedtak_fatterVedtak() {
-        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns lagBehandlingsresultatMedMedlemskap(
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns lagBehandlingsresultatMedMedlemskap {
             medlemskapstype = Medlemskapstyper.FRIVILLIG
-        )
+        }
         every { behandlingsresultatService.lagre(any()) } returnsArgument 0
         val request = lagFattVedtakRequest(
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
@@ -136,7 +138,7 @@ class FtrlVedtakServiceTest {
         val behandling = lagBehandling()
         behandling.tema = Behandlingstema.PENSJONIST
 
-        val behandlingsresultat = lagBehandlingsresultatMedMedlemskap(medlemskapstype = Medlemskapstyper.PLIKTIG)
+        val behandlingsresultat = lagBehandlingsresultatMedMedlemskap { medlemskapstype = Medlemskapstyper.PLIKTIG }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
         every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
 
@@ -171,7 +173,7 @@ class FtrlVedtakServiceTest {
         val behandling = lagBehandling()
         behandling.tema = Behandlingstema.PENSJONIST
 
-        val behandlingsresultat = lagBehandlingsresultatMedMedlemskap(medlemskapstype = Medlemskapstyper.FRIVILLIG)
+        val behandlingsresultat = lagBehandlingsresultatMedMedlemskap { medlemskapstype = Medlemskapstyper.FRIVILLIG }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
         every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
 
@@ -204,7 +206,7 @@ class FtrlVedtakServiceTest {
     fun fattVedtak_ikkeYrkesaktivFrivllig_senderRiktigBrevType() {
         val behandling = lagBehandling()
         behandling.tema = Behandlingstema.IKKE_YRKESAKTIV
-        val behandlingsresultat = lagBehandlingsresultatMedMedlemskap(medlemskapstype = Medlemskapstyper.FRIVILLIG)
+        val behandlingsresultat = lagBehandlingsresultatMedMedlemskap { medlemskapstype = Medlemskapstyper.FRIVILLIG }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
         every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
 
@@ -237,7 +239,7 @@ class FtrlVedtakServiceTest {
     fun fattVedtak_ikkeYrkesaktivPliktig_senderRiktigBrevType() {
         val behandling = lagBehandling()
         behandling.tema = Behandlingstema.IKKE_YRKESAKTIV
-        val behandlingsresultat = lagBehandlingsresultatMedMedlemskap(medlemskapstype = Medlemskapstyper.PLIKTIG)
+        val behandlingsresultat = lagBehandlingsresultatMedMedlemskap { medlemskapstype = Medlemskapstyper.PLIKTIG }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
         every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
 
@@ -390,10 +392,10 @@ class FtrlVedtakServiceTest {
 
     @Test
     fun `fattVedtak uten avklartefakta eller opphørte perioder gir MEDLEM_I_FOLKETRYGDEN`() {
-        val behandlingsresultat = lagBehandlingsresultatMedMedlemskap(
-            medlemskapstype = Medlemskapstyper.PLIKTIG,
+        val behandlingsresultat = lagBehandlingsresultatMedMedlemskap {
+            medlemskapstype = Medlemskapstyper.PLIKTIG
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-        )
+        }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
         every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
         val request = lagFattVedtakRequest(type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, begrunnelseFritekst = "fritekst for begrunnelse")
@@ -408,18 +410,18 @@ class FtrlVedtakServiceTest {
     fun `oppdaterBehandlingsresultatForOpphørt kaster feil hvis fullstendigManglendeInnbetaling mangler`() {
         // Simulerer race condition: avklartefakta finnes ved første kall,
         // men er borte ved andre kall (f.eks. slettet av annen tråd)
-        val medAvklartefakta = Behandlingsresultat().apply {
-            avklartefakta = mutableSetOf(Avklartefakta().apply {
+        val medAvklartefakta = Behandlingsresultat.forTest {
+            avklartefakta {
                 type = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
                 referanse = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode
-            })
+            }
         }
-        val utenAvklartefakta = Behandlingsresultat().apply {
-            avklartefakta = mutableSetOf() // Tom!
-            medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
+        val utenAvklartefakta = Behandlingsresultat.forTest {
+            // Tom avklartefakta - ingen avklartefakta { } blocks
+            medlemskapsperiode {
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 fom = LocalDate.now()
-            })
+            }
         }
 
         // Første kall (erFullstendigOpphør sjekk): returnerer MED avklartefakta
@@ -439,19 +441,16 @@ class FtrlVedtakServiceTest {
     @Test
     fun `utledBehandlingsresultatType kaster feil hvis alle medlemskapsperioder er opphørt uten FULLSTENDIG_MANGLENDE_INNBETALING`() {
         // Alle perioder er opphørt, men ingen FULLSTENDIG_MANGLENDE_INNBETALING - inkonsistent tilstand
-        val behandlingsresultat = Behandlingsresultat().apply {
-            medlemskapsperioder = mutableSetOf(
-                Medlemskapsperiode().apply {
-                    innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
-                    fom = LocalDate.now()
-                },
-                Medlemskapsperiode().apply {
-                    innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
-                    fom = LocalDate.now().minusMonths(1)
-                }
-            )
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            medlemskapsperiode {
+                innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                fom = LocalDate.now()
+            }
+            medlemskapsperiode {
+                innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                fom = LocalDate.now().minusMonths(1)
+            }
             // Mangler FULLSTENDIG_MANGLENDE_INNBETALING avklartefakta
-            avklartefakta = mutableSetOf()
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
@@ -465,15 +464,16 @@ class FtrlVedtakServiceTest {
     @Test
     fun fattVedtak_opphørt_feilOpphørtDato_kasterFeil() {
         every { behandlingsresultatService.lagre(any()) } returnsArgument 0
-        val behandlingsresultat = Behandlingsresultat().apply {
-            avklartefakta = mutableSetOf(Avklartefakta(), Avklartefakta().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            avklartefakta { }
+            avklartefakta {
                 type = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
                 referanse = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode
-            })
-            medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
+            }
+            medlemskapsperiode {
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 fom = LocalDate.now()
-            })
+            }
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
         val request = lagFattVedtakRequest(
@@ -523,66 +523,48 @@ class FtrlVedtakServiceTest {
         }
 
     private fun lagBehandlingsresultatMedMedlemskap(
-        medlemskapstype: Medlemskapstyper,
-        innvilgelsesresultat: InnvilgelsesResultat? = null
-    ): Behandlingsresultat {
-        val medlemskapsperiode = Medlemskapsperiode().apply {
-            this.medlemskapstype = medlemskapstype
-            this.innvilgelsesresultat = innvilgelsesresultat
-        }
-        return Behandlingsresultat.forTest {
-            this@forTest.medlemskapsperioder.add(medlemskapsperiode)
-        }
+        init: MedlemskapsperiodeTestFactory.Builder.() -> Unit
+    ) = Behandlingsresultat.forTest {
+        medlemskapsperiode(init)
     }
 
-    private fun lagDelvisOpphørtBehandlingsresultat(): Behandlingsresultat {
-        val opphørtPeriode = Medlemskapsperiode().apply {
+    private fun lagDelvisOpphørtBehandlingsresultat() = Behandlingsresultat.forTest {
+        medlemskapsperiode {
             innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
             fom = LocalDate.now()
         }
-        val innvilgetPeriode = Medlemskapsperiode().apply {
+        medlemskapsperiode {
             medlemskapstype = Medlemskapstyper.PLIKTIG
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             fom = LocalDate.now().plusMonths(6)
         }
-        return Behandlingsresultat.forTest {
-            this@forTest.medlemskapsperioder.add(opphørtPeriode)
-            this@forTest.medlemskapsperioder.add(innvilgetPeriode)
-        }
     }
 
-    private fun lagOpphørtBehandlingsresultat(): Behandlingsresultat {
-        val avklartefakta1 = Avklartefakta()
-        val avklartefakta2 = Avklartefakta().apply {
+    private fun lagOpphørtBehandlingsresultat() = Behandlingsresultat.forTest {
+        avklartefakta { }
+        avklartefakta {
             type = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
             referanse = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode
         }
-        val periode1 = Medlemskapsperiode().apply {
+        medlemskapsperiode {
             id = 1
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             fom = LocalDate.now()
         }
-        val periode2 = Medlemskapsperiode().apply {
+        medlemskapsperiode {
             id = 2
             innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
             fom = LocalDate.now()
         }
-        val periode3 = Medlemskapsperiode().apply {
+        medlemskapsperiode {
             id = 3
             innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
             fom = LocalDate.now()
         }
-        return Behandlingsresultat.forTest {
-            this@forTest.avklartefakta.add(avklartefakta1)
-            this@forTest.avklartefakta.add(avklartefakta2)
-            this@forTest.medlemskapsperioder.add(periode1)
-            this@forTest.medlemskapsperioder.add(periode2)
-            this@forTest.medlemskapsperioder.add(periode3)
-            utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
-            nyVurderingBakgrunn = "blah"
-            innledningFritekst = "blah"
-            begrunnelseFritekst = "blah"
-            trygdeavgiftFritekst = "blah"
-        }
+        utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
+        nyVurderingBakgrunn = "blah"
+        innledningFritekst = "blah"
+        begrunnelseFritekst = "blah"
+        trygdeavgiftFritekst = "blah"
     }
 }

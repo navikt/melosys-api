@@ -9,6 +9,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.anmodningsperiodeForTest
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Institusjon
 import no.nav.melosys.domain.kodeverk.*
@@ -392,14 +393,12 @@ class EosVedtakServiceKtTest {
             fom = LocalDate.now()
         }
 
-    private fun lagAnmodningsperiodeMedSvar(svarType: Anmodningsperiodesvartyper): Anmodningsperiode {
-        val anmodningsperiodeSvar = AnmodningsperiodeSvar().apply {
-            anmodningsperiodeSvarType = svarType
+    private fun lagAnmodningsperiodeMedSvar(svarType: Anmodningsperiodesvartyper) =
+        anmodningsperiodeForTest {
+            anmodningsperiodeSvar {
+                anmodningsperiodeSvarType = svarType
+            }
         }
-        return Anmodningsperiode().apply {
-            this.anmodningsperiodeSvar = anmodningsperiodeSvar
-        }
-    }
 
     private fun lagRequest(
         behandlingsresultattype: Behandlingsresultattyper,

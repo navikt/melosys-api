@@ -6,6 +6,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.BehandlingsresultatTestFactory
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -60,7 +61,7 @@ class AnnullerSakServiceTest {
                 status = Behandlingsstatus.OPPRETTET
             }
         }
-        val behandlingsresultat = lagBehandlingsresultat(behandlingId)
+        val behandlingsresultat = lagBehandlingsresultat { id = behandlingId }
 
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
@@ -89,7 +90,7 @@ class AnnullerSakServiceTest {
             }
         }
 
-        val behandlingsresultat = lagBehandlingsresultat(behandlingId)
+        val behandlingsresultat = lagBehandlingsresultat { id = behandlingId }
 
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
@@ -114,7 +115,7 @@ class AnnullerSakServiceTest {
                 tema = Behandlingstema.PENSJONIST
             }
         }
-        val behandlingsresultat = lagBehandlingsresultat(behandlingId)
+        val behandlingsresultat = lagBehandlingsresultat { id = behandlingId }
 
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
@@ -129,6 +130,7 @@ class AnnullerSakServiceTest {
         verify { prosessinstansService.opprettAnnullerFagsakProsessflyt(fagsak.finnAktivBehandlingIkkeÅrsavregning()) }
     }
 
-    private fun lagBehandlingsresultat(behandlingId: Long) =
-        Behandlingsresultat.forTest { id = behandlingId }
+    private fun lagBehandlingsresultat(
+        init: BehandlingsresultatTestFactory.Builder.() -> Unit = {}
+    ) = Behandlingsresultat.forTest(init)
 }
