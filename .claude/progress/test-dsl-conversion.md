@@ -78,12 +78,15 @@ First, read the testing skill for context:
 | Phase 1: service/avgift | 8 | 88 |
 | Phase 1: service/behandling | 7 (+1 no changes) | 116 |
 | Phase 1: service/dokument | 13 | 213 |
-| **Total** | **28** | **417** |
+| Phase 1: service/eessi | 7 | 50 |
+| **Total** | **35** | **467** |
 
 ### New Test Factories Created
 - `VilkaarsresultatTestFactory` - Created during Phase 1 service/behandling conversion
 - Extended `BehandlingsresultatTestFactory` with `vilkaarsresultat {}` DSL builder
 - Extended `SaksopplysningTestFactory` with `kilder` property
+- Extended `SaksopplysningTestFactory.SedDokumentBuilder` with `sedType` property (Phase 1 service/eessi)
+- Extended `AnmodningsperiodeTestFactory.Builder` with `medlPeriodeID` property (Phase 1 service/eessi)
 
 ### By Module
 
@@ -185,7 +188,14 @@ val behandling = Behandling.forTest { /* config */ }
   - ÅrsavregningVedtakMapperTest.kt (12 tests)
   - EessiServiceTest.kt (42 tests)
   - SedDataByggerTest.kt (39 tests)
-- [ ] service/eessi/** - 8 files
+- [x] service/eessi/** - 7 files converted (50 tests passing)
+  - [x] AdminInnvalideringSedRuterTest.kt (8 tests)
+  - [x] AnmodningOmUnntakSedRuterTest.kt (4 tests)
+  - [x] SvarAnmodningUnntakSedRuterTest.kt (5 tests)
+  - [x] UnntaksperiodeSedRuterTest.kt (6 tests)
+  - [x] DefaultSedRuterTest.kt (8 tests)
+  - [x] AdminFjernmottakerSedRuterTest.kt (8 tests)
+  - [x] ArbeidFlereLandSedRuterTest.kt (11 tests)
 - [ ] service/sak/** - 12 files
 - [ ] service/vedtak/** - 6 files
 
