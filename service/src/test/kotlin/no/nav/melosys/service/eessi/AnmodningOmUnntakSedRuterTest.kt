@@ -4,7 +4,12 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.lovvalgsperiode
 import no.nav.melosys.domain.eessi.Periode
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap
@@ -44,130 +49,95 @@ class AnmodningOmUnntakSedRuterTest {
 
     @Test
     fun `finnSakOgBestemRuting gsakSaksnummerErNull NySak`() {
-        val prosessinstans = Prosessinstans.forTest()
-        val melosysEessiMelding = MelosysEessiMelding().apply {
-            aktoerId = AKTØR_ID
-        }
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
-
+        val melding = MelosysEessiMelding(aktoerId = AKTØR_ID)
+        val prosessinstans = lagProsessinstans(melding)
 
         anmodningOmUnntakSedRuter.rutSedTilBehandling(prosessinstans, null)
 
-
         verify {
             prosessinstansService.opprettProsessinstansNySakMottattAnmodningOmUnntak(
-                melosysEessiMelding,
-                melosysEessiMelding.aktoerId
+                melding,
+                melding.aktoerId
             )
         }
     }
 
     @Test
     fun `finnSakOgBestemRuting sakEksistererPeriodeEndret nyBehandling`() {
-        val fagsak = opprettFagsak()
-        val prosessinstans = Prosessinstans.forTest()
-        val melosysEessiMelding = opprettMelosysEessiMelding(NÅ, NESTE_ÅR)
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
-        prosessinstans.behandling = fagsak.behandlinger[0]
-        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns opprettBehandlingsresultatMedLovvalgsperiode(
-            NÅ,
-            NESTE_ÅR.plusDays(1)
-        )
+        val fagsak = lagFagsak()
+        val melding = lagMelosysEessiMelding(NÅ, NESTE_ÅR)
+        val prosessinstans = lagProsessinstans(melding, fagsak.behandlinger[0])
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns lagBehandlingsresultatMedLovvalgsperiode(NÅ, NESTE_ÅR.plusDays(1))
         every { fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER) } returns Optional.of(fagsak)
-
 
         anmodningOmUnntakSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER)
 
-
-        verify {
-            prosessinstansService.opprettProsessinstansNyBehandlingMottattAnmodningUnntak(
-                melosysEessiMelding,
-                GSAK_SAKSNUMMER
-            )
-        }
+        verify { prosessinstansService.opprettProsessinstansNyBehandlingMottattAnmodningUnntak(melding, GSAK_SAKSNUMMER) }
     }
 
     @Test
     fun `finnSakOgBestemRuting sakEksistererPeriodeIkkeEndret ikkeNyBehandling`() {
-        val fagsak = opprettFagsak()
-        val prosessinstans = Prosessinstans.forTest()
-        val melosysEessiMelding = opprettMelosysEessiMelding(NÅ, NESTE_ÅR)
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
-        prosessinstans.behandling = fagsak.behandlinger[0]
-        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns opprettBehandlingsresultatMedLovvalgsperiode(NÅ, NESTE_ÅR)
+        val fagsak = lagFagsak()
+        val melding = lagMelosysEessiMelding(NÅ, NESTE_ÅR)
+        val prosessinstans = lagProsessinstans(melding, fagsak.behandlinger[0])
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns lagBehandlingsresultatMedLovvalgsperiode(NÅ, NESTE_ÅR)
         every { fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER) } returns Optional.of(fagsak)
-
 
         anmodningOmUnntakSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER)
 
-
-        verify(exactly = 0) {
-            prosessinstansService.opprettProsessinstansNyBehandlingMottattAnmodningUnntak(any(), any())
-        }
-        verify {
-            prosessinstansService.opprettProsessinstansSedJournalføring(
-                fagsak.behandlinger[0],
-                melosysEessiMelding
-            )
-        }
+        verify(exactly = 0) { prosessinstansService.opprettProsessinstansNyBehandlingMottattAnmodningUnntak(any(), any()) }
+        verify { prosessinstansService.opprettProsessinstansSedJournalføring(fagsak.behandlinger[0], melding) }
     }
 
     @Test
     fun `finnSakOgBestemRuting sakEksistererIkke nySak`() {
-        val prosessinstans = Prosessinstans.forTest()
-        val melosysEessiMelding = MelosysEessiMelding()
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
-        prosessinstans.setData(ProsessDataKey.AKTØR_ID, AKTØR_ID)
+        val melding = MelosysEessiMelding()
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.EESSI_MELDING, melding)
+            medData(ProsessDataKey.AKTØR_ID, AKTØR_ID)
+        }
         every { fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER) } returns Optional.empty()
-
 
         anmodningOmUnntakSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER)
 
-
-        verify {
-            prosessinstansService.opprettProsessinstansNySakMottattAnmodningOmUnntak(
-                melosysEessiMelding,
-                AKTØR_ID
-            )
-        }
+        verify { prosessinstansService.opprettProsessinstansNySakMottattAnmodningOmUnntak(melding, AKTØR_ID) }
     }
 
-    private fun opprettBehandlingsresultatMedLovvalgsperiode(fom: LocalDate, tom: LocalDate): Behandlingsresultat =
-        Behandlingsresultat().apply {
-            lovvalgsperioder.add(
-                Lovvalgsperiode().apply {
-                    lovvalgsland = Land_iso2.SE
-                    this.fom = fom
-                    this.tom = tom
-                }
-            )
+    private fun lagProsessinstans(melding: MelosysEessiMelding, behandling: Behandling? = null) =
+        Prosessinstans.forTest {
+            medData(ProsessDataKey.EESSI_MELDING, melding)
+            behandling?.let { this.behandling = it }
         }
 
-    private fun opprettFagsak(): Fagsak =
+    private fun lagBehandlingsresultatMedLovvalgsperiode(fom: LocalDate, tom: LocalDate) =
+        Behandlingsresultat.forTest {
+            lovvalgsperiode {
+                lovvalgsland = Land_iso2.SE
+                this.fom = fom
+                this.tom = tom
+            }
+        }
+
+    private fun lagFagsak(): Fagsak =
         Behandling.forTest {
             id = 1L
             status = Behandlingsstatus.OPPRETTET
             fagsak { }
         }.fagsak
 
-    private fun opprettMelosysEessiMelding(fom: LocalDate, tom: LocalDate): MelosysEessiMelding =
-        MelosysEessiMelding().apply {
-            aktoerId = AKTØR_ID
-            artikkel = "12_1"
-            dokumentId = "123321"
-            journalpostId = "j123"
-            lovvalgsland = "SE"
-
-            periode = Periode().apply {
-                this.fom = fom
-                this.tom = tom
-            }
-            rinaSaksnummer = "r123"
-            sedId = "s123"
-            statsborgerskap = Collections.singletonList(Statsborgerskap("SE"))
-            sedType = "A001"
-            bucType = "LA_BUC_01"
-        }
+    private fun lagMelosysEessiMelding(fom: LocalDate, tom: LocalDate) = MelosysEessiMelding(
+        aktoerId = AKTØR_ID,
+        artikkel = "12_1",
+        dokumentId = "123321",
+        journalpostId = "j123",
+        lovvalgsland = "SE",
+        periode = Periode(fom = fom, tom = tom),
+        rinaSaksnummer = "r123",
+        sedId = "s123",
+        statsborgerskap = Collections.singletonList(Statsborgerskap("SE")),
+        sedType = "A001",
+        bucType = "LA_BUC_01"
+    )
 
     companion object {
         const val AKTØR_ID = "13412"
