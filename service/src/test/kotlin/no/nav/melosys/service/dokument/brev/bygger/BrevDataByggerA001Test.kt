@@ -13,7 +13,6 @@ import no.nav.melosys.domain.brev.DoksysBrevbestilling
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
 import no.nav.melosys.domain.dokument.felles.Periode
-import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
 import no.nav.melosys.domain.kodeverk.Kodeverk
 import no.nav.melosys.domain.kodeverk.Landkoder
@@ -131,7 +130,7 @@ class BrevDataByggerA001Test {
             soeknadBlock = init
         }
 
-        fun build(medlDokument: MedlemskapDokument, arbDokument: ArbeidsforholdDokument): TestOppsett {
+        fun build(arbDokument: ArbeidsforholdDokument): TestOppsett {
             val builder = this
             val soeknad = soeknadForTest {
                 bostedAdresse(
@@ -150,7 +149,6 @@ class BrevDataByggerA001Test {
             val behandling = Behandling.forTest {
                 id = 123L
                 fagsak { medBruker() }
-                saksopplysning { dokument = medlDokument; type = SaksopplysningType.MEDL }
                 saksopplysning { dokument = arbDokument; type = SaksopplysningType.ARBFORH }
                 mottatteOpplysninger { mottatteOpplysningerData = soeknad }
             }
@@ -160,11 +158,10 @@ class BrevDataByggerA001Test {
     }
 
     private fun lagBehandling(init: TestOppsettBuilder.() -> Unit = {}): TestOppsett {
-        val medlDokument = MedlemskapDokument()
         val arbDokument = ArbeidsforholdDokument()
         lagArbeidsforhold(arbDokument, ORGNR2, LocalDate.of(2005, 1, 11), LocalDate.of(2017, 8, 11))
 
-        return TestOppsettBuilder().apply(init).build(medlDokument, arbDokument)
+        return TestOppsettBuilder().apply(init).build(arbDokument)
     }
 
     private fun lagBrevDataGrunnlag(behandling: Behandling): BrevDataGrunnlag =
