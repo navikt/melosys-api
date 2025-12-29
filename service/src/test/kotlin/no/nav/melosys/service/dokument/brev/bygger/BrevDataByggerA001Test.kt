@@ -24,7 +24,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_naeringsdrivende_begr
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.mottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.SoeknadTestFactory
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.data.Bosted
 import no.nav.melosys.domain.mottatteopplysninger.soeknadForTest
 import no.nav.melosys.domain.person.Persondata
@@ -98,14 +97,6 @@ class BrevDataByggerA001Test {
         every { vilkaarsresultatService.finnUnntaksVilkaarsresultat(any()) } returns vilkaarsresultat
     }
 
-    /**
-     * Data class for test setup results
-     */
-    private data class TestOppsett(
-        val behandling: Behandling,
-        val arbDokument: ArbeidsforholdDokument,
-        val soeknad: Soeknad
-    )
 
     /**
      * DSL builder for A001 test setup.
@@ -129,7 +120,7 @@ class BrevDataByggerA001Test {
             soeknadBlock = init
         }
 
-        fun build(arbDokument: ArbeidsforholdDokument): TestOppsett {
+        fun build(arbDokument: ArbeidsforholdDokument): Behandling {
             val builder = this
             val soeknad = soeknadForTest {
                 bostedAdresse(
@@ -144,23 +135,25 @@ class BrevDataByggerA001Test {
                 builder.soeknadBlock?.invoke(this)
             }
 
-            val behandling = Behandling.forTest {
+            return Behandling.forTest {
                 id = 123L
                 fagsak { medBruker() }
                 saksopplysning { dokument = arbDokument; type = SaksopplysningType.ARBFORH }
                 mottatteOpplysninger { mottatteOpplysningerData = soeknad }
             }
-
-            return TestOppsett(behandling, arbDokument, soeknad)
         }
     }
 
-    private fun lagBehandling(init: TestOppsettBuilder.() -> Unit = {}): TestOppsett {
+    private fun lagBehandling(init: TestOppsettBuilder.() -> Unit = {}): Behandling {
         val arbDokument = ArbeidsforholdDokument()
         lagArbeidsforhold(arbDokument, ORGNR2, LocalDate.of(2005, 1, 11), LocalDate.of(2017, 8, 11))
 
         return TestOppsettBuilder().apply(init).build(arbDokument)
     }
+
+    /** Extract ArbeidsforholdDokument from behandling for tests that need to add more arbeidsforhold */
+    private fun Behandling.arbDokument(): ArbeidsforholdDokument =
+        saksopplysninger.first { it.type == SaksopplysningType.ARBFORH }.dokument as ArbeidsforholdDokument
 
     private fun lagBrevDataGrunnlag(behandling: Behandling): BrevDataGrunnlag =
         lagBrevDataGrunnlag(behandling, PersonopplysningerObjectFactory.lagPersonopplysninger())
@@ -205,23 +198,23 @@ class BrevDataByggerA001Test {
     @Test
     fun `hent avklarte selvstendige foretak`() {
         avklarteOrganisasjoner.add(ORGNR1)
-        val oppsett = lagBehandling {
+        val behandling = lagBehandling {
             selvstendigForetakOrgnr = listOf(ORGNR1, ORGNR2)
         }
 
-        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(oppsett.behandling), SAKSBEHANDLER_ID) as BrevDataA001
+        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(behandling), SAKSBEHANDLER_ID) as BrevDataA001
         brevDataA001.selvstendigeVirksomheter.map { it.orgnr } shouldContainExactly listOf(ORGNR1)
     }
 
     @Test
     fun `hent avklarte norske foretak`() {
         avklarteOrganisasjoner.add(ORGNR1)
-        val oppsett = lagBehandling {
+        val behandling = lagBehandling {
             selvstendigForetakOrgnr = listOf(ORGNR1)
             ekstraArbeidsgivere = listOf(ORGNR1)
         }
 
-        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(oppsett.behandling), SAKSBEHANDLER_ID) as BrevDataA001
+        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(behandling), SAKSBEHANDLER_ID) as BrevDataA001
 
         brevDataA001.run {
             selvstendigeVirksomheter.map { it.orgnr } shouldContainExactly listOf(ORGNR1)
@@ -231,22 +224,22 @@ class BrevDataByggerA001Test {
 
     @Test
     fun `ingen avklarte foretak`() {
-        val oppsett = lagBehandling {
+        val behandling = lagBehandling {
             selvstendigForetakOrgnr = listOf(ORGNR1)
         }
 
-        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(oppsett.behandling), SAKSBEHANDLER_ID) as BrevDataA001
+        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(behandling), SAKSBEHANDLER_ID) as BrevDataA001
         brevDataA001.ansettelsesperiode shouldBe null
     }
 
     @Test
     fun `lag art16 med art121 har kun art16 begrunnelser`() {
-        val oppsett = lagBehandling()
+        val behandling = lagBehandling()
         val vilkaarsresultat = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_1, false, UTSENDELSE_OVER_24_MN)
         every { vilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(any()) } returns vilkaarsresultat
         lagUnntaksVilkaarResultat(Vilkaar.FO_883_2004_ART16_1, ERSTATTER_EN_ANNEN_UNDER_5_AAR)
 
-        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(oppsett.behandling), SAKSBEHANDLER_ID) as BrevDataA001
+        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(behandling), SAKSBEHANDLER_ID) as BrevDataA001
 
         brevDataA001.run {
             anmodningUtenArt12Begrunnelser.shouldBeEmpty()
@@ -257,12 +250,12 @@ class BrevDataByggerA001Test {
 
     @Test
     fun `lag art16 med art122 har kun art16 begrunnelser`() {
-        val oppsett = lagBehandling()
+        val behandling = lagBehandling()
         val vilkaarsresultat = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, NORMALT_IKKE_DRIFT_NORGE)
         every { vilkaarsresultatService.finnUtsendingNæringsdrivendeVilkaarsresultat(any()) } returns vilkaarsresultat
         lagUnntaksVilkaarResultat(Vilkaar.FO_883_2004_ART16_1, ERSTATTER_EN_ANNEN_UNDER_5_AAR)
 
-        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(oppsett.behandling), SAKSBEHANDLER_ID) as BrevDataA001
+        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(behandling), SAKSBEHANDLER_ID) as BrevDataA001
 
         brevDataA001.run {
             anmodningUtenArt12Begrunnelser.shouldBeEmpty()
@@ -273,12 +266,12 @@ class BrevDataByggerA001Test {
 
     @Test
     fun `lag art18 med art141 har kun art18 begrunnelser`() {
-        val oppsett = lagBehandling()
+        val behandling = lagBehandling()
         val vilkaarsresultat = lagVilkaarsresultat(Vilkaar.KONV_EFTA_STORBRITANNIA_ART14_1, false, UTSENDELSE_OVER_24_MN)
         every { vilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(any()) } returns vilkaarsresultat
         lagUnntaksVilkaarResultat(Vilkaar.KONV_EFTA_STORBRITANNIA_ART18_1, ERSTATTER_EN_ANNEN_UNDER_5_AAR)
 
-        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(oppsett.behandling), SAKSBEHANDLER_ID) as BrevDataA001
+        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(behandling), SAKSBEHANDLER_ID) as BrevDataA001
 
         brevDataA001.run {
             anmodningUtenArt12Begrunnelser.shouldBeEmpty()
@@ -289,10 +282,10 @@ class BrevDataByggerA001Test {
 
     @Test
     fun `lag art16 uten art12 har kun art16 uten art12 begrunnelser`() {
-        val oppsett = lagBehandling()
+        val behandling = lagBehandling()
         lagUnntaksVilkaarResultat(Vilkaar.FO_883_2004_ART16_1, SJOEMANNSKIRKEN)
 
-        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(oppsett.behandling), SAKSBEHANDLER_ID) as BrevDataA001
+        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(behandling), SAKSBEHANDLER_ID) as BrevDataA001
 
         brevDataA001.run {
             anmodningBegrunnelser.shouldBeEmpty()
@@ -304,32 +297,32 @@ class BrevDataByggerA001Test {
     @Test
     fun `test ansettelsesperiode`() {
         avklarteOrganisasjoner.add(ORGNR1)
-        val oppsett = lagBehandling()
+        val behandling = lagBehandling()
 
-        lagArbeidsforhold(oppsett.arbDokument, ORGNR1, LocalDate.of(1976, 10, 23), LocalDate.of(1978, 10, 23))
-        val forventet = lagArbeidsforhold(oppsett.arbDokument, ORGNR1, LocalDate.of(2005, 1, 11), LocalDate.of(2018, 8, 11))
+        lagArbeidsforhold(behandling.arbDokument(), ORGNR1, LocalDate.of(1976, 10, 23), LocalDate.of(1978, 10, 23))
+        val forventet = lagArbeidsforhold(behandling.arbDokument(), ORGNR1, LocalDate.of(2005, 1, 11), LocalDate.of(2018, 8, 11))
         // Senere arbeidsforhold, men ikke et valgt arbeidsforhold
-        lagArbeidsforhold(oppsett.arbDokument, ORGNR2, LocalDate.of(2010, 10, 23), LocalDate.of(2017, 10, 23))
+        lagArbeidsforhold(behandling.arbDokument(), ORGNR2, LocalDate.of(2010, 10, 23), LocalDate.of(2017, 10, 23))
 
-        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(oppsett.behandling), SAKSBEHANDLER_ID) as BrevDataA001
+        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(behandling), SAKSBEHANDLER_ID) as BrevDataA001
         brevDataA001.ansettelsesperiode shouldBe forventet.ansettelsesPeriode
     }
 
     @Test
     fun `test ingen ansettelse periode`() {
         avklarteOrganisasjoner.add(ORGNR1)
-        val oppsett = lagBehandling()
+        val behandling = lagBehandling()
 
-        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(oppsett.behandling), SAKSBEHANDLER_ID) as BrevDataA001
+        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(behandling), SAKSBEHANDLER_ID) as BrevDataA001
         brevDataA001.ansettelsesperiode shouldBe null
     }
 
     @Test
     fun `lag brevdata ytterligere info fra bestilling info finnes`() {
-        val oppsett = lagBehandling()
+        val behandling = lagBehandling()
         val forventetInfo = "By the way..."
         val brevbestilling = DoksysBrevbestilling.Builder()
-            .medBehandling(oppsett.behandling)
+            .medBehandling(behandling)
             .medYtterligereInformasjon(forventetInfo)
             .build()
         val brevdataGrunnlag = lagBrevDataGrunnlag(brevbestilling)
@@ -340,11 +333,11 @@ class BrevDataByggerA001Test {
 
     @Test
     fun `lag brevdata har ikke bostedsadresse bruker kontaktadresse`() {
-        val oppsett = lagBehandling {
+        val behandling = lagBehandling {
             soeknad { bosted(Bosted()) }
         }
 
-        val doksysBrevbestilling = DoksysBrevbestilling.Builder().medBehandling(oppsett.behandling).build()
+        val doksysBrevbestilling = DoksysBrevbestilling.Builder().medBehandling(behandling).build()
         val personopplysninger = lagPersonopplysningerUtenBostedsadresse()
         val brevdataGrunnlag = lagBrevDataGrunnlag(doksysBrevbestilling, personopplysninger)
 
@@ -354,11 +347,11 @@ class BrevDataByggerA001Test {
 
     @Test
     fun `lag brevdata har ikke bostedsadresse eller kontaktadresse kaster feilmelding`() {
-        val oppsett = lagBehandling {
+        val behandling = lagBehandling {
             soeknad { bosted(Bosted()) }
         }
 
-        val doksysBrevbestilling = DoksysBrevbestilling.Builder().medBehandling(oppsett.behandling).build()
+        val doksysBrevbestilling = DoksysBrevbestilling.Builder().medBehandling(behandling).build()
         val personopplysninger = lagPersonopplysningerUtenBostedsadresseOgKontaktadresse()
         val brevdataGrunnlag = lagBrevDataGrunnlag(doksysBrevbestilling, personopplysninger)
 
