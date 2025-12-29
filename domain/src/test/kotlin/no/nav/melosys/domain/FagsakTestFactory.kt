@@ -73,11 +73,22 @@ object FagsakTestFactory {
             }.apply(init))
         }
 
-        fun medVirksomhet() = apply {
+        fun medVirksomhet() = medVirksomhet {}
+
+        fun medVirksomhet(init: Aktoer.() -> Unit = {}) = apply {
             leggTilAktør(Aktoer().apply {
                 orgnr = ORGNR
                 rolle = Aktoersroller.VIRKSOMHET
-            })
+            }.apply(init))
+        }
+
+        fun medArbeidsgiver() = medArbeidsgiver {}
+
+        fun medArbeidsgiver(init: Aktoer.() -> Unit = {}) = apply {
+            leggTilAktør(Aktoer().apply {
+                orgnr = ORGNR
+                rolle = Aktoersroller.ARBEIDSGIVER
+            }.apply(init))
         }
 
         fun medTrygdemyndighet() = apply {
