@@ -9,6 +9,7 @@ import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -125,6 +126,15 @@ class SedDokumentBuilder {
     var rinaDokumentID: String? = null
     var fnr: String? = null
     var sedType: no.nav.melosys.domain.eessi.SedType? = null
+    var lovvalgsperiode: no.nav.melosys.domain.dokument.medlemskap.Periode? = null
+    var lovvalgBestemmelse: LovvalgBestemmelse? = null
+    var lovvalgslandKode: Landkoder? = null
+    var unntakFraLovvalgBestemmelse: LovvalgBestemmelse? = null
+    var unntakFraLovvalgslandKode: Landkoder? = null
+
+    fun lovvalgsperiode(fom: LocalDate, tom: LocalDate? = null) {
+        lovvalgsperiode = no.nav.melosys.domain.dokument.medlemskap.Periode(fom, tom)
+    }
 
     fun build(): SedDokument = SedDokument().apply {
         this.avsenderLandkode = this@SedDokumentBuilder.avsenderLandkode
@@ -132,6 +142,11 @@ class SedDokumentBuilder {
         this.rinaDokumentID = this@SedDokumentBuilder.rinaDokumentID
         this.fnr = this@SedDokumentBuilder.fnr
         this.sedType = this@SedDokumentBuilder.sedType
+        this.lovvalgsperiode = this@SedDokumentBuilder.lovvalgsperiode
+        this.lovvalgBestemmelse = this@SedDokumentBuilder.lovvalgBestemmelse
+        this.lovvalgslandKode = this@SedDokumentBuilder.lovvalgslandKode
+        this.unntakFraLovvalgBestemmelse = this@SedDokumentBuilder.unntakFraLovvalgBestemmelse
+        this.unntakFraLovvalgslandKode = this@SedDokumentBuilder.unntakFraLovvalgslandKode
     }
 }
 

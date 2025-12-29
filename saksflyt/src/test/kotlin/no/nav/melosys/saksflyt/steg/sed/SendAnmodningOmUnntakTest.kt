@@ -44,23 +44,10 @@ class SendAnmodningOmUnntakTest {
 
     private lateinit var sendAnmodningOmUnntak: SendAnmodningOmUnntak
 
-    private lateinit var prosessinstans: Prosessinstans
     private val brevbestillingSlot = slot<DoksysBrevbestilling>()
 
     @BeforeEach
     fun setUp() {
-        prosessinstans = Prosessinstans.forTest {
-            type = ProsessType.OPPRETT_SAK
-            status = ProsessStatus.KLAR
-            behandling {
-                id = BEHANDLING_ID
-                fagsak {
-                    gsakSaksnummer = 123456789L
-                }
-                dokumentasjonSvarfristDato = Instant.now()
-            }
-        }
-
         sendAnmodningOmUnntak = SendAnmodningOmUnntak(
             eessiService, brevBestiller, behandlingService,
             behandlingsresultatService, anmodningsperiodeService
@@ -76,9 +63,11 @@ class SendAnmodningOmUnntakTest {
 
     @Test
     fun `utfør artikkel16 skal sende sed med vedlegg`() {
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
-        prosessinstans.setData(ProsessDataKey.VEDLEGG_SED, setOf(DokumentReferanse("", "")))
-        val behandlingsresultat = hentBehandlingsresultat()
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
+            medData(ProsessDataKey.VEDLEGG_SED, setOf(DokumentReferanse("", "")))
+        }
+        val behandlingsresultat = lagBehandlingsresultat()
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         val forventetVedlegg = Vedlegg(byteArrayOf(), "tittel")
         every { eessiService.lagEessiVedlegg(any(), any()) } returns setOf(forventetVedlegg)
@@ -101,10 +90,11 @@ class SendAnmodningOmUnntakTest {
 
     @Test
     fun `utfør artikkel18_1 skal sende sed`() {
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
-        val behandlingsresultat = hentBehandlingsresultat()
-        behandlingsresultat.anmodningsperioder.forEach { periode ->
-            periode.bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
+        }
+        val behandlingsresultat = lagBehandlingsresultatMedAnmodningsperiode {
+            bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
@@ -126,9 +116,11 @@ class SendAnmodningOmUnntakTest {
 
     @Test
     fun `utfør ingen institusjon eessi klar skal sende brev`() {
-        val behandlingsresultat = hentBehandlingsresultat()
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.YTTERLIGERE_INFO_SED, "Mer info")
+        }
+        val behandlingsresultat = lagBehandlingsresultat()
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
-        prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, "Mer info")
 
 
         sendAnmodningOmUnntak.utfør(prosessinstans)
@@ -145,13 +137,26 @@ class SendAnmodningOmUnntakTest {
 
     @Test
     fun `utfør ingen bestemmelse skal verifisere sed ikke sendt`() {
-        val behandlingsresultat = hentBehandlingsresultat()
-        behandlingsresultat.anmodningsperioder = mutableSetOf(Anmodningsperiode())
-        every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat
-        prosessinstans.hentBehandling.id = 2L
+        val behandlingId = 2L
+        val prosessinstans = lagProsessinstans(behandlingId) {
+            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
+            medData(ProsessDataKey.YTTERLIGERE_INFO_SED, "fritekst")
+        }
         val nå = prosessinstans.hentBehandling.dokumentasjonSvarfristDato
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
-        prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, "fritekst")
+
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = behandlingId
+            behandling {
+                id = behandlingId
+                fagsak { gsakSaksnummer = 123456789L }
+                dokumentasjonSvarfristDato = Instant.now()
+            }
+            anmodningsperiode {
+                bestemmelse = null
+            }
+            type = Behandlingsresultattyper.ANMODNING_OM_UNNTAK
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
 
 
         sendAnmodningOmUnntak.utfør(prosessinstans)
@@ -164,22 +169,46 @@ class SendAnmodningOmUnntakTest {
         verify { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(prosessinstans.hentBehandling.id) }
     }
 
-    private fun hentBehandlingsresultat() = Behandlingsresultat().apply {
+    private fun lagProsessinstans(
+        behandlingId: Long = BEHANDLING_ID,
+        init: Prosessinstans.Builder.() -> Unit = {}
+    ) = Prosessinstans.forTest {
+        type = ProsessType.OPPRETT_SAK
+        status = ProsessStatus.KLAR
+        behandling {
+            id = behandlingId
+            fagsak {
+                gsakSaksnummer = 123456789L
+            }
+            dokumentasjonSvarfristDato = Instant.now()
+        }
+        init()
+    }
+
+    private fun lagBehandlingsresultat() = lagBehandlingsresultatMedAnmodningsperiode()
+
+    private fun lagBehandlingsresultatMedAnmodningsperiode(
+        anmodningsperiodeInit: AnmodningsperiodeTestFactory.Builder.() -> Unit = {}
+    ) = Behandlingsresultat.forTest {
         id = BEHANDLING_ID
-        behandling = Behandling.forTest {
+        behandling {
             id = BEHANDLING_ID
             fagsak {
                 gsakSaksnummer = 123456789L
             }
             dokumentasjonSvarfristDato = Instant.now()
         }
-        anmodningsperioder = mutableSetOf(
-            Anmodningsperiode(
-                LocalDate.now(), LocalDate.now(), Land_iso2.NO,
-                Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5,
-                Land_iso2.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Trygdedekninger.FULL_DEKNING_EOSFO
-            )
-        )
+        anmodningsperiode {
+            fom = LocalDate.now()
+            tom = LocalDate.now()
+            lovvalgsland = Land_iso2.NO
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2
+            tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5
+            unntakFraLovvalgsland = Land_iso2.NO
+            unntakFraBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+            dekning = Trygdedekninger.FULL_DEKNING_EOSFO
+            anmodningsperiodeInit()
+        }
         type = Behandlingsresultattyper.ANMODNING_OM_UNNTAK
     }
 
