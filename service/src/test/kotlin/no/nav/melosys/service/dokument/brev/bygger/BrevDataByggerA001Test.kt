@@ -120,7 +120,6 @@ class BrevDataByggerA001Test {
      */
     @MelosysTestDsl
     private class TestOppsettBuilder {
-        var foretakUtlandOrgnr: String = ORGNR1
         var selvstendigForetakOrgnr: List<String> = emptyList()
         var ekstraArbeidsgivere: List<String> = emptyList()
 
@@ -140,7 +139,6 @@ class BrevDataByggerA001Test {
                     postnummer = "0165",
                     poststed = "Oslo"
                 )
-                foretakUtland(builder.foretakUtlandOrgnr)
                 builder.selvstendigForetakOrgnr.forEach { selvstendigForetak(it) }
                 builder.ekstraArbeidsgivere.forEach { ekstraArbeidsgiver(it) }
                 builder.soeknadBlock?.invoke(this)
