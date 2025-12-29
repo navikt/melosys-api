@@ -8,7 +8,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.FagsakTestFactory
-import no.nav.melosys.domain.FagsakTestFactory.lagFagsak
+import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
@@ -28,20 +28,21 @@ internal class OppdaterOppgaveAnmodningUnntakSendtTest {
 
     private val oppgaveSlot = slot<OppgaveOppdatering>()
     private lateinit var oppdaterOppgaveAnmodningUnntakSendt: OppdaterOppgaveAnmodningUnntakSendt
-    private lateinit var prosessinstans: Prosessinstans
 
     @BeforeEach
     fun setUp() {
         oppdaterOppgaveAnmodningUnntakSendt = OppdaterOppgaveAnmodningUnntakSendt(oppgaveService)
-        val toMånederFremITid = LocalDate.now().plusMonths(2L)
-        prosessinstans = Prosessinstans.forTest {
-            behandling {
-                dokumentasjonSvarfristDato = Instant.from(ZonedDateTime.of(toMånederFremITid, LocalTime.MAX, ZoneId.systemDefault()))
-                fagsak = lagFagsak()
-            }
-            medData(ProsessDataKey.OPPGAVE_ID, OPPGAVE_ID)
-        }
         every { oppgaveService.oppdaterOppgave(any(), any<OppgaveOppdatering>()) } returns Unit
+    }
+
+    private fun lagProsessinstans() = Prosessinstans.forTest {
+        behandling {
+            dokumentasjonSvarfristDato = Instant.from(
+                ZonedDateTime.of(LocalDate.now().plusMonths(2L), LocalTime.MAX, ZoneId.systemDefault())
+            )
+            fagsak { }
+        }
+        medData(ProsessDataKey.OPPGAVE_ID, OPPGAVE_ID)
     }
 
     @Test
@@ -51,7 +52,7 @@ internal class OppdaterOppgaveAnmodningUnntakSendtTest {
         every { oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(any<String>()) } returns oppgave
         val toMånederFremITid = LocalDate.now().plusMonths(2L)
 
-        oppdaterOppgaveAnmodningUnntakSendt.utfør(prosessinstans)
+        oppdaterOppgaveAnmodningUnntakSendt.utfør(lagProsessinstans())
 
         verify { oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(FagsakTestFactory.SAKSNUMMER) }
         verify { oppgaveService.oppdaterOppgave(eq(oppgave.oppgaveId), capture(oppgaveSlot)) }
@@ -68,7 +69,7 @@ internal class OppdaterOppgaveAnmodningUnntakSendtTest {
         val oppgave = lagOppgave(treMånederFremITid, eksisterendeBeskrivelse)
         every { oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(any<String>()) } returns oppgave
 
-        oppdaterOppgaveAnmodningUnntakSendt.utfør(prosessinstans)
+        oppdaterOppgaveAnmodningUnntakSendt.utfør(lagProsessinstans())
 
         verify { oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(FagsakTestFactory.SAKSNUMMER) }
         verify { oppgaveService.oppdaterOppgave(eq(oppgave.oppgaveId), capture(oppgaveSlot)) }

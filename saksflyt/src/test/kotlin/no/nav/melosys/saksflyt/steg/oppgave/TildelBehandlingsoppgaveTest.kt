@@ -20,38 +20,42 @@ internal class TildelBehandlingsoppgaveTest {
     private lateinit var oppgaveService: OppgaveService
 
     private lateinit var tildelBehandlingsoppgave: TildelBehandlingsoppgave
-    private lateinit var prosessinstans: Prosessinstans
+
     @BeforeEach
     fun setUp() {
         tildelBehandlingsoppgave = TildelBehandlingsoppgave(oppgaveService)
-        prosessinstans = Prosessinstans.forTest {
-            medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER)
-            medData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
-        }
-        every {oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER)} returns
+        every { oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER) } returns
             Optional.of(Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build())
-        every {oppgaveService.tildelOppgave(any(), any())} returns Unit
+        every { oppgaveService.tildelOppgave(any(), any()) } returns Unit
     }
 
     @Test
     fun utfør_finnerOppgave_forventTildelingAvOppgave() {
-        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true)
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER)
+            medData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
+            medData(ProsessDataKey.SKAL_TILORDNES, true)
+        }
         every { oppgaveService.finnÅpneBehandlingsoppgaverMedFagsaksnummer(SAKSNUMMER) } returns listOf(Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build())
 
         tildelBehandlingsoppgave.utfør(prosessinstans)
 
-        verify {oppgaveService.tildelOppgave(OPPGAVE_ID, SAKSBEHANDLER)}
+        verify { oppgaveService.tildelOppgave(OPPGAVE_ID, SAKSBEHANDLER) }
     }
 
     @Test
     fun utfør_finnerOppgave_forventTildelingAvFlereOppgaver() {
-        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true)
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER)
+            medData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
+            medData(ProsessDataKey.SKAL_TILORDNES, true)
+        }
         every { oppgaveService.finnÅpneBehandlingsoppgaverMedFagsaksnummer(SAKSNUMMER) } returns listOf(Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build(), Oppgave.Builder().setOppgaveId(OPPGAVE_ID2).build())
 
         tildelBehandlingsoppgave.utfør(prosessinstans)
 
-        verify {oppgaveService.tildelOppgave(OPPGAVE_ID, SAKSBEHANDLER)}
-        verify {oppgaveService.tildelOppgave(OPPGAVE_ID2, SAKSBEHANDLER)}
+        verify { oppgaveService.tildelOppgave(OPPGAVE_ID, SAKSBEHANDLER) }
+        verify { oppgaveService.tildelOppgave(OPPGAVE_ID2, SAKSBEHANDLER) }
     }
 
     companion object {

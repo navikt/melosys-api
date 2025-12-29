@@ -513,7 +513,7 @@ class OpprettFakturaserieTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = OPPRINNELIG_BEHANDLING_ID
             fakturaserieReferanse = FAKTURASERIE_REFERANSE
-            behandling = Behandling.forTest {
+            behandling {
                 id = OPPRINNELIG_BEHANDLING_ID
             }
         }
@@ -613,7 +613,7 @@ class OpprettFakturaserieTest {
                     }
                 }
             }
-            behandling = Behandling.forTest {
+            behandling {
                 id = OPPRINNELIG_BEHANDLING_ID
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
@@ -621,6 +621,9 @@ class OpprettFakturaserieTest {
                 }
             }
         }
+
+        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak!!
+
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = BEHANDLING_ID
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
@@ -642,7 +645,7 @@ class OpprettFakturaserieTest {
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = opprinneligBehandlingsresultat.behandling?.fagsak
+                fagsak = sharedFagsak
             }
         }
 
@@ -679,7 +682,7 @@ class OpprettFakturaserieTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = OPPRINNELIG_BEHANDLING_ID
             fakturaserieReferanse = FAKTURASERIE_REFERANSE
-            behandling = Behandling.forTest {
+            behandling {
                 id = OPPRINNELIG_BEHANDLING_ID
             }
             medlemskapsperiode {
@@ -780,7 +783,7 @@ class OpprettFakturaserieTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = OPPRINNELIG_BEHANDLING_ID
             fakturaserieReferanse = FAKTURASERIE_REFERANSE
-            behandling = Behandling.forTest {
+            behandling {
                 id = OPPRINNELIG_BEHANDLING_ID
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
@@ -811,10 +814,13 @@ class OpprettFakturaserieTest {
             }
         }
 
+        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak!!
+
+        // Add an ÅRSAVREGNING behandling to the same fagsak
         Behandling.forTest {
             id = 3L
             type = Behandlingstyper.ÅRSAVREGNING
-            fagsak = opprinneligBehandlingsresultat.behandling?.fagsak
+            fagsak = sharedFagsak
         }
 
         val behandlingsresultat = Behandlingsresultat.forTest {
@@ -852,7 +858,7 @@ class OpprettFakturaserieTest {
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = opprinneligBehandlingsresultat.behandling?.fagsak
+                fagsak = sharedFagsak
             }
         }
 
@@ -882,7 +888,7 @@ class OpprettFakturaserieTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = OPPRINNELIG_BEHANDLING_ID
             fakturaserieReferanse = FAKTURASERIE_REFERANSE
-            behandling = Behandling.forTest {
+            behandling {
                 id = OPPRINNELIG_BEHANDLING_ID
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
@@ -912,6 +918,9 @@ class OpprettFakturaserieTest {
                 }
             }
         }
+
+        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak!!
+
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = BEHANDLING_ID
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
@@ -947,7 +956,7 @@ class OpprettFakturaserieTest {
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = opprinneligBehandlingsresultat.behandling?.fagsak
+                fagsak = sharedFagsak
             }
         }
 
@@ -976,7 +985,7 @@ class OpprettFakturaserieTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = OPPRINNELIG_BEHANDLING_ID
             fakturaserieReferanse = FAKTURASERIE_REFERANSE
-            behandling = Behandling.forTest {
+            behandling {
                 id = OPPRINNELIG_BEHANDLING_ID
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
@@ -1009,10 +1018,13 @@ class OpprettFakturaserieTest {
             }
         }
 
+        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak!!
+
+        // Add another behandling to the same fagsak
         Behandling.forTest {
             id = 0L
             registrertDato = Instant.EPOCH
-            fagsak = opprinneligBehandlingsresultat.behandling!!.fagsak
+            fagsak = sharedFagsak
         }
 
         val behandlingsresultat = Behandlingsresultat.forTest {
@@ -1050,7 +1062,7 @@ class OpprettFakturaserieTest {
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = opprinneligBehandlingsresultat.behandling!!.fagsak
+                fagsak = sharedFagsak
             }
         }
 
@@ -1535,7 +1547,7 @@ class OpprettFakturaserieTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = OPPRINNELIG_BEHANDLING_ID
             fakturaserieReferanse = FAKTURASERIE_REFERANSE
-            behandling = Behandling.forTest {
+            behandling {
                 id = OPPRINNELIG_BEHANDLING_ID
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.FØRSTEGANG
@@ -1569,6 +1581,9 @@ class OpprettFakturaserieTest {
                 }
             }
         }
+
+        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak!!
+
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = BEHANDLING_ID
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
@@ -1590,7 +1605,7 @@ class OpprettFakturaserieTest {
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = opprinneligBehandlingsresultat.behandling!!.fagsak
+                fagsak = sharedFagsak
             }
         }
 
@@ -1633,7 +1648,7 @@ class OpprettFakturaserieTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = OPPRINNELIG_BEHANDLING_ID
             fakturaserieReferanse = FAKTURASERIE_REFERANSE
-            behandling = Behandling.forTest {
+            behandling {
                 id = OPPRINNELIG_BEHANDLING_ID
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.FØRSTEGANG
@@ -1667,6 +1682,9 @@ class OpprettFakturaserieTest {
                 }
             }
         }
+
+        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak!!
+
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = BEHANDLING_ID
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
@@ -1688,7 +1706,7 @@ class OpprettFakturaserieTest {
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = opprinneligBehandlingsresultat.behandling!!.fagsak
+                fagsak = sharedFagsak
             }
         }
 

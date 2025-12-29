@@ -5,15 +5,16 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Landkoder
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
+import no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.behandling
 import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService
@@ -34,16 +35,11 @@ class VurderInngangsvilkaarTest {
     private lateinit var vurderInngangsvilkaar: VurderInngangsvilkaar
 
     private val behandlingID = 143L
-    private lateinit var behandling: Behandling
 
     @BeforeEach
     fun setUp() {
         every { inngangsvilkaarService.vurderOgLagreInngangsvilkår(any(), any(), any(), any()) } returns true
         vurderInngangsvilkaar = VurderInngangsvilkaar(inngangsvilkaarService, behandlingService)
-        behandling = Behandling.forTest {
-            id = behandlingID
-        }
-        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
     }
 
     @Test
@@ -53,16 +49,20 @@ class VurderInngangsvilkaarTest {
             soeknadsland.setLandkoder(listOf(Landkoder.NO.kode, Landkoder.SE.kode))
         }
 
-        behandling.mottatteOpplysninger = MottatteOpplysninger().apply {
-            this.mottatteOpplysningerData = mottatteOpplysningerData
+        val behandling = Behandling.forTest {
+            id = behandlingID
+            fagsak { }
+            mottatteOpplysninger = mottatteOpplysningerForTest {
+                this.mottatteOpplysningerData = mottatteOpplysningerData
+            }
         }
-        behandling.fagsak = Fagsak.forTest()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
 
         val prosessinstans = Prosessinstans.forTest {
             type = ProsessType.OPPRETT_SAK
             status = ProsessStatus.KLAR
+            behandling { id = behandlingID }
         }
-        prosessinstans.behandling = behandling
 
         every { inngangsvilkaarService.skalVurdereInngangsvilkår(any()) } returns true
         every {
@@ -83,13 +83,19 @@ class VurderInngangsvilkaarTest {
 
     @Test
     fun `utfoerSteg skalIkkeVurdereInngangsvilkår vurdererIkkeInngangsvilkår`() {
+        val behandling = Behandling.forTest {
+            id = behandlingID
+            fagsak { }
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+
         every { inngangsvilkaarService.skalVurdereInngangsvilkår(any()) } returns false
+
         val prosessinstans = Prosessinstans.forTest {
             type = ProsessType.OPPRETT_SAK
             status = ProsessStatus.KLAR
-            behandling = this@VurderInngangsvilkaarTest.behandling
+            behandling { id = behandlingID }
         }
-        behandling.fagsak = Fagsak.forTest()
 
 
         vurderInngangsvilkaar.utfør(prosessinstans)
