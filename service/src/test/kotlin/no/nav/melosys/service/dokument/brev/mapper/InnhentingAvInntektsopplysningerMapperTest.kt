@@ -7,7 +7,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.brev.InnhentingAvInntektsopplysningerBrevbestilling
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat

@@ -4,7 +4,7 @@ import io.getunleash.FakeUnleash
 import io.kotest.matchers.shouldBe
 import io.mockk.*
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.forTest

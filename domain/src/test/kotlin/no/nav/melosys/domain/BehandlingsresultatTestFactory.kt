@@ -1,9 +1,6 @@
 package no.nav.melosys.domain
 
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeTestFactory
-import no.nav.melosys.domain.avgift.forTest
-import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
@@ -32,6 +29,11 @@ fun BehandlingsresultatTestFactory.Builder.vedtakMetadata(init: VedtakMetadata.(
         endretDato = Instant.now()
         endretAv = "bla"
     }.apply(init)
+}
+
+// Extension for building behandlingsresultat inside Årsavregning.forTest { }
+fun ÅrsavregningTestFactory.Builder.behandlingsresultat(init: BehandlingsresultatTestFactory.Builder.() -> Unit) = apply {
+    this.behandlingsresultat = Behandlingsresultat.forTest(init)
 }
 
 fun BehandlingsresultatTestFactory.Builder.årsavregning(init: ÅrsavregningTestFactory.Builder.() -> Unit) = apply {

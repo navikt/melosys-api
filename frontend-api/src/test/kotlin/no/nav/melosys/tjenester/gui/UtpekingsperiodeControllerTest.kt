@@ -11,6 +11,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.domain.utpekingsperiodeForTest
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.service.utpeking.UtpekingService
 import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingsperioderDto
@@ -96,13 +97,12 @@ internal class UtpekingsperiodeControllerTest {
     }
 
     private fun lagUtpekingsperioder() = listOf(
-        Utpekingsperiode(
-            LocalDate.now(),
-            LocalDate.now(),
-            Land_iso2.SE,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A,
-            null
-        ),
+        utpekingsperiodeForTest {
+            fom = LocalDate.now()
+            tom = LocalDate.now()
+            lovvalgsland = Land_iso2.SE
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A
+        },
         random.nextObject(Utpekingsperiode::class.java),
         random.nextObject(Utpekingsperiode::class.java)
     )

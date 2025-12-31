@@ -3,14 +3,16 @@ package no.nav.melosys.tjenester.gui
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.inntektForTest
+import no.nav.melosys.domain.avgift.skatteforholdForTest
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.medlemskapsperiodeForTest
 import no.nav.melosys.service.avgift.EøsPensjonistTrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
@@ -162,18 +164,18 @@ class TrygdeavgiftControllerTest(
             trygdesats = BigDecimal.valueOf(7.9),
             trygdeavgiftsbeløpMd = Penger(BigDecimal.valueOf(10000.0)),
 
-            grunnlagMedlemskapsperiode = Medlemskapsperiode().apply {
+            grunnlagMedlemskapsperiode = medlemskapsperiodeForTest {
                 trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
             },
 
-            grunnlagInntekstperiode = Inntektsperiode().apply {
+            grunnlagInntekstperiode = inntektForTest {
                 fomDato = LocalDate.now()
                 tomDato = LocalDate.now()
                 type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                 avgiftspliktigTotalinntekt = Penger(5000.0)
             },
 
-            grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
+            grunnlagSkatteforholdTilNorge = skatteforholdForTest {
                 fomDato = LocalDate.now()
                 tomDato = LocalDate.now()
                 skatteplikttype = Skatteplikttype.SKATTEPLIKTIG

@@ -257,6 +257,23 @@ Files converted from legacy patterns:
 - [x] FagsakControllerTest.kt (32 tests, 9 patterns)
 - [x] MedlemskapsperiodeControllerTest.kt (2 tests, 1 pattern)
 - [x] BehandlingsnotatControllerTest.kt (3 tests, 2 patterns + BehandlingsnotatTestFactory)
+- [x] HenleggelseControllerTest.kt (2 tests, 1 pattern)
+- [x] UtpekingControllerTest.kt (1 test) - already compliant
+- [x] VideresendingControllerTest.kt (2 tests) - already compliant
+- [x] AnmodningsperiodeControllerTest.kt (4 tests, 2 patterns)
+- [x] TrygdeavgiftControllerTest.kt (5 tests, 3 patterns)
+- [x] BehandlingsresultatControllerTest.kt (4 tests) - already compliant
+- [x] ÅrsavregningListControllerTest.kt (1 test, 1 pattern + moved ÅrsavregningTestFactory)
+- [x] LovvalgsperiodeDtoTest.kt (2 tests) - only DTOs
+- [x] UtpekingsperiodeControllerTest.kt (2 tests, 1 pattern)
+- [x] UnntaksperiodeControllerTest.kt (2 tests) - already clean
+- [x] UnntaksregistreringControllerTest.kt (1 test) - already clean
+- [x] KontrollControllerTest.kt (6 tests) - already clean
+
+**Phase 3 Summary (2025-12-31):**
+- 28 files processed
+- ~60 patterns converted
+- ~150 tests verified passing
 
 ### Phase 4: Remaining
 - [ ] integrasjon/** - as needed
