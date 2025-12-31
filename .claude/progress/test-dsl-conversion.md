@@ -207,14 +207,56 @@ val behandling = Behandling.forTest { /* config */ }
   - [x] EosVedtakServiceKtTest.kt (7 tests)
   - [x] FtrlVedtakServiceTest.kt (12 tests)
 
-### Phase 2: Saksflyt Tests
-- [ ] saksflyt/steg/behandling/** - 12 files
-- [ ] saksflyt/steg/sed/** - 15 files
-- [ ] saksflyt/steg/brev/** - 10 files
-- [ ] saksflyt/steg/medl/** - 5 files
+### Phase 1.5: Remaining Service Tests (2025-12-31)
+Files converted from legacy patterns (SaksbehandlingDataFactory, .apply after factory):
+- [x] JournalfoeringServiceTest.kt (49 tests, ~20+ patterns)
+- [x] OppgaveplukkerTest.kt (10 tests, 9 patterns)
+- [x] LandvelgerServiceTest.kt (23 tests, 11 patterns)
+- [x] KontrollTest.kt (18 tests, ~30 patterns)
+- [x] AnmodningUnntakKontrollServiceTest.kt (9 tests, 12 patterns)
+- [x] MedlPeriodeServiceTest.kt (18 tests, 20 patterns)
+- [x] OppgaveServiceTest.kt (23 tests, 16 patterns)
+- [x] MedlAnmodningsperiodeServiceTest.kt (2 tests) - already using forTest DSL
+- [x] RegisteropplysningerServiceTest.kt (7 tests) - already using forTest DSL
+- [x] SaksopplysningEventListenerTest.kt (4 tests) - already using forTest DSL
+- [x] LovvalgsperiodeServiceTest.kt (17 tests, 16 patterns)
+- [x] SaksbehandlingReglerTest.kt (43 tests, 1 pattern) - mostly compliant
+- [x] OverlappendeMedlemskapsperioderReglerTest.kt (30 tests, ~15 patterns)
+- [x] OpprettForslagMedlemskapsperiodeServiceTest.kt (12 tests, ~20 patterns)
+- [x] MedlemskapsperiodeServiceTest.kt (tests pass, ~40 patterns)
+- [x] AvklarteMedfolgendeFamilieServiceTest.kt (13 tests, 8 patterns)
 
-### Phase 3: Frontend-API Tests
-- [ ] frontend-api/tjenester/gui/** - 15 files
+**Phase 1.5 Summary (2025-12-31):**
+- 16 files processed
+- 12 files converted (~200+ patterns total)
+- 4 files already compliant
+- ~300 tests verified passing
+
+### Phase 2: Saksflyt Tests ✅ COMPLETED
+- [x] saksflyt/steg/behandling/** - 11 files (100% using forTest)
+- [x] saksflyt/steg/sed/** - 14 files (100% using forTest)
+- [x] saksflyt/steg/brev/** - 10 files (100% using forTest)
+- [x] saksflyt/steg/medl/** - 5 files (100% using forTest)
+
+Commits: `4c38ace`, `ae33185`, `74b05bc`, `740c541`
+
+### Phase 3: Frontend-API Tests (2025-12-31)
+Files converted from legacy patterns:
+- [x] BehandlingControllerTest.kt (4 tests, 2 patterns)
+- [x] VedtakControllerTest.kt (5 tests) - only DTOs, no changes needed
+- [x] LovvalgsperiodeControllerTest.kt (6 tests, 2 patterns)
+- [x] MottatteOpplysningerControllerTest.kt (3 tests, 2 patterns)
+- [x] AktoerControllerTest.kt (4 tests, 2 patterns + enhanced FagsakTestFactory)
+- [x] AvklartefaktaControllerTest.kt (3 tests, 2 patterns + AvklartefaktaRegistreringTestFactory)
+- [x] AnmodningUnntakControllerTest.kt (2 tests) - only DTOs, no changes needed
+- [x] AvvisUtpekingControllerTest.kt (1 test) - only DTOs, no changes needed
+- [x] HelseutgiftDekkesPeriodeControllerTest.kt (5 tests, 1 pattern)
+- [x] SaksopplysningerTilDtoTest.kt (2 tests, 4 patterns + arbeidsforholdForTest DSL)
+- [x] BrevmalListeByggerTest.kt (39 tests, 10 patterns)
+- [x] TrygdeavtaleControllerTest.kt (7 tests, 6 patterns)
+- [x] FagsakControllerTest.kt (32 tests, 9 patterns)
+- [x] MedlemskapsperiodeControllerTest.kt (2 tests, 1 pattern)
+- [x] BehandlingsnotatControllerTest.kt (3 tests, 2 patterns + BehandlingsnotatTestFactory)
 
 ### Phase 4: Remaining
 - [ ] integrasjon/** - as needed

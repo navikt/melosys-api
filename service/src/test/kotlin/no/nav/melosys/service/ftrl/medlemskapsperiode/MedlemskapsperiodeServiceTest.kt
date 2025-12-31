@@ -14,19 +14,16 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.behandling
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.medlemskapsperiode
+import no.nav.melosys.domain.medlemskapsperiodeForTest
+import no.nav.melosys.domain.mottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.repository.MedlemskapsperiodeRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.ftrl.GyldigeTrygdedekningerService
@@ -34,7 +31,6 @@ import no.nav.melosys.service.medl.MedlPeriodeService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.math.BigDecimal
 import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
@@ -74,11 +70,11 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun hentMedlemskapsperioder_finnesMedlemAvFolketrygden_returnererMedlemskapsperioder() {
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns Behandlingsresultat().apply {
-            val periode1 = Medlemskapsperiode().apply { id = 1L }
-            val periode2 = Medlemskapsperiode().apply { id = 2L }
-            medlemskapsperioder = mutableSetOf(periode1, periode2)
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            medlemskapsperiode { id = 1L }
+            medlemskapsperiode { id = 2L }
         }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
 
         medlemskapsperiodeService.hentMedlemskapsperioder(BEHANDLING_ID_1).shouldHaveSize(2)
     }
@@ -140,15 +136,17 @@ class MedlemskapsperiodeServiceTest {
     fun oppdaterMedlemskapsperiode_medlemskapsperiodeFinnes_oppdateres() {
         every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
 
-        val trygdeavgiftsperiode = lagTrygdeavgiftsperiode(SkatteforholdTilNorge(), Inntektsperiode())
-        val medlemskapsperiode = Medlemskapsperiode().apply {
+        val medlemskapsperiode = medlemskapsperiodeForTest {
             id = MEDLEMSKAPSPERIODE_ID_1
-            trygdeavgiftsperioder = mutableSetOf(trygdeavgiftsperiode)
+            trygdeavgiftsperiode {
+                grunnlagSkatteforholdTilNorge { }
+                grunnlagInntekstperiode { }
+            }
         }
 
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            medlemskapsperioder = mutableSetOf(medlemskapsperiode)
-        }
+        val behandlingsresultat = lagBehandlingsresultat()
+        behandlingsresultat.addMedlemskapsperiode(medlemskapsperiode)
+
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
         every { medlemskapsperiodeRepository.saveAndFlush(any()) } returnsArgument 0
 
@@ -178,9 +176,9 @@ class MedlemskapsperiodeServiceTest {
     @Test
     fun oppdaterMedlemskapsperiode_medlemskapsperiodeOgFastsattTrygdeavgiftFinnes_oppdateres() {
         every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
-        }
+        val behandlingsresultat = lagBehandlingsresultat()
+        behandlingsresultat.addMedlemskapsperiode(medlemskapsperiodeForTest { id = MEDLEMSKAPSPERIODE_ID_1 })
+
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
         every { medlemskapsperiodeRepository.saveAndFlush(any()) } returnsArgument 0
 
@@ -223,7 +221,9 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun `opprettMedlemskapsperiode kaster exception når tomDato er null og bestemmelse ikke er 2_1`() {
-        val behandlingsresultat = lagBehandlingsresultat(Land_iso2.AU).apply { behandling!!.tema = Behandlingstema.IKKE_YRKESAKTIV }
+        val behandlingsresultat = lagBehandlingsresultat(Land_iso2.AU)
+        behandlingsresultat.behandling!!.tema = Behandlingstema.IKKE_YRKESAKTIV
+
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
 
 
@@ -262,9 +262,10 @@ class MedlemskapsperiodeServiceTest {
     fun oppdaterMedlemskapsperiode_opphoertBestemmelse_kasterIkkeException() {
         every { gyldigeTrygdedekningerService.hentTrygdedekninger(Behandlingstema.YRKESAKTIV, null) } returns
             listOf(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE)
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns lagBehandlingsresultat().apply {
-            medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
-        }
+        val behandlingsresultat = lagBehandlingsresultat()
+        behandlingsresultat.addMedlemskapsperiode(medlemskapsperiodeForTest { id = MEDLEMSKAPSPERIODE_ID_1 })
+
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
         every { medlemskapsperiodeRepository.saveAndFlush(any()) } returnsArgument 0
 
 
@@ -339,10 +340,10 @@ class MedlemskapsperiodeServiceTest {
     @Test
     fun oppdaterMedlemskapsperiode_finnerIkkeMedlemskapsperiode_kasterException() {
         every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns
-            lagBehandlingsresultat().apply {
-                medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
-            }
+        val behandlingsresultat = lagBehandlingsresultat()
+        behandlingsresultat.addMedlemskapsperiode(medlemskapsperiodeForTest { id = MEDLEMSKAPSPERIODE_ID_1 })
+
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
 
 
         shouldThrow<FunksjonellException> {
@@ -361,11 +362,11 @@ class MedlemskapsperiodeServiceTest {
     @Test
     fun `erstattMedlemskapsperioder skal kun opprette nye perioder når gammel liste er tom`() {
         every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
-        val medlemskapsperiode1 = Medlemskapsperiode().apply {
+        val medlemskapsperiode1 = medlemskapsperiodeForTest {
             fom = NÅ.minusDays(1)
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
-        val medlemskapsperiode2 = Medlemskapsperiode().apply {
+        val medlemskapsperiode2 = medlemskapsperiodeForTest {
             fom = NÅ.plusDays(1)
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
@@ -382,12 +383,12 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun `erstattMedlemskapsperioder skal kun avvise gamle perioder når ny liste er tom`() {
-        val gammelMedlemskapsperiode = Medlemskapsperiode().apply {
+        val gammelMedlemskapsperiode = medlemskapsperiodeForTest {
             medlPeriodeID = MEDL_ID_1
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
-        val gammelListe = mutableSetOf(gammelMedlemskapsperiode)
-        val behandlingsresultat = lagBehandlingsresultat().apply { medlemskapsperioder = gammelListe }
+        val behandlingsresultat = lagBehandlingsresultat()
+        behandlingsresultat.addMedlemskapsperiode(gammelMedlemskapsperiode)
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
 
@@ -402,13 +403,15 @@ class MedlemskapsperiodeServiceTest {
     @Test
     fun `erstattMedlemskapsperioder skal opprette nye og avvise gamle når begge lister ikke er tomme og det er ingen felles elementer`() {
         every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
-        val gammelMedlemskapsperiode = Medlemskapsperiode().apply {
+        val gammelMedlemskapsperiode = medlemskapsperiodeForTest {
             medlPeriodeID = MEDL_ID_1
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
-        val behandlingsresultat = lagBehandlingsresultat().apply { medlemskapsperioder = mutableSetOf(gammelMedlemskapsperiode) }
+        val behandlingsresultat = lagBehandlingsresultat()
+        behandlingsresultat.addMedlemskapsperiode(gammelMedlemskapsperiode)
+
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
-        val nyMedlemskapsperiode = Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.INNVILGET }
+        val nyMedlemskapsperiode = medlemskapsperiodeForTest { innvilgelsesresultat = InnvilgelsesResultat.INNVILGET }
 
 
         medlemskapsperiodeService.erstattMedlemskapsperioder(BEHANDLING_ID_2, BEHANDLING_ID_1, listOf(nyMedlemskapsperiode))
@@ -420,19 +423,21 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun `erstattMedlemskapsperioder skal oppdatere periode når begge lister har felles elementer`() {
-        every { medlemskapsperiodeRepository.save(any()) } returns Medlemskapsperiode()
-        val fellesMedlemskapsperiode = Medlemskapsperiode().apply {
+        every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
+        val fellesMedlemskapsperiode = medlemskapsperiodeForTest {
             medlPeriodeID = MEDL_ID_1
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
-        val gammelMedlemskapsperiode = Medlemskapsperiode().apply {
+        val gammelMedlemskapsperiode = medlemskapsperiodeForTest {
             medlPeriodeID = MEDL_ID_2
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
-        val gammelListe = mutableSetOf(fellesMedlemskapsperiode, gammelMedlemskapsperiode)
-        val nyMedlemskapsperiode = Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.INNVILGET }
+        val nyMedlemskapsperiode = medlemskapsperiodeForTest { innvilgelsesresultat = InnvilgelsesResultat.INNVILGET }
         val nyListe = listOf(fellesMedlemskapsperiode, nyMedlemskapsperiode)
-        val behandlingsresultat = lagBehandlingsresultat().apply { medlemskapsperioder = gammelListe }
+        val behandlingsresultat = lagBehandlingsresultat()
+        behandlingsresultat.addMedlemskapsperiode(fellesMedlemskapsperiode)
+        behandlingsresultat.addMedlemskapsperiode(gammelMedlemskapsperiode)
+
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
 
 
@@ -446,16 +451,18 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun `erstattMedlemskapsperioder skal fjerne innvilgede perioder som blir avslått`() {
-        val gammelPeriode = Medlemskapsperiode().apply {
+        val gammelPeriode = medlemskapsperiodeForTest {
             medlPeriodeID = MEDL_ID_1
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
-        val nyPeriode = Medlemskapsperiode().apply {
+        val nyPeriode = medlemskapsperiodeForTest {
             medlPeriodeID = MEDL_ID_1
             innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
         }
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns
-            lagBehandlingsresultat().apply { medlemskapsperioder = mutableSetOf(gammelPeriode) }
+        val behandlingsresultat = lagBehandlingsresultat()
+        behandlingsresultat.addMedlemskapsperiode(gammelPeriode)
+
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
 
 
         medlemskapsperiodeService.erstattMedlemskapsperioder(BEHANDLING_ID_2, BEHANDLING_ID_1, listOf(nyPeriode))
@@ -467,16 +474,18 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun `erstattMedlemskapsperioder skal kun avvise gamle perioder som er innvilget`() {
-        val gammelMedlemskapsperiodeInnvilget = Medlemskapsperiode().apply {
+        val gammelMedlemskapsperiodeInnvilget = medlemskapsperiodeForTest {
             medlPeriodeID = MEDL_ID_1
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
-        val gammelMedlemskapsperiodeAvslag = Medlemskapsperiode().apply {
+        val gammelMedlemskapsperiodeAvslag = medlemskapsperiodeForTest {
             medlPeriodeID = MEDL_ID_2
             innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
         }
-        val gammelListe = mutableSetOf(gammelMedlemskapsperiodeInnvilget, gammelMedlemskapsperiodeAvslag)
-        val behandlingsresultat = lagBehandlingsresultat().apply { medlemskapsperioder = gammelListe }
+        val behandlingsresultat = lagBehandlingsresultat()
+        behandlingsresultat.addMedlemskapsperiode(gammelMedlemskapsperiodeInnvilget)
+        behandlingsresultat.addMedlemskapsperiode(gammelMedlemskapsperiodeAvslag)
+
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
 
 
@@ -490,10 +499,10 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun `erstattMedlemskapsperioder skal kunne opprette nye opphørte perioder`() {
-        val behandlingsresultat = lagBehandlingsresultat().apply { medlemskapsperioder = mutableSetOf() }
+        val behandlingsresultat = lagBehandlingsresultat()
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
-        val nyInnvilgetMedlemskapsperiode = Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.INNVILGET }
-        val nyOpphørtMedlemskapsperiode = Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT }
+        val nyInnvilgetMedlemskapsperiode = medlemskapsperiodeForTest { innvilgelsesresultat = InnvilgelsesResultat.INNVILGET }
+        val nyOpphørtMedlemskapsperiode = medlemskapsperiodeForTest { innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT }
 
 
         medlemskapsperiodeService.erstattMedlemskapsperioder(
@@ -508,11 +517,13 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun `erstattMedlemskapsperioder skal kunne oppdatere opphørte perioder som videreføres fra tidligere behandling`() {
-        val videreførtMedlemskapsperiode = Medlemskapsperiode().apply {
+        val videreførtMedlemskapsperiode = medlemskapsperiodeForTest {
             medlPeriodeID = MEDL_ID_1
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
-        val behandlingsresultat = lagBehandlingsresultat().apply { medlemskapsperioder = mutableSetOf(videreførtMedlemskapsperiode) }
+        val behandlingsresultat = lagBehandlingsresultat()
+        behandlingsresultat.addMedlemskapsperiode(videreførtMedlemskapsperiode)
+
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
         val videreførtMedlemskapsperiodeOpphøres = videreførtMedlemskapsperiode.apply {
             innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
@@ -527,13 +538,15 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun `erstattMedlemskapsperioder skal feilregistrere opphørte perioder som ikke videreføres fra tidligere behandling`() {
-        val gammelOpphørtPeriode = Medlemskapsperiode().apply {
+        val gammelOpphørtPeriode = medlemskapsperiodeForTest {
             medlPeriodeID = MEDL_ID_1
             innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
         }
-        val behandlingsresultat = lagBehandlingsresultat().apply { medlemskapsperioder = mutableSetOf(gammelOpphørtPeriode) }
+        val behandlingsresultat = lagBehandlingsresultat()
+        behandlingsresultat.addMedlemskapsperiode(gammelOpphørtPeriode)
+
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
-        val nyMedlemskapsperiode = Medlemskapsperiode().apply {
+        val nyMedlemskapsperiode = medlemskapsperiodeForTest {
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
 
@@ -546,7 +559,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun `opprettEllerOppdaterMedlPeriode oppretter når medlId ikke finnes`() {
-        val medlemskapsperiodeUtenMedlId = Medlemskapsperiode()
+        val medlemskapsperiodeUtenMedlId = medlemskapsperiodeForTest { }
 
 
         medlemskapsperiodeService.opprettEllerOppdaterMedlPeriode(BEHANDLING_ID_1, medlemskapsperiodeUtenMedlId)
@@ -557,7 +570,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun `opprettEllerOppdaterMedlPeriode oppdaterer når medlId finnes`() {
-        val medlemskapsperiodeMedMedlId = Medlemskapsperiode().apply { medlPeriodeID = 1L }
+        val medlemskapsperiodeMedMedlId = medlemskapsperiodeForTest { medlPeriodeID = 1L }
 
 
         medlemskapsperiodeService.opprettEllerOppdaterMedlPeriode(BEHANDLING_ID_1, medlemskapsperiodeMedMedlId)
@@ -568,9 +581,10 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun slettMedlemskapsperiode_finnerIkkeMedlemskapsperiode_kasterException() {
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns lagBehandlingsresultat().apply {
-            medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
-        }
+        val behandlingsresultat = lagBehandlingsresultat()
+        behandlingsresultat.addMedlemskapsperiode(medlemskapsperiodeForTest { id = MEDLEMSKAPSPERIODE_ID_1 })
+
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
 
 
         shouldThrow<FunksjonellException> { medlemskapsperiodeService.slettMedlemskapsperiode(BEHANDLING_ID_1, MEDLEMSKAPSPERIODE_ID_2) }
@@ -579,11 +593,10 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun slettMedlemskapsperiode_finnesToMedlemskapsperioder_sletterDenEne() {
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            medlemskapsperioder = mutableSetOf(
-                Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 },
-                Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_2 })
-        }
+        val behandlingsresultat = lagBehandlingsresultat()
+        behandlingsresultat.addMedlemskapsperiode(medlemskapsperiodeForTest { id = MEDLEMSKAPSPERIODE_ID_1 })
+        behandlingsresultat.addMedlemskapsperiode(medlemskapsperiodeForTest { id = MEDLEMSKAPSPERIODE_ID_2 })
+
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
 
 
@@ -594,9 +607,9 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun slettMedlemskapsperiode_fjernTrygdeavgiftsperioder_slettes() {
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
-        }
+        val behandlingsresultat = lagBehandlingsresultat()
+        behandlingsresultat.addMedlemskapsperiode(medlemskapsperiodeForTest { id = MEDLEMSKAPSPERIODE_ID_1 })
+
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
 
 
@@ -609,11 +622,10 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun slettMedlemskapsperioder_finnesToMedlemskapsperioder_sletterAlle() {
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            medlemskapsperioder = mutableSetOf(
-                Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 },
-                Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_2 })
-        }
+        val behandlingsresultat = lagBehandlingsresultat()
+        behandlingsresultat.addMedlemskapsperiode(medlemskapsperiodeForTest { id = MEDLEMSKAPSPERIODE_ID_1 })
+        behandlingsresultat.addMedlemskapsperiode(medlemskapsperiodeForTest { id = MEDLEMSKAPSPERIODE_ID_2 })
+
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
 
 
@@ -625,11 +637,10 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun slettMedlemskapsperioder_finnesFastsattTrygdeavgift_fjernerTrygdeavgiftsperioderOmDeFinnes() {
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            medlemskapsperioder = mutableSetOf(
-                Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 },
-                Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_2 })
-        }
+        val behandlingsresultat = lagBehandlingsresultat()
+        behandlingsresultat.addMedlemskapsperiode(medlemskapsperiodeForTest { id = MEDLEMSKAPSPERIODE_ID_1 })
+        behandlingsresultat.addMedlemskapsperiode(medlemskapsperiodeForTest { id = MEDLEMSKAPSPERIODE_ID_2 })
+
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
 
 
@@ -640,27 +651,15 @@ class MedlemskapsperiodeServiceTest {
         behandlingsresultat.medlemskapsperioder.shouldBeEmpty()
     }
 
-    private fun lagBehandlingsresultat(land: Land_iso2 = Land_iso2.AU): Behandlingsresultat = Behandlingsresultat().apply {
-        behandling = Behandling.forTest {
+    private fun lagBehandlingsresultat(land: Land_iso2 = Land_iso2.AU): Behandlingsresultat = Behandlingsresultat.forTest {
+        behandling {
             id = BEHANDLING_ID_1
             tema = Behandlingstema.YRKESAKTIV
-            mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysninger {
                 mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
                     soeknadsland = Soeknadsland(listOf(land.kode), false)
                 }
             }
         }
     }
-
-    private fun lagTrygdeavgiftsperiode(
-        skatteforholdTilNorge: SkatteforholdTilNorge,
-        inntektsperiode: Inntektsperiode
-    ) = Trygdeavgiftsperiode(
-        grunnlagInntekstperiode = inntektsperiode,
-        grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,
-        periodeTil = LocalDate.now(),
-        periodeFra = LocalDate.now(),
-        trygdesats = BigDecimal(1),
-        trygdeavgiftsbeløpMd = Penger(BigDecimal(1), NOK.kode)
-    )
 }

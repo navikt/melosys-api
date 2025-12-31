@@ -91,11 +91,13 @@ object FagsakTestFactory {
             }.apply(init))
         }
 
-        fun medTrygdemyndighet() = apply {
+        fun medTrygdemyndighet() = medTrygdemyndighet {}
+
+        fun medTrygdemyndighet(init: Aktoer.() -> Unit = {}) = apply {
             leggTilAktør(Aktoer().apply {
                 institusjonID = INSTITUSJON_ID
                 rolle = Aktoersroller.TRYGDEMYNDIGHET
-            })
+            }.apply(init))
         }
 
         fun medFullmektig(init: Aktoer.() -> Unit = {}) = apply {

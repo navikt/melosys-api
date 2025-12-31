@@ -9,16 +9,23 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.SaksopplysningType
+import no.nav.melosys.domain.TidligereMedlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
+import no.nav.melosys.domain.lovvalgsperiodeForTest
+import no.nav.melosys.domain.saksopplysning
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.medl.GrunnlagMedl
@@ -63,8 +70,12 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun hentLovvalgsperiode_ugyldigLovvalgsperiode_kasterException() {
-        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(BEH_ID) } returns
-            listOf(Lovvalgsperiode().apply { id = BEH_ID })
+        // DELVIS_INNVILGET is neither INNVILGET nor AVSLAATT, making harUgyldigTilstand() return true
+        val ugyldigLovvalgsperiode = lovvalgsperiodeForTest {
+            id = BEH_ID
+            innvilgelsesresultat = InnvilgelsesResultat.DELVIS_INNVILGET
+        }
+        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(BEH_ID) } returns listOf(ugyldigLovvalgsperiode)
 
 
         shouldThrow<FunksjonellException> {
@@ -75,11 +86,11 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun hentLovvalgsperiode_enLovvalgsperiode_girResultat() {
-        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(BEH_ID) } returns
-            listOf(Lovvalgsperiode().apply {
-                id = BEH_ID
-                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-            })
+        val gyldigLovvalgsperiode = lovvalgsperiodeForTest {
+            id = BEH_ID
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
+        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(BEH_ID) } returns listOf(gyldigLovvalgsperiode)
 
 
         lovvalgsperiodeService.hentLovvalgsperiode(BEH_ID).run {
@@ -97,13 +108,13 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun lagreLovvalgsperioderReturnererLovvalgsperiodeMedBehandlingsresultat() {
-        val lagretBehandlingsresultat = Behandlingsresultat().apply { id = BEH_ID }
+        val lagretBehandlingsresultat = Behandlingsresultat.forTest { id = BEH_ID }
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(BEH_ID) } returns emptyList()
         every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.of(lagretBehandlingsresultat)
         every { lovvalgsperiodeRepository.saveAllAndFlush(any<List<Lovvalgsperiode>>()) } answers { firstArg() }
 
 
-        val lovvalgsPerioder = listOf(Lovvalgsperiode())
+        val lovvalgsPerioder = listOf(lovvalgsperiodeForTest())
         lovvalgsperiodeService.lagreLovvalgsperioder(BEH_ID, lovvalgsPerioder)
             .shouldHaveSize(1).run {
                 harBehandlingsResultatMedRiktigId(this) shouldBe true
@@ -113,7 +124,7 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun lagreLovvalgsperioderUtenBehandlingsresultatKasterException() {
-        val lovvalgsperioder = mutableSetOf(Lovvalgsperiode())
+        val lovvalgsperioder = mutableSetOf(lovvalgsperiodeForTest())
         every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.empty()
 
 
@@ -128,14 +139,14 @@ internal class LovvalgsperiodeServiceTest {
         val lovvalgsCaptor = slot<Lovvalgsperiode>()
 
         val lovvalgsperiodeId = 3L
-        val eksisterendeLovvalgsperiode = Lovvalgsperiode().apply {
+        val eksisterendeLovvalgsperiode = lovvalgsperiodeForTest {
             id = lovvalgsperiodeId
         }
 
         every { lovvalgsperiodeRepository.findById(lovvalgsperiodeId) } returns Optional.of(eksisterendeLovvalgsperiode)
         every { lovvalgsperiodeRepository.save(capture(lovvalgsCaptor)) } answers { firstArg() }
 
-        val request = Lovvalgsperiode().apply {
+        val request = lovvalgsperiodeForTest {
             fom = LocalDate.now()
             tom = LocalDate.now()
             lovvalgsland = Land_iso2.BA
@@ -167,7 +178,7 @@ internal class LovvalgsperiodeServiceTest {
     @Test
     fun oppdaterLovvalgsperiode_lovvalgsperiodeFinnesIkke_kasterException() {
         val lovvalgsPeriodeId = 3L
-        val request = Lovvalgsperiode()
+        val request = lovvalgsperiodeForTest()
         every { lovvalgsperiodeRepository.findById(lovvalgsPeriodeId) } returns Optional.empty()
 
 
@@ -219,8 +230,7 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun hentTidligereLovvalgsperioder_ingenPerioderValgt_returnererTomCollection() {
-        val behandling = Behandling.forTest()
-        behandling.id = BEH_ID
+        val behandling = Behandling.forTest { id = BEH_ID }
         every { tidligereMedlemsperiodeRepository.findById_BehandlingId(BEH_ID) } returns emptyList()
 
 
@@ -229,17 +239,16 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun hentOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingMedTidligerePeriode_returnererPeriode() {
-        val opprinneligBehandling = Behandling.forTest {
-            id = 2L
-        }
+        val opprinnelig = Behandling.forTest { id = 2L }
 
-        val behandling = Behandling.forTest()
-        behandling.opprinneligBehandling = opprinneligBehandling
+        val behandling = Behandling.forTest {
+            opprinneligBehandling = opprinnelig
+        }
 
         every { behandlingRepository.findById(BEH_ID) } returns Optional.of(behandling)
 
-        val opprinneligLovvalgsperiode = Lovvalgsperiode()
-        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(opprinneligBehandling.id) } returns listOf(opprinneligLovvalgsperiode)
+        val opprinneligLovvalgsperiode = lovvalgsperiodeForTest()
+        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(opprinnelig.id) } returns listOf(opprinneligLovvalgsperiode)
 
 
         lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(BEH_ID) shouldBe opprinneligLovvalgsperiode
@@ -267,12 +276,11 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun hentOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingUtenTidligerePeriode_kasterException() {
-        val opprinneligBehandling = Behandling.forTest {
-            id = 2L
-        }
+        val opprinnelig = Behandling.forTest { id = 2L }
 
-        val behandling = Behandling.forTest()
-        behandling.opprinneligBehandling = opprinneligBehandling
+        val behandling = Behandling.forTest {
+            opprinneligBehandling = opprinnelig
+        }
 
         every { behandlingRepository.findById(BEH_ID) } returns Optional.of(behandling)
 
@@ -284,17 +292,16 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun finnOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingMedTidligerePeriode_returnererPeriode() {
-        val opprinneligBehandling = Behandling.forTest {
-            id = 2L
-        }
+        val opprinnelig = Behandling.forTest { id = 2L }
 
-        val behandling = Behandling.forTest()
-        behandling.opprinneligBehandling = opprinneligBehandling
+        val behandling = Behandling.forTest {
+            opprinneligBehandling = opprinnelig
+        }
 
         every { behandlingRepository.findById(BEH_ID) } returns Optional.of(behandling)
 
-        val opprinneligLovvalgsperiode = Lovvalgsperiode().apply { id = 3000 }
-        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(opprinneligBehandling.id) } returns listOf(opprinneligLovvalgsperiode)
+        val opprinneligLovvalgsperiode = lovvalgsperiodeForTest { id = 3000 }
+        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(opprinnelig.id) } returns listOf(opprinneligLovvalgsperiode)
 
 
         lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(BEH_ID) shouldBe opprinneligLovvalgsperiode
@@ -302,12 +309,11 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun finnOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingUtenTidligerePeriode_optionalEmpty() {
-        val opprinneligBehandling = Behandling.forTest {
-            id = 2L
-        }
+        val opprinnelig = Behandling.forTest { id = 2L }
 
-        val behandling = Behandling.forTest()
-        behandling.opprinneligBehandling = opprinneligBehandling
+        val behandling = Behandling.forTest {
+            opprinneligBehandling = opprinnelig
+        }
         every { behandlingRepository.findById(BEH_ID) } returns Optional.of(behandling)
 
 
@@ -315,30 +321,19 @@ internal class LovvalgsperiodeServiceTest {
     }
 
     private fun mockTidligereMedlemsperiodeRepository(periodeID: Long) {
-        val tidligereMedlemsperiodeId = TidligereMedlemsperiodeId().apply {
-            periodeId = periodeID
-        }
-
-        val tidligereMedlemsperiode = TidligereMedlemsperiode().apply {
-            id = tidligereMedlemsperiodeId
-        }
+        val tidligereMedlemsperiode = TidligereMedlemsperiode(BEH_ID, periodeID)
 
         every { tidligereMedlemsperiodeRepository.findById_BehandlingId(BEH_ID) } returns listOf(tidligereMedlemsperiode)
     }
 
-    private fun lagBehandlingMedMedlOpplysning(medlDokument: MedlemskapDokument): Behandling {
-        val medl = Saksopplysning().apply {
-            dokument = medlDokument
-            type = SaksopplysningType.MEDL
-        }
-
-        val behandling = Behandling.forTest {
+    private fun lagBehandlingMedMedlOpplysning(medlDokument: MedlemskapDokument): Behandling =
+        Behandling.forTest {
             id = BEH_ID
-            saksopplysninger.add(medl)
+            saksopplysning {
+                dokument = medlDokument
+                type = SaksopplysningType.MEDL
+            }
         }
-
-        return behandling
-    }
 
     private fun harBehandlingsResultatMedRiktigId(lovvalgsperioder: Iterable<Lovvalgsperiode>): Boolean {
         return lovvalgsperioder.all { it.getBehandlingsresultat() != null && it.hentBehandlingsresultat().id == BEH_ID }

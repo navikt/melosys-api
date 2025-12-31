@@ -5,6 +5,7 @@ import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeTestFactory
 import no.nav.melosys.domain.avgift.forTest
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
@@ -79,13 +80,43 @@ object AvklartefaktaTestFactory {
         var fakta: String? = null
         var begrunnelseFritekst: String? = null
 
-        fun build(): Avklartefakta = Avklartefakta().apply {
+        private val registreringer: MutableSet<AvklartefaktaRegistreringTestFactory.Builder> = mutableSetOf()
+
+        fun registrering(init: AvklartefaktaRegistreringTestFactory.Builder.() -> Unit) {
+            registreringer.add(AvklartefaktaRegistreringTestFactory.Builder().apply(init))
+        }
+
+        fun build(): Avklartefakta {
+            val avklartefakta = Avklartefakta().apply {
+                this.id = this@Builder.id
+                this.type = this@Builder.type
+                this.referanse = this@Builder.referanse
+                this.subjekt = this@Builder.subjekt
+                this.fakta = this@Builder.fakta
+                this.begrunnelseFritekst = this@Builder.begrunnelseFritekst
+            }
+
+            // Bygg registreringer og sett opp relasjoner
+            registreringer.forEach { regBuilder ->
+                val registrering = regBuilder.build(avklartefakta)
+                avklartefakta.registreringer.add(registrering)
+            }
+
+            return avklartefakta
+        }
+    }
+}
+
+object AvklartefaktaRegistreringTestFactory {
+    @MelosysTestDsl
+    class Builder {
+        var id: Long? = null
+        var begrunnelseKode: String? = null
+
+        fun build(avklartefakta: Avklartefakta): AvklartefaktaRegistrering = AvklartefaktaRegistrering().apply {
             this.id = this@Builder.id
-            this.type = this@Builder.type
-            this.referanse = this@Builder.referanse
-            this.subjekt = this@Builder.subjekt
-            this.fakta = this@Builder.fakta
-            this.begrunnelseFritekst = this@Builder.begrunnelseFritekst
+            this.avklartefakta = avklartefakta
+            this.begrunnelseKode = this@Builder.begrunnelseKode
         }
     }
 }

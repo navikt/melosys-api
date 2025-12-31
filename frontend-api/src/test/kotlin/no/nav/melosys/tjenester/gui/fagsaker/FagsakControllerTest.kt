@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.FagsakTestFactory.BEHANDLING_ID
 import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.avgift.forTest
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse
@@ -365,16 +366,14 @@ internal class FagsakControllerTest {
 
         @Test
         fun hentFagsaker_medMedlemAvFolketrygdenOgMedlemskapsperioder_verifiserErMappetKorrekt() {
-            val medlemskapsperiode = Medlemskapsperiode().apply {
-                this.fom = FOM
-                this.tom = TOM
-                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-            }
-
-            val behandlingsresultat = Behandlingsresultat().apply {
-                this.id = BEHANDLING_ID
-                this.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
-                this.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            val behandlingsresultat = Behandlingsresultat.forTest {
+                id = BEHANDLING_ID
+                type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+                medlemskapsperiode {
+                    fom = FOM
+                    tom = TOM
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                }
             }
 
             mockBehandlingsresultat(behandlingsresultat)
@@ -392,10 +391,8 @@ internal class FagsakControllerTest {
 
         @Test
         fun hentFagsaker_medTomtFnr_verifiserAtNavnErUkjent() {
-            val brukerUtenFnr = Aktoer()
-            brukerUtenFnr.rolle = Aktoersroller.BRUKER
             val fagsak = Fagsak.forTest {
-                aktører(brukerUtenFnr)
+                medBruker { aktørId = null }
             }
 
             mockFagsakController(fagsak)
@@ -602,11 +599,8 @@ internal class FagsakControllerTest {
 
         @Test
         fun hentFagsaker_medTomtOrgnr_verifiserAtNavnErUkjent() {
-            val aktoer = Aktoer()
-            aktoer.rolle = Aktoersroller.VIRKSOMHET
-
             fagsak = Fagsak.forTest {
-                aktører(aktoer)
+                medVirksomhet { orgnr = null }
             }
 
             mockBehandlingsresultat(lagDefaultBehandlingResultat())
@@ -959,12 +953,12 @@ internal class FagsakControllerTest {
                 vedtakMetadata = null
             }
 
-            val behandlingsresultatTilHenvendelse = Behandlingsresultat().apply {
+            val behandlingsresultatTilHenvendelse = Behandlingsresultat.forTest {
                 id = 2
                 type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
             }
 
-            val behandlingsresultatUtenPeriode = Behandlingsresultat().apply {
+            val behandlingsresultatUtenPeriode = Behandlingsresultat.forTest {
                 id = 3
                 type = Behandlingsresultattyper.FERDIGBEHANDLET
             }
@@ -1046,24 +1040,40 @@ internal class FagsakControllerTest {
             registrertDato = Instant.now()
         }
 
-        private fun lagDefaultBehandlingResultat() = Behandlingsresultat().apply {
+        private fun lagDefaultBehandlingResultat() = Behandlingsresultat.forTest {
             id = BEHANDLING_ID
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            lovvalgsperioder = mutableSetOf(lagDefaultLovvalgsPeriode())
-            medlemskapsperioder = mutableSetOf(lagDefaultMedlemskapsPeriode())
-            vedtakMetadata = VedtakMetadata()
+            lovvalgsperiode {
+                fom = FORVENTET_LOVVALGSPERIODE.periode.fom
+                tom = FORVENTET_LOVVALGSPERIODE.periode.tom
+                dekning = Trygdedekninger.FULL_DEKNING_EOSFO
+                lovvalgsland = Land_iso2.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsland)
+                bestemmelse = Lovvalgbestemmelser_883_2004.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsbestemmelse)
+                tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.valueOf(FORVENTET_LOVVALGSPERIODE.tilleggBestemmelse)
+                innvilgelsesresultat = InnvilgelsesResultat.valueOf(FORVENTET_LOVVALGSPERIODE.innvilgelsesResultat)
+                medlemskapstype = Medlemskapstyper.valueOf(FORVENTET_LOVVALGSPERIODE.medlemskapstype)
+                medlPeriodeID = FORVENTET_LOVVALGSPERIODE.medlemskapsperiodeID.toLong()
+            }
+            medlemskapsperiode {
+                fom = FORVENTET_LOVVALGSPERIODE.periode.fom
+                tom = FORVENTET_LOVVALGSPERIODE.periode.tom
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            }
+            vedtakMetadata { }
         }
 
-
-        private fun lagDefaultBehandlingResultatForEøsPensjonist() = Behandlingsresultat().apply {
+        private fun lagDefaultBehandlingResultatForEøsPensjonist() = Behandlingsresultat.forTest {
             id = BEHANDLING_ID
             type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
-            helseutgiftDekkesPeriode =
-                HelseutgiftDekkesPeriode(this, LocalDate.now().plusDays(1), LocalDate.now().plusDays(2), Land_iso2.BE)
-            vedtakMetadata = VedtakMetadata()
+            helseutgiftDekkesPeriode {
+                fomDato = LocalDate.now().plusDays(1)
+                tomDato = LocalDate.now().plusDays(2)
+                bostedLandkode = Land_iso2.BE
+            }
+            vedtakMetadata { }
         }
 
-        private fun lagDefaultLovvalgsPeriode() = Lovvalgsperiode().apply {
+        private fun lagDefaultLovvalgsPeriode() = lovvalgsperiodeForTest {
             fom = FORVENTET_LOVVALGSPERIODE.periode.fom
             tom = FORVENTET_LOVVALGSPERIODE.periode.tom
             dekning = Trygdedekninger.FULL_DEKNING_EOSFO
@@ -1075,7 +1085,7 @@ internal class FagsakControllerTest {
             medlPeriodeID = FORVENTET_LOVVALGSPERIODE.medlemskapsperiodeID.toLong()
         }
 
-        private fun lagDefaultMedlemskapsPeriode() = Medlemskapsperiode().apply {
+        private fun lagDefaultMedlemskapsPeriode() = medlemskapsperiodeForTest {
             fom = FORVENTET_LOVVALGSPERIODE.periode.fom
             tom = FORVENTET_LOVVALGSPERIODE.periode.tom
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET

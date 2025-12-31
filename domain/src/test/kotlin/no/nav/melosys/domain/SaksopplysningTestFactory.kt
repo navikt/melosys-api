@@ -17,6 +17,9 @@ import java.time.OffsetDateTime
 fun saksopplysningForTest(init: SaksopplysningTestFactory.Builder.() -> Unit = {}): Saksopplysning =
     SaksopplysningTestFactory.Builder().apply(init).build()
 
+fun arbeidsforholdForTest(init: ArbeidsforholdBuilder.() -> Unit = {}): Arbeidsforhold =
+    ArbeidsforholdBuilder().apply(init).build()
+
 fun SaksopplysningTestFactory.Builder.personDokument(init: PersonDokumentTestFactory.Builder.() -> Unit) = apply {
     this.dokument = PersonDokumentTestFactory.Builder().apply(init).build()
 }

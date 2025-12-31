@@ -10,14 +10,13 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
@@ -28,9 +27,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
 import no.nav.melosys.exception.KontrolldataFeilType
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl
-import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.LovvalgsperiodeService
-import no.nav.melosys.service.SaksbehandlingDataFactory
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
@@ -89,25 +86,42 @@ internal class KontrollTest {
     lateinit var helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService
 
     private val behandlingID = 1L
-    private val lovvalgsperiode = Lovvalgsperiode().apply {
+
+    private lateinit var mockedKontroll: Kontroll
+    private val unleash = FakeUnleash()
+
+    private fun lagBehandling(
+        init: BehandlingTestFactory.BehandlingTestBuilder.() -> Unit = {}
+    ): Behandling = Behandling.forTest {
+        id = behandlingID
+        status = Behandlingsstatus.UNDER_BEHANDLING
+        type = Behandlingstyper.FØRSTEGANG
+        tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+        fagsak {
+            medBruker()
+            medGsakSaksnummer()
+        }
+        mottatteOpplysninger {
+            mottatteOpplysningerData = MottatteOpplysningerData()
+        }
+        saksopplysning {
+            type = SaksopplysningType.MEDL
+            dokument = MedlemskapDokument()
+        }
+        init()
+    }
+
+    private fun lagLovvalgsperiode(
+        init: LovvalgsperiodeTestFactory.Builder.() -> Unit = {}
+    ): Lovvalgsperiode = lovvalgsperiodeForTest {
         tom = LocalDate.now()
         bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
+        init()
     }
-    private val mottatteOpplysningerData = MottatteOpplysningerData()
-    private val behandling = SaksbehandlingDataFactory.lagBehandling(mottatteOpplysningerData)
-
-    lateinit var mockedKontroll: Kontroll
-    private val unleash = FakeUnleash()
 
     @BeforeEach
     fun setup() {
         every { persondataFasade.hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
-        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
-        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
-        behandling.saksopplysninger.add(Saksopplysning().apply {
-            type = SaksopplysningType.MEDL
-            dokument = MedlemskapDokument()
-        })
 
         mockedKontroll = Kontroll(
             behandlingService,
@@ -128,6 +142,9 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_medOgUtenFeilSomSkalIgnoreres_returnererKorrekt() {
+        val behandling = lagBehandling()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
         every { persondataFasade.hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser()
         val feilSomSkalIgnoreres = Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER
 
@@ -147,6 +164,10 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_HenleggelsePersonMedRegistrertAdresse_returnererTomCollection() {
+        val behandling = lagBehandling()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
+
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.HENLEGGELSE, emptySet())
 
 
@@ -155,6 +176,10 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_AvslagPersonMedRegistrertAdresse_returnererTomCollection() {
+        val behandling = lagBehandling()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
+
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, emptySet())
 
         resultat.shouldBeEmpty()
@@ -162,8 +187,12 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_avslagIngenFlyt__returnererTomCollection() {
-        behandling.type = Behandlingstyper.HENVENDELSE
-        behandling.mottatteOpplysninger = null
+        val behandling = lagBehandling {
+            type = Behandlingstyper.HENVENDELSE
+            mottatteOpplysninger = null
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
         every { saksbehandlingRegler.harIngenFlyt(any()) } returns true
 
 
@@ -175,12 +204,16 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_periodeUnder24MndArt12IkkeOverlappendePeriode_returnererTomCollection() {
-        mockLovvalgsperiodeService()
-        lovvalgsperiode.apply {
+        val behandling = lagBehandling()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
+
+        val lovvalgsperiode = lagLovvalgsperiode {
             fom = LocalDate.now()
             tom = LocalDate.now().plusYears(1)
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
         }
+        mockLovvalgsperiodeService(lovvalgsperiode)
 
 
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
@@ -191,8 +224,16 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_FTRL_returnerer_adresse_mangler() {
+        val behandling = lagBehandling {
+            fagsak {
+                medBruker()
+                medGsakSaksnummer()
+                type = Sakstyper.FTRL
+            }
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
         every { persondataFasade.hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser()
-        behandling.fagsak.type = Sakstyper.FTRL
 
 
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
@@ -205,16 +246,20 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_fullmektigFinnes_adresse_mangler() {
-        val fullmektig = Aktoer().apply {
-            rolle = Aktoersroller.FULLMEKTIG
-            personIdent = "12345678910"
-            setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD)
+        val behandling = lagBehandling {
+            fagsak {
+                medBruker()
+                medGsakSaksnummer()
+                type = Sakstyper.FTRL
+                medFullmektig {
+                    personIdent = "12345678910"
+                    setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD)
+                }
+            }
         }
-        behandling.fagsak.apply {
-            aktører.add(fullmektig)
-            type = Sakstyper.FTRL
-        }
-        every { persondataFasade.hentPerson(fullmektig.personIdent) } returns PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
+        every { persondataFasade.hentPerson("12345678910") } returns PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser()
 
 
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
@@ -227,6 +272,9 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_AvslagPersonUtenRegistrertAdresse_returnererKode() {
+        val behandling = lagBehandling()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
         every { persondataFasade.hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser()
 
 
@@ -240,6 +288,9 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_HenleggelsePersonUtenRegistrertAdresse_returnererKontrollfeil() {
+        val behandling = lagBehandling()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
         every { persondataFasade.hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser()
 
 
@@ -256,12 +307,16 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_periodeOver24MndArt16IkkeOverlappendePeriode_returnererTomCollection() {
-        mockLovvalgsperiodeService()
-        lovvalgsperiode.apply {
+        val behandling = lagBehandling()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
+
+        val lovvalgsperiode = lagLovvalgsperiode {
             fom = LocalDate.now()
             tom = LocalDate.now().plusYears(3)
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
         }
+        mockLovvalgsperiodeService(lovvalgsperiode)
 
 
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK, emptySet())
@@ -272,19 +327,40 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_periodeOver24MndArt12MedOverlappendePeriode_returnererCollectionMedToKoder() {
-        mockLovvalgsperiodeService()
-        lovvalgsperiode.apply {
+        val behandling = Behandling.forTest {
+            id = behandlingID
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            type = Behandlingstyper.FØRSTEGANG
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            fagsak {
+                medBruker()
+                medGsakSaksnummer()
+            }
+            mottatteOpplysninger {
+                mottatteOpplysningerData = MottatteOpplysningerData()
+            }
+            saksopplysning {
+                type = SaksopplysningType.MEDL
+                dokument = MedlemskapDokument().apply {
+                    medlemsperiode = listOf(
+                        Medlemsperiode(
+                            null, Periode(LocalDate.now().plusMonths(2), LocalDate.now().plusYears(2)), null,
+                            PeriodestatusMedl.GYLD.kode, null, null, null, null, null, null
+                        )
+                    )
+                }
+            }
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
+
+        val lovvalgsperiode = lagLovvalgsperiode {
             fom = LocalDate.now()
             tom = LocalDate.now().plusYears(3)
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
-        behandling.hentMedlemskapDokument().medlemsperiode = listOf(
-            Medlemsperiode(
-                null, Periode(LocalDate.now().plusMonths(2), LocalDate.now().plusYears(2)), null,
-                PeriodestatusMedl.GYLD.kode, null, null, null, null, null, null
-            )
-        )
+        mockLovvalgsperiodeService(lovvalgsperiode)
 
 
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, emptySet())
@@ -300,50 +376,60 @@ internal class KontrollTest {
 
     @Test
     fun `tidligere trygdeavgiftsperioder som avsluttes dagen før en ny trygdeavgiftsperiode, skal gi kontrollfeil, dersom periode er i annen fagsak og har trygdeavgift`() {
-        behandling.fagsak.type = Sakstyper.FTRL
-
-        val behandlingFraAndreFagsak = Behandling.forTest {
-            fagsak = Fagsak(saksnummer = "test-321", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
+        val behandling = lagBehandling {
+            fagsak {
+                medBruker()
+                medGsakSaksnummer()
+                type = Sakstyper.FTRL
+            }
         }
-        val behandlingsresultatFraAndreFagsak = Behandlingsresultat().apply {
-            behandling = behandlingFraAndreFagsak
-            val medlemskapsperiode = Medlemskapsperiode().apply {
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
+
+        val behandlingsresultatFraAndreFagsak = Behandlingsresultat.forTest {
+            behandling {
+                fagsak {
+                    saksnummer = "test-321"
+                    status = Saksstatuser.OPPRETTET
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.FTRL
+                }
+            }
+            medlemskapsperiode {
                 fom = LocalDate.of(2012, 12, 1)
                 tom = LocalDate.of(2012, 12, 20)
-                trygdeavgiftsperioder.add(
-                    Trygdeavgiftsperiode(
-                        periodeFra = LocalDate.of(2012, 12, 1),
-                        periodeTil = LocalDate.of(2012, 12, 20),
-                        trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-                        trygdesats = BigDecimal.TEN
-                    )
-                )
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.of(2012, 12, 1)
+                    periodeTil = LocalDate.of(2012, 12, 20)
+                    trygdeavgiftsbeløpMd = BigDecimal.TEN
+                    trygdesats = BigDecimal.TEN
+                }
             }
-            addMedlemskapsperiode(medlemskapsperiode)
         }
 
         every {
             behandlingsresultatService.finnAlleBehandlingsresultatForAktør(any())
         } returns listOf(behandlingsresultatFraAndreFagsak)
 
-        val nyBehandling1 = Behandling.forTest {
-            fagsak = behandling.fagsak
-        }
-        val behandlingsresultatMedNyePerioder = Behandlingsresultat().apply {
-            behandling = nyBehandling1
-            val medlemskapsperiode = Medlemskapsperiode().apply {
+        val behandlingsresultatMedNyePerioder = Behandlingsresultat.forTest {
+            behandling {
+                fagsak {
+                    saksnummer = behandling.fagsak.saksnummer
+                    type = behandling.fagsak.type
+                    tema = behandling.fagsak.tema
+                    status = behandling.fagsak.status
+                }
+            }
+            medlemskapsperiode {
                 fom = LocalDate.of(2012, 12, 21)
                 tom = LocalDate.of(2012, 12, 24)
-                trygdeavgiftsperioder.add(
-                    Trygdeavgiftsperiode(
-                        periodeFra = LocalDate.of(2012, 12, 21),
-                        periodeTil = LocalDate.of(2012, 12, 24),
-                        trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-                        trygdesats = BigDecimal.TEN
-                    )
-                )
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.of(2012, 12, 21)
+                    periodeTil = LocalDate.of(2012, 12, 24)
+                    trygdeavgiftsbeløpMd = BigDecimal.TEN
+                    trygdesats = BigDecimal.TEN
+                }
             }
-            addMedlemskapsperiode(medlemskapsperiode)
         }
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultatMedNyePerioder
 
@@ -358,50 +444,60 @@ internal class KontrollTest {
 
     @Test
     fun `trygdeavgiftsperioder med overlappende periode, skal gi kontrollfeil, dersom periode er i annen fagsak og har trygdeavgift`() {
-        behandling.fagsak.type = Sakstyper.FTRL
-
-        val behandlingFraAndreFagsak = Behandling.forTest {
-            fagsak = Fagsak(saksnummer = "test-321", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
+        val behandling = lagBehandling {
+            fagsak {
+                medBruker()
+                medGsakSaksnummer()
+                type = Sakstyper.FTRL
+            }
         }
-        val behandlingsresultatFraAndreFagsak = Behandlingsresultat().apply {
-            behandling = behandlingFraAndreFagsak
-            val medlemskapsperiode = Medlemskapsperiode().apply {
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
+
+        val behandlingsresultatFraAndreFagsak = Behandlingsresultat.forTest {
+            behandling {
+                fagsak {
+                    saksnummer = "test-321"
+                    status = Saksstatuser.OPPRETTET
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.FTRL
+                }
+            }
+            medlemskapsperiode {
                 fom = LocalDate.of(2012, 12, 11)
                 tom = LocalDate.of(2012, 12, 24)
-                trygdeavgiftsperioder.add(
-                    Trygdeavgiftsperiode(
-                        periodeFra = LocalDate.of(2012, 12, 11),
-                        periodeTil = LocalDate.of(2012, 12, 24),
-                        trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-                        trygdesats = BigDecimal.TEN
-                    )
-                )
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.of(2012, 12, 11)
+                    periodeTil = LocalDate.of(2012, 12, 24)
+                    trygdeavgiftsbeløpMd = BigDecimal.TEN
+                    trygdesats = BigDecimal.TEN
+                }
             }
-            addMedlemskapsperiode(medlemskapsperiode)
         }
 
         every {
             behandlingsresultatService.finnAlleBehandlingsresultatForAktør(any())
         } returns listOf(behandlingsresultatFraAndreFagsak)
 
-        val nyBehandling = Behandling.forTest {
-            fagsak = behandling.fagsak
-        }
-        val behandlingsresultatMedNyePerioder = Behandlingsresultat().apply {
-            behandling = nyBehandling
-            val medlemskapsperiode = Medlemskapsperiode().apply {
+        val behandlingsresultatMedNyePerioder = Behandlingsresultat.forTest {
+            behandling {
+                fagsak {
+                    saksnummer = behandling.fagsak.saksnummer
+                    type = behandling.fagsak.type
+                    tema = behandling.fagsak.tema
+                    status = behandling.fagsak.status
+                }
+            }
+            medlemskapsperiode {
                 fom = LocalDate.of(2012, 12, 1)
                 tom = LocalDate.of(2012, 12, 20)
-                trygdeavgiftsperioder.add(
-                    Trygdeavgiftsperiode(
-                        periodeFra = LocalDate.of(2012, 12, 1),
-                        periodeTil = LocalDate.of(2012, 12, 20),
-                        trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-                        trygdesats = BigDecimal.TEN
-                    )
-                )
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.of(2012, 12, 1)
+                    periodeTil = LocalDate.of(2012, 12, 20)
+                    trygdeavgiftsbeløpMd = BigDecimal.TEN
+                    trygdesats = BigDecimal.TEN
+                }
             }
-            addMedlemskapsperiode(medlemskapsperiode)
         }
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultatMedNyePerioder
 
@@ -416,52 +512,65 @@ internal class KontrollTest {
 
     @Test
     fun `tidligere trygdeavgiftsperioder som avsluttes dagen før en ny trygdeavgiftsperiode, skal ikke gi kontrollfeil, dersom periode er i samme fagsak`() {
-        behandling.fagsak.type = Sakstyper.FTRL
+        val sammeFagsakSaksnummer = "MEL-test"
 
-        val sammeFagsak = Fagsak(saksnummer = "MEL-test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
-
-        val behandlingSammeFagsak1 = Behandling.forTest {
-            fagsak = sammeFagsak
+        val behandling = lagBehandling {
+            fagsak {
+                medBruker()
+                medGsakSaksnummer()
+                saksnummer = sammeFagsakSaksnummer
+                status = Saksstatuser.OPPRETTET
+                tema = Sakstemaer.TRYGDEAVGIFT
+                type = Sakstyper.FTRL
+            }
         }
-        val behandlingsresultatFraFagsak = Behandlingsresultat().apply {
-            behandling = behandlingSammeFagsak1
-            val medlemskapsperiode = Medlemskapsperiode().apply {
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
+
+        val behandlingsresultatFraFagsak = Behandlingsresultat.forTest {
+            behandling {
+                fagsak {
+                    saksnummer = sammeFagsakSaksnummer
+                    status = Saksstatuser.OPPRETTET
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.FTRL
+                }
+            }
+            medlemskapsperiode {
                 fom = LocalDate.of(2012, 12, 1)
                 tom = LocalDate.of(2012, 12, 20)
-                trygdeavgiftsperioder.add(
-                    Trygdeavgiftsperiode(
-                        periodeFra = LocalDate.of(2012, 12, 1),
-                        periodeTil = LocalDate.of(2012, 12, 20),
-                        trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-                        trygdesats = BigDecimal.TEN
-                    )
-                )
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.of(2012, 12, 1)
+                    periodeTil = LocalDate.of(2012, 12, 20)
+                    trygdeavgiftsbeløpMd = BigDecimal.TEN
+                    trygdesats = BigDecimal.TEN
+                }
             }
-            addMedlemskapsperiode(medlemskapsperiode)
         }
 
         every {
             behandlingsresultatService.finnAlleBehandlingsresultatForAktør(any())
         } returns listOf(behandlingsresultatFraFagsak)
 
-        val behandlingSammeFagsak2 = Behandling.forTest {
-            fagsak = sammeFagsak
-        }
-        val behandlingsresultatMedNyePerioder = Behandlingsresultat().apply {
-            behandling = behandlingSammeFagsak2
-            val medlemskapsperiode = Medlemskapsperiode().apply {
+        val behandlingsresultatMedNyePerioder = Behandlingsresultat.forTest {
+            behandling {
+                fagsak {
+                    saksnummer = sammeFagsakSaksnummer
+                    status = Saksstatuser.OPPRETTET
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.FTRL
+                }
+            }
+            medlemskapsperiode {
                 fom = LocalDate.of(2012, 12, 21)
                 tom = LocalDate.of(2012, 12, 24)
-                trygdeavgiftsperioder.add(
-                    Trygdeavgiftsperiode(
-                        periodeFra = LocalDate.of(2012, 12, 21),
-                        periodeTil = LocalDate.of(2012, 12, 24),
-                        trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-                        trygdesats = BigDecimal.TEN
-                    )
-                )
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.of(2012, 12, 21)
+                    periodeTil = LocalDate.of(2012, 12, 24)
+                    trygdeavgiftsbeløpMd = BigDecimal.TEN
+                    trygdesats = BigDecimal.TEN
+                }
             }
-            addMedlemskapsperiode(medlemskapsperiode)
         }
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultatMedNyePerioder
 
@@ -474,52 +583,65 @@ internal class KontrollTest {
 
     @Test
     fun `trygdeavgiftsperioder med overlappende periode, skal ikke gi kontrollfeil, dersom periode er i samme fagsak og har trygdeavgift`() {
-        behandling.fagsak.type = Sakstyper.FTRL
+        val sammeFagsakSaksnummer = "MEL-test"
 
-        val sammeFagsak = Fagsak(saksnummer = "MEL-test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
-
-        val behandlingSammeFagsak1 = Behandling.forTest {
-            fagsak = sammeFagsak
+        val behandling = lagBehandling {
+            fagsak {
+                medBruker()
+                medGsakSaksnummer()
+                saksnummer = sammeFagsakSaksnummer
+                status = Saksstatuser.OPPRETTET
+                tema = Sakstemaer.TRYGDEAVGIFT
+                type = Sakstyper.FTRL
+            }
         }
-        val behandlingsresultatFraFagsak = Behandlingsresultat().apply {
-            behandling = behandlingSammeFagsak1
-            val medlemskapsperiode = Medlemskapsperiode().apply {
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
+
+        val behandlingsresultatFraFagsak = Behandlingsresultat.forTest {
+            behandling {
+                fagsak {
+                    saksnummer = sammeFagsakSaksnummer
+                    status = Saksstatuser.OPPRETTET
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.FTRL
+                }
+            }
+            medlemskapsperiode {
                 fom = LocalDate.of(2012, 12, 11)
                 tom = LocalDate.of(2012, 12, 24)
-                trygdeavgiftsperioder.add(
-                    Trygdeavgiftsperiode(
-                        periodeFra = LocalDate.of(2012, 12, 11),
-                        periodeTil = LocalDate.of(2012, 12, 24),
-                        trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-                        trygdesats = BigDecimal.TEN
-                    )
-                )
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.of(2012, 12, 11)
+                    periodeTil = LocalDate.of(2012, 12, 24)
+                    trygdeavgiftsbeløpMd = BigDecimal.TEN
+                    trygdesats = BigDecimal.TEN
+                }
             }
-            addMedlemskapsperiode(medlemskapsperiode)
         }
 
         every {
             behandlingsresultatService.finnAlleBehandlingsresultatForAktør(any())
         } returns listOf(behandlingsresultatFraFagsak)
 
-        val behandlingSammeFagsak2 = Behandling.forTest {
-            fagsak = sammeFagsak
-        }
-        val behandlingsresultatMedNyePerioder = Behandlingsresultat().apply {
-            behandling = behandlingSammeFagsak2
-            val medlemskapsperiode = Medlemskapsperiode().apply {
+        val behandlingsresultatMedNyePerioder = Behandlingsresultat.forTest {
+            behandling {
+                fagsak {
+                    saksnummer = sammeFagsakSaksnummer
+                    status = Saksstatuser.OPPRETTET
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.FTRL
+                }
+            }
+            medlemskapsperiode {
                 fom = LocalDate.of(2012, 12, 1)
                 tom = LocalDate.of(2012, 12, 20)
-                trygdeavgiftsperioder.add(
-                    Trygdeavgiftsperiode(
-                        periodeFra = LocalDate.of(2012, 12, 1),
-                        periodeTil = LocalDate.of(2012, 12, 20),
-                        trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-                        trygdesats = BigDecimal.TEN
-                    )
-                )
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.of(2012, 12, 1)
+                    periodeTil = LocalDate.of(2012, 12, 20)
+                    trygdeavgiftsbeløpMd = BigDecimal.TEN
+                    trygdesats = BigDecimal.TEN
+                }
             }
-            addMedlemskapsperiode(medlemskapsperiode)
         }
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultatMedNyePerioder
 
@@ -532,14 +654,25 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_periodeOver3År_returnererKode() {
-        mockLovvalgsperiodeService()
-        lovvalgsperiode.apply {
+        val behandling = lagBehandling {
+            fagsak {
+                medBruker()
+                medGsakSaksnummer()
+                type = Sakstyper.TRYGDEAVTALE
+            }
+            mottatteOpplysninger {
+                mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+            }
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
+
+        val lovvalgsperiode = lagLovvalgsperiode {
             fom = LocalDate.now()
             tom = LocalDate.now().plusYears(3).plusDays(1)
             bestemmelse = Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1
         }
-        behandling.mottatteOpplysninger!!.mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
-        behandling.fagsak.type = Sakstyper.TRYGDEAVTALE
+        mockLovvalgsperiodeService(lovvalgsperiode)
 
 
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
@@ -551,7 +684,12 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_manglerAdresse_returnererKode() {
-        mockLovvalgsperiodeService()
+        val behandling = lagBehandling()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
+
+        val lovvalgsperiode = lagLovvalgsperiode()
+        mockLovvalgsperiodeService(lovvalgsperiode)
         every { persondataFasade.hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser()
 
 
@@ -564,8 +702,14 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_periodeManglerSluttdato_returnererKode() {
-        mockLovvalgsperiodeService()
-        lovvalgsperiode.tom = null
+        val behandling = lagBehandling()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
+
+        val lovvalgsperiode = lagLovvalgsperiode {
+            tom = null
+        }
+        mockLovvalgsperiodeService(lovvalgsperiode)
 
 
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND, emptySet())
@@ -581,10 +725,16 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_periodeManglerSluttdatoOgErUnntak_returnererKode() {
-        mockLovvalgsperiodeService()
-        lovvalgsperiode.tom = null
-        behandling.tema = Behandlingstema.REGISTRERING_UNNTAK
+        val behandling = lagBehandling {
+            tema = Behandlingstema.REGISTRERING_UNNTAK
+        }
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
+
+        val lovvalgsperiode = lagLovvalgsperiode {
+            tom = null
+        }
+        mockLovvalgsperiodeService(lovvalgsperiode)
 
 
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND, emptySet())
@@ -599,8 +749,19 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_arbeidsstedManglerFelter_returnererKode() {
-        mockLovvalgsperiodeService()
-        mottatteOpplysningerData.arbeidPaaLand.fysiskeArbeidssteder = listOf(FysiskArbeidssted())
+        val mottatteOpplysningerData = MottatteOpplysningerData().apply {
+            arbeidPaaLand.fysiskeArbeidssteder = listOf(FysiskArbeidssted())
+        }
+        val behandling = lagBehandling {
+            mottatteOpplysninger {
+                this.mottatteOpplysningerData = mottatteOpplysningerData
+            }
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
+
+        val lovvalgsperiode = lagLovvalgsperiode()
+        mockLovvalgsperiodeService(lovvalgsperiode)
 
 
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK, emptySet())
@@ -613,8 +774,19 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_foretakUtlandManglerFelter_returnererKode() {
-        mockLovvalgsperiodeService()
-        mottatteOpplysningerData.foretakUtland = listOf(ForetakUtland().apply { selvstendigNæringsvirksomhet = false })
+        val mottatteOpplysningerData = MottatteOpplysningerData().apply {
+            foretakUtland = listOf(ForetakUtland().apply { selvstendigNæringsvirksomhet = false })
+        }
+        val behandling = lagBehandling {
+            mottatteOpplysninger {
+                this.mottatteOpplysningerData = mottatteOpplysningerData
+            }
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
+
+        val lovvalgsperiode = lagLovvalgsperiode()
+        mockLovvalgsperiodeService(lovvalgsperiode)
 
 
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, emptySet())
@@ -627,8 +799,13 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_avklartVirksomhetErOpphørt_returnererKode() {
-        mockLovvalgsperiodeService()
+        val behandling = lagBehandling()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
         every { avklarteVirksomheterService.harOpphørtAvklartVirksomhet(behandling) } returns true
+
+        val lovvalgsperiode = lagLovvalgsperiode()
+        mockLovvalgsperiodeService(lovvalgsperiode)
 
 
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
@@ -641,11 +818,24 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_representantIUtlandetMangler_returnererKode() {
-        mockLovvalgsperiodeService()
-        lovvalgsperiode.fom = LocalDate.now()
-        lovvalgsperiode.bestemmelse = Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1
-        behandling.mottatteOpplysninger!!.mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
-        behandling.fagsak.type = Sakstyper.TRYGDEAVTALE
+        val behandling = lagBehandling {
+            fagsak {
+                medBruker()
+                medGsakSaksnummer()
+                type = Sakstyper.TRYGDEAVTALE
+            }
+            mottatteOpplysninger {
+                mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+            }
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
+
+        val lovvalgsperiode = lagLovvalgsperiode {
+            fom = LocalDate.now()
+            bestemmelse = Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1
+        }
+        mockLovvalgsperiodeService(lovvalgsperiode)
 
 
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
@@ -657,9 +847,8 @@ internal class KontrollTest {
     }
 
 
-    private fun mockLovvalgsperiodeService() {
+    private fun mockLovvalgsperiodeService(lovvalgsperiode: Lovvalgsperiode) {
         every { lovvalgsperiodeService.hentLovvalgsperiode(behandlingID) } returns lovvalgsperiode
         every { lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(behandlingID) } returns null
     }
 }
-

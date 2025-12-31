@@ -7,9 +7,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import io.mockk.verifyOrder
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
-import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.inntekt.InntektService
@@ -114,17 +112,19 @@ class RegisteropplysningerServiceTest {
 
     @Test
     fun `hentOgLagreOpplysninger med alle opplysninger i vilkårlig rekkefølge alle blir hentet og lagret i rett rekkefølge`() {
-        val arbeidsforhold = Arbeidsforhold().apply {
-            arbeidsgiverID = "123456789"
+        val behandlingMedSaksopplysning = Behandling.forTest {
+            id = 2L
+            tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+            saksopplysning {
+                type = SaksopplysningType.ARBFORH
+                arbeidsforholdDokument {
+                    arbeidsgiverID = "123456789"
+                }
+            }
+        }.also {
+            it.saksopplysninger.first().leggTilKildesystemOgMottattDokument(SaksopplysningKildesystem.AAREG, null)
         }
-
-        val arbeidsforholdDokument = ArbeidsforholdDokument(listOf(arbeidsforhold))
-        val saksopplysning = Saksopplysning().apply {
-            dokument = arbeidsforholdDokument
-            type = SaksopplysningType.ARBFORH
-            leggTilKildesystemOgMottattDokument(SaksopplysningKildesystem.AAREG, null)
-        }
-        every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns hentBehandling(saksopplysning)
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandlingMedSaksopplysning
 
 
         registeropplysningerService.hentOgLagreOpplysninger(
@@ -261,28 +261,21 @@ class RegisteropplysningerServiceTest {
         tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
     }
 
-    private fun hentBehandling(saksopplysning: Saksopplysning) = hentBehandling().apply {
-        saksopplysninger.add(saksopplysning)
-    }
-
-    private fun hentSedSaksopplysning(fom: LocalDate, tom: LocalDate) = Saksopplysning().apply {
-        dokument = hentSedDokument(fom, tom)
+    private fun hentSedSaksopplysning(fom: LocalDate, tom: LocalDate) = saksopplysningForTest {
         type = SaksopplysningType.SEDOPPL
+        sedDokument {
+            lovvalgsperiode(fom, tom)
+            fnr = "123"
+        }
     }
 
-    private fun hentSedDokument(fom: LocalDate, tom: LocalDate) = SedDokument().apply {
-        lovvalgsperiode = no.nav.melosys.domain.dokument.medlemskap.Periode(fom, tom)
-        fnr = "123"
-    }
-
-    private fun lagSaksopplysning(saksopplysningType: SaksopplysningType) = Saksopplysning().apply {
+    private fun lagSaksopplysning(saksopplysningType: SaksopplysningType) = saksopplysningForTest {
         type = saksopplysningType
     }
 
-    private fun lagArbeidsforholdDokument() =
-        ArbeidsforholdDokument(listOf(Arbeidsforhold().apply {
-            arbeidsgiverID = "123456789"
-        }))
+    private fun lagArbeidsforholdDokument() = ArbeidsforholdDokumentBuilder()
+        .apply { arbeidsgiverID = "123456789" }
+        .build()
 
     private fun registeropplysningerRequest(fom: LocalDate, tom: LocalDate): RegisteropplysningerRequest.RegisteropplysningerRequestBuilder =
         RegisteropplysningerRequest.builder()
