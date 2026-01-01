@@ -55,9 +55,10 @@ object MedlemskapsperiodeTestFactory {
             this.bestemmelse = this@Builder.bestemmelse
             this.medlPeriodeID = this@Builder.medlPeriodeID
 
-            // Legg til trygdeavgiftsperioder uten å sette grunnlagMedlemskapsperiode
-            // (for å matche oppførsel ved direkte sett-tilordning i tester)
-            this.trygdeavgiftsperioder.addAll(this@Builder.trygdeavgiftsperioder)
+            // Bruk addTrygdeavgiftsperiode for å sette grunnlagMedlemskapsperiode back-referanse
+            this@Builder.trygdeavgiftsperioder.forEach { periode ->
+                this.addTrygdeavgiftsperiode(periode)
+            }
         }
     }
 }

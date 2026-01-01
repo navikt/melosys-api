@@ -237,6 +237,7 @@ class SatsendringFinnerTest {
             }
         }
         val behandlingsresultatNyVurdering = lagBehandlingsresultat(2) { trygdeavgiftsperiode(OPPRINNELIG_SATS) }
+        val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.first()
 
         mockHentBehandling(fagsak)
 
@@ -246,8 +247,8 @@ class SatsendringFinnerTest {
         )
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
         every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(
-            lagTrygdeavgiftsperiode { sats(NY_SATS) },
-            lagTrygdeavgiftsperiode { år(2024) }
+            lagTrygdeavgiftsperiode { sats(NY_SATS); grunnlag(medlemskapsperiode) },
+            lagTrygdeavgiftsperiode { år(2024); grunnlag(medlemskapsperiode) }
         )
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingMedSatsendring.id) } returns behandlingsresultat
 
@@ -516,12 +517,13 @@ class SatsendringFinnerTest {
             trygdeavgiftsperiode(OPPRINNELIG_SATS)
             trygdeavgiftsperiode(NY_SATS, id = 2L)
         }
+        val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.first()
 
         mockHentBehandling(fagsak)
         every { behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år) } returns listOf(behandlingsresultat)
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
-        val elements3 = lagTrygdeavgiftsperiode { id = null }
-        val elements4 = lagTrygdeavgiftsperiode { id = null; sats(NY_SATS) }
+        val elements3 = lagTrygdeavgiftsperiode { id = null; grunnlag(medlemskapsperiode) }
+        val elements4 = lagTrygdeavgiftsperiode { id = null; sats(NY_SATS); grunnlag(medlemskapsperiode) }
         every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(elements4, elements3)
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultat.hentId()) } returns behandlingsresultat
 
@@ -657,6 +659,13 @@ class SatsendringFinnerTest {
     private fun TrygdeavgiftsperiodeTestFactory.Builder.år(year: Int) {
         periodeFra = LocalDate.of(year, 1, 1)
         periodeTil = LocalDate.of(year, 12, 31)
+    }
+
+    /**
+     * Convenience extension for å sette grunnlag (kreves for erLikForSatsendring-sammenligning).
+     */
+    private fun TrygdeavgiftsperiodeTestFactory.Builder.grunnlag(grunnlag: Medlemskapsperiode) {
+        medlemskapsperiode = grunnlag
     }
 
     companion object {
