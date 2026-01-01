@@ -770,7 +770,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.PENSJONIST, Behandlingstyper.FØRSTEGANG).apply {
             status = Behandlingsstatus.UNDER_BEHANDLING
-            fagsak = Fagsak.forTest().apply {
+            fagsak = Fagsak.forTest {
                 tema = Sakstemaer.TRYGDEAVGIFT
             }
         }
