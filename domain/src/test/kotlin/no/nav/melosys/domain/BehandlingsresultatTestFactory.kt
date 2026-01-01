@@ -31,14 +31,7 @@ fun BehandlingsresultatTestFactory.Builder.vedtakMetadata(init: VedtakMetadata.(
     }.apply(init)
 }
 
-// Extension for building behandlingsresultat inside Årsavregning.forTest { }
-fun ÅrsavregningTestFactory.Builder.behandlingsresultat(init: BehandlingsresultatTestFactory.Builder.() -> Unit) = apply {
-    this.behandlingsresultat = Behandlingsresultat.forTest(init)
-}
-
-fun BehandlingsresultatTestFactory.Builder.årsavregning(init: ÅrsavregningTestFactory.Builder.() -> Unit) = apply {
-    this.årsavregning = Årsavregning.forTest(init)
-}
+// Note: Cross-factory extensions (årsavregning, behandlingsresultat) are defined in TestFactoryExtensions.kt
 
 fun BehandlingsresultatTestFactory.Builder.helseutgiftDekkesPeriode(init: HelseutgiftDekkesPeriodeTestFactory.Builder.() -> Unit) = apply {
     this.helseutgiftDekkesPeriode = HelseutgiftDekkesPeriode.forTest(init)
@@ -126,6 +119,28 @@ object AvklartefaktaRegistreringTestFactory {
 fun BehandlingsresultatTestFactory.Builder.anmodningsperiode(init: AnmodningsperiodeTestFactory.Builder.() -> Unit) = apply {
     val nyAnmodningsperiode = anmodningsperiodeForTest(init)
     anmodningsperioder.add(nyAnmodningsperiode)
+}
+
+/**
+ * Add an existing Anmodningsperiode to the builder.
+ * Useful when you have a pre-constructed Anmodningsperiode.
+ */
+fun BehandlingsresultatTestFactory.Builder.medExistingAnmodningsperiode(anmodningsperiode: Anmodningsperiode) = apply {
+    anmodningsperioder.add(anmodningsperiode)
+}
+
+/**
+ * Add an existing Medlemskapsperiode to the builder.
+ */
+fun BehandlingsresultatTestFactory.Builder.medExistingMedlemskapsperiode(medlemskapsperiode: Medlemskapsperiode) = apply {
+    medlemskapsperioder.add(medlemskapsperiode)
+}
+
+/**
+ * Add a collection of existing Medlemskapsperioder to the builder.
+ */
+fun BehandlingsresultatTestFactory.Builder.medExistingMedlemskapsperioder(perioder: Collection<Medlemskapsperiode>) = apply {
+    medlemskapsperioder.addAll(perioder)
 }
 
 fun BehandlingsresultatTestFactory.Builder.utpekingsperiode(init: UtpekingsperiodeTestFactory.Builder.() -> Unit) = apply {

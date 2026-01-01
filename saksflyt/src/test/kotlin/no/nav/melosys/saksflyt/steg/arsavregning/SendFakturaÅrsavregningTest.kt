@@ -28,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @ExtendWith(MockKExtension::class)
@@ -135,7 +136,7 @@ class SendFakturaÅrsavregningTest {
             this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
             startDato shouldBe PERIODE_START
             sluttDato shouldBe PERIODE_SLUTT
-            beskrivelse shouldBe """Medlemskapsperiode 01.02.2025 - 31.10.2025, endelig beregnet trygdeavgift ${behandlingsresultat.hentÅrsavregning().beregnetAvgiftBelop} - """ +
+            beskrivelse shouldBe """Medlemskapsperiode ${PERIODE_START.format(DATE_FORMATTER)} - ${PERIODE_SLUTT.format(DATE_FORMATTER)}, endelig beregnet trygdeavgift ${behandlingsresultat.hentÅrsavregning().beregnetAvgiftBelop} - """ +
                 """forskuddsvis fakturert trygdeavgift ${behandlingsresultat.hentÅrsavregning().tidligereFakturertBeloep ?: 0}"""
         }
 
@@ -300,7 +301,8 @@ class SendFakturaÅrsavregningTest {
         const val SAKSBEHANDLER = "G568493"
         const val fakturaserieRef = "GDL435389405Gf"
         const val tidligereFakturaserieRef = "763452GG"
-        val PERIODE_START = LocalDate.now().withMonth(2).withDayOfMonth(1)
-        val PERIODE_SLUTT = LocalDate.now().withMonth(10).withDayOfMonth(31)
+        val PERIODE_START: LocalDate = LocalDate.now().withMonth(2).withDayOfMonth(1)
+        val PERIODE_SLUTT: LocalDate = LocalDate.now().withMonth(10).withDayOfMonth(31)
+        val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
     }
 }

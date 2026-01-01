@@ -33,10 +33,8 @@ object FagsakTestFactory {
     const val ORGNR = "123456789"
     const val INSTITUSJON_ID = "SE:id"
 
-    @JvmStatic
     fun builder() = Builder()
 
-    @JvmStatic
     fun lagFagsak() = builder().build()
 
     @MelosysTestDsl
@@ -64,7 +62,7 @@ object FagsakTestFactory {
         fun registrertDato(registrertDato: Instant) = apply { this.registrertDato = registrertDato }
         fun endretDato(endretDato: Instant) = apply { this.endretDato = endretDato }
 
-        fun medBruker() = medBruker {}  // trengs for bakoverkompatibilitet med java
+        fun medBruker() = medBruker {}
 
         fun medBruker(init: Aktoer.() -> Unit = {}) = apply {
             leggTilAktør(Aktoer().apply {
@@ -135,7 +133,6 @@ object FagsakTestFactory {
         }
     }
 
-    @JvmStatic
     fun lagFagsakMedBehandlinger(vararg behandlinger: Behandling): Fagsak {
         val fagsak = builder()
             .status(Saksstatuser.OPPRETTET)
@@ -146,7 +143,6 @@ object FagsakTestFactory {
         return fagsak
     }
 
-    @JvmStatic
     fun lagBehandling(
         id: Long = BEHANDLING_ID,
         status: Behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING,

@@ -20,7 +20,6 @@ object MottatteOpplysningerTestFactory {
     const val DEFAULT_JSON_DATA = "{}"
     val DEFAULT_TYPE = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
 
-    @JvmStatic
     fun builder() = Builder()
 
     @MelosysTestDsl

@@ -66,6 +66,20 @@ fun BehandlingTestFactory.BehandlingTestBuilder.saksopplysning(init: Saksopplysn
 }
 
 /**
+ * DSL extension for å sette opprinneligBehandling innenfor en Behandling builder.
+ */
+fun BehandlingTestFactory.BehandlingTestBuilder.medOpprinneligBehandling(behandling: Behandling) = apply {
+    this.opprinneligBehandling = behandling
+}
+
+/**
+ * DSL extension for å sette opprinneligBehandling med builder innenfor en Behandling builder.
+ */
+fun BehandlingTestFactory.BehandlingTestBuilder.opprinneligBehandling(init: BehandlingTestFactory.BehandlingTestBuilder.() -> Unit) = apply {
+    this.opprinneligBehandling = Behandling.forTest(init)
+}
+
+/**
  * Test-verktøy for å opprette Behandling-instanser med standardverdier.
  */
 object BehandlingTestFactory {
@@ -90,7 +104,6 @@ object BehandlingTestFactory {
      *     .build();
      * ```
      */
-    @JvmStatic
     fun builderWithDefaults() = BehandlingTestBuilder().apply {
         id = BEHANDLING_ID // 0L allows JPA to auto-generate ID in integration tests
         // Sett standardverdier for alle påkrevde felt

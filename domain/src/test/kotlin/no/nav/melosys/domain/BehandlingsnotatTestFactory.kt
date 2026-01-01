@@ -49,6 +49,5 @@ object BehandlingsnotatTestFactory {
         }
     }
 
-    @JvmStatic
     fun builderWithDefaults() = Builder()
 }

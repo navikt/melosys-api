@@ -13,8 +13,34 @@ fun Prosessinstans.Builder.behandling(init: BehandlingTestFactory.BehandlingTest
     this.behandling = Behandling.forTest(init)
 }
 
+/**
+ * Set an existing behandling on the prosessinstans builder.
+ */
+fun Prosessinstans.Builder.medExistingBehandling(behandling: Behandling) = apply {
+    this.behandling = behandling
+}
+
+/**
+ * Configure the behandling with an opprinneligBehandling.
+ * Useful for NY_VURDERING and MANGLENDE_INNBETALING_TRYGDEAVGIFT behandlingstyper.
+ *
+ * Example:
+ * ```
+ * Prosessinstans.forTest {
+ *     behandling {
+ *         type = Behandlingstyper.NY_VURDERING
+ *         opprinneligBehandling {
+ *             id = 1L
+ *         }
+ *     }
+ * }
+ * ```
+ */
+fun BehandlingTestFactory.BehandlingTestBuilder.medOpprinneligBehandlingId(id: Long) = apply {
+    this.opprinneligBehandling = Behandling.forTest { this.id = id }
+}
+
 object ProsessinstansTestFactory {
-    @JvmStatic
     fun builderWithDefaults() = Prosessinstans.builder().apply {
         id = UUID.randomUUID()
         type = ProsessType.OPPRETT_SAK

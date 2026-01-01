@@ -8,7 +8,6 @@ object OrganisasjonDokumentTestFactory {
     const val NAVN = "Ola Norman"
     const val SEKTORKODE = "6500"
 
-    @JvmStatic
     fun builder() = Builder()
 
     @MelosysTestDsl
@@ -17,8 +16,6 @@ object OrganisasjonDokumentTestFactory {
         var navn: String = NAVN
         var sektorkode: String = SEKTORKODE
         var organisasjonsDetaljer: OrganisasjonsDetaljer? = null
-
-        // Beholdt for Java-kompatibilitet
         fun orgnummer(orgnummer: String) = apply { this.orgnummer = orgnummer }
         fun navn(navn: String) = apply { this.navn = navn }
         fun sektorkode(sektorkode: String) = apply { this.sektorkode = sektorkode }
