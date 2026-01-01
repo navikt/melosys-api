@@ -146,7 +146,26 @@ class TrygdeavgiftsberegningValidatorTest {
 
         @Test
         fun kastFeilmeldingNårMedlemskapsperioderHarOpphold() {
-            val behandlingsresultat = lagGyldigBehandlingsresultat()
+            // Opprett behandlingsresultat med to medlemskapsperioder som har et opphold mellom seg
+            val behandlingsresultat = Behandlingsresultat.forTest {
+                behandling {
+                    status = Behandlingsstatus.OPPRETTET
+                    fagsak { type = Sakstyper.FTRL }
+                }
+                medlemskapsperiode {
+                    fom = LocalDate.now()
+                    tom = LocalDate.now().plusDays(5)
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                }
+                medlemskapsperiode {
+                    fom = LocalDate.now().plusDays(7)  // Gap: dag 6 mangler
+                    tom = LocalDate.now().plusDays(10)
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                }
+                årsavregning { }
+            }
 
             val skatteforholdsPerioder = listOf(
                 skatteforholdForTest {
@@ -161,19 +180,6 @@ class TrygdeavgiftsberegningValidatorTest {
                     fomDato = LocalDate.now()
                     tomDato = LocalDate.now().plusDays(2)
                     type = Inntektskildetype.ARBEIDSINNTEKT
-                }
-            )
-
-            behandlingsresultat.medlemskapsperioder = mutableSetOf(
-                medlemskapsperiodeForTest {
-                    fom = LocalDate.now()
-                    tom = LocalDate.now().plusDays(5)
-                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
-                },
-                medlemskapsperiodeForTest {
-                    fom = LocalDate.now().plusDays(7)
-                    tom = LocalDate.now().plusDays(10)
-                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                 }
             )
 
