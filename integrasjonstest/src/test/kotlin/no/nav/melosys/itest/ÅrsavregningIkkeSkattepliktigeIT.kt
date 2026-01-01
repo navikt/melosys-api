@@ -101,7 +101,7 @@ class ÅrsavregningIkkeSkattepliktigeIT(
                     behandlingsresultatRepository.findById(årsavregningsbehandling.id)
                         .shouldBePresent()
                         .årsavregning.shouldNotBeNull()
-                        .aar shouldBe 2025
+                        .aar shouldBe ÅRSAVREGNING_ÅR
                 }
         }
     }
