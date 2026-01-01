@@ -470,7 +470,7 @@ class SendVedtaksbrevInnlandTest {
 
     @Test
     fun `utfør avslag 12_1 med arbeidsgiver sender til arbeidsgiver`() {
-        // Fagsak already has ARBEIDSGIVER from lagBehandling(), so this test passes without additional setup
+        // Fagsak har allerede ARBEIDSGIVER fra lagBehandling(), så testen passerer uten ekstra oppsett
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID) } returns
             lagBehandlingsresultat(lagLovvalgsperiode(FO_883_2004_ART12_1, LocalDate.now(), Land_iso2.HR, false))
         every { prosessinstansService.opprettProsessinstansSendBrev(any(), capture(doksysBrevbestillingSlot), any()) } just Runs

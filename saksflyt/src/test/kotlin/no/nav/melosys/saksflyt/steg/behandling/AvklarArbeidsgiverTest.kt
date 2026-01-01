@@ -87,7 +87,7 @@ class AvklarArbeidsgiverTest {
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             }
         }
-        // Link the standalone lovvalgsperiode to the behandlingsresultat for mutation tests
+        // Koble lovvalgsperioden til behandlingsresultat for mutasjonstester
         lovvalgsperiode = behandlingsresultat.lovvalgsperioder.first()
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat

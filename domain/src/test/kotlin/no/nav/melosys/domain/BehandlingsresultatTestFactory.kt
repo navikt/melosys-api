@@ -31,7 +31,7 @@ fun BehandlingsresultatTestFactory.Builder.vedtakMetadata(init: VedtakMetadata.(
     }.apply(init)
 }
 
-// Note: Cross-factory extensions (årsavregning, behandlingsresultat) are defined in TestFactoryExtensions.kt
+// Merk: Cross-factory extensions (årsavregning, behandlingsresultat) er definert i TestFactoryExtensions.kt
 
 fun BehandlingsresultatTestFactory.Builder.helseutgiftDekkesPeriode(init: HelseutgiftDekkesPeriodeTestFactory.Builder.() -> Unit) = apply {
     this.helseutgiftDekkesPeriode = HelseutgiftDekkesPeriode.forTest(init)

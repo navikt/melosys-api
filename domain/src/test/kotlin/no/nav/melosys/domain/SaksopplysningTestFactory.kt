@@ -38,7 +38,7 @@ fun SaksopplysningTestFactory.Builder.arbeidsforholdDokument(init: Arbeidsforhol
 
 @MelosysTestDsl
 class ArbeidsforholdDokumentBuilder {
-    // For single arbeidsforhold (simple pattern)
+    // For enkelt arbeidsforhold (enkelt mønster)
     var arbeidsforholdID: String? = null
     var arbeidsforholdIDnav: Long = 0
     var ansettelsesPeriode: Periode? = null
@@ -52,7 +52,7 @@ class ArbeidsforholdDokumentBuilder {
     var opprettelsestidspunkt: OffsetDateTime? = null
     var sistBekreftet: OffsetDateTime? = null
 
-    // For multiple arbeidsforhold
+    // For flere arbeidsforhold
     private val arbeidsforholdListe = mutableListOf<Arbeidsforhold>()
 
     fun ansettelsesPeriode(fom: LocalDate, tom: LocalDate? = null) {

@@ -816,7 +816,7 @@ class OpprettFakturaserieTest {
 
         val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak!!
 
-        // Add an ÅRSAVREGNING behandling to the same fagsak
+        // Legg til en ÅRSAVREGNING-behandling på samme fagsak
         Behandling.forTest {
             id = 3L
             type = Behandlingstyper.ÅRSAVREGNING
@@ -1020,7 +1020,7 @@ class OpprettFakturaserieTest {
 
         val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak!!
 
-        // Add another behandling to the same fagsak
+        // Legg til en annen behandling på samme fagsak
         Behandling.forTest {
             id = 0L
             registrertDato = Instant.EPOCH

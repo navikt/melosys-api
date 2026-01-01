@@ -20,7 +20,7 @@ object SoeknadTestFactory {
         private val selvstendigForetakListe = mutableListOf<SelvstendigForetak>()
         private val ekstraArbeidsgivereListe = mutableListOf<String>()
 
-        // Bosted address fields
+        // Bosted-adressefelt
         var bostedLandkode: String? = null
         var bostedPoststed: String? = null
         var bostedGatenavn: String? = null
@@ -30,10 +30,10 @@ object SoeknadTestFactory {
         var periodeFom: LocalDate? = null
         var periodeTom: LocalDate? = null
 
-        // Direct bosted override (for edge case tests)
+        // Direkte bosted-overstyring (for edge case-tester)
         private var customBosted: Bosted? = null
 
-        /** Replace bosted entirely (for edge case tests like empty bosted) */
+        /** Erstatt bosted helt (for edge case-tester som tomt bosted) */
         fun bosted(bosted: Bosted) = apply {
             customBosted = bosted
         }
@@ -51,7 +51,7 @@ object SoeknadTestFactory {
             this.periodeTom = tom
         }
 
-        /** Add a foreign business (foretak utland) */
+        /** Legg til utenlandsk foretak */
         fun foretakUtland(orgnr: String, selvstendig: Boolean = false) = apply {
             foretakUtlandListe.add(ForetakUtland().apply {
                 this.orgnr = orgnr
@@ -59,17 +59,17 @@ object SoeknadTestFactory {
             })
         }
 
-        /** Add a self-employed business (selvstendig foretak) */
+        /** Legg til selvstendig foretak */
         fun selvstendigForetak(orgnr: String) = apply {
             selvstendigForetakListe.add(SelvstendigForetak().apply { this.orgnr = orgnr })
         }
 
-        /** Add an extra Norwegian employer orgnr */
+        /** Legg til ekstra norsk arbeidsgiver (orgnr) */
         fun ekstraArbeidsgiver(orgnr: String) = apply {
             ekstraArbeidsgivereListe.add(orgnr)
         }
 
-        /** Configure bosted address with all fields */
+        /** Konfigurer bostedadresse med alle felt */
         fun bostedAdresse(
             landkode: String = "NO",
             poststed: String? = null,
@@ -91,7 +91,7 @@ object SoeknadTestFactory {
             // Sett arbeidssteder
             this.arbeidPaaLand.fysiskeArbeidssteder = this@Builder.fysiskeArbeidssteder
 
-            // Sett bosted - either custom or from individual fields
+            // Sett bosted - enten egendefinert eller fra individuelle felt
             if (this@Builder.customBosted != null) {
                 this.bosted = this@Builder.customBosted!!
             } else {

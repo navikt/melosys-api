@@ -78,7 +78,7 @@ class AvsluttFagsakOgBehandlingTest {
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             }
         }
-        // Link the lovvalgsperiode for mutation tests
+        // Koble lovvalgsperioden for mutasjonstester
         lovvalgsperiode = behandlingsresultat.lovvalgsperioder.first()
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat

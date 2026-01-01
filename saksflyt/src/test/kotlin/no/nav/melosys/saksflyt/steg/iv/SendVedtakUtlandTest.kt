@@ -253,8 +253,8 @@ class SendVedtakUtlandTest {
 
     @Test
     fun `utfør skal ikke sende A012 når Norge er utpekt og elektronisk BUC er åpen med standard behandlingsresultat`() {
-        // Note: This test verifies that when prosessinstans.behandling does NOT have tema=BESLUTNING_LOVVALG_NORGE,
-        // A012 should not be sent, even if there's an open LA_BUC_02.
+        // Merk: Denne testen verifiserer at når prosessinstans.behandling IKKE har tema=BESLUTNING_LOVVALG_NORGE,
+        // skal A012 ikke sendes, selv om det finnes en åpen LA_BUC_02.
         val prosessinstans = lagProsessinstans {
             medData(ProsessDataKey.YTTERLIGERE_INFO_SED, "Hei")
         }
