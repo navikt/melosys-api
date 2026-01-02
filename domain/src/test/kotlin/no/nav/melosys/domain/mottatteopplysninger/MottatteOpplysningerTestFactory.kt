@@ -3,6 +3,7 @@ package no.nav.melosys.domain.mottatteopplysninger
 import no.nav.melosys.domain.MelosysTestDsl
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
 import java.time.Instant
+import java.time.LocalDate
 
 fun mottatteOpplysningerForTest(init: MottatteOpplysningerTestFactory.Builder.() -> Unit = {}): MottatteOpplysninger =
     MottatteOpplysningerTestFactory.Builder().apply(init).build()
@@ -34,6 +35,13 @@ object MottatteOpplysningerTestFactory {
         var eksternReferanseID: String? = null
         var mottatteOpplysningerData: MottatteOpplysningerData? = null
 
+        /**
+         * @deprecated Mottaksdato har blitt flyttet til behandlingsårsak
+         */
+        @Deprecated("Mottaksdato har blitt flyttet til behandlingsårsak")
+        var mottaksdato: LocalDate? = null
+
+        @Suppress("DEPRECATION")
         fun build(): MottatteOpplysninger = MottatteOpplysninger().apply {
             this@apply.id = this@Builder.id
             this@apply.versjon = this@Builder.versjon
@@ -44,6 +52,7 @@ object MottatteOpplysningerTestFactory {
             this@apply.jsonData = this@Builder.jsonData
             this@apply.eksternReferanseID = this@Builder.eksternReferanseID
             this@apply.mottatteOpplysningerData = this@Builder.mottatteOpplysningerData
+            this@apply.mottaksdato = this@Builder.mottaksdato
         }
     }
 }

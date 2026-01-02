@@ -51,12 +51,6 @@ class AvsluttArt13BehandlingServiceTest {
 
     private val behandlingID = 11L
 
-    private val behandlingsresultat = Behandlingsresultat()
-    private lateinit var behandling: Behandling
-    private val lovvalgsperiode = Lovvalgsperiode()
-    private val vedtakMetadata = VedtakMetadata()
-    private lateinit var fagsak: Fagsak
-
     @BeforeEach
     fun setup() {
         avsluttArt13BehandlingService = AvsluttArt13BehandlingService(
@@ -64,35 +58,65 @@ class AvsluttArt13BehandlingServiceTest {
             behandlingsresultatService, medlPeriodeService, lovvalgsperiodeService
         )
 
-        behandling = Behandling.forTest {
-            id = behandlingID
-            status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
-            tema = Behandlingstema.ARBEID_FLERE_LAND
-        }
-        fagsak = behandling.fagsak
-
-        behandlingsresultat.apply {
-            id = behandlingID
-            this.behandling = this@AvsluttArt13BehandlingServiceTest.behandling
-            lovvalgsperioder.add(lovvalgsperiode)
-            this.vedtakMetadata = this@AvsluttArt13BehandlingServiceTest.vedtakMetadata
-        }
-        lovvalgsperiode.apply {
-            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A
-            medlPeriodeID = 123L
-        }
-
-        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
         every { fagsakService.avsluttFagsakOgBehandling(any(), any(), any()) } returns Unit
         every { medlPeriodeService.oppdaterPeriodeEndelig(any()) } returns Unit
     }
 
+    private fun lagBehandling(
+        init: BehandlingTestFactory.BehandlingTestBuilder.() -> Unit = {}
+    ) = Behandling.forTest {
+        id = behandlingID
+        status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
+        tema = Behandlingstema.ARBEID_FLERE_LAND
+        init()
+    }
+
+    private fun lagLovvalgsperiode(
+        init: LovvalgsperiodeTestFactory.Builder.() -> Unit = {}
+    ) = lovvalgsperiodeForTest {
+        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A
+        medlPeriodeID = 123L
+        init()
+    }
+
+    private fun lagBehandlingsresultat(
+        behandling: Behandling,
+        lovvalgsperiode: Lovvalgsperiode,
+        vedtaksdato: Instant? = null,
+        harVedtakMetadata: Boolean = true,
+        init: BehandlingsresultatTestFactory.Builder.() -> Unit = {}
+    ) = Behandlingsresultat.forTest {
+        id = behandlingID
+        this.behandling = behandling
+        lovvalgsperioder.add(lovvalgsperiode)
+        if (harVedtakMetadata) {
+            vedtakMetadata {
+                if (vedtaksdato != null) {
+                    this.vedtaksdato = vedtaksdato
+                }
+            }
+        }
+        init()
+    }
+
+    private fun setupMocks(behandling: Behandling, behandlingsresultat: Behandlingsresultat) {
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
+    }
+
     @Test
     fun `avsluttBehandlingArt13 ikke art13 kaster exception`() {
-        vedtakMetadata.vedtaksdato = månederOgDagerSiden(2, 1)
-        lovvalgsperiode.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+        val behandling = lagBehandling()
+        val lovvalgsperiode = lagLovvalgsperiode {
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+        }
+        val behandlingsresultat = lagBehandlingsresultat(
+            behandling = behandling,
+            lovvalgsperiode = lovvalgsperiode,
+            vedtaksdato = månederOgDagerSiden(2, 1)
+        )
+        setupMocks(behandling, behandlingsresultat)
 
 
         val exception = shouldThrow<FunksjonellException> {
@@ -105,8 +129,14 @@ class AvsluttArt13BehandlingServiceTest {
 
     @Test
     fun `avsluttBehandlingArt13 søknad 1 måned siden vedtak behandling ikke avsluttet`() {
-        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
-        vedtakMetadata.vedtaksdato = månederOgDagerSiden(1, 0)
+        val behandling = lagBehandling { tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE }
+        val lovvalgsperiode = lagLovvalgsperiode()
+        val behandlingsresultat = lagBehandlingsresultat(
+            behandling = behandling,
+            lovvalgsperiode = lovvalgsperiode,
+            vedtaksdato = månederOgDagerSiden(1, 0)
+        )
+        setupMocks(behandling, behandlingsresultat)
 
 
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
@@ -117,21 +147,33 @@ class AvsluttArt13BehandlingServiceTest {
 
     @Test
     fun `avsluttBehandlingArt13 norge utpekt 2 måneder 1 dag siden vedtak behandling blir avsluttet`() {
-        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
-        vedtakMetadata.vedtaksdato = månederOgDagerSiden(2, 1)
+        val behandling = lagBehandling { tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE }
+        val lovvalgsperiode = lagLovvalgsperiode()
+        val behandlingsresultat = lagBehandlingsresultat(
+            behandling = behandling,
+            lovvalgsperiode = lovvalgsperiode,
+            vedtaksdato = månederOgDagerSiden(2, 1)
+        )
+        setupMocks(behandling, behandlingsresultat)
 
 
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
         verify { medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode) }
     }
 
     @Test
     fun `avsluttBehandlingArt13 norge utpekt vedtak ikke lagret kaster exception`() {
-        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
-        behandlingsresultat.vedtakMetadata = null
+        val behandling = lagBehandling { tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE }
+        val lovvalgsperiode = lagLovvalgsperiode()
+        val behandlingsresultat = lagBehandlingsresultat(
+            behandling = behandling,
+            lovvalgsperiode = lovvalgsperiode,
+            harVedtakMetadata = false
+        )
+        setupMocks(behandling, behandlingsresultat)
 
 
         val exception = shouldThrow<IllegalArgumentException> {
@@ -144,29 +186,44 @@ class AvsluttArt13BehandlingServiceTest {
 
     @Test
     fun `avsluttBehandlingArt13 søknad 2 måneder 1 dag siden endret dato medl oppdatert og behandling blir avsluttet`() {
-        behandlingsresultat.endretDato = månederOgDagerSiden(2, 1)
-        vedtakMetadata.vedtaksdato = månederOgDagerSiden(2, 1)
+        val behandling = lagBehandling()
+        val lovvalgsperiode = lagLovvalgsperiode()
+        val behandlingsresultat = lagBehandlingsresultat(
+            behandling = behandling,
+            lovvalgsperiode = lovvalgsperiode,
+            vedtaksdato = månederOgDagerSiden(2, 1)
+        ) {
+            endretDato = månederOgDagerSiden(2, 1)
+        }
+        setupMocks(behandling, behandlingsresultat)
 
 
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
         verify { medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode) }
     }
 
     @Test
     fun `avsluttBehandlingArt13 søknad 3 måneder siden endret dato utpeking uten vedtak lovvalgsperiode opprettet og behandling avsluttet`() {
-        val utpekingsperiode = Utpekingsperiode(
-            LocalDate.now(), LocalDate.now(), Land_iso2.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null
-        ).apply {
-            medlPeriodeID = 123L
-        }
-        behandlingsresultat.apply {
+        val behandling = lagBehandling()
+        val lovvalgsperiode = lagLovvalgsperiode()
+        val behandlingsresultat = lagBehandlingsresultat(
+            behandling = behandling,
+            lovvalgsperiode = lovvalgsperiode,
+            harVedtakMetadata = false
+        ) {
             endretDato = månederOgDagerSiden(3, 0)
-            vedtakMetadata = null
-            utpekingsperioder.add(utpekingsperiode)
+            utpekingsperiode {
+                fom = LocalDate.now()
+                tom = LocalDate.now()
+                lovvalgsland = Land_iso2.SE
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1
+                medlPeriodeID = 123L
+            }
         }
+        setupMocks(behandling, behandlingsresultat)
         every { lovvalgsperiodeService.lagreLovvalgsperioder(any(), any()) } answers { secondArg() }
 
 
@@ -174,14 +231,22 @@ class AvsluttArt13BehandlingServiceTest {
 
 
         verify { lovvalgsperiodeService.lagreLovvalgsperioder(eq(behandlingID), any()) }
-        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
         verify { medlPeriodeService.oppdaterPeriodeEndelig(any()) }
     }
 
     @Test
     fun `avsluttBehandlingHvisToMndPassert skal ikke avslutte behandling hvis saksstatus ikke er OPPRETTET`() {
-        vedtakMetadata.vedtaksdato = månederOgDagerSiden(2, 1)
-        fagsak.status = Saksstatuser.ANNULLERT
+        val behandling = lagBehandling {
+            fagsak { status = Saksstatuser.ANNULLERT }
+        }
+        val lovvalgsperiode = lagLovvalgsperiode()
+        val behandlingsresultat = lagBehandlingsresultat(
+            behandling = behandling,
+            lovvalgsperiode = lovvalgsperiode,
+            vedtaksdato = månederOgDagerSiden(2, 1)
+        )
+        setupMocks(behandling, behandlingsresultat)
 
 
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
@@ -193,22 +258,29 @@ class AvsluttArt13BehandlingServiceTest {
 
     @Test
     fun `avsluttBehandlingHvisToMndPassert skal ikke avslutte behandling hvis det finnes nyere relevant behandling på samme fagsak`() {
-        vedtakMetadata.vedtaksdato = månederOgDagerSiden(2, 1)
+        val behandling = lagBehandling()
+        val lovvalgsperiode = lagLovvalgsperiode()
+        val behandlingsresultat = lagBehandlingsresultat(
+            behandling = behandling,
+            lovvalgsperiode = lovvalgsperiode,
+            vedtaksdato = månederOgDagerSiden(2, 1)
+        )
+        setupMocks(behandling, behandlingsresultat)
+
         val nyereBehandlingID = 999L
         val nyereBehandling = Behandling.forTest {
             id = nyereBehandlingID
-            status = Behandlingsstatus.AVSLUTTET // Nyere behandling er avsluttet
+            status = Behandlingsstatus.AVSLUTTET
             tema = Behandlingstema.ARBEID_FLERE_LAND
-            type = Behandlingstyper.NY_VURDERING // relevant type
+            type = Behandlingstyper.NY_VURDERING
             this.fagsak = behandling.fagsak
         }
         nyereBehandling.registrertDato = behandling.registrertDato.plus(Duration.ofDays(1))
         behandling.fagsak.leggTilBehandling(nyereBehandling)
 
-        // Nyere behandling har vedtak
-        val nyereBehandlingsresultat = Behandlingsresultat().apply {
+        val nyereBehandlingsresultat = Behandlingsresultat.forTest {
             id = nyereBehandlingID
-            vedtakMetadata = VedtakMetadata().apply {
+            vedtakMetadata {
                 vedtaksdato = månederOgDagerSiden(1, 0)
             }
         }
@@ -224,12 +296,18 @@ class AvsluttArt13BehandlingServiceTest {
 
     @Test
     fun `avsluttBehandlingHvisToMndPassert skal avslutte når nyere behandling er henvendelse`() {
-        // Oppfyller 2 mnd krav
-        vedtakMetadata.vedtaksdato = månederOgDagerSiden(2, 1)
-        // Nyere HENVENDELSE skal ikke blokkere
+        val behandling = lagBehandling()
+        val lovvalgsperiode = lagLovvalgsperiode()
+        val behandlingsresultat = lagBehandlingsresultat(
+            behandling = behandling,
+            lovvalgsperiode = lovvalgsperiode,
+            vedtaksdato = månederOgDagerSiden(2, 1)
+        )
+        setupMocks(behandling, behandlingsresultat)
+
         val henvendelse = Behandling.forTest {
             id = 1000L
-            status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING // lik status men type gjør den irrelevant
+            status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
             tema = Behandlingstema.ARBEID_FLERE_LAND
             type = Behandlingstyper.HENVENDELSE
             this.fagsak = behandling.fagsak
@@ -241,28 +319,34 @@ class AvsluttArt13BehandlingServiceTest {
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
         verify { medlPeriodeService.oppdaterPeriodeEndelig(any()) }
     }
 
     @Test
     fun `avsluttBehandlingHvisToMndPassert skal ikke avslutte hvis nyere behandling har registrert unntak`() {
-        vedtakMetadata.vedtaksdato = månederOgDagerSiden(2, 1)
+        val behandling = lagBehandling()
+        val lovvalgsperiode = lagLovvalgsperiode()
+        val behandlingsresultat = lagBehandlingsresultat(
+            behandling = behandling,
+            lovvalgsperiode = lovvalgsperiode,
+            vedtaksdato = månederOgDagerSiden(2, 1)
+        )
+        setupMocks(behandling, behandlingsresultat)
+
         val nyereBehandlingId = 666L
         val nyereBehandling = Behandling.forTest {
             id = nyereBehandlingId
             status = Behandlingsstatus.AVSLUTTET
             tema = Behandlingstema.ARBEID_FLERE_LAND
-            type = Behandlingstyper.NY_VURDERING // relevant type
+            type = Behandlingstyper.NY_VURDERING
             this.fagsak = behandling.fagsak
         }
         nyereBehandling.registrertDato = behandling.registrertDato.plus(Duration.ofDays(1))
         behandling.fagsak.leggTilBehandling(nyereBehandling)
 
-        // Nyere behandling har utfallRegistreringUnntak (men ikke vedtak)
-        val nyereBehandlingsresultat = Behandlingsresultat().apply {
+        val nyereBehandlingsresultat = Behandlingsresultat.forTest {
             id = nyereBehandlingId
-            vedtakMetadata = null
             utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
         }
         every { behandlingsresultatService.hentBehandlingsresultat(nyereBehandlingId) } returns nyereBehandlingsresultat
@@ -277,23 +361,29 @@ class AvsluttArt13BehandlingServiceTest {
 
     @Test
     fun `avsluttBehandlingHvisToMndPassert skal avslutte når nyere avsluttet behandling mangler vedtak og utfall`() {
-        vedtakMetadata.vedtaksdato = månederOgDagerSiden(2, 1)
+        val behandling = lagBehandling()
+        val lovvalgsperiode = lagLovvalgsperiode()
+        val behandlingsresultat = lagBehandlingsresultat(
+            behandling = behandling,
+            lovvalgsperiode = lovvalgsperiode,
+            vedtaksdato = månederOgDagerSiden(2, 1)
+        )
+        setupMocks(behandling, behandlingsresultat)
+
         val nyereBehandlingId = 777L
         val nyereBehandling = Behandling.forTest {
             id = nyereBehandlingId
             status = Behandlingsstatus.AVSLUTTET
             tema = Behandlingstema.ARBEID_FLERE_LAND
-            type = Behandlingstyper.NY_VURDERING // relevant type
+            type = Behandlingstyper.NY_VURDERING
             this.fagsak = behandling.fagsak
         }
         nyereBehandling.registrertDato = behandling.registrertDato.plus(Duration.ofDays(1))
         behandling.fagsak.leggTilBehandling(nyereBehandling)
 
-        // Nyere behandling mangler både vedtak og utfallRegistreringUnntak
-        val nyereBehandlingsresultat = Behandlingsresultat().apply {
+        val nyereBehandlingsresultat = Behandlingsresultat.forTest {
             id = nyereBehandlingId
-            vedtakMetadata = null
-            utfallRegistreringUnntak = null
+            // Mangler både vedtakMetadata og utfallRegistreringUnntak
         }
         every { behandlingsresultatService.hentBehandlingsresultat(nyereBehandlingId) } returns nyereBehandlingsresultat
 
@@ -301,7 +391,7 @@ class AvsluttArt13BehandlingServiceTest {
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
         verify { medlPeriodeService.oppdaterPeriodeEndelig(any()) }
     }
 

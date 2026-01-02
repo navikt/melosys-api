@@ -46,6 +46,34 @@ fun BehandlingTestFactory.BehandlingTestBuilder.medBehandlingsårsakType(
 }
 
 /**
+ * DSL extension for å konfigurere behandlingsårsak med alle felt.
+ *
+ * Eksempel:
+ * ```
+ * val behandling = Behandling.forTest {
+ *     behandlingsårsak {
+ *         type = Behandlingsaarsaktyper.SØKNAD
+ *         mottaksdato = LocalDate.of(2022, 12, 1)
+ *     }
+ * }
+ * ```
+ */
+fun BehandlingTestFactory.BehandlingTestBuilder.behandlingsårsak(
+    init: BehandlingsaarsakBuilder.() -> Unit
+) = apply {
+    medBehandlingsårsak(BehandlingsaarsakBuilder().apply(init).build())
+}
+
+@MelosysTestDsl
+class BehandlingsaarsakBuilder {
+    var type: Behandlingsaarsaktyper = Behandlingsaarsaktyper.SØKNAD
+    var fritekst: String = ""
+    var mottaksdato: LocalDate = LocalDate.now()
+
+    fun build(): Behandlingsaarsak = Behandlingsaarsak(type, fritekst, mottaksdato)
+}
+
+/**
  * DSL extension for å konfigurere mottatte opplysninger innenfor en Behandling builder.
  */
 fun BehandlingTestFactory.BehandlingTestBuilder.mottatteOpplysninger(

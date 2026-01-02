@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import java.time.Instant
 import java.time.LocalDate
@@ -146,6 +147,14 @@ fun BehandlingsresultatTestFactory.Builder.medExistingMedlemskapsperioder(period
 fun BehandlingsresultatTestFactory.Builder.utpekingsperiode(init: UtpekingsperiodeTestFactory.Builder.() -> Unit) = apply {
     val nyUtpekingsperiode = utpekingsperiodeForTest(init)
     utpekingsperioder.add(nyUtpekingsperiode)
+}
+
+fun kontrollresultatForTest(init: KontrollresultatTestFactory.Builder.() -> Unit = {}): Kontrollresultat =
+    KontrollresultatTestFactory.Builder().apply(init).build()
+
+fun BehandlingsresultatTestFactory.Builder.kontrollresultat(init: KontrollresultatTestFactory.Builder.() -> Unit) = apply {
+    val nyttKontrollresultat = kontrollresultatForTest(init)
+    kontrollresultater.add(nyttKontrollresultat)
 }
 
 fun anmodningsperiodeForTest(init: AnmodningsperiodeTestFactory.Builder.() -> Unit = {}): Anmodningsperiode =
@@ -294,6 +303,7 @@ object BehandlingsresultatTestFactory {
         val avklartefakta: MutableSet<Avklartefakta> = mutableSetOf()
         val anmodningsperioder: MutableSet<Anmodningsperiode> = mutableSetOf()
         val utpekingsperioder: MutableSet<Utpekingsperiode> = mutableSetOf()
+        val kontrollresultater: MutableSet<Kontrollresultat> = mutableSetOf()
 
         fun build(): Behandlingsresultat {
             val behandlingsresultat = Behandlingsresultat().apply {
@@ -374,7 +384,28 @@ object BehandlingsresultatTestFactory {
                 utpekingsperiode.behandlingsresultat = behandlingsresultat
             }
 
+            // Sett opp relasjoner for kontrollresultater
+            kontrollresultater.forEach { kontrollresultat ->
+                behandlingsresultat.kontrollresultater.add(kontrollresultat)
+                kontrollresultat.behandlingsresultat = behandlingsresultat
+            }
+
             return behandlingsresultat
+        }
+    }
+}
+
+object KontrollresultatTestFactory {
+    val DEFAULT_BEGRUNNELSE = Kontroll_begrunnelser.FEIL_I_PERIODEN
+
+    @MelosysTestDsl
+    class Builder {
+        var id: Long? = null
+        var begrunnelse: Kontroll_begrunnelser = DEFAULT_BEGRUNNELSE
+
+        fun build(): Kontrollresultat = Kontrollresultat().apply {
+            this.id = this@Builder.id
+            this.begrunnelse = this@Builder.begrunnelse
         }
     }
 }
