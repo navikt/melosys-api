@@ -475,22 +475,24 @@ class BehandlingServiceTest {
         val replikertBehandling = behandlingService.replikerBehandling(tidligsteInaktiveBehandling, Behandlingstyper.ENDRET_PERIODE)
         tidligsteInaktiveBehandling.registrertDato = Instant.now().minus(2, ChronoUnit.DAYS)
 
-        replikertBehandling.id shouldBe 0L
-        replikertBehandling.tema shouldBe tidligsteInaktiveBehandling.tema
-        replikertBehandling.status shouldBe OPPRETTET
-        replikertBehandling.dokumentasjonSvarfristDato shouldBe tidligsteInaktiveBehandling.dokumentasjonSvarfristDato
-        replikertBehandling.initierendeJournalpostId shouldBe tidligsteInaktiveBehandling.initierendeJournalpostId
-        replikertBehandling.behandlingsårsak shouldBe null
-        replikertBehandling.registrertDato shouldNotBe tidligsteInaktiveBehandling.registrertDato
-        replikertBehandling.mottatteOpplysninger?.mottatteOpplysningerData shouldNotBe null
+        with(replikertBehandling) {
+            id shouldBe 0L
+            tema shouldBe tidligsteInaktiveBehandling.tema
+            status shouldBe OPPRETTET
+            dokumentasjonSvarfristDato shouldBe tidligsteInaktiveBehandling.dokumentasjonSvarfristDato
+            initierendeJournalpostId shouldBe tidligsteInaktiveBehandling.initierendeJournalpostId
+            behandlingsårsak shouldBe null
+            registrertDato shouldNotBe tidligsteInaktiveBehandling.registrertDato
+            mottatteOpplysninger?.mottatteOpplysningerData shouldNotBe null
 
-        replikertBehandling.saksopplysninger.size shouldBe 1
-        replikertBehandling.saksopplysninger.all { it.id == null } shouldBe true
-        replikertBehandling.saksopplysninger.all { it.behandling == replikertBehandling } shouldBe true
-        replikertBehandling.saksopplysninger.all { it.kilder.first().mottattDokument == "dokxml" } shouldBe true
-        replikertBehandling.saksopplysninger.all { it.type == SaksopplysningType.INNTK } shouldBe true
-        replikertBehandling.saksopplysninger.all { it.endretDato.toString() == "2020-02-11T09:37:30Z" } shouldBe true
-        replikertBehandling.saksopplysninger.flatMap { it.kilder }.all { it.id == null } shouldBe true
+            saksopplysninger.size shouldBe 1
+            saksopplysninger.all { it.id == null } shouldBe true
+            saksopplysninger.all { it.behandling == replikertBehandling } shouldBe true
+            saksopplysninger.all { it.kilder.first().mottattDokument == "dokxml" } shouldBe true
+            saksopplysninger.all { it.type == SaksopplysningType.INNTK } shouldBe true
+            saksopplysninger.all { it.endretDato.toString() == "2020-02-11T09:37:30Z" } shouldBe true
+            saksopplysninger.flatMap { it.kilder }.all { it.id == null } shouldBe true
+        }
     }
 
     @Test
