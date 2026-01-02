@@ -14,13 +14,6 @@ fun Prosessinstans.Builder.behandling(init: BehandlingTestFactory.BehandlingTest
 }
 
 /**
- * Set an existing behandling on the prosessinstans builder.
- */
-fun Prosessinstans.Builder.medExistingBehandling(behandling: Behandling) = apply {
-    this.behandling = behandling
-}
-
-/**
  * Configure the behandling with an opprinneligBehandling.
  * Useful for NY_VURDERING and MANGLENDE_INNBETALING_TRYGDEAVGIFT behandlingstyper.
  *

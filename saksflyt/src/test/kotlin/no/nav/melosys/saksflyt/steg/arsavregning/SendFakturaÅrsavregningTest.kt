@@ -6,7 +6,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.behandling
@@ -18,7 +17,6 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.medlemskapsperiode
 import no.nav.melosys.domain.tidligereBehandlingsresultat
-import no.nav.melosys.domain.trygdeavgiftsperiode
 import no.nav.melosys.domain.vedtakMetadata
 import no.nav.melosys.domain.årsavregning
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
@@ -28,7 +26,6 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.behandling
 import no.nav.melosys.saksflytapi.domain.forTest
-import no.nav.melosys.saksflytapi.domain.medExistingBehandling
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -40,7 +37,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Optional
-import kotlin.math.log
 
 @ExtendWith(MockKExtension::class)
 class SendFakturaÅrsavregningTest {
@@ -71,18 +67,19 @@ class SendFakturaÅrsavregningTest {
 
     @Test
     fun `sender ikke faktura når faktureringsbelop er mindre enn 100`() {
-        val behandling = Behandling.forTest {
-            id = 100
-        }
         val behandlingsresultat = Behandlingsresultat.forTest {
             årsavregning {
                 aar = 2023
                 tilFaktureringBeloep = BigDecimal(99)
             }
         }
-        val prosessinstans = lagProsessInstans(behandling)
+        val prosessinstans = lagProsessInstans {
+            behandling {
+                id = 100
+            }
+        }
 
-        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(prosessinstans.hentBehandling.id) } returns behandlingsresultat
 
         sendFakturaÅrsavregning.utfør(prosessinstans)
 
@@ -91,13 +88,12 @@ class SendFakturaÅrsavregningTest {
 
     @Test
     fun `sender faktura når belop er større eller lik 100`() {
-        val behandling = Behandling.forTest {
-            id = 100
-            fagsak = lagFagsak()
-        }
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = 100
-            this.behandling = behandling
+            behandling {
+                id = 100
+                fagsak = lagFagsak()
+            }
             vedtakMetadata {
                 vedtaksdato = Instant.now()
             }
@@ -121,7 +117,8 @@ class SendFakturaÅrsavregningTest {
                 }
             }
         }
-        val prosessinstans = lagProsessInstans(behandling)
+        val behandling = behandlingsresultat.hentBehandling()
+        val prosessinstans = lagProsessInstans { this.behandling = behandling }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
@@ -155,13 +152,12 @@ class SendFakturaÅrsavregningTest {
 
     @Test
     fun `sender faktura - dato hentes fra tidligere behandlingsgrunnlag`() {
-        val behandling = Behandling.forTest {
-            id = 100
-            fagsak = lagFagsak()
-        }
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = 100
-            this.behandling = behandling
+            behandling {
+                id = 100
+                fagsak = lagFagsak()
+            }
             vedtakMetadata {
                 vedtaksdato = Instant.now()
             }
@@ -187,7 +183,8 @@ class SendFakturaÅrsavregningTest {
                 }
             }
         }
-        val prosessinstans = lagProsessInstans(behandling)
+        val behandling = behandlingsresultat.hentBehandling()
+        val prosessinstans = lagProsessInstans { this.behandling = behandling }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
@@ -215,13 +212,12 @@ class SendFakturaÅrsavregningTest {
 
     @Test
     fun `sender faktura - finnes ikke trygdeavgiftsperioder så dato settes fra 0101 i året til 3112 i året `() {
-        val behandling = Behandling.forTest {
-            id = 100
-            fagsak = lagFagsak()
-        }
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = 100
-            this.behandling = behandling
+            behandling {
+                id = 100
+                fagsak = lagFagsak()
+            }
             vedtakMetadata {
                 vedtaksdato = Instant.now()
             }
@@ -237,7 +233,8 @@ class SendFakturaÅrsavregningTest {
                 }
             }
         }
-        val prosessinstans = lagProsessInstans(behandling)
+        val behandling = behandlingsresultat.hentBehandling()
+        val prosessinstans = lagProsessInstans { this.behandling = behandling }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
@@ -264,9 +261,9 @@ class SendFakturaÅrsavregningTest {
         }
     }
 
-    private fun lagProsessInstans(behandling: Behandling): Prosessinstans = Prosessinstans.forTest {
+    private fun lagProsessInstans(init: Prosessinstans.Builder.() -> Unit = {}): Prosessinstans = Prosessinstans.forTest {
         medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER)
-        medExistingBehandling(behandling)
+        init()
     }
 
     private fun lagFagsak(): Fagsak = Fagsak.forTest {
