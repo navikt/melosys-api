@@ -61,10 +61,11 @@
 ## Test Results
 - 1018 service tests passing as of last commit
 
-## Next Files to Refactor (agents started but changes not persisted)
-These files had agents working on them but changes weren't saved to disk:
-- TilBrevAdresseServiceTest.kt
-- UnntaksperiodeServiceTest.kt
-- OppfriskSaksopplysningerServiceTest.kt
+## Batch 3 Completed
+- [x] TilBrevAdresseServiceTest.kt - 13 tests
+- [x] UnntaksperiodeServiceTest.kt - 10 tests
+- [x] UnntaksregistreringServiceTest.kt - 4 tests
 
-Use kotlin-test-refactorer agent to redo these.
+## Next Files to Refactor
+- OppfriskSaksopplysningerServiceTest.kt
+- And remaining files in service/dokument, service/ftrl sections

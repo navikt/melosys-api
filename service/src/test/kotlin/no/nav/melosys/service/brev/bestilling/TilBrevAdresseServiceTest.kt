@@ -8,18 +8,26 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.OrganisasjonsDetaljerTestFactory
+import no.nav.melosys.domain.Saksopplysning
+import no.nav.melosys.domain.SaksopplysningType
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
-import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.organisasjonDokument
 import no.nav.melosys.domain.person.Navn
 import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.domain.person.Personopplysninger
 import no.nav.melosys.domain.person.adresse.Bostedsadresse
+import no.nav.melosys.domain.personDokument
+import no.nav.melosys.domain.saksopplysning
+import no.nav.melosys.domain.saksopplysningForTest
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.service.aktoer.KontaktopplysningService
@@ -288,31 +296,21 @@ class TilBrevAdresseServiceTest {
         )
     }
 
-    private fun lagBehandling(): Behandling {
-        val behandling = Behandling.forTest {
-            fagsak {
-                medBruker()
+    private fun lagBehandling() = Behandling.forTest {
+        fagsak {
+            medBruker()
+        }
+        saksopplysning {
+            type = SaksopplysningType.PERSOPL
+            personDokument {
+                fnr = "12345678910"
+                sammensattNavn = "Ola Nordmann"
             }
         }
-        behandling.saksopplysninger.add(lagPERSOPLSaksopplysning())
-        return behandling
     }
 
-    private fun lagPERSOPLSaksopplysning() = Saksopplysning().apply {
-        dokument = PersonDokument().apply {
-            fnr = "12345678910"
-            sammensattNavn = "Ola Nordmann"
-            gjeldendePostadresse.apply {
-                adresselinje1 = "Gateadresse 43A"
-                postnr = "0123"
-                land = Land.av(Land.NORGE)
-            }
-        }
-        type = SaksopplysningType.PERSOPL
-    }
-
-    private fun lagOrgSaksopplysning(orgNummer: String, navn: String) = Saksopplysning().apply {
-        val geogragiskAdresse = SemistrukturertAdresse().apply {
+    private fun lagOrgSaksopplysning(orgNummer: String, navn: String): Saksopplysning {
+        val geografiskAdresse = SemistrukturertAdresse().apply {
             adresselinje1 = "Gateadresse 43A"
             postnr = "0123"
             poststed = "Oslo"
@@ -321,16 +319,17 @@ class TilBrevAdresseServiceTest {
         }
 
         val organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
-            .postadresse(geogragiskAdresse)
+            .postadresse(geografiskAdresse)
             .build()
-        organisasjonsDetaljer.postadresse = listOf(geogragiskAdresse)
 
-        dokument = OrganisasjonDokumentTestFactory.builder()
-            .orgnummer(orgNummer)
-            .navn(navn)
-            .organisasjonsDetaljer(organisasjonsDetaljer)
-            .build()
-        type = SaksopplysningType.ORG
+        return saksopplysningForTest {
+            type = SaksopplysningType.ORG
+            organisasjonDokument {
+                orgnummer = orgNummer
+                this.navn = navn
+                this.organisasjonsDetaljer = organisasjonsDetaljer
+            }
+        }
     }
 
     private fun lagPersondataMedTomCo(): Persondata = Personopplysninger(

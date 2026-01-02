@@ -19,8 +19,9 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
-import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
+import no.nav.melosys.domain.mottatteopplysninger.anmodningEllerAttest
+import no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -55,7 +56,7 @@ class UnntaksregistreringServiceTest {
     @Test
     fun registrerUnntakFraMedlemskap_sakstypeTrygdeavtale_lagrerAltKorrekt() {
         val behandling = lagBehandling(Sakstyper.TRYGDEAVTALE, null, Land_iso2.BA)
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
         }
         val captor = slot<Behandlingsresultat>()
@@ -81,7 +82,7 @@ class UnntaksregistreringServiceTest {
     @Test
     fun registrerUnntakFraMedlemskap_sakstypeEØS_lagrerAltKorrekt() {
         val behandling = lagBehandling(Sakstyper.EU_EOS, Land_iso2.DK, null)
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
         }
         val captor = slot<Behandlingsresultat>()
@@ -107,7 +108,7 @@ class UnntaksregistreringServiceTest {
     @Test
     fun registrerUnntakFraMedlemskap_utfallRegistreringUnntakIkkeGodkjent_lagrerAltKorrekt() {
         val behandling = lagBehandling(Sakstyper.EU_EOS, null, null)
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             utfallRegistreringUnntak = Utfallregistreringunntak.IKKE_GODKJENT
         }
         val captor = slot<Behandlingsresultat>()
@@ -132,9 +133,8 @@ class UnntaksregistreringServiceTest {
 
     @Test
     fun registrerUnntakFraMedlemskap_mottatteOpplysningerDataIkkeAnmodningEllerAttest_kasterFeil() {
-        val behandling = lagBehandling(Sakstyper.EU_EOS, null, null)
-        behandling.mottatteOpplysninger?.mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
-        val behandlingsresultat = Behandlingsresultat()
+        val behandling = lagBehandlingMedSøknadNorgeEllerUtenforEØS(Sakstyper.EU_EOS)
+        val behandlingsresultat = Behandlingsresultat.forTest { }
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
@@ -152,10 +152,20 @@ class UnntaksregistreringServiceTest {
             type = sakstype
         }
         mottatteOpplysninger {
-            mottatteOpplysningerData = AnmodningEllerAttest().apply {
+            anmodningEllerAttest {
                 this.avsenderland = avsenderland
                 this.lovvalgsland = lovvalgsland
             }
+        }
+    }
+
+    private fun lagBehandlingMedSøknadNorgeEllerUtenforEØS(sakstype: Sakstyper) = Behandling.forTest {
+        id = BEHANDLING_ID
+        fagsak {
+            type = sakstype
+        }
+        mottatteOpplysninger {
+            mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
         }
     }
 
