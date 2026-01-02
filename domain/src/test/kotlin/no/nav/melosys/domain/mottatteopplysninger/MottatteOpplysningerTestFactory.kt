@@ -1,7 +1,9 @@
 package no.nav.melosys.domain.mottatteopplysninger
 
 import no.nav.melosys.domain.MelosysTestDsl
+import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import java.time.Instant
 import java.time.LocalDate
 
@@ -14,6 +16,33 @@ fun MottatteOpplysningerTestFactory.Builder.soeknad(init: SoeknadTestFactory.Bui
 
 fun MottatteOpplysningerTestFactory.Builder.anmodningEllerAttest(init: AnmodningEllerAttestTestFactory.Builder.() -> Unit) = apply {
     this.mottatteOpplysningerData = anmodningEllerAttestForTest(init)
+}
+
+fun MottatteOpplysningerTestFactory.Builder.søknadNorgeEllerUtenforEØS(init: SøknadNorgeEllerUtenforEØSTestFactory.Builder.() -> Unit) = apply {
+    this.mottatteOpplysningerData = søknadNorgeEllerUtenforEØSForTest(init)
+}
+
+fun søknadNorgeEllerUtenforEØSForTest(init: SøknadNorgeEllerUtenforEØSTestFactory.Builder.() -> Unit = {}): SøknadNorgeEllerUtenforEØS =
+    SøknadNorgeEllerUtenforEØSTestFactory.Builder().apply(init).build()
+
+object SøknadNorgeEllerUtenforEØSTestFactory {
+    @MelosysTestDsl
+    class Builder {
+        var landkoder: List<String> = emptyList()
+        var flereLandUkjentHvilke: Boolean = false
+
+        fun landkoder(vararg land: Land_iso2) {
+            landkoder = land.map { it.toString() }
+        }
+
+        fun landkoder(vararg landkoder: String) {
+            this.landkoder = landkoder.toList()
+        }
+
+        fun build(): SøknadNorgeEllerUtenforEØS = SøknadNorgeEllerUtenforEØS().apply {
+            soeknadsland = Soeknadsland(this@Builder.landkoder, this@Builder.flereLandUkjentHvilke)
+        }
+    }
 }
 
 object MottatteOpplysningerTestFactory {

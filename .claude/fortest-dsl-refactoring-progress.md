@@ -36,10 +36,10 @@
 - [ ] Various mapper tests (InnvilgelsesbrevMapperTest, etc.)
 
 ### service/ftrl tests (~5 files)
-- [ ] AvklarteFaktaForBestemmelseTest.kt
-- [ ] VilkårForBestemmelseIkkeYrkesaktivTest.kt
-- [ ] VilkårForBestemmelsePensjonistTest.kt
-- [ ] VilkårForBestemmelseYrkesaktivTest.kt
+- [x] AvklarteFaktaForBestemmelseTest.kt - 7 tests
+- [x] VilkårForBestemmelseIkkeYrkesaktivTest.kt - 14 tests
+- [x] VilkårForBestemmelsePensjonistTest.kt - 9 tests
+- [x] VilkårForBestemmelseYrkesaktivTest.kt - 21 tests
 - [ ] UtledMedlemskapsperiodeTest.kt
 
 ### service/other tests (~20 files)
@@ -70,6 +70,16 @@
 - [x] OppfriskSaksopplysningerServiceTest.kt - 10 tests
 - [x] AnmodningsperiodeServiceTest.kt - 13 tests
 
+## Batch 5 Completed (ftrl/vilkaar tests)
+- [x] AvklarteFaktaForBestemmelseTest.kt - 7 tests
+- [x] VilkårForBestemmelseIkkeYrkesaktivTest.kt - 14 tests
+- [x] VilkårForBestemmelsePensjonistTest.kt - 9 tests
+- [x] VilkårForBestemmelseYrkesaktivTest.kt - 21 tests
+
+### DSL Extensions Added (Batch 5)
+- `SøknadNorgeEllerUtenforEØSTestFactory`: New factory for SøknadNorgeEllerUtenforEØS with `landkoder()` DSL
+- `MottatteOpplysningerTestFactory`: Added `søknadNorgeEllerUtenforEØS {}` extension function
+
 ## Next Files to Refactor
 - UtledMedlemskapsperiodeTest.kt
-- And remaining files in service/dokument, service/ftrl sections
+- And remaining files in service/dokument section
