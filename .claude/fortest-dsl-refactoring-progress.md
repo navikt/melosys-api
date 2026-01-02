@@ -27,7 +27,7 @@
 ## Remaining (service module)
 
 ### service/dokument tests (~25 files)
-- [ ] BrevDataServiceTest.kt
+- [x] BrevDataServiceTest.kt
 - [ ] DokumentServiceTest.kt
 - [ ] BrevmottakerServiceTest.kt
 - [ ] TilBrevAdresseServiceTest.kt
@@ -60,3 +60,11 @@
 
 ## Test Results
 - 1018 service tests passing as of last commit
+
+## Next Files to Refactor (agents started but changes not persisted)
+These files had agents working on them but changes weren't saved to disk:
+- TilBrevAdresseServiceTest.kt
+- UnntaksperiodeServiceTest.kt
+- OppfriskSaksopplysningerServiceTest.kt
+
+Use kotlin-test-refactorer agent to redo these.
