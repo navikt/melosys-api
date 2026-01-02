@@ -6,6 +6,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid
 import java.time.LocalDate
 
 fun soeknadForTest(init: SoeknadTestFactory.Builder.() -> Unit = {}): Soeknad =
@@ -19,6 +20,8 @@ object SoeknadTestFactory {
         private val foretakUtlandListe = mutableListOf<ForetakUtland>()
         private val selvstendigForetakListe = mutableListOf<SelvstendigForetak>()
         private val ekstraArbeidsgivereListe = mutableListOf<String>()
+        private val oppholdUtlandLandkoder = mutableListOf<String>()
+        private val maritimtArbeidListe = mutableListOf<MaritimtArbeid>()
 
         // Bosted-adressefelt
         var bostedLandkode: String? = null
@@ -69,6 +72,16 @@ object SoeknadTestFactory {
             ekstraArbeidsgivereListe.add(orgnr)
         }
 
+        /** Legg til oppholdsland i utlandet */
+        fun oppholdUtland(vararg landkoder: String) = apply {
+            oppholdUtlandLandkoder.addAll(landkoder)
+        }
+
+        /** Legg til maritimt arbeid */
+        fun maritimtArbeid(init: MaritimtArbeidBuilder.() -> Unit) = apply {
+            maritimtArbeidListe.add(MaritimtArbeidBuilder().apply(init).build())
+        }
+
         /** Konfigurer bostedadresse med alle felt */
         fun bostedAdresse(
             landkode: String = "NO",
@@ -115,9 +128,18 @@ object SoeknadTestFactory {
 
             // Sett ekstra arbeidsgivere
             this.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = ekstraArbeidsgivereListe
+
+            // Sett opphold i utland
+            if (oppholdUtlandLandkoder.isNotEmpty()) {
+                this.oppholdUtland.oppholdslandkoder = oppholdUtlandLandkoder.toList()
+            }
+
+            // Sett maritimt arbeid
+            this.maritimtArbeid = maritimtArbeidListe
         }
     }
 
+    @MelosysTestDsl
     class FysiskArbeidsstedBuilder {
         var virksomhetNavn: String? = null
         var landkode: String? = null
@@ -131,6 +153,19 @@ object SoeknadTestFactory {
             this@FysiskArbeidsstedBuilder.poststed?.let { this.adresse.poststed = it }
             this@FysiskArbeidsstedBuilder.gatenavn?.let { this.adresse.gatenavn = it }
             this@FysiskArbeidsstedBuilder.postnummer?.let { this.adresse.postnummer = it }
+        }
+    }
+
+    @MelosysTestDsl
+    class MaritimtArbeidBuilder {
+        var territorialfarvannLandkode: String? = null
+        var flaggLandkode: String? = null
+        var enhetNavn: String? = null
+
+        fun build(): MaritimtArbeid = MaritimtArbeid().apply {
+            this@MaritimtArbeidBuilder.territorialfarvannLandkode?.let { this.territorialfarvannLandkode = it }
+            this@MaritimtArbeidBuilder.flaggLandkode?.let { this.flaggLandkode = it }
+            this@MaritimtArbeidBuilder.enhetNavn?.let { this.enhetNavn = it }
         }
     }
 }

@@ -13,10 +13,14 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.LovvalgsperiodeTestFactory
+import no.nav.melosys.domain.MedlemskapsperiodeTestFactory
+import no.nav.melosys.domain.behandling
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -25,8 +29,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.lovvalgsperiodeForTest
+import no.nav.melosys.domain.medlemskapsperiodeForTest
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag
+import no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPost
@@ -34,7 +40,6 @@ import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPut
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
-import no.nav.melosys.domain.Fagsak
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class MedlServiceTest {
@@ -83,7 +88,7 @@ internal class MedlServiceTest {
     @Test
     fun skalOpprettPeriodeEndelig() {
         val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
-        val lovvalgsperiode = lagLovvalgsPeriode().apply {
+        val lovvalgsperiode = lagLovvalgsPeriode {
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
         }
         every {
@@ -112,7 +117,7 @@ internal class MedlServiceTest {
 
     @Test
     fun skalOpprettPeriodeUnderAvklaring() {
-        val lovvalgsperiode = lagLovvalgsPeriode().apply {
+        val lovvalgsperiode = lagLovvalgsPeriode {
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
         }
         val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
@@ -142,12 +147,11 @@ internal class MedlServiceTest {
 
     @Test
     fun skalOpprettPeriodeMedOvergangsregelSomGrunnlag() {
-        val lovvalgsperiode =
-            lagLovvalgsPeriode().apply {
-                bestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A
-                tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A
-                behandlingsresultat = lagBehandlingsresultatMedOvergangsregelbestemmelser()
-            }
+        val lovvalgsperiode = lagLovvalgsPeriode {
+            bestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A
+            tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A
+            behandlingsresultat = lagBehandlingsresultatMedOvergangsregelbestemmelser()
+        }
         val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
         every {
             mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
@@ -175,7 +179,7 @@ internal class MedlServiceTest {
 
     @Test
     fun skalOpprettPeriodeForeløpig() {
-        val lovvalgsperiode = lagLovvalgsPeriode().apply {
+        val lovvalgsperiode = lagLovvalgsPeriode {
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
         }
         val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
@@ -206,7 +210,7 @@ internal class MedlServiceTest {
     @Test
     fun skalOppdaterePeriodeEndelig() {
         every { mockRestConsumer.hentPeriode(any()) } returns hentMedlemskapsunntak()
-        val lovvalgsperiode = lagLovvalgsPeriode().apply {
+        val lovvalgsperiode = lagLovvalgsPeriode {
             medlPeriodeID = 123456L
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
             tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
@@ -238,7 +242,7 @@ internal class MedlServiceTest {
 
     @Test
     fun skalOpprettPeriodeForeløpigUnntak() {
-        val lovvalgsperiode = lagLovvalgsPeriode().apply {
+        val lovvalgsperiode = lagLovvalgsPeriode {
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
             tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5
         }
@@ -296,7 +300,9 @@ internal class MedlServiceTest {
 
     @Test
     fun skalOppretteOpphørtPeriodeEndelig() {
-        val medlemskapsperiode = lagMedlemskapsPeriode().apply { bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD }
+        val medlemskapsperiode = lagMedlemskapsPeriode {
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
+        }
 
         val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
         every {
@@ -326,7 +332,7 @@ internal class MedlServiceTest {
     @Test
     fun skalOppdatereOpphørtPeriode() {
         every { mockRestConsumer.hentPeriode(any()) } returns hentMedlemskapsunntak()
-        val medlemskapsperiode = lagMedlemskapsPeriode().apply {
+        val medlemskapsperiode = lagMedlemskapsPeriode {
             medlPeriodeID = 123456L
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
         }
@@ -359,7 +365,7 @@ internal class MedlServiceTest {
     @Test
     fun skalOppdaterePeriodeForeløpig() {
         every { mockRestConsumer.hentPeriode(any()) } returns hentMedlemskapsunntak()
-        val lovvalgsperiode = lagLovvalgsPeriode().apply {
+        val lovvalgsperiode = lagLovvalgsPeriode {
             medlPeriodeID = 123456L
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
         }
@@ -424,46 +430,44 @@ internal class MedlServiceTest {
         medlService.avvisPeriode(123456L, StatusaarsakMedl.AVVIST)
     }
 
-    private fun lagLovvalgsPeriode() = Lovvalgsperiode().apply {
+    private fun lagLovvalgsPeriode(
+        init: LovvalgsperiodeTestFactory.Builder.() -> Unit = {}
+    ) = lovvalgsperiodeForTest {
         fom = LocalDate.now()
         tom = LocalDate.now().plusYears(1)
         dekning = Trygdedekninger.FULL_DEKNING_EOSFO
         lovvalgsland = Land_iso2.BE
         tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
+        init()
     }
 
-    private fun lagMedlemskapsPeriode() = Medlemskapsperiode().apply {
+    private fun lagMedlemskapsPeriode(
+        init: MedlemskapsperiodeTestFactory.Builder.() -> Unit = {}
+    ) = medlemskapsperiodeForTest {
         medlemskapstype = Medlemskapstyper.FRIVILLIG
         trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
         fom = LocalDate.now()
         tom = LocalDate.now().plusYears(1)
         bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
+        init()
     }
 
-    private fun lagBehandlingsresultatMedOvergangsregelbestemmelser(): Behandlingsresultat {
-        val behandlingsresultat = Behandlingsresultat()
-        Fagsak.forTest()
-
-        behandlingsresultat.apply {
+    private fun lagBehandlingsresultatMedOvergangsregelbestemmelser(): Behandlingsresultat =
+        Behandlingsresultat.forTest {
             id = 1L
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            behandling = Behandling.forTest {
+            behandling {
                 id = 1233
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.VURDER_DOKUMENT
-                mottatteOpplysninger = MottatteOpplysninger().apply {
+                mottatteOpplysninger = mottatteOpplysningerForTest {
                     mottatteOpplysningerData = SedGrunnlag().apply {
                         overgangsregelbestemmelser = listOf(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_A)
                     }
                 }
             }
         }
-
-
-        return behandlingsresultat
-    }
-
 
     private fun hentMedlemskapsunntakListe() = objectMapper.readValue(
         javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodelisteResponse.json"),

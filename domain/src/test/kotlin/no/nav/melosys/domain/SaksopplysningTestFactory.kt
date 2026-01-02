@@ -165,6 +165,13 @@ object SaksopplysningTestFactory {
         var registrertDato: Instant = Instant.now()
         var endretDato: Instant = Instant.now()
 
+        private val kilderListe = mutableListOf<SaksopplysningKildeBuilder>()
+
+        /** Legg til en kilde for saksopplysningen */
+        fun kilde(init: SaksopplysningKildeBuilder.() -> Unit) = apply {
+            kilderListe.add(SaksopplysningKildeBuilder().apply(init))
+        }
+
         fun build(): Saksopplysning = Saksopplysning().apply {
             this.behandling = this@Builder.behandling ?: Behandling.forTest {}
             this.type = this@Builder.type
@@ -172,6 +179,24 @@ object SaksopplysningTestFactory {
             this.dokument = this@Builder.dokument
             this.registrertDato = this@Builder.registrertDato
             this.endretDato = this@Builder.endretDato
+            // Bygg kilder og knytt til saksopplysningen
+            if (kilderListe.isNotEmpty()) {
+                this.kilder = kilderListe.map { it.build(this) }.toSet()
+            }
         }
+    }
+}
+
+@MelosysTestDsl
+class SaksopplysningKildeBuilder {
+    var id: Long? = null
+    var kilde: SaksopplysningKildesystem = SaksopplysningKildesystem.EREG
+    var mottattDokument: String = ""
+
+    fun build(saksopplysning: Saksopplysning): SaksopplysningKilde = SaksopplysningKilde().apply {
+        this@SaksopplysningKildeBuilder.id?.let { this.id = it }
+        this.saksopplysning = saksopplysning
+        this.kilde = this@SaksopplysningKildeBuilder.kilde
+        this.mottattDokument = this@SaksopplysningKildeBuilder.mottattDokument
     }
 }

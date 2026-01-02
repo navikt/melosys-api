@@ -44,3 +44,21 @@ fun ÅrsavregningTestFactory.Builder.behandlingsresultat(init: Behandlingsresult
 fun BehandlingsresultatTestFactory.Builder.årsavregning(init: ÅrsavregningTestFactory.Builder.() -> Unit) = apply {
     this.årsavregning = Årsavregning.forTest(init)
 }
+
+/**
+ * Extension for building tidligereBehandlingsresultat inside Årsavregning.forTest { }
+ *
+ * Example:
+ * ```
+ * Årsavregning.forTest {
+ *     aar = 2023
+ *     tidligereBehandlingsresultat {
+ *         fakturaserieReferanse = "123456"
+ *         behandling { type = Behandlingstyper.ÅRSAVREGNING }
+ *     }
+ * }
+ * ```
+ */
+fun ÅrsavregningTestFactory.Builder.tidligereBehandlingsresultat(init: BehandlingsresultatTestFactory.Builder.() -> Unit) = apply {
+    this.tidligereBehandlingsresultat = Behandlingsresultat.forTest(init)
+}

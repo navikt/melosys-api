@@ -6,19 +6,29 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.behandling
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.medlemskapsperiode
+import no.nav.melosys.domain.tidligereBehandlingsresultat
+import no.nav.melosys.domain.trygdeavgiftsperiode
+import no.nav.melosys.domain.vedtakMetadata
+import no.nav.melosys.domain.årsavregning
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaDto
-import no.nav.melosys.saksflyt.TestdataFactory.lagBruker
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.behandling
 import no.nav.melosys.saksflytapi.domain.forTest
+import no.nav.melosys.saksflytapi.domain.medExistingBehandling
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -29,7 +39,8 @@ import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Optional
+import kotlin.math.log
 
 @ExtendWith(MockKExtension::class)
 class SendFakturaÅrsavregningTest {
@@ -63,15 +74,13 @@ class SendFakturaÅrsavregningTest {
         val behandling = Behandling.forTest {
             id = 100
         }
-        val behandlingsresultat = Behandlingsresultat().apply {
-            årsavregning = Årsavregning.forTest {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            årsavregning {
                 aar = 2023
                 tilFaktureringBeloep = BigDecimal(99)
             }
         }
-        val prosessinstans = lagProsessInstans {
-            this.behandling = behandling
-        }
+        val prosessinstans = lagProsessInstans(behandling)
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
 
@@ -86,34 +95,33 @@ class SendFakturaÅrsavregningTest {
             id = 100
             fagsak = lagFagsak()
         }
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             id = 100
             this.behandling = behandling
-            vedtakMetadata = VedtakMetadata().apply {
+            vedtakMetadata {
                 vedtaksdato = Instant.now()
             }
-            årsavregning = Årsavregning.forTest {
+            årsavregning {
                 aar = 2023
                 beregnetAvgiftBelop = BigDecimal(2300)
                 tilFaktureringBeloep = BigDecimal(2300)
-                tidligereBehandlingsresultat = Behandlingsresultat().apply {
-                    this.fakturaserieReferanse = tidligereFakturaserieRef
-                    this.behandling = Behandling.forTest {
+                tidligereBehandlingsresultat {
+                    fakturaserieReferanse = TIDLIGERE_FAKTURASERIE_REF
+                    behandling {
                         type = Behandlingstyper.ÅRSAVREGNING
                     }
                 }
             }
-            medlemskapsperioder = mutableSetOf(
-                lagMedlemskapsPeriode {
-                    trygdeavgiftsperioder = mutableSetOf(
-                        lagTrygdeavgiftsperiode()
-                    )
+            medlemskapsperiode {
+                trygdeavgiftsperiode {
+                    periodeFra = PERIODE_START
+                    periodeTil = PERIODE_SLUTT
+                    trygdeavgiftsbeløpMd = BigDecimal(100)
+                    trygdesats = BigDecimal(1)
                 }
-            )
+            }
         }
-        val prosessinstans = lagProsessInstans {
-            this.behandling = behandling
-        }
+        val prosessinstans = lagProsessInstans(behandling)
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
@@ -125,7 +133,7 @@ class SendFakturaÅrsavregningTest {
                 capture(fakturaDtoSlot),
                 SAKSBEHANDLER
             )
-        } returns NyFakturaserieResponseDto(fakturaserieRef)
+        } returns NyFakturaserieResponseDto(FAKTURASERIE_REF)
 
         val behandlingsresultatSlot = slot<Behandlingsresultat>()
         every { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) } returns behandlingsresultat
@@ -133,7 +141,7 @@ class SendFakturaÅrsavregningTest {
         sendFakturaÅrsavregning.utfør(prosessinstans)
 
         fakturaDtoSlot.captured.run {
-            this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
+            this.fakturaserieReferanse shouldBe TIDLIGERE_FAKTURASERIE_REF
             startDato shouldBe PERIODE_START
             sluttDato shouldBe PERIODE_SLUTT
             beskrivelse shouldBe """Medlemskapsperiode ${PERIODE_START.format(DATE_FORMATTER)} - ${PERIODE_SLUTT.format(DATE_FORMATTER)}, endelig beregnet trygdeavgift ${behandlingsresultat.hentÅrsavregning().beregnetAvgiftBelop} - """ +
@@ -141,7 +149,7 @@ class SendFakturaÅrsavregningTest {
         }
 
         behandlingsresultatSlot.captured.run {
-            this.fakturaserieReferanse shouldBe fakturaserieRef
+            this.fakturaserieReferanse shouldBe FAKTURASERIE_REF
         }
     }
 
@@ -151,36 +159,35 @@ class SendFakturaÅrsavregningTest {
             id = 100
             fagsak = lagFagsak()
         }
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             id = 100
             this.behandling = behandling
-            vedtakMetadata = VedtakMetadata().apply {
+            vedtakMetadata {
                 vedtaksdato = Instant.now()
             }
-            årsavregning = Årsavregning.forTest {
+            årsavregning {
                 aar = 2023
                 tilFaktureringBeloep = BigDecimal(2300)
-                tidligereBehandlingsresultat = Behandlingsresultat().apply {
-                    this.fakturaserieReferanse = tidligereFakturaserieRef
-                    this.behandling = Behandling.forTest {
+                tidligereBehandlingsresultat {
+                    fakturaserieReferanse = TIDLIGERE_FAKTURASERIE_REF
+                    behandling {
                         type = Behandlingstyper.ÅRSAVREGNING
                         fagsak {
                             type = Sakstyper.FTRL
                         }
                     }
-                    medlemskapsperioder = mutableSetOf(
-                        lagMedlemskapsPeriode {
-                            trygdeavgiftsperioder = setOf(
-                                lagTrygdeavgiftsperiode()
-                            ).toMutableSet()
+                    medlemskapsperiode {
+                        trygdeavgiftsperiode {
+                            periodeFra = PERIODE_START
+                            periodeTil = PERIODE_SLUTT
+                            trygdeavgiftsbeløpMd = BigDecimal(100)
+                            trygdesats = BigDecimal(1)
                         }
-                    )
+                    }
                 }
             }
         }
-        val prosessinstans = lagProsessInstans {
-            this.behandling = behandling
-        }
+        val prosessinstans = lagProsessInstans(behandling)
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
@@ -192,7 +199,7 @@ class SendFakturaÅrsavregningTest {
                 capture(fakturaDtoSlot),
                 SAKSBEHANDLER
             )
-        } returns NyFakturaserieResponseDto(fakturaserieRef)
+        } returns NyFakturaserieResponseDto(FAKTURASERIE_REF)
 
         val behandlingsresultatSlot = slot<Behandlingsresultat>()
         every { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) } returns behandlingsresultat
@@ -200,7 +207,7 @@ class SendFakturaÅrsavregningTest {
         sendFakturaÅrsavregning.utfør(prosessinstans)
 
         fakturaDtoSlot.captured.run {
-            this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
+            this.fakturaserieReferanse shouldBe TIDLIGERE_FAKTURASERIE_REF
             startDato shouldBe PERIODE_START
             sluttDato shouldBe PERIODE_SLUTT
         }
@@ -212,27 +219,25 @@ class SendFakturaÅrsavregningTest {
             id = 100
             fagsak = lagFagsak()
         }
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             id = 100
             this.behandling = behandling
-            vedtakMetadata = VedtakMetadata().apply {
+            vedtakMetadata {
                 vedtaksdato = Instant.now()
             }
-            årsavregning = Årsavregning.forTest {
+            årsavregning {
                 aar = 2023
                 manueltAvgiftBeloep = BigDecimal(2300)
                 tilFaktureringBeloep = BigDecimal(2300)
-                tidligereBehandlingsresultat = Behandlingsresultat().apply {
-                    this.fakturaserieReferanse = tidligereFakturaserieRef
-                    this.behandling = Behandling.forTest {
+                tidligereBehandlingsresultat {
+                    fakturaserieReferanse = TIDLIGERE_FAKTURASERIE_REF
+                    behandling {
                         type = Behandlingstyper.ÅRSAVREGNING
                     }
                 }
             }
         }
-        val prosessinstans = lagProsessInstans {
-            this.behandling = behandling
-        }
+        val prosessinstans = lagProsessInstans(behandling)
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
@@ -244,7 +249,7 @@ class SendFakturaÅrsavregningTest {
                 capture(fakturaDtoSlot),
                 SAKSBEHANDLER
             )
-        } returns NyFakturaserieResponseDto(fakturaserieRef)
+        } returns NyFakturaserieResponseDto(FAKTURASERIE_REF)
 
         val behandlingsresultatSlot = slot<Behandlingsresultat>()
         every { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) } returns behandlingsresultat
@@ -252,55 +257,32 @@ class SendFakturaÅrsavregningTest {
         sendFakturaÅrsavregning.utfør(prosessinstans)
 
         fakturaDtoSlot.captured.run {
-            this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
+            this.fakturaserieReferanse shouldBe TIDLIGERE_FAKTURASERIE_REF
             startDato shouldBe LocalDate.of(behandlingsresultat.hentÅrsavregning().aar, 1, 1)
             sluttDato shouldBe LocalDate.of(behandlingsresultat.hentÅrsavregning().aar, 12, 31)
             beskrivelse shouldBe "Årsavregning 2023"
         }
     }
 
-    private fun lagProsessInstans(block: Prosessinstans.() -> Unit = {}): Prosessinstans = Prosessinstans.forTest {
+    private fun lagProsessInstans(behandling: Behandling): Prosessinstans = Prosessinstans.forTest {
         medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER)
-    }.apply {
-        block()
+        medExistingBehandling(behandling)
     }
 
-    private fun lagFagsak(block: Fagsak.() -> Unit = {}): Fagsak = Fagsak(
-        SAKSNUMMER,
-        123L,
-        Sakstyper.FTRL,
-        Sakstemaer.TRYGDEAVGIFT,
-        Saksstatuser.OPPRETTET,
-        null,
-        mutableSetOf(lagBruker()),
-        mutableListOf()
-    ).apply {
-        block()
+    private fun lagFagsak(): Fagsak = Fagsak.forTest {
+        saksnummer = SAKSNUMMER
+        gsakSaksnummer = 123L
+        type = Sakstyper.FTRL
+        tema = Sakstemaer.TRYGDEAVGIFT
+        status = Saksstatuser.OPPRETTET
+        medBruker()
     }
-
-    private fun lagMedlemskapsPeriode(block: Medlemskapsperiode.() -> Unit = {}) = Medlemskapsperiode(
-    ).apply {
-        block()
-    }
-
-    private fun lagTrygdeavgiftsperiode(block: Trygdeavgiftsperiode.() -> Unit = {}): Trygdeavgiftsperiode {
-        return Trygdeavgiftsperiode(
-            id = 1,
-            periodeFra = PERIODE_START,
-            periodeTil = PERIODE_SLUTT,
-            trygdeavgiftsbeløpMd = Penger(BigDecimal(100), "NOK"),
-            trygdesats = BigDecimal(1),
-        ).apply {
-            block()
-        }
-    }
-
 
     companion object {
         const val SAKSNUMMER = "MEL-test"
         const val SAKSBEHANDLER = "G568493"
-        const val fakturaserieRef = "GDL435389405Gf"
-        const val tidligereFakturaserieRef = "763452GG"
+        const val FAKTURASERIE_REF = "GDL435389405Gf"
+        const val TIDLIGERE_FAKTURASERIE_REF = "763452GG"
         val PERIODE_START: LocalDate = LocalDate.now().withMonth(2).withDayOfMonth(1)
         val PERIODE_SLUTT: LocalDate = LocalDate.now().withMonth(10).withDayOfMonth(31)
         val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
