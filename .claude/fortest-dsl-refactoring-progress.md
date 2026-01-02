@@ -66,6 +66,10 @@
 - [x] UnntaksperiodeServiceTest.kt - 10 tests
 - [x] UnntaksregistreringServiceTest.kt - 4 tests
 
+## Batch 4 Completed
+- [x] OppfriskSaksopplysningerServiceTest.kt - 10 tests
+- [x] AnmodningsperiodeServiceTest.kt - 13 tests
+
 ## Next Files to Refactor
-- OppfriskSaksopplysningerServiceTest.kt
+- UtledMedlemskapsperiodeTest.kt
 - And remaining files in service/dokument, service/ftrl sections

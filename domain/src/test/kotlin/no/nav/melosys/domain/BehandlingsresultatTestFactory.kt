@@ -183,6 +183,7 @@ object AnmodningsperiodeTestFactory {
         var sendtUtland: Boolean = false
         var anmodetAv: String? = null
         var medlPeriodeID: Long? = null
+        var behandlingsresultat: Behandlingsresultat? = null
         private var anmodningsperiodeSvarBuilder: AnmodningsperiodeSvarBuilder? = null
 
         fun anmodningsperiodeSvar(init: AnmodningsperiodeSvarBuilder.() -> Unit) {
@@ -204,6 +205,7 @@ object AnmodningsperiodeTestFactory {
                 this@apply.setSendtUtland(this@Builder.sendtUtland)
                 this@apply.anmodetAv = this@Builder.anmodetAv
                 this@apply.medlPeriodeID = this@Builder.medlPeriodeID
+                this@apply.behandlingsresultat = this@Builder.behandlingsresultat
             }
 
             anmodningsperiodeSvarBuilder?.let { svarBuilder ->
