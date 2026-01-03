@@ -7,18 +7,27 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.OrganisasjonDokumentTestFactory
+import no.nav.melosys.domain.OrganisasjonsDetaljerTestFactory
+import no.nav.melosys.domain.SaksopplysningType
+import no.nav.melosys.domain.UtenlandskMyndighet
 import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.brev.Mottakerliste
 import no.nav.melosys.domain.brev.NorskMyndighet.SKATTEETATEN
 import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
-import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Mottakerroller.*
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*
+import no.nav.melosys.domain.personDokument
+import no.nav.melosys.domain.saksopplysning
+import no.nav.melosys.domain.saksopplysningForTest
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.service.aktoer.KontaktopplysningService
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService
@@ -600,8 +609,13 @@ class HentMuligeBrevmottakereServiceTest {
         fagsak {
             medBruker()
         }
-    }.apply {
-        saksopplysninger.add(lagPERSOPLSaksopplysning())
+        saksopplysning {
+            type = SaksopplysningType.PERSOPL
+            personDokument {
+                fnr = "12345678910"
+                sammensattNavn = "Ola Nordmann"
+            }
+        }
     }
 
     private fun mockHentOrganisasjon(orgnr: String, navn: String) {
@@ -612,7 +626,9 @@ class HentMuligeBrevmottakereServiceTest {
         every { eregFasade.finnOrganisasjon(orgnr) } returns Optional.of(lagOrgSaksopplysning(orgnr, navn))
     }
 
-    private fun lagOrgSaksopplysning(orgNummer: String, navn: String): Saksopplysning {
+    private fun lagOrgSaksopplysning(orgNummer: String, navn: String) = saksopplysningForTest {
+        type = SaksopplysningType.ORG
+        // SemistrukturertAdresse og OrganisasjonsDetaljer DSL er ikke tilgjengelig, bruker .apply
         val geogragiskAdresse = SemistrukturertAdresse().apply {
             adresselinje1 = "Gateadresse 43A"
             postnr = "0123"
@@ -623,25 +639,10 @@ class HentMuligeBrevmottakereServiceTest {
         val organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
             .postadresse(geogragiskAdresse)
             .build()
-        val dokument = OrganisasjonDokumentTestFactory.builder()
+        dokument = OrganisasjonDokumentTestFactory.builder()
             .orgnummer(orgNummer)
             .navn(navn)
             .organisasjonsDetaljer(organisasjonsDetaljer)
             .build()
-        return Saksopplysning().apply {
-            this.dokument = dokument
-            type = SaksopplysningType.ORG
-        }
-    }
-
-    private fun lagPERSOPLSaksopplysning() = Saksopplysning().apply {
-        this.dokument = PersonDokument().apply {
-            fnr = "12345678910"
-            sammensattNavn = "Ola Nordmann"
-            gjeldendePostadresse.adresselinje1 = "Gateadresse 43A"
-            gjeldendePostadresse.postnr = "0123"
-            gjeldendePostadresse.land = Land.av(Land.NORGE)
-        }
-        type = SaksopplysningType.PERSOPL
     }
 }
