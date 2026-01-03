@@ -8,7 +8,6 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles
 import no.nav.melosys.domain.AnmodningsperiodeSvar
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.begrunnelse
 import no.nav.melosys.domain.forTest
@@ -31,25 +30,19 @@ import no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles
 import no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactoryTest
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class AvslagYrkesaktivMapperTest {
 
-    private lateinit var fellesType: FellesType
-    private lateinit var navFelles: MelosysNAVFelles
+    // Brev-types use .apply since they don't have forTest DSL
+    private val fellesType = FellesType().apply {
+        fagsaksnummer = "MELTEST-1"
+    }
 
-    @BeforeEach
-    fun setUp() {
-        fellesType = FellesType().apply {
-            fagsaksnummer = "MELTEST-1"
-        }
-
-        navFelles = lagNAVFelles().apply {
-            mottaker.mottakeradresse = lagNorskPostadresse()
-            kontaktinformasjon = lagKontaktInformasjon()
-        }
+    private val navFelles = lagNAVFelles().apply {
+        mottaker.mottakeradresse = lagNorskPostadresse()
+        kontaktinformasjon = lagKontaktInformasjon()
     }
 
     @Test
@@ -153,8 +146,8 @@ class AvslagYrkesaktivMapperTest {
 
 
         for (begrunnelse in begrunnelser) {
-            val vilkaarsresultat = Vilkaarsresultat().apply {
-                this.begrunnelser = setOf(begrunnelse)
+            val vilkaarsresultat = vilkaarsresultatForTest {
+                begrunnelseKoder.add(begrunnelse.kode)
                 begrunnelseFritekst = "Fritekst"
             }
             brevdata.art16Vilkaar = vilkaarsresultat
