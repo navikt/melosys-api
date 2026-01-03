@@ -93,6 +93,10 @@
 - [x] OpprettLovvalgsperiodeServiceTest.kt - 17 tests (enhanced AnmodningEllerAttestTestFactory with periode())
 - [x] TrygdeavtaleServiceTest.kt - 11 tests
 
+## Batch 9 Completed
+- [x] A1MapperTest.kt - 25 tests (removed lateinit var, added helper functions)
+- [x] AttestMapperTest.kt - 1 test
+
 ## Next Files to Refactor
 - More mapper tests in service/dokument
 - Remaining service tests
