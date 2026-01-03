@@ -7,6 +7,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak
 import no.nav.melosys.domain.mottatteopplysninger.data.UtenlandskIdent
+import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid
 import java.time.LocalDate
@@ -191,11 +192,15 @@ object SoeknadTestFactory {
         var territorialfarvannLandkode: String? = null
         var flaggLandkode: String? = null
         var enhetNavn: String? = null
+        var innretningLandkode: String? = null
+        var fartsomradeKode: Fartsomrader? = null
 
         fun build(): MaritimtArbeid = MaritimtArbeid().apply {
             this@MaritimtArbeidBuilder.territorialfarvannLandkode?.let { this.territorialfarvannLandkode = it }
             this@MaritimtArbeidBuilder.flaggLandkode?.let { this.flaggLandkode = it }
             this@MaritimtArbeidBuilder.enhetNavn?.let { this.enhetNavn = it }
+            this@MaritimtArbeidBuilder.innretningLandkode?.let { this.innretningLandkode = it }
+            this@MaritimtArbeidBuilder.fartsomradeKode?.let { this.fartsomradeKode = it }
         }
     }
 

@@ -3,8 +3,6 @@ package no.nav.melosys.service.dokument.brev.mapper
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.adresse.StrukturertAdresse
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
 import no.nav.melosys.domain.kodeverk.Land_iso2
@@ -15,11 +13,8 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid
+import no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest
+import no.nav.melosys.domain.mottatteopplysninger.soeknad
 import no.nav.melosys.service.dokument.brev.BrevDataA1
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
@@ -41,17 +36,20 @@ class InnvilgelsesbrevMapperTest {
     @Test
     fun `mapArbeidslandFraSøknad til brevXml gir ikke tom XML streng`() {
         val xmlFraFil = hentBrevXmlFraFil("innvilgelsesbrev/innvilgelsesbrev.xml")
+        val behandlingsresultat = lagBehandlingsresultat {
+            lovvalgsperiode { konfigurer(NOW) }
+            avklartefakta {
+                type = Avklartefaktatyper.VIRKSOMHET
+                subjekt = "123456789"
+                fakta = "TRUE"
+            }
+        }
         val testMapTilBrevXml = testMapTilBrevXml(
-            lagBehandlingsresultat(
-                setOf(lagLovvalgsperiode()),
-                setOf(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"))
-            ),
-            false
+            lagBehandling(medFartsområde = false),
+            behandlingsresultat
         )
 
-
         val diff = createDiffIgnoreNameSpace(xmlFraFil, testMapTilBrevXml)
-
 
         withClue(diff.differences) {
             diff.hasDifferences() shouldBe false
@@ -61,25 +59,25 @@ class InnvilgelsesbrevMapperTest {
     @Test
     fun `mapTilBrevXML maritimtArbeidInnenriks arbeidsland settes til territorialfarvannLand`() {
         val xmlFraFil = hentBrevXmlFraFil("innvilgelsesbrev/innvilgelsesbrev_territorialfarvann.xml")
+        val behandlingsresultat = lagBehandlingsresultat {
+            lovvalgsperiode { konfigurer(NOW) }
+            avklartefakta {
+                type = Avklartefaktatyper.VIRKSOMHET
+                subjekt = "123456789"
+                fakta = "TRUE"
+            }
+        }
         val testMapTilBrevXml = testMapTilBrevXml(
-            lagBehandlingsresultat(
-                setOf(lagLovvalgsperiode()),
-                setOf(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"))
-            ),
-            true
+            lagBehandling(medFartsområde = true),
+            behandlingsresultat
         )
 
-
         val diff = createDiffIgnoreNameSpace(xmlFraFil, testMapTilBrevXml)
-
 
         withClue(diff.differences) {
             diff.hasDifferences() shouldBe false
         }
     }
-
-    private fun testMapTilBrevXml(behandlingsresultat: Behandlingsresultat, medFartsområde: Boolean): String =
-        testMapTilBrevXml(lagBehandling(medFartsområde), behandlingsresultat)
 
     private fun hentBrevXmlFraFil(filnavn: String): String =
         javaClass.classLoader.getResourceAsStream(filnavn)?.bufferedReader()?.readText()
@@ -88,9 +86,20 @@ class InnvilgelsesbrevMapperTest {
     private fun testMapTilBrevXml(behandling: Behandling, behandlingsresultat: Behandlingsresultat): String {
         val fellesType = lagFellesType()
         val navFelles = lagNAVFelles()
-        val brevdataA1 = BrevDataA1().apply {
-            val virksomhet =
-                AvklartVirksomhet("Virker ikke", "123456789", BrevDataTestUtils.lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID)
+        val brevdataA1 = lagBrevDataA1()
+        val brevdataInnvilgelse = lagBrevDataInnvilgelse(brevdataA1)
+
+        return instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse)
+    }
+
+    private fun lagBrevDataA1(): BrevDataA1 {
+        val virksomhet = no.nav.melosys.domain.avklartefakta.AvklartVirksomhet(
+            "Virker ikke",
+            "123456789",
+            BrevDataTestUtils.lagStrukturertAdresse(),
+            Yrkesaktivitetstyper.LOENNET_ARBEID
+        )
+        return BrevDataA1().apply {
             hovedvirksomhet = virksomhet
             bivirksomheter = listOf(virksomhet)
             bostedsadresse = BrevDataTestUtils.lagStrukturertAdresse()
@@ -99,10 +108,13 @@ class InnvilgelsesbrevMapperTest {
             arbeidssteder = ArrayList()
             arbeidsland = ArrayList()
         }
+    }
 
-        val brevdataInnvilgelse = BrevDataInnvilgelse(BrevbestillingDto(), "SAKSBEHANDLER").apply {
+    private fun lagBrevDataInnvilgelse(brevdataA1: BrevDataA1): BrevDataInnvilgelse {
+        val lovvalgsperiode = lagLovvalgsperiode()
+        return BrevDataInnvilgelse(BrevbestillingDto(), "SAKSBEHANDLER").apply {
             vedleggA1 = brevdataA1
-            lovvalgsperiode = lagLovvalgsperiode()
+            this.lovvalgsperiode = lovvalgsperiode
             avklartMaritimType = Maritimtyper.SKIP
             turistskip = true
             hovedvirksomhet = brevdataA1.hovedvirksomhet
@@ -111,8 +123,6 @@ class InnvilgelsesbrevMapperTest {
             trygdemyndighetsland = "Sverige"
             avklarteMedfolgendeBarn = BrevDataTestUtils.lagAvklarteMedfølgendeBarn()
         }
-
-        return instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse)
     }
 
     private fun createDiffIgnoreNameSpace(expectedXml: String, testMapTilBrevXml: String): Diff =
@@ -143,63 +153,42 @@ class InnvilgelsesbrevMapperTest {
             .checkForSimilar()
             .build()
 
-    private fun lagBehandlingsresultat(perioder: Set<Lovvalgsperiode>, fakta: Set<Avklartefakta>) = Behandlingsresultat().apply {
-        avklartefakta = fakta.toMutableSet()
-        lovvalgsperioder = perioder.toMutableSet()
+    private fun lagBehandlingsresultat(init: BehandlingsresultatTestFactory.Builder.() -> Unit) =
+        Behandlingsresultat.forTest(init)
+
+    private fun LovvalgsperiodeTestFactory.Builder.konfigurer(fom: LocalDate) {
+        bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+        this.fom = fom
+        tom = NOW
+        lovvalgsland = Land_iso2.AT
+        tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
     }
 
-    private fun lagLovvalgsperiode(): Lovvalgsperiode = lagLovvalgsperiode(NOW)
+    private fun lagLovvalgsperiode(): Lovvalgsperiode = lovvalgsperiodeForTest { konfigurer(NOW) }
 
-    private fun lagLovvalgsperiode(fom: LocalDate): Lovvalgsperiode =
-        Lovvalgsperiode().apply {
-            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
-            this.fom = fom
-            tom = NOW
-            lovvalgsland = Land_iso2.AT
-            tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
-        }
-
-    private fun lagAvklarteFakta(type: Avklartefaktatyper, verdi: String) =
-        Avklartefakta().apply {
-            this.type = type
-            fakta = "TRUE"
-            subjekt = verdi
-        }
-
-    private fun lagBehandling(medFartsområde: Boolean): Behandling =
-        lagBehandling(FagsakTestFactory.lagFagsak(), lagSoeknadDokument(medFartsområde))
-
-    private fun lagSoeknadDokument(medFartsområde: Boolean) = Soeknad().apply {
-        val strukturertAdresse = StrukturertAdresse().apply {
-            landkode = "AT"
-        }
-        val fysiskArbeidssted = FysiskArbeidssted(null, strukturertAdresse)
-        arbeidPaaLand.fysiskeArbeidssteder = listOf(fysiskArbeidssted)
-        maritimtArbeid.add(
-            if (medFartsområde) lagMaritimtArbeidMedFartsområde() else lagMaritimtArbeidUtenFartsområde()
-        )
-    }
-
-    private fun lagMaritimtArbeidUtenFartsområde() = MaritimtArbeid().apply {
-        enhetNavn = "Dunfjæder"
-        innretningLandkode = "NO"
-    }
-
-    private fun lagMaritimtArbeidMedFartsområde() = MaritimtArbeid().apply {
-        enhetNavn = "Dunfjæder"
-        innretningLandkode = "NO"
-        territorialfarvannLandkode = "GB"
-        fartsomradeKode = Fartsomrader.INNENRIKS
-    }
-
-    private fun lagBehandling(fagsak: Fagsak, mottatteOpplysningerData: MottatteOpplysningerData): Behandling {
-        val mottatteOpplysninger = MottatteOpplysninger().apply {
-            this.mottatteOpplysningerData = mottatteOpplysningerData
+    private fun lagBehandling(medFartsområde: Boolean): Behandling {
+        val mottatteOpplysninger = mottatteOpplysningerForTest {
+            soeknad {
+                fysiskeArbeidssted { landkode = "AT" }
+                if (medFartsområde) {
+                    maritimtArbeid {
+                        enhetNavn = "Dunfjæder"
+                        innretningLandkode = "NO"
+                        territorialfarvannLandkode = "GB"
+                        fartsomradeKode = Fartsomrader.INNENRIKS
+                    }
+                } else {
+                    maritimtArbeid {
+                        enhetNavn = "Dunfjæder"
+                        innretningLandkode = "NO"
+                    }
+                }
+            }
         }
 
         return Behandling.forTest {
             type = Behandlingstyper.KLAGE
-            this.fagsak = fagsak
+            fagsak { }
             this.mottatteOpplysninger = mottatteOpplysninger
         }
     }
