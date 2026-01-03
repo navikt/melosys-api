@@ -28,9 +28,9 @@
 
 ### service/dokument tests (~25 files)
 - [x] BrevDataServiceTest.kt
+- [x] TilBrevAdresseServiceTest.kt (Batch 3)
 - [ ] DokumentServiceTest.kt
 - [ ] BrevmottakerServiceTest.kt
-- [ ] TilBrevAdresseServiceTest.kt
 - [ ] HentMuligeBrevmottakereServiceTest.kt
 - [ ] DokgenTestData.kt
 - [ ] Various mapper tests (InnvilgelsesbrevMapperTest, etc.)
@@ -40,13 +40,13 @@
 - [x] VilkårForBestemmelseIkkeYrkesaktivTest.kt - 14 tests
 - [x] VilkårForBestemmelsePensjonistTest.kt - 9 tests
 - [x] VilkårForBestemmelseYrkesaktivTest.kt - 21 tests
-- [ ] UtledMedlemskapsperiodeTest.kt
+- [x] UtledMedlemskapsperiodeTest.kt
 
 ### service/other tests (~20 files)
-- [ ] OppfriskSaksopplysningerServiceTest.kt
-- [ ] UnntaksregistreringServiceTest.kt
-- [ ] UnntaksperiodeServiceTest.kt
-- [ ] AnmodningsperiodeServiceTest.kt
+- [x] OppfriskSaksopplysningerServiceTest.kt (Batch 4)
+- [x] UnntaksregistreringServiceTest.kt (Batch 3)
+- [x] UnntaksperiodeServiceTest.kt (Batch 3)
+- [x] AnmodningsperiodeServiceTest.kt (Batch 4)
 - [ ] LovligeKombinasjonerSaksbehandlingServiceTest.kt
 - [ ] OpprettLovvalgsperiodeServiceTest.kt
 - [ ] TrygdeavtaleServiceTest.kt
@@ -81,5 +81,29 @@
 - `MottatteOpplysningerTestFactory`: Added `søknadNorgeEllerUtenforEØS {}` extension function
 
 ## Next Files to Refactor
-- UtledMedlemskapsperiodeTest.kt
+- DokumentServiceTest.kt
+- BrevmottakerServiceTest.kt
+- HentMuligeBrevmottakereServiceTest.kt
 - And remaining files in service/dokument section
+
+## Workflow Hints (Avoiding Context Overflow)
+
+When using parallel subagents for batch refactoring:
+
+1. **Small batches**: Run 2-3 subagents max, not 4-5
+2. **Commit immediately**: After each batch completes, commit before starting next
+3. **Manual compact**: Run `/compact` after each batch, don't rely on autocompact
+4. **Short prompts**: Keep subagent task descriptions concise
+5. **Check progress file**: Start each session by reading this file to know where to resume
+
+### Recommended Session Flow
+```
+1. Read progress file
+2. Run 2 subagents in parallel
+3. Wait for completion
+4. Commit changes
+5. /compact
+6. Repeat or end session
+```
+
+This prevents the orchestrator from accumulating too much context from parallel agent results.
