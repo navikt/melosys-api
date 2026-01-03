@@ -97,6 +97,10 @@
 - [x] A1MapperTest.kt - 25 tests (removed lateinit var, added helper functions)
 - [x] AttestMapperTest.kt - 1 test
 
+## Batch 10 Completed
+- [x] AvslagYrkesaktivMapperTest.kt - 3 tests
+- [x] AvslagArbeidsgiverMapperTest.kt - 2 tests
+
 ## Next Files to Refactor
 - More mapper tests in service/dokument
 - Remaining service tests
