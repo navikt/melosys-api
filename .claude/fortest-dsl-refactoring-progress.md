@@ -49,8 +49,8 @@
 - [x] UnntaksperiodeServiceTest.kt (Batch 3)
 - [x] AnmodningsperiodeServiceTest.kt (Batch 4)
 - [x] LovligeKombinasjonerSaksbehandlingServiceTest.kt - 67 tests
-- [ ] OpprettLovvalgsperiodeServiceTest.kt
-- [ ] TrygdeavtaleServiceTest.kt
+- [x] OpprettLovvalgsperiodeServiceTest.kt - 17 tests
+- [x] TrygdeavtaleServiceTest.kt - 11 tests
 - [ ] And more...
 
 ## Anti-patterns to Convert
@@ -89,10 +89,13 @@
 - [x] InnvilgelsesbrevMapperTest.kt - 2 tests (enhanced MaritimtArbeidBuilder DSL)
 - [x] LovligeKombinasjonerSaksbehandlingServiceTest.kt - 67 tests
 
+## Batch 8 Completed
+- [x] OpprettLovvalgsperiodeServiceTest.kt - 17 tests (enhanced AnmodningEllerAttestTestFactory with periode())
+- [x] TrygdeavtaleServiceTest.kt - 11 tests
+
 ## Next Files to Refactor
-- OpprettLovvalgsperiodeServiceTest.kt
-- TrygdeavtaleServiceTest.kt
 - More mapper tests in service/dokument
+- Remaining service tests
 
 ## Workflow Hints (Avoiding Context Overflow)
 
