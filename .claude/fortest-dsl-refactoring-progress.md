@@ -101,6 +101,10 @@
 - [x] AvslagYrkesaktivMapperTest.kt - 3 tests
 - [x] AvslagArbeidsgiverMapperTest.kt - 2 tests
 
+## Batch 11 Completed
+- [x] InnvilgelseFtrlYrkesaktivMapperTest.kt - 14 tests
+- [x] InnvilgelseFtrlPensjonistMapperTest.kt - 4 tests
+
 ## Next Files to Refactor
 - More mapper tests in service/dokument
 - Remaining service tests
