@@ -46,16 +46,12 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.apache.commons.lang3.StringUtils
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class A1MapperTest {
 
-    private lateinit var melosysNAVFelles: MelosysNAVFelles
-    private lateinit var brevData: BrevDataA1
-    private lateinit var fellesType: FellesType
     private val mapper = A1Mapper()
     private val easyRandom = EasyRandomConfigurer.randomForDokProd()
 
@@ -73,16 +69,18 @@ internal class A1MapperTest {
         id = 1L
     }
 
-    @BeforeEach
-    fun setup() {
-        val boAdresse = StrukturertAdresse().apply {
-            husnummerEtasjeLeilighet = "12B"
-            gatenavn = "Bogata"
-            postnummer = "0165"
-            poststed = "Poststed"
-            region = "Region"
-            landkode = Landkoder.NO.kode
-        }
+    private fun lagDefaultBostedsadresse() = StrukturertAdresse(
+        gatenavn = "Bogata",
+        husnummerEtasjeLeilighet = "12B",
+        postnummer = "0165",
+        poststed = "Poststed",
+        region = "Region",
+        landkode = Landkoder.NO.kode
+    )
+
+    private fun lagDefaultBrevData(
+        init: BrevDataA1.() -> Unit = {}
+    ): BrevDataA1 {
         val strukturertAdresse = BrevDataTestUtils.lagStrukturertAdresse()
         val virksomhet = AvklartVirksomhet(
             "Jarlsberg",
@@ -99,28 +97,32 @@ internal class A1MapperTest {
         val fysiskArbeidssted = FysiskArbeidssted("JARLSBERG INTERNATIONAL", "123456789", strukturertAdresse)
         val maritimtArbeidsstedSkip = BrevDataTestUtils.lagMaritimtArbeidssted(Maritimtyper.SKIP)
         val maritimtArbeidsstedSokkel = BrevDataTestUtils.lagMaritimtArbeidssted(Maritimtyper.SOKKEL) as MaritimtArbeidssted
-        brevData = BrevDataA1().apply {
-            yrkesgruppe = Yrkesgrupper.ORDINAER
-            bostedsadresse = boAdresse
-            arbeidssteder = listOf(fysiskArbeidssted, maritimtArbeidsstedSkip, maritimtArbeidsstedSokkel)
-            arbeidsland = listOf(Land_iso2.SE)
-            person = PersonopplysningerObjectFactory.lagPersonopplysninger()
-            hovedvirksomhet = virksomhet
+        return BrevDataA1(
+            yrkesgruppe = Yrkesgrupper.ORDINAER,
+            bostedsadresse = lagDefaultBostedsadresse(),
+            arbeidssteder = listOf(fysiskArbeidssted, maritimtArbeidsstedSkip, maritimtArbeidsstedSokkel),
+            arbeidsland = listOf(Land_iso2.SE),
+            person = PersonopplysningerObjectFactory.lagPersonopplysninger(),
+            hovedvirksomhet = virksomhet,
             bivirksomheter = listOf(utenlandskVirksomhet)
-        }
-        fellesType = FellesType().apply {
-            fagsaksnummer = "MELTEST-4"
-        }
-        melosysNAVFelles = easyRandom.nextObject(MelosysNAVFelles::class.java).apply {
+        ).apply(init)
+    }
+
+    private fun lagDefaultFellesType() = FellesType().apply {
+        fagsaksnummer = "MELTEST-4"
+    }
+
+    private fun lagDefaultMelosysNAVFelles(): MelosysNAVFelles =
+        easyRandom.nextObject(MelosysNAVFelles::class.java).apply {
             mottaker.mottakeradresse = BrevDataUtils.lagNorskPostadresse()
             kontaktinformasjon = BrevDataUtils.lagKontaktInformasjon()
         }
-    }
 
     @Test
     fun mapTilBrevXML() {
         val behandling = lagDefaultBehandling()
         val behandlingsresultat = lagDefaultBehandlingsresultat()
+        val brevData = lagDefaultBrevData()
         mapTilBrevXML(brevData, behandling, behandlingsresultat).shouldNotBeNull()
     }
 
@@ -128,10 +130,11 @@ internal class A1MapperTest {
     fun mapTilBrevXML_hovedVirksomhetUtenOrgnr_fyll4_2MedMellomrom() {
         val behandling = lagDefaultBehandling()
         val behandlingsresultat = lagDefaultBehandlingsresultat()
-        val utenlandskForetak = BrevDataTestUtils.lagForetakUtland(false)
-        utenlandskForetak.orgnr = null
-        brevData.hovedvirksomhet = AvklartVirksomhet(utenlandskForetak)
-        brevData.arbeidsland = listOf(*Land_iso2.values()) // List.of(Landkoder.GB, Landkoder.SE);
+        val utenlandskForetak = BrevDataTestUtils.lagForetakUtland(false).apply { orgnr = null }
+        val brevData = lagDefaultBrevData {
+            hovedvirksomhet = AvklartVirksomhet(utenlandskForetak)
+            arbeidsland = Land_iso2.entries
+        }
         mapper.mapA1(behandling, behandlingsresultat, brevData)
         mapTilBrevXML(brevData, behandling, behandlingsresultat).shouldNotBeNull()
     }
@@ -140,7 +143,9 @@ internal class A1MapperTest {
     fun mapTilBrevXML_bostedsAdresseIkkeGyldig_settBostedsadresseSinGateAdresseTom() {
         val behandling = lagDefaultBehandling()
         val behandlingsresultat = lagDefaultBehandlingsresultat()
-        brevData.bostedsadresse?.gatenavn = null
+        val brevData = lagDefaultBrevData {
+            bostedsadresse = lagDefaultBostedsadresse().apply { gatenavn = null }
+        }
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.person.bostedsadresse.gatenavn.shouldBe(" ")
         mapTilBrevXML(brevData, behandling, behandlingsresultat).shouldNotBeNull()
@@ -150,7 +155,9 @@ internal class A1MapperTest {
     fun mapBrevTilXML_arbeidslandUtenFysiskArbeidssted_fyllerPåMedArbeidsland() {
         val behandling = lagDefaultBehandling()
         val behandlingsresultat = lagDefaultBehandlingsresultat()
-        brevData.arbeidsland = listOf(Land_iso2.SE, Land_iso2.DK, Land_iso2.GB)
+        val brevData = lagDefaultBrevData {
+            arbeidsland = listOf(Land_iso2.SE, Land_iso2.DK, Land_iso2.GB)
+        }
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.fysiskArbeidsstedAdresseListe.adresse.forExactly(1) {
             it.adresselinje1.shouldContainInOrder("Danmark", "Sverige")
@@ -169,6 +176,7 @@ internal class A1MapperTest {
                 tom = LocalDate.now()
             }
         }
+        val brevData = lagDefaultBrevData()
 
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.bivirksomhetListe.bivirksomhet.forExactly(1) {
@@ -187,6 +195,7 @@ internal class A1MapperTest {
                 tom = LocalDate.now()
             }
         }
+        val brevData = lagDefaultBrevData()
 
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.bivirksomhetListe.bivirksomhet.forExactly(1) {
@@ -200,11 +209,13 @@ internal class A1MapperTest {
         val behandling = lagDefaultBehandling()
         val behandlingsresultat = lagDefaultBehandlingsresultat()
         val landkode = Landkoder.FI
-        val luftfartBase = LuftfartBase().apply {
-            hjemmebaseNavn = "hjemmebaseNav"
+        val luftfartBase = LuftfartBase(
+            hjemmebaseNavn = "hjemmebaseNav",
             hjemmebaseLand = landkode.kode
+        )
+        val brevData = lagDefaultBrevData {
+            arbeidssteder = listOf(FlyvendeArbeidssted(luftfartBase))
         }
-        brevData.arbeidssteder = listOf<Arbeidssted>(FlyvendeArbeidssted(luftfartBase))
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.bivirksomhetListe.bivirksomhet.forExactly(1) {
             it.navn.shouldBe(luftfartBase.hjemmebaseNavn)
@@ -220,10 +231,11 @@ internal class A1MapperTest {
         val behandlingsresultat = lagDefaultBehandlingsresultat()
         val adresse = BrevDataTestUtils.lagStrukturertAdresse()
         val fysiskArbeidssted: Arbeidssted = FysiskArbeidssted("", "", adresse)
-        brevData.arbeidssteder = listOf(fysiskArbeidssted)
-        brevData.arbeidsland = emptyList()
+        val brevData = lagDefaultBrevData {
+            arbeidssteder = listOf(fysiskArbeidssted)
+            arbeidsland = emptyList()
+        }
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
-
 
         fysiskArbeidssted.lagAdresselinje().length.shouldBeLessThan(A1Mapper.MAKS_ANTALL_TEGN_PER_LINJE_5_2)
         a1.fysiskArbeidsstedAdresseListe.adresse.stream()
@@ -236,14 +248,20 @@ internal class A1MapperTest {
     fun mapTilBrevXML_harLangAdressePåArbeidssted_brekkerAdresseOverFlereLinjer() {
         val behandling = lagDefaultBehandling()
         val behandlingsresultat = lagDefaultBehandlingsresultat()
-        val adresse = BrevDataTestUtils.lagStrukturertAdresse()
-        adresse.gatenavn =
-            "Lorem ipsumdolorsitamet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua-veien"
-        adresse.husnummerEtasjeLeilighet = "47"
+        val adresse = StrukturertAdresse(
+            gatenavn = "Lorem ipsumdolorsitamet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua-veien",
+            husnummerEtasjeLeilighet = "47",
+            postnummer = "4321",
+            poststed = "Poststed",
+            region = null,
+            landkode = Landkoder.BG.kode
+        )
         val fysiskArbeidssted = FysiskArbeidssted("", "", adresse)
         fysiskArbeidssted.lagAdresselinje().length.shouldBeGreaterThan(A1Mapper.MAKS_ANTALL_TEGN_PER_LINJE_5_2)
-        brevData.arbeidssteder = listOf(fysiskArbeidssted)
-        brevData.arbeidsland = emptyList()
+        val brevData = lagDefaultBrevData {
+            arbeidssteder = listOf(fysiskArbeidssted)
+            arbeidsland = emptyList()
+        }
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.fysiskArbeidsstedAdresseListe.adresse
             .map { obj: AdresseType -> obj.adresselinje1 }
@@ -255,9 +273,11 @@ internal class A1MapperTest {
     fun mapTilBrevXML_harUkjentEllerIkkeOppgittArbeidsted_brekkerAdresseOverFlereLinjer() {
         val behandling = lagDefaultBehandling()
         val behandlingsresultat = lagDefaultBehandlingsresultat()
-        brevData.ukjenteEllerAlleEosLand = true
-        brevData.arbeidssteder = emptyList()
-        brevData.arbeidsland = emptyList()
+        val brevData = lagDefaultBrevData {
+            ukjenteEllerAlleEosLand = true
+            arbeidssteder = emptyList()
+            arbeidsland = emptyList()
+        }
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.fysiskArbeidsstedAdresseListe.adresse
             .map { obj: AdresseType -> obj.adresselinje1 }
@@ -271,6 +291,7 @@ internal class A1MapperTest {
         fun `bruker har flere statsborgerskap - forvent Norsk Svensk og Dansk statsborgerskap i alfabetisk rekkefølge`() {
             val behandling = lagDefaultBehandling()
             val behandlingsresultat = lagDefaultBehandlingsresultat()
+            val brevData = lagDefaultBrevData()
             val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
 
             a1.person.statsborgerskap shouldBe "DK,NO,SE"
@@ -280,11 +301,9 @@ internal class A1MapperTest {
         fun `bruker med Kosovo som statsborgerskap skal vise tekst UNKNOWN`() {
             val behandling = lagDefaultBehandling()
             val behandlingsresultat = lagDefaultBehandlingsresultat()
-            setBrevDataPersonStatsborgerskap(
-                listOf(
-                    Land.KOSOVO
-                )
-            )
+            val brevData = lagDefaultBrevData {
+                person = lagPersonopplysningerMedStatsborgerskap(listOf(Land.KOSOVO))
+            }
             val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
 
             a1.person.statsborgerskap shouldBe A1Mapper.UNKNOWN_TEKST
@@ -294,11 +313,9 @@ internal class A1MapperTest {
         fun `bruker med ukjent som statsborgerskap skal vise tekst UNKNOWN`() {
             val behandling = lagDefaultBehandling()
             val behandlingsresultat = lagDefaultBehandlingsresultat()
-            setBrevDataPersonStatsborgerskap(
-                listOf(
-                    Land.UNKNOWN
-                )
-            )
+            val brevData = lagDefaultBrevData {
+                person = lagPersonopplysningerMedStatsborgerskap(listOf(Land.UNKNOWN))
+            }
             val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
 
             a1.person.statsborgerskap shouldBe A1Mapper.UNKNOWN_TEKST
@@ -308,12 +325,9 @@ internal class A1MapperTest {
         fun `bruker med Kosovo og Norge som statsborgerskap skal fjerne Kosovo`() {
             val behandling = lagDefaultBehandling()
             val behandlingsresultat = lagDefaultBehandlingsresultat()
-            setBrevDataPersonStatsborgerskap(
-                listOf(
-                    Land.KOSOVO,
-                    Land.NORGE
-                )
-            )
+            val brevData = lagDefaultBrevData {
+                person = lagPersonopplysningerMedStatsborgerskap(listOf(Land.KOSOVO, Land.NORGE))
+            }
             val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
 
             a1.person.statsborgerskap shouldBe "NO"
@@ -323,12 +337,9 @@ internal class A1MapperTest {
         fun `bruker med ukjent og Norge som statsborgerskap skal fjerne ukjent`() {
             val behandling = lagDefaultBehandling()
             val behandlingsresultat = lagDefaultBehandlingsresultat()
-            setBrevDataPersonStatsborgerskap(
-                listOf(
-                    Land.UNKNOWN,
-                    Land.NORGE
-                )
-            )
+            val brevData = lagDefaultBrevData {
+                person = lagPersonopplysningerMedStatsborgerskap(listOf(Land.UNKNOWN, Land.NORGE))
+            }
             val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
 
             a1.person.statsborgerskap shouldBe "NO"
@@ -338,26 +349,29 @@ internal class A1MapperTest {
         fun `om bruker er statsløs bruk statsløs tekst`() {
             val behandling = lagDefaultBehandling()
             val behandlingsresultat = lagDefaultBehandlingsresultat()
-            brevData.person = PersonopplysningerObjectFactory.lagPersonopplysningerStatløs()
+            val brevData = lagDefaultBrevData {
+                person = PersonopplysningerObjectFactory.lagPersonopplysningerStatløs()
+            }
 
             val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
 
             a1.person.statsborgerskap shouldBe A1Mapper.STATSLØS_TEKST
         }
 
-        private fun setBrevDataPersonStatsborgerskap(iso3Landkode: List<String>) {
-            (brevData.person as Personopplysninger).statsborgerskap = iso3Landkode.map {
-                Statsborgerskap(
-                    it,
-                    null,
-                    LocalDate.EPOCH,
-                    LocalDate.now(),
-                    "PDL",
-                    "Dolly",
-                    false
-                )
+        private fun lagPersonopplysningerMedStatsborgerskap(iso3Landkoder: List<String>): Personopplysninger =
+            PersonopplysningerObjectFactory.lagPersonopplysninger().apply {
+                statsborgerskap = iso3Landkoder.map {
+                    Statsborgerskap(
+                        it,
+                        null,
+                        LocalDate.EPOCH,
+                        LocalDate.now(),
+                        "PDL",
+                        "Dolly",
+                        false
+                    )
+                }
             }
-        }
     }
 
 
@@ -366,6 +380,7 @@ internal class A1MapperTest {
     fun mapTilBrevXML_bostedsadresserFraRegister_forventBostedsadresse() {
         val behandling = lagDefaultBehandling()
         val behandlingsresultat = lagDefaultBehandlingsresultat()
+        val brevData = lagDefaultBrevData()
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.person.bostedsadresse.run {
             gatenavn.shouldBe("Bogata")
@@ -381,7 +396,9 @@ internal class A1MapperTest {
     fun mapTilBrevXML_harFlereAdresserRegistrert_forventUtfylltMidlertidigAdresseMedNyesteRegistrerteDato() {
         val behandling = lagDefaultBehandling()
         val behandlingsresultat = lagDefaultBehandlingsresultat()
-        brevData.person = PersonopplysningerObjectFactory.lagPersonopplysninger()
+        val brevData = lagDefaultBrevData {
+            person = PersonopplysningerObjectFactory.lagPersonopplysninger()
+        }
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.person.midlertidigOppholdsadresse.gatenavn.shouldBe("gatenavnOppholdsadresseFreg")
     }
@@ -390,7 +407,9 @@ internal class A1MapperTest {
     fun mapTilBrevXML_harIngenOppholdsadresse_forventUtfylltMidlertidigAdresseMedKontaktAdresse() {
         val behandling = lagDefaultBehandling()
         val behandlingsresultat = lagDefaultBehandlingsresultat()
-        brevData.person = PersonopplysningerObjectFactory.lagPersonopplysningerUtenOppholdsadresse()
+        val brevData = lagDefaultBrevData {
+            person = PersonopplysningerObjectFactory.lagPersonopplysningerUtenOppholdsadresse()
+        }
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.person.midlertidigOppholdsadresse.gatenavn.shouldBe("gatenavnKontaktadresseFreg")
     }
@@ -399,7 +418,9 @@ internal class A1MapperTest {
     fun mapTilBrevXML_harIngenOppholdsadresse_forventUtfylltMidlertidigAdresseMedKontaktAdresseSemistrukturert() {
         val behandling = lagDefaultBehandling()
         val behandlingsresultat = lagDefaultBehandlingsresultat()
-        brevData.person = PersonopplysningerObjectFactory.lagPersonopplysningerKontaktadresseSemistrukturert(true)
+        val brevData = lagDefaultBrevData {
+            person = PersonopplysningerObjectFactory.lagPersonopplysningerKontaktadresseSemistrukturert(true)
+        }
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.person.midlertidigOppholdsadresse.gatenavn.shouldBe("Kranstien 3 0338 Oslo")
     }
@@ -408,7 +429,9 @@ internal class A1MapperTest {
     fun mapTilBrevXML_harIngenKontaktadresse_forventUtfylltMidlertidigAdresseMedOppholdsadresse() {
         val behandling = lagDefaultBehandling()
         val behandlingsresultat = lagDefaultBehandlingsresultat()
-        brevData.person = PersonopplysningerObjectFactory.lagPersonopplysningerUtenKontaktadresse()
+        val brevData = lagDefaultBrevData {
+            person = PersonopplysningerObjectFactory.lagPersonopplysningerUtenKontaktadresse()
+        }
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.person.midlertidigOppholdsadresse.gatenavn.shouldBe("gatenavnOppholdsadresseFreg")
     }
@@ -417,8 +440,10 @@ internal class A1MapperTest {
     fun mapTilBrevXML_harIngenAdresserRegistrert() {
         val behandling = lagDefaultBehandling()
         val behandlingsresultat = lagDefaultBehandlingsresultat()
-        brevData.bostedsadresse = null
-        brevData.person = PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser()
+        val brevData = lagDefaultBrevData {
+            bostedsadresse = null
+            person = PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser()
+        }
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.person.run {
             bostedsadresse.shouldBeNull()
@@ -430,7 +455,9 @@ internal class A1MapperTest {
     fun mapTilBrevXML_brevdataManglerBostedsadresse_bostedsadresseErTom() {
         val behandling = lagDefaultBehandling()
         val behandlingsresultat = lagDefaultBehandlingsresultat()
-        brevData.bostedsadresse = null
+        val brevData = lagDefaultBrevData {
+            bostedsadresse = null
+        }
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.person.bostedsadresse.shouldBeNull()
     }
@@ -439,8 +466,12 @@ internal class A1MapperTest {
     fun `mapperA1vedlegg ved utendlandsadresse er ikke postnr obligatorisk fra melosys`() {
         val behandling = lagDefaultBehandling()
         val behandlingsresultat = lagDefaultBehandlingsresultat()
-        brevData.bostedsadresse?.postnummer = null
-        brevData.bostedsadresse?.landkode = "SE"
+        val brevData = lagDefaultBrevData {
+            bostedsadresse = lagDefaultBostedsadresse().apply {
+                postnummer = null
+                landkode = "SE"
+            }
+        }
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.person.bostedsadresse.postnr.shouldBe(" ")
     }
@@ -449,15 +480,19 @@ internal class A1MapperTest {
     fun `mapperA1vedlegg ved norsk adresse er postnr obligatorisk fra melosys`() {
         val behandling = lagDefaultBehandling()
         val behandlingsresultat = lagDefaultBehandlingsresultat()
-        brevData.bostedsadresse?.postnummer = null
-        brevData.bostedsadresse?.landkode = "NO"
+        val brevData = lagDefaultBrevData {
+            bostedsadresse = lagDefaultBostedsadresse().apply {
+                postnummer = null
+                landkode = "NO"
+            }
+        }
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.person.bostedsadresse.postnr.shouldBe(null)
     }
 
     private fun mapTilBrevXML(brevData: BrevData, behandling: Behandling, behandlingsresultat: Behandlingsresultat): String {
         val xsdLocation = "melosysbrev/melosys_000116.xsd"
-        val fag = mapFag()
+        val fag = Fag().apply { vedleggA1 = "true" }
         val vedlegg = VedleggType().apply {
             a1 = mapper.mapA1(behandling, behandlingsresultat, brevData as BrevDataA1)
         }
@@ -465,17 +500,11 @@ internal class A1MapperTest {
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, xsdLocation)
     }
 
-    private fun mapFag(): Fag {
-        return Fag().apply {
-            vedleggA1 = "true"
-        }
-    }
-
     private fun mapTilBrevdataType(fag: Fag, vedlegg: VedleggType): JAXBElement<BrevdataType> {
         val factory = ObjectFactory()
         val brevdataType = factory.createBrevdataType().apply {
-            this.felles = fellesType
-            this.navFelles = melosysNAVFelles
+            this.felles = lagDefaultFellesType()
+            this.navFelles = lagDefaultMelosysNAVFelles()
             this.fag = fag
             this.vedlegg = vedlegg
         }
