@@ -29,8 +29,8 @@
 ### service/dokument tests (~25 files)
 - [x] BrevDataServiceTest.kt
 - [x] TilBrevAdresseServiceTest.kt (Batch 3)
-- [ ] DokumentServiceTest.kt
-- [ ] BrevmottakerServiceTest.kt
+- [x] DokumentServiceTest.kt
+- [x] BrevmottakerServiceTest.kt
 - [ ] HentMuligeBrevmottakereServiceTest.kt
 - [ ] DokgenTestData.kt
 - [ ] Various mapper tests (InnvilgelsesbrevMapperTest, etc.)
