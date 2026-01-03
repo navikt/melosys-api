@@ -33,7 +33,8 @@
 - [x] BrevmottakerServiceTest.kt
 - [x] HentMuligeBrevmottakereServiceTest.kt - 13 tests
 - [x] DokgenTestData.kt - utility file, 50+ dependent tests
-- [ ] Various mapper tests (InnvilgelsesbrevMapperTest, etc.)
+- [x] InnvilgelsesbrevMapperTest.kt - 2 tests
+- [ ] Various mapper tests (remaining)
 
 ### service/ftrl tests (~5 files)
 - [x] AvklarteFaktaForBestemmelseTest.kt - 7 tests
@@ -47,7 +48,7 @@
 - [x] UnntaksregistreringServiceTest.kt (Batch 3)
 - [x] UnntaksperiodeServiceTest.kt (Batch 3)
 - [x] AnmodningsperiodeServiceTest.kt (Batch 4)
-- [ ] LovligeKombinasjonerSaksbehandlingServiceTest.kt
+- [x] LovligeKombinasjonerSaksbehandlingServiceTest.kt - 67 tests
 - [ ] OpprettLovvalgsperiodeServiceTest.kt
 - [ ] TrygdeavtaleServiceTest.kt
 - [ ] And more...
@@ -84,11 +85,14 @@
 - [x] HentMuligeBrevmottakereServiceTest.kt - 13 tests
 - [x] DokgenTestData.kt - utility file
 
+## Batch 7 Completed
+- [x] InnvilgelsesbrevMapperTest.kt - 2 tests (enhanced MaritimtArbeidBuilder DSL)
+- [x] LovligeKombinasjonerSaksbehandlingServiceTest.kt - 67 tests
+
 ## Next Files to Refactor
-- Mapper tests in service/dokument (InnvilgelsesbrevMapperTest, etc.)
-- LovligeKombinasjonerSaksbehandlingServiceTest.kt
 - OpprettLovvalgsperiodeServiceTest.kt
 - TrygdeavtaleServiceTest.kt
+- More mapper tests in service/dokument
 
 ## Workflow Hints (Avoiding Context Overflow)
 
