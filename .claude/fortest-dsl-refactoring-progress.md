@@ -2,6 +2,10 @@
 
 ## Status: In Progress
 
+## Reference Documentation
+- **forTest DSL Guide**: `.claude/skills/testing/references/fortest-dsl.md`
+- **Agent to use**: `kotlin-test-refactorer` - converts test files to immutable forTest DSL pattern
+
 ## Completed
 
 ### Shared Factories (service module)
@@ -105,9 +109,30 @@
 - [x] InnvilgelseFtrlYrkesaktivMapperTest.kt - 14 tests
 - [x] InnvilgelseFtrlPensjonistMapperTest.kt - 4 tests
 
+## Batch 12 Completed
+- [x] TrygdeavtaleMapperTest.kt - 19 tests (converted `Lovvalgsperiode().apply`, `OmfattetFamilie().apply`, added helper functions)
+
 ## Next Files to Refactor
-- More mapper tests in service/dokument
-- Remaining service tests
+
+### Mapper tests with `lateinit var` patterns (priority)
+- [x] TrygdeavtaleMapperTest.kt - 19 tests, uses `Lovvalgsperiode().apply`, `OmfattetFamilie().apply`
+- [ ] A001MapperTest.kt - 7 tests, uses `StrukturertAdresse().apply`, `PersonDokument().apply`, `BrevDataA001().apply`
+- [ ] InformasjonTrygdeavgiftMapperTest.kt - 4 tests (mostly converted, verify)
+- [ ] InnhentingAvInntektsopplysningerMapperTest.kt
+- [ ] ÅrsavregningVedtakMapperTest.kt
+- [ ] RettigheterOgPlikterStandardvedleggMapperTest.kt
+- [ ] OrienteringTilArbeidsgiverOmVedtakMapperTest.kt
+- [ ] OrienteringAnmodningUnntakMapperTest.kt
+- [ ] InnvilgelseEftaStorbritanniaMapperTest.kt
+- [ ] DokgenMalMapperTest.kt
+- [ ] AnmodningUnntakMapperTest.kt
+- [ ] UtpekingAnnetLandMapperTest.kt
+
+### Mapper tests with `().apply {}` patterns only
+- [ ] InnvilgelsesbrevFlereLandMapperTest.kt
+- [ ] InnvilgelseArbeidsgiverBrevMapperTest.kt
+- [ ] VideresendSoknadMapperTest.kt
+- [ ] VilkaarsresultatTilBegrunnelseMapperTest.kt
 
 ## Workflow Hints (Avoiding Context Overflow)
 

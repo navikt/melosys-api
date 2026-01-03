@@ -10,6 +10,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.lovvalgsperiodeForTest
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling
 import no.nav.melosys.domain.kodeverk.Land_iso2
@@ -324,10 +325,8 @@ class TrygdeavtaleMapperTest {
         )
 
     private fun lagOmfattetMedfølgendeBarn() = AvklarteMedfolgendeFamilie(
-        setOf(OmfattetFamilie(UUID_BARN_1).apply {
-            this.sammensattNavn = BARN_NAVN_1
-            this.ident = BARN1_FNR
-        }), setOf()
+        setOf(lagOmfattetFamilie(UUID_BARN_1, navn = BARN_NAVN_1, ident = BARN1_FNR)),
+        setOf()
     )
 
     private fun lagIkkeOmfattetMedfølgendeBarn() = AvklarteMedfolgendeFamilie(
@@ -351,12 +350,8 @@ class TrygdeavtaleMapperTest {
     )
 
     private fun lagBarnUtenFnr() = AvklarteMedfolgendeFamilie(
-        setOf(
-            OmfattetFamilie(UUID_BARN_3).apply {
-                this.sammensattNavn = BARN_NAVN_3
-                this.ident = BARN3_UTEN_FNR
-            }
-        ), setOf()
+        setOf(lagOmfattetFamilie(UUID_BARN_3, navn = BARN_NAVN_3, ident = BARN3_UTEN_FNR)),
+        setOf()
     )
 
     private fun tomFamilie(): AvklarteMedfolgendeFamilie =
@@ -392,16 +387,14 @@ class TrygdeavtaleMapperTest {
         )
 
     private fun lagAvklartMedfølgendeBarn() = AvklarteMedfolgendeFamilie(
-        setOf(OmfattetFamilie(UUID_BARN_1).apply {
-            this.ident = BARN1_FNR
-        }), setOf(
-            IkkeOmfattetFamilie(
+        setOf(lagOmfattetFamilie(UUID_BARN_1, ident = BARN1_FNR)),
+        setOf(
+            lagIkkeOmfattetFamilie(
                 UUID_BARN_2,
-                Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.kode,
-                null
-            ).apply {
-                this.ident = BARN2_FNR
-            })
+                begrunnelse = Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.kode,
+                ident = BARN2_FNR
+            )
+        )
     )
 
     private fun lagMedfølgendeEktefelle(): Map<String, MedfolgendeFamilie> = mapOf(
@@ -429,17 +422,35 @@ class TrygdeavtaleMapperTest {
     )
 
 
-    fun lagLovvalgsperiode(): Lovvalgsperiode {
-        return Lovvalgsperiode().apply {
-            fom = DokgenTestData.LOVVALGSPERIODE_FOM
-            tom = DokgenTestData.LOVVALGSPERIODE_TOM
-            dekning = Trygdedekninger.FULL_DEKNING_FTRL
-            bestemmelse = Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1
-        }
+    fun lagLovvalgsperiode(): Lovvalgsperiode = lovvalgsperiodeForTest {
+        fom = DokgenTestData.LOVVALGSPERIODE_FOM
+        tom = DokgenTestData.LOVVALGSPERIODE_TOM
+        dekning = Trygdedekninger.FULL_DEKNING_FTRL
+        bestemmelse = Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1
     }
 
     fun sjekkAdresser(): List<Arguments> {
         return TrygdeavtaleAdresseSjekkerTest().sjekkAdresser()
+    }
+
+    private fun lagOmfattetFamilie(
+        uuid: String,
+        navn: String? = null,
+        ident: String? = null
+    ) = OmfattetFamilie(uuid).also {
+        it.sammensattNavn = navn
+        it.ident = ident
+    }
+
+    private fun lagIkkeOmfattetFamilie(
+        uuid: String,
+        begrunnelse: String?,
+        begrunnelseFritekst: String? = null,
+        navn: String? = null,
+        ident: String? = null
+    ) = IkkeOmfattetFamilie(uuid, begrunnelse, begrunnelseFritekst).also {
+        it.sammensattNavn = navn
+        it.ident = ident
     }
 
     companion object {
