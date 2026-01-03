@@ -31,8 +31,8 @@
 - [x] TilBrevAdresseServiceTest.kt (Batch 3)
 - [x] DokumentServiceTest.kt
 - [x] BrevmottakerServiceTest.kt
-- [ ] HentMuligeBrevmottakereServiceTest.kt
-- [ ] DokgenTestData.kt
+- [x] HentMuligeBrevmottakereServiceTest.kt - 13 tests
+- [x] DokgenTestData.kt - utility file, 50+ dependent tests
 - [ ] Various mapper tests (InnvilgelsesbrevMapperTest, etc.)
 
 ### service/ftrl tests (~5 files)
@@ -80,11 +80,15 @@
 - `SøknadNorgeEllerUtenforEØSTestFactory`: New factory for SøknadNorgeEllerUtenforEØS with `landkoder()` DSL
 - `MottatteOpplysningerTestFactory`: Added `søknadNorgeEllerUtenforEØS {}` extension function
 
+## Batch 6 Completed
+- [x] HentMuligeBrevmottakereServiceTest.kt - 13 tests
+- [x] DokgenTestData.kt - utility file
+
 ## Next Files to Refactor
-- DokumentServiceTest.kt
-- BrevmottakerServiceTest.kt
-- HentMuligeBrevmottakereServiceTest.kt
-- And remaining files in service/dokument section
+- Mapper tests in service/dokument (InnvilgelsesbrevMapperTest, etc.)
+- LovligeKombinasjonerSaksbehandlingServiceTest.kt
+- OpprettLovvalgsperiodeServiceTest.kt
+- TrygdeavtaleServiceTest.kt
 
 ## Workflow Hints (Avoiding Context Overflow)
 
