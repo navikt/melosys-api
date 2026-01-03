@@ -32,9 +32,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
-import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
-import no.nav.melosys.domain.mottatteopplysninger.data.JuridiskArbeidsgiverNorge
+import no.nav.melosys.domain.mottatteopplysninger.soeknad
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.doksys.DoksysFasade
 import no.nav.melosys.integrasjon.doksys.Dokumentbestilling
@@ -78,7 +76,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
-import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS as Soeknad
 
 internal class DokumentServiceTest {
 
@@ -196,10 +193,9 @@ internal class DokumentServiceTest {
 
 
     private fun lagDokumentService(brevdatabyggervelger: BrevDataByggerVelger?): DokumentService {
-        val aktør = lagAktør(Aktoersroller.BRUKER)
         val behandling = lagBehandling()
         val behandlingService = mockBehandlingService(behandling)
-        val persondataFasade = mockPersondataFasade(aktør)
+        val persondataFasade = mockPersondataFasade()
         val arbeidsgiverFaktum = lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, ORGNR)
         val yrkesgruppeFaktum = lagAvklarteFakta(Avklartefaktatyper.YRKESGRUPPE, AvklartYrkesgruppeType.ORDINAER.name, null)
         val behandlingsresultat = lagBehandlingsresultat(
@@ -360,8 +356,8 @@ internal class DokumentServiceTest {
             every { findById(BEHANDLINGSID) } returns Optional.of(behandlingsresultat)
         }
 
-    private fun mockPersondataFasade(aktør: Aktoer) = mockk<PersondataFasade> {
-        every { hentFolkeregisterident(any()) } returns "IDENT${aktør.aktørId}"
+    private fun mockPersondataFasade() = mockk<PersondataFasade> {
+        every { hentFolkeregisterident(any()) } returns "IDENT123"
         every { hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
     }
 
@@ -442,25 +438,27 @@ internal class DokumentServiceTest {
         type = Behandlingstyper.KLAGE
         fagsak {
             medGsakSaksnummer()
-            aktører(
-                hashSetOf(
-                    lagAktør(Aktoersroller.BRUKER),
-                    lagAktør(Aktoersroller.FULLMEKTIG)
-                )
-            )
+            medBruker { aktørId = "123"; orgnr = "999" }
+            medFullmektig { aktørId = "123"; orgnr = "999"; setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD) }
         }
-        mottatteOpplysninger = MottatteOpplysninger().apply {
-            this.mottatteOpplysningerData = Soeknad().apply {
-                foretakUtland.add(ForetakUtland().apply {
-                    orgnr = "12345678910"
-                })
-                juridiskArbeidsgiverNorge = JuridiskArbeidsgiverNorge().apply {
-                    ekstraArbeidsgivere = listOf(ORGNR)
-                }
-                oppholdUtland.oppholdslandkoder.toMutableList().add("DK")
+        mottatteOpplysninger {
+            soeknad {
+                foretakUtland("12345678910")
+                ekstraArbeidsgiver(ORGNR)
             }
         }
-        saksopplysninger = mutableSetOf(lagSaksopplysning(SaksopplysningType.PERSOPL, lagPersonDokument()))
+        saksopplysning {
+            type = SaksopplysningType.PERSOPL
+            personDokument {
+                kjønn = KjoennsType("K")
+                statsborgerskap = Land(Land.BELGIA)
+                fornavn = "For"
+                etternavn = "Etter"
+                sammensattNavn = "For Etter"
+                fødselsdato = LocalDate.ofYearDay(1900, 1)
+                bostedsadresse = lagBostedsadresse()
+            }
+        }
     }
 
     private fun lagSaksopplysning(saksopplysningType: SaksopplysningType, saksopplysningDokument: no.nav.melosys.domain.dokument.SaksopplysningDokument) =
@@ -478,16 +476,6 @@ internal class DokumentServiceTest {
             type = avklartefaktaType
             fakta = avklartefaktaFakta
         }
-
-    private fun lagAktør(type: Aktoersroller) = Aktoer().apply {
-        aktørId = type.name + idTeller++
-        aktørId = "123"
-        orgnr = "999"
-        rolle = type
-        if (type == Aktoersroller.FULLMEKTIG) {
-            setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD)
-        }
-    }
 
     private fun lagLovvalgsperiode() = lovvalgsperiodeForTest {
         bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
@@ -520,7 +508,5 @@ internal class DokumentServiceTest {
     companion object {
         private const val BEHANDLINGSID = 13L
         private const val ORGNR = "123456789"
-
-        private var idTeller = 1L
     }
 }

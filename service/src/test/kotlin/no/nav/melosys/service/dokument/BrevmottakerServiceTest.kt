@@ -17,8 +17,6 @@ import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.brev.Mottaker
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
-import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Mottakerroller.*
@@ -27,9 +25,9 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
+import no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.TekniskException
@@ -153,11 +151,11 @@ class BrevmottakerServiceTest {
 
     @Test
     fun `avklarMottakere medVirksomhetRolleOgVirksomhet girVirksomhetMottaker`() {
-        val virksomhet = Aktoer().apply {
-            rolle = Aktoersroller.VIRKSOMHET
-            orgnr = "orgnr"
+        val fagsak = Fagsak.forTest {
+            medVirksomhet { orgnr = "orgnr" }
         }
-        val behandling = lagBehandlingMed(Fagsak.forTest { leggTilAktør(virksomhet) })
+        val behandling = lagBehandlingMed(fagsak)
+        val virksomhet = fagsak.hentVirksomhet()!!
 
         val mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(VIRKSOMHET), behandling)
 
@@ -491,10 +489,13 @@ class BrevmottakerServiceTest {
     ) = Behandling.forTest {
         id = 123L
         this.fagsak = fagsak
-        this.mottatteOpplysninger = MottatteOpplysninger().apply {
+        mottatteOpplysninger {
             mottatteOpplysningerData = MottatteOpplysningerData()
         }
-        this.saksopplysninger.add(Saksopplysning()) // Empty saksopplysning to allow ArbeidsforholdDokument lookup
+        saksopplysning {
+            type = SaksopplysningType.ARBFORH
+            arbeidsforholdDokument { }
+        }
     }
 
     private fun lagUtenlandskMyndighet(): UtenlandskMyndighet = UtenlandskMyndighet().apply {
