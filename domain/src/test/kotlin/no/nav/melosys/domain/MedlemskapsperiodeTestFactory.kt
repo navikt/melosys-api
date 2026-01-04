@@ -28,7 +28,7 @@ object MedlemskapsperiodeTestFactory {
         var innvilgelsesresultat: InnvilgelsesResultat = INNVILGELSESRESULTAT
         var medlemskapstype: Medlemskapstyper = MEDLEMSKAPSTYPE
         var trygdedekning: Trygdedekninger = TRYGDEDEKNING
-        var bestemmelse: Bestemmelse = BESTEMMELSE
+        var bestemmelse: Bestemmelse? = BESTEMMELSE
         var medlPeriodeID: Long? = null
 
         val trygdeavgiftsperioder = mutableListOf<Trygdeavgiftsperiode>()

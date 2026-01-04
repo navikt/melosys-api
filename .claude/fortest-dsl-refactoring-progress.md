@@ -121,8 +121,8 @@
 - [x] InformasjonTrygdeavgiftMapperTest.kt - 4 tests (already uses forTest DSL correctly, verified)
 - [x] InnhentingAvInntektsopplysningerMapperTest.kt - 2 tests (converted to forTest DSL, removed @BeforeEach)
 - [x] ÅrsavregningVedtakMapperTest.kt - 12 tests (removed mocked domain entities, use forTest DSL)
-- [ ] RettigheterOgPlikterStandardvedleggMapperTest.kt
-- [ ] OrienteringTilArbeidsgiverOmVedtakMapperTest.kt
+- [x] RettigheterOgPlikterStandardvedleggMapperTest.kt - 3 tests (converted to forTest DSL)
+- [x] OrienteringTilArbeidsgiverOmVedtakMapperTest.kt - 2 tests (converted to forTest DSL, added vilkaarsresultatForTest)
 - [ ] OrienteringAnmodningUnntakMapperTest.kt
 - [ ] InnvilgelseEftaStorbritanniaMapperTest.kt
 - [ ] DokgenMalMapperTest.kt
