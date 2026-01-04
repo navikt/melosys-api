@@ -16,11 +16,11 @@ import org.springframework.stereotype.Component
 private val log = KotlinLogging.logger { }
 
 /**
- * Saga step that saves personopplysninger (PDL_PERSOPL, PDL_PERS_SAKS) to the behandling.
+ * Saga-steg som lagrer personopplysninger (PDL_PERSOPL, PDL_PERS_SAKS) på behandlingen.
  *
- * This step replaces the logic from [SaksoppplysningEventListener.lagrePersonopplysninger]
- * for IVERKSETTER_VEDTAK status to eliminate race conditions between the synchronous
- * event listener and async saga execution.
+ * Dette steget erstatter logikken fra [SaksoppplysningEventListener.lagrePersonopplysninger]
+ * for IVERKSETTER_VEDTAK-status for å eliminere race conditions mellom den synkrone
+ * event-listeneren og asynkron saga-kjøring.
  *
  * @see no.nav.melosys.service.saksopplysninger.SaksoppplysningEventListener
  */
@@ -36,27 +36,27 @@ class LagrePersonopplysninger(
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandlingId = prosessinstans.hentBehandling.id
-        // Always reload behandling to get fresh state after HTTP transaction committed
+        // Last alltid behandling på nytt for å få oppdatert tilstand etter at HTTP-transaksjonen er committet
         val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId)
 
-        // Only process if hovedpart is BRUKER (same condition as event listener)
+        // Behandle kun hvis hovedpart er BRUKER (samme betingelse som i event-listeneren)
         if (behandling.fagsak.hovedpartRolle != Aktoersroller.BRUKER) {
-            log.debug { "Skipping LAGRE_PERSONOPPLYSNINGER for behandling $behandlingId - hovedpart is not BRUKER" }
+            log.debug { "Hopper over LAGRE_PERSONOPPLYSNINGER for behandling $behandlingId - hovedpart er ikke BRUKER" }
             return
         }
 
-        // Save PDL_PERSOPL if missing
+        // Lagre PDL_PERSOPL hvis den mangler
         if (behandling.manglerSaksopplysningerAvType(listOf(SaksopplysningType.PDL_PERSOPL))) {
             val persondata = hentPersondata(behandling)
             saksopplysningerService.lagrePersonopplysninger(behandling, persondata)
-            log.info { "Saved PDL_PERSOPL saksopplysning for behandling $behandlingId" }
+            log.info { "Lagret PDL_PERSOPL saksopplysning for behandling $behandlingId" }
         }
 
-        // Save PDL_PERS_SAKS if missing
+        // Lagre PDL_PERS_SAKS hvis den mangler
         if (behandling.manglerSaksopplysningerAvType(listOf(SaksopplysningType.PDL_PERS_SAKS))) {
             val personMedHistorikk = persondataFasade.hentPersonMedHistorikk(behandling.fagsak.hentBrukersAktørID())
             saksopplysningerService.lagrePersonMedHistorikk(behandling, personMedHistorikk)
-            log.info { "Saved PDL_PERS_SAKS saksopplysning for behandling $behandlingId" }
+            log.info { "Lagret PDL_PERS_SAKS saksopplysning for behandling $behandlingId" }
         }
     }
 
