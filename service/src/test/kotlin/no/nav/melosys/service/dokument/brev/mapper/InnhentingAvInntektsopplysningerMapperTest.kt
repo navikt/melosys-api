@@ -6,16 +6,19 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.brev.InnhentingAvInntektsopplysningerBrevbestilling
-import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.dokument.personDokumentForTest
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.medlemskapsperiode
+import no.nav.melosys.domain.årsavregning
 import no.nav.melosys.exception.FunksjonellException
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
@@ -26,28 +29,21 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
     @MockK
     private lateinit var mockDokgenMapperDatahenter: DokgenMapperDatahenter
 
-    private lateinit var innhentingAvInntektsopplysningerMapper: InnhentingAvInntektsopplysningerMapper
-
-    @BeforeEach
-    fun setup() {
-        innhentingAvInntektsopplysningerMapper = InnhentingAvInntektsopplysningerMapper(
-            mockDokgenMapperDatahenter,
-        )
+    private val innhentingAvInntektsopplysningerMapper by lazy {
+        InnhentingAvInntektsopplysningerMapper(mockDokgenMapperDatahenter)
     }
 
     @Test
     fun `hent inntektsopplysninger for årsavregning`() {
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat()
 
+        val personDokument = personDokumentForTest { sammensattNavn = "Hei Test" }
+
         val brevbestilling =
             InnhentingAvInntektsopplysningerBrevbestilling.Builder()
                 .medBehandling(lagBehandling())
-                .medPersonDokument(PersonDokument().apply {
-                    sammensattNavn = "Hei Test"
-                })
-                .medPersonMottaker(PersonDokument().apply {
-                    sammensattNavn = "Hei Test"
-                })
+                .medPersonDokument(personDokument)
+                .medPersonMottaker(personDokument)
                 .build()
 
         innhentingAvInntektsopplysningerMapper.map(brevbestilling).run {
@@ -61,17 +57,15 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
 
     @Test
     fun `hent inntektsopplysninger for årsavregning skal kaste feil når årsavregning er null`() {
-        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns Behandlingsresultat().apply { årsavregning = null }
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns Behandlingsresultat.forTest { }
+
+        val personDokument = personDokumentForTest { sammensattNavn = "Hei Test" }
 
         val brevbestilling =
             InnhentingAvInntektsopplysningerBrevbestilling.Builder()
                 .medBehandling(lagBehandling())
-                .medPersonDokument(PersonDokument().apply {
-                    sammensattNavn = "Hei Test"
-                })
-                .medPersonMottaker(PersonDokument().apply {
-                    sammensattNavn = "Hei Test"
-                })
+                .medPersonDokument(personDokument)
+                .medPersonMottaker(personDokument)
                 .build()
 
         shouldThrow<FunksjonellException> {
@@ -88,30 +82,26 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
             tema = Behandlingstema.YRKESAKTIV
         }
 
-    private fun lagBehandlingsResultat(): Behandlingsresultat {
-        return Behandlingsresultat().apply {
-            årsavregning = Årsavregning.forTest {
-                aar = 2023
-                medlemskapsperioder = mutableSetOf(
-                    Medlemskapsperiode().apply {
-                        fom = LocalDate.of(2022, 5, 17)
-                        tom = LocalDate.of(2022, 8, 17)
-                        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                    },
-                    Medlemskapsperiode().apply {
-                        fom = LocalDate.of(2022, 8, 18)
-                        tom = LocalDate.of(2023, 8, 17)
-                        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                    },
-                    Medlemskapsperiode().apply {
-                        fom = LocalDate.of(2023, 8, 18)
-                        tom = LocalDate.of(2023, 9, 1)
-                        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                    })
+    private fun lagBehandlingsResultat() =
+        Behandlingsresultat.forTest {
+            årsavregning { aar = 2023 }
+            medlemskapsperiode {
+                fom = LocalDate.of(2022, 5, 17)
+                tom = LocalDate.of(2022, 8, 17)
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2022, 8, 18)
+                tom = LocalDate.of(2023, 8, 17)
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2023, 8, 18)
+                tom = LocalDate.of(2023, 9, 1)
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             }
         }
-    }
 }

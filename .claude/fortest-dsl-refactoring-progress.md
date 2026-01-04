@@ -118,8 +118,8 @@
 ### Mapper tests with `lateinit var` patterns (priority)
 - [x] TrygdeavtaleMapperTest.kt - 19 tests, uses `Lovvalgsperiode().apply`, `OmfattetFamilie().apply`
 - [x] A001MapperTest.kt - 6 tests, uses `StrukturertAdresse().apply`, `PersonDokument().apply`, `BrevDataA001().apply`
-- [ ] InformasjonTrygdeavgiftMapperTest.kt - 4 tests (mostly converted, verify)
-- [ ] InnhentingAvInntektsopplysningerMapperTest.kt
+- [x] InformasjonTrygdeavgiftMapperTest.kt - 4 tests (already uses forTest DSL correctly, verified)
+- [x] InnhentingAvInntektsopplysningerMapperTest.kt - 2 tests (converted to forTest DSL, removed @BeforeEach)
 - [ ] ÅrsavregningVedtakMapperTest.kt
 - [ ] RettigheterOgPlikterStandardvedleggMapperTest.kt
 - [ ] OrienteringTilArbeidsgiverOmVedtakMapperTest.kt
