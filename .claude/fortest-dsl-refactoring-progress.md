@@ -120,7 +120,7 @@
 - [x] A001MapperTest.kt - 6 tests, uses `StrukturertAdresse().apply`, `PersonDokument().apply`, `BrevDataA001().apply`
 - [x] InformasjonTrygdeavgiftMapperTest.kt - 4 tests (already uses forTest DSL correctly, verified)
 - [x] InnhentingAvInntektsopplysningerMapperTest.kt - 2 tests (converted to forTest DSL, removed @BeforeEach)
-- [ ] ÅrsavregningVedtakMapperTest.kt
+- [x] ÅrsavregningVedtakMapperTest.kt - 12 tests (removed mocked domain entities, use forTest DSL)
 - [ ] RettigheterOgPlikterStandardvedleggMapperTest.kt
 - [ ] OrienteringTilArbeidsgiverOmVedtakMapperTest.kt
 - [ ] OrienteringAnmodningUnntakMapperTest.kt

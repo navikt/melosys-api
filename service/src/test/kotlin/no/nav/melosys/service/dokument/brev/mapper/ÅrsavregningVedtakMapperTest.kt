@@ -6,10 +6,10 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.BehandlingsresultatTestFactory
+import no.nav.melosys.domain.behandling
+import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
 import no.nav.melosys.domain.dokument.personDokumentForTest
@@ -18,6 +18,8 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.medlemskapsperiodeForTest
+import no.nav.melosys.domain.tidligereBehandlingsresultat
+import no.nav.melosys.domain.årsavregning
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
@@ -233,19 +235,17 @@ class ÅrsavregningVedtakMapperTest {
 
     @Test
     fun `mapÅrsavregning skal detektere automatisk re-årsavregning korrekt når tidligereBehandlingsresultat finnes`() {
-        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
-
-        // Opprett en tidligere årsavregningsbehandling
-        val tidligereÅrsavregningsBehandling = Behandling.forTest {
-            id = 999L
-            type = Behandlingstyper.ÅRSAVREGNING
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata {
+            årsavregning {
+                aar = 2023
+                tidligereBehandlingsresultat {
+                    behandling {
+                        id = 999L
+                        type = Behandlingstyper.ÅRSAVREGNING
+                    }
+                }
+            }
         }
-        val tidligereBehandlingsresultat = mockk<Behandlingsresultat>().apply {
-            every { behandling } returns tidligereÅrsavregningsBehandling
-        }
-
-        // Sett opp nåværende årsavregning til å referere til den tidligere
-        every { behandlingsresultat.hentÅrsavregning().tidligereBehandlingsresultat } returns tidligereBehandlingsresultat
 
         val årsavregningModel = lagÅrsavregningModel(BigDecimal(1000), BigDecimal(500))
         every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
@@ -383,33 +383,27 @@ class ÅrsavregningVedtakMapperTest {
         )
 
 
-    private fun lagFellesTestdata(): Pair<ÅrsavregningVedtakBrevBestilling, Behandlingsresultat> {
+    private fun lagFellesTestdata(
+        init: BehandlingsresultatTestFactory.Builder.() -> Unit = {}
+    ): Pair<ÅrsavregningVedtakBrevBestilling, Behandlingsresultat> {
         val personDokument = personDokumentForTest { sammensattNavn = "Hei Test" }
         val brevbestilling = ÅrsavregningVedtakBrevBestilling.Builder()
             .medPersonDokument(personDokument)
             .medPersonMottaker(personDokument)
             .medBehandling(lagBehandling())
             .build()
-        val behandlingsresultat = lagBehandlingsresultat()
+        val behandlingsresultat = lagBehandlingsresultat(init)
         return Pair(brevbestilling, behandlingsresultat)
     }
 
-    private fun lagBehandlingsresultat(): Behandlingsresultat {
-        val fagsak = mockk<Fagsak>(relaxed = true)
-        every { fagsak.erSakstypeEøs() } returns true
-        every { fagsak.erSakstypeTrygdeavtale() } returns false
-
-        val behandling = mockk<Behandling>(relaxed = true)
-        every { behandling.fagsak } returns fagsak
-
-        val årsavregning = mockk<Årsavregning>(relaxed = true)
-        every { årsavregning.aar } returns 2023
-
-        val behandlingsresultat = Behandlingsresultat()
-        behandlingsresultat.behandling = behandling
-        behandlingsresultat.årsavregning = årsavregning
-
-        return behandlingsresultat
+    private fun lagBehandlingsresultat(
+        init: BehandlingsresultatTestFactory.Builder.() -> Unit = {}
+    ): Behandlingsresultat = Behandlingsresultat.forTest {
+        behandling {
+            fagsak { type = Sakstyper.EU_EOS }
+        }
+        årsavregning { aar = 2023 }
+        init()
     }
 
     private fun lagÅrsavregningModel(beregnetAvgiftBelop: BigDecimal, tidligereFakturertBeloep: BigDecimal): ÅrsavregningModel {
