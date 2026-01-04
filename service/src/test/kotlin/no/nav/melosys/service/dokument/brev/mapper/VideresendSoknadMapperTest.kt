@@ -33,7 +33,6 @@ class VideresendSoknadMapperTest {
         resultat shouldMatch "(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\\n.*"
     }
 
-    // BrevDataVideresend og UtenlandskMyndighet har ikke forTest DSL - bruker .apply
     private fun lagBrevDataVideresend() =
         BrevDataVideresend(BrevbestillingDto(), "Saksbehandler").apply {
             bostedsland = Landkoder.NO.beskrivelse
