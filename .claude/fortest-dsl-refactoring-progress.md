@@ -111,12 +111,13 @@
 
 ## Batch 12 Completed
 - [x] TrygdeavtaleMapperTest.kt - 19 tests (converted `Lovvalgsperiode().apply`, `OmfattetFamilie().apply`, added helper functions)
+- [x] A001MapperTest.kt - 6 tests (removed lateinit vars, created BrevDataA001Builder DSL, used personDokumentForTest)
 
 ## Next Files to Refactor
 
 ### Mapper tests with `lateinit var` patterns (priority)
 - [x] TrygdeavtaleMapperTest.kt - 19 tests, uses `Lovvalgsperiode().apply`, `OmfattetFamilie().apply`
-- [ ] A001MapperTest.kt - 7 tests, uses `StrukturertAdresse().apply`, `PersonDokument().apply`, `BrevDataA001().apply`
+- [x] A001MapperTest.kt - 6 tests, uses `StrukturertAdresse().apply`, `PersonDokument().apply`, `BrevDataA001().apply`
 - [ ] InformasjonTrygdeavgiftMapperTest.kt - 4 tests (mostly converted, verify)
 - [ ] InnhentingAvInntektsopplysningerMapperTest.kt
 - [ ] ÅrsavregningVedtakMapperTest.kt
