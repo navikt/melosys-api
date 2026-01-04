@@ -828,7 +828,7 @@ class ReplikerBehandlingsresultatServiceTest {
         val exception =
             shouldThrow<IllegalStateException> { replikerBehandlingsresultatService.filtrerTrygdeavgiftsperioder(trygdeavgiftsperioder) }
 
-        exception.message shouldBe "Trygdeavgiftsperiode 1 går over flere år (2024-09-01 - 2025-08-31)"
+        exception.message shouldBe "Trygdeavgiftsperiode 1 går over flere år (${inneværendeÅr - 1}-09-01 - $inneværendeÅr-08-31)"
     }
 
     @Test
@@ -932,7 +932,7 @@ class ReplikerBehandlingsresultatServiceTest {
                 replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
             }
 
-        exception.message shouldBe "Trygdeavgiftsperiode 1 går over flere år (2024-09-01 - 2025-08-31)"
+        exception.message shouldBe "Trygdeavgiftsperiode 1 går over flere år (${inneværendeÅr - 1}-09-01 - $inneværendeÅr-08-31)"
     }
 
     @Test
