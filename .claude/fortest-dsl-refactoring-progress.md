@@ -125,8 +125,8 @@
 - [x] OrienteringTilArbeidsgiverOmVedtakMapperTest.kt - 2 tests (converted to forTest DSL, added vilkaarsresultatForTest)
 - [x] OrienteringAnmodningUnntakMapperTest.kt - 1 test (converted to forTest DSL)
 - [x] InnvilgelseEftaStorbritanniaMapperTest.kt - 7 tests (converted PersonDokument, Behandlingsresultat, added DSL builder)
-- [ ] DokgenMalMapperTest.kt
-- [ ] AnmodningUnntakMapperTest.kt
+- [x] DokgenMalMapperTest.kt - 20 tests (converted Behandlingsresultat/Medlemskapsperiode to forTest DSL)
+- [x] AnmodningUnntakMapperTest.kt - 5 tests (converted all Entity().apply patterns, removed @BeforeEach)
 - [ ] UtpekingAnnetLandMapperTest.kt
 
 ### Mapper tests with `().apply {}` patterns only
