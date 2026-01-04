@@ -26,13 +26,14 @@ class VideresendSoknadMapperTest {
 
 
         val resultat = instans.mapTilBrevXML(
-            fellesType, navFelles, behandling, Behandlingsresultat(), brevdata
+            fellesType, navFelles, behandling, Behandlingsresultat.forTest { }, brevdata
         )
 
 
         resultat shouldMatch "(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\\n.*"
     }
 
+    // BrevDataVideresend og UtenlandskMyndighet har ikke forTest DSL - bruker .apply
     private fun lagBrevDataVideresend() =
         BrevDataVideresend(BrevbestillingDto(), "Saksbehandler").apply {
             bostedsland = Landkoder.NO.beskrivelse

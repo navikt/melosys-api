@@ -130,10 +130,10 @@
 - [x] UtpekingAnnetLandMapperTest.kt - 1 test (converted to forTest DSL, removed @BeforeEach)
 
 ### Mapper tests with `().apply {}` patterns only
-- [ ] InnvilgelsesbrevFlereLandMapperTest.kt
-- [ ] InnvilgelseArbeidsgiverBrevMapperTest.kt
-- [ ] VideresendSoknadMapperTest.kt
-- [ ] VilkaarsresultatTilBegrunnelseMapperTest.kt
+- [x] InnvilgelsesbrevFlereLandMapperTest.kt - 2 tests (converted Lovvalgsperiode/Behandlingsresultat to forTest DSL)
+- [x] InnvilgelseArbeidsgiverBrevMapperTest.kt - 1 test (removed 6 helper functions, use nested DSL)
+- [x] VideresendSoknadMapperTest.kt - 1 test (converted Behandlingsresultat to forTest DSL)
+- [x] VilkaarsresultatTilBegrunnelseMapperTest.kt - 9 tests (converted to vilkaarsresultatForTest DSL)
 
 ## Workflow Hints (Avoiding Context Overflow)
 

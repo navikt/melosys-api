@@ -2,8 +2,7 @@ package no.nav.melosys.service.dokument.sed.mapper
 
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
-import no.nav.melosys.domain.VilkaarBegrunnelse
-import no.nav.melosys.domain.Vilkaarsresultat
+import no.nav.melosys.domain.begrunnelse
 import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser.SAERLIG_GRUNN
 import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR
@@ -11,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_engelsk_begrunnelse
 import no.nav.melosys.domain.kodeverk.begrunnelser.Direkte_til_anmodning_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.Direkte_til_anmodning_begrunnelser.SJOEMANNSKIRKEN
 import no.nav.melosys.domain.kodeverk.begrunnelser.Direkte_til_anmodning_engelsk_begrunnelser
+import no.nav.melosys.domain.vilkaarsresultatForTest
 import no.nav.melosys.service.dokument.brev.mapper.felles.FellesBrevtypeMappingTest.Companion.hentAlleVerdierFraKodeverk
 import org.junit.jupiter.api.Test
 
@@ -18,7 +18,9 @@ class VilkaarsresultatTilBegrunnelseMapperTest {
 
     @Test
     fun tilEngelskBegrunnelseString_medArt16_1_forventBeskrivelse() {
-        val vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(listOf(UTSENDELSE_MELLOM_24_MN_OG_5_AAR.kode))
+        val vilkaarsresultat = vilkaarsresultatForTest {
+            begrunnelse(UTSENDELSE_MELLOM_24_MN_OG_5_AAR.kode)
+        }
 
         VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat) shouldBe
             Anmodning_engelsk_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.beskrivelse
@@ -26,10 +28,12 @@ class VilkaarsresultatTilBegrunnelseMapperTest {
 
     @Test
     fun tilEngelskBegrunnelseString_medArt16UtenArt12_forventBeskrivelse() {
-        val vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(listOf(SJOEMANNSKIRKEN.kode))
+        val vilkaarsresultat = vilkaarsresultatForTest {
+            begrunnelse(SJOEMANNSKIRKEN.kode)
+        }
 
         val result = VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat)
-        result shouldBe "Working for Sjømannskirken (The Norwegian Seamen’s Church), which is a nonprofit organization receiving financial support from the Norwegian Government."
+        result shouldBe "Working for Sjømannskirken (The Norwegian Seamen's Church), which is a nonprofit organization receiving financial support from the Norwegian Government."
     }
 
     @Test
@@ -70,12 +74,10 @@ class VilkaarsresultatTilBegrunnelseMapperTest {
 
     @Test
     fun tilEngelskBegrunnelseString_Art16MedFlereBegrunnelser_forventSammensattBeskrivelse() {
-        val vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(
-            listOf(
-                "UTSENDELSE_MELLOM_24_MN_OG_5_AAR",
-                "IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK"
-            )
-        )
+        val vilkaarsresultat = vilkaarsresultatForTest {
+            begrunnelse("UTSENDELSE_MELLOM_24_MN_OG_5_AAR")
+            begrunnelse("IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK")
+        }
 
         VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat) shouldBe
             Anmodning_engelsk_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.beskrivelse + "\n" +
@@ -84,8 +86,10 @@ class VilkaarsresultatTilBegrunnelseMapperTest {
 
     @Test
     fun tilEngelskBegrunnelseString_art16_forventFritekst() {
-        val vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(listOf("SAERLIG_GRUNN"))
-        vilkaarsresultat.begrunnelseFritekstEessi = "Fritekst som beskriver anmodning om unntak"
+        val vilkaarsresultat = vilkaarsresultatForTest {
+            begrunnelse("SAERLIG_GRUNN")
+            begrunnelseFritekstEessi = "Fritekst som beskriver anmodning om unntak"
+        }
 
         VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat) shouldBe
             "Fritekst som beskriver anmodning om unntak"
@@ -93,15 +97,13 @@ class VilkaarsresultatTilBegrunnelseMapperTest {
 
     @Test
     fun tilEngelskBegrunnelseString_Art16MedFlereBegrunnelserOgFritekst_forventSammensattBeskrivelseOgFritekst() {
-        val vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(
-            listOf(
-                "UTSENDELSE_MELLOM_24_MN_OG_5_AAR",
-                "IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK",
-                "SAERLIG_GRUNN"
-            )
-        )
         val fritekstEngelsk = "Something"
-        vilkaarsresultat.begrunnelseFritekstEessi = fritekstEngelsk
+        val vilkaarsresultat = vilkaarsresultatForTest {
+            begrunnelse("UTSENDELSE_MELLOM_24_MN_OG_5_AAR")
+            begrunnelse("IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK")
+            begrunnelse("SAERLIG_GRUNN")
+            begrunnelseFritekstEessi = fritekstEngelsk
+        }
 
         val result = VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat)
         result shouldBe Anmodning_engelsk_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.beskrivelse + "\n" +
@@ -111,16 +113,10 @@ class VilkaarsresultatTilBegrunnelseMapperTest {
 
     @Test
     fun tilEngelskBegrunnelseString_MedKodeSomIkkeFinnes_forventTomString() {
-        val vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(listOf("EN_KODE_SOM_IKKE_FINNES_I_KODEVERK"))
+        val vilkaarsresultat = vilkaarsresultatForTest {
+            begrunnelse("EN_KODE_SOM_IKKE_FINNES_I_KODEVERK")
+        }
 
         VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat) shouldBe ""
-    }
-
-    private fun lagVilkaarsresultatMedBegrunnelser(vilkaarBegrunnelseKoder: List<String>) = Vilkaarsresultat().apply {
-        begrunnelser = vilkaarBegrunnelseKoder.map { lagVilkaarBegrunnelse(it) }.toSet()
-    }
-
-    private fun lagVilkaarBegrunnelse(kode: String) = VilkaarBegrunnelse().apply {
-        this.kode = kode
     }
 }
