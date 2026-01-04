@@ -123,8 +123,8 @@
 - [x] ÅrsavregningVedtakMapperTest.kt - 12 tests (removed mocked domain entities, use forTest DSL)
 - [x] RettigheterOgPlikterStandardvedleggMapperTest.kt - 3 tests (converted to forTest DSL)
 - [x] OrienteringTilArbeidsgiverOmVedtakMapperTest.kt - 2 tests (converted to forTest DSL, added vilkaarsresultatForTest)
-- [ ] OrienteringAnmodningUnntakMapperTest.kt
-- [ ] InnvilgelseEftaStorbritanniaMapperTest.kt
+- [x] OrienteringAnmodningUnntakMapperTest.kt - 1 test (converted to forTest DSL)
+- [x] InnvilgelseEftaStorbritanniaMapperTest.kt - 7 tests (converted PersonDokument, Behandlingsresultat, added DSL builder)
 - [ ] DokgenMalMapperTest.kt
 - [ ] AnmodningUnntakMapperTest.kt
 - [ ] UtpekingAnnetLandMapperTest.kt
