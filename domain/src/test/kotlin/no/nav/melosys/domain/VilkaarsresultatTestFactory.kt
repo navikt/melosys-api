@@ -19,7 +19,7 @@ object VilkaarsresultatTestFactory {
         var isOppfylt: Boolean = false
         var begrunnelseFritekst: String? = null
         var begrunnelseFritekstEessi: String? = null
-        val begrunnelseKoder: MutableSet<String> = mutableSetOf()
+        val begrunnelseKoder: MutableList<String> = mutableListOf()
 
         fun build(): Vilkaarsresultat {
             val vilkaarsresultat = Vilkaarsresultat().apply {
@@ -30,13 +30,13 @@ object VilkaarsresultatTestFactory {
                 this.begrunnelseFritekstEessi = this@Builder.begrunnelseFritekstEessi
             }
 
-            begrunnelseKoder.forEach { kode ->
-                val begrunnelse = VilkaarBegrunnelse().apply {
+            // Use toSet() on list to create a LinkedHashSet that preserves insertion order
+            vilkaarsresultat.begrunnelser = begrunnelseKoder.map { kode ->
+                VilkaarBegrunnelse().apply {
                     this.kode = kode
                     this.vilkaarsresultat = vilkaarsresultat
                 }
-                vilkaarsresultat.begrunnelser.add(begrunnelse)
-            }
+            }.toSet()
 
             return vilkaarsresultat
         }

@@ -33,7 +33,7 @@ class VilkaarsresultatTilBegrunnelseMapperTest {
         }
 
         val result = VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat)
-        result shouldBe "Working for Sjømannskirken (The Norwegian Seamen's Church), which is a nonprofit organization receiving financial support from the Norwegian Government."
+        result shouldBe Direkte_til_anmodning_engelsk_begrunnelser.SJOEMANNSKIRKEN.beskrivelse
     }
 
     @Test
