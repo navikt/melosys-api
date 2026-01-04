@@ -127,7 +127,7 @@
 - [x] InnvilgelseEftaStorbritanniaMapperTest.kt - 7 tests (converted PersonDokument, Behandlingsresultat, added DSL builder)
 - [x] DokgenMalMapperTest.kt - 20 tests (converted Behandlingsresultat/Medlemskapsperiode to forTest DSL)
 - [x] AnmodningUnntakMapperTest.kt - 5 tests (converted all Entity().apply patterns, removed @BeforeEach)
-- [ ] UtpekingAnnetLandMapperTest.kt
+- [x] UtpekingAnnetLandMapperTest.kt - 1 test (converted to forTest DSL, removed @BeforeEach)
 
 ### Mapper tests with `().apply {}` patterns only
 - [ ] InnvilgelsesbrevFlereLandMapperTest.kt
