@@ -17,6 +17,7 @@ import no.nav.melosys.domain.arkiv.Vedlegg
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.domain.eessi.sed.OpprettBucOgSedDtoV2
 import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagA003Dto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
@@ -38,6 +39,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import java.time.LocalDate
 import java.util.*
+import no.nav.melosys.domain.eessi.sed.VedleggReferanse
 
 @SpringBootTest
 @ActiveProfiles("wiremock-test")
@@ -139,6 +141,105 @@ class EessiConsumerTest(
                 SedDataDto(), listOf(), BucType.LA_BUC_01, true, true
             )
         }.message.shouldContain("Kall mot eessi feilet")
+    }
+
+    @Test
+    fun opprettBucOgSedV2() {
+        val opprettBucOgSedDtoV2 = OpprettBucOgSedDtoV2(
+            bucType = BucType.LA_BUC_01,
+            sedDataDto = SedDataDto(),
+            vedlegg = setOf(
+                VedleggReferanse("journalpostId1", "dokumentId1", "Tittel 1"),
+                VedleggReferanse("journalpostId2", "dokumentId2", "Tittel 2")
+            ),
+            sendAutomatisk = true,
+            oppdaterEksisterende = false
+        )
+
+        serviceUnderTestMockServer.stubFor(
+            WireMock.any(WireMock.urlMatching(".*"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("{\"rinaSaksnummer\":\"67890\",\"rinaUrl\":\"localhost:3000/rina/67890\"}")
+                )
+        )
+
+
+        val opprettSedDto = eessiConsumer.opprettBucOgSedV2(opprettBucOgSedDtoV2)
+
+
+        serviceUnderTestMockServer.verify(
+            WireMock.postRequestedFor(WireMock.urlEqualTo("/api/v2/buc"))
+                .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
+                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withRequestBody(WireMock.equalToJson(ObjectMapper().writeValueAsString(opprettBucOgSedDtoV2)))
+        )
+
+        opprettSedDto.rinaSaksnummer.shouldBe("67890")
+        opprettSedDto.rinaUrl.shouldBe("localhost:3000/rina/67890")
+        MetricsTestConfig.checkMetricsUri("/api/v2/buc")
+    }
+
+    @Test
+    fun opprettBucOgSedV2_forventException() {
+        val opprettBucOgSedDtoV2 = OpprettBucOgSedDtoV2(
+            bucType = BucType.LA_BUC_01,
+            sedDataDto = SedDataDto(),
+            vedlegg = emptySet(),
+            sendAutomatisk = false,
+            oppdaterEksisterende = false
+        )
+
+        serviceUnderTestMockServer.stubFor(
+            WireMock.any(WireMock.urlMatching(".*"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(500)
+                )
+        )
+
+
+        shouldThrow<TekniskException> {
+            eessiConsumer.opprettBucOgSedV2(opprettBucOgSedDtoV2)
+        }.message.shouldContain("Kall mot eessi feilet")
+    }
+
+    @Test
+    fun opprettBucOgSedV2_medTommeVedlegg() {
+        val opprettBucOgSedDtoV2 = OpprettBucOgSedDtoV2(
+            bucType = BucType.LA_BUC_03,
+            sedDataDto = SedDataDto(),
+            vedlegg = emptySet(),
+            sendAutomatisk = false,
+            oppdaterEksisterende = true
+        )
+
+        serviceUnderTestMockServer.stubFor(
+            WireMock.any(WireMock.urlMatching(".*"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("{\"rinaSaksnummer\":\"99999\",\"rinaUrl\":\"localhost:3000/rina/99999\"}")
+                )
+        )
+
+
+        val opprettSedDto = eessiConsumer.opprettBucOgSedV2(opprettBucOgSedDtoV2)
+
+
+        serviceUnderTestMockServer.verify(
+            WireMock.postRequestedFor(WireMock.urlEqualTo("/api/v2/buc"))
+                .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
+                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withRequestBody(WireMock.equalToJson(ObjectMapper().writeValueAsString(opprettBucOgSedDtoV2)))
+        )
+
+        opprettSedDto.rinaSaksnummer.shouldBe("99999")
     }
 
     @Test

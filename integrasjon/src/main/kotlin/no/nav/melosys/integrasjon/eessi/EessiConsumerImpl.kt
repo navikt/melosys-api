@@ -5,6 +5,7 @@ import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Institusjon
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.domain.eessi.sed.OpprettBucOgSedDtoV2
 import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
 import no.nav.melosys.integrasjon.eessi.dto.*
@@ -27,6 +28,14 @@ open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, 
                 bucType, sendAutomatisk, oppdaterEksisterendeOmFinnes
             )
             .bodyValue(OpprettBucOgSedDto(sedDataDto, vedlegg))
+            .retrieve()
+            .bodyToMono<OpprettSedDto>()
+            .block()!!
+
+    override fun opprettBucOgSedV2(opprettBucOgSedDtoV2: OpprettBucOgSedDtoV2) =
+        webClient.post()
+            .uri("/v2/buc")
+            .bodyValue(opprettBucOgSedDtoV2)
             .retrieve()
             .bodyToMono<OpprettSedDto>()
             .block()!!
