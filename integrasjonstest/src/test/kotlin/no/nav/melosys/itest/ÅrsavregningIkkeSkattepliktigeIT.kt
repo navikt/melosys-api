@@ -8,11 +8,7 @@ import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.*
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -101,7 +97,7 @@ class ÅrsavregningIkkeSkattepliktigeIT(
                     behandlingsresultatRepository.findById(årsavregningsbehandling.id)
                         .shouldBePresent()
                         .årsavregning.shouldNotBeNull()
-                        .aar shouldBe 2025
+                        .aar shouldBe ÅRSAVREGNING_ÅR
                 }
         }
     }
