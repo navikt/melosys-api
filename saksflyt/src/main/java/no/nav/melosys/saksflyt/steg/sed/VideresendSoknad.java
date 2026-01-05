@@ -12,7 +12,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.FysiskDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
@@ -74,15 +73,14 @@ public class VideresendSoknad extends AbstraktSendUtland {
             prosessinstans.getBehandling().getId(), sendtStatus);
     }
 
-    private Collection<Vedlegg> hentVedlegg(Prosessinstans prosessinstans) {
-        final Set<DokumentReferanse> vedleggReferanser = prosessinstans.getData(ProsessDataKey.VEDLEGG_SED,
-            new TypeReference<Set<DokumentReferanse>>() {
+    private Collection<DokumentReferanse> hentVedlegg(Prosessinstans prosessinstans) {
+        final Set<DokumentReferanse> dokumentReferanser = prosessinstans.getData(ProsessDataKey.VEDLEGG_SED,
+            new TypeReference<>() {
             });
-        if (CollectionUtils.isEmpty(vedleggReferanser)) {
+        if (CollectionUtils.isEmpty(dokumentReferanser)) {
             throw new FunksjonellException("Kan ikke videresende søknad uten vedlegg!");
         }
-
-        return eessiService.lagEessiVedlegg(prosessinstans.getBehandling().getFagsak(), vedleggReferanser);
+        return dokumentReferanser;
     }
 
     @Override

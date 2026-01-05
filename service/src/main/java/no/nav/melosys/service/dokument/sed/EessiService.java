@@ -8,15 +8,14 @@ import java.util.stream.Collectors;
 import io.getunleash.Unleash;
 import jakarta.annotation.Nullable;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.eessi.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
-import no.nav.melosys.domain.eessi.sed.InvalideringSedDto;
-import no.nav.melosys.domain.eessi.sed.SedDataDto;
-import no.nav.melosys.domain.eessi.sed.UtpekingAvvisDto;
+import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -24,6 +23,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_k
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
@@ -69,18 +69,16 @@ public class EessiService {
         this.unleash = unleash;
     }
 
-    public Collection<Vedlegg> lagEessiVedlegg(Fagsak fagsak, Collection<DokumentReferanse> vedleggReferanser) {
-        if (vedleggReferanser.isEmpty()) {
+    protected Collection<Vedlegg> lagEessiVedlegg(Fagsak fagsak, Collection<DokumentReferanse> dokumentReferanser) {
+        if (dokumentReferanser.isEmpty()) {
             return Collections.emptySet();
         }
         final List<Journalpost> journalposter = joarkFasade.hentJournalposterTilknyttetSak(
             new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(), fagsak.getSaksnummer())
         );
         final Collection<Vedlegg> vedlegg = new ArrayList<>();
-        for (DokumentReferanse dokumentReferanse : vedleggReferanser) {
-            Journalpost journalpost = journalposter.stream()
-                .filter(jp -> jp.getJournalpostId().equals(dokumentReferanse.getJournalpostID()))
-                .findFirst()
+        for (DokumentReferanse dokumentReferanse : dokumentReferanser) {
+            Journalpost journalpost = findJournalPost(dokumentReferanse.getJournalpostID(), journalposter)
                 .orElseThrow(() -> new IkkeFunnetException(String.format("Finner ikke journalpost %s for sak %s",
                     dokumentReferanse.getJournalpostID(), fagsak.getSaksnummer())));
             vedlegg.add(lagEessiVedlegg(journalpost, dokumentReferanse));
@@ -88,14 +86,42 @@ public class EessiService {
         return vedlegg;
     }
 
-    private Vedlegg lagEessiVedlegg(Journalpost journalpost, DokumentReferanse vedleggReferanse) {
-        byte[] pdf = joarkFasade.hentDokument(vedleggReferanse.getJournalpostID(), vedleggReferanse.getDokumentID());
-        String tittel = journalpost.hentArkivDokument(vedleggReferanse.getDokumentID()).getTittel();
+    protected Collection<VedleggReferanse> lagVedleggReferanser(Fagsak fagsak, Collection<DokumentReferanse> dokumentReferanser) {
+        if (dokumentReferanser.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        final List<Journalpost> journalposter = joarkFasade.hentJournalposterTilknyttetSak(
+            new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(), fagsak.getSaksnummer())
+        );
+
+        return dokumentReferanser.stream().map(dokumentReferanse -> {
+            Journalpost journalpost = findJournalPost(dokumentReferanse.getJournalpostID(), journalposter)
+                .orElseThrow(() -> new IkkeFunnetException(String.format("Finner ikke journalpost %s for sak %s",
+                    dokumentReferanse.getJournalpostID(), fagsak.getSaksnummer())));
+
+            return new VedleggReferanse(
+                journalpost.getJournalpostId(),
+                dokumentReferanse.getDokumentID(),
+                journalpost.hentArkivDokument(dokumentReferanse.getDokumentID()).getTittel()
+            );
+        }).toList();
+    }
+
+    private Optional<Journalpost> findJournalPost(String journalpostId, List<Journalpost> journalposter) {
+        return journalposter.stream()
+            .filter(jp -> jp.getJournalpostId().equals(journalpostId))
+            .findFirst();
+    }
+
+    private Vedlegg lagEessiVedlegg(Journalpost journalpost, DokumentReferanse dokumentReferanse) {
+        byte[] pdf = joarkFasade.hentDokument(dokumentReferanse.getJournalpostID(), dokumentReferanse.getDokumentID());
+        String tittel = journalpost.hentArkivDokument(dokumentReferanse.getDokumentID()).getTittel();
         return new Vedlegg(pdf, tittel);
     }
 
     public void opprettOgSendSed(long behandlingID, List<String> mottakerInstitusjoner, BucType bucType,
-                                 Collection<Vedlegg> vedlegg, String ytterligereInformasjon) {
+                                 Collection<DokumentReferanse> dokumentReferanser, String ytterligereInformasjon) {
         log.info("Starter sending av SED for behandling {}", behandlingID);
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -109,12 +135,15 @@ public class EessiService {
         sedData.setYtterligereInformasjon(mapYtterligereInformasjon(ytterligereInformasjon, periodeType, behandlingsresultat));
 
         log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
-        OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(
+
+        OpprettSedDto opprettSedDto = featureToggledOpprettBucOgSed(
+            behandling,
+            dokumentReferanser,
             sedData,
-            vedlegg,
             bucType,
             true,
-            true);
+            true
+        );
 
         log.info("Buc opprettet med id {} for behandling {}", opprettSedDto.getRinaSaksnummer(), behandling.getId());
     }
@@ -123,13 +152,13 @@ public class EessiService {
     public String opprettBucOgSed(long behandlingID,
                                   BucType bucType,
                                   List<String> mottakerInstitusjoner,
-                                  Collection<DokumentReferanse> vedleggReferanser) {
+                                  Collection<DokumentReferanse> dokumentReferanser) {
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
 
         Fagsak fagsak = behandling.getFagsak();
         joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(
-            new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(), fagsak.getSaksnummer()), vedleggReferanser
+            new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(), fagsak.getSaksnummer()), dokumentReferanser
         );
 
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
@@ -138,9 +167,40 @@ public class EessiService {
         sedDataDto.setMottakerIder(mottakerInstitusjoner);
         sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());
 
-        final var vedlegg = lagEessiVedlegg(behandling.getFagsak(), vedleggReferanser);
+
         log.info("Oppretter buc og sed for behandling {} med bucType {}", behandling.getId(), bucType);
-        return eessiConsumer.opprettBucOgSed(sedDataDto, vedlegg, bucType, false, false).getRinaUrl();
+        return featureToggledOpprettBucOgSed(
+            behandling,
+            dokumentReferanser,
+            sedDataDto,
+            bucType,
+            false,
+            false
+        ).getRinaUrl();
+    }
+
+    // Blir litt mange metodeparametere her, men heldigvis er denne bare midlertidig inntil feature-togglingen er fjernet
+    private OpprettSedDto featureToggledOpprettBucOgSed(
+        Behandling behandling,
+        Collection<DokumentReferanse> dokumentReferanser,
+        SedDataDto sedDataDto,
+        BucType bucType,
+        Boolean sendAutomatisk,
+        Boolean oppdaterEksisterende
+    ) {
+        if (unleash.isEnabled(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)) {
+            log.info("Oppretter buc og sed med v2-endepunkt");
+            return eessiConsumer.opprettBucOgSedV2(new OpprettBucOgSedDtoV2(
+                bucType,
+                sedDataDto,
+                lagVedleggReferanser(behandling.getFagsak(), dokumentReferanser),
+                sendAutomatisk,
+                oppdaterEksisterende
+            ));
+        }
+
+        final var vedlegg = lagEessiVedlegg(behandling.getFagsak(), dokumentReferanser);
+        return eessiConsumer.opprettBucOgSed(sedDataDto, vedlegg, bucType, sendAutomatisk, oppdaterEksisterende);
     }
 
     public List<Institusjon> hentEessiMottakerinstitusjoner(String bucType, Collection<String> landkoder) {
