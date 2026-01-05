@@ -137,7 +137,7 @@ class SendFakturaÅrsavregningTest {
             this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
             startDato shouldBe PERIODE_START
             sluttDato shouldBe PERIODE_SLUTT
-            beskrivelse shouldBe """Medlemskapsperiode 01.02.2025 - 31.10.2025, endelig beregnet trygdeavgift ${behandlingsresultat.hentÅrsavregning().beregnetAvgiftBelop} - """ +
+            beskrivelse shouldBe """Medlemskapsperiode 01.02.$inneværendeÅr - 31.10.$inneværendeÅr, endelig beregnet trygdeavgift ${behandlingsresultat.hentÅrsavregning().beregnetAvgiftBelop} - """ +
                 """forskuddsvis fakturert trygdeavgift ${behandlingsresultat.hentÅrsavregning().tidligereFakturertBeloep ?: 0}"""
         }
 
@@ -302,6 +302,7 @@ class SendFakturaÅrsavregningTest {
         const val SAKSBEHANDLER = "G568493"
         const val fakturaserieRef = "GDL435389405Gf"
         const val tidligereFakturaserieRef = "763452GG"
+        private val inneværendeÅr = LocalDate.now().year
         val PERIODE_START = LocalDate.now().withMonth(2).withDayOfMonth(1)
         val PERIODE_SLUTT = LocalDate.now().withMonth(10).withDayOfMonth(31)
     }
