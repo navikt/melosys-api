@@ -161,10 +161,7 @@ class OpprettOgJournalforBrevTest {
         val virksomhetOrgnr = "orgnr"
         val behandling = Behandling.forTest {
             fagsak {
-                leggTilAktør(Aktoer().apply {
-                    orgnr = virksomhetOrgnr
-                    rolle = Aktoersroller.VIRKSOMHET
-                })
+                medVirksomhet { orgnr = virksomhetOrgnr }
             }
             type = Behandlingstyper.FØRSTEGANG
             tema = Behandlingstema.YRKESAKTIV
@@ -729,15 +726,14 @@ class OpprettOgJournalforBrevTest {
         aktørId = aktørID
     )
 
+    // Journalpost er en transient integrasjons-DTO fra Joark, ikke en persistert domeneentitet.
+    // Bruker .apply siden det ikke finnes forTest DSL for denne typen.
     private fun lagJournalpost(journalpostId: String, dokumentId: String, tittel: String) =
         Journalpost(journalpostId).apply {
             journalposttype = Journalposttype.UT
             avsenderId = "NAVAT:07"
             korrespondansepartNavn = "Test12345"
-            hoveddokument = ArkivDokument().apply {
-                this.dokumentId = dokumentId
-                this.tittel = tittel
-            }
+            hoveddokument = ArkivDokument(dokumentId = dokumentId, tittel = tittel)
         }
 
     private fun hentProduserbaredokumenter() = listOf(

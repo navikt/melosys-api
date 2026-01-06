@@ -5,18 +5,18 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.behandling
 import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.lovvalgsperiode
 import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
+import no.nav.melosys.domain.medlemskapsperiode
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -47,9 +47,6 @@ class ManglendeFakturabetalingConsumerTest {
 
     @Test
     fun `opprett prosess for varselbrev om manglende innbetaling når alle lovvalgsperioder er pliktige`() {
-        val lovvalgsperiode = mockk<Lovvalgsperiode>(relaxed = true)
-        every { lovvalgsperiode.erPliktigMedlemskap() } returns true
-
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 id = 123
@@ -58,7 +55,9 @@ class ManglendeFakturabetalingConsumerTest {
                     tema = Sakstemaer.MEDLEMSKAP_LOVVALG
                 }
             }
-            lovvalgsperioder.add(lovvalgsperiode)
+            lovvalgsperiode {
+                medlemskapstype = Medlemskapstyper.PLIKTIG
+            }
         }
         val behandling = behandlingsresultat.behandling
 
@@ -92,9 +91,6 @@ class ManglendeFakturabetalingConsumerTest {
     @Test
     fun `opprett prosess for varselbrev om manglende innbetaling når alle medlemskapsperioder er pliktige`() {
         // Given
-        val medlemskapsperiode = mockk<Medlemskapsperiode>(relaxed = true)
-        every { medlemskapsperiode.erPliktigMedlemskap() } returns true
-
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 id = 123
@@ -102,7 +98,9 @@ class ManglendeFakturabetalingConsumerTest {
                     type = Sakstyper.FTRL
                 }
             }
-            medlemskapsperioder.add(medlemskapsperiode)
+            medlemskapsperiode {
+                medlemskapstype = Medlemskapstyper.PLIKTIG
+            }
         }
         val behandling = behandlingsresultat.behandling
 
@@ -179,14 +177,13 @@ class ManglendeFakturabetalingConsumerTest {
     @Test
     fun `opprett prosess for manglende innbetaling behandling, frivillig medlemskap`() {
         // Given
-        val medlemskapsperiode = mockk<Medlemskapsperiode>(relaxed = true)
-        every { medlemskapsperiode.erPliktigMedlemskap() } returns false
-
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 id = 123
             }
-            medlemskapsperioder.add(medlemskapsperiode)
+            medlemskapsperiode {
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+            }
         }
 
         val melding = ManglendeFakturabetalingMelding(

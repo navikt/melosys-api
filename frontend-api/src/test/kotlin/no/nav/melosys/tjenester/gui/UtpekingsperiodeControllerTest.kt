@@ -4,22 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.verify
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Utpekingsperiode
-import no.nav.melosys.domain.dokument.SaksopplysningDokument
-import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.kodeverk.Land_iso2
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.utpekingsperiodeForTest
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.service.utpeking.UtpekingService
 import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingsperioderDto
 import no.nav.melosys.tjenester.gui.util.responseBody
-import org.jeasy.random.EasyRandom
-import org.jeasy.random.EasyRandomParameters
-import org.jeasy.random.FieldPredicates.ofType
-import org.jeasy.random.randomizers.misc.EnumRandomizer
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -32,16 +23,6 @@ import java.time.LocalDate
 
 @WebMvcTest(controllers = [UtpekingsperiodeController::class])
 internal class UtpekingsperiodeControllerTest {
-
-    private val random = EasyRandom(
-        EasyRandomParameters()
-            .randomizationDepth(2)
-            .randomize(ofType(LovvalgBestemmelse::class.java)) {
-                EnumRandomizer(Lovvalgbestemmelser_883_2004::class.java).randomValue
-            }
-            .randomize(SaksopplysningDokument::class.java) { PersonDokument() }
-            .randomize(ofType(Behandlingsresultat::class.java)) { null }
-    )
 
     @MockkBean
     private lateinit var aksesskontroll: Aksesskontroll
@@ -103,8 +84,18 @@ internal class UtpekingsperiodeControllerTest {
             lovvalgsland = Land_iso2.SE
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A
         },
-        random.nextObject(Utpekingsperiode::class.java),
-        random.nextObject(Utpekingsperiode::class.java)
+        utpekingsperiodeForTest {
+            fom = LocalDate.now().minusMonths(3)
+            tom = LocalDate.now().minusMonths(1)
+            lovvalgsland = Land_iso2.DK
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1
+        },
+        utpekingsperiodeForTest {
+            fom = LocalDate.now().plusMonths(1)
+            tom = LocalDate.now().plusMonths(6)
+            lovvalgsland = Land_iso2.FI
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A
+        }
     )
 
     companion object {

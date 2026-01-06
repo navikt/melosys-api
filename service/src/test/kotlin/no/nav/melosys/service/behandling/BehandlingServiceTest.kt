@@ -300,8 +300,7 @@ class BehandlingServiceTest {
         status = AVSLUTTET
         initierendeJournalpostId = "initierendeJournalpostId"
         dokumentasjonSvarfristDato = Instant.parse("2017-12-11T09:37:30.00Z")
-        behandlingsårsak = Behandlingsaarsak().apply {
-            id = 23L
+        behandlingsårsak {
             mottaksdato = LocalDate.now()
         }
         mottatteOpplysninger { soeknad { } }
@@ -497,13 +496,33 @@ class BehandlingServiceTest {
 
     @Test
     fun `replikerBehandling utenMottatteOpplysninger blirReplikert`() {
-        val tidligsteInaktiveBehandling = opprettBehandlingMedData()
-        tidligsteInaktiveBehandling.mottatteOpplysninger = null
+        val tidligsteInaktiveBehandling = opprettBehandlingUtenMottatteOpplysninger()
 
         every { behandlingRepository.save(any()) } answers { firstArg() }
         val replikertBehandling = behandlingService.replikerBehandling(tidligsteInaktiveBehandling, Behandlingstyper.NY_VURDERING)
 
         replikertBehandling.mottatteOpplysninger shouldBe null
+    }
+
+    private fun opprettBehandlingUtenMottatteOpplysninger(): Behandling = Behandling.forTest {
+        id = 665L
+        tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+        status = AVSLUTTET
+        initierendeJournalpostId = "initierendeJournalpostId"
+        dokumentasjonSvarfristDato = Instant.parse("2017-12-11T09:37:30.00Z")
+        behandlingsårsak {
+            mottaksdato = LocalDate.now()
+        }
+        fagsak { }
+        saksopplysning {
+            type = SaksopplysningType.INNTK
+            endretDato = Instant.parse("2020-02-11T09:37:30Z")
+            kilde {
+                id = 123321L
+                kilde = SaksopplysningKildesystem.EREG
+                mottattDokument = "dokxml"
+            }
+        }
     }
 
     @Test

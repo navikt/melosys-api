@@ -247,9 +247,7 @@ internal class DokgenMalMapperTest {
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.NO.kode) } returns Landkoder.NO.beskrivelse
 
         val behandling = DokgenTestData.lagBehandling()
-        val org = DokgenTestData.lagOrg()
-        org.organisasjonDetaljer.forretningsadresse = listOf(lagOrgForretningsadresse())
-        org.organisasjonDetaljer.postadresse = emptyList()
+        val org = lagOrgMedKunForretningsadresse()
         val brevbestilling = DokgenBrevbestilling.Builder()
             .medProduserbartdokument(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medBehandling(behandling)
@@ -475,7 +473,7 @@ internal class DokgenMalMapperTest {
         every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata()
         every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
         every { mockDokgenMapperDatahenter.hentNorskPoststed(any()) } returns "Andeby"
-        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns Behandlingsresultat()
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns Behandlingsresultat.forTest { }
         val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
 
         val brevbestilling: DokgenBrevbestilling = VarselbrevManglendeInnbetalingBrevbestilling.Builder()
@@ -808,6 +806,11 @@ internal class DokgenMalMapperTest {
         postnr = DokgenTestData.POSTNR_ORG
         gyldighetsperiode = Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2))
         landkode = "NO"
+    }
+
+    private fun lagOrgMedKunForretningsadresse() = DokgenTestData.lagOrg().apply {
+        organisasjonDetaljer.forretningsadresse = listOf(lagOrgForretningsadresse())
+        organisasjonDetaljer.postadresse = emptyList()
     }
 
     companion object {

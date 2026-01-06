@@ -166,6 +166,7 @@ class A001MapperTest {
                 strukturertAdresse
             )
             val maritimtArbeidssted = BrevDataTestUtils.lagMaritimtArbeidssted()
+            // UtenlandskMyndighet har ikke forTest DSL - bruker .apply
             val myndighet = UtenlandskMyndighet().apply {
                 navn = "SAV"
                 institusjonskode = "23"

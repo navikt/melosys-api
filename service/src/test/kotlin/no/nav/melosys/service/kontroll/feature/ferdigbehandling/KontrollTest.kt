@@ -341,6 +341,7 @@ internal class KontrollTest {
             }
             saksopplysning {
                 type = SaksopplysningType.MEDL
+                // MedlemskapDokument er et dokument/DTO-objekt uten forTest DSL - bruker .apply
                 dokument = MedlemskapDokument().apply {
                     medlemsperiode = listOf(
                         Medlemsperiode(
@@ -749,12 +750,13 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_arbeidsstedManglerFelter_returnererKode() {
-        val mottatteOpplysningerData = MottatteOpplysningerData().apply {
+        // MottatteOpplysningerData er et Java DTO-objekt uten forTest DSL - bruker .apply
+        val mottatteOpplysningerTestData = MottatteOpplysningerData().apply {
             arbeidPaaLand.fysiskeArbeidssteder = listOf(FysiskArbeidssted())
         }
         val behandling = lagBehandling {
             mottatteOpplysninger {
-                this.mottatteOpplysningerData = mottatteOpplysningerData
+                mottatteOpplysningerData = mottatteOpplysningerTestData
             }
         }
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
@@ -774,12 +776,13 @@ internal class KontrollTest {
 
     @Test
     fun kontroller_foretakUtlandManglerFelter_returnererKode() {
-        val mottatteOpplysningerData = MottatteOpplysningerData().apply {
+        // MottatteOpplysningerData og ForetakUtland er Java DTO-objekter uten forTest DSL - bruker .apply
+        val mottatteOpplysningerTestData = MottatteOpplysningerData().apply {
             foretakUtland = listOf(ForetakUtland().apply { selvstendigNæringsvirksomhet = false })
         }
         val behandling = lagBehandling {
             mottatteOpplysninger {
-                this.mottatteOpplysningerData = mottatteOpplysningerData
+                mottatteOpplysningerData = mottatteOpplysningerTestData
             }
         }
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling

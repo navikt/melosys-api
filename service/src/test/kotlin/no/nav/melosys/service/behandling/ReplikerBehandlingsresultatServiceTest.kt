@@ -115,19 +115,13 @@ class ReplikerBehandlingsresultatServiceTest {
             medExistingMedlemskapsperiode(innvilgetMedlemskapsperiode)
             medExistingMedlemskapsperiode(avslaattMedlemskapsperiode)
             medExistingMedlemskapsperiode(opphoertMedlemskapsperiode)
-        }.also {
-            it.avklartefakta.add(avklartefaktaOriginal)
-            avklartefaktaOriginal.behandlingsresultat = it
-            it.vilkaarsresultater.add(vilkaarsresultatOriginal)
-            vilkaarsresultatOriginal.behandlingsresultat = it
-            it.lovvalgsperioder.add(lovvalgsperiodeOriginal)
-            lovvalgsperiodeOriginal.behandlingsresultat = it
-            it.behandlingsresultatBegrunnelser.add(lagBehandlingsresultatBegrunnelse(it))
-            it.kontrollresultater.add(lagKontrollresultat(it))
-            it.anmodningsperioder.add(anmodningsperiodeOriginal)
-            anmodningsperiodeOriginal.behandlingsresultat = it
-            it.utpekingsperioder.add(utpekingsperiodeOriginal)
-            utpekingsperiodeOriginal.behandlingsresultat = it
+            medExistingAvklartefakta(avklartefaktaOriginal)
+            medExistingVilkaarsresultat(vilkaarsresultatOriginal)
+            medExistingLovvalgsperiode(lovvalgsperiodeOriginal)
+            begrunnelse("begrunnelsekode")
+            kontrollresultat { begrunnelse = Kontroll_begrunnelser.FEIL_I_PERIODEN }
+            medExistingAnmodningsperiode(anmodningsperiodeOriginal)
+            medExistingUtpekingsperiode(utpekingsperiodeOriginal)
         }
 
 
@@ -324,23 +318,15 @@ class ReplikerBehandlingsresultatServiceTest {
             utfallRegistreringUnntak = Utfallregistreringunntak.IKKE_GODKJENT
             trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
             vedtakMetadata { vedtaksdato = Instant.parse("2002-02-11T09:37:30Z") }
-        }.also {
-            it.avklartefakta.add(avklartefaktaOriginal)
-            avklartefaktaOriginal.behandlingsresultat = it
-            it.vilkaarsresultater.add(vilkaarsresultatOriginal)
-            vilkaarsresultatOriginal.behandlingsresultat = it
-            it.behandlingsresultatBegrunnelser.add(lagBehandlingsresultatBegrunnelse(it))
-            it.kontrollresultater.add(lagKontrollresultat(it))
-            it.anmodningsperioder.add(anmodningsperiodeOriginal)
-            anmodningsperiodeOriginal.behandlingsresultat = it
-            it.utpekingsperioder.add(utpekingsperiodeOriginal)
-            utpekingsperiodeOriginal.behandlingsresultat = it
-            it.lovvalgsperioder.add(innvilgetLovvalgsperiode)
-            innvilgetLovvalgsperiode.behandlingsresultat = it
-            it.lovvalgsperioder.add(avslaattLovvalgsperiode)
-            avslaattLovvalgsperiode.behandlingsresultat = it
-            it.lovvalgsperioder.add(opphoertLovvalgsperiode)
-            opphoertLovvalgsperiode.behandlingsresultat = it
+            medExistingAvklartefakta(avklartefaktaOriginal)
+            medExistingVilkaarsresultat(vilkaarsresultatOriginal)
+            begrunnelse("begrunnelsekode")
+            kontrollresultat { begrunnelse = Kontroll_begrunnelser.FEIL_I_PERIODEN }
+            medExistingAnmodningsperiode(anmodningsperiodeOriginal)
+            medExistingUtpekingsperiode(utpekingsperiodeOriginal)
+            medExistingLovvalgsperiode(innvilgetLovvalgsperiode)
+            medExistingLovvalgsperiode(avslaattLovvalgsperiode)
+            medExistingLovvalgsperiode(opphoertLovvalgsperiode)
         }
 
 
@@ -519,19 +505,13 @@ class ReplikerBehandlingsresultatServiceTest {
             medExistingMedlemskapsperiode(innvilgetMedlemskapsperiode)
             medExistingMedlemskapsperiode(avslaattMedlemskapsperiode)
             medExistingMedlemskapsperiode(opphoertMedlemskapsperiode)
-        }.also {
-            it.avklartefakta.add(avklartefaktaOriginal)
-            avklartefaktaOriginal.behandlingsresultat = it
-            it.vilkaarsresultater.add(vilkaarsresultatOriginal)
-            vilkaarsresultatOriginal.behandlingsresultat = it
-            it.lovvalgsperioder.add(lovvalgsperiodeOriginal)
-            lovvalgsperiodeOriginal.behandlingsresultat = it
-            it.behandlingsresultatBegrunnelser.add(lagBehandlingsresultatBegrunnelse(it))
-            it.kontrollresultater.add(lagKontrollresultat(it))
-            it.anmodningsperioder.add(anmodningsperiodeOriginal)
-            anmodningsperiodeOriginal.behandlingsresultat = it
-            it.utpekingsperioder.add(utpekingsperiodeOriginal)
-            utpekingsperiodeOriginal.behandlingsresultat = it
+            medExistingAvklartefakta(avklartefaktaOriginal)
+            medExistingVilkaarsresultat(vilkaarsresultatOriginal)
+            medExistingLovvalgsperiode(lovvalgsperiodeOriginal)
+            begrunnelse("begrunnelsekode")
+            kontrollresultat { begrunnelse = Kontroll_begrunnelser.FEIL_I_PERIODEN }
+            medExistingAnmodningsperiode(anmodningsperiodeOriginal)
+            medExistingUtpekingsperiode(utpekingsperiodeOriginal)
         }
 
         val behandlingReplika = Behandling.forTest {
@@ -710,8 +690,13 @@ class ReplikerBehandlingsresultatServiceTest {
         }
     }
 
-    private fun lagTrygdeavgiftsperiode(): Trygdeavgiftsperiode {
-        val inntektsperiode = inntektForTest {
+    private fun lagTrygdeavgiftsperiode() = Trygdeavgiftsperiode.forTest {
+        id = 1L
+        periodeFra = LocalDate.now()
+        periodeTil = LocalDate.now()
+        trygdeavgiftsbeløpMd = BigDecimal(500)
+        trygdesats = BigDecimal(50)
+        grunnlagInntekstperiode {
             id = 1L
             fomDato = LocalDate.now()
             tomDato = LocalDate.now()
@@ -719,22 +704,12 @@ class ReplikerBehandlingsresultatServiceTest {
             avgiftspliktigMndInntekt = Penger(1000.0)
             arbeidsgiversavgiftBetalesTilSkatt = false
         }
-        val skatteforholdTilNorge = skatteforholdForTest {
+        grunnlagSkatteforholdTilNorge {
             id = 1L
             fomDato = LocalDate.now()
             tomDato = LocalDate.now()
             skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
         }
-
-        return Trygdeavgiftsperiode(
-            id = 1L,
-            periodeFra = LocalDate.now(),
-            periodeTil = LocalDate.now(),
-            trygdeavgiftsbeløpMd = Penger(500.0),
-            trygdesats = BigDecimal(50),
-            grunnlagInntekstperiode = inntektsperiode,
-            grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
-        )
     }
 
     private fun lagMedlemskapsperiode(innvilgelsesResultat: InnvilgelsesResultat, id: Long) = medlemskapsperiodeForTest {
@@ -748,12 +723,12 @@ class ReplikerBehandlingsresultatServiceTest {
         bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
     }
 
-    private fun lagHelseutgiftDekkesPeriode(behandlingsresultat: Behandlingsresultat) = HelseutgiftDekkesPeriode(
-        behandlingsresultat,
-        fomDato = LocalDate.now(),
-        tomDato = LocalDate.now(),
+    private fun lagHelseutgiftDekkesPeriode(behandlingsresultat: Behandlingsresultat) = HelseutgiftDekkesPeriode.forTest {
+        this.behandlingsresultat = behandlingsresultat
+        fomDato = LocalDate.now()
+        tomDato = LocalDate.now()
         bostedLandkode = Land_iso2.DK
-    )
+    }
 
     private fun lagBehandlingsresultatMedData(tidligsteInaktiveBehandling: Behandling) = Behandlingsresultat.forTest {
         id = 30L
@@ -810,10 +785,9 @@ class ReplikerBehandlingsresultatServiceTest {
     }
 
     private fun lagBehandlingsresultatBegrunnelse(behandlingsresultat: Behandlingsresultat) =
-        BehandlingsresultatBegrunnelse().apply {
+        BehandlingsresultatBegrunnelse.lag("begrunnelsekode").apply {
             id = 32L
             this.behandlingsresultat = behandlingsresultat
-            kode = "begrunnelsekode"
         }
 
     private fun lagVilkaarsresultat() = vilkaarsresultatForTest {

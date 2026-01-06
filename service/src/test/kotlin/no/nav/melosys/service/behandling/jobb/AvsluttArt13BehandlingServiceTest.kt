@@ -274,8 +274,8 @@ class AvsluttArt13BehandlingServiceTest {
             tema = Behandlingstema.ARBEID_FLERE_LAND
             type = Behandlingstyper.NY_VURDERING
             this.fagsak = behandling.fagsak
+            registrertDato = behandling.registrertDato.plus(Duration.ofDays(1))
         }
-        nyereBehandling.registrertDato = behandling.registrertDato.plus(Duration.ofDays(1))
         behandling.fagsak.leggTilBehandling(nyereBehandling)
 
         val nyereBehandlingsresultat = Behandlingsresultat.forTest {
@@ -311,8 +311,8 @@ class AvsluttArt13BehandlingServiceTest {
             tema = Behandlingstema.ARBEID_FLERE_LAND
             type = Behandlingstyper.HENVENDELSE
             this.fagsak = behandling.fagsak
+            registrertDato = behandling.registrertDato.plus(Duration.ofDays(1))
         }
-        henvendelse.registrertDato = behandling.registrertDato.plus(Duration.ofDays(1))
         behandling.fagsak.leggTilBehandling(henvendelse)
 
 
@@ -341,8 +341,8 @@ class AvsluttArt13BehandlingServiceTest {
             tema = Behandlingstema.ARBEID_FLERE_LAND
             type = Behandlingstyper.NY_VURDERING
             this.fagsak = behandling.fagsak
+            registrertDato = behandling.registrertDato.plus(Duration.ofDays(1))
         }
-        nyereBehandling.registrertDato = behandling.registrertDato.plus(Duration.ofDays(1))
         behandling.fagsak.leggTilBehandling(nyereBehandling)
 
         val nyereBehandlingsresultat = Behandlingsresultat.forTest {
@@ -377,8 +377,8 @@ class AvsluttArt13BehandlingServiceTest {
             tema = Behandlingstema.ARBEID_FLERE_LAND
             type = Behandlingstyper.NY_VURDERING
             this.fagsak = behandling.fagsak
+            registrertDato = behandling.registrertDato.plus(Duration.ofDays(1))
         }
-        nyereBehandling.registrertDato = behandling.registrertDato.plus(Duration.ofDays(1))
         behandling.fagsak.leggTilBehandling(nyereBehandling)
 
         val nyereBehandlingsresultat = Behandlingsresultat.forTest {

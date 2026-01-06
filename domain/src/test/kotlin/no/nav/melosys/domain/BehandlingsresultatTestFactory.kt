@@ -144,6 +144,41 @@ fun BehandlingsresultatTestFactory.Builder.medExistingMedlemskapsperioder(period
     medlemskapsperioder.addAll(perioder)
 }
 
+/**
+ * Add an existing Lovvalgsperiode to the builder.
+ */
+fun BehandlingsresultatTestFactory.Builder.medExistingLovvalgsperiode(lovvalgsperiode: Lovvalgsperiode) = apply {
+    lovvalgsperioder.add(lovvalgsperiode)
+}
+
+/**
+ * Add an existing Utpekingsperiode to the builder.
+ */
+fun BehandlingsresultatTestFactory.Builder.medExistingUtpekingsperiode(utpekingsperiode: Utpekingsperiode) = apply {
+    utpekingsperioder.add(utpekingsperiode)
+}
+
+/**
+ * Add an existing Avklartefakta to the builder.
+ */
+fun BehandlingsresultatTestFactory.Builder.medExistingAvklartefakta(avklartefakta: Avklartefakta) = apply {
+    this.avklartefakta.add(avklartefakta)
+}
+
+/**
+ * Add an existing Vilkaarsresultat to the builder.
+ */
+fun BehandlingsresultatTestFactory.Builder.medExistingVilkaarsresultat(vilkaarsresultat: Vilkaarsresultat) = apply {
+    vilkaarsresultater.add(vilkaarsresultat)
+}
+
+/**
+ * Add an existing Kontrollresultat to the builder.
+ */
+fun BehandlingsresultatTestFactory.Builder.medExistingKontrollresultat(kontrollresultat: Kontrollresultat) = apply {
+    kontrollresultater.add(kontrollresultat)
+}
+
 fun BehandlingsresultatTestFactory.Builder.utpekingsperiode(init: UtpekingsperiodeTestFactory.Builder.() -> Unit) = apply {
     val nyUtpekingsperiode = utpekingsperiodeForTest(init)
     utpekingsperioder.add(nyUtpekingsperiode)

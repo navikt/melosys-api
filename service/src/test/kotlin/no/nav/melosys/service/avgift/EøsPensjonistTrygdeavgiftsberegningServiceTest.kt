@@ -19,6 +19,7 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.forTest
 import no.nav.melosys.domain.avgift.inntektForTest
 import no.nav.melosys.domain.avgift.skatteforholdForTest
+import no.nav.melosys.domain.HelseutgiftDekkesPeriodeTestFactory
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -121,6 +122,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         behandling: Behandling,
         fom: LocalDate = FOM,
         tom: LocalDate = TOM,
+        helseutgiftDekkesPeriodeInit: HelseutgiftDekkesPeriodeTestFactory.Builder.() -> Unit = {},
         init: BehandlingsresultatTestFactory.Builder.() -> Unit = {}
     ): Behandlingsresultat = Behandlingsresultat.forTest {
         id = 1L
@@ -130,6 +132,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             fomDato = fom
             tomDato = tom
             bostedLandkode = Land_iso2.DK
+            helseutgiftDekkesPeriodeInit()
         }
         init()
     }
@@ -367,17 +370,18 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                 tema = Sakstemaer.TRYGDEAVGIFT
             }
         }
-        val behandlingsresultat = lagBehandlingsresultat(behandling)
-        setupMocksForBehandling(behandling, behandlingsresultat)
-
-        behandlingsresultat.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.add(
-            Trygdeavgiftsperiode.forTest {
-                periodeFra = FOM
-                periodeTil = TOM
-                trygdeavgiftsbeløpMd = BigDecimal.valueOf(790.0)
-                trygdesats = BigDecimal.valueOf(7.9)
+        val behandlingsresultat = lagBehandlingsresultat(
+            behandling,
+            helseutgiftDekkesPeriodeInit = {
+                trygdeavgiftsperiode {
+                    periodeFra = FOM
+                    periodeTil = TOM
+                    trygdeavgiftsbeløpMd = BigDecimal.valueOf(790.0)
+                    trygdesats = BigDecimal.valueOf(7.9)
+                }
             }
         )
+        setupMocksForBehandling(behandling, behandlingsresultat)
 
         val skatteforholdsperioder = listOf(
             skatteforholdForTest {
@@ -423,17 +427,18 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                 tema = Sakstemaer.TRYGDEAVGIFT
             }
         }
-        val behandlingsresultat = lagBehandlingsresultat(behandling)
-        setupMocksForBehandling(behandling, behandlingsresultat)
-
-        behandlingsresultat.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.add(
-            Trygdeavgiftsperiode.forTest {
-                periodeFra = FOM
-                periodeTil = TOM
-                trygdeavgiftsbeløpMd = BigDecimal.valueOf(790.0)
-                trygdesats = BigDecimal.valueOf(7.9)
+        val behandlingsresultat = lagBehandlingsresultat(
+            behandling,
+            helseutgiftDekkesPeriodeInit = {
+                trygdeavgiftsperiode {
+                    periodeFra = FOM
+                    periodeTil = TOM
+                    trygdeavgiftsbeløpMd = BigDecimal.valueOf(790.0)
+                    trygdesats = BigDecimal.valueOf(7.9)
+                }
             }
         )
+        setupMocksForBehandling(behandling, behandlingsresultat)
 
         val skatteforholdsperioder = listOf(
             skatteforholdForTest {
@@ -478,17 +483,18 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                 tema = Sakstemaer.TRYGDEAVGIFT
             }
         }
-        val behandlingsresultat = lagBehandlingsresultat(behandling)
-        setupMocksForBehandling(behandling, behandlingsresultat)
-
-        behandlingsresultat.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.add(
-            Trygdeavgiftsperiode.forTest {
-                periodeFra = FOM
-                periodeTil = TOM
-                trygdeavgiftsbeløpMd = BigDecimal.valueOf(790.0)
-                trygdesats = BigDecimal.valueOf(7.9)
+        val behandlingsresultat = lagBehandlingsresultat(
+            behandling,
+            helseutgiftDekkesPeriodeInit = {
+                trygdeavgiftsperiode {
+                    periodeFra = FOM
+                    periodeTil = TOM
+                    trygdeavgiftsbeløpMd = BigDecimal.valueOf(790.0)
+                    trygdesats = BigDecimal.valueOf(7.9)
+                }
             }
         )
+        setupMocksForBehandling(behandling, behandlingsresultat)
 
         val skatteforholdsperioder = listOf(
             skatteforholdForTest {
@@ -590,11 +596,10 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         val behandling = lagBehandling {
             fagsak {
                 medBruker()
-                leggTilAktør(Aktoer().apply {
-                    rolle = Aktoersroller.FULLMEKTIG
+                medFullmektig {
                     personIdent = FULLMEKTIG_AKTØR_ID
-                    fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
-                })
+                    setFullmaktstype(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
+                }
             }
         }
         every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandling)
@@ -607,11 +612,10 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         val behandling = lagBehandling {
             fagsak {
                 medBruker()
-                leggTilAktør(Aktoer().apply {
+                medFullmektig {
                     orgnr = FULLMEKTIG_ORGNR
-                    rolle = Aktoersroller.FULLMEKTIG
-                    fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
-                })
+                    setFullmaktstype(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
+                }
             }
         }
         every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandling)
@@ -624,14 +628,10 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         val behandling = lagBehandling {
             fagsak {
                 medBruker()
-                leggTilAktør(Aktoer().apply {
+                medFullmektig {
                     aktørId = FULLMEKTIG_AKTØR_ID
-                    rolle = Aktoersroller.FULLMEKTIG
-                    fullmakter = setOf(
-                        Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_SØKNAD },
-                        Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER }
-                    )
-                })
+                    setFullmaktstyper(listOf(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER))
+                }
             }
         }
         every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandling)

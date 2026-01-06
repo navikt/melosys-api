@@ -7,6 +7,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.forTest
 import no.nav.melosys.domain.avgift.inntektForTest
 import no.nav.melosys.domain.avgift.skatteforholdForTest
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
@@ -158,29 +159,26 @@ class TrygdeavgiftControllerTest(
     }
 
     fun lagTrygdeavgiftsperioder(): Set<Trygdeavgiftsperiode> {
-        val trygdeavgift = Trygdeavgiftsperiode(
-            periodeFra = LocalDate.now(),
-            periodeTil = LocalDate.now().plusDays(10),
-            trygdesats = BigDecimal.valueOf(7.9),
-            trygdeavgiftsbeløpMd = Penger(BigDecimal.valueOf(10000.0)),
-
-            grunnlagMedlemskapsperiode = medlemskapsperiodeForTest {
+        val trygdeavgift = Trygdeavgiftsperiode.forTest {
+            periodeFra = LocalDate.now()
+            periodeTil = LocalDate.now().plusDays(10)
+            trygdesats = BigDecimal.valueOf(7.9)
+            trygdeavgiftsbeløpMd = BigDecimal.valueOf(10000.0)
+            medlemskapsperiode = medlemskapsperiodeForTest {
                 trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-            },
-
-            grunnlagInntekstperiode = inntektForTest {
+            }
+            grunnlagInntekstperiode {
                 fomDato = LocalDate.now()
                 tomDato = LocalDate.now()
                 type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                 avgiftspliktigTotalinntekt = Penger(5000.0)
-            },
-
-            grunnlagSkatteforholdTilNorge = skatteforholdForTest {
+            }
+            grunnlagSkatteforholdTilNorge {
                 fomDato = LocalDate.now()
                 tomDato = LocalDate.now()
                 skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
             }
-        )
+        }
 
         return setOf(trygdeavgift)
     }

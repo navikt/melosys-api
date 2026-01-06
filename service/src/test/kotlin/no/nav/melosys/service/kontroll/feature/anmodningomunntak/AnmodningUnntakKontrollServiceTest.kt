@@ -4,10 +4,10 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.Anmodningsperiode
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.BehandlingTestFactory
 import no.nav.melosys.domain.SaksopplysningType
+import no.nav.melosys.domain.anmodningsperiodeForTest
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
@@ -165,12 +165,13 @@ internal class AnmodningUnntakKontrollServiceTest {
 
     @Test
     fun utførKontroller_foretakUtlandManglerFelter_returnererKode() {
-        val mottatteOpplysningerData = MottatteOpplysningerData().apply {
+        // MottatteOpplysningerData og ForetakUtland er Java DTO-objekter uten forTest DSL - bruker .apply
+        val mottatteOpplysningerTestData = MottatteOpplysningerData().apply {
             foretakUtland = listOf(ForetakUtland().apply { selvstendigNæringsvirksomhet = false })
         }
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns lagBehandling {
             mottatteOpplysninger {
-                this.mottatteOpplysningerData = mottatteOpplysningerData
+                mottatteOpplysningerData = mottatteOpplysningerTestData
             }
         }
         mockAnmodningsperiode()
@@ -233,6 +234,10 @@ internal class AnmodningUnntakKontrollServiceTest {
             GrunnlagMedl.FO_12_2.kode,
             null, null, null, null, null
         )
+        // MedlemskapDokument er et dokument/DTO-objekt uten forTest DSL - bruker .apply
+        val medlemskapDokument = MedlemskapDokument().apply {
+            medlemsperiode = listOf(testMedlemsperiode)
+        }
         return Behandling.forTest {
             id = BEHANDLING_ID
             status = Behandlingsstatus.UNDER_BEHANDLING
@@ -247,9 +252,7 @@ internal class AnmodningUnntakKontrollServiceTest {
             }
             saksopplysning {
                 type = SaksopplysningType.MEDL
-                dokument = MedlemskapDokument().apply {
-                    medlemsperiode = listOf(testMedlemsperiode)
-                }
+                dokument = medlemskapDokument
             }
         }
     }
@@ -259,7 +262,7 @@ internal class AnmodningUnntakKontrollServiceTest {
         tom: LocalDate? = LocalDate.now().plusYears(2),
         bestemmelse: no.nav.melosys.domain.kodeverk.LovvalgBestemmelse? = null
     ) {
-        val anmodningsperiode = Anmodningsperiode().apply {
+        val anmodningsperiode = anmodningsperiodeForTest {
             this.fom = fom
             this.tom = tom
             this.bestemmelse = bestemmelse
