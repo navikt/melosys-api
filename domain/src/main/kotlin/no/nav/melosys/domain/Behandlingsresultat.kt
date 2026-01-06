@@ -19,6 +19,7 @@ import java.util.*
 
 @Entity
 @Table(name = "behandlingsresultat")
+// Hindrer at saga-steg overskriver felter endret av fattVedtak() - kun endrede kolonner inkluderes i UPDATE (MELOSYS-7718)
 @DynamicUpdate
 @EntityListeners(AuditingEntityListener::class)
 open class Behandlingsresultat : RegistreringsInfo() {
