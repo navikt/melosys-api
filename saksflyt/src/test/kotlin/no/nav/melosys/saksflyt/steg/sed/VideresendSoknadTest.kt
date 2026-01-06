@@ -14,7 +14,6 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.arkiv.DokumentReferanse
 import no.nav.melosys.domain.arkiv.Journalpost
-import no.nav.melosys.domain.arkiv.Vedlegg
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.forTest
@@ -102,17 +101,14 @@ internal class VideresendSoknadTest {
             this.behandling = behandling
         }
 
-        val vedlegg = byteArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-        val dokumentReferanse = DokumentReferanse(
+        val dokumentReferanser = setOf(DokumentReferanse(
             behandling.initierendeJournalpostId!!,
             journalpost.hoveddokument.dokumentId!!
-        )
+        ))
         prosessinstans = prosessinstans.toBuilder()
-            .medData(ProsessDataKey.VEDLEGG_SED, setOf(dokumentReferanse))
+            .medData(ProsessDataKey.VEDLEGG_SED, dokumentReferanser)
             .build()
-        val forventetVedlegg = Vedlegg(vedlegg, "tittel")
 
-        every { eessiService.lagEessiVedlegg(any(), any()) } returns setOf(forventetVedlegg)
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
 
 
@@ -121,8 +117,7 @@ internal class VideresendSoknadTest {
 
         verify {
             eessiService.opprettOgSendSed(
-                behandlingID, listOf(MOTTAKER_INSTITUSJON), BucType.LA_BUC_03,
-                match { collection -> collection.contains(forventetVedlegg) }, null
+                behandlingID, listOf(MOTTAKER_INSTITUSJON), BucType.LA_BUC_03, dokumentReferanser, null
             )
         }
         prosessinstans.getData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID).shouldBeNull()
@@ -152,7 +147,6 @@ internal class VideresendSoknadTest {
 
         every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId!!) } returns journalpost
         every { joarkFasade.hentDokument(behandling.initierendeJournalpostId!!, journalpost.hoveddokument.dokumentId) } returns vedlegg
-        every { eessiService.lagEessiVedlegg(any(), any()) } returns emptySet()
         every {
             sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(
                 any(),
