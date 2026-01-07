@@ -11,6 +11,7 @@ import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import io.mockk.every
 import io.mockk.mockk
@@ -808,11 +809,14 @@ class ReplikerBehandlingsresultatServiceTest {
         unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val innevarendeAr = LocalDate.now().year
 
+        val periodeFra = LocalDate.of(inneværendeÅr - 1, 9, 1)
+        val periodeTil = LocalDate.of(inneværendeÅr, 8, 31)
+
         val trygdeavgiftsperioder = listOf(
             Trygdeavgiftsperiode(
                 id = 1L,
-                periodeFra = LocalDate.of(innevarendeAr - 1, 9, 1),
-                periodeTil = LocalDate.of(innevarendeAr, 8, 31),
+                periodeFra = periodeFra,
+                periodeTil = periodeTil,
                 trygdeavgiftsbeløpMd = Penger(1000.0),
                 trygdesats = BigDecimal("7.8")
             )
@@ -821,7 +825,8 @@ class ReplikerBehandlingsresultatServiceTest {
         val exception =
             shouldThrow<IllegalStateException> { replikerBehandlingsresultatService.filtrerTrygdeavgiftsperioder(trygdeavgiftsperioder) }
 
-        exception.message shouldBe "Trygdeavgiftsperiode 1 går over flere år (${innevarendeAr - 1}-09-01 - ${innevarendeAr}-08-31)"
+        exception.message shouldContain "Trygdeavgiftsperiode 1 går over flere år"
+        exception.message shouldContain "($periodeFra - $periodeTil)"
     }
 
     @Test
@@ -868,6 +873,9 @@ class ReplikerBehandlingsresultatServiceTest {
         unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val innevarendeAr = LocalDate.now().year
 
+        val periodeFra = LocalDate.of(inneværendeÅr - 1, 9, 1)
+        val periodeTil = LocalDate.of(inneværendeÅr, 8, 31)
+
         val tidligsteInaktiveBehandling = Behandling.forTest {
             id = 1L
             type = Behandlingstyper.NY_VURDERING
@@ -895,8 +903,8 @@ class ReplikerBehandlingsresultatServiceTest {
 
         val trygdeavgiftsperiode = Trygdeavgiftsperiode(
             id = 1L,
-            periodeFra = LocalDate.of(innevarendeAr - 1, 9, 1), // Starter før innevaerende ar
-            periodeTil = LocalDate.of(innevarendeAr, 8, 31),    // Slutter i innevaerende ar
+            periodeFra = periodeFra, // Starter før inneværende år
+            periodeTil = periodeTil, // Slutter i inneværende år
             trygdeavgiftsbeløpMd = Penger(1000.0),
             trygdesats = BigDecimal("7.8"),
             grunnlagInntekstperiode = inntektsperiode,
@@ -925,7 +933,8 @@ class ReplikerBehandlingsresultatServiceTest {
                 replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
             }
 
-        exception.message shouldBe "Trygdeavgiftsperiode 1 går over flere år (${innevarendeAr - 1}-09-01 - ${innevarendeAr}-08-31)"
+        exception.message shouldContain "Trygdeavgiftsperiode 1 går over flere år"
+        exception.message shouldContain "($periodeFra - $periodeTil)"
     }
 
     @Test

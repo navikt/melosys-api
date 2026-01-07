@@ -18,7 +18,9 @@ import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.*
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis
+import no.nav.melosys.domain.eessi.sed.OpprettBucOgSedDtoV2
 import no.nav.melosys.domain.eessi.sed.SedDataDto
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
@@ -42,6 +44,7 @@ import org.jeasy.random.EasyRandom
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import no.nav.melosys.domain.eessi.sed.VedleggReferanse
 
 class EessiServiceTest {
 
@@ -82,6 +85,7 @@ class EessiServiceTest {
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
+        unleash.disable(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)
         eessiService = EessiService(
             behandlingService,
             behandlingsresultatService,
@@ -152,7 +156,7 @@ class EessiServiceTest {
         val sedDataDtoSlot = slot<SedDataDto>()
         every { eessiConsumer.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, null, "fritekst")
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), "fritekst")
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.INGEN)) }
         verify { eessiConsumer.opprettBucOgSed(any(), any(), eq(BucType.LA_BUC_03), eq(true), eq(true)) }
@@ -167,7 +171,7 @@ class EessiServiceTest {
         mockBehandling()
         mockBehandlingsresultat()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, null, null)
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, emptyList(), null)
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.ANMODNINGSPERIODE)) }
         verify { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_01), eq(true), eq(true)) }
@@ -186,7 +190,7 @@ class EessiServiceTest {
         val sedDataDtoSlot = slot<SedDataDto>()
         every { eessiConsumer.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, null, "fritekst")
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, emptyList(), "fritekst")
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.ANMODNINGSPERIODE)) }
         verify { eessiConsumer.opprettBucOgSed(any(), any(), eq(BucType.LA_BUC_01), eq(true), eq(true)) }
@@ -219,7 +223,7 @@ class EessiServiceTest {
         val sedDataDtoSlot = slot<SedDataDto>()
         every { eessiConsumer.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_04, null, "fritekst")
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_04, emptyList(), "fritekst")
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE)) }
         verify { eessiConsumer.opprettBucOgSed(any(), any(), eq(BucType.LA_BUC_04), eq(true), eq(true)) }
@@ -246,7 +250,7 @@ class EessiServiceTest {
         mockBehandling()
         mockBehandlingsresultat()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_02, null, null)
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_02, emptyList(), null)
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE)) }
         verify { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_02), eq(true), eq(true)) }
@@ -261,7 +265,7 @@ class EessiServiceTest {
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_02, null, null)
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_02, emptyList(), null)
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(behandlingsresultat), eq(PeriodeType.UTPEKINGSPERIODE)) }
         verify { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_02), eq(true), eq(true)) }
@@ -288,7 +292,7 @@ class EessiServiceTest {
         mockBehandling()
         mockBehandlingsresultat()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_04, null, null)
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_04, emptyList(), null)
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE)) }
         verify { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_04), eq(true), eq(true)) }
@@ -309,6 +313,102 @@ class EessiServiceTest {
         eessiService.opprettBucOgSed(BEHANDLING_ID, BucType.LA_BUC_01, listOf(mottakerBelgia1), emptyList())
 
         verify { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_01), eq(false), eq(false)) }
+    }
+
+    @Test
+    fun `opprettBucOgSed medFeatureToggle MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2 på kallerOpprettBucOgSedV2`() {
+        unleash.enable(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)
+
+        val opprettSedDto = OpprettSedDto().apply {
+            rinaUrl = "localhost:3000"
+        }
+        val behandling = lagBehandling()
+        val sedDataDto = SedDataDto()
+
+        val journalpost = lagJournalpost(listOf(
+            lagArkivDokument("hoved"),
+            lagArkivDokument("dok1"),
+            lagArkivDokument("dok2"))
+        )
+
+        val dokumentReferanser = journalpost.vedleggListe.map {
+            DokumentReferanse(journalpost.journalpostId, it.dokumentId ?: error("dokumentId burde ikke være null her"))
+        }
+
+        val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
+        every { eessiConsumer.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) } returns opprettSedDto
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        every { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns sedDataDto
+        every { joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(any(), any()) } returns Unit
+        every { joarkFasade.hentJournalposterTilknyttetSak(any()) } returns listOf(journalpost)
+        mockBehandlingsresultat()
+
+        eessiService.opprettBucOgSed(BEHANDLING_ID, BucType.LA_BUC_01, listOf(mottakerBelgia1), dokumentReferanser)
+
+        verify(exactly = 1) { eessiConsumer.opprettBucOgSedV2(any<OpprettBucOgSedDtoV2>()) }
+        verify(exactly = 0) { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), any<BucType>(), any(), any()) }
+
+        val forventetOpprettBucOgSedDtoV2 = OpprettBucOgSedDtoV2(
+            bucType = BucType.LA_BUC_01,
+            sedDataDto = sedDataDto,
+            vedlegg = journalpost.vedleggListe.map{
+                VedleggReferanse(
+                    journalpost.journalpostId,
+                    it.dokumentId ?: error("dokumentId burde ikke være null her"),
+                    it.tittel
+                )
+            },
+            sendAutomatisk = false,
+            oppdaterEksisterende = false
+        )
+        opprettBucOgSedDtoV2Slot.captured shouldBe forventetOpprettBucOgSedDtoV2
+    }
+
+    @Test
+    fun `opprettOgSendSed medFeatureToggle MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2 på kallerOpprettBucOgSedV2`() {
+        unleash.enable(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)
+
+        val behandling = lagBehandling()
+        val sedDataDto = SedDataDto()
+
+        val journalpost = lagJournalpost(listOf(
+            lagArkivDokument("hoved"),
+            lagArkivDokument("dok1"),
+            lagArkivDokument("dok2"))
+        )
+
+        val dokumentReferanser = journalpost.vedleggListe.map {
+            DokumentReferanse(journalpost.journalpostId, it.dokumentId ?: error("dokumentId burde ikke være null her"))
+        }
+
+        val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
+        every { eessiConsumer.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) } returns OpprettSedDto()
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns sedDataDto
+        every { joarkFasade.hentJournalposterTilknyttetSak(any()) } returns listOf(journalpost)
+        mockBehandlingsresultat()
+
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf(mottakerBelgia1), BucType.LA_BUC_01, dokumentReferanser, null)
+
+        verify(exactly = 1) { eessiConsumer.opprettBucOgSedV2(any<OpprettBucOgSedDtoV2>()) }
+        verify(exactly = 0) { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), any<BucType>(), any(), any()) }
+
+        val forventetOpprettBucOgSedDtoV2 = OpprettBucOgSedDtoV2(
+            bucType = BucType.LA_BUC_01,
+            sedDataDto = sedDataDto,
+            vedlegg = journalpost.vedleggListe.map{
+                VedleggReferanse(
+                    journalpost.journalpostId,
+                    it.dokumentId ?: error("dokumentId burde ikke være null her"),
+                    it.tittel
+                )
+            },
+            sendAutomatisk = true,
+            oppdaterEksisterende = true
+        )
+        opprettBucOgSedDtoV2Slot.captured shouldBe forventetOpprettBucOgSedDtoV2
     }
 
     @Test

@@ -9,7 +9,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.arkiv.DokumentReferanse
-import no.nav.melosys.domain.arkiv.Vedlegg
 import no.nav.melosys.domain.brev.DoksysBrevbestilling
 import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.eessi.BucType
@@ -57,31 +56,27 @@ class SendAnmodningOmUnntakTest {
         every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns mockk()
         every { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(any()) } returns Unit
         every { eessiService.opprettOgSendSed(any<Long>(), any(), any(), any(), any()) } returns Unit
-        every { eessiService.lagEessiVedlegg(any(), any()) } returns emptySet()
         every { brevBestiller.bestill(any()) } returns Unit
     }
 
     @Test
     fun `utfør artikkel16 skal sende sed med vedlegg`() {
+        val dokumentReferanser = setOf(DokumentReferanse("", ""))
         val prosessinstans = lagProsessinstans {
             medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
-            medData(ProsessDataKey.VEDLEGG_SED, setOf(DokumentReferanse("", "")))
+            medData(ProsessDataKey.VEDLEGG_SED, dokumentReferanser)
         }
         val behandlingsresultat = lagBehandlingsresultat()
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
-        val forventetVedlegg = Vedlegg(byteArrayOf(), "tittel")
-        every { eessiService.lagEessiVedlegg(any(), any()) } returns setOf(forventetVedlegg)
-
 
         sendAnmodningOmUnntak.utfør(prosessinstans)
-
 
         verify {
             eessiService.opprettOgSendSed(
                 BEHANDLING_ID,
                 listOf(MOTTAKER_INSTITSJON),
                 BucType.LA_BUC_01,
-                match { it.contains(forventetVedlegg) },
+                dokumentReferanser,
                 null
             )
         }

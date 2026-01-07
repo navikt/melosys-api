@@ -35,7 +35,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.Optional
 
 @ExtendWith(MockKExtension::class)
@@ -102,7 +101,7 @@ class SendFakturaÅrsavregningTest {
                 beregnetAvgiftBelop = BigDecimal(2300)
                 tilFaktureringBeloep = BigDecimal(2300)
                 tidligereBehandlingsresultat {
-                    fakturaserieReferanse = TIDLIGERE_FAKTURASERIE_REF
+                    fakturaserieReferanse = tidligereFakturaserieRef
                     behandling {
                         type = Behandlingstyper.ÅRSAVREGNING
                     }
@@ -130,7 +129,7 @@ class SendFakturaÅrsavregningTest {
                 capture(fakturaDtoSlot),
                 SAKSBEHANDLER
             )
-        } returns NyFakturaserieResponseDto(FAKTURASERIE_REF)
+        } returns NyFakturaserieResponseDto(fakturaserieRef)
 
         val behandlingsresultatSlot = slot<Behandlingsresultat>()
         every { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) } returns behandlingsresultat
@@ -138,15 +137,15 @@ class SendFakturaÅrsavregningTest {
         sendFakturaÅrsavregning.utfør(prosessinstans)
 
         fakturaDtoSlot.captured.run {
-            this.fakturaserieReferanse shouldBe TIDLIGERE_FAKTURASERIE_REF
+            this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
             startDato shouldBe PERIODE_START
             sluttDato shouldBe PERIODE_SLUTT
-            beskrivelse shouldBe """Medlemskapsperiode ${PERIODE_START.format(DATE_FORMATTER)} - ${PERIODE_SLUTT.format(DATE_FORMATTER)}, endelig beregnet trygdeavgift ${behandlingsresultat.hentÅrsavregning().beregnetAvgiftBelop} - """ +
+            beskrivelse shouldBe """Medlemskapsperiode 01.02.$inneværendeÅr - 31.10.$inneværendeÅr, endelig beregnet trygdeavgift ${behandlingsresultat.hentÅrsavregning().beregnetAvgiftBelop} - """ +
                 """forskuddsvis fakturert trygdeavgift ${behandlingsresultat.hentÅrsavregning().tidligereFakturertBeloep ?: 0}"""
         }
 
         behandlingsresultatSlot.captured.run {
-            this.fakturaserieReferanse shouldBe FAKTURASERIE_REF
+            this.fakturaserieReferanse shouldBe fakturaserieRef
         }
     }
 
@@ -165,7 +164,7 @@ class SendFakturaÅrsavregningTest {
                 aar = 2023
                 tilFaktureringBeloep = BigDecimal(2300)
                 tidligereBehandlingsresultat {
-                    fakturaserieReferanse = TIDLIGERE_FAKTURASERIE_REF
+                    fakturaserieReferanse = tidligereFakturaserieRef
                     behandling {
                         type = Behandlingstyper.ÅRSAVREGNING
                         fagsak {
@@ -196,7 +195,7 @@ class SendFakturaÅrsavregningTest {
                 capture(fakturaDtoSlot),
                 SAKSBEHANDLER
             )
-        } returns NyFakturaserieResponseDto(FAKTURASERIE_REF)
+        } returns NyFakturaserieResponseDto(fakturaserieRef)
 
         val behandlingsresultatSlot = slot<Behandlingsresultat>()
         every { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) } returns behandlingsresultat
@@ -204,7 +203,7 @@ class SendFakturaÅrsavregningTest {
         sendFakturaÅrsavregning.utfør(prosessinstans)
 
         fakturaDtoSlot.captured.run {
-            this.fakturaserieReferanse shouldBe TIDLIGERE_FAKTURASERIE_REF
+            this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
             startDato shouldBe PERIODE_START
             sluttDato shouldBe PERIODE_SLUTT
         }
@@ -226,7 +225,7 @@ class SendFakturaÅrsavregningTest {
                 manueltAvgiftBeloep = BigDecimal(2300)
                 tilFaktureringBeloep = BigDecimal(2300)
                 tidligereBehandlingsresultat {
-                    fakturaserieReferanse = TIDLIGERE_FAKTURASERIE_REF
+                    fakturaserieReferanse = tidligereFakturaserieRef
                     behandling {
                         type = Behandlingstyper.ÅRSAVREGNING
                     }
@@ -246,7 +245,7 @@ class SendFakturaÅrsavregningTest {
                 capture(fakturaDtoSlot),
                 SAKSBEHANDLER
             )
-        } returns NyFakturaserieResponseDto(FAKTURASERIE_REF)
+        } returns NyFakturaserieResponseDto(fakturaserieRef)
 
         val behandlingsresultatSlot = slot<Behandlingsresultat>()
         every { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) } returns behandlingsresultat
@@ -254,7 +253,7 @@ class SendFakturaÅrsavregningTest {
         sendFakturaÅrsavregning.utfør(prosessinstans)
 
         fakturaDtoSlot.captured.run {
-            this.fakturaserieReferanse shouldBe TIDLIGERE_FAKTURASERIE_REF
+            this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
             startDato shouldBe LocalDate.of(behandlingsresultat.hentÅrsavregning().aar, 1, 1)
             sluttDato shouldBe LocalDate.of(behandlingsresultat.hentÅrsavregning().aar, 12, 31)
             beskrivelse shouldBe "Årsavregning 2023"
@@ -278,10 +277,10 @@ class SendFakturaÅrsavregningTest {
     companion object {
         const val SAKSNUMMER = "MEL-test"
         const val SAKSBEHANDLER = "G568493"
-        const val FAKTURASERIE_REF = "GDL435389405Gf"
-        const val TIDLIGERE_FAKTURASERIE_REF = "763452GG"
+        const val fakturaserieRef = "GDL435389405Gf"
+        const val tidligereFakturaserieRef = "763452GG"
+        private val inneværendeÅr = LocalDate.now().year
         val PERIODE_START: LocalDate = LocalDate.now().withMonth(2).withDayOfMonth(1)
         val PERIODE_SLUTT: LocalDate = LocalDate.now().withMonth(10).withDayOfMonth(31)
-        val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
     }
 }

@@ -2,20 +2,16 @@ package no.nav.melosys.itest.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.tomakehurst.wiremock.client.WireMock
+import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
-import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.Behandlingsmaate
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
-import no.nav.melosys.domain.avgift.inntektForTest
-import no.nav.melosys.domain.avgift.skatteforholdForTest
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
@@ -83,7 +79,6 @@ class ÅrsavregningIT(
         val saksnummer1 = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
         val saksnummer2 = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
-
         executeAndWait(
             mapOf(
                 ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING to 2
@@ -91,7 +86,7 @@ class ÅrsavregningIT(
         ) {
             skatteHendelseMeldingKafkaTemplate.send(
                 "teammelosys.skattehendelser.v1-local",
-                Skattehendelse("$CURRENT_YEAR", TEST_FNR, "ny")
+                Skattehendelse(inneværendeÅr.toString(), TEST_FNR, "ny")
             )
         }
 
@@ -108,7 +103,7 @@ class ÅrsavregningIT(
                                 .årsavregning
                                 .shouldNotBeNull()
                                 .run {
-                                    aar shouldBe CURRENT_YEAR
+                                    aar shouldBe inneværendeÅr
                                 }
                         }
                 }
@@ -139,11 +134,10 @@ class ÅrsavregningIT(
             opprettSak.opprettNySakOgBehandling(opprettSakDto)
         }.hentBehandling.id
 
-
-        årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, CURRENT_YEAR)
+        årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, inneværendeÅr)
         val årsavregning =
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(årsavregningBehandlingID).shouldBePresent().årsavregning
-        val periode = DatoPeriodeDto(LocalDate.of(CURRENT_YEAR, 1, 1), LocalDate.of(CURRENT_YEAR, 2, 1))
+        val periode = DatoPeriodeDto(LocalDate.of(inneværendeÅr, 1, 1), LocalDate.of(inneværendeÅr, 2, 1))
         val skattefordholdsperioder = listOf(
             SkatteforholdTilNorge().apply {
                 fomDato = periode.fom
@@ -174,7 +168,7 @@ class ÅrsavregningIT(
             årsavregningBehandlingID,
             skattefordholdsperioder,
             inntektsperioder,
-            LocalDate.of(CURRENT_YEAR, 4, 4)
+            LocalDate.of(inneværendeÅr, 4, 4)
         )
 
         val beregnetAvgiftBelop = BigDecimal(2000)
@@ -199,7 +193,7 @@ class ÅrsavregningIT(
         behandlingsresultatService.hentBehandlingsresultat(årsavregningBehandlingID).run {
             type shouldBe Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
             behandlingsmåte shouldBe Behandlingsmaate.MANUELT
-            hentÅrsavregning().aar shouldBe CURRENT_YEAR
+            hentÅrsavregning().aar shouldBe inneværendeÅr
             hentÅrsavregning().beregnetAvgiftBelop shouldBe beregnetAvgiftBelop
             hentÅrsavregning().tilFaktureringBeloep shouldBe beregnetAvgiftBelop
             fakturaserieReferanse shouldBe this@ÅrsavregningIT.fakturaserieReferanse
@@ -231,11 +225,11 @@ class ÅrsavregningIT(
         val tidligereFakturertBeloep = BigDecimal(1040) // beregnes når årsavregning opprettes
         val beregnetAvgiftBelop = BigDecimal(2000)
 
-        årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, CURRENT_YEAR)
+        årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, inneværendeÅr)
 
         val årsavregning =
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(årsavregningBehandlingID).shouldBePresent().årsavregning
-        val periode = DatoPeriodeDto(LocalDate.of(CURRENT_YEAR, 1, 1), LocalDate.of(CURRENT_YEAR, 2, 1))
+        val periode = DatoPeriodeDto(LocalDate.of(inneværendeÅr, 1, 1), LocalDate.of(inneværendeÅr, 2, 1))
         val skattefordholdsperioder = listOf(
             SkatteforholdTilNorge().apply {
                 fomDato = periode.fom
@@ -257,7 +251,7 @@ class ÅrsavregningIT(
             årsavregningBehandlingID,
             skattefordholdsperioder,
             inntektsperioder,
-            LocalDate.of(CURRENT_YEAR, 4, 4)
+            LocalDate.of(inneværendeÅr, 4, 4)
         )
         årsavregningService.oppdater(årsavregningBehandlingID, årsavregning!!.id, beregnetAvgiftBelop)
 
@@ -280,7 +274,7 @@ class ÅrsavregningIT(
         behandlingsresultatService.hentBehandlingsresultat(årsavregningBehandlingID).run {
             type shouldBe Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
             behandlingsmåte shouldBe Behandlingsmaate.MANUELT
-            hentÅrsavregning().aar shouldBe CURRENT_YEAR
+            hentÅrsavregning().aar shouldBe inneværendeÅr
             hentÅrsavregning().tidligereFakturertBeloep shouldBe tidligereFakturertBeloep
             hentÅrsavregning().beregnetAvgiftBelop shouldBe beregnetAvgiftBelop
             hentÅrsavregning().tilFaktureringBeloep shouldBe beregnetAvgiftBelop - tidligereFakturertBeloep
@@ -313,16 +307,15 @@ class ÅrsavregningIT(
             )
         }.hentBehandling.id
 
-        val gjelderÅr = CURRENT_YEAR
         val beregnetAvgiftBelop = BigDecimal(2000)
-        årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, gjelderÅr)
+        årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, inneværendeÅr)
         val årsavregning =
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(årsavregningBehandlingID).shouldBePresent().hentÅrsavregning()
 
         // Legg til medlemskapsperioder og trygdeavgiftsperioder med skattepliktinformasjon
         val periode = DatoPeriodeDto(
-            fom = LocalDate.of(gjelderÅr, 1, 1),
-            tom = LocalDate.of(gjelderÅr, 2, 1)
+            fom = LocalDate.of(inneværendeÅr, 1, 1),
+            tom = LocalDate.of(inneværendeÅr, 2, 1)
         )
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
@@ -375,8 +368,8 @@ class ÅrsavregningIT(
             withClue("Fødselsnummer skal være $TEST_FNR") {
                 fnr shouldBe TEST_FNR
             }
-            withClue("Inntektsår skal være $gjelderÅr") {
-                inntektsAr shouldBe gjelderÅr
+            withClue("Inntektsår skal være $inneværendeÅr") {
+                inntektsAr shouldBe inneværendeÅr
             }
             withClue("Rapport type skal være NY_INNTEKT for første gangs vedtak") {
                 endringstype shouldBe PensjonsopptjeningHendelse.Endringstype.NY_INNTEKT
@@ -433,15 +426,15 @@ class ÅrsavregningIT(
         sakstype = Sakstyper.FTRL
         behandlingstema = Behandlingstema.YRKESAKTIV
         behandlingstype = Behandlingstyper.ÅRSAVREGNING
-        mottaksdato = LocalDate.of(CURRENT_YEAR, 1, 1)
+        mottaksdato = LocalDate.of(inneværendeÅr, 1, 1)
         behandlingsaarsakType = Behandlingsaarsaktyper.HENVENDELSE
     }
 
     fun lagFørstegangsbehandling(
         skatteplikttype: Skatteplikttype,
         arbeidsgiversavgiftBetales: Boolean,
-        medlemskapsperiodeFom: LocalDate = LocalDate.of(CURRENT_YEAR, 1, 1),
-        medlemskapsperiodeTom: LocalDate = LocalDate.of(CURRENT_YEAR, 2, 1)
+        medlemskapsperiodeFom: LocalDate = LocalDate.of(inneværendeÅr, 1, 1),
+        medlemskapsperiodeTom: LocalDate = LocalDate.of(inneværendeÅr, 2, 1)
     ): String {
         val behandling = journalførOgVentTilProsesserErFerdige(
             defaultJournalføringDto().apply {
@@ -541,8 +534,8 @@ class ÅrsavregningIT(
         behandlingId: Long,
         skatteplikttype: Skatteplikttype,
         arbeidsgiversavgiftBetales: Boolean,
-        medlemskapsperiodeFom: LocalDate = LocalDate.of(CURRENT_YEAR, 1, 1),
-        medlemskapsperiodeTom: LocalDate = LocalDate.of(CURRENT_YEAR, 2, 1)
+        medlemskapsperiodeFom: LocalDate = LocalDate.of(inneværendeÅr, 1, 1),
+        medlemskapsperiodeTom: LocalDate = LocalDate.of(inneværendeÅr, 2, 1)
     ) {
         val medlemskapsperiodeId = opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
             behandlingId,
@@ -582,6 +575,6 @@ class ÅrsavregningIT(
 
     companion object {
         private const val TEST_FNR = "30056928150"
-        private val CURRENT_YEAR = LocalDate.now().year
+        private val inneværendeÅr = LocalDate.now().year
     }
 }

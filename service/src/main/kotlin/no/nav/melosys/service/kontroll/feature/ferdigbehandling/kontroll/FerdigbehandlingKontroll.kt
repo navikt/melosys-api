@@ -154,7 +154,7 @@ object FerdigbehandlingKontroll {
     fun periodeOver24Mnd(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
 
-        if (!lovvalgsperiode.erAvslått() && erBestemmelseDerInnvilgetMedlemskapsperiodeIkkeKanOverskride24mnd(lovvalgsperiode.hentBestemmelse()) &&
+        if (!lovvalgsperiode.erAvslått() && erBestemmelseDerInnvilgetMedlemskapsperiodeIkkeKanOverskride24mnd(lovvalgsperiode.bestemmelse) &&
             PeriodeRegler.periodeOver24Måneder(lovvalgsperiode.hentFom(), lovvalgsperiode.tom)
         ) {
             return Kontrollfeil(Kontroll_begrunnelser.PERIODEN_OVER_24_MD)
@@ -301,7 +301,7 @@ object FerdigbehandlingKontroll {
         val JANUAR_2024 = LocalDate.of(2024, 1, 1)
         val storbritanniaBestemmelser = Lovvalgbestemmelser_konv_efta_storbritannia.values()
 
-        if (lovvalgsperiode.hentBestemmelse() in storbritanniaBestemmelser && lovvalgsperiode.fom?.isBefore(JANUAR_2024) == true) {
+        if (lovvalgsperiode.bestemmelse in storbritanniaBestemmelser && lovvalgsperiode.fom?.isBefore(JANUAR_2024) == true) {
             return Kontrollfeil(Kontroll_begrunnelser.STORBRITANNIA_KONV_BRUKT_FOR_TIDLIG)
         }
 
