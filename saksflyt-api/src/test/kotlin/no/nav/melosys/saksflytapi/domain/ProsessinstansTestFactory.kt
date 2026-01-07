@@ -84,7 +84,13 @@ object ProsessinstansTestFactory {
                 .medLåsReferanse(låsReferanse)
 
             dataMap.forEach { (key, value) ->
-                builder.medData(key, value)
+                // Explicitly dispatch to the correct overload:
+                // - String values should use medData(key, String?) to avoid JSON serialization
+                // - Other values should use medData(key, Any?) which JSON-serializes
+                when (value) {
+                    is String -> builder.medData(key, value as String?)
+                    else -> builder.medData(key, value)
+                }
             }
 
             return builder.build()
