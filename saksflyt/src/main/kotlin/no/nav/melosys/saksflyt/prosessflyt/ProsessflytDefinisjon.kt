@@ -164,6 +164,7 @@ object ProsessflytDefinisjon {
         ),
         IVERKSETT_VEDTAK_AARSAVREGNING to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_AARSAVREGNING,
+            LAGRE_PERSONOPPLYSNINGER,
             SEND_FAKTURA_AARSAVREGNING,
             VARSLE_PENSJONSOPPTJENING,
             AVSLUTT_SAK_OG_BEHANDLING,
@@ -171,6 +172,7 @@ object ProsessflytDefinisjon {
         ),
         IVERKSETT_VEDTAK_EOS to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_EOS,
+            LAGRE_PERSONOPPLYSNINGER,
             AVKLAR_MYNDIGHET,
             AVKLAR_ARBEIDSGIVER,
             LAGRE_LOVVALGSPERIODE_MEDL,
@@ -183,12 +185,14 @@ object ProsessflytDefinisjon {
         ),
         IVERKSETT_EOS_PENSJONIST_AVGIFT to ProsessFlyt(
             prosessType = IVERKSETT_EOS_PENSJONIST_AVGIFT,
+            LAGRE_PERSONOPPLYSNINGER,
             OPPRETT_FAKTURASERIE,
             AVSLUTT_SAK_OG_BEHANDLING,
             SEND_ORIENTERINGSBREV_TRYGDEAVGIFT
         ),
         IVERKSETT_VEDTAK_FTRL to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_FTRL,
+            LAGRE_PERSONOPPLYSNINGER,
             LAGRE_MEDLEMSKAPSPERIODE_MEDL,
             OPPRETT_FAKTURASERIE,
             AVSLUTT_SAK_OG_BEHANDLING,
@@ -200,6 +204,7 @@ object ProsessflytDefinisjon {
         ),
         IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
+            LAGRE_PERSONOPPLYSNINGER,
             LAGRE_LOVVALGSPERIODE_MEDL,
             SEND_VEDTAKSBREV_INNLAND,
             AVSLUTT_SAK_OG_BEHANDLING,
@@ -207,6 +212,7 @@ object ProsessflytDefinisjon {
         ),
         IVERKSETT_VEDTAK_TRYGDEAVTALE to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_TRYGDEAVTALE,
+            LAGRE_PERSONOPPLYSNINGER,
             AVKLAR_MYNDIGHET,
             AVKLAR_ARBEIDSGIVER,
             LAGRE_LOVVALGSPERIODE_MEDL,
