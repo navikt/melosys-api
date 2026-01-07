@@ -465,6 +465,7 @@ internal class OppgaveServiceTest {
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             fagsak = Fagsak.forTest()
         }
+        every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { behandlingService.lagre(behandling) } returns Unit
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", oppgave.tilordnetRessurs)
@@ -481,6 +482,7 @@ internal class OppgaveServiceTest {
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             fagsak = Fagsak.forTest()
         }
+        every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { oppgaveFasade.oppdaterOppgave(any(), any()) } returns Unit
         every { behandlingService.lagre(behandling) } returns Unit
 
