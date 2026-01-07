@@ -161,7 +161,7 @@ class FtrlVedtakService(
             innledningFritekst = request.innledningFritekst
             trygdeavgiftFritekst = request.trygdeavgiftFritekst
             fastsattAvLand = Land_iso2.NO
-        }.let { behandlingsresultatService.lagre(it) }
+        }.let { behandlingsresultatService.lagreOgFlush(it) }
     }
 
     private fun Behandlingsresultat.harFullstendigManglendeInnbetaling(): Boolean =
@@ -222,7 +222,7 @@ class FtrlVedtakService(
         behandlingsresultat.settVedtakMetadata(request.vedtakstype, LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong()))
         behandlingsresultat.begrunnelseFritekst = request.begrunnelseFritekst
         behandlingsresultat.fastsattAvLand = Land_iso2.NO
-        return behandlingsresultatService.lagre(behandlingsresultat)
+        return behandlingsresultatService.lagreOgFlush(behandlingsresultat)
     }
 
     private fun Behandlingstema.erPensjonist(): Boolean = this == Behandlingstema.PENSJONIST
