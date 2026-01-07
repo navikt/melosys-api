@@ -40,7 +40,7 @@ public class SaksoppplysningEventListener {
     @Transactional
     public void lagrePersonopplysninger(BehandlingEndretStatusEvent event) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(event.getBehandling().getId());
-        // Note: IVERKSETTER_VEDTAK is now handled by LagrePersonopplysninger saga step to avoid race condition
+        // Merk: IVERKSETTER_VEDTAK håndteres nå av LagrePersonopplysninger saga-steg for å unngå race condition
         if (List.of(Behandlingsstatus.AVSLUTTET, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING).contains(event.getBehandlingsstatus())
             && behandling.getFagsak().getHovedpartRolle() == Aktoersroller.BRUKER
         ) {

@@ -38,6 +38,4 @@ public interface ProsessinstansRepository extends JpaRepository<Prosessinstans, 
 
     @Query(value = "SELECT * FROM PROSESSINSTANS p WHERE p.REGISTRERT_DATO > ?1", nativeQuery = true)
     Collection<Prosessinstans> findAllAfterDate(LocalDateTime localDateTime);
-
-    Collection<Prosessinstans> findAllByBehandling_Id(Long behandlingId);
 }
