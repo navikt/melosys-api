@@ -18,6 +18,7 @@ import no.nav.melosys.domain.person.PersonMedHistorikk
 import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
+import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataFasade
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -26,6 +27,9 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
 class PersonopplysningerLagrerTest {
+
+    @MockK
+    lateinit var behandlingService: BehandlingService
 
     @RelaxedMockK
     lateinit var saksopplysningerService: SaksopplysningerService
@@ -44,6 +48,7 @@ class PersonopplysningerLagrerTest {
     @BeforeEach
     fun setup() {
         personopplysningerLagrer = PersonopplysningerLagrer(
+            behandlingService,
             saksopplysningerService,
             persondataFasade,
             avklartefaktaService
@@ -58,8 +63,9 @@ class PersonopplysningerLagrerTest {
                 id = behandlingId
                 fagsak = Fagsak.forTest { medVirksomhet() }
             }
+            every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
 
-            val result = personopplysningerLagrer.lagreHvisMangler(behandling)
+            val result = personopplysningerLagrer.lagreHvisMangler(behandlingId)
 
             result shouldBe false
             verify { saksopplysningerService wasNot Called }
@@ -73,11 +79,12 @@ class PersonopplysningerLagrerTest {
         @Test
         fun `lagrer PDL_PERSOPL uten familierelasjoner når det mangler og ingen medfølgende familie`() {
             val behandling = mockBehandlingMissingPdlPersopl()
+            every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
             val persondata = mockk<Persondata>()
             every { persondataFasade.hentPerson(aktørId) } returns persondata
             mockNoMedfølgendeFamilie()
 
-            val result = personopplysningerLagrer.lagreHvisMangler(behandling)
+            val result = personopplysningerLagrer.lagreHvisMangler(behandlingId)
 
             result shouldBe true
             verify { saksopplysningerService.lagrePersonopplysninger(behandling, persondata) }
@@ -88,11 +95,12 @@ class PersonopplysningerLagrerTest {
         @Test
         fun `lagrer PDL_PERSOPL med familierelasjoner når medfølgende barn finnes`() {
             val behandling = mockBehandlingMissingPdlPersopl()
+            every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
             val persondata = mockk<Persondata>()
             every { persondataFasade.hentPerson(aktørId, Informasjonsbehov.MED_FAMILIERELASJONER) } returns persondata
             mockMedfølgendeBarnFinnes()
 
-            val result = personopplysningerLagrer.lagreHvisMangler(behandling)
+            val result = personopplysningerLagrer.lagreHvisMangler(behandlingId)
 
             result shouldBe true
             verify { saksopplysningerService.lagrePersonopplysninger(behandling, persondata) }
@@ -102,11 +110,12 @@ class PersonopplysningerLagrerTest {
         @Test
         fun `lagrer PDL_PERSOPL med familierelasjoner når medfølgende ektefelle finnes`() {
             val behandling = mockBehandlingMissingPdlPersopl()
+            every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
             val persondata = mockk<Persondata>()
             every { persondataFasade.hentPerson(aktørId, Informasjonsbehov.MED_FAMILIERELASJONER) } returns persondata
             mockMedfølgendeEktefelleFinnes()
 
-            val result = personopplysningerLagrer.lagreHvisMangler(behandling)
+            val result = personopplysningerLagrer.lagreHvisMangler(behandlingId)
 
             result shouldBe true
             verify { saksopplysningerService.lagrePersonopplysninger(behandling, persondata) }
@@ -116,10 +125,11 @@ class PersonopplysningerLagrerTest {
         @Test
         fun `lagrer PDL_PERS_SAKS når det mangler`() {
             val behandling = mockBehandlingMissingPdlPersSaks()
+            every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
             val personMedHistorikk = mockk<PersonMedHistorikk>()
             every { persondataFasade.hentPersonMedHistorikk(aktørId) } returns personMedHistorikk
 
-            val result = personopplysningerLagrer.lagreHvisMangler(behandling)
+            val result = personopplysningerLagrer.lagreHvisMangler(behandlingId)
 
             result shouldBe true
             verify { saksopplysningerService.lagrePersonMedHistorikk(behandling, personMedHistorikk) }
@@ -128,8 +138,9 @@ class PersonopplysningerLagrerTest {
         @Test
         fun `lagrer ikke PDL_PERSOPL når det allerede finnes`() {
             val behandling = mockBehandlingWithAllSaksopplysninger()
+            every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
 
-            personopplysningerLagrer.lagreHvisMangler(behandling)
+            personopplysningerLagrer.lagreHvisMangler(behandlingId)
 
             verify(exactly = 0) { saksopplysningerService.lagrePersonopplysninger(any(), any()) }
         }
@@ -137,8 +148,9 @@ class PersonopplysningerLagrerTest {
         @Test
         fun `lagrer ikke PDL_PERS_SAKS når det allerede finnes`() {
             val behandling = mockBehandlingWithAllSaksopplysninger()
+            every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
 
-            personopplysningerLagrer.lagreHvisMangler(behandling)
+            personopplysningerLagrer.lagreHvisMangler(behandlingId)
 
             verify(exactly = 0) { saksopplysningerService.lagrePersonMedHistorikk(any(), any()) }
         }
@@ -146,8 +158,9 @@ class PersonopplysningerLagrerTest {
         @Test
         fun `returnerer false når ingenting ble lagret`() {
             val behandling = mockBehandlingWithAllSaksopplysninger()
+            every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
 
-            val result = personopplysningerLagrer.lagreHvisMangler(behandling)
+            val result = personopplysningerLagrer.lagreHvisMangler(behandlingId)
 
             result shouldBe false
         }
@@ -155,13 +168,14 @@ class PersonopplysningerLagrerTest {
         @Test
         fun `lagrer begge saksopplysningstyper når begge mangler`() {
             val behandling = mockBehandlingMissingBoth()
+            every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
             val persondata = mockk<Persondata>()
             val personMedHistorikk = mockk<PersonMedHistorikk>()
             every { persondataFasade.hentPerson(aktørId) } returns persondata
             every { persondataFasade.hentPersonMedHistorikk(aktørId) } returns personMedHistorikk
             mockNoMedfølgendeFamilie()
 
-            val result = personopplysningerLagrer.lagreHvisMangler(behandling)
+            val result = personopplysningerLagrer.lagreHvisMangler(behandlingId)
 
             result shouldBe true
             verify { saksopplysningerService.lagrePersonopplysninger(behandling, persondata) }

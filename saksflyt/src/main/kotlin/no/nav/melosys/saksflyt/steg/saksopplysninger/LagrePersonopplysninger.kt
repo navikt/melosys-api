@@ -4,7 +4,6 @@ import mu.KotlinLogging
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.saksopplysninger.PersonopplysningerLagrer
 import org.springframework.stereotype.Component
 
@@ -21,7 +20,6 @@ private val log = KotlinLogging.logger { }
  */
 @Component
 class LagrePersonopplysninger(
-    private val behandlingService: BehandlingService,
     private val personopplysningerLagrer: PersonopplysningerLagrer
 ) : StegBehandler {
 
@@ -30,9 +28,6 @@ class LagrePersonopplysninger(
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandlingId = prosessinstans.hentBehandling.id
         log.debug { "Kjører LAGRE_PERSONOPPLYSNINGER for behandling $behandlingId" }
-
-        // Last alltid behandling på nytt for å få oppdatert tilstand etter at HTTP-transaksjonen er committet
-        val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId)
-        personopplysningerLagrer.lagreHvisMangler(behandling)
+        personopplysningerLagrer.lagreHvisMangler(behandlingId)
     }
 }

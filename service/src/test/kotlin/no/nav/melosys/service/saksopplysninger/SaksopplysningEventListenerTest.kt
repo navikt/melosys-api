@@ -1,17 +1,12 @@
 package no.nav.melosys.service.saksopplysninger
 
 import io.mockk.Called
-import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.BehandlingEndretStatusEvent
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.service.SaksbehandlingDataFactory
-import no.nav.melosys.service.behandling.BehandlingService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -21,9 +16,6 @@ import org.junit.jupiter.params.provider.EnumSource
 @ExtendWith(MockKExtension::class)
 class SaksopplysningEventListenerTest {
 
-    @MockK
-    private lateinit var behandlingService: BehandlingService
-
     @RelaxedMockK
     private lateinit var personopplysningerLagrer: PersonopplysningerLagrer
 
@@ -32,7 +24,6 @@ class SaksopplysningEventListenerTest {
     @BeforeEach
     fun setUp() {
         saksoppplysningEventListener = SaksoppplysningEventListener(
-            behandlingService,
             personopplysningerLagrer
         )
     }
@@ -42,12 +33,10 @@ class SaksopplysningEventListenerTest {
         val behandling = SaksbehandlingDataFactory.lagBehandling()
         behandling.status = Behandlingsstatus.AVSLUTTET
 
-        every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
-
         val event = BehandlingEndretStatusEvent(Behandlingsstatus.AVSLUTTET, behandling)
         saksoppplysningEventListener.lagrePersonopplysninger(event)
 
-        verify { personopplysningerLagrer.lagreHvisMangler(behandling) }
+        verify { personopplysningerLagrer.lagreHvisMangler(behandling.id) }
     }
 
     @Test
@@ -55,12 +44,10 @@ class SaksopplysningEventListenerTest {
         val behandling = SaksbehandlingDataFactory.lagBehandling()
         behandling.status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
 
-        every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
-
         val event = BehandlingEndretStatusEvent(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING, behandling)
         saksoppplysningEventListener.lagrePersonopplysninger(event)
 
-        verify { personopplysningerLagrer.lagreHvisMangler(behandling) }
+        verify { personopplysningerLagrer.lagreHvisMangler(behandling.id) }
     }
 
     @ParameterizedTest
@@ -77,6 +64,5 @@ class SaksopplysningEventListenerTest {
         saksoppplysningEventListener.lagrePersonopplysninger(event)
 
         verify { personopplysningerLagrer wasNot Called }
-        verify { behandlingService wasNot Called }
     }
 }
