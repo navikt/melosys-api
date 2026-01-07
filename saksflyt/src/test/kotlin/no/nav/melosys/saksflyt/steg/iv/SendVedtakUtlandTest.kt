@@ -19,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.saksflyt.steg.sed.SendVedtakUtland
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.brev.SedSomBrevService
 import no.nav.melosys.service.dokument.sed.EessiService
@@ -88,7 +89,7 @@ class SendVedtakUtlandTest {
     }
 
     private fun lagProsessinstans(
-        init: Prosessinstans.Builder.() -> Unit = {}
+        init: ProsessinstansTestFactory.ProsessinstansTestBuilder.() -> Unit = {}
     ) = Prosessinstans.forTest {
         type = ProsessType.OPPRETT_SAK
         status = ProsessStatus.KLAR

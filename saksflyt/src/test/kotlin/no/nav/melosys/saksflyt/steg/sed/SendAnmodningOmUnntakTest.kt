@@ -22,6 +22,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_k
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.saksflyt.brev.BrevBestiller
 import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.sed.EessiService
@@ -166,7 +167,7 @@ class SendAnmodningOmUnntakTest {
 
     private fun lagProsessinstans(
         behandlingId: Long = BEHANDLING_ID,
-        init: Prosessinstans.Builder.() -> Unit = {}
+        init: ProsessinstansTestFactory.ProsessinstansTestBuilder.() -> Unit = {}
     ) = Prosessinstans.forTest {
         type = ProsessType.OPPRETT_SAK
         status = ProsessStatus.KLAR

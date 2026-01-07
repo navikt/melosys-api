@@ -13,6 +13,7 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflyt.ProsessinstansBehandlerDelegate
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -201,7 +202,7 @@ class ProsessinstansAdminServiceTest {
         verify { prosessinstansRepository.save(prosessinstans) }
     }
 
-    private fun lagProsessinstans(init: Prosessinstans.Builder.() -> Unit = {}) = Prosessinstans.forTest {
+    private fun lagProsessinstans(init: ProsessinstansTestFactory.ProsessinstansTestBuilder.() -> Unit = {}) = Prosessinstans.forTest {
         type = PROSESS_TYPE
         status = ProsessStatus.FEILET
         behandling {

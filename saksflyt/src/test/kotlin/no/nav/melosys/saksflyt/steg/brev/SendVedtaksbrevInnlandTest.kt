@@ -27,6 +27,7 @@ import no.nav.melosys.domain.mottatteopplysninger.soeknad
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -552,7 +553,7 @@ class SendVedtaksbrevInnlandTest {
     }
 
     private fun lagProsessinstans(
-        init: Prosessinstans.Builder.() -> Unit = {}
+        init: ProsessinstansTestFactory.ProsessinstansTestBuilder.() -> Unit = {}
     ) = Prosessinstans.forTest {
         type = ProsessType.IVERKSETT_VEDTAK_EOS
         status = ProsessStatus.KLAR
