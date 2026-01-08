@@ -8,7 +8,6 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Aktoersroller
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
@@ -55,7 +54,7 @@ class SkattepliktigeAarsavregningDryrunService(
 
         log.info { "Starter dryrun for ${skattehendelser.size} skattehendelser" }
 
-        jobMonitor.execute {
+        jobMonitor.execute(maxErrorsBeforeStop = 100) {
             antallInputHendelser = skattehendelser.size
 
             skattehendelser.forEach { hendelse ->
