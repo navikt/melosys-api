@@ -15,7 +15,7 @@ class AnnullerSakService(
     private val medlemskapsperiodeService: MedlemskapsperiodeService,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val oppgaveService: OppgaveService,
-    private val helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService,
+    private val helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService
 ) {
     fun annullerSak(saksnummer: String) {
         val fagsak = fagsakService.hentFagsak(saksnummer)
@@ -23,7 +23,7 @@ class AnnullerSakService(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id)
-        if(behandling.erEøsPensjonist()){
+        if (behandling.erEøsPensjonist()) {
             helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(behandlingsresultat.hentId())
         } else {
             medlemskapsperiodeService.slettMedlemskapsperioder(behandlingsresultat.hentId())

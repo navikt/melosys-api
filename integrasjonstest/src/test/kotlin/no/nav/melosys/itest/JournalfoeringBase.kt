@@ -2,12 +2,10 @@ package no.nav.melosys.itest
 
 import com.github.tomakehurst.wiremock.extension.Extension
 import io.kotest.matchers.nulls.shouldNotBeNull
-import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.kodeverk.Avsendertyper
 import no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker
 import no.nav.melosys.domain.kodeverk.Landkoder
-import no.nav.melosys.melosysmock.oppgave.Oppgave
-import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
+import no.nav.melosys.itest.mock.OppgaveVerificationDto
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.felles.dto.SoeknadslandDto
@@ -17,12 +15,9 @@ import no.nav.melosys.service.oppgave.OppgaveService
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
-class JournalfoeringBase(
+abstract class JournalfoeringBase(
     extensionForWireMock: Extension? = null
 ) : MockServerTestBaseWithProsessManager(extensionForWireMock) {
-
-    @Autowired
-    protected lateinit var journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator
 
     @Autowired
     protected lateinit var journalføringService: JournalfoeringService
@@ -34,7 +29,7 @@ class JournalfoeringBase(
         journalfoeringOpprettDto: JournalfoeringOpprettDto,
         waitFor: Map<ProsessType, Int>,
     ): Prosessinstans {
-        val jfrOppgave: Oppgave = lagJfrOppgave()
+        val jfrOppgave = lagJfrOppgave()
         val lagJournalfoeringOpprettDto = lagJournalfoeringOpprettDto(jfrOppgave, journalfoeringOpprettDto)
 
         return executeAndWait(waitFor, ProsessType.JFR_NY_SAK_BRUKER) {
@@ -53,21 +48,29 @@ class JournalfoeringBase(
         process = process
     )
 
-    protected fun lagJfrOppgave(): Oppgave =
-        journalføringsoppgaveGenerator.opprettJfrOppgave(tilordnetRessurs = "Z123456", forVirksomhet = false)
+    protected fun lagJfrOppgave(
+        tilordnetRessurs: String = "Z123456",
+        forVirksomhet: Boolean = false
+    ): OppgaveVerificationDto {
+        return mockVerificationClient.opprettJfrOppgave(
+            tilordnetRessurs = tilordnetRessurs,
+            forVirksomhet = forVirksomhet
+        )
+    }
 
     protected fun lagJournalfoeringOpprettDto(
-        jfrOppgave: Oppgave,
+        jfrOppgave: OppgaveVerificationDto,
         journalfoeringOpprettDto: JournalfoeringOpprettDto
     ): JournalfoeringOpprettDto {
-
-        val hentJournalpost = if (jfrOppgave.journalpostId != null) journalføringService.hentJournalpost(jfrOppgave.journalpostId) else null
+        val hentJournalpost = if (jfrOppgave.journalpostId != null) {
+            journalføringService.hentJournalpost(jfrOppgave.journalpostId)
+        } else null
         return lagJournalføringDto(jfrOppgave, hentJournalpost?.hoveddokument, journalfoeringOpprettDto)
     }
 
     private fun lagJournalføringDto(
-        oppgave: Oppgave,
-        dokument: ArkivDokument?,
+        oppgave: OppgaveVerificationDto,
+        dokument: no.nav.melosys.domain.arkiv.ArkivDokument?,
         journalfoeringOpprettDto: JournalfoeringOpprettDto
     ): JournalfoeringOpprettDto {
         return journalfoeringOpprettDto.apply {
@@ -110,14 +113,19 @@ class JournalfoeringBase(
         saksnummer: String,
         journalfoeringTilordneDto: JournalfoeringTilordneDto = defaultJournalfoeringTilordneDto()
     ): JournalfoeringTilordneDto {
-        val jfrOppgave: Oppgave = lagJfrOppgave()
-        val hentJournalpost = if (jfrOppgave.journalpostId != null) journalføringService.hentJournalpost(jfrOppgave.journalpostId) else null
+        val jfrOppgave = lagJfrOppgave()
+        val hentJournalpost = if (jfrOppgave.journalpostId != null) {
+            journalføringService.hentJournalpost(jfrOppgave.journalpostId)
+        } else null
         return journalfoeringTilordneDto
             .apply {
                 this.saksnummer = saksnummer
                 journalpostID = jfrOppgave.journalpostId
                 oppgaveID = jfrOppgave.id.toString()
-                hoveddokument = DokumentDto(hentJournalpost?.hoveddokument?.dokumentId, hentJournalpost?.hoveddokument?.tittel).apply {
+                hoveddokument = DokumentDto(
+                    hentJournalpost?.hoveddokument?.dokumentId,
+                    hentJournalpost?.hoveddokument?.tittel
+                ).apply {
                     logiskeVedlegg = emptyList()
                 }
             }.apply {
@@ -140,7 +148,7 @@ class JournalfoeringBase(
         }
 
     companion object {
-        val periodeFOM = LocalDate.of(2001, 1, 1)
-        val periodeTOM = LocalDate.of(2001, 1, 2)
+        val periodeFOM: LocalDate = LocalDate.of(2001, 1, 1)
+        val periodeTOM: LocalDate = LocalDate.of(2001, 1, 2)
     }
 }

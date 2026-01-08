@@ -4,14 +4,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
-import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucType;
@@ -67,15 +65,13 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
         behandlingService.lagre(behandling);
         anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(behandling.getId());
 
-        sendUtland(BucType.LA_BUC_01, prosessinstans, hentVedlegg(prosessinstans));
+        sendUtland(BucType.LA_BUC_01, prosessinstans, hentDokumentReferanser(prosessinstans));
     }
 
-    private Collection<Vedlegg> hentVedlegg(Prosessinstans prosessinstans) {
-        final Set<DokumentReferanse> vedleggReferanser = prosessinstans.getData(ProsessDataKey.VEDLEGG_SED,
+    private Collection<DokumentReferanse> hentDokumentReferanser(Prosessinstans prosessinstans) {
+        return prosessinstans.getData(ProsessDataKey.VEDLEGG_SED,
             new TypeReference<>() {
             }, Collections.emptySet());
-        return eessiService.lagEessiVedlegg(prosessinstans.getBehandling().getFagsak(),
-            vedleggReferanser);
     }
 
     @Override

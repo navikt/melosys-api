@@ -24,6 +24,12 @@ class HelseutgiftDekkesPeriodeService(
     ): HelseutgiftDekkesPeriode {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
+        val eksisterendePeriode = helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(behandlingID).takeIf { it != null }
+
+        if(eksisterendePeriode != null) {
+            return oppdaterHelseutgiftDekkesPeriode(behandlingID, fomDato, tomDato, bostedLandkode)
+        }
+
         val nyHelseutgiftDekkesPeriode = HelseutgiftDekkesPeriode(
             behandlingsresultat = behandlingsresultat,
             fomDato = fomDato,

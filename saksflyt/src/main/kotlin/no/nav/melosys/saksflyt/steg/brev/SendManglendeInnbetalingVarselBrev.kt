@@ -10,6 +10,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.DokumentServiceFasade
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,7 +21,7 @@ import java.time.Period
 @Component
 class SendManglendeInnbetalingVarselBrev(
     @Autowired private val dokumentServiceFasade: DokumentServiceFasade,
-    @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService
+    @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
 ) : StegBehandler {
 
     val TRYGDEAVGIFT_BETALINGSFRIST_UKER = 4
@@ -35,7 +36,6 @@ class SendManglendeInnbetalingVarselBrev(
         val mottaksDato = prosessinstans.hentData<LocalDate>(ProsessDataKey.MOTTATT_DATO)
         val fakturanummer = prosessinstans.getData(ProsessDataKey.FAKTURANUMMER)
         val fullmektigForBetaling = finnFullmektigTrygdeavgift(behandling.fagsak, behandling.id)
-
         val brevbestillingDto = BrevbestillingDto()
             .apply {
                 this.betalingsstatus = betalingsstatus
@@ -45,6 +45,7 @@ class SendManglendeInnbetalingVarselBrev(
                 this.betalingsfrist = mottaksDato.plus(Period.ofWeeks(TRYGDEAVGIFT_BETALINGSFRIST_UKER))
                 this.fullmektigForBetaling = fullmektigForBetaling
                 this.isErEøsPensjonist = behandling.erEøsPensjonist()
+                this.isErEøsLovvalg = behandling.fagsak.erLovvalg()
             }
 
         dokumentServiceFasade.produserDokument(behandling.id, brevbestillingDto)

@@ -57,9 +57,9 @@ class TrygdeavgiftControllerTest(
     private val trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
 
     @Test
-    fun `skal hente trygdeavgiftsperioder`() {
+    fun `skal hente beregnet trygdeavgift`() {
         every { aksesskontroll.autoriser(any()) } returns Unit
-        every { trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(BEHANDLINGSRESULTAT_ID) } returns trygdeavgiftsperioder
+        every { trygdeavgiftService.hentTrygdeavgiftsperioder(BEHANDLINGSRESULTAT_ID) } returns trygdeavgiftsperioder
 
         mockMvc.perform(get("$BASE_URL/beregning", 1L)
             .contentType(MediaType.APPLICATION_JSON))
@@ -123,6 +123,17 @@ class TrygdeavgiftControllerTest(
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk)
             .andExpectResponseBody(FakturamottakerDto(MOTTAKER_NAVN))
+    }
+
+    @Test
+    fun `skal hente trygdeavgiftsperioder`() {
+        every { aksesskontroll.autoriser(any()) } returns Unit
+        every { trygdeavgiftService.hentTrygdeavgiftsperioder(BEHANDLINGSRESULTAT_ID) } returns trygdeavgiftsperioder
+
+        mockMvc.perform(get(BASE_URL, 1L)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpectResponseBody(trygdeavgiftsperioder.map { TrygdeavgiftsperiodeDto(it) })
     }
 
     private fun forventetBeregnetTrygdeavgiftDto(): BeregnetTrygdeavgiftDto {

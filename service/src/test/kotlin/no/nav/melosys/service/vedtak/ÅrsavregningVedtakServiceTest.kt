@@ -64,7 +64,7 @@ class ÅrsavregningVedtakServiceTest {
         )
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) }.returns(Behandlingsresultat())
-        every { behandlingsresultatService.lagre(any()) } returnsArgument 0
+        every { behandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
 
         val request = lagFattVedtakRequest(
             behandlingsResultattype = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT,
@@ -85,7 +85,7 @@ class ÅrsavregningVedtakServiceTest {
 
 
         verify {
-            behandlingsresultatService.lagre(withArg {
+            behandlingsresultatService.lagreOgFlush(withArg {
                 it.type shouldBe request.behandlingsresultatTypeKode
                 it.nyVurderingBakgrunn shouldBe request.nyVurderingBakgrunn
                 it.begrunnelseFritekst shouldBe request.begrunnelseFritekst

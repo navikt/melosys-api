@@ -87,7 +87,7 @@ class FtrlVedtakServiceTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns Behandlingsresultat().apply {
             addMedlemskapsperiode(Medlemskapsperiode().apply { medlemskapstype = Medlemskapstyper.FRIVILLIG })
         }
-        every { behandlingsresultatService.lagre(any()) } returnsArgument 0
+        every { behandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
         val request = lagFattVedtakRequest(
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
             innledningFritekst = "Innledning",
@@ -104,7 +104,7 @@ class FtrlVedtakServiceTest {
         ftrlVedtakService.fattVedtak(lagBehandling(), request)
 
 
-        verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
+        verify { behandlingsresultatService.lagreOgFlush(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
         verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEH_ID) }
@@ -143,7 +143,7 @@ class FtrlVedtakServiceTest {
                 })
             }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
-        every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
+        every { behandlingsresultatService.lagreOgFlush(behandlingsresultat) } returns behandlingsresultat
 
         val request = lagFattVedtakRequest(
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
@@ -183,7 +183,7 @@ class FtrlVedtakServiceTest {
                 })
             }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
-        every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
+        every { behandlingsresultatService.lagreOgFlush(behandlingsresultat) } returns behandlingsresultat
 
         val request = lagFattVedtakRequest(
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
@@ -221,7 +221,7 @@ class FtrlVedtakServiceTest {
                 })
             }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
-        every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
+        every { behandlingsresultatService.lagreOgFlush(behandlingsresultat) } returns behandlingsresultat
 
         val request = lagFattVedtakRequest(
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
@@ -259,7 +259,7 @@ class FtrlVedtakServiceTest {
                 })
             }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
-        every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
+        every { behandlingsresultatService.lagreOgFlush(behandlingsresultat) } returns behandlingsresultat
 
         val request = lagFattVedtakRequest(
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
@@ -295,7 +295,7 @@ class FtrlVedtakServiceTest {
         ftrlVedtakService.fattVedtak(lagBehandling(), request)
 
 
-        verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
+        verify { behandlingsresultatService.lagreOgFlush(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
         verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEH_ID) }
@@ -318,7 +318,7 @@ class FtrlVedtakServiceTest {
 
     @Test
     fun fattVedtak_delvis_opphørt_fatterVedtak() {
-        every { behandlingsresultatService.lagre(any()) } returnsArgument 0
+        every { behandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns Behandlingsresultat().apply {
             medlemskapsperioder = mutableSetOf(
                 Medlemskapsperiode().apply {
@@ -342,7 +342,7 @@ class FtrlVedtakServiceTest {
         ftrlVedtakService.fattVedtak(lagBehandling(), request)
 
 
-        verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
+        verify { behandlingsresultatService.lagreOgFlush(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
         verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEH_ID) }
@@ -367,7 +367,7 @@ class FtrlVedtakServiceTest {
 
     @Test
     fun fattVedtak_opphørt_fatterVedtak() {
-        every { behandlingsresultatService.lagre(any()) } returnsArgument 0
+        every { behandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
         val behandlingsresultat = Behandlingsresultat().apply {
             avklartefakta = mutableSetOf(Avklartefakta(), Avklartefakta().apply {
                 type = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
@@ -406,7 +406,7 @@ class FtrlVedtakServiceTest {
         ftrlVedtakService.fattVedtak(lagBehandling(), request)
 
 
-        verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
+        verify { behandlingsresultatService.lagreOgFlush(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
         verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.OPPHØRT) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEH_ID) }
@@ -455,12 +455,12 @@ class FtrlVedtakServiceTest {
             })
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
-        every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
+        every { behandlingsresultatService.lagreOgFlush(behandlingsresultat) } returns behandlingsresultat
         val request = lagFattVedtakRequest(type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, begrunnelseFritekst = "fritekst for begrunnelse")
 
         ftrlVedtakService.fattVedtak(lagBehandling(), request)
 
-        verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
+        verify { behandlingsresultatService.lagreOgFlush(capture(behandlingsresultatSlot)) }
         behandlingsresultatSlot.captured.type shouldBe Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
     }
 
@@ -524,7 +524,7 @@ class FtrlVedtakServiceTest {
 
     @Test
     fun fattVedtak_opphørt_feilOpphørtDato_kasterFeil() {
-        every { behandlingsresultatService.lagre(any()) } returnsArgument 0
+        every { behandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
         val behandlingsresultat = Behandlingsresultat().apply {
             avklartefakta = mutableSetOf(Avklartefakta(), Avklartefakta().apply {
                 type = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING

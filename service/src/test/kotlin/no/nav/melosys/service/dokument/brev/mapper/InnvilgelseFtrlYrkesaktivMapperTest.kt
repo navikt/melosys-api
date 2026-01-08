@@ -138,7 +138,7 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
                 trygdeavgiftsperiode {
                     periodeFra = LocalDate.now().minusYears(1).withDayOfYear(1)
-                    periodeTil = LocalDate.now().withMonth(6).withDayOfMonth(30)
+                    periodeTil = LocalDate.now().minusYears(1).withMonth(12).withDayOfMonth(31)
                     trygdesats = BigDecimal(0.05)
                     trygdeavgiftsbeløpMd = BigDecimal(500)
                     grunnlagSkatteforholdTilNorge {
@@ -149,7 +149,7 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
                     }
                 }
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().withMonth(7).withDayOfMonth(1)
+                    periodeFra = LocalDate.now().withMonth(1).withDayOfMonth(1)
                     periodeTil = LocalDate.now().withMonth(12).withDayOfMonth(31)
                     trygdesats = BigDecimal.ZERO
                     trygdeavgiftsbeløpMd = BigDecimal.ZERO

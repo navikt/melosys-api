@@ -12,9 +12,6 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerKonverterer
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
-import no.nav.melosys.integrasjon.medl.api.v1.Sporingsinformasjon
-import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
@@ -27,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 import kotlin.test.Test
 
 class AvsluttBehandlingArt13JobbIT(
@@ -45,31 +41,19 @@ class AvsluttBehandlingArt13JobbIT(
     @BeforeEach
     fun setup() {
         avsluttArt13BehandlingJobb = AvsluttArt13BehandlingJobb(behandlingService, avsluttArt13BehandlingService)
-        MedlRepo.repo.apply {
-            put(1242L, MedlemskapsunntakForGet().apply {
-                unntakId = 1242L
-                ident = "21075114491"
-                fraOgMed = LocalDate.now()
-                tilOgMed = LocalDate.now().plusYears(1)
-                status = "GODKJENT"
-                dekning = "FULL"
-                lovvalgsland = "AT"
-                lovvalg = "FOROVRIG"
-                grunnlag = "ARBEID"
-                medlem = true
-                sporingsinformasjon = Sporingsinformasjon().apply {
-                    versjon = 0
-                    registrert = LocalDate.now()
-                    besluttet = LocalDate.now()
-                    kilde = "SRVMELOSYS"
-                    kildedokument = "DEFAULT_TEST_DOCUMENT"
-                    opprettet = LocalDateTime.now()
-                    opprettetAv = "SRVMELOSYS"
-                    sistEndret = LocalDateTime.now()
-                    sistEndretAv = "SRVMELOSYS"
-                }
-            })
-        }
+        // Create MEDL entry via mock container
+        mockVerificationClient.opprettMedl(
+            unntakId = 1242L,
+            ident = "21075114491",
+            fraOgMed = LocalDate.now(),
+            tilOgMed = LocalDate.now().plusYears(1),
+            status = "GODKJENT",
+            dekning = "FULL",
+            lovvalgsland = "AT",
+            lovvalg = "FOROVRIG",
+            grunnlag = "ARBEID",
+            medlem = true
+        )
     }
 
     @Test

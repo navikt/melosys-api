@@ -20,11 +20,12 @@ class InformasjonTrygdeavgift(
     val tomDato: LocalDate,
     val bostedLand: String,
     val begrunnelseFritekst: String?,
-    val trygdeavgiftMottaker: Trygdeavgiftmottaker,
+    val trygdeavgiftMottaker: Trygdeavgiftmottaker?,
     val erNordisk: Boolean,
     val betalingsvalg: Betalingstype,
     val fullmektigTrygdeavgift: String?,
     val avgiftsperioder: List<AvgiftsperiodeEøsPensjonist>,
+    val harAvgiftspliktigePerioderIForegåendeÅr: Boolean
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
 }
@@ -36,5 +37,5 @@ data class AvgiftsperiodeEøsPensjonist(
     val avgiftPerMd: BigDecimal,
     val avgiftspliktigInntektPerMd: BigDecimal,
     val inntektskilde: String,
-    val skatteplikt: Boolean
+    val skatteplikt: Boolean,
 )

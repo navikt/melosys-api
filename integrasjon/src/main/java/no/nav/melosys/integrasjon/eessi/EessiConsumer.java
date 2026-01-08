@@ -6,6 +6,7 @@ import java.util.List;
 import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.eessi.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.eessi.sed.OpprettBucOgSedDtoV2;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
@@ -20,6 +21,8 @@ public interface EessiConsumer {
                                   BucType bucType,
                                   boolean forsøkSend,
                                   boolean oppdaterEksisterendeOmFinnes);
+
+    OpprettSedDto opprettBucOgSedV2(OpprettBucOgSedDtoV2 opprettBucOgSedDtoV2);
 
     void sendSedPåEksisterendeBuc(SedDataDto sedDataDto,
                                   String rinaSaksnummer,

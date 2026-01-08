@@ -1,42 +1,74 @@
+# Mock URL-er for eksterne tjenester konfigureres dynamisk i ComponentTestBase.kt
+# via @DynamicPropertySource. Dette støtter både testcontainers (dynamisk port)
+# og lokal docker-compose (fast port 8083).
+#
+# URL-ene under "OVERRIDES BY ComponentTestBase" er placeholder-verdier som kreves
+# for Spring @Value injection, men overstyres alltid av ComponentTestBase.kt.
+# Bruk localhost:8083 som placeholder (mock-containerens interne port).
+
+# ============================================================================
+# OVERRIDDEN BY ComponentTestBase.kt - ikke endre disse manuelt
+# ============================================================================
 DistribuerJournalpost_v1:
-  url: http://localhost:8093/rest/v1/distribuerjournalpost
+  url: http://localhost:8083/rest/v1/distribuerjournalpost
 Dokumentproduksjon_v3:
-  url: http://localhost:8093/soap/services/dokumentproduksjon/v3
+  url: http://localhost:8083/soap/services/dokumentproduksjon/v3
 Inngangsvilkaar:
-  url: http://localhost:8093/api
+  url: http://localhost:8083/api
 JournalpostApi_v1:
-  url: http://localhost:8093/rest/journalpostapi/v1
+  url: http://localhost:8083/rest/journalpostapi/v1
 KodeverkAPI_v1:
-  url: http://localhost:8093/api
-Melosys-admin:
-  apikey: dummy
+  url: http://localhost:8083/api
 MelosysEessi:
-  url: http://localhost:8093/api
-MelosysSoknadMottak:
-  url: dummy
+  url: http://localhost:8083/api
 OppgaveAPI_v1:
-  url: http://localhost:8093/api/v1
+  url: http://localhost:8083/api/v1
 PDL:
-  url: http://localhost:8093/graphql
+  url: http://localhost:8083/graphql
 REST_STS:
-  url: http://localhost:8093/rest/v1/sts
+  url: http://localhost:8083/rest/v1/sts
 SAF:
-  url: http://localhost:8093
+  url: http://localhost:8083
 SakAPI_v1:
-  url: http://localhost:8093/api/v1/saker
+  url: http://localhost:8083/api/v1/saker
 SakOgBehandling_v1:
-  url: http://localhost:8093/soap/services/sakOgBehandling/v1
-UNLEASH:
-  token: faketoken
+  url: http://localhost:8083/soap/services/sakOgBehandling/v1
 arbeidsforhold:
   rest:
-    url: http://localhost:8093/aareg-services/api/v1/arbeidstaker/arbeidsforhold
+    url: http://localhost:8083/aareg-services/api/v1/arbeidstaker/arbeidsforhold
+ereg:
+  rest:
+    url: http://localhost:8083/ereg/v2
+inntekt:
+  rest:
+    url: http://localhost:8083/inntektskomponenten/rs/api/v1
+medlemskap:
+  rest:
+    url: http://localhost:8083
+microsoft:
+  graph:
+    rest:
+      url: http://localhost:8083/graph/v1.0
+tilgangsmaskinen:
+  url: http://localhost:8083/tilgangsmaskinen
+utbetaling_rest:
+  url: http://localhost:8083/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern
+# ============================================================================
+
+melosys:
+  kodeverk:
+    scheduler:
+      enabled: false  # Deaktiver scheduler i integrasjonstester
+
+Melosys-admin:
+  apikey: dummy
+MelosysSoknadMottak:
+  url: dummy
+UNLEASH:
+  token: faketoken
 dokumentproduksjon:
   uten:
     token: true
-ereg:
-  rest:
-    url: http://localhost:8093/ereg/v2
 faktureringskomponenten:
   url: http://localhost:8094
 graphiql:
@@ -47,9 +79,6 @@ graphql:
     mapping: /graphql
   tools:
     schema-location-pattern: '**/*graphqls-test'
-inntekt:
-  rest:
-    url: http://localhost:8093/inntektskomponenten/rs/api/v1
 kafka:
   aiven:
     a1-utstedt:
@@ -77,18 +106,11 @@ kafka:
 ldap:
   url: ldap://localhost:8389/
   userbasedn: ou=NAV,ou=BusinessUnits,dc=test,dc=local
-medlemskap:
-  rest:
-    url: http://localhost:8093
 melosysdokgen:
   v1:
     url: http://localhost:8094/api/v1
 melosystrygdeavgift:
   url: http://localhost:8094/api
-microsoft:
-  graph:
-    rest:
-      url: http://localhost:8093/graph/v1.0
 'no':
   nav:
     security:
@@ -248,7 +270,3 @@ stsPolicy:
 systemuser:
   password: dummy
   username: srvmelosys
-tilgangsmaskinen:
-  url: http://localhost:8093/tilgangsmaskinen
-utbetaling_rest:
-  url: http://localhost:8093/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern

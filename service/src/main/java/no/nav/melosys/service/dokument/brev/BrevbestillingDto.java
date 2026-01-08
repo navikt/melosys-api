@@ -48,6 +48,7 @@ public final class BrevbestillingDto {
     private LocalDate opphørtDato;
     private boolean erInnvilgelse;
     private boolean erEøsPensjonist;
+    private boolean erEøsLovvalg;
 
     public BrevbestillingDto() {
     }
@@ -87,7 +88,8 @@ public final class BrevbestillingDto {
         String annenPersonMottakerIdent,
         LocalDate opphørtDato,
         boolean erInnvilgelse,
-        boolean erEøsPensjonist) {
+        boolean erEøsPensjonist,
+        boolean erEøsLovvalg) {
 
         this.produserbardokument = produserbardokument;
         this.mottaker = mottaker;
@@ -124,6 +126,7 @@ public final class BrevbestillingDto {
         this.opphørtDato = opphørtDato;
         this.erInnvilgelse = erInnvilgelse;
         this.erEøsPensjonist = erEøsPensjonist;
+        this.erEøsLovvalg = erEøsLovvalg;
     }
 
 
@@ -167,6 +170,7 @@ public final class BrevbestillingDto {
             null,
             null,
             null,
+            false,
             false,
             false
         );
@@ -432,13 +436,14 @@ public final class BrevbestillingDto {
             Objects.equals(fakturanummer, that.fakturanummer) && betalingsstatus == that.betalingsstatus &&
             Objects.equals(fullmektigForBetaling, that.fullmektigForBetaling) && Objects.equals(betalingsfrist, that.betalingsfrist) &&
             Objects.equals(annenPersonMottakerIdent, that.annenPersonMottakerIdent) && Objects.equals(opphørtDato, that.opphørtDato) && Objects.equals(erInnvilgelse, that.erInnvilgelse) &&
-            Objects.equals(erEøsPensjonist, that.erEøsPensjonist);
+            Objects.equals(erEøsPensjonist, that.erEøsPensjonist) &&
+            Objects.equals(erEøsLovvalg, that.erEøsLovvalg);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(produserbardokument, mottaker, orgnr, orgnrNorskMyndighet, institusjonID, innledningFritekst, manglerFritekst,
-            begrunnelseFritekst, ektefelleFritekst, barnFritekst, trygdeavgiftFritekst, kontaktpersonNavn, kopiMottakere, bestillersId, fritekstTittel, fritekst, distribusjonstype, skalViseStandardTekstOmkontaktopplysninger, nyVurderingBakgrunn, saksVedlegg, fritekstvedlegg, dokumentTittel, saksbehandlerNrToIdent, begrunnelseKode, ytterligereInformasjon, fakturanummer, betalingsstatus, fullmektigForBetaling, betalingsfrist, annenPersonMottakerIdent, opphørtDato, erInnvilgelse, erEøsPensjonist);
+            begrunnelseFritekst, ektefelleFritekst, barnFritekst, trygdeavgiftFritekst, kontaktpersonNavn, kopiMottakere, bestillersId, fritekstTittel, fritekst, distribusjonstype, skalViseStandardTekstOmkontaktopplysninger, nyVurderingBakgrunn, saksVedlegg, fritekstvedlegg, dokumentTittel, saksbehandlerNrToIdent, begrunnelseKode, ytterligereInformasjon, fakturanummer, betalingsstatus, fullmektigForBetaling, betalingsfrist, annenPersonMottakerIdent, opphørtDato, erInnvilgelse, erEøsPensjonist, erEøsLovvalg);
     }
 
     @Override
@@ -477,6 +482,7 @@ public final class BrevbestillingDto {
             ", opphørtDato='" + opphørtDato + '\'' +
             ", erInnvilgelse='" + erInnvilgelse + '\'' +
             ", erEøsPensjonist='" + erEøsPensjonist + '\'' +
+            ", erEøsLovvalg='" + erEøsLovvalg + '\'' +
             '}';
     }
 
@@ -528,10 +534,19 @@ public final class BrevbestillingDto {
         this.erInnvilgelse = erInnvilgelse;
     }
 
-    public boolean isErEøsPensjonist() { return erEøsPensjonist; }
+    public boolean isErEøsPensjonist() {
+        return erEøsPensjonist;
+    }
 
     public void setErEøsPensjonist(boolean erEøsPensjonist) {
         this.erEøsPensjonist = erEøsPensjonist;
     }
 
+    public boolean isErEøsLovvalg() {
+        return erEøsLovvalg;
+    }
+
+    public void setErEøsLovvalg(boolean erEøsLovvalg) {
+        this.erEøsLovvalg = erEøsLovvalg;
+    }
 }

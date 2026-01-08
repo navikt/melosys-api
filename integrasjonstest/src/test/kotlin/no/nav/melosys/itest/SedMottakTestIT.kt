@@ -20,8 +20,7 @@ import no.nav.melosys.domain.eessi.melding.UtpekingAvvis
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
-import no.nav.melosys.melosysmock.config.SoapConfig
-import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
+import no.nav.melosys.itest.mock.OpprettSedRequest
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -42,12 +41,10 @@ import org.junit.jupiter.params.provider.Arguments.argumentSet
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.context.annotation.Import
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 import java.util.*
 
-@Import(SoapConfig::class)
 class SedMottakTestIT(
     @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
@@ -70,9 +67,25 @@ class SedMottakTestIT(
     fun `A009 med etterfølgende X008 skal gi fagsak annullert`() {
         val ref = Random().nextInt(100000).toString()
 
-        val sedInfo = SedInformasjon(ref, SedType.A009.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
-        val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
-        MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
+        // Use HTTP client to create BUC info instead of direct repo access
+        mockVerificationClient.opprettBucinformasjon(
+            id = ref,
+            erAapen = true,
+            bucType = null,
+            opprettetDato = LocalDate.now(),
+            mottakerinstitusjoner = null,
+            seder = listOf(
+                OpprettSedRequest(
+                    bucId = ref,
+                    sedId = SedType.A009.name,
+                    opprettetDato = LocalDate.now(),
+                    sistOppdatert = LocalDate.now(),
+                    sedType = SedType.A009.name,
+                    status = "AVBRUTT",
+                    rinaUrl = null
+                )
+            )
+        )
 
         val eessiMeldingA009 = eessiMeldingTestDataFactory.melosysEessiMelding {
             bucType = BucType.LA_BUC_04.name
@@ -120,16 +133,31 @@ class SedMottakTestIT(
                 .shouldBePresent()
                 .type.shouldBe(Behandlingsresultattyper.HENLEGGELSE)
         }
-
     }
 
     @Test
     fun `A009 med etterfølgende X006 skal gi fagsak annullert`() {
         val ref = Random().nextInt(100000).toString()
 
-        val sedInfo = SedInformasjon(ref, SedType.A009.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
-        val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
-        MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
+        // Use HTTP client to create BUC info instead of direct repo access
+        mockVerificationClient.opprettBucinformasjon(
+            id = ref,
+            erAapen = true,
+            bucType = null,
+            opprettetDato = LocalDate.now(),
+            mottakerinstitusjoner = null,
+            seder = listOf(
+                OpprettSedRequest(
+                    bucId = ref,
+                    sedId = SedType.A009.name,
+                    opprettetDato = LocalDate.now(),
+                    sistOppdatert = LocalDate.now(),
+                    sedType = SedType.A009.name,
+                    status = "AVBRUTT",
+                    rinaUrl = null
+                )
+            )
+        )
 
         val eessiMeldingA009 = eessiMeldingTestDataFactory.melosysEessiMelding {
             bucType = BucType.LA_BUC_04.name
@@ -184,6 +212,8 @@ class SedMottakTestIT(
     fun `A003 med etterfølgende X006 og lovvalgsland er NO skal gi manuelt behandling`() {
         val ref = Random().nextInt(100000).toString()
 
+        // No BUC info setup needed for this test (original test doesn't have it)
+
         val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding {
             bucType = BucType.LA_BUC_02.name
             rinaSaksnummer = ref
@@ -234,9 +264,25 @@ class SedMottakTestIT(
     fun `A003 med etterfølgende X008 og lovvalgsland er NO skal gi manuelt behandling`() {
         val ref = Random().nextInt(100000).toString()
 
-        val sedInfo = SedInformasjon(ref, SedType.A003.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
-        val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
-        MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
+        // Use HTTP client to create BUC info instead of direct repo access
+        mockVerificationClient.opprettBucinformasjon(
+            id = ref,
+            erAapen = true,
+            bucType = null,
+            opprettetDato = LocalDate.now(),
+            mottakerinstitusjoner = null,
+            seder = listOf(
+                OpprettSedRequest(
+                    bucId = ref,
+                    sedId = SedType.A003.name,
+                    opprettetDato = LocalDate.now(),
+                    sistOppdatert = LocalDate.now(),
+                    sedType = SedType.A003.name,
+                    status = "AVBRUTT",
+                    rinaUrl = null
+                )
+            )
+        )
 
         val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding {
             bucType = BucType.LA_BUC_02.name
@@ -290,9 +336,25 @@ class SedMottakTestIT(
     fun `A003 med etterfølgende X008 og lovvalgsland ikke NO skal annullere saken og henlegge i melosys`() {
         val ref = Random().nextInt(100000).toString()
 
-        val sedInfo = SedInformasjon(ref, SedType.A003.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
-        val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
-        MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
+        // Use HTTP client to create BUC info instead of direct repo access
+        mockVerificationClient.opprettBucinformasjon(
+            id = ref,
+            erAapen = true,
+            bucType = null,
+            opprettetDato = LocalDate.now(),
+            mottakerinstitusjoner = null,
+            seder = listOf(
+                OpprettSedRequest(
+                    bucId = ref,
+                    sedId = SedType.A003.name,
+                    opprettetDato = LocalDate.now(),
+                    sistOppdatert = LocalDate.now(),
+                    sedType = SedType.A003.name,
+                    status = "AVBRUTT",
+                    rinaUrl = null
+                )
+            )
+        )
 
         val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding {
             bucType = BucType.LA_BUC_02.name
@@ -340,7 +402,7 @@ class SedMottakTestIT(
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id).shouldBePresent().type
                 .shouldBe(Behandlingsresultattyper.HENLEGGELSE)
         }
-        oppgaveRepo.repo.values
+        mockVerificationClient.oppgaver()
             .single()
             .run {
                 status.shouldBe("FERDIGSTILT")
@@ -408,13 +470,35 @@ class SedMottakTestIT(
         val rinaSaksnummer = Random().nextInt(100000).toString()
 
         val datoOmToÅr = LocalDate.now().plusYears(2)
-        val sedInfoA003 =
-            SedInformasjon(rinaSaksnummer, "A003id", datoOmToÅr, datoOmToÅr, SedType.A003.name, "MOTTATT", null)
-        val sedInfoA012 =
-            SedInformasjon(rinaSaksnummer, "A012id", datoOmToÅr, datoOmToÅr, SedType.A012.name, "SENDT", null)
-        val bucInformasjon =
-            BucInformasjon(rinaSaksnummer, true, "LA_BUC_02", LocalDate.now(), null, listOf(sedInfoA003, sedInfoA012))
-        MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
+
+        // Use HTTP client to create BUC info instead of direct repo access
+        mockVerificationClient.opprettBucinformasjon(
+            id = rinaSaksnummer,
+            erAapen = true,
+            bucType = "LA_BUC_02",
+            opprettetDato = LocalDate.now(),
+            mottakerinstitusjoner = null,
+            seder = listOf(
+                OpprettSedRequest(
+                    bucId = rinaSaksnummer,
+                    sedId = "A003id",
+                    opprettetDato = datoOmToÅr,
+                    sistOppdatert = datoOmToÅr,
+                    sedType = SedType.A003.name,
+                    status = "MOTTATT",
+                    rinaUrl = null
+                ),
+                OpprettSedRequest(
+                    bucId = rinaSaksnummer,
+                    sedId = "A012id",
+                    opprettetDato = datoOmToÅr,
+                    sistOppdatert = datoOmToÅr,
+                    sedType = SedType.A012.name,
+                    status = "SENDT",
+                    rinaUrl = null
+                )
+            )
+        )
 
         val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding {
             bucType = BucType.LA_BUC_02.name
@@ -499,10 +583,10 @@ class SedMottakTestIT(
             })
         }
 
-        MelosysEessiRepo.sedRepo.get(rinaSaksnummer)!!.shouldContainInOrder(
-            SedType.A012,
-            SedType.X008,
-            SedType.A004,
+        mockVerificationClient.sedForRinaSak(rinaSaksnummer).shouldContainInOrder(
+            "A012",
+            "X008",
+            "A004",
         )
         vedtaksProsessInstans.behandling.shouldNotBeNull().run {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
@@ -517,7 +601,6 @@ class SedMottakTestIT(
         )
     }
 
-
     @ParameterizedTest
     @MethodSource("toggleMedForventetdResultatForA003SendBrev")
     fun `Motta A003, avvise med A004, ugyldiggjøre avvisning A004 med X008 for så å sende en A012`(forventedeProsessTyper: Pair<Boolean, Map<ProsessType, Int>>) {
@@ -529,13 +612,34 @@ class SedMottakTestIT(
         val rinaSaksnummer = Random().nextInt(100000).toString()
 
         val datoNå = LocalDate.now()
-        val sedInfoA003 =
-            SedInformasjon(rinaSaksnummer, "idA003", datoNå, datoNå, SedType.A003.name, "MOTTATT", null)
-        val sedInfoA004 =
-            SedInformasjon(rinaSaksnummer, "idA004", datoNå, datoNå, SedType.A004.name, "SENDT", null)
-        val bucInformasjon =
-            BucInformasjon(rinaSaksnummer, true, "LA_BUC_02", LocalDate.now(), null, listOf(sedInfoA003, sedInfoA004))
-        MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
+
+        mockVerificationClient.opprettBucinformasjon(
+            id = rinaSaksnummer,
+            erAapen = true,
+            bucType = "LA_BUC_02",
+            opprettetDato = LocalDate.now(),
+            mottakerinstitusjoner = null,
+            seder = listOf(
+                OpprettSedRequest(
+                    bucId = rinaSaksnummer,
+                    sedId = "idA003",
+                    opprettetDato = datoNå,
+                    sistOppdatert = datoNå,
+                    sedType = SedType.A003.name,
+                    status = "MOTTATT",
+                    rinaUrl = null
+                ),
+                OpprettSedRequest(
+                    bucId = rinaSaksnummer,
+                    sedId = "idA004",
+                    opprettetDato = datoNå,
+                    sistOppdatert = datoNå,
+                    sedType = SedType.A004.name,
+                    status = "SENDT",
+                    rinaUrl = null
+                )
+            )
+        )
 
 
         val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding {
@@ -626,10 +730,10 @@ class SedMottakTestIT(
             artikkel.shouldBe(Lovvalgsbestemmelse.ART_11_3_a)
         }
 
-        MelosysEessiRepo.sedRepo.get(rinaSaksnummer)!!.shouldContainInOrder(
-            SedType.A004,
-            SedType.X008,
-            SedType.A012,
+        mockVerificationClient.sedForRinaSak(rinaSaksnummer).shouldContainInOrder(
+            "A004",
+            "X008",
+            "A012",
         )
         vedtaksProsessInstans.behandling.shouldNotBeNull().apply {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)

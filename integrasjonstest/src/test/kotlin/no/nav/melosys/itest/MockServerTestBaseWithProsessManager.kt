@@ -6,19 +6,15 @@ import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.extension.Extension
 import no.nav.melosys.ProsessinstansTestManager
-import no.nav.melosys.melosysmock.oppgave.OppgaveRepo
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
 
-class MockServerTestBaseWithProsessManager(
+abstract class MockServerTestBaseWithProsessManager(
     extensionForWireMock: Extension? = null
 ) : ComponentTestBase() {
-
-    @Autowired
-    protected lateinit var oppgaveRepo: OppgaveRepo
 
     @Autowired
     protected lateinit var prosessinstansTestManager: ProsessinstansTestManager
@@ -34,8 +30,8 @@ class MockServerTestBaseWithProsessManager(
         )
 
     @BeforeEach
-    fun beforeComponentTestBaseWithMockServer() {
-        // Setter opp systemkontekst slik at kall fra testene ikke logger "Call have not been registrert from RestController or Prosess"
+    fun beforeMockServerTestBaseWithProsessManager() {
+        // Sett opp systemkontekst for testkall
         ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
         mockServer.start()
         mockServer.stubFor(
@@ -60,8 +56,7 @@ class MockServerTestBaseWithProsessManager(
     }
 
     @AfterEach
-    fun afterComponentTestBaseWithMockServer() {
-        oppgaveRepo.repo.clear()
+    fun afterMockServerTestBaseWithProsessManager() {
         prosessinstansTestManager.clear()
         ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
         mockServer.stop()

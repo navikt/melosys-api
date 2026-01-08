@@ -10,6 +10,7 @@ jobs:
       packages: read
       pull-requests: write
       checks: write
+      id-token: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       PASSWORD: ${{ secrets.READER_TOKEN }}
@@ -19,7 +20,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Setup Maven
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -30,6 +31,10 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Authenticate with Google Artifact Registry
+        uses: nais/login@v0
+        with:
+          team: teammelosys
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
