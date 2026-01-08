@@ -61,52 +61,57 @@ class SkattepliktigeAarsavregningDryrunService(
             skattehendelser.forEach { hendelse ->
                 if (jobMonitor.shouldStop) return@execute
 
-                val år = hendelse.gjelderPeriode.toIntOrNull()
-                if (år == null) {
-                    log.warn { "Ugyldig gjelderPeriode: ${hendelse.gjelderPeriode} for identifikator ${hendelse.identifikator}" }
-                    antallUgyldigInput++
-                    return@forEach
-                }
-
-                val sakerMedTrygdeavgift = finnSakerMedTrygdeavgift(hendelse.identifikator, år)
-
-                if (sakerMedTrygdeavgift.isEmpty()) {
-                    log.debug { "Fant ingen sak med trygdeavgift for aktør: ${hendelse.identifikator}" }
-                    antallUtenTreff++
-                    return@forEach
-                }
-
-                sakerMedTrygdeavgift.forEach { fagsak ->
-                    antallSakerFunnet++
-                    val aktivÅrsavregning = finnAktivÅrsavregningBehandling(fagsak, år)
-                    val villeOpprettetProsessinstans = aktivÅrsavregning == null
-
-                    if (villeOpprettetProsessinstans) {
-                        antallVilleOpprettetProsessinstans++
-                    } else {
-                        antallMedEksisterendeAarsavregning++
+                try {
+                    val år = hendelse.gjelderPeriode.toIntOrNull()
+                    if (år == null) {
+                        log.warn { "Ugyldig gjelderPeriode: ${hendelse.gjelderPeriode} for identifikator ${hendelse.identifikator}" }
+                        antallUgyldigInput++
+                        return@forEach
                     }
 
-                    val behandlingsresultat = årsavregningService
-                        .hentGjeldendeBehandlingsresultaterForÅrsavregning(fagsak.saksnummer, år)
-                        ?.sisteBehandlingsresultatMedAvgift
+                    val sakerMedTrygdeavgift = finnSakerMedTrygdeavgift(hendelse.identifikator, år)
 
-                    val trygdeavgiftMottaker = behandlingsresultat?.let {
-                        trygdeavgiftMottakerService.getTrygdeavgiftMottaker(it)
+                    if (sakerMedTrygdeavgift.isEmpty()) {
+                        log.debug { "Fant ingen sak med trygdeavgift for aktør: ${hendelse.identifikator}" }
+                        antallUtenTreff++
+                        return@forEach
                     }
 
-                    resultater.add(
-                        SakDryrunResultat(
-                            saksnummer = fagsak.saksnummer,
-                            gjelderAr = år,
-                            identifikator = hendelse.identifikator,
-                            harAktivAarsavregning = aktivÅrsavregning != null,
-                            aarsavregningBehandlingStatus = aktivÅrsavregning?.status?.name,
-                            trygdeavgiftMottaker = trygdeavgiftMottaker?.name,
-                            villeOpprettetProsessinstans = villeOpprettetProsessinstans,
-                            behandlingId = aktivÅrsavregning?.id
+                    sakerMedTrygdeavgift.forEach { fagsak ->
+                        antallSakerFunnet++
+                        val aktivÅrsavregning = finnAktivÅrsavregningBehandling(fagsak, år)
+                        val villeOpprettetProsessinstans = aktivÅrsavregning == null
+
+                        if (villeOpprettetProsessinstans) {
+                            antallVilleOpprettetProsessinstans++
+                        } else {
+                            antallMedEksisterendeAarsavregning++
+                        }
+
+                        val behandlingsresultat = årsavregningService
+                            .hentGjeldendeBehandlingsresultaterForÅrsavregning(fagsak.saksnummer, år)
+                            ?.sisteBehandlingsresultatMedAvgift
+
+                        val trygdeavgiftMottaker = behandlingsresultat?.let {
+                            trygdeavgiftMottakerService.getTrygdeavgiftMottaker(it)
+                        }
+
+                        resultater.add(
+                            SakDryrunResultat(
+                                saksnummer = fagsak.saksnummer,
+                                gjelderAr = år,
+                                identifikator = hendelse.identifikator,
+                                harAktivAarsavregning = aktivÅrsavregning != null,
+                                aarsavregningBehandlingStatus = aktivÅrsavregning?.status?.name,
+                                trygdeavgiftMottaker = trygdeavgiftMottaker?.name,
+                                villeOpprettetProsessinstans = villeOpprettetProsessinstans,
+                                behandlingId = aktivÅrsavregning?.id
+                            )
                         )
-                    )
+                    }
+                } catch (e: Exception) {
+                    log.warn(e) { "Feil ved prosessering av hendelse for identifikator ${hendelse.identifikator}" }
+                    jobMonitor.registerException(e)
                 }
             }
 
