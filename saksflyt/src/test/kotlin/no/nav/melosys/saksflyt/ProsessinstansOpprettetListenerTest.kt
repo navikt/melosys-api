@@ -43,17 +43,21 @@ class ProsessinstansOpprettetListenerTest {
         prosessinstansId = UUID.randomUUID()
 
         // Prosessinstans fra eventen (stale referanse fra HTTP-transaksjon)
+        // Simulerer at denne ble opprettet tidligere og har gammel endretDato
         eventProsessinstans = Prosessinstans.builder()
             .medId(prosessinstansId)
             .medType(ProsessType.IVERKSETT_VEDTAK_FTRL)
             .medStatus(ProsessStatus.KLAR)
+            .medEndretDato(java.time.LocalDateTime.of(2024, 1, 1, 10, 0))
             .build()
 
-        // Fersk prosessinstans fra databasen
+        // Fersk prosessinstans fra databasen - har nyere endretDato
+        // Dette simulerer at entiteten har blitt oppdatert mellom event-publisering og AFTER_COMMIT
         freshProsessinstans = Prosessinstans.builder()
             .medId(prosessinstansId)
             .medType(ProsessType.IVERKSETT_VEDTAK_FTRL)
             .medStatus(ProsessStatus.KLAR)
+            .medEndretDato(java.time.LocalDateTime.of(2024, 1, 1, 12, 0))
             .build()
 
         event = ProsessinstansOpprettetEvent(eventProsessinstans)
@@ -79,6 +83,16 @@ class ProsessinstansOpprettetListenerTest {
         // Vi sjekker dette ved å verifisere at det er samme referanse som freshProsessinstans
         assert(capturedProsessinstans.captured === freshProsessinstans) {
             "Forventet at prosessinstans fra repository ble brukt, ikke fra event"
+        }
+
+        // Ekstra verifisering: sjekk at det IKKE er event-objektet
+        assert(capturedProsessinstans.captured !== eventProsessinstans) {
+            "Prosessinstans fra event skal IKKE brukes - den kan ha stale data"
+        }
+
+        // Verifiser at vi faktisk brukte objektet med nyere endretDato (fra DB)
+        assert(capturedProsessinstans.captured.endretDato == freshProsessinstans.endretDato) {
+            "Forventet at prosessinstans med oppdatert endretDato ble brukt"
         }
     }
 
