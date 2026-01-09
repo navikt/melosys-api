@@ -66,21 +66,35 @@ public class SaksopplysningKilde {
         this.mottattDokument = mottattDokument;
     }
 
+    /**
+     * Equals-implementasjon som følger JPA entity best practice.
+     * Bruker id når tilgjengelig, ellers business key (saksopplysning + kilde).
+     * VIKTIG: Ikke bruk @Lob-felt (mottattDokument) i equals/hashCode da CLOB-representasjon
+     * kan variere mellom sesjoner og forårsake problemer med Set-medlemskap og orphanRemoval.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof SaksopplysningKilde)) { // Implisitt nullsjekk
             return false;
         }
         SaksopplysningKilde that = (SaksopplysningKilde) o;
-        return Objects.equals(this.kilde, that.kilde)
-            && Objects.equals(this.mottattDokument, that.mottattDokument);
+        if (this.id != null && that.id != null) { // Begge entiteter er persistert. True hvis samme rad i db.
+            return this.id.equals(that.id);
+        }
+        // Fallback til business key for upersisterte entiteter
+        return Objects.equals(this.saksopplysning, that.saksopplysning)
+            && Objects.equals(this.kilde, that.kilde);
     }
 
+    /**
+     * HashCode basert på uforanderlige felt for stabil Set-oppførsel.
+     * Bruker kun kilde (enum) som er immutable etter opprettelse.
+     */
     @Override
     public int hashCode() {
-        return Objects.hash(kilde, mottattDokument);
+        return Objects.hash(kilde);
     }
 }
