@@ -8,9 +8,11 @@ import jakarta.persistence.*;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.jpa.SaksopplysningDokumentConverter;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
 @Table(name = "saksopplysning")
+@DynamicUpdate // Hindrer race condition mellom HTTP-tråd og saga-tråd - kun endrede kolonner inkluderes i UPDATE
 public class Saksopplysning {
 
     @Id
