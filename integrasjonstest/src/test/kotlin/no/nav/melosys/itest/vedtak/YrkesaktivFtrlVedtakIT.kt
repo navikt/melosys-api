@@ -205,7 +205,7 @@ class YrkesaktivFtrlVedtakIT(
 
         fagsakRepository.findBySaksnummer(saksnummer)
             .shouldBePresent().run {
-                behandlinger.shouldHaveSize(2)
+                behandlinger.shouldHaveSize(3)
                 finnAktivBehandlingIkkeÅrsavregning().shouldNotBeNull().run {
                     tema shouldBe Behandlingstema.YRKESAKTIV
                     type shouldBe Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
@@ -328,11 +328,15 @@ class YrkesaktivFtrlVedtakIT(
             .medBestillersId("komponent test")
             .build()
 
+
         executeAndWait(
-            mapOf(
-                ProsessType.IVERKSETT_VEDTAK_FTRL to 1,
-                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
-            )
+            buildMap {
+                put(ProsessType.IVERKSETT_VEDTAK_FTRL, 1)
+                put(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, 1)
+                if (periodeÅr < LocalDate.now().year) {
+                    put(ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING, 1)
+                }
+            }
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }

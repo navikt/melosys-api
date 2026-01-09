@@ -1,5 +1,6 @@
 package no.nav.melosys.itest.vedtak.satsendring
 
+import TrygdeavgiftsberegningMedSatsendring
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -346,10 +347,13 @@ class SatsendringIT @Autowired constructor(
             .build()
 
         executeAndWait(
-            mapOf(
-                ProsessType.IVERKSETT_VEDTAK_FTRL to 1,
-                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
-            )
+            buildMap {
+                put(ProsessType.IVERKSETT_VEDTAK_FTRL, 1)
+                put(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, 1)
+                if (år < LocalDate.now().year) {
+                    put(ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING, 1)
+                }
+            }
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
