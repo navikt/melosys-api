@@ -16,7 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 public class AnmodningsperiodeSkrivDto {
     private static final LovvalgBestemmelsekonverterer konverterer = new LovvalgBestemmelsekonverterer();
 
-    public final String id;
+    public final Long id;
     @JsonUnwrapped(suffix = "Dato")
     public final PeriodeDto periode;
     public final String lovvalgBestemmelse;
@@ -28,7 +28,7 @@ public class AnmodningsperiodeSkrivDto {
     public final String medlemskapsperiodeID;
 
 
-    protected AnmodningsperiodeSkrivDto(String id,
+    protected AnmodningsperiodeSkrivDto(Long id,
                                         PeriodeDto periode,
                                         LovvalgBestemmelse lovvalgBestemmelse,
                                         LovvalgBestemmelse tilleggBestemmelse,
@@ -51,7 +51,7 @@ public class AnmodningsperiodeSkrivDto {
     @JsonCreator
     @SuppressWarnings("unused")
     public AnmodningsperiodeSkrivDto(Map<String, String> json) {
-        this(json.get("id"),
+        this(parseLongOrNull(json.get("id")),
             new PeriodeDto(LocalDate.parse(json.get("fomDato")),
                 StringUtils.isEmpty(json.get("tomDato")) ? null : LocalDate.parse(json.get("tomDato"))),
             konverterLovvalgsBestemmelse(json.get("lovvalgBestemmelse")),
@@ -64,7 +64,7 @@ public class AnmodningsperiodeSkrivDto {
     }
 
     public static AnmodningsperiodeSkrivDto av(Anmodningsperiode anmodningsperiode) {
-        return new AnmodningsperiodeSkrivDto(anmodningsperiode.getId().toString(),
+        return new AnmodningsperiodeSkrivDto(anmodningsperiode.getId(),
             new PeriodeDto(anmodningsperiode.getFom(), anmodningsperiode.getTom()),
             anmodningsperiode.getBestemmelse(),
             anmodningsperiode.getTilleggsbestemmelse(),
@@ -91,6 +91,10 @@ public class AnmodningsperiodeSkrivDto {
 
     private static <E extends Enum<E>> E enumVerdiEllerNull(Class<E> enumKlasse, String nøkkel) {
         return nøkkel == null ? null : Enum.valueOf(enumKlasse, nøkkel);
+    }
+
+    private static Long parseLongOrNull(String value) {
+        return StringUtils.isEmpty(value) ? null : Long.parseLong(value);
     }
 }
 

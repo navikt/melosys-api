@@ -12,7 +12,7 @@ import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 public final class AnmodningsperiodeLesDto extends AnmodningsperiodeSkrivDto {
     public final boolean sendtUtland;
 
-    private AnmodningsperiodeLesDto(String id,
+    private AnmodningsperiodeLesDto(Long id,
                                     PeriodeDto periodeDto,
                                     LovvalgBestemmelse bestemmelse,
                                     LovvalgBestemmelse tilleggsbestemmelse,
@@ -35,7 +35,7 @@ public final class AnmodningsperiodeLesDto extends AnmodningsperiodeSkrivDto {
     }
 
     public static AnmodningsperiodeLesDto av(Anmodningsperiode anmodningsperiode) {
-        return new AnmodningsperiodeLesDto(anmodningsperiode.getId().toString(),
+        return new AnmodningsperiodeLesDto(anmodningsperiode.getId(),
             new PeriodeDto(anmodningsperiode.getFom(), anmodningsperiode.getTom()),
             anmodningsperiode.getBestemmelse(),
             anmodningsperiode.getTilleggsbestemmelse(),
