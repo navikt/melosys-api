@@ -48,7 +48,7 @@ class LovvalgsperiodeDtoTest {
             Tilleggsbestemmelser_883_2004.valueOf(json["tilleggBestemmelse"]!!),
             enumVerdiEllerNull(Land_iso2::class.java, json["lovvalgsland"]),
             InnvilgelsesResultat.valueOf(json["innvilgelsesResultat"]!!),
-            enumVerdiEllerNull(Trygdedekninger::class.java, json["trygdeDekning"]),
+            enumVerdiEllerNull(Trygdedekninger::class.java, json["trygdedekning"]),
             enumVerdiEllerNull(Medlemskapstyper::class.java, json["medlemskapstype"]),
             "20"
         )
@@ -64,7 +64,7 @@ class LovvalgsperiodeDtoTest {
                 "  \"innvilgelsesResultat\": \"INNVILGET\"," +
                 "  \"lovvalgsland\": \"NO\"," +
                 "  \"unntakFraLovvalgsland\": %s," +
-                "  \"trygdeDekning\": %s," +
+                "  \"trygdedekning\": %s," +
                 "  \"medlemskapstype\": \"PLIKTIG\"," +
                 "  \"medlemskapsperiodeID\": 20" +
                 "}"

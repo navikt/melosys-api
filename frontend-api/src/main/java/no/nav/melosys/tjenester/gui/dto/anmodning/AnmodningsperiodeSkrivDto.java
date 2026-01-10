@@ -24,7 +24,7 @@ public class AnmodningsperiodeSkrivDto {
     public final String lovvalgsland;
     public final String unntakFraBestemmelse;
     public final String unntakFraLovvalgsland;
-    public final String trygdeDekning;
+    public final String trygdedekning;
     public final String medlemskapsperiodeID;
 
 
@@ -35,7 +35,7 @@ public class AnmodningsperiodeSkrivDto {
                                         Land_iso2 lovvalgsland,
                                         LovvalgBestemmelse unntakFraBestemmelse,
                                         Land_iso2 unntakFraLovvalgsland,
-                                        Trygdedekninger trygdeDekning,
+                                        Trygdedekninger trygdedekning,
                                         String medlemskapsperiodeID) {
         this.id = id;
         this.periode = periode;
@@ -44,7 +44,7 @@ public class AnmodningsperiodeSkrivDto {
         this.lovvalgsland = lovvalgsland != null ? lovvalgsland.name() : null;
         this.unntakFraBestemmelse = unntakFraBestemmelse != null ? unntakFraBestemmelse.name() : null;
         this.unntakFraLovvalgsland = unntakFraLovvalgsland != null ? unntakFraLovvalgsland.name() : null;
-        this.trygdeDekning = trygdeDekning != null ? trygdeDekning.name() : null;
+        this.trygdedekning = trygdedekning != null ? trygdedekning.name() : null;
         this.medlemskapsperiodeID = medlemskapsperiodeID;
     }
 
@@ -59,7 +59,7 @@ public class AnmodningsperiodeSkrivDto {
             enumVerdiEllerNull(Land_iso2.class, json.get("lovvalgsland")),
             konverterLovvalgsBestemmelse(json.get("unntakFraBestemmelse")),
             enumVerdiEllerNull(Land_iso2.class, json.get("unntakFraLovvalgsland")),
-            enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
+            enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdedekning")),
             json.get("medlemskapsperiodeID"));
     }
 
@@ -82,7 +82,7 @@ public class AnmodningsperiodeSkrivDto {
             konverterer.convertToEntityAttribute(tilleggBestemmelse),
             enumVerdiEllerNull(Land_iso2.class, unntakFraLovvalgsland),
             konverterer.convertToEntityAttribute(unntakFraBestemmelse),
-            enumVerdiEllerNull(Trygdedekninger.class, trygdeDekning));
+            enumVerdiEllerNull(Trygdedekninger.class, trygdedekning));
     }
 
     private static LovvalgBestemmelse konverterLovvalgsBestemmelse(String bestemmelsesnavn) {
