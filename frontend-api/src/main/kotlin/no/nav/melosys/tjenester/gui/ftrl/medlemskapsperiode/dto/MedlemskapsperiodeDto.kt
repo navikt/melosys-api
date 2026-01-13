@@ -13,5 +13,6 @@ data class MedlemskapsperiodeDto(
     val bestemmelse: Bestemmelse,
     val innvilgelsesResultat: InnvilgelsesResultat,
     val trygdedekning: Trygdedekninger,
-    val medlemskapstype: Medlemskapstyper
+    val medlemskapstype: Medlemskapstyper,
+    val type: String = "MEDLEMSKAPSPERIODE"
 )
