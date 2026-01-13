@@ -3,10 +3,13 @@ package no.nav.melosys.saksflyt.steg.arsavregning
 import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -30,12 +33,22 @@ class OppretteÅrsavregningVedEndring(
         return ProsessSteg.OPPRETTE_AARSAVREGNING_ENDRING
     }
 
+    // Er egne oppgaver som skal legge til FTRL.penjonist, EØS.pensjonist|offentlig-tjenesteperson år årsavregning er ok
+    fun harTemaOgTypeSomSkalBehandles(behandling: Behandling, fagsak: Fagsak) =
+        behandling.tema == Behandlingstema.YRKESAKTIV && fagsak.type == Sakstyper.FTRL
+
     override fun utfør(prosessinstans: Prosessinstans) {
         if (!unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
             return
         }
 
         val behandling = prosessinstans.hentBehandling
+        val fagsak = behandling.fagsak
+
+        if (!harTemaOgTypeSomSkalBehandles(behandling, fagsak)) {
+            return
+        }
+
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
         val potensielleÅrsavregningÅrNy: Set<Int> = hentPotensielleÅrsavregningÅrFraAvgiftsperioder(behandlingsresultat)
 

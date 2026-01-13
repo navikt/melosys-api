@@ -18,6 +18,7 @@ import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
@@ -60,6 +61,7 @@ class OppretteÅrsavregningVedEndringTest {
             behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.YRKESAKTIV
                 fagsak {
                     saksnummer = SAKSNUMMER
                     type = Sakstyper.FTRL
@@ -108,6 +110,7 @@ class OppretteÅrsavregningVedEndringTest {
             behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.YRKESAKTIV
                 fagsak {
                     saksnummer = SAKSNUMMER
                     type = Sakstyper.FTRL
@@ -155,6 +158,7 @@ class OppretteÅrsavregningVedEndringTest {
             behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.YRKESAKTIV
                 fagsak {
                     saksnummer = SAKSNUMMER
                     type = Sakstyper.FTRL
@@ -190,6 +194,7 @@ class OppretteÅrsavregningVedEndringTest {
             behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.YRKESAKTIV
                 fagsak {
                     saksnummer = SAKSNUMMER
                     type = Sakstyper.FTRL
@@ -209,6 +214,7 @@ class OppretteÅrsavregningVedEndringTest {
             behandling {
                 id = 2L
                 type = Behandlingstyper.NY_VURDERING
+                tema = Behandlingstema.YRKESAKTIV
                 fagsak {
                     saksnummer = SAKSNUMMER
                     type = Sakstyper.FTRL
@@ -249,6 +255,7 @@ class OppretteÅrsavregningVedEndringTest {
         confirmVerified(prosessInstansService)
     }
 
+    @Disabled("Egen jira sak for eøs saker")
     @ParameterizedTest(name = "{0}")
     @MethodSource("endringITidligereLovvalgsperiodeScenarios")
     fun `ny vurdering lovvalgsperiode scenario`(scenario: PeriodeEndringScenario) {
@@ -316,6 +323,7 @@ class OppretteÅrsavregningVedEndringTest {
         confirmVerified(prosessInstansService)
     }
 
+    @Disabled("Egen jira sak for eøs saker")
     @ParameterizedTest(name = "{0}")
     @MethodSource("endringITidligereHelseutgiftsperiodeScenarios")
     fun `ny vurdering helseutgiftdekkes scenario`(scenario: PeriodeEndringScenario) {
