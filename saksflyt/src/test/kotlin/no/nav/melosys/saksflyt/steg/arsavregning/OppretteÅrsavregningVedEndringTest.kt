@@ -8,10 +8,9 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
-import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
@@ -70,7 +69,7 @@ class OppretteÅrsavregningVedEndringTest {
                 fom = LocalDate.now().minusYears(2)
                 tom = LocalDate.now().plusYears(1)
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-
+                trygdedekning = Trygdedekninger.FULL_DEKNING
             }
         }
 
@@ -85,8 +84,20 @@ class OppretteÅrsavregningVedEndringTest {
         oppretteÅrsavregningVedEndring.utfør(prosessinstans)
 
 
-        verify { prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2024", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE) }
-        verify { prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE) }
+        verify {
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
+                SAKSNUMMER,
+                "2024",
+                Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+            )
+        }
+        verify {
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
+                SAKSNUMMER,
+                "2025",
+                Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+            )
+        }
         confirmVerified(prosessInstansService)
     }
 
@@ -106,11 +117,13 @@ class OppretteÅrsavregningVedEndringTest {
                 fom = LocalDate.now().minusYears(2)
                 tom = LocalDate.now().minusYears(1)
                 innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
+                trygdedekning = Trygdedekninger.FULL_DEKNING
             }
             medlemskapsperiode {
                 fom = LocalDate.now().minusYears(1)
                 tom = LocalDate.now().plusYears(1)
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                trygdedekning = Trygdedekninger.FULL_DEKNING
             }
         }
 
@@ -125,7 +138,13 @@ class OppretteÅrsavregningVedEndringTest {
         oppretteÅrsavregningVedEndring.utfør(prosessinstans)
 
 
-        verify { prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE) }
+        verify {
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
+                SAKSNUMMER,
+                "2025",
+                Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+            )
+        }
         confirmVerified(prosessInstansService)
     }
 
@@ -145,7 +164,7 @@ class OppretteÅrsavregningVedEndringTest {
                 fom = LocalDate.now()
                 tom = LocalDate.now().plusYears(1)
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-
+                trygdedekning = Trygdedekninger.FULL_DEKNING
             }
         }
 
@@ -164,8 +183,8 @@ class OppretteÅrsavregningVedEndringTest {
     }
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("endringITidligerePeriodeScenarios")
-    fun `ny vurdering scenario`(scenario: PeriodeEndringScenario) {
+    @MethodSource("endringITidligereMedlemskapsperiodeScenarios")
+    fun `ny vurdering medlemskapsperiode scenario`(scenario: PeriodeEndringScenario) {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
             behandling {
@@ -181,6 +200,7 @@ class OppretteÅrsavregningVedEndringTest {
                 tom = LocalDate.now().plusYears(1)
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 medlemskapstype = Medlemskapstyper.FRIVILLIG
+                trygdedekning = Trygdedekninger.FULL_DEKNING
             }
         }
 
@@ -199,8 +219,141 @@ class OppretteÅrsavregningVedEndringTest {
                 medlemskapsperiode {
                     fom = periode.fom
                     tom = periode.tom
-                    innvilgelsesresultat = periode.innvilgelsesresultat
+                    innvilgelsesresultat = periode.innvilgelsesresultat!!
+                    medlemskapstype = periode.medlemskapstype!!
+                    trygdedekning = periode.dekning!!
+                }
+            }
+        }
+
+        val prosessinstans = Prosessinstans.forTest {
+            behandling = behandlingsresultat.behandling
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns opprinneligBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat
+        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+
+        oppretteÅrsavregningVedEndring.utfør(prosessinstans)
+
+        scenario.forventedeÅr.forEach { år ->
+            verify {
+                prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
+                    SAKSNUMMER,
+                    år,
+                    Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+                )
+            }
+        }
+
+        confirmVerified(prosessInstansService)
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("endringITidligereLovvalgsperiodeScenarios")
+    fun `ny vurdering lovvalgsperiode scenario`(scenario: PeriodeEndringScenario) {
+        val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            behandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                fagsak {
+                    saksnummer = SAKSNUMMER
+                    type = Sakstyper.EU_EOS
+                }
+            }
+            lovvalgsperiode {
+                fom = LocalDate.now().minusYears(2)
+                tom = LocalDate.now().plusYears(1)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                dekning = Trygdedekninger.FULL_DEKNING
+            }
+        }
+
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 2L
+            behandling {
+                id = 2L
+                type = Behandlingstyper.NY_VURDERING
+                fagsak {
+                    saksnummer = SAKSNUMMER
+                    type = Sakstyper.EU_EOS
+                }
+                opprinneligBehandling = opprinneligBehandlingsresultat.behandling
+            }
+            scenario.ny.forEach { periode ->
+                lovvalgsperiode {
+                    fom = periode.fom
+                    tom = periode.tom
+                    innvilgelsesresultat = periode.innvilgelsesresultat!!
                     medlemskapstype = periode.medlemskapstype
+                    dekning = periode.dekning
+                }
+            }
+        }
+
+        val prosessinstans = Prosessinstans.forTest {
+            behandling = behandlingsresultat.behandling
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns opprinneligBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat
+        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+
+        oppretteÅrsavregningVedEndring.utfør(prosessinstans)
+
+        scenario.forventedeÅr.forEach { år ->
+            verify {
+                prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
+                    SAKSNUMMER,
+                    år,
+                    Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+                )
+            }
+        }
+
+        confirmVerified(prosessInstansService)
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("endringITidligereHelseutgiftsperiodeScenarios")
+    fun `ny vurdering helseutgiftdekkes scenario`(scenario: PeriodeEndringScenario) {
+        val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            behandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.PENSJONIST
+                fagsak {
+                    saksnummer = SAKSNUMMER
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.EU_EOS
+                }
+            }
+            helseutgiftDekkesPeriode {
+                fomDato = LocalDate.now().minusYears(2)
+                tomDato = LocalDate.now().plusYears(1)
+            }
+        }
+
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 2L
+            behandling {
+                id = 2L
+                type = Behandlingstyper.NY_VURDERING
+                tema = Behandlingstema.PENSJONIST
+                fagsak {
+                    saksnummer = SAKSNUMMER
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.EU_EOS
+                }
+                opprinneligBehandling = opprinneligBehandlingsresultat.behandling
+            }
+            scenario.ny.forEach { periode ->
+                helseutgiftDekkesPeriode {
+                    fomDato = periode.fom
+                    tomDato = periode.tom
                 }
             }
         }
@@ -230,14 +383,15 @@ class OppretteÅrsavregningVedEndringTest {
 
     companion object {
         @JvmStatic
-        fun endringITidligerePeriodeScenarios() = Stream.of(
+        fun endringITidligereMedlemskapsperiodeScenarios() = Stream.of(
             PeriodeEndringScenario(
                 ny = listOf(
                     Periode(
                         fom = LocalDate.now().minusYears(2).justerMånederISammeÅr(2),
                         tom = LocalDate.now().plusYears(1),
                         innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                        dekning = Trygdedekninger.FULL_DEKNING
                     )
                 ),
                 forventedeÅr = listOf("2024", "2025"),
@@ -249,7 +403,8 @@ class OppretteÅrsavregningVedEndringTest {
                         fom = LocalDate.now().minusYears(2),
                         tom = LocalDate.now().plusYears(1),
                         innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
-                        medlemskapstype = Medlemskapstyper.PLIKTIG
+                        medlemskapstype = Medlemskapstyper.PLIKTIG,
+                        dekning = Trygdedekninger.FULL_DEKNING
                     )
                 ),
                 forventedeÅr = listOf("2024", "2025"),
@@ -261,7 +416,8 @@ class OppretteÅrsavregningVedEndringTest {
                         fom = LocalDate.now().minusYears(1),
                         tom = LocalDate.now().plusYears(1),
                         innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                        dekning = Trygdedekninger.FULL_DEKNING
                     )
                 ),
                 forventedeÅr = listOf("2024", "2025"),
@@ -273,7 +429,8 @@ class OppretteÅrsavregningVedEndringTest {
                         fom = LocalDate.now().minusYears(2),
                         tom = LocalDate.now().plusYears(1),
                         innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT,
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                        dekning = Trygdedekninger.FULL_DEKNING
                     )
                 ),
                 forventedeÅr = listOf("2024", "2025"),
@@ -285,18 +442,182 @@ class OppretteÅrsavregningVedEndringTest {
                         fom = LocalDate.now().minusYears(2),
                         tom = LocalDate.now().minusYears(1),
                         innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT,
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                        dekning = Trygdedekninger.FULL_DEKNING
                     ),
                     Periode(
                         fom = LocalDate.now().minusYears(1),
                         tom = LocalDate.now().plusYears(1),
                         innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                        dekning = Trygdedekninger.FULL_DEKNING
                     )
                 ),
                 forventedeÅr = listOf("2024", "2025"),
                 beskrivelse = "En avslått periode, en innvilget - 2 årsavregninger"
+            ),
+            PeriodeEndringScenario(
+                ny = listOf(
+                    Periode(
+                        fom = LocalDate.now().minusYears(2),
+                        tom = LocalDate.now().plusYears(1),
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                        dekning = Trygdedekninger.FULL_DEKNING
+                    )
+                ),
+                forventedeÅr = emptyList(),
+                beskrivelse = "Ingen endring - ingen årsavregning"
+            ),
+            PeriodeEndringScenario(
+                ny = listOf(
+                    Periode(
+                        fom = LocalDate.now().minusYears(2),
+                        tom = LocalDate.now().plusYears(1),
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                        dekning = Trygdedekninger.FULL_DEKNING_FTRL
+                    )
+                ),
+                forventedeÅr = listOf("2024", "2025"),
+                beskrivelse = "Endret dekning - 2 årsavregninger"
             )
+        )
+
+        @JvmStatic
+        fun endringITidligereLovvalgsperiodeScenarios() = Stream.of(
+            PeriodeEndringScenario(
+                ny = listOf(
+                    Periode(
+                        fom = LocalDate.now().minusYears(2).justerMånederISammeÅr(2),
+                        tom = LocalDate.now().plusYears(1),
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                        dekning = Trygdedekninger.FULL_DEKNING
+                    )
+                ),
+                forventedeÅr = listOf("2024", "2025"),
+                beskrivelse = "Endring i fom dato innenfor samme år tidligere - 2 årsavregninger"
+            ),
+            PeriodeEndringScenario(
+                ny = listOf(
+                    Periode(
+                        fom = LocalDate.now().minusYears(2),
+                        tom = LocalDate.now().plusYears(1),
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                        medlemskapstype = Medlemskapstyper.PLIKTIG,
+                        dekning = Trygdedekninger.FULL_DEKNING
+                    )
+                ),
+                forventedeÅr = listOf("2024", "2025"),
+                beskrivelse = "Endring fra frivillig til pliktig medlemskap - 2 årsavregninger"
+            ),
+            PeriodeEndringScenario(
+                ny = listOf(
+                    Periode(
+                        fom = LocalDate.now().minusYears(1),
+                        tom = LocalDate.now().plusYears(1),
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                        dekning = Trygdedekninger.FULL_DEKNING
+                    )
+                ),
+                forventedeÅr = listOf("2024", "2025"),
+                beskrivelse = "Endrer fom til kun et år tidligere - 2 årsavregning"
+            ),
+            PeriodeEndringScenario(
+                ny = listOf(
+                    Periode(
+                        fom = LocalDate.now().minusYears(2),
+                        tom = LocalDate.now().plusYears(1),
+                        innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT,
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                        dekning = Trygdedekninger.FULL_DEKNING
+                    )
+                ),
+                forventedeÅr = listOf("2024", "2025"),
+                beskrivelse = "Avslått periode - 2 årsavregninger"
+            ),
+            PeriodeEndringScenario(
+                ny = listOf(
+                    Periode(
+                        fom = LocalDate.now().minusYears(2),
+                        tom = LocalDate.now().minusYears(1),
+                        innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT,
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                        dekning = Trygdedekninger.FULL_DEKNING
+                    ),
+                    Periode(
+                        fom = LocalDate.now().minusYears(1),
+                        tom = LocalDate.now().plusYears(1),
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                        dekning = Trygdedekninger.FULL_DEKNING
+                    )
+                ),
+                forventedeÅr = listOf("2024", "2025"),
+                beskrivelse = "En avslått periode, en innvilget - 2 årsavregninger"
+            ),
+            PeriodeEndringScenario(
+                ny = listOf(
+                    Periode(
+                        fom = LocalDate.now().minusYears(2),
+                        tom = LocalDate.now().plusYears(1),
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                        dekning = Trygdedekninger.FULL_DEKNING
+                    )
+                ),
+                forventedeÅr = emptyList(),
+                beskrivelse = "Ingen endring - ingen årsavregning"
+            ),
+            PeriodeEndringScenario(
+                ny = listOf(
+                    Periode(
+                        fom = LocalDate.now().minusYears(2),
+                        tom = LocalDate.now().plusYears(1),
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                        dekning = Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER
+                    )
+                ),
+                forventedeÅr = listOf("2024", "2025"),
+                beskrivelse = "Endret dekning - 2 årsavregninger"
+            )
+        )
+
+        @JvmStatic
+        fun endringITidligereHelseutgiftsperiodeScenarios() = Stream.of(
+            PeriodeEndringScenario(
+                ny = listOf(
+                    Periode(
+                        fom = LocalDate.now().minusYears(2).justerMånederISammeÅr(2),
+                        tom = LocalDate.now().plusYears(1)
+                    )
+                ),
+                forventedeÅr = listOf("2024", "2025"),
+                beskrivelse = "Endring i fom dato innenfor samme år tidligere - 2 årsavregninger"
+            ),
+            PeriodeEndringScenario(
+                ny = listOf(
+                    Periode(
+                        fom = LocalDate.now().minusYears(1),
+                        tom = LocalDate.now().plusYears(1),
+                    )
+                ),
+                forventedeÅr = listOf("2024", "2025"),
+                beskrivelse = "Endrer fom til kun et år tidligere - 2 årsavregning"
+            ),
+            PeriodeEndringScenario(
+                ny = listOf(
+                    Periode(
+                        fom = LocalDate.now().minusYears(2),
+                        tom = LocalDate.now().plusYears(1),
+                    )
+                ),
+                forventedeÅr = emptyList(),
+                beskrivelse = "Ingen endring - ingen årsavregning"
+            ),
         )
     }
 }
@@ -304,8 +625,9 @@ class OppretteÅrsavregningVedEndringTest {
 data class Periode(
     val fom: LocalDate,
     val tom: LocalDate,
-    val innvilgelsesresultat: InnvilgelsesResultat,
-    val medlemskapstype: Medlemskapstyper
+    val innvilgelsesresultat: InnvilgelsesResultat? = null,
+    val medlemskapstype: Medlemskapstyper? = null,
+    val dekning: Trygdedekninger? = null
 )
 
 data class PeriodeEndringScenario(
