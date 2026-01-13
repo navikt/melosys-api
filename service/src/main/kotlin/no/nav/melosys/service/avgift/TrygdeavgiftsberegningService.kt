@@ -230,7 +230,7 @@ class TrygdeavgiftsberegningService(
 
         if (unleash.isEnabled(MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER) && behandlingsresultatService.hentBehandlingsresultat(
                 behandlingID
-            ).medlemskapsperioder.all { it.hentTom().year < LocalDate.now().year }
+            ).finnAvgiftspliktigPerioder().all { it.tom.year < LocalDate.now().year }
         ) {
             return TrygdeavgiftsgrunnlagModel(
                 emptyList(),
