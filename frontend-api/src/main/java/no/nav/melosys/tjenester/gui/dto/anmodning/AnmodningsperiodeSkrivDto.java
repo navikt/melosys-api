@@ -94,7 +94,14 @@ public class AnmodningsperiodeSkrivDto {
     }
 
     private static Long parseLongOrNull(String value) {
-        return StringUtils.isEmpty(value) ? null : Long.parseLong(value);
+        if (StringUtils.isEmpty(value)) {
+            return null;
+        }
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Ugyldig numerisk verdi for id: '" + value + "'", e);
+        }
     }
 }
 
