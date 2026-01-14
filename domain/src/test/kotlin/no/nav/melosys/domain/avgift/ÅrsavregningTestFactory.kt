@@ -13,13 +13,13 @@ fun Årsavregning.Companion.forTest(init: ÅrsavregningTestFactory.Builder.() ->
 // to avoid circular dependency and ambiguity issues
 
 object ÅrsavregningTestFactory {
-    val DEFAULT_AAR = LocalDate.now().year
+    val DEFAULT_ÅR = LocalDate.now().year
 
     @MelosysTestDsl
     class Builder {
         var id: Long? = 0
         var behandlingsresultat: Behandlingsresultat? = null
-        var aar: Int = DEFAULT_AAR
+        var aar: Int = DEFAULT_ÅR
         var tidligereBehandlingsresultat: Behandlingsresultat? = null
         var tidligereFakturertBeloep: BigDecimal? = null
         var beregnetAvgiftBelop: BigDecimal? = null
@@ -31,7 +31,7 @@ object ÅrsavregningTestFactory {
         var harSkjoennsfastsattInntektsgrunnlag: Boolean = false
 
         fun build(): Årsavregning = Årsavregning(
-            id = id ?: error("id er paakrevd for Aarsavregning"),
+            id = id ?: error("id er påkrevd for Årsavregning"),
             behandlingsresultat = behandlingsresultat,
             aar = aar,
             tidligereBehandlingsresultat = tidligereBehandlingsresultat,
