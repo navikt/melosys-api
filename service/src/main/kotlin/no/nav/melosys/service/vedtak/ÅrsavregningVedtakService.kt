@@ -76,6 +76,6 @@ class ÅrsavregningVedtakService(
         behandlingsresultat.trygdeavgiftFritekst = request.trygdeavgiftFritekst
         behandlingsresultat.fastsattAvLand = Land_iso2.NO
 
-        return behandlingsresultatService.lagre(behandlingsresultat)
+        return behandlingsresultatService.lagreOgFlush(behandlingsresultat)
     }
 }

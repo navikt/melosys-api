@@ -1,6 +1,7 @@
 package no.nav.melosys.domain
 
 import jakarta.persistence.*
+import org.hibernate.annotations.DynamicUpdate
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
@@ -18,6 +19,8 @@ import java.util.*
 
 @Entity
 @Table(name = "behandlingsresultat")
+// Hindrer at saga-steg overskriver felter endret av fattVedtak() - kun endrede kolonner inkluderes i UPDATE (MELOSYS-7718)
+@DynamicUpdate
 @EntityListeners(AuditingEntityListener::class)
 open class Behandlingsresultat : RegistreringsInfo() {
 

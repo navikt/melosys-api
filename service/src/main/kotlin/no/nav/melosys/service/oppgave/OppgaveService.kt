@@ -119,8 +119,10 @@ class OppgaveService(
             lagBehandlingsoppgave(behandling, tilordnetRessurs, journalpostID, aktørID, orgnr)
         } else {
             if (behandling.oppgaveId == null) {
-                behandling.oppgaveId = eksisterendeOppgave.oppgaveId
-                behandlingService.lagre(behandling)
+                // Last behandlingen på nytt for å unngå optimistisk låsefeil (stale object)
+                val freshBehandling = behandlingService.hentBehandling(behandling.id)
+                freshBehandling.oppgaveId = eksisterendeOppgave.oppgaveId
+                behandlingService.lagre(freshBehandling)
             }
             if (tilordnetRessurs != eksisterendeOppgave.tilordnetRessurs) {
                 oppdaterOppgave(eksisterendeOppgave.oppgaveId, OppgaveOppdatering.builder().tilordnetRessurs(tilordnetRessurs).build())
@@ -236,8 +238,10 @@ class OppgaveService(
     }
 
     private fun settOppgaveIdPåBehandling(behandling: Behandling, oppgaveId: String) {
-        behandling.oppgaveId = oppgaveId
-        behandlingService.lagre(behandling)
+        // Last behandlingen på nytt for å unngå optimistisk låsefeil (stale object)
+        val freshBehandling = behandlingService.hentBehandling(behandling.id)
+        freshBehandling.oppgaveId = oppgaveId
+        behandlingService.lagre(freshBehandling)
     }
 
     private fun Collection<Oppgave>.tilDtoer(): List<OppgaveDto> = this.mapNotNull { tilOppgaveDtoHåndterException(it) }
