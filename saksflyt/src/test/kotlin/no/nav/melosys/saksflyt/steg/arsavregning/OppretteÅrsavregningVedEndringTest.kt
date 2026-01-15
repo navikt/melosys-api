@@ -20,14 +20,15 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
-import java.util.stream.Stream
 
 private const val SAKSNUMMER = "123456789"
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockKExtension::class)
 class OppretteÅrsavregningVedEndringTest {
 
@@ -389,245 +390,240 @@ class OppretteÅrsavregningVedEndringTest {
         confirmVerified(prosessInstansService)
     }
 
-    companion object {
-        @JvmStatic
-        fun endringITidligereMedlemskapsperiodeScenarios() = Stream.of(
-            PeriodeEndringScenario(
-                ny = listOf(
-                    Periode(
-                        fom = LocalDate.now().minusYears(2).justerMånederISammeÅr(2),
-                        tom = LocalDate.now().plusYears(1),
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
-                        dekning = Trygdedekninger.FULL_DEKNING
-                    )
-                ),
-                forventedeÅr = listOf("2024", "2025"),
-                beskrivelse = "Endring i fom dato innenfor samme år tidligere - 2 årsavregninger"
+    fun endringITidligereMedlemskapsperiodeScenarios() = listOf(
+        PeriodeEndringScenario(
+            ny = listOf(
+                Periode(
+                    fom = LocalDate.now().minusYears(2).justerMånederISammeÅr(2),
+                    tom = LocalDate.now().plusYears(1),
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                    dekning = Trygdedekninger.FULL_DEKNING
+                )
             ),
-            PeriodeEndringScenario(
-                ny = listOf(
-                    Periode(
-                        fom = LocalDate.now().minusYears(2),
-                        tom = LocalDate.now().plusYears(1),
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
-                        medlemskapstype = Medlemskapstyper.PLIKTIG,
-                        dekning = Trygdedekninger.FULL_DEKNING
-                    )
-                ),
-                forventedeÅr = listOf("2024", "2025"),
-                beskrivelse = "Endring fra frivillig til pliktig medlemskap - 2 årsavregninger"
+            forventedeÅr = listOf("2024", "2025"),
+            beskrivelse = "Endring i fom dato innenfor samme år tidligere - 2 årsavregninger"
+        ),
+        PeriodeEndringScenario(
+            ny = listOf(
+                Periode(
+                    fom = LocalDate.now().minusYears(2),
+                    tom = LocalDate.now().plusYears(1),
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                    medlemskapstype = Medlemskapstyper.PLIKTIG,
+                    dekning = Trygdedekninger.FULL_DEKNING
+                )
             ),
-            PeriodeEndringScenario(
-                ny = listOf(
-                    Periode(
-                        fom = LocalDate.now().minusYears(1),
-                        tom = LocalDate.now().plusYears(1),
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
-                        dekning = Trygdedekninger.FULL_DEKNING
-                    )
-                ),
-                forventedeÅr = listOf("2024", "2025"),
-                beskrivelse = "Endrer fom til kun et år tidligere - 2 årsavregning"
+            forventedeÅr = listOf("2024", "2025"),
+            beskrivelse = "Endring fra frivillig til pliktig medlemskap - 2 årsavregninger"
+        ),
+        PeriodeEndringScenario(
+            ny = listOf(
+                Periode(
+                    fom = LocalDate.now().minusYears(1),
+                    tom = LocalDate.now().plusYears(1),
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                    dekning = Trygdedekninger.FULL_DEKNING
+                )
             ),
-            PeriodeEndringScenario(
-                ny = listOf(
-                    Periode(
-                        fom = LocalDate.now().minusYears(2),
-                        tom = LocalDate.now().plusYears(1),
-                        innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT,
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
-                        dekning = Trygdedekninger.FULL_DEKNING
-                    )
-                ),
-                forventedeÅr = listOf("2024", "2025"),
-                beskrivelse = "Avslått periode - 2 årsavregninger"
+            forventedeÅr = listOf("2024", "2025"),
+            beskrivelse = "Endrer fom til kun et år tidligere - 2 årsavregning"
+        ),
+        PeriodeEndringScenario(
+            ny = listOf(
+                Periode(
+                    fom = LocalDate.now().minusYears(2),
+                    tom = LocalDate.now().plusYears(1),
+                    innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT,
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                    dekning = Trygdedekninger.FULL_DEKNING
+                )
             ),
-            PeriodeEndringScenario(
-                ny = listOf(
-                    Periode(
-                        fom = LocalDate.now().minusYears(2),
-                        tom = LocalDate.now().minusYears(1),
-                        innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT,
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
-                        dekning = Trygdedekninger.FULL_DEKNING
-                    ),
-                    Periode(
-                        fom = LocalDate.now().minusYears(1),
-                        tom = LocalDate.now().plusYears(1),
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
-                        dekning = Trygdedekninger.FULL_DEKNING
-                    )
+            forventedeÅr = listOf("2024", "2025"),
+            beskrivelse = "Avslått periode - 2 årsavregninger"
+        ),
+        PeriodeEndringScenario(
+            ny = listOf(
+                Periode(
+                    fom = LocalDate.now().minusYears(2),
+                    tom = LocalDate.now().minusYears(1),
+                    innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT,
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                    dekning = Trygdedekninger.FULL_DEKNING
                 ),
-                forventedeÅr = listOf("2024", "2025"),
-                beskrivelse = "En avslått periode, en innvilget - 2 årsavregninger"
+                Periode(
+                    fom = LocalDate.now().minusYears(1),
+                    tom = LocalDate.now().plusYears(1),
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                    dekning = Trygdedekninger.FULL_DEKNING
+                )
             ),
-            PeriodeEndringScenario(
-                ny = listOf(
-                    Periode(
-                        fom = LocalDate.now().minusYears(2),
-                        tom = LocalDate.now().plusYears(1),
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
-                        dekning = Trygdedekninger.FULL_DEKNING
-                    )
-                ),
-                forventedeÅr = emptyList(),
-                beskrivelse = "Ingen endring - ingen årsavregning"
+            forventedeÅr = listOf("2024", "2025"),
+            beskrivelse = "En avslått periode, en innvilget - 2 årsavregninger"
+        ),
+        PeriodeEndringScenario(
+            ny = listOf(
+                Periode(
+                    fom = LocalDate.now().minusYears(2),
+                    tom = LocalDate.now().plusYears(1),
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                    dekning = Trygdedekninger.FULL_DEKNING
+                )
             ),
-            PeriodeEndringScenario(
-                ny = listOf(
-                    Periode(
-                        fom = LocalDate.now().minusYears(2),
-                        tom = LocalDate.now().plusYears(1),
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
-                        dekning = Trygdedekninger.FULL_DEKNING_FTRL
-                    )
-                ),
-                forventedeÅr = listOf("2024", "2025"),
-                beskrivelse = "Endret dekning - 2 årsavregninger"
-            )
+            forventedeÅr = emptyList(),
+            beskrivelse = "Ingen endring - ingen årsavregning"
+        ),
+        PeriodeEndringScenario(
+            ny = listOf(
+                Periode(
+                    fom = LocalDate.now().minusYears(2),
+                    tom = LocalDate.now().plusYears(1),
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                    dekning = Trygdedekninger.FULL_DEKNING_FTRL
+                )
+            ),
+            forventedeÅr = listOf("2024", "2025"),
+            beskrivelse = "Endret dekning - 2 årsavregninger"
         )
+    )
 
-        @JvmStatic
-        fun endringITidligereLovvalgsperiodeScenarios() = Stream.of(
-            PeriodeEndringScenario(
-                ny = listOf(
-                    Periode(
-                        fom = LocalDate.now().minusYears(2).justerMånederISammeÅr(2),
-                        tom = LocalDate.now().plusYears(1),
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
-                        dekning = Trygdedekninger.FULL_DEKNING
-                    )
-                ),
-                forventedeÅr = listOf("2024", "2025"),
-                beskrivelse = "Endring i fom dato innenfor samme år tidligere - 2 årsavregninger"
+    fun endringITidligereLovvalgsperiodeScenarios() = listOf(
+        PeriodeEndringScenario(
+            ny = listOf(
+                Periode(
+                    fom = LocalDate.now().minusYears(2).justerMånederISammeÅr(2),
+                    tom = LocalDate.now().plusYears(1),
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                    dekning = Trygdedekninger.FULL_DEKNING
+                )
             ),
-            PeriodeEndringScenario(
-                ny = listOf(
-                    Periode(
-                        fom = LocalDate.now().minusYears(2),
-                        tom = LocalDate.now().plusYears(1),
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
-                        medlemskapstype = Medlemskapstyper.PLIKTIG,
-                        dekning = Trygdedekninger.FULL_DEKNING
-                    )
-                ),
-                forventedeÅr = listOf("2024", "2025"),
-                beskrivelse = "Endring fra frivillig til pliktig medlemskap - 2 årsavregninger"
+            forventedeÅr = listOf("2024", "2025"),
+            beskrivelse = "Endring i fom dato innenfor samme år tidligere - 2 årsavregninger"
+        ),
+        PeriodeEndringScenario(
+            ny = listOf(
+                Periode(
+                    fom = LocalDate.now().minusYears(2),
+                    tom = LocalDate.now().plusYears(1),
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                    medlemskapstype = Medlemskapstyper.PLIKTIG,
+                    dekning = Trygdedekninger.FULL_DEKNING
+                )
             ),
-            PeriodeEndringScenario(
-                ny = listOf(
-                    Periode(
-                        fom = LocalDate.now().minusYears(1),
-                        tom = LocalDate.now().plusYears(1),
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
-                        dekning = Trygdedekninger.FULL_DEKNING
-                    )
-                ),
-                forventedeÅr = listOf("2024", "2025"),
-                beskrivelse = "Endrer fom til kun et år tidligere - 2 årsavregning"
+            forventedeÅr = listOf("2024", "2025"),
+            beskrivelse = "Endring fra frivillig til pliktig medlemskap - 2 årsavregninger"
+        ),
+        PeriodeEndringScenario(
+            ny = listOf(
+                Periode(
+                    fom = LocalDate.now().minusYears(1),
+                    tom = LocalDate.now().plusYears(1),
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                    dekning = Trygdedekninger.FULL_DEKNING
+                )
             ),
-            PeriodeEndringScenario(
-                ny = listOf(
-                    Periode(
-                        fom = LocalDate.now().minusYears(2),
-                        tom = LocalDate.now().plusYears(1),
-                        innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT,
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
-                        dekning = Trygdedekninger.FULL_DEKNING
-                    )
-                ),
-                forventedeÅr = listOf("2024", "2025"),
-                beskrivelse = "Avslått periode - 2 årsavregninger"
+            forventedeÅr = listOf("2024", "2025"),
+            beskrivelse = "Endrer fom til kun et år tidligere - 2 årsavregning"
+        ),
+        PeriodeEndringScenario(
+            ny = listOf(
+                Periode(
+                    fom = LocalDate.now().minusYears(2),
+                    tom = LocalDate.now().plusYears(1),
+                    innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT,
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                    dekning = Trygdedekninger.FULL_DEKNING
+                )
             ),
-            PeriodeEndringScenario(
-                ny = listOf(
-                    Periode(
-                        fom = LocalDate.now().minusYears(2),
-                        tom = LocalDate.now().minusYears(1),
-                        innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT,
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
-                        dekning = Trygdedekninger.FULL_DEKNING
-                    ),
-                    Periode(
-                        fom = LocalDate.now().minusYears(1),
-                        tom = LocalDate.now().plusYears(1),
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
-                        dekning = Trygdedekninger.FULL_DEKNING
-                    )
+            forventedeÅr = listOf("2024", "2025"),
+            beskrivelse = "Avslått periode - 2 årsavregninger"
+        ),
+        PeriodeEndringScenario(
+            ny = listOf(
+                Periode(
+                    fom = LocalDate.now().minusYears(2),
+                    tom = LocalDate.now().minusYears(1),
+                    innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT,
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                    dekning = Trygdedekninger.FULL_DEKNING
                 ),
-                forventedeÅr = listOf("2024", "2025"),
-                beskrivelse = "En avslått periode, en innvilget - 2 årsavregninger"
+                Periode(
+                    fom = LocalDate.now().minusYears(1),
+                    tom = LocalDate.now().plusYears(1),
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                    dekning = Trygdedekninger.FULL_DEKNING
+                )
             ),
-            PeriodeEndringScenario(
-                ny = listOf(
-                    Periode(
-                        fom = LocalDate.now().minusYears(2),
-                        tom = LocalDate.now().plusYears(1),
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
-                        dekning = Trygdedekninger.FULL_DEKNING
-                    )
-                ),
-                forventedeÅr = emptyList(),
-                beskrivelse = "Ingen endring - ingen årsavregning"
+            forventedeÅr = listOf("2024", "2025"),
+            beskrivelse = "En avslått periode, en innvilget - 2 årsavregninger"
+        ),
+        PeriodeEndringScenario(
+            ny = listOf(
+                Periode(
+                    fom = LocalDate.now().minusYears(2),
+                    tom = LocalDate.now().plusYears(1),
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                    dekning = Trygdedekninger.FULL_DEKNING
+                )
             ),
-            PeriodeEndringScenario(
-                ny = listOf(
-                    Periode(
-                        fom = LocalDate.now().minusYears(2),
-                        tom = LocalDate.now().plusYears(1),
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
-                        dekning = Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER
-                    )
-                ),
-                forventedeÅr = listOf("2024", "2025"),
-                beskrivelse = "Endret dekning - 2 årsavregninger"
-            )
+            forventedeÅr = emptyList(),
+            beskrivelse = "Ingen endring - ingen årsavregning"
+        ),
+        PeriodeEndringScenario(
+            ny = listOf(
+                Periode(
+                    fom = LocalDate.now().minusYears(2),
+                    tom = LocalDate.now().plusYears(1),
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG,
+                    dekning = Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER
+                )
+            ),
+            forventedeÅr = listOf("2024", "2025"),
+            beskrivelse = "Endret dekning - 2 årsavregninger"
         )
+    )
 
-        @JvmStatic
-        fun endringITidligereHelseutgiftsperiodeScenarios() = Stream.of(
-            PeriodeEndringScenario(
-                ny = listOf(
-                    Periode(
-                        fom = LocalDate.now().minusYears(2).justerMånederISammeÅr(2),
-                        tom = LocalDate.now().plusYears(1)
-                    )
-                ),
-                forventedeÅr = listOf("2024", "2025"),
-                beskrivelse = "Endring i fom dato innenfor samme år tidligere - 2 årsavregninger"
+    fun endringITidligereHelseutgiftsperiodeScenarios() = listOf(
+        PeriodeEndringScenario(
+            ny = listOf(
+                Periode(
+                    fom = LocalDate.now().minusYears(2).justerMånederISammeÅr(2),
+                    tom = LocalDate.now().plusYears(1)
+                )
             ),
-            PeriodeEndringScenario(
-                ny = listOf(
-                    Periode(
-                        fom = LocalDate.now().minusYears(1),
-                        tom = LocalDate.now().plusYears(1),
-                    )
-                ),
-                forventedeÅr = listOf("2024", "2025"),
-                beskrivelse = "Endrer fom til kun et år tidligere - 2 årsavregning"
+            forventedeÅr = listOf("2024", "2025"),
+            beskrivelse = "Endring i fom dato innenfor samme år tidligere - 2 årsavregninger"
+        ),
+        PeriodeEndringScenario(
+            ny = listOf(
+                Periode(
+                    fom = LocalDate.now().minusYears(1),
+                    tom = LocalDate.now().plusYears(1),
+                )
             ),
-            PeriodeEndringScenario(
-                ny = listOf(
-                    Periode(
-                        fom = LocalDate.now().minusYears(2),
-                        tom = LocalDate.now().plusYears(1),
-                    )
-                ),
-                forventedeÅr = emptyList(),
-                beskrivelse = "Ingen endring - ingen årsavregning"
+            forventedeÅr = listOf("2024", "2025"),
+            beskrivelse = "Endrer fom til kun et år tidligere - 2 årsavregning"
+        ),
+        PeriodeEndringScenario(
+            ny = listOf(
+                Periode(
+                    fom = LocalDate.now().minusYears(2),
+                    tom = LocalDate.now().plusYears(1),
+                )
             ),
-        )
-    }
+            forventedeÅr = emptyList(),
+            beskrivelse = "Ingen endring - ingen årsavregning"
+        ),
+    )
 }
 
 data class Periode(

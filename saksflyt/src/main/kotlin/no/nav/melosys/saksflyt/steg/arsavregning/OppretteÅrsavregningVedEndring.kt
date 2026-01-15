@@ -54,7 +54,7 @@ class OppretteÅrsavregningVedEndring(
 
         if (behandling.erFørstegangsvurdering()) {
             opprettÅrsavregning(potensielleÅrsavregningÅrNy, behandling)
-        } else if ((behandling.erNyVurdering())) {
+        } else if (behandling.erNyVurdering()) {
             val opprinneligBehandling = behandling.hentOpprinneligBehandling()
             val opprinneligBehandlingsresultat =
                 behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
@@ -73,7 +73,7 @@ class OppretteÅrsavregningVedEndring(
         potensielleÅrsavregningÅr: Set<Int>,
         behandling: Behandling
     ) {
-        for (potensieltÅr in potensielleÅrsavregningÅr) {
+        potensielleÅrsavregningÅr.forEach { potensieltÅr ->
             val harAktivÅrsavregningforÅr =
                 årsavregningService.finnÅrsavregningerPåFagsak(
                     behandling.fagsak.saksnummer,
@@ -115,7 +115,7 @@ class OppretteÅrsavregningVedEndring(
             .map { periode ->
                 AvgiftspliktigPeriodeTilSammenligning(
                     fom = periode.getFom(),
-                    tom = periode.getTom().avkortTilForrigeÅr(),
+                    tom = periode.getTom()?.avkortTilForrigeÅr(),
                     trygdedekning = periode.hentTrygdedekning(),
                     erPliktigMedlemskap = periode.erPliktigMedlemskap()
                 )

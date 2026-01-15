@@ -328,7 +328,6 @@ class YrkesaktivFtrlVedtakIT(
             .medBestillersId("komponent test")
             .build()
 
-
         executeAndWait(
             buildMap {
                 put(ProsessType.IVERKSETT_VEDTAK_FTRL, 1)
