@@ -19,14 +19,15 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta.IKKE_VALGT_FAKTA
 import no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
 import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.mottatteOpplysninger
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.IKKE_SOEKERS_BARN
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.IKKE_TRE_AV_FEM_SISTE_ÅR
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.SAMBOER_UTEN_FELLES_BARN
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie
+import no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie
 import no.nav.melosys.domain.person.familie.OmfattetFamilie
@@ -88,11 +89,9 @@ class AvklarteMedfolgendeFamilieServiceTest {
             )
         )
 
-        val behandlingsresultat = Behandlingsresultat().apply {
-            id = 1L
-        }
+        val behandlingsresultat = Behandlingsresultat.forTest { id = 1L }
 
-        every { behandlingService.hentBehandling(1L) } returns mockBehandling()
+        every { behandlingService.hentBehandling(1L) } returns lagBehandlingMedMedfolgendeFamilie()
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { avklarteFaktaRepository.deleteByBehandlingsresultatIdAndType(any(), any()) } just runs
         every { avklarteFaktaRepository.flush() } just runs
@@ -116,7 +115,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
             referanse shouldBe Avklartefaktatyper.VURDERING_LOVVALG_BARN.kode
             fakta shouldBe IKKE_VALGT_FAKTA
             begrunnelseFritekst shouldBe FRITEKST_BARN
-            behandlingsresultat shouldBe behandlingsresultat
+            this.behandlingsresultat shouldBe behandlingsresultat
             registreringer shouldHaveSize 1
         }
 
@@ -129,7 +128,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
             referanse shouldBe Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER.kode
             fakta shouldBe IKKE_VALGT_FAKTA
             begrunnelseFritekst shouldBe FRITEKST_EKTEFELLE_SAMBOER
-            behandlingsresultat shouldBe behandlingsresultat
+            this.behandlingsresultat shouldBe behandlingsresultat
             registreringer shouldHaveSize 1
         }
 
@@ -147,11 +146,9 @@ class AvklarteMedfolgendeFamilieServiceTest {
             emptySet()
         )
 
-        val behandlingsresultat = Behandlingsresultat().apply {
-            id = 1L
-        }
+        val behandlingsresultat = Behandlingsresultat.forTest { id = 1L }
 
-        every { behandlingService.hentBehandling(1L) } returns mockBehandling()
+        every { behandlingService.hentBehandling(1L) } returns lagBehandlingMedMedfolgendeFamilie()
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { avklarteFaktaRepository.deleteByBehandlingsresultatIdAndType(any(), any()) } just runs
         every { avklarteFaktaRepository.flush() } just runs
@@ -175,7 +172,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
             referanse shouldBe Avklartefaktatyper.VURDERING_LOVVALG_BARN.kode
             fakta shouldBe VALGT_FAKTA
             begrunnelseFritekst.shouldBeNull()
-            behandlingsresultat shouldBe behandlingsresultat
+            this.behandlingsresultat shouldBe behandlingsresultat
             registreringer.shouldBeEmpty()
         }
 
@@ -185,7 +182,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
             referanse shouldBe Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER.kode
             fakta shouldBe VALGT_FAKTA
             begrunnelseFritekst.shouldBeNull()
-            behandlingsresultat shouldBe behandlingsresultat
+            this.behandlingsresultat shouldBe behandlingsresultat
             registreringer.shouldBeEmpty()
         }
     }
@@ -197,7 +194,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
             emptySet()
         )
 
-        every { behandlingService.hentBehandling(1L) } returns mockBehandling()
+        every { behandlingService.hentBehandling(1L) } returns lagBehandlingMedMedfolgendeFamilie()
 
         shouldThrow<FunksjonellException> {
             avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie)
@@ -215,7 +212,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
             )
         )
 
-        every { behandlingService.hentBehandling(1L) } returns mockBehandling()
+        every { behandlingService.hentBehandling(1L) } returns lagBehandlingMedMedfolgendeFamilie()
 
         shouldThrow<FunksjonellException> {
             avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie)
@@ -233,7 +230,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
             )
         )
 
-        every { behandlingService.hentBehandling(1L) } returns mockBehandling()
+        every { behandlingService.hentBehandling(1L) } returns lagBehandlingMedMedfolgendeFamilie()
 
         shouldThrow<FunksjonellException> {
             avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie)
@@ -251,7 +248,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
             )
         )
 
-        every { behandlingService.hentBehandling(1L) } returns mockBehandling()
+        every { behandlingService.hentBehandling(1L) } returns lagBehandlingMedMedfolgendeFamilie()
 
         shouldThrow<FunksjonellException> {
             avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie)
@@ -269,7 +266,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
             )
         )
 
-        every { behandlingService.hentBehandling(1L) } returns mockBehandling()
+        every { behandlingService.hentBehandling(1L) } returns lagBehandlingMedMedfolgendeFamilie()
 
         shouldThrow<FunksjonellException> {
             avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie)
@@ -368,10 +365,13 @@ class AvklarteMedfolgendeFamilieServiceTest {
         omfattet.first().uuid shouldBe UUID_EKTEFELLE_SAMBOER
     }
 
-    private fun lagMottatteOpplysninger(medFolgendeFamilie: Boolean = true): MottatteOpplysninger {
-        val mottatteOpplysningerData = MottatteOpplysningerData()
-        if (medFolgendeFamilie) {
-            mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie = listOf(
+    private fun lagMottatteOpplysninger(medFolgendeFamilie: Boolean = true) = mottatteOpplysningerForTest {
+        mottatteOpplysningerData = lagMottatteOpplysningerData(medFolgendeFamilie)
+    }
+
+    private fun lagMottatteOpplysningerData(medFolgendeFamilie: Boolean = true) = MottatteOpplysningerData().also {
+        it.personOpplysninger.medfolgendeFamilie = if (medFolgendeFamilie) {
+            listOf(
                 MedfolgendeFamilie.tilMedfolgendeFamilie(UUID_BARN, "09080723451", "Bjartmar", MedfolgendeFamilie.Relasjonsrolle.BARN),
                 MedfolgendeFamilie.tilMedfolgendeFamilie(UUID_BARN2, "09080723452", "Arnhild", MedfolgendeFamilie.Relasjonsrolle.BARN),
                 MedfolgendeFamilie.tilMedfolgendeFamilie(
@@ -382,50 +382,43 @@ class AvklarteMedfolgendeFamilieServiceTest {
                 )
             )
         } else {
-            mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie = emptyList()
-        }
-        return MottatteOpplysninger().apply {
-            this.mottatteOpplysningerData = mottatteOpplysningerData
+            emptyList()
         }
     }
 
-    private fun lagAvklartMedfølgendeBarn(uuid: String): Avklartefakta =
+    private fun lagAvklartMedfølgendeBarn(uuid: String) =
         lagAvklartFakta(uuid, Avklartefaktatyper.VURDERING_LOVVALG_BARN, VALGT_FAKTA)
 
-    private fun lagAvklartIkkeMedfølgendeBarn(uuid: String): Avklartefakta =
-        lagAvklartFakta(uuid, Avklartefaktatyper.VURDERING_LOVVALG_BARN, IKKE_VALGT_FAKTA)
-            .apply {
-                begrunnelseFritekst = IKKE_SOEKERS_BARN.kode
-                registreringer = setOf(AvklartefaktaRegistrering().apply {
-                    this.begrunnelseKode = IKKE_SOEKERS_BARN.kode
-                })
-            }
+    private fun lagAvklartIkkeMedfølgendeBarn(uuid: String) =
+        lagAvklartFakta(uuid, Avklartefaktatyper.VURDERING_LOVVALG_BARN, IKKE_VALGT_FAKTA).also { avklartefakta ->
+            avklartefakta.begrunnelseFritekst = IKKE_SOEKERS_BARN.kode
+            avklartefakta.registreringer = setOf(
+                AvklartefaktaRegistrering().also { it.begrunnelseKode = IKKE_SOEKERS_BARN.kode }
+            )
+        }
 
-    private fun lagAvklartMedfølgendeEktefelle(uuid: String): Avklartefakta =
+    private fun lagAvklartMedfølgendeEktefelle(uuid: String) =
         lagAvklartFakta(uuid, Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, VALGT_FAKTA)
 
-    private fun lagAvklartIkkeMedfølgendeEktefelle(uuid: String): Avklartefakta =
-        lagAvklartFakta(uuid, Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, IKKE_VALGT_FAKTA).apply {
-            begrunnelseFritekst = IKKE_TRE_AV_FEM_SISTE_ÅR.kode
-            registreringer = setOf(AvklartefaktaRegistrering().apply {
-                this.begrunnelseKode = IKKE_TRE_AV_FEM_SISTE_ÅR.kode
-            })
+    private fun lagAvklartIkkeMedfølgendeEktefelle(uuid: String) =
+        lagAvklartFakta(uuid, Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, IKKE_VALGT_FAKTA).also { avklartefakta ->
+            avklartefakta.begrunnelseFritekst = IKKE_TRE_AV_FEM_SISTE_ÅR.kode
+            avklartefakta.registreringer = setOf(
+                AvklartefaktaRegistrering().also { it.begrunnelseKode = IKKE_TRE_AV_FEM_SISTE_ÅR.kode }
+            )
         }
 
     private fun lagAvklartFakta(uuid: String, avklartefaktatype: Avklartefaktatyper, valgtFakta: String) =
         Avklartefakta(null, null, avklartefaktatype, uuid, valgtFakta)
 
-    private fun mockBehandling(): Behandling {
-        val medfolgendeFamilieUuid1 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID_BARN, "fnr1", null, MedfolgendeFamilie.Relasjonsrolle.BARN)
-        val medfolgendeFamilieUuid2 =
-            MedfolgendeFamilie.tilMedfolgendeFamilie(UUID_EKTEFELLE_SAMBOER, "fnr2", null, MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER)
-        val mottatteOpplysningerData = MottatteOpplysningerData()
-        mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie = listOf(medfolgendeFamilieUuid1, medfolgendeFamilieUuid2)
-        val mottatteOpplysninger = MottatteOpplysninger().apply {
-            this.mottatteOpplysningerData = mottatteOpplysningerData
-        }
-        return Behandling.forTest {
-            this.mottatteOpplysninger = mottatteOpplysninger
+    private fun lagBehandlingMedMedfolgendeFamilie() = Behandling.forTest {
+        mottatteOpplysninger {
+            mottatteOpplysningerData = MottatteOpplysningerData().also {
+                it.personOpplysninger.medfolgendeFamilie = listOf(
+                    MedfolgendeFamilie.tilMedfolgendeFamilie(UUID_BARN, "fnr1", null, MedfolgendeFamilie.Relasjonsrolle.BARN),
+                    MedfolgendeFamilie.tilMedfolgendeFamilie(UUID_EKTEFELLE_SAMBOER, "fnr2", null, MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER)
+                )
+            }
         }
     }
 

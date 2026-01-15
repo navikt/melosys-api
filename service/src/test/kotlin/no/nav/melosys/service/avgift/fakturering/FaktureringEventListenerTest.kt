@@ -4,7 +4,6 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Vedtakstyper
@@ -46,24 +45,37 @@ internal class FaktureringEventListenerTest {
             trygdeavgiftService,
             prosessinstansService
         )
+    }
 
-
+    private fun lagFullmektigMedTrygdeavgiftFullmakt(
+        orgnr: String,
+        registrertDato: Instant,
+        endretDato: Instant = registrertDato
+    ): Aktoer {
+        val aktoer = Aktoer().apply {
+            id = 1
+            this.registrertDato = registrertDato
+            this.endretDato = endretDato
+            this.orgnr = orgnr
+            rolle = Aktoersroller.FULLMEKTIG
+        }
+        val fullmakt = Fullmakt().apply {
+            this.aktoer = aktoer
+            type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT
+        }
+        aktoer.fullmakter = setOf(fullmakt)
+        return aktoer
     }
 
     @Test
     fun oppdaterFakturaMottakerHvisNødvendig() {
-        val nåværendeFullmektigAvgift = Aktoer().apply {
-            id = 1
-            registrertDato =  LocalDate.of(2023, 12, 1).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
-            endretDato = registrertDato
-            orgnr = "888888888"
-            rolle = Aktoersroller.FULLMEKTIG
-        }
-        val fullmakt = Fullmakt().apply {
-            aktoer = nåværendeFullmektigAvgift
-            type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT
-        }
-        nåværendeFullmektigAvgift.fullmakter = setOf(fullmakt)
+        val desember1 = LocalDate.of(2023, 12, 1).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
+        val desember2 = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
+
+        val nåværendeFullmektigAvgift = lagFullmektigMedTrygdeavgiftFullmakt(
+            orgnr = "888888888",
+            registrertDato = desember1
+        )
         val fagsak = Fagsak.forTest { aktører(nåværendeFullmektigAvgift) }
         val avsluttetBehandling = Behandling.forTest {
             id = 1
@@ -71,25 +83,15 @@ internal class FaktureringEventListenerTest {
             registrertDato = Instant.EPOCH
             this.fagsak = fagsak
         }
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             behandling = avsluttetBehandling
-            vedtakMetadata = null
         }
 
-        val historiskFullmektig = Aktoer().apply {
-            id = 1
-            registrertDato = LocalDate.of(2023, 12, 1).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
-            endretDato = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
-            orgnr = "999999999"
-            rolle = Aktoersroller.FULLMEKTIG
-        }
-        val historiskFullmakt = Fullmakt().apply {
-            aktoer = historiskFullmektig
-            type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT
-        }
-        historiskFullmektig.apply {
-            fullmakter = setOf(historiskFullmakt)
-        }
+        val historiskFullmektig = lagFullmektigMedTrygdeavgiftFullmakt(
+            orgnr = "999999999",
+            registrertDato = desember1,
+            endretDato = desember2
+        )
 
         every { behandlingsresultatService.hentBehandlingsresultat(avsluttetBehandling.id) } returns behandlingsresultat
         every { behandlingService.hentBehandling(avsluttetBehandling.id) } returns avsluttetBehandling
@@ -103,14 +105,12 @@ internal class FaktureringEventListenerTest {
         every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer, true) } returns true
         every { prosessinstansService.opprettProsessinstansOppdaterFaktura(avsluttetBehandling) } just runs
 
-
         faktureringEventListener.oppdaterFakturaMottakerHvisNødvendig(
             BehandlingEndretStatusEvent(
                 AVSLUTTET,
                 avsluttetBehandling
             )
         )
-
 
         verify { prosessinstansService.opprettProsessinstansOppdaterFaktura(avsluttetBehandling) }
     }
@@ -133,18 +133,12 @@ internal class FaktureringEventListenerTest {
 
     @Test
     fun `Ikke oppdater fakturamottaker hvis en behandling avsluttes med vedtak, siden fakturamottaker oppdateres ifm vedtak allerede`() {
-        val nåværendeFullmektigAvgift = Aktoer().apply {
-            id = 1
-            registrertDato =  LocalDate.of(2023, 12, 1).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
-            endretDato = registrertDato
-            orgnr = "888888888"
-            rolle = Aktoersroller.FULLMEKTIG
-        }
-        val fullmakt = Fullmakt().apply {
-            aktoer = nåværendeFullmektigAvgift
-            type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT
-        }
-        nåværendeFullmektigAvgift.fullmakter = setOf(fullmakt)
+        val desember1 = LocalDate.of(2023, 12, 1).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
+
+        val nåværendeFullmektigAvgift = lagFullmektigMedTrygdeavgiftFullmakt(
+            orgnr = "888888888",
+            registrertDato = desember1
+        )
         val fagsak = Fagsak.forTest { aktører(nåværendeFullmektigAvgift) }
         val avsluttetBehandling = Behandling.forTest {
             id = 1
@@ -152,30 +146,14 @@ internal class FaktureringEventListenerTest {
             registrertDato = Instant.EPOCH
             this.fagsak = fagsak
         }
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             behandling = avsluttetBehandling
-            vedtakMetadata = VedtakMetadata().apply {
+            vedtakMetadata {
                 vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
             }
         }
 
-        val historiskFullmektig = Aktoer().apply {
-            id = 1
-            registrertDato = LocalDate.of(2023, 12, 1).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
-            endretDato = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
-            orgnr = "999999999"
-            rolle = Aktoersroller.FULLMEKTIG
-        }
-        val historiskFullmakt = Fullmakt().apply {
-            aktoer = historiskFullmektig
-            type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT
-        }
-        historiskFullmektig.apply {
-            fullmakter = setOf(historiskFullmakt)
-        }
-
         every { behandlingsresultatService.hentBehandlingsresultat(avsluttetBehandling.id) } returns behandlingsresultat
-
 
         faktureringEventListener.oppdaterFakturaMottakerHvisNødvendig(
             BehandlingEndretStatusEvent(
@@ -184,12 +162,14 @@ internal class FaktureringEventListenerTest {
             )
         )
 
-
         verify { prosessinstansService wasNot called }
     }
 
     @Test
     fun `Hvis tidligere fullmektig ble fjernet, skal bruker få fakturaer`() {
+        val desember1 = LocalDate.of(2023, 12, 1).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
+        val desember2 = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
+
         val fagsak = Fagsak.forTest()
         val avsluttetBehandling = Behandling.forTest {
             id = 1
@@ -197,25 +177,15 @@ internal class FaktureringEventListenerTest {
             registrertDato = Instant.EPOCH
             this.fagsak = fagsak
         }
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             behandling = avsluttetBehandling
-            vedtakMetadata = null
         }
 
-        val historiskFullmektig = Aktoer().apply {
-            id = 1
-            registrertDato = LocalDate.of(2023, 12, 1).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
-            endretDato = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
-            orgnr = "999999999"
-            rolle = Aktoersroller.FULLMEKTIG
-        }
-        val historiskFullmakt = Fullmakt().apply {
-            aktoer = historiskFullmektig
-            type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT
-        }
-        historiskFullmektig.apply {
-            fullmakter = setOf(historiskFullmakt)
-        }
+        val historiskFullmektig = lagFullmektigMedTrygdeavgiftFullmakt(
+            orgnr = "999999999",
+            registrertDato = desember1,
+            endretDato = desember2
+        )
 
         every { behandlingsresultatService.hentBehandlingsresultat(avsluttetBehandling.id) } returns behandlingsresultat
         every { behandlingService.hentBehandling(avsluttetBehandling.id) } returns avsluttetBehandling
@@ -229,14 +199,12 @@ internal class FaktureringEventListenerTest {
         every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer, true) } returns true
         every { prosessinstansService.opprettProsessinstansOppdaterFaktura(avsluttetBehandling) } just runs
 
-
         faktureringEventListener.oppdaterFakturaMottakerHvisNødvendig(
             BehandlingEndretStatusEvent(
                 AVSLUTTET,
                 avsluttetBehandling
             )
         )
-
 
         verify { prosessinstansService.opprettProsessinstansOppdaterFaktura(avsluttetBehandling) }
     }

@@ -4,16 +4,22 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.behandling
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
+import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.medlemskapsperiode
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.saksflytapi.domain.behandling
+import no.nav.melosys.saksflytapi.domain.behandling as prosessinstansBehandling
 import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
@@ -36,80 +42,57 @@ class TibakestillTrygdeavgiftTest {
 
     @Test
     fun `skal tilbakestille trygdeavgift når relevant aktiv behandling finnes`() {
+        val behandlingId = 1L
+
         val prosessinstans = Prosessinstans.forTest {
-            behandling {
-                id = 1L
-                fagsak = Fagsak.forTest()
+            prosessinstansBehandling {
+                id = behandlingId
+                fagsak { }
                 type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
                 status = Behandlingsstatus.UNDER_BEHANDLING
             }
         }
 
-        val behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = Behandling.forTest {
-                id = 1L
-                fagsak = Fagsak.forTest()
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
+                id = behandlingId
+                fagsak { }
                 type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
                 status = Behandlingsstatus.UNDER_BEHANDLING
             }
-            medlemskapsperioder = lagMedlemskapsperioder(this).toMutableSet()
+            medlemskapsperiode {
+                fom = LocalDate.EPOCH.plusMonths(1)
+                tom = LocalDate.EPOCH.plusMonths(4)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.now()
+                    periodeTil = LocalDate.now().plusDays(10)
+                    trygdesats = BigDecimal.valueOf(7.9)
+                    trygdeavgiftsbeløpMd = BigDecimal.valueOf(10000.0)
+                    grunnlagInntekstperiode {
+                        fomDato = LocalDate.now()
+                        tomDato = LocalDate.now()
+                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                        avgiftspliktigTotalinntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        fomDato = LocalDate.now()
+                        tomDato = LocalDate.now()
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    }
+                }
+            }
         }
-        every {
-            behandlingsresultatService.hentBehandlingsresultat(Behandling.forTest {
-                id = 1L
-                fagsak = Fagsak.forTest()
-                type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-                status = Behandlingsstatus.UNDER_BEHANDLING
-            }.id)
-        } returns behandlingsresultat
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
 
 
         tibakestillTrygdeavgift.utfør(prosessinstans)
 
 
         behandlingsresultat.trygdeavgiftsperioder.shouldBeEmpty()
-    }
-
-    private fun lagMedlemskapsperioder(behandlingsresultat: Behandlingsresultat): List<Medlemskapsperiode> {
-        val medlemskapsperiode = Medlemskapsperiode().apply {
-            fom = LocalDate.EPOCH.plusMonths(1)
-            tom = LocalDate.EPOCH.plusMonths(4)
-            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-            medlemskapstype = Medlemskapstyper.FRIVILLIG
-            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
-            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
-            this.behandlingsresultat = behandlingsresultat
-        }
-        medlemskapsperiode.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
-
-        return listOf(medlemskapsperiode)
-    }
-
-    private fun lagTrygdeavgiftsperioder(): MutableSet<Trygdeavgiftsperiode> {
-        val trygdeavgift = Trygdeavgiftsperiode(
-            periodeFra = LocalDate.now(),
-            periodeTil = LocalDate.now().plusDays(10),
-            trygdesats = BigDecimal.valueOf(7.9),
-            trygdeavgiftsbeløpMd = Penger(BigDecimal.valueOf(10000.0)),
-
-            grunnlagMedlemskapsperiode = Medlemskapsperiode().apply {
-                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-            },
-
-            grunnlagInntekstperiode = Inntektsperiode().apply {
-                fomDato = LocalDate.now()
-                tomDato = LocalDate.now()
-                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-                avgiftspliktigTotalinntekt = Penger(5000.0)
-            },
-
-            grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
-                fomDato = LocalDate.now()
-                tomDato = LocalDate.now()
-                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-            }
-        )
-
-        return mutableSetOf(trygdeavgift)
     }
 }

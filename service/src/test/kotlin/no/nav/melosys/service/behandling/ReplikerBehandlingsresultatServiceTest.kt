@@ -21,8 +21,9 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.avklartefakta.Avklartefakta
-import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
+import no.nav.melosys.domain.avgift.forTest
+import no.nav.melosys.domain.avgift.inntektForTest
+import no.nav.melosys.domain.avgift.skatteforholdForTest
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
@@ -41,7 +42,6 @@ import java.time.Instant
 import java.time.LocalDate
 
 class ReplikerBehandlingsresultatServiceTest {
-    private lateinit var behandlingsresultatOriginal: Behandlingsresultat
     private var behandlingsresultatService = mockk<BehandlingsresultatService>()
     private val unleash = FakeUnleash()
 
@@ -71,35 +71,24 @@ class ReplikerBehandlingsresultatServiceTest {
                 tema = Sakstemaer.UNNTAK
             }
         }
-        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
-        val avklartefaktaOriginal = opprettAvklartefakta()
-        behandlingsresultatOriginal.avklartefakta.add(avklartefaktaOriginal)
-        val vilkaarsresultatOriginal = opprettVilkaarsresultat()
-        behandlingsresultatOriginal.vilkaarsresultater.add(vilkaarsresultatOriginal)
-        val lovvalgsperiodeOriginal = opprettLovvalgsperiode()
-        behandlingsresultatOriginal.lovvalgsperioder.add(lovvalgsperiodeOriginal)
-        behandlingsresultatOriginal.behandlingsresultatBegrunnelser.add(opprettBehandlingsresultatBegrunnelse())
-        behandlingsresultatOriginal.kontrollresultater.add(opprettKontrollresultat())
-        val anmodningsperiodeOriginal = opprettAnmodningsperiode()
-        behandlingsresultatOriginal.anmodningsperioder.add(anmodningsperiodeOriginal)
-        val utpekingsperiodeOriginal = opprettUtpekingsperiode()
-        behandlingsresultatOriginal.utpekingsperioder.add(utpekingsperiodeOriginal)
-        val innvilgetMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.INNVILGET, 1L)
-        val avslaattMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT, 2L)
-        val opphoertMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.OPPHØRT, 3L)
+
+        val innvilgetMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET, 1L)
+        val avslaattMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT, 2L)
+        val opphoertMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.OPPHØRT, 3L)
+
         innvilgetMedlemskapsperiode.trygdeavgiftsperioder.add(
             lagTrygdeavgiftsperiode().copyEntity(grunnlagMedlemskapsperiode = innvilgetMedlemskapsperiode)
         )
         innvilgetMedlemskapsperiode.trygdeavgiftsperioder.add(
             lagTrygdeavgiftsperiode().copyEntity(
                 grunnlagMedlemskapsperiode = innvilgetMedlemskapsperiode,
-                grunnlagInntekstperiode = Inntektsperiode().apply {
+                grunnlagInntekstperiode = inntektForTest {
                     id = 2L
                     fomDato = LocalDate.now()
                     tomDato = LocalDate.now()
                     type = Inntektskildetype.ARBEIDSINNTEKT
                     avgiftspliktigMndInntekt = Penger(1000.0)
-                    isArbeidsgiversavgiftBetalesTilSkatt = false
+                    arbeidsgiversavgiftBetalesTilSkatt = false
                 })
         )
         innvilgetMedlemskapsperiode.trygdeavgiftsperioder.add(
@@ -108,10 +97,33 @@ class ReplikerBehandlingsresultatServiceTest {
                 grunnlagInntekstperiode = null,
             )
         )
-        behandlingsresultatOriginal.addMedlemskapsperiode(innvilgetMedlemskapsperiode)
-        behandlingsresultatOriginal.addMedlemskapsperiode(avslaattMedlemskapsperiode)
-        behandlingsresultatOriginal.addMedlemskapsperiode(opphoertMedlemskapsperiode)
-        behandlingsresultatOriginal.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
+
+        val lovvalgsperiodeOriginal = lagLovvalgsperiode()
+        val avklartefaktaOriginal = lagAvklartefakta()
+        val vilkaarsresultatOriginal = lagVilkaarsresultat()
+        val anmodningsperiodeOriginal = lagAnmodningsperiode()
+        val utpekingsperiodeOriginal = lagUtpekingsperiode()
+
+        val behandlingsresultatOriginal = Behandlingsresultat.forTest {
+            id = 30L
+            behandling = tidligsteInaktiveBehandling
+            behandlingsmåte = Behandlingsmaate.MANUELT
+            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            utfallUtpeking = Utfallregistreringunntak.IKKE_GODKJENT
+            utfallRegistreringUnntak = Utfallregistreringunntak.IKKE_GODKJENT
+            trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
+            vedtakMetadata { vedtaksdato = Instant.parse("2002-02-11T09:37:30Z") }
+            medExistingMedlemskapsperiode(innvilgetMedlemskapsperiode)
+            medExistingMedlemskapsperiode(avslaattMedlemskapsperiode)
+            medExistingMedlemskapsperiode(opphoertMedlemskapsperiode)
+            medExistingAvklartefakta(avklartefaktaOriginal)
+            medExistingVilkaarsresultat(vilkaarsresultatOriginal)
+            medExistingLovvalgsperiode(lovvalgsperiodeOriginal)
+            begrunnelse("begrunnelsekode")
+            kontrollresultat { begrunnelse = Kontroll_begrunnelser.FEIL_I_PERIODEN }
+            medExistingAnmodningsperiode(anmodningsperiodeOriginal)
+            medExistingUtpekingsperiode(utpekingsperiodeOriginal)
+        }
 
 
         val behandlingReplika = Behandling.forTest {
@@ -266,33 +278,24 @@ class ReplikerBehandlingsresultatServiceTest {
                 tema = Sakstemaer.MEDLEMSKAP_LOVVALG
             }
         }
-        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
-        val avklartefaktaOriginal = opprettAvklartefakta()
-        behandlingsresultatOriginal.avklartefakta.add(avklartefaktaOriginal)
-        val vilkaarsresultatOriginal = opprettVilkaarsresultat()
-        behandlingsresultatOriginal.vilkaarsresultater.add(vilkaarsresultatOriginal)
-        behandlingsresultatOriginal.behandlingsresultatBegrunnelser.add(opprettBehandlingsresultatBegrunnelse())
-        behandlingsresultatOriginal.kontrollresultater.add(opprettKontrollresultat())
-        val anmodningsperiodeOriginal = opprettAnmodningsperiode()
-        behandlingsresultatOriginal.anmodningsperioder.add(anmodningsperiodeOriginal)
-        val utpekingsperiodeOriginal = opprettUtpekingsperiode()
-        behandlingsresultatOriginal.utpekingsperioder.add(utpekingsperiodeOriginal)
-        val innvilgetLovvalgsperiode = opprettLovvalgsperiode(InnvilgelsesResultat.INNVILGET, 1L)
-        val avslaattLovvalgsperiode = opprettLovvalgsperiode(InnvilgelsesResultat.AVSLAATT, 2L)
-        val opphoertLovvalgsperiode = opprettLovvalgsperiode(InnvilgelsesResultat.OPPHØRT, 3L)
+
+        val innvilgetLovvalgsperiode = lagLovvalgsperiode(InnvilgelsesResultat.INNVILGET, 1L)
+        val avslaattLovvalgsperiode = lagLovvalgsperiode(InnvilgelsesResultat.AVSLAATT, 2L)
+        val opphoertLovvalgsperiode = lagLovvalgsperiode(InnvilgelsesResultat.OPPHØRT, 3L)
+
         innvilgetLovvalgsperiode.trygdeavgiftsperioder.add(
             lagTrygdeavgiftsperiode().copyEntity(grunnlagLovvalgsPeriode = innvilgetLovvalgsperiode)
         )
         innvilgetLovvalgsperiode.trygdeavgiftsperioder.add(
             lagTrygdeavgiftsperiode().copyEntity(
                 grunnlagLovvalgsPeriode = innvilgetLovvalgsperiode,
-                grunnlagInntekstperiode = Inntektsperiode().apply {
+                grunnlagInntekstperiode = inntektForTest {
                     id = 2L
                     fomDato = LocalDate.now()
                     tomDato = LocalDate.now()
                     type = Inntektskildetype.ARBEIDSINNTEKT
                     avgiftspliktigMndInntekt = Penger(1000.0)
-                    isArbeidsgiversavgiftBetalesTilSkatt = false
+                    arbeidsgiversavgiftBetalesTilSkatt = false
                 })
         )
         innvilgetLovvalgsperiode.trygdeavgiftsperioder.add(
@@ -301,12 +304,31 @@ class ReplikerBehandlingsresultatServiceTest {
                 grunnlagInntekstperiode = null,
             )
         )
-        behandlingsresultatOriginal.apply {
-            lovvalgsperioder.add(innvilgetLovvalgsperiode)
-            lovvalgsperioder.add(avslaattLovvalgsperiode)
-            lovvalgsperioder.add(opphoertLovvalgsperiode)
+
+        val avklartefaktaOriginal = lagAvklartefakta()
+        val vilkaarsresultatOriginal = lagVilkaarsresultat()
+        val anmodningsperiodeOriginal = lagAnmodningsperiode()
+        val utpekingsperiodeOriginal = lagUtpekingsperiode()
+
+        val behandlingsresultatOriginal = Behandlingsresultat.forTest {
+            id = 30L
+            behandling = tidligsteInaktiveBehandling
+            behandlingsmåte = Behandlingsmaate.MANUELT
+            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            utfallUtpeking = Utfallregistreringunntak.IKKE_GODKJENT
+            utfallRegistreringUnntak = Utfallregistreringunntak.IKKE_GODKJENT
+            trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
+            vedtakMetadata { vedtaksdato = Instant.parse("2002-02-11T09:37:30Z") }
+            medExistingAvklartefakta(avklartefaktaOriginal)
+            medExistingVilkaarsresultat(vilkaarsresultatOriginal)
+            begrunnelse("begrunnelsekode")
+            kontrollresultat { begrunnelse = Kontroll_begrunnelser.FEIL_I_PERIODEN }
+            medExistingAnmodningsperiode(anmodningsperiodeOriginal)
+            medExistingUtpekingsperiode(utpekingsperiodeOriginal)
+            medExistingLovvalgsperiode(innvilgetLovvalgsperiode)
+            medExistingLovvalgsperiode(avslaattLovvalgsperiode)
+            medExistingLovvalgsperiode(opphoertLovvalgsperiode)
         }
-        behandlingsresultatOriginal.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
 
 
         val behandlingReplika = Behandling.forTest {
@@ -458,29 +480,40 @@ class ReplikerBehandlingsresultatServiceTest {
         val tidligsteInaktiveBehandling = Behandling.forTest {
             id = 1L
         }
-        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
-        val avklartefaktaOriginal = opprettAvklartefakta()
-        behandlingsresultatOriginal.avklartefakta.add(avklartefaktaOriginal)
-        val vilkaarsresultatOriginal = opprettVilkaarsresultat()
-        behandlingsresultatOriginal.vilkaarsresultater.add(vilkaarsresultatOriginal)
-        val lovvalgsperiodeOriginal = opprettLovvalgsperiode()
-        behandlingsresultatOriginal.lovvalgsperioder.add(lovvalgsperiodeOriginal)
-        behandlingsresultatOriginal.behandlingsresultatBegrunnelser.add(opprettBehandlingsresultatBegrunnelse())
-        behandlingsresultatOriginal.kontrollresultater.add(opprettKontrollresultat())
-        val anmodningsperiodeOriginal = opprettAnmodningsperiode()
-        behandlingsresultatOriginal.anmodningsperioder.add(anmodningsperiodeOriginal)
-        val utpekingsperiodeOriginal = opprettUtpekingsperiode()
-        behandlingsresultatOriginal.utpekingsperioder.add(utpekingsperiodeOriginal)
-        val innvilgetMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.INNVILGET, 1L)
-        val avslaattMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT, 2L)
-        val opphoertMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.OPPHØRT, 3L)
+
+        val innvilgetMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET, 1L)
+        val avslaattMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT, 2L)
+        val opphoertMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.OPPHØRT, 3L)
         innvilgetMedlemskapsperiode.trygdeavgiftsperioder.add(
             lagTrygdeavgiftsperiode().copyEntity(grunnlagMedlemskapsperiode = innvilgetMedlemskapsperiode)
         )
-        behandlingsresultatOriginal.addMedlemskapsperiode(innvilgetMedlemskapsperiode)
-        behandlingsresultatOriginal.addMedlemskapsperiode(avslaattMedlemskapsperiode)
-        behandlingsresultatOriginal.addMedlemskapsperiode(opphoertMedlemskapsperiode)
-        behandlingsresultatOriginal.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
+
+        val lovvalgsperiodeOriginal = lagLovvalgsperiode()
+        val avklartefaktaOriginal = lagAvklartefakta()
+        val vilkaarsresultatOriginal = lagVilkaarsresultat()
+        val anmodningsperiodeOriginal = lagAnmodningsperiode()
+        val utpekingsperiodeOriginal = lagUtpekingsperiode()
+
+        val behandlingsresultatOriginal = Behandlingsresultat.forTest {
+            id = 30L
+            behandling = tidligsteInaktiveBehandling
+            behandlingsmåte = Behandlingsmaate.MANUELT
+            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            utfallUtpeking = Utfallregistreringunntak.IKKE_GODKJENT
+            utfallRegistreringUnntak = Utfallregistreringunntak.IKKE_GODKJENT
+            trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
+            vedtakMetadata { vedtaksdato = Instant.parse("2002-02-11T09:37:30Z") }
+            medExistingMedlemskapsperiode(innvilgetMedlemskapsperiode)
+            medExistingMedlemskapsperiode(avslaattMedlemskapsperiode)
+            medExistingMedlemskapsperiode(opphoertMedlemskapsperiode)
+            medExistingAvklartefakta(avklartefaktaOriginal)
+            medExistingVilkaarsresultat(vilkaarsresultatOriginal)
+            medExistingLovvalgsperiode(lovvalgsperiodeOriginal)
+            begrunnelse("begrunnelsekode")
+            kontrollresultat { begrunnelse = Kontroll_begrunnelser.FEIL_I_PERIODEN }
+            medExistingAnmodningsperiode(anmodningsperiodeOriginal)
+            medExistingUtpekingsperiode(utpekingsperiodeOriginal)
+        }
 
         val behandlingReplika = Behandling.forTest {
             id = 2L
@@ -540,9 +573,9 @@ class ReplikerBehandlingsresultatServiceTest {
             }
         }
 
-        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+        val behandlingsresultatOriginal = lagBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
-        val helseutgiftDekkesPeriode = opprettHelseutgiftDekkesPeriode(behandlingsresultatOriginal)
+        val helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(behandlingsresultatOriginal)
         val trygdeavgiftsperiode = lagTrygdeavgiftsperiode().copyEntity(grunnlagHelseutgiftDekkesPeriode = helseutgiftDekkesPeriode)
 
         helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
@@ -595,9 +628,9 @@ class ReplikerBehandlingsresultatServiceTest {
                 tema = Sakstemaer.UNNTAK
             }
         }
-        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+        val behandlingsresultatOriginal = lagBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
-        val innvilgetMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.INNVILGET, 1L)
+        val innvilgetMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET, 1L)
         val trygdeavgiftsperiode = lagTrygdeavgiftsperiode().copyEntity(
             grunnlagMedlemskapsperiode = innvilgetMedlemskapsperiode,
             grunnlagInntekstperiode = null,
@@ -633,9 +666,9 @@ class ReplikerBehandlingsresultatServiceTest {
                 tema = Sakstemaer.UNNTAK
             }
         }
-        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+        val behandlingsresultatOriginal = lagBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
-        val innvilgetMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.INNVILGET, 1L)
+        val innvilgetMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET, 1L)
         val trygdeavgiftsperiode = lagTrygdeavgiftsperiode()
 
         innvilgetMedlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
@@ -658,161 +691,121 @@ class ReplikerBehandlingsresultatServiceTest {
         }
     }
 
-    private fun lagTrygdeavgiftsperiode(): Trygdeavgiftsperiode {
-        val inntektsperiode = Inntektsperiode().apply {
+    private fun lagTrygdeavgiftsperiode() = Trygdeavgiftsperiode.forTest {
+        id = 1L
+        periodeFra = LocalDate.now()
+        periodeTil = LocalDate.now()
+        trygdeavgiftsbeløpMd = BigDecimal(500)
+        trygdesats = BigDecimal(50)
+        grunnlagInntekstperiode {
             id = 1L
             fomDato = LocalDate.now()
             tomDato = LocalDate.now()
             type = Inntektskildetype.INNTEKT_FRA_UTLANDET
             avgiftspliktigMndInntekt = Penger(1000.0)
-            isArbeidsgiversavgiftBetalesTilSkatt = false
+            arbeidsgiversavgiftBetalesTilSkatt = false
         }
-        val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
+        grunnlagSkatteforholdTilNorge {
             id = 1L
             fomDato = LocalDate.now()
             tomDato = LocalDate.now()
             skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
         }
-
-        return Trygdeavgiftsperiode(
-            id = 1L,
-            periodeFra = LocalDate.now(),
-            periodeTil = LocalDate.now(),
-            trygdeavgiftsbeløpMd = Penger(500.0),
-            trygdesats = BigDecimal(50),
-            grunnlagInntekstperiode = inntektsperiode,
-            grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
-        )
     }
 
-    private fun opprettMedlemskapsperiode(innvilgelsesResultat: InnvilgelsesResultat, id: Long): Medlemskapsperiode {
-        val medlemskapsperiode = Medlemskapsperiode()
-        medlemskapsperiode.id = id
-        medlemskapsperiode.innvilgelsesresultat = innvilgelsesResultat
-        medlemskapsperiode.medlPeriodeID = 77L
-        medlemskapsperiode.fom = LocalDate.now()
-        medlemskapsperiode.tom = LocalDate.now()
-        medlemskapsperiode.medlemskapstype = Medlemskapstyper.PLIKTIG
-        medlemskapsperiode.trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
-        medlemskapsperiode.medlPeriodeID = 123L
-        medlemskapsperiode.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
-        return medlemskapsperiode
+    private fun lagMedlemskapsperiode(innvilgelsesResultat: InnvilgelsesResultat, id: Long) = medlemskapsperiodeForTest {
+        this.id = id
+        this.innvilgelsesresultat = innvilgelsesResultat
+        medlPeriodeID = 123L
+        fom = LocalDate.now()
+        tom = LocalDate.now()
+        medlemskapstype = Medlemskapstyper.PLIKTIG
+        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
+        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
     }
 
-    private fun opprettHelseutgiftDekkesPeriode(behandlingsresultat: Behandlingsresultat): HelseutgiftDekkesPeriode {
-        val helseutgiftDekkesPeriode = HelseutgiftDekkesPeriode(
-            behandlingsresultat,
-            fomDato = LocalDate.now(),
-            tomDato = LocalDate.now(),
-            bostedLandkode = Land_iso2.DK
-        )
-
-        return helseutgiftDekkesPeriode
+    private fun lagHelseutgiftDekkesPeriode(behandlingsresultat: Behandlingsresultat) = HelseutgiftDekkesPeriode.forTest {
+        this.behandlingsresultat = behandlingsresultat
+        fomDato = LocalDate.now()
+        tomDato = LocalDate.now()
+        bostedLandkode = Land_iso2.DK
     }
 
-    private fun opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling: Behandling): Behandlingsresultat {
-        val behandlingsresultat = Behandlingsresultat()
-        behandlingsresultat.id = 30L
-        behandlingsresultat.behandling = tidligsteInaktiveBehandling
-        behandlingsresultat.behandlingsmåte = Behandlingsmaate.MANUELT
-        behandlingsresultat.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-        val vedtakMetadata = VedtakMetadata()
-        vedtakMetadata.vedtaksdato = Instant.parse("2002-02-11T09:37:30Z")
-        behandlingsresultat.vedtakMetadata = vedtakMetadata
-        behandlingsresultat.avklartefakta = LinkedHashSet()
-        behandlingsresultat.lovvalgsperioder = LinkedHashSet()
-        behandlingsresultat.vilkaarsresultater = LinkedHashSet()
-        behandlingsresultat.utfallUtpeking = Utfallregistreringunntak.IKKE_GODKJENT
-        behandlingsresultat.utfallRegistreringUnntak = Utfallregistreringunntak.IKKE_GODKJENT
-        return behandlingsresultat
+    private fun lagBehandlingsresultatMedData(tidligsteInaktiveBehandling: Behandling) = Behandlingsresultat.forTest {
+        id = 30L
+        behandling = tidligsteInaktiveBehandling
+        behandlingsmåte = Behandlingsmaate.MANUELT
+        type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+        utfallUtpeking = Utfallregistreringunntak.IKKE_GODKJENT
+        utfallRegistreringUnntak = Utfallregistreringunntak.IKKE_GODKJENT
+        vedtakMetadata { vedtaksdato = Instant.parse("2002-02-11T09:37:30Z") }
     }
 
-    private fun opprettLovvalgsperiode(innvilgelsesResultat: InnvilgelsesResultat? = InnvilgelsesResultat.INNVILGET, id: Long? = 32L): Lovvalgsperiode {
-        val lovvalgsperiode = Lovvalgsperiode()
-        lovvalgsperiode.id = id
-        lovvalgsperiode.innvilgelsesresultat = innvilgelsesResultat
-        lovvalgsperiode.behandlingsresultat = behandlingsresultatOriginal
-        lovvalgsperiode.dekning = Trygdedekninger.FULL_DEKNING_EOSFO
-        lovvalgsperiode.fom = LocalDate.now()
-        lovvalgsperiode.tom = LocalDate.now().plusMonths(2)
-        lovvalgsperiode.medlPeriodeID = 777L
-        return lovvalgsperiode
+    private fun lagLovvalgsperiode(
+        innvilgelsesResultat: InnvilgelsesResultat = InnvilgelsesResultat.INNVILGET,
+        id: Long? = 32L
+    ) = lovvalgsperiodeForTest {
+        this.id = id
+        this.innvilgelsesresultat = innvilgelsesResultat
+        dekning = Trygdedekninger.FULL_DEKNING_EOSFO
+        fom = LocalDate.now()
+        tom = LocalDate.now().plusMonths(2)
+        medlPeriodeID = 777L
     }
 
-    private fun opprettAnmodningsperiode(): Anmodningsperiode {
-        val anmodningsperiode = Anmodningsperiode()
-        anmodningsperiode.id = 32L
-        anmodningsperiode.fom = LocalDate.now()
-        anmodningsperiode.tom = LocalDate.now().plusYears(1L)
-        anmodningsperiode.lovvalgsland = Land_iso2.SE
-        anmodningsperiode.unntakFraLovvalgsland = Land_iso2.NO
-        anmodningsperiode.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
-        anmodningsperiode.unntakFraBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
-        anmodningsperiode.tilleggsbestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1
-        anmodningsperiode.behandlingsresultat = behandlingsresultatOriginal
-        anmodningsperiode.setSendtUtland(true)
-        anmodningsperiode.anmodningsperiodeSvar = AnmodningsperiodeSvar()
-        anmodningsperiode.dekning = Trygdedekninger.FULL_DEKNING_EOSFO
-        return anmodningsperiode
+    private fun lagAnmodningsperiode() = anmodningsperiodeForTest {
+        id = 32L
+        fom = LocalDate.now()
+        tom = LocalDate.now().plusYears(1L)
+        lovvalgsland = Land_iso2.SE
+        unntakFraLovvalgsland = Land_iso2.NO
+        bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
+        unntakFraBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+        tilleggsbestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1
+        sendtUtland = true
+        anmodningsperiodeSvar { }
+        dekning = Trygdedekninger.FULL_DEKNING_EOSFO
     }
 
-    private fun opprettUtpekingsperiode(): Utpekingsperiode {
-        val utpekingsperiode = Utpekingsperiode(
-            LocalDate.now(), LocalDate.now().plusYears(1), Land_iso2.SE,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
-        )
-        utpekingsperiode.id = 11111L
-        utpekingsperiode.medlPeriodeID = 1242L
-        utpekingsperiode.sendtUtland = LocalDate.now()
-        return utpekingsperiode
+    private fun lagUtpekingsperiode() = utpekingsperiodeForTest {
+        id = 11111L
+        fom = LocalDate.now()
+        tom = LocalDate.now().plusYears(1)
+        lovvalgsland = Land_iso2.SE
+        bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A
+        tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
+        medlPeriodeID = 1242L
+        sendtUtland = LocalDate.now()
     }
 
-    private fun opprettAvklartefakta(): Avklartefakta {
-        val avklartefakta = Avklartefakta()
-        avklartefakta.id = 32L
-        avklartefakta.behandlingsresultat = behandlingsresultatOriginal
-        avklartefakta.fakta = "fakta"
-        avklartefakta.type = Avklartefaktatyper.ARBEIDSLAND
-        val avklartefaktaRegistrering = AvklartefaktaRegistrering()
-        avklartefaktaRegistrering.begrunnelseKode = "registrering_begrunnelsekode"
-        avklartefakta.registreringer.add(avklartefaktaRegistrering)
-        return avklartefakta
+    private fun lagAvklartefakta() = avklartefaktaForTest {
+        id = 32L
+        fakta = "fakta"
+        type = Avklartefaktatyper.ARBEIDSLAND
+        registrering { begrunnelseKode = "registrering_begrunnelsekode" }
     }
 
-    private fun opprettBehandlingsresultatBegrunnelse(): BehandlingsresultatBegrunnelse {
-        val behandlingsresultatBegrunnelse = BehandlingsresultatBegrunnelse()
-        behandlingsresultatBegrunnelse.id = 32L
-        behandlingsresultatBegrunnelse.behandlingsresultat = behandlingsresultatOriginal
-        behandlingsresultatBegrunnelse.kode = "begrunnelsekode"
-        return behandlingsresultatBegrunnelse
+    private fun lagBehandlingsresultatBegrunnelse(behandlingsresultat: Behandlingsresultat) =
+        BehandlingsresultatBegrunnelse.lag("begrunnelsekode").apply {
+            id = 32L
+            this.behandlingsresultat = behandlingsresultat
+        }
+
+    private fun lagVilkaarsresultat() = vilkaarsresultatForTest {
+        id = 32L
+        begrunnelseFritekst = "fritekst"
+        begrunnelseFritekstEessi = "free text"
+        begrunnelse("kode")
     }
 
-    private fun opprettVilkaarsresultat(): Vilkaarsresultat {
-        val vilkaarsresultat = Vilkaarsresultat()
-        vilkaarsresultat.behandlingsresultat = behandlingsresultatOriginal
-        vilkaarsresultat.id = 32L
-        vilkaarsresultat.begrunnelseFritekst = "fritekst"
-        vilkaarsresultat.begrunnelseFritekstEessi = "free text"
-        val begrunnelser = HashSet<VilkaarBegrunnelse>()
-        val vilkaarBegrunnelse = VilkaarBegrunnelse()
-        vilkaarBegrunnelse.id = 2222L
-        vilkaarBegrunnelse.kode = "kode"
-        begrunnelser.add(vilkaarBegrunnelse)
-        vilkaarsresultat.begrunnelser = begrunnelser
-        return vilkaarsresultat
-    }
-
-    private fun opprettKontrollresultat(): Kontrollresultat {
-        val kontrollresultat = Kontrollresultat()
-        kontrollresultat.id = 123L
-        kontrollresultat.behandlingsresultat = behandlingsresultatOriginal
-        kontrollresultat.begrunnelse = Kontroll_begrunnelser.FEIL_I_PERIODEN
-        return kontrollresultat
-    }
+    private fun lagKontrollresultat(behandlingsresultat: Behandlingsresultat) = kontrollresultatForTest {
+        id = 123L
+        begrunnelse = Kontroll_begrunnelser.FEIL_I_PERIODEN
+    }.apply { this.behandlingsresultat = behandlingsresultat }
 
 
     @Test
-    fun `filtrerTrygdeavgiftsperioder med toggle PÅ - feiler når trygdeavgiftsperiode går over flere år`() {
+    fun `filtrerTrygdeavgiftsperioder med toggle PA - feiler når trygdeavgiftsperiode går over flere år`() {
         unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
 
@@ -837,7 +830,7 @@ class ReplikerBehandlingsresultatServiceTest {
     }
 
     @Test
-    fun `filtrerTrygdeavgiftsperioder med toggle PÅ - filtrerer bort perioder som slutter før inneværende år`() {
+    fun `filtrerTrygdeavgiftsperioder med toggle PA - filtrerer bort perioder som slutter før inneværende år`() {
         unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
 
@@ -876,7 +869,7 @@ class ReplikerBehandlingsresultatServiceTest {
     }
 
     @Test
-    fun `replikerTrygdeavgiftForPensjonist med toggle PÅ - feiler når trygdeavgiftsperioder går over flere år`() {
+    fun `replikerTrygdeavgiftForPensjonist med toggle PA - feiler når trygdeavgiftsperioder går over flere år`() {
         unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
 
@@ -892,17 +885,17 @@ class ReplikerBehandlingsresultatServiceTest {
                 tema = Sakstemaer.TRYGDEAVGIFT
             }
         }
-        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+        val behandlingsresultatOriginal = lagBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
-        val helseutgiftDekkesPeriode = opprettHelseutgiftDekkesPeriode(behandlingsresultatOriginal)
+        val helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(behandlingsresultatOriginal)
 
-        val inntektsperiode = Inntektsperiode().apply {
+        val inntektsperiode = inntektForTest {
             id = 1L
             fomDato = LocalDate.of(inneværendeÅr - 1, 6, 1)
             tomDato = LocalDate.of(inneværendeÅr, 6, 30)
         }
 
-        val skatteforhold = SkatteforholdTilNorge().apply {
+        val skatteforhold = skatteforholdForTest {
             id = 1L
             fomDato = LocalDate.of(inneværendeÅr - 1, 1, 1)
             tomDato = LocalDate.of(inneværendeÅr, 12, 31)
@@ -945,7 +938,7 @@ class ReplikerBehandlingsresultatServiceTest {
     }
 
     @Test
-    fun `replikerTrygdeavgiftForPensjonist med toggle PÅ - avkorter også inntektsperioder og skatteforhold som starter før inneværende år`() {
+    fun `replikerTrygdeavgiftForPensjonist med toggle PA - avkorter også inntektsperioder og skatteforhold som starter før inneværende år`() {
         unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
 
@@ -958,19 +951,19 @@ class ReplikerBehandlingsresultatServiceTest {
                 tema = Sakstemaer.TRYGDEAVGIFT
             }
         }
-        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+        val behandlingsresultatOriginal = lagBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
-        val helseutgiftDekkesPeriode = opprettHelseutgiftDekkesPeriode(behandlingsresultatOriginal)
+        val helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(behandlingsresultatOriginal)
 
         // Opprett inntektsperiode som overlapper med inneværende år (skal avkortes)
-        val overlappendeInntektsperiode = Inntektsperiode().apply {
+        val overlappendeInntektsperiode = inntektForTest {
             id = 1L
             fomDato = LocalDate.of(inneværendeÅr - 1, 1, 1)  // Starter før inneværende år
             tomDato = LocalDate.of(inneværendeÅr, 12, 31)    // Slutter i inneværende år
         }
 
         // Opprett skatteforhold som overlapper med inneværende år (skal avkortes)
-        val overlappendeSkatteforhold = SkatteforholdTilNorge().apply {
+        val overlappendeSkatteforhold = skatteforholdForTest {
             id = 1L
             fomDato = LocalDate.of(inneværendeÅr - 1, 6, 1) // Starter før inneværende år
             tomDato = LocalDate.of(inneværendeÅr, 6, 30)     // Slutter i inneværende år
@@ -1037,7 +1030,7 @@ class ReplikerBehandlingsresultatServiceTest {
     }
 
     @Test
-    fun `replikerTrygdeavgift med toggle PÅ - filtrerer og avkorter for vanlige medlemmer`() {
+    fun `replikerTrygdeavgift med toggle PA - filtrerer og avkorter for vanlige medlemmer`() {
         unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
 
@@ -1049,10 +1042,10 @@ class ReplikerBehandlingsresultatServiceTest {
                 tema = Sakstemaer.UNNTAK
             }
         }
-        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+        val behandlingsresultatOriginal = lagBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
         // Opprett medlemskapsperiode som trygdeavgiftsperiodene skal knyttes til
-        val medlemskapsperiode = Medlemskapsperiode().apply {
+        val medlemskapsperiode = medlemskapsperiodeForTest {
             id = 1L
             fom = LocalDate.of(inneværendeÅr - 1, 1, 1)
             tom = LocalDate.of(inneværendeÅr + 1, 12, 31)
@@ -1061,14 +1054,14 @@ class ReplikerBehandlingsresultatServiceTest {
         behandlingsresultatOriginal.medlemskapsperioder.add(medlemskapsperiode)
 
         // Opprett inntektsperiode som overlapper med inneværende år
-        val inntektsperiode = Inntektsperiode().apply {
+        val inntektsperiode = inntektForTest {
             id = 1L
             fomDato = LocalDate.of(inneværendeÅr - 1, 6, 1)
             tomDato = LocalDate.of(inneværendeÅr, 6, 30)
         }
 
         // Opprett skatteforhold som overlapper med inneværende år
-        val skatteforhold = SkatteforholdTilNorge().apply {
+        val skatteforhold = skatteforholdForTest {
             id = 1L
             fomDato = LocalDate.of(inneværendeÅr - 1, 3, 1)
             tomDato = LocalDate.of(inneværendeÅr, 12, 31)
@@ -1157,10 +1150,10 @@ class ReplikerBehandlingsresultatServiceTest {
                 tema = Sakstemaer.UNNTAK
             }
         }
-        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+        val behandlingsresultatOriginal = lagBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
         // Opprett medlemskapsperiode
-        val medlemskapsperiode = Medlemskapsperiode().apply {
+        val medlemskapsperiode = medlemskapsperiodeForTest {
             id = 1L
             fom = LocalDate.of(inneværendeÅr - 2, 1, 1)
             tom = LocalDate.of(inneværendeÅr - 1, 12, 31)
@@ -1168,8 +1161,8 @@ class ReplikerBehandlingsresultatServiceTest {
         }
         behandlingsresultatOriginal.medlemskapsperioder.add(medlemskapsperiode)
 
-        // Opprett skatteforhold (påkrevd)
-        val skatteforhold = SkatteforholdTilNorge().apply {
+        // Opprett skatteforhold (pakrevd)
+        val skatteforhold = skatteforholdForTest {
             id = 1L
             fomDato = LocalDate.of(inneværendeÅr - 2, 1, 1)
             tomDato = LocalDate.of(inneværendeÅr - 1, 12, 31)
@@ -1227,12 +1220,12 @@ class ReplikerBehandlingsresultatServiceTest {
                 tema = Sakstemaer.TRYGDEAVGIFT
             }
         }
-        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+        val behandlingsresultatOriginal = lagBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
-        val helseutgiftDekkesPeriode = opprettHelseutgiftDekkesPeriode(behandlingsresultatOriginal)
+        val helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(behandlingsresultatOriginal)
 
-        // Opprett skatteforhold (påkrevd for pensjonist også)
-        val skatteforhold = SkatteforholdTilNorge().apply {
+        // Opprett skatteforhold (pakrevd for pensjonist også)
+        val skatteforhold = skatteforholdForTest {
             id = 1L
             fomDato = LocalDate.of(inneværendeÅr - 2, 1, 1)
             tomDato = LocalDate.of(inneværendeÅr - 1, 12, 31)
@@ -1309,7 +1302,7 @@ class ReplikerBehandlingsresultatServiceTest {
     }
 
     @Test
-    fun `replikerTrygdeavgift med toggle PÅ - håndterer periode som starter og slutter i inneværende år korrekt`() {
+    fun `replikerTrygdeavgift med toggle PA - håndterer periode som starter og slutter i inneværende år korrekt`() {
         unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
 
@@ -1320,10 +1313,10 @@ class ReplikerBehandlingsresultatServiceTest {
                 tema = Sakstemaer.UNNTAK
             }
         }
-        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+        val behandlingsresultatOriginal = lagBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
         // Opprett medlemskapsperiode og skatteforhold
-        val medlemskapsperiode = Medlemskapsperiode().apply {
+        val medlemskapsperiode = medlemskapsperiodeForTest {
             id = 1L
             fom = LocalDate.of(inneværendeÅr, 1, 1)
             tom = LocalDate.of(inneværendeÅr, 12, 31)
@@ -1331,7 +1324,7 @@ class ReplikerBehandlingsresultatServiceTest {
         }
         behandlingsresultatOriginal.medlemskapsperioder.add(medlemskapsperiode)
 
-        val skatteforhold = SkatteforholdTilNorge().apply {
+        val skatteforhold = skatteforholdForTest {
             id = 1L
             fomDato = LocalDate.of(inneværendeÅr, 1, 1)
             tomDato = LocalDate.of(inneværendeÅr, 12, 31)
@@ -1375,7 +1368,7 @@ class ReplikerBehandlingsresultatServiceTest {
     }
 
     @Test
-    fun `replikerTrygdeavgift med toggle PÅ - håndterer periode som går over flere år fremover`() {
+    fun `replikerTrygdeavgift med toggle PA - håndterer periode som går over flere år fremover`() {
         unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
 
@@ -1386,10 +1379,10 @@ class ReplikerBehandlingsresultatServiceTest {
                 tema = Sakstemaer.UNNTAK
             }
         }
-        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+        val behandlingsresultatOriginal = lagBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
         // Opprett medlemskapsperiode og skatteforhold
-        val medlemskapsperiode = Medlemskapsperiode().apply {
+        val medlemskapsperiode = medlemskapsperiodeForTest {
             id = 1L
             fom = LocalDate.of(inneværendeÅr - 1, 1, 1)
             tom = LocalDate.of(inneværendeÅr + 1, 12, 31)
@@ -1397,7 +1390,7 @@ class ReplikerBehandlingsresultatServiceTest {
         }
         behandlingsresultatOriginal.medlemskapsperioder.add(medlemskapsperiode)
 
-        val skatteforhold = SkatteforholdTilNorge().apply {
+        val skatteforhold = skatteforholdForTest {
             id = 1L
             fomDato = LocalDate.of(inneværendeÅr - 1, 6, 1)
             tomDato = LocalDate.of(inneværendeÅr + 1, 12, 31)
@@ -1414,7 +1407,7 @@ class ReplikerBehandlingsresultatServiceTest {
             grunnlagSkatteforholdTilNorge = skatteforhold
         )
         // Trygdeavgiftsperiode som går fra forrige år til neste år
-        val trygdeavgiftsperiodeIÅr = Trygdeavgiftsperiode(
+        val trygdeavgiftsperiodeIAr = Trygdeavgiftsperiode(
             id = 2L,
             periodeFra = LocalDate.of(inneværendeÅr, 1, 1),
             periodeTil = LocalDate.of(inneværendeÅr, 12, 31),
@@ -1424,7 +1417,7 @@ class ReplikerBehandlingsresultatServiceTest {
             grunnlagSkatteforholdTilNorge = skatteforhold
         )
 
-        val trygdeavgiftsperiodeNesteÅr = Trygdeavgiftsperiode(
+        val trygdeavgiftsperiodeNesteAr = Trygdeavgiftsperiode(
             id = 3L,
             periodeFra = LocalDate.of(inneværendeÅr+1 , 1, 1),
             periodeTil = LocalDate.of(inneværendeÅr+1, 12, 31),
@@ -1434,8 +1427,8 @@ class ReplikerBehandlingsresultatServiceTest {
             grunnlagSkatteforholdTilNorge = skatteforhold
         )
         medlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiodeIFjor)
-        medlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiodeIÅr)
-        medlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiodeNesteÅr)
+        medlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiodeIAr)
+        medlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiodeNesteAr)
 
         val behandlingReplika = Behandling.forTest {
             id = 2L
@@ -1455,15 +1448,15 @@ class ReplikerBehandlingsresultatServiceTest {
         val behandlingsresultatReplika = slot.captured
 
         behandlingsresultatReplika.trygdeavgiftsperioder shouldHaveSize 2
-        val replisertPeriodeIÅr = behandlingsresultatReplika.trygdeavgiftsperioder.minBy { b -> b.periodeFra }
-        val replisertPeriodeNesteÅr = behandlingsresultatReplika.trygdeavgiftsperioder.maxBy { b -> b.periodeFra }
+        val replisertPeriodeIAr = behandlingsresultatReplika.trygdeavgiftsperioder.minBy { b -> b.periodeFra }
+        val replisertPeriodeNesteAr = behandlingsresultatReplika.trygdeavgiftsperioder.maxBy { b -> b.periodeFra }
 
         // Periode skal avkortes til å starte 1. januar, men slutt-dato skal være uendret
-        replisertPeriodeIÅr.periodeFra shouldBe LocalDate.of(inneværendeÅr, 1, 1)
-        replisertPeriodeIÅr.periodeTil shouldBe LocalDate.of(inneværendeÅr, 12, 31)
+        replisertPeriodeIAr.periodeFra shouldBe LocalDate.of(inneværendeÅr, 1, 1)
+        replisertPeriodeIAr.periodeTil shouldBe LocalDate.of(inneværendeÅr, 12, 31)
 
-        replisertPeriodeNesteÅr.periodeFra shouldBe LocalDate.of(inneværendeÅr + 1, 1, 1)
-        replisertPeriodeNesteÅr.periodeTil shouldBe LocalDate.of(inneværendeÅr + 1, 12, 31)
+        replisertPeriodeNesteAr.periodeFra shouldBe LocalDate.of(inneværendeÅr + 1, 1, 1)
+        replisertPeriodeNesteAr.periodeTil shouldBe LocalDate.of(inneværendeÅr + 1, 12, 31)
     }
 
 
@@ -1476,13 +1469,14 @@ class ReplikerBehandlingsresultatServiceTest {
                 tema = Sakstemaer.MEDLEMSKAP_LOVVALG
             }
         }
-        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+        val behandlingsresultatOriginal = lagBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
-        val lovvalgsperiodeOriginal = opprettLovvalgsperiode().apply {
+        val lovvalgsperiodeOriginal = lagLovvalgsperiode().apply {
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             medlemskapstype = Medlemskapstyper.PLIKTIG
         }
         behandlingsresultatOriginal.lovvalgsperioder.add(lovvalgsperiodeOriginal)
+        lovvalgsperiodeOriginal.behandlingsresultat = behandlingsresultatOriginal
 
         val behandlingReplika = Behandling.forTest {
             id = 2L
@@ -1517,38 +1511,38 @@ class ReplikerBehandlingsresultatServiceTest {
     }
 
     @Test
-    fun `replikerMedlemskapsperioderBasertPåBehandlingstype inkluderer opphørt for MANGLENDE_INNBETALING_TRYGDEAVGIFT`() {
+    fun `replikerMedlemskapsperioderBasertPaBehandlingstype inkluderer opphørt for MANGLENDE_INNBETALING_TRYGDEAVGIFT`() {
         val inneværendeÅr = LocalDate.now().year
 
         val tidligsteInaktiveBehandling = Behandling.forTest {
             id = 1L
             type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         }
-        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+        val behandlingsresultatOriginal = lagBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
         // Legg til både innvilget og opphørt medlemskapsperiode
-        val innvilgetPeriode = Medlemskapsperiode().apply {
+        val innvilgetPeriode = medlemskapsperiodeForTest {
             id = 1L
             fom = LocalDate.of(inneværendeÅr, 1, 1)
             tom = LocalDate.of(inneværendeÅr, 6, 30)
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
 
-        val opphørtPeriode = Medlemskapsperiode().apply {
+        val opphoertPeriode = medlemskapsperiodeForTest {
             id = 2L
             fom = LocalDate.of(inneværendeÅr, 7, 1)
             tom = LocalDate.of(inneværendeÅr, 12, 31)
             innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
         }
 
-        val avslåttPeriode = Medlemskapsperiode().apply {
+        val avslaattPeriode = medlemskapsperiodeForTest {
             id = 3L
             fom = LocalDate.of(inneværendeÅr - 1, 1, 1)
             tom = LocalDate.of(inneværendeÅr - 1, 12, 31)
             innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
         }
 
-        behandlingsresultatOriginal.medlemskapsperioder.addAll(setOf(innvilgetPeriode, opphørtPeriode, avslåttPeriode))
+        behandlingsresultatOriginal.medlemskapsperioder.addAll(setOf(innvilgetPeriode, opphoertPeriode, avslaattPeriode))
 
         val behandlingReplika = Behandling.forTest {
             id = 2L

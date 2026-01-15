@@ -6,7 +6,6 @@ import java.math.BigDecimal
 import java.time.YearMonth
 
 object InntektTestFactory {
-    @JvmStatic
     fun createInntektForTest(
         type: InntektType,
         yearMonth: YearMonth = YearMonth.now().plusYears(2)

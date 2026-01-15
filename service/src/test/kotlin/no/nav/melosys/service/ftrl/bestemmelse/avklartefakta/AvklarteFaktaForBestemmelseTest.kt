@@ -16,9 +16,8 @@ import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivoppholdtype.MIDLERTIDIG_2_1_
 import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivoppholdtype.VEKSELVIS_2_1_FJERDE_LEDD
 import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivrelasjontype.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
-import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
-import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest
+import no.nav.melosys.domain.mottatteopplysninger.søknadNorgeEllerUtenforEØS
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import org.junit.jupiter.api.BeforeEach
@@ -40,18 +39,14 @@ class AvklarteFaktaForBestemmelseTest {
         avklarteFaktaForBestemmelse = AvklarteFaktaForBestemmelse(mottatteOpplysningerService, behandlingService)
     }
 
-
     @Test
     fun `avklarte fakta for FTRL_KAP2_2_1, ett eller flere land utenfor Norge, er ARBEIDSSITUASJON, yrkesaktiv`() {
-        val mottatteOpplysninger =
-            MottatteOpplysninger().apply {
-                mottatteOpplysningerData =
-                    SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(Land_iso2.NO.toString(), "AB", "PR") } }
-            }
+        val mottatteOpplysninger = mottatteOpplysningerForTest {
+            søknadNorgeEllerUtenforEØS { landkoder(Land_iso2.NO.toString(), "AB", "PR") }
+        }
         val behandling = Behandling.forTest { tema = Behandlingstema.YRKESAKTIV }
-        every {behandlingService.hentBehandling(1L)} returns behandling
-        every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
-
+        every { behandlingService.hentBehandling(1L) } returns behandling
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(1L) } returns mottatteOpplysninger
 
         avklarteFaktaForBestemmelse.hentAvklarteFakta(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1, 1L
@@ -63,28 +58,24 @@ class AvklarteFaktaForBestemmelseTest {
         )
     }
 
-
     @Test
     fun `avklarte fakta for FTRL_KAP2_2_1, kun norge, ingen avklarte fakta yrkesaktiv`() {
-        val mottatteOpplysninger =
-            MottatteOpplysninger().apply {
-                mottatteOpplysningerData =
-                    SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(Land_iso2.NO.toString()) } }
-            }
+        val mottatteOpplysninger = mottatteOpplysningerForTest {
+            søknadNorgeEllerUtenforEØS { landkoder(Land_iso2.NO.toString()) }
+        }
         val behandling = Behandling.forTest { tema = Behandlingstema.YRKESAKTIV }
-        every {behandlingService.hentBehandling(1L)} returns behandling
-        every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
+        every { behandlingService.hentBehandling(1L) } returns behandling
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(1L) } returns mottatteOpplysninger
 
         avklarteFaktaForBestemmelse.hentAvklarteFakta(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1, 1L
         ).shouldBeEmpty()
     }
 
-
     @Test
     fun `avklarte fakta for FTRL_KAP2_2_2, er ARBEIDSSITUASJON, yrkesaktiv`() {
         val behandling = Behandling.forTest { tema = Behandlingstema.YRKESAKTIV }
-        every {behandlingService.hentBehandling(1L)} returns behandling
+        every { behandlingService.hentBehandling(1L) } returns behandling
 
         avklarteFaktaForBestemmelse.hentAvklarteFakta(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_2, 1L
@@ -98,16 +89,12 @@ class AvklarteFaktaForBestemmelseTest {
 
     @Test
     fun `avklarte fakta for FTRL_KAP2_2_1, ett eller flere land utenfor Norge, er IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD`() {
-        val mottatteOpplysninger =
-            MottatteOpplysninger().apply {
-                mottatteOpplysningerData =
-                    SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(Land_iso2.NO.toString(), "AB", "PR") } }
-            }
-
+        val mottatteOpplysninger = mottatteOpplysningerForTest {
+            søknadNorgeEllerUtenforEØS { landkoder(Land_iso2.NO.toString(), "AB", "PR") }
+        }
         val behandling = Behandling.forTest { tema = Behandlingstema.IKKE_YRKESAKTIV }
-        every {behandlingService.hentBehandling(1L)} returns behandling
-        every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
-
+        every { behandlingService.hentBehandling(1L) } returns behandling
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(1L) } returns mottatteOpplysninger
 
         avklarteFaktaForBestemmelse.hentAvklarteFakta(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1, 1L
@@ -121,15 +108,12 @@ class AvklarteFaktaForBestemmelseTest {
 
     @Test
     fun `avklarte fakta for FTRL_KAP2_2_1, Norge, ingen avklarte fakta`() {
-        val mottatteOpplysninger =
-            MottatteOpplysninger().apply {
-                mottatteOpplysningerData =
-                    SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(Land_iso2.NO.toString()) } }
-            }
+        val mottatteOpplysninger = mottatteOpplysningerForTest {
+            søknadNorgeEllerUtenforEØS { landkoder(Land_iso2.NO.toString()) }
+        }
         val behandling = Behandling.forTest { tema = Behandlingstema.YRKESAKTIV }
-
-        every {behandlingService.hentBehandling(1L)} returns behandling
-        every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
+        every { behandlingService.hentBehandling(1L) } returns behandling
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(1L) } returns mottatteOpplysninger
 
         avklarteFaktaForBestemmelse.hentAvklarteFakta(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1, 1L
@@ -139,7 +123,7 @@ class AvklarteFaktaForBestemmelseTest {
     @Test
     fun `avklarte fakta for FTRL_KAP2_2_5_ANDRE_LEDD er IKKE_YRKESAKTIV_RELASJON`() {
         val behandling = Behandling.forTest { tema = Behandlingstema.IKKE_YRKESAKTIV }
-        every {behandlingService.hentBehandling(1L)} returns behandling
+        every { behandlingService.hentBehandling(1L) } returns behandling
 
         avklarteFaktaForBestemmelse.hentAvklarteFakta(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_ANDRE_LEDD, 1L
@@ -155,7 +139,7 @@ class AvklarteFaktaForBestemmelseTest {
     @Test
     fun `avklarte fakta for FTRL_KAP2_2_8_FJERDE_LEDD er IKKE_YRKESAKTIV_RELASJON`() {
         val behandling = Behandling.forTest { tema = Behandlingstema.IKKE_YRKESAKTIV }
-        every {behandlingService.hentBehandling(1L)} returns behandling
+        every { behandlingService.hentBehandling(1L) } returns behandling
 
         avklarteFaktaForBestemmelse.hentAvklarteFakta(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FJERDE_LEDD, 1L

@@ -2,11 +2,9 @@ package no.nav.melosys.service
 
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
-import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
+import no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest
+import no.nav.melosys.domain.mottatteopplysninger.soeknadForTest
 
 object MottatteOpplysningerStub {
 
@@ -14,34 +12,14 @@ object MottatteOpplysningerStub {
         selvstendigeForetak: List<String>,
         foretakUtland: List<ForetakUtland>,
         ekstraArbeidsgivere: List<String>
-    ) = MottatteOpplysninger().apply {
+    ): MottatteOpplysninger = mottatteOpplysningerForTest {
         type = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
-        mottatteOpplysningerData = lagMottatteOpplysningerdata(
-            selvstendigeForetak,
-            foretakUtland,
-            ekstraArbeidsgivere
-        )
-    }
-
-    private fun lagMottatteOpplysningerdata(
-        selvstendigeForetak: List<String>,
-        foretakUtland: List<ForetakUtland>,
-        ekstraArbeidsgivere: List<String>
-    ): MottatteOpplysningerData = Soeknad().apply {
-        selvstendigArbeid.selvstendigForetak = selvstendigeForetak.map { orgnr ->
-            SelvstendigForetak().apply {
-                this.orgnr = orgnr
-            }
+        mottatteOpplysningerData = soeknadForTest {
+            selvstendigeForetak.forEach { selvstendigForetak(it) }
+            fysiskeArbeidssted { landkode = "DE" }
+            ekstraArbeidsgivere.forEach { ekstraArbeidsgiver(it) }
+            foretakUtland.forEach { foretak -> foretakUtland(foretak) }
+            landkoder("DE")
         }
-
-        arbeidPaaLand.fysiskeArbeidssteder = listOf(
-            FysiskArbeidssted().apply {
-                adresse.landkode = "DE"
-            }
-        )
-
-        juridiskArbeidsgiverNorge.ekstraArbeidsgivere = ekstraArbeidsgivere
-        this.foretakUtland = foretakUtland
-        soeknadsland.landkoder.add("DE")
     }
 }

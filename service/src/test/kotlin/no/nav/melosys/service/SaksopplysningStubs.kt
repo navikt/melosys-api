@@ -3,21 +3,23 @@ package no.nav.melosys.service
 import no.nav.melosys.domain.OrganisasjonDokumentTestFactory
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.SaksopplysningType
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
+import no.nav.melosys.domain.arbeidsforholdDokument
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
+import no.nav.melosys.domain.saksopplysningForTest
 
 object SaksopplysningStubs {
 
-    fun lagArbeidsforholdOpplysning(registrereArbeidsgiverOrgnumre: List<String>): Saksopplysning {
-        val arbeidsforholdDokument = mock(ArbeidsforholdDokument::class.java)
-        `when`(arbeidsforholdDokument.hentOrgnumre()).thenReturn(HashSet(registrereArbeidsgiverOrgnumre))
-        return Saksopplysning().apply {
-            dokument = arbeidsforholdDokument
+    fun lagArbeidsforholdOpplysning(registrereArbeidsgiverOrgnumre: List<String>): Saksopplysning =
+        saksopplysningForTest {
             type = SaksopplysningType.ARBFORH
+            arbeidsforholdDokument {
+                registrereArbeidsgiverOrgnumre.forEach { orgnr ->
+                    arbeidsforhold {
+                        arbeidsgiverID = orgnr
+                    }
+                }
+            }
         }
-    }
 
     fun lagArbeidsforholdOpplysninger(registrerteArbeidsgivere: List<String>): MutableSet<Saksopplysning> =
         mutableSetOf(lagArbeidsforholdOpplysning(registrerteArbeidsgivere))

@@ -146,7 +146,6 @@ class FerdigstillJournalpostSedTest {
             journalpostId = JOURNALPOST_ID
         })
         medData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, TITTEL)
-        medBehandling(behandling)
     }
 
     companion object {

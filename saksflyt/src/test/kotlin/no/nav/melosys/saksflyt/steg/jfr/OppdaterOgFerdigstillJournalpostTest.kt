@@ -8,8 +8,8 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Avsendertyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -141,7 +141,7 @@ internal class OppdaterOgFerdigstillJournalpostTest {
         medData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
         behandling {
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-            fagsak = Fagsak.forTest()
+            fagsak { }
             type = Behandlingstyper.FØRSTEGANG
         }
     }

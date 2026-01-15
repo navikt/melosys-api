@@ -16,22 +16,17 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.dokument.felles.Land
-import no.nav.melosys.domain.dokument.person.Diskresjonskode
-import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.dokument.personDokumentForTest
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.mottatteopplysninger.anmodningEllerAttest
 import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
+import no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest
+import no.nav.melosys.domain.mottatteopplysninger.soeknad
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
@@ -133,7 +128,7 @@ internal class OppgaveServiceTest {
             .setOppgaveId(JFR_OPPG_ID)
             .setOppgavetype(Oppgavetyper.JFR)
         val oppgaver = setOf(oppgave1.build(), oppgave2.build())
-        val behandling = lagBehandling().apply { oppgaveId = BEH_OPPG_ID }
+        val behandling = lagBehandling(oppgaveId = BEH_OPPG_ID)
         val fagsak = Fagsak.forTest {
             behandlinger(behandling)
         }
@@ -161,7 +156,7 @@ internal class OppgaveServiceTest {
 
     @Test
     fun hentOppgaverMedAnsvarlig_mottatteopplysningerFinnesIkke_mappesKorrekt() {
-        val behandling = lagBehandling().apply { oppgaveId = BEH_OPPG_ID }
+        val behandling = lagBehandling(oppgaveId = BEH_OPPG_ID)
         val fagsak = Fagsak.forTest {
             behandlinger(behandling)
         }
@@ -185,12 +180,12 @@ internal class OppgaveServiceTest {
 
     @Test
     fun hentOppgaverMedAnsvarlig_mottatteopplysningerDataErAnmodningEllerAttest_mappesKorrekt() {
-        val behandling = lagBehandling().apply { oppgaveId = BEH_OPPG_ID }
+        val behandling = lagBehandling(oppgaveId = BEH_OPPG_ID)
         val fagsak = Fagsak.forTest {
             behandlinger(behandling)
         }
-        val mottatteOpplysninger = lagMottatteOpplysninger().apply {
-            mottatteOpplysningerData = AnmodningEllerAttest()
+        val mottatteOpplysninger = mottatteOpplysningerForTest {
+            anmodningEllerAttest { }
         }
         every { oppgaveFasade.finnOppgaverMedAnsvarlig(TILORDNET_RESSURS) } returns setOf(oppgave)
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
@@ -211,18 +206,21 @@ internal class OppgaveServiceTest {
 
     @Test
     fun hentOppgaverMedAnsvarlig_notaterEksisterer_forventSisteNotat() {
-        val behandlingsnotat1 = Behandlingsnotat().apply {
-            registrertDato = Instant.now()
-            tekst = "Test1"
-        }
-        val behandlingsnotat2 = Behandlingsnotat().apply {
-            registrertDato = Instant.now().plusMillis(2000)
-            tekst = "Test2"
-        }
-        val behandling = lagBehandling().apply {
-            oppgaveId = BEH_OPPG_ID
-            behandlingsnotater = mutableSetOf(behandlingsnotat1, behandlingsnotat2)
-        }
+        val notatTidspunkt1 = Instant.now()
+        val notatTidspunkt2 = notatTidspunkt1.plusMillis(2000)
+        val behandling = lagBehandling(
+            oppgaveId = BEH_OPPG_ID,
+            behandlingsnotater = mutableSetOf(
+                Behandlingsnotat().apply {
+                    registrertDato = notatTidspunkt1
+                    tekst = "Test1"
+                },
+                Behandlingsnotat().apply {
+                    registrertDato = notatTidspunkt2
+                    tekst = "Test2"
+                }
+            )
+        )
         val fagsak = Fagsak.forTest {
             behandlinger(behandling)
         }
@@ -239,7 +237,7 @@ internal class OppgaveServiceTest {
             .shouldNotBeNull()
             .shouldBeInstanceOf<BehandlingsoppgaveDto>()
             .apply {
-                sisteNotat.shouldBe(behandlingsnotat2.tekst)
+                sisteNotat.shouldBe("Test2")
             }
     }
 
@@ -421,10 +419,10 @@ internal class OppgaveServiceTest {
 
     @Test
     fun opprettEllerGjenbrukBehandlingsoppgave_oppgaveOpprettElektroniskSøknad_oppgaveBlirOpprettetMedBeskrivelse() {
-        val behandling = lagBehandling().apply {
-            mottatteOpplysninger = MottatteOpplysninger().apply {
-                mottatteOpplysningerData = MottatteOpplysningerData()
+        val behandling = lagBehandling {
+            mottatteOpplysninger {
                 type = Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS
+                soeknad { }
             }
         }
         every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandling
@@ -443,9 +441,7 @@ internal class OppgaveServiceTest {
 
     @Test
     fun opprettEllerGjenbrukBehandlingsoppgave_oppgaveNyVurdering_oppgaveBlirOpprettetMedBeskrivelse() {
-        val behandling = lagBehandling().apply {
-            type = Behandlingstyper.NY_VURDERING
-        }
+        val behandling = lagBehandling { type = Behandlingstyper.NY_VURDERING }
         every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandling
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
@@ -510,13 +506,17 @@ internal class OppgaveServiceTest {
 
     @Test
     fun opprettEllerGjenbrukBehandlingsoppgave_barnHarBeskyttelsesbehov_sensitivOppgaveBlirOpprettet() {
-        val behandling = lagBehandling().apply {
-            mottatteOpplysninger = MottatteOpplysninger().apply {
-                mottatteOpplysningerData = MottatteOpplysningerData().apply {
-                    personOpplysninger.medfolgendeFamilie = listOf(MedfolgendeFamilie.tilBarnFraFnrOgNavn("fnrBarn", null))
+        val behandling = lagBehandling {
+            mottatteOpplysninger {
+                soeknad {
+                    // personOpplysninger.medfolgendeFamilie is set via custom logic
                 }
             }
         }
+        // Add medfolgendeFamilie to the søknad data - this requires a custom approach since it's deeply nested
+        behandling.mottatteOpplysninger?.mottatteOpplysningerData?.personOpplysninger?.medfolgendeFamilie =
+            listOf(MedfolgendeFamilie.tilBarnFraFnrOgNavn("fnrBarn", null))
+
         every { persondataFasade.harStrengtFortroligAdresse(FagsakTestFactory.BRUKER_AKTØR_ID) } returns false
         every { persondataFasade.harStrengtFortroligAdresse("fnrBarn") } returns true
         every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandling
@@ -564,8 +564,7 @@ internal class OppgaveServiceTest {
     fun saksbehandlerErTilordnetOppgaveForSaksnummer_erTilordnet_erSann() {
         val saksnummer = "MEL-test"
         val saksbehandler = "Z12111"
-        val behandling = lagBehandling()
-        behandling.oppgaveId = "1"
+        val behandling = lagBehandling(oppgaveId = "1")
         val oppgave = Oppgave.Builder().setTilordnetRessurs(saksbehandler).setOppgaveId("1").build()
         every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer) } returns listOf(oppgave)
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
@@ -578,8 +577,7 @@ internal class OppgaveServiceTest {
     fun saksbehandlerErTilordnetOppgaveForSaksnummer_erIkkeTilordnet_erIkkeSann() {
         val saksnummer = "MEL-test"
         val saksbehandler = "Z12111"
-        val behandling = lagBehandling()
-        behandling.oppgaveId = "1"
+        val behandling = lagBehandling(oppgaveId = "1")
         val oppgave = Oppgave.Builder().setOppgaveId("1").build()
         every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer) } returns listOf(oppgave)
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
@@ -592,7 +590,6 @@ internal class OppgaveServiceTest {
     fun saksbehandlerErTilordnetOppgaveForSaksnummer_finnesIngenOppgaver_erIkkeSann() {
         val saksnummer = "MEL-test"
         val behandling = lagBehandling()
-        behandling.fagsak.apply { leggTilBehandling(behandling) }
         every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer) } returns emptyList()
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
 
@@ -605,48 +602,39 @@ internal class OppgaveServiceTest {
         private const val JFR_OPPG_ID = "2"
         private const val JFR_OPPG_JPID = "02"
         private const val TILORDNET_RESSURS = "Z123456"
-        private fun lagBehandling(): Behandling {
-            val personOpplysning = Saksopplysning().apply {
+
+        private fun lagBehandling(
+            oppgaveId: String? = null,
+            behandlingsnotater: MutableSet<Behandlingsnotat> = mutableSetOf(),
+            init: BehandlingTestFactory.BehandlingTestBuilder.() -> Unit = {}
+        ): Behandling = Behandling.forTest {
+            id = 1L
+            fagsak { medBruker() }
+            type = Behandlingstyper.FØRSTEGANG
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            registrertDato = Instant.ofEpochMilli(111L)
+            endretDato = Instant.ofEpochMilli(222L)
+            saksopplysning {
                 type = SaksopplysningType.PERSOPL
-                dokument = lagPersonDokument()
+                personDokument {
+                    fnr = "fnr"
+                    sammensattNavn = "sammensattNavn"
+                }
             }
-            val saksopplysninger: MutableSet<Saksopplysning> = HashSet()
-            saksopplysninger.add(personOpplysning)
-
-            val behandling = Behandling.forTest {
-                id = 1L
-                fagsak { medBruker() }
-                type = Behandlingstyper.FØRSTEGANG
-                tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-                registrertDato = Instant.ofEpochMilli(111L)
-                endretDato = Instant.ofEpochMilli(222L)
-                this.saksopplysninger = saksopplysninger
-                dokumentasjonSvarfristDato = Instant.ofEpochMilli(333L)
-                status = Behandlingsstatus.OPPRETTET
-            }
-            return behandling
+            dokumentasjonSvarfristDato = Instant.ofEpochMilli(333L)
+            status = Behandlingsstatus.OPPRETTET
+            init()
+        }.apply {
+            this.oppgaveId = oppgaveId
+            this.behandlingsnotater = behandlingsnotater
         }
 
-        private fun lagPersonDokument(): PersonDokument = PersonDokument().apply {
-            fnr = "fnr"
-            sammensattNavn = "sammensattNavn"
-            diskresjonskode = Diskresjonskode()
-        }
-
-        private fun lagMottatteOpplysninger(): MottatteOpplysninger = MottatteOpplysninger().apply {
-            mottatteOpplysningerData = lagSoeknadDokument()
-        }
-
-        private fun lagSoeknadDokument(): Soeknad {
-            val soeknad = Soeknad()
-            val fysiskArbeidssted = FysiskArbeidssted()
-            fysiskArbeidssted.adresse.landkode = Land(Land.NORGE).kode
-            return soeknad.apply {
-                arbeidPaaLand.fysiskeArbeidssteder = listOf(fysiskArbeidssted)
-                oppholdUtland.oppholdslandkoder = listOf(Landkoder.NO.kode)
-                oppholdUtland.oppholdsPeriode = Periode(LocalDate.now(), LocalDate.of(2018, 12, 12))
-                soeknadsland.landkoder.add(Landkoder.BE.kode)
-
+        private fun lagMottatteOpplysninger() = mottatteOpplysningerForTest {
+            soeknad {
+                landkoder(Landkoder.BE.kode)
+                fysiskeArbeidssted {
+                    landkode = Landkoder.NO.kode
+                }
             }
         }
     }

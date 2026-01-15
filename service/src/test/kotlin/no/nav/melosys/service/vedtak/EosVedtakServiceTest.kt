@@ -9,6 +9,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.anmodningsperiodeForTest
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Institusjon
 import no.nav.melosys.domain.kodeverk.*
@@ -72,7 +73,7 @@ class EosVedtakServiceKtTest {
     private lateinit var behandling: Behandling
 
     private lateinit var vedtakService: EosVedtakService
-    private val behandlingsresultat = Behandlingsresultat()
+    private lateinit var behandlingsresultat: Behandlingsresultat
 
     @BeforeEach
     fun setUp() {
@@ -98,7 +99,7 @@ class EosVedtakServiceKtTest {
         every { behandling.fagsak } returns Fagsak.forTest()
         every { behandling.toString() } returns "Behandling{id=1, fagsak=MEL-test, type=FØRSTEGANG, status=AVSLUTTET}"
 
-        behandlingsresultat.apply {
+        behandlingsresultat = Behandlingsresultat.forTest {
             id = BEHANDLING_ID
             this.behandling = this@EosVedtakServiceKtTest.behandling
         }
@@ -236,12 +237,9 @@ class EosVedtakServiceKtTest {
         mockBehandlingsresultat()
         leggTilLovvalgsperiode()
 
-        val anmodningsperiode = Anmodningsperiode().apply {
-            anmodningsperiodeSvar = AnmodningsperiodeSvar().apply {
-                anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
-            }
-        }
-        behandlingsresultat.anmodningsperioder = mutableSetOf(anmodningsperiode)
+        behandlingsresultat.anmodningsperioder = mutableSetOf(
+            lagAnmodningsperiodeMedSvar(Anmodningsperiodesvartyper.INNVILGELSE)
+        )
 
         vedtakService.fattVedtak(
             behandling, lagRequest(
@@ -382,16 +380,25 @@ class EosVedtakServiceKtTest {
         } returns listOf(Institusjon("AB:CDEF123", "inst", Landkoder.SE.kode))
     }
 
-    private fun leggTilLovvalgsperiode(innvilgelsesResultat: InnvilgelsesResultat? = null) {
-        val lovvalgsperiode = Lovvalgsperiode().apply {
+    private fun leggTilLovvalgsperiode(innvilgelsesResultat: InnvilgelsesResultat = InnvilgelsesResultat.INNVILGET) {
+        behandlingsresultat.lovvalgsperioder = mutableSetOf(lagLovvalgsperiode(innvilgelsesResultat))
+    }
+
+    private fun lagLovvalgsperiode(innvilgelsesResultat: InnvilgelsesResultat = InnvilgelsesResultat.INNVILGET) =
+        Lovvalgsperiode.forTest {
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
             this.innvilgelsesresultat = innvilgelsesResultat
             lovvalgsland = Land_iso2.NO
             medlPeriodeID = 123L
             fom = LocalDate.now()
         }
-        behandlingsresultat.lovvalgsperioder = mutableSetOf(lovvalgsperiode)
-    }
+
+    private fun lagAnmodningsperiodeMedSvar(svarType: Anmodningsperiodesvartyper) =
+        anmodningsperiodeForTest {
+            anmodningsperiodeSvar {
+                anmodningsperiodeSvarType = svarType
+            }
+        }
 
     private fun lagRequest(
         behandlingsresultattype: Behandlingsresultattyper,

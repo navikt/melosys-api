@@ -238,9 +238,10 @@ class ProsessinstansTest {
     fun `hentSaksbehandlerHvisTilordnes skal returnere saksbehandler når skal tilordnes`() {
         val saksbehandler = "Z123456"
         val prosessinstans = Prosessinstans.forTest {
-            medData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
             medData(ProsessDataKey.SKAL_TILORDNES, true)
         }
+        // Use setData with String to avoid JSON serialization (which adds quotes)
+        prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
 
         prosessinstans.hentSaksbehandlerHvisTilordnes() shouldBe saksbehandler
     }
@@ -423,9 +424,9 @@ class ProsessinstansTest {
 
     @Test
     fun `getData skal kaste IllegalStateException ved ugyldig JSON`() {
-        val prosessinstans = Prosessinstans.forTest {
-            medData(ProsessDataKey.EESSI_MELDING, "ugyldig json {")
-        }
+        val prosessinstans = Prosessinstans.forTest()
+        // Use setData with String to store invalid JSON directly (not serialized)
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, "ugyldig json {")
 
         shouldThrow<IllegalStateException> {
             prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding::class.java)
@@ -482,9 +483,9 @@ class ProsessinstansTest {
 
     @Test
     fun `getData med TypeReference skal kaste IllegalStateException ved ugyldig JSON`() {
-        val prosessinstans = Prosessinstans.forTest {
-            medData(ProsessDataKey.OPPHOLDSLAND, "ugyldig json {")
-        }
+        val prosessinstans = Prosessinstans.forTest()
+        // Use setData with String to store invalid JSON directly (not serialized)
+        prosessinstans.setData(ProsessDataKey.OPPHOLDSLAND, "ugyldig json {")
 
         shouldThrow<IllegalStateException> {
             prosessinstans.hentData<List<String>>(ProsessDataKey.OPPHOLDSLAND)

@@ -5,18 +5,18 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.behandling
 import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.lovvalgsperiode
 import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
+import no.nav.melosys.domain.medlemskapsperiode
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -47,21 +47,19 @@ class ManglendeFakturabetalingConsumerTest {
 
     @Test
     fun `opprett prosess for varselbrev om manglende innbetaling når alle lovvalgsperioder er pliktige`() {
-        val behandling = Behandling.forTest {
-            id = 123
-            fagsak {
-                type = Sakstyper.EU_EOS
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
+                id = 123
+                fagsak {
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                }
+            }
+            lovvalgsperiode {
+                medlemskapstype = Medlemskapstyper.PLIKTIG
             }
         }
-
-        val lovvalgsperiode = mockk<Lovvalgsperiode>()
-        every { lovvalgsperiode.erPliktigMedlemskap() } returns true
-
-        val behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = behandling
-            this.lovvalgsperioder = mutableSetOf(lovvalgsperiode)
-        }
+        val behandling = behandlingsresultat.behandling
 
         val melding = ManglendeFakturabetalingMelding(
             fakturaserieReferanse = FAKTURASERIE_REFERANSE,
@@ -93,20 +91,18 @@ class ManglendeFakturabetalingConsumerTest {
     @Test
     fun `opprett prosess for varselbrev om manglende innbetaling når alle medlemskapsperioder er pliktige`() {
         // Given
-        val behandling = Behandling.forTest {
-            id = 123
-            fagsak {
-                type = Sakstyper.FTRL
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
+                id = 123
+                fagsak {
+                    type = Sakstyper.FTRL
+                }
+            }
+            medlemskapsperiode {
+                medlemskapstype = Medlemskapstyper.PLIKTIG
             }
         }
-
-        val medlemskapsperiode = mockk<Medlemskapsperiode>()
-        every { medlemskapsperiode.erPliktigMedlemskap() } returns true
-
-        val behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = behandling
-            this.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
-        }
+        val behandling = behandlingsresultat.behandling
 
         val melding = ManglendeFakturabetalingMelding(
             fakturaserieReferanse = FAKTURASERIE_REFERANSE,
@@ -138,18 +134,17 @@ class ManglendeFakturabetalingConsumerTest {
     @Test
     fun `opprett prosess for varselbrev om manglende innbetaling når det er eøs pensjonist`() {
         // Given
-        val behandling = Behandling.forTest {
-            id = 123
-            tema = Behandlingstema.PENSJONIST
-            fagsak = Fagsak.forTest {
-                type = Sakstyper.EU_EOS
-                tema = Sakstemaer.TRYGDEAVGIFT
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
+                id = 123
+                tema = Behandlingstema.PENSJONIST
+                fagsak {
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                }
             }
         }
-
-        val behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = behandling
-        }
+        val behandling = behandlingsresultat.behandling
 
         val melding = ManglendeFakturabetalingMelding(
             fakturaserieReferanse = FAKTURASERIE_REFERANSE,
@@ -182,16 +177,13 @@ class ManglendeFakturabetalingConsumerTest {
     @Test
     fun `opprett prosess for manglende innbetaling behandling, frivillig medlemskap`() {
         // Given
-        val behandling = Behandling.forTest {
-            id = 123
-        }
-
-        val medlemskapsperiode = mockk<Medlemskapsperiode>()
-        every { medlemskapsperiode.erPliktigMedlemskap() } returns false
-
-        val behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = behandling
-            this.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
+                id = 123
+            }
+            medlemskapsperiode {
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+            }
         }
 
         val melding = ManglendeFakturabetalingMelding(

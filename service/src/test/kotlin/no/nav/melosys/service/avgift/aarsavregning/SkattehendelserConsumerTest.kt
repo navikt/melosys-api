@@ -69,14 +69,14 @@ class SkattehendelserConsumerTest {
 
     @Test
     fun `lag behandling ved skatteoppgjør hendelse når vi har fagsak behandlinger med trygdeavgift`() {
-        val behandling = Behandling.forTest {
-            status = Behandlingsstatus.AVSLUTTET
-        }
         val fagsak = lagFagsak {
-            leggTilBehandling(behandling)
+            behandling {
+                status = Behandlingsstatus.AVSLUTTET
+            }
         }
-        val behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = behandling
+        val behandling = fagsak.behandlinger.first()
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            this.behandling { id = behandling.id }
         }
 
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
@@ -117,17 +117,19 @@ class SkattehendelserConsumerTest {
 
     @Test
     fun `oppdater behandling ved skatteoppgjør med endring i tidligere skatteoppgjør og ikke avsluttet ennå med overlapp`() {
-        val behandling = Behandling.forTest {
-            type = Behandlingstyper.ÅRSAVREGNING
-            status = Behandlingsstatus.UNDER_BEHANDLING
-            fagsak = lagFagsak()
+        val fagsak = lagFagsak {
+            behandling {
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.UNDER_BEHANDLING
+            }
         }
+        val behandling = fagsak.behandlinger.first()
 
-        val behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = behandling
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            this.behandling { id = behandling.id }
             id = 2
             type = Behandlingsresultattyper.IKKE_FASTSATT
-            årsavregning = Årsavregning.forTest {
+            årsavregning {
                 aar = GJELDER_ÅR
             }
         }
@@ -197,17 +199,16 @@ class SkattehendelserConsumerTest {
 
     @Test
     fun `skal ikke opprette automatisk årsavregningoppgave dersom trygdeavgiften bare skal betales til Skatteetaten `() {
-
-        val behandling = Behandling.forTest {
-            status = Behandlingsstatus.AVSLUTTET
-            id = 123
-        }
         val fagsak = lagFagsak {
-            this.leggTilBehandling(behandling)
+            behandling {
+                id = 123
+                status = Behandlingsstatus.AVSLUTTET
+            }
         }
+        val behandling = fagsak.behandlinger.first()
 
-        val behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = behandling
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            this.behandling { id = behandling.id }
             id = 123
             type = Behandlingsresultattyper.FERDIGBEHANDLET
         }
@@ -243,12 +244,11 @@ class SkattehendelserConsumerTest {
     }
 
 
-    private fun lagFagsak(block: Fagsak.() -> Unit = {}) = Fagsak.forTest {
+    private fun lagFagsak(init: FagsakTestFactory.Builder.() -> Unit = {}) = Fagsak.forTest {
         type = Sakstyper.EU_EOS
         tema = Sakstemaer.MEDLEMSKAP_LOVVALG
         status(Saksstatuser.OPPRETTET)
-    }.apply {
-        block()
+        init()
     }
 
     companion object {

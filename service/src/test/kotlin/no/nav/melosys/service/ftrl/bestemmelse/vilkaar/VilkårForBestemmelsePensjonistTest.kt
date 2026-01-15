@@ -8,12 +8,11 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.Vilkaar.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest
 import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelseYrkesaktiv.Companion.toStringList
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -22,22 +21,17 @@ class VilkårForBestemmelsePensjonistTest {
     @MockK
     private lateinit var mottatteOpplysningerService: MottatteOpplysningerService
 
-    private lateinit var vilkårForBestemmelse: VilkårForBestemmelsePensjonist
-
-    @BeforeEach
-    fun setUp() {
-        vilkårForBestemmelse = VilkårForBestemmelsePensjonist(mottatteOpplysningerService)
-    }
+    private val vilkårForBestemmelse by lazy { VilkårForBestemmelsePensjonist(mottatteOpplysningerService) }
 
     @Test
     fun `vilkår for FTRL_KAP2_2_1, ett eller flere land utenfor Norge`() {
-        val mottatteOpplysninger =
-            MottatteOpplysninger().apply {
-                mottatteOpplysningerData =
-                    SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(
-                        Land_iso2.NO.toString(), "AB", "PR") } }
+        val mottatteOpplysninger = mottatteOpplysningerForTest {
+            // SøknadNorgeEllerUtenforEØS har ikke egen DSL - bruker .apply
+            mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
+                soeknadsland = Soeknadsland(listOf(Land_iso2.NO.toString(), "AB", "PR"), false)
             }
-        every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
+        }
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(1L) } returns mottatteOpplysninger
 
 
         val vilkår = vilkårForBestemmelse.hentVilkår(
@@ -62,13 +56,13 @@ class VilkårForBestemmelsePensjonistTest {
 
     @Test
     fun `vilkår for FTRL_KAP2_2_1, kun Norge`() {
-        val mottatteOpplysninger =
-            MottatteOpplysninger().apply {
-                mottatteOpplysningerData =
-                    SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(
-                        Land_iso2.NO.toString()) } }
+        val mottatteOpplysninger = mottatteOpplysningerForTest {
+            // SøknadNorgeEllerUtenforEØS har ikke egen DSL - bruker .apply
+            mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
+                soeknadsland = Soeknadsland(listOf(Land_iso2.NO.toString()), false)
             }
-        every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
+        }
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(1L) } returns mottatteOpplysninger
 
 
         val vilkår = vilkårForBestemmelse.hentVilkår(

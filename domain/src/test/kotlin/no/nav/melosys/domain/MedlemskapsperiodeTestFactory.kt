@@ -23,12 +23,12 @@ object MedlemskapsperiodeTestFactory {
     @MelosysTestDsl
     class Builder {
         var id: Long? = null
-        var fom: LocalDate = FOM
-        var tom: LocalDate = TOM
+        var fom: LocalDate? = FOM
+        var tom: LocalDate? = TOM
         var innvilgelsesresultat: InnvilgelsesResultat = INNVILGELSESRESULTAT
         var medlemskapstype: Medlemskapstyper = MEDLEMSKAPSTYPE
         var trygdedekning: Trygdedekninger = TRYGDEDEKNING
-        var bestemmelse: Bestemmelse = BESTEMMELSE
+        var bestemmelse: Bestemmelse? = BESTEMMELSE
         var medlPeriodeID: Long? = null
 
         val trygdeavgiftsperioder = mutableListOf<Trygdeavgiftsperiode>()
@@ -55,7 +55,7 @@ object MedlemskapsperiodeTestFactory {
             this.bestemmelse = this@Builder.bestemmelse
             this.medlPeriodeID = this@Builder.medlPeriodeID
 
-            // Legg til trygdeavgiftsperioder
+            // Bruk addTrygdeavgiftsperiode for å sette grunnlagMedlemskapsperiode back-referanse
             this@Builder.trygdeavgiftsperioder.forEach { periode ->
                 this.addTrygdeavgiftsperiode(periode)
             }

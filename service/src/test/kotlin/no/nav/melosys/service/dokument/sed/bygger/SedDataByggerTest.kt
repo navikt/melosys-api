@@ -81,61 +81,19 @@ class SedDataByggerTest {
     private lateinit var saksbehandlingRegler: SaksbehandlingRegler
 
     private lateinit var dataBygger: SedDataBygger
-    private lateinit var behandling: Behandling
-    private lateinit var behandlingsresultat: Behandlingsresultat
-    private lateinit var lovvalgsperiode: Lovvalgsperiode
-    private lateinit var anmodningsperiode: Anmodningsperiode
-    private lateinit var utpekingsperiode: Utpekingsperiode
     private val fakeUnleash = FakeUnleash()
 
     @BeforeEach
     fun setup() {
-        behandling = DataByggerStubs.hentBehandlingStub()
         every { organisasjonOppslagService.hentOrganisasjoner(any()) } returns DataByggerStubs.hentOrganisasjonDokumentSetStub()
 
-        lovvalgsperiode = Lovvalgsperiode().apply {
-            lovvalgsland = Land_iso2.NO
+        val tidligereLovvalgsperiode = lovvalgsperiodeForTest {
             fom = LocalDate.now()
-            tom = LocalDate.now().plusYears(1L)
-            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+            tom = LocalDate.now().plusMonths(2L)
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2
         }
+        every { lovvalgsperiodeService.hentTidligereLovvalgsperioder(any()) } returns listOf(tidligereLovvalgsperiode)
 
-        behandlingsresultat = Behandlingsresultat().apply {
-            id = 0L
-        }
-
-        val vilkaarsresultat = Vilkaarsresultat()
-        val vilkaarBegrunnelse = VilkaarBegrunnelse().apply {
-            kode = "SOEKT_FOR_SENT"
-        }
-        vilkaarsresultat.begrunnelser = hashSetOf(vilkaarBegrunnelse)
-        behandlingsresultat.vilkaarsresultater = mutableSetOf(vilkaarsresultat)
-        lovvalgsperiode.behandlingsresultat = behandlingsresultat
-
-        anmodningsperiode = Anmodningsperiode(
-            LocalDate.now(),
-            LocalDate.now().plusYears(2),
-            Land_iso2.NO,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
-            null,
-            Land_iso2.SE,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A,
-            Trygdedekninger.FULL_DEKNING_EOSFO
-        )
-        behandlingsresultat.anmodningsperioder = mutableSetOf(anmodningsperiode)
-        behandlingsresultat.lovvalgsperioder = mutableSetOf(lovvalgsperiode)
-
-        utpekingsperiode = Utpekingsperiode(
-            LocalDate.now(),
-            LocalDate.now().plusYears(3),
-            Land_iso2.DK,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4
-        )
-        behandlingsresultat.utpekingsperioder.add(utpekingsperiode)
-
-        behandling = DataByggerStubs.hentBehandlingStub()
-        behandlingsresultat.behandling = behandling
         dataBygger = SedDataBygger(
             behandlingsresultatService,
             landvelgerService,
@@ -143,42 +101,84 @@ class SedDataByggerTest {
             saksbehandlingRegler,
             fakeUnleash
         )
+    }
 
-        val tidligereLovvalgsperiode = Lovvalgsperiode().apply {
-            fom = LocalDate.now()
-            tom = LocalDate.now().plusMonths(2L)
-            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2
+    /**
+     * Creates a standard test behandlingsresultat with lovvalgsperiode, anmodningsperiode, and utpekingsperiode.
+     * Each test gets its own fresh copy.
+     */
+    private fun lagStandardBehandlingsresultat(
+        behandling: Behandling = DataByggerStubs.hentBehandlingStub(),
+        lovvalgsperiodeInit: LovvalgsperiodeTestFactory.Builder.() -> Unit = {},
+        anmodningsperiodeInit: AnmodningsperiodeTestFactory.Builder.() -> Unit = {},
+        utpekingsperiodeInit: UtpekingsperiodeTestFactory.Builder.() -> Unit = {}
+    ): Behandlingsresultat = Behandlingsresultat.forTest {
+        id = 0L
+        this.behandling = behandling
+
+        vilkaarsresultat {
+            begrunnelse("SOEKT_FOR_SENT")
         }
-        every { lovvalgsperiodeService.hentTidligereLovvalgsperioder(any()) } returns listOf(tidligereLovvalgsperiode)
+
+        lovvalgsperiode {
+            lovvalgsland = Land_iso2.NO
+            fom = LocalDate.now()
+            tom = LocalDate.now().plusYears(1L)
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+            lovvalgsperiodeInit()
+        }
+
+        anmodningsperiode {
+            fom = LocalDate.now()
+            tom = LocalDate.now().plusYears(2)
+            lovvalgsland = Land_iso2.NO
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
+            unntakFraLovvalgsland = Land_iso2.SE
+            unntakFraBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
+            dekning = Trygdedekninger.FULL_DEKNING_EOSFO
+            anmodningsperiodeInit()
+        }
+
+        utpekingsperiode {
+            fom = LocalDate.now()
+            tom = LocalDate.now().plusYears(3)
+            lovvalgsland = Land_iso2.DK
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3
+            tilleggsbestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4
+            utpekingsperiodeInit()
+        }
     }
 
     private fun lagSedData(
         periodeType: PeriodeType = PeriodeType.LOVVALGSPERIODE,
-        behandlingsresultat: Behandlingsresultat = this.behandlingsresultat,
+        behandlingsresultat: Behandlingsresultat = lagStandardBehandlingsresultat(),
         customizePersonDokument: (PersonDokument.() -> Unit)? = null
     ): SedDataDto {
         val grunnlag = if (customizePersonDokument != null) {
-            lagGrunnlagMedSøknad(customizePersonDokument)
+            lagGrunnlagMedSøknad(behandlingsresultat.behandling!!, customizePersonDokument)
         } else {
-            lagGrunnlagMedSøknad()
+            lagGrunnlagMedSøknad(behandlingsresultat.behandling!!)
         }
         return dataBygger.lag(grunnlag, behandlingsresultat, periodeType)
     }
 
     private fun lagSedDataUtkast(
         periodeType: PeriodeType = PeriodeType.LOVVALGSPERIODE,
-        behandlingsresultat: Behandlingsresultat = this.behandlingsresultat,
+        behandlingsresultat: Behandlingsresultat = lagStandardBehandlingsresultat(),
         customizePersonDokument: (PersonDokument.() -> Unit)? = null
     ): SedDataDto {
         val grunnlag = if (customizePersonDokument != null) {
-            lagGrunnlagMedSøknad(customizePersonDokument)
+            lagGrunnlagMedSøknad(behandlingsresultat.behandling!!, customizePersonDokument)
         } else {
-            lagGrunnlagMedSøknad()
+            lagGrunnlagMedSøknad(behandlingsresultat.behandling!!)
         }
         return dataBygger.lagUtkast(grunnlag, behandlingsresultat, periodeType)
     }
 
-    private fun lagGrunnlagMedSøknad(persondata: Persondata = DataByggerStubs.lagPersonDokument()): SedDataGrunnlagMedSoknad {
+    private fun lagGrunnlagMedSøknad(
+        behandling: Behandling = DataByggerStubs.hentBehandlingStub(),
+        persondata: Persondata = DataByggerStubs.lagPersonDokument()
+    ): SedDataGrunnlagMedSoknad {
         val avklarteVirksomheterService = AvklarteVirksomheterService(
             avklartefaktaService,
             organisasjonOppslagService,
@@ -195,13 +195,17 @@ class SedDataByggerTest {
     }
 
     private fun lagGrunnlagMedSøknad(
+        behandling: Behandling,
         customizePersonDokument: PersonDokument.() -> Unit
     ): SedDataGrunnlagMedSoknad {
         val personDokument = DataByggerStubs.lagPersonDokument().apply(customizePersonDokument)
-        return lagGrunnlagMedSøknad(personDokument)
+        return lagGrunnlagMedSøknad(behandling, personDokument)
     }
 
-    private fun lagGrunnlagUtenSøknad(persondata: Persondata = DataByggerStubs.lagPersonDokument()): SedDataGrunnlagUtenSoknad {
+    private fun lagGrunnlagUtenSøknad(
+        behandling: Behandling = DataByggerStubs.hentBehandlingStub(),
+        persondata: Persondata = DataByggerStubs.lagPersonDokument()
+    ): SedDataGrunnlagUtenSoknad {
         return SedDataGrunnlagUtenSoknad(behandling, kodeverkService, persondata)
     }
 
@@ -232,7 +236,10 @@ class SedDataByggerTest {
 
     @Test
     fun `lag medlemsperiodeTypeLovvalgsperiodeMedSøknad forventLovvalgsperiodeBrukt`() {
-        val sedData = lagSedData()
+        val behandlingsresultat = lagStandardBehandlingsresultat()
+        val lovvalgsperiode = behandlingsresultat.lovvalgsperioder.first()
+
+        val sedData = lagSedData(behandlingsresultat = behandlingsresultat)
 
         sedData.shouldNotBeNull().run {
             arbeidsgivendeVirksomheter.shouldNotBeEmpty()
@@ -255,13 +262,15 @@ class SedDataByggerTest {
 
     @Test
     fun `lag storbritanniaAnmodningsperiode forventKorrektMapping`() {
-        anmodningsperiode.run {
-            bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
-            unntakFraBestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4
-            tilleggsbestemmelse = Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1
-        }
+        val behandlingsresultat = lagStandardBehandlingsresultat(
+            anmodningsperiodeInit = {
+                bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
+                unntakFraBestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4
+                tilleggsbestemmelse = Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1
+            }
+        )
 
-        val sedData = lagSedData(PeriodeType.ANMODNINGSPERIODE)
+        val sedData = lagSedData(PeriodeType.ANMODNINGSPERIODE, behandlingsresultat)
 
         sedData.shouldNotBeNull().run {
             lovvalgsperioder.shouldNotBeEmpty().first().run {
@@ -274,7 +283,10 @@ class SedDataByggerTest {
 
     @Test
     fun `lag medlemsperiodeTypeAnmodningsperiodeMedSøknad forventAnmodningsperiode`() {
-        val sedData = lagSedData(PeriodeType.ANMODNINGSPERIODE)
+        val behandlingsresultat = lagStandardBehandlingsresultat()
+        val anmodningsperiode = behandlingsresultat.anmodningsperioder.first()
+
+        val sedData = lagSedData(PeriodeType.ANMODNINGSPERIODE, behandlingsresultat)
 
         sedData.shouldNotBeNull().run {
             lovvalgsperioder.shouldNotBeEmpty().first().run {
@@ -287,7 +299,10 @@ class SedDataByggerTest {
 
     @Test
     fun `lag medlemsperiodeTypeUtpekingsperiodeMedSøknad forventUtpekingsperiode`() {
-        val sedData = lagSedData(PeriodeType.UTPEKINGSPERIODE)
+        val behandlingsresultat = lagStandardBehandlingsresultat()
+        val utpekingsperiode = behandlingsresultat.utpekingsperioder.first()
+
+        val sedData = lagSedData(PeriodeType.UTPEKINGSPERIODE, behandlingsresultat)
 
         sedData.shouldNotBeNull().run {
             lovvalgsperioder.shouldNotBeEmpty().first().run {
@@ -300,7 +315,11 @@ class SedDataByggerTest {
 
     @Test
     fun `lag medlemsperiodeTypeAnmodningsperiodeUtenSøknad forventAnmodningsperiode`() {
-        val sedData = dataBygger.lag(lagGrunnlagUtenSøknad(), behandlingsresultat, PeriodeType.ANMODNINGSPERIODE)
+        val behandling = DataByggerStubs.hentBehandlingStub()
+        val behandlingsresultat = lagStandardBehandlingsresultat(behandling)
+        val anmodningsperiode = behandlingsresultat.anmodningsperioder.first()
+
+        val sedData = dataBygger.lag(lagGrunnlagUtenSøknad(behandling), behandlingsresultat, PeriodeType.ANMODNINGSPERIODE)
 
         sedData.shouldNotBeNull().run {
             lovvalgsperioder.shouldNotBeEmpty().first().run {
@@ -320,7 +339,8 @@ class SedDataByggerTest {
 
     @Test
     fun `lag bostedsadresseUtenGateadresse gatenavnBlirNA`() {
-        val sedData = lagSedData {
+        val behandlingsresultat = lagStandardBehandlingsresultat()
+        val sedData = lagSedData(behandlingsresultat = behandlingsresultat) {
             this.bostedsadresse = Bostedsadresse(
                 land = Land(Land.SVERIGE)
             )
@@ -332,7 +352,8 @@ class SedDataByggerTest {
 
     @Test
     fun `lag bostedsadresseUtenGatenavn gatenavnBlirNA`() {
-        val sedData = lagSedData {
+        val behandlingsresultat = lagStandardBehandlingsresultat()
+        val sedData = lagSedData(behandlingsresultat = behandlingsresultat) {
             bostedsadresse = Bostedsadresse(
                 gateadresse = Gateadresse(
                     gatenavn = "",
@@ -348,7 +369,8 @@ class SedDataByggerTest {
 
     @Test
     fun `lag bostedsadresseMedBlanktGatenavn gatenavnBlirNA`() {
-        val sedData = lagSedData {
+        val behandlingsresultat = lagStandardBehandlingsresultat()
+        val sedData = lagSedData(behandlingsresultat = behandlingsresultat) {
             bostedsadresse = Bostedsadresse(
                 gateadresse = Gateadresse(
                     gatenavn = " ",
@@ -364,7 +386,8 @@ class SedDataByggerTest {
 
     @Test
     fun `lag bostedsadresseMedGatenavnOgHusnummer rettFormatertGateadresse`() {
-        val sedData = lagSedData {
+        val behandlingsresultat = lagStandardBehandlingsresultat()
+        val sedData = lagSedData(behandlingsresultat = behandlingsresultat) {
             this.bostedsadresse = Bostedsadresse(
                 gateadresse = Gateadresse(
                     gatenavn = "gate",
@@ -380,8 +403,10 @@ class SedDataByggerTest {
 
     @Test
     fun `lag medKontaktadresse kontadresseMappes`() {
+        val behandling = DataByggerStubs.hentBehandlingStub()
+        val behandlingsresultat = lagStandardBehandlingsresultat(behandling)
         val persondataMedKontakadresse = PersonopplysningerObjectFactory.lagPersonopplysninger()
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(persondataMedKontakadresse)
+        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(behandling, persondataMedKontakadresse)
 
         val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
@@ -391,8 +416,10 @@ class SedDataByggerTest {
 
     @Test
     fun `lag utenKontaktadresse kontadresseErNull`() {
+        val behandling = DataByggerStubs.hentBehandlingStub()
+        val behandlingsresultat = lagStandardBehandlingsresultat(behandling)
         val persondata = PersonopplysningerObjectFactory.lagPersonopplysningerUtenKontaktadresse()
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(persondata)
+        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(behandling, persondata)
 
         val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
@@ -401,8 +428,10 @@ class SedDataByggerTest {
 
     @Test
     fun `lag medOppholdsadresse oppholdsadresseMappes`() {
+        val behandling = DataByggerStubs.hentBehandlingStub()
+        val behandlingsresultat = lagStandardBehandlingsresultat(behandling)
         val persondataMedOppholdsadresse = PersonopplysningerObjectFactory.lagPersonopplysninger()
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(persondataMedOppholdsadresse)
+        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(behandling, persondataMedOppholdsadresse)
 
         val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
@@ -412,8 +441,10 @@ class SedDataByggerTest {
 
     @Test
     fun `lag utenOppholdsadresse oppholdsadresseErNull`() {
+        val behandling = DataByggerStubs.hentBehandlingStub()
+        val behandlingsresultat = lagStandardBehandlingsresultat(behandling)
         val persondata = PersonopplysningerObjectFactory.lagPersonopplysningerUtenOppholdsadresse()
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(persondata)
+        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(behandling, persondata)
 
         val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
@@ -439,7 +470,8 @@ class SedDataByggerTest {
 
     @Test
     fun `lag brukerErKode6 forventHarSensitiveOpplysninger`() {
-        val sedData = lagSedDataUtkast {
+        val behandlingsresultat = lagStandardBehandlingsresultat()
+        val sedData = lagSedDataUtkast(behandlingsresultat = behandlingsresultat) {
             diskresjonskode = Diskresjonskode().apply {
                 kode = "SPSF"
             }
@@ -451,7 +483,8 @@ class SedDataByggerTest {
 
     @Test
     fun `lag brukerHarKode7 forventHarIkkeSensitiveOpplysninger`() {
-        val sedData = lagSedDataUtkast {
+        val behandlingsresultat = lagStandardBehandlingsresultat()
+        val sedData = lagSedDataUtkast(behandlingsresultat = behandlingsresultat) {
             diskresjonskode = Diskresjonskode().apply {
                 kode = "SPSO"
             }
@@ -463,7 +496,8 @@ class SedDataByggerTest {
 
     @Test
     fun `lag brukerHarIngenDiskresjonskode forventHarIkkeSensitiveOpplysninger`() {
-        val sedData = lagSedDataUtkast {
+        val behandlingsresultat = lagStandardBehandlingsresultat()
+        val sedData = lagSedDataUtkast(behandlingsresultat = behandlingsresultat) {
             diskresjonskode = null
         }
 
@@ -491,7 +525,10 @@ class SedDataByggerTest {
 
     @Test
     fun `lagUtkast medlemsperiodeTypeIngenUtenSøknad utenLovvalgsperioder`() {
-        val sedData = dataBygger.lagUtkast(lagGrunnlagUtenSøknad(), behandlingsresultat, PeriodeType.INGEN)
+        val behandling = DataByggerStubs.hentBehandlingStub()
+        val behandlingsresultat = lagStandardBehandlingsresultat(behandling)
+
+        val sedData = dataBygger.lagUtkast(lagGrunnlagUtenSøknad(behandling), behandlingsresultat, PeriodeType.INGEN)
 
         sedData.run {
             bruker.shouldNotBeNull()
@@ -502,7 +539,10 @@ class SedDataByggerTest {
 
     @Test
     fun `lagUtkast medlemsperiodeTypeLovvalgsperiodeMedSøknad medLovvalgsperioder`() {
-        val sedData = lagSedDataUtkast()
+        val behandlingsresultat = lagStandardBehandlingsresultat()
+        val lovvalgsperiode = behandlingsresultat.lovvalgsperioder.first()
+
+        val sedData = lagSedDataUtkast(behandlingsresultat = behandlingsresultat)
 
         lagUtkastAssertions(sedData, true)
         sedData.run {
@@ -530,8 +570,10 @@ class SedDataByggerTest {
             hjemmebaseNavn = "hjemmebaseNavn",
             hjemmebaseLand = "GB"
         )
+        val behandling = DataByggerStubs.hentBehandlingStub()
+        val behandlingsresultat = lagStandardBehandlingsresultat(behandling)
 
-        val dataGrunnlag = lagGrunnlagMedSøknad()
+        val dataGrunnlag = lagGrunnlagMedSøknad(behandling)
         dataGrunnlag.mottatteOpplysningerData.luftfartBaser = listOf(luftfartBase)
         val sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
@@ -548,7 +590,9 @@ class SedDataByggerTest {
 
     @Test
     fun `lagUtkast medUtenlandskSelvstendigForetak forventAtUtenlandskSelvstendigForetakIkkeSendesSomArbeidsgivendeVirksomhet`() {
-        val dataGrunnlag = lagGrunnlagMedSøknad().apply {
+        val behandling = DataByggerStubs.hentBehandlingStub()
+        val behandlingsresultat = lagStandardBehandlingsresultat(behandling)
+        val dataGrunnlag = lagGrunnlagMedSøknad(behandling).apply {
             mottatteOpplysningerData.foretakUtland = listOf(ForetakUtland().apply {
                 adresse = StrukturertAdresse()
                 adresse.landkode = Landkoder.DE.kode
@@ -570,27 +614,29 @@ class SedDataByggerTest {
 
     @Test
     fun `lagVedtakDto ikkeOpprinneligVedtakMedDagensDato setterDatoOgVariablerISed`() {
-        val behandlingsresultatMedVedtak = Behandlingsresultat().apply {
-            id = 1L
-        }
-        val vedtakMetadata = VedtakMetadata().apply {
-            vedtaksdato = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()
-        }
-        behandlingsresultatMedVedtak.vedtakMetadata = vedtakMetadata
-
+        val behandling = DataByggerStubs.hentBehandlingStub()
         val avsluttetBehandling = DataByggerStubs.hentBehandlingStub().apply {
             status = Behandlingsstatus.AVSLUTTET
             id = 2L
         }
-        behandlingsresultatMedVedtak.behandling = avsluttetBehandling
 
+        val behandlingsresultatMedVedtak = Behandlingsresultat.forTest {
+            id = 1L
+            this.behandling = avsluttetBehandling
+            vedtakMetadata {
+                vedtaksdato = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()
+            }
+        }
+
+        // Link both behandlinger to the same fagsak
         behandling.fagsak.leggTilBehandling(behandling)
         behandling.fagsak.leggTilBehandling(avsluttetBehandling)
-        behandlingsresultat.behandling = behandling
+
+        val behandlingsresultat = lagStandardBehandlingsresultat(behandling)
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultatMedVedtak
 
-        val sedDataDto = lagSedData()
+        val sedDataDto = lagSedData(behandlingsresultat = behandlingsresultat)
         sedDataDto.shouldNotBeNull().vedtakDto.shouldNotBeNull().run {
             erFørstegangsvedtak shouldBe false
             datoForrigeVedtak shouldBe LocalDate.now()
@@ -599,25 +645,28 @@ class SedDataByggerTest {
 
     @Test
     fun `lagVedtakDto midlertidigLovvalgsbestemt settesSomIkkeFørstegangsvedtak`() {
-        val behandlingsresultatMedVedtak = Behandlingsresultat()
-        val vedtakMetadata = VedtakMetadata().apply {
-            vedtaksdato = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()
-        }
-        behandlingsresultatMedVedtak.vedtakMetadata = vedtakMetadata
-
+        val behandling = DataByggerStubs.hentBehandlingStub()
         val avsluttetBehandling = DataByggerStubs.hentBehandlingStub().apply {
             status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
             id = 2L
         }
-        behandlingsresultatMedVedtak.behandling = avsluttetBehandling
 
+        val behandlingsresultatMedVedtak = Behandlingsresultat.forTest {
+            this.behandling = avsluttetBehandling
+            vedtakMetadata {
+                vedtaksdato = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()
+            }
+        }
+
+        // Link both behandlinger to the same fagsak
         behandling.fagsak.leggTilBehandling(behandling)
         behandling.fagsak.leggTilBehandling(avsluttetBehandling)
-        behandlingsresultat.behandling = behandling
+
+        val behandlingsresultat = lagStandardBehandlingsresultat(behandling)
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultatMedVedtak
 
-        val sedDataDto = lagSedData()
+        val sedDataDto = lagSedData(behandlingsresultat = behandlingsresultat)
         sedDataDto.shouldNotBeNull().vedtakDto.shouldNotBeNull().run {
             erFørstegangsvedtak shouldBe false
             datoForrigeVedtak shouldBe LocalDate.now()
@@ -626,6 +675,7 @@ class SedDataByggerTest {
 
     @Test
     fun `lag arbeidsstedManglerLandkode kasterFeil`() {
+        val behandlingsresultat = lagStandardBehandlingsresultat()
         val sedDataGrunnlagMedSoknad = lagGrunnlagMedManglendeAdressefelter(true, false, false)
         shouldThrow<FunksjonellException> {
             dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
@@ -635,6 +685,7 @@ class SedDataByggerTest {
     @Test
     fun `lag arbeidsgivendeVirksomhetManglerLandkode kasterFeil`() {
         every { avklartefaktaService.hentAvklarteOrgnrOgUuid(any()) } returns setOf("uuid")
+        val behandlingsresultat = lagStandardBehandlingsresultat()
         val sedDataGrunnlagMedSoknad = lagGrunnlagMedManglendeAdressefelter(false, true, false)
         shouldThrow<FunksjonellException> {
             dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
@@ -644,6 +695,7 @@ class SedDataByggerTest {
     @Test
     fun `lag selvstendigVirksomhetManglerLandkode kasterFeil`() {
         every { avklartefaktaService.hentAvklarteOrgnrOgUuid(any()) } returns setOf("uuid")
+        val behandlingsresultat = lagStandardBehandlingsresultat()
         val sedDataGrunnlagMedSoknad = lagGrunnlagMedManglendeAdressefelter(false, false, true)
         shouldThrow<FunksjonellException> {
             dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
@@ -652,6 +704,7 @@ class SedDataByggerTest {
 
     @Test
     fun `lagArbeidssted manglerObligatoriskeFelter blirUnknown`() {
+        val behandlingsresultat = lagStandardBehandlingsresultat()
         val sedData = dataBygger.lag(
             lagGrunnlagMedManglendeAdressefelter(false, false, false),
             behandlingsresultat,
@@ -664,6 +717,7 @@ class SedDataByggerTest {
     @Test
     fun `lagVirksomhet manglerObligatoriskeFelter blirUnknown`() {
         every { avklartefaktaService.hentAvklarteOrgnrOgUuid(any()) } returns setOf("uuid")
+        val behandlingsresultat = lagStandardBehandlingsresultat()
         val sedData = dataBygger.lag(
             lagGrunnlagMedManglendeAdressefelter(false, false, false),
             behandlingsresultat,
@@ -683,12 +737,15 @@ class SedDataByggerTest {
 
     @Test
     fun `lag harFlytErEøsErIkkeSed søknadsperiodeBlirSatt`() {
-        val fagsak = Fagsak.forTest()
-        behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-        behandling.type = Behandlingstyper.FØRSTEGANG
-        behandling.fagsak = fagsak
+        val behandling = DataByggerStubs.hentBehandlingStub().apply {
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            type = Behandlingstyper.FØRSTEGANG
+            fagsak = Fagsak.forTest()
+        }
+        val behandlingsresultat = lagStandardBehandlingsresultat(behandling)
         val søknad = behandling.mottatteOpplysninger.shouldNotBeNull().mottatteOpplysningerData
-        val sedData = lagSedData()
+
+        val sedData = lagSedData(behandlingsresultat = behandlingsresultat)
 
         sedData.søknadsperiode.shouldNotBeNull().run {
             fom shouldBe søknad.periode.fom
@@ -698,45 +755,55 @@ class SedDataByggerTest {
 
     @Test
     fun `lag erIkkeEuEøs søknadsperiodeBlirIkkeSatt`() {
-        val fagsak = Fagsak.forTest {
-            type = Sakstyper.TRYGDEAVTALE
+        val behandling = DataByggerStubs.hentBehandlingStub().apply {
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            type = Behandlingstyper.FØRSTEGANG
+            fagsak = Fagsak.forTest {
+                type = Sakstyper.TRYGDEAVTALE
+            }
         }
-        behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-        behandling.type = Behandlingstyper.FØRSTEGANG
-        behandling.fagsak = fagsak
-        val sedData = lagSedData()
+        val behandlingsresultat = lagStandardBehandlingsresultat(behandling)
+
+        val sedData = lagSedData(behandlingsresultat = behandlingsresultat)
 
         sedData.søknadsperiode.shouldBeNull()
     }
 
     @Test
     fun `lag erSed søknadsperiodeBlirIkkeSatt`() {
-        val fagsak = Fagsak.forTest()
-        behandling.tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
-        behandling.type = Behandlingstyper.FØRSTEGANG
-        behandling.fagsak = fagsak
-        val sedData = lagSedData()
+        val behandling = DataByggerStubs.hentBehandlingStub().apply {
+            tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+            type = Behandlingstyper.FØRSTEGANG
+            fagsak = Fagsak.forTest()
+        }
+        val behandlingsresultat = lagStandardBehandlingsresultat(behandling)
+
+        val sedData = lagSedData(behandlingsresultat = behandlingsresultat)
 
         sedData.søknadsperiode.shouldBeNull()
     }
 
     @Test
     fun `lag harIkkeFlyt søknadsperiodeBlirIkkeSatt`() {
-        val fagsak = Fagsak.forTest()
-        behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-        behandling.type = Behandlingstyper.HENVENDELSE
-        behandling.fagsak = fagsak
+        val behandling = DataByggerStubs.hentBehandlingStub().apply {
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            type = Behandlingstyper.HENVENDELSE
+            fagsak = Fagsak.forTest()
+        }
+        val behandlingsresultat = lagStandardBehandlingsresultat(behandling)
         every { saksbehandlingRegler.harIngenFlyt(any()) } returns true
 
-        val sedData = lagSedData()
+        val sedData = lagSedData(behandlingsresultat = behandlingsresultat)
 
         sedData.søknadsperiode.shouldBeNull()
     }
 
     @Test
     fun `lag medFlereStatsborgerskap alleStatsborgerSkapMappes`() {
+        val behandling = DataByggerStubs.hentBehandlingStub()
+        val behandlingsresultat = lagStandardBehandlingsresultat(behandling)
         val personDataFraPDL = PersonopplysningerObjectFactory.lagPersonopplysninger()
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(personDataFraPDL)
+        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(behandling, personDataFraPDL)
 
         val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 

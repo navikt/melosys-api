@@ -7,6 +7,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Anmodningsperiode
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.anmodningsperiode
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Saksstatuser
@@ -52,8 +53,6 @@ class AdminFjernmottakerSedRuterTest {
 
     private fun generateBehandlingID() = System.nanoTime()
     private val arkivsakID = 123321L
-    private val prosessinstans = Prosessinstans.forTest()
-    private val melosysEessiMelding = MelosysEessiMelding()
 
     @BeforeEach
     fun setup() {
@@ -65,34 +64,45 @@ class AdminFjernmottakerSedRuterTest {
             medlPeriodeService,
             behandlingService
         )
-
-        melosysEessiMelding.apply {
-            aktoerId = "12312412"
-            rinaSaksnummer = "143141"
-            journalpostId = "test-journalpost-id"
-        }
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
     }
+
+    private fun lagMelosysEessiMelding(x006NavErFjernet: Boolean = false) = MelosysEessiMelding(
+        aktoerId = "12312412",
+        rinaSaksnummer = "143141",
+        journalpostId = "test-journalpost-id",
+        x006NavErFjernet = x006NavErFjernet
+    )
+
+    private fun lagProsessinstans(melding: MelosysEessiMelding) =
+        Prosessinstans.forTest { medData(ProsessDataKey.EESSI_MELDING, melding) }
 
     @Test
     fun `rutSedTilBehandling arkivsaksIdErNull opprettJournalFøringsOppgave`() {
+        val melding = lagMelosysEessiMelding()
+        val prosessinstans = lagProsessinstans(melding)
+
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, null)
+
         verify {
             oppgaveService.opprettJournalføringsoppgave(
-                melosysEessiMelding.journalpostId!!,
-                melosysEessiMelding.aktoerId!!
+                melding.journalpostId!!,
+                melding.aktoerId!!
             )
         }
     }
 
     @Test
     fun `rutSedTilBehandling finnesIngenTilhørendeFagsak opprettesJfrOppgave`() {
+        val melding = lagMelosysEessiMelding()
+        val prosessinstans = lagProsessinstans(melding)
         every { fagsakService.finnFagsakFraArkivsakID(arkivsakID) } returns Optional.empty()
+
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID)
+
         verify {
             oppgaveService.opprettJournalføringsoppgave(
-                melosysEessiMelding.journalpostId!!,
-                melosysEessiMelding.aktoerId!!
+                melding.journalpostId!!,
+                melding.aktoerId!!
             )
         }
     }
@@ -100,96 +110,84 @@ class AdminFjernmottakerSedRuterTest {
     @Test
     fun `rutSedTilBehandling erIkkeX006MottakerPåÅpenA003 blirIkkeAvsluttetEllerSattTilAnnullert`() {
         val fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, Behandlingsstatus.UNDER_BEHANDLING)
-        melosysEessiMelding.x006NavErFjernet = false
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
-
+        val melding = lagMelosysEessiMelding(x006NavErFjernet = false)
+        val prosessinstans = lagProsessinstans(melding)
         val sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning()
-
         every { fagsakService.finnFagsakFraArkivsakID(arkivsakID) } returns Optional.of(fagsak)
+
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID)
-        verify { prosessinstansService.opprettProsessinstansSedJournalføring(sistAktiveBehandling, melosysEessiMelding) }
+
+        verify { prosessinstansService.opprettProsessinstansSedJournalføring(sistAktiveBehandling, melding) }
     }
 
     @Test
     fun `rutSedTilBehandling erX006MottakerErIkkeTilstedePåSed opprettJournalFøringsProsess`() {
         val fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, Behandlingsstatus.UNDER_BEHANDLING)
-
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        val melding = lagMelosysEessiMelding()
+        val prosessinstans = lagProsessinstans(melding)
         val sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning()
-
         every { fagsakService.finnFagsakFraArkivsakID(arkivsakID) } returns Optional.of(fagsak)
 
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID)
+
         verify(exactly = 0) { behandlingsresultatService.hentBehandlingsresultat(any()) }
-        verify { prosessinstansService.opprettProsessinstansSedJournalføring(sistAktiveBehandling, melosysEessiMelding) }
+        verify { prosessinstansService.opprettProsessinstansSedJournalføring(sistAktiveBehandling, melding) }
     }
 
     @Test
     fun `rutSedTilBehandling erX006MottakerPåÅpenA003 blirAvsluttetOgSattTilAnnullert`() {
         val fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, Behandlingsstatus.UNDER_BEHANDLING)
-        melosysEessiMelding.x006NavErFjernet = true
-
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        val melding = lagMelosysEessiMelding(x006NavErFjernet = true)
+        val prosessinstans = lagProsessinstans(melding)
         val sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning()
-
-        val behandlingsresultat = Behandlingsresultat().apply {
-            behandling = sistAktiveBehandling
-        }
-
-        val anmodningsperiode = Anmodningsperiode().apply {
-            medlPeriodeID = 20L
-        }
-        behandlingsresultat.anmodningsperioder = mutableSetOf(anmodningsperiode)
+        val behandlingsresultat = lagBehandlingsresultat(sistAktiveBehandling, medlPeriodeID = 20L)
 
         every { fagsakService.finnFagsakFraArkivsakID(arkivsakID) } returns Optional.of(fagsak)
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID)
 
         verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.ANNULLERT) }
-        verify { medlPeriodeService.avvisPeriodeOpphørt(behandlingsresultat.hentAnmodningsperiode().medlPeriodeID) }
-        verify { prosessinstansService.opprettProsessinstansSedJournalføring(sistAktiveBehandling, melosysEessiMelding) }
+        verify { medlPeriodeService.avvisPeriodeOpphørt(20L) }
+        verify { prosessinstansService.opprettProsessinstansSedJournalføring(sistAktiveBehandling, melding) }
     }
 
     @Test
     fun `rutSedTilBehandling erX006MottakerPåAvsluttetBehandling oppdaterStatusPåFagsakTilAnnulert`() {
         val fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, Behandlingsstatus.AVSLUTTET)
-        melosysEessiMelding.x006NavErFjernet = true
-
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        val melding = lagMelosysEessiMelding(x006NavErFjernet = true)
+        val prosessinstans = lagProsessinstans(melding)
         val sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning()
-
-        val behandlingsresultat = Behandlingsresultat().apply {
-            behandling = sistAktiveBehandling
-        }
-
-        val anmodningsperiode = Anmodningsperiode().apply {
-            medlPeriodeID = 20L
-        }
-        behandlingsresultat.anmodningsperioder = mutableSetOf(anmodningsperiode)
+        val behandlingsresultat = lagBehandlingsresultat(sistAktiveBehandling, medlPeriodeID = 20L)
 
         every { fagsakService.finnFagsakFraArkivsakID(arkivsakID) } returns Optional.of(fagsak)
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID)
 
         verify { fagsakService.oppdaterStatus(fagsak, Saksstatuser.ANNULLERT) }
-        verify { medlPeriodeService.avvisPeriodeOpphørt(anmodningsperiode.medlPeriodeID) }
-        verify { prosessinstansService.opprettProsessinstansSedJournalføring(sistAktiveBehandling, melosysEessiMelding) }
+        verify { medlPeriodeService.avvisPeriodeOpphørt(20L) }
+        verify { prosessinstansService.opprettProsessinstansSedJournalføring(sistAktiveBehandling, melding) }
     }
 
     @Test
     fun `rutSedTilBehandling tilhørendeFagsakFinnesOgBehandlingErNorgeUtpektAktiv behandlingsstausVURDER_DOKUMENT`() {
         val fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING)
-        every { fagsakService.finnFagsakFraArkivsakID(arkivsakID) } returns Optional.of(fagsak)
+        val melding = lagMelosysEessiMelding()
+        val prosessinstans = lagProsessinstans(melding)
         val sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning()
+        every { fagsakService.finnFagsakFraArkivsakID(arkivsakID) } returns Optional.of(fagsak)
 
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID)
 
         verify { behandlingService.endreStatus(sistAktiveBehandling.id, Behandlingsstatus.VURDER_DOKUMENT) }
-        verify { prosessinstansService.opprettProsessinstansSedJournalføring(sistAktiveBehandling, melosysEessiMelding) }
+        verify { prosessinstansService.opprettProsessinstansSedJournalføring(sistAktiveBehandling, melding) }
     }
 
     @Test
     fun `rutSedTilBehandling tilhørendeFagsakFinnesOgBehandlingErNorgeUtpektIkkeAktiv journalføringsOppgaveLages`() {
+        val melding = lagMelosysEessiMelding()
+        val prosessinstans = lagProsessinstans(melding)
         every {
             fagsakService.finnFagsakFraArkivsakID(arkivsakID)
         } returns Optional.of(lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.AVSLUTTET))
@@ -198,11 +196,17 @@ class AdminFjernmottakerSedRuterTest {
 
         verify {
             oppgaveService.opprettJournalføringsoppgave(
-                melosysEessiMelding.journalpostId!!,
-                melosysEessiMelding.aktoerId!!
+                melding.journalpostId!!,
+                melding.aktoerId!!
             )
         }
     }
+
+    private fun lagBehandlingsresultat(behandling: no.nav.melosys.domain.Behandling, medlPeriodeID: Long) =
+        Behandlingsresultat.forTest {
+            this.behandling = behandling
+            anmodningsperiode { this.medlPeriodeID = medlPeriodeID }
+        }
 
     private fun lagFagsak(behandlingstema: Behandlingstema, behandlingsstatus: Behandlingsstatus) = Fagsak.forTest {
         behandling {

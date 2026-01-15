@@ -4,6 +4,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
@@ -100,7 +101,7 @@ class AltinnSoeknadServiceTest {
     @Test
     fun `opprett fagsak og behandling fra altinn søknad søknad eksisterer arbeidsgiver offentlig verifiser arbeid tjenesteperson eller fly`() {
         val fagsak = lagFagsak()
-        val søknad = lagMedlemskapArbeidEOSM().apply {
+        val søknad = lagMedlemskapArbeidEOSM {
             innhold.arbeidsgiver.setOffentligVirksomhet(true)
         }
         val opprettSakRequestSlot = slot<OpprettSakRequest>()
@@ -153,7 +154,7 @@ class AltinnSoeknadServiceTest {
     @Test
     fun `opprett sak fra altinn søknad fullmakt uten rådgivningsfirma lager arbeidsgiver som fullmektig`() {
         val fagsak = lagFagsak()
-        val søknad = lagMedlemskapArbeidEOSM().apply {
+        val søknad = lagMedlemskapArbeidEOSM {
             innhold.fullmakt.fullmektigVirksomhetsnummer = null
             innhold.fullmakt.setFullmaktFraArbeidstaker(true)
         }
@@ -180,7 +181,7 @@ class AltinnSoeknadServiceTest {
     @Test
     fun `opprett sak fra altinn søknad kontaktperson navn finnes lager kontaktopplysninger`() {
         val fagsak = lagFagsak()
-        val søknad = lagMedlemskapArbeidEOSM().apply {
+        val søknad = lagMedlemskapArbeidEOSM {
             innhold.arbeidsgiver.kontaktperson.kontaktpersonNavn = "Ola"
         }
         val opprettSakRequestSlot = slot<OpprettSakRequest>()
@@ -206,7 +207,7 @@ class AltinnSoeknadServiceTest {
     fun `opprett sak fra altinn søknad arbeidstaker har utenlandsk ID nummer utenlandsk person ID blir satt`() {
         val utenlandskPersonId = "utenlandskPersonId"
         val fagsak = lagFagsak()
-        val søknad = lagMedlemskapArbeidEOSM().apply {
+        val søknad = lagMedlemskapArbeidEOSM {
             innhold.arbeidstaker.utenlandskIDnummer = utenlandskPersonId
         }
         val opprettSakRequestSlot = slot<OpprettSakRequest>()
@@ -245,11 +246,15 @@ class AltinnSoeknadServiceTest {
         }
     }
 
-    private fun lagMedlemskapArbeidEOSM(): MedlemskapArbeidEOSM {
+    private fun lagMedlemskapArbeidEOSM(
+        init: MedlemskapArbeidEOSM.() -> Unit = {}
+    ): MedlemskapArbeidEOSM {
         val jaxbContext = JAXBContext.newInstance(ObjectFactory::class.java)
         val url = javaClass.classLoader.getResource("altinn/NAV_MedlemskapArbeidEOS.xml")
         return try {
-            (jaxbContext.createUnmarshaller().unmarshal(url) as JAXBElement<MedlemskapArbeidEOSM>).value
+            jaxbContext.createUnmarshaller().unmarshal(url)
+                .shouldBeInstanceOf<JAXBElement<MedlemskapArbeidEOSM>>()
+                .value.apply(init)
         } catch (e: JAXBException) {
             throw IllegalStateException(e)
         }

@@ -13,8 +13,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.FagsakTestFactory.builder
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.arkiv.BrukerIdType
 import no.nav.melosys.domain.arkiv.Journalpost
@@ -95,6 +93,7 @@ internal class JournalfoeringServiceTest {
 
     @BeforeEach
     fun setup() {
+        // Journalpost og DTOer har ikke forTest DSL - bruker .apply siden dette ikke er domeneentiteter
         journalpost = Journalpost("123").apply {
             hoveddokument = ArkivDokument()
             forsendelseMottatt = Instant.EPOCH
@@ -248,7 +247,7 @@ internal class JournalfoeringServiceTest {
             forvaltningsmeldingMottaker = ForvaltningsmeldingMottaker.BRUKER
         }
         every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
-        every { fagsakService.hentFagsak(tilordneDto.saksnummer) } returns lagFagsak(lagBehandling()).apply { tema = Sakstemaer.UNNTAK }
+        every { fagsakService.hentFagsak(tilordneDto.saksnummer) } returns lagFagsak { tema = Sakstemaer.UNNTAK }
 
 
         shouldThrow<FunksjonellException> { journalfoeringService.journalførOgKnyttTilEksisterendeSak(tilordneDto) }
@@ -264,7 +263,7 @@ internal class JournalfoeringServiceTest {
             forvaltningsmeldingMottaker = ForvaltningsmeldingMottaker.BRUKER
         }
         every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
-        every { fagsakService.hentFagsak(tilordneDto.saksnummer) } returns lagFagsak(lagBehandling()).apply { tema = Sakstemaer.MEDLEMSKAP_LOVVALG }
+        every { fagsakService.hentFagsak(tilordneDto.saksnummer) } returns lagFagsak()
 
 
         shouldThrow<FunksjonellException> { journalfoeringService.journalførOgKnyttTilEksisterendeSak(tilordneDto) }
@@ -491,6 +490,7 @@ internal class JournalfoeringServiceTest {
             fagsak = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS)
         }
         journalpost.mottaksKanal = "EESSI"
+        // MelosysEessiMelding har ikke forTest DSL - bruker .apply
         val melosysEessiMelding = MelosysEessiMelding().apply { rinaSaksnummer = RINA_SAKSNUMMER }
         every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
         every { utenlandskMyndighetService.finnInstitusjonID(any()) } returns Optional.empty()
@@ -506,6 +506,7 @@ internal class JournalfoeringServiceTest {
     fun journalførOgOpprettSak_støtterAutomatiskBehandling_forventException() {
         opprettDto.behandlingstemaKode = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING.kode
         journalpost.mottaksKanal = "EESSI"
+        // MelosysEessiMelding har ikke forTest DSL - bruker .apply
         val melosysEessiMelding = MelosysEessiMelding().apply { rinaSaksnummer = RINA_SAKSNUMMER }
         every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
         every { eessiService.hentSedTilknyttetJournalpost(journalpost.journalpostId) } returns melosysEessiMelding
@@ -518,13 +519,14 @@ internal class JournalfoeringServiceTest {
 
     @Test
     fun journalførOgOpprettSak_sedAlleredeTilknyttet_kasterException() {
+        // MelosysEessiMelding har ikke forTest DSL - bruker .apply
         val melosysEessiMelding = MelosysEessiMelding().apply { rinaSaksnummer = RINA_SAKSNUMMER }
         opprettDto.behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
         journalpost.mottaksKanal = "EESSI"
         every { eessiService.hentSedTilknyttetJournalpost(journalpost.journalpostId) } returns melosysEessiMelding
         every { eessiService.støtterAutomatiskBehandling(melosysEessiMelding) } returns false
         every { eessiService.finnSakForRinasaksnummer(RINA_SAKSNUMMER) } returns Optional.of(ARKIVSAK_ID)
-        every { fagsakService.finnFagsakFraArkivsakID(ARKIVSAK_ID) } returns Optional.of(builder().saksnummer(ARKIVSAK_ID.toString()).build())
+        every { fagsakService.finnFagsakFraArkivsakID(ARKIVSAK_ID) } returns Optional.of(Fagsak.forTest { saksnummer = ARKIVSAK_ID.toString() })
         every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
 
 
@@ -606,7 +608,7 @@ internal class JournalfoeringServiceTest {
     @Test
     fun journalførOgKnyttTilEksisterendeSak_altOK_prosessinstansOpprettet() {
         tilordneDto.saksnummer = MELOSYS_SAKSNUMMER
-        val fagsak = builder().behandlinger(Behandling.forTest { status = Behandlingsstatus.UNDER_BEHANDLING }).build()
+        val fagsak = lagFagsak { behandling { status = Behandlingsstatus.UNDER_BEHANDLING } }
         every { joarkFasade.hentJournalpost(tilordneDto.journalpostID) } returns journalpost
         every { fagsakService.hentFagsak(MELOSYS_SAKSNUMMER) } returns fagsak
         every { utenlandskMyndighetService.finnInstitusjonID(any()) } returns Optional.of(INSTITUSJON_ID)
@@ -627,7 +629,7 @@ internal class JournalfoeringServiceTest {
     fun journalførOgKnyttTilEksisterendeSak_behandlingstypeFØRSTEGANG_prosessinstansOpprettet() {
         tilordneDto.saksnummer = MELOSYS_SAKSNUMMER
         tilordneDto.behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
-        val fagsak = builder().behandlinger(Behandling.forTest { status = Behandlingsstatus.UNDER_BEHANDLING }).build()
+        val fagsak = lagFagsak { behandling { status = Behandlingsstatus.UNDER_BEHANDLING } }
         every { joarkFasade.hentJournalpost(tilordneDto.journalpostID) } returns journalpost
         every { fagsakService.hentFagsak(MELOSYS_SAKSNUMMER) } returns fagsak
         every { utenlandskMyndighetService.finnInstitusjonID(any()) } returns Optional.empty()
@@ -659,11 +661,11 @@ internal class JournalfoeringServiceTest {
     fun journalførOgKnyttTilEksisterendeSak_sedSakTilknyttetAnnenFagsak_kasterException() {
         journalpost.mottaksKanal = "EESSI"
         tilordneDto.saksnummer = "FAGSAK SOM PRØVER Å KNYTTE JOURNALPOST FOR SED TIL SEG"
+        // MelosysEessiMelding har ikke forTest DSL - bruker .apply
         val melosysEessiMelding = MelosysEessiMelding().apply { rinaSaksnummer = RINA_SAKSNUMMER }
-        val fagsak = builder()
-            .saksnummer("FAGSAK KOBLET TIL SED FRA FØR")
-            .behandlinger(Behandling.forTest { status = Behandlingsstatus.UNDER_BEHANDLING })
-            .build()
+        val fagsak = lagFagsak("FAGSAK KOBLET TIL SED FRA FØR") {
+            behandling { status = Behandlingsstatus.UNDER_BEHANDLING }
+        }
         every { eessiService.hentSedTilknyttetJournalpost(journalpost.journalpostId) } returns melosysEessiMelding
         every { eessiService.finnSakForRinasaksnummer(RINA_SAKSNUMMER) } returns Optional.of(ARKIVSAK_ID)
         every { eessiService.støtterAutomatiskBehandling(melosysEessiMelding) } returns false
@@ -682,15 +684,16 @@ internal class JournalfoeringServiceTest {
         tilordneDto.saksnummer = MELOSYS_SAKSNUMMER
         tilordneDto.behandlingstemaKode = Behandlingstema.BESLUTNING_LOVVALG_NORGE.kode
         tilordneDto.behandlingstypeKode = Behandlingstyper.NY_VURDERING.kode
-        val behandling = lagBehandling().apply {
-            status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
-            type = Behandlingstyper.NY_VURDERING
-            tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
-        }
-        val fagsak = lagFagsak(behandling).apply {
+        val fagsak = lagFagsak {
             type = Sakstyper.FTRL
             tema = Sakstemaer.UNNTAK
-            leggTilAktør(Aktoer().apply { rolle = Aktoersroller.BRUKER })
+            medBruker()
+            behandling {
+                id = 1L
+                status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
+                type = Behandlingstyper.NY_VURDERING
+                tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+            }
         }
         every { behandlingsresultatRepository.findById(any()) } returns Optional.empty()
         every { joarkFasade.hentJournalpost(tilordneDto.journalpostID) } returns journalpost
@@ -720,13 +723,15 @@ internal class JournalfoeringServiceTest {
         tilordneDto.saksnummer = MELOSYS_SAKSNUMMER
         tilordneDto.behandlingstemaKode = Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET.kode
         tilordneDto.behandlingstypeKode = Behandlingstyper.HENVENDELSE.kode
-        val behandling = lagBehandling().apply {
-            status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
-        }
-        val fagsak = lagFagsak(behandling).apply {
+        val fagsak = lagFagsak {
             type = Sakstyper.EU_EOS
             tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-            leggTilAktør(Aktoer().apply { rolle = Aktoersroller.BRUKER })
+            medBruker()
+            behandling {
+                id = 1L
+                status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
+                tema = Behandlingstema.YRKESAKTIV
+            }
         }
         every { joarkFasade.hentJournalpost(tilordneDto.journalpostID) } returns journalpost
         every { fagsakService.hentFagsak(MELOSYS_SAKSNUMMER) } returns fagsak
@@ -755,17 +760,18 @@ internal class JournalfoeringServiceTest {
         tilordneDto.saksnummer = MELOSYS_SAKSNUMMER
         tilordneDto.behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
         tilordneDto.behandlingstypeKode = Behandlingstyper.NY_VURDERING.kode
-        val behandling = lagBehandling().apply {
-            status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
-            type = Behandlingstyper.NY_VURDERING
-            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-        }
-        val fagsak = lagFagsak(behandling).apply {
+        val fagsak = lagFagsak {
             type = Sakstyper.EU_EOS
             tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-            leggTilAktør(Aktoer().apply { rolle = Aktoersroller.BRUKER })
+            medBruker()
+            behandling {
+                id = 1L
+                status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
+                type = Behandlingstyper.NY_VURDERING
+                tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            }
         }
-        val behandlingsresultat = Behandlingsresultat().apply { type = Behandlingsresultattyper.AVSLAG_SØKNAD }
+        val behandlingsresultat = Behandlingsresultat.forTest { type = Behandlingsresultattyper.AVSLAG_SØKNAD }
         every { joarkFasade.hentJournalpost(tilordneDto.journalpostID) } returns journalpost
         every { fagsakService.hentFagsak(MELOSYS_SAKSNUMMER) } returns fagsak
         every { behandlingsresultatRepository.findById(any()) } returns Optional.of(behandlingsresultat)
@@ -792,10 +798,16 @@ internal class JournalfoeringServiceTest {
     @Test
     fun journalførOgOpprettAndregangsBehandling_ikkeTillattBehandlingstype_feilKastes() {
         tilordneDto.saksnummer = MELOSYS_SAKSNUMMER
-        val aktivBehandling = lagBehandling().apply { status = Behandlingsstatus.UNDER_BEHANDLING }
+        val behandlingId = 1L
         every { joarkFasade.hentJournalpost(tilordneDto.journalpostID) } returns journalpost
-        every { fagsakService.hentFagsak(MELOSYS_SAKSNUMMER) } returns builder().saksnummer(MELOSYS_SAKSNUMMER).behandlinger(aktivBehandling).build()
-        every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(aktivBehandling.id) } returns Behandlingsresultat()
+        every { fagsakService.hentFagsak(MELOSYS_SAKSNUMMER) } returns lagFagsak {
+            behandling {
+                id = behandlingId
+                status = Behandlingsstatus.UNDER_BEHANDLING
+                tema = Behandlingstema.YRKESAKTIV
+            }
+        }
+        every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandlingId) } returns Behandlingsresultat.forTest()
 
 
         shouldThrow<FunksjonellException> { journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto) }
@@ -805,13 +817,19 @@ internal class JournalfoeringServiceTest {
     @Test
     fun journalførOgOpprettAndregangsBehandling_fagsakHarAktivBehandlingMenErArtikkel16AnmodningSendtUtland_feilKastesIkke() {
         tilordneDto.saksnummer = MELOSYS_SAKSNUMMER
-        val aktivBehandling = lagBehandling().apply { status = Behandlingsstatus.UNDER_BEHANDLING }
-        val behandlingsresultat = Behandlingsresultat().apply {
-            anmodningsperioder.add(Anmodningsperiode().apply { setSendtUtland(true) })
+        val behandlingId = 1L
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            anmodningsperiode { sendtUtland = true }
         }
         every { joarkFasade.hentJournalpost(tilordneDto.journalpostID) } returns journalpost
-        every { fagsakService.hentFagsak(MELOSYS_SAKSNUMMER) } returns lagFagsak(aktivBehandling)
-        every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(aktivBehandling.id) } returns behandlingsresultat
+        every { fagsakService.hentFagsak(MELOSYS_SAKSNUMMER) } returns lagFagsak {
+            behandling {
+                id = behandlingId
+                status = Behandlingsstatus.UNDER_BEHANDLING
+                tema = Behandlingstema.YRKESAKTIV
+            }
+        }
+        every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandlingId) } returns behandlingsresultat
 
 
         shouldThrow<FunksjonellException> { journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto) }
@@ -821,19 +839,24 @@ internal class JournalfoeringServiceTest {
     @Test
     fun journalførOgOpprettAndregangsBehandling_sedSakTilknyttetAnnenFagsak_kasterException() {
         journalpost.mottaksKanal = "EESSI"
+        // MelosysEessiMelding har ikke forTest DSL - bruker .apply
         val melosysEessiMelding = MelosysEessiMelding().apply { rinaSaksnummer = RINA_SAKSNUMMER }
-        val fagsak1Behandling = lagBehandling().apply {
-            status = Behandlingsstatus.AVSLUTTET
-            tema = Behandlingstema.UTSENDT_SELVSTENDIG
+        val fagsak1 = lagFagsak("FAGSAK KOBLET TIL SED FRA FØR") {
+            type = Sakstyper.EU_EOS
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            behandling {
+                id = 1L
+                status = Behandlingsstatus.AVSLUTTET
+                tema = Behandlingstema.UTSENDT_SELVSTENDIG
+            }
         }
-        val fagsak1 = lagFagsak("FAGSAK KOBLET TIL SED FRA FØR", fagsak1Behandling)
-        fagsak1.type = Sakstyper.EU_EOS
-        fagsak1.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-        val fagsak2Behandling = lagBehandling().apply {
-            status = Behandlingsstatus.AVSLUTTET
-            tema = Behandlingstema.UTSENDT_SELVSTENDIG
+        val fagsak2 = lagFagsak("FAGSAK SOM PRØVER Å KNYTTE JOURNALPOST FOR SED TIL SEG") {
+            behandling {
+                id = 2L
+                status = Behandlingsstatus.AVSLUTTET
+                tema = Behandlingstema.UTSENDT_SELVSTENDIG
+            }
         }
-        val fagsak2 = lagFagsak("FAGSAK SOM PRØVER Å KNYTTE JOURNALPOST FOR SED TIL SEG", fagsak2Behandling)
         tilordneDto.saksnummer = fagsak2.saksnummer
         tilordneDto.behandlingstemaKode = Behandlingstema.UTSENDT_SELVSTENDIG.kode
         tilordneDto.behandlingstypeKode = Behandlingstyper.NY_VURDERING.kode
@@ -898,6 +921,7 @@ internal class JournalfoeringServiceTest {
 
     @Test
     fun journalførSed_støtterAutomatiskBehandling_prosessinstansOpprettetOppgaveFerdigstilt() {
+        // MelosysEessiMelding har ikke forTest DSL - bruker .apply
         val melosysEessiMelding = MelosysEessiMelding().apply { rinaSaksnummer = "123" }
         every { eessiService.støtterAutomatiskBehandling(journalfoeringSedDto.journalpostID) } returns true
         every { eessiService.hentSedTilknyttetJournalpost(journalfoeringSedDto.journalpostID) } returns melosysEessiMelding
@@ -917,22 +941,17 @@ internal class JournalfoeringServiceTest {
             behandlingstypeKode = Behandlingstyper.ÅRSAVREGNING.kode
             behandlingstemaKode = Behandlingstema.YRKESAKTIV.kode
         }
-        val aktivBehandling = lagBehandling().apply {
-            status = Behandlingsstatus.OPPRETTET
-            type = Behandlingstyper.FØRSTEGANG
-            tema = Behandlingstema.YRKESAKTIV
-        }
-        val fagsak = lagFagsak(aktivBehandling)
-            .apply {
-                type = Sakstyper.FTRL
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        val fagsak = lagFagsak {
+            type = Sakstyper.FTRL
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            medBruker { setAktørId("12345678901") }
+            behandling {
+                id = 1L
+                status = Behandlingsstatus.OPPRETTET
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.YRKESAKTIV
             }
-
-        val bruker = Aktoer().apply {
-            rolle = Aktoersroller.BRUKER
-            aktørId = "12345678901"
         }
-        fagsak.leggTilAktør(bruker)
 
         every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
         every { fagsakService.hentFagsak(MELOSYS_SAKSNUMMER) } returns fagsak
@@ -950,33 +969,32 @@ internal class JournalfoeringServiceTest {
             behandlingstypeKode = Behandlingstyper.NY_VURDERING.kode
             behandlingstemaKode = Behandlingstema.BESLUTNING_LOVVALG_NORGE.kode
         }
-        val aktivBehandling = lagBehandling().apply {
-            status = Behandlingsstatus.OPPRETTET
-            type = Behandlingstyper.FØRSTEGANG
-            tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+        val behandlingId = 1L
+        val fagsak = lagFagsak {
+            medBruker { setAktørId("12345678901") }
+            behandling {
+                id = behandlingId
+                status = Behandlingsstatus.OPPRETTET
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+            }
         }
-        val fagsak = lagFagsak(aktivBehandling)
-        val bruker = Aktoer().apply {
-            rolle = Aktoersroller.BRUKER
-            aktørId = "12345678901"
-        }
-        fagsak.leggTilAktør(bruker)
 
         every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
         every { fagsakService.hentFagsak(MELOSYS_SAKSNUMMER) } returns fagsak
         every { utenlandskMyndighetService.finnInstitusjonID(any()) } returns Optional.empty()
 
-        //Mock anmodningsperiode slik at vi får gyldige behandlingstyper for opprettelse av ny sak.
-        val anmodningsperiode = Anmodningsperiode()
-        anmodningsperiode.setSendtUtland(true)
-        every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(aktivBehandling.id) } returns Behandlingsresultat().apply {
-            anmodningsperioder = mutableSetOf(anmodningsperiode)
+        // Mock anmodningsperiode slik at vi får gyldige behandlingstyper for opprettelse av ny sak.
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            anmodningsperiode { sendtUtland = true }
         }
-        every { behandlingService.avsluttBehandling(aktivBehandling.id) } just Runs
+        every { behandlingsresultatRepository.findById(behandlingId) } returns Optional.of(behandlingsresultat)
+        every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandlingId) } returns behandlingsresultat
+        every { behandlingService.avsluttBehandling(behandlingId) } just Runs
 
         journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto)
 
-        verify(exactly = 1) { behandlingService.avsluttBehandling(aktivBehandling.id) }
+        verify(exactly = 1) { behandlingService.avsluttBehandling(behandlingId) }
     }
 
     private fun lagFagsakDto(fom: LocalDate?, tom: LocalDate?, land: String?, sakstype: Sakstyper): FagsakDto =
@@ -991,18 +1009,19 @@ internal class JournalfoeringServiceTest {
         }
 
 
-    private fun lagFagsak(saksnummer: String, behandling: Behandling): Fagsak =
-        builder().saksnummer(saksnummer).behandlinger(behandling).build().apply {
-            behandling.fagsak = this
-        }
-
-    private fun lagFagsak(behandling: Behandling): Fagsak = lagFagsak(MELOSYS_SAKSNUMMER, behandling)
-
-    private fun lagBehandling(): Behandling =
-        Behandling.forTest {
+    private fun lagFagsak(
+        saksnummer: String = MELOSYS_SAKSNUMMER,
+        init: FagsakTestFactory.Builder.() -> Unit = {}
+    ): Fagsak = Fagsak.forTest {
+        this.saksnummer = saksnummer
+        type = Sakstyper.EU_EOS
+        tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        behandling {
             id = 1L
             status = Behandlingsstatus.AVSLUTTET
             tema = Behandlingstema.YRKESAKTIV
         }
+        init()
+    }
 }
 

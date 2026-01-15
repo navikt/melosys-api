@@ -18,6 +18,7 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflyt.brev.BrevBestiller
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.behandling
 import no.nav.melosys.saksflytapi.domain.forTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -37,10 +38,10 @@ class BestillBrevTest {
 
     @Test
     fun utfør_altOk_kallerBestill() {
-        val behandling = Behandling.forTest { }
         val prosessinstans = Prosessinstans.forTest {
-            this.behandling = behandling
+            behandling { }
         }
+        val behandling = prosessinstans.behandling!!
         val brevbestilling = DoksysBrevbestilling.Builder()
             .medProduserbartDokument(INNVILGELSE_YRKESAKTIV)
             .medMottakere(Mottaker.medRolle(Mottakerroller.BRUKER))
@@ -79,7 +80,7 @@ class BestillBrevTest {
     @Test
     fun utfør_manglerBrevbestilling_kasterFeilmelding() {
         val prosessinstans = Prosessinstans.forTest {
-            behandling = Behandling.forTest { }
+            behandling { }
         }
 
 
@@ -93,9 +94,8 @@ class BestillBrevTest {
 
     @Test
     fun utfør_flereEnnEnMottaker_kasterFeilmelding() {
-        val behandling = Behandling.forTest { }
         val prosessinstans = Prosessinstans.forTest {
-            this.behandling = behandling
+            behandling { }
             medData(
                 ProsessDataKey.BREVBESTILLING,
                 DoksysBrevbestilling.Builder()

@@ -15,7 +15,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -24,10 +23,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.brev.Distribusjonstype
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
-import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
-import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.domain.mottatteopplysninger.anmodningEllerAttest
+import no.nav.melosys.domain.mottatteopplysninger.soeknad
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -130,7 +127,7 @@ internal class BrevmalListeByggerTest {
 
     @Test
     fun byggBrevmalDtoListe_virksomhetErHovedpart_returnererTilgjengeligeMaler() {
-        val behandling = lagBehandling(aktoer = Aktoer().apply { rolle = Aktoersroller.VIRKSOMHET })
+        val behandling = lagBehandling { fagsak { medVirksomhet() } }
         every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandling
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
 
@@ -192,14 +189,14 @@ internal class BrevmalListeByggerTest {
 
     fun byggBrevmalDtoListe_behandlingsTemaIkkeStøttet_returnererIkkeArbeidsgiverArbeidsgiversFullmektigParametere() = listOf(
         argumentSet("mottakereAlle", Behandlingstema.UTSENDT_ARBEIDSTAKER, mottakereAlle),
-        argumentSet("mottakereUtenArbeidsgiver",Behandlingstema.UTSENDT_SELVSTENDIG, mottakereUtenArbeidsgiver),
-        argumentSet("mottakereAlle",Behandlingstema.ARBEID_FLERE_LAND, mottakereAlle),
-        argumentSet("mottakereAlle",Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY, mottakereAlle),
-        argumentSet("mottakereAlle",Behandlingstema.ARBEID_KUN_NORGE, mottakereAlle),
-        argumentSet("mottakereUtenArbeidsgiver",Behandlingstema.IKKE_YRKESAKTIV, mottakereUtenArbeidsgiver),
-        argumentSet("mottakereUtenArbeidsgiver",Behandlingstema.PENSJONIST, mottakereUtenArbeidsgiver),
-        argumentSet("mottakereAlle",Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, mottakereAlle),
-        argumentSet("mottakereAlle",Behandlingstema.TRYGDETID, mottakereAlle),
+        argumentSet("mottakereUtenArbeidsgiver", Behandlingstema.UTSENDT_SELVSTENDIG, mottakereUtenArbeidsgiver),
+        argumentSet("mottakereAlle", Behandlingstema.ARBEID_FLERE_LAND, mottakereAlle),
+        argumentSet("mottakereAlle", Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY, mottakereAlle),
+        argumentSet("mottakereAlle", Behandlingstema.ARBEID_KUN_NORGE, mottakereAlle),
+        argumentSet("mottakereUtenArbeidsgiver", Behandlingstema.IKKE_YRKESAKTIV, mottakereUtenArbeidsgiver),
+        argumentSet("mottakereUtenArbeidsgiver", Behandlingstema.PENSJONIST, mottakereUtenArbeidsgiver),
+        argumentSet("mottakereAlle", Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, mottakereAlle),
+        argumentSet("mottakereAlle", Behandlingstema.TRYGDETID, mottakereAlle),
     )
 
     @ParameterizedTest(name = "{index} - {argumentSetName} {0}")
@@ -212,10 +209,9 @@ internal class BrevmalListeByggerTest {
         mockUtenlandskTrygdemyndighetServiceMottakerValgKall()
 
         val behandling = lagBehandling(
-            Behandlingstyper.FØRSTEGANG,
-            Sakstyper.EU_EOS,
-            Aktoer().apply { rolle = Aktoersroller.BRUKER },
-            behandlingstema
+            behandlingstype = Behandlingstyper.FØRSTEGANG,
+            sakstype = Sakstyper.EU_EOS,
+            behandlingstema = behandlingstema
         )
 
         every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandling
@@ -502,12 +498,8 @@ internal class BrevmalListeByggerTest {
 
     @Test
     fun byggBrevmalDtoListe_trygdeavtale_lagerRiktigeTittelValgForFritekstbrev() {
-        val behandlingTrygdeavtale = lagBehandling(sakstype = Sakstyper.TRYGDEAVTALE).apply {
-            mottatteOpplysninger = MottatteOpplysninger().apply {
-                mottatteOpplysningerData = MottatteOpplysningerData().apply {
-                    soeknadsland = Soeknadsland(listOf(Land_iso2.GB.kode), false)
-                }
-            }
+        val behandlingTrygdeavtale = lagBehandling(sakstype = Sakstyper.TRYGDEAVTALE) {
+            mottatteOpplysninger { soeknad { landkoder(Land_iso2.GB.kode) } }
         }
         every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandlingTrygdeavtale
         every { behandlingService.hentBehandling(any<Long>()) } returns behandlingTrygdeavtale
@@ -530,12 +522,8 @@ internal class BrevmalListeByggerTest {
 
     @Test
     fun byggBrevmalDtoListe_trygdeavtale_lagerRiktigeDistribusjonstyperForFritekstbrev() {
-        val behandlingTrygdeavtale = lagBehandling(sakstype = Sakstyper.TRYGDEAVTALE).apply {
-            mottatteOpplysninger = MottatteOpplysninger().apply {
-                mottatteOpplysningerData = AnmodningEllerAttest().apply {
-                    lovvalgsland = Land_iso2.GB
-                }
-            }
+        val behandlingTrygdeavtale = lagBehandling(sakstype = Sakstyper.TRYGDEAVTALE) {
+            mottatteOpplysninger { anmodningEllerAttest { lovvalgsland = Land_iso2.GB } }
         }
         every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandlingTrygdeavtale
         every { behandlingService.hentBehandling(any<Long>()) } returns behandlingTrygdeavtale
@@ -563,11 +551,13 @@ internal class BrevmalListeByggerTest {
 
     @Test
     fun byggBrevmalDtoListe_trygdeavtale_behandlingUtenFlyt_lagerRiktigeFeltForUtenlandskTrygdeMyndighetFritekstbrev() {
-        val behandlingTrygdeavtale = lagBehandling(Behandlingstyper.HENVENDELSE, Sakstyper.TRYGDEAVTALE).apply {
-            mottatteOpplysninger = MottatteOpplysninger().apply {
-                mottatteOpplysningerData = AnmodningEllerAttest()
-            }
+        val behandlingTrygdeavtale = lagBehandling(
+            behandlingstype = Behandlingstyper.HENVENDELSE,
+            sakstype = Sakstyper.TRYGDEAVTALE
+        ) {
+            mottatteOpplysninger { anmodningEllerAttest { } }
         }
+        // UtenlandskMyndighet has no forTest DSL, using apply pattern
         val utenlandskMyndighet = UtenlandskMyndighet().apply { landkode = Land_iso2.AU }
         every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandlingTrygdeavtale
         every { behandlingService.hentBehandling(any<Long>()) } returns behandlingTrygdeavtale
@@ -624,12 +614,8 @@ internal class BrevmalListeByggerTest {
 
     @Test
     fun byggBrevmalDtoListe_trygdeavtale_behandlingMedFlyt_lagerRiktigeFeltForUtenlandskTrygdeMyndighetFritekstbrev() {
-        val behandlingTrygdeavtale = lagBehandling(sakstype = Sakstyper.TRYGDEAVTALE).apply {
-            mottatteOpplysninger = MottatteOpplysninger().apply {
-                mottatteOpplysningerData = AnmodningEllerAttest().apply {
-                    lovvalgsland = Land_iso2.AU
-                }
-            }
+        val behandlingTrygdeavtale = lagBehandling(sakstype = Sakstyper.TRYGDEAVTALE) {
+            mottatteOpplysninger { anmodningEllerAttest { lovvalgsland = Land_iso2.AU } }
         }
         every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandlingTrygdeavtale
         every { behandlingService.hentBehandling(any<Long>()) } returns behandlingTrygdeavtale
@@ -650,10 +636,8 @@ internal class BrevmalListeByggerTest {
 
     @Test
     fun byggBrevmalDtoListe_trygdeavtale_behandlingUtenLand_lagerFeilmeldingForUtenlandskTrygdeMyndighetMottaker() {
-        val behandlingTrygdeavtale = lagBehandling(sakstype = Sakstyper.TRYGDEAVTALE).apply {
-            mottatteOpplysninger = MottatteOpplysninger().apply {
-                mottatteOpplysningerData = AnmodningEllerAttest()
-            }
+        val behandlingTrygdeavtale = lagBehandling(sakstype = Sakstyper.TRYGDEAVTALE) {
+            mottatteOpplysninger { anmodningEllerAttest { lovvalgsland = null } }
         }
         every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandlingTrygdeavtale
         every { behandlingService.hentBehandling(any<Long>()) } returns behandlingTrygdeavtale
@@ -729,28 +713,27 @@ internal class BrevmalListeByggerTest {
     fun lagBehandling(
         behandlingstype: Behandlingstyper = Behandlingstyper.FØRSTEGANG,
         sakstype: Sakstyper = Sakstyper.EU_EOS,
-        aktoer: Aktoer = Aktoer().apply { rolle = Aktoersroller.BRUKER },
-        behandlingstema: Behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+        behandlingstema: Behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER,
+        init: BehandlingTestFactory.BehandlingTestBuilder.() -> Unit = {}
     ): Behandling = Behandling.forTest {
         id = 1L
         fagsak {
             type = sakstype
-            leggTilAktør(aktoer)
+            medBruker()
         }
         tema = behandlingstema
         type = behandlingstype
-
+        init()
     }
 
     fun lagBrevAdresse(land: Land_iso2) = listOf(
         BrevAdresse("Mottaker", null, null, "0010", null, null, land.name)
     )
 
+    // UtenlandskMyndighet has no forTest DSL - keeping direct construction
     fun mockUtenlandskTrygdemyndighetServiceMottakerValgKall() {
-        val utenlandskMyndighetGrønland = UtenlandskMyndighet()
-        utenlandskMyndighetGrønland.landkode = Land_iso2.GL
-        val utenlandskMyndighetFærøyene = UtenlandskMyndighet()
-        utenlandskMyndighetFærøyene.landkode = Land_iso2.FO
+        val utenlandskMyndighetGrønland = UtenlandskMyndighet().apply { landkode = Land_iso2.GL }
+        val utenlandskMyndighetFærøyene = UtenlandskMyndighet().apply { landkode = Land_iso2.FO }
         every { utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.GL) } returns utenlandskMyndighetGrønland
         every { utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.FO) } returns utenlandskMyndighetFærøyene
         every { utenlandskMyndighetService.hentAlleUtenlandskeMyndigheter() } returns emptyList()

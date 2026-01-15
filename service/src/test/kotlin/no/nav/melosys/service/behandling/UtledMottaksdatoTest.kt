@@ -6,10 +6,10 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsaarsak
 import no.nav.melosys.domain.arkiv.Journalpost
+import no.nav.melosys.domain.behandlingsårsak
 import no.nav.melosys.domain.forTest
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteOpplysninger
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,13 +34,12 @@ class UtledMottaksdatoTest {
     @Test
     fun `getMottaksdato behandlingsårsak finnes returnerer mottaksdato`() {
         val behandling = Behandling.forTest {
-            behandlingsårsak = Behandlingsaarsak()
+            behandlingsårsak {
+                mottaksdato = MOTTAKSDATO
+            }
         }
-        behandling.behandlingsårsak?.mottaksdato = MOTTAKSDATO
-
 
         val utledetDato = utledMottaksdato.getMottaksdato(behandling)
-
 
         utledetDato shouldBe MOTTAKSDATO
         verify(exactly = 0) { joarkFasade.hentJournalpost(any()) }
@@ -94,16 +93,15 @@ class UtledMottaksdatoTest {
     }
 
     @Test
-    fun `getMottaksdato med journalpost behandlingsårsak finnes returnerer mottaksdato`() {
+    fun `getMottaksdato med journalpost behandlingsaarsak finnes returnerer mottaksdato`() {
         val journalpost = Journalpost(JOURNALPOST_ID)
         val behandling = Behandling.forTest {
-            behandlingsårsak = Behandlingsaarsak()
+            behandlingsårsak {
+                mottaksdato = MOTTAKSDATO
+            }
         }
-        behandling.behandlingsårsak?.mottaksdato = MOTTAKSDATO
-
 
         val utledetDato = utledMottaksdato.getMottaksdato(behandling, journalpost)
-
 
         utledetDato shouldBe MOTTAKSDATO
     }
@@ -137,17 +135,15 @@ class UtledMottaksdatoTest {
     }
 
     @Test
-    fun `getMottaksdato behandlingsårsak finnes ikke mottatte opplysninger har dato returnerer mottatte opplysninger mottaksdato`() {
-        val mottatteOpplysningerMedDato = MottatteOpplysninger().apply {
-            mottaksdato = MOTTAKSDATO
-        }
+    @Suppress("DEPRECATION")
+    fun `getMottaksdato behandlingsaarsak finnes ikke mottatte opplysninger har dato returnerer mottatte opplysninger mottaksdato`() {
         val behandling = Behandling.forTest {
-            mottatteOpplysninger = mottatteOpplysningerMedDato
+            mottatteOpplysninger {
+                mottaksdato = MOTTAKSDATO
+            }
         }
-
 
         val utledetDato = utledMottaksdato.getMottaksdato(behandling)
-
 
         utledetDato shouldBe MOTTAKSDATO
     }

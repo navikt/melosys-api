@@ -311,6 +311,7 @@ class EessiConsumerTest(
     @Test
     fun hentMelosysEessiMeldingFraJournalpostID() {
         val journalpostID = "115314"
+        // MelosysEessiMelding er en integrasjons-DTO uten forTest DSL - bruker .apply
         val melosysEessiMelding = MelosysEessiMelding().apply {
             sedType = "A009"
             journalpostId = journalpostID
@@ -354,6 +355,7 @@ class EessiConsumerTest(
 
     @Test
     fun hentSakForRinasaksnummer() {
+        // SaksrelasjonDto er en integrasjons-DTO uten forTest DSL - bruker .apply
         val saksrelasjon = SaksrelasjonDto().apply {
             rinaSaksnummer = "114422"
             gsakSaksnummer = 123L

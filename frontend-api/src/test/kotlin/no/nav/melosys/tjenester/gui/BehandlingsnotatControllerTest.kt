@@ -3,10 +3,9 @@ package no.nav.melosys.tjenester.gui
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsnotat
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.behandling
+import no.nav.melosys.domain.behandlingsnotatForTest
+import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -23,7 +22,6 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.time.Instant
 
 @WebMvcTest(controllers = [BehandlingsnotatController::class])
 class BehandlingsnotatControllerTest {
@@ -103,19 +101,16 @@ class BehandlingsnotatControllerTest {
             .andExpect(status().isOk)
     }
 
-    private fun lagBehandlingsnotat() = Behandlingsnotat().apply {
+    private fun lagBehandlingsnotat() = behandlingsnotatForTest {
         tekst = "hei"
         registrertAv = SAKSBEHANDLER
         endretAv = SAKSBEHANDLER
-        behandling = Behandling.forTest {
-            fagsak = Fagsak.forTest { }
+        behandling {
+            fagsak { }
             status = Behandlingsstatus.UNDER_BEHANDLING
             type = Behandlingstyper.FØRSTEGANG
             tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
         }
-        id = 1L
-        endretDato = Instant.now()
-        registrertDato = Instant.now()
     }
 
     companion object {

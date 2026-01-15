@@ -1,7 +1,6 @@
 package no.nav.melosys.domain.avgift
 
 import io.kotest.matchers.shouldBe
-import no.nav.melosys.domain.forTest
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 

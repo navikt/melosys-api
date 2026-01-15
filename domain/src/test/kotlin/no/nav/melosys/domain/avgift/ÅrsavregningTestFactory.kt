@@ -1,12 +1,16 @@
-package no.nav.melosys.domain
+package no.nav.melosys.domain.avgift
 
-import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.MelosysTestDsl
 import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import java.math.BigDecimal
 import java.time.LocalDate
 
 fun Årsavregning.Companion.forTest(init: ÅrsavregningTestFactory.Builder.() -> Unit = {}): Årsavregning =
     ÅrsavregningTestFactory.Builder().apply(init).build()
+
+// Note: behandlingsresultat extension is defined in no.nav.melosys.domain.BehandlingsresultatTestFactory
+// to avoid circular dependency and ambiguity issues
 
 object ÅrsavregningTestFactory {
     val DEFAULT_ÅR = LocalDate.now().year

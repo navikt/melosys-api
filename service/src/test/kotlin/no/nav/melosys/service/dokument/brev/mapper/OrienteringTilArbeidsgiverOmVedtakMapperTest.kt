@@ -8,9 +8,8 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType
-import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.brev.OrienteringTilArbeidsgiverOmVedtakBrevbestilling
-import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.dokument.personDokumentForTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -47,8 +46,6 @@ internal class OrienteringTilArbeidsgiverOmVedtakMapperTest {
     @MockK
     private lateinit var mockLandvelgerService: LandvelgerService
 
-    private lateinit var orienteringTilArbeidsgiverOmVedtakMapper: OrienteringTilArbeidsgiverOmVedtakMapper
-
     private val orgnr1 = "111111111"
     private val orgnr2 = "222222222"
     private val orgnr3 = "123456789"
@@ -56,15 +53,19 @@ internal class OrienteringTilArbeidsgiverOmVedtakMapperTest {
     private val uuid1 = "a2k2jf-a3khs"
     private val uuid2 = "0dkf93-kj701"
 
-    @BeforeEach
-    fun setup() {
-        orienteringTilArbeidsgiverOmVedtakMapper = OrienteringTilArbeidsgiverOmVedtakMapper(
+    private val orienteringTilArbeidsgiverOmVedtakMapper by lazy {
+        OrienteringTilArbeidsgiverOmVedtakMapper(
             mockDokgenMapperDatahenter,
             mockVilkaarsresultatService,
             mockAvklartefaktaService,
             mockVirksomheterService,
             mockLandvelgerService,
         )
+    }
+
+    @BeforeEach
+    fun setup() {
+        // Mocks are initialized by MockKExtension
     }
 
     @Test
@@ -77,7 +78,7 @@ internal class OrienteringTilArbeidsgiverOmVedtakMapperTest {
                 )
             )
         } returns true
-        every { mockVilkaarsresultatService.finnVilkaarsresultat(ofType(), Vilkaar.VESENTLIG_VIRKSOMHET) } returns Vilkaarsresultat().apply {
+        every { mockVilkaarsresultatService.finnVilkaarsresultat(ofType(), Vilkaar.VESENTLIG_VIRKSOMHET) } returns vilkaarsresultatForTest {
             isOppfylt = true
         }
 
@@ -85,15 +86,14 @@ internal class OrienteringTilArbeidsgiverOmVedtakMapperTest {
         every { mockAvklartefaktaService.hentAvklarteOrgnrOgUuid(ofType()) } returns setOf(orgnr1, orgnr2, orgnr3, orgnr4, uuid1, uuid2)
         every { mockLandvelgerService.hentArbeidsland(ofType()) } returns Land_iso2.DE
 
+        val personDokument = personDokumentForTest {
+            sammensattNavn = "Hei Test"
+        }
 
         val brevbestilling = OrienteringTilArbeidsgiverOmVedtakBrevbestilling.Builder()
             .medErInnvilgelse(true)
-            .medPersonDokument(PersonDokument().apply {
-                sammensattNavn = "Hei Test"
-            })
-            .medPersonMottaker(PersonDokument().apply {
-                sammensattNavn = "Hei Test"
-            })
+            .medPersonDokument(personDokument)
+            .medPersonMottaker(personDokument)
             .medBehandling(lagBehandling())
             .build()
 
@@ -118,27 +118,25 @@ internal class OrienteringTilArbeidsgiverOmVedtakMapperTest {
                 )
             )
         } returns true
-        every { mockVilkaarsresultatService.finnVilkaarsresultat(ofType(), Vilkaar.VESENTLIG_VIRKSOMHET) } returns Vilkaarsresultat().apply {
+        every { mockVilkaarsresultatService.finnVilkaarsresultat(ofType(), Vilkaar.VESENTLIG_VIRKSOMHET) } returns vilkaarsresultatForTest {
             isOppfylt = true
-            begrunnelser = setOf(
-                VilkaarBegrunnelse().apply { kode = "KUN_ADMIN_ANSATTE" },
-                VilkaarBegrunnelse().apply { kode = "FOR_LITE_OMSETNING_NORGE" },
-                VilkaarBegrunnelse().apply { kode = "REKRUTTERER_ANSATTE_UTL" })
+            begrunnelse("KUN_ADMIN_ANSATTE")
+            begrunnelse("FOR_LITE_OMSETNING_NORGE")
+            begrunnelse("REKRUTTERER_ANSATTE_UTL")
         }
 
         every { mockVirksomheterService.hentAlleNorskeVirksomheter(ofType()) } returns listOf(BrevDataTestUtils.lagNorskVirksomhet())
         every { mockAvklartefaktaService.hentAvklarteOrgnrOgUuid(ofType()) } returns setOf(orgnr1, orgnr2, orgnr3, orgnr4, uuid1, uuid2)
         every { mockLandvelgerService.hentArbeidsland(ofType()) } returns Land_iso2.DE
 
+        val personDokument = personDokumentForTest {
+            sammensattNavn = "Hei Test"
+        }
 
         val brevbestilling = OrienteringTilArbeidsgiverOmVedtakBrevbestilling.Builder()
             .medErInnvilgelse(false)
-            .medPersonDokument(PersonDokument().apply {
-                sammensattNavn = "Hei Test"
-            })
-            .medPersonMottaker(PersonDokument().apply {
-                sammensattNavn = "Hei Test"
-            })
+            .medPersonDokument(personDokument)
+            .medPersonMottaker(personDokument)
             .medBehandling(lagBehandling())
             .build()
 
@@ -162,19 +160,24 @@ internal class OrienteringTilArbeidsgiverOmVedtakMapperTest {
         tema = Behandlingstema.YRKESAKTIV
     }
 
-    private fun lagBehandlingsResultat(lovvalgsbestemmelse: LovvalgBestemmelse): Behandlingsresultat {
-        return Behandlingsresultat().apply {
-            id = 1L
-            behandling = lagBehandling()
-            avklartefakta = mutableSetOf(Avklartefakta().apply {
-                fakta = AvklartYrkesgruppeType.ORDINAER_UTEN_ART12.name
-            })
-            lovvalgsperioder = mutableSetOf(Lovvalgsperiode().apply {
-                fom = LocalDate.of(2020, 1, 1)
-                tom = LocalDate.of(2021, 2, 1)
-                lovvalgsland = Land_iso2.NO
-                bestemmelse = lovvalgsbestemmelse
-            })
+    private fun lagBehandlingsResultat(lovvalgsbestemmelse: LovvalgBestemmelse) = Behandlingsresultat.forTest {
+        id = 1L
+        behandling { lagBehandlingBuilder() }
+        avklartefakta {
+            fakta = AvklartYrkesgruppeType.ORDINAER_UTEN_ART12.name
         }
+        lovvalgsperiode {
+            fom = LocalDate.of(2020, 1, 1)
+            tom = LocalDate.of(2021, 2, 1)
+            lovvalgsland = Land_iso2.NO
+            bestemmelse = lovvalgsbestemmelse
+        }
+    }
+
+    private fun BehandlingTestFactory.BehandlingTestBuilder.lagBehandlingBuilder() {
+        id = 1L
+        fagsak { type = Sakstyper.FTRL }
+        type = Behandlingstyper.FØRSTEGANG
+        tema = Behandlingstema.YRKESAKTIV
     }
 }

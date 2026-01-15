@@ -8,7 +8,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.medlemskap.Periode
-import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -47,7 +46,6 @@ class UnntaksperiodeServiceTest {
     private lateinit var unntaksperiodeKontrollService: UnntaksperiodeKontrollService
 
     private lateinit var unntaksperiodeService: UnntaksperiodeService
-    private lateinit var behandling: Behandling
 
     @BeforeEach
     fun setUp() {
@@ -59,19 +57,23 @@ class UnntaksperiodeServiceTest {
             prosessinstansService,
             unntaksperiodeKontrollService
         )
+    }
 
-        behandling = Behandling.forTest {
-            id = 1L
-            fagsak = FagsakTestFactory.lagFagsak()
-            tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
-        }
-
-        every { behandlingService.hentBehandling(any()) } returns behandling
+    private fun lagBehandling(
+        init: BehandlingTestFactory.BehandlingTestBuilder.() -> Unit = {}
+    ) = Behandling.forTest {
+        id = 1L
+        fagsak = FagsakTestFactory.lagFagsak()
+        tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
+        init()
     }
 
     @Test
     fun `godkjennPeriode behandling avsluttet forvent exception`() {
-        behandling.status = Behandlingsstatus.AVSLUTTET
+        val behandling = lagBehandling {
+            status = Behandlingsstatus.AVSLUTTET
+        }
+        every { behandlingService.hentBehandling(any()) } returns behandling
         val unntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder().build()
 
         val exception = shouldThrow<FunksjonellException> {
@@ -82,7 +84,10 @@ class UnntaksperiodeServiceTest {
 
     @Test
     fun `godkjennPeriode feil behandlingstype forvent exception`() {
-        behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+        val behandling = lagBehandling {
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+        }
+        every { behandlingService.hentBehandling(any()) } returns behandling
         val unntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder().build()
 
         val exception = shouldThrow<FunksjonellException> {
@@ -93,13 +98,15 @@ class UnntaksperiodeServiceTest {
 
     @Test
     fun `godkjennPeriode sed dokument har opp ned periode forvent exception`() {
-        val sedSaksopplysning = Saksopplysning().apply {
-            type = SaksopplysningType.SEDOPPL
-            dokument = SedDokument().apply {
-                lovvalgsperiode = PERIODE_BAD
+        val behandling = lagBehandling {
+            saksopplysning {
+                type = SaksopplysningType.SEDOPPL
+                sedDokument {
+                    lovvalgsperiode = PERIODE_BAD
+                }
             }
         }
-        behandling.saksopplysninger.add(sedSaksopplysning)
+        every { behandlingService.hentBehandling(any()) } returns behandling
         val unntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder().build()
 
         val exception = shouldThrow<FunksjonellException> {
@@ -110,13 +117,15 @@ class UnntaksperiodeServiceTest {
 
     @Test
     fun `godkjennPeriode endret periode uten feil verifiser kall`() {
-        val sedSaksopplysning = Saksopplysning().apply {
-            type = SaksopplysningType.SEDOPPL
-            dokument = SedDokument().apply {
-                lovvalgsperiode = PERIODE_BAD
+        val behandling = lagBehandling {
+            saksopplysning {
+                type = SaksopplysningType.SEDOPPL
+                sedDokument {
+                    lovvalgsperiode = PERIODE_BAD
+                }
             }
         }
-        behandling.saksopplysninger.add(sedSaksopplysning)
+        every { behandlingService.hentBehandling(any()) } returns behandling
 
         val unntaksperiode = Unntaksperiode(LocalDate.of(2000, 1, 1), LocalDate.of(2001, 1, 1))
         val endretUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
@@ -130,7 +139,7 @@ class UnntaksperiodeServiceTest {
         every { lovvalgsperiodeService.lagreLovvalgsperioder(any(), any()) } returns emptyList()
         every { prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(any(), any(), any(), any()) } just Runs
         every { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) } just Runs
-        every { unntaksperiodeKontrollService.kontrollPeriode(any<SedDokument>(), any()) } just Runs
+        every { unntaksperiodeKontrollService.kontrollPeriode(any<no.nav.melosys.domain.dokument.sed.SedDokument>(), any()) } just Runs
 
         unntaksperiodeService.godkjennPeriode(1L, endretUnntaksperiodeGodkjenning)
 
@@ -140,7 +149,7 @@ class UnntaksperiodeServiceTest {
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id) }
         verify {
             unntaksperiodeKontrollService.kontrollPeriode(
-                any<SedDokument>(),
+                any<no.nav.melosys.domain.dokument.sed.SedDokument>(),
                 any<Periode>()
             )
         }
@@ -148,6 +157,9 @@ class UnntaksperiodeServiceTest {
 
     @Test
     fun `godkjennPeriode endret periode er opp ned forvent exception`() {
+        val behandling = lagBehandling()
+        every { behandlingService.hentBehandling(any()) } returns behandling
+
         val unntaksperiode = Unntaksperiode(LocalDate.of(2001, 1, 1), LocalDate.of(2000, 1, 1))
         val endretUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
             .endretPeriode(unntaksperiode)
@@ -160,6 +172,9 @@ class UnntaksperiodeServiceTest {
 
     @Test
     fun `godkjennPeriode tom endret periode forvent exception`() {
+        val behandling = lagBehandling()
+        every { behandlingService.hentBehandling(any()) } returns behandling
+
         val unntaksperiode = Unntaksperiode(null, null)
         val endretUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
             .endretPeriode(unntaksperiode)
@@ -172,13 +187,8 @@ class UnntaksperiodeServiceTest {
 
     @Test
     fun `ikkeGodkjennPeriode opp ned periode forvent ingen exception`() {
-        val sedSaksopplysning = Saksopplysning().apply {
-            type = SaksopplysningType.SEDOPPL
-            dokument = SedDokument().apply {
-                lovvalgsperiode = PERIODE_BAD
-            }
-        }
-        behandling.saksopplysninger.add(sedSaksopplysning)
+        val behandling = lagBehandlingMedSedOgPeriode(PERIODE_BAD)
+        every { behandlingService.hentBehandling(any()) } returns behandling
         val begrunnelser = mutableSetOf(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.kode)
 
         every { behandlingsresultatService.settUtfallRegistreringUnntakOgType(any(), any()) } just Runs
@@ -193,7 +203,8 @@ class UnntaksperiodeServiceTest {
 
     @Test
     fun `ikkeGodkjennPeriode med begrunnelser ingen feil`() {
-        leggTilNødvendigeSaksopplysninger()
+        val behandling = lagBehandlingMedSedOgPeriode(PERIODE_OK)
+        every { behandlingService.hentBehandling(any()) } returns behandling
         val begrunnelser = mutableSetOf(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.kode)
 
         every { behandlingsresultatService.settUtfallRegistreringUnntakOgType(any(), any()) } just Runs
@@ -208,7 +219,8 @@ class UnntaksperiodeServiceTest {
 
     @Test
     fun `ikkeGodkjennPeriode ingen begrunnelser forvent exception`() {
-        leggTilNødvendigeSaksopplysninger()
+        val behandling = lagBehandlingMedSedOgPeriode(PERIODE_OK)
+        every { behandlingService.hentBehandling(any()) } returns behandling
 
         val exception = shouldThrow<FunksjonellException> {
             unntaksperiodeService.ikkeGodkjennPeriode(1L, setOf(), null)
@@ -218,7 +230,8 @@ class UnntaksperiodeServiceTest {
 
     @Test
     fun `ikkeGodkjennPeriode begrunnelse annet ingen fritekst forvent exception`() {
-        leggTilNødvendigeSaksopplysninger()
+        val behandling = lagBehandlingMedSedOgPeriode(PERIODE_OK)
+        every { behandlingService.hentBehandling(any()) } returns behandling
         val begrunnelser = mutableSetOf(
             Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.kode,
             Ikke_godkjent_begrunnelser.ANNET.kode
@@ -230,13 +243,13 @@ class UnntaksperiodeServiceTest {
         exception.message shouldContain "krever fritekst"
     }
 
-    private fun leggTilNødvendigeSaksopplysninger() {
-        behandling.saksopplysninger.add(Saksopplysning().apply {
-            this.type = SaksopplysningType.SEDOPPL
-            this.dokument = SedDokument().apply {
-                this.lovvalgsperiode = PERIODE_OK
+    private fun lagBehandlingMedSedOgPeriode(periode: Periode) = lagBehandling {
+        saksopplysning {
+            type = SaksopplysningType.SEDOPPL
+            sedDokument {
+                lovvalgsperiode = periode
             }
-        })
+        }
     }
 
     companion object {

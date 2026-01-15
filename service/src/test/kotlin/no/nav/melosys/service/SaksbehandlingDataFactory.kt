@@ -17,6 +17,20 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+/**
+ * Factory for å lage test-data for saksbehandling.
+ *
+ * VIKTIG: lagBehandling-funksjonene legger IKKE behandlingen til fagsakens behandlinger-liste.
+ * Dette er bevisst, slik at testene selv kan kontrollere når behandlingen knyttes til fagsak.
+ * Kall `fagsak.leggTilBehandling(behandling)` etter å ha hentet behandlingen.
+ *
+ * Eksempel:
+ * ```kotlin
+ * val fagsak = SaksbehandlingDataFactory.lagFagsak()
+ * val behandling = SaksbehandlingDataFactory.lagBehandling(fagsak)
+ * fagsak.leggTilBehandling(behandling)  // Må kalles eksplisitt
+ * ```
+ */
 object SaksbehandlingDataFactory {
     fun lagBehandling(): Behandling = lagBehandling(lagFagsak(), MottatteOpplysningerData())
 
@@ -25,23 +39,34 @@ object SaksbehandlingDataFactory {
 
     fun lagBehandling(fagsak: Fagsak): Behandling = lagBehandling(fagsak, MottatteOpplysningerData())
 
+    /**
+     * Lager en Behandling med gitt fagsak og mottatte opplysninger.
+     *
+     * MERK: Behandlingen legges IKKE automatisk til fagsak.behandlinger.
+     * Kall `fagsak.leggTilBehandling(behandling)` for å knytte dem sammen.
+     */
     fun lagBehandling(
         fagsak: Fagsak,
         mottatteOpplysningerData: MottatteOpplysningerData
     ): Behandling {
-        val nå = Instant.now()
-        return BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
-            .medFagsak(fagsak)
-            .medMottatteOpplysninger(MottatteOpplysninger())
-            .medRegistrertDato(nå.minus(30, ChronoUnit.DAYS))
-            .medEndretDato(nå)
-            .build().apply {
-                this.mottatteOpplysninger?.mottatteOpplysningerData = mottatteOpplysningerData
+        val naa = Instant.now()
+        // Bruker BehandlingTestFactory.builderWithDefaults() direkte (ikke Behandling.forTest)
+        // for å unngå at behandlingen automatisk legges til fagsaken.
+        // Dette bevarer original oppførsel der testene selv kaller fagsak.leggTilBehandling().
+        return BehandlingTestFactory.builderWithDefaults().apply {
+            id = 1L
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            type = Behandlingstyper.FØRSTEGANG
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            this.fagsak = fagsak
+            mottatteOpplysninger = MottatteOpplysninger().apply {
+                this.mottatteOpplysningerData = mottatteOpplysningerData
             }
+            registrertDato = naa.minus(30, ChronoUnit.DAYS)
+            endretDato = naa
+        }.build().apply {
+            this.mottatteOpplysninger?.behandling = this
+        }
     }
 
     fun lagBehandlingMedMedlemskapDokument(): Behandling =
@@ -51,17 +76,31 @@ object SaksbehandlingDataFactory {
         fagsak: Fagsak,
         mottatteOpplysningerData: MottatteOpplysningerData
     ): Behandling {
-        val behandling = lagBehandling(fagsak, mottatteOpplysningerData)
+        val naa = Instant.now()
         val medlemsperiode = lagMedlemsperiode(23L, GrunnlagMedl.FO_12_2.kode)
         val medlDokument = MedlemskapDokument().apply {
             this.medlemsperiode = listOf(medlemsperiode)
         }
-        val medl = Saksopplysning().apply {
+        val medlSaksopplysning = saksopplysningForTest {
             dokument = medlDokument
             type = SaksopplysningType.MEDL
         }
-        return behandling.apply {
-            saksopplysninger = mutableSetOf(medl)
+
+        return BehandlingTestFactory.builderWithDefaults().apply {
+            id = 1L
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            type = Behandlingstyper.FØRSTEGANG
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            this.fagsak = fagsak
+            mottatteOpplysninger = MottatteOpplysninger().apply {
+                this.mottatteOpplysningerData = mottatteOpplysningerData
+            }
+            saksopplysninger = mutableSetOf(medlSaksopplysning)
+            registrertDato = naa.minus(30, ChronoUnit.DAYS)
+            endretDato = naa
+        }.build().apply {
+            this.mottatteOpplysninger?.behandling = this
+            this.saksopplysninger.forEach { it.behandling = this }
         }
     }
 
@@ -73,36 +112,56 @@ object SaksbehandlingDataFactory {
         )
     }
 
-    fun lagInaktivBehandling(): Behandling = lagBehandling().apply {
+    fun lagInaktivBehandling(): Behandling = Behandling.forTest {
+        id = 1L
         status = Behandlingsstatus.AVSLUTTET
+        type = Behandlingstyper.FØRSTEGANG
+        tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+        fagsak { medBruker(); medGsakSaksnummer() }
+        mottatteOpplysninger { }
     }
 
-    fun lagInaktivBehandling(fagsak: Fagsak): Behandling = lagBehandling().apply {
-        this.fagsak = fagsak
+    /**
+     * Lager en inaktiv (avsluttet) Behandling med gitt fagsak.
+     *
+     * MERK: Behandlingen legges IKKE automatisk til fagsak.behandlinger.
+     * Kall `fagsak.leggTilBehandling(behandling)` for å knytte dem sammen.
+     */
+    fun lagInaktivBehandling(fagsak: Fagsak): Behandling {
+        val naa = Instant.now()
+        return BehandlingTestFactory.builderWithDefaults().apply {
+            id = 1L
+            status = Behandlingsstatus.AVSLUTTET
+            type = Behandlingstyper.FØRSTEGANG
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            this.fagsak = fagsak
+            mottatteOpplysninger = MottatteOpplysninger()
+            registrertDato = naa.minus(30, ChronoUnit.DAYS)
+            endretDato = naa
+        }.build().apply {
+            this.mottatteOpplysninger?.behandling = this
+        }
+    }
+
+    fun lagInaktivBehandlingSomIkkeResulterIVedtak(): Behandling = Behandling.forTest {
+        id = 1L
         status = Behandlingsstatus.AVSLUTTET
+        type = Behandlingstyper.FØRSTEGANG
+        tema = Behandlingstema.TRYGDETID
+        fagsak { medBruker(); medGsakSaksnummer() }
     }
 
-    fun lagInaktivBehandlingSomIkkeResulterIVedtak(): Behandling {
-        val nå = Instant.now()
-        return BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medStatus(Behandlingsstatus.AVSLUTTET)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medTema(Behandlingstema.TRYGDETID)
-            .medFagsak(lagFagsak())
-            .medRegistrertDato(nå.minus(30, ChronoUnit.DAYS))
-            .medEndretDato(nå)
-            .build()
-    }
-
-    fun lagBehandlingsresultat(): Behandlingsresultat = Behandlingsresultat().apply {
+    fun lagBehandlingsresultat(): Behandlingsresultat = Behandlingsresultat.forTest {
         id = 1L
         type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-        vedtakMetadata = VedtakMetadata().apply {
+        vedtakMetadata {
             vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
             vedtaksdato = Instant.now().minus(3, ChronoUnit.DAYS)
         }
     }
 
-    fun lagFagsak(): Fagsak = FagsakTestFactory.builder().medBruker().medGsakSaksnummer().build()
+    fun lagFagsak(): Fagsak = Fagsak.forTest {
+        medBruker()
+        medGsakSaksnummer()
+    }
 }

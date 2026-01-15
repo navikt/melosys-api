@@ -14,6 +14,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.anmodningsperiode
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstemaer.*
@@ -88,7 +89,10 @@ internal class EndreSakServiceTest {
 
     @Test
     fun `endring av sak, ikke ingen flyt - oppdater, opprett ny søknad og oppfrisk saksopplysninger`() {
-        val opprinneligFagsak = lagFagsak(TRYGDEAVTALE, TRYGDEAVGIFT)
+        val opprinneligFagsak = lagFagsak {
+            type = TRYGDEAVTALE
+            tema = TRYGDEAVGIFT
+        }
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
             periode = Periode()
             soeknadsland = Soeknadsland()
@@ -225,7 +229,10 @@ internal class EndreSakServiceTest {
 
     @Test
     fun `ikke lov å endre behandlinger med status IVERKSETTER_VEDTAK`() {
-        val opprinneligFagsak = lagFagsak(FTRL, UNNTAK)
+        val opprinneligFagsak = lagFagsak {
+            type = FTRL
+            tema = UNNTAK
+        }
         val behandling = SaksbehandlingDataFactory.lagInaktivBehandling(opprinneligFagsak).apply {
             status = IVERKSETTER_VEDTAK
         }
@@ -250,16 +257,14 @@ internal class EndreSakServiceTest {
 
     @Test
     fun `ikke lov å endre fagsak eller behandlinger med sendt anmodning om unntak`() {
-        val opprinneligFagsak = lagFagsak(FTRL, UNNTAK)
+        val opprinneligFagsak = lagFagsak {
+            type = FTRL
+            tema = UNNTAK
+        }
         val behandling = SaksbehandlingDataFactory.lagBehandling(opprinneligFagsak)
         opprinneligFagsak.leggTilBehandling(behandling)
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns opprinneligFagsak
-        val anmodningsperiode = Anmodningsperiode().apply {
-            setSendtUtland(true)
-        }
-        val resultat = Behandlingsresultat().apply {
-            anmodningsperioder.add(anmodningsperiode)
-        }
+        val resultat = lagBehandlingsresultatMedSendtAnmodning()
         every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandling.id) } returns resultat
 
 
@@ -279,16 +284,14 @@ internal class EndreSakServiceTest {
 
     @Test
     fun `greit å endre behandlingsstatus med sendt anmodning om unntak`() {
-        val sak = lagFagsak(FTRL, UNNTAK)
+        val sak = lagFagsak {
+            type = FTRL
+            tema = UNNTAK
+        }
         val behandling = SaksbehandlingDataFactory.lagBehandling(sak)
         sak.leggTilBehandling(behandling)
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns sak
-        val anmodningsperiode = Anmodningsperiode().apply {
-            setSendtUtland(true)
-        }
-        val resultat = Behandlingsresultat().apply {
-            anmodningsperioder.add(anmodningsperiode)
-        }
+        val resultat = lagBehandlingsresultatMedSendtAnmodning()
         every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandling.id) } returns resultat
 
 
@@ -318,7 +321,10 @@ internal class EndreSakServiceTest {
 
     @Test
     fun `endring av kun mottaksdato eller behandlingsstatus skal ikke endre mottatte opplysninger eller registeropplysninger`() {
-        val sak = lagFagsak(EU_EOS, UNNTAK)
+        val sak = lagFagsak {
+            type = EU_EOS
+            tema = UNNTAK
+        }
         val behandling = SaksbehandlingDataFactory.lagBehandling(sak)
         sak.leggTilBehandling(behandling)
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns sak
@@ -341,7 +347,10 @@ internal class EndreSakServiceTest {
 
     @Test
     fun `endring av sak, ikke ingen flyt - oppdater, opprett ny søknad, oppfrisker ikke når registeropplysninger ikke har blitt hentet før`() {
-        val opprinneligFagsak = lagFagsak(TRYGDEAVTALE, TRYGDEAVGIFT)
+        val opprinneligFagsak = lagFagsak {
+            type = TRYGDEAVTALE
+            tema = TRYGDEAVGIFT
+        }
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
             periode = Periode()
             soeknadsland = Soeknadsland()
@@ -396,7 +405,10 @@ internal class EndreSakServiceTest {
             type = HENVENDELSE
             status = UNDER_BEHANDLING
         }
-        val sak = lagFagsak(FTRL, MEDLEMSKAP_LOVVALG).apply {
+        val sak = lagFagsak {
+            type = FTRL
+            tema = MEDLEMSKAP_LOVVALG
+        }.apply {
             leggTilBehandling(gammelBehandling)
             leggTilBehandling(aktivBehandling)
         }
@@ -435,7 +447,10 @@ internal class EndreSakServiceTest {
 
     @Test
     fun `endring av behandlingstatus og mottaksdato til oppsumering til årsavregningsbehandling`(){
-        val sak = lagFagsak(TRYGDEAVTALE, MEDLEMSKAP_LOVVALG)
+        val sak = lagFagsak {
+            type = TRYGDEAVTALE
+            tema = MEDLEMSKAP_LOVVALG
+        }
         val behandling = SaksbehandlingDataFactory.lagBehandling(sak)
 
         val NY_MOTTAKSDATO = LocalDate.now()
@@ -461,10 +476,15 @@ internal class EndreSakServiceTest {
         }
     }
 
-    private fun lagFagsak(sakstype: Sakstyper, sakstema: Sakstemaer) =
-        Fagsak.forTest {
-            type = sakstype
-            tema = sakstema
-            medBruker()
+    private fun lagFagsak(
+        init: FagsakTestFactory.Builder.() -> Unit = {}
+    ) = Fagsak.forTest {
+        medBruker()
+        init()
+    }
+
+    private fun lagBehandlingsresultatMedSendtAnmodning(): Behandlingsresultat =
+        Behandlingsresultat.forTest {
+            anmodningsperiode { sendtUtland = true }
         }
 }

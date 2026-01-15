@@ -92,7 +92,7 @@ class MedlPeriodeServiceTest {
     @Test
     fun opprettPeriodeForeløpig() {
         setupHappyPathBehandling()
-        val utpekingsperiode = Utpekingsperiode()
+        val utpekingsperiode = utpekingsperiodeForTest()
         every { medlService.opprettPeriodeForeløpig(any(), any(), any()) } returns MEDL_PERIODE_ID
         every { utpekingsperiodeRepository.save(any()) } returns utpekingsperiode
 
@@ -106,9 +106,9 @@ class MedlPeriodeServiceTest {
     fun opprettPeriodeUnderAvklaring() {
         setupHappyPathBehandling(Sakstyper.EU_EOS, Behandlingstema.UTSENDT_ARBEIDSTAKER)
         every { medlService.opprettPeriodeUnderAvklaring(any(), any(), any()) } returns MEDL_PERIODE_ID
-        every { anmodningsperiodeRepository.save(any()) } returns Anmodningsperiode()
+        every { anmodningsperiodeRepository.save(any()) } returns anmodningsperiodeForTest()
 
-        medlPeriodeService.opprettPeriodeUnderAvklaring(Anmodningsperiode(), 1L)
+        medlPeriodeService.opprettPeriodeUnderAvklaring(anmodningsperiodeForTest(), 1L)
         verify { medlService.opprettPeriodeUnderAvklaring(FNR, any(), KildedokumenttypeMedl.HENV_SOKNAD) }
         verify { medlAnmodningsperiodeService.lagreAnmodningsperiode(any()) }
     }
@@ -117,9 +117,9 @@ class MedlPeriodeServiceTest {
     fun opprettPeriodeEndelig() {
         setupHappyPathBehandling()
         every { medlService.opprettPeriodeEndelig(any(), any(), any()) } returns MEDL_PERIODE_ID
-        every { lovvalgsperiodeRepository.save(any()) } returns Lovvalgsperiode()
+        every { lovvalgsperiodeRepository.save(any()) } returns lovvalgsperiodeForTest()
 
-        medlPeriodeService.opprettPeriodeEndelig(Lovvalgsperiode(), 1L)
+        medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiodeForTest(), 1L)
 
         verify { medlService.opprettPeriodeEndelig(FNR, any(), KildedokumenttypeMedl.SED) }
         verify { lovvalgsperiodeRepository.save(any()) }
@@ -131,7 +131,7 @@ class MedlPeriodeServiceTest {
         every { medlService.opprettPeriodeEndelig(FNR, any(), any()) } returns null
 
         shouldThrow<TekniskException> {
-            medlPeriodeService.opprettPeriodeEndelig(1L, Medlemskapsperiode())
+            medlPeriodeService.opprettPeriodeEndelig(1L, medlemskapsperiodeForTest())
         }.message.shouldContain("Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID")
 
         verify(exactly = 0) { medlemskapsperiodeRepository.save(any()) }
@@ -140,7 +140,7 @@ class MedlPeriodeServiceTest {
     @Test
     fun opprettPeriodeEndeligFtrl() {
         setupHappyPathBehandling()
-        val medlemskapsperiode = Medlemskapsperiode()
+        val medlemskapsperiode = medlemskapsperiodeForTest()
         every { medlemskapsperiodeRepository.save(any()) } returns medlemskapsperiode
 
         medlPeriodeService.opprettPeriodeEndelig(1L, medlemskapsperiode)
@@ -152,7 +152,7 @@ class MedlPeriodeServiceTest {
     @Test
     fun opprettOpphørtPeriode() {
         setupHappyPathBehandling()
-        val medlemskapsperiode = Medlemskapsperiode()
+        val medlemskapsperiode = medlemskapsperiodeForTest()
         every { medlemskapsperiodeRepository.save(any()) } returns medlemskapsperiode
 
         medlPeriodeService.opprettOpphørtPeriode(1L, medlemskapsperiode)
@@ -166,7 +166,7 @@ class MedlPeriodeServiceTest {
     fun oppdaterPeriodeEndelig() {
         setupHappyPathBehandling(Sakstyper.EU_EOS, Behandlingstema.UTSENDT_ARBEIDSTAKER)
 
-        val lovvalgsperiode = Lovvalgsperiode().apply {
+        val lovvalgsperiode = lovvalgsperiodeForTest {
             medlPeriodeID = MEDL_PERIODE_ID
             behandlingsresultat = lagBehandlingsResultat()
         }
@@ -181,7 +181,7 @@ class MedlPeriodeServiceTest {
     @Test
     fun oppdaterOpphørtPeriode() {
         setupHappyPathBehandling(Sakstyper.FTRL, Behandlingstema.YRKESAKTIV)
-        val medlemskapsperiode = Medlemskapsperiode().apply {
+        val medlemskapsperiode = medlemskapsperiodeForTest {
             medlPeriodeID = MEDL_PERIODE_ID
         }
 
@@ -195,7 +195,7 @@ class MedlPeriodeServiceTest {
     @Test
     fun oppdaterPeriodeForeløpig() {
         setupHappyPathBehandling(Sakstyper.EU_EOS, Behandlingstema.UTSENDT_ARBEIDSTAKER)
-        val lovvalgsperiode = Lovvalgsperiode().apply {
+        val lovvalgsperiode = lovvalgsperiodeForTest {
             medlPeriodeID = MEDL_PERIODE_ID
             behandlingsresultat = lagBehandlingsResultat()
         }
@@ -216,7 +216,7 @@ class MedlPeriodeServiceTest {
                 medBruker()
             }
         }
-        val lovvalgsperiode = Lovvalgsperiode().apply {
+        val lovvalgsperiode = lovvalgsperiodeForTest {
             medlPeriodeID = MEDL_PERIODE_ID
             behandlingsresultat = lagBehandlingsResultat()
         }
@@ -238,7 +238,7 @@ class MedlPeriodeServiceTest {
             }
         }
 
-        val lovvalgsperiode = Lovvalgsperiode().apply {
+        val lovvalgsperiode = lovvalgsperiodeForTest {
             medlPeriodeID = MEDL_PERIODE_ID
             behandlingsresultat = lagBehandlingsResultat()
         }
@@ -256,7 +256,7 @@ class MedlPeriodeServiceTest {
             tema = Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
             fagsak { medBruker() }
         }
-        val lovvalgsperiode = Lovvalgsperiode().apply {
+        val lovvalgsperiode = lovvalgsperiodeForTest {
             medlPeriodeID = MEDL_PERIODE_ID
             behandlingsresultat = lagBehandlingsResultat()
         }
@@ -292,16 +292,13 @@ class MedlPeriodeServiceTest {
     @Test
     fun avsluttTidligereMedlPeriode_behandlingOgPeriodeFinnes_avviserPeriode() {
         val fagsak = Fagsak.forTest {
-            behandlinger(
-                Behandling.forTest {
-                    status = Behandlingsstatus.AVSLUTTET
-                    id = 1L
-                }
-            )
+            behandling {
+                status = Behandlingsstatus.AVSLUTTET
+                id = 1L
+            }
         }
-        val behandlingsresultat = Behandlingsresultat().apply {
-            lovvalgsperioder =
-                mutableSetOf(Lovvalgsperiode().apply { medlPeriodeID = MEDL_PERIODE_ID })
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            lovvalgsperiode { medlPeriodeID = MEDL_PERIODE_ID }
         }
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { fagsakService.hentFagsak("MEL-1") } returns fagsak
@@ -315,14 +312,12 @@ class MedlPeriodeServiceTest {
     @Test
     fun avsluttTidligereMedlPeriode_ingenEksisterendePeriode_ingenPeriodeBlirAvvist() {
         val fagsak = Fagsak.forTest {
-            behandlinger(
-                Behandling.forTest {
-                    status = Behandlingsstatus.AVSLUTTET
-                    id = 1L
-                }
-            )
+            behandling {
+                status = Behandlingsstatus.AVSLUTTET
+                id = 1L
+            }
         }
-        val behandlingsresultat = Behandlingsresultat().apply { lovvalgsperioder = mutableSetOf() }
+        val behandlingsresultat = Behandlingsresultat.forTest()
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { fagsakService.hentFagsak("MEL-1") } returns fagsak
 
@@ -345,10 +340,9 @@ class MedlPeriodeServiceTest {
     private fun lagBehandlingsResultat(
         sakstype: Sakstyper = Sakstyper.EU_EOS,
         behandlingstema: Behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
-    ):
-        Behandlingsresultat = Behandlingsresultat().apply {
+    ): Behandlingsresultat = Behandlingsresultat.forTest {
         id = 1L
-        behandling = Behandling.forTest {
+        behandling {
             tema = behandlingstema
             fagsak {
                 type = sakstype

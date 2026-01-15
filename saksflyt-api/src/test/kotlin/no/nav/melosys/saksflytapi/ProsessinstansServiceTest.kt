@@ -26,8 +26,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
+import no.nav.melosys.domain.mottatteOpplysninger
 import no.nav.melosys.saksflytapi.domain.*
 import no.nav.melosys.saksflytapi.journalfoering.DokumentRequest
 import no.nav.melosys.saksflytapi.journalfoering.JournalfoeringOpprettRequest
@@ -39,7 +38,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import java.time.LocalDate
-import java.util.UUID
 
 @ExtendWith(MockKExtension::class)
 class ProsessinstansServiceTest {
@@ -200,21 +198,17 @@ class ProsessinstansServiceTest {
     }
 
     private fun lagBehandling(): Behandling = Behandling.forTest {
-        mottatteOpplysninger = MottatteOpplysninger().apply {
-            mottatteOpplysningerData = MottatteOpplysningerData()
-        }
+        mottatteOpplysninger { }
     }
 
     @Test
     fun `opprett prosessinstans for opprett og distribuer brev til bruker skal sende til korrekt mottaker`() {
         val saksbehandler = settInnloggetSaksbehandler()
         val behandling = lagBehandling()
-        val mottaker = Mottaker().apply {
-            rolle = Mottakerroller.BRUKER
+        val mottaker = Mottaker(
+            rolle = Mottakerroller.BRUKER,
             aktørId = "123"
-            personIdent = null
-            orgnr = null
-        }
+        )
 
         val brevbestilling = MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(MANGELBREV_BRUKER)
@@ -239,12 +233,10 @@ class ProsessinstansServiceTest {
     fun `opprett prosessinstans for opprett og distribuer brev til arbeidsgiver skal sende til organisasjon`() {
         val saksbehandler = settInnloggetSaksbehandler()
         val behandling = lagBehandling()
-        val mottaker = Mottaker().apply {
-            rolle = Mottakerroller.ARBEIDSGIVER
-            aktørId = null
-            personIdent = null
+        val mottaker = Mottaker(
+            rolle = Mottakerroller.ARBEIDSGIVER,
             orgnr = "987654321"
-        }
+        )
 
         val brevbestilling = MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(MANGELBREV_ARBEIDSGIVER)
@@ -269,12 +261,10 @@ class ProsessinstansServiceTest {
     fun `opprett prosessinstans for opprett og distribuer brev til fullmektig person skal håndtere personident`() {
         val saksbehandler = settInnloggetSaksbehandler()
         val behandling = lagBehandling()
-        val mottaker = Mottaker().apply {
-            rolle = Mottakerroller.FULLMEKTIG
-            aktørId = null
+        val mottaker = Mottaker(
+            rolle = Mottakerroller.FULLMEKTIG,
             personIdent = "123"
-            orgnr = null
-        }
+        )
 
         val brevbestilling = MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(MANGELBREV_ARBEIDSGIVER)
@@ -299,12 +289,10 @@ class ProsessinstansServiceTest {
     fun `opprett prosessinstans for opprett og distribuer brev til fullmektig organisasjon skal håndtere orgnr`() {
         val saksbehandler = settInnloggetSaksbehandler()
         val behandling = lagBehandling()
-        val mottaker = Mottaker().apply {
-            rolle = Mottakerroller.FULLMEKTIG
-            aktørId = null
-            personIdent = null
+        val mottaker = Mottaker(
+            rolle = Mottakerroller.FULLMEKTIG,
             orgnr = "987654321"
-        }
+        )
 
         val brevbestilling = MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(MANGELBREV_ARBEIDSGIVER)
@@ -327,7 +315,7 @@ class ProsessinstansServiceTest {
 
     @Test
     fun `opprett prosessinstans for journalføring med utenlandsk myndighet skal sette avsender i prosessinstans`() {
-        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest().apply {
+        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest {
             avsenderType = Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET
             avsenderID = "DK"
         }
@@ -347,7 +335,7 @@ class ProsessinstansServiceTest {
 
     @Test
     fun `opprett prosessinstans for journalføring med elektronisk mottakskanal skal ikke sette avsender i prosessinstans`() {
-        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest().apply {
+        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest {
             avsenderType = Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET
             avsenderID = "DK"
             avsenderNavn = "Trygdemyndighet i Danmark"
@@ -374,7 +362,7 @@ class ProsessinstansServiceTest {
 
     @Test
     fun `opprett prosessinstans for journalføring med forvaltningsmelding mottaker bruker skal settes i prosessinstans`() {
-        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest().apply {
+        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest {
             forvaltningsmeldingMottaker = ForvaltningsmeldingMottaker.BRUKER
         }
 
@@ -392,7 +380,7 @@ class ProsessinstansServiceTest {
 
     @Test
     fun `opprett prosessinstans for journalføring med forvaltningsmelding mottaker ingen skal settes i prosessinstans`() {
-        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest().apply {
+        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest {
             forvaltningsmeldingMottaker = ForvaltningsmeldingMottaker.INGEN
         }
 
@@ -412,7 +400,7 @@ class ProsessinstansServiceTest {
 
     @Test
     fun `opprett prosessinstans for journalføring med virksomhet orgnr skal settes i prosessinstans`() {
-        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest().apply {
+        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest {
             brukerID = null
             virksomhetOrgnr = "orgnr"
         }
@@ -429,7 +417,7 @@ class ProsessinstansServiceTest {
 
     @Test
     fun `opprett prosessinstans for journalføring med skal tilordnes true skal settes i prosessinstans`() {
-        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest().apply {
+        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest {
             skalTilordnes = true
         }
 
@@ -447,7 +435,7 @@ class ProsessinstansServiceTest {
 
     @Test
     fun `opprett prosessinstans for journalføring med skal tilordnes false skal settes i prosessinstans`() {
-        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest().apply {
+        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest {
             skalTilordnes = false
         }
 
@@ -465,7 +453,7 @@ class ProsessinstansServiceTest {
 
     @Test
     fun `opprett prosessinstans for journalføring med vedlegg skal sette vedlegg og titler`() {
-        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest().apply {
+        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest {
             hoveddokument.shouldNotBeNull().run {
                 dokumentID = "hovedDokumentID"
                 logiskeVedlegg = mutableListOf("tittel")
@@ -497,14 +485,12 @@ class ProsessinstansServiceTest {
 
     @Test
     fun `opprett prosessinstans for journalføring med fysiske vedlegg skal sette vedlegg og titler`() {
-        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest().apply {
+        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest {
             hoveddokument!!.dokumentID = "hovedDokumentID"
-            val vedlegg = mutableListOf<DokumentRequest>()
-            val fysiskVedlegg = DokumentRequest("dokID1", "tittel1", mutableListOf<String>())
-            vedlegg.add(fysiskVedlegg)
-            val fysiskVedlegg2 = DokumentRequest("hovedDokumentID", "Logisk ??", mutableListOf<String>())
-            vedlegg.add(fysiskVedlegg2)
-            this.vedlegg = vedlegg
+            vedlegg = listOf(
+                DokumentRequest("dokID1", "tittel1", mutableListOf()),
+                DokumentRequest("hovedDokumentID", "Logisk ??", mutableListOf())
+            )
         }
 
 
@@ -761,40 +747,35 @@ class ProsessinstansServiceTest {
         }
     }
 
-    private fun lagMelosysEessiMelding() = MelosysEessiMelding().apply {
-        sedId = UUID.randomUUID().toString()
-        sedVersjon = "v4"
-        aktoerId = "123"
-        artikkel = "12_1"
-        dokumentId = "123321"
-        gsakSaksnummer = 432432L
-        journalpostId = "j123"
-        lovvalgsland = "SE"
-
-        val periode = Periode().apply {
-            fom = LocalDate.EPOCH
-            tom = LocalDate.EPOCH.plusYears(1)
-        }
-        this.periode = periode
-
-        val statsborgerskap = Statsborgerskap("SE")
-
-        rinaSaksnummer = "r123"
-        sedId = "s123"
-        this.statsborgerskap = listOf(statsborgerskap)
-        sedType = "A009"
+    private fun lagMelosysEessiMelding(
+        init: MelosysEessiMelding.() -> Unit = {}
+    ) = MelosysEessiMelding(
+        sedId = "s123",
+        sedVersjon = "v4",
+        aktoerId = "123",
+        artikkel = "12_1",
+        dokumentId = "123321",
+        gsakSaksnummer = 432432L,
+        journalpostId = "j123",
+        lovvalgsland = "SE",
+        periode = Periode(fom = LocalDate.EPOCH, tom = LocalDate.EPOCH.plusYears(1)),
+        statsborgerskap = listOf(Statsborgerskap("SE")),
+        rinaSaksnummer = "r123",
+        sedType = "A009",
         bucType = "LA_BUC_04"
-    }
+    ).apply(init)
 
-    private fun lagJournalfoeringOpprettRequest() = JournalfoeringOpprettRequest().apply {
-        behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
-        journalpostID = "journalpostid"
-        oppgaveID = "oppgaveid"
-        brukerID = "brukerid"
-        avsenderID = "avsenderid"
-        avsenderNavn = "avsendernavn"
-        hoveddokument = DokumentRequest("dokumentid", "hovedkokumenttittel", mutableListOf<String>())
-    }
+    private fun lagJournalfoeringOpprettRequest(
+        init: JournalfoeringOpprettRequest.() -> Unit = {}
+    ) = JournalfoeringOpprettRequest(
+        behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode,
+        journalpostID = "journalpostid",
+        oppgaveID = "oppgaveid",
+        brukerID = "brukerid",
+        avsenderID = "avsenderid",
+        avsenderNavn = "avsendernavn",
+        hoveddokument = DokumentRequest("dokumentid", "hovedkokumenttittel", mutableListOf())
+    ).apply(init)
 
     private fun settInnloggetSaksbehandler(): String {
         val saksbehandler = "Z123456"

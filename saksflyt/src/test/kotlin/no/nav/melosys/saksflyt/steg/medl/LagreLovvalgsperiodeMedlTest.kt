@@ -409,19 +409,19 @@ internal class LagreLovvalgsperiodeMedlTest {
         verify { medlPeriodeService.avvisPeriodeFeilregistrert(opprinneligLovvalgsperiode.hentMedlPeriodeID()) }
     }
 
-    private fun lagVilkaarsresultat(vilkaar: Vilkaar?, oppfylt: Boolean) = Vilkaarsresultat().apply {
-        this.vilkaar = vilkaar
-        this.isOppfylt = oppfylt
+    private fun lagVilkaarsresultat(vilkaar: Vilkaar?, oppfylt: Boolean) = Vilkaarsresultat().also {
+        it.vilkaar = vilkaar
+        it.isOppfylt = oppfylt
     }
 
     private fun lagLovvalgsperiode(
         medlPeriodeID: Long?,
         lovvalgBestemmelse: LovvalgBestemmelse?,
         innvilgelsesResultat: InnvilgelsesResultat?
-    ) = Lovvalgsperiode().apply {
+    ) = Lovvalgsperiode.forTest {
         this.medlPeriodeID = medlPeriodeID
-        this.bestemmelse = lovvalgBestemmelse
-        this.innvilgelsesresultat = innvilgelsesResultat
+        bestemmelse = lovvalgBestemmelse
+        innvilgelsesResultat?.let { this.innvilgelsesresultat = it }
     }
 
 }

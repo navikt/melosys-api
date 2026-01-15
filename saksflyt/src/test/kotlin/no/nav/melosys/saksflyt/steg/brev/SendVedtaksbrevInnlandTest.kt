@@ -9,7 +9,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType
-import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.brev.DoksysBrevbestilling
 import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.brev.NorskMyndighet
@@ -24,12 +23,11 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_k
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad
-import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
+import no.nav.melosys.domain.mottatteopplysninger.soeknad
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -53,16 +51,14 @@ class SendVedtaksbrevInnlandTest {
     @MockK
     private lateinit var avklarteVirksomheterService: AvklarteVirksomheterService
 
-    private lateinit var behandling: Behandling
     private val fakeUnleash = FakeUnleash()
     private lateinit var sendVedtaksbrevInnland: SendVedtaksbrevInnland
     private val doksysBrevbestillingSlot = slot<DoksysBrevbestilling>()
 
     @BeforeEach
     fun setUp() {
-        behandling = lagBehandling()
         fakeUnleash.resetAll()
-        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGID) } returns behandling
+        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGID) } returns lagBehandling()
         every { avklarteVirksomheterService.hentNorskeSelvstendigeForetak(any()) } returns emptyList()
         every { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), any()) } just Runs
         every { prosessinstansService.opprettProsessinstansSendBrev(any(), any(), any()) } just Runs
@@ -117,7 +113,7 @@ class SendVedtaksbrevInnlandTest {
 
 
         val mottakere = listOf(Mottaker.medRolle(Mottakerroller.BRUKER))
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, any(), mottakere) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), mottakere) }
         doksysBrevbestillingSlot.captured.produserbartdokument shouldBe INNVILGELSE_YRKESAKTIV
     }
 
@@ -131,9 +127,9 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans())
 
 
-        verify(exactly = 2) { prosessinstansService.opprettProsessinstanserSendBrev(behandling, any(), any()) }
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, match { it.produserbartdokument == INNVILGELSE_EFTA_STORBRITANNIA }, any()) }
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, match { it.produserbartdokument == ATTEST_A1 }, any()) }
+        verify(exactly = 2) { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), any()) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), match { it.produserbartdokument == INNVILGELSE_EFTA_STORBRITANNIA }, any()) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), match { it.produserbartdokument == ATTEST_A1 }, any()) }
     }
 
     @Test
@@ -149,7 +145,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans())
 
 
-        verify(exactly = 1) { prosessinstansService.opprettProsessinstanserSendBrev(behandling, any(), any()) }
+        verify(exactly = 1) { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), any()) }
         doksysBrevbestillingSlot.captured.produserbartdokument shouldBe INNVILGELSE_YRKESAKTIV
     }
 
@@ -166,9 +162,9 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans())
 
 
-        verify(exactly = 2) { prosessinstansService.opprettProsessinstanserSendBrev(behandling, any(), any()) }
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, match { it.produserbartdokument == INNVILGELSE_EFTA_STORBRITANNIA }, any()) }
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, match { it.produserbartdokument == ATTEST_A1 }, any()) }
+        verify(exactly = 2) { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), any()) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), match { it.produserbartdokument == INNVILGELSE_EFTA_STORBRITANNIA }, any()) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), match { it.produserbartdokument == ATTEST_A1 }, any()) }
     }
 
     @Test
@@ -176,17 +172,17 @@ class SendVedtaksbrevInnlandTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID) } returns
             lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_2))
 
-        val prosessinstans = lagProsessinstans().apply {
-            setData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, true)
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, true)
         }
 
 
         sendVedtaksbrevInnland.utfør(prosessinstans)
 
 
-        verify(exactly = 2) { prosessinstansService.opprettProsessinstanserSendBrev(behandling, any(), any()) }
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, match { it.produserbartdokument == INNVILGELSE_EFTA_STORBRITANNIA }, any()) }
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, match { it.produserbartdokument == ATTEST_A1 }, any()) }
+        verify(exactly = 2) { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), any()) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), match { it.produserbartdokument == INNVILGELSE_EFTA_STORBRITANNIA }, any()) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), match { it.produserbartdokument == ATTEST_A1 }, any()) }
     }
 
     @Test
@@ -195,15 +191,15 @@ class SendVedtaksbrevInnlandTest {
             lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4))
         every { prosessinstansService.opprettProsessinstansSendBrev(any(), capture(doksysBrevbestillingSlot), any()) } just Runs
 
-        val prosessinstans = lagProsessinstans().apply {
-            setData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, true)
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, true)
         }
 
 
         sendVedtaksbrevInnland.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { prosessinstansService.opprettProsessinstansSendBrev(behandling, any(), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)) }
+        verify(exactly = 1) { prosessinstansService.opprettProsessinstansSendBrev(any(), any(), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)) }
         doksysBrevbestillingSlot.captured.produserbartdokument shouldBe ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK
     }
 
@@ -213,15 +209,15 @@ class SendVedtaksbrevInnlandTest {
             lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(KONV_EFTA_STORBRITANNIA_ART18_1))
         every { prosessinstansService.opprettProsessinstansSendBrev(any(), capture(doksysBrevbestillingSlot), any()) } just Runs
 
-        val prosessinstans = lagProsessinstans().apply {
-            setData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, true)
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, true)
         }
 
 
         sendVedtaksbrevInnland.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { prosessinstansService.opprettProsessinstansSendBrev(behandling, any(), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)) }
+        verify(exactly = 1) { prosessinstansService.opprettProsessinstansSendBrev(any(), any(), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)) }
         doksysBrevbestillingSlot.captured.produserbartdokument shouldBe ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK
     }
 
@@ -238,8 +234,8 @@ class SendVedtaksbrevInnlandTest {
 
         val mottakere = listOf(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.HELFO), Mottaker.av(NorskMyndighet.SKATTEETATEN))
 
-        verify(exactly = 1) { prosessinstansService.opprettProsessinstanserSendBrev(behandling, match { it.produserbartdokument == AVSLAG_EFTA_STORBRITANNIA }, mottakere) }
-        verify(exactly = 1) { prosessinstansService.opprettProsessinstansSendBrev(behandling, match { it.produserbartdokument == ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK }, Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)) }
+        verify(exactly = 1) { prosessinstansService.opprettProsessinstanserSendBrev(any(), match { it.produserbartdokument == AVSLAG_EFTA_STORBRITANNIA }, mottakere) }
+        verify(exactly = 1) { prosessinstansService.opprettProsessinstansSendBrev(any(), match { it.produserbartdokument == ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK }, Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)) }
     }
 
     @Test
@@ -253,9 +249,9 @@ class SendVedtaksbrevInnlandTest {
 
 
         val mottakere = listOf(Mottaker.medRolle(Mottakerroller.BRUKER))
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, any(), mottakere) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), mottakere) }
         doksysBrevbestillingSlot.captured.produserbartdokument shouldBe INNVILGELSE_YRKESAKTIV
-        verify(exactly = 0) { prosessinstansService.opprettProsessinstansSendBrev(behandling, any<DoksysBrevbestilling>(), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)) }
+        verify(exactly = 0) { prosessinstansService.opprettProsessinstansSendBrev(any(), any<DoksysBrevbestilling>(), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)) }
     }
 
     @Test
@@ -269,13 +265,14 @@ class SendVedtaksbrevInnlandTest {
 
 
         val mottakere = listOf(Mottaker.medRolle(Mottakerroller.BRUKER))
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, any(), mottakere) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), mottakere) }
         doksysBrevbestillingSlot.captured.produserbartdokument shouldBe INNVILGELSE_YRKESAKTIV_FLERE_LAND
     }
 
     @Test
     fun `utfør innvilgelse FO_883_2004_ART11_2 ikke yrkesaktiv vedtak sendes`() {
-        behandling.tema = Behandlingstema.IKKE_YRKESAKTIV
+        val behandling = lagBehandling { tema = Behandlingstema.IKKE_YRKESAKTIV }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGID) } returns behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID) } returns
             lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_2))
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(Sakstyper.EU_EOS, Behandlingstema.IKKE_YRKESAKTIV) } returns true
@@ -286,7 +283,7 @@ class SendVedtaksbrevInnlandTest {
 
 
         val mottakere = listOf(Mottaker.medRolle(Mottakerroller.BRUKER))
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, any(), mottakere) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), mottakere) }
         doksysBrevbestillingSlot.captured.produserbartdokument shouldBe IKKE_YRKESAKTIV_VEDTAKSBREV
     }
 
@@ -300,7 +297,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans())
 
 
-        verify { prosessinstansService.opprettProsessinstansSendBrev(behandling, any(), Mottaker.medRolle(Mottakerroller.BRUKER)) }
+        verify { prosessinstansService.opprettProsessinstansSendBrev(any(), any(), Mottaker.medRolle(Mottakerroller.BRUKER)) }
         doksysBrevbestillingSlot.captured.produserbartdokument shouldBe ORIENTERING_UTPEKING_UTLAND
     }
 
@@ -314,31 +311,42 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans())
 
 
-        verify(exactly = 0) { prosessinstansService.opprettProsessinstansSendBrev(behandling, any<DoksysBrevbestilling>(), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)) }
+        verify(exactly = 0) { prosessinstansService.opprettProsessinstansSendBrev(any(), any<DoksysBrevbestilling>(), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)) }
     }
 
     @Test
     fun `utfør innvilgelse 13_1A med utenlandsk foretak sender brev til statlig skatteoppkreving`() {
+        val behandling = lagBehandling {
+            mottatteOpplysninger {
+                soeknad {
+                    foretakUtland("123456789", selvstendig = false)
+                }
+            }
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGID) } returns behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID) } returns
             lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A))
         every { prosessinstansService.opprettProsessinstanserSendBrev(any(), capture(doksysBrevbestillingSlot), any()) } just Runs
-
-        val arbeidsgiverUtland = ForetakUtland().apply {
-            selvstendigNæringsvirksomhet = false
-        }
-        behandling.mottatteOpplysninger!!.mottatteOpplysningerData.foretakUtland.add(arbeidsgiverUtland)
 
 
         sendVedtaksbrevInnland.utfør(lagProsessinstans())
 
 
         val mottakere = listOf(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.SKATTEINNKREVER_UTLAND))
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, any(), mottakere) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), mottakere) }
         doksysBrevbestillingSlot.captured.produserbartdokument shouldBe INNVILGELSE_YRKESAKTIV_FLERE_LAND
     }
 
     @Test
     fun `utfør innvilgelse 11_3_A med selvstendig utenlandsk foretak sender ikke brev til statlig skatteoppkreving`() {
+        val behandling = lagBehandling {
+            mottatteOpplysninger {
+                soeknad {
+                    foretakUtland("123456789", selvstendig = true)
+                }
+            }
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGID) } returns behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID) } returns
             lagBehandlingsresultatMedAvklarteFakta(
                 lagInnvilgetLovvalgsperiode(FO_883_2004_ART11_3A),
@@ -346,46 +354,54 @@ class SendVedtaksbrevInnlandTest {
             )
         every { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), any()) } just Runs
 
-        val arbeidsgiverUtland = ForetakUtland().apply {
-            selvstendigNæringsvirksomhet = true
-        }
-        behandling.mottatteOpplysninger!!.mottatteOpplysningerData.foretakUtland.add(arbeidsgiverUtland)
-
 
         sendVedtaksbrevInnland.utfør(lagProsessinstans())
 
 
         val mottakere = listOf(Mottaker.medRolle(Mottakerroller.BRUKER))
-        verify(exactly = 2) { prosessinstansService.opprettProsessinstanserSendBrev(behandling, any(), mottakere) }
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, match { it.produserbartdokument == INNVILGELSE_EFTA_STORBRITANNIA }, any()) }
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, match { it.produserbartdokument == ATTEST_A1 }, any()) }
+        verify(exactly = 2) { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), mottakere) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), match { it.produserbartdokument == INNVILGELSE_EFTA_STORBRITANNIA }, any()) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), match { it.produserbartdokument == ATTEST_A1 }, any()) }
     }
 
     @Test
     fun `utfør innvilgelse 16_1 med utenlandsk selvstendig arbeid sender ikke brev til statlig skatteoppkreving`() {
-        val behandlingsresultat = lagBehandlingsresultat(lagLovvalgsperiodeArt16_1()).apply {
-            anmodningsperioder.add(lagAnmodningsperiodeMedSvar())
+        val behandling = lagBehandling {
+            mottatteOpplysninger {
+                soeknad {
+                    foretakUtland("123456789", selvstendig = true)
+                }
+            }
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGID) } returns behandling
+        val behandlingsresultat = lagBehandlingsresultat(lagLovvalgsperiodeArt16_1()) {
+            anmodningsperiode {
+                anmodetAv = "Z111111"
+                anmodningsperiodeSvar {
+                    anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
+                }
+            }
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID) } returns behandlingsresultat
         every { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), any()) } just Runs
-
-        val utenlandskSelvstendigVirksomhet = ForetakUtland().apply {
-            selvstendigNæringsvirksomhet = true
-        }
-        behandling.mottatteOpplysninger!!.mottatteOpplysningerData.foretakUtland.add(utenlandskSelvstendigVirksomhet)
 
 
         sendVedtaksbrevInnland.utfør(lagProsessinstans())
 
 
         val mottakere = listOf(Mottaker.medRolle(Mottakerroller.BRUKER))
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, any<DoksysBrevbestilling>(), mottakere) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), any<DoksysBrevbestilling>(), mottakere) }
     }
 
     @Test
     fun `utfør innvilgelse 16_1 saksbehandler ikke satt bruker saksbehandler som anmodet om unntak ved brevbestilling`() {
-        val behandlingsresultat = lagBehandlingsresultat(lagLovvalgsperiodeArt16_1()).apply {
-            anmodningsperioder.add(lagAnmodningsperiodeMedSvar())
+        val behandlingsresultat = lagBehandlingsresultat(lagLovvalgsperiodeArt16_1()) {
+            anmodningsperiode {
+                anmodetAv = "Z111111"
+                anmodningsperiodeSvar {
+                    anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
+                }
+            }
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID) } returns behandlingsresultat
         every { prosessinstansService.opprettProsessinstanserSendBrev(any(), capture(doksysBrevbestillingSlot), any()) } just Runs
@@ -398,24 +414,30 @@ class SendVedtaksbrevInnlandTest {
 
         prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER) shouldBe null
         val mottakere = listOf(Mottaker.medRolle(Mottakerroller.BRUKER))
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, any(), mottakere) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), mottakere) }
         doksysBrevbestillingSlot.captured.avsenderID shouldBe "Z111111"
     }
 
     @Test
     fun `utfør innvilgelse 12_1 sender ikke brev til statlig skatteoppkreving`() {
+        val behandling = lagBehandling {
+            mottatteOpplysninger {
+                soeknad {
+                    foretakUtland("123456789")
+                }
+            }
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGID) } returns behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID) } returns
             lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART12_1))
         every { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), any()) } just Runs
-
-        behandling.mottatteOpplysninger!!.mottatteOpplysningerData.foretakUtland.add(ForetakUtland())
 
 
         sendVedtaksbrevInnland.utfør(lagProsessinstans())
 
 
         val mottakere = listOf(Mottaker.medRolle(Mottakerroller.BRUKER))
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, any<DoksysBrevbestilling>(), mottakere) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), any<DoksysBrevbestilling>(), mottakere) }
     }
 
     @Test
@@ -428,7 +450,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans())
 
 
-        verify { prosessinstansService.opprettProsessinstansSendBrev(behandling, any(), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)) }
+        verify { prosessinstansService.opprettProsessinstansSendBrev(any(), any(), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)) }
         doksysBrevbestillingSlot.captured.produserbartdokument shouldBe ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK
     }
 
@@ -443,27 +465,22 @@ class SendVedtaksbrevInnlandTest {
 
 
         val mottakere = listOf(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.HELFO), Mottaker.av(NorskMyndighet.SKATTEETATEN))
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, any(), mottakere) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), mottakere) }
         doksysBrevbestillingSlot.captured.produserbartdokument shouldBe AVSLAG_YRKESAKTIV
     }
 
     @Test
     fun `utfør avslag 12_1 med arbeidsgiver sender til arbeidsgiver`() {
+        // Fagsak har allerede ARBEIDSGIVER fra lagBehandling(), så testen passerer uten ekstra oppsett
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID) } returns
             lagBehandlingsresultat(lagLovvalgsperiode(FO_883_2004_ART12_1, LocalDate.now(), Land_iso2.HR, false))
         every { prosessinstansService.opprettProsessinstansSendBrev(any(), capture(doksysBrevbestillingSlot), any()) } just Runs
-
-        val arbeidsgiver = Aktoer().apply {
-            rolle = Aktoersroller.ARBEIDSGIVER
-            orgnr = "123456789"
-        }
-        behandling.fagsak.leggTilAktør(arbeidsgiver)
 
 
         sendVedtaksbrevInnland.utfør(lagProsessinstans())
 
 
-        verify { prosessinstansService.opprettProsessinstansSendBrev(behandling, any(), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)) }
+        verify { prosessinstansService.opprettProsessinstansSendBrev(any(), any(), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)) }
         doksysBrevbestillingSlot.captured.produserbartdokument shouldBe ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK
     }
 
@@ -478,7 +495,7 @@ class SendVedtaksbrevInnlandTest {
 
 
         val mottakere = listOf(Mottaker.medRolle(Mottakerroller.BRUKER))
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, any<DoksysBrevbestilling>(), mottakere) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), any<DoksysBrevbestilling>(), mottakere) }
     }
 
     @Test
@@ -493,17 +510,17 @@ class SendVedtaksbrevInnlandTest {
 
 
         val mottakere = listOf(Mottaker.medRolle(Mottakerroller.BRUKER))
-        verify(exactly = 2) { prosessinstansService.opprettProsessinstanserSendBrev(behandling, any(), mottakere) }
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, match { it.produserbartdokument == INNVILGELSE_EFTA_STORBRITANNIA }, any()) }
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, match { it.produserbartdokument == ATTEST_A1 }, any()) }
+        verify(exactly = 2) { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), mottakere) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), match { it.produserbartdokument == INNVILGELSE_EFTA_STORBRITANNIA }, any()) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), match { it.produserbartdokument == ATTEST_A1 }, any()) }
 
-        verify { prosessinstansService.opprettProsessinstansSendBrev(behandling, any(), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)) }
+        verify { prosessinstansService.opprettProsessinstansSendBrev(any(), any(), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)) }
         doksysBrevbestillingSlot.captured.produserbartdokument shouldBe ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK
     }
 
     @Test
     fun `utfør på fastsatt lovvalg i Norge uten innvilget bestemmelse går til feilet maskinelt`() {
-        val behandlingsresultat = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ANNET)).apply {
+        val behandlingsresultat = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ANNET)) {
             type = Behandlingsresultattyper.IKKE_FASTSATT
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID) } returns behandlingsresultat
@@ -517,16 +534,11 @@ class SendVedtaksbrevInnlandTest {
 
     @Test
     fun `utfør på innvilgelsesbrev 12_1 med begrunnelseskode forkortet periode oppdaterer brevdata`() {
-        val behandlingsresultat = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART12_1)).apply {
-            avklartefakta.add(
-                Avklartefakta(
-                    this,
-                    Avklartefaktatyper.AARSAK_ENDRING_PERIODE.kode,
-                    Avklartefaktatyper.AARSAK_ENDRING_PERIODE,
-                    null,
-                    Endretperiode.ENDRINGER_ARBEIDSSITUASJON.kode
-                )
-            )
+        val behandlingsresultat = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART12_1)) {
+            avklartefakta {
+                type = Avklartefaktatyper.AARSAK_ENDRING_PERIODE
+                fakta = Endretperiode.ENDRINGER_ARBEIDSSITUASJON.kode
+            }
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID) } returns behandlingsresultat
         every { prosessinstansService.opprettProsessinstanserSendBrev(any(), capture(doksysBrevbestillingSlot), any()) } just Runs
@@ -536,11 +548,13 @@ class SendVedtaksbrevInnlandTest {
 
 
         val mottakere = listOf(Mottaker.medRolle(Mottakerroller.BRUKER))
-        verify { prosessinstansService.opprettProsessinstanserSendBrev(behandling, any(), mottakere) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), mottakere) }
         doksysBrevbestillingSlot.captured.begrunnelseKode shouldBe Endretperiode.ENDRINGER_ARBEIDSSITUASJON.kode
     }
 
-    private fun lagProsessinstans() = Prosessinstans.forTest {
+    private fun lagProsessinstans(
+        init: ProsessinstansTestFactory.ProsessinstansTestBuilder.() -> Unit = {}
+    ) = Prosessinstans.forTest {
         type = ProsessType.IVERKSETT_VEDTAK_EOS
         status = ProsessStatus.KLAR
         behandling {
@@ -548,26 +562,22 @@ class SendVedtaksbrevInnlandTest {
             fagsak = lagFagsak()
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             type = Behandlingstyper.FØRSTEGANG
-            mottatteOpplysninger = MottatteOpplysninger().apply {
-                mottatteOpplysningerData = Soeknad()
-            }
+            mottatteOpplysninger { soeknad { } }
         }
         medData(ProsessDataKey.BREVDATA, BrevData())
+        init()
     }
 
-    private fun lagBehandling() = Behandling.forTest {
+    private fun lagBehandling(
+        init: BehandlingTestFactory.BehandlingTestBuilder.() -> Unit = {}
+    ) = Behandling.forTest {
         id = BEHANDLINGID
         type = Behandlingstyper.FØRSTEGANG
         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-        mottatteOpplysninger = MottatteOpplysninger().apply {
-            mottatteOpplysningerData = Soeknad()
-        }
+        mottatteOpplysninger { soeknad { } }
         fagsak {
             gsakSaksnummer = 123456789L
-            leggTilAktør(Aktoer().apply {
-                aktørId = "1"
-                rolle = Aktoersroller.BRUKER
-            })
+            medBruker { aktørId = "1" }
             leggTilAktør(Aktoer().apply {
                 aktørId = "2"
                 rolle = Aktoersroller.TRYGDEMYNDIGHET
@@ -578,14 +588,12 @@ class SendVedtaksbrevInnlandTest {
                 orgnr = "123456789"
             })
         }
+        init()
     }
 
     private fun lagFagsak() = Fagsak.forTest {
         gsakSaksnummer = 123456789L
-        leggTilAktør(Aktoer().apply {
-            aktørId = "1"
-            rolle = Aktoersroller.BRUKER
-        })
+        medBruker { aktørId = "1" }
         leggTilAktør(Aktoer().apply {
             aktørId = "2"
             rolle = Aktoersroller.TRYGDEMYNDIGHET
@@ -597,31 +605,25 @@ class SendVedtaksbrevInnlandTest {
         })
     }
 
-    private fun lagAnmodningsperiodeMedSvar() = Anmodningsperiode().apply {
-        anmodetAv = "Z111111"
-        anmodningsperiodeSvar = AnmodningsperiodeSvar().apply {
-            anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
-        }
-    }
-
     private fun lagLovvalgsperiodeArt16_1() = lagInnvilgetLovvalgsperiode(FO_883_2004_ART16_1)
 
     private fun lagInnvilgetLovvalgsperiode(bestemmelse: LovvalgBestemmelse) =
         lagLovvalgsperiode(bestemmelse, LocalDate.now(), Land_iso2.NO, true)
 
-    private fun lagLovvalgsperiode(bestemmelse: LovvalgBestemmelse, fom: LocalDate, land: Land_iso2, innvilget: Boolean) = Lovvalgsperiode().apply {
+    private fun lagLovvalgsperiode(
+        bestemmelse: LovvalgBestemmelse,
+        fom: LocalDate,
+        land: Land_iso2,
+        innvilget: Boolean
+    ) = lovvalgsperiodeForTest {
         this.fom = fom
         tom = fom.plusDays(1)
         lovvalgsland = land
         this.bestemmelse = bestemmelse
-        innvilgelsesresultat = if (innvilget) {
-            InnvilgelsesResultat.INNVILGET
-        } else {
-            InnvilgelsesResultat.AVSLAATT
-        }
+        innvilgelsesresultat = if (innvilget) InnvilgelsesResultat.INNVILGET else InnvilgelsesResultat.AVSLAATT
     }
 
-    private fun lagUtpekingsperiode() = Utpekingsperiode().apply {
+    private fun lagUtpekingsperiode() = utpekingsperiodeForTest {
         fom = LocalDate.MIN
         tom = LocalDate.MIN.plusDays(1)
         lovvalgsland = Land_iso2.PL
@@ -631,35 +633,94 @@ class SendVedtaksbrevInnlandTest {
     private fun lagBehandlingsresultat(periode: Lovvalgsperiode) =
         lagBehandlingsresultat(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, setOf(periode), Land_iso2.NO)
 
-    private fun lagBehandlingsresultat(utpekingsperiode: Utpekingsperiode, lovvalgsperiode: Lovvalgsperiode) = Behandlingsresultat().apply {
-        utpekingsperioder = mutableSetOf(utpekingsperiode)
-        lovvalgsperioder = mutableSetOf(lovvalgsperiode)
+    private fun lagBehandlingsresultat(
+        periode: Lovvalgsperiode,
+        init: BehandlingsresultatTestFactory.Builder.() -> Unit
+    ) = Behandlingsresultat.forTest {
+        lovvalgsperiode {
+            fom = periode.fom!!
+            tom = periode.tom
+            lovvalgsland = periode.lovvalgsland
+            bestemmelse = periode.bestemmelse
+            innvilgelsesresultat = periode.innvilgelsesresultat!!
+        }
+        type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+        fastsattAvLand = Land_iso2.NO
+        init()
+    }
+
+    private fun lagBehandlingsresultat(
+        utpekingsperiode: Utpekingsperiode,
+        lovvalgsperiode: Lovvalgsperiode
+    ) = Behandlingsresultat.forTest {
+        utpekingsperiode {
+            fom = utpekingsperiode.fom!!
+            tom = utpekingsperiode.tom
+            lovvalgsland = utpekingsperiode.lovvalgsland
+            bestemmelse = utpekingsperiode.bestemmelse
+        }
+        lovvalgsperiode {
+            fom = lovvalgsperiode.fom!!
+            tom = lovvalgsperiode.tom
+            this.lovvalgsland = lovvalgsperiode.lovvalgsland
+            this.bestemmelse = lovvalgsperiode.bestemmelse
+            innvilgelsesresultat = lovvalgsperiode.innvilgelsesresultat!!
+        }
         type = Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
         fastsattAvLand = Land_iso2.NO
     }
 
-    private fun lagBehandlingsresultat(type: Behandlingsresultattyper, perioder: Set<Lovvalgsperiode>, land: Land_iso2?) = Behandlingsresultat().apply {
-        lovvalgsperioder = perioder.toMutableSet()
+    private fun lagBehandlingsresultat(
+        type: Behandlingsresultattyper,
+        perioder: Set<Lovvalgsperiode>,
+        land: Land_iso2?
+    ) = Behandlingsresultat.forTest {
+        perioder.forEach { periode ->
+            lovvalgsperiode {
+                fom = periode.fom!!
+                tom = periode.tom
+                lovvalgsland = periode.lovvalgsland
+                bestemmelse = periode.bestemmelse
+                innvilgelsesresultat = periode.innvilgelsesresultat!!
+            }
+        }
         this.type = type
         fastsattAvLand = land
-        vilkaarsresultater = mutableSetOf()
     }
 
-    private fun lagBehandlingsresultatMedAvklarteFakta(periode: Lovvalgsperiode, avklartefakta: Set<Avklartefakta>) = Behandlingsresultat().apply {
-        lovvalgsperioder = mutableSetOf(periode)
+    private fun lagBehandlingsresultatMedAvklarteFakta(
+        periode: Lovvalgsperiode,
+        avklartefaktaSet: Set<no.nav.melosys.domain.avklartefakta.Avklartefakta>
+    ) = Behandlingsresultat.forTest {
+        lovvalgsperiode {
+            fom = periode.fom!!
+            tom = periode.tom
+            lovvalgsland = periode.lovvalgsland
+            bestemmelse = periode.bestemmelse
+            innvilgelsesresultat = periode.innvilgelsesresultat!!
+        }
         type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
         fastsattAvLand = Land_iso2.NO
-        vilkaarsresultater = mutableSetOf()
-        this.avklartefakta = avklartefakta.toMutableSet()
+        avklartefaktaSet.forEach { fakta ->
+            avklartefakta {
+                this.type = fakta.type
+                this.fakta = fakta.fakta
+                subjekt = fakta.subjekt
+            }
+        }
     }
 
     private fun lagBehandlingsresultatUtenPerioder(behandlingstype: Behandlingsresultattyper) =
         lagBehandlingsresultat(behandlingstype, emptySet(), Land_iso2.NO)
 
-    private fun lagAvklarteFakta(type: Avklartefaktatyper, fakta: String, subjekt: String) = Avklartefakta().apply {
-        this.subjekt = subjekt
+    private fun lagAvklarteFakta(
+        type: Avklartefaktatyper,
+        fakta: String,
+        subjekt: String
+    ) = avklartefaktaForTest {
         this.type = type
         this.fakta = fakta
+        this.subjekt = subjekt
     }
 
     companion object {

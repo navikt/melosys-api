@@ -5,8 +5,8 @@ import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.UtenlandskMyndighet
+import no.nav.melosys.domain.saksopplysningForTest
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.arkiv.Distribusjonstype
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
@@ -129,7 +129,7 @@ class DistribuerJournalpostTest {
             setData(ProsessDataKey.ORGNR, "123456789")
         }
 
-        val saksopplysning = Saksopplysning().apply {
+        val saksopplysning = saksopplysningForTest {
             dokument = TestdataFactory.lagOrgMedPostadresse()
         }
 
@@ -158,7 +158,7 @@ class DistribuerJournalpostTest {
             setData(ProsessDataKey.ORGNR, "123456789")
         }
 
-        val saksopplysning = Saksopplysning().apply {
+        val saksopplysning = saksopplysningForTest {
             dokument = TestdataFactory.lagOrgMedForretningsadresse()
         }
 
