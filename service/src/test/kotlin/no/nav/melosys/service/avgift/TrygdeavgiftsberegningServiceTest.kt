@@ -1575,6 +1575,227 @@ internal class TrygdeavgiftsberegningServiceTest {
                     }
                 }
             }
+
+            @Test
+            fun `gir tom skatt og inntekt når tomdato year før now year, lovvalgsperiode`() {
+                unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+
+                val inneværendeÅr = LocalDate.now().year
+
+                val opprinneligBehandling = Behandling.forTest {
+                    id = 99L
+                    tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+                    fagsak {
+                        type = Sakstyper.EU_EOS
+                        tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                    }
+                }
+
+                val behandling = Behandling.forTest {
+                    id = BEHANDLING_ID
+                    tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+                    type = Behandlingstyper.NY_VURDERING
+                    fagsak {
+                        type = Sakstyper.EU_EOS
+                        tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                    }
+                }
+                behandling.opprinneligBehandling = opprinneligBehandling
+
+                val behandlingsresultat = Behandlingsresultat.forTest {
+                    this.behandling = behandling
+                    lovvalgsperiode {
+                        fom = LocalDate.of(inneværendeÅr - 2, 1, 1)
+                        tom = LocalDate.of(inneværendeÅr - 1, 12, 31)
+                    }
+                }
+
+                every { mockBehandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+                every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
+                val result = trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(BEHANDLING_ID)
+
+                with(result) {
+                    skatteforholdsperioder.shouldBeEmpty()
+                    inntektsperioder.shouldBeEmpty()
+                }
+            }
+
+            @Test
+            fun `gir tom skatt og inntekt når tomdato year før now year, medlemskapsperiode`() {
+                unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+
+                val inneværendeÅr = LocalDate.now().year
+
+                val opprinneligBehandling = Behandling.forTest {
+                    id = 99L
+                    tema = Behandlingstema.YRKESAKTIV
+                    fagsak {
+                        type = Sakstyper.FTRL
+                        tema = Sakstemaer.TRYGDEAVGIFT
+                    }
+                }
+
+                val behandling = Behandling.forTest {
+                    id = BEHANDLING_ID
+                    tema = Behandlingstema.YRKESAKTIV
+                    type = Behandlingstyper.NY_VURDERING
+                    fagsak {
+                        type = Sakstyper.FTRL
+                        tema = Sakstemaer.TRYGDEAVGIFT
+                    }
+                }
+                behandling.opprinneligBehandling = opprinneligBehandling
+
+                val behandlingsresultat = Behandlingsresultat.forTest {
+                    this.behandling = behandling
+                    medlemskapsperiode {
+                        fom = LocalDate.of(inneværendeÅr - 2, 1, 1)
+                        tom = LocalDate.of(inneværendeÅr - 1, 12, 31)
+                    }
+                }
+
+                every { mockBehandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+                every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
+                val result = trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(BEHANDLING_ID)
+
+                with(result) {
+                    skatteforholdsperioder.shouldBeEmpty()
+                    inntektsperioder.shouldBeEmpty()
+                }
+            }
+
+            @Test
+            fun `gir tom skatt og inntekt når tomdato year før now year, helseutgiftDekkes`() {
+                // HelseutgiftDekkesPeriode har sin egen beregningsservice, men finnAvgiftpliktigPeriode
+                // støtter også denne periode typen, så legger inn en test her. Planen er å få
+                // HelseutgiftDekkesPeriode over på denne beregningen også. Er en mer refaktorerings oppgave
+                unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+
+                val inneværendeÅr = LocalDate.now().year
+
+                val opprinneligBehandling = Behandling.forTest {
+                    id = 99L
+                    tema = Behandlingstema.PENSJONIST
+                    fagsak {
+                        type = Sakstyper.EU_EOS
+                        tema = Sakstemaer.TRYGDEAVGIFT
+                    }
+                }
+
+                val behandling = Behandling.forTest {
+                    id = BEHANDLING_ID
+                    tema = Behandlingstema.PENSJONIST
+                    type = Behandlingstyper.NY_VURDERING
+                    fagsak {
+                        type = Sakstyper.EU_EOS
+                        tema = Sakstemaer.TRYGDEAVGIFT
+                    }
+                }
+                behandling.opprinneligBehandling = opprinneligBehandling
+
+                val behandlingsresultat = Behandlingsresultat.forTest {
+                    this.behandling = behandling
+                    helseutgiftDekkesPeriode {
+                        fomDato = LocalDate.of(inneværendeÅr - 2, 1, 1)
+                        tomDato = LocalDate.of(inneværendeÅr - 1, 12, 31)
+                    }
+                }
+
+                every { mockBehandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+                every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
+                val result = trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(BEHANDLING_ID)
+
+                with(result) {
+                    skatteforholdsperioder.shouldBeEmpty()
+                    inntektsperioder.shouldBeEmpty()
+                }
+            }
+
+            @Test
+            fun `skal returnere opprinnelige perioder når behandling er avsluttet og det er ny vurdering`() {
+                unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+
+                val inneværendeÅr = LocalDate.now().year
+
+                val opprinneligBehandling = Behandling.forTest {
+                    id = 99L
+                    tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+                    fagsak {
+                        type = Sakstyper.EU_EOS
+                        tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                    }
+                }
+
+                val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
+                    id = 99L
+                    behandling = opprinneligBehandling
+                    lovvalgsperiode {
+                        fom = LocalDate.of(inneværendeÅr - 1, 6, 1)
+                        tom = LocalDate.of(inneværendeÅr, 12, 31)
+
+                        trygdeavgiftsperiode {
+                            periodeFra = LocalDate.of(inneværendeÅr - 1, 6, 1)
+                            periodeTil = LocalDate.of(inneværendeÅr, 12, 31)
+                            trygdeavgiftsbeløpMd = BigDecimal.valueOf(1000)
+                            trygdesats = BigDecimal.valueOf(7.9)
+
+                            grunnlagSkatteforholdTilNorge {
+                                fomDato = LocalDate.of(inneværendeÅr - 1, 6, 1)
+                                tomDato = LocalDate.of(inneværendeÅr, 12, 31)
+                                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                            }
+
+                            grunnlagInntekstperiode {
+                                fomDato = LocalDate.of(inneværendeÅr - 1, 7, 1)
+                                tomDato = LocalDate.of(inneværendeÅr, 11, 30)
+                                type = Inntektskildetype.ARBEIDSINNTEKT
+                                avgiftspliktigMndInntekt = Penger(BigDecimal.valueOf(50000))
+                            }
+                        }
+                    }
+                }
+
+                val behandling = Behandling.forTest {
+                    id = BEHANDLING_ID
+                    tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+                    type = Behandlingstyper.NY_VURDERING
+                    fagsak {
+                        type = Sakstyper.EU_EOS
+                        tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                    }
+                }
+                behandling.opprinneligBehandling = opprinneligBehandling
+
+                val behandlingsresultat = Behandlingsresultat.forTest {
+                    this.behandling = behandling
+                    lovvalgsperiode {
+                        fom = LocalDate.of(inneværendeÅr - 1, 1, 1)
+                        tom = LocalDate.of(inneværendeÅr, 12, 31)
+                    }
+                }
+
+                every { mockBehandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+                every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+                every { mockBehandlingsresultatService.hentBehandlingsresultat(99L) } returns opprinneligBehandlingsresultat
+
+                val result = trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(BEHANDLING_ID)
+                val førsteJanuar = LocalDate.now().withDayOfYear(1)
+
+                with(result) {
+                    skatteforholdsperioder.shouldHaveSize(1).single().run {
+                        fomDato shouldBe førsteJanuar
+                        tomDato shouldBe LocalDate.of(inneværendeÅr, 12, 31)
+                    }
+
+                    inntektsperioder.shouldHaveSize(1).single().run {
+                        fomDato shouldBe førsteJanuar
+                        tomDato shouldBe LocalDate.of(inneværendeÅr, 11, 30)
+                    }
+                }
+            }
         }
 
         @Nested
@@ -1760,6 +1981,88 @@ internal class TrygdeavgiftsberegningServiceTest {
                         LocalDate.of(inneværendeÅr - 2, 1, 1),
                         LocalDate.of(2024, 7, 1)
                     )
+                }
+            }
+
+            @Test
+            fun `skal returnere opprinnelige perioder selv om lovvalgsperioder er avsluttet`() {
+                unleash.disable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+
+                val inneværendeÅr = LocalDate.now().year
+
+                val opprinneligBehandling = Behandling.forTest {
+                    id = 99L
+                    tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+                    fagsak {
+                        type = Sakstyper.EU_EOS
+                        tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                    }
+                }
+
+                val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
+                    id = 99L
+                    behandling = opprinneligBehandling
+                    lovvalgsperiode {
+                        fom = LocalDate.of(inneværendeÅr - 1, 6, 1)
+                        tom = LocalDate.of(inneværendeÅr, 12, 31)
+
+                        trygdeavgiftsperiode {
+                            periodeFra = LocalDate.of(inneværendeÅr - 1, 6, 1)
+                            periodeTil = LocalDate.of(inneværendeÅr, 12, 31)
+                            trygdeavgiftsbeløpMd = BigDecimal.valueOf(1000)
+                            trygdesats = BigDecimal.valueOf(7.9)
+
+                            grunnlagSkatteforholdTilNorge {
+                                fomDato = LocalDate.of(inneværendeÅr - 1, 6, 1)
+                                tomDato = LocalDate.of(inneværendeÅr, 12, 31)
+                                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                            }
+
+                            grunnlagInntekstperiode {
+                                fomDato = LocalDate.of(inneværendeÅr - 1, 7, 1)
+                                tomDato = LocalDate.of(inneværendeÅr, 11, 30)
+                                type = Inntektskildetype.ARBEIDSINNTEKT
+                                avgiftspliktigMndInntekt = Penger(BigDecimal.valueOf(50000))
+                            }
+                        }
+                    }
+                }
+
+                val behandling = Behandling.forTest {
+                    id = BEHANDLING_ID
+                    tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+                    type = Behandlingstyper.NY_VURDERING
+                    fagsak {
+                        type = Sakstyper.EU_EOS
+                        tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                    }
+                }
+                behandling.opprinneligBehandling = opprinneligBehandling
+
+                val behandlingsresultat = Behandlingsresultat.forTest {
+                    this.behandling = behandling
+                    lovvalgsperiode {
+                        fom = LocalDate.of(inneværendeÅr - 2, 1, 1)
+                        tom = LocalDate.of(inneværendeÅr - 1, 12, 31)
+                    }
+                }
+
+                every { mockBehandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+                every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+                every { mockBehandlingsresultatService.hentBehandlingsresultat(99L) } returns opprinneligBehandlingsresultat
+
+                val result = trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(BEHANDLING_ID)
+
+                with(result) {
+                    skatteforholdsperioder.shouldHaveSize(1).single().run {
+                        fomDato shouldBe LocalDate.of(inneværendeÅr - 1, 6, 1)
+                        tomDato shouldBe LocalDate.of(inneværendeÅr, 12, 31)
+                    }
+
+                    inntektsperioder.shouldHaveSize(1).single().run {
+                        fomDato shouldBe LocalDate.of(inneværendeÅr - 1, 7, 1)
+                        tomDato shouldBe LocalDate.of(inneværendeÅr, 11, 30)
+                    }
                 }
             }
         }
