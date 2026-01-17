@@ -66,21 +66,33 @@ public class SaksopplysningKilde {
         this.mottattDokument = mottattDokument;
     }
 
+    /**
+     * Equals implementation that avoids using @Lob field (mottattDokument) to ensure stable Set behavior.
+     * <p>
+     * Using @Lob in equals/hashCode causes issues because CLOB representations can vary between
+     * Hibernate sessions, leading to unstable hashCode values and incorrect Set membership detection.
+     * This can cause OptimisticLockingException even without actual concurrent modification.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof SaksopplysningKilde that)) {
             return false;
         }
-        SaksopplysningKilde that = (SaksopplysningKilde) o;
-        return Objects.equals(this.kilde, that.kilde)
-            && Objects.equals(this.mottattDokument, that.mottattDokument);
+        // Persisted entities: compare by id only
+        if (this.id != null && that.id != null) {
+            return this.id.equals(that.id);
+        }
+        // Unpersisted: use business key WITHOUT @Lob field
+        return Objects.equals(this.saksopplysning, that.saksopplysning)
+            && Objects.equals(this.kilde, that.kilde);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(kilde, mottattDokument);
+        // Only use immutable field - stable across Hibernate sessions
+        return Objects.hash(kilde);
     }
 }
