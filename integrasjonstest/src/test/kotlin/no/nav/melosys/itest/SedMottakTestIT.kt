@@ -13,6 +13,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.melosys.ProsessinstansTestManager
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.eessi.*
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
@@ -42,6 +43,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.core.KafkaTemplate
+import java.time.Duration
 import java.time.LocalDate
 import java.util.*
 
@@ -411,6 +413,7 @@ class SedMottakTestIT(
 
     @Test
     fun mottaSED_mottar3SED_blirBehandletEtterHverandre() {
+        ProsessinstansTestManager.timeOutFindingProsess = Duration.ofSeconds(20)
         val rinaSaksnummer = Random().nextInt(100000).toString()
 
         //Periode på 6 år - fører til et kontrolltreff
