@@ -146,7 +146,6 @@ class SatsendringIT @Autowired constructor(
         }
     }
 
-    @Disabled("Stopper merging av prodfeil. Francois vil se på dette ved en senere anledning")
     @ParameterizedTest
     @EnumSource(value = ProsessType::class, names = ["SATSENDRING", "SATSENDRING_TILBAKESTILL_NY_VURDERING"])
     fun `oppretter prosess og påfølgende satsendringbehandling som iverksettes og sender faktura`(prosessType: ProsessType) {
