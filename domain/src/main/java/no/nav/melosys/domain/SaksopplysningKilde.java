@@ -1,6 +1,5 @@
 package no.nav.melosys.domain;
 
-import java.util.Objects;
 import jakarta.persistence.*;
 
 import org.hibernate.annotations.DynamicUpdate;
@@ -71,32 +70,18 @@ public class SaksopplysningKilde {
     }
 
     /**
-     * Equals implementation that avoids using @Lob field (mottattDokument) to ensure stable Set behavior.
-     * <p>
-     * Using @Lob in equals/hashCode causes issues because CLOB representations can vary between
-     * Hibernate sessions, leading to unstable hashCode values and incorrect Set membership detection.
-     * This can cause OptimisticLockingException even without actual concurrent modification.
+     * ID-basert equals - anbefalt JPA-mønster.
+     * Unngår @Lob-felt som kan gi ustabil oppførsel mellom Hibernate-sesjoner.
      */
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof SaksopplysningKilde that)) {
-            return false;
-        }
-        // Persisted entities: compare by id only
-        if (this.id != null && that.id != null) {
-            return this.id.equals(that.id);
-        }
-        // Unpersisted: use business key WITHOUT @Lob field
-        return Objects.equals(this.saksopplysning, that.saksopplysning)
-            && Objects.equals(this.kilde, that.kilde);
+        if (this == o) return true;
+        if (!(o instanceof SaksopplysningKilde that)) return false;
+        return id != null && id.equals(that.id);
     }
 
     @Override
     public int hashCode() {
-        // Only use immutable field - stable across Hibernate sessions
-        return Objects.hash(kilde);
+        return 31;
     }
 }
