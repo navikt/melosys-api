@@ -16,7 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 public class AnmodningsperiodeSkrivDto {
     private static final LovvalgBestemmelsekonverterer konverterer = new LovvalgBestemmelsekonverterer();
 
-    public final Long id;
+    public final String id;
     @JsonUnwrapped(suffix = "Dato")
     public final PeriodeDto periode;
     public final String lovvalgBestemmelse;
@@ -24,18 +24,18 @@ public class AnmodningsperiodeSkrivDto {
     public final String lovvalgsland;
     public final String unntakFraBestemmelse;
     public final String unntakFraLovvalgsland;
-    public final String trygdedekning;
+    public final String trygdeDekning;
     public final String medlemskapsperiodeID;
 
 
-    protected AnmodningsperiodeSkrivDto(Long id,
+    protected AnmodningsperiodeSkrivDto(String id,
                                         PeriodeDto periode,
                                         LovvalgBestemmelse lovvalgBestemmelse,
                                         LovvalgBestemmelse tilleggBestemmelse,
                                         Land_iso2 lovvalgsland,
                                         LovvalgBestemmelse unntakFraBestemmelse,
                                         Land_iso2 unntakFraLovvalgsland,
-                                        Trygdedekninger trygdedekning,
+                                        Trygdedekninger trygdeDekning,
                                         String medlemskapsperiodeID) {
         this.id = id;
         this.periode = periode;
@@ -44,14 +44,14 @@ public class AnmodningsperiodeSkrivDto {
         this.lovvalgsland = lovvalgsland != null ? lovvalgsland.name() : null;
         this.unntakFraBestemmelse = unntakFraBestemmelse != null ? unntakFraBestemmelse.name() : null;
         this.unntakFraLovvalgsland = unntakFraLovvalgsland != null ? unntakFraLovvalgsland.name() : null;
-        this.trygdedekning = trygdedekning != null ? trygdedekning.name() : null;
+        this.trygdeDekning = trygdeDekning != null ? trygdeDekning.name() : null;
         this.medlemskapsperiodeID = medlemskapsperiodeID;
     }
 
     @JsonCreator
     @SuppressWarnings("unused")
     public AnmodningsperiodeSkrivDto(Map<String, String> json) {
-        this(parseLongOrNull(json.get("id")),
+        this(json.get("id"),
             new PeriodeDto(LocalDate.parse(json.get("fomDato")),
                 StringUtils.isEmpty(json.get("tomDato")) ? null : LocalDate.parse(json.get("tomDato"))),
             konverterLovvalgsBestemmelse(json.get("lovvalgBestemmelse")),
@@ -59,12 +59,12 @@ public class AnmodningsperiodeSkrivDto {
             enumVerdiEllerNull(Land_iso2.class, json.get("lovvalgsland")),
             konverterLovvalgsBestemmelse(json.get("unntakFraBestemmelse")),
             enumVerdiEllerNull(Land_iso2.class, json.get("unntakFraLovvalgsland")),
-            enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdedekning")),
+            enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
             json.get("medlemskapsperiodeID"));
     }
 
     public static AnmodningsperiodeSkrivDto av(Anmodningsperiode anmodningsperiode) {
-        return new AnmodningsperiodeSkrivDto(anmodningsperiode.getId(),
+        return new AnmodningsperiodeSkrivDto(anmodningsperiode.getId().toString(),
             new PeriodeDto(anmodningsperiode.getFom(), anmodningsperiode.getTom()),
             anmodningsperiode.getBestemmelse(),
             anmodningsperiode.getTilleggsbestemmelse(),
@@ -82,7 +82,7 @@ public class AnmodningsperiodeSkrivDto {
             konverterer.convertToEntityAttribute(tilleggBestemmelse),
             enumVerdiEllerNull(Land_iso2.class, unntakFraLovvalgsland),
             konverterer.convertToEntityAttribute(unntakFraBestemmelse),
-            enumVerdiEllerNull(Trygdedekninger.class, trygdedekning));
+            enumVerdiEllerNull(Trygdedekninger.class, trygdeDekning));
     }
 
     private static LovvalgBestemmelse konverterLovvalgsBestemmelse(String bestemmelsesnavn) {
@@ -91,17 +91,6 @@ public class AnmodningsperiodeSkrivDto {
 
     private static <E extends Enum<E>> E enumVerdiEllerNull(Class<E> enumKlasse, String nøkkel) {
         return nøkkel == null ? null : Enum.valueOf(enumKlasse, nøkkel);
-    }
-
-    private static Long parseLongOrNull(String value) {
-        if (StringUtils.isEmpty(value)) {
-            return null;
-        }
-        try {
-            return Long.parseLong(value);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Ugyldig numerisk verdi for id: '" + value + "'", e);
-        }
     }
 }
 
