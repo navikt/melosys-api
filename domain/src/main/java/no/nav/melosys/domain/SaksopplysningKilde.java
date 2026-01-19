@@ -1,6 +1,5 @@
 package no.nav.melosys.domain;
 
-import java.util.Objects;
 import jakarta.persistence.*;
 
 import org.hibernate.annotations.DynamicUpdate;
@@ -13,6 +12,10 @@ public class SaksopplysningKilde {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Version
+    @Column(name = "versjon")
+    private Long versjon;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "saksopplysning_id", nullable = false, updatable = false)
@@ -66,21 +69,19 @@ public class SaksopplysningKilde {
         this.mottattDokument = mottattDokument;
     }
 
+    /**
+     * ID-basert equals - anbefalt JPA-mønster.
+     * Unngår @Lob-felt som kan gi ustabil oppførsel mellom Hibernate-sesjoner.
+     */
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        SaksopplysningKilde that = (SaksopplysningKilde) o;
-        return Objects.equals(this.kilde, that.kilde)
-            && Objects.equals(this.mottattDokument, that.mottattDokument);
+        if (this == o) return true;
+        if (!(o instanceof SaksopplysningKilde that)) return false;
+        return id != null && id.equals(that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(kilde, mottattDokument);
+        return 31;
     }
 }
