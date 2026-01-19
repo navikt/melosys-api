@@ -20,7 +20,6 @@ class SendOrienteringsbrevVideresendSøknadTest {
     private val brevBestiller: BrevBestiller = mockk()
 
     private lateinit var steg: SendOrienteringsbrevVideresendSøknad
-    private lateinit var prosessinstans: Prosessinstans
 
     private val captor = slot<DoksysBrevbestilling>()
 
@@ -28,8 +27,11 @@ class SendOrienteringsbrevVideresendSøknadTest {
     fun setup() {
         steg = SendOrienteringsbrevVideresendSøknad(behandlingService, brevBestiller)
         every { brevBestiller.bestill(capture(captor)) } just Runs
+    }
 
-        prosessinstans = Prosessinstans.forTest {
+    @Test
+    fun `utfør brevbestilling harRiktigBrevTypeOgMottaker`() {
+        val prosessinstans = Prosessinstans.forTest {
             type = ProsessType.OPPRETT_SAK
             status = ProsessStatus.KLAR
             behandling {
@@ -37,10 +39,7 @@ class SendOrienteringsbrevVideresendSøknadTest {
             }
         }
         every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns prosessinstans.hentBehandling
-    }
 
-    @Test
-    fun `utfør brevbestilling harRiktigBrevTypeOgMottaker`() {
         steg.utfør(prosessinstans)
 
         verify { brevBestiller.bestill(capture(captor)) }

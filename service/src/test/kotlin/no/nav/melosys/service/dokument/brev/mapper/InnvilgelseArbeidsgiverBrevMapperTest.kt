@@ -2,19 +2,22 @@ package no.nav.melosys.service.dokument.brev.mapper
 
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldMatch
-import no.nav.dok.melosysbrev.felles.melosys_felles.KjoennKode
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.SaksopplysningType
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
-import no.nav.melosys.domain.avklartefakta.Avklartefakta
-import no.nav.melosys.domain.dokument.SaksopplysningDokument
+import no.nav.melosys.domain.avklartefakta
 import no.nav.melosys.domain.dokument.felles.Land
-import no.nav.melosys.domain.dokument.person.KjoennsType
-import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
+import no.nav.melosys.domain.lovvalgsperiode
+import no.nav.melosys.domain.lovvalgsperiodeForTest
+import no.nav.melosys.domain.personDokument
+import no.nav.melosys.domain.saksopplysning
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType
@@ -28,17 +31,25 @@ class InnvilgelseArbeidsgiverBrevMapperTest {
 
     @Test
     fun `mapArbeidsLandSammensattNavnLovvalgsperiodeFraSøkandTilBrevXml gir ikke tom XML streng`() {
-        val behandlingsresultat = lagBehandlingsresultat(
-            setOf(lagLovvalgsperiode()),
-            setOf(lagAvklarteFakta())
-        )
-
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            lovvalgsperiode {
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+                fom = LocalDate.now()
+                tom = LocalDate.now()
+                lovvalgsland = Land_iso2.AT
+            }
+            avklartefakta {
+                type = Avklartefaktatyper.VIRKSOMHET
+                fakta = "TRUE"
+                subjekt = "123456789"
+            }
+        }
 
         testMapTilBrevXml(behandlingsresultat)
     }
 
     private fun testMapTilBrevXml(behandlingsresultat: Behandlingsresultat) =
-        testMapTilBrevXml(lagBehandling(FagsakTestFactory.lagFagsak()), behandlingsresultat)
+        testMapTilBrevXml(lagBehandling(), behandlingsresultat)
 
     private fun testMapTilBrevXml(behandling: Behandling, behandlingsresultat: Behandlingsresultat) {
         val fellesType = lagFellesType()
@@ -46,7 +57,12 @@ class InnvilgelseArbeidsgiverBrevMapperTest {
         val brevDataInnvilgelse = BrevDataInnvilgelse(BrevbestillingDto(), "Z123456").apply {
             arbeidsland = "Sverige"
             hovedvirksomhet = AvklartVirksomhet("Equinor", "987654321", null, Yrkesaktivitetstyper.LOENNET_ARBEID)
-            lovvalgsperiode = lagLovvalgsperiode()
+            lovvalgsperiode = lovvalgsperiodeForTest {
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+                fom = LocalDate.now()
+                tom = LocalDate.now()
+                lovvalgsland = Land_iso2.AT
+            }
             personNavn = "For Etter"
         }
 
@@ -56,47 +72,18 @@ class InnvilgelseArbeidsgiverBrevMapperTest {
         resultat shouldContain ":navn>For Etter</ns"
     }
 
-    private fun lagBehandlingsresultat(perioder: Set<Lovvalgsperiode>, fakta: Set<Avklartefakta>) = Behandlingsresultat().apply {
-        avklartefakta = fakta.toMutableSet()
-        lovvalgsperioder = perioder.toMutableSet()
-    }
-
-    private fun lagLovvalgsperiode(): Lovvalgsperiode =
-        lagLovvalgsperiode(LocalDate.now())
-
-    private fun lagLovvalgsperiode(fom: LocalDate) = Lovvalgsperiode().apply {
-        bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
-        this.fom = fom
-        tom = LocalDate.now()
-        lovvalgsland = Land_iso2.AT
-    }
-
-    private fun lagAvklarteFakta() = Avklartefakta().apply {
-        type = Avklartefaktatyper.VIRKSOMHET
-        fakta = "TRUE"
-        subjekt = "123456789"
-    }
-
-    private fun lagBehandling(fagsak: Fagsak): Behandling {
-        val pdok = PersonDokument().apply {
-            kjønn = KjoennsType(KjoennKode.U.name)
-            fornavn = "For"
-            etternavn = "Etter"
-            sammensattNavn = "For Etter"
-            statsborgerskap = Land(Land.BELGIA)
-            fødselsdato = LocalDate.ofYearDay(1900, 1)
-        }
-        return lagBehandling(fagsak, setOf(lagSaksopplysning(SaksopplysningType.PERSOPL, pdok)))
-    }
-
-    private fun lagSaksopplysning(type: SaksopplysningType, dokument: SaksopplysningDokument) = Saksopplysning().apply {
-        this.type = type
-        this.dokument = dokument
-    }
-
-    private fun lagBehandling(fagsak: Fagsak, saksopplysninger: Set<Saksopplysning>) = Behandling.forTest {
+    private fun lagBehandling() = Behandling.forTest {
         type = Behandlingstyper.FØRSTEGANG
-        this.fagsak = fagsak
-        this.saksopplysninger = saksopplysninger.toMutableSet()
+        saksopplysning {
+            type = SaksopplysningType.PERSOPL
+            personDokument {
+                kjønn = no.nav.melosys.domain.dokument.person.KjoennsType("U")
+                fornavn = "For"
+                etternavn = "Etter"
+                sammensattNavn = "For Etter"
+                statsborgerskap = Land(Land.BELGIA)
+                fødselsdato = LocalDate.ofYearDay(1900, 1)
+            }
+        }
     }
 }

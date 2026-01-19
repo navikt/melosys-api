@@ -9,9 +9,7 @@ import io.mockk.just
 import io.mockk.verify
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER
-import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.SaksopplysningType
-import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.forTest
@@ -19,6 +17,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.oppgave.Oppgave
+import no.nav.melosys.domain.saksopplysningForTest
+import no.nav.melosys.domain.sedDokument
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
@@ -63,9 +63,10 @@ class DefaultSedRuterTest {
 
     @Test
     fun `bestemManuellBehandling saksnummerFinnesIkkeErNySedINyBehandling nesteStegOppretJfrOppg`() {
-        val prosessinstans = Prosessinstans.forTest()
-        val melosysEessiMelding = hentMelosysEessiMelding(SedType.A005)
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        val melosysEessiMelding = lagMelosysEessiMelding(SedType.A005)
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        }
 
         defaultSedRuter.rutSedTilBehandling(prosessinstans, null)
 
@@ -80,11 +81,12 @@ class DefaultSedRuterTest {
     @Test
     fun `bestemManuellBehandling X009PurringSaksnummerOgFagsakEksisterer oppdatererPrioritet`() {
         val oppgaveId = "333"
-        val prosessinstans = Prosessinstans.forTest()
-        val melosysEessiMelding = hentMelosysEessiMelding(SedType.X009)
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        val melosysEessiMelding = lagMelosysEessiMelding(SedType.X009)
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        }
         val oppgave = Oppgave.Builder().setOppgaveId(oppgaveId).build()
-        val fagsak = hentFagsak()
+        val fagsak = lagFagsak()
 
         every { fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER) } returns Optional.of(fagsak)
         every { oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER) } returns Optional.of(oppgave)
@@ -101,13 +103,13 @@ class DefaultSedRuterTest {
     @ParameterizedTest
     @EnumSource(value = SedType::class, names = ["A012", "X001", "X007", "X005"])
     fun `rutSedTilBehandling SedTyperSaksnummerOgFagsakEksistererStatusMidlertidigLovvalgsbeslutning ikkeOppdaterStatusEllerOppgave`(sedType: SedType) {
-        val prosessinstans = Prosessinstans.forTest()
-        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER)
-        val melosysEessiMelding = hentMelosysEessiMelding(sedType)
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        val melosysEessiMelding = lagMelosysEessiMelding(sedType)
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER)
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        }
 
-        val fagsak = hentFagsak()
-        fagsak.hentSistOppdatertBehandlingIkkeÅrsavregning().status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
+        val fagsak = lagFagsak(behandlingsstatus = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING)
 
         every { fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER) } returns Optional.of(fagsak)
 
@@ -122,19 +124,21 @@ class DefaultSedRuterTest {
 
     @Test
     fun `bestemManuellBehandling behandlingOpprettetOgSkalBehandleSED opprettOppgave`() {
-        val prosessinstans = Prosessinstans.forTest()
-        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER)
-        val melosysEessiMelding = hentMelosysEessiMelding(SedType.A004)
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        val melosysEessiMelding = lagMelosysEessiMelding(SedType.A004)
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER)
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        }
 
-        val fagsak = hentFagsak()
-        val behandling = fagsak.finnAktivBehandlingIkkeÅrsavregning()
-        behandling?.type = Behandlingstyper.HENVENDELSE
-        behandling?.status = Behandlingsstatus.OPPRETTET
+        val fagsak = lagFagsak(
+            behandlingsstatus = Behandlingsstatus.OPPRETTET,
+            behandlingstype = Behandlingstyper.HENVENDELSE
+        )
+        val behandling = fagsak.finnAktivBehandlingIkkeÅrsavregning()!!
         every { fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER) } returns Optional.of(fagsak)
         every { oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(any()) } returns Optional.empty()
         every { oppgaveService.lagBehandlingsoppgave(any()) } returns oppgaveFactory.lagBehandlingsoppgave(
-            behandling!!,
+            behandling,
             LocalDate.now(),
             behandling::hentSedDokument
         )
@@ -153,14 +157,13 @@ class DefaultSedRuterTest {
 
     @Test
     fun `bestemManuellBehandling behandlingAvsluttet opprettJournalforingsOppgave`() {
-        val prosessinstans = Prosessinstans.forTest()
-        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER)
-        val melosysEessiMelding = hentMelosysEessiMelding(SedType.A004)
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        val melosysEessiMelding = lagMelosysEessiMelding(SedType.A004)
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER)
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        }
 
-        val fagsak = hentFagsak()
-        val behandling = fagsak.finnAktivBehandlingIkkeÅrsavregning()
-        behandling?.status = Behandlingsstatus.AVSLUTTET
+        val fagsak = lagFagsak(behandlingsstatus = Behandlingsstatus.AVSLUTTET)
         every { fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER) } returns Optional.of(fagsak)
 
         defaultSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER)
@@ -176,23 +179,24 @@ class DefaultSedRuterTest {
         verify(exactly = 0) { prosessinstansService.opprettProsessinstansSedJournalføring(any(), any()) }
     }
 
-    private fun hentMelosysEessiMelding(sedType: SedType): MelosysEessiMelding {
-        return MelosysEessiMelding().apply {
-            this.sedType = sedType.name
-            aktoerId = "12321321"
-            journalpostId = "test-journalpost-id"
-        }
-    }
+    private fun lagMelosysEessiMelding(sedType: SedType) = MelosysEessiMelding(
+        sedType = sedType.name,
+        aktoerId = "12321321",
+        journalpostId = "test-journalpost-id"
+    )
 
-    private fun hentFagsak() = Fagsak.forTest {
+    private fun lagFagsak(
+        behandlingsstatus: Behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING,
+        behandlingstype: Behandlingstyper = Behandlingstyper.FØRSTEGANG
+    ) = Fagsak.forTest {
         behandling {
             id = 1L
-            status = Behandlingsstatus.UNDER_BEHANDLING
+            status = behandlingsstatus
             tema = Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET
-            type = Behandlingstyper.FØRSTEGANG
-            saksopplysninger.add(Saksopplysning().apply {
+            type = behandlingstype
+            saksopplysninger.add(saksopplysningForTest {
                 type = SaksopplysningType.SEDOPPL
-                dokument = SedDokument().apply {
+                sedDokument {
                     sedType = SedType.A003
                 }
             })

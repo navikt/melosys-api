@@ -25,7 +25,9 @@ import no.nav.melosys.domain.saksopplysning
 import no.nav.melosys.saksflyt.TestdataFactory.lagPersonopplysning
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory
 import no.nav.melosys.saksflytapi.domain.forTest
+import no.nav.melosys.domain.BehandlingTestFactory
 import no.nav.melosys.service.avgift.aarsavregning.GjeldendeBehandlingsresultaterForÅrsavregning
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
@@ -201,7 +203,7 @@ class OpprettÅrsavregningModelBehandlingTest {
         every { mottatteOpplysningerService.opprettMottatteopplysningerForAarsavregning(any()) } just runs
     }
 
-    private fun lagBehandling(block: Behandling.Builder.() -> Unit = {}): Behandling = Behandling.forTest {
+    private fun lagBehandling(block: BehandlingTestFactory.BehandlingTestBuilder.() -> Unit = {}): Behandling = Behandling.forTest {
         type = Behandlingstyper.FØRSTEGANG
         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
         saksopplysning {
@@ -213,7 +215,7 @@ class OpprettÅrsavregningModelBehandlingTest {
         block()
     }
 
-    private fun lagProsessInstans(block: Prosessinstans.Builder.() -> Unit = {}): Prosessinstans = Prosessinstans.forTest {
+    private fun lagProsessInstans(block: ProsessinstansTestFactory.ProsessinstansTestBuilder.() -> Unit = {}): Prosessinstans = Prosessinstans.forTest {
         medData(ProsessDataKey.GJELDER_ÅR, GJELDER_ÅR)
         medData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
         block()

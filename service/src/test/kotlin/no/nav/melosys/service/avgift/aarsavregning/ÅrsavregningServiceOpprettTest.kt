@@ -7,9 +7,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -25,16 +23,17 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
 
     @Test
     fun `Ny årsavregning kaster feil når flere årsavregninger eksisterer for samme år på samme Fagsak`() {
+        val eksisterendeBehandling = Behandling.forTest { id = 1L }
+        val eksisterendeBehandlingsresultat = Behandlingsresultat.forTest {
+            behandling = eksisterendeBehandling
+        }
         val årsavregningEntity1 = Årsavregning.forTest {
             aar = 2023
-            behandlingsresultat = Behandlingsresultat()
+            behandlingsresultat = eksisterendeBehandlingsresultat
         }
-        val eksisterendeBehandling = Behandling.forTest { id = 1L }
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(årsavregningEntity1))
         every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(1, 2023) }.returns(1)
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(Behandlingsresultat().apply {
-            behandling = eksisterendeBehandling
-        })
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(eksisterendeBehandlingsresultat)
 
         shouldThrow<FunksjonellException> {
             årsavregningService.opprettÅrsavregning(1, 2023)

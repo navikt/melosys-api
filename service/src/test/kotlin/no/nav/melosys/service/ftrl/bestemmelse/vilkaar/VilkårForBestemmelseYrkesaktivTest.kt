@@ -7,12 +7,11 @@ import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
-import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
-import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerTestFactory
+import no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest
+import no.nav.melosys.domain.mottatteopplysninger.søknadNorgeEllerUtenforEØS
 import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelseYrkesaktiv.Companion.toStringList
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -21,27 +20,19 @@ class VilkårForBestemmelseYrkesaktivTest {
     @MockK
     private lateinit var mottatteOpplysningerService: MottatteOpplysningerService
 
-    private lateinit var vilkårForBestemmelse: VilkårForBestemmelseYrkesaktiv
+    private val vilkårForBestemmelse by lazy { VilkårForBestemmelseYrkesaktiv(mottatteOpplysningerService) }
 
-
-    @BeforeEach
-    fun setUp() {
-        vilkårForBestemmelse = VilkårForBestemmelseYrkesaktiv(mottatteOpplysningerService)
-    }
+    private fun lagMottatteOpplysninger(
+        init: MottatteOpplysningerTestFactory.Builder.() -> Unit = {}
+    ) = mottatteOpplysningerForTest(init)
 
     @Test
     fun `vilkår for FTRL_KAP2_2_1_kun_norge`() {
-        val mottatteOpplysninger =
-            MottatteOpplysninger().apply {
-                mottatteOpplysningerData =
-                    SøknadNorgeEllerUtenforEØS().apply {
-                        soeknadsland = Soeknadsland().apply {
-                            landkoder = listOf(
-                                Land_iso2.NO.toString()
-                            )
-                        }
-                    }
+        val mottatteOpplysninger = lagMottatteOpplysninger {
+            søknadNorgeEllerUtenforEØS {
+                landkoder(Land_iso2.NO)
             }
+        }
 
         every { mottatteOpplysningerService.hentMottatteOpplysninger(1L) } returns mottatteOpplysninger
 
@@ -60,17 +51,11 @@ class VilkårForBestemmelseYrkesaktivTest {
 
     @Test
     fun `vilkår for FTRL_KAP2_2_1 ett eller flere land utenfor norge, MIDLERTIDIG_ARBEID_2_1_FJERDE_LEDD`() {
-        val mottatteOpplysninger =
-            MottatteOpplysninger().apply {
-                mottatteOpplysningerData =
-                    SøknadNorgeEllerUtenforEØS().apply {
-                        soeknadsland = Soeknadsland().apply {
-                            landkoder = listOf(
-                                Land_iso2.NO.toString(), Land_iso2.BA.toString()
-                            )
-                        }
-                    }
+        val mottatteOpplysninger = lagMottatteOpplysninger {
+            søknadNorgeEllerUtenforEØS {
+                landkoder(Land_iso2.NO, Land_iso2.BA)
             }
+        }
 
         every { mottatteOpplysningerService.hentMottatteOpplysninger(1L) } returns mottatteOpplysninger
 
@@ -90,17 +75,11 @@ class VilkårForBestemmelseYrkesaktivTest {
 
     @Test
     fun `vilkår for FTRL_KAP2_2_1 ett eller flere land utenfor norge, VEKSELVIS_ARBEID_2_1_FJERDE_LEDD`() {
-        val mottatteOpplysninger =
-            MottatteOpplysninger().apply {
-                mottatteOpplysningerData =
-                    SøknadNorgeEllerUtenforEØS().apply {
-                        soeknadsland = Soeknadsland().apply {
-                            landkoder = listOf(
-                                Land_iso2.NO.toString(), Land_iso2.BA.toString()
-                            )
-                        }
-                    }
+        val mottatteOpplysninger = lagMottatteOpplysninger {
+            søknadNorgeEllerUtenforEØS {
+                landkoder(Land_iso2.NO, Land_iso2.BA)
             }
+        }
 
         every { mottatteOpplysningerService.hentMottatteOpplysninger(1L) } returns mottatteOpplysninger
 
@@ -368,20 +347,11 @@ class VilkårForBestemmelseYrkesaktivTest {
             1L
         )
 
-
         vilkår.shouldContainExactly(
-            Vilkår(
-                Vilkaar.FTRL_2_1A_TRYGDEKOORDINGERING
-            ),
-            Vilkår(
-                Vilkaar.FTRL_2_8_STUDENT_UVIVERSITET_HØGSKOLE
-            ),
-            Vilkår(
-                Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID
-            ),
-            Vilkår(
-                Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
-            ),
+            Vilkår(Vilkaar.FTRL_2_1A_TRYGDEKOORDINGERING),
+            Vilkår(Vilkaar.FTRL_2_8_STUDENT_UVIVERSITET_HØGSKOLE),
+            Vilkår(Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID),
+            Vilkår(Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE),
         )
     }
 }

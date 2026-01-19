@@ -271,21 +271,23 @@ class AngiBehandlingsresultatServiceTest {
 
     @Test
     fun `oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling skal fjerne medlemskapsperioder når FTRL og gyldig resultattype`() {
-        val behandlingsresultat = lagBehandlingsresultat(
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Sakstyper.FTRL,
-            Behandlingstyper.FØRSTEGANG,
-            Behandlingstema.YRKESAKTIV
-        ).apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
-            medlemskapsperioder = mutableSetOf()
+            type = Behandlingsresultattyper.AVSLAG_SØKNAD
+            behandling {
+                id = BEHANDLING_ID
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.YRKESAKTIV
+                fagsak {
+                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                    type = Sakstyper.FTRL
+                }
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2020, 1, 1)
+                tom = LocalDate.of(2021, 1, 1)
+            }
         }
-        val medlemskapsperiode = Medlemskapsperiode().apply {
-            fom = LocalDate.of(2020, 1, 1)
-            tom = LocalDate.of(2021, 1, 1)
-        }
-        behandlingsresultat.medlemskapsperioder.add(medlemskapsperiode)
-        behandlingsresultat.type = Behandlingsresultattyper.AVSLAG_SØKNAD
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
 
@@ -310,8 +312,8 @@ class AngiBehandlingsresultatServiceTest {
         sakstype: Sakstyper,
         behandlingstype: Behandlingstyper,
         behandlingstema: Behandlingstema
-    ): Behandlingsresultat = Behandlingsresultat().apply {
-        this.behandling = Behandling.forTest {
+    ): Behandlingsresultat = Behandlingsresultat.forTest {
+        behandling {
             id = BEHANDLING_ID
             type = behandlingstype
             tema = behandlingstema

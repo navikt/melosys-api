@@ -137,7 +137,7 @@ class OpprettFakturaserieTest {
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         opprettFakturaserie.utfør(prosessinstans)
@@ -189,7 +189,7 @@ class OpprettFakturaserieTest {
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
@@ -252,7 +252,7 @@ class OpprettFakturaserieTest {
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
@@ -313,7 +313,7 @@ class OpprettFakturaserieTest {
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
 
@@ -366,7 +366,7 @@ class OpprettFakturaserieTest {
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
 
@@ -424,7 +424,7 @@ class OpprettFakturaserieTest {
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
@@ -488,7 +488,7 @@ class OpprettFakturaserieTest {
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
@@ -513,7 +513,7 @@ class OpprettFakturaserieTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = OPPRINNELIG_BEHANDLING_ID
             fakturaserieReferanse = FAKTURASERIE_REFERANSE
-            behandling = Behandling.forTest {
+            behandling {
                 id = OPPRINNELIG_BEHANDLING_ID
             }
         }
@@ -556,7 +556,7 @@ class OpprettFakturaserieTest {
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
@@ -613,7 +613,7 @@ class OpprettFakturaserieTest {
                     }
                 }
             }
-            behandling = Behandling.forTest {
+            behandling {
                 id = OPPRINNELIG_BEHANDLING_ID
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
@@ -621,6 +621,9 @@ class OpprettFakturaserieTest {
                 }
             }
         }
+
+        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak!!
+
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = BEHANDLING_ID
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
@@ -642,14 +645,14 @@ class OpprettFakturaserieTest {
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = opprinneligBehandlingsresultat.behandling?.fagsak
+                fagsak = sharedFagsak
             }
         }
 
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
@@ -679,7 +682,7 @@ class OpprettFakturaserieTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = OPPRINNELIG_BEHANDLING_ID
             fakturaserieReferanse = FAKTURASERIE_REFERANSE
-            behandling = Behandling.forTest {
+            behandling {
                 id = OPPRINNELIG_BEHANDLING_ID
             }
             medlemskapsperiode {
@@ -750,7 +753,7 @@ class OpprettFakturaserieTest {
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
@@ -780,7 +783,7 @@ class OpprettFakturaserieTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = OPPRINNELIG_BEHANDLING_ID
             fakturaserieReferanse = FAKTURASERIE_REFERANSE
-            behandling = Behandling.forTest {
+            behandling {
                 id = OPPRINNELIG_BEHANDLING_ID
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
@@ -811,10 +814,13 @@ class OpprettFakturaserieTest {
             }
         }
 
+        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak!!
+
+        // Legg til en ÅRSAVREGNING-behandling på samme fagsak
         Behandling.forTest {
             id = 3L
             type = Behandlingstyper.ÅRSAVREGNING
-            fagsak = opprinneligBehandlingsresultat.behandling?.fagsak
+            fagsak = sharedFagsak
         }
 
         val behandlingsresultat = Behandlingsresultat.forTest {
@@ -852,14 +858,14 @@ class OpprettFakturaserieTest {
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = opprinneligBehandlingsresultat.behandling?.fagsak
+                fagsak = sharedFagsak
             }
         }
 
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
@@ -882,7 +888,7 @@ class OpprettFakturaserieTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = OPPRINNELIG_BEHANDLING_ID
             fakturaserieReferanse = FAKTURASERIE_REFERANSE
-            behandling = Behandling.forTest {
+            behandling {
                 id = OPPRINNELIG_BEHANDLING_ID
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
@@ -912,6 +918,9 @@ class OpprettFakturaserieTest {
                 }
             }
         }
+
+        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak!!
+
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = BEHANDLING_ID
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
@@ -947,14 +956,14 @@ class OpprettFakturaserieTest {
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = opprinneligBehandlingsresultat.behandling?.fagsak
+                fagsak = sharedFagsak
             }
         }
 
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
@@ -976,7 +985,7 @@ class OpprettFakturaserieTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = OPPRINNELIG_BEHANDLING_ID
             fakturaserieReferanse = FAKTURASERIE_REFERANSE
-            behandling = Behandling.forTest {
+            behandling {
                 id = OPPRINNELIG_BEHANDLING_ID
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
@@ -1009,10 +1018,13 @@ class OpprettFakturaserieTest {
             }
         }
 
+        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak!!
+
+        // Legg til en annen behandling på samme fagsak
         Behandling.forTest {
             id = 0L
             registrertDato = Instant.EPOCH
-            fagsak = opprinneligBehandlingsresultat.behandling!!.fagsak
+            fagsak = sharedFagsak
         }
 
         val behandlingsresultat = Behandlingsresultat.forTest {
@@ -1050,14 +1062,14 @@ class OpprettFakturaserieTest {
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = opprinneligBehandlingsresultat.behandling!!.fagsak
+                fagsak = sharedFagsak
             }
         }
 
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
@@ -1129,7 +1141,7 @@ class OpprettFakturaserieTest {
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         behandlingsresultat.trygdeavgiftsperioder.size.shouldBe(2)
@@ -1187,7 +1199,7 @@ class OpprettFakturaserieTest {
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         behandlingsresultat.trygdeavgiftsperioder.size.shouldBe(1)
@@ -1247,7 +1259,7 @@ class OpprettFakturaserieTest {
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
@@ -1316,7 +1328,7 @@ class OpprettFakturaserieTest {
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
@@ -1390,7 +1402,7 @@ class OpprettFakturaserieTest {
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
@@ -1450,7 +1462,7 @@ class OpprettFakturaserieTest {
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandlingsresultat.behandling
@@ -1515,7 +1527,7 @@ class OpprettFakturaserieTest {
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandlingsresultat.behandling
@@ -1535,7 +1547,7 @@ class OpprettFakturaserieTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = OPPRINNELIG_BEHANDLING_ID
             fakturaserieReferanse = FAKTURASERIE_REFERANSE
-            behandling = Behandling.forTest {
+            behandling {
                 id = OPPRINNELIG_BEHANDLING_ID
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.FØRSTEGANG
@@ -1569,6 +1581,9 @@ class OpprettFakturaserieTest {
                 }
             }
         }
+
+        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak!!
+
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = BEHANDLING_ID
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
@@ -1590,14 +1605,14 @@ class OpprettFakturaserieTest {
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = opprinneligBehandlingsresultat.behandling!!.fagsak
+                fagsak = sharedFagsak
             }
         }
 
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
@@ -1633,7 +1648,7 @@ class OpprettFakturaserieTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = OPPRINNELIG_BEHANDLING_ID
             fakturaserieReferanse = FAKTURASERIE_REFERANSE
-            behandling = Behandling.forTest {
+            behandling {
                 id = OPPRINNELIG_BEHANDLING_ID
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.FØRSTEGANG
@@ -1667,6 +1682,9 @@ class OpprettFakturaserieTest {
                 }
             }
         }
+
+        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak!!
+
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = BEHANDLING_ID
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
@@ -1688,14 +1706,14 @@ class OpprettFakturaserieTest {
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = opprinneligBehandlingsresultat.behandling!!.fagsak
+                fagsak = sharedFagsak
             }
         }
 
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
+            medBehandling(behandlingsresultat.hentBehandling())
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat

@@ -6,7 +6,6 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse
 object OrganisasjonsDetaljerTestFactory {
     const val ORGNUMMER = "123456789"
 
-    @JvmStatic
     fun builder() = Builder()
 
     class Builder(

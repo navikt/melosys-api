@@ -10,11 +10,13 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.Saksopplysning
+import no.nav.melosys.domain.SaksopplysningType
+import no.nav.melosys.domain.arbeidsforholdDokument
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype
-import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat.INNVILGET
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper.PLIKTIG
@@ -24,15 +26,24 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_e
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Tilleggsbestemmelser_trygdeavtale_ca.CAN_ART8
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.lovvalgsperiodeForTest
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
-import no.nav.melosys.domain.mottatteopplysninger.data.*
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
+import no.nav.melosys.domain.mottatteopplysninger.data.JuridiskArbeidsgiverNorge
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie
 import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie.Relasjonsrolle.BARN
 import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER
 import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie.tilMedfolgendeFamilie
+import no.nav.melosys.domain.mottatteopplysninger.data.OpplysningerOmBrukeren
+import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigArbeid
+import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak
+import no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest
+import no.nav.melosys.domain.mottatteOpplysninger
+import no.nav.melosys.domain.organisasjonDokument
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie
 import no.nav.melosys.domain.person.familie.OmfattetFamilie
+import no.nav.melosys.domain.saksopplysningForTest
 import no.nav.melosys.domain.util.LovvalgBestemmelseUtils
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.service.LovvalgsperiodeService
@@ -398,7 +409,7 @@ class TrygdeavtaleServiceTest {
         setOf(IkkeOmfattetFamilie(UUID_BARN_1, OVER_18_AR.kode, BEGRUNNELSE_BARN))
     )
 
-    private fun lagLovvalgsperiode(): Lovvalgsperiode = Lovvalgsperiode().apply {
+    private fun lagLovvalgsperiode(): Lovvalgsperiode = lovvalgsperiodeForTest {
         id = 11L
         bestemmelse = UK_ART6_1
         fom = PERIODE_FOM
@@ -407,13 +418,13 @@ class TrygdeavtaleServiceTest {
     }
 
     private fun lagBehandlingMedFamilie(familie: List<MedfolgendeFamilie>) = Behandling.forTest {
-        medMottatteOpplysninger(MottatteOpplysninger().apply {
+        mottatteOpplysninger {
             mottatteOpplysningerData = MottatteOpplysningerData().apply {
                 personOpplysninger = OpplysningerOmBrukeren().apply {
                     medfolgendeFamilie = familie
                 }
             }
-        })
+        }
     }
 
     private fun lagBehandlingMedVirksomheter(
@@ -423,13 +434,13 @@ class TrygdeavtaleServiceTest {
         saksopplysninger: Set<Saksopplysning>
     ): Behandling = Behandling.forTest {
         medSaksopplysninger(saksopplysninger.toMutableSet())
-        medMottatteOpplysninger(MottatteOpplysninger().apply {
+        mottatteOpplysninger {
             mottatteOpplysningerData = MottatteOpplysningerData().apply {
                 this.selvstendigArbeid = selvstendigArbeid
                 this.juridiskArbeidsgiverNorge = juridiskArbeidsgiverNorge
                 this.foretakUtland = foretakUtland
             }
-        })
+        }
     }
 
     private fun lagForetakUtland(uuidNavn: Map<String, String>): List<ForetakUtland> = uuidNavn.entries.map { (uuid, navn) ->
@@ -439,22 +450,19 @@ class TrygdeavtaleServiceTest {
         }
     }
 
-    private fun lagOrgSaksopplysning(orgnr: String, navn: String) = Saksopplysning().apply {
-        id = orgnr.toLong()
+    private fun lagOrgSaksopplysning(orgnr: String, navn: String) = saksopplysningForTest {
         type = SaksopplysningType.ORG
-        dokument = lagOrganisasjonsDokument(orgnr, navn)
+        organisasjonDokument {
+            orgnummer = orgnr
+            this.navn = navn
+        }
     }
 
-    private fun lagOrganisasjonsDokument(orgnr: String, navn: String): OrganisasjonDokument = OrganisasjonDokumentTestFactory.builder()
-        .orgnummer(orgnr)
-        .navn(navn)
-        .build()
-
-    private fun lagArbForhSaksopplysning(orgnumre: List<String>) = Saksopplysning().apply {
+    private fun lagArbForhSaksopplysning(orgnumre: List<String>) = saksopplysningForTest {
         type = SaksopplysningType.ARBFORH
-        dokument = ArbeidsforholdDokument().apply {
-            this.arbeidsforhold = orgnumre.map { orgnr ->
-                Arbeidsforhold().apply {
+        arbeidsforholdDokument {
+            orgnumre.forEach { orgnr ->
+                arbeidsforhold {
                     arbeidsgivertype = Aktoertype.ORGANISASJON
                     arbeidsgiverID = orgnr
                     opplysningspliktigtype = Aktoertype.ORGANISASJON

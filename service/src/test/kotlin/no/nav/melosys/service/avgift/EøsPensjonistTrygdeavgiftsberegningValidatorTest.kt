@@ -4,18 +4,21 @@ import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import io.mockk.mockk
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.avgift.inntektForTest
+import no.nav.melosys.domain.avgift.skatteforholdForTest
+import no.nav.melosys.domain.behandling
 import no.nav.melosys.domain.forTest
-import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
-import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.helseutgiftDekkesPeriode
+import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.årsavregning
 import no.nav.melosys.exception.FunksjonellException
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -47,7 +50,7 @@ class EøsPensjonistTrygdeavgiftsberegningValidatorTest {
         if (expectedError != null) {
             shouldThrow<FunksjonellException> {
                 EøsPensjonistTrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
-                    testCase.helseutgiftDekkesPeriode,
+                    behandlingsresultat.helseutgiftDekkesPeriode!!,
                     testCase.skatteforholdsperioder,
                     testCase.inntektsperioder,
                     behandlingsresultat,
@@ -57,7 +60,7 @@ class EøsPensjonistTrygdeavgiftsberegningValidatorTest {
         } else {
             shouldNotThrow<FunksjonellException> {
                 EøsPensjonistTrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
-                    testCase.helseutgiftDekkesPeriode,
+                    behandlingsresultat.helseutgiftDekkesPeriode!!,
                     testCase.skatteforholdsperioder,
                     testCase.inntektsperioder,
                     behandlingsresultat,
@@ -98,7 +101,7 @@ class EøsPensjonistTrygdeavgiftsberegningValidatorTest {
 
         shouldNotThrow<FunksjonellException> {
             EøsPensjonistTrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
-                testCase.helseutgiftDekkesPeriode,
+                behandlingsresultat.helseutgiftDekkesPeriode!!,
                 testCase.skatteforholdsperioder,
                 testCase.inntektsperioder,
                 behandlingsresultat,
@@ -286,14 +289,18 @@ class EøsPensjonistTrygdeavgiftsberegningValidatorTest {
         }
     )
 
-    private fun opprettBehandlingsresultat(testCase: EøsValideringsTestCase) = Behandlingsresultat().apply {
-        behandling = Behandling.forTest {
+    private fun opprettBehandlingsresultat(testCase: EøsValideringsTestCase) = Behandlingsresultat.forTest {
+        behandling {
             tema = Behandlingstema.PENSJONIST
             status = Behandlingsstatus.OPPRETTET
             type = Behandlingstyper.NY_VURDERING
         }
-        helseutgiftDekkesPeriode = testCase.helseutgiftDekkesPeriode
-        årsavregning = Årsavregning.forTest()
+        helseutgiftDekkesPeriode {
+            fomDato = testCase.helseutgiftDekkesPeriode.fomDato
+            tomDato = testCase.helseutgiftDekkesPeriode.tomDato
+            bostedLandkode = testCase.helseutgiftDekkesPeriode.bostedLandkode
+        }
+        årsavregning { }
     }
 
     private fun eøsValideringsScenario(init: EøsValideringsScenarioBuilder.() -> Unit): Arguments.ArgumentSet =
@@ -311,18 +318,16 @@ class EøsPensjonistTrygdeavgiftsberegningValidatorTest {
     }
 
     class EøsValideringsTestCaseBuilder {
-        private var helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = null
+        private var helseutgiftDekkesPeriode: HelseutgiftDekkesPeriodeData? = null
         private val skatteforholdsperioderList = mutableListOf<SkatteforholdTilNorge>()
         private val inntektsperioderList = mutableListOf<Inntektsperiode>()
 
-        fun helseutgiftPeriode(init: HelseutgiftDekkesPeriode.() -> Unit) {
-            helseutgiftDekkesPeriode = HelseutgiftDekkesPeriode.forTest {
-                behandlingsresultat = mockk<Behandlingsresultat>()
-            }.apply(init)
+        fun helseutgiftPeriode(init: HelseutgiftDekkesPeriodeBuilder.() -> Unit) {
+            helseutgiftDekkesPeriode = HelseutgiftDekkesPeriodeBuilder().apply(init).build()
         }
 
-        fun skatteforhold(init: SkatteforholdTilNorge.() -> Unit) {
-            skatteforholdsperioderList.add(createSkatteforhold(init))
+        fun skatteforhold(init: SkatteforholdBuilder.() -> Unit) {
+            skatteforholdsperioderList.add(SkatteforholdBuilder().apply(init).build())
         }
 
         fun skatteforholdsperioder(init: SkatteforholdsperioderBuilder.() -> Unit) {
@@ -340,38 +345,59 @@ class EøsPensjonistTrygdeavgiftsberegningValidatorTest {
         )
     }
 
+    class HelseutgiftDekkesPeriodeBuilder {
+        var fomDato: LocalDate = LocalDate.now()
+        var tomDato: LocalDate = LocalDate.now().plusDays(1)
+        var bostedLandkode: Land_iso2 = Land_iso2.NO
+
+        fun build() = HelseutgiftDekkesPeriodeData(fomDato, tomDato, bostedLandkode)
+    }
+
+    class SkatteforholdBuilder {
+        var fomDato: LocalDate = LocalDate.now()
+        var tomDato: LocalDate = LocalDate.now().plusDays(30)
+        var skatteplikttype: Skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+
+        fun build(): SkatteforholdTilNorge = skatteforholdForTest {
+            this.fomDato = this@SkatteforholdBuilder.fomDato
+            this.tomDato = this@SkatteforholdBuilder.tomDato
+            this.skatteplikttype = this@SkatteforholdBuilder.skatteplikttype
+        }
+    }
+
+    class InntektBuilder {
+        var fomDato: LocalDate = LocalDate.now()
+        var tomDato: LocalDate = LocalDate.now().plusDays(30)
+        var type: Inntektskildetype = Inntektskildetype.ARBEIDSINNTEKT
+
+        fun build(): Inntektsperiode = inntektForTest {
+            this.fomDato = this@InntektBuilder.fomDato
+            this.tomDato = this@InntektBuilder.tomDato
+            this.type = this@InntektBuilder.type
+        }
+    }
+
     class SkatteforholdsperioderBuilder(private val list: MutableList<SkatteforholdTilNorge>) {
-        fun periode(init: SkatteforholdTilNorge.() -> Unit) {
-            list.add(createSkatteforhold(init))
+        fun periode(init: SkatteforholdBuilder.() -> Unit) {
+            list.add(SkatteforholdBuilder().apply(init).build())
         }
     }
 
     class InntektsperioderBuilder(private val list: MutableList<Inntektsperiode>) {
-        fun periode(init: Inntektsperiode.() -> Unit) {
-            list.add(createInntektsperiode(init))
+        fun periode(init: InntektBuilder.() -> Unit) {
+            list.add(InntektBuilder().apply(init).build())
         }
     }
 
+    data class HelseutgiftDekkesPeriodeData(
+        val fomDato: LocalDate,
+        val tomDato: LocalDate,
+        val bostedLandkode: Land_iso2
+    )
+
     data class EøsValideringsTestCase(
-        val helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode,
+        val helseutgiftDekkesPeriode: HelseutgiftDekkesPeriodeData,
         val skatteforholdsperioder: List<SkatteforholdTilNorge>,
         val inntektsperioder: List<Inntektsperiode>
     )
-
-    companion object {
-        private fun createSkatteforhold(init: SkatteforholdTilNorge.() -> Unit): SkatteforholdTilNorge =
-            SkatteforholdTilNorge().apply {
-                fomDato = LocalDate.now()
-                tomDato = LocalDate.now().plusDays(30)
-                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-            }.apply(init)
-
-        private fun createInntektsperiode(init: Inntektsperiode.() -> Unit): Inntektsperiode =
-            Inntektsperiode().apply {
-                fomDato = LocalDate.now()
-                tomDato = LocalDate.now().plusDays(30)
-                type = Inntektskildetype.ARBEIDSINNTEKT
-                isArbeidsgiversavgiftBetalesTilSkatt = false
-            }.apply(init)
-    }
 }

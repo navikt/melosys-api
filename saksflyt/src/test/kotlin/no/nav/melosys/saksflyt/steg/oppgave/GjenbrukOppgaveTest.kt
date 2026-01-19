@@ -7,11 +7,9 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.Fagsystem
 import no.nav.melosys.domain.fagsak
-import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -104,15 +102,9 @@ internal class GjenbrukOppgaveTest {
                 type = Behandlingstyper.FØRSTEGANG
                 fagsak {
                     if (erForVirksomhet) {
-                        leggTilAktør(Aktoer().apply {
-                            orgnr = "999999999"
-                            rolle = Aktoersroller.VIRKSOMHET
-                        })
+                        medVirksomhet { orgnr = "999999999" }
                     } else {
-                        leggTilAktør(Aktoer().apply {
-                            aktørId = "123321"
-                            rolle = Aktoersroller.BRUKER
-                        })
+                        medBruker { aktørId = "123321" }
                     }
                 }
             }

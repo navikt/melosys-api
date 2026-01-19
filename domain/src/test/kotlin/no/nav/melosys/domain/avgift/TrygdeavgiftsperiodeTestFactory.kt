@@ -67,6 +67,7 @@ object TrygdeavgiftsperiodeTestFactory {
 
     @MelosysTestDsl
     class Builder {
+        var id: Long? = null
         var periodeFra: LocalDate = PERIODE_FRA
         var periodeTil: LocalDate = PERIODE_TIL
         var trygdesats: BigDecimal = TRYGDESATS
@@ -96,6 +97,7 @@ object TrygdeavgiftsperiodeTestFactory {
             }
 
             return Trygdeavgiftsperiode(
+                id = id,
                 periodeFra = periodeFra,
                 periodeTil = periodeTil,
                 trygdesats = trygdesats,

@@ -3,10 +3,11 @@ package no.nav.melosys.saksflyt.steg.brev
 import io.mockk.*
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.BehandlingsresultatBegrunnelse
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.begrunnelse
 import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
@@ -17,6 +18,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
+private const val BEHANDLING_ID = 12314L
+
 @ExtendWith(MockKExtension::class)
 class SendHenleggelsesbrevTest {
 
@@ -25,13 +28,9 @@ class SendHenleggelsesbrevTest {
 
     private lateinit var sendHenleggelsesbrev: SendHenleggelsesbrev
 
-    private val behandlingsresultat = Behandlingsresultat()
-    private val behandlingID = 12314L
-
     @BeforeEach
     fun setUp() {
         sendHenleggelsesbrev = SendHenleggelsesbrev(brevBestiller, behandlingsresultatService)
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
         every { brevBestiller.bestill(any(), any(), any(), any(), any(), any()) } just Runs
     }
 
@@ -39,18 +38,18 @@ class SendHenleggelsesbrevTest {
     fun `utfør sendHenleggelsesbrev produserDokument`() {
         val saksbehandler = "Z097"
 
-        val begrunnelse = BehandlingsresultatBegrunnelse().apply {
-            kode = Henleggelsesgrunner.ANNET.kode
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            begrunnelseFritekst = "fritekst"
+            begrunnelse(Henleggelsesgrunner.ANNET.kode)
         }
-        behandlingsresultat.behandlingsresultatBegrunnelser.add(begrunnelse)
-        behandlingsresultat.begrunnelseFritekst = "fritekst"
 
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         val prosessinstans = Prosessinstans.forTest {
             type = ProsessType.HENLEGG_SAK
             status = ProsessStatus.KLAR
             behandling {
-                id = behandlingID
+                id = BEHANDLING_ID
                 fagsak {
                     gsakSaksnummer = FagsakTestFactory.GSAK_SAKSNUMMER
                 }
@@ -59,9 +58,7 @@ class SendHenleggelsesbrevTest {
             medData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
         }
 
-
         sendHenleggelsesbrev.utfør(prosessinstans)
-
 
         verify {
             brevBestiller.bestill(

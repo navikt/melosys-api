@@ -6,6 +6,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
@@ -54,14 +55,14 @@ class KansellerFakturaserieTest {
             }
             medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
         }
-        val behandlingsresultatOpprinneligBehandling = Behandlingsresultat().apply {
+        val behandlingsresultatOpprinneligBehandling = Behandlingsresultat.forTest {
             id = behandlingId
             fakturaserieReferanse = fakturaReferanse
         }
 
         val nyFakturaserieResponseDto = NyFakturaserieResponseDto(fakturaReferanse)
 
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns Behandlingsresultat().apply { id = behandlingId }
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns Behandlingsresultat.forTest { id = behandlingId }
         every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns behandlingsresultatOpprinneligBehandling
         every { faktureringskomponentenConsumer.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT) } returns nyFakturaserieResponseDto
 
@@ -103,17 +104,17 @@ class KansellerFakturaserieTest {
             medBehandling(nyesteBehandlingUtenFakturaserieReferanse)
             medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
         }
-        val behandlingsresultatOpprinneligBehandling = Behandlingsresultat().apply {
+        val behandlingsresultatOpprinneligBehandling = Behandlingsresultat.forTest {
             id = opprinneligBehandlingId
             fakturaserieReferanse = fakturaReferanse
         }
 
         val nyFakturaserieResponseDto = NyFakturaserieResponseDto(fakturaReferanse)
 
-        every { behandlingsresultatService.hentBehandlingsresultat(nyesteBehandlingId) } returns Behandlingsresultat().apply {
+        every { behandlingsresultatService.hentBehandlingsresultat(nyesteBehandlingId) } returns Behandlingsresultat.forTest {
             id = nyesteBehandlingId
         }
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingHenvendelseId) } returns Behandlingsresultat().apply {
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingHenvendelseId) } returns Behandlingsresultat.forTest {
             id = behandlingHenvendelseId
         }
         every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns behandlingsresultatOpprinneligBehandling

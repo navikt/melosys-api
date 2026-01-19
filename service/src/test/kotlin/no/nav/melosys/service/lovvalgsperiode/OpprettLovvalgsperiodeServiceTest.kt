@@ -9,14 +9,18 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.lovvalgsperiodeForTest
+import no.nav.melosys.domain.mottatteOpplysninger
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.*
-import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode
+import no.nav.melosys.domain.mottatteopplysninger.anmodningEllerAttest
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.LovvalgsperiodeRepository
 import no.nav.melosys.service.LandvelgerService
@@ -371,8 +375,8 @@ class OpprettLovvalgsperiodeServiceTest {
     @Test
     fun opprettLovvalgsperiode_flereEnnÉnLovvalgsperiode_kasterFeil() {
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(any()) } returns listOf(
-            Lovvalgsperiode(),
-            Lovvalgsperiode()
+            lovvalgsperiodeForTest(),
+            lovvalgsperiodeForTest()
         )
         val request = OpprettLovvalgsperiodeRequest(null, null, null, null, null)
 
@@ -384,18 +388,18 @@ class OpprettLovvalgsperiodeServiceTest {
     private fun mockHappyCase(behandling: Behandling) {
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(behandling.id) } returns emptyList()
-        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns Behandlingsresultat()
-        every { lovvalgsperiodeRepository.save(any()) } returns Lovvalgsperiode()
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns Behandlingsresultat.forTest()
+        every { lovvalgsperiodeRepository.save(any()) } returns lovvalgsperiodeForTest()
     }
 
     private fun lagBehandling(land: Land_iso2): Behandling =
         Behandling.forTest {
             id = 1L
             fagsak { type = Sakstyper.TRYGDEAVTALE }
-            mottatteOpplysninger = MottatteOpplysninger().apply {
-                mottatteOpplysningerData = AnmodningEllerAttest().apply {
+            mottatteOpplysninger {
+                anmodningEllerAttest {
                     lovvalgsland = land
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(6))
+                    periode(LocalDate.now(), LocalDate.now().plusMonths(6))
                 }
             }
             tema = Behandlingstema.YRKESAKTIV

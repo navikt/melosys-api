@@ -15,11 +15,12 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.RepresentantIUtlandet
+import no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest
+import no.nav.melosys.domain.mottatteopplysninger.søknadNorgeEllerUtenforEØSForTest
 import no.nav.melosys.domain.person.*
 import no.nav.melosys.domain.person.adresse.Bostedsadresse
 import no.nav.melosys.domain.person.adresse.Kontaktadresse
@@ -46,33 +47,27 @@ object DokgenTestData {
 
     fun lagBehandling(): Behandling = lagBehandling(lagFagsak())
 
-    fun lagBehandling(fagsak: Fagsak): Behandling =
-        BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medFagsak(fagsak)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
-            .medMottatteOpplysninger(lagMottatteOpplysninger())
-            .build()
+    fun lagBehandling(fagsak: Fagsak): Behandling = Behandling.forTest {
+        id = 1L
+        this.fagsak = fagsak
+        type = Behandlingstyper.FØRSTEGANG
+        tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+        mottatteOpplysninger { mottatteOpplysningerData = lagMottatteOpplysningerdata() }
+    }
 
-    fun lagFagsak(medFullmektig: Boolean = false): Fagsak =
-        FagsakTestFactory.builder()
-            .saksnummer(SAKSNUMMER)
-            .behandlinger(lagBehandlinger())
-            .type(Sakstyper.FTRL)
-            .tema(Sakstemaer.UNNTAK)
-            .medBruker()
-            .build().apply {
-                registrertDato = Instant.now()
-                endretAv = "L12345"
-                if (medFullmektig) {
-                    val fullmektig = Aktoer().apply {
-                        rolle = Aktoersroller.FULLMEKTIG
-                        setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD)
-                    }
-                    leggTilAktør(fullmektig)
-                }
+    fun lagFagsak(medFullmektig: Boolean = false): Fagsak = Fagsak.forTest {
+        saksnummer = SAKSNUMMER
+        behandlinger(lagBehandlinger())
+        type = Sakstyper.FTRL
+        tema = Sakstemaer.UNNTAK
+        medBruker()
+        registrertDato = Instant.now()
+        if (medFullmektig) {
+            medFullmektig {
+                setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD)
             }
+        }
+    }.also { it.endretAv = "L12345" }
 
     fun lagPersondata(fødselsdato: LocalDate? = null): Persondata {
         val bostedsadresse = Bostedsadresse(
@@ -93,12 +88,12 @@ object DokgenTestData {
         )
     }
 
-    fun lagAdresse() = UstrukturertAdresse().apply {
-        adresselinje1 = ADRESSELINJE_1_BRUKER
-        postnr = POSTNR_BRUKER
-        poststed = POSTSTED_BRUKER
+    fun lagAdresse() = UstrukturertAdresse(
+        adresselinje1 = ADRESSELINJE_1_BRUKER,
+        postnr = POSTNR_BRUKER,
+        poststed = POSTSTED_BRUKER,
         land = Land(Land.NORGE)
-    }
+    )
 
     fun lagKontaktOpplysning() = Kontaktopplysning().apply {
         kontaktNavn = KONTAKT_NAVN
@@ -128,17 +123,13 @@ object DokgenTestData {
     }
 
     private fun lagBehandlinger(): List<Behandling> = listOf(
-        BehandlingTestFactory.builderWithDefaults()
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medRegistrertDato(Instant.now())
-            .build()
+        Behandling.forTest {
+            type = Behandlingstyper.FØRSTEGANG
+            registrertDato = Instant.now()
+        }
     )
 
-    private fun lagMottatteOpplysninger() = MottatteOpplysninger().apply {
-        mottatteOpplysningerData = lagMottatteOpplysningerdata()
-    }
-
-    fun lagMottatteOpplysningerSøknadUtenforEØS() = MottatteOpplysninger().apply {
+    fun lagMottatteOpplysningerSøknadUtenforEØS() = mottatteOpplysningerForTest {
         mottatteOpplysningerData = lagMottatteOpplysningerdataSøknadUtenforEØS()
     }
 
@@ -146,8 +137,9 @@ object DokgenTestData {
         soeknadsland = Soeknadsland(listOf("AT"), false)
     }
 
-    private fun lagMottatteOpplysningerdataSøknadUtenforEØS() = SøknadNorgeEllerUtenforEØS().apply {
-        soeknadsland = Soeknadsland(listOf("AT"), false)
+    private fun lagMottatteOpplysningerdataSøknadUtenforEØS() = søknadNorgeEllerUtenforEØSForTest {
+        landkoder("AT")
+    }.apply {
         trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
     }
 
@@ -171,48 +163,36 @@ object DokgenTestData {
         )
     )
 
-    fun lagTrygdeavtaleBehandling(representantIUtlandet: RepresentantIUtlandet?): Behandling =
-        lagBehandling(lagFagsak()).apply {
-            val mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
-                this.representantIUtlandet = representantIUtlandet
-            }
-            this.mottatteOpplysninger?.mottatteOpplysningerData = mottatteOpplysningerData
+    fun lagTrygdeavtaleBehandling(representantIUtlandet: RepresentantIUtlandet?): Behandling {
+        val søknadData = søknadNorgeEllerUtenforEØSForTest().apply {
+            this.representantIUtlandet = representantIUtlandet
         }
+        return Behandling.forTest {
+            id = 1L
+            fagsak = lagFagsak()
+            type = Behandlingstyper.FØRSTEGANG
+            tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+            mottatteOpplysninger { mottatteOpplysningerData = søknadData }
+        }
+    }
 
-    fun lagLovvalgsperiode() = Lovvalgsperiode().apply {
+    fun lagLovvalgsperiode() = lovvalgsperiodeForTest {
         fom = LOVVALGSPERIODE_FOM
         tom = LOVVALGSPERIODE_TOM
         dekning = Trygdedekninger.FULL_DEKNING_FTRL
         bestemmelse = Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1
     }
 
-    fun lagMottaker(rolle: Mottakerroller): Mottaker = Mottaker().apply {
-        when (rolle) {
-            Mottakerroller.BRUKER -> {
-                this.rolle = Mottakerroller.BRUKER
-                aktørId = FNR_BRUKER
-            }
-
-            Mottakerroller.VIRKSOMHET -> {
-                this.rolle = Mottakerroller.VIRKSOMHET
-                orgnr = ORGNR
-            }
-
-            Mottakerroller.ARBEIDSGIVER -> {
-                this.rolle = Mottakerroller.ARBEIDSGIVER
-                orgnr = ORGNR_FULLMEKTIG
-            }
-
-            else -> throw IllegalArgumentException("Støtter ikke mottakerrolle ${rolle.kode}")
-        }
+    fun lagMottaker(rolle: Mottakerroller): Mottaker = when (rolle) {
+        Mottakerroller.BRUKER -> Mottaker(rolle = Mottakerroller.BRUKER, aktørId = FNR_BRUKER)
+        Mottakerroller.VIRKSOMHET -> Mottaker(rolle = Mottakerroller.VIRKSOMHET, orgnr = ORGNR)
+        Mottakerroller.ARBEIDSGIVER -> Mottaker(rolle = Mottakerroller.ARBEIDSGIVER, orgnr = ORGNR_FULLMEKTIG)
+        else -> throw IllegalArgumentException("Støtter ikke mottakerrolle ${rolle.kode}")
     }
 
-    fun lagMottakerFullmektig(aktoertype: Aktoertype): Mottaker = Mottaker().apply {
-        when (aktoertype) {
-            Aktoertype.PERSON -> personIdent = FNR_FULLMEKTIG
-            Aktoertype.ORGANISASJON -> orgnr = ORGNR_FULLMEKTIG
-            else -> throw IllegalArgumentException("Fullmektig må være person eller organisasjon")
-        }
-        rolle = Mottakerroller.FULLMEKTIG
+    fun lagMottakerFullmektig(aktoertype: Aktoertype): Mottaker = when (aktoertype) {
+        Aktoertype.PERSON -> Mottaker(rolle = Mottakerroller.FULLMEKTIG, personIdent = FNR_FULLMEKTIG)
+        Aktoertype.ORGANISASJON -> Mottaker(rolle = Mottakerroller.FULLMEKTIG, orgnr = ORGNR_FULLMEKTIG)
+        else -> throw IllegalArgumentException("Fullmektig må være person eller organisasjon")
     }
 }

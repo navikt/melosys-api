@@ -2,10 +2,9 @@ package no.nav.melosys.tjenester.gui.aarsavregning
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Årsavregning
-import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.avgift.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
@@ -41,9 +40,9 @@ internal class ÅrsavregningListControllerTest {
         } returns listOf(Årsavregning.forTest {
             id = 35
             aar = 2023
-            behandlingsresultat = Behandlingsresultat().apply {
+            behandlingsresultat {
                 type = Behandlingsresultattyper.FERDIGBEHANDLET
-                behandling = Behandling.forTest {
+                behandling {
                     id = 45
                 }
             }

@@ -12,8 +12,9 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.brev.*
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.medlemskapsperiode
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse
@@ -38,7 +39,6 @@ import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.Soknad
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.assertj.core.api.AssertionsForClassTypes
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Instant
@@ -77,11 +77,8 @@ internal class DokgenMalMapperTest {
     @MockK
     private lateinit var mockInformasjonTrygdeavgiftMapper: InformasjonTrygdeavgiftMapper
 
-    private lateinit var dokgenMalMapper: DokgenMalMapper
-
-    @BeforeEach
-    fun init() {
-        dokgenMalMapper = DokgenMalMapper(
+    private val dokgenMalMapper by lazy {
+        DokgenMalMapper(
             mockDokgenMapperDatahenter,
             mockInnvilgelseFtrlMapper,
             mockInnvilgelseEftaStorbritanniaMapper,
@@ -250,9 +247,7 @@ internal class DokgenMalMapperTest {
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.NO.kode) } returns Landkoder.NO.beskrivelse
 
         val behandling = DokgenTestData.lagBehandling()
-        val org = DokgenTestData.lagOrg()
-        org.organisasjonDetaljer.forretningsadresse = listOf(lagOrgForretningsadresse())
-        org.organisasjonDetaljer.postadresse = emptyList()
+        val org = lagOrgMedKunForretningsadresse()
         val brevbestilling = DokgenBrevbestilling.Builder()
             .medProduserbartdokument(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medBehandling(behandling)
@@ -424,9 +419,9 @@ internal class DokgenMalMapperTest {
                     .first()
             )
         } returns Landkoder.AT.beskrivelse
-        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns Behandlingsresultat().apply {
-            medlemskapsperioder.add(Medlemskapsperiode().apply { medlemskapstype = Medlemskapstyper.FRIVILLIG })
-            this@apply.behandling = behandling
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns Behandlingsresultat.forTest {
+            this.behandling = behandling
+            medlemskapsperiode { medlemskapstype = Medlemskapstyper.FRIVILLIG }
         }
 
         val brevbestilling: DokgenBrevbestilling = VedtakOpphoertMedlemskapBrevbestilling.Builder()
@@ -454,8 +449,8 @@ internal class DokgenMalMapperTest {
         every { mockDokgenMapperDatahenter.hentNorskPoststed(any()) } returns "Andeby"
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.NO.kode) } returns Landkoder.NO.beskrivelse
         every { mockDokgenMapperDatahenter.hentFullmektigNavn(any(), any()) } returns null
-        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns Behandlingsresultat().apply {
-            medlemskapsperioder.add(Medlemskapsperiode().apply { medlemskapstype = Medlemskapstyper.FRIVILLIG })
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns Behandlingsresultat.forTest {
+            medlemskapsperiode { medlemskapstype = Medlemskapstyper.FRIVILLIG }
         }
         val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
         val brevbestilling: DokgenBrevbestilling = VarselbrevManglendeInnbetalingBrevbestilling.Builder()
@@ -478,7 +473,7 @@ internal class DokgenMalMapperTest {
         every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata()
         every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
         every { mockDokgenMapperDatahenter.hentNorskPoststed(any()) } returns "Andeby"
-        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns Behandlingsresultat()
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns Behandlingsresultat.forTest { }
         val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
 
         val brevbestilling: DokgenBrevbestilling = VarselbrevManglendeInnbetalingBrevbestilling.Builder()
@@ -806,13 +801,16 @@ internal class DokgenMalMapperTest {
             .build()
     }
 
-    private fun lagOrgForretningsadresse(): GeografiskAdresse {
-        val semistrukturertAdresse = SemistrukturertAdresse()
-        semistrukturertAdresse.adresselinje1 = FORRETNINGSADRESSE_ORG
-        semistrukturertAdresse.postnr = DokgenTestData.POSTNR_ORG
-        semistrukturertAdresse.gyldighetsperiode = Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2))
-        semistrukturertAdresse.landkode = "NO"
-        return semistrukturertAdresse
+    private fun lagOrgForretningsadresse(): GeografiskAdresse = SemistrukturertAdresse().apply {
+        adresselinje1 = FORRETNINGSADRESSE_ORG
+        postnr = DokgenTestData.POSTNR_ORG
+        gyldighetsperiode = Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2))
+        landkode = "NO"
+    }
+
+    private fun lagOrgMedKunForretningsadresse() = DokgenTestData.lagOrg().apply {
+        organisasjonDetaljer.forretningsadresse = listOf(lagOrgForretningsadresse())
+        organisasjonDetaljer.postadresse = emptyList()
     }
 
     companion object {

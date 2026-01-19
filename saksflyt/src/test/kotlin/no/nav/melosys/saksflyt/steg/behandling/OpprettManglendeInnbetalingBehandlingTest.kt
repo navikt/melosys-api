@@ -11,6 +11,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.medlemskapsperiode
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.*
@@ -313,11 +314,11 @@ class OpprettManglendeInnbetalingBehandlingTest {
     @Test
     fun `oppretter ikke behandling om siste behandling det ble fattet vedtak i har pliktig medlemskap`() {
         val mottaksdato = LocalDate.now()
-        val behandlingsresultat = lagBehandlingsresultat().apply {
+        val behandlingsresultat = lagBehandlingsresultat {
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            medlemskapsperioder.add(Medlemskapsperiode().apply {
+            medlemskapsperiode {
                 medlemskapstype = Medlemskapstyper.PLIKTIG
-            })
+            }
         }
         val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse!!, mottaksdato)
         val behandling = lagBehandling()
@@ -338,9 +339,12 @@ class OpprettManglendeInnbetalingBehandlingTest {
         }.message.shouldBe("Det skal ikke opprettes behandling ved manglende innbetaling av avgift for pliktig medlemskap")
     }
 
-    private fun lagBehandlingsresultat() = Behandlingsresultat().apply {
-        id = 1L
-        fakturaserieReferanse = "referanse"
+    private fun lagBehandlingsresultat(init: BehandlingsresultatTestFactory.Builder.() -> Unit = {}): Behandlingsresultat {
+        return Behandlingsresultat.forTest {
+            id = 1L
+            fakturaserieReferanse = "referanse"
+            init()
+        }
     }
 
     private fun lagProsessinstans(
@@ -351,11 +355,14 @@ class OpprettManglendeInnbetalingBehandlingTest {
         medData(ProsessDataKey.MOTTATT_DATO, mottaksdato)
     }
 
-    private fun lagBehandling(block: Behandling.() -> Unit = {}) = Behandling.forTest {
-        id = 1L
-        fagsak {
-            type = Sakstyper.FTRL
+    private fun lagBehandling(init: BehandlingTestFactory.BehandlingTestBuilder.() -> Unit = {}): Behandling {
+        return Behandling.forTest {
+            id = 1L
+            fagsak {
+                type = Sakstyper.FTRL
+            }
+            tema = Behandlingstema.YRKESAKTIV
+            init()
         }
-        tema = Behandlingstema.YRKESAKTIV
-    }.apply { block() }
+    }
 }

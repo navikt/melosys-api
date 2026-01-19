@@ -44,20 +44,22 @@ class BehandlingsresultatServiceTest {
     @Test
     fun tømBehandlingsresultat() {
         val behandlingID = 1L
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             id = behandlingID
-            avklartefakta = hashSetOf(Avklartefakta())
-            lovvalgsperioder = hashSetOf(Lovvalgsperiode())
-            vilkaarsresultater = hashSetOf(Vilkaarsresultat())
             utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
             innledningFritekst = "Innledning fritekst"
             begrunnelseFritekst = "Begrunnelse fritekst"
             nyVurderingBakgrunn = "ny vurdering bakgrunn"
             trygdeavgiftFritekst = "trygdeavgift fritekst"
-            behandling = Behandling.forTest {
+            behandling {
                 id = behandlingID
-                fagsak = Fagsak.forTest()
+                fagsak { }
             }
+            lovvalgsperiode { }
+            vilkaarsresultat { }
+        }.apply {
+            // avklartefakta has no builder support, set directly
+            avklartefakta.add(Avklartefakta())
         }
 
         every { behandlingsresultatRepo.findById(any()) } returns Optional.of(behandlingsresultat)
@@ -83,25 +85,26 @@ class BehandlingsresultatServiceTest {
     @Test
     fun `Tøm behandlingsresultat for eøs pensjonist`() {
         val behandlingID = 1L
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             id = behandlingID
-            avklartefakta = hashSetOf(Avklartefakta())
-            lovvalgsperioder = hashSetOf(Lovvalgsperiode())
-            vilkaarsresultater = hashSetOf(Vilkaarsresultat())
             utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
             innledningFritekst = "Innledning fritekst"
             begrunnelseFritekst = "Begrunnelse fritekst"
             nyVurderingBakgrunn = "ny vurdering bakgrunn"
             trygdeavgiftFritekst = "trygdeavgift fritekst"
-            behandling = Behandling.forTest {
+            behandling {
                 id = behandlingID
-                fagsak = Fagsak.forTest()
                 tema = Behandlingstema.PENSJONIST
-                fagsak = Fagsak.forTest {
+                fagsak {
                     type = Sakstyper.EU_EOS
                     tema = Sakstemaer.TRYGDEAVGIFT
                 }
             }
+            lovvalgsperiode { }
+            vilkaarsresultat { }
+        }.apply {
+            // avklartefakta has no builder support, set directly
+            avklartefakta.add(Avklartefakta())
         }
 
         every { behandlingsresultatRepo.findById(any()) } returns Optional.of(behandlingsresultat)
@@ -135,10 +138,8 @@ class BehandlingsresultatServiceTest {
 
     @Test
     fun hentBehandlingsresultat_returnererBehandlingsresultat() {
-        val resultat = Behandlingsresultat().apply {
-            behandlingsresultatBegrunnelser = mutableSetOf(BehandlingsresultatBegrunnelse().apply {
-                kode = Henleggelsesgrunner.ANNET.kode
-            })
+        val resultat = Behandlingsresultat.forTest {
+            begrunnelse(Henleggelsesgrunner.ANNET.kode)
         }
         every { behandlingsresultatRepo.findById(any()) } returns Optional.of(resultat)
 
@@ -172,16 +173,16 @@ class BehandlingsresultatServiceTest {
         val behandlingID = 123L
         val utfallUtpeking = Utfallregistreringunntak.GODKJENT
 
-        val mockBehandlingsresultat = Behandlingsresultat()
-        every { behandlingsresultatRepo.findById(behandlingID) } returns Optional.of(mockBehandlingsresultat)
-        every { behandlingsresultatRepo.findWithKontrollresultaterById(behandlingID) } returns Optional.of(mockBehandlingsresultat)
-        every { behandlingsresultatRepo.save(any()) } returns mockBehandlingsresultat
+        val behandlingsresultat = Behandlingsresultat.forTest()
+        every { behandlingsresultatRepo.findById(behandlingID) } returns Optional.of(behandlingsresultat)
+        every { behandlingsresultatRepo.findWithKontrollresultaterById(behandlingID) } returns Optional.of(behandlingsresultat)
+        every { behandlingsresultatRepo.save(any()) } returns behandlingsresultat
 
 
         behandlingsresultatService.settUtfallRegistreringUnntakOgType(behandlingID, utfallUtpeking)
 
 
-        mockBehandlingsresultat.type shouldBe Behandlingsresultattyper.REGISTRERT_UNNTAK
+        behandlingsresultat.type shouldBe Behandlingsresultattyper.REGISTRERT_UNNTAK
     }
 
     @Test
@@ -189,21 +190,21 @@ class BehandlingsresultatServiceTest {
         val behandlingID = 123L
         val utfallUtpeking = Utfallregistreringunntak.IKKE_GODKJENT
 
-        val mockBehandlingsresultat = Behandlingsresultat()
-        every { behandlingsresultatRepo.findById(behandlingID) } returns Optional.of(mockBehandlingsresultat)
-        every { behandlingsresultatRepo.findWithKontrollresultaterById(behandlingID) } returns Optional.of(mockBehandlingsresultat)
-        every { behandlingsresultatRepo.save(any()) } returns mockBehandlingsresultat
+        val behandlingsresultat = Behandlingsresultat.forTest()
+        every { behandlingsresultatRepo.findById(behandlingID) } returns Optional.of(behandlingsresultat)
+        every { behandlingsresultatRepo.findWithKontrollresultaterById(behandlingID) } returns Optional.of(behandlingsresultat)
+        every { behandlingsresultatRepo.save(any()) } returns behandlingsresultat
 
 
         behandlingsresultatService.settUtfallRegistreringUnntakOgType(behandlingID, utfallUtpeking)
 
 
-        mockBehandlingsresultat.type shouldBe Behandlingsresultattyper.FERDIGBEHANDLET
+        behandlingsresultat.type shouldBe Behandlingsresultattyper.FERDIGBEHANDLET
     }
 
     @Test
     fun oppdaterBehandlingsresultattype_idEksisterer_oppdatererBehandlingsresultattype() {
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             type = Behandlingsresultattyper.ANMODNING_OM_UNNTAK
         }
         every { behandlingsresultatRepo.findById(1L) } returns Optional.of(behandlingsresultat)
@@ -231,7 +232,7 @@ class BehandlingsresultatServiceTest {
 
     @Test
     fun oppdaterBehandlingsmaate_bhmåteUdefinert_verifiserOppdatert() {
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             behandlingsmåte = Behandlingsmaate.MANUELT
         }
         every { behandlingsresultatRepo.findById(any()) } returns Optional.of(behandlingsresultat)
@@ -247,7 +248,7 @@ class BehandlingsresultatServiceTest {
 
     @Test
     fun settUtfallRegistreringUnntakOgType_ikkeSatt_lagres() {
-        val behandlingsresultat = Behandlingsresultat()
+        val behandlingsresultat = Behandlingsresultat.forTest()
         every { behandlingsresultatRepo.findById(1L) } returns Optional.of(behandlingsresultat)
         every { behandlingsresultatRepo.findWithKontrollresultaterById(1L) } returns Optional.of(behandlingsresultat)
         every { behandlingsresultatRepo.save(any()) } returns behandlingsresultat
@@ -261,7 +262,7 @@ class BehandlingsresultatServiceTest {
 
     @Test
     fun settUtfallRegistreringUnntakOgType_alleredeSatt_kasterException() {
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
         }
         every { behandlingsresultatRepo.findById(1L) } returns Optional.of(behandlingsresultat)
@@ -274,7 +275,7 @@ class BehandlingsresultatServiceTest {
 
     @Test
     fun oppdaterUtfallRegistreringUnntak_alleredeSatt_oppdaterer() {
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
         }
         every { behandlingsresultatRepo.findWithKontrollresultaterById(1L) } returns Optional.of(behandlingsresultat)
@@ -292,7 +293,7 @@ class BehandlingsresultatServiceTest {
         val behandlingsresultatBegrunnelse = BehandlingsresultatBegrunnelse().apply {
             kode = "koden"
         }
-        val behandlingsresultat = Behandlingsresultat()
+        val behandlingsresultat = Behandlingsresultat.forTest()
         every { behandlingsresultatRepo.findById(1L) } returns Optional.of(behandlingsresultat)
         every { behandlingsresultatRepo.save(any()) } returns behandlingsresultat
 
@@ -306,7 +307,7 @@ class BehandlingsresultatServiceTest {
 
     @Test
     fun oppdaterFritekster_altOk_blirLagret() {
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
         }
         every { behandlingsresultatRepo.findById(1L) } returns Optional.of(behandlingsresultat)

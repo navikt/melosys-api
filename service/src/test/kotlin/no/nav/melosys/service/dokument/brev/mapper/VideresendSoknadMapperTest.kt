@@ -26,7 +26,7 @@ class VideresendSoknadMapperTest {
 
 
         val resultat = instans.mapTilBrevXML(
-            fellesType, navFelles, behandling, Behandlingsresultat(), brevdata
+            fellesType, navFelles, behandling, Behandlingsresultat.forTest { }, brevdata
         )
 
 
@@ -36,7 +36,7 @@ class VideresendSoknadMapperTest {
     private fun lagBrevDataVideresend() =
         BrevDataVideresend(BrevbestillingDto(), "Saksbehandler").apply {
             bostedsland = Landkoder.NO.beskrivelse
-            trygdemyndighet = UtenlandskMyndighet().apply {
+            trygdemyndighet = utenlandskMyndighetForTest {
                 navn = "Försäkringskassan"
                 gateadresse1 = "Box 1164"
                 postnummer = "SE-621 22"
@@ -45,4 +45,12 @@ class VideresendSoknadMapperTest {
                 landkode = Land_iso2.SE
             }
         }
+
+    /**
+     * Simple DSL helper for creating UtenlandskMyndighet test instances.
+     * UtenlandskMyndighet is a JPA entity without a dedicated TestFactory.
+     */
+    private fun utenlandskMyndighetForTest(
+        init: UtenlandskMyndighet.() -> Unit
+    ): UtenlandskMyndighet = UtenlandskMyndighet().apply(init)
 }

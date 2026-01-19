@@ -28,13 +28,16 @@ class SendOrienteringAnmodningUnntakTest {
     @MockK
     private lateinit var behandlingService: BehandlingService
 
-    private lateinit var behandling: Behandling
-    private lateinit var prosessinstans: Prosessinstans
     private lateinit var sendOrienteringAnmodningUnntak: SendOrienteringAnmodningUnntak
 
     @BeforeEach
     fun setUp() {
-        prosessinstans = Prosessinstans.forTest {
+        sendOrienteringAnmodningUnntak = SendOrienteringAnmodningUnntak(brevBestiller, behandlingService)
+    }
+
+    @Test
+    fun utfoerSteg() {
+        val prosessinstans = Prosessinstans.forTest {
             type = ProsessType.ANMODNING_OM_UNNTAK
             status = ProsessStatus.KLAR
             behandling {
@@ -44,26 +47,18 @@ class SendOrienteringAnmodningUnntakTest {
             medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER)
             medData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, Behandlingsresultattyper.ANMODNING_OM_UNNTAK.kode)
         }
-        behandling = prosessinstans.hentBehandling
+        val behandling = prosessinstans.hentBehandling
 
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandling.id) } returns behandling
 
-
-        sendOrienteringAnmodningUnntak = SendOrienteringAnmodningUnntak(brevBestiller, behandlingService)
-    }
-
-    @Test
-    fun utfoerSteg() {
         val captor = slot<DoksysBrevbestilling>()
         every { brevBestiller.bestill(capture(captor)) } returns Unit
 
-
         sendOrienteringAnmodningUnntak.utfør(prosessinstans)
-
 
         captor.captured.run {
             produserbartdokument shouldBe ORIENTERING_ANMODNING_UNNTAK
-            behandling shouldBe this@SendOrienteringAnmodningUnntakTest.behandling
+            this.behandling shouldBe behandling
             avsenderID shouldBe SAKSBEHANDLER
             mottakere shouldBe listOf(Mottaker.medRolle(Mottakerroller.BRUKER))
         }

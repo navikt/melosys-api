@@ -6,7 +6,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.FagsakTestFactory
-import no.nav.melosys.domain.FagsakTestFactory.builder
+import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
@@ -34,12 +34,11 @@ internal class OpprettOppgaveTest {
     fun utfoerSteg_nySak_sendForvaltningsmelding() {
         val journalpostID = "142342343"
         val saksbehandler = "meg!"
-        val fagsak = builder().medBruker().build()
         val prosessinstans = Prosessinstans.forTest {
             behandling {
                 id = 243L
                 initierendeJournalpostId = journalpostID
-                this.fagsak = fagsak
+                fagsak { medBruker() }
             }
             medData(ProsessDataKey.SKAL_TILORDNES, true)
             medData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
@@ -49,11 +48,7 @@ internal class OpprettOppgaveTest {
 
         verify {
             oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
-                Behandling.forTest {
-                    id = 243L
-                    initierendeJournalpostId = journalpostID
-                    this.fagsak = fagsak
-                },
+                match { it.id == 243L && it.initierendeJournalpostId == journalpostID },
                 journalpostID,
                 FagsakTestFactory.BRUKER_AKTØR_ID,
                 saksbehandler,
@@ -66,12 +61,11 @@ internal class OpprettOppgaveTest {
     fun utfoerSteg_nyOppgave_virksomhet() {
         val journalpostID = "142342343"
         val saksbehandler = "meg!"
-        val fagsak = builder().medVirksomhet().build()
         val prosessinstans = Prosessinstans.forTest {
             behandling {
                 id = 243L
                 initierendeJournalpostId = journalpostID
-                this.fagsak = fagsak
+                fagsak { medVirksomhet() }
             }
             medData(ProsessDataKey.SKAL_TILORDNES, true)
             medData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
@@ -81,11 +75,7 @@ internal class OpprettOppgaveTest {
 
         verify {
             oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
-                Behandling.forTest {
-                    id = 243L
-                    initierendeJournalpostId = journalpostID
-                    this.fagsak = fagsak
-                },
+                match { it.id == 243L && it.initierendeJournalpostId == journalpostID },
                 journalpostID,
                 null,
                 saksbehandler,

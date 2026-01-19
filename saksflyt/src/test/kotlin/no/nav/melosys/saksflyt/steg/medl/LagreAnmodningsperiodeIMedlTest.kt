@@ -45,8 +45,8 @@ class LagreAnmodningsperiodeIMedlTest {
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, null, null, null, Trygdedekninger.FULL_DEKNING_EOSFO
         )
 
-        behandlingsresultat = Behandlingsresultat().apply {
-            anmodningsperioder = setOf(anmodningsperiode).toMutableSet()
+        behandlingsresultat = Behandlingsresultat.forTest { }.also {
+            it.anmodningsperioder = setOf(anmodningsperiode).toMutableSet()
         }
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
 
@@ -115,8 +115,8 @@ class LagreAnmodningsperiodeIMedlTest {
             medType(Behandlingstyper.FØRSTEGANG)
             medRegistrertDato(Instant.now().minusSeconds(20))
         }
-        val førsteAnmodningsperiode = Anmodningsperiode().apply {
-            medlPeriodeID = 44L
+        val førsteAnmodningsperiode = Anmodningsperiode().also {
+            it.medlPeriodeID = 44L
         }
 
         behandling.fagsak = fagsak
@@ -154,10 +154,11 @@ class LagreAnmodningsperiodeIMedlTest {
     private fun lagBehandlingsresultat(
         behandlingsresultattyper: Behandlingsresultattyper,
         anmodningsperiode: Anmodningsperiode?
-    ) = Behandlingsresultat().apply {
-        this.type = behandlingsresultattyper
+    ) = Behandlingsresultat.forTest {
+        type = behandlingsresultattyper
+    }.also {
         if (anmodningsperiode != null) {
-            this.anmodningsperioder = mutableSetOf(anmodningsperiode)
+            it.anmodningsperioder = mutableSetOf(anmodningsperiode)
         }
     }
 

@@ -7,17 +7,18 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import no.nav.melosys.domain.*
-import no.nav.melosys.domain.dokument.sed.SedDokument
-import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.SaksopplysningType
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.mottatteOpplysninger
+import no.nav.melosys.domain.saksopplysning
+import no.nav.melosys.domain.sedDokument
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
-import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
+import no.nav.melosys.domain.mottatteopplysninger.soeknad
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -105,12 +106,7 @@ class OppfriskSaksopplysningerServiceTest {
 
     @Test
     fun `oppfrisk saksopplysning virksomhet ingen flyt`() {
-        val behandling = lagBehandling()
-        val virksomhet = Aktoer().apply {
-            rolle = Aktoersroller.VIRKSOMHET
-        }
-        behandling.fagsak.leggTilAktør(virksomhet)
-        behandling.type = Behandlingstyper.HENVENDELSE
+        val behandling = lagBehandlingMedVirksomhetOgType(Behandlingstyper.HENVENDELSE)
         every { behandlingService.hentBehandling(any()) } returns behandling
         every { saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any()) } returns true
         every { inngangsvilkaarService.skalVurdereInngangsvilkår(any()) } returns false
@@ -124,8 +120,9 @@ class OppfriskSaksopplysningerServiceTest {
 
     @Test
     fun `oppfrisk saksopplysning anmodning om unntak sendt feiler`() {
+        // Note: The test checks that when erUtsending() is true and anmodningsperiode is sent,
+        // it throws FunksjonellException. The default tema (UTSENDT_ARBEIDSTAKER) makes erUtsending() true.
         every { behandlingService.hentBehandling(any()) } returns lagBehandling()
-        lagBehandling().tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
         every { anmodningsperiodeService.harSendtAnmodningsperiode(BEHANDLING_ID) } returns true
 
         val exception = shouldThrow<FunksjonellException> {
@@ -136,9 +133,7 @@ class OppfriskSaksopplysningerServiceTest {
 
     @Test
     fun `oppfrisk saksopplysning med SED kaller kontroller`() {
-        val behandling = lagBehandling()
-        behandling.tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
-        behandling.saksopplysninger.add(lagSED())
+        val behandling = lagBehandlingMedSED()
         every { behandlingService.hentBehandling(any()) } returns behandling
         every { persondataFasade.hentFolkeregisterident(any()) } returns "322211"
 
@@ -149,8 +144,7 @@ class OppfriskSaksopplysningerServiceTest {
 
     @Test
     fun `oppfrisk saksopplysning har ikke oppfylt inngangsvilkår oppdaterer type`() {
-        val behandling = lagBehandling()
-        behandling.fagsak.type = Sakstyper.EU_EOS
+        val behandling = lagBehandlingMedFagsakType(Sakstyper.EU_EOS)
 
         every { behandlingService.hentBehandling(any()) } returns behandling
         every { persondataFasade.hentFolkeregisterident(any()) } returns "322211"
@@ -176,8 +170,7 @@ class OppfriskSaksopplysningerServiceTest {
 
     @Test
     fun `oppfrisk saksopplysning utleder periode for årsavregning`() {
-        val behandling = lagBehandling()
-        behandling.type = Behandlingstyper.ÅRSAVREGNING
+        val behandling = lagBehandlingMedType(Behandlingstyper.ÅRSAVREGNING)
         every { behandlingService.hentBehandling(any()) } returns behandling
         every { persondataFasade.hentFolkeregisterident(any()) } returns "322211"
         every { inngangsvilkaarService.skalVurdereInngangsvilkår(any()) } returns false
@@ -188,13 +181,6 @@ class OppfriskSaksopplysningerServiceTest {
         verify { registeropplysningerService.hentOgLagreOpplysninger(any<RegisteropplysningerRequest>()) }
     }
 
-    private fun lagSED() = Saksopplysning().apply {
-        type = SaksopplysningType.SEDOPPL
-        dokument = SedDokument().apply {
-            lovvalgsperiode = no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.MIN, LocalDate.MAX)
-        }
-    }
-
     private fun lagBehandling() = Behandling.forTest {
         id = BEHANDLING_ID
         type = Behandlingstyper.FØRSTEGANG
@@ -202,20 +188,99 @@ class OppfriskSaksopplysningerServiceTest {
         fagsak {
             medBruker()
         }
-        saksopplysninger = mutableSetOf<Saksopplysning>().apply {
-            add(Saksopplysning().apply {
-                type = SaksopplysningType.PERSOPL
-            })
+        saksopplysning {
+            type = SaksopplysningType.PERSOPL
         }
-
-        val soeknad = Soeknad().apply {
-            arbeidPaaLand.fysiskeArbeidssteder = listOf(FysiskArbeidssted())
-            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(2))
-            soeknadsland = Soeknadsland(listOf("SE"), false)
+        mottatteOpplysninger {
+            soeknad {
+                fysiskeArbeidssted { }
+                periode(LocalDate.now(), LocalDate.now().plusYears(2))
+                landkoder("SE")
+            }
         }
+    }
 
-        mottatteOpplysninger = MottatteOpplysninger().apply {
-            mottatteOpplysningerData = soeknad
+    private fun lagBehandlingMedVirksomhetOgType(behandlingstype: Behandlingstyper) = Behandling.forTest {
+        id = BEHANDLING_ID
+        type = behandlingstype
+        tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+        fagsak {
+            medBruker()
+            medVirksomhet()
+        }
+        saksopplysning {
+            type = SaksopplysningType.PERSOPL
+        }
+        mottatteOpplysninger {
+            soeknad {
+                fysiskeArbeidssted { }
+                periode(LocalDate.now(), LocalDate.now().plusYears(2))
+                landkoder("SE")
+            }
+        }
+    }
+
+    private fun lagBehandlingMedType(behandlingstype: Behandlingstyper) = Behandling.forTest {
+        id = BEHANDLING_ID
+        type = behandlingstype
+        tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+        fagsak {
+            medBruker()
+        }
+        saksopplysning {
+            type = SaksopplysningType.PERSOPL
+        }
+        mottatteOpplysninger {
+            soeknad {
+                fysiskeArbeidssted { }
+                periode(LocalDate.now(), LocalDate.now().plusYears(2))
+                landkoder("SE")
+            }
+        }
+    }
+
+    private fun lagBehandlingMedSED() = Behandling.forTest {
+        id = BEHANDLING_ID
+        type = Behandlingstyper.FØRSTEGANG
+        tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
+        fagsak {
+            medBruker()
+        }
+        saksopplysning {
+            type = SaksopplysningType.PERSOPL
+        }
+        saksopplysning {
+            type = SaksopplysningType.SEDOPPL
+            sedDokument {
+                lovvalgsperiode(LocalDate.MIN, LocalDate.MAX)
+            }
+        }
+        mottatteOpplysninger {
+            soeknad {
+                fysiskeArbeidssted { }
+                periode(LocalDate.now(), LocalDate.now().plusYears(2))
+                landkoder("SE")
+            }
+        }
+    }
+
+    private fun lagBehandlingMedFagsakType(sakstype: Sakstyper) = Behandling.forTest {
+        id = BEHANDLING_ID
+        type = Behandlingstyper.FØRSTEGANG
+        tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+        fagsak {
+            medBruker()
+            type = sakstype
+        }
+        saksopplysning {
+            type = SaksopplysningType.PERSOPL
+        }
+        mottatteOpplysninger {
+            soeknad {
+                fysiskeArbeidssted { }
+                periode(LocalDate.now(), LocalDate.now().plusYears(2))
+                landkoder("SE")
+            }
         }
     }
 

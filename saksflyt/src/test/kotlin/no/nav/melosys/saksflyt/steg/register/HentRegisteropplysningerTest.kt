@@ -7,19 +7,20 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode
+import no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest
+import no.nav.melosys.domain.mottatteopplysninger.soeknad
+import no.nav.melosys.domain.mottatteOpplysninger
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.behandling
 import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataFasade
@@ -51,22 +52,10 @@ class HentRegisteropplysningerTest {
 
     private val requestCaptor = slot<RegisteropplysningerRequest>()
 
-    private lateinit var behandling: Behandling
-
     private val fakeUnleash = FakeUnleash()
 
     @BeforeEach
     fun setUp() {
-        val fagsak = Fagsak.forTest {
-            medBruker()
-        }
-
-        behandling = Behandling.forTest {
-            id = 222L
-            this.fagsak = fagsak
-            type = Behandlingstyper.FØRSTEGANG
-        }
-
         val registeropplysningerFactory = RegisteropplysningerFactory(saksbehandlingRegler, fakeUnleash)
         hentRegisteropplysninger = HentRegisteropplysninger(
             registeropplysningerService,
@@ -75,8 +64,6 @@ class HentRegisteropplysningerTest {
             persondataFasade,
             registeropplysningerFactory
         )
-
-        every { behandlingService.hentBehandling(behandling.id) } returns behandling
 
         // Mock saksbehandlingRegler metoder
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
@@ -91,24 +78,33 @@ class HentRegisteropplysningerTest {
         every { registeropplysningerService.hentOgLagreOpplysninger(any()) } just Runs
     }
 
-    private fun opprettProsessinstans(behandling: Behandling): Prosessinstans {
-        return Prosessinstans.forTest {
-            type = ProsessType.OPPRETT_SAK
-            status = ProsessStatus.KLAR
-            medBehandling(behandling)
-        }
+    private fun lagBehandling(
+        init: no.nav.melosys.domain.BehandlingTestFactory.BehandlingTestBuilder.() -> Unit = {}
+    ): Behandling = Behandling.forTest {
+        id = 222L
+        type = Behandlingstyper.FØRSTEGANG
+        fagsak { medBruker() }
+        init()
+    }.also { behandling ->
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
     }
 
     @Test
     fun `utfør skal hoppe over steg`() {
-        val fagsak = Fagsak.forTest {
-            type = Sakstyper.FTRL
-            medBruker()
+        val behandling = lagBehandling {
+            tema = Behandlingstema.ARBEID_KUN_NORGE
+            fagsak {
+                type = Sakstyper.FTRL
+                medBruker()
+            }
         }
-        behandling.fagsak = fagsak
-        behandling.tema = Behandlingstema.ARBEID_KUN_NORGE
 
-        val prosessinstans = opprettProsessinstans(behandling)
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            behandling { id = behandling.id }
+            this.behandling = behandling
+        }
 
 
         hentRegisteropplysninger.utfør(prosessinstans)
@@ -119,14 +115,20 @@ class HentRegisteropplysningerTest {
 
     @Test
     fun `utfør skal hoppe over steg for virksomhet`() {
-        val fagsak = Fagsak.forTest {
-            type = Sakstyper.FTRL
-            medVirksomhet()
+        val behandling = lagBehandling {
+            tema = Behandlingstema.ARBEID_KUN_NORGE
+            fagsak {
+                type = Sakstyper.FTRL
+                medVirksomhet()
+            }
         }
-        behandling.fagsak = fagsak
-        behandling.tema = Behandlingstema.ARBEID_KUN_NORGE
 
-        val prosessinstans = opprettProsessinstans(behandling)
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            behandling { id = behandling.id }
+            this.behandling = behandling
+        }
 
 
         hentRegisteropplysninger.utfør(prosessinstans)
@@ -140,18 +142,27 @@ class HentRegisteropplysningerTest {
         val ident = "143545"
         every { persondataFasade.hentFolkeregisterident(FagsakTestFactory.BRUKER_AKTØR_ID) } returns ident
 
-        behandling.fagsak.type = Sakstyper.EU_EOS
-        behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-
-        val periode = Periode(LocalDate.now(), LocalDate.now().plusYears(2))
-        val mottatteOpplysninger = MottatteOpplysninger().apply {
-            mottatteOpplysningerData = Soeknad().apply {
-                this.periode = periode
+        val periodeFom = LocalDate.now()
+        val periodeTom = LocalDate.now().plusYears(2)
+        val behandling = lagBehandling {
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            fagsak {
+                type = Sakstyper.EU_EOS
+                medBruker()
+            }
+            mottatteOpplysninger {
+                soeknad {
+                    periode(periodeFom, periodeTom)
+                }
             }
         }
-        behandling.mottatteOpplysninger = mottatteOpplysninger
 
-        val prosessinstans = opprettProsessinstans(behandling)
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            behandling { id = behandling.id }
+            this.behandling = behandling
+        }
 
 
         hentRegisteropplysninger.utfør(prosessinstans)
@@ -162,22 +173,30 @@ class HentRegisteropplysningerTest {
         requestCaptor.captured.run {
             behandlingID shouldBe behandling.id
             fnr shouldBe ident
-            fom shouldBe periode.fom
-            tom shouldBe periode.tom
+            fom shouldBe periodeFom
+            tom shouldBe periodeTom
         }
     }
 
     @Test
     fun `utfør skal ikke lagre noe når sakstype er FTRL`() {
-        behandling.tema = Behandlingstema.YRKESAKTIV
-        behandling.fagsak.type = Sakstyper.FTRL
-
-        val mottatteOpplysninger = MottatteOpplysninger().apply {
-            mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+        val behandling = lagBehandling {
+            tema = Behandlingstema.YRKESAKTIV
+            fagsak {
+                type = Sakstyper.FTRL
+                medBruker()
+            }
+            mottatteOpplysninger = mottatteOpplysningerForTest {
+                mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+            }
         }
-        behandling.mottatteOpplysninger = mottatteOpplysninger
 
-        val prosessinstans = opprettProsessinstans(behandling)
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            behandling { id = behandling.id }
+            this.behandling = behandling
+        }
 
 
         hentRegisteropplysninger.utfør(prosessinstans)
@@ -188,15 +207,23 @@ class HentRegisteropplysningerTest {
 
     @Test
     fun `utfør skal ikke lagre noe når sakstype er TRYGDEAVTALE`() {
-        behandling.tema = Behandlingstema.YRKESAKTIV
-        behandling.fagsak.type = Sakstyper.TRYGDEAVTALE
-
-        val mottatteOpplysninger = MottatteOpplysninger().apply {
-            mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+        val behandling = lagBehandling {
+            tema = Behandlingstema.YRKESAKTIV
+            fagsak {
+                type = Sakstyper.TRYGDEAVTALE
+                medBruker()
+            }
+            mottatteOpplysninger = mottatteOpplysningerForTest {
+                mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+            }
         }
-        behandling.mottatteOpplysninger = mottatteOpplysninger
 
-        val prosessinstans = opprettProsessinstans(behandling)
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            behandling { id = behandling.id }
+            this.behandling = behandling
+        }
 
 
         hentRegisteropplysninger.utfør(prosessinstans)
@@ -207,17 +234,25 @@ class HentRegisteropplysningerTest {
 
     @Test
     fun `utfør skal ikke lagre noe når sakstype er EØS og unntak`() {
-        behandling.tema = Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
-        behandling.fagsak.type = Sakstyper.EU_EOS
-        behandling.type = Behandlingstyper.FØRSTEGANG
+        val behandling = lagBehandling {
+            tema = Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
+            type = Behandlingstyper.FØRSTEGANG
+            fagsak {
+                type = Sakstyper.EU_EOS
+                medBruker()
+            }
+            mottatteOpplysninger = mottatteOpplysningerForTest {
+                mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+            }
+        }
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
 
-        val mottatteOpplysninger = MottatteOpplysninger().apply {
-            mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            behandling { id = behandling.id }
+            this.behandling = behandling
         }
-        behandling.mottatteOpplysninger = mottatteOpplysninger
-
-        val prosessinstans = opprettProsessinstans(behandling)
 
 
         hentRegisteropplysninger.utfør(prosessinstans)
@@ -228,17 +263,25 @@ class HentRegisteropplysningerTest {
 
     @Test
     fun `utfør skal ikke lagre noe når sakstype er EØS og ikke yrkesaktiv`() {
-        behandling.tema = Behandlingstema.IKKE_YRKESAKTIV
-        behandling.fagsak.type = Sakstyper.EU_EOS
-        behandling.type = Behandlingstyper.FØRSTEGANG
+        val behandling = lagBehandling {
+            tema = Behandlingstema.IKKE_YRKESAKTIV
+            type = Behandlingstyper.FØRSTEGANG
+            fagsak {
+                type = Sakstyper.EU_EOS
+                medBruker()
+            }
+            mottatteOpplysninger = mottatteOpplysningerForTest {
+                mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+            }
+        }
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
 
-        val mottatteOpplysninger = MottatteOpplysninger().apply {
-            mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            behandling { id = behandling.id }
+            this.behandling = behandling
         }
-        behandling.mottatteOpplysninger = mottatteOpplysninger
-
-        val prosessinstans = opprettProsessinstans(behandling)
 
 
         hentRegisteropplysninger.utfør(prosessinstans)
@@ -249,17 +292,25 @@ class HentRegisteropplysningerTest {
 
     @Test
     fun `utfør skal ikke lagre noe når det er Årsavregning for EØS-Pensjonist`() {
-        behandling.tema = Behandlingstema.PENSJONIST
-        behandling.fagsak.type = Sakstyper.EU_EOS
-        behandling.type = Behandlingstyper.ÅRSAVREGNING
+        val behandling = lagBehandling {
+            tema = Behandlingstema.PENSJONIST
+            type = Behandlingstyper.ÅRSAVREGNING
+            fagsak {
+                type = Sakstyper.EU_EOS
+                medBruker()
+            }
+            mottatteOpplysninger = mottatteOpplysningerForTest {
+                mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+            }
+        }
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
 
-        val mottatteOpplysninger = MottatteOpplysninger().apply {
-            mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            behandling { id = behandling.id }
+            this.behandling = behandling
         }
-        behandling.mottatteOpplysninger = mottatteOpplysninger
-
-        val prosessinstans = opprettProsessinstans(behandling)
 
 
         hentRegisteropplysninger.utfør(prosessinstans)
@@ -270,10 +321,21 @@ class HentRegisteropplysningerTest {
 
     @Test
     fun `utfør skal hente ingenting når har ingen flyt`() {
-        behandling.tema = Behandlingstema.TRYGDETID
-        behandling.fagsak.type = Sakstyper.EU_EOS
-        val prosessinstans = opprettProsessinstans(behandling)
+        val behandling = lagBehandling {
+            tema = Behandlingstema.TRYGDETID
+            fagsak {
+                type = Sakstyper.EU_EOS
+                medBruker()
+            }
+        }
         every { saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any()) } returns true
+
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            behandling { id = behandling.id }
+            this.behandling = behandling
+        }
 
 
         hentRegisteropplysninger.utfør(prosessinstans)

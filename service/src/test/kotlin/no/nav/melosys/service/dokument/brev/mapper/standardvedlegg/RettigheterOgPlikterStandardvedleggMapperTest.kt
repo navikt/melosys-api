@@ -5,8 +5,11 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.BehandlingsresultatTestFactory
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.lovvalgsperiode
+import no.nav.melosys.domain.medlemskapsperiode
+import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
@@ -41,7 +44,7 @@ internal class RettigheterOgPlikterStandardvedleggMapperTest {
     fun `skal mappe bestemmelse fra medlemskapsperiode når tilgjengelig`() {
         every { mockBehandlingsresultatService.hentBehandlingsresultat(1L) } returns lagBehandlingsresultat(
             medlemskapBestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_A,
-            lovvalgBestemmelse =  null
+            lovvalgBestemmelse = null
         )
 
         val resultat = mapper.mapInnvilgelse(1L, true)
@@ -62,26 +65,22 @@ internal class RettigheterOgPlikterStandardvedleggMapperTest {
     }
 
     private fun lagBehandlingsresultat(
-        medlemskapBestemmelse: Folketrygdloven_kap2_bestemmelser?,
-        lovvalgBestemmelse: LovvalgBestemmelse?
-    ): Behandlingsresultat {
-        return Behandlingsresultat().apply {
-            medlemskapsperioder = mutableSetOf(
-                Medlemskapsperiode().apply {
-                    fom = LocalDate.now()
-                    tom = LocalDate.now().plusMonths(1)
-                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                    bestemmelse = medlemskapBestemmelse
-                }
-            )
-            lovvalgsperioder = mutableSetOf(
-                Lovvalgsperiode().apply {
-                    fom = LocalDate.now()
-                    tom = LocalDate.now().plusMonths(1)
-                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                    bestemmelse = lovvalgBestemmelse
-                }
-            )
+        medlemskapBestemmelse: Bestemmelse?,
+        lovvalgBestemmelse: LovvalgBestemmelse?,
+        init: BehandlingsresultatTestFactory.Builder.() -> Unit = {}
+    ) = Behandlingsresultat.forTest {
+        medlemskapsperiode {
+            fom = LocalDate.now()
+            tom = LocalDate.now().plusMonths(1)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            bestemmelse = medlemskapBestemmelse
         }
+        lovvalgsperiode {
+            fom = LocalDate.now()
+            tom = LocalDate.now().plusMonths(1)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            bestemmelse = lovvalgBestemmelse
+        }
+        init()
     }
 }

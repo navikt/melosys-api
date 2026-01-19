@@ -2,118 +2,116 @@ package no.nav.melosys.service.dokument.sed.bygger
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.OrganisasjonDokumentTestFactory
+import no.nav.melosys.domain.SaksopplysningType
 import no.nav.melosys.domain.adresse.StrukturertAdresse
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
+import no.nav.melosys.domain.arbeidsforholdDokument
 import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
-import no.nav.melosys.domain.dokument.person.Familiemedlem
 import no.nav.melosys.domain.dokument.person.Familierelasjon
 import no.nav.melosys.domain.dokument.person.KjoennsType
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse
 import no.nav.melosys.domain.dokument.person.adresse.Gateadresse
-import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.dokument.personDokumentForTest
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Landkoder
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.mottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
-import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigArbeid
-import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak
-import no.nav.melosys.domain.mottatteopplysninger.data.UtenlandskIdent
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid
+import no.nav.melosys.domain.mottatteopplysninger.soeknad
+import no.nav.melosys.domain.personDokument
+import no.nav.melosys.domain.saksopplysning
 import java.time.LocalDate
 
 // For gjenbruk av AbstraktSedDatabygger implementasjonen i nåværende og fremtidige tester
 object DataByggerStubs {
 
+    private fun hentStrukturertAddresseStub() = StrukturertAdresse(
+        husnummerEtasjeLeilighet = "25",
+        gatenavn = "Gatenavn",
+        postnummer = "0165",
+        region = "Region",
+        landkode = Landkoder.NO.kode
+    )
+
     fun hentBehandlingStub(): Behandling {
-        val mottatteOpplysninger = MottatteOpplysninger()
-
-        val fagsak = FagsakTestFactory.lagFagsak()
-        val myndighet = Aktoer().apply {
-            rolle = Aktoersroller.TRYGDEMYNDIGHET
-            institusjonID = "SE:123321"
-        }
-        fagsak.leggTilAktør(myndighet)
-
-        val saksopplysninger = mutableSetOf<Saksopplysning>()
-
-        val foretakUtland = ForetakUtland().apply {
-            adresse = hentStrukturertAddresseStub()
-            navn = "navn foretak"
-            uuid = "uuid"
-        }
-
-        val søknadDokument = Soeknad().apply {
-            selvstendigArbeid = SelvstendigArbeid()
-            this.foretakUtland = mutableListOf(foretakUtland)
-
-            val selvstendigForetak = SelvstendigForetak().apply {
-                orgnr = "12312312"
+        return Behandling.forTest {
+            id = 1L
+            fagsak {
+                medBruker()
+                medTrygdemyndighet { institusjonID = "SE:123321" }
             }
-            selvstendigArbeid.selvstendigForetak = listOf(selvstendigForetak)
-            selvstendigArbeid.erSelvstendig = true
+            mottatteOpplysninger {
+                soeknad {
+                    erSelvstendig = true
+                    selvstendigForetak("12312312")
 
-            val fysiskArbeidssted = FysiskArbeidssted("foretaknavn", hentStrukturertAddresseStub())
-            arbeidPaaLand.fysiskeArbeidssteder = mutableListOf(fysiskArbeidssted)
+                    foretakUtlandMedDetaljer {
+                        navn = "navn foretak"
+                        uuid = "uuid"
+                        adresse(hentStrukturertAddresseStub())
+                    }
 
-            val utenlandskIdent = UtenlandskIdent().apply {
-                ident = "439205843"
-                landkode = "SE"
+                    fysiskeArbeidssted {
+                        virksomhetNavn = "foretaknavn"
+                        landkode = hentStrukturertAddresseStub().landkode
+                        gatenavn = hentStrukturertAddresseStub().gatenavn
+                        postnummer = hentStrukturertAddresseStub().postnummer
+                    }
+
+                    utenlandskIdent("439205843", "SE")
+                    maritimtArbeid { enhetNavn = "enhet" }
+                }
             }
-            personOpplysninger.utenlandskIdent = listOf(utenlandskIdent)
+            saksopplysning {
+                type = SaksopplysningType.ARBFORH
+                arbeidsforholdDokument { }
+            }
+            saksopplysning {
+                type = SaksopplysningType.PERSOPL
+                personDokument {
+                    erEgenAnsatt = true
+                    fødselsdato = LocalDate.now()
+                    bostedsadresse = Bostedsadresse(
+                        gateadresse = Gateadresse(),
+                        land = Land(Land.NORGE),
+                        poststed = "1212"
+                    )
+                    kjønn = KjoennsType("M")
+                    fornavn = "Mrfornavn"
+                    etternavn = "Spock"
+                    statsborgerskap = Land(Land.NORGE)
+                    familiemedlem {
+                        navn = "farnavn"
+                        fnr = "111111111"
+                        familierelasjon = Familierelasjon.FARA
+                    }
+                }
+            }
         }
-        mottatteOpplysninger.mottatteOpplysningerData = søknadDokument
-
-        var saksopplysning = Saksopplysning().apply {
-            type = SaksopplysningType.ARBFORH
-            dokument = ArbeidsforholdDokument()
-        }
-        saksopplysninger.add(saksopplysning)
-
-        søknadDokument.maritimtArbeid = listOf(MaritimtArbeid().apply {
-            enhetNavn = "enhet"
-        })
-
-        val personDokument = lagPersonDokument()
-
-        saksopplysning = Saksopplysning().apply {
-            type = SaksopplysningType.PERSOPL
-            dokument = personDokument
-        }
-        saksopplysninger.add(saksopplysning)
-
-        return BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medFagsak(fagsak)
-            .medMottatteOpplysninger(mottatteOpplysninger)
-            .medSaksopplysninger(saksopplysninger)
-            .build()
     }
 
-    fun lagPersonDokument(): PersonDokument = PersonDokument().apply {
-        setErEgenAnsatt(true)
+    fun lagPersonDokument(): PersonDokument = personDokumentForTest {
+        erEgenAnsatt = true
         fødselsdato = LocalDate.now()
-
         bostedsadresse = Bostedsadresse(
             gateadresse = Gateadresse(),
             land = Land(Land.NORGE),
             poststed = "1212"
         )
-
-        familiemedlemmer = listOf(Familiemedlem().apply {
-            navn = "farnavn"
-            fnr = "111111111"
-            familierelasjon = Familierelasjon.FARA
-        })
-
         kjønn = KjoennsType("M")
         fornavn = "Mrfornavn"
         etternavn = "Spock"
         statsborgerskap = Land(Land.NORGE)
+        familiemedlem {
+            navn = "farnavn"
+            fnr = "111111111"
+            familierelasjon = Familierelasjon.FARA
+        }
     }
 
     fun hentBehandlingMedManglendeAdressefelterStub(
@@ -144,14 +142,6 @@ object DataByggerStubs {
 
         return behandling
     }
-
-    private fun hentStrukturertAddresseStub() = StrukturertAdresse(
-        husnummerEtasjeLeilighet = "25",
-        gatenavn = "Gatenavn",
-        postnummer = "0165",
-        region = "Region",
-        landkode = Landkoder.NO.kode
-    )
 
     fun hentOrganisasjonDokumentSetStub(): Set<OrganisasjonDokument> {
         val orgDokumentHashSet = hashSetOf<OrganisasjonDokument>()

@@ -11,7 +11,6 @@ import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.dokument.medlemskap.Periode
-import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Land_iso2
@@ -21,11 +20,11 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid
+import no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest
+import no.nav.melosys.domain.mottatteopplysninger.soeknadForTest
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
@@ -63,26 +62,25 @@ class LandvelgerServiceTest {
 
     @BeforeEach
     fun setUp() {
-        søknad = Soeknad().apply {
-            oppholdUtland.oppholdslandkoder = oppholdUtland.oppholdslandkoder + "NO"
-            bosted.oppgittAdresse.landkode = oppgittbostedsland.kode
-            // Don't set søknadsland by default - let individual tests set it as needed
-            val maritimtArbeid = MaritimtArbeid().apply {
+        søknad = soeknadForTest {
+            oppholdUtland("NO")
+            bostedAdresse(landkode = oppgittbostedsland.kode)
+            maritimtArbeid {
                 territorialfarvannLandkode = territorialfarvannLand.kode
             }
-            this.maritimtArbeid = this.maritimtArbeid + maritimtArbeid
         }
 
-        lovvalgsperiode = Lovvalgsperiode()
+        lovvalgsperiode = lovvalgsperiodeForTest {
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+        }
 
-        anmodningsperiode = Anmodningsperiode()
-        anmodningsperiode.unntakFraBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+        anmodningsperiode = anmodningsperiodeForTest {
+            unntakFraBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+        }
 
         behandling = lagBehandlingMedSedDokument()
 
-        lovvalgsperiode = Lovvalgsperiode()
-        lovvalgsperiode.innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-        lovvalgsperiode.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
         landvelgerService = LandvelgerService(avklartefaktaService, behandlingsresultatService, mottatteOpplysningerService)
 
         every { avklartefaktaService.hentAlleAvklarteArbeidsland(any()) } returns mutableSetOf()
@@ -91,15 +89,12 @@ class LandvelgerServiceTest {
     }
 
     private fun lagBehandlingsresultat(periode: PeriodeOmLovvalg): Behandlingsresultat {
-        val behandling = Behandling.forTest {
-            id = behandlingID
-        }
-        val behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = behandling
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling { id = behandlingID }
             id = behandlingID
             when (periode) {
-                is Lovvalgsperiode -> lovvalgsperioder = mutableSetOf(periode)
-                is Anmodningsperiode -> anmodningsperioder = mutableSetOf(periode)
+                is Lovvalgsperiode -> lovvalgsperioder.add(periode)
+                is Anmodningsperiode -> anmodningsperioder.add(periode)
             }
         }
 
@@ -353,11 +348,9 @@ class LandvelgerServiceTest {
     @Test
     fun `hentUtenlandskTrygdemyndighetsland medArt13Videresending`() {
         mockMottatteOpplysninger()
-        val behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = Behandling.forTest {
-                fagsak {
-                    status = Saksstatuser.VIDERESENDT
-                }
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
+                fagsak { status = Saksstatuser.VIDERESENDT }
             }
             id = behandlingID
         }
@@ -480,22 +473,23 @@ class LandvelgerServiceTest {
         }
 
     private fun mockMottatteOpplysninger() {
-        val mottatteOpplysninger = MottatteOpplysninger().apply {
+        val mottatteOpplysninger = mottatteOpplysningerForTest {
             mottatteOpplysningerData = søknad
-            behandling = this@LandvelgerServiceTest.behandling
         }
+        mottatteOpplysninger.behandling = this@LandvelgerServiceTest.behandling
         every { mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID) } returns mottatteOpplysninger
     }
 
-    private fun lagBehandlingMedSedDokument(): Behandling = SaksbehandlingDataFactory.lagBehandling().apply {
+    private fun lagBehandlingMedSedDokument(): Behandling = Behandling.forTest {
+        fagsak { medBruker(); medGsakSaksnummer() }
         tema = Behandlingstema.ARBEID_FLERE_LAND
-        saksopplysninger.add(Saksopplysning().apply {
-            this.dokument = SedDokument().apply {
-                this.sedType = SedType.A001
-                this.unntakFraLovvalgslandKode = Landkoder.BE
-                this.lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+        saksopplysning {
+            type = SaksopplysningType.SEDOPPL
+            sedDokument {
+                sedType = SedType.A001
+                unntakFraLovvalgslandKode = Landkoder.BE
+                lovvalgsperiode(LocalDate.now(), LocalDate.now().plusMonths(1))
             }
-            this.type = SaksopplysningType.SEDOPPL
-        })
+        }
     }
 }

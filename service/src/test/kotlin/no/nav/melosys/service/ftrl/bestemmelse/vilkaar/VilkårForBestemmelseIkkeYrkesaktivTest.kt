@@ -6,9 +6,8 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.Vilkaar.*
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
-import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
-import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest
+import no.nav.melosys.domain.mottatteopplysninger.søknadNorgeEllerUtenforEØS
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -28,13 +27,12 @@ class VilkårForBestemmelseIkkeYrkesaktivTest {
 
     @Test
     fun `vilkår for FTRL_KAP2_2_1, ett eller flere land utenfor Norge`() {
-        val mottatteOpplysninger =
-            MottatteOpplysninger().apply {
-                mottatteOpplysningerData =
-                    SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(
-                        Land_iso2.NO.toString(), "AB", "PR") } }
+        val mottatteOpplysninger = mottatteOpplysningerForTest {
+            søknadNorgeEllerUtenforEØS {
+                landkoder(Land_iso2.NO.toString(), "AB", "PR")
             }
-        every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
+        }
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(1L) } returns mottatteOpplysninger
 
 
         val vilkår = vilkårForBestemmelse.hentVilkår(
@@ -59,13 +57,12 @@ class VilkårForBestemmelseIkkeYrkesaktivTest {
 
     @Test
     fun `vilkår for FTRL_KAP2_2_1, kun Norge`() {
-        val mottatteOpplysninger =
-            MottatteOpplysninger().apply {
-                mottatteOpplysningerData =
-                    SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(
-                        Land_iso2.NO.toString()) } }
+        val mottatteOpplysninger = mottatteOpplysningerForTest {
+            søknadNorgeEllerUtenforEØS {
+                landkoder(Land_iso2.NO.toString())
             }
-        every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
+        }
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(1L) } returns mottatteOpplysninger
 
 
         val vilkår = vilkårForBestemmelse.hentVilkår(

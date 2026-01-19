@@ -9,6 +9,8 @@ import io.mockk.verify
 import no.nav.melosys.domain.Anmodningsperiode
 import no.nav.melosys.domain.AnmodningsperiodeSvar
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.anmodningsperiodeForTest
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
@@ -69,7 +71,7 @@ class AnmodningsperiodeServiceTest {
     fun `lagreAnmodningsperioder - ingen svar registrert - mottar lagrede perioder`() {
         val anmodningsperiode = lagAnmodningsperiode()
         val anmodningperioder = listOf(anmodningsperiode)
-        val behandlingsresultat = Behandlingsresultat()
+        val behandlingsresultat = Behandlingsresultat.forTest { }
         every { anmodningsperiodeRepository.findByBehandlingsresultatId(BEHANDLINGS_ID) } returns listOf(anmodningsperiode)
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGS_ID) } returns behandlingsresultat
         every { anmodningsperiodeRepository.saveAll(anmodningperioder) } returns anmodningperioder
@@ -84,8 +86,8 @@ class AnmodningsperiodeServiceTest {
 
     @Test
     fun `lagreAnmodningsperioder - svar er registrert - forvent funksjonell exception`() {
-        val anmodningsperiode = lagAnmodningsperiode().apply {
-            anmodningsperiodeSvar = AnmodningsperiodeSvar()
+        val anmodningsperiode = lagAnmodningsperiode {
+            anmodningsperiodeSvar { }
         }
         every { anmodningsperiodeRepository.findByBehandlingsresultatId(BEHANDLINGS_ID) } returns listOf(anmodningsperiode)
 
@@ -153,9 +155,7 @@ class AnmodningsperiodeServiceTest {
 
     @Test
     fun `lagreAnmodningsperiodeSvar - mangler behandlingsresultat - forvent funksjonell exception`() {
-        val anmodningsperiode = mockAnmodningsperiodeIdPaaFindById().apply {
-            behandlingsresultat = null
-        }
+        val anmodningsperiode = mockAnmodningsperiodeIdPaaFindById { behandlingsresultat = null }
         val svar = AnmodningsperiodeSvar().apply {
             anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
             this.anmodningsperiode = anmodningsperiode
@@ -204,7 +204,7 @@ class AnmodningsperiodeServiceTest {
 
     @Test
     fun `oppdaterAnmodningsperiodeSendtForBehandling - verifiser oppdatert`() {
-        val anmodningsperiode = Anmodningsperiode()
+        val anmodningsperiode = anmodningsperiodeForTest { }
         every { anmodningsperiodeRepository.findByBehandlingsresultatId(any<Long>()) } returns listOf(anmodningsperiode)
         every { anmodningsperiodeRepository.save(anmodningsperiode) } returns anmodningsperiode
 
@@ -219,7 +219,7 @@ class AnmodningsperiodeServiceTest {
     @Test
     fun `oppdaterAnmodetAvForBehandling - er ikke satt fra før - oppdateres`() {
         val anmodetAv = "MEG"
-        val anmodningsperiode = Anmodningsperiode()
+        val anmodningsperiode = anmodningsperiodeForTest { }
         every { anmodningsperiodeRepository.findByBehandlingsresultatId(any<Long>()) } returns listOf(anmodningsperiode)
         every { anmodningsperiodeRepository.save(anmodningsperiode) } returns anmodningsperiode
 
@@ -233,9 +233,7 @@ class AnmodningsperiodeServiceTest {
 
     @Test
     fun `oppdaterAnmodetAvForBehandling - er satt fra før - kaster exception`() {
-        val anmodningsperiode = Anmodningsperiode().apply {
-            anmodetAv = "DEG"
-        }
+        val anmodningsperiode = anmodningsperiodeForTest { anmodetAv = "DEG" }
         every { anmodningsperiodeRepository.findByBehandlingsresultatId(any<Long>()) } returns listOf(anmodningsperiode)
 
 
@@ -247,20 +245,25 @@ class AnmodningsperiodeServiceTest {
         exception.message shouldBe "Anmodningsperiode for behandling 1 er allerede anmodet av DEG"
     }
 
-    private fun lagAnmodningsperiode(): Anmodningsperiode = Anmodningsperiode(
-        LocalDate.now(), LocalDate.now().plusYears(2),
-        Land_iso2.NO,
-        Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
-        null, Land_iso2.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO
-    ).apply {
+    private fun lagAnmodningsperiode(
+        init: no.nav.melosys.domain.AnmodningsperiodeTestFactory.Builder.() -> Unit = {}
+    ): Anmodningsperiode = anmodningsperiodeForTest {
         id = ANMODNINGSPERIODE_ID
-        behandlingsresultat = Behandlingsresultat().apply {
-            id = BEHANDLINGS_ID
-        }
+        fom = LocalDate.now()
+        tom = LocalDate.now().plusYears(2)
+        lovvalgsland = Land_iso2.NO
+        bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
+        unntakFraLovvalgsland = Land_iso2.SE
+        unntakFraBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A
+        dekning = Trygdedekninger.FULL_DEKNING_EOSFO
+        behandlingsresultat = Behandlingsresultat.forTest { id = BEHANDLINGS_ID }
+        init()
     }
 
-    private fun mockAnmodningsperiodeIdPaaFindById(): Anmodningsperiode {
-        val anmodningsperiode = lagAnmodningsperiode()
+    private fun mockAnmodningsperiodeIdPaaFindById(
+        init: no.nav.melosys.domain.AnmodningsperiodeTestFactory.Builder.() -> Unit = {}
+    ): Anmodningsperiode {
+        val anmodningsperiode = lagAnmodningsperiode(init)
         every { anmodningsperiodeRepository.findById(ANMODNINGSPERIODE_ID) } returns Optional.of(anmodningsperiode)
         return anmodningsperiode
     }

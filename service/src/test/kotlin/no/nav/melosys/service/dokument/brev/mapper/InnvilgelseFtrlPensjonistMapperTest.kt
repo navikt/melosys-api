@@ -134,14 +134,10 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
             begrunnelseFritekst = BEGRUNNELSE_FRITEKST
             trygdeavgiftFritekst = TRYGDEAVGIFT_FRITEKST
             nyVurderingBakgrunn = "NYE_OPPLYSNINGER"
-        }.apply {
-            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply {
+            vilkaarsresultat {
                 vilkaar = Vilkaar.FTRL_2_2_INNRETNING_NATURRESSURSER
                 begrunnelseFritekst = "<p>Vilkårresultat begrunnelse fritekst</p>"
-                begrunnelser = setOf(VilkaarBegrunnelse().apply {
-                    kode = null
-                })
-            })
+            }
         }
 
         mockHappyCase(behandlingsresultat)
@@ -239,14 +235,10 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
             begrunnelseFritekst = BEGRUNNELSE_FRITEKST
             trygdeavgiftFritekst = TRYGDEAVGIFT_FRITEKST
             nyVurderingBakgrunn = "NYE_OPPLYSNINGER"
-        }.apply {
-            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply {
+            vilkaarsresultat {
                 vilkaar = Vilkaar.FTRL_2_2_INNRETNING_NATURRESSURSER
                 begrunnelseFritekst = "<p>Vilkårresultat begrunnelse fritekst</p>"
-                begrunnelser = setOf(VilkaarBegrunnelse().apply {
-                    kode = null
-                })
-            })
+            }
         }
 
         mockHappyCase(behandlingsresultat)
@@ -344,14 +336,11 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
             begrunnelseFritekst = BEGRUNNELSE_FRITEKST
             trygdeavgiftFritekst = TRYGDEAVGIFT_FRITEKST
             nyVurderingBakgrunn = "NYE_OPPLYSNINGER"
-        }.apply {
-            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply {
+            vilkaarsresultat {
                 vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
                 begrunnelseFritekst = "<p>Vilkårresultat begrunnelse fritekst</p>"
-                begrunnelser = setOf(VilkaarBegrunnelse().apply {
-                    kode = Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN.kode
-                })
-            })
+                begrunnelse(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN.kode)
+            }
         }
 
         mockHappyCase(behandlingsresultat)
@@ -453,14 +442,11 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
             begrunnelseFritekst = BEGRUNNELSE_FRITEKST
             trygdeavgiftFritekst = TRYGDEAVGIFT_FRITEKST
             nyVurderingBakgrunn = "NYE_OPPLYSNINGER"
-        }.apply {
-            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply {
+            vilkaarsresultat {
                 vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
                 begrunnelseFritekst = "<p>Vilkårresultat begrunnelse fritekst</p>"
-                begrunnelser = setOf(VilkaarBegrunnelse().apply {
-                    kode = Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN.kode
-                })
-            })
+                begrunnelse(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN.kode)
+            }
         }
 
         mockHappyCase(behandlingsresultat)

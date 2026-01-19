@@ -26,7 +26,7 @@ KodeverkAPI_v1:
 Melosys-admin:
   apikey: dummy
 MelosysEessi:
-  url: http://localhost:8083/api
+  url: http://localhost:8081/api
 MelosysSoknadMottak:
   url: http://localhost:8082/api
 NAIS_CLUSTER_NAME: dev-fss

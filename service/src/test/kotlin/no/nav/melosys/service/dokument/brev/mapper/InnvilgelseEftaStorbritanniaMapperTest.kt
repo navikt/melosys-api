@@ -9,18 +9,15 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType
-import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.brev.InnvilgelseEftaStorbritanniaBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Land
-import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse
-import no.nav.melosys.domain.dokument.sed.SedDokument
+import no.nav.melosys.domain.dokument.personDokumentForTest
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
@@ -53,14 +50,9 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
     @MockK
     private lateinit var mockLandvelgerService: LandvelgerService
 
-    private lateinit var innvilgelseEftaStorbritanniaMapper: InnvilgelseEftaStorbritanniaMapper
-
     private val unleash = FakeUnleash()
-
-    @BeforeEach
-    fun setup() {
-        unleash.enableAll()
-        innvilgelseEftaStorbritanniaMapper = InnvilgelseEftaStorbritanniaMapper(
+    private val innvilgelseEftaStorbritanniaMapper by lazy {
+        InnvilgelseEftaStorbritanniaMapper(
             mockVilkaarsresultatService,
             mockDokgenMapperDatahenter,
             mockVirksomheterService,
@@ -70,9 +62,14 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
         )
     }
 
+    @BeforeEach
+    fun setup() {
+        unleash.enableAll()
+    }
+
     @Test
     fun `Innvilgelse efta Storbritannia brevbestilling, arbeid kun norge`() {
-        val behandling = lagBehandling(behandlingstype = Behandlingstyper.FØRSTEGANG)
+        val behandling = lagBehandling { type = Behandlingstyper.FØRSTEGANG }
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsresultat(
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A,
             behandling
@@ -91,19 +88,13 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
         every { mockVirksomheterService.hentUtenlandskeVirksomheter(ofType()) } returns listOf(BrevDataTestUtils.lagUtenlandskVirksomhet())
         every { mockLandvelgerService.hentBostedsland(ofType()) } returns Bostedsland("NO")
 
-
         val brevbestilling =
             InnvilgelseEftaStorbritanniaBrevbestilling.Builder()
                 .medBehandling(behandling)
-                .medPersonDokument(PersonDokument().apply {
+                .medPersonDokument(personDokumentForTest { sammensattNavn = "Hei Test" })
+                .medPersonMottaker(personDokumentForTest {
                     sammensattNavn = "Hei Test"
-
-                })
-                .medPersonMottaker(PersonDokument().apply {
-                    sammensattNavn = "Hei Test"
-                    bostedsadresse = Bostedsadresse().apply {
-                        land = Land.av("NOR")
-                    }
+                    bostedsadresse = Bostedsadresse(land = Land.av("NOR"))
                 })
                 .build()
 
@@ -122,7 +113,7 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
 
     @Test
     fun `Innvilgelse efta Storbritannia brevbestilling`() {
-        val behandling = lagBehandling(behandlingstype = Behandlingstyper.FØRSTEGANG)
+        val behandling = lagBehandling { type = Behandlingstyper.FØRSTEGANG }
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsresultat(
             Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1,
             behandling
@@ -141,19 +132,13 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
         every { mockVirksomheterService.hentUtenlandskeVirksomheter(ofType()) } returns listOf(BrevDataTestUtils.lagUtenlandskVirksomhet())
         every { mockLandvelgerService.hentBostedsland(ofType()) } returns Bostedsland("GB")
 
-
         val brevbestilling =
             InnvilgelseEftaStorbritanniaBrevbestilling.Builder()
                 .medBehandling(behandling)
-                .medPersonDokument(PersonDokument().apply {
+                .medPersonDokument(personDokumentForTest { sammensattNavn = "Hei Test" })
+                .medPersonMottaker(personDokumentForTest {
                     sammensattNavn = "Hei Test"
-
-                })
-                .medPersonMottaker(PersonDokument().apply {
-                    sammensattNavn = "Hei Test"
-                    bostedsadresse = Bostedsadresse().apply {
-                        land = Land.av("GBR")
-                    }
+                    bostedsadresse = Bostedsadresse(land = Land.av("GBR"))
                 })
                 .build()
 
@@ -178,7 +163,7 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
         every { mockVirksomheterService.hentUtenlandskeVirksomheter(ofType()) } returns listOf(BrevDataTestUtils.lagUtenlandskVirksomhet())
         every { mockLandvelgerService.hentBostedsland(ofType()) } returns Bostedsland("SE")
 
-        val behandling = lagBehandling(behandlingstype = Behandlingstyper.FØRSTEGANG)
+        val behandling = lagBehandling { type = Behandlingstyper.FØRSTEGANG }
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsresultat(
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A,
             behandling
@@ -186,14 +171,10 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
 
         val brevbestilling = InnvilgelseEftaStorbritanniaBrevbestilling.Builder()
             .medBehandling(behandling)
-            .medPersonDokument(PersonDokument().apply {
+            .medPersonDokument(personDokumentForTest { sammensattNavn = "Test Person" })
+            .medPersonMottaker(personDokumentForTest {
                 sammensattNavn = "Test Person"
-            })
-            .medPersonMottaker(PersonDokument().apply {
-                sammensattNavn = "Test Person"
-                bostedsadresse = Bostedsadresse().apply {
-                    land = Land.av("SWE")
-                }
+                bostedsadresse = Bostedsadresse(land = Land.av("SWE"))
             })
             .build()
 
@@ -212,7 +193,10 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
         every { mockVirksomheterService.hentUtenlandskeVirksomheter(ofType()) } returns listOf(BrevDataTestUtils.lagUtenlandskVirksomhet())
         every { mockLandvelgerService.hentBostedsland(ofType()) } returns Bostedsland("SE")
 
-        val behandling = lagBehandling(behandlingstype = Behandlingstyper.FØRSTEGANG, landkoder = listOf(Landkoder.SE.kode))
+        val behandling = lagBehandling {
+            type = Behandlingstyper.FØRSTEGANG
+            landkoder = listOf(Landkoder.SE.kode)
+        }
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsresultat(
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A,
             behandling
@@ -220,14 +204,10 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
 
         val brevbestilling = InnvilgelseEftaStorbritanniaBrevbestilling.Builder()
             .medBehandling(behandling)
-            .medPersonDokument(PersonDokument().apply {
+            .medPersonDokument(personDokumentForTest { sammensattNavn = "Test Person" })
+            .medPersonMottaker(personDokumentForTest {
                 sammensattNavn = "Test Person"
-            })
-            .medPersonMottaker(PersonDokument().apply {
-                sammensattNavn = "Test Person"
-                bostedsadresse = Bostedsadresse().apply {
-                    land = Land.av("SWE")
-                }
+                bostedsadresse = Bostedsadresse(land = Land.av("SWE"))
             })
             .build()
 
@@ -246,7 +226,11 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
         every { mockVirksomheterService.hentUtenlandskeVirksomheter(ofType()) } returns listOf(BrevDataTestUtils.lagUtenlandskVirksomhet())
         every { mockLandvelgerService.hentBostedsland(ofType()) } returns Bostedsland("SE")
 
-        val behandling = lagBehandling(behandlingstype = Behandlingstyper.FØRSTEGANG, inkluderSed = false, landkoder = listOf(Landkoder.SE.kode))
+        val behandling = lagBehandling {
+            type = Behandlingstyper.FØRSTEGANG
+            inkluderSed = false
+            landkoder = listOf(Landkoder.SE.kode)
+        }
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsresultat(
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A,
             behandling
@@ -254,14 +238,10 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
 
         val brevbestilling = InnvilgelseEftaStorbritanniaBrevbestilling.Builder()
             .medBehandling(behandling)
-            .medPersonDokument(PersonDokument().apply {
+            .medPersonDokument(personDokumentForTest { sammensattNavn = "Test Person" })
+            .medPersonMottaker(personDokumentForTest {
                 sammensattNavn = "Test Person"
-            })
-            .medPersonMottaker(PersonDokument().apply {
-                sammensattNavn = "Test Person"
-                bostedsadresse = Bostedsadresse().apply {
-                    land = Land.av("SWE")
-                }
+                bostedsadresse = Bostedsadresse(land = Land.av("SWE"))
             })
             .build()
 
@@ -280,11 +260,11 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
         every { mockVirksomheterService.hentUtenlandskeVirksomheter(ofType()) } returns listOf(BrevDataTestUtils.lagUtenlandskVirksomhet())
         every { mockLandvelgerService.hentBostedsland(ofType()) } returns Bostedsland("NO")
 
-        val behandling = lagBehandling(
-            landkoder = listOf(Landkoder.NO.kode),
-            behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_NORGE,
-            behandlingstype = Behandlingstyper.FØRSTEGANG,
-        )
+        val behandling = lagBehandling {
+            landkoder = listOf(Landkoder.NO.kode)
+            tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+            type = Behandlingstyper.FØRSTEGANG
+        }
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsresultat(
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A,
             behandling
@@ -292,14 +272,10 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
 
         val brevbestilling = InnvilgelseEftaStorbritanniaBrevbestilling.Builder()
             .medBehandling(behandling)
-            .medPersonDokument(PersonDokument().apply {
+            .medPersonDokument(personDokumentForTest { sammensattNavn = "Test Person" })
+            .medPersonMottaker(personDokumentForTest {
                 sammensattNavn = "Test Person"
-            })
-            .medPersonMottaker(PersonDokument().apply {
-                sammensattNavn = "Test Person"
-                bostedsadresse = Bostedsadresse().apply {
-                    land = Land.av("NOR")
-                }
+                bostedsadresse = Bostedsadresse(land = Land.av("NOR"))
             })
             .build()
 
@@ -312,7 +288,10 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
 
     @Test
     fun `Innvilgelse efta Storbritannia brevbestilling, arbeid kun norge - Nye opplysninger som nyVurderingBakgrunn`() {
-        val behandling = lagBehandling(behandlingstype = Behandlingstyper.NY_VURDERING, sakstyper = Sakstyper.EU_EOS)
+        val behandling = lagBehandling {
+            type = Behandlingstyper.NY_VURDERING
+            sakstype = Sakstyper.EU_EOS
+        }
 
         every {
             mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType())
@@ -331,19 +310,13 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
         every { mockVirksomheterService.hentUtenlandskeVirksomheter(ofType()) } returns listOf(BrevDataTestUtils.lagUtenlandskVirksomhet())
         every { mockLandvelgerService.hentBostedsland(ofType()) } returns Bostedsland("NO")
 
-
         val brevbestilling =
             InnvilgelseEftaStorbritanniaBrevbestilling.Builder()
                 .medBehandling(behandling)
-                .medPersonDokument(PersonDokument().apply {
+                .medPersonDokument(personDokumentForTest { sammensattNavn = "Hei Test" })
+                .medPersonMottaker(personDokumentForTest {
                     sammensattNavn = "Hei Test"
-
-                })
-                .medPersonMottaker(PersonDokument().apply {
-                    sammensattNavn = "Hei Test"
-                    bostedsadresse = Bostedsadresse().apply {
-                        land = Land.av("NOR")
-                    }
+                    bostedsadresse = Bostedsadresse(land = Land.av("NOR"))
                 })
                 .build()
 
@@ -354,63 +327,57 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
         }
     }
 
-    private fun lagBehandling(
-        landkoder: List<String> = listOf(Landkoder.SE.kode, Landkoder.FR.kode),
-        inkluderSed: Boolean = true,
-        behandlingstema: Behandlingstema = Behandlingstema.YRKESAKTIV,
-        behandlingstype: Behandlingstyper? = null,
-        sakstyper: Sakstyper = Sakstyper.FTRL,
-    ): Behandling = Behandling.forTest {
-        id = 1L
-        fagsak {
-            type = sakstyper
-        }
-        type = behandlingstype!!
-        tema = behandlingstema
-    }.also { behandling ->
-        behandling.mottatteOpplysninger = MottatteOpplysninger().apply {
-            this.behandling = behandling
-            mottatteOpplysningerData = MottatteOpplysningerData().apply {
-                soeknadsland = Soeknadsland().apply {
-                    this.landkoder = landkoder
-                }
-                periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1))
-            }
-        }
+    @MelosysTestDsl
+    private class BehandlingBuilder {
+        var landkoder: List<String> = listOf(Landkoder.SE.kode, Landkoder.FR.kode)
+        var inkluderSed: Boolean = true
+        var tema: Behandlingstema = Behandlingstema.YRKESAKTIV
+        var type: Behandlingstyper = Behandlingstyper.FØRSTEGANG
+        var sakstype: Sakstyper = Sakstyper.FTRL
 
-        if (inkluderSed) {
-            val saksopplysning = Saksopplysning().apply {
-                this.behandling = behandling
-                dokument = SedDokument().apply {
-                    avsenderLandkode = Landkoder.SE
+        fun build(): Behandling {
+            val builder = this
+            return Behandling.forTest {
+                id = 1L
+                fagsak { type = builder.sakstype }
+                type = builder.type
+                tema = builder.tema
+                mottatteOpplysninger {
+                    mottatteOpplysningerData = MottatteOpplysningerData().apply {
+                        soeknadsland = Soeknadsland(builder.landkoder, false)
+                        periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1))
+                    }
                 }
-                type = SaksopplysningType.SEDOPPL
+                if (builder.inkluderSed) {
+                    saksopplysning {
+                        type = SaksopplysningType.SEDOPPL
+                        sedDokument { avsenderLandkode = Landkoder.SE }
+                    }
+                }
             }
-            behandling.saksopplysninger = mutableSetOf(saksopplysning)
         }
     }
+
+    private fun lagBehandling(init: BehandlingBuilder.() -> Unit = {}): Behandling =
+        BehandlingBuilder().apply(init).build()
 
     private fun lagBehandlingsresultat(
         lovvalgsbestemmelse: LovvalgBestemmelse,
         behandling: Behandling? = null,
         nyVurderingBakgrunn: String? = null
-    ): Behandlingsresultat {
-        return Behandlingsresultat().apply {
-            id = 1L
-            this.behandling = behandling ?: lagBehandling()
-            avklartefakta = mutableSetOf(Avklartefakta().apply {
-                fakta = AvklartYrkesgruppeType.ORDINAER.name
-                type = Avklartefaktatyper.YRKESGRUPPE
-            })
-            lovvalgsperioder = mutableSetOf(Lovvalgsperiode().apply {
-                fom = LocalDate.of(2020, 1, 1)
-                tom = LocalDate.of(2021, 2, 1)
-                lovvalgsland = Land_iso2.NO
-                bestemmelse = lovvalgsbestemmelse
-            })
-
-            this.nyVurderingBakgrunn = nyVurderingBakgrunn
+    ): Behandlingsresultat = Behandlingsresultat.forTest {
+        id = 1L
+        this.behandling = behandling ?: lagBehandling()
+        this.nyVurderingBakgrunn = nyVurderingBakgrunn
+        avklartefakta {
+            fakta = AvklartYrkesgruppeType.ORDINAER.name
+            type = Avklartefaktatyper.YRKESGRUPPE
+        }
+        lovvalgsperiode {
+            fom = LocalDate.of(2020, 1, 1)
+            tom = LocalDate.of(2021, 2, 1)
+            lovvalgsland = Land_iso2.NO
+            bestemmelse = lovvalgsbestemmelse
         }
     }
-
 }

@@ -46,6 +46,34 @@ fun BehandlingTestFactory.BehandlingTestBuilder.medBehandlingsårsakType(
 }
 
 /**
+ * DSL extension for å konfigurere behandlingsårsak med alle felt.
+ *
+ * Eksempel:
+ * ```
+ * val behandling = Behandling.forTest {
+ *     behandlingsårsak {
+ *         type = Behandlingsaarsaktyper.SØKNAD
+ *         mottaksdato = LocalDate.of(2022, 12, 1)
+ *     }
+ * }
+ * ```
+ */
+fun BehandlingTestFactory.BehandlingTestBuilder.behandlingsårsak(
+    init: BehandlingsaarsakBuilder.() -> Unit
+) = apply {
+    medBehandlingsårsak(BehandlingsaarsakBuilder().apply(init).build())
+}
+
+@MelosysTestDsl
+class BehandlingsaarsakBuilder {
+    var type: Behandlingsaarsaktyper = Behandlingsaarsaktyper.SØKNAD
+    var fritekst: String = ""
+    var mottaksdato: LocalDate = LocalDate.now()
+
+    fun build(): Behandlingsaarsak = Behandlingsaarsak(type, fritekst, mottaksdato)
+}
+
+/**
  * DSL extension for å konfigurere mottatte opplysninger innenfor en Behandling builder.
  */
 fun BehandlingTestFactory.BehandlingTestBuilder.mottatteOpplysninger(
@@ -63,6 +91,20 @@ fun BehandlingTestFactory.BehandlingTestBuilder.saksopplysning(init: Saksopplysn
         init()
     }
     this.saksopplysninger.add(saksopplysning)
+}
+
+/**
+ * DSL extension for å sette opprinneligBehandling innenfor en Behandling builder.
+ */
+fun BehandlingTestFactory.BehandlingTestBuilder.medOpprinneligBehandling(behandling: Behandling) = apply {
+    this.opprinneligBehandling = behandling
+}
+
+/**
+ * DSL extension for å sette opprinneligBehandling med builder innenfor en Behandling builder.
+ */
+fun BehandlingTestFactory.BehandlingTestBuilder.opprinneligBehandling(init: BehandlingTestFactory.BehandlingTestBuilder.() -> Unit) = apply {
+    this.opprinneligBehandling = Behandling.forTest(init)
 }
 
 /**
@@ -90,7 +132,6 @@ object BehandlingTestFactory {
      *     .build();
      * ```
      */
-    @JvmStatic
     fun builderWithDefaults() = BehandlingTestBuilder().apply {
         id = BEHANDLING_ID // 0L allows JPA to auto-generate ID in integration tests
         // Sett standardverdier for alle påkrevde felt

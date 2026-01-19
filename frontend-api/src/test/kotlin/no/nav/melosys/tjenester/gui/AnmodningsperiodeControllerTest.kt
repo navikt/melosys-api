@@ -5,8 +5,9 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.verify
 import no.nav.melosys.domain.Anmodningsperiode
-import no.nav.melosys.domain.AnmodningsperiodeSvar
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.anmodningsperiode
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
@@ -91,13 +92,17 @@ class AnmodningsperiodeControllerTest {
 
     @Test
     fun `skal hente anmodningsperiode svar`() {
-        val anmodningsperiode = Anmodningsperiode().apply {
-            behandlingsresultat = Behandlingsresultat().apply { id = 1L }
-            anmodningsperiodeSvar = AnmodningsperiodeSvar().apply {
-                begrunnelseFritekst = "test"
-                anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            anmodningsperiode {
+                anmodningsperiodeSvar {
+                    begrunnelseFritekst = "test"
+                    anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
+                }
             }
         }
+        val anmodningsperiode = behandlingsresultat.anmodningsperioder.first()
+
         every { anmodningsperiodeService.finnAnmodningsperiode(1L) } returns Optional.of(anmodningsperiode)
         every { aksesskontroll.autoriser(1L) } returns Unit
 
@@ -113,15 +118,17 @@ class AnmodningsperiodeControllerTest {
 
     @Test
     fun `skal lagre anmodningsperiode svar`() {
-        val svar = AnmodningsperiodeSvar().apply {
-            anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
-            begrunnelseFritekst = "fritekst"
-            this.anmodningsperiode = anmodningsperiode
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            anmodningsperiode {
+                anmodningsperiodeSvar {
+                    anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
+                    begrunnelseFritekst = "fritekst"
+                }
+            }
         }
-        val anmodningsperiode = Anmodningsperiode().apply {
-            behandlingsresultat = Behandlingsresultat().apply { id = 1L }
-            anmodningsperiodeSvar = svar
-        }
+        val anmodningsperiode = behandlingsresultat.anmodningsperioder.first()
+        val svar = anmodningsperiode.anmodningsperiodeSvar!!
 
         every { anmodningsperiodeService.finnAnmodningsperiode(any()) } returns Optional.of(anmodningsperiode)
         every { anmodningsperiodeService.lagreAnmodningsperiodeSvarMedLovvalgsperiode(any(), any()) } returns svar

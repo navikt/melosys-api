@@ -51,8 +51,7 @@ class OppdaterFakturamottakerTest {
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns Fagsak.forTest {
             behandling { id = BEHANDLING_ID }
         }
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns Behandlingsresultat()
-
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns Behandlingsresultat.forTest { }
 
         oppdaterFakturamottaker.utfør(Prosessinstans.forTest { medData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER) })
 
@@ -77,8 +76,8 @@ class OppdaterFakturamottakerTest {
                 registrertDato = Instant.now()
             }
         }
-        val behandlingsresultat1 = Behandlingsresultat().apply { fakturaserieReferanse = "1" }
-        val behandlingsresultat2 = Behandlingsresultat().apply { fakturaserieReferanse = "2" }
+        val behandlingsresultat1 = Behandlingsresultat.forTest { fakturaserieReferanse = "1" }
+        val behandlingsresultat2 = Behandlingsresultat.forTest { fakturaserieReferanse = "2" }
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat1
         every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat2
@@ -108,8 +107,8 @@ class OppdaterFakturamottakerTest {
 
     @Test
     fun utfør_referanseMenIngenFullmektig_kallerFaktureringskomponentMedTomFullmektig() {
-        val fagsak = Fagsak.forTest { behandlinger(Behandling.forTest { id = BEHANDLING_ID }) }
-        val behandlingsresultat = Behandlingsresultat().apply { fakturaserieReferanse = "1" }
+        val fagsak = Fagsak.forTest { behandling { id = BEHANDLING_ID } }
+        val behandlingsresultat = Behandlingsresultat.forTest { fakturaserieReferanse = "1" }
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
