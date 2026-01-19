@@ -523,11 +523,7 @@ class ÅrsavregningIT(
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
 
-        return behandling.fagsak.saksnummer.also {
-            addCleanUpAction {
-                slettSakMedAvhengigheter(it)
-            }
-        }
+        return behandling.fagsak.saksnummer
     }
 
     private fun setupTrygdeavgiftBeregning(

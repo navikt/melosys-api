@@ -619,7 +619,6 @@ class ÅrsavregningIkkeSkattepliktigeIT(
             it.hentBehandling().fagsak.behandlinger.clear()
 
             fagsakRepository.save(fagsak)
-            addCleanUpAction { slettSakMedAvhengigheter(it.hentBehandling().fagsak.saksnummer) }
             behandlingsresultatRepository.save(it)
         }
 

@@ -274,11 +274,7 @@ class SatsendringIT @Autowired constructor(
     @Test
     fun `Prosess kan ikke opprette prosess på nytt for samme behandling`() {
         val behandling = Behandling.forTest { id = 3647 }
-        prosessinstansService.opprettSatsendringBehandlingFor(behandling, satsendringÅr).also {
-            addCleanUpAction {
-                slettProsessinstans(it)
-            }
-        }
+        prosessinstansService.opprettSatsendringBehandlingFor(behandling, satsendringÅr)
 
         shouldThrow<FunksjonellException> { prosessinstansService.opprettSatsendringBehandlingFor(behandling, satsendringÅr) }
             .message shouldBe "Det finnes allerede en aktiv prosess for satsendring av behandling ${behandling.id}"
@@ -358,11 +354,7 @@ class SatsendringIT @Autowired constructor(
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
 
-        return behandling.also {
-            addCleanUpAction {
-                slettSakMedAvhengigheter(it.fagsak.saksnummer)
-            }
-        }
+        return behandling
     }
 
     private fun lagPeriode(
