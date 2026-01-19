@@ -14,6 +14,10 @@ public class SaksopplysningKilde {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Version
+    @Column(name = "versjon")
+    private Long versjon;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "saksopplysning_id", nullable = false, updatable = false)
     private Saksopplysning saksopplysning;
