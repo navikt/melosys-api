@@ -48,7 +48,7 @@ class VideresendingControllerTest {
         }
         every { fagsakService.hentFagsak(any<String>()) } returns fagsak
         every { aksesskontroll.autoriserSakstilgang(any<Fagsak>()) } returns Unit
-        every { videresendSoknadService.videresend(any<String>(), any<String>(), any<String>(), any()) } returns Unit
+        every { videresendSoknadService.videresend(any<String>(), any<String>(), any<String>(), any(), any(), any()) } returns Unit
 
 
         mockMvc.perform(

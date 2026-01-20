@@ -121,7 +121,8 @@ public class EessiService {
     }
 
     public void opprettOgSendSed(long behandlingID, List<String> mottakerInstitusjoner, BucType bucType,
-                                 Collection<DokumentReferanse> dokumentReferanser, String ytterligereInformasjon) {
+                                 Collection<DokumentReferanse> dokumentReferanser, String ytterligereInformasjon,
+                                 String a008Formaal) {
         log.info("Starter sending av SED for behandling {}", behandlingID);
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -133,6 +134,7 @@ public class EessiService {
         sedData.setMottakerIder(mottakerInstitusjoner);
         sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
         sedData.setYtterligereInformasjon(mapYtterligereInformasjon(ytterligereInformasjon, periodeType, behandlingsresultat));
+        sedData.setA008Formaal(a008Formaal);
 
         log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
 

@@ -28,4 +28,7 @@ class SedDataDto : SedGrunnlagDto() {
     var vedtakDto: VedtakDto? = null
 
     var invalideringSedDto: InvalideringSedDto? = null
+
+    // A008 CDM 4.4 - formål med A008 SED
+    var a008Formaal: String? = null
 }

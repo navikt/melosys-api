@@ -53,7 +53,9 @@ public class VideresendingController {
 
         videresendSoknadService.videresend(saksnummer, videresendDto.getMottakerinstitusjon(),
             videresendDto.getFritekst(), videresendDto.getVedlegg().stream().map(
-                v -> new DokumentReferanse(v.journalpostID(), v.dokumentID())).collect(Collectors.toUnmodifiableSet()));
+                v -> new DokumentReferanse(v.journalpostID(), v.dokumentID())).collect(Collectors.toUnmodifiableSet()),
+            videresendDto.getYtterligereInformasjonSed(),
+            videresendDto.getA008Formaal());
         return ResponseEntity.noContent().build();
     }
 }

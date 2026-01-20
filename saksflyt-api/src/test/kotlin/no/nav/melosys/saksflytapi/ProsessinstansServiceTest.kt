@@ -183,7 +183,9 @@ class ProsessinstansServiceTest {
             behandling,
             null,
             "T",
-            setOf(dokumentReferanse)
+            setOf(dokumentReferanse),
+            null,
+            null
         )
 
 
