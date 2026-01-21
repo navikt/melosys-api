@@ -65,7 +65,6 @@ class AvsluttBehandlingArt13JobbIT(
             status = Saksstatuser.OPPRETTET
             medBruker()
         }.also {
-            addCleanUpAction { slettSakMedAvhengigheter(it.saksnummer) }
             fagsakRepository.save(it)
         }
 

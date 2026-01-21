@@ -81,11 +81,6 @@ class SatsendringAdminControllerIT @Autowired constructor(
         val behandlingUtenSatsendring = lagFørstegangsbehandlingUtenSatsendring()
         val behandlingMedSatsendringOgNyVurdering = lagFørstegangsbehandlingMedSatsendringOgNyVurdering()
 
-        // Registrer saker for opprydding
-        addCleanUpAction { slettSakMedAvhengigheter(behandlingMedSatsendring.fagsak.saksnummer) }
-        addCleanUpAction { slettSakMedAvhengigheter(behandlingUtenSatsendring.fagsak.saksnummer) }
-        addCleanUpAction { slettSakMedAvhengigheter(behandlingMedSatsendringOgNyVurdering.fagsak.saksnummer) }
-
         val prosesserFørKjøring = prosessinstansRepository.findAll()
 
 
@@ -122,10 +117,6 @@ class SatsendringAdminControllerIT @Autowired constructor(
 
         // Behandling uten satsendring skal ikke ha ny prosess
         nyeProsesser.filter { it.behandling?.id == behandlingUtenSatsendring.id }.shouldBeEmpty()
-
-        nyeProsesser.forEach {
-            addCleanUpAction { slettProsessinstans(it.id!!) }
-        }
     }
 
     private fun lagFørstegangsbehandlingMedSatsendring(): Behandling {

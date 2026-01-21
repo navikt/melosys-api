@@ -49,11 +49,6 @@ class AktoerHistorikkServiceIT(
             saksnummer, null, Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Saksstatuser.OPPRETTET
         ).apply { leggTilRegisteringInfo() }
             .also { fagsakRepository.save(it) }
-            .also {
-                addCleanUpAction {
-                    slettSakMedAvhengigheter(it.saksnummer)
-                }
-            }
     }
 
     private fun RegistreringsInfo.leggTilRegisteringInfo() {

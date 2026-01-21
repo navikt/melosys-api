@@ -67,7 +67,6 @@ class AnnuleringNyVurderingEøsOgTrygdeavtaleIT(
             status = Saksstatuser.OPPRETTET
             medBruker { aktørId = "1111111111111" }
         }.also {
-            addCleanUpAction { slettSakMedAvhengigheter(it.saksnummer) }
             fagsakRepository.save(it)
         }
 
