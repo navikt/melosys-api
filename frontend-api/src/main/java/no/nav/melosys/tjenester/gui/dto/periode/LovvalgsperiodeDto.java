@@ -21,7 +21,7 @@ public final class LovvalgsperiodeDto {
     public final String tilleggBestemmelse;
     public final String lovvalgsland;
     public final String innvilgelsesResultat;
-    public final String trygdedekning;
+    public final String trygdeDekning;
     public final String medlemskapstype;
     public final String medlemskapsperiodeID;
 
@@ -31,7 +31,7 @@ public final class LovvalgsperiodeDto {
                               LovvalgBestemmelse tilleggBestemmelse,
                               Land_iso2 lovvalgsland,
                               InnvilgelsesResultat innvilgelsesResultat,
-                              Trygdedekninger trygdedekning,
+                              Trygdedekninger trygdeDekning,
                               Medlemskapstyper medlemskapstype,
                               String medlemskapsperiodeID) {
         this.periodeID = periodeID;
@@ -40,7 +40,7 @@ public final class LovvalgsperiodeDto {
         this.tilleggBestemmelse = tilleggBestemmelse != null ? tilleggBestemmelse.name() : null;
         this.lovvalgsland = lovvalgsland != null ? lovvalgsland.name() : null;
         this.innvilgelsesResultat = innvilgelsesResultat.name();
-        this.trygdedekning = trygdedekning != null ? trygdedekning.name() : null;
+        this.trygdeDekning = trygdeDekning != null ? trygdeDekning.name() : null;
         this.medlemskapstype = medlemskapstype != null ? medlemskapstype.name() : null;
         this.medlemskapsperiodeID = medlemskapsperiodeID;
     }
@@ -54,7 +54,7 @@ public final class LovvalgsperiodeDto {
             konverterLovvalgsBestemmelse(json.get("tilleggBestemmelse")),
             enumVerdiEllerNull(Land_iso2.class, json.get("lovvalgsland")),
             InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
-            enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdedekning")),
+            enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
             enumVerdiEllerNull(Medlemskapstyper.class, json.get("medlemskapstype")),
             json.get("medlemskapsperiodeID"));
     }
@@ -93,7 +93,7 @@ public final class LovvalgsperiodeDto {
         resultat.setBestemmelse(konverterer.convertToEntityAttribute(lovvalgsbestemmelse));
         resultat.setTilleggsbestemmelse(konverterer.convertToEntityAttribute(tilleggBestemmelse));
         resultat.setInnvilgelsesresultat(enumVerdiEllerNull(InnvilgelsesResultat.class, innvilgelsesResultat));
-        resultat.setDekning(enumVerdiEllerNull(Trygdedekninger.class, trygdedekning));
+        resultat.setDekning(enumVerdiEllerNull(Trygdedekninger.class, trygdeDekning));
         resultat.setMedlemskapstype(enumVerdiEllerNull(Medlemskapstyper.class, medlemskapstype));
         resultat.setMedlPeriodeID(medlemskapsperiodeID != null ? Long.valueOf(medlemskapsperiodeID) : null);
         return resultat;
