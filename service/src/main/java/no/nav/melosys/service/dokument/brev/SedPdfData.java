@@ -10,15 +10,9 @@ public class SedPdfData {
     private Boolean vilSendeAnmodningOmMerInformasjon;
     private String nyttLovvalgsland;
     private String fritekst;
+    private String a008Formaal; // CDM 4.4: "endringsmelding" | "arbeid_flere_land"
 
     public SedPdfData() {
-    }
-
-    public SedPdfData(String begrunnelseUtenlandskMyndighet, Boolean vilSendeAnmodningOmMerInformasjon, String nyttLovvalgsland, String fritekst) {
-        this.begrunnelseUtenlandskMyndighet = begrunnelseUtenlandskMyndighet;
-        this.vilSendeAnmodningOmMerInformasjon = vilSendeAnmodningOmMerInformasjon;
-        this.nyttLovvalgsland = nyttLovvalgsland;
-        this.fritekst = fritekst;
     }
 
     public String getBegrunnelseUtenlandskMyndighet() {
@@ -53,6 +47,14 @@ public class SedPdfData {
         this.fritekst = fritekst;
     }
 
+    public String getA008Formaal() {
+        return a008Formaal;
+    }
+
+    public void setA008Formaal(String a008Formaal) {
+        this.a008Formaal = a008Formaal;
+    }
+
     // Utfyller SedDataDto med fritekst og annen informasjon som ikke lagres strukturert i Melosys
     public void utfyllSedDataDto(SedDataDto sedDataDto) {
 
@@ -62,5 +64,6 @@ public class SedPdfData {
         ));
 
         sedDataDto.setYtterligereInformasjon(fritekst);
+        sedDataDto.setA008Formaal(a008Formaal);
     }
 }
