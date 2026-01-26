@@ -70,6 +70,28 @@ class MDCOperations {
                 UUID.randomUUID().toString()
             } else correlationId
         }
+
+        @JvmStatic
+        fun getCorrelationIdFromKafkaHeaders(kafkaHeaders: Map<String, ByteArray?>): String {
+            val bytes = kafkaHeaders[CORRELATION_ID]
+            return if (bytes != null && bytes.isNotEmpty()) {
+                String(bytes)
+            } else {
+                UUID.randomUUID().toString()
+            }
+        }
+
+        inline fun <T> withCorrelationId(correlationId: String, block: () -> T): T {
+            putToMDC(CORRELATION_ID, correlationId)
+            return try {
+                block()
+            } finally {
+                remove(CORRELATION_ID)
+            }
+        }
+
+        inline fun <T> withKafkaCorrelationId(kafkaHeaders: Map<String, ByteArray?>, block: () -> T): T =
+            withCorrelationId(getCorrelationIdFromKafkaHeaders(kafkaHeaders), block)
     }
 
 }

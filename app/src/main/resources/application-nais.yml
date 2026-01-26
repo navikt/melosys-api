@@ -69,6 +69,9 @@ kafka:
     soknad-mottak:
       groupid: teammelosys-soknad-mottak-consumer
       topic: ${KAFKA_AIVEN_SOKNADMOTTATT_TOPIC:teammelosys.soknad-mottak.v1}
+    skjema-mottatt:
+      groupid: teammelosys-skjema-mottatt-consumer
+      topic: ${KAFKA_SKJEMA_MOTTAK_TOPIC:teammelosys.skjema.innsendt.v1}
 medlemskap:
   rest:
     url: ${MEDL_REST_API_BASE_URL}
