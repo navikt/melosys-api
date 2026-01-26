@@ -134,7 +134,9 @@ public class EessiService {
         sedData.setMottakerIder(mottakerInstitusjoner);
         sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
         sedData.setYtterligereInformasjon(mapYtterligereInformasjon(ytterligereInformasjon, periodeType, behandlingsresultat));
-        sedData.setA008Formaal(a008Formaal);
+        if (unleash.isEnabled(ToggleName.MELOSYS_CDM_4_4)) {
+            sedData.setA008Formaal(a008Formaal);
+        }
 
         log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
 
@@ -337,6 +339,9 @@ public class EessiService {
         if (sedPdfData != null) {
             sedPdfData.setFritekst(mapYtterligereInformasjon(sedPdfData.getFritekst(), periodeType, behandlingsresultat));
             sedPdfData.utfyllSedDataDto(sedDataDto);
+            if (!unleash.isEnabled(ToggleName.MELOSYS_CDM_4_4)) {
+                sedDataDto.setA008Formaal(null);
+            }
         }
         log.info("Henter pdf for sed med type {} for behandling {}", sedType, behandlingID);
         return eessiConsumer.genererSedPdf(sedDataDto, sedType);
