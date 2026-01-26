@@ -339,9 +339,6 @@ public class EessiService {
         if (sedPdfData != null) {
             sedPdfData.setFritekst(mapYtterligereInformasjon(sedPdfData.getFritekst(), periodeType, behandlingsresultat));
             sedPdfData.utfyllSedDataDto(sedDataDto);
-            if (!unleash.isEnabled(ToggleName.MELOSYS_CDM_4_4)) {
-                sedDataDto.setA008Formaal(null);
-            }
         }
         log.info("Henter pdf for sed med type {} for behandling {}", sedType, behandlingID);
         return eessiConsumer.genererSedPdf(sedDataDto, sedType);
