@@ -103,6 +103,9 @@ kafka:
     soknad-mottak:
       groupid: teammelosys-soknad-mottak-consumer-local
       topic: teammelosys.soknad-mottak.v1-local
+    skjema-mottatt:
+      groupid: teammelosys-skjema-mottatt-consumer-local
+      topic: teammelosys.skjema.innsendt.v1-local
 ldap:
   url: ldap://localhost:8389/
   userbasedn: ou=NAV,ou=BusinessUnits,dc=test,dc=local
