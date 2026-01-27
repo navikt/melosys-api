@@ -80,6 +80,9 @@ kafka:
     soknad-mottak:
       groupid: teammelosys-soknad-mottak-consumer
       topic: teammelosys.soknad-mottak.v1-q1:teammelosys.soknad-mottak.v1
+    skjema-mottatt:
+      groupid: teammelosys-skjema-mottatt-consumer
+      topic: teammelosys.skjema.innsendt.v1-q1
 logging:
   level:
     org:
