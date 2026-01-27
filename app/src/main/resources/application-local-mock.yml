@@ -76,6 +76,9 @@ kafka:
     soknad-mottak:
       groupid: teammelosys-soknad-mottak-consumer-local
       topic: teammelosys.soknad-mottak.v1-local
+    skjema-mottatt:
+      groupid: teammelosys-skjema-mottatt-consumer
+      topic: teammelosys.skjema.innsendt.v1-local
 logging:
   level:
     org:
