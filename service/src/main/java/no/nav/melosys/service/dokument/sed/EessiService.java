@@ -10,6 +10,7 @@ import jakarta.annotation.Nullable;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
+import no.nav.melosys.domain.eessi.A008Formaal;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.eessi.*;
@@ -124,6 +125,7 @@ public class EessiService {
                                  Collection<DokumentReferanse> dokumentReferanser, String ytterligereInformasjon,
                                  String a008Formaal) {
         log.info("Starter sending av SED for behandling {}", behandlingID);
+        validerA008Formaal(a008Formaal);
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         Fagsak fagsak = behandling.getFagsak();
@@ -509,5 +511,14 @@ public class EessiService {
 
         log.info("Forsøker å sende sed {} for behandling {}", sedType, behandlingID);
         eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, sedTypeAvklarer.apply(behandlingsresultat));
+    }
+
+    private void validerA008Formaal(String a008Formaal) {
+        if (!A008Formaal.erGyldig(a008Formaal)) {
+            throw new FunksjonellException(
+                String.format("Ugyldig verdi for a008Formaal: '%s'. Gyldige verdier er: %s",
+                    a008Formaal, A008Formaal.gyldigeVerdier())
+            );
+        }
     }
 }

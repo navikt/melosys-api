@@ -960,6 +960,100 @@ class EessiServiceTest {
         eessiService.kanOppretteSedTyperPåBuc("5566", SedType.A011) shouldBe false
     }
 
+    // CDM 4.4 toggle tests
+    @Test
+    fun `opprettOgSendSed med toggle CDM_4_4 på setter a008Formaal på sedData`() {
+        unleash.enable(ToggleName.MELOSYS_CDM_4_4)
+        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        mockBehandling()
+        mockBehandlingsresultat()
+
+        val sedDataDtoSlot = slot<SedDataDto>()
+        every { eessiConsumer.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
+
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "arbeid_flere_land")
+
+        sedDataDtoSlot.captured.a008Formaal shouldBe "arbeid_flere_land"
+    }
+
+    @Test
+    fun `opprettOgSendSed med toggle CDM_4_4 av setter ikke a008Formaal på sedData`() {
+        unleash.disable(ToggleName.MELOSYS_CDM_4_4)
+        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        mockBehandling()
+        mockBehandlingsresultat()
+
+        val sedDataDtoSlot = slot<SedDataDto>()
+        every { eessiConsumer.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
+
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "arbeid_flere_land")
+
+        sedDataDtoSlot.captured.a008Formaal shouldBe null
+    }
+
+    @Test
+    fun `opprettOgSendSed med gyldig a008Formaal endringsmelding validerer ok`() {
+        unleash.enable(ToggleName.MELOSYS_CDM_4_4)
+        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        mockBehandling()
+        mockBehandlingsresultat()
+
+        val sedDataDtoSlot = slot<SedDataDto>()
+        every { eessiConsumer.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
+
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "endringsmelding")
+
+        sedDataDtoSlot.captured.a008Formaal shouldBe "endringsmelding"
+    }
+
+    @Test
+    fun `opprettOgSendSed med null a008Formaal validerer ok`() {
+        unleash.enable(ToggleName.MELOSYS_CDM_4_4)
+        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        mockBehandling()
+        mockBehandlingsresultat()
+
+        val sedDataDtoSlot = slot<SedDataDto>()
+        every { eessiConsumer.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
+
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, null)
+
+        sedDataDtoSlot.captured.a008Formaal shouldBe null
+    }
+
+    @Test
+    fun `opprettOgSendSed med ugyldig a008Formaal kaster FunksjonellException`() {
+        val ugyldigVerdi = "ugyldig_formaal"
+
+        val exception = shouldThrow<FunksjonellException> {
+            eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, ugyldigVerdi)
+        }
+
+        exception.message shouldContain "Ugyldig verdi for a008Formaal"
+        exception.message shouldContain ugyldigVerdi
+        exception.message shouldContain "endringsmelding"
+        exception.message shouldContain "arbeid_flere_land"
+    }
+
+    @Test
+    fun `opprettOgSendSed med case-sensitiv feil a008Formaal kaster FunksjonellException`() {
+        val feilCase = "ARBEID_FLERE_LAND" // Store bokstaver
+
+        val exception = shouldThrow<FunksjonellException> {
+            eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, feilCase)
+        }
+
+        exception.message shouldContain "Ugyldig verdi for a008Formaal"
+    }
+
     private fun lagJournalpost(dokumenter: List<ArkivDokument>) = Journalpost("jpID").apply {
         hoveddokument = dokumenter[0]
         vedleggListe.clear()
