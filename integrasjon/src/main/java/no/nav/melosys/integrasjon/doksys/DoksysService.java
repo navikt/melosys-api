@@ -157,6 +157,8 @@ public class DoksysService implements DoksysFasade {
     }
 
     private StrukturertAdresse mapLandkode(StrukturertAdresse adresse) {
+        // Vi støtter Quebec, men vi må mappe det til CA før distribuering av journalpost
+        // fordi kun landkode på 2 bokstaver godtas.
         if (Land_iso2.CA_QC.getKode().equals(adresse.getLandkode())) {
             adresse.setLandkode(Land_iso2.CA.getKode());
         }
