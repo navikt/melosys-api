@@ -276,7 +276,7 @@ This document provides a comprehensive analysis of the 735 Java classes remainin
 
 **Categories:**
 
-#### Behandling (Case Processing) - 10 files
+#### Behandling (Case Processing) - 11 files
 - `OpprettFagsakOgBehandling.java` - Create case and treatment
 - `OpprettFagsakOgBehandlingFraSed.java` - Create from SED
 - `OpprettFagsakOgBehandlingFraAltinnSøknad.java` - Create from Altinn
@@ -289,7 +289,7 @@ This document provides a comprehensive analysis of the 735 Java classes remainin
 - `OpprettMottatteOpplysninger.java` - Create received information
 - `SettVurderDokument.java` - Set document for review
 
-#### SED (European Documents) - 19 files
+#### SED (European Documents) - 16 files
 - `SedMottakRuting.java` - SED receipt routing
 - `AbstraktSendUtland.java` - Abstract send abroad
 - `SendVedtakUtland.java` - Send decision abroad
@@ -307,7 +307,7 @@ This document provides a comprehensive analysis of the 735 Java classes remainin
 - `VideresendSoknad.java` - Forward application
 - `HentMottakerinstitusjonerForkortetPeriode.java` - Get recipient institutions
 
-#### Brev (Letters) - 8 files
+#### Brev (Letters) - 7 files
 - `BestillBrev.java` - Order letter
 - `SendVedtaksbrevInnland.java` - Send domestic decision letter
 - `SendOrienteringsbrevVideresendSøknad.java` - Send forwarding notification
@@ -333,7 +333,7 @@ This document provides a comprehensive analysis of the 735 Java classes remainin
 - `RegisterKontroll.java` - Registry control
 - `HentRegisteropplysninger.java` - Fetch registry information
 
-#### Admin/Control - 6 files
+#### Admin/Control - 5 files
 - `ProsessinstansAdminController.java` - Process instance admin controller
 - `ProsessinstansAdminService.java` - Process instance admin service
 - `SaksflytHealthIndicator.java` - Workflow health indicator
