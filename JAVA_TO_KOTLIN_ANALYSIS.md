@@ -476,6 +476,12 @@ This document provides a comprehensive analysis of the 735 Java classes remainin
 ### Tier 1: Low Complexity (≈150 files)
 **Files:** DTOs, simple entities, exception classes, repository interfaces, enums
 
+**Specific Categories:**
+- DTOs: ~100 files (simple data classes)
+- Repository interfaces: 22 files
+- Exception classes: 7 files
+- Simple enums and configurations: ~20 files
+
 **Characteristics:**
 - Minimal logic
 - POJOs with getters/setters
@@ -492,6 +498,15 @@ This document provides a comprehensive analysis of the 735 Java classes remainin
 
 ### Tier 2: Medium Complexity (≈350 files)
 **Files:** Controllers, standard services, simple mappers, integration clients
+
+**Specific Categories:**
+- Controllers: ~60 files
+- Standard services: ~70 files
+- Simple mappers: ~20 files
+- Integration DTOs: ~100 files
+- Configuration classes: ~10 files
+- Statistics services: 9 files
+- Remaining DTOs: ~80 files
 
 **Characteristics:**
 - Standard Spring patterns
@@ -510,6 +525,14 @@ This document provides a comprehensive analysis of the 735 Java classes remainin
 ### Tier 3: High Complexity (≈150 files)
 **Files:** Complex services, builders, advanced mappers, integration consumers
 
+**Specific Categories:**
+- Complex business services: ~30 files
+- Builders and advanced mappers: ~30 files
+- Document generation services: ~30 files
+- Integration consumers: ~40 files
+- EESSI services: ~15 files
+- Remaining complex logic: ~5 files
+
 **Characteristics:**
 - Complex business logic
 - Multiple dependencies
@@ -527,6 +550,15 @@ This document provides a comprehensive analysis of the 735 Java classes remainin
 
 ### Tier 4: Critical/High Risk (≈85 files)
 **Files:** Workflow steps, domain entities, security config, database migrations
+
+**Specific Categories:**
+- Domain entities (JPA): 78 files
+- Workflow steps: 58 files (may overlap with services)
+- Security configurations: 6 files
+- Database migrations: 2 files (DO NOT CONVERT)
+- Critical configurations: ~5 files
+
+**Note:** Some workflow steps (58 files) are already counted in Tier 2/3 as services. This tier represents ~85 unique critical files requiring special attention.
 
 **Characteristics:**
 - Business-critical workflows
