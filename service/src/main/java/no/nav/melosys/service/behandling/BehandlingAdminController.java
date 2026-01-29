@@ -56,9 +56,13 @@ public class BehandlingAdminController {
         description = "Ferdigstill en oppgave til behandling. Setter oppgaven til ferdigstillt i oppgaveapi")
     public ResponseEntity<String> avsluttOppgaveTilBehandling(@PathVariable Long behandlingID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
+
+        log.info("Admin forsøker å ferdigstille oppgave med oppgaveID: {} for behandling med ID: {}",
+            behandlingID, behandling.getOppgaveId());
+
         oppgaveService.ferdigstillOppgave(behandling.getOppgaveId());
 
-        return ResponseEntity.ok(behandling.getOppgaveId());
+        return ResponseEntity.ok("Ferdigstill oppgave med oppgaveID: " + behandling.getOppgaveId());
     }
 
     @PutMapping("/batch/avslutt")
