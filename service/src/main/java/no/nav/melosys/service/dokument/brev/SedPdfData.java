@@ -54,7 +54,7 @@ public class SedPdfData {
     }
 
     public String getA008Formaal() {
-        return a008Formaal.getVerdi();
+        return a008Formaal != null ? a008Formaal.getVerdi() : null;
     }
 
     public void setA008Formaal(String a008Formaal) {

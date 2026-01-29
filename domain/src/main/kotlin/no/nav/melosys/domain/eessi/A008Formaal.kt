@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.eessi
 
+import com.fasterxml.jackson.annotation.JsonValue
 import mu.KotlinLogging
-import no.nav.melosys.exception.FunksjonellException
 
 /**
  * Formål med A008 SED i CDM 4.4.
@@ -10,7 +10,7 @@ import no.nav.melosys.exception.FunksjonellException
  */
 private val log = KotlinLogging.logger { }
 
-enum class A008Formaal(val verdi: String) {
+enum class A008Formaal(@JsonValue val verdi: String) {
     /**
      * Endringsmelding - brukes når det er endringer i eksisterende lovvalg
      */
