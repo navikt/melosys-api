@@ -51,14 +51,14 @@ public class BehandlingAdminController {
     }
 
 
-    @PutMapping("/{behandlingID}/behandling/ferdigstillOppgave")
+    @PutMapping("/{behandlingID}/ferdigstillOppgave")
     @Operation(summary = "Ferdigstill en oppgave til behandling",
-        description = "Ferdigstill en oppgave til behandling. Setter oppgaven til ferdigstillt i gosys")
-    public ResponseEntity<Void> avsluttOppgaveTilBehandling(@PathVariable Long behandlingID, @RequestParam(required = false) Behandlingsresultattyper behandlingsresultattype) {
+        description = "Ferdigstill en oppgave til behandling. Setter oppgaven til ferdigstillt i oppgaveapi")
+    public ResponseEntity<String> avsluttOppgaveTilBehandling(@PathVariable Long behandlingID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         oppgaveService.ferdigstillOppgave(behandling.getOppgaveId());
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(behandling.getOppgaveId());
     }
 
     @PutMapping("/batch/avslutt")
