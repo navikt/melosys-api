@@ -6,8 +6,10 @@ import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +25,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/admin/behandlinger")
 public class BehandlingAdminController {
     private final BehandlingService behandlingService;
+    private final OppgaveService oppgaveService;
     private static final Logger log = LoggerFactory.getLogger(BehandlingAdminController.class);
 
 
-    public BehandlingAdminController(BehandlingService behandlingService) {
+    public BehandlingAdminController(BehandlingService behandlingService, OppgaveService oppgaveService) {
         this.behandlingService = behandlingService;
+        this.oppgaveService = oppgaveService;
     }
 
     @PutMapping("/{behandlingID}/avslutt")
@@ -42,6 +46,17 @@ public class BehandlingAdminController {
             log.info("Admin forsøker å avslutte behandling {}", behandlingID);
             behandlingService.avsluttBehandling(behandlingID);
         }
+
+        return ResponseEntity.noContent().build();
+    }
+
+
+    @PutMapping("/{behandlingID}/behandling/ferdigstillOppgave")
+    @Operation(summary = "Ferdigstill en oppgave til behandling",
+        description = "Ferdigstill en oppgave til behandling. Setter oppgaven til ferdigstillt i gosys")
+    public ResponseEntity<Void> avsluttOppgaveTilBehandling(@PathVariable Long behandlingID, @RequestParam(required = false) Behandlingsresultattyper behandlingsresultattype) {
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        oppgaveService.ferdigstillOppgave(behandling.getOppgaveId());
 
         return ResponseEntity.noContent().build();
     }
