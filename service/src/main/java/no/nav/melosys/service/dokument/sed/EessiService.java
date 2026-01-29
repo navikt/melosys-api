@@ -125,7 +125,6 @@ public class EessiService {
                                  Collection<DokumentReferanse> dokumentReferanser, String ytterligereInformasjon,
                                  String a008Formaal) {
         log.info("Starter sending av SED for behandling {}", behandlingID);
-        validerA008Formaal(a008Formaal);
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         Fagsak fagsak = behandling.getFagsak();
@@ -137,7 +136,7 @@ public class EessiService {
         sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
         sedData.setYtterligereInformasjon(mapYtterligereInformasjon(ytterligereInformasjon, periodeType, behandlingsresultat));
         if (unleash.isEnabled(ToggleName.MELOSYS_CDM_4_4)) {
-            sedData.setA008Formaal(a008Formaal);
+            sedData.setA008Formaal(A008Formaal.hentVerdi(a008Formaal));
         }
 
         log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
@@ -340,7 +339,7 @@ public class EessiService {
 
         if (sedPdfData != null) {
             sedPdfData.setFritekst(mapYtterligereInformasjon(sedPdfData.getFritekst(), periodeType, behandlingsresultat));
-            sedPdfData.utfyllSedDataDto(sedDataDto);
+            sedPdfData.utfyllSedDataDto(unleash, sedDataDto);
         }
         log.info("Henter pdf for sed med type {} for behandling {}", sedType, behandlingID);
         return eessiConsumer.genererSedPdf(sedDataDto, sedType);

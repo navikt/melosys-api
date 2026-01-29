@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.eessi.sed
 
+import no.nav.melosys.domain.eessi.A008Formaal
 import no.nav.melosys.domain.eessi.Periode
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak
 
@@ -30,5 +31,5 @@ class SedDataDto : SedGrunnlagDto() {
     var invalideringSedDto: InvalideringSedDto? = null
 
     // A008 CDM 4.4 - formål med A008 SED
-    var a008Formaal: String? = null
+    var a008Formaal: A008Formaal? = null
 }
