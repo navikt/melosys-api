@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.arkiv.Distribusjonstidspunkt;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -13,8 +14,8 @@ import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.Adresse;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostRequest;
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.*;
-import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.ObjectFactory;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.*;
+import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.ObjectFactory;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserDokumentutkastRequest;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserDokumentutkastResponse;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentRequest;
@@ -133,8 +134,8 @@ public class DoksysService implements DoksysFasade {
         } catch (ProduserIkkeredigerbartDokumentSikkerhetsbegrensning e) {
             throw new SikkerhetsbegrensningException(e);
         } catch (ProduserIkkeredigerbartDokumentDokumentErRedigerbart | ProduserIkkeRedigerbartDokumentJoarkForretningsmessigUnntak
-            | ProduserIkkeredigerbartDokumentBrevdataValideringFeilet | ProduserIkkeredigerbartDokumentDokumentErVedlegg
-            | ProduserIkkeRedigerbartDokumentInputValideringFeilet e) {
+                 | ProduserIkkeredigerbartDokumentBrevdataValideringFeilet | ProduserIkkeredigerbartDokumentDokumentErVedlegg
+                 | ProduserIkkeRedigerbartDokumentInputValideringFeilet e) {
             throw new IntegrasjonException(e);
         }
     }
@@ -147,12 +148,19 @@ public class DoksysService implements DoksysFasade {
             .dokumentProdApp(MELOSYS.getKode())
             .adresse("NO".equalsIgnoreCase(mottakeradresse.getLandkode())
                 ? norskAdresse(mottakeradresse)
-                : utenlandskAdresse(mottakeradresse))
+                : utenlandskAdresse(mapLandkode(mottakeradresse)))
             .distribusjonstype(distribusjonstype)
             .distribusjonstidspunkt(Distribusjonstidspunkt.KJERNETID)
             .build();
 
         return distribuerJournalpostConsumer.distribuerJournalpost(request).getBestillingsId();
+    }
+
+    private StrukturertAdresse mapLandkode(StrukturertAdresse adresse) {
+        if (Land_iso2.CA_QC.getKode().equals(adresse.getLandkode())) {
+            adresse.setLandkode(Land_iso2.CA.getKode());
+        }
+        return adresse;
     }
 
     @Override
