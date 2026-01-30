@@ -511,13 +511,4 @@ public class EessiService {
         log.info("Forsøker å sende sed {} for behandling {}", sedType, behandlingID);
         eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, sedTypeAvklarer.apply(behandlingsresultat));
     }
-
-    private void validerA008Formaal(String a008Formaal) {
-        if (!A008Formaal.erGyldig(a008Formaal)) {
-            throw new FunksjonellException(
-                String.format("Ugyldig verdi for a008Formaal: '%s'. Gyldige verdier er: %s",
-                    a008Formaal, A008Formaal.gyldigeVerdier())
-            );
-        }
-    }
 }
