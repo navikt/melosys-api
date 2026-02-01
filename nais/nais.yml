@@ -48,7 +48,7 @@ spec:
           cluster: {{NAIS_CLUSTER_NAME_GCP}}
     outbound:
       external:
-        - host: "melosys-unleash-api.nav.cloud.nais.io"
+        - host: "teammelosys-unleash-api.nav.cloud.nais.io"
       rules:
         - application: {{APP_NAME_OPPGAVE}}
         - application: {{APP_NAME_PDL}}
