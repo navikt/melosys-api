@@ -41,6 +41,15 @@ class TrygdeavgiftService(
             .eøsPensjonistTrygdeavgiftsperioder
     }
 
+    @Transactional(readOnly = true)
+    fun hentAlleFakturaserieReferanser(saksnummer: String): List<String> {
+        val fagsak = fagsakService.hentFagsak(saksnummer)
+        return fagsak.behandlinger
+            .mapNotNull { behandlingsresultatService.hentBehandlingsresultat(it.id).fakturaserieReferanse }
+            .filter { it.isNotBlank() }
+            .distinct()
+    }
+
     @Transactional
     fun slettTrygdeavgiftsperioderPåBehandlingsresultat(behandlingID: Long) {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
