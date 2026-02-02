@@ -14,6 +14,7 @@ APP_NAME_DOKDISTFORDELING: dokdistfordeling-q1
 AZURE_APP_CLIENT_ID: '"lol"'
 AZURE_APP_CLIENT_SECRET: '"lol"'
 AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: http://host.docker.internal:8082/isso/token
+MELOSYS_SKJEMA_API_URL: http://placeholder-inntil-lagt-til-i-melosys-docker-compose
 DistribuerJournalpost_v1:
   url: http://localhost:8083/rest/v1/distribuerjournalpost
 Dokumentproduksjon_v3:
