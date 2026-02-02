@@ -20,11 +20,12 @@ private val log = KotlinLogging.logger { }
 class FeatureToggleConfigNais {
 
     @Bean
-    fun unleash(@Value("\${unleash.token}") token: String): Unleash {
+    fun unleash(@Value("\${unleash.token}") token: String,
+                @Value("\${unleash.url}") url: String): Unleash {
         val unleashConfig = UnleashConfig.builder()
             .apiKey(token)
             .appName(APP_NAME)
-            .unleashAPI(UNLEASH_URL)
+            .unleashAPI(url)
             .build()
 
         return DefaultUnleash(
@@ -38,7 +39,6 @@ class FeatureToggleConfigNais {
     }
 
     companion object {
-        const val UNLEASH_URL = "https://melosys-unleash-api.nav.cloud.nais.io/api"
         const val APP_NAME = "Melosys-api"
     }
 }
