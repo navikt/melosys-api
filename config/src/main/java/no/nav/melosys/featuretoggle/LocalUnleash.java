@@ -1,7 +1,13 @@
 package no.nav.melosys.featuretoggle;
 
-import io.getunleash.*;
+import io.getunleash.EvaluatedToggle;
+import io.getunleash.FeatureDefinition;
+import io.getunleash.MoreOperations;
+import io.getunleash.Unleash;
+import io.getunleash.UnleashContext;
+import io.getunleash.impactmetrics.MetricsAPI;
 import io.getunleash.lang.Nullable;
+import io.getunleash.variant.Variant;
 
 import java.util.*;
 import java.util.function.BiPredicate;
@@ -76,11 +82,6 @@ public final class LocalUnleash implements Unleash {
     }
 
     @Override
-    public List<String> getFeatureToggleNames() {
-        return more().getFeatureToggleNames();
-    }
-
-    @Override
     public void shutdown() {
         Unleash.super.shutdown();
     }
@@ -88,6 +89,12 @@ public final class LocalUnleash implements Unleash {
     @Override
     public MoreOperations more() {
         return new LocalUnleash.FakeMore();
+    }
+
+    @Override
+    public MetricsAPI getImpactMetrics() {
+        // Returnerer null siden LocalUnleash ikke støtter impact metrics
+        return null;
     }
 
     public void enableAllExcept(String... excludedFeatures) {
@@ -156,7 +163,7 @@ public final class LocalUnleash implements Unleash {
         }
 
         @Override
-        public Optional<FeatureToggle> getFeatureToggleDefinition(String s) {
+        public Optional<FeatureDefinition> getFeatureToggleDefinition(String s) {
             return Optional.empty();
         }
 
@@ -174,16 +181,6 @@ public final class LocalUnleash implements Unleash {
                             toggleName, isEnabled(toggleName), getVariant(toggleName));
                     })
                 .collect(Collectors.toList());
-        }
-
-        @Override
-        public void count(String toggleName, boolean enabled) {
-            // Nothing to count
-        }
-
-        @Override
-        public void countVariant(String toggleName, String variantName) {
-            // Nothing to count
         }
     }
 }

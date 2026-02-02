@@ -1,5 +1,6 @@
 package no.nav.melosys.featuretoggle
 
+import io.getunleash.UnleashContext
 import io.getunleash.strategy.Strategy
 import mu.KotlinLogging
 import no.nav.melosys.sikkerhet.context.SubjectHandler
@@ -12,7 +13,7 @@ internal class ByUserIdStrategy : Strategy {
 
     override fun getName(): String = "byUserId"
 
-    override fun isEnabled(parameters: Map<String, String>): Boolean {
+    override fun isEnabled(parameters: MutableMap<String, String>, context: UnleashContext): Boolean {
         val userIDs = parameters["user"]
         if (userIDs.isNullOrBlank()) return false
 
