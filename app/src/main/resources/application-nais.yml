@@ -114,5 +114,6 @@ tilgangsmaskinen:
   url: ${TILGANGSMASKINEN_URL}
 unleash:
   token: ${UNLEASH_SERVER_API_TOKEN}
+  url: ${UNLEASH_SERVER_API_URL}/api
 utbetaling_rest:
   url: ${UTBETALING_V2_ENDPOINTURL}
