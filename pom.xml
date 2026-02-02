@@ -127,7 +127,7 @@
         <xmlsec.version>4.0.4</xmlsec.version>
         <wiremock-standalone.version>3.13.2</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
-        <melosys-skjema-api-types.version>2026.02.02-79070fb7e675</melosys-skjema-api-types.version>
+        <melosys-skjema-api-types.version>2026.02.02-44d6cfac0e7b-java17</melosys-skjema-api-types.version>
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det
