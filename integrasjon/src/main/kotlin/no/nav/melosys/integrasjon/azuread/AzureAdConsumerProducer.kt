@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.azuread
 
 import no.nav.melosys.integrasjon.felles.CallIdAware
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.felles.WebClientConfig
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -14,13 +13,14 @@ import reactor.netty.http.client.HttpClient
 import reactor.netty.transport.ProxyProvider
 import reactor.netty.transport.ProxyProvider.TypeSpec
 import java.net.URI
+import no.nav.melosys.integrasjon.felles.errorFilter
 
 @Configuration
 class AzureAdConsumerProducer(
     @Value("\${microsoft.graph.rest.url}") private val url: String,
     @Value("\${http.proxy:#{null}}") private val httpProxy: String?,
     private val genericAuthFilterFactory: GenericAuthFilterFactory,
-) : CallIdAware, WebClientConfig {
+) : CallIdAware {
 
     @Bean
     fun azureAdConsumer(

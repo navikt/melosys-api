@@ -1,14 +1,15 @@
 package no.nav.melosys.integrasjon.dokgen;
 
-import no.nav.melosys.integrasjon.felles.WebClientConfig;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import static no.nav.melosys.integrasjon.felles.WebClientUtilsKt.errorFilter;
+
 @Configuration
-public class DokgenConsumerProducer implements WebClientConfig {
+public class DokgenConsumerProducer {
     private final String url;
 
     public DokgenConsumerProducer(@Value("${melosysdokgen.v1.url}") String url) {

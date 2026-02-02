@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold
 
 import no.nav.melosys.exception.TekniskException
-import no.nav.melosys.integrasjon.felles.WebClientConfig
 import org.springframework.http.MediaType
 import org.springframework.retry.annotation.Retryable
 import org.springframework.web.reactive.function.client.WebClient
@@ -10,7 +9,7 @@ import org.springframework.web.util.UriBuilder
 import java.util.*
 
 @Retryable
-open class ArbeidsforholdConsumer(private val webClient: WebClient) : WebClientConfig {
+open class ArbeidsforholdConsumer(private val webClient: WebClient) {
     open fun finnArbeidsforholdPrArbeidstaker(
         fnr: String,
         arbeidsforholdQuery: ArbeidsforholdQuery
