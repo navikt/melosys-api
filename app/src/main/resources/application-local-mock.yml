@@ -8,6 +8,7 @@ APP_NAME_SAF: saf
 APP_NAME_TILGANGSMASKINEN: populasjonstilgangkontroll
 APP_NAME_UTBETALING: sokos-utbetaldata
 APP_NAME_MELOSYS_SOKNAD_MOTTAK: melosys-soknad-mottak
+APP_NAME_MELOSYS_SKJEMA_API: melosys-skjema-api
 APP_NAME_DOKARKIV: dokarkiv-q1
 APP_NAME_DOKDISTFORDELING: dokdistfordeling-q1
 AZURE_APP_CLIENT_ID: '"lol"'
