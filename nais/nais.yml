@@ -61,6 +61,7 @@ spec:
         - application: {{APP_NAME_MELOSYS_SOKNAD_MOTTAK}}
         - application: {{APP_NAME_DOKARKIV}}
         - application: {{APP_NAME_DOKDISTFORDELING}}
+        - application: {{APP_NAME_MELOSYS_SKJEMA_API}}
         - application: logging
           namespace: nais-system
   webproxy: true
