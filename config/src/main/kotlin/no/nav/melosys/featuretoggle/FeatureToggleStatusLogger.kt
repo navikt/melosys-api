@@ -5,7 +5,7 @@ import mu.KotlinLogging
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
-import kotlin.reflect.full.memberProperties
+import java.lang.reflect.Modifier
 
 private val log = KotlinLogging.logger {}
 
@@ -46,15 +46,15 @@ class FeatureToggleStatusLogger(private val unleash: Unleash) {
     }
 
     private fun getToggleNamesFromObject(): List<Pair<String, String>> {
-        return ToggleName::class.memberProperties
-            .filter { it.returnType.classifier == String::class }
-            .mapNotNull { prop ->
-                try {
-                    val value = prop.get(ToggleName) as? String
-                    if (value != null) prop.name to value else null
-                } catch (e: Exception) {
-                    null
-                }
+        return ToggleName::class.java.declaredFields
+            .filter { field ->
+                Modifier.isStatic(field.modifiers) &&
+                    Modifier.isFinal(field.modifiers) &&
+                    field.type == String::class.java
+            }
+            .map { field ->
+                field.isAccessible = true
+                field.name to (field.get(null) as String)
             }
     }
 }
