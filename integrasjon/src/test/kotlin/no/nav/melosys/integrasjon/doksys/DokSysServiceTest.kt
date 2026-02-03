@@ -221,6 +221,33 @@ class DokSysServiceTest {
     }
 
     @Test
+    fun `distribuer journalpost med QUEBEC adresse`() {
+        val mottakeradresse = StrukturertAdresse().apply {
+            landkode = "CA_QC"
+            gatenavn = "Gate i QUEBEC"
+            postnummer = "0463"
+            region = "Region i QUEBEC"
+            husnummerEtasjeLeilighet = "4B"
+            poststed = "QUEBEC STED"
+        }
+        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+
+
+        dokSysService.distribuerJournalpost("123456", mottakeradresse, Distribusjonstype.VIKTIG)
+
+
+        val captor = slot<DistribuerJournalpostRequest>()
+        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+
+        captor.captured.run {
+            journalpostId shouldBe "123456"
+            adresse.land shouldBe "CA"
+            adresse.adresseType shouldBe "utenlandskPostadresse"
+            distribusjonstype shouldBe Distribusjonstype.VIKTIG
+        }
+    }
+
+    @Test
     fun `distribuer journalpost med norsk adresse`() {
         val mottakeradresse = StrukturertAdresse().apply {
             landkode = "NO"

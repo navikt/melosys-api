@@ -127,6 +127,7 @@
         <xmlsec.version>4.0.4</xmlsec.version>
         <wiremock-standalone.version>3.13.2</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
+        <melosys-skjema-api-types.version>2026.02.02-44d6cfac0e7b-java17</melosys-skjema-api-types.version>
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det
@@ -208,6 +209,11 @@
                 <groupId>no.nav.melosys</groupId>
                 <artifactId>melosys-internt-kodeverk</artifactId>
                 <version>${melosys.internt.kodeverk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.melosys</groupId>
+                <artifactId>melosys-skjema-api-types</artifactId>
+                <version>${melosys-skjema-api-types.version}</version>
             </dependency>
 
             <!-- Eksterne biblioteker -->
@@ -745,6 +751,10 @@
         <repository>
             <id>github-package-registry-navikt</id>
             <url>https://maven.pkg.github.com/navikt/maven-release</url>
+        </repository>
+        <repository>
+            <id>nav-gpr-mirror</id>
+            <url>https://github-package-registry-mirror.gc.nav.no/cached/maven-release</url>
         </repository>
         <repository>
             <id>freg-abac</id>

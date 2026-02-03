@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.soknadmottak
+package no.nav.melosys.integrasjon.melosysskjema
 
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.errorFilter
@@ -9,18 +9,18 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
-class SoknadMottakConfig {
+class MelosysSkjemaApiWebClientConfig {
 
     @Bean
-    fun soknadMottakWebClient(
+    fun melosysSkjemaApiWebClient(
         webClientBuilder: WebClient.Builder,
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter,
         genericAuthFilterFactory: GenericAuthFilterFactory,
-        @Value("\${MelosysSoknadMottak.url}") url: String
+        @Value("\${MELOSYS_SKJEMA_API_URL}") url: String
     ): WebClient = webClientBuilder
         .baseUrl(url)
-        .filter(genericAuthFilterFactory.getAzureFilter("melosys-soknad-mottak"))
+        .filter(genericAuthFilterFactory.getAzureFilter("melosys-skjema"))
         .filter(correlationIdOutgoingFilter)
-        .filter(errorFilter("Kall mot søknad mottak feilet."))
+        .filter(errorFilter("Kall mot melosys-skjema feilet."))
         .build()
 }
