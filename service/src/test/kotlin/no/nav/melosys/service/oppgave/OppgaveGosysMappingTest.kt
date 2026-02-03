@@ -100,4 +100,21 @@ class OppgaveGosysMappingTest {
             beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.TOMT)
         }
     }
+
+    @Test
+    fun `kombo EU_EOS, TRYGDEAVGIFT, PENSJONIST, ÅRSAVREGNING skal gi oppgavetype BEH_ARSAVREG og tema TRY`() {
+        val oppgave = oppgaveGosysMapping.finnOppgave(
+            Sakstyper.EU_EOS,
+            Sakstemaer.TRYGDEAVGIFT,
+            Behandlingstema.PENSJONIST,
+            Behandlingstyper.ÅRSAVREGNING
+        )
+
+        oppgave.apply {
+            oppgaveBehandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_PENSJONIST_ELLER_UFORETRYGDET)
+            tema.shouldBe(Tema.TRY)
+            oppgaveType.shouldBe(Oppgavetyper.BEH_ARSAVREG)
+            beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.TOMT)
+        }
+    }
 }

@@ -378,12 +378,24 @@ internal open class OppgaveGosysMapping {
             TableRow(
                 Sakstyper.EU_EOS,
                 Sakstemaer.TRYGDEAVGIFT,
-                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE, Behandlingstyper.ÅRSAVREGNING),
+                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.PENSJONIST),
                 Oppgave(
                     OppgaveBehandlingstema.EU_EOS_PENSJONIST_ELLER_UFORETRYGDET, // ab0480
                     Tema.TRY,
                     Oppgavetyper.BEH_SAK_MK,
+                    Beskrivelsefelt.TOMT
+                )
+            ),
+            TableRow(
+                Sakstyper.EU_EOS,
+                Sakstemaer.TRYGDEAVGIFT,
+                setOf(Behandlingstyper.ÅRSAVREGNING),
+                setOf(Behandlingstema.PENSJONIST),
+                Oppgave(
+                    OppgaveBehandlingstema.EU_EOS_PENSJONIST_ELLER_UFORETRYGDET, // ab0480
+                    Tema.TRY,
+                    Oppgavetyper.BEH_ARSAVREG,
                     Beskrivelsefelt.TOMT
                 )
             ),
