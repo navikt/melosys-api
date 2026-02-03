@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.joark.saf;
 
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory;
-import no.nav.melosys.integrasjon.felles.WebClientConfig;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -10,8 +9,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import static no.nav.melosys.integrasjon.felles.WebClientUtilsKt.errorFilter;
+
 @Configuration
-public class SafConsumerProducer implements WebClientConfig {
+public class SafConsumerProducer {
     private static final String NAV_CONSUMER_ID = "Nav-Consumer-Id";
     private static final String CLIENT_NAME = "saf";
 

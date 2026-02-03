@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.oppgave.konsument;
 
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory;
-import no.nav.melosys.integrasjon.felles.WebClientConfig;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -11,8 +10,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import static no.nav.melosys.integrasjon.felles.WebClientUtilsKt.errorFilter;
+
 @Configuration
-public class OppgaveConsumerProducer implements WebClientConfig {
+public class OppgaveConsumerProducer {
     private static final String CLIENT_NAME = "oppgave";
     private final String url;
     private final GenericAuthFilterFactory genericAuthFilterFactory;

@@ -2,9 +2,8 @@ package no.nav.melosys.integrasjon.kodeverk.impl
 
 import no.nav.melosys.integrasjon.felles.CallIdAware
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.felles.WebClientConfig
+import no.nav.melosys.integrasjon.felles.errorFilter
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
-import no.nav.melosys.integrasjon.medl.MedlemskapRestConsumer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -17,7 +16,7 @@ import reactor.core.publisher.Mono
 class KodeverkConsumerProducer(
     @param:Value("\${KodeverkAPI_v1.url}") private val endpointUrl: String,
     private val genericAuthFilterFactory: GenericAuthFilterFactory
-) : CallIdAware, WebClientConfig {
+) : CallIdAware {
 
     @Bean
     fun kodeverkConsumer(
