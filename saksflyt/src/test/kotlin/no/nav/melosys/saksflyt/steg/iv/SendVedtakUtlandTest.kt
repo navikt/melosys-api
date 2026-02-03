@@ -57,7 +57,7 @@ class SendVedtakUtlandTest {
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns lagBehandlingsresultat()
         every { behandlingsresultatService.hentBehandlingsresultatMedAvklartefakta(any()) } returns lagBehandlingsresultat()
 
-        every { eessiService.opprettOgSendSed(any(), any(), any(), any(), any()) } just Runs
+        every { eessiService.opprettOgSendSed(any(), any(), any(), any(), any(), any()) } just Runs
         every { prosessinstansService.opprettProsessinstansSendBrev(any(), any(), any()) } just Runs
         every { utpekingService.oppdaterSendtUtland(any()) } just Runs
         every { eessiService.lukkBuc(any()) } just Runs
@@ -112,7 +112,7 @@ class SendVedtakUtlandTest {
         sendVedtakUtland.utfør(prosessinstans)
 
 
-        verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_04), eq(emptySet()), null) }
+        verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_04), eq(emptySet()), null, null) }
     }
 
     @Test
@@ -155,7 +155,7 @@ class SendVedtakUtlandTest {
         sendVedtakUtland.utfør(prosessinstans)
 
 
-        verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_05), eq(emptySet()), null) }
+        verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_05), eq(emptySet()), null, null) }
     }
 
     @Test
@@ -168,7 +168,7 @@ class SendVedtakUtlandTest {
         sendVedtakUtland.utfør(prosessinstans)
 
 
-        verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), any(), any(), null) }
+        verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), any(), any(), null, null) }
     }
 
     @Test

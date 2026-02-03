@@ -131,6 +131,10 @@
             <artifactId>kotest-assertions-json-jvm</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.github.microutils</groupId>
+            <artifactId>kotlin-logging-jvm</artifactId>
+        </dependency>
     </dependencies>
 
 

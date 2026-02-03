@@ -8,6 +8,8 @@ import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
 public class VideresendDto {
     private String mottakerinstitusjon;
     private String fritekst;
+    private String ytterligereInformasjonSed;
+    private String a008Formaal;
     private Collection<VedleggDto> vedlegg = new ArrayList<>();
 
     public String getMottakerinstitusjon() {
@@ -24,6 +26,22 @@ public class VideresendDto {
 
     public void setFritekst(String fritekst) {
         this.fritekst = fritekst;
+    }
+
+    public String getYtterligereInformasjonSed() {
+        return ytterligereInformasjonSed;
+    }
+
+    public void setYtterligereInformasjonSed(String ytterligereInformasjonSed) {
+        this.ytterligereInformasjonSed = ytterligereInformasjonSed;
+    }
+
+    public String getA008Formaal() {
+        return a008Formaal;
+    }
+
+    public void setA008Formaal(String a008Formaal) {
+        this.a008Formaal = a008Formaal;
     }
 
     public Collection<VedleggDto> getVedlegg() {

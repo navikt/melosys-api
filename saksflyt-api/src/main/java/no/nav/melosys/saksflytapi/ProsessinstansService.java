@@ -521,13 +521,17 @@ public class ProsessinstansService {
     @Transactional
     public void opprettProsessinstansVideresendSoknad(Behandling behandling, @Nullable String mottakerInstitusjon,
                                                       String fritekstBrev,
-                                                      Set<DokumentReferanse> vedleggReferanser) {
+                                                      Set<DokumentReferanse> vedleggReferanser,
+                                                      @Nullable String ytterligereInformasjonSed,
+                                                      @Nullable String a008Formaal) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.VIDERESEND_SOKNAD)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerInstitusjon != null ? Set.of(mottakerInstitusjon) : null)
             .medVedleggTilSed(vedleggReferanser)
             .medBegrunnelseFritekst(fritekstBrev)
+            .medYtterligereinformasjonSed(ytterligereInformasjonSed)
+            .medA008Formaal(a008Formaal)
             .build();
 
         prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstype.VIKTIG);

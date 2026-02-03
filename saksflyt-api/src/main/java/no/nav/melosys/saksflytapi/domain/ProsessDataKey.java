@@ -72,6 +72,7 @@ public enum ProsessDataKey {
     VEDLEGG_SED("vedleggTilSed"),
     VIRKSOMHET_ORGNR("virksomhetOrgnr"),
     YTTERLIGERE_INFO_SED("ytterligereInformasjonSed"),
+    A008_FORMAAL("a008Formaal"),
     PROCESS_PARENT_ID("parentId"),
     FORVALTNINGSMELDING_MOTTAKER("forvaltningsmeldingMottaker"),
     GJELDER_ÅR("gjelderÅr"),

@@ -1,24 +1,24 @@
 package no.nav.melosys.service.dokument.brev;
 
+import io.getunleash.Unleash;
+import no.nav.melosys.domain.eessi.A008Formaal;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.eessi.sed.UtpekingAvvisDto;
+import no.nav.melosys.featuretoggle.ToggleName;
 import org.apache.commons.lang3.BooleanUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SedPdfData {
+    static final Logger log = LoggerFactory.getLogger(SedPdfData.class);
 
     private String begrunnelseUtenlandskMyndighet;
     private Boolean vilSendeAnmodningOmMerInformasjon;
     private String nyttLovvalgsland;
     private String fritekst;
+    private A008Formaal a008Formaal;
 
     public SedPdfData() {
-    }
-
-    public SedPdfData(String begrunnelseUtenlandskMyndighet, Boolean vilSendeAnmodningOmMerInformasjon, String nyttLovvalgsland, String fritekst) {
-        this.begrunnelseUtenlandskMyndighet = begrunnelseUtenlandskMyndighet;
-        this.vilSendeAnmodningOmMerInformasjon = vilSendeAnmodningOmMerInformasjon;
-        this.nyttLovvalgsland = nyttLovvalgsland;
-        this.fritekst = fritekst;
     }
 
     public String getBegrunnelseUtenlandskMyndighet() {
@@ -53,8 +53,16 @@ public class SedPdfData {
         this.fritekst = fritekst;
     }
 
+    public String getA008Formaal() {
+        return a008Formaal != null ? a008Formaal.getVerdi() : null;
+    }
+
+    public void setA008Formaal(String a008Formaal) {
+        this.a008Formaal = A008Formaal.hentVerdi(a008Formaal);
+    }
+
     // Utfyller SedDataDto med fritekst og annen informasjon som ikke lagres strukturert i Melosys
-    public void utfyllSedDataDto(SedDataDto sedDataDto) {
+    public void utfyllSedDataDto(Unleash unleash, SedDataDto sedDataDto) {
 
         //OK å alltid sette denne. Blir ikke brukt med mindre A004-pdf skal produseres
         sedDataDto.setUtpekingAvvis(new UtpekingAvvisDto(
@@ -62,5 +70,8 @@ public class SedPdfData {
         ));
 
         sedDataDto.setYtterligereInformasjon(fritekst);
+        if (unleash.isEnabled(ToggleName.MELOSYS_CDM_4_4)) {
+            sedDataDto.setA008Formaal(a008Formaal);
+        }
     }
 }
