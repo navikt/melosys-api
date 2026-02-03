@@ -339,6 +339,15 @@ object ProsessflytDefinisjon {
             OPPRETT_OPPGAVE,
             SEND_FORVALTNINGSMELDING
         ),
+        MOTTAK_SOKNAD_SKJEMA to ProsessFlyt(
+            prosessType = MOTTAK_SOKNAD_SKJEMA,
+            HENT_SOKNAD_FRA_SKJEMA_API,
+            OPPRETT_SAK_OG_BEHANDLING_SKJEMA,
+            KNYTT_JOURNALPOST_TIL_SAK,
+            LAGRE_SAKSOPPLYSNINGER_SKJEMA,
+            HENT_REGISTEROPPLYSNINGER,
+            OPPRETT_OPPGAVE
+        ),
         ProsessType.OPPDATER_FAKTURAMOTTAKER to ProsessFlyt(
             prosessType = ProsessType.OPPDATER_FAKTURAMOTTAKER,
             ProsessSteg.OPPDATER_FAKTURAMOTTAKER
