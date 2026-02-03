@@ -12,6 +12,7 @@ import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningRequest
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
+import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
 import no.nav.melosys.service.avgift.model.InntektsperiodeModel
 import no.nav.melosys.service.avgift.model.SkatteforholdTilNorgeModel
 import no.nav.melosys.service.avgift.model.TrygdeavgiftsgrunnlagModel
@@ -36,7 +37,7 @@ class TrygdeavgiftsberegningService(
     private val unleash: Unleash
 ) {
 
-    @Transactional(readOnly = true)
+    @Transactional
     fun beregnOgLagreTrygdeavgift(
         behandlingID: Long,
         skatteforholdsperioder: List<SkatteforholdTilNorge> = emptyList(),
@@ -55,6 +56,12 @@ class TrygdeavgiftsberegningService(
         val nyeTrygdeavgiftsperioder =
             lagNyeTrygeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
         trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
+
+        behandlingsresultat.årsavregning?.let { årsavregning ->
+            val totalAvgift = TotalbeløpBeregner.hentTotalavgift(nyeTrygdeavgiftsperioder)
+            årsavregning.beregnetAvgiftBelop = totalAvgift
+            årsavregning.beregnTilFaktureringsBeloep()
+        }
 
         return nyeTrygdeavgiftsperioder.toSet()
     }
