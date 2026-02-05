@@ -57,8 +57,7 @@ internal class MedlemskapsperiodeControllerTest {
             "tomDato": "2025-12-03",
             "innvilgelsesResultat": "DELVIS_INNVILGET",
             "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON",
-            "medlemskapstype": "FRIVILLIG",
-            "type": "MEDLEMSKAPSPERIODE"
+            "medlemskapstype": "FRIVILLIG"
         }
         ]""".trimIndent()
 
