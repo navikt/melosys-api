@@ -75,6 +75,8 @@ class Fagsak(
 
     fun hentAktiveÅrsavregninger(): List<Behandling> = behandlinger.filter { it.erAktiv() && it.erÅrsavregning() }
 
+    fun hentAlleÅrsavregninger(): List<Behandling> = behandlinger.filter { it.erÅrsavregning() }
+
     fun hentInaktiveBehandlinger(): List<Behandling> = behandlinger.filter { it.erInaktiv() }
 
     fun harKunÅrsavregningsBehandlinger(): Boolean = behandlinger.filter { !it.erÅrsavregning() }.isEmpty()

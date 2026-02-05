@@ -6,7 +6,6 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
@@ -71,6 +70,71 @@ class KansellerFakturaserieTest {
 
         verify { behandlingsresultatService.lagre(behandlingsresultatOpprinneligBehandling) }
         verify { faktureringskomponentenConsumer.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT) }
+    }
+
+    @Test
+    fun `kanseller fakturaserie med årsavregning`() {
+        val behandlingId = 123L
+        val opprinneligBehandlingId = 456L
+        val behandlingIdÅrsavregning = 500L
+        val fakturaReferanse = "FADKFOGMV123"
+        val fakturaReferanseÅrsavregning = "FADKF4536M"
+        val SAKSBEHANDLER_IDENT = "S123456"
+
+        val opprinneligBehandling = Behandling.forTest {
+            id = opprinneligBehandlingId
+            registrertDato = Instant.now().minusSeconds(1333337)
+        }
+
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = behandlingId
+                this.opprinneligBehandling = opprinneligBehandling
+                registrertDato = Instant.now()
+                fagsak {
+                    leggTilBehandling(opprinneligBehandling)
+                    behandling {
+                        id = behandlingIdÅrsavregning
+                        type = Behandlingstyper.ÅRSAVREGNING
+                    }
+                }
+            }
+            medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
+        }
+        val behandlingsresultatOpprinneligBehandling = Behandlingsresultat.forTest {
+            id = opprinneligBehandlingId
+            fakturaserieReferanse = fakturaReferanse
+        }
+        val behandlingsresultatÅrsavregning = Behandlingsresultat.forTest {
+            id = behandlingIdÅrsavregning
+            fakturaserieReferanse = fakturaReferanseÅrsavregning
+        }
+
+        val nyFakturaserieResponseDto = NyFakturaserieResponseDto("kanselleringsRef")
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns Behandlingsresultat.forTest { id = behandlingId }
+        every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns behandlingsresultatOpprinneligBehandling
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingIdÅrsavregning) } returns behandlingsresultatÅrsavregning
+        every {
+            faktureringskomponentenConsumer.kansellerFakturaserie(
+                fakturaReferanse,
+                SAKSBEHANDLER_IDENT,
+                listOf(fakturaReferanseÅrsavregning)
+            )
+        } returns nyFakturaserieResponseDto
+
+
+        kansellerFakturaserie.utfør(prosessinstans)
+
+        verify {
+            behandlingsresultatService.lagre(
+                match {
+                    it.fakturaserieReferanse == nyFakturaserieResponseDto.fakturaserieReferanse
+                }
+            )
+        }
+
+        verify { faktureringskomponentenConsumer.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT, listOf(fakturaReferanseÅrsavregning)) }
     }
 
 

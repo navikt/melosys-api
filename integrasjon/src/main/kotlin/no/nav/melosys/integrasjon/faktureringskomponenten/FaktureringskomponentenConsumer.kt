@@ -24,13 +24,21 @@ open class FaktureringskomponentenConsumer(private val webClient: WebClient) : J
             .bodyToMono<NyFakturaserieResponseDto>()
             .block()!!
 
-    fun kansellerFakturaserie(referanse: String, saksbehandlerIdent: String) =
-        webClient.delete()
-            .uri("/fakturaserier/{referanse}", referanse)
-            .header("Nav-User-Id", saksbehandlerIdent)
-            .retrieve()
-            .bodyToMono<NyFakturaserieResponseDto>()
-            .block()!!
+    fun kansellerFakturaserie(
+        referanse: String,
+        saksbehandlerIdent: String,
+        årsavregningRef: List<String> = emptyList()
+    ) = webClient.post()
+        .uri("/fakturaserier/{referanse}/kanseller", referanse)
+        .header("Nav-User-Id", saksbehandlerIdent)
+        .bodyValue(KanselleringRequestDto(årsavregningRef))
+        .retrieve()
+        .bodyToMono<NyFakturaserieResponseDto>()
+        .block()!!
+
+    data class KanselleringRequestDto(
+        val årsavregningRef: List<String> = emptyList()
+    )
 
     fun oppdaterFakturaMottaker(referanse: String, fakturaMottakerDto: FakturaMottakerDto, saksbehandlerIdent: String? = null) =
         webClient.put()

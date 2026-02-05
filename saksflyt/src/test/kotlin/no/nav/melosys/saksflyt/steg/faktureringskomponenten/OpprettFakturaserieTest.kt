@@ -549,8 +549,17 @@ class OpprettFakturaserieTest {
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
                     medBruker()
+                    behandling {
+                        id = BEHANDLING_ID_ÅRSAVREGNING
+                        type = Behandlingstyper.ÅRSAVREGNING
+                    }
                 }
             }
+        }
+
+        val behandlingsresultatÅrsavregning = Behandlingsresultat.forTest {
+            id = BEHANDLING_ID_ÅRSAVREGNING
+            fakturaserieReferanse = FAKTURASERIE_REFERANSE_ÅRSAVREGNING
         }
 
         val prosessinstans = Prosessinstans.forTest {
@@ -561,12 +570,15 @@ class OpprettFakturaserieTest {
 
         every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_ÅRSAVREGNING) } returns behandlingsresultatÅrsavregning
+
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandlingsresultat.behandling
         every { pdlService.finnFolkeregisterident(BRUKER_AKTØR_ID) } returns Optional.of(BRUKER_AKTØRID)
         every {
             faktureringskomponentenConsumer.kansellerFakturaserie(
                 FAKTURASERIE_REFERANSE,
-                SAKSBEHANDLER_IDENT
+                SAKSBEHANDLER_IDENT,
+                listOf(FAKTURASERIE_REFERANSE_ÅRSAVREGNING)
             )
         } returns NyFakturaserieResponseDto(
             NY_FAKTURASERIE_REFERANSE
@@ -576,7 +588,13 @@ class OpprettFakturaserieTest {
         opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.kansellerFakturaserie(eq(FAKTURASERIE_REFERANSE), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 1) {
+            faktureringskomponentenConsumer.kansellerFakturaserie(
+                FAKTURASERIE_REFERANSE,
+                SAKSBEHANDLER_IDENT,
+                listOf(FAKTURASERIE_REFERANSE_ÅRSAVREGNING)
+            )
+        }
         verify {
             behandlingsresultatService.lagre(
                 match {
@@ -1732,6 +1750,8 @@ class OpprettFakturaserieTest {
     companion object {
         const val SAKSBEHANDLER_IDENT = "S123456"
         const val BEHANDLING_ID = 1L
+        const val BEHANDLING_ID_ÅRSAVREGNING = 500L
+        const val FAKTURASERIE_REFERANSE_ÅRSAVREGNING = "FADKF4536M"
         const val OPPRINNELIG_BEHANDLING_ID = 2L
         const val BRUKER_AKTØRID = "12345678911"
         const val FULLMEKTIG_IDENT = "123456789"

@@ -45,7 +45,8 @@ class OpprettFakturaserie(
         val behandling = prosessinstans.hentBehandling
         val behandlingID = behandling.id
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-        val erLovvalgMedTrygdeavgiftsperiode = unleash.isEnabled(ToggleName.MELOSYS_EØS_FAKTURERING_AV_TRYGDEAVGIFT) && behandling.fagsak.erLovvalg() && behandlingsresultat.trygdeavgiftsperioder.isNotEmpty()
+        val erLovvalgMedTrygdeavgiftsperiode =
+            unleash.isEnabled(ToggleName.MELOSYS_EØS_FAKTURERING_AV_TRYGDEAVGIFT) && behandling.fagsak.erLovvalg() && behandlingsresultat.trygdeavgiftsperioder.isNotEmpty()
 
         if (!erLovvalgMedTrygdeavgiftsperiode && prosessinstans.type == ProsessType.IVERKSETT_VEDTAK_EOS) {
             return
@@ -89,7 +90,11 @@ class OpprettFakturaserie(
         opprinneligFakturaserieReferanse: String,
         saksbehandlerIdent: String
     ) {
-        val fakturaserieResponse = faktureringskomponentenConsumer.kansellerFakturaserie(opprinneligFakturaserieReferanse, saksbehandlerIdent)
+        val alleÅrsavregningBehandlinger = behandlingsresultat.behandling?.fagsak?.hentAlleÅrsavregninger().let { it ?: emptyList() }
+        val årsavregningRefs = alleÅrsavregningBehandlinger
+            .mapNotNull { behandlingsresultatService.hentBehandlingsresultat(it.id).fakturaserieReferanse }
+        val fakturaserieResponse =
+            faktureringskomponentenConsumer.kansellerFakturaserie(opprinneligFakturaserieReferanse, saksbehandlerIdent, årsavregningRefs)
         behandlingsresultat.fakturaserieReferanse = fakturaserieResponse.fakturaserieReferanse
         behandlingsresultatService.lagre(behandlingsresultat)
     }
