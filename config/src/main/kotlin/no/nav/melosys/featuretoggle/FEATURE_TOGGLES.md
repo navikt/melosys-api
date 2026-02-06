@@ -131,12 +131,12 @@ Når applikasjonen starter med Unleash server konfigurert (i lokale profiler):
    - For toggles IKKE konfigurert i Unleash → returnerer `true` (enabled som standard)
 4. Denne wrapperen er **kun aktiv i lokale profiler** (`!nais & !test`)
 
-### 5. Fallback-modus (LocalUnleash)
+### 5. Fallback-modus (FakeUnleash)
 
 Hvis `unleash.url` eller `unleash.token` **ikke** er konfigurert:
 
-- `FeatureToggleConfigLocal` oppretter en `LocalUnleash`-instans i stedet
-- `LocalUnleash` er en in-memory fake som enabler alle toggles **unntatt**:
+- `FeatureToggleConfigLocal` oppretter en `FakeUnleash`-instans (fra Unleash SDK) i stedet
+- `FakeUnleash` er en in-memory fake som enabler alle toggles **unntatt**:
   - `MELOSYS_ÅRSAVREGNING_UTEN_FLYT` (eksplisitt disabled)
 
 For å bruke fallback-modus, fjern eller kommenter ut `unleash.url` i `application-local.yml`.
@@ -234,7 +234,7 @@ Dette er forventet oppførsel når toggles ikke er konfigurert i Unleash og du k
 
 Default-enabled oppførselen er **kun aktiv i lokale profiler** (`!nais & !test`). I produksjon (NAIS) og test-miljøer gjelder standard Unleash-oppførsel (ukjente toggles = disabled).
 
-Hvis du trenger standard oppførsel i lokal utvikling, fjern eller kommenter ut `unleash.url`-konfigurasjonen for å bruke `LocalUnleash` fallback i stedet.
+Hvis du trenger standard oppførsel i lokal utvikling, fjern eller kommenter ut `unleash.url`-konfigurasjonen for å bruke `FakeUnleash` fallback i stedet.
 
 ## Relaterte filer
 

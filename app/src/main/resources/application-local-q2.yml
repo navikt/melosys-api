@@ -10,9 +10,11 @@ APP_NAME_SAF: saf
 APP_NAME_TILGANGSMASKINEN: populasjonstilgangskontroll
 APP_NAME_UTBETALING: sokos-utbetaldata
 APP_NAME_MELOSYS_SOKNAD_MOTTAK: melosys-soknad-mottak
+APP_NAME_MELOSYS_SKJEMA_API: melosys-skjema-api
 APP_NAME_DOKARKIV: dokarkiv-q2
 APP_NAME_DOKDISTFORDELING: dokdistfordeling-q2
 AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/oauth2/v2.0/token
+MELOSYS_SKJEMA_API_URL: https://melosys-skjema-api.intern.dev.nav.no
 DistribuerJournalpost_v1:
   url: https://dokdistfordeling-q2.dev.intern.nav.no/rest/v1/distribuerjournalpost
 Dokumentproduksjon_v3:

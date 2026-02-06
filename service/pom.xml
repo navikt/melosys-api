@@ -90,6 +90,10 @@
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-skjema-api-types</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-integrasjon</artifactId>
         </dependency>
         <dependency>

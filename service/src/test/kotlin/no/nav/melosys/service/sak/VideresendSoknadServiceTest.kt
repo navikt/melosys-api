@@ -103,7 +103,7 @@ class VideresendSoknadServiceTest {
         every { persondataFasade.hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
         val dokumentReferanse = DokumentReferanse("jpID", "dokID")
 
-        videresendSoknadService.videresend(SAKSNUMMER, "", "fritekst", setOf(dokumentReferanse))
+        videresendSoknadService.videresend(SAKSNUMMER, "", "fritekst", setOf(dokumentReferanse), "ytterligereInfo", "arbeid_flere_land")
 
         verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.VIDERESENDT) }
         verify {
@@ -111,7 +111,9 @@ class VideresendSoknadServiceTest {
                 behandling,
                 validerteMottakere.first(),
                 "fritekst",
-                setOf(dokumentReferanse)
+                setOf(dokumentReferanse),
+                "ytterligereInfo",
+                "arbeid_flere_land"
             )
         }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id) }
@@ -124,7 +126,7 @@ class VideresendSoknadServiceTest {
         behandling.tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
 
         val exception = shouldThrow<FunksjonellException> {
-            videresendSoknadService.videresend(SAKSNUMMER, "", "", emptySet())
+            videresendSoknadService.videresend(SAKSNUMMER, "", "", emptySet(), null, null)
         }
         exception.message shouldContain "har ikke behandlingstema 'ARBEID_FLERE_LAND' og kan ikke videresendes"
     }
@@ -135,7 +137,7 @@ class VideresendSoknadServiceTest {
         behandling.tema = Behandlingstema.ARBEID_FLERE_LAND
 
         val exception = shouldThrow<FunksjonellException> {
-            videresendSoknadService.videresend(SAKSNUMMER, "", "", emptySet())
+            videresendSoknadService.videresend(SAKSNUMMER, "", "", emptySet(), null, null)
         }
         exception.message shouldContain "til Norge"
     }
@@ -146,7 +148,7 @@ class VideresendSoknadServiceTest {
         behandling.tema = Behandlingstema.ARBEID_FLERE_LAND
 
         val exception = shouldThrow<FunksjonellException> {
-            videresendSoknadService.videresend(SAKSNUMMER, "", "", emptySet())
+            videresendSoknadService.videresend(SAKSNUMMER, "", "", emptySet(), null, null)
         }
         exception.message shouldContain "Bostedsland ikke avklart"
     }
@@ -158,7 +160,7 @@ class VideresendSoknadServiceTest {
         every { persondataFasade.hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser()
 
         val exception = shouldThrow<FunksjonellException> {
-            videresendSoknadService.videresend(SAKSNUMMER, "", "", emptySet())
+            videresendSoknadService.videresend(SAKSNUMMER, "", "", emptySet(), null, null)
         }
         exception.message shouldContain "mangler adresse"
     }

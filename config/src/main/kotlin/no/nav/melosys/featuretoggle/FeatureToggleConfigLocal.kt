@@ -1,6 +1,7 @@
 package no.nav.melosys.featuretoggle
 
 import io.getunleash.DefaultUnleash
+import io.getunleash.FakeUnleash
 import io.getunleash.Unleash
 import io.getunleash.util.UnleashConfig
 import mu.KotlinLogging
@@ -63,13 +64,13 @@ class FeatureToggleConfigLocal {
                 log.info { "FeatureToggleConfigLocal: Bruker DefaultEnabledUnleash som wrapper for Unleash-server på $unleashUrl" }
             }
         } else {
-            // Fallback til LocalUnleash hvis Unleash-server ikke er konfigurert
-            LocalUnleash().apply {
+            // Fallback til FakeUnleash hvis Unleash-server ikke er konfigurert
+            FakeUnleash().apply {
                 enableAllExcept(
                     *autoDisabledToggles.toTypedArray()
                 )
             }.also {
-                log.info { "FeatureToggleConfigLocal: Bruker LocalUnleash (ingen Unleash-server konfigurert)" }
+                log.info { "FeatureToggleConfigLocal: Bruker FakeUnleash (ingen Unleash-server konfigurert)" }
             }
         }
     }

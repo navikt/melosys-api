@@ -8,12 +8,8 @@ import ch.qos.logback.core.read.ListAppender
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import com.google.gson.GsonBuilder
-import io.getunleash.ActivationStrategy
 import io.getunleash.DefaultUnleash
-import io.getunleash.FeatureToggle
-import io.getunleash.repository.JsonToggleCollectionDeserializer
-import io.getunleash.repository.ToggleCollection
+import io.getunleash.UnleashContext
 import io.getunleash.util.UnleashConfig
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -61,9 +57,10 @@ internal class ByUserIdStrategyTest {
         SubjectHandler.set(subjectHandler)
         every { subjectHandler.userID } returns SAKSBEHANDLER
         val byUserIdStrategy = ByUserIdStrategy()
+        val context = UnleashContext.builder().build()
 
 
-        val enabled = byUserIdStrategy.isEnabled(mapOf("user" to "Z1,$SAKSBEHANDLER,Z2"))
+        val enabled = byUserIdStrategy.isEnabled(mutableMapOf("user" to "Z1,$SAKSBEHANDLER,Z2"), context)
 
 
         enabled.shouldBeTrue()
@@ -74,9 +71,10 @@ internal class ByUserIdStrategyTest {
         val uuid = UUID.randomUUID()
         ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "", SAKSBEHANDLER, null)
         val byUserIdStrategy = ByUserIdStrategy()
+        val context = UnleashContext.builder().build()
 
 
-        val enabled = byUserIdStrategy.isEnabled(mapOf("user" to SAKSBEHANDLER))
+        val enabled = byUserIdStrategy.isEnabled(mutableMapOf("user" to SAKSBEHANDLER), context)
 
 
         enabled.shouldBeTrue()
@@ -86,9 +84,10 @@ internal class ByUserIdStrategyTest {
     @Test
     fun `unleash skal være disabled når brukerID ikke finnes i SubjectHandler eller ThreadLocalAccessInfo`() {
         val byUserIdStrategy = ByUserIdStrategy()
+        val context = UnleashContext.builder().build()
 
 
-        val enabled = byUserIdStrategy.isEnabled(mapOf("user" to SAKSBEHANDLER))
+        val enabled = byUserIdStrategy.isEnabled(mutableMapOf("user" to SAKSBEHANDLER), context)
 
 
         enabled.shouldBeFalse()
@@ -158,25 +157,25 @@ internal class ByUserIdStrategyTest {
     }
 
     private fun createApiResponseJson(): String {
-        val toggleCollection =
-            ToggleCollection(
-                listOf(
-                    FeatureToggle(
-                        "melosys.toggle",
-                        true,
-                        mutableListOf(
-                            ActivationStrategy("byUserId", mapOf("user" to "Z123456"))
-                        )
-                    )
-                )
-            )
-
-        val gson = GsonBuilder()
-            .registerTypeAdapter(
-                ToggleCollection::class.java, JsonToggleCollectionDeserializer()
-            )
-            .create()
-        return gson.toJson(toggleCollection)
+        return """
+            {
+                "version": 2,
+                "features": [
+                    {
+                        "name": "melosys.toggle",
+                        "enabled": true,
+                        "strategies": [
+                            {
+                                "name": "byUserId",
+                                "parameters": {
+                                    "user": "Z123456"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        """.trimIndent()
     }
 
 

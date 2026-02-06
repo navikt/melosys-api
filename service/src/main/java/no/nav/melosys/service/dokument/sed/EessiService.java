@@ -10,6 +10,7 @@ import jakarta.annotation.Nullable;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
+import no.nav.melosys.domain.eessi.A008Formaal;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.eessi.*;
@@ -121,7 +122,8 @@ public class EessiService {
     }
 
     public void opprettOgSendSed(long behandlingID, List<String> mottakerInstitusjoner, BucType bucType,
-                                 Collection<DokumentReferanse> dokumentReferanser, String ytterligereInformasjon) {
+                                 Collection<DokumentReferanse> dokumentReferanser, String ytterligereInformasjon,
+                                 String a008Formaal) {
         log.info("Starter sending av SED for behandling {}", behandlingID);
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -133,6 +135,9 @@ public class EessiService {
         sedData.setMottakerIder(mottakerInstitusjoner);
         sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
         sedData.setYtterligereInformasjon(mapYtterligereInformasjon(ytterligereInformasjon, periodeType, behandlingsresultat));
+        if (unleash.isEnabled(ToggleName.MELOSYS_CDM_4_4)) {
+            sedData.setA008Formaal(A008Formaal.hentVerdi(a008Formaal));
+        }
 
         log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
 
@@ -334,7 +339,7 @@ public class EessiService {
 
         if (sedPdfData != null) {
             sedPdfData.setFritekst(mapYtterligereInformasjon(sedPdfData.getFritekst(), periodeType, behandlingsresultat));
-            sedPdfData.utfyllSedDataDto(sedDataDto);
+            sedPdfData.utfyllSedDataDto(unleash, sedDataDto);
         }
         log.info("Henter pdf for sed med type {} for behandling {}", sedType, behandlingID);
         return eessiConsumer.genererSedPdf(sedDataDto, sedType);

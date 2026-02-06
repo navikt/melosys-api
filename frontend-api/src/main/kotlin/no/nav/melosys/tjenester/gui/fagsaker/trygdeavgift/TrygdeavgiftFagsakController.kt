@@ -39,6 +39,13 @@ class TrygdeavgiftFagsakController(
             )
         )
     }
+
+    @GetMapping("/fakturaseriereferanser")
+    @Operation(summary = "Hent alle unike fakturaseriereferanser for fagsaken")
+    fun hentFakturaserieReferanser(@PathVariable("saksnummer") saksnummer: String): ResponseEntity<List<String>> {
+        aksesskontroll.autoriserSakstilgang(saksnummer)
+        return ResponseEntity.ok(trygdeavgiftService.hentAlleFakturaserieReferanser(saksnummer))
+    }
 }
 
 data class TrygdeavgiftOppsummering(val harBehandlingMedTrygdeavgift: Boolean)
