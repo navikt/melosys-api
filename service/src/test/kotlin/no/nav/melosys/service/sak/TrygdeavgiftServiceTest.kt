@@ -2,6 +2,8 @@ package no.nav.melosys.service.sak
 
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldHaveSize
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -226,6 +228,81 @@ class TrygdeavgiftServiceTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSRESULTAT_ID) } returns behandlingsresultat
 
         trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat).shouldBeTrue()
+    }
+
+    @Test
+    fun `hentAlleFakturaserieReferanser returnerer alle unike referanser for sak`() {
+        val behandlingId1 = 101L
+        val behandlingId2 = 102L
+        val fagsak = Fagsak.forTest {
+            behandling { id = behandlingId1 }
+            behandling { id = behandlingId2 }
+        }
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId1) } returns
+            Behandlingsresultat.forTest { id = 201L; fakturaserieReferanse = "REF-1" }
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId2) } returns
+            Behandlingsresultat.forTest { id = 202L; fakturaserieReferanse = "REF-2" }
+
+        val referanser = trygdeavgiftService.hentAlleFakturaserieReferanser(FagsakTestFactory.SAKSNUMMER)
+
+        referanser shouldContainExactlyInAnyOrder listOf("REF-1", "REF-2")
+    }
+
+    @Test
+    fun `hentAlleFakturaserieReferanser filtrerer bort null og blank referanser`() {
+        val behandlingId1 = 101L
+        val behandlingId2 = 102L
+        val behandlingId3 = 103L
+        val fagsak = Fagsak.forTest {
+            behandling { id = behandlingId1 }
+            behandling { id = behandlingId2 }
+            behandling { id = behandlingId3 }
+        }
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId1) } returns
+            Behandlingsresultat.forTest { id = 201L; fakturaserieReferanse = "REF-1" }
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId2) } returns
+            Behandlingsresultat.forTest { id = 202L; fakturaserieReferanse = null }
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId3) } returns
+            Behandlingsresultat.forTest { id = 203L; fakturaserieReferanse = "" }
+
+        val referanser = trygdeavgiftService.hentAlleFakturaserieReferanser(FagsakTestFactory.SAKSNUMMER)
+
+        referanser shouldContainExactlyInAnyOrder listOf("REF-1")
+    }
+
+    @Test
+    fun `hentAlleFakturaserieReferanser dedupliserer referanser`() {
+        val behandlingId1 = 101L
+        val behandlingId2 = 102L
+        val fagsak = Fagsak.forTest {
+            behandling { id = behandlingId1 }
+            behandling { id = behandlingId2 }
+        }
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId1) } returns
+            Behandlingsresultat.forTest { id = 201L; fakturaserieReferanse = "REF-1" }
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId2) } returns
+            Behandlingsresultat.forTest { id = 202L; fakturaserieReferanse = "REF-1" }
+
+        val referanser = trygdeavgiftService.hentAlleFakturaserieReferanser(FagsakTestFactory.SAKSNUMMER)
+
+        referanser shouldContainExactlyInAnyOrder listOf("REF-1")
+    }
+
+    @Test
+    fun `hentAlleFakturaserieReferanser returnerer tom liste når ingen behandlinger har referanse`() {
+        val fagsak = Fagsak.forTest {
+            behandling { id = BEHANDLING_ID }
+        }
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns
+            Behandlingsresultat.forTest { id = BEHANDLINGSRESULTAT_ID; fakturaserieReferanse = null }
+
+        val referanser = trygdeavgiftService.hentAlleFakturaserieReferanser(FagsakTestFactory.SAKSNUMMER)
+
+        referanser shouldHaveSize 0
     }
 
     private fun lagFagsak(

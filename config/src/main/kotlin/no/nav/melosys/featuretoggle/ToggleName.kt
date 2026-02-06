@@ -5,6 +5,7 @@ object ToggleName {
     const val MELOSYS_SEND_MELDING_OM_VEDTAK = "melosys.send_melding_om_vedtak"
     const val MELOSYS_11_3_A_NORGE_ER_UTPEKT = "melosys.11_3_a_Norge_er_utpekt"
     const val MELOSYS_SKATTEHENDELSE_CONSUMER = "melosys.skattehendelse.consumer"
+    const val MELOSYS_SKJEMA_MOTTATT_CONSUMER = "melosys.skjema_mottatt.consumer"
     const val MELOSYS_ÅRSAVREGNING = "melosys.arsavregning"
     const val MELOSYS_ÅRSAVREGNING_UTEN_FLYT = "melosys.arsavregning.uten.flyt"
     const val MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST = "melosys.arsavregning.eos_pensjonist"
@@ -16,4 +17,5 @@ object ToggleName {
     const val MELOSYS_SORTER_SOK_PA_REDIGERINGSDATO = "melosys.sorter_sok_pa_redigeringsdato"
     const val MELOSYS_EØS_FAKTURERING_AV_TRYGDEAVGIFT = "melosys.eos_fakturering_av_trygdeavgift"
     const val MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2 = "melosys.bruk_opprett_buc_og_sed_v2"
+    const val MELOSYS_CDM_4_4 = "melosys.cdm-4-4"
 }

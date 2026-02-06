@@ -42,7 +42,8 @@ internal class SedGrunnlagDtoTest {
               "svarAnmodningUnntak" : null,
               "utpekingAvvis" : null,
               "vedtakDto" : null,
-              "invalideringSedDto" : null
+              "invalideringSedDto" : null,
+              "a008Formaal" : null
             }
         """
     }

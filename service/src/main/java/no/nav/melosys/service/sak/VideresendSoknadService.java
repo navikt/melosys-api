@@ -60,7 +60,9 @@ public class VideresendSoknadService {
     public void videresend(String saksnummer,
                            String mottakerinstitusjon,
                            String fritekst,
-                           Set<DokumentReferanse> vedleggReferanser) {
+                           Set<DokumentReferanse> vedleggReferanser,
+                           String ytterligereInformasjonSed,
+                           String a008Formaal) {
         final Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         final Behandling behandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         log.info("Videresender søknad for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandling.getId());
@@ -81,7 +83,9 @@ public class VideresendSoknadService {
         prosessinstansService.opprettProsessinstansVideresendSoknad(behandling,
             avklarteEessiMottakere.stream().findFirst().orElse(null),
             fritekst,
-            vedleggReferanser
+            vedleggReferanser,
+            ytterligereInformasjonSed,
+            a008Formaal
         );
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
     }

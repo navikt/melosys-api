@@ -37,7 +37,6 @@ import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -146,7 +145,6 @@ class SatsendringIT @Autowired constructor(
         }
     }
 
-    @Disabled("Stopper merging av prodfeil. Francois vil se på dette ved en senere anledning")
     @ParameterizedTest
     @EnumSource(value = ProsessType::class, names = ["SATSENDRING", "SATSENDRING_TILBAKESTILL_NY_VURDERING"])
     fun `oppretter prosess og påfølgende satsendringbehandling som iverksettes og sender faktura`(prosessType: ProsessType) {
@@ -274,11 +272,7 @@ class SatsendringIT @Autowired constructor(
     @Test
     fun `Prosess kan ikke opprette prosess på nytt for samme behandling`() {
         val behandling = Behandling.forTest { id = 3647 }
-        prosessinstansService.opprettSatsendringBehandlingFor(behandling, satsendringÅr).also {
-            addCleanUpAction {
-                slettProsessinstans(it)
-            }
-        }
+        prosessinstansService.opprettSatsendringBehandlingFor(behandling, satsendringÅr)
 
         shouldThrow<FunksjonellException> { prosessinstansService.opprettSatsendringBehandlingFor(behandling, satsendringÅr) }
             .message shouldBe "Det finnes allerede en aktiv prosess for satsendring av behandling ${behandling.id}"
@@ -358,11 +352,7 @@ class SatsendringIT @Autowired constructor(
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
 
-        return behandling.also {
-            addCleanUpAction {
-                slettSakMedAvhengigheter(it.fagsak.saksnummer)
-            }
-        }
+        return behandling
     }
 
     private fun lagPeriode(

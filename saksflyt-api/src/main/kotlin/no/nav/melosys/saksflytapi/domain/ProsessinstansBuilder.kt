@@ -13,6 +13,7 @@ class ProsessinstansBuilder(
     private var begrunnelseFritekst: String? = null,
     private var vedleggTilSed: Set<DokumentReferanse?>? = null,
     private var ytterligereInformasjonTilSed: String? = null,
+    private var a008Formaal: String? = null,
     private var eessiMottakere: Set<String?>? = null,
     private var eessiMelding: MelosysEessiMelding? = null
 ) {
@@ -22,6 +23,9 @@ class ProsessinstansBuilder(
     fun medVedleggTilSed(vedlegg: Set<DokumentReferanse?>?): ProsessinstansBuilder = apply { this.vedleggTilSed = vedlegg }
     fun medYtterligereinformasjonSed(ytterligereInformasjonSed: String?): ProsessinstansBuilder =
         apply { this.ytterligereInformasjonTilSed = ytterligereInformasjonSed }
+
+    fun medA008Formaal(a008Formaal: String?): ProsessinstansBuilder =
+        apply { this.a008Formaal = a008Formaal }
 
     fun medEessiMottakere(eessiMottakere: Set<String?>?): ProsessinstansBuilder = apply { this.eessiMottakere = eessiMottakere }
     fun medEessiMelding(eessiMelding: MelosysEessiMelding?): ProsessinstansBuilder = apply { this.eessiMelding = eessiMelding }
@@ -41,6 +45,9 @@ class ProsessinstansBuilder(
         }
         if (StringUtils.isNotEmpty(ytterligereInformasjonTilSed)) {
             setData(ProsessDataKey.YTTERLIGERE_INFO_SED, ytterligereInformasjonTilSed)
+        }
+        if (StringUtils.isNotEmpty(a008Formaal)) {
+            setData(ProsessDataKey.A008_FORMAAL, a008Formaal)
         }
         if (!CollectionUtils.isEmpty(eessiMottakere)) {
             setData(ProsessDataKey.EESSI_MOTTAKERE, eessiMottakere)

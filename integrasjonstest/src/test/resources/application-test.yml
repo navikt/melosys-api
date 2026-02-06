@@ -64,6 +64,7 @@ Melosys-admin:
   apikey: dummy
 MelosysSoknadMottak:
   url: dummy
+MELOSYS_SKJEMA_API_URL: http://localhost:8083
 UNLEASH:
   token: faketoken
 dokumentproduksjon:
@@ -103,6 +104,9 @@ kafka:
     soknad-mottak:
       groupid: teammelosys-soknad-mottak-consumer-local
       topic: teammelosys.soknad-mottak.v1-local
+    skjema-mottatt:
+      groupid: teammelosys-skjema-mottatt-consumer-local
+      topic: teammelosys.skjema.innsendt.v1-local
 ldap:
   url: ldap://localhost:8389/
   userbasedn: ou=NAV,ou=BusinessUnits,dc=test,dc=local
@@ -214,6 +218,14 @@ melosystrygdeavgift:
               scope: api:///dummy
               token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
             melosys-soknad-mottak:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+            melosys-skjema:
               authentication:
                 client-auth-method: client_secret_basic
                 client-id: dummy_client-id

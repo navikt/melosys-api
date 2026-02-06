@@ -117,7 +117,7 @@ internal class VideresendSoknadTest {
 
         verify {
             eessiService.opprettOgSendSed(
-                behandlingID, listOf(MOTTAKER_INSTITUSJON), BucType.LA_BUC_03, dokumentReferanser, null
+                behandlingID, listOf(MOTTAKER_INSTITUSJON), BucType.LA_BUC_03, dokumentReferanser, null, null
             )
         }
         prosessinstans.getData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID).shouldBeNull()

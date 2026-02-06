@@ -1,6 +1,8 @@
 package no.nav.melosys.featuretoggle
 
-import io.getunleash.*
+import io.getunleash.Unleash
+import io.getunleash.UnleashContext
+import io.getunleash.variant.Variant
 import mu.KotlinLogging
 
 private val log = KotlinLogging.logger {}

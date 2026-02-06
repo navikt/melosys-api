@@ -2,7 +2,7 @@ package no.nav.melosys.integrasjon.utbetaling
 
 import no.nav.melosys.integrasjon.felles.CallIdAware
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.felles.WebClientConfig
+import no.nav.melosys.integrasjon.felles.errorFilter
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono
 class UtbetalingConsumerProducerV2(
     @Value("\${utbetaling_rest.url}") private val url: String,
     private val genericAuthFilterFactory: GenericAuthFilterFactory
-) : CallIdAware, WebClientConfig {
+) : CallIdAware {
     @Bean
     fun utbetalingConsumerV2(
         webClientBuilder: WebClient.Builder, correlationIdOutgoingFilter: CorrelationIdOutgoingFilter

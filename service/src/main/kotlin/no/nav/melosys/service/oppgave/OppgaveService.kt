@@ -54,11 +54,12 @@ class OppgaveService(
     }
 
     fun ferdigstillOppgaveMedBehandlingID(behandlingID: Long) {
+        val behandling = behandlingService.hentBehandling(behandlingID)
         val oppgave = finnBehandlingsoppgaveForBehandlingID(behandlingID)
         if (oppgave != null) {
             ferdigstillOppgave(oppgave.oppgaveId)
         } else {
-            log.warn("Finner ingen oppgave for behandling $behandlingID")
+            log.warn("Finner ingen oppgave for behandling $behandlingID, med oppgaveid ${behandling.oppgaveId}")
         }
     }
 
