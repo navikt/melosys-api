@@ -147,6 +147,11 @@ class PeriodeReglerTest {
         PeriodeRegler.periodeOver12Måneder(DATO, DATO.plusMonths(12)) shouldBe true
     }
 
+    @Test
+    fun `periodeOver2ÅrOgEnDag skal returnere true for åpen periode uten sluttdato`() {
+        PeriodeRegler.periodeOver2ÅrOgEnDag(DATO, null) shouldBe true
+    }
+
     companion object {
         private val DATO = LocalDate.parse("2024-01-01")
     }
