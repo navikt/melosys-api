@@ -28,7 +28,7 @@ public enum ProsessType {
     MOTTAK_SED("MOTTAK_SED", "Mottak av SED for journalføring og videre ruting"),
     MOTTAK_SED_JOURNALFØRING("MOTTAK_SED_JOURNALFØRING", "Mottak av SED som kun skal journalføres"),
     MOTTAK_SOKNAD_ALTINN("MOTTAK_SOKNAD_ALTINN", "Mottak av elektronisk søknad fra altinn"),
-    MOTTAK_SOKNAD_UTSENDT_ARBEIDSTAKER("MOTTAK_SOKNAD_UTSENDT_ARBEIDSTAKER", "Mottak av søknad om utsendt arbeidstaker fra skjema"),
+    MELOSYS_MOTTAK_DIGITAL_SØKNAD("MELOSYS_MOTTAK_DIGITAL_SØKNAD", "Mottak av digital søknad"),
     OPPDATER_FAKTURAMOTTAKER("OPPDATER_FAKTURAMOTTAKER", "Oppdaterer fakturamottaker i faktureringskomponent"),
     OPPRETT_NY_BEHANDLING_AARSAVREGNING("OPPRETT_NY_BEHANDLING_ARSAVREGNING", "Oppretter årsavregningbehandling på aktuell bruker"),
     OPPRETT_NY_BEHANDLING_FOR_SAK("OPPRETT_NY_BEHANDLING_FOR_SAK", "Oppretter ny behandling og ny oppgave for eksisterende sak"),
