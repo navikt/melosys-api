@@ -576,7 +576,7 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public void opprettProsessinstansMelosysSkjemaMottatt(UUID skjemaId) {
+    public void opprettProsessinstansMelosysSøknadMottatt(UUID skjemaId) {
         String låsReferanse = skjemaId.toString();
         ProsessType prosessType = ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD;
 

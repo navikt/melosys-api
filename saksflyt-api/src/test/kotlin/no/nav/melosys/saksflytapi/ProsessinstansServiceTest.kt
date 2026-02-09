@@ -756,7 +756,7 @@ class ProsessinstansServiceTest {
 
         every { prosessinstansRepo.existsByLåsReferanseAndType(skjemaId.toString(), ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD) } returns false
 
-        prosessinstansService.opprettProsessinstansMelosysSkjemaMottatt(skjemaId)
+        prosessinstansService.`opprettProsessinstansMelosysSøknadMottatt`(skjemaId)
 
         val lagretInstans = piListCaptor.last()
         lagretInstans.run {
@@ -771,7 +771,7 @@ class ProsessinstansServiceTest {
 
         every { prosessinstansRepo.existsByLåsReferanseAndType(skjemaId.toString(), ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD) } returns true
 
-        prosessinstansService.opprettProsessinstansMelosysSkjemaMottatt(skjemaId)
+        prosessinstansService.`opprettProsessinstansMelosysSøknadMottatt`(skjemaId)
 
         verify(exactly = 0) { prosessinstansRepo.save(any<Prosessinstans>()) }
     }

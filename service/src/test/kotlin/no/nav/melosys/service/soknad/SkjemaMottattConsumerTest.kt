@@ -39,11 +39,11 @@ class SkjemaMottattConsumerTest {
         val consumerRecord = ConsumerRecord<String, SkjemaMottattMelding>("topic", 0, 0, "key", melding)
 
         every { unleash.isEnabled(ToggleName.MELOSYS_SKJEMA_MOTTATT_CONSUMER) } returns true
-        every { prosessinstansService.opprettProsessinstansMelosysSkjemaMottatt(skjemaId) } just Runs
+        every { prosessinstansService.`opprettProsessinstansMelosysSøknadMottatt`(skjemaId) } just Runs
 
         skjemaMottattConsumer.mottaSkjemaMelding(consumerRecord, emptyMap())
 
-        verify { prosessinstansService.opprettProsessinstansMelosysSkjemaMottatt(skjemaId) }
+        verify { prosessinstansService.`opprettProsessinstansMelosysSøknadMottatt`(skjemaId) }
     }
 
     @Test
@@ -56,6 +56,6 @@ class SkjemaMottattConsumerTest {
 
         skjemaMottattConsumer.mottaSkjemaMelding(consumerRecord, emptyMap())
 
-        verify(exactly = 0) { prosessinstansService.opprettProsessinstansMelosysSkjemaMottatt(any()) }
+        verify(exactly = 0) { prosessinstansService.`opprettProsessinstansMelosysSøknadMottatt`(any()) }
     }
 }
