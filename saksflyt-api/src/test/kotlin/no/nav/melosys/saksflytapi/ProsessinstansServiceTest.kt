@@ -38,6 +38,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import java.time.LocalDate
+import java.util.UUID
 
 @ExtendWith(MockKExtension::class)
 class ProsessinstansServiceTest {
@@ -747,6 +748,32 @@ class ProsessinstansServiceTest {
             getData(ProsessDataKey.GJELDER_ÅR) shouldBe "2023"
             hentData<Behandlingsaarsaktyper>(ProsessDataKey.ÅRSAK_TYPE) shouldBe Behandlingsaarsaktyper.MELDING_FRA_SKATT
         }
+    }
+
+    @Test
+    fun `opprett prosessinstans for melosys skjema mottatt skal opprette prosessinstans med korrekt type og låsReferanse`() {
+        val skjemaId = UUID.randomUUID()
+
+        every { prosessinstansRepo.existsByLåsReferanseAndType(skjemaId.toString(), ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD) } returns false
+
+        prosessinstansService.opprettProsessinstansMelosysSkjemaMottatt(skjemaId)
+
+        val lagretInstans = piListCaptor.last()
+        lagretInstans.run {
+            type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
+            låsReferanse shouldBe skjemaId.toString()
+        }
+    }
+
+    @Test
+    fun `opprett prosessinstans for melosys skjema mottatt skal ikke opprette duplikat når prosessinstans finnes fra før`() {
+        val skjemaId = UUID.randomUUID()
+
+        every { prosessinstansRepo.existsByLåsReferanseAndType(skjemaId.toString(), ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD) } returns true
+
+        prosessinstansService.opprettProsessinstansMelosysSkjemaMottatt(skjemaId)
+
+        verify(exactly = 0) { prosessinstansRepo.save(any<Prosessinstans>()) }
     }
 
     private fun lagMelosysEessiMelding(

@@ -19,4 +19,6 @@ public interface ProsessinstansForServiceRepository extends JpaRepository<Proses
         "AND DBMS_LOB.INSTR(DATA, 'opprinneligBeh=' || :behandlingID) > 0",
         nativeQuery = true)
     List<Prosessinstans> findBySatsendringAndOpprinneligBehandlingIdNotFerdig(@Param("behandlingID") Long behandlingID);
+
+    boolean existsByLåsReferanseAndType(String låsReferanse, ProsessType type);
 }

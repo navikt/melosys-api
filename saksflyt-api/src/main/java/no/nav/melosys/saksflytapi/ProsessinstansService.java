@@ -576,6 +576,24 @@ public class ProsessinstansService {
     }
 
     @Transactional
+    public void opprettProsessinstansMelosysSkjemaMottatt(UUID skjemaId) {
+        String låsReferanse = skjemaId.toString();
+        ProsessType prosessType = ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD;
+
+        if (prosessinstansRepo.existsByLåsReferanseAndType(låsReferanse, prosessType)) {
+            logger.error("Skjema med skjemaId {} har vært mottatt tidligere. Dette skal ikke skje.", skjemaId);
+            return;
+        }
+
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(prosessType)
+            .medLåsReferanse(låsReferanse)
+            .build();
+
+        lagre(prosessinstans);
+    }
+
+    @Transactional
     public void opprettProsessinstansAvvisUtpeking(Behandling behandling, UtpekingAvvis utpekingAvvis) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.UTPEKING_AVVIS)
