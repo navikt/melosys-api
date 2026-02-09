@@ -3,6 +3,7 @@ package no.nav.melosys.service.avgift
 import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.*
+import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
@@ -58,9 +59,11 @@ class TrygdeavgiftsberegningService(
         trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
 
         behandlingsresultat.årsavregning?.let { årsavregning ->
-            val totalAvgift = TotalbeløpBeregner.hentTotalavgift(nyeTrygdeavgiftsperioder)
-            årsavregning.beregnetAvgiftBelop = totalAvgift
-            årsavregning.beregnTilFaktureringsBeloep()
+            if (årsavregning.endeligAvgiftValg != EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT) {
+                val totalAvgift = TotalbeløpBeregner.hentTotalavgift(nyeTrygdeavgiftsperioder)
+                årsavregning.beregnetAvgiftBelop = totalAvgift
+                årsavregning.beregnTilFaktureringsBeloep()
+            }
         }
 
         return nyeTrygdeavgiftsperioder.toSet()
