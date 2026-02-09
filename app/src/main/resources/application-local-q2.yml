@@ -34,7 +34,7 @@ MelosysSoknadMottak:
 NAIS_CLUSTER_NAME: dev-fss
 NAIS_CLUSTER_NAME_GCP: dev-gcp
 OppgaveAPI_v1:
-  url: https://oppgave.dev.intern.nav.no/api/v1
+  url: https://oppgave.intern.dev.nav.no/api/v1
 PDL:
   url: https://pdl-api.dev.intern.nav.no/graphql
 Person_v3:
