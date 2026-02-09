@@ -67,16 +67,31 @@ class MelosysSkjemaApiClientTest(
         val skjemaId = UUID.randomUUID()
         val responseJson = """
             {
-              "arbeidstakersDel": {
-                "utenlandsoppdraget": {
-                  "utsendelsesLand": "SE",
-                  "utsendelsePeriode": {
-                    "fraDato": "2024-01-01",
-                    "tilDato": "2024-12-31"
+              "skjemaer": [
+                {
+                  "id": "550e8400-e29b-41d4-a716-446655440000",
+                  "status": "SENDT",
+                  "type": "UTSENDT_ARBEIDSTAKER",
+                  "fnr": "12345678901",
+                  "orgnr": "123456789",
+                  "metadata": {
+                    "metadatatype": "UTSENDT_ARBEIDSTAKER_DEG_SELV",
+                    "skjemadel": "ARBEIDSTAKERS_DEL",
+                    "arbeidsgiverNavn": "Test Bedrift AS",
+                    "juridiskEnhetOrgnr": "987654321"
+                  },
+                  "data": {
+                    "type": "UTSENDT_ARBEIDSTAKER_ARBEIDSTAKERS_DEL",
+                    "utenlandsoppdraget": {
+                      "utsendelsesLand": "SE",
+                      "utsendelsePeriode": {
+                        "fraDato": "2024-01-01",
+                        "tilDato": "2024-12-31"
+                      }
+                    }
                   }
                 }
-              },
-              "arbeidsgiversDel": null,
+              ],
               "referanseId": "MEL-5CA141"
             }
         """.trimIndent()
