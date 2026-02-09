@@ -8,7 +8,6 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
@@ -54,12 +53,16 @@ class OpprettFakturaserie(
 
         val saksbehandlerIdent = prosessinstans.hentData(ProsessDataKey.SAKSBEHANDLER)
 
-        if (behandlingsresultat.erOpphørt() || andregangsvurderingHarFjernetTrygdeavgift(behandling, behandlingsresultat)) {
+        if (behandlingsresultat.erOpphørt()) {
             val opprinneligFakturaserieReferanse =
                 behandlingsresultatService.hentBehandlingsresultat(behandling.hentOpprinneligBehandling().id).hentFakturaserieReferanse()
             log.info("Kansellerer fakturaserie for behandling: $behandlingID med fakturaseriereferanse: $opprinneligFakturaserieReferanse")
             kansellerFakturaserieOgLagreReferanse(behandlingsresultat, opprinneligFakturaserieReferanse, saksbehandlerIdent)
-        } else if (skalOppretteFakturaserie(behandlingsresultat) || skalAvregneInneværendeOgFremtidigePerioderTilNull(behandlingsresultat)) {
+        } else if (skalOppretteFakturaserie(behandlingsresultat) || andregangsvurderingHarFjernetFakturerbarTrygdeavgift(
+                behandling,
+                behandlingsresultat
+            ) || skalAvregneInneværendeOgFremtidigePerioderTilNull(behandlingsresultat)
+        ) {
             log.info("Oppretter fakturaserie for behandling: $behandlingID")
             opprettFakturaserieOgLagreReferanse(behandlingsresultat, mapFakturaserieDto(behandlingsresultat, prosessinstans), saksbehandlerIdent)
         } else {
@@ -67,23 +70,10 @@ class OpprettFakturaserie(
         }
     }
 
-
-    private fun andregangsvurderingHarFjernetTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean =
+    private fun andregangsvurderingHarFjernetFakturerbarTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean =
         behandling.erAndregangsbehandling()
             && harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling)
-            && behandling.fagsak.behandlinger.none { it.type == Behandlingstyper.ÅRSAVREGNING }
-            && alleTrygdeavgiftsperioderPåSakenErInneværendeEllerFremtidige(behandling)
             && !trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
-
-    private fun alleTrygdeavgiftsperioderPåSakenErInneværendeEllerFremtidige(behandling: Behandling): Boolean {
-        if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
-            return behandling.fagsak.behandlinger
-                .filter { it.id != behandling.id }
-                .all { it.let { behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder.all { it.fom.year >= LocalDate.now().year } } }
-        }
-        return true
-    }
-
 
     private fun kansellerFakturaserieOgLagreReferanse(
         behandlingsresultat: Behandlingsresultat,
