@@ -55,7 +55,7 @@ class TrygdeavgiftsberegningService(
         )
 
         val nyeTrygdeavgiftsperioder =
-            lagNyeTrygeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
+            lagNyeTrygdeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
         trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
 
         behandlingsresultat.årsavregning?.let { årsavregning ->
@@ -74,7 +74,7 @@ class TrygdeavgiftsberegningService(
     }
 
     @Suppress("SpringTransactionalMethodCallsInspection") // warning på beregnTrygdeavgift ignoreres pga eksisterende transaksjon
-    private fun lagNyeTrygeavgiftsperioder(
+    private fun lagNyeTrygdeavgiftsperioder(
         behandlingsresultat: Behandlingsresultat,
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsperioder: List<Inntektsperiode>,
