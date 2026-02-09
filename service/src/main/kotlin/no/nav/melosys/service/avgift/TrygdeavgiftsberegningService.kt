@@ -62,7 +62,11 @@ class TrygdeavgiftsberegningService(
             if (årsavregning.endeligAvgiftValg != EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT) {
                 val totalAvgift = TotalbeløpBeregner.hentTotalavgift(nyeTrygdeavgiftsperioder)
                 årsavregning.beregnetAvgiftBelop = totalAvgift
-                årsavregning.beregnTilFaktureringsBeloep()
+                if (totalAvgift != null) {
+                    årsavregning.beregnTilFaktureringsBeloep()
+                } else {
+                    årsavregning.tilFaktureringBeloep = null
+                }
             }
         }
 
