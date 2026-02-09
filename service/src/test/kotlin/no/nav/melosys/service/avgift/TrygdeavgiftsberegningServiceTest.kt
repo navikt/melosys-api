@@ -2187,6 +2187,88 @@ internal class TrygdeavgiftsberegningServiceTest {
             årsavregning.tilFaktureringBeloep.shouldNotBeNull()
             årsavregning.tilFaktureringBeloep shouldBe årsavregning.beregnetAvgiftBelop
         }
+
+        @Test
+        fun `beregnOgLagreTrygdeavgift skal ikke overskrive beregnetAvgiftBelop ved manuell endelig avgift`() {
+            // MELOSYS-7878: Verifiser at guard for MANUELL_ENDELIG_AVGIFT ikke regresserer
+
+            val notSoRandomUuid = UUID.randomUUID()
+            mockkStatic(UUID::class)
+            every { UUID.randomUUID() } returns notSoRandomUuid
+
+            val manueltBeloep = BigDecimal("1234.00")
+
+            val behandlingsresultat = Behandlingsresultat.forTest {
+                id = 1L
+                behandling {
+                    tema = Behandlingstema.YRKESAKTIV
+                    type = Behandlingstyper.ÅRSAVREGNING
+                    fagsak {
+                        medBruker()
+                        type = Sakstyper.FTRL
+                    }
+                }
+                type = Behandlingsresultattyper.IKKE_FASTSATT
+
+                medlemskapsperiode {
+                    id = 1L
+                    fom = FOM
+                    tom = TOM
+                    trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+                }
+
+                årsavregning {
+                    aar = LocalDate.now().year
+                    endeligAvgiftValg = EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT
+                    manueltAvgiftBeloep = manueltBeloep
+                }
+            }
+
+            every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+            every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
+            every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
+
+            every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
+                listOf(
+                    TrygdeavgiftsberegningResponse(
+                        TrygdeavgiftsperiodeDto(
+                            DatoPeriodeDto(FOM, TOM),
+                            BigDecimal.valueOf(7.9),
+                            PengerDto(BigDecimal("500.00"), NOK)
+                        ),
+                        TrygdeavgiftsgrunnlagDto(
+                            idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                            notSoRandomUuid,
+                            notSoRandomUuid
+                        )
+                    )
+                )
+            )
+            every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
+
+            // Act
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+                BEHANDLING_ID,
+                skatteforholdsperioder = listOf(
+                    skatteforhold { skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG }
+                ),
+                inntektsperioder = listOf(
+                    inntekt {
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(BigDecimal(10000))
+                    }
+                )
+            )
+
+            // Assert: beregnetAvgiftBelop skal ikke ha blitt satt
+            val årsavregning = behandlingsresultat.årsavregning
+            årsavregning.shouldNotBeNull()
+            årsavregning.beregnetAvgiftBelop.shouldBeNull()
+            årsavregning.manueltAvgiftBeloep shouldBe manueltBeloep
+        }
     }
 
     private fun idToUUid(id: Long): UUID = UUID.nameUUIDFromBytes(id.toString().toByteArray())
