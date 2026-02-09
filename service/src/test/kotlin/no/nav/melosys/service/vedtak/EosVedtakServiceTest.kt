@@ -13,6 +13,7 @@ import no.nav.melosys.domain.anmodningsperiodeForTest
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Institusjon
 import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -353,6 +354,63 @@ class EosVedtakServiceKtTest {
         verify(exactly = 0) { prosessinstansService.opprettProsessinstansIverksettVedtakEos(any(), any(), any(), any(), any(), any()) }
     }
 
+    @Test
+    fun `fattVedtak - art11_3B med tomme mottakerinstitusjoner - fatter vedtak uten SED`() {
+        mockBehandlingsresultat()
+        leggTilLovvalgsperiode(
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B
+        )
+
+        vedtakService.fattVedtak(
+            behandling, lagRequest(
+                Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+                Vedtakstyper.FØRSTEGANGSVEDTAK,
+                BEHANDLINGSRESULTAT_FRITEKST,
+                null,
+                emptySet()
+            )
+        )
+
+        verify {
+            prosessinstansService.opprettProsessinstansIverksettVedtakEos(
+                any(), any(), any(), any(),
+                eq(emptySet()),
+                any()
+            )
+        }
+        verify(exactly = 0) { landvelgerService.hentUtenlandskTrygdemyndighetsland(any()) }
+        verify(exactly = 0) { eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), any(), any()) }
+    }
+
+    @Test
+    fun `fattVedtak - art11_3B med mottakerinstitusjoner - validerer og fatter vedtak`() {
+        val mottakerinstitusjoner = setOf("FR:INST123")
+        mockBehandlingsresultat()
+        mockEessiReady()
+        leggTilLovvalgsperiode(
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B
+        )
+
+        vedtakService.fattVedtak(
+            behandling, lagRequest(
+                Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+                Vedtakstyper.FØRSTEGANGSVEDTAK,
+                BEHANDLINGSRESULTAT_FRITEKST,
+                null,
+                mottakerinstitusjoner
+            )
+        )
+
+        verify { eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), any(), any()) }
+        verify {
+            prosessinstansService.opprettProsessinstansIverksettVedtakEos(
+                any(), any(), any(), any(),
+                eq(mottakerinstitusjoner),
+                any()
+            )
+        }
+    }
+
     private fun mockBehandlingsresultat() {
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { behandlingsresultatService.lagre(any()) } returns behandlingsresultat
@@ -380,13 +438,19 @@ class EosVedtakServiceKtTest {
         } returns listOf(Institusjon("AB:CDEF123", "inst", Landkoder.SE.kode))
     }
 
-    private fun leggTilLovvalgsperiode(innvilgelsesResultat: InnvilgelsesResultat = InnvilgelsesResultat.INNVILGET) {
-        behandlingsresultat.lovvalgsperioder = mutableSetOf(lagLovvalgsperiode(innvilgelsesResultat))
+    private fun leggTilLovvalgsperiode(
+        innvilgelsesResultat: InnvilgelsesResultat = InnvilgelsesResultat.INNVILGET,
+        bestemmelse: LovvalgBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+    ) {
+        behandlingsresultat.lovvalgsperioder = mutableSetOf(lagLovvalgsperiode(innvilgelsesResultat, bestemmelse))
     }
 
-    private fun lagLovvalgsperiode(innvilgelsesResultat: InnvilgelsesResultat = InnvilgelsesResultat.INNVILGET) =
+    private fun lagLovvalgsperiode(
+        innvilgelsesResultat: InnvilgelsesResultat = InnvilgelsesResultat.INNVILGET,
+        bestemmelse: LovvalgBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+    ) =
         Lovvalgsperiode.forTest {
-            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+            this.bestemmelse = bestemmelse
             this.innvilgelsesresultat = innvilgelsesResultat
             lovvalgsland = Land_iso2.NO
             medlPeriodeID = 123L
