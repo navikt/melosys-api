@@ -46,6 +46,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.core.KafkaTemplate
+import java.math.BigDecimal
 import java.time.LocalDate
 
 class PensjonistFtrlVedtakIT(
@@ -115,7 +116,10 @@ class PensjonistFtrlVedtakIT(
             skattefordholdsperioder,
             inntektsforholdsperioder,
             LocalDate.of(inneværendeÅr, 4, 4)
-        )
+        ).shouldHaveSize(1)
+            .first().apply {
+                trygdeavgiftsbeløpMd.shouldBe(Penger(BigDecimal.ZERO))
+            }
 
 
         val vedtakRequest = FattVedtakRequest.Builder()
@@ -173,8 +177,7 @@ class PensjonistFtrlVedtakIT(
                 )
             )
 
-        mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
-        mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier/$fakturaserieReferanse/kanseller")))
+        mockServer.verify(2, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
     }
 
     @Test
