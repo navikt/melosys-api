@@ -2184,6 +2184,8 @@ internal class TrygdeavgiftsberegningServiceTest {
             årsavregning.beregnetAvgiftBelop.shouldNotBeNull()
             // Totalbeløp = månedsavgift * antall måneder i perioden
             årsavregning.beregnetAvgiftBelop!!.compareTo(BigDecimal.ZERO) shouldBe 1 // > 0
+            årsavregning.tilFaktureringBeloep.shouldNotBeNull()
+            årsavregning.tilFaktureringBeloep shouldBe årsavregning.beregnetAvgiftBelop
         }
     }
 
