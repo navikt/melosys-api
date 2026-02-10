@@ -34,7 +34,7 @@ class SkjemaMottattConsumer(
         log.info { "Mottatt skjema-melding med skjemaId: ${melding.skjemaId}" }
 
         if (unleash.isEnabled(ToggleName.MELOSYS_SKJEMA_MOTTATT_CONSUMER)) {
-            prosessinstansService.opprettProsessinstansMelosysSøknadMottatt(melding.skjemaId)
+            prosessinstansService.opprettProsessinstansMelosysSøknadMottatt(melding)
         }
     }
 }

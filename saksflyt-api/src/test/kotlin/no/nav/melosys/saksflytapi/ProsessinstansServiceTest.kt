@@ -32,6 +32,7 @@ import no.nav.melosys.saksflytapi.journalfoering.DokumentRequest
 import no.nav.melosys.saksflytapi.journalfoering.JournalfoeringOpprettRequest
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
+import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -753,25 +754,28 @@ class ProsessinstansServiceTest {
     @Test
     fun `opprett prosessinstans for melosys skjema mottatt skal opprette prosessinstans med korrekt type og låsReferanse`() {
         val skjemaId = UUID.randomUUID()
+        val melding = SkjemaMottattMelding(skjemaId)
 
         every { prosessinstansRepo.existsByLåsReferanseAndType(skjemaId.toString(), ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD) } returns false
 
-        prosessinstansService.`opprettProsessinstansMelosysSøknadMottatt`(skjemaId)
+        prosessinstansService.`opprettProsessinstansMelosysSøknadMottatt`(melding)
 
         val lagretInstans = piListCaptor.last()
         lagretInstans.run {
             type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
             låsReferanse shouldBe skjemaId.toString()
+            hentData<SkjemaMottattMelding>(ProsessDataKey.SØKNAD_MOTTATT_MELDING).skjemaId shouldBe skjemaId
         }
     }
 
     @Test
     fun `opprett prosessinstans for melosys skjema mottatt skal ikke opprette duplikat når prosessinstans finnes fra før`() {
         val skjemaId = UUID.randomUUID()
+        val melding = SkjemaMottattMelding(skjemaId)
 
         every { prosessinstansRepo.existsByLåsReferanseAndType(skjemaId.toString(), ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD) } returns true
 
-        prosessinstansService.`opprettProsessinstansMelosysSøknadMottatt`(skjemaId)
+        prosessinstansService.`opprettProsessinstansMelosysSøknadMottatt`(melding)
 
         verify(exactly = 0) { prosessinstansRepo.save(any<Prosessinstans>()) }
     }
