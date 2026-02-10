@@ -8,7 +8,7 @@ import io.mockk.just
 import io.mockk.Runs
 import io.mockk.verify
 import no.nav.melosys.featuretoggle.ToggleName
-import no.nav.melosys.integrasjon.SkjemaMottattMelding
+import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.BeforeEach

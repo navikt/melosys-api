@@ -4,7 +4,7 @@ import io.getunleash.Unleash
 import mu.KotlinLogging
 import no.nav.melosys.config.MDCOperations.Companion.withKafkaCorrelationId
 import no.nav.melosys.featuretoggle.ToggleName
-import no.nav.melosys.integrasjon.SkjemaMottattMelding
+import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.context.annotation.Profile
