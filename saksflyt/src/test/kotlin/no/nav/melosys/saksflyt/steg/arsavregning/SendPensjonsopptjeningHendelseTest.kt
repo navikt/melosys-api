@@ -6,6 +6,7 @@ import io.mockk.*
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.behandling
@@ -234,6 +235,52 @@ class SendPensjonsopptjeningHendelseTest {
 
         val hendelse = capturedEvent.captured
         hendelse.pgi shouldBe 75000L  // Skal bruke manuelt beløp
+    }
+
+    @Test
+    fun `utfør sender ikke POPP-hendelse for MANUELL_ENDELIG_AVGIFT`() {
+        // Simulerer prod-scenariet: MANUELL valgt men trygdeavgiftsperioder
+        // er ikke slettet fra DB (pga JPA orphanRemoval timing)
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
+                fagsak {
+                    type = Sakstyper.FTRL
+                    medBruker()
+                }
+            }
+            årsavregning {
+                aar = 2023
+                beregnetAvgiftBelop = null
+                manueltAvgiftBeloep = BigDecimal("75000")
+                endeligAvgiftValg = EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT
+            }
+            vedtakMetadata {
+                vedtaksdato = Instant.parse("2024-01-15T00:00:00Z")
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2023, 1, 1)
+                tom = LocalDate.of(2023, 12, 31)
+                trygdeavgiftsperiode {
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+        }
+
+        val prosessinstans = Prosessinstans.prosessinstansForTest {
+            behandling = behandlingsresultat.hentBehandling()
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(BehandlingTestFactory.BEHANDLING_ID) } returns behandlingsresultat
+
+
+        sendPensjonsopptjeningHendelse.utfør(prosessinstans)
+
+
+        // Selv om trygdeavgiftsperioder finnes (JPA timing-problem),
+        // skal MANUELL_ENDELIG_AVGIFT forhindre sending av POPP-hendelse
+        verify(exactly = 0) { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
     }
 
     @Test

@@ -5,6 +5,7 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.featuretoggle.ToggleName
@@ -85,6 +86,11 @@ class SendPensjonsopptjeningHendelse(
 
         if (behandlingsresultat.årsavregning == null) {
             log.info("Sender ikke POPP-hendelse: Ingen årsavregning for behandlingsresultat: ${behandlingsresultat.id}")
+            return false
+        }
+
+        if (behandlingsresultat.årsavregning!!.endeligAvgiftValg == EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT) {
+            log.info("Sender ikke POPP-hendelse: Manuelt fastsatt trygdeavgift for behandlingsresultat: ${behandlingsresultat.id}")
             return false
         }
 
