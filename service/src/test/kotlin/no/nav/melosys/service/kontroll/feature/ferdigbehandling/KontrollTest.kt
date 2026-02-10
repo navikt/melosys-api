@@ -654,6 +654,138 @@ internal class KontrollTest {
     }
 
     @Test
+    fun `trygdeavgiftsperioder i bortfalt fagsak skal ikke gi overlappende periode kontrollfeil`() {
+        val behandling = lagBehandling {
+            fagsak {
+                medBruker()
+                medGsakSaksnummer()
+                type = Sakstyper.FTRL
+            }
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
+
+        val behandlingsresultatFraBortfaltFagsak = Behandlingsresultat.forTest {
+            behandling {
+                fagsak {
+                    saksnummer = "test-bortfalt"
+                    status = Saksstatuser.HENLAGT_BORTFALT
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.FTRL
+                }
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2012, 12, 11)
+                tom = LocalDate.of(2012, 12, 24)
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.of(2012, 12, 11)
+                    periodeTil = LocalDate.of(2012, 12, 24)
+                    trygdeavgiftsbeløpMd = BigDecimal.TEN
+                    trygdesats = BigDecimal.TEN
+                }
+            }
+        }
+
+        every {
+            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(any())
+        } returns listOf(behandlingsresultatFraBortfaltFagsak)
+
+        val behandlingsresultatMedNyePerioder = Behandlingsresultat.forTest {
+            behandling {
+                fagsak {
+                    saksnummer = behandling.fagsak.saksnummer
+                    type = behandling.fagsak.type
+                    tema = behandling.fagsak.tema
+                    status = behandling.fagsak.status
+                }
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2012, 12, 1)
+                tom = LocalDate.of(2012, 12, 20)
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.of(2012, 12, 1)
+                    periodeTil = LocalDate.of(2012, 12, 20)
+                    trygdeavgiftsbeløpMd = BigDecimal.TEN
+                    trygdesats = BigDecimal.TEN
+                }
+            }
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultatMedNyePerioder
+
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
+
+        val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
+
+        resultat.shouldBeEmpty()
+    }
+
+    @Test
+    fun `trygdeavgiftsperioder i bortfalt fagsak skal ikke gi direkte forutgående periode kontrollfeil`() {
+        val behandling = lagBehandling {
+            fagsak {
+                medBruker()
+                medGsakSaksnummer()
+                type = Sakstyper.FTRL
+            }
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
+
+        val behandlingsresultatFraBortfaltFagsak = Behandlingsresultat.forTest {
+            behandling {
+                fagsak {
+                    saksnummer = "test-bortfalt"
+                    status = Saksstatuser.HENLAGT_BORTFALT
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.FTRL
+                }
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2012, 12, 1)
+                tom = LocalDate.of(2012, 12, 20)
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.of(2012, 12, 1)
+                    periodeTil = LocalDate.of(2012, 12, 20)
+                    trygdeavgiftsbeløpMd = BigDecimal.TEN
+                    trygdesats = BigDecimal.TEN
+                }
+            }
+        }
+
+        every {
+            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(any())
+        } returns listOf(behandlingsresultatFraBortfaltFagsak)
+
+        val behandlingsresultatMedNyePerioder = Behandlingsresultat.forTest {
+            behandling {
+                fagsak {
+                    saksnummer = behandling.fagsak.saksnummer
+                    type = behandling.fagsak.type
+                    tema = behandling.fagsak.tema
+                    status = behandling.fagsak.status
+                }
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2012, 12, 21)
+                tom = LocalDate.of(2012, 12, 24)
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.of(2012, 12, 21)
+                    periodeTil = LocalDate.of(2012, 12, 24)
+                    trygdeavgiftsbeløpMd = BigDecimal.TEN
+                    trygdesats = BigDecimal.TEN
+                }
+            }
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultatMedNyePerioder
+
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
+
+        val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
+
+        resultat.shouldBeEmpty()
+    }
+
+    @Test
     fun kontroller_periodeOver3År_returnererKode() {
         val behandling = lagBehandling {
             fagsak {

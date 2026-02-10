@@ -38,6 +38,6 @@ class TrygdeavgiftFagsakControllerTest {
 
 
         verify { aksesskontroll.autoriserSakstilgang("123") }
-        verify { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift("123", false) }
+        verify { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift("123", true) }
     }
 }
