@@ -84,12 +84,12 @@ class SendPensjonsopptjeningHendelse(
             return false
         }
 
-        if (behandlingsresultat.årsavregning == null) {
+        val årsavregning = behandlingsresultat.årsavregning ?: run {
             log.info("Sender ikke POPP-hendelse: Ingen årsavregning for behandlingsresultat: ${behandlingsresultat.id}")
             return false
         }
 
-        if (behandlingsresultat.årsavregning!!.endeligAvgiftValg == EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT) {
+        if (årsavregning.endeligAvgiftValg == EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT) {
             log.info("Sender ikke POPP-hendelse: Manuelt fastsatt trygdeavgift for behandlingsresultat: ${behandlingsresultat.id}")
             return false
         }
