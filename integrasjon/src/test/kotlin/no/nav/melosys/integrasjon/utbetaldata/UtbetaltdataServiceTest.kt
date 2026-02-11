@@ -15,17 +15,17 @@ import no.nav.melosys.domain.dokument.utbetaling.Periode
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.integrasjon.utbetaling.UtbetalingRequest
 import no.nav.melosys.integrasjon.utbetaling.*
-import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestService
+import no.nav.melosys.integrasjon.utbetaling.UtbetaltdataService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class UtbetaldataRestServiceTest {
+class UtbetaltdataServiceTest {
 
-    private var mockRestConsumer = mockk<UtbetaldataRestConsumer>()
+    private var mockRestConsumer = mockk<UtbetaltdataClient>()
     private val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
-    private val utbetaldataServiceV2: UtbetaldataRestService = UtbetaldataRestService(mockRestConsumer, objectMapper)
+    private val utbetaltdataServiceV2: UtbetaltdataService = UtbetaltdataService(mockRestConsumer, objectMapper)
 
     @Test
     fun hentUtbetalingerBarnetrygd_medTreff_verifiserSaksopplysning() {
@@ -41,7 +41,7 @@ class UtbetaldataRestServiceTest {
             mockRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest)
         } returns hentUtbetalingListe()
 
-        val saksopplysning = utbetaldataServiceV2.hentUtbetalingerBarnetrygd(FNR,
+        val saksopplysning = utbetaltdataServiceV2.hentUtbetalingerBarnetrygd(FNR,
             LocalDate.now().minusMonths(2),
             LocalDate.now())
 
@@ -86,7 +86,7 @@ class UtbetaldataRestServiceTest {
             mockRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest)
         } returns hentUtbetalingListe()
 
-        val saksopplysning = utbetaldataServiceV2.hentUtbetalingerBarnetrygd(FNR,
+        val saksopplysning = utbetaltdataServiceV2.hentUtbetalingerBarnetrygd(FNR,
             LocalDate.now().minusMonths(2),
             LocalDate.now())
 
@@ -111,7 +111,7 @@ class UtbetaldataRestServiceTest {
             mockRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest)
         } returns hentUtbetalingListe()
 
-        val saksopplysning = utbetaldataServiceV2.hentUtbetalingerBarnetrygd(FNR,
+        val saksopplysning = utbetaltdataServiceV2.hentUtbetalingerBarnetrygd(FNR,
             fom,
             tom)
 
@@ -134,7 +134,7 @@ class UtbetaldataRestServiceTest {
             mockRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest)
         } returns hentUtbetalingListe()
 
-        val saksopplysning = utbetaldataServiceV2.hentUtbetalingerBarnetrygd(FNR,
+        val saksopplysning = utbetaltdataServiceV2.hentUtbetalingerBarnetrygd(FNR,
             fom,
             tom)
 

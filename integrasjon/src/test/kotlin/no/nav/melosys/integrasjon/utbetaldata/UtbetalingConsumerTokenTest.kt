@@ -8,8 +8,8 @@ import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.integrasjon.utbetaling.Periode
-import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestConsumer
-import no.nav.melosys.integrasjon.utbetaling.UtbetalingConsumerProducerV2
+import no.nav.melosys.integrasjon.utbetaling.UtbetaltdataClient
+import no.nav.melosys.integrasjon.utbetaling.UtbetaltdataClientConfig
 import no.nav.melosys.integrasjon.utbetaling.UtbetalingRequest
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -31,12 +31,12 @@ import java.time.LocalDate
         OAuthMockServer::class,
 
         GenericAuthFilterFactory::class,
-        UtbetalingConsumerProducerV2::class,
+        UtbetaltdataClientConfig::class,
     ]
 )
 @AutoConfigureWebClient
 class UtbetalingConsumerTokenTest(
-    @Autowired private val utbetalingRestConsumer: UtbetaldataRestConsumer,
+    @Autowired private val utbetalingRestConsumer: UtbetaltdataClient,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer

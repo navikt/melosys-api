@@ -16,7 +16,7 @@ import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntekt.InntektService;
-import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestService;
+import no.nav.melosys.integrasjon.utbetaling.UtbetaltdataService;
 import no.nav.melosys.service.aareg.ArbeidsforholdService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
@@ -53,7 +53,7 @@ public class RegisteropplysningerService {
     private final InntektService inntektService;
     private final SaksopplysningerService saksopplysningerService;
     private final RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
-    private final UtbetaldataRestService utbetaldataRestService;
+    private final UtbetaltdataService utbetaltdataService;
 
     public RegisteropplysningerService(MedlPeriodeService medlPeriodeService,
                                        EregFasade eregFasade,
@@ -62,7 +62,7 @@ public class RegisteropplysningerService {
                                        InntektService inntektService,
                                        SaksopplysningerService saksopplysningerService,
                                        RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory,
-                                       UtbetaldataRestService utbetaldataRestService) {
+                                       UtbetaltdataService utbetaltdataService) {
         this.medlPeriodeService = medlPeriodeService;
         this.eregFasade = eregFasade;
         this.arbeidsforholdService = arbeidsforholdService;
@@ -70,7 +70,7 @@ public class RegisteropplysningerService {
         this.inntektService = inntektService;
         this.saksopplysningerService = saksopplysningerService;
         this.registeropplysningerPeriodeFactory = registeropplysningerPeriodeFactory;
-        this.utbetaldataRestService = utbetaldataRestService;
+        this.utbetaltdataService = utbetaltdataService;
     }
 
     @Transactional
@@ -179,7 +179,7 @@ public class RegisteropplysningerService {
 
         RegisteropplysningerPeriodeFactory.Periode periodeForYtelser = registeropplysningerPeriodeFactory.hentPeriodeForInntekt(fom, tom, behandling);
 
-        Saksopplysning saksopplysning = utbetaldataRestService.hentUtbetalingerBarnetrygd(registeropplysningerRequest.getFnr(), periodeForYtelser.fom.atDay(1), periodeForYtelser.tom.atDay(1));
+        Saksopplysning saksopplysning = utbetaltdataService.hentUtbetalingerBarnetrygd(registeropplysningerRequest.getFnr(), periodeForYtelser.fom.atDay(1), periodeForYtelser.tom.atDay(1));
         return saksopplysning != null ? List.of(saksopplysning) : List.of();
     }
 
