@@ -5,7 +5,7 @@ import no.nav.melosys.integrasjon.kodeverk.impl.dto.FellesKodeverkDto
 import org.springframework.web.reactive.function.client.WebClient
 import java.time.LocalDate
 
-class KodeverkConsumerImpl internal constructor(private val webClient: WebClient) : CallIdAware {
+class KodeverkClient internal constructor(private val webClient: WebClient) : CallIdAware {
 
     fun hentKodeverk(navn: String): FellesKodeverkDto {
         return webClient

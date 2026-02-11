@@ -13,7 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 
 @Configuration
-class KodeverkConsumerProducer(
+class KodeverkClientConfig(
     @param:Value("\${KodeverkAPI_v1.url}") private val endpointUrl: String,
     private val genericAuthFilterFactory: GenericAuthFilterFactory
 ) : CallIdAware {
@@ -21,7 +21,7 @@ class KodeverkConsumerProducer(
     @Bean
     fun kodeverkConsumer(
         webClientBuilder: WebClient.Builder, correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
-    ) = KodeverkConsumerImpl(
+    ) = KodeverkClient(
         webClientBuilder
             .baseUrl(endpointUrl)
             .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
