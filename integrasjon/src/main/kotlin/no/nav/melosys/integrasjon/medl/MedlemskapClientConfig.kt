@@ -13,7 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 
 @Configuration
-class MedlemskapRestConsumerProducer(
+class MedlemskapClientConfig(
     @Value("\${medlemskap.rest.url}") private val url: String,
     private val genericAuthFilterFactory: GenericAuthFilterFactory
 ) : CallIdAware {

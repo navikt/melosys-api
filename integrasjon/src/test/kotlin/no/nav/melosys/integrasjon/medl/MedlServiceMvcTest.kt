@@ -39,7 +39,7 @@ import java.time.LocalDate
         OAuthMockServer::class,
 
         GenericAuthFilterFactory::class,
-        MedlemskapRestConsumerProducer::class,
+        MedlemskapClientConfig::class,
     ]
 )
 @AutoConfigureWebClient

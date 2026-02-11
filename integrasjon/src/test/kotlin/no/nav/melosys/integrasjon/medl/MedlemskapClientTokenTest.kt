@@ -26,11 +26,11 @@ import java.time.LocalDate
         OAuthMockServer::class,
 
         GenericAuthFilterFactory::class,
-        MedlemskapRestConsumerProducer::class,
+        MedlemskapClientConfig::class,
     ]
 )
 @AutoConfigureWebClient
-class MedlemskapConsumerTokenTest(
+class MedlemskapClientTokenTest(
     @Autowired private val medlemskapClient: MedlemskapClient,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
