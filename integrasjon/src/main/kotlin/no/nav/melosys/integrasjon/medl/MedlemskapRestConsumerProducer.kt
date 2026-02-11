@@ -20,7 +20,7 @@ class MedlemskapRestConsumerProducer(
     @Bean
     fun medlemskapRestConsumer(
         webClientBuilder: WebClient.Builder, correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
-    ) = MedlemskapRestConsumer(
+    ) = MedlemskapClient(
         webClientBuilder
             .baseUrl(url)
             .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))

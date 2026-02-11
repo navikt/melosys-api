@@ -31,7 +31,7 @@ import java.time.LocalDate
 )
 @AutoConfigureWebClient
 class MedlemskapConsumerTokenTest(
-    @Autowired private val medlemskapRestConsumer: MedlemskapRestConsumer,
+    @Autowired private val medlemskapClient: MedlemskapClient,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
@@ -97,6 +97,6 @@ class MedlemskapConsumerTokenTest(
         val fom = LocalDate.now().minusDays(2)
         val tom = LocalDate.now().plusDays(2)
         val fnr = "12345678990"
-        medlemskapRestConsumer.hentPeriodeListe(fnr, fom, tom)
+        medlemskapClient.hentPeriodeListe(fnr, fom, tom)
     }
 }

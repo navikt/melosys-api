@@ -23,7 +23,7 @@ import java.time.LocalDate
 
 @Service
 class MedlService(
-    private val medlemskapRestConsumer: MedlemskapRestConsumer,
+    private val medlemskapClient: MedlemskapClient,
     private val objectMapper: ObjectMapper
 ) {
 
@@ -32,7 +32,7 @@ class MedlService(
     }
 
     fun hentPeriodeListe(fnr: String, fom: LocalDate?, tom: LocalDate?): Saksopplysning {
-        val periodeListeResponse = medlemskapRestConsumer.hentPeriodeListe(fnr, fom, tom)
+        val periodeListeResponse = medlemskapClient.hentPeriodeListe(fnr, fom, tom)
 
         return Saksopplysning().apply {
             type = SaksopplysningType.MEDL
@@ -148,7 +148,7 @@ class MedlService(
             )
         )
 
-        medlemskapRestConsumer.oppdaterPeriode(request)
+        medlemskapClient.oppdaterPeriode(request)
     }
 
     private fun opprettPeriode(
@@ -169,7 +169,7 @@ class MedlService(
             status = periodestatusMedl.kode
             statusaarsak = statusaarsakMedl?.kode
         }
-        return medlemskapRestConsumer.opprettPeriode(request).unntakId
+        return medlemskapClient.opprettPeriode(request).unntakId
     }
 
     private fun lovvalgRequestForPost(periodeOmLovvalg: PeriodeOmLovvalg): MedlemskapsunntakForPost {
@@ -231,7 +231,7 @@ class MedlService(
             statusaarsak = statusaarsakMedl?.kode
         }
 
-        medlemskapRestConsumer.oppdaterPeriode(request)
+        medlemskapClient.oppdaterPeriode(request)
     }
 
     private fun lovvalgRequestForPut(
@@ -290,7 +290,7 @@ class MedlService(
     }
 
     private fun hentEksisterendePeriode(medlPeriodeID: Long): MedlemskapsunntakForGet {
-        return medlemskapRestConsumer.hentPeriode(medlPeriodeID.toString())
+        return medlemskapClient.hentPeriode(medlPeriodeID.toString())
     }
 
     companion object {
