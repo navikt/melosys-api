@@ -9,6 +9,11 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType
+import no.nav.melosys.skjema.types.DegSelvMetadata
+import no.nav.melosys.skjema.types.Skjemadel
+import no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaDto
+import no.nav.melosys.skjema.types.arbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
+import no.nav.melosys.skjema.types.common.SkjemaStatus
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerM2MSkjemaData
 import org.awaitility.kotlin.await
@@ -39,6 +44,24 @@ class DigitalSøknadMottakIT(
     fun `mottak av digital søknad starter saga og henter søknadsdata fra melosys-skjema-api`() {
         val skjemaId = UUID.randomUUID()
 
+        val forventetSøknadsdata = UtsendtArbeidstakerM2MSkjemaData(
+            skjemaer = listOf(
+                UtsendtArbeidstakerSkjemaDto(
+                    id = skjemaId,
+                    status = SkjemaStatus.SENDT,
+                    fnr = "12345678901",
+                    orgnr = "123456789",
+                    metadata = DegSelvMetadata(
+                        skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
+                        arbeidsgiverNavn = "Test AS",
+                        juridiskEnhetOrgnr = "987654321"
+                    ),
+                    data = UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
+                )
+            ),
+            referanseId = "MEL-$skjemaId"
+        )
+
         // Stub melosys-skjema-api endpoint
         mockServer.stubFor(
             WireMock.get(WireMock.urlPathEqualTo("/m2m/api/skjema/utsendt-arbeidstaker/$skjemaId/data"))
@@ -46,14 +69,7 @@ class DigitalSøknadMottakIT(
                     WireMock.aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(
-                            """
-                            {
-                                "skjemaer": [],
-                                "referanseId": "MEL-$skjemaId"
-                            }
-                            """.trimIndent()
-                        )
+                        .withBody(objectMapper.writeValueAsString(forventetSøknadsdata))
                 )
         )
 
@@ -86,11 +102,11 @@ class DigitalSøknadMottakIT(
 
         // Verify data stored by consumer (SØKNAD_MOTTATT_MELDING)
         val mottattMelding = prosessinstans.hentData<SkjemaMottattMelding>(ProsessDataKey.SØKNAD_MOTTATT_MELDING)
-        mottattMelding.skjemaId shouldBe skjemaId
+        mottattMelding shouldBe melding
 
         // Verify data stored by step 1 (SØKNADSDATA)
         val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerM2MSkjemaData>(ProsessDataKey.SØKNADSDATA)
-        søknadsdata.referanseId shouldBe "MEL-$skjemaId"
+        søknadsdata shouldBe forventetSøknadsdata
 
         // Verify HTTP call to melosys-skjema-api was made
         mockServer.verify(

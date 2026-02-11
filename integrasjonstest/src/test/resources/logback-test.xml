@@ -15,6 +15,7 @@
     <logger name="state.change.logger" level="WARN"/>
     <logger name="org.apache.zookeeper" level="WARN"/>
     <logger name="org.springframework.kafka" level="WARN"/>
+    <logger name="org.flywaydb.core.internal" level="WARN"/>
 
     <logger name="org.hibernate" level="WARN"/>
     <logger name="kafka" level="WARN"/>

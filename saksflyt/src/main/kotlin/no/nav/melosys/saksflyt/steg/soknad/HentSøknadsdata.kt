@@ -34,7 +34,5 @@ class HentSøknadsdata(
         val søknadsdata = melosysSkjemaApiClient.hentUtsendtArbeidstakerSkjema(skjemaId)
 
         prosessinstans.setData(SØKNADSDATA, søknadsdata)
-
-        log.info { "Hentet og lagret søknadsdata for skjemaId $skjemaId" }
     }
 }

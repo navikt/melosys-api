@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.soknad
 
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -11,6 +10,11 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
+import no.nav.melosys.skjema.types.DegSelvMetadata
+import no.nav.melosys.skjema.types.Skjemadel
+import no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaDto
+import no.nav.melosys.skjema.types.arbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
+import no.nav.melosys.skjema.types.common.SkjemaStatus
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerM2MSkjemaData
 import org.junit.jupiter.api.BeforeEach
@@ -46,9 +50,22 @@ internal class HentSøknadsdataTest {
     @Test
     fun `utfør henter søknadsdata og lagrer på prosessinstans`() {
         val søknadsdata = UtsendtArbeidstakerM2MSkjemaData(
-            skjemaer = emptyList(),
+            skjemaer = listOf(
+                UtsendtArbeidstakerSkjemaDto(
+                    id = UUID.randomUUID(),
+                    status = SkjemaStatus.SENDT,
+                    fnr = "12345678901",
+                    orgnr = "123456789",
+                    metadata = DegSelvMetadata(
+                        skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
+                        arbeidsgiverNavn = "Test AS",
+                        juridiskEnhetOrgnr = "987654321"
+                    ),
+                    data = UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
+                )),
             referanseId = "MEL-TEST123"
         )
+
 
         every { melosysSkjemaApiClient.hentUtsendtArbeidstakerSkjema(skjemaId) } returns søknadsdata
 
@@ -57,8 +74,6 @@ internal class HentSøknadsdataTest {
         verify { melosysSkjemaApiClient.hentUtsendtArbeidstakerSkjema(skjemaId) }
 
         val lagretData = prosessinstans.hentData<UtsendtArbeidstakerM2MSkjemaData>(ProsessDataKey.SØKNADSDATA)
-        lagretData shouldNotBe null
-        lagretData.referanseId shouldBe "MEL-TEST123"
-        lagretData.skjemaer shouldBe emptyList()
+        lagretData shouldBe søknadsdata
     }
 }
