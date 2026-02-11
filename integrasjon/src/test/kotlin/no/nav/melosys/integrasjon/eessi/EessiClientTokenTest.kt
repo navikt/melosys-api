@@ -30,13 +30,13 @@ import org.springframework.test.context.ContextConfiguration
         OAuthMockServer::class,
 
         GenericAuthFilterFactory::class,
-        EessiConsumerProducerConfig::class,
+        EessiClientConfig::class,
     ]
 )
 @AutoConfigureWebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class EessiConsumerTokenTest(
-    @Autowired private val eessiConsumer: EessiConsumer,
+class EessiClientTokenTest(
+    @Autowired private val eessiClient: EessiClient,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
@@ -113,5 +113,5 @@ class EessiConsumerTokenTest(
     override fun getMockData(): String = "[]"
 
     override fun executeRequest() =
-        eessiConsumer.hentMuligeAksjoner("123")
+        eessiClient.hentMuligeAksjoner("123")
 }

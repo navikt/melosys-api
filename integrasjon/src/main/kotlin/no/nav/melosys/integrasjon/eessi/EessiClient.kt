@@ -10,12 +10,14 @@ import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
 import no.nav.melosys.integrasjon.eessi.dto.*
 import no.nav.melosys.integrasjon.felles.JsonRestIntegrasjon
+import org.springframework.retry.annotation.Retryable
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 
-open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, JsonRestIntegrasjon {
+@Retryable
+open class EessiClient(private val webClient: WebClient) : JsonRestIntegrasjon {
 
-    override fun opprettBucOgSed(
+    fun opprettBucOgSed(
         sedDataDto: SedDataDto,
         vedlegg: Collection<Vedlegg>,
         bucType: BucType,
@@ -32,7 +34,7 @@ open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, 
             .bodyToMono<OpprettSedDto>()
             .block()!!
 
-    override fun opprettBucOgSedV2(opprettBucOgSedDtoV2: OpprettBucOgSedDtoV2) =
+    fun opprettBucOgSedV2(opprettBucOgSedDtoV2: OpprettBucOgSedDtoV2) =
         webClient.post()
             .uri("/v2/buc")
             .bodyValue(opprettBucOgSedDtoV2)
@@ -40,7 +42,7 @@ open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, 
             .bodyToMono<OpprettSedDto>()
             .block()!!
 
-    override fun sendSedPåEksisterendeBuc(sedDataDto: SedDataDto, rinaSaksnummer: String, sedType: SedType) {
+    fun sendSedPåEksisterendeBuc(sedDataDto: SedDataDto, rinaSaksnummer: String, sedType: SedType) {
         webClient.post()
             .uri("/buc/{bucID}/sed/{sedType}", rinaSaksnummer, sedType)
             .bodyValue(sedDataDto)
@@ -49,21 +51,21 @@ open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, 
             .block()
     }
 
-    override fun hentMottakerinstitusjoner(bucType: String, landkoder: Collection<String>) =
+    fun hentMottakerinstitusjoner(bucType: String, landkoder: Collection<String>) =
         webClient.get()
             .uri("/buc/{bucType}/institusjoner?land={landkoder}", bucType, landkoder.toTypedArray())
             .retrieve()
             .bodyToMono<List<InstitusjonDto>>()
             .block()!!.map { Institusjon(it.id, it.navn, it.landkode) }.toList()
 
-    override fun hentMelosysEessiMeldingFraJournalpostID(journalpostID: String) =
+    fun hentMelosysEessiMeldingFraJournalpostID(journalpostID: String) =
         webClient.get()
             .uri("/journalpost/{journalpostID}/eessimelding", journalpostID)
             .retrieve()
             .bodyToMono<MelosysEessiMelding>()
             .block()!!
 
-    override fun lagreSaksrelasjon(saksrelasjonDto: SaksrelasjonDto) {
+    fun lagreSaksrelasjon(saksrelasjonDto: SaksrelasjonDto) {
         webClient.post()
             .uri("/sak")
             .bodyValue(saksrelasjonDto)
@@ -72,21 +74,21 @@ open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, 
             .block()
     }
 
-    override fun hentSakForGsakSaksnummer(gsakSaksnummer: Long) =
+    fun hentSakForGsakSaksnummer(gsakSaksnummer: Long) =
         webClient.get()
             .uri("/sak?gsakSaksnummer={gsakSaksnummer}", gsakSaksnummer)
             .retrieve()
             .bodyToMono<List<SaksrelasjonDto>>()
             .block()!!
 
-    override fun hentSakForRinasaksnummer(rinaSaksnummer: String) =
+    fun hentSakForRinasaksnummer(rinaSaksnummer: String) =
         webClient.get()
             .uri("/sak?rinaSaksnummer={rinaSaksnummer}", rinaSaksnummer)
             .retrieve()
             .bodyToMono<List<SaksrelasjonDto>>()
             .block()!!
 
-    override fun genererSedPdf(sedDataDto: SedDataDto, sedType: SedType) =
+    fun genererSedPdf(sedDataDto: SedDataDto, sedType: SedType) =
         webClient.post()
             .uri("/sed/{sedType}/pdf", sedType)
             .bodyValue(sedDataDto)
@@ -95,7 +97,7 @@ open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, 
             .block()!!
 
 
-    override fun journalfoerTidligereSendteSedFor(rinaSaksnummer: String) {
+    fun journalfoerTidligereSendteSedFor(rinaSaksnummer: String) {
         webClient.post()
             .uri("/journalfoerTidligereSendteSedFor/{rinaSaksnummer}", rinaSaksnummer)
             .retrieve()
@@ -103,21 +105,21 @@ open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, 
             .block()
     }
 
-    override fun hentTilknyttedeBucer(gsakSaksnummer: Long, statuser: List<String>) =
+    fun hentTilknyttedeBucer(gsakSaksnummer: Long, statuser: List<String>) =
         webClient.get()
             .uri("/sak/{arkivSakID}/bucer?statuser={statuser}", gsakSaksnummer, statuser.toTypedArray())
             .retrieve()
             .bodyToMono<List<BucinfoDto>>()
             .block()!!.map { it.tilDomene() }.toList()
 
-    override fun hentSedGrunnlag(rinaSaksnummer: String, rinaDokumentID: String) =
+    fun hentSedGrunnlag(rinaSaksnummer: String, rinaDokumentID: String) =
         webClient.get()
             .uri("/buc/{rinaSaksnummer}/sed/{rinaDokumentID}/grunnlag", rinaSaksnummer, rinaDokumentID)
             .retrieve()
             .bodyToMono<SedGrunnlagDto>()
             .block()!!
 
-    override fun lukkBuc(rinaSaksnummer: String) {
+    fun lukkBuc(rinaSaksnummer: String) {
         webClient.post()
             .uri("/buc/{rinaSaksnummer}/lukk", rinaSaksnummer)
             .retrieve()
@@ -125,7 +127,7 @@ open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, 
             .block()
     }
 
-    override fun hentMuligeAksjoner(rinaSaksnummer: String) =
+    fun hentMuligeAksjoner(rinaSaksnummer: String) =
         webClient.get()
             .uri("/buc/{rinaSaksnummer}/aksjoner", rinaSaksnummer)
             .retrieve()

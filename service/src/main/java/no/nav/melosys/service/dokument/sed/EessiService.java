@@ -25,7 +25,7 @@ import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.featuretoggle.ToggleName;
-import no.nav.melosys.integrasjon.eessi.EessiConsumer;
+import no.nav.melosys.integrasjon.eessi.EessiClient;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.joark.HentJournalposterTilknyttetSakRequest;
@@ -53,18 +53,18 @@ public class EessiService {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final JoarkFasade joarkFasade;
-    private final EessiConsumer eessiConsumer;
+    private final EessiClient eessiClient;
     private final SedDataBygger sedDataBygger;
     private final SedDataGrunnlagFactory dataGrunnlagFactory;
     private final Unleash unleash;
 
     public EessiService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
-                        EessiConsumer eessiConsumer, JoarkFasade joarkFasade,
+                        EessiClient eessiClient, JoarkFasade joarkFasade,
                         SedDataBygger sedDataBygger, SedDataGrunnlagFactory dataGrunnlagFactory, Unleash unleash) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.joarkFasade = joarkFasade;
-        this.eessiConsumer = eessiConsumer;
+        this.eessiClient = eessiClient;
         this.sedDataBygger = sedDataBygger;
         this.dataGrunnlagFactory = dataGrunnlagFactory;
         this.unleash = unleash;
@@ -195,7 +195,7 @@ public class EessiService {
     ) {
         if (unleash.isEnabled(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)) {
             log.info("Oppretter buc og sed med v2-endepunkt");
-            return eessiConsumer.opprettBucOgSedV2(new OpprettBucOgSedDtoV2(
+            return eessiClient.opprettBucOgSedV2(new OpprettBucOgSedDtoV2(
                 bucType,
                 sedDataDto,
                 lagVedleggReferanser(behandling.getFagsak(), dokumentReferanser),
@@ -205,11 +205,11 @@ public class EessiService {
         }
 
         final var vedlegg = lagEessiVedlegg(behandling.getFagsak(), dokumentReferanser);
-        return eessiConsumer.opprettBucOgSed(sedDataDto, vedlegg, bucType, sendAutomatisk, oppdaterEksisterende);
+        return eessiClient.opprettBucOgSed(sedDataDto, vedlegg, bucType, sendAutomatisk, oppdaterEksisterende);
     }
 
     public List<Institusjon> hentEessiMottakerinstitusjoner(String bucType, Collection<String> landkoder) {
-        return eessiConsumer.hentMottakerinstitusjoner(bucType, landkoder);
+        return eessiClient.hentMottakerinstitusjoner(bucType, landkoder);
     }
 
     private boolean landErEessiReady(String bucType, String landkode) {
@@ -240,7 +240,7 @@ public class EessiService {
     }
 
     public List<BucInformasjon> hentTilknyttedeBucer(long arkivsakID, List<String> statuser) {
-        return eessiConsumer.hentTilknyttedeBucer(arkivsakID, statuser);
+        return eessiClient.hentTilknyttedeBucer(arkivsakID, statuser);
     }
 
     public boolean støtterAutomatiskBehandling(String journalpostID) {
@@ -263,17 +263,17 @@ public class EessiService {
     }
 
     public MelosysEessiMelding hentSedTilknyttetJournalpost(String journalpostID) {
-        return eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(journalpostID);
+        return eessiClient.hentMelosysEessiMeldingFraJournalpostID(journalpostID);
     }
 
     public Optional<Long> finnSakForRinasaksnummer(String rinaSaksnummer) {
-        return eessiConsumer.hentSakForRinasaksnummer(rinaSaksnummer).stream()
+        return eessiClient.hentSakForRinasaksnummer(rinaSaksnummer).stream()
             .findFirst().map(SaksrelasjonDto::getGsakSaksnummer);
     }
 
     public void lagreSaksrelasjon(Long arkivsakID, String rinaSaksnummer, String bucType) {
         log.info("Lagrer saksrelasjon mellom arkivsak {} og rinasak {}", arkivsakID, rinaSaksnummer);
-        eessiConsumer.lagreSaksrelasjon(new SaksrelasjonDto(arkivsakID, rinaSaksnummer, bucType));
+        eessiClient.lagreSaksrelasjon(new SaksrelasjonDto(arkivsakID, rinaSaksnummer, bucType));
     }
 
     public void sendAnmodningUnntakSvar(long behandlingId, String ytterligereInformasjon) {
@@ -312,7 +312,7 @@ public class EessiService {
             annullerSedForNyVurderingMedSendtVedtak(behandling);
         }
 
-        eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, SedType.A004);
+        eessiClient.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, SedType.A004);
     }
 
     @Transactional(readOnly = true)
@@ -342,7 +342,7 @@ public class EessiService {
             sedPdfData.utfyllSedDataDto(unleash, sedDataDto);
         }
         log.info("Henter pdf for sed med type {} for behandling {}", sedType, behandlingID);
-        return eessiConsumer.genererSedPdf(sedDataDto, sedType);
+        return eessiClient.genererSedPdf(sedDataDto, sedType);
     }
 
     private String mapYtterligereInformasjon(String fritekst, PeriodeType periodeType, Behandlingsresultat behandlingsresultat) {
@@ -364,7 +364,7 @@ public class EessiService {
 
     public void opprettJournalpostForTidligereSed(String rinaSaksnummer) {
         log.info("Oppretter journalpost for tidligere sendt sed for rinasak {}", rinaSaksnummer);
-        eessiConsumer.journalfoerTidligereSendteSedFor(rinaSaksnummer);
+        eessiClient.journalfoerTidligereSendteSedFor(rinaSaksnummer);
     }
 
     public SedType hentSedTypeForAnmodningUnntakSvar(Long behandlingID) {
@@ -412,7 +412,7 @@ public class EessiService {
      * @return true hvis vi kan opprette sed på buc.
      */
     public boolean kanOppretteSedTyperPåBuc(String rinaSaksnummer, SedType sedType) {
-        return eessiConsumer.hentMuligeAksjoner(rinaSaksnummer)
+        return eessiClient.hentMuligeAksjoner(rinaSaksnummer)
             .stream().anyMatch(s -> sedType.name().equals(s.split(" ")[1]) && s.split(" ")[2].equals("Create"));
     }
 
@@ -451,11 +451,11 @@ public class EessiService {
     }
 
     public SedGrunnlag hentSedGrunnlag(String rinaSaksnummer, String rinaDokumentID) {
-        return SedGrunnlagMapper.tilSedGrunnlag(eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID));
+        return SedGrunnlagMapper.tilSedGrunnlag(eessiClient.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID));
     }
 
     public void lukkBuc(String rinaSaksnummer) {
-        eessiConsumer.lukkBuc(rinaSaksnummer);
+        eessiClient.lukkBuc(rinaSaksnummer);
     }
 
     private void sendInvalideringSed(long behandlingID, String sedTypeSomSkalInvalideres, LocalDate opprettetDato) {
@@ -473,7 +473,7 @@ public class EessiService {
 
         log.info("Forsøker å sende sed {} for behandling {}", SedType.X008, behandlingID);
         try {
-            eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, SedType.X008);
+            eessiClient.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, SedType.X008);
         } catch (Exception e) {
             log.warn(String.format("Forsøkte å sende SED %s for behandling %s, men det feilet i melosys-eessi.", SedType.X008, behandling.getId()), e);
         }
@@ -509,6 +509,6 @@ public class EessiService {
         String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
 
         log.info("Forsøker å sende sed {} for behandling {}", sedType, behandlingID);
-        eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, sedTypeAvklarer.apply(behandlingsresultat));
+        eessiClient.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, sedTypeAvklarer.apply(behandlingsresultat));
     }
 }

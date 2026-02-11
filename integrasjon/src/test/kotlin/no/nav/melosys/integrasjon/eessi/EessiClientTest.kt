@@ -49,14 +49,14 @@ import no.nav.melosys.domain.eessi.sed.VedleggReferanse
         CorrelationIdOutgoingFilter::class,
 
         GenericAuthFilterFactory::class,
-        EessiConsumerProducerConfig::class,
+        EessiClientConfig::class,
         MetricsTestConfig::class,
     ]
 )
 @AutoConfigureWebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class EessiConsumerTest(
-    @Autowired private val eessiConsumer: EessiConsumer,
+class EessiClientTest(
+    @Autowired private val eessiClient: EessiClient,
     @Autowired private val oAuthMockServer: OAuthMockServer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
 ) {
@@ -112,7 +112,7 @@ class EessiConsumerTest(
         )
 
 
-        val opprettSedDto = eessiConsumer.opprettBucOgSed(
+        val opprettSedDto = eessiClient.opprettBucOgSed(
             sedDataDto,
             vedlegg,
             BucType.LA_BUC_01,
@@ -137,7 +137,7 @@ class EessiConsumerTest(
 
 
         shouldThrow<TekniskException> {
-            eessiConsumer.opprettBucOgSed(
+            eessiClient.opprettBucOgSed(
                 SedDataDto(), listOf(), BucType.LA_BUC_01, true, true
             )
         }.message.shouldContain("Kall mot eessi feilet")
@@ -167,7 +167,7 @@ class EessiConsumerTest(
         )
 
 
-        val opprettSedDto = eessiConsumer.opprettBucOgSedV2(opprettBucOgSedDtoV2)
+        val opprettSedDto = eessiClient.opprettBucOgSedV2(opprettBucOgSedDtoV2)
 
 
         serviceUnderTestMockServer.verify(
@@ -203,7 +203,7 @@ class EessiConsumerTest(
 
 
         shouldThrow<TekniskException> {
-            eessiConsumer.opprettBucOgSedV2(opprettBucOgSedDtoV2)
+            eessiClient.opprettBucOgSedV2(opprettBucOgSedDtoV2)
         }.message.shouldContain("Kall mot eessi feilet")
     }
 
@@ -228,7 +228,7 @@ class EessiConsumerTest(
         )
 
 
-        val opprettSedDto = eessiConsumer.opprettBucOgSedV2(opprettBucOgSedDtoV2)
+        val opprettSedDto = eessiClient.opprettBucOgSedV2(opprettBucOgSedDtoV2)
 
 
         serviceUnderTestMockServer.verify(
@@ -255,7 +255,7 @@ class EessiConsumerTest(
         )
 
 
-        eessiConsumer.sendSedPåEksisterendeBuc(
+        eessiClient.sendSedPåEksisterendeBuc(
             sedDataDto,
             "12345",
             SedType.A001
@@ -277,7 +277,7 @@ class EessiConsumerTest(
         )
 
 
-        val institusjoner = eessiConsumer.hentMottakerinstitusjoner("LA_BUC_01", listOf("DE", "PL"))
+        val institusjoner = eessiClient.hentMottakerinstitusjoner("LA_BUC_01", listOf("DE", "PL"))
 
 
         institusjoner
@@ -303,7 +303,7 @@ class EessiConsumerTest(
 
 
         shouldThrow<NullPointerException> {
-            eessiConsumer.hentMottakerinstitusjoner("LA_BUC_01", listOf("DE"))
+            eessiClient.hentMottakerinstitusjoner("LA_BUC_01", listOf("DE"))
         }
     }
 
@@ -327,7 +327,7 @@ class EessiConsumerTest(
         )
 
 
-        val response = eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(journalpostID)
+        val response = eessiClient.hentMelosysEessiMeldingFraJournalpostID(journalpostID)
 
 
         response.apply {
@@ -350,7 +350,7 @@ class EessiConsumerTest(
                 )
         )
 
-        eessiConsumer.lagreSaksrelasjon(saksrelasjonDto)
+        eessiClient.lagreSaksrelasjon(saksrelasjonDto)
     }
 
     @Test
@@ -373,7 +373,7 @@ class EessiConsumerTest(
 
 
         val saksRelasjoner: List<SaksrelasjonDto> =
-            eessiConsumer.hentSakForRinasaksnummer(saksrelasjon.rinaSaksnummer)
+            eessiClient.hentSakForRinasaksnummer(saksrelasjon.rinaSaksnummer)
 
 
         saksRelasjoner
@@ -398,7 +398,7 @@ class EessiConsumerTest(
         )
 
 
-        val resultPDF: ByteArray = eessiConsumer.genererSedPdf(SedDataDto(), SedType.A001)
+        val resultPDF: ByteArray = eessiClient.genererSedPdf(SedDataDto(), SedType.A001)
 
 
         resultPDF.shouldBe(pdf)
@@ -419,7 +419,7 @@ class EessiConsumerTest(
         )
 
 
-        val hentTilknyttedeBucer = eessiConsumer.hentTilknyttedeBucer(1L, listOf("UTKAST"))
+        val hentTilknyttedeBucer = eessiClient.hentTilknyttedeBucer(1L, listOf("UTKAST"))
 
 
         hentTilknyttedeBucer
@@ -471,7 +471,7 @@ class EessiConsumerTest(
                 )
         )
 
-        eessiConsumer.hentTilknyttedeBucer(1L, listOf("UTKAST", "MOTTATT", "SENDT"))
+        eessiClient.hentTilknyttedeBucer(1L, listOf("UTKAST", "MOTTATT", "SENDT"))
 
         MetricsTestConfig.metricsUriShouldContainBrackets()
     }
@@ -487,7 +487,7 @@ class EessiConsumerTest(
                         .withBody("[]")
                 )
         )
-        eessiConsumer.hentTilknyttedeBucer(1L, listOf("SENDT", "UTKAST"))
+        eessiClient.hentTilknyttedeBucer(1L, listOf("SENDT", "UTKAST"))
 
         MetricsTestConfig.metricsUriShouldContainBrackets()
     }
@@ -505,7 +505,7 @@ class EessiConsumerTest(
         )
 
         val response: SedGrunnlagDto =
-            eessiConsumer.hentSedGrunnlag("1234", "abcdef")
+            eessiClient.hentSedGrunnlag("1234", "abcdef")
 
 
         response.shouldBeInstanceOf<SedGrunnlagA003Dto>()
@@ -525,7 +525,7 @@ class EessiConsumerTest(
                 )
         )
 
-        eessiConsumer.lukkBuc(rinaSaksnummer)
+        eessiClient.lukkBuc(rinaSaksnummer)
 
         MetricsTestConfig.metricsUriShouldContainBrackets()
     }
