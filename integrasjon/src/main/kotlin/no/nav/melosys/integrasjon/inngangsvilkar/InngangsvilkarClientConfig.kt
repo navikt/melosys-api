@@ -10,21 +10,22 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
-class InngangsvilkarConfig {
+class InngangsvilkarClientConfig {
 
     @Bean
-    fun inngangsvilkaarWebClient(
+    fun inngangsvilkaarClient(
         @Value("\${Inngangsvilkaar.url}") url: String,
         webclientBuilder: WebClient.Builder,
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter,
-    ): WebClient = webclientBuilder
-        .baseUrl(url)
-        .defaultHeaders { httpHeaders ->
-            httpHeaders.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
-            httpHeaders.contentType = MediaType.APPLICATION_JSON
-        }
-        .filter(correlationIdOutgoingFilter)
-        .filter(errorFilter("Kall mot inngangsvilkår feilet."))
-        .build()
-
+    ) = InngangsvilkaarClient(
+        webclientBuilder
+            .baseUrl(url)
+            .defaultHeaders { httpHeaders ->
+                httpHeaders.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
+                httpHeaders.contentType = MediaType.APPLICATION_JSON
+            }
+            .filter(correlationIdOutgoingFilter)
+            .filter(errorFilter("Kall mot inngangsvilkår feilet."))
+            .build()
+    )
 }

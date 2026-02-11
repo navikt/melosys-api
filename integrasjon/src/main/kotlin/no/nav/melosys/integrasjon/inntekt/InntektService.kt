@@ -11,7 +11,7 @@ private val log = KotlinLogging.logger { }
 
 @Service
 class InntektService(
-    private val inntektRestConsumer: InntektRestConsumer
+    private val inntektClient: InntektClient
 ) {
     private val inntektKonverter = InntektKonverter()
 
@@ -31,7 +31,7 @@ class InntektService(
             log.info("Hele perioden($fom -> $tom) er fra før $JANUAR_2015 som inntektskomponenten ikke støtter. Lager en tom respons")
             return InntektResponse(ident = Aktoer(personID, AktoerType.AKTOER_ID))
         }
-        return inntektRestConsumer.hentInntektListe(
+        return inntektClient.hentInntektListe(
             InntektRequest(
                 ainntektsfilter = AINNTEKTSFILTER,
                 formaal = FORMAAL,

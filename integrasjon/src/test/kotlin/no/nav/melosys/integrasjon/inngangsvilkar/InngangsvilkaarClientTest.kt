@@ -26,9 +26,9 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class InngangsvilkaarConsumerTest {
+class InngangsvilkaarClientTest {
     private lateinit var wireMockServer: WireMockServer
-    private lateinit var inngangsvilkaarConsumer: InngangsvilkaarConsumer
+    private lateinit var inngangsvilkaarClient: InngangsvilkaarClient
 
     @BeforeEach
     fun setup() {
@@ -40,7 +40,7 @@ class InngangsvilkaarConsumerTest {
         val webClient = WebClient.builder()
             .baseUrl(url)
             .build()
-        inngangsvilkaarConsumer = InngangsvilkaarConsumer(webClient)
+        inngangsvilkaarClient = InngangsvilkaarClient(webClient)
     }
 
     @AfterEach
@@ -66,7 +66,7 @@ class InngangsvilkaarConsumerTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody("""{"kvalifisererForEf883_2004": true,"feilmeldinger": []}""")))
 
-        val response = inngangsvilkaarConsumer.vurderInngangsvilkår(vurderInngangsvilkaarRequest)
+        val response = inngangsvilkaarClient.vurderInngangsvilkår(vurderInngangsvilkaarRequest)
 
 
         verify(postRequestedFor(urlPathEqualTo("/inngangsvilkaar"))

@@ -38,13 +38,13 @@ import java.util.*
         OAuthMockServer::class,
         CorrelationIdOutgoingFilter::class,
         GenericAuthFilterFactory::class,
-        InntektRestConsumerConfig::class,
+        InntektClientConfig::class,
     ]
 )
 @AutoConfigureWebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class InntektRestConsumerTest(
-    @Autowired private val inntektRestConsumer: InntektRestConsumer,
+class InntektClientTest(
+    @Autowired private val inntektClient: InntektClient,
     @Autowired private val oAuthMockServer: OAuthMockServer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int
 ) {
@@ -93,7 +93,7 @@ class InntektRestConsumerTest(
                 )
         )
 
-        val inntektListe = inntektRestConsumer.hentInntektListe(
+        val inntektListe = inntektClient.hentInntektListe(
             InntektRequest(
                 ainntektsfilter = "MedlemskapA-inntekt",
                 formaal = "Medlemskap",
@@ -160,7 +160,7 @@ class InntektRestConsumerTest(
         )
 
         shouldThrow<DecodingException> {
-            inntektRestConsumer.hentInntektListe(
+            inntektClient.hentInntektListe(
                 InntektRequest(
                     ainntektsfilter = "MedlemskapA-inntekt",
                     formaal = "Medlemskap",
