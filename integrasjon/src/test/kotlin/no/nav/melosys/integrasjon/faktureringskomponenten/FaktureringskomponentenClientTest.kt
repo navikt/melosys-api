@@ -32,16 +32,16 @@ import java.util.*
         GenericAuthFilterFactory::class,
 
         CorrelationIdOutgoingFilter::class,
-        FaktureringskomponentenConsumerProducer::class,
+        FaktureringskomponentenClientConfig::class,
         FakeUnleash::class
     ]
 )
 @AutoConfigureWebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class FaktureringskomponentenConsumerTest(
+class FaktureringskomponentenClientTest(
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Autowired private val oAuthMockServer: OAuthMockServer,
-    @Autowired private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
+    @Autowired private val faktureringskomponentenClient: FaktureringskomponentenClient,
 ) {
 
     private val processUUID = UUID.randomUUID()
@@ -104,7 +104,7 @@ class FaktureringskomponentenConsumerTest(
                 )
         )
 
-        val nyFakturaserieResponseDto = faktureringskomponentenConsumer.lagFakturaserie(lagFakturaserieDto(), "melosys")
+        val nyFakturaserieResponseDto = faktureringskomponentenClient.lagFakturaserie(lagFakturaserieDto(), "melosys")
         nyFakturaserieResponseDto.fakturaserieReferanse.shouldBe("456")
     }
 
@@ -140,7 +140,7 @@ class FaktureringskomponentenConsumerTest(
                 )
         )
 
-        val nyFakturaserieResponseDto = faktureringskomponentenConsumer.lagFaktura(lagFakturaDto(), "melosys")
+        val nyFakturaserieResponseDto = faktureringskomponentenClient.lagFaktura(lagFakturaDto(), "melosys")
         nyFakturaserieResponseDto.fakturaserieReferanse.shouldBe("123")
     }
 

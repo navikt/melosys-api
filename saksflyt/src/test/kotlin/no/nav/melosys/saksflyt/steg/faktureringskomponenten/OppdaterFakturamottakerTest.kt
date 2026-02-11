@@ -9,7 +9,7 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
+import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenClient
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaMottakerDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FullmektigDto
 import no.nav.melosys.saksflyt.steg.fakturering.OppdaterFakturamottaker
@@ -34,7 +34,7 @@ class OppdaterFakturamottakerTest {
     lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @RelaxedMockK
-    lateinit var faktureringskomponentenConsumer: FaktureringskomponentenConsumer
+    lateinit var faktureringskomponentenClient: FaktureringskomponentenClient
 
     private val SAKSBEHANDLER_IDENT = "S123456"
     private val BEHANDLING_ID = 1L
@@ -43,7 +43,7 @@ class OppdaterFakturamottakerTest {
 
     @BeforeEach
     fun setup() {
-        oppdaterFakturamottaker = OppdaterFakturamottaker(fagsakService, behandlingsresultatService, faktureringskomponentenConsumer)
+        oppdaterFakturamottaker = OppdaterFakturamottaker(fagsakService, behandlingsresultatService, faktureringskomponentenClient)
     }
 
     @Test
@@ -57,7 +57,7 @@ class OppdaterFakturamottakerTest {
 
         verify { fagsakService.hentFagsak(SAKSNUMMER) }
         verify { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }
-        verify { faktureringskomponentenConsumer wasNot Called }
+        verify { faktureringskomponentenClient wasNot Called }
     }
 
     @Test
@@ -94,7 +94,7 @@ class OppdaterFakturamottakerTest {
         verify { fagsakService.hentFagsak(SAKSNUMMER) }
         verify { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }
         verify {
-            faktureringskomponentenConsumer.oppdaterFakturaMottaker(
+            faktureringskomponentenClient.oppdaterFakturaMottaker(
                 behandlingsresultat2.fakturaserieReferanse!!,
                 FakturaMottakerDto(FullmektigDto(Aktoer().apply {
                     this.rolle = Aktoersroller.FULLMEKTIG
@@ -124,7 +124,7 @@ class OppdaterFakturamottakerTest {
         verify { fagsakService.hentFagsak(SAKSNUMMER) }
         verify { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }
         verify {
-            faktureringskomponentenConsumer.oppdaterFakturaMottaker(
+            faktureringskomponentenClient.oppdaterFakturaMottaker(
                 behandlingsresultat.fakturaserieReferanse!!,
                 FakturaMottakerDto(FullmektigDto(null)),
                 eq(SAKSBEHANDLER_IDENT)

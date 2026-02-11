@@ -26,12 +26,12 @@ import java.time.LocalDate
     classes = [
         OAuthMockServer::class,
         GenericAuthFilterFactory::class,
-        FaktureringskomponentenConsumerProducer::class,
+        FaktureringskomponentenClientConfig::class,
     ]
 )
 @AutoConfigureWebClient
-class FaktureringskomponentenConsumerTokenTest(
-    @Autowired private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
+class FaktureringskomponentenClientTokenTest(
+    @Autowired private val faktureringskomponentenClient: FaktureringskomponentenClient,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
@@ -91,7 +91,7 @@ class FaktureringskomponentenConsumerTokenTest(
         "}"
 
     override fun executeRequest() =
-        faktureringskomponentenConsumer.lagFakturaserie(lagFakturaserieDto(), "N123456")
+        faktureringskomponentenClient.lagFakturaserie(lagFakturaserieDto(), "N123456")
 
 
     private fun lagFakturaserieDto(

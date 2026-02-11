@@ -13,7 +13,7 @@ data class NyFakturaserieResponseDto(
     val fakturaserieReferanse: String,
 )
 
-open class FaktureringskomponentenConsumer(private val webClient: WebClient) : JsonRestIntegrasjon {
+open class FaktureringskomponentenClient(private val webClient: WebClient) : JsonRestIntegrasjon {
 
     fun lagFakturaserie(fakturaserieDto: FakturaserieDto, saksbehandlerIdent: String? = null) =
         webClient.post()

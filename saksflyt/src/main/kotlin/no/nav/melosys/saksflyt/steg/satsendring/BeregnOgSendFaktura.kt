@@ -6,7 +6,7 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
+import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenClient
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component
 class BeregnOgSendFaktura(
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
+    private val faktureringskomponentenClient: FaktureringskomponentenClient,
     private val pdlService: PersondataService,
     private val behandlingService: BehandlingService
 ) : StegBehandler {
@@ -45,7 +45,7 @@ class BeregnOgSendFaktura(
         nyTrygdeavgift: Set<Trygdeavgiftsperiode>
     ) {
         val fakturaserieDto = mapFakturaserieDto(behandlingsresultat, nyTrygdeavgift)
-        val faktureringResponse = faktureringskomponentenConsumer.lagFakturaserie(fakturaserieDto)
+        val faktureringResponse = faktureringskomponentenClient.lagFakturaserie(fakturaserieDto)
         behandlingsresultat.fakturaserieReferanse = faktureringResponse.fakturaserieReferanse
         behandlingsresultatService.lagre(behandlingsresultat)
     }
