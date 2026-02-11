@@ -4,8 +4,8 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumerConfig
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdClient
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdClientConfig
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdQuery
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdResponse
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
@@ -23,14 +23,14 @@ import org.springframework.test.context.ContextConfiguration
 @ContextConfiguration(
     classes = [
         OAuthMockServer::class,
-        ArbeidsforholdConsumerConfig::class,
+        ArbeidsforholdClientConfig::class,
         GenericAuthFilterFactory::class,
 
     ]
 )
 @AutoConfigureWebClient
 private class AaregConsumerTokenTest(
-    @Autowired private val arbeidsforholdConsumer: ArbeidsforholdConsumer,
+    @Autowired private val arbeidsforholdClient: ArbeidsforholdClient,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
@@ -91,5 +91,5 @@ private class AaregConsumerTokenTest(
     }
 
     override fun executeRequest() =
-        arbeidsforholdConsumer.finnArbeidsforholdPrArbeidstaker("121", ArbeidsforholdQuery())
+        arbeidsforholdClient.finnArbeidsforholdPrArbeidstaker("121", ArbeidsforholdQuery())
 }

@@ -9,7 +9,7 @@ import org.springframework.web.util.UriBuilder
 import java.util.*
 
 @Retryable
-open class ArbeidsforholdConsumer(private val webClient: WebClient) {
+open class ArbeidsforholdClient(private val webClient: WebClient) {
     open fun finnArbeidsforholdPrArbeidstaker(
         fnr: String,
         arbeidsforholdQuery: ArbeidsforholdQuery

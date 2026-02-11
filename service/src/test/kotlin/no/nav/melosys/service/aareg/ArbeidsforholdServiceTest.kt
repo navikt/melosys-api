@@ -13,7 +13,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdClient
 import no.nav.melosys.service.kodeverk.KodeverkService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
@@ -37,7 +37,7 @@ internal class ArbeidsforholdServiceTest {
     private val kodeverkServiceMock: KodeverkService = mockk()
     private val arbeidsforholdService: ArbeidsforholdService = ArbeidsforholdService(arbeidsforholdRestConsumer(), kodeverkServiceMock)
 
-    private fun arbeidsforholdRestConsumer() = ArbeidsforholdConsumer(
+    private fun arbeidsforholdRestConsumer() = ArbeidsforholdClient(
         WebClient.builder()
             .baseUrl("http://localhost:" + wireMockServer.port())
             .build()
