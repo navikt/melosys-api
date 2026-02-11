@@ -14,10 +14,12 @@ import org.springframework.retry.annotation.Retryable
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 
+// Klasse og metoder må være open for at retry skal funke og at webClient ikke skal bli null
+// https://github.com/spring-projects/spring-framework/issues/26729
 @Retryable
 open class EessiClient(private val webClient: WebClient) : JsonRestIntegrasjon {
 
-    fun opprettBucOgSed(
+    open fun opprettBucOgSed(
         sedDataDto: SedDataDto,
         vedlegg: Collection<Vedlegg>,
         bucType: BucType,
@@ -34,7 +36,7 @@ open class EessiClient(private val webClient: WebClient) : JsonRestIntegrasjon {
             .bodyToMono<OpprettSedDto>()
             .block()!!
 
-    fun opprettBucOgSedV2(opprettBucOgSedDtoV2: OpprettBucOgSedDtoV2) =
+    open fun opprettBucOgSedV2(opprettBucOgSedDtoV2: OpprettBucOgSedDtoV2) =
         webClient.post()
             .uri("/v2/buc")
             .bodyValue(opprettBucOgSedDtoV2)
@@ -42,7 +44,7 @@ open class EessiClient(private val webClient: WebClient) : JsonRestIntegrasjon {
             .bodyToMono<OpprettSedDto>()
             .block()!!
 
-    fun sendSedPåEksisterendeBuc(sedDataDto: SedDataDto, rinaSaksnummer: String, sedType: SedType) {
+    open fun sendSedPåEksisterendeBuc(sedDataDto: SedDataDto, rinaSaksnummer: String, sedType: SedType) {
         webClient.post()
             .uri("/buc/{bucID}/sed/{sedType}", rinaSaksnummer, sedType)
             .bodyValue(sedDataDto)
@@ -51,21 +53,21 @@ open class EessiClient(private val webClient: WebClient) : JsonRestIntegrasjon {
             .block()
     }
 
-    fun hentMottakerinstitusjoner(bucType: String, landkoder: Collection<String>) =
+    open fun hentMottakerinstitusjoner(bucType: String, landkoder: Collection<String>) =
         webClient.get()
             .uri("/buc/{bucType}/institusjoner?land={landkoder}", bucType, landkoder.toTypedArray())
             .retrieve()
             .bodyToMono<List<InstitusjonDto>>()
             .block()!!.map { Institusjon(it.id, it.navn, it.landkode) }.toList()
 
-    fun hentMelosysEessiMeldingFraJournalpostID(journalpostID: String) =
+    open fun hentMelosysEessiMeldingFraJournalpostID(journalpostID: String) =
         webClient.get()
             .uri("/journalpost/{journalpostID}/eessimelding", journalpostID)
             .retrieve()
             .bodyToMono<MelosysEessiMelding>()
             .block()!!
 
-    fun lagreSaksrelasjon(saksrelasjonDto: SaksrelasjonDto) {
+    open fun lagreSaksrelasjon(saksrelasjonDto: SaksrelasjonDto) {
         webClient.post()
             .uri("/sak")
             .bodyValue(saksrelasjonDto)
@@ -74,21 +76,21 @@ open class EessiClient(private val webClient: WebClient) : JsonRestIntegrasjon {
             .block()
     }
 
-    fun hentSakForGsakSaksnummer(gsakSaksnummer: Long) =
+    open fun hentSakForGsakSaksnummer(gsakSaksnummer: Long) =
         webClient.get()
             .uri("/sak?gsakSaksnummer={gsakSaksnummer}", gsakSaksnummer)
             .retrieve()
             .bodyToMono<List<SaksrelasjonDto>>()
             .block()!!
 
-    fun hentSakForRinasaksnummer(rinaSaksnummer: String) =
+    open fun hentSakForRinasaksnummer(rinaSaksnummer: String) =
         webClient.get()
             .uri("/sak?rinaSaksnummer={rinaSaksnummer}", rinaSaksnummer)
             .retrieve()
             .bodyToMono<List<SaksrelasjonDto>>()
             .block()!!
 
-    fun genererSedPdf(sedDataDto: SedDataDto, sedType: SedType) =
+    open fun genererSedPdf(sedDataDto: SedDataDto, sedType: SedType) =
         webClient.post()
             .uri("/sed/{sedType}/pdf", sedType)
             .bodyValue(sedDataDto)
@@ -97,7 +99,7 @@ open class EessiClient(private val webClient: WebClient) : JsonRestIntegrasjon {
             .block()!!
 
 
-    fun journalfoerTidligereSendteSedFor(rinaSaksnummer: String) {
+    open fun journalfoerTidligereSendteSedFor(rinaSaksnummer: String) {
         webClient.post()
             .uri("/journalfoerTidligereSendteSedFor/{rinaSaksnummer}", rinaSaksnummer)
             .retrieve()
@@ -105,21 +107,21 @@ open class EessiClient(private val webClient: WebClient) : JsonRestIntegrasjon {
             .block()
     }
 
-    fun hentTilknyttedeBucer(gsakSaksnummer: Long, statuser: List<String>) =
+    open fun hentTilknyttedeBucer(gsakSaksnummer: Long, statuser: List<String>) =
         webClient.get()
             .uri("/sak/{arkivSakID}/bucer?statuser={statuser}", gsakSaksnummer, statuser.toTypedArray())
             .retrieve()
             .bodyToMono<List<BucinfoDto>>()
             .block()!!.map { it.tilDomene() }.toList()
 
-    fun hentSedGrunnlag(rinaSaksnummer: String, rinaDokumentID: String) =
+    open fun hentSedGrunnlag(rinaSaksnummer: String, rinaDokumentID: String) =
         webClient.get()
             .uri("/buc/{rinaSaksnummer}/sed/{rinaDokumentID}/grunnlag", rinaSaksnummer, rinaDokumentID)
             .retrieve()
             .bodyToMono<SedGrunnlagDto>()
             .block()!!
 
-    fun lukkBuc(rinaSaksnummer: String) {
+    open fun lukkBuc(rinaSaksnummer: String) {
         webClient.post()
             .uri("/buc/{rinaSaksnummer}/lukk", rinaSaksnummer)
             .retrieve()
@@ -127,7 +129,7 @@ open class EessiClient(private val webClient: WebClient) : JsonRestIntegrasjon {
             .block()
     }
 
-    fun hentMuligeAksjoner(rinaSaksnummer: String) =
+    open fun hentMuligeAksjoner(rinaSaksnummer: String) =
         webClient.get()
             .uri("/buc/{rinaSaksnummer}/aksjoner", rinaSaksnummer)
             .retrieve()
