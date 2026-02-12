@@ -61,8 +61,6 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     public void utfør(Prosessinstans prosessinstans) {
         final var behandling = prosessinstans.getBehandling();
         final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        var mottakere = prosessinstans.getData(EESSI_MOTTAKERE);
-        boolean harMottakerinstutisjoner = mottakere != null && !mottakere.isEmpty();
 
         if (behandling.erNorgeUtpekt()) {
             var bucer = eessiService.hentTilknyttedeBucer(behandling.getFagsak().getGsakSaksnummer(), Collections.emptyList());
@@ -76,7 +74,8 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             SendUtlandStatus status = sendSedA003(prosessinstans);
             log.info("SendUtlandStatus for behandling {}: {}", behandling.getId(), status);
         } else if (skalSendesUtland(behandlingsresultat)) {
-            if(erArtikkel11_3B(behandlingsresultat) && !harMottakerinstutisjoner) {
+            var mottakere = prosessinstans.getData(EESSI_MOTTAKERE);
+            if (erArtikkel11_3B(behandlingsresultat) && (mottakere == null || mottakere.isEmpty())) {
                 log.info("Sender ikke SED for behandling {}", behandling.getId());
             } else {
                 super.sendUtland(avklarBucType(behandling), prosessinstans);
