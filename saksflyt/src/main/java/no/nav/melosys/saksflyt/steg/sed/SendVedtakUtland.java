@@ -76,7 +76,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         } else if (skalSendesUtland(behandlingsresultat)) {
             var mottakere = prosessinstans.getData(EESSI_MOTTAKERE);
             if (erArtikkel11_3B(behandlingsresultat) && (mottakere == null || mottakere.isEmpty())) {
-                log.info("Sender ikke SED for behandling {}", behandling.getId());
+                log.info("Sender ikke SED for behandling {}, mottakerinstusjoner er ikke oppgitt", behandling.getId());
             } else {
                 super.sendUtland(avklarBucType(behandling), prosessinstans);
             }
