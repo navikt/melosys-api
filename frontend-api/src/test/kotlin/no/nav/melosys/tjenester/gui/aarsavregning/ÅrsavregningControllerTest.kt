@@ -170,7 +170,8 @@ internal class ÅrsavregningControllerTest {
           "bestemmelse": "FTRL_KAP2_2_8",
           "innvilgelsesResultat": "INNVILGET",
           "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_B_PENSJON",
-          "medlemskapstype": "PLIKTIG"
+          "medlemskapstype": "PLIKTIG",
+          "type": "MEDLEMSKAPSPERIODE"
         },
         {
           "id": 0,
@@ -179,7 +180,8 @@ internal class ÅrsavregningControllerTest {
           "bestemmelse": "FTRL_KAP2_2_8",
           "innvilgelsesResultat": "INNVILGET",
           "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER",
-          "medlemskapstype": "PLIKTIG"
+          "medlemskapstype": "PLIKTIG",
+          "type": "MEDLEMSKAPSPERIODE"
         }
       ],
       "skatteforholdsperioder": [
@@ -248,7 +250,8 @@ internal class ÅrsavregningControllerTest {
         "bestemmelse": "FTRL_KAP2_2_8",
         "innvilgelsesResultat": "INNVILGET",
         "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_B_PENSJON",
-        "medlemskapstype": "PLIKTIG"
+        "medlemskapstype": "PLIKTIG",
+        "type": "MEDLEMSKAPSPERIODE"
     },
     {
         "id": 0,
@@ -257,7 +260,8 @@ internal class ÅrsavregningControllerTest {
         "bestemmelse": "FTRL_KAP2_2_8",
         "innvilgelsesResultat": "INNVILGET",
         "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER",
-        "medlemskapstype": "PLIKTIG"
+        "medlemskapstype": "PLIKTIG",
+        "type": "MEDLEMSKAPSPERIODE"
     }
 ],
   "nyttTrygdeavgiftsGrunnlag": null,
@@ -409,7 +413,8 @@ internal class ÅrsavregningControllerTest {
                     "bestemmelse": "FTRL_KAP2_2_1",
                     "innvilgelsesResultat": "INNVILGET",
                     "trygdedekning": "FULL_DEKNING_FTRL",
-                    "medlemskapstype": "PLIKTIG"
+                    "medlemskapstype": "PLIKTIG",
+                    "type": "MEDLEMSKAPSPERIODE"
                 }
             ],
             "skatteforholdsperioder": [
@@ -459,7 +464,8 @@ internal class ÅrsavregningControllerTest {
                     "bestemmelse": "FTRL_KAP2_2_1",
                     "innvilgelsesResultat": "INNVILGET",
                     "trygdedekning": "FULL_DEKNING_FTRL",
-                    "medlemskapstype": "PLIKTIG"
+                    "medlemskapstype": "PLIKTIG",
+                    "type": "MEDLEMSKAPSPERIODE"
                 }
             ],
             "skatteforholdsperioder": [

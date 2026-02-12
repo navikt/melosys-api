@@ -67,8 +67,8 @@ internal class MedlPeriodeKonverterTest {
 
     @Test
     fun hentFellesKodeForDekningtype() {
-        val trygdeDekning = Trygdedekninger.UTEN_DEKNING
-        val dekningMedl = tilMedlTrygdeDekning(trygdeDekning)
+        val trygdedekning = Trygdedekninger.UTEN_DEKNING
+        val dekningMedl = tilMedlTrygdeDekning(trygdedekning)
         dekningMedl shouldBe DekningMedl.UNNTATT
     }
 

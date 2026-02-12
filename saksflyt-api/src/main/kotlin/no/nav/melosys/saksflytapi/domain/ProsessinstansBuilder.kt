@@ -15,7 +15,8 @@ class ProsessinstansBuilder(
     private var ytterligereInformasjonTilSed: String? = null,
     private var a008Formaal: String? = null,
     private var eessiMottakere: Set<String?>? = null,
-    private var eessiMelding: MelosysEessiMelding? = null
+    private var eessiMelding: MelosysEessiMelding? = null,
+    private var låsReferanse: String? = null
 ) {
     fun medType(type: ProsessType?): ProsessinstansBuilder = apply { this.type = type }
     fun medBehandling(behandling: Behandling?): ProsessinstansBuilder = apply { this.behandling = behandling }
@@ -29,6 +30,7 @@ class ProsessinstansBuilder(
 
     fun medEessiMottakere(eessiMottakere: Set<String?>?): ProsessinstansBuilder = apply { this.eessiMottakere = eessiMottakere }
     fun medEessiMelding(eessiMelding: MelosysEessiMelding?): ProsessinstansBuilder = apply { this.eessiMelding = eessiMelding }
+    fun medLåsReferanse(låsReferanse: String?): ProsessinstansBuilder = apply { this.låsReferanse = låsReferanse }
 
     fun build(): Prosessinstans = Prosessinstans(
         type = type ?: error("Prosessinstans må ha en type"),
@@ -36,6 +38,7 @@ class ProsessinstansBuilder(
         behandling = behandling,
         registrertDato = LocalDateTime.now(),
         endretDato = LocalDateTime.now(),
+        låsReferanse = låsReferanse
     ).apply {
         if (StringUtils.isNotEmpty(begrunnelseFritekst))  {
             setData(ProsessDataKey.BEGRUNNELSE_FRITEKST, begrunnelseFritekst)

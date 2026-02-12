@@ -34,7 +34,7 @@ MelosysSoknadMottak:
 NAIS_CLUSTER_NAME: dev-fss
 NAIS_CLUSTER_NAME_GCP: dev-gcp
 OppgaveAPI_v1:
-  url: https://oppgave.dev.intern.nav.no/api/v1
+  url: https://oppgave.intern.dev.nav.no/api/v1
 PDL:
   url: https://pdl-api.dev.intern.nav.no/graphql
 Person_v3:
@@ -153,7 +153,11 @@ systemuser:
 tilgangsmaskinen:
   url: https://tilgangsmaskin.intern.dev.nav.no
 unleash:
-  token: faketoken
-  url: fakeurl
+  url: ${UNLEASH_URL:http://localhost:4242/api}
+  token: ${UNLEASH_TOKEN:*:development.unleash-insecure-client-api-token}
+  admin-token: ${UNLEASH_ADMIN_TOKEN:*:*.unleash-insecure-api-token}
+  app-name: ${UNLEASH_APP_NAME:melosys-api}
+  environment: ${UNLEASH_ENVIRONMENT:development}
+  project-id: ${UNLEASH_PROJECT_ID:default}
 utbetaling_rest:
   url: https://sokos-utbetaldata.dev.intern.nav.no/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern

@@ -82,6 +82,12 @@ class UfmKontrollTest {
             expected = Kontroll_begrunnelser.PERIODEN_OVER_24_MD
         },
         kontrollTestCase {
+            name = "periode uten sluttdato gir perioden over 24 mnd treff"
+            data = kontrollData(fom = EPOCH_DATE_1970, tom = null)
+            kontroll = UfmKontroll::periodeOver24MånederOgEnDag
+            expected = Kontroll_begrunnelser.PERIODEN_OVER_24_MD
+        },
+        kontrollTestCase {
             name = "periode med nøyaktig 2 år og 1 dag er OK"
             data = kontrollData(
                 fom = EPOCH_DATE_1970.plusYears(2),

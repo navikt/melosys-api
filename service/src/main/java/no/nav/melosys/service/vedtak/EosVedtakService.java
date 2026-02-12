@@ -15,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
@@ -146,6 +147,10 @@ public class EosVedtakService implements FattVedtakInterface {
             return Collections.emptySet();
         }
 
+        if (erArtikkel11_3B(behandlingsresultat) && (mottakerinstitusjoner == null || mottakerinstitusjoner.isEmpty())) {
+            return Collections.emptySet();
+        }
+
         Collection<Land_iso2> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
         if (!behandling.erNorgeUtpekt() && skalSedSendes(behandlingsresultat, landkoder)) {
             mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
@@ -173,5 +178,10 @@ public class EosVedtakService implements FattVedtakInterface {
         return BucType.fraBestemmelse(
             behandlingsresultat.hentValidertPeriodeOmLovvalg().getBestemmelse()
         );
+    }
+
+    private static boolean erArtikkel11_3B(Behandlingsresultat behandlingsresultat) {
+        return behandlingsresultat.hentValidertPeriodeOmLovvalg().getBestemmelse()
+            == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B;
     }
 }

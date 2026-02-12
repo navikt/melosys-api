@@ -1,6 +1,6 @@
 package no.nav.melosys.featuretoggle
 
-import io.getunleash.FeatureToggle
+import io.getunleash.FeatureDefinition
 import io.getunleash.MoreOperations
 import io.getunleash.Unleash
 import io.getunleash.UnleashContext
@@ -33,9 +33,9 @@ class DefaultEnabledUnleashTest {
     @Test
     fun `should return actual state when toggle is defined and enabled`() {
         val toggleName = "known.toggle.enabled"
-        val featureToggle: FeatureToggle = mockk()
+        val featureDefinition: FeatureDefinition = mockk()
         every { delegate.more() } returns moreOperations
-        every { moreOperations.getFeatureToggleDefinition(toggleName) } returns Optional.of(featureToggle)
+        every { moreOperations.getFeatureToggleDefinition(toggleName) } returns Optional.of(featureDefinition)
         every { delegate.isEnabled(toggleName, false) } returns true
 
         val result = unleash.isEnabled(toggleName)
@@ -48,9 +48,9 @@ class DefaultEnabledUnleashTest {
     @Test
     fun `should return actual state when toggle is defined and disabled`() {
         val toggleName = "known.toggle.disabled"
-        val featureToggle: FeatureToggle = mockk()
+        val featureDefinition: FeatureDefinition = mockk()
         every { delegate.more() } returns moreOperations
-        every { moreOperations.getFeatureToggleDefinition(toggleName) } returns Optional.of(featureToggle)
+        every { moreOperations.getFeatureToggleDefinition(toggleName) } returns Optional.of(featureDefinition)
         every { delegate.isEnabled(toggleName, false) } returns false
 
         val result = unleash.isEnabled(toggleName)
@@ -63,10 +63,10 @@ class DefaultEnabledUnleashTest {
     @Test
     fun `should support UnleashContext parameter for defined toggle`() {
         val toggleName = "context.toggle"
-        val featureToggle: FeatureToggle = mockk()
+        val featureDefinition: FeatureDefinition = mockk()
         val context = UnleashContext.builder().userId("test-user").build()
         every { delegate.more() } returns moreOperations
-        every { moreOperations.getFeatureToggleDefinition(toggleName) } returns Optional.of(featureToggle)
+        every { moreOperations.getFeatureToggleDefinition(toggleName) } returns Optional.of(featureDefinition)
         every { delegate.isEnabled(toggleName, context, false) } returns true
 
         val result = unleash.isEnabled(toggleName, context)
@@ -93,9 +93,9 @@ class DefaultEnabledUnleashTest {
     @Test
     fun `should respect defaultSetting parameter for known toggle`() {
         val toggleName = "known.toggle"
-        val featureToggle: FeatureToggle = mockk()
+        val featureDefinition: FeatureDefinition = mockk()
         every { delegate.more() } returns moreOperations
-        every { moreOperations.getFeatureToggleDefinition(toggleName) } returns Optional.of(featureToggle)
+        every { moreOperations.getFeatureToggleDefinition(toggleName) } returns Optional.of(featureDefinition)
         every { delegate.isEnabled(toggleName, true) } returns false
 
         val result = unleash.isEnabled(toggleName, true)

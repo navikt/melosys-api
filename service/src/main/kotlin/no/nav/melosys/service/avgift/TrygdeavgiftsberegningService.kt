@@ -3,6 +3,7 @@ package no.nav.melosys.service.avgift
 import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.*
+import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
@@ -12,6 +13,7 @@ import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningRequest
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
+import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
 import no.nav.melosys.service.avgift.model.InntektsperiodeModel
 import no.nav.melosys.service.avgift.model.SkatteforholdTilNorgeModel
 import no.nav.melosys.service.avgift.model.TrygdeavgiftsgrunnlagModel
@@ -36,7 +38,7 @@ class TrygdeavgiftsberegningService(
     private val unleash: Unleash
 ) {
 
-    @Transactional(readOnly = true)
+    @Transactional
     fun beregnOgLagreTrygdeavgift(
         behandlingID: Long,
         skatteforholdsperioder: List<SkatteforholdTilNorge> = emptyList(),
@@ -53,14 +55,26 @@ class TrygdeavgiftsberegningService(
         )
 
         val nyeTrygdeavgiftsperioder =
-            lagNyeTrygeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
+            lagNyeTrygdeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
         trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
+
+        behandlingsresultat.årsavregning?.let { årsavregning ->
+            if (årsavregning.endeligAvgiftValg != EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT) {
+                val totalAvgift = TotalbeløpBeregner.hentTotalavgift(nyeTrygdeavgiftsperioder)
+                årsavregning.beregnetAvgiftBelop = totalAvgift
+                if (totalAvgift != null) {
+                    årsavregning.beregnTilFaktureringsBeloep()
+                } else {
+                    årsavregning.tilFaktureringBeloep = null
+                }
+            }
+        }
 
         return nyeTrygdeavgiftsperioder.toSet()
     }
 
     @Suppress("SpringTransactionalMethodCallsInspection") // warning på beregnTrygdeavgift ignoreres pga eksisterende transaksjon
-    private fun lagNyeTrygeavgiftsperioder(
+    private fun lagNyeTrygdeavgiftsperioder(
         behandlingsresultat: Behandlingsresultat,
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsperioder: List<Inntektsperiode>,

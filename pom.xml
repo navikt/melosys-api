@@ -43,6 +43,7 @@
         <!-- Melosys -->
         <melosys.internt.kodeverk.version>5.15.328-1c79e4b</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.154-midlertidig</melosys.brev.version>
+        <melosys-skjema-api-types.version>2026.02.09-cdcee727b0c0-java17</melosys-skjema-api-types.version>
 
         <!-- NAV -->
         <nav.tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</nav.tjenestespesifikasjoner.version>
@@ -86,7 +87,7 @@
         <slf4j.version>2.0.17</slf4j.version>
         <springfox.version>3.0.0</springfox.version>
         <swagger.version>1.5.21</swagger.version>
-        <unleash.version>8.3.0</unleash.version>
+        <unleash.version>12.1.1</unleash.version>
         <bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
         <bouncycastle-jdk18on.version>1.83</bouncycastle-jdk18on.version>
         <nimbus-jose-jwt.version>10.6</nimbus-jose-jwt.version>
@@ -127,7 +128,6 @@
         <xmlsec.version>4.0.4</xmlsec.version>
         <wiremock-standalone.version>3.13.2</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
-        <melosys-skjema-api-types.version>2026.02.02-44d6cfac0e7b-java17</melosys-skjema-api-types.version>
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det

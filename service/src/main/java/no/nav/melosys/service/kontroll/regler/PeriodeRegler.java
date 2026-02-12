@@ -31,7 +31,8 @@ public final class PeriodeRegler {
     }
 
     public static boolean periodeOver2ÅrOgEnDag(LocalDate fom, LocalDate tom) {
-        return tom != null && antallÅr(fom, tom) > 2 || antallÅr(fom, tom) >= 2 && antallDager(fom, tom) > 0;
+        if (tom == null) return true;
+        return antallÅr(fom, tom) > 2 || antallÅr(fom, tom) >= 2 && antallDager(fom, tom) > 0;
     }
 
     private static int antallÅr(LocalDate fom, LocalDate tom) {

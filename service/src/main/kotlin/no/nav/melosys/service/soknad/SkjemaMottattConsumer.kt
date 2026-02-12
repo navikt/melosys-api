@@ -5,6 +5,7 @@ import mu.KotlinLogging
 import no.nav.melosys.config.MDCOperations.Companion.withKafkaCorrelationId
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.SkjemaMottattMelding
+import no.nav.melosys.saksflytapi.ProsessinstansService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.KafkaListener
@@ -16,7 +17,8 @@ private val log = KotlinLogging.logger { }
 @Profile("!local-q1 & !local-q2")
 @Service
 class SkjemaMottattConsumer(
-    private val unleash: Unleash
+    private val unleash: Unleash,
+    private val prosessinstansService: ProsessinstansService
 ) {
 
     @KafkaListener(
@@ -32,7 +34,7 @@ class SkjemaMottattConsumer(
         log.info { "Mottatt skjema-melding med skjemaId: ${melding.skjemaId}" }
 
         if (unleash.isEnabled(ToggleName.MELOSYS_SKJEMA_MOTTATT_CONSUMER)) {
-            // TODO: Implementer håndtering av skjema-mottatt melding
+            prosessinstansService.opprettProsessinstansMelosysSøknadMottatt(melding.skjemaId)
         }
     }
 }
