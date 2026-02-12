@@ -18,7 +18,7 @@ class InntektClientConfig(
 ) : CallIdAware {
 
     @Bean
-    fun inntektRestConsumerConsumer(
+    fun inntektClient(
         webClientBuilder: WebClient.Builder,
         systemContextExchangeFilter: GenericAuthFilterFactory,
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter

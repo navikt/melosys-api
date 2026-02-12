@@ -12,7 +12,7 @@ import org.springframework.web.reactive.function.client.WebClient
 @Configuration
 class ArbeidsforholdClientConfig(@Value("\${arbeidsforhold.rest.url}") private val url: String) {
     @Bean
-    fun arbeidsforholdConsumer(
+    fun arbeidsforholdClient(
         webClientBuilder: WebClient.Builder,
         authFilterFactory: GenericAuthFilterFactory,
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter

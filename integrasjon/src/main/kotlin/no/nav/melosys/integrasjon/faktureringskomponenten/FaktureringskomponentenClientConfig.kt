@@ -16,7 +16,7 @@ class FaktureringskomponentenClientConfig(
     private val genericAuthFilterFactory: GenericAuthFilterFactory
 ) {
     @Bean
-    fun faktureringskomponentenConsumer(
+    fun faktureringskomponentenClient(
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter?,
         webClientBuilder: WebClient.Builder
     ): FaktureringskomponentenClient {

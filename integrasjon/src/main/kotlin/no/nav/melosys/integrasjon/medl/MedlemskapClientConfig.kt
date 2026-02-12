@@ -18,7 +18,7 @@ class MedlemskapClientConfig(
     private val genericAuthFilterFactory: GenericAuthFilterFactory
 ) : CallIdAware {
     @Bean
-    fun medlemskapRestConsumer(
+    fun medlemskapClient(
         webClientBuilder: WebClient.Builder, correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
     ) = MedlemskapClient(
         webClientBuilder

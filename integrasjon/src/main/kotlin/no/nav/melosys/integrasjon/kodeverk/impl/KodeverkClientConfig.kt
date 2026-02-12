@@ -19,7 +19,7 @@ class KodeverkClientConfig(
 ) : CallIdAware {
 
     @Bean
-    fun kodeverkConsumer(
+    fun kodeverkClient(
         webClientBuilder: WebClient.Builder, correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
     ) = KodeverkClient(
         webClientBuilder

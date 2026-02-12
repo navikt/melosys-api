@@ -16,7 +16,7 @@ class EessiClientConfig(
     private val genericAuthFilterFactory: GenericAuthFilterFactory
 ) {
     @Bean
-    fun melosysEessiConsumer(
+    fun eessiClient(
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter,
         webClientBuilder: WebClient.Builder
     ): EessiClient = EessiClient(
