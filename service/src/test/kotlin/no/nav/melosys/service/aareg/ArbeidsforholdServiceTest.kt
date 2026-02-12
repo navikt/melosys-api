@@ -35,9 +35,9 @@ internal class ArbeidsforholdServiceTest {
         }
 
     private val kodeverkServiceMock: KodeverkService = mockk()
-    private val arbeidsforholdService: ArbeidsforholdService = ArbeidsforholdService(arbeidsforholdRestConsumer(), kodeverkServiceMock)
+    private val arbeidsforholdService: ArbeidsforholdService = ArbeidsforholdService(arbeidsforholdClient(), kodeverkServiceMock)
 
-    private fun arbeidsforholdRestConsumer() = ArbeidsforholdClient(
+    private fun arbeidsforholdClient() = ArbeidsforholdClient(
         WebClient.builder()
             .baseUrl("http://localhost:" + wireMockServer.port())
             .build()
