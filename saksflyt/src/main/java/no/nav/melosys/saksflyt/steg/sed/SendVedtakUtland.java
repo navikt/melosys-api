@@ -14,6 +14,7 @@ import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_A1;
+import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.EESSI_MOTTAKERE;
 
 
 @Component
@@ -59,6 +61,8 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     public void utfør(Prosessinstans prosessinstans) {
         final var behandling = prosessinstans.getBehandling();
         final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        var mottakere = prosessinstans.getData(EESSI_MOTTAKERE);
+        boolean harMottakerinstutisjoner = mottakere != null && !mottakere.isEmpty();
 
         if (behandling.erNorgeUtpekt()) {
             var bucer = eessiService.hentTilknyttedeBucer(behandling.getFagsak().getGsakSaksnummer(), Collections.emptyList());
@@ -72,7 +76,11 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             SendUtlandStatus status = sendSedA003(prosessinstans);
             log.info("SendUtlandStatus for behandling {}: {}", behandling.getId(), status);
         } else if (skalSendesUtland(behandlingsresultat)) {
-            super.sendUtland(avklarBucType(behandling), prosessinstans);
+            if(erArtikkel11_3B(behandlingsresultat) && !harMottakerinstutisjoner) {
+                log.info("Sender ikke SED for behandling {}", behandling.getId());
+            } else {
+                super.sendUtland(avklarBucType(behandling), prosessinstans);
+            }
         } else if (behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar()) {
             finnOgLukkTilhørendeBUC(behandlingsresultat);
         }
@@ -82,6 +90,11 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         log.info("Sender A003 for utpeking til {}, i behandling {}",
             prosessinstans.getData(ProsessDataKey.UTPEKT_LAND), prosessinstans.getBehandling().getId());
         return sendUtland(BucType.LA_BUC_02, prosessinstans);
+    }
+
+    private static boolean erArtikkel11_3B(Behandlingsresultat behandlingsresultat) {
+        return behandlingsresultat.hentValidertPeriodeOmLovvalg().getBestemmelse()
+            == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B;
     }
 
     @Override
