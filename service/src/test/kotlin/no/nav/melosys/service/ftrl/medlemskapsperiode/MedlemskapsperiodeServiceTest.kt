@@ -21,6 +21,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.medlemskapsperiode
 import no.nav.melosys.domain.medlemskapsperiodeForTest
 import no.nav.melosys.domain.mottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
@@ -649,6 +650,34 @@ class MedlemskapsperiodeServiceTest {
 
         behandlingsresultat.trygdeavgiftsperioder.shouldBeEmpty()
         behandlingsresultat.medlemskapsperioder.shouldBeEmpty()
+    }
+
+    @Test
+    fun `opprettMedlemskapsperiode kaster ikke ClassCastException for behandling med Soeknad-type`() {
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
+                id = BEHANDLING_ID_1
+                tema = Behandlingstema.YRKESAKTIV
+                mottatteOpplysninger {
+                    mottatteOpplysningerData = Soeknad()
+                }
+            }
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
+        every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
+
+
+        shouldNotThrow<ClassCastException> {
+            medlemskapsperiodeService.opprettMedlemskapsperiode(
+                BEHANDLING_ID_1,
+                NÅ,
+                NÅ,
+                InnvilgelsesResultat.AVSLAATT,
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD
+            )
+        }
     }
 
     private fun lagBehandlingsresultat(land: Land_iso2 = Land_iso2.AU): Behandlingsresultat = Behandlingsresultat.forTest {
