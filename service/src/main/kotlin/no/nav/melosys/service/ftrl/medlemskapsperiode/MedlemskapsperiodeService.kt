@@ -38,7 +38,7 @@ class MedlemskapsperiodeService(
     ): Medlemskapsperiode {
 
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-        val land = behandlingsresultat.hentBehandling().hentMottatteOpplysninger().mottatteOpplysningerData.soeknadsland.landkoder
+        val landkoder = behandlingsresultat.hentBehandling().hentMottatteOpplysninger().mottatteOpplysningerData.soeknadsland.landkoder
 
         validerFelt(
             behandlingsresultat.hentBehandling().tema,
@@ -47,7 +47,7 @@ class MedlemskapsperiodeService(
             innvilgelsesResultat,
             trygdedekning,
             bestemmelse,
-            land
+            landkoder
         )
 
         val nyMedlemskapsperiode = Medlemskapsperiode().apply {
@@ -75,7 +75,7 @@ class MedlemskapsperiodeService(
         bestemmelse: Bestemmelse?
     ): Medlemskapsperiode {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-        val land = behandlingsresultat.hentBehandling().hentMottatteOpplysninger().mottatteOpplysningerData.soeknadsland.landkoder
+        val landkoder = behandlingsresultat.hentBehandling().hentMottatteOpplysninger().mottatteOpplysningerData.soeknadsland.landkoder
 
         validerFelt(
             behandlingsresultat.hentBehandling().tema,
@@ -84,7 +84,7 @@ class MedlemskapsperiodeService(
             innvilgelsesResultat,
             trygdedekning,
             bestemmelse,
-            land
+            landkoder
         )
 
         val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.firstOrNull { it.id == medlemskapsperiodeID }
