@@ -3,7 +3,7 @@ package no.nav.melosys.service.ftrl.medlemskapsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
+
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.MedlemskapsperiodeRepository
@@ -38,8 +38,7 @@ class MedlemskapsperiodeService(
     ): Medlemskapsperiode {
 
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-        val land = (behandlingsresultat.hentBehandling().hentMottatteOpplysninger().mottatteOpplysningerData as? SøknadNorgeEllerUtenforEØS)
-            ?.soeknadsland?.landkoder ?: emptyList()
+        val land = behandlingsresultat.hentBehandling().hentMottatteOpplysninger().mottatteOpplysningerData.soeknadsland.landkoder
 
         validerFelt(
             behandlingsresultat.hentBehandling().tema,
@@ -76,8 +75,7 @@ class MedlemskapsperiodeService(
         bestemmelse: Bestemmelse?
     ): Medlemskapsperiode {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-        val land = (behandlingsresultat.hentBehandling().hentMottatteOpplysninger().mottatteOpplysningerData as? SøknadNorgeEllerUtenforEØS)
-            ?.soeknadsland?.landkoder ?: emptyList()
+        val land = behandlingsresultat.hentBehandling().hentMottatteOpplysninger().mottatteOpplysningerData.soeknadsland.landkoder
 
         validerFelt(
             behandlingsresultat.hentBehandling().tema,
