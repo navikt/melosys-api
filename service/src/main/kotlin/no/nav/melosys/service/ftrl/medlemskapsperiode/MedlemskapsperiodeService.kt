@@ -36,6 +36,7 @@ class MedlemskapsperiodeService(
         trygdedekning: Trygdedekninger?,
         bestemmelse: Bestemmelse?
     ): Medlemskapsperiode {
+
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         val land = (behandlingsresultat.hentBehandling().hentMottatteOpplysninger().mottatteOpplysningerData as? SøknadNorgeEllerUtenforEØS)
             ?.soeknadsland?.landkoder ?: emptyList()
