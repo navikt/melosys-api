@@ -14,7 +14,7 @@ import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.domain.oppgave.PrioritetType
 import no.nav.melosys.integrasjon.Konstanter
-import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer
+import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveClient
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto
@@ -29,13 +29,13 @@ import java.time.format.DateTimeFormatter
 @ExtendWith(MockKExtension::class)
 internal class OppgaveFasadeImplTest {
 
-    private val oppgaveConsumer = mockk<OppgaveConsumer>()
+    private val oppgaveClient = mockk<OppgaveClient>()
 
     private lateinit var oppgaveFasadeImpl: OppgaveFasadeImpl
 
     @BeforeEach
     fun setup() {
-        oppgaveFasadeImpl = OppgaveFasadeImpl(oppgaveConsumer)
+        oppgaveFasadeImpl = OppgaveFasadeImpl(oppgaveClient)
     }
 
     @Test
@@ -47,14 +47,14 @@ internal class OppgaveFasadeImplTest {
             setBehandlingstema(behandlingstema)
             setFristFerdigstillelse(LocalDate.now())
         }
-        every { oppgaveConsumer.opprettOppgave(any()) } returns "123"
+        every { oppgaveClient.opprettOppgave(any()) } returns "123"
 
 
         oppgaveFasadeImpl.opprettOppgave(oppgaveBuilder.build())
 
 
         val captor = slot<OpprettOppgaveDto>()
-        verify { oppgaveConsumer.opprettOppgave(capture(captor)) }
+        verify { oppgaveClient.opprettOppgave(capture(captor)) }
         val opprettOppgaveDto = captor.captured
 
         opprettOppgaveDto.run {
@@ -67,14 +67,14 @@ internal class OppgaveFasadeImplTest {
     @Test
     fun `opprettOppgave gyldig oppgave validerer dto`() {
         val oppgave = lagOppgave()
-        every { oppgaveConsumer.opprettOppgave(any()) } returns "123"
+        every { oppgaveClient.opprettOppgave(any()) } returns "123"
 
 
         oppgaveFasadeImpl.opprettOppgave(oppgave)
 
 
         val opprettOppgaveDtoCaptor = slot<OpprettOppgaveDto>()
-        verify { oppgaveConsumer.opprettOppgave(capture(opprettOppgaveDtoCaptor)) }
+        verify { oppgaveClient.opprettOppgave(capture(opprettOppgaveDtoCaptor)) }
 
         opprettOppgaveDtoCaptor.captured.shouldNotBeNull().run {
             journalpostId shouldBe oppgave.journalpostId
@@ -93,14 +93,14 @@ internal class OppgaveFasadeImplTest {
     @Test
     fun `finnOppgaveListeMedAnsvarlig gyldig oppgave verifiserer to kall mot oppgave`() {
         val oppgaveDto = OppgaveDto()
-        every { oppgaveConsumer.hentOppgaveListe(any<OppgaveSearchRequest>()) } returns listOf(oppgaveDto)
+        every { oppgaveClient.hentOppgaveListe(any<OppgaveSearchRequest>()) } returns listOf(oppgaveDto)
 
 
         oppgaveFasadeImpl.finnOppgaverMedAnsvarlig("123")
 
 
         val oppgaveSearchRequestCaptor = mutableListOf<OppgaveSearchRequest>()
-        verify(exactly = 2) { oppgaveConsumer.hentOppgaveListe(capture(oppgaveSearchRequestCaptor)) }
+        verify(exactly = 2) { oppgaveClient.hentOppgaveListe(capture(oppgaveSearchRequestCaptor)) }
 
         oppgaveSearchRequestCaptor.shouldHaveSize(2).toList().run {
             get(0).behandlesAvApplikasjon shouldBe Fagsystem.MELOSYS.kode
@@ -114,7 +114,7 @@ internal class OppgaveFasadeImplTest {
         val oppgaveID = "123duplikat"
         val oppgaveDto1 = OppgaveDto().apply { id = oppgaveID }
         val oppgaveDto2 = OppgaveDto().apply { id = oppgaveID }
-        every { oppgaveConsumer.hentOppgaveListe(any<OppgaveSearchRequest>()) } returns listOf(oppgaveDto1, oppgaveDto2)
+        every { oppgaveClient.hentOppgaveListe(any<OppgaveSearchRequest>()) } returns listOf(oppgaveDto1, oppgaveDto2)
 
 
         val oppgaver = oppgaveFasadeImpl.finnOppgaverMedAnsvarlig("123")
@@ -133,7 +133,7 @@ internal class OppgaveFasadeImplTest {
             tema = "MED"
             saksreferanse = "MEL-111"
         }
-        every { oppgaveConsumer.hentOppgave("1234") } returns oppgaveDto
+        every { oppgaveClient.hentOppgave("1234") } returns oppgaveDto
 
 
         val oppgave = oppgaveFasadeImpl.hentOppgave("1234")
@@ -151,7 +151,7 @@ internal class OppgaveFasadeImplTest {
     fun `finnUtildelteOppgaverEtterFrist mottar oppgave med og uten saksreferanse returnerer oppgave med saksreferanse`() {
         val jfrOppgave = OppgaveDto().apply { oppgavetype = "JFR" }
         val behOppgave = OppgaveDto().apply { saksreferanse = "MEL-123" }
-        every { oppgaveConsumer.hentOppgaveListe(any<OppgaveSearchRequest>()) } returns listOf(jfrOppgave, behOppgave)
+        every { oppgaveClient.hentOppgaveListe(any<OppgaveSearchRequest>()) } returns listOf(jfrOppgave, behOppgave)
 
 
         val oppgaver = oppgaveFasadeImpl.finnUtildelteOppgaverEtterFrist(null)
@@ -164,8 +164,8 @@ internal class OppgaveFasadeImplTest {
     @Test
     fun `oppdaterOppgave mapper oppgave oppdatering til oppgave dto riktig`() {
         val oppgaveDto = OppgaveDto().apply { mappeId = "321" }
-        every { oppgaveConsumer.hentOppgave("123") } returns oppgaveDto
-        every { oppgaveConsumer.oppdaterOppgave(any()) } returns mockk()
+        every { oppgaveClient.hentOppgave("123") } returns oppgaveDto
+        every { oppgaveClient.oppdaterOppgave(any()) } returns mockk()
 
         val oppgaveOppdatering = OppgaveOppdatering.builder()
             .oppgavetype(Oppgavetyper.JFR)
@@ -185,7 +185,7 @@ internal class OppgaveFasadeImplTest {
 
 
         val oppgaveDtoArgumentCaptor = slot<OppgaveDto>()
-        verify { oppgaveConsumer.oppdaterOppgave(capture(oppgaveDtoArgumentCaptor)) }
+        verify { oppgaveClient.oppdaterOppgave(capture(oppgaveDtoArgumentCaptor)) }
         val capturedDto = oppgaveDtoArgumentCaptor.captured
         capturedDto.run {
             oppgavetype shouldBe Oppgavetyper.JFR.kode
@@ -205,8 +205,8 @@ internal class OppgaveFasadeImplTest {
     @Test
     fun `oppdaterOppgave formaterer beskrivelseslogg riktig når beskrivelse eksisterer`() {
         val oppgaveDto = OppgaveDto().apply { beskrivelse = "Testy test" }
-        every { oppgaveConsumer.hentOppgave("123") } returns oppgaveDto
-        every { oppgaveConsumer.oppdaterOppgave(any()) } returns mockk()
+        every { oppgaveClient.hentOppgave("123") } returns oppgaveDto
+        every { oppgaveClient.oppdaterOppgave(any()) } returns mockk()
 
         val oppgaveOppdatering = OppgaveOppdatering.builder()
             .behandlingstema("UTSENDT_ARBEIDSTAKER")
@@ -219,7 +219,7 @@ internal class OppgaveFasadeImplTest {
 
 
         val oppgaveDtoArgumentCaptor = slot<OppgaveDto>()
-        verify { oppgaveConsumer.oppdaterOppgave(capture(oppgaveDtoArgumentCaptor)) }
+        verify { oppgaveClient.oppdaterOppgave(capture(oppgaveDtoArgumentCaptor)) }
         val oppdateringstidspunkt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))
         oppgaveDtoArgumentCaptor.captured.beskrivelse shouldBe
             "--- $oppdateringstidspunkt (srvmelosys, ${Fagsystem.MELOSYS.beskrivelse}) ---\n Ny beskrivelse - MEL-123\n\nTesty test"
@@ -228,8 +228,8 @@ internal class OppgaveFasadeImplTest {
     @Test
     fun `oppdaterOppgave formaterer beskrivelseslogg riktig når beskrivelse ikke eksisterer`() {
         val oppgaveDto = OppgaveDto()
-        every { oppgaveConsumer.hentOppgave("123") } returns oppgaveDto
-        every { oppgaveConsumer.oppdaterOppgave(any()) } returns mockk()
+        every { oppgaveClient.hentOppgave("123") } returns oppgaveDto
+        every { oppgaveClient.oppdaterOppgave(any()) } returns mockk()
 
         val oppgaveOppdatering = OppgaveOppdatering.builder()
             .behandlingstema("UTSENDT_ARBEIDSTAKER")
@@ -242,7 +242,7 @@ internal class OppgaveFasadeImplTest {
 
 
         val oppgaveDtoArgumentCaptor = slot<OppgaveDto>()
-        verify { oppgaveConsumer.oppdaterOppgave(capture(oppgaveDtoArgumentCaptor)) }
+        verify { oppgaveClient.oppdaterOppgave(capture(oppgaveDtoArgumentCaptor)) }
         val oppdateringstidspunkt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))
         oppgaveDtoArgumentCaptor.captured.beskrivelse shouldBe
             "--- $oppdateringstidspunkt (srvmelosys, Melosys) ---\n Ny beskrivelse - MEL-123\n"

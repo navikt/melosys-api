@@ -20,13 +20,13 @@ import org.springframework.test.context.ContextConfiguration
 @ContextConfiguration(
     classes = [
         OAuthMockServer::class,
-        OppgaveConsumerProducer::class,
+        OppgaveClientProducer::class,
         GenericAuthFilterFactory::class
     ]
 )
 @AutoConfigureWebClient
-class OppgaveConsumerTokenTest(
-    @Autowired private val oppgaveConsumer: OppgaveConsumer,
+class OppgaveClientTokenTest(
+    @Autowired private val oppgaveClient: OppgaveClient,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
@@ -85,5 +85,5 @@ class OppgaveConsumerTokenTest(
     }
 
     override fun executeRequest() =
-        oppgaveConsumer.hentOppgave("1")
+        oppgaveClient.hentOppgave("1")
 }

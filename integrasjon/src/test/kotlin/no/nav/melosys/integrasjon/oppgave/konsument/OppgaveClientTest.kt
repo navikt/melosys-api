@@ -19,9 +19,9 @@ import java.time.LocalDate
 import java.time.ZonedDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class OppgaveConsumerTest {
+class OppgaveClientTest {
 
-    private lateinit var oppgaveConsumer: OppgaveConsumer
+    private lateinit var oppgaveClient: OppgaveClient
     private lateinit var mockServer: MockWebServer
 
     @BeforeAll
@@ -37,7 +37,7 @@ class OppgaveConsumerTest {
 
     @BeforeEach
     fun setup() {
-        oppgaveConsumer = OppgaveConsumer(WebClient.builder().baseUrl("http://localhost:${mockServer.port}").build())
+        oppgaveClient = OppgaveClient(WebClient.builder().baseUrl("http://localhost:${mockServer.port}").build())
     }
 
     @Test
@@ -49,7 +49,7 @@ class OppgaveConsumerTest {
         )
 
 
-        val oppgave = oppgaveConsumer.hentOppgave("1")
+        val oppgave = oppgaveClient.hentOppgave("1")
 
 
         oppgave!!.run {
@@ -85,7 +85,7 @@ class OppgaveConsumerTest {
 
 
         val exception = shouldThrow<IkkeFunnetException> {
-            oppgaveConsumer.hentOppgave("1")
+            oppgaveClient.hentOppgave("1")
         }
 
 
@@ -111,7 +111,7 @@ class OppgaveConsumerTest {
         }.build()
 
 
-        val oppgaver = oppgaveConsumer.hentOppgaveListe(searchRequest)
+        val oppgaver = oppgaveClient.hentOppgaveListe(searchRequest)
 
 
         oppgaver.map { it.saksreferanse } shouldContainExactlyInAnyOrder listOf("MEL-301", "MEL-513")
@@ -126,7 +126,7 @@ class OppgaveConsumerTest {
         )
 
 
-        val result = oppgaveConsumer.oppdaterOppgave(OppgaveDto())
+        val result = oppgaveClient.oppdaterOppgave(OppgaveDto())
 
 
         result.id shouldBe "11519"
@@ -141,7 +141,7 @@ class OppgaveConsumerTest {
         )
 
 
-        val oppgaveID = oppgaveConsumer.opprettOppgave(OpprettOppgaveDto())
+        val oppgaveID = oppgaveClient.opprettOppgave(OpprettOppgaveDto())
 
 
         oppgaveID shouldBe "11519"

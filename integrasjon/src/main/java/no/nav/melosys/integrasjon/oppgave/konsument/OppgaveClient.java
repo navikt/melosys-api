@@ -16,7 +16,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 @Retryable
-public class OppgaveConsumer extends RestErrorHandler {
+public class OppgaveClient extends RestErrorHandler {
     private static final int OPPGAVE_BATCH_SIZE = 40;
     private static final int OPPGAVE_ANTALL_LIMIT = 100000;
     private static final String OPPGAVE_BASE_URI = "/oppgaver";
@@ -24,7 +24,7 @@ public class OppgaveConsumer extends RestErrorHandler {
 
     private final WebClient webClient;
 
-    public OppgaveConsumer(WebClient webClient) {
+    public OppgaveClient(WebClient webClient) {
         this.webClient = webClient;
     }
 

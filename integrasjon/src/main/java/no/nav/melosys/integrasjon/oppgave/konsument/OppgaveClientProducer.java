@@ -13,12 +13,12 @@ import org.springframework.web.reactive.function.client.WebClient;
 import static no.nav.melosys.integrasjon.felles.WebClientUtilsKt.errorFilter;
 
 @Configuration
-public class OppgaveConsumerProducer {
+public class OppgaveClientProducer {
     private static final String CLIENT_NAME = "oppgave";
     private final String url;
     private final GenericAuthFilterFactory genericAuthFilterFactory;
 
-    public OppgaveConsumerProducer(
+    public OppgaveClientProducer(
         @Value("${OppgaveAPI_v1.url}") String url, GenericAuthFilterFactory genericAuthFilterFactory
     ) {
         this.url = url;
@@ -27,10 +27,10 @@ public class OppgaveConsumerProducer {
 
     @Bean
     @Primary
-    public OppgaveConsumer oppgaveConsumer(
+    public OppgaveClient oppgaveClient(
         WebClient.Builder webClientBuilder, CorrelationIdOutgoingFilter correlationIdOutgoingFilter
     ) {
-        return new OppgaveConsumer(
+        return new OppgaveClient(
             webClientBuilder
                 .defaultHeaders(this::defaultHeaders)
                 .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
