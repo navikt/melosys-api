@@ -4,7 +4,7 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import com.github.tomakehurst.wiremock.matching.UrlPattern
-import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
+import no.nav.melosys.integrasjon.ClientWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
@@ -35,7 +35,7 @@ class MedlemskapClientTokenTest(
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
-) : ConsumerWireMockTestBase<String, Unit>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
+) : ClientWireMockTestBase<String, Unit>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
 
 
     override fun createWireMock(): MappingBuilder {

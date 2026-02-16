@@ -7,7 +7,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.integrasjon.pdl.PDLConsumer
+import no.nav.melosys.integrasjon.pdl.PDLClient
 import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.IDENT_PERSON_GIFT
 import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.PERSON_GIFT_FORNAVN
 import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.lagPersonGift
@@ -20,14 +20,14 @@ import org.junit.jupiter.api.extension.ExtendWith
 class EktefelleEllerPartnerFamiliemedlemFilterTest {
 
     @MockK
-    private lateinit var pdlConsumer: PDLConsumer
+    private lateinit var pdlClient: PDLClient
 
     @InjectMockKs
     private lateinit var ektefelleEllerPartnerFamiliemedlemFilter: EktefelleEllerPartnerFamiliemedlemFilter
 
     @Test
     fun `hentEktefelleEllerPartnerFraSivilstander fårGiftSivilstandTilbake`() {
-        every { pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) } returns lagPersonGift()
+        every { pdlClient.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) } returns lagPersonGift()
         val sivilstandTilHovedperson = lagSivilstandForHovedperson()
 
 

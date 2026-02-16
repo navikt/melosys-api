@@ -32,7 +32,7 @@ class InntektKonverterTest {
     fun `skal kunne konverter valid inntekt response`() {
         val inntektResponse = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
-            .readValue<InntektResponse>(hentRessurs("mock/inntekt/inntektConsumerResponse.json"))
+            .readValue<InntektResponse>(hentRessurs("mock/inntekt/inntektClientResponse.json"))
 
         val saksopplysning = InntektKonverter().lagSaksopplysning(inntektResponse)
 

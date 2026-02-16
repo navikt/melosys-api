@@ -7,7 +7,7 @@ import no.nav.melosys.domain.SaksopplysningType
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.TekniskException
-import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonRestConsumer
+import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonRestClient
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -15,7 +15,7 @@ private val log = KotlinLogging.logger { }
 
 @Service
 class EregRestService(
-    private val organisasjonRestConsumer: OrganisasjonRestConsumer
+    private val organisasjonRestClient: OrganisasjonRestClient
 ) : EregFasade {
     private val eregDtoTilSaksopplysningKonverter: EregDtoTilSaksopplysningKonverter = EregDtoTilSaksopplysningKonverter()
 
@@ -23,7 +23,7 @@ class EregRestService(
         if (erUgyldigOrgnummer(orgnr)) {
             throw TekniskException("orgnr er ikke gyldig")
         }
-        val organisasjon = organisasjonRestConsumer.hentOrganisasjon(orgnr)
+        val organisasjon = organisasjonRestClient.hentOrganisasjon(orgnr)
         return eregDtoTilSaksopplysningKonverter.lagSaksopplysning(organisasjon).apply {
             leggTilKildesystemOgMottattDokument(
                 SaksopplysningKildesystem.EREG, organisasjon.tilJsonString()

@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER
 import no.nav.melosys.integrasjon.ereg.EregFasade
-import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
+import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningRequest
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
@@ -34,7 +34,7 @@ class TrygdeavgiftsberegningService(
     private val trygdeavgiftperiodeErstatter: TrygdeavgiftperiodeErstatter,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val persondataService: PersondataService,
-    private val trygdeavgiftConsumer: TrygdeavgiftConsumer,
+    private val trygdeavgiftClient: TrygdeavgiftClient,
     private val unleash: Unleash
 ) {
 
@@ -156,7 +156,7 @@ class TrygdeavgiftsberegningService(
         val inntektsperiodeDtoList = inntektsperioderMedUUID.map { it.second.tilInntektsperiodeDto(it.first) }
         val foedselDato = hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultat.hentId(), innvilgedeAvgiftspliktigperioder)
 
-        val beregnetTrygdeavgiftList = trygdeavgiftConsumer.beregnTrygdeavgift(
+        val beregnetTrygdeavgiftList = trygdeavgiftClient.beregnTrygdeavgift(
             TrygdeavgiftsberegningRequest(
                 innvilgedeAvgiftspliktigperioder.tilMedlemskapsperiodeDtoSet(),
                 skatteforholdsperiodeDtoSet,

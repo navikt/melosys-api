@@ -25,7 +25,7 @@ open class ArbeidsforholdClient(private val webClient: WebClient) {
             .queryParamIfPresent("ansettelsesperiodeFom", Optional.ofNullable(arbeidsforholdQuery.ansettelsesperiodeFom))
             .queryParamIfPresent("ansettelsesperiodeTom", Optional.ofNullable(arbeidsforholdQuery.ansettelsesperiodeTom))
             .build()
-    } // Om vi ønsker å se request med mer detaljer i grafana må vi gjøre det samme som er gjort i MedlemskapRestConsumer
+    } // Om vi ønsker å se request med mer detaljer i grafana må vi gjøre det samme som er gjort i MedlemskapRestClient
         // Nå ser vi bare request på host
         .header("Nav-Personident", fnr)
         .accept(MediaType.APPLICATION_JSON)

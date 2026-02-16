@@ -17,14 +17,14 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.SikkerhetsbegrensningException
 import no.nav.melosys.integrasjon.Konstanter
-import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiConsumer
+import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiClient
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.AvsenderMottaker.IdType
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.Bruker.BrukerIdType.FNR
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.FerdigstillJournalpostRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OppdaterJournalpostRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostResponse
-import no.nav.melosys.integrasjon.joark.saf.SafConsumer
+import no.nav.melosys.integrasjon.joark.saf.SafClient
 import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -36,8 +36,8 @@ import java.time.ZoneId
 class JoarkServiceTest {
     private lateinit var joarkService: JoarkService
 
-    private val journalpostapiConsumer = mockk<JournalpostapiConsumer>()
-    private val safConsumer = mockk<SafConsumer>()
+    private val journalpostapiClient = mockk<JournalpostapiClient>()
+    private val safClient = mockk<SafClient>()
 
     private val ferdigstillJournalpostCaptor = slot<FerdigstillJournalpostRequest>()
     private val oppdaterJournalpostRequestCaptor = slot<OppdaterJournalpostRequest>()
@@ -46,7 +46,7 @@ class JoarkServiceTest {
     @BeforeEach
     fun setUp() {
         clearAllMocks()
-        joarkService = JoarkService(journalpostapiConsumer, safConsumer)
+        joarkService = JoarkService(journalpostapiClient, safClient)
         logiskVedleggTittelCaptor.clear()
     }
 
@@ -54,7 +54,7 @@ class JoarkServiceTest {
     fun `hent journalposter tilknyttet sak bruker saf mapper alle saf journalposter`() {
         val saksnummer = "191919"
         val arkivsakID = 12345L
-        every { safConsumer.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost("111"), safJournalpost("222"))
+        every { safClient.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost("111"), safJournalpost("222"))
 
         val journalposter = joarkService.hentJournalposterTilknyttetSak(HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer))
 
@@ -83,16 +83,16 @@ class JoarkServiceTest {
             .medLogiskeVedleggTitler(listOf("dok1", "dok2"))
             .build()
 
-        every { safConsumer.hentJournalpost(any()) } returns safJournalpost(journalpostID)
-        every { journalpostapiConsumer.fjernLogiskeVedlegg(any(), any()) } just Runs
-        every { journalpostapiConsumer.oppdaterJournalpost(capture(oppdaterJournalpostRequestCaptor), any()) } just Runs
-        every { journalpostapiConsumer.leggTilLogiskVedlegg(any(), capture(logiskVedleggTittelCaptor)) } just Runs
-        every { journalpostapiConsumer.ferdigstillJournalpost(any(), any()) } just Runs
+        every { safClient.hentJournalpost(any()) } returns safJournalpost(journalpostID)
+        every { journalpostapiClient.fjernLogiskeVedlegg(any(), any()) } just Runs
+        every { journalpostapiClient.oppdaterJournalpost(capture(oppdaterJournalpostRequestCaptor), any()) } just Runs
+        every { journalpostapiClient.leggTilLogiskVedlegg(any(), capture(logiskVedleggTittelCaptor)) } just Runs
+        every { journalpostapiClient.ferdigstillJournalpost(any(), any()) } just Runs
 
         joarkService.oppdaterOgFerdigstillJournalpost("123", journalpostOppdatering)
 
-        verify { journalpostapiConsumer.fjernLogiskeVedlegg(any(), any()) }
-        verify { journalpostapiConsumer.oppdaterJournalpost(any(), any()) }
+        verify { journalpostapiClient.fjernLogiskeVedlegg(any(), any()) }
+        verify { journalpostapiClient.oppdaterJournalpost(any(), any()) }
         val request = oppdaterJournalpostRequestCaptor.captured
 
         request.shouldNotBeNull().run {
@@ -121,8 +121,8 @@ class JoarkServiceTest {
             get(1).dokumentInfoId shouldBe fysiskVedleggID
         }
 
-        verify(exactly = 2) { journalpostapiConsumer.leggTilLogiskVedlegg(any(), any()) }
-        verify { journalpostapiConsumer.ferdigstillJournalpost(any(), any()) }
+        verify(exactly = 2) { journalpostapiClient.leggTilLogiskVedlegg(any(), any()) }
+        verify { journalpostapiClient.ferdigstillJournalpost(any(), any()) }
         logiskVedleggTittelCaptor shouldHaveSize 2
         logiskVedleggTittelCaptor[0] shouldBe "dok1"
         logiskVedleggTittelCaptor[1] shouldBe "dok2"
@@ -143,16 +143,16 @@ class JoarkServiceTest {
             .medTittel(tittel)
             .build()
 
-        every { safConsumer.hentJournalpost(any()) } returns safJournalpostUtenVedlegg()
-        every { journalpostapiConsumer.fjernLogiskeVedlegg(any(), any()) } just Runs
-        every { journalpostapiConsumer.oppdaterJournalpost(capture(oppdaterJournalpostRequestCaptor), any()) } just Runs
-        every { journalpostapiConsumer.leggTilLogiskVedlegg(any(), any()) } just Runs
-        every { journalpostapiConsumer.ferdigstillJournalpost(any(), any()) } just Runs
+        every { safClient.hentJournalpost(any()) } returns safJournalpostUtenVedlegg()
+        every { journalpostapiClient.fjernLogiskeVedlegg(any(), any()) } just Runs
+        every { journalpostapiClient.oppdaterJournalpost(capture(oppdaterJournalpostRequestCaptor), any()) } just Runs
+        every { journalpostapiClient.leggTilLogiskVedlegg(any(), any()) } just Runs
+        every { journalpostapiClient.ferdigstillJournalpost(any(), any()) } just Runs
 
         joarkService.oppdaterOgFerdigstillJournalpost("123", journalpostOppdatering)
 
-        verify(exactly = 0) { journalpostapiConsumer.fjernLogiskeVedlegg(any(), any()) }
-        verify { journalpostapiConsumer.oppdaterJournalpost(any(), any()) }
+        verify(exactly = 0) { journalpostapiClient.fjernLogiskeVedlegg(any(), any()) }
+        verify { journalpostapiClient.oppdaterJournalpost(any(), any()) }
         val request = oppdaterJournalpostRequestCaptor.captured
 
         request.shouldNotBeNull().run {
@@ -178,8 +178,8 @@ class JoarkServiceTest {
             get(0).dokumentInfoId shouldBe hovedDokumentID
         }
 
-        verify(exactly = 0) { journalpostapiConsumer.leggTilLogiskVedlegg(any(), any()) }
-        verify { journalpostapiConsumer.ferdigstillJournalpost(any(), any()) }
+        verify(exactly = 0) { journalpostapiClient.leggTilLogiskVedlegg(any(), any()) }
+        verify { journalpostapiClient.ferdigstillJournalpost(any(), any()) }
     }
 
     @Test
@@ -194,16 +194,16 @@ class JoarkServiceTest {
             .medTittel(tittel)
             .build()
 
-        every { safConsumer.hentJournalpost(any()) } returns safJournalpostUtenVedlegg()
-        every { journalpostapiConsumer.fjernLogiskeVedlegg(any(), any()) } just Runs
-        every { journalpostapiConsumer.oppdaterJournalpost(capture(oppdaterJournalpostRequestCaptor), any()) } just Runs
-        every { journalpostapiConsumer.leggTilLogiskVedlegg(any(), any()) } just Runs
-        every { journalpostapiConsumer.ferdigstillJournalpost(any(), any()) } just Runs
+        every { safClient.hentJournalpost(any()) } returns safJournalpostUtenVedlegg()
+        every { journalpostapiClient.fjernLogiskeVedlegg(any(), any()) } just Runs
+        every { journalpostapiClient.oppdaterJournalpost(capture(oppdaterJournalpostRequestCaptor), any()) } just Runs
+        every { journalpostapiClient.leggTilLogiskVedlegg(any(), any()) } just Runs
+        every { journalpostapiClient.ferdigstillJournalpost(any(), any()) } just Runs
 
         joarkService.oppdaterOgFerdigstillJournalpost("123", journalpostOppdatering)
 
-        verify(exactly = 0) { journalpostapiConsumer.fjernLogiskeVedlegg(any(), any()) }
-        verify { journalpostapiConsumer.oppdaterJournalpost(any(), any()) }
+        verify(exactly = 0) { journalpostapiClient.fjernLogiskeVedlegg(any(), any()) }
+        verify { journalpostapiClient.oppdaterJournalpost(any(), any()) }
         val request = oppdaterJournalpostRequestCaptor.captured
 
         request.shouldNotBeNull().run {
@@ -227,8 +227,8 @@ class JoarkServiceTest {
             get(0).dokumentInfoId shouldBe hovedDokumentID
         }
 
-        verify(exactly = 0) { journalpostapiConsumer.leggTilLogiskVedlegg(any(), any()) }
-        verify { journalpostapiConsumer.ferdigstillJournalpost(any(), any()) }
+        verify(exactly = 0) { journalpostapiClient.leggTilLogiskVedlegg(any(), any()) }
+        verify { journalpostapiClient.ferdigstillJournalpost(any(), any()) }
     }
 
     @Test
@@ -239,15 +239,15 @@ class JoarkServiceTest {
             .medBrukerID("12345")
             .build()
 
-        every { safConsumer.hentJournalpost(any()) } returns safJournalpost(journalpostID, false)
-        every { journalpostapiConsumer.oppdaterJournalpost(any<OppdaterJournalpostRequest>(), any()) } just Runs
-        every { journalpostapiConsumer.ferdigstillJournalpost(any<FerdigstillJournalpostRequest>(), eq(journalpostID)) } just Runs
+        every { safClient.hentJournalpost(any()) } returns safJournalpost(journalpostID, false)
+        every { journalpostapiClient.oppdaterJournalpost(any<OppdaterJournalpostRequest>(), any()) } just Runs
+        every { journalpostapiClient.ferdigstillJournalpost(any<FerdigstillJournalpostRequest>(), eq(journalpostID)) } just Runs
 
         joarkService.oppdaterOgFerdigstillJournalpost(journalpostID, journalpostOppdatering)
 
-        verify(exactly = 0) { journalpostapiConsumer.fjernLogiskeVedlegg(any(), any()) }
-        verify { journalpostapiConsumer.oppdaterJournalpost(any<OppdaterJournalpostRequest>(), any()) }
-        verify { journalpostapiConsumer.ferdigstillJournalpost(any<FerdigstillJournalpostRequest>(), eq(journalpostID)) }
+        verify(exactly = 0) { journalpostapiClient.fjernLogiskeVedlegg(any(), any()) }
+        verify { journalpostapiClient.oppdaterJournalpost(any<OppdaterJournalpostRequest>(), any()) }
+        verify { journalpostapiClient.ferdigstillJournalpost(any<FerdigstillJournalpostRequest>(), eq(journalpostID)) }
     }
 
     @Test
@@ -256,7 +256,7 @@ class JoarkServiceTest {
         val saksnummer = "191919"
         val arkivsakID = 12345L
         val safJournalpost = safJournalpost(journalpostId)
-        every { safConsumer.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
+        every { safClient.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
 
         val dokumentReferanser = listOf(DokumentReferanse(journalpostId, VEDLEGG_MED_TILGANG_ID))
 
@@ -278,7 +278,7 @@ class JoarkServiceTest {
             dokumentReferanser
         )
 
-        verify(exactly = 0) { safConsumer.hentDokumentoversikt(any()) }
+        verify(exactly = 0) { safClient.hentDokumentoversikt(any()) }
     }
 
     @Test
@@ -287,7 +287,7 @@ class JoarkServiceTest {
         val saksnummer = "191919"
         val arkivsakID = 12345L
         val safJournalpost = safJournalpost(journalpostId)
-        every { safConsumer.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
+        every { safClient.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
 
         val dokumentReferanser = listOf(DokumentReferanse(journalpostId, VEDLEGG_UTEN_TILGANG_ID))
         val request = HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer)
@@ -305,7 +305,7 @@ class JoarkServiceTest {
         val saksnummer = "191919"
         val arkivsakID = 12345L
         val safJournalpost = safJournalpost(journalpostId)
-        every { safConsumer.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
+        every { safClient.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
 
         val dokumentReferanser = listOf(DokumentReferanse("12345", VEDLEGG_MED_TILGANG_ID))
         val request = HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer)
@@ -323,7 +323,7 @@ class JoarkServiceTest {
         val saksnummer = "191919"
         val arkivsakID = 12345L
         val safJournalpost = safJournalpostUtenVedlegg()
-        every { safConsumer.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
+        every { safClient.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
 
         val dokumentReferanser = listOf(DokumentReferanse(journalpostId, VEDLEGG_MED_TILGANG_ID))
         val request = HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer)
@@ -339,7 +339,7 @@ class JoarkServiceTest {
     fun `hent journalpost med status utgår er utgått`() {
         val journalpostID = "1112233"
         val safJournalpost = safJournalpost(journalpostID, Journalstatus.UTGAAR, false)
-        every { safConsumer.hentJournalpost(journalpostID) } returns safJournalpost
+        every { safClient.hentJournalpost(journalpostID) } returns safJournalpost
 
         val journalpost = joarkService.hentJournalpost(journalpostID)
 
@@ -350,7 +350,7 @@ class JoarkServiceTest {
     fun `hent journalpost med status mottatt er ikke utgått`() {
         val journalpostID = "1112233"
         val safJournalpost = safJournalpost(journalpostID, Journalstatus.MOTTATT, false)
-        every { safConsumer.hentJournalpost(journalpostID) } returns safJournalpost
+        every { safClient.hentJournalpost(journalpostID) } returns safJournalpost
 
         val journalpost = joarkService.hentJournalpost(journalpostID)
 
@@ -361,7 +361,7 @@ class JoarkServiceTest {
     fun `hent journalpost verifiser mapping`() {
         val journalpostID = "1112233"
         val safJournalpost = safJournalpost(journalpostID)
-        every { safConsumer.hentJournalpost(journalpostID) } returns safJournalpost
+        every { safClient.hentJournalpost(journalpostID) } returns safJournalpost
 
         val journalpost = joarkService.hentJournalpost(journalpostID)
 
@@ -421,7 +421,7 @@ class JoarkServiceTest {
             .map(LocalDateTime::toLocalDate)
             .first()
 
-        every { safConsumer.hentJournalpost(journalpostID) } returns safJournalpost
+        every { safClient.hentJournalpost(journalpostID) } returns safJournalpost
 
         joarkService.hentMottaksDatoForJournalpost(journalpostID).shouldNotBeNull() shouldBe forventetMottaksdato
     }
@@ -429,33 +429,33 @@ class JoarkServiceTest {
     @Test
     fun `ferdigstill journalpost når journalpost blir journalført ingen exception`() {
         val journalpostId = "123"
-        every { journalpostapiConsumer.ferdigstillJournalpost(capture(ferdigstillJournalpostCaptor), eq(journalpostId)) } just Runs
+        every { journalpostapiClient.ferdigstillJournalpost(capture(ferdigstillJournalpostCaptor), eq(journalpostId)) } just Runs
 
         joarkService.ferdigstillJournalføring(journalpostId)
 
-        verify { journalpostapiConsumer.ferdigstillJournalpost(any(), eq(journalpostId)) }
+        verify { journalpostapiClient.ferdigstillJournalpost(any(), eq(journalpostId)) }
         ferdigstillJournalpostCaptor.captured.journalfoerendeEnhet shouldBe Konstanter.MELOSYS_ENHET_ID.toString()
     }
 
     @Test
     fun `opprett journalpost uten validering forvent metodekall`() {
-        every { journalpostapiConsumer.opprettJournalpost(any<OpprettJournalpostRequest>(), any()) } returns
+        every { journalpostapiClient.opprettJournalpost(any<OpprettJournalpostRequest>(), any()) } returns
             OpprettJournalpostResponse.builder().journalpostId("1234").build()
 
         val journalpostId = joarkService.opprettJournalpost(lagOpprettJournalpost(), false)
 
-        verify { journalpostapiConsumer.opprettJournalpost(any<OpprettJournalpostRequest>(), any()) }
+        verify { journalpostapiClient.opprettJournalpost(any<OpprettJournalpostRequest>(), any()) }
         journalpostId.shouldNotBeNull()
     }
 
     @Test
     fun `opprett journalpost med valider felt forvent validert`() {
-        every { journalpostapiConsumer.opprettJournalpost(any<OpprettJournalpostRequest>(), any()) } returns
+        every { journalpostapiClient.opprettJournalpost(any<OpprettJournalpostRequest>(), any()) } returns
             OpprettJournalpostResponse.builder().journalpostId("1234").build()
 
         val journalpostId = joarkService.opprettJournalpost(lagOpprettJournalpost(), true)
 
-        verify { journalpostapiConsumer.opprettJournalpost(any<OpprettJournalpostRequest>(), any()) }
+        verify { journalpostapiClient.opprettJournalpost(any<OpprettJournalpostRequest>(), any()) }
         journalpostId.shouldNotBeNull()
     }
 
@@ -470,7 +470,7 @@ class JoarkServiceTest {
         }
 
         exception.message shouldContain "Saksnummer mangler"
-        verify(exactly = 0) { journalpostapiConsumer.opprettJournalpost(any<OpprettJournalpostRequest>(), any()) }
+        verify(exactly = 0) { journalpostapiClient.opprettJournalpost(any<OpprettJournalpostRequest>(), any()) }
     }
 
     @Test
@@ -480,12 +480,12 @@ class JoarkServiceTest {
         }
         val captor = slot<OpprettJournalpostRequest>()
 
-        every { journalpostapiConsumer.opprettJournalpost(capture(captor), any()) } returns
+        every { journalpostapiClient.opprettJournalpost(capture(captor), any()) } returns
             OpprettJournalpostResponse.builder().journalpostId("1234").build()
 
         joarkService.opprettJournalpost(opprettJournalpost, false)
 
-        verify { journalpostapiConsumer.opprettJournalpost(any(), any()) }
+        verify { journalpostapiClient.opprettJournalpost(any(), any()) }
         val opprettJournalpostRequest = captor.captured
         opprettJournalpostRequest.shouldNotBeNull()
         opprettJournalpostRequest.datoMottatt shouldBe LocalDate.ofInstant(opprettJournalpost.forsendelseMottatt, ZoneId.systemDefault())

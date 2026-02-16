@@ -12,7 +12,7 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.integrasjon.pdl.PDLConsumer;
+import no.nav.melosys.integrasjon.pdl.PDLClient;
 import no.nav.melosys.integrasjon.pdl.dto.HarMetadata;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse;
@@ -38,7 +38,7 @@ public class PersondataService implements PersondataFasade {
     private static final Logger log = LoggerFactory.getLogger(PersondataService.class);
     private final BehandlingService behandlingService;
     private final KodeverkService kodeverkService;
-    private final PDLConsumer pdlConsumer;
+    private final PDLClient pdlClient;
     private final SaksopplysningerService saksopplysningerService;
     private final FamiliemedlemService familiemedlemService;
 
@@ -47,12 +47,12 @@ public class PersondataService implements PersondataFasade {
 
     public PersondataService(BehandlingService behandlingService,
                              KodeverkService kodeverkService,
-                             PDLConsumer pdlConsumer,
+                             PDLClient pdlClient,
                              SaksopplysningerService saksopplysningerService,
                              FamiliemedlemService familiemedlemService) {
         this.behandlingService = behandlingService;
         this.kodeverkService = kodeverkService;
-        this.pdlConsumer = pdlConsumer;
+        this.pdlClient = pdlClient;
         this.saksopplysningerService = saksopplysningerService;
         this.familiemedlemService = familiemedlemService;
     }
@@ -60,7 +60,7 @@ public class PersondataService implements PersondataFasade {
     @Override
     @Cacheable("aktoerID")
     public String hentAktørIdForIdent(String ident) {
-        return pdlConsumer.hentIdenter(ident).identer()
+        return pdlClient.hentIdenter(ident).identer()
             .stream().filter(Ident::erAktørID)
             .findFirst().map(Ident::ident)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke aktørID!"));
@@ -69,7 +69,7 @@ public class PersondataService implements PersondataFasade {
     @Override
     @Cacheable("folkeregisterIdent")
     public Optional<String> finnFolkeregisterident(String ident) {
-        return pdlConsumer.hentIdenter(ident).identer()
+        return pdlClient.hentIdenter(ident).identer()
             .stream().filter(Ident::erFolkeregisterIdent)
             .findFirst().map(Ident::ident);
     }
@@ -89,14 +89,14 @@ public class PersondataService implements PersondataFasade {
     @Override
     public Persondata hentPerson(String ident, Informasjonsbehov informasjonsbehov) {
         return switch (informasjonsbehov) {
-            case INGEN, STANDARD -> PersonopplysningerOversetter.oversett(pdlConsumer.hentPerson(ident),
+            case INGEN, STANDARD -> PersonopplysningerOversetter.oversett(pdlClient.hentPerson(ident),
                 kodeverkService);
             case MED_FAMILIERELASJONER -> lagPersondataMedFamilie(ident);
         };
     }
 
     private Persondata lagPersondataMedFamilie(String ident) {
-        final Person person = pdlConsumer.hentPerson(ident);
+        final Person person = pdlClient.hentPerson(ident);
         return PersonopplysningerOversetter.oversettMedFamilie(person,
             familiemedlemService.hentFamiliemedlemmer(person),
             kodeverkService);
@@ -117,7 +117,7 @@ public class PersondataService implements PersondataFasade {
     @Override
     public PersonMedHistorikk hentPersonMedHistorikk(String ident) {
         log.debug("Henter person med historikk ved bruk av ident");
-        return PersonMedHistorikkOversetter.oversett(pdlConsumer.hentPersonMedHistorikk(ident), kodeverkService);
+        return PersonMedHistorikkOversetter.oversett(pdlClient.hentPersonMedHistorikk(ident), kodeverkService);
     }
 
     @Override
@@ -132,7 +132,7 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public String hentSammensattNavn(String ident) {
-        return pdlConsumer.hentNavn(ident).stream()
+        return pdlClient.hentNavn(ident).stream()
             .max(Comparator.comparing(n -> n.metadata().datoSistRegistrert()))
             .map(NavnOversetter::tilSammensattNavn)
             .orElse(NavnOversetter.UKJENT);
@@ -140,7 +140,7 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public Set<Statsborgerskap> hentStatsborgerskap(String ident) {
-        return pdlConsumer.hentStatsborgerskap(ident).stream()
+        return pdlClient.hentStatsborgerskap(ident).stream()
             .filter(HarMetadata::erGyldig)
             .map(StatsborgerskapOversetter::oversett)
             .collect(Collectors.toUnmodifiableSet());
@@ -148,6 +148,6 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public boolean harStrengtFortroligAdresse(String ident) {
-        return pdlConsumer.hentAdressebeskyttelser(ident).stream().anyMatch(Adressebeskyttelse::erStrengtFortrolig);
+        return pdlClient.hentAdressebeskyttelser(ident).stream().anyMatch(Adressebeskyttelse::erStrengtFortrolig);
     }
 }

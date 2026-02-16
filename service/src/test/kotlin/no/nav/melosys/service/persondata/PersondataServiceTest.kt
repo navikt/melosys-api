@@ -21,7 +21,7 @@ import no.nav.melosys.domain.kodeverk.Personstatuser
 import no.nav.melosys.domain.person.*
 import no.nav.melosys.domain.person.familie.Familiemedlem
 import no.nav.melosys.exception.IkkeFunnetException
-import no.nav.melosys.integrasjon.pdl.PDLConsumer
+import no.nav.melosys.integrasjon.pdl.PDLClient
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident
 import no.nav.melosys.integrasjon.pdl.dto.identer.IdentGruppe.*
 import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste
@@ -55,7 +55,7 @@ class PersondataServiceTest {
     private lateinit var kodeverkService: KodeverkService
 
     @MockK
-    private lateinit var pdlConsumer: PDLConsumer
+    private lateinit var pdlClient: PDLClient
 
     @MockK
     private lateinit var saksopplysningerService: SaksopplysningerService
@@ -70,7 +70,7 @@ class PersondataServiceTest {
         persondataService = PersondataService(
             behandlingService,
             kodeverkService,
-            pdlConsumer,
+            pdlClient,
             saksopplysningerService,
             familiemedlemService
         )
@@ -78,7 +78,7 @@ class PersondataServiceTest {
 
     @Test
     fun `hentAktørID finnes verifiser aktørId`() {
-        every { pdlConsumer.hentIdenter(any()) } returns lagIdentliste()
+        every { pdlClient.hentIdenter(any()) } returns lagIdentliste()
 
 
         val result = persondataService.hentAktørIdForIdent("123")
@@ -89,7 +89,7 @@ class PersondataServiceTest {
 
     @Test
     fun `hentAktørID finnes ikke feiler`() {
-        every { pdlConsumer.hentIdenter("321") } returns lagTomIdentliste()
+        every { pdlClient.hentIdenter("321") } returns lagTomIdentliste()
 
 
         val exception = shouldThrow<IkkeFunnetException> {
@@ -102,7 +102,7 @@ class PersondataServiceTest {
 
     @Test
     fun `hentFolkeregisterIdent finnes verifiser ident`() {
-        every { pdlConsumer.hentIdenter(any()) } returns lagIdentliste()
+        every { pdlClient.hentIdenter(any()) } returns lagIdentliste()
 
 
         val result = persondataService.hentFolkeregisterident("123")
@@ -113,7 +113,7 @@ class PersondataServiceTest {
 
     @Test
     fun `hentFolkeregisterIdent finnes ikke feiler`() {
-        every { pdlConsumer.hentIdenter(any()) } returns lagTomIdentliste()
+        every { pdlClient.hentIdenter(any()) } returns lagTomIdentliste()
 
 
         val exception = shouldThrow<IkkeFunnetException> {
@@ -127,7 +127,7 @@ class PersondataServiceTest {
     @Test
     fun `hentPersonMedFamilie returnerer person med familie`() {
         val forventetRelatertVedSivilstandID = "forventetRelatertVedSivilstandID"
-        every { pdlConsumer.hentPerson(any()) } returns lagPerson()
+        every { pdlClient.hentPerson(any()) } returns lagPerson()
         every { familiemedlemService.hentFamiliemedlemmer(lagPerson()) } returns setOf(
             FamiliemedlemOversetter.oversettBarn(lagPerson(), lagFolkeregisterIdent("identForelder1")),
             FamiliemedlemOversetter.oversettEktefelleEllerPartner(
@@ -180,7 +180,7 @@ class PersondataServiceTest {
     @Test
     fun `hentPersonMedHistorikk aktiv behandling konvertering ok`() {
         every { behandlingService.hentBehandling(1L) } returns SaksbehandlingDataFactory.lagBehandling()
-        every { pdlConsumer.hentPersonMedHistorikk(any()) } returns lagPerson()
+        every { pdlClient.hentPersonMedHistorikk(any()) } returns lagPerson()
         every { kodeverkService.dekod(any(), any()) } returns "Mocked value"
 
 
@@ -277,7 +277,7 @@ class PersondataServiceTest {
 
     @Test
     fun `hentSammensatNavn returnerer formatert navn`() {
-        every { pdlConsumer.hentNavn(any()) } returns setOf(
+        every { pdlClient.hentNavn(any()) } returns setOf(
             no.nav.melosys.integrasjon.pdl.dto.person.Navn(
                 "Fornavn", "Mellom", "Etternavnsen", metadata()
             )
@@ -292,7 +292,7 @@ class PersondataServiceTest {
 
     @Test
     fun `hentStatsborgerskap returnerer statsborgerskap`() {
-        every { pdlConsumer.hentStatsborgerskap("ident") } returns setOf(
+        every { pdlClient.hentStatsborgerskap("ident") } returns setOf(
             no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap(
                 "AIA",
                 LocalDate.parse("2021-05-08"),
@@ -321,7 +321,7 @@ class PersondataServiceTest {
 
     @Test
     fun `harStrengtFortroligAdresse returnerer true når strengt fortrolig finnes`() {
-        every { pdlConsumer.hentAdressebeskyttelser(any()) } returns listOf(
+        every { pdlClient.hentAdressebeskyttelser(any()) } returns listOf(
             Adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT, metadata()),
             Adressebeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG, metadata())
         )
