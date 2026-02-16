@@ -13,17 +13,17 @@ import org.springframework.web.reactive.function.client.WebClient;
 import static no.nav.melosys.integrasjon.felles.WebClientUtilsKt.errorFilter;
 
 @Configuration
-public class PDLConsumerProducer {
+public class PDLClientProducer {
 
     private static final String BEHANDLINGSNUMMER = "behandlingsnummer";
     private static final String MELOSYS_BEHANDLINGSNUMMER = "B272";
 
     @Bean
-    public PDLConsumer pdlConsumerForSaksbehandler(WebClient.Builder webclientBuilder,
+    public PDLClient pdlClientForSaksbehandler(WebClient.Builder webclientBuilder,
                                                    @Value("${PDL.url}") String pdlUrl,
                                                    PDLAuthFilterAzure pdlAuthFilter,
                                                    CorrelationIdOutgoingFilter correlationIdOutgoingFilter) {
-        return new PDLConsumerImpl(
+        return new PDLClientImpl(
             webclientBuilder(webclientBuilder, pdlUrl)
                 .filter(pdlAuthFilter)
                 .filter(correlationIdOutgoingFilter)

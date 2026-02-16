@@ -23,8 +23,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import static no.nav.melosys.integrasjon.pdl.dto.identer.Query.HENT_IDENTER_QUERY;
 import static no.nav.melosys.integrasjon.pdl.dto.person.Query.*;
 
-public class PDLConsumerImpl implements PDLConsumer {
-    private static final Logger log = LoggerFactory.getLogger(PDLConsumerImpl.class);
+public class PDLClientImpl implements PDLClient {
+    private static final Logger log = LoggerFactory.getLogger(PDLClientImpl.class);
     private static final ObjectWriter JSON_WRITER = new ObjectMapper().writer();
     private static final String CALL_ID = "Nav-Call-Id";
     private static final String HISTORIKK = "historikk";
@@ -33,7 +33,7 @@ public class PDLConsumerImpl implements PDLConsumer {
         PDLFeilkode.NOT_FOUND);
     private final WebClient webClient;
 
-    public PDLConsumerImpl(WebClient webClient) {
+    public PDLClientImpl(WebClient webClient) {
         this.webClient = webClient;
     }
 

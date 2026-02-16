@@ -39,13 +39,13 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class PDLConsumerImplTest {
+class PDLClientImplTest {
 
-    private lateinit var pdlConsumer: PDLConsumer
+    private lateinit var pdlClient: PDLClient
 
     @BeforeEach
     fun setup() {
-        pdlConsumer = PDLConsumerImpl(
+        pdlClient = PDLClientImpl(
             WebClient.builder().baseUrl("http://localhost:${mockServer.port}")
                 .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE).build())
     }
@@ -59,7 +59,7 @@ class PDLConsumerImplTest {
         )
 
 
-        pdlConsumer.hentIdenter("123").identer() shouldContainExactly listOf(
+        pdlClient.hentIdenter("123").identer() shouldContainExactly listOf(
             Ident("99026522600", FOLKEREGISTERIDENT),
             Ident("9834873315250", AKTORID)
         )
@@ -75,7 +75,7 @@ class PDLConsumerImplTest {
 
 
         val exception = shouldThrow<IntegrasjonException> {
-            pdlConsumer.hentIdenter("123")
+            pdlClient.hentIdenter("123")
         }
         exception.message shouldContain "My error message"
     }
@@ -89,7 +89,7 @@ class PDLConsumerImplTest {
         )
 
 
-        val person = pdlConsumer.hentFamilierelasjoner("ident")
+        val person = pdlClient.hentFamilierelasjoner("ident")
 
 
         person.run {
@@ -132,7 +132,7 @@ class PDLConsumerImplTest {
         )
 
 
-        val person = pdlConsumer.hentPerson("123123123")
+        val person = pdlClient.hentPerson("123123123")
 
 
         person.run {
@@ -190,7 +190,7 @@ class PDLConsumerImplTest {
         )
 
 
-        val person = pdlConsumer.hentPerson("123123123")
+        val person = pdlClient.hentPerson("123123123")
 
 
         person.run {
@@ -243,7 +243,7 @@ class PDLConsumerImplTest {
         )
 
 
-        pdlConsumer.hentStatsborgerskap("123") shouldContainExactlyInAnyOrder listOf(
+        pdlClient.hentStatsborgerskap("123") shouldContainExactlyInAnyOrder listOf(
             Statsborgerskap(
                 "ALB", null, LocalDate.parse("1961-02-01"), LocalDate.parse("1981-09-07"),
                 Metadata(
@@ -270,7 +270,7 @@ class PDLConsumerImplTest {
         )
 
 
-        val person = pdlConsumer.hentPerson("23487505536")
+        val person = pdlClient.hentPerson("23487505536")
 
 
         person.run {
@@ -345,7 +345,7 @@ class PDLConsumerImplTest {
         )
 
 
-        val person = pdlConsumer.hentPerson("23487505536")
+        val person = pdlClient.hentPerson("23487505536")
 
 
         person.run {

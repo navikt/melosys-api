@@ -10,7 +10,7 @@ import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap;
 import org.springframework.retry.annotation.Retryable;
 
 @Retryable
-public interface PDLConsumer {
+public interface PDLClient {
     Identliste hentIdenter(String ident);
 
     Person hentBarn(String ident);

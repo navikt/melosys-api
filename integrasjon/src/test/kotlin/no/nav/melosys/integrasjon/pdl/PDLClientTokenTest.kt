@@ -25,13 +25,13 @@ import org.springframework.test.context.ContextConfiguration
         MetricsTestConfig::class,
         OAuthMockServer::class,
 
-        PDLConsumerProducer::class,
+        PDLClientProducer::class,
         PDLAuthFilterAzure::class
     ]
 )
 @AutoConfigureWebClient
-class PDLConsumerTokenTest(
-    @param:Autowired private val pdlConsumer: PDLConsumer,
+class PDLClientTokenTest(
+    @param:Autowired private val pdlClient: PDLClient,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
@@ -112,5 +112,5 @@ class PDLConsumerTokenTest(
     }
 
     override fun executeRequest() =
-        pdlConsumer.hentIdenter("0")
+        pdlClient.hentIdenter("0")
 }

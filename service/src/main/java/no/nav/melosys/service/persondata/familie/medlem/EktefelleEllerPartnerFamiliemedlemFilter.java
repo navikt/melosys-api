@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.person.familie.Familiemedlem;
-import no.nav.melosys.integrasjon.pdl.PDLConsumer;
+import no.nav.melosys.integrasjon.pdl.PDLClient;
 import no.nav.melosys.integrasjon.pdl.dto.HarMetadata;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
 import no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand;
@@ -18,10 +18,10 @@ import static no.nav.melosys.integrasjon.pdl.dto.person.Sivilstandstype.*;
 @Component
 public class EktefelleEllerPartnerFamiliemedlemFilter {
 
-    private final PDLConsumer pdlConsumer;
+    private final PDLClient pdlClient;
 
-    public EktefelleEllerPartnerFamiliemedlemFilter(PDLConsumer pdlConsumer) {
-        this.pdlConsumer = pdlConsumer;
+    public EktefelleEllerPartnerFamiliemedlemFilter(PDLClient pdlClient) {
+        this.pdlClient = pdlClient;
     }
 
     @NotNull
@@ -91,7 +91,7 @@ public class EktefelleEllerPartnerFamiliemedlemFilter {
     @NotNull
     private Set<Familiemedlem> lagFamiliemedlemFraSivilstand(Sivilstand sivilstand) {
         String ident = sivilstand.relatertVedSivilstand();
-        Person person = pdlConsumer.hentEktefelleEllerPartner(ident);
+        Person person = pdlClient.hentEktefelleEllerPartner(ident);
         return Set.of(FamiliemedlemOversetter.oversettEktefelleEllerPartner(person, sivilstand));
     }
 
