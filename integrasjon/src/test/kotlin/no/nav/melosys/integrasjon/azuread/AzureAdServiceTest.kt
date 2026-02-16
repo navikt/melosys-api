@@ -4,15 +4,13 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.melosys.domain.kodeverk.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AzureAdServiceTest {
 
-    private var mockRestConsumer = mockk<AzureAdConsumer>()
+    private var mockRestConsumer = mockk<AzureAdClient>()
     private val azureAdService: AzureAdService = AzureAdService(mockRestConsumer)
 
     @Test

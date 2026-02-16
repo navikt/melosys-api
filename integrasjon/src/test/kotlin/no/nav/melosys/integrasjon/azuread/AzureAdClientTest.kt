@@ -28,15 +28,15 @@ import java.util.*
         OAuthMockServer::class,
         CorrelationIdOutgoingFilter::class,
 
-        AzureAdConsumerProducer::class,
+        AzureAdClientConfig::class,
         GenericAuthFilterFactory::class,
         FakeUnleash::class
     ]
 )
 @AutoConfigureWebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class AzureAdConsumerTest(
-    @Autowired private val azureAdConsumer: AzureAdConsumer,
+class AzureAdClientTest(
+    @Autowired private val azureAdClient: AzureAdClient,
     @Autowired private val oAuthMockServer: OAuthMockServer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int
 ) {
@@ -93,7 +93,7 @@ class AzureAdConsumerTest(
                 )
         )
 
-        val saksbehandlerNavnResponse = azureAdConsumer.hentSaksbehandlerNavn(ident)
+        val saksbehandlerNavnResponse = azureAdClient.hentSaksbehandlerNavn(ident)
 
         saksbehandlerNavnResponse.shouldBe(saksbehandlerNavn)
     }
@@ -115,7 +115,7 @@ class AzureAdConsumerTest(
                 )
         )
 
-        val saksbehandlerNavnResponse = azureAdConsumer.hentSaksbehandlerNavn(ident)
+        val saksbehandlerNavnResponse = azureAdClient.hentSaksbehandlerNavn(ident)
 
         saksbehandlerNavnResponse.shouldBe(null)
     }

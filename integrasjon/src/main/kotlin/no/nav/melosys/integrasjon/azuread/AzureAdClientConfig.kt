@@ -16,18 +16,18 @@ import java.net.URI
 import no.nav.melosys.integrasjon.felles.errorFilter
 
 @Configuration
-class AzureAdConsumerProducer(
+class AzureAdClientConfig(
     @Value("\${microsoft.graph.rest.url}") private val url: String,
     @Value("\${http.proxy:#{null}}") private val httpProxy: String?,
     private val genericAuthFilterFactory: GenericAuthFilterFactory,
 ) : CallIdAware {
 
     @Bean
-    fun azureAdConsumer(
-        webClientBuilder: WebClient.Builder, correlationIdOutgoingFilter: CorrelationIdOutgoingFilter,
-    ): AzureAdConsumer {
+    fun azureAdClient(
+        webClientBuilder: WebClient.Builder
+    ): AzureAdClient {
 
-        return AzureAdConsumer(
+        return AzureAdClient(
             webClientBuilder
                 .baseUrl(url)
                 .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))

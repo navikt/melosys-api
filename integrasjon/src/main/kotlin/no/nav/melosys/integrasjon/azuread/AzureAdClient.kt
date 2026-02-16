@@ -8,7 +8,7 @@ import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.util.UriBuilder
 
 @Retryable
-open class AzureAdConsumer(
+open class AzureAdClient(
     private val webClient: WebClient,
 ) {
 
