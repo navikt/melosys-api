@@ -136,6 +136,27 @@ class SendVedtakUtlandTest {
     }
 
     @Test
+    fun `utfør skal ikke sende SED når artikkel 11_3B og ingen mottakerinstitusjoner`() {
+        val behandlingsresultat = lagBehandlingsresultat {
+            lovvalgsperioder.clear()
+            lovvalgsperiode {
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B
+                lovvalgsland = Land_iso2.NO
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            }
+        }
+        val prosessinstans = lagProsessinstans()
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultatMedAvklartefakta(any()) } returns behandlingsresultat
+
+
+        sendVedtakUtland.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { eessiService.opprettOgSendSed(any(), any(), any(), any(), any(), any()) }
+    }
+
+    @Test
     fun `utfør skal sende SED for artikkel 11 når suksessfull og status er oppdatert resultat`() {
         val behandlingsresultat = lagBehandlingsresultat {
             lovvalgsperioder.clear()
