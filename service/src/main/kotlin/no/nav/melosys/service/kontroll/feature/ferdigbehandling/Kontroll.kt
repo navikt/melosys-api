@@ -309,6 +309,7 @@ class Kontroll(
 
         return tidligereBehandlingsResultat
             .filter { it.hentBehandling().fagsak.saksnummer != behandling.fagsak.saksnummer }
+            .filter { it.hentBehandling().fagsak.status !in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT }
             .mapNotNull { it.helseutgiftDekkesPeriode }
     }
 
