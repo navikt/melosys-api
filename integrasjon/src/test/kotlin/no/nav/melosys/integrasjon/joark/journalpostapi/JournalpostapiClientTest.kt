@@ -19,9 +19,9 @@ import java.time.LocalDate
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.LogiskVedleggRequest
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class JournalpostapiConsumerTest {
+class JournalpostapiClientTest {
 
-    private lateinit var journalpostapiConsumer: JournalpostapiConsumer
+    private lateinit var journalpostapiClient: JournalpostapiClient
     private lateinit var wireMockServer: WireMockServer
 
     private val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
@@ -35,7 +35,7 @@ class JournalpostapiConsumerTest {
             .baseUrl(wireMockServer.baseUrl())
             .build()
 
-        journalpostapiConsumer = JournalpostapiConsumer(webClient)
+        journalpostapiClient = JournalpostapiClient(webClient)
     }
 
     @BeforeEach
@@ -55,7 +55,7 @@ class JournalpostapiConsumerTest {
             .journalpostType(OpprettJournalpostRequest.JournalpostType.INNGAAENDE)
             .build()
 
-        journalpostapiConsumer.opprettJournalpost(req, true)
+        journalpostapiClient.opprettJournalpost(req, true)
 
         wireMockServer.verify(
             postRequestedFor(urlPathEqualTo("/journalpost"))
@@ -70,7 +70,7 @@ class JournalpostapiConsumerTest {
         val journalpostId = "123123"
         val oppdaterJournalpostRequest = OppdaterJournalpostRequest.Builder().medTittel("Tittel").build()
 
-        journalpostapiConsumer.oppdaterJournalpost(oppdaterJournalpostRequest, journalpostId)
+        journalpostapiClient.oppdaterJournalpost(oppdaterJournalpostRequest, journalpostId)
 
         wireMockServer.verify(
             putRequestedFor(urlPathEqualTo("/journalpost/$journalpostId"))
@@ -83,7 +83,7 @@ class JournalpostapiConsumerTest {
     fun `leggTilLogiskVedlegg - verifiser URL`() {
         val dokumentInfoId = "532"
         val tittel = "tittel"
-        journalpostapiConsumer.leggTilLogiskVedlegg(dokumentInfoId, tittel)
+        journalpostapiClient.leggTilLogiskVedlegg(dokumentInfoId, tittel)
 
         wireMockServer.verify(
             postRequestedFor(urlPathEqualTo("/dokumentInfo/$dokumentInfoId/logiskVedlegg/"))
@@ -99,7 +99,7 @@ class JournalpostapiConsumerTest {
         val dokumentInfoId = "124j"
         val logiskVedleggId = "3j2io"
 
-        journalpostapiConsumer.fjernLogiskeVedlegg(dokumentInfoId, logiskVedleggId)
+        journalpostapiClient.fjernLogiskeVedlegg(dokumentInfoId, logiskVedleggId)
 
         wireMockServer.verify(
             deleteRequestedFor(urlPathEqualTo("/dokumentInfo/$dokumentInfoId/logiskVedlegg/$logiskVedleggId"))
@@ -110,7 +110,7 @@ class JournalpostapiConsumerTest {
     fun `ferdigstillJournalpost - verifiser URL`() {
         val journalpostId = "54325"
         val ferdigstillJournalpostRequest = FerdigstillJournalpostRequest()
-        journalpostapiConsumer.ferdigstillJournalpost(ferdigstillJournalpostRequest, journalpostId)
+        journalpostapiClient.ferdigstillJournalpost(ferdigstillJournalpostRequest, journalpostId)
 
         wireMockServer.verify(
             patchRequestedFor(urlPathEqualTo("/journalpost/$journalpostId/ferdigstill"))
@@ -128,7 +128,7 @@ class JournalpostapiConsumerTest {
             .journalpostType(OpprettJournalpostRequest.JournalpostType.INNGAAENDE)
             .build()
 
-        journalpostapiConsumer.opprettJournalpost(req, true)
+        journalpostapiClient.opprettJournalpost(req, true)
 
         wireMockServer.verify(
             postRequestedFor(urlPathEqualTo("/journalpost"))

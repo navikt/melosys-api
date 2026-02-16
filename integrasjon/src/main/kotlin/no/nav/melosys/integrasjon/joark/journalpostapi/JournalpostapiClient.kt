@@ -13,7 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient
 private val log = KotlinLogging.logger { }
 
 @Service
-class JournalpostapiConsumer(
+class JournalpostapiClient(
     private val journalpostapiWebClient: WebClient
 ) : JsonRestIntegrasjon {
 
