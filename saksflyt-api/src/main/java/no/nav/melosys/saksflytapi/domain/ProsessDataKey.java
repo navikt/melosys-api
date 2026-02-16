@@ -44,6 +44,8 @@ public enum ProsessDataKey {
     MOTTAKSKANAL_ER_ELEKTRONISK("mottakskanalErElektronisk"),
     MOTTATT_DATO("mottattDato"),
     MOTTATT_SOKNAD_ID("mottattSoknadID"),
+    SØKNAD_MOTTATT_MELDING("søknadMottattMelding"),
+    SØKNADSDATA("søknadsdata"),
     OPPGAVE_ID("oppgaveID"),
     OPPHOLDSLAND("oppholdsland"),
     ORGNR("orgnr"),

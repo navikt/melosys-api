@@ -33,6 +33,7 @@ class SaksflytapiArchitectureTest {
                 "no.nav.melosys.sikkerhet..",
                 "no.nav.melosys.saksflytapi..",
                 "no.nav.melosys.config..",
+                "no.nav.melosys.skjema..",
             )
 
     @ArchTest

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
+import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
@@ -57,6 +58,18 @@ class KafkaTestConfig {
     ): KafkaTemplate<String, Skattehendelse> {
         val props = kafkaProperties.buildProducerProperties(null)
         val producerFactory: ProducerFactory<String, Skattehendelse> =
+            DefaultKafkaProducerFactory(props, StringSerializer(), JsonSerializer(objectMapper))
+        return KafkaTemplate(producerFactory)
+    }
+
+    @Bean
+    @Qualifier("skjemaMottattMelding")
+    fun skjemaMottattMeldingKafkaTemplate(
+        kafkaProperties: KafkaProperties,
+        objectMapper: ObjectMapper?
+    ): KafkaTemplate<String, SkjemaMottattMelding> {
+        val props = kafkaProperties.buildProducerProperties(null)
+        val producerFactory: ProducerFactory<String, SkjemaMottattMelding> =
             DefaultKafkaProducerFactory(props, StringSerializer(), JsonSerializer(objectMapper))
         return KafkaTemplate(producerFactory)
     }
