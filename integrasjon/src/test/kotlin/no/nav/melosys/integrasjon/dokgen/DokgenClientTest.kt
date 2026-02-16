@@ -26,10 +26,10 @@ import java.time.Instant
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class DokgenConsumerTest {
+class DokgenClientTest {
 
     private lateinit var wireMockServer: WireMockServer
-    private lateinit var dokgenConsumer: DokgenConsumer
+    private lateinit var dokgenClient: DokgenClient
 
     @BeforeAll
     fun setup() {
@@ -40,7 +40,7 @@ class DokgenConsumerTest {
             .baseUrl("http://localhost:" + wireMockServer.port())
             .build()
 
-        dokgenConsumer = DokgenConsumer(webClient)
+        dokgenClient = DokgenClient(webClient)
     }
 
     @AfterAll
@@ -61,7 +61,7 @@ class DokgenConsumerTest {
         )
 
 
-        dokgenConsumer.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), false, false) shouldNotBe null
+        dokgenClient.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), false, false) shouldNotBe null
     }
 
     @Test
@@ -77,7 +77,7 @@ class DokgenConsumerTest {
         )
 
 
-        dokgenConsumer.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), true, false) shouldNotBe null
+        dokgenClient.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), true, false) shouldNotBe null
     }
 
     @Test
@@ -94,7 +94,7 @@ class DokgenConsumerTest {
         )
 
 
-        dokgenConsumer.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), true, true) shouldNotBe null
+        dokgenClient.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), true, true) shouldNotBe null
     }
 
     @Test
@@ -112,7 +112,7 @@ class DokgenConsumerTest {
         )
 
 
-        dokgenConsumer.lagPdfForStandardvedlegg("standardvedlegg", standardvedlegg) shouldNotBe null
+        dokgenClient.lagPdfForStandardvedlegg("standardvedlegg", standardvedlegg) shouldNotBe null
     }
 
     @Test
@@ -130,7 +130,7 @@ class DokgenConsumerTest {
         )
 
 
-        dokgenConsumer.lagPdfForStandardvedlegg("standardvedlegg", null) shouldNotBe null
+        dokgenClient.lagPdfForStandardvedlegg("standardvedlegg", null) shouldNotBe null
     }
 
     private fun getMangelbrevBruker() = MangelbrevBruker.av(

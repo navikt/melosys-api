@@ -9,12 +9,12 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 //TODO: Kotlinize
 @Retryable
-public class DokgenConsumer {
-    private static final Logger log = LoggerFactory.getLogger(DokgenConsumer.class);
+public class DokgenClient {
+    private static final Logger log = LoggerFactory.getLogger(DokgenClient.class);
 
     private final WebClient webClient;
 
-    public DokgenConsumer(WebClient webClient) {
+    public DokgenClient(WebClient webClient) {
         this.webClient = webClient;
     }
 

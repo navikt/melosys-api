@@ -9,17 +9,17 @@ import org.springframework.web.reactive.function.client.WebClient;
 import static no.nav.melosys.integrasjon.felles.WebClientUtilsKt.errorFilter;
 
 @Configuration
-public class DokgenConsumerProducer {
+public class DokgenClientConfig {
     private final String url;
 
-    public DokgenConsumerProducer(@Value("${melosysdokgen.v1.url}") String url) {
+    public DokgenClientConfig(@Value("${melosysdokgen.v1.url}") String url) {
         this.url = url;
     }
 
     @Bean
-    public DokgenConsumer dokgenConsumer(WebClient.Builder webClientBuilder,
+    public DokgenClient dokgenClient(WebClient.Builder webClientBuilder,
                                          CorrelationIdOutgoingFilter correlationIdOutgoingFilter) {
-        return new DokgenConsumer(
+        return new DokgenClient(
             webClientBuilder
                 .baseUrl(url)
                 .filter(errorFilter("Kall mot dokumentgenereringstjeneste feilet."))
