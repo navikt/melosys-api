@@ -23,9 +23,9 @@ import java.time.LocalDate
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UtbetaltdataServiceTest {
 
-    private var mockRestConsumer = mockk<UtbetaltdataClient>()
+    private var mockRestClient = mockk<UtbetaltdataClient>()
     private val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
-    private val utbetaltdataServiceV2: UtbetaltdataService = UtbetaltdataService(mockRestConsumer, objectMapper)
+    private val utbetaltdataServiceV2: UtbetaltdataService = UtbetaltdataService(mockRestClient, objectMapper)
 
     @Test
     fun hentUtbetalingerBarnetrygd_medTreff_verifiserSaksopplysning() {
@@ -38,7 +38,7 @@ class UtbetaltdataServiceTest {
             "Rettighetshaver")
 
         every {
-            mockRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest)
+            mockRestClient.hentUtbetalingsInformasjon(utbetalingRequest)
         } returns hentUtbetalingListe()
 
         val saksopplysning = utbetaltdataServiceV2.hentUtbetalingerBarnetrygd(FNR,
@@ -83,7 +83,7 @@ class UtbetaltdataServiceTest {
             "Rettighetshaver")
 
         every {
-            mockRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest)
+            mockRestClient.hentUtbetalingsInformasjon(utbetalingRequest)
         } returns hentUtbetalingListe()
 
         val saksopplysning = utbetaltdataServiceV2.hentUtbetalingerBarnetrygd(FNR,
@@ -108,7 +108,7 @@ class UtbetaltdataServiceTest {
             "Rettighetshaver")
 
         every {
-            mockRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest)
+            mockRestClient.hentUtbetalingsInformasjon(utbetalingRequest)
         } returns hentUtbetalingListe()
 
         val saksopplysning = utbetaltdataServiceV2.hentUtbetalingerBarnetrygd(FNR,
@@ -131,7 +131,7 @@ class UtbetaltdataServiceTest {
             "Rettighetshaver")
 
         every {
-            mockRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest)
+            mockRestClient.hentUtbetalingsInformasjon(utbetalingRequest)
         } returns hentUtbetalingListe()
 
         val saksopplysning = utbetaltdataServiceV2.hentUtbetalingerBarnetrygd(FNR,

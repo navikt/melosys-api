@@ -36,7 +36,7 @@ import java.time.LocalDate
 )
 @AutoConfigureWebClient
 class UtbetalingConsumerTokenTest(
-    @Autowired private val utbetalingRestConsumer: UtbetaltdataClient,
+    @Autowired private val utbetalingRestClient: UtbetaltdataClient,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
@@ -94,7 +94,7 @@ class UtbetalingConsumerTokenTest(
     override fun executeRequest() {
         val fnr = "12345678990"
         val periodeFom = Periode(LocalDate.now().minusDays(2).toString(), LocalDate.now().plusDays(2).toString())
-        utbetalingRestConsumer.hentUtbetalingsInformasjon(
+        utbetalingRestClient.hentUtbetalingsInformasjon(
             UtbetalingRequest(
                 fnr,
                 periodeFom,

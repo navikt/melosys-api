@@ -20,7 +20,7 @@ class TilgangsmaskinenClientProducer(
 ) {
 
     @Bean
-    fun tilgangsmaskineConsumer(
+    fun tilgangsmaskinenClient(
         webClientBuilder: WebClient.Builder,
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
     ): TilgangsmaskinenClient {

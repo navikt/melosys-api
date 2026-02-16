@@ -10,15 +10,15 @@ import org.junit.jupiter.api.TestInstance
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AzureAdServiceTest {
 
-    private var mockRestConsumer = mockk<AzureAdClient>()
-    private val azureAdService: AzureAdService = AzureAdService(mockRestConsumer)
+    private var mockRestClient = mockk<AzureAdClient>()
+    private val azureAdService: AzureAdService = AzureAdService(mockRestClient)
 
     @Test
     fun skalHenteSaksbehandlerNavn() {
         val ident = "Z123456"
         val expectedSaksbehandlerNavn = "Lokal Testbruker"
         every {
-            mockRestConsumer.hentSaksbehandlerNavn(
+            mockRestClient.hentSaksbehandlerNavn(
                 ident
             )
         } returns expectedSaksbehandlerNavn

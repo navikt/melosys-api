@@ -22,7 +22,7 @@ import java.time.LocalDate
 class MedlemskapClientTest {
 
     private lateinit var wireMockServer: WireMockServer
-    private lateinit var restConsumer: MedlemskapClient
+    private lateinit var restClient: MedlemskapClient
 
     @BeforeAll
     fun setup() {
@@ -33,7 +33,7 @@ class MedlemskapClientTest {
             .baseUrl("http://localhost:" + wireMockServer.port())
             .build()
 
-        restConsumer = MedlemskapClient(webClient)
+        restClient = MedlemskapClient(webClient)
     }
 
     @AfterAll
@@ -58,7 +58,7 @@ class MedlemskapClientTest {
         )
 
 
-        restConsumer.hentPeriodeListe(fnr, fom, tom).shouldBeEmpty()
+        restClient.hentPeriodeListe(fnr, fom, tom).shouldBeEmpty()
 
 
         wireMockServer.verify(postRequestedFor(urlPathEqualTo("/rest/v1/periode/soek")))
@@ -76,7 +76,7 @@ class MedlemskapClientTest {
         )
 
 
-        restConsumer.hentPeriode("123") shouldNotBe null
+        restClient.hentPeriode("123") shouldNotBe null
     }
 
     @Test
@@ -90,7 +90,7 @@ class MedlemskapClientTest {
 
 
         val exception = shouldThrow<RuntimeException> {
-            restConsumer.oppdaterPeriode(MedlemskapsunntakForPut())
+            restClient.oppdaterPeriode(MedlemskapsunntakForPut())
         }
 
 
@@ -113,6 +113,6 @@ class MedlemskapClientTest {
         )
 
 
-        restConsumer.oppdaterPeriode(medlemskapsunntakForPut) shouldNotBe null
+        restClient.oppdaterPeriode(medlemskapsunntakForPut) shouldNotBe null
     }
 }
