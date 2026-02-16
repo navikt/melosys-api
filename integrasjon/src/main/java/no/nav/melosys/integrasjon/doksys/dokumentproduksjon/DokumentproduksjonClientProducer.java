@@ -23,14 +23,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class DokumentproduksjonConsumerProducer {
+public class DokumentproduksjonClientProducer {
 
-    private final DokumentproduksjonConsumerConfig config;
+    private final DokumentproduksjonClientConfig config;
     private final RestSTSService restSTSService;
     private final String stsPolicy;
 
 
-    public DokumentproduksjonConsumerProducer(DokumentproduksjonConsumerConfig config, RestSTSService restSTSService, @Value("${stsPolicy.url}") String stsPolicy) {
+    public DokumentproduksjonClientProducer(DokumentproduksjonClientConfig config, RestSTSService restSTSService, @Value("${stsPolicy.url}") String stsPolicy) {
         this.config = config;
         this.restSTSService = restSTSService;
         this.stsPolicy = stsPolicy;
@@ -38,21 +38,21 @@ public class DokumentproduksjonConsumerProducer {
 
     @Bean
     @ConditionalOnProperty(name="dokumentproduksjon.uten.token", havingValue = "false", matchIfMissing = true)
-    public DokumentproduksjonConsumer dokumentproduksjonConsumer() {
+    public DokumentproduksjonClient dokumentproduksjonClient() {
         DokumentproduksjonV3 port = config.getPort();
         Client client = ClientProxy.getClient(port);
 
         configureClient(client);
 
-        return new DokumentproduksjonConsumer(port);
+        return new DokumentproduksjonClient(port);
     }
 
     @Bean
     @ConditionalOnProperty(name="dokumentproduksjon.uten.token", havingValue="true")
-    public DokumentproduksjonConsumer dokumentproduksjonConsumerForLocalAndTesting() {
+    public DokumentproduksjonClient dokumentproduksjonClientForLocalAndTesting() {
         DokumentproduksjonV3 port = config.getPort();
 
-        return new DokumentproduksjonConsumer(port);
+        return new DokumentproduksjonClient(port);
     }
 
     private void configureClient(Client client) {

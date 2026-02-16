@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DokumentproduksjonConsumerConfig {
+public class DokumentproduksjonClientConfig {
     private static final String WSDL = "wsdl/no/nav/tjeneste/virksomhet/dokumentproduksjon/v3/Binding.wsdl";
     private static final String NAMESPACE = "http://nav.no/tjeneste/virksomhet/dokumentproduksjon/v3/Binding";
     private static final QName SERVICE = new QName(NAMESPACE, "Dokumentproduksjon_v3");
@@ -21,7 +21,7 @@ public class DokumentproduksjonConsumerConfig {
 
     private String endpointUrl; // NOSONAR
 
-    public DokumentproduksjonConsumerConfig(@Value("${Dokumentproduksjon_v3.url}") String endpointUrl) {
+    public DokumentproduksjonClientConfig(@Value("${Dokumentproduksjon_v3.url}") String endpointUrl) {
         this.endpointUrl = endpointUrl;
     }
 

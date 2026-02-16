@@ -8,11 +8,11 @@ import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkere
 import org.springframework.retry.annotation.Retryable;
 
 @Retryable
-public class DokumentproduksjonConsumer {
+public class DokumentproduksjonClient {
 
     private final DokumentproduksjonV3 dokumentProduksjonV3Port;
 
-    public DokumentproduksjonConsumer(DokumentproduksjonV3 dokumentProduksjonV3Port) {
+    public DokumentproduksjonClient(DokumentproduksjonV3 dokumentProduksjonV3Port) {
         this.dokumentProduksjonV3Port = dokumentProduksjonV3Port;
     }
 

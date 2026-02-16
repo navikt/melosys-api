@@ -34,13 +34,13 @@ import org.springframework.test.context.ContextConfiguration
         SecurityTokenServiceClient::class,
         RestSTSService::class,
         MetricsTestConfig::class,
-        DokumentproduksjonConsumerConfig::class,
-        DokumentproduksjonConsumerProducer::class
+        DokumentproduksjonClientConfig::class,
+        DokumentproduksjonClientProducer::class
     ]
 )
 @AutoConfigureWebClient
-class DokumentproduksjonConsumerTokenTest(
-    @Autowired private val dokumentproduksjonConsumer: DokumentproduksjonConsumer,
+class DokumentproduksjonClientTokenTest(
+    @Autowired private val dokumentproduksjonClient: DokumentproduksjonClient,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
@@ -133,7 +133,7 @@ class DokumentproduksjonConsumerTokenTest(
     """.trimIndent()
 
     override fun executeRequest() =
-        dokumentproduksjonConsumer.produserIkkeredigerbartDokument(ProduserIkkeredigerbartDokumentRequest())
+        dokumentproduksjonClient.produserIkkeredigerbartDokument(ProduserIkkeredigerbartDokumentRequest())
 
     private fun defaultSecurityServiceWireMockMappingForSystem(): MappingBuilder =
         get("/samltoken")
