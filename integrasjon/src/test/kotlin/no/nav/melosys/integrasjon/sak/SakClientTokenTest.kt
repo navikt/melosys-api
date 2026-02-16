@@ -22,13 +22,13 @@ import org.springframework.test.context.ContextConfiguration
 @ActiveProfiles("wiremock-test")
 @ContextConfiguration(
     classes = [
-        SakConsumerConfig::class,
+        SakClientConfig::class,
         OAuthMockServer::class
     ]
 )
 @AutoConfigureWebClient
-class SakConsumerTokenTest(
-    @Autowired private val sakConsumer: SakConsumerInterface,
+class SakClientTokenTest(
+    @Autowired private val sakClient: SakClientInterface,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
@@ -81,5 +81,5 @@ class SakConsumerTokenTest(
     }
 
     override fun executeRequest() =
-        sakConsumer.opprettSak(SakDto())
+        sakClient.opprettSak(SakDto())
 }

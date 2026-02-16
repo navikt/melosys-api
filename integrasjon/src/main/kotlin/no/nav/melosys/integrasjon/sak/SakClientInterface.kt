@@ -1,5 +1,5 @@
 package no.nav.melosys.integrasjon.sak
 
-fun interface SakConsumerInterface {
+fun interface SakClientInterface {
     fun opprettSak(sakDto: SakDto): SakDto
 }

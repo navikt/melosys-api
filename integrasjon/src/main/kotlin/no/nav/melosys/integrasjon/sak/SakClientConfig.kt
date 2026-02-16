@@ -10,20 +10,20 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
-class SakConsumerConfig(
+class SakClientConfig(
     @Value("\${SakAPI_v1.url}") private val url: String
 ) {
     @Bean
-    fun sakConsumer(
+    fun sakClient(
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter,
         webClientBuilder: WebClient.Builder
-    ): SakConsumerInterface {
+    ): SakClientInterface {
         val webClient = webClientBuilder
             .baseUrl(url)
             .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot Sak API feilet"))
             .build()
-        return BasicAuthSakConsumer(webClient)
+        return BasicAuthSakClient(webClient)
     }
 }

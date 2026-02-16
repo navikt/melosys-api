@@ -9,9 +9,9 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 
 // TODO erstatt basic auth med bruk av Entra tokens
-class BasicAuthSakConsumer(
+class BasicAuthSakClient(
     private val webClient: WebClient
-) : SakConsumerInterface, BasicAuthAware {
+) : SakClientInterface, BasicAuthAware {
 
     override fun opprettSak(sakDto: SakDto): SakDto {
         val userID = SubjectHandler.getInstance().getUserID()
