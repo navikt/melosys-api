@@ -442,7 +442,7 @@ class EessiServiceTest {
     }
 
     @Test
-    fun `hentTilknyttedeBucer medFeilIConsumer forventException`() {
+    fun `hentTilknyttedeBucer medFeilIClient forventException`() {
         every { eessiClient.hentTilknyttedeBucer(any(), any<List<String>>()) } throws IntegrasjonException("Error!")
 
         shouldThrow<IntegrasjonException> {

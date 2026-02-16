@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class AzureAdService(
-    private val azureAdConsumer: AzureAdConsumer,
+    private val azureAdClient: AzureAdClient,
 ) {
-    fun hentSaksbehandlerNavn(ident: String): String? = azureAdConsumer.hentSaksbehandlerNavn(ident)
+    fun hentSaksbehandlerNavn(ident: String): String? = azureAdClient.hentSaksbehandlerNavn(ident)
 }

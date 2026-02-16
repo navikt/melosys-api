@@ -12,7 +12,7 @@ import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.dokument.person.Sivilstand
 import no.nav.melosys.domain.person.familie.Familierelasjon
-import no.nav.melosys.integrasjon.pdl.PDLConsumer
+import no.nav.melosys.integrasjon.pdl.PDLClient
 import no.nav.melosys.service.SaksbehandlingDataFactory.lagInaktivBehandlingSomIkkeResulterIVedtak
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PdlObjectFactory.lagPerson
@@ -34,7 +34,7 @@ import java.time.LocalDate
 class FamiliemedlemServiceTest {
 
     private val behandlingService: BehandlingService = mockk()
-    private val pdlConsumer: PDLConsumer = mockk()
+    private val pdlClient: PDLClient = mockk()
     private val saksopplysningerService: SaksopplysningerService = mockk()
 
     private lateinit var familiemedlemService: FamiliemedlemService
@@ -44,8 +44,8 @@ class FamiliemedlemServiceTest {
         familiemedlemService = FamiliemedlemService(
             behandlingService,
             saksopplysningerService,
-            EktefelleEllerPartnerFamiliemedlemFilter(pdlConsumer),
-            pdlConsumer
+            EktefelleEllerPartnerFamiliemedlemFilter(pdlClient),
+            pdlClient
         )
     }
 
@@ -75,9 +75,9 @@ class FamiliemedlemServiceTest {
     fun `hentFamiliemedlemmerFraBehandlingID aktivBehandling`() {
         val behandlingID = 1L
         every { behandlingService.hentBehandling(behandlingID) } returns lagBehandling()
-        every { pdlConsumer.hentFamilierelasjoner(FagsakTestFactory.BRUKER_AKTØR_ID) } returns lagHovedpersonMedBarn()
-        every { pdlConsumer.hentBarn(IDENT_BARN) } returns lagPerson()
-        every { pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) } returns lagPersonGift()
+        every { pdlClient.hentFamilierelasjoner(FagsakTestFactory.BRUKER_AKTØR_ID) } returns lagHovedpersonMedBarn()
+        every { pdlClient.hentBarn(IDENT_BARN) } returns lagPerson()
+        every { pdlClient.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) } returns lagPersonGift()
 
 
         val familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(behandlingID)
@@ -93,10 +93,10 @@ class FamiliemedlemServiceTest {
     fun `hentFamiliemedlemmerFraBehandlingID aktivBehandling korrigertPåSammeDato`() {
         val behandlingID = 1L
         every { behandlingService.hentBehandling(behandlingID) } returns lagBehandling()
-        every { pdlConsumer.hentFamilierelasjoner(FagsakTestFactory.BRUKER_AKTØR_ID) } returns
+        every { pdlClient.hentFamilierelasjoner(FagsakTestFactory.BRUKER_AKTØR_ID) } returns
             lagHovedpersonMedBarn_medKorrigertGiftSeparertSkiltPåSammeDato()
-        every { pdlConsumer.hentBarn(IDENT_BARN) } returns lagPerson()
-        every { pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) } returns lagPersonGift()
+        every { pdlClient.hentBarn(IDENT_BARN) } returns lagPerson()
+        every { pdlClient.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) } returns lagPersonGift()
 
 
         val familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(behandlingID)
@@ -130,7 +130,7 @@ class FamiliemedlemServiceTest {
     fun `hentFamiliemedlemmer dobbeltGiftemålSituasjon forventerEttGiftemål ogEttBarn`() {
         val hovedperson = lagHovedperson()
         val giftPerson = lagPersonGift()
-        every { pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) } returns giftPerson
+        every { pdlClient.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) } returns giftPerson
 
 
         val familiemedlemmer = familiemedlemService.hentFamiliemedlemmer(hovedperson)
@@ -143,7 +143,7 @@ class FamiliemedlemServiceTest {
             erRelatertVedSivilstand() shouldBe true
             navn.shouldNotBeNull().harLiktFornavn(PERSON_GIFT_FORNAVN) shouldBe true
         }
-        verify(exactly = 1) { pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) }
+        verify(exactly = 1) { pdlClient.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) }
     }
 
     private fun lagPersonDokumentMedFamiliemedlemmer(sivilstand: Sivilstand) = PersonDokument().apply {

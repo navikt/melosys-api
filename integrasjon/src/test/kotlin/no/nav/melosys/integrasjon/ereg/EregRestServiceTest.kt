@@ -11,7 +11,7 @@ import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonResponse.*
-import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonRestConsumer
+import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonRestClient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -19,12 +19,12 @@ import java.time.LocalDateTime
 
 class EregRestServiceTest {
 
-    private val organisasjonRestConsumer = mockk<OrganisasjonRestConsumer>()
+    private val organisasjonRestClient = mockk<OrganisasjonRestClient>()
     private lateinit var eregService: EregRestService
 
     @BeforeEach
     fun before() {
-        every { organisasjonRestConsumer.hentOrganisasjon("873102322") } returns Organisasjon(
+        every { organisasjonRestClient.hentOrganisasjon("873102322") } returns Organisasjon(
             organisasjonsnummer = "873102322",
             organisasjonDetaljer = OrganisasjonDetaljer(
                 navn = listOf(
@@ -36,8 +36,8 @@ class EregRestServiceTest {
                 )
             )
         )
-        every { organisasjonRestConsumer.hentOrganisasjon("111111111") } throws IkkeFunnetException("111111111 Ikke funnet")
-        eregService = EregRestService(organisasjonRestConsumer)
+        every { organisasjonRestClient.hentOrganisasjon("111111111") } throws IkkeFunnetException("111111111 Ikke funnet")
+        eregService = EregRestService(organisasjonRestClient)
     }
 
     @Test

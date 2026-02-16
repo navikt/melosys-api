@@ -26,7 +26,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.ereg.EregFasade
-import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
+import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -50,7 +50,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     private lateinit var mockEregFasade: EregFasade
 
     @MockK
-    private lateinit var mockTrygdeavgiftConsumer: TrygdeavgiftConsumer
+    private lateinit var mockTrygdeavgiftClient: TrygdeavgiftClient
 
     @MockK(relaxed = true)
     lateinit var mockBehandlingsresultatService: BehandlingsresultatService
@@ -94,7 +94,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             trygdeavgiftMottakerService,
             helseutgiftDekkesPeriodeService,
             mockPersondataService,
-            mockTrygdeavgiftConsumer,
+            mockTrygdeavgiftClient,
             unleash
         )
 
@@ -245,7 +245,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         every { UUID.randomUUID() } returns notSoRandomUuid
 
         every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
-        every { mockTrygdeavgiftConsumer.beregnTrygdeavgiftEosPensjonist(ofType(EøsPensjonistTrygdeavgiftsberegningRequest::class)) }.returns(
+        every { mockTrygdeavgiftClient.beregnTrygdeavgiftEosPensjonist(ofType(EøsPensjonistTrygdeavgiftsberegningRequest::class)) }.returns(
             listOf(
                 EøsPensjonistTrygdeavgiftsberegningResponse(
                     TrygdeavgiftsperiodeDto(
@@ -319,7 +319,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         every { UUID.randomUUID() } returns notSoRandomUuid
 
         every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
-        every { mockTrygdeavgiftConsumer.beregnTrygdeavgiftEosPensjonist(ofType(EøsPensjonistTrygdeavgiftsberegningRequest::class)) }.returns(
+        every { mockTrygdeavgiftClient.beregnTrygdeavgiftEosPensjonist(ofType(EøsPensjonistTrygdeavgiftsberegningRequest::class)) }.returns(
             listOf(
                 EøsPensjonistTrygdeavgiftsberegningResponse(
                     TrygdeavgiftsperiodeDto(
@@ -391,7 +391,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             }
         )
 
-        every { mockTrygdeavgiftConsumer.beregnTrygdeavgiftEosPensjonist(ofType(EøsPensjonistTrygdeavgiftsberegningRequest::class)) }.returns(
+        every { mockTrygdeavgiftClient.beregnTrygdeavgiftEosPensjonist(ofType(EøsPensjonistTrygdeavgiftsberegningRequest::class)) }.returns(
             listOf(
                 EøsPensjonistTrygdeavgiftsberegningResponse(
                     TrygdeavgiftsperiodeDto(
@@ -514,7 +514,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             }
         )
 
-        every { mockTrygdeavgiftConsumer.beregnTrygdeavgiftEosPensjonist(ofType(EøsPensjonistTrygdeavgiftsberegningRequest::class)) }.returns(
+        every { mockTrygdeavgiftClient.beregnTrygdeavgiftEosPensjonist(ofType(EøsPensjonistTrygdeavgiftsberegningRequest::class)) }.returns(
             listOf(
                 EøsPensjonistTrygdeavgiftsberegningResponse(
                     TrygdeavgiftsperiodeDto(

@@ -19,7 +19,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.integrasjon.joark.saf.SafConsumer
+import no.nav.melosys.integrasjon.joark.saf.SafClient
 import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.*
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
@@ -62,7 +62,7 @@ class SaksflytOppstartIT(
 ) : OracleTestContainerBase() {
 
     @MockkBean
-    lateinit var safConsumer: SafConsumer
+    lateinit var safConsumer: SafClient
 
     @AfterEach
     fun after() {
