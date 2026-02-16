@@ -14,9 +14,9 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TrygdeavgiftConsumerTest {
+class TrygdeavgiftClientTest {
 
-    private lateinit var trygdeavgiftConsumer: TrygdeavgiftConsumer
+    private lateinit var trygdeavgiftClient: TrygdeavgiftClient
 
     private lateinit var mockServer: MockWebServer
 
@@ -34,7 +34,7 @@ class TrygdeavgiftConsumerTest {
 
     @BeforeEach
     fun setup() {
-        trygdeavgiftConsumer = TrygdeavgiftConsumer(url)
+        trygdeavgiftClient = TrygdeavgiftClient(url)
     }
 
     @Test
@@ -46,7 +46,7 @@ class TrygdeavgiftConsumerTest {
         )
 
 
-        val response = trygdeavgiftConsumer.beregnTrygdeavgift(lagTrygdeavgiftsberegningRequest())
+        val response = trygdeavgiftClient.beregnTrygdeavgift(lagTrygdeavgiftsberegningRequest())
 
 
         response[0].run {

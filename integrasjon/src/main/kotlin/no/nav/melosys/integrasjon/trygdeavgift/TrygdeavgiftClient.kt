@@ -15,7 +15,7 @@ import org.springframework.web.reactive.function.client.bodyToMono
 
 @Component
 @Retryable
-class TrygdeavgiftConsumer(@Value("\${melosystrygdeavgift.url}") url: String?) {
+class TrygdeavgiftClient(@Value("\${melosystrygdeavgift.url}") url: String?) {
     private val webClient: WebClient
 
     init {
