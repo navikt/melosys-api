@@ -27,14 +27,14 @@ import reactor.core.publisher.Mono;
 
 import static java.util.Objects.requireNonNull;
 
-public class SafConsumer extends RestErrorHandler implements CallIdAware {
+public class SafClient extends RestErrorHandler implements CallIdAware {
     private static final String CALL_ID = "Nav-Callid";
     private static final String HENT_DOKUMENT_ROOT = "/rest/hentdokument/{journalpostId}/{dokumentInfoId}/{variantFormat}";
     private static final String GRAPHQL_ROOT = "/graphql";
 
     private final WebClient webClient;
 
-    public SafConsumer(WebClient webClient) {
+    public SafClient(WebClient webClient) {
         this.webClient = webClient;
     }
 

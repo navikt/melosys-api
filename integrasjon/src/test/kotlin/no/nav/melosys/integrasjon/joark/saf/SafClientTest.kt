@@ -30,8 +30,8 @@ import java.util.*
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
-class SafConsumerTest {
-    private lateinit var safConsumer: SafConsumer
+class SafClientTest {
+    private lateinit var safClient: SafClient
 
     private lateinit var mockServer: MockWebServer
 
@@ -43,7 +43,7 @@ class SafConsumerTest {
             start()
         }
 
-        safConsumer = SafConsumer(WebClient.builder().baseUrl("http://localhost:${mockServer.port}").build())
+        safClient = SafClient(WebClient.builder().baseUrl("http://localhost:${mockServer.port}").build())
     }
 
     @Test
@@ -54,7 +54,7 @@ class SafConsumerTest {
                 .setBody("pdf")
         )
 
-        val pdf = safConsumer.hentDokument(JOURNALPOST_ID, DOKUMENT_ID)
+        val pdf = safClient.hentDokument(JOURNALPOST_ID, DOKUMENT_ID)
 
         pdf shouldBe byteArrayOf('p'.code.toByte(), 'd'.code.toByte(), 'f'.code.toByte())
     }
@@ -69,7 +69,7 @@ class SafConsumerTest {
         )
 
         val exception = shouldThrow<IkkeFunnetException> {
-            safConsumer.hentDokument(JOURNALPOST_ID, DOKUMENT_ID)
+            safClient.hentDokument(JOURNALPOST_ID, DOKUMENT_ID)
         }
 
         exception.message shouldContain "ikke funnet"
@@ -85,7 +85,7 @@ class SafConsumerTest {
         )
 
         val exception = shouldThrow<SikkerhetsbegrensningException> {
-            safConsumer.hentDokument(JOURNALPOST_ID, DOKUMENT_ID)
+            safClient.hentDokument(JOURNALPOST_ID, DOKUMENT_ID)
         }
 
         exception.message shouldContain "no valid token"
@@ -101,7 +101,7 @@ class SafConsumerTest {
         )
 
         val exception = shouldThrow<IntegrasjonException> {
-            safConsumer.hentJournalpost(JOURNALPOST_ID)
+            safClient.hentJournalpost(JOURNALPOST_ID)
         }
 
         exception.message shouldContain "ikke funnet"
@@ -117,7 +117,7 @@ class SafConsumerTest {
         )
 
         val exception = shouldThrow<SikkerhetsbegrensningException> {
-            safConsumer.hentJournalpost(JOURNALPOST_ID)
+            safClient.hentJournalpost(JOURNALPOST_ID)
         }
 
         exception.message shouldContain "no valid token"
@@ -127,7 +127,7 @@ class SafConsumerTest {
     fun `hentDokumentoversikt ingen paginering forvent antall journalposter og kall`() {
         mockServer.enqueue(responseAv("peker", false))
 
-        val journalposter = safConsumer.hentDokumentoversikt("MEL-1")
+        val journalposter = safClient.hentDokumentoversikt("MEL-1")
 
         journalposter shouldHaveSize 10
         mockServer.requestCount shouldBe 1
@@ -147,7 +147,7 @@ class SafConsumerTest {
             }
         }
 
-        val journalposter = safConsumer.hentDokumentoversikt("MEL-1")
+        val journalposter = safClient.hentDokumentoversikt("MEL-1")
 
         journalposter shouldHaveSize 40
         mockServer.requestCount shouldBe 4

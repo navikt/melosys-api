@@ -16,7 +16,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiClient;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*;
-import no.nav.melosys.integrasjon.joark.saf.SafConsumer;
+import no.nav.melosys.integrasjon.joark.saf.SafClient;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -26,11 +26,11 @@ import org.springframework.util.CollectionUtils;
 @Primary
 public class JoarkService implements JoarkFasade {
     private final JournalpostapiClient journalpostapiClient;
-    private final SafConsumer safConsumer;
+    private final SafClient safClient;
 
-    public JoarkService(JournalpostapiClient journalpostapiClient, SafConsumer safConsumer) {
+    public JoarkService(JournalpostapiClient journalpostapiClient, SafClient safClient) {
         this.journalpostapiClient = journalpostapiClient;
-        this.safConsumer = safConsumer;
+        this.safClient = safClient;
     }
 
     @Override
@@ -41,12 +41,12 @@ public class JoarkService implements JoarkFasade {
 
     @Override
     public byte[] hentDokument(String journalPostID, String dokumentID) {
-        return safConsumer.hentDokument(journalPostID, dokumentID);
+        return safClient.hentDokument(journalPostID, dokumentID);
     }
 
     @Override
     public Journalpost hentJournalpost(String journalpostID) {
-        return safConsumer.hentJournalpost(journalpostID).tilDomene();
+        return safClient.hentJournalpost(journalpostID).tilDomene();
     }
 
     public void validerDokumenterTilhørerSakOgHarTilgang(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
@@ -94,7 +94,7 @@ public class JoarkService implements JoarkFasade {
 
     @Override
     public List<Journalpost> hentJournalposterTilknyttetSak(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest) {
-        return safConsumer.hentDokumentoversikt(hentJournalposterTilknyttetSakRequest.saksnummer())
+        return safClient.hentDokumentoversikt(hentJournalposterTilknyttetSakRequest.saksnummer())
             .stream()
             .map(no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost::tilDomene)
             .toList();

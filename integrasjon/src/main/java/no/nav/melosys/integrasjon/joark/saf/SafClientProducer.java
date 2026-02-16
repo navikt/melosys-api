@@ -12,14 +12,14 @@ import org.springframework.web.reactive.function.client.WebClient;
 import static no.nav.melosys.integrasjon.felles.WebClientUtilsKt.errorFilter;
 
 @Configuration
-public class SafConsumerProducer {
+public class SafClientProducer {
     private static final String NAV_CONSUMER_ID = "Nav-Consumer-Id";
     private static final String CLIENT_NAME = "saf";
 
     private final String url;
     private final GenericAuthFilterFactory genericAuthFilterFactory;
 
-    public SafConsumerProducer(
+    public SafClientProducer(
         @Value("${SAF.url}") String url, GenericAuthFilterFactory genericAuthFilterFactory
 
     ) {
@@ -28,9 +28,9 @@ public class SafConsumerProducer {
     }
 
     @Bean
-    public SafConsumer safConsumer(WebClient.Builder webClientBuilder,
+    public SafClient safClient(WebClient.Builder webClientBuilder,
                                    CorrelationIdOutgoingFilter correlationIdOutgoingFilter) {
-        return new SafConsumer(
+        return new SafClient(
             webClientBuilder
                 .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
                 .filter(correlationIdOutgoingFilter)

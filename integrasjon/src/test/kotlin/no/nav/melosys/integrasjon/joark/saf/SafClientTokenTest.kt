@@ -20,12 +20,12 @@ import org.springframework.test.context.ContextConfiguration
     classes = [
         OAuthMockServer::class,
         GenericAuthFilterFactory::class,
-        SafConsumerProducer::class,
+        SafClientProducer::class,
     ]
 )
 @AutoConfigureWebClient
-class SafConsumerTokenTest(
-    @Autowired private val safConsumer: SafConsumer,
+class SafClientTokenTest(
+    @Autowired private val safClient: SafClient,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
@@ -85,5 +85,5 @@ class SafConsumerTokenTest(
         return ByteArray(0)
     }
 
-    override fun executeRequest() = safConsumer.hentDokument("1", "1")
+    override fun executeRequest() = safClient.hentDokument("1", "1")
 }

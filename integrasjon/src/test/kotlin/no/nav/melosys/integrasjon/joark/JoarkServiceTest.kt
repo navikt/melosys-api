@@ -24,7 +24,7 @@ import no.nav.melosys.integrasjon.joark.journalpostapi.dto.FerdigstillJournalpos
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OppdaterJournalpostRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostResponse
-import no.nav.melosys.integrasjon.joark.saf.SafConsumer
+import no.nav.melosys.integrasjon.joark.saf.SafClient
 import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -37,7 +37,7 @@ class JoarkServiceTest {
     private lateinit var joarkService: JoarkService
 
     private val journalpostapiClient = mockk<JournalpostapiClient>()
-    private val safConsumer = mockk<SafConsumer>()
+    private val safClient = mockk<SafClient>()
 
     private val ferdigstillJournalpostCaptor = slot<FerdigstillJournalpostRequest>()
     private val oppdaterJournalpostRequestCaptor = slot<OppdaterJournalpostRequest>()
@@ -46,7 +46,7 @@ class JoarkServiceTest {
     @BeforeEach
     fun setUp() {
         clearAllMocks()
-        joarkService = JoarkService(journalpostapiClient, safConsumer)
+        joarkService = JoarkService(journalpostapiClient, safClient)
         logiskVedleggTittelCaptor.clear()
     }
 
@@ -54,7 +54,7 @@ class JoarkServiceTest {
     fun `hent journalposter tilknyttet sak bruker saf mapper alle saf journalposter`() {
         val saksnummer = "191919"
         val arkivsakID = 12345L
-        every { safConsumer.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost("111"), safJournalpost("222"))
+        every { safClient.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost("111"), safJournalpost("222"))
 
         val journalposter = joarkService.hentJournalposterTilknyttetSak(HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer))
 
@@ -83,7 +83,7 @@ class JoarkServiceTest {
             .medLogiskeVedleggTitler(listOf("dok1", "dok2"))
             .build()
 
-        every { safConsumer.hentJournalpost(any()) } returns safJournalpost(journalpostID)
+        every { safClient.hentJournalpost(any()) } returns safJournalpost(journalpostID)
         every { journalpostapiClient.fjernLogiskeVedlegg(any(), any()) } just Runs
         every { journalpostapiClient.oppdaterJournalpost(capture(oppdaterJournalpostRequestCaptor), any()) } just Runs
         every { journalpostapiClient.leggTilLogiskVedlegg(any(), capture(logiskVedleggTittelCaptor)) } just Runs
@@ -143,7 +143,7 @@ class JoarkServiceTest {
             .medTittel(tittel)
             .build()
 
-        every { safConsumer.hentJournalpost(any()) } returns safJournalpostUtenVedlegg()
+        every { safClient.hentJournalpost(any()) } returns safJournalpostUtenVedlegg()
         every { journalpostapiClient.fjernLogiskeVedlegg(any(), any()) } just Runs
         every { journalpostapiClient.oppdaterJournalpost(capture(oppdaterJournalpostRequestCaptor), any()) } just Runs
         every { journalpostapiClient.leggTilLogiskVedlegg(any(), any()) } just Runs
@@ -194,7 +194,7 @@ class JoarkServiceTest {
             .medTittel(tittel)
             .build()
 
-        every { safConsumer.hentJournalpost(any()) } returns safJournalpostUtenVedlegg()
+        every { safClient.hentJournalpost(any()) } returns safJournalpostUtenVedlegg()
         every { journalpostapiClient.fjernLogiskeVedlegg(any(), any()) } just Runs
         every { journalpostapiClient.oppdaterJournalpost(capture(oppdaterJournalpostRequestCaptor), any()) } just Runs
         every { journalpostapiClient.leggTilLogiskVedlegg(any(), any()) } just Runs
@@ -239,7 +239,7 @@ class JoarkServiceTest {
             .medBrukerID("12345")
             .build()
 
-        every { safConsumer.hentJournalpost(any()) } returns safJournalpost(journalpostID, false)
+        every { safClient.hentJournalpost(any()) } returns safJournalpost(journalpostID, false)
         every { journalpostapiClient.oppdaterJournalpost(any<OppdaterJournalpostRequest>(), any()) } just Runs
         every { journalpostapiClient.ferdigstillJournalpost(any<FerdigstillJournalpostRequest>(), eq(journalpostID)) } just Runs
 
@@ -256,7 +256,7 @@ class JoarkServiceTest {
         val saksnummer = "191919"
         val arkivsakID = 12345L
         val safJournalpost = safJournalpost(journalpostId)
-        every { safConsumer.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
+        every { safClient.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
 
         val dokumentReferanser = listOf(DokumentReferanse(journalpostId, VEDLEGG_MED_TILGANG_ID))
 
@@ -278,7 +278,7 @@ class JoarkServiceTest {
             dokumentReferanser
         )
 
-        verify(exactly = 0) { safConsumer.hentDokumentoversikt(any()) }
+        verify(exactly = 0) { safClient.hentDokumentoversikt(any()) }
     }
 
     @Test
@@ -287,7 +287,7 @@ class JoarkServiceTest {
         val saksnummer = "191919"
         val arkivsakID = 12345L
         val safJournalpost = safJournalpost(journalpostId)
-        every { safConsumer.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
+        every { safClient.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
 
         val dokumentReferanser = listOf(DokumentReferanse(journalpostId, VEDLEGG_UTEN_TILGANG_ID))
         val request = HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer)
@@ -305,7 +305,7 @@ class JoarkServiceTest {
         val saksnummer = "191919"
         val arkivsakID = 12345L
         val safJournalpost = safJournalpost(journalpostId)
-        every { safConsumer.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
+        every { safClient.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
 
         val dokumentReferanser = listOf(DokumentReferanse("12345", VEDLEGG_MED_TILGANG_ID))
         val request = HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer)
@@ -323,7 +323,7 @@ class JoarkServiceTest {
         val saksnummer = "191919"
         val arkivsakID = 12345L
         val safJournalpost = safJournalpostUtenVedlegg()
-        every { safConsumer.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
+        every { safClient.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
 
         val dokumentReferanser = listOf(DokumentReferanse(journalpostId, VEDLEGG_MED_TILGANG_ID))
         val request = HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer)
@@ -339,7 +339,7 @@ class JoarkServiceTest {
     fun `hent journalpost med status utgår er utgått`() {
         val journalpostID = "1112233"
         val safJournalpost = safJournalpost(journalpostID, Journalstatus.UTGAAR, false)
-        every { safConsumer.hentJournalpost(journalpostID) } returns safJournalpost
+        every { safClient.hentJournalpost(journalpostID) } returns safJournalpost
 
         val journalpost = joarkService.hentJournalpost(journalpostID)
 
@@ -350,7 +350,7 @@ class JoarkServiceTest {
     fun `hent journalpost med status mottatt er ikke utgått`() {
         val journalpostID = "1112233"
         val safJournalpost = safJournalpost(journalpostID, Journalstatus.MOTTATT, false)
-        every { safConsumer.hentJournalpost(journalpostID) } returns safJournalpost
+        every { safClient.hentJournalpost(journalpostID) } returns safJournalpost
 
         val journalpost = joarkService.hentJournalpost(journalpostID)
 
@@ -361,7 +361,7 @@ class JoarkServiceTest {
     fun `hent journalpost verifiser mapping`() {
         val journalpostID = "1112233"
         val safJournalpost = safJournalpost(journalpostID)
-        every { safConsumer.hentJournalpost(journalpostID) } returns safJournalpost
+        every { safClient.hentJournalpost(journalpostID) } returns safJournalpost
 
         val journalpost = joarkService.hentJournalpost(journalpostID)
 
@@ -421,7 +421,7 @@ class JoarkServiceTest {
             .map(LocalDateTime::toLocalDate)
             .first()
 
-        every { safConsumer.hentJournalpost(journalpostID) } returns safJournalpost
+        every { safClient.hentJournalpost(journalpostID) } returns safJournalpost
 
         joarkService.hentMottaksDatoForJournalpost(journalpostID).shouldNotBeNull() shouldBe forventetMottaksdato
     }
