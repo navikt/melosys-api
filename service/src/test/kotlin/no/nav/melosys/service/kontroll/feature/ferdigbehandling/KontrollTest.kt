@@ -10,6 +10,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
@@ -781,6 +782,93 @@ internal class KontrollTest {
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
 
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
+
+        resultat.shouldBeEmpty()
+    }
+
+    @Test
+    fun `helseutgift dekkes-perioder i gyldig fagsak skal gi overlappende periode kontrollfeil`() {
+        val behandling = lagBehandling {
+            tema = Behandlingstema.PENSJONIST
+            fagsak {
+                medBruker()
+                medGsakSaksnummer()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+
+        val nyHelseutgiftDekkesPeriode = HelseutgiftDekkesPeriode.forTest {
+            fomDato = LocalDate.of(2012, 12, 1)
+            tomDato = LocalDate.of(2012, 12, 20)
+        }
+        every { helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(any()) } returns nyHelseutgiftDekkesPeriode
+
+        val behandlingsresultatFraGyldigFagsak = Behandlingsresultat.forTest {
+            behandling {
+                fagsak {
+                    saksnummer = "test-gyldig"
+                    status = Saksstatuser.OPPRETTET
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.EU_EOS
+                }
+            }
+            helseutgiftDekkesPeriode {
+                fomDato = LocalDate.of(2012, 12, 10)
+                tomDato = LocalDate.of(2012, 12, 25)
+            }
+        }
+
+        every {
+            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(any())
+        } returns listOf(behandlingsresultatFraGyldigFagsak)
+
+        val resultat = mockedKontroll.kontroller(behandlingID, null, emptySet())
+
+        resultat.shouldNotBeEmpty()
+            .single().kode shouldBe Kontroll_begrunnelser.OVERLAPPENDE_HELSEUTGIFT_DEKKES_PERIODE
+    }
+
+    @Test
+    fun `helseutgift dekkes-perioder i bortfalt fagsak skal ikke gi overlappende periode kontrollfeil`() {
+        val behandling = lagBehandling {
+            tema = Behandlingstema.PENSJONIST
+            fagsak {
+                medBruker()
+                medGsakSaksnummer()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+
+        val nyHelseutgiftDekkesPeriode = HelseutgiftDekkesPeriode.forTest {
+            fomDato = LocalDate.of(2012, 12, 1)
+            tomDato = LocalDate.of(2012, 12, 20)
+        }
+        every { helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(any()) } returns nyHelseutgiftDekkesPeriode
+
+        val behandlingsresultatFraBortfaltFagsak = Behandlingsresultat.forTest {
+            behandling {
+                fagsak {
+                    saksnummer = "test-bortfalt"
+                    status = Saksstatuser.HENLAGT_BORTFALT
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.EU_EOS
+                }
+            }
+            helseutgiftDekkesPeriode {
+                fomDato = LocalDate.of(2012, 12, 10)
+                tomDato = LocalDate.of(2012, 12, 25)
+            }
+        }
+
+        every {
+            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(any())
+        } returns listOf(behandlingsresultatFraBortfaltFagsak)
+
+        val resultat = mockedKontroll.kontroller(behandlingID, null, emptySet())
 
         resultat.shouldBeEmpty()
     }
