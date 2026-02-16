@@ -2,7 +2,7 @@ package no.nav.melosys.service.sak;
 
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.integrasjon.sak.SakConsumerInterface;
+import no.nav.melosys.integrasjon.sak.SakClientInterface;
 import no.nav.melosys.integrasjon.sak.SakDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +13,10 @@ public class ArkivsakService {
 
     private static final Logger log = LoggerFactory.getLogger(ArkivsakService.class);
 
-    private final SakConsumerInterface sakConsumer;
+    private final SakClientInterface sakClient;
 
-    public ArkivsakService(SakConsumerInterface sakConsumer) {
-        this.sakConsumer = sakConsumer;
+    public ArkivsakService(SakClientInterface sakClient) {
+        this.sakClient = sakClient;
     }
 
     public Long opprettSakForBruker(String saksnummer, Tema tema, String aktørId) {
@@ -26,7 +26,7 @@ public class ArkivsakService {
         sakDto.setAktørId(aktørId);
         sakDto.setApplikasjon(Fagsystem.MELOSYS.getKode());
         sakDto.setSaksnummer(saksnummer);
-        sakDto = sakConsumer.opprettSak(sakDto);
+        sakDto = sakClient.opprettSak(sakDto);
         log.info("Sak opprettet med sakID: {} for bruker", sakDto.getId());
         return sakDto.getId();
     }
@@ -38,7 +38,7 @@ public class ArkivsakService {
         sakDto.setOrgnr(orgnr);
         sakDto.setApplikasjon(Fagsystem.MELOSYS.getKode());
         sakDto.setSaksnummer(saksnummer);
-        sakDto = sakConsumer.opprettSak(sakDto);
+        sakDto = sakClient.opprettSak(sakDto);
         log.info("Sak opprettet med sakID: {} for virksomhet: {}", sakDto.getId(), sakDto.getOrgnr());
         return sakDto.getId();
     }

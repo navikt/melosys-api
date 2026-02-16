@@ -19,7 +19,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
-import no.nav.melosys.integrasjon.dokgen.DokgenConsumer
+import no.nav.melosys.integrasjon.dokgen.DokgenClient
 import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.StandardvedleggDto
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.joark.JoarkFasade
@@ -43,7 +43,7 @@ import java.util.*
 
 class DokgenServiceTest {
 
-    private val dokgenConsumer: DokgenConsumer = mockk()
+    private val dokgenClient: DokgenClient = mockk()
     private val dokumentproduksjonsInfoMapper: DokumentproduksjonsInfoMapper = mockk()
     private val joarkFasade: JoarkFasade = mockk()
     private val dokgenMalMapper: DokgenMalMapper = mockk()
@@ -66,7 +66,7 @@ class DokgenServiceTest {
     fun setup() {
         clearAllMocks()
         dokgenService = DokgenService(
-            dokgenConsumer,
+            dokgenClient,
             dokumentproduksjonsInfoMapper,
             joarkFasade,
             dokgenMalMapper,
@@ -97,14 +97,14 @@ class DokgenServiceTest {
         every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
         every { dokumentproduksjonsInfoMapper.hentMalnavn(any()) } returns "malnavn"
         every { dokgenMalMapper.mapBehandling(any(), any()) } returns mockk()
-        every { dokgenConsumer.lagPdf(any(), any(), any(), any()) } returns pdf
+        every { dokgenClient.lagPdf(any(), any(), any(), any()) } returns pdf
         every { utledMottaksdato.getMottaksdato(any(), isNull()) } returns LocalDate.now()
         every { unleash.isEnabled(any<String>()) } returns false
 
         val result = dokgenService.produserUtkast(behandlingId, brevbestillingDto)
 
         result shouldBe pdf
-        verify { dokgenConsumer.lagPdf(any(), any(), false, true) }
+        verify { dokgenClient.lagPdf(any(), any(), false, true) }
     }
 
     @Test
@@ -122,7 +122,7 @@ class DokgenServiceTest {
         every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
         every { dokumentproduksjonsInfoMapper.hentMalnavn(any()) } returns "malnavn"
         every { dokgenMalMapper.mapBehandling(any(), any()) } returns mockk()
-        every { dokgenConsumer.lagPdf(any(), any(), any(), any()) } returns pdf
+        every { dokgenClient.lagPdf(any(), any(), any(), any()) } returns pdf
         every { utledMottaksdato.getMottaksdato(any(), isNull()) } returns LocalDate.now()
         every { unleash.isEnabled(any<String>()) } returns false
 
@@ -151,7 +151,7 @@ class DokgenServiceTest {
             every { dokument } returns OrganisasjonDokument("123456789", "Org navn", null, mockk(), "sektorkode")
         }
         every { dokgenMalMapper.mapBehandling(any(), any()) } returns mockk()
-        every { dokgenConsumer.lagPdf(any(), any(), any(), any()) } returns pdf
+        every { dokgenClient.lagPdf(any(), any(), any(), any()) } returns pdf
         every { utledMottaksdato.getMottaksdato(any(), isNull()) } returns LocalDate.now()
         every { unleash.isEnabled(any<String>()) } returns false
 
@@ -180,7 +180,7 @@ class DokgenServiceTest {
             every { dokument } returns OrganisasjonDokument("123456789", "Org navn", null, mockk(), "sektorkode")
         }
         every { dokgenMalMapper.mapBehandling(any(), any()) } returns mockk()
-        every { dokgenConsumer.lagPdf(any(), any(), any(), any()) } returns pdf
+        every { dokgenClient.lagPdf(any(), any(), any(), any()) } returns pdf
         every { utledMottaksdato.getMottaksdato(any(), isNull()) } returns LocalDate.now()
         every { unleash.isEnabled(any<String>()) } returns false
 
@@ -206,7 +206,7 @@ class DokgenServiceTest {
         every { dokumentproduksjonsInfoMapper.hentMalnavn(any()) } returns "malnavn"
         every { utenlandskMyndighetService.hentUtenlandskMyndighet(any(), any()) } returns mockk()
         every { dokgenMalMapper.mapBehandling(any(), any()) } returns mockk()
-        every { dokgenConsumer.lagPdf(any(), any(), any(), any()) } returns pdf
+        every { dokgenClient.lagPdf(any(), any(), any(), any()) } returns pdf
         every { utledMottaksdato.getMottaksdato(any(), isNull()) } returns LocalDate.now()
         every { unleash.isEnabled(any<String>()) } returns false
 
@@ -230,7 +230,7 @@ class DokgenServiceTest {
         every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
         every { dokumentproduksjonsInfoMapper.hentMalnavn(any()) } returns "malnavn"
         every { dokgenMalMapper.mapBehandling(any(), any()) } returns mockk()
-        every { dokgenConsumer.lagPdf(any(), any(), any(), any()) } returns pdf
+        every { dokgenClient.lagPdf(any(), any(), any(), any()) } returns pdf
         every { utledMottaksdato.getMottaksdato(any(), isNull()) } returns LocalDate.now()
         every { unleash.isEnabled(ToggleName.STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND) } returns true
 
@@ -260,7 +260,7 @@ class DokgenServiceTest {
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
         every { dokumentproduksjonsInfoMapper.hentMalnavn(any()) } returns "malnavn"
         every { dokgenMalMapper.mapBehandling(any(), any()) } returns mockk()
-        every { dokgenConsumer.lagPdf(any(), any(), any(), any()) } returns pdf
+        every { dokgenClient.lagPdf(any(), any(), any(), any()) } returns pdf
         every { utledMottaksdato.getMottaksdato(any(), isNull()) } returns LocalDate.now()
 
         val result = dokgenService.produserBrev(mottaker, brevbestilling)
@@ -273,12 +273,12 @@ class DokgenServiceTest {
         val standardvedleggType = StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
         val pdf = "PDF".toByteArray()
 
-        every { dokgenConsumer.lagPdfForStandardvedlegg(any(), isNull()) } returns pdf
+        every { dokgenClient.lagPdfForStandardvedlegg(any(), isNull()) } returns pdf
 
         val result = dokgenService.produserStandardvedlegg(standardvedleggType)
 
         result shouldBe pdf
-        verify { dokgenConsumer.lagPdfForStandardvedlegg(standardvedleggType.malnavn, null) }
+        verify { dokgenClient.lagPdfForStandardvedlegg(standardvedleggType.malnavn, null) }
     }
 
     @Test
@@ -287,12 +287,12 @@ class DokgenServiceTest {
         val standardvedleggDto = mockk<StandardvedleggDto>()
         val pdf = "PDF".toByteArray()
 
-        every { dokgenConsumer.lagPdfForStandardvedlegg(any(), any()) } returns pdf
+        every { dokgenClient.lagPdfForStandardvedlegg(any(), any()) } returns pdf
 
         val result = dokgenService.produserStandardvedlegg(standardvedleggType, standardvedleggDto)
 
         result shouldBe pdf
-        verify { dokgenConsumer.lagPdfForStandardvedlegg(standardvedleggType.malnavn, standardvedleggDto) }
+        verify { dokgenClient.lagPdfForStandardvedlegg(standardvedleggType.malnavn, standardvedleggDto) }
     }
 
     @Test

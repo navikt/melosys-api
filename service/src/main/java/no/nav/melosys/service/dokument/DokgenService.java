@@ -19,7 +19,7 @@ import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.featuretoggle.ToggleName;
-import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
+import no.nav.melosys.integrasjon.dokgen.DokgenClient;
 import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.StandardvedleggDto;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -43,7 +43,7 @@ import static org.springframework.util.StringUtils.hasText;
 @Service
 public class DokgenService {
 
-    private final DokgenConsumer dokgenConsumer;
+    private final DokgenClient dokgenClient;
     private final DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper;
     private final JoarkFasade joarkFasade;
     private final DokgenMalMapper dokgenMalMapper;
@@ -58,7 +58,7 @@ public class DokgenService {
 
     private final Unleash unleash;
 
-    public DokgenService(DokgenConsumer dokgenConsumer,
+    public DokgenService(DokgenClient dokgenClient,
                          DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper,
                          JoarkFasade joarkFasade,
                          DokgenMalMapper dokgenMalMapper,
@@ -71,7 +71,7 @@ public class DokgenService {
                          UtenlandskMyndighetService utenlandskMyndighetService,
                          UtledMottaksdato utledMottaksdato,
                          Unleash unleash) {
-        this.dokgenConsumer = dokgenConsumer;
+        this.dokgenClient = dokgenClient;
         this.dokumentproduksjonsInfoMapper = dokumentproduksjonsInfoMapper;
         this.joarkFasade = joarkFasade;
         this.dokgenMalMapper = dokgenMalMapper;
@@ -139,7 +139,7 @@ public class DokgenService {
         settForsendelseMottattOgAvsender(behandling, builder);
 
         var dokgenDto = dokgenMalMapper.mapBehandling(builder.build(), mottaker);
-        return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.isBestillKopi(), brevbestilling.isBestillUtkast());
+        return dokgenClient.lagPdf(malnavn, dokgenDto, brevbestilling.isBestillKopi(), brevbestilling.isBestillUtkast());
     }
 
     public byte[] produserStandardvedlegg(StandardvedleggType standardvedleggType) {
@@ -147,7 +147,7 @@ public class DokgenService {
     }
 
     public byte[] produserStandardvedlegg(StandardvedleggType standardvedleggType, StandardvedleggDto standardvedlegg) {
-        return dokgenConsumer.lagPdfForStandardvedlegg(standardvedleggType.getMalnavn(), standardvedlegg);
+        return dokgenClient.lagPdfForStandardvedlegg(standardvedleggType.getMalnavn(), standardvedlegg);
     }
 
     @Transactional
