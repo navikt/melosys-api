@@ -24,7 +24,7 @@ public class RestSTSService {
     private static final Logger log = LoggerFactory.getLogger(RestSTSService.class);
     private static final String ACCESS_TOKEN_KEY = "access_token";
 
-    private final SecurityTokenServiceConsumer securityTokenServiceConsumer;
+    private final SecurityTokenServiceClient securityTokenServiceClient;
     private final Counter oidcTokenRequestCounter;
     private final Counter samlTokenRequestCounter;
     private final Counter oidcTokenErrorCounter;
@@ -32,8 +32,8 @@ public class RestSTSService {
     private final Timer oidcTokenRequestTimer;
     private final Timer samlTokenRequestTimer;
 
-    public RestSTSService(SecurityTokenServiceConsumer securityTokenServiceConsumer, MeterRegistry meterRegistry) {
-        this.securityTokenServiceConsumer = securityTokenServiceConsumer;
+    public RestSTSService(SecurityTokenServiceClient securityTokenServiceClient, MeterRegistry meterRegistry) {
+        this.securityTokenServiceClient = securityTokenServiceClient;
 
         this.oidcTokenRequestCounter = Counter.builder(MetrikkerNavn.STS_OIDC_REQUESTS)
             .description("Number of OIDC token requests")
@@ -90,7 +90,7 @@ public class RestSTSService {
 
         return oidcTokenRequestTimer.recordCallable(() -> {
             try {
-                Map<String, Object> responseBody = securityTokenServiceConsumer.getResponseForOidcToken();
+                Map<String, Object> responseBody = securityTokenServiceClient.getResponseForOidcToken();
                 return (String) responseBody.get(ACCESS_TOKEN_KEY);
 
             } catch (HttpStatusCodeException e) {
@@ -109,7 +109,7 @@ public class RestSTSService {
 
         return samlTokenRequestTimer.recordCallable(() -> {
             try {
-                Map<String, Object> responseBody = securityTokenServiceConsumer.getResponseForSamlToken();
+                Map<String, Object> responseBody = securityTokenServiceClient.getResponseForSamlToken();
                 return (String) responseBody.get(ACCESS_TOKEN_KEY);
 
             } catch (HttpStatusCodeException e) {

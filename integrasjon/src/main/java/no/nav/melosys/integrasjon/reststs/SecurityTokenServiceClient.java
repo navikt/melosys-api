@@ -15,10 +15,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
-public class SecurityTokenServiceConsumer implements BasicAuthAware {
+public class SecurityTokenServiceClient implements BasicAuthAware {
     private final WebClient webClient;
 
-    public SecurityTokenServiceConsumer(WebClient webClient) {
+    public SecurityTokenServiceClient(WebClient webClient) {
         this.webClient = webClient;
     }
 

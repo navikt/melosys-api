@@ -8,7 +8,7 @@ import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.reststs.RestSTSService
-import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
+import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
@@ -31,7 +31,7 @@ import org.springframework.test.context.ContextConfiguration
         OAuthMockServer::class,
 
         StsWebClientProducer::class,
-        SecurityTokenServiceConsumer::class,
+        SecurityTokenServiceClient::class,
         RestSTSService::class,
         MetricsTestConfig::class,
         DokumentproduksjonConsumerConfig::class,

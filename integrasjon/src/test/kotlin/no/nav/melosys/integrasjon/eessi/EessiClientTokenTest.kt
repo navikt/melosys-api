@@ -7,7 +7,7 @@ import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
+import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -26,7 +26,7 @@ import org.springframework.test.context.ContextConfiguration
 @ContextConfiguration(
     classes = [
         StsWebClientProducer::class,
-        SecurityTokenServiceConsumer::class,
+        SecurityTokenServiceClient::class,
         OAuthMockServer::class,
 
         GenericAuthFilterFactory::class,
