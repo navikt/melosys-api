@@ -9,11 +9,11 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @Retryable
 @Service
-class DistribuerJournalpostConsumer(
+class DistribuerJournalpostClient(
     private val distribuerJournalpostWebClient: WebClient
 ) {
 
-    private val log = LoggerFactory.getLogger(DistribuerJournalpostConsumer::class.java)
+    private val log = LoggerFactory.getLogger(DistribuerJournalpostClient::class.java)
 
     fun distribuerJournalpost(request: DistribuerJournalpostRequest): DistribuerJournalpostResponse {
         log.info("Distribuerer journalpost {}", request.journalpostId)

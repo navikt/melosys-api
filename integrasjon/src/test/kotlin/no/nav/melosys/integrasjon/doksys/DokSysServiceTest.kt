@@ -16,7 +16,7 @@ import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Mottakerroller
-import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.DistribuerJournalpostConsumer
+import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.DistribuerJournalpostClient
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostRequest
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostResponse
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer
@@ -45,13 +45,13 @@ class DokSysServiceTest {
     private val REP_ORGNR = "87654321"
 
     private val dokumentproduksjonConsumer = mockk<DokumentproduksjonConsumer>()
-    private val distribuerJournalpostConsumer = mockk<DistribuerJournalpostConsumer>()
+    private val distribuerJournalpostClient = mockk<DistribuerJournalpostClient>()
 
     private lateinit var dokSysService: DoksysService
 
     @BeforeEach
     fun setUp() {
-        dokSysService = DoksysService(dokumentproduksjonConsumer, distribuerJournalpostConsumer)
+        dokSysService = DoksysService(dokumentproduksjonConsumer, distribuerJournalpostClient)
     }
 
     @Test
@@ -230,14 +230,14 @@ class DokSysServiceTest {
             husnummerEtasjeLeilighet = "4B"
             poststed = "QUEBEC STED"
         }
-        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+        every { distribuerJournalpostClient.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
 
 
         dokSysService.distribuerJournalpost("123456", mottakeradresse, Distribusjonstype.VIKTIG)
 
 
         val captor = slot<DistribuerJournalpostRequest>()
-        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+        verify { distribuerJournalpostClient.distribuerJournalpost(capture(captor)) }
 
         captor.captured.run {
             journalpostId shouldBe "123456"
@@ -257,14 +257,14 @@ class DokSysServiceTest {
             husnummerEtasjeLeilighet = "4B"
             poststed = "Oslo"
         }
-        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+        every { distribuerJournalpostClient.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
 
 
         dokSysService.distribuerJournalpost("123456", mottakeradresse, Distribusjonstype.VIKTIG)
 
 
         val captor = slot<DistribuerJournalpostRequest>()
-        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+        verify { distribuerJournalpostClient.distribuerJournalpost(capture(captor)) }
 
         captor.captured.run {
             journalpostId shouldBe "123456"
@@ -283,14 +283,14 @@ class DokSysServiceTest {
             husnummerEtasjeLeilighet = "4B"
             poststed = "Stockholm"
         }
-        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+        every { distribuerJournalpostClient.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
 
 
         dokSysService.distribuerJournalpost("123456", mottakeradresse, Distribusjonstype.VIKTIG)
 
 
         val captor = slot<DistribuerJournalpostRequest>()
-        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+        verify { distribuerJournalpostClient.distribuerJournalpost(capture(captor)) }
 
         captor.captured.run {
             journalpostId shouldBe "123456"
@@ -302,14 +302,14 @@ class DokSysServiceTest {
     @Test
     fun `distribuer journalpost uten adresse`() {
         val journalpostId = "123456"
-        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+        every { distribuerJournalpostClient.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
 
 
         dokSysService.distribuerJournalpost(journalpostId, Distribusjonstype.ANNET)
 
 
         val captor = slot<DistribuerJournalpostRequest>()
-        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+        verify { distribuerJournalpostClient.distribuerJournalpost(capture(captor)) }
 
         captor.captured.run {
             journalpostId shouldBe journalpostId
@@ -326,14 +326,14 @@ class DokSysServiceTest {
             postnummer = "9999"
             landkode = "NO"
         }
-        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+        every { distribuerJournalpostClient.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
 
 
         dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, null, null, Distribusjonstype.VEDTAK)
 
 
         val captor = slot<DistribuerJournalpostRequest>()
-        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+        verify { distribuerJournalpostClient.distribuerJournalpost(capture(captor)) }
 
         captor.captured.run {
             journalpostId shouldBe journalpostId
@@ -352,14 +352,14 @@ class DokSysServiceTest {
             postnummer = "9999"
             landkode = "BE"
         }
-        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+        every { distribuerJournalpostClient.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
 
 
         dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, null, null, Distribusjonstype.VEDTAK)
 
 
         val captor = slot<DistribuerJournalpostRequest>()
-        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+        verify { distribuerJournalpostClient.distribuerJournalpost(capture(captor)) }
 
         captor.captured.run {
             journalpostId shouldBe journalpostId
@@ -381,14 +381,14 @@ class DokSysServiceTest {
         val kontaktopplysning = Kontaktopplysning().apply {
             kontaktNavn = "Fetter Anton"
         }
-        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+        every { distribuerJournalpostClient.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
 
 
         dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, kontaktopplysning, null, Distribusjonstype.VEDTAK)
 
 
         val captor = slot<DistribuerJournalpostRequest>()
-        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+        verify { distribuerJournalpostClient.distribuerJournalpost(capture(captor)) }
 
         captor.captured.run {
             journalpostId shouldBe journalpostId
@@ -411,14 +411,14 @@ class DokSysServiceTest {
         val kontaktopplysning = Kontaktopplysning().apply {
             kontaktNavn = "Fetter Anton"
         }
-        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+        every { distribuerJournalpostClient.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
 
 
         dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, kontaktopplysning, "Kari Kontakt", Distribusjonstype.ANNET)
 
 
         val captor = slot<DistribuerJournalpostRequest>()
-        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+        verify { distribuerJournalpostClient.distribuerJournalpost(capture(captor)) }
 
         captor.captured.run {
             journalpostId shouldBe journalpostId

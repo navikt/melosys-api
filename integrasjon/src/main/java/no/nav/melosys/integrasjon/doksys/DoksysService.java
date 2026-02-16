@@ -9,7 +9,7 @@ import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.DistribuerJournalpostConsumer;
+import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.DistribuerJournalpostClient;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.Adresse;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostRequest;
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer;
@@ -44,13 +44,13 @@ public class DoksysService implements DoksysFasade {
     private static final String LINE_SEPARATOR = System.lineSeparator();
     private static final String SYS_AVSENDER = "Melosys";
     private final DokumentproduksjonConsumer dokumentproduksjonConsumer;
-    private final DistribuerJournalpostConsumer distribuerJournalpostConsumer;
+    private final DistribuerJournalpostClient distribuerJournalpostClient;
 
     private final ObjectFactory objectFactory;
 
-    public DoksysService(DokumentproduksjonConsumer dokumentproduksjonConsumer, DistribuerJournalpostConsumer distribuerJournalpostConsumer) {
+    public DoksysService(DokumentproduksjonConsumer dokumentproduksjonConsumer, DistribuerJournalpostClient distribuerJournalpostClient) {
         this.dokumentproduksjonConsumer = dokumentproduksjonConsumer;
-        this.distribuerJournalpostConsumer = distribuerJournalpostConsumer;
+        this.distribuerJournalpostClient = distribuerJournalpostClient;
         this.objectFactory = new ObjectFactory();
     }
 
@@ -153,7 +153,7 @@ public class DoksysService implements DoksysFasade {
             .distribusjonstidspunkt(Distribusjonstidspunkt.KJERNETID)
             .build();
 
-        return distribuerJournalpostConsumer.distribuerJournalpost(request).getBestillingsId();
+        return distribuerJournalpostClient.distribuerJournalpost(request).getBestillingsId();
     }
 
     private StrukturertAdresse mapLandkode(StrukturertAdresse adresse) {
@@ -176,7 +176,7 @@ public class DoksysService implements DoksysFasade {
             .distribusjonstidspunkt(Distribusjonstidspunkt.KJERNETID)
             .build();
 
-        return distribuerJournalpostConsumer.distribuerJournalpost(request).getBestillingsId();
+        return distribuerJournalpostClient.distribuerJournalpost(request).getBestillingsId();
     }
 
     @Override
@@ -189,7 +189,7 @@ public class DoksysService implements DoksysFasade {
             .distribusjonstidspunkt(Distribusjonstidspunkt.KJERNETID)
             .build();
 
-        return distribuerJournalpostConsumer.distribuerJournalpost(request).getBestillingsId();
+        return distribuerJournalpostClient.distribuerJournalpost(request).getBestillingsId();
     }
 
     private static Adresse norskAdresse(StrukturertAdresse strukturertAdresse) {
