@@ -34,13 +34,13 @@ import java.util.*
 @ContextConfiguration(
     classes = [
         CorrelationIdOutgoingFilter::class,
-        OrganisasjonRestConsumerConfig::class,
+        OrganisasjonRestClientConfig::class,
     ]
 )
 @AutoConfigureWebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class OrganisasjonRestConsumerTest(
-    @Autowired private val organisasjonRestConsumer: OrganisasjonRestConsumer,
+class OrganisasjonRestClientTest(
+    @Autowired private val organisasjonRestClient: OrganisasjonRestClient,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int
 ) {
 
@@ -75,7 +75,7 @@ class OrganisasjonRestConsumerTest(
         val orgnummer = "928497705"
         lagStub(orgnummer)
 
-        val organisasjon = organisasjonRestConsumer.hentOrganisasjon(orgnummer)
+        val organisasjon = organisasjonRestClient.hentOrganisasjon(orgnummer)
 
 
         organisasjon.shouldBeTypeOf<Organisasjon>().apply {
@@ -90,7 +90,7 @@ class OrganisasjonRestConsumerTest(
         lagStub(orgnummer)
 
 
-        val organisasjon = organisasjonRestConsumer.hentOrganisasjon(orgnummer)
+        val organisasjon = organisasjonRestClient.hentOrganisasjon(orgnummer)
 
 
         organisasjon.shouldBeTypeOf<JuridiskEnhet>().apply {
@@ -155,7 +155,7 @@ class OrganisasjonRestConsumerTest(
         lagStub(orgnummer)
 
 
-        val organisasjon = organisasjonRestConsumer.hentOrganisasjon(orgnummer)
+        val organisasjon = organisasjonRestClient.hentOrganisasjon(orgnummer)
 
 
         organisasjon.shouldBeTypeOf<Virksomhet>().apply {
@@ -211,7 +211,7 @@ class OrganisasjonRestConsumerTest(
         val orgnummer = "974774577"
         lagStub(orgnummer)
 
-        val organisasjon = organisasjonRestConsumer.hentOrganisasjon(orgnummer)
+        val organisasjon = organisasjonRestClient.hentOrganisasjon(orgnummer)
 
 
         organisasjon.shouldBeTypeOf<Organisasjonsledd>().apply {
@@ -299,7 +299,7 @@ class OrganisasjonRestConsumerTest(
         )
 
         shouldThrow<IkkeFunnetException> {
-            organisasjonRestConsumer.hentOrganisasjon(orgnummer)
+            organisasjonRestClient.hentOrganisasjon(orgnummer)
         }
     }
 
@@ -309,14 +309,14 @@ class OrganisasjonRestConsumerTest(
         lagStub(orgnummer)
 
         shouldThrow<DecodingException> {
-            organisasjonRestConsumer.hentOrganisasjon(orgnummer)
+            organisasjonRestClient.hentOrganisasjon(orgnummer)
         }.message.shouldContain("value failed for JSON property organisasjonDetaljer due to missing")
     }
 
 
     private fun lagStub(orgnummer: String) {
         val fil = "mock/organisasjon/$orgnummer.json"
-        val jsonData = OrganisasjonRestConsumerTest::class.java.classLoader.getResource(fil)
+        val jsonData = OrganisasjonRestClientTest::class.java.classLoader.getResource(fil)
             ?.readText(StandardCharsets.UTF_8) ?: throw IkkeFunnetException("Fant ikke $fil")
         serviceUnderTestMockServer.stubFor(
             WireMock.get("/ereg/v2/organisasjon/$orgnummer")

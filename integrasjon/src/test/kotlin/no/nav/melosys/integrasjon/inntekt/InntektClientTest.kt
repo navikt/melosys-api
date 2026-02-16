@@ -12,7 +12,7 @@ import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.OAuthMockServer
-import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonRestConsumerTest
+import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonRestClientTest
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
@@ -175,6 +175,6 @@ class InntektClientTest(
         )
     }
 
-    fun hentRessurs(fil: String): String = OrganisasjonRestConsumerTest::class.java.classLoader.getResource(fil)
+    fun hentRessurs(fil: String): String = OrganisasjonRestClientTest::class.java.classLoader.getResource(fil)
         ?.readText(StandardCharsets.UTF_8) ?: throw IkkeFunnetException("Fant ikke $fil")
 }

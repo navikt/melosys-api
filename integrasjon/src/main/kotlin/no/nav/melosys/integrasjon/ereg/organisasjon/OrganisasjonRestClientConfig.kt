@@ -17,16 +17,16 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 
 @Configuration
-class OrganisasjonRestConsumerConfig(
+class OrganisasjonRestClientConfig(
     @Value("\${ereg.rest.url}") private val url: String
 ) : CallIdAware {
 
     @Bean
-    fun organisasjonRestConsumer(
+    fun organisasjonRestClient(
         webClientBuilder: WebClient.Builder,
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
-    ): OrganisasjonRestConsumer {
-        return OrganisasjonRestConsumer(
+    ): OrganisasjonRestClient {
+        return OrganisasjonRestClient(
             webClientBuilder
                 .baseUrl(url)
                 .filter(headerFilter())

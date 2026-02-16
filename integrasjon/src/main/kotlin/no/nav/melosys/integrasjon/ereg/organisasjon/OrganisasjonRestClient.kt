@@ -5,7 +5,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 
-open class OrganisasjonRestConsumer(private val webClient: WebClient) {
+open class OrganisasjonRestClient(private val webClient: WebClient) {
 
     fun hentOrganisasjon(orgnummer: String): OrganisasjonResponse.Organisasjon {
         return webClient.get().uri("/organisasjon/{orgnummer}", orgnummer)
