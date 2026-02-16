@@ -13,17 +13,17 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 
 @Configuration
-class InntektRestConsumerConfig(
+class InntektClientConfig(
     @Value("\${inntekt.rest.url}") private val url: String
 ) : CallIdAware {
 
     @Bean
-    fun inntektRestConsumerConsumer(
+    fun inntektClient(
         webClientBuilder: WebClient.Builder,
         systemContextExchangeFilter: GenericAuthFilterFactory,
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
-    ): InntektRestConsumer {
-        return InntektRestConsumer(
+    ): InntektClient {
+        return InntektClient(
             webClientBuilder
                 .baseUrl(url)
                 .filter(systemContextExchangeFilter.getAzureFilter(CLIENT_NAME))

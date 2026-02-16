@@ -10,13 +10,13 @@ import org.springframework.web.reactive.function.client.WebClient
 
 
 @Configuration
-class ArbeidsforholdConsumerConfig(@Value("\${arbeidsforhold.rest.url}") private val url: String) {
+class ArbeidsforholdClientConfig(@Value("\${arbeidsforhold.rest.url}") private val url: String) {
     @Bean
-    fun arbeidsforholdConsumer(
+    fun arbeidsforholdClient(
         webClientBuilder: WebClient.Builder,
         authFilterFactory: GenericAuthFilterFactory,
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
-    ) = ArbeidsforholdConsumer(
+    ) = ArbeidsforholdClient(
         webClientBuilder.baseUrl(url)
             .defaultHeader(NAV_CONSUMER_ID_NAME, MELOSYS_CONSUMER_ID)
             .filter(authFilterFactory.getAzureFilter(CLIENT_NAME))

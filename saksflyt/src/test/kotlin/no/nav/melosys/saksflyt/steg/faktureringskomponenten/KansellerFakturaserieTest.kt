@@ -8,7 +8,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
+import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenClient
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.saksflyt.steg.fakturering.KansellerFakturaserie
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
@@ -27,7 +27,7 @@ class KansellerFakturaserieTest {
     lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @RelaxedMockK
-    lateinit var faktureringskomponentenConsumer: FaktureringskomponentenConsumer
+    lateinit var faktureringskomponentenClient: FaktureringskomponentenClient
 
     @InjectMockKs
     lateinit var kansellerFakturaserie: KansellerFakturaserie
@@ -64,13 +64,13 @@ class KansellerFakturaserieTest {
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns Behandlingsresultat.forTest { id = behandlingId }
         every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns behandlingsresultatOpprinneligBehandling
-        every { faktureringskomponentenConsumer.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT) } returns nyFakturaserieResponseDto
+        every { faktureringskomponentenClient.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT) } returns nyFakturaserieResponseDto
 
 
         kansellerFakturaserie.utfør(prosessinstans)
 
         verify { behandlingsresultatService.lagre(behandlingsresultatOpprinneligBehandling) }
-        verify { faktureringskomponentenConsumer.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT) }
+        verify { faktureringskomponentenClient.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT) }
     }
 
 
@@ -118,12 +118,12 @@ class KansellerFakturaserieTest {
             id = behandlingHenvendelseId
         }
         every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns behandlingsresultatOpprinneligBehandling
-        every { faktureringskomponentenConsumer.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT) } returns nyFakturaserieResponseDto
+        every { faktureringskomponentenClient.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT) } returns nyFakturaserieResponseDto
 
         kansellerFakturaserie.utfør(prosessinstans)
 
         verify { behandlingsresultatService.lagre(behandlingsresultatOpprinneligBehandling) }
-        verify { faktureringskomponentenConsumer.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT) }
+        verify { faktureringskomponentenClient.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT) }
     }
 
 }

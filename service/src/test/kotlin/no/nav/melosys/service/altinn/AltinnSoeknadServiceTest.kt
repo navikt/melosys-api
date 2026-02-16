@@ -22,7 +22,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.msm.AltinnDokument
-import no.nav.melosys.integrasjon.soknadmottak.SoknadMottakConsumer
+import no.nav.melosys.integrasjon.soknadmottak.SoknadMottakClient
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
@@ -40,7 +40,7 @@ import java.time.ZoneId
 @ExtendWith(MockKExtension::class)
 class AltinnSoeknadServiceTest {
     @RelaxedMockK
-    lateinit var soknadMottakConsumer: SoknadMottakConsumer
+    lateinit var soknadMottakClient: SoknadMottakClient
 
     @RelaxedMockK
     lateinit var fagsakService: FagsakService
@@ -59,7 +59,7 @@ class AltinnSoeknadServiceTest {
     @BeforeEach
     fun setup() {
         altinnSoeknadService = AltinnSoeknadService(
-            soknadMottakConsumer,
+            soknadMottakClient,
             fagsakService,
             mottatteOpplysningerService,
             persondataFasade,
@@ -73,8 +73,8 @@ class AltinnSoeknadServiceTest {
         val søknad = lagMedlemskapArbeidEOSM()
         val opprettSakRequestSlot = slot<OpprettSakRequest>()
 
-        every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
-        every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
+        every { soknadMottakClient.hentSøknad(søknadID) } returns søknad
+        every { soknadMottakClient.hentDokumenter(søknadID) } returns setOf(søknadDokument)
         every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
         every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
 
@@ -106,8 +106,8 @@ class AltinnSoeknadServiceTest {
         }
         val opprettSakRequestSlot = slot<OpprettSakRequest>()
 
-        every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
-        every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
+        every { soknadMottakClient.hentSøknad(søknadID) } returns søknad
+        every { soknadMottakClient.hentDokumenter(søknadID) } returns setOf(søknadDokument)
         every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
         every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
 
@@ -133,8 +133,8 @@ class AltinnSoeknadServiceTest {
         val søknad = lagMedlemskapArbeidEOSM()
         val opprettSakRequestSlot = slot<OpprettSakRequest>()
 
-        every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
-        every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
+        every { soknadMottakClient.hentSøknad(søknadID) } returns søknad
+        every { soknadMottakClient.hentDokumenter(søknadID) } returns setOf(søknadDokument)
         every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
         every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
 
@@ -160,8 +160,8 @@ class AltinnSoeknadServiceTest {
         }
         val opprettSakRequestSlot = slot<OpprettSakRequest>()
 
-        every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
-        every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
+        every { soknadMottakClient.hentSøknad(søknadID) } returns søknad
+        every { soknadMottakClient.hentDokumenter(søknadID) } returns setOf(søknadDokument)
         every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
         every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
 
@@ -186,8 +186,8 @@ class AltinnSoeknadServiceTest {
         }
         val opprettSakRequestSlot = slot<OpprettSakRequest>()
 
-        every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
-        every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
+        every { soknadMottakClient.hentSøknad(søknadID) } returns søknad
+        every { soknadMottakClient.hentDokumenter(søknadID) } returns setOf(søknadDokument)
         every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
         every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
 
@@ -212,8 +212,8 @@ class AltinnSoeknadServiceTest {
         }
         val opprettSakRequestSlot = slot<OpprettSakRequest>()
 
-        every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
-        every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
+        every { soknadMottakClient.hentSøknad(søknadID) } returns søknad
+        every { soknadMottakClient.hentDokumenter(søknadID) } returns setOf(søknadDokument)
         every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
 
 
@@ -230,8 +230,8 @@ class AltinnSoeknadServiceTest {
         val fagsak = lagFagsak()
         val søknad = lagMedlemskapArbeidEOSM()
 
-        every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
-        every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
+        every { soknadMottakClient.hentSøknad(søknadID) } returns søknad
+        every { soknadMottakClient.hentDokumenter(søknadID) } returns setOf(søknadDokument)
         every { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) } returns fagsak
 
 

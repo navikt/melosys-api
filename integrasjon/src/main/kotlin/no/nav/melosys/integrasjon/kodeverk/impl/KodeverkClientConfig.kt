@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.utbetaling
+package no.nav.melosys.integrasjon.kodeverk.impl
 
 import no.nav.melosys.integrasjon.felles.CallIdAware
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
@@ -13,20 +13,21 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 
 @Configuration
-class UtbetalingConsumerProducerV2(
-    @Value("\${utbetaling_rest.url}") private val url: String,
+class KodeverkClientConfig(
+    @param:Value("\${KodeverkAPI_v1.url}") private val endpointUrl: String,
     private val genericAuthFilterFactory: GenericAuthFilterFactory
 ) : CallIdAware {
+
     @Bean
-    fun utbetalingConsumerV2(
+    fun kodeverkClient(
         webClientBuilder: WebClient.Builder, correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
-    ) = UtbetaldataRestConsumer(
+    ) = KodeverkClient(
         webClientBuilder
-            .baseUrl(url)
-            .filter(headerFilter())
+            .baseUrl(endpointUrl)
             .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
+            .filter(headerFilter())
             .filter(correlationIdOutgoingFilter)
-            .filter(errorFilter("Kall mot Utbetalinger feilet."))
+            .filter(errorFilter("Kall mot felles-kodeverk feilet."))
             .build()
     )
 
@@ -42,6 +43,6 @@ class UtbetalingConsumerProducerV2(
 
     companion object {
         private const val CONSUMER_ID = "srvmelosys"
-        private const val CLIENT_NAME = "sokos-utbetaldata"
+        private val CLIENT_NAME = "felleskodeverk"
     }
 }

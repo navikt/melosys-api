@@ -44,7 +44,7 @@ import java.time.LocalDate
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class MedlServiceTest {
 
-    private var mockRestConsumer = mockk<MedlemskapRestConsumer>()
+    private var mockRestConsumer = mockk<MedlemskapClient>()
     private val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
     private val medlService: MedlService = MedlService(mockRestConsumer, objectMapper)
 

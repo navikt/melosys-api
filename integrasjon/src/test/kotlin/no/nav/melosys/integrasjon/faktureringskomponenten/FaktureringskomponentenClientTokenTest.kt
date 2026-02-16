@@ -1,17 +1,14 @@
-package no.nav.melosys.integrasjon.eessi
+package no.nav.melosys.integrasjon.faktureringskomponenten
 
+import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
-import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.string.shouldContain
-import no.nav.melosys.exception.TekniskException
+import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
-import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
@@ -20,27 +17,29 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import java.math.BigDecimal
+import java.time.LocalDate
 
 @SpringBootTest
 @ActiveProfiles("wiremock-test")
 @ContextConfiguration(
     classes = [
-        StsWebClientProducer::class,
-        SecurityTokenServiceConsumer::class,
         OAuthMockServer::class,
-
         GenericAuthFilterFactory::class,
-        EessiConsumerProducerConfig::class,
+        FaktureringskomponentenClientConfig::class,
     ]
 )
 @AutoConfigureWebClient
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class EessiConsumerTokenTest(
-    @Autowired private val eessiConsumer: EessiConsumer,
+class FaktureringskomponentenClientTokenTest(
+    @Autowired private val faktureringskomponentenClient: FaktureringskomponentenClient,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
-) : ConsumerWireMockTestBase<String, List<String>>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
+) : ConsumerWireMockTestBase<String, NyFakturaserieResponseDto>(
+    mockServiceUnderTestPort,
+    mockSecurityPort,
+    oAuthMockServer
+) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {
@@ -66,19 +65,6 @@ class EessiConsumerTokenTest(
         executeFromController()
     }
 
-
-    @Test
-    fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
-        verifyHeaders(
-            mapOf(
-                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
-                Pair(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)),
-                Pair(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-            )
-        )
-        executeRequest()
-    }
-
     @Test
     fun correlationIdLeggesPåRequest() {
         verifyHeaders(
@@ -86,7 +72,7 @@ class EessiConsumerTokenTest(
                 Pair("X-Correlation-ID", WireMock.matching(UUID_REGEX)),
             )
         )
-        executeRequest()
+        executeFromController()
     }
 
     @Test
@@ -96,22 +82,45 @@ class EessiConsumerTokenTest(
         }
     }
 
-    @Test
-    fun `Skal feile om token ikke stemmer overens`() {
-        verifyHeaders(
-            mapOf(
-                Pair("Authorization", WireMock.equalTo("Bearer --feil token--")),
-                Pair(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)),
-                Pair(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-            )
-        )
-        shouldThrow<TekniskException> {
-            executeFromSystem()
-        }.message.shouldContain("Authorization: Bearer --feil token--")
+    override fun createWireMock(): MappingBuilder {
+        return WireMock.post(UrlPattern.ANY)
     }
 
-    override fun getMockData(): String = "[]"
+    override fun getMockData(): String = "{\n" +
+        "  \"fakturaserieReferanse\": \"123\"\n" +
+        "}"
 
     override fun executeRequest() =
-        eessiConsumer.hentMuligeAksjoner("123")
+        faktureringskomponentenClient.lagFakturaserie(lagFakturaserieDto(), "N123456")
+
+
+    private fun lagFakturaserieDto(
+        fakturaserieReferanse: String? = null,
+        fodselsnummer: String = "12345678911",
+        fullmektig: FullmektigDto = FullmektigDto("11987654321", "123456789"),
+        referanseBruker: String = "Nasse Nøff",
+        referanseNav: String = "NAV Medlemskap og avgift",
+        fakturaGjelder: Innbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
+        intervall: FaktureringIntervall = FaktureringIntervall.KVARTAL,
+        fakturaseriePeriode: List<FakturaseriePeriodeDto> = listOf(
+            FakturaseriePeriodeDto(
+                BigDecimal.valueOf(123),
+                LocalDate.now(),
+                LocalDate.now(),
+                "Beskrivelse"
+            )
+        ),
+    ): FakturaserieDto {
+        return FakturaserieDto(
+            fodselsnummer,
+            fakturaserieReferanse,
+            fullmektig,
+            referanseBruker,
+            referanseNav,
+            fakturaGjelder,
+            intervall,
+            fakturaseriePeriode
+        )
+    }
 }
+

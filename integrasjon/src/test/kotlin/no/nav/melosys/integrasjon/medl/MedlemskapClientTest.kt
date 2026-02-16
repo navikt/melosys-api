@@ -19,10 +19,10 @@ import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class MedlemskapRestConsumerTest {
+class MedlemskapClientTest {
 
     private lateinit var wireMockServer: WireMockServer
-    private lateinit var restConsumer: MedlemskapRestConsumer
+    private lateinit var restConsumer: MedlemskapClient
 
     @BeforeAll
     fun setup() {
@@ -33,7 +33,7 @@ class MedlemskapRestConsumerTest {
             .baseUrl("http://localhost:" + wireMockServer.port())
             .build()
 
-        restConsumer = MedlemskapRestConsumer(webClient)
+        restConsumer = MedlemskapClient(webClient)
     }
 
     @AfterAll
@@ -89,8 +89,8 @@ class MedlemskapRestConsumerTest {
         )
 
 
-        val exception = shouldThrow<RuntimeException> { 
-            restConsumer.oppdaterPeriode(MedlemskapsunntakForPut()) 
+        val exception = shouldThrow<RuntimeException> {
+            restConsumer.oppdaterPeriode(MedlemskapsunntakForPut())
         }
 
 

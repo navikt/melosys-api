@@ -17,8 +17,8 @@ import java.util.function.Consumer
 
 
 @Service
-class UtbetaldataRestService(
-    private val utbetaldataRestConsumer: UtbetaldataRestConsumer,
+class UtbetaltdataService(
+    private val utbetaltdataClient: UtbetaltdataClient,
     private val objectMapper: ObjectMapper
 ) {
 
@@ -35,7 +35,7 @@ class UtbetaldataRestService(
         val utbetalingResponse = if (erTomEldreEnnTreAar(fnr, fom, tom))
             emptyList()
         else
-            fjernYtelserFraUtbetalingerSomIkkeErBarnetrygd(utbetaldataRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest))
+            fjernYtelserFraUtbetalingerSomIkkeErBarnetrygd(utbetaltdataClient.hentUtbetalingsInformasjon(utbetalingRequest))
 
         return Saksopplysning().apply {
             type = SaksopplysningType.UTBETAL

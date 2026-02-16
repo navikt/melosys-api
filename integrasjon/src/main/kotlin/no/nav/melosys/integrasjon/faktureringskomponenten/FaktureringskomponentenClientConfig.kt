@@ -11,16 +11,16 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
-class FaktureringskomponentenConsumerProducer(
+class FaktureringskomponentenClientConfig(
     @Value("\${faktureringskomponenten.url}") private val url: String,
     private val genericAuthFilterFactory: GenericAuthFilterFactory
 ) {
     @Bean
-    fun faktureringskomponentenConsumer(
+    fun faktureringskomponentenClient(
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter?,
         webClientBuilder: WebClient.Builder
-    ): FaktureringskomponentenConsumer {
-        return object : FaktureringskomponentenConsumer(webClientBuilder
+    ): FaktureringskomponentenClient {
+        return object : FaktureringskomponentenClient(webClientBuilder
             .baseUrl(url)
             .filter(genericAuthFilterFactory.getAzureFilter("faktureringskomponenten"))
             .filter(correlationIdOutgoingFilter!!)

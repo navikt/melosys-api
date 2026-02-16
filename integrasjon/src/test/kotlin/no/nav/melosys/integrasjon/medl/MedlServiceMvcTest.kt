@@ -39,12 +39,12 @@ import java.time.LocalDate
         OAuthMockServer::class,
 
         GenericAuthFilterFactory::class,
-        MedlemskapRestConsumerProducer::class,
+        MedlemskapClientConfig::class,
     ]
 )
 @AutoConfigureWebClient
 class MedlServiceMvcTest(
-    @Autowired private val medlemskapRestConsumer: MedlemskapRestConsumer,
+    @Autowired private val medlemskapClient: MedlemskapClient,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
@@ -52,7 +52,7 @@ class MedlServiceMvcTest(
 
     private val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
 
-    private val medlService = MedlService(medlemskapRestConsumer, objectMapper)
+    private val medlService = MedlService(medlemskapClient, objectMapper)
 
     override fun createWireMock(): MappingBuilder {
         return WireMock.post(UrlPattern.ANY)

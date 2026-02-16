@@ -11,7 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient
 private val log = KotlinLogging.logger { }
 
 @Service
-class SoknadMottakConsumer(private val soknadMottakWebClient: WebClient) {
+class SoknadMottakClient(private val soknadMottakWebClient: WebClient) {
 
     fun hentSøknad(søknadID: String): MedlemskapArbeidEOSM {
         log.info("Henter søknad med ID {}", søknadID)

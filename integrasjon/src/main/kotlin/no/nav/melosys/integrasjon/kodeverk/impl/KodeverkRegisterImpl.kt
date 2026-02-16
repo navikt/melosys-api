@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component
 import org.springframework.web.server.ResponseStatusException
 
 @Component
-class KodeverkRegisterImpl internal constructor(private val kodeverkConsumer: KodeverkConsumerImpl) : KodeverkRegister {
+class KodeverkRegisterImpl internal constructor(private val kodeverkClient: KodeverkClient) : KodeverkRegister {
     @Cacheable("kodeverk")
     override fun hentKodeverk(kodeverkNavn: String): Kodeverk {
         return try {
-            val fellesKodeverkDto = kodeverkConsumer.hentKodeverk(kodeverkNavn)
+            val fellesKodeverkDto = kodeverkClient.hentKodeverk(kodeverkNavn)
             val koder: MutableMap<String, List<Kode>> = HashMap()
             for ((key, value) in fellesKodeverkDto.betydninger) {
                 val termer = value.stream().map { betydning: BetydningDto ->

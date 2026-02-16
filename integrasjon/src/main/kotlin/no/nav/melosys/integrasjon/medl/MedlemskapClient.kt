@@ -11,7 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import java.time.LocalDate
 
 @Retryable
-open class MedlemskapRestConsumer(private val webClient: WebClient)  {
+open class MedlemskapClient(private val webClient: WebClient)  {
 
     // Metoder må være open for at retry skal funke og at webClient ikke skal bli null
     // https://github.com/spring-projects/spring-framework/issues/26729

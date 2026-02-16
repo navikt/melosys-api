@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.kodeverk.impl
+package no.nav.melosys.integrasjon.medl
 
 import no.nav.melosys.integrasjon.felles.CallIdAware
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
@@ -13,21 +13,20 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 
 @Configuration
-class KodeverkConsumerProducer(
-    @param:Value("\${KodeverkAPI_v1.url}") private val endpointUrl: String,
+class MedlemskapClientConfig(
+    @Value("\${medlemskap.rest.url}") private val url: String,
     private val genericAuthFilterFactory: GenericAuthFilterFactory
 ) : CallIdAware {
-
     @Bean
-    fun kodeverkConsumer(
+    fun medlemskapClient(
         webClientBuilder: WebClient.Builder, correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
-    ) = KodeverkConsumerImpl(
+    ) = MedlemskapClient(
         webClientBuilder
-            .baseUrl(endpointUrl)
+            .baseUrl(url)
             .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
             .filter(headerFilter())
             .filter(correlationIdOutgoingFilter)
-            .filter(errorFilter("Kall mot felles-kodeverk feilet."))
+            .filter(errorFilter("Kall mot Medl feilet."))
             .build()
     )
 
@@ -43,6 +42,6 @@ class KodeverkConsumerProducer(
 
     companion object {
         private const val CONSUMER_ID = "srvmelosys"
-        private val CLIENT_NAME = "felleskodeverk"
+        private val CLIENT_NAME = "medl"
     }
 }

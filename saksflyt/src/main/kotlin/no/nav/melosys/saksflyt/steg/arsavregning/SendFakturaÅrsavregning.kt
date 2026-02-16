@@ -4,7 +4,7 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
+import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenClient
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FullmektigDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.Innbetalingstype
@@ -28,7 +28,7 @@ private val log = KotlinLogging.logger { }
 class SendFakturaÅrsavregning(
     private val behandlingService: BehandlingService,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
+    private val faktureringskomponentenClient: FaktureringskomponentenClient,
     private val pdlService: PersondataService,
 ) : StegBehandler {
 
@@ -44,7 +44,7 @@ class SendFakturaÅrsavregning(
 
         if (tilFaktureringBelopErStørreEllerLikMinimumBeløp(behandlingsresultat)) {
             val fakturaDto = mapFakturaserieDto(behandlingsresultat)
-            val responseDto = faktureringskomponentenConsumer.lagFaktura(fakturaDto, saksbehandlerIdent)
+            val responseDto = faktureringskomponentenClient.lagFaktura(fakturaDto, saksbehandlerIdent)
             behandlingsresultat.fakturaserieReferanse = responseDto.fakturaserieReferanse
             behandlingsresultatService.lagre(behandlingsresultat)
             log.info("Oppretter årsavregningfaktura for behandling: $behandlingsId")

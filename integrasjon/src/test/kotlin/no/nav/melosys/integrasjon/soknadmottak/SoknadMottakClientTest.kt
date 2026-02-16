@@ -23,9 +23,9 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class SoknadMottakConsumerTest {
+class SoknadMottakClientTest {
 
-    private lateinit var soknadMottakConsumer: SoknadMottakConsumer
+    private lateinit var soknadMottakClient: SoknadMottakClient
     private lateinit var wireMockServer: WireMockServer
 
     private val søknadID = "grj304iht"
@@ -39,7 +39,7 @@ class SoknadMottakConsumerTest {
             .baseUrl(wireMockServer.baseUrl())
             .build()
 
-        soknadMottakConsumer = SoknadMottakConsumer(webClient)
+        soknadMottakClient = SoknadMottakClient(webClient)
     }
 
     @BeforeEach
@@ -63,7 +63,7 @@ class SoknadMottakConsumerTest {
                 )
         )
 
-        val søknad = soknadMottakConsumer.hentSøknad(søknadID)
+        val søknad = soknadMottakClient.hentSøknad(søknadID)
 
         søknad.run {
             innhold.shouldNotBeNull().run {
@@ -96,7 +96,7 @@ class SoknadMottakConsumerTest {
                 )
         )
 
-        val dokumenter = soknadMottakConsumer.hentDokumenter(søknadID)
+        val dokumenter = soknadMottakClient.hentDokumenter(søknadID)
 
         dokumenter.run {
             size shouldBe 1

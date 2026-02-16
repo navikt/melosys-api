@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.medl
+package no.nav.melosys.integrasjon.utbetaling
 
 import no.nav.melosys.integrasjon.felles.CallIdAware
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
@@ -13,20 +13,20 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 
 @Configuration
-class MedlemskapRestConsumerProducer(
-    @Value("\${medlemskap.rest.url}") private val url: String,
+class UtbetaltdataClientConfig(
+    @Value("\${utbetaling_rest.url}") private val url: String,
     private val genericAuthFilterFactory: GenericAuthFilterFactory
 ) : CallIdAware {
     @Bean
-    fun medlemskapRestConsumer(
+    fun utbetaltdataClient(
         webClientBuilder: WebClient.Builder, correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
-    ) = MedlemskapRestConsumer(
+    ) = UtbetaltdataClient(
         webClientBuilder
             .baseUrl(url)
-            .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
             .filter(headerFilter())
+            .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
             .filter(correlationIdOutgoingFilter)
-            .filter(errorFilter("Kall mot Medl feilet."))
+            .filter(errorFilter("Kall mot Utbetalinger feilet."))
             .build()
     )
 
@@ -42,6 +42,6 @@ class MedlemskapRestConsumerProducer(
 
     companion object {
         private const val CONSUMER_ID = "srvmelosys"
-        private val CLIENT_NAME = "medl"
+        private const val CLIENT_NAME = "sokos-utbetaldata"
     }
 }
