@@ -14,7 +14,7 @@ import org.springframework.web.reactive.function.client.WebClient
  * Configuration for Tilgangsmaskinen Consumer og Producer
  */
 @Configuration
-class TilgangsmaskinenConsumerProducer(
+class TilgangsmaskinenClientProducer(
     @Value("\${tilgangsmaskinen.url}") private val url: String,
     private val genericAuthFilterFactory: GenericAuthFilterFactory
 ) {
@@ -23,8 +23,8 @@ class TilgangsmaskinenConsumerProducer(
     fun tilgangsmaskineConsumer(
         webClientBuilder: WebClient.Builder,
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
-    ): TilgangsmaskinenConsumer {
-        return TilgangsmaskinenConsumer(
+    ): TilgangsmaskinenClient {
+        return TilgangsmaskinenClient(
             webClientBuilder
                 .baseUrl(url)
                 .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))

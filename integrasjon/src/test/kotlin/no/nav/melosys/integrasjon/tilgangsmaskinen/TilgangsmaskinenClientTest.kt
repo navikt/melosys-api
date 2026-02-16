@@ -18,9 +18,9 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TilgangsmaskinenConsumerTest {
+class TilgangsmaskinenClientTest {
 
-    private lateinit var tilgangsmaskinenConsumer: TilgangsmaskinenConsumer
+    private lateinit var tilgangsmaskinenClient: TilgangsmaskinenClient
 
     private lateinit var mockServer: MockWebServer
     private val objectMapper = ObjectMapper()
@@ -38,7 +38,7 @@ class TilgangsmaskinenConsumerTest {
 
     @BeforeEach
     fun setup() {
-        tilgangsmaskinenConsumer = TilgangsmaskinenConsumer(
+        tilgangsmaskinenClient = TilgangsmaskinenClient(
             WebClient.builder()
                 .baseUrl("http://localhost:${mockServer.port}")
                 .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -53,7 +53,7 @@ class TilgangsmaskinenConsumerTest {
                 .setResponseCode(204)
         )
 
-        val harTilgang = tilgangsmaskinenConsumer.sjekkTilgang("12345678901", RegelType.KJERNE_REGELTYPE)
+        val harTilgang = tilgangsmaskinenClient.sjekkTilgang("12345678901", RegelType.KJERNE_REGELTYPE)
 
         harTilgang shouldBe true
 
@@ -72,7 +72,7 @@ class TilgangsmaskinenConsumerTest {
                 .setResponseCode(204)
         )
 
-        val harTilgang = tilgangsmaskinenConsumer.sjekkTilgang("12345678901", RegelType.KOMPLETT_REGELTYPE)
+        val harTilgang = tilgangsmaskinenClient.sjekkTilgang("12345678901", RegelType.KOMPLETT_REGELTYPE)
 
         harTilgang shouldBe true
 
@@ -103,7 +103,7 @@ class TilgangsmaskinenConsumerTest {
                 .setBody(objectMapper.writeValueAsString(problemDetail))
         )
 
-        tilgangsmaskinenConsumer.sjekkTilgang("03508331575").run {
+        tilgangsmaskinenClient.sjekkTilgang("03508331575").run {
             this shouldBe false
         }
     }
@@ -118,7 +118,7 @@ class TilgangsmaskinenConsumerTest {
         )
 
         shouldThrow<TilgangsmaskinenException> {
-            tilgangsmaskinenConsumer.sjekkTilgang("12345678901")
+            tilgangsmaskinenClient.sjekkTilgang("12345678901")
         }
     }
 
@@ -132,7 +132,7 @@ class TilgangsmaskinenConsumerTest {
         )
 
         shouldThrow<TilgangsmaskinenException> {
-            tilgangsmaskinenConsumer.sjekkTilgang("12345678901")
+            tilgangsmaskinenClient.sjekkTilgang("12345678901")
         }
     }
 }

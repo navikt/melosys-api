@@ -19,7 +19,7 @@ private val log = KotlinLogging.logger {}
  * - Request: Bare fnr som string
  * - Response: 204 for suksess, 403 med ProblemDetail for avslag
  */
-open class TilgangsmaskinenConsumer(
+open class TilgangsmaskinenClient(
     private val webClient: WebClient
 ) {
 
