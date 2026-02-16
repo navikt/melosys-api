@@ -19,7 +19,7 @@ class InntektDtoFraInntektsDokumentTest {
     fun `sjekk at mapping fra Saksopplysning InntektDokument til InntektDto blir som forventet`() {
         val inntektResponse = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
-            .readValue<InntektResponse>(hentRessurs("mock/inntekt/inntektConsumerResponse.json"))
+            .readValue<InntektResponse>(hentRessurs("mock/inntekt/inntektClientResponse.json"))
 
         val inntektDtoJson = InntektDto(
             InntektKonverter().lagSaksopplysning(inntektResponse).dokument as InntektDokument

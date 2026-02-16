@@ -89,7 +89,7 @@ class InntektClientTest(
                     WireMock.aResponse()
                         .withStatus(200)
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(hentRessurs("mock/inntekt/inntektConsumerResponse.json"))
+                        .withBody(hentRessurs("mock/inntekt/inntektClientResponse.json"))
                 )
         )
 
@@ -155,7 +155,7 @@ class InntektClientTest(
                     WireMock.aResponse()
                         .withStatus(200)
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(hentRessurs("mock/inntekt/inntektConsumerResponse-med-null.json"))
+                        .withBody(hentRessurs("mock/inntekt/inntektClientResponse-med-null.json"))
                 )
         )
 
