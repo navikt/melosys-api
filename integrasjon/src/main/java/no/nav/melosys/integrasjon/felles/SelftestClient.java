@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.felles;
 
-public interface SelftestConsumer {
+public interface SelftestClient {
 
     void ping();
 

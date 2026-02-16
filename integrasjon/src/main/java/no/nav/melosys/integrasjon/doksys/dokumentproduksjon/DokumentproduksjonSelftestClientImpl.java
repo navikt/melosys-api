@@ -2,13 +2,13 @@ package no.nav.melosys.integrasjon.doksys.dokumentproduksjon;
 
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.DokumentproduksjonV3;
 
-public class DokumentproduksjonSelftestConsumerImpl implements DokumentproduksjonSelftestConsumer {
+public class DokumentproduksjonSelftestClientImpl implements DokumentproduksjonSelftestClient {
 
     private DokumentproduksjonV3 port;
 
     private String endpointUrl;
 
-    public DokumentproduksjonSelftestConsumerImpl(DokumentproduksjonV3 port, String endpointUrl) {
+    public DokumentproduksjonSelftestClientImpl(DokumentproduksjonV3 port, String endpointUrl) {
         this.port = port;
         this.endpointUrl = endpointUrl;
     }
