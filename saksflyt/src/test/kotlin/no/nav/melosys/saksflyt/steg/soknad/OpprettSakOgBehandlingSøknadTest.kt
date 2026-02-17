@@ -6,7 +6,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.slot
-import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -93,9 +92,6 @@ internal class OpprettSakOgBehandlingSøknadTest {
         every { fagsak.hentAktivBehandling() } returns behandling
 
         opprettSakOgBehandlingSøknad.utfør(prosessinstans)
-
-        verify { persondataFasade.hentAktørIdForIdent(fnr) }
-        verify { fagsakService.nyFagsakOgBehandling(any()) }
 
         val capturedRequest = requestSlot.captured
         capturedRequest.aktørID shouldBe aktørId
