@@ -82,5 +82,12 @@ class FysiskDokument : ArkivDokument() {
             AltinnDokument.AltinnDokumentType.SOKNAD -> "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits"
             AltinnDokument.AltinnDokumentType.FULLMAKT -> "Fullmakt"
         }
+
+        @JvmStatic
+        fun lagFysiskDokumentDigitalSøknad(pdf: ByteArray, tittel: String) = FysiskDokument().apply {
+            dokumentKategori = DOKUMENT_KATEGORI_SOKNAD
+            this.tittel = tittel
+            addDokumentVariant(DokumentVariant.lagDokumentVariant(pdf))
+        }
     }
 }

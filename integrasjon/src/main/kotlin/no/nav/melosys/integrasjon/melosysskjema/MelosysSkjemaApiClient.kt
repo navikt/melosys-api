@@ -22,4 +22,15 @@ class MelosysSkjemaApiClient(private val melosysSkjemaApiWebClient: WebClient) {
             .bodyToMono(UtsendtArbeidstakerM2MSkjemaData::class.java)
             .block() ?: error("Kunne ikke hente skjema for ID $skjemaId")
     }
+
+    fun hentPdf(skjemaId: UUID): ByteArray {
+        log.info("Henter PDF for skjema med ID {}", skjemaId)
+
+        return melosysSkjemaApiWebClient.get()
+            .uri("/m2m/api/skjema/{id}/pdf", skjemaId)
+            .accept(MediaType.APPLICATION_PDF)
+            .retrieve()
+            .bodyToMono(ByteArray::class.java)
+            .block() ?: error("Kunne ikke hente PDF for skjema $skjemaId")
+    }
 }

@@ -18,6 +18,7 @@ public class OpprettJournalpost extends Journalpost {
     private static final String MEDLEMSKAP_OG_AVGIFT = "4530";
     private static final String MEDLEMSKAP = "MED";
     private static final String ALTINN = "ALTINN";
+    private static final String NAV_NO = "NAV_NO";
 
     public enum KorrespondansepartIdType {
         UTENLANDSK_ORGANISASJON("UTL_ORG"),
@@ -127,6 +128,41 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
         opprettJournalpost.setVedlegg(FysiskDokument.lagFysiskDokumentListeFraVedlegg(bestilling, bestilling.getVedlegg()));
 
+        return opprettJournalpost;
+    }
+
+    /**
+     * Oppretter journalpost for digital søknad mottatt via nav.no.
+     *
+     * @param fagsak Fagsaken søknaden tilhører
+     * @param pdf PDF-representasjon av søknaden
+     * @param brukerFnr Fødselsnummer til bruker (arbeidstaker)
+     * @param referanseId Ekstern referanse-ID for søknaden
+     * @param tittel Tittel på dokumentet
+     * @return OpprettJournalpost klar til å sendes til Joark
+     */
+    public static OpprettJournalpost lagJournalpostForDigitalSøknad(
+        Fagsak fagsak,
+        byte[] pdf,
+        String brukerFnr,
+        String referanseId,
+        String tittel
+    ) {
+        OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
+        opprettJournalpost.setHoveddokument(lagFysiskDokumentDigitalSøknad(pdf, tittel));
+        opprettJournalpost.setInnhold(tittel);
+        opprettJournalpost.setSaksnummer(fagsak.getSaksnummer());
+        opprettJournalpost.setMottaksKanal(NAV_NO);
+        opprettJournalpost.setJournalposttype(Journalposttype.INN);
+        opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
+        opprettJournalpost.setTema(MEDLEMSKAP);
+        opprettJournalpost.setBrukerId(brukerFnr);
+        opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
+        opprettJournalpost.setEksternReferanseId(referanseId);
+        // Avsender/mottaker er bruker selv (digital selvbetjening)
+        opprettJournalpost.setKorrespondansepartId(brukerFnr);
+        opprettJournalpost.setKorrespondansepartIdType(KorrespondansepartIdType.FNR);
+        // TODO: Sett forsendelseMottatt når innsendingstidspunkt er tilgjengelig
         return opprettJournalpost;
     }
 
