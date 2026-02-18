@@ -5,7 +5,8 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.arkiv.BrukerIdType
 import no.nav.melosys.domain.arkiv.Journalposttype
 import no.nav.melosys.domain.arkiv.OpprettJournalpost
@@ -161,8 +162,9 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
     }
 
     private fun lagProsessinstans(søknadsdata: UtsendtArbeidstakerM2MSkjemaData): Prosessinstans {
-        val fagsak = Fagsak().apply { saksnummer = this@OpprettOgFerdigstillJournalpostSøknadTest.saksnummer }
-        val behandling = Behandling().apply { this.fagsak = fagsak }
+        val behandling = Behandling.forTest {
+            fagsak { saksnummer = this@OpprettOgFerdigstillJournalpostSøknadTest.saksnummer }
+        }
 
         return Prosessinstans.forTest {
             medData(ProsessDataKey.SØKNADSDATA, søknadsdata)
