@@ -49,6 +49,7 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
     private lateinit var opprettOgFerdigstillJournalpostSøknad: OpprettOgFerdigstillJournalpostSøknad
 
     private val fnr = "12345678901"
+    private val innsenderFnr = "98765432100"
     private val orgnr = "123456789"
     private val juridiskEnhetOrgnr = "987654321"
     private val referanseId = "MEL-TEST123"
@@ -60,6 +61,7 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
     private val capturedJournalpost = slot<OpprettJournalpost>()
 
     private val brukerNavn = "Test Testesen"
+    private val innsenderNavn = "Innsender Innsendersen"
 
     @BeforeEach
     fun setup() {
@@ -70,7 +72,7 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
         every { melosysSkjemaApiClient.hentPdf(skjemaId) } returns pdfBytes
         every { joarkFasade.opprettJournalpost(capture(capturedJournalpost), eq(true)) } returns journalpostId
         every { behandlingService.lagre(any()) } just Runs
-        every { persondataFasade.hentSammensattNavn(fnr) } returns brukerNavn
+        every { persondataFasade.hentSammensattNavn(innsenderFnr) } returns innsenderNavn
     }
 
     @Test
@@ -99,7 +101,8 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
         opprettJournalpost.journalposttype shouldBe Journalposttype.INN
         opprettJournalpost.innhold shouldBe "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits"
         opprettJournalpost.hoveddokument.tittel shouldBe "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits"
-        opprettJournalpost.korrespondansepartNavn shouldBe brukerNavn
+        opprettJournalpost.korrespondansepartId shouldBe innsenderFnr
+        opprettJournalpost.korrespondansepartNavn shouldBe innsenderNavn
     }
 
     @Test
@@ -169,7 +172,7 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
             tidligereInnsendteSkjema = emptyList(),
             referanseId = referanseId,
             innsendtTidspunkt = java.time.LocalDateTime.now(),
-            innsenderFnr = fnr
+            innsenderFnr = this@OpprettOgFerdigstillJournalpostSøknadTest.innsenderFnr
         )
     }
 

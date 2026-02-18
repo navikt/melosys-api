@@ -55,13 +55,14 @@ class OpprettOgFerdigstillJournalpostSøknad(
         val skjema = søknadsdata.skjema
         val skjemaId = skjema.id
         val brukerFnr = skjema.fnr
+        val innsenderFnr = søknadsdata.innsenderFnr
         val referanseId = søknadsdata.referanseId
         val tittel = utledTittel(skjema.metadata.skjemadel)
 
         log.info { "Henter PDF og oppretter journalpost for digital søknad, referanseId=$referanseId, saksnummer=${fagsak.saksnummer}" }
 
         val pdf = melosysSkjemaApiClient.hentPdf(skjemaId)
-        val brukerNavn = persondataFasade.hentSammensattNavn(brukerFnr)
+        val innsenderNavn = persondataFasade.hentSammensattNavn(innsenderFnr)
 
         val opprettJournalpost = OpprettJournalpost().apply {
             hoveddokument = FysiskDokument.lagFysiskDokumentDigitalSøknad(pdf, tittel)
@@ -74,9 +75,8 @@ class OpprettOgFerdigstillJournalpostSøknad(
             brukerId = brukerFnr
             brukerIdType = BrukerIdType.FOLKEREGISTERIDENT
             eksternReferanseId = referanseId
-            // Avsender/mottaker er bruker selv (digital selvbetjening)
-            korrespondansepartId = brukerFnr
-            korrespondansepartNavn = brukerNavn
+            korrespondansepartId = innsenderFnr
+            korrespondansepartNavn = innsenderNavn
             setKorrespondansepartIdType(OpprettJournalpost.KorrespondansepartIdType.FNR)
         }
 
