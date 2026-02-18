@@ -38,7 +38,9 @@ class OpprettOgFerdigstillJournalpostSøknad(
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.OPPRETT_OG_FERDIGSTILL_JOURNALPOST_SØKNAD
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val behandling = prosessinstans.behandling
+        val behandling = requireNotNull(prosessinstans.behandling) {
+            "Behandling må være opprettet før journalpost kan opprettes"
+        }
         val fagsak = behandling.fagsak
 
         val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerM2MSkjemaData>(SØKNADSDATA)
