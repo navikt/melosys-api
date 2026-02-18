@@ -8,6 +8,7 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeTestFactory
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
+import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -102,6 +103,36 @@ abstract class ÅrsavregningServiceTestBase {
             }
             grunnlagSkatteforholdTilNorge {
                 skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+            }
+            init()
+        }
+    }
+
+    protected fun BehandlingsresultatTestFactory.Builder.helseutgiftDekkesPeriode(
+        start: String,
+        slutt: String,
+        medTrygdeavgift: Boolean = true,
+        init: HelseutgiftDekkesPeriodeTestFactory.Builder.() -> Unit = {}
+    ) {
+        helseutgiftDekkesPeriode {
+            fomDato = LocalDate.parse(start)
+            tomDato = LocalDate.parse(slutt)
+            bostedLandkode = Land_iso2.DK
+
+            if (medTrygdeavgift) {
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.parse(start)
+                    periodeTil = LocalDate.parse(slutt)
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
             }
             init()
         }

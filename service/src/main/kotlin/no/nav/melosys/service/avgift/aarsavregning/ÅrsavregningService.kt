@@ -117,15 +117,25 @@ class ÅrsavregningService(
             gjelderÅr
         )
 
-        val sisteBehandlingsresultatMedMedlemskapsperiode = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgiftspliktigPeriode
+        val sisteBehandlingsresultatMedAvgiftspliktigPeriode = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgiftspliktigPeriode
 
-        // Replikerer medlemskapsperioder fra siste behandling med medlemskap
-        if (sisteBehandlingsresultatMedMedlemskapsperiode != null) {
-            replikerMedlemskapsperioder(
-                behandlingsresultat,
-                sisteBehandlingsresultatMedMedlemskapsperiode,
-                gjelderÅr
-            )
+        // Replikerer avgiftsperioder fra siste behandling med medlemskap, lovvalgsperidoer kommer her og
+        if (sisteBehandlingsresultatMedAvgiftspliktigPeriode != null) {
+            when (sisteBehandlingsresultatMedAvgiftspliktigPeriode.finnAvgiftspliktigPerioder().first()) {
+                is Medlemskapsperiode -> replikerMedlemskapsperioder(
+                    behandlingsresultat,
+                    sisteBehandlingsresultatMedAvgiftspliktigPeriode,
+                    gjelderÅr
+                )
+
+                is HelseutgiftDekkesPeriode -> replikerHelseutgiftDekkesPeriode(
+                    behandlingsresultat,
+                    sisteBehandlingsresultatMedAvgiftspliktigPeriode,
+                    gjelderÅr
+                )
+
+                else -> throw FunksjonellException("Ukjent type avgiftspliktigPeriode: ${sisteBehandlingsresultatMedAvgiftspliktigPeriode.finnAvgiftspliktigPerioder().first()}")
+            }
         }
 
         val sisteÅrsavregning = sisteRelevanteBehandlinger?.sisteÅrsavregning?.årsavregning
@@ -133,7 +143,7 @@ class ÅrsavregningService(
         val årsavregning = Årsavregning(
             aar = gjelderÅr,
             behandlingsresultat = behandlingsresultat,
-            tidligereBehandlingsresultat = sisteBehandlingsresultatMedMedlemskapsperiode,
+            tidligereBehandlingsresultat = sisteBehandlingsresultatMedAvgiftspliktigPeriode,
             tidligereFakturertBeloep =
                 sisteÅrsavregning?.manueltAvgiftBeloep
                     ?: TotalbeløpBeregner.hentTotalavgift(
@@ -233,6 +243,22 @@ class ÅrsavregningService(
                 medlemskapsperiodeReplika.id = null
                 behandlingsresultat.addMedlemskapsperiode(medlemskapsperiodeReplika)
             }
+        }
+    }
+
+    private fun replikerHelseutgiftDekkesPeriode(
+        behandlingsresultat: Behandlingsresultat,
+        tidligereBehandlingsresultat: Behandlingsresultat,
+        gjelderÅr: Int
+    ) {
+        if (tidligereBehandlingsresultat.helseutgiftDekkesPeriode?.overlapperMedÅr(gjelderÅr) ?: return) {
+            val helseutgiftDekkesReplika = BeanUtils.cloneBean(tidligereBehandlingsresultat.helseutgiftDekkesPeriode) as HelseutgiftDekkesPeriode
+            helseutgiftDekkesReplika.behandlingsresultat = behandlingsresultat
+            helseutgiftDekkesReplika.trygdeavgiftsperioder = HashSet()
+            helseutgiftDekkesReplika.avkortFomDato(gjelderÅr)
+            helseutgiftDekkesReplika.avkortTomDato(gjelderÅr)
+            helseutgiftDekkesReplika.id = null
+            behandlingsresultat.helseutgiftDekkesPeriode = helseutgiftDekkesReplika
         }
     }
 
