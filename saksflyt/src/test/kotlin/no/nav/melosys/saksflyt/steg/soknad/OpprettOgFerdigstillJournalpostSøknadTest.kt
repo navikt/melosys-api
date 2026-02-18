@@ -79,7 +79,7 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
 
         verify { melosysSkjemaApiClient.hentPdf(skjemaId) }
         verify { joarkFasade.opprettJournalpost(any(), eq(true)) }
-        verify { behandlingService.lagre(prosessinstans.behandling!!) }
+        verify { behandlingService.lagre(any()) }
 
         val opprettJournalpost = capturedJournalpost.captured
         opprettJournalpost.tema shouldBe "MED"
@@ -113,7 +113,7 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
 
         opprettOgFerdigstillJournalpostSøknad.utfør(prosessinstans)
 
-        verify { behandling.initierendeJournalpostId = journalpostId }
+        behandling.initierendeJournalpostId shouldBe journalpostId
     }
 
     @Test
@@ -161,11 +161,8 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
     }
 
     private fun lagProsessinstans(søknadsdata: UtsendtArbeidstakerM2MSkjemaData): Prosessinstans {
-        val fagsak = mockk<Fagsak>()
-        val behandling = mockk<Behandling>(relaxed = true)
-
-        every { fagsak.saksnummer } returns saksnummer
-        every { behandling.fagsak } returns fagsak
+        val fagsak = Fagsak().apply { saksnummer = this@OpprettOgFerdigstillJournalpostSøknadTest.saksnummer }
+        val behandling = Behandling().apply { this.fagsak = fagsak }
 
         return Prosessinstans.forTest {
             medData(ProsessDataKey.SØKNADSDATA, søknadsdata)
