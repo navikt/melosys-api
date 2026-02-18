@@ -17,6 +17,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.skjema.types.ArbeidsgiverMetadata
 import no.nav.melosys.skjema.types.DegSelvMetadata
 import no.nav.melosys.skjema.types.Skjemadel
@@ -42,6 +43,9 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
     @MockK
     lateinit var behandlingService: BehandlingService
 
+    @MockK
+    lateinit var persondataFasade: PersondataFasade
+
     private lateinit var opprettOgFerdigstillJournalpostSøknad: OpprettOgFerdigstillJournalpostSøknad
 
     private val fnr = "12345678901"
@@ -55,15 +59,18 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
 
     private val capturedJournalpost = slot<OpprettJournalpost>()
 
+    private val brukerNavn = "Test Testesen"
+
     @BeforeEach
     fun setup() {
         opprettOgFerdigstillJournalpostSøknad = OpprettOgFerdigstillJournalpostSøknad(
-            melosysSkjemaApiClient, joarkFasade, behandlingService
+            melosysSkjemaApiClient, joarkFasade, behandlingService, persondataFasade
         )
 
         every { melosysSkjemaApiClient.hentPdf(skjemaId) } returns pdfBytes
         every { joarkFasade.opprettJournalpost(capture(capturedJournalpost), eq(true)) } returns journalpostId
         every { behandlingService.lagre(any()) } just Runs
+        every { persondataFasade.hentSammensattNavn(fnr) } returns brukerNavn
     }
 
     @Test
@@ -92,6 +99,7 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
         opprettJournalpost.journalposttype shouldBe Journalposttype.INN
         opprettJournalpost.innhold shouldBe "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits"
         opprettJournalpost.hoveddokument.tittel shouldBe "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits"
+        opprettJournalpost.korrespondansepartNavn shouldBe brukerNavn
     }
 
     @Test

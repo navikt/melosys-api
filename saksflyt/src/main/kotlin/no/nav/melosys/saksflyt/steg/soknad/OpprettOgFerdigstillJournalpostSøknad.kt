@@ -1,6 +1,9 @@
 package no.nav.melosys.saksflyt.steg.soknad
 
 import mu.KotlinLogging
+import no.nav.melosys.domain.arkiv.BrukerIdType
+import no.nav.melosys.domain.arkiv.FysiskDokument
+import no.nav.melosys.domain.arkiv.Journalposttype
 import no.nav.melosys.domain.arkiv.OpprettJournalpost
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.integrasjon.melosysskjema.MelosysSkjemaApiClient
@@ -9,6 +12,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey.SØKNADSDATA
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.skjema.types.Skjemadel
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerM2MSkjemaData
 import org.springframework.stereotype.Component
@@ -17,6 +21,9 @@ private val log = KotlinLogging.logger { }
 
 private const val TITTEL_ARBEIDSTAKER = "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits"
 private const val TITTEL_ARBEIDSGIVER = "Bekreftelse på utsending i EØS eller Sveits"
+private const val MEDLEMSKAP_OG_AVGIFT = "4530"
+private const val MEDLEMSKAP = "MED"
+private const val NAV_NO = "NAV_NO"
 
 /**
  * Saga-steg som oppretter og ferdigstiller journalpost i Joark for digital søknad.
@@ -32,7 +39,8 @@ private const val TITTEL_ARBEIDSGIVER = "Bekreftelse på utsending i EØS eller 
 class OpprettOgFerdigstillJournalpostSøknad(
     private val melosysSkjemaApiClient: MelosysSkjemaApiClient,
     private val joarkFasade: JoarkFasade,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
+    private val persondataFasade: PersondataFasade
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.OPPRETT_OG_FERDIGSTILL_JOURNALPOST_SØKNAD
@@ -48,19 +56,29 @@ class OpprettOgFerdigstillJournalpostSøknad(
         val skjemaId = skjema.id
         val brukerFnr = skjema.fnr
         val referanseId = søknadsdata.referanseId
-        val tittel = utledTittel(skjema.metadata.skjemadel)
 
         log.info { "Henter PDF og oppretter journalpost for digital søknad, referanseId=$referanseId, saksnummer=${fagsak.saksnummer}" }
 
         val pdf = melosysSkjemaApiClient.hentPdf(skjemaId)
+        val brukerNavn = persondataFasade.hentSammensattNavn(brukerFnr)
+        val tittel = utledTittel(skjema.metadata.skjemadel)
 
-        val opprettJournalpost = OpprettJournalpost.lagJournalpostForDigitalSøknad(
-            fagsak,
-            pdf,
-            brukerFnr,
-            referanseId,
-            tittel
-        )
+        val opprettJournalpost = OpprettJournalpost().apply {
+            hoveddokument = FysiskDokument.lagFysiskDokumentDigitalSøknad(pdf, tittel)
+            innhold = tittel
+            saksnummer = fagsak.saksnummer
+            mottaksKanal = NAV_NO
+            journalposttype = Journalposttype.INN
+            journalførendeEnhet = MEDLEMSKAP_OG_AVGIFT
+            tema = MEDLEMSKAP
+            brukerId = brukerFnr
+            brukerIdType = BrukerIdType.FOLKEREGISTERIDENT
+            eksternReferanseId = referanseId
+            // Avsender/mottaker er bruker selv (digital selvbetjening)
+            korrespondansepartId = brukerFnr
+            korrespondansepartNavn = brukerNavn
+            setKorrespondansepartIdType(OpprettJournalpost.KorrespondansepartIdType.FNR)
+        }
 
         val journalpostId = joarkFasade.opprettJournalpost(opprettJournalpost, true)
 
