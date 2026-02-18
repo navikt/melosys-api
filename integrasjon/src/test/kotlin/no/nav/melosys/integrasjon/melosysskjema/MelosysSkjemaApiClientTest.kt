@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.melosysskjema
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -77,32 +76,34 @@ class MelosysSkjemaApiClientTest(
         val skjemaId = UUID.randomUUID()
         val responseJson = """
             {
-              "skjemaer": [
-                {
-                  "id": "550e8400-e29b-41d4-a716-446655440000",
-                  "status": "SENDT",
-                  "type": "UTSENDT_ARBEIDSTAKER",
-                  "fnr": "12345678901",
-                  "orgnr": "123456789",
-                  "metadata": {
-                    "metadatatype": "UTSENDT_ARBEIDSTAKER_DEG_SELV",
-                    "skjemadel": "ARBEIDSTAKERS_DEL",
-                    "arbeidsgiverNavn": "Test Bedrift AS",
-                    "juridiskEnhetOrgnr": "987654321"
-                  },
-                  "data": {
-                    "type": "UTSENDT_ARBEIDSTAKER_ARBEIDSTAKERS_DEL",
-                    "utenlandsoppdraget": {
-                      "utsendelsesLand": "SE",
-                      "utsendelsePeriode": {
-                        "fraDato": "2024-01-01",
-                        "tilDato": "2024-12-31"
-                      }
+              "skjema": {
+                "id": "550e8400-e29b-41d4-a716-446655440000",
+                "status": "SENDT",
+                "type": "UTSENDT_ARBEIDSTAKER",
+                "fnr": "12345678901",
+                "orgnr": "123456789",
+                "metadata": {
+                  "metadatatype": "UTSENDT_ARBEIDSTAKER_DEG_SELV",
+                  "skjemadel": "ARBEIDSTAKERS_DEL",
+                  "arbeidsgiverNavn": "Test Bedrift AS",
+                  "juridiskEnhetOrgnr": "987654321"
+                },
+                "data": {
+                  "type": "UTSENDT_ARBEIDSTAKER_ARBEIDSTAKERS_DEL",
+                  "utenlandsoppdraget": {
+                    "utsendelsesLand": "SE",
+                    "utsendelsePeriode": {
+                      "fraDato": "2024-01-01",
+                      "tilDato": "2024-12-31"
                     }
                   }
                 }
-              ],
-              "referanseId": "MEL-5CA141"
+              },
+              "kobletSkjema": null,
+              "tidligereInnsendteSkjema": [],
+              "referanseId": "MEL-5CA141",
+              "innsendtTidspunkt": "2024-01-15T10:30:00",
+              "innsenderFnr": "12345678901"
             }
         """.trimIndent()
 
@@ -120,9 +121,9 @@ class MelosysSkjemaApiClientTest(
 
         resultat.shouldNotBeNull()
         resultat.referanseId shouldBe "MEL-5CA141"
-        resultat.skjemaer shouldHaveSize 1
+        resultat.innsenderFnr shouldBe "12345678901"
 
-        val skjema = resultat.skjemaer.first()
+        val skjema = resultat.skjema
         skjema.id shouldBe UUID.fromString("550e8400-e29b-41d4-a716-446655440000")
         skjema.status shouldBe SkjemaStatus.SENDT
         skjema.type shouldBe SkjemaType.UTSENDT_ARBEIDSTAKER

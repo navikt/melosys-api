@@ -25,7 +25,7 @@ import no.nav.melosys.skjema.types.Skjemadel
 import no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaDto
 import no.nav.melosys.skjema.types.arbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
 import no.nav.melosys.skjema.types.common.SkjemaStatus
-import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerM2MSkjemaData
+import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -49,22 +49,26 @@ internal class OpprettSakOgBehandlingSøknadTest {
     private val juridiskEnhetOrgnr = "987654321"
     private val referanseId = "MEL-TEST123"
 
-    private val søknadsdata = UtsendtArbeidstakerM2MSkjemaData(
-        skjemaer = listOf(
-            UtsendtArbeidstakerSkjemaDto(
-                id = UUID.randomUUID(),
-                status = SkjemaStatus.SENDT,
-                fnr = fnr,
-                orgnr = orgnr,
-                metadata = DegSelvMetadata(
-                    skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
-                    arbeidsgiverNavn = "Test AS",
-                    juridiskEnhetOrgnr = juridiskEnhetOrgnr
-                ),
-                data = UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
-            )
+    private val skjema = UtsendtArbeidstakerSkjemaDto(
+        id = UUID.randomUUID(),
+        status = SkjemaStatus.SENDT,
+        fnr = fnr,
+        orgnr = orgnr,
+        metadata = DegSelvMetadata(
+            skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
+            arbeidsgiverNavn = "Test AS",
+            juridiskEnhetOrgnr = juridiskEnhetOrgnr
         ),
-        referanseId = referanseId
+        data = UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
+    )
+
+    private val søknadsdata = UtsendtArbeidstakerSkjemaM2MDto(
+        skjema = skjema,
+        kobletSkjema = null,
+        tidligereInnsendteSkjema = emptyList(),
+        referanseId = referanseId,
+        innsendtTidspunkt = java.time.LocalDateTime.now(),
+        innsenderFnr = fnr
     )
 
     @BeforeEach

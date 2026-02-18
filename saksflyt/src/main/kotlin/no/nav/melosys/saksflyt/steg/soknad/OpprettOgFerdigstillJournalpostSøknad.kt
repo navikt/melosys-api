@@ -14,7 +14,7 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.skjema.types.Skjemadel
-import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerM2MSkjemaData
+import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.springframework.stereotype.Component
 
 private val log = KotlinLogging.logger { }
@@ -51,17 +51,17 @@ class OpprettOgFerdigstillJournalpostSøknad(
         }
         val fagsak = behandling.fagsak
 
-        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerM2MSkjemaData>(SØKNADSDATA)
-        val skjema = søknadsdata.skjemaer.first()
+        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(SØKNADSDATA)
+        val skjema = søknadsdata.skjema
         val skjemaId = skjema.id
         val brukerFnr = skjema.fnr
         val referanseId = søknadsdata.referanseId
+        val tittel = utledTittel(skjema.metadata.skjemadel)
 
         log.info { "Henter PDF og oppretter journalpost for digital søknad, referanseId=$referanseId, saksnummer=${fagsak.saksnummer}" }
 
         val pdf = melosysSkjemaApiClient.hentPdf(skjemaId)
         val brukerNavn = persondataFasade.hentSammensattNavn(brukerFnr)
-        val tittel = utledTittel(skjema.metadata.skjemadel)
 
         val opprettJournalpost = OpprettJournalpost().apply {
             hoveddokument = FysiskDokument.lagFysiskDokumentDigitalSøknad(pdf, tittel)
