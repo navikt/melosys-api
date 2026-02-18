@@ -324,7 +324,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                 shouldBeInstanceOf<HelseutgiftDekkesPeriodeForAvgift>()
                 fom shouldBe LocalDate.of(2023, 1, 1)
                 tom shouldBe LocalDate.of(2023, 12, 31)
-                dekning shouldBe Trygdedekninger.FULL_DEKNING
+                dekning shouldBe Trygdedekninger.FULL_DEKNING_EOSFO
             }
 
             tidligereFakturertBeloep shouldNotBe null
