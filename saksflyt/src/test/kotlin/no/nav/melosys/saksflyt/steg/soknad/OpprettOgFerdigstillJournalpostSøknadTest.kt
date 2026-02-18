@@ -113,7 +113,7 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
 
         opprettOgFerdigstillJournalpostSøknad.utfør(prosessinstans)
 
-        behandling.initierendeJournalpostId shouldBe journalpostId
+        verify { behandling.initierendeJournalpostId = journalpostId }
     }
 
     @Test
