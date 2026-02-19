@@ -16,7 +16,7 @@ import no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaDto
 import no.nav.melosys.skjema.types.arbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
 import no.nav.melosys.skjema.types.common.SkjemaStatus
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
-import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerM2MSkjemaData
+import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -49,21 +49,25 @@ internal class HentSøknadsdataTest {
 
     @Test
     fun `utfør henter søknadsdata og lagrer på prosessinstans`() {
-        val søknadsdata = UtsendtArbeidstakerM2MSkjemaData(
-            skjemaer = listOf(
-                UtsendtArbeidstakerSkjemaDto(
-                    id = UUID.randomUUID(),
-                    status = SkjemaStatus.SENDT,
-                    fnr = "12345678901",
-                    orgnr = "123456789",
-                    metadata = DegSelvMetadata(
-                        skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
-                        arbeidsgiverNavn = "Test AS",
-                        juridiskEnhetOrgnr = "987654321"
-                    ),
-                    data = UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
-                )),
-            referanseId = "MEL-TEST123"
+        val skjema = UtsendtArbeidstakerSkjemaDto(
+            id = UUID.randomUUID(),
+            status = SkjemaStatus.SENDT,
+            fnr = "12345678901",
+            orgnr = "123456789",
+            metadata = DegSelvMetadata(
+                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
+                arbeidsgiverNavn = "Test AS",
+                juridiskEnhetOrgnr = "987654321"
+            ),
+            data = UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
+        )
+        val søknadsdata = UtsendtArbeidstakerSkjemaM2MDto(
+            skjema = skjema,
+            kobletSkjema = null,
+            tidligereInnsendteSkjema = emptyList(),
+            referanseId = "MEL-TEST123",
+            innsendtTidspunkt = java.time.LocalDateTime.now(),
+            innsenderFnr = "12345678901"
         )
 
 
@@ -73,7 +77,7 @@ internal class HentSøknadsdataTest {
 
         verify { melosysSkjemaApiClient.hentUtsendtArbeidstakerSkjema(skjemaId) }
 
-        val lagretData = prosessinstans.hentData<UtsendtArbeidstakerM2MSkjemaData>(ProsessDataKey.SØKNADSDATA)
+        val lagretData = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.SØKNADSDATA)
         lagretData shouldBe søknadsdata
     }
 }

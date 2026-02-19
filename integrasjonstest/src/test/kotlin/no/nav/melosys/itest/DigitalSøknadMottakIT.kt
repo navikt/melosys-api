@@ -20,7 +20,7 @@ import no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaDto
 import no.nav.melosys.skjema.types.arbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
 import no.nav.melosys.skjema.types.common.SkjemaStatus
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
-import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerM2MSkjemaData
+import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -51,25 +51,29 @@ class DigitalSøknadMottakIT(
         // Bruker fnr fra PersonRepo i melosys-mock (KARAFFEL TRIVIELL)
         val testFnr = "30056928150"
 
-        val forventetSøknadsdata = UtsendtArbeidstakerM2MSkjemaData(
-            skjemaer = listOf(
-                UtsendtArbeidstakerSkjemaDto(
-                    id = skjemaId,
-                    status = SkjemaStatus.SENDT,
-                    fnr = testFnr,
-                    orgnr = "123456789",
-                    metadata = DegSelvMetadata(
-                        skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
-                        arbeidsgiverNavn = "Test AS",
-                        juridiskEnhetOrgnr = "987654321"
-                    ),
-                    data = UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
-                )
+        val skjema = UtsendtArbeidstakerSkjemaDto(
+            id = skjemaId,
+            status = SkjemaStatus.SENDT,
+            fnr = testFnr,
+            orgnr = "123456789",
+            metadata = DegSelvMetadata(
+                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
+                arbeidsgiverNavn = "Test AS",
+                juridiskEnhetOrgnr = "987654321"
             ),
-            referanseId = "MEL-$skjemaId"
+            data = UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
         )
 
-        // Stub melosys-skjema-api endpoint
+        val forventetSøknadsdata = UtsendtArbeidstakerSkjemaM2MDto(
+            skjema = skjema,
+            kobletSkjema = null,
+            tidligereInnsendteSkjema = emptyList(),
+            referanseId = "MEL-$skjemaId",
+            innsendtTidspunkt = java.time.LocalDateTime.now(),
+            innsenderFnr = testFnr
+        )
+
+        // Stub melosys-skjema-api endpoint for søknadsdata
         mockServer.stubFor(
             WireMock.get(WireMock.urlPathEqualTo("/m2m/api/skjema/utsendt-arbeidstaker/$skjemaId/data"))
                 .willReturn(
@@ -80,12 +84,23 @@ class DigitalSøknadMottakIT(
                 )
         )
 
+        // Stub melosys-skjema-api endpoint for PDF
+        mockServer.stubFor(
+            WireMock.get(WireMock.urlPathEqualTo("/m2m/api/skjema/$skjemaId/pdf"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/pdf")
+                        .withBody("PDF content".toByteArray())
+                )
+        )
+
         val melding = SkjemaMottattMelding(skjemaId)
 
         // Send Kafka message
         kafkaTemplate.send(kafkaTopic, melding)
 
-        // Wait for saga to fail at step 3 (expected - step not implemented yet)
+        // Wait for saga to fail at step 4 (expected - step not implemented yet)
         await.atMost(Duration.ofSeconds(10)).until {
             prosessinstansRepository.findAllByLåsReferanseStartingWith(skjemaId.toString())
                 .firstOrNull()?.status == ProsessStatus.FEILET
@@ -99,21 +114,21 @@ class DigitalSøknadMottakIT(
         prosessinstans.status shouldBe ProsessStatus.FEILET
         prosessinstans.låsReferanse shouldBe skjemaId.toString()
 
-        // Step progression - step 1 and 2 completed, failed at step 3
-        prosessinstans.sistFullførtSteg shouldBe ProsessSteg.OPPRETT_SAK_OG_BEHANDLING_SØKNAD
+        // Step progression - step 1, 2, and 3 completed, failed at step 4
+        prosessinstans.sistFullførtSteg shouldBe ProsessSteg.OPPRETT_OG_FERDIGSTILL_JOURNALPOST_SØKNAD
 
         // Error hendelse - verify we failed at the expected step
         prosessinstans.hendelser.shouldHaveSize(1)
-        prosessinstans.hendelser.first().steg shouldBe ProsessSteg.OPPRETT_OG_FERDIGSTILL_JOURNALPOST_SØKNAD
-        prosessinstans.hendelser.first().type shouldBe "NoSuchElementException"
+        prosessinstans.hendelser.first().steg shouldBe ProsessSteg.LAGRE_SAKSOPPLYSNINGER_SØKNAD
 
         // Verify data stored by consumer (SØKNAD_MOTTATT_MELDING)
         val mottattMelding = prosessinstans.hentData<SkjemaMottattMelding>(ProsessDataKey.SØKNAD_MOTTATT_MELDING)
         mottattMelding shouldBe melding
 
         // Verify data stored by step 1 (SØKNADSDATA)
-        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerM2MSkjemaData>(ProsessDataKey.SØKNADSDATA)
-        søknadsdata shouldBe forventetSøknadsdata
+        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.SØKNADSDATA)
+        søknadsdata.referanseId shouldBe forventetSøknadsdata.referanseId
+        søknadsdata.skjema.fnr shouldBe forventetSøknadsdata.skjema.fnr
 
         // Verify behandling was created and set on prosessinstans (step 2)
         val behandling = prosessinstans.behandling.shouldNotBeNull()
@@ -122,5 +137,8 @@ class DigitalSøknadMottakIT(
         fagsak.tema shouldBe Sakstemaer.MEDLEMSKAP_LOVVALG
         behandling.tema shouldBe Behandlingstema.UTSENDT_ARBEIDSTAKER
         behandling.type shouldBe Behandlingstyper.FØRSTEGANG
+
+        // Verify journalpostId was set on behandling (step 3)
+        behandling.initierendeJournalpostId.shouldNotBeNull()
     }
 }

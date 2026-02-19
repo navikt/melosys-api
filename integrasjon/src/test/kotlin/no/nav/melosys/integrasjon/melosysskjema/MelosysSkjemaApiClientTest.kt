@@ -3,16 +3,17 @@ package no.nav.melosys.integrasjon.melosysskjema
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.skjema.types.DegSelvMetadata
 import no.nav.melosys.skjema.types.Skjemadel
 import no.nav.melosys.skjema.types.SkjemaType
+import no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaDto
 import no.nav.melosys.skjema.types.arbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
+import no.nav.melosys.skjema.types.arbeidstaker.utenlandsoppdraget.UtenlandsoppdragetArbeidstakersDelDto
 import no.nav.melosys.skjema.types.common.SkjemaStatus
 import no.nav.melosys.skjema.types.felles.LandKode
+import no.nav.melosys.skjema.types.felles.PeriodeDto
+import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
@@ -77,32 +78,34 @@ class MelosysSkjemaApiClientTest(
         val skjemaId = UUID.randomUUID()
         val responseJson = """
             {
-              "skjemaer": [
-                {
-                  "id": "550e8400-e29b-41d4-a716-446655440000",
-                  "status": "SENDT",
-                  "type": "UTSENDT_ARBEIDSTAKER",
-                  "fnr": "12345678901",
-                  "orgnr": "123456789",
-                  "metadata": {
-                    "metadatatype": "UTSENDT_ARBEIDSTAKER_DEG_SELV",
-                    "skjemadel": "ARBEIDSTAKERS_DEL",
-                    "arbeidsgiverNavn": "Test Bedrift AS",
-                    "juridiskEnhetOrgnr": "987654321"
-                  },
-                  "data": {
-                    "type": "UTSENDT_ARBEIDSTAKER_ARBEIDSTAKERS_DEL",
-                    "utenlandsoppdraget": {
-                      "utsendelsesLand": "SE",
-                      "utsendelsePeriode": {
-                        "fraDato": "2024-01-01",
-                        "tilDato": "2024-12-31"
-                      }
+              "skjema": {
+                "id": "550e8400-e29b-41d4-a716-446655440000",
+                "status": "SENDT",
+                "type": "UTSENDT_ARBEIDSTAKER",
+                "fnr": "12345678901",
+                "orgnr": "123456789",
+                "metadata": {
+                  "metadatatype": "UTSENDT_ARBEIDSTAKER_DEG_SELV",
+                  "skjemadel": "ARBEIDSTAKERS_DEL",
+                  "arbeidsgiverNavn": "Test Bedrift AS",
+                  "juridiskEnhetOrgnr": "987654321"
+                },
+                "data": {
+                  "type": "UTSENDT_ARBEIDSTAKER_ARBEIDSTAKERS_DEL",
+                  "utenlandsoppdraget": {
+                    "utsendelsesLand": "SE",
+                    "utsendelsePeriode": {
+                      "fraDato": "2024-01-01",
+                      "tilDato": "2024-12-31"
                     }
                   }
                 }
-              ],
-              "referanseId": "MEL-5CA141"
+              },
+              "kobletSkjema": null,
+              "tidligereInnsendteSkjema": [],
+              "referanseId": "MEL-5CA141",
+              "innsendtTidspunkt": "2024-01-15T10:30:00",
+              "innsenderFnr": "12345678901"
             }
         """.trimIndent()
 
@@ -116,31 +119,36 @@ class MelosysSkjemaApiClientTest(
                 )
         )
 
-        val resultat = melosysSkjemaApiClient.hentUtsendtArbeidstakerSkjema(skjemaId)
+        val deserializedResponse = melosysSkjemaApiClient.hentUtsendtArbeidstakerSkjema(skjemaId)
 
-        resultat.shouldNotBeNull()
-        resultat.referanseId shouldBe "MEL-5CA141"
-        resultat.skjemaer shouldHaveSize 1
-
-        val skjema = resultat.skjemaer.first()
-        skjema.id shouldBe UUID.fromString("550e8400-e29b-41d4-a716-446655440000")
-        skjema.status shouldBe SkjemaStatus.SENDT
-        skjema.type shouldBe SkjemaType.UTSENDT_ARBEIDSTAKER
-        skjema.fnr shouldBe "12345678901"
-        skjema.orgnr shouldBe "123456789"
-
-        skjema.metadata.shouldBeInstanceOf<DegSelvMetadata>()
-        val metadata = skjema.metadata as DegSelvMetadata
-        metadata.skjemadel shouldBe Skjemadel.ARBEIDSTAKERS_DEL
-        metadata.arbeidsgiverNavn shouldBe "Test Bedrift AS"
-        metadata.juridiskEnhetOrgnr shouldBe "987654321"
-
-        skjema.data.shouldBeInstanceOf<UtsendtArbeidstakerArbeidstakersSkjemaDataDto>()
-        val data = skjema.data as UtsendtArbeidstakerArbeidstakersSkjemaDataDto
-        data.utenlandsoppdraget.shouldNotBeNull()
-        data.utenlandsoppdraget!!.utsendelsesLand shouldBe LandKode.SE
-        data.utenlandsoppdraget!!.utsendelsePeriode.fraDato shouldBe LocalDate.of(2024, 1, 1)
-        data.utenlandsoppdraget!!.utsendelsePeriode.tilDato shouldBe LocalDate.of(2024, 12, 31)
+        deserializedResponse shouldBe UtsendtArbeidstakerSkjemaM2MDto(
+            skjema = UtsendtArbeidstakerSkjemaDto(
+                id = UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+                status = SkjemaStatus.SENDT,
+                type = SkjemaType.UTSENDT_ARBEIDSTAKER,
+                fnr = "12345678901",
+                orgnr = "123456789",
+                metadata = DegSelvMetadata(
+                    skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
+                    arbeidsgiverNavn = "Test Bedrift AS",
+                    juridiskEnhetOrgnr = "987654321"
+                ),
+                data = UtsendtArbeidstakerArbeidstakersSkjemaDataDto(
+                    utenlandsoppdraget = UtenlandsoppdragetArbeidstakersDelDto(
+                        utsendelsesLand = LandKode.SE,
+                        utsendelsePeriode = PeriodeDto(
+                            fraDato = LocalDate.of(2024, 1, 1),
+                            tilDato = LocalDate.of(2024, 12, 31)
+                        )
+                    )
+                )
+            ),
+            kobletSkjema = null,
+            tidligereInnsendteSkjema = emptyList(),
+            referanseId = "MEL-5CA141",
+            innsendtTidspunkt = java.time.LocalDateTime.of(2024, 1, 15, 10, 30, 0),
+            innsenderFnr = "12345678901"
+        )
 
         wireMockServer.verify(
             WireMock.getRequestedFor(WireMock.urlPathEqualTo("/m2m/api/skjema/utsendt-arbeidstaker/$skjemaId/data"))

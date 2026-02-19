@@ -18,6 +18,7 @@ public class OpprettJournalpost extends Journalpost {
     private static final String MEDLEMSKAP_OG_AVGIFT = "4530";
     private static final String MEDLEMSKAP = "MED";
     private static final String ALTINN = "ALTINN";
+    private static final String NAV_NO = "NAV_NO";
 
     public enum KorrespondansepartIdType {
         UTENLANDSK_ORGANISASJON("UTL_ORG"),

@@ -13,7 +13,7 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.OpprettSakRequest
-import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerM2MSkjemaData
+import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -39,10 +39,10 @@ class OpprettSakOgBehandlingSøknad(
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.OPPRETT_SAK_OG_BEHANDLING_SØKNAD
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerM2MSkjemaData>(SØKNADSDATA)
+        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(SØKNADSDATA)
 
-        // Hent første skjema (arbeidstaker er alltid hovedperson)
-        val skjema = søknadsdata.skjemaer.first()
+        // Hent skjema (arbeidstaker er alltid hovedperson)
+        val skjema = søknadsdata.skjema
         val fnr = skjema.fnr
 
         log.info { "Oppretter fagsak og behandling for digital søknad, referanseId=${søknadsdata.referanseId}" }

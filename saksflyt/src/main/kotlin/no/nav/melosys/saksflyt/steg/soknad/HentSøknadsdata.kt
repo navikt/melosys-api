@@ -16,7 +16,7 @@ private val log = KotlinLogging.logger { }
  * Saga-steg som henter søknadsdata fra melosys-skjema-api og lagrer på prosessinstansen.
  *
  * Henter skjemaId fra Kafka-meldingen og bruker MelosysSkjemaApiClient til å hente
- * komplett søknadsdata (UtsendtArbeidstakerM2MSkjemaData) for videre behandling.
+ * komplett søknadsdata (UtsendtArbeidstakerSkjemaM2MDto) for videre behandling.
  */
 @Component
 class HentSøknadsdata(
