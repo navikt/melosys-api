@@ -202,7 +202,7 @@ object TrygdeavgiftsberegningValidator {
         if (behandlingsresultat.finnAvgiftspliktigPerioder().isEmpty()) {
             throw FunksjonellException(AVGIFTSPLIKTIGPERIODER_EMPTY)
         }
-        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && behandlingsresultat.årsavregning != null) {
+        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && behandlingsresultat.årsavregning != null && !behandlingsresultat.erEøsPensjonist()) {
             alleMedlemskapsperioderHarSammeBestemmelse(behandlingsresultat.medlemskapsperioder)
             medlemskapsperioderHarOpphold(behandlingsresultat.medlemskapsperioder)
         }
