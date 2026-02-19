@@ -157,7 +157,7 @@ class EessiServiceTest {
         val sedDataDtoSlot = slot<SedDataDto>()
         every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), "fritekst", null)
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), "fritekst", null, false)
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.INGEN)) }
         verify { eessiClient.opprettBucOgSed(any(), any(), eq(BucType.LA_BUC_03), eq(true), eq(true)) }
@@ -172,7 +172,7 @@ class EessiServiceTest {
         mockBehandling()
         mockBehandlingsresultat()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, emptyList(), null, null)
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, emptyList(), null, null, false)
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.ANMODNINGSPERIODE)) }
         verify { eessiClient.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_01), eq(true), eq(true)) }
@@ -191,7 +191,7 @@ class EessiServiceTest {
         val sedDataDtoSlot = slot<SedDataDto>()
         every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, emptyList(), "fritekst", null)
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, emptyList(), "fritekst", null, false)
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.ANMODNINGSPERIODE)) }
         verify { eessiClient.opprettBucOgSed(any(), any(), eq(BucType.LA_BUC_01), eq(true), eq(true)) }
@@ -224,7 +224,7 @@ class EessiServiceTest {
         val sedDataDtoSlot = slot<SedDataDto>()
         every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_04, emptyList(), "fritekst", null)
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_04, emptyList(), "fritekst", null, false)
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE)) }
         verify { eessiClient.opprettBucOgSed(any(), any(), eq(BucType.LA_BUC_04), eq(true), eq(true)) }
@@ -251,7 +251,7 @@ class EessiServiceTest {
         mockBehandling()
         mockBehandlingsresultat()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_02, emptyList(), null, null)
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_02, emptyList(), null, null, false)
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE)) }
         verify { eessiClient.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_02), eq(true), eq(true)) }
@@ -266,7 +266,7 @@ class EessiServiceTest {
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_02, emptyList(), null, null)
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_02, emptyList(), null, null, false)
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(behandlingsresultat), eq(PeriodeType.UTPEKINGSPERIODE)) }
         verify { eessiClient.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_02), eq(true), eq(true)) }
@@ -293,7 +293,7 @@ class EessiServiceTest {
         mockBehandling()
         mockBehandlingsresultat()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_04, emptyList(), null, null)
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_04, emptyList(), null, null, false)
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE)) }
         verify { eessiClient.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_04), eq(true), eq(true)) }
@@ -391,7 +391,7 @@ class EessiServiceTest {
         every { joarkFasade.hentJournalposterTilknyttetSak(any()) } returns listOf(journalpost)
         mockBehandlingsresultat()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf(mottakerBelgia1), BucType.LA_BUC_01, dokumentReferanser, null, null)
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf(mottakerBelgia1), BucType.LA_BUC_01, dokumentReferanser, null, null, false)
 
         verify(exactly = 1) { eessiClient.opprettBucOgSedV2(any<OpprettBucOgSedDtoV2>()) }
         verify(exactly = 0) { eessiClient.opprettBucOgSed(any<SedDataDto>(), any(), any<BucType>(), any(), any()) }
@@ -974,7 +974,7 @@ class EessiServiceTest {
         val sedDataDtoSlot = slot<SedDataDto>()
         every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "arbeid_flere_land")
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "arbeid_flere_land", false)
 
         sedDataDtoSlot.captured.a008Formaal shouldBe A008Formaal.ARBEID_FLERE_LAND
     }
@@ -991,7 +991,7 @@ class EessiServiceTest {
         val sedDataDtoSlot = slot<SedDataDto>()
         every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "arbeid_flere_land")
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "arbeid_flere_land", false)
 
         sedDataDtoSlot.captured.a008Formaal shouldBe null
     }
@@ -1008,7 +1008,7 @@ class EessiServiceTest {
         val sedDataDtoSlot = slot<SedDataDto>()
         every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "endringsmelding")
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "endringsmelding", false)
 
         sedDataDtoSlot.captured.a008Formaal shouldBe A008Formaal.ENDRINGSMELDING
     }
@@ -1025,7 +1025,7 @@ class EessiServiceTest {
         val sedDataDtoSlot = slot<SedDataDto>()
         every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, null)
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, null, false)
 
         // null bruker default ARBEID_FLERE_LAND
         sedDataDtoSlot.captured.a008Formaal shouldBe A008Formaal.ARBEID_FLERE_LAND
@@ -1044,7 +1044,7 @@ class EessiServiceTest {
         every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
 
         // Ugyldig verdi faller tilbake til default
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "ugyldig_formaal")
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "ugyldig_formaal", false)
 
         sedDataDtoSlot.captured.a008Formaal shouldBe A008Formaal.ARBEID_FLERE_LAND
     }
@@ -1062,7 +1062,7 @@ class EessiServiceTest {
         every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
 
         // Store bokstaver er ugyldig, faller tilbake til default
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "ARBEID_FLERE_LAND")
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "ARBEID_FLERE_LAND", false)
 
         sedDataDtoSlot.captured.a008Formaal shouldBe A008Formaal.ARBEID_FLERE_LAND
     }
@@ -1080,7 +1080,7 @@ class EessiServiceTest {
         every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
 
         // Når toggle er av, settes ikke a008Formaal uansett input
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "ugyldig_formaal")
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "ugyldig_formaal", false)
 
         sedDataDtoSlot.captured.a008Formaal.shouldBeNull()
     }

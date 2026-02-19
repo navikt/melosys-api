@@ -14,6 +14,7 @@ class ProsessinstansBuilder(
     private var vedleggTilSed: Set<DokumentReferanse?>? = null,
     private var ytterligereInformasjonTilSed: String? = null,
     private var a008Formaal: String? = null,
+    private var erFjernarbeidTWFA: Boolean? = null,
     private var eessiMottakere: Set<String?>? = null,
     private var eessiMelding: MelosysEessiMelding? = null,
     private var låsReferanse: String? = null
@@ -27,6 +28,9 @@ class ProsessinstansBuilder(
 
     fun medA008Formaal(a008Formaal: String?): ProsessinstansBuilder =
         apply { this.a008Formaal = a008Formaal }
+
+    fun medErFjernarbeidTWFA(erFjernarbeidTWFA: Boolean?): ProsessinstansBuilder =
+        apply { this.erFjernarbeidTWFA = erFjernarbeidTWFA }
 
     fun medEessiMottakere(eessiMottakere: Set<String?>?): ProsessinstansBuilder = apply { this.eessiMottakere = eessiMottakere }
     fun medEessiMelding(eessiMelding: MelosysEessiMelding?): ProsessinstansBuilder = apply { this.eessiMelding = eessiMelding }
@@ -51,6 +55,9 @@ class ProsessinstansBuilder(
         }
         if (StringUtils.isNotEmpty(a008Formaal)) {
             setData(ProsessDataKey.A008_FORMAAL, a008Formaal)
+        }
+        if (erFjernarbeidTWFA == true) {
+            setData(ProsessDataKey.ER_FJERNARBEID_TWFA, true)
         }
         if (!CollectionUtils.isEmpty(eessiMottakere)) {
             setData(ProsessDataKey.EESSI_MOTTAKERE, eessiMottakere)

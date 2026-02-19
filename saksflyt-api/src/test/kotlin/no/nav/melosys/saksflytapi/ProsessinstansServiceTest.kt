@@ -117,7 +117,8 @@ class ProsessinstansServiceTest {
             setOf(mottakerInstitusjon),
             setOf(dokumentReferanse),
             "FRITEKST_SED",
-            ""
+            "",
+            true
         )
 
 
@@ -128,6 +129,7 @@ class ProsessinstansServiceTest {
             hentData<List<String>>(ProsessDataKey.EESSI_MOTTAKERE).first() shouldBe mottakerInstitusjon
             hentData<Set<DokumentReferanse>>(ProsessDataKey.VEDLEGG_SED) shouldBe setOf(dokumentReferanse)
             getData(ProsessDataKey.YTTERLIGERE_INFO_SED) shouldBe "FRITEKST_SED"
+            getData(ProsessDataKey.ER_FJERNARBEID_TWFA) shouldBe "true"
         }
     }
 

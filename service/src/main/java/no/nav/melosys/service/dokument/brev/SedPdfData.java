@@ -17,6 +17,7 @@ public class SedPdfData {
     private String nyttLovvalgsland;
     private String fritekst;
     private A008Formaal a008Formaal;
+    private Boolean erFjernarbeidTWFA;
 
     public SedPdfData() {
     }
@@ -61,6 +62,14 @@ public class SedPdfData {
         this.a008Formaal = A008Formaal.hentVerdi(a008Formaal);
     }
 
+    public Boolean getErFjernarbeidTWFA() {
+        return erFjernarbeidTWFA;
+    }
+
+    public void setErFjernarbeidTWFA(Boolean erFjernarbeidTWFA) {
+        this.erFjernarbeidTWFA = erFjernarbeidTWFA;
+    }
+
     // Utfyller SedDataDto med fritekst og annen informasjon som ikke lagres strukturert i Melosys
     public void utfyllSedDataDto(Unleash unleash, SedDataDto sedDataDto) {
 
@@ -72,6 +81,7 @@ public class SedPdfData {
         sedDataDto.setYtterligereInformasjon(fritekst);
         if (unleash.isEnabled(ToggleName.MELOSYS_CDM_4_4)) {
             sedDataDto.setA008Formaal(a008Formaal);
+            sedDataDto.setErFjernarbeidTWFA(BooleanUtils.isTrue(erFjernarbeidTWFA));
         }
     }
 }

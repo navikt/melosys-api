@@ -46,7 +46,8 @@ public abstract class AbstraktSendUtland implements StegBehandler {
             if (!CollectionUtils.isEmpty(mottakerinstitusjoner)) {
                 eessiService.opprettOgSendSed(behandlingID, new ArrayList<>(mottakerinstitusjoner), bucType, dokumentReferanser,
                     prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED),
-                    prosessinstans.getData(ProsessDataKey.A008_FORMAAL));
+                    prosessinstans.getData(ProsessDataKey.A008_FORMAAL),
+                    Boolean.parseBoolean(prosessinstans.getData(ProsessDataKey.ER_FJERNARBEID_TWFA)));
                 return SendUtlandStatus.SED_SENDT;
             } else {
                 sendBrev(prosessinstans);

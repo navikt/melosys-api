@@ -56,7 +56,7 @@ class SendAnmodningOmUnntakTest {
         every { behandlingService.lagre(any()) } returns mockk()
         every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns mockk()
         every { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(any()) } returns Unit
-        every { eessiService.opprettOgSendSed(any<Long>(), any(), any(), any(), any(), any()) } returns Unit
+        every { eessiService.opprettOgSendSed(any<Long>(), any(), any(), any(), any(), any(), any()) } returns Unit
         every { brevBestiller.bestill(any()) } returns Unit
     }
 
@@ -79,7 +79,8 @@ class SendAnmodningOmUnntakTest {
                 BucType.LA_BUC_01,
                 dokumentReferanser,
                 null,
-                null
+                null,
+                false
             )
         }
         verify { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(BEHANDLING_ID) }
@@ -106,7 +107,8 @@ class SendAnmodningOmUnntakTest {
                 BucType.LA_BUC_01,
                 any(),
                 null,
-                null
+                null,
+                false
             )
         }
         verify { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(BEHANDLING_ID) }
@@ -162,7 +164,7 @@ class SendAnmodningOmUnntakTest {
 
         prosessinstans.hentBehandling.dokumentasjonSvarfristDato!!.isAfter(nå!!) shouldBe true
         verify(exactly = 0) {
-            eessiService.opprettOgSendSed(any<Long>(), any(), BucType.LA_BUC_01, null, "fritekst", any())
+            eessiService.opprettOgSendSed(any<Long>(), any(), BucType.LA_BUC_01, null, "fritekst", any(), any())
         }
         verify { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(prosessinstans.hentBehandling.id) }
     }
