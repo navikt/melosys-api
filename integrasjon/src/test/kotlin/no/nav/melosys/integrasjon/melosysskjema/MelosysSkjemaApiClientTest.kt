@@ -119,7 +119,9 @@ class MelosysSkjemaApiClientTest(
                 )
         )
 
-        val forventet = UtsendtArbeidstakerSkjemaM2MDto(
+        val deserializedResponse = melosysSkjemaApiClient.hentUtsendtArbeidstakerSkjema(skjemaId)
+
+        deserializedResponse shouldBe UtsendtArbeidstakerSkjemaM2MDto(
             skjema = UtsendtArbeidstakerSkjemaDto(
                 id = UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
                 status = SkjemaStatus.SENDT,
@@ -147,10 +149,6 @@ class MelosysSkjemaApiClientTest(
             innsendtTidspunkt = java.time.LocalDateTime.of(2024, 1, 15, 10, 30, 0),
             innsenderFnr = "12345678901"
         )
-
-        val resultat = melosysSkjemaApiClient.hentUtsendtArbeidstakerSkjema(skjemaId)
-
-        resultat shouldBe forventet
 
         wireMockServer.verify(
             WireMock.getRequestedFor(WireMock.urlPathEqualTo("/m2m/api/skjema/utsendt-arbeidstaker/$skjemaId/data"))
