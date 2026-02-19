@@ -153,7 +153,7 @@ class SendVedtakUtlandTest {
         sendVedtakUtland.utfør(prosessinstans)
 
 
-        verify(exactly = 0) { eessiService.opprettOgSendSed(any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { eessiService.opprettOgSendSed(any(), any(), any(), any(), any(), any(), false) }
     }
 
     @Test
