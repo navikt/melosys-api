@@ -83,7 +83,7 @@
         <papertrailapp-syslog.version>1.0.0</papertrailapp-syslog.version> <!-- Fra august 2014, men er den som brukes hos NAV -->
         <easy-random.version>5.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
-        <shedlock.version>4.35.0</shedlock.version>
+        <shedlock.version>7.6.0</shedlock.version>
         <slf4j.version>2.0.17</slf4j.version>
         <springfox.version>3.0.0</springfox.version>
         <swagger.version>1.5.21</swagger.version>
