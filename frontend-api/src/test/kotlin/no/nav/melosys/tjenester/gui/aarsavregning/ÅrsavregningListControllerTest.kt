@@ -66,7 +66,7 @@ internal class ÅrsavregningListControllerTest {
             )
                 .queryParam("aar", "2023")
                 .queryParam("resultattype", "FERDIGBEHANDLET")
-        ).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.content().json(expectedJson, true))
+        ).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.content().json(expectedJson, org.springframework.test.json.JsonCompareMode.STRICT))
 
 
     }

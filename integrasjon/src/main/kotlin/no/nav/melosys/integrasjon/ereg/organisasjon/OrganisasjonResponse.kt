@@ -34,7 +34,7 @@ class OrganisasjonResponse {
         fun tilJsonString(): String = try {
             jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
-                .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+                .setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY)
                 .writeValueAsString(this)
         } catch (e: JsonProcessingException) {
             throw TekniskException("Kunne ikke konvertere organisasjon til json string", e)
