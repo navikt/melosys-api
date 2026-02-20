@@ -360,6 +360,17 @@ internal class A1MapperTest {
         }
 
         @Test
+        fun `CDM 4_4 - bruker med kun Kosovo skal generere gyldig brev-XML`() {
+            val behandling = lagDefaultBehandling()
+            val behandlingsresultat = lagDefaultBehandlingsresultat()
+            val brevData = lagDefaultBrevData {
+                erCdm44 = true
+                person = lagPersonopplysningerMedStatsborgerskap(listOf(Land.KOSOVO))
+            }
+            mapTilBrevXML(brevData, behandling, behandlingsresultat).shouldNotBeNull()
+        }
+
+        @Test
         fun `bruker med ukjent og Norge som statsborgerskap skal fjerne ukjent`() {
             val behandling = lagDefaultBehandling()
             val behandlingsresultat = lagDefaultBehandlingsresultat()

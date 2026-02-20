@@ -168,6 +168,23 @@ class BrevDataByggerA1Test {
     }
 
     @Test
+    fun `lag med erCdm44 true propagerer til BrevDataA1`() {
+        mockAvklarteOrganisasjoner(listOf("1"))
+        val byggerMedCdm44 = BrevDataByggerA1(avklartefaktaService, landvelgerService, true)
+        val brevDataDto = byggerMedCdm44.lag(dataGrunnlag, saksbehandler) as BrevDataA1
+
+        brevDataDto.erCdm44 shouldBe true
+    }
+
+    @Test
+    fun `lag med erCdm44 false propagerer til BrevDataA1`() {
+        mockAvklarteOrganisasjoner(listOf("1"))
+        val brevDataDto = brevDataByggerA1.lag(dataGrunnlag, saksbehandler) as BrevDataA1
+
+        brevDataDto.erCdm44 shouldBe false
+    }
+
+    @Test
     fun `lag ArbeidsstedHosOppdragsgiver girUtenlandskvirksomhet`() {
         mockAvklarteOrganisasjoner(listOf(orgnr2))
 
