@@ -285,7 +285,7 @@ class AnmodningUnntakServiceTest {
         behandling.status = Behandlingsstatus.UNDER_BEHANDLING
 
         val anmodningsperiodeSvar = lagAnmodningsperiodeSvar()
-        anmodningsperiodeSvar.begrunnelseFritekst = RandomStringUtils.random(256)
+        anmodningsperiodeSvar.begrunnelseFritekst = RandomStringUtils.insecure().next(256)
         anmodningsperiodeSvar.anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
 
         every { behandlingService.hentBehandling(any()) } returns behandling

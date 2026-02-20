@@ -46,8 +46,8 @@ class EregRestService(
         }
     }
 
-    override fun hentOrganisasjonNavn(orgnr: String): String =
-        (hentOrganisasjon(orgnr).dokument as OrganisasjonDokument).navn
+    override fun hentOrganisasjonNavn(orgnummer: String): String =
+        (hentOrganisasjon(orgnummer).dokument as OrganisasjonDokument).navn
 
     private fun erUgyldigOrgnummer(orgnr: String) = orgnr.length == 11
 

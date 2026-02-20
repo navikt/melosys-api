@@ -41,7 +41,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.concurrent.TimeUnit
 
 
-@Suppress("DEPRECATION") // Jackson2AutoConfiguration is the only Jackson 2 auto-config available
 @ActiveProfiles("test")
 @EmbeddedKafka(
     count = 1, controlledShutdown = true, partitions = 1,

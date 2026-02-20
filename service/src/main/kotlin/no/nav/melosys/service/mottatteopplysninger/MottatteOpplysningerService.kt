@@ -151,7 +151,6 @@ class MottatteOpplysningerService(
                     type = Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS
                     data = SøknadNorgeEllerUtenforEØS()
                 }
-                else -> throw FunksjonellException("Klarer ikke opprette søknad for behandling $behandlingID")
             }
         }
 
