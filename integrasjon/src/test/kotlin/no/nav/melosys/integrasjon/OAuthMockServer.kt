@@ -6,9 +6,9 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.nimbusds.jwt.JWT
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.PlainJWT
-import com.ninjasquad.springmockk.MockkBean
 import io.mockk.clearMocks
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.verify
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
@@ -16,6 +16,7 @@ import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.security.token.support.core.jwt.JwtToken
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Bean
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
@@ -27,8 +28,10 @@ class OAuthMockServer(
     private val azureMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(mockSecurityPort))
 
-    @MockkBean
-    private lateinit var tokenValidationContextHolder: TokenValidationContextHolder
+    private val tokenValidationContextHolder: TokenValidationContextHolder = mockk(relaxed = true)
+
+    @Bean
+    fun tokenValidationContextHolder(): TokenValidationContextHolder = tokenValidationContextHolder
 
     private fun shouldUseSystemToken() = ThreadLocalAccessInfo.shouldUseSystemToken()
 
@@ -37,11 +40,11 @@ class OAuthMockServer(
     fun reset() {
         clearMocks(tokenValidationContextHolder)
         if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
-            verify(exactly = 0) { tokenValidationContextHolder.tokenValidationContext }
-            verify(exactly = 0) { tokenValidationContextHolder.tokenValidationContext = any() }
+            verify(exactly = 0) { tokenValidationContextHolder.getTokenValidationContext() }
+            verify(exactly = 0) { tokenValidationContextHolder.setTokenValidationContext(any()) }
         } else {
-            every { tokenValidationContextHolder.tokenValidationContext } returns tokenValidationContext()
-            every { tokenValidationContextHolder.tokenValidationContext = any() } returns Unit
+            every { tokenValidationContextHolder.getTokenValidationContext() } returns tokenValidationContext()
+            every { tokenValidationContextHolder.setTokenValidationContext(any()) } returns Unit
         }
         azureMockServer.stubFor(
             WireMock.post("/oauth2/v2.0/token").willReturn(

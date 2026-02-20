@@ -37,7 +37,7 @@ class UtstedtA1AivenProducerTest {
 
     private class MockA1UtstedtMeldingProducerFactory : ProducerFactory<String, UtstedtA1Melding> {
         override fun createProducer(): Producer<String, UtstedtA1Melding> =
-            MockProducer(true, StringSerializer(), JsonSerializer(OBJECT_MAPPER))
+            MockProducer(true, null, StringSerializer(), JsonSerializer(OBJECT_MAPPER))
 
         override fun createProducer(@Nullable txIdPrefix: String?): Producer<String, UtstedtA1Melding> = createProducer()
     }

@@ -18,7 +18,7 @@ open class FaktureringskomponentenClient(private val webClient: WebClient) : Jso
     fun lagFakturaserie(fakturaserieDto: FakturaserieDto, saksbehandlerIdent: String? = null) =
         webClient.post()
             .uri("/fakturaserier")
-            .header("Nav-User-Id", saksbehandlerIdent)
+            .apply { saksbehandlerIdent?.let { header("Nav-User-Id", it) } }
             .bodyValue(fakturaserieDto)
             .retrieve()
             .bodyToMono<NyFakturaserieResponseDto>()
@@ -35,7 +35,7 @@ open class FaktureringskomponentenClient(private val webClient: WebClient) : Jso
     fun oppdaterFakturaMottaker(referanse: String, fakturaMottakerDto: FakturaMottakerDto, saksbehandlerIdent: String? = null) =
         webClient.put()
             .uri("/fakturaserier/{referanse}/mottaker", referanse)
-            .header("Nav-User-Id", saksbehandlerIdent)
+            .apply { saksbehandlerIdent?.let { header("Nav-User-Id", it) } }
             .bodyValue(fakturaMottakerDto)
             .retrieve()
             .bodyToMono<Void>()

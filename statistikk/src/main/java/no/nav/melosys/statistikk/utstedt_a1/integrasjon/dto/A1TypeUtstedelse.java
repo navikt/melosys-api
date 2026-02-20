@@ -16,8 +16,7 @@ public enum A1TypeUtstedelse {
             case ENDRINGSVEDTAK:
                 return ENDRING;
             default:
-                throw new UnsupportedOperationException(String.format(
-                    "Vedtakstype %s er ikke støttet ved sending av melding om utstedt A1", vedtakstype));
+                throw new UnsupportedOperationException("Vedtakstype %s er ikke støttet ved sending av melding om utstedt A1".formatted(vedtakstype));
         }
     }
 }

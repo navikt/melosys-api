@@ -11,7 +11,6 @@ import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import org.springframework.stereotype.Component;
 
-import static java.lang.String.format;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
 @Component
@@ -185,7 +184,7 @@ public class DokumentproduksjonsInfoMapper {
 
     private void sjekkOmStøttetDokument(Produserbaredokumenter produserbartDokument) {
         if (!DOKUMENTPRODUKSJONS_INFO_MAP.containsKey(produserbartDokument)) {
-            throw new FunksjonellException(format("ProduserbartDokument %s er ikke støttet", produserbartDokument));
+            throw new FunksjonellException("ProduserbartDokument %s er ikke støttet".formatted(produserbartDokument));
         }
     }
 

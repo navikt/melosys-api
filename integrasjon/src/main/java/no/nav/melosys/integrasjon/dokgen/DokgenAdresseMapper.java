@@ -2,7 +2,7 @@ package no.nav.melosys.integrasjon.dokgen;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;

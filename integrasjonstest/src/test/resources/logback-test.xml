@@ -18,7 +18,6 @@
     <logger name="org.flywaydb.core.internal" level="WARN"/>
     <logger name="org.hibernate" level="WARN"/>
     <logger name="kafka" level="WARN"/>
-    <logger name="springfox" level="WARN"/>
     <logger name="graphql.kickstart.tools" level="ERROR"/>
     <logger name="melosys-mock" level="WARN"/>
 </configuration>

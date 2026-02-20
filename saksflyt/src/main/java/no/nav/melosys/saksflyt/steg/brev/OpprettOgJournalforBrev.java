@@ -259,7 +259,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         return journalposter.stream()
             .filter(journalpost -> saksvedlegg.journalpostID().equals(journalpost.getJournalpostId()))
             .findFirst()
-            .orElseThrow(() -> new IkkeFunnetException(String.format("Finner ikke journalpost %s for saken %s", saksvedlegg.journalpostID(), "saksnummer")))
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke journalpost %s for saken %s".formatted(saksvedlegg.journalpostID(), "saksnummer")))
             .hentArkivDokument(saksvedlegg.dokumentID());
     }
 }

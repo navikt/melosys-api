@@ -1,6 +1,7 @@
 package no.nav.melosys.repository;
 
 import java.util.Collection;
+import org.jspecify.annotations.Nullable;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -8,7 +9,6 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.lang.Nullable;
 
 public interface BehandlingRepository extends CrudRepository<Behandling, Long> {
 

@@ -170,8 +170,6 @@ spring:
         maximumSize: 2048
         tilgangsmaskinen: maximumSize=1024,expireAfterWrite=60m
     type: caffeine
-  codec:
-    max-in-memory-size: 50MB
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
     hikari:
@@ -209,6 +207,7 @@ spring:
       pool:
         core-size: 1
         max-size: 4
+  http.codecs.max-in-memory-size: 50MB
 springdoc:
   api-docs:
     path: /api-docs
