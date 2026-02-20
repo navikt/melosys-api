@@ -90,7 +90,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.soeknadsland.landkoder shouldHaveSize 1
             søknad.soeknadsland.landkoder.first() shouldBe "DE"
             søknad.soeknadsland.isFlereLandUkjentHvilke.shouldBeFalse()
@@ -104,7 +104,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     utenlandsoppdraget = lagUtenlandsoppdragetDto(utsendelseLand = LandKode.SE)
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.soeknadsland.landkoder shouldHaveSize 1
             søknad.soeknadsland.landkoder.first() shouldBe "SE"
         }
@@ -122,7 +122,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     utenlandsoppdraget = lagUtenlandsoppdragetDto(utsendelseLand = LandKode.SE)
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.soeknadsland.landkoder.first() shouldBe "DE"
         }
 
@@ -132,7 +132,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                 skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
                 data = lagArbeidstakerData()
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.soeknadsland.landkoder.shouldBeEmpty()
         }
     }
@@ -152,7 +152,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.periode.fom shouldBe fom
             søknad.periode.tom shouldBe tom
         }
@@ -170,7 +170,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.periode.fom shouldBe fom
             søknad.periode.tom shouldBe tom
         }
@@ -195,7 +195,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.periode.fom shouldBe arbeidstakerFom
             søknad.periode.tom shouldBe arbeidstakerTom
         }
@@ -222,7 +222,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.personOpplysninger.medfolgendeFamilie shouldHaveSize 1
             søknad.personOpplysninger.medfolgendeFamilie.first().fnr shouldBe "01012012345"
             søknad.personOpplysninger.medfolgendeFamilie.first().navn shouldBe "Ola Nordmann"
@@ -239,7 +239,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.personOpplysninger.medfolgendeFamilie.shouldBeEmpty()
         }
 
@@ -249,7 +249,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                 skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
                 data = lagArbeidsgiverData()
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.personOpplysninger.medfolgendeFamilie.shouldBeEmpty()
         }
     }
@@ -278,7 +278,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.arbeidPaaLand.fysiskeArbeidssteder shouldHaveSize 1
             søknad.arbeidPaaLand.erFastArbeidssted shouldBe true
@@ -308,7 +308,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.arbeidPaaLand.erFastArbeidssted shouldBe false
             søknad.arbeidPaaLand.fysiskeArbeidssteder shouldHaveSize 1
@@ -331,7 +331,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.maritimtArbeid shouldHaveSize 1
             val maritimt = søknad.maritimtArbeid.first()
@@ -356,7 +356,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.maritimtArbeid.first().innretningstype shouldBe Innretningstyper.BORESKIP
         }
 
@@ -378,7 +378,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.maritimtArbeid shouldHaveSize 1
             val maritimt = søknad.maritimtArbeid.first()
@@ -406,7 +406,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.maritimtArbeid.first().fartsomradeKode shouldBe Fartsomrader.INNENRIKS
             søknad.maritimtArbeid.first().territorialfarvannLandkode shouldBe "SE"
@@ -430,7 +430,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.luftfartBaser shouldHaveSize 1
             val luftfart = søknad.luftfartBaser.first()
@@ -454,7 +454,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.utenlandsoppdraget.erUtsendelseForOppdragIUtlandet shouldBe true
             søknad.utenlandsoppdraget.erAnsattForOppdragIUtlandet shouldBe false
@@ -475,7 +475,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.utenlandsoppdraget.erErstatningTidligereUtsendte shouldBe true
             søknad.utenlandsoppdraget.samletUtsendingsperiode.fom shouldBe LocalDate.of(2024, 1, 1)
@@ -490,7 +490,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     utenlandsoppdraget = lagUtenlandsoppdragetDto(erstatterAnnen = false)
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.utenlandsoppdraget.samletUtsendingsperiode.fom.shouldBeNull()
             søknad.utenlandsoppdraget.samletUtsendingsperiode.tom.shouldBeNull()
@@ -502,7 +502,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                 skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
                 data = lagArbeidstakerData()
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.utenlandsoppdraget.erUtsendelseForOppdragIUtlandet.shouldBeNull()
         }
     }
@@ -519,7 +519,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.juridiskArbeidsgiverNorge.erOffentligVirksomhet shouldBe true
         }
 
@@ -533,7 +533,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.juridiskArbeidsgiverNorge.erOffentligVirksomhet shouldBe false
         }
     }
@@ -551,7 +551,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.loennOgGodtgjoerelse?.norskArbgUtbetalerLoenn shouldBe true
         }
 
@@ -566,7 +566,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.loennOgGodtgjoerelse?.norskArbgUtbetalerLoenn shouldBe false
         }
     }
@@ -593,7 +593,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.arbeidssituasjonOgOevrig.harLoennetArbeidMinstEnMndFoerUtsending shouldBe true
             søknad.arbeidssituasjonOgOevrig.beskrivelseArbeidSisteMnd shouldBe "Jobbet hos arbeidsgiver i Norge"
@@ -608,7 +608,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                 skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
                 data = lagArbeidsgiverData()
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.arbeidssituasjonOgOevrig.harLoennetArbeidMinstEnMndFoerUtsending.shouldBeNull()
             søknad.arbeidssituasjonOgOevrig.beskrivelseArbeidSisteMnd.shouldBeNull()
@@ -619,7 +619,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
     }
 
     @Nested
-    inner class TilUtsendtArbeidstakerSøknadIntegrasjon {
+    inner class TilSoeknadIntegrasjon {
         @Test
         fun `mapper komplett søknad med begge deler`() {
             val dto = lagM2MDtoMedBegge(
@@ -676,7 +676,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                 )
             )
 
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             // Søknadsland fra arbeidstaker (presedens)
             søknad.soeknadsland.landkoder shouldBe listOf("DE")
@@ -718,7 +718,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     )
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.soeknadsland.landkoder shouldBe listOf("FI")
             søknad.periode.fom shouldBe LocalDate.of(2025, 6, 1)
@@ -740,7 +740,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     virksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(erArbeidsgiverenOffentligVirksomhet = true)
                 )
             )
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(dto)
+            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.soeknadsland.landkoder shouldBe listOf("SE")
             søknad.periode.fom shouldBe LocalDate.of(2025, 3, 1)

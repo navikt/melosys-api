@@ -16,7 +16,7 @@ private val log = KotlinLogging.logger { }
  * Saga-steg som mapper søknadsdata til saksopplysninger (MottatteOpplysninger) på behandlingen.
  *
  * Henter søknadsdata fra prosessinstansen (lagret av HENT_SØKNADSDATA), mapper til
- * UtsendtArbeidstakerSøknad domenemodell via UtsendtArbeidstakerSøknadMapper, og lagrer som
+ * Soeknad domenemodell via UtsendtArbeidstakerSøknadMapper, og lagrer som
  * MottatteOpplysninger via MottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs().
  *
  * Forutsetninger:
@@ -41,7 +41,7 @@ class LagreSaksopplysningerSøknad(
 
         log.info { "Mapper og lagrer saksopplysninger fra digital søknad, referanseId=$referanseId, behandlingId=${behandling.id}" }
 
-        val søknad = UtsendtArbeidstakerSøknadMapper.tilUtsendtArbeidstakerSøknad(søknadsdata)
+        val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(søknadsdata)
         val originalData = objectMapper.writeValueAsString(søknadsdata)
 
         mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(

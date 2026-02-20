@@ -13,7 +13,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
-import no.nav.melosys.domain.mottatteopplysninger.utsendtarbeidstaker.UtsendtArbeidstakerSøknad
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
@@ -87,7 +87,7 @@ internal class LagreSaksopplysningerSøknadTest {
     @Test
     fun `utfør mapper søknadsdata og lagrer saksopplysninger`() {
         val originalDataJson = """{"referanseId":"MEL-TEST123"}"""
-        val soeknadSlot = slot<UtsendtArbeidstakerSøknad>()
+        val soeknadSlot = slot<Soeknad>()
 
         every { objectMapper.writeValueAsString(søknadsdata) } returns originalDataJson
         every {

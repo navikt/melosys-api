@@ -4,19 +4,19 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.kodeverk.Flyvningstyper
 import no.nav.melosys.domain.kodeverk.Innretningstyper
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.mottatteopplysninger.data.ArbeidssituasjonOgOevrig
 import no.nav.melosys.domain.mottatteopplysninger.data.JuridiskArbeidsgiverNorge
+import no.nav.melosys.domain.mottatteopplysninger.data.LoennOgGodtgjoerelse
 import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie
 import no.nav.melosys.domain.mottatteopplysninger.data.OpplysningerOmBrukeren
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.domain.mottatteopplysninger.data.Utenlandsoppdraget
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.ArbeidPaaLand
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.LuftfartBase
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid
-import no.nav.melosys.domain.mottatteopplysninger.utsendtarbeidstaker.ArbeidssituasjonOgOevrigUtsendtArbeidstaker
-import no.nav.melosys.domain.mottatteopplysninger.utsendtarbeidstaker.LoennOgGodtgjoerelseUtsendtArbeidstaker
-import no.nav.melosys.domain.mottatteopplysninger.utsendtarbeidstaker.UtenlandsoppdragetUtsendtArbeidstaker
-import no.nav.melosys.domain.mottatteopplysninger.utsendtarbeidstaker.UtsendtArbeidstakerSøknad
 import no.nav.melosys.skjema.types.Skjemadel
 import no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaDto
 import no.nav.melosys.skjema.types.arbeidsgiver.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
@@ -32,44 +32,40 @@ import no.nav.melosys.skjema.types.felles.PeriodeDto
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 
 /**
- * Mapper digital søknadsdata (UtsendtArbeidstakerSkjemaM2MDto) til domenemodellen [UtsendtArbeidstakerSøknad].
+ * Mapper digital søknadsdata (UtsendtArbeidstakerSkjemaM2MDto) til domenemodellen [Soeknad].
  *
  * Søknaden kan bestå av to deler (arbeidstakers del og arbeidsgivers del) som sendes inn
- * som separate skjema. Denne mapperen kombinerer data fra begge deler til én [UtsendtArbeidstakerSøknad].
+ * som separate skjema. Denne mapperen kombinerer data fra begge deler til én [Soeknad].
  */
 object UtsendtArbeidstakerSøknadMapper {
 
-    fun tilUtsendtArbeidstakerSøknad(dto: UtsendtArbeidstakerSkjemaM2MDto): UtsendtArbeidstakerSøknad {
+    fun tilSoeknad(dto: UtsendtArbeidstakerSkjemaM2MDto): Soeknad {
         val (arbeidstakerSkjema, arbeidsgiverSkjema) = finnSkjemadeler(dto)
         val arbeidstakerData = arbeidstakerSkjema?.data as? UtsendtArbeidstakerArbeidstakersSkjemaDataDto
         val arbeidsgiverData = arbeidsgiverSkjema?.data as? UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
 
-        // Bygg val-felter via constructor
-        val loenn = arbeidsgiverData?.let { mapLoennOgGodtgjoerelse(it) }
-        val utenlandsoppdraget = arbeidsgiverData?.let { mapUtenlandsoppdraget(it.utenlandsoppdraget) }
-            ?: UtenlandsoppdragetUtsendtArbeidstaker()
-        val arbeidssituasjon = arbeidstakerData?.let { mapArbeidssituasjonOgOevrig(it) }
-            ?: ArbeidssituasjonOgOevrigUtsendtArbeidstaker()
+        return Soeknad().apply {
+            // Sett Soeknad-spesifikke felter
+            loennOgGodtgjoerelse = arbeidsgiverData?.let { mapLoennOgGodtgjoerelse(it) }
+            utenlandsoppdraget = arbeidsgiverData?.let { mapUtenlandsoppdraget(it.utenlandsoppdraget) }
+                ?: Utenlandsoppdraget()
+            arbeidssituasjonOgOevrig = arbeidstakerData?.let { mapArbeidssituasjonOgOevrig(it) }
+                ?: ArbeidssituasjonOgOevrig()
 
-        return UtsendtArbeidstakerSøknad(
-            loennOgGodtgjoerelse = loenn,
-            utenlandsoppdraget = utenlandsoppdraget,
-            arbeidssituasjonOgOevrig = arbeidssituasjon
-        ).apply {
             // Sett arvede mutable parent-felter. Arbeidsgiver først, arbeidstaker sist (presedens)
             arbeidsgiverData?.let { applyArbeidsgiverData(this, it) }
             arbeidstakerData?.let { applyArbeidstakerData(this, it) }
         }
     }
 
-    private fun applyArbeidsgiverData(søknad: UtsendtArbeidstakerSøknad, data: UtsendtArbeidstakerArbeidsgiversSkjemaDataDto) {
+    private fun applyArbeidsgiverData(søknad: Soeknad, data: UtsendtArbeidstakerArbeidsgiversSkjemaDataDto) {
         søknad.soeknadsland = mapSoeknadsland(data.utenlandsoppdraget?.utsendelseLand)
         søknad.periode = mapPeriode(data.utenlandsoppdraget?.arbeidstakerUtsendelsePeriode)
         mapArbeidssteder(søknad, data)
         søknad.juridiskArbeidsgiverNorge = mapJuridiskArbeidsgiverNorge(data)
     }
 
-    private fun applyArbeidstakerData(søknad: UtsendtArbeidstakerSøknad, data: UtsendtArbeidstakerArbeidstakersSkjemaDataDto) {
+    private fun applyArbeidstakerData(søknad: Soeknad, data: UtsendtArbeidstakerArbeidstakersSkjemaDataDto) {
         søknad.soeknadsland = mapSoeknadsland(data.utenlandsoppdraget?.utsendelsesLand)
         søknad.periode = mapPeriode(data.utenlandsoppdraget?.utsendelsePeriode)
         søknad.personOpplysninger = mapPersonopplysninger(data)
@@ -119,7 +115,7 @@ object UtsendtArbeidstakerSøknadMapper {
     // --- Arbeidssteder ---
 
     private fun mapArbeidssteder(
-        søknad: UtsendtArbeidstakerSøknad,
+        søknad: Soeknad,
         arbeidsgiverData: UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
     ) {
         val arbeidssted = arbeidsgiverData.arbeidsstedIUtlandet ?: return
@@ -206,8 +202,8 @@ object UtsendtArbeidstakerSøknadMapper {
 
     // --- Utenlandsoppdraget ---
 
-    private fun mapUtenlandsoppdraget(utenlandsoppdraget: UtenlandsoppdragetDto?): UtenlandsoppdragetUtsendtArbeidstaker {
-        if (utenlandsoppdraget == null) return UtenlandsoppdragetUtsendtArbeidstaker()
+    private fun mapUtenlandsoppdraget(utenlandsoppdraget: UtenlandsoppdragetDto?): Utenlandsoppdraget {
+        if (utenlandsoppdraget == null) return Utenlandsoppdraget()
 
         val samletPeriode = if (utenlandsoppdraget.arbeidstakerErstatterAnnenPerson) {
             utenlandsoppdraget.forrigeArbeidstakerUtsendelsePeriode?.let {
@@ -217,7 +213,7 @@ object UtsendtArbeidstakerSøknadMapper {
             Periode()
         }
 
-        return UtenlandsoppdragetUtsendtArbeidstaker(
+        return Utenlandsoppdraget(
             samletUtsendingsperiode = samletPeriode,
             erUtsendelseForOppdragIUtlandet = utenlandsoppdraget.arbeidsgiverHarOppdragILandet,
             erFortsattAnsattEtterOppdraget = utenlandsoppdraget.arbeidstakerForblirAnsattIHelePerioden,
@@ -242,9 +238,9 @@ object UtsendtArbeidstakerSøknadMapper {
 
     private fun mapLoennOgGodtgjoerelse(
         arbeidsgiverData: UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
-    ): LoennOgGodtgjoerelseUtsendtArbeidstaker {
+    ): LoennOgGodtgjoerelse {
         val lonn = arbeidsgiverData.arbeidstakerensLonn
-        return LoennOgGodtgjoerelseUtsendtArbeidstaker(
+        return LoennOgGodtgjoerelse(
             norskArbgUtbetalerLoenn = lonn?.arbeidsgiverBetalerAllLonnOgNaturaytelserIUtsendingsperioden
         )
     }
@@ -253,16 +249,16 @@ object UtsendtArbeidstakerSøknadMapper {
 
     private fun mapArbeidssituasjonOgOevrig(
         arbeidstakerData: UtsendtArbeidstakerArbeidstakersSkjemaDataDto
-    ): ArbeidssituasjonOgOevrigUtsendtArbeidstaker {
+    ): ArbeidssituasjonOgOevrig {
         val arbeidssituasjon = arbeidstakerData.arbeidssituasjon
         val skatt = arbeidstakerData.skatteforholdOgInntekt
 
-        return ArbeidssituasjonOgOevrigUtsendtArbeidstaker(
-            harLoennetArbeidMinstEnMndFoerUtsending = arbeidssituasjon?.harVaertEllerSkalVaereILonnetArbeidFoerUtsending,
-            beskrivelseArbeidSisteMnd = arbeidssituasjon?.aktivitetIMaanedenFoerUtsendingen,
-            harAndreArbeidsgivereIUtsendingsperioden = arbeidssituasjon?.skalJobbeForFlereVirksomheter,
-            erSkattepliktig = skatt?.erSkattepliktigTilNorgeIHeleutsendingsperioden,
+        return ArbeidssituasjonOgOevrig().apply {
+            harLoennetArbeidMinstEnMndFoerUtsending = arbeidssituasjon?.harVaertEllerSkalVaereILonnetArbeidFoerUtsending
+            beskrivelseArbeidSisteMnd = arbeidssituasjon?.aktivitetIMaanedenFoerUtsendingen
+            harAndreArbeidsgivereIUtsendingsperioden = arbeidssituasjon?.skalJobbeForFlereVirksomheter
+            erSkattepliktig = skatt?.erSkattepliktigTilNorgeIHeleutsendingsperioden
             mottarYtelserUtlandet = skatt?.mottarPengestotteFraAnnetEosLandEllerSveits
-        )
+        }
     }
 }
