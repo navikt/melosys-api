@@ -182,6 +182,8 @@ spring:
     default-property-inclusion: ALWAYS
     deserialization:
       fail-on-unknown-properties: false
+    mapper:
+      default-view-inclusion: true
     serialization:
       write-dates-as-timestamps: false
   jpa:
@@ -192,6 +194,10 @@ spring:
           autocommit: false
         id:
           db_structure_naming_strategy: legacy
+        timezone:
+          default_storage: NORMALIZE
+        type:
+          preferred_instant_jdbc_type: TIMESTAMP
         format_sql: true
         show_sql: false
       org:
