@@ -19,6 +19,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.json.JsonCompareMode
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.math.BigDecimal
@@ -280,7 +281,7 @@ internal class ÅrsavregningControllerTest {
 
         mockMvc.perform(
             MockMvcRequestBuilders.get("$BASE_URL/{behandlingID}/aarsavregninger", 1).contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk()).andExpect(content().json(expectedJson, true))
+        ).andExpect(status().isOk()).andExpect(content().json(expectedJson, JsonCompareMode.STRICT))
     }
 
     @Test
@@ -517,7 +518,7 @@ internal class ÅrsavregningControllerTest {
 
         mockMvc.perform(
             MockMvcRequestBuilders.get("$BASE_URL/{behandlingID}/aarsavregninger", 1).contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk()).andExpect(content().json(expectedJson, true))
+        ).andExpect(status().isOk()).andExpect(content().json(expectedJson, JsonCompareMode.STRICT))
     }
 
     companion object {

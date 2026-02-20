@@ -33,8 +33,6 @@ import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
-import org.springframework.kafka.support.serializer.JsonDeserializer
-import org.springframework.kafka.support.serializer.JsonSerializer
 
 typealias KafkaConsumerContainerFactory<T> = KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, T>>
 
@@ -98,7 +96,7 @@ class KafkaConfig(
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to brokersUrl,
             ) + securityConfig(),
             StringSerializer(),
-            JsonSerializer(objectMapper)
+            ObjectMapperSerializer(objectMapper)
         )
 
     @Bean
@@ -110,7 +108,7 @@ class KafkaConfig(
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to brokersUrl,
             ) + securityConfig(),
             StringSerializer(),
-            JsonSerializer(objectMapper)
+            ObjectMapperSerializer(objectMapper)
         )
 
     @Bean
@@ -152,7 +150,6 @@ class KafkaConfig(
         ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
         ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG to 15000,
         ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
-        ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to JsonDeserializer::class.java,
         ConsumerConfig.MAX_POLL_RECORDS_CONFIG to 1
     )
 
@@ -191,6 +188,13 @@ class LoggingDeserializer<T>(
             val rawMessage = data?.let { String(it) } ?: "null data"
             throw FailedDeserializationException(topic ?: "unknown", rawMessage, e)
         }
+    }
+}
+
+class ObjectMapperSerializer<T>(private val objectMapper: ObjectMapper) : org.apache.kafka.common.serialization.Serializer<T> {
+    override fun serialize(topic: String?, data: T?): ByteArray? {
+        if (data == null) return null
+        return objectMapper.writeValueAsBytes(data)
     }
 }
 

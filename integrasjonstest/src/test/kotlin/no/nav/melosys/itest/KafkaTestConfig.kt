@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
-import org.springframework.kafka.support.serializer.JsonSerializer
+import no.nav.melosys.integrasjon.kafka.ObjectMapperSerializer
 
 @TestConfiguration
 class KafkaTestConfig {
@@ -26,7 +26,7 @@ class KafkaTestConfig {
     ): KafkaTemplate<String, MelosysEessiMelding> {
         val props = kafkaProperties.buildConsumerProperties()
         val producerFactory: ProducerFactory<String, MelosysEessiMelding> =
-            DefaultKafkaProducerFactory(props, StringSerializer(), JsonSerializer(objectMapper))
+            DefaultKafkaProducerFactory(props, StringSerializer(), ObjectMapperSerializer(objectMapper))
         return KafkaTemplate(producerFactory)
     }
 
@@ -46,7 +46,7 @@ class KafkaTestConfig {
     ): KafkaTemplate<String, ManglendeFakturabetalingMelding> {
         val props = kafkaProperties.buildProducerProperties()
         val producerFactory: ProducerFactory<String, ManglendeFakturabetalingMelding> =
-            DefaultKafkaProducerFactory(props, StringSerializer(), JsonSerializer(objectMapper))
+            DefaultKafkaProducerFactory(props, StringSerializer(), ObjectMapperSerializer(objectMapper))
         return KafkaTemplate(producerFactory)
     }
 
@@ -58,7 +58,7 @@ class KafkaTestConfig {
     ): KafkaTemplate<String, Skattehendelse> {
         val props = kafkaProperties.buildProducerProperties()
         val producerFactory: ProducerFactory<String, Skattehendelse> =
-            DefaultKafkaProducerFactory(props, StringSerializer(), JsonSerializer(objectMapper))
+            DefaultKafkaProducerFactory(props, StringSerializer(), ObjectMapperSerializer(objectMapper))
         return KafkaTemplate(producerFactory)
     }
 
@@ -70,7 +70,7 @@ class KafkaTestConfig {
     ): KafkaTemplate<String, SkjemaMottattMelding> {
         val props = kafkaProperties.buildProducerProperties()
         val producerFactory: ProducerFactory<String, SkjemaMottattMelding> =
-            DefaultKafkaProducerFactory(props, StringSerializer(), JsonSerializer(objectMapper))
+            DefaultKafkaProducerFactory(props, StringSerializer(), ObjectMapperSerializer(objectMapper))
         return KafkaTemplate(producerFactory)
     }
 }

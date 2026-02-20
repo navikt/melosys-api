@@ -29,7 +29,7 @@ class MidlertidigPostadresseSerializerTest {
     @BeforeEach
     fun setUp() {
         mapper = ObjectMapper().apply {
-            setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
             configure(SerializationFeature.INDENT_OUTPUT, true)
             registerModule(SimpleModule().apply {
                 addSerializer(MidlertidigPostadresseSerializer(kodeverkService))

@@ -15,7 +15,7 @@ import no.nav.melosys.domain.jpa.PropertiesConverter
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer
 import org.apache.commons.lang3.exception.ExceptionUtils
-import org.hibernate.annotations.GenericGenerator
+import org.hibernate.annotations.UuidGenerator
 import org.springframework.util.ObjectUtils.isEmpty
 import java.io.IOException
 import java.time.LocalDateTime
@@ -28,8 +28,8 @@ import java.util.*
 @Table(name = "prosessinstans")
 class Prosessinstans(
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @GeneratedValue
+    @UuidGenerator
     @Column(name = "uuid", nullable = false)
     var id: UUID? = null,
 
