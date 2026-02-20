@@ -17,7 +17,7 @@ class AvsluttArt13BehandlingJobb(
     private val avsluttArt13BehandlingService: AvsluttArt13BehandlingService
 ) {
 
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "\${melosys.jobb.avslutt-art13.cron:0 0 0 * * *}")
     @SchedulerLock(name = "avsluttBehandlingArt13Jobb", lockAtLeastFor = "10m")
     fun avsluttBehandlingArt13() {
         val processID = UUID.randomUUID()
