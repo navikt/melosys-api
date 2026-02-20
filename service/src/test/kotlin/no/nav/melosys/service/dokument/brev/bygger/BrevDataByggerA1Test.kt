@@ -106,7 +106,7 @@ class BrevDataByggerA1Test {
             avklartefaktaService,
             personDok
         )
-        brevDataByggerA1 = BrevDataByggerA1(avklartefaktaService, landvelgerService)
+        brevDataByggerA1 = BrevDataByggerA1(avklartefaktaService, landvelgerService, false)
     }
 
     private fun mockAvklarteOrganisasjoner(orgnumre: List<String>) {
