@@ -87,7 +87,7 @@ class MottatteOpplysningerService(
 
 
     fun opprettSøknadUtsendteArbeidstakereEøs(
-        behandlingID: Long, orginalData: String?, soeknad: MottatteOpplysningerData, eksternReferanseID: String?
+        behandlingID: Long, orginalData: String?, soeknad: Soeknad, eksternReferanseID: String?
     ): MottatteOpplysninger = opprettMottatteOpplysninger(
         behandlingID,
         orginalData,
