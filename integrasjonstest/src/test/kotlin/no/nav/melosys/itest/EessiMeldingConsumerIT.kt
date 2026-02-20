@@ -37,7 +37,6 @@ import org.springframework.test.context.ContextConfiguration
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-@Suppress("DEPRECATION") // Jackson2AutoConfiguration is the only Jackson 2 auto-config available
 @ActiveProfiles("test")
 @SpringBootTest
 @EmbeddedKafka(

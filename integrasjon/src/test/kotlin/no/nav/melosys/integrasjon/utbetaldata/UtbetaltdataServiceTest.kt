@@ -144,7 +144,7 @@ class UtbetaltdataServiceTest {
     }
 
     private fun hentUtbetalingListe(): List<Utbetaling> = objectMapper.readValue(
-        javaClass.classLoader.getResource("mock/utbetaldata/ubetalingResponse.json"),
+        javaClass.classLoader.getResource("mock/utbetaldata/ubetalingResponse.json")!!.openStream(),
         Array<Utbetaling>::class.java
     ).toList()
 

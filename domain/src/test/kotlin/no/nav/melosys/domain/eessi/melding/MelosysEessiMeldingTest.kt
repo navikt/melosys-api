@@ -30,7 +30,7 @@ class MelosysEessiMeldingTest {
         """
 
         val melding = objectMapper.readValue<MelosysEessiMelding>(json)
-        melding.arbeidsland!!.shouldHaveSize(1)
+        melding.arbeidsland.shouldHaveSize(1)
             .single()
             .arbeidssted shouldBe emptyList()
     }

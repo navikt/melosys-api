@@ -23,7 +23,7 @@ public class FellesKodeverkSerializer extends StdSerializer<KodeverkHjelper> {
         String kode = kodeverkHjelper.getKode();
         String term = null;
 
-        if (StringUtils.isEmpty(kode)) {
+        if (!StringUtils.hasText(kode)) {
             kode = null;
         } else {
             term = kodeverkService.dekod(kodeverkHjelper.hentKodeverkNavn(), kodeverkHjelper.getKode());

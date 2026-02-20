@@ -100,11 +100,11 @@ class SendFakturaÅrsavregning(
     private fun finnStartDato(behandlingsresultat: Behandlingsresultat): LocalDate {
         val perioder = behandlingsresultat.trygdeavgiftsperioder
 
-        val tidligerePerioder = if (perioder.isNullOrEmpty()) {
+        val tidligerePerioder = if (perioder.isEmpty()) {
             behandlingsresultat.hentÅrsavregning().tidligereBehandlingsresultat?.trygdeavgiftsperioder
         } else null
 
-        return perioder?.takeIf { it.isNotEmpty() }?.minOfOrNull { it.periodeFra }
+        return perioder.takeIf { it.isNotEmpty() }?.minOfOrNull { it.periodeFra }
             ?: tidligerePerioder?.minOfOrNull { it.periodeFra }
             ?: LocalDate.of(behandlingsresultat.hentÅrsavregning().aar, 1, 1)
     }
@@ -112,11 +112,11 @@ class SendFakturaÅrsavregning(
     private fun finnSluttDato(behandlingsresultat: Behandlingsresultat): LocalDate {
         val perioder = behandlingsresultat.trygdeavgiftsperioder
 
-        val tidligerePerioder = if (perioder.isNullOrEmpty()) {
+        val tidligerePerioder = if (perioder.isEmpty()) {
             behandlingsresultat.hentÅrsavregning().tidligereBehandlingsresultat?.trygdeavgiftsperioder
         } else null
 
-        return perioder?.takeIf { it.isNotEmpty() }?.minOfOrNull { it.periodeTil }
+        return perioder.takeIf { it.isNotEmpty() }?.minOfOrNull { it.periodeTil }
             ?: tidligerePerioder?.minOfOrNull { it.periodeTil }
             ?: LocalDate.of(behandlingsresultat.hentÅrsavregning().aar, 12, 31)
     }

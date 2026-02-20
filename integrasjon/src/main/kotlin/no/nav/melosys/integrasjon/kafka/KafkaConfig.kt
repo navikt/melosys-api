@@ -130,16 +130,15 @@ class KafkaConfig(
 
         containerProperties.ackMode = ContainerProperties.AckMode.RECORD
 
-        @Suppress("UNCHECKED_CAST")
-        val props = (kafkaProperties.buildConsumerProperties() + consumerConfig(groupId) + securityConfig() + mapOf(
+        val props = kafkaProperties.buildConsumerProperties() + consumerConfig(groupId) + securityConfig() + mapOf(
             ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to ErrorHandlingDeserializer::class.java,
             ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS to LoggingDeserializer::class.java
-        )) as Map<String, Any>
+        )
 
         setConsumerFactory(DefaultKafkaConsumerFactory(
             props,
             StringDeserializer(),
-            LoggingDeserializer(objectMapper, T::class.java) as Deserializer<T>
+            LoggingDeserializer(objectMapper, T::class.java)
         ))
     }
 

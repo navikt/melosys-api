@@ -16,7 +16,7 @@ public final class IsoLandkodeKonverterer {
     static {
         Arrays.stream(Locale.getISOCountries())
             .forEach(c -> {
-                ISO2_ISO3.put(c, new Locale("", c).getISO3Country());
+                ISO2_ISO3.put(c, Locale.of("", c).getISO3Country());
             });
         ISO2_ISO3.put("XU", "XUK");
         ISO2_ISO3.put("XK", "XXK");

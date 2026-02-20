@@ -224,5 +224,5 @@ class MelosysHendelseTest {
             .properties.shouldBe(mapOf("pnr" to "12345"))
     }
 
-    private fun Any.toJson(): String = objectMapper.valueToTree<JsonNode?>(this).toPrettyString()
+    private fun Any.toJson(): String = objectMapper.valueToTree<JsonNode>(this).toPrettyString()
 }

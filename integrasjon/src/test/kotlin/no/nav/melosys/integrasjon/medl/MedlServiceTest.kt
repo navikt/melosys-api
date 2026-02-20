@@ -470,12 +470,12 @@ internal class MedlServiceTest {
         }
 
     private fun hentMedlemskapsunntakListe() = objectMapper.readValue(
-        javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodelisteResponse.json"),
+        javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodelisteResponse.json")!!.openStream(),
         Array<MedlemskapsunntakForGet>::class.java
     ).toList()
 
     private fun hentMedlemskapsunntak() = objectMapper.readValue(
-        javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodeResponse.json"),
+        javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodeResponse.json")!!.openStream(),
         MedlemskapsunntakForGet::class.java
     )
 

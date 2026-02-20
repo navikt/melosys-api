@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdInterceptor;
@@ -32,13 +33,14 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Bean
     public ObjectMapper objectMapper(@Lazy KodeverkService kodeverkService) {
-        return new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .registerModule(new KotlinModule.Builder().build())
-            .registerModule(new MelosysModule(kodeverkService))
+        return JsonMapper.builder()
+            .addModule(new JavaTimeModule())
+            .addModule(new KotlinModule.Builder().build())
+            .addModule(new MelosysModule(kodeverkService))
             .enable(MapperFeature.DEFAULT_VIEW_INCLUSION)
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .build();
     }
 
     @Override
