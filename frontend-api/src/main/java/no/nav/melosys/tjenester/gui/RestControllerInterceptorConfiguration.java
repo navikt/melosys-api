@@ -14,7 +14,8 @@ public class RestControllerInterceptorConfiguration implements WebMvcConfigurer 
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(getRestControllerInterceptor());
+        registry.addInterceptor(getRestControllerInterceptor())
+            .excludePathPatterns("/internal/**");
     }
 
     @Bean

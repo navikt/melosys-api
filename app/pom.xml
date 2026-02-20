@@ -10,9 +10,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>app</artifactId>
-  <properties>
-    <jakarta-servlet.version>5.0.0</jakarta-servlet.version>
-  </properties>
 
     <dependencies>
         <dependency>

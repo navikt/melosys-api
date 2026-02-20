@@ -1,7 +1,5 @@
 package no.nav.melosys.tjenester.gui.config;
 
-import java.util.List;
-
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,12 +9,12 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdInterceptor;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.config.jackson.MelosysModule;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.filter.UrlHandlerFilter;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
@@ -26,27 +24,21 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
     private static final String API_PREFIX = "/api";
     private static final String FRONTEND_API_TJENESTER = "no.nav.melosys.tjenester.gui";
-    private final KodeverkService kodeverkService;
     private final ApiKeyInterceptor apiKeyInterceptor;
 
-    public WebConfig(KodeverkService kodeverkService,
-                     ApiKeyInterceptor apiKeyInterceptor) {
-        this.kodeverkService = kodeverkService;
+    public WebConfig(ApiKeyInterceptor apiKeyInterceptor) {
         this.apiKeyInterceptor = apiKeyInterceptor;
     }
 
-    @Override
-    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.removeIf(MappingJackson2HttpMessageConverter.class::isInstance);
-        converters.add(new MappingJackson2HttpMessageConverter(apiObjectMapper()));
-    }
-
-    private ObjectMapper apiObjectMapper() {
-        return Jackson2ObjectMapperBuilder.json()
-            .modules(new JavaTimeModule(), new KotlinModule.Builder().build(), new MelosysModule(kodeverkService))
-            .featuresToEnable(MapperFeature.DEFAULT_VIEW_INCLUSION)
-            .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .build();
+    @Bean
+    public ObjectMapper objectMapper(@Lazy KodeverkService kodeverkService) {
+        return new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .registerModule(new KotlinModule.Builder().build())
+            .registerModule(new MelosysModule(kodeverkService))
+            .enable(MapperFeature.DEFAULT_VIEW_INCLUSION)
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
     @Override
@@ -70,5 +62,10 @@ public class WebConfig implements WebMvcConfigurer {
 
         // test dette kun for ftrl admin så kan vi bytte fjerne AdminController for resten om det funker fint
         registry.addInterceptor(apiKeyInterceptor).addPathPatterns("/admin/**");
+    }
+
+    @Bean
+    public UrlHandlerFilter urlHandlerFilter() {
+        return UrlHandlerFilter.trailingSlashHandler("/**").wrapRequest().build();
     }
 }
