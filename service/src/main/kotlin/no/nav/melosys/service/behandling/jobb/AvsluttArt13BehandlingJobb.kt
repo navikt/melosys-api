@@ -5,6 +5,7 @@ import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.util.*
@@ -14,8 +15,13 @@ private val log = KotlinLogging.logger { }
 @Component
 class AvsluttArt13BehandlingJobb(
     private val behandlingService: BehandlingService,
-    private val avsluttArt13BehandlingService: AvsluttArt13BehandlingService
+    private val avsluttArt13BehandlingService: AvsluttArt13BehandlingService,
+    @Value("\${melosys.jobb.avslutt-art13.cron}") private val cron: String
 ) {
+
+    init {
+        log.info { "AvsluttArt13BehandlingJobb konfigurert med cron='$cron'" }
+    }
 
     @Scheduled(cron = "\${melosys.jobb.avslutt-art13.cron}")
     @SchedulerLock(name = "avsluttBehandlingArt13Jobb", lockAtLeastFor = "10m")
