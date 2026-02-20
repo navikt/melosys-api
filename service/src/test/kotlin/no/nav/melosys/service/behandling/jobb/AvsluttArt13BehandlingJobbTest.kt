@@ -23,7 +23,7 @@ class AvsluttArt13BehandlingJobbTest {
 
     @BeforeEach
     fun setup() {
-        avsluttArt13BehandlingJobb = AvsluttArt13BehandlingJobb(behandlingService, avsluttArt13BehandlingService)
+        avsluttArt13BehandlingJobb = AvsluttArt13BehandlingJobb(behandlingService, avsluttArt13BehandlingService, "0 0 0 * * *")
     }
 
     @Test
