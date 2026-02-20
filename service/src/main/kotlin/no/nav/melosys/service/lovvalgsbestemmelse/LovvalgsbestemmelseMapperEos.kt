@@ -25,7 +25,7 @@ class LovvalgsbestemmelseMapperEos {
                     *Tilleggsbestemmelser_883_2004.values(),
                     *Overgangsregelbestemmelser.values()
                 ).filterNot { lovvalgBestemmelse ->
-                    arrayOf(
+                    arrayOf<LovvalgBestemmelse>(
                         Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1,
                         Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET,
                         Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8,
