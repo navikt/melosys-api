@@ -18,7 +18,7 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
@@ -123,7 +123,7 @@ class KafkaConfig(
     fun melosysPoppHendelseKafkaTemplate(producerFactory: ProducerFactory<String, PensjonsopptjeningHendelse>): KafkaTemplate<String, PensjonsopptjeningHendelse> =
         KafkaTemplate(producerFactory)
 
-    private inline fun <reified T> kafkaListenerContainerFactoryStopOnError(
+    private inline fun <reified T : Any> kafkaListenerContainerFactoryStopOnError(
         objectMapper: ObjectMapper,
         kafkaProperties: KafkaProperties,
         groupId: String
@@ -132,16 +132,17 @@ class KafkaConfig(
 
         containerProperties.ackMode = ContainerProperties.AckMode.RECORD
 
-        val props = kafkaProperties.buildConsumerProperties(null) + consumerConfig(groupId) + securityConfig() + mapOf(
+        @Suppress("UNCHECKED_CAST")
+        val props = (kafkaProperties.buildConsumerProperties() + consumerConfig(groupId) + securityConfig() + mapOf(
             ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to ErrorHandlingDeserializer::class.java,
             ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS to LoggingDeserializer::class.java
-        )
+        )) as Map<String, Any>
 
-        consumerFactory = DefaultKafkaConsumerFactory(
+        setConsumerFactory(DefaultKafkaConsumerFactory(
             props,
             StringDeserializer(),
             LoggingDeserializer(objectMapper, T::class.java) as Deserializer<T>
-        )
+        ))
     }
 
     private fun consumerConfig(groupId: String) = mapOf<String, Any>(

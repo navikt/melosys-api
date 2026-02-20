@@ -12,6 +12,10 @@
     <artifactId>melosys-statistikk</artifactId>
     <dependencies>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-jackson2</artifactId>
+        </dependency>
+        <dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-service</artifactId>
         </dependency>
@@ -19,6 +23,12 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
         </dependency>
+    <dependency>
+      <groupId>com.sun.xml.ws</groupId>
+      <artifactId>jaxws-rt</artifactId>
+      <version>2.3.7</version>
+      <scope>provided</scope>
+    </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

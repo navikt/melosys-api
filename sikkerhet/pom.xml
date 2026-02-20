@@ -10,6 +10,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>sikkerhet</artifactId>
+  <properties>
+    <jakarta-servlet.version>5.0.0</jakarta-servlet.version>
+  </properties>
 
     <dependencies>
         <dependency>
@@ -23,7 +26,8 @@
         <!-- OIDC login -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
+      <version>4.0.3</version>
         </dependency>
         <dependency>
             <groupId>no.nav.security</groupId>
@@ -162,13 +166,14 @@
             <dependencies>
                 <dependency>
                     <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-web</artifactId>
+                    <artifactId>spring-boot-starter-webmvc</artifactId>
                     <exclusions>
                         <exclusion>
                             <groupId>org.springframework.boot</groupId>
                             <artifactId>spring-boot-starter-tomcat</artifactId>
                         </exclusion>
                     </exclusions>
+          <version>4.0.3</version>
                 </dependency>
 
                 <dependency>

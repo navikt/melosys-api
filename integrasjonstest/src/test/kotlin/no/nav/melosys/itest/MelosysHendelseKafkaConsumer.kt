@@ -4,7 +4,7 @@ import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
 import no.nav.melosys.integrasjon.kafka.KafkaConsumerContainerFactory
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.kafka.annotation.KafkaListener
@@ -40,11 +40,11 @@ class MelosysHendelseKafkaConsumer {
             kafkaProperties: KafkaProperties
         ): KafkaConsumerContainerFactory<MelosysHendelse> =
             ConcurrentKafkaListenerContainerFactory<String, MelosysHendelse>().apply {
-                consumerFactory = DefaultKafkaConsumerFactory(
-                    kafkaProperties.buildConsumerProperties(null),
+                setConsumerFactory(DefaultKafkaConsumerFactory(
+                    kafkaProperties.buildConsumerProperties(),
                     StringDeserializer(),
                     JsonDeserializer(MelosysHendelse::class.java, false)
-                )
+                ))
             }
     }
 }

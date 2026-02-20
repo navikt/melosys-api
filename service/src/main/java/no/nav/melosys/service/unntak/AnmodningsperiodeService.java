@@ -61,8 +61,7 @@ public class AnmodningsperiodeService {
         return hentAnmodningsperioder(behandlingID).stream()
             .map(Anmodningsperiode::getId)
             .map(this::finnAnmodningsperiodeSvar)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
+            .flatMap(Optional::stream)
             .findFirst()
             .orElseThrow(() -> new FunksjonellException("Finner ingen AnmodningsperiodeSvar for behandling " + behandlingID));
     }

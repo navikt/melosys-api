@@ -24,11 +24,11 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.http.HttpMessageConvertersAutoConfiguration
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration
-import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.http.converter.autoconfigure.HttpMessageConvertersAutoConfiguration
+import org.springframework.boot.jackson2.autoconfigure.Jackson2AutoConfiguration
+import org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration
+import org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.kafka.core.KafkaTemplate
@@ -49,7 +49,7 @@ import java.util.concurrent.TimeUnit
 )
 @ContextConfiguration(
     classes = [
-        JacksonAutoConfiguration::class,
+        Jackson2AutoConfiguration::class,
         KafkaAutoConfiguration::class,
         HttpMessageConvertersAutoConfiguration::class,
         WebMvcAutoConfiguration::class,

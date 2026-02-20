@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -22,10 +21,5 @@ public class RestControllerInterceptorConfiguration implements WebMvcConfigurer 
     public RestControllerInterceptor getRestControllerInterceptor() {
         logger.info("Registering RestControllerInterceptor");
         return new RestControllerInterceptor();
-    }
-
-    @Override
-    public void configurePathMatch(PathMatchConfigurer configurer) {
-        configurer.setUseTrailingSlashMatch(true);
     }
 }

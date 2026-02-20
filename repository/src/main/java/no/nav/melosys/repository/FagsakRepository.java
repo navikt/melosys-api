@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -24,6 +26,6 @@ public interface FagsakRepository extends CrudRepository<Fagsak, String> {
     @Query("select f from Fagsak f, Aktoer a where a.fagsak = f and a.rolle = :rolle  and a.orgnr = :id")
     List<Fagsak> findByRolleAndOrgnr(@Param("rolle") Aktoersroller rolle, @Param("id") String orgnr);
 
-    @Query(value = "SELECT saksnummer_seq.nextval FROM dual", nativeQuery = true)
+    @NativeQuery("SELECT saksnummer_seq.nextval FROM dual")
     Long hentNesteSekvensVerdi();
 }

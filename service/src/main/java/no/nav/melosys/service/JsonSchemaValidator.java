@@ -129,7 +129,7 @@ public class JsonSchemaValidator {
         logger.error(FEILMELDING, (currentUri != null ? currentUri.toString() : schema.getSchemaPath()));
         validationResult.getValidationMessages().forEach(
             validationMessage -> logger.error(formaterMelding(validationMessage, json)));
-        throw new ValidationException(String.format("%s: %d schema violations found",
+        throw new ValidationException("%s: %d schema violations found".formatted(
             schema.getCurrentUri(), validationResult.getValidationMessages().size()));
     }
 
