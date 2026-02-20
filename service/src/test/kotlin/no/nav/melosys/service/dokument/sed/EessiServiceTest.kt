@@ -1085,6 +1085,40 @@ class EessiServiceTest {
         sedDataDtoSlot.captured.a008Formaal.shouldBeNull()
     }
 
+    @Test
+    fun `opprettOgSendSed med toggle CDM_4_4 på setter erFjernarbeidTWFA på sedData`() {
+        unleash.enable(ToggleName.MELOSYS_CDM_4_4)
+        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        mockBehandling()
+        mockBehandlingsresultat()
+
+        val sedDataDtoSlot = slot<SedDataDto>()
+        every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
+
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, emptyList(), null, null, true)
+
+        sedDataDtoSlot.captured.erFjernarbeidTWFA shouldBe true
+    }
+
+    @Test
+    fun `opprettOgSendSed med toggle CDM_4_4 av setter ikke erFjernarbeidTWFA på sedData`() {
+        unleash.disable(ToggleName.MELOSYS_CDM_4_4)
+        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        mockBehandling()
+        mockBehandlingsresultat()
+
+        val sedDataDtoSlot = slot<SedDataDto>()
+        every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
+
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, emptyList(), null, null, true)
+
+        sedDataDtoSlot.captured.erFjernarbeidTWFA.shouldBeNull()
+    }
+
     private fun lagJournalpost(dokumenter: List<ArkivDokument>) = Journalpost("jpID").apply {
         hoveddokument = dokumenter[0]
         vedleggListe.clear()
