@@ -119,17 +119,22 @@ class A1Mapper {
             Optional.ofNullable(kontaktadresse.hentEllerLagStrukturertAdresse()) : Optional.of(oppholdsadresse.getStrukturertAdresse());
     }
 
-    private static String mapStatsborgerskap(Set<Land> statsborgerskap) {
+    private String mapStatsborgerskap(Set<Land> statsborgerskap) {
         if (statsborgerskap.contains(Land.av(Land.STATSLØS))) {
             return STATSLØS_TEKST;
         }
 
-        List<String> gyldigeStatsborgerskap = statsborgerskap.stream()
+        var stream = statsborgerskap.stream()
             .sorted(Comparator.comparing(Land::getKode))
-            .filter( land -> !land.equals(Land.av(Land.UNKNOWN)))
-            .filter( land -> !land.equals(Land.av(Land.KOSOVO)))
+            .filter(land -> !land.equals(Land.av(Land.UNKNOWN)));
+
+        if (!brevData.getErCdm44()) {
+            stream = stream.filter(land -> !land.equals(Land.av(Land.KOSOVO)));
+        }
+
+        List<String> gyldigeStatsborgerskap = stream
             .map(land -> IsoLandkodeKonverterer.tilIso2(land.getKode())).toList();
-        if(gyldigeStatsborgerskap.isEmpty()) {
+        if (gyldigeStatsborgerskap.isEmpty()) {
             return UNKNOWN_TEKST;
         }
 
