@@ -73,7 +73,7 @@ class SedPdfDataTest {
     }
 
     @Test
-    fun `utfyllSedDataDto setter erFjernarbeidTWFA naar satt`() {
+    fun `utfyllSedDataDto setter erFjernarbeidTWFA når satt`() {
         val sedPdfData = SedPdfData().apply {
             erFjernarbeidTWFA = true
         }
@@ -85,7 +85,7 @@ class SedPdfDataTest {
     }
 
     @Test
-    fun `utfyllSedDataDto setter ikke erFjernarbeidTWFA naar ikke satt`() {
+    fun `utfyllSedDataDto setter ikke erFjernarbeidTWFA når ikke satt`() {
         val sedPdfData = SedPdfData()
         val sedDataDto = SedDataDto()
 
@@ -95,7 +95,7 @@ class SedPdfDataTest {
     }
 
     @Test
-    fun `utfyllSedDataDto setter erFjernarbeidTWFA til false naar eksplisitt false`() {
+    fun `utfyllSedDataDto setter erFjernarbeidTWFA til false når eksplisitt false`() {
         val sedPdfData = SedPdfData().apply {
             erFjernarbeidTWFA = false
         }
@@ -107,7 +107,7 @@ class SedPdfDataTest {
     }
 
     @Test
-    fun `utfyllSedDataDto setter ikke erFjernarbeidTWFA naar CDM 4_4 toggle er av`() {
+    fun `utfyllSedDataDto setter ikke erFjernarbeidTWFA når CDM 4_4 toggle er av`() {
         val unleashMedToggleAv = FakeUnleash()
         val sedPdfData = SedPdfData().apply {
             erFjernarbeidTWFA = true
