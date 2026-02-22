@@ -134,7 +134,7 @@ class A1Mapper {
 
         List<String> gyldigeStatsborgerskap = stream
             .map(land -> IsoLandkodeKonverterer.tilIso2(land.getKode())).toList();
-        if(gyldigeStatsborgerskap.isEmpty()) {
+        if (gyldigeStatsborgerskap.isEmpty()) {
             return UNKNOWN_TEKST;
         }
 
