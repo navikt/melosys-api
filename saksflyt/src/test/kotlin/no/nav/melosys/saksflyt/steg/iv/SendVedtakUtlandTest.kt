@@ -112,7 +112,7 @@ class SendVedtakUtlandTest {
         sendVedtakUtland.utfør(prosessinstans)
 
 
-        verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_04), eq(emptySet()), null, null, false) }
+        verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_04), eq(emptySet()), null, null, null) }
     }
 
     @Test
@@ -153,7 +153,7 @@ class SendVedtakUtlandTest {
         sendVedtakUtland.utfør(prosessinstans)
 
 
-        verify(exactly = 0) { eessiService.opprettOgSendSed(any(), any(), any(), any(), any(), any(), false) }
+        verify(exactly = 0) { eessiService.opprettOgSendSed(any(), any(), any(), any(), any(), any(), any()) }
     }
 
     @Test
@@ -176,7 +176,7 @@ class SendVedtakUtlandTest {
         sendVedtakUtland.utfør(prosessinstans)
 
 
-        verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_05), eq(emptySet()), null, null, false) }
+        verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_05), eq(emptySet()), null, null, null) }
     }
 
     @Test
@@ -189,7 +189,7 @@ class SendVedtakUtlandTest {
         sendVedtakUtland.utfør(prosessinstans)
 
 
-        verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), any(), any(), null, null, false) }
+        verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), any(), any(), null, null, null) }
     }
 
     @Test

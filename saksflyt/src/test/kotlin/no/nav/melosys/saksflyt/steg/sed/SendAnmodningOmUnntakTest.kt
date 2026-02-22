@@ -80,7 +80,7 @@ class SendAnmodningOmUnntakTest {
                 dokumentReferanser,
                 null,
                 null,
-                false
+                null
             )
         }
         verify { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(BEHANDLING_ID) }
@@ -108,7 +108,7 @@ class SendAnmodningOmUnntakTest {
                 any(),
                 null,
                 null,
-                false
+                null
             )
         }
         verify { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(BEHANDLING_ID) }
