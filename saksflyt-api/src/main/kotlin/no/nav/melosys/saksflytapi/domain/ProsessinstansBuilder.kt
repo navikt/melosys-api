@@ -56,8 +56,8 @@ class ProsessinstansBuilder(
         if (StringUtils.isNotEmpty(a008Formaal)) {
             setData(ProsessDataKey.A008_FORMAAL, a008Formaal)
         }
-        if (erFjernarbeidTWFA == true) {
-            setData(ProsessDataKey.ER_FJERNARBEID_TWFA, true)
+        if (erFjernarbeidTWFA != null) {
+            setData(ProsessDataKey.ER_FJERNARBEID_TWFA, erFjernarbeidTWFA)
         }
         if (!CollectionUtils.isEmpty(eessiMottakere)) {
             setData(ProsessDataKey.EESSI_MOTTAKERE, eessiMottakere)

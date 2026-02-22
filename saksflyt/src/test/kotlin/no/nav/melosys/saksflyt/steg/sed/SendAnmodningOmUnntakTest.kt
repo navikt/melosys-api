@@ -115,6 +115,54 @@ class SendAnmodningOmUnntakTest {
     }
 
     @Test
+    fun `utfør med erFjernarbeidTWFA true skal sende sed med TWFA-flagg`() {
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
+            medData(ProsessDataKey.ER_FJERNARBEID_TWFA, true)
+        }
+        val behandlingsresultat = lagBehandlingsresultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
+        sendAnmodningOmUnntak.utfør(prosessinstans)
+
+        verify {
+            eessiService.opprettOgSendSed(
+                BEHANDLING_ID,
+                listOf(MOTTAKER_INSTITSJON),
+                BucType.LA_BUC_01,
+                any(),
+                null,
+                null,
+                true
+            )
+        }
+    }
+
+    @Test
+    fun `utfør med erFjernarbeidTWFA false skal sende sed med TWFA false`() {
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
+            medData(ProsessDataKey.ER_FJERNARBEID_TWFA, false)
+        }
+        val behandlingsresultat = lagBehandlingsresultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
+        sendAnmodningOmUnntak.utfør(prosessinstans)
+
+        verify {
+            eessiService.opprettOgSendSed(
+                BEHANDLING_ID,
+                listOf(MOTTAKER_INSTITSJON),
+                BucType.LA_BUC_01,
+                any(),
+                null,
+                null,
+                false
+            )
+        }
+    }
+
+    @Test
     fun `utfør ingen institusjon eessi klar skal sende brev`() {
         val prosessinstans = lagProsessinstans {
             medData(ProsessDataKey.YTTERLIGERE_INFO_SED, "Mer info")

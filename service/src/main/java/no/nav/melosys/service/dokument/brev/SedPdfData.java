@@ -81,7 +81,9 @@ public class SedPdfData {
         sedDataDto.setYtterligereInformasjon(fritekst);
         if (unleash.isEnabled(ToggleName.MELOSYS_CDM_4_4)) {
             sedDataDto.setA008Formaal(a008Formaal);
-            sedDataDto.setErFjernarbeidTWFA(BooleanUtils.isTrue(erFjernarbeidTWFA));
+            if (erFjernarbeidTWFA != null) {
+                sedDataDto.setErFjernarbeidTWFA(erFjernarbeidTWFA);
+            }
         }
     }
 }

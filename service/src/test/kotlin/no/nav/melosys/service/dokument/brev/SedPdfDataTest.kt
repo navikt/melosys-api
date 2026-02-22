@@ -85,8 +85,20 @@ class SedPdfDataTest {
     }
 
     @Test
-    fun `utfyllSedDataDto setter erFjernarbeidTWFA til false naar ikke satt`() {
+    fun `utfyllSedDataDto setter ikke erFjernarbeidTWFA naar ikke satt`() {
         val sedPdfData = SedPdfData()
+        val sedDataDto = SedDataDto()
+
+        sedPdfData.utfyllSedDataDto(unleash, sedDataDto)
+
+        sedDataDto.erFjernarbeidTWFA.shouldBeNull()
+    }
+
+    @Test
+    fun `utfyllSedDataDto setter erFjernarbeidTWFA til false naar eksplisitt false`() {
+        val sedPdfData = SedPdfData().apply {
+            erFjernarbeidTWFA = false
+        }
         val sedDataDto = SedDataDto()
 
         sedPdfData.utfyllSedDataDto(unleash, sedDataDto)

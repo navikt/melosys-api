@@ -134,6 +134,52 @@ class ProsessinstansServiceTest {
     }
 
     @Test
+    fun `opprett prosessinstans for anmodning om unntak med erFjernarbeidTWFA false skal lagre false`() {
+        val behandling = Behandling.forTest { }
+        val mottakerInstitusjon = "SE:123"
+        val dokumentReferanse = DokumentReferanse("jpID", "dokID")
+
+
+        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(
+            behandling,
+            setOf(mottakerInstitusjon),
+            setOf(dokumentReferanse),
+            "FRITEKST_SED",
+            "",
+            false
+        )
+
+
+        val lagretInstans = piListCaptor.last()
+        lagretInstans.run {
+            getData(ProsessDataKey.ER_FJERNARBEID_TWFA) shouldBe "false"
+        }
+    }
+
+    @Test
+    fun `opprett prosessinstans for anmodning om unntak med erFjernarbeidTWFA null skal ikke lagre feltet`() {
+        val behandling = Behandling.forTest { }
+        val mottakerInstitusjon = "SE:123"
+        val dokumentReferanse = DokumentReferanse("jpID", "dokID")
+
+
+        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(
+            behandling,
+            setOf(mottakerInstitusjon),
+            setOf(dokumentReferanse),
+            "FRITEKST_SED",
+            "",
+            null
+        )
+
+
+        val lagretInstans = piListCaptor.last()
+        lagretInstans.run {
+            finnData<String>(ProsessDataKey.ER_FJERNARBEID_TWFA) shouldBe null
+        }
+    }
+
+    @Test
     fun `opprett prosessinstans for iverksett vedtak skal lagre behandling og resultattype`() {
         val behandling = Behandling.forTest { }
         val resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
