@@ -71,4 +71,51 @@ class SedPdfDataTest {
 
         sedDataDto.utpekingAvvis!!.vilSendeAnmodningOmMerInformasjon shouldBe false
     }
+
+    @Test
+    fun `utfyllSedDataDto setter erFjernarbeidTWFA når satt`() {
+        val sedPdfData = SedPdfData().apply {
+            erFjernarbeidTWFA = true
+        }
+        val sedDataDto = SedDataDto()
+
+        sedPdfData.utfyllSedDataDto(unleash, sedDataDto)
+
+        sedDataDto.erFjernarbeidTWFA shouldBe true
+    }
+
+    @Test
+    fun `utfyllSedDataDto setter ikke erFjernarbeidTWFA når ikke satt`() {
+        val sedPdfData = SedPdfData()
+        val sedDataDto = SedDataDto()
+
+        sedPdfData.utfyllSedDataDto(unleash, sedDataDto)
+
+        sedDataDto.erFjernarbeidTWFA.shouldBeNull()
+    }
+
+    @Test
+    fun `utfyllSedDataDto setter erFjernarbeidTWFA til false når eksplisitt false`() {
+        val sedPdfData = SedPdfData().apply {
+            erFjernarbeidTWFA = false
+        }
+        val sedDataDto = SedDataDto()
+
+        sedPdfData.utfyllSedDataDto(unleash, sedDataDto)
+
+        sedDataDto.erFjernarbeidTWFA shouldBe false
+    }
+
+    @Test
+    fun `utfyllSedDataDto setter ikke erFjernarbeidTWFA når CDM 4_4 toggle er av`() {
+        val unleashMedToggleAv = FakeUnleash()
+        val sedPdfData = SedPdfData().apply {
+            erFjernarbeidTWFA = true
+        }
+        val sedDataDto = SedDataDto()
+
+        sedPdfData.utfyllSedDataDto(unleashMedToggleAv, sedDataDto)
+
+        sedDataDto.erFjernarbeidTWFA.shouldBeNull()
+    }
 }

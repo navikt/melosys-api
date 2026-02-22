@@ -319,7 +319,8 @@ public class ProsessinstansService {
     @Transactional
     public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, Set<String> mottakerInstitusjon,
                                                        Set<DokumentReferanse> vedleggReferanserTilSed,
-                                                       String ytterligereInformasjonSed, String begrunnelseFritekst) {
+                                                       String ytterligereInformasjonSed, String begrunnelseFritekst,
+                                                       Boolean erFjernarbeidTWFA) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.ANMODNING_OM_UNNTAK)
             .medBehandling(behandling)
@@ -327,6 +328,7 @@ public class ProsessinstansService {
             .medVedleggTilSed(vedleggReferanserTilSed)
             .medYtterligereinformasjonSed(ytterligereInformasjonSed)
             .medBegrunnelseFritekst(begrunnelseFritekst)
+            .medErFjernarbeidTWFA(erFjernarbeidTWFA)
             .build();
 
         lagre(prosessinstans);

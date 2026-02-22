@@ -10,6 +10,7 @@ public class AnmodningUnntakDto {
     private String fritekstSed;
     private String begrunnelseFritekst;
     private Collection<VedleggDto> vedlegg = new ArrayList<>();
+    private Boolean erFjernarbeidTWFA;
 
     public String getBegrunnelseFritekst() {
         return begrunnelseFritekst;
@@ -40,5 +41,13 @@ public class AnmodningUnntakDto {
 
     public void setVedlegg(Collection<VedleggDto> vedlegg) {
         this.vedlegg = vedlegg;
+    }
+
+    public Boolean getErFjernarbeidTWFA() {
+        return erFjernarbeidTWFA;
+    }
+
+    public void setErFjernarbeidTWFA(Boolean erFjernarbeidTWFA) {
+        this.erFjernarbeidTWFA = erFjernarbeidTWFA;
     }
 }
