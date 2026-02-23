@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.filter.UrlHandlerFilter;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
@@ -66,8 +65,4 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(apiKeyInterceptor).addPathPatterns("/admin/**");
     }
 
-    @Bean
-    public UrlHandlerFilter urlHandlerFilter() {
-        return UrlHandlerFilter.trailingSlashHandler("/**").wrapRequest().build();
-    }
 }
