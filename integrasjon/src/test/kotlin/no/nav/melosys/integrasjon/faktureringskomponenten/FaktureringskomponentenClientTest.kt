@@ -169,7 +169,7 @@ class FaktureringskomponentenClientTest(
         )
 
         val nyFakturaserieResponseDto =
-            faktureringskomponentenConsumer.kansellerFakturaserie(referanse, "", listOf("ÅRSAVREGNING-2024-ABC123", "ÅRSAVREGNING-2023-XYZ789"))
+            faktureringskomponentenClient.kansellerFakturaserie(referanse, "", listOf("ÅRSAVREGNING-2024-ABC123", "ÅRSAVREGNING-2023-XYZ789"))
         nyFakturaserieResponseDto.fakturaserieReferanse.shouldBe("5689")
     }
 

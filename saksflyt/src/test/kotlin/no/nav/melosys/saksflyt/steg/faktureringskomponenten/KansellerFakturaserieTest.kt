@@ -116,7 +116,7 @@ class KansellerFakturaserieTest {
         every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns behandlingsresultatOpprinneligBehandling
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingIdÅrsavregning) } returns behandlingsresultatÅrsavregning
         every {
-            faktureringskomponentenConsumer.kansellerFakturaserie(
+            faktureringskomponentenClient.kansellerFakturaserie(
                 fakturaReferanse,
                 SAKSBEHANDLER_IDENT,
                 listOf(fakturaReferanseÅrsavregning)
@@ -134,7 +134,7 @@ class KansellerFakturaserieTest {
             )
         }
 
-        verify { faktureringskomponentenConsumer.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT, listOf(fakturaReferanseÅrsavregning)) }
+        verify { faktureringskomponentenClient.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT, listOf(fakturaReferanseÅrsavregning)) }
     }
 
 
