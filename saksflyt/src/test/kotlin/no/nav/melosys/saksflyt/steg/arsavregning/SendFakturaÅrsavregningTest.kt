@@ -19,7 +19,7 @@ import no.nav.melosys.domain.medlemskapsperiode
 import no.nav.melosys.domain.tidligereBehandlingsresultat
 import no.nav.melosys.domain.vedtakMetadata
 import no.nav.melosys.domain.årsavregning
-import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
+import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenClient
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaDto
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
@@ -51,7 +51,7 @@ class SendFakturaÅrsavregningTest {
     private lateinit var pdlService: PersondataService
 
     @MockK
-    private lateinit var faktureringskomponentenConsumer: FaktureringskomponentenConsumer
+    private lateinit var faktureringskomponentenClient: FaktureringskomponentenClient
 
     private lateinit var sendFakturaÅrsavregning: SendFakturaÅrsavregning
 
@@ -60,7 +60,7 @@ class SendFakturaÅrsavregningTest {
         sendFakturaÅrsavregning = SendFakturaÅrsavregning(
             behandlingService,
             behandlingsresultatService,
-            faktureringskomponentenConsumer,
+            faktureringskomponentenClient,
             pdlService
         )
     }
@@ -83,7 +83,7 @@ class SendFakturaÅrsavregningTest {
 
         sendFakturaÅrsavregning.utfør(prosessinstans)
 
-        verify(exactly = 0) { faktureringskomponentenConsumer.lagFaktura(any(), any()) }
+        verify(exactly = 0) { faktureringskomponentenClient.lagFaktura(any(), any()) }
     }
 
     @Test
@@ -126,7 +126,7 @@ class SendFakturaÅrsavregningTest {
 
         val fakturaDtoSlot = slot<FakturaDto>()
         every {
-            faktureringskomponentenConsumer.lagFaktura(
+            faktureringskomponentenClient.lagFaktura(
                 capture(fakturaDtoSlot),
                 SAKSBEHANDLER
             )
@@ -192,7 +192,7 @@ class SendFakturaÅrsavregningTest {
 
         val fakturaDtoSlot = slot<FakturaDto>()
         every {
-            faktureringskomponentenConsumer.lagFaktura(
+            faktureringskomponentenClient.lagFaktura(
                 capture(fakturaDtoSlot),
                 SAKSBEHANDLER
             )
@@ -242,7 +242,7 @@ class SendFakturaÅrsavregningTest {
 
         val fakturaDtoSlot = slot<FakturaDto>()
         every {
-            faktureringskomponentenConsumer.lagFaktura(
+            faktureringskomponentenClient.lagFaktura(
                 capture(fakturaDtoSlot),
                 SAKSBEHANDLER
             )

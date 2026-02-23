@@ -16,13 +16,13 @@ import java.time.YearMonth
 
 class InntektServiceTest {
 
-    private val inntektRestConsumer = mockk<InntektRestConsumer>()
+    private val inntektClient = mockk<InntektClient>()
     private lateinit var inntektService: InntektService
 
     @BeforeEach
     fun setup() {
         val aktoer = Aktoer(PERSON_ID, AktoerType.AKTOER_ID)
-        every { inntektRestConsumer.hentInntektListe(any()) } returns InntektResponse(
+        every { inntektClient.hentInntektListe(any()) } returns InntektResponse(
             listOf(
                 InntektResponse.ArbeidsInntektMaaned(
                     aarMaaned = YearMonth.of(2022, 1),
@@ -33,7 +33,7 @@ class InntektServiceTest {
             aktoer
         )
 
-        inntektService = InntektService(inntektRestConsumer)
+        inntektService = InntektService(inntektClient)
     }
 
     @Test
@@ -57,7 +57,7 @@ class InntektServiceTest {
 
         val dokument = saksopplysning.dokument as InntektDokument
         val slot = slot<InntektRequest>()
-        verify { inntektRestConsumer.hentInntektListe(capture(slot)) }
+        verify { inntektClient.hentInntektListe(capture(slot)) }
         slot.captured.maanedFom.shouldBe(YearMonth.of(2015, 1))
         slot.captured.maanedTom.shouldBe(YearMonth.of(2017, 8))
         dokument.shouldNotBeNull()
@@ -71,7 +71,7 @@ class InntektServiceTest {
                 fom = YearMonth.of(2012, 1),
                 tom = YearMonth.of(2014, 12)
             )
-        verify(exactly = 0) { inntektRestConsumer.hentInntektListe(any()) }
+        verify(exactly = 0) { inntektClient.hentInntektListe(any()) }
 
         saksopplysning.kilder.shouldNotBeEmpty()
         saksopplysning.kilder.iterator().next().mottattDokument.shouldNotBeNull()

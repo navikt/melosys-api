@@ -16,10 +16,10 @@ import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Mottakerroller
-import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.DistribuerJournalpostConsumer
+import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.DistribuerJournalpostClient
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostRequest
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostResponse
-import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer
+import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonClient
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.Dokumentbestillingsinformasjon
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.Organisasjon
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.Person
@@ -44,25 +44,25 @@ class DokSysServiceTest {
     private val REP_FNR = "10987654321"
     private val REP_ORGNR = "87654321"
 
-    private val dokumentproduksjonConsumer = mockk<DokumentproduksjonConsumer>()
-    private val distribuerJournalpostConsumer = mockk<DistribuerJournalpostConsumer>()
+    private val dokumentproduksjonClient = mockk<DokumentproduksjonClient>()
+    private val distribuerJournalpostClient = mockk<DistribuerJournalpostClient>()
 
     private lateinit var dokSysService: DoksysService
 
     @BeforeEach
     fun setUp() {
-        dokSysService = DoksysService(dokumentproduksjonConsumer, distribuerJournalpostConsumer)
+        dokSysService = DoksysService(dokumentproduksjonClient, distribuerJournalpostClient)
     }
 
     @Test
     fun `produser dokumentutkast`() {
         val metadata = lagMetadataForBruker(null)
-        every { dokumentproduksjonConsumer.produserDokumentutkast(any()) } returns ProduserDokumentutkastResponse()
+        every { dokumentproduksjonClient.produserDokumentutkast(any()) } returns ProduserDokumentutkastResponse()
 
         dokSysService.produserDokumentutkast(Dokumentbestilling(metadata, lagBrevData()))
 
         val captor = slot<ProduserDokumentutkastRequest>()
-        verify { dokumentproduksjonConsumer.produserDokumentutkast(capture(captor)) }
+        verify { dokumentproduksjonClient.produserDokumentutkast(capture(captor)) }
         val dokumentutkastRequest = captor.captured
         dokumentutkastRequest.dokumenttypeId shouldBe metadata.dokumenttypeID
     }
@@ -70,14 +70,14 @@ class DokSysServiceTest {
     @Test
     fun `produser ikke-redigerbart dokument for bruker`() {
         val metadata = lagMetadataForBruker(null)
-        every { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
+        every { dokumentproduksjonClient.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
 
 
         dokSysService.produserIkkeredigerbartDokument(Dokumentbestilling(metadata, lagBrevData()))
 
 
         val captor = slot<ProduserIkkeredigerbartDokumentRequest>()
-        verify { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(capture(captor)) }
+        verify { dokumentproduksjonClient.produserIkkeredigerbartDokument(capture(captor)) }
 
         hentDokumentBestillingInfoFraCaptor(captor).run {
             dokumenttypeId shouldBe metadata.dokumenttypeID
@@ -100,14 +100,14 @@ class DokSysServiceTest {
             landkode = "BE"
         }
         val metadata = lagMetadataForBruker(postadresse)
-        every { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
+        every { dokumentproduksjonClient.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
 
 
         dokSysService.produserIkkeredigerbartDokument(Dokumentbestilling(metadata, lagBrevData()))
 
 
         val captor = slot<ProduserIkkeredigerbartDokumentRequest>()
-        verify { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(capture(captor)) }
+        verify { dokumentproduksjonClient.produserIkkeredigerbartDokument(capture(captor)) }
 
         hentDokumentBestillingInfoFraCaptor(captor).run {
             mottaker.isBerik shouldBe false
@@ -126,14 +126,14 @@ class DokSysServiceTest {
     @Test
     fun `produser ikke-redigerbart dokument til arbeidsgiver`() {
         val metadata = lagMetadataMedArbeidsgiver()
-        every { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
+        every { dokumentproduksjonClient.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
 
 
         dokSysService.produserIkkeredigerbartDokument(Dokumentbestilling(metadata, lagBrevData()))
 
 
         val captor = slot<ProduserIkkeredigerbartDokumentRequest>()
-        verify { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(capture(captor)) }
+        verify { dokumentproduksjonClient.produserIkkeredigerbartDokument(capture(captor)) }
 
         hentDokumentBestillingInfoFraCaptor(captor).run {
             mottaker.shouldBeInstanceOf<Organisasjon>()
@@ -144,14 +144,14 @@ class DokSysServiceTest {
     @Test
     fun `produser ikke-redigerbart dokument til fullmektig person`() {
         val metadata = lagMetadataMedFullmektig(Aktoertype.PERSON)
-        every { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
+        every { dokumentproduksjonClient.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
 
 
         dokSysService.produserIkkeredigerbartDokument(Dokumentbestilling(metadata, lagBrevData()))
 
 
         val captor = slot<ProduserIkkeredigerbartDokumentRequest>()
-        verify { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(capture(captor)) }
+        verify { dokumentproduksjonClient.produserIkkeredigerbartDokument(capture(captor)) }
 
         hentDokumentBestillingInfoFraCaptor(captor).run {
             mottaker.isBerik shouldBe true
@@ -163,14 +163,14 @@ class DokSysServiceTest {
     @Test
     fun `produser ikke-redigerbart dokument til fullmektig organisasjon`() {
         val metadata = lagMetadataMedFullmektig(Aktoertype.ORGANISASJON)
-        every { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
+        every { dokumentproduksjonClient.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
 
 
         dokSysService.produserIkkeredigerbartDokument(Dokumentbestilling(metadata, lagBrevData()))
 
 
         val captor = slot<ProduserIkkeredigerbartDokumentRequest>()
-        verify { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(capture(captor)) }
+        verify { dokumentproduksjonClient.produserIkkeredigerbartDokument(capture(captor)) }
 
         hentDokumentBestillingInfoFraCaptor(captor).run {
             mottaker.shouldBeInstanceOf<Organisasjon>()
@@ -181,14 +181,14 @@ class DokSysServiceTest {
     @Test
     fun `produser ikke-redigerbart dokument til utenlandsk myndighet`() {
         val metadata = lagMetadataMedUtenlandskMyndighet()
-        every { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
+        every { dokumentproduksjonClient.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
 
 
         dokSysService.produserIkkeredigerbartDokument(Dokumentbestilling(metadata, lagBrevData()))
 
 
         val captor = slot<ProduserIkkeredigerbartDokumentRequest>()
-        verify { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(capture(captor)) }
+        verify { dokumentproduksjonClient.produserIkkeredigerbartDokument(capture(captor)) }
 
         hentDokumentBestillingInfoFraCaptor(captor).run {
             mottaker.isBerik shouldBe false
@@ -205,14 +205,14 @@ class DokSysServiceTest {
     @Test
     fun `produser ikke-redigerbart dokument til norsk myndighet`() {
         val metadata = lagMetadataMedNorskMyndighet()
-        every { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
+        every { dokumentproduksjonClient.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
 
 
         dokSysService.produserIkkeredigerbartDokument(Dokumentbestilling(metadata, lagBrevData()))
 
 
         val captor = slot<ProduserIkkeredigerbartDokumentRequest>()
-        verify { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(capture(captor)) }
+        verify { dokumentproduksjonClient.produserIkkeredigerbartDokument(capture(captor)) }
 
         hentDokumentBestillingInfoFraCaptor(captor).run {
             mottaker.shouldBeInstanceOf<Organisasjon>()
@@ -230,14 +230,14 @@ class DokSysServiceTest {
             husnummerEtasjeLeilighet = "4B"
             poststed = "QUEBEC STED"
         }
-        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+        every { distribuerJournalpostClient.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
 
 
         dokSysService.distribuerJournalpost("123456", mottakeradresse, Distribusjonstype.VIKTIG)
 
 
         val captor = slot<DistribuerJournalpostRequest>()
-        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+        verify { distribuerJournalpostClient.distribuerJournalpost(capture(captor)) }
 
         captor.captured.run {
             journalpostId shouldBe "123456"
@@ -257,14 +257,14 @@ class DokSysServiceTest {
             husnummerEtasjeLeilighet = "4B"
             poststed = "Oslo"
         }
-        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+        every { distribuerJournalpostClient.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
 
 
         dokSysService.distribuerJournalpost("123456", mottakeradresse, Distribusjonstype.VIKTIG)
 
 
         val captor = slot<DistribuerJournalpostRequest>()
-        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+        verify { distribuerJournalpostClient.distribuerJournalpost(capture(captor)) }
 
         captor.captured.run {
             journalpostId shouldBe "123456"
@@ -283,14 +283,14 @@ class DokSysServiceTest {
             husnummerEtasjeLeilighet = "4B"
             poststed = "Stockholm"
         }
-        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+        every { distribuerJournalpostClient.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
 
 
         dokSysService.distribuerJournalpost("123456", mottakeradresse, Distribusjonstype.VIKTIG)
 
 
         val captor = slot<DistribuerJournalpostRequest>()
-        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+        verify { distribuerJournalpostClient.distribuerJournalpost(capture(captor)) }
 
         captor.captured.run {
             journalpostId shouldBe "123456"
@@ -302,14 +302,14 @@ class DokSysServiceTest {
     @Test
     fun `distribuer journalpost uten adresse`() {
         val journalpostId = "123456"
-        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+        every { distribuerJournalpostClient.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
 
 
         dokSysService.distribuerJournalpost(journalpostId, Distribusjonstype.ANNET)
 
 
         val captor = slot<DistribuerJournalpostRequest>()
-        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+        verify { distribuerJournalpostClient.distribuerJournalpost(capture(captor)) }
 
         captor.captured.run {
             journalpostId shouldBe journalpostId
@@ -326,14 +326,14 @@ class DokSysServiceTest {
             postnummer = "9999"
             landkode = "NO"
         }
-        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+        every { distribuerJournalpostClient.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
 
 
         dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, null, null, Distribusjonstype.VEDTAK)
 
 
         val captor = slot<DistribuerJournalpostRequest>()
-        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+        verify { distribuerJournalpostClient.distribuerJournalpost(capture(captor)) }
 
         captor.captured.run {
             journalpostId shouldBe journalpostId
@@ -352,14 +352,14 @@ class DokSysServiceTest {
             postnummer = "9999"
             landkode = "BE"
         }
-        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+        every { distribuerJournalpostClient.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
 
 
         dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, null, null, Distribusjonstype.VEDTAK)
 
 
         val captor = slot<DistribuerJournalpostRequest>()
-        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+        verify { distribuerJournalpostClient.distribuerJournalpost(capture(captor)) }
 
         captor.captured.run {
             journalpostId shouldBe journalpostId
@@ -381,14 +381,14 @@ class DokSysServiceTest {
         val kontaktopplysning = Kontaktopplysning().apply {
             kontaktNavn = "Fetter Anton"
         }
-        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+        every { distribuerJournalpostClient.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
 
 
         dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, kontaktopplysning, null, Distribusjonstype.VEDTAK)
 
 
         val captor = slot<DistribuerJournalpostRequest>()
-        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+        verify { distribuerJournalpostClient.distribuerJournalpost(capture(captor)) }
 
         captor.captured.run {
             journalpostId shouldBe journalpostId
@@ -411,14 +411,14 @@ class DokSysServiceTest {
         val kontaktopplysning = Kontaktopplysning().apply {
             kontaktNavn = "Fetter Anton"
         }
-        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+        every { distribuerJournalpostClient.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
 
 
         dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, kontaktopplysning, "Kari Kontakt", Distribusjonstype.ANNET)
 
 
         val captor = slot<DistribuerJournalpostRequest>()
-        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+        verify { distribuerJournalpostClient.distribuerJournalpost(capture(captor)) }
 
         captor.captured.run {
             journalpostId shouldBe journalpostId

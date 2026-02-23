@@ -1,0 +1,73 @@
+package no.nav.melosys.integrasjon.faktureringskomponenten
+
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaDto
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaMottakerDto
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
+import no.nav.melosys.integrasjon.felles.JsonRestIntegrasjon
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
+import java.math.BigDecimal
+
+data class NyFakturaserieResponseDto(
+    val fakturaserieReferanse: String,
+)
+
+open class FaktureringskomponentenClient(private val webClient: WebClient) : JsonRestIntegrasjon {
+
+    fun lagFakturaserie(fakturaserieDto: FakturaserieDto, saksbehandlerIdent: String? = null) =
+        webClient.post()
+            .uri("/fakturaserier")
+            .header("Nav-User-Id", saksbehandlerIdent)
+            .bodyValue(fakturaserieDto)
+            .retrieve()
+            .bodyToMono<NyFakturaserieResponseDto>()
+            .block()!!
+
+    fun kansellerFakturaserie(
+        referanse: String,
+        saksbehandlerIdent: String,
+        årsavregningRef: List<String> = emptyList()
+    ) = webClient.post()
+        .uri("/fakturaserier/{referanse}/kanseller", referanse)
+        .header("Nav-User-Id", saksbehandlerIdent)
+        .bodyValue(KanselleringRequestDto(årsavregningRef))
+        .retrieve()
+        .bodyToMono<NyFakturaserieResponseDto>()
+        .block()!!
+
+    data class KanselleringRequestDto(
+        val årsavregningRef: List<String> = emptyList()
+    )
+
+    fun oppdaterFakturaMottaker(referanse: String, fakturaMottakerDto: FakturaMottakerDto, saksbehandlerIdent: String? = null) =
+        webClient.put()
+            .uri("/fakturaserier/{referanse}/mottaker", referanse)
+            .header("Nav-User-Id", saksbehandlerIdent)
+            .bodyValue(fakturaMottakerDto)
+            .retrieve()
+            .bodyToMono<Void>()
+            .block()
+
+    fun hentTotalTrygdeavgiftForPeriode(
+        beregnTotalBeløpDto: BeregnTotalBeløpDto,
+        saksbehandlerIdent: String
+    ): BigDecimal {
+        return webClient.post()
+            .uri("/totalbeloep/beregn")
+            .header("Nav-User-Id", saksbehandlerIdent)
+            .bodyValue(beregnTotalBeløpDto)
+            .retrieve()
+            .bodyToMono<BigDecimal>()
+            .block() ?: throw IllegalStateException("Feil ved beregning av total trygdeavgift")
+    }
+
+    fun lagFaktura(fakturaDto: FakturaDto, saksbehandlerIdent: String) =
+        webClient.post()
+            .uri("/fakturaer")
+            .header("Nav-User-Id", saksbehandlerIdent)
+            .bodyValue(fakturaDto)
+            .retrieve()
+            .bodyToMono<NyFakturaserieResponseDto>()
+            .block()!!
+}

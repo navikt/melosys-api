@@ -25,7 +25,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
-import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
+import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenClient
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringIntervall
@@ -58,7 +58,7 @@ class OpprettFakturaserieTest {
     lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @RelaxedMockK
-    lateinit var faktureringskomponentenConsumer: FaktureringskomponentenConsumer
+    lateinit var faktureringskomponentenClient: FaktureringskomponentenClient
 
     @RelaxedMockK
     lateinit var pdlService: PersondataService
@@ -83,7 +83,7 @@ class OpprettFakturaserieTest {
         opprettFakturaserie = OpprettFakturaserie(
             behandlingService,
             behandlingsresultatService,
-            faktureringskomponentenConsumer,
+            faktureringskomponentenClient,
             pdlService,
             trygdeavgiftService,
             unleash
@@ -142,7 +142,7 @@ class OpprettFakturaserieTest {
 
         opprettFakturaserie.utfør(prosessinstans)
 
-        verify(exactly = 0) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 0) { faktureringskomponentenClient.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
     }
 
     @Test
@@ -201,7 +201,7 @@ class OpprettFakturaserieTest {
         opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 1) { faktureringskomponentenClient.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull().run {
             referanseBruker.shouldContain("Vedtak om medlemskap datert ")
             fakturaserieReferanse.shouldBeNull()
@@ -264,7 +264,7 @@ class OpprettFakturaserieTest {
         opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 1) { faktureringskomponentenClient.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull().run {
             referanseBruker.shouldContain("Vedtak om medlemskap datert ")
             fakturaserieReferanse.shouldBeNull()
@@ -324,7 +324,7 @@ class OpprettFakturaserieTest {
 
         opprettFakturaserie.utfør(prosessinstans)
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 1) { faktureringskomponentenClient.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull().run {
             referanseBruker.shouldContain("Informasjon om trygdeavgift datert ")
             fakturaserieReferanse.shouldBeNull()
@@ -377,7 +377,7 @@ class OpprettFakturaserieTest {
 
         opprettFakturaserie.utfør(prosessinstans)
 
-        verify { faktureringskomponentenConsumer wasNot Called }
+        verify { faktureringskomponentenClient wasNot Called }
     }
 
     @Test
@@ -436,7 +436,7 @@ class OpprettFakturaserieTest {
         opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 1) { faktureringskomponentenClient.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull().run {
             referanseBruker.shouldContain("Vedtak om medlemskap datert ")
             fakturaserieReferanse.shouldBeNull()
@@ -500,7 +500,7 @@ class OpprettFakturaserieTest {
         opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 1) { faktureringskomponentenClient.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull().run {
             referanseBruker.shouldContain("Vedtak om medlemskap datert ")
             fakturaserieReferanse.shouldBeNull()
@@ -575,7 +575,7 @@ class OpprettFakturaserieTest {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandlingsresultat.behandling
         every { pdlService.finnFolkeregisterident(BRUKER_AKTØR_ID) } returns Optional.of(BRUKER_AKTØRID)
         every {
-            faktureringskomponentenConsumer.kansellerFakturaserie(
+            faktureringskomponentenClient.kansellerFakturaserie(
                 FAKTURASERIE_REFERANSE,
                 SAKSBEHANDLER_IDENT,
                 listOf(FAKTURASERIE_REFERANSE_ÅRSAVREGNING)
@@ -589,7 +589,7 @@ class OpprettFakturaserieTest {
 
 
         verify(exactly = 1) {
-            faktureringskomponentenConsumer.kansellerFakturaserie(
+            faktureringskomponentenClient.kansellerFakturaserie(
                 FAKTURASERIE_REFERANSE,
                 SAKSBEHANDLER_IDENT,
                 listOf(FAKTURASERIE_REFERANSE_ÅRSAVREGNING)
@@ -684,7 +684,7 @@ class OpprettFakturaserieTest {
         opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 1) { faktureringskomponentenClient.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.fakturaserieReferanse.shouldBe(FAKTURASERIE_REFERANSE)
         slotFakturaserieDto.captured.perioder.shouldBeEmpty()
@@ -783,7 +783,7 @@ class OpprettFakturaserieTest {
         opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 1) { faktureringskomponentenClient.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.fakturaserieReferanse.shouldBe(FAKTURASERIE_REFERANSE)
         slotFakturaserieDto.captured.perioder.shouldBeEmpty()
@@ -883,7 +883,7 @@ class OpprettFakturaserieTest {
         opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 0) { faktureringskomponentenConsumer.kansellerFakturaserie(eq(FAKTURASERIE_REFERANSE), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 0) { faktureringskomponentenClient.kansellerFakturaserie(eq(FAKTURASERIE_REFERANSE), eq(SAKSBEHANDLER_IDENT)) }
     }
 
     @Test
@@ -988,7 +988,7 @@ class OpprettFakturaserieTest {
         opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 1) { faktureringskomponentenClient.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.fakturaserieReferanse.shouldBe(FAKTURASERIE_REFERANSE)
         slotFakturaserieDto.captured.perioder.apply {
@@ -1061,7 +1061,7 @@ class OpprettFakturaserieTest {
         opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 1) { faktureringskomponentenClient.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.perioder.size.shouldBe(1)
     }
@@ -1117,7 +1117,7 @@ class OpprettFakturaserieTest {
         opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 0) { faktureringskomponentenConsumer.lagFakturaserie(any(), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 0) { faktureringskomponentenClient.lagFakturaserie(any(), eq(SAKSBEHANDLER_IDENT)) }
     }
 
     @Test
@@ -1175,7 +1175,7 @@ class OpprettFakturaserieTest {
         opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 0) { faktureringskomponentenConsumer.lagFakturaserie(any(), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 0) { faktureringskomponentenClient.lagFakturaserie(any(), eq(SAKSBEHANDLER_IDENT)) }
     }
 
     @Test
@@ -1246,7 +1246,7 @@ class OpprettFakturaserieTest {
         opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 1) { faktureringskomponentenClient.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.fullmektig?.organisasjonsnummer.shouldBe(FULLMEKTIG_IDENT)
         slotFakturaserieDto.captured.fullmektig?.fodselsnummer.shouldBeNull()
@@ -1320,7 +1320,7 @@ class OpprettFakturaserieTest {
         opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 1) { faktureringskomponentenClient.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.fullmektig?.fodselsnummer.shouldBe(FULLMEKTIG_IDENT)
         slotFakturaserieDto.captured.fullmektig?.organisasjonsnummer.shouldBeNull()
@@ -1378,7 +1378,7 @@ class OpprettFakturaserieTest {
 
         opprettFakturaserie.utfør(prosessinstans)
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 1) { faktureringskomponentenClient.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.perioder.apply {
             shouldHaveSize(1)
@@ -1445,7 +1445,7 @@ class OpprettFakturaserieTest {
         opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify { faktureringskomponentenConsumer wasNot Called }
+        verify { faktureringskomponentenClient wasNot Called }
     }
 
     @Test
@@ -1526,14 +1526,14 @@ class OpprettFakturaserieTest {
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(opprinneligBehandlingsresultat) } returns true
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandlingsresultat.behandling
         every { pdlService.finnFolkeregisterident(BRUKER_AKTØR_ID) } returns Optional.of(BRUKER_AKTØRID)
-        every { faktureringskomponentenConsumer.lagFakturaserie(any(), SAKSBEHANDLER_IDENT) } returns
+        every { faktureringskomponentenClient.lagFakturaserie(any(), SAKSBEHANDLER_IDENT) } returns
             NyFakturaserieResponseDto(FAKTURASERIE_REFERANSE)
 
 
         opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 1) { faktureringskomponentenClient.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         verify {
             behandlingsresultatService.lagre(
                 match {

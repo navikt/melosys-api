@@ -7,7 +7,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Tema
-import no.nav.melosys.integrasjon.sak.SakConsumerInterface
+import no.nav.melosys.integrasjon.sak.SakClientInterface
 import no.nav.melosys.integrasjon.sak.SakDto
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,13 +16,13 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(MockKExtension::class)
 class ArkivsakServiceTest {
     @MockK
-    private lateinit var sakConsumer: SakConsumerInterface
+    private lateinit var sakClient: SakClientInterface
 
     private lateinit var arkivsakService: ArkivsakService
 
     @BeforeEach
     fun setup() {
-        arkivsakService = ArkivsakService(sakConsumer)
+        arkivsakService = ArkivsakService(sakClient)
     }
 
     @Test
@@ -35,7 +35,7 @@ class ArkivsakServiceTest {
         val sakDto = SakDto().apply {
             id = sakID
         }
-        every { sakConsumer.opprettSak(any()) } returns sakDto
+        every { sakClient.opprettSak(any()) } returns sakDto
 
 
         val opprettetSakID = arkivsakService.opprettSakForBruker(saksnummer, tema, aktørID)
@@ -44,7 +44,7 @@ class ArkivsakServiceTest {
         opprettetSakID shouldBe sakID
 
         val capturedSakDto = slot<SakDto>()
-        verify { sakConsumer.opprettSak(capture(capturedSakDto)) }
+        verify { sakClient.opprettSak(capture(capturedSakDto)) }
         capturedSakDto.captured.tema shouldBe Tema.MED.kode
     }
 
@@ -58,7 +58,7 @@ class ArkivsakServiceTest {
         val sakDto = SakDto().apply {
             id = sakID
         }
-        every { sakConsumer.opprettSak(any()) } returns sakDto
+        every { sakClient.opprettSak(any()) } returns sakDto
 
 
         val opprettetSakID = arkivsakService.opprettSakForBruker(saksnummer, tema, aktørID)
@@ -67,7 +67,7 @@ class ArkivsakServiceTest {
         opprettetSakID shouldBe sakID
 
         val capturedSakDto = slot<SakDto>()
-        verify { sakConsumer.opprettSak(capture(capturedSakDto)) }
+        verify { sakClient.opprettSak(capture(capturedSakDto)) }
         capturedSakDto.captured.tema shouldBe Tema.UFM.kode
     }
 
@@ -81,7 +81,7 @@ class ArkivsakServiceTest {
         val sakDto = SakDto().apply {
             id = sakID
         }
-        every { sakConsumer.opprettSak(any()) } returns sakDto
+        every { sakClient.opprettSak(any()) } returns sakDto
 
 
         val opprettetSakID = arkivsakService.opprettSakForVirksomhet(saksnummer, tema, orgId)
@@ -90,7 +90,7 @@ class ArkivsakServiceTest {
         opprettetSakID shouldBe sakID
 
         val capturedSakDto = slot<SakDto>()
-        verify { sakConsumer.opprettSak(capture(capturedSakDto)) }
+        verify { sakClient.opprettSak(capture(capturedSakDto)) }
         capturedSakDto.captured.tema shouldBe Tema.MED.kode
     }
 
@@ -104,7 +104,7 @@ class ArkivsakServiceTest {
         val sakDto = SakDto().apply {
             id = sakID
         }
-        every { sakConsumer.opprettSak(any()) } returns sakDto
+        every { sakClient.opprettSak(any()) } returns sakDto
 
 
         val opprettetSakID = arkivsakService.opprettSakForVirksomhet(saksnummer, tema, orgId)
@@ -113,7 +113,7 @@ class ArkivsakServiceTest {
         opprettetSakID shouldBe sakID
 
         val capturedSakDto = slot<SakDto>()
-        verify { sakConsumer.opprettSak(capture(capturedSakDto)) }
+        verify { sakClient.opprettSak(capture(capturedSakDto)) }
         capturedSakDto.captured.tema shouldBe Tema.UFM.kode
     }
 }

@@ -19,7 +19,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumer;
+import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarClient;
 import no.nav.melosys.integrasjon.inngangsvilkar.VurderInngangsvilkaarRequest;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.VilkaarsresultatService;
@@ -40,18 +40,18 @@ public class InngangsvilkaarService {
     private static final long DEFAULT_SLUTTDATO_ANTALL_ÅR = 1;
 
     private final BehandlingService behandlingService;
-    private final InngangsvilkaarConsumer inngangsvilkaarConsumer;
+    private final InngangsvilkaarClient inngangsvilkaarClient;
     private final PersondataFasade persondataFasade;
     private final VilkaarsresultatService vilkaarsresultatService;
     private final SaksbehandlingRegler saksbehandlingRegler;
 
     public InngangsvilkaarService(BehandlingService behandlingService,
-                                  InngangsvilkaarConsumer inngangsvilkaarConsumer,
+                                  InngangsvilkaarClient inngangsvilkaarClient,
                                   PersondataFasade persondataFasade,
                                   VilkaarsresultatService vilkaarsresultatService,
                                   SaksbehandlingRegler saksbehandlingRegler) {
         this.behandlingService = behandlingService;
-        this.inngangsvilkaarConsumer = inngangsvilkaarConsumer;
+        this.inngangsvilkaarClient = inngangsvilkaarClient;
         this.persondataFasade = persondataFasade;
         this.vilkaarsresultatService = vilkaarsresultatService;
         this.saksbehandlingRegler = saksbehandlingRegler;
@@ -96,7 +96,7 @@ public class InngangsvilkaarService {
 
         var landkoderISO3 = Set.copyOf(tilIso3(søknadsland));
 
-        InngangsvilkarResponse res = inngangsvilkaarConsumer.vurderInngangsvilkår(
+        InngangsvilkarResponse res = inngangsvilkaarClient.vurderInngangsvilkår(
             new VurderInngangsvilkaarRequest(
                 statsborgerskap.stream().map(Land::toString).collect(Collectors.toSet()),
                 landkoderISO3,

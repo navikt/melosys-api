@@ -19,7 +19,7 @@ import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.util.KodeverkUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer;
+import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveClient;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
@@ -49,17 +49,17 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         Oppgavetyper.BEH_SED.getKode(), Oppgavetyper.VURD_HENV.getKode(), Oppgavetyper.VURD_MAN_INNB.getKode()};
     private static final String[] OPPGAVE_TEMA = new String[]{Tema.MED.getKode(), Tema.UFM.getKode(), Tema.TRY.getKode()};
 
-    private final OppgaveConsumer oppgaveConsumer;
+    private final OppgaveClient oppgaveClient;
 
-    public OppgaveFasadeImpl(OppgaveConsumer oppgaveConsumer) {
-        this.oppgaveConsumer = oppgaveConsumer;
+    public OppgaveFasadeImpl(OppgaveClient oppgaveClient) {
+        this.oppgaveClient = oppgaveClient;
     }
 
     @Override
     public void ferdigstillOppgave(String oppgaveID) {
         OppgaveDto oppgave = hentOppgaveDto(oppgaveID);
         oppgave.setStatus(OPPGAVE_STATUS_FERDIGSTILT);
-        oppgaveConsumer.oppdaterOppgave(oppgave);
+        oppgaveClient.oppdaterOppgave(oppgave);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .medTildeltRessurs(false)
             .medBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode());
 
-        List<OppgaveDto> oppgaver = oppgaveConsumer.hentOppgaveListe(searchRequestBuilder.build());
+        List<OppgaveDto> oppgaver = oppgaveClient.hentOppgaveListe(searchRequestBuilder.build());
 
         return oppgaver.stream().map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
             .filter(erGyldigBehandlingsoppgave)
@@ -129,14 +129,14 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
         oppgaveDto.setTilordnetRessurs(oppgave.getTilordnetRessurs());
 
-        return oppgaveConsumer.opprettOppgave(oppgaveDto);
+        return oppgaveClient.opprettOppgave(oppgaveDto);
     }
 
     @Override
     public void leggTilbakeOppgave(String oppgaveId) {
         OppgaveDto oppgave = hentOppgaveDto(oppgaveId);
         oppgave.setTilordnetRessurs(null);
-        oppgaveConsumer.oppdaterOppgave(oppgave);
+        oppgaveClient.oppdaterOppgave(oppgave);
     }
 
     @Override
@@ -191,11 +191,11 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             oppgaveDto.setFristFerdigstillelse(oppgaveOppdatering.getFristFerdigstillelse());
         }
 
-        oppgaveConsumer.oppdaterOppgave(oppgaveDto);
+        oppgaveClient.oppdaterOppgave(oppgaveDto);
     }
 
     private OppgaveDto hentOppgaveDto(String oppgaveID) {
-        OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveID);
+        OppgaveDto oppgave = oppgaveClient.hentOppgave(oppgaveID);
         if (oppgave == null) {
             throw new IkkeFunnetException("Feil ved henting av oppgave for oppgaveID:" + oppgaveID);
         }
@@ -217,12 +217,12 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
     private Set<Oppgave> hentOppgaverAlleTyper(OppgaveSearchRequest.Builder oppgaveSearchRequestBuilder) {
         // Henter oppgaver opprettet av melosys, hvor melosys har satt behandlesAvApplikasjon
-        List<OppgaveDto> finnOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(
+        List<OppgaveDto> finnOppgaveListeResponse = oppgaveClient.hentOppgaveListe(
             oppgaveSearchRequestBuilder.medBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode()).build()
         );
 
         // Henter journalføringsoppgaver. Disse er ikke opprettet av Melosys
-        List<OppgaveDto> finnJfrOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(
+        List<OppgaveDto> finnJfrOppgaveListeResponse = oppgaveClient.hentOppgaveListe(
             oppgaveSearchRequestBuilder.medOppgaveTyper(new String[]{Oppgavetyper.JFR.getKode()})
                 .medBehandlesAvApplikasjon(null).build()
         );
@@ -243,7 +243,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 
-        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
+        return oppgaveClient.hentOppgaveListe(oppgaveSearchRequest).stream()
             .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
             .toList();
     }
@@ -258,7 +258,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 
-        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
+        return oppgaveClient.hentOppgaveListe(oppgaveSearchRequest).stream()
             .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
             .toList();
     }
@@ -272,7 +272,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 
-        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
+        return oppgaveClient.hentOppgaveListe(oppgaveSearchRequest).stream()
             .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
             .toList();
     }
@@ -287,7 +287,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 
-        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
+        return oppgaveClient.hentOppgaveListe(oppgaveSearchRequest).stream()
             .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
             .toList();
     }
@@ -304,7 +304,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AVSLUTTET)
             .build();
 
-        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
+        return oppgaveClient.hentOppgaveListe(oppgaveSearchRequest).stream()
             .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
             .toList();
     }

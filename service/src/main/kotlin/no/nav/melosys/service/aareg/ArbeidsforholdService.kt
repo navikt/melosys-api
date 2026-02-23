@@ -3,7 +3,7 @@ package no.nav.melosys.service.aareg
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.SaksopplysningKildesystem
 import no.nav.melosys.domain.SaksopplysningType
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdClient
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdQuery
 import no.nav.melosys.service.kodeverk.KodeverkService
 import org.springframework.stereotype.Service
@@ -11,7 +11,7 @@ import java.time.LocalDate
 
 @Service
 class ArbeidsforholdService(
-    private val arbeidsforholdConsumer: ArbeidsforholdConsumer,
+    private val arbeidsforholdClient: ArbeidsforholdClient,
     private val kodeverkService: KodeverkService
 ) {
     fun finnArbeidsforholdPrArbeidstaker(ident: String, fom: LocalDate?, tom: LocalDate?): Saksopplysning {
@@ -22,7 +22,7 @@ class ArbeidsforholdService(
             ansettelsesperiodeTom = tom
         )
 
-        val response = arbeidsforholdConsumer.finnArbeidsforholdPrArbeidstaker(ident, arbeidsforholdQuery)
+        val response = arbeidsforholdClient.finnArbeidsforholdPrArbeidstaker(ident, arbeidsforholdQuery)
 
         return ArbeidsforholdKonverter(response, kodeverkService).createSaksopplysning().apply {
             leggTilKildesystemOgMottattDokument(SaksopplysningKildesystem.AAREG, response.tilSaksopplysning())

@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
-import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
+import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenClient
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
@@ -32,7 +32,7 @@ private val log = KotlinLogging.logger { }
 class OpprettFakturaserie(
     private val behandlingService: BehandlingService,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
+    private val faktureringskomponentenClient: FaktureringskomponentenClient,
     private val pdlService: PersondataService,
     private val trygdeavgiftService: TrygdeavgiftService,
     private val unleash: Unleash
@@ -84,7 +84,7 @@ class OpprettFakturaserie(
         val årsavregningRefs = alleÅrsavregningBehandlinger
             .mapNotNull { behandlingsresultatService.hentBehandlingsresultat(it.id).fakturaserieReferanse }
         val fakturaserieResponse =
-            faktureringskomponentenConsumer.kansellerFakturaserie(opprinneligFakturaserieReferanse, saksbehandlerIdent, årsavregningRefs)
+            faktureringskomponentenClient.kansellerFakturaserie(opprinneligFakturaserieReferanse, saksbehandlerIdent, årsavregningRefs)
         behandlingsresultat.fakturaserieReferanse = fakturaserieResponse.fakturaserieReferanse
         behandlingsresultatService.lagre(behandlingsresultat)
     }
@@ -126,7 +126,7 @@ class OpprettFakturaserie(
         fakturaserieDto: FakturaserieDto,
         saksbehandlerIdent: String
     ) {
-        val fakturaserieResponse = faktureringskomponentenConsumer.lagFakturaserie(fakturaserieDto, saksbehandlerIdent)
+        val fakturaserieResponse = faktureringskomponentenClient.lagFakturaserie(fakturaserieDto, saksbehandlerIdent)
         behandlingsresultat.fakturaserieReferanse = fakturaserieResponse.fakturaserieReferanse
         behandlingsresultatService.lagre(behandlingsresultat)
     }

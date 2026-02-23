@@ -1,0 +1,126 @@
+package no.nav.melosys.integrasjon.faktureringskomponenten
+
+import com.github.tomakehurst.wiremock.client.MappingBuilder
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.matching.UrlPattern
+import no.nav.melosys.integrasjon.ClientWireMockTestBase
+import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
+import java.math.BigDecimal
+import java.time.LocalDate
+
+@SpringBootTest
+@ActiveProfiles("wiremock-test")
+@ContextConfiguration(
+    classes = [
+        OAuthMockServer::class,
+        GenericAuthFilterFactory::class,
+        FaktureringskomponentenClientConfig::class,
+    ]
+)
+@AutoConfigureWebClient
+class FaktureringskomponentenClientTokenTest(
+    @Autowired private val faktureringskomponentenClient: FaktureringskomponentenClient,
+    @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int,
+    @Autowired oAuthMockServer: OAuthMockServer
+) : ClientWireMockTestBase<String, NyFakturaserieResponseDto>(
+    mockServiceUnderTestPort,
+    mockSecurityPort,
+    oAuthMockServer
+) {
+
+    @Test
+    fun authorizationSkalKommeFraSystem() {
+        verifyHeaders(
+            mapOf(
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
+                Pair(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)),
+                Pair(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+            )
+        )
+        executeFromSystem()
+    }
+
+    @Test
+    fun authorizationSkalKommeFraBruker() {
+        verifyHeaders(
+            mapOf(
+                Pair("Authorization", WireMock.equalTo("Bearer -- user_access_token --")),
+                Pair(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)),
+                Pair(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+            )
+        )
+        executeFromController()
+    }
+
+    @Test
+    fun correlationIdLeggesPåRequest() {
+        verifyHeaders(
+            mapOf(
+                Pair("X-Correlation-ID", WireMock.matching(UUID_REGEX)),
+            )
+        )
+        executeFromController()
+    }
+
+    @Test
+    fun skalBrukeErrorFilterOgGiRiktigFeilmelding() {
+        executeErrorFromServer { error ->
+            Assertions.assertThat(error).contains(errorFromServerMessage())
+        }
+    }
+
+    override fun createWireMock(): MappingBuilder {
+        return WireMock.post(UrlPattern.ANY)
+    }
+
+    override fun getMockData(): String = "{\n" +
+        "  \"fakturaserieReferanse\": \"123\"\n" +
+        "}"
+
+    override fun executeRequest() =
+        faktureringskomponentenClient.lagFakturaserie(lagFakturaserieDto(), "N123456")
+
+
+    private fun lagFakturaserieDto(
+        fakturaserieReferanse: String? = null,
+        fodselsnummer: String = "12345678911",
+        fullmektig: FullmektigDto = FullmektigDto("11987654321", "123456789"),
+        referanseBruker: String = "Nasse Nøff",
+        referanseNav: String = "NAV Medlemskap og avgift",
+        fakturaGjelder: Innbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
+        intervall: FaktureringIntervall = FaktureringIntervall.KVARTAL,
+        fakturaseriePeriode: List<FakturaseriePeriodeDto> = listOf(
+            FakturaseriePeriodeDto(
+                BigDecimal.valueOf(123),
+                LocalDate.now(),
+                LocalDate.now(),
+                "Beskrivelse"
+            )
+        ),
+    ): FakturaserieDto {
+        return FakturaserieDto(
+            fodselsnummer,
+            fakturaserieReferanse,
+            fullmektig,
+            referanseBruker,
+            referanseNav,
+            fakturaGjelder,
+            intervall,
+            fakturaseriePeriode
+        )
+    }
+}
+

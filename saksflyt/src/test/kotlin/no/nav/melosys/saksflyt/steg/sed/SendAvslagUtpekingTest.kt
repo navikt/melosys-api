@@ -11,7 +11,7 @@ import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis
 import no.nav.melosys.domain.eessi.sed.SedDataDto
-import no.nav.melosys.integrasjon.eessi.EessiConsumer
+import no.nav.melosys.integrasjon.eessi.EessiClient
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.saksflytapi.domain.*
 import no.nav.melosys.service.behandling.BehandlingService
@@ -33,7 +33,7 @@ class SendAvslagUtpekingTest {
     private lateinit var sedDataGrunnlagFactory: SedDataGrunnlagFactory
 
     @MockK
-    private lateinit var eessiConsumer: EessiConsumer
+    private lateinit var eessiClient: EessiClient
 
     @MockK
     private lateinit var joarkFasade: JoarkFasade
@@ -53,7 +53,7 @@ class SendAvslagUtpekingTest {
     @BeforeEach
     fun settOpp() {
         eessiService = EessiService(
-            behandlingService, behandlingsresultatService, eessiConsumer, joarkFasade,
+            behandlingService, behandlingsresultatService, eessiClient, joarkFasade,
             sedDataBygger, sedDataGrunnlagFactory, fakeUnleash
         )
         sendAvslagUtpeking = SendAvslagUtpeking(eessiService)
@@ -96,12 +96,12 @@ class SendAvslagUtpekingTest {
             )
         }
 
-        every { eessiConsumer.sendSedPåEksisterendeBuc(any(), any(), any()) } returns Unit
+        every { eessiClient.sendSedPåEksisterendeBuc(any(), any(), any()) } returns Unit
 
 
         sendAvslagUtpeking.utfør(prosessinstans)
 
 
-        verify { eessiConsumer.sendSedPåEksisterendeBuc(any(), any(), any()) }
+        verify { eessiClient.sendSedPåEksisterendeBuc(any(), any(), any()) }
     }
 }

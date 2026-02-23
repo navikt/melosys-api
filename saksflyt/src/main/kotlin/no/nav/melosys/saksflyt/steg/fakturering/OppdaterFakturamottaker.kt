@@ -2,7 +2,7 @@ package no.nav.melosys.saksflyt.steg.fakturering
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
+import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenClient
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaMottakerDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FullmektigDto
 import no.nav.melosys.saksflyt.steg.StegBehandler
@@ -19,7 +19,7 @@ private val log = KotlinLogging.logger { }
 class OppdaterFakturamottaker(
     private val fagsakService: FagsakService,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
+    private val faktureringskomponentenClient: FaktureringskomponentenClient,
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg {
@@ -42,7 +42,7 @@ class OppdaterFakturamottaker(
 
         log.info("Oppdaterer fakturamottaker for fakturaserie : $sisteFakturaserieReferanse")
 
-        faktureringskomponentenConsumer.oppdaterFakturaMottaker(
+        faktureringskomponentenClient.oppdaterFakturaMottaker(
             sisteFakturaserieReferanse,
             FakturaMottakerDto(FullmektigDto(fullmektig)),
             prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)

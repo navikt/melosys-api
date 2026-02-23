@@ -27,7 +27,7 @@ class InntektDokumentConverterTest {
 
     @Test
     fun `sjekk json resulat fra konvertering for lagring i databaase mot fasit fra fil`() {
-        val inntektResponse = mapper.readValue<InntektResponse>(hentRessurs("mock/inntekt/inntektConsumerResponse.json"))
+        val inntektResponse = mapper.readValue<InntektResponse>(hentRessurs("mock/inntekt/inntektClientResponse.json"))
         val forventetInntektDokumentDatabaseJson = hentRessurs("mock/inntekt/InntektDocumentConverterResult.json")
 
 
@@ -40,7 +40,7 @@ class InntektDokumentConverterTest {
 
     @Test
     fun `sjekk json resulat fra konvertering for frontend mot fasit fra fil`() {
-        val inntektResponse = mapper.readValue<InntektResponse>(hentRessurs("mock/inntekt/inntektConsumerResponse.json"))
+        val inntektResponse = mapper.readValue<InntektResponse>(hentRessurs("mock/inntekt/inntektClientResponse.json"))
         val forventetInntektDokumentrFrontEndJson = hentRessurs("mock/inntekt/InntektDocumentConverterFrontEndResult.json")
         val mapperWithView = mapper
             .configure(SerializationFeature.INDENT_OUTPUT, true)

@@ -108,7 +108,7 @@ class AnmodningUnntakServiceTest {
         every { eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), any(), any()) } returns setOf(MOTTAKER_INSTITUSJON)
         every { joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(any(), any()) } just Runs
         every { anmodningsperiodeService.oppdaterAnmodetAvForBehandling(BEHANDLING_ID, "Z990007") } just Runs
-        every { prosessinstansService.opprettProsessinstansAnmodningOmUnntak(any(), any(), any(), any(), any()) } just Runs
+        every { prosessinstansService.opprettProsessinstansAnmodningOmUnntak(any(), any(), any(), any(), any(), any()) } just Runs
         every { oppgaveService.leggTilbakeBehandlingsoppgaveMedSaksnummer(any()) } just Runs
         every { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK) } just Runs
 
@@ -117,7 +117,8 @@ class AnmodningUnntakServiceTest {
             MOTTAKER_INSTITUSJON,
             setOf(dokumentReferanse),
             FRITEKST_SED,
-            BEGRUNNELSE_FRITEKST
+            BEGRUNNELSE_FRITEKST,
+            null
         )
 
         verify { anmodningUnntakKontrollService.utførKontroller(BEHANDLING_ID) }
@@ -128,7 +129,8 @@ class AnmodningUnntakServiceTest {
                 any(),
                 eq(setOf(dokumentReferanse)),
                 eq(FRITEKST_SED),
-                eq(BEGRUNNELSE_FRITEKST)
+                eq(BEGRUNNELSE_FRITEKST),
+                isNull()
             )
         }
         verify { oppgaveService.leggTilbakeBehandlingsoppgaveMedSaksnummer(any()) }
@@ -150,7 +152,7 @@ class AnmodningUnntakServiceTest {
         every { eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), any(), any()) } returns emptySet()
         every { joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(any(), any()) } just Runs
         every { anmodningsperiodeService.oppdaterAnmodetAvForBehandling(BEHANDLING_ID, "Z990007") } just Runs
-        every { prosessinstansService.opprettProsessinstansAnmodningOmUnntak(any(), any(), any(), any(), any()) } just Runs
+        every { prosessinstansService.opprettProsessinstansAnmodningOmUnntak(any(), any(), any(), any(), any(), any()) } just Runs
         every { oppgaveService.leggTilbakeBehandlingsoppgaveMedSaksnummer(any()) } just Runs
         every { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK) } just Runs
 
@@ -159,7 +161,8 @@ class AnmodningUnntakServiceTest {
             null,
             emptySet(),
             FRITEKST_SED,
-            BEGRUNNELSE_FRITEKST
+            BEGRUNNELSE_FRITEKST,
+            null
         )
 
         verify { anmodningUnntakKontrollService.utførKontroller(BEHANDLING_ID) }
@@ -170,7 +173,8 @@ class AnmodningUnntakServiceTest {
                 any(),
                 any(),
                 eq(FRITEKST_SED),
-                eq(BEGRUNNELSE_FRITEKST)
+                eq(BEGRUNNELSE_FRITEKST),
+                isNull()
             )
         }
         verify { oppgaveService.leggTilbakeBehandlingsoppgaveMedSaksnummer(any()) }

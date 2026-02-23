@@ -43,7 +43,8 @@ internal class SedGrunnlagDtoTest {
               "utpekingAvvis" : null,
               "vedtakDto" : null,
               "invalideringSedDto" : null,
-              "a008Formaal" : null
+              "a008Formaal" : null,
+              "erFjernarbeidTWFA" : null
             }
         """
     }

@@ -15,7 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.msm.AltinnDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.soknadmottak.SoknadMottakConsumer;
+import no.nav.melosys.integrasjon.soknadmottak.SoknadMottakClient;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -35,18 +35,18 @@ import java.util.List;
 
 @Service
 public class AltinnSoeknadService {
-    private final SoknadMottakConsumer soknadMottakConsumer;
+    private final SoknadMottakClient soknadMottakClient;
     private final FagsakService fagsakService;
     private final MottatteOpplysningerService mottatteOpplysningerService;
     private final PersondataFasade persondataFasade;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
 
-    public AltinnSoeknadService(SoknadMottakConsumer soknadMottakConsumer,
+    public AltinnSoeknadService(SoknadMottakClient soknadMottakClient,
                                 FagsakService fagsakService,
                                 MottatteOpplysningerService mottatteOpplysningerService,
                                 PersondataFasade persondataFasade,
                                 AvklarteVirksomheterService avklarteVirksomheterService) {
-        this.soknadMottakConsumer = soknadMottakConsumer;
+        this.soknadMottakClient = soknadMottakClient;
         this.fagsakService = fagsakService;
         this.mottatteOpplysningerService = mottatteOpplysningerService;
         this.persondataFasade = persondataFasade;
@@ -54,7 +54,7 @@ public class AltinnSoeknadService {
     }
 
     public Behandling opprettFagsakOgBehandlingFraAltinnSøknad(String søknadReferanse) {
-        final MedlemskapArbeidEOSM søknad = soknadMottakConsumer.hentSøknad(søknadReferanse);
+        final MedlemskapArbeidEOSM søknad = soknadMottakClient.hentSøknad(søknadReferanse);
         final LocalDate mottaksdato = hentMottaksdato(søknadReferanse);
 
         final Fagsak fagsak = fagsakService.nyFagsakOgBehandling(lagOpprettSakRequest(søknad, mottaksdato));
@@ -106,7 +106,7 @@ public class AltinnSoeknadService {
     }
 
     public Collection<AltinnDokument> hentDokumenterTilknyttetSoknad(String søknadReferanse) {
-        return soknadMottakConsumer.hentDokumenter(søknadReferanse);
+        return soknadMottakClient.hentDokumenter(søknadReferanse);
     }
 
     private LocalDate hentMottaksdato(String søknadReferanse) {

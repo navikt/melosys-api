@@ -2,7 +2,7 @@ package no.nav.melosys.saksflyt.steg.fakturering
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
+import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenClient
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
@@ -15,7 +15,7 @@ private val log = KotlinLogging.logger { }
 @Component
 class KansellerFakturaserie(
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
+    private val faktureringskomponentenClient: FaktureringskomponentenClient,
 ) : StegBehandler {
     override fun inngangsSteg(): ProsessSteg {
         return ProsessSteg.KANSELLER_FAKTURASERIE
@@ -37,7 +37,7 @@ class KansellerFakturaserie(
             val årsavregningRefs = fagsak.hentAlleÅrsavregninger()
                 .mapNotNull { behandlingsresultatService.hentBehandlingsresultat(it.id).fakturaserieReferanse }
             val fakturaserieResponse =
-                faktureringskomponentenConsumer.kansellerFakturaserie(
+                faktureringskomponentenClient.kansellerFakturaserie(
                     behandlingsresultat.fakturaserieReferanse!!,
                     saksbehandlerIdent,
                     årsavregningRefs

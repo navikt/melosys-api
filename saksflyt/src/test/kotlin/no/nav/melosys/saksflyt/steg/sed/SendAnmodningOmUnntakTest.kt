@@ -56,7 +56,7 @@ class SendAnmodningOmUnntakTest {
         every { behandlingService.lagre(any()) } returns mockk()
         every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns mockk()
         every { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(any()) } returns Unit
-        every { eessiService.opprettOgSendSed(any<Long>(), any(), any(), any(), any(), any()) } returns Unit
+        every { eessiService.opprettOgSendSed(any<Long>(), any(), any(), any(), any(), any(), any()) } returns Unit
         every { brevBestiller.bestill(any()) } returns Unit
     }
 
@@ -78,6 +78,7 @@ class SendAnmodningOmUnntakTest {
                 listOf(MOTTAKER_INSTITSJON),
                 BucType.LA_BUC_01,
                 dokumentReferanser,
+                null,
                 null,
                 null
             )
@@ -106,10 +107,59 @@ class SendAnmodningOmUnntakTest {
                 BucType.LA_BUC_01,
                 any(),
                 null,
+                null,
                 null
             )
         }
         verify { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(BEHANDLING_ID) }
+    }
+
+    @Test
+    fun `utfør med erFjernarbeidTWFA true skal sende sed med TWFA-flagg`() {
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
+            medData(ProsessDataKey.ER_FJERNARBEID_TWFA, true)
+        }
+        val behandlingsresultat = lagBehandlingsresultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
+        sendAnmodningOmUnntak.utfør(prosessinstans)
+
+        verify {
+            eessiService.opprettOgSendSed(
+                BEHANDLING_ID,
+                listOf(MOTTAKER_INSTITSJON),
+                BucType.LA_BUC_01,
+                any(),
+                null,
+                null,
+                true
+            )
+        }
+    }
+
+    @Test
+    fun `utfør med erFjernarbeidTWFA false skal sende sed med TWFA false`() {
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
+            medData(ProsessDataKey.ER_FJERNARBEID_TWFA, false)
+        }
+        val behandlingsresultat = lagBehandlingsresultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
+        sendAnmodningOmUnntak.utfør(prosessinstans)
+
+        verify {
+            eessiService.opprettOgSendSed(
+                BEHANDLING_ID,
+                listOf(MOTTAKER_INSTITSJON),
+                BucType.LA_BUC_01,
+                any(),
+                null,
+                null,
+                false
+            )
+        }
     }
 
     @Test
@@ -162,7 +212,7 @@ class SendAnmodningOmUnntakTest {
 
         prosessinstans.hentBehandling.dokumentasjonSvarfristDato!!.isAfter(nå!!) shouldBe true
         verify(exactly = 0) {
-            eessiService.opprettOgSendSed(any<Long>(), any(), BucType.LA_BUC_01, null, "fritekst", any())
+            eessiService.opprettOgSendSed(any<Long>(), any(), BucType.LA_BUC_01, null, "fritekst", any(), any())
         }
         verify { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(prosessinstans.hentBehandling.id) }
     }

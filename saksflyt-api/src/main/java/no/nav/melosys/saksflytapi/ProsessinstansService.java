@@ -31,6 +31,7 @@ import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.saksflytapi.journalfoering.*;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
+import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -318,7 +319,8 @@ public class ProsessinstansService {
     @Transactional
     public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, Set<String> mottakerInstitusjon,
                                                        Set<DokumentReferanse> vedleggReferanserTilSed,
-                                                       String ytterligereInformasjonSed, String begrunnelseFritekst) {
+                                                       String ytterligereInformasjonSed, String begrunnelseFritekst,
+                                                       Boolean erFjernarbeidTWFA) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.ANMODNING_OM_UNNTAK)
             .medBehandling(behandling)
@@ -326,6 +328,7 @@ public class ProsessinstansService {
             .medVedleggTilSed(vedleggReferanserTilSed)
             .medYtterligereinformasjonSed(ytterligereInformasjonSed)
             .medBegrunnelseFritekst(begrunnelseFritekst)
+            .medErFjernarbeidTWFA(erFjernarbeidTWFA)
             .build();
 
         lagre(prosessinstans);
@@ -576,12 +579,12 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public void opprettProsessinstansMelosysSøknadMottatt(UUID skjemaId) {
-        String låsReferanse = skjemaId.toString();
+    public void opprettProsessinstansMelosysSøknadMottatt(SkjemaMottattMelding melding) {
+        String låsReferanse = melding.getSkjemaId().toString();
         ProsessType prosessType = ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD;
 
         if (prosessinstansRepo.existsByLåsReferanseAndType(låsReferanse, prosessType)) {
-            logger.error("Skjema med skjemaId {} har vært mottatt tidligere. Dette skal ikke skje.", skjemaId);
+            logger.error("Skjema med skjemaId {} har vært mottatt tidligere. Dette skal ikke skje.", melding.getSkjemaId());
             return;
         }
 
@@ -589,6 +592,7 @@ public class ProsessinstansService {
             .medType(prosessType)
             .medLåsReferanse(låsReferanse)
             .build();
+        prosessinstans.setData(SØKNAD_MOTTATT_MELDING, melding);
 
         lagre(prosessinstans);
     }

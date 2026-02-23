@@ -50,16 +50,17 @@ class AvsluttArt13BehandlingService(
         erFagsakStatusGyldigForAutomatiskAvslutting(behandling) && !finnesNyereRelevantLovvalgBehandling(behandling)
 
     /**
-     * Kun saker med status OPPRETTET skal automatisk avsluttes av jobben.
-     * Hvis saksstatus er noe annet enn OPPRETTET, betyr det at saken allerede er håndtert.
+     * Saker med status OPPRETTET eller LOVVALG_AVKLART skal automatisk avsluttes av jobben.
+     * LOVVALG_AVKLART er gyldig fordi en ny vurdering på en allerede avklart sak
+     * beholder denne statusen, og behandlingen skal likevel avsluttes etter 2 måneder.
      *
-     * Dette forhindrer f.eks. at avviste MEDL-perioder blir gjort gyldige igjen.
+     * Dette forhindrer f.eks. at avviste MEDL-perioder (ANNULLERT/HENLAGT) blir gjort gyldige igjen.
      */
     private fun erFagsakStatusGyldigForAutomatiskAvslutting(behandling: Behandling): Boolean =
-        if (behandling.fagsak.status == Saksstatuser.OPPRETTET) {
+        if (behandling.fagsak.status in setOf(Saksstatuser.OPPRETTET, Saksstatuser.LOVVALG_AVKLART)) {
             true
         } else {
-            log.info { "Avslutter ikke behandling ${behandling.id} med saksstatus ${behandling.fagsak.status} (krever OPPRETTET)" }
+            log.info { "Avslutter ikke behandling ${behandling.id} med saksstatus ${behandling.fagsak.status} (krever OPPRETTET eller LOVVALG_AVKLART)" }
             false
         }
 

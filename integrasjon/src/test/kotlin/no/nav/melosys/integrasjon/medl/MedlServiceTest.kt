@@ -44,14 +44,14 @@ import java.time.LocalDate
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class MedlServiceTest {
 
-    private var mockRestConsumer = mockk<MedlemskapRestConsumer>()
+    private var mockRestClient = mockk<MedlemskapClient>()
     private val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
-    private val medlService: MedlService = MedlService(mockRestConsumer, objectMapper)
+    private val medlService: MedlService = MedlService(mockRestClient, objectMapper)
 
     @Test
     fun skalHentPeriodeliste() {
         every {
-            mockRestConsumer.hentPeriodeListe(
+            mockRestClient.hentPeriodeListe(
                 FNR, LocalDate.now(), LocalDate.now()
             )
         } returns hentMedlemskapsunntakListe()
@@ -92,7 +92,7 @@ internal class MedlServiceTest {
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
         }
         every {
-            mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
+            mockRestClient.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
         }.answers {
             medlemskapsunntakForPostCapturingSlot.captured.shouldBeEqualToComparingFields(
                 MedlemskapsunntakForPost(
@@ -122,7 +122,7 @@ internal class MedlServiceTest {
         }
         val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
         every {
-            mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
+            mockRestClient.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
         } answers {
             medlemskapsunntakForPostCapturingSlot.captured.shouldBeEqualToComparingFields(
                 MedlemskapsunntakForPost(
@@ -154,7 +154,7 @@ internal class MedlServiceTest {
         }
         val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
         every {
-            mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
+            mockRestClient.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
         } answers {
             medlemskapsunntakForPostCapturingSlot.captured.shouldBeEqualToComparingFields(
                 MedlemskapsunntakForPost(
@@ -184,7 +184,7 @@ internal class MedlServiceTest {
         }
         val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
         every {
-            mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
+            mockRestClient.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
         } answers {
             medlemskapsunntakForPostCapturingSlot.captured.shouldBeEqualToComparingFields(
                 MedlemskapsunntakForPost(
@@ -209,7 +209,7 @@ internal class MedlServiceTest {
 
     @Test
     fun skalOppdaterePeriodeEndelig() {
-        every { mockRestConsumer.hentPeriode(any()) } returns hentMedlemskapsunntak()
+        every { mockRestClient.hentPeriode(any()) } returns hentMedlemskapsunntak()
         val lovvalgsperiode = lagLovvalgsPeriode {
             medlPeriodeID = 123456L
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
@@ -217,7 +217,7 @@ internal class MedlServiceTest {
         }
         val medlemskapsunntakForPutCapturingSlot = slot<MedlemskapsunntakForPut>()
         every {
-            mockRestConsumer.oppdaterPeriode(capture(medlemskapsunntakForPutCapturingSlot))
+            mockRestClient.oppdaterPeriode(capture(medlemskapsunntakForPutCapturingSlot))
         }.answers {
             medlemskapsunntakForPutCapturingSlot.captured.shouldBeEqualToComparingFields(
                 MedlemskapsunntakForPut(
@@ -248,7 +248,7 @@ internal class MedlServiceTest {
         }
         val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
         every {
-            mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
+            mockRestClient.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
         } answers {
             medlemskapsunntakForPostCapturingSlot.captured.shouldBeEqualToComparingFields(
                 MedlemskapsunntakForPost(
@@ -276,7 +276,7 @@ internal class MedlServiceTest {
         val medlemskapsperiode = lagMedlemskapsPeriode()
         val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
         every {
-            mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
+            mockRestClient.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
         }.answers {
             medlemskapsunntakForPostCapturingSlot.captured.shouldBeEqualToComparingFields(
                 MedlemskapsunntakForPost(
@@ -306,7 +306,7 @@ internal class MedlServiceTest {
 
         val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
         every {
-            mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
+            mockRestClient.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
         }.answers {
             medlemskapsunntakForPostCapturingSlot.captured.shouldBeEqualToComparingFields(
                 MedlemskapsunntakForPost(
@@ -331,14 +331,14 @@ internal class MedlServiceTest {
 
     @Test
     fun skalOppdatereOpphørtPeriode() {
-        every { mockRestConsumer.hentPeriode(any()) } returns hentMedlemskapsunntak()
+        every { mockRestClient.hentPeriode(any()) } returns hentMedlemskapsunntak()
         val medlemskapsperiode = lagMedlemskapsPeriode {
             medlPeriodeID = 123456L
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
         }
         val medlemskapsunntakForPutCapturingSlot = slot<MedlemskapsunntakForPut>()
         every {
-            mockRestConsumer.oppdaterPeriode(capture(medlemskapsunntakForPutCapturingSlot))
+            mockRestClient.oppdaterPeriode(capture(medlemskapsunntakForPutCapturingSlot))
         }.answers {
             medlemskapsunntakForPutCapturingSlot.captured.shouldBeEqualToComparingFields(
                 MedlemskapsunntakForPut(
@@ -364,14 +364,14 @@ internal class MedlServiceTest {
 
     @Test
     fun skalOppdaterePeriodeForeløpig() {
-        every { mockRestConsumer.hentPeriode(any()) } returns hentMedlemskapsunntak()
+        every { mockRestClient.hentPeriode(any()) } returns hentMedlemskapsunntak()
         val lovvalgsperiode = lagLovvalgsPeriode {
             medlPeriodeID = 123456L
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
         }
         val medlemskapsunntakForPutCapturingSlot = slot<MedlemskapsunntakForPut>()
         every {
-            mockRestConsumer.oppdaterPeriode(capture(medlemskapsunntakForPutCapturingSlot))
+            mockRestClient.oppdaterPeriode(capture(medlemskapsunntakForPutCapturingSlot))
         }.answers {
             medlemskapsunntakForPutCapturingSlot.captured.shouldBeEqualToComparingFields(
                 MedlemskapsunntakForPut(
@@ -403,10 +403,10 @@ internal class MedlServiceTest {
 
     @Test
     fun skalAvvisePeriode() {
-        every { mockRestConsumer.hentPeriode(any()) } returns hentMedlemskapsunntak()
+        every { mockRestClient.hentPeriode(any()) } returns hentMedlemskapsunntak()
         val medlemskapsunntakForPutCapturingSlot = slot<MedlemskapsunntakForPut>()
         every {
-            mockRestConsumer.oppdaterPeriode(capture(medlemskapsunntakForPutCapturingSlot))
+            mockRestClient.oppdaterPeriode(capture(medlemskapsunntakForPutCapturingSlot))
         }.answers {
             medlemskapsunntakForPutCapturingSlot.captured.shouldBeEqualToComparingFields(
                 MedlemskapsunntakForPut(

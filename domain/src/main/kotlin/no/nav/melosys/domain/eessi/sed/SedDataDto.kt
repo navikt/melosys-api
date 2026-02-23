@@ -32,4 +32,7 @@ class SedDataDto : SedGrunnlagDto() {
 
     // A008 CDM 4.4 - formål med A008 SED
     var a008Formaal: A008Formaal? = null
+
+    // A001 CDM 4.4 - rammeavtale om fjernarbeid (TWFA)
+    var erFjernarbeidTWFA: Boolean? = null
 }
