@@ -1,0 +1,45 @@
+package no.nav.melosys.integrasjon.pdl;
+
+import java.util.Collections;
+
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import static no.nav.melosys.integrasjon.felles.WebClientUtilsKt.errorFilter;
+
+@Configuration
+public class PDLClientProducer {
+
+    private static final String BEHANDLINGSNUMMER = "behandlingsnummer";
+    private static final String MELOSYS_BEHANDLINGSNUMMER = "B272";
+
+    @Bean
+    public PDLClient pdlClientForSaksbehandler(WebClient.Builder webclientBuilder,
+                                                   @Value("${PDL.url}") String pdlUrl,
+                                                   PDLAuthFilterAzure pdlAuthFilter,
+                                                   CorrelationIdOutgoingFilter correlationIdOutgoingFilter) {
+        return new PDLClientImpl(
+            webclientBuilder(webclientBuilder, pdlUrl)
+                .filter(pdlAuthFilter)
+                .filter(correlationIdOutgoingFilter)
+                .filter(errorFilter("Kall mot PDL feilet."))
+                .build());
+    }
+
+    private WebClient.Builder webclientBuilder(WebClient.Builder webclientBuilder, String pdlUrl) {
+        return webclientBuilder
+            .baseUrl(pdlUrl)
+            .defaultHeaders(this::defaultHeaders);
+    }
+
+    private void defaultHeaders(HttpHeaders httpHeaders) {
+        httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        httpHeaders.set(BEHANDLINGSNUMMER, MELOSYS_BEHANDLINGSNUMMER);
+    }
+}

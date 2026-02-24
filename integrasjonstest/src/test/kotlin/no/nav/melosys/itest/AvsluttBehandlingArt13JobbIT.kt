@@ -40,7 +40,7 @@ class AvsluttBehandlingArt13JobbIT(
 
     @BeforeEach
     fun setup() {
-        avsluttArt13BehandlingJobb = AvsluttArt13BehandlingJobb(behandlingService, avsluttArt13BehandlingService)
+        avsluttArt13BehandlingJobb = AvsluttArt13BehandlingJobb(behandlingService, avsluttArt13BehandlingService, "0 0 0 * * *")
         // Create MEDL entry via mock container
         mockVerificationClient.opprettMedl(
             unntakId = 1242L,
@@ -58,7 +58,7 @@ class AvsluttBehandlingArt13JobbIT(
 
     @Test
     fun testAvsluttBehandlingArt13Jobb() {
-        val jobb = AvsluttArt13BehandlingJobb(behandlingService, avsluttArt13BehandlingService)
+        val jobb = AvsluttArt13BehandlingJobb(behandlingService, avsluttArt13BehandlingService, "0 0 0 * * *")
 
         val fagsak = Fagsak.forTest {
             tema = Sakstemaer.MEDLEMSKAP_LOVVALG

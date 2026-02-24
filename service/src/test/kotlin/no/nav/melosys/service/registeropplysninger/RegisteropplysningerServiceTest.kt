@@ -7,11 +7,10 @@ import io.mockk.mockk
 import io.mockk.verify
 import io.mockk.verifyOrder
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.inntekt.InntektService
-import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestService
+import no.nav.melosys.integrasjon.utbetaling.UtbetaltdataService
 import no.nav.melosys.service.aareg.ArbeidsforholdService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.medl.MedlPeriodeService
@@ -48,7 +47,7 @@ class RegisteropplysningerServiceTest {
     private lateinit var registeropplysningerPeriodeFactory: RegisteropplysningerPeriodeFactory
 
     @MockK
-    private lateinit var utbetaldataRestService: UtbetaldataRestService
+    private lateinit var utbetaltdataService: UtbetaltdataService
 
     private lateinit var registeropplysningerService: RegisteropplysningerService
 
@@ -62,7 +61,7 @@ class RegisteropplysningerServiceTest {
             inntektService,
             saksopplysningerService,
             registeropplysningerPeriodeFactory,
-            utbetaldataRestService
+            utbetaltdataService
         )
 
         every { arbeidsforholdService.finnArbeidsforholdPrArbeidstaker(any(), any(), any()) } returns lagSaksopplysning(SaksopplysningType.ARBFORH)
@@ -79,7 +78,7 @@ class RegisteropplysningerServiceTest {
         every { registeropplysningerPeriodeFactory.hentPeriodeForInntekt(any(), any(), any()) } returns hentPeriode()
 
         every { behandlingService.lagre(any()) } returns mockk()
-        every { utbetaldataRestService.hentUtbetalingerBarnetrygd(any(), any(), any()) } returns lagSaksopplysning(SaksopplysningType.UTBETAL)
+        every { utbetaltdataService.hentUtbetalingerBarnetrygd(any(), any(), any()) } returns lagSaksopplysning(SaksopplysningType.UTBETAL)
     }
 
     @Test

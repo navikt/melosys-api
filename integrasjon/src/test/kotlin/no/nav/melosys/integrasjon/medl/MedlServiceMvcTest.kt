@@ -16,10 +16,10 @@ import no.nav.melosys.domain.SaksopplysningType
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
-import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
+import no.nav.melosys.integrasjon.ClientWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
+import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,24 +35,24 @@ import java.time.LocalDate
 @ContextConfiguration(
     classes = [
         StsWebClientProducer::class,
-        SecurityTokenServiceConsumer::class,
+        SecurityTokenServiceClient::class,
         OAuthMockServer::class,
 
         GenericAuthFilterFactory::class,
-        MedlemskapRestConsumerProducer::class,
+        MedlemskapClientConfig::class,
     ]
 )
 @AutoConfigureWebClient
 class MedlServiceMvcTest(
-    @Autowired private val medlemskapRestConsumer: MedlemskapRestConsumer,
+    @Autowired private val medlemskapClient: MedlemskapClient,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
-) : ConsumerWireMockTestBase<String, Saksopplysning>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
+) : ClientWireMockTestBase<String, Saksopplysning>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
 
     private val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
 
-    private val medlService = MedlService(medlemskapRestConsumer, objectMapper)
+    private val medlService = MedlService(medlemskapClient, objectMapper)
 
     override fun createWireMock(): MappingBuilder {
         return WireMock.post(UrlPattern.ANY)

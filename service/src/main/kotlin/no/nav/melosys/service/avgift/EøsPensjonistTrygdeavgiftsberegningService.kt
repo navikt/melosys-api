@@ -12,7 +12,7 @@ import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.integrasjon.ereg.EregFasade
-import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
+import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
 import no.nav.melosys.integrasjon.trygdeavgift.dto.EøsPensjonistTrygdeavgiftsberegningRequest
 import no.nav.melosys.integrasjon.trygdeavgift.dto.EøsPensjonistTrygdeavgiftsberegningResponse
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
@@ -35,7 +35,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService,
     private val persondataService: PersondataService,
-    private val trygdeavgiftConsumer: TrygdeavgiftConsumer,
+    private val trygdeavgiftClient: TrygdeavgiftClient,
     private val unleash: Unleash
 ) {
     @Transactional
@@ -95,7 +95,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         val fagsak = behandlingService.hentBehandling(behandlingsresultat.hentId()).fagsak
         val foedselsdato = persondataService.hentPerson(fagsak.hentBrukersAktørID()).fødselsdato
 
-        val beregnetTrygdeavgiftList = trygdeavgiftConsumer.beregnTrygdeavgiftEosPensjonist(
+        val beregnetTrygdeavgiftList = trygdeavgiftClient.beregnTrygdeavgiftEosPensjonist(
             EøsPensjonistTrygdeavgiftsberegningRequest(
                 helseutgiftDekkesPeriodeDto,
                 skatteforholdsperiodeDtoSet,

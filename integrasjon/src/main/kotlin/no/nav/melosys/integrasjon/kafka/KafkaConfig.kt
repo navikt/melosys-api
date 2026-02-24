@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
-import no.nav.melosys.integrasjon.SkjemaMottattMelding
+import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import no.nav.melosys.integrasjon.SoknadMottatt
 import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
 import no.nav.melosys.integrasjon.popp.PensjonsopptjeningHendelse

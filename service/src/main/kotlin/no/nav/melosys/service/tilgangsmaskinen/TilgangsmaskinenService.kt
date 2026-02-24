@@ -2,7 +2,7 @@ package no.nav.melosys.service.tilgangsmaskinen
 
 import mu.KotlinLogging
 import no.nav.melosys.service.persondata.PersondataService
-import no.nav.melosys.integrasjon.tilgangsmaskinen.TilgangsmaskinenConsumer
+import no.nav.melosys.integrasjon.tilgangsmaskinen.TilgangsmaskinenClient
 import no.nav.melosys.integrasjon.tilgangsmaskinen.TilgangsmaskinenException
 import no.nav.melosys.integrasjon.tilgangsmaskinen.dto.RegelType
 import org.springframework.cache.annotation.Cacheable
@@ -24,7 +24,7 @@ private val log = KotlinLogging.logger { }
 
 @Service
 class TilgangsmaskinenService(
-    private val tilgangsmaskinenConsumer: TilgangsmaskinenConsumer,
+    private val tilgangsmaskinenClient: TilgangsmaskinenClient,
     private val persondataService: PersondataService
 ) {
 
@@ -40,7 +40,7 @@ class TilgangsmaskinenService(
         log.debug("Sjekker tilgang til fnr via Tilgangsmaskinen med KOMPLETT_REGELTYPE")
 
         try {
-            return tilgangsmaskinenConsumer.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
+            return tilgangsmaskinenClient.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
         } catch (e: TilgangsmaskinenException) {
             throw TilgangsmaskinenException("Feil ved tilgangssjekk for fnr.", e)
         }
@@ -62,7 +62,7 @@ class TilgangsmaskinenService(
         val fnr = hentFnrFraPdl(aktørId)
 
         try {
-            return tilgangsmaskinenConsumer.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
+            return tilgangsmaskinenClient.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
         } catch (e: TilgangsmaskinenException) {
             throw TilgangsmaskinenException("Feil ved tilgangssjekk for aktørId.", e)
         }

@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument
 
+import io.getunleash.Unleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -271,6 +272,7 @@ internal class DokumentServiceTest {
         val vilkaarsresultatService = mockk<VilkaarsresultatService>()
         val persondataFasade = mockk<PersondataFasade>()
 
+        val unleash = mockk<Unleash> { every { isEnabled(any<String>()) } returns false }
         return BrevDataByggerVelger(
             anmodningsperiodeService,
             avklartefaktaService,
@@ -281,7 +283,8 @@ internal class DokumentServiceTest {
             utpekingService,
             vilkaarsresultatService,
             persondataFasade,
-            mottatteOpplysningerService
+            mottatteOpplysningerService,
+            unleash
         )
     }
 

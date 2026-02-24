@@ -236,7 +236,7 @@ class AvsluttArt13BehandlingServiceTest {
     }
 
     @Test
-    fun `avsluttBehandlingHvisToMndPassert skal ikke avslutte behandling hvis saksstatus ikke er OPPRETTET`() {
+    fun `avsluttBehandlingHvisToMndPassert skal ikke avslutte behandling hvis saksstatus er ANNULLERT`() {
         val behandling = lagBehandling {
             fagsak { status = Saksstatuser.ANNULLERT }
         }
@@ -254,6 +254,27 @@ class AvsluttArt13BehandlingServiceTest {
 
         verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any(), any()) }
         verify(exactly = 0) { medlPeriodeService.oppdaterPeriodeEndelig(any()) }
+    }
+
+    @Test
+    fun `avsluttBehandlingHvisToMndPassert skal avslutte behandling hvis saksstatus er LOVVALG_AVKLART`() {
+        val behandling = lagBehandling {
+            fagsak { status = Saksstatuser.LOVVALG_AVKLART }
+        }
+        val lovvalgsperiode = lagLovvalgsperiode()
+        val behandlingsresultat = lagBehandlingsresultat(
+            behandling = behandling,
+            lovvalgsperiode = lovvalgsperiode,
+            vedtaksdato = månederOgDagerSiden(2, 1)
+        )
+        setupMocks(behandling, behandlingsresultat)
+
+
+        avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
+
+
+        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
+        verify { medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode) }
     }
 
     @Test

@@ -27,7 +27,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.domain.person.Statsborgerskap
 import no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso3
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumer
+import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarClient
 import no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
@@ -46,7 +46,7 @@ class InngangsvilkaarServiceTest {
     lateinit var behandlingService: BehandlingService
 
     @MockK
-    lateinit var inngangsvilkaarConsumer: InngangsvilkaarConsumer
+    lateinit var inngangsvilkaarClient: InngangsvilkaarClient
 
     @MockK
     lateinit var persondataFasade: PersondataFasade
@@ -64,7 +64,7 @@ class InngangsvilkaarServiceTest {
     fun setUp() {
         inngangsvilkaarService = InngangsvilkaarService(
             behandlingService,
-            inngangsvilkaarConsumer,
+            inngangsvilkaarClient,
             persondataFasade,
             vilkaarsresultatService,
             saksbehandlingRegler
@@ -89,7 +89,7 @@ class InngangsvilkaarServiceTest {
             kvalifisererForEf883_2004 = true
         }
         every {
-            inngangsvilkaarConsumer.vurderInngangsvilkår(any())
+            inngangsvilkaarClient.vurderInngangsvilkår(any())
         } returns res
 
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
@@ -97,7 +97,7 @@ class InngangsvilkaarServiceTest {
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, søknadsland, false, periode)
 
         verify {
-            inngangsvilkaarConsumer.vurderInngangsvilkår(
+            inngangsvilkaarClient.vurderInngangsvilkår(
                 VurderInngangsvilkaarRequest(
                     setOf(Land.FINLAND, Land.SVERIGE),
                     tilIso3(søknadsland).toSet(),
@@ -155,7 +155,7 @@ class InngangsvilkaarServiceTest {
             kvalifisererForEf883_2004 = true
         }
         every {
-            inngangsvilkaarConsumer.vurderInngangsvilkår(
+            inngangsvilkaarClient.vurderInngangsvilkår(
                 capture(vurderInngangsvilkaarRequestSlot),
             )
         } returns res
@@ -183,14 +183,14 @@ class InngangsvilkaarServiceTest {
             kvalifisererForEf883_2004 = true
         }
         every {
-            inngangsvilkaarConsumer.vurderInngangsvilkår(any())
+            inngangsvilkaarClient.vurderInngangsvilkår(any())
         } returns res
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, emptyList(), true, periode)
 
         verify {
-            inngangsvilkaarConsumer.vurderInngangsvilkår(
+            inngangsvilkaarClient.vurderInngangsvilkår(
                 VurderInngangsvilkaarRequest(
                     setOf(Land.FINLAND),
                     emptySet(),
@@ -229,7 +229,7 @@ class InngangsvilkaarServiceTest {
             kvalifisererForEf883_2004 = false
         }
         every {
-            inngangsvilkaarConsumer.vurderInngangsvilkår(any())
+            inngangsvilkaarClient.vurderInngangsvilkår(any())
         } returns res
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 

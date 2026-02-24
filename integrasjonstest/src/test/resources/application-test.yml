@@ -64,7 +64,7 @@ Melosys-admin:
   apikey: dummy
 MelosysSoknadMottak:
   url: dummy
-MELOSYS_SKJEMA_API_URL: http://localhost:8083
+MELOSYS_SKJEMA_API_URL: http://localhost:8094
 UNLEASH:
   token: faketoken
 dokumentproduksjon:

@@ -1,0 +1,116 @@
+package no.nav.melosys.integrasjon.pdl
+
+import com.github.tomakehurst.wiremock.client.MappingBuilder
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.matching.StringValuePattern
+import no.nav.melosys.integrasjon.ClientWireMockTestBase
+import no.nav.melosys.integrasjon.MetricsTestConfig
+import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste
+import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
+
+@SpringBootTest
+@ActiveProfiles("wiremock-test")
+@ContextConfiguration(
+    classes = [
+        StsWebClientProducer::class,
+        MetricsTestConfig::class,
+        OAuthMockServer::class,
+
+        PDLClientProducer::class,
+        PDLAuthFilterAzure::class
+    ]
+)
+@AutoConfigureWebClient
+class PDLClientTokenTest(
+    @param:Autowired private val pdlClient: PDLClient,
+    @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int,
+    @Autowired oAuthMockServer: OAuthMockServer
+) : ClientWireMockTestBase<String, Identliste>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
+
+    @Test
+    fun authorizationSkalKommeFraSystem() {
+        verifyHeaders(
+            mapOf<String, StringValuePattern>(
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
+                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --azure-token-from-system--"))
+            )
+        )
+        executeFromSystem()
+    }
+
+    @Test
+    fun authorizationSkalKommeFraBruker() {
+        verifyHeaders(
+            mapOf<String, StringValuePattern>(
+                Pair("Authorization", WireMock.equalTo("Bearer -- user_access_token --")),
+                Pair("Nav-Consumer-Token", WireMock.absent())
+            )
+        )
+        executeFromController()
+    }
+
+    @Test
+    fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
+        verifyHeaders(
+            mapOf<String, StringValuePattern>(
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
+                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --azure-token-from-system--"))
+            )
+        )
+        executeRequest()
+    }
+
+    @Test
+    fun skalBrukeErrorFilterOgGiRiktigFeilmelding() {
+        executeErrorFromServer { error ->
+            Assertions.assertThat(error).startsWith("Kall mot PDL feilet.")
+        }
+    }
+
+    @Test
+    fun correlationIdLeggesPåRequest() {
+        verifyHeaders(
+            mapOf(
+                Pair("X-Correlation-ID", WireMock.matching(UUID_REGEX)),
+            )
+        )
+        executeRequest()
+    }
+
+    override fun createWireMock(): MappingBuilder {
+        return WireMock.post("/graphql")
+    }
+
+    override fun getMockData(): String {
+        return """{
+          "data": {
+            "hentIdenter": {
+              "identer": [
+                {
+                  "ident": "99026522600",
+                  "gruppe": "FOLKEREGISTERIDENT"
+                },
+                {
+                  "ident": "9834873315250",
+                  "gruppe": "AKTORID"
+                }
+              ]
+            }
+          }
+        }
+        """
+    }
+
+    override fun executeRequest() =
+        pdlClient.hentIdenter("0")
+}

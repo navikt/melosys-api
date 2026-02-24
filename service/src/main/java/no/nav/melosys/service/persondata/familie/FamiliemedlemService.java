@@ -3,7 +3,7 @@ package no.nav.melosys.service.persondata.familie;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.person.Folkeregisteridentifikator;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
-import no.nav.melosys.integrasjon.pdl.PDLConsumer;
+import no.nav.melosys.integrasjon.pdl.PDLClient;
 import no.nav.melosys.integrasjon.pdl.dto.person.ForelderBarnRelasjon;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -28,16 +28,16 @@ public class FamiliemedlemService {
     private final BehandlingService behandlingService;
     private final SaksopplysningerService saksopplysningerService;
     private final EktefelleEllerPartnerFamiliemedlemFilter ektefelleEllerPartnerFamiliemedlemFilter;
-    private final PDLConsumer pdlConsumer;
+    private final PDLClient pdlClient;
 
     public FamiliemedlemService(BehandlingService behandlingService,
                                 SaksopplysningerService saksopplysningerService,
                                 EktefelleEllerPartnerFamiliemedlemFilter ektefelleEllerPartnerFamiliemedlemFilter,
-                                PDLConsumer pdlConsumer) {
+                                PDLClient pdlClient) {
         this.behandlingService = behandlingService;
         this.saksopplysningerService = saksopplysningerService;
         this.ektefelleEllerPartnerFamiliemedlemFilter = ektefelleEllerPartnerFamiliemedlemFilter;
-        this.pdlConsumer = pdlConsumer;
+        this.pdlClient = pdlClient;
     }
 
     public Set<Familiemedlem> hentFamiliemedlemmerFraBehandlingID(long behandlingID) {
@@ -56,7 +56,7 @@ public class FamiliemedlemService {
     }
 
     public Set<Familiemedlem> hentFamiliemedlemmerFraIdent(String ident) {
-        Person person = pdlConsumer.hentFamilierelasjoner(ident);
+        Person person = pdlClient.hentFamilierelasjoner(ident);
         return hentFamiliemedlemmer(person);
     }
 
@@ -79,7 +79,7 @@ public class FamiliemedlemService {
         return forelderBarnRelasjoner.stream()
             .filter(ForelderBarnRelasjon::erForelder)
             .map(forelderBarnRelasjon -> {
-                final Person person = pdlConsumer.hentForelder(forelderBarnRelasjon.relatertPersonsIdent());
+                final Person person = pdlClient.hentForelder(forelderBarnRelasjon.relatertPersonsIdent());
                 return lagFamilieMedlemForelder(forelderBarnRelasjon, person);
             })
             .collect(Collectors.toUnmodifiableSet());
@@ -97,7 +97,7 @@ public class FamiliemedlemService {
             .filter(ForelderBarnRelasjon::erBarn)
             .map(ForelderBarnRelasjon::relatertPersonsIdent)
             .filter(Objects::nonNull)
-            .map(pdlConsumer::hentBarn)
+            .map(pdlClient::hentBarn)
             .map(barn -> FamiliemedlemOversetter.oversettBarn(barn, folkeregisteridentifikator))
             .collect(Collectors.toUnmodifiableSet());
     }

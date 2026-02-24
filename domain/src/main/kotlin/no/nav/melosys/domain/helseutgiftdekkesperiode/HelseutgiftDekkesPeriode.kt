@@ -71,9 +71,20 @@ class HelseutgiftDekkesPeriode(
 
     override fun hentMedlemskapstype(): Medlemskapstyper = Medlemskapstyper.PLIKTIG
 
+    fun avkortTomDato(gjelderÅr: Int) {
+        if (this.overlapperMedÅr(gjelderÅr) && this.tomDato.year > gjelderÅr) {
+            this.tomDato = LocalDate.of(gjelderÅr, 12, 31)
+        }
+    }
+
+    fun avkortFomDato(gjelderÅr: Int) {
+        if (this.overlapperMedÅr(gjelderÅr) && this.fomDato.year < gjelderÅr) {
+            this.fomDato = LocalDate.of(gjelderÅr, 1, 1)
+        }
+    }
     override fun hentTrygdedekning(): Trygdedekninger =
-        // TODO: Bruker FULL_DEKNING inntil fag finner et mer passende verdi
-        Trygdedekninger.FULL_DEKNING
+        // TODO: Bruker FULL_DEKNING_EOSFO inntil fag finner et mer passende verdi
+        Trygdedekninger.FULL_DEKNING_EOSFO
 
     companion object //For å kunne legge på forTest DSL.
 }

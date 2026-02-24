@@ -9,6 +9,7 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.service.sak.FagsakService.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -283,6 +284,9 @@ class Kontroll(
                 tidligereResultat.hentBehandling().fagsak.saksnummer != behandling.fagsak.saksnummer
             }
             .filter { tidligereResultat ->
+                tidligereResultat.hentBehandling().fagsak.status !in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT
+            }
+            .filter { tidligereResultat ->
                 trygdeavgiftService.harFakturerbarTrygdeavgift(tidligereResultat,)
             }
             .flatMap {
@@ -305,6 +309,7 @@ class Kontroll(
 
         return tidligereBehandlingsResultat
             .filter { it.hentBehandling().fagsak.saksnummer != behandling.fagsak.saksnummer }
+            .filter { it.hentBehandling().fagsak.status !in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT }
             .mapNotNull { it.helseutgiftDekkesPeriode }
     }
 

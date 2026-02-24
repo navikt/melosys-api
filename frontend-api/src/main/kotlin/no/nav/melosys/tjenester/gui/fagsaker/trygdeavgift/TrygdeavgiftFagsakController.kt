@@ -34,7 +34,7 @@ class TrygdeavgiftFagsakController(
         return ResponseEntity.ok(
             TrygdeavgiftOppsummering(
                 trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(
-                    saksnummer
+                    saksnummer, sjekkFakturaserie = true
                 )
             )
         )
