@@ -1,11 +1,14 @@
 package no.nav.melosys.saksflyt.steg.soknad
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -13,10 +16,13 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.OpprettSakRequest
@@ -40,6 +46,12 @@ internal class OpprettSakOgBehandlingSøknadTest {
     @MockK
     lateinit var persondataFasade: PersondataFasade
 
+    @MockK
+    lateinit var mottatteOpplysningerService: MottatteOpplysningerService
+
+    @MockK
+    lateinit var objectMapper: ObjectMapper
+
     private lateinit var opprettSakOgBehandlingSøknad: OpprettSakOgBehandlingSøknad
     private lateinit var prosessinstans: Prosessinstans
 
@@ -48,6 +60,7 @@ internal class OpprettSakOgBehandlingSøknadTest {
     private val orgnr = "123456789"
     private val juridiskEnhetOrgnr = "987654321"
     private val referanseId = "MEL-TEST123"
+    private val behandlingId = 42L
 
     private val skjema = UtsendtArbeidstakerSkjemaDto(
         id = UUID.randomUUID(),
@@ -73,11 +86,35 @@ internal class OpprettSakOgBehandlingSøknadTest {
 
     @BeforeEach
     fun setup() {
-        opprettSakOgBehandlingSøknad = OpprettSakOgBehandlingSøknad(fagsakService, persondataFasade)
+        opprettSakOgBehandlingSøknad = OpprettSakOgBehandlingSøknad(
+            fagsakService, persondataFasade, mottatteOpplysningerService, objectMapper
+        )
 
         prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SØKNADSDATA, søknadsdata)
         }
+    }
+
+    private fun mockFagsakOgBehandling(): Behandling {
+        val fagsak = mockk<Fagsak>()
+        val behandling = mockk<Behandling>()
+
+        every { persondataFasade.hentAktørIdForIdent(fnr) } returns aktørId
+        every { fagsakService.nyFagsakOgBehandling(any()) } returns fagsak
+        every { fagsak.hentAktivBehandling() } returns behandling
+        every { fagsak.saksnummer } returns "MEL-1234"
+        every { behandling.id } returns behandlingId
+
+        return behandling
+    }
+
+    private fun mockMottatteOpplysninger() {
+        every { objectMapper.writeValueAsString(søknadsdata) } returns """{"referanseId":"$referanseId"}"""
+        every {
+            mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
+                any(), any(), any(), any()
+            )
+        } returns mockk<MottatteOpplysninger>()
     }
 
     @Test
@@ -87,13 +124,15 @@ internal class OpprettSakOgBehandlingSøknadTest {
 
     @Test
     fun `utfør oppretter fagsak og behandling med korrekte verdier`() {
-        val fagsak = mockk<Fagsak>()
-        val behandling = mockk<Behandling>()
+        mockFagsakOgBehandling()
+        mockMottatteOpplysninger()
         val requestSlot = slot<OpprettSakRequest>()
-
-        every { persondataFasade.hentAktørIdForIdent(fnr) } returns aktørId
-        every { fagsakService.nyFagsakOgBehandling(capture(requestSlot)) } returns fagsak
-        every { fagsak.hentAktivBehandling() } returns behandling
+        every { fagsakService.nyFagsakOgBehandling(capture(requestSlot)) } returns mockk<Fagsak>().also {
+            every { it.hentAktivBehandling() } returns mockk<Behandling>().also { b ->
+                every { b.id } returns behandlingId
+            }
+            every { it.saksnummer } returns "MEL-1234"
+        }
 
         opprettSakOgBehandlingSøknad.utfør(prosessinstans)
 
@@ -108,15 +147,35 @@ internal class OpprettSakOgBehandlingSøknadTest {
 
     @Test
     fun `utfør setter behandling på prosessinstans`() {
-        val fagsak = mockk<Fagsak>()
-        val behandling = mockk<Behandling>()
-
-        every { persondataFasade.hentAktørIdForIdent(fnr) } returns aktørId
-        every { fagsakService.nyFagsakOgBehandling(any()) } returns fagsak
-        every { fagsak.hentAktivBehandling() } returns behandling
+        val behandling = mockFagsakOgBehandling()
+        mockMottatteOpplysninger()
 
         opprettSakOgBehandlingSøknad.utfør(prosessinstans)
 
         prosessinstans.behandling shouldBe behandling
+    }
+
+    @Test
+    fun `utfør lagrer mottatte opplysninger på behandlingen`() {
+        mockFagsakOgBehandling()
+        mockMottatteOpplysninger()
+        val soeknadSlot = slot<Soeknad>()
+
+        every {
+            mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
+                eq(behandlingId), any(), capture(soeknadSlot), eq(referanseId)
+            )
+        } returns mockk<MottatteOpplysninger>()
+
+        opprettSakOgBehandlingSøknad.utfør(prosessinstans)
+
+        soeknadSlot.captured.shouldNotBeNull()
+
+        verify(exactly = 1) {
+            objectMapper.writeValueAsString(søknadsdata)
+            mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
+                behandlingId, any(), any(), referanseId
+            )
+        }
     }
 }
