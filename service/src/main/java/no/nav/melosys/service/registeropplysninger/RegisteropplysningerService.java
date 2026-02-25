@@ -4,6 +4,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
@@ -31,6 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class RegisteropplysningerService {
     private static final Logger log = LoggerFactory.getLogger(RegisteropplysningerService.class);
+
+    private static final ConcurrentHashMap<Long, ReentrantLock> behandlingLocks = new ConcurrentHashMap<>();
 
     private static final Comparator<SaksopplysningType> SAKSOPPLYSNINGSTYPE_COMPARATOR = (s1, s2) -> {
         if (s1 == SaksopplysningType.ARBFORH || s1 == SaksopplysningType.INNTK) return -1;
@@ -89,17 +93,31 @@ public class RegisteropplysningerService {
             registeropplysningerRequest.setFom(registeropplysningerRequest.getFom().minusYears(5));
         }
 
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(registeropplysningerRequest.getBehandlingID());
+        long behandlingId = registeropplysningerRequest.getBehandlingID();
 
-        // Debounce: skip if register data was just fetched (prevents concurrent modification race condition)
-        if (behandling.getSisteOpplysningerHentetDato() != null
-                && Duration.between(behandling.getSisteOpplysningerHentetDato(), Instant.now()).getSeconds() < 2) {
-            log.info("Registeropplysninger nylig hentet for behandling {}, hopper over",
-                registeropplysningerRequest.getBehandlingID());
+        // Application-level lock: prevents concurrent hentOgLagreOpplysninger for same behandling.
+        // tryLock() returns immediately if another thread holds the lock — the concurrent call is
+        // redundant (same data would be fetched) so we skip it to avoid OptimisticLockingFailureException.
+        var lock = behandlingLocks.computeIfAbsent(behandlingId, k -> new ReentrantLock());
+        if (!lock.tryLock()) {
+            log.info("Registeropplysninger hentes allerede for behandling {}, hopper over", behandlingId);
             return;
         }
+        try {
+            Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
 
-        hentOgLagreOpplysninger(registeropplysningerRequest, behandling);
+            // Debounce: skip if register data was just fetched (catches sequential near-duplicate calls)
+            if (behandling.getSisteOpplysningerHentetDato() != null
+                    && Duration.between(behandling.getSisteOpplysningerHentetDato(), Instant.now()).getSeconds() < 2) {
+                log.info("Registeropplysninger nylig hentet for behandling {}, hopper over", behandlingId);
+                return;
+            }
+
+            hentOgLagreOpplysninger(registeropplysningerRequest, behandling);
+        } finally {
+            lock.unlock();
+            behandlingLocks.remove(behandlingId);
+        }
     }
 
     private void hentOgLagreOpplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
