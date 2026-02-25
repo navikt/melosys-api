@@ -291,7 +291,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
 
         årsavregningService.oppdaterHarTrygdeavgiftFraAvgiftssystemet(2L, false)
 
-        verify(exactly = 2) { behandlingsresultatService.lagreOgFlush(any()) }
+        verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(any()) }
 
         behandlingsresultatCaptor.captured.helseutgiftDekkesPeriode.shouldNotBeNull().run {
             fomDato shouldBe LocalDate.of(2023, 1, 1)

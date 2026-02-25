@@ -216,7 +216,6 @@ class ÅrsavregningService(
         if (!harTrygdeavgiftFraAvgiftssystemet) {
             behandlingsresultat.clearMedlemskapsperioder()
             behandlingsresultat.helseutgiftDekkesPeriode = null
-            behandlingsresultatService.lagreOgFlush(behandlingsresultat)
 
             if (årsavregning.tidligereBehandlingsresultat != null) {
                 val tidligereResult = årsavregning.hentTidligereBehandlingsresultat
