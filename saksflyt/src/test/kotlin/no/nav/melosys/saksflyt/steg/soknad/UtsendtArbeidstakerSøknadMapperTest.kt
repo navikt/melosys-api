@@ -8,10 +8,8 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.kodeverk.Innretningstyper
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader
-import no.nav.melosys.skjema.types.ArbeidsgiverMetadata
-import no.nav.melosys.skjema.types.DegSelvMetadata
+import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.Skjemadel
-import no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaDto
 import no.nav.melosys.skjema.types.arbeidsgiver.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
 import no.nav.melosys.skjema.types.arbeidsgiver.arbeidsgiversvirksomhetinorge.ArbeidsgiverensVirksomhetINorgeDto
 import no.nav.melosys.skjema.types.arbeidsgiver.arbeidsstedIutlandet.ArbeidsstedIUtlandetDto
@@ -32,15 +30,11 @@ import no.nav.melosys.skjema.types.arbeidstaker.familiemedlemmer.Familiemedlem
 import no.nav.melosys.skjema.types.arbeidstaker.familiemedlemmer.FamiliemedlemmerDto
 import no.nav.melosys.skjema.types.arbeidstaker.skatteforholdoginntekt.SkatteforholdOgInntektDto
 import no.nav.melosys.skjema.types.arbeidstaker.utenlandsoppdraget.UtenlandsoppdragetArbeidstakersDelDto
-import no.nav.melosys.skjema.types.common.SkjemaStatus
 import no.nav.melosys.skjema.types.felles.LandKode
 import no.nav.melosys.skjema.types.felles.PeriodeDto
-import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 
 internal class UtsendtArbeidstakerSøknadMapperTest {
 
@@ -48,10 +42,10 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
     inner class FinnSkjemadeler {
         @Test
         fun `finner arbeidstaker-skjema når det er hovedskjema`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
                 data = lagArbeidstakerData()
-            )
+            }
             val (arbeidstaker, arbeidsgiver) = UtsendtArbeidstakerSøknadMapper.finnSkjemadeler(dto)
             arbeidstaker.shouldNotBeNull()
             arbeidsgiver.shouldBeNull()
@@ -59,7 +53,12 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
 
         @Test
         fun `finner begge deler når koblet skjema finnes`() {
-            val dto = lagM2MDtoMedBegge()
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                data = lagArbeidstakerData()
+                medKobletArbeidsgiverSkjema {
+                    data = lagArbeidsgiverData()
+                }
+            }
             val (arbeidstaker, arbeidsgiver) = UtsendtArbeidstakerSøknadMapper.finnSkjemadeler(dto)
             arbeidstaker.shouldNotBeNull()
             arbeidsgiver.shouldNotBeNull()
@@ -67,10 +66,10 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
 
         @Test
         fun `finner arbeidsgiver-skjema når det er hovedskjema`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData()
-            )
+            }
             val (arbeidstaker, arbeidsgiver) = UtsendtArbeidstakerSøknadMapper.finnSkjemadeler(dto)
             arbeidstaker.shouldBeNull()
             arbeidsgiver.shouldNotBeNull()
@@ -81,15 +80,15 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
     inner class Soeknadsland {
         @Test
         fun `mapper søknadsland fra arbeidstaker-del`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
                 data = lagArbeidstakerData(
                     utenlandsoppdraget = UtenlandsoppdragetArbeidstakersDelDto(
                         utsendelsesLand = LandKode.DE,
                         utsendelsePeriode = PeriodeDto(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31))
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.soeknadsland.landkoder shouldHaveSize 1
             søknad.soeknadsland.landkoder.first() shouldBe "DE"
@@ -98,12 +97,12 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
 
         @Test
         fun `mapper søknadsland fra arbeidsgiver-del når arbeidstaker-del mangler`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
                     utenlandsoppdraget = lagUtenlandsoppdragetDto(utsendelseLand = LandKode.SE)
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.soeknadsland.landkoder shouldHaveSize 1
             søknad.soeknadsland.landkoder.first() shouldBe "SE"
@@ -111,27 +110,29 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
 
         @Test
         fun `arbeidstaker-del har presedens over arbeidsgiver-del for søknadsland`() {
-            val dto = lagM2MDtoMedBegge(
-                arbeidstakerData = lagArbeidstakerData(
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                data = lagArbeidstakerData(
                     utenlandsoppdraget = UtenlandsoppdragetArbeidstakersDelDto(
                         utsendelsesLand = LandKode.DE,
                         utsendelsePeriode = PeriodeDto(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31))
                     )
-                ),
-                arbeidsgiverData = lagArbeidsgiverData(
-                    utenlandsoppdraget = lagUtenlandsoppdragetDto(utsendelseLand = LandKode.SE)
                 )
-            )
+                medKobletArbeidsgiverSkjema {
+                    data = lagArbeidsgiverData(
+                        utenlandsoppdraget = lagUtenlandsoppdragetDto(utsendelseLand = LandKode.SE)
+                    )
+                }
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.soeknadsland.landkoder.first() shouldBe "DE"
         }
 
         @Test
         fun `returnerer tom soeknadsland når ingen utenlandsoppdraget finnes`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
                 data = lagArbeidstakerData()
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.soeknadsland.landkoder.shouldBeEmpty()
         }
@@ -143,15 +144,15 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
         fun `mapper periode fra arbeidstaker-del`() {
             val fom = LocalDate.of(2025, 3, 1)
             val tom = LocalDate.of(2025, 9, 30)
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
                 data = lagArbeidstakerData(
                     utenlandsoppdraget = UtenlandsoppdragetArbeidstakersDelDto(
                         utsendelsesLand = LandKode.DE,
                         utsendelsePeriode = PeriodeDto(fom, tom)
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.periode.fom shouldBe fom
             søknad.periode.tom shouldBe tom
@@ -161,15 +162,15 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
         fun `mapper periode fra arbeidsgiver-del når arbeidstaker-del mangler`() {
             val fom = LocalDate.of(2025, 6, 1)
             val tom = LocalDate.of(2026, 5, 31)
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
                     utenlandsoppdraget = lagUtenlandsoppdragetDto(
                         utsendelseLand = LandKode.FI,
                         arbeidstakerPeriode = PeriodeDto(fom, tom)
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.periode.fom shouldBe fom
             søknad.periode.tom shouldBe tom
@@ -181,20 +182,22 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
             val arbeidstakerTom = LocalDate.of(2025, 6, 30)
             val arbeidsgiverFom = LocalDate.of(2025, 3, 1)
             val arbeidsgiverTom = LocalDate.of(2025, 12, 31)
-            val dto = lagM2MDtoMedBegge(
-                arbeidstakerData = lagArbeidstakerData(
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                data = lagArbeidstakerData(
                     utenlandsoppdraget = UtenlandsoppdragetArbeidstakersDelDto(
                         utsendelsesLand = LandKode.DE,
                         utsendelsePeriode = PeriodeDto(arbeidstakerFom, arbeidstakerTom)
                     )
-                ),
-                arbeidsgiverData = lagArbeidsgiverData(
-                    utenlandsoppdraget = lagUtenlandsoppdragetDto(
-                        utsendelseLand = LandKode.DE,
-                        arbeidstakerPeriode = PeriodeDto(arbeidsgiverFom, arbeidsgiverTom)
-                    )
                 )
-            )
+                medKobletArbeidsgiverSkjema {
+                    data = lagArbeidsgiverData(
+                        utenlandsoppdraget = lagUtenlandsoppdragetDto(
+                            utsendelseLand = LandKode.DE,
+                            arbeidstakerPeriode = PeriodeDto(arbeidsgiverFom, arbeidsgiverTom)
+                        )
+                    )
+                }
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.periode.fom shouldBe arbeidstakerFom
             søknad.periode.tom shouldBe arbeidstakerTom
@@ -205,8 +208,8 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
     inner class Personopplysninger {
         @Test
         fun `mapper familiemedlemmer`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
                 data = lagArbeidstakerData(
                     familiemedlemmer = FamiliemedlemmerDto(
                         skalHaMedFamiliemedlemmer = true,
@@ -221,7 +224,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                         )
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.personOpplysninger.medfolgendeFamilie shouldHaveSize 1
             søknad.personOpplysninger.medfolgendeFamilie.first().fnr shouldBe "01012012345"
@@ -230,25 +233,25 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
 
         @Test
         fun `returnerer tomme familiemedlemmer når skalHaMedFamiliemedlemmer er false`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
                 data = lagArbeidstakerData(
                     familiemedlemmer = FamiliemedlemmerDto(
                         skalHaMedFamiliemedlemmer = false,
                         familiemedlemmer = emptyList()
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.personOpplysninger.medfolgendeFamilie.shouldBeEmpty()
         }
 
         @Test
         fun `personopplysninger har default verdier når kun arbeidsgiver-del finnes`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData()
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.personOpplysninger.medfolgendeFamilie.shouldBeEmpty()
         }
@@ -258,8 +261,8 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
     inner class Arbeidssteder {
         @Test
         fun `mapper arbeid på land med fast arbeidssted`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
                     arbeidssted = ArbeidsstedIUtlandetDto(
                         arbeidsstedType = ArbeidsstedType.PA_LAND,
@@ -277,7 +280,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                         )
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.arbeidPaaLand.fysiskeArbeidssteder shouldHaveSize 1
@@ -293,8 +296,8 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
 
         @Test
         fun `mapper arbeid på land med vekslende arbeidssted`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
                     arbeidssted = ArbeidsstedIUtlandetDto(
                         arbeidsstedType = ArbeidsstedType.PA_LAND,
@@ -307,7 +310,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                         )
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.arbeidPaaLand.erFastArbeidssted shouldBe false
@@ -317,8 +320,8 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
 
         @Test
         fun `mapper offshore arbeidssted`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
                     arbeidssted = ArbeidsstedIUtlandetDto(
                         arbeidsstedType = ArbeidsstedType.OFFSHORE,
@@ -330,7 +333,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                         )
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.maritimtArbeid shouldHaveSize 1
@@ -342,8 +345,8 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
 
         @Test
         fun `mapper boreskip offshore`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
                     arbeidssted = ArbeidsstedIUtlandetDto(
                         arbeidsstedType = ArbeidsstedType.OFFSHORE,
@@ -355,15 +358,15 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                         )
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.maritimtArbeid.first().innretningstype shouldBe Innretningstyper.BORESKIP
         }
 
         @Test
         fun `mapper arbeid på skip`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
                     arbeidssted = ArbeidsstedIUtlandetDto(
                         arbeidsstedType = ArbeidsstedType.PA_SKIP,
@@ -377,7 +380,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                         )
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.maritimtArbeid shouldHaveSize 1
@@ -390,8 +393,8 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
 
         @Test
         fun `mapper arbeid på skip i territorialfarvann`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
                     arbeidssted = ArbeidsstedIUtlandetDto(
                         arbeidsstedType = ArbeidsstedType.PA_SKIP,
@@ -405,7 +408,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                         )
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.maritimtArbeid.first().fartsomradeKode shouldBe Fartsomrader.INNENRIKS
@@ -414,8 +417,8 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
 
         @Test
         fun `mapper luftfart`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
                     arbeidssted = ArbeidsstedIUtlandetDto(
                         arbeidsstedType = ArbeidsstedType.OM_BORD_PA_FLY,
@@ -429,7 +432,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                         )
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.luftfartBaser shouldHaveSize 1
@@ -443,8 +446,8 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
     inner class UtenlandsoppdragetMapping {
         @Test
         fun `mapper utenlandsoppdraget`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
                     utenlandsoppdraget = lagUtenlandsoppdragetDto(
                         arbeidsgiverHarOppdrag = true,
@@ -453,7 +456,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                         erstatterAnnen = false
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.utenlandsoppdraget.erUtsendelseForOppdragIUtlandet shouldBe true
@@ -466,15 +469,15 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
         @Test
         fun `mapper samlet utsendingsperiode når erstatter annen person`() {
             val forrigePeriode = PeriodeDto(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31))
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
                     utenlandsoppdraget = lagUtenlandsoppdragetDto(
                         erstatterAnnen = true,
                         forrigePeriode = forrigePeriode
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.utenlandsoppdraget.erErstatningTidligereUtsendte shouldBe true
@@ -484,12 +487,12 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
 
         @Test
         fun `samlet utsendingsperiode er tom når ikke erstatter`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
                     utenlandsoppdraget = lagUtenlandsoppdragetDto(erstatterAnnen = false)
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.utenlandsoppdraget.samletUtsendingsperiode.fom.shouldBeNull()
@@ -498,10 +501,10 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
 
         @Test
         fun `returnerer default utenlandsoppdraget når kun arbeidstaker-del finnes`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
                 data = lagArbeidstakerData()
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.utenlandsoppdraget.erUtsendelseForOppdragIUtlandet.shouldBeNull()
         }
@@ -511,28 +514,28 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
     inner class JuridiskArbeidsgiverNorgeMapping {
         @Test
         fun `mapper offentlig virksomhet`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
                     virksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(
                         erArbeidsgiverenOffentligVirksomhet = true
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.juridiskArbeidsgiverNorge.erOffentligVirksomhet shouldBe true
         }
 
         @Test
         fun `mapper privat virksomhet`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
                     virksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(
                         erArbeidsgiverenOffentligVirksomhet = false
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.juridiskArbeidsgiverNorge.erOffentligVirksomhet shouldBe false
         }
@@ -542,30 +545,30 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
     inner class LoennOgGodtgjoerelseMapping {
         @Test
         fun `mapper lønn og godtgjørelse`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
                     lonn = ArbeidstakerensLonnDto(
                         arbeidsgiverBetalerAllLonnOgNaturaytelserIUtsendingsperioden = true,
                         virksomheterSomUtbetalerLonnOgNaturalytelser = null
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.loennOgGodtgjoerelse?.norskArbgUtbetalerLoenn shouldBe true
         }
 
         @Test
         fun `mapper lønn og godtgjørelse med false`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
                     lonn = ArbeidstakerensLonnDto(
                         arbeidsgiverBetalerAllLonnOgNaturaytelserIUtsendingsperioden = false,
                         virksomheterSomUtbetalerLonnOgNaturalytelser = null
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
             søknad.loennOgGodtgjoerelse?.norskArbgUtbetalerLoenn shouldBe false
         }
@@ -575,8 +578,8 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
     inner class ArbeidssituasjonOgOevrigMapping {
         @Test
         fun `mapper arbeidssituasjon og øvrig`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
                 data = lagArbeidstakerData(
                     arbeidssituasjon = ArbeidssituasjonDto(
                         harVaertEllerSkalVaereILonnetArbeidFoerUtsending = true,
@@ -592,7 +595,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                         pengestotteSomMottasFraAndreLandBeskrivelse = null
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.arbeidssituasjonOgOevrig.harLoennetArbeidMinstEnMndFoerUtsending shouldBe true
@@ -604,10 +607,10 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
 
         @Test
         fun `arbeidssituasjon har default verdier når kun arbeidsgiver-del finnes`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData()
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.arbeidssituasjonOgOevrig.harLoennetArbeidMinstEnMndFoerUtsending.shouldBeNull()
@@ -622,8 +625,8 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
     inner class TilSoeknadIntegrasjon {
         @Test
         fun `mapper komplett søknad med begge deler`() {
-            val dto = lagM2MDtoMedBegge(
-                arbeidstakerData = lagArbeidstakerData(
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                data = lagArbeidstakerData(
                     utenlandsoppdraget = UtenlandsoppdragetArbeidstakersDelDto(
                         utsendelsesLand = LandKode.DE,
                         utsendelsePeriode = PeriodeDto(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31))
@@ -647,34 +650,36 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                             Familiemedlem("Barn", "Barnsen", true, "01012012345", null)
                         )
                     )
-                ),
-                arbeidsgiverData = lagArbeidsgiverData(
-                    utenlandsoppdraget = lagUtenlandsoppdragetDto(
-                        utsendelseLand = LandKode.DE,
-                        arbeidsgiverHarOppdrag = true,
-                        ansattForOppdraget = false,
-                        forblirAnsatt = true,
-                        erstatterAnnen = false
-                    ),
-                    virksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(
-                        erArbeidsgiverenOffentligVirksomhet = false
-                    ),
-                    lonn = ArbeidstakerensLonnDto(
-                        arbeidsgiverBetalerAllLonnOgNaturaytelserIUtsendingsperioden = true,
-                        virksomheterSomUtbetalerLonnOgNaturalytelser = null
-                    ),
-                    arbeidssted = ArbeidsstedIUtlandetDto(
-                        arbeidsstedType = ArbeidsstedType.PA_LAND,
-                        paLand = PaLandDto(
-                            navnPaVirksomhet = "Berlin GmbH",
-                            fastEllerVekslendeArbeidssted = FastEllerVekslendeArbeidssted.FAST,
-                            fastArbeidssted = PaLandFastArbeidsstedDto("Hauptstraße", "1", "10115", "Berlin"),
-                            beskrivelseVekslende = null,
-                            erHjemmekontor = false
+                )
+                medKobletArbeidsgiverSkjema {
+                    data = lagArbeidsgiverData(
+                        utenlandsoppdraget = lagUtenlandsoppdragetDto(
+                            utsendelseLand = LandKode.DE,
+                            arbeidsgiverHarOppdrag = true,
+                            ansattForOppdraget = false,
+                            forblirAnsatt = true,
+                            erstatterAnnen = false
+                        ),
+                        virksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(
+                            erArbeidsgiverenOffentligVirksomhet = false
+                        ),
+                        lonn = ArbeidstakerensLonnDto(
+                            arbeidsgiverBetalerAllLonnOgNaturaytelserIUtsendingsperioden = true,
+                            virksomheterSomUtbetalerLonnOgNaturalytelser = null
+                        ),
+                        arbeidssted = ArbeidsstedIUtlandetDto(
+                            arbeidsstedType = ArbeidsstedType.PA_LAND,
+                            paLand = PaLandDto(
+                                navnPaVirksomhet = "Berlin GmbH",
+                                fastEllerVekslendeArbeidssted = FastEllerVekslendeArbeidssted.FAST,
+                                fastArbeidssted = PaLandFastArbeidsstedDto("Hauptstraße", "1", "10115", "Berlin"),
+                                beskrivelseVekslende = null,
+                                erHjemmekontor = false
+                            )
                         )
                     )
-                )
-            )
+                }
+            }
 
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
@@ -709,15 +714,15 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
 
         @Test
         fun `mapper søknad med kun arbeidstaker-del`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
                 data = lagArbeidstakerData(
                     utenlandsoppdraget = UtenlandsoppdragetArbeidstakersDelDto(
                         utsendelsesLand = LandKode.FI,
                         utsendelsePeriode = PeriodeDto(LocalDate.of(2025, 6, 1), LocalDate.of(2025, 12, 31))
                     )
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.soeknadsland.landkoder shouldBe listOf("FI")
@@ -728,8 +733,8 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
 
         @Test
         fun `mapper søknad med kun arbeidsgiver-del`() {
-            val dto = lagM2MDto(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
                     utenlandsoppdraget = lagUtenlandsoppdragetDto(
                         utsendelseLand = LandKode.SE,
@@ -739,7 +744,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                     ),
                     virksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(erArbeidsgiverenOffentligVirksomhet = true)
                 )
-            )
+            }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
 
             søknad.soeknadsland.landkoder shouldBe listOf("SE")
@@ -750,7 +755,7 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
         }
     }
 
-    // --- Test data helpers ---
+    // --- Test data helpers (mapper-specific) ---
 
     private fun lagArbeidstakerData(
         utenlandsoppdraget: UtenlandsoppdragetArbeidstakersDelDto? = null,
@@ -795,52 +800,5 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
         utenlandsoppholdetsBegrunnelse = null,
         ansettelsesforholdBeskrivelse = null,
         forrigeArbeidstakerUtsendelsePeriode = forrigePeriode
-    )
-
-    private fun lagSkjemaDto(
-        skjemadel: Skjemadel,
-        data: no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaData
-    ) = UtsendtArbeidstakerSkjemaDto(
-        id = UUID.randomUUID(),
-        status = SkjemaStatus.SENDT,
-        fnr = "12345678901",
-        orgnr = "123456789",
-        metadata = when (skjemadel) {
-            Skjemadel.ARBEIDSTAKERS_DEL -> DegSelvMetadata(
-                skjemadel = skjemadel,
-                arbeidsgiverNavn = "Test AS",
-                juridiskEnhetOrgnr = "987654321"
-            )
-            Skjemadel.ARBEIDSGIVERS_DEL -> ArbeidsgiverMetadata(
-                skjemadel = skjemadel,
-                arbeidsgiverNavn = "Test AS",
-                juridiskEnhetOrgnr = "987654321"
-            )
-        },
-        data = data
-    )
-
-    private fun lagM2MDto(
-        skjemadel: Skjemadel,
-        data: no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaData
-    ) = UtsendtArbeidstakerSkjemaM2MDto(
-        skjema = lagSkjemaDto(skjemadel, data),
-        kobletSkjema = null,
-        tidligereInnsendteSkjema = emptyList(),
-        referanseId = "MEL-${UUID.randomUUID()}",
-        innsendtTidspunkt = LocalDateTime.now(),
-        innsenderFnr = "12345678901"
-    )
-
-    private fun lagM2MDtoMedBegge(
-        arbeidstakerData: UtsendtArbeidstakerArbeidstakersSkjemaDataDto = lagArbeidstakerData(),
-        arbeidsgiverData: UtsendtArbeidstakerArbeidsgiversSkjemaDataDto = lagArbeidsgiverData()
-    ) = UtsendtArbeidstakerSkjemaM2MDto(
-        skjema = lagSkjemaDto(Skjemadel.ARBEIDSTAKERS_DEL, arbeidstakerData),
-        kobletSkjema = lagSkjemaDto(Skjemadel.ARBEIDSGIVERS_DEL, arbeidsgiverData),
-        tidligereInnsendteSkjema = emptyList(),
-        referanseId = "MEL-${UUID.randomUUID()}",
-        innsendtTidspunkt = LocalDateTime.now(),
-        innsenderFnr = "12345678901"
     )
 }

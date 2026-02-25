@@ -14,11 +14,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType
-import no.nav.melosys.skjema.types.DegSelvMetadata
-import no.nav.melosys.skjema.types.Skjemadel
-import no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaDto
-import no.nav.melosys.skjema.types.arbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
-import no.nav.melosys.skjema.types.common.SkjemaStatus
+import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.awaitility.kotlin.await
@@ -29,7 +25,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.core.KafkaTemplate
 
 import java.time.Duration
-import java.util.UUID
 
 class DigitalSøknadMottakIT(
     @Autowired @Qualifier("skjemaMottattMelding")
@@ -47,31 +42,13 @@ class DigitalSøknadMottakIT(
 
     @Test
     fun `mottak av digital søknad starter saga og henter søknadsdata fra melosys-skjema-api`() {
-        val skjemaId = UUID.randomUUID()
         // Bruker fnr fra PersonRepo i melosys-mock (KARAFFEL TRIVIELL)
         val testFnr = "30056928150"
 
-        val skjema = UtsendtArbeidstakerSkjemaDto(
-            id = skjemaId,
-            status = SkjemaStatus.SENDT,
-            fnr = testFnr,
-            orgnr = "123456789",
-            metadata = DegSelvMetadata(
-                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
-                arbeidsgiverNavn = "Test AS",
-                juridiskEnhetOrgnr = "987654321"
-            ),
-            data = UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
-        )
-
-        val forventetSøknadsdata = UtsendtArbeidstakerSkjemaM2MDto(
-            skjema = skjema,
-            kobletSkjema = null,
-            tidligereInnsendteSkjema = emptyList(),
-            referanseId = "MEL-$skjemaId",
-            innsendtTidspunkt = java.time.LocalDateTime.now(),
-            innsenderFnr = testFnr
-        )
+        val forventetSøknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            fnr = testFnr
+        }
+        val skjemaId = forventetSøknadsdata.skjema.id
 
         // Stub melosys-skjema-api endpoint for søknadsdata
         mockServer.stubFor(
@@ -138,7 +115,7 @@ class DigitalSøknadMottakIT(
         // Verify journalpostId was set on behandling (step 3)
         behandling.initierendeJournalpostId.shouldNotBeNull()
 
-        // Verify saksopplysninger (MottatteOpplysninger) was created on behandling (step 4)
+        // Verify mottatteOpplysninger was created on behandling (step 4)
         behandling.mottatteOpplysninger.shouldNotBeNull()
     }
 }

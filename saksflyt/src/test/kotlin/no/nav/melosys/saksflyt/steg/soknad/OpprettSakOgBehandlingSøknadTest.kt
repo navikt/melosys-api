@@ -22,20 +22,14 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
+import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.OpprettSakRequest
-import no.nav.melosys.skjema.types.DegSelvMetadata
-import no.nav.melosys.skjema.types.Skjemadel
-import no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaDto
-import no.nav.melosys.skjema.types.arbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
-import no.nav.melosys.skjema.types.common.SkjemaStatus
-import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.util.UUID
 
 @ExtendWith(MockKExtension::class)
 internal class OpprettSakOgBehandlingSøknadTest {
@@ -62,27 +56,12 @@ internal class OpprettSakOgBehandlingSøknadTest {
     private val referanseId = "MEL-TEST123"
     private val behandlingId = 42L
 
-    private val skjema = UtsendtArbeidstakerSkjemaDto(
-        id = UUID.randomUUID(),
-        status = SkjemaStatus.SENDT,
-        fnr = fnr,
-        orgnr = orgnr,
-        metadata = DegSelvMetadata(
-            skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
-            arbeidsgiverNavn = "Test AS",
-            juridiskEnhetOrgnr = juridiskEnhetOrgnr
-        ),
-        data = UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
-    )
-
-    private val søknadsdata = UtsendtArbeidstakerSkjemaM2MDto(
-        skjema = skjema,
-        kobletSkjema = null,
-        tidligereInnsendteSkjema = emptyList(),
-        referanseId = referanseId,
-        innsendtTidspunkt = java.time.LocalDateTime.now(),
-        innsenderFnr = fnr
-    )
+    private val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+        fnr = this@OpprettSakOgBehandlingSøknadTest.fnr
+        orgnr = this@OpprettSakOgBehandlingSøknadTest.orgnr
+        juridiskEnhetOrgnr = this@OpprettSakOgBehandlingSøknadTest.juridiskEnhetOrgnr
+        referanseId = this@OpprettSakOgBehandlingSøknadTest.referanseId
+    }
 
     @BeforeEach
     fun setup() {
