@@ -29,7 +29,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
         var data: no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaData =
             UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
         var referanseId: String = "MEL-${UUID.randomUUID()}"
-        var innsenderFnr: String = "12345678901"
+        var innsenderFnr: String? = null
         var innsendtTidspunkt: LocalDateTime = LocalDateTime.now()
 
         private var kobletSkjemaBuilder: ArbeidsgiverSkjemaBuilder? = null
@@ -55,7 +55,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
                 tidligereInnsendteSkjema = emptyList(),
                 referanseId = referanseId,
                 innsendtTidspunkt = innsendtTidspunkt,
-                innsenderFnr = innsenderFnr
+                innsenderFnr = innsenderFnr ?: fnr
             )
         }
 
