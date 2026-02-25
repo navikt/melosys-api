@@ -345,6 +345,7 @@ object ProsessflytDefinisjon {
             OPPRETT_SAK_OG_BEHANDLING_SØKNAD,
             OPPRETT_OG_FERDIGSTILL_JOURNALPOST_SØKNAD,
             HENT_REGISTEROPPLYSNINGER,
+            VURDER_INNGANGSVILKÅR,
             OPPRETT_OPPGAVE
         ),
         ProsessType.OPPDATER_FAKTURAMOTTAKER to ProsessFlyt(
