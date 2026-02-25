@@ -1,5 +1,6 @@
 package no.nav.melosys.service.registeropplysninger;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
@@ -89,6 +90,14 @@ public class RegisteropplysningerService {
         }
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(registeropplysningerRequest.getBehandlingID());
+
+        // Debounce: skip if register data was just fetched (prevents concurrent modification race condition)
+        if (behandling.getSisteOpplysningerHentetDato() != null
+                && Duration.between(behandling.getSisteOpplysningerHentetDato(), Instant.now()).getSeconds() < 2) {
+            log.info("Registeropplysninger nylig hentet for behandling {}, hopper over",
+                registeropplysningerRequest.getBehandlingID());
+            return;
+        }
 
         hentOgLagreOpplysninger(registeropplysningerRequest, behandling);
     }
