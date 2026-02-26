@@ -6,9 +6,6 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
-
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
@@ -32,6 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 public class RegisteropplysningerService {
@@ -98,31 +97,34 @@ public class RegisteropplysningerService {
 
         long behandlingId = registeropplysningerRequest.getBehandlingID();
 
-        // Application-level lock: prevents concurrent hentOgLagreOpplysninger for same behandling.
-        // tryLock() returns immediately if another thread holds the lock — the concurrent call is
-        // redundant (same data would be fetched) so we skip it to avoid OptimisticLockingFailureException.
+        // Applikasjonsnivå-lock: forhindrer samtidige kall til hentOgLagreOpplysninger for samme behandling.
+        // tryLock() returnerer umiddelbart false hvis en annen tråd holder locken — det samtidige kallet
+        // er redundant (samme data ville blitt hentet) så vi skipper det for å unngå OptimisticLockingFailureException.
         //
-        // The lock is released AFTER the transaction commits (via TransactionSynchronization),
-        // not in a finally block. This prevents Thread B from acquiring the lock while Thread A's
-        // transaction is still uncommitted (which would cause stale reads and OptimisticLockingFailureException).
+        // Locken frigjøres ETTER at transaksjonen er committet (via TransactionSynchronization),
+        // ikke i en finally-blokk. Dette forhindrer at Tråd B tar locken mens Tråd A sin
+        // transaksjon ennå ikke er committet (som ville gitt stale reads og OptimisticLockingFailureException).
         var lock = behandlingLocks.computeIfAbsent(behandlingId, k -> new ReentrantLock());
         if (!lock.tryLock()) {
             log.info("Registeropplysninger hentes allerede for behandling {}, hopper over", behandlingId);
             return;
         }
 
-        // Release lock after transaction completes (commit or rollback)
+        // Frigjør lock etter at transaksjonen er fullført (commit eller rollback).
+        // Vi fjerner IKKE locken fra behandlingLocks — fjerning skaper en race condition der
+        // Tråd B tar den opplåste locken, deretter fjerner Tråd A den fra mappet slik at Tråd C
+        // lager en ny lock, og B og C kjører samtidig. Lock-objekter er lette (~100 bytes)
+        // og gjenbrukbare, så å beholde dem unngår denne racen med ubetydelig minnekostnad.
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCompletion(int status) {
                 lock.unlock();
-                behandlingLocks.remove(behandlingId);
             }
         });
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
 
-        // Debounce: skip if register data was just fetched (catches sequential near-duplicate calls)
+        // Debounce: hopp over hvis registerdata nettopp ble hentet (fanger sekvensielle nær-duplikater)
         if (behandling.getSisteOpplysningerHentetDato() != null
                 && Duration.between(behandling.getSisteOpplysningerHentetDato(), Instant.now()).getSeconds() < 2) {
             log.info("Registeropplysninger nylig hentet for behandling {}, hopper over", behandlingId);
