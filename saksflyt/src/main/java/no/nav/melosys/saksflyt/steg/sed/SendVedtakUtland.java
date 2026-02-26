@@ -121,24 +121,22 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             if (landKanIkkeMottaSed != null && !landKanIkkeMottaSed.isEmpty()) {
                 for (String landkode : landKanIkkeMottaSed) {
                     Land_iso2 land = Land_iso2.valueOf(landkode);
-                    DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
-                        .medProduserbartDokument(ATTEST_A1)
-                        .medAvsenderID(hentSaksbehandler(prosessinstans))
-                        .medBegrunnelseKode(hentBegrunnelsekodeTilForkortetPeriode(prosessinstans))
-                        .build();
                     Mottaker mottaker = Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
                     mottaker.setTrygdemyndighetLand(land);
-                    prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, mottaker);
+                    prosessinstansService.opprettProsessinstansSendBrev(behandling, lagA1Brevbestilling(prosessinstans), mottaker);
                 }
             } else {
-                DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
-                    .medProduserbartDokument(ATTEST_A1)
-                    .medAvsenderID(hentSaksbehandler(prosessinstans))
-                    .medBegrunnelseKode(hentBegrunnelsekodeTilForkortetPeriode(prosessinstans))
-                    .build();
-                prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
+                prosessinstansService.opprettProsessinstansSendBrev(behandling, lagA1Brevbestilling(prosessinstans), Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
             }
         }
+    }
+
+    private DoksysBrevbestilling lagA1Brevbestilling(Prosessinstans prosessinstans) {
+        return new DoksysBrevbestilling.Builder()
+            .medProduserbartDokument(ATTEST_A1)
+            .medAvsenderID(hentSaksbehandler(prosessinstans))
+            .medBegrunnelseKode(hentBegrunnelsekodeTilForkortetPeriode(prosessinstans))
+            .build();
     }
 
     @Override
