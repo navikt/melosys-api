@@ -15,9 +15,11 @@ import no.nav.melosys.service.aareg.ArbeidsforholdService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.medl.MedlPeriodeService
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
@@ -53,6 +55,10 @@ class RegisteropplysningerServiceTest {
 
     @BeforeEach
     fun setUp() {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.initSynchronization()
+        }
+
         registeropplysningerService = RegisteropplysningerService(
             medlPeriodeService,
             eregFasade,
@@ -79,6 +85,13 @@ class RegisteropplysningerServiceTest {
 
         every { behandlingService.lagre(any()) } returns mockk()
         every { utbetaltdataService.hentUtbetalingerBarnetrygd(any(), any(), any()) } returns lagSaksopplysning(SaksopplysningType.UTBETAL)
+    }
+
+    @AfterEach
+    fun tearDown() {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.clearSynchronization()
+        }
     }
 
     @Test
