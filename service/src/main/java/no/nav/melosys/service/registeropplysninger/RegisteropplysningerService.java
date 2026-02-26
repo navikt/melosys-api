@@ -6,6 +6,9 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
+
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
@@ -98,26 +101,35 @@ public class RegisteropplysningerService {
         // Application-level lock: prevents concurrent hentOgLagreOpplysninger for same behandling.
         // tryLock() returns immediately if another thread holds the lock — the concurrent call is
         // redundant (same data would be fetched) so we skip it to avoid OptimisticLockingFailureException.
+        //
+        // The lock is released AFTER the transaction commits (via TransactionSynchronization),
+        // not in a finally block. This prevents Thread B from acquiring the lock while Thread A's
+        // transaction is still uncommitted (which would cause stale reads and OptimisticLockingFailureException).
         var lock = behandlingLocks.computeIfAbsent(behandlingId, k -> new ReentrantLock());
         if (!lock.tryLock()) {
             log.info("Registeropplysninger hentes allerede for behandling {}, hopper over", behandlingId);
             return;
         }
-        try {
-            Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
 
-            // Debounce: skip if register data was just fetched (catches sequential near-duplicate calls)
-            if (behandling.getSisteOpplysningerHentetDato() != null
-                    && Duration.between(behandling.getSisteOpplysningerHentetDato(), Instant.now()).getSeconds() < 2) {
-                log.info("Registeropplysninger nylig hentet for behandling {}, hopper over", behandlingId);
-                return;
+        // Release lock after transaction completes (commit or rollback)
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCompletion(int status) {
+                lock.unlock();
+                behandlingLocks.remove(behandlingId);
             }
+        });
 
-            hentOgLagreOpplysninger(registeropplysningerRequest, behandling);
-        } finally {
-            lock.unlock();
-            behandlingLocks.remove(behandlingId);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
+
+        // Debounce: skip if register data was just fetched (catches sequential near-duplicate calls)
+        if (behandling.getSisteOpplysningerHentetDato() != null
+                && Duration.between(behandling.getSisteOpplysningerHentetDato(), Instant.now()).getSeconds() < 2) {
+            log.info("Registeropplysninger nylig hentet for behandling {}, hopper over", behandlingId);
+            return;
         }
+
+        hentOgLagreOpplysninger(registeropplysningerRequest, behandling);
     }
 
     private void hentOgLagreOpplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
