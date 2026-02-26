@@ -2,6 +2,9 @@ package no.nav.melosys.saksflyt.steg.sed;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import io.getunleash.Unleash;
 import no.nav.melosys.domain.Behandling;
@@ -78,7 +81,15 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             if (erArtikkel11_3B(behandlingsresultat) && (mottakere == null || mottakere.isEmpty())) {
                 log.info("Sender ikke SED for behandling {}, mottakerinstusjoner er ikke oppgitt", behandling.getId());
             } else {
-                super.sendUtland(avklarBucType(behandling), prosessinstans);
+                SendUtlandStatus status = super.sendUtland(avklarBucType(behandling), prosessinstans);
+                // Når BREV_SENDT har sendBrev() allerede håndtert LAND_KAN_IKKE_MOTTA_SED.
+                // For SED_SENDT, send brev eksplisitt til land som ikke kan motta SED.
+                if (status != SendUtlandStatus.BREV_SENDT) {
+                    Set<String> landKanIkkeMottaSed = prosessinstans.getData(ProsessDataKey.LAND_KAN_IKKE_MOTTA_SED, new TypeReference<Set<String>>() {});
+                    if (landKanIkkeMottaSed != null && !landKanIkkeMottaSed.isEmpty()) {
+                        sendBrev(prosessinstans);
+                    }
+                }
             }
         } else if (behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar()) {
             finnOgLukkTilhørendeBUC(behandlingsresultat);
@@ -106,12 +117,27 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostID);
             prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, utpektLand);
         } else {
-            DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
-                .medProduserbartDokument(ATTEST_A1)
-                .medAvsenderID(hentSaksbehandler(prosessinstans))
-                .medBegrunnelseKode(hentBegrunnelsekodeTilForkortetPeriode(prosessinstans))
-                .build();
-            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
+            Set<String> landKanIkkeMottaSed = prosessinstans.getData(ProsessDataKey.LAND_KAN_IKKE_MOTTA_SED, new TypeReference<Set<String>>() {});
+            if (landKanIkkeMottaSed != null && !landKanIkkeMottaSed.isEmpty()) {
+                for (String landkode : landKanIkkeMottaSed) {
+                    Land_iso2 land = Land_iso2.valueOf(landkode);
+                    DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
+                        .medProduserbartDokument(ATTEST_A1)
+                        .medAvsenderID(hentSaksbehandler(prosessinstans))
+                        .medBegrunnelseKode(hentBegrunnelsekodeTilForkortetPeriode(prosessinstans))
+                        .build();
+                    Mottaker mottaker = Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
+                    mottaker.setTrygdemyndighetLand(land);
+                    prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, mottaker);
+                }
+            } else {
+                DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
+                    .medProduserbartDokument(ATTEST_A1)
+                    .medAvsenderID(hentSaksbehandler(prosessinstans))
+                    .medBegrunnelseKode(hentBegrunnelsekodeTilForkortetPeriode(prosessinstans))
+                    .build();
+                prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
+            }
         }
     }
 

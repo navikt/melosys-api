@@ -307,6 +307,63 @@ class SendVedtakUtlandTest {
         verify(exactly = 0) { eessiService.sendGodkjenningArbeidFlereLand(any(), any()) }
     }
 
+    @Test
+    fun `utfør skal sende SED og deretter brev til land som ikke kan motta SED når EESSI-mottakere og land som ikke kan motta SED finnes`() {
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITUSJON))
+            medData(ProsessDataKey.LAND_KAN_IKKE_MOTTA_SED, setOf(Land_iso2.FO.kode))
+        }
+
+
+        sendVedtakUtland.utfør(prosessinstans)
+
+
+        // Verifiser at SED er sendt
+        verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), any(), any(), any(), any(), any()) }
+        // Verifiser at brev er sendt til FO
+        verify {
+            prosessinstansService.opprettProsessinstansSendBrev(
+                any(),
+                capture(brevbestillingCaptor),
+                match<Mottaker> { it.trygdemyndighetLand == Land_iso2.FO }
+            )
+        }
+        brevbestillingCaptor.captured.produserbartdokument shouldBe Produserbaredokumenter.ATTEST_A1
+    }
+
+    @Test
+    fun `utfør skal sende SED uten brev når ingen land som ikke kan motta SED`() {
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITUSJON))
+        }
+
+
+        sendVedtakUtland.utfør(prosessinstans)
+
+
+        // Verifiser at SED er sendt
+        verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), any(), any(), any(), any(), any()) }
+        // Verifiser at INGEN papir-brev er sendt
+        verify(exactly = 0) { prosessinstansService.opprettProsessinstansSendBrev(any(), any(), any()) }
+    }
+
+    @Test
+    fun `utfør skal sende brev til FO og GL når begge er land som ikke kan motta SED`() {
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITUSJON))
+            medData(ProsessDataKey.LAND_KAN_IKKE_MOTTA_SED, setOf(Land_iso2.FO.kode, Land_iso2.GL.kode))
+        }
+
+
+        sendVedtakUtland.utfør(prosessinstans)
+
+
+        // Verifiser at SED er sendt
+        verify { eessiService.opprettOgSendSed(any(), any(), any(), any(), any(), any(), any()) }
+        // Verifiser at papir-brev er sendt to ganger (FO og GL)
+        verify(exactly = 2) { prosessinstansService.opprettProsessinstansSendBrev(any(), any(), any()) }
+    }
+
     companion object {
         private const val BEHANDLING_ID = 1L
         private const val GSAK_SAKSNUMMER = 123456789L

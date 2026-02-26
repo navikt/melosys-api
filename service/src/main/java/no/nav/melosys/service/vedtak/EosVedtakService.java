@@ -3,7 +3,9 @@ package no.nav.melosys.service.vedtak;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -114,9 +116,12 @@ public class EosVedtakService implements FattVedtakInterface {
             var fritekst = request.getFritekst() == null ? request.getBegrunnelseFritekst() : request.getFritekst();
 
             oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), fritekst, request.getNyVurderingBakgrunn());
-            Set<String> mottakerinstitusjoner = avklarMottakerInstitusjoner(behandling, request.getMottakerinstitusjoner(), behandlingsresultat);
+            Collection<Land_iso2> alleLandkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
+            Set<String> landKanIkkeMottaSed = filtrerLandKanIkkeMottaSed(alleLandkoder);
+            Set<String> mottakerinstitusjoner = avklarMottakerInstitusjoner(behandling, request.getMottakerinstitusjoner(),
+                behandlingsresultat, filtrerLandKanMottaSed(alleLandkoder));
             prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, request.getBehandlingsresultatTypeKode(),
-                fritekst, request.getFritekstSed(), mottakerinstitusjoner, request.isKopiTilArbeidsgiver());
+                fritekst, request.getFritekstSed(), mottakerinstitusjoner, request.isKopiTilArbeidsgiver(), landKanIkkeMottaSed);
         }
 
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
@@ -142,7 +147,8 @@ public class EosVedtakService implements FattVedtakInterface {
 
     private Set<String> avklarMottakerInstitusjoner(Behandling behandling,
                                                     Set<String> mottakerinstitusjoner,
-                                                    Behandlingsresultat behandlingsresultat) {
+                                                    Behandlingsresultat behandlingsresultat,
+                                                    Collection<Land_iso2> eessiLandkoder) {
         if (saksbehandlingRegler.harIngenFlyt(behandling)) {
             return Collections.emptySet();
         }
@@ -151,11 +157,10 @@ public class EosVedtakService implements FattVedtakInterface {
             return Collections.emptySet();
         }
 
-        Collection<Land_iso2> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
-        if (!behandling.erNorgeUtpekt() && skalSedSendes(behandlingsresultat, landkoder)) {
+        if (!behandling.erNorgeUtpekt() && skalSedSendes(behandlingsresultat, eessiLandkoder)) {
             mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
                 mottakerinstitusjoner,
-                landkoder,
+                eessiLandkoder,
                 avklarBucType(behandlingsresultat)
             );
         } else {
@@ -183,5 +188,22 @@ public class EosVedtakService implements FattVedtakInterface {
     private static boolean erArtikkel11_3B(Behandlingsresultat behandlingsresultat) {
         return behandlingsresultat.hentValidertPeriodeOmLovvalg().getBestemmelse()
             == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B;
+    }
+
+    static Set<String> filtrerLandKanIkkeMottaSed(Collection<Land_iso2> landkoder) {
+        return landkoder.stream()
+            .filter(EosVedtakService::kanIkkeMottaSed)
+            .map(Land_iso2::getKode)
+            .collect(Collectors.toSet());
+    }
+
+    static List<Land_iso2> filtrerLandKanMottaSed(Collection<Land_iso2> landkoder) {
+        return landkoder.stream()
+            .filter(land -> !kanIkkeMottaSed(land))
+            .collect(Collectors.toList());
+    }
+
+    private static boolean kanIkkeMottaSed(Land_iso2 land) {
+        return land == Land_iso2.FO || land == Land_iso2.GL;
     }
 }
