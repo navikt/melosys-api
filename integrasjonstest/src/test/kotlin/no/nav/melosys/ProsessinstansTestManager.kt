@@ -55,6 +55,7 @@ class ProsessinstansTestManager(
             return withClue("Wait for ${waitForProsesses.keys}") {
                 waitForAllProcessesToFinish(waitForProsesses, onWaitUntil)
                 prosessinstanserFerdig
+                    .filter { it.status == ProsessStatus.FERDIG }
                     .firstOrNull { it.type == returnProsessOfType }
                     ?: error("Fant ikke prosess for $returnProsessOfType")
             }.also {
@@ -117,7 +118,13 @@ class ProsessinstansTestManager(
                     }
             }
         }
-        log.info { "Alle $expectedTotal prosesser ferdig: ${prosessinstanserFerdig.toTypeToCountMap()}" }
+        log.info {
+            "Alle $expectedTotal prosesser ferdig: ${
+                prosessinstanserFerdig
+                    .filter { it.status == ProsessStatus.FERDIG }
+                    .toTypeToCountMap()
+            }"
+        }
     }
 
     private fun List<Prosessinstans>.toTypeToCountMap(): Map<ProsessType, Int> = groupBy { it.type }.mapValues { it.value.size }
