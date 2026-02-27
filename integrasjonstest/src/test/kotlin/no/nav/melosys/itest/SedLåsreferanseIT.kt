@@ -82,7 +82,7 @@ class SedLåsreferanseIT(
             }
 
             logItems.filterBuilder
-                .waitUntilLogLineMatch("MOTTAK_SED ferdig", 2.seconds)
+                .waitUntilLogLineMatch("prosesser ferdig", 2.seconds)
                 .match<ProsessinstansBehandler>()
                 .replace(prosessRegister.prosessIdStringToName())
                 .replace(sed1ås, "<sed1Lås>")
@@ -118,7 +118,7 @@ class SedLåsreferanseIT(
             }
 
             logItems.filterBuilder
-                .waitUntilLogLineMatch("MOTTAK_SED ferdig", 2.seconds)
+                .waitUntilLogLineMatch("prosesser ferdig", 2.seconds)
                 .match<ProsessinstansBehandler>()
                 .replace(prosessRegister.prosessIdStringToName())
                 .replace(sed1ås, "<sed1Lås>")
