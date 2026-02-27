@@ -10,11 +10,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
-import no.nav.melosys.skjema.types.DegSelvMetadata
-import no.nav.melosys.skjema.types.Skjemadel
-import no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaDto
-import no.nav.melosys.skjema.types.arbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
-import no.nav.melosys.skjema.types.common.SkjemaStatus
+import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.junit.jupiter.api.BeforeEach
@@ -49,27 +45,9 @@ internal class HentSøknadsdataTest {
 
     @Test
     fun `utfør henter søknadsdata og lagrer på prosessinstans`() {
-        val skjema = UtsendtArbeidstakerSkjemaDto(
-            id = UUID.randomUUID(),
-            status = SkjemaStatus.SENDT,
-            fnr = "12345678901",
-            orgnr = "123456789",
-            metadata = DegSelvMetadata(
-                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
-                arbeidsgiverNavn = "Test AS",
-                juridiskEnhetOrgnr = "987654321"
-            ),
-            data = UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
-        )
-        val søknadsdata = UtsendtArbeidstakerSkjemaM2MDto(
-            skjema = skjema,
-            kobletSkjema = null,
-            tidligereInnsendteSkjema = emptyList(),
-            referanseId = "MEL-TEST123",
-            innsendtTidspunkt = java.time.LocalDateTime.now(),
-            innsenderFnr = "12345678901"
-        )
-
+        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            referanseId = "MEL-TEST123"
+        }
 
         every { melosysSkjemaApiClient.hentUtsendtArbeidstakerSkjema(skjemaId) } returns søknadsdata
 
