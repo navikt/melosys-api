@@ -111,16 +111,27 @@ public class RegisteropplysningerService {
         }
 
         // Frigjør lock etter at transaksjonen er fullført (commit eller rollback).
-        // Vi fjerner IKKE locken fra behandlingLocks — fjerning skaper en race condition der
-        // Tråd B tar den opplåste locken, deretter fjerner Tråd A den fra mappet slik at Tråd C
-        // lager en ny lock, og B og C kjører samtidig. Lock-objekter er lette (~100 bytes)
-        // og gjenbrukbare, så å beholde dem unngår denne racen med ubetydelig minnekostnad.
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCompletion(int status) {
-                lock.unlock();
-            }
-        });
+        // Trygg opprydding: tryLock() etter unlock() sjekker at ingen annen tråd har tatt locken
+        // før vi fjerner den fra mappet. Hvis noen andre holder locken, beholder vi oppføringen.
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCompletion(int status) {
+                    lock.unlock();
+                    if (lock.tryLock()) {
+                        try {
+                            behandlingLocks.remove(behandlingId, lock);
+                        } finally {
+                            lock.unlock();
+                        }
+                    }
+                }
+            });
+        } else {
+            log.warn("Ingen aktiv transaksjonssynchronisering for behandling {}, frigjør lock direkte", behandlingId);
+            lock.unlock();
+            return;
+        }
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
 
