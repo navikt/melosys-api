@@ -73,8 +73,6 @@ class OpprettSakOgBehandlingSøknad(
         val fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest)
         val behandling = fagsak.hentAktivBehandling()
 
-        prosessinstans.behandling = behandling
-
         log.info { "Opprettet fagsak ${fagsak.saksnummer} med behandling ${behandling.id} for digital søknad referanseId=$referanseId" }
 
         // Lagre mottatte opplysninger (søknadsdata) på behandlingen
@@ -88,6 +86,7 @@ class OpprettSakOgBehandlingSøknad(
             referanseId
         )
 
+        prosessinstans.behandling = behandling
         log.info { "Lagret mottatte opplysninger for digital søknad referanseId=$referanseId" }
     }
 }
