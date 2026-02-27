@@ -123,7 +123,7 @@ public class EessiService {
 
     public void opprettOgSendSed(long behandlingID, List<String> mottakerInstitusjoner, BucType bucType,
                                  Collection<DokumentReferanse> dokumentReferanser, String ytterligereInformasjon,
-                                 String a008Formaal) {
+                                 String a008Formaal, Boolean erFjernarbeidTWFA) {
         log.info("Starter sending av SED for behandling {}", behandlingID);
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -137,6 +137,9 @@ public class EessiService {
         sedData.setYtterligereInformasjon(mapYtterligereInformasjon(ytterligereInformasjon, periodeType, behandlingsresultat));
         if (unleash.isEnabled(ToggleName.MELOSYS_CDM_4_4)) {
             sedData.setA008Formaal(A008Formaal.hentVerdi(a008Formaal));
+            if (erFjernarbeidTWFA != null) {
+                sedData.setErFjernarbeidTWFA(erFjernarbeidTWFA);
+            }
         }
 
         log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());

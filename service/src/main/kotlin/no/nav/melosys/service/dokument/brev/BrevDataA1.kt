@@ -19,5 +19,6 @@ class BrevDataA1(
     var arbeidsland: Collection<Land_iso2>? = null,
     var ukjenteEllerAlleEosLand: Boolean = false,
     var bostedsadresse: StrukturertAdresse? = null,
-    var bivirksomheter: Collection<AvklartVirksomhet>? = null
+    var bivirksomheter: Collection<AvklartVirksomhet>? = null,
+    var erCdm44: Boolean = false
 ) : BrevData(saksbehandler, fritekst, begrunnelseKode)

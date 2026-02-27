@@ -45,7 +45,7 @@ class AnmodningUnntakControllerTest {
             vedlegg = setOf(vedleggDto)
         }
         every { aksesskontroll.autoriserSkriv(BEHANDLING_ID) } returns Unit
-        every { anmodningUnntakService.anmodningOmUnntak(any(), any(), any(), any(), any()) } returns Unit
+        every { anmodningUnntakService.anmodningOmUnntak(any(), any(), any(), any(), any(), any()) } returns Unit
 
 
         mockMvc.perform(
@@ -57,14 +57,15 @@ class AnmodningUnntakControllerTest {
 
 
         verify { aksesskontroll.autoriserSkriv(BEHANDLING_ID) }
-        verify { 
+        verify {
             anmodningUnntakService.anmodningOmUnntak(
-                BEHANDLING_ID, 
+                BEHANDLING_ID,
                 mottakerInstitusjon,
-                setOf(DokumentReferanse("jpID", "dokID")), 
-                fritekstSed, 
-                begrunnelseFritekst
-            ) 
+                setOf(DokumentReferanse("jpID", "dokID")),
+                fritekstSed,
+                begrunnelseFritekst,
+                null
+            )
         }
     }
 

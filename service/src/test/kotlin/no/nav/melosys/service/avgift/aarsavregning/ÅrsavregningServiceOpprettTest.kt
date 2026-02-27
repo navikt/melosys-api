@@ -249,6 +249,84 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
     }
 
     @Test
+    fun `opprettÅrsavregning - EØS pensjonist med eksisterende årsavregning fjerner gammel helseutgiftDekkesPeriode ved årbytte`() {
+        val fagsak = Fagsak.forTest {
+            saksnummer = "123456"
+            type = Sakstyper.EU_EOS
+            tema = Sakstemaer.TRYGDEAVGIFT
+            behandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.PENSJONIST
+                status = Behandlingsstatus.AVSLUTTET
+            }
+            behandling {
+                id = 2L
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.OPPRETTET
+            }
+        }
+
+        val førstegangBehandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
+            registrertDato = LocalDate.now().minusDays(30).atStartOfDay().toInstant(ZoneOffset.UTC)
+            vedtakMetadata {
+                vedtaksdato = LocalDate.now().minusDays(30).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            behandling = fagsak.behandlinger[0]
+
+            helseutgiftDekkesPeriode("2023-01-01", "2024-12-31")
+        }
+
+        val årsavregningBehandlingsresultat = Behandlingsresultat.forTest {
+            id = 2L
+            registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+            behandling = fagsak.behandlinger[1]
+
+            helseutgiftDekkesPeriode("2023-01-01", "2023-12-31", medTrygdeavgift = false)
+        }
+
+        val eksisterendeÅrsavregning = Årsavregning.forTest {
+            aar = 2023
+            behandlingsresultat = årsavregningBehandlingsresultat
+        }
+        årsavregningBehandlingsresultat.årsavregning = eksisterendeÅrsavregning
+
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } answers {
+            val id = firstArg<Long>()
+            when (id) {
+                1L -> førstegangBehandlingsresultat
+                2L -> årsavregningBehandlingsresultat
+                else -> null
+            }.shouldNotBeNull()
+        }
+
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+        every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(2, 2024) } returns 0
+        every { behandlingsresultatService.lagreOgFlush(any()) } answers { firstArg() }
+        every { behandlingsresultatService.lagre(any()) } answers {
+            firstArg<Behandlingsresultat>().apply {
+                årsavregning?.id = 51L
+            }
+        }
+
+        val resultat = årsavregningService.opprettÅrsavregning(2, 2024)
+
+        resultat.shouldNotBeNull().run {
+            årsavregningID shouldBe 51L
+            år shouldBe 2024
+
+            årsavregningBehandlingsresultat.helseutgiftDekkesPeriode.shouldNotBeNull().run {
+                fomDato shouldBe LocalDate.of(2024, 1, 1)
+                tomDato shouldBe LocalDate.of(2024, 12, 31)
+                behandlingsresultat shouldBe årsavregningBehandlingsresultat
+                trygdeavgiftsperioder shouldHaveSize 0
+            }
+        }
+    }
+
+    @Test
     fun `opprettÅrsavregning - EØS pensjonist med HelseutgiftDekkesPeriode replikerer helseutgiftperiode`() {
         val fagsak = Fagsak.forTest {
             saksnummer = "123456"

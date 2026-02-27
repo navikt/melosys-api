@@ -77,7 +77,7 @@ public class AnmodningUnntakService {
     @Transactional
     public void anmodningOmUnntak(long behandlingID, String mottakerinstitusjon,
                                   Set<DokumentReferanse> vedleggReferanser, String ytterligereInformasjonSed,
-                                  String begrunnelseFritekst) throws ValideringException {
+                                  String begrunnelseFritekst, Boolean erFjernarbeidTWFA) throws ValideringException {
         Set<String> mottakerinstitusjoner = validerMottakerInstitusjon(behandlingID, mottakerinstitusjon);
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
@@ -90,7 +90,7 @@ public class AnmodningUnntakService {
 
         anmodningsperiodeService.oppdaterAnmodetAvForBehandling(behandlingID, SubjectHandler.getInstance().getUserID());
         prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerinstitusjoner,
-            vedleggReferanser, ytterligereInformasjonSed, begrunnelseFritekst);
+            vedleggReferanser, ytterligereInformasjonSed, begrunnelseFritekst, erFjernarbeidTWFA);
         oppgaveService.leggTilbakeBehandlingsoppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
