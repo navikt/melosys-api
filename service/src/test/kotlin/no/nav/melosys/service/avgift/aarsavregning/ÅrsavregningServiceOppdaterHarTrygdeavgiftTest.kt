@@ -12,6 +12,8 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import org.junit.jupiter.api.Test
@@ -228,6 +230,78 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
             harTrygdeavgiftFraAvgiftssystemet shouldBe true
             tilFaktureringBeloep shouldBe null
             tidligereFakturertBeloep shouldBe BigDecimal(50)
+            trygdeavgiftFraAvgiftssystemet shouldBe null
+        }
+    }
+
+    @Test
+    fun `tilbakestiller helseutgiftDekkesPeriode når harTrygdeavgiftFraAvgiftssystemet settes til false for EØS pensjonist`() {
+        val fagsak = Fagsak.forTest {
+            saksnummer = "123456"
+            type = Sakstyper.EU_EOS
+            tema = Sakstemaer.TRYGDEAVGIFT
+            behandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.PENSJONIST
+                status = Behandlingsstatus.AVSLUTTET
+            }
+            behandling {
+                id = 2L
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.OPPRETTET
+            }
+        }
+
+        val tidligereBehandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
+            vedtakMetadata {
+                vedtaksdato = LocalDate.now().minusDays(30).atStartOfDay().toInstant(java.time.ZoneOffset.UTC)
+            }
+            behandling = fagsak.behandlinger[0]
+
+            helseutgiftDekkesPeriode("2023-01-01", "2023-12-31")
+        }
+
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 2L
+            behandling = fagsak.behandlinger[1]
+
+            helseutgiftDekkesPeriode("2023-01-01", "2023-12-31", medTrygdeavgift = false)
+        }
+
+        val årsavregning = Årsavregning.forTest {
+            id = 112
+            aar = 2023
+            this.behandlingsresultat = behandlingsresultat
+            this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
+            this.harTrygdeavgiftFraAvgiftssystemet = true
+        }
+
+        behandlingsresultat.årsavregning = årsavregning
+
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns tidligereBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat
+
+        val behandlingsresultatCaptor = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagreOgFlush(capture(behandlingsresultatCaptor)) } answers {
+            behandlingsresultatCaptor.captured
+        }
+
+        årsavregningService.oppdaterHarTrygdeavgiftFraAvgiftssystemet(2L, false)
+
+        verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(any()) }
+
+        behandlingsresultatCaptor.captured.helseutgiftDekkesPeriode.shouldNotBeNull().run {
+            fomDato shouldBe LocalDate.of(2023, 1, 1)
+            tomDato shouldBe LocalDate.of(2023, 12, 31)
+            trygdeavgiftsperioder shouldHaveSize 0
+        }
+
+        behandlingsresultatCaptor.captured.årsavregning.shouldNotBeNull().run {
+            harTrygdeavgiftFraAvgiftssystemet shouldBe false
+            tilFaktureringBeloep shouldBe null
             trygdeavgiftFraAvgiftssystemet shouldBe null
         }
     }
