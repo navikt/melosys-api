@@ -108,11 +108,9 @@ class ProsessinstansTestManagerTest {
                 "awaitility-thread" to "awaitCheckForDoneCount",
                 thread.name to "jfrKnytt.status = ProsessStatus.FERDIG",
                 "awaitility-thread" to "awaitCheckForDoneCount",
-                "main" to "JFR_KNYTT ferdig",
-                "awaitility-thread" to "awaitCheckForDoneCount",
                 thread.name to "iverksettVedtakEos.status = ProsessStatus.FERDIG",
                 "awaitility-thread" to "awaitCheckForDoneCount",
-                "main" to "IVERKSETT_VEDTAK_EOS ferdig"
+                "main" to "Alle 2 prosesser ferdig: {JFR_KNYTT=1, IVERKSETT_VEDTAK_EOS=1}"
             )
 
             awaitCheckForDoneCount shouldBeGreaterThan 5
@@ -218,10 +216,15 @@ class ProsessinstansTestManagerTest {
             ) {
             }
         }.message shouldBe "Wait for [JFR_KNYTT, IVERKSETT_VEDTAK_EOS]\n" +
-            "wait for prosees type:IVERKSETT_VEDTAK_EOS to have status FERDIG\n" +
-            "Condition with Lambda expression in no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
-            "prosess med type: IVERKSETT_VEDTAK_EOS har status KLAR\n" +
-            "expected:<FERDIG> but was:<KLAR>"
+            "wait for all 2 processes to finish\n" +
+            "1/2 finished. Ferdig: {JFR_KNYTT=1}, Forventet: {JFR_KNYTT=1, IVERKSETT_VEDTAK_EOS=1}\n" +
+            "Values differed at keys \n" +
+            "expected:<{\n" +
+            "  JFR_KNYTT = 1,\n" +
+            "  IVERKSETT_VEDTAK_EOS = 1\n" +
+            "}> but was:<{\n" +
+            "  JFR_KNYTT = 1\n" +
+            "}>"
     }
 
 

@@ -1,8 +1,6 @@
 package no.nav.melosys
 
 import io.kotest.assertions.withClue
-import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import mu.KotlinLogging
 import no.nav.melosys.AwaitUtil.onTimeout
@@ -53,12 +51,12 @@ class ProsessinstansTestManager(
         try {
             process()
             waitForProcessesToStart(waitForProsesses)
-            val prosessTypes = waitForProsesses.map { it.key }
-            log.info { "prosessinstanser started $prosessTypes" }
-            return withClue("Wait for $prosessTypes") {
-                prosessTypes
-                    .map { waitForAndReturnProcess(it, onWaitUntil) }
-                    .firstOrNull { it.type == returnProsessOfType } ?: error("Fant ikke prosess for $returnProsessOfType")
+            log.info { "prosessinstanser started ${waitForProsesses.keys}" }
+            return withClue("Wait for ${waitForProsesses.keys}") {
+                waitForAllProcessesToFinish(waitForProsesses, onWaitUntil)
+                prosessinstanserFerdig
+                    .firstOrNull { it.type == returnProsessOfType }
+                    ?: error("Fant ikke prosess for $returnProsessOfType")
             }.also {
                 // Vi sjekker dette igjen siden vi kan få false positive første gang vi sjekker
                 // Det kan skje at kun en prosess er startet, og waitForProsesses inneholder feilaktig bare denne
@@ -90,32 +88,36 @@ class ProsessinstansTestManager(
         }
     }
 
-    private fun waitForAndReturnProcess(prosessType: ProsessType, onWaitUntil: () -> Unit = {}): Prosessinstans {
-        withClue("wait for prosees type:$prosessType to have status FERDIG") {
-            return AwaitUtil.awaitWithFailOnLogErrors {
-                var current: Prosessinstans? = null
+    /**
+     * Venter til ALLE forventede prosesser har status FERDIG (ikke bare én per type).
+     * Forhindrer at asynkrone prosesser fra forrige test fortsetter å kjøre
+     * etter at truncateAllTables() har ryddet databasen.
+     */
+    private fun waitForAllProcessesToFinish(
+        waitForProsesses: Map<ProsessType, Int>,
+        onWaitUntil: () -> Unit
+    ) {
+        val expectedTotal = waitForProsesses.values.sum()
+        withClue("wait for all $expectedTotal processes to finish") {
+            AwaitUtil.awaitWithFailOnLogErrors {
                 pollDelay(pollDelay)
                     .timeout(timeOut)
                     .onTimeout { e ->
-                        val prosesserStartet = prosessinstanserFerdig.firstOrNull { it.type == prosessType }?.status
-                        withClue(e.message) {
-                            withClue("prosess med type: $prosessType har status $prosesserStartet") {
-                                prosessinstanserOpprettet.map { it.type } shouldContain prosessType
-                                prosessinstanserOpprettet.firstOrNull { it.type == prosessType }?.status shouldBe ProsessStatus.FERDIG
-                            }
+                        val ferdigByType = prosessinstanserFerdig
+                            .filter { it.status == ProsessStatus.FERDIG }
+                            .toTypeToCountMap()
+                        withClue("${ferdigByType.values.sum()}/$expectedTotal finished. " +
+                                "Ferdig: $ferdigByType, Forventet: $waitForProsesses") {
+                            ferdigByType shouldBe waitForProsesses
                         }
                     }
                     .waitUntil(abort = { prosessinstanserOpprettet.any { it.status == ProsessStatus.FEILET } }) {
                         onWaitUntil()
-                        current = prosessinstanserFerdig.firstOrNull { it.type == prosessType && it.status == ProsessStatus.FERDIG }
-                        current != null
+                        prosessinstanserFerdig.count { it.status == ProsessStatus.FERDIG } >= expectedTotal
                     }
-                current.shouldNotBeNull()
-            }.also {
-                log.info { "$prosessType ferdig" }
             }
         }
-
+        log.info { "Alle $expectedTotal prosesser ferdig: ${prosessinstanserFerdig.toTypeToCountMap()}" }
     }
 
     private fun List<Prosessinstans>.toTypeToCountMap(): Map<ProsessType, Int> = groupBy { it.type }.mapValues { it.value.size }
