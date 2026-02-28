@@ -14,11 +14,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType
-import no.nav.melosys.skjema.types.DegSelvMetadata
-import no.nav.melosys.skjema.types.Skjemadel
-import no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaDto
-import no.nav.melosys.skjema.types.arbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
-import no.nav.melosys.skjema.types.common.SkjemaStatus
+import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.awaitility.kotlin.await
@@ -29,7 +25,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.core.KafkaTemplate
 
 import java.time.Duration
-import java.util.UUID
 
 class DigitalSøknadMottakIT(
     @Autowired @Qualifier("skjemaMottattMelding")
@@ -47,31 +42,13 @@ class DigitalSøknadMottakIT(
 
     @Test
     fun `mottak av digital søknad starter saga og henter søknadsdata fra melosys-skjema-api`() {
-        val skjemaId = UUID.randomUUID()
         // Bruker fnr fra PersonRepo i melosys-mock (KARAFFEL TRIVIELL)
         val testFnr = "30056928150"
 
-        val skjema = UtsendtArbeidstakerSkjemaDto(
-            id = skjemaId,
-            status = SkjemaStatus.SENDT,
-            fnr = testFnr,
-            orgnr = "123456789",
-            metadata = DegSelvMetadata(
-                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
-                arbeidsgiverNavn = "Test AS",
-                juridiskEnhetOrgnr = "987654321"
-            ),
-            data = UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
-        )
-
-        val forventetSøknadsdata = UtsendtArbeidstakerSkjemaM2MDto(
-            skjema = skjema,
-            kobletSkjema = null,
-            tidligereInnsendteSkjema = emptyList(),
-            referanseId = "MEL-$skjemaId",
-            innsendtTidspunkt = java.time.LocalDateTime.now(),
-            innsenderFnr = testFnr
-        )
+        val forventetSøknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            fnr = testFnr
+        }
+        val skjemaId = forventetSøknadsdata.skjema.id
 
         // Stub melosys-skjema-api endpoint for søknadsdata
         mockServer.stubFor(
@@ -100,10 +77,10 @@ class DigitalSøknadMottakIT(
         // Send Kafka message
         kafkaTemplate.send(kafkaTopic, melding)
 
-        // Wait for saga to fail at step 4 (expected - step not implemented yet)
+        // Wait for saga to complete
         await.atMost(Duration.ofSeconds(10)).until {
             prosessinstansRepository.findAllByLåsReferanseStartingWith(skjemaId.toString())
-                .firstOrNull()?.status == ProsessStatus.FEILET
+                .firstOrNull()?.status == ProsessStatus.FERDIG
         }
 
         // Fetch and verify prosessinstans state
@@ -111,15 +88,12 @@ class DigitalSøknadMottakIT(
 
         // Basic prosessinstans info
         prosessinstans.type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
-        prosessinstans.status shouldBe ProsessStatus.FEILET
+        prosessinstans.status shouldBe ProsessStatus.FERDIG
         prosessinstans.låsReferanse shouldBe skjemaId.toString()
 
-        // Step progression - step 1, 2, and 3 completed, failed at step 4
-        prosessinstans.sistFullførtSteg shouldBe ProsessSteg.OPPRETT_OG_FERDIGSTILL_JOURNALPOST_SØKNAD
-
-        // Error hendelse - verify we failed at the expected step
-        prosessinstans.hendelser.shouldHaveSize(1)
-        prosessinstans.hendelser.first().steg shouldBe ProsessSteg.LAGRE_SAKSOPPLYSNINGER_SØKNAD
+        // All steps completed successfully
+        prosessinstans.sistFullførtSteg shouldBe ProsessSteg.OPPRETT_OPPGAVE
+        prosessinstans.hendelser.shouldHaveSize(0)
 
         // Verify data stored by consumer (SØKNAD_MOTTATT_MELDING)
         val mottattMelding = prosessinstans.hentData<SkjemaMottattMelding>(ProsessDataKey.SØKNAD_MOTTATT_MELDING)
@@ -140,5 +114,8 @@ class DigitalSøknadMottakIT(
 
         // Verify journalpostId was set on behandling (step 3)
         behandling.initierendeJournalpostId.shouldNotBeNull()
+
+        // Verify mottatteOpplysninger was created on behandling (step 4)
+        behandling.mottatteOpplysninger.shouldNotBeNull()
     }
 }

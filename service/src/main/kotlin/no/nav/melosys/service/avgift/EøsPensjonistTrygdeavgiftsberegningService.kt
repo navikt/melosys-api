@@ -7,6 +7,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
@@ -14,6 +15,7 @@ import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
 import no.nav.melosys.integrasjon.trygdeavgift.dto.EøsPensjonistTrygdeavgiftsberegningRequest
 import no.nav.melosys.integrasjon.trygdeavgift.dto.EøsPensjonistTrygdeavgiftsberegningResponse
+import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
@@ -36,7 +38,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
     private val trygdeavgiftClient: TrygdeavgiftClient,
     private val unleash: Unleash
 ) {
-    @Transactional(readOnly = true)
+    @Transactional
     fun beregnOgLagreTrygdeavgift(
         behandlingID: Long,
         skatteforholdsperioder: List<SkatteforholdTilNorge> = emptyList(),
@@ -59,6 +61,18 @@ class EøsPensjonistTrygdeavgiftsberegningService(
             lagNyeTrygdeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
 
         trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
+
+        behandlingsresultat.årsavregning?.let { årsavregning ->
+            if (årsavregning.endeligAvgiftValg != EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT) {
+                val totalAvgift = TotalbeløpBeregner.hentTotalavgift(nyeTrygdeavgiftsperioder)
+                årsavregning.beregnetAvgiftBelop = totalAvgift
+                if (totalAvgift != null) {
+                    årsavregning.beregnTilFaktureringsBeloep()
+                } else {
+                    årsavregning.tilFaktureringBeloep = null
+                }
+            }
+        }
 
         return nyeTrygdeavgiftsperioder.toSet()
     }

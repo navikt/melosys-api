@@ -16,20 +16,14 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
+import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataFasade
-import no.nav.melosys.skjema.types.ArbeidsgiverMetadata
-import no.nav.melosys.skjema.types.DegSelvMetadata
 import no.nav.melosys.skjema.types.Skjemadel
-import no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaDto
 import no.nav.melosys.skjema.types.arbeidsgiver.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
-import no.nav.melosys.skjema.types.arbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
-import no.nav.melosys.skjema.types.common.SkjemaStatus
-import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.util.UUID
 
 @ExtendWith(MockKExtension::class)
 internal class OpprettOgFerdigstillJournalpostSøknadTest {
@@ -50,12 +44,9 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
 
     private val fnr = "12345678901"
     private val innsenderFnr = "98765432100"
-    private val orgnr = "123456789"
-    private val juridiskEnhetOrgnr = "987654321"
     private val referanseId = "MEL-TEST123"
     private val saksnummer = "SAK-12345"
     private val journalpostId = "JOARK-123456"
-    private val skjemaId = UUID.randomUUID()
     private val pdfBytes = "PDF content".toByteArray()
 
     private val capturedJournalpost = slot<OpprettJournalpost>()
@@ -69,7 +60,6 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
             melosysSkjemaApiClient, joarkFasade, behandlingService, persondataFasade
         )
 
-        every { melosysSkjemaApiClient.hentPdf(skjemaId) } returns pdfBytes
         every { joarkFasade.opprettJournalpost(capture(capturedJournalpost), eq(true)) } returns journalpostId
         every { behandlingService.lagre(any()) } just Runs
         every { persondataFasade.hentSammensattNavn(innsenderFnr) } returns innsenderNavn
@@ -87,7 +77,7 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
 
         opprettOgFerdigstillJournalpostSøknad.utfør(prosessinstans)
 
-        verify { melosysSkjemaApiClient.hentPdf(skjemaId) }
+        verify { melosysSkjemaApiClient.hentPdf(søknadsdata.skjema.id) }
         verify { joarkFasade.opprettJournalpost(any(), eq(true)) }
         verify { behandlingService.lagre(any()) }
 
@@ -138,45 +128,20 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
         verify { joarkFasade.opprettJournalpost(any(), eq(true)) }
     }
 
-    private fun lagSøknadsdata(skjemadel: Skjemadel): UtsendtArbeidstakerSkjemaM2MDto {
-        val metadata = when (skjemadel) {
-            Skjemadel.ARBEIDSTAKERS_DEL -> DegSelvMetadata(
-                skjemadel = skjemadel,
-                arbeidsgiverNavn = "Test AS",
-                juridiskEnhetOrgnr = juridiskEnhetOrgnr
-            )
-            Skjemadel.ARBEIDSGIVERS_DEL -> ArbeidsgiverMetadata(
-                skjemadel = skjemadel,
-                arbeidsgiverNavn = "Test AS",
-                juridiskEnhetOrgnr = juridiskEnhetOrgnr
-            )
-        }
-
-        val data = when (skjemadel) {
-            Skjemadel.ARBEIDSTAKERS_DEL -> UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
-            Skjemadel.ARBEIDSGIVERS_DEL -> UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
-        }
-
-        val skjema = UtsendtArbeidstakerSkjemaDto(
-            id = skjemaId,
-            status = SkjemaStatus.SENDT,
-            fnr = fnr,
-            orgnr = orgnr,
-            metadata = metadata,
-            data = data
-        )
-
-        return UtsendtArbeidstakerSkjemaM2MDto(
-            skjema = skjema,
-            kobletSkjema = null,
-            tidligereInnsendteSkjema = emptyList(),
-            referanseId = referanseId,
-            innsendtTidspunkt = java.time.LocalDateTime.now(),
+    private fun lagSøknadsdata(skjemadel: Skjemadel) =
+        lagUtsendtArbeidstakerSkjemaM2MDto {
+            this.skjemadel = skjemadel
+            fnr = this@OpprettOgFerdigstillJournalpostSøknadTest.fnr
+            referanseId = this@OpprettOgFerdigstillJournalpostSøknadTest.referanseId
             innsenderFnr = this@OpprettOgFerdigstillJournalpostSøknadTest.innsenderFnr
-        )
-    }
+            if (skjemadel == Skjemadel.ARBEIDSGIVERS_DEL) {
+                data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
+            }
+        }.also {
+            every { melosysSkjemaApiClient.hentPdf(it.skjema.id) } returns pdfBytes
+        }
 
-    private fun lagProsessinstans(søknadsdata: UtsendtArbeidstakerSkjemaM2MDto): Prosessinstans {
+    private fun lagProsessinstans(søknadsdata: no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto): Prosessinstans {
         val behandling = Behandling.forTest {
             fagsak { saksnummer = this@OpprettOgFerdigstillJournalpostSøknadTest.saksnummer }
         }
