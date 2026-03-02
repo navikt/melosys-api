@@ -135,7 +135,7 @@ public class RegisteropplysningerService {
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
 
-        // Debounce: hopp over hvis registerdata nettopp ble hentet (fanger sekvensielle nær-duplikater)
+        // Duplikatsjekk: hopp over hvis registerdata nettopp ble hentet (under 2 sek siden)
         if (behandling.getSisteOpplysningerHentetDato() != null
                 && Duration.between(behandling.getSisteOpplysningerHentetDato(), Instant.now()).getSeconds() < 2) {
             log.info("Registeropplysninger nylig hentet for behandling {}, hopper over", behandlingId);
@@ -260,6 +260,11 @@ public class RegisteropplysningerService {
         behandling.getSaksopplysninger().removeIf(s -> s.getType() != SaksopplysningType.SEDOPPL);
         behandling.setSisteOpplysningerHentetDato(null);
         behandlingService.lagre(behandling);
+    }
+
+    // Package-private for test
+    static ConcurrentHashMap<Long, ReentrantLock> getBehandlingLocksForTest() {
+        return behandlingLocks;
     }
 
     @FunctionalInterface

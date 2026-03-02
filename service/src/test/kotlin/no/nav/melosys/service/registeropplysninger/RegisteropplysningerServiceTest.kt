@@ -275,7 +275,7 @@ class RegisteropplysningerServiceTest {
     }
 
     @Test
-    fun `hentOgLagreOpplysninger debounce skipper kall hvis registerdata nettopp ble hentet`() {
+    fun `hentOgLagreOpplysninger skipper kall hvis registerdata nettopp ble hentet`() {
         val behandling = Behandling.forTest {
             id = 3L
             tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
@@ -296,10 +296,7 @@ class RegisteropplysningerServiceTest {
 
     @Test
     fun `hentOgLagreOpplysninger lock skipper samtidige kall for samme behandling`() {
-        val lockField = RegisteropplysningerService::class.java.getDeclaredField("behandlingLocks")
-        lockField.isAccessible = true
-        @Suppress("UNCHECKED_CAST")
-        val locks = lockField.get(null) as java.util.concurrent.ConcurrentHashMap<Long, java.util.concurrent.locks.ReentrantLock>
+        val locks = RegisteropplysningerService.getBehandlingLocksForTest()
         val existingLock = java.util.concurrent.locks.ReentrantLock()
 
         // Locken må holdes av en annen tråd — ReentrantLock tillater samme tråd å re-locke
