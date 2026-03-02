@@ -38,6 +38,7 @@ public class RegisteropplysningerService {
     private static final Logger log = LoggerFactory.getLogger(RegisteropplysningerService.class);
 
     private static final ConcurrentHashMap<Long, ReentrantLock> behandlingLocks = new ConcurrentHashMap<>();
+    private static final long NYLIG_HENTET_TERSKEL_SEKUNDER = 2;
 
     private static final Comparator<SaksopplysningType> SAKSOPPLYSNINGSTYPE_COMPARATOR = (s1, s2) -> {
         if (s1 == SaksopplysningType.ARBFORH || s1 == SaksopplysningType.INNTK) return -1;
@@ -98,22 +99,36 @@ public class RegisteropplysningerService {
 
         long behandlingId = registeropplysningerRequest.getBehandlingID();
 
-        // Applikasjonsnivå-lock: forhindrer samtidige kall til hentOgLagreOpplysninger for samme behandling.
-        // tryLock() returnerer umiddelbart false hvis en annen tråd holder locken — det samtidige kallet
-        // er redundant (samme data ville blitt hentet) så vi skipper det for å unngå OptimisticLockingFailureException.
-        //
-        // Locken frigjøres ETTER at transaksjonen er committet (via TransactionSynchronization),
-        // ikke i en finally-blokk. Dette forhindrer at Tråd B tar locken mens Tråd A sin
-        // transaksjon ennå ikke er committet (som ville gitt stale reads og OptimisticLockingFailureException).
-        var lock = behandlingLocks.computeIfAbsent(behandlingId, k -> new ReentrantLock());
-        if (!lock.tryLock()) {
-            log.info("Registeropplysninger hentes allerede for behandling {}, hopper over", behandlingId);
+        if (!tryAcquireLock(behandlingId)) {
             return;
         }
 
-        // Frigjør lock etter at transaksjonen er fullført (commit eller rollback).
-        // Trygg opprydding: tryLock() etter unlock() sjekker at ingen annen tråd har tatt locken
-        // før vi fjerner den fra mappet. Hvis noen andre holder locken, beholder vi oppføringen.
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
+
+        if (erNyligHentet(behandling)) {
+            log.info("Registeropplysninger nylig hentet for behandling {}, hopper over", behandlingId);
+            return;
+        }
+
+        hentOgLagreOpplysninger(registeropplysningerRequest, behandling);
+    }
+
+    // Forhindrer samtidige kall til hentOgLagreOpplysninger for samme behandling.
+    // Locken frigjøres etter TX commit via TransactionSynchronization, ikke i finally-blokk,
+    // slik at Tråd B ikke tar locken mens Tråd A sin transaksjon ennå ikke er committet.
+    private boolean tryAcquireLock(long behandlingId) {
+        var lock = behandlingLocks.computeIfAbsent(behandlingId, k -> new ReentrantLock());
+        if (!lock.tryLock()) {
+            log.info("Registeropplysninger hentes allerede for behandling {}, hopper over", behandlingId);
+            return false;
+        }
+        if (!registerLockRelease(behandlingId, lock)) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean registerLockRelease(long behandlingId, ReentrantLock lock) {
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
@@ -128,22 +143,18 @@ public class RegisteropplysningerService {
                     }
                 }
             });
+            return true;
         } else {
             log.warn("Ingen aktiv transaksjonssynchronisering for behandling {}, frigjør lock direkte", behandlingId);
             lock.unlock();
-            return;
+            return false;
         }
+    }
 
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
-
-        // Duplikatsjekk: hopp over hvis registerdata nettopp ble hentet (under 2 sek siden)
-        if (behandling.getSisteOpplysningerHentetDato() != null
-                && Duration.between(behandling.getSisteOpplysningerHentetDato(), Instant.now()).getSeconds() < 2) {
-            log.info("Registeropplysninger nylig hentet for behandling {}, hopper over", behandlingId);
-            return;
-        }
-
-        hentOgLagreOpplysninger(registeropplysningerRequest, behandling);
+    private boolean erNyligHentet(Behandling behandling) {
+        return behandling.getSisteOpplysningerHentetDato() != null
+            && Duration.between(behandling.getSisteOpplysningerHentetDato(), Instant.now()).getSeconds()
+                < NYLIG_HENTET_TERSKEL_SEKUNDER;
     }
 
     private void hentOgLagreOpplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
