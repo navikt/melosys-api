@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -262,7 +263,7 @@ public class RegisteropplysningerService {
         behandlingService.lagre(behandling);
     }
 
-    @com.google.common.annotations.VisibleForTesting
+    @VisibleForTesting
     static ConcurrentHashMap<Long, ReentrantLock> getBehandlingLocksForTest() {
         return behandlingLocks;
     }
