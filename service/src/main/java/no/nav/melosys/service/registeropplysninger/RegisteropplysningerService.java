@@ -262,7 +262,7 @@ public class RegisteropplysningerService {
         behandlingService.lagre(behandling);
     }
 
-    // Package-private for test
+    @com.google.common.annotations.VisibleForTesting
     static ConcurrentHashMap<Long, ReentrantLock> getBehandlingLocksForTest() {
         return behandlingLocks;
     }
