@@ -119,9 +119,9 @@ class BehandlingsresultatService(
         oppdaterUtfallRegistreringUnntak(behandlingID, utfallRegistreringUnntak)
     }
 
-    fun oppdaterUtfallRegistreringUnntak(behandlingID: Long, utfallUtpeking: Utfallregistreringunntak): Behandlingsresultat =
+    fun oppdaterUtfallRegistreringUnntak(behandlingID: Long, utfallRegistreringUnntak: Utfallregistreringunntak): Behandlingsresultat =
         hentBehandlingsresultatMedKontrollresultat(behandlingID).apply {
-            utfallRegistreringUnntak = utfallUtpeking
+            this.utfallRegistreringUnntak = utfallRegistreringUnntak
         }.let {
             behandlingsresultatRepository.save(it)
         }
