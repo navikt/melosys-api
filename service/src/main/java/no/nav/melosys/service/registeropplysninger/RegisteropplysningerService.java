@@ -1,10 +1,14 @@
 package no.nav.melosys.service.registeropplysninger;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -26,10 +30,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 public class RegisteropplysningerService {
     private static final Logger log = LoggerFactory.getLogger(RegisteropplysningerService.class);
+
+    private static final ConcurrentHashMap<Long, ReentrantLock> behandlingLocks = new ConcurrentHashMap<>();
+    private static final long NYLIG_HENTET_TERSKEL_SEKUNDER = 2;
 
     private static final Comparator<SaksopplysningType> SAKSOPPLYSNINGSTYPE_COMPARATOR = (s1, s2) -> {
         if (s1 == SaksopplysningType.ARBFORH || s1 == SaksopplysningType.INNTK) return -1;
@@ -88,9 +97,64 @@ public class RegisteropplysningerService {
             registeropplysningerRequest.setFom(registeropplysningerRequest.getFom().minusYears(5));
         }
 
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(registeropplysningerRequest.getBehandlingID());
+        long behandlingId = registeropplysningerRequest.getBehandlingID();
+
+        if (!tryAcquireLock(behandlingId)) {
+            return;
+        }
+
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
+
+        if (erNyligHentet(behandling)) {
+            log.info("Registeropplysninger nylig hentet for behandling {}, hopper over", behandlingId);
+            return;
+        }
 
         hentOgLagreOpplysninger(registeropplysningerRequest, behandling);
+    }
+
+    // Forhindrer samtidige kall til hentOgLagreOpplysninger for samme behandling.
+    // Locken frigjøres etter TX commit via TransactionSynchronization, ikke i finally-blokk,
+    // slik at Tråd B ikke tar locken mens Tråd A sin transaksjon ennå ikke er committet.
+    private boolean tryAcquireLock(long behandlingId) {
+        var lock = behandlingLocks.computeIfAbsent(behandlingId, k -> new ReentrantLock());
+        if (!lock.tryLock()) {
+            log.info("Registeropplysninger hentes allerede for behandling {}, hopper over", behandlingId);
+            return false;
+        }
+        if (!registerLockRelease(behandlingId, lock)) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean registerLockRelease(long behandlingId, ReentrantLock lock) {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCompletion(int status) {
+                    lock.unlock();
+                    if (lock.tryLock()) {
+                        try {
+                            behandlingLocks.remove(behandlingId, lock);
+                        } finally {
+                            lock.unlock();
+                        }
+                    }
+                }
+            });
+            return true;
+        } else {
+            log.warn("Ingen aktiv transaksjonssynchronisering for behandling {}, frigjør lock direkte", behandlingId);
+            lock.unlock();
+            return false;
+        }
+    }
+
+    private boolean erNyligHentet(Behandling behandling) {
+        return behandling.getSisteOpplysningerHentetDato() != null
+            && Duration.between(behandling.getSisteOpplysningerHentetDato(), Instant.now()).getSeconds()
+                < NYLIG_HENTET_TERSKEL_SEKUNDER;
     }
 
     private void hentOgLagreOpplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
@@ -208,6 +272,11 @@ public class RegisteropplysningerService {
         behandling.getSaksopplysninger().removeIf(s -> s.getType() != SaksopplysningType.SEDOPPL);
         behandling.setSisteOpplysningerHentetDato(null);
         behandlingService.lagre(behandling);
+    }
+
+    @VisibleForTesting
+    static ConcurrentHashMap<Long, ReentrantLock> getBehandlingLocksForTest() {
+        return behandlingLocks;
     }
 
     @FunctionalInterface

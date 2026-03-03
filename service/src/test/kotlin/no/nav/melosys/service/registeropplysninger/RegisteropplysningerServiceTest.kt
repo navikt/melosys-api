@@ -15,9 +15,13 @@ import no.nav.melosys.service.aareg.ArbeidsforholdService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.medl.MedlPeriodeService
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.transaction.support.TransactionSynchronization
+import org.springframework.transaction.support.TransactionSynchronizationManager
+import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
@@ -53,6 +57,10 @@ class RegisteropplysningerServiceTest {
 
     @BeforeEach
     fun setUp() {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.initSynchronization()
+        }
+
         registeropplysningerService = RegisteropplysningerService(
             medlPeriodeService,
             eregFasade,
@@ -79,6 +87,17 @@ class RegisteropplysningerServiceTest {
 
         every { behandlingService.lagre(any()) } returns mockk()
         every { utbetaltdataService.hentUtbetalingerBarnetrygd(any(), any(), any()) } returns lagSaksopplysning(SaksopplysningType.UTBETAL)
+    }
+
+    @AfterEach
+    fun tearDown() {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            // Kjør registrerte synchronizations (frigjør locks) før vi rydder opp
+            TransactionSynchronizationManager.getSynchronizations().forEach {
+                it.afterCompletion(TransactionSynchronization.STATUS_COMMITTED)
+            }
+            TransactionSynchronizationManager.clearSynchronization()
+        }
     }
 
     @Test
@@ -253,6 +272,60 @@ class RegisteropplysningerServiceTest {
 
         verify { eregFasade.hentOrganisasjon(any()) }
         verify { behandlingService.lagre(any()) }
+    }
+
+    @Test
+    fun `hentOgLagreOpplysninger skipper kall hvis registerdata nettopp ble hentet`() {
+        val behandling = Behandling.forTest {
+            id = 3L
+            tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+        }
+        behandling.sisteOpplysningerHentetDato = Instant.now()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(3L) } returns behandling
+
+        registeropplysningerService.hentOgLagreOpplysninger(
+            registeropplysningerRequest(LocalDate.now().minusYears(1), LocalDate.now())
+                .behandlingID(3L)
+                .saksopplysningTyper(saksopplysningstyper().medlemskapsopplysninger().build())
+                .build()
+        )
+
+        verify(exactly = 0) { medlPeriodeService.hentPeriodeListe(any(), any(), any()) }
+        verify(exactly = 0) { behandlingService.lagre(any()) }
+    }
+
+    @Test
+    fun `hentOgLagreOpplysninger lock skipper samtidige kall for samme behandling`() {
+        val locks = RegisteropplysningerService.getBehandlingLocksForTest()
+        val existingLock = java.util.concurrent.locks.ReentrantLock()
+
+        // Locken må holdes av en annen tråd — ReentrantLock tillater samme tråd å re-locke
+        val latch = java.util.concurrent.CountDownLatch(1)
+        val thread = Thread {
+            existingLock.lock()
+            latch.countDown()
+            try { Thread.sleep(5000) } catch (_: InterruptedException) {}
+            existingLock.unlock()
+        }
+        thread.isDaemon = true
+        thread.start()
+        latch.await()
+        locks[4L] = existingLock
+
+        try {
+            registeropplysningerService.hentOgLagreOpplysninger(
+                registeropplysningerRequest(LocalDate.now().minusYears(1), LocalDate.now())
+                    .behandlingID(4L)
+                    .saksopplysningTyper(saksopplysningstyper().medlemskapsopplysninger().build())
+                    .build()
+            )
+
+            verify(exactly = 0) { behandlingService.hentBehandlingMedSaksopplysninger(4L) }
+            verify(exactly = 0) { behandlingService.lagre(any()) }
+        } finally {
+            thread.interrupt()
+            locks.remove(4L)
+        }
     }
 
     private fun hentBehandling() = Behandling.forTest {
