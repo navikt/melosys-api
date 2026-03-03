@@ -4,7 +4,6 @@ import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
@@ -56,17 +55,49 @@ class OppretteÅrsavregningVedEndring(
             opprettÅrsavregning(potensielleÅrsavregningÅrNy, behandling)
         } else if (behandling.erNyVurdering()) {
             val opprinneligBehandling = behandling.hentOpprinneligBehandling()
-            val opprinneligBehandlingsresultat =
-                behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
-            if (!harEndringerITidligereÅr(behandlingsresultat, opprinneligBehandlingsresultat)) {
-                return
+            val opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
+
+            val årMedEndringer = finnÅrMedEndringer(behandlingsresultat, opprinneligBehandlingsresultat)
+            if (årMedEndringer.isNotEmpty()) {
+                opprettÅrsavregning(årMedEndringer, behandling)
             }
-            val potensielleÅrsavregningÅr: Set<Int> =
-                hentPotensielleÅrsavregningÅrFraAvgiftsperioder(opprinneligBehandlingsresultat).union(
-                    potensielleÅrsavregningÅrNy
-                )
-            opprettÅrsavregning(potensielleÅrsavregningÅr, behandling)
         }
+    }
+
+    private fun finnÅrMedEndringer(
+        behandlingsresultat: Behandlingsresultat,
+        opprinneligBehandlingsresultat: Behandlingsresultat
+    ): Set<Int> {
+        val potensielleÅr = hentPotensielleÅrsavregningÅrFraAvgiftsperioder(opprinneligBehandlingsresultat)
+            .union(hentPotensielleÅrsavregningÅrFraAvgiftsperioder(behandlingsresultat))
+
+        return potensielleÅr.filter { år ->
+            perioderForÅr(behandlingsresultat, år) != perioderForÅr(opprinneligBehandlingsresultat, år)
+        }.toSet()
+    }
+
+    private fun perioderForÅr(
+        behandlingsresultat: Behandlingsresultat,
+        år: Int
+    ): Set<AvgiftspliktigPeriodeTilSammenligning> {
+        return behandlingsresultat.finnAvgiftspliktigPerioder()
+            .filter { it.erInnvilget() }
+            .filter { periode ->
+                val fom = periode.getFom() ?: return@filter false
+                val tom = periode.getTom()
+                val sluttÅr = tom?.year ?: LocalDate.now().year
+                år in fom.year..sluttÅr
+            }
+            .map { periode ->
+                AvgiftspliktigPeriodeTilSammenligning(
+                    fom = maxOf(periode.getFom(), LocalDate.of(år, 1, 1)),
+                    tom = periode.getTom()?.let { minOf(it, LocalDate.of(år, 12, 31)) }
+                        ?: LocalDate.of(år, 12, 31),
+                    trygdedekning = periode.hentTrygdedekning(),
+                    erPliktigMedlemskap = periode.erPliktigMedlemskap()
+                )
+            }
+            .toSet()
     }
 
     private fun opprettÅrsavregning(
@@ -106,44 +137,6 @@ class OppretteÅrsavregningVedEndring(
                 (startÅr..sluttÅr).asSequence().filter { it < inneværendeÅr }
             }
             .toSet()
-
-    fun harEndringerITidligereÅr(
-        behandlingsresultat: Behandlingsresultat,
-        opprinneligBehandlingsresultat: Behandlingsresultat
-    ): Boolean {
-        fun perioderITidligereÅr(br: Behandlingsresultat) = br.finnInnvilgedePerioderITidligereÅr()
-            .map { periode ->
-                AvgiftspliktigPeriodeTilSammenligning(
-                    fom = periode.getFom(),
-                    tom = periode.getTom()?.avkortTilForrigeÅr(),
-                    trygdedekning = periode.hentTrygdedekning(),
-                    erPliktigMedlemskap = periode.erPliktigMedlemskap()
-                )
-            }
-            .toSet()
-
-        return perioderITidligereÅr(behandlingsresultat) !=
-                perioderITidligereÅr(opprinneligBehandlingsresultat)
-    }
-
-    private fun Behandlingsresultat.finnInnvilgedePerioderITidligereÅr(): List<AvgiftspliktigPeriode> {
-        val currentYear = LocalDate.now().year
-        return finnAvgiftspliktigPerioder()
-            .filter { it.erInnvilget() }
-            .filter { periode ->
-                val fom = periode.getFom()
-                fom != null && fom.year < currentYear
-            }
-    }
-
-    private fun LocalDate.avkortTilForrigeÅr(): LocalDate {
-        val forrigeÅr = LocalDate.now().year - 1
-        return if (this.year > forrigeÅr) {
-            LocalDate.of(forrigeÅr, 12, 31)
-        } else {
-            this
-        }
-    }
 }
 
 private data class AvgiftspliktigPeriodeTilSammenligning(

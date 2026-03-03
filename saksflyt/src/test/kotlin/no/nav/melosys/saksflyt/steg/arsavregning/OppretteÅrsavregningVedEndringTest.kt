@@ -1,12 +1,9 @@
 package no.nav.melosys.saksflyt.steg.arsavregning
 
 import io.getunleash.FakeUnleash
-import io.mockk.Called
-import io.mockk.confirmVerified
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
@@ -53,6 +50,7 @@ class OppretteÅrsavregningVedEndringTest {
             prosessInstansService,
             fakeUnleash
         )
+        clearAllMocks()
     }
 
     @Test
@@ -256,6 +254,67 @@ class OppretteÅrsavregningVedEndringTest {
         confirmVerified(prosessInstansService)
     }
 
+    @Test
+    fun `ny vurdering - endrer tom dato - kun årsavregning for året med tom endring`() {
+        val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            behandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.YRKESAKTIV
+                fagsak {
+                    saksnummer = SAKSNUMMER
+                    type = Sakstyper.FTRL
+                }
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2024, 1, 1)
+                tom = LocalDate.of(2025, 1, 1)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                trygdedekning = Trygdedekninger.FULL_DEKNING
+            }
+        }
+
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 2L
+            behandling {
+                id = 2L
+                type = Behandlingstyper.NY_VURDERING
+                tema = Behandlingstema.YRKESAKTIV
+                fagsak {
+                    saksnummer = SAKSNUMMER
+                    type = Sakstyper.FTRL
+                }
+                opprinneligBehandling = opprinneligBehandlingsresultat.behandling
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2024, 1, 1)
+                tom = LocalDate.of(2025, 1, 15)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                trygdedekning = Trygdedekninger.FULL_DEKNING
+            }
+        }
+
+        val prosessinstans = Prosessinstans.forTest {
+            behandling = behandlingsresultat.behandling
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns opprinneligBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat
+        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+
+        oppretteÅrsavregningVedEndring.utfør(prosessinstans)
+
+        verify {
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE)
+        }
+
+        confirmVerified(prosessInstansService)
+    }
+
+
     @Disabled("Egen jira sak for eøs saker")
     @ParameterizedTest(name = "{0}")
     @MethodSource("endringITidligereLovvalgsperiodeScenarios")
@@ -401,8 +460,8 @@ class OppretteÅrsavregningVedEndringTest {
                     dekning = Trygdedekninger.FULL_DEKNING
                 )
             ),
-            forventedeÅr = listOf("2024", "2025"),
-            beskrivelse = "Endring i fom dato innenfor samme år tidligere - 2 årsavregninger"
+            forventedeÅr = listOf("2024"),
+            beskrivelse = "Endring i fom dato innenfor samme år tidligere - 1 årsavregninger"
         ),
         PeriodeEndringScenario(
             ny = listOf(
