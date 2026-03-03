@@ -304,34 +304,34 @@ class BehandlingsresultatServiceTest {
     }
 
     @Test
-    fun oppdaterUtfallUtpeking_ikkeSatt_lagres() {
+    fun settUtfallUtpeking_ikkeSatt_lagres() {
         val behandlingsresultat = Behandlingsresultat.forTest()
         every { behandlingsresultatRepo.findById(1L) } returns Optional.of(behandlingsresultat)
         every { behandlingsresultatRepo.save(any()) } returns behandlingsresultat
 
 
-        behandlingsresultatService.oppdaterUtfallUtpeking(1, Utfallregistreringunntak.IKKE_GODKJENT)
+        behandlingsresultatService.settUtfallUtpeking(1, Utfallregistreringunntak.IKKE_GODKJENT)
 
 
         verify { behandlingsresultatRepo.save(behandlingsresultat) }
     }
 
     @Test
-    fun oppdaterUtfallUtpeking_alleredeSattMedSammeVerdi_hopperOver() {
+    fun settUtfallUtpeking_alleredeSattMedSammeVerdi_hopperOver() {
         val behandlingsresultat = Behandlingsresultat.forTest {
             utfallUtpeking = Utfallregistreringunntak.IKKE_GODKJENT
         }
         every { behandlingsresultatRepo.findById(1L) } returns Optional.of(behandlingsresultat)
 
 
-        behandlingsresultatService.oppdaterUtfallUtpeking(1, Utfallregistreringunntak.IKKE_GODKJENT)
+        behandlingsresultatService.settUtfallUtpeking(1, Utfallregistreringunntak.IKKE_GODKJENT)
 
 
         verify(exactly = 0) { behandlingsresultatRepo.save(any()) }
     }
 
     @Test
-    fun oppdaterUtfallUtpeking_alleredeSattMedAnnenVerdi_kasterException() {
+    fun settUtfallUtpeking_alleredeSattMedAnnenVerdi_kasterException() {
         val behandlingsresultat = Behandlingsresultat.forTest {
             utfallUtpeking = Utfallregistreringunntak.GODKJENT
         }
@@ -339,7 +339,7 @@ class BehandlingsresultatServiceTest {
 
 
         shouldThrow<FunksjonellException> {
-            behandlingsresultatService.oppdaterUtfallUtpeking(1, Utfallregistreringunntak.IKKE_GODKJENT)
+            behandlingsresultatService.settUtfallUtpeking(1, Utfallregistreringunntak.IKKE_GODKJENT)
         }.message shouldContain "Utfall for utpeking er allerede satt for behandlingsresultat"
     }
 

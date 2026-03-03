@@ -126,7 +126,7 @@ class BehandlingsresultatService(
             behandlingsresultatRepository.save(it)
         }
 
-    fun oppdaterUtfallUtpeking(behandlingID: Long, utfallUtpeking: Utfallregistreringunntak) {
+    fun settUtfallUtpeking(behandlingID: Long, utfallUtpeking: Utfallregistreringunntak) {
         val behandlingsresultat = hentBehandlingsresultat(behandlingID)
 
         validerOgHåndterEksisterendeUtfall(
