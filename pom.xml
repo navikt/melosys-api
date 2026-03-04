@@ -92,7 +92,7 @@
         <bouncycastle-jdk18on.version>1.83</bouncycastle-jdk18on.version>
         <nimbus-jose-jwt.version>10.7</nimbus-jose-jwt.version>
         <neethi.version>3.2.1</neethi.version>
-        <jakarta.jaxb.version>3.0.1</jakarta.jaxb.version>
+        <jakarta.jaxb.version>4.0.5</jakarta.jaxb.version>
         <javaparser.version>1.0.11</javaparser.version>
         <google.errorprone.version>2.47.0</google.errorprone.version>
         <checkerframework.version>3.53.1</checkerframework.version>
