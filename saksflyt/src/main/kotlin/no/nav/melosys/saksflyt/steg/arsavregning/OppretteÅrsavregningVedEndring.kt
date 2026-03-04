@@ -141,7 +141,7 @@ class OppretteÅrsavregningVedEndring(
 
 private data class AvgiftspliktigPeriodeTilSammenligning(
     val fom: LocalDate,
-    val tom: LocalDate?,
+    val tom: LocalDate,
     val trygdedekning: Trygdedekninger,
     val erPliktigMedlemskap: Boolean
 )
