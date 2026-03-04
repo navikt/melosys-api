@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.7</version>
+        <version>3.5.11</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -64,7 +64,7 @@
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
         <guava.version>33.5.0-jre</guava.version>
         <graphql-java.version>21.5</graphql-java.version>
-        <logback.version>1.5.29</logback.version>
+        <logback.version>1.5.32</logback.version>
         <logstash.version>8.1</logstash.version>
         <hikaricp.version>7.0.2</hikaricp.version>
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
@@ -83,21 +83,21 @@
         <papertrailapp-syslog.version>1.0.0</papertrailapp-syslog.version> <!-- Fra august 2014, men er den som brukes hos NAV -->
         <easy-random.version>5.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
-        <shedlock.version>4.35.0</shedlock.version>
+        <shedlock.version>4.48.0</shedlock.version>
         <slf4j.version>2.0.17</slf4j.version>
         <springfox.version>3.0.0</springfox.version>
         <swagger.version>1.5.21</swagger.version>
-        <unleash.version>12.1.1</unleash.version>
+        <unleash.version>12.1.2</unleash.version>
         <bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
         <bouncycastle-jdk18on.version>1.83</bouncycastle-jdk18on.version>
-        <nimbus-jose-jwt.version>10.7</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>10.8</nimbus-jose-jwt.version>
         <neethi.version>3.2.1</neethi.version>
-        <jakarta.jaxb.version>3.0.1</jakarta.jaxb.version>
+        <jakarta.jaxb.version>4.0.5</jakarta.jaxb.version>
         <javaparser.version>1.0.11</javaparser.version>
         <google.errorprone.version>2.47.0</google.errorprone.version>
         <checkerframework.version>3.53.1</checkerframework.version>
         <threeten.version>1.8.0</threeten.version>
-        <jetbrains.annotations.version>21.0.1</jetbrains.annotations.version>
+        <jetbrains.annotations.version>26.1.0</jetbrains.annotations.version>
         <snappy.java.version>1.1.10.8</snappy.java.version>
         <mockito.inline.version>5.2.0</mockito.inline.version>
         <jacoco.version>0.8.14</jacoco.version>
@@ -112,8 +112,8 @@
         <graphql.java.extended.scalars.version>24.0</graphql.java.extended.scalars.version>
         <ulid-java>5.2.3</ulid-java>
         <!-- Spring-data-envers, hibernate, antlr4 Downgraded due to: https://hibernate.atlassian.net/browse/HHH-17612 and compatability-->
-        <spring-data-envers.version>3.5.5</spring-data-envers.version>
-        <hibernate.version>6.2.4.Final</hibernate.version>
+        <spring-data-envers.version>4.0.3</spring-data-envers.version>
+        <hibernate.version>6.6.43.Final</hibernate.version>
         <antlr4.version>4.13.2</antlr4.version>
         <springdoc-openapi.version>2.8.15</springdoc-openapi.version>
 

@@ -261,7 +261,21 @@ class BehandlingsresultatServiceTest {
     }
 
     @Test
-    fun settUtfallRegistreringUnntakOgType_alleredeSatt_kasterException() {
+    fun settUtfallRegistreringUnntakOgType_alleredeSattMedSammeVerdi_hopperOver() {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
+        }
+        every { behandlingsresultatRepo.findById(1L) } returns Optional.of(behandlingsresultat)
+
+
+        behandlingsresultatService.settUtfallRegistreringUnntakOgType(1, Utfallregistreringunntak.GODKJENT)
+
+
+        verify(exactly = 0) { behandlingsresultatRepo.save(any()) }
+    }
+
+    @Test
+    fun settUtfallRegistreringUnntakOgType_alleredeSattMedAnnenVerdi_kasterException() {
         val behandlingsresultat = Behandlingsresultat.forTest {
             utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
         }
@@ -269,7 +283,7 @@ class BehandlingsresultatServiceTest {
 
 
         shouldThrow<FunksjonellException> {
-            behandlingsresultatService.settUtfallRegistreringUnntakOgType(1, Utfallregistreringunntak.GODKJENT)
+            behandlingsresultatService.settUtfallRegistreringUnntakOgType(1, Utfallregistreringunntak.IKKE_GODKJENT)
         }.message shouldContain "Utfall for registrering av unntak er allerede satt for behandlingsresultat"
     }
 
@@ -286,6 +300,47 @@ class BehandlingsresultatServiceTest {
 
 
         verify { behandlingsresultatRepo.save(behandlingsresultat) }
+
+    }
+
+    @Test
+    fun settUtfallUtpeking_ikkeSatt_lagres() {
+        val behandlingsresultat = Behandlingsresultat.forTest()
+        every { behandlingsresultatRepo.findById(1L) } returns Optional.of(behandlingsresultat)
+        every { behandlingsresultatRepo.save(any()) } returns behandlingsresultat
+
+
+        behandlingsresultatService.settUtfallUtpeking(1, Utfallregistreringunntak.IKKE_GODKJENT)
+
+
+        verify { behandlingsresultatRepo.save(behandlingsresultat) }
+    }
+
+    @Test
+    fun settUtfallUtpeking_alleredeSattMedSammeVerdi_hopperOver() {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            utfallUtpeking = Utfallregistreringunntak.IKKE_GODKJENT
+        }
+        every { behandlingsresultatRepo.findById(1L) } returns Optional.of(behandlingsresultat)
+
+
+        behandlingsresultatService.settUtfallUtpeking(1, Utfallregistreringunntak.IKKE_GODKJENT)
+
+
+        verify(exactly = 0) { behandlingsresultatRepo.save(any()) }
+    }
+
+    @Test
+    fun settUtfallUtpeking_alleredeSattMedAnnenVerdi_kasterException() {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            utfallUtpeking = Utfallregistreringunntak.GODKJENT
+        }
+        every { behandlingsresultatRepo.findById(1L) } returns Optional.of(behandlingsresultat)
+
+
+        shouldThrow<FunksjonellException> {
+            behandlingsresultatService.settUtfallUtpeking(1, Utfallregistreringunntak.IKKE_GODKJENT)
+        }.message shouldContain "Utfall for utpeking er allerede satt for behandlingsresultat"
     }
 
     @Test

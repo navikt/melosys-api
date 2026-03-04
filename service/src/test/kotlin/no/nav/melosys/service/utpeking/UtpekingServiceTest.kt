@@ -297,7 +297,7 @@ class UtpekingServiceTest {
             )
         } just Runs
         every {
-            behandlingsresultatService.oppdaterUtfallUtpeking(
+            behandlingsresultatService.settUtfallUtpeking(
                 BEHANDLING_ID,
                 Utfallregistreringunntak.IKKE_GODKJENT
             )
@@ -307,7 +307,7 @@ class UtpekingServiceTest {
 
         utpekingService.avvisUtpeking(BEHANDLING_ID, lagUtpekingAvvis())
 
-        verify { behandlingsresultatService.oppdaterUtfallUtpeking(BEHANDLING_ID, Utfallregistreringunntak.IKKE_GODKJENT) }
+        verify { behandlingsresultatService.settUtfallUtpeking(BEHANDLING_ID, Utfallregistreringunntak.IKKE_GODKJENT) }
         verify { prosessinstansService.opprettProsessinstansAvvisUtpeking(behandling, any()) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
     }
@@ -332,7 +332,7 @@ class UtpekingServiceTest {
             )
         } just Runs
         every {
-            behandlingsresultatService.oppdaterUtfallUtpeking(
+            behandlingsresultatService.settUtfallUtpeking(
                 BEHANDLING_ID,
                 Utfallregistreringunntak.IKKE_GODKJENT
             )
