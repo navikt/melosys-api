@@ -88,6 +88,11 @@ public class JsonSchemaValidator {
     }
 
     private void valider(String json, Schema schema, Logger logger) {
+        try {
+            objectMapper.readTree(json);
+        } catch (JsonProcessingException e) {
+            throw new TekniskException("Ugyldig JSON-input", e);
+        }
         List<Error> errors = schema.validate(json, InputFormat.JSON);
         if (!errors.isEmpty()) {
             formaterFeil(errors, schema, json, logger);
@@ -113,6 +118,9 @@ public class JsonSchemaValidator {
     private Schema hentSchema(String schemaNavn) {
         InputStream inputStream = Thread.currentThread().getContextClassLoader()
             .getResourceAsStream(schemaNavn);
+        if (inputStream == null) {
+            throw new TekniskException("Fant ikke JSON-schema: " + schemaNavn);
+        }
         return hentSchema(inputStream);
     }
 
@@ -121,7 +129,9 @@ public class JsonSchemaValidator {
     }
 
     private void formaterFeil(List<Error> errors, Schema schema, String json, Logger logger) {
-        String schemaUri = schema.getSchemaLocation().toString();
+        String schemaUri = schema.getSchemaLocation() != null
+            ? schema.getSchemaLocation().toString()
+            : "ukjent schema";
         logger.error(FEILMELDING, schemaUri);
         errors.forEach(error -> logger.error(formaterMelding(error, json)));
         throw new ValidationException(String.format("%s: %d schema violations found",
@@ -130,7 +140,19 @@ public class JsonSchemaValidator {
 
     private String formaterMelding(Error error, String json) {
         String sti = error.getInstanceLocation().toString();
-        final Object objekt = JsonPath.read(json, sti);
-        return error.getMessage().replace(sti, sti + " [" + objekt + "]");
+        try {
+            String jsonPath = jsonPointerTilJsonPath(sti);
+            final Object objekt = JsonPath.read(json, jsonPath);
+            return error.getMessage().replace(sti, sti + " [" + objekt + "]");
+        } catch (Exception e) {
+            return error.getMessage();
+        }
+    }
+
+    private static String jsonPointerTilJsonPath(String jsonPointer) {
+        if (jsonPointer.isEmpty() || jsonPointer.equals("/")) {
+            return "$";
+        }
+        return "$" + jsonPointer.replace("/", ".");
     }
 }
