@@ -1,7 +1,7 @@
 package no.nav.melosys.service;
 
 import java.io.InputStream;
-import java.net.URI;
+import java.util.List;
 import jakarta.validation.ValidationException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,31 +21,30 @@ public class JsonSchemaValidator {
         .registerModule(new JavaTimeModule())
         .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
-    private static final JsonSchemaFactory DEFAULT_JSON_SCHEMA_FACTORY = JsonSchemaFactory
-        .builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7))
-        .build();
+    private static final SchemaRegistry DEFAULT_SCHEMA_REGISTRY = SchemaRegistry
+        .withDefaultDialect(SpecificationVersion.DRAFT_7);
 
     private static final Logger log = LoggerFactory.getLogger(JsonSchemaValidator.class);
     private static final String FEILMELDING = "Schemavalidering feilet for schema {}";
 
     private final ObjectMapper objectMapper;
-    private final JsonSchemaFactory jsonSchemaFactory;
+    private final SchemaRegistry schemaRegistry;
 
-    public JsonSchemaValidator(ObjectMapper objectMapper, JsonSchemaFactory jsonSchemaFactory) {
+    public JsonSchemaValidator(ObjectMapper objectMapper, SchemaRegistry schemaRegistry) {
         this.objectMapper = objectMapper;
-        this.jsonSchemaFactory = jsonSchemaFactory;
+        this.schemaRegistry = schemaRegistry;
     }
 
-    public JsonSchemaValidator(JsonSchemaFactory jsonSchemaFactory) {
-        this(DEFAULT_OBJECT_MAPPER, jsonSchemaFactory);
+    public JsonSchemaValidator(SchemaRegistry schemaRegistry) {
+        this(DEFAULT_OBJECT_MAPPER, schemaRegistry);
     }
 
     public JsonSchemaValidator(ObjectMapper objectMapper) {
-        this(objectMapper, DEFAULT_JSON_SCHEMA_FACTORY);
+        this(objectMapper, DEFAULT_SCHEMA_REGISTRY);
     }
 
     public JsonSchemaValidator() {
-        this(DEFAULT_OBJECT_MAPPER, DEFAULT_JSON_SCHEMA_FACTORY);
+        this(DEFAULT_OBJECT_MAPPER, DEFAULT_SCHEMA_REGISTRY);
     }
 
     public void valider(Object object, String schemaNavn) {
@@ -53,7 +52,7 @@ public class JsonSchemaValidator {
     }
 
     public void valider(String json, String schemaNavn) {
-        valider(tilJsonNode(json), hentSchema(schemaNavn));
+        valider(json, hentSchema(schemaNavn));
     }
 
     public void valider(String json, InputStream schemaStream) {
@@ -61,7 +60,7 @@ public class JsonSchemaValidator {
     }
 
     public void valider(String json, InputStream schemaStream, Logger logger) {
-        valider(tilJsonNode(json), hentSchema(schemaStream), logger);
+        valider(json, hentSchema(schemaStream), logger);
     }
 
     public void valider(Object o, InputStream schemaStream) {
@@ -73,28 +72,21 @@ public class JsonSchemaValidator {
     }
 
     public void valider(ArrayNode arrayNode, InputStream schemaStream, Logger logger) {
-        valider(arrayNode, hentSchema(schemaStream), logger);
-    }
-
-    private void valider(ArrayNode arrayNode, JsonSchema schema, Logger logger) {
-        ValidationResult result = schema.validateAndCollect(arrayNode);
-        if (!result.getValidationMessages().isEmpty()) {
-            formaterFeil(result, schema, arrayNode.toString(), logger);
-        }
+        valider(nodeTilString(arrayNode), hentSchema(schemaStream), logger);
     }
 
     public void valider(JsonNode jsonObject, InputStream schemaStream, Logger logger) {
-        valider(jsonObject, hentSchema(schemaStream), logger);
+        valider(nodeTilString(jsonObject), hentSchema(schemaStream), logger);
     }
 
-    private void valider(JsonNode jsonNode, JsonSchema schema) {
-        valider(jsonNode, schema, log);
+    private void valider(String json, Schema schema) {
+        valider(json, schema, log);
     }
 
-    private void valider(JsonNode jsonNode, JsonSchema schema, Logger logger) {
-        ValidationResult result = schema.validateAndCollect(jsonNode);
-        if (!result.getValidationMessages().isEmpty()) {
-            formaterFeil(result, schema, jsonNode.toString(), logger);
+    private void valider(String json, Schema schema, Logger logger) {
+        List<Error> errors = schema.validate(json, InputFormat.JSON);
+        if (!errors.isEmpty()) {
+            formaterFeil(errors, schema, json, logger);
         }
     }
 
@@ -106,36 +98,35 @@ public class JsonSchemaValidator {
         }
     }
 
-    private JsonNode tilJsonNode(String jsonString) {
+    private String nodeTilString(JsonNode node) {
         try {
-            return objectMapper.readTree(jsonString);
+            return objectMapper.writeValueAsString(node);
         } catch (JsonProcessingException e) {
-            throw new TekniskException("Feil ved mapping av string til json", e);
+            throw new TekniskException("Feil ved mapping av JsonNode til json", e);
         }
     }
 
-    private JsonSchema hentSchema(String schemaNavn) {
+    private Schema hentSchema(String schemaNavn) {
         InputStream inputStream = Thread.currentThread().getContextClassLoader()
             .getResourceAsStream(schemaNavn);
         return hentSchema(inputStream);
     }
 
-    private JsonSchema hentSchema(InputStream schemaStream) {
-        return jsonSchemaFactory.getSchema(schemaStream);
+    private Schema hentSchema(InputStream schemaStream) {
+        return schemaRegistry.getSchema(schemaStream);
     }
 
-    private void formaterFeil(ValidationResult validationResult, JsonSchema schema, String json, Logger logger) {
-        URI currentUri = schema.getCurrentUri();
-        logger.error(FEILMELDING, (currentUri != null ? currentUri.toString() : schema.getSchemaPath()));
-        validationResult.getValidationMessages().forEach(
-            validationMessage -> logger.error(formaterMelding(validationMessage, json)));
+    private void formaterFeil(List<Error> errors, Schema schema, String json, Logger logger) {
+        String schemaUri = schema.getSchemaLocation().toString();
+        logger.error(FEILMELDING, schemaUri);
+        errors.forEach(error -> logger.error(formaterMelding(error, json)));
         throw new ValidationException(String.format("%s: %d schema violations found",
-            schema.getCurrentUri(), validationResult.getValidationMessages().size()));
+            schemaUri, errors.size()));
     }
 
-    private String formaterMelding(ValidationMessage validationMessage, String json) {
-        String sti = validationMessage.getPath();
+    private String formaterMelding(Error error, String json) {
+        String sti = error.getInstanceLocation().toString();
         final Object objekt = JsonPath.read(json, sti);
-        return validationMessage.getMessage().replace(sti, sti + " [" + objekt + "]");
+        return error.getMessage().replace(sti, sti + " [" + objekt + "]");
     }
 }
