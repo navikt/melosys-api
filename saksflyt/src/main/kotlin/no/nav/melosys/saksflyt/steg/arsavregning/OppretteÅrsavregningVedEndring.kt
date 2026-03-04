@@ -61,6 +61,8 @@ class OppretteÅrsavregningVedEndring(
             if (årMedEndringer.isNotEmpty()) {
                 opprettÅrsavregning(årMedEndringer, behandling)
             }
+        } else {
+            log.debug("Behandling ${behandling.id} er verken førstegang eller ny vurdering, oppretter ikke årsavregning")
         }
     }
 
