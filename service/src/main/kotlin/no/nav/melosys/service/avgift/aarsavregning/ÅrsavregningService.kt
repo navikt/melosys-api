@@ -108,6 +108,7 @@ class ÅrsavregningService(
             behandlingsresultat.årsavregning?.behandlingsresultat = null
             behandlingsresultat.årsavregning = null
             behandlingsresultat.medlemskapsperioder.clear()
+            behandlingsresultat.helseutgiftDekkesPeriode = null
             behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         }
 
@@ -214,13 +215,25 @@ class ÅrsavregningService(
 
         if (!harTrygdeavgiftFraAvgiftssystemet) {
             behandlingsresultat.clearMedlemskapsperioder()
+            behandlingsresultat.helseutgiftDekkesPeriode = null
 
-            if (årsavregning.tidligereBehandlingsresultat != null && årsavregning.hentTidligereBehandlingsresultat.medlemskapsperioder.isNotEmpty()) {
-                replikerMedlemskapsperioder(
-                    behandlingsresultat,
-                    årsavregning.hentTidligereBehandlingsresultat,
-                    årsavregning.aar
-                )
+            if (årsavregning.tidligereBehandlingsresultat != null) {
+                val tidligereResult = årsavregning.hentTidligereBehandlingsresultat
+                when (tidligereResult.finnAvgiftspliktigPerioder().firstOrNull()) {
+                    is Medlemskapsperiode -> replikerMedlemskapsperioder(
+                        behandlingsresultat,
+                        tidligereResult,
+                        årsavregning.aar
+                    )
+
+                    is HelseutgiftDekkesPeriode -> replikerHelseutgiftDekkesPeriode(
+                        behandlingsresultat,
+                        tidligereResult,
+                        årsavregning.aar
+                    )
+
+                    else -> {}
+                }
             }
         }
 

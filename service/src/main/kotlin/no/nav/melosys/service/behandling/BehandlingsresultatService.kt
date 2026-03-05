@@ -107,26 +107,35 @@ class BehandlingsresultatService(
 
     fun settUtfallRegistreringUnntakOgType(behandlingID: Long, utfallRegistreringUnntak: Utfallregistreringunntak) {
         val behandlingsresultat = hentBehandlingsresultat(behandlingID)
-        if (behandlingsresultat.utfallRegistreringUnntak != null) {
-            throw FunksjonellException("Utfall for registrering av unntak er allerede satt for behandlingsresultat $behandlingID")
-        }
+
+        validerOgHåndterEksisterendeUtfall(
+            eksisterendeVerdi = behandlingsresultat.utfallRegistreringUnntak,
+            nyVerdi = utfallRegistreringUnntak,
+            behandlingID = behandlingID,
+            resultatNavn = "registrering av unntak"
+        ) ?: return
+
         behandlingsresultat.type = finnKorrektBehandlingsResultat(utfallRegistreringUnntak)
         oppdaterUtfallRegistreringUnntak(behandlingID, utfallRegistreringUnntak)
     }
 
-    fun oppdaterUtfallRegistreringUnntak(behandlingID: Long, utfallUtpeking: Utfallregistreringunntak): Behandlingsresultat {
+    fun oppdaterUtfallRegistreringUnntak(behandlingID: Long, utfallRegistreringUnntak: Utfallregistreringunntak): Behandlingsresultat =
         hentBehandlingsresultatMedKontrollresultat(behandlingID).apply {
-            utfallRegistreringUnntak = utfallUtpeking
-        }.also {
-            return behandlingsresultatRepository.save(it)
+            this.utfallRegistreringUnntak = utfallRegistreringUnntak
+        }.let {
+            behandlingsresultatRepository.save(it)
         }
-    }
 
-    fun oppdaterUtfallUtpeking(behandlingID: Long, utfallUtpeking: Utfallregistreringunntak) {
+    fun settUtfallUtpeking(behandlingID: Long, utfallUtpeking: Utfallregistreringunntak) {
         val behandlingsresultat = hentBehandlingsresultat(behandlingID)
-        if (behandlingsresultat.utfallUtpeking != null) {
-            throw FunksjonellException("Utfall for utpeking er allerede satt for behandlingsresultat $behandlingID")
-        }
+
+        validerOgHåndterEksisterendeUtfall(
+            eksisterendeVerdi = behandlingsresultat.utfallUtpeking,
+            nyVerdi = utfallUtpeking,
+            behandlingID = behandlingID,
+            resultatNavn = "utpeking"
+        ) ?: return
+
         behandlingsresultat.utfallUtpeking = utfallUtpeking
         behandlingsresultatRepository.save(behandlingsresultat)
     }
@@ -158,13 +167,26 @@ class BehandlingsresultatService(
             behandlingsresultatRepository.save(behandlingsresultat)
         }
 
+    private fun validerOgHåndterEksisterendeUtfall(
+        eksisterendeVerdi: Utfallregistreringunntak?,
+        nyVerdi: Utfallregistreringunntak,
+        behandlingID: Long,
+        resultatNavn: String
+    ): Unit? = when {
+        eksisterendeVerdi == nyVerdi -> {
+            log.warn("Utfall for $resultatNavn er allerede satt til $nyVerdi for behandlingsresultat $behandlingID, hopper over")
+            null
+        }
+        eksisterendeVerdi != null -> throw FunksjonellException("Utfall for $resultatNavn er allerede satt for behandlingsresultat $behandlingID")
+        else -> Unit
+    }
+
     private fun finnKorrektBehandlingsResultat(utfallregistreringunntak: Utfallregistreringunntak): Behandlingsresultattyper =
         when (utfallregistreringunntak) {
             Utfallregistreringunntak.GODKJENT, Utfallregistreringunntak.DELVIS_GODKJENT -> Behandlingsresultattyper.REGISTRERT_UNNTAK
             Utfallregistreringunntak.IKKE_GODKJENT -> Behandlingsresultattyper.FERDIGBEHANDLET
             else -> Behandlingsresultattyper.IKKE_FASTSATT
         }
-
 
     private fun <T> Optional<T>.orElseThrowIkkeFunnetException(behandlingsid: Long): T =
         this.orElseThrow { IkkeFunnetException("Kan ikke finne behandlingsresultat for behandling: $behandlingsid") }

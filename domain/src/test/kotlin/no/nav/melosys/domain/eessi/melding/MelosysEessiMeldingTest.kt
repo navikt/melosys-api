@@ -36,6 +36,49 @@ class MelosysEessiMeldingTest {
     }
 
     @Test
+    fun `skal deserialisere arbeidssted med null navn fra A008 CDM 4_4`() {
+        val objectMapper = jacksonObjectMapper()
+
+        val json = """
+            {
+              "sedType": "A008",
+              "bucType": "LA_BUC_03",
+              "arbeidsland": [
+                {
+                  "land": "PL",
+                  "arbeidssted": [
+                    {
+                      "navn": null,
+                      "adresse": {"by": "N/A", "land": null},
+                      "hjemmebase": null,
+                      "erIkkeFastAdresse": false
+                    }
+                  ]
+                },
+                {
+                  "land": "DE",
+                  "arbeidssted": [
+                    {
+                      "navn": null,
+                      "adresse": {"by": "N/A"},
+                      "hjemmebase": null,
+                      "erIkkeFastAdresse": false
+                    }
+                  ]
+                }
+              ]
+            }
+        """
+
+        val melding = objectMapper.readValue<MelosysEessiMelding>(json)
+        melding.arbeidsland shouldHaveSize 2
+        melding.arbeidsland[0].land shouldBe "PL"
+        melding.arbeidsland[0].arbeidssted.single().navn shouldBe null
+        melding.arbeidsland[0].arbeidssted.single().adresse.by shouldBe "N/A"
+        melding.arbeidsland[1].land shouldBe "DE"
+    }
+
+    @Test
     fun `lagUnikIdentifikator bruker alle verdier når de er satt`() {
         val melding = MelosysEessiMelding(
             rinaSaksnummer = "rinaSaksnummer",

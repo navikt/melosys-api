@@ -183,7 +183,7 @@ public class UtpekingService {
                 behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.UTPEKING_NORGE_AVVIST);
             }
 
-            behandlingsresultatService.oppdaterUtfallUtpeking(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
+            behandlingsresultatService.settUtfallUtpeking(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
         } else {
             throw new FunksjonellException("Kan ikke avvise utpeking for en behandling med tema " + behandling.getTema());
         }

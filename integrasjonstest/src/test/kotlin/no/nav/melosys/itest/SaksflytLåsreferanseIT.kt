@@ -94,7 +94,7 @@ class SaksflytLåsreferanseIT(
             }
 
             logItems.filterBuilder
-                .waitUntilLogLineMatch("OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING ferdig", 2.seconds)
+                .waitUntilLogLineMatch("prosesser ferdig", 2.seconds)
                 .match<ProsessinstansBehandler>()
                 .replace(prosessRegister.prosessIdStringToName())
                 .replace(manglendeInnbetalingLås1, "<manglendeInnbetalingLås1>")
@@ -141,7 +141,7 @@ class SaksflytLåsreferanseIT(
             }
 
             logItems.filterBuilder
-                .waitUntilLogLineMatch("OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING ferdig", 2.seconds)
+                .waitUntilLogLineMatch("prosesser ferdig", 2.seconds)
                 .match<ProsessinstansBehandler>()
                 .replace(prosessRegister.prosessIdStringToName())
                 .replace(manglendeInnbetalingLås1, "<manglendeInnbetalingLås1>")

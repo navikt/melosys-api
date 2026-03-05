@@ -128,7 +128,7 @@ public class EosVedtakService implements FattVedtakInterface {
                                              String nyVurderingBakgrunn) {
         final Behandling behandling = behandlingsresultat.getBehandling();
         if (behandling.erNorgeUtpekt()) {
-            behandlingsresultatService.oppdaterUtfallUtpeking(behandling.getId(), GODKJENT);
+            behandlingsresultatService.settUtfallUtpeking(behandling.getId(), GODKJENT);
         }
 
         behandlingsresultat.setNyVurderingBakgrunn(nyVurderingBakgrunn);

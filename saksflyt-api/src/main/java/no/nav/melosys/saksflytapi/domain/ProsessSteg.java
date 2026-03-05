@@ -23,7 +23,7 @@ public enum ProsessSteg {
     LAGRE_LOVVALGSPERIODE_MEDL("LAGRE_LOVVALGSPERIODE_MEDL", "Lagrer en lovvalgsperiode i MEDL som foreløpig eller endelig"),
     LAGRE_MEDLEMSKAPSPERIODE_MEDL("LAGRE_MEDLEMSKAPSPERIODE_MEDL", "Lagrer en medlemskapsperiode (Folketrygden) i MEDL som endelig"),
     LAGRE_PERSONOPPLYSNINGER("LAGRE_PERSONOPPLYSNINGER", "Lagrer personopplysninger som saksopplysninger på behandling"),
-    LAGRE_SAKSOPPLYSNINGER_SØKNAD("LAGRE_SAKSOPPLYSNINGER_SØKNAD", "Lagrer søknadsdata for visning i sidemeny"),
+
     OPPDATER_FAKTURAMOTTAKER("OPPDATER_FAKTURAMOTTAKER", "Oppdaterer fakturamottaker på eventuell faktura til sak"),
     OPPDATER_OG_FERDIGSTILL_JOURNALPOST("OPPDATER_OG_FERDIGSTILL_JOURNALPOST", "Oppdaterer og ferdigstiller journalposten i Joark"),
     OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT("OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT", "Oppdaterer oppgave med frist og beskrivelse"),
