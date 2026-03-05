@@ -1,9 +1,12 @@
 package no.nav.melosys.saksflyt.steg.arsavregning
 
 import io.getunleash.FakeUnleash
-import io.mockk.*
+import io.mockk.Called
+import io.mockk.confirmVerified
+import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
@@ -29,6 +32,10 @@ private const val SAKSNUMMER = "123456789"
 @ExtendWith(MockKExtension::class)
 class OppretteÅrsavregningVedEndringTest {
 
+    companion object {
+        private val MARS2026 = LocalDate.of(2026, 3, 5)
+    }
+
     @RelaxedMockK
     private lateinit var årsavregningService: ÅrsavregningService
 
@@ -50,7 +57,6 @@ class OppretteÅrsavregningVedEndringTest {
             prosessInstansService,
             fakeUnleash
         )
-        clearAllMocks()
     }
 
     @Test
@@ -67,8 +73,8 @@ class OppretteÅrsavregningVedEndringTest {
                 }
             }
             medlemskapsperiode {
-                fom = LocalDate.now().minusYears(2)
-                tom = LocalDate.now().plusYears(1)
+                fom = MARS2026.minusYears(2)
+                tom = MARS2026.plusYears(1)
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 trygdedekning = Trygdedekninger.FULL_DEKNING
             }
@@ -116,14 +122,14 @@ class OppretteÅrsavregningVedEndringTest {
                 }
             }
             medlemskapsperiode {
-                fom = LocalDate.now().minusYears(2)
-                tom = LocalDate.now().minusYears(1)
+                fom = MARS2026.minusYears(2)
+                tom = MARS2026.minusYears(1)
                 innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
                 trygdedekning = Trygdedekninger.FULL_DEKNING
             }
             medlemskapsperiode {
-                fom = LocalDate.now().minusYears(1)
-                tom = LocalDate.now().plusYears(1)
+                fom = MARS2026.minusYears(1)
+                tom = MARS2026.plusYears(1)
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 trygdedekning = Trygdedekninger.FULL_DEKNING
             }
@@ -164,8 +170,8 @@ class OppretteÅrsavregningVedEndringTest {
                 }
             }
             medlemskapsperiode {
-                fom = LocalDate.now()
-                tom = LocalDate.now().plusYears(1)
+                fom = MARS2026
+                tom = MARS2026.plusYears(1)
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 trygdedekning = Trygdedekninger.FULL_DEKNING
             }
@@ -200,8 +206,8 @@ class OppretteÅrsavregningVedEndringTest {
                 }
             }
             medlemskapsperiode {
-                fom = LocalDate.now().minusYears(2)
-                tom = LocalDate.now().plusYears(1)
+                fom = MARS2026.minusYears(2)
+                tom = MARS2026.plusYears(1)
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 medlemskapstype = Medlemskapstyper.FRIVILLIG
                 trygdedekning = Trygdedekninger.FULL_DEKNING
@@ -314,6 +320,67 @@ class OppretteÅrsavregningVedEndringTest {
         confirmVerified(prosessInstansService)
     }
 
+    @Test
+    fun `ny vurdering - åpen tom dato - endrer pliktig så alle år før nå skal gi årsavregning`() {
+        val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            behandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.YRKESAKTIV
+                fagsak {
+                    saksnummer = SAKSNUMMER
+                    type = Sakstyper.FTRL
+                }
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2024, 1, 1)
+                tom = null
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                trygdedekning = Trygdedekninger.FULL_DEKNING
+            }
+        }
+
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 2L
+            behandling {
+                id = 2L
+                type = Behandlingstyper.NY_VURDERING
+                tema = Behandlingstema.YRKESAKTIV
+                fagsak {
+                    saksnummer = SAKSNUMMER
+                    type = Sakstyper.FTRL
+                }
+                opprinneligBehandling = opprinneligBehandlingsresultat.behandling
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2024, 1, 1)
+                tom = null
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.PLIKTIG
+                trygdedekning = Trygdedekninger.FULL_DEKNING
+            }
+        }
+
+        val prosessinstans = Prosessinstans.forTest {
+            behandling = behandlingsresultat.behandling
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns opprinneligBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat
+        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+
+        oppretteÅrsavregningVedEndring.utfør(prosessinstans)
+
+        verify {
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2024", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE)
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE)
+        }
+
+        confirmVerified(prosessInstansService)
+    }
+
 
     @Disabled("Egen jira sak for eøs saker")
     @ParameterizedTest(name = "{0}")
@@ -330,8 +397,8 @@ class OppretteÅrsavregningVedEndringTest {
                 }
             }
             lovvalgsperiode {
-                fom = LocalDate.now().minusYears(2)
-                tom = LocalDate.now().plusYears(1)
+                fom = MARS2026.minusYears(2)
+                tom = MARS2026.plusYears(1)
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 medlemskapstype = Medlemskapstyper.FRIVILLIG
                 dekning = Trygdedekninger.FULL_DEKNING
@@ -400,8 +467,8 @@ class OppretteÅrsavregningVedEndringTest {
                 }
             }
             helseutgiftDekkesPeriode {
-                fomDato = LocalDate.now().minusYears(2)
-                tomDato = LocalDate.now().plusYears(1)
+                fomDato = MARS2026.minusYears(2)
+                tomDato = MARS2026.plusYears(1)
             }
         }
 
@@ -453,8 +520,8 @@ class OppretteÅrsavregningVedEndringTest {
         PeriodeEndringScenario(
             ny = listOf(
                 Periode(
-                    fom = LocalDate.now().minusYears(2).justerMånederISammeÅr(2),
-                    tom = LocalDate.now().plusYears(1),
+                    fom = MARS2026.minusYears(2).justerMånederISammeÅr(2),
+                    tom = MARS2026.plusYears(1),
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
                     medlemskapstype = Medlemskapstyper.FRIVILLIG,
                     dekning = Trygdedekninger.FULL_DEKNING
@@ -466,8 +533,8 @@ class OppretteÅrsavregningVedEndringTest {
         PeriodeEndringScenario(
             ny = listOf(
                 Periode(
-                    fom = LocalDate.now().minusYears(2),
-                    tom = LocalDate.now().plusYears(1),
+                    fom = MARS2026.minusYears(2),
+                    tom = MARS2026.plusYears(1),
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
                     medlemskapstype = Medlemskapstyper.PLIKTIG,
                     dekning = Trygdedekninger.FULL_DEKNING
@@ -479,8 +546,8 @@ class OppretteÅrsavregningVedEndringTest {
         PeriodeEndringScenario(
             ny = listOf(
                 Periode(
-                    fom = LocalDate.now().minusYears(1),
-                    tom = LocalDate.now().plusYears(1),
+                    fom = MARS2026.minusYears(1),
+                    tom = MARS2026.plusYears(1),
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
                     medlemskapstype = Medlemskapstyper.FRIVILLIG,
                     dekning = Trygdedekninger.FULL_DEKNING
@@ -492,8 +559,8 @@ class OppretteÅrsavregningVedEndringTest {
         PeriodeEndringScenario(
             ny = listOf(
                 Periode(
-                    fom = LocalDate.now().minusYears(2),
-                    tom = LocalDate.now().plusYears(1),
+                    fom = MARS2026.minusYears(2),
+                    tom = MARS2026.plusYears(1),
                     innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT,
                     medlemskapstype = Medlemskapstyper.FRIVILLIG,
                     dekning = Trygdedekninger.FULL_DEKNING
@@ -505,15 +572,15 @@ class OppretteÅrsavregningVedEndringTest {
         PeriodeEndringScenario(
             ny = listOf(
                 Periode(
-                    fom = LocalDate.now().minusYears(2),
-                    tom = LocalDate.now().minusYears(1),
+                    fom = MARS2026.minusYears(2),
+                    tom = MARS2026.minusYears(1),
                     innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT,
                     medlemskapstype = Medlemskapstyper.FRIVILLIG,
                     dekning = Trygdedekninger.FULL_DEKNING
                 ),
                 Periode(
-                    fom = LocalDate.now().minusYears(1),
-                    tom = LocalDate.now().plusYears(1),
+                    fom = MARS2026.minusYears(1),
+                    tom = MARS2026.plusYears(1),
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
                     medlemskapstype = Medlemskapstyper.FRIVILLIG,
                     dekning = Trygdedekninger.FULL_DEKNING
@@ -525,8 +592,8 @@ class OppretteÅrsavregningVedEndringTest {
         PeriodeEndringScenario(
             ny = listOf(
                 Periode(
-                    fom = LocalDate.now().minusYears(2),
-                    tom = LocalDate.now().plusYears(1),
+                    fom = MARS2026.minusYears(2),
+                    tom = MARS2026.plusYears(1),
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
                     medlemskapstype = Medlemskapstyper.FRIVILLIG,
                     dekning = Trygdedekninger.FULL_DEKNING
@@ -538,8 +605,8 @@ class OppretteÅrsavregningVedEndringTest {
         PeriodeEndringScenario(
             ny = listOf(
                 Periode(
-                    fom = LocalDate.now().minusYears(2),
-                    tom = LocalDate.now().plusYears(1),
+                    fom = MARS2026.minusYears(2),
+                    tom = MARS2026.plusYears(1),
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
                     medlemskapstype = Medlemskapstyper.FRIVILLIG,
                     dekning = Trygdedekninger.FULL_DEKNING_FTRL
@@ -554,8 +621,8 @@ class OppretteÅrsavregningVedEndringTest {
         PeriodeEndringScenario(
             ny = listOf(
                 Periode(
-                    fom = LocalDate.now().minusYears(2).justerMånederISammeÅr(2),
-                    tom = LocalDate.now().plusYears(1),
+                    fom = MARS2026.minusYears(2).justerMånederISammeÅr(2),
+                    tom = MARS2026.plusYears(1),
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
                     medlemskapstype = Medlemskapstyper.FRIVILLIG,
                     dekning = Trygdedekninger.FULL_DEKNING
@@ -567,8 +634,8 @@ class OppretteÅrsavregningVedEndringTest {
         PeriodeEndringScenario(
             ny = listOf(
                 Periode(
-                    fom = LocalDate.now().minusYears(2),
-                    tom = LocalDate.now().plusYears(1),
+                    fom = MARS2026.minusYears(2),
+                    tom = MARS2026.plusYears(1),
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
                     medlemskapstype = Medlemskapstyper.PLIKTIG,
                     dekning = Trygdedekninger.FULL_DEKNING
@@ -580,8 +647,8 @@ class OppretteÅrsavregningVedEndringTest {
         PeriodeEndringScenario(
             ny = listOf(
                 Periode(
-                    fom = LocalDate.now().minusYears(1),
-                    tom = LocalDate.now().plusYears(1),
+                    fom = MARS2026.minusYears(1),
+                    tom = MARS2026.plusYears(1),
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
                     medlemskapstype = Medlemskapstyper.FRIVILLIG,
                     dekning = Trygdedekninger.FULL_DEKNING
@@ -593,8 +660,8 @@ class OppretteÅrsavregningVedEndringTest {
         PeriodeEndringScenario(
             ny = listOf(
                 Periode(
-                    fom = LocalDate.now().minusYears(2),
-                    tom = LocalDate.now().plusYears(1),
+                    fom = MARS2026.minusYears(2),
+                    tom = MARS2026.plusYears(1),
                     innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT,
                     medlemskapstype = Medlemskapstyper.FRIVILLIG,
                     dekning = Trygdedekninger.FULL_DEKNING
@@ -606,15 +673,15 @@ class OppretteÅrsavregningVedEndringTest {
         PeriodeEndringScenario(
             ny = listOf(
                 Periode(
-                    fom = LocalDate.now().minusYears(2),
-                    tom = LocalDate.now().minusYears(1),
+                    fom = MARS2026.minusYears(2),
+                    tom = MARS2026.minusYears(1),
                     innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT,
                     medlemskapstype = Medlemskapstyper.FRIVILLIG,
                     dekning = Trygdedekninger.FULL_DEKNING
                 ),
                 Periode(
-                    fom = LocalDate.now().minusYears(1),
-                    tom = LocalDate.now().plusYears(1),
+                    fom = MARS2026.minusYears(1),
+                    tom = MARS2026.plusYears(1),
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
                     medlemskapstype = Medlemskapstyper.FRIVILLIG,
                     dekning = Trygdedekninger.FULL_DEKNING
@@ -626,8 +693,8 @@ class OppretteÅrsavregningVedEndringTest {
         PeriodeEndringScenario(
             ny = listOf(
                 Periode(
-                    fom = LocalDate.now().minusYears(2),
-                    tom = LocalDate.now().plusYears(1),
+                    fom = MARS2026.minusYears(2),
+                    tom = MARS2026.plusYears(1),
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
                     medlemskapstype = Medlemskapstyper.FRIVILLIG,
                     dekning = Trygdedekninger.FULL_DEKNING
@@ -639,8 +706,8 @@ class OppretteÅrsavregningVedEndringTest {
         PeriodeEndringScenario(
             ny = listOf(
                 Periode(
-                    fom = LocalDate.now().minusYears(2),
-                    tom = LocalDate.now().plusYears(1),
+                    fom = MARS2026.minusYears(2),
+                    tom = MARS2026.plusYears(1),
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
                     medlemskapstype = Medlemskapstyper.FRIVILLIG,
                     dekning = Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER
@@ -655,8 +722,8 @@ class OppretteÅrsavregningVedEndringTest {
         PeriodeEndringScenario(
             ny = listOf(
                 Periode(
-                    fom = LocalDate.now().minusYears(2).justerMånederISammeÅr(2),
-                    tom = LocalDate.now().plusYears(1)
+                    fom = MARS2026.minusYears(2).justerMånederISammeÅr(2),
+                    tom = MARS2026.plusYears(1)
                 )
             ),
             forventedeÅr = listOf("2024", "2025"),
@@ -665,8 +732,8 @@ class OppretteÅrsavregningVedEndringTest {
         PeriodeEndringScenario(
             ny = listOf(
                 Periode(
-                    fom = LocalDate.now().minusYears(1),
-                    tom = LocalDate.now().plusYears(1),
+                    fom = MARS2026.minusYears(1),
+                    tom = MARS2026.plusYears(1),
                 )
             ),
             forventedeÅr = listOf("2024", "2025"),
@@ -675,8 +742,8 @@ class OppretteÅrsavregningVedEndringTest {
         PeriodeEndringScenario(
             ny = listOf(
                 Periode(
-                    fom = LocalDate.now().minusYears(2),
-                    tom = LocalDate.now().plusYears(1),
+                    fom = MARS2026.minusYears(2),
+                    tom = MARS2026.plusYears(1),
                 )
             ),
             forventedeÅr = emptyList(),
@@ -708,4 +775,5 @@ private fun LocalDate.justerMånederISammeÅr(måneder: Long): LocalDate {
     } else {
         justertDato
     }
+
 }
