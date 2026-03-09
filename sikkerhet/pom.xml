@@ -169,7 +169,6 @@
                             <artifactId>spring-boot-starter-tomcat</artifactId>
                         </exclusion>
                     </exclusions>
-          <version>4.0.3</version>
                 </dependency>
 
                 <dependency>
