@@ -24,7 +24,7 @@ class KafkaTestConfig {
         kafkaProperties: KafkaProperties,
         objectMapper: ObjectMapper
     ): KafkaTemplate<String, MelosysEessiMelding> {
-        val props = kafkaProperties.buildConsumerProperties()
+        val props = kafkaProperties.buildProducerProperties()
         val producerFactory: ProducerFactory<String, MelosysEessiMelding> =
             DefaultKafkaProducerFactory(props, StringSerializer(), ObjectMapperSerializer(objectMapper))
         return KafkaTemplate(producerFactory)
