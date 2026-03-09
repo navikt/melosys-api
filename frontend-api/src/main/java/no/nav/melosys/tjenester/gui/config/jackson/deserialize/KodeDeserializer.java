@@ -66,7 +66,12 @@ public class KodeDeserializer extends JsonDeserializer<Kodeverk> {
         }
 
         // Then try matching by kode
-        for (Object constant : enumType.getEnumConstants()) {
+        Object[] constants = enumType.getEnumConstants();
+        if (constants == null) {
+            throw ctxt.weirdStringException(value, enumType,
+                "Type is not an enum: " + enumType.getName());
+        }
+        for (Object constant : constants) {
             Kodeverk kv = (Kodeverk) constant;
             if (value.equals(kv.getKode())) {
                 return kv;
