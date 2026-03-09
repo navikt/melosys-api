@@ -9,27 +9,27 @@ import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.kodeverk.Innretningstyper
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader
 import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
-import no.nav.melosys.skjema.types.Skjemadel
-import no.nav.melosys.skjema.types.arbeidsgiver.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
-import no.nav.melosys.skjema.types.arbeidsgiver.arbeidsgiversvirksomhetinorge.ArbeidsgiverensVirksomhetINorgeDto
-import no.nav.melosys.skjema.types.arbeidsgiver.arbeidsstedIutlandet.ArbeidsstedIUtlandetDto
-import no.nav.melosys.skjema.types.arbeidsgiver.arbeidsstedIutlandet.ArbeidsstedType
-import no.nav.melosys.skjema.types.arbeidsgiver.arbeidsstedIutlandet.Farvann
-import no.nav.melosys.skjema.types.arbeidsgiver.arbeidsstedIutlandet.FastEllerVekslendeArbeidssted
-import no.nav.melosys.skjema.types.arbeidsgiver.arbeidsstedIutlandet.OmBordPaFlyDto
-import no.nav.melosys.skjema.types.arbeidsgiver.arbeidsstedIutlandet.OffshoreDto
-import no.nav.melosys.skjema.types.arbeidsgiver.arbeidsstedIutlandet.PaLandDto
-import no.nav.melosys.skjema.types.arbeidsgiver.arbeidsstedIutlandet.PaLandFastArbeidsstedDto
-import no.nav.melosys.skjema.types.arbeidsgiver.arbeidsstedIutlandet.PaSkipDto
-import no.nav.melosys.skjema.types.arbeidsgiver.arbeidsstedIutlandet.TypeInnretning
-import no.nav.melosys.skjema.types.arbeidsgiver.arbeidstakerenslonn.ArbeidstakerensLonnDto
-import no.nav.melosys.skjema.types.arbeidsgiver.utenlandsoppdraget.UtenlandsoppdragetDto
-import no.nav.melosys.skjema.types.arbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
-import no.nav.melosys.skjema.types.arbeidstaker.arbeidssituasjon.ArbeidssituasjonDto
-import no.nav.melosys.skjema.types.arbeidstaker.familiemedlemmer.Familiemedlem
-import no.nav.melosys.skjema.types.arbeidstaker.familiemedlemmer.FamiliemedlemmerDto
-import no.nav.melosys.skjema.types.arbeidstaker.skatteforholdoginntekt.SkatteforholdOgInntektDto
-import no.nav.melosys.skjema.types.arbeidstaker.utenlandsoppdraget.UtenlandsoppdragetArbeidstakersDelDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverensVirksomhetINorgeDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidssituasjonDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsstedIUtlandetDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsstedType
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidstakerensLonnDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.Familiemedlem
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.FamiliemedlemmerDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.Farvann
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.FastEllerVekslendeArbeidssted
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.OffshoreDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.OmBordPaFlyDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.PaLandDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.PaLandFastArbeidsstedDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.PaSkipDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.SkatteforholdOgInntektDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.TypeInnretning
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtenlandsoppdragetDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendingsperiodeOgLandDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
 import no.nav.melosys.skjema.types.felles.LandKode
 import no.nav.melosys.skjema.types.felles.PeriodeDto
 import org.junit.jupiter.api.Nested
@@ -83,8 +83,8 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
                 data = lagArbeidstakerData(
-                    utenlandsoppdraget = UtenlandsoppdragetArbeidstakersDelDto(
-                        utsendelsesLand = LandKode.DE,
+                    utsendingsperiodeOgLand = UtsendingsperiodeOgLandDto(
+                        utsendelseLand = LandKode.DE,
                         utsendelsePeriode = PeriodeDto(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31))
                     )
                 )
@@ -100,7 +100,10 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
-                    utenlandsoppdraget = lagUtenlandsoppdragetDto(utsendelseLand = LandKode.SE)
+                    utsendingsperiodeOgLand = UtsendingsperiodeOgLandDto(
+                        utsendelseLand = LandKode.SE,
+                        utsendelsePeriode = PeriodeDto(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31))
+                    )
                 )
             }
             val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(dto)
@@ -112,14 +115,17 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
         fun `arbeidstaker-del har presedens over arbeidsgiver-del for søknadsland`() {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 data = lagArbeidstakerData(
-                    utenlandsoppdraget = UtenlandsoppdragetArbeidstakersDelDto(
-                        utsendelsesLand = LandKode.DE,
+                    utsendingsperiodeOgLand = UtsendingsperiodeOgLandDto(
+                        utsendelseLand = LandKode.DE,
                         utsendelsePeriode = PeriodeDto(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31))
                     )
                 )
                 medKobletArbeidsgiverSkjema {
                     data = lagArbeidsgiverData(
-                        utenlandsoppdraget = lagUtenlandsoppdragetDto(utsendelseLand = LandKode.SE)
+                        utsendingsperiodeOgLand = UtsendingsperiodeOgLandDto(
+                            utsendelseLand = LandKode.SE,
+                            utsendelsePeriode = PeriodeDto(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31))
+                        )
                     )
                 }
             }
@@ -147,8 +153,8 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
                 data = lagArbeidstakerData(
-                    utenlandsoppdraget = UtenlandsoppdragetArbeidstakersDelDto(
-                        utsendelsesLand = LandKode.DE,
+                    utsendingsperiodeOgLand = UtsendingsperiodeOgLandDto(
+                        utsendelseLand = LandKode.DE,
                         utsendelsePeriode = PeriodeDto(fom, tom)
                     )
                 )
@@ -165,9 +171,9 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
-                    utenlandsoppdraget = lagUtenlandsoppdragetDto(
+                    utsendingsperiodeOgLand = UtsendingsperiodeOgLandDto(
                         utsendelseLand = LandKode.FI,
-                        arbeidstakerPeriode = PeriodeDto(fom, tom)
+                        utsendelsePeriode = PeriodeDto(fom, tom)
                     )
                 )
             }
@@ -184,16 +190,16 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
             val arbeidsgiverTom = LocalDate.of(2025, 12, 31)
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 data = lagArbeidstakerData(
-                    utenlandsoppdraget = UtenlandsoppdragetArbeidstakersDelDto(
-                        utsendelsesLand = LandKode.DE,
+                    utsendingsperiodeOgLand = UtsendingsperiodeOgLandDto(
+                        utsendelseLand = LandKode.DE,
                         utsendelsePeriode = PeriodeDto(arbeidstakerFom, arbeidstakerTom)
                     )
                 )
                 medKobletArbeidsgiverSkjema {
                     data = lagArbeidsgiverData(
-                        utenlandsoppdraget = lagUtenlandsoppdragetDto(
+                        utsendingsperiodeOgLand = UtsendingsperiodeOgLandDto(
                             utsendelseLand = LandKode.DE,
-                            arbeidstakerPeriode = PeriodeDto(arbeidsgiverFom, arbeidsgiverTom)
+                            utsendelsePeriode = PeriodeDto(arbeidsgiverFom, arbeidsgiverTom)
                         )
                     )
                 }
@@ -627,8 +633,8 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
         fun `mapper komplett søknad med begge deler`() {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 data = lagArbeidstakerData(
-                    utenlandsoppdraget = UtenlandsoppdragetArbeidstakersDelDto(
-                        utsendelsesLand = LandKode.DE,
+                    utsendingsperiodeOgLand = UtsendingsperiodeOgLandDto(
+                        utsendelseLand = LandKode.DE,
                         utsendelsePeriode = PeriodeDto(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31))
                     ),
                     arbeidssituasjon = ArbeidssituasjonDto(
@@ -654,7 +660,6 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                 medKobletArbeidsgiverSkjema {
                     data = lagArbeidsgiverData(
                         utenlandsoppdraget = lagUtenlandsoppdragetDto(
-                            utsendelseLand = LandKode.DE,
                             arbeidsgiverHarOppdrag = true,
                             ansattForOppdraget = false,
                             forblirAnsatt = true,
@@ -717,8 +722,8 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
                 data = lagArbeidstakerData(
-                    utenlandsoppdraget = UtenlandsoppdragetArbeidstakersDelDto(
-                        utsendelsesLand = LandKode.FI,
+                    utsendingsperiodeOgLand = UtsendingsperiodeOgLandDto(
+                        utsendelseLand = LandKode.FI,
                         utsendelsePeriode = PeriodeDto(LocalDate.of(2025, 6, 1), LocalDate.of(2025, 12, 31))
                     )
                 )
@@ -737,10 +742,12 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
                 skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = lagArbeidsgiverData(
                     utenlandsoppdraget = lagUtenlandsoppdragetDto(
-                        utsendelseLand = LandKode.SE,
-                        arbeidstakerPeriode = PeriodeDto(LocalDate.of(2025, 3, 1), LocalDate.of(2025, 8, 31)),
                         arbeidsgiverHarOppdrag = true,
                         erstatterAnnen = false
+                    ),
+                    utsendingsperiodeOgLand = UtsendingsperiodeOgLandDto(
+                        utsendelseLand = LandKode.SE,
+                        utsendelsePeriode = PeriodeDto(LocalDate.of(2025, 3, 1), LocalDate.of(2025, 8, 31))
                     ),
                     virksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(erArbeidsgiverenOffentligVirksomhet = true)
                 )
@@ -758,12 +765,12 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
     // --- Test data helpers (mapper-specific) ---
 
     private fun lagArbeidstakerData(
-        utenlandsoppdraget: UtenlandsoppdragetArbeidstakersDelDto? = null,
+        utsendingsperiodeOgLand: UtsendingsperiodeOgLandDto? = null,
         arbeidssituasjon: ArbeidssituasjonDto? = null,
         skatteforhold: SkatteforholdOgInntektDto? = null,
         familiemedlemmer: FamiliemedlemmerDto? = null
     ) = UtsendtArbeidstakerArbeidstakersSkjemaDataDto(
-        utenlandsoppdraget = utenlandsoppdraget,
+        utsendingsperiodeOgLand = utsendingsperiodeOgLand,
         arbeidssituasjon = arbeidssituasjon,
         skatteforholdOgInntekt = skatteforhold,
         familiemedlemmer = familiemedlemmer
@@ -773,25 +780,23 @@ internal class UtsendtArbeidstakerSøknadMapperTest {
         utenlandsoppdraget: UtenlandsoppdragetDto? = null,
         virksomhetINorge: ArbeidsgiverensVirksomhetINorgeDto? = null,
         lonn: ArbeidstakerensLonnDto? = null,
-        arbeidssted: ArbeidsstedIUtlandetDto? = null
+        arbeidssted: ArbeidsstedIUtlandetDto? = null,
+        utsendingsperiodeOgLand: UtsendingsperiodeOgLandDto? = null
     ) = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto(
         utenlandsoppdraget = utenlandsoppdraget,
         arbeidsgiverensVirksomhetINorge = virksomhetINorge,
         arbeidstakerensLonn = lonn,
-        arbeidsstedIUtlandet = arbeidssted
+        arbeidsstedIUtlandet = arbeidssted,
+        utsendingsperiodeOgLand = utsendingsperiodeOgLand
     )
 
     private fun lagUtenlandsoppdragetDto(
-        utsendelseLand: LandKode = LandKode.DE,
-        arbeidstakerPeriode: PeriodeDto = PeriodeDto(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31)),
         arbeidsgiverHarOppdrag: Boolean = true,
         ansattForOppdraget: Boolean = false,
         forblirAnsatt: Boolean = true,
         erstatterAnnen: Boolean = false,
         forrigePeriode: PeriodeDto? = null
     ) = UtenlandsoppdragetDto(
-        utsendelseLand = utsendelseLand,
-        arbeidstakerUtsendelsePeriode = arbeidstakerPeriode,
         arbeidsgiverHarOppdragILandet = arbeidsgiverHarOppdrag,
         arbeidstakerBleAnsattForUtenlandsoppdraget = ansattForOppdraget,
         arbeidstakerForblirAnsattIHelePerioden = forblirAnsatt,
