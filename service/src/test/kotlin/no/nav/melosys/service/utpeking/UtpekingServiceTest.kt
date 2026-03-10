@@ -475,33 +475,28 @@ class UtpekingServiceTest {
     }
 
     @Test
-    fun `lagreUtpekingsperioder eksisterendeUtpekingsperiodeUtenBestemmelse kasterException`() {
+    fun `lagreUtpekingsperioder eksisterendeUtpekingsperiodeMedNullLovvalgsland lagresLikevel`() {
         val eksisterendeUtpekingsperiode = Utpekingsperiode().apply {
             bestemmelse = null
-            lovvalgsland = Land_iso2.SE
-        }
-
-        every { utpekingsperiodeRepository.findByBehandlingsresultat_Id(BEHANDLING_ID) } returns listOf(eksisterendeUtpekingsperiode)
-
-        val exception = shouldThrow<FunksjonellException> {
-            utpekingService.lagreUtpekingsperioder(BEHANDLING_ID, emptyList())
-        }
-        exception.message shouldContain "Kan ikke oppdatere utpekingsperiode uten bestemmelse for behandlingID: "
-    }
-
-    @Test
-    fun `lagreUtpekingsperioder eksisterendeUtpekingsperiodeUtenLovvalgsland kasterException`() {
-        val eksisterendeUtpekingsperiode = Utpekingsperiode().apply {
-            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1
             lovvalgsland = null
         }
+        val nyeUtpekingsperioder = listOf(
+            Utpekingsperiode(
+                LocalDate.now(), LocalDate.now().plusDays(30), Land_iso2.SE,
+                Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null
+            )
+        )
 
         every { utpekingsperiodeRepository.findByBehandlingsresultat_Id(BEHANDLING_ID) } returns listOf(eksisterendeUtpekingsperiode)
+        every { utpekingsperiodeRepository.deleteByBehandlingsresultat(any()) } returns emptyList()
+        every { utpekingsperiodeRepository.flush() } returns Unit
+        every { utpekingsperiodeRepository.saveAll(nyeUtpekingsperioder) } returns nyeUtpekingsperioder
 
-        val exception = shouldThrow<FunksjonellException> {
-            utpekingService.lagreUtpekingsperioder(BEHANDLING_ID, emptyList())
-        }
-        exception.message shouldContain "Kan ikke oppdatere utpekingsperiode uten lovvalgsland for behandlingID: "
+        val resultat = utpekingService.lagreUtpekingsperioder(BEHANDLING_ID, nyeUtpekingsperioder)
+
+        verify { utpekingsperiodeRepository.deleteByBehandlingsresultat(behandlingsresultat) }
+        verify { utpekingsperiodeRepository.saveAll(nyeUtpekingsperioder) }
+        resultat shouldBe nyeUtpekingsperioder
     }
 
     @Test

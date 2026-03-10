@@ -87,12 +87,6 @@ public class UtpekingService {
             if (utpekingsperiode.getSendtUtland() != null) {
                 throw new FunksjonellException("Kan ikke oppdatere utpekingsperiode etter at A003 er sendt for behandlingID: " + behandlingID);
             }
-            if (utpekingsperiode.getLovvalgsland() == null) {
-                throw new FunksjonellException("Kan ikke oppdatere utpekingsperiode uten lovvalgsland for behandlingID: " + behandlingID);
-            }
-            if (utpekingsperiode.getBestemmelse() == null) {
-                throw new FunksjonellException("Kan ikke oppdatere utpekingsperiode uten bestemmelse for behandlingID: " + behandlingID);
-            }
         }
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
