@@ -469,15 +469,15 @@ internal class MedlServiceTest {
             }
         }
 
-    private fun hentMedlemskapsunntakListe() = objectMapper.readValue(
-        javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodelisteResponse.json")!!.openStream(),
-        Array<MedlemskapsunntakForGet>::class.java
-    ).toList()
+    private fun hentMedlemskapsunntakListe() =
+        javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodelisteResponse.json")!!.openStream().use { stream ->
+            objectMapper.readValue(stream, Array<MedlemskapsunntakForGet>::class.java)
+        }.toList()
 
-    private fun hentMedlemskapsunntak() = objectMapper.readValue(
-        javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodeResponse.json")!!.openStream(),
-        MedlemskapsunntakForGet::class.java
-    )
+    private fun hentMedlemskapsunntak() =
+        javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodeResponse.json")!!.openStream().use { stream ->
+            objectMapper.readValue(stream, MedlemskapsunntakForGet::class.java)
+        }
 
     companion object {
         private const val FNR = "77777777773"
