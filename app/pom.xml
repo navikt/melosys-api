@@ -122,7 +122,7 @@
                     <dependency>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-starter-flyway</artifactId>
-                        <version>4.0.3</version>
+                        <version>${springboot.version}</version>
                     </dependency>
                     <dependency>
                         <groupId>com.oracle.database.jdbc</groupId>

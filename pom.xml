@@ -123,6 +123,7 @@
         <xmlsec.version>4.0.4</xmlsec.version>
         <wiremock-standalone.version>3.13.2</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
+        <springboot.version>4.0.3</springboot.version>
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det

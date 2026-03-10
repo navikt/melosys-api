@@ -46,9 +46,17 @@ internal class ByUserIdStrategyTest {
         wireMockServer.stop()
     }
 
+    private var originalSubjectHandler: SubjectHandler? = null
+
     @BeforeEach
     fun setup() {
+        originalSubjectHandler = SubjectHandler.getInstance()
         SubjectHandler.set(null)
+    }
+
+    @AfterEach
+    fun teardown() {
+        SubjectHandler.set(originalSubjectHandler)
     }
 
     @Test
