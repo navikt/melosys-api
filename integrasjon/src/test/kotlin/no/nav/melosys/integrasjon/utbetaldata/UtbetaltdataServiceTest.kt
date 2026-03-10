@@ -143,10 +143,10 @@ class UtbetaltdataServiceTest {
             .utbetalinger.shouldHaveSize(2)
     }
 
-    private fun hentUtbetalingListe(): List<Utbetaling> = objectMapper.readValue(
-        javaClass.classLoader.getResource("mock/utbetaldata/ubetalingResponse.json")!!.openStream(),
-        Array<Utbetaling>::class.java
-    ).toList()
+    private fun hentUtbetalingListe(): List<Utbetaling> =
+        javaClass.classLoader.getResource("mock/utbetaldata/ubetalingResponse.json")!!.openStream().use { stream ->
+            objectMapper.readValue(stream, Array<Utbetaling>::class.java)
+        }.toList()
 
     companion object {
         private const val FNR = "77777777773"
