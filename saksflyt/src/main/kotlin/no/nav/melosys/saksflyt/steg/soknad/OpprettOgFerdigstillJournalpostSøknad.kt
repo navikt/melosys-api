@@ -13,7 +13,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataFasade
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
+import no.nav.melosys.skjema.types.Skjemadel
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.springframework.stereotype.Component
 
@@ -91,6 +91,5 @@ class OpprettOgFerdigstillJournalpostSøknad(
     private fun utledTittel(skjemadel: Skjemadel): String = when (skjemadel) {
         Skjemadel.ARBEIDSTAKERS_DEL -> TITTEL_ARBEIDSTAKER
         Skjemadel.ARBEIDSGIVERS_DEL -> TITTEL_ARBEIDSGIVER
-        Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL -> TITTEL_ARBEIDSTAKER
     }
 }

@@ -4,12 +4,12 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.matchers.shouldBe
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.DegSelvMetadata
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
+import no.nav.melosys.skjema.types.DegSelvMetadata
+import no.nav.melosys.skjema.types.Skjemadel
 import no.nav.melosys.skjema.types.SkjemaType
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendingsperiodeOgLandDto
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaDto
+import no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaDto
+import no.nav.melosys.skjema.types.arbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
+import no.nav.melosys.skjema.types.arbeidstaker.utenlandsoppdraget.UtenlandsoppdragetArbeidstakersDelDto
 import no.nav.melosys.skjema.types.common.SkjemaStatus
 import no.nav.melosys.skjema.types.felles.LandKode
 import no.nav.melosys.skjema.types.felles.PeriodeDto
@@ -92,8 +92,8 @@ class MelosysSkjemaApiClientTest(
                 },
                 "data": {
                   "type": "UTSENDT_ARBEIDSTAKER_ARBEIDSTAKERS_DEL",
-                  "utsendingsperiodeOgLand": {
-                    "utsendelseLand": "SE",
+                  "utenlandsoppdraget": {
+                    "utsendelsesLand": "SE",
                     "utsendelsePeriode": {
                       "fraDato": "2024-01-01",
                       "tilDato": "2024-12-31"
@@ -134,8 +134,8 @@ class MelosysSkjemaApiClientTest(
                     juridiskEnhetOrgnr = "987654321"
                 ),
                 data = UtsendtArbeidstakerArbeidstakersSkjemaDataDto(
-                    utsendingsperiodeOgLand = UtsendingsperiodeOgLandDto(
-                        utsendelseLand = LandKode.SE,
+                    utenlandsoppdraget = UtenlandsoppdragetArbeidstakersDelDto(
+                        utsendelsesLand = LandKode.SE,
                         utsendelsePeriode = PeriodeDto(
                             fraDato = LocalDate.of(2024, 1, 1),
                             tilDato = LocalDate.of(2024, 12, 31)
