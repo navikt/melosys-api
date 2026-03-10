@@ -32,7 +32,6 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 import org.springframework.kafka.listener.ContainerProperties
-import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 
 typealias KafkaConsumerContainerFactory<T> = KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, T>>
 
@@ -130,10 +129,7 @@ class KafkaConfig(
 
         containerProperties.ackMode = ContainerProperties.AckMode.RECORD
 
-        val props = kafkaProperties.buildConsumerProperties() + consumerConfig(groupId) + securityConfig() + mapOf(
-            ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to ErrorHandlingDeserializer::class.java,
-            ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS to LoggingDeserializer::class.java
-        )
+        val props = kafkaProperties.buildConsumerProperties() + consumerConfig(groupId) + securityConfig()
 
         setConsumerFactory(DefaultKafkaConsumerFactory(
             props,
