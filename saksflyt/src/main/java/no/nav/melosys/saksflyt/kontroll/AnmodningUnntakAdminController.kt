@@ -7,6 +7,7 @@ import no.nav.melosys.saksflyt.steg.sed.SendAnmodningOmUnntak
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.unntak.AnmodningsperiodeService
 import no.nav.security.token.support.core.api.Protected
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -23,8 +24,11 @@ class AnmodningUnntakAdminController(
     val anmodningsperiodeService: AnmodningsperiodeService,
     ) {
 
+    private val log = LoggerFactory.getLogger(javaClass)
+
     @PostMapping("/{behandlingID}/fortsett-uten-sed")
     fun oppdaterAnmodningOmUnntakUtenSED(@PathVariable behandlingID: Long): ResponseEntity<Unit> {
+        log.info("Admin: Oppdaterer anmodning om unntak uten å SED for behandling {}", behandlingID)
 
         val behandling = behandlingService.hentBehandling(behandlingID)
 
