@@ -3,6 +3,7 @@ package no.nav.melosys.service.unntak
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
@@ -352,6 +353,22 @@ class AnmodningUnntakServiceTest {
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
         Trygdedekninger.FULL_DEKNING_EOSFO
     )
+    @Test
+    fun `fortsettAnmodningUtenSed setter status og svarfrist og oppdaterer anmodningsperiode`() {
+        val behandling = Behandling.forTest { id = BEHANDLING_ID }
+
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingService.lagre(behandling) } just Runs
+        every { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(BEHANDLING_ID) } just Runs
+
+        anmodningUnntakService.fortsettAnmodningUtenSed(BEHANDLING_ID)
+
+        behandling.status shouldBe Behandlingsstatus.ANMODNING_UNNTAK_SENDT
+        behandling.dokumentasjonSvarfristDato shouldNotBe null
+        verify { behandlingService.lagre(behandling) }
+        verify { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(BEHANDLING_ID) }
+    }
+
     companion object {
         private const val BEHANDLING_ID = 1L
         private const val FRITEKST_SED = "Ytterligere info som fritekst"
