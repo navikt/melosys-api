@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.tilgangsmaskinen
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.integrasjon.tilgangsmaskinen.dto.AvvisningsKode

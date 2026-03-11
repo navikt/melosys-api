@@ -1,9 +1,8 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.SerializationFeature
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -190,8 +189,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
     private val Any.toJsonNode: JsonNode
         get() {
             return jacksonObjectMapper()
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                .registerModule(JavaTimeModule())
+                
                 .valueToTree(this)
         }
 }

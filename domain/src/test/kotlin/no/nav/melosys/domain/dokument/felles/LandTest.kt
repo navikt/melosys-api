@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.dokument.felles
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 

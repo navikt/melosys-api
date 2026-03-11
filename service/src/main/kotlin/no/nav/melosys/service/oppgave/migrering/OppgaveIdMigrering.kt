@@ -1,9 +1,8 @@
 package no.nav.melosys.service.oppgave.migrering
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.SerializationFeature
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
@@ -107,8 +106,7 @@ class OppgaveIdMigrering(
     private val Any.toJsonNode: JsonNode
         get() {
             return jacksonObjectMapper()
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                .registerModule(JavaTimeModule())
+                
                 .valueToTree(this)
         }
 }

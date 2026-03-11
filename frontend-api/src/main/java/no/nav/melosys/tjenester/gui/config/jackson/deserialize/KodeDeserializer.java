@@ -1,11 +1,9 @@
 package no.nav.melosys.tjenester.gui.config.jackson.deserialize;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 
 /**
@@ -13,7 +11,7 @@ import no.nav.melosys.domain.kodeverk.Kodeverk;
  * and KodeDto objects ({@code {"kode":"FØRSTEGANGSVEDTAK","term":"..."}}).
  * This enables roundtrip serialization/deserialization with {@link no.nav.melosys.tjenester.gui.config.jackson.serialize.KodeSerializer}.
  */
-public class KodeDeserializer extends JsonDeserializer<Kodeverk> {
+public class KodeDeserializer extends ValueDeserializer<Kodeverk> {
 
     private final Class<? extends Kodeverk> enumType;
 
@@ -22,7 +20,7 @@ public class KodeDeserializer extends JsonDeserializer<Kodeverk> {
     }
 
     @Override
-    public Kodeverk deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+    public Kodeverk deserialize(JsonParser p, DeserializationContext ctxt) {
         if (p.currentToken() == JsonToken.VALUE_STRING) {
             return resolveEnum(p.getValueAsString(), ctxt);
         }
@@ -35,7 +33,7 @@ public class KodeDeserializer extends JsonDeserializer<Kodeverk> {
             "Expected string or object for Kodeverk enum");
     }
 
-    private Kodeverk deserializeFromObject(JsonParser p, DeserializationContext ctxt) throws IOException {
+    private Kodeverk deserializeFromObject(JsonParser p, DeserializationContext ctxt) {
         String kode = null;
         while (p.nextToken() != JsonToken.END_OBJECT) {
             String fieldName = p.currentName();
@@ -51,7 +49,7 @@ public class KodeDeserializer extends JsonDeserializer<Kodeverk> {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private Kodeverk resolveEnum(String value, DeserializationContext ctxt) throws IOException {
+    private Kodeverk resolveEnum(String value, DeserializationContext ctxt) {
         if (value == null || value.isEmpty()) {
             return null;
         }

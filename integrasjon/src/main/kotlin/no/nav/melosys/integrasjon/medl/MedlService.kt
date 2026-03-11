@@ -1,8 +1,7 @@
 package no.nav.melosys.integrasjon.medl
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import tools.jackson.core.JacksonException
+import tools.jackson.databind.ObjectMapper
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
@@ -28,7 +27,7 @@ class MedlService(
 ) {
 
     init {
-        objectMapper.registerModule(JavaTimeModule())
+        objectMapper
     }
 
     fun hentPeriodeListe(fnr: String, fom: LocalDate?, tom: LocalDate?): Saksopplysning {
@@ -57,7 +56,7 @@ class MedlService(
                     SaksopplysningKildesystem.MEDL,
                     objectMapper.writeValueAsString(periodeListeResponse)
                 )
-            } catch (e: JsonProcessingException) {
+            } catch (e: JacksonException) {
                 throw TekniskException("Kunne ikke lagre kildedokument fra MEDL")
             }
         }

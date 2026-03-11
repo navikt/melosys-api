@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import no.nav.melosys.integrasjon.kafka.LoggingDeserializer
 import org.springframework.stereotype.Component
 import java.util.concurrent.BlockingQueue

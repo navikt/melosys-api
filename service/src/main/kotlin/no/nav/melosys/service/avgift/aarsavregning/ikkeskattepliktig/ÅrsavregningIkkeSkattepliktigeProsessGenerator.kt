@@ -1,9 +1,8 @@
 package no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.SerializationFeature
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
@@ -33,8 +32,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
     )
 
     fun sakerFunnetJsonString(): String = jacksonObjectMapper()
-        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        .registerModule(JavaTimeModule())
+        
         .valueToTree<JsonNode>(sakerFunnet.map { it.toMap() }).toPrettyString()
 
     @Async("taskExecutor")

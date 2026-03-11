@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.joark.journalpostapi
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import tools.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
@@ -23,8 +22,8 @@ class JournalpostapiClientTest {
 
     private lateinit var journalpostapiClient: JournalpostapiClient
     private lateinit var wireMockServer: WireMockServer
+    private val objectMapper = ObjectMapper()
 
-    private val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
 
     @BeforeAll
     fun `initial setup`() {

@@ -1,10 +1,8 @@
 package no.nav.melosys.tjenester.gui.config.jackson.serialize;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdSerializer;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -27,7 +25,7 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
     }
 
     @Override
-    public void serialize(OrganisasjonDokument organisasjon, JsonGenerator generator, SerializerProvider provider) throws IOException {
+    public void serialize(OrganisasjonDokument organisasjon, JsonGenerator generator, SerializationContext provider) {
         OrganisasjonDto organisasjonDto = new OrganisasjonDto();
 
         organisasjonDto.setOrgnr(organisasjon.getOrgnummer());
@@ -40,7 +38,7 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
         organisasjonDto.setForretningsadresse(tilAdresseDto(organisasjon.getForretningsadresse()));
         organisasjonDto.setPostadresse(tilAdresseDto(organisasjon.getPostadresse()));
 
-        generator.writeObject(organisasjonDto);
+        generator.writePOJO(organisasjonDto);
     }
 
     private AdresseDto tilAdresseDto(StrukturertAdresse adresse) {

@@ -74,7 +74,7 @@
         <mockito-kotlin.version>6.2.3</mockito-kotlin.version>
         <mockk.version>1.14.9</mockk.version>
         <micrometer-jvm-extras.version>0.2.2</micrometer-jvm-extras.version>
-        <networknt.json-schema-validator.version>1.0.74</networknt.json-schema-validator.version>
+        <networknt.json-schema-validator.version>3.0.0</networknt.json-schema-validator.version>
         <ojdbc.version>21.16.0.0</ojdbc.version>
         <okhttp.version>5.3.2</okhttp.version>
         <oracle.version>18</oracle.version>
@@ -343,21 +343,6 @@
                 <artifactId>cxf-services-sts-core</artifactId>
                 <version>${cxf.version}</version>
             </dependency>
-            <!-- Jackson: SB 4.0 uses Jackson 3 by default, but we stay on Jackson 2.
-                 Exclude Jackson 3 (tools.jackson) from spring-boot-jackson to prevent
-                 Jackson 3 auto-config and codecs from activating.
-                 spring-boot-jackson2 (added in individual modules) provides ObjectMapper
-                 bean auto-configuration for Jackson 2. -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-jackson</artifactId>
-                <exclusions>
-                    <exclusion>
-                        <groupId>tools.jackson.core</groupId>
-                        <artifactId>jackson-databind</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
             <dependency>
                 <groupId>net.javacrumbs.shedlock</groupId>
                 <artifactId>shedlock-spring</artifactId>
@@ -479,12 +464,6 @@
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>${springdoc-openapi.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-jackson</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <!-- NAV felleskomponenter -->
@@ -497,16 +476,6 @@
                 <groupId>no.nav.security</groupId>
                 <artifactId>token-client-spring</artifactId>
                 <version>${token-support.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>tools.jackson.core</groupId>
-                        <artifactId>jackson-databind</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>tools.jackson.module</groupId>
-                        <artifactId>jackson-module-kotlin</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>no.nav.tjenester</groupId>

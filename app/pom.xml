@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-jackson2</artifactId>
+            <artifactId>spring-boot-jackson</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>

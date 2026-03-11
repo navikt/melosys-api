@@ -5,7 +5,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.service.JsonSchemaValidator;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding;

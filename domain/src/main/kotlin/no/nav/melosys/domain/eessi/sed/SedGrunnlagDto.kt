@@ -3,7 +3,7 @@ package no.nav.melosys.domain.eessi.sed
 import com.fasterxml.jackson.annotation.JsonSetter
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.Nulls
-import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver
+import tools.jackson.databind.annotation.JsonTypeIdResolver
 import no.nav.melosys.domain.eessi.SedType
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "sedType", visible = true)

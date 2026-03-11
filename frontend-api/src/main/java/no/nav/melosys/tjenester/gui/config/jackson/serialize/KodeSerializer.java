@@ -1,12 +1,11 @@
 package no.nav.melosys.tjenester.gui.config.jackson.serialize;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdSerializer;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
@@ -30,10 +29,10 @@ public class KodeSerializer extends StdSerializer<Kodeverk> {
     }
 
     @Override
-    public void serialize(Kodeverk value, JsonGenerator generator, SerializerProvider provider) throws IOException {
+    public void serialize(Kodeverk value, JsonGenerator generator, SerializationContext provider) {
         if (skalMappesTilKodeDto(value)) {
             KodeDto kodeDto = new KodeDto(value.getKode(), value.getBeskrivelse());
-            generator.writeObject(kodeDto);
+            generator.writePOJO(kodeDto);
         } else {
             generator.writeString(value.getKode());
         }

@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui.config.jackson.serialize
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.SerializerProvider
+import tools.jackson.core.JsonGenerator
+import tools.jackson.databind.SerializationContext
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -17,7 +17,7 @@ class FellesKodeverkSerializerTest {
     private val kodeverkService = mockk<KodeverkService>()
     private val serializer = FellesKodeverkSerializer(kodeverkService)
     private val generator = mockk<JsonGenerator>(relaxed = true)
-    private val provider = mockk<SerializerProvider>()
+    private val provider = mockk<SerializationContext>()
 
     @Test
     fun `serialize should write kode and term for valid kode`() {
@@ -28,8 +28,8 @@ class FellesKodeverkSerializerTest {
 
         verifyOrder {
             generator.writeStartObject()
-            generator.writeStringField("kode", "NO")
-            generator.writeStringField("term", "Norge")
+            generator.writeStringProperty("kode", "NO")
+            generator.writeStringProperty("term", "Norge")
             generator.writeEndObject()
         }
     }
@@ -42,8 +42,8 @@ class FellesKodeverkSerializerTest {
 
         verifyOrder {
             generator.writeStartObject()
-            generator.writeStringField("kode", null)
-            generator.writeStringField("term", null)
+            generator.writeStringProperty("kode", null)
+            generator.writeStringProperty("term", null)
             generator.writeEndObject()
         }
         verify(exactly = 0) { kodeverkService.dekod(any(), any()) }
@@ -57,8 +57,8 @@ class FellesKodeverkSerializerTest {
 
         verifyOrder {
             generator.writeStartObject()
-            generator.writeStringField("kode", null)
-            generator.writeStringField("term", null)
+            generator.writeStringProperty("kode", null)
+            generator.writeStringProperty("term", null)
             generator.writeEndObject()
         }
         verify(exactly = 0) { kodeverkService.dekod(any(), any()) }
