@@ -76,17 +76,6 @@ public class AnmodningUnntakService {
     }
 
     @Transactional
-    public void fortsettAnmodningUtenSed(long behandlingID) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
-
-        LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(AnmodningUnntakKonstanter.SVARFRIST_MÅNEDER);
-        behandling.setDokumentasjonSvarfristDato(svarFristDato.atZone(AnmodningUnntakKonstanter.TIME_ZONE_ID).toInstant());
-        behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
-        behandlingService.lagre(behandling);
-        anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(behandling.getId());
-    }
-
-    @Transactional
     public void anmodningOmUnntak(long behandlingID, String mottakerinstitusjon,
                                   Set<DokumentReferanse> vedleggReferanser, String ytterligereInformasjonSed,
                                   String begrunnelseFritekst, Boolean erFjernarbeidTWFA) throws ValideringException {
@@ -142,6 +131,17 @@ public class AnmodningUnntakService {
 
         prosessinstansService.opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling, ytterligereInfo);
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
+    }
+
+    @Transactional
+    public void fortsettAnmodningUtenSed(long behandlingID) {
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+
+        LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(AnmodningUnntakKonstanter.SVARFRIST_MÅNEDER);
+        behandling.setDokumentasjonSvarfristDato(svarFristDato.atZone(AnmodningUnntakKonstanter.TIME_ZONE_ID).toInstant());
+        behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
+        behandlingService.lagre(behandling);
+        anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(behandling.getId());
     }
 
     private static void validerBehandlingstemaUnntak(Behandling behandling) {
