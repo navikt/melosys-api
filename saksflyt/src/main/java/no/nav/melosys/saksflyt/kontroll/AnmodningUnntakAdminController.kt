@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.saksflyt.steg.sed.SendAnmodningOmUnntak
-import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.unntak.AnmodningsperiodeService
 import no.nav.security.token.support.core.api.Protected
@@ -20,7 +19,7 @@ import java.time.LocalDateTime
 @RestController
 @Tags(Tag(name = "anmodning-unntak"), Tag(name = "admin"))
 @RequestMapping("/admin/anmodning-unntak")
- class AnmodningUnntakAdminController(
+class AnmodningUnntakAdminController(
     val behandlingService: BehandlingService,
     val anmodningsperiodeService: AnmodningsperiodeService,
     ) {
