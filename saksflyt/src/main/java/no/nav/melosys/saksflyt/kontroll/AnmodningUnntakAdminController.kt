@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.kontroll
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.saksflyt.steg.sed.SendAnmodningOmUnntak
 import no.nav.melosys.service.behandling.BehandlingService
@@ -27,10 +26,10 @@ class AnmodningUnntakAdminController(
     @PostMapping("/{behandlingID}/fortsett-uten-sed")
     fun oppdaterAnmodningOmUnntakUtenSED(@PathVariable behandlingID: Long): ResponseEntity<Unit> {
 
-        val behandling: Behandling? = behandlingService.hentBehandling(behandlingID)
+        val behandling = behandlingService.hentBehandling(behandlingID)
 
         val svarFristDato = LocalDateTime.now().plusMonths(SendAnmodningOmUnntak.SVARFRIST_MÅNEDER.toLong())
-        behandling!!.dokumentasjonSvarfristDato = svarFristDato.atZone(SendAnmodningOmUnntak.TIME_ZONE_ID).toInstant()
+        behandling.dokumentasjonSvarfristDato = svarFristDato.atZone(SendAnmodningOmUnntak.TIME_ZONE_ID).toInstant()
         behandling.status = Behandlingsstatus.ANMODNING_UNNTAK_SENDT
         behandlingService.lagre(behandling)
         anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(behandling.id)
