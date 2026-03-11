@@ -1,11 +1,9 @@
-package no.nav.melosys.saksflyt.kontroll
+package no.nav.melosys.service.unntak
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
-import no.nav.melosys.saksflyt.steg.sed.SendAnmodningOmUnntak
 import no.nav.melosys.service.behandling.BehandlingService
-import no.nav.melosys.service.unntak.AnmodningsperiodeService
 import no.nav.security.token.support.core.api.Protected
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -30,12 +28,12 @@ class AnmodningUnntakAdminController(
     @Transactional
     @PostMapping("/{behandlingID}/fortsett-uten-sed")
     fun oppdaterAnmodningOmUnntakUtenSED(@PathVariable behandlingID: Long): ResponseEntity<Unit> {
-        log.info("Admin: Oppdaterer anmodning om unntak uten å SED for behandling {}", behandlingID)
+        log.info("Admin: Oppdaterer anmodning om unntak uten SED for behandling {}", behandlingID)
 
         val behandling = behandlingService.hentBehandling(behandlingID)
 
-        val svarFristDato = LocalDateTime.now().plusMonths(SendAnmodningOmUnntak.SVARFRIST_MÅNEDER.toLong())
-        behandling.dokumentasjonSvarfristDato = svarFristDato.atZone(SendAnmodningOmUnntak.TIME_ZONE_ID).toInstant()
+        val svarFristDato = LocalDateTime.now().plusMonths(AnmodningUnntakKonstanter.SVARFRIST_MÅNEDER.toLong())
+        behandling.dokumentasjonSvarfristDato = svarFristDato.atZone(AnmodningUnntakKonstanter.TIME_ZONE_ID).toInstant()
         behandling.status = Behandlingsstatus.ANMODNING_UNNTAK_SENDT
         behandlingService.lagre(behandling)
         anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(behandling.id)
@@ -44,3 +42,4 @@ class AnmodningUnntakAdminController(
 
     }
 }
+
