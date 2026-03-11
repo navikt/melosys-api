@@ -36,8 +36,8 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
     private final BehandlingService behandlingService;
     private final AnmodningsperiodeService anmodningsperiodeService;
 
-    private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
-    private static final int SVARFRIST_MÅNEDER = 2;
+    public static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
+    public static final int SVARFRIST_MÅNEDER = 2;
 
     public SendAnmodningOmUnntak(EessiService eessiService,
                                  BrevBestiller brevBestiller,
