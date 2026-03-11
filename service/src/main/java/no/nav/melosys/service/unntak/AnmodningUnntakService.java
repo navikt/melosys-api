@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -72,6 +73,17 @@ public class AnmodningUnntakService {
         this.eessiService = eessiService;
         this.anmodningUnntakKontrollService = anmodningUnntakKontrollService;
         this.joarkFasade = joarkFasade;
+    }
+
+    @Transactional
+    public void fortsettAnmodningUtenSed(long behandlingID) {
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+
+        LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(AnmodningUnntakKonstanter.SVARFRIST_MÅNEDER);
+        behandling.setDokumentasjonSvarfristDato(svarFristDato.atZone(AnmodningUnntakKonstanter.TIME_ZONE_ID).toInstant());
+        behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
+        behandlingService.lagre(behandling);
+        anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(behandling.getId());
     }
 
     @Transactional
