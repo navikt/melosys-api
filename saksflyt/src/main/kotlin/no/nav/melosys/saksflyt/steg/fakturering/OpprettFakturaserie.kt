@@ -80,7 +80,7 @@ class OpprettFakturaserie(
         opprinneligFakturaserieReferanse: String,
         saksbehandlerIdent: String
     ) {
-        val alleÅrsavregningBehandlinger = behandlingsresultat.behandling?.fagsak?.hentAlleÅrsavregninger().let { it ?: emptyList() }
+        val alleÅrsavregningBehandlinger = behandlingsresultat.behandling?.fagsak?.hentAlleÅrsavregninger().orEmpty()
         val årsavregningRefs = alleÅrsavregningBehandlinger
             .mapNotNull { behandlingsresultatService.hentBehandlingsresultat(it.id).fakturaserieReferanse }
         val fakturaserieResponse =
