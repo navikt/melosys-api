@@ -43,7 +43,7 @@
         <!-- Melosys -->
         <melosys.internt.kodeverk.version>5.15.328-1c79e4b</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.154-midlertidig</melosys.brev.version>
-        <melosys-skjema-api-types.version>2026.02.18-360bc6ea1e23-java17</melosys-skjema-api-types.version>
+        <melosys-skjema-api-types.version>2026.03.06-15a1fa8131f5</melosys-skjema-api-types.version>
 
         <!-- NAV -->
         <nav.tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</nav.tjenestespesifikasjoner.version>

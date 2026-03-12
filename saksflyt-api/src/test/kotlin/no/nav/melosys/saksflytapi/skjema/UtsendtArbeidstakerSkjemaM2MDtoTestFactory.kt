@@ -1,12 +1,13 @@
 package no.nav.melosys.saksflytapi.skjema
 
 import no.nav.melosys.domain.MelosysTestDsl
-import no.nav.melosys.skjema.types.ArbeidsgiverMetadata
-import no.nav.melosys.skjema.types.DegSelvMetadata
-import no.nav.melosys.skjema.types.Skjemadel
-import no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaDto
-import no.nav.melosys.skjema.types.arbeidsgiver.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
-import no.nav.melosys.skjema.types.arbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.DegSelvMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaDto
 import no.nav.melosys.skjema.types.common.SkjemaStatus
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import java.time.LocalDateTime
@@ -26,7 +27,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
         var juridiskEnhetOrgnr: String = "987654321"
         var arbeidsgiverNavn: String = "Test AS"
         var skjemadel: Skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
-        var data: no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaData =
+        var data: no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaData =
             UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
         var referanseId: String = "MEL-${UUID.randomUUID()}"
         var innsenderFnr: String? = null
@@ -61,7 +62,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
 
         private fun lagSkjemaDto(
             skjemadel: Skjemadel,
-            data: no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaData,
+            data: no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaData,
             fnr: String = this.fnr,
             orgnr: String = this.orgnr,
             juridiskEnhetOrgnr: String = this.juridiskEnhetOrgnr,
@@ -78,6 +79,11 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
                     juridiskEnhetOrgnr = juridiskEnhetOrgnr
                 )
                 Skjemadel.ARBEIDSGIVERS_DEL -> ArbeidsgiverMetadata(
+                    skjemadel = skjemadel,
+                    arbeidsgiverNavn = arbeidsgiverNavn,
+                    juridiskEnhetOrgnr = juridiskEnhetOrgnr
+                )
+                Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL -> DegSelvMetadata(
                     skjemadel = skjemadel,
                     arbeidsgiverNavn = arbeidsgiverNavn,
                     juridiskEnhetOrgnr = juridiskEnhetOrgnr
