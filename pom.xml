@@ -70,7 +70,7 @@
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
         <json-smart.version>2.6.0</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
-        <kotest.version>6.1.3</kotest.version>
+        <kotest.version>6.1.6</kotest.version>
         <kotlin-logging.version>3.0.5</kotlin-logging.version>
         <mockito-kotlin.version>6.2.3</mockito-kotlin.version>
         <mockk.version>1.14.9</mockk.version>
@@ -87,15 +87,15 @@
         <slf4j.version>2.0.17</slf4j.version>
         <springfox.version>3.0.0</springfox.version>
         <swagger.version>1.5.21</swagger.version>
-        <unleash.version>12.1.2</unleash.version>
+        <unleash.version>12.2.0</unleash.version>
         <bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
         <bouncycastle-jdk18on.version>1.83</bouncycastle-jdk18on.version>
         <nimbus-jose-jwt.version>10.8</nimbus-jose-jwt.version>
         <neethi.version>3.2.1</neethi.version>
         <jakarta.jaxb.version>4.0.5</jakarta.jaxb.version>
         <javaparser.version>1.0.11</javaparser.version>
-        <google.errorprone.version>2.47.0</google.errorprone.version>
-        <checkerframework.version>3.53.1</checkerframework.version>
+        <google.errorprone.version>2.48.0</google.errorprone.version>
+        <checkerframework.version>3.54.0</checkerframework.version>
         <threeten.version>1.8.0</threeten.version>
         <jetbrains.annotations.version>26.1.0</jetbrains.annotations.version>
         <snappy.java.version>1.1.10.8</snappy.java.version>
@@ -113,9 +113,9 @@
         <ulid-java>5.2.3</ulid-java>
         <!-- Spring-data-envers, hibernate, antlr4 Downgraded due to: https://hibernate.atlassian.net/browse/HHH-17612 and compatability-->
         <spring-data-envers.version>4.0.3</spring-data-envers.version>
-        <hibernate.version>6.6.43.Final</hibernate.version>
+        <hibernate.version>6.6.44.Final</hibernate.version>
         <antlr4.version>4.13.2</antlr4.version>
-        <springdoc-openapi.version>2.8.15</springdoc-openapi.version>
+        <springdoc-openapi.version>2.8.16</springdoc-openapi.version>
 
         <!-- Bump JUnit versjon for å kunne bruke argumentSetName, denne kan muligens fjernes når vi bumper spring neste gang -->
         <junit-jupiter.version>5.11.3</junit-jupiter.version>
