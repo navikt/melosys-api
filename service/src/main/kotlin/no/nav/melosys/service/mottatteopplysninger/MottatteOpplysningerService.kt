@@ -1,9 +1,8 @@
 package no.nav.melosys.service.mottatteopplysninger
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinModule
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
@@ -185,9 +184,8 @@ class MottatteOpplysningerService(
 
         val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID).apply {
             if (mottatteOpplysninger != null) {
-                val mapper = ObjectMapper()
-                    .registerModule(JavaTimeModule())
-                    .registerModule(KotlinModule.Builder().build())
+                val mapper = JsonMapper.builder().build()
+                    
                 val json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mottatteOpplysningerData)
                 log.info(teamLogsMarker, "Feil i  mottatteopplysninger for mottatteOpplysningerData: $json") //TODO fjern  etter debugging
 

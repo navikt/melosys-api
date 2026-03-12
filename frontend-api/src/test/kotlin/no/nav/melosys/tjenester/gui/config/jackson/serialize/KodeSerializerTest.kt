@@ -1,7 +1,8 @@
 package no.nav.melosys.tjenester.gui.config.jackson.serialize
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.module.SimpleModule
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.databind.module.SimpleModule
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
@@ -16,11 +17,11 @@ class KodeSerializerTest {
 
     @BeforeEach
     fun setUp() {
-        mapper = ObjectMapper().apply {
-            registerModule(SimpleModule().apply {
+        mapper = JsonMapper.builder()
+            .addModule(SimpleModule().apply {
                 addSerializer(KodeSerializer())
             })
-        }
+            .build()
     }
 
     @Test

@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.soknadmottak
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import tools.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
@@ -27,6 +26,7 @@ class SoknadMottakClientTest {
 
     private lateinit var soknadMottakClient: SoknadMottakClient
     private lateinit var wireMockServer: WireMockServer
+    private val objectMapper = ObjectMapper()
 
     private val søknadID = "grj304iht"
 
@@ -83,7 +83,6 @@ class SoknadMottakClientTest {
             søknadID, "dokID123", "tittel", "Fullmakt", "Base64EncodedPdf", Instant.MIN
         )
 
-        val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
         val jsonResponseBody = objectMapper.writeValueAsString(setOf(altinnDokument))
 
         wireMockServer.stubFor(

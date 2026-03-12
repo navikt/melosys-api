@@ -3,20 +3,20 @@ package no.nav.melosys.integrasjon.aareg.arbeidsforhold
 import com.fasterxml.jackson.annotation.JsonAnyGetter
 import com.fasterxml.jackson.annotation.JsonAnySetter
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import tools.jackson.core.JacksonException
+import tools.jackson.databind.ObjectMapper
 import no.nav.melosys.exception.TekniskException
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 
 class ArbeidsforholdResponse(val arbeidsforhold: List<Arbeidsforhold>) {
+    private val objectMapper = ObjectMapper()
+
     fun tilSaksopplysning(): String {
-        val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
         try {
             return objectMapper.writeValueAsString(arbeidsforhold)
-        } catch (e: JsonProcessingException) {
+        } catch (e: JacksonException) {
             throw TekniskException("Kunne ikke konvertere arbeidsforhold til json string", e)
         }
     }

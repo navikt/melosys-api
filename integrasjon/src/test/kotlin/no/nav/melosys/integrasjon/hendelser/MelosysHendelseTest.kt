@@ -3,10 +3,11 @@ package no.nav.melosys.integrasjon.hendelser
 import com.fasterxml.jackson.annotation.JsonAnySetter
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.kotlinModule
+import tools.jackson.module.kotlin.readValue
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -20,7 +21,7 @@ import java.time.LocalDate
 
 
 class MelosysHendelseTest {
-    val objectMapper = jacksonObjectMapper().registerModules(JavaTimeModule())
+    val objectMapper = jacksonObjectMapper()
 
     @Test
     fun `serialize tom hendelse`() {
@@ -67,8 +68,8 @@ class MelosysHendelseTest {
                     "behandligsresultatType": "FERDIGBEHANDLET",
                     "vedtakstype": "FØRSTEGANGSVEDTAK",
                     "medlemskapsperioder" : [ {
-                      "fom" : [ 2021, 1, 1 ],
-                      "tom" : [ 2022, 1, 1 ],
+                      "fom" : "2021-01-01",
+                      "tom" : "2022-01-01",
                       "innvilgelsesResultat" : "INNVILGET"
                     } ],
                     "lovvalgsperioder": []
@@ -168,7 +169,10 @@ class MelosysHendelseTest {
 
     @Test
     fun `deserialize og legg til default ved manglende`() {
-        objectMapper.registerSubtypes(DummyMelding::class.java)
+        val testMapper = JsonMapper.builder()
+            .addModule(kotlinModule())
+            .registerSubtypes(DummyMelding::class.java)
+            .build()
 
         val json = """
             {
@@ -180,7 +184,7 @@ class MelosysHendelseTest {
             }"""
 
 
-        val result = objectMapper.readValue<MelosysHendelse>(json)
+        val result = testMapper.readValue<MelosysHendelse>(json)
 
 
         result.melding.shouldBe(

@@ -1,8 +1,8 @@
 package no.nav.melosys.integrasjon.joark.saf
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.ObjectWriter
+import tools.jackson.core.JacksonException
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectWriter
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -167,7 +167,7 @@ class SafClientTest {
                 .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setResponseCode(200)
                 .setBody(objectWriter.writeValueAsString(lagHentDokumentoversiktResponse(nestePeker, finnesNeste)))
-        } catch (e: JsonProcessingException) {
+        } catch (e: JacksonException) {
             throw RuntimeException("Kunne ikke serialisere response")
         }
     }

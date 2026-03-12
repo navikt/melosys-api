@@ -13,7 +13,7 @@ import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.boot.jackson2.autoconfigure.Jackson2AutoConfiguration
+import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration
 import org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit
 )
 @ContextConfiguration(
     classes = [
-        Jackson2AutoConfiguration::class,
+        JacksonAutoConfiguration::class,
         KafkaAutoConfiguration::class,
         SoknadMottattConsumer::class,
         SoknadMottattConsumerIT.TestConfig::class,

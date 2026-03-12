@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflytapi.domain
 
-import com.fasterxml.jackson.core.JsonParseException
+import tools.jackson.core.JacksonException
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
@@ -431,24 +431,24 @@ class ProsessinstansTest {
         shouldThrow<IllegalStateException> {
             prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding::class.java)
         }.run {
-            message shouldContain "Ugyldig JSON for ${ProsessDataKey.EESSI_MELDING}"
+            message shouldContain "JSON-feil for ${ProsessDataKey.EESSI_MELDING}"
             message shouldContain "ved deserialisering til MelosysEessiMelding"
-            cause.shouldBeInstanceOf<JsonParseException>()
+            cause.shouldBeInstanceOf<JacksonException>()
         }
     }
 
     @Test
     fun `getData skal kaste IllegalStateException ved mapping-feil`() {
         val prosessinstans = Prosessinstans.forTest {
-            medData(ProsessDataKey.EESSI_MELDING, "{\"ugyldigFelt\": \"verdi\"}")
+            medData(ProsessDataKey.EESSI_MELDING, "[\"ikke\", \"et\", \"objekt\"]")
         }
 
         shouldThrow<IllegalStateException> {
             prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding::class.java)
         }.run {
-            message shouldContain "Mapping-feil for ${ProsessDataKey.EESSI_MELDING}"
+            message shouldContain "JSON-feil for ${ProsessDataKey.EESSI_MELDING}"
             message shouldContain "ved deserialisering til MelosysEessiMelding"
-            cause shouldBe instanceOf<com.fasterxml.jackson.databind.JsonMappingException>()
+            cause shouldBe instanceOf<JacksonException>()
         }
 
     }
@@ -461,9 +461,9 @@ class ProsessinstansTest {
         shouldThrow<IllegalStateException> {
             prosessinstans.hentData<MelosysEessiMelding>(ProsessDataKey.EESSI_MELDING)
         }.run {
-            message shouldContain "Ugyldig JSON for ${ProsessDataKey.EESSI_MELDING}"
+            message shouldContain "JSON-feil for ${ProsessDataKey.EESSI_MELDING}"
             message shouldContain "ved deserialisering til"
-            cause shouldBe instanceOf<JsonParseException>()
+            cause shouldBe instanceOf<JacksonException>()
         }
     }
 
@@ -475,9 +475,9 @@ class ProsessinstansTest {
         shouldThrow<IllegalStateException> {
             prosessinstans.finnData<MelosysEessiMelding>(ProsessDataKey.EESSI_MELDING)
         }.run {
-            message shouldContain "Ugyldig JSON for ${ProsessDataKey.EESSI_MELDING}"
+            message shouldContain "JSON-feil for ${ProsessDataKey.EESSI_MELDING}"
             message shouldContain "ved deserialisering til"
-            cause shouldBe instanceOf<JsonParseException>()
+            cause shouldBe instanceOf<JacksonException>()
         }
     }
 
@@ -490,9 +490,9 @@ class ProsessinstansTest {
         shouldThrow<IllegalStateException> {
             prosessinstans.hentData<List<String>>(ProsessDataKey.OPPHOLDSLAND)
         }.run {
-            message shouldContain "Ugyldig JSON for ${ProsessDataKey.OPPHOLDSLAND}"
+            message shouldContain "JSON-feil for ${ProsessDataKey.OPPHOLDSLAND}"
             message shouldContain "ved deserialisering til"
-            cause shouldBe instanceOf<JsonParseException>()
+            cause shouldBe instanceOf<JacksonException>()
         }
     }
 

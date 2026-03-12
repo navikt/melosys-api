@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import no.nav.melosys.domain.avgift.Inntektsperiode

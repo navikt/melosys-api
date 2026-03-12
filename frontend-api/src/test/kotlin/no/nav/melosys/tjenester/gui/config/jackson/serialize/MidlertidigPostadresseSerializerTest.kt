@@ -1,9 +1,10 @@
 package no.nav.melosys.tjenester.gui.config.jackson.serialize
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.module.SimpleModule
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.SerializationFeature
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.databind.module.SimpleModule
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
@@ -28,13 +29,13 @@ class MidlertidigPostadresseSerializerTest {
 
     @BeforeEach
     fun setUp() {
-        mapper = ObjectMapper().apply {
-            setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
-            configure(SerializationFeature.INDENT_OUTPUT, true)
-            registerModule(SimpleModule().apply {
+        mapper = JsonMapper.builder()
+            .changeDefaultPropertyInclusion { JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL) }
+            .configure(SerializationFeature.INDENT_OUTPUT, true)
+            .addModule(SimpleModule().apply {
                 addSerializer(MidlertidigPostadresseSerializer(kodeverkService))
             })
-        }
+            .build()
     }
 
     @Test

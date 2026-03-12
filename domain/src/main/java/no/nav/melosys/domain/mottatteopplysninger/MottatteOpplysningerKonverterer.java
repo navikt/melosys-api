@@ -2,15 +2,14 @@ package no.nav.melosys.domain.mottatteopplysninger;
 
 import java.util.EnumMap;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.kotlin.KotlinModule;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
 
 public final class MottatteOpplysningerKonverterer {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = JsonMapper.builder().build();
 
     private static final EnumMap<Mottatteopplysningertyper, Class<? extends MottatteOpplysningerData>> mapper = new EnumMap<>(Mottatteopplysningertyper.class);
 
@@ -21,7 +20,6 @@ public final class MottatteOpplysningerKonverterer {
         mapper.put(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS, Soeknad.class);
         mapper.put(Mottatteopplysningertyper.SED, SedGrunnlag.class);
         mapper.put(Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST, AnmodningEllerAttest.class);
-        objectMapper.registerModules(new JavaTimeModule(), new KotlinModule.Builder().build());
     }
 
     private MottatteOpplysningerKonverterer() {
@@ -31,7 +29,7 @@ public final class MottatteOpplysningerKonverterer {
         if (mottatteOpplysninger.getMottatteOpplysningerData() != null) {
             try {
                 mottatteOpplysninger.setJsonData(lagJsonFraType(mottatteOpplysninger.getMottatteOpplysningerData()));
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 throw new IllegalArgumentException("Kan ikke lage json fra datagrunnlag. MottatteOpplysninger id: " + mottatteOpplysninger.getId());
             }
         }
@@ -42,7 +40,7 @@ public final class MottatteOpplysningerKonverterer {
             mottatteOpplysninger.setMottatteOpplysningerData(
                 lagDatagrunnlagFraType(mottatteOpplysninger.getJsonData(), klasseForType(mottatteOpplysninger.getType()))
             );
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Kan ikke laste datagrunnlag med id " + mottatteOpplysninger.getId(), e);
         }
     }
@@ -51,11 +49,11 @@ public final class MottatteOpplysningerKonverterer {
         return mapper.get(type);
     }
 
-    private static MottatteOpplysningerData lagDatagrunnlagFraType(String json, Class<? extends MottatteOpplysningerData> clazz) throws JsonProcessingException {
+    private static MottatteOpplysningerData lagDatagrunnlagFraType(String json, Class<? extends MottatteOpplysningerData> clazz) throws JacksonException {
         return objectMapper.readValue(json, clazz);
     }
 
-    private static String lagJsonFraType(MottatteOpplysningerData mottatteOpplysningerData) throws JsonProcessingException {
+    private static String lagJsonFraType(MottatteOpplysningerData mottatteOpplysningerData) throws JacksonException {
         return objectMapper
             .writerWithDefaultPrettyPrinter()
             .writeValueAsString(mottatteOpplysningerData);

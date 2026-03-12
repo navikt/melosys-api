@@ -1,12 +1,9 @@
 package no.nav.melosys.tjenester.gui.config;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.kotlin.KotlinModule;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.module.kotlin.KotlinModule;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdInterceptor;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.config.jackson.MelosysModule;
@@ -31,13 +28,12 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public ObjectMapper objectMapper(@Lazy KodeverkService kodeverkService) {
+    public JsonMapper objectMapper(@Lazy KodeverkService kodeverkService) {
         return JsonMapper.builder()
-            .addModule(new JavaTimeModule())
+            
             .addModule(new KotlinModule.Builder().build())
             .addModule(new MelosysModule(kodeverkService))
             .enable(MapperFeature.DEFAULT_VIEW_INCLUSION)
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .build();
     }

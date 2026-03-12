@@ -1,11 +1,12 @@
 package no.nav.melosys.tjenester.gui.config.jackson.deserialize
 
-import com.fasterxml.jackson.databind.BeanDescription
-import com.fasterxml.jackson.databind.DeserializationConfig
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.module.SimpleDeserializers
-import com.fasterxml.jackson.databind.module.SimpleModule
+import tools.jackson.databind.BeanDescription
+import tools.jackson.databind.DeserializationConfig
+import tools.jackson.databind.JavaType
+import tools.jackson.databind.ValueDeserializer
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.databind.module.SimpleDeserializers
+import tools.jackson.databind.module.SimpleModule
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.Tema
@@ -16,28 +17,28 @@ import org.junit.jupiter.api.Test
 
 class KodeDeserializerTest {
 
-    private lateinit var mapper: ObjectMapper
+    private lateinit var mapper: tools.jackson.databind.ObjectMapper
 
     @BeforeEach
     fun setUp() {
-        mapper = ObjectMapper().apply {
-            registerModule(SimpleModule().apply {
+        mapper = JsonMapper.builder()
+            .addModule(SimpleModule().apply {
                 addSerializer(KodeSerializer())
                 setDeserializers(object : SimpleDeserializers() {
                     override fun findEnumDeserializer(
-                        type: Class<*>,
+                        enumType: JavaType,
                         config: DeserializationConfig,
-                        beanDesc: BeanDescription
-                    ): JsonDeserializer<*>? {
-                        if (Kodeverk::class.java.isAssignableFrom(type)) {
+                        beanDescRef: BeanDescription.Supplier
+                    ): ValueDeserializer<*>? {
+                        if (Kodeverk::class.java.isAssignableFrom(enumType.rawClass)) {
                             @Suppress("UNCHECKED_CAST")
-                            return KodeDeserializer(type as Class<out Kodeverk>)
+                            return KodeDeserializer(enumType.rawClass as Class<out Kodeverk>)
                         }
                         return null
                     }
                 })
             })
-        }
+            .build()
     }
 
     @Test

@@ -5,7 +5,9 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import no.nav.melosys.domain.dokument.SaksopplysningDokument
+import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
+import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon
 import no.nav.melosys.domain.dokument.inntekt.Inntekt
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument
@@ -28,6 +30,7 @@ import org.jeasy.random.FieldPredicates
 import org.jeasy.random.randomizers.misc.EnumRandomizer
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -185,6 +188,47 @@ internal class SaksopplysningDokumentConverterTest {
 
 
         deserialisert.statsborgerskap.shouldBeNull()
+    }
+
+    @Test
+    fun `konverterFraDatabase kan deserialisere LocalDate fra gammelt Jackson2 array-format`() {
+        // Jackson 2 med WRITE_DATES_AS_TIMESTAMPS=true lagret datoer som arrays [år, måned, dag].
+        // Jackson 3 skriver ISO-strenger, men må fortsatt kunne lese gammel data fra DB.
+        // Vi serialiserer med ISO-format, bytter ut med arrays og verifiserer backward-kompatibilitet.
+        val dokument = ArbeidsforholdDokument(
+            arbeidsforhold = listOf(Arbeidsforhold().apply {
+                arbeidsgiverID = "999888777"
+                ansettelsesPeriode = Periode(LocalDate.of(2021, 6, 2), LocalDate.of(2022, 1, 1))
+            })
+        )
+        val isoJson = converter.convertToDatabaseColumn(dokument)!!
+        val arrayJson = isoJson
+            .replace("\"2021-06-02\"", "[2021,6,2]")
+            .replace("\"2022-01-01\"", "[2022,1,1]")
+
+        val deserialisert = converter.convertToEntityAttribute(arrayJson) as ArbeidsforholdDokument
+
+        val periode = deserialisert.arbeidsforhold.first().ansettelsesPeriode!!
+        periode.fom shouldBe LocalDate.of(2021, 6, 2)
+        periode.tom shouldBe LocalDate.of(2022, 1, 1)
+    }
+
+    @Test
+    fun `konverterTilDatabase serialiserer LocalDate som ISO-streng i Jackson3`() {
+        // Jackson 2 med WRITE_DATES_AS_TIMESTAMPS=true lagret datoer som arrays.
+        // Jackson 3 skal nå skrive ISO-strenger for nye data.
+        val dokument = ArbeidsforholdDokument(
+            arbeidsforhold = listOf(Arbeidsforhold().apply {
+                arbeidsgiverID = "999888777"
+                ansettelsesPeriode = Periode(LocalDate.of(2021, 6, 2), LocalDate.of(2022, 1, 1))
+            })
+        )
+
+        val json = converter.convertToDatabaseColumn(dokument)!!
+
+        json shouldContain """"2021-06-02""""
+        json shouldContain """"2022-01-01""""
+        json shouldNotContain "[2021"
     }
 
     private fun <T : SaksopplysningDokument> testKonverteringObject(saksopplysningDokument: T) {

@@ -1,7 +1,6 @@
 package no.nav.melosys.service.saksopplysninger
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Saksopplysning
@@ -25,7 +24,7 @@ private val log = KotlinLogging.logger { }
 class OpprettSedDokumentService(
     private val saksopplysningRepository: SaksopplysningRepository
 ) {
-    private val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
+    private val mapper = jacksonObjectMapper()
 
     fun opprettSedSaksopplysning(melosysEessiMelding: MelosysEessiMelding, behandling: Behandling): Saksopplysning {
         val now = Instant.now()

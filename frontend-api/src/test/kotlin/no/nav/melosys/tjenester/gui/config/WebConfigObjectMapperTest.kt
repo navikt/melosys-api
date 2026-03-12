@@ -1,9 +1,8 @@
 package no.nav.melosys.tjenester.gui.config
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.MapperFeature
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.json.JsonMapper
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.MapperFeature
+import tools.jackson.databind.json.JsonMapper
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
@@ -24,8 +23,6 @@ class WebConfigObjectMapperTest {
 
     @Test
     fun `objectMapper should serialize dates as ISO strings, not timestamps`() {
-        objectMapper.isEnabled(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) shouldBe false
-
         val json = objectMapper.writeValueAsString(mapOf("date" to LocalDate.of(2025, 1, 15)))
         json shouldBe """{"date":"2025-01-15"}"""
     }

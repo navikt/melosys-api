@@ -1,8 +1,7 @@
 package no.nav.melosys.statistikk.utstedt_a1.integrasjon
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.SerializationFeature
 import io.kotest.matchers.shouldNotBe
 import jakarta.annotation.Nullable
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.A1TypeUtstedelse
@@ -55,8 +54,6 @@ class UtstedtA1AivenProducerTest {
 
     companion object {
         private val OBJECT_MAPPER = ObjectMapper().apply {
-            registerModule(JavaTimeModule())
-            configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
         }
     }
 }

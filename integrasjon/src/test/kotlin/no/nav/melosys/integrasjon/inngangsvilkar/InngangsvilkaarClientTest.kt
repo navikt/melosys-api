@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.inngangsvilkar
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import tools.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.any
@@ -29,6 +28,7 @@ import org.springframework.web.reactive.function.client.WebClient
 class InngangsvilkaarClientTest {
     private lateinit var wireMockServer: WireMockServer
     private lateinit var inngangsvilkaarClient: InngangsvilkaarClient
+    private val objectMapper = ObjectMapper()
 
     @BeforeEach
     fun setup() {
@@ -58,7 +58,6 @@ class InngangsvilkaarClientTest {
             periode = Periode(LocalDate.now(), LocalDate.now())
         )
 
-        val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
 
         stubFor(any(urlMatching(".*"))
             .willReturn(aResponse()

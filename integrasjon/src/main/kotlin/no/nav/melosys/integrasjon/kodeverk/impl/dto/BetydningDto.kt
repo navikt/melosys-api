@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.kodeverk.impl.dto
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer
+import tools.jackson.databind.annotation.JsonDeserialize
+import tools.jackson.databind.ext.javatime.deser.LocalDateDeserializer
 import java.time.LocalDate
 
 data class BetydningDto(

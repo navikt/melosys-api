@@ -1,11 +1,10 @@
 package no.nav.melosys.tjenester.gui.config.jackson
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.MapperFeature
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.json.JsonMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinModule
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.MapperFeature
+import tools.jackson.databind.SerializationFeature
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.KotlinModule
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
@@ -28,10 +27,9 @@ class MelosysModuleTest {
     @BeforeEach
     fun setUp() {
         mapper = JsonMapper.builder()
-            .addModule(JavaTimeModule())
+            
             .addModule(KotlinModule.Builder().build())
             .addModule(MelosysModule(kodeverkService))
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .enable(MapperFeature.DEFAULT_VIEW_INCLUSION)
             .build()
