@@ -17,16 +17,16 @@ import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.ArbeidPaaLa
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.LuftfartBase
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid
-import no.nav.melosys.skjema.types.Skjemadel
-import no.nav.melosys.skjema.types.UtsendtArbeidstakerSkjemaDto
-import no.nav.melosys.skjema.types.arbeidsgiver.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
-import no.nav.melosys.skjema.types.arbeidsgiver.arbeidsstedIutlandet.ArbeidsstedIUtlandetDto
-import no.nav.melosys.skjema.types.arbeidsgiver.arbeidsstedIutlandet.ArbeidsstedType
-import no.nav.melosys.skjema.types.arbeidsgiver.arbeidsstedIutlandet.Farvann
-import no.nav.melosys.skjema.types.arbeidsgiver.arbeidsstedIutlandet.FastEllerVekslendeArbeidssted
-import no.nav.melosys.skjema.types.arbeidsgiver.arbeidsstedIutlandet.TypeInnretning
-import no.nav.melosys.skjema.types.arbeidsgiver.utenlandsoppdraget.UtenlandsoppdragetDto
-import no.nav.melosys.skjema.types.arbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsstedIUtlandetDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.FamiliemedlemmerDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsstedType
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.Farvann
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.FastEllerVekslendeArbeidssted
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.TypeInnretning
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtenlandsoppdragetDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto
 import no.nav.melosys.skjema.types.felles.LandKode
 import no.nav.melosys.skjema.types.felles.PeriodeDto
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
@@ -40,48 +40,73 @@ import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 object UtsendtArbeidstakerSøknadMapper {
 
     fun tilSoeknad(dto: UtsendtArbeidstakerSkjemaM2MDto): Soeknad {
-        val (arbeidstakerSkjema, arbeidsgiverSkjema) = finnSkjemadeler(dto)
-        val arbeidstakerData = arbeidstakerSkjema?.data as? UtsendtArbeidstakerArbeidstakersSkjemaDataDto
-        val arbeidsgiverData = arbeidsgiverSkjema?.data as? UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
-
         return Soeknad().apply {
-            // Sett Soeknad-spesifikke felter
-            loennOgGodtgjoerelse = arbeidsgiverData?.let { mapLoennOgGodtgjoerelse(it) }
-            utenlandsoppdraget = arbeidsgiverData?.let { mapUtenlandsoppdraget(it.utenlandsoppdraget) }
-                ?: Utenlandsoppdraget()
-            arbeidssituasjonOgOevrig = arbeidstakerData?.let { mapArbeidssituasjonOgOevrig(it) }
-                ?: ArbeidssituasjonOgOevrig()
+            when (val data = dto.skjema.data) {
+                is UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto -> applyKombinertData(this, data)
 
-            // Sett arvede mutable parent-felter. Arbeidsgiver først, arbeidstaker sist (presedens)
-            arbeidsgiverData?.let { applyArbeidsgiverData(this, it) }
-            arbeidstakerData?.let { applyArbeidstakerData(this, it) }
+                is UtsendtArbeidstakerArbeidstakersSkjemaDataDto -> {
+                    // Arbeidstaker er hovedskjema; koblet skjema (om det finnes) er arbeidsgivers del
+                    val arbeidsgiverData = dto.kobletSkjema?.data as? UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
+                    arbeidsgiverData?.let { applyArbeidsgiverData(this, it) }
+                    applyArbeidstakerData(this, data)
+                }
+
+                is UtsendtArbeidstakerArbeidsgiversSkjemaDataDto -> {
+                    // Arbeidsgiver er hovedskjema; koblet skjema (om det finnes) er arbeidstakers del
+                    val arbeidstakerData = dto.kobletSkjema?.data as? UtsendtArbeidstakerArbeidstakersSkjemaDataDto
+                    applyArbeidsgiverData(this, data)
+                    arbeidstakerData?.let { applyArbeidstakerData(this, it) }
+                }
+            }
         }
     }
 
+    private fun applyKombinertData(
+        søknad: Soeknad,
+        data: UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto
+    ) {
+        val agData = data.arbeidsgiversData
+        val atData = data.arbeidstakersData
+
+        søknad.loennOgGodtgjoerelse = agData.arbeidstakerensLonn?.let {
+            LoennOgGodtgjoerelse(norskArbgUtbetalerLoenn = it.arbeidsgiverBetalerAllLonnOgNaturaytelserIUtsendingsperioden)
+        }
+        søknad.utenlandsoppdraget = mapUtenlandsoppdraget(agData.utenlandsoppdraget)
+
+        søknad.arbeidssituasjonOgOevrig = ArbeidssituasjonOgOevrig().apply {
+            harLoennetArbeidMinstEnMndFoerUtsending = atData.arbeidssituasjon?.harVaertEllerSkalVaereILonnetArbeidFoerUtsending
+            beskrivelseArbeidSisteMnd = atData.arbeidssituasjon?.aktivitetIMaanedenFoerUtsendingen
+            harAndreArbeidsgivereIUtsendingsperioden = atData.arbeidssituasjon?.skalJobbeForFlereVirksomheter
+            erSkattepliktig = atData.skatteforholdOgInntekt?.erSkattepliktigTilNorgeIHeleutsendingsperioden
+            mottarYtelserUtlandet = atData.skatteforholdOgInntekt?.mottarPengestotteFraAnnetEosLandEllerSveits
+        }
+
+        søknad.soeknadsland = mapSoeknadsland(data.utsendingsperiodeOgLand?.utsendelseLand)
+        søknad.periode = mapPeriode(data.utsendingsperiodeOgLand?.utsendelsePeriode)
+
+        mapArbeidssteder(søknad, agData.arbeidsstedIUtlandet)
+
+        søknad.juridiskArbeidsgiverNorge = JuridiskArbeidsgiverNorge().apply {
+            erOffentligVirksomhet = agData.arbeidsgiverensVirksomhetINorge?.erArbeidsgiverenOffentligVirksomhet
+        }
+
+        søknad.personOpplysninger = mapPersonopplysninger(atData.familiemedlemmer)
+    }
+
     private fun applyArbeidsgiverData(søknad: Soeknad, data: UtsendtArbeidstakerArbeidsgiversSkjemaDataDto) {
-        søknad.soeknadsland = mapSoeknadsland(data.utenlandsoppdraget?.utsendelseLand)
-        søknad.periode = mapPeriode(data.utenlandsoppdraget?.arbeidstakerUtsendelsePeriode)
-        mapArbeidssteder(søknad, data)
+        søknad.loennOgGodtgjoerelse = mapLoennOgGodtgjoerelse(data)
+        søknad.utenlandsoppdraget = mapUtenlandsoppdraget(data.utenlandsoppdraget)
+        søknad.soeknadsland = mapSoeknadsland(data.utsendingsperiodeOgLand?.utsendelseLand)
+        søknad.periode = mapPeriode(data.utsendingsperiodeOgLand?.utsendelsePeriode)
+        mapArbeidssteder(søknad, data.arbeidsstedIUtlandet)
         søknad.juridiskArbeidsgiverNorge = mapJuridiskArbeidsgiverNorge(data)
     }
 
     private fun applyArbeidstakerData(søknad: Soeknad, data: UtsendtArbeidstakerArbeidstakersSkjemaDataDto) {
-        søknad.soeknadsland = mapSoeknadsland(data.utenlandsoppdraget?.utsendelsesLand)
-        søknad.periode = mapPeriode(data.utenlandsoppdraget?.utsendelsePeriode)
+        søknad.soeknadsland = mapSoeknadsland(data.utsendingsperiodeOgLand?.utsendelseLand)
+        søknad.periode = mapPeriode(data.utsendingsperiodeOgLand?.utsendelsePeriode)
         søknad.personOpplysninger = mapPersonopplysninger(data)
-    }
-
-    /**
-     * Finner arbeidstaker- og arbeidsgiver-skjema fra M2M-DTOen.
-     * Hovedskjemaet (skjema) og koblet skjema kan være enten arbeidstakers eller arbeidsgivers del.
-     */
-    internal fun finnSkjemadeler(
-        dto: UtsendtArbeidstakerSkjemaM2MDto
-    ): Pair<UtsendtArbeidstakerSkjemaDto?, UtsendtArbeidstakerSkjemaDto?> {
-        val skjemaer = listOfNotNull(dto.skjema, dto.kobletSkjema)
-        val arbeidstakerSkjema = skjemaer.find { it.metadata.skjemadel == Skjemadel.ARBEIDSTAKERS_DEL }
-        val arbeidsgiverSkjema = skjemaer.find { it.metadata.skjemadel == Skjemadel.ARBEIDSGIVERS_DEL }
-        return arbeidstakerSkjema to arbeidsgiverSkjema
+        søknad.arbeidssituasjonOgOevrig = mapArbeidssituasjonOgOevrig(data)
     }
 
     // --- Søknadsland ---
@@ -98,9 +123,10 @@ object UtsendtArbeidstakerSøknadMapper {
 
     private fun mapPersonopplysninger(
         arbeidstakerData: UtsendtArbeidstakerArbeidstakersSkjemaDataDto
-    ): OpplysningerOmBrukeren {
+    ): OpplysningerOmBrukeren = mapPersonopplysninger(arbeidstakerData.familiemedlemmer)
+
+    private fun mapPersonopplysninger(familiemedlemmer: FamiliemedlemmerDto?): OpplysningerOmBrukeren {
         val personopplysninger = OpplysningerOmBrukeren()
-        val familiemedlemmer = arbeidstakerData.familiemedlemmer
         if (familiemedlemmer != null && familiemedlemmer.skalHaMedFamiliemedlemmer) {
             personopplysninger.medfolgendeFamilie = familiemedlemmer.familiemedlemmer.map { fm ->
                 MedfolgendeFamilie.tilBarnFraFnrOgNavn(
@@ -116,9 +142,9 @@ object UtsendtArbeidstakerSøknadMapper {
 
     private fun mapArbeidssteder(
         søknad: Soeknad,
-        arbeidsgiverData: UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
+        arbeidssted: ArbeidsstedIUtlandetDto?
     ) {
-        val arbeidssted = arbeidsgiverData.arbeidsstedIUtlandet ?: return
+        if (arbeidssted == null) return
         when (arbeidssted.arbeidsstedType) {
             ArbeidsstedType.PA_LAND -> søknad.arbeidPaaLand = mapArbeidPaaLand(arbeidssted)
             ArbeidsstedType.OFFSHORE -> søknad.maritimtArbeid = mapOffshore(arbeidssted)
