@@ -355,7 +355,10 @@ class AnmodningUnntakServiceTest {
     )
     @Test
     fun `fortsettAnmodningUtenSed setter status og svarfrist og oppdaterer anmodningsperiode`() {
-        val behandling = Behandling.forTest { id = BEHANDLING_ID }
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+        }
 
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { behandlingService.lagre(behandling) } just Runs
@@ -370,17 +373,29 @@ class AnmodningUnntakServiceTest {
     }
 
     @Test
-    fun `fortsettAnmodningUtenSed gjør ingen endringer når behandling er ikke utsending og er inaktiv`() {
+    fun `fortsettAnmodningUtenSed feil behandlingstema forvent exception`() {
+        val behandling = Behandling.forTest { id = BEHANDLING_ID }
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+
+        val exception = shouldThrow<FunksjonellException> {
+            anmodningUnntakService.fortsettAnmodningUtenSed(BEHANDLING_ID)
+        }
+        exception.message shouldContain "Behandling er ikke av tema ANMODNING_OM_UNNTAK_HOVEDREGEL"
+    }
+
+    @Test
+    fun `fortsettAnmodningUtenSed behandling er avsluttet forvent exception`() {
         val behandling = Behandling.forTest {
             id = BEHANDLING_ID
-            tema = Behandlingstema.YRKESAKTIV
+            tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
             status = Behandlingsstatus.AVSLUTTET
         }
-
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
-        anmodningUnntakService.fortsettAnmodningUtenSed(BEHANDLING_ID)
-        verify(exactly = 0) { behandlingService.lagre(any()) }
-        verify(exactly = 0) { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(any()) }
+
+        val exception = shouldThrow<FunksjonellException> {
+            anmodningUnntakService.fortsettAnmodningUtenSed(BEHANDLING_ID)
+        }
+        exception.message shouldContain "Behandlingen er avsluttet"
     }
 
     companion object {

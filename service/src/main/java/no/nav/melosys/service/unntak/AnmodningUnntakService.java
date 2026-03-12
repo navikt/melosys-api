@@ -1,5 +1,11 @@
 package no.nav.melosys.service.unntak;
 
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -31,12 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 
 @Service
 public class AnmodningUnntakService {
@@ -136,8 +136,8 @@ public class AnmodningUnntakService {
     @Transactional
     public void fortsettAnmodningUtenSed(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-
-        if(!behandling.erUtsending() && behandling.erInaktiv()) return;
+        validerBehandlingstemaUnntak(behandling);
+        validerBehandlingsstatus(behandling);
 
         LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(AnmodningUnntakKonstanter.SVARFRIST_MÅNEDER);
         behandling.setDokumentasjonSvarfristDato(svarFristDato.atZone(AnmodningUnntakKonstanter.TIME_ZONE_ID).toInstant());
