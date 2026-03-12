@@ -38,7 +38,7 @@ import kotlin.test.Test
 @ActiveProfiles("test")
 @SpringBootTest(
     classes = [Application::class, EndreAktoerIdIT.TestConfig::class],
-    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @EmbeddedKafka
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
