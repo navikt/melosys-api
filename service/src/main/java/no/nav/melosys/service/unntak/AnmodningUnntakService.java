@@ -1,5 +1,11 @@
 package no.nav.melosys.service.unntak;
 
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -31,11 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 
 @Service
 public class AnmodningUnntakService {
@@ -132,9 +133,29 @@ public class AnmodningUnntakService {
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
     }
 
+    @Transactional
+    public void fortsettAnmodningUtenSed(long behandlingID) {
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+
+        validerBehandlingstemaUtsendtArbeidstaker(behandling);
+        validerBehandlingsstatus(behandling);
+
+        LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(AnmodningUnntakKonstanter.SVARFRIST_MÅNEDER);
+        behandling.setDokumentasjonSvarfristDato(svarFristDato.atZone(AnmodningUnntakKonstanter.TIME_ZONE_ID).toInstant());
+        behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
+        behandlingService.lagre(behandling);
+        anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(behandling.getId());
+    }
+
     private static void validerBehandlingstemaUnntak(Behandling behandling) {
         if (behandling.getTema() != Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL) {
             throw new FunksjonellException("Behandling er ikke av tema ANMODNING_OM_UNNTAK_HOVEDREGEL");
+        }
+    }
+
+    private static void validerBehandlingstemaUtsendtArbeidstaker(Behandling behandling) {
+        if (behandling.getTema() != Behandlingstema.UTSENDT_ARBEIDSTAKER) {
+            throw new FunksjonellException("Behandling er ikke av tema UTSENDT_ARBEIDSTAKER");
         }
     }
 
