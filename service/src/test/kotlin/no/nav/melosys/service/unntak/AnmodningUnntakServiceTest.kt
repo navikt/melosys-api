@@ -369,6 +369,20 @@ class AnmodningUnntakServiceTest {
         verify { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(BEHANDLING_ID) }
     }
 
+    @Test
+    fun `fortsettAnmodningUtenSed gjør ingen endringer når behandling er ikke utsending og er inaktiv`() {
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            tema = Behandlingstema.YRKESAKTIV
+            status = Behandlingsstatus.AVSLUTTET
+        }
+
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        anmodningUnntakService.fortsettAnmodningUtenSed(BEHANDLING_ID)
+        verify(exactly = 0) { behandlingService.lagre(any()) }
+        verify(exactly = 0) { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(any()) }
+    }
+
     companion object {
         private const val BEHANDLING_ID = 1L
         private const val FRITEKST_SED = "Ytterligere info som fritekst"

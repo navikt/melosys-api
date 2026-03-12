@@ -137,6 +137,8 @@ public class AnmodningUnntakService {
     public void fortsettAnmodningUtenSed(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
+        if(!behandling.erUtsending() && behandling.erInaktiv()) return;
+
         LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(AnmodningUnntakKonstanter.SVARFRIST_MÅNEDER);
         behandling.setDokumentasjonSvarfristDato(svarFristDato.atZone(AnmodningUnntakKonstanter.TIME_ZONE_ID).toInstant());
         behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
