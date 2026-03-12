@@ -357,7 +357,7 @@ class AnmodningUnntakServiceTest {
     fun `fortsettAnmodningUtenSed setter status og svarfrist og oppdaterer anmodningsperiode`() {
         val behandling = Behandling.forTest {
             id = BEHANDLING_ID
-            tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
         }
 
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
@@ -380,14 +380,14 @@ class AnmodningUnntakServiceTest {
         val exception = shouldThrow<FunksjonellException> {
             anmodningUnntakService.fortsettAnmodningUtenSed(BEHANDLING_ID)
         }
-        exception.message shouldContain "Behandling er ikke av tema ANMODNING_OM_UNNTAK_HOVEDREGEL"
+        exception.message shouldContain "Behandling er ikke av tema UTSENDT_ARBEIDSTAKER"
     }
 
     @Test
     fun `fortsettAnmodningUtenSed behandling er avsluttet forvent exception`() {
         val behandling = Behandling.forTest {
             id = BEHANDLING_ID
-            tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             status = Behandlingsstatus.AVSLUTTET
         }
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling

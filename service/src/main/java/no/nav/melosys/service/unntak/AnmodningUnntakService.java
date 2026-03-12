@@ -136,7 +136,8 @@ public class AnmodningUnntakService {
     @Transactional
     public void fortsettAnmodningUtenSed(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        validerBehandlingstemaUnntak(behandling);
+
+        validerBehandlingstemaUtsendtArbeidstaker(behandling);
         validerBehandlingsstatus(behandling);
 
         LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(AnmodningUnntakKonstanter.SVARFRIST_MÅNEDER);
@@ -149,6 +150,12 @@ public class AnmodningUnntakService {
     private static void validerBehandlingstemaUnntak(Behandling behandling) {
         if (behandling.getTema() != Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL) {
             throw new FunksjonellException("Behandling er ikke av tema ANMODNING_OM_UNNTAK_HOVEDREGEL");
+        }
+    }
+
+    private static void validerBehandlingstemaUtsendtArbeidstaker(Behandling behandling) {
+        if (behandling.getTema() != Behandlingstema.UTSENDT_ARBEIDSTAKER) {
+            throw new FunksjonellException("Behandling er ikke av tema UTSENDT_ARBEIDSTAKER");
         }
     }
 
