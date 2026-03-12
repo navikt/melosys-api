@@ -63,13 +63,19 @@ class KansellerFakturaserieTest {
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns Behandlingsresultat.forTest { id = behandlingId }
         every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns behandlingsresultatOpprinneligBehandling
-        every { faktureringskomponentenClient.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT) } returns nyFakturaserieResponseDto
+        every {
+            faktureringskomponentenClient.kansellerFakturaserie(
+                fakturaReferanse,
+                SAKSBEHANDLER_IDENT,
+                emptyList()
+            )
+        } returns nyFakturaserieResponseDto
 
 
         kansellerFakturaserie.utfør(prosessinstans)
 
         verify { behandlingsresultatService.lagre(behandlingsresultatOpprinneligBehandling) }
-        verify { faktureringskomponentenClient.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT) }
+        verify { faktureringskomponentenClient.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT, emptyList()) }
     }
 
     @Test
@@ -182,12 +188,18 @@ class KansellerFakturaserieTest {
             id = behandlingHenvendelseId
         }
         every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns behandlingsresultatOpprinneligBehandling
-        every { faktureringskomponentenClient.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT) } returns nyFakturaserieResponseDto
+        every {
+            faktureringskomponentenClient.kansellerFakturaserie(
+                fakturaReferanse,
+                SAKSBEHANDLER_IDENT,
+                emptyList()
+            )
+        } returns nyFakturaserieResponseDto
 
         kansellerFakturaserie.utfør(prosessinstans)
 
         verify { behandlingsresultatService.lagre(behandlingsresultatOpprinneligBehandling) }
-        verify { faktureringskomponentenClient.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT) }
+        verify { faktureringskomponentenClient.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT, emptyList()) }
     }
 
 }

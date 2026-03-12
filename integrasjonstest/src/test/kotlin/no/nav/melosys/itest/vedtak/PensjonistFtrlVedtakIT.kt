@@ -77,7 +77,7 @@ class PensjonistFtrlVedtakIT(
     }
 
     @Test
-    fun `Pensjonist vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og kanseller fakturaserie i ny vurdering`() {
+    fun `Pensjonist vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og send tomme perioder (avregn mot 0) i ny vurdering`() {
         val saksnummer = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
         val behandlingsId = executeAndWait(
