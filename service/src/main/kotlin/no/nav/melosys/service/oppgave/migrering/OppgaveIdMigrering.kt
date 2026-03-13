@@ -105,7 +105,6 @@ class OppgaveIdMigrering(
     private val Any.toJsonNode: JsonNode
         get() {
             return jacksonObjectMapper()
-                
                 .valueToTree(this)
         }
 }

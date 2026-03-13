@@ -15,8 +15,6 @@ private val logger = KotlinLogging.logger {}
 
 class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
     private val objectMapper = jacksonObjectMapper()
-        
-
 
     private val kallPerMedlemskapsperiode = ConcurrentHashMap<String, Int>()
 

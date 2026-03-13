@@ -90,7 +90,6 @@ class JobMonitor<T : JobMonitor.Stats>(
         )
 
     private fun Any.toJson() = jacksonObjectMapper()
-        
         .writerWithDefaultPrettyPrinter()
         .writeValueAsString(this)
 

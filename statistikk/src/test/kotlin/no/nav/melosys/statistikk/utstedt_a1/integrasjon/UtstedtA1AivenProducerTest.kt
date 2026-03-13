@@ -1,7 +1,6 @@
 package no.nav.melosys.statistikk.utstedt_a1.integrasjon
 
 import tools.jackson.databind.ObjectMapper
-import tools.jackson.databind.SerializationFeature
 import io.kotest.matchers.shouldNotBe
 import jakarta.annotation.Nullable
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.A1TypeUtstedelse
@@ -53,7 +52,6 @@ class UtstedtA1AivenProducerTest {
     )
 
     companion object {
-        private val OBJECT_MAPPER = ObjectMapper().apply {
-        }
+        private val OBJECT_MAPPER = ObjectMapper()
     }
 }

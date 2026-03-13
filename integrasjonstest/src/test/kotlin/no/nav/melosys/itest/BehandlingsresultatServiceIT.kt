@@ -1,6 +1,5 @@
 package no.nav.melosys.itest
 
-import tools.jackson.databind.SerializationFeature
 import tools.jackson.module.kotlin.jacksonObjectMapper
 import io.getunleash.FakeUnleash
 import no.nav.melosys.domain.*
@@ -48,8 +47,7 @@ class BehandlingsresultatServiceIT(
     data class Behandlinger(val orginal: Behandling, val replika: Behandling)
 
     // Denne kan ikke wires inn i siden vi ikke har hele spring contex
-    private val objectMapper = jacksonObjectMapper().apply {
-    }
+    private val objectMapper = jacksonObjectMapper()
 
     @Test
     fun `id i database blir riktig etter replikerting`() {

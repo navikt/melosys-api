@@ -438,7 +438,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `getData skal kaste IllegalStateException ved mapping-feil`() {
+    fun `getData skal kaste IllegalStateException ved Jackson-feil`() {
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.EESSI_MELDING, "[\"ikke\", \"et\", \"objekt\"]")
         }

@@ -189,7 +189,6 @@ class DokgenMalMapperIkkeYrkesaktivTest {
     private val Any.toJsonNode: JsonNode
         get() {
             return jacksonObjectMapper()
-                
                 .valueToTree(this)
         }
 }
