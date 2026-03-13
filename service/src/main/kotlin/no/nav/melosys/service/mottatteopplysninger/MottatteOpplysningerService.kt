@@ -185,7 +185,6 @@ class MottatteOpplysningerService(
         val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID).apply {
             if (mottatteOpplysninger != null) {
                 val mapper = JsonMapper.builder().build()
-                    
                 val json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mottatteOpplysningerData)
                 log.info(teamLogsMarker, "Feil i  mottatteopplysninger for mottatteOpplysningerData: $json") //TODO fjern  etter debugging
 

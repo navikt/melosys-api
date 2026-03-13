@@ -44,7 +44,6 @@ object Migrering {
 
     private fun hentMigreringsSaker(fileName: String): List<MigreringsSak> {
         return jacksonObjectMapper()
-            
             .readValue(File(fileName), object : TypeReference<List<MigreringsInfoForLesing>>() {})
             .map { it.tilMigreringsInfo() }
     }

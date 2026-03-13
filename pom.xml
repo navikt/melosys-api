@@ -344,11 +344,7 @@
                 <artifactId>cxf-services-sts-core</artifactId>
                 <version>${cxf.version}</version>
             </dependency>
-            <!-- Jackson: SB 4.0 uses Jackson 3 by default, but we stay on Jackson 2.
-                 Exclude Jackson 3 (tools.jackson) from spring-boot-jackson to prevent
-                 Jackson 3 auto-config and codecs from activating.
-                 spring-boot-jackson2 (added in individual modules) provides ObjectMapper
-                 bean auto-configuration for Jackson 2. -->
+            <!-- Jackson: SB 4.0 bruker Jackson 3 som standard. Migrert fra Jackson 2 (com.fasterxml) til Jackson 3 (tools.jackson 3.0.4). -->
             <dependency>
                 <groupId>net.javacrumbs.shedlock</groupId>
                 <artifactId>shedlock-spring</artifactId>
