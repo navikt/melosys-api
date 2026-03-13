@@ -148,7 +148,7 @@ public class AnmodningUnntakService {
     }
 
     @Transactional
-    public void fortsettMedMottattSvar(long behandlingID) {
+    public void endreStatusTilVurderDokument(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         validerBehandlingstemaUtsendtArbeidstaker(behandling);

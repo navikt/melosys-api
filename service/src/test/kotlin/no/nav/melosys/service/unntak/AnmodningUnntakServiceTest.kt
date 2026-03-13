@@ -399,7 +399,7 @@ class AnmodningUnntakServiceTest {
     }
 
     @Test
-    fun `fortsettAnmodningMedMottattSvar setter status til VURDER_DOKUMENT`() {
+    fun `endreStatusTilVurderDokument setter status til VURDER_DOKUMENT`() {
         val behandling = Behandling.forTest {
             id = BEHANDLING_ID
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
@@ -409,7 +409,7 @@ class AnmodningUnntakServiceTest {
         every { behandlingService.lagre(behandling) } just Runs
 
 
-        anmodningUnntakService.fortsettMedMottattSvar(BEHANDLING_ID)
+        anmodningUnntakService.endreStatusTilVurderDokument(BEHANDLING_ID)
 
 
         behandling.status shouldBe Behandlingsstatus.VURDER_DOKUMENT
@@ -417,7 +417,7 @@ class AnmodningUnntakServiceTest {
     }
 
     @Test
-    fun `fortsettAnmodningMedMottattSvar feil behandlingsstatus forvent exception`() {
+    fun `endreStatusTilVurderDokument feil behandlingsstatus forvent exception`() {
         val behandling = Behandling.forTest {
             id = BEHANDLING_ID
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
@@ -428,7 +428,7 @@ class AnmodningUnntakServiceTest {
 
 
         val exception = shouldThrow<FunksjonellException> {
-            anmodningUnntakService.fortsettMedMottattSvar(BEHANDLING_ID)
+            anmodningUnntakService.endreStatusTilVurderDokument(BEHANDLING_ID)
         }
 
 

@@ -42,7 +42,7 @@ class AnmodningUnntakAdminController(
     fun endreStatusTilVurderDokument(@PathVariable behandlingID: Long): ResponseEntity<Unit> {
         log.info("Admin: Endrer status til VURDER_DOKUMENT for behandling {}", behandlingID)
 
-        anmodningUnntakService.fortsettMedMottattSvar(behandlingID)
+        anmodningUnntakService.endreStatusTilVurderDokument(behandlingID)
 
         return ResponseEntity.noContent().build()
     }
