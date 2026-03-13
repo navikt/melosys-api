@@ -5,6 +5,7 @@ import tools.jackson.databind.ObjectMapper
 import tools.jackson.databind.SerializationFeature
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.databind.module.SimpleModule
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
@@ -39,7 +40,7 @@ class MidlertidigPostadresseSerializerTest {
     }
 
     @Test
-    fun `skal serialisere midlertidig postadresse Norge`() {
+    fun `skal serialisere midlertidig postadresse Norge med korrekt struktur`() {
         every { kodeverkService.dekod(POSTNUMMER, "0557") } returns "Oslo"
 
         val midlertidigPostadresse = MidlertidigPostadresseNorge().apply {
@@ -51,15 +52,20 @@ class MidlertidigPostadresseSerializerTest {
             land = Land(NORGE)
         }
 
+        val tree = mapper.readTree(mapper.writeValueAsString(midlertidigPostadresse))
 
-        val json = mapper.writeValueAsString(midlertidigPostadresse)
-
-
-        json shouldNotBe null
+        tree["adressetype"].asText() shouldBe "STRUKTURERT"
+        tree["strukturertAdresse"] shouldNotBe null
+        tree["strukturertAdresse"]["gatenavn"].asText() shouldBe "SANNERGATA"
+        tree["strukturertAdresse"]["husnummer"].asText() shouldBe "2"
+        tree["strukturertAdresse"]["postnummer"].asText() shouldBe "0557"
+        tree["strukturertAdresse"]["poststed"].asText() shouldBe "Oslo"
+        tree["strukturertAdresse"]["landkode"].asText() shouldBe NORGE
+        tree.path("ustrukturertAdresse").isMissingNode shouldBe true
     }
 
     @Test
-    fun `skal serialisere midlertidig postadresse utland`() {
+    fun `skal serialisere midlertidig postadresse utland med korrekt struktur`() {
         val midlertidigPostadresse = MidlertidigPostadresseUtland().apply {
             adresselinje1 = "42 Mock Road"
             adresselinje2 = "Mock City"
@@ -67,10 +73,11 @@ class MidlertidigPostadresseSerializerTest {
             land = Land(STORBRITANNIA)
         }
 
+        val tree = mapper.readTree(mapper.writeValueAsString(midlertidigPostadresse))
 
-        val json = mapper.writeValueAsString(midlertidigPostadresse)
-
-
-        json shouldNotBe null
+        tree["adressetype"].asText() shouldBe "USTRUKTURERT"
+        tree["ustrukturertAdresse"] shouldNotBe null
+        tree["ustrukturertAdresse"]["landkode"].asText() shouldBe STORBRITANNIA
+        tree.path("strukturertAdresse").isMissingNode shouldBe true
     }
 }
