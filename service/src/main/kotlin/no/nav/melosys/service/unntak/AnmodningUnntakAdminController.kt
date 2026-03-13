@@ -28,4 +28,13 @@ class AnmodningUnntakAdminController(
 
         return ResponseEntity.noContent().build()
     }
+
+    @PostMapping("/{behandlingID}/fortsett-med-mottatt-svar")
+    fun fortsettMedMottattSvar(@PathVariable behandlingID: Long): ResponseEntity<Unit> {
+        log.info("Admin: Fortsetter behandling med allerede mottatt svar på anmodning for behandling {}", behandlingID)
+
+        anmodningUnntakService.fortsettMedMottattSvar(behandlingID)
+
+        return ResponseEntity.noContent().build()
+    }
 }
