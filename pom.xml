@@ -90,6 +90,7 @@
         <bouncycastle-jdk18on.version>1.83</bouncycastle-jdk18on.version>
         <nimbus-jose-jwt.version>10.8</nimbus-jose-jwt.version>
         <neethi.version>3.2.1</neethi.version>
+        <jaxws-rt.version>4.0.3</jaxws-rt.version>
         <jakarta.jaxb.version>4.0.5</jakarta.jaxb.version>
         <javaparser.version>1.0.11</javaparser.version>
         <google.errorprone.version>2.48.0</google.errorprone.version>
@@ -679,6 +680,11 @@
                 <groupId>org.eclipse.angus</groupId>
                 <artifactId>angus-activation</artifactId>
                 <version>2.0.3</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.ws</groupId>
+                <artifactId>jaxws-rt</artifactId>
+                <version>${jaxws-rt.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

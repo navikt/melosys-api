@@ -31,7 +31,7 @@ class KafkaSerializationTest {
             val bytes = serializer.serialize("test-topic", message)
 
             bytes shouldNotBe null
-            val json = String(bytes!!)
+            val json = String(bytes!!, Charsets.UTF_8)
             json shouldContain "\"name\":\"hello\""
             json shouldContain "\"value\":42"
         }
@@ -50,7 +50,7 @@ class KafkaSerializationTest {
 
             val bytes = dateSerializer.serialize("test-topic", message)
 
-            val json = String(bytes!!)
+            val json = String(bytes!!, Charsets.UTF_8)
             json shouldContain "2025-01-15"
         }
 
