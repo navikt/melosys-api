@@ -4,10 +4,12 @@ import tools.jackson.databind.DeserializationFeature
 import tools.jackson.databind.MapperFeature
 import tools.jackson.databind.json.JsonMapper
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldMatch
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
 import no.nav.melosys.service.kodeverk.KodeverkService
 import org.junit.jupiter.api.Test
+import java.time.Instant
 import java.time.LocalDate
 
 class WebConfigObjectMapperTest {
@@ -35,6 +37,13 @@ class WebConfigObjectMapperTest {
     @Test
     fun `objectMapper should have DEFAULT_VIEW_INCLUSION enabled`() {
         objectMapper.isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION) shouldBe true
+    }
+
+    @Test
+    fun `objectMapper should serialize Instant as ISO-8601 string, not timestamp`() {
+        val instant = Instant.parse("2025-01-15T10:30:00Z")
+        val json = objectMapper.writeValueAsString(mapOf("ts" to instant))
+        json shouldMatch Regex("""^\{"ts":"2025-01-15T10:30:00(\.\d+)?Z"\}$""")
     }
 
     @Test
