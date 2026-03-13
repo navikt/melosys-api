@@ -144,6 +144,35 @@ class FaktureringskomponentenClientTest(
         nyFakturaserieResponseDto.fakturaserieReferanse.shouldBe("123")
     }
 
+    @Test
+    fun `kanseller fakturaserie med årsavregning`() {
+        val json = """
+            {
+              "årsavregningRef": [
+                "ÅRSAVREGNING-2024-ABC123",
+                "ÅRSAVREGNING-2023-XYZ789"
+              ]
+            }
+        """.trimIndent()
+
+        val referanse = UUID.randomUUID().toString()
+
+        serviceUnderTestMockServer.stubFor(
+            post("/fakturaserier/$referanse/kanseller")
+                .withRequestBody(WireMock.equalToJson(json))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("{ \"fakturaserieReferanse\": \"5689\" }")
+                )
+        )
+
+        val nyFakturaserieResponseDto =
+            faktureringskomponentenClient.kansellerFakturaserie(referanse, "", listOf("ÅRSAVREGNING-2024-ABC123", "ÅRSAVREGNING-2023-XYZ789"))
+        nyFakturaserieResponseDto.fakturaserieReferanse.shouldBe("5689")
+    }
+
     fun get(url: String): MappingBuilder =
         WireMock.get(url)
             .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
