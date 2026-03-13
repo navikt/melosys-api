@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.kafka
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -16,6 +17,7 @@ class KafkaSerializationTest {
 
     private val objectMapper = ObjectMapper().apply {
         registerModule(JavaTimeModule())
+        registerModule(KotlinModule.Builder().build())
         disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 

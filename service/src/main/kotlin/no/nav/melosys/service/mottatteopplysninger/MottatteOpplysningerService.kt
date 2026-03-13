@@ -151,6 +151,7 @@ class MottatteOpplysningerService(
                     type = Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS
                     data = SøknadNorgeEllerUtenforEØS()
                 }
+                else -> throw FunksjonellException("Ukjent sakstype ${behandling.fagsak.type} for behandling $behandlingID")
             }
         }
 
