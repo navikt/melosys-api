@@ -8,6 +8,7 @@ import io.kotest.matchers.string.shouldMatch
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
 import no.nav.melosys.service.kodeverk.KodeverkService
+import no.nav.melosys.tjenester.gui.dto.BehandlingOppsummeringDto
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
@@ -44,6 +45,19 @@ class WebConfigObjectMapperTest {
         val instant = Instant.parse("2025-01-15T10:30:00Z")
         val json = objectMapper.writeValueAsString(mapOf("ts" to instant))
         json shouldMatch Regex("""^\{"ts":"2025-01-15T10:30:00(\.\d+)?Z"\}$""")
+    }
+
+    @Test
+    fun `BehandlingOppsummeringDto skal serialisere Instant og LocalDate som ISO-8601 strings`() {
+        val dto = BehandlingOppsummeringDto().apply {
+            registrertDato = Instant.parse("2025-03-13T10:00:00Z")
+            behandlingsfrist = LocalDate.of(2025, 6, 1)
+        }
+
+        val tree = objectMapper.readTree(objectMapper.writeValueAsString(dto))
+
+        tree["registrertDato"].asText() shouldMatch Regex("""2025-03-13T10:00:00(\.\d+)?Z""")
+        tree["behandlingsfrist"].asText() shouldBe "2025-06-01"
     }
 
     @Test
