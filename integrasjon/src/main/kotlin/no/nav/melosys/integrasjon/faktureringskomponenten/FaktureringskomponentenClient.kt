@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.faktureringskomponenten
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaMottakerDto
@@ -37,6 +38,7 @@ open class FaktureringskomponentenClient(private val webClient: WebClient) : Jso
         .block()!!
 
     data class KanselleringRequestDto(
+        @JsonProperty("årsavregningRef")
         val årsavregningRef: List<String> = emptyList()
     )
 
