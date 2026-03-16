@@ -4,9 +4,13 @@ import tools.jackson.databind.DeserializationFeature
 import tools.jackson.databind.MapperFeature
 import tools.jackson.databind.json.JsonMapper
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldMatch
+import io.kotest.matchers.string.shouldStartWith
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.service.kodeverk.KodeverkService
 import no.nav.melosys.tjenester.gui.dto.BehandlingOppsummeringDto
 import org.junit.jupiter.api.Test
@@ -69,5 +73,26 @@ class WebConfigObjectMapperTest {
         val deserialized = objectMapper.readValue(json, TestDto::class.java)
 
         deserialized shouldBe dto
+    }
+
+    @Test
+    fun `KodeSerializer serialiserer Kodeverk i IKKE_MAPPES_TIL_KODE_DTO som plain string`() {
+        // InnvilgelsesResultat er i IKKE_MAPPES_TIL_KODE_DTO og skal serialiseres som plain string.
+        // I Jackson 3 må modulens serializer fortsatt prioriteres fremfor default enum-serialisering.
+        val json = objectMapper.writeValueAsString(InnvilgelsesResultat.INNVILGET)
+
+        json shouldStartWith "\""
+        json shouldBe "\"${InnvilgelsesResultat.INNVILGET.kode}\""
+    }
+
+    @Test
+    fun `KodeSerializer serialiserer Kodeverk utenfor IKKE_MAPPES_TIL_KODE_DTO som KodeDto-objekt`() {
+        // Sakstyper er IKKE i IKKE_MAPPES_TIL_KODE_DTO og skal serialiseres som {"kode":"...","term":"..."}.
+        // Verifiserer at MelosysModule sin KodeSerializer fortsatt brukes for disse i Jackson 3.
+        val node = objectMapper.readTree(objectMapper.writeValueAsString(Sakstyper.EU_EOS))
+
+        node["kode"] shouldNotBe null
+        node["term"] shouldNotBe null
+        node["kode"].asText() shouldBe Sakstyper.EU_EOS.kode
     }
 }
