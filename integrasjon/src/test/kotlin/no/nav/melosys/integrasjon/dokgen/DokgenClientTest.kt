@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.kotest.matchers.shouldNotBe
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.kodeverk.Saksstatuser
@@ -13,6 +14,9 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.person.Persondata
+import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.StandardvedleggDto
+import org.springframework.http.codec.json.JacksonJsonEncoder
+import tools.jackson.databind.json.JsonMapper
 import no.nav.melosys.integrasjon.dokgen.dto.MangelbrevBruker
 import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.InnvilgelseRettigheterPlikterStandardvedlegg
 import org.junit.jupiter.api.AfterAll
@@ -133,6 +137,28 @@ class DokgenClientTest {
         dokgenClient.lagPdfForStandardvedlegg("standardvedlegg", null) shouldNotBe null
     }
 
+    @Test
+    fun `JacksonJsonEncoder serialiserer Kodeverk-enum som plain string, ikke KodeDto-objekt`() {
+        // Verifiserer at DokgenClientProducer sin JacksonJsonEncoder(ukonfigurertObjectMapper) faktisk
+        // brukes av WebClient ved serialisering av request-body — ikke Spring Boot sin default encoder.
+        // Hvis MelosysModule hadde vært aktiv ville Behandlingsmaate blitt serialisert som
+        // {"kode":"MANUELT","term":"..."} i stedet for "MANUELT", og dokgen-kallet ville feilet.
+        val dokgenObjectMapper = JsonMapper.builder().build()
+        val webClientMedEncoder = WebClient.builder()
+            .baseUrl("http://localhost:" + wireMockServer.port())
+            .codecs { it.defaultCodecs().jacksonJsonEncoder(JacksonJsonEncoder(dokgenObjectMapper)) }
+            .build()
+        val dokgenClientMedEncoder = DokgenClient(webClientMedEncoder)
+
+        wireMockServer.stubFor(
+            post(urlPathEqualTo("/mal/testmal/lag-pdf"))
+                .withRequestBody(matchingJsonPath("$.behandlingsmaate", equalTo("MANUELT")))
+                .willReturn(aResponse().withStatus(200).withBody("pdf".toByteArray()))
+        )
+
+        dokgenClientMedEncoder.lagPdfForStandardvedlegg("testmal", TestDtoMedKodeverk(Behandlingsmaate.MANUELT)) shouldNotBe null
+    }
+
     private fun getMangelbrevBruker() = MangelbrevBruker.av(
         MangelbrevBrevbestilling.Builder()
             .medBehandling(lagBehandling())
@@ -155,4 +181,6 @@ class DokgenClientTest {
         dokument = PersonDokument()
         type = SaksopplysningType.PERSOPL
     }
+
+    private data class TestDtoMedKodeverk(val behandlingsmaate: Behandlingsmaate) : StandardvedleggDto
 }
