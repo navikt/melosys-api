@@ -132,11 +132,6 @@
             <groupId>org.threeten</groupId>
             <artifactId>threeten-extra</artifactId>
         </dependency>
-    <dependency>
-      <groupId>com.sun.xml.ws</groupId>
-      <artifactId>jaxws-rt</artifactId>
-      <scope>provided</scope>
-    </dependency>
 
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>

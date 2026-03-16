@@ -2,24 +2,29 @@ package no.nav.melosys.tjenester.gui.config
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.json.JsonMapper
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
 import no.nav.melosys.service.kodeverk.KodeverkService
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.http.converter.HttpMessageConverter
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import java.time.LocalDate
 
 class WebConfigObjectMapperTest {
 
     private val kodeverkService = mockk<KodeverkService>(relaxed = true)
-    private val webConfig = WebConfig(mockk())
-    private val objectMapper = webConfig.objectMapper(kodeverkService)
+    private val webConfig = WebConfig(mockk(), kodeverkService)
+    private lateinit var objectMapper: ObjectMapper
 
-    @Test
-    fun `objectMapper should be a JsonMapper instance`() {
-        objectMapper.shouldBeInstanceOf<JsonMapper>()
+    @BeforeEach
+    fun setUp() {
+        val customizer = webConfig.jacksonCustomizer()
+        val builder = org.springframework.http.converter.json.Jackson2ObjectMapperBuilder()
+        customizer.customize(builder)
+        objectMapper = builder.build()
     }
 
     @Test
@@ -49,5 +54,14 @@ class WebConfigObjectMapperTest {
         val deserialized = objectMapper.readValue(json, TestDto::class.java)
 
         deserialized shouldBe dto
+    }
+
+    @Test
+    fun `extendMessageConverters should register MelosysModule on MVC converters`() {
+        val converter = MappingJackson2HttpMessageConverter(objectMapper)
+        val converters: MutableList<HttpMessageConverter<*>> = mutableListOf(converter)
+        webConfig.extendMessageConverters(converters)
+        val registeredModuleIds = converter.objectMapper.registeredModuleIds
+        registeredModuleIds.any { it.toString().contains("MelosysModule") } shouldBe true
     }
 }
