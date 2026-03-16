@@ -9,6 +9,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ArrayNode;
+import com.jayway.jsonpath.InvalidPathException;
 import com.jayway.jsonpath.JsonPath;
 import com.networknt.schema.Error;
 import com.networknt.schema.Schema;
@@ -135,7 +136,7 @@ public class JsonSchemaValidator {
         try {
             final Object objekt = JsonPath.read(json, sti);
             return error.getMessage().replace(sti, sti + " [" + objekt + "]");
-        } catch (Exception e) {
+        } catch (InvalidPathException e) {
             return error.getMessage();
         }
     }

@@ -11,7 +11,6 @@ import java.time.LocalDate
 import java.util.*
 
 class ArbeidsforholdResponse(val arbeidsforhold: List<Arbeidsforhold>) {
-    private val objectMapper = ObjectMapper()
 
     fun tilSaksopplysning(): String {
         try {
@@ -19,6 +18,10 @@ class ArbeidsforholdResponse(val arbeidsforhold: List<Arbeidsforhold>) {
         } catch (e: JacksonException) {
             throw TekniskException("Kunne ikke konvertere arbeidsforhold til json string", e)
         }
+    }
+
+    companion object {
+        private val objectMapper = ObjectMapper()
     }
 
     data class Arbeidsforhold(
