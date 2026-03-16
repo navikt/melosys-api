@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.filter.UrlHandlerFilter;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
@@ -50,6 +51,11 @@ public class WebConfig implements WebMvcConfigurer {
             .filter(c -> c instanceof MappingJackson2HttpMessageConverter)
             .map(c -> (MappingJackson2HttpMessageConverter) c)
             .forEach(c -> c.getObjectMapper().registerModule(new MelosysModule(kodeverkService)));
+    }
+
+    @Bean
+    public UrlHandlerFilter trailingSlashFilter() throws Exception {
+        return UrlHandlerFilter.trailingSlashHandler("/**").wrapRequest().build();
     }
 
     @Override

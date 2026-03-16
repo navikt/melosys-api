@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.medl
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
@@ -28,7 +27,6 @@ class MedlService(
 ) {
 
     init {
-        objectMapper.registerModule(JavaTimeModule())
     }
 
     fun hentPeriodeListe(fnr: String, fom: LocalDate?, tom: LocalDate?): Saksopplysning {

@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.utbetaling
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.SaksopplysningKildesystem
 import no.nav.melosys.domain.SaksopplysningType
@@ -23,7 +22,6 @@ class UtbetaltdataService(
 ) {
 
     init {
-        objectMapper.registerKotlinModule()
     }
 
     fun hentUtbetalingerBarnetrygd(fnr: String, fom: LocalDate, tom: LocalDate): Saksopplysning {
