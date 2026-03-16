@@ -398,6 +398,43 @@ class AnmodningUnntakServiceTest {
         exception.message shouldContain "Behandlingen er avsluttet"
     }
 
+    @Test
+    fun `endreStatusTilVurderDokument setter status til VURDER_DOKUMENT`() {
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            status = Behandlingsstatus.ANMODNING_UNNTAK_SENDT
+        }
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingService.lagre(behandling) } just Runs
+
+
+        anmodningUnntakService.endreStatusTilVurderDokument(BEHANDLING_ID)
+
+
+        behandling.status shouldBe Behandlingsstatus.VURDER_DOKUMENT
+        verify { behandlingService.lagre(behandling) }
+    }
+
+    @Test
+    fun `endreStatusTilVurderDokument feil behandlingsstatus forvent exception`() {
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingService.lagre(behandling) } just Runs
+
+
+        val exception = shouldThrow<FunksjonellException> {
+            anmodningUnntakService.endreStatusTilVurderDokument(BEHANDLING_ID)
+        }
+
+
+        exception.message shouldContain "Behandlingen har ikke status ANMODNING_UNNTAK_SENDT"
+    }
+
     companion object {
         private const val BEHANDLING_ID = 1L
         private const val FRITEKST_SED = "Ytterligere info som fritekst"

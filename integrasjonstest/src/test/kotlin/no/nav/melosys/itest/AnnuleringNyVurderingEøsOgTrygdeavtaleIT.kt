@@ -6,14 +6,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.forTest
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
-import no.nav.melosys.domain.kodeverk.Land_iso2
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
-import no.nav.melosys.domain.kodeverk.Sakstemaer
-import no.nav.melosys.domain.kodeverk.Sakstyper
-import no.nav.melosys.domain.kodeverk.Saksstatuser
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -34,7 +27,7 @@ import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import java.util.stream.Stream
 
 class AnnuleringNyVurderingEøsOgTrygdeavtaleIT(
@@ -152,7 +145,7 @@ class AnnuleringNyVurderingEøsOgTrygdeavtaleIT(
 
         mockServer.verify(
             1,
-            WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/$fakturaserieReferanse"))
+            WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier/$fakturaserieReferanse/kanseller"))
         )
     }
 
