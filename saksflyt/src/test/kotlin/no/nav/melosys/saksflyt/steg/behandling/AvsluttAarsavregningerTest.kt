@@ -61,14 +61,18 @@ class AvsluttAarsavregningerTest {
         }
 
         justRun { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) }
+        justRun { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) }
         justRun { behandlingsresultatService.oppdaterBehandlingsresultattype(any(), Behandlingsresultattyper.FERDIGBEHANDLET) }
         justRun { behandlingService.avsluttBehandling(any()) }
 
         avsluttAarsavregninger.utfør(prosessinstans)
 
 
-        verify(exactly = 2) { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) }
-        verify(exactly = 2) { behandlingsresultatService.oppdaterBehandlingsresultattype(any(), Behandlingsresultattyper.FERDIGBEHANDLET) }
-        verify(exactly = 2) { behandlingService.avsluttBehandling(any()) }
+        verify(exactly = 1) { oppgaveService.ferdigstillOppgaveMedBehandlingID(11L) }
+        verify(exactly = 1) { oppgaveService.ferdigstillOppgaveMedBehandlingID(12L) }
+        verify(exactly = 1) { behandlingsresultatService.oppdaterBehandlingsresultattype(11L, Behandlingsresultattyper.FERDIGBEHANDLET) }
+        verify(exactly = 1) { behandlingsresultatService.oppdaterBehandlingsresultattype(12L, Behandlingsresultattyper.FERDIGBEHANDLET) }
+        verify(exactly = 1) { behandlingService.avsluttBehandling(11L) }
+        verify(exactly = 1) { behandlingService.avsluttBehandling(12L) }
     }
 }
