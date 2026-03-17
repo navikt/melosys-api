@@ -101,6 +101,9 @@ class TrygdeavgiftClientTest(
                             "foedselsdato": [2000, 1, 1]
                         }
                         """,
+                        // TrygdeavgiftClient bruker sin egen WebClient uten JavaTimeModule,
+                        // så LocalDate serialiseres som timestamp-array. Testen dokumenterer
+                        // denne faktiske atferden som safety net for Spring Boot 4-oppgradering.
                         true, false
                     )
                 )

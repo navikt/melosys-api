@@ -1,12 +1,13 @@
 package no.nav.melosys.integrasjon.dokgen
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.any
 import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
 import com.github.tomakehurst.wiremock.client.WireMock.containing
-import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.equalTo
+import com.github.tomakehurst.wiremock.client.WireMock.matching
+import com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
@@ -53,7 +54,6 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DokgenClientTest(
     @Autowired private val dokgenClient: DokgenClient,
-    @Autowired private val objectMapper: ObjectMapper,
     @Value("\${mockserver.port}") mockServerPort: Int,
 ) {
     private val processUUID = UUID.randomUUID()
@@ -86,15 +86,16 @@ class DokgenClientTest(
             )
         )
 
-        val mangelbrevBruker = getMangelbrevBruker()
-        val expectedBody = objectMapper.writeValueAsString(mangelbrevBruker)
+        dokgenClient.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), false, false) shouldNotBe null
 
-        dokgenClient.lagPdf("mangelbrev_bruker", mangelbrevBruker, false, false) shouldNotBe null
-
+        // Asserts kritiske serialiseringsegenskaper: enum-felter som rene strenger (ikke {kode,term}-objekter)
+        // og dato-felter i ISO-8601-format (ikke arrays).
         mockServer.verify(
             postRequestedFor(urlPathEqualTo("/dokgen/mal/mangelbrev_bruker/lag-pdf"))
                 .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
-                .withRequestBody(equalToJson(expectedBody, true, false))
+                .withRequestBody(matchingJsonPath("$.sakstype", equalTo("EU_EOS")))
+                .withRequestBody(matchingJsonPath("$.sakstema", equalTo("MEDLEMSKAP_LOVVALG")))
+                .withRequestBody(matchingJsonPath("$.dagensDato", matching("\\d{4}-\\d{2}-\\d{2}T.+")))
         )
     }
 

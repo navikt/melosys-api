@@ -140,6 +140,9 @@ class TilgangsmaskinenClientTest(
             )
         )
 
+        // errorFilter i TilgangsmaskinenClientProducer fanger 403 som TekniskException
+        // før sjekkTilgang() sin catch-blokk kjøres, og wrapper det i TilgangsmaskinenException.
+        // Testen dokumenterer faktisk nåværende atferd som safety net for Spring Boot 4-oppgradering.
         shouldThrow<TilgangsmaskinenException> {
             tilgangsmaskinenClient.sjekkTilgang("03508331575")
         }
