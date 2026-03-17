@@ -92,6 +92,7 @@ public class VideresendSoknadService {
 
     private void valider(Behandling behandling, Bostedsland bostedsland) {
         validerBehandlingstemaErArbeidFlereLand(behandling);
+        validerArbeidslandErKjent(behandling);
         validerBostedsland(behandling, bostedsland);
         validerAdresse(behandling);
     }
@@ -105,6 +106,12 @@ public class VideresendSoknadService {
     private void validerBehandlingstemaErArbeidFlereLand(Behandling behandling) {
         if (!Behandlingstema.ARBEID_FLERE_LAND.equals(behandling.getTema())) {
             throw new FunksjonellException("Behandling " + behandling.getId() + " har ikke behandlingstema 'ARBEID_FLERE_LAND' og kan ikke videresendes");
+        }
+    }
+
+    private void validerArbeidslandErKjent(Behandling behandling) {
+        if (landvelgerService.isFlereLandUkjentHvilke(behandling.getId())) {
+            throw new FunksjonellException("Kan ikke videresende søknad når land under \"Periode og land\" ikke er kjent");
         }
     }
 

@@ -132,6 +132,18 @@ class VideresendSoknadServiceTest {
     }
 
     @Test
+    fun `videresend kaster exception naar arbeidsland ikke er kjent`() {
+        every { landvelgerService.hentBostedsland(behandling) } returns bostedsland
+        every { landvelgerService.isFlereLandUkjentHvilke(behandling.id) } returns true
+        behandling.tema = Behandlingstema.ARBEID_FLERE_LAND
+
+        val exception = shouldThrow<FunksjonellException> {
+            videresendSoknadService.videresend(SAKSNUMMER, "", "", emptySet(), null, null)
+        }
+        exception.message shouldContain "arbeidsland ikke er kjent"
+    }
+
+    @Test
     fun `henlegg og videresend bostedsland norge er søknad kaster exception`() {
         every { landvelgerService.hentBostedsland(behandling) } returns Bostedsland(Landkoder.NO)
         behandling.tema = Behandlingstema.ARBEID_FLERE_LAND
