@@ -107,31 +107,72 @@ enum class Avgiftsberegningstype {
 
 ---
 
-## 3. Endringer per repo og koordinering
+## 3. Bakoverkompatibel deploy-strategi
 
-### Sekvens mellom repoene
+### Prinsipp: Nye felter legges til — gamle felter beholdes
+
+I stedet for å **erstatte** `grunnlag`-feltet (breaking change), legges nye felter til **ved siden av** de eksisterende. Dette gjør at repoene kan deployes i **vilkårlig rekkefølge** uten nedetid.
+
+### API-kontrakt (melosys-trygdeavgift-beregning → melosys-api)
+
+```kotlin
+// BeregnetTrygdeavgiftResponse.kt — bakoverkompatibel versjon
+data class BeregnetTrygdeavgiftResponse(
+    val beregnetPeriode: Trygdeavgiftsperiode,
+    val grunnlag: AvgiftsperiodeGrunnlag,                    // BEHOLDES — alltid siste/eneste
+    val grunnlagListe: List<AvgiftsperiodeGrunnlag>? = null, // NYTT — null = bruk grunnlag
+    val beregningstype: Avgiftsberegningstype? = null        // NYTT — null = ORDINAER
+)
+```
+
+### Database (melosys-api)
+
+Samme prinsipp — nye strukturer legges til, gamle beholdes under overgangsperioden:
+- **V150:** Ny `trygdeavgiftsperiode_grunnlag`-tabell + `beregningstype`-kolonne + nullable sats
+- Koden leser fra ny tabell, faller tilbake til gamle FK-er
+- **V151:** Dropp gamle FK-kolonner (etter at alt fungerer)
+
+### Deploy-sekvens
 
 ```mermaid
 sequenceDiagram
-    participant API as melosys-api
     participant BEREGN as melosys-trygdeavgift-beregning
+    participant API as melosys-api
 
-    Note over API,BEREGN: Fase 1: API-kontraktendring
+    rect rgb(230, 245, 230)
+    Note over BEREGN: Steg 1: Deploy ny beregning
+    BEREGN->>API: grunnlag=siste, grunnlagListe=[alle], beregningstype=TJUEFEM_PROSENT_REGEL
+    Note over API: Gammel API ignorerer ukjente felter (Jackson default)
+    Note over API: Leser grunnlag som før — fungerer
+    end
 
-    API->>BEREGN: POST /api/v2/beregn (request uendret)
-    BEREGN->>BEREGN: Beregn avgift, inkl. 25%-regel
+    rect rgb(230, 230, 245)
+    Note over API: Steg 2: Deploy ny API (når som helst etterpå)
+    API->>API: Leser grunnlagListe hvis != null, ellers grunnlag
+    API->>API: Leser beregningstype hvis != null, ellers ORDINAER
+    API->>API: Lagrer i ny tabell + nye kolonner
+    end
 
-    Note over BEREGN: I DAG: grunnlag = AvgiftsperiodeGrunnlag(perioder.last()), sats = 0.00
-    Note over BEREGN: NYTT: grunnlag = List[alle perioder], sats = null, beregningstype = 25%
-
-    BEREGN-->>API: List<BeregnetTrygdeavgiftResponse>
-
-    Note over API: Mottar N grunnlag + beregningstype per respons-element
-    API->>API: lagTrygdeavgiftsperiode(): mapper grunnlag + beregningstype + nullable sats
-    API->>API: Lagrer via JPA cascade
+    rect rgb(245, 230, 230)
+    Note over BEREGN,API: Steg 3: Opprydding (valgfri, separat PR)
+    Note over BEREGN: Fjern deprecated grunnlag-felt
+    Note over API: Fjern legacy fallback + V151: dropp gamle FK-kolonner
+    end
 ```
 
-**Deploy-rekkefølge:** `melosys-trygdeavgift-beregning` MÅ deployes **før** eller **samtidig med** `melosys-api`, fordi API-et må kunne lese den nye JSON-strukturen. Alternativt: gjør endringen bakoverkompatibel med en overgangsperiode.
+**Fordeler:**
+- Ingen koordinert deploy — repoene er uavhengige
+- Rollback er trygt i begge retninger
+- Kan verifisere i q1 før opprydding
+
+### Kompatibilitetsmatrise
+
+| melosys-trygdeavgift-beregning | melosys-api | Resultat |
+|-------------------------------|-------------|----------|
+| Gammel | Gammel | Fungerer som i dag |
+| **Ny** | Gammel | Gammel API ignorerer `grunnlagListe`/`beregningstype`, leser `grunnlag` |
+| Gammel | **Ny** | `grunnlagListe` er null → fallback til `grunnlag`. `beregningstype` er null → `ORDINAER` |
+| **Ny** | **Ny** | Full funksjonalitet — alle grunnlag + beregningstype lagres |
 
 ---
 
@@ -145,10 +186,10 @@ sequenceDiagram
 |-----|----------------|----------------|
 | `modell/felles/Trygdeavgiftsperiode.kt` | — | `sats: BigDecimal` → `sats: BigDecimal?` (nullable) |
 | `modell/felles/Avgiftsberegningstype.kt` | — | **Ny enum:** `ORDINAER`, `TJUEFEM_PROSENT_REGEL`, `MINSTEBELOEP` |
-| `standard/modell/BeregnetTrygdeavgiftResponse.kt` | `grunnlag` → `List<AvgiftsperiodeGrunnlag>` | Nytt felt: `beregningstype: Avgiftsberegningstype` |
+| `standard/modell/BeregnetTrygdeavgiftResponse.kt` | Behold `grunnlag`, legg til `grunnlagListe: List<...>?` | Legg til `beregningstype: Avgiftsberegningstype?` |
 | `standard/modell/AvgiftsperiodeGrunnlag.kt` | Uendret (brukes fortsatt for enkeltelement) | — |
 | `standard/BeregningService.kt` | 3 steder: `.last()` → pass hele listen | 3 steder: `sats = BigDecimal.ZERO.setScale(2)` → `sats = null` + sett beregningstype |
-| `eospensjonist/modell/EøsPensjonistBeregnetTrygdeavgiftResponse.kt` | `grunnlag` → `List<...>` | Nytt felt: `beregningstype: Avgiftsberegningstype` |
+| `eospensjonist/modell/EøsPensjonistBeregnetTrygdeavgiftResponse.kt` | Behold `grunnlag`, legg til `grunnlagListe: List<...>?` | Legg til `beregningstype: Avgiftsberegningstype?` |
 | `eospensjonist/EøsPensjonistBeregningService.kt` | 1 sted: `.last()` → pass hele listen | 1 sted: `sats = null` + beregningstype |
 | Berørte tester | Alle tester som konstruerer `BeregnetTrygdeavgiftResponse` | Tester som asserted `sats shouldBe BigDecimal.ZERO` → `sats shouldBe null` |
 
@@ -163,11 +204,12 @@ BeregnetTrygdeavgiftResponse(
     Trygdeavgiftsperiode(periode = samletPeriode, sats = BigDecimal.ZERO.setScale(2), ...),
     AvgiftsperiodeGrunnlag(grunnlagPerioder.last())
 )
-// ETTER:
+// ETTER (bakoverkompatibel):
 BeregnetTrygdeavgiftResponse(
-    Trygdeavgiftsperiode(periode = samletPeriode, sats = null, ...),  // 7969: null i stedet for 0
-    grunnlagPerioder.map { AvgiftsperiodeGrunnlag(it) },              // 7588: alle grunnlag
-    beregningstype = Avgiftsberegningstype.TJUEFEM_PROSENT_REGEL      // 7969: eksplisitt type
+    Trygdeavgiftsperiode(periode = samletPeriode, sats = null, ...),
+    grunnlag = AvgiftsperiodeGrunnlag(grunnlagPerioder.last()),          // beholdes for gammel API
+    grunnlagListe = grunnlagPerioder.map { AvgiftsperiodeGrunnlag(it) }, // 7588: alle grunnlag
+    beregningstype = Avgiftsberegningstype.TJUEFEM_PROSENT_REGEL        // 7969: eksplisitt type
 )
 ```
 
@@ -198,54 +240,53 @@ grunnlagPerioder = periodeberegninger.map { it.grunnlagPeriode }
 Trenger også `beregningstype = MINSTEBELOEP` med `sats = null` og `månedsavgift = 0`.
 Sjekk om dette håndteres i beregningsservicen allerede eller om det bare filtreres bort.
 
-#### Ny JSON-kontrakt (respons)
+#### Ny JSON-kontrakt (respons — bakoverkompatibel)
 
+**Ordinær beregning** (ingen endring for gammel API):
 ```json
-[
-  {
-    "beregnetPeriode": {
-      "periode": { "fom": "2025-05-01", "tom": "2025-12-31" },
-      "sats": 7.7,
-      "månedsavgift": { "verdi": 1540, "valuta": { "kode": "NOK", "desimaler": 2 } }
-    },
-    "grunnlag": [
-      {
-        "medlemskapsperiodeId": "uuid-1",
-        "skatteforholdsperiodeId": "uuid-a",
-        "inntektsperiodeId": "uuid-x"
-      }
-    ],
-    "beregningstype": "ORDINAER"
+{
+  "beregnetPeriode": {
+    "periode": { "fom": "2025-05-01", "tom": "2025-08-31" },
+    "sats": 7.7,
+    "månedsavgift": { "verdi": 1540, "valuta": { "kode": "NOK", "desimaler": 2 } }
   },
-  {
-    "beregnetPeriode": {
-      "periode": { "fom": "2025-05-01", "tom": "2025-12-31" },
-      "sats": null,
-      "månedsavgift": { "verdi": 3448, "valuta": { "kode": "NOK", "desimaler": 2 } }
-    },
-    "grunnlag": [
-      {
-        "medlemskapsperiodeId": "uuid-1",
-        "skatteforholdsperiodeId": "uuid-a",
-        "inntektsperiodeId": "uuid-x"
-      },
-      {
-        "medlemskapsperiodeId": "uuid-1",
-        "skatteforholdsperiodeId": "uuid-b",
-        "inntektsperiodeId": "uuid-y"
-      }
-    ],
-    "beregningstype": "TJUEFEM_PROSENT_REGEL"
-  }
-]
+  "grunnlag": { "medlemskapsperiodeId": "uuid-1", "skatteforholdsperiodeId": "uuid-a", "inntektsperiodeId": "uuid-x" },
+  "grunnlagListe": null,
+  "beregningstype": null
+}
 ```
 
-**Kontrakt-endringer oppsummert (7588 + 7969):**
-- `grunnlag`: `object` → `array` (alltid liste, 1 element for ordinær beregning)
-- `sats`: `number` → `number | null` (null ved 25%-regel og minstebeløp)
-- `beregningstype`: **nytt felt** — `ORDINAER`, `TJUEFEM_PROSENT_REGEL`, eller `MINSTEBELOEP`
+**25%-regel** (gammel API ignorerer nye felter, leser `grunnlag` som før):
+```json
+{
+  "beregnetPeriode": {
+    "periode": { "fom": "2025-05-01", "tom": "2025-12-31" },
+    "sats": null,
+    "månedsavgift": { "verdi": 3448, "valuta": { "kode": "NOK", "desimaler": 2 } }
+  },
+  "grunnlag": { "medlemskapsperiodeId": "uuid-1", "skatteforholdsperiodeId": "uuid-b", "inntektsperiodeId": "uuid-y" },
+  "grunnlagListe": [
+    { "medlemskapsperiodeId": "uuid-1", "skatteforholdsperiodeId": "uuid-a", "inntektsperiodeId": "uuid-x" },
+    { "medlemskapsperiodeId": "uuid-1", "skatteforholdsperiodeId": "uuid-b", "inntektsperiodeId": "uuid-y" }
+  ],
+  "beregningstype": "TJUEFEM_PROSENT_REGEL"
+}
+```
 
-**Bakoverkompatibilitet:** Ordinære perioder har `grunnlag` med 1 element, `sats` med verdi, og `beregningstype = ORDINAER`. melosys-api kan håndtere begge formater under overgangsperioden ved å sjekke om `grunnlag` er array eller objekt.
+**Kontrakt-endringer oppsummert:**
+- `grunnlag`: **uendret** — beholdes som enkelt-objekt (siste/eneste grunnlag)
+- `grunnlagListe`: **nytt felt** — `List<AvgiftsperiodeGrunnlag>?` (null = bruk `grunnlag`)
+- `sats`: `number` → `number | null` (null ved 25%-regel og minstebeløp)
+- `beregningstype`: **nytt felt** — `Avgiftsberegningstype?` (null = `ORDINAER`)
+
+**Mottaker-logikk i melosys-api:**
+```kotlin
+// TrygdeavgiftsberegningService.lagTrygdeavgiftsperiode()
+val alleGrunnlag = response.grunnlagListe       // ny API: bruk listen
+    ?: listOf(response.grunnlag)                // gammel API: wrap enkeltobjekt
+val beregningstype = response.beregningstype
+    ?: Avgiftsberegningstype.ORDINAER           // gammel API: default
+```
 
 ---
 
@@ -495,8 +536,8 @@ graph TD
 
 | # | Fil | Endring |
 |---|-----|---------|
-| 18 | `TrygdeavgiftsgrunnlagDto.kt` (integrasjon) | `val grunnlag: TrygdeavgiftsgrunnlagDto` → `val grunnlag: List<TrygdeavgiftsgrunnlagDto>` |
-| 19 | `TrygdeavgiftsberegningResponse.kt` (integrasjon) | Tilpass til liste av grunnlag |
+| 18 | `TrygdeavgiftsgrunnlagDto.kt` (integrasjon) | Uendret — brukes fortsatt som enkeltelement |
+| 19 | `TrygdeavgiftsberegningResponse.kt` (integrasjon) | Behold `grunnlag`, legg til `grunnlagListe: List<TrygdeavgiftsgrunnlagDto>?` og `beregningstype: String?` |
 
 ##### Reverse relationships (JPA)
 
@@ -572,7 +613,7 @@ graph LR
 | # | Spørsmål | Kontekst | Forslag |
 |---|----------|----------|---------|
 | 4 | **Skal gamle FK-kolonner droppes?** | V150 migrerer data. Skal V151 droppe kolonner? | Ja — i separat migrasjon etter at all kode er oppdatert og deployet. Gir en trygg overgangsperiode. |
-| 5 | **Deploy-koordinering** | `melosys-trygdeavgift-beregning` endrer JSON-kontrakt. | Gjør responsen bakoverkompatibel: ved ubegrenset beregning returneres liste med 1 element. Deploy beregning først, deretter API. |
+| 5 | **Deploy-koordinering** | ~~Løst~~. Nye felter (`grunnlagListe`, `beregningstype`) er nullable/additive. Repoene kan deployes uavhengig. | Opprydding (fjerne deprecated `grunnlag`-felt + V151) gjøres i separat PR etter verifisering. |
 | 6 | **`copyEntity()` semantikk** | Hva betyr det å kopiere en periode med N grunnlag? Skal grunnlagene deles eller deep-copies? | Deep-copy (nye entiteter med `id = null`). Eksisterende mønster i `ReplikerBehandlingsresultatService` gjør dette allerede for FK-ene. |
 | 7 | **Nullable sats i `fattet-vedtak-schema.json`** (7969) | `service/src/main/resources/fattet-vedtak-schema.json` refererer `trygdesats`. Kafka-konsumenter kan bryte på null. | Oppdater JSON-schema til å tillate null. Sjekk om statistikk-modul (`UtstedtA1Service`) leser sats. |
 | 8 | **`erLikForSatsendring()` med null** (7969) | Brukes av satsendring-logikk for å sjekke om perioder har endret seg. `null.compareTo(null)` kaster NPE. | Implementer null-safe sammenligning: `trygdesats == other.trygdesats` (Kotlin's `==` er null-safe) i stedet for `.compareTo()`. |
@@ -583,47 +624,31 @@ graph LR
 
 ```mermaid
 gantt
-    title Implementeringsfaser (7588 + 7969)
+    title Implementeringsfaser (7588 + 7969) — bakoverkompatibel
     dateFormat  YYYY-MM-DD
     axisFormat  %d.%m
 
     section Repo: melosys-trygdeavgift-beregning
-    Ny enum Avgiftsberegningstype (7969)            :a0, 2026-03-17, 1d
-    Endre Response til List + beregningstype        :a1, 2026-03-17, 1d
+    Ny enum + nullable sats i Trygdeavgiftsperiode  :a0, 2026-03-17, 1d
+    Legg til grunnlagListe + beregningstype på Response :a1, 2026-03-17, 1d
     Fiks .last() + sats=null i BeregningService     :a2, after a1, 1d
     Fiks EøsPensjonistBeregningService              :a3, after a1, 1d
     Oppdater tester                                 :a4, after a2, 1d
     Deploy til q1                                   :milestone, a5, after a4, 0d
 
-    section Repo: melosys-api (fase 1 - DB)
-    Ny enum Avgiftsberegningstype (7969)            :b0, after a4, 1d
-    Ny entitet TrygdeavgiftsperiodeGrunnlag (7588)  :b1, after a4, 1d
-    Flyway V150 - grunnlag-tabell + beregningstype + nullable sats  :b2, after b1, 1d
+    section Repo: melosys-api (uavhengig deploy)
+    Ny enum + entitet TrygdeavgiftsperiodeGrunnlag  :b1, 2026-03-17, 1d
+    Flyway V150 - ny tabell + beregningstype + nullable sats :b2, after b1, 1d
+    Oppdater Trygdeavgiftsperiode.kt + test factories :c1, after b2, 2d
+    Services med fallback-logikk (grunnlagListe ?? grunnlag) :d1, after c1, 3d
+    DTO-er, controllers, brevmappere, saksflyt       :e1, after d1, 2d
+    Unit-tester + integrasjonstester                 :f1, after e1, 2d
+    Deploy til q1                                    :milestone, f2, after f1, 0d
 
-    section Repo: melosys-api (fase 2 - entitet)
-    Oppdater Trygdeavgiftsperiode.kt (begge)        :c1, after b2, 1d
-    Oppdater test factories                         :c2, after c1, 1d
-
-    section Repo: melosys-api (fase 3 - services)
-    TrygdeavgiftsberegningService (begge)           :d1, after c2, 2d
-    TrygdeavgiftperiodeErstatter (7588)             :d2, after c2, 1d
-    ReplikerBehandlingsresultatService (7588)        :d3, after c2, 1d
-    EøsPensjonistTrygdeavgiftsberegningService       :d4, after c2, 1d
-    Andre services (6 stk)                          :d5, after c2, 2d
-
-    section Repo: melosys-api (fase 4 - DTO/API + brev)
-    Integrasjon-DTO-er (begge)                      :e1, after d1, 1d
-    Frontend-API DTO-er + controllers (begge)        :e2, after d1, 1d
-    Brevmappere - nullable sats + beregningstype     :e3, after d1, 1d
-    Saksflyt-steg - nullable sats i fakturatekst     :e4, after d1, 1d
-
-    section Testing
-    Unit-tester                                     :f1, after e4, 2d
-    Integrasjonstester                              :f2, after f1, 1d
-    Deploy til q1                                   :milestone, f3, after f2, 0d
-
-    section Opprydding
-    Flyway V151 - dropp gamle FK-kolonner           :g1, after f3, 1d
+    section Opprydding (separat PR, etter verifisering i q1)
+    Beregning: fjern deprecated grunnlag-felt         :g1, after f2, 1d
+    API: fjern legacy fallback-kode                   :g2, after f2, 1d
+    Flyway V151 - dropp gamle FK-kolonner             :g3, after g2, 1d
 ```
 
 ---
@@ -633,7 +658,7 @@ gantt
 | Risiko | Sannsynlighet | Konsekvens | Tiltak |
 |--------|---------------|------------|--------|
 | Datamigrasjon feiler (NULL i inntektsperiode/skatteforhold) | Middels | Høy | Legg til WHERE-filter i INSERT; håndter perioder uten grunnlag separat |
-| Deploy-rekkefølge feil — API leser nytt format fra gammel beregning | Lav | Høy | Bakoverkompatibel JSON (liste med 1 element = gammelt format) |
+| ~~Deploy-rekkefølge feil~~ | ~~Eliminert~~ | — | Bakoverkompatibel strategi: nye felter er nullable/additive, gammel API ignorerer dem |
 | `ReplikerBehandlingsresultatService` bryter | Høy | Høy | Grundig testing — denne er vanskeligst å refaktorere |
 | Brevmappere viser feil grunnlag | Middels | Middels | Manuell test av brev-generering i q1 |
 | JPA cascade-problemer med ny `@OneToMany` | Middels | Middels | Teste med integrasjonstester mot Oracle |
@@ -652,7 +677,6 @@ gantt
 - [ ] `melosys-api` mottar og lagrer N grunnlag per trygdeavgiftsperiode
 - [ ] `TrygdeavgiftperiodeErstatter` matcher korrekt med flere grunnlag
 - [ ] `ReplikerBehandlingsresultatService` kopierer grunnlag-listen ved ny vurdering
-- [ ] Gamle FK-kolonner droppet i separat migrasjon etter validering
 
 ### MELOSYS-7969 (beregningstype + nullable sats)
 - [ ] `melosys-trygdeavgift-beregning` returnerer `beregningstype` og `sats: null` ved 25%-regel/minstebeløp
@@ -662,10 +686,20 @@ gantt
 - [ ] Fakturatekst håndterer null sats korrekt (ingen "Sats: null %")
 - [ ] Frontend viser beregningstype (koordinert med [MELOSYS-7530](https://jira.adeo.no/browse/MELOSYS-7530))
 
+### Bakoverkompatibilitet
+- [ ] Gammel `melosys-api` + ny `melosys-trygdeavgift-beregning` fungerer (nye felter ignoreres)
+- [ ] Ny `melosys-api` + gammel `melosys-trygdeavgift-beregning` fungerer (fallback til `grunnlag` når `grunnlagListe` er null)
+- [ ] Ny `melosys-api` leser fra ny grunnlag-tabell, faller tilbake til gamle FK-kolonner for eksisterende data
+
 ### Felles
 - [ ] Alle eksisterende tester oppdatert og passerer
 - [ ] Integrasjonstester verifiserer end-to-end flyt med 25%-regel
 - [ ] Brev generert korrekt for alle scenarioer (ordinær, 25%-regel, minstebeløp)
+
+### Opprydding (separat PR)
+- [ ] `grunnlag`-feltet fjernet fra `BeregnetTrygdeavgiftResponse` (beregnings-repo)
+- [ ] Legacy fallback-kode fjernet fra `melosys-api`
+- [ ] V151: Gamle FK-kolonner droppet fra `trygdeavgiftsperiode`
 
 ---
 
