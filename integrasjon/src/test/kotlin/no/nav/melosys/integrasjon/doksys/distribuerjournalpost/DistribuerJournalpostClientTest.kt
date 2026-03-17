@@ -109,7 +109,7 @@ class DistribuerJournalpostClientTest(
         response.bestillingsId shouldBe "best-123"
 
         mockServer.verify(
-            postRequestedFor(urlEqualTo("/dokdistfordeling"))
+            postRequestedFor(urlEqualTo("/rest/v1/distribuerjournalpost"))
                 .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
@@ -164,7 +164,7 @@ class DistribuerJournalpostClientTest(
         distribuerJournalpostClient.distribuerJournalpost(request)
 
         mockServer.verify(
-            postRequestedFor(urlEqualTo("/dokdistfordeling"))
+            postRequestedFor(urlEqualTo("/rest/v1/distribuerjournalpost"))
                 .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))

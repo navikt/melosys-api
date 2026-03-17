@@ -1,8 +1,8 @@
 MELOSYS_SKJEMA_API_URL: http://localhost:${mockserver.port}
 DistribuerJournalpost_v1:
-  url: http://localhost:${mockserver.port}/dokdistfordeling
+  url: http://localhost:${mockserver.port}/rest/v1/distribuerjournalpost
 KodeverkAPI_v1:
-  url: http://localhost:${mockserver.port}/kodeverk
+  url: http://localhost:${mockserver.port}/api
 Dokumentproduksjon_v3:
   url: http://localhost:${mockserver.port}/soap/services/dokumentproduksjon/v3
 MelosysEessi:

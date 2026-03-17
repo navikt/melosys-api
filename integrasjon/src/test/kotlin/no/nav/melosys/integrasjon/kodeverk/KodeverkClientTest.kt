@@ -83,7 +83,7 @@ class KodeverkClientTest(
     fun `hentKodeverk kaller korrekt URL og returnerer deserialisert dto`() {
         val kodeverkNavn = "Statsborgerskap"
         mockServer.stubFor(
-            get(urlPathEqualTo("/kodeverk/v1/kodeverk/$kodeverkNavn/koder/betydninger"))
+            get(urlPathEqualTo("/api/v1/kodeverk/$kodeverkNavn/koder/betydninger"))
                 .willReturn(
                     aResponse()
                         .withStatus(200)
@@ -119,7 +119,7 @@ class KodeverkClientTest(
     fun `hentKodeverk sender obligatoriske Nav-headere`() {
         val kodeverkNavn = "Landkoder"
         mockServer.stubFor(
-            get(urlPathEqualTo("/kodeverk/v1/kodeverk/$kodeverkNavn/koder/betydninger"))
+            get(urlPathEqualTo("/api/v1/kodeverk/$kodeverkNavn/koder/betydninger"))
                 .willReturn(
                     aResponse()
                         .withStatus(200)
@@ -131,7 +131,7 @@ class KodeverkClientTest(
         kodeverkClient.hentKodeverk(kodeverkNavn)
 
         mockServer.verify(
-            getRequestedFor(urlPathEqualTo("/kodeverk/v1/kodeverk/$kodeverkNavn/koder/betydninger"))
+            getRequestedFor(urlPathEqualTo("/api/v1/kodeverk/$kodeverkNavn/koder/betydninger"))
                 .withHeader("Nav-Consumer-Id", equalTo("srvmelosys"))
         )
     }
@@ -140,7 +140,7 @@ class KodeverkClientTest(
     fun `hentKodeverk sender korrekte query-parametere`() {
         val kodeverkNavn = "Retningsnumre"
         mockServer.stubFor(
-            get(urlPathEqualTo("/kodeverk/v1/kodeverk/$kodeverkNavn/koder/betydninger"))
+            get(urlPathEqualTo("/api/v1/kodeverk/$kodeverkNavn/koder/betydninger"))
                 .willReturn(
                     aResponse()
                         .withStatus(200)
@@ -152,7 +152,7 @@ class KodeverkClientTest(
         kodeverkClient.hentKodeverk(kodeverkNavn)
 
         mockServer.verify(
-            getRequestedFor(urlPathEqualTo("/kodeverk/v1/kodeverk/$kodeverkNavn/koder/betydninger"))
+            getRequestedFor(urlPathEqualTo("/api/v1/kodeverk/$kodeverkNavn/koder/betydninger"))
                 .withQueryParam("ekskluderUgyldige", equalTo("false"))
                 .withQueryParam("oppslagsdato", equalTo(java.time.LocalDate.MIN.toString()))
                 .withQueryParam("spraak", equalTo("nb"))
