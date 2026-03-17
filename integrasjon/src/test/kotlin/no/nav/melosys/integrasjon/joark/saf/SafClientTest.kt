@@ -8,16 +8,16 @@ import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
 import com.github.tomakehurst.wiremock.client.WireMock.containing
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.matching
+import com.github.tomakehurst.wiremock.client.WireMock.moreThanOrExactly
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import com.github.tomakehurst.wiremock.stubbing.Scenario
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.IntegrasjonException
-import no.nav.melosys.exception.SikkerhetsbegrensningException
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
@@ -227,6 +227,38 @@ class SafClientTest(
         val journalposter = safClient.hentDokumentoversikt("MEL-1")
 
         journalposter shouldHaveSize 10
+    }
+
+    @Test
+    fun `hentDokumentoversikt med paginering henter alle sider og returnerer totalt antall journalposter`() {
+        mockServer.stubFor(
+            any(anyUrl())
+                .inScenario("paginering")
+                .whenScenarioStateIs(Scenario.STARTED)
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(objectMapper.writeValueAsString(lagHentDokumentoversiktResponse("cursor-side-2", true)))
+                )
+                .willSetStateTo("side2")
+        )
+        mockServer.stubFor(
+            any(anyUrl())
+                .inScenario("paginering")
+                .whenScenarioStateIs("side2")
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(objectMapper.writeValueAsString(lagHentDokumentoversiktResponse("cursor-side-3", false)))
+                )
+        )
+
+        val journalposter = safClient.hentDokumentoversikt("MEL-1")
+
+        journalposter shouldHaveSize 20
+        mockServer.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/graphql")))
     }
 
     private fun lagHentDokumentoversiktResponse(nestePeker: String, finnesNeste: Boolean): GraphQLResponse<HentDokumentoversiktResponseWrapper> =

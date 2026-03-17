@@ -53,11 +53,11 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DokgenClientTest(
     @Autowired private val dokgenClient: DokgenClient,
+    @Autowired private val objectMapper: ObjectMapper,
     @Value("\${mockserver.port}") mockServerPort: Int,
 ) {
     private val processUUID = UUID.randomUUID()
     private val mockServer = WireMockServer(WireMockConfiguration.wireMockConfig().port(mockServerPort))
-    private val objectMapper = ObjectMapper()
 
     @BeforeAll
     fun beforeAll() {

@@ -149,7 +149,7 @@ class InntektClientTest(
             postRequestedFor(urlEqualTo("/inntektskomponenten/rs/api/v1/hentinntektliste"))
                 .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
-                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                .withHeader(HttpHeaders.AUTHORIZATION, WireMock.equalTo("Bearer --azure-token-from-system--"))
         )
     }
 

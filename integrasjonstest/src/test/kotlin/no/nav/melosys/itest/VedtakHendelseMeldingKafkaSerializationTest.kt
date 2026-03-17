@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.hendelser
+package no.nav.melosys.itest
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.assertions.json.shouldEqualJson
@@ -10,9 +10,14 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Vedtakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
+import no.nav.melosys.integrasjon.hendelser.Periode
+import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.json.JsonTest
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ContextConfiguration
 import java.time.LocalDate
 
 /**
@@ -25,7 +30,8 @@ import java.time.LocalDate
  * Kodeverk-enums serialiseres som {"kode":"...","term":"..."} i stedet for plain strings,
  * noe som brekker downstream consumers av vedtakshendelse-topicen.
  */
-@JsonTest
+@SpringBootTest
+@ContextConfiguration(classes = [JacksonAutoConfiguration::class])
 class VedtakHendelseMeldingKafkaSerializationTest {
 
     @Autowired
@@ -77,7 +83,6 @@ class VedtakHendelseMeldingKafkaSerializationTest {
     fun `VedtakHendelseMelding inneholder ikke kode-term-objekter for Kodeverk`() {
         val json = objectMapper.writeValueAsString(MelosysHendelse(vedtakHendelseMelding))
 
-        // Verifiserer at KodeSerializer (MelosysModule) IKKE er aktiv for Kafka-serialisering
         json shouldNotContain """"kode""""
         json shouldNotContain """"term""""
     }

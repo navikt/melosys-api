@@ -1,13 +1,16 @@
-package no.nav.melosys.integrasjon.popp
+package no.nav.melosys.itest
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.assertions.json.shouldContainJsonKeyValue
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldNotContain
+import no.nav.melosys.integrasjon.popp.PensjonsopptjeningHendelse
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.json.JsonTest
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ContextConfiguration
 import java.time.LocalDateTime
 
 /**
@@ -16,7 +19,8 @@ import java.time.LocalDateTime
  * Bruker Spring Boot sin auto-konfigurerte ObjectMapper (JavaTimeModule + KotlinModule,
  * uten MelosysModule) — identisk med ObjectMapper som KafkaConfig injiserer i produksjon.
  */
-@JsonTest
+@SpringBootTest
+@ContextConfiguration(classes = [JacksonAutoConfiguration::class])
 class PensjonsopptjeningHendelseKafkaSerializationTest {
 
     @Autowired
