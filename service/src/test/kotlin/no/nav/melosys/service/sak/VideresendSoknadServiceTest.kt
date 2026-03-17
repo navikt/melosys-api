@@ -132,7 +132,7 @@ class VideresendSoknadServiceTest {
     }
 
     @Test
-    fun `videresend kaster exception naar arbeidsland ikke er kjent`() {
+    fun `videresend kaster exception naar land ikke er kjent`() {
         every { landvelgerService.hentBostedsland(behandling) } returns bostedsland
         every { landvelgerService.isFlereLandUkjentHvilke(behandling.id) } returns true
         behandling.tema = Behandlingstema.ARBEID_FLERE_LAND
@@ -140,7 +140,7 @@ class VideresendSoknadServiceTest {
         val exception = shouldThrow<FunksjonellException> {
             videresendSoknadService.videresend(SAKSNUMMER, "", "", emptySet(), null, null)
         }
-        exception.message shouldContain "arbeidsland ikke er kjent"
+        exception.message shouldContain "Kan ikke videresende søknad når land under \"Periode og land\" ikke er kjent"
     }
 
     @Test
