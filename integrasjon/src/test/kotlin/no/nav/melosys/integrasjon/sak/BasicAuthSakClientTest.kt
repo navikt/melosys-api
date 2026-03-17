@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.inngangsvilkar
+package no.nav.melosys.integrasjon.sak
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
@@ -6,12 +6,12 @@ import com.github.tomakehurst.wiremock.client.WireMock.any
 import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
 import com.github.tomakehurst.wiremock.client.WireMock.containing
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.matching
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import io.kotest.matchers.shouldBe
-import no.nav.melosys.domain.dokument.felles.Land
-import no.nav.melosys.domain.dokument.felles.Periode
+import no.nav.melosys.integrasjon.MetricsTestConfig
+import no.nav.melosys.integrasjon.felles.EnvironmentHandler
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.AfterAll
@@ -25,9 +25,9 @@ import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebCl
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.mock.env.MockEnvironment
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
-import java.time.LocalDate
 import java.util.UUID
 
 @SpringBootTest
@@ -35,13 +35,14 @@ import java.util.UUID
 @ContextConfiguration(
     classes = [
         CorrelationIdOutgoingFilter::class,
-        InngangsvilkarClientConfig::class,
+        SakClientConfig::class,
+        MetricsTestConfig::class,
     ]
 )
 @AutoConfigureWebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class InngangsvilkaarClientTest(
-    @Autowired private val inngangsvilkaarClient: InngangsvilkaarClient,
+class BasicAuthSakClientTest(
+    @Autowired private val sakClient: SakClientInterface,
     @Value("\${mockserver.port}") mockServerPort: Int,
 ) {
     private val processUUID = UUID.randomUUID()
@@ -51,6 +52,11 @@ class InngangsvilkaarClientTest(
     fun beforeAll() {
         ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prosessSteg")
         mockServer.start()
+        val environment = MockEnvironment().apply {
+            setProperty("systemuser.username", "srvmelosys")
+            setProperty("systemuser.password", "dummy")
+        }
+        EnvironmentHandler(environment)
     }
 
     @AfterAll
@@ -65,43 +71,56 @@ class InngangsvilkaarClientTest(
     }
 
     @Test
-    fun `vurderInngangsvilkaar serialiserer request body korrekt`() {
+    fun `opprettSak serialiserer request body korrekt`() {
         mockServer.stubFor(
-            any(anyUrl())
-                .willReturn(
-                    aResponse()
-                        .withStatus(200)
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("""{"kvalifisererForEf883_2004": true, "feilmeldinger": []}""")
-                )
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(
+                        """
+                        {
+                            "id": 123,
+                            "tema": "MED",
+                            "applikasjon": "MELOSYS",
+                            "fagsakNr": "MEL-456",
+                            "aktoerId": "12345678901",
+                            "orgnr": null,
+                            "opprettetAv": null,
+                            "opprettetTidspunkt": null
+                        }
+                        """
+                    )
+            )
         )
 
-        val request = VurderInngangsvilkaarRequest(
-            statsborgerskap = setOf(Land.NORGE),
-            arbeidsland = setOf(Land.SVERIGE),
-            flereLandUkjentHvilke = false,
-            periode = Periode(LocalDate.of(2023, 1, 15), LocalDate.of(2023, 6, 30))
+        val request = SakDto(
+            tema = "MED",
+            applikasjon = "MELOSYS",
+            saksnummer = "MEL-456",
+            aktørId = "12345678901",
+            orgnr = null,
         )
 
-        val response = inngangsvilkaarClient.vurderInngangsvilkår(request)
-
-        response.kvalifisererForEf883_2004 shouldBe true
+        sakClient.opprettSak(request)
 
         mockServer.verify(
-            postRequestedFor(urlEqualTo("/inngangsvilkaar"))
+            postRequestedFor(urlEqualTo("/api/v1/saker"))
                 .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Basic .+"))
                 .withRequestBody(
                     equalToJson(
                         """
                         {
-                            "statsborgerskap": ["NOR"],
-                            "arbeidsland": ["SWE"],
-                            "flereLandUkjentHvilke": false,
-                            "periode": {
-                                "fom": "2023-01-15",
-                                "tom": "2023-06-30"
-                            }
+                            "id": null,
+                            "tema": "MED",
+                            "applikasjon": "MELOSYS",
+                            "fagsakNr": "MEL-456",
+                            "aktoerId": "12345678901",
+                            "orgnr": null,
+                            "opprettetAv": null,
+                            "opprettetTidspunkt": null
                         }
                         """,
                         true, false
@@ -110,4 +129,3 @@ class InngangsvilkaarClientTest(
         )
     }
 }
-

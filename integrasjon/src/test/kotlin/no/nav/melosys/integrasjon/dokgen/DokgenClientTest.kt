@@ -1,10 +1,16 @@
 package no.nav.melosys.integrasjon.dokgen
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock.*
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.any
+import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
+import com.github.tomakehurst.wiremock.client.WireMock.containing
+import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.matchers.shouldNotBe
-import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling
 import no.nav.melosys.domain.dokument.person.PersonDokument
@@ -13,122 +19,148 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.person.Persondata
+import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.dokgen.dto.MangelbrevBruker
 import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.InnvilgelseRettigheterPlikterStandardvedlegg
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.web.reactive.function.client.WebClient
-import java.nio.charset.StandardCharsets
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import java.time.Instant
+import java.util.UUID
 
-@ExtendWith(MockKExtension::class)
+@SpringBootTest
+@ActiveProfiles("wiremock-test")
+@ContextConfiguration(
+    classes = [
+        CorrelationIdOutgoingFilter::class,
+        DokgenClientProducer::class,
+        MetricsTestConfig::class,
+    ]
+)
+@AutoConfigureWebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class DokgenClientTest {
-
-    private lateinit var wireMockServer: WireMockServer
-    private lateinit var dokgenClient: DokgenClient
+class DokgenClientTest(
+    @Autowired private val dokgenClient: DokgenClient,
+    @Value("\${mockserver.port}") mockServerPort: Int,
+) {
+    private val processUUID = UUID.randomUUID()
+    private val mockServer = WireMockServer(WireMockConfiguration.wireMockConfig().port(mockServerPort))
+    private val objectMapper = ObjectMapper()
 
     @BeforeAll
-    fun setup() {
-        wireMockServer = WireMockServer(wireMockConfig().dynamicPort())
-        wireMockServer.start()
-
-        val webClient = WebClient.builder()
-            .baseUrl("http://localhost:" + wireMockServer.port())
-            .build()
-
-        dokgenClient = DokgenClient(webClient)
+    fun beforeAll() {
+        ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prosessSteg")
+        mockServer.start()
     }
 
     @AfterAll
-    fun tearDown() {
-        wireMockServer.stop()
+    fun afterAll() {
+        mockServer.stop()
+        ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
+    }
+
+    @BeforeEach
+    fun beforeEach() {
+        mockServer.resetAll()
+    }
+
+    @Test
+    fun `lagPdf serialiserer request body korrekt`() {
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withBody("pdf")
+            )
+        )
+
+        val mangelbrevBruker = getMangelbrevBruker()
+        val expectedBody = objectMapper.writeValueAsString(mangelbrevBruker)
+
+        dokgenClient.lagPdf("mangelbrev_bruker", mangelbrevBruker, false, false) shouldNotBe null
+
+        mockServer.verify(
+            postRequestedFor(urlPathEqualTo("/dokgen/mal/mangelbrev_bruker/lag-pdf"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withRequestBody(equalToJson(expectedBody, true, false))
+        )
     }
 
     @Test
     fun `lagPdf skal bestille brev`() {
-        wireMockServer.stubFor(
-            post(urlPathEqualTo("/mal/mangelbrev_bruker/lag-pdf"))
-                .withQueryParam("somKopi", equalTo("false"))
-                .willReturn(
-                    aResponse()
-                        .withStatus(200)
-                        .withBody("pdf".toByteArray(StandardCharsets.UTF_8))
-                )
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withBody("pdf")
+            )
         )
-
 
         dokgenClient.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), false, false) shouldNotBe null
     }
 
     @Test
     fun `lagPdf skal bestille brev som kopi`() {
-        wireMockServer.stubFor(
-            post(urlPathEqualTo("/mal/mangelbrev_bruker/lag-pdf"))
-                .withQueryParam("somKopi", equalTo("true"))
-                .willReturn(
-                    aResponse()
-                        .withStatus(200)
-                        .withBody("pdf".toByteArray(StandardCharsets.UTF_8))
-                )
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withBody("pdf")
+            )
         )
-
 
         dokgenClient.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), true, false) shouldNotBe null
     }
 
     @Test
     fun `lagPdf skal bestille brev som utkast`() {
-        wireMockServer.stubFor(
-            post(urlPathEqualTo("/mal/mangelbrev_bruker/lag-pdf"))
-                .withQueryParam("somKopi", equalTo("true"))
-                .withQueryParam("utkast", equalTo("true"))
-                .willReturn(
-                    aResponse()
-                        .withStatus(200)
-                        .withBody("pdf".toByteArray(StandardCharsets.UTF_8))
-                )
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withBody("pdf")
+            )
         )
-
 
         dokgenClient.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), true, true) shouldNotBe null
     }
 
     @Test
     fun `lagPdfForStandardvedlegg med data skal bestille brev`() {
-        val standardvedlegg = InnvilgelseRettigheterPlikterStandardvedlegg("Hei")
-        wireMockServer.stubFor(
-            post(urlPathEqualTo("/mal/standardvedlegg/lag-pdf"))
-                .withQueryParam("somKopi", equalTo("false"))
-                .withQueryParam("utkast", equalTo("false"))
-                .willReturn(
-                    aResponse()
-                        .withStatus(200)
-                        .withBody("pdf".toByteArray(StandardCharsets.UTF_8))
-                )
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withBody("pdf")
+            )
         )
 
+        val standardvedlegg = InnvilgelseRettigheterPlikterStandardvedlegg("Hei")
 
         dokgenClient.lagPdfForStandardvedlegg("standardvedlegg", standardvedlegg) shouldNotBe null
     }
 
     @Test
     fun `lagPdfForStandardvedlegg uten data skal bestille brev`() {
-        wireMockServer.stubFor(
-            post(urlPathEqualTo("/mal/standardvedlegg/lag-pdf"))
-                .withQueryParam("somKopi", equalTo("false"))
-                .withQueryParam("utkast", equalTo("false"))
-                .withHeader("Content-Type", equalTo("application/json"))
-                .willReturn(
-                    aResponse()
-                        .withStatus(200)
-                        .withBody("pdf".toByteArray(StandardCharsets.UTF_8))
-                )
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withBody("pdf")
+            )
         )
-
 
         dokgenClient.lagPdfForStandardvedlegg("standardvedlegg", null) shouldNotBe null
     }
