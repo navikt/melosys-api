@@ -15,7 +15,7 @@ import java.time.LocalDate
 
 @SpringBootTest
 @ContextConfiguration(classes = [JacksonAutoConfiguration::class])
-class UtstedtA1AivenProducerTest {
+class UtstedtA1MeldingSerializationTest {
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper

@@ -110,6 +110,12 @@ class DokgenClientTest(
         )
 
         dokgenClient.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), false, false) shouldNotBe null
+
+        mockServer.verify(
+            postRequestedFor(urlPathEqualTo("/dokgen/mal/mangelbrev_bruker/lag-pdf"))
+                .withQueryParam("somKopi", equalTo("false"))
+                .withQueryParam("utkast", equalTo("false"))
+        )
     }
 
     @Test
@@ -123,6 +129,12 @@ class DokgenClientTest(
         )
 
         dokgenClient.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), true, false) shouldNotBe null
+
+        mockServer.verify(
+            postRequestedFor(urlPathEqualTo("/dokgen/mal/mangelbrev_bruker/lag-pdf"))
+                .withQueryParam("somKopi", equalTo("true"))
+                .withQueryParam("utkast", equalTo("false"))
+        )
     }
 
     @Test
@@ -136,6 +148,12 @@ class DokgenClientTest(
         )
 
         dokgenClient.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), true, true) shouldNotBe null
+
+        mockServer.verify(
+            postRequestedFor(urlPathEqualTo("/dokgen/mal/mangelbrev_bruker/lag-pdf"))
+                .withQueryParam("somKopi", equalTo("true"))
+                .withQueryParam("utkast", equalTo("true"))
+        )
     }
 
     @Test
