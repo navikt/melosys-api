@@ -39,7 +39,7 @@ erDiagram
 ```
 
 **Begrensning i kode:**
-- `Trygdeavgiftsperiode.addGrunnlag()` (linje 117) kaster error ved mer enn ett grunnlag: `"Kan ikke ha flere grunnlag samtidig."`
+- `Trygdeavgiftsperiode.addGrunnlag()` (linje 110-127) kaster error ved mer enn ett grunnlag: `"Trygdeavgiftsperiode har allerede et grunnlag satt. Kan ikke ha flere grunnlag samtidig."`
 - `BeregningService.kt` i `melosys-trygdeavgift-beregning` bruker `.last()` på 3 steder + 1 i `EøsPensjonistBeregningService.kt` — kun siste grunnlag bevares når 25%-regelen slår inn
 
 ### Manglende metadata om beregningstype (7969)
@@ -48,7 +48,7 @@ I tillegg til grunnlag-problemet, mangler det informasjon om **hvilken beregning
 
 1. **Ingen indikator på 25%-regel vs ordinær beregning** — verken i API-responsen fra `melosys-trygdeavgift-beregning` eller i `Trygdeavgiftsperiode`-entiteten. Saksbehandler og brev kan ikke se *hvorfor* en periode har den satsen den har.
 2. **Sats `0.00` brukes som proxy** — de 4 `.last()`-stedene setter `sats = BigDecimal.ZERO.setScale(2)` for begrensede perioder. Men `0%` er feil — 25%-regelen bruker ingen sats, den beregner et totalbeløp. Sats bør være `null`.
-3. **Brevmappere sjekker `trygdesats == BigDecimal.ZERO`** — `InnvilgelseFtrlMapper.kt` (linje 301, 334) og `InformasjonTrygdeavgiftMapper.kt` (linje 74) bruker dette for å avgjøre om avgiftsperioder skal vises. Med nullable sats må denne logikken oppdateres.
+3. **Brevmappere sjekker `trygdesats == BigDecimal.ZERO`** — `InnvilgelseFtrlMapper.kt` (linje 299-314) og `InformasjonTrygdeavgiftMapper.kt` (linje 71-96) bruker dette for å avgjøre om avgiftsperioder skal vises. Med nullable sats må denne logikken oppdateres.
 
 ### Hva 25%-regelen krever
 
@@ -128,9 +128,9 @@ data class BeregnetTrygdeavgiftResponse(
 ### Database (melosys-api)
 
 Samme prinsipp — nye strukturer legges til, gamle beholdes under overgangsperioden:
-- **V150:** Ny `trygdeavgiftsperiode_grunnlag`-tabell + `beregningstype`-kolonne + nullable sats
+- **V151:** Ny `trygdeavgiftsperiode_grunnlag`-tabell + `beregningstype`-kolonne + nullable sats
 - Koden leser fra ny tabell, faller tilbake til gamle FK-er
-- **V151:** Dropp gamle FK-kolonner (etter at alt fungerer)
+- **V152:** Dropp gamle FK-kolonner (etter at alt fungerer)
 
 ### Deploy-sekvens
 
@@ -156,7 +156,7 @@ sequenceDiagram
     rect rgb(245, 230, 230)
     Note over BEREGN,API: Steg 3: Opprydding (valgfri, separat PR)
     Note over BEREGN: Fjern deprecated grunnlag-felt
-    Note over API: Fjern legacy fallback + V151: dropp gamle FK-kolonner
+    Note over API: Fjern legacy fallback + V152: dropp gamle FK-kolonner
     end
 ```
 
@@ -330,7 +330,7 @@ class TrygdeavgiftsperiodeGrunnlag(
 )
 ```
 
-#### Flyway-migrasjon: `V150__trygdeavgiftsperiode_grunnlag_og_beregningstype.sql`
+#### Flyway-migrasjon: `V151__trygdeavgiftsperiode_grunnlag_og_beregningstype.sql`
 
 ```sql
 -- 1. Ny grunnlag-tabell (7588)
@@ -356,6 +356,9 @@ CREATE TABLE trygdeavgiftsperiode_grunnlag (
         REFERENCES skatteforhold_til_norge(id)
 );
 
+-- Indeks på FK for JPA lazy loading ytelse (unngår full table scan)
+CREATE INDEX idx_tag_trygdeavgiftsperiode ON trygdeavgiftsperiode_grunnlag(trygdeavgiftsperiode_id);
+
 -- 2. Migrer eksisterende grunnlag-data (7588)
 INSERT INTO trygdeavgiftsperiode_grunnlag
     (trygdeavgiftsperiode_id, medlemskapsperiode_id, lovvalgsperiode_id,
@@ -368,7 +371,7 @@ WHERE t.inntektsperiode_id IS NOT NULL
   AND t.skatteforhold_id IS NOT NULL;
 
 -- 3. Ny kolonne for beregningstype (7969)
-ALTER TABLE trygdeavgiftsperiode ADD beregningstype VARCHAR2(30);
+ALTER TABLE trygdeavgiftsperiode ADD beregningstype VARCHAR2(50);
 
 -- 4. Sett default beregningstype for eksisterende data (7969)
 UPDATE trygdeavgiftsperiode SET beregningstype = 'ORDINAER';
@@ -378,7 +381,7 @@ UPDATE trygdeavgiftsperiode SET beregningstype = 'ORDINAER';
 ALTER TABLE trygdeavgiftsperiode MODIFY trygdesats NULL;
 ```
 
-**Separat migrasjon `V151__fjern_gamle_grunnlag_fk.sql`** (etter at all kode er oppdatert og deployet):
+**Separat migrasjon `V152__fjern_gamle_grunnlag_fk.sql`** (etter at all kode er oppdatert og deployet):
 ```sql
 ALTER TABLE trygdeavgiftsperiode DROP COLUMN inntektsperiode_id;
 ALTER TABLE trygdeavgiftsperiode DROP COLUMN skatteforhold_id;
@@ -437,10 +440,10 @@ fun erBegrenset(): Boolean = beregningstype != Avgiftsberegningstype.ORDINAER
 
 **Oppdateres:**
 - `copyEntity()` — kopierer grunnlag-listen + beregningstype
-- `erLikForSatsendring()` — sammenligner grunnlag-lister + beregningstype; nullable sats-sammenligning
-- `harAvgift()` — `trygdesats` er nå nullable: `trygdesats?.let { BigDecimal.ZERO.compareTo(it) != 0 } ?: false`
+- `erLikForSatsendring()` — **dobbel endring:** (1) nullable sats-sammenligning: `.compareTo()` → `==` (Kotlin null-safe), (2) erstatt 5 FK-felt-sammenligninger med sammenligning av grunnlag-listen + beregningstype
+- `harAvgift()` — `trygdesats` er nå nullable. **OBS:** 25%-regel-perioder har `sats = null` men **positivt beløp** — de *har* avgift. Ny logikk: `BigDecimal.ZERO.compareTo(trygdeavgiftsbeløpMd.verdi) != 0` (kun beløp-basert sjekk, sats er irrelevant)
 
-**Impact av nullable `trygdesats` (7969):** 48 filer refererer `trygdesats`. Alle steder som leser `trygdesats` direkte (`.toDouble()`, `.compareTo()`, string-interpolering `"Sats: ${it.trygdesats} %"`) må håndtere null-tilfellet:
+**Impact av nullable `trygdesats` (7969):** 38 filer refererer `trygdesats`. Alle steder som leser `trygdesats` direkte (`.toDouble()`, `.compareTo()`, string-interpolering `"Sats: ${it.trygdesats} %"`) må håndtere null-tilfellet:
 
 | Brukssted | Dagens kode | Ny kode |
 |-----------|-------------|---------|
@@ -451,6 +454,43 @@ fun erBegrenset(): Boolean = beregningstype != Avgiftsberegningstype.ORDINAER
 | `InformasjonTrygdeavgiftMapper.kt` | Samme mønster | Samme løsning |
 | `ÅrsavregningVedtakMapper.kt` | `trygdesats` i brev | Vis "25%-regel" i stedet for sats |
 | `erLikForSatsendring()` | `trygdesats.compareTo(...)` | Null-safe sammenligning |
+| `BeregnOgSendFaktura.kt` | `"Sats: ${it.trygdesats} %"` | `trygdesats?.let { "Sats: $it %" } ?: "Beregnet etter 25%-regel"` |
+| `fattet-vedtak-schema.json` | `"trygdesats": { "type": "number" }` + required | Se ny Fase 3b under |
+
+---
+
+### Fase 3b: melosys-api — Oppdater `fattet-vedtak-schema.json` (Kafka-kontrakt)
+
+> **KRITISK:** `trygdesats` er definert som **required** med type `number` i JSON-schemaet.
+> Å sende `null` vil bryte Kafka-konsumenter (DVH/statistikk-teamet).
+
+**Fil:** `service/src/main/resources/fattet-vedtak-schema.json` (linje 42-64)
+
+```json
+// FØR:
+"trygdeavgift": {
+  "properties": {
+    "trygdesats": { "type": "number" }
+  },
+  "required": ["avgiftspliktigInntekt", "avgiftsbeløpMd", "trygdesats", "avgiftskode"]
+}
+
+// ETTER:
+"trygdeavgift": {
+  "properties": {
+    "trygdesats": { "type": ["number", "null"] },
+    "beregningstype": { "type": ["string", "null"] }
+  },
+  "required": ["avgiftspliktigInntekt", "avgiftsbeløpMd", "avgiftskode"]
+}
+```
+
+**Handling:**
+1. Endre `trygdesats` type til `["number", "null"]`
+2. Fjerne `trygdesats` fra `required`-arrayet
+3. Legge til `beregningstype` som nytt felt
+4. **Koordinere med DVH-teamet** — de konsumerer `fattet-vedtak`-meldinger via Kafka
+5. Sjekke om `UtstedtA1Service` (statistikk-modul) leser `trygdesats`
 
 ---
 
@@ -500,7 +540,7 @@ graph TD
 | # | Fil | Endring | Risiko |
 |---|-----|---------|--------|
 | 1 | `TrygdeavgiftsberegningService.kt` | `lagTrygdeavgiftsperiode()`: mapper N grunnlag fra response.grunnlag-listen til N `TrygdeavgiftsperiodeGrunnlag`-entiteter. `hentOpprinneligTrygdeavgiftsperioder()`: henter inntekt/skatteforhold via grunnlag-listen i stedet for direkte FK. | **Høy** — kjernemetode |
-| 2 | `EøsPensjonistTrygdeavgiftsberegningService.kt` | Samme mønster som #1 for EØS-pensjonist-varianten. | **Høy** |
+| 2 | `EøsPensjonistTrygdeavgiftsberegningService.kt` | Samme mønster som #1 for EØS-pensjonist-varianten. **NB:** Denne servicen kaller **ikke** `addGrunnlag()` selv — grunnlag legges til via `TrygdeavgiftperiodeErstatter` (linje 42). Endringen her er i `lagTrygdeavgiftsperiode()` som setter FK-er direkte i konstruktøren. | **Høy** |
 | 3 | `TrygdeavgiftperiodeErstatter.kt` | `erstattTrygdeavgiftsperioder()` linje 24-26: ID-matching via `grunnlagMedlemskapsperiode?.id` → match mot **alle** grunnlag i listen. | **Høy** — endret matchingsstrategi |
 | 4 | `ReplikerBehandlingsresultatService.kt` | `copyEntity()` med grunnlag-nulling → kopier grunnlag-listen. `addGrunnlag()` → `leggTilGrunnlag()`. | **Høy** — replikering av behandlingsresultat |
 | 5 | `LovvalgsperiodeService.kt` | `copyEntity()` med grunnlag-felter → kopier via ny liste. | **Middels** |
@@ -529,22 +569,22 @@ graph TD
 
 | # | Fil | Endring |
 |---|-----|---------|
-| 16 | `OpprettFakturaserie.kt` | `hentGrunnlagInntekstperiode()` og `hentGrunnlagMedlemskapsperiode()` — tilpass |
-| 17 | `BeregnOgSendFaktura.kt` | Samme mønster |
+| 16 | `OpprettFakturaserie.kt` | `hentGrunnlagInntekstperiode()` og `hentGrunnlagMedlemskapsperiode()` — tilpass. Bruker `harAvgift()` for filtrering (linje 154, 156) og `trygdesats` i string-interpolering (linje 192). |
+| 17 | `BeregnOgSendFaktura.kt` | Samme mønster. **Kritisk:** `"Sats: ${it.trygdesats} %"` (linje 88) vil skrive "Sats: null %" med nullable sats. Må håndtere null-tilfellet eksplisitt. |
 
 ##### Integrasjon-DTO
 
 | # | Fil | Endring |
 |---|-----|---------|
-| 18 | `TrygdeavgiftsgrunnlagDto.kt` (integrasjon) | Uendret — brukes fortsatt som enkeltelement |
+| 18 | `TrygdeavgiftsgrunnlagDto.kt` (integrasjon) | `medlemskapsperiodeId: UUID` → `medlemskapsperiodeId: UUID?` (nullable — kan være lovvalgsperiode eller helseutgiftDekkesPeriode i stedet). Vurder å legge til `lovvalgsperiodeId: UUID?` og `helseutgiftDekkesPeriodeId: UUID?` for fullstendig dekning. |
 | 19 | `TrygdeavgiftsberegningResponse.kt` (integrasjon) | Behold `grunnlag`, legg til `grunnlagListe: List<TrygdeavgiftsgrunnlagDto>?` og `beregningstype: String?` |
 
 ##### Reverse relationships (JPA)
 
 | # | Fil | Endring |
 |---|-----|---------|
-| 20 | `Inntektsperiode.java` | Fjern/oppdater `@OneToMany` mapping til Trygdeavgiftsperiode |
-| 21 | `SkatteforholdTilNorge.java` | Fjern/oppdater `@OneToMany` mapping til Trygdeavgiftsperiode |
+| 20 | `Inntektsperiode.java` | Har `@OneToMany(mappedBy = "grunnlagInntekstperiode") Set<Trygdeavgiftsperiode>`. Etter at FK-ene fjernes fra `Trygdeavgiftsperiode` blir `mappedBy` ugyldig. **Anbefalt:** Fjern `@OneToMany`-feltet helt (verifiser at det ikke brukes direkte — relasjonen går nå via `TrygdeavgiftsperiodeGrunnlag`). |
+| 21 | `SkatteforholdTilNorge.java` | Samme mønster — har `@OneToMany(mappedBy = "grunnlagSkatteforholdTilNorge") Set<Trygdeavgiftsperiode>`. **Anbefalt:** Fjern `@OneToMany`-feltet. |
 
 ---
 
@@ -612,11 +652,12 @@ graph LR
 
 | # | Spørsmål | Kontekst | Forslag |
 |---|----------|----------|---------|
-| 4 | **Skal gamle FK-kolonner droppes?** | V150 migrerer data. Skal V151 droppe kolonner? | Ja — i separat migrasjon etter at all kode er oppdatert og deployet. Gir en trygg overgangsperiode. |
-| 5 | **Deploy-koordinering** | ~~Løst~~. Nye felter (`grunnlagListe`, `beregningstype`) er nullable/additive. Repoene kan deployes uavhengig. | Opprydding (fjerne deprecated `grunnlag`-felt + V151) gjøres i separat PR etter verifisering. |
+| 4 | **Skal gamle FK-kolonner droppes?** | V151 migrerer data. Skal V152 droppe kolonner? | Ja — i separat migrasjon etter at all kode er oppdatert og deployet. Gir en trygg overgangsperiode. |
+| 5 | **Deploy-koordinering** | ~~Løst~~. Nye felter (`grunnlagListe`, `beregningstype`) er nullable/additive. Repoene kan deployes uavhengig. | Opprydding (fjerne deprecated `grunnlag`-felt + V152) gjøres i separat PR etter verifisering. |
 | 6 | **`copyEntity()` semantikk** | Hva betyr det å kopiere en periode med N grunnlag? Skal grunnlagene deles eller deep-copies? | Deep-copy (nye entiteter med `id = null`). Eksisterende mønster i `ReplikerBehandlingsresultatService` gjør dette allerede for FK-ene. |
-| 7 | **Nullable sats i `fattet-vedtak-schema.json`** (7969) | `service/src/main/resources/fattet-vedtak-schema.json` refererer `trygdesats`. Kafka-konsumenter kan bryte på null. | Oppdater JSON-schema til å tillate null. Sjekk om statistikk-modul (`UtstedtA1Service`) leser sats. |
-| 8 | **`erLikForSatsendring()` med null** (7969) | Brukes av satsendring-logikk for å sjekke om perioder har endret seg. `null.compareTo(null)` kaster NPE. | Implementer null-safe sammenligning: `trygdesats == other.trygdesats` (Kotlin's `==` er null-safe) i stedet for `.compareTo()`. |
+| 7 | ~~**Nullable sats i `fattet-vedtak-schema.json`**~~ | ~~Løst — se ny Fase 3b.~~ `trygdesats` er **required** med type `number` i schemaet. Endring krever koordinering med DVH. | Implementert som eget steg i Fase 3b med eksplisitt handling. |
+| 8 | **`erLikForSatsendring()` med null** (7969) | Brukes av satsendring-logikk for å sjekke om perioder har endret seg. `null.compareTo(null)` kaster NPE. Metoden sammenligner også 5 FK-felter som skal erstattes av grunnlag-listen. | **Dobbel endring:** (1) `.compareTo()` → `==` (Kotlin null-safe), (2) FK-sammenligninger → grunnlag-liste + beregningstype. |
+| 9 | **Misjonærinntekt og 25%-regelen** | Confluence viser at misjonærinntekt har en **egen** 25%-regel (fra misjonærforskriften), separat fra ordinær. `TJUEFEM_PROSENT_REGEL` brukes for begge. | Verifiser at beregningsservice i `melosys-trygdeavgift-beregning` ikke trenger distinksjon mellom de to reglene, eller om enum-verdien bør utvides. |
 
 ---
 
@@ -638,8 +679,9 @@ gantt
 
     section Repo: melosys-api (uavhengig deploy)
     Ny enum + entitet TrygdeavgiftsperiodeGrunnlag  :b1, 2026-03-17, 1d
-    Flyway V150 - ny tabell + beregningstype + nullable sats :b2, after b1, 1d
+    Flyway V151 - ny tabell + beregningstype + nullable sats :b2, after b1, 1d
     Oppdater Trygdeavgiftsperiode.kt + test factories :c1, after b2, 2d
+    fattet-vedtak-schema.json + DVH-koordinering     :c2, after b2, 1d
     Services med fallback-logikk (grunnlagListe ?? grunnlag) :d1, after c1, 3d
     DTO-er, controllers, brevmappere, saksflyt       :e1, after d1, 2d
     Unit-tester + integrasjonstester                 :f1, after e1, 2d
@@ -648,7 +690,7 @@ gantt
     section Opprydding (separat PR, etter verifisering i q1)
     Beregning: fjern deprecated grunnlag-felt         :g1, after f2, 1d
     API: fjern legacy fallback-kode                   :g2, after f2, 1d
-    Flyway V151 - dropp gamle FK-kolonner             :g3, after g2, 1d
+    Flyway V152 - dropp gamle FK-kolonner             :g3, after g2, 1d
 ```
 
 ---
@@ -662,9 +704,12 @@ gantt
 | `ReplikerBehandlingsresultatService` bryter | Høy | Høy | Grundig testing — denne er vanskeligst å refaktorere |
 | Brevmappere viser feil grunnlag | Middels | Middels | Manuell test av brev-generering i q1 |
 | JPA cascade-problemer med ny `@OneToMany` | Middels | Middels | Teste med integrasjonstester mot Oracle |
-| **Nullable sats bryter NullPointerException** (7969) | **Høy** | **Høy** | 48 filer refererer `trygdesats`. Gjør systematisk gjennomgang. Bruk `erBegrenset()` som guard i stedet for å sjekke `trygdesats == 0` |
+| **Nullable sats bryter NullPointerException** (7969) | **Høy** | **Høy** | 38 filer refererer `trygdesats`. Gjør systematisk gjennomgang. Bruk `erBegrenset()` som guard i stedet for å sjekke `trygdesats == 0` |
+| **`harAvgift()` returnerer feil for 25%-regel** (7969) | **Høy** | **Høy** | Dagens `harAvgift()` sjekker BÅDE sats og beløp. Med `sats = null` returnerer den `false` selv om perioden har positivt beløp. Brukes av `OpprettFakturaserie` for filtrering — 25%-perioder ville blitt ekskludert fra fakturering. Ny logikk: kun beløp-basert sjekk. |
+| **`fattet-vedtak-schema.json` breaking change** (7969) | **Høy** | **Høy** | `trygdesats` er `required` med type `number`. Null-verdi bryter Kafka-konsumenter (DVH/statistikk). Krever skjemaoppdatering + koordinering med DVH-teamet. Se Fase 3b. |
 | **Fakturatekst med null sats** (7969) | Middels | Middels | `OpprettFakturaserie.kt` og `BeregnOgSendFaktura.kt` interpolerer sats i string. Test at brev/faktura ikke viser "Sats: null %" |
 | **Eksisterende data uten beregningstype** (7969) | Lav | Lav | Migrasjon setter `ORDINAER` som default — alle eksisterende perioder er ordinære |
+| **Manglende indeks på FK i ny tabell** | Lav | Middels | Uten indeks på `trygdeavgiftsperiode_id` gjør JPA `@OneToMany` lazy loading full table scan. Indeks lagt til i V151-migrasjon. |
 
 ---
 
@@ -682,6 +727,9 @@ gantt
 - [ ] `melosys-trygdeavgift-beregning` returnerer `beregningstype` og `sats: null` ved 25%-regel/minstebeløp
 - [ ] `melosys-api` lagrer `beregningstype` (enum) på `Trygdeavgiftsperiode`
 - [ ] `trygdesats`-kolonnen er nullable i Oracle og i JPA-entiteten
+- [ ] `fattet-vedtak-schema.json` oppdatert — `trygdesats` er nullable og ikke lenger required, `beregningstype` lagt til
+- [ ] DVH-teamet er informert om Kafka-kontraktendringen
+- [ ] `harAvgift()` fungerer korrekt for 25%-regel-perioder (beløp > 0, sats = null → returner true)
 - [ ] Brevmappere viser "25%-regel" eller "Minstebeløp" i stedet for sats når beregningstype != ORDINAER
 - [ ] Fakturatekst håndterer null sats korrekt (ingen "Sats: null %")
 - [ ] Frontend viser beregningstype (koordinert med [MELOSYS-7530](https://jira.adeo.no/browse/MELOSYS-7530))
@@ -699,7 +747,7 @@ gantt
 ### Opprydding (separat PR)
 - [ ] `grunnlag`-feltet fjernet fra `BeregnetTrygdeavgiftResponse` (beregnings-repo)
 - [ ] Legacy fallback-kode fjernet fra `melosys-api`
-- [ ] V151: Gamle FK-kolonner droppet fra `trygdeavgiftsperiode`
+- [ ] V152: Gamle FK-kolonner droppet fra `trygdeavgiftsperiode`
 
 ---
 
