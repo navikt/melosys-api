@@ -405,7 +405,7 @@ class InnvilgelseFtrlMapper(
         avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling) +
             avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling) +
             avklarteVirksomheterService.hentNorskeSelvstendigeForetak(behandling)
-        ).map { it.navn }
+        ).map { it.navn }.distinct()
 
     private fun Medlemskapsperiode.harFullDekning(): Boolean = listOf(
         Trygdedekninger.FULL_DEKNING,
