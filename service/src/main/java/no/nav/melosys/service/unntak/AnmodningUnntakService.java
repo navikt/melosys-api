@@ -147,6 +147,17 @@ public class AnmodningUnntakService {
         anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(behandling.getId());
     }
 
+    @Transactional
+    public void endreStatusTilVurderDokument(long behandlingID) {
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+
+        validerBehandlingstemaUtsendtArbeidstaker(behandling);
+        validerBehandlingsstatusAnmodningSendt(behandling);
+
+        behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
+        behandlingService.lagre(behandling);
+    }
+
     private static void validerBehandlingstemaUnntak(Behandling behandling) {
         if (behandling.getTema() != Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL) {
             throw new FunksjonellException("Behandling er ikke av tema ANMODNING_OM_UNNTAK_HOVEDREGEL");
@@ -162,6 +173,14 @@ public class AnmodningUnntakService {
     private static void validerBehandlingsstatus(Behandling behandling) {
         if (behandling.getStatus() == Behandlingsstatus.AVSLUTTET) {
             throw new FunksjonellException("Behandlingen er avsluttet");
+        }
+    }
+
+    private static void validerBehandlingsstatusAnmodningSendt(Behandling behandling) {
+        validerBehandlingsstatus(behandling);
+
+        if(behandling.getStatus() !=  Behandlingsstatus.ANMODNING_UNNTAK_SENDT) {
+            throw new  FunksjonellException("Behandlingen har ikke status ANMODNING_UNNTAK_SENDT");
         }
     }
 
