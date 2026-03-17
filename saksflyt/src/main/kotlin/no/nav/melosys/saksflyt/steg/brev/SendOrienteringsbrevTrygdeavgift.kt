@@ -5,6 +5,7 @@ import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.saksflyt.steg.StegBehandler
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -32,6 +33,7 @@ class SendOrienteringsbrevTrygdeavgift(
                 this.produserbardokument = Produserbaredokumenter.TRYGDEAVGIFT_INFORMASJONSBREV
                 this.mottaker = Mottakerroller.BRUKER
                 this.fullmektigForBetaling = fullmektigForBetaling
+                this.bestillersId = prosessinstans.hentData(ProsessDataKey.SAKSBEHANDLER)
             }
 
         dokumentServiceFasade.produserDokument(behandling.id, brevbestillingDto)
