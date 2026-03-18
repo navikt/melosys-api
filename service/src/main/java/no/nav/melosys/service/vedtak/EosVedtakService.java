@@ -203,6 +203,7 @@ public class EosVedtakService implements FattVedtakInterface {
     static List<Land_iso2> filtrerLandKanMottaSed(Collection<Land_iso2> landkoder) {
         return landkoder.stream()
             .filter(land -> !kanIkkeMottaSed(land))
+            .distinct()
             .collect(Collectors.toList());
     }
 

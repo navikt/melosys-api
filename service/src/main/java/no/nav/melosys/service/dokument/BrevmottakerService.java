@@ -246,10 +246,14 @@ public class BrevmottakerService {
         }
 
         if (mottaker.getTrygdemyndighetLand() != null) {
-            return utenlandskMyndighetMottakerMap.entrySet().stream()
+            List<Mottaker> mottakere = utenlandskMyndighetMottakerMap.entrySet().stream()
                 .filter(e -> mottaker.getTrygdemyndighetLand().equals(e.getKey().getLandkode()))
                 .map(Map.Entry::getValue)
                 .toList();
+            if (mottakere.isEmpty()) {
+                throw new FunksjonellException("Finner ingen utenlandsk trygdemyndighet for land " + mottaker.getTrygdemyndighetLand().getKode() + ". Kontroller at adressen er registrert.");
+            }
+            return mottakere;
         }
 
         if (produserbartDokument == ATTEST_A1 && kanReservereMotA1(behandling)) {
