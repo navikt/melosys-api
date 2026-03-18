@@ -121,7 +121,7 @@ public class BrevmottakerService {
             case BRUKER -> avklarMottakereForBruker(produserbartDokument, behandling, forhåndsvisning);
             case VIRKSOMHET -> avklarMottakereForVirksomhet(behandling);
             case ARBEIDSGIVER -> avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter, produserbartDokument);
-            case UTENLANDSK_TRYGDEMYNDIGHET -> avklarMottakereForUtenlandskTrygdemyndighet(behandling, produserbartDokument);
+            case UTENLANDSK_TRYGDEMYNDIGHET -> avklarMottakereForUtenlandskTrygdemyndighet(behandling, produserbartDokument, mottaker);
             case NORSK_MYNDIGHET -> avklarMottakereForNorskMyndighet(mottaker);
             case FULLMEKTIG -> avklarMottakereForFullmektig(behandling.getFagsak());
             default -> throw new FunksjonellException("%s støttes ikke.".formatted(mottaker.getRolle()));
@@ -236,13 +236,20 @@ public class BrevmottakerService {
         return arbeidsgiver;
     }
 
-    private List<Mottaker> avklarMottakereForUtenlandskTrygdemyndighet(Behandling behandling, Produserbaredokumenter produserbartDokument) {
+    private List<Mottaker> avklarMottakereForUtenlandskTrygdemyndighet(Behandling behandling, Produserbaredokumenter produserbartDokument, Mottaker mottaker) {
         // Utenlandsk myndighet
         Map<UtenlandskMyndighet, Mottaker> utenlandskMyndighetMottakerMap
             = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling);
 
         if (produserbartDokument == UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV && utenlandskMyndighetMottakerMap.isEmpty()) {
             throw new FunksjonellException("Du kan ikke sende brev til trygdemyndigheten i landet du har valgt, fordi korrekt adresse er ukjent.");
+        }
+
+        if (mottaker.getTrygdemyndighetLand() != null) {
+            return utenlandskMyndighetMottakerMap.entrySet().stream()
+                .filter(e -> mottaker.getTrygdemyndighetLand().equals(e.getKey().getLandkode()))
+                .map(Map.Entry::getValue)
+                .toList();
         }
 
         if (produserbartDokument == ATTEST_A1 && kanReservereMotA1(behandling)) {

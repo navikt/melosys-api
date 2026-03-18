@@ -141,6 +141,7 @@ public class EessiService {
                 sedData.setErFjernarbeidTWFA(erFjernarbeidTWFA);
             }
         }
+        filtrerIkkeEessiLandFraSed(sedData);
 
         log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
 
@@ -217,6 +218,16 @@ public class EessiService {
 
     private boolean landErEessiReady(String bucType, String landkode) {
         return !hentEessiMottakerinstitusjoner(bucType, Set.of(landkode)).isEmpty();
+    }
+
+    private static void filtrerIkkeEessiLandFraSed(SedDataDto sedData) {
+        Set<String> ikkeEessiLand = Set.of(Land_iso2.FO.getKode(), Land_iso2.GL.getKode());
+        sedData.setArbeidsland(sedData.getArbeidsland().stream()
+            .filter(al -> !ikkeEessiLand.contains(al.getLand()))
+            .collect(java.util.stream.Collectors.toCollection(java.util.ArrayList::new)));
+        sedData.setArbeidssteder(sedData.getArbeidssteder().stream()
+            .filter(a -> a.getAdresse() == null || !ikkeEessiLand.contains(a.getAdresse().getLand()))
+            .collect(java.util.stream.Collectors.toCollection(java.util.ArrayList::new)));
     }
 
     public boolean landErEessiReady(String bucType, Collection<Land_iso2> landkoder) {

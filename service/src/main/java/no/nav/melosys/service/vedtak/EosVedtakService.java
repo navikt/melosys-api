@@ -117,9 +117,12 @@ public class EosVedtakService implements FattVedtakInterface {
 
             oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), fritekst, request.getNyVurderingBakgrunn());
             Collection<Land_iso2> alleLandkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
+            log.debug("Behandling {}: alle arbeidsland={}", behandlingID, alleLandkoder.stream().map(Land_iso2::getKode).toList());
             Set<String> landKanIkkeMottaSed = filtrerLandKanIkkeMottaSed(alleLandkoder);
+            log.debug("Behandling {}: land til papir-A1 (kan ikke motta SED)={}", behandlingID, landKanIkkeMottaSed);
             Set<String> mottakerinstitusjoner = avklarMottakerInstitusjoner(behandling, request.getMottakerinstitusjoner(),
                 behandlingsresultat, filtrerLandKanMottaSed(alleLandkoder));
+            log.debug("Behandling {}: EESSI-mottakerinstitusjoner (til SED)={}", behandlingID, mottakerinstitusjoner);
             prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, request.getBehandlingsresultatTypeKode(),
                 fritekst, request.getFritekstSed(), mottakerinstitusjoner, request.isKopiTilArbeidsgiver(), landKanIkkeMottaSed);
         }

@@ -82,11 +82,13 @@ public class SendVedtakUtland extends AbstraktSendUtland {
                 log.info("Sender ikke SED for behandling {}, mottakerinstusjoner er ikke oppgitt", behandling.getId());
             } else {
                 SendUtlandStatus status = super.sendUtland(avklarBucType(behandling), prosessinstans);
+                log.debug("Behandling {}: SendUtlandStatus={}", behandling.getId(), status);
                 // Når BREV_SENDT har sendBrev() allerede håndtert LAND_KAN_IKKE_MOTTA_SED.
                 // For SED_SENDT, send brev eksplisitt til land som ikke kan motta SED.
                 if (status != SendUtlandStatus.BREV_SENDT) {
                     Set<String> landKanIkkeMottaSed = prosessinstans.getData(ProsessDataKey.LAND_KAN_IKKE_MOTTA_SED, new TypeReference<Set<String>>() {});
                     if (landKanIkkeMottaSed != null && !landKanIkkeMottaSed.isEmpty()) {
+                        log.debug("Behandling {}: sender papir-A1 til land som ikke kan motta SED={}", behandling.getId(), landKanIkkeMottaSed);
                         sendBrev(prosessinstans);
                     }
                 }
@@ -121,11 +123,13 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             if (landKanIkkeMottaSed != null && !landKanIkkeMottaSed.isEmpty()) {
                 for (String landkode : landKanIkkeMottaSed) {
                     Land_iso2 land = Land_iso2.valueOf(landkode);
+                    log.debug("Behandling {}: oppretter papir-A1 brevbestilling for land={}", behandling.getId(), landkode);
                     Mottaker mottaker = Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
                     mottaker.setTrygdemyndighetLand(land);
                     prosessinstansService.opprettProsessinstansSendBrev(behandling, lagA1Brevbestilling(prosessinstans), mottaker);
                 }
             } else {
+                log.debug("Behandling {}: oppretter papir-A1 brevbestilling til generisk utenlandsk trygdemyndighet", behandling.getId());
                 prosessinstansService.opprettProsessinstansSendBrev(behandling, lagA1Brevbestilling(prosessinstans), Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
             }
         }
