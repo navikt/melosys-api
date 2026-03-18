@@ -1,6 +1,6 @@
 package no.nav.melosys.itest
 
-import io.kotest.assertions.json.shouldContainJsonKeyValue
+import io.kotest.assertions.json.shouldEqualJson
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducerConfig
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.A1TypeUtstedelse
@@ -24,6 +24,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import java.time.Duration
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 @ActiveProfiles("test", "local")
@@ -59,13 +60,28 @@ class UtstedtA1MeldingSerializationTest(
         producer.produserMelding(melding)
 
         val json = readFromKafka(topic)
-        json.shouldContainJsonKeyValue("$.datoUtstedelse", "2025-06-01")
-        json.shouldContainJsonKeyValue("$.periode.fom", "2025-06-01")
-        json.shouldContainJsonKeyValue("$.periode.tom", "2025-09-01")
-        json.shouldContainJsonKeyValue("$.artikkel", "11.3a")
-        json.shouldContainJsonKeyValue("$.typeUtstedelse", "FØRSTEGANG")
-        json.shouldContainJsonKeyValue("$.saksnummer", "MEL-123")
-        json.shouldContainJsonKeyValue("$.behandlingId", 123)
+
+        // meldingOpprettetTidspunkt settes til ZonedDateTime.now() i konstruktøren —
+        // Jackson serialiserer med ISO_OFFSET_DATE_TIME (uten zone-ID), ikke ZonedDateTime.toString()
+        val tidspunkt = melding.meldingOpprettetTidspunkt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+
+        json shouldEqualJson """
+            {
+                "serienummer": "MEL-123123",
+                "saksnummer": "MEL-123",
+                "behandlingId": 123,
+                "aktorId": "1234567898765",
+                "artikkel": "11.3a",
+                "periode": {
+                    "fom": "2025-06-01",
+                    "tom": "2025-09-01"
+                },
+                "utsendtTilLand": "SE",
+                "datoUtstedelse": "2025-06-01",
+                "typeUtstedelse": "FØRSTEGANG",
+                "meldingOpprettetTidspunkt": "$tidspunkt"
+            }
+        """
     }
 
     private fun lagMelding() = UtstedtA1Melding(
