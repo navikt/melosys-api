@@ -139,21 +139,21 @@ sequenceDiagram
     participant BEREGN as melosys-trygdeavgift-beregning
     participant API as melosys-api
 
-    rect rgb(230, 245, 230)
+    rect rgb(60, 140, 70)
     Note over BEREGN: Steg 1: Deploy ny beregning
     BEREGN->>API: grunnlag=siste, grunnlagListe=[alle], beregningstype=TJUEFEM_PROSENT_REGEL
     Note over API: Gammel API ignorerer ukjente felter (Jackson default)
     Note over API: Leser grunnlag som før — fungerer
     end
 
-    rect rgb(230, 230, 245)
+    rect rgb(60, 80, 160)
     Note over API: Steg 2: Deploy ny API (når som helst etterpå)
     API->>API: Leser grunnlagListe hvis != null, ellers grunnlag
     API->>API: Leser beregningstype hvis != null, ellers ORDINAER
     API->>API: Lagrer i ny tabell + nye kolonner
     end
 
-    rect rgb(245, 230, 230)
+    rect rgb(160, 70, 70)
     Note over BEREGN,API: Steg 3: Opprydding (valgfri, separat PR)
     Note over BEREGN: Fjern deprecated grunnlag-felt
     Note over API: Fjern legacy fallback + V152: dropp gamle FK-kolonner
@@ -526,11 +526,11 @@ graph TD
     A --> S[Inntektsperiode.java<br/>reverse @OneToMany]
     A --> T[SkatteforholdTilNorge.java<br/>reverse @OneToMany]
 
-    style A fill:#f96,stroke:#333,stroke-width:2px
-    style B fill:#ff9,stroke:#333
-    style C fill:#ff9,stroke:#333
-    style D fill:#ff9,stroke:#333
-    style E fill:#ff9,stroke:#333
+    style A fill:#c05020,stroke:#999,stroke-width:2px,color:#fff
+    style B fill:#7a6a20,stroke:#999,color:#fff
+    style C fill:#7a6a20,stroke:#999,color:#fff
+    style D fill:#7a6a20,stroke:#999,color:#fff
+    style E fill:#7a6a20,stroke:#999,color:#fff
 ```
 
 #### Detaljer per fil
