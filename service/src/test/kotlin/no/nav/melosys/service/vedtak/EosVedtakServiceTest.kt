@@ -523,7 +523,7 @@ class EosVedtakServiceKtTest {
             )
         )
 
-        // Skal IKKE kalles med 7-parameter-versjonen med land som ikke kan motta SED
+        // Verifiserer at landKanIkkeMottaSed er tomt (ingen FO/GL i arbeidslandene)
         verify {
             prosessinstansService.opprettProsessinstansIverksettVedtakEos(
                 any(), any(), any(), any(),
