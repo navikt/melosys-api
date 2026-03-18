@@ -1,7 +1,5 @@
 package no.nav.melosys.integrasjon.joark.journalpostapi
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.any
@@ -61,8 +59,6 @@ class JournalpostapiClientTest(
     private val processUUID = UUID.randomUUID()
     private val mockServer = WireMockServer(WireMockConfiguration.wireMockConfig().port(mockServerPort))
 
-    private val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
-
     @BeforeAll
     fun beforeAll() {
         ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prosessSteg")
@@ -106,7 +102,7 @@ class JournalpostapiClientTest(
                 .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
-                .withRequestBody(equalToJson(objectMapper.writeValueAsString(req), true, false))
+                .withRequestBody(equalToJson("""{"journalpostType":"INNGAAENDE","avsenderMottaker":null,"bruker":null,"tema":null,"behandlingstema":null,"tittel":null,"kanal":null,"journalfoerendeEnhet":null,"eksternReferanseId":null,"tilleggsopplysninger":null,"sak":null,"dokumenter":null,"datoMottatt":null}""", true, false))
         )
     }
 
@@ -132,7 +128,7 @@ class JournalpostapiClientTest(
                 .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
-                .withRequestBody(equalToJson(objectMapper.writeValueAsString(req), true, false))
+                .withRequestBody(equalToJson("""{"datoMottatt":null,"tittel":"Tittel","journalfoerendeEnhet":"4530","bruker":null,"avsenderMottaker":null,"dokumenter":[],"sak":null,"tema":null}""", true, false))
         )
     }
 
@@ -158,7 +154,7 @@ class JournalpostapiClientTest(
                 .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
                 .withRequestBody(
-                    equalToJson(objectMapper.writeValueAsString(LogiskVedleggRequest(tittel)), true, false)
+                    equalToJson("""{"tittel":"tittel"}""", true, false)
                 )
         )
     }
@@ -207,7 +203,7 @@ class JournalpostapiClientTest(
                 .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
-                .withRequestBody(equalToJson(objectMapper.writeValueAsString(req), true, false))
+                .withRequestBody(equalToJson("""{"journalfoerendeEnhet":"4530"}""", true, false))
         )
     }
 
@@ -236,7 +232,7 @@ class JournalpostapiClientTest(
                 .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
-                .withRequestBody(equalToJson(objectMapper.writeValueAsString(req), true, false))
+                .withRequestBody(equalToJson("""{"journalpostType":"INNGAAENDE","avsenderMottaker":null,"bruker":null,"tema":null,"behandlingstema":null,"tittel":null,"kanal":null,"journalfoerendeEnhet":null,"eksternReferanseId":null,"tilleggsopplysninger":null,"sak":null,"dokumenter":null,"datoMottatt":"1970-01-01"}""", true, false))
         )
     }
 }

@@ -134,7 +134,7 @@ class EessiClientTest(
                 .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
                 .withRequestBody(
                     equalToJson(
-                        ObjectMapper().writeValueAsString(OpprettBucOgSedDto(sedDataDto, vedlegg)),
+                        """{"sedDataDto":{"sedType":null,"utenlandskIdent":[],"bostedsadresse":null,"arbeidsgivendeVirksomheter":[],"selvstendigeVirksomheter":[],"arbeidssteder":[],"arbeidsland":[],"harFastArbeidssted":null,"lovvalgsperioder":[],"ytterligereInformasjon":null,"bruker":null,"kontaktadresse":null,"oppholdsadresse":null,"familieMedlem":[],"søknadsperiode":null,"avklartBostedsland":null,"gsakSaksnummer":null,"tidligereLovvalgsperioder":[],"mottakerIder":null,"svarAnmodningUnntak":null,"utpekingAvvis":null,"vedtakDto":null,"invalideringSedDto":null,"a008Formaal":null,"erFjernarbeidTWFA":null},"vedlegg":[{"innhold":"cGRm","tittel":"tittel","hentInnhold":"cGRm"}]}""",
                         true, false
                     )
                 )
@@ -190,7 +190,7 @@ class EessiClientTest(
                 .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
                 .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .withRequestBody(WireMock.equalToJson(ObjectMapper().writeValueAsString(opprettBucOgSedDtoV2)))
+                .withRequestBody(WireMock.equalToJson("""{"bucType":"LA_BUC_01","sedDataDto":{"sedType":null,"utenlandskIdent":[],"bostedsadresse":null,"arbeidsgivendeVirksomheter":[],"selvstendigeVirksomheter":[],"arbeidssteder":[],"arbeidsland":[],"harFastArbeidssted":null,"lovvalgsperioder":[],"ytterligereInformasjon":null,"bruker":null,"kontaktadresse":null,"oppholdsadresse":null,"familieMedlem":[],"søknadsperiode":null,"avklartBostedsland":null,"gsakSaksnummer":null,"tidligereLovvalgsperioder":[],"mottakerIder":null,"svarAnmodningUnntak":null,"utpekingAvvis":null,"vedtakDto":null,"invalideringSedDto":null,"a008Formaal":null,"erFjernarbeidTWFA":null},"vedlegg":[{"journalpostId":"journalpostId1","dokumentId":"dokumentId1","tittel":"Tittel 1"},{"journalpostId":"journalpostId2","dokumentId":"dokumentId2","tittel":"Tittel 2"}],"sendAutomatisk":true,"oppdaterEksisterende":false}""", true, false))
         )
 
         opprettSedDto.rinaSaksnummer.shouldBe("67890")
@@ -251,7 +251,7 @@ class EessiClientTest(
                 .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
                 .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .withRequestBody(WireMock.equalToJson(ObjectMapper().writeValueAsString(opprettBucOgSedDtoV2)))
+                .withRequestBody(WireMock.equalToJson("""{"bucType":"LA_BUC_03","sedDataDto":{"sedType":null,"utenlandskIdent":[],"bostedsadresse":null,"arbeidsgivendeVirksomheter":[],"selvstendigeVirksomheter":[],"arbeidssteder":[],"arbeidsland":[],"harFastArbeidssted":null,"lovvalgsperioder":[],"ytterligereInformasjon":null,"bruker":null,"kontaktadresse":null,"oppholdsadresse":null,"familieMedlem":[],"søknadsperiode":null,"avklartBostedsland":null,"gsakSaksnummer":null,"tidligereLovvalgsperioder":[],"mottakerIder":null,"svarAnmodningUnntak":null,"utpekingAvvis":null,"vedtakDto":null,"invalideringSedDto":null,"a008Formaal":null,"erFjernarbeidTWFA":null},"vedlegg":[],"sendAutomatisk":false,"oppdaterEksisterende":true}""", true, false))
         )
 
         opprettSedDto.rinaSaksnummer.shouldBe("99999")
@@ -283,7 +283,7 @@ class EessiClientTest(
                 .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
                 .withRequestBody(
-                    equalToJson(ObjectMapper().writeValueAsString(sedDataDto), true, false)
+                    equalToJson("""{"sedType":null,"utenlandskIdent":[],"bostedsadresse":null,"arbeidsgivendeVirksomheter":[],"selvstendigeVirksomheter":[],"arbeidssteder":[],"arbeidsland":[],"harFastArbeidssted":null,"lovvalgsperioder":[],"ytterligereInformasjon":null,"bruker":null,"kontaktadresse":null,"oppholdsadresse":null,"familieMedlem":[],"søknadsperiode":null,"avklartBostedsland":null,"gsakSaksnummer":null,"tidligereLovvalgsperioder":[],"mottakerIder":null,"svarAnmodningUnntak":null,"utpekingAvvis":null,"vedtakDto":null,"invalideringSedDto":null,"a008Formaal":null,"erFjernarbeidTWFA":null}""", true, false)
                 )
         )
     }
@@ -382,7 +382,7 @@ class EessiClientTest(
                 .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
                 .withRequestBody(
-                    equalToJson(ObjectMapper().writeValueAsString(saksrelasjonDto), true, false)
+                    equalToJson("""{"gsakSaksnummer":123,"rinaSaksnummer":"123","bucType":"123"}""", true, false)
                 )
         )
     }
@@ -444,7 +444,7 @@ class EessiClientTest(
                 .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
                 .withRequestBody(
-                    equalToJson(ObjectMapper().writeValueAsString(sedDataDto), true, false)
+                    equalToJson("""{"sedType":null,"utenlandskIdent":[],"bostedsadresse":null,"arbeidsgivendeVirksomheter":[],"selvstendigeVirksomheter":[],"arbeidssteder":[],"arbeidsland":[],"harFastArbeidssted":null,"lovvalgsperioder":[],"ytterligereInformasjon":null,"bruker":null,"kontaktadresse":null,"oppholdsadresse":null,"familieMedlem":[],"søknadsperiode":null,"avklartBostedsland":null,"gsakSaksnummer":null,"tidligereLovvalgsperioder":[],"mottakerIder":null,"svarAnmodningUnntak":null,"utpekingAvvis":null,"vedtakDto":null,"invalideringSedDto":null,"a008Formaal":null,"erFjernarbeidTWFA":null}""", true, false)
                 )
         )
     }

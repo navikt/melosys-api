@@ -22,12 +22,10 @@ import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.felles.graphql.GraphQLRequest
 import no.nav.melosys.integrasjon.felles.graphql.GraphQLResponse
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.joark.saf.dto.HentDokumentoversiktResponse
 import no.nav.melosys.integrasjon.joark.saf.dto.HentDokumentoversiktResponseWrapper
-import no.nav.melosys.integrasjon.joark.saf.dto.Query
 import no.nav.melosys.integrasjon.joark.saf.dto.SideInfo
 import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.AvsenderMottaker
 import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.AvsenderMottakerType
@@ -111,8 +109,7 @@ class SafClientTest(
             )
         )
 
-        val expectedRequest = GraphQLRequest(Query.HENT_JOURNALPOST_QUERY, mapOf(Query.JOURNALPOST_ID to "jp-123"))
-        val expectedJson = objectMapper.writeValueAsString(expectedRequest)
+        val expectedJson = """{"query":"  query(${'$'}journalpostId: String!) {\n    query: journalpost(journalpostId: ${'$'}journalpostId) {\n      journalpostId\n      tittel\n      journalstatus\n      tema\n      journalposttype\n      sak {\n        fagsakId\n      }\n      bruker {\n        id\n        type\n      }\n      avsenderMottaker {\n        id\n        type\n        navn\n        land\n      }\n      kanal\n      relevanteDatoer {\n        dato\n        datotype\n      }\n      dokumenter {\n        dokumentInfoId\n        tittel\n        brevkode\n        logiskeVedlegg {\n          logiskVedleggId\n          tittel\n        }\n        dokumentvarianter {\n          saksbehandlerHarTilgang\n          variantformat\n        }\n      }\n    }\n  }\n","variables":{"journalpostId":"jp-123"}}"""
 
         safClient.hentJournalpost("jp-123")
 

@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.pdl
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.any
@@ -21,7 +20,6 @@ import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.exception.IntegrasjonException
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
-import no.nav.melosys.integrasjon.felles.graphql.GraphQLRequest
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.pdl.dto.Endring
 import no.nav.melosys.integrasjon.pdl.dto.Endringstype
@@ -29,7 +27,6 @@ import no.nav.melosys.integrasjon.pdl.dto.Metadata
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident
 import no.nav.melosys.integrasjon.pdl.dto.identer.IdentGruppe.AKTORID
 import no.nav.melosys.integrasjon.pdl.dto.identer.IdentGruppe.FOLKEREGISTERIDENT
-import no.nav.melosys.integrasjon.pdl.dto.identer.Query.HENT_IDENTER_QUERY
 import no.nav.melosys.integrasjon.pdl.dto.person.Familierelasjonsrolle
 import no.nav.melosys.integrasjon.pdl.dto.person.KjoennType
 import no.nav.melosys.integrasjon.pdl.dto.person.Sivilstandstype
@@ -81,8 +78,6 @@ class PDLClientImplTest(
 ) {
     private val processUUID = UUID.randomUUID()
     private val mockServer = WireMockServer(WireMockConfiguration.wireMockConfig().port(mockServerPort))
-    private val objectMapper = ObjectMapper()
-
     @BeforeAll
     fun beforeAll() {
         ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prosessSteg")
@@ -116,8 +111,7 @@ class PDLClientImplTest(
 
         pdlClient.hentIdenter("12345678901")
 
-        val expectedRequest = GraphQLRequest(HENT_IDENTER_QUERY, mapOf("ident" to "12345678901"))
-        val expectedJson = objectMapper.writeValueAsString(expectedRequest)
+        val expectedJson = """{"query":"query(${'$'}ident: ID!) {\n  hentIdenter(ident: ${'$'}ident) {\n      identer {\n          ident,\n          gruppe\n      }\n  }\n}\n","variables":{"ident":"12345678901"}}"""
 
         mockServer.verify(
             postRequestedFor(urlEqualTo("/graphql"))

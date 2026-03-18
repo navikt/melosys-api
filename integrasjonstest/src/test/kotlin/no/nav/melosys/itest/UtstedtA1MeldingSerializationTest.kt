@@ -1,10 +1,12 @@
 package no.nav.melosys.itest
 
-import io.kotest.assertions.json.shouldEqualJson
-import no.nav.melosys.integrasjon.kafka.KafkaConfig
-import no.nav.melosys.integrasjon.kafka.SkippableKafkaErrorHandler
-import no.nav.melosys.integrasjon.popp.KafkaPensjonsopptjeningHendelseProducer
-import no.nav.melosys.integrasjon.popp.PensjonsopptjeningHendelse
+import io.kotest.assertions.json.shouldContainJsonKeyValue
+import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer
+import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducerConfig
+import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.A1TypeUtstedelse
+import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse
+import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Periode
+import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -20,14 +22,14 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import java.time.Duration
-import java.time.LocalDateTime
+import java.time.LocalDate
 import java.util.UUID
 
-@ActiveProfiles("test")
+@ActiveProfiles("test", "local")
 @SpringBootTest
 @EmbeddedKafka(
     count = 1, controlledShutdown = true, partitions = 1,
-    topics = ["\${kafka.aiven.popp-hendelser.topic}"],
+    topics = ["\${kafka.aiven.a1-utstedt.topic}"],
     brokerProperties = [
         "offsets.topic.replication.factor=1",
         "transaction.state.log.replication.factor=1",
@@ -38,50 +40,48 @@ import java.util.UUID
     classes = [
         JacksonAutoConfiguration::class,
         KafkaAutoConfiguration::class,
-        KafkaConfig::class,
-        SkippableKafkaErrorHandler::class,
-        KafkaPensjonsopptjeningHendelseProducer::class
+        UtstedtA1AivenProducerConfig::class,
+        UtstedtA1AivenProducer::class
     ]
 )
-class PensjonsopptjeningHendelseKafkaSerializationTest(
-    @Autowired private val producer: KafkaPensjonsopptjeningHendelseProducer,
+class UtstedtA1MeldingSerializationTest(
+    @Autowired private val producer: UtstedtA1AivenProducer,
     @Autowired private val kafkaProperties: KafkaProperties,
-    @Value("\${kafka.aiven.popp-hendelser.topic}") private val topic: String
+    @Value("\${kafka.aiven.a1-utstedt.topic}") private val topic: String
 ) {
 
     @Test
     @DirtiesContext
-    fun `PensjonsopptjeningHendelse serialiseres korrekt av Kafka-producer`() {
-        val hendelse = PensjonsopptjeningHendelse(
-            hendelsesId = "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-            fnr = "12345678901",
-            pgi = 500_000L,
-            inntektsAr = 2023,
-            fastsattTidspunkt = LocalDateTime.of(2024, 3, 15, 10, 30, 0),
-            endringstype = PensjonsopptjeningHendelse.Endringstype.NY_INNTEKT,
-            melosysBehandlingID = 42L
-        )
+    fun `UtstedtA1Melding serialiseres korrekt av Kafka-producer`() {
+        val melding = lagMelding()
 
-        producer.sendPensjonsopptjeningHendelse(hendelse)
+        producer.produserMelding(melding)
 
         val json = readFromKafka(topic)
-        json shouldEqualJson """
-            {
-                "hendelsesId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-                "fnr": "12345678901",
-                "pgi": 500000,
-                "inntektsAr": 2023,
-                "fastsattTidspunkt": "2024-03-15T10:30:00",
-                "endringstype": "NY_INNTEKT",
-                "melosysBehandlingID": 42
-            }
-        """
+        json.shouldContainJsonKeyValue("$.datoUtstedelse", "2025-06-01")
+        json.shouldContainJsonKeyValue("$.periode.fom", "2025-06-01")
+        json.shouldContainJsonKeyValue("$.periode.tom", "2025-09-01")
+        json.shouldContainJsonKeyValue("$.artikkel", "11.3a")
+        json.shouldContainJsonKeyValue("$.typeUtstedelse", "FØRSTEGANG")
+        json.shouldContainJsonKeyValue("$.saksnummer", "MEL-123")
+        json.shouldContainJsonKeyValue("$.behandlingId", 123)
     }
+
+    private fun lagMelding() = UtstedtA1Melding(
+        "MEL-123",
+        123L,
+        "1234567898765",
+        Lovvalgsbestemmelse.ART_11_3_a,
+        Periode(LocalDate.of(2025, 6, 1), LocalDate.of(2025, 9, 1)),
+        "SE",
+        LocalDate.of(2025, 6, 1),
+        A1TypeUtstedelse.FØRSTEGANG
+    )
 
     private fun readFromKafka(topic: String): String {
         val props = mapOf<String, Any>(
             ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaProperties.bootstrapServers.joinToString(","),
-            ConsumerConfig.GROUP_ID_CONFIG to "test-consumer-popp-${UUID.randomUUID()}",
+            ConsumerConfig.GROUP_ID_CONFIG to "test-consumer-a1-${UUID.randomUUID()}",
             ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
             ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java.name,
             ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java.name

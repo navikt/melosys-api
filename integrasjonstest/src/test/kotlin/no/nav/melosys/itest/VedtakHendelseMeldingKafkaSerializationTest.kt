@@ -1,62 +1,85 @@
 package no.nav.melosys.itest
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.assertions.json.shouldEqualJson
-import io.kotest.matchers.shouldBe
-import io.kotest.matchers.string.shouldNotContain
-import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Vedtakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.integrasjon.hendelser.KafkaMelosysHendelseProducer
 import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
-import no.nav.melosys.integrasjon.hendelser.Periode
 import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
+import no.nav.melosys.integrasjon.hendelser.Periode
+import no.nav.melosys.integrasjon.kafka.KafkaConfig
+import no.nav.melosys.integrasjon.kafka.SkippableKafkaErrorHandler
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.common.serialization.StringDeserializer
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration
+import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.kafka.test.context.EmbeddedKafka
+import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import java.time.Duration
 import java.time.LocalDate
+import java.util.UUID
 
-/**
- * Verifiserer at VedtakHendelseMelding serialiseres korrekt for Kafka-produksjon.
- *
- * Bruker Spring Boot sin auto-konfigurerte ObjectMapper — identisk med ObjectMapper som
- * KafkaConfig injiserer i produksjon. Testen verifiserer at MelosysModule (KodeSerializer)
- * IKKE er aktiv for Kafka-serialisering: den er kun registrert på MVC-converters for
- * HTTP-responser til frontend. Hvis MelosysModule feilaktig registreres globalt vil
- * Kodeverk-enums serialiseres som {"kode":"...","term":"..."} i stedet for plain strings,
- * noe som brekker downstream consumers av vedtakshendelse-topicen.
- */
+@ActiveProfiles("test")
 @SpringBootTest
-@ContextConfiguration(classes = [JacksonAutoConfiguration::class])
-class VedtakHendelseMeldingKafkaSerializationTest {
-
-    @Autowired
-    private lateinit var objectMapper: ObjectMapper
-
-    private val vedtakHendelseMelding = VedtakHendelseMelding(
-        folkeregisterIdent = "12345678901",
-        sakstype = Sakstyper.TRYGDEAVTALE,
-        sakstema = Sakstemaer.TRYGDEAVGIFT,
-        behandligsresultatType = Behandlingsresultattyper.FERDIGBEHANDLET,
-        vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK,
-        medlemskapsperioder = listOf(
-            Periode(
-                fom = LocalDate.of(2021, 1, 1),
-                tom = LocalDate.of(2022, 12, 31),
-                innvilgelsesResultat = InnvilgelsesResultat.INNVILGET
-            )
-        ),
-        lovvalgsperioder = listOf()
-    )
+@EmbeddedKafka(
+    count = 1, controlledShutdown = true, partitions = 1,
+    topics = ["\${kafka.aiven.melosys-hendelser.topic}"],
+    brokerProperties = [
+        "offsets.topic.replication.factor=1",
+        "transaction.state.log.replication.factor=1",
+        "transaction.state.log.min.isr=1"
+    ]
+)
+@ContextConfiguration(
+    classes = [
+        JacksonAutoConfiguration::class,
+        KafkaAutoConfiguration::class,
+        KafkaConfig::class,
+        SkippableKafkaErrorHandler::class,
+        KafkaMelosysHendelseProducer::class
+    ]
+)
+class VedtakHendelseMeldingKafkaSerializationTest(
+    @Autowired private val producer: KafkaMelosysHendelseProducer,
+    @Autowired private val kafkaProperties: KafkaProperties,
+    @Value("\${kafka.aiven.melosys-hendelser.topic}") private val topic: String
+) {
 
     @Test
-    fun `VedtakHendelseMelding serialiserer Kodeverk-enums som plain strings`() {
-        val json = objectMapper.writeValueAsString(MelosysHendelse(vedtakHendelseMelding))
+    @DirtiesContext
+    fun `VedtakHendelseMelding serialiseres korrekt av Kafka-producer`() {
+        val hendelse = MelosysHendelse(
+            VedtakHendelseMelding(
+                folkeregisterIdent = "12345678901",
+                sakstype = Sakstyper.TRYGDEAVTALE,
+                sakstema = Sakstemaer.TRYGDEAVGIFT,
+                behandligsresultatType = Behandlingsresultattyper.FERDIGBEHANDLET,
+                vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK,
+                medlemskapsperioder = listOf(
+                    Periode(
+                        fom = LocalDate.of(2021, 1, 1),
+                        tom = LocalDate.of(2022, 12, 31),
+                        innvilgelsesResultat = InnvilgelsesResultat.INNVILGET
+                    )
+                ),
+                lovvalgsperioder = listOf()
+            )
+        )
 
+        producer.produserBestillingsmelding(hendelse)
+
+        val json = readFromKafka(topic)
         json shouldEqualJson """
             {
                 "melding": {
@@ -79,25 +102,17 @@ class VedtakHendelseMeldingKafkaSerializationTest {
         """
     }
 
-    @Test
-    fun `VedtakHendelseMelding inneholder ikke kode-term-objekter for Kodeverk`() {
-        val json = objectMapper.writeValueAsString(MelosysHendelse(vedtakHendelseMelding))
-
-        json shouldNotContain """"kode""""
-        json shouldNotContain """"term""""
-    }
-
-    @Test
-    fun `VedtakHendelseMelding round-trip deserialisering`() {
-        val original = MelosysHendelse(vedtakHendelseMelding)
-        val json = objectMapper.writeValueAsString(original)
-        val deserialized = objectMapper.readValue(json, MelosysHendelse::class.java)
-
-        deserialized.melding shouldEqualVedtak vedtakHendelseMelding
-    }
-
-    private infix fun Any.shouldEqualVedtak(expected: VedtakHendelseMelding) {
-        val actual = this.shouldBeInstanceOf<VedtakHendelseMelding>()
-        actual shouldBe expected
+    private fun readFromKafka(topic: String): String {
+        val props = mapOf<String, Any>(
+            ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaProperties.bootstrapServers.joinToString(","),
+            ConsumerConfig.GROUP_ID_CONFIG to "test-consumer-vedtak-${UUID.randomUUID()}",
+            ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
+            ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java.name,
+            ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java.name
+        )
+        return KafkaConsumer<String, String>(props).use { consumer ->
+            consumer.subscribe(listOf(topic))
+            consumer.poll(Duration.ofSeconds(10)).first().value()
+        }
     }
 }
