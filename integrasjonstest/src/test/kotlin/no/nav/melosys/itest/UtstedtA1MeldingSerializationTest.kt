@@ -11,6 +11,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.fail
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration
@@ -88,7 +89,12 @@ class UtstedtA1MeldingSerializationTest(
         )
         return KafkaConsumer<String, String>(props).use { consumer ->
             consumer.subscribe(listOf(topic))
-            consumer.poll(Duration.ofSeconds(10)).first().value()
+            val deadline = System.currentTimeMillis() + 10_000L
+            while (System.currentTimeMillis() < deadline) {
+                val record = consumer.poll(Duration.ofMillis(500)).firstOrNull()
+                if (record != null) return@use record.value()
+            }
+            fail("Ingen records mottatt fra topic '$topic' innen 10 sekunder")
         }
     }
 }
