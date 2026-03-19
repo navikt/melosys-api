@@ -3,12 +3,12 @@ package no.nav.melosys.tjenester.gui.config;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdInterceptor;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.config.jackson.MelosysModule;
-import org.springframework.boot.jackson2.autoconfigure.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -36,21 +36,26 @@ public class WebConfig implements WebMvcConfigurer {
         this.kodeverkService = kodeverkService;
     }
 
-    @Bean
-    public Jackson2ObjectMapperBuilderCustomizer jacksonCustomizer() {
-        return builder -> builder
-            .modules(new JavaTimeModule(), new KotlinModule.Builder().build())
-            .featuresToEnable(MapperFeature.DEFAULT_VIEW_INCLUSION)
-            .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,
-                DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-    }
-
+    /**
+     * Legger Jackson 2-konverter med MelosysModule FØRST i listen slik at den
+     * tar prioritet over Spring MVC 7 sin standard Jackson 3-konverter.
+     * Jackson 3 brukes ikke i denne modulen.
+     */
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.stream()
-            .filter(c -> c instanceof MappingJackson2HttpMessageConverter)
-            .map(c -> (MappingJackson2HttpMessageConverter) c)
-            .forEach(c -> c.getObjectMapper().registerModule(new MelosysModule(kodeverkService)));
+        converters.add(0, createMvcJackson2Converter());
+    }
+
+    MappingJackson2HttpMessageConverter createMvcJackson2Converter() {
+        var mapper = JsonMapper.builder()
+            .addModule(new JavaTimeModule())
+            .addModule(new KotlinModule.Builder().build())
+            .addModule(new MelosysModule(kodeverkService))
+            .enable(MapperFeature.DEFAULT_VIEW_INCLUSION)
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .build();
+        return new MappingJackson2HttpMessageConverter(mapper);
     }
 
     @Bean
@@ -76,8 +81,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new CorrelationIdInterceptor());
-
-        // test dette kun for ftrl admin så kan vi bytte fjerne AdminController for resten om det funker fint
         registry.addInterceptor(apiKeyInterceptor).addPathPatterns("/admin/**");
     }
 

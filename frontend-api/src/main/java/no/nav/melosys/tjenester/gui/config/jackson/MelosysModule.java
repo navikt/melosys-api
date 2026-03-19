@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleDeserializers;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.config.jackson.deserialize.KodeDeserializer;
 import no.nav.melosys.tjenester.gui.config.jackson.serialize.*;
@@ -20,6 +22,8 @@ public class MelosysModule extends SimpleModule {
         addSerializer(new MedlemsperiodeSerializer(kodeverkService));
         addSerializer(new MidlertidigPostadresseSerializer(kodeverkService));
         addSerializer(new OrganisasjonSerializer(kodeverkService));
+
+        addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer());
 
         setDeserializers(new SimpleDeserializers() {
             @Override
