@@ -50,6 +50,8 @@ import static java.util.function.Predicate.not;
 public class EessiService {
     private static final Logger log = LoggerFactory.getLogger(EessiService.class);
 
+    public static final Set<Land_iso2> LAND_UTEN_SED_MOTTAK = Set.of(Land_iso2.FO, Land_iso2.GL);
+
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final JoarkFasade joarkFasade;
@@ -221,7 +223,9 @@ public class EessiService {
     }
 
     private static void filtrerIkkeEessiLandFraSed(SedDataDto sedData) {
-        Set<String> ikkeEessiLand = Set.of(Land_iso2.FO.getKode(), Land_iso2.GL.getKode());
+        Set<String> ikkeEessiLand = LAND_UTEN_SED_MOTTAK.stream()
+            .map(Land_iso2::getKode)
+            .collect(Collectors.toUnmodifiableSet());
         sedData.setArbeidsland(sedData.getArbeidsland().stream()
             .filter(al -> !ikkeEessiLand.contains(al.getLand()))
             .collect(java.util.stream.Collectors.toCollection(java.util.ArrayList::new)));

@@ -208,6 +208,6 @@ public class EosVedtakService implements FattVedtakInterface {
     }
 
     private static boolean kanIkkeMottaSed(Land_iso2 land) {
-        return land == Land_iso2.FO || land == Land_iso2.GL;
+        return EessiService.LAND_UTEN_SED_MOTTAK.contains(land);
     }
 }
