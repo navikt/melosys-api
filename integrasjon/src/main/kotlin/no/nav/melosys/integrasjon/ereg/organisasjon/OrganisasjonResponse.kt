@@ -108,15 +108,16 @@ class OrganisasjonResponse {
 
 
     class JuridiskEnhet(
-        val bestaarAvOrganisasjonsledd: List<BestaarAvOrganisasjonsledd> = listOf(),
-        val driverVirksomheter: List<DriverVirksomhet> = listOf(),
-        val fisjoner: List<JuridiskEnhetFisjon> = listOf(),
-        val fusjoner: List<JuridiskEnhetFusjon> = listOf(),
-        val knytninger: List<JuridiskEnhetKnytning> = listOf(),
-        val juridiskEnhetDetaljer: JuridiskEnhetDetaljer? = null,
         organisasjonsnummer: String,
         organisasjonDetaljer: OrganisasjonDetaljer,
-    ) : Organisasjon(organisasjonDetaljer, organisasjonsnummer)
+    ) : Organisasjon(organisasjonDetaljer, organisasjonsnummer) {
+        val bestaarAvOrganisasjonsledd: List<BestaarAvOrganisasjonsledd> = listOf()
+        val driverVirksomheter: List<DriverVirksomhet> = listOf()
+        val fisjoner: List<JuridiskEnhetFisjon> = listOf()
+        val fusjoner: List<JuridiskEnhetFusjon> = listOf()
+        val knytninger: List<JuridiskEnhetKnytning> = listOf()
+        val juridiskEnhetDetaljer: JuridiskEnhetDetaljer? = null
+    }
 
     data class BestaarAvOrganisasjonsledd(
         val bruksperiode: Bruksperiode? = null,

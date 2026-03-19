@@ -86,9 +86,7 @@ class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
     }
 
     private fun localDateFromRequest(datoID: String, requestBody: JsonNode): LocalDate =
-        requestBody["medlemskapsperioder"][0]["periode"][datoID]
-            .map { it.asInt() }
-            .let { (year, month, day) -> LocalDate.of(year, month, day) }
+        LocalDate.parse(requestBody["medlemskapsperioder"][0]["periode"][datoID].asText())
 
     override fun getName(): String {
         return "trygdeavgiftsberegning-med-satsendring-transformer"

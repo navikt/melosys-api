@@ -28,8 +28,8 @@ class EøsPensjonistTrygdeavgiftsberegningTransformer : ResponseTransformerV2 {
             val helseutgiftDekkesPeriodeFom = requestBody["helseutgiftDekkesPeriode"]["periode"]["fom"]
             val helseutgiftDekkesPeriodeTom = requestBody["helseutgiftDekkesPeriode"]["periode"]["tom"]
 
-            val mappetDatoFom = LocalDate.of(helseutgiftDekkesPeriodeFom[0].asInt(), helseutgiftDekkesPeriodeFom[1].asInt(), helseutgiftDekkesPeriodeFom[2].asInt())
-            val mappetDatoTom = LocalDate.of(helseutgiftDekkesPeriodeTom[0].asInt(), helseutgiftDekkesPeriodeTom[1].asInt(), helseutgiftDekkesPeriodeTom[2].asInt())
+            val mappetDatoFom = LocalDate.parse(helseutgiftDekkesPeriodeFom.asText())
+            val mappetDatoTom = LocalDate.parse(helseutgiftDekkesPeriodeTom.asText())
             val skatteforholdsperioderUuid = requestBody["skatteforholdsperioder"][0]["id"].asText()
             val inntektsperioderUuid = requestBody["inntektsperioder"][0]["id"].asText()
 
