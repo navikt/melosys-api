@@ -2,28 +2,25 @@
 
 set -u  # Error on unset vars
 
-# Parse arguments
-CMD_ARGS="$@"
+# Parse arguments — build a clean passthrough array, stripping our custom flags
 LOG_FILE="/tmp/mvn.log"
 VERBOSE=0
 USE_VERIFY=0
-USE_INTEGRATION_TEST=0  # New flag for integration tests
-SUGGEST_AM=0  # Flag to track if we should suggest -am
+USE_INTEGRATION_TEST=0
+SUGGEST_AM=0
+PASSTHROUGH_ARGS=()
 
 for arg in "$@"; do
-  if [[ "$arg" == "--verbose" ]]; then
-    VERBOSE=1
-  elif [[ "$arg" == "--verify" ]]; then
-    USE_VERIFY=1
-    # Remove --verify from CMD_ARGS since Maven doesn't recognize it
-    CMD_ARGS="${CMD_ARGS/--verify/}"
-  elif [[ "$arg" == "--integration" || "$arg" == "-it" ]]; then
-    USE_INTEGRATION_TEST=1
-    # Remove --integration/-it from CMD_ARGS since Maven doesn't recognize it
-    CMD_ARGS="${CMD_ARGS/--integration/}"
-    CMD_ARGS="${CMD_ARGS/-it/}"
-  fi
+  case "$arg" in
+    --verbose)     VERBOSE=1 ;;
+    --verify)      USE_VERIFY=1 ;;
+    --integration) USE_INTEGRATION_TEST=1 ;;
+    -it)           USE_INTEGRATION_TEST=1 ;;
+    *)             PASSTHROUGH_ARGS+=("$arg") ;;
+  esac
 done
+
+CMD_ARGS="${PASSTHROUGH_ARGS[*]}"
 
 # Determine Maven command
 if [ $USE_INTEGRATION_TEST -eq 1 ]; then
@@ -131,7 +128,8 @@ fi
 print_header "Test Results"
 
 # Extract test summary (handle both Surefire and Failsafe output)
-SUMMARY=$(grep -E "Tests run:|IT tests run:" "$LOG_FILE" | tail -1 || echo "No test summary found")
+SUMMARY=$(grep -E "Tests run:|IT tests run:" "$LOG_FILE" | tail -1)
+SUMMARY="${SUMMARY:-No test summary found}"
 
 # Parse failures and errors from summary
 FAILURES=$(echo "$SUMMARY" | sed -n 's/.*Failures: \([0-9]*\).*/\1/p')
