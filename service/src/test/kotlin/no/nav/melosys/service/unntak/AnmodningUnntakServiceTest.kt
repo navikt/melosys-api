@@ -3,6 +3,7 @@ package no.nav.melosys.service.unntak
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
@@ -352,6 +353,88 @@ class AnmodningUnntakServiceTest {
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
         Trygdedekninger.FULL_DEKNING_EOSFO
     )
+    @Test
+    fun `fortsettAnmodningUtenSed setter status og svarfrist og oppdaterer anmodningsperiode`() {
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+        }
+
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingService.lagre(behandling) } just Runs
+        every { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(BEHANDLING_ID) } just Runs
+
+        anmodningUnntakService.fortsettAnmodningUtenSed(BEHANDLING_ID)
+
+        behandling.status shouldBe Behandlingsstatus.ANMODNING_UNNTAK_SENDT
+        behandling.dokumentasjonSvarfristDato shouldNotBe null
+        verify { behandlingService.lagre(behandling) }
+        verify { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(BEHANDLING_ID) }
+    }
+
+    @Test
+    fun `fortsettAnmodningUtenSed feil behandlingstema forvent exception`() {
+        val behandling = Behandling.forTest { id = BEHANDLING_ID }
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+
+        val exception = shouldThrow<FunksjonellException> {
+            anmodningUnntakService.fortsettAnmodningUtenSed(BEHANDLING_ID)
+        }
+        exception.message shouldContain "Behandling er ikke av tema UTSENDT_ARBEIDSTAKER"
+    }
+
+    @Test
+    fun `fortsettAnmodningUtenSed behandling er avsluttet forvent exception`() {
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            status = Behandlingsstatus.AVSLUTTET
+        }
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+
+        val exception = shouldThrow<FunksjonellException> {
+            anmodningUnntakService.fortsettAnmodningUtenSed(BEHANDLING_ID)
+        }
+        exception.message shouldContain "Behandlingen er avsluttet"
+    }
+
+    @Test
+    fun `endreStatusTilVurderDokument setter status til VURDER_DOKUMENT`() {
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            status = Behandlingsstatus.ANMODNING_UNNTAK_SENDT
+        }
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingService.lagre(behandling) } just Runs
+
+
+        anmodningUnntakService.endreStatusTilVurderDokument(BEHANDLING_ID)
+
+
+        behandling.status shouldBe Behandlingsstatus.VURDER_DOKUMENT
+        verify { behandlingService.lagre(behandling) }
+    }
+
+    @Test
+    fun `endreStatusTilVurderDokument feil behandlingsstatus forvent exception`() {
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingService.lagre(behandling) } just Runs
+
+
+        val exception = shouldThrow<FunksjonellException> {
+            anmodningUnntakService.endreStatusTilVurderDokument(BEHANDLING_ID)
+        }
+
+
+        exception.message shouldContain "Behandlingen har ikke status ANMODNING_UNNTAK_SENDT"
+    }
+
     companion object {
         private const val BEHANDLING_ID = 1L
         private const val FRITEKST_SED = "Ytterligere info som fritekst"

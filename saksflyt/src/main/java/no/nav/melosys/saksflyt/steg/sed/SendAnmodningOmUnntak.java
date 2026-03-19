@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -26,6 +25,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import no.nav.melosys.service.unntak.AnmodningUnntakKonstanter;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.YTTERLIGERE_INFO_SED;
@@ -36,8 +36,6 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
     private final BehandlingService behandlingService;
     private final AnmodningsperiodeService anmodningsperiodeService;
 
-    private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
-    private static final int SVARFRIST_MÅNEDER = 2;
 
     public SendAnmodningOmUnntak(EessiService eessiService,
                                  BrevBestiller brevBestiller,
@@ -59,8 +57,8 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
     public void utfør(Prosessinstans prosessinstans) {
 
         Behandling behandling = prosessinstans.getBehandling();
-        LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(SVARFRIST_MÅNEDER);
-        behandling.setDokumentasjonSvarfristDato(svarFristDato.atZone(TIME_ZONE_ID).toInstant());
+        LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(AnmodningUnntakKonstanter.SVARFRIST_MÅNEDER);
+        behandling.setDokumentasjonSvarfristDato(svarFristDato.atZone(AnmodningUnntakKonstanter.TIME_ZONE_ID).toInstant());
         behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         behandlingService.lagre(behandling);
         anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(behandling.getId());

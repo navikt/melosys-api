@@ -26,14 +26,22 @@ class KansellerFakturaserie(
         val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)!!
         val fagsak = behandling!!.fagsak
         val sisteBehandlingMedFakturaserieReferanse =
-            fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().firstOrNull { harFakturaserieReferanse(it) }
+            fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()
+                .filter { !it.erÅrsavregning() }
+                .firstOrNull { harFakturaserieReferanse(it) }
 
         if (sisteBehandlingMedFakturaserieReferanse != null) {
             val behandlingID = sisteBehandlingMedFakturaserieReferanse.id
             val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
             log.info("Kansellerer fakturaserie for behandling: $behandlingID med fakturaseriereferanse: ${behandlingsresultat.fakturaserieReferanse}")
+            val årsavregningRefs = fagsak.hentAlleÅrsavregninger()
+                .mapNotNull { behandlingsresultatService.hentBehandlingsresultat(it.id).fakturaserieReferanse }
             val fakturaserieResponse =
-                faktureringskomponentenClient.kansellerFakturaserie(behandlingsresultat.fakturaserieReferanse!!, saksbehandlerIdent)
+                faktureringskomponentenClient.kansellerFakturaserie(
+                    behandlingsresultat.fakturaserieReferanse!!,
+                    saksbehandlerIdent,
+                    årsavregningRefs
+                )
             behandlingsresultat.fakturaserieReferanse = fakturaserieResponse.fakturaserieReferanse
             behandlingsresultatService.lagre(behandlingsresultat)
         } else {

@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.trygdeavgift
+package no.nav.melosys.integrasjon.sak
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
@@ -6,15 +6,13 @@ import com.github.tomakehurst.wiremock.client.WireMock.any
 import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
 import com.github.tomakehurst.wiremock.client.WireMock.containing
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.matching
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
-import no.nav.melosys.domain.readResourceAsString
 import no.nav.melosys.integrasjon.MetricsTestConfig
-import no.nav.melosys.integrasjon.trygdeavgift.dto.PengerDto
-import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningRequest
+import no.nav.melosys.integrasjon.felles.EnvironmentHandler
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -27,24 +25,24 @@ import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebCl
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.mock.env.MockEnvironment
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
-import java.math.BigDecimal
-import java.time.LocalDate
 import java.util.UUID
 
 @SpringBootTest
 @ActiveProfiles("wiremock-test")
 @ContextConfiguration(
     classes = [
-        TrygdeavgiftClient::class,
+        CorrelationIdOutgoingFilter::class,
+        SakClientConfig::class,
         MetricsTestConfig::class,
     ]
 )
 @AutoConfigureWebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TrygdeavgiftClientTest(
-    @Autowired private val trygdeavgiftClient: TrygdeavgiftClient,
+class BasicAuthSakClientTest(
+    @Autowired private val sakClient: SakClientInterface,
     @Value("\${mockserver.port}") mockServerPort: Int,
 ) {
     private val processUUID = UUID.randomUUID()
@@ -54,6 +52,11 @@ class TrygdeavgiftClientTest(
     fun beforeAll() {
         ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prosessSteg")
         mockServer.start()
+        val environment = MockEnvironment().apply {
+            setProperty("systemuser.username", "srvmelosys")
+            setProperty("systemuser.password", "dummy")
+        }
+        EnvironmentHandler(environment)
     }
 
     @AfterAll
@@ -68,73 +71,61 @@ class TrygdeavgiftClientTest(
     }
 
     @Test
-    fun `beregnTrygdeavgift serialiserer request body korrekt`() {
+    fun `opprettSak serialiserer request body korrekt`() {
         mockServer.stubFor(
             any(anyUrl()).willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .withBody(readResourceAsString("mock/trygdeavgift/trygdeavgift.json"))
+                    .withBody(
+                        """
+                        {
+                            "id": 123,
+                            "tema": "MED",
+                            "applikasjon": "MELOSYS",
+                            "fagsakNr": "MEL-456",
+                            "aktoerId": "12345678901",
+                            "orgnr": null,
+                            "opprettetAv": null,
+                            "opprettetTidspunkt": null
+                        }
+                        """
+                    )
             )
         )
 
-        val request = TrygdeavgiftsberegningRequest(
-            medlemskapsperioder = emptySet(),
-            skatteforholdsperioder = emptySet(),
-            inntektsperioder = emptyList(),
-            foedselsdato = LocalDate.of(2000, 1, 1)
+        val request = SakDto(
+            tema = "MED",
+            applikasjon = "MELOSYS",
+            saksnummer = "MEL-456",
+            aktørId = "12345678901",
+            orgnr = null,
         )
 
-        trygdeavgiftClient.beregnTrygdeavgift(request)
+        sakClient.opprettSak(request)
 
         mockServer.verify(
-            postRequestedFor(urlEqualTo("/trygdeavgift/v2/beregn"))
+            postRequestedFor(urlEqualTo("/api/v1/saker"))
                 .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Basic .+"))
                 .withRequestBody(
                     equalToJson(
                         """
                         {
-                            "medlemskapsperioder": [],
-                            "skatteforholdsperioder": [],
-                            "inntektsperioder": [],
-                            "foedselsdato": [2000, 1, 1]
+                            "id": null,
+                            "tema": "MED",
+                            "applikasjon": "MELOSYS",
+                            "fagsakNr": "MEL-456",
+                            "aktoerId": "12345678901",
+                            "orgnr": null,
+                            "opprettetAv": null,
+                            "opprettetTidspunkt": null
                         }
                         """,
-                        // TrygdeavgiftClient bruker sin egen WebClient uten JavaTimeModule,
-                        // så LocalDate serialiseres som timestamp-array. Testen dokumenterer
-                        // denne faktiske atferden som safety net for Spring Boot 4-oppgradering.
                         true, false
                     )
                 )
         )
     }
-
-    @Test
-    fun `beregn trygdeavgift mapper response korrekt`() {
-        mockServer.stubFor(
-            any(anyUrl()).willReturn(
-                aResponse()
-                    .withStatus(200)
-                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .withBody(readResourceAsString("mock/trygdeavgift/trygdeavgift.json"))
-            )
-        )
-
-        val response = trygdeavgiftClient.beregnTrygdeavgift(lagTrygdeavgiftsberegningRequest())
-
-        response[0].run {
-            beregnetPeriode.sats shouldBe BigDecimal.valueOf(21.8)
-            beregnetPeriode.månedsavgift shouldBe PengerDto(BigDecimal.valueOf(21800))
-            component2() shouldNotBe null
-        }
-    }
-
-    private fun lagTrygdeavgiftsberegningRequest() = TrygdeavgiftsberegningRequest(
-        emptySet(),
-        emptySet(),
-        emptyList(),
-        LocalDate.now().minusYears(20)
-    )
 }
-
