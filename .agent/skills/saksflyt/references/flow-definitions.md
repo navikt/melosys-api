@@ -1,0 +1,390 @@
+# Flow Definitions
+
+## Table of Contents
+1. [Overview](#overview)
+2. [Verdict Execution Flows](#verdict-execution-flows)
+3. [Journaling Flows](#journaling-flows)
+4. [SED/EESSI Flows](#sedeessi-flows)
+5. [Exception/Unntak Flows](#exceptionunntak-flows)
+6. [Administrative Flows](#administrative-flows)
+7. [ProsessSteg Reference](#prosesssteg-reference)
+
+## Overview
+
+All flow definitions are in `saksflyt/src/main/kotlin/.../prosessflyt/ProsessflytDefinisjon.kt`.
+
+Each `ProsessType` maps to a `ProsessFlyt` containing an ordered list of `ProsessSteg`.
+
+## Verdict Execution Flows
+
+### IVERKSETT_VEDTAK_EOS
+Execute EØS verdict - send to foreign authorities.
+```
+AVKLAR_MYNDIGHET → AVKLAR_ARBEIDSGIVER → LAGRE_LOVVALGSPERIODE_MEDL →
+OPPRETT_FAKTURASERIE → SEND_VEDTAKSBREV_INNLAND → SEND_VEDTAK_UTLAND →
+DISTRIBUER_JOURNALPOST_UTLAND → AVSLUTT_SAK_OG_BEHANDLING → SEND_MELDING_OM_VEDTAK
+```
+
+### IVERKSETT_VEDTAK_FTRL
+Execute Folketrygdloven verdict.
+```
+LAGRE_MEDLEMSKAPSPERIODE_MEDL → OPPRETT_FAKTURASERIE →
+AVSLUTT_SAK_OG_BEHANDLING → SEND_MELDING_OM_VEDTAK → RESET_ÅPNE_ÅRSAVREGNINGER
+```
+
+### IVERKSETT_VEDTAK_TRYGDEAVTALE
+Execute bilateral agreement verdict.
+```
+AVKLAR_MYNDIGHET → AVKLAR_ARBEIDSGIVER → LAGRE_LOVVALGSPERIODE_MEDL →
+AVSLUTT_SAK_OG_BEHANDLING → SEND_MELDING_OM_VEDTAK
+```
+
+### IVERKSETT_VEDTAK_IKKE_YRKESAKTIV
+Non-worker verdict execution.
+```
+LAGRE_LOVVALGSPERIODE_MEDL → SEND_VEDTAKSBREV_INNLAND →
+AVSLUTT_SAK_OG_BEHANDLING → SEND_MELDING_OM_VEDTAK
+```
+
+### IVERKSETT_VEDTAK_AARSAVREGNING
+Annual reconciliation verdict.
+```
+SEND_FAKTURA_AARSAVREGNING → VARSLE_PENSJONSOPPTJENING →
+AVSLUTT_SAK_OG_BEHANDLING → SEND_MELDING_OM_VEDTAK
+```
+
+### IVERKSETT_EOS_PENSJONIST_AVGIFT
+EØS pensioner fee.
+```
+OPPRETT_FAKTURASERIE → AVSLUTT_SAK_OG_BEHANDLING → SEND_ORIENTERINGSBREV_TRYGDEAVGIFT
+```
+
+## Journaling Flows
+
+### JFR_NY_SAK_BRUKER
+New case from user journal entry.
+```
+OPPRETT_SAK_OG_BEH → OPPRETT_MOTTATTEOPPLYSNINGER → OPPRETT_ARKIVSAK →
+OPPDATER_SAKSRELASJON → OPPDATER_OG_FERDIGSTILL_JOURNALPOST →
+HENT_REGISTEROPPLYSNINGER → VURDER_INNGANGSVILKÅR → OPPRETT_OPPGAVE →
+SEND_FORVALTNINGSMELDING
+```
+
+### JFR_NY_SAK_VIRKSOMHET
+New case from organization journal entry.
+```
+OPPRETT_SAK_OG_BEH → OPPRETT_ARKIVSAK → OPPDATER_OG_FERDIGSTILL_JOURNALPOST →
+OPPRETT_OPPGAVE
+```
+
+### JFR_KNYTT
+Link to existing case.
+```
+OPPDATER_OG_FERDIGSTILL_JOURNALPOST → OPPDATER_SAKSRELASJON →
+OPPRETT_TIDLIGERE_JOURNALPOSTER_FOR_SAK → JFR_SETT_VURDER_DOKUMENT →
+JFR_TILDEL_BEHANDLINGSOPPGAVE → SEND_FORVALTNINGSMELDING
+```
+
+### JFR_ANDREGANG_NY_BEHANDLING
+Second-time journal with new treatment.
+```
+OPPRETT_NY_BEHANDLING → OPPRETT_MOTTATTEOPPLYSNINGER →
+OPPDATER_OG_FERDIGSTILL_JOURNALPOST → OPPDATER_SAKSRELASJON →
+HENT_REGISTEROPPLYSNINGER → VURDER_INNGANGSVILKÅR → OPPRETT_OPPGAVE →
+SEND_FORVALTNINGSMELDING
+```
+
+### JFR_ANDREGANG_REPLIKER_BEHANDLING
+Second-time journal replicating treatment.
+```
+REPLIKER_BEHANDLING → OPPDATER_OG_FERDIGSTILL_JOURNALPOST →
+OPPDATER_SAKSRELASJON → OPPRETT_OPPGAVE → SEND_FORVALTNINGSMELDING
+```
+
+## SED/EESSI Flows
+
+### MOTTAK_SED
+Receive SED for routing.
+```
+SED_MOTTAK_RUTING
+```
+*Note: This is a simple routing step that determines further handling.*
+
+### MOTTAK_SED_JOURNALFØRING
+Receive SED for journaling only.
+```
+SED_MOTTAK_FERDIGSTILL_JOURNALPOST
+```
+
+### REGISTRERING_UNNTAK_NY_SAK
+Register exception - new case from SED.
+```
+SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH → OPPRETT_ARKIVSAK → OPPDATER_SAKSRELASJON →
+SED_MOTTAK_FERDIGSTILL_JOURNALPOST → OPPRETT_SEDDOKUMENT →
+HENT_REGISTEROPPLYSNINGER → REGISTERKONTROLL → BESTEM_BEHANDLINGMÅTE_SED
+```
+
+### REGISTRERING_UNNTAK_NY_BEHANDLING
+Register exception - new treatment from SED.
+```
+SED_MOTTAK_OPPRETT_NY_BEHANDLING → SED_MOTTAK_FERDIGSTILL_JOURNALPOST →
+AVSLUTT_TIDLIGERE_MEDL_PERIODE → OPPRETT_SEDDOKUMENT →
+HENT_REGISTEROPPLYSNINGER → REGISTERKONTROLL → BESTEM_BEHANDLINGMÅTE_SED
+```
+
+### ARBEID_FLERE_LAND_NY_SAK
+Work in multiple countries - new case (A003 SED).
+```
+SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH → OPPRETT_ARKIVSAK → OPPDATER_SAKSRELASJON →
+SED_MOTTAK_FERDIGSTILL_JOURNALPOST → OPPRETT_SEDDOKUMENT → OPPRETT_SED_GRUNNLAG →
+HENT_REGISTEROPPLYSNINGER → VURDER_INNGANGSVILKÅR → REGISTERKONTROLL →
+BESTEM_BEHANDLINGMÅTE_SED
+```
+
+### ARBEID_FLERE_LAND_NY_BEHANDLING
+Work in multiple countries - new treatment (A003 SED).
+```
+SED_MOTTAK_OPPRETT_NY_BEHANDLING → SED_MOTTAK_FERDIGSTILL_JOURNALPOST →
+AVSLUTT_TIDLIGERE_MEDL_PERIODE → OPPRETT_SEDDOKUMENT → OPPRETT_SED_GRUNNLAG →
+HENT_REGISTEROPPLYSNINGER → VURDER_INNGANGSVILKÅR → REGISTERKONTROLL →
+BESTEM_BEHANDLINGMÅTE_SED
+```
+
+### ANMODNING_OM_UNNTAK_SVAR
+Response to exception request.
+```
+SED_MOTTAK_FERDIGSTILL_JOURNALPOST → OPPRETT_ANMODNINGSPERIODESVAR →
+BESTEM_BEHANDLINGSMÅTE_SVAR_ANMODNING_UNNTAK
+```
+
+### MOTTAK_SOKNAD_ALTINN
+Receive application from Altinn.
+```
+OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD → OPPRETT_ARKIVSAK →
+OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN → HENT_REGISTEROPPLYSNINGER →
+VURDER_INNGANGSVILKÅR → OPPRETT_OPPGAVE → SEND_FORVALTNINGSMELDING
+```
+
+## Exception/Unntak Flows
+
+### ANMODNING_OM_UNNTAK
+Request exception from foreign authority.
+```
+AVKLAR_MYNDIGHET → LAGRE_ANMODNINGSPERIODE_MEDL →
+SEND_ORIENTERING_ANMODNING_UNNTAK → SEND_ANMODNING_OM_UNNTAK →
+OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT
+```
+
+### REGISTRERE_UNNTAK_FRA_MEDLEMSKAP
+Register membership exception.
+```
+LAGRE_LOVVALGSPERIODE_MEDL → AVSLUTT_SAK_OG_BEHANDLING
+```
+
+### REGISTRERING_UNNTAK_GODKJENN
+Approve exception period.
+```
+LAGRE_LOVVALGSPERIODE_MEDL → SEND_GODKJENNING_REGISTRERING_UNNTAK →
+AVSLUTT_SAK_OG_BEHANDLING
+```
+
+### REGISTRERING_UNNTAK_AVVIS
+Reject exception period.
+```
+AVSLUTT_SAK_OG_BEHANDLING
+```
+
+### ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK
+Receive exception request - new case.
+```
+SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH → OPPRETT_ARKIVSAK → OPPDATER_SAKSRELASJON →
+SED_MOTTAK_FERDIGSTILL_JOURNALPOST → OPPRETT_SEDDOKUMENT → OPPRETT_SED_GRUNNLAG →
+OPPRETT_ANMODNINGSPERIODE_FRA_SED → HENT_REGISTEROPPLYSNINGER →
+REGISTERKONTROLL → LAGRE_ANMODNINGSPERIODE_MEDL → BESTEM_BEHANDLINGMÅTE_SED
+```
+
+### ANMODNING_OM_UNNTAK_MOTTAK_NY_BEHANDLING
+Receive exception request - new treatment.
+```
+SED_MOTTAK_OPPRETT_NY_BEHANDLING → SED_MOTTAK_FERDIGSTILL_JOURNALPOST →
+OPPRETT_SEDDOKUMENT → OPPRETT_SED_GRUNNLAG → OPPRETT_ANMODNINGSPERIODE_FRA_SED →
+AVSLUTT_TIDLIGERE_MEDL_ANMODNINGSPERIODE → AVSLUTT_TIDLIGERE_MEDL_PERIODE →
+HENT_REGISTEROPPLYSNINGER → REGISTERKONTROLL → LAGRE_ANMODNINGSPERIODE_MEDL →
+BESTEM_BEHANDLINGMÅTE_SED
+```
+
+### ANMODNING_OM_UNNTAK_MOTTAK_SVAR
+Respond to exception request.
+```
+LAGRE_LOVVALGSPERIODE_MEDL → SEND_SVAR_ANMODNING_UNNTAK →
+AVSLUTT_SAK_OG_BEHANDLING
+```
+
+## Administrative Flows
+
+### OPPRETT_SAK
+Create new case.
+```
+OPPRETT_SAK_OG_BEH → OPPRETT_MOTTATTEOPPLYSNINGER → OPPRETT_ARKIVSAK →
+HENT_REGISTEROPPLYSNINGER → VURDER_INNGANGSVILKÅR → OPPRETT_OPPGAVE
+```
+
+### OPPRETT_NY_BEHANDLING_FOR_SAK
+Create new treatment for existing case.
+```
+OPPRETT_NY_BEHANDLING → OPPRETT_MOTTATTEOPPLYSNINGER →
+HENT_REGISTEROPPLYSNINGER → VURDER_INNGANGSVILKÅR → OPPRETT_OPPGAVE
+```
+
+### OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK
+Create replicated treatment.
+```
+REPLIKER_BEHANDLING → OPPRETT_OPPGAVE
+```
+
+### HENLEGG_SAK
+Dismiss case.
+```
+SEND_HENLEGGELSESBREV
+```
+
+### ANNULLER_SAK
+Annul case - remove MEDL periods and cancel invoice.
+```
+LAGRE_MEDLEMSKAPSPERIODE_MEDL → LAGRE_LOVVALGSPERIODE_MEDL →
+KANSELLER_FAKTURASERIE → AVSLUTT_SAK_OG_BEHANDLING
+```
+
+### VIDERESEND_SOKNAD
+Forward application.
+```
+AVKLAR_MYNDIGHET → SEND_ORIENTERINGSBREV_VIDERESENDING_SØKNAD →
+VIDERESEND_SØKNAD → DISTRIBUER_JOURNALPOST_UTLAND
+```
+
+### UTPEKING_AVVIS
+Reject designation.
+```
+UTPEKING_SEND_AVSLAG → AVSLUTT_SAK_OG_BEHANDLING
+```
+
+### OPPRETT_OG_DISTRIBUER_BREV
+Create and distribute letter.
+```
+OPPRETT_OG_JOURNALFØR_BREV → DISTRIBUER_JOURNALPOST
+```
+
+### SEND_BREV
+Send letter via Doksys.
+```
+BESTILL_BREV
+```
+
+### SATSENDRING
+Rate change processing.
+```
+OPPRETT_SATSBEHANDLING → BEREGN_OG_SEND_FAKTURA → AVSLUTT_SAK_OG_BEHANDLING
+```
+
+### OPPDATER_FAKTURAMOTTAKER
+Update invoice recipient.
+```
+OPPDATER_FAKTURAMOTTAKER
+```
+
+### OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING
+Create treatment for missing payment.
+```
+OPPRETT_MANGLENDE_INNBETALING_BEHANDLING → OPPRETT_OPPGAVE →
+SEND_MANGLENDE_INNBETALING_VARSELBREV
+```
+
+### OPPRETT_NY_BEHANDLING_AARSAVREGNING
+Create annual reconciliation treatment.
+```
+OPPRETT_AARSAVREGNING_BEHANDLING → OPPRETT_OPPGAVE
+```
+
+## ProsessSteg Reference
+
+All steps are defined in `saksflyt-api/src/main/java/.../domain/ProsessSteg.java`.
+
+### MEDL Steps
+
+| Step | Description |
+|------|-------------|
+| `LAGRE_LOVVALGSPERIODE_MEDL` | Save applicable law period to MEDL |
+| `LAGRE_MEDLEMSKAPSPERIODE_MEDL` | Save membership period to MEDL |
+| `LAGRE_ANMODNINGSPERIODE_MEDL` | Save request period to MEDL |
+| `AVSLUTT_TIDLIGERE_MEDL_PERIODE` | Close previous MEDL period |
+| `AVSLUTT_TIDLIGERE_MEDL_ANMODNINGSPERIODE` | Close previous request period |
+
+### Case/Treatment Steps
+
+| Step | Description |
+|------|-------------|
+| `OPPRETT_SAK_OG_BEH` | Create case and treatment |
+| `OPPRETT_NY_BEHANDLING` | Create new treatment |
+| `REPLIKER_BEHANDLING` | Replicate first closed treatment |
+| `AVSLUTT_SAK_OG_BEHANDLING` | Close case and treatment |
+| `OPPRETT_MOTTATTEOPPLYSNINGER` | Create received information |
+
+### Journaling Steps
+
+| Step | Description |
+|------|-------------|
+| `OPPRETT_ARKIVSAK` | Create archive case |
+| `OPPDATER_OG_FERDIGSTILL_JOURNALPOST` | Update and complete journal entry |
+| `SED_MOTTAK_FERDIGSTILL_JOURNALPOST` | Complete incoming SED journal |
+| `DISTRIBUER_JOURNALPOST` | Distribute journal entry |
+| `DISTRIBUER_JOURNALPOST_UTLAND` | Distribute to foreign authority |
+
+### Letter/Communication Steps
+
+| Step | Description |
+|------|-------------|
+| `SEND_VEDTAKSBREV_INNLAND` | Send verdict letter domestically |
+| `SEND_VEDTAK_UTLAND` | Send verdict abroad |
+| `SEND_FORVALTNINGSMELDING` | Send administrative message |
+| `SEND_HENLEGGELSESBREV` | Send dismissal letter |
+| `BESTILL_BREV` | Order letter via Doksys |
+| `OPPRETT_OG_JOURNALFØR_BREV` | Create and journal letter |
+
+### SED Steps
+
+| Step | Description |
+|------|-------------|
+| `SED_MOTTAK_RUTING` | Route incoming SED |
+| `SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH` | Create case from SED |
+| `SED_MOTTAK_OPPRETT_NY_BEHANDLING` | Create treatment from updated SED |
+| `OPPRETT_SEDDOKUMENT` | Create case info from SED |
+| `OPPRETT_SED_GRUNNLAG` | Create received info from SED |
+| `BESTEM_BEHANDLINGMÅTE_SED` | Determine SED handling method |
+
+### Register/Validation Steps
+
+| Step | Description |
+|------|-------------|
+| `HENT_REGISTEROPPLYSNINGER` | Fetch register information |
+| `REGISTERKONTROLL` | Register verification |
+| `VURDER_INNGANGSVILKÅR` | Evaluate entry conditions |
+| `AVKLAR_MYNDIGHET` | Clarify foreign authority |
+| `AVKLAR_ARBEIDSGIVER` | Clarify Norwegian employer |
+
+### Task Steps
+
+| Step | Description |
+|------|-------------|
+| `OPPRETT_OPPGAVE` | Create task (Gosys) |
+| `GJENBRUK_OPPGAVE` | Reuse existing task |
+| `JFR_TILDEL_BEHANDLINGSOPPGAVE` | Assign treatment task |
+
+### Invoice Steps
+
+| Step | Description |
+|------|-------------|
+| `OPPRETT_FAKTURASERIE` | Create invoice series |
+| `KANSELLER_FAKTURASERIE` | Cancel invoice series |
+| `BEREGN_OG_SEND_FAKTURA` | Calculate and send invoice |
+| `SEND_FAKTURA_AARSAVREGNING` | Send annual reconciliation invoice |
+| `OPPDATER_FAKTURAMOTTAKER` | Update invoice recipient |
