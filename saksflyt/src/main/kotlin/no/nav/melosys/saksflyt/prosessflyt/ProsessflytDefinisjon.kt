@@ -84,6 +84,7 @@ object ProsessflytDefinisjon {
             LAGRE_MEDLEMSKAPSPERIODE_MEDL,
             LAGRE_LOVVALGSPERIODE_MEDL,
             KANSELLER_FAKTURASERIE,
+            AVSLUTT_AARSAVREGNINGER,
             AVSLUTT_SAK_OG_BEHANDLING
         ),
         JFR_KNYTT to ProsessFlyt(

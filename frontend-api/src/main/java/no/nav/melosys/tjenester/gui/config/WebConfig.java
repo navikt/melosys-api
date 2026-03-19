@@ -16,6 +16,7 @@ import org.springframework.web.servlet.config.annotation.ContentNegotiationConfi
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.handler.UrlHandlerFilter;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -30,12 +31,16 @@ public class WebConfig implements WebMvcConfigurer {
     @Bean
     public JsonMapper objectMapper(@Lazy KodeverkService kodeverkService) {
         return JsonMapper.builder()
-            
             .addModule(new KotlinModule.Builder().build())
             .addModule(new MelosysModule(kodeverkService))
             .enable(MapperFeature.DEFAULT_VIEW_INCLUSION)
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .build();
+    }
+
+    @Bean
+    public UrlHandlerFilter trailingSlashFilter() throws Exception {
+        return UrlHandlerFilter.trailingSlashHandler("/**").wrapRequest().build();
     }
 
     @Override

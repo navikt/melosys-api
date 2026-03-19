@@ -1,56 +1,100 @@
 package no.nav.melosys.integrasjon.oppgave.konsument
 
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.any
+import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
+import com.github.tomakehurst.wiremock.client.WireMock.containing
+import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.matching
+import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.domain.readResourceAsString
-import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.integrasjon.MetricsTestConfig
+import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-import org.junit.jupiter.api.*
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.webclient.test.autoconfigure.AutoConfigureWebClient
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import java.time.LocalDate
 import java.time.ZonedDateTime
+import java.util.UUID
 
+@SpringBootTest
+@ActiveProfiles("wiremock-test")
+@ContextConfiguration(
+    classes = [
+        OAuthMockServer::class,
+        CorrelationIdOutgoingFilter::class,
+        GenericAuthFilterFactory::class,
+        OppgaveClientProducer::class,
+        MetricsTestConfig::class,
+    ]
+)
+@AutoConfigureWebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class OppgaveClientTest {
-
-    private lateinit var oppgaveClient: OppgaveClient
-    private lateinit var mockServer: MockWebServer
+class OppgaveClientTest(
+    @Autowired private val oppgaveClient: OppgaveClient,
+    @Autowired private val oAuthMockServer: OAuthMockServer,
+    @Value("\${mockserver.port}") mockServerPort: Int,
+) {
+    private val processUUID = UUID.randomUUID()
+    private val mockServer = WireMockServer(WireMockConfiguration.wireMockConfig().port(mockServerPort))
 
     @BeforeAll
-    fun setupServer() {
-        mockServer = MockWebServer()
+    fun beforeAll() {
+        ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prosessSteg")
         mockServer.start()
+        oAuthMockServer.start()
     }
 
     @AfterAll
-    fun tearDown() {
-        mockServer.shutdown()
+    fun afterAll() {
+        mockServer.stop()
+        oAuthMockServer.stop()
+        ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
     }
 
     @BeforeEach
-    fun setup() {
-        oppgaveClient = OppgaveClient(WebClient.builder().baseUrl("http://localhost:${mockServer.port}").build())
+    fun beforeEach() {
+        mockServer.resetAll()
+        oAuthMockServer.reset()
     }
 
     @Test
     fun `hentOppgave oppgave finnes verifiserer mapping`() {
-        mockServer.enqueue(
-            MockResponse()
-                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(readResourceAsString(OPPGAVE_GET_JSON_PATH))
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(readResourceAsString(OPPGAVE_GET_JSON_PATH))
+            )
         )
 
-
         val oppgave = oppgaveClient.hentOppgave("1")
-
 
         oppgave!!.run {
             id shouldBe "11519"
@@ -75,29 +119,32 @@ class OppgaveClientTest {
     }
 
     @Test
-    fun `hentOppgave oppgave finnes ikke 404 status kaster IkkeFunnetException`() {
-        mockServer.enqueue(
-            MockResponse()
-                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setResponseCode(404)
-                .setBody(readResourceAsString(OPPGAVE_FEILMELDING_JSON_PATH))
+    fun `hentOppgave oppgave finnes ikke 404 status kaster TekniskException`() {
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(404)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(readResourceAsString(OPPGAVE_FEILMELDING_JSON_PATH))
+            )
         )
 
-
-        val exception = shouldThrow<IkkeFunnetException> {
+        val exception = shouldThrow<TekniskException> {
             oppgaveClient.hentOppgave("1")
         }
 
-
-        exception.message shouldContain "Fant ingen oppgave"
+        exception.message shouldContain "Kall mot Oppgave feilet."
     }
 
     @Test
     fun `hentOppgaveListe mottar to oppgaver verifiserer mapping`() {
-        mockServer.enqueue(
-            MockResponse()
-                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(readResourceAsString(OPPGAVELIST_GET_JSON_PATH))
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(readResourceAsString(OPPGAVELIST_GET_JSON_PATH))
+            )
         )
 
         val searchRequest = OppgaveSearchRequest.Builder("123").apply {
@@ -110,41 +157,144 @@ class OppgaveClientTest {
             medStatusKategori("AAPEN")
         }.build()
 
-
         val oppgaver = oppgaveClient.hentOppgaveListe(searchRequest)
-
 
         oppgaver.map { it.saksreferanse } shouldContainExactlyInAnyOrder listOf("MEL-301", "MEL-513")
     }
 
     @Test
-    fun `oppdaterOppgave oppgave oppdateres verifiserer mapping`() {
-        mockServer.enqueue(
-            MockResponse()
-                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(readResourceAsString(OPPGAVE_GET_JSON_PATH))
+    fun `opprettOppgave serialiserer request body korrekt`() {
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(readResourceAsString(OPPGAVE_GET_JSON_PATH))
+            )
         )
 
+        val request = OpprettOppgaveDto().apply {
+            aktivDato = LocalDate.of(2024, 1, 15)
+            aktørId = "1332607802528"
+            orgnr = null
+            behandlesAvApplikasjon = "FS38"
+            behandlingstema = "ab0390"
+            behandlingstype = null
+            beskrivelse = "Test oppgave"
+            fristFerdigstillelse = LocalDate.of(2024, 2, 1)
+            journalpostId = "439654251"
+            oppgavetype = "BEH_SED"
+            prioritet = "NORM"
+            saksreferanse = "MEL-123"
+            tema = "MED"
+            temagruppe = null
+            tildeltEnhetsnr = "4530"
+            tilordnetRessurs = null
+            mappeId = null
+        }
 
-        val result = oppgaveClient.oppdaterOppgave(OppgaveDto())
+        oppgaveClient.opprettOppgave(request)
 
-
-        result.id shouldBe "11519"
+        mockServer.verify(
+            postRequestedFor(urlEqualTo("/api/v1/oppgaver"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                .withRequestBody(
+                    equalToJson(
+                        """
+                        {
+                            "aktivDato": "2024-01-15",
+                            "aktoerId": "1332607802528",
+                            "orgnr": null,
+                            "behandlesAvApplikasjon": "FS38",
+                            "behandlingstema": "ab0390",
+                            "behandlingstype": null,
+                            "beskrivelse": "Test oppgave",
+                            "fristFerdigstillelse": "2024-02-01",
+                            "journalpostId": "439654251",
+                            "oppgavetype": "BEH_SED",
+                            "prioritet": "NORM",
+                            "saksreferanse": "MEL-123",
+                            "tema": "MED",
+                            "temagruppe": null,
+                            "tildeltEnhetsnr": "4530",
+                            "tilordnetRessurs": null,
+                            "mappeId": null
+                        }
+                        """,
+                        true, false
+                    )
+                )
+        )
     }
 
     @Test
-    fun `opprettOppgave oppgave opprettes verifiserer mapping`() {
-        mockServer.enqueue(
-            MockResponse()
-                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(readResourceAsString(OPPGAVE_GET_JSON_PATH))
+    fun `oppdaterOppgave serialiserer request body korrekt`() {
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(readResourceAsString(OPPGAVE_GET_JSON_PATH))
+            )
         )
 
+        val request = OppgaveDto().apply {
+            id = "11519"
+            versjon = 3
+            status = "AAPNET"
+            aktivDato = LocalDate.of(2024, 1, 15)
+            aktørId = "1332607802528"
+            behandlesAvApplikasjon = "FS38"
+            behandlingstema = "ab0390"
+            beskrivelse = "Oppdatert beskrivelse"
+            fristFerdigstillelse = LocalDate.of(2024, 2, 1)
+            journalpostId = "439654251"
+            oppgavetype = "BEH_SED"
+            prioritet = "NORM"
+            saksreferanse = "MEL-123"
+            tema = "MED"
+            tildeltEnhetsnr = "4530"
+        }
 
-        val oppgaveID = oppgaveClient.opprettOppgave(OpprettOppgaveDto())
+        oppgaveClient.oppdaterOppgave(request)
 
-
-        oppgaveID shouldBe "11519"
+        mockServer.verify(
+            putRequestedFor(urlEqualTo("/api/v1/oppgaver/11519"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                .withRequestBody(
+                    equalToJson(
+                        """
+                        {
+                            "id": "11519",
+                            "versjon": 3,
+                            "status": "AAPNET",
+                            "aktivDato": "2024-01-15",
+                            "aktoerId": "1332607802528",
+                            "orgnr": null,
+                            "behandlesAvApplikasjon": "FS38",
+                            "behandlingstema": "ab0390",
+                            "behandlingstype": null,
+                            "beskrivelse": "Oppdatert beskrivelse",
+                            "fristFerdigstillelse": "2024-02-01",
+                            "journalpostId": "439654251",
+                            "oppgavetype": "BEH_SED",
+                            "prioritet": "NORM",
+                            "saksreferanse": "MEL-123",
+                            "tema": "MED",
+                            "temagruppe": null,
+                            "tildeltEnhetsnr": "4530",
+                            "tilordnetRessurs": null,
+                            "mappeId": null
+                        }
+                        """,
+                        true, false
+                    )
+                )
+        )
     }
 
     companion object {

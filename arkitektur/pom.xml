@@ -33,11 +33,6 @@
             <artifactId>melosys-service</artifactId>
             <scope>test</scope>
         </dependency>
-    <dependency>
-      <groupId>com.sun.xml.ws</groupId>
-      <artifactId>jaxws-rt</artifactId>
-      <scope>provided</scope>
-    </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>melosys-integrasjon</artifactId>

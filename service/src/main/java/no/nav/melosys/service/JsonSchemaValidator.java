@@ -4,14 +4,15 @@ import java.io.InputStream;
 import java.util.List;
 import jakarta.validation.ValidationException;
 
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.node.ArrayNode;
-import com.jayway.jsonpath.InvalidPathException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jayway.jsonpath.JsonPath;
 import com.networknt.schema.Error;
+import com.networknt.schema.InputFormat;
 import com.networknt.schema.Schema;
 import com.networknt.schema.SchemaRegistry;
 import com.networknt.schema.SpecificationVersion;
@@ -20,10 +21,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JsonSchemaValidator {
-    private static final ObjectMapper DEFAULT_OBJECT_MAPPER = JsonMapper.builder().build();
+    private static final ObjectMapper DEFAULT_OBJECT_MAPPER = new ObjectMapper()
+        .registerModule(new JavaTimeModule())
+        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
-    private static final SchemaRegistry DEFAULT_SCHEMA_REGISTRY =
-        SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_7);
+    private static final SchemaRegistry DEFAULT_SCHEMA_REGISTRY = SchemaRegistry
+        .withDefaultDialect(SpecificationVersion.DRAFT_7);
 
     private static final Logger log = LoggerFactory.getLogger(JsonSchemaValidator.class);
     private static final String FEILMELDING = "Schemavalidering feilet for schema {}";
@@ -53,7 +56,7 @@ public class JsonSchemaValidator {
     }
 
     public void valider(String json, String schemaNavn) {
-        valider(tilJsonNode(json), hentSchema(schemaNavn));
+        valider(json, hentSchema(schemaNavn));
     }
 
     public void valider(String json, InputStream schemaStream) {
@@ -61,7 +64,7 @@ public class JsonSchemaValidator {
     }
 
     public void valider(String json, InputStream schemaStream, Logger logger) {
-        valider(tilJsonNode(json), hentSchema(schemaStream), logger);
+        valider(json, hentSchema(schemaStream), logger);
     }
 
     public void valider(Object o, InputStream schemaStream) {
@@ -73,50 +76,51 @@ public class JsonSchemaValidator {
     }
 
     public void valider(ArrayNode arrayNode, InputStream schemaStream, Logger logger) {
-        valider(arrayNode, hentSchema(schemaStream), logger);
-    }
-
-    private void valider(ArrayNode arrayNode, Schema schema, Logger logger) {
-        List<Error> errors = schema.validate(arrayNode);
-        if (!errors.isEmpty()) {
-            formaterFeil(errors, schema, arrayNode.toString(), logger);
-        }
+        valider(nodeTilString(arrayNode), hentSchema(schemaStream), logger);
     }
 
     public void valider(JsonNode jsonObject, InputStream schemaStream, Logger logger) {
-        valider(jsonObject, hentSchema(schemaStream), logger);
+        valider(nodeTilString(jsonObject), hentSchema(schemaStream), logger);
     }
 
-    private void valider(JsonNode jsonNode, Schema schema) {
-        valider(jsonNode, schema, log);
+    private void valider(String json, Schema schema) {
+        valider(json, schema, log);
     }
 
-    private void valider(JsonNode jsonNode, Schema schema, Logger logger) {
-        List<Error> errors = schema.validate(jsonNode);
+    private void valider(String json, Schema schema, Logger logger) {
+        try {
+            objectMapper.readTree(json);
+        } catch (JsonProcessingException e) {
+            throw new TekniskException("Ugyldig JSON-input", e);
+        }
+        List<Error> errors = schema.validate(json, InputFormat.JSON);
         if (!errors.isEmpty()) {
-            formaterFeil(errors, schema, jsonNode.toString(), logger);
+            formaterFeil(errors, schema, json, logger);
         }
     }
 
     private String objektTilString(Object object) {
         try {
             return objectMapper.writeValueAsString(object);
-        } catch (JacksonException e) {
+        } catch (JsonProcessingException e) {
             throw new TekniskException("Feil ved mapping av objekt til json", e);
         }
     }
 
-    private JsonNode tilJsonNode(String jsonString) {
+    private String nodeTilString(JsonNode node) {
         try {
-            return objectMapper.readTree(jsonString);
-        } catch (JacksonException e) {
-            throw new TekniskException("Feil ved mapping av string til json", e);
+            return objectMapper.writeValueAsString(node);
+        } catch (JsonProcessingException e) {
+            throw new TekniskException("Feil ved mapping av JsonNode til json", e);
         }
     }
 
     private Schema hentSchema(String schemaNavn) {
         InputStream inputStream = Thread.currentThread().getContextClassLoader()
             .getResourceAsStream(schemaNavn);
+        if (inputStream == null) {
+            throw new TekniskException("Fant ikke JSON-schema: " + schemaNavn);
+        }
         return hentSchema(inputStream);
     }
 
@@ -125,19 +129,30 @@ public class JsonSchemaValidator {
     }
 
     private void formaterFeil(List<Error> errors, Schema schema, String json, Logger logger) {
-        String schemaLocation = schema.getSchemaLocation().toString();
-        logger.error(FEILMELDING, schemaLocation);
+        String schemaUri = schema.getSchemaLocation() != null
+            ? schema.getSchemaLocation().toString()
+            : "ukjent schema";
+        logger.error(FEILMELDING, schemaUri);
         errors.forEach(error -> logger.error(formaterMelding(error, json)));
-        throw new ValidationException("%s: %d schema violations found".formatted(schemaLocation, errors.size()));
+        throw new ValidationException(String.format("%s: %d schema violations found",
+            schemaUri, errors.size()));
     }
 
     private String formaterMelding(Error error, String json) {
         String sti = error.getInstanceLocation().toString();
         try {
-            final Object objekt = JsonPath.read(json, sti);
+            String jsonPath = jsonPointerTilJsonPath(sti);
+            final Object objekt = JsonPath.read(json, jsonPath);
             return error.getMessage().replace(sti, sti + " [" + objekt + "]");
-        } catch (InvalidPathException e) {
+        } catch (Exception e) {
             return error.getMessage();
         }
+    }
+
+    private static String jsonPointerTilJsonPath(String jsonPointer) {
+        if (jsonPointer.isEmpty() || jsonPointer.equals("/")) {
+            return "$";
+        }
+        return "$" + jsonPointer.replace("/", ".");
     }
 }

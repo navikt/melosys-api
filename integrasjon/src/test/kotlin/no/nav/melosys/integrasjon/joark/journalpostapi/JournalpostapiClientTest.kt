@@ -1,127 +1,225 @@
 package no.nav.melosys.integrasjon.joark.journalpostapi
 
-import tools.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock.*
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.any
+import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
+import com.github.tomakehurst.wiremock.client.WireMock.containing
+import com.github.tomakehurst.wiremock.client.WireMock.deleteRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.matching
+import com.github.tomakehurst.wiremock.client.WireMock.patchRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.FerdigstillJournalpostRequest
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.LogiskVedleggRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OppdaterJournalpostRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.webclient.test.autoconfigure.AutoConfigureWebClient
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import java.time.LocalDate
-import no.nav.melosys.integrasjon.joark.journalpostapi.dto.LogiskVedleggRequest
+import java.util.UUID
 
+@SpringBootTest
+@ActiveProfiles("wiremock-test")
+@ContextConfiguration(
+    classes = [
+        OAuthMockServer::class,
+        CorrelationIdOutgoingFilter::class,
+        GenericAuthFilterFactory::class,
+        JournalpostapiClientConfig::class,
+        JournalpostapiClient::class,
+    ]
+)
+@AutoConfigureWebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class JournalpostapiClientTest {
-
-    private lateinit var journalpostapiClient: JournalpostapiClient
-    private lateinit var wireMockServer: WireMockServer
-    private val objectMapper = ObjectMapper()
-
+class JournalpostapiClientTest(
+    @Autowired private val journalpostapiClient: JournalpostapiClient,
+    @Autowired private val oAuthMockServer: OAuthMockServer,
+    @Value("\${mockserver.port}") mockServerPort: Int,
+) {
+    private val processUUID = UUID.randomUUID()
+    private val mockServer = WireMockServer(WireMockConfiguration.wireMockConfig().port(mockServerPort))
 
     @BeforeAll
-    fun `initial setup`() {
-        wireMockServer = WireMockServer(wireMockConfig().dynamicPort())
-        wireMockServer.start()
+    fun beforeAll() {
+        ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prosessSteg")
+        mockServer.start()
+        oAuthMockServer.start()
+    }
 
-        val webClient = WebClient.builder()
-            .baseUrl(wireMockServer.baseUrl())
-            .build()
-
-        journalpostapiClient = JournalpostapiClient(webClient)
+    @AfterAll
+    fun afterAll() {
+        mockServer.stop()
+        oAuthMockServer.stop()
+        ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
     }
 
     @BeforeEach
-    fun setup() {
-        wireMockServer.resetAll()
-
-        wireMockServer.stubFor(any(urlMatching(".*"))
-            .willReturn(aResponse()
-                .withStatus(200)
-                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .withBody("{}")))
+    fun beforeEach() {
+        mockServer.resetAll()
+        oAuthMockServer.reset()
     }
 
     @Test
-    fun `opprettJournalpost - verifiser URL`() {
+    fun `opprettJournalpost serialiserer request og URL korrekt`() {
+        mockServer.stubFor(
+            any(anyUrl())
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("""{"journalpostId": "jp-001", "journalstatus": "ENDELIG"}""")
+                )
+        )
+
         val req = OpprettJournalpostRequest.OpprettJournalpostRequestBuilder()
             .journalpostType(OpprettJournalpostRequest.JournalpostType.INNGAAENDE)
             .build()
 
         journalpostapiClient.opprettJournalpost(req, true)
 
-        wireMockServer.verify(
-            postRequestedFor(urlPathEqualTo("/journalpost"))
-                .withQueryParam("forsoekFerdigstill", equalTo("true"))
-                .withHeader(HttpHeaders.CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .withRequestBody(matchingJsonPath("$.journalpostType", equalTo("INNGAAENDE")))
+        mockServer.verify(
+            postRequestedFor(urlEqualTo("/journalpost?forsoekFerdigstill=true"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                .withRequestBody(equalToJson("""{"journalpostType":"INNGAAENDE","avsenderMottaker":null,"bruker":null,"tema":null,"behandlingstema":null,"tittel":null,"kanal":null,"journalfoerendeEnhet":null,"eksternReferanseId":null,"tilleggsopplysninger":null,"sak":null,"dokumenter":null,"datoMottatt":null}""", true, false))
         )
     }
 
     @Test
-    fun `oppdaterJournalpost - verifiser URL`() {
+    fun `oppdaterJournalpost serialiserer request og URL korrekt`() {
+        mockServer.stubFor(
+            any(anyUrl())
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("{}")
+                )
+        )
+
         val journalpostId = "123123"
-        val oppdaterJournalpostRequest = OppdaterJournalpostRequest.Builder().medTittel("Tittel").build()
+        val req = OppdaterJournalpostRequest.Builder().medTittel("Tittel").build()
 
-        journalpostapiClient.oppdaterJournalpost(oppdaterJournalpostRequest, journalpostId)
+        journalpostapiClient.oppdaterJournalpost(req, journalpostId)
 
-        wireMockServer.verify(
+        mockServer.verify(
             putRequestedFor(urlPathEqualTo("/journalpost/$journalpostId"))
-                .withHeader(HttpHeaders.CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .withRequestBody(equalToJson(objectMapper.writeValueAsString(oppdaterJournalpostRequest)))
+                .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                .withRequestBody(equalToJson("""{"datoMottatt":null,"tittel":"Tittel","journalfoerendeEnhet":"4530","bruker":null,"avsenderMottaker":null,"dokumenter":[],"sak":null,"tema":null}""", true, false))
         )
     }
 
     @Test
-    fun `leggTilLogiskVedlegg - verifiser URL`() {
+    fun `leggTilLogiskVedlegg serialiserer request og URL korrekt`() {
+        mockServer.stubFor(
+            any(anyUrl())
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("{}")
+                )
+        )
+
         val dokumentInfoId = "532"
         val tittel = "tittel"
         journalpostapiClient.leggTilLogiskVedlegg(dokumentInfoId, tittel)
 
-        wireMockServer.verify(
+        mockServer.verify(
             postRequestedFor(urlPathEqualTo("/dokumentInfo/$dokumentInfoId/logiskVedlegg/"))
-                .withHeader(HttpHeaders.CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .withRequestBody(equalToJson(
-                    objectMapper.writeValueAsString(LogiskVedleggRequest(tittel))
-                ))
+                .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                .withRequestBody(
+                    equalToJson("""{"tittel":"tittel"}""", true, false)
+                )
         )
     }
 
     @Test
-    fun `fjernLogiskeVedlegg - verifiser URL`() {
+    fun `fjernLogiskeVedlegg sender korrekt URL`() {
+        mockServer.stubFor(
+            any(anyUrl())
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("{}")
+                )
+        )
+
         val dokumentInfoId = "124j"
         val logiskVedleggId = "3j2io"
 
         journalpostapiClient.fjernLogiskeVedlegg(dokumentInfoId, logiskVedleggId)
 
-        wireMockServer.verify(
+        mockServer.verify(
             deleteRequestedFor(urlPathEqualTo("/dokumentInfo/$dokumentInfoId/logiskVedlegg/$logiskVedleggId"))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
         )
     }
 
     @Test
-    fun `ferdigstillJournalpost - verifiser URL`() {
+    fun `ferdigstillJournalpost serialiserer request og URL korrekt`() {
+        mockServer.stubFor(
+            any(anyUrl())
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("{}")
+                )
+        )
+
         val journalpostId = "54325"
-        val ferdigstillJournalpostRequest = FerdigstillJournalpostRequest()
-        journalpostapiClient.ferdigstillJournalpost(ferdigstillJournalpostRequest, journalpostId)
+        val req = FerdigstillJournalpostRequest()
+        journalpostapiClient.ferdigstillJournalpost(req, journalpostId)
 
-        wireMockServer.verify(
+        mockServer.verify(
             patchRequestedFor(urlPathEqualTo("/journalpost/$journalpostId/ferdigstill"))
-                .withHeader(HttpHeaders.CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .withRequestBody(equalToJson(objectMapper.writeValueAsString(ferdigstillJournalpostRequest)))
+                .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                .withRequestBody(equalToJson("""{"journalfoerendeEnhet":"4530"}""", true, false))
         )
     }
 
     @Test
-    fun `opprettJournalpost - verifiser datoMottatt`() {
-        val datoMottatt = "1970-01-01"
+    fun `opprettJournalpost serialiserer datoMottatt korrekt`() {
+        mockServer.stubFor(
+            any(anyUrl())
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("""{"journalpostId": "jp-002", "journalstatus": "MOTTATT"}""")
+                )
+        )
 
+        val datoMottatt = "1970-01-01"
         val req = OpprettJournalpostRequest.OpprettJournalpostRequestBuilder()
             .datoMottatt(LocalDate.parse(datoMottatt))
             .journalpostType(OpprettJournalpostRequest.JournalpostType.INNGAAENDE)
@@ -129,9 +227,13 @@ class JournalpostapiClientTest {
 
         journalpostapiClient.opprettJournalpost(req, true)
 
-        wireMockServer.verify(
-            postRequestedFor(urlPathEqualTo("/journalpost"))
-                .withRequestBody(equalToJson(objectMapper.writeValueAsString(req)))
+        mockServer.verify(
+            postRequestedFor(urlEqualTo("/journalpost?forsoekFerdigstill=true"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                .withRequestBody(equalToJson("""{"journalpostType":"INNGAAENDE","avsenderMottaker":null,"bruker":null,"tema":null,"behandlingstema":null,"tittel":null,"kanal":null,"journalfoerendeEnhet":null,"eksternReferanseId":null,"tilleggsopplysninger":null,"sak":null,"dokumenter":null,"datoMottatt":"1970-01-01"}""", true, false))
         )
     }
 }
+

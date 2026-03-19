@@ -1,4 +1,8 @@
 MELOSYS_SKJEMA_API_URL: http://localhost:${mockserver.port}
+DistribuerJournalpost_v1:
+  url: http://localhost:${mockserver.port}/rest/v1/distribuerjournalpost
+KodeverkAPI_v1:
+  url: http://localhost:${mockserver.port}/api
 Dokumentproduksjon_v3:
   url: http://localhost:${mockserver.port}/soap/services/dokumentproduksjon/v3
 MelosysEessi:
@@ -23,6 +27,10 @@ ereg:
   rest:
     url: http://localhost:${mockserver.port}/ereg/v2
 faktureringskomponenten:
+  url: http://localhost:${mockserver.port}
+Inngangsvilkaar:
+  url: http://localhost:${mockserver.port}
+JournalpostApi_v1:
   url: http://localhost:${mockserver.port}
 inntekt:
   rest:
@@ -150,6 +158,30 @@ mockserver:
               grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
               scope: api://dummy
               token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
+            dokdistfordeling:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://dummy
+              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
+            felleskodeverk:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: client_credentials
+              scope: api://dummy
+              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
+            tilgangsmaskinen:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://dummy
+              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
 stsPolicy:
   url: classpath:not_used
 systemuser:
@@ -157,3 +189,10 @@ systemuser:
   username: srvmelosys
 utbetaling_rest:
   url: http://localhost:${mockserver.port}/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern
+melosysdokgen:
+  v1:
+    url: http://localhost:${mockserver.port}/dokgen
+melosystrygdeavgift:
+  url: http://localhost:${mockserver.port}/trygdeavgift
+tilgangsmaskinen:
+  url: http://localhost:${mockserver.port}/tilgangsmaskinen

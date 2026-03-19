@@ -1,6 +1,7 @@
 package no.nav.melosys.itest.vedtak
 
-import tools.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
@@ -14,18 +15,17 @@ import java.util.*
  */
 class TrygdeavgiftsberegningTransformer() : ResponseTransformerV2 {
     override fun transform(response: Response?, serveEvent: ServeEvent?): Response {
-        val mapper = jacksonObjectMapper()
+        val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
         if (serveEvent?.request?.url != "/api/v2/beregn") {
             throw IllegalArgumentException("Invalid url. Denne transformeren støtter kun /api/v2/beregn")
         }
 
         val requestBody = mapper.readTree(serveEvent.request?.bodyAsString)
-        val medlemskapsUuid = requestBody["medlemskapsperioder"][0]["id"].asText()
-        val skatteUuid = requestBody["skatteforholdsperioder"][0]["id"].asText()
-        val inntektUuid = requestBody["inntektsperioder"][0]["id"].asText()
-        val fomNode = requestBody["skatteforholdsperioder"][0]["periode"]["fom"]
-        val skatteforholdÅr = LocalDate.parse(fomNode.asText()).year
+        val medlemskapsperioderUuid = requestBody["medlemskapsperioder"][0]["id"].asText()
+        val skatteforholdsperioderUuid = requestBody["skatteforholdsperioder"][0]["id"].asText()
+        val inntektsperioderUuid = requestBody["inntektsperioder"][0]["id"].asText()
+        val skatteforholdÅr = LocalDate.parse(requestBody["skatteforholdsperioder"][0]["periode"]["fom"].asText()).year
 
         val skatteforhold = requestBody["skatteforholdsperioder"][0]["skatteforhold"].asText()
         val sats = if (skatteforhold == "IKKE_SKATTEPLIKTIG") 6.8.toBigDecimal() else 0.toBigDecimal()
@@ -35,17 +35,17 @@ class TrygdeavgiftsberegningTransformer() : ResponseTransformerV2 {
         ) else PengerDto(0.toBigDecimal(), NOK)
         val responsBodyFraTrygdeavgiftsberegning = listOf(
             TrygdeavgiftsberegningResponse(
-                    TrygdeavgiftsperiodeDto(
-                        DatoPeriodeDto(LocalDate.of(skatteforholdÅr, 1, 1), LocalDate.of(skatteforholdÅr, 2, 1)),
-                        sats,
-                        månedsavgift
-                    ),
-                    TrygdeavgiftsgrunnlagDto(
-                        UUID.fromString(medlemskapsUuid),
-                        UUID.fromString(skatteUuid),
-                        UUID.fromString(inntektUuid)
-                    )
+                TrygdeavgiftsperiodeDto(
+                    DatoPeriodeDto(LocalDate.of(skatteforholdÅr, 1, 1), LocalDate.of(skatteforholdÅr, 2, 1)),
+                    sats,
+                    månedsavgift
+                ),
+                TrygdeavgiftsgrunnlagDto(
+                    UUID.fromString(medlemskapsperioderUuid),
+                    UUID.fromString(skatteforholdsperioderUuid),
+                    UUID.fromString(inntektsperioderUuid)
                 )
+            )
         )
 
         return Response.Builder.like(response)

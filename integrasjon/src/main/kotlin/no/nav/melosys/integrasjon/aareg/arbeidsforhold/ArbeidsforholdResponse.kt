@@ -25,7 +25,6 @@ class ArbeidsforholdResponse(val arbeidsforhold: List<Arbeidsforhold>) {
     }
 
     data class Arbeidsforhold(
-        private val unknownProperties: MutableMap<String?, Any> = mutableMapOf(),
         val arbeidsforholdId: String?, // Arbeidsforhold-id fra opplysningspliktig
         val navArbeidsforholdId: Int, // Arbeidsforhold-id i AAREG
         val ansettelsesperiode: Ansettelsesperiode,
@@ -42,6 +41,7 @@ class ArbeidsforholdResponse(val arbeidsforhold: List<Arbeidsforhold>) {
         val sistBekreftet: String?,
         val antallTimerForTimeloennet: List<AntallTimerForTimeloennet>?
     ) {
+        private val unknownProperties: MutableMap<String?, Any> = mutableMapOf()
         val periode: Periode
             get() = ansettelsesperiode.periode
 

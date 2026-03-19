@@ -24,6 +24,8 @@ public class MelosysModule extends SimpleModule {
         addSerializer(new MidlertidigPostadresseSerializer(kodeverkService));
         addSerializer(new OrganisasjonSerializer(kodeverkService));
 
+        addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer());
+
         setDeserializers(new SimpleDeserializers() {
             @Override
             @SuppressWarnings("unchecked")

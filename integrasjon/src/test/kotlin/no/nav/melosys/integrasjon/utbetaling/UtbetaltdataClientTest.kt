@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.trygdeavgift
+package no.nav.melosys.integrasjon.utbetaling
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
@@ -6,15 +6,14 @@ import com.github.tomakehurst.wiremock.client.WireMock.any
 import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
 import com.github.tomakehurst.wiremock.client.WireMock.containing
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.matching
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
-import no.nav.melosys.domain.readResourceAsString
 import no.nav.melosys.integrasjon.MetricsTestConfig
-import no.nav.melosys.integrasjon.trygdeavgift.dto.PengerDto
-import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningRequest
+import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -29,22 +28,24 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
-import java.math.BigDecimal
-import java.time.LocalDate
 import java.util.UUID
 
 @SpringBootTest
 @ActiveProfiles("wiremock-test")
 @ContextConfiguration(
     classes = [
-        TrygdeavgiftClient::class,
+        OAuthMockServer::class,
+        CorrelationIdOutgoingFilter::class,
+        GenericAuthFilterFactory::class,
+        UtbetaltdataClientConfig::class,
         MetricsTestConfig::class,
     ]
 )
 @AutoConfigureWebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TrygdeavgiftClientTest(
-    @Autowired private val trygdeavgiftClient: TrygdeavgiftClient,
+class UtbetaltdataClientTest(
+    @Autowired private val utbetaltdataClient: UtbetaltdataClient,
+    @Autowired private val oAuthMockServer: OAuthMockServer,
     @Value("\${mockserver.port}") mockServerPort: Int,
 ) {
     private val processUUID = UUID.randomUUID()
@@ -54,87 +55,63 @@ class TrygdeavgiftClientTest(
     fun beforeAll() {
         ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prosessSteg")
         mockServer.start()
+        oAuthMockServer.start()
     }
 
     @AfterAll
     fun afterAll() {
         mockServer.stop()
+        oAuthMockServer.stop()
         ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
     }
 
     @BeforeEach
     fun beforeEach() {
         mockServer.resetAll()
+        oAuthMockServer.reset()
     }
 
     @Test
-    fun `beregnTrygdeavgift serialiserer request body korrekt`() {
+    fun `hentUtbetalingsInformasjon serialiserer request body korrekt`() {
         mockServer.stubFor(
             any(anyUrl()).willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .withBody(readResourceAsString("mock/trygdeavgift/trygdeavgift.json"))
+                    .withBody("[]")
             )
         )
 
-        val request = TrygdeavgiftsberegningRequest(
-            medlemskapsperioder = emptySet(),
-            skatteforholdsperioder = emptySet(),
-            inntektsperioder = emptyList(),
-            foedselsdato = LocalDate.of(2000, 1, 1)
+        val request = UtbetalingRequest(
+            ident = "12345678901",
+            periode = Periode(fom = "2024-01-01", tom = "2024-12-31"),
+            periodetype = "UTBETALINGSPERIODE",
+            rolle = "RETTIGHETSHAVER"
         )
 
-        trygdeavgiftClient.beregnTrygdeavgift(request)
+        utbetaltdataClient.hentUtbetalingsInformasjon(request)
 
         mockServer.verify(
-            postRequestedFor(urlEqualTo("/trygdeavgift/v2/beregn"))
+            postRequestedFor(urlEqualTo("/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern"))
                 .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
                 .withRequestBody(
                     equalToJson(
                         """
                         {
-                            "medlemskapsperioder": [],
-                            "skatteforholdsperioder": [],
-                            "inntektsperioder": [],
-                            "foedselsdato": [2000, 1, 1]
+                            "ident": "12345678901",
+                            "periode": {
+                                "fom": "2024-01-01",
+                                "tom": "2024-12-31"
+                            },
+                            "periodetype": "UTBETALINGSPERIODE",
+                            "rolle": "RETTIGHETSHAVER"
                         }
                         """,
-                        // TrygdeavgiftClient bruker sin egen WebClient uten JavaTimeModule,
-                        // så LocalDate serialiseres som timestamp-array. Testen dokumenterer
-                        // denne faktiske atferden som safety net for Spring Boot 4-oppgradering.
                         true, false
                     )
                 )
         )
     }
-
-    @Test
-    fun `beregn trygdeavgift mapper response korrekt`() {
-        mockServer.stubFor(
-            any(anyUrl()).willReturn(
-                aResponse()
-                    .withStatus(200)
-                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .withBody(readResourceAsString("mock/trygdeavgift/trygdeavgift.json"))
-            )
-        )
-
-        val response = trygdeavgiftClient.beregnTrygdeavgift(lagTrygdeavgiftsberegningRequest())
-
-        response[0].run {
-            beregnetPeriode.sats shouldBe BigDecimal.valueOf(21.8)
-            beregnetPeriode.månedsavgift shouldBe PengerDto(BigDecimal.valueOf(21800))
-            component2() shouldNotBe null
-        }
-    }
-
-    private fun lagTrygdeavgiftsberegningRequest() = TrygdeavgiftsberegningRequest(
-        emptySet(),
-        emptySet(),
-        emptyList(),
-        LocalDate.now().minusYears(20)
-    )
 }
-

@@ -1,6 +1,8 @@
 package no.nav.melosys.integrasjon.utbetaldata
 
-import tools.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.FieldsEqualityCheckConfig
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
@@ -23,7 +25,7 @@ import java.time.LocalDate
 class UtbetaltdataServiceTest {
 
     private var mockRestClient = mockk<UtbetaltdataClient>()
-    private val objectMapper = ObjectMapper()
+    private val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()); registerKotlinModule() }
     private val utbetaltdataServiceV2: UtbetaltdataService = UtbetaltdataService(mockRestClient, objectMapper)
 
     @Test
