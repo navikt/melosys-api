@@ -449,12 +449,12 @@ fun erBegrenset(): Boolean = beregningstype != Avgiftsberegningstype.ORDINAER
 |-----------|-------------|---------|
 | `TrygdeavgiftsperiodeDto.kt` | `trygdesats.toDouble()` | `trygdesats?.toDouble()` (DTO-feltet også nullable) |
 | `ÅrsavregningController.kt` | `periode.trygdesats.toDouble()` | `periode.trygdesats?.toDouble()` |
-| `OpprettFakturaserie.kt` | `"Sats: ${it.trygdesats} %"` | `trygdesats?.let { "Sats: $it %" } ?: "25%-regel"` |
-| `InnvilgelseFtrlMapper.kt` | `it.trygdesats == BigDecimal.ZERO` | `it.trygdesats == null \|\| it.trygdesats == BigDecimal.ZERO` (eller bruk `erBegrenset()`) |
-| `InformasjonTrygdeavgiftMapper.kt` | Samme mønster | Samme løsning |
-| `ÅrsavregningVedtakMapper.kt` | `trygdesats` i brev | Vis "25%-regel" i stedet for sats |
+| `OpprettFakturaserie.kt` | `"Sats: ${it.trygdesats} %"` | `trygdesats?.let { "Sats: $it %" } ?: when(beregningstype) { TJUEFEM_PROSENT_REGEL → "**"; MINSTEBELOEP → "*"; ... }` (avklart: bruk `*`/`**` symboler fra vedtaksmal V.14) |
+| `InnvilgelseFtrlMapper.kt` | `it.trygdesats == BigDecimal.ZERO` | `it.trygdesats == null \|\| it.trygdesats == BigDecimal.ZERO` (eller bruk `erBegrenset()`) — avklart: vis `*`/`**` i sats-kolonnen + forklaringstekster |
+| `InformasjonTrygdeavgiftMapper.kt` | Samme mønster | Samme løsning som InnvilgelseFtrlMapper |
+| `ÅrsavregningVedtakMapper.kt` | `trygdesats` i brev | Vis `*` (minstebeløp) eller `**` (25%-regel) i sats-kolonnen — avklart fra vedtaksmal V.14 |
 | `erLikForSatsendring()` | `trygdesats.compareTo(...)` | Null-safe sammenligning |
-| `BeregnOgSendFaktura.kt` | `"Sats: ${it.trygdesats} %"` | `trygdesats?.let { "Sats: $it %" } ?: "Beregnet etter 25%-regel"` |
+| `BeregnOgSendFaktura.kt` | `"Sats: ${it.trygdesats} %"` | `trygdesats?.let { "Sats: $it %" } ?: when(beregningstype) { TJUEFEM_PROSENT_REGEL → "**"; MINSTEBELOEP → "*"; ... }` |
 | `fattet-vedtak-schema.json` | `"trygdesats": { "type": "number" }` + required | Se ny Fase 3b under |
 
 ---
@@ -640,13 +640,16 @@ graph LR
 | 2 | **Inntektsvisning i årsavregning** | `ÅrsavregningController.kt` leser `grunnlagInntekstperiode?.kalkulertMndInntekt()`. Med flere grunnlag — summere? Vise første? | Trolig: **summere** månedsinntekt fra alle grunnlag. Avklar med frontend-oppgave [MELOSYS-7530](https://jira.adeo.no/browse/MELOSYS-7530). |
 | 3 | **Faktura-beløp per inntektskilde** | `OpprettFakturaserie.kt` bruker `hentGrunnlagInntekstperiode()` for å hente faktura-beløp. Med flere grunnlag — én fakturalinje per grunnlag eller summert? | Avklar med faktureringslogikk. |
 
-### Faglige spørsmål (7969-spesifikke)
+### ~~Faglige spørsmål (7969-spesifikke)~~ — Avklart 2026-03-19
 
-| # | Spørsmål | Kontekst | Forslag |
-|---|----------|----------|---------|
-| 4 | **Hva skal vises i brev når 25%-regelen brukes?** | Brevmappere viser i dag sats per periode. Med `sats = null` — hva står i brevet? "Beregnet etter 25%-regelen" uten sats? | Avklar med brevmal-eier. Foreslår: ny brev-seksjon som forklarer at 25%-regelen er brukt, med totalbeløp i stedet for sats. |
-| 5 | **Hva med perioder der minstebeløpet slår inn?** | Minstebeløp → ingen avgift. Skal disse periodene i det hele tatt lagres som `Trygdeavgiftsperiode` med `beregningstype = MINSTEBELOEP`? | Trolig ja — for sporbarhet. Men avklar: `månedsavgift = 0` og `sats = null`? Eller filtreres de bort? |
-| 6 | **Sats i frontend/årsavregning** | `ÅrsavregningController` og DTOer sender `trygdesats.toDouble()` til frontend. Med null — 0.0? Eller eget felt for beregningstype? | Frontend-oppgave [MELOSYS-7530](https://jira.adeo.no/browse/MELOSYS-7530) bør inkludere visning av beregningstype. |
+> **Kilde:** Vedtaksmal V.14 ([Vedtak om innvilgelse av frivillig medlemskap i folketrygden V.14.pdf](docs/Vedtak%20om%20innvilgelse%20av%20frivillig%20medlemskap%20i%20folketrygden%20V.14.pdf)),
+> [MELOSYS-7530](https://jira.adeo.no/browse/MELOSYS-7530) med Figma-skisser, og faglig avklaring fra Francois.
+
+| # | Spørsmål | Avklaring |
+|---|----------|-----------|
+| 4 | ~~**Hva skal vises i brev når 25%-regelen brukes?**~~ | **Avklart.** Vedtaksmalen viser at sats-kolonnen i avgiftstabellen bruker `*` for minstebeløp og `**` for 25%-regelen, med fotnoter: `* Inntekten er lavere enn minstebeløpet for trygdeavgift.` og `** Trygdeavgiften kan maks utgjøre 25 % av inntekten som overstiger minstebeløpet.` I tillegg vises egne tekstblokker som forklarer reglene når de er brukt. **Implementeringskonsekvens:** Brevmappere skal sende `*`/`**` som sats-tekst (ikke en tallverdi), pluss betinget inkludering av forklaringstekstene. |
+| 5 | ~~**Hva med perioder der minstebeløpet slår inn?**~~ | **Avklart.** Perioder med inntekt under minstebeløpet **skal lagres** som `Trygdeavgiftsperiode` med `beregningstype = MINSTEBELOEP`, `sats = null`, og `månedsavgift = 0 kr`. De vises i brevtabellen med `*` som sats og `0 kr` som avgift. Forklaringstekst: *«Du skal ikke betale trygdeavgift i år der inntekten din er under minstebeløpet.»* |
+| 6 | ~~**Sats i frontend/årsavregning**~~ | **Avklart.** Sats skal **ikke** vises i frontend/årsavregning for disse tilfellene. I stedet vises `*` (minstebeløp) eller `**` (25%-regel) — se [Figma-skisser](https://www.figma.com/design/eA9mI5tHdXQKoRjpA8g1oT/FTRL?node-id=3448-31836). **Implementeringskonsekvens:** DTO-er og controller må sende `beregningstype` til frontend. Frontend (MELOSYS-7530) viser symboler i stedet for sats-verdi basert på beregningstype. |
 
 ### Tekniske spørsmål
 
@@ -707,7 +710,7 @@ gantt
 | **Nullable sats bryter NullPointerException** (7969) | **Høy** | **Høy** | 38 filer refererer `trygdesats`. Gjør systematisk gjennomgang. Bruk `erBegrenset()` som guard i stedet for å sjekke `trygdesats == 0` |
 | **`harAvgift()` returnerer feil for 25%-regel** (7969) | **Høy** | **Høy** | Dagens `harAvgift()` sjekker BÅDE sats og beløp. Med `sats = null` returnerer den `false` selv om perioden har positivt beløp. Brukes av `OpprettFakturaserie` for filtrering — 25%-perioder ville blitt ekskludert fra fakturering. Ny logikk: kun beløp-basert sjekk. |
 | **`fattet-vedtak-schema.json` breaking change** (7969) | **Høy** | **Høy** | `trygdesats` er `required` med type `number`. Null-verdi bryter Kafka-konsumenter (DVH/statistikk). Krever skjemaoppdatering + koordinering med DVH-teamet. Se Fase 3b. |
-| **Fakturatekst med null sats** (7969) | Middels | Middels | `OpprettFakturaserie.kt` og `BeregnOgSendFaktura.kt` interpolerer sats i string. Test at brev/faktura ikke viser "Sats: null %" |
+| **Fakturatekst med null sats** (7969) | Middels | Middels | `OpprettFakturaserie.kt` og `BeregnOgSendFaktura.kt` interpolerer sats i string. **Avklart:** Skal vise `*` (minstebeløp) eller `**` (25%-regel) i stedet for sats — jf. vedtaksmal V.14 |
 | **Eksisterende data uten beregningstype** (7969) | Lav | Lav | Migrasjon setter `ORDINAER` som default — alle eksisterende perioder er ordinære |
 | **Manglende indeks på FK i ny tabell** | Lav | Middels | Uten indeks på `trygdeavgiftsperiode_id` gjør JPA `@OneToMany` lazy loading full table scan. Indeks lagt til i V151-migrasjon. |
 
