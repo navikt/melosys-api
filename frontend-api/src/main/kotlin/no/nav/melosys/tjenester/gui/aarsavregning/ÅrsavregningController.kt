@@ -224,7 +224,7 @@ class ÅrsavregningController(
                 inntektskildetype = periode.grunnlagInntekstperiode?.type,
                 inntektPerMd = avgiftspliktigMndInntekt,
                 arbeidsgiversavgiftBetales = periode.grunnlagInntekstperiode?.isArbeidsgiversavgiftBetalesTilSkatt,
-                avgiftssats = periode.trygdesats.toDouble(),
+                avgiftssats = periode.trygdesats?.toDouble(),
                 avgiftPerMd = periode.trygdeavgiftsbeløpMd.hentVerdi().intValueExact()
             )
         }
@@ -344,7 +344,7 @@ data class TrygdeavgiftsperiodeDto(
     val inntektskildetype: Inntektskildetype?,
     val arbeidsgiversavgiftBetales: Boolean?,
     val inntektPerMd: BigDecimal,
-    val avgiftssats: Double,
+    val avgiftssats: Double?,
     val avgiftPerMd: Int
 )
 

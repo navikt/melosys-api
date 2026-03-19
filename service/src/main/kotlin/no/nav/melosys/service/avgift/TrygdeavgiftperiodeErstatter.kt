@@ -21,11 +21,17 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
 
         behandlingsresultat.finnAvgiftspliktigPerioder().forEach { avgiftspliktigperiode ->
             trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
-                val erMatch = trygdeavgiftsperiode.grunnlagMedlemskapsperiode?.id == avgiftspliktigperiode.hentId() ||
+                val erLegacyMatch = trygdeavgiftsperiode.grunnlagMedlemskapsperiode?.id == avgiftspliktigperiode.hentId() ||
                     trygdeavgiftsperiode.grunnlagLovvalgsPeriode?.id == avgiftspliktigperiode.hentId() ||
                     trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode?.id == avgiftspliktigperiode.hentId()
 
-                if (erMatch) {
+                val erGrunnlagListeMatch = trygdeavgiftsperiode.grunnlagListe.any {
+                    it.medlemskapsperiode?.hentId() == avgiftspliktigperiode.hentId() ||
+                        it.lovvalgsperiode?.hentId() == avgiftspliktigperiode.hentId() ||
+                        it.helseutgiftDekkesPeriode?.id == avgiftspliktigperiode.hentId()
+                }
+
+                if (erLegacyMatch || erGrunnlagListeMatch) {
                     avgiftspliktigperiode.addTrygdeavgiftsperiode(trygdeavgiftsperiode)
                 }
             }

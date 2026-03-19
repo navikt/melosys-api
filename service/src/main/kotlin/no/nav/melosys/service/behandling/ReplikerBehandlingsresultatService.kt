@@ -5,6 +5,7 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeGrunnlag
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
@@ -139,6 +140,30 @@ class ReplikerBehandlingsresultatService(
 
             trygdeavgiftsperiodeReplika.addGrunnlag(grunnlag)
             grunnlag.addTrygdeavgiftsperiode(trygdeavgiftsperiodeReplika)
+
+            // Deep-copy grunnlagListe
+            trygdeavgiftsperiodeOriginal.grunnlagListe.forEach { originalGrunnlagEntitet ->
+                val avgiftspliktigReplika = originalGrunnlagEntitet.medlemskapsperiode?.let { mp ->
+                    behandlingsresultatReplika.finnAvgiftspliktigPerioder().find { it.hentId() == mp.hentId() } as? Medlemskapsperiode
+                }
+                val lovvalgReplika = originalGrunnlagEntitet.lovvalgsperiode?.let { lp ->
+                    behandlingsresultatReplika.finnAvgiftspliktigPerioder().find { it.hentId() == lp.hentId() } as? Lovvalgsperiode
+                }
+
+                val grunnlagReplika = TrygdeavgiftsperiodeGrunnlag(
+                    trygdeavgiftsperiode = trygdeavgiftsperiodeReplika,
+                    medlemskapsperiode = avgiftspliktigReplika,
+                    lovvalgsperiode = lovvalgReplika,
+                    helseutgiftDekkesPeriode = originalGrunnlagEntitet.helseutgiftDekkesPeriode,
+                    inntektsperiode = inntektsperioderReplika
+                        .find { it.id == originalGrunnlagEntitet.inntektsperiode.id }
+                        ?: originalGrunnlagEntitet.inntektsperiode,
+                    skatteforhold = skatteforholdTilNorgeReplika
+                        .find { it.id == originalGrunnlagEntitet.skatteforhold.id }
+                        ?: originalGrunnlagEntitet.skatteforhold,
+                )
+                trygdeavgiftsperiodeReplika.leggTilGrunnlag(grunnlagReplika)
+            }
         }
 
         behandlingsresultatReplika.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeReplika ->
@@ -146,6 +171,7 @@ class ReplikerBehandlingsresultatService(
             trygdeavgiftsperiodeReplika.grunnlagInntekstperiode?.id = null
             trygdeavgiftsperiodeReplika.grunnlagSkatteforholdTilNorge?.id = null
             trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode?.id = null
+            trygdeavgiftsperiodeReplika.grunnlagListe.forEach { it.id = null }
         }
     }
 
@@ -178,6 +204,21 @@ class ReplikerBehandlingsresultatService(
             trygdeavgiftsperiodeReplika.grunnlagHelseutgiftDekkesPeriode?.run {
                 trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
             } ?: throw IllegalStateException("Helseutgift dekkes periode ikke funnet")
+
+            // Deep-copy grunnlagListe for pensjonist
+            trygdeavgiftsperiodeOriginal.grunnlagListe.forEach { originalGrunnlagEntitet ->
+                val grunnlagReplika = TrygdeavgiftsperiodeGrunnlag(
+                    trygdeavgiftsperiode = trygdeavgiftsperiodeReplika,
+                    helseutgiftDekkesPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode,
+                    inntektsperiode = inntektsperioderReplika
+                        .find { it.id == originalGrunnlagEntitet.inntektsperiode.id }
+                        ?: originalGrunnlagEntitet.inntektsperiode,
+                    skatteforhold = skatteforholdTilNorgeReplika
+                        .find { it.id == originalGrunnlagEntitet.skatteforhold.id }
+                        ?: originalGrunnlagEntitet.skatteforhold,
+                )
+                trygdeavgiftsperiodeReplika.leggTilGrunnlag(grunnlagReplika)
+            }
         }
 
         behandlingsresultatReplika.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeReplika ->
@@ -185,6 +226,7 @@ class ReplikerBehandlingsresultatService(
             trygdeavgiftsperiodeReplika.grunnlagHelseutgiftDekkesPeriode?.id = null
             trygdeavgiftsperiodeReplika.grunnlagInntekstperiode?.id = null
             trygdeavgiftsperiodeReplika.grunnlagSkatteforholdTilNorge?.id = null
+            trygdeavgiftsperiodeReplika.grunnlagListe.forEach { it.id = null }
         }
     }
 

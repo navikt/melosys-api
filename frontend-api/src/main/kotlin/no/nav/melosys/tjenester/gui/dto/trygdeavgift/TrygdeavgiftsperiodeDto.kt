@@ -10,7 +10,7 @@ data class TrygdeavgiftsperiodeDto(
     val tom: LocalDate,
     val trygdedekning: Trygdedekninger,
     val inntektskildetype: Inntektskildetype?,
-    val avgiftssats: Double,
+    val avgiftssats: Double?,
     val avgiftPerMd: Int
 ) {
     constructor(trygdeavgiftsperiode: Trygdeavgiftsperiode) :
@@ -19,7 +19,7 @@ data class TrygdeavgiftsperiodeDto(
             trygdeavgiftsperiode.periodeTil,
             trygdedekning = trygdeavgiftsperiode.hentGrunnlagAvgiftsperiode().hentTrygdedekning(),
             trygdeavgiftsperiode.grunnlagInntekstperiode?.type,
-            trygdeavgiftsperiode.trygdesats.toDouble(),
+            trygdeavgiftsperiode.trygdesats?.toDouble(),
             trygdeavgiftsperiode.trygdeavgiftsbeløpMd.hentVerdi().toInt()
         )
 }

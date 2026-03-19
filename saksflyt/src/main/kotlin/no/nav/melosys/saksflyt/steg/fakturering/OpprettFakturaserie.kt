@@ -189,7 +189,7 @@ class OpprettFakturaserie(
                 it.periodeTil,
                 "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}, " +
                     "Dekning: ${mapDekning(it)}, " +
-                    "Sats: ${it.trygdesats} %"
+                    "${mapSatsTekst(it)}"
             )
         }
     }
@@ -201,10 +201,13 @@ class OpprettFakturaserie(
                 it.periodeFra,
                 it.periodeTil,
                 "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}, " +
-                    "Sats: ${it.trygdesats} %"
+                    "${mapSatsTekst(it)}"
             )
         }
     }
+
+    private fun mapSatsTekst(trygdeavgiftsperiode: Trygdeavgiftsperiode): String =
+        trygdeavgiftsperiode.trygdesats?.let { "Sats: $it %" } ?: "Beregningstype: ${trygdeavgiftsperiode.beregningstype}"
 
     private fun mapDekning(trygdeavgiftsperiode: Trygdeavgiftsperiode): String {
         if (trygdeavgiftsperiode.hentGrunnlagInntekstperiode().type === Inntektskildetype.PENSJON_UFØRETRYGD ||

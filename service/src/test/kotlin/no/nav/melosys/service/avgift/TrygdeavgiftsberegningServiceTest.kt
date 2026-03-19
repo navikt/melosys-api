@@ -186,7 +186,8 @@ internal class TrygdeavgiftsberegningServiceTest {
                             grunnlagSkatteforholdTilNorge = skatteforhold { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG },
                         ),
                         ignorePrivateFields = false,
-                        property = Trygdeavgiftsperiode::id
+                        Trygdeavgiftsperiode::id,
+                        Trygdeavgiftsperiode::grunnlagListe
                     )
                 verify { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
 
@@ -805,7 +806,8 @@ internal class TrygdeavgiftsberegningServiceTest {
                             grunnlagSkatteforholdTilNorge = skatteforhold,
                         ),
                         ignorePrivateFields = false,
-                        property = Trygdeavgiftsperiode::id
+                        Trygdeavgiftsperiode::id,
+                        Trygdeavgiftsperiode::grunnlagListe
                     )
 
 

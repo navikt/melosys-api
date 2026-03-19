@@ -2,11 +2,13 @@ package no.nav.melosys.service.avgift
 
 import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.avgift.Avgiftsberegningstype
 import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeGrunnlag
 import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
@@ -120,25 +122,51 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         inntektsperioderMedUUID: List<Pair<UUID, Inntektsperiode>>,
         dagensDato: LocalDate
     ): Trygdeavgiftsperiode {
-        val skatteforholdsperiodeID = response.grunnlag.skatteforholdsperiodeId
-        val inntektsperiodeID = response.grunnlag.inntektsperiodeId
+        val alleGrunnlag = response.grunnlagListe ?: listOf(response.grunnlag)
+        val beregningstype = response.beregningstype
+            ?.let { Avgiftsberegningstype.valueOf(it) }
+            ?: Avgiftsberegningstype.ORDINAER
+
+        val førsteGrunnlag = alleGrunnlag.first()
 
         val grunnlagSkatteforholdTilNorge = skatteforholdsperioderMedUUID
-            .find { it.first == skatteforholdsperiodeID }?.second
-            ?: throw IllegalStateException("Fant ikke skatteforholdsperiode $skatteforholdsperiodeID")
+            .find { it.first == førsteGrunnlag.skatteforholdsperiodeId }?.second
+            ?: throw IllegalStateException("Fant ikke skatteforholdsperiode ${førsteGrunnlag.skatteforholdsperiodeId}")
 
         val grunnlagInntekstperiode = inntektsperioderMedUUID
-            .find { it.first == inntektsperiodeID }?.second
-            ?: throw IllegalStateException("Fant ikke inntektsperiode $inntektsperiodeID")
+            .find { it.first == førsteGrunnlag.inntektsperiodeId }?.second
+            ?: throw IllegalStateException("Fant ikke inntektsperiode ${førsteGrunnlag.inntektsperiodeId}")
 
-        return Trygdeavgiftsperiode(
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
             periodeFra = response.beregnetPeriode.periode.fom,
             periodeTil = response.beregnetPeriode.periode.tom,
             trygdesats = response.beregnetPeriode.sats,
             trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger(),
             grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
             grunnlagInntekstperiode = grunnlagInntekstperiode,
+            beregningstype = beregningstype,
         )
+
+        // Opprett TrygdeavgiftsperiodeGrunnlag for hvert element
+        alleGrunnlag.forEach { grunnlagDto ->
+            val skatteforhold = skatteforholdsperioderMedUUID
+                .find { it.first == grunnlagDto.skatteforholdsperiodeId }?.second
+                ?: throw IllegalStateException("Fant ikke skatteforholdsperiode ${grunnlagDto.skatteforholdsperiodeId}")
+
+            val inntektsperiode = inntektsperioderMedUUID
+                .find { it.first == grunnlagDto.inntektsperiodeId }?.second
+                ?: throw IllegalStateException("Fant ikke inntektsperiode ${grunnlagDto.inntektsperiodeId}")
+
+            val grunnlagEntitet = TrygdeavgiftsperiodeGrunnlag(
+                trygdeavgiftsperiode = trygdeavgiftsperiode,
+                inntektsperiode = inntektsperiode,
+                skatteforhold = skatteforhold,
+                // helseutgiftDekkesPeriode settes av TrygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder()
+            )
+            trygdeavgiftsperiode.leggTilGrunnlag(grunnlagEntitet)
+        }
+
+        return trygdeavgiftsperiode
     }
 
     @Suppress("SpringTransactionalMethodCallsInspection") // warning på beregnTrygdeavgift ignoreres pga eksisterende transaksjon

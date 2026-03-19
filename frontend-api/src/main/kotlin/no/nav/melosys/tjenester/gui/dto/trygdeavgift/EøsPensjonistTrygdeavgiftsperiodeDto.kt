@@ -8,7 +8,7 @@ data class EøsPensjonistTrygdeavgiftsperiodeDto(
     val fom: LocalDate,
     val tom: LocalDate,
     val inntektskildetype: Inntektskildetype?,
-    val avgiftssats: Double,
+    val avgiftssats: Double?,
     val avgiftPerMd: Int
 ) {
     constructor(trygdeavgiftsperiode: Trygdeavgiftsperiode) :
@@ -16,7 +16,7 @@ data class EøsPensjonistTrygdeavgiftsperiodeDto(
             trygdeavgiftsperiode.periodeFra,
             trygdeavgiftsperiode.periodeTil,
             trygdeavgiftsperiode.grunnlagInntekstperiode?.type,
-            trygdeavgiftsperiode.trygdesats.toDouble(),
+            trygdeavgiftsperiode.trygdesats?.toDouble(),
             trygdeavgiftsperiode.trygdeavgiftsbeløpMd.hentVerdi().toInt()
         )
 }

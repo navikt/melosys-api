@@ -71,7 +71,7 @@ class InformasjonTrygdeavgiftMapper(
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodeEøsPensjonist> {
         val perioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toSet()
 
-        if (perioder.all { it.trygdeavgiftsbeløpMd.verdi == BigDecimal.ZERO && it.trygdesats == BigDecimal.ZERO }) {
+        if (perioder.all { !it.harAvgift() }) {
             return emptyList()
         }
 
