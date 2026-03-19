@@ -14,7 +14,9 @@ import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.helseutgiftDekkesPeriode
 import no.nav.melosys.domain.medlemskapsperiode
 import no.nav.melosys.domain.tidligereBehandlingsresultat
 import no.nav.melosys.domain.vedtakMetadata
@@ -141,8 +143,82 @@ class SendFakturaÅrsavregningTest {
             this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
             startDato shouldBe PERIODE_START
             sluttDato shouldBe PERIODE_SLUTT
-            beskrivelse shouldBe """Medlemskapsperiode 01.02.$inneværendeÅr - 31.10.$inneværendeÅr, endelig beregnet trygdeavgift ${behandlingsresultat.hentÅrsavregning().beregnetAvgiftBelop} - """ +
-                """forskuddsvis fakturert trygdeavgift ${behandlingsresultat.hentÅrsavregning().tidligereFakturertBeloep ?: 0}"""
+            beskrivelse shouldBe """Periode 01.02.$inneværendeÅr - 31.10.$inneværendeÅr, endelig beregnet trygdeavgift ${behandlingsresultat.hentÅrsavregning().beregnetAvgiftBelop} - """ +
+                """forskuddsvis betalt trygdeavgift ${behandlingsresultat.hentÅrsavregning().tidligereFakturertBeloep ?: 0}"""
+        }
+
+        behandlingsresultatSlot.captured.run {
+            this.fakturaserieReferanse shouldBe fakturaserieRef
+        }
+    }
+
+    @Test
+    fun `sender faktura med helseutgiftDekkesPeriode når belop er større eller lik 100`() {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 100
+            behandling {
+                id = 100
+                tema = Behandlingstema.PENSJONIST
+                fagsak {
+                    saksnummer = SAKSNUMMER
+                    gsakSaksnummer = 123L
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    status = Saksstatuser.OPPRETTET
+                    medBruker()
+                }
+            }
+            vedtakMetadata {
+                vedtaksdato = Instant.now()
+            }
+            årsavregning {
+                aar = 2023
+                beregnetAvgiftBelop = BigDecimal(2300)
+                tilFaktureringBeloep = BigDecimal(2300)
+                tidligereBehandlingsresultat {
+                    fakturaserieReferanse = tidligereFakturaserieRef
+                    behandling {
+                        type = Behandlingstyper.ÅRSAVREGNING
+                    }
+                }
+            }
+            helseutgiftDekkesPeriode {
+                fomDato = PERIODE_START
+                tomDato = PERIODE_SLUTT
+                trygdeavgiftsperiode {
+                    periodeFra = PERIODE_START
+                    periodeTil = PERIODE_SLUTT
+                    trygdeavgiftsbeløpMd = BigDecimal(100)
+                    trygdesats = BigDecimal(1)
+                }
+            }
+        }
+        val behandling = behandlingsresultat.hentBehandling()
+        val prosessinstans = lagProsessInstans { this.behandling = behandling }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        every { pdlService.finnFolkeregisterident(behandling.fagsak.hentBrukersAktørID()) } returns Optional.of("123456789")
+
+        val fakturaDtoSlot = slot<FakturaDto>()
+        every {
+            faktureringskomponentenClient.lagFaktura(
+                capture(fakturaDtoSlot),
+                SAKSBEHANDLER
+            )
+        } returns NyFakturaserieResponseDto(fakturaserieRef)
+
+        val behandlingsresultatSlot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) } returns behandlingsresultat
+
+        sendFakturaÅrsavregning.utfør(prosessinstans)
+
+        fakturaDtoSlot.captured.run {
+            this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
+            startDato shouldBe PERIODE_START
+            sluttDato shouldBe PERIODE_SLUTT
+            beskrivelse shouldBe """Periode 01.02.$inneværendeÅr - 31.10.$inneværendeÅr, endelig beregnet trygdeavgift ${behandlingsresultat.hentÅrsavregning().beregnetAvgiftBelop} - """ +
+                """forskuddsvis betalt trygdeavgift ${behandlingsresultat.hentÅrsavregning().tidligereFakturertBeloep ?: 0}"""
         }
 
         behandlingsresultatSlot.captured.run {

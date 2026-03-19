@@ -66,7 +66,7 @@ abstract class AvgiftFaktureringTestBase(
                 )
         )
         mockServer.stubFor(
-            WireMock.delete(WireMock.urlMatching("/fakturaserier/.*"))
+            WireMock.post(WireMock.urlMatching("/fakturaserier/.*/kanseller"))
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)
