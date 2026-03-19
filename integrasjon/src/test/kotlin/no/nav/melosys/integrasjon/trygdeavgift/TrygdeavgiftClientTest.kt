@@ -98,7 +98,7 @@ class TrygdeavgiftClientTest(
                             "medlemskapsperioder": [],
                             "skatteforholdsperioder": [],
                             "inntektsperioder": [],
-                            "foedselsdato": [2000, 1, 1]
+                            "foedselsdato": "2000-01-01"
                         }
                         """,
                         // TrygdeavgiftClient bruker sin egen WebClient uten JavaTimeModule,

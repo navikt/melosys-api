@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.Nulls
 import tools.jackson.databind.annotation.JsonTypeIdResolver
 import no.nav.melosys.domain.eessi.SedType
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "sedType", visible = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.CUSTOM, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "sedType", visible = true)
 @JsonTypeIdResolver(SedGrunnlagTypeResolver::class)
 open class SedGrunnlagDto {
     var sedType: String? = null
