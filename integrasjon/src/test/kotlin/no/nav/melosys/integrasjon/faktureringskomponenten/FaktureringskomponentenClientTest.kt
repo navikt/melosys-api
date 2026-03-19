@@ -1,8 +1,14 @@
 package no.nav.melosys.integrasjon.faktureringskomponenten
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.MappingBuilder
-import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.any
+import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
+import com.github.tomakehurst.wiremock.client.WireMock.containing
+import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.matching
+import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.getunleash.FakeUnleash
 import io.kotest.matchers.shouldBe
@@ -47,13 +53,13 @@ class FaktureringskomponentenClientTest(
     private val processUUID = UUID.randomUUID()
     private val serviceUnderTestMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(mockServiceUnderTestPort))
+    private val mockServer get() = serviceUnderTestMockServer
 
     @BeforeAll
     fun beforeAll() {
         ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prossesSteg")
         serviceUnderTestMockServer.start()
         oAuthMockServer.start()
-        oAuthMockServer.reset()
     }
 
     @AfterAll
@@ -64,40 +70,17 @@ class FaktureringskomponentenClientTest(
     }
 
     @BeforeEach
-    fun before() {
+    fun beforeEach() {
         serviceUnderTestMockServer.resetAll()
+        oAuthMockServer.reset()
     }
 
     @Test
     fun `lag en fakturaserie`() {
-        val json = """
-            {
-              "fodselsnummer": "12345678911",
-              "fakturaserieReferanse": null,
-              "fullmektig": {
-                "fodselsnummer": "11987654321",
-                "organisasjonsnummer": "123456789"
-              },
-              "referanseBruker": "Nasse Nøff",
-              "referanseNAV": "NAV Medlemskap og avgift",
-              "fakturaGjelderInnbetalingstype": "TRYGDEAVGIFT",
-              "intervall": "KVARTAL",
-              "perioder": [
-                {
-                  "enhetsprisPerManed": 123,
-                  "startDato": "2024-11-04",
-                  "sluttDato": "2024-11-04",
-                  "beskrivelse": "Beskrivelse"
-                }
-              ]
-            }
-        """.trimIndent()
-
-        serviceUnderTestMockServer.stubFor(
-            post("/fakturaserier")
-                .withRequestBody(WireMock.equalToJson(json))
+        mockServer.stubFor(
+            any(anyUrl())
                 .willReturn(
-                    WireMock.aResponse()
+                    aResponse()
                         .withStatus(200)
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody("{ \"fakturaserieReferanse\": \"456\" }")
@@ -106,34 +89,48 @@ class FaktureringskomponentenClientTest(
 
         val nyFakturaserieResponseDto = faktureringskomponentenClient.lagFakturaserie(lagFakturaserieDto(), "melosys")
         nyFakturaserieResponseDto.fakturaserieReferanse.shouldBe("456")
+
+        serviceUnderTestMockServer.verify(
+            postRequestedFor(urlEqualTo("/fakturaserier"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                .withRequestBody(
+                    equalToJson(
+                        """
+                        {
+                          "fodselsnummer": "12345678911",
+                          "fakturaserieReferanse": null,
+                          "fullmektig": {
+                            "fodselsnummer": "11987654321",
+                            "organisasjonsnummer": "123456789"
+                          },
+                          "referanseBruker": "Nasse Nøff",
+                          "referanseNAV": "NAV Medlemskap og avgift",
+                          "fakturaGjelderInnbetalingstype": "TRYGDEAVGIFT",
+                          "intervall": "KVARTAL",
+                          "perioder": [
+                            {
+                              "enhetsprisPerManed": 123,
+                              "startDato": "2024-11-04",
+                              "sluttDato": "2024-11-04",
+                              "beskrivelse": "Beskrivelse"
+                            }
+                          ]
+                        }
+                        """,
+                        true, false
+                    )
+                )
+        )
     }
 
     @Test
     fun `lag en faktura`() {
-        val json = """
-            {
-                "fodselsnummer":"12345678911",
-                "fakturaserieReferanse":"483756934",
-                "fullmektig":
-                  {
-                    "fodselsnummer":"11987654321",
-                    "organisasjonsnummer":"123456789"
-                  },
-                "referanseBruker":"Nasse Nøff",
-                "referanseNAV":"NAV Medlemskap og avgift",
-                "fakturaGjelderInnbetalingstype":"TRYGDEAVGIFT",
-                "belop":2000,
-                "startDato":"2024-01-01",
-                "sluttDato":"2024-12-31",
-                "beskrivelse":"Medlemskapsperiode 2024-01-01 - 2024-12-31 endelig beregnet trygdeavgift 2000 - forskuddsvis fakturert trygdeavgift 2000"
-            }
-        """.trimIndent()
-
-        serviceUnderTestMockServer.stubFor(
-            post("/fakturaer")
-                .withRequestBody(WireMock.equalToJson(json))
+        mockServer.stubFor(
+            any(anyUrl())
                 .willReturn(
-                    WireMock.aResponse()
+                    aResponse()
                         .withStatus(200)
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody("{ \"fakturaserieReferanse\": \"123\" }")
@@ -142,26 +139,46 @@ class FaktureringskomponentenClientTest(
 
         val nyFakturaserieResponseDto = faktureringskomponentenClient.lagFaktura(lagFakturaDto(), "melosys")
         nyFakturaserieResponseDto.fakturaserieReferanse.shouldBe("123")
+
+        serviceUnderTestMockServer.verify(
+            postRequestedFor(urlEqualTo("/fakturaer"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                .withRequestBody(
+                    equalToJson(
+                        """
+                        {
+                            "fodselsnummer":"12345678911",
+                            "fakturaserieReferanse":"483756934",
+                            "fullmektig":
+                              {
+                                "fodselsnummer":"11987654321",
+                                "organisasjonsnummer":"123456789"
+                              },
+                            "referanseBruker":"Nasse Nøff",
+                            "referanseNAV":"NAV Medlemskap og avgift",
+                            "fakturaGjelderInnbetalingstype":"TRYGDEAVGIFT",
+                            "belop":2000,
+                            "startDato":"2024-01-01",
+                            "sluttDato":"2024-12-31",
+                            "beskrivelse":"Medlemskapsperiode 2024-01-01 - 2024-12-31 endelig beregnet trygdeavgift 2000 - forskuddsvis fakturert trygdeavgift 2000"
+                        }
+                        """,
+                        true, false
+                    )
+                )
+        )
     }
 
     @Test
     fun `kanseller fakturaserie med årsavregning`() {
-        val json = """
-            {
-              "årsavregningRef": [
-                "ÅRSAVREGNING-2024-ABC123",
-                "ÅRSAVREGNING-2023-XYZ789"
-              ]
-            }
-        """.trimIndent()
+        val referanse = "test-fakturaserie-referanse"
 
-        val referanse = UUID.randomUUID().toString()
-
-        serviceUnderTestMockServer.stubFor(
-            post("/fakturaserier/$referanse/kanseller")
-                .withRequestBody(WireMock.equalToJson(json))
+        mockServer.stubFor(
+            any(anyUrl())
                 .willReturn(
-                    WireMock.aResponse()
+                    aResponse()
                         .withStatus(200)
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody("{ \"fakturaserieReferanse\": \"5689\" }")
@@ -171,19 +188,27 @@ class FaktureringskomponentenClientTest(
         val nyFakturaserieResponseDto =
             faktureringskomponentenClient.kansellerFakturaserie(referanse, "", listOf("ÅRSAVREGNING-2024-ABC123", "ÅRSAVREGNING-2023-XYZ789"))
         nyFakturaserieResponseDto.fakturaserieReferanse.shouldBe("5689")
+
+        serviceUnderTestMockServer.verify(
+            postRequestedFor(urlEqualTo("/fakturaserier/$referanse/kanseller"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                .withRequestBody(
+                    equalToJson(
+                        """
+                        {
+                          "årsavregningRef": [
+                            "ÅRSAVREGNING-2024-ABC123",
+                            "ÅRSAVREGNING-2023-XYZ789"
+                          ]
+                        }
+                        """,
+                        true, false
+                    )
+                )
+        )
     }
-
-    fun get(url: String): MappingBuilder =
-        WireMock.get(url)
-            .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
-            .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-
-    fun post(url: String): MappingBuilder =
-        WireMock.post(url)
-            .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
-            .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-            .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-
 
     private fun lagFakturaserieDto(
         fakturaserieReferanse: String? = null,
