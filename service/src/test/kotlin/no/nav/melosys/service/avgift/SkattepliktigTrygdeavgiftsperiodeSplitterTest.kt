@@ -9,7 +9,7 @@ import no.nav.melosys.domain.medlemskapsperiodeForTest
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class SkattepliktigTrygdeavgiftsperiodeSplitterTest {
+internal class SkattepliktigTrygdeavgiftsperiodeSplitterTest {
 
     @Test
     fun `periode innenfor ett år gir én trygdeavgiftsperiode`() {
