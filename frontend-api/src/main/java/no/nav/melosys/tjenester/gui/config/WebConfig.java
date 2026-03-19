@@ -16,7 +16,7 @@ import org.springframework.web.servlet.config.annotation.ContentNegotiationConfi
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.handler.UrlHandlerFilter;
+import org.springframework.web.filter.UrlHandlerFilter;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {

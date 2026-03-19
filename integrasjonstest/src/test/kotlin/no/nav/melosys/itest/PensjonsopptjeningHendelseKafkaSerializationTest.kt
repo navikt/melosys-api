@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.jackson2.autoconfigure.Jackson2AutoConfiguration
+import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration
 import org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties
 import org.springframework.boot.test.context.SpringBootTest
@@ -37,7 +37,7 @@ import java.util.UUID
 )
 @ContextConfiguration(
     classes = [
-        Jackson2AutoConfiguration::class,
+        JacksonAutoConfiguration::class,
         KafkaAutoConfiguration::class,
         KafkaConfig::class,
         SkippableKafkaErrorHandler::class,

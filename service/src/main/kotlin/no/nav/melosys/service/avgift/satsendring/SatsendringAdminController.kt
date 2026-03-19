@@ -9,7 +9,6 @@ import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.BehandlingInf
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
-import com.fasterxml.jackson.annotation.JsonProperty
 import org.springframework.web.bind.annotation.*
 
 @Protected
