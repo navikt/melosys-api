@@ -327,6 +327,36 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
         }
     }
 
+    @Test
+    fun `navnVirksomheter inneholder ikke duplikater ved samme virksomhet som selvstendig og arbeidstaker`() {
+        val behandling = lagBehandling { type = Behandlingstyper.FØRSTEGANG }
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsresultat(
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A,
+            behandling
+        )
+        every { mockVilkaarsresultatService.finnVilkaarsresultat(ofType(), Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP) } returns null
+        every { mockVilkaarsresultatService.oppfyllerVilkaar(ofType(), Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP) } returns true
+        every { mockLandvelgerService.hentBostedsland(ofType()) } returns Bostedsland("NO")
+
+        val duplikatVirksomhet = BrevDataTestUtils.lagUtenlandskVirksomhet()
+        every { mockVirksomheterService.hentAlleNorskeVirksomheter(ofType()) } returns listOf(BrevDataTestUtils.lagNorskVirksomhet())
+        every { mockVirksomheterService.hentUtenlandskeVirksomheter(ofType()) } returns listOf(duplikatVirksomhet, duplikatVirksomhet)
+
+        val brevbestilling =
+            InnvilgelseEftaStorbritanniaBrevbestilling.Builder()
+                .medBehandling(behandling)
+                .medPersonDokument(personDokumentForTest { sammensattNavn = "Hei Test" })
+                .medPersonMottaker(personDokumentForTest {
+                    sammensattNavn = "Hei Test"
+                    bostedsadresse = Bostedsadresse(land = Land.av("NOR"))
+                })
+                .build()
+
+        innvilgelseEftaStorbritanniaMapper.mapInnvilgelseEftaStorbritannia(brevbestilling).run {
+            navnVirksomheter.shouldBe(listOf("Bedrift AS", "Bedrift Utenlandsk AS"))
+        }
+    }
+
     @MelosysTestDsl
     private class BehandlingBuilder {
         var landkoder: List<String> = listOf(Landkoder.SE.kode, Landkoder.FR.kode)

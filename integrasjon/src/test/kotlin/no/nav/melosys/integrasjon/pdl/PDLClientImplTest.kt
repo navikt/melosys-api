@@ -1,5 +1,15 @@
 package no.nav.melosys.integrasjon.pdl
 
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.any
+import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
+import com.github.tomakehurst.wiremock.client.WireMock.containing
+import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.matching
+import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
@@ -8,6 +18,9 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.exception.IntegrasjonException
+import no.nav.melosys.integrasjon.MetricsTestConfig
+import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.pdl.dto.Endring
 import no.nav.melosys.integrasjon.pdl.dto.Endringstype
 import no.nav.melosys.integrasjon.pdl.dto.Metadata
@@ -22,42 +35,103 @@ import no.nav.melosys.integrasjon.pdl.dto.person.adresse.PostadresseIFrittFormat
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.UtenlandskAdresse
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.UtenlandskAdresseIFrittFormat
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Vegadresse
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import java.io.IOException
 import java.net.URISyntaxException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.Objects
+import java.util.UUID
 
-class PDLClientImplTest {
+@SpringBootTest
+@ActiveProfiles("wiremock-test")
+@ContextConfiguration(
+    classes = [
+        OAuthMockServer::class,
+        CorrelationIdOutgoingFilter::class,
+        PDLClientProducer::class,
+        PDLAuthFilterAzure::class,
+        MetricsTestConfig::class,
+    ]
+)
+@AutoConfigureWebClient
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class PDLClientImplTest(
+    @Autowired private val pdlClient: PDLClient,
+    @Autowired private val oAuthMockServer: OAuthMockServer,
+    @Value("\${mockserver.port}") mockServerPort: Int,
+) {
+    private val processUUID = UUID.randomUUID()
+    private val mockServer = WireMockServer(WireMockConfiguration.wireMockConfig().port(mockServerPort))
+    @BeforeAll
+    fun beforeAll() {
+        ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prosessSteg")
+        mockServer.start()
+        oAuthMockServer.start()
+    }
 
-    private lateinit var pdlClient: PDLClient
+    @AfterAll
+    fun afterAll() {
+        mockServer.stop()
+        oAuthMockServer.stop()
+        ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
+    }
 
     @BeforeEach
-    fun setup() {
-        pdlClient = PDLClientImpl(
-            WebClient.builder().baseUrl("http://localhost:${mockServer.port}")
-                .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE).build())
+    fun beforeEach() {
+        mockServer.resetAll()
+        oAuthMockServer.reset()
+    }
+
+    @Test
+    fun `hentIdenter serialiserer GraphQL request body korrekt`() {
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(lastFil("mock/pdl/hentIdenter.json"))
+            )
+        )
+
+        pdlClient.hentIdenter("12345678901")
+
+        val expectedJson = """{"query":"query(${'$'}ident: ID!) {\n  hentIdenter(ident: ${'$'}ident) {\n      identer {\n          ident,\n          gruppe\n      }\n  }\n}\n","variables":{"ident":"12345678901"}}"""
+
+        mockServer.verify(
+            postRequestedFor(urlEqualTo("/graphql"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                .withRequestBody(equalToJson(expectedJson, true, false))
+        )
     }
 
     @Test
     fun `hentIdenter med ident mottar og mapper response uten feil`() {
-        mockServer.enqueue(
-            MockResponse()
-                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(lastFil("mock/pdl/hentIdenter.json"))
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(lastFil("mock/pdl/hentIdenter.json"))
+            )
         )
-
 
         pdlClient.hentIdenter("123").identer() shouldContainExactly listOf(
             Ident("99026522600", FOLKEREGISTERIDENT),
@@ -67,12 +141,14 @@ class PDLClientImplTest {
 
     @Test
     fun `hentIdenter feil fra PDL kaster feil`() {
-        mockServer.enqueue(
-            MockResponse()
-                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(lastFil("mock/pdl/feil.json"))
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(lastFil("mock/pdl/feil.json"))
+            )
         )
-
 
         val exception = shouldThrow<IntegrasjonException> {
             pdlClient.hentIdenter("123")
@@ -82,15 +158,16 @@ class PDLClientImplTest {
 
     @Test
     fun `hent familierelasjoner`() {
-        mockServer.enqueue(
-            MockResponse()
-                .setBody(lastFil("mock/pdl/hentFamilierelasjoner.json"))
-                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(lastFil("mock/pdl/hentFamilierelasjoner.json"))
+            )
         )
 
-
         val person = pdlClient.hentFamilierelasjoner("ident")
-
 
         person.run {
             folkeregisteridentifikator()
@@ -119,21 +196,21 @@ class PDLClientImplTest {
                     metadata.historisk shouldBe true
                 }
             }
-
         }
     }
 
     @Test
     fun `hentPerson med ident mottar person response uten feil`() {
-        mockServer.enqueue(
-            MockResponse()
-                .setBody(lastFil("mock/pdl/hentPerson.json"))
-                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(lastFil("mock/pdl/hentPerson.json"))
+            )
         )
 
-
         val person = pdlClient.hentPerson("123123123")
-
 
         person.run {
             adressebeskyttelse().shouldBeEmpty()
@@ -183,15 +260,16 @@ class PDLClientImplTest {
 
     @Test
     fun `hentPerson med ident mottar adresser uten feil`() {
-        mockServer.enqueue(
-            MockResponse()
-                .setBody(lastFil("mock/pdl/hentPerson.json"))
-                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(lastFil("mock/pdl/hentPerson.json"))
+            )
         )
 
-
         val person = pdlClient.hentPerson("123123123")
-
 
         person.run {
             bostedsadresse()
@@ -235,13 +313,14 @@ class PDLClientImplTest {
 
     @Test
     fun `hentStatsborgerskap med ident mottar response uten feil`() {
-        mockServer.enqueue(
-            MockResponse().setBody(lastFil("mock/pdl/hentStatsborgerskap.json")).addHeader(
-                HttpHeaders.CONTENT_TYPE,
-                MediaType.APPLICATION_JSON_VALUE
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(lastFil("mock/pdl/hentStatsborgerskap.json"))
             )
         )
-
 
         pdlClient.hentStatsborgerskap("123") shouldContainExactlyInAnyOrder listOf(
             Statsborgerskap(
@@ -263,15 +342,16 @@ class PDLClientImplTest {
 
     @Test
     fun `hentPersonMedHistorikk mottar person response uten feil`() {
-        mockServer.enqueue(
-            MockResponse()
-                .setBody(lastFil("mock/pdl/hentPersonHistorikk.json"))
-                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(lastFil("mock/pdl/hentPersonHistorikk.json"))
+            )
         )
 
-
         val person = pdlClient.hentPerson("23487505536")
-
 
         person.run {
             doedsfall()
@@ -338,15 +418,16 @@ class PDLClientImplTest {
 
     @Test
     fun `hentPersonMedHistorikk mottar adresser uten feil`() {
-        mockServer.enqueue(
-            MockResponse()
-                .setBody(lastFil("mock/pdl/hentPersonHistorikk.json"))
-                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(lastFil("mock/pdl/hentPersonHistorikk.json"))
+            )
         )
 
-
         val person = pdlClient.hentPerson("23487505536")
-
 
         person.run {
             bostedsadresse()
@@ -403,20 +484,5 @@ class PDLClientImplTest {
             throw IllegalStateException(e)
         }
     }
-
-    companion object {
-        private lateinit var mockServer: MockWebServer
-
-        @JvmStatic
-        @BeforeAll
-        fun setupServer() {
-            mockServer = MockWebServer().apply { start() }
-        }
-
-        @JvmStatic
-        @AfterAll
-        fun tearDown() {
-            mockServer.shutdown()
-        }
-    }
 }
+

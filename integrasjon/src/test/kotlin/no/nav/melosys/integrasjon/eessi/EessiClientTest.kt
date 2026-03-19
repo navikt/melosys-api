@@ -2,8 +2,16 @@ package no.nav.melosys.integrasjon.eessi
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.any
+import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
+import com.github.tomakehurst.wiremock.client.WireMock.containing
+import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.matching
+import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeSingleton
@@ -21,9 +29,11 @@ import no.nav.melosys.domain.eessi.sed.OpprettBucOgSedDtoV2
 import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagA003Dto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
+import no.nav.melosys.domain.eessi.sed.VedleggReferanse
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.integrasjon.eessi.dto.OpprettBucOgSedDto
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
@@ -39,7 +49,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import java.time.LocalDate
 import java.util.*
-import no.nav.melosys.domain.eessi.sed.VedleggReferanse
 
 @SpringBootTest
 @ActiveProfiles("wiremock-test")
@@ -94,15 +103,9 @@ class EessiClientTest(
     fun opprettBucOgSed() {
         val sedDataDto = SedDataDto()
         val vedlegg = setOf(Vedlegg("pdf".toByteArray(), "tittel"))
-        val json = ObjectMapper().writeValueAsString(
-            mapOf(
-                "sedDataDto" to sedDataDto,
-                "vedlegg" to vedlegg
-            )
-        )
+
         serviceUnderTestMockServer.stubFor(
-            post("/api/buc/LA_BUC_01?sendAutomatisk=true&oppdaterEksisterende=true")
-                .withRequestBody(WireMock.equalToJson(json))
+            any(anyUrl())
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)
@@ -110,7 +113,6 @@ class EessiClientTest(
                         .withBody("{\"rinaSaksnummer\":\"12345\",\"rinaUrl\":\"localhost:3000\"}")
                 )
         )
-
 
         val opprettSedDto = eessiClient.opprettBucOgSed(
             sedDataDto,
@@ -121,20 +123,33 @@ class EessiClientTest(
         )
 
         MetricsTestConfig.checkMetricsUri("/api/buc/{bucType}?sendAutomatisk={sendAutomatisk}&oppdaterEksisterende={oppdaterEksisterendeOmFinnes}")
-
         opprettSedDto.rinaSaksnummer.shouldBe("12345")
+
+        serviceUnderTestMockServer.verify(
+            postRequestedFor(urlPathEqualTo("/api/buc/LA_BUC_01"))
+                .withQueryParam("sendAutomatisk", WireMock.equalTo("true"))
+                .withQueryParam("oppdaterEksisterende", WireMock.equalTo("true"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                .withRequestBody(
+                    equalToJson(
+                        """{"sedDataDto":{"sedType":null,"utenlandskIdent":[],"bostedsadresse":null,"arbeidsgivendeVirksomheter":[],"selvstendigeVirksomheter":[],"arbeidssteder":[],"arbeidsland":[],"harFastArbeidssted":null,"lovvalgsperioder":[],"ytterligereInformasjon":null,"bruker":null,"kontaktadresse":null,"oppholdsadresse":null,"familieMedlem":[],"søknadsperiode":null,"avklartBostedsland":null,"gsakSaksnummer":null,"tidligereLovvalgsperioder":[],"mottakerIder":null,"svarAnmodningUnntak":null,"utpekingAvvis":null,"vedtakDto":null,"invalideringSedDto":null,"a008Formaal":null,"erFjernarbeidTWFA":null},"vedlegg":[{"innhold":"cGRm","tittel":"tittel","hentInnhold":"cGRm"}]}""",
+                        true, false
+                    )
+                )
+        )
     }
 
     @Test
     fun opprettBucOgSed_forventException() {
         serviceUnderTestMockServer.stubFor(
-            post("/api/buc/LA_BUC_01?sendAutomatisk=true&oppdaterEksisterende=true")
+            any(anyUrl())
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(500)
                 )
         )
-
 
         shouldThrow<TekniskException> {
             eessiClient.opprettBucOgSed(
@@ -175,7 +190,7 @@ class EessiClientTest(
                 .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
                 .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .withRequestBody(WireMock.equalToJson(ObjectMapper().writeValueAsString(opprettBucOgSedDtoV2)))
+                .withRequestBody(WireMock.equalToJson("""{"bucType":"LA_BUC_01","sedDataDto":{"sedType":null,"utenlandskIdent":[],"bostedsadresse":null,"arbeidsgivendeVirksomheter":[],"selvstendigeVirksomheter":[],"arbeidssteder":[],"arbeidsland":[],"harFastArbeidssted":null,"lovvalgsperioder":[],"ytterligereInformasjon":null,"bruker":null,"kontaktadresse":null,"oppholdsadresse":null,"familieMedlem":[],"søknadsperiode":null,"avklartBostedsland":null,"gsakSaksnummer":null,"tidligereLovvalgsperioder":[],"mottakerIder":null,"svarAnmodningUnntak":null,"utpekingAvvis":null,"vedtakDto":null,"invalideringSedDto":null,"a008Formaal":null,"erFjernarbeidTWFA":null},"vedlegg":[{"journalpostId":"journalpostId1","dokumentId":"dokumentId1","tittel":"Tittel 1"},{"journalpostId":"journalpostId2","dokumentId":"dokumentId2","tittel":"Tittel 2"}],"sendAutomatisk":true,"oppdaterEksisterende":false}""", true, false))
         )
 
         opprettSedDto.rinaSaksnummer.shouldBe("67890")
@@ -236,7 +251,7 @@ class EessiClientTest(
                 .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
                 .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .withRequestBody(WireMock.equalToJson(ObjectMapper().writeValueAsString(opprettBucOgSedDtoV2)))
+                .withRequestBody(WireMock.equalToJson("""{"bucType":"LA_BUC_03","sedDataDto":{"sedType":null,"utenlandskIdent":[],"bostedsadresse":null,"arbeidsgivendeVirksomheter":[],"selvstendigeVirksomheter":[],"arbeidssteder":[],"arbeidsland":[],"harFastArbeidssted":null,"lovvalgsperioder":[],"ytterligereInformasjon":null,"bruker":null,"kontaktadresse":null,"oppholdsadresse":null,"familieMedlem":[],"søknadsperiode":null,"avklartBostedsland":null,"gsakSaksnummer":null,"tidligereLovvalgsperioder":[],"mottakerIder":null,"svarAnmodningUnntak":null,"utpekingAvvis":null,"vedtakDto":null,"invalideringSedDto":null,"a008Formaal":null,"erFjernarbeidTWFA":null},"vedlegg":[],"sendAutomatisk":false,"oppdaterEksisterende":true}""", true, false))
         )
 
         opprettSedDto.rinaSaksnummer.shouldBe("99999")
@@ -245,15 +260,14 @@ class EessiClientTest(
     @Test
     fun sendSedPåEksisterendeBuc() {
         val sedDataDto = SedDataDto()
+
         serviceUnderTestMockServer.stubFor(
-            post("/api/buc/12345/sed/A001")
-                .withRequestBody(WireMock.equalToJson((ObjectMapper().writeValueAsString(sedDataDto))))
+            any(anyUrl())
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(204)
                 )
         )
-
 
         eessiClient.sendSedPåEksisterendeBuc(
             sedDataDto,
@@ -262,6 +276,16 @@ class EessiClientTest(
         )
 
         MetricsTestConfig.checkMetricsUri("/api/buc/{bucID}/sed/{sedType}")
+
+        serviceUnderTestMockServer.verify(
+            postRequestedFor(urlEqualTo("/api/buc/12345/sed/A001"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                .withRequestBody(
+                    equalToJson("""{"sedType":null,"utenlandskIdent":[],"bostedsadresse":null,"arbeidsgivendeVirksomheter":[],"selvstendigeVirksomheter":[],"arbeidssteder":[],"arbeidsland":[],"harFastArbeidssted":null,"lovvalgsperioder":[],"ytterligereInformasjon":null,"bruker":null,"kontaktadresse":null,"oppholdsadresse":null,"familieMedlem":[],"søknadsperiode":null,"avklartBostedsland":null,"gsakSaksnummer":null,"tidligereLovvalgsperioder":[],"mottakerIder":null,"svarAnmodningUnntak":null,"utpekingAvvis":null,"vedtakDto":null,"invalideringSedDto":null,"a008Formaal":null,"erFjernarbeidTWFA":null}""", true, false)
+                )
+        )
     }
 
     @Test
@@ -341,9 +365,9 @@ class EessiClientTest(
     @Test
     fun lagreSaksrelasjon() {
         val saksrelasjonDto = SaksrelasjonDto(123L, "123", "123")
+
         serviceUnderTestMockServer.stubFor(
-            post("/api/sak")
-                .withRequestBody(WireMock.equalToJson(ObjectMapper().writeValueAsString(saksrelasjonDto)))
+            any(anyUrl())
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(204)
@@ -351,6 +375,16 @@ class EessiClientTest(
         )
 
         eessiClient.lagreSaksrelasjon(saksrelasjonDto)
+
+        serviceUnderTestMockServer.verify(
+            postRequestedFor(urlEqualTo("/api/sak"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                .withRequestBody(
+                    equalToJson("""{"gsakSaksnummer":123,"rinaSaksnummer":"123","bucType":"123"}""", true, false)
+                )
+        )
     }
 
     @Test
@@ -387,8 +421,10 @@ class EessiClientTest(
     @Test
     fun genererSedPdf() {
         val pdf = "pdf".toByteArray()
+        val sedDataDto = SedDataDto()
+
         serviceUnderTestMockServer.stubFor(
-            post("/api/sed/A001/pdf")
+            any(anyUrl())
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)
@@ -397,13 +433,20 @@ class EessiClientTest(
                 )
         )
 
-
-        val resultPDF: ByteArray = eessiClient.genererSedPdf(SedDataDto(), SedType.A001)
-
+        val resultPDF: ByteArray = eessiClient.genererSedPdf(sedDataDto, SedType.A001)
 
         resultPDF.shouldBe(pdf)
-
         MetricsTestConfig.metricsUriShouldContainBrackets()
+
+        serviceUnderTestMockServer.verify(
+            postRequestedFor(urlPathEqualTo("/api/sed/A001/pdf"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                .withRequestBody(
+                    equalToJson("""{"sedType":null,"utenlandskIdent":[],"bostedsadresse":null,"arbeidsgivendeVirksomheter":[],"selvstendigeVirksomheter":[],"arbeidssteder":[],"arbeidsland":[],"harFastArbeidssted":null,"lovvalgsperioder":[],"ytterligereInformasjon":null,"bruker":null,"kontaktadresse":null,"oppholdsadresse":null,"familieMedlem":[],"søknadsperiode":null,"avklartBostedsland":null,"gsakSaksnummer":null,"tidligereLovvalgsperioder":[],"mottakerIder":null,"svarAnmodningUnntak":null,"utpekingAvvis":null,"vedtakDto":null,"invalideringSedDto":null,"a008Formaal":null,"erFjernarbeidTWFA":null}""", true, false)
+                )
+        )
     }
 
     @Test
@@ -530,15 +573,5 @@ class EessiClientTest(
         MetricsTestConfig.metricsUriShouldContainBrackets()
     }
 
-    fun get(url: String): MappingBuilder =
-        WireMock.get(url)
-            .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
-            .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-
-    fun post(url: String): MappingBuilder =
-        WireMock.post(url)
-            .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
-            .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-            .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-
 }
+
