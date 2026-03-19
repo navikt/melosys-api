@@ -119,26 +119,26 @@ kafkaOffsetChecker.waitForConsumerToCatchUp(topic, groupId, timeout)
 
 ```bash
 # Unit test
-~/.claude/scripts/run-tests.sh -pl service -Dtest=MyServiceTest
+scripts/run-tests.sh -pl service -Dtest=MyServiceTest
 
 # Specific method
-~/.claude/scripts/run-tests.sh -pl service -Dtest=MyServiceTest#testMethodName
+scripts/run-tests.sh -pl service -Dtest=MyServiceTest#testMethodName
 
 # Integration test
-~/.claude/scripts/run-tests.sh -pl integrasjonstest --integration -Dtest=MyIT
+scripts/run-tests.sh -pl integrasjonstest --integration -Dtest=MyIT
 ```
 
 ### Test Groups
 
 ```bash
 # All unit tests in module
-~/.claude/scripts/run-tests.sh -pl service
+scripts/run-tests.sh -pl service
 
 # All integration tests
-~/.claude/scripts/run-tests.sh -pl integrasjonstest --integration
+scripts/run-tests.sh -pl integrasjonstest --integration
 
 # With dependency rebuild
-~/.claude/scripts/run-tests.sh -pl integrasjonstest -am --integration
+scripts/run-tests.sh -pl integrasjonstest -am --integration
 ```
 
 ### Debug Mode

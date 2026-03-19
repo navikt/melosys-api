@@ -29,13 +29,13 @@ Expert knowledge of testing patterns and strategies in melosys-api.
 
 ```bash
 # Unit tests for a module
-~/.claude/scripts/run-tests.sh -pl service -Dtest=MyServiceTest
+scripts/run-tests.sh -pl service -Dtest=MyServiceTest
 
 # Integration tests without dependency rebuild
-~/.claude/scripts/run-tests.sh -pl integrasjonstest --integration -Dtest=MyIT
+scripts/run-tests.sh -pl integrasjonstest --integration -Dtest=MyIT
 
 # Integration tests with dependency rebuild
-~/.claude/scripts/run-tests.sh -pl integrasjonstest -am --integration -Dtest=MyIT
+scripts/run-tests.sh -pl integrasjonstest -am --integration -Dtest=MyIT
 ```
 
 ### Key Base Classes
@@ -392,7 +392,7 @@ melosys:
 Quick commands:
 ```bash
 # Single test
-~/.claude/scripts/run-tests.sh -pl service -Dtest=MyServiceTest#testMethodName
+scripts/run-tests.sh -pl service -Dtest=MyServiceTest#testMethodName
 
 # Debug mode (attach debugger to port 5005)
 mvn -pl service test -Dtest=MyTest -Dmaven.surefire.debug
