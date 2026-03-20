@@ -22,7 +22,6 @@ object SkattepliktigTrygdeavgiftsperiodeSplitter {
         val totalTom = avgiftspliktigperiode.tom
 
         return (totalFom.year..totalTom.year)
-            .filter { år -> avgiftspliktigperiode.overlapperMedÅr(år) }
             .filter { år -> fraOgMedÅr == null || år >= fraOgMedÅr }
             .map { år ->
                 val periodeFom = if (totalFom.year == år) totalFom else LocalDate.of(år, 1, 1)
