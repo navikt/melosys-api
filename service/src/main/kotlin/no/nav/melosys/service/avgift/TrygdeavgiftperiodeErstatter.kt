@@ -19,6 +19,11 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatId)
         nullstillTrygdeavgiftsperioder(behandlingsresultat)
 
+        // Flush DELETEs til databasen FØR nye perioder legges til.
+        // Uten dette prøver Hibernate å UPDATE (i stedet for DELETE+INSERT)
+        // grunnlag-rader i samme flush, og setter inntektsperiode_id=NULL → ORA-01407.
+        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+
         behandlingsresultat.finnAvgiftspliktigPerioder().forEach { avgiftspliktigperiode ->
             trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
                 val erLegacyMatch = trygdeavgiftsperiode.grunnlagMedlemskapsperiode?.id == avgiftspliktigperiode.hentId() ||
