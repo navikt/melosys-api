@@ -18,6 +18,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.ReplikerBehandlingsresultatService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import jakarta.persistence.EntityManager
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
@@ -39,6 +40,7 @@ class TrygdeavgiftsperiodeGrunnlagIT(
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val replikerBehandlingsresultatService: ReplikerBehandlingsresultatService,
+    @Autowired private val entityManager: EntityManager,
 ) : DataJpaTestBase() {
 
     @Test
@@ -115,6 +117,65 @@ class TrygdeavgiftsperiodeGrunnlagIT(
             grunnlag.inntektsperiode.shouldNotBeNull()
             grunnlag.skatteforhold.shouldNotBeNull()
         }
+    }
+
+    @Test
+    fun `re-lagring av behandlingsresultat med eksisterende grunnlag gir ikke ORA-01407`() {
+        // Reproduserer scenarioet fra steg-navigering:
+        // 1. Opprett og lagre behandling med trygdeavgift + grunnlag (simulerer beregning)
+        val (original, _) = lagFagsakMedBehandlinger()
+        val br = lagBehandlingsresultatMedTrygdeavgift(original, antallGrunnlag = 1)
+        behandlingsresultatRepository.saveAndFlush(br)
+
+        // Clear persistence context — tvinger ekte DB-roundtrip (som i produksjon)
+        entityManager.clear()
+
+        // 2. Last på nytt fra DB (simulerer navigering til Trygdeavgift-steget)
+        val lastet = behandlingsresultatRepository.findById(original.id).get()
+        lastet.trygdeavgiftsperioder.single().grunnlagListe shouldHaveSize 1
+
+        // 3. Lagre igjen uten endringer (simulerer "Bekreft og fortsett")
+        //    ORA-01407 oppstod her: Hibernate cascader MERGE gjennom lazy-lastet
+        //    grunnlagListe og genererer UPDATE med inntektsperiode_id=NULL
+        behandlingsresultatRepository.saveAndFlush(lastet)
+
+        entityManager.clear()
+
+        // 4. Verifiser at data fortsatt er intakt
+        val etterReLagring = behandlingsresultatRepository.findById(original.id).get()
+        val tap = etterReLagring.trygdeavgiftsperioder.single()
+        tap.grunnlagListe shouldHaveSize 1
+        tap.grunnlagListe.first().inntektsperiode.shouldNotBeNull()
+        tap.grunnlagListe.first().skatteforhold.shouldNotBeNull()
+    }
+
+    @Test
+    fun `re-lagring med dual-referanse til samme Inntektsperiode gir ikke ORA-01407`() {
+        // Spesifikt case: grunnlag og parent trygdeavgiftsperiode refererer SAMME Inntektsperiode
+        val (original, _) = lagFagsakMedBehandlinger()
+        val br = lagBehandlingsresultatMedTrygdeavgift(original, antallGrunnlag = 1)
+
+        // Verifiser dual-referanse
+        val tap = br.trygdeavgiftsperioder.single()
+        val legacyInntekt = tap.grunnlagInntekstperiode
+        val grunnlagInntekt = tap.grunnlagListe.first().inntektsperiode
+        legacyInntekt shouldBe grunnlagInntekt // Samme instans
+
+        behandlingsresultatRepository.saveAndFlush(br)
+        entityManager.clear()
+
+        // Last, lagre, last, lagre — to runder med ekte DB-roundtrips
+        val lastet1 = behandlingsresultatRepository.findById(original.id).get()
+        behandlingsresultatRepository.saveAndFlush(lastet1)
+        entityManager.clear()
+
+        val lastet2 = behandlingsresultatRepository.findById(original.id).get()
+        behandlingsresultatRepository.saveAndFlush(lastet2)
+        entityManager.clear()
+
+        // Verifiser integritet
+        val endelig = behandlingsresultatRepository.findById(original.id).get()
+        endelig.trygdeavgiftsperioder.single().grunnlagListe shouldHaveSize 1
     }
 
     // --- Hjelpemetoder ---

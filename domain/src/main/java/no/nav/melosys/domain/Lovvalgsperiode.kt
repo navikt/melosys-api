@@ -89,7 +89,10 @@ class Lovvalgsperiode : PeriodeOmLovvalg, AvgiftspliktigPeriode {
     var trygdeavgiftsperioder: MutableSet<Trygdeavgiftsperiode> = HashSet(1)
 
     override fun clearTrygdeavgiftsperioder() {
-        trygdeavgiftsperioder.forEach { it.grunnlagLovvalgsPeriode = null }
+        trygdeavgiftsperioder.forEach {
+            it.grunnlagListe.clear()
+            it.grunnlagLovvalgsPeriode = null
+        }
         trygdeavgiftsperioder.clear()
     }
 

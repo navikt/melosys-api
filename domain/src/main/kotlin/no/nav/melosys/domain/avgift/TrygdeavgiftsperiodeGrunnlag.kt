@@ -28,12 +28,12 @@ class TrygdeavgiftsperiodeGrunnlag(
     @JoinColumn(name = "helseutgift_dekkes_periode_id")
     var helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = null,
 
-    @ManyToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
-    @JoinColumn(name = "inntektsperiode_id")
+    @ManyToOne
+    @JoinColumn(name = "inntektsperiode_id", nullable = false)
     val inntektsperiode: Inntektsperiode,
 
-    @ManyToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
-    @JoinColumn(name = "skatteforhold_id")
+    @ManyToOne
+    @JoinColumn(name = "skatteforhold_id", nullable = false)
     val skatteforhold: SkatteforholdTilNorge,
 ) {
 
