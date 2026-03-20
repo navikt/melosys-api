@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.kafka
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
@@ -18,7 +18,7 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
@@ -32,9 +32,6 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 import org.springframework.kafka.listener.ContainerProperties
-import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
-import org.springframework.kafka.support.serializer.JsonDeserializer
-import org.springframework.kafka.support.serializer.JsonSerializer
 
 typealias KafkaConsumerContainerFactory<T> = KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, T>>
 
@@ -98,7 +95,7 @@ class KafkaConfig(
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to brokersUrl,
             ) + securityConfig(),
             StringSerializer(),
-            JsonSerializer(objectMapper)
+            ObjectMapperSerializer(objectMapper)
         )
 
     @Bean
@@ -110,7 +107,7 @@ class KafkaConfig(
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to brokersUrl,
             ) + securityConfig(),
             StringSerializer(),
-            JsonSerializer(objectMapper)
+            ObjectMapperSerializer(objectMapper)
         )
 
     @Bean
@@ -123,7 +120,7 @@ class KafkaConfig(
     fun melosysPoppHendelseKafkaTemplate(producerFactory: ProducerFactory<String, PensjonsopptjeningHendelse>): KafkaTemplate<String, PensjonsopptjeningHendelse> =
         KafkaTemplate(producerFactory)
 
-    private inline fun <reified T> kafkaListenerContainerFactoryStopOnError(
+    private inline fun <reified T : Any> kafkaListenerContainerFactoryStopOnError(
         objectMapper: ObjectMapper,
         kafkaProperties: KafkaProperties,
         groupId: String
@@ -132,16 +129,13 @@ class KafkaConfig(
 
         containerProperties.ackMode = ContainerProperties.AckMode.RECORD
 
-        val props = kafkaProperties.buildConsumerProperties(null) + consumerConfig(groupId) + securityConfig() + mapOf(
-            ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to ErrorHandlingDeserializer::class.java,
-            ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS to LoggingDeserializer::class.java
-        )
+        val props = kafkaProperties.buildConsumerProperties() + consumerConfig(groupId) + securityConfig()
 
-        consumerFactory = DefaultKafkaConsumerFactory(
+        setConsumerFactory(DefaultKafkaConsumerFactory(
             props,
             StringDeserializer(),
-            LoggingDeserializer(objectMapper, T::class.java) as Deserializer<T>
-        )
+            LoggingDeserializer(objectMapper, T::class.java)
+        ))
     }
 
     private fun consumerConfig(groupId: String) = mapOf<String, Any>(
@@ -151,7 +145,6 @@ class KafkaConfig(
         ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
         ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG to 15000,
         ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
-        ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to JsonDeserializer::class.java,
         ConsumerConfig.MAX_POLL_RECORDS_CONFIG to 1
     )
 
@@ -190,6 +183,13 @@ class LoggingDeserializer<T>(
             val rawMessage = data?.let { String(it) } ?: "null data"
             throw FailedDeserializationException(topic ?: "unknown", rawMessage, e)
         }
+    }
+}
+
+class ObjectMapperSerializer<T>(private val objectMapper: ObjectMapper) : org.apache.kafka.common.serialization.Serializer<T> {
+    override fun serialize(topic: String?, data: T?): ByteArray? {
+        if (data == null) return null
+        return objectMapper.writeValueAsBytes(data)
     }
 }
 

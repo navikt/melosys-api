@@ -10,8 +10,8 @@ import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
@@ -25,7 +25,7 @@ internal class ÅrsavregningListControllerTest {
     @MockkBean
     private lateinit var årsavregningService: ÅrsavregningService
 
-    @MockBean
+    @MockitoBean
     private lateinit var aksesskontroll: Aksesskontroll
 
 
@@ -66,7 +66,7 @@ internal class ÅrsavregningListControllerTest {
             )
                 .queryParam("aar", "2023")
                 .queryParam("resultattype", "FERDIGBEHANDLET")
-        ).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.content().json(expectedJson, true))
+        ).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.content().json(expectedJson, org.springframework.test.json.JsonCompareMode.STRICT))
 
 
     }

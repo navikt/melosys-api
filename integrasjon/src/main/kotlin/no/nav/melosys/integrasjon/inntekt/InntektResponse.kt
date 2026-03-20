@@ -6,9 +6,8 @@ import com.fasterxml.jackson.annotation.JsonSetter
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.Nulls
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import tools.jackson.core.JacksonException
+import tools.jackson.databind.ObjectMapper
 import no.nav.melosys.exception.TekniskException
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -20,11 +19,11 @@ data class InntektResponse(
     val arbeidsInntektMaaned: List<ArbeidsInntektMaaned> = listOf(),
     val ident: Aktoer
 ) {
-    private val objectMapper = ObjectMapper().registerModule(JavaTimeModule())
+    private val objectMapper = ObjectMapper()
 
     fun tilJsonString(): String = try {
         objectMapper.writeValueAsString(this)
-    } catch (e: JsonProcessingException) {
+    } catch (e: JacksonException) {
         throw TekniskException("Kunne ikke konvertere inntekt til json string", e)
     }
 

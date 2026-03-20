@@ -1,23 +1,30 @@
 package no.nav.melosys.saksflytapi.domain
 
-import com.fasterxml.jackson.core.JsonParseException
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.JsonMappingException
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinModule
+import tools.jackson.core.JacksonException
+import tools.jackson.core.type.TypeReference
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.databind.module.SimpleModule
+import tools.jackson.module.kotlin.kotlinModule
 import jakarta.persistence.*
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.jpa.PropertiesConverter
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.AnnenPersonMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMedFullmaktMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.DegSelvMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMedFullmaktMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaData
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaDto
+import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
+import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.apache.commons.lang3.exception.ExceptionUtils
-import org.hibernate.annotations.GenericGenerator
+import org.hibernate.annotations.UuidGenerator
 import org.springframework.util.ObjectUtils.isEmpty
-import java.io.IOException
 import java.time.LocalDateTime
 import java.util.*
 
@@ -28,8 +35,8 @@ import java.util.*
 @Table(name = "prosessinstans")
 class Prosessinstans(
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @GeneratedValue
+    @UuidGenerator
     @Column(name = "uuid", nullable = false)
     var id: UUID? = null,
 
@@ -78,12 +85,8 @@ class Prosessinstans(
     private inline fun <R> decodeOrThrow(key: ProsessDataKey, target: String, decode: () -> R): R =
         try {
             decode()
-        } catch (e: JsonParseException) {
-            throw IllegalStateException("Ugyldig JSON for $key ved deserialisering til $target", e)
-        } catch (e: JsonMappingException) {
-            throw IllegalStateException("Mapping-feil for $key ved deserialisering til $target", e)
-        } catch (e: IOException) {
-            throw IllegalStateException("I/O-feil ved lesing av data for $key", e)
+        } catch (e: JacksonException) {
+            throw IllegalStateException("JSON-feil for $key ved deserialisering til $target", e)
         }
 
     private fun targetName(type: Class<*>) = type.simpleName
@@ -136,7 +139,7 @@ class Prosessinstans(
             try {
                 val dataString = dataMapper.writeValueAsString(value)
                 setData(key, dataString)
-            } catch (e: JsonProcessingException) {
+            } catch (e: JacksonException) {
                 throw IllegalStateException("Feil ved serialisering", e)
             }
         }
@@ -206,10 +209,20 @@ class Prosessinstans(
 
     companion object {
         @JvmStatic
-        val dataMapper: ObjectMapper = ObjectMapper()
-            .registerModule(JavaTimeModule())
-            .registerModule(SimpleModule().addDeserializer(LovvalgBestemmelse::class.java, LovvalgBestemmelseDeserializer()))
-            .registerModule(KotlinModule.Builder().build())
+        val dataMapper: ObjectMapper = JsonMapper.builder()
+            .addModule(kotlinModule())
+            .addModule(SimpleModule().addDeserializer(LovvalgBestemmelse::class.java, LovvalgBestemmelseDeserializer()))
+            .addMixIn(SkjemaMottattMelding::class.java, SkjemaMottattMeldingMixin::class.java)
+            .addMixIn(UtsendtArbeidstakerMetadata::class.java, UtsendtArbeidstakerMetadataMixin::class.java)
+            .addMixIn(DegSelvMetadata::class.java, DegSelvMetadataMixin::class.java)
+            .addMixIn(ArbeidsgiverMetadata::class.java, ArbeidsgiverMetadataMixin::class.java)
+            .addMixIn(AnnenPersonMetadata::class.java, AnnenPersonMetadataMixin::class.java)
+            .addMixIn(ArbeidsgiverMedFullmaktMetadata::class.java, ArbeidsgiverMedFullmaktMetadataMixin::class.java)
+            .addMixIn(RadgiverMedFullmaktMetadata::class.java, RadgiverMedFullmaktMetadataMixin::class.java)
+            .addMixIn(UtsendtArbeidstakerSkjemaData::class.java, UtsendtArbeidstakerSkjemaDataMixin::class.java)
+            .addMixIn(UtsendtArbeidstakerSkjemaDto::class.java, UtsendtArbeidstakerSkjemaDtoMixin::class.java)
+            .addMixIn(UtsendtArbeidstakerSkjemaM2MDto::class.java, UtsendtArbeidstakerSkjemaM2MDtoMixin::class.java)
+            .build()
 
         @JvmStatic
         fun builder() = Builder()
@@ -253,7 +266,7 @@ class Prosessinstans(
                 try {
                     val dataString = dataMapper.writeValueAsString(value)
                     data.setProperty(key.kode, dataString)
-                } catch (e: JsonProcessingException) {
+                } catch (e: JacksonException) {
                     throw IllegalStateException("Feil ved serialisering", e)
                 }
             }

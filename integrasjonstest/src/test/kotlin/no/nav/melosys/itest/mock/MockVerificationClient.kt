@@ -1,13 +1,11 @@
 package no.nav.melosys.itest.mock
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.kotlinModule
 import org.slf4j.LoggerFactory
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.web.client.RestClient
 
 /**
@@ -45,14 +43,15 @@ class MockVerificationClient(
         private const val VERIFICATION_BASE_PATH = "/testdata/verification"
 
         private fun createRestClient(): RestClient {
-            val objectMapper: ObjectMapper = jacksonObjectMapper()
-                .registerModule(JavaTimeModule())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            val objectMapper = JsonMapper.builder()
+                .addModule(kotlinModule())
+                .disable(tools.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build()
 
             return RestClient.builder()
                 .messageConverters { converters ->
-                    converters.removeIf { it is MappingJackson2HttpMessageConverter }
-                    converters.add(MappingJackson2HttpMessageConverter(objectMapper))
+                    converters.removeIf { it is JacksonJsonHttpMessageConverter }
+                    converters.add(JacksonJsonHttpMessageConverter(objectMapper))
                 }
                 .build()
         }

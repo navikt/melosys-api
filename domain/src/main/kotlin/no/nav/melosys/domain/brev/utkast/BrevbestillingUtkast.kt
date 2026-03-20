@@ -2,7 +2,7 @@ package no.nav.melosys.domain.brev.utkast
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import tools.jackson.databind.annotation.JsonSerialize
 import no.nav.melosys.domain.arkiv.Distribusjonstype
 import no.nav.melosys.domain.brev.StandardvedleggType
 import no.nav.melosys.domain.brev.utkast.Utkast.FritekstVedlegg
