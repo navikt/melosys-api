@@ -228,10 +228,10 @@ public class EessiService {
             .collect(Collectors.toUnmodifiableSet());
         sedData.setArbeidsland(sedData.getArbeidsland().stream()
             .filter(al -> !ikkeEessiLand.contains(al.getLand()))
-            .collect(java.util.stream.Collectors.toCollection(java.util.ArrayList::new)));
+            .collect(Collectors.toCollection(ArrayList::new)));
         sedData.setArbeidssteder(sedData.getArbeidssteder().stream()
             .filter(a -> a.getAdresse() == null || !ikkeEessiLand.contains(a.getAdresse().getLand()))
-            .collect(java.util.stream.Collectors.toCollection(java.util.ArrayList::new)));
+            .collect(Collectors.toCollection(ArrayList::new)));
     }
 
     public boolean landErEessiReady(String bucType, Collection<Land_iso2> landkoder) {

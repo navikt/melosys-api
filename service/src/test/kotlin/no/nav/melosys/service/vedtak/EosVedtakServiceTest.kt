@@ -140,8 +140,7 @@ class EosVedtakServiceKtTest {
                 eq(BEHANDLINGSRESULTAT_FRITEKST),
                 isNull(),
                 eq(mottakerinstitusjoner),
-                eq(true),
-                any()
+                eq(true)
             )
         }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
@@ -190,8 +189,7 @@ class EosVedtakServiceKtTest {
                 eq(BEHANDLINGSRESULTAT_FRITEKST),
                 eq("FRITEKST_SED"),
                 eq(mottakerinstitusjoner),
-                eq(true),
-                any()
+                eq(true)
             )
         }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
@@ -229,8 +227,7 @@ class EosVedtakServiceKtTest {
                 eq(BEHANDLINGSRESULTAT_FRITEKST),
                 eq("FRITEKST_SED"),
                 any<Set<String>>(),
-                eq(true),
-                any()
+                eq(true)
             )
         }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
@@ -271,8 +268,7 @@ class EosVedtakServiceKtTest {
                 eq(BEHANDLINGSRESULTAT_FRITEKST),
                 eq("FRITEKST_SED"),
                 any<Set<String>>(),
-                eq(true),
-                any()
+                eq(true)
             )
         }
     }
@@ -305,8 +301,7 @@ class EosVedtakServiceKtTest {
                 isNull(),
                 isNull(),
                 any<Set<String>>(),
-                eq(true),
-                any()
+                eq(true)
             )
         }
     }
@@ -330,8 +325,7 @@ class EosVedtakServiceKtTest {
                 isNull(),
                 isNull(),
                 any<Set<String>>(),
-                eq(true),
-                any()
+                eq(true)
             )
         }
         verify(exactly = 0) { eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), any(), any()) }
@@ -357,7 +351,7 @@ class EosVedtakServiceKtTest {
         }.message shouldBe "Det finnes allerede en vedtak-prosess for behandling $behandling"
 
         verify { prosessinstansService.harVedtakInstans(BEHANDLING_ID) }
-        verify(exactly = 0) { prosessinstansService.opprettProsessinstansIverksettVedtakEos(any(), any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { prosessinstansService.opprettProsessinstansIverksettVedtakEos(any(), any(), any(), any(), any(), any()) }
     }
 
     @Test
@@ -381,7 +375,6 @@ class EosVedtakServiceKtTest {
             prosessinstansService.opprettProsessinstansIverksettVedtakEos(
                 any(), any(), any(), any(),
                 eq(emptySet()),
-                any(),
                 any()
             )
         }
@@ -412,14 +405,13 @@ class EosVedtakServiceKtTest {
             prosessinstansService.opprettProsessinstansIverksettVedtakEos(
                 any(), any(), any(), any(),
                 eq(mottakerinstitusjoner),
-                any(),
                 any()
             )
         }
     }
 
     @Test
-    fun `fattVedtak - art13 med FO blant arbeidsland - filtrerer FO fra EESSI-validering og lagrer som land som ikke kan motta SED`() {
+    fun `fattVedtak - art13 med FO blant arbeidsland - filtrerer FO fra EESSI-validering`() {
         val mottakerinstitusjoner = setOf("SE:INST456")
         mockBehandlingsresultat()
         every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns mutableListOf(Land_iso2.SE, Land_iso2.FO)
@@ -451,13 +443,12 @@ class EosVedtakServiceKtTest {
                 any()
             )
         }
-        // Papirland (FO) skal lagres i prosessinstans
+        // FO er filtrert ut av EESSI-landkoder, kun SE sendes til EESSI
         verify {
             prosessinstansService.opprettProsessinstansIverksettVedtakEos(
                 any(), any(), any(), any(),
                 eq(mottakerinstitusjoner),
-                any(),
-                eq(setOf(Land_iso2.FO.kode))
+                any()
             )
         }
     }
@@ -495,13 +486,12 @@ class EosVedtakServiceKtTest {
                 any()
             )
         }
-        // Papirland (FO + GL) skal lagres
+        // FO og GL er filtrert ut av EESSI-landkoder, kun SE og DK sendes til EESSI
         verify {
             prosessinstansService.opprettProsessinstansIverksettVedtakEos(
                 any(), any(), any(), any(),
                 eq(mottakerinstitusjoner),
-                any(),
-                eq(setOf(Land_iso2.FO.kode, Land_iso2.GL.kode))
+                any()
             )
         }
     }
@@ -523,13 +513,12 @@ class EosVedtakServiceKtTest {
             )
         )
 
-        // Verifiserer at landKanIkkeMottaSed er tomt (ingen FO/GL i arbeidslandene)
+        // Verifiserer at landKanIkkeMottaSed ikke lenger er en parameter
         verify {
             prosessinstansService.opprettProsessinstansIverksettVedtakEos(
                 any(), any(), any(), any(),
                 eq(mottakerinstitusjoner),
-                any(),
-                eq(emptySet())
+                any()
             )
         }
     }

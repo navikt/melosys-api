@@ -3,8 +3,7 @@ package no.nav.melosys.saksflyt.steg.sed;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
-import com.fasterxml.jackson.core.type.TypeReference;
+import java.util.stream.Collectors;
 
 import io.getunleash.Unleash;
 import no.nav.melosys.domain.Behandling;
@@ -22,6 +21,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
@@ -42,16 +42,19 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     private final SedSomBrevService sedSomBrevService;
     private final UtpekingService utpekingService;
     private final ProsessinstansService prosessinstansService;
+    private final LandvelgerService landvelgerService;
     private final Unleash unleash;
 
     public SendVedtakUtland(EessiService eessiService,
                             BehandlingsresultatService behandlingsresultatService,
                             SedSomBrevService sedSomBrevService,
-                            UtpekingService utpekingService, ProsessinstansService prosessinstansService, Unleash unleash) {
+                            UtpekingService utpekingService, ProsessinstansService prosessinstansService,
+                            LandvelgerService landvelgerService, Unleash unleash) {
         super(eessiService, behandlingsresultatService);
         this.sedSomBrevService = sedSomBrevService;
         this.utpekingService = utpekingService;
         this.prosessinstansService = prosessinstansService;
+        this.landvelgerService = landvelgerService;
         this.unleash = unleash;
     }
 
@@ -83,11 +86,11 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             } else {
                 SendUtlandStatus status = super.sendUtland(avklarBucType(behandling), prosessinstans);
                 log.debug("Behandling {}: SendUtlandStatus={}", behandling.getId(), status);
-                // Når BREV_SENDT har sendBrev() allerede håndtert LAND_KAN_IKKE_MOTTA_SED.
-                // For SED_SENDT, send brev eksplisitt til land som ikke kan motta SED.
-                if (status != SendUtlandStatus.BREV_SENDT) {
-                    Set<String> landKanIkkeMottaSed = prosessinstans.getData(ProsessDataKey.LAND_KAN_IKKE_MOTTA_SED, new TypeReference<Set<String>>() {});
-                    if (landKanIkkeMottaSed != null && !landKanIkkeMottaSed.isEmpty()) {
+                // Kun ved SED_SENDT: send brev eksplisitt til land som ikke kan motta SED.
+                // Ved BREV_SENDT har sendBrev() allerede håndtert FO/GL-land.
+                if (status == SendUtlandStatus.SED_SENDT) {
+                    Set<Land_iso2> landKanIkkeMottaSed = hentLandSomIkkeKanMottaSed(behandling.getId());
+                    if (!landKanIkkeMottaSed.isEmpty()) {
                         log.debug("Behandling {}: sender papir-A1 til land som ikke kan motta SED={}", behandling.getId(), landKanIkkeMottaSed);
                         sendBrev(prosessinstans);
                     }
@@ -119,11 +122,10 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostID);
             prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, utpektLand);
         } else {
-            Set<String> landKanIkkeMottaSed = prosessinstans.getData(ProsessDataKey.LAND_KAN_IKKE_MOTTA_SED, new TypeReference<Set<String>>() {});
-            if (landKanIkkeMottaSed != null && !landKanIkkeMottaSed.isEmpty()) {
-                for (String landkode : landKanIkkeMottaSed) {
-                    Land_iso2 land = Land_iso2.valueOf(landkode);
-                    log.debug("Behandling {}: oppretter papir-A1 brevbestilling for land={}", behandling.getId(), landkode);
+            Set<Land_iso2> landKanIkkeMottaSed = hentLandSomIkkeKanMottaSed(behandling.getId());
+            if (!landKanIkkeMottaSed.isEmpty()) {
+                for (Land_iso2 land : landKanIkkeMottaSed) {
+                    log.debug("Behandling {}: oppretter papir-A1 brevbestilling for land={}", behandling.getId(), land.getKode());
                     Mottaker mottaker = Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
                     mottaker.setTrygdemyndighetLand(land);
                     prosessinstansService.opprettProsessinstansSendBrev(behandling, lagA1Brevbestilling(prosessinstans), mottaker);
@@ -133,6 +135,13 @@ public class SendVedtakUtland extends AbstraktSendUtland {
                 prosessinstansService.opprettProsessinstansSendBrev(behandling, lagA1Brevbestilling(prosessinstans), Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
             }
         }
+    }
+
+    private Set<Land_iso2> hentLandSomIkkeKanMottaSed(long behandlingId) {
+        return landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingId)
+            .stream()
+            .filter(EessiService.LAND_UTEN_SED_MOTTAK::contains)
+            .collect(Collectors.toSet());
     }
 
     private DoksysBrevbestilling lagA1Brevbestilling(Prosessinstans prosessinstans) {

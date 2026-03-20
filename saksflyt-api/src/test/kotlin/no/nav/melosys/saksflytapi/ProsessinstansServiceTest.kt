@@ -192,8 +192,7 @@ class ProsessinstansServiceTest {
             "FRITEKST",
             "FRITEKST_SED",
             setOf(mottakerInstitusjon),
-            true,
-            emptySet()
+            true
         )
 
 
