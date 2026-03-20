@@ -30,7 +30,7 @@ class Trygdeavgiftsperiode(
     @Column(name = "trygdesats")
     val trygdesats: BigDecimal?,
 
-    @ManyToOne(cascade = [CascadeType.ALL])
+    @ManyToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     @JoinColumn(name = "inntektsperiode_id")
     val grunnlagInntekstperiode: Inntektsperiode? = null,
 
@@ -46,7 +46,7 @@ class Trygdeavgiftsperiode(
     @JoinColumn(name = "lovvalg_periode_id")
     var grunnlagLovvalgsPeriode: Lovvalgsperiode? = null,
 
-    @ManyToOne(cascade = [CascadeType.ALL])
+    @ManyToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     @JoinColumn(name = "skatteforhold_id")
     val grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = null,
 
