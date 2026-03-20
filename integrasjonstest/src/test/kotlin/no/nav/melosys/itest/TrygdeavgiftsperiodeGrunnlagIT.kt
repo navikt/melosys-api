@@ -21,6 +21,7 @@ import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import jakarta.persistence.EntityManager
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.context.annotation.Import
 import java.math.BigDecimal
 import java.time.Instant
@@ -41,6 +42,7 @@ class TrygdeavgiftsperiodeGrunnlagIT(
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val replikerBehandlingsresultatService: ReplikerBehandlingsresultatService,
     @Autowired private val entityManager: EntityManager,
+    @Autowired private val jdbcTemplate: JdbcTemplate,
 ) : DataJpaTestBase() {
 
     @Test
@@ -117,6 +119,64 @@ class TrygdeavgiftsperiodeGrunnlagIT(
             grunnlag.inntektsperiode.shouldNotBeNull()
             grunnlag.skatteforhold.shouldNotBeNull()
         }
+    }
+
+    @Test
+    fun `erstatt trygdeavgiftsperioder med grunnlag feiler ikke på FK constraint`() {
+        // Reproduserer E2E-scenarioet: beregn → lagre → beregn på nytt (erstatt).
+        // Feilte med ORA-02292 fordi Hibernate slettet inntektsperiode (cascade=ALL)
+        // før grunnlag-raden som refererer den var slettet.
+        val (original, _) = lagFagsakMedBehandlinger()
+        val br = lagBehandlingsresultatMedTrygdeavgift(original, antallGrunnlag = 1)
+        behandlingsresultatRepository.saveAndFlush(br)
+        entityManager.clear()
+
+        // Verifiser at grunnlag-rader finnes i databasen
+        val grunnlagCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM trygdeavgiftsperiode_grunnlag", Int::class.java
+        )
+        grunnlagCount shouldBe 1
+
+        // Simuler ny beregning: last, slett gamle perioder, lagre (flush), legg til nye
+        val lastet = behandlingsresultatRepository.findById(original.id).get()
+        lastet.finnAvgiftspliktigPerioder().forEach { it.clearTrygdeavgiftsperioder() }
+        behandlingsresultatRepository.saveAndFlush(lastet)
+        entityManager.clear()
+
+        // Verifiser at grunnlag-rader er slettet via ON DELETE CASCADE
+        val grunnlagCountEtterSletting = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM trygdeavgiftsperiode_grunnlag", Int::class.java
+        )
+        grunnlagCountEtterSletting shouldBe 0
+
+        // Legg til nye perioder
+        val oppdatert = behandlingsresultatRepository.findById(original.id).get()
+        oppdatert.trygdeavgiftsperioder shouldHaveSize 0
+
+        val mp = oppdatert.medlemskapsperioder.first()
+        val nyTap = Trygdeavgiftsperiode(
+            periodeFra = LocalDate.of(2025, 1, 1),
+            periodeTil = LocalDate.of(2025, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(BigDecimal("2000.00")),
+            trygdesats = BigDecimal("7.90"),
+            grunnlagMedlemskapsperiode = mp,
+            grunnlagInntekstperiode = lagInntektsperiode(1),
+            grunnlagSkatteforholdTilNorge = lagSkatteforhold(),
+        )
+        nyTap.leggTilGrunnlag(TrygdeavgiftsperiodeGrunnlag(
+            trygdeavgiftsperiode = nyTap,
+            medlemskapsperiode = mp,
+            inntektsperiode = nyTap.grunnlagInntekstperiode!!,
+            skatteforhold = nyTap.grunnlagSkatteforholdTilNorge!!,
+        ))
+        mp.trygdeavgiftsperioder.add(nyTap)
+        behandlingsresultatRepository.saveAndFlush(oppdatert)
+        entityManager.clear()
+
+        // Verifiser
+        val endelig = behandlingsresultatRepository.findById(original.id).get()
+        endelig.trygdeavgiftsperioder shouldHaveSize 1
+        endelig.trygdeavgiftsperioder.single().grunnlagListe shouldHaveSize 1
     }
 
     @Test
