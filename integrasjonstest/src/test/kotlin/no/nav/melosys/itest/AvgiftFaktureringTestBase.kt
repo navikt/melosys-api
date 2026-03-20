@@ -87,6 +87,8 @@ abstract class AvgiftFaktureringTestBase(
 
     @AfterEach
     fun afterMockForFakturaTestBase() {
-        SubjectHandler.set(originalSubjectHandler)
+        if (originalSubjectHandler != null) {
+            SubjectHandler.set(originalSubjectHandler)
+        }
     }
 }

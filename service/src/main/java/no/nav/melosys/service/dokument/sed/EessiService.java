@@ -80,8 +80,8 @@ public class EessiService {
         final Collection<Vedlegg> vedlegg = new ArrayList<>();
         for (DokumentReferanse dokumentReferanse : dokumentReferanser) {
             Journalpost journalpost = findJournalPost(dokumentReferanse.getJournalpostID(), journalposter)
-                .orElseThrow(() -> new IkkeFunnetException(String.format("Finner ikke journalpost %s for sak %s",
-                    dokumentReferanse.getJournalpostID(), fagsak.getSaksnummer())));
+                .orElseThrow(() -> new IkkeFunnetException("Finner ikke journalpost %s for sak %s".formatted(
+                dokumentReferanse.getJournalpostID(), fagsak.getSaksnummer())));
             vedlegg.add(lagEessiVedlegg(journalpost, dokumentReferanse));
         }
         return vedlegg;
@@ -98,8 +98,8 @@ public class EessiService {
 
         return dokumentReferanser.stream().map(dokumentReferanse -> {
             Journalpost journalpost = findJournalPost(dokumentReferanse.getJournalpostID(), journalposter)
-                .orElseThrow(() -> new IkkeFunnetException(String.format("Finner ikke journalpost %s for sak %s",
-                    dokumentReferanse.getJournalpostID(), fagsak.getSaksnummer())));
+                .orElseThrow(() -> new IkkeFunnetException("Finner ikke journalpost %s for sak %s".formatted(
+                dokumentReferanse.getJournalpostID(), fagsak.getSaksnummer())));
 
             return new VedleggReferanse(
                 journalpost.getJournalpostId(),
@@ -478,7 +478,7 @@ public class EessiService {
         try {
             eessiClient.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, SedType.X008);
         } catch (Exception e) {
-            log.warn(String.format("Forsøkte å sende SED %s for behandling %s, men det feilet i melosys-eessi.", SedType.X008, behandling.getId()), e);
+            log.warn("Forsøkte å sende SED %s for behandling %s, men det feilet i melosys-eessi.".formatted(SedType.X008, behandling.getId()), e);
         }
     }
 

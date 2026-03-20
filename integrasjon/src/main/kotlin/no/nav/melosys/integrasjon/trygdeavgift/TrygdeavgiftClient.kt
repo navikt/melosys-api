@@ -15,15 +15,14 @@ import org.springframework.web.reactive.function.client.bodyToMono
 
 @Component
 @Retryable
-class TrygdeavgiftClient(@Value("\${melosystrygdeavgift.url}") url: String?) {
-    private val webClient: WebClient
-
-    init {
-        webClient = WebClient.builder()
-            .baseUrl(url!!)
-            .defaultHeaders { httpHeaders: HttpHeaders -> defaultHeaders(httpHeaders) }
-            .build()
-    }
+class TrygdeavgiftClient(
+    @Value("\${melosystrygdeavgift.url}") url: String,
+    webClientBuilder: WebClient.Builder,
+) {
+    private val webClient: WebClient = webClientBuilder
+        .baseUrl(url)
+        .defaultHeaders { httpHeaders: HttpHeaders -> defaultHeaders(httpHeaders) }
+        .build()
 
     private fun defaultHeaders(httpHeaders: HttpHeaders) {
         httpHeaders.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)

@@ -26,7 +26,7 @@ public class SpringSubjectHandler extends SubjectHandler {
 
     @Override
     public String getOidcTokenString() {
-        return hasValidToken() ? azureActiveDirectoryToken().getTokenAsString() : null;
+        return hasValidToken() ? azureActiveDirectoryToken().getEncodedToken() : null;
     }
 
     @Override

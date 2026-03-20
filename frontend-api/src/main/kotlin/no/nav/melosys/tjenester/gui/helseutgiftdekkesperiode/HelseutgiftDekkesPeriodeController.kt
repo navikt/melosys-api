@@ -67,11 +67,11 @@ class HelseutgiftDekkesPeriodeController(
     @GetMapping
     fun finnHelseutgiftDekkesPeriode(
         @PathVariable("behandlingID") behandlingID: Long
-    ): ResponseEntity<HelseutgiftDekkesPeriodeDto?> {
+    ): ResponseEntity<HelseutgiftDekkesPeriodeDto> {
         aksesskontroll.autoriser(behandlingID)
 
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandlingID)
-            ?: return ResponseEntity.noContent().build()
+            ?: return ResponseEntity.noContent().build<HelseutgiftDekkesPeriodeDto>()
 
         return ResponseEntity.ok(HelseutgiftDekkesPeriodeDto.av(helseutgiftDekkesPeriode))
     }

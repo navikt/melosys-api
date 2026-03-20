@@ -12,7 +12,6 @@ import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData
 import no.nav.melosys.service.kontroll.regler.*
 import no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiodeMerEnn1DagFraSed
 import no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler.harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland
-import org.apache.cxf.common.util.StringUtils.isEmpty
 import kotlin.jvm.optionals.getOrNull
 
 private val log = KotlinLogging.logger { }
@@ -158,5 +157,5 @@ object UfmKontroll {
                 sed.lovvalgBestemmelse == Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A
 
     private fun harMottatteOpplysningerMedYtterligereInformasjon(data: MottatteOpplysningerData?) =
-        !isEmpty((data as? SedGrunnlag)?.ytterligereInformasjon)
+        !(data as? SedGrunnlag)?.ytterligereInformasjon.isNullOrEmpty()
 }

@@ -25,7 +25,7 @@ class TrygdeavgiftsberegningTransformer() : ResponseTransformerV2 {
         val medlemskapsperioderUuid = requestBody["medlemskapsperioder"][0]["id"].asText()
         val skatteforholdsperioderUuid = requestBody["skatteforholdsperioder"][0]["id"].asText()
         val inntektsperioderUuid = requestBody["inntektsperioder"][0]["id"].asText()
-        val skatteforholdÅr = requestBody["skatteforholdsperioder"][0]["periode"]["fom"][0].asInt()
+        val skatteforholdÅr = LocalDate.parse(requestBody["skatteforholdsperioder"][0]["periode"]["fom"].asText()).year
 
         val skatteforhold = requestBody["skatteforholdsperioder"][0]["skatteforhold"].asText()
         val sats = if (skatteforhold == "IKKE_SKATTEPLIKTIG") 6.8.toBigDecimal() else 0.toBigDecimal()

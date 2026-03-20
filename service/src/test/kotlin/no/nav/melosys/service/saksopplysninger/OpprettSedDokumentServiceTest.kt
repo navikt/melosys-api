@@ -84,16 +84,8 @@ class OpprettSedDokumentServiceTest {
               "avsenderLandkode": "GB",
               "fnr": null,
               "lovvalgsperiode": {
-                "fom": [
-                  2012,
-                  12,
-                  12
-                ],
-                "tom": [
-                  2012,
-                  12,
-                  13
-                ]
+                "fom": "2012-12-12",
+                "tom": "2012-12-13"
               },
               "lovvalgBestemmelse": "FO_883_2004_ART12_1",
               "lovvalgslandKode": "SE",

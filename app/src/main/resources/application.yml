@@ -170,8 +170,6 @@ spring:
         maximumSize: 2048
         tilgangsmaskinen: maximumSize=1024,expireAfterWrite=60m
     type: caffeine
-  codec:
-    max-in-memory-size: 50MB
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
     hikari:
@@ -184,8 +182,8 @@ spring:
     default-property-inclusion: ALWAYS
     deserialization:
       fail-on-unknown-properties: false
-    serialization:
-      write-dates-as-timestamps: false
+    mapper:
+      default-view-inclusion: true
   jpa:
     open-in-view: false
     properties:
@@ -194,6 +192,10 @@ spring:
           autocommit: false
         id:
           db_structure_naming_strategy: legacy
+        timezone:
+          default_storage: NORMALIZE
+        type:
+          preferred_instant_jdbc_type: TIMESTAMP
         format_sql: true
         show_sql: false
       org:
@@ -209,6 +211,7 @@ spring:
       pool:
         core-size: 1
         max-size: 4
+  http.codecs.max-in-memory-size: 50MB
 springdoc:
   api-docs:
     path: /api-docs

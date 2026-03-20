@@ -61,7 +61,7 @@ public class JoarkService implements JoarkFasade {
 
         for (var dokumentReferanse : dokumentReferanser) {
             if (!journalposterTilknyttetSak.containsKey(dokumentReferanse.getJournalpostID())) {
-                throw new FunksjonellException(String.format("Journalpost med ID %s tilhører ikke sak %s",
+                throw new FunksjonellException("Journalpost med ID %s tilhører ikke sak %s".formatted(
                     dokumentReferanse.getJournalpostID(),
                     hentJournalposterTilknyttetSakRequest.saksnummer()));
             }
@@ -70,15 +70,13 @@ public class JoarkService implements JoarkFasade {
                 .ifPresentOrElse(
                     arkivDokument -> {
                         if (!arkivDokument.harTilgangTilArkivVariant())
-                            throw new SikkerhetsbegrensningException(String.format(
-                                "Ikke tilgang til arkivdokument %s i journalpost %s",
+                            throw new SikkerhetsbegrensningException("Ikke tilgang til arkivdokument %s i journalpost %s".formatted(
                                 dokumentReferanse.getDokumentID(),
                                 dokumentReferanse.getJournalpostID()
                             ));
                     },
                     () -> {
-                        throw new IkkeFunnetException(String.format(
-                            "Finner ikke dokument med id %s for journalpost %s",
+                        throw new IkkeFunnetException("Finner ikke dokument med id %s for journalpost %s".formatted(
                             dokumentReferanse.getDokumentID(),
                             dokumentReferanse.getJournalpostID()));
                     });
