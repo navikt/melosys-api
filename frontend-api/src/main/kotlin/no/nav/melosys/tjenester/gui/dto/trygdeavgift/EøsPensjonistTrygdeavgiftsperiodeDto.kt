@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 
+import no.nav.melosys.domain.avgift.Avgiftsberegningstype
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import java.time.LocalDate
@@ -9,7 +10,8 @@ data class EøsPensjonistTrygdeavgiftsperiodeDto(
     val tom: LocalDate,
     val inntektskildetype: Inntektskildetype?,
     val avgiftssats: Double?,
-    val avgiftPerMd: Int
+    val avgiftPerMd: Int,
+    val beregningstype: String? = null
 ) {
     constructor(trygdeavgiftsperiode: Trygdeavgiftsperiode) :
         this(
@@ -17,6 +19,7 @@ data class EøsPensjonistTrygdeavgiftsperiodeDto(
             trygdeavgiftsperiode.periodeTil,
             trygdeavgiftsperiode.grunnlagInntekstperiode?.type,
             trygdeavgiftsperiode.trygdesats?.toDouble(),
-            trygdeavgiftsperiode.trygdeavgiftsbeløpMd.hentVerdi().toInt()
+            trygdeavgiftsperiode.trygdeavgiftsbeløpMd.hentVerdi().toInt(),
+            trygdeavgiftsperiode.beregningstype.takeIf { it != Avgiftsberegningstype.ORDINAER }?.name
         )
 }
