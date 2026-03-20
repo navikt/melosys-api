@@ -90,7 +90,6 @@ class Lovvalgsperiode : PeriodeOmLovvalg, AvgiftspliktigPeriode {
 
     override fun clearTrygdeavgiftsperioder() {
         trygdeavgiftsperioder.forEach {
-            it.grunnlagListe.clear()
             it.grunnlagLovvalgsPeriode = null
         }
         trygdeavgiftsperioder.clear()

@@ -52,7 +52,6 @@ class HelseutgiftDekkesPeriode(
 
     override fun clearTrygdeavgiftsperioder() {
         trygdeavgiftsperioder.forEach {
-            it.grunnlagListe.clear()
             it.grunnlagHelseutgiftDekkesPeriode = null
         }
         trygdeavgiftsperioder.clear()

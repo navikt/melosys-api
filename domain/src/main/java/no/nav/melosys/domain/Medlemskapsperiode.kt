@@ -130,7 +130,6 @@ class Medlemskapsperiode : HarBestemmelse<Bestemmelse?>, AvgiftspliktigPeriode {
 
     override fun clearTrygdeavgiftsperioder() {
         trygdeavgiftsperioder.forEach {
-            it.grunnlagListe.clear()
             it.grunnlagMedlemskapsperiode = null
         }
         trygdeavgiftsperioder.clear()
