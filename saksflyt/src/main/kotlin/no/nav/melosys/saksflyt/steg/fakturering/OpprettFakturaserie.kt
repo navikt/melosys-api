@@ -5,6 +5,7 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.satsTekst
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
@@ -189,7 +190,7 @@ class OpprettFakturaserie(
                 it.periodeTil,
                 "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}, " +
                     "Dekning: ${mapDekning(it)}, " +
-                    "${mapSatsTekst(it)}"
+                    "${it.satsTekst()}"
             )
         }
     }
@@ -201,13 +202,10 @@ class OpprettFakturaserie(
                 it.periodeFra,
                 it.periodeTil,
                 "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}, " +
-                    "${mapSatsTekst(it)}"
+                    "${it.satsTekst()}"
             )
         }
     }
-
-    private fun mapSatsTekst(trygdeavgiftsperiode: Trygdeavgiftsperiode): String =
-        trygdeavgiftsperiode.trygdesats?.let { "Sats: $it %" } ?: "Beregningstype: ${trygdeavgiftsperiode.beregningstype}"
 
     private fun mapDekning(trygdeavgiftsperiode: Trygdeavgiftsperiode): String {
         if (trygdeavgiftsperiode.hentGrunnlagInntekstperiode().type === Inntektskildetype.PENSJON_UFØRETRYGD ||

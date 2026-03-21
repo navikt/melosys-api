@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.satsendring
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.satsTekst
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.exception.FunksjonellException
@@ -85,13 +86,10 @@ class BeregnOgSendFaktura(
                 "Faktura for årlig satsoppdatering av trygdeavgift, " +
                     "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}, " +
                     "Dekning: ${mapDekning(it)}, " +
-                    "${mapSatsTekst(it)}"
+                    "${it.satsTekst()}"
             )
         }
     }
-
-    private fun mapSatsTekst(trygdeavgiftsperiode: Trygdeavgiftsperiode): String =
-        trygdeavgiftsperiode.trygdesats?.let { "Sats: $it %" } ?: "Beregningstype: ${trygdeavgiftsperiode.beregningstype}"
 
     private fun mapDekning(trygdeavgiftsperiode: Trygdeavgiftsperiode): String {
         if (trygdeavgiftsperiode.hentGrunnlagInntekstperiode().type === Inntektskildetype.PENSJON_UFØRETRYGD ||
