@@ -81,13 +81,14 @@ class InformasjonTrygdeavgiftMapper(
 
         return gruppertePerioder[valgtÅr]
             ?.map {
+                val inntektsperiode = it.hentGrunnlagInntekstperiode()
                 AvgiftsperiodeEøsPensjonist(
                     fom = it.periodeFra,
                     tom = it.periodeTil,
                     avgiftssats = it.trygdesats,
                     avgiftPerMd = it.trygdeavgiftsbeløpMd.hentVerdi(),
-                    inntektskilde = it.hentGrunnlagInntekstperiode().type.beskrivelse,
-                    avgiftspliktigInntektPerMd = it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
+                    inntektskilde = inntektsperiode.type.beskrivelse,
+                    avgiftspliktigInntektPerMd = inntektsperiode.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
                     skatteplikt = it.hentGrunnlagSkatteforholdTilNorge().skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
                 )
             }

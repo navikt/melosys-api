@@ -118,24 +118,23 @@ class ReplikerBehandlingsresultatService(
             }
         }
 
+        val inntektMap = inntektsperioderReplika.associateBy { it.id }
+        val skatteforholdMap = skatteforholdTilNorgeReplika.associateBy { it.id }
+        val avgiftspliktigePerioderReplika = behandlingsresultatReplika.finnAvgiftspliktigPerioder()
+
         trygdeavgiftsperioderTilReplikering.forEach { trygdeavgiftsperiodeOriginal ->
             val trygdeavgiftsperiodeReplika = trygdeavgiftsperiodeOriginal.copyEntity(
                 id = trygdeavgiftsperiodeOriginal.id,
-                // I de tilfellene bruker ikke skal betale avgift til Nav, er det ikke krav om at inntektsperioder må være satt.
-                grunnlagInntekstperiode = inntektsperioderReplika
-                    .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode?.id },
-                grunnlagSkatteforholdTilNorge = skatteforholdTilNorgeReplika
-                    .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge?.id }
+                grunnlagInntekstperiode = inntektMap[trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode?.id],
+                grunnlagSkatteforholdTilNorge = skatteforholdMap[trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge?.id]
                     ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),
-                // Dette sikrer at replika ikke kobles til originale perioder.
-                // Og addGrunnlag() validerer at ingen grunnlag er satt fra før.
                 grunnlagMedlemskapsperiode = null,
                 grunnlagLovvalgsPeriode = null,
                 grunnlagHelseutgiftDekkesPeriode = null
             )
 
             val originalGrunnlagId = trygdeavgiftsperiodeOriginal.hentGrunnlagAvgiftsperiode().hentId()
-            val grunnlag = behandlingsresultatReplika.finnAvgiftspliktigPerioder()
+            val grunnlag = avgiftspliktigePerioderReplika
                 .find { it.hentId() == originalGrunnlagId }
                 ?: error("Grunnlagsperiode med id $originalGrunnlagId ikke funnet")
 
@@ -144,8 +143,8 @@ class ReplikerBehandlingsresultatService(
 
             deepCopyGrunnlagListe(
                 trygdeavgiftsperiodeOriginal, trygdeavgiftsperiodeReplika,
-                inntektsperioderReplika, skatteforholdTilNorgeReplika,
-                behandlingsresultatReplika.finnAvgiftspliktigPerioder()
+                inntektMap, skatteforholdMap,
+                avgiftspliktigePerioderReplika
             )
         }
 
@@ -173,14 +172,15 @@ class ReplikerBehandlingsresultatService(
         behandlingsresultatReplika.medlemskapsperioder = HashSet()
         behandlingsresultatReplika.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder = HashSet()
 
+        val inntektMap = inntektsperioderReplika.associateBy { it.id }
+        val skatteforholdMap = skatteforholdTilNorgeReplika.associateBy { it.id }
+
         trygdeavgiftsperioderTilReplikering.forEach { trygdeavgiftsperiodeOriginal ->
             val trygdeavgiftsperiodeReplika = trygdeavgiftsperiodeOriginal.copyEntity(
                 id = trygdeavgiftsperiodeOriginal.id,
                 grunnlagHelseutgiftDekkesPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode,
-                grunnlagInntekstperiode = inntektsperioderReplika
-                    .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode?.id },
-                grunnlagSkatteforholdTilNorge = skatteforholdTilNorgeReplika
-                    .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge?.id }
+                grunnlagInntekstperiode = inntektMap[trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode?.id],
+                grunnlagSkatteforholdTilNorge = skatteforholdMap[trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge?.id]
                     ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),
             )
 
@@ -190,7 +190,7 @@ class ReplikerBehandlingsresultatService(
 
             deepCopyGrunnlagListe(
                 trygdeavgiftsperiodeOriginal, trygdeavgiftsperiodeReplika,
-                inntektsperioderReplika, skatteforholdTilNorgeReplika,
+                inntektMap, skatteforholdMap,
                 helseutgiftDekkesPeriodeReplika = behandlingsresultatReplika.helseutgiftDekkesPeriode
             )
         }
@@ -217,13 +217,11 @@ class ReplikerBehandlingsresultatService(
     private fun deepCopyGrunnlagListe(
         original: Trygdeavgiftsperiode,
         replika: Trygdeavgiftsperiode,
-        inntektsperioderReplika: List<Inntektsperiode>,
-        skatteforholdReplika: List<SkatteforholdTilNorge>,
+        inntektMap: Map<Long?, Inntektsperiode>,
+        skatteforholdMap: Map<Long?, SkatteforholdTilNorge>,
         avgiftspliktigePerioder: Collection<AvgiftspliktigPeriode> = emptyList(),
         helseutgiftDekkesPeriodeReplika: HelseutgiftDekkesPeriode? = null,
     ) {
-        val inntektMap = inntektsperioderReplika.associateBy { it.id }
-        val skatteforholdMap = skatteforholdReplika.associateBy { it.id }
 
         original.grunnlagListe.forEach { orig ->
             val grunnlagReplika = TrygdeavgiftsperiodeGrunnlag(

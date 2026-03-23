@@ -82,8 +82,6 @@ class Trygdeavgiftsperiode(
         grunnlagListe.add(g)
     }
 
-    fun hentAlleGrunnlag(): List<TrygdeavgiftsperiodeGrunnlag> = grunnlagListe.toList()
-
     override fun getFom(): LocalDate = periodeFra
 
     override fun getTom(): LocalDate = periodeTil
