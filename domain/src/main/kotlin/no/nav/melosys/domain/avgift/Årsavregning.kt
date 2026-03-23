@@ -32,8 +32,8 @@ class Årsavregning(
     @Column(name = "til_fakturering_beloep")
     var tilFaktureringBeloep: BigDecimal? = null,
 
-    @Column(name = "har_trygdeavgift_fra_avgiftssystemet")
-    var harTrygdeavgiftFraAvgiftssystemet: Boolean? = null,
+    @Column(name = "har_innbetalt_trygdeavgift")
+    var harInnbetaltTrygdeavgift: Boolean? = null,
 
     @Column(name = "trygdeavgift_fra_avgiftssystemet")
     var trygdeavgiftFraAvgiftssystemet: BigDecimal? = null,
