@@ -497,6 +497,37 @@ class EosVedtakServiceKtTest {
     }
 
     @Test
+    fun `fattVedtak - kun FO og GL blant arbeidsland - ingen EESSI-validering, tomme mottakerinstitusjoner`() {
+        mockBehandlingsresultat()
+        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns mutableListOf(Land_iso2.FO, Land_iso2.GL)
+        every { behandling.erNorgeUtpekt() } returns false
+        leggTilLovvalgsperiode(bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A)
+
+        vedtakService.fattVedtak(
+            behandling, lagRequest(
+                Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+                Vedtakstyper.FØRSTEGANGSVEDTAK,
+                BEHANDLINGSRESULTAT_FRITEKST,
+                null,
+                emptySet()
+            )
+        )
+
+        // Kun FO/GL er arbeidsland — alle filtreres ut, ingen EESSI-validering
+        verify(exactly = 0) {
+            eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), any(), any())
+        }
+        // Prosessinstans opprettes med tomme mottakerinstitusjoner
+        verify {
+            prosessinstansService.opprettProsessinstansIverksettVedtakEos(
+                any(), any(), any(), any(),
+                eq(emptySet()),
+                any()
+            )
+        }
+    }
+
+    @Test
     fun `fattVedtak - kun EESSI-land uten FO eller GL - ingen land som ikke kan motta SED`() {
         val mottakerinstitusjoner = setOf("SE:INST456")
         mockBehandlingsresultat()

@@ -51,6 +51,9 @@ public class EessiService {
     private static final Logger log = LoggerFactory.getLogger(EessiService.class);
 
     public static final Set<Land_iso2> LAND_UTEN_SED_MOTTAK = Set.of(Land_iso2.FO, Land_iso2.GL);
+    private static final Set<String> LAND_UTEN_SED_MOTTAK_KODER = LAND_UTEN_SED_MOTTAK.stream()
+        .map(Land_iso2::getKode)
+        .collect(Collectors.toUnmodifiableSet());
 
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -223,14 +226,11 @@ public class EessiService {
     }
 
     private static void filtrerIkkeEessiLandFraSed(SedDataDto sedData) {
-        Set<String> ikkeEessiLand = LAND_UTEN_SED_MOTTAK.stream()
-            .map(Land_iso2::getKode)
-            .collect(Collectors.toUnmodifiableSet());
         sedData.setArbeidsland(sedData.getArbeidsland().stream()
-            .filter(al -> !ikkeEessiLand.contains(al.getLand()))
+            .filter(al -> !LAND_UTEN_SED_MOTTAK_KODER.contains(al.getLand()))
             .collect(Collectors.toCollection(ArrayList::new)));
         sedData.setArbeidssteder(sedData.getArbeidssteder().stream()
-            .filter(a -> a.getAdresse() == null || !ikkeEessiLand.contains(a.getAdresse().getLand()))
+            .filter(a -> a.getAdresse() == null || !LAND_UTEN_SED_MOTTAK_KODER.contains(a.getAdresse().getLand()))
             .collect(Collectors.toCollection(ArrayList::new)));
     }
 
