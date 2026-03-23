@@ -295,6 +295,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
     @Test
     fun `erSkattemessigEmigrert er true når en periode har IKKE_SKATTEPLIKTIG`() {
         unleash.enableAll()
+        val år = LocalDate.now().year
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
             behandling {
@@ -307,30 +308,30 @@ internal class InformasjonTrygdeavgiftMapperTest {
                 }
             }
             helseutgiftDekkesPeriode {
-                fomDato = LocalDate.now().withMonth(1)
-                tomDato = LocalDate.now().withMonth(12)
+                fomDato = LocalDate.of(år, 1, 1)
+                tomDato = LocalDate.of(år, 12, 1)
                 bostedLandkode = Land_iso2.DK
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().withMonth(1)
-                    periodeTil = LocalDate.now().withMonth(6)
+                    periodeFra = LocalDate.of(år, 1, 1)
+                    periodeTil = LocalDate.of(år, 6, 1)
                     trygdesats = BigDecimal(0.05)
                     trygdeavgiftsbeløpMd = BigDecimal(500.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().withMonth(1)
-                        tomDato = LocalDate.now().withMonth(6)
+                        fomDato = LocalDate.of(år, 1, 1)
+                        tomDato = LocalDate.of(år, 6, 1)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     }
                 }
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().withMonth(7)
-                    periodeTil = LocalDate.now().withMonth(12)
+                    periodeFra = LocalDate.of(år, 7, 1)
+                    periodeTil = LocalDate.of(år, 12, 1)
                     trygdesats = BigDecimal(0.05)
                     trygdeavgiftsbeløpMd = BigDecimal(500.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().withMonth(7)
-                        tomDato = LocalDate.now().withMonth(12)
+                        fomDato = LocalDate.of(år, 7, 1)
+                        tomDato = LocalDate.of(år, 12, 1)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
@@ -472,6 +473,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
     @Test
     fun `avgiftsperioder er tom når alle perioder har avgift 0 og sats 0`() {
         unleash.enableAll()
+        val år = LocalDate.now().year
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
             behandling {
@@ -484,30 +486,30 @@ internal class InformasjonTrygdeavgiftMapperTest {
                 }
             }
             helseutgiftDekkesPeriode {
-                fomDato = LocalDate.now().withMonth(1)
-                tomDato = LocalDate.now().withMonth(12)
+                fomDato = LocalDate.of(år, 1, 1)
+                tomDato = LocalDate.of(år, 12, 1)
                 bostedLandkode = Land_iso2.DK
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().withMonth(1)
-                    periodeTil = LocalDate.now().withMonth(6)
+                    periodeFra = LocalDate.of(år, 1, 1)
+                    periodeTil = LocalDate.of(år, 6, 1)
                     trygdesats = BigDecimal.ZERO
                     trygdeavgiftsbeløpMd = BigDecimal(0.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().withMonth(1)
-                        tomDato = LocalDate.now().withMonth(6)
+                        fomDato = LocalDate.of(år, 1, 1)
+                        tomDato = LocalDate.of(år, 6, 1)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     }
                 }
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().withMonth(7)
-                    periodeTil = LocalDate.now().withMonth(12)
+                    periodeFra = LocalDate.of(år, 7, 1)
+                    periodeTil = LocalDate.of(år, 12, 1)
                     trygdesats = BigDecimal.ZERO
                     trygdeavgiftsbeløpMd = BigDecimal(0.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().withMonth(7)
-                        tomDato = LocalDate.now().withMonth(12)
+                        fomDato = LocalDate.of(år, 7, 1)
+                        tomDato = LocalDate.of(år, 12, 1)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
