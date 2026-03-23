@@ -273,7 +273,7 @@ internal class ÅrsavregningControllerTest {
     "trygdeavgiftFraAvgiftssystemet": null,
     "manueltAvgiftBeloep": null
   },
-  "harTrygdeavgiftFraAvgiftssystemet": false,
+  "harInnbetaltTrygdeavgift": false,
   "endeligAvgiftValg": null,
   "harSkjoennsfastsattInntekt": false
 }"""
@@ -510,7 +510,7 @@ internal class ÅrsavregningControllerTest {
         "trygdeavgiftFraAvgiftssystemet": null,
         "manueltAvgiftBeloep": null
     },
-    "harTrygdeavgiftFraAvgiftssystemet": false,
+    "harInnbetaltTrygdeavgift": false,
     "endeligAvgiftValg": "OPPLYSNINGER_ENDRET",
     "harSkjoennsfastsattInntekt": false
 }"""
