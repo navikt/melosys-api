@@ -21,7 +21,7 @@ en tallverdi. Dette bryter nedstroms tjenester og brevmaler som ikke hanterer nu
 | melosys-dokgen | Schema avviser null, Handlebars gt-krasj | FIKSET | `7588-grunnlag` |
 | faktureringskomponenten | ArithmeticException Rounding necessary | FIKSET | `7588-grunnlag` |
 | melosys-trygdeavgift-beregning | (opprinnelig kilde til nullable sats) | OK | `7588-grunnlag` |
-| melosys-e2e-tests | Race condition nyvurderingbakgrunn | UNDER ARBEID | branch: feature/ftrl-trygdeavgift-25-prosent-regel-e2e |
+| melosys-e2e-tests | Test-data (inntekt under minstebelop) + feil API-endepunkt | FIKSET | branch: feature/ftrl-trygdeavgift-25-prosent-regel-e2e |
 
 ---
 
@@ -80,32 +80,27 @@ som kan vaere null nar data leses fra ny grunnlag-tabell.
 **Fiks:** Byttet til `hentGrunnlagInntekstperiode()` / `hentGrunnlagSkatteforholdTilNorge()`
 som faller tilbake korrekt.
 
-## Feil 6: Fakturaserie-referanse mangler for nyvurdering (UNDER ANALYSE)
+## Feil 6: Fakturaserie-referanse mangler for nyvurdering (FIKSET — test-feil)
 
-**Symptom:** 4 E2E-tester feiler med:
+**Symptom:** 4 E2E-tester feilet med:
 ```
 Failed to get fakturaserie null: 404
   /fakturaserier/null → "Fant ikke fakturaserie pa: null"
 ```
-`getFakturaserieReferanse(behandlingId)` returnerer null for nyvurdering-behandlingen.
 
-**Feilende tester:**
-- komplett-sak-flere-land-arbeidsinntekt-nv-kansellering
-- komplett-sak-flere-land-arbeidsinntekt
-- komplett-sak-nv-annulering-lukker-apne-arsavregninger
-- komplett-sak-nv-periode-endres-til-kun-tidligere-ar
+**Rotarsak:** To problemer i testene, ikke i backend:
 
-**Mulig arsak:** OPPRETT_FAKTURASERIE-steget kjorer for nyvurdering-behandlingen, men
-loggen viser "Ingen fakturaserie opprettet". Enten:
-- `harFakturerbarTrygdeavgift()` returnerer false (trygdeavgiftsperiodene mangler avgift)
-- `skalFaktureres()` returnerer false (betalingstype feil)
-- Fakturaserie-referansen lagres ikke tilbake i behandling-tabellen
+1. **Inntekt under minstebelopet:** Testene brukte bruttoinntekt 10000 kr/mnd. Med
+   25%-regelen gir dette 60000 kr/halvar som er under minstebelopet (99650 kr/ar).
+   Beregningen returnerer korrekt belop=0, og ingen fakturaserie opprettes.
+   Fikset ved a oke inntekt til 100000 kr/mnd.
 
-**Ikke relatert til harAvgift()-endringen** — den nye sjekken er MINDRE restriktiv
-(kun belop-basert, ikke sats+belop), sa flere perioder vil kvalifisere.
+2. **Feil API-endepunkt i test-verifikasjon:** Testene brukte GET /fakturaserier/{referanse}
+   som ikke inkluderer krediterings-fakturaserier. Byttet til GET /fakturaserier?referanse=
+   som traverserer hele erstattet_med-kjeden.
 
-**Neste steg:** Legg til debug-logging i OpprettFakturaserie for a identifisere
-hvilken betingelse som feiler. Verifiser om dette er pre-eksisterende.
+**Ikke relatert til backend-endringer** — harAvgift(), OpprettFakturaserie og
+faktureringslogikken fungerer korrekt.
 
 ---
 
