@@ -21,7 +21,7 @@ class ÅrsavregningTest {
     fun `beregnTilFaktureringsBeloep med tidligere fakturert beløp fra avgiftssystemet trekker fra tidligere fakturert beløp fra avgiftssystemet`() {
         val årsavregning = Årsavregning.forTest {
             beregnetAvgiftBelop = BigDecimal(1000)
-            harTrygdeavgiftFraAvgiftssystemet = true
+            harInnbetaltTrygdeavgift = true
             trygdeavgiftFraAvgiftssystemet = BigDecimal(200)
         }
 
@@ -46,7 +46,7 @@ class ÅrsavregningTest {
     fun `beregnTilFaktureringsBeloep med tidligere fakturert beløp og tidligere fakturert beløp fra avgiftssystemet trekker fra begge`() {
         val årsavregning = Årsavregning.forTest {
             beregnetAvgiftBelop = BigDecimal(1000)
-            harTrygdeavgiftFraAvgiftssystemet = true
+            harInnbetaltTrygdeavgift = true
             trygdeavgiftFraAvgiftssystemet = BigDecimal(200)
             tidligereFakturertBeloep = BigDecimal(200)
         }

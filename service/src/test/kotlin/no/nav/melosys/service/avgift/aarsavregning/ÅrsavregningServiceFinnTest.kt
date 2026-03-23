@@ -183,7 +183,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
                 tidligereFakturertBeloep = BigDecimal("6000.00")
                 beregnetAvgiftBelop = BigDecimal("6500.00")
                 tilFaktureringBeloep = BigDecimal("500.00")
-                harTrygdeavgiftFraAvgiftssystemet = true
+                harInnbetaltTrygdeavgift = true
                 trygdeavgiftFraAvgiftssystemet = BigDecimal("6200.00")
                 endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
                 manueltAvgiftBeloep = null
@@ -265,7 +265,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
                 tidligereFakturertBeloep = BigDecimal("1000.00")
                 beregnetAvgiftBelop = BigDecimal("1500.00")
                 tilFaktureringBeloep = BigDecimal("500.00")
-                harTrygdeavgiftFraAvgiftssystemet = true
+                harInnbetaltTrygdeavgift = true
                 trygdeavgiftFraAvgiftssystemet = BigDecimal("1200.00")
                 endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
                 manueltAvgiftBeloep = null
@@ -327,7 +327,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
                 tidligereFakturertBeloep = BigDecimal("1000.00")
                 beregnetAvgiftBelop = BigDecimal("1500.00")
                 tilFaktureringBeloep = BigDecimal("500.00")
-                harTrygdeavgiftFraAvgiftssystemet = true
+                harInnbetaltTrygdeavgift = true
                 trygdeavgiftFraAvgiftssystemet = BigDecimal("1200.00")
                 endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
                 manueltAvgiftBeloep = null
