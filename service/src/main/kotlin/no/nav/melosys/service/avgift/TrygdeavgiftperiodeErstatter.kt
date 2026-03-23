@@ -49,6 +49,8 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatId)
         nullstillEøsPensjonistTrygdeavgiftsperioder(behandlingsresultat)
 
+        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+
         trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
             trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode
             behandlingsresultat.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.add(trygdeavgiftsperiode)
