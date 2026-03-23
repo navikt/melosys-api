@@ -3,8 +3,8 @@
 -- automatisk tilhørende grunnlag-rader.
 --
 -- NB: inntektsperiode_id og skatteforhold_id har IKKE ON DELETE CASCADE.
--- Disse radene eies av Trygdeavgiftsperiode (cascade=ALL) og slettes etter
--- at grunnlag allerede er borte (via ON DELETE CASCADE ovenfor).
+-- Disse har cascade=PERSIST+MERGE (ikke REMOVE) i JPA for å unngå ORA-02292.
+-- Orphaned rader i inntektsperiode/skatteforhold_til_norge ryddes opp manuelt.
 
 ALTER TABLE trygdeavgiftsperiode_grunnlag DROP CONSTRAINT fk_tag_trygdeavgiftsperiode;
 ALTER TABLE trygdeavgiftsperiode_grunnlag ADD CONSTRAINT fk_tag_trygdeavgiftsperiode
