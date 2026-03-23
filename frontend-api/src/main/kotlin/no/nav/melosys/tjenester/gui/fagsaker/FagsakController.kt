@@ -240,8 +240,13 @@ class FagsakController(
 
     private fun hentSistHelseutgiftDekkesPeriode(fagsak: Fagsak): HelseutgiftDekkesPeriode? =
         fagsak.hentSistEndretBehandlingIkkeÅrsavregning()?.let {
-            behandlingsresultatService.hentBehandlingsresultat(it.id).helseutgiftDekkesPeriode
+            behandlingsresultatService.hentBehandlingsresultatMedHelseutgiftDekkesPerioder(it.id).helseutgiftDekkesPerioder.firstOrNull()
         }
+
+    private fun hentAlleHelseutgiftDekkesPerioder(fagsak: Fagsak): List<HelseutgiftDekkesPeriode> =
+        fagsak.hentSistEndretBehandlingIkkeÅrsavregning()?.let {
+            behandlingsresultatService.hentBehandlingsresultatMedHelseutgiftDekkesPerioder(it.id).helseutgiftDekkesPerioder.toList()
+        } ?: emptyList()
 
     private fun hentSaksopplysninger(fagsak: Fagsak, aktiveBehandlinger: Boolean): Saksopplysninger {
         val behandling = hentSisteBehandlingMedFattetVedtakIkkeÅrsavregning(fagsak)
@@ -324,11 +329,12 @@ class FagsakController(
 
             TRYGDEAVTALE, EU_EOS -> {
                 if (sakstema == TRYGDEAVGIFT && saksOpplysninger.behandling?.erEøsPensjonist() == true) {
-                    val helseutgiftDekkesPeriode = hentSistHelseutgiftDekkesPeriode(fagsak) ?: return PeriodeDto()
+                    val helseutgiftDekkesPerioder = hentAlleHelseutgiftDekkesPerioder(fagsak)
+                    if (helseutgiftDekkesPerioder.isEmpty()) return PeriodeDto()
 
                     return PeriodeDto(
-                        helseutgiftDekkesPeriode.fomDato,
-                        helseutgiftDekkesPeriode.tomDato
+                        helseutgiftDekkesPerioder.minOf { it.fomDato },
+                        helseutgiftDekkesPerioder.maxOf { it.tomDato }
                     )
                 }
 

@@ -39,8 +39,11 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
         nullstillEøsPensjonistTrygdeavgiftsperioder(behandlingsresultat)
 
         trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
-            trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode
-            behandlingsresultat.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+            // Find the first matching helseutgiftDekkesPeriode (all periods share grunnlag in current single-beregning flow)
+            val matchingPeriode = behandlingsresultat.helseutgiftDekkesPerioder.firstOrNull()
+                ?: error("Ingen helseutgift dekkes perioder funnet for behandlingsresultat $behandlingsresultatId")
+            trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode = matchingPeriode
+            matchingPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
         }
 
         val saved = behandlingsresultatService.lagre(behandlingsresultat)
@@ -56,6 +59,6 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
 
     private fun nullstillEøsPensjonistTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat) {
         behandlingsresultat.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
-        behandlingsresultat.hentHelseutgiftDekkesPeriode().clearTrygdeavgiftsperioder()
+        behandlingsresultat.helseutgiftDekkesPerioder.forEach { it.clearTrygdeavgiftsperioder() }
     }
 }

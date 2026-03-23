@@ -98,7 +98,7 @@ class TrygdeavgiftperiodeErstatterTest() {
                 bostedLand
             )
         behandlingsresultat.apply {
-            this.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
+            this.addHelseutgiftDekkesPeriode(helseutgiftDekkesPeriode)
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
@@ -251,10 +251,9 @@ class TrygdeavgiftperiodeErstatterTest() {
                     fagsak {
                         type = Sakstyper.FTRL
                     }
-
-                }.also {
-                    it.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
                 }
+            }.also {
+                it.addHelseutgiftDekkesPeriode(helseutgiftDekkesPeriode)
             }
         }
 

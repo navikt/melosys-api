@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.Optional
 
 
 @ExtendWith(MockKExtension::class)
@@ -51,20 +52,18 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
     }
 
     @Test
-    fun finnHelseutgiftDekkesPeriode_ingenPeriode_kasterException() {
-        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns null
+    fun finnHelseutgiftDekkesPerioder_ingenPeriode_returnerTomListe() {
+        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns emptyList()
 
-        helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(BEH_ID).run {
-            this shouldBe null
-        }
+        helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(BEH_ID).shouldBeEmpty()
     }
 
     @Test
-    fun finnHelseutgiftDekkesPeriode_periodeEksisterer_girResultat() {
+    fun finnHelseutgiftDekkesPerioder_periodeEksisterer_girResultat() {
         val helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode()
-        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns helseutgiftDekkesPeriode
+        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns listOf(helseutgiftDekkesPeriode)
 
-        helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(BEH_ID)!!.run {
+        helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(BEH_ID).single().run {
             this.behandlingsresultat shouldBe helseutgiftDekkesPeriode.behandlingsresultat
             this.fomDato shouldBe helseutgiftDekkesPeriode.fomDato
             this.tomDato shouldBe helseutgiftDekkesPeriode.tomDato
@@ -79,7 +78,6 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
             behandling { id = BEH_ID }
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns lagretBehandlingsresultat
-        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns null
         every { helseutgiftDekkesPeriodeRepository.save(any()) } answers { firstArg() }
 
         helseutgiftDekkesPeriodeService.opprettHelseutgiftDekkesPeriode(BEH_ID, FOM_DATO, TOM_DATO, BOSTEDLANDKODE).run {
@@ -91,29 +89,27 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
     }
 
     @Test
-    fun `Opprett skal oppdatere eksisterende periode og bare lagre en gang`() {
-        val eksisterendePeriode = lagHelseutgiftDekkesPeriode().apply { id = 321L }
+    fun `Opprett skal opprette ny periode`() {
         val lagretBehandlingsresultat = mockk<Behandlingsresultat>(relaxed = true)
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns lagretBehandlingsresultat
-        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns eksisterendePeriode
         every { helseutgiftDekkesPeriodeRepository.save(any()) } answers { firstArg() }
 
         helseutgiftDekkesPeriodeService
             .opprettHelseutgiftDekkesPeriode(BEH_ID, NY_FOM_DATO, NY_TOM_DATO, NY_BOSTEDLANDKODE)
             .run {
-                id shouldBe eksisterendePeriode.id
                 fomDato shouldBe NY_FOM_DATO
                 tomDato shouldBe NY_TOM_DATO
                 bostedLandkode shouldBe NY_BOSTEDLANDKODE
             }
 
-        verify(exactly = 1) { helseutgiftDekkesPeriodeRepository.save(eksisterendePeriode) }
+        verify(exactly = 1) { helseutgiftDekkesPeriodeRepository.save(any()) }
     }
 
     @Test
     fun `Lagret trygdeavgift skal fjernes og helseutgift dekkes periode skal oppdateres med data`() {
         val lagretHelseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode().apply {
+            id = PERIODE_ID
             trygdeavgiftsperioder.add(
                 Trygdeavgiftsperiode(
                     id = 1L,
@@ -127,10 +123,10 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
 
         val oppdatertHelseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(bostedsland = Land_iso2.NO)
 
-        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns lagretHelseutgiftDekkesPeriode
+        every { helseutgiftDekkesPeriodeRepository.findById(PERIODE_ID) } returns Optional.of(lagretHelseutgiftDekkesPeriode)
         every { helseutgiftDekkesPeriodeRepository.save(any()) } answers { firstArg() }
 
-        helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(BEH_ID, FOM_DATO, TOM_DATO, Land_iso2.NO).run {
+        helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(PERIODE_ID, FOM_DATO, TOM_DATO, Land_iso2.NO).run {
             this.behandlingsresultat shouldBe oppdatertHelseutgiftDekkesPeriode.behandlingsresultat
             this.fomDato shouldBe oppdatertHelseutgiftDekkesPeriode.fomDato
             this.tomDato shouldBe oppdatertHelseutgiftDekkesPeriode.tomDato
@@ -142,11 +138,11 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
 
     @Test
     fun oppdaterHelseutgiftDekkesPeriode_kasterFeil() {
-        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns null
+        every { helseutgiftDekkesPeriodeRepository.findById(any()) } returns Optional.empty()
 
         shouldThrow<IkkeFunnetException> {
-            helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(BEH_ID, FOM_DATO, TOM_DATO, Land_iso2.NO)
-        }.message shouldBe "Finner ingen helseutgift-periode med behandlingID: $BEH_ID"
+            helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(999L, FOM_DATO, TOM_DATO, Land_iso2.NO)
+        }.message shouldBe "Finner ingen helseutgift-periode med id: 999"
     }
 
     @Test
@@ -174,18 +170,17 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
         }
 
         behandlingsresultat.apply {
-            helseutgiftDekkesPeriode = lagretHelseutgiftDekkesPeriode
+            addHelseutgiftDekkesPeriode(lagretHelseutgiftDekkesPeriode)
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
-        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns lagretHelseutgiftDekkesPeriode
 
 
-        helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(BEH_ID)
+        helseutgiftDekkesPeriodeService.slettAlleHelseutgiftDekkesPerioder(BEH_ID)
 
 
         behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.shouldBeEmpty()
-        behandlingsresultat.helseutgiftDekkesPeriode.shouldBe(null)
+        behandlingsresultat.helseutgiftDekkesPerioder.shouldBeEmpty()
     }
 
     @Test
@@ -193,10 +188,10 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
 
 
-        helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(BEH_ID)
+        helseutgiftDekkesPeriodeService.slettAlleHelseutgiftDekkesPerioder(BEH_ID)
 
 
-        behandlingsresultat.helseutgiftDekkesPeriode.shouldBe(null)
+        behandlingsresultat.helseutgiftDekkesPerioder.shouldBeEmpty()
         verify(exactly = 0) { behandlingsresultatService.lagreOgFlush(any())}
     }
 
@@ -212,6 +207,7 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
 
     companion object {
         private val BEH_ID = 1L
+        private val PERIODE_ID = 10L
         private val FOM_DATO = LocalDate.of(2025, 1, 1)
         private val TOM_DATO = LocalDate.of(2025, 1, 2)
         private val BOSTEDLANDKODE = Land_iso2.BA

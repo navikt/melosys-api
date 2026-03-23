@@ -28,7 +28,7 @@ internal class OverlappendeHelseutgiftDekkesPerioderReglerTest {
         OverlappendeHelseutgiftDekkesPerioderRegler.harOverlappendeMedlPeriode(
             medelskapDokument,
             HelseutgiftDekkesPeriodeData(
-                nyHelseutgiftDekkesPeriode = kontrollHelseutgiftDekkesPeriode,
+                nyeHelseutgiftDekkesPerioder = listOf(kontrollHelseutgiftDekkesPeriode),
                 tidligereHelseutgiftDekkesPerioder = emptyList()
             )
         ).shouldBeTrue()
@@ -45,7 +45,7 @@ internal class OverlappendeHelseutgiftDekkesPerioderReglerTest {
 
         OverlappendeHelseutgiftDekkesPerioderRegler.harOverlappendeHelseutgiftDekkesPeriode(
             HelseutgiftDekkesPeriodeData(
-                nyHelseutgiftDekkesPeriode = kontrollHelseutgiftDekkesPeriode,
+                nyeHelseutgiftDekkesPerioder = listOf(kontrollHelseutgiftDekkesPeriode),
                 tidligereHelseutgiftDekkesPerioder = listOf(tidligereHelseutgiftDekkesPeriode)
             )
         ).shouldBeTrue()

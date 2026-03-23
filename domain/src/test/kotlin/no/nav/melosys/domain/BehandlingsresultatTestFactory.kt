@@ -35,7 +35,7 @@ fun BehandlingsresultatTestFactory.Builder.vedtakMetadata(init: VedtakMetadata.(
 // Merk: Cross-factory extensions (årsavregning, behandlingsresultat) er definert i TestFactoryExtensions.kt
 
 fun BehandlingsresultatTestFactory.Builder.helseutgiftDekkesPeriode(init: HelseutgiftDekkesPeriodeTestFactory.Builder.() -> Unit) = apply {
-    this.helseutgiftDekkesPeriode = HelseutgiftDekkesPeriode.forTest(init)
+    this.helseutgiftDekkesPerioder.add(HelseutgiftDekkesPeriode.forTest(init))
 }
 
 fun BehandlingsresultatTestFactory.Builder.medlemskapsperiode(init: MedlemskapsperiodeTestFactory.Builder.() -> Unit) = apply {
@@ -331,7 +331,7 @@ object BehandlingsresultatTestFactory {
 
         var vedtakMetadata: VedtakMetadata? = null
         var årsavregning: Årsavregning? = null
-        var helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = null
+        var helseutgiftDekkesPerioder: MutableSet<HelseutgiftDekkesPeriode> = mutableSetOf()
 
         val medlemskapsperioder: MutableSet<Medlemskapsperiode> = mutableSetOf()
         val lovvalgsperioder: MutableSet<Lovvalgsperiode> = mutableSetOf()
@@ -374,9 +374,9 @@ object BehandlingsresultatTestFactory {
                 it.behandlingsresultat = behandlingsresultat
             }
 
-            // Sett opp relasjoner for helseutgiftDekkesPeriode
-            this@Builder.helseutgiftDekkesPeriode?.let {
-                behandlingsresultat.helseutgiftDekkesPeriode = it
+            // Sett opp relasjoner for helseutgiftDekkesPerioder
+            this@Builder.helseutgiftDekkesPerioder.forEach {
+                behandlingsresultat.addHelseutgiftDekkesPeriode(it)
                 it.behandlingsresultat = behandlingsresultat
             }
 
