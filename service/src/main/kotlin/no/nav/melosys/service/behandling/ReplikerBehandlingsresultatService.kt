@@ -27,7 +27,10 @@ class ReplikerBehandlingsresultatService(
     @Transactional(rollbackFor = [Exception::class])
     fun replikerBehandlingsresultat(tidligsteInaktiveBehandling: Behandling, behandlingReplika: Behandling) {
         val behandlingsresultatOriginal: Behandlingsresultat =
-            Hibernate.unproxy(behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id)) as Behandlingsresultat
+            Hibernate.unproxy(
+                behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id),
+                Behandlingsresultat::class.java
+            )
 
         val behandlingsresultatReplika = BeanUtils.cloneBean(behandlingsresultatOriginal) as Behandlingsresultat
 
