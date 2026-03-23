@@ -162,7 +162,7 @@ class FaktureringskomponentenClientTest(
                             "belop":2000,
                             "startDato":"2024-01-01",
                             "sluttDato":"2024-12-31",
-                            "beskrivelse":"Medlemskapsperiode 2024-01-01 - 2024-12-31 endelig beregnet trygdeavgift 2000 - forskuddsvis fakturert trygdeavgift 2000"
+                            "beskrivelse":"Periode 2024-01-01 - 2024-12-31 endelig beregnet trygdeavgift 2000 - forskuddsvis betalt trygdeavgift 2000"
                         }
                         """,
                         true, false
@@ -260,7 +260,7 @@ class FaktureringskomponentenClientTest(
             belop,
             startDato,
             sluttDato,
-            "Medlemskapsperiode $startDato - $sluttDato endelig beregnet trygdeavgift $belop - forskuddsvis fakturert trygdeavgift $belop"
+            "Periode $startDato - $sluttDato endelig beregnet trygdeavgift $belop - forskuddsvis betalt trygdeavgift $belop"
         )
     }
 
