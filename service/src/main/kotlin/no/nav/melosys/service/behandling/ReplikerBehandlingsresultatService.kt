@@ -193,6 +193,9 @@ class ReplikerBehandlingsresultatService(
         val inntektMap = inntektsperioderReplika.associateBy { it.id }
         val skatteforholdMap = skatteforholdTilNorgeReplika.associateBy { it.id }
 
+        val inntektMap = inntektsperioderReplika.associateBy { it.id }
+        val skatteforholdMap = skatteforholdTilNorgeReplika.associateBy { it.id }
+
         trygdeavgiftsperioderTilReplikering.forEach { trygdeavgiftsperiodeOriginal ->
             val origHelseutgiftPeriodeId = trygdeavgiftsperiodeOriginal.grunnlagHelseutgiftDekkesPeriode?.id
             val replikaHelseutgiftPeriode = origTilReplikaHelseutgiftMap[origHelseutgiftPeriodeId]
