@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.tilgangsmaskinen
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.any
@@ -56,7 +56,7 @@ class TilgangsmaskinenClientTest(
 ) {
     private val processUUID = UUID.randomUUID()
     private val mockServer = WireMockServer(WireMockConfiguration.wireMockConfig().port(mockServerPort))
-    private val objectMapper = ObjectMapper()
+    private val objectMapper = JsonMapper.builder().build()
 
     @BeforeAll
     fun beforeAll() {

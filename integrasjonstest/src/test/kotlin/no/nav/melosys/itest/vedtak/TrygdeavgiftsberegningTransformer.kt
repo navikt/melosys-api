@@ -1,7 +1,6 @@
 package no.nav.melosys.itest.vedtak
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
@@ -15,7 +14,7 @@ import java.util.*
  */
 class TrygdeavgiftsberegningTransformer() : ResponseTransformerV2 {
     override fun transform(response: Response?, serveEvent: ServeEvent?): Response {
-        val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
+        val mapper = jacksonObjectMapper()
 
         if (serveEvent?.request?.url != "/api/v2/beregn") {
             throw IllegalArgumentException("Invalid url. Denne transformeren støtter kun /api/v2/beregn")
