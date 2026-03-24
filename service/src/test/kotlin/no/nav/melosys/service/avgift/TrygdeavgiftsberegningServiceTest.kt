@@ -18,7 +18,6 @@ import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
 import no.nav.melosys.domain.avgift.*
-import no.nav.melosys.domain.årsavregning
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -430,6 +429,121 @@ internal class TrygdeavgiftsberegningServiceTest {
                     grunnlagSkatteforholdTilNorge.shouldNotBeNull().run {
                         fomDato.shouldBe(FOM)
                         tomDato.shouldBe(TOM)
+                        skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
+                    }
+                    grunnlagInntekstperiode.shouldBeNull()
+                    grunnlagMedlemskapsperiode.shouldBe(behandlingsresultat.medlemskapsperioder.first())
+                }
+            }
+
+            @Test
+            fun `pliktig medlem og skattepliktig med periode over to år skal periodisere til én trygdeavgiftsperiode per år`() {
+                val fomToÅr = LocalDate.of(2024, 3, 1)
+                val tomToÅr = LocalDate.of(2025, 6, 30)
+
+                val behandlingsresultat = defaultBehandlingsresultat {
+                    medlemskapsperiode {
+                        id = 1L
+                        fom = fomToÅr
+                        tom = tomToÅr
+                        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                        medlemskapstype = Medlemskapstyper.PLIKTIG
+                        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
+                    }
+                }
+
+                every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
+
+                val resultat = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+                    behandlingID = BEHANDLING_ID,
+                    skatteforholdsperioder = listOf(
+                        skatteforhold {
+                            skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                            fomDato = fomToÅr
+                            tomDato = tomToÅr
+                        }
+                    ),
+                    inntektsperioder = emptyList()
+                )
+
+                verify(exactly = 0) { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
+
+                resultat.shouldHaveSize(2)
+                val sortert = resultat.sortedBy { it.periodeFra }
+
+                sortert[0].apply {
+                    periodeFra.shouldBe(LocalDate.of(2024, 3, 1))
+                    periodeTil.shouldBe(LocalDate.of(2024, 12, 31))
+                    trygdesats.shouldBe(BigDecimal.ZERO)
+                    trygdeavgiftsbeløpMd.shouldBe(Penger(BigDecimal.ZERO))
+                    grunnlagSkatteforholdTilNorge.shouldNotBeNull().run {
+                        fomDato.shouldBe(LocalDate.of(2024, 3, 1))
+                        tomDato.shouldBe(LocalDate.of(2024, 12, 31))
+                        skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
+                    }
+                    grunnlagInntekstperiode.shouldBeNull()
+                    grunnlagMedlemskapsperiode.shouldBe(behandlingsresultat.medlemskapsperioder.first())
+                }
+
+                sortert[1].apply {
+                    periodeFra.shouldBe(LocalDate.of(2025, 1, 1))
+                    periodeTil.shouldBe(LocalDate.of(2025, 6, 30))
+                    grunnlagSkatteforholdTilNorge.shouldNotBeNull().run {
+                        fomDato.shouldBe(LocalDate.of(2025, 1, 1))
+                        tomDato.shouldBe(LocalDate.of(2025, 6, 30))
+                        skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
+                    }
+                    grunnlagInntekstperiode.shouldBeNull()
+                    grunnlagMedlemskapsperiode.shouldBe(behandlingsresultat.medlemskapsperioder.first())
+                }
+            }
+
+            @Test
+            fun `pliktig medlem og skattepliktig med periode over to år - toggle på - filtrerer bort tidligere år`() {
+                unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+                val dagensDato = LocalDate.of(2025, 1, 1)
+                val fomToÅr = LocalDate.of(2024, 3, 1)
+                val tomToÅr = LocalDate.of(2025, 6, 30)
+
+                val behandlingsresultat = defaultBehandlingsresultat {
+                    medlemskapsperiode {
+                        id = 1L
+                        fom = fomToÅr
+                        tom = tomToÅr
+                        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                        medlemskapstype = Medlemskapstyper.PLIKTIG
+                        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
+                    }
+                }
+
+                every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
+
+                val resultat = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+                    behandlingID = BEHANDLING_ID,
+                    skatteforholdsperioder = listOf(
+                        skatteforhold {
+                            skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                            fomDato = LocalDate.of(2025, 1, 1)
+                            tomDato = tomToÅr
+                        }
+                    ),
+                    inntektsperioder = emptyList(),
+                    dagensDato = dagensDato
+                )
+
+                verify(exactly = 0) { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
+
+                resultat.shouldHaveSize(1)
+                resultat.first().apply {
+                    periodeFra.shouldBe(LocalDate.of(2025, 1, 1))
+                    periodeTil.shouldBe(LocalDate.of(2025, 6, 30))
+                    grunnlagSkatteforholdTilNorge.shouldNotBeNull().run {
+                        fomDato.shouldBe(LocalDate.of(2025, 1, 1))
+                        tomDato.shouldBe(LocalDate.of(2025, 6, 30))
                         skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
                     }
                     grunnlagInntekstperiode.shouldBeNull()
