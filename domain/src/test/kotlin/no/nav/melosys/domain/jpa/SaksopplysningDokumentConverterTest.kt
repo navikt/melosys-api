@@ -31,6 +31,8 @@ import org.jeasy.random.randomizers.misc.EnumRandomizer
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -229,6 +231,32 @@ internal class SaksopplysningDokumentConverterTest {
         json shouldContain """"2021-06-02""""
         json shouldContain """"2022-01-01""""
         json shouldNotContain "[2021"
+    }
+
+    @Test
+    fun `konverterFraDatabase kan deserialisere LocalDateTime fra gammelt Jackson2 array-format`() {
+        // Jackson 2 med WRITE_DATES_AS_TIMESTAMPS=true lagret LocalDateTime som arrays [år,måned,dag,time,minutt,sekund].
+        // Jackson 3 skriver ISO-strenger, men må fortsatt kunne lese gammel data fra DB.
+        val json = """
+            {"type":"PersonhistorikkDokument","bostedsadressePeriodeListe":[{"endringstidspunkt":[2023,7,1,12,30,45]}]}
+        """.trimIndent()
+
+        val deserialisert = converter.convertToEntityAttribute(json) as no.nav.melosys.domain.dokument.person.PersonhistorikkDokument
+
+        deserialisert.bostedsadressePeriodeListe.first().endringstidspunkt shouldBe LocalDateTime.of(2023, 7, 1, 12, 30, 45)
+    }
+
+    @Test
+    fun `konverterFraDatabase kan deserialisere YearMonth fra gammelt Jackson2 array-format`() {
+        // Jackson 2 med WRITE_DATES_AS_TIMESTAMPS=true lagret YearMonth som arrays [år,måned].
+        // Jackson 3 skriver ISO-strenger, men må fortsatt kunne lese gammel data fra DB.
+        val json = """
+            {"type":"InntektDokument","arbeidsInntektMaanedListe":[{"aarMaaned":[2022,3],"arbeidsInntektInformasjon":{"inntektListe":[]}}]}
+        """.trimIndent()
+
+        val deserialisert = converter.convertToEntityAttribute(json) as InntektDokument
+
+        deserialisert.arbeidsInntektMaanedListe.first().aarMaaned shouldBe YearMonth.of(2022, 3)
     }
 
     private fun <T : SaksopplysningDokument> testKonverteringObject(saksopplysningDokument: T) {
