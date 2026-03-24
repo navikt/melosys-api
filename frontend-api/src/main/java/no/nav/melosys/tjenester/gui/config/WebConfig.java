@@ -1,9 +1,8 @@
 package no.nav.melosys.tjenester.gui.config;
 
-import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.MapperFeature;
-import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.module.kotlin.KotlinModule;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdInterceptor;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.config.jackson.MelosysModule;
@@ -29,13 +28,11 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public JsonMapper objectMapper(@Lazy KodeverkService kodeverkService) {
-        return JsonMapper.builder()
+    public JsonMapperBuilderCustomizer melosysJsonMapperCustomizer(@Lazy KodeverkService kodeverkService) {
+        return builder -> builder
             .addModule(new KotlinModule.Builder().build())
             .addModule(new MelosysModule(kodeverkService))
-            .enable(MapperFeature.DEFAULT_VIEW_INCLUSION)
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .build();
+            .enable(MapperFeature.DEFAULT_VIEW_INCLUSION);
     }
 
     @Bean

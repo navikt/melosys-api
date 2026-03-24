@@ -21,7 +21,11 @@ class WebConfigObjectMapperTest {
 
     private val kodeverkService = mockk<KodeverkService>(relaxed = true)
     private val webConfig = WebConfig(mockk())
-    private val objectMapper = webConfig.objectMapper(kodeverkService)
+    private val objectMapper: JsonMapper = run {
+        val builder = JsonMapper.builder()
+        webConfig.melosysJsonMapperCustomizer(kodeverkService).customize(builder)
+        builder.build()
+    }
 
     @Test
     fun `objectMapper should be a JsonMapper instance`() {
