@@ -20,6 +20,7 @@ import no.nav.melosys.saksflyt.steg.sed.SendVedtakUtland
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.*
 import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory
+import no.nav.melosys.service.LandvelgerService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.brev.SedSomBrevService
 import no.nav.melosys.service.dokument.sed.EessiService
@@ -47,6 +48,9 @@ class SendVedtakUtlandTest {
     @MockK
     private lateinit var prosessinstansService: ProsessinstansService
 
+    @MockK
+    private lateinit var landvelgerService: LandvelgerService
+
     private lateinit var sendVedtakUtland: SendVedtakUtland
 
     private val fakeUnleash = FakeUnleash()
@@ -62,9 +66,10 @@ class SendVedtakUtlandTest {
         every { utpekingService.oppdaterSendtUtland(any()) } just Runs
         every { eessiService.lukkBuc(any()) } just Runs
         every { eessiService.sendGodkjenningArbeidFlereLand(any(), any()) } just Runs
+        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(any()) } returns emptyList()
 
         sendVedtakUtland =
-            SendVedtakUtland(eessiService, behandlingsresultatService, sedSomBrevService, utpekingService, prosessinstansService, fakeUnleash)
+            SendVedtakUtland(eessiService, behandlingsresultatService, sedSomBrevService, utpekingService, prosessinstansService, landvelgerService, fakeUnleash)
     }
 
     private fun lagBehandlingsresultat(
@@ -305,6 +310,61 @@ class SendVedtakUtlandTest {
 
 
         verify(exactly = 0) { eessiService.sendGodkjenningArbeidFlereLand(any(), any()) }
+    }
+
+    @Test
+    fun `utfør skal sende SED og deretter brev til land som ikke kan motta SED når EESSI-mottakere og land som ikke kan motta SED finnes`() {
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITUSJON))
+        }
+        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.FO, Land_iso2.SE)
+
+
+        sendVedtakUtland.utfør(prosessinstans)
+
+
+        // Verifiser at SED er sendt
+        verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), any(), any(), any(), any(), any()) }
+        // Verifiser at brev er sendt til FO
+        verify {
+            prosessinstansService.opprettProsessinstansSendBrev(
+                any(),
+                capture(brevbestillingCaptor),
+                match<Mottaker> { it.trygdemyndighetLand == Land_iso2.FO }
+            )
+        }
+        brevbestillingCaptor.captured.produserbartdokument shouldBe Produserbaredokumenter.ATTEST_A1
+    }
+
+    @Test
+    fun `utfør skal sende SED uten brev når ingen land som ikke kan motta SED`() {
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITUSJON))
+        }
+
+        sendVedtakUtland.utfør(prosessinstans)
+
+        // Verifiser at SED er sendt
+        verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), any(), any(), any(), any(), any()) }
+        // Verifiser at INGEN papir-brev er sendt
+        verify(exactly = 0) { prosessinstansService.opprettProsessinstansSendBrev(any(), any(), any()) }
+    }
+
+    @Test
+    fun `utfør skal sende brev til FO og GL når begge er land som ikke kan motta SED`() {
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITUSJON))
+        }
+        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.FO, Land_iso2.GL)
+
+
+        sendVedtakUtland.utfør(prosessinstans)
+
+
+        // Verifiser at SED er sendt
+        verify { eessiService.opprettOgSendSed(any(), any(), any(), any(), any(), any(), any()) }
+        // Verifiser at papir-brev er sendt to ganger (FO og GL)
+        verify(exactly = 2) { prosessinstansService.opprettProsessinstansSendBrev(any(), any(), any()) }
     }
 
     companion object {

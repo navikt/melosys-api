@@ -7,6 +7,8 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.*
@@ -46,6 +48,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import no.nav.melosys.domain.eessi.sed.VedleggReferanse
+import no.nav.melosys.domain.eessi.sed.Arbeidsland
+import no.nav.melosys.domain.eessi.sed.Arbeidssted
 
 class EessiServiceTest {
 
@@ -1128,6 +1132,36 @@ class EessiServiceTest {
     private fun lagArkivDokument(dokumentID: String) = ArkivDokument().apply {
         dokumentId = dokumentID
         tittel = "Tittel $dokumentID"
+    }
+
+    @Test
+    fun `opprettOgSendSed med FO og GL i arbeidsland - filtrerer dem fra SedDataDto før sending`() {
+        val sedDataDto = SedDataDto().apply {
+            arbeidsland = mutableListOf(
+                Arbeidsland("DK", emptyList()),
+                Arbeidsland("BE", emptyList()),
+                Arbeidsland("FO", emptyList()),
+                Arbeidsland("GL", emptyList())
+            )
+            arbeidssteder = mutableListOf(
+                Arbeidssted.lagIkkeFastArbeidssted("DK"),
+                Arbeidssted.lagIkkeFastArbeidssted("FO"),
+                Arbeidssted.lagIkkeFastArbeidssted("GL")
+            )
+        }
+        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns sedDataDto
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        mockBehandling()
+        mockBehandlingsresultat()
+
+        val sedDataDtoSlot = slot<SedDataDto>()
+        every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
+
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("DK:ADTEST", "BE:0208044709"), BucType.LA_BUC_03, emptyList(), null, null, null)
+
+        val sendt = sedDataDtoSlot.captured
+        sendt.arbeidsland.map { it.land } shouldContainExactlyInAnyOrder listOf("DK", "BE")
+        sendt.arbeidssteder.map { it.adresse?.land } shouldContainExactly listOf("DK")
     }
 
     companion object {
