@@ -5,11 +5,14 @@ import java.util.EnumMap;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.module.kotlin.KotlinModule;
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
 
 public final class MottatteOpplysningerKonverterer {
 
-    private static final ObjectMapper objectMapper = JsonMapper.builder().build();
+    private static final ObjectMapper objectMapper = JsonMapper.builder()
+        .addModule(new KotlinModule.Builder().build())
+        .build();
 
     private static final EnumMap<Mottatteopplysningertyper, Class<? extends MottatteOpplysningerData>> mapper = new EnumMap<>(Mottatteopplysningertyper.class);
 
