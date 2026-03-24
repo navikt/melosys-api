@@ -193,12 +193,8 @@ public class EosVedtakService implements FattVedtakInterface {
 
     static List<Land_iso2> filtrerLandKanMottaSed(Collection<Land_iso2> landkoder) {
         return landkoder.stream()
-            .filter(land -> !kanIkkeMottaSed(land))
+            .filter(land -> !EessiService.LAND_UTEN_SED_MOTTAK.contains(land))
             .distinct()
             .collect(Collectors.toList());
-    }
-
-    private static boolean kanIkkeMottaSed(Land_iso2 land) {
-        return EessiService.LAND_UTEN_SED_MOTTAK.contains(land);
     }
 }

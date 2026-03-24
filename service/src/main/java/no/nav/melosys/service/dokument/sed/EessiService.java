@@ -225,6 +225,10 @@ public class EessiService {
         return !hentEessiMottakerinstitusjoner(bucType, Set.of(landkode)).isEmpty();
     }
 
+    /**
+     * Muterer sedData in-place ved å fjerne arbeidsland og arbeidssteder for land som ikke kan motta SED (FO/GL).
+     * sedData sendes videre til eessiClient etter kallet.
+     */
     private static void filtrerIkkeEessiLandFraSed(SedDataDto sedData) {
         sedData.setArbeidsland(sedData.getArbeidsland().stream()
             .filter(al -> !LAND_UTEN_SED_MOTTAK_KODER.contains(al.getLand()))

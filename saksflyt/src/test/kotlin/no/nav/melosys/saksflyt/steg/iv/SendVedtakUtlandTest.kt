@@ -342,9 +342,7 @@ class SendVedtakUtlandTest {
             medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITUSJON))
         }
 
-
         sendVedtakUtland.utfør(prosessinstans)
-
 
         // Verifiser at SED er sendt
         verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), any(), any(), any(), any(), any()) }
