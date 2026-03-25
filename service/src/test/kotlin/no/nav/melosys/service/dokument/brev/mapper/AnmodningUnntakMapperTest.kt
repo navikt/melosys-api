@@ -147,9 +147,8 @@ class AnmodningUnntakMapperTest {
                 unntakFraLovvalgsland = Land_iso2.DK
             }
         }
-        val brevData = lagBrevData().apply {
+        val brevData = lagBrevData(anmodningFritekst = "Avsnitt A\nAvsnitt B").apply {
             fritekst = "Linje 1\nLinje 2"
-            anmodningFritekst = "Avsnitt A\nAvsnitt B"
         }
 
         val xml = mapper.mapTilBrevXML(lagFellesType(), lagMelosysNAVFelles(), behandling, resultat, brevData)
@@ -158,14 +157,14 @@ class AnmodningUnntakMapperTest {
         xml shouldContain "Avsnitt A[_¶_]Avsnitt B"
     }
 
-    private fun lagBrevData(): BrevDataAnmodningUnntak = BrevDataAnmodningUnntak(
+    private fun lagBrevData(anmodningFritekst: String? = null): BrevDataAnmodningUnntak = BrevDataAnmodningUnntak(
         "Z999999",
         Landkoder.AT.beskrivelse,
         AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG),
         Yrkesaktivitetstyper.SELVSTENDIG,
         emptySet(),
         emptySet(),
-        null
+        anmodningFritekst
     )
 
     // FellesType er ekstern brev-type (ikke domain entity), derfor brukes .apply her

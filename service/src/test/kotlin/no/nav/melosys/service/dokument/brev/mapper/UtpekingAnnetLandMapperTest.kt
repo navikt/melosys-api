@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument.brev.mapper
 import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
