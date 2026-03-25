@@ -208,6 +208,7 @@ class TrygdeavgiftsberegningService(
             grunnlagInntekstperiode = inntektsperiodeMap[førsteGrunnlag.inntektsperiodeId]
                 ?: throw IllegalStateException("Fant ikke inntektsperiode ${førsteGrunnlag.inntektsperiodeId}"),
             beregningstype = beregningstype,
+            avgiftsdel = response.avgiftsdel,
         )
 
         // Legacy: sett avgiftspliktig periode via gamle FK-felt (fra første grunnlag)

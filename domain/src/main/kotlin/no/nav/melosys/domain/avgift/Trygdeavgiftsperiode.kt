@@ -54,6 +54,9 @@ class Trygdeavgiftsperiode(
     @Enumerated(EnumType.STRING)
     val beregningstype: Avgiftsberegningstype = Avgiftsberegningstype.ORDINAER,
 
+    @Column(name = "avgiftsdel")
+    val avgiftsdel: String? = null,
+
     ) : ErPeriode {
 
     @OneToMany(mappedBy = "trygdeavgiftsperiode", cascade = [CascadeType.PERSIST, CascadeType.MERGE], fetch = FetchType.LAZY)
@@ -98,6 +101,7 @@ class Trygdeavgiftsperiode(
         grunnlagLovvalgsPeriode: Lovvalgsperiode? = this.grunnlagLovvalgsPeriode,
         grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = this.grunnlagSkatteforholdTilNorge,
         beregningstype: Avgiftsberegningstype = this.beregningstype,
+        avgiftsdel: String? = this.avgiftsdel,
     ) = Trygdeavgiftsperiode(
         id = id,
         periodeFra = periodeFra,
@@ -110,6 +114,7 @@ class Trygdeavgiftsperiode(
         grunnlagLovvalgsPeriode = grunnlagLovvalgsPeriode,
         grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
         beregningstype = beregningstype,
+        avgiftsdel = avgiftsdel,
     )
 
     fun erLikForSatsendring(other: Trygdeavgiftsperiode): Boolean =

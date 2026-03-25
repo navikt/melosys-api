@@ -13,7 +13,9 @@ data class TrygdeavgiftsperiodeDto(
     val inntektskildetype: Inntektskildetype?,
     val avgiftssats: Double?,
     val avgiftPerMd: Int,
-    val beregningstype: String? = null
+    val beregningstype: String? = null,
+    val harSammenslåtteInntektskilder: Boolean = false,
+    val avgiftsdel: String? = null
 ) {
     constructor(trygdeavgiftsperiode: Trygdeavgiftsperiode) :
         this(
@@ -23,6 +25,11 @@ data class TrygdeavgiftsperiodeDto(
             trygdeavgiftsperiode.grunnlagInntekstperiode?.type,
             trygdeavgiftsperiode.trygdesats?.toDouble(),
             trygdeavgiftsperiode.trygdeavgiftsbeløpMd.hentVerdi().setScale(0, java.math.RoundingMode.HALF_UP).intValueExact(),
-            trygdeavgiftsperiode.beregningstype.takeIf { it != Avgiftsberegningstype.ORDINAER }?.name
+            trygdeavgiftsperiode.beregningstype.takeIf { it != Avgiftsberegningstype.ORDINAER }?.name,
+            harSammenslåtteInntektskilder = trygdeavgiftsperiode.grunnlagListe
+                .map { it.inntektsperiode.type }
+                .distinct()
+                .size > 1,
+            avgiftsdel = trygdeavgiftsperiode.avgiftsdel
         )
 }
