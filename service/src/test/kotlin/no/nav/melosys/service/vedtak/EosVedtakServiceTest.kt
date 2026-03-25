@@ -378,7 +378,6 @@ class EosVedtakServiceKtTest {
                 any()
             )
         }
-        verify(exactly = 0) { landvelgerService.hentUtenlandskTrygdemyndighetsland(any()) }
         verify(exactly = 0) { eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), any(), any()) }
     }
 
@@ -411,6 +410,150 @@ class EosVedtakServiceKtTest {
         }
     }
 
+    @Test
+    fun `fattVedtak - art13 med FO blant arbeidsland - filtrerer FO fra EESSI-validering`() {
+        val mottakerinstitusjoner = setOf("SE:INST456")
+        mockBehandlingsresultat()
+        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns mutableListOf(Land_iso2.SE, Land_iso2.FO)
+        every { behandling.erNorgeUtpekt() } returns false
+        every {
+            eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
+                any<Set<String>>(),
+                any<Collection<Land_iso2>>(),
+                any<BucType>()
+            )
+        } answers { firstArg<Set<String>>() }
+        leggTilLovvalgsperiode(bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A)
+
+        vedtakService.fattVedtak(
+            behandling, lagRequest(
+                Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+                Vedtakstyper.FØRSTEGANGSVEDTAK,
+                BEHANDLINGSRESULTAT_FRITEKST,
+                null,
+                mottakerinstitusjoner
+            )
+        )
+
+        // EESSI-validering skal kun kalles med SE (uten FO)
+        verify {
+            eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
+                any(),
+                eq(listOf(Land_iso2.SE)),
+                any()
+            )
+        }
+        // FO er filtrert ut av EESSI-landkoder, kun SE sendes til EESSI
+        verify {
+            prosessinstansService.opprettProsessinstansIverksettVedtakEos(
+                any(), any(), any(), any(),
+                eq(mottakerinstitusjoner),
+                any()
+            )
+        }
+    }
+
+    @Test
+    fun `fattVedtak - art13 med FO og GL blant arbeidsland - filtrerer begge fra EESSI-validering`() {
+        val mottakerinstitusjoner = setOf("SE:INST456", "DK:INST789")
+        mockBehandlingsresultat()
+        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns mutableListOf(Land_iso2.SE, Land_iso2.FO, Land_iso2.GL, Land_iso2.DK)
+        every { behandling.erNorgeUtpekt() } returns false
+        every {
+            eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
+                any<Set<String>>(),
+                any<Collection<Land_iso2>>(),
+                any<BucType>()
+            )
+        } answers { firstArg<Set<String>>() }
+        leggTilLovvalgsperiode(bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A)
+
+        vedtakService.fattVedtak(
+            behandling, lagRequest(
+                Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+                Vedtakstyper.FØRSTEGANGSVEDTAK,
+                BEHANDLINGSRESULTAT_FRITEKST,
+                null,
+                mottakerinstitusjoner
+            )
+        )
+
+        // EESSI-validering skal kun kalles med SE og DK (uten FO/GL)
+        verify {
+            eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
+                any(),
+                match<Collection<Land_iso2>> { it.containsAll(listOf(Land_iso2.SE, Land_iso2.DK)) && !it.contains(Land_iso2.FO) && !it.contains(Land_iso2.GL) },
+                any()
+            )
+        }
+        // FO og GL er filtrert ut av EESSI-landkoder, kun SE og DK sendes til EESSI
+        verify {
+            prosessinstansService.opprettProsessinstansIverksettVedtakEos(
+                any(), any(), any(), any(),
+                eq(mottakerinstitusjoner),
+                any()
+            )
+        }
+    }
+
+    @Test
+    fun `fattVedtak - kun FO og GL blant arbeidsland - ingen EESSI-validering, tomme mottakerinstitusjoner`() {
+        mockBehandlingsresultat()
+        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns mutableListOf(Land_iso2.FO, Land_iso2.GL)
+        every { behandling.erNorgeUtpekt() } returns false
+        leggTilLovvalgsperiode(bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A)
+
+        vedtakService.fattVedtak(
+            behandling, lagRequest(
+                Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+                Vedtakstyper.FØRSTEGANGSVEDTAK,
+                BEHANDLINGSRESULTAT_FRITEKST,
+                null,
+                emptySet()
+            )
+        )
+
+        // Kun FO/GL er arbeidsland — alle filtreres ut, ingen EESSI-validering
+        verify(exactly = 0) {
+            eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), any(), any())
+        }
+        // Prosessinstans opprettes med tomme mottakerinstitusjoner
+        verify {
+            prosessinstansService.opprettProsessinstansIverksettVedtakEos(
+                any(), any(), any(), any(),
+                eq(emptySet()),
+                any()
+            )
+        }
+    }
+
+    @Test
+    fun `fattVedtak - kun EESSI-land uten FO eller GL - ingen land som ikke kan motta SED`() {
+        val mottakerinstitusjoner = setOf("SE:INST456")
+        mockBehandlingsresultat()
+        mockEessiReady()
+        leggTilLovvalgsperiode()
+
+        vedtakService.fattVedtak(
+            behandling, lagRequest(
+                Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+                Vedtakstyper.FØRSTEGANGSVEDTAK,
+                BEHANDLINGSRESULTAT_FRITEKST,
+                null,
+                mottakerinstitusjoner
+            )
+        )
+
+        // Verifiserer at landKanIkkeMottaSed ikke lenger er en parameter
+        verify {
+            prosessinstansService.opprettProsessinstansIverksettVedtakEos(
+                any(), any(), any(), any(),
+                eq(mottakerinstitusjoner),
+                any()
+            )
+        }
+    }
+
     private fun mockBehandlingsresultat() {
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { behandlingsresultatService.lagre(any()) } returns behandlingsresultat
@@ -418,6 +561,7 @@ class EosVedtakServiceKtTest {
         every { prosessinstansService.harVedtakInstans(BEHANDLING_ID) } returns false
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling) } returns false
         every { saksbehandlingRegler.harIngenFlyt(behandling) } returns false
+        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns mutableListOf()
     }
 
     private fun mockEessiReady() {

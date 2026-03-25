@@ -5,7 +5,6 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Avgiftsberegningstype
 import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeGrunnlag
@@ -13,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
+import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
 import no.nav.melosys.integrasjon.trygdeavgift.dto.EøsPensjonistTrygdeavgiftsberegningRequest
@@ -166,7 +166,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
     ): List<Trygdeavgiftsperiode> {
 
         if (erSkattepliktig(skatteforholdsperioder, inntektsperioder) && skatteforholdsperioder.size == 1) {
-            return skattepliktigTrygdeavgiftsperioderAvAvgiftspliktigperioder(behandlingsresultat.finnAvgiftspliktigPerioder())
+            return skattepliktigTrygdeavgiftsperioderAvAvgiftspliktigperioder(behandlingsresultat.finnAvgiftspliktigPerioder(), dagensDato)
         }
 
         val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
@@ -219,24 +219,10 @@ class EøsPensjonistTrygdeavgiftsberegningService(
     }
 
     private fun skattepliktigTrygdeavgiftsperioderAvAvgiftspliktigperioder(
-        avgiftspliktigperioder: Collection<AvgiftspliktigPeriode>
-    ): List<Trygdeavgiftsperiode> = avgiftspliktigperioder.map { mp -> opprettSkattepliktigTrygdeavgiftsperiode(mp) }
-
-    private fun opprettSkattepliktigTrygdeavgiftsperiode(avgiftspliktigperiode: AvgiftspliktigPeriode): Trygdeavgiftsperiode {
-        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
-            periodeFra = avgiftspliktigperiode.fom,
-            periodeTil = avgiftspliktigperiode.tom,
-            trygdesats = BigDecimal.ZERO,
-            trygdeavgiftsbeløpMd = Penger(BigDecimal.ZERO),
-            grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
-                fomDato = avgiftspliktigperiode.fom
-                tomDato = avgiftspliktigperiode.tom
-                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-            }
-        )
-
-        trygdeavgiftsperiode.addGrunnlag(avgiftspliktigperiode)
-
-        return trygdeavgiftsperiode
+        avgiftspliktigperioder: Collection<AvgiftspliktigPeriode>,
+        dagensDato: LocalDate = LocalDate.now()
+    ): List<Trygdeavgiftsperiode> {
+        val fraOgMedÅr = if (unleash.isEnabled(MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) dagensDato.year else null
+        return avgiftspliktigperioder.flatMap { SkattepliktigTrygdeavgiftsperiodeSplitter.splittPåÅr(it, fraOgMedÅr) }
     }
 }

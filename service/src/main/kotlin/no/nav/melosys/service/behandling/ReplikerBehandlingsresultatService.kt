@@ -14,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.featuretoggle.ToggleName
 import org.apache.commons.beanutils.BeanUtils
+import org.hibernate.Hibernate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.lang.reflect.InvocationTargetException
@@ -28,7 +29,10 @@ class ReplikerBehandlingsresultatService(
     @Transactional(rollbackFor = [Exception::class])
     fun replikerBehandlingsresultat(tidligsteInaktiveBehandling: Behandling, behandlingReplika: Behandling) {
         val behandlingsresultatOriginal: Behandlingsresultat =
-            behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id)
+            Hibernate.unproxy(
+                behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id),
+                Behandlingsresultat::class.java
+            )
 
         val behandlingsresultatReplika = BeanUtils.cloneBean(behandlingsresultatOriginal) as Behandlingsresultat
 

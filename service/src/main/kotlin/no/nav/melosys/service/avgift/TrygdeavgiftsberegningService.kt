@@ -91,7 +91,9 @@ class TrygdeavgiftsberegningService(
         ) {
             require(behandlingsresultat.finnAvgiftspliktigPerioder().size == 1 && skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en avgiftspliktig- og skatteforholdsperiode når perioden er pliktig og skattepliktig" }
             return skattepliktigTrygdeavgiftsperioderAvAvgiftspliktigperioder(
-                behandlingsresultat.finnAvgiftspliktigPerioder().filter { it.erInnvilget() })
+                behandlingsresultat.finnAvgiftspliktigPerioder().filter { it.erInnvilget() },
+                dagensDato
+            )
         }
 
         val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
@@ -105,25 +107,11 @@ class TrygdeavgiftsberegningService(
         når det er pliktig medlemskap og Skattepliktig Ja.
     */
     private fun skattepliktigTrygdeavgiftsperioderAvAvgiftspliktigperioder(
-        avgiftspliktigperioder: Collection<AvgiftspliktigPeriode>
-    ): List<Trygdeavgiftsperiode> = avgiftspliktigperioder.map { mp -> opprettSkattepliktigTrygdeavgiftsperiode(mp) }
-
-    private fun opprettSkattepliktigTrygdeavgiftsperiode(avgiftspliktigperiode: AvgiftspliktigPeriode): Trygdeavgiftsperiode {
-        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
-            periodeFra = avgiftspliktigperiode.fom,
-            periodeTil = avgiftspliktigperiode.tom,
-            trygdesats = BigDecimal.ZERO,
-            trygdeavgiftsbeløpMd = Penger(BigDecimal.ZERO),
-            grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
-                fomDato = avgiftspliktigperiode.fom
-                tomDato = avgiftspliktigperiode.tom
-                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-            }
-        )
-
-        trygdeavgiftsperiode.addGrunnlag(avgiftspliktigperiode)
-
-        return trygdeavgiftsperiode
+        avgiftspliktigperioder: Collection<AvgiftspliktigPeriode>,
+        dagensDato: LocalDate = LocalDate.now()
+    ): List<Trygdeavgiftsperiode> {
+        val fraOgMedÅr = if (unleash.isEnabled(MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) dagensDato.year else null
+        return avgiftspliktigperioder.flatMap { SkattepliktigTrygdeavgiftsperiodeSplitter.splittPåÅr(it, fraOgMedÅr) }
     }
 
     private fun erPliktigMedlemskapSkattepliktig(
