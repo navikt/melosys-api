@@ -17,6 +17,7 @@ import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.service.dokument.brev.BrevData
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv
 import no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone
+import no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.tilMetaforceLinjeskift
 import no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.*
 
 
@@ -43,7 +44,7 @@ open class AvslagYrkesaktivMapper : BrevDataMapper {
     }
 
     private fun mapArt161AvslagFraAnmodningsperiode(fag: Fag, svar: AnmodningsperiodeSvar) {
-        fag.begrunnelseFritekst = svar.begrunnelseFritekst
+        fag.begrunnelseFritekst = tilMetaforceLinjeskift(svar.begrunnelseFritekst)
         fag.art161AvslagBegrunnelse = lagTomArt161AvslagBegrunnelse()
     }
 
@@ -80,7 +81,7 @@ open class AvslagYrkesaktivMapper : BrevDataMapper {
         )
         art122NormalVirksomhetBegrunnelse = mapArt122NormalVirksomhetBegrunnelseType(resultat.hentVilkaarbegrunnelser(NORMALT_DRIVER_VIRKSOMHET))
 
-        fritekst = brevData.fritekst
+        fritekst = tilMetaforceLinjeskift(brevData.fritekst)
 
         anmodningsPeriodeSvarType = brevData.anmodningsperiodeSvar?.anmodningsperiodeSvarType?.let {
             AnmodningsPeriodeSvarTypeKode.valueOf(it.kode)
@@ -102,7 +103,7 @@ open class AvslagYrkesaktivMapper : BrevDataMapper {
                 Avslag_anmodning_begrunnelser.INGEN_SPESIELLE_FORHOLD -> art161AvslagBegrunnelser.ingenSpesielleForhold = JA
                 Avslag_anmodning_begrunnelser.SAERLIG_AVSLAGSGRUNN -> {
                     art161AvslagBegrunnelser.saerligAvslagsgrunn = JA
-                    fag.begrunnelseFritekst = validerFritekstbegrunnelse(vilkaarsresultat.begrunnelseFritekst)
+                    fag.begrunnelseFritekst = tilMetaforceLinjeskift(validerFritekstbegrunnelse(vilkaarsresultat.begrunnelseFritekst))
                 }
 
                 Avslag_anmodning_begrunnelser.SOEKT_FOR_SENT -> art161AvslagBegrunnelser.soektForSent = JA

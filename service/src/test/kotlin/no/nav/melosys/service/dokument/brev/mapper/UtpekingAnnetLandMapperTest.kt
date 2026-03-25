@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.mapper
 import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
@@ -33,6 +34,19 @@ class UtpekingAnnetLandMapperTest {
             shouldContain(Landkoder.EE.beskrivelse)
             shouldContain(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3.kode)
         }
+    }
+
+    @Test
+    fun `fritekst med linjeskift konverteres til Metaforce-format`() {
+        val brevdata = lagDataUtpekingAnnetLand().apply {
+            fritekst = "Linje 1\nLinje 2"
+        }
+
+        val xml = utpekingAnnetLandMapper.mapTilBrevXML(
+            lagFellesType(), lagNAVFelles(), Behandling.forTest { }, Behandlingsresultat.forTest { }, brevdata
+        )
+
+        xml shouldContain "Linje 1[_¶_]Linje 2"
     }
 
     private fun lagDataUtpekingAnnetLand() =
