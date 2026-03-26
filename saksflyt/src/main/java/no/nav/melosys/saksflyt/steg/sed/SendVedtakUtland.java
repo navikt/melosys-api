@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -117,8 +118,14 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostID);
             prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, utpektLand);
         } else {
-            Set<Land_iso2> ikkeEessiLand = hentLandSomIkkeKanMottaSed(behandling.getId());
-            if (!ikkeEessiLand.isEmpty()) {
+            Set<Land_iso2> alleTrygdemyndighetsland = new HashSet<>(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId()));
+            Set<Land_iso2> ikkeEessiLand = alleTrygdemyndighetsland.stream()
+                .filter(EessiService.LAND_UTEN_SED_MOTTAK::contains)
+                .collect(Collectors.toSet());
+            // Splitt per land kun hvis ALLE trygdemyndighetsland er FO/GL (kan ikke motta SED).
+            // Hvis andre land også er med (f.eks. SE uten registrerte institusjoner), sendes
+            // ett generisk brev slik at ingen land faller ut.
+            if (!alleTrygdemyndighetsland.isEmpty() && ikkeEessiLand.equals(alleTrygdemyndighetsland)) {
                 opprettPapirA1PerLand(behandling, prosessinstans, ikkeEessiLand);
             } else {
                 log.debug("Behandling {}: oppretter papir-A1 brevbestilling til generisk utenlandsk trygdemyndighet", behandling.getId());
