@@ -793,12 +793,12 @@ MELOSYS-7530 var opprinnelig en ren visningsoppgave for frontend. Under testing 
 
 | Repo | Branch | PR | Status | Docker-image |
 |------|--------|-----|--------|-------------|
-| melosys-trygdeavgift-beregning | feature/7588-grunnlagliste-beregningstype | #379 | Ferdig, 201 tester grønne | 7530-visning (sha256:98b9...) |
-| melosys-api | feature/7588-utvid-trygdeavgiftsperiode-grunnlag | #3273 | Ferdig, merget m/master, pushet | 7530-visning (sha256:0be2...) |
-| melosys-web | feature/7530-25prosent-regel-visning | #3033 | Ferdig, 16 tester grønne | 7530-visning (sha256:f38e...) |
-| melosys-dokgen | feature/7588-utvid-trygdeavgiftsperiode-grunnlag | #520 | Under review | 7530-visning |
+| melosys-trygdeavgift-beregning | feature/7588-grunnlagliste-beregningstype | #379 | Klar for review (201 tester grønne) | 7530-visning (sha256:98b9...) |
+| melosys-api | feature/7588-utvid-trygdeavgiftsperiode-grunnlag | #3273 | Klar for review (merget m/master) | 7530-visning (sha256:0be2...) |
+| melosys-web | feature/7530-25prosent-regel-visning | #3033 | Approved (16 tester grønne) | 7530-visning (sha256:f38e...) |
+| melosys-dokgen | feature/7588-utvid-trygdeavgiftsperiode-grunnlag | #520 | Klar for review (review-kommentarer adressert) | 7530-visning |
 | melosys-e2e-tests | feature/ftrl-trygdeavgift-25-prosent-regel-e2e | — | 72/72 CI grønn | — |
-| faktureringskomponenten | fix/half-up-avrunding-belopberegner | #293 | Åpen | 7530-visning |
+| faktureringskomponenten | fix/half-up-avrunding-belopberegner | #293 | Klar for review | 7530-visning |
 
 ---
 
