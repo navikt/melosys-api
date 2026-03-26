@@ -21,6 +21,7 @@ import org.xml.sax.SAXException;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.tilMetaforceLinjeskift;
 
 public final class UtpekingAnnetLandMapper implements BrevDataMapper {
     private static final String XSD_LOCATION = "melosysbrev/melosys_000168.xsd";
@@ -46,7 +47,7 @@ public final class UtpekingAnnetLandMapper implements BrevDataMapper {
         if (utpekingsperiode.getTilleggsbestemmelse() != null) {
             fag.setTilleggsbestemmelse(TilleggsbestemmelseKodeMapper.map(utpekingsperiode.getTilleggsbestemmelse()));
         }
-        fag.setFritekst(brevDataUtpekingAnnetLand.getFritekst());
+        fag.setFritekst(tilMetaforceLinjeskift(brevDataUtpekingAnnetLand.getFritekst()));
 
         return fag;
     }

@@ -250,4 +250,5 @@ public class BrevDataService {
     private boolean personManglerAdresseFraRegister(String id) {
         return persondataFasade.hentPerson(id).manglerGyldigRegistrertAdresse();
     }
+
 }

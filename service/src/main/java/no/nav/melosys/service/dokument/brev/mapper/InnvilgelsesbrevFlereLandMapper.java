@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.lagXmlDato;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.tilMetaforceLinjeskift;
 
 public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
 
@@ -110,7 +111,7 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
             fag.setVedtaksType(tilVedtaksTypeKode(resultat.getVedtakMetadata().getVedtakstype()));
         }
 
-        fag.setFritekst(brevdata.getFritekst());
+        fag.setFritekst(tilMetaforceLinjeskift(brevdata.getFritekst()));
 
         return fag;
     }

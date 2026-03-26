@@ -35,6 +35,19 @@ class UtpekingAnnetLandMapperTest {
         }
     }
 
+    @Test
+    fun `fritekst med linjeskift konverteres til Metaforce-format`() {
+        val brevdata = lagDataUtpekingAnnetLand().apply {
+            fritekst = "Linje 1\nLinje 2"
+        }
+
+        val xml = utpekingAnnetLandMapper.mapTilBrevXML(
+            lagFellesType(), lagNAVFelles(), Behandling.forTest { }, Behandlingsresultat.forTest { }, brevdata
+        )
+
+        xml shouldContain "Linje 1[_¶_]Linje 2"
+    }
+
     private fun lagDataUtpekingAnnetLand() =
         BrevDataUtpekingAnnetLand(BrevbestillingDto(), "Saksbehandler").apply {
             utpekingsperiode = utpekingsperiodeForTest {
