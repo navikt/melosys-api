@@ -455,7 +455,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                 skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
             }
             grunnlagHelseutgiftDekkesPeriode.shouldNotBeNull()
-                .shouldBe(behandlingsresultat.hentHelseutgiftDekkesPeriode())
+                .shouldBe(behandlingsresultat.helseutgiftDekkesPerioder.first())
         }
     }
 
