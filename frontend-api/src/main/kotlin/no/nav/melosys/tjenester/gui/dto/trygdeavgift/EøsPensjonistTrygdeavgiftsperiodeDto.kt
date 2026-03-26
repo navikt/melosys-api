@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 
-import no.nav.melosys.domain.avgift.Avgiftsberegningstype
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import java.math.RoundingMode
@@ -12,7 +12,7 @@ data class EøsPensjonistTrygdeavgiftsperiodeDto(
     val inntektskildetype: Inntektskildetype?,
     val avgiftssats: Double?,
     val avgiftPerMd: Int,
-    val beregningstype: String? = null,
+    val beregningsregel: String? = null,
     val harSammenslåtteInntektskilder: Boolean = false,
     val avgiftsdel: String? = null
 ) {
@@ -23,7 +23,7 @@ data class EøsPensjonistTrygdeavgiftsperiodeDto(
             trygdeavgiftsperiode.grunnlagInntekstperiode?.type,
             trygdeavgiftsperiode.trygdesats?.toDouble(),
             trygdeavgiftsperiode.trygdeavgiftsbeløpMd.hentVerdi().setScale(0, RoundingMode.HALF_UP).intValueExact(),
-            trygdeavgiftsperiode.beregningstype.takeIf { it != Avgiftsberegningstype.ORDINAER }?.name,
+            trygdeavgiftsperiode.beregningsregel.takeIf { it != Avgiftsberegningsregel.ORDINAER }?.name,
             harSammenslåtteInntektskilder = trygdeavgiftsperiode.grunnlagListe
                 .map { it.inntektsperiode.type }
                 .distinct()

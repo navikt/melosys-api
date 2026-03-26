@@ -54,7 +54,7 @@
         "avgiftskode": {
           "type": "string"
         },
-        "beregningstype": {
+        "beregningsregel": {
           "type": ["string", "null"]
         }
       },

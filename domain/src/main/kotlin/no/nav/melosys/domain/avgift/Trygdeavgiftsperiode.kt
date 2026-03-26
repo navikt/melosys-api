@@ -52,7 +52,7 @@ class Trygdeavgiftsperiode(
 
     @Column(name = "beregningstype")
     @Enumerated(EnumType.STRING)
-    val beregningstype: Avgiftsberegningstype = Avgiftsberegningstype.ORDINAER,
+    val beregningsregel: Avgiftsberegningsregel = Avgiftsberegningsregel.ORDINAER,
 
     @Column(name = "avgiftsdel")
     val avgiftsdel: String? = null,
@@ -78,7 +78,7 @@ class Trygdeavgiftsperiode(
     fun harAvgift(): Boolean =
         BigDecimal.ZERO.compareTo(trygdeavgiftsbeløpMd.verdi) != 0
 
-    fun erBegrenset(): Boolean = beregningstype != Avgiftsberegningstype.ORDINAER
+    fun erBegrenset(): Boolean = beregningsregel != Avgiftsberegningsregel.ORDINAER
 
     fun leggTilGrunnlag(g: TrygdeavgiftsperiodeGrunnlag) {
         g.trygdeavgiftsperiode = this
@@ -100,7 +100,7 @@ class Trygdeavgiftsperiode(
         grunnlagHelseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = this.grunnlagHelseutgiftDekkesPeriode,
         grunnlagLovvalgsPeriode: Lovvalgsperiode? = this.grunnlagLovvalgsPeriode,
         grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = this.grunnlagSkatteforholdTilNorge,
-        beregningstype: Avgiftsberegningstype = this.beregningstype,
+        beregningsregel: Avgiftsberegningsregel = this.beregningsregel,
         avgiftsdel: String? = this.avgiftsdel,
     ) = Trygdeavgiftsperiode(
         id = id,
@@ -113,7 +113,7 @@ class Trygdeavgiftsperiode(
         grunnlagHelseutgiftDekkesPeriode = grunnlagHelseutgiftDekkesPeriode,
         grunnlagLovvalgsPeriode = grunnlagLovvalgsPeriode,
         grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
-        beregningstype = beregningstype,
+        beregningsregel = beregningsregel,
         avgiftsdel = avgiftsdel,
     )
 
@@ -122,7 +122,7 @@ class Trygdeavgiftsperiode(
             periodeTil == other.periodeTil &&
             trygdeavgiftsbeløpMd == other.trygdeavgiftsbeløpMd &&
             (trygdesats ?: BigDecimal.ZERO).compareTo(other.trygdesats ?: BigDecimal.ZERO) == 0 &&
-            beregningstype == other.beregningstype &&
+            beregningsregel == other.beregningsregel &&
             grunnlagInntekstperiode == other.grunnlagInntekstperiode &&
             grunnlagMedlemskapsperiode == other.grunnlagMedlemskapsperiode &&
             grunnlagHelseutgiftDekkesPeriode == other.grunnlagHelseutgiftDekkesPeriode &&
@@ -151,7 +151,7 @@ class Trygdeavgiftsperiode(
 
     override fun toString(): String {
         return "Trygdeavgiftsperiode(id=$id, periodeFra=$periodeFra, periodeTil=$periodeTil, " +
-            "trygdeavgiftsbeløpMd=$trygdeavgiftsbeløpMd, trygdesats=$trygdesats, beregningstype=$beregningstype)"
+            "trygdeavgiftsbeløpMd=$trygdeavgiftsbeløpMd, trygdesats=$trygdesats, beregningsregel=$beregningsregel)"
     }
 
     override fun equals(other: Any?): Boolean {

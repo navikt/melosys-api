@@ -175,9 +175,9 @@ class TrygdeavgiftsberegningService(
         dagensDato: LocalDate = LocalDate.now()
     ): Trygdeavgiftsperiode {
         val alleGrunnlag = response.grunnlagListe ?: listOf(response.grunnlag)
-        val beregningstype = response.beregningstype
-            ?.let { Avgiftsberegningstype.valueOf(it) }
-            ?: Avgiftsberegningstype.ORDINAER
+        val beregningsregel = response.beregningstype
+            ?.let { Avgiftsberegningsregel.valueOf(it) }
+            ?: Avgiftsberegningsregel.ORDINAER
 
         val skatteforholdMap = skatteforholdsperioderMedUUID.toMap()
         val inntektsperiodeMap = inntektsperioderMedUUID.toMap()
@@ -195,7 +195,7 @@ class TrygdeavgiftsberegningService(
                 ?: throw IllegalStateException("Fant ikke skatteforholdsperiode ${førsteGrunnlag.skatteforholdsperiodeId}"),
             grunnlagInntekstperiode = inntektsperiodeMap[førsteGrunnlag.inntektsperiodeId]
                 ?: throw IllegalStateException("Fant ikke inntektsperiode ${førsteGrunnlag.inntektsperiodeId}"),
-            beregningstype = beregningstype,
+            beregningsregel = beregningsregel,
             avgiftsdel = response.avgiftsdel,
         )
 
