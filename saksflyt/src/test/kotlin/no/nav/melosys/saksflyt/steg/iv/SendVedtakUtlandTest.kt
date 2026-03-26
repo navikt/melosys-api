@@ -319,9 +319,7 @@ class SendVedtakUtlandTest {
         }
         every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.FO, Land_iso2.SE)
 
-
         sendVedtakUtland.utfør(prosessinstans)
-
 
         // Verifiser at SED er sendt
         verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), any(), any(), any(), any(), any()) }
@@ -357,9 +355,7 @@ class SendVedtakUtlandTest {
         }
         every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.FO, Land_iso2.GL)
 
-
         sendVedtakUtland.utfør(prosessinstans)
-
 
         // Verifiser at SED er sendt
         verify { eessiService.opprettOgSendSed(any(), any(), any(), any(), any(), any(), any()) }
