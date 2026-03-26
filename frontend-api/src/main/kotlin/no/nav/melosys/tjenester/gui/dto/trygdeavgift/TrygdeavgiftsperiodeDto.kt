@@ -1,6 +1,5 @@
 package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
@@ -15,7 +14,6 @@ data class TrygdeavgiftsperiodeDto(
     val inntektskildetype: Inntektskildetype?,
     val avgiftssats: Double?,
     val avgiftPerMd: Int,
-    @get:JsonProperty("beregningsregel")
     val beregningsregel: String? = null,
     val harSammenslåtteInntektskilder: Boolean = false,
     val avgiftsdel: String? = null
