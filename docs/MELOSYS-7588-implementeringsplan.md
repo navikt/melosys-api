@@ -719,49 +719,97 @@ gantt
 ## 8. Akseptansekriterier
 
 ### MELOSYS-7588 (flere grunnlag)
-- [ ] Ny tabell `trygdeavgiftsperiode_grunnlag` opprettet i Oracle
-- [ ] Alle eksisterende data migrert fra gamle FK-kolonner til ny tabell
-- [ ] `melosys-trygdeavgift-beregning` returnerer liste av grunnlag per beregnet periode
-- [ ] `melosys-api` mottar og lagrer N grunnlag per trygdeavgiftsperiode
-- [ ] `TrygdeavgiftperiodeErstatter` matcher korrekt med flere grunnlag
-- [ ] `ReplikerBehandlingsresultatService` kopierer grunnlag-listen ved ny vurdering
+- [x] Ny tabell `trygdeavgiftsperiode_grunnlag` opprettet i Oracle (V151)
+- [x] Alle eksisterende data migrert fra gamle FK-kolonner til ny tabell (V151 INSERT)
+- [x] `melosys-trygdeavgift-beregning` returnerer liste av grunnlag per beregnet periode (PR #379)
+- [x] `melosys-api` mottar og lagrer N grunnlag per trygdeavgiftsperiode (`lagTrygdeavgiftsperiode()`)
+- [x] `TrygdeavgiftperiodeErstatter` matcher korrekt med flere grunnlag (legacy + grunnlagListe match)
+- [x] `ReplikerBehandlingsresultatService` kopierer grunnlag-listen ved ny vurdering (`deepCopyGrunnlagListe()`)
 
 ### MELOSYS-7969 (beregningstype + nullable sats)
-- [ ] `melosys-trygdeavgift-beregning` returnerer `beregningstype` og `sats: null` ved 25%-regel/minstebeløp
-- [ ] `melosys-api` lagrer `beregningstype` (enum) på `Trygdeavgiftsperiode`
-- [ ] `trygdesats`-kolonnen er nullable i Oracle og i JPA-entiteten
-- [ ] `fattet-vedtak-schema.json` oppdatert — `trygdesats` er nullable og ikke lenger required, `beregningstype` lagt til
+- [x] `melosys-trygdeavgift-beregning` returnerer `beregningstype` og `sats: null` ved 25%-regel/minstebeløp (PR #379)
+- [x] `melosys-api` lagrer `beregningstype` (enum) på `Trygdeavgiftsperiode` (V151)
+- [x] `trygdesats`-kolonnen er nullable i Oracle og i JPA-entiteten (V151)
+- [x] `fattet-vedtak-schema.json` oppdatert — `trygdesats` er nullable og ikke lenger required, `beregningstype` lagt til
 - [ ] DVH-teamet er informert om Kafka-kontraktendringen
-- [ ] `harAvgift()` fungerer korrekt for 25%-regel-perioder (beløp > 0, sats = null → returner true)
-- [ ] Brevmappere viser "25%-regel" eller "Minstebeløp" i stedet for sats når beregningstype != ORDINAER
-- [ ] Fakturatekst håndterer null sats korrekt (ingen "Sats: null %")
-- [ ] Frontend viser beregningstype (koordinert med [MELOSYS-7530](https://jira.adeo.no/browse/MELOSYS-7530))
+- [x] `harAvgift()` fungerer korrekt for 25%-regel-perioder (beløp > 0, sats = null -> returner true) — kun beløp-basert sjekk
+- [ ] Brevmappere viser `*`/`**` i sats-kolonnen når beregningstype != ORDINAER (melosys-dokgen PR #520 er klar)
+- [x] Fakturatekst håndterer null sats korrekt (ingen "Sats: null %")
+- [x] Frontend viser beregningstype (melosys-web PR #3033 ferdig)
+
+### MELOSYS-7530 (visning av beregning og grunnlag — ny seksjon)
+- [x] Frontend viser `*` (25%-regel) og `**` (minstebeløp) i sats-kolonnen
+- [x] Frontend viser `***` i inntektskilde-kolonnen ved sammenslåtte inntektskilder (`harSammenslåtteInntektskilder`)
+- [x] Frontend viser "Helsedel"/"Pensjonsdel" ved todelt 25%-regel (`avgiftsdel`)
+- [x] `avgiftsdel` eksponert gjennom hele stacken: beregningsservice -> melosys-api (V153) -> frontend-DTOer
+- [x] `harSammenslåtteInntektskilder: Boolean` lagt til på `TrygdeavgiftsperiodeDto` og `EøsPensjonistTrygdeavgiftsperiodeDto`
+- [x] `TrygdeavgiftsgrunnlagDto` leser skatteforhold/inntektskilder fra `grunnlagListe` (med legacy FK-fallback)
+- [x] `Hibernate.initialize()` i `TrygdeavgiftService` for lazy loading av `grunnlagListe` i GET-path
+- [x] MINSTEBELOEP-fix: beregningsservicen returnerer korrekt beregningstype (ikke TJUEFEM_PROSENT_REGEL) + samlet periode
+- [x] E2E-tester: 72/72 grønn CI (minstebeløp, dekning helsedel/pensjonsdel, inntektskilde, årsperioder)
 
 ### Bakoverkompatibilitet
-- [ ] Gammel `melosys-api` + ny `melosys-trygdeavgift-beregning` fungerer (nye felter ignoreres)
-- [ ] Ny `melosys-api` + gammel `melosys-trygdeavgift-beregning` fungerer (fallback til `grunnlag` når `grunnlagListe` er null)
-- [ ] Ny `melosys-api` leser fra ny grunnlag-tabell, faller tilbake til gamle FK-kolonner for eksisterende data
+- [x] Gammel `melosys-api` + ny `melosys-trygdeavgift-beregning` fungerer (nye felter ignoreres)
+- [x] Ny `melosys-api` + gammel `melosys-trygdeavgift-beregning` fungerer (fallback til `grunnlag` når `grunnlagListe` er null)
+- [x] Ny `melosys-api` leser fra ny grunnlag-tabell, faller tilbake til gamle FK-kolonner for eksisterende data
+- [x] Frontend er bakoverkompatibelt — alle nye felter er optional
 
 ### Felles
-- [ ] Alle eksisterende tester oppdatert og passerer
-- [ ] Integrasjonstester verifiserer end-to-end flyt med 25%-regel
-- [ ] Brev generert korrekt for alle scenarioer (ordinær, 25%-regel, minstebeløp)
+- [x] Alle eksisterende tester oppdatert og passerer (melosys-api 43+, beregning 201, web 16)
+- [x] E2E-tester verifiserer end-to-end flyt med 25%-regel, minstebeløp og sammenslåtte inntektskilder
+- [ ] Brev generert korrekt for alle scenarioer (melosys-dokgen PR #520 under review)
 
-### Opprydding (separat PR)
+### Opprydding (separat PR — ikke startet)
 - [ ] `grunnlag`-feltet fjernet fra `BeregnetTrygdeavgiftResponse` (beregnings-repo)
 - [ ] Legacy fallback-kode fjernet fra `melosys-api`
-- [ ] V152: Gamle FK-kolonner droppet fra `trygdeavgiftsperiode`
+- [ ] Gamle FK-kolonner droppet fra `trygdeavgiftsperiode` (NB: V152 brukes nå til ON DELETE CASCADE, ny migrasjon trengs)
 
 ---
 
-## 9. Relaterte oppgaver
+## 9. Retrospektiv: MELOSYS-7530 avdekket hull i 7588
+
+MELOSYS-7530 var opprinnelig en ren visningsoppgave for frontend. Under testing avdekket Mina 4 bugs som krevde endringer i flere repoer. Alle skyldtes at 7588-datamodellen ikke hadde blitt testet end-to-end med reelle scenarioer.
+
+### Hva skjedde
+
+7588 bygde infrastrukturen (grunnlagListe, beregningstype, ny DB-tabell), men unit-testene brukte mockede responses. Første gang noen sendte 2+ skatteforhold og 3 inntektskilder gjennom hele stacken og sjekket resultatet, dukket hullene opp:
+
+| Feil | Repo | Årsak | Omfang |
+|------|------|-------|--------|
+| Feil beregningstype for minstebeløp | melosys-trygdeavgift-beregning | MaksimalAvgift skilte ikke mellom MINSTEBELOEP og TJUEFEM_PROSENT_REGEL | Refaktorering av MaksimalAvgift med ny resultat-type og årsak-enum, berørte alle beregningspaths |
+| Unødvendig splitting av minstebeløp-perioder | melosys-trygdeavgift-beregning | Todelt beregning (helse+pensjon) ble gjort selv når begge ga 0 kr | Ny logikk for å slå sammen til én periode ved minstebeløp |
+| Feil dekning ved todelt 25%-regel | melosys-trygdeavgift-beregning + melosys-api | Responsen manglet info om hvilken del (helse/pensjon) hver periode tilhørte | Nytt felt `avgiftsdel` gjennom hele stacken: response-DTO, entity, DB-kolonne (V153), frontend-DTO |
+| Manglende indikator for sammenslåtte inntektskilder | melosys-api | `TrygdeavgiftsgrunnlagDto` leste kun fra legacy FK-felter (1 element) | Ny lesing fra grunnlagListe + `harSammenslåtteInntektskilder`-flagg + LazyInitializationException-fiks |
+
+### Lærdom
+
+- **Test med reelle scenarioer tidlig.** Unit-tester med mockede responses fanger ikke integrasjonsproblemer. En enkel E2E-test med 25%-regel-data ville fanget feil 1-3 under 7588-arbeidet.
+- **Visningsoppgaver avdekker dataproblemer.** Når frontend skal vise data på nye måter, tester det implisitt at backend leverer riktig data. Planlegg for dette.
+- **Nye felter krever hele stacken.** `avgiftsdel` var ikke planlagt i 7588, men ble nødvendig da vi faktisk testet todelt visning. Bakoverkompatibel deploy-strategi (nullable felter) gjorde dette mulig uten koordinert deploy.
+
+---
+
+## 10. Status per repo (oppdatert 2026-03-26)
+
+| Repo | Branch | PR | Status | Docker-image |
+|------|--------|-----|--------|-------------|
+| melosys-trygdeavgift-beregning | feature/7588-grunnlagliste-beregningstype | #379 | Ferdig, 201 tester grønne | 7530-visning (sha256:98b9...) |
+| melosys-api | feature/7588-utvid-trygdeavgiftsperiode-grunnlag | #3273 | Ferdig, merget m/master, pushet | 7530-visning (sha256:0be2...) |
+| melosys-web | feature/7530-25prosent-regel-visning | #3033 | Ferdig, 16 tester grønne | 7530-visning (sha256:f38e...) |
+| melosys-dokgen | feature/7588-utvid-trygdeavgiftsperiode-grunnlag | #520 | Under review | 7530-visning |
+| melosys-e2e-tests | feature/ftrl-trygdeavgift-25-prosent-regel-e2e | — | 72/72 CI grønn | — |
+| faktureringskomponenten | fix/half-up-avrunding-belopberegner | #294 | Approved | 7530-visning |
+
+---
+
+## 11. Relaterte oppgaver
 
 | Jira | Tittel | Relasjon |
 |------|--------|----------|
 | [MELOSYS-7464](https://jira.adeo.no/browse/MELOSYS-7464) | Støtte til 25%-regelen og minstebeløpet | Epic (parent) |
 | [MELOSYS-7557](https://jira.adeo.no/browse/MELOSYS-7557) | Teknisk analyse | Konkluderer med "lang" periode-tilnærming |
 | [MELOSYS-7969](https://jira.adeo.no/browse/MELOSYS-7969) | Bruk av 25%-regel eller minstebeløp må lagres | **Slått sammen i denne planen** — beregningstype + nullable sats |
-| [MELOSYS-7530](https://jira.adeo.no/browse/MELOSYS-7530) | Tilpasse visning av beregning og grunnlag | Frontend — konsumerer begge endringene |
+| [MELOSYS-7530](https://jira.adeo.no/browse/MELOSYS-7530) | Tilpasse visning av beregning og grunnlag | Frontend + backend-fikser for visning |
 | [MELOSYS-6631](https://jira.adeo.no/browse/MELOSYS-6631) | Forenkling av datamodell: Fjern trygdeavgiftsgrunnlag | Historikk — forrige forenklingrunde |
 | [MELOSYS-7158](https://jira.adeo.no/browse/MELOSYS-7158) | Feil beregning ved flere medlemskapsperioder | Symptom på 1:1-begrensningen |
 | [MELOSYS-6688](https://jira.adeo.no/browse/MELOSYS-6688) | Støtte til 25%-regel i årsavregningen — MVP | Manuell overstyring (beholdes parallelt) |
