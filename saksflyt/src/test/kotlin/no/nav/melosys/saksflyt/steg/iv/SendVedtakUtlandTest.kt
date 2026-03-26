@@ -368,7 +368,7 @@ class SendVedtakUtlandTest {
     }
 
     @Test
-    fun `utfør skal sende to papir-brev per land når kun FO og GL og ingen EESSI-mottakere`() {
+    fun `utfør skal sende ett papir-brev per land (FO og GL) når ingen EESSI-mottakere`() {
         every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.FO, Land_iso2.GL)
         every { behandlingsresultatService.hentBehandlingsresultatMedAvklartefakta(BEHANDLING_ID) } returns lagBehandlingsresultat()
         val prosessinstans = lagProsessinstans() // Ingen EESSI_MOTTAKERE
