@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import java.math.RoundingMode
 import java.time.LocalDate
 
 data class EøsPensjonistTrygdeavgiftsperiodeDto(
