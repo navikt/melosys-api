@@ -39,9 +39,14 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
         nullstillEøsPensjonistTrygdeavgiftsperioder(behandlingsresultat)
 
         trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
-            // Find the first matching helseutgiftDekkesPeriode (all periods share grunnlag in current single-beregning flow)
-            val matchingPeriode = behandlingsresultat.helseutgiftDekkesPerioder.firstOrNull()
-                ?: error("Ingen helseutgift dekkes perioder funnet for behandlingsresultat $behandlingsresultatId")
+            val grunnlagId = trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode?.id
+            val matchingPeriode = if (grunnlagId != null) {
+                behandlingsresultat.helseutgiftDekkesPerioder.firstOrNull { it.id == grunnlagId }
+            } else {
+                null
+            }
+                ?: behandlingsresultat.helseutgiftDekkesPerioder.singleOrNull()
+                ?: error("Ingen matchende helseutgift dekkes periode funnet for behandlingsresultat $behandlingsresultatId")
             trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode = matchingPeriode
             matchingPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
         }

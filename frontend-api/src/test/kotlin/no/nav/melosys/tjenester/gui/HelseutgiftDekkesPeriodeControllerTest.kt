@@ -114,6 +114,7 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
         every {
             helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(
                 any(),
+                any(),
                 helseutgiftDekkesPeriodeDto.fomDato,
                 helseutgiftDekkesPeriodeDto.tomDato,
                 Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode)

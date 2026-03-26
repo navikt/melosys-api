@@ -331,7 +331,7 @@ object BehandlingsresultatTestFactory {
 
         var vedtakMetadata: VedtakMetadata? = null
         var årsavregning: Årsavregning? = null
-        var helseutgiftDekkesPerioder: MutableSet<HelseutgiftDekkesPeriode> = mutableSetOf()
+        var helseutgiftDekkesPerioder: MutableList<HelseutgiftDekkesPeriode> = mutableListOf()
 
         val medlemskapsperioder: MutableSet<Medlemskapsperiode> = mutableSetOf()
         val lovvalgsperioder: MutableSet<Lovvalgsperiode> = mutableSetOf()

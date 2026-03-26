@@ -351,7 +351,7 @@ class OppgaveService(
         val behandling = behandlingService.hentBehandling(sistAktivBehandlingID)
         if (behandling.erEøsPensjonist()){
             val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
-            behandlingsresultat.helseutgiftDekkesPerioder.firstOrNull()?.let {
+            behandlingsresultat.helseutgiftDekkesPerioder.maxByOrNull { it.tomDato }?.let {
                 return SoeknadslandDto(listOf(it.bostedLandkode.kode),false)
             }
         }

@@ -240,7 +240,8 @@ class FagsakController(
 
     private fun hentSistHelseutgiftDekkesPeriode(fagsak: Fagsak): HelseutgiftDekkesPeriode? =
         fagsak.hentSistEndretBehandlingIkkeÅrsavregning()?.let {
-            behandlingsresultatService.hentBehandlingsresultatMedHelseutgiftDekkesPerioder(it.id).helseutgiftDekkesPerioder.firstOrNull()
+            behandlingsresultatService.hentBehandlingsresultatMedHelseutgiftDekkesPerioder(it.id)
+                .helseutgiftDekkesPerioder.maxByOrNull { periode -> periode.tomDato }
         }
 
     private fun hentAlleHelseutgiftDekkesPerioder(fagsak: Fagsak): List<HelseutgiftDekkesPeriode> =

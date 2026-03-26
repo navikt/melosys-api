@@ -43,7 +43,7 @@ class ReplikerBehandlingsresultatService(
         behandlingsresultatReplika.type = Behandlingsresultattyper.IKKE_FASTSATT
         behandlingsresultatReplika.medlemskapsperioder = HashSet()
         behandlingsresultatReplika.lovvalgsperioder = HashSet()
-        behandlingsresultatReplika.helseutgiftDekkesPerioder = mutableSetOf()
+        behandlingsresultatReplika.helseutgiftDekkesPerioder = mutableListOf()
 
         replikerAvklartefakta(behandlingsresultatOriginal, behandlingsresultatReplika)
         replikerLovvalgsperioder(behandlingsresultatOriginal, behandlingsresultatReplika, behandlingReplika.type)

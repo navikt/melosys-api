@@ -56,6 +56,7 @@ class HelseutgiftDekkesPeriodeController(
         }
 
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(
+            behandlingID,
             periodeId,
             helseutgiftDekkesPeriodeDto.fomDato,
             helseutgiftDekkesPeriodeDto.tomDato,
@@ -83,7 +84,7 @@ class HelseutgiftDekkesPeriodeController(
     ): ResponseEntity<Void> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
-        helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(periodeId)
+        helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(behandlingID, periodeId)
 
         return ResponseEntity.noContent().build()
     }

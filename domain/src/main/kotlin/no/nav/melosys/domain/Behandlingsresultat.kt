@@ -100,7 +100,7 @@ open class Behandlingsresultat : RegistreringsInfo() {
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
     @org.hibernate.annotations.SQLRestriction("kilde = 'MELOSYS'")
-    var helseutgiftDekkesPerioder: MutableSet<HelseutgiftDekkesPeriode> = mutableSetOf()
+    var helseutgiftDekkesPerioder: MutableList<HelseutgiftDekkesPeriode> = mutableListOf()
 
     @Column(name = "trygdeavgift_type")
     @Enumerated(EnumType.STRING)

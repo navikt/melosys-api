@@ -127,7 +127,7 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
         every { helseutgiftDekkesPeriodeRepository.findById(PERIODE_ID) } returns Optional.of(lagretHelseutgiftDekkesPeriode)
         every { helseutgiftDekkesPeriodeRepository.save(any()) } answers { firstArg() }
 
-        helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(PERIODE_ID, FOM_DATO, TOM_DATO, Land_iso2.NO).run {
+        helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(BEH_ID, PERIODE_ID, FOM_DATO, TOM_DATO, Land_iso2.NO).run {
             this.behandlingsresultat shouldBe oppdatertHelseutgiftDekkesPeriode.behandlingsresultat
             this.fomDato shouldBe oppdatertHelseutgiftDekkesPeriode.fomDato
             this.tomDato shouldBe oppdatertHelseutgiftDekkesPeriode.tomDato
@@ -142,8 +142,76 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
         every { helseutgiftDekkesPeriodeRepository.findById(any()) } returns Optional.empty()
 
         shouldThrow<IkkeFunnetException> {
-            helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(999L, FOM_DATO, TOM_DATO, Land_iso2.NO)
+            helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(BEH_ID, 999L, FOM_DATO, TOM_DATO, Land_iso2.NO)
         }.message shouldBe "Finner ingen helseutgift-periode med id: 999"
+    }
+
+    @Test
+    fun `oppdater skal kaste feil når periode tilhører annen behandling`() {
+        val annenBehandlingsresultat = Behandlingsresultat.forTest {
+            id = 999L
+            behandling { id = 999L }
+        }
+        val periode = HelseutgiftDekkesPeriode(
+            behandlingsresultat = annenBehandlingsresultat,
+            fomDato = FOM_DATO,
+            tomDato = TOM_DATO,
+            bostedLandkode = BOSTEDLANDKODE
+        ).apply { id = PERIODE_ID }
+
+        every { helseutgiftDekkesPeriodeRepository.findById(PERIODE_ID) } returns Optional.of(periode)
+
+        shouldThrow<IkkeFunnetException> {
+            helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(BEH_ID, PERIODE_ID, FOM_DATO, TOM_DATO, Land_iso2.NO)
+        }.message shouldBe "Helseutgift-periode med id $PERIODE_ID tilhører ikke behandling $BEH_ID"
+    }
+
+    @Test
+    fun `oppdater skal kaste feil når periode har kilde AVGIFT_SYSTEMET`() {
+        val periode = lagHelseutgiftDekkesPeriode().apply {
+            id = PERIODE_ID
+            kilde = HelseutgiftDekkesPeriodeKilde.AVGIFT_SYSTEMET
+        }
+
+        every { helseutgiftDekkesPeriodeRepository.findById(PERIODE_ID) } returns Optional.of(periode)
+
+        shouldThrow<IkkeFunnetException> {
+            helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(BEH_ID, PERIODE_ID, FOM_DATO, TOM_DATO, Land_iso2.NO)
+        }.message shouldBe "Helseutgift-periode med id $PERIODE_ID har kilde AVGIFT_SYSTEMET og kan ikke endres"
+    }
+
+    @Test
+    fun `slett skal kaste feil når periode tilhører annen behandling`() {
+        val annenBehandlingsresultat = Behandlingsresultat.forTest {
+            id = 999L
+            behandling { id = 999L }
+        }
+        val periode = HelseutgiftDekkesPeriode(
+            behandlingsresultat = annenBehandlingsresultat,
+            fomDato = FOM_DATO,
+            tomDato = TOM_DATO,
+            bostedLandkode = BOSTEDLANDKODE
+        ).apply { id = PERIODE_ID }
+
+        every { helseutgiftDekkesPeriodeRepository.findById(PERIODE_ID) } returns Optional.of(periode)
+
+        shouldThrow<IkkeFunnetException> {
+            helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(BEH_ID, PERIODE_ID)
+        }.message shouldBe "Helseutgift-periode med id $PERIODE_ID tilhører ikke behandling $BEH_ID"
+    }
+
+    @Test
+    fun `slett skal kaste feil når periode har kilde AVGIFT_SYSTEMET`() {
+        val periode = lagHelseutgiftDekkesPeriode().apply {
+            id = PERIODE_ID
+            kilde = HelseutgiftDekkesPeriodeKilde.AVGIFT_SYSTEMET
+        }
+
+        every { helseutgiftDekkesPeriodeRepository.findById(PERIODE_ID) } returns Optional.of(periode)
+
+        shouldThrow<IkkeFunnetException> {
+            helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(BEH_ID, PERIODE_ID)
+        }.message shouldBe "Helseutgift-periode med id $PERIODE_ID har kilde AVGIFT_SYSTEMET og kan ikke endres"
     }
 
     @Test
