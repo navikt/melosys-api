@@ -57,9 +57,6 @@ class Trygdeavgiftsperiode(
     @Column(name = "avgiftsdel")
     val avgiftsdel: Avgiftsdel? = null,
 
-    @Column(name = "avgiftsdel")
-    val avgiftsdel: String? = null,
-
     ) : ErPeriode {
 
     @OneToMany(mappedBy = "trygdeavgiftsperiode", cascade = [CascadeType.PERSIST, CascadeType.MERGE], fetch = FetchType.LAZY)

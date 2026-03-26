@@ -23,7 +23,6 @@ import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.context.annotation.Import
 import org.springframework.jdbc.core.JdbcTemplate
 import java.math.BigDecimal

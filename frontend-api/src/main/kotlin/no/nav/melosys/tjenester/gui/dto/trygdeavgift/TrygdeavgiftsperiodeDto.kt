@@ -5,7 +5,6 @@ import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import java.math.RoundingMode
 import java.time.LocalDate
 
 data class TrygdeavgiftsperiodeDto(
