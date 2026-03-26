@@ -16,11 +16,8 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.avgift.forTest
 import no.nav.melosys.domain.avgift.inntektForTest
 import no.nav.melosys.domain.avgift.skatteforholdForTest
-import no.nav.melosys.domain.HelseutgiftDekkesPeriodeTestFactory
-import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -415,6 +412,50 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         trygdeavgiftsperioder.forEach {
             it.trygdesats.shouldBe(BigDecimal.ZERO)
             it.trygdeavgiftsbeløpMd.shouldBe(Penger(0.0))
+        }
+    }
+
+    @Test
+    fun `beregnTrygdeavgift - skattepliktig med periode over to år - toggle på - filtrerer bort tidligere år`() {
+        val dagensDato = LocalDate.of(2025, 1, 1)
+        val fomToÅr = LocalDate.of(2024, 3, 1)
+        val tomToÅr = LocalDate.of(2025, 6, 30)
+
+        val behandling = lagBehandling {
+            fagsak {
+                medBruker()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+        }
+        val behandlingsresultat = lagBehandlingsresultat(behandling, fom = fomToÅr, tom = tomToÅr)
+        setupMocksForBehandling(behandling, behandlingsresultat)
+
+        val skatteforholdsperioder = listOf(
+            skatteforholdForTest {
+                fomDato = LocalDate.of(2025, 1, 1)
+                tomDato = tomToÅr
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
+        )
+
+        val resultat = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+            BEHANDLING_ID, skatteforholdsperioder, emptyList(), dagensDato
+        )
+
+        verify(exactly = 0) { mockTrygdeavgiftClient.beregnTrygdeavgiftEosPensjonist(ofType(EøsPensjonistTrygdeavgiftsberegningRequest::class)) }
+
+        resultat.shouldHaveSize(1)
+        resultat.first().apply {
+            periodeFra.shouldBe(LocalDate.of(2025, 1, 1))
+            periodeTil.shouldBe(LocalDate.of(2025, 6, 30))
+            grunnlagSkatteforholdTilNorge.shouldNotBeNull().run {
+                fomDato.shouldBe(LocalDate.of(2025, 1, 1))
+                tomDato.shouldBe(LocalDate.of(2025, 6, 30))
+                skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
+            }
+            grunnlagHelseutgiftDekkesPeriode.shouldNotBeNull()
+                .shouldBe(behandlingsresultat.hentHelseutgiftDekkesPeriode())
         }
     }
 

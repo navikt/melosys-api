@@ -2,6 +2,8 @@ package no.nav.melosys.saksflyt.steg.sed;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import io.getunleash.Unleash;
 import no.nav.melosys.domain.Behandling;
@@ -20,6 +22,7 @@ import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.ProsessSteg;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -39,16 +42,19 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     private final SedSomBrevService sedSomBrevService;
     private final UtpekingService utpekingService;
     private final ProsessinstansService prosessinstansService;
+    private final LandvelgerService landvelgerService;
     private final Unleash unleash;
 
     public SendVedtakUtland(EessiService eessiService,
                             BehandlingsresultatService behandlingsresultatService,
                             SedSomBrevService sedSomBrevService,
-                            UtpekingService utpekingService, ProsessinstansService prosessinstansService, Unleash unleash) {
+                            UtpekingService utpekingService, ProsessinstansService prosessinstansService,
+                            LandvelgerService landvelgerService, Unleash unleash) {
         super(eessiService, behandlingsresultatService);
         this.sedSomBrevService = sedSomBrevService;
         this.utpekingService = utpekingService;
         this.prosessinstansService = prosessinstansService;
+        this.landvelgerService = landvelgerService;
         this.unleash = unleash;
     }
 
@@ -78,7 +84,17 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             if (erArtikkel11_3B(behandlingsresultat) && (mottakere == null || mottakere.isEmpty())) {
                 log.info("Sender ikke SED for behandling {}, mottakerinstusjoner er ikke oppgitt", behandling.getId());
             } else {
-                super.sendUtland(avklarBucType(behandling), prosessinstans);
+                SendUtlandStatus status = super.sendUtland(avklarBucType(behandling), prosessinstans);
+                log.debug("Behandling {}: SendUtlandStatus={}", behandling.getId(), status);
+                // Kun ved SED_SENDT: send papir-A1 eksplisitt til land som ikke kan motta SED (FO/GL).
+                if (status == SendUtlandStatus.SED_SENDT) {
+                    for (Land_iso2 land : hentLandSomIkkeKanMottaSed(behandling.getId())) {
+                        log.debug("Behandling {}: oppretter papir-A1 brevbestilling for land={}", behandling.getId(), land.getKode());
+                        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
+                        mottaker.setTrygdemyndighetLand(land);
+                        prosessinstansService.opprettProsessinstansSendBrev(behandling, lagA1Brevbestilling(prosessinstans), mottaker);
+                    }
+                }
             }
         } else if (behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar()) {
             finnOgLukkTilhørendeBUC(behandlingsresultat);
@@ -106,13 +122,24 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostID);
             prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, utpektLand);
         } else {
-            DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
-                .medProduserbartDokument(ATTEST_A1)
-                .medAvsenderID(hentSaksbehandler(prosessinstans))
-                .medBegrunnelseKode(hentBegrunnelsekodeTilForkortetPeriode(prosessinstans))
-                .build();
-            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
+            log.debug("Behandling {}: oppretter papir-A1 brevbestilling til generisk utenlandsk trygdemyndighet", behandling.getId());
+            prosessinstansService.opprettProsessinstansSendBrev(behandling, lagA1Brevbestilling(prosessinstans), Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
         }
+    }
+
+    private Set<Land_iso2> hentLandSomIkkeKanMottaSed(long behandlingId) {
+        return landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingId)
+            .stream()
+            .filter(EessiService.LAND_UTEN_SED_MOTTAK::contains)
+            .collect(Collectors.toSet());
+    }
+
+    private DoksysBrevbestilling lagA1Brevbestilling(Prosessinstans prosessinstans) {
+        return new DoksysBrevbestilling.Builder()
+            .medProduserbartDokument(ATTEST_A1)
+            .medAvsenderID(hentSaksbehandler(prosessinstans))
+            .medBegrunnelseKode(hentBegrunnelsekodeTilForkortetPeriode(prosessinstans))
+            .build();
     }
 
     @Override
