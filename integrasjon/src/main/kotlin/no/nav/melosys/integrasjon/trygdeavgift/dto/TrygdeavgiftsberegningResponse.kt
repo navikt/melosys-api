@@ -4,6 +4,6 @@ data class TrygdeavgiftsberegningResponse(
     val beregnetPeriode: TrygdeavgiftsperiodeDto,
     val grunnlag: TrygdeavgiftsgrunnlagDto,
     val grunnlagListe: List<TrygdeavgiftsgrunnlagDto>? = null,
-    val beregningstype: String? = null,
+    val beregningsregel: String? = null,
     val avgiftsdel: String? = null,
 )

@@ -4,5 +4,5 @@ data class EøsPensjonistTrygdeavgiftsberegningResponse(
     val beregnetPeriode: TrygdeavgiftsperiodeDto,
     val grunnlag: EøsPensjonistTrygdeavgiftsgrunnlagDto,
     val grunnlagListe: List<EøsPensjonistTrygdeavgiftsgrunnlagDto>? = null,
-    val beregningstype: String? = null,
+    val beregningsregel: String? = null,
 )

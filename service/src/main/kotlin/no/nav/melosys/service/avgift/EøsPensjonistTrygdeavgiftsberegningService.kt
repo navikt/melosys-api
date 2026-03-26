@@ -123,7 +123,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         dagensDato: LocalDate
     ): Trygdeavgiftsperiode {
         val alleGrunnlag = response.grunnlagListe ?: listOf(response.grunnlag)
-        val beregningsregel = response.beregningstype
+        val beregningsregel = response.beregningsregel
             ?.let { Avgiftsberegningsregel.valueOf(it) }
             ?: Avgiftsberegningsregel.ORDINAER
 
