@@ -367,6 +367,35 @@ class SendVedtakUtlandTest {
         verify(exactly = 2) { prosessinstansService.opprettProsessinstansSendBrev(any(), any(), any()) }
     }
 
+    @Test
+    fun `utfør skal sende to papir-brev per land når kun FO og GL og ingen EESSI-mottakere`() {
+        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.FO, Land_iso2.GL)
+        every { behandlingsresultatService.hentBehandlingsresultatMedAvklartefakta(BEHANDLING_ID) } returns lagBehandlingsresultat()
+        val prosessinstans = lagProsessinstans() // Ingen EESSI_MOTTAKERE
+
+
+        sendVedtakUtland.utfør(prosessinstans)
+
+
+        // Verifiser at SED ikke er sendt (ingen EESSI-land)
+        verify(exactly = 0) { eessiService.opprettOgSendSed(any(), any(), any(), any(), any(), any(), any()) }
+        // Verifiser at papir-brev er sendt to ganger (FO og GL)
+        verify(exactly = 2) { prosessinstansService.opprettProsessinstansSendBrev(any(), any(), any()) }
+        // Verifiser at FO og GL får hvert sitt brev med riktig landkode
+        verify {
+            prosessinstansService.opprettProsessinstansSendBrev(
+                any(), any(),
+                match<Mottaker> { it.trygdemyndighetLand == Land_iso2.FO }
+            )
+        }
+        verify {
+            prosessinstansService.opprettProsessinstansSendBrev(
+                any(), any(),
+                match<Mottaker> { it.trygdemyndighetLand == Land_iso2.GL }
+            )
+        }
+    }
+
     companion object {
         private const val BEHANDLING_ID = 1L
         private const val GSAK_SAKSNUMMER = 123456789L

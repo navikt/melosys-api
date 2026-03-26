@@ -88,12 +88,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
                 log.debug("Behandling {}: SendUtlandStatus={}", behandling.getId(), status);
                 // Kun ved SED_SENDT: send papir-A1 eksplisitt til land som ikke kan motta SED (FO/GL).
                 if (status == SendUtlandStatus.SED_SENDT) {
-                    for (Land_iso2 land : hentLandSomIkkeKanMottaSed(behandling.getId())) {
-                        log.debug("Behandling {}: oppretter papir-A1 brevbestilling for land={}", behandling.getId(), land.getKode());
-                        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
-                        mottaker.setTrygdemyndighetLand(land);
-                        prosessinstansService.opprettProsessinstansSendBrev(behandling, lagA1Brevbestilling(prosessinstans), mottaker);
-                    }
+                    opprettPapirA1PerLand(behandling, prosessinstans, hentLandSomIkkeKanMottaSed(behandling.getId()));
                 }
             }
         } else if (behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar()) {
@@ -122,8 +117,22 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostID);
             prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, utpektLand);
         } else {
-            log.debug("Behandling {}: oppretter papir-A1 brevbestilling til generisk utenlandsk trygdemyndighet", behandling.getId());
-            prosessinstansService.opprettProsessinstansSendBrev(behandling, lagA1Brevbestilling(prosessinstans), Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
+            Set<Land_iso2> ikkeEessiLand = hentLandSomIkkeKanMottaSed(behandling.getId());
+            if (!ikkeEessiLand.isEmpty()) {
+                opprettPapirA1PerLand(behandling, prosessinstans, ikkeEessiLand);
+            } else {
+                log.debug("Behandling {}: oppretter papir-A1 brevbestilling til generisk utenlandsk trygdemyndighet", behandling.getId());
+                prosessinstansService.opprettProsessinstansSendBrev(behandling, lagA1Brevbestilling(prosessinstans), Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
+            }
+        }
+    }
+
+    private void opprettPapirA1PerLand(Behandling behandling, Prosessinstans prosessinstans, Set<Land_iso2> land) {
+        for (Land_iso2 l : land) {
+            log.debug("Behandling {}: oppretter papir-A1 brevbestilling for land={}", behandling.getId(), l.getKode());
+            Mottaker mottaker = Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
+            mottaker.setTrygdemyndighetLand(l);
+            prosessinstansService.opprettProsessinstansSendBrev(behandling, lagA1Brevbestilling(prosessinstans), mottaker);
         }
     }
 
