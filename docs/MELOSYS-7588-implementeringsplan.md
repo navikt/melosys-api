@@ -798,7 +798,7 @@ MELOSYS-7530 var opprinnelig en ren visningsoppgave for frontend. Under testing 
 | melosys-web | feature/7530-25prosent-regel-visning | #3033 | Ferdig, 16 tester grønne | 7530-visning (sha256:f38e...) |
 | melosys-dokgen | feature/7588-utvid-trygdeavgiftsperiode-grunnlag | #520 | Under review | 7530-visning |
 | melosys-e2e-tests | feature/ftrl-trygdeavgift-25-prosent-regel-e2e | — | 72/72 CI grønn | — |
-| faktureringskomponenten | fix/half-up-avrunding-belopberegner | #294 | Approved | 7530-visning |
+| faktureringskomponenten | fix/half-up-avrunding-belopberegner | #293 | Åpen | 7530-visning |
 
 ---
 
