@@ -14,6 +14,7 @@ import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeKilde
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.HelseutgiftDekkesPeriodeRepository
@@ -53,7 +54,7 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
 
     @Test
     fun finnHelseutgiftDekkesPerioder_ingenPeriode_returnerTomListe() {
-        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns emptyList()
+        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatIdAndKilde(BEH_ID, HelseutgiftDekkesPeriodeKilde.MELOSYS) } returns emptyList()
 
         helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(BEH_ID).shouldBeEmpty()
     }
@@ -61,7 +62,7 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
     @Test
     fun finnHelseutgiftDekkesPerioder_periodeEksisterer_girResultat() {
         val helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode()
-        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns listOf(helseutgiftDekkesPeriode)
+        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatIdAndKilde(BEH_ID, HelseutgiftDekkesPeriodeKilde.MELOSYS) } returns listOf(helseutgiftDekkesPeriode)
 
         helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(BEH_ID).single().run {
             this.behandlingsresultat shouldBe helseutgiftDekkesPeriode.behandlingsresultat
