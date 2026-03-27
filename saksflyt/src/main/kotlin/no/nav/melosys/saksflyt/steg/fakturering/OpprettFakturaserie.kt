@@ -5,6 +5,7 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import java.math.RoundingMode
 import no.nav.melosys.domain.avgift.satsTekst
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
@@ -185,7 +186,7 @@ class OpprettFakturaserie(
     private fun mapFakturaseriePeriodeDto(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
         return trygdeavgiftsperioder.map {
             FakturaseriePeriodeDto(
-                it.trygdeavgiftsbeløpMd.hentVerdi(),
+                it.trygdeavgiftsbeløpMd.hentVerdi().setScale(2, RoundingMode.HALF_UP),
                 it.periodeFra,
                 it.periodeTil,
                 "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}, " +
@@ -198,7 +199,7 @@ class OpprettFakturaserie(
     private fun mapFakturaseriePeriodeDtoUtenDekning(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
         return trygdeavgiftsperioder.map {
             FakturaseriePeriodeDto(
-                it.trygdeavgiftsbeløpMd.hentVerdi(),
+                it.trygdeavgiftsbeløpMd.hentVerdi().setScale(2, RoundingMode.HALF_UP),
                 it.periodeFra,
                 it.periodeTil,
                 "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}, " +
