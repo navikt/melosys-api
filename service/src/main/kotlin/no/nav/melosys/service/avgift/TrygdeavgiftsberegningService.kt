@@ -176,7 +176,7 @@ class TrygdeavgiftsberegningService(
     ): Trygdeavgiftsperiode {
         val alleGrunnlag = response.grunnlagListe ?: listOf(response.grunnlag)
         val beregningsregel = response.beregningsregel
-            ?.let { Avgiftsberegningsregel.valueOf(it) }
+            ?.let { Avgiftsberegningsregel.valueOf(it.replace("Æ", "AE").replace("Ø", "OE")) }
             ?: Avgiftsberegningsregel.ORDINAER
 
         val skatteforholdMap = skatteforholdsperioderMedUUID.toMap()
