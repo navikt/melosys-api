@@ -98,8 +98,9 @@ open class Behandlingsresultat : RegistreringsInfo() {
     @OneToOne(mappedBy = "behandlingsresultat", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
     var årsavregning: Årsavregning? = null
 
-    @OneToOne(mappedBy = "behandlingsresultat", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
-    var helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = null
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
+    @org.hibernate.annotations.SQLRestriction("kilde = 'MELOSYS'")
+    var helseutgiftDekkesPerioder: MutableList<HelseutgiftDekkesPeriode> = mutableListOf()
 
     @Column(name = "trygdeavgift_type")
     @Enumerated(EnumType.STRING)
@@ -109,8 +110,8 @@ open class Behandlingsresultat : RegistreringsInfo() {
         finnAvgiftspliktigPerioder().any { it.erInnvilget() && it.overlapperMedÅr(år) }
 
     fun finnAvgiftspliktigPerioder(): List<AvgiftspliktigPeriode> = when {
-        behandling?.erEøsPensjonist() == true && helseutgiftDekkesPeriode != null ->
-            listOf(hentHelseutgiftDekkesPeriode())
+        behandling?.erEøsPensjonist() == true && helseutgiftDekkesPerioder.isNotEmpty() ->
+            helseutgiftDekkesPerioder.toList()
         behandling?.fagsak?.erLovvalg() == true ->
             lovvalgsperioder.toList()
         else ->
@@ -125,8 +126,6 @@ open class Behandlingsresultat : RegistreringsInfo() {
     fun hentBehandling() = behandling ?: error("behandling er påkrevd for Behandlingsresultat")
 
     fun hentVedtakMetadata() = vedtakMetadata ?: error("vedtakMetadata er påkrevd for Behandlingsresultat")
-
-    fun hentHelseutgiftDekkesPeriode() = helseutgiftDekkesPeriode ?: error("helseutgiftDekkesPeriode er påkrevd for Behandlingsresultat")
 
     fun hentÅrsavregning() = årsavregning ?: error("årsavregning er påkrevd for Behandlingsresultat")
 
@@ -147,14 +146,24 @@ open class Behandlingsresultat : RegistreringsInfo() {
         medlemskapsperioder.clear()
     }
 
+    fun addHelseutgiftDekkesPeriode(periode: HelseutgiftDekkesPeriode) {
+        helseutgiftDekkesPerioder.add(periode)
+        periode.behandlingsresultat = this
+    }
+
+    fun clearHelseutgiftDekkesPerioder() {
+        helseutgiftDekkesPerioder.forEach { it.clearTrygdeavgiftsperioder() }
+        helseutgiftDekkesPerioder.clear()
+    }
+
     fun clearLovvalgsperioder() {
         lovvalgsperioder.forEach { it.setBehandlingsresultat(null) }
         lovvalgsperioder.forEach(Lovvalgsperiode::clearTrygdeavgiftsperioder)
         lovvalgsperioder.clear()
     }
 
-    fun clearTrygdevgiftPåHelseutgiftDekkesPeriode() {
-        helseutgiftDekkesPeriode?.clearTrygdeavgiftsperioder()
+    fun clearTrygdevgiftPåHelseutgiftDekkesPerioder() {
+        helseutgiftDekkesPerioder.forEach { it.clearTrygdeavgiftsperioder() }
     }
 
     fun erEøsPensjonist() =
@@ -209,20 +218,15 @@ open class Behandlingsresultat : RegistreringsInfo() {
         }
 
     val eøsPensjonistTrygdeavgiftsperioder: Set<Trygdeavgiftsperiode>
-        get() {
-            if (helseutgiftDekkesPeriode == null) {
-                return emptySet()
-            }
-            return hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder
-        }
+        get() = helseutgiftDekkesPerioder.flatMap { it.trygdeavgiftsperioder }.toSet()
 
     fun clearTrygdeavgiftsperioder() {
         medlemskapsperioder.forEach(Medlemskapsperiode::clearTrygdeavgiftsperioder)
     }
 
     fun clearTrygdeavgiftsperioderHelseutgiftPeriode() {
-        helseutgiftDekkesPeriode?.clearTrygdeavgiftsperioder()
-            ?: error("helseutgiftDekkesPeriode må være satt for å kunne cleare trygdeavgiftsperioder")
+        require(helseutgiftDekkesPerioder.isNotEmpty()) { "helseutgiftDekkesPerioder må være satt for å kunne cleare trygdeavgiftsperioder" }
+        helseutgiftDekkesPerioder.forEach { it.clearTrygdeavgiftsperioder() }
     }
 
     fun hentSkatteforholdTilNorge(): Set<SkatteforholdTilNorge> =

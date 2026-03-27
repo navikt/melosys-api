@@ -108,7 +108,7 @@ class ÅrsavregningService(
             behandlingsresultat.årsavregning?.behandlingsresultat = null
             behandlingsresultat.årsavregning = null
             behandlingsresultat.medlemskapsperioder.clear()
-            behandlingsresultat.helseutgiftDekkesPeriode = null
+            behandlingsresultat.clearHelseutgiftDekkesPerioder()
             behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         }
 
@@ -215,7 +215,7 @@ class ÅrsavregningService(
 
         if (!harTrygdeavgiftFraAvgiftssystemet) {
             behandlingsresultat.clearMedlemskapsperioder()
-            behandlingsresultat.helseutgiftDekkesPeriode = null
+            behandlingsresultat.clearHelseutgiftDekkesPerioder()
 
             if (årsavregning.tidligereBehandlingsresultat != null) {
                 val tidligereResult = årsavregning.hentTidligereBehandlingsresultat
@@ -264,14 +264,16 @@ class ÅrsavregningService(
         tidligereBehandlingsresultat: Behandlingsresultat,
         gjelderÅr: Int
     ) {
-        if (tidligereBehandlingsresultat.helseutgiftDekkesPeriode?.overlapperMedÅr(gjelderÅr) ?: return) {
-            val helseutgiftDekkesReplika = BeanUtils.cloneBean(tidligereBehandlingsresultat.helseutgiftDekkesPeriode) as HelseutgiftDekkesPeriode
-            helseutgiftDekkesReplika.behandlingsresultat = behandlingsresultat
-            helseutgiftDekkesReplika.trygdeavgiftsperioder = HashSet()
-            helseutgiftDekkesReplika.avkortFomDato(gjelderÅr)
-            helseutgiftDekkesReplika.avkortTomDato(gjelderÅr)
-            helseutgiftDekkesReplika.id = null
-            behandlingsresultat.helseutgiftDekkesPeriode = helseutgiftDekkesReplika
+        for (originalPeriode in tidligereBehandlingsresultat.helseutgiftDekkesPerioder) {
+            if (originalPeriode.overlapperMedÅr(gjelderÅr)) {
+                val helseutgiftDekkesReplika = BeanUtils.cloneBean(originalPeriode) as HelseutgiftDekkesPeriode
+                helseutgiftDekkesReplika.behandlingsresultat = behandlingsresultat
+                helseutgiftDekkesReplika.trygdeavgiftsperioder = HashSet()
+                helseutgiftDekkesReplika.avkortFomDato(gjelderÅr)
+                helseutgiftDekkesReplika.avkortTomDato(gjelderÅr)
+                helseutgiftDekkesReplika.id = null
+                behandlingsresultat.addHelseutgiftDekkesPeriode(helseutgiftDekkesReplika)
+            }
         }
     }
 
