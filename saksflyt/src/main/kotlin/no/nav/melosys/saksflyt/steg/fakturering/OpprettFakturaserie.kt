@@ -198,3 +198,4 @@ class OpprettFakturaserie(
             .firstOrNull()
 
 }
+
