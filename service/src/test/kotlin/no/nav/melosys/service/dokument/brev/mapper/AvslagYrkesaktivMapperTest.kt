@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldMatch
 import io.mockk.spyk
 import no.nav.dok.melosysbrev._000081.Fag
@@ -136,6 +137,47 @@ class AvslagYrkesaktivMapperTest {
 
 
         xml shouldMatch """(?s)\<\?xml version="\d\.\d+" .*>\n.*"""
+    }
+
+    @Test
+    fun `fritekst med linjeskift konverteres til Metaforce-format`() {
+        val behandling = Behandling.forTest {
+            mottatteOpplysninger {
+                soeknad {
+                    fysiskeArbeidssted { landkode = "NO" }
+                }
+            }
+        }
+        val vilkaarsresultat16_1 = vilkaarsresultatForTest {
+            vilkaar = Vilkaar.FO_883_2004_ART16_1
+            isOppfylt = false
+            begrunnelse(Avslag_anmodning_begrunnelser.OVER_5_AAR.kode)
+            begrunnelseFritekst = "Begrunnelse 1\nBegrunnelse 2"
+        }
+        val resultat = Behandlingsresultat.forTest {
+            lovvalgsperiode {
+                lovvalgsland = Land_iso2.NO
+                fom = LocalDate.now()
+                tom = LocalDate.now()
+            }
+            vilkaarsresultat {
+                vilkaar = Vilkaar.FO_883_2004_ART12_1
+                isOppfylt = false
+                begrunnelse(Utsendt_arbeidstaker_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET.kode)
+            }
+        }
+        val brevData = BrevDataAvslagYrkesaktiv(BrevbestillingDto(), "Z999999").apply {
+            fritekst = "Linje 1\nLinje 2"
+            arbeidsland = Landkoder.AT.beskrivelse
+            hovedvirksomhet = AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.LOENNET_ARBEID)
+            anmodningsperiodeSvar = AnmodningsperiodeSvar()
+            yrkesaktivitet = Yrkesaktivitetstyper.LOENNET_ARBEID
+            art16Vilkaar = vilkaarsresultat16_1
+        }
+
+        val xml = spyk(AvslagYrkesaktivMapper()).mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData)
+
+        xml shouldContain "Linje 1[_¶_]Linje 2"
     }
 
     @Test
