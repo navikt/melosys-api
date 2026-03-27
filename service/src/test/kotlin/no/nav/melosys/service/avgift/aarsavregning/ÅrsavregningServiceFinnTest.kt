@@ -50,7 +50,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             tidligereFakturertBeloep shouldBe null
             beregnetAvgiftBelop shouldBe null
             tilFaktureringBeloep shouldBe null
-            harTrygdeavgiftFraAvgiftssystemet shouldBe null
+            harInnbetaltTrygdeavgift shouldBe null
             trygdeavgiftFraAvgiftssystemet shouldBe null
             manueltAvgiftBeloep shouldBe null
             tidligereTrygdeavgiftFraAvgiftssystemet shouldBe null
@@ -183,7 +183,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
                 tidligereFakturertBeloep = BigDecimal("6000.00")
                 beregnetAvgiftBelop = BigDecimal("6500.00")
                 tilFaktureringBeloep = BigDecimal("500.00")
-                harTrygdeavgiftFraAvgiftssystemet = true
+                harInnbetaltTrygdeavgift = true
                 trygdeavgiftFraAvgiftssystemet = BigDecimal("6200.00")
                 endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
                 manueltAvgiftBeloep = null
@@ -232,7 +232,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             tidligereFakturertBeloep shouldBe BigDecimal("6000.00")
             beregnetAvgiftBelop shouldBe BigDecimal("6500.00")
             tilFaktureringBeloep shouldBe BigDecimal("500.00")
-            harTrygdeavgiftFraAvgiftssystemet shouldBe true
+            harInnbetaltTrygdeavgift shouldBe true
             trygdeavgiftFraAvgiftssystemet shouldBe BigDecimal("6200.00")
             endeligAvgiftValg shouldBe EndeligAvgiftValg.OPPLYSNINGER_ENDRET
             manueltAvgiftBeloep shouldBe null
@@ -265,7 +265,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
                 tidligereFakturertBeloep = BigDecimal("1000.00")
                 beregnetAvgiftBelop = BigDecimal("1500.00")
                 tilFaktureringBeloep = BigDecimal("500.00")
-                harTrygdeavgiftFraAvgiftssystemet = true
+                harInnbetaltTrygdeavgift = true
                 trygdeavgiftFraAvgiftssystemet = BigDecimal("1200.00")
                 endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
                 manueltAvgiftBeloep = null
@@ -293,7 +293,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             tidligereFakturertBeloep shouldBe BigDecimal("1000.00")
             beregnetAvgiftBelop shouldBe BigDecimal("1500.00")
             tilFaktureringBeloep shouldBe BigDecimal("500.00")
-            harTrygdeavgiftFraAvgiftssystemet shouldBe true
+            harInnbetaltTrygdeavgift shouldBe true
             trygdeavgiftFraAvgiftssystemet shouldBe BigDecimal("1200.00")
             endeligAvgiftValg shouldBe EndeligAvgiftValg.OPPLYSNINGER_ENDRET
             manueltAvgiftBeloep shouldBe null
@@ -327,7 +327,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
                 tidligereFakturertBeloep = BigDecimal("1000.00")
                 beregnetAvgiftBelop = BigDecimal("1500.00")
                 tilFaktureringBeloep = BigDecimal("500.00")
-                harTrygdeavgiftFraAvgiftssystemet = true
+                harInnbetaltTrygdeavgift = true
                 trygdeavgiftFraAvgiftssystemet = BigDecimal("1200.00")
                 endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
                 manueltAvgiftBeloep = null
@@ -377,7 +377,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             tidligereFakturertBeloep shouldBe BigDecimal("1000.00")
             beregnetAvgiftBelop shouldBe BigDecimal("1500.00")
             tilFaktureringBeloep shouldBe BigDecimal("500.00")
-            harTrygdeavgiftFraAvgiftssystemet shouldBe true
+            harInnbetaltTrygdeavgift shouldBe true
             trygdeavgiftFraAvgiftssystemet shouldBe BigDecimal("1200.00")
             endeligAvgiftValg shouldBe EndeligAvgiftValg.OPPLYSNINGER_ENDRET
             manueltAvgiftBeloep shouldBe null

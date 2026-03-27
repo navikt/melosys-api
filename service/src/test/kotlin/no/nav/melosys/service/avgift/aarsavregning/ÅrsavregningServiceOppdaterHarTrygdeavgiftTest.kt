@@ -32,7 +32,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
 
         shouldThrow<FunksjonellException> {
-            årsavregningService.oppdaterHarTrygdeavgiftFraAvgiftssystemet(1L, true)
+            årsavregningService.oppdaterHarInnbetaltTrygdeavgift(1L, true)
         }
     }
 
@@ -57,14 +57,14 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { behandlingsresultatService.lagreOgFlush(any()) } returns behandlingsresultat
 
-        årsavregningService.oppdaterHarTrygdeavgiftFraAvgiftssystemet(1L, true)
+        årsavregningService.oppdaterHarInnbetaltTrygdeavgift(1L, true)
 
         verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(behandlingsresultat) }
 
 
         with(behandlingsresultat) {
             årsavregning.shouldNotBeNull().run {
-                harTrygdeavgiftFraAvgiftssystemet shouldBe true
+                harInnbetaltTrygdeavgift shouldBe true
                 tilFaktureringBeloep shouldBe null
                 tidligereFakturertBeloep shouldBe BigDecimal.ONE
                 trygdeavgiftFraAvgiftssystemet shouldBe null
@@ -103,7 +103,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
             aar = 2023
             this.behandlingsresultat = behandlingsresultat
             this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
-            this.harTrygdeavgiftFraAvgiftssystemet = true
+            this.harInnbetaltTrygdeavgift = true
             this.tilFaktureringBeloep = BigDecimal.valueOf(100)
             this.tidligereFakturertBeloep = BigDecimal.valueOf(50)
             this.trygdeavgiftFraAvgiftssystemet = BigDecimal.valueOf(50)
@@ -126,7 +126,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
         }
 
 
-        årsavregningService.oppdaterHarTrygdeavgiftFraAvgiftssystemet(1L, false)
+        årsavregningService.oppdaterHarInnbetaltTrygdeavgift(1L, false)
 
 
         verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(any()) }
@@ -146,7 +146,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
 
         behandlingsresultatCaptor.captured.årsavregning.shouldNotBeNull().run {
             // Sjekk at feltene ble nullstilt
-            harTrygdeavgiftFraAvgiftssystemet shouldBe false
+            harInnbetaltTrygdeavgift shouldBe false
             tilFaktureringBeloep shouldBe null
             tidligereFakturertBeloep shouldBe BigDecimal(50)
             trygdeavgiftFraAvgiftssystemet shouldBe null
@@ -165,7 +165,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
                 id = 112
                 aar = 2023
                 tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
-                harTrygdeavgiftFraAvgiftssystemet = false
+                harInnbetaltTrygdeavgift = false
                 tilFaktureringBeloep = BigDecimal.valueOf(100)
                 tidligereFakturertBeloep = BigDecimal.valueOf(50)
                 trygdeavgiftFraAvgiftssystemet = BigDecimal.valueOf(50)
@@ -181,14 +181,14 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
         every { behandlingsresultatService.lagreOgFlush(any()) } returns behandlingsresultat
 
 
-        årsavregningService.oppdaterHarTrygdeavgiftFraAvgiftssystemet(1L, true)
+        årsavregningService.oppdaterHarInnbetaltTrygdeavgift(1L, true)
 
 
         verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(behandlingsresultat) }
 
         with(behandlingsresultat) {
             årsavregning.shouldNotBeNull().run {
-                harTrygdeavgiftFraAvgiftssystemet shouldBe true
+                harInnbetaltTrygdeavgift shouldBe true
                 tilFaktureringBeloep shouldBe null
                 tidligereFakturertBeloep shouldBe BigDecimal(50)
                 trygdeavgiftFraAvgiftssystemet shouldBe null
@@ -212,7 +212,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
                 this.tilFaktureringBeloep = BigDecimal.valueOf(100)
                 this.tidligereFakturertBeloep = BigDecimal.valueOf(50)
                 this.trygdeavgiftFraAvgiftssystemet = BigDecimal.valueOf(50)
-                this.harTrygdeavgiftFraAvgiftssystemet = false
+                this.harInnbetaltTrygdeavgift = false
             }
             medlemskapsperiode("2023-01-01", "2023-05-31")
         }
@@ -221,13 +221,13 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
         every { behandlingsresultatService.lagreOgFlush(any()) } returns behandlingsresultat
 
 
-        val resultat = årsavregningService.oppdaterHarTrygdeavgiftFraAvgiftssystemet(1L, true)
+        val resultat = årsavregningService.oppdaterHarInnbetaltTrygdeavgift(1L, true)
 
 
         with(resultat) {
             årsavregningID shouldBe 112
             år shouldBe 2023
-            harTrygdeavgiftFraAvgiftssystemet shouldBe true
+            harInnbetaltTrygdeavgift shouldBe true
             tilFaktureringBeloep shouldBe null
             tidligereFakturertBeloep shouldBe BigDecimal(50)
             trygdeavgiftFraAvgiftssystemet shouldBe null
@@ -276,7 +276,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
             aar = 2023
             this.behandlingsresultat = behandlingsresultat
             this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
-            this.harTrygdeavgiftFraAvgiftssystemet = true
+            this.harInnbetaltTrygdeavgift = true
         }
 
         behandlingsresultat.årsavregning = årsavregning
@@ -289,7 +289,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
             behandlingsresultatCaptor.captured
         }
 
-        årsavregningService.oppdaterHarTrygdeavgiftFraAvgiftssystemet(2L, false)
+        årsavregningService.oppdaterHarInnbetaltTrygdeavgift(2L, false)
 
         verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(any()) }
 
@@ -300,7 +300,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
         }
 
         behandlingsresultatCaptor.captured.årsavregning.shouldNotBeNull().run {
-            harTrygdeavgiftFraAvgiftssystemet shouldBe false
+            harInnbetaltTrygdeavgift shouldBe false
             tilFaktureringBeloep shouldBe null
             trygdeavgiftFraAvgiftssystemet shouldBe null
         }

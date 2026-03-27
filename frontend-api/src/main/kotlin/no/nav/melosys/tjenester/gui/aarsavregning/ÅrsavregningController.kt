@@ -79,15 +79,15 @@ class ÅrsavregningController(
     }
 
     @PostMapping("/grunnlagstype")
-    fun oppdaterHarTrygdeavgiftFraAvgiftssystemet(
+    fun oppdaterHarInnbetaltTrygdeavgift(
         @PathVariable("behandlingID") behandlingID: Long,
-        @RequestBody harTrygdeavgiftFraAvgiftssystemetRequest: HarTrygdeavgiftFraAvgiftssystemetRequest
+        @RequestBody harInnbetaltTrygdeavgiftRequest: HarInnbetaltTrygdeavgiftRequest
     ): ResponseEntity<ÅrsavregningResponse> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
-        val årsavregning = årsavregningService.oppdaterHarTrygdeavgiftFraAvgiftssystemet(
+        val årsavregning = årsavregningService.oppdaterHarInnbetaltTrygdeavgift(
             behandlingID,
-            harTrygdeavgiftFraAvgiftssystemetRequest.harTrygdeavgiftFraAvgiftssystemet
+            harInnbetaltTrygdeavgiftRequest.harInnbetaltTrygdeavgift
         )
 
         return ResponseEntity.ok(
@@ -176,7 +176,7 @@ class ÅrsavregningController(
                 trygdeavgiftFraAvgiftssystemet = årsavregningModel.trygdeavgiftFraAvgiftssystemet,
                 manueltAvgiftBeloep = årsavregningModel.manueltAvgiftBeloep,
             ),
-            harTrygdeavgiftFraAvgiftssystemet = årsavregningModel.harTrygdeavgiftFraAvgiftssystemet,
+            harInnbetaltTrygdeavgift = årsavregningModel.harInnbetaltTrygdeavgift,
             endeligAvgiftValg = årsavregningModel.endeligAvgiftValg?.name,
             harSkjoennsfastsattInntekt = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag
         )
@@ -289,8 +289,8 @@ data class LagÅrsavregningRequest(
     val aar: Int,
 )
 
-data class HarTrygdeavgiftFraAvgiftssystemetRequest(
-    val harTrygdeavgiftFraAvgiftssystemet: Boolean
+data class HarInnbetaltTrygdeavgiftRequest(
+    val harInnbetaltTrygdeavgift: Boolean
 )
 
 data class HarSkjoennsfastsattInntektRequest(
@@ -305,7 +305,7 @@ data class ÅrsavregningResponse(
     val nyttTrygdeavgiftsGrunnlag: GrunnlagsOpplysningerDto?,
     val endeligAvgift: AvgiftDto?,
     val avregning: AvregningDto?,
-    val harTrygdeavgiftFraAvgiftssystemet: Boolean?,
+    val harInnbetaltTrygdeavgift: Boolean?,
     val endeligAvgiftValg: String?,
     val harSkjoennsfastsattInntekt: Boolean?,
 )

@@ -131,7 +131,7 @@ class ÅrsavregningVedtakMapper(
     }
 
     private fun harGrunnlagKunFraMelosys(årsavregning: ÅrsavregningModel): Boolean =
-        (årsavregning.harTrygdeavgiftFraAvgiftssystemet == null || årsavregning.harTrygdeavgiftFraAvgiftssystemet != true) && årsavregning.tidligereTrygdeavgiftsGrunnlag != null
+        (årsavregning.harInnbetaltTrygdeavgift == null || årsavregning.harInnbetaltTrygdeavgift != true) && årsavregning.tidligereTrygdeavgiftsGrunnlag != null
 
     private fun totaltTidligereFakturertBeloep(årsavregning: ÅrsavregningModel): BigDecimal {
         return (årsavregning.tidligereFakturertBeloep ?: BigDecimal.ZERO) + (årsavregning.trygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO)
