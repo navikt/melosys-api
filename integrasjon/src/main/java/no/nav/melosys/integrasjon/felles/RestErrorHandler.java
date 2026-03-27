@@ -1,9 +1,8 @@
 package no.nav.melosys.integrasjon.felles;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -44,7 +43,7 @@ public abstract class RestErrorHandler {
         try {
             JsonNode json = objectMapper.readTree(feilmelding).path("message");
             return json.isMissingNode() ? e.getMessage() : json.toString();
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             log.warn("Kunne ikke lese feilmelding fra response", ex);
             return feilmelding;
         }

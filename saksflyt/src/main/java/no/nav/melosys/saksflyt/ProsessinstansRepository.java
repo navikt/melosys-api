@@ -9,6 +9,7 @@ import no.nav.melosys.saksflyt.metrikker.ProsessinstansAntall;
 import no.nav.melosys.saksflyt.metrikker.ProsessinstansStegAntall;
 import no.nav.melosys.saksflytapi.domain.*;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 
 public interface ProsessinstansRepository extends JpaRepository<Prosessinstans, UUID> {
@@ -36,6 +37,6 @@ public interface ProsessinstansRepository extends JpaRepository<Prosessinstans, 
 
     Collection<Prosessinstans> findAllByLåsReferanseStartingWith(String låsReferanse);
 
-    @Query(value = "SELECT * FROM PROSESSINSTANS p WHERE p.REGISTRERT_DATO > ?1", nativeQuery = true)
+    @NativeQuery("SELECT * FROM PROSESSINSTANS p WHERE p.REGISTRERT_DATO > ?1")
     Collection<Prosessinstans> findAllAfterDate(LocalDateTime localDateTime);
 }

@@ -486,7 +486,7 @@ public class ProsessinstansService {
             builder.medData(ORGNR, mottaker.getOrgnr());
         }
         if (hasText(mottaker.getInstitusjonID())) {
-            builder.medData(INSTITUSJON_ID, String.format("\"%s\"", mottaker.getInstitusjonID()));
+            builder.medData(INSTITUSJON_ID, "\"%s\"".formatted(mottaker.getInstitusjonID()));
         }
 
         Prosessinstans prosessinstans = builder.build();

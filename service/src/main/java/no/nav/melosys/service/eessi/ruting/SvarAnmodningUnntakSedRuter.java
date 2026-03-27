@@ -60,8 +60,7 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
             .stream().findFirst();
 
         if (behandling.erUtsending() && anmodningsperiode.isEmpty()) {
-            throw new FunksjonellException(String.format(
-                "Mottatt SED %s på buctype %s - finner behandling %s for rinasak %s, men behandlingen har ingen anmodningsperiode",
+            throw new FunksjonellException("Mottatt SED %s på buctype %s - finner behandling %s for rinasak %s, men behandlingen har ingen anmodningsperiode".formatted(
                 melosysEessiMelding.getSedType(), melosysEessiMelding.getBucType(), behandling.getId(), melosysEessiMelding.getRinaSaksnummer()));
         } else if (behandling.getTema() == Behandlingstema.IKKE_YRKESAKTIV) {
             oppdaterBehandlingOgOppgave(behandling, melosysEessiMelding.getSedType());
@@ -112,7 +111,7 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
     }
 
     private String lagMottattSedBeskrivelse(String sedType) {
-        return String.format(MOTTATT_SED_BESKRIVELSE, sedType);
+        return MOTTATT_SED_BESKRIVELSE.formatted(sedType);
     }
 
     @Override

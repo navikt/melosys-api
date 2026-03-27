@@ -1,8 +1,6 @@
 package no.nav.melosys.itest
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import io.getunleash.FakeUnleash
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Inntektsperiode
@@ -49,10 +47,7 @@ class BehandlingsresultatServiceIT(
     data class Behandlinger(val orginal: Behandling, val replika: Behandling)
 
     // Denne kan ikke wires inn i siden vi ikke har hele spring contex
-    private val objectMapper = jacksonObjectMapper().apply {
-        configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        registerModule(JavaTimeModule())
-    }
+    private val objectMapper = jacksonObjectMapper()
 
     @Test
     fun `id i database blir riktig etter replikerting`() {

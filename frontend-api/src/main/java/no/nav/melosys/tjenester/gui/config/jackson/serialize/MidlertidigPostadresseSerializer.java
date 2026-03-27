@@ -1,13 +1,12 @@
 package no.nav.melosys.tjenester.gui.config.jackson.serialize;
 
-import java.io.IOException;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdSerializer;
 import no.nav.melosys.domain.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
@@ -27,7 +26,7 @@ public class MidlertidigPostadresseSerializer extends StdSerializer<no.nav.melos
     }
 
     @Override
-    public void serialize(no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse midlertidigPostadresse, JsonGenerator generator, SerializerProvider provider) throws IOException {
+    public void serialize(no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse midlertidigPostadresse, JsonGenerator generator, SerializationContext provider) {
         MidlertidigPostadresseDto dto = new MidlertidigPostadresseDto();
 
         if (midlertidigPostadresse instanceof MidlertidigPostadresseNorge adresse) {
@@ -48,6 +47,6 @@ public class MidlertidigPostadresseSerializer extends StdSerializer<no.nav.melos
             dto.ustrukturertAdresse = UstrukturertAdresse.av(adresse);
             dto.adressetype = MidlertidigPostadresseDto.Adressetype.USTRUKTURERT;
         }
-        generator.writeObject(dto);
+        generator.writePOJO(dto);
     }
 }

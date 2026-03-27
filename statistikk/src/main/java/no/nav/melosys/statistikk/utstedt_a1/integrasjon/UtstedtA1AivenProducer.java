@@ -5,7 +5,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.service.JsonSchemaValidator;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding;
@@ -23,14 +22,11 @@ public class UtstedtA1AivenProducer {
     private static final String A1_UTSTEDT_SCHEMA = "utstedt_a1/a1-utstedt-schema.json";
 
     private final KafkaTemplate<String, UtstedtA1Melding> aivenKafkaTemplate;
-    private final ObjectMapper objectMapper;
     private final String topicName;
 
     public UtstedtA1AivenProducer(@Qualifier("aivenUtstedtA1") KafkaTemplate<String, UtstedtA1Melding> aivenKafkaTemplate,
-                                  ObjectMapper objectMapper,
                                   @Value("${kafka.aiven.a1-utstedt.topic}") String topicName) {
         this.aivenKafkaTemplate = aivenKafkaTemplate;
-        this.objectMapper = objectMapper;
         this.topicName = topicName;
     }
 
@@ -58,6 +54,6 @@ public class UtstedtA1AivenProducer {
     }
 
     private void valider(UtstedtA1Melding melding) {
-        new JsonSchemaValidator(objectMapper).valider(melding, A1_UTSTEDT_SCHEMA);
+        new JsonSchemaValidator().valider(melding, A1_UTSTEDT_SCHEMA);
     }
 }

@@ -4,8 +4,8 @@
     "flereLandUkjentHvilke" : false
   },
   "periode" : {
-    "fom" : [ 2018, 1, 2 ],
-    "tom" : [ 2019, 1, 2 ]
+    "fom" : "2018-01-02",
+    "tom" : "2019-01-02"
   },
   "personOpplysninger" : {
     "utenlandskIdent" : [ {
@@ -59,8 +59,8 @@
   "oppholdUtland" : {
     "oppholdslandkoder" : [ "DK" ],
     "oppholdsPeriode" : {
-      "fom" : [ 2018, 1, 1 ],
-      "tom" : [ 2018, 6, 1 ]
+      "fom" : "2018-01-01",
+      "tom" : "2018-06-01"
     },
     "studentFinansieringKode" : "LAANEKASSEN",
     "studentSemester" : "2018/2019",
@@ -126,7 +126,7 @@
     "arbeidstakerTidligereUtsendt24Mnd" : false,
     "arbeidsgiverBetalerArbeidsgiveravgift" : true,
     "trygdeavgiftTrukketGjennomSkatt" : true,
-    "trygdeavgiftTrukketGjennomSkattDato" : [ 2018, 1, 1 ]
+    "trygdeavgiftTrukketGjennomSkattDato" : "2018-01-01"
   },
   "utenlandsoppdraget" : {
     "samletUtsendingsperiode" : {

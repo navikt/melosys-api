@@ -1,10 +1,9 @@
 package no.nav.melosys.tjenester.gui.dto.inntekt
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.SerializationFeature
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument
 import no.nav.melosys.exception.IkkeFunnetException
@@ -18,7 +17,7 @@ class InntektDtoFraInntektsDokumentTest {
     @Test
     fun `sjekk at mapping fra Saksopplysning InntektDokument til InntektDto blir som forventet`() {
         val inntektResponse = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
+            
             .readValue<InntektResponse>(hentRessurs("mock/inntekt/inntektClientResponse.json"))
 
         val inntektDtoJson = InntektDto(
@@ -32,7 +31,6 @@ class InntektDtoFraInntektsDokumentTest {
         ?.readText(StandardCharsets.UTF_8) ?: throw IkkeFunnetException("Fant ikke $fil")
 
     private fun Any.toJsonNode(): JsonNode = jacksonObjectMapper()
-        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        .registerModule(JavaTimeModule())
+        
         .valueToTree(this)
 }

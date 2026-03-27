@@ -1,7 +1,7 @@
 package no.nav.melosys.service.mottatteopplysninger
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -272,8 +272,8 @@ internal class MottatteOpplysningerServiceTest {
         }
         slot.captured.apply {
             jsonData.toJsonNode["periode"].apply {
-                this["fom"].toString().shouldBe("[2000,1,1]")
-                this["tom"].toString().shouldBe("[2010,1,1]")
+                this["fom"].toString().shouldBe("\"2000-01-01\"")
+                this["tom"].toString().shouldBe("\"2010-01-01\"")
             }
         }
     }
