@@ -52,7 +52,7 @@ class Trygdeavgiftsperiode(
 
     @Column(name = "beregningstype")
     @Enumerated(EnumType.STRING)
-    val beregningsregel: Avgiftsberegningsregel = Avgiftsberegningsregel.ORDINAER,
+    val beregningsregel: Avgiftsberegningsregel = Avgiftsberegningsregel.ORDINÆR,
 
     @Column(name = "avgiftsdel")
     val avgiftsdel: String? = null,
@@ -78,7 +78,7 @@ class Trygdeavgiftsperiode(
     fun harAvgift(): Boolean =
         BigDecimal.ZERO.compareTo(trygdeavgiftsbeløpMd.verdi) != 0
 
-    fun erBegrenset(): Boolean = beregningsregel != Avgiftsberegningsregel.ORDINAER
+    fun erBegrenset(): Boolean = beregningsregel != Avgiftsberegningsregel.ORDINÆR
 
     fun leggTilGrunnlag(g: TrygdeavgiftsperiodeGrunnlag) {
         g.trygdeavgiftsperiode = this

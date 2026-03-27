@@ -125,7 +125,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         val alleGrunnlag = response.grunnlagListe ?: listOf(response.grunnlag)
         val beregningsregel = response.beregningsregel
             ?.let { Avgiftsberegningsregel.valueOf(it) }
-            ?: Avgiftsberegningsregel.ORDINAER
+            ?: Avgiftsberegningsregel.ORDINÆR
 
         val skatteforholdMap = skatteforholdsperioderMedUUID.toMap()
         val inntektsperiodeMap = inntektsperioderMedUUID.toMap()

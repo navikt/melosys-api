@@ -55,7 +55,7 @@ class TrygdeavgiftsperiodeGrunnlagIT(
         val tap = lastet.trygdeavgiftsperioder.single()
 
         tap.grunnlagListe shouldHaveSize 1
-        tap.beregningsregel shouldBe Avgiftsberegningsregel.ORDINAER
+        tap.beregningsregel shouldBe Avgiftsberegningsregel.ORDINÆR
         tap.trygdesats shouldBe BigDecimal("6.80")
 
         val grunnlag = tap.grunnlagListe.first()
@@ -297,7 +297,7 @@ class TrygdeavgiftsperiodeGrunnlagIT(
             grunnlagMedlemskapsperiode = medlemskapsperiode,
             grunnlagInntekstperiode = lagInntektsperiode(1),
             grunnlagSkatteforholdTilNorge = lagSkatteforhold(),
-            beregningsregel = if (begrenset) Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL else Avgiftsberegningsregel.ORDINAER,
+            beregningsregel = if (begrenset) Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL else Avgiftsberegningsregel.ORDINÆR,
         )
 
         // Legg til N grunnlag i grunnlagListe
