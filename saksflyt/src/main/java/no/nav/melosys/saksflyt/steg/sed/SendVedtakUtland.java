@@ -119,9 +119,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, utpektLand);
         } else {
             Set<Land_iso2> alleTrygdemyndighetsland = new HashSet<>(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId()));
-            Set<Land_iso2> ikkeEessiLand = alleTrygdemyndighetsland.stream()
-                .filter(EessiService.LAND_UTEN_SED_MOTTAK::contains)
-                .collect(Collectors.toSet());
+            Set<Land_iso2> ikkeEessiLand = hentLandSomIkkeKanMottaSed(behandling.getId());
             // Splitt per land kun hvis ALLE trygdemyndighetsland er FO/GL (kan ikke motta SED).
             // Hvis andre land også er med (f.eks. SE uten registrerte institusjoner), sendes
             // ett generisk brev slik at ingen land faller ut.

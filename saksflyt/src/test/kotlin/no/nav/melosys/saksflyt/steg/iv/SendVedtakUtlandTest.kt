@@ -418,6 +418,24 @@ class SendVedtakUtlandTest {
         }
     }
 
+    @Test
+    fun `utfør skal sende generisk papir-brev når ingen utenlandske trygdemyndighetsland`() {
+        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns emptyList()
+        every { behandlingsresultatService.hentBehandlingsresultatMedAvklartefakta(BEHANDLING_ID) } returns lagBehandlingsresultat()
+        val prosessinstans = lagProsessinstans()
+
+        sendVedtakUtland.utfør(prosessinstans)
+
+        verify(exactly = 0) { eessiService.opprettOgSendSed(any(), any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { prosessinstansService.opprettProsessinstansSendBrev(any(), any(), any()) }
+        verify {
+            prosessinstansService.opprettProsessinstansSendBrev(
+                any(), any(),
+                match<Mottaker> { it.trygdemyndighetLand == null }
+            )
+        }
+    }
+
     companion object {
         private const val BEHANDLING_ID = 1L
         private const val GSAK_SAKSNUMMER = 123456789L
