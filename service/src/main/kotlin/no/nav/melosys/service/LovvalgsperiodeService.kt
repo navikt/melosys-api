@@ -7,6 +7,7 @@ import no.nav.melosys.domain.TidligereMedlemsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeGrunnlag
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca
@@ -187,13 +188,25 @@ class LovvalgsperiodeService(
 
     private fun kopierTrygdeavgiftsperiode(
         trygdeavgiftsperiode: Trygdeavgiftsperiode,
-    ): Trygdeavgiftsperiode =
-        trygdeavgiftsperiode.copyEntity(
+    ): Trygdeavgiftsperiode {
+        val kopi = trygdeavgiftsperiode.copyEntity(
             id = null,
             grunnlagInntekstperiode = kopierInntektsperiode(trygdeavgiftsperiode.grunnlagInntekstperiode),
             grunnlagLovvalgsPeriode = null,
             grunnlagSkatteforholdTilNorge = kopierSkatteforhold(trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge),
         )
+        trygdeavgiftsperiode.grunnlagListe.forEach { orig ->
+            kopi.leggTilGrunnlag(
+                TrygdeavgiftsperiodeGrunnlag(
+                    trygdeavgiftsperiode = kopi,
+                    lovvalgsperiode = null,
+                    inntektsperiode = kopierInntektsperiode(orig.inntektsperiode)!!,
+                    skatteforhold = kopierSkatteforhold(orig.skatteforhold)!!,
+                )
+            )
+        }
+        return kopi
+    }
 
     private fun kopierInntektsperiode(original: Inntektsperiode?): Inntektsperiode? =
         original?.copyEntity(

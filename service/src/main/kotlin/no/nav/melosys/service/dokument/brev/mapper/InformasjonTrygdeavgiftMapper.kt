@@ -71,7 +71,7 @@ class InformasjonTrygdeavgiftMapper(
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodeEøsPensjonist> {
         val perioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toSet()
 
-        if (perioder.all { it.trygdeavgiftsbeløpMd.verdi == BigDecimal.ZERO && it.trygdesats == BigDecimal.ZERO }) {
+        if (perioder.all { !it.harAvgift() }) {
             return emptyList()
         }
 
@@ -81,14 +81,15 @@ class InformasjonTrygdeavgiftMapper(
 
         return gruppertePerioder[valgtÅr]
             ?.map {
+                val inntektsperiode = it.hentGrunnlagInntekstperiode()
                 AvgiftsperiodeEøsPensjonist(
                     fom = it.periodeFra,
                     tom = it.periodeTil,
                     avgiftssats = it.trygdesats,
                     avgiftPerMd = it.trygdeavgiftsbeløpMd.hentVerdi(),
-                    inntektskilde = it.grunnlagInntekstperiode!!.type.beskrivelse,
-                    avgiftspliktigInntektPerMd = it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
-                    skatteplikt = it.grunnlagSkatteforholdTilNorge!!.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
+                    inntektskilde = inntektsperiode.type.beskrivelse,
+                    avgiftspliktigInntektPerMd = inntektsperiode.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
+                    skatteplikt = it.hentGrunnlagSkatteforholdTilNorge().skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
                 )
             }
             ?.sortedByDescending { it.fom }
