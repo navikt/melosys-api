@@ -18,6 +18,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -81,7 +82,7 @@ class SendFakturaÅrsavregning(
             fullmektig = FullmektigDto(fullmektig),
             fakturaGjelderInnbetalingstype = Innbetalingstype.AARSAVREGNING,
             referanseBruker = "Årsavregning datert $vedtaksdato",
-            belop = årsavregning.hentTilFaktureringBeloep,
+            belop = årsavregning.hentTilFaktureringBeloep.setScale(2, RoundingMode.HALF_UP),
             startDato = startDato,
             sluttDato = sluttDato,
             beskrivelse = if (årsavregning.manueltAvgiftBeloep == null) {
