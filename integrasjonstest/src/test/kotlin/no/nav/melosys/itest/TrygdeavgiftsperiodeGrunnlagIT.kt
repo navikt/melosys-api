@@ -80,6 +80,21 @@ class TrygdeavgiftsperiodeGrunnlagIT(
     }
 
     @Test
+    fun `trygdeavgiftsperiode med MINSTEBELØP persisteres korrekt`() {
+        val (original, _) = lagFagsakMedBehandlinger()
+        val br = lagBehandlingsresultatMedTrygdeavgift(
+            original,
+            beregningsregelOverride = Avgiftsberegningsregel.MINSTEBELØP
+        )
+        behandlingsresultatRepository.save(br)
+
+        val lastet = behandlingsresultatRepository.findById(original.id).get()
+        val tap = lastet.trygdeavgiftsperioder.single()
+
+        tap.beregningsregel shouldBe Avgiftsberegningsregel.MINSTEBELØP
+    }
+
+    @Test
     fun `clearTrygdeavgiftsperioder sletter også grunnlag-rader via cascade`() {
         val (original, _) = lagFagsakMedBehandlinger()
         val br = lagBehandlingsresultatMedTrygdeavgift(original, antallGrunnlag = 2)
@@ -270,7 +285,8 @@ class TrygdeavgiftsperiodeGrunnlagIT(
     private fun lagBehandlingsresultatMedTrygdeavgift(
         behandling: Behandling,
         antallGrunnlag: Int = 1,
-        begrenset: Boolean = false
+        begrenset: Boolean = false,
+        beregningsregelOverride: Avgiftsberegningsregel? = null
     ): Behandlingsresultat {
         val br = Behandlingsresultat().apply {
             this.behandling = behandling
@@ -289,6 +305,7 @@ class TrygdeavgiftsperiodeGrunnlagIT(
         }
         br.addMedlemskapsperiode(medlemskapsperiode)
 
+        val defaultBeregningsregel = if (begrenset) Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL else Avgiftsberegningsregel.ORDINÆR
         val tap = Trygdeavgiftsperiode(
             periodeFra = LocalDate.of(2025, 1, 1),
             periodeTil = LocalDate.of(2025, 12, 31),
@@ -297,7 +314,7 @@ class TrygdeavgiftsperiodeGrunnlagIT(
             grunnlagMedlemskapsperiode = medlemskapsperiode,
             grunnlagInntekstperiode = lagInntektsperiode(1),
             grunnlagSkatteforholdTilNorge = lagSkatteforhold(),
-            beregningsregel = if (begrenset) Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL else Avgiftsberegningsregel.ORDINÆR,
+            beregningsregel = beregningsregelOverride ?: defaultBeregningsregel,
         )
 
         // Legg til N grunnlag i grunnlagListe

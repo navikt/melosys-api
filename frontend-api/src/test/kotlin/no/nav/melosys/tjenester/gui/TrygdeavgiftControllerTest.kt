@@ -3,10 +3,12 @@ package no.nav.melosys.tjenester.gui
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeGrunnlag
 import no.nav.melosys.domain.avgift.forTest
 import no.nav.melosys.domain.avgift.inntektForTest
 import no.nav.melosys.domain.avgift.skatteforholdForTest
@@ -139,6 +141,26 @@ class TrygdeavgiftControllerTest(
             .andExpectResponseBody(trygdeavgiftsperioder.map { TrygdeavgiftsperiodeDto(it) })
     }
 
+    @Test
+    fun `trygdeavgiftsperiode med TJUEFEM_PROSENT_REGEL og sammenslåtte inntektskilder serialiseres korrekt`() {
+        val periode = lagTrygdeavgiftsperiodeMedBeregningsregel()
+        every { aksesskontroll.autoriser(any()) } returns Unit
+        every { trygdeavgiftService.hentTrygdeavgiftsperioder(BEHANDLINGSRESULTAT_ID) } returns setOf(periode)
+
+        mockMvc.perform(get(BASE_URL, 1L)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect { result ->
+                val json = result.response.contentAsString
+                assert(json.contains("\"beregningsregel\":\"TJUEFEM_PROSENT_REGEL\"")) {
+                    "Forventet beregningsregel TJUEFEM_PROSENT_REGEL i responsen, men fikk: $json"
+                }
+                assert(json.contains("\"harSammenslåtteInntektskilder\":true")) {
+                    "Forventet harSammenslåtteInntektskilder=true i responsen, men fikk: $json"
+                }
+            }
+    }
+
     private fun forventetBeregnetTrygdeavgiftDto(): BeregnetTrygdeavgiftDto {
         return BeregnetTrygdeavgiftDto(
             trygdeavgiftsperioder.map { TrygdeavgiftsperiodeDto(it) },
@@ -181,6 +203,66 @@ class TrygdeavgiftControllerTest(
         }
 
         return setOf(trygdeavgift)
+    }
+
+    fun lagTrygdeavgiftsperiodeMedBeregningsregel(): Trygdeavgiftsperiode {
+        val periode = Trygdeavgiftsperiode.forTest {
+            periodeFra = LocalDate.now()
+            periodeTil = LocalDate.now().plusDays(10)
+            trygdesats = null
+            trygdeavgiftsbeløpMd = BigDecimal.valueOf(5000.0)
+            beregningsregel = Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL
+            medlemskapsperiode = medlemskapsperiodeForTest {
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+            }
+            grunnlagInntekstperiode {
+                fomDato = LocalDate.now()
+                tomDato = LocalDate.now()
+                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                avgiftspliktigTotalinntekt = Penger(5000.0)
+            }
+            grunnlagSkatteforholdTilNorge {
+                fomDato = LocalDate.now()
+                tomDato = LocalDate.now()
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
+        }
+
+        val skatteforhold = SkatteforholdTilNorge().apply {
+            fomDato = LocalDate.now()
+            tomDato = LocalDate.now()
+            skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+        }
+
+        // Grunnlag 1: INNTEKT_FRA_UTLANDET
+        val inntekt1 = Inntektsperiode().apply {
+            fomDato = LocalDate.now()
+            tomDato = LocalDate.now()
+            type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+            avgiftspliktigMndInntekt = Penger(5000.0)
+        }
+        periode.leggTilGrunnlag(TrygdeavgiftsperiodeGrunnlag(
+            trygdeavgiftsperiode = periode,
+            inntektsperiode = inntekt1,
+            skatteforhold = skatteforhold,
+            medlemskapsperiode = periode.grunnlagMedlemskapsperiode,
+        ))
+
+        // Grunnlag 2: ARBEIDSINNTEKT — gjør harSammenslåtteInntektskilder = true
+        val inntekt2 = Inntektsperiode().apply {
+            fomDato = LocalDate.now()
+            tomDato = LocalDate.now()
+            type = Inntektskildetype.ARBEIDSINNTEKT
+            avgiftspliktigMndInntekt = Penger(3000.0)
+        }
+        periode.leggTilGrunnlag(TrygdeavgiftsperiodeGrunnlag(
+            trygdeavgiftsperiode = periode,
+            inntektsperiode = inntekt2,
+            skatteforhold = skatteforhold,
+            medlemskapsperiode = periode.grunnlagMedlemskapsperiode,
+        ))
+
+        return periode
     }
 
     private inline fun <reified T> ResultActions.andExpectResponseBody(expectedObject: T): ResultActions =
