@@ -38,6 +38,7 @@ import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.persondata.PersondataService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -66,6 +67,9 @@ class OpprettFakturaserieTest {
     @RelaxedMockK
     lateinit var trygdeavgiftService: TrygdeavgiftService
 
+    @RelaxedMockK
+    lateinit var oppgaveService: OppgaveService
+
     private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
     private lateinit var opprettFakturaserie: OpprettFakturaserie
 
@@ -86,7 +90,8 @@ class OpprettFakturaserieTest {
             faktureringskomponentenClient,
             pdlService,
             trygdeavgiftService,
-            unleash
+            unleash,
+            oppgaveService
         )
     }
 
@@ -602,6 +607,251 @@ class OpprettFakturaserieTest {
                 }
             )
         }
+        verify(exactly = 1) { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID_ÅRSAVREGNING) }
+        verify(exactly = 1) { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID_ÅRSAVREGNING, Behandlingsresultattyper.FERDIGBEHANDLET) }
+        verify(exactly = 1) { behandlingService.avsluttBehandling(BEHANDLING_ID_ÅRSAVREGNING) }
+    }
+
+    @Test
+    fun `Kanseller betaling ved opphør uten aktive årsavregninger lukker ingen årsavregninger`() {
+        val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
+            id = OPPRINNELIG_BEHANDLING_ID
+            fakturaserieReferanse = FAKTURASERIE_REFERANSE
+            behandling {
+                id = OPPRINNELIG_BEHANDLING_ID
+            }
+        }
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = BEHANDLING_ID
+            type = Behandlingsresultattyper.OPPHØRT
+            medlemskapsperiode {
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                fom = LocalDate.of(2022, 1, 1)
+                tom = LocalDate.of(2023, 5, 31)
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+                trygdeavgiftsperiode {
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                        type = Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
+                    }
+                }
+            }
+            vedtakMetadata {
+                vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
+                vedtaksdato = Instant.now().minus(3, ChronoUnit.DAYS)
+            }
+            behandling {
+                id = BEHANDLING_ID
+                opprinneligBehandling = opprinneligBehandlingsresultat.behandling
+                tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak {
+                    betalingsvalg = Betalingstype.FAKTURA
+                    medBruker()
+                }
+            }
+        }
+
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
+            medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
+            medBehandling(behandlingsresultat.hentBehandling())
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandlingsresultat.behandling
+        every { pdlService.finnFolkeregisterident(BRUKER_AKTØR_ID) } returns Optional.of(BRUKER_AKTØRID)
+        every {
+            faktureringskomponentenClient.kansellerFakturaserie(
+                FAKTURASERIE_REFERANSE,
+                SAKSBEHANDLER_IDENT,
+                emptyList()
+            )
+        } returns NyFakturaserieResponseDto(NY_FAKTURASERIE_REFERANSE)
+
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+
+        verify(exactly = 1) {
+            faktureringskomponentenClient.kansellerFakturaserie(
+                FAKTURASERIE_REFERANSE,
+                SAKSBEHANDLER_IDENT,
+                emptyList()
+            )
+        }
+        verify(exactly = 0) { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) }
+        verify(exactly = 0) { behandlingService.avsluttBehandling(any<Long>()) }
+    }
+
+    @Test
+    fun `Kanseller betaling ved opphør med arvet fakturaserieReferanse fra replisering`() {
+        val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
+            id = OPPRINNELIG_BEHANDLING_ID
+            fakturaserieReferanse = FAKTURASERIE_REFERANSE
+            behandling {
+                id = OPPRINNELIG_BEHANDLING_ID
+            }
+        }
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = BEHANDLING_ID
+            type = Behandlingsresultattyper.OPPHØRT
+            fakturaserieReferanse = FAKTURASERIE_REFERANSE
+            medlemskapsperiode {
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                fom = LocalDate.of(2022, 1, 1)
+                tom = LocalDate.of(2023, 5, 31)
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+                trygdeavgiftsperiode {
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                        type = Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
+                    }
+                }
+            }
+            vedtakMetadata {
+                vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
+                vedtaksdato = Instant.now().minus(3, ChronoUnit.DAYS)
+            }
+            behandling {
+                id = BEHANDLING_ID
+                opprinneligBehandling = opprinneligBehandlingsresultat.behandling
+                tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak {
+                    betalingsvalg = Betalingstype.FAKTURA
+                    medBruker()
+                    behandling {
+                        id = BEHANDLING_ID_ÅRSAVREGNING
+                        type = Behandlingstyper.ÅRSAVREGNING
+                    }
+                }
+            }
+        }
+
+        val behandlingsresultatÅrsavregning = Behandlingsresultat.forTest {
+            id = BEHANDLING_ID_ÅRSAVREGNING
+            fakturaserieReferanse = FAKTURASERIE_REFERANSE_ÅRSAVREGNING
+        }
+
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
+            medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
+            medBehandling(behandlingsresultat.hentBehandling())
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_ÅRSAVREGNING) } returns behandlingsresultatÅrsavregning
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandlingsresultat.behandling
+        every { pdlService.finnFolkeregisterident(BRUKER_AKTØR_ID) } returns Optional.of(BRUKER_AKTØRID)
+        every {
+            faktureringskomponentenClient.kansellerFakturaserie(
+                FAKTURASERIE_REFERANSE,
+                SAKSBEHANDLER_IDENT,
+                listOf(FAKTURASERIE_REFERANSE_ÅRSAVREGNING)
+            )
+        } returns NyFakturaserieResponseDto(NY_FAKTURASERIE_REFERANSE)
+
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+
+        verify(exactly = 1) {
+            faktureringskomponentenClient.kansellerFakturaserie(
+                FAKTURASERIE_REFERANSE,
+                SAKSBEHANDLER_IDENT,
+                listOf(FAKTURASERIE_REFERANSE_ÅRSAVREGNING)
+            )
+        }
+        verify {
+            behandlingsresultatService.lagre(match { it.fakturaserieReferanse == NY_FAKTURASERIE_REFERANSE })
+        }
+        verify(exactly = 1) { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID_ÅRSAVREGNING) }
+        verify(exactly = 1) { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID_ÅRSAVREGNING, Behandlingsresultattyper.FERDIGBEHANDLET) }
+        verify(exactly = 1) { behandlingService.avsluttBehandling(BEHANDLING_ID_ÅRSAVREGNING) }
+    }
+
+    @Test
+    fun `Rekjøring av opphør hopper over kansellering når fakturaserieReferanse er ulik opprinnelig`() {
+        val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
+            id = OPPRINNELIG_BEHANDLING_ID
+            fakturaserieReferanse = FAKTURASERIE_REFERANSE
+            behandling {
+                id = OPPRINNELIG_BEHANDLING_ID
+            }
+        }
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = BEHANDLING_ID
+            type = Behandlingsresultattyper.OPPHØRT
+            fakturaserieReferanse = NY_FAKTURASERIE_REFERANSE
+            medlemskapsperiode {
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                fom = LocalDate.of(2022, 1, 1)
+                tom = LocalDate.of(2023, 5, 31)
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+                trygdeavgiftsperiode {
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                        type = Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
+                    }
+                }
+            }
+            vedtakMetadata {
+                vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
+                vedtaksdato = Instant.now().minus(3, ChronoUnit.DAYS)
+            }
+            behandling {
+                id = BEHANDLING_ID
+                opprinneligBehandling = opprinneligBehandlingsresultat.behandling
+                tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak {
+                    betalingsvalg = Betalingstype.FAKTURA
+                    medBruker()
+                    behandling {
+                        id = BEHANDLING_ID_ÅRSAVREGNING
+                        type = Behandlingstyper.ÅRSAVREGNING
+                    }
+                }
+            }
+        }
+
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
+            medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
+            medBehandling(behandlingsresultat.hentBehandling())
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandlingsresultat.behandling
+
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { faktureringskomponentenClient.kansellerFakturaserie(any(), any(), any()) }
+        verify(exactly = 0) { behandlingsresultatService.lagre(any()) }
+        verify(exactly = 1) { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID_ÅRSAVREGNING) }
+        verify(exactly = 1) { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID_ÅRSAVREGNING, Behandlingsresultattyper.FERDIGBEHANDLET) }
+        verify(exactly = 1) { behandlingService.avsluttBehandling(BEHANDLING_ID_ÅRSAVREGNING) }
     }
 
     @Test
