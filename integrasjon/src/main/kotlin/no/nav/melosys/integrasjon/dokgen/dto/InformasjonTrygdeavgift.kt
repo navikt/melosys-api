@@ -25,7 +25,8 @@ class InformasjonTrygdeavgift(
     val betalingsvalg: Betalingstype,
     val fullmektigTrygdeavgift: String?,
     val avgiftsperioder: List<AvgiftsperiodeEøsPensjonist>,
-    val harAvgiftspliktigePerioderIForegåendeÅr: Boolean
+    val harAvgiftspliktigePerioderIForegåendeÅr: Boolean,
+    val erSkattemessigEmigrert: Boolean
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
 }
