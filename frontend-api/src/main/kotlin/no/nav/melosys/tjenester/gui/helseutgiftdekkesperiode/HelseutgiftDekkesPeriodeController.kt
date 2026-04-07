@@ -43,9 +43,10 @@ class HelseutgiftDekkesPeriodeController(
         return ResponseEntity.ok(HelseutgiftDekkesPeriodeDto.av(helseutgiftDekkesPeriode))
     }
 
-    @PutMapping
+    @PutMapping("/{periodeId}")
     fun oppdaterHelseutgiftDekkesPeriode(
         @PathVariable("behandlingID") behandlingID: Long,
+        @PathVariable("periodeId") periodeId: Long,
         @RequestBody helseutgiftDekkesPeriodeDto: HelseutgiftDekkesPeriodeDto
     ): ResponseEntity<HelseutgiftDekkesPeriodeDto> {
         aksesskontroll.autoriserSkriv(behandlingID)
@@ -56,6 +57,7 @@ class HelseutgiftDekkesPeriodeController(
 
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(
             behandlingID,
+            periodeId,
             helseutgiftDekkesPeriodeDto.fomDato,
             helseutgiftDekkesPeriodeDto.tomDato,
             Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode)
@@ -65,15 +67,26 @@ class HelseutgiftDekkesPeriodeController(
     }
 
     @GetMapping
-    fun finnHelseutgiftDekkesPeriode(
+    fun finnHelseutgiftDekkesPerioder(
         @PathVariable("behandlingID") behandlingID: Long
-    ): ResponseEntity<HelseutgiftDekkesPeriodeDto?> {
+    ): ResponseEntity<List<HelseutgiftDekkesPeriodeDto>> {
         aksesskontroll.autoriser(behandlingID)
 
-        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandlingID)
-            ?: return ResponseEntity.noContent().build()
+        val perioder = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(behandlingID)
 
-        return ResponseEntity.ok(HelseutgiftDekkesPeriodeDto.av(helseutgiftDekkesPeriode))
+        return ResponseEntity.ok(perioder.map { HelseutgiftDekkesPeriodeDto.av(it) })
+    }
+
+    @DeleteMapping("/{periodeId}")
+    fun slettHelseutgiftDekkesPeriode(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @PathVariable("periodeId") periodeId: Long
+    ): ResponseEntity<Void> {
+        aksesskontroll.autoriserSkriv(behandlingID)
+
+        helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(behandlingID, periodeId)
+
+        return ResponseEntity.noContent().build()
     }
 
     private fun erGyldigLand(land: String): Boolean {
@@ -83,6 +96,7 @@ class HelseutgiftDekkesPeriodeController(
 
 
 data class HelseutgiftDekkesPeriodeDto(
+    val id: Long? = null,
     val fomDato: LocalDate,
     val tomDato: LocalDate,
     val bostedLandkode: String,
@@ -90,6 +104,7 @@ data class HelseutgiftDekkesPeriodeDto(
     companion object {
         fun av(helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode): HelseutgiftDekkesPeriodeDto {
             return HelseutgiftDekkesPeriodeDto(
+                id = helseutgiftDekkesPeriode.id,
                 fomDato = helseutgiftDekkesPeriode.fomDato,
                 tomDato = helseutgiftDekkesPeriode.tomDato,
                 bostedLandkode = helseutgiftDekkesPeriode.bostedLandkode.kode

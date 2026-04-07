@@ -2,6 +2,7 @@ package no.nav.melosys.service.avgift.aarsavregning
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -293,7 +294,8 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
 
         verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(any()) }
 
-        behandlingsresultatCaptor.captured.helseutgiftDekkesPeriode.shouldNotBeNull().run {
+        behandlingsresultatCaptor.captured.helseutgiftDekkesPerioder.shouldNotBeEmpty()
+        behandlingsresultatCaptor.captured.helseutgiftDekkesPerioder.first().run {
             fomDato shouldBe LocalDate.of(2023, 1, 1)
             tomDato shouldBe LocalDate.of(2023, 12, 31)
             trygdeavgiftsperioder shouldHaveSize 0

@@ -18,6 +18,9 @@ public interface BehandlingsresultatRepository extends JpaRepository<Behandlings
     @EntityGraph(attributePaths = {"anmodningsperioder"}, type = EntityGraph.EntityGraphType.LOAD)
     Optional<Behandlingsresultat> findWithAnmodningsperioderById(Long behandlingID);
 
+    @EntityGraph(attributePaths = {"helseutgiftDekkesPerioder"}, type = EntityGraph.EntityGraphType.LOAD)
+    Optional<Behandlingsresultat> findWithHelseutgiftDekkesPerioderById(Long behandlingID);
+
     List<Behandlingsresultat> findAllByFakturaserieReferanse(String fakturaserieReferanse);
 
     @EntityGraph(attributePaths = {"lovvalgsperioder", "medlemskapsperioder"}, type = EntityGraph.EntityGraphType.LOAD)
