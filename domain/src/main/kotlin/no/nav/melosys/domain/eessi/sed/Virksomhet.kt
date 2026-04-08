@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.eessi.sed
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
 import org.apache.commons.lang3.StringUtils
 import java.util.*
@@ -9,6 +10,7 @@ class Virksomhet {
     var adresse: Adresse? = null
     var orgnr: String? = null
 
+    @JsonCreator
     constructor()
 
     constructor(navn: String?, orgnr: String?, adresse: Adresse?) {

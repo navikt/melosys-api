@@ -1,9 +1,10 @@
 package no.nav.melosys.service.aareg
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.introspect.AnnotatedMember
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.cfg.MapperConfig
+import tools.jackson.databind.introspect.AnnotatedMember
+import tools.jackson.databind.introspect.JacksonAnnotationIntrospector
+import tools.jackson.databind.json.JsonMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
@@ -88,29 +89,26 @@ internal class ArbeidsforholdServiceTest {
 
         val arbeidsforholdDokument = saksopplysning.dokument as ArbeidsforholdDokument
         val arbeidsforhold = arbeidsforholdDokument.arbeidsforhold
-        val objectMapper = ObjectMapper().apply {
-            registerModule(JavaTimeModule())
-            setAnnotationIntrospector(object : JacksonAnnotationIntrospector() {
-                override fun hasIgnoreMarker(m: AnnotatedMember): Boolean {
+        val objectMapper = JsonMapper.builder()
+            .annotationIntrospector(object : JacksonAnnotationIntrospector() {
+                override fun hasIgnoreMarker(config: MapperConfig<*>, m: AnnotatedMember): Boolean {
                     // Ikke sjekk disse siden daylight saving vil forandre offset med 1 time og få testen til å feile
                     val exclusions = listOf("opprettelsestidspunkt", "sistBekreftet")
-                    return exclusions.contains(m.name) || super.hasIgnoreMarker(m)
+                    return exclusions.contains(m.name) || super.hasIgnoreMarker(config, m)
                 }
             })
-        }
+            .build()
         val result = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(arbeidsforhold)
         result shouldBe expectedRestResult
     }
 
     private val expectedRestResult = """
         [ {
-          "arbeidsforholdID" : null,
-          "arbeidsforholdIDnav" : 123456,
+          "Aordning" : false,
           "ansettelsesPeriode" : {
-            "fom" : [ 2014, 7, 1 ],
+            "fom" : "2014-07-01",
             "tom" : null
           },
-          "arbeidsforholdstype" : "ordinaertArbeidsforhold",
           "arbeidsavtaler" : [ {
             "arbeidstidsordning" : {
               "kode" : "ikkeSkift"
@@ -121,14 +119,14 @@ internal class ArbeidsforholdServiceTest {
               "term" : "IT-KONSULENT"
             },
             "gyldighetsperiode" : {
-              "fom" : [ 2014, 7, 1 ],
-              "tom" : [ 2015, 12, 31 ]
+              "fom" : "2014-07-01",
+              "tom" : "2015-12-31"
             },
             "avtaltArbeidstimerPerUke" : 37.5,
             "stillingsprosent" : 49.5,
-            "sisteLoennsendringsdato" : [ 2014, 7, 1 ],
+            "sisteLoennsendringsdato" : "2014-07-01",
             "beregnetAntallTimerPrUke" : 26.5,
-            "endringsdatoStillingsprosent" : [ 2014, 7, 1 ],
+            "endringsdatoStillingsprosent" : "2014-07-01",
             "skipsregister" : null,
             "skipstype" : null,
             "maritimArbeidsavtale" : false,
@@ -136,36 +134,38 @@ internal class ArbeidsforholdServiceTest {
             "antallTimerGammeltAa" : null,
             "fartsomraade" : null
           } ],
+          "arbeidsforholdID" : null,
+          "arbeidsforholdIDnav" : 123456,
+          "arbeidsforholdstype" : "ordinaertArbeidsforhold",
+          "arbeidsgiverID" : "991609407",
+          "arbeidsgivertype" : "ORGANISASJON",
+          "arbeidstakerID" : "31126700000",
+          "opplysningspliktigID" : "991609407",
+          "opplysningspliktigtype" : "ORGANISASJON",
           "permisjonOgPermittering" : [ {
+            "permisjonOgPermittering" : "Permisjon med foreldrepenger",
             "permisjonsId" : "123-xyz",
             "permisjonsPeriode" : {
-              "fom" : [ 2014, 7, 1 ],
-              "tom" : [ 2015, 12, 31 ]
+              "fom" : "2014-07-01",
+              "tom" : "2015-12-31"
             },
-            "permisjonsprosent" : 50.5,
-            "permisjonOgPermittering" : "Permisjon med foreldrepenger"
+            "permisjonsprosent" : 50.5
           } ],
-          "utenlandsopphold" : [ {
-            "periode" : {
-              "fom" : [ 2014, 7, 1 ],
-              "tom" : [ 2015, 12, 31 ]
-            },
-            "land" : "JPN",
-            "rapporteringsAarMaaned" : [ 2017, 12 ]
-          } ],
-          "arbeidsgivertype" : "ORGANISASJON",
-          "arbeidsgiverID" : "991609407",
-          "arbeidstakerID" : "31126700000",
-          "opplysningspliktigtype" : "ORGANISASJON",
-          "opplysningspliktigID" : "991609407",
-          "Aordning" : false,
           "timerTimelonnet" : [ {
             "antallTimer" : 37.5,
             "timelonnetPeriode" : {
-              "fom" : [ 2014, 7, 1 ],
-              "tom" : [ 2015, 12, 31 ]
+              "fom" : "2014-07-01",
+              "tom" : "2015-12-31"
             },
-            "rapporteringsAarMaaned" : [ 2018, 5 ]
+            "rapporteringsAarMaaned" : "2018-05"
+          } ],
+          "utenlandsopphold" : [ {
+            "land" : "JPN",
+            "periode" : {
+              "fom" : "2014-07-01",
+              "tom" : "2015-12-31"
+            },
+            "rapporteringsAarMaaned" : "2017-12"
           } ]
         } ]
 """.trimIndent()

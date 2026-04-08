@@ -6,8 +6,8 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @ActiveProfiles("test")
 @SpringBootTest(
     classes = [Application::class],
-    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @EmbeddedKafka
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)

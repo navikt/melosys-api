@@ -1,7 +1,7 @@
 package no.nav.melosys.itest
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
 import io.getunleash.FakeUnleash
 import io.getunleash.Unleash
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -12,7 +12,7 @@ import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.kafka.test.context.EmbeddedKafka
@@ -25,7 +25,7 @@ import org.springframework.test.context.DynamicPropertySource
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @SpringBootTest(
     classes = [Application::class],
-    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @EmbeddedKafka(
     count = 1, controlledShutdown = true, partitions = 1,

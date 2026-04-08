@@ -26,7 +26,7 @@ class BasicAuthSakClient(
             .block() ?: throw TekniskException("Mangler respons fra Sak")
     }
 
-    private val auth: String?
+    private val auth: String
         get() {
             if (ThreadLocalAccessInfo.shouldUseOidcToken()) {
                 throw TekniskException("Sak kan kun bli kalt i fra prosess")

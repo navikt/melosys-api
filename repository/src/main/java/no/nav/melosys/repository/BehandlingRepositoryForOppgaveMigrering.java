@@ -2,6 +2,7 @@ package no.nav.melosys.repository;
 
 import java.util.Collection;
 import java.util.List;
+import org.jspecify.annotations.Nullable;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.SakOgBehandlingDTO;
@@ -10,7 +11,6 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.lang.Nullable;
 
 public interface BehandlingRepositoryForOppgaveMigrering extends CrudRepository<Behandling, Long> {
     @EntityGraph(attributePaths = "saksopplysninger")

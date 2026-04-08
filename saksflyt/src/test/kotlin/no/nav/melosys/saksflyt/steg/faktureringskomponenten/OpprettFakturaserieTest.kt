@@ -728,6 +728,7 @@ class OpprettFakturaserieTest {
 
         val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak
 
+
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = BEHANDLING_ID
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
@@ -825,7 +826,7 @@ class OpprettFakturaserieTest {
             }
         }
 
-        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak!!
+        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak
 
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = BEHANDLING_ID
@@ -924,7 +925,7 @@ class OpprettFakturaserieTest {
             }
         }
 
-        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak!!
+        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak
 
         // Legg til en annen behandling på samme fagsak
         Behandling.forTest {
@@ -1488,7 +1489,7 @@ class OpprettFakturaserieTest {
             }
         }
 
-        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak!!
+        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak
 
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = BEHANDLING_ID
@@ -1589,7 +1590,7 @@ class OpprettFakturaserieTest {
             }
         }
 
-        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak!!
+        val sharedFagsak = opprinneligBehandlingsresultat.behandling!!.fagsak
 
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = BEHANDLING_ID

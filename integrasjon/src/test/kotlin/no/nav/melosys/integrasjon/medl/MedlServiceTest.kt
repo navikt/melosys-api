@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.medl
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import tools.jackson.databind.ObjectMapper
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.FieldsEqualityCheckConfig
@@ -45,7 +44,7 @@ import java.time.LocalDate
 internal class MedlServiceTest {
 
     private var mockRestClient = mockk<MedlemskapClient>()
-    private val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
+    private val objectMapper = ObjectMapper()
     private val medlService: MedlService = MedlService(mockRestClient, objectMapper)
 
     @Test
@@ -469,15 +468,15 @@ internal class MedlServiceTest {
             }
         }
 
-    private fun hentMedlemskapsunntakListe() = objectMapper.readValue(
-        javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodelisteResponse.json"),
-        Array<MedlemskapsunntakForGet>::class.java
-    ).toList()
+    private fun hentMedlemskapsunntakListe() =
+        javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodelisteResponse.json")!!.openStream().use { stream ->
+            objectMapper.readValue(stream, Array<MedlemskapsunntakForGet>::class.java)
+        }.toList()
 
-    private fun hentMedlemskapsunntak() = objectMapper.readValue(
-        javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodeResponse.json"),
-        MedlemskapsunntakForGet::class.java
-    )
+    private fun hentMedlemskapsunntak() =
+        javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodeResponse.json")!!.openStream().use { stream ->
+            objectMapper.readValue(stream, MedlemskapsunntakForGet::class.java)
+        }
 
     companion object {
         private const val FNR = "77777777773"

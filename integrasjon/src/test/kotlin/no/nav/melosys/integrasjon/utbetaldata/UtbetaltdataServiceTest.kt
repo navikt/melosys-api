@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.utbetaldata
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.FieldsEqualityCheckConfig
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
@@ -24,7 +24,7 @@ import java.time.LocalDate
 class UtbetaltdataServiceTest {
 
     private var mockRestClient = mockk<UtbetaltdataClient>()
-    private val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
+    private val objectMapper = jacksonObjectMapper()
     private val utbetaltdataServiceV2: UtbetaltdataService = UtbetaltdataService(mockRestClient, objectMapper)
 
     @Test
@@ -143,10 +143,10 @@ class UtbetaltdataServiceTest {
             .utbetalinger.shouldHaveSize(2)
     }
 
-    private fun hentUtbetalingListe(): List<Utbetaling> = objectMapper.readValue(
-        javaClass.classLoader.getResource("mock/utbetaldata/ubetalingResponse.json"),
-        Array<Utbetaling>::class.java
-    ).toList()
+    private fun hentUtbetalingListe(): List<Utbetaling> =
+        javaClass.classLoader.getResource("mock/utbetaldata/ubetalingResponse.json")!!.openStream().use { stream ->
+            objectMapper.readValue(stream, Array<Utbetaling>::class.java) as Array<Utbetaling>
+        }.toList()
 
     companion object {
         private const val FNR = "77777777773"

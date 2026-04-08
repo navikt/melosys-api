@@ -52,6 +52,6 @@ public class Kontrollfeil {
 
     @Override
     public String toString() {
-        return String.format("%s %s", kode, felter);
+        return "%s %s".formatted(kode, felter);
     }
 }

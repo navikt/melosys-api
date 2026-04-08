@@ -23,6 +23,7 @@ import org.slf4j.MDC;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,7 +67,12 @@ public class ProsessinstansBehandler {
         }
 
         prosessinstans.setStatus(UNDER_BEHANDLING);
-        lagreProsessinstans(prosessinstans);
+        try {
+            lagreProsessinstans(prosessinstans);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            log.info("Prosessinstans {} finnes ikke lenger i databasen, hopper over behandling", prosessinstans.getId());
+            return;
+        }
 
         ProsessflytDefinisjon.finnFlytForProsessType(prosessinstans.getType()).ifPresentOrElse(
             prosessFlyt -> this.utførFlyt(prosessinstans, prosessFlyt),
@@ -171,7 +177,11 @@ public class ProsessinstansBehandler {
         log.error("Feil ved behandling av prosessinstans {} på steg {}", prosessinstans.getId(), steg, e);
         prosessinstans.leggTilHendelse(steg, e);
         prosessinstans.setStatus(ProsessStatus.FEILET);
-        lagreProsessinstans(prosessinstans);
+        try {
+            lagreProsessinstans(prosessinstans);
+        } catch (ObjectOptimisticLockingFailureException ex) {
+            log.info("Prosessinstans {} ble slettet under feilhåndtering", prosessinstans.getId());
+        }
     }
 
     private Prosessinstans lagreProsessinstans(Prosessinstans prosessinstans) {

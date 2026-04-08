@@ -1,8 +1,7 @@
 package no.nav.melosys.integrasjon.ereg
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
@@ -126,7 +125,7 @@ class EregDtoTilSaksopplysningKonverterTests {
     }
 
     private fun hentOrganisasjon(file: String) = jacksonObjectMapper()
-        .registerModule(JavaTimeModule())
+        
         .readValue<Organisasjon>(hentRessurs("mock/organisasjon/konverter/$file"))
 
     private fun hentRessurs(fil: String): String = this::class.java.classLoader.getResource(fil)

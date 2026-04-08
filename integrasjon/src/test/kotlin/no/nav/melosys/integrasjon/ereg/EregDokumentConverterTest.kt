@@ -1,8 +1,7 @@
 package no.nav.melosys.integrasjon.ereg
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.assertions.withClue
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -17,7 +16,7 @@ import java.nio.charset.StandardCharsets
 
 class EregDokumentConverterTest {
 
-    private val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
+    private val mapper = jacksonObjectMapper()
 
     @Test
     fun `Konvertering av virksomhet til json skal bli som forventet`() {

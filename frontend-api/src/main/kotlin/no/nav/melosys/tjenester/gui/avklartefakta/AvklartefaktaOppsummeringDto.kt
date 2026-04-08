@@ -5,7 +5,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.ArbeidslandDto
 import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.VirksomheterDto
 
-data class AvklartefaktaOppsummeringDto internal constructor(
+data class AvklartefaktaOppsummeringDto(
     val virksomheter: VirksomheterDto,
     val arbeidsland: ArbeidslandDto,
     val fullstendigManglendeInnbetaling: Boolean?,

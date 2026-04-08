@@ -1,10 +1,8 @@
 package no.nav.melosys.tjenester.gui.config.jackson.serialize;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdSerializer;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
@@ -23,7 +21,7 @@ public class MedlemsperiodeSerializer extends StdSerializer<Medlemsperiode> {
     }
 
     @Override
-    public void serialize(Medlemsperiode medlemsperiode, JsonGenerator generator, SerializerProvider provider) throws IOException {
+    public void serialize(Medlemsperiode medlemsperiode, JsonGenerator generator, SerializationContext provider) {
         MedlemsperiodeDto medlemsperiodeDto = new MedlemsperiodeDto();
         Periode periode = medlemsperiode.getPeriode();
 
@@ -37,7 +35,7 @@ public class MedlemsperiodeSerializer extends StdSerializer<Medlemsperiode> {
         medlemsperiodeDto.setLovvalg(getKodeverdi(FellesKodeverk.LOVVALG_MEDL, medlemsperiode.getLovvalg()));
         medlemsperiodeDto.setStatus(getKodeverdi(FellesKodeverk.PERIODESTATUS_MEDL, medlemsperiode.getStatus()));
         medlemsperiodeDto.setTrygdedekning(getKodeverdi(FellesKodeverk.DEKNING_MEDL, medlemsperiode.getTrygdedekning()));
-        generator.writeObject(medlemsperiodeDto);
+        generator.writePOJO(medlemsperiodeDto);
     }
 
     private PeriodeDto getPeriode(Periode periode) {

@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.tilgangsmaskinen
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.any
@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
+import org.springframework.boot.webclient.test.autoconfigure.AutoConfigureWebClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -56,7 +56,7 @@ class TilgangsmaskinenClientTest(
 ) {
     private val processUUID = UUID.randomUUID()
     private val mockServer = WireMockServer(WireMockConfiguration.wireMockConfig().port(mockServerPort))
-    private val objectMapper = ObjectMapper()
+    private val objectMapper = JsonMapper.builder().build()
 
     @BeforeAll
     fun beforeAll() {

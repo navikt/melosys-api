@@ -4,13 +4,14 @@ import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
 import no.nav.melosys.integrasjon.kafka.KafkaConsumerContainerFactory
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
-import org.springframework.kafka.support.serializer.JsonDeserializer
+import tools.jackson.databind.ObjectMapper
+import no.nav.melosys.integrasjon.kafka.LoggingDeserializer
 import org.springframework.stereotype.Component
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
@@ -37,14 +38,15 @@ class MelosysHendelseKafkaConsumer {
     class Config {
         @Bean
         fun melosysMeldingListenerContainerFactory(
-            kafkaProperties: KafkaProperties
+            kafkaProperties: KafkaProperties,
+            objectMapper: ObjectMapper
         ): KafkaConsumerContainerFactory<MelosysHendelse> =
             ConcurrentKafkaListenerContainerFactory<String, MelosysHendelse>().apply {
-                consumerFactory = DefaultKafkaConsumerFactory(
-                    kafkaProperties.buildConsumerProperties(null),
+                setConsumerFactory(DefaultKafkaConsumerFactory(
+                    kafkaProperties.buildConsumerProperties(),
                     StringDeserializer(),
-                    JsonDeserializer(MelosysHendelse::class.java, false)
-                )
+                    LoggingDeserializer(objectMapper, MelosysHendelse::class.java)
+                ))
             }
     }
 }

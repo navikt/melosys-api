@@ -3,9 +3,9 @@ package no.nav.melosys.integrasjon.pdl;
 import java.util.*;
 import java.util.function.Predicate;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectWriter;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.graphql.GraphQLError;
@@ -130,7 +130,7 @@ public class PDLClientImpl implements PDLClient {
         String graphQLErrorsAsJSON = null;
         try {
             graphQLErrorsAsJSON = JSON_WRITER.writeValueAsString(errors);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error("GraphQL feil kunne ikke serialiseres: ", e);
         }
         return graphQLErrorsAsJSON;

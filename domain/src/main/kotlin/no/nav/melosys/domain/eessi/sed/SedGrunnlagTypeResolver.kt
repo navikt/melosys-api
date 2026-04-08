@@ -1,9 +1,9 @@
 package no.nav.melosys.domain.eessi.sed
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.databind.DatabindContext
-import com.fasterxml.jackson.databind.JavaType
-import com.fasterxml.jackson.databind.jsontype.impl.TypeIdResolverBase
+import tools.jackson.databind.DatabindContext
+import tools.jackson.databind.JavaType
+import tools.jackson.databind.jsontype.impl.TypeIdResolverBase
 import no.nav.melosys.domain.eessi.SedType
 
 /**
@@ -22,11 +22,11 @@ class SedGrunnlagTypeResolver : TypeIdResolverBase() {
         this.baseType = javaType
     }
 
-    override fun idFromValue(o: Any?): String = "N/A"
+    override fun idFromValue(ctxt: DatabindContext, o: Any?): String = "N/A"
 
-    override fun idFromValueAndType(o: Any?, aClass: Class<*>?): String? = null
+    override fun idFromValueAndType(ctxt: DatabindContext, o: Any?, aClass: Class<*>?): String? = null
 
-    override fun idFromBaseType(): String? = null
+    override fun idFromBaseType(ctxt: DatabindContext): String? = null
 
     /**
      * Løser konkret Java-type basert på SED-type streng.

@@ -267,6 +267,22 @@ queueManager:
 server:
   port: 8093
 spring:
+  autoconfigure:
+    exclude:
+      - graphql.kickstart.autoconfigure.web.servlet.GraphQLWebAutoConfiguration
+      - graphql.kickstart.autoconfigure.web.servlet.GraphQLWebSecurityAutoConfiguration
+      - graphql.kickstart.autoconfigure.web.servlet.GraphQLWebsocketAutoConfiguration
+      - graphql.kickstart.autoconfigure.web.servlet.GraphQLInstrumentationAutoConfiguration
+      - graphql.kickstart.autoconfigure.web.reactive.GraphQLSpringWebfluxAutoConfiguration
+      - graphql.kickstart.autoconfigure.web.reactive.MonoAutoConfiguration
+      - graphql.kickstart.autoconfigure.tools.GraphQLJavaToolsAutoConfiguration
+      - graphql.kickstart.autoconfigure.annotations.GraphQLAnnotationsAutoConfiguration
+      - graphql.kickstart.autoconfigure.editor.graphiql.GraphiQLAutoConfiguration
+      - graphql.kickstart.autoconfigure.editor.altair.AltairAutoConfiguration
+      - graphql.kickstart.autoconfigure.editor.voyager.VoyagerAutoConfiguration
+      - graphql.kickstart.autoconfigure.editor.voyager.ReactiveVoyagerAutoConfiguration
+      - graphql.kickstart.autoconfigure.editor.playground.PlaygroundAutoConfiguration
+      - graphql.kickstart.autoconfigure.editor.playground.PlaygroundWebFluxAutoConfiguration
   datasource:
     driverClassName: oracle.jdbc.OracleDriver
     password: melosyspwd

@@ -77,8 +77,7 @@ public class TrygdeavtaleAdresseSjekker {
                 persondata.finnBostedsadresse(),
                 persondata.finnOppholdsadresse(),
                 persondata.finnKontaktadresse())
-            .filter(Optional::isPresent)
-            .map(Optional::get);
+            .flatMap(Optional::stream);
     }
 
     private boolean sjekkAdresseMotLand(StrukturertAdresse adresse, Land_iso2 landkode) {

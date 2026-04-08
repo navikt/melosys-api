@@ -64,6 +64,7 @@ class SaksflytapiArchitectureTest {
             "com..",
             "org..",
             "io..",
+            "tools..",
             "no.nav.security.."
         )
     }

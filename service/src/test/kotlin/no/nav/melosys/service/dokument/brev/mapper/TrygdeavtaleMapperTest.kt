@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
@@ -474,20 +474,7 @@ class TrygdeavtaleMapperTest {
         private val FORVENTEDE_FELTER_FOR_INNVILGELSE_STORBRITANNIA_MAPPING = String.format(
             """
             {
-              "innvilgelse" : {
-                "innledningFritekst" : "innledningFritekst",
-                "begrunnelseFritekst" : "begrunnelse",
-                "ektefelleFritekst" : "ektefelleFritekst",
-                "barnFritekst" : "barnFritekst"
-              },
               "artikkel" : "UK_ART6_1",
-              "soknad" : {
-                "soknadsdato" : "%s",
-                "periodeFom" : "%s",
-                "periodeTom" : "%s",
-                "virksomhetsnavn" : "Bang Hansen",
-                "soknadsland" : "Storbritannia"
-              },
               "familie" : {
                 "minstEttOmfattetFamiliemedlem" : true,
                 "ektefelle" : {
@@ -514,22 +501,39 @@ class TrygdeavtaleMapperTest {
                   "foedselsdato" : "%s"
                 } ]
               },
+              "innvilgelse" : {
+                "innledningFritekst" : "innledningFritekst",
+                "begrunnelseFritekst" : "begrunnelse",
+                "ektefelleFritekst" : "ektefelleFritekst",
+                "barnFritekst" : "barnFritekst"
+              },
+              "soknad" : {
+                "soknadsdato" : "%s",
+                "periodeFom" : "%s",
+                "periodeTom" : "%s",
+                "virksomhetsnavn" : "Bang Hansen",
+                "soknadsland" : "Storbritannia"
+              },
               "virksomhetArbeidsgiverSkalHaKopi" : false
             }""".trimIndent(),
-            SOKNADSDATO,
-            DokgenTestData.LOVVALGSPERIODE_FOM,
-            DokgenTestData.LOVVALGSPERIODE_TOM,
             EKTEFELLE_FNR,
             LocalDate.of(1980, 10, 1),
             BARN1_FNR,
             LocalDate.of(2000, 10, 1),
             BARN2_FNR,
-            LocalDate.of(1990, 10, 2)
+            LocalDate.of(1990, 10, 2),
+            SOKNADSDATO,
+            DokgenTestData.LOVVALGSPERIODE_FOM,
+            DokgenTestData.LOVVALGSPERIODE_TOM
         )
 
         private val FORVENTEDE_FELTER_FOR_ATTEST_STORBRITANNIA_MAPPING = String.format(
             """
             {
+              "arbeidsgiverNorge" : {
+                "virksomhetsnavn" : "Bang Hansen",
+                "fullstendigAdresse" : [ "Strukturert Gate 12B", "4321", "Poststed", "Bulgaria" ]
+              },
               "arbeidstaker" : {
                 "navn" : "Donald Duck",
                 "foedselsdato" : null,
@@ -550,19 +554,15 @@ class TrygdeavtaleMapperTest {
                   "dnr" : null
                 } ]
               },
-              "arbeidsgiverNorge" : {
-                "virksomhetsnavn" : "Bang Hansen",
-                "fullstendigAdresse" : [ "Strukturert Gate 12B", "4321", "Poststed", "Bulgaria" ]
+              "representant" : {
+                "navn" : "Foretaksnavn",
+                "adresse" : [ "Uk address" ]
               },
               "utsendelse" : {
                 "artikkel" : "UK_ART6_1",
                 "oppholdsadresse" : [ "Unknown" ],
                 "startdato" : "%s",
                 "sluttdato" : "%s"
-              },
-              "representant" : {
-                "navn" : "Foretaksnavn",
-                "adresse" : [ "Uk address" ]
               },
               "vedtaksdato" : "%s"
             }""".trimIndent(),
