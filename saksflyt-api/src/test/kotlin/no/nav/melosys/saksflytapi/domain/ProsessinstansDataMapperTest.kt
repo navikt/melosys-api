@@ -159,6 +159,8 @@ class ProsessinstansDataMapperTest {
               "type": "UTSENDT_ARBEIDSTAKER",
               "fnr": "12345678901",
               "orgnr": "123456789",
+              "opprettetDato": "2024-01-01T12:00:00",
+              "endretDato": "2024-01-02T08:30:00",
               "metadata": {
                 "metadatatype": "UTSENDT_ARBEIDSTAKER_DEG_SELV",
                 "skjemadel": "ARBEIDSTAKERS_DEL",
@@ -206,6 +208,8 @@ class ProsessinstansDataMapperTest {
                 "type": "UTSENDT_ARBEIDSTAKER",
                 "fnr": "12345678901",
                 "orgnr": "123456789",
+                "opprettetDato": "2024-01-01T12:00:00",
+                "endretDato": "2024-01-02T08:30:00",
                 "metadata": {
                   "metadatatype": "UTSENDT_ARBEIDSTAKER_DEG_SELV",
                   "skjemadel": "ARBEIDSTAKERS_DEL",
