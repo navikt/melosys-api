@@ -72,6 +72,8 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
             status = SkjemaStatus.SENDT,
             fnr = fnr,
             orgnr = orgnr,
+            opprettetDato = LocalDateTime.now(),
+            endretDato = LocalDateTime.now(),
             metadata = when (skjemadel) {
                 Skjemadel.ARBEIDSTAKERS_DEL -> DegSelvMetadata(
                     skjemadel = skjemadel,

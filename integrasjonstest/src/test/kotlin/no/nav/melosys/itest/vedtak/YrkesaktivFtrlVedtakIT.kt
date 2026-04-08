@@ -24,9 +24,11 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
 import no.nav.melosys.itest.AvgiftFaktureringTestBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.repository.BehandlingRepository
+import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -61,6 +63,8 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
+    @Autowired private val årsavregningService: ÅrsavregningService,
+    @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
 ) : AvgiftFaktureringTestBase(TrygdeavgiftsberegningTransformer()) {
@@ -232,6 +236,98 @@ class YrkesaktivFtrlVedtakIT(
                     }
                 }
             }
+
+        mockServer.verify(
+            1,
+            WireMock.postRequestedFor(WireMock.urlEqualTo("/api/v1/mal/varsel_manglende_innbetaling/lag-pdf?somKopi=false&utkast=false"))
+        )
+    }
+
+    @Test
+    fun `manglende innbetaling på ferdigbehandlet årsavregning skal opprette ny MANGLENDE_INNBETALING_TRYGDEAVGIFT behandling`() {
+        // Reproduserer bug der BeanUtils.cloneBean på Hibernate-entitet gav NPE i replikerAvklartefakta
+        // fordi avklartefakta (satt under førstegangsbehandling) ikke var lastet i session-cache
+        // da replikerBehandlingsresultat kjørte i OpprettManglendeInnbetalingBehandling.lagNyBehandling.
+        // Løsningen er Hibernate.unproxy() i ReplikerBehandlingsresultatService.
+        val tidligereÅr = inneværendeÅr - 1
+        val saksnummer = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false, tidligereÅr)
+
+        val årsavregningBehandlingId = fagsakRepository.findBySaksnummer(saksnummer)
+            .shouldBePresent().hentAktiveÅrsavregninger().first().id
+
+        årsavregningService.opprettÅrsavregning(årsavregningBehandlingId, tidligereÅr)
+        val årsavregning = behandlingsresultatRepository
+            .findWithLovvalgOgMedlemskapsperioderById(årsavregningBehandlingId)
+            .shouldBePresent().årsavregning
+
+        val periode = DatoPeriodeDto(LocalDate.of(tidligereÅr, 1, 1), LocalDate.of(tidligereÅr, 2, 1))
+        val skattefordholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = periode.fom
+                tomDato = periode.tom
+                skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+            }
+        )
+        val inntektsperioder = listOf(
+            Inntektsperiode().apply {
+                fomDato = periode.fom
+                tomDato = periode.tom
+                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                isArbeidsgiversavgiftBetalesTilSkatt = false
+                avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
+                avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
+            }
+        )
+
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+            årsavregningBehandlingId,
+            skattefordholdsperioder,
+            inntektsperioder,
+            LocalDate.of(tidligereÅr, 4, 4)
+        )
+
+        val beregnetAvgiftBelop = BigDecimal(2000)
+        årsavregningService.oppdater(årsavregningBehandlingId, årsavregning!!.id, beregnetAvgiftBelop)
+
+        val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
+            .medBehandlingsresultatType(Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT)
+            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
+            .medBestillersId("komponent test")
+            .build()
+
+        executeAndWait(
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
+        ) {
+            vedtaksfattingFasade.fattVedtak(årsavregningBehandlingId, vedtakRequestÅrsavregning)
+        }
+
+        // Årsavregning er nå ferdigbehandlet med fakturaserieReferanse satt.
+        // Simuler manglende innbetaling på årsavregningsfakturaen.
+        executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
+        ) {
+            manglendeFakturabetalingMeldingTemplate.send(
+                kafkaTopic, ManglendeFakturabetalingMelding(
+                    fakturaserieReferanse = fakturaserieReferanse,
+                    betalingsstatus = Betalingsstatus.IKKE_BETALT,
+                    datoMottatt = LocalDate.now(),
+                    fakturanummer = "23004119"
+                )
+            )
+        }
+
+        fagsakRepository.findBySaksnummer(saksnummer).shouldBePresent().run {
+            finnAktivBehandlingIkkeÅrsavregning().shouldNotBeNull().run {
+                type shouldBe Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+                tema shouldBe Behandlingstema.YRKESAKTIV
+            }
+        }
 
         mockServer.verify(
             1,

@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import no.nav.dok.melosysbrev._000084.BestemmelseDetSoekesUnntakFraKode
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType
 import no.nav.melosys.domain.*
@@ -135,14 +136,35 @@ class AnmodningUnntakMapperTest {
         }
     }
 
-    private fun lagBrevData(): BrevDataAnmodningUnntak = BrevDataAnmodningUnntak(
+    @Test
+    fun `fritekst med linjeskift konverteres til Metaforce-format`() {
+        val behandling = lagBehandling()
+        val resultat = lagBehandlingsresultat {
+            anmodningsperiode {
+                fom = LocalDate.of(2000, 1, 1)
+                tom = LocalDate.of(2001, 1, 1)
+                lovvalgsland = Land_iso2.NO
+                unntakFraLovvalgsland = Land_iso2.DK
+            }
+        }
+        val brevData = lagBrevData(anmodningFritekst = "Avsnitt A\nAvsnitt B").apply {
+            fritekst = "Linje 1\nLinje 2"
+        }
+
+        val xml = mapper.mapTilBrevXML(lagFellesType(), lagMelosysNAVFelles(), behandling, resultat, brevData)
+
+        xml shouldContain "Linje 1[_¶_]Linje 2"
+        xml shouldContain "Avsnitt A[_¶_]Avsnitt B"
+    }
+
+    private fun lagBrevData(anmodningFritekst: String? = null): BrevDataAnmodningUnntak = BrevDataAnmodningUnntak(
         "Z999999",
         Landkoder.AT.beskrivelse,
         AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG),
         Yrkesaktivitetstyper.SELVSTENDIG,
         emptySet(),
         emptySet(),
-        null
+        anmodningFritekst
     )
 
     // FellesType er ekstern brev-type (ikke domain entity), derfor brukes .apply her
