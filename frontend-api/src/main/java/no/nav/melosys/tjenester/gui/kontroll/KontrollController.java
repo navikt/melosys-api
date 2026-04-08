@@ -67,14 +67,15 @@ public class KontrollController {
         if (ferdigbehandlingKontrollerDto.vedtakstype() == null) {
             throw new FunksjonellException("Vedtakstype mangler.");
         }
+        boolean skalOppdatere = Boolean.TRUE.equals(ferdigbehandlingKontrollerDto.skalRegisteropplysningerOppdateres());
         aksesskontroll.autoriser(
             ferdigbehandlingKontrollerDto.behandlingID(),
-            ferdigbehandlingKontrollerDto.skalRegisteropplysningerOppdateres() ? Aksesstype.SKRIV : Aksesstype.LES
+            skalOppdatere ? Aksesstype.SKRIV : Aksesstype.LES
         );
 
         Collection<Kontrollfeil> kontrollfeil = ferdigbehandlingKontrollFacade.kontroller(
             ferdigbehandlingKontrollerDto.behandlingID(),
-            ferdigbehandlingKontrollerDto.skalRegisteropplysningerOppdateres(),
+            skalOppdatere,
             ferdigbehandlingKontrollerDto.behandlingsresultattype(),
             ferdigbehandlingKontrollerDto.kontrollerSomSkalIgnoreres()
         );

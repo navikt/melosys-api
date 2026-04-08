@@ -141,10 +141,10 @@ public class AvklartefaktaController {
     @PostMapping("{behandlingID}/ukjent-sluttdato-medlemskapsperiode")
     @Operation(summary = "Lagre ukjent sluttdato som avklartefakta")
     public AvklartefaktaOppsummeringDto lagreUkjentSluttdatoMedlemskapsperiodeSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
-                                                                                               @RequestBody boolean ukjentSluttdato) {
+                                                                                               @RequestBody Boolean ukjentSluttdato) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
-        avklartUkjentSluttdatoMedlemskapsperiodeService.lagreUkjentSluttdatoMedlemskapsperiodeSomAvklartefakta(behandlingID, ukjentSluttdato);
+        avklartUkjentSluttdatoMedlemskapsperiodeService.lagreUkjentSluttdatoMedlemskapsperiodeSomAvklartefakta(behandlingID, Boolean.TRUE.equals(ukjentSluttdato));
 
         return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
