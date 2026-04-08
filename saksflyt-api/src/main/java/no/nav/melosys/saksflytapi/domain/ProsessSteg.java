@@ -17,6 +17,8 @@ public enum ProsessSteg {
     HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE("HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE", "Henter mottakerinstitusjon fra tidligere sendt BUC ved forkortet periode"),
     HENT_REGISTEROPPLYSNINGER("HENT_REGISTER_OPPL", "Henter registeropplysninger"),
     HENT_SØKNADSDATA("HENT_SØKNADSDATA", "Henter søknadsdata"),
+    HÅNDTER_EKSISTERENDE_SAK_SØKNAD("HÅNDTER_EKSISTERENDE_SAK_SØKNAD", "Håndterer eksisterende sak for mottatt søknad"),
+    SEND_SAKSNUMMER_TIL_SKJEMA("SEND_SAKSNUMMER_TIL_SKJEMA", "Sender saksnummer tilbake til melosys-skjema-api"),
     JFR_SETT_VURDER_DOKUMENT("JFR_SETT_VURDER_DOKUMENT", "Setter status til VURDER_DOKUMENT"),
     JFR_TILDEL_BEHANDLINGSOPPGAVE("JFR_TILDEL_BEHANDLINGSOPPGAVE", "Tildeler behandlingsoppgave for gjeldende fagsak til en saksbehandler"),
     LAGRE_ANMODNINGSPERIODE_MEDL("LAGRE_ANMODNINGSPERIODE_MEDL", "Lagrer en anmodningsperiode som under avklaring i MEDL"),

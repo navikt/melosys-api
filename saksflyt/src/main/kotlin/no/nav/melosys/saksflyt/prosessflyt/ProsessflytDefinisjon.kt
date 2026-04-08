@@ -347,7 +347,15 @@ object ProsessflytDefinisjon {
             OPPRETT_OG_FERDIGSTILL_JOURNALPOST_SØKNAD,
             HENT_REGISTEROPPLYSNINGER,
             VURDER_INNGANGSVILKÅR,
-            OPPRETT_OPPGAVE
+            OPPRETT_OPPGAVE,
+            SEND_SAKSNUMMER_TIL_SKJEMA
+        ),
+        MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD to ProsessFlyt(
+            prosessType = MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD,
+            HENT_SØKNADSDATA,
+            HÅNDTER_EKSISTERENDE_SAK_SØKNAD,
+            OPPRETT_OG_FERDIGSTILL_JOURNALPOST_SØKNAD,
+            SEND_SAKSNUMMER_TIL_SKJEMA
         ),
         ProsessType.OPPDATER_FAKTURAMOTTAKER to ProsessFlyt(
             prosessType = ProsessType.OPPDATER_FAKTURAMOTTAKER,
