@@ -82,8 +82,10 @@ class OpprettOgFerdigstillJournalpostSøknad(
 
         val journalpostId = joarkFasade.opprettJournalpost(opprettJournalpost, true)
 
-        behandling.initierendeJournalpostId = journalpostId
-        behandlingService.lagre(behandling)
+        if (behandling.initierendeJournalpostId == null) {
+            behandling.initierendeJournalpostId = journalpostId
+            behandlingService.lagre(behandling)
+        }
 
         log.info { "Opprettet journalpost $journalpostId for digital søknad referanseId=$referanseId" }
     }
