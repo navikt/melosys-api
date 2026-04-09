@@ -84,11 +84,10 @@ class HåndterEksisterendeSakSøknad(
             fagsak.leggTilBehandling(nyBehandling)
             log.info { "Opprettet ny behandling ${nyBehandling.id} (NY_VURDERING) på eksisterende sak $saksnummer" }
 
-            // Lagre mottatte opplysninger på ny behandling
-            val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(søknadsdata)
-            val originalData = objectMapper.writeValueAsString(søknadsdata)
+            // Lagre mottatte opplysninger på ny behandling (kun periode + land)
+            val søknad = ForenkletSøknadMapper.tilSoeknad(søknadsdata)
             mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
-                nyBehandling.id, originalData, søknad, referanseId
+                nyBehandling.id, null, søknad, referanseId
             )
             nyBehandling
         }

@@ -86,13 +86,18 @@ class OpprettSakOgBehandlingSøknad(
 
         // Lagre alle relaterte skjemaId-er i mapping-tabellen
         val alleRelatertIder = samleRelaterteSkjemaIder(søknadsdata)
-        skjemaSakMappingService.lagreMappinger(alleRelatertIder, fagsak.saksnummer)
-
-        // Lagre mottatte opplysninger
-        val søknad = UtsendtArbeidstakerSøknadMapper.tilSoeknad(søknadsdata)
         val originalData = objectMapper.writeValueAsString(søknadsdata)
+        val innsendtDato = søknadsdata.innsendtTidspunkt.atZone(java.time.ZoneId.of("Europe/Oslo")).toInstant()
+        skjemaSakMappingService.lagreMappinger(
+            alleRelatertIder, fagsak.saksnummer,
+            originalData = originalData,
+            innsendtDato = innsendtDato
+        )
+
+        // Lagre mottatte opplysninger (kun periode + land)
+        val søknad = ForenkletSøknadMapper.tilSoeknad(søknadsdata)
         mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
-            behandling.id, originalData, søknad, referanseId
+            behandling.id, null, søknad, referanseId
         )
 
         prosessinstans.behandling = behandling
