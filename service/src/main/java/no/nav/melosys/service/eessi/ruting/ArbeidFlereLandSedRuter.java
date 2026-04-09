@@ -147,8 +147,7 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
 
     private void validerNorgeIkkeUtpektOgVedtakIkkeFattet(Behandling behandling, Behandlingsresultat behandlingsresultat) {
         if (behandling.erNorgeUtpekt() && behandlingsresultat.harVedtak()) {
-            throw new FunksjonellException(String.format(
-                "Det er allerede fattet vedtak på behandling %s med tema %s. Støtte for omgjøring ikke implementert",
+            throw new FunksjonellException("Det er allerede fattet vedtak på behandling %s med tema %s. Støtte for omgjøring ikke implementert".formatted(
                 behandling.getId(), behandling.getTema()));
         }
     }

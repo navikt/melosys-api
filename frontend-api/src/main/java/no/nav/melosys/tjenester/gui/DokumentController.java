@@ -59,7 +59,7 @@ public class DokumentController {
         }
 
         byte[] dokument = dokumentHentingService.hentDokument(journalpostID, dokumentID);
-        return lagResponseAvDokument(dokument, String.format("journalpost-dok-%s.pdf", dokumentID));
+        return lagResponseAvDokument(dokument, "journalpost-dok-%s.pdf".formatted(dokumentID));
     }
 
     @Deprecated(since = "MELOSYS-5899")
@@ -79,7 +79,7 @@ public class DokumentController {
         }
 
         byte[] dokument = dokumentHentingService.hentDokument(journalpostID, dokumentID);
-        return lagResponseAvDokument(dokument, String.format("journalpost-dok-%s.pdf", dokumentID));
+        return lagResponseAvDokument(dokument, "journalpost-dok-%s.pdf".formatted(dokumentID));
     }
 
     @Deprecated(since = "MELOSYS-5899")

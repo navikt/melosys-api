@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.medl
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import tools.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.UrlPattern
@@ -24,7 +23,7 @@ import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
+import org.springframework.boot.webclient.test.autoconfigure.AutoConfigureWebClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
@@ -50,8 +49,8 @@ class MedlServiceMvcTest(
     @Autowired oAuthMockServer: OAuthMockServer
 ) : ClientWireMockTestBase<String, Saksopplysning>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
 
-    private val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
 
+    private val objectMapper = ObjectMapper()
     private val medlService = MedlService(medlemskapClient, objectMapper)
 
     override fun createWireMock(): MappingBuilder {

@@ -4,7 +4,7 @@ import no.nav.melosys.saksflytapi.journalfoering.JournalfoeringTilordneRequest;
 
 public class JournalfoeringTilordneDto extends JournalfoeringDto {
     private String saksnummer; // Melosys saksnummer
-    private boolean ingenVurdering;
+    private Boolean ingenVurdering = false;
 
     public String getSaksnummer() {
         return saksnummer;
@@ -15,10 +15,10 @@ public class JournalfoeringTilordneDto extends JournalfoeringDto {
     }
 
     public boolean isIngenVurdering() {
-        return ingenVurdering;
+        return Boolean.TRUE.equals(ingenVurdering);
     }
 
-    public void setIngenVurdering(boolean ingenVurdering) {
+    public void setIngenVurdering(Boolean ingenVurdering) {
         this.ingenVurdering = ingenVurdering;
     }
 
@@ -34,12 +34,12 @@ public class JournalfoeringTilordneDto extends JournalfoeringDto {
             hoveddokument.tilDokumentRequest(),
             vedlegg.stream().map(DokumentDto::tilDokumentRequest).toList(),
             mottattDato,
-            skalTilordnes,
+            isSkalTilordnes(),
             forvaltningsmeldingMottaker,
             behandlingstemaKode,
             behandlingstypeKode,
             saksnummer,
-            ingenVurdering
+            isIngenVurdering()
         );
     }
 

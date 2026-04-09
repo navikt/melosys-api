@@ -155,7 +155,7 @@ class BrevmottakerServiceTest {
             medVirksomhet { orgnr = "orgnr" }
         }
         val behandling = lagBehandlingMed(fagsak)
-        val virksomhet = fagsak.hentVirksomhet()!!
+        val virksomhet = fagsak.hentVirksomhet()
 
         val mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(VIRKSOMHET), behandling)
 

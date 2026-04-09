@@ -106,7 +106,7 @@ public class AngiBehandlingsresultatService {
                 throw new FunksjonellException("Kan ikke endre til behandlingsresultattype: " + behandlingsresultattype.getBeskrivelse());
         }
 
-        throw new FunksjonellException(String.format("Kan ikke endre behandlingsresultattype til %s på sak %s", behandlingsresultattype, fagsak.getSaksnummer()));
+        throw new FunksjonellException("Kan ikke endre behandlingsresultattype til %s på sak %s".formatted(behandlingsresultattype, fagsak.getSaksnummer()));
     }
 
     private boolean erGyldigEndringForMEDLEM_I_FOLKETRYGDEN(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {

@@ -1,9 +1,10 @@
 package no.nav.melosys.integrasjon.inntekt
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import tools.jackson.databind.MapperFeature
+import tools.jackson.databind.SerializationFeature
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -23,7 +24,7 @@ import java.nio.charset.StandardCharsets
 
 class InntektDokumentConverterTest {
 
-    private val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
+    private val mapper = jacksonObjectMapper()
 
     @Test
     fun `sjekk json resulat fra konvertering for lagring i databaase mot fasit fra fil`() {
@@ -42,10 +43,12 @@ class InntektDokumentConverterTest {
     fun `sjekk json resulat fra konvertering for frontend mot fasit fra fil`() {
         val inntektResponse = mapper.readValue<InntektResponse>(hentRessurs("mock/inntekt/inntektClientResponse.json"))
         val forventetInntektDokumentrFrontEndJson = hentRessurs("mock/inntekt/InntektDocumentConverterFrontEndResult.json")
-        val mapperWithView = mapper
+        val mapperWithView = JsonMapper.builder()
+            .enable(MapperFeature.DEFAULT_VIEW_INCLUSION)
             .configure(SerializationFeature.INDENT_OUTPUT, true)
             .addMixIn(SaksopplysningDokument::class.java, SaksopplysningDokumentMixIn::class.java)
             .addMixIn(TilleggsinformasjonDetaljer::class.java, TilleggsinformasjonDetaljerMixIn::class.java)
+            .build()
             .writerWithView(DokumentView.FrontendApi::class.java)
 
 

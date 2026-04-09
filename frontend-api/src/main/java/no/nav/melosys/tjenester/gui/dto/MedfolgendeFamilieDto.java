@@ -10,7 +10,7 @@ import static no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_LOVVALG_BARN;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER;
 
-public record MedfolgendeFamilieDto(String uuid, boolean omfattet, String begrunnelseKode, String begrunnelseFritekst) {
+public record MedfolgendeFamilieDto(String uuid, Boolean omfattet, String begrunnelseKode, String begrunnelseFritekst) {
     public static Set<MedfolgendeFamilieDto> av(Set<AvklartefaktaDto> avklartefaktas) {
         return avklartefaktas.stream()
             .filter(MedfolgendeFamilieDto::erMedfolgendeFamilieFakta)
@@ -32,6 +32,6 @@ public record MedfolgendeFamilieDto(String uuid, boolean omfattet, String begrun
     }
 
     public boolean erIkkeOmfattet() {
-        return !omfattet;
+        return !Boolean.TRUE.equals(omfattet);
     }
 }

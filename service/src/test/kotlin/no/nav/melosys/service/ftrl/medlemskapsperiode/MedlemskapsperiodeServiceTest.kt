@@ -195,7 +195,7 @@ class MedlemskapsperiodeServiceTest {
 
 
         verify { medlemskapsperiodeRepository.saveAndFlush(any()) }
-        behandlingsresultat.trygdeavgiftsperioder?.shouldBeEmpty()
+        behandlingsresultat.trygdeavgiftsperioder.shouldBeEmpty()
     }
 
     @Test

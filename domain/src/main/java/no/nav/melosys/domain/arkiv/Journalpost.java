@@ -49,7 +49,7 @@ public class Journalpost {
 
     public ArkivDokument hentArkivDokument(String dokumentID) {
         return finnArkivDokument(dokumentID).orElseThrow(() ->
-            new IkkeFunnetException(String.format("Finner ikke dokument %s i journalpost %s", dokumentID, journalpostId)));
+            new IkkeFunnetException("Finner ikke dokument %s i journalpost %s".formatted(dokumentID, journalpostId)));
     }
 
     public String getJournalpostId() {

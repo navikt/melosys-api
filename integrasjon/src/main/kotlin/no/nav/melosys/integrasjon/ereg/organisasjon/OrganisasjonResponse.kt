@@ -3,9 +3,8 @@ package no.nav.melosys.integrasjon.ereg.organisasjon
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.core.JacksonException
+import tools.jackson.databind.json.JsonMapper
 import no.nav.melosys.exception.TekniskException
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -32,11 +31,11 @@ class OrganisasjonResponse {
     ) : OrganisasjonBase(organisasjonsnummer, navn) {
 
         fun tilJsonString(): String = try {
-            jacksonObjectMapper()
-                .registerModule(JavaTimeModule())
-                .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+            JsonMapper.builder()
+                .changeDefaultPropertyInclusion { JsonInclude.Value.construct(JsonInclude.Include.NON_EMPTY, JsonInclude.Include.NON_EMPTY) }
+                .build()
                 .writeValueAsString(this)
-        } catch (e: JsonProcessingException) {
+        } catch (e: JacksonException) {
             throw TekniskException("Kunne ikke konvertere organisasjon til json string", e)
         }
     }
@@ -47,15 +46,16 @@ class OrganisasjonResponse {
         val virksomhetDetaljer: VirksomhetDetaljer? = null,
         organisasjonsnummer: String,
         organisasjonDetaljer: OrganisasjonDetaljer,
-    ) : Organisasjon(organisasjonDetaljer, organisasjonsnummer)
+        navn: Navn? = null,
+    ) : Organisasjon(organisasjonDetaljer, organisasjonsnummer, navn)
 
-    class VirksomhetDetaljer {
-        val oppstartsdato: LocalDate? = null
-        val eierskiftedato: LocalDate? = null
-        val nedleggelsesdato: LocalDate? = null
-        val enhetstype: String? = null
-        val ubemannetVirksomhet: Boolean? = null
-    }
+    data class VirksomhetDetaljer(
+        val oppstartsdato: LocalDate? = null,
+        val eierskiftedato: LocalDate? = null,
+        val nedleggelsesdato: LocalDate? = null,
+        val enhetstype: String? = null,
+        val ubemannetVirksomhet: Boolean? = null,
+    )
 
     open class VirksomhetNoekkelinfo(organisasjonsnummer: String, navn: Navn? = null) : OrganisasjonBase(organisasjonsnummer, navn)
 
@@ -116,7 +116,8 @@ class OrganisasjonResponse {
         val juridiskEnhetDetaljer: JuridiskEnhetDetaljer? = null,
         organisasjonsnummer: String,
         organisasjonDetaljer: OrganisasjonDetaljer,
-    ) : Organisasjon(organisasjonDetaljer, organisasjonsnummer)
+        navn: Navn? = null,
+    ) : Organisasjon(organisasjonDetaljer, organisasjonsnummer, navn)
 
     data class BestaarAvOrganisasjonsledd(
         val bruksperiode: Bruksperiode? = null,

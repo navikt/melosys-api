@@ -11,6 +11,6 @@ public record FerdigbehandlingKontrollerDto(
     Vedtakstyper vedtakstype,
     Behandlingsresultattyper behandlingsresultattype,
     Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres,
-    boolean skalRegisteropplysningerOppdateres
+    Boolean skalRegisteropplysningerOppdateres
 ) {
 }

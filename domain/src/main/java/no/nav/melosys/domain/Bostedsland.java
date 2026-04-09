@@ -18,7 +18,7 @@ public record Bostedsland(String landkode) {
         try {
             return Landkoder.valueOf(landkode);
         } catch (IllegalArgumentException e) {
-            throw new FunksjonellException(String.format("Prøvde å lese landkode fra %s, men støtter bare EU/EØS land", landkode));
+            throw new FunksjonellException("Prøvde å lese landkode fra %s, men støtter bare EU/EØS land".formatted(landkode));
         }
     }
 }

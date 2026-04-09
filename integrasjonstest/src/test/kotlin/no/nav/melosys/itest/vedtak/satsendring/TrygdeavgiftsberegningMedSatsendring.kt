@@ -1,7 +1,5 @@
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
@@ -17,9 +15,6 @@ private val logger = KotlinLogging.logger {}
 
 class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
     private val objectMapper = jacksonObjectMapper()
-        .registerModule(JavaTimeModule())
-        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-
 
     private val kallPerMedlemskapsperiode = ConcurrentHashMap<String, Int>()
 
@@ -86,9 +81,7 @@ class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
     }
 
     private fun localDateFromRequest(datoID: String, requestBody: JsonNode): LocalDate =
-        requestBody["medlemskapsperioder"][0]["periode"][datoID]
-            .map { it.asInt() }
-            .let { (year, month, day) -> LocalDate.of(year, month, day) }
+        LocalDate.parse(requestBody["medlemskapsperioder"][0]["periode"][datoID].asText())
 
     override fun getName(): String {
         return "trygdeavgiftsberegning-med-satsendring-transformer"

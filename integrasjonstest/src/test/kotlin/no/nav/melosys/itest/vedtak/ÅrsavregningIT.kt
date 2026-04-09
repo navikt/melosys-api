@@ -1,6 +1,6 @@
 package no.nav.melosys.itest.vedtak
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import com.github.tomakehurst.wiremock.client.WireMock
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.assertions.withClue
