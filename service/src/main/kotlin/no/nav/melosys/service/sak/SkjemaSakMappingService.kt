@@ -22,6 +22,8 @@ class SkjemaSakMappingService(
     /**
      * Finner saksnummer for relaterte skjemaId-er, men kun hvis saken har gyldig status
      * (OPPRETTET eller LOVVALG_AVKLART).
+     *
+     * Kaster exception hvis flere åpne saker finnes — det indikerer datainkonsistens.
      */
     @Transactional(readOnly = true)
     fun finnSaksnummerForGyldigSak(skjemaIder: Collection<UUID>): String? {
@@ -30,18 +32,25 @@ class SkjemaSakMappingService(
         val mappinger = skjemaSakMappingRepository.findBySkjemaIdIn(skjemaIder)
         if (mappinger.isEmpty()) return null
 
-        // Finn saksnumre og sjekk status
         val saksnumre = mappinger.map { it.saksnummer }.distinct()
-        for (saksnummer in saksnumre) {
-            val fagsak = fagsakRepository.findBySaksnummer(saksnummer).orElse(null) ?: continue
-            if (fagsak.status in gyldigeSaksstatuser) {
-                log.info { "Fant gyldig sak $saksnummer (status=${fagsak.status}) for skjemaIder" }
-                return saksnummer
-            }
+        val gyldige = saksnumre.mapNotNull { saksnummer ->
+            val fagsak = fagsakRepository.findBySaksnummer(saksnummer).orElse(null) ?: return@mapNotNull null
+            if (fagsak.status in gyldigeSaksstatuser) saksnummer else null
         }
 
-        log.info { "Fant ${mappinger.size} mappinger men ingen sak med gyldig status" }
-        return null
+        return when {
+            gyldige.isEmpty() -> {
+                log.info { "Fant ${mappinger.size} mappinger men ingen sak med gyldig status" }
+                null
+            }
+            gyldige.size == 1 -> {
+                log.info { "Fant gyldig sak ${gyldige.first()} for skjemaIder" }
+                gyldige.first()
+            }
+            else -> throw IllegalStateException(
+                "Fant ${gyldige.size} åpne saker (${gyldige.joinToString()}) for relaterte skjemaIder — forventet maks 1"
+            )
+        }
     }
 
     @Transactional
