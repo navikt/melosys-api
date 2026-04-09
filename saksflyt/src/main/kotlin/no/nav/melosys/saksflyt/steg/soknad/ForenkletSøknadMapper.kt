@@ -26,7 +26,7 @@ object ForenkletSøknadMapper {
         }
     }
 
-    private fun hentPeriodeOgLand(dto: UtsendtArbeidstakerSkjemaM2MDto): Pair<Periode, Soeknadsland> {
+    fun hentPeriodeOgLand(dto: UtsendtArbeidstakerSkjemaM2MDto): Pair<Periode, Soeknadsland> {
         return when (val data = dto.skjema.data) {
             is UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto ->
                 mapPeriode(data.utsendingsperiodeOgLand?.utsendelsePeriode) to

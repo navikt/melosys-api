@@ -2,45 +2,57 @@ package no.nav.melosys.saksflyt.steg.soknad
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflyt.steg.StegBehandler
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey.SØKNADSDATA
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
+import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.SkjemaSakMappingService
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerMetadata
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.time.ZoneId
 
 private val log = KotlinLogging.logger { }
 
+private val SØKNADSBEHANDLING_TYPER = setOf(
+    Behandlingstyper.FØRSTEGANG,
+    Behandlingstyper.NY_VURDERING,
+    Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+)
+
 /**
- * Saga-steg som håndterer journalføring på eksisterende sak for digital søknad.
+ * Saga-steg som håndterer mottak av digital søknad på eksisterende sak.
  *
- * Brukes i MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD-flyten når mapping-oppslag i consumer
- * avdekket at en relatert instans allerede har opprettet sak.
+ * Brukes i MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD-flyten.
  *
  * Logikk:
- * 1. Henter eksisterende fagsak via saksnummer fra prosessinstans-data
- * 2. Sjekker behandlingsstatus:
- *    - Aktiv behandling: oppdater status (AVVENT_DOK_PART → OPPRETTET) om nødvendig
- *    - Alle avsluttet: opprett ny behandling med NY_VURDERING + oppgave
- * 3. Lagrer mapping for nåværende skjemaId
- * 4. Setter behandling på prosessinstansen for journalpost-steget
+ * 1. Hent eksisterende fagsak via saksnummer fra prosessinstans-data
+ * 2. Finn åpen søknadsbehandling (FØRSTEGANG/NY_VURDERING/MANGLENDE_INNBETALING)
+ * 3a. Åpen behandling funnet:
+ *     - UNDER_BEHANDLING/AVVENT_DOK_PART → VURDER_DOKUMENT + reset stegvelger
+ *     - OPPRETTET/VURDER_DOKUMENT → kun oppdater mottatte opplysninger
+ * 3b. Ingen åpen behandling:
+ *     - Opprett ny behandling (NY_VURDERING) + mottatte opplysninger + oppgave
+ * 4. Lagre mapping (skjemaId, originalData, innsendtDato)
+ * 5. Sett behandling på prosessinstansen
  */
 @Component
 class HåndterEksisterendeSakSøknad(
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
+    private val behandlingsresultatService: BehandlingsresultatService,
     private val mottatteOpplysningerService: MottatteOpplysningerService,
+    private val oppgaveService: OppgaveService,
     private val skjemaSakMappingService: SkjemaSakMappingService,
     private val objectMapper: ObjectMapper
 ) : StegBehandler {
@@ -48,51 +60,103 @@ class HåndterEksisterendeSakSøknad(
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.HÅNDTER_EKSISTERENDE_SAK_SØKNAD
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(SØKNADSDATA)
-        val saksnummer = prosessinstans.hentData(no.nav.melosys.saksflytapi.domain.ProsessDataKey.SAKSNUMMER)
-        val metadata = søknadsdata.skjema.metadata as UtsendtArbeidstakerMetadata
+        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.SØKNADSDATA)
+        val saksnummer = prosessinstans.hentData(ProsessDataKey.SAKSNUMMER)
         val referanseId = søknadsdata.referanseId
 
         val fagsak = fagsakService.hentFagsak(saksnummer)
         log.info { "Håndterer eksisterende sak $saksnummer for digital søknad referanseId=$referanseId" }
 
-        // Lagre mapping for nåværende skjemaId
-        skjemaSakMappingService.lagreMapping(søknadsdata.skjema.id, saksnummer)
+        val åpenBehandling = finnÅpenSøknadsbehandling(fagsak)
 
-        val aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning()
-
-        val behandling = if (aktivBehandling != null) {
-            val erArbeidstakerEllerBegge = metadata.skjemadel != Skjemadel.ARBEIDSGIVERS_DEL
-            if (aktivBehandling.status == Behandlingsstatus.AVVENT_DOK_PART && erArbeidstakerEllerBegge) {
-                aktivBehandling.status = Behandlingsstatus.OPPRETTET
-                behandlingService.lagre(aktivBehandling)
-                log.info { "Endret behandlingsstatus fra AVVENT_DOK_PART til OPPRETTET for behandling ${aktivBehandling.id}" }
-            }
-            aktivBehandling
+        val behandling = if (åpenBehandling != null) {
+            håndterÅpenBehandling(åpenBehandling, søknadsdata)
         } else {
-            // Alle behandlinger er avsluttet — opprett ny behandling med NY_VURDERING
-            val nyBehandling = behandlingService.nyBehandling(
-                fagsak,
-                Behandlingsstatus.OPPRETTET,
-                Behandlingstyper.NY_VURDERING,
-                Behandlingstema.UTSENDT_ARBEIDSTAKER,
-                null, null,
-                LocalDate.now(),
-                Behandlingsaarsaktyper.SØKNAD,
-                null
-            )
-            fagsak.leggTilBehandling(nyBehandling)
-            log.info { "Opprettet ny behandling ${nyBehandling.id} (NY_VURDERING) på eksisterende sak $saksnummer" }
-
-            // Lagre mottatte opplysninger på ny behandling (kun periode + land)
-            val søknad = ForenkletSøknadMapper.tilSoeknad(søknadsdata)
-            mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
-                nyBehandling.id, null, søknad, referanseId
-            )
-            nyBehandling
+            opprettNyVurdering(fagsak, søknadsdata)
         }
 
+        // Lagre mapping
+        val originalData = objectMapper.writeValueAsString(søknadsdata)
+        val innsendtDato = søknadsdata.innsendtTidspunkt.atZone(ZoneId.of("Europe/Oslo")).toInstant()
+        skjemaSakMappingService.lagreMapping(
+            søknadsdata.skjema.id, saksnummer,
+            originalData = originalData,
+            innsendtDato = innsendtDato
+        )
+
         prosessinstans.behandling = behandling
-        log.info { "Ferdig med håndtering av eksisterende sak $saksnummer, behandling=${behandling.id}" }
+        log.info { "Ferdig med eksisterende sak $saksnummer, behandling=${behandling.id}" }
+    }
+
+    private fun finnÅpenSøknadsbehandling(fagsak: no.nav.melosys.domain.Fagsak): Behandling? {
+        val aktiv = fagsak.finnAktivBehandlingIkkeÅrsavregning() ?: return null
+        return if (aktiv.type in SØKNADSBEHANDLING_TYPER) aktiv else null
+    }
+
+    private fun håndterÅpenBehandling(
+        behandling: Behandling,
+        søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
+    ): Behandling {
+        val skalResetteStegvelger = behandling.status in setOf(
+            Behandlingsstatus.UNDER_BEHANDLING,
+            Behandlingsstatus.AVVENT_DOK_PART
+        )
+
+        if (skalResetteStegvelger) {
+            behandling.status = Behandlingsstatus.VURDER_DOKUMENT
+            behandlingService.lagre(behandling)
+            log.info { "Endret behandlingsstatus til VURDER_DOKUMENT for behandling ${behandling.id}" }
+
+            behandlingsresultatService.tømBehandlingsresultat(behandling.id)
+            log.info { "Reset stegvelger (tømBehandlingsresultat) for behandling ${behandling.id}" }
+        }
+
+        // Oppdater mottatte opplysninger med nyeste periode og land
+        val (periode, land) = ForenkletSøknadMapper.hentPeriodeOgLand(søknadsdata)
+        mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(
+            behandling.id, periode, land
+        )
+        log.info { "Oppdatert mottatte opplysninger (periode + land) for behandling ${behandling.id}" }
+
+        return behandling
+    }
+
+    private fun opprettNyVurdering(
+        fagsak: no.nav.melosys.domain.Fagsak,
+        søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
+    ): Behandling {
+        val saksnummer = fagsak.saksnummer
+        val referanseId = søknadsdata.referanseId
+
+        val nyBehandling = behandlingService.nyBehandling(
+            fagsak,
+            Behandlingsstatus.OPPRETTET,
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER,
+            null, null,
+            LocalDate.now(),
+            Behandlingsaarsaktyper.SØKNAD,
+            null
+        )
+        fagsak.leggTilBehandling(nyBehandling)
+        log.info { "Opprettet behandling ${nyBehandling.id} (NY_VURDERING) på sak $saksnummer" }
+
+        // Mottatte opplysninger (kun periode + land)
+        val søknad = ForenkletSøknadMapper.tilSoeknad(søknadsdata)
+        mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
+            nyBehandling.id, null, søknad, referanseId
+        )
+
+        // Oppgave
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
+            nyBehandling,
+            null,
+            fagsak.finnBrukersAktørID(),
+            null,
+            fagsak.finnVirksomhetsOrgnr()
+        )
+        log.info { "Opprettet oppgave for ny behandling ${nyBehandling.id}" }
+
+        return nyBehandling
     }
 }
