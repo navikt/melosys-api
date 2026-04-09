@@ -40,6 +40,9 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
     @MockK
     lateinit var persondataFasade: PersondataFasade
 
+    @MockK
+    lateinit var skjemaSakMappingService: no.nav.melosys.service.sak.SkjemaSakMappingService
+
     private lateinit var opprettOgFerdigstillJournalpostSøknad: OpprettOgFerdigstillJournalpostSøknad
 
     private val fnr = "12345678901"
@@ -57,12 +60,13 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
     @BeforeEach
     fun setup() {
         opprettOgFerdigstillJournalpostSøknad = OpprettOgFerdigstillJournalpostSøknad(
-            melosysSkjemaApiClient, joarkFasade, behandlingService, persondataFasade
+            melosysSkjemaApiClient, joarkFasade, behandlingService, persondataFasade, skjemaSakMappingService
         )
 
         every { joarkFasade.opprettJournalpost(capture(capturedJournalpost), eq(true)) } returns journalpostId
         every { behandlingService.lagre(any()) } just Runs
         every { persondataFasade.hentSammensattNavn(innsenderFnr) } returns innsenderNavn
+        every { skjemaSakMappingService.oppdaterJournalpostId(any(), any()) } just Runs
     }
 
     @Test

@@ -13,6 +13,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.service.sak.SkjemaSakMappingService
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.springframework.stereotype.Component
@@ -40,7 +41,8 @@ class OpprettOgFerdigstillJournalpostSøknad(
     private val melosysSkjemaApiClient: MelosysSkjemaApiClient,
     private val joarkFasade: JoarkFasade,
     private val behandlingService: BehandlingService,
-    private val persondataFasade: PersondataFasade
+    private val persondataFasade: PersondataFasade,
+    private val skjemaSakMappingService: SkjemaSakMappingService
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.OPPRETT_OG_FERDIGSTILL_JOURNALPOST_SØKNAD
@@ -86,6 +88,8 @@ class OpprettOgFerdigstillJournalpostSøknad(
             behandling.initierendeJournalpostId = journalpostId
             behandlingService.lagre(behandling)
         }
+
+        skjemaSakMappingService.oppdaterJournalpostId(skjemaId, journalpostId)
 
         log.info { "Opprettet journalpost $journalpostId for digital søknad referanseId=$referanseId" }
     }
