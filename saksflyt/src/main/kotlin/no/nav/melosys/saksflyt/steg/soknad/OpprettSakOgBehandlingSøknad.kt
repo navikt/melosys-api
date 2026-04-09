@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.steg.soknad
 
-import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
 import mu.KotlinLogging
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -44,7 +44,7 @@ class OpprettSakOgBehandlingSøknad(
     private val fagsakService: FagsakService,
     private val persondataFasade: PersondataFasade,
     private val mottatteOpplysningerService: MottatteOpplysningerService,
-    private val objectMapper: ObjectMapper,
+    private val jsonMapper: JsonMapper,
     private val skjemaSakMappingService: SkjemaSakMappingService,
     private val behandlingService: BehandlingService
 ) : StegBehandler {
@@ -86,7 +86,7 @@ class OpprettSakOgBehandlingSøknad(
 
         // Lagre alle relaterte skjemaId-er i mapping-tabellen
         val alleRelatertIder = samleRelaterteSkjemaIder(søknadsdata)
-        val originalData = objectMapper.writeValueAsString(søknadsdata)
+        val originalData = jsonMapper.writeValueAsString(søknadsdata)
         val innsendtDato = søknadsdata.innsendtTidspunkt.atZone(java.time.ZoneId.of("Europe/Oslo")).toInstant()
         skjemaSakMappingService.lagreMappinger(
             alleRelatertIder, fagsak.saksnummer,

@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.steg.soknad
 
-import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -42,7 +42,7 @@ internal class OpprettSakOgBehandlingSøknadTest {
     @MockK lateinit var fagsakService: FagsakService
     @MockK lateinit var persondataFasade: PersondataFasade
     @MockK lateinit var mottatteOpplysningerService: MottatteOpplysningerService
-    @MockK lateinit var objectMapper: ObjectMapper
+    @MockK lateinit var jsonMapper: JsonMapper
     @MockK lateinit var skjemaSakMappingService: SkjemaSakMappingService
     @MockK lateinit var behandlingService: BehandlingService
 
@@ -66,7 +66,7 @@ internal class OpprettSakOgBehandlingSøknadTest {
     @BeforeEach
     fun setup() {
         opprettSakOgBehandlingSøknad = OpprettSakOgBehandlingSøknad(
-            fagsakService, persondataFasade, mottatteOpplysningerService, objectMapper,
+            fagsakService, persondataFasade, mottatteOpplysningerService, jsonMapper,
             skjemaSakMappingService, behandlingService
         )
 
@@ -92,7 +92,7 @@ internal class OpprettSakOgBehandlingSøknadTest {
     }
 
     private fun mockMottatteOpplysninger() {
-        every { objectMapper.writeValueAsString(søknadsdata) } returns """{"referanseId":"$referanseId"}"""
+        every { jsonMapper.writeValueAsString(søknadsdata) } returns """{"referanseId":"$referanseId"}"""
         every {
             mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any())
         } returns mockk<MottatteOpplysninger>()
@@ -154,7 +154,7 @@ internal class OpprettSakOgBehandlingSøknadTest {
         soeknadSlot.captured.shouldNotBeNull()
 
         verify(exactly = 1) {
-            objectMapper.writeValueAsString(søknadsdata)
+            jsonMapper.writeValueAsString(søknadsdata)
             mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
                 behandlingId, any(), any(), referanseId
             )

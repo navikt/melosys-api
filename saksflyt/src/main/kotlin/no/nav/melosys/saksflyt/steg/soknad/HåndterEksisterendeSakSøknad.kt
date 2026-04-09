@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.steg.soknad
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
@@ -54,7 +54,7 @@ class HåndterEksisterendeSakSøknad(
     private val mottatteOpplysningerService: MottatteOpplysningerService,
     private val oppgaveService: OppgaveService,
     private val skjemaSakMappingService: SkjemaSakMappingService,
-    private val objectMapper: ObjectMapper
+    private val jsonMapper: JsonMapper
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.HÅNDTER_EKSISTERENDE_SAK_SØKNAD
@@ -76,7 +76,7 @@ class HåndterEksisterendeSakSøknad(
         }
 
         // Lagre mapping
-        val originalData = objectMapper.writeValueAsString(søknadsdata)
+        val originalData = jsonMapper.writeValueAsString(søknadsdata)
         val innsendtDato = søknadsdata.innsendtTidspunkt.atZone(ZoneId.of("Europe/Oslo")).toInstant()
         skjemaSakMappingService.lagreMapping(
             søknadsdata.skjema.id, saksnummer,
