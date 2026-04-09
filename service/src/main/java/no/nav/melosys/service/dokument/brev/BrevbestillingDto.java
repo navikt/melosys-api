@@ -30,14 +30,14 @@ public final class BrevbestillingDto {
     private String fritekstTittel;
     private String fritekst;
     private Distribusjonstype distribusjonstype;
-    private boolean skalViseStandardTekstOmkontaktopplysninger;
+    private Boolean skalViseStandardTekstOmkontaktopplysninger = false;
     private String nyVurderingBakgrunn;
     private List<SaksvedleggDto> saksVedlegg;
     private StandardvedleggType standardvedleggType;
     private List<FritekstvedleggDto> fritekstvedlegg;
     private String dokumentTittel;
     private String saksbehandlerNrToIdent;
-    private boolean skalViseStandardTekstOmOpplysninger;
+    private Boolean skalViseStandardTekstOmOpplysninger = false;
     private String begrunnelseKode;
     private String ytterligereInformasjon;
     private String fakturanummer;
@@ -46,9 +46,9 @@ public final class BrevbestillingDto {
     private LocalDate betalingsfrist;
     private String annenPersonMottakerIdent;
     private LocalDate opphørtDato;
-    private boolean erInnvilgelse;
-    private boolean erEøsPensjonist;
-    private boolean erEøsLovvalg;
+    private Boolean erInnvilgelse = false;
+    private Boolean erEøsPensjonist = false;
+    private Boolean erEøsLovvalg = false;
 
     public BrevbestillingDto() {
     }
@@ -71,14 +71,14 @@ public final class BrevbestillingDto {
         String fritekstTittel,
         String fritekst,
         Distribusjonstype distribusjonstype,
-        boolean skalViseStandardTekstOmkontaktopplysninger,
+        Boolean skalViseStandardTekstOmkontaktopplysninger,
         String nyVurderingBakgrunn,
         List<SaksvedleggDto> saksVedlegg,
         StandardvedleggType standardvedleggType,
         List<FritekstvedleggDto> fritekstvedlegg,
         String dokumentTittel,
         String saksbehandlerNrToIdent,
-        boolean skalViseStandardTekstOmOpplysninger,
+        Boolean skalViseStandardTekstOmOpplysninger,
         String begrunnelseKode,
         String ytterligereInformasjon,
         String fakturanummer,
@@ -87,9 +87,9 @@ public final class BrevbestillingDto {
         LocalDate betalingsfrist,
         String annenPersonMottakerIdent,
         LocalDate opphørtDato,
-        boolean erInnvilgelse,
-        boolean erEøsPensjonist,
-        boolean erEøsLovvalg) {
+        Boolean erInnvilgelse,
+        Boolean erEøsPensjonist,
+        Boolean erEøsLovvalg) {
 
         this.produserbardokument = produserbardokument;
         this.mottaker = mottaker;
@@ -244,7 +244,7 @@ public final class BrevbestillingDto {
         this.distribusjonstype = distribusjonstype;
     }
 
-    public void setSkalViseStandardTekstOmkontaktopplysninger(boolean skalViseStandardTekstOmkontaktopplysninger) {
+    public void setSkalViseStandardTekstOmkontaktopplysninger(Boolean skalViseStandardTekstOmkontaktopplysninger) {
         this.skalViseStandardTekstOmkontaktopplysninger = skalViseStandardTekstOmkontaktopplysninger;
     }
 
@@ -281,10 +281,10 @@ public final class BrevbestillingDto {
     }
 
     public boolean isSkalViseStandardTekstOmOpplysninger() {
-        return skalViseStandardTekstOmOpplysninger;
+        return Boolean.TRUE.equals(skalViseStandardTekstOmOpplysninger);
     }
 
-    public void setSkalViseStandardTekstOmOpplysninger(boolean skalViseStandardTekstOmOpplysninger) {
+    public void setSkalViseStandardTekstOmOpplysninger(Boolean skalViseStandardTekstOmOpplysninger) {
         this.skalViseStandardTekstOmOpplysninger = skalViseStandardTekstOmOpplysninger;
     }
 
@@ -363,7 +363,7 @@ public final class BrevbestillingDto {
     }
 
     public boolean isSkalViseStandardTekstOmKontaktopplysninger() {
-        return skalViseStandardTekstOmkontaktopplysninger;
+        return Boolean.TRUE.equals(skalViseStandardTekstOmkontaktopplysninger);
     }
 
     public String getNyVurderingBakgrunn() {
@@ -527,26 +527,26 @@ public final class BrevbestillingDto {
     }
 
     public boolean isErInnvilgelse() {
-        return erInnvilgelse;
+        return Boolean.TRUE.equals(erInnvilgelse);
     }
 
-    public void setErInnvilgelse(boolean erInnvilgelse) {
+    public void setErInnvilgelse(Boolean erInnvilgelse) {
         this.erInnvilgelse = erInnvilgelse;
     }
 
     public boolean isErEøsPensjonist() {
-        return erEøsPensjonist;
+        return Boolean.TRUE.equals(erEøsPensjonist);
     }
 
-    public void setErEøsPensjonist(boolean erEøsPensjonist) {
+    public void setErEøsPensjonist(Boolean erEøsPensjonist) {
         this.erEøsPensjonist = erEøsPensjonist;
     }
 
     public boolean isErEøsLovvalg() {
-        return erEøsLovvalg;
+        return Boolean.TRUE.equals(erEøsLovvalg);
     }
 
-    public void setErEøsLovvalg(boolean erEøsLovvalg) {
+    public void setErEøsLovvalg(Boolean erEøsLovvalg) {
         this.erEøsLovvalg = erEøsLovvalg;
     }
 }
