@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.Vilkaarsresultat
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
@@ -297,7 +298,7 @@ class InnvilgelseFtrlMapper(
 
 
     private fun mapAvgiftsPerioder(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodeDto> {
-        if (behandlingsresultat.trygdeavgiftsperioder.all { !it.harAvgift() }) {
+        if (behandlingsresultat.trygdeavgiftsperioder.all { !it.harAvgift() && !it.erBegrenset() }) {
             return emptyList()
         }
 
@@ -325,6 +326,7 @@ class InnvilgelseFtrlMapper(
         trygdeavgiftsbeløpMd.hentVerdi(),
         hentGrunnlagInntekstperiode().type,
         hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
+        beregningsregel = beregningsregel.takeIf { it != Avgiftsberegningsregel.ORDINÆR }?.name,
     )
 
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodePensjonist> {
