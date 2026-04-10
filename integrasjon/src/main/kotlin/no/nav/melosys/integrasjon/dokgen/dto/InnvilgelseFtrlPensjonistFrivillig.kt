@@ -102,5 +102,6 @@ data class AvgiftsperiodePensjonist(
     val inntektskildetype: String,
     val trygdedekning: String,
     val arbeidsgiveravgiftBetalt: SvarAlternativ,
-    val skatteplikt: Boolean
+    val skatteplikt: Boolean,
+    val beregningsregel: String? = null,
 )

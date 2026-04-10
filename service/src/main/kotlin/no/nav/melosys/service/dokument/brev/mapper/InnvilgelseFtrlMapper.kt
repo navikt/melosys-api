@@ -330,9 +330,7 @@ class InnvilgelseFtrlMapper(
     )
 
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodePensjonist> {
-        if (behandlingsresultat.trygdeavgiftsperioder.all {
-                !it.harAvgift()
-            }) {
+        if (behandlingsresultat.trygdeavgiftsperioder.all { !it.harAvgift() && !it.erBegrenset() }) {
             return emptyList()
         }
 
@@ -351,7 +349,8 @@ class InnvilgelseFtrlMapper(
                     trygdedekning = it.hentGrunnlagMedlemskapsperiode().hentTrygdedekning().beskrivelse,
                     avgiftspliktigInntektPerMd = it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
                     arbeidsgiveravgiftBetalt = SvarAlternativ.IKKE_RELEVANT,
-                    skatteplikt = it.hentGrunnlagSkatteforholdTilNorge().skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
+                    skatteplikt = it.hentGrunnlagSkatteforholdTilNorge().skatteplikttype == Skatteplikttype.SKATTEPLIKTIG,
+                    beregningsregel = it.beregningsregel.takeIf { regel -> regel != Avgiftsberegningsregel.ORDINÆR }?.name,
                 )
             }
             ?.sortedByDescending { it.fom }
