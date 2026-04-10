@@ -40,4 +40,6 @@ data class AvgiftsperiodeEøsPensjonist(
     val inntektskilde: String,
     val skatteplikt: Boolean,
     val beregningsregel: String? = null,
+    val minstebelopVerdi: java.math.BigDecimal? = null,
+    val minstebelopAar: Int? = null,
 )

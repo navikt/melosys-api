@@ -14,4 +14,6 @@ data class AvgiftsperiodeDto(
     val inntektskildetype: Inntektskildetype,
     val avgiftspliktigInntektPerMd: BigDecimal,
     val beregningsregel: String? = null,
+    val minstebelopVerdi: BigDecimal? = null,
+    val minstebelopAar: Int? = null,
 )

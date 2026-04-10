@@ -104,4 +104,6 @@ data class AvgiftsperiodePensjonist(
     val arbeidsgiveravgiftBetalt: SvarAlternativ,
     val skatteplikt: Boolean,
     val beregningsregel: String? = null,
+    val minstebelopVerdi: BigDecimal? = null,
+    val minstebelopAar: Int? = null,
 )

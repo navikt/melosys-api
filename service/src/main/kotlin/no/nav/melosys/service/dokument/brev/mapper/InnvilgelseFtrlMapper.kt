@@ -327,6 +327,8 @@ class InnvilgelseFtrlMapper(
         hentGrunnlagInntekstperiode().type,
         hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
         beregningsregel = beregningsregel.takeIf { it != Avgiftsberegningsregel.ORDINÆR }?.name,
+        minstebelopVerdi = minstebelopVerdi,
+        minstebelopAar = minstebelopAar,
     )
 
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodePensjonist> {
@@ -351,6 +353,8 @@ class InnvilgelseFtrlMapper(
                     arbeidsgiveravgiftBetalt = SvarAlternativ.IKKE_RELEVANT,
                     skatteplikt = it.hentGrunnlagSkatteforholdTilNorge().skatteplikttype == Skatteplikttype.SKATTEPLIKTIG,
                     beregningsregel = it.beregningsregel.takeIf { regel -> regel != Avgiftsberegningsregel.ORDINÆR }?.name,
+                    minstebelopVerdi = it.minstebelopVerdi,
+                    minstebelopAar = it.minstebelopAar,
                 )
             }
             ?.sortedByDescending { it.fom }
