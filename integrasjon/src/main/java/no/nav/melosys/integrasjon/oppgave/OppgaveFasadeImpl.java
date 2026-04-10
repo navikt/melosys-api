@@ -340,7 +340,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     public static String hentNyBeskrivelseHendelseslogg(String beskrivelse, String saksnummer) {
         String userID = SubjectHandler.getUserIDOrSystemUser();
         String oppdateringstidspunkt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
-        return String.format("--- %s (%s, %s) ---\n %s\n",
+        return "--- %s (%s, %s) ---\n %s\n".formatted(
             oppdateringstidspunkt, userID, Fagsystem.MELOSYS.getBeskrivelse(), beskrivelse + " - " + saksnummer);
     }
 

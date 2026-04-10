@@ -106,12 +106,9 @@ class LovvalgsperiodeService(
             return
         }
 
-        // 1: Fjern trygdeavgiftsperioder og persister endringen
-        eksisterende.forEach { it.clearTrygdeavgiftsperioder() }
-        lovvalgsperiodeRepo.saveAllAndFlush(eksisterende)
-
-        // 2: Slett selve periodene etter at children er slettet
-        lovvalgsperiodeRepo.deleteAllInBatch(eksisterende)
+        // orphanRemoval på lovvalgsperioder håndterer sletting av hele treet inkludert trygdeavgiftsperioder.
+        behandlingsresultat.lovvalgsperioder.clear()
+        lovvalgsperiodeRepo.flush()
     }
 
     fun hentTidligereLovvalgsperioder(behandling: Behandling): Collection<Lovvalgsperiode> {

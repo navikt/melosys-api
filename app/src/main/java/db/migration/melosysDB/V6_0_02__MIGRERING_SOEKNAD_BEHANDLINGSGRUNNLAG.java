@@ -17,10 +17,9 @@ import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import oracle.jdbc.OracleConnection;
 import oracle.jdbc.OraclePreparedStatement;
@@ -39,8 +38,6 @@ public class V6_0_02__MIGRERING_SOEKNAD_BEHANDLINGSGRUNNLAG extends BaseJavaMigr
 
     public V6_0_02__MIGRERING_SOEKNAD_BEHANDLINGSGRUNNLAG() {
         this.objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
         jaxb2Marshaller = new Jaxb2Marshaller();
         jaxb2Marshaller.setPackagesToScan("no.nav.melosys.domain.dokument");
@@ -81,7 +78,7 @@ public class V6_0_02__MIGRERING_SOEKNAD_BEHANDLINGSGRUNNLAG extends BaseJavaMigr
         insertSøknad(con, behandlingID, versjon, registrertDato, endretDato, søknadJson);
     }
 
-    private String lagSøknadDokumentJson(String søknadXml, String versjon) throws JsonProcessingException, TransformerException {
+    private String lagSøknadDokumentJson(String søknadXml, String versjon) throws JacksonException, TransformerException {
         StringReader stringReader = new StringReader(transformer(søknadXml, versjon));
         Soeknad soeknad = (Soeknad) jaxb2Marshaller.unmarshal(new StreamSource(stringReader));
         return objectMapper.writeValueAsString(soeknad);

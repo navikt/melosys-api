@@ -5,7 +5,7 @@ import java.util.Set;
 
 public class VilkaarDto {
     private String vilkaar;
-    private boolean oppfylt;
+    private Boolean oppfylt = false;
     private Set<String> begrunnelseKoder;
     private String begrunnelseFritekst;
     private String begrunnelseFritekstEngelsk;
@@ -23,10 +23,10 @@ public class VilkaarDto {
     }
 
     public boolean isOppfylt() {
-        return oppfylt;
+        return Boolean.TRUE.equals(oppfylt);
     }
 
-    public void setOppfylt(boolean oppfylt) {
+    public void setOppfylt(Boolean oppfylt) {
         this.oppfylt = oppfylt;
     }
 

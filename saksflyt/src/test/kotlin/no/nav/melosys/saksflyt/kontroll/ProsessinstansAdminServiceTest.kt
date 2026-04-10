@@ -159,10 +159,10 @@ class ProsessinstansAdminServiceTest {
             registrertDato = LocalDateTime.now().minusDays(2)
             status = ProsessStatus.KLAR
         }
-        every { prosessinstansRepository.findAllById(setOf(prosessinstans.id)) } returns listOf(prosessinstans)
+        every { prosessinstansRepository.findAllById(setOf(prosessinstans.id!!)) } returns listOf(prosessinstans)
 
 
-        prosessinstansAdminService.restartProsessinstanser(setOf(prosessinstans.id))
+        prosessinstansAdminService.restartProsessinstanser(setOf(prosessinstans.id!!))
 
 
         prosessinstans.status shouldBe ProsessStatus.RESTARTET

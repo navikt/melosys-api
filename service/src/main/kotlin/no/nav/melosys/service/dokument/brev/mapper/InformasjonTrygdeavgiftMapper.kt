@@ -57,6 +57,9 @@ class InformasjonTrygdeavgiftMapper(
                 } ?: false
             } else {
                 false
+            },
+            erSkattemessigEmigrert = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.any {
+                it.grunnlagSkatteforholdTilNorge?.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG
             }
         )
     }
@@ -77,7 +80,11 @@ class InformasjonTrygdeavgiftMapper(
 
         val inneværendeÅr = LocalDate.now().year
         val gruppertePerioder = perioder.groupBy { it.periodeTil.year }
-        val valgtÅr = velgRelevantÅr(gruppertePerioder.keys, inneværendeÅr)
+        val årMedAvgift = gruppertePerioder.filterValues { årsperioder ->
+            årsperioder.any { !(it.trygdeavgiftsbeløpMd.verdi == BigDecimal.ZERO && it.trygdesats == BigDecimal.ZERO) }
+        }.keys
+        val valgtÅr = velgRelevantÅr(årMedAvgift, inneværendeÅr)
+            ?: return emptyList()
 
         return gruppertePerioder[valgtÅr]
             ?.map {
@@ -96,11 +103,12 @@ class InformasjonTrygdeavgiftMapper(
             ?: emptyList()
     }
 
-    private fun velgRelevantÅr(tilgjengeligeÅr: Set<Int>, inneværendeÅr: Int): Int {
+    private fun velgRelevantÅr(tilgjengeligeÅr: Set<Int>, inneværendeÅr: Int): Int? {
+        if (tilgjengeligeÅr.isEmpty()) return null
         return when {
             inneværendeÅr in tilgjengeligeÅr -> inneværendeÅr
-            tilgjengeligeÅr.all { it < inneværendeÅr } -> tilgjengeligeÅr.maxOrNull() ?: inneværendeÅr
-            else -> tilgjengeligeÅr.minOrNull() ?: inneværendeÅr
+            tilgjengeligeÅr.all { it < inneværendeÅr } -> tilgjengeligeÅr.maxOrNull()
+            else -> tilgjengeligeÅr.minOrNull()
         }
     }
 

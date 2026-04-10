@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.steg.soknad
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import mu.KotlinLogging
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper

@@ -22,13 +22,14 @@ import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
+import org.springframework.boot.webclient.test.autoconfigure.AutoConfigureWebClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @SpringBootTest
@@ -84,6 +85,8 @@ class MelosysSkjemaApiClientTest(
                 "type": "UTSENDT_ARBEIDSTAKER",
                 "fnr": "12345678901",
                 "orgnr": "123456789",
+                "opprettetDato": "2024-01-15T10:00:00",
+                "endretDato": "2024-01-15T10:30:00",
                 "metadata": {
                   "metadatatype": "UTSENDT_ARBEIDSTAKER_DEG_SELV",
                   "skjemadel": "ARBEIDSTAKERS_DEL",
@@ -128,6 +131,8 @@ class MelosysSkjemaApiClientTest(
                 type = SkjemaType.UTSENDT_ARBEIDSTAKER,
                 fnr = "12345678901",
                 orgnr = "123456789",
+                opprettetDato = LocalDateTime.parse("2024-01-15T10:00:00"),
+                endretDato = LocalDateTime.parse("2024-01-15T10:30:00"),
                 metadata = DegSelvMetadata(
                     skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
                     arbeidsgiverNavn = "Test Bedrift AS",
@@ -146,7 +151,7 @@ class MelosysSkjemaApiClientTest(
             kobletSkjema = null,
             tidligereInnsendteSkjema = emptyList(),
             referanseId = "MEL-5CA141",
-            innsendtTidspunkt = java.time.LocalDateTime.of(2024, 1, 15, 10, 30, 0),
+            innsendtTidspunkt = LocalDateTime.parse("2024-01-15T10:30:00"),
             innsenderFnr = "12345678901"
         )
 

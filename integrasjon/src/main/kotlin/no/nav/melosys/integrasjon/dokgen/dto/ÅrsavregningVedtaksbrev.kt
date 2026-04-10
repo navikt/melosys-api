@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.dokgen.dto
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import java.math.BigDecimal
@@ -9,6 +10,7 @@ import java.time.LocalDate
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ÅrsavregningVedtaksbrev(
     brevBestilling: ÅrsavregningVedtakBrevBestilling,
+    @JsonProperty("årsavregningsår")
     val årsavregningsår: Int,
     val endeligTrygdeavgift: List<Avgiftsperiode>,
     val forskuddsvisFakturertTrygdeavgift: List<Avgiftsperiode>,

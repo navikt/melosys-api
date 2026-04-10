@@ -20,7 +20,7 @@ public abstract class JournalfoeringDto {
     protected Avsendertyper avsenderType;
     protected DokumentDto hoveddokument;
     protected List<DokumentDto> vedlegg = new ArrayList<>();
-    protected boolean skalTilordnes;
+    protected Boolean skalTilordnes = false;
     protected LocalDate mottattDato;
     protected String behandlingstemaKode;
     protected String behandlingstypeKode;
@@ -99,10 +99,10 @@ public abstract class JournalfoeringDto {
     }
 
     public boolean isSkalTilordnes() {
-        return skalTilordnes;
+        return Boolean.TRUE.equals(skalTilordnes);
     }
 
-    public void setSkalTilordnes(boolean skalTilordnes) {
+    public void setSkalTilordnes(Boolean skalTilordnes) {
         this.skalTilordnes = skalTilordnes;
     }
 

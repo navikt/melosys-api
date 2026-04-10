@@ -1,7 +1,7 @@
 package no.nav.melosys.itest
 
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.ninjasquad.springmockk.SpykBean
+import com.ninjasquad.springmockk.MockkSpyBean
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -26,10 +26,10 @@ import java.time.Duration
  * Integrasjonstest som verifiserer at @Transactional(REQUIRES_NEW) på StegBehandler.utfør()
  * faktisk gir rollback av alle databaseendringer innenfor et steg ved feil.
  *
- * Bruker @SpykBean for MottatteOpplysningerService for å trigge en exception ETTER at
+ * Bruker @MockkSpyBean for MottatteOpplysningerService for å trigge en exception ETTER at
  * fagsakService.nyFagsakOgBehandling() allerede har skrevet fagsak+behandling til databasen.
  *
- * Har egen testklasse fordi @SpykBean endrer Spring-konteksten og ikke bør påvirke andre tester.
+ * Har egen testklasse fordi @MockkSpyBean endrer Spring-konteksten og ikke bør påvirke andre tester.
  */
 class DigitalSøknadRollbackIT(
     @Autowired @Qualifier("skjemaMottattMelding")
@@ -38,7 +38,7 @@ class DigitalSøknadRollbackIT(
     @Autowired private val fagsakRepository: FagsakRepository,
 ) : MockServerTestBaseWithProsessManager() {
 
-    @SpykBean
+    @MockkSpyBean
     private lateinit var mottatteOpplysningerService: MottatteOpplysningerService
 
     private val kafkaTopic = "teammelosys.skjema.innsendt.v1-local"

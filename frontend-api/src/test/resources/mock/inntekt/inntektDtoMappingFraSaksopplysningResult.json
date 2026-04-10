@@ -5,7 +5,7 @@
       "inntektListe" : [ {
         "type" : "Loennsinntekt",
         "arbeidsforholdREF" : null,
-        "beloep" : 5E+4,
+        "beloep" : 50000,
         "fordel" : "kontantytelse",
         "inntektskilde" : "A-ordningen",
         "inntektsperiodetype" : "Maaned",
@@ -24,7 +24,7 @@
         "tilleggsinformasjon" : {
           "kategori" : "bla",
           "tilleggsinformasjonDetaljer" : {
-            "åretUtbetalingenGjelderFor" : "1980"
+            "åretUtbetalingenGjelderFor" : 1980
           }
         },
         "inntektsmottakerID" : "2395801903843",
@@ -41,7 +41,7 @@
       "inntektListe" : [ {
         "type" : "YtelseFraOffentlige",
         "arbeidsforholdREF" : null,
-        "beloep" : 5E+4,
+        "beloep" : 50000,
         "fordel" : "kontantytelse",
         "inntektskilde" : "A-ordningen",
         "inntektsperiodetype" : "Maaned",
@@ -76,7 +76,7 @@
       "inntektListe" : [ {
         "type" : "Naeringsinntekt",
         "arbeidsforholdREF" : null,
-        "beloep" : 5E+4,
+        "beloep" : 50000,
         "fordel" : "kontantytelse",
         "inntektskilde" : "A-ordningen",
         "inntektsperiodetype" : "Maaned",
@@ -96,7 +96,7 @@
           "kategori" : "bla",
           "tilleggsinformasjonDetaljer" : {
             "antallDager" : 40,
-            "betaltTrygdeavgift" : 5E+4
+            "betaltTrygdeavgift" : 50000
           }
         },
         "inntektsmottakerID" : "2395801903843",
@@ -112,7 +112,7 @@
       "inntektListe" : [ {
         "type" : "Naeringsinntekt",
         "arbeidsforholdREF" : null,
-        "beloep" : 5E+4,
+        "beloep" : 50000,
         "fordel" : "kontantytelse",
         "inntektskilde" : "A-ordningen",
         "inntektsperiodetype" : "Maaned",

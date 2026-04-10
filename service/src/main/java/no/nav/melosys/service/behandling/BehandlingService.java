@@ -257,7 +257,7 @@ public class BehandlingService {
             replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
                  IllegalAccessException e) {
-            throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
+            throw new TekniskException("Klarte ikke replikere behandling %s for fagsak %s".formatted(
                 tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
         }
 

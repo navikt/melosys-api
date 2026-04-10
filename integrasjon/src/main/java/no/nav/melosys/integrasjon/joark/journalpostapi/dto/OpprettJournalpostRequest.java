@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.FysiskDokument;
 import no.nav.melosys.domain.arkiv.Journalposttype;
@@ -33,7 +32,6 @@ public class OpprettJournalpostRequest {
     //"Første dokument blir tilknyttet som hoveddokument på journalposten. Øvrige dokumenter tilknyttes som vedlegg. Rekkefølgen på vedlegg beholdes ikke ved uthenting av journalpost."
     private List<Dokument> dokumenter;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate datoMottatt;
 
     private OpprettJournalpostRequest(JournalpostType journalpostType,

@@ -20,7 +20,7 @@ import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
+import org.springframework.boot.webclient.test.autoconfigure.AutoConfigureWebClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -162,7 +162,7 @@ class FaktureringskomponentenClientTest(
                             "belop":2000,
                             "startDato":"2024-01-01",
                             "sluttDato":"2024-12-31",
-                            "beskrivelse":"Periode 2024-01-01 - 2024-12-31 endelig beregnet trygdeavgift 2000 - forskuddsvis betalt trygdeavgift 2000"
+                            "beskrivelse":"Medlemskapsperiode 2024-01-01 - 2024-12-31 endelig beregnet trygdeavgift 2000 - forskuddsvis fakturert trygdeavgift 2000"
                         }
                         """,
                         true, false
@@ -260,7 +260,7 @@ class FaktureringskomponentenClientTest(
             belop,
             startDato,
             sluttDato,
-            "Periode $startDato - $sluttDato endelig beregnet trygdeavgift $belop - forskuddsvis betalt trygdeavgift $belop"
+            "Medlemskapsperiode $startDato - $sluttDato endelig beregnet trygdeavgift $belop - forskuddsvis fakturert trygdeavgift $belop"
         )
     }
 
