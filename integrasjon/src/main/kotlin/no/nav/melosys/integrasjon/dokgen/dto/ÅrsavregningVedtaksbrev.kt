@@ -65,7 +65,7 @@ class ÅrsavregningVedtaksbrev(
 data class Avgiftsperiode(
     val fom: LocalDate,
     val tom: LocalDate,
-    val avgiftssats: BigDecimal,
+    val avgiftssats: BigDecimal?,
     val avgiftPerMd: BigDecimal,
     val avgiftspliktigInntektPerMd: BigDecimal,
     val inntektskilde: String,

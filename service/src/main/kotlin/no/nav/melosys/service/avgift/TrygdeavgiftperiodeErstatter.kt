@@ -19,13 +19,24 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatId)
         nullstillTrygdeavgiftsperioder(behandlingsresultat)
 
+        // Flush DELETEs til databasen FØR nye perioder legges til.
+        // Uten dette prøver Hibernate å UPDATE (i stedet for DELETE+INSERT)
+        // grunnlag-rader i samme flush, og setter inntektsperiode_id=NULL → ORA-01407.
+        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+
         behandlingsresultat.finnAvgiftspliktigPerioder().forEach { avgiftspliktigperiode ->
             trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
-                val erMatch = trygdeavgiftsperiode.grunnlagMedlemskapsperiode?.id == avgiftspliktigperiode.hentId() ||
+                val erLegacyMatch = trygdeavgiftsperiode.grunnlagMedlemskapsperiode?.id == avgiftspliktigperiode.hentId() ||
                     trygdeavgiftsperiode.grunnlagLovvalgsPeriode?.id == avgiftspliktigperiode.hentId() ||
                     trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode?.id == avgiftspliktigperiode.hentId()
 
-                if (erMatch) {
+                val erGrunnlagListeMatch = trygdeavgiftsperiode.grunnlagListe.any {
+                    it.medlemskapsperiode?.hentId() == avgiftspliktigperiode.hentId() ||
+                        it.lovvalgsperiode?.hentId() == avgiftspliktigperiode.hentId() ||
+                        it.helseutgiftDekkesPeriode?.id == avgiftspliktigperiode.hentId()
+                }
+
+                if (erLegacyMatch || erGrunnlagListeMatch) {
                     avgiftspliktigperiode.addTrygdeavgiftsperiode(trygdeavgiftsperiode)
                 }
             }
@@ -37,6 +48,8 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
     fun erstattEøsPensjonistTrygdeavgiftsperioder(behandlingsresultatId: Long, trygdeavgiftsperioder: List<Trygdeavgiftsperiode>) {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatId)
         nullstillEøsPensjonistTrygdeavgiftsperioder(behandlingsresultat)
+
+        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
 
         trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
             trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode
