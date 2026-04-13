@@ -45,8 +45,9 @@ class ManglendeFakturabetalingConsumer(
                 return
             }
 
+            val avgiftspliktigPerioder = sisteResultatMedReferanse.finnAvgiftspliktigPerioder()
             if (sisteResultatMedReferanse.hentBehandling().erEøsPensjonist() ||
-                sisteResultatMedReferanse.finnAvgiftspliktigPerioder().isNotEmpty() && sisteResultatMedReferanse.finnAvgiftspliktigPerioder().all { it.erPliktigMedlemskap() }) {
+                avgiftspliktigPerioder.isNotEmpty() && avgiftspliktigPerioder.all { it.erPliktigMedlemskap() }) {
                 prosessinstansService.opprettProsessManglendeInnbetalingVarselBrev(
                     sisteResultatMedReferanse.behandling,
                     manglendeFakturebetalingMelding
