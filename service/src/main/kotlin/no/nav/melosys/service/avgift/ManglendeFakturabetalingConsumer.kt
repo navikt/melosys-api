@@ -3,10 +3,12 @@ package no.nav.melosys.service.avgift
 import io.getunleash.Unleash
 import jakarta.transaction.Transactional
 import mu.KotlinLogging
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.sak.FagsakService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Profile
@@ -40,7 +42,14 @@ class ManglendeFakturabetalingConsumer(
                     throw FunksjonellException("Finner ikke behandlingsresultat med fakturaserie-referanse: $fakturaserieReferanse")
                 }.first()
 
-            if (sisteResultatMedReferanse.hentBehandling().erEøsPensjonist() || sisteResultatMedReferanse.finnAvgiftspliktigPerioder().isNotEmpty() && sisteResultatMedReferanse.finnAvgiftspliktigPerioder().all { it.erPliktigMedlemskap() }) {
+            val fagsak = sisteResultatMedReferanse.hentBehandling().fagsak
+            if(fagsak.erAnnullertEllerOpphørt()) {
+                log.info("Fagsak for fakturaserie-referanse $fakturaserieReferanse er opphørt/annullert, hopper over manglende fakturabetaling")
+                return
+            }
+
+            if (sisteResultatMedReferanse.hentBehandling().erEøsPensjonist() ||
+                sisteResultatMedReferanse.finnAvgiftspliktigPerioder().isNotEmpty() && sisteResultatMedReferanse.finnAvgiftspliktigPerioder().all { it.erPliktigMedlemskap() }) {
                 prosessinstansService.opprettProsessManglendeInnbetalingVarselBrev(
                     sisteResultatMedReferanse.behandling,
                     manglendeFakturebetalingMelding
