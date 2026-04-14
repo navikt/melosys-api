@@ -84,15 +84,18 @@ class OpprettSakOgBehandlingSøknad(
             log.info { "Satt behandlingsstatus til AVVENT_DOK_PART (kun arbeidsgiver-del mottatt)" }
         }
 
-        // Lagre alle relaterte skjemaId-er i mapping-tabellen
-        val alleRelatertIder = samleRelaterteSkjemaIder(søknadsdata)
+        // Lagre hoved-skjemaId med originalData, og kun mapping for relaterte IDs
         val originalData = jsonMapper.writeValueAsString(søknadsdata)
         val innsendtDato = søknadsdata.innsendtTidspunkt.atZone(java.time.ZoneId.of("Europe/Oslo")).toInstant()
-        skjemaSakMappingService.lagreMappinger(
-            alleRelatertIder, fagsak.saksnummer,
+        skjemaSakMappingService.lagreMapping(
+            søknadsdata.skjema.id, fagsak.saksnummer,
             originalData = originalData,
             innsendtDato = innsendtDato
         )
+        val andreRelatertIder = samleRelaterteSkjemaIder(søknadsdata) - søknadsdata.skjema.id
+        if (andreRelatertIder.isNotEmpty()) {
+            skjemaSakMappingService.lagreMappinger(andreRelatertIder, fagsak.saksnummer)
+        }
 
         // Lagre mottatte opplysninger (kun periode + land)
         val søknad = ForenkletSøknadMapper.tilSoeknad(søknadsdata)

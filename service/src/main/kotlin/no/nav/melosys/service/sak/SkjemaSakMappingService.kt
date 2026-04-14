@@ -5,7 +5,9 @@ import no.nav.melosys.domain.SkjemaSakMapping
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.SkjemaSakMappingRepository
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.util.UUID
@@ -53,7 +55,7 @@ class SkjemaSakMappingService(
         }
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun lagreMapping(
         skjemaId: UUID,
         saksnummer: String,
@@ -61,21 +63,20 @@ class SkjemaSakMappingService(
         originalData: String? = null,
         innsendtDato: Instant? = null
     ) {
-        if (skjemaSakMappingRepository.findBySkjemaId(skjemaId).isPresent) {
-            log.debug { "Mapping for skjemaId=$skjemaId eksisterer allerede" }
-            return
-        }
-
-        skjemaSakMappingRepository.save(
-            SkjemaSakMapping(
-                skjemaId = skjemaId,
-                saksnummer = saksnummer,
-                mottatteOpplysningerId = mottatteOpplysningerId,
-                originalData = originalData,
-                innsendtDato = innsendtDato
+        try {
+            skjemaSakMappingRepository.save(
+                SkjemaSakMapping(
+                    skjemaId = skjemaId,
+                    saksnummer = saksnummer,
+                    mottatteOpplysningerId = mottatteOpplysningerId,
+                    originalData = originalData,
+                    innsendtDato = innsendtDato
+                )
             )
-        )
-        log.info { "Lagret mapping: skjemaId=$skjemaId → saksnummer=$saksnummer" }
+            log.info { "Lagret mapping: skjemaId=$skjemaId → saksnummer=$saksnummer" }
+        } catch (e: DataIntegrityViolationException) {
+            log.debug { "Mapping for skjemaId=$skjemaId eksisterer allerede (PK-constraint)" }
+        }
     }
 
     @Transactional
@@ -98,6 +99,8 @@ class SkjemaSakMappingService(
             mapping.journalpostId = journalpostId
             skjemaSakMappingRepository.save(mapping)
             log.info { "Oppdatert journalpostId=$journalpostId for skjemaId=$skjemaId" }
+        } else {
+            log.warn { "Kan ikke oppdatere journalpostId — ingen mapping funnet for skjemaId=$skjemaId" }
         }
     }
 }
