@@ -74,6 +74,7 @@ internal class OpprettSakOgBehandlingSøknadTest {
             medData(ProsessDataKey.SØKNADSDATA, søknadsdata)
         }
 
+        every { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) } just Runs
         every { skjemaSakMappingService.lagreMappinger(any(), any()) } just Runs
     }
 
@@ -168,6 +169,6 @@ internal class OpprettSakOgBehandlingSøknadTest {
 
         opprettSakOgBehandlingSøknad.utfør(prosessinstans)
 
-        verify { skjemaSakMappingService.lagreMappinger(any(), eq("MEL-1234")) }
+        verify { skjemaSakMappingService.lagreMapping(any(), eq("MEL-1234"), any(), any(), any()) }
     }
 }

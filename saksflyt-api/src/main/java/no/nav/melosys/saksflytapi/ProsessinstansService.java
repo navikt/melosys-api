@@ -580,30 +580,19 @@ public class ProsessinstansService {
 
     @Transactional
     public void opprettProsessinstansMelosysSøknadMottatt(SkjemaMottattMelding melding) {
-        String låsReferanse = melding.getSkjemaId().toString();
-        ProsessType prosessType = ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD;
-
-        if (prosessinstansRepo.existsByLåsReferanseAndType(låsReferanse, prosessType)) {
-            logger.error("Skjema med skjemaId {} har vært mottatt tidligere. Dette skal ikke skje.", melding.getSkjemaId());
-            return;
-        }
-
-        Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(prosessType)
-            .medLåsReferanse(låsReferanse)
-            .build();
-        prosessinstans.setData(SØKNAD_MOTTATT_MELDING, melding);
-
-        lagre(prosessinstans);
+        opprettSøknadProsessinstans(melding, ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD, null);
     }
 
     @Transactional
     public void opprettProsessinstansEksisterendeDigitalSøknad(SkjemaMottattMelding melding, String saksnummer) {
+        opprettSøknadProsessinstans(melding, ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD, saksnummer);
+    }
+
+    private void opprettSøknadProsessinstans(SkjemaMottattMelding melding, ProsessType prosessType, String saksnummer) {
         String låsReferanse = melding.getSkjemaId().toString();
-        ProsessType prosessType = ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD;
 
         if (prosessinstansRepo.existsByLåsReferanseAndType(låsReferanse, prosessType)) {
-            logger.error("Skjema med skjemaId {} har vært mottatt tidligere for journalføring.", melding.getSkjemaId());
+            logger.error("Skjema med skjemaId {} har vært mottatt tidligere for prosesstype {}.", melding.getSkjemaId(), prosessType);
             return;
         }
 
@@ -612,7 +601,9 @@ public class ProsessinstansService {
             .medLåsReferanse(låsReferanse)
             .build();
         prosessinstans.setData(SØKNAD_MOTTATT_MELDING, melding);
-        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
+        if (saksnummer != null) {
+            prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
+        }
 
         lagre(prosessinstans);
     }
@@ -796,3 +787,4 @@ public class ProsessinstansService {
         return !prosessinstansRepo.findBySatsendringAndOpprinneligBehandlingIdNotFerdig(behandlingID).isEmpty();
     }
 }
+|

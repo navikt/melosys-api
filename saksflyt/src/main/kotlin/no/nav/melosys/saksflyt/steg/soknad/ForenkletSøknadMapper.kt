@@ -6,9 +6,6 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.skjema.types.felles.LandKode
 import no.nav.melosys.skjema.types.felles.PeriodeDto
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto
 
 /**
  * Forenklet mapper som kun mapper periode og land fra skjemadata til [Soeknad].
@@ -27,19 +24,9 @@ object ForenkletSøknadMapper {
     }
 
     fun hentPeriodeOgLand(dto: UtsendtArbeidstakerSkjemaM2MDto): Pair<Periode, Soeknadsland> {
-        return when (val data = dto.skjema.data) {
-            is UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto ->
-                mapPeriode(data.utsendingsperiodeOgLand?.utsendelsePeriode) to
-                    mapSoeknadsland(data.utsendingsperiodeOgLand?.utsendelseLand)
-
-            is UtsendtArbeidstakerArbeidstakersSkjemaDataDto ->
-                mapPeriode(data.utsendingsperiodeOgLand?.utsendelsePeriode) to
-                    mapSoeknadsland(data.utsendingsperiodeOgLand?.utsendelseLand)
-
-            is UtsendtArbeidstakerArbeidsgiversSkjemaDataDto ->
-                mapPeriode(data.utsendingsperiodeOgLand?.utsendelsePeriode) to
-                    mapSoeknadsland(data.utsendingsperiodeOgLand?.utsendelseLand)
-        }
+        val data = dto.skjema.data
+        return mapPeriode(data.utsendingsperiodeOgLand?.utsendelsePeriode) to
+            mapSoeknadsland(data.utsendingsperiodeOgLand?.utsendelseLand)
     }
 
     private fun mapPeriode(periodeDto: PeriodeDto?): Periode =

@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.soknad
 import tools.jackson.databind.json.JsonMapper
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -23,6 +24,8 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 private val log = KotlinLogging.logger { }
+
+internal val OSLO_ZONE: ZoneId = ZoneId.of("Europe/Oslo")
 
 private val SØKNADSBEHANDLING_TYPER = setOf(
     Behandlingstyper.FØRSTEGANG,
@@ -75,9 +78,8 @@ class HåndterEksisterendeSakSøknad(
             opprettNyVurdering(fagsak, søknadsdata)
         }
 
-        // Lagre mapping
         val originalData = jsonMapper.writeValueAsString(søknadsdata)
-        val innsendtDato = søknadsdata.innsendtTidspunkt.atZone(ZoneId.of("Europe/Oslo")).toInstant()
+        val innsendtDato = søknadsdata.innsendtTidspunkt.atZone(OSLO_ZONE).toInstant()
         skjemaSakMappingService.lagreMapping(
             søknadsdata.skjema.id, saksnummer,
             originalData = originalData,
@@ -88,7 +90,7 @@ class HåndterEksisterendeSakSøknad(
         log.info { "Ferdig med eksisterende sak $saksnummer, behandling=${behandling.id}" }
     }
 
-    private fun finnÅpenSøknadsbehandling(fagsak: no.nav.melosys.domain.Fagsak): Behandling? {
+    private fun finnÅpenSøknadsbehandling(fagsak: Fagsak): Behandling? {
         val aktiv = fagsak.finnAktivBehandlingIkkeÅrsavregning() ?: return null
         return if (aktiv.type in SØKNADSBEHANDLING_TYPER) aktiv else null
     }
@@ -111,7 +113,6 @@ class HåndterEksisterendeSakSøknad(
             log.info { "Reset stegvelger (tømBehandlingsresultat) for behandling ${behandling.id}" }
         }
 
-        // Oppdater mottatte opplysninger med nyeste periode og land
         val (periode, land) = ForenkletSøknadMapper.hentPeriodeOgLand(søknadsdata)
         mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(
             behandling.id, periode, land
@@ -122,7 +123,7 @@ class HåndterEksisterendeSakSøknad(
     }
 
     private fun opprettNyVurdering(
-        fagsak: no.nav.melosys.domain.Fagsak,
+        fagsak: Fagsak,
         søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
     ): Behandling {
         val saksnummer = fagsak.saksnummer
@@ -141,13 +142,11 @@ class HåndterEksisterendeSakSøknad(
         fagsak.leggTilBehandling(nyBehandling)
         log.info { "Opprettet behandling ${nyBehandling.id} (NY_VURDERING) på sak $saksnummer" }
 
-        // Mottatte opplysninger (kun periode + land)
         val søknad = ForenkletSøknadMapper.tilSoeknad(søknadsdata)
         mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
             nyBehandling.id, null, søknad, referanseId
         )
 
-        // Oppgave
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
             nyBehandling,
             null,

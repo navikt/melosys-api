@@ -35,10 +35,9 @@ class SkjemaSakMappingService(
         if (mappinger.isEmpty()) return null
 
         val saksnumre = mappinger.map { it.saksnummer }.distinct()
-        val gyldige = saksnumre.mapNotNull { saksnummer ->
-            val fagsak = fagsakRepository.findBySaksnummer(saksnummer).orElse(null) ?: return@mapNotNull null
-            if (fagsak.status in gyldigeSaksstatuser) saksnummer else null
-        }
+        val gyldige = fagsakRepository.findAllBySaksnummerIn(saksnumre)
+            .filter { it.status in gyldigeSaksstatuser }
+            .map { it.saksnummer }
 
         return when {
             gyldige.isEmpty() -> {
@@ -75,11 +74,10 @@ class SkjemaSakMappingService(
             )
             log.info { "Lagret mapping: skjemaId=$skjemaId → saksnummer=$saksnummer" }
         } catch (e: DataIntegrityViolationException) {
-            log.debug { "Mapping for skjemaId=$skjemaId eksisterer allerede (PK-constraint)" }
+            log.info { "Mapping for skjemaId=$skjemaId eksisterer allerede (PK-constraint)" }
         }
     }
 
-    @Transactional
     fun lagreMappinger(
         skjemaIder: Collection<UUID>,
         saksnummer: String,

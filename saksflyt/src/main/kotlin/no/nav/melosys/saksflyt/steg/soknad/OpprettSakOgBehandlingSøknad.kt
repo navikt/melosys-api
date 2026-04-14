@@ -86,7 +86,7 @@ class OpprettSakOgBehandlingSøknad(
 
         // Lagre hoved-skjemaId med originalData, og kun mapping for relaterte IDs
         val originalData = jsonMapper.writeValueAsString(søknadsdata)
-        val innsendtDato = søknadsdata.innsendtTidspunkt.atZone(java.time.ZoneId.of("Europe/Oslo")).toInstant()
+        val innsendtDato = søknadsdata.innsendtTidspunkt.atZone(OSLO_ZONE).toInstant()
         skjemaSakMappingService.lagreMapping(
             søknadsdata.skjema.id, fagsak.saksnummer,
             originalData = originalData,

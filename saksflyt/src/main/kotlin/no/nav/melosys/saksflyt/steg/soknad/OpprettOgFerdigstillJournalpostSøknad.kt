@@ -84,6 +84,7 @@ class OpprettOgFerdigstillJournalpostSøknad(
 
         val journalpostId = joarkFasade.opprettJournalpost(opprettJournalpost, true)
 
+        // Eksisterende-sak-flyten gjenbruker behandling som allerede kan ha en journalpost
         if (behandling.initierendeJournalpostId == null) {
             behandling.initierendeJournalpostId = journalpostId
             behandlingService.lagre(behandling)
