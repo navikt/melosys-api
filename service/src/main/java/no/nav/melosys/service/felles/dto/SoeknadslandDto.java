@@ -11,12 +11,12 @@ public class SoeknadslandDto {
     @JsonProperty("landkoder")
     private List<String> landkoder;
     @JsonProperty("flereLandUkjentHvilke")
-    private boolean flereLandUkjentHvilke;
+    private Boolean flereLandUkjentHvilke;
 
     public SoeknadslandDto() {
     }
 
-    public SoeknadslandDto(List<String> landkoder, boolean flereLandUkjentHvilke) {
+    public SoeknadslandDto(List<String> landkoder, Boolean flereLandUkjentHvilke) {
         this.landkoder = landkoder;
         this.flereLandUkjentHvilke = flereLandUkjentHvilke;
     }
@@ -30,10 +30,10 @@ public class SoeknadslandDto {
     }
 
     public boolean isFlereLandUkjentHvilke() {
-        return flereLandUkjentHvilke;
+        return Boolean.TRUE.equals(flereLandUkjentHvilke);
     }
 
-    public void setFlereLandUkjentHvilke(boolean flereLandUkjentHvilke) {
+    public void setFlereLandUkjentHvilke(Boolean flereLandUkjentHvilke) {
         this.flereLandUkjentHvilke = flereLandUkjentHvilke;
     }
 
@@ -48,12 +48,12 @@ public class SoeknadslandDto {
         if (this == o) return true;
         if (!(o instanceof SoeknadslandDto)) return false;
         SoeknadslandDto that = (SoeknadslandDto) o;
-        return this.flereLandUkjentHvilke == that.flereLandUkjentHvilke &&
+        return this.isFlereLandUkjentHvilke() == that.isFlereLandUkjentHvilke() &&
             this.getLandkoder().equals(that.getLandkoder());
     }
 
     public no.nav.melosys.saksflytapi.journalfoering.Soeknadsland tilSoknadsland() {
-        return new no.nav.melosys.saksflytapi.journalfoering.Soeknadsland(this.landkoder, flereLandUkjentHvilke);
+        return new no.nav.melosys.saksflytapi.journalfoering.Soeknadsland(this.landkoder, isFlereLandUkjentHvilke());
     }
 
     public static SoeknadslandDto av(Soeknadsland søknadsland) {

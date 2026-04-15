@@ -189,6 +189,8 @@ class Fagsak(
 
     fun erSakstypeFtrl(): Boolean = Sakstyper.FTRL == type
 
+    fun erAnnullertEllerOpphørt(): Boolean = status == Saksstatuser.ANNULLERT || status == Saksstatuser.OPPHØRT
+
     override fun equals(other: Any?): Boolean {
         if (this === other) {
             return true

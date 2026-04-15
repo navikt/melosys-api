@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper
 
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
@@ -77,6 +78,29 @@ class InnvilgelsesbrevMapperTest {
         withClue(diff.differences) {
             diff.hasDifferences() shouldBe false
         }
+    }
+
+    @Test
+    fun `fritekst med linjeskift konverteres til Metaforce-format`() {
+        val behandlingsresultat = lagBehandlingsresultat {
+            lovvalgsperiode { konfigurer(NOW) }
+            avklartefakta {
+                type = Avklartefaktatyper.VIRKSOMHET
+                subjekt = "123456789"
+                fakta = "TRUE"
+            }
+        }
+        val brevdataA1 = lagBrevDataA1()
+        val brevdataInnvilgelse = lagBrevDataInnvilgelse(brevdataA1).apply {
+            fritekst = "Linje 1\nLinje 2\nLinje 3"
+        }
+
+        val brevXml = instans.mapTilBrevXML(
+            lagFellesType(), lagNAVFelles(),
+            lagBehandling(medFartsområde = false), behandlingsresultat, brevdataInnvilgelse
+        )
+
+        brevXml shouldContain "Linje 1[_¶_]Linje 2[_¶_]Linje 3"
     }
 
     private fun hentBrevXmlFraFil(filnavn: String): String =

@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.kafka
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import mu.KotlinLogging
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord

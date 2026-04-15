@@ -28,6 +28,7 @@ import org.xml.sax.SAXException;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.tilMetaforceLinjeskift;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.*;
 
 public class AnmodningUnntakMapper implements BrevDataMapper {
@@ -101,9 +102,9 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
 
         mapAnmodningUtenArt12Begrunnelser(brevData.getAnmodningUtenArt12Begrunnelser()).ifPresent(fag::setArt161AnmodningUtenArt12Begrunnelse);
 
-        fag.setAnmodningFritekst(brevData.getAnmodningFritekst());
+        fag.setAnmodningFritekst(tilMetaforceLinjeskift(brevData.getAnmodningFritekst()));
 
-        fag.setBegrunnelseFritekst(brevData.getFritekst());
+        fag.setBegrunnelseFritekst(tilMetaforceLinjeskift(brevData.getFritekst()));
 
         return fag;
     }

@@ -26,8 +26,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration
-import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration
+import org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.test.context.EmbeddedKafka

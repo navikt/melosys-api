@@ -4,12 +4,11 @@ import java.io.InputStream;
 import java.util.List;
 import jakarta.validation.ValidationException;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
 import com.jayway.jsonpath.JsonPath;
 import com.networknt.schema.Error;
 import com.networknt.schema.InputFormat;
@@ -21,9 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JsonSchemaValidator {
-    private static final ObjectMapper DEFAULT_OBJECT_MAPPER = new ObjectMapper()
-        .registerModule(new JavaTimeModule())
-        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+    private static final ObjectMapper DEFAULT_OBJECT_MAPPER = JsonMapper.builder().build();
 
     private static final SchemaRegistry DEFAULT_SCHEMA_REGISTRY = SchemaRegistry
         .withDefaultDialect(SpecificationVersion.DRAFT_7);
@@ -90,7 +87,7 @@ public class JsonSchemaValidator {
     private void valider(String json, Schema schema, Logger logger) {
         try {
             objectMapper.readTree(json);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new TekniskException("Ugyldig JSON-input", e);
         }
         List<Error> errors = schema.validate(json, InputFormat.JSON);
@@ -102,7 +99,7 @@ public class JsonSchemaValidator {
     private String objektTilString(Object object) {
         try {
             return objectMapper.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new TekniskException("Feil ved mapping av objekt til json", e);
         }
     }
@@ -110,7 +107,7 @@ public class JsonSchemaValidator {
     private String nodeTilString(JsonNode node) {
         try {
             return objectMapper.writeValueAsString(node);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new TekniskException("Feil ved mapping av JsonNode til json", e);
         }
     }

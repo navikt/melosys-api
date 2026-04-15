@@ -30,7 +30,7 @@ class ÅrsavregningVedtakService(
 ) : FattVedtakInterface {
     private val log = KotlinLogging.logger { }
 
-    override fun fattVedtak(behandling: Behandling, request: FattVedtakRequest) {
+    override fun fattVedtak(behandling: Behandling, fattVedtakRequest: FattVedtakRequest) {
         valider(behandling)
 
         val behandlingID = behandling.id
@@ -40,11 +40,11 @@ class ÅrsavregningVedtakService(
             throw FunksjonellException("Det finnes allerede en vedtak-prosess for behandling $behandlingID")
         }
 
-        oppdaterBehandlingsresultat(behandlingID, request)
+        oppdaterBehandlingsresultat(behandlingID, fattVedtakRequest)
 
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK)
         prosessinstansService.opprettProsessinstansIverksettVedtakÅrsavregning(behandling)
-        dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request))
+        dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(fattVedtakRequest))
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id)
     }
 
@@ -54,26 +54,26 @@ class ÅrsavregningVedtakService(
         }
     }
 
-    private fun lagBrevbestilling(request: FattVedtakRequest): BrevbestillingDto =
+    private fun lagBrevbestilling(fattVedtakRequest: FattVedtakRequest): BrevbestillingDto =
         BrevbestillingDto().apply {
             produserbardokument = Produserbaredokumenter.AARSAVREGNING_VEDTAKSBREV
             mottaker = Mottakerroller.BRUKER
-            kopiMottakere = request.kopiMottakere
-            bestillersId = request.bestillersId
-            innledningFritekst = request.innledningFritekst
-            begrunnelseFritekst = request.begrunnelseFritekst
+            kopiMottakere = fattVedtakRequest.kopiMottakere
+            bestillersId = fattVedtakRequest.bestillersId
+            innledningFritekst = fattVedtakRequest.innledningFritekst
+            begrunnelseFritekst = fattVedtakRequest.begrunnelseFritekst
             standardvedleggType = produserbardokument.hentStandardvedlegg().single()
         }
 
-    private fun oppdaterBehandlingsresultat(behandlingID: Long, request: FattVedtakRequest): Behandlingsresultat {
+    private fun oppdaterBehandlingsresultat(behandlingID: Long, fattVedtakRequest: FattVedtakRequest): Behandlingsresultat {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
         behandlingsresultat.type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
-        behandlingsresultat.settVedtakMetadata(request.vedtakstype, LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong()))
-        behandlingsresultat.nyVurderingBakgrunn = request.nyVurderingBakgrunn
-        behandlingsresultat.begrunnelseFritekst = request.begrunnelseFritekst
-        behandlingsresultat.innledningFritekst = request.innledningFritekst
-        behandlingsresultat.trygdeavgiftFritekst = request.trygdeavgiftFritekst
+        behandlingsresultat.settVedtakMetadata(fattVedtakRequest.vedtakstype, LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong()))
+        behandlingsresultat.nyVurderingBakgrunn = fattVedtakRequest.nyVurderingBakgrunn
+        behandlingsresultat.begrunnelseFritekst = fattVedtakRequest.begrunnelseFritekst
+        behandlingsresultat.innledningFritekst = fattVedtakRequest.innledningFritekst
+        behandlingsresultat.trygdeavgiftFritekst = fattVedtakRequest.trygdeavgiftFritekst
         behandlingsresultat.fastsattAvLand = Land_iso2.NO
 
         return behandlingsresultatService.lagreOgFlush(behandlingsresultat)

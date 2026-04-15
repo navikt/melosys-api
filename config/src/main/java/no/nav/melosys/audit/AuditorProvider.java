@@ -5,7 +5,7 @@ import java.util.Optional;
 import no.nav.melosys.sikkerhet.context.SaksflytSubjektHolder;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.data.domain.AuditorAware;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 public class AuditorProvider implements AuditorAware<String> {
 
@@ -19,7 +19,7 @@ public class AuditorProvider implements AuditorAware<String> {
         }
 
         String saksbehandler = SaksflytSubjektHolder.get();
-        if (!StringUtils.isEmpty(saksbehandler)) {
+        if (!ObjectUtils.isEmpty(saksbehandler)) {
             return Optional.of(saksbehandler);
         }
 

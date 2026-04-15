@@ -1,8 +1,7 @@
 package no.nav.melosys.integrasjon.inntekt
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
@@ -31,7 +30,7 @@ class InntektKonverterTest {
     @Test
     fun `skal kunne konverter valid inntekt response`() {
         val inntektResponse = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
+            
             .readValue<InntektResponse>(hentRessurs("mock/inntekt/inntektClientResponse.json"))
 
         val saksopplysning = InntektKonverter().lagSaksopplysning(inntektResponse)

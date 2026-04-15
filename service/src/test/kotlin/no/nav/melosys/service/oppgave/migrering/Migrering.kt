@@ -1,8 +1,7 @@
 package no.nav.melosys.service.oppgave.migrering
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.core.type.TypeReference
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.melosys.domain.Fagsystem
 import no.nav.melosys.domain.SakOgBehandlingDTO
 import no.nav.melosys.domain.Tema
@@ -45,7 +44,6 @@ object Migrering {
 
     private fun hentMigreringsSaker(fileName: String): List<MigreringsSak> {
         return jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
             .readValue(File(fileName), object : TypeReference<List<MigreringsInfoForLesing>>() {})
             .map { it.tilMigreringsInfo() }
     }

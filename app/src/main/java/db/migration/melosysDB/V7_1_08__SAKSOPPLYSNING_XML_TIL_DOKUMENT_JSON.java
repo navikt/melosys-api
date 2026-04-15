@@ -8,7 +8,7 @@ import jakarta.xml.bind.helpers.DefaultValidationEventHandler;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
@@ -57,7 +57,7 @@ public class V7_1_08__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON extends BaseJavaMigra
         }
     }
 
-    private void opprettMigrering(OracleResultSet resultSet, OracleConnection con) throws SQLException, TransformerException, JsonProcessingException {
+    private void opprettMigrering(OracleResultSet resultSet, OracleConnection con) throws SQLException, TransformerException, JacksonException {
         long saksopplysningID = resultSet.getLong("id");
         String versjon = resultSet.getString("versjon");
         String opplysningType = resultSet.getString("opplysning_type");
@@ -109,7 +109,7 @@ public class V7_1_08__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON extends BaseJavaMigra
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends SaksopplysningDokument> String lagDokumentJson(Class<T> clazz, String xml, String path, String versjon) throws TransformerException, JsonProcessingException {
+    private <T extends SaksopplysningDokument> String lagDokumentJson(Class<T> clazz, String xml, String path, String versjon) throws TransformerException, JacksonException {
         StringReader stringReader = new StringReader(xml);
         T dokument = (T) jaxb2Marshaller.unmarshal(new StreamSource(stringReader));
         return converter.convertToDatabaseColumn(dokument);

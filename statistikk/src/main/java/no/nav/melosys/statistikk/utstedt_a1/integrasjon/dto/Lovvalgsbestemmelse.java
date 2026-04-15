@@ -53,7 +53,7 @@ public enum Lovvalgsbestemmelse {
     public static Lovvalgsbestemmelse av(LovvalgBestemmelse lovvalgBestemmelse) {
         return Optional.ofNullable(LOVVALGSBESTEMMELSE_MAP.get(lovvalgBestemmelse))
             .orElseThrow(() -> new UnsupportedOperationException(
-                String.format("Lovvalgsbestemmelse %s støttes ikke for melding om utstedt A1", lovvalgBestemmelse)));
+            "Lovvalgsbestemmelse %s støttes ikke for melding om utstedt A1".formatted(lovvalgBestemmelse)));
     }
 
     public static Lovvalgsbestemmelse avKonvensjonEftaStorbritannia(Lovvalgbestemmelser_konv_efta_storbritannia lovvalgBestemmelse) {

@@ -3,8 +3,8 @@ package no.nav.melosys.integrasjon.dokgen.dto;
 import java.time.Instant;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
+import tools.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.ext.javatime.ser.InstantSerializer;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker;

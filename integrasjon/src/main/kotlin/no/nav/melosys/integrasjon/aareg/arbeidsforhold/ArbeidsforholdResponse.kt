@@ -3,26 +3,28 @@ package no.nav.melosys.integrasjon.aareg.arbeidsforhold
 import com.fasterxml.jackson.annotation.JsonAnyGetter
 import com.fasterxml.jackson.annotation.JsonAnySetter
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import tools.jackson.core.JacksonException
+import tools.jackson.databind.ObjectMapper
 import no.nav.melosys.exception.TekniskException
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 
 class ArbeidsforholdResponse(val arbeidsforhold: List<Arbeidsforhold>) {
+
     fun tilSaksopplysning(): String {
-        val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
         try {
             return objectMapper.writeValueAsString(arbeidsforhold)
-        } catch (e: JsonProcessingException) {
+        } catch (e: JacksonException) {
             throw TekniskException("Kunne ikke konvertere arbeidsforhold til json string", e)
         }
     }
 
+    companion object {
+        private val objectMapper = ObjectMapper()
+    }
+
     data class Arbeidsforhold(
-        private val unknownProperties: MutableMap<String?, Any> = mutableMapOf(),
         val arbeidsforholdId: String?, // Arbeidsforhold-id fra opplysningspliktig
         val navArbeidsforholdId: Int, // Arbeidsforhold-id i AAREG
         val ansettelsesperiode: Ansettelsesperiode,
@@ -39,6 +41,7 @@ class ArbeidsforholdResponse(val arbeidsforhold: List<Arbeidsforhold>) {
         val sistBekreftet: String?,
         val antallTimerForTimeloennet: List<AntallTimerForTimeloennet>?
     ) {
+        private val unknownProperties: MutableMap<String?, Any> = mutableMapOf()
         val periode: Periode
             get() = ansettelsesperiode.periode
 

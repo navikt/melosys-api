@@ -1,5 +1,7 @@
 package no.nav.melosys.domain.brev
 
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.arkiv.Distribusjonstype
 import no.nav.melosys.domain.kodeverk.Mottakerroller
@@ -13,16 +15,17 @@ class DoksysBrevbestilling : Brevbestilling {
     val distribusjonstype: Distribusjonstype?
     val ytterligereInformasjon: String?
 
+    @JsonCreator
     private constructor(
-        produserbartdokument: Produserbaredokumenter?,
-        avsenderID: String?,
-        mottakerRolle: Mottakerroller?,
-        mottakere: Collection<Mottaker>?,
-        behandling: Behandling?,
-        begrunnelseKode: String?,
-        fritekst: String?,
-        ytterligereInformasjon: String?,
-        distribusjonstype: Distribusjonstype?
+        @JsonProperty("produserbartdokument") produserbartdokument: Produserbaredokumenter?,
+        @JsonProperty("avsenderID") avsenderID: String?,
+        @JsonProperty("mottakerRolle") mottakerRolle: Mottakerroller?,
+        @JsonProperty("mottakere") mottakere: Collection<Mottaker>?,
+        @JsonProperty("behandling") behandling: Behandling?,
+        @JsonProperty("begrunnelseKode") begrunnelseKode: String?,
+        @JsonProperty("fritekst") fritekst: String?,
+        @JsonProperty("ytterligereInformasjon") ytterligereInformasjon: String?,
+        @JsonProperty("distribusjonstype") distribusjonstype: Distribusjonstype?
     ) : super(produserbartdokument, behandling, avsenderID) {
         this.mottakerRolle = mottakerRolle
         this.mottakere = mottakere

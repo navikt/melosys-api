@@ -36,7 +36,9 @@ import java.util.stream.Collectors;
 
 import static java.util.Map.entry;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
+import no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.lagXmlDato;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.tilMetaforceLinjeskift;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.mapArt121BegrunnelseType;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.mapArt122BegrunnelseType;
 
@@ -103,6 +105,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         }
 
         brevdata.getAnmodningsperiodesvar().map(AnmodningsperiodeSvar::getBegrunnelseFritekst)
+            .map(BrevMapperUtils::tilMetaforceLinjeskift)
             .ifPresent(fag::setBegrunnelseFritekst);
 
         brevdata.getAnmodningsperiodesvar()
@@ -142,7 +145,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         Set<VilkaarBegrunnelse> art122Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_2, KONV_EFTA_STORBRITANNIA_ART14_2, KONV_EFTA_STORBRITANNIA_ART16_3);
         fag.setArt122Begrunnelse(mapArt122BegrunnelseType(art122Begrunnelser));
 
-        fag.setFritekst(brevdata.getFritekst());
+        fag.setFritekst(tilMetaforceLinjeskift(brevdata.getFritekst()));
 
         if (resultat.getVedtakMetadata() != null) {
             fag.setVedtaksType(tilVedtaksTypeKode(resultat.getVedtakMetadata().getVedtakstype()));
@@ -159,7 +162,9 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             );
             fag.setBarnIkkeOmfattetAvNorskTrygdListe(hentBarnIkkeOmfattetAvNorskTrygd(brevdata.getAvklarteMedfolgendeBarn()));
             fag.setBarnOmfattetAvNorskTrygdListe(hentBarnOmfattetAvNorskTrygd(brevdata.getAvklarteMedfolgendeBarn()));
-            brevdata.getAvklarteMedfolgendeBarn().hentBegrunnelseFritekst().ifPresent(fag::setMedfoelgendeBarnFritekst);
+            brevdata.getAvklarteMedfolgendeBarn().hentBegrunnelseFritekst()
+                .map(BrevMapperUtils::tilMetaforceLinjeskift)
+                .ifPresent(fag::setMedfoelgendeBarnFritekst);
         } else {
             fag.setAntallBarnOmfattetAvNorskTrygd(BigInteger.valueOf(0));
         }

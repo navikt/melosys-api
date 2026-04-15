@@ -40,6 +40,17 @@ public final class BrevMapperUtils {
         );
     }
 
+    /**
+     * Konverterer linjeskift til Metaforce-format for bruk i fritekstfelter i Doksys-brev.
+     * Metaforce rendrer ikke standard linjeskift (\n), men støtter [_¶_] som linjeskift-markør.
+     */
+    public static String tilMetaforceLinjeskift(String tekst) {
+        if (tekst == null) {
+            return null;
+        }
+        return tekst.replace("\n", "[_¶_]");
+    }
+
     public static XMLGregorianCalendar convertToXMLGregorianCalendarRemoveTimezone(Instant instant) {
         if (instant == null) {
             return null;

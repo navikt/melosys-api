@@ -16,7 +16,7 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
