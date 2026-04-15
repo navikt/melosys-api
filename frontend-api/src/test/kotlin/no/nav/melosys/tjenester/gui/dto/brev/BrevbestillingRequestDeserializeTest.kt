@@ -80,6 +80,24 @@ class BrevbestillingRequestDeserializeTest {
     }
 
     @Test
+    fun `tilUtkast konverterer null boolean til false uten NPE`() {
+        val json = """
+            {
+              "produserbardokument": null,
+              "mottaker": null,
+              "skalViseStandardTekstOmkontaktopplysninger": null,
+              "skalViseStandardTekstOmOpplysninger": null
+            }
+        """.trimIndent()
+
+        val request = objectMapper.readValue<BrevbestillingRequest>(json)
+        val utkast = request.tilUtkast()
+
+        utkast.kontaktopplysninger shouldBe false
+        utkast.skalViseStandardTekstOmOpplysninger shouldBe false
+    }
+
+    @Test
     fun `tilBrevbestillingDto konverterer null boolean til false`() {
         val json = """
             {
