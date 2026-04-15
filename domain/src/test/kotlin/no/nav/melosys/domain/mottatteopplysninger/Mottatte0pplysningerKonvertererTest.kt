@@ -10,6 +10,22 @@ import kotlin.test.Test
 class MottatteOpplysningerKonvertererTest {
 
     @Test
+    fun `skal tåle null for boolean-felt i søknad (Jackson 3 null-for-primitiv)`() {
+        val json = javaClass.classLoader.getResource("soeknad/soeknad.json")?.readText()
+            ?: throw IllegalArgumentException("Kunne ikke lese json fra 'soeknad/soeknad.json'")
+        val jsonMedNullBoolean = json.replace("\"flereLandUkjentHvilke\" : false", "\"flereLandUkjentHvilke\" : null")
+
+        MottatteOpplysninger().apply {
+            type = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
+            jsonData = jsonMedNullBoolean
+        }.also { mottatteOpplysninger ->
+            MottatteOpplysningerKonverterer.lastMottatteOpplysninger(mottatteOpplysninger)
+            val soeknad = mottatteOpplysninger.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
+            soeknad.soeknadsland.isFlereLandUkjentHvilke shouldBe false
+        }
+    }
+
+    @Test
     fun `skal fungere å konverte fra json til dto og tilbake til json`() {
         val json = javaClass.classLoader.getResource("soeknad/soeknad.json")?.readText()
             ?: throw IllegalArgumentException("Kunne ikke lese json fra 'soeknad/soeknad.json'")

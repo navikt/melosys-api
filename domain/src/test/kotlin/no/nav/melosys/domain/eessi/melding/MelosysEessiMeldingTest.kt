@@ -79,6 +79,30 @@ class MelosysEessiMeldingTest {
     }
 
     @Test
+    fun `skal tåle null for boolean-felt (Jackson 3 null-for-primitiv)`() {
+        val objectMapper = jacksonObjectMapper()
+        val json = """
+            {
+              "erEndring": null,
+              "midlertidigBestemmelse": null,
+              "x006NavErFjernet": null,
+              "arbeidssteder": [
+                {
+                  "adresse": {"by": "Oslo"},
+                  "erIkkeFastAdresse": null
+                }
+              ]
+            }
+        """
+
+        val melding = objectMapper.readValue<MelosysEessiMelding>(json)
+        melding.erEndring shouldBe false
+        melding.midlertidigBestemmelse shouldBe false
+        melding.x006NavErFjernet shouldBe false
+        melding.arbeidssteder.single().erIkkeFastAdresse shouldBe false
+    }
+
+    @Test
     fun `lagUnikIdentifikator bruker alle verdier når de er satt`() {
         val melding = MelosysEessiMelding(
             rinaSaksnummer = "rinaSaksnummer",

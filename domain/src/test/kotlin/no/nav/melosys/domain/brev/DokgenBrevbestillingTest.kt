@@ -42,6 +42,30 @@ class DokgenBrevbestillingTest {
         }
     }
 
+    @Test
+    fun `deserialisering skal tåle null for boolean-felt i alle subtyper (Jackson 3 null-for-primitiv)`() {
+        val jsonSubTypes = DokgenBrevbestilling::class.java.getAnnotation(JsonSubTypes::class.java)
+            ?: throw IllegalStateException("DokgenBrevbestilling mangler JsonSubTypes-annotasjon")
+
+        val classes = jsonSubTypes.value.map { it.value.java }.toList()
+
+        for (type in classes) {
+            // Bygg JSON med gyldige verdier først, deretter sett alle boolean-felt til null
+            val node = getAllNodesFromType(type)
+            setBooleanFieldsToNull(node, type)
+            setBooleanFieldsToNull(node, DokgenBrevbestilling::class.java)
+
+            val result = dataMapper.readValue(node.toPrettyString(), type)
+            result.shouldNotBeNull()
+        }
+    }
+
+    private fun setBooleanFieldsToNull(node: ObjectNode, type: Class<*>) {
+        type.declaredFields
+            .filter { it.type == Boolean::class.javaPrimitiveType || it.type == Boolean::class.javaObjectType }
+            .forEach { node.putNull(it.name) }
+    }
+
     private fun getAllNodesFromType(type: Class<*>): ObjectNode = dataMapper.createObjectNode().also { node ->
         type.declaredFields.forEach { field ->
             when (field.type.simpleName) {
