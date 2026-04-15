@@ -1,5 +1,7 @@
 package no.nav.melosys.service.sak
 
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -21,6 +23,7 @@ class OpprettSakDto {
     var behandlingsaarsakFritekst: String? = null
     var soknadDto: SøknadDto? = null
     var mottaksdato: LocalDate? = null
+    @JsonSetter(nulls = Nulls.SKIP)
     var skalTilordnes: Boolean = false
 
     fun tilOpprettSakRequest(): OpprettSakRequest {

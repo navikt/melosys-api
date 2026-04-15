@@ -1,5 +1,7 @@
 package no.nav.melosys.tjenester.gui.aarsavregning
 
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
@@ -290,11 +292,13 @@ data class LagÅrsavregningRequest(
 )
 
 data class HarTrygdeavgiftFraAvgiftssystemetRequest(
-    val harTrygdeavgiftFraAvgiftssystemet: Boolean
+    @JsonSetter(nulls = Nulls.SKIP)
+    val harTrygdeavgiftFraAvgiftssystemet: Boolean = false
 )
 
 data class HarSkjoennsfastsattInntektRequest(
-    val harSkjoennsfastsattInntekt: Boolean
+    @JsonSetter(nulls = Nulls.SKIP)
+    val harSkjoennsfastsattInntekt: Boolean = false
 )
 
 data class ÅrsavregningResponse(
