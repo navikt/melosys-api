@@ -34,20 +34,24 @@ class InformasjonTrygdeavgiftMapper(
     internal fun mapInformasjonTrygdeavgift(brevbestilling: DokgenBrevbestilling): InformasjonTrygdeavgift {
         val behandlingId = brevbestilling.behandlingNonNull().id
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandlingId)
-        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandlingId)
+        val helseutgiftDekkesPerioder = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(behandlingId)
 
-        if (helseutgiftDekkesPeriode == null) {
+        if (helseutgiftDekkesPerioder.isEmpty()) {
             throw IkkeFunnetException("Finner ingen helseutgift-periode med behandlingID: $behandlingId")
         }
 
+        val fomDato = helseutgiftDekkesPerioder.minOf { it.fomDato }
+        val tomDato = helseutgiftDekkesPerioder.maxOf { it.tomDato }
+        val førstePeriode = helseutgiftDekkesPerioder.minByOrNull { it.fomDato }!!
+
         return InformasjonTrygdeavgift(
             brevbestilling = brevbestilling,
-            fomDato = helseutgiftDekkesPeriode.fomDato,
-            tomDato = helseutgiftDekkesPeriode.tomDato,
-            bostedLand = helseutgiftDekkesPeriode.bostedLandkode.beskrivelse,
+            fomDato = fomDato,
+            tomDato = tomDato,
+            bostedLand = førstePeriode.bostedLandkode.beskrivelse,
             begrunnelseFritekst = behandlingsresultat.begrunnelseFritekst,
             trygdeavgiftMottaker = utledTrygdeavgiftsmottaker(behandlingsresultat),
-            erNordisk = NordiskeLand.erNordiskLand(helseutgiftDekkesPeriode.bostedLandkode),
+            erNordisk = NordiskeLand.erNordiskLand(førstePeriode.bostedLandkode),
             betalingsvalg = hentBetalingsvalg(behandlingsresultat.hentBehandling()),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.hentBehandling()),
             avgiftsperioder = mapAvgiftsperioderPensjonist(behandlingsresultat),

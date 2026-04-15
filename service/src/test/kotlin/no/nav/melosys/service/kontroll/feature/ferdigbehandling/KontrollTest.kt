@@ -803,7 +803,7 @@ internal class KontrollTest {
             fomDato = LocalDate.of(2012, 12, 1)
             tomDato = LocalDate.of(2012, 12, 20)
         }
-        every { helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(any()) } returns nyHelseutgiftDekkesPeriode
+        every { helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPerioder(any()) } returns listOf(nyHelseutgiftDekkesPeriode)
 
         val behandlingsresultatFraGyldigFagsak = Behandlingsresultat.forTest {
             behandling {
@@ -847,7 +847,7 @@ internal class KontrollTest {
             fomDato = LocalDate.of(2012, 12, 1)
             tomDato = LocalDate.of(2012, 12, 20)
         }
-        every { helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(any()) } returns nyHelseutgiftDekkesPeriode
+        every { helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPerioder(any()) } returns listOf(nyHelseutgiftDekkesPeriode)
 
         val behandlingsresultatFraBortfaltFagsak = Behandlingsresultat.forTest {
             behandling {

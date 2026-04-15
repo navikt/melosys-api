@@ -24,7 +24,7 @@ class AnnullerSakService(
 
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id)
         if (behandling.erEøsPensjonist()) {
-            helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(behandlingsresultat.hentId())
+            helseutgiftDekkesPeriodeService.slettAlleHelseutgiftDekkesPerioder(behandlingsresultat.hentId())
         } else {
             medlemskapsperiodeService.slettMedlemskapsperioder(behandlingsresultat.hentId())
         }
