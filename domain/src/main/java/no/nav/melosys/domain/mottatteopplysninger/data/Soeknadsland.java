@@ -12,12 +12,12 @@ import no.nav.melosys.exception.TekniskException;
 public class Soeknadsland {
     private List<String> landkoder = new ArrayList<>();
 
-    private boolean flereLandUkjentHvilke;
+    private Boolean flereLandUkjentHvilke;
 
     public Soeknadsland() {
     }
 
-    public Soeknadsland(List<String> landkoder, boolean flereLandUkjentHvilke) {
+    public Soeknadsland(List<String> landkoder, Boolean flereLandUkjentHvilke) {
         this.landkoder = landkoder;
         this.flereLandUkjentHvilke = flereLandUkjentHvilke;
     }
@@ -27,7 +27,7 @@ public class Soeknadsland {
     }
 
     public boolean erGyldig() {
-        return !landkoder.isEmpty() || flereLandUkjentHvilke;
+        return !landkoder.isEmpty() || Boolean.TRUE.equals(flereLandUkjentHvilke);
     }
 
     public Trygdeavtale_myndighetsland hentSoeknadslandForTrygdeavtale() {
@@ -46,10 +46,10 @@ public class Soeknadsland {
     }
 
     public boolean isFlereLandUkjentHvilke() {
-        return flereLandUkjentHvilke;
+        return Boolean.TRUE.equals(flereLandUkjentHvilke);
     }
 
-    public void setFlereLandUkjentHvilke(boolean flereLandUkjentHvilke) {
+    public void setFlereLandUkjentHvilke(Boolean flereLandUkjentHvilke) {
         this.flereLandUkjentHvilke = flereLandUkjentHvilke;
     }
 }

@@ -1,6 +1,8 @@
 package no.nav.melosys.domain.brev
 
 import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 
 class FritekstbrevBrevbestilling : DokgenBrevbestilling {
@@ -8,12 +10,14 @@ class FritekstbrevBrevbestilling : DokgenBrevbestilling {
     var fritekst: String? = null
 
     @JsonAlias("isKontaktopplysninger")
+    @JsonSetter(nulls = Nulls.SKIP)
     var kontaktopplysninger: Boolean = false
 
     var navnFullmektig: String? = null
     var saksbehandlerNrToNavn: String? = null
 
     @JsonAlias("isBrukerSkalHaKopi")
+    @JsonSetter(nulls = Nulls.SKIP)
     var brukerSkalHaKopi: Boolean = false
 
     var mottakerType: Mottakerroller? = null

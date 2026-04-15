@@ -1,6 +1,10 @@
 package no.nav.melosys.domain.brev
 
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
+
 class InnhentingAvInntektsopplysningerBrevbestilling : DokgenBrevbestilling {
+    @JsonSetter(nulls = Nulls.SKIP)
     var skalViseStandardTekstOmOpplysninger: Boolean = false
     var fritekst: String? = null
 

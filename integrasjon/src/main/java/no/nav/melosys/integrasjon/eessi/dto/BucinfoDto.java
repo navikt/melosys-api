@@ -12,7 +12,7 @@ import no.nav.melosys.domain.eessi.BucInformasjon;
 public class BucinfoDto {
 
     private String id;
-    private boolean erÅpen;
+    private Boolean erÅpen;
     private String bucType;
     private Long opprettetDato;
     private Set<String> mottakerinstitusjoner = new HashSet<>();
@@ -21,7 +21,7 @@ public class BucinfoDto {
     public BucinfoDto() {
     }
 
-    public BucinfoDto(String id, boolean erÅpen, String bucType, Long opprettetDato, List<SedinfoDto> seder) {
+    public BucinfoDto(String id, Boolean erÅpen, String bucType, Long opprettetDato, List<SedinfoDto> seder) {
         this.id = id;
         this.erÅpen = erÅpen;
         this.bucType = bucType;
@@ -63,10 +63,10 @@ public class BucinfoDto {
     }
 
     public boolean isErÅpen() {
-        return erÅpen;
+        return Boolean.TRUE.equals(erÅpen);
     }
 
-    public void setErÅpen(boolean erÅpen) {
+    public void setErÅpen(Boolean erÅpen) {
         this.erÅpen = erÅpen;
     }
 

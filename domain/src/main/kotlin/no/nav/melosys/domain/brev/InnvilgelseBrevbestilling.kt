@@ -1,6 +1,8 @@
 package no.nav.melosys.domain.brev
 
 import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
 
 class InnvilgelseBrevbestilling : DokgenBrevbestilling {
     var innledningFritekst: String? = null
@@ -9,6 +11,7 @@ class InnvilgelseBrevbestilling : DokgenBrevbestilling {
     var barnFritekst: String? = null
 
     @JsonAlias("isVirksomhetArbeidsgiverSkalHaKopi") // for reading old java format
+    @JsonSetter(nulls = Nulls.SKIP)
     var virksomhetArbeidsgiverSkalHaKopi: Boolean = false
     var nyVurderingBakgrunn: String? = null
 

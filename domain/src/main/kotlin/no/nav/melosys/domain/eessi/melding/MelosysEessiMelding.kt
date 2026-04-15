@@ -26,8 +26,11 @@ data class MelosysEessiMelding(
     var periode: Periode? = null,
     var lovvalgsland: String? = null,
     var artikkel: String? = null,
+    @JsonSetter(nulls = Nulls.SKIP)
     var erEndring: Boolean = false,
+    @JsonSetter(nulls = Nulls.SKIP)
     var midlertidigBestemmelse: Boolean = false,
+    @JsonSetter(nulls = Nulls.SKIP)
     var x006NavErFjernet: Boolean = false,
     var ytterligereInformasjon: String? = null,
     var bucType: String? = null,

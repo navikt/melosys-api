@@ -1,6 +1,10 @@
 package no.nav.melosys.domain.brev
 
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
+
 class OrienteringTilArbeidsgiverOmVedtakBrevbestilling : DokgenBrevbestilling {
+    @JsonSetter(nulls = Nulls.SKIP)
     var erInnvilgelse: Boolean = false
 
     constructor() : super()

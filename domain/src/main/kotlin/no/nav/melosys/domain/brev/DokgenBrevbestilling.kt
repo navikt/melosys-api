@@ -1,8 +1,10 @@
 package no.nav.melosys.domain.brev
 
 import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonSetter
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.Nulls
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Kontaktopplysning
 import no.nav.melosys.domain.UtenlandskMyndighet
@@ -45,9 +47,11 @@ open class DokgenBrevbestilling : Brevbestilling {
     var behandlingId: Long = 0L
 
     @JsonAlias("isBestillKopi")
+    @JsonSetter(nulls = Nulls.SKIP)
     var bestillKopi: Boolean = false
 
     @JsonAlias("isBestillUtkast")
+    @JsonSetter(nulls = Nulls.SKIP)
     var bestillUtkast: Boolean = false
 
     var vedtaksdato: Instant? = null

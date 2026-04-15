@@ -2,6 +2,8 @@ package no.nav.melosys.domain.brev.utkast
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
 import tools.jackson.databind.annotation.JsonSerialize
 import no.nav.melosys.domain.arkiv.Distribusjonstype
 import no.nav.melosys.domain.brev.StandardvedleggType
@@ -30,14 +32,16 @@ data class BrevbestillingUtkast(
     val fritekstTittel: String?,
     val fritekst: String?,
     val distribusjonstype: Distribusjonstype?,
-    val kontaktopplysninger: Boolean,
+    @JsonSetter(nulls = Nulls.SKIP)
+    val kontaktopplysninger: Boolean = false,
     val nyVurderingBakgrunn: String?,
     val saksVedlegg: MutableList<Saksvedlegg?>?,
     val standardvedleggType: StandardvedleggType?,
     val fritekstVedlegg: MutableList<FritekstVedlegg?>?,
     val dokumentTittel: String?,
     val saksbehandlerNrToIdent: String?,
-    val skalViseStandardTekstOmOpplysninger: Boolean
+    @JsonSetter(nulls = Nulls.SKIP)
+    val skalViseStandardTekstOmOpplysninger: Boolean = false
 ) {
     @JsonIgnore
     fun getTittel(): String? = when {

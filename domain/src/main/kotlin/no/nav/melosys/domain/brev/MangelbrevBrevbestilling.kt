@@ -1,6 +1,8 @@
 package no.nav.melosys.domain.brev
 
 import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
 
 class MangelbrevBrevbestilling : DokgenBrevbestilling {
     var manglerInfoFritekst: String? = null
@@ -8,6 +10,7 @@ class MangelbrevBrevbestilling : DokgenBrevbestilling {
     var fullmektigNavn: String? = null
 
     @JsonAlias("isBrukerSkalHaKopi") // for reading old java format
+    @JsonSetter(nulls = Nulls.SKIP)
     var brukerSkalHaKopi: Boolean = false
 
     // Add this method for Java compatibility
