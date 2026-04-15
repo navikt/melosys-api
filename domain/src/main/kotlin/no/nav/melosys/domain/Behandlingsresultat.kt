@@ -162,10 +162,6 @@ open class Behandlingsresultat : RegistreringsInfo() {
         lovvalgsperioder.clear()
     }
 
-    fun clearTrygdevgiftPåHelseutgiftDekkesPerioder() {
-        helseutgiftDekkesPerioder.forEach { it.clearTrygdeavgiftsperioder() }
-    }
-
     fun erEøsPensjonist() =
         behandling?.erEøsPensjonist() ?: false
 
