@@ -1,7 +1,6 @@
 package no.nav.melosys.itest.vedtak
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
@@ -16,7 +15,7 @@ import java.util.*
 class EøsPensjonistTrygdeavgiftsberegningTransformer : ResponseTransformerV2 {
     override fun transform(response: Response?, serveEvent: ServeEvent?): Response {
 
-        val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
+        val mapper = jacksonObjectMapper()
 
         if (serveEvent?.request?.url != "/api/v2/eos-pensjonist/beregn") {
             throw IllegalArgumentException("Invalid url. Denne transformeren støtter kun /api/v2/eos-pensjonist/beregn")
@@ -28,8 +27,8 @@ class EøsPensjonistTrygdeavgiftsberegningTransformer : ResponseTransformerV2 {
             val helseutgiftDekkesPeriodeFom = requestBody["helseutgiftDekkesPeriode"]["periode"]["fom"]
             val helseutgiftDekkesPeriodeTom = requestBody["helseutgiftDekkesPeriode"]["periode"]["tom"]
 
-            val mappetDatoFom = LocalDate.of(helseutgiftDekkesPeriodeFom[0].asInt(), helseutgiftDekkesPeriodeFom[1].asInt(), helseutgiftDekkesPeriodeFom[2].asInt())
-            val mappetDatoTom = LocalDate.of(helseutgiftDekkesPeriodeTom[0].asInt(), helseutgiftDekkesPeriodeTom[1].asInt(), helseutgiftDekkesPeriodeTom[2].asInt())
+            val mappetDatoFom = LocalDate.parse(helseutgiftDekkesPeriodeFom.asText())
+            val mappetDatoTom = LocalDate.parse(helseutgiftDekkesPeriodeTom.asText())
             val skatteforholdsperioderUuid = requestBody["skatteforholdsperioder"][0]["id"].asText()
             val inntektsperioderUuid = requestBody["inntektsperioder"][0]["id"].asText()
 

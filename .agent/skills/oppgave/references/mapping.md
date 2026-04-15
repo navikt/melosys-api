@@ -23,7 +23,7 @@ Confluence documentation: https://confluence.adeo.no/display/TEESSI/Oppgaver+i+G
 | Oppgavetype | `oppgave.oppgavetype` | BEH_SAK_MK, VUR, etc. |
 | Tema | `oppgave.tema` | MED, UFM, TRY |
 | Behandlingstema | `oppgave.behandlingstema` | ab0424, ab0483, etc. |
-| Prioritet | `oppgave.prioritet` | LAV, NORM, HOY |
+| Prioritet | `oppgave.prioritet` | LAV, NORM, HOY, KRITISK |
 
 ## Mapping Table Structure
 

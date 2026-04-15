@@ -2,8 +2,8 @@ package no.nav.melosys.integrasjon.dokgen.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
+import tools.jackson.databind.annotation.JsonSerialize
+import tools.jackson.databind.ext.javatime.ser.LocalDateSerializer
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper

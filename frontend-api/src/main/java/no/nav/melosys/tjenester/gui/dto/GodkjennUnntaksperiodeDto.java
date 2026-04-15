@@ -5,7 +5,7 @@ import no.nav.melosys.service.unntaksperiode.Unntaksperiode;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeGodkjenning;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 
-public record GodkjennUnntaksperiodeDto(boolean varsleUtland,
+public record GodkjennUnntaksperiodeDto(Boolean varsleUtland,
                                         String fritekst,
                                         PeriodeDto endretPeriode,
                                         String lovvalgsbestemmelse) {
@@ -16,7 +16,7 @@ public record GodkjennUnntaksperiodeDto(boolean varsleUtland,
         final Unntaksperiode endretPeriode = this.endretPeriode == null ? null : new Unntaksperiode(this.endretPeriode.getFom(), this.endretPeriode.getTom());
 
         return UnntaksperiodeGodkjenning.builder()
-            .varsleUtland(this.varsleUtland)
+            .varsleUtland(Boolean.TRUE.equals(this.varsleUtland))
             .fritekst(this.fritekst)
             .endretPeriode(endretPeriode)
             .lovvalgsbestemmelse(lovvalgBestemmelsekonverterer.convertToEntityAttribute(this.lovvalgsbestemmelse))

@@ -163,7 +163,7 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
 
         shouldThrow<IkkeFunnetException> {
             helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(BEH_ID, PERIODE_ID, FOM_DATO, TOM_DATO, Land_iso2.NO)
-        }.message shouldBe "Helseutgift-periode med id $PERIODE_ID tilhører ikke behandling $BEH_ID"
+        }.message shouldBe "Finner ingen helseutgift-periode med id: $PERIODE_ID"
     }
 
     @Test
@@ -177,7 +177,7 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
 
         shouldThrow<IkkeFunnetException> {
             helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(BEH_ID, PERIODE_ID, FOM_DATO, TOM_DATO, Land_iso2.NO)
-        }.message shouldBe "Helseutgift-periode med id $PERIODE_ID har kilde AVGIFT_SYSTEMET og kan ikke endres"
+        }.message shouldBe "Finner ingen helseutgift-periode med id: $PERIODE_ID"
     }
 
     @Test
@@ -197,7 +197,7 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
 
         shouldThrow<IkkeFunnetException> {
             helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(BEH_ID, PERIODE_ID)
-        }.message shouldBe "Helseutgift-periode med id $PERIODE_ID tilhører ikke behandling $BEH_ID"
+        }.message shouldBe "Finner ingen helseutgift-periode med id: $PERIODE_ID"
     }
 
     @Test
@@ -211,7 +211,7 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
 
         shouldThrow<IkkeFunnetException> {
             helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(BEH_ID, PERIODE_ID)
-        }.message shouldBe "Helseutgift-periode med id $PERIODE_ID har kilde AVGIFT_SYSTEMET og kan ikke endres"
+        }.message shouldBe "Finner ingen helseutgift-periode med id: $PERIODE_ID"
     }
 
     @Test

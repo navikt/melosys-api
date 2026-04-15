@@ -92,6 +92,7 @@ class ProsessinstansTestManagerTest {
             iverksettVedtakEos.status shouldBe ProsessStatus.FERDIG
 
             logItems.map { it.threadName to it.formattedMessage }
+                .filter { !it.first.startsWith("kafka-producer-network-thread") }
                 .fold(mutableListOf<Pair<String, String>>()) { acc, current ->
                     if (current.first == "awaitility-thread") {
                         if (acc.lastOrNull()?.first != "awaitility-thread") {

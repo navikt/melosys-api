@@ -189,7 +189,6 @@ class BehandlingsresultatService(
         when (utfallregistreringunntak) {
             Utfallregistreringunntak.GODKJENT, Utfallregistreringunntak.DELVIS_GODKJENT -> Behandlingsresultattyper.REGISTRERT_UNNTAK
             Utfallregistreringunntak.IKKE_GODKJENT -> Behandlingsresultattyper.FERDIGBEHANDLET
-            else -> Behandlingsresultattyper.IKKE_FASTSATT
         }
 
     private fun <T> Optional<T>.orElseThrowIkkeFunnetException(behandlingsid: Long): T =

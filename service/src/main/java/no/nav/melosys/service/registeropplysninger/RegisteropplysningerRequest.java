@@ -127,7 +127,7 @@ public class RegisteropplysningerRequest {
                 String påkrevdeSaksopplysningstyper = intersect(SaksopplysningType.KREVER_FNR, saksopplysningTyper.getOpplysningstyper())
                     .stream().map(SaksopplysningType::getBeskrivelse).collect(Collectors.joining(", "));
 
-                throw new TekniskException(String.format("Krever at fnr er satt ved henting av %s", påkrevdeSaksopplysningstyper));
+                throw new TekniskException("Krever at fnr er satt ved henting av %s".formatted(påkrevdeSaksopplysningstyper));
             }
         }
 

@@ -4,7 +4,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.LuftfartBase
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid
-import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang3.StringUtils
 
 
 class AdresseRegler {

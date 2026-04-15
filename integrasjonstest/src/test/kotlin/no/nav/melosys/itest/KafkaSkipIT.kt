@@ -1,7 +1,7 @@
 package no.nav.melosys.itest
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.kotest.matchers.maps.shouldBeEmpty
 import io.kotest.matchers.maps.shouldHaveSize
@@ -24,11 +24,11 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.http.HttpMessageConvertersAutoConfiguration
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration
-import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.http.converter.autoconfigure.HttpMessageConvertersAutoConfiguration
+import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration
+import org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration
+import org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.kafka.core.KafkaTemplate
@@ -114,7 +114,7 @@ class KafkaSkipIT(
         // Parse the error response to extract the message key
         val node: JsonNode = jacksonObjectMapper().readTree(result.response.contentAsString)
         val errorsNode = node.get("errors")
-        val errorKey = errorsNode.fieldNames().next()
+        val errorKey = errorsNode.propertyNames().first()
         println(errorKey)
 
         // Act & Assert: Delete the failed message and verify that the offset now increases
@@ -158,7 +158,7 @@ class KafkaSkipIT(
 
         val node: JsonNode = jacksonObjectMapper().readTree(result.response.contentAsString)
         val errorsNode = node.get("errors")
-        val errorKey = errorsNode.fieldNames().next()
+        val errorKey = errorsNode.propertyNames().first()
 
         kafkaOffsetChecker.offsetIncreased(topic, groupId) {
             mockMvc.perform(

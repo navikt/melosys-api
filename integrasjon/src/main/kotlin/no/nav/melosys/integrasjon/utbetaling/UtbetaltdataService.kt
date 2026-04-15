@@ -1,8 +1,7 @@
 package no.nav.melosys.integrasjon.utbetaling
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import tools.jackson.core.JacksonException
+import tools.jackson.databind.ObjectMapper
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.SaksopplysningKildesystem
 import no.nav.melosys.domain.SaksopplysningType
@@ -21,10 +20,6 @@ class UtbetaltdataService(
     private val utbetaltdataClient: UtbetaltdataClient,
     private val objectMapper: ObjectMapper
 ) {
-
-    init {
-        objectMapper.registerKotlinModule()
-    }
 
     fun hentUtbetalingerBarnetrygd(fnr: String, fom: LocalDate, tom: LocalDate): Saksopplysning {
         val utbetalingRequest = UtbetalingRequest(fnr,
@@ -57,7 +52,7 @@ class UtbetaltdataService(
                     SaksopplysningKildesystem.UTBETALDATA,
                     objectMapper.writeValueAsString(utbetalingResponse)
                 )
-            } catch (e: JsonProcessingException) {
+            } catch (e: JacksonException) {
                 throw TekniskException("Kunne ikke lagre kildedokument fra utbetaldata")
             }
         }

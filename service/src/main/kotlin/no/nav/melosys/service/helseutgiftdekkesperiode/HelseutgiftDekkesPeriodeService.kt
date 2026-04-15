@@ -88,15 +88,17 @@ class HelseutgiftDekkesPeriodeService(
     }
 
     private fun hentOgValiderPeriode(periodeId: Long, behandlingID: Long): HelseutgiftDekkesPeriode {
+        val ikkeFunnetMelding = "Finner ingen helseutgift-periode med id: $periodeId"
+
         val periode = helseutgiftDekkesPeriodeRepository.findById(periodeId)
-            .orElseThrow { IkkeFunnetException("Finner ingen helseutgift-periode med id: $periodeId") }
+            .orElseThrow { IkkeFunnetException(ikkeFunnetMelding) }
 
         if (periode.behandlingsresultat.hentId() != behandlingID) {
-            throw IkkeFunnetException("Helseutgift-periode med id $periodeId tilhører ikke behandling $behandlingID")
+            throw IkkeFunnetException(ikkeFunnetMelding)
         }
 
         if (periode.kilde != HelseutgiftDekkesPeriodeKilde.MELOSYS) {
-            throw IkkeFunnetException("Helseutgift-periode med id $periodeId har kilde ${periode.kilde} og kan ikke endres")
+            throw IkkeFunnetException(ikkeFunnetMelding)
         }
 
         return periode

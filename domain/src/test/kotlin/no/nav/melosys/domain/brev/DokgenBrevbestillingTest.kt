@@ -1,11 +1,10 @@
 package no.nav.melosys.domain.brev
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.databind.module.SimpleModule
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
 import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.kodeverk.Mottakerroller
@@ -22,9 +21,9 @@ import org.junit.jupiter.api.Test
  */
 class DokgenBrevbestillingTest {
 
-    private val dataMapper = jacksonObjectMapper()
-        .registerModule(JavaTimeModule())
-        .registerModule(SimpleModule().addDeserializer(LovvalgBestemmelse::class.java, LovvalgBestemmelseDeserializer()))
+    private val dataMapper = JsonMapper.builder()
+        .addModule(SimpleModule().addDeserializer(LovvalgBestemmelse::class.java, LovvalgBestemmelseDeserializer()))
+        .build()
 
     @Test
     fun `deserialisering skal bli riktig type for alle subtyper av DokgenBrevbestilling`() {
@@ -48,7 +47,7 @@ class DokgenBrevbestillingTest {
             when (field.type.simpleName) {
                 "boolean", "Boolean" -> node.put(field.name, false)
                 "LocalDate" -> node.put(field.name, "2022-02-02")
-                "Periode" -> node.set<ObjectNode>(field.name, dataMapper.createObjectNode().apply {
+                "Periode" -> node.set(field.name, dataMapper.createObjectNode().apply {
                     put("fom", "2022-02-02")
                     put("tom", "2022-02-02")
                 })
@@ -56,7 +55,7 @@ class DokgenBrevbestillingTest {
                 Mottakerroller::class.java.simpleName -> node.put(field.name, Mottakerroller.NORSK_MYNDIGHET.name)
                 Ikkeyrkesaktivsituasjontype::class.java.simpleName -> node.put(field.name, Ikkeyrkesaktivsituasjontype.ANNET.name)
                 Betalingsstatus::class.java.simpleName -> node.put(field.name, Betalingsstatus.DELVIS_BETALT.name)
-                "List" -> node.set<ArrayNode>(field.name, ArrayNode(dataMapper.nodeFactory).apply {
+                "List" -> node.set(field.name, ArrayNode(dataMapper.nodeFactory).apply {
                     add("Norge")
                     add("Sverige")
                 })

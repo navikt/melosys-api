@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui.dto.periode
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.core.type.TypeReference
+import tools.jackson.databind.ObjectMapper
 import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Land_iso2

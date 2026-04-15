@@ -1,8 +1,7 @@
 package no.nav.melosys.domain.dokument.arbeidsforhold
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.readValue
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 import io.kotest.matchers.collections.*
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldEndWith
@@ -133,7 +132,7 @@ internal class ArbeidsforholdDokumentTest {
 
     @Test
     fun jsonSerialiseringOgDeserialiseringBrukerArbeidsforholdListe() {
-        val objectMapper = ObjectMapper().registerModule(JavaTimeModule())
+        val objectMapper = ObjectMapper()
         val arbeidsforhold1 = Arbeidsforhold().apply {
             arbeidsgiverID = "123456789"
             ansettelsesPeriode = Periode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 12, 31))
@@ -156,7 +155,7 @@ internal class ArbeidsforholdDokumentTest {
 
     @Test
     fun jsonSerialiseringMedJsonValueAnnotationGirListeIkkeObjekt() {
-        val objectMapper = ObjectMapper().registerModule(JavaTimeModule())
+        val objectMapper = ObjectMapper()
         val arbeidsforhold1 = Arbeidsforhold().apply {
             arbeidsgiverID = "123456789"
             ansettelsesPeriode = Periode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 12, 31))
@@ -175,7 +174,7 @@ internal class ArbeidsforholdDokumentTest {
 
     @Test
     fun jsonDeserialiseringMedJsonCreatorAnnotationFraListeFormat() {
-        val objectMapper = ObjectMapper().registerModule(JavaTimeModule())
+        val objectMapper = ObjectMapper()
         // JSON i liste-format (slik det var i Java med @JsonValue)
         val json = """
             [

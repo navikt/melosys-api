@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.eessi.sed
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import io.kotest.assertions.json.shouldEqualJson
 import org.junit.jupiter.api.Test
 

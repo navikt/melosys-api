@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avgift.satsendring
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.exception.IkkeFunnetException
@@ -106,7 +107,7 @@ class SatsendringAdminController(
 }
 
 data class SatsendringRapportDto(
-    val år: Int,
+    @JsonProperty("år") val år: Int,
     val behandlingerMedSatsendring: BehandlingerMedTotalDto,
     val behandlingerMedSatsendringOgBeroertAktivBehandling: BehandlingerMedTotalDto,
     val behandlingerUtenSatsendring: BehandlingerMedTotalDto,

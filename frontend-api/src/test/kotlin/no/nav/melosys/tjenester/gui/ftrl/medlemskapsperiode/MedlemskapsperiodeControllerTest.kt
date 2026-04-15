@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.justRun
@@ -15,11 +15,12 @@ import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.BestemmelseDto
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.json.JsonCompareMode
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.LocalDate
@@ -66,7 +67,7 @@ internal class MedlemskapsperiodeControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk())
-            .andExpect(content().json(expectedJson, true))
+            .andExpect(content().json(expectedJson, JsonCompareMode.STRICT))
     }
 
     @Test

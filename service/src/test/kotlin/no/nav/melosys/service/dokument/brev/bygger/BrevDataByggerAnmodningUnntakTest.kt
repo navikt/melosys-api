@@ -63,7 +63,7 @@ class BrevDataByggerAnmodningUnntakTest {
         val brevData = brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), SAKSBEHANDLER) as BrevDataAnmodningUnntak
         brevData.run {
             hovedvirksomhet!!.orgnr shouldBe "999"
-            hovedvirksomhet!!.erSelvstendigForetak() shouldBe true
+            hovedvirksomhet.erSelvstendigForetak() shouldBe true
             arbeidsland shouldBe Landkoder.DE.beskrivelse
         }
     }

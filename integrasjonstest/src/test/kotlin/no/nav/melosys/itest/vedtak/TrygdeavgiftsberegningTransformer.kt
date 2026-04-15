@@ -1,7 +1,6 @@
 package no.nav.melosys.itest.vedtak
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
@@ -15,7 +14,7 @@ import java.util.*
  */
 class TrygdeavgiftsberegningTransformer() : ResponseTransformerV2 {
     override fun transform(response: Response?, serveEvent: ServeEvent?): Response {
-        val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
+        val mapper = jacksonObjectMapper()
 
         if (serveEvent?.request?.url != "/api/v2/beregn") {
             throw IllegalArgumentException("Invalid url. Denne transformeren støtter kun /api/v2/beregn")
@@ -25,7 +24,7 @@ class TrygdeavgiftsberegningTransformer() : ResponseTransformerV2 {
         val medlemskapsperioderUuid = requestBody["medlemskapsperioder"][0]["id"].asText()
         val skatteforholdsperioderUuid = requestBody["skatteforholdsperioder"][0]["id"].asText()
         val inntektsperioderUuid = requestBody["inntektsperioder"][0]["id"].asText()
-        val skatteforholdÅr = requestBody["skatteforholdsperioder"][0]["periode"]["fom"][0].asInt()
+        val skatteforholdÅr = LocalDate.parse(requestBody["skatteforholdsperioder"][0]["periode"]["fom"].asText()).year
 
         val skatteforhold = requestBody["skatteforholdsperioder"][0]["skatteforhold"].asText()
         val sats = if (skatteforhold == "IKKE_SKATTEPLIKTIG") 6.8.toBigDecimal() else 0.toBigDecimal()

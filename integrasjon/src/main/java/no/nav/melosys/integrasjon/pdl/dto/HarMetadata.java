@@ -14,7 +14,7 @@ public interface HarMetadata {
     }
 
     default boolean erIkkeHistorisk() {
-        return !metadata().historisk();
+        return !Boolean.TRUE.equals(metadata().historisk());
     }
 
     default LocalDateTime hentDatoSistRegistrert() {

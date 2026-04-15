@@ -294,7 +294,8 @@ class ÅrsavregningService(
             ),
             sisteGjeldendeAvgiftspliktigPerioder = hentSisteGjeldendeAvgiftspliktigePerioder(
                 år,
-                årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer
+                årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer,
+                vedtaksDato
             ),
             tidligereAvgift = hentTidligereAvgift(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer, vedtaksDato),
             nyttTrygdeavgiftsGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
@@ -411,10 +412,10 @@ class ÅrsavregningService(
         )
     }
 
-    private fun hentSisteGjeldendeAvgiftspliktigePerioder(år: Int, saksnummer: String?): List<AvgiftsperiodeForAvgift> {
+    private fun hentSisteGjeldendeAvgiftspliktigePerioder(år: Int, saksnummer: String?, førVedtaksdato: Instant? = null): List<AvgiftsperiodeForAvgift> {
         if (saksnummer == null) return emptyList()
 
-        val gjeldendeBehandlingsresultater = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år)
+        val gjeldendeBehandlingsresultater = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år, førVedtaksdato)
         if (gjeldendeBehandlingsresultater == null || gjeldendeBehandlingsresultater.sisteBehandlingsresultatMedAvgiftspliktigPeriode == null) {
             return emptyList()
         }

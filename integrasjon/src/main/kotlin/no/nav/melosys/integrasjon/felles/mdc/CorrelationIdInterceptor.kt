@@ -16,7 +16,7 @@ class CorrelationIdInterceptor : HandlerInterceptor {
     private val SYSTEMBRUKER = "srvmelosys"
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-        val userId = SubjectHandler.getInstance().userID
+        val userId = SubjectHandler.getInstance()?.userID
         val callId = MDCOperations.generateCallId()
         MDCOperations.putToMDC(MDCOperations.MDC_CALL_ID, callId)
         MDCOperations.putToMDC(

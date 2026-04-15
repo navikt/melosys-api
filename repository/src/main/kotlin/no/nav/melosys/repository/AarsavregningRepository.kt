@@ -2,14 +2,14 @@ package no.nav.melosys.repository
 
 import no.nav.melosys.domain.avgift.Årsavregning
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.Query
+import org.springframework.data.jpa.repository.NativeQuery
 import org.springframework.data.repository.query.Param
 
 interface AarsavregningRepository : JpaRepository<Årsavregning, Long> {
 
     fun findByBehandlingsresultatId(behandlingID: Long): Årsavregning?
 
-    @Query(
+    @NativeQuery(
         """
     SELECT COUNT(DISTINCT a.behandlingsresultat_id)
     FROM behandling b
@@ -20,7 +20,7 @@ interface AarsavregningRepository : JpaRepository<Årsavregning, Long> {
       AND a.aar = :aar
       AND b2.beh_type = 'ÅRSAVREGNING'
       AND b2.status != 'AVSLUTTET'
-    """, nativeQuery = true
+    """
     )
     fun finnAntallÅrsavregningerPåFagsakForÅr(@Param("behandlingId") behandlingId: Long, @Param("aar") år: Int): Int
 }

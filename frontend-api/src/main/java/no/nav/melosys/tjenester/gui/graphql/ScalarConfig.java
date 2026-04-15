@@ -67,9 +67,9 @@ class ScalarConfig {
 
             @Override
             public LocalDate parseLiteral(Object input) {
-                if (input instanceof StringValue) {
+                if (input instanceof StringValue value) {
                     try {
-                        return LocalDate.parse(((StringValue) input).getValue());
+                        return LocalDate.parse(value.getValue());
                     } catch (DateTimeParseException e) {
                         throw new CoercingParseLiteralException(
                             "Value not a valid date. Provided value: " + input + ". Expected format: YYYY-MM-DD", e);
@@ -94,8 +94,8 @@ class ScalarConfig {
         return new Coercing<>() {
             @Override
             public String serialize(Object input) {
-                if (input instanceof LocalDateTime) {
-                    return ((LocalDateTime) input).truncatedTo(SECONDS).toString();
+                if (input instanceof LocalDateTime time) {
+                    return time.truncatedTo(SECONDS).toString();
                 }
                 throw new CoercingSerializeException(
                     "Graphql serialization from " + input.getClass() + " to DateTime scalar not implemented.");
