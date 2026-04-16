@@ -8,7 +8,6 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
@@ -18,7 +17,6 @@ import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.awaitility.kotlin.await
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -33,12 +31,6 @@ class DigitalSøknadMottakIT(
 ) : MockServerTestBaseWithProsessManager() {
 
     private val kafkaTopic = "teammelosys.skjema.innsendt.v1-local"
-
-    @BeforeEach
-    fun setupMocks() {
-        // Enable feature toggle for skjema consumer
-        fakeUnleash.enable(ToggleName.MELOSYS_SKJEMA_MOTTATT_CONSUMER)
-    }
 
     @Test
     fun `mottak av digital søknad starter saga og henter søknadsdata fra melosys-skjema-api`() {
@@ -72,6 +64,12 @@ class DigitalSøknadMottakIT(
                 )
         )
 
+        // Stub melosys-skjema-api endpoint for saksnummer-registrering
+        mockServer.stubFor(
+            WireMock.post(WireMock.urlPathEqualTo("/m2m/api/skjema/$skjemaId/saksnummer"))
+                .willReturn(WireMock.aResponse().withStatus(204))
+        )
+
         val melding = SkjemaMottattMelding(skjemaId)
 
         // Send Kafka message
@@ -91,16 +89,16 @@ class DigitalSøknadMottakIT(
         prosessinstans.status shouldBe ProsessStatus.FERDIG
         prosessinstans.låsReferanse shouldBe skjemaId.toString()
 
-        // All steps completed successfully
-        prosessinstans.sistFullførtSteg shouldBe ProsessSteg.OPPRETT_OPPGAVE
+        // All steps completed successfully (SEND_SAKSNUMMER_TIL_SKJEMA is the last step)
+        prosessinstans.sistFullførtSteg shouldBe ProsessSteg.SEND_SAKSNUMMER_TIL_MELOSYS_SKJEMA_API
         prosessinstans.hendelser.shouldHaveSize(0)
 
         // Verify data stored by consumer (SØKNAD_MOTTATT_MELDING)
-        val mottattMelding = prosessinstans.hentData<SkjemaMottattMelding>(ProsessDataKey.SØKNAD_MOTTATT_MELDING)
+        val mottattMelding = prosessinstans.hentData<SkjemaMottattMelding>(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID)
         mottattMelding shouldBe melding
 
         // Verify data stored by step 1 (SØKNADSDATA)
-        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.SØKNADSDATA)
+        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.DIGITAL_SØKNADSDATA)
         søknadsdata.referanseId shouldBe forventetSøknadsdata.referanseId
         søknadsdata.skjema.fnr shouldBe forventetSøknadsdata.skjema.fnr
 
