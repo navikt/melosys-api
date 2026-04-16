@@ -156,6 +156,10 @@ open class Behandlingsresultat : RegistreringsInfo() {
         helseutgiftDekkesPerioder.clear()
     }
 
+    fun clearTrygdeavgiftPåHelseutgiftDekkesPerioder() {
+        helseutgiftDekkesPerioder.forEach { it.clearTrygdeavgiftsperioder() }
+    }
+
     fun clearLovvalgsperioder() {
         lovvalgsperioder.forEach { it.setBehandlingsresultat(null) }
         lovvalgsperioder.forEach(Lovvalgsperiode::clearTrygdeavgiftsperioder)

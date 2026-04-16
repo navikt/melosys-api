@@ -264,17 +264,16 @@ class ÅrsavregningService(
         tidligereBehandlingsresultat: Behandlingsresultat,
         gjelderÅr: Int
     ) {
-        for (originalPeriode in tidligereBehandlingsresultat.helseutgiftDekkesPerioder) {
-            if (originalPeriode.overlapperMedÅr(gjelderÅr)) {
-                val helseutgiftDekkesReplika = BeanUtils.cloneBean(originalPeriode) as HelseutgiftDekkesPeriode
-                helseutgiftDekkesReplika.behandlingsresultat = behandlingsresultat
-                helseutgiftDekkesReplika.trygdeavgiftsperioder = HashSet()
-                helseutgiftDekkesReplika.avkortFomDato(gjelderÅr)
-                helseutgiftDekkesReplika.avkortTomDato(gjelderÅr)
-                helseutgiftDekkesReplika.id = null
-                behandlingsresultat.addHelseutgiftDekkesPeriode(helseutgiftDekkesReplika)
+        tidligereBehandlingsresultat.helseutgiftDekkesPerioder
+            .filter { it.overlapperMedÅr(gjelderÅr) }
+            .forEach { originalPeriode ->
+                val replika = BeanUtils.cloneBean(originalPeriode) as HelseutgiftDekkesPeriode
+                replika.id = null
+                replika.trygdeavgiftsperioder = HashSet()
+                replika.avkortFomDato(gjelderÅr)
+                replika.avkortTomDato(gjelderÅr)
+                behandlingsresultat.addHelseutgiftDekkesPeriode(replika)
             }
-        }
     }
 
     private fun lagÅrsavregningModelFraÅrsavregning(årsavregning: Årsavregning): ÅrsavregningModel {

@@ -29,7 +29,7 @@ class BehandlingsresultatService(
         behandlingsresultatRepository.findById(behandlingID)
             .orElseThrowIkkeFunnetException(behandlingID).apply {
                 clearMedlemskapsperioder()
-                clearHelseutgiftDekkesPerioder()
+                clearTrygdeavgiftPåHelseutgiftDekkesPerioder()
                 if (!erEøsPensjonist()) avklartefakta.clear()
                 clearLovvalgsperioder()
                 vilkaarsresultater.clear()
