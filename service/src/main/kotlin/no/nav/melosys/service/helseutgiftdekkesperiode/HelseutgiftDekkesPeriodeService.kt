@@ -37,6 +37,8 @@ class HelseutgiftDekkesPeriodeService(
             bostedLandkode = bostedLandkode
         )
 
+        behandlingsresultat.helseutgiftDekkesPerioder.add(nyHelseutgiftDekkesPeriode)
+
         return helseutgiftDekkesPeriodeRepository.save(nyHelseutgiftDekkesPeriode)
     }
 
