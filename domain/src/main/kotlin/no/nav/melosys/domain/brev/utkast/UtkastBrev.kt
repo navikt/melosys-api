@@ -1,8 +1,10 @@
 package no.nav.melosys.domain.brev.utkast
 
 import tools.jackson.core.JacksonException
+import tools.jackson.databind.DeserializationFeature
 import tools.jackson.databind.ObjectMapper
-import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.KotlinModule
 import tools.jackson.module.kotlin.readValue
 import jakarta.persistence.*
 import no.nav.melosys.exception.TekniskException
@@ -42,7 +44,10 @@ class UtkastBrev(
     }
 
     companion object {
-        val objectMapper: ObjectMapper = jacksonObjectMapper()
+        val objectMapper: ObjectMapper = JsonMapper.builder()
+            .addModule(KotlinModule.Builder().build())
+            .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+            .build()
     }
 
     class Builder {
