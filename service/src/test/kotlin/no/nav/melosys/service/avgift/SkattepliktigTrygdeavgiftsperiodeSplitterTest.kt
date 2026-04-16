@@ -4,6 +4,7 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.medlemskapsperiodeForTest
 import org.junit.jupiter.api.Test
@@ -43,16 +44,18 @@ internal class SkattepliktigTrygdeavgiftsperiodeSplitterTest {
         resultat[0].apply {
             periodeFra.shouldBe(LocalDate.of(2024, 3, 1))
             periodeTil.shouldBe(LocalDate.of(2024, 12, 31))
-            assertSkattepliktigSkatteforhold(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 12, 31))
+            assertSkattepliktigSkatteforhold(LocalDate.of(2024, 3, 1), LocalDate.of(2025, 6, 30))
             grunnlagMedlemskapsperiode.shouldBe(periode)
         }
 
         resultat[1].apply {
             periodeFra.shouldBe(LocalDate.of(2025, 1, 1))
             periodeTil.shouldBe(LocalDate.of(2025, 6, 30))
-            assertSkattepliktigSkatteforhold(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 6, 30))
+            assertSkattepliktigSkatteforhold(LocalDate.of(2024, 3, 1), LocalDate.of(2025, 6, 30))
             grunnlagMedlemskapsperiode.shouldBe(periode)
         }
+
+        resultat[0].grunnlagSkatteforholdTilNorge.shouldBeSameInstanceAs(resultat[1].grunnlagSkatteforholdTilNorge)
     }
 
     @Test
@@ -72,6 +75,8 @@ internal class SkattepliktigTrygdeavgiftsperiodeSplitterTest {
         resultat[2].periodeFra.shouldBe(LocalDate.of(2025, 1, 1))
         resultat[2].periodeTil.shouldBe(LocalDate.of(2025, 3, 31))
         resultat.forEach { it.grunnlagMedlemskapsperiode.shouldBe(periode) }
+        resultat[0].grunnlagSkatteforholdTilNorge.shouldBeSameInstanceAs(resultat[1].grunnlagSkatteforholdTilNorge)
+        resultat[1].grunnlagSkatteforholdTilNorge.shouldBeSameInstanceAs(resultat[2].grunnlagSkatteforholdTilNorge)
     }
 
     @Test
