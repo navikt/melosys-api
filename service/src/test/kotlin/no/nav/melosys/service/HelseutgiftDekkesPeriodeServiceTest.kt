@@ -90,7 +90,7 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
     }
 
     @Test
-    fun `Opprett skal opprette ny periode`() {
+    fun `Opprett skal opprette ny helseutgift dekkes periode`() {
         val lagretBehandlingsresultat = mockk<Behandlingsresultat>(relaxed = true)
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns lagretBehandlingsresultat
