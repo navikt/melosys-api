@@ -148,7 +148,7 @@ internal class ÅrsavregningControllerTest {
             tidligereFakturertBeloep = BigDecimal(21170.0),
             beregnetAvgiftBelop = BigDecimal(24280.0),
             tilFaktureringBeloep = BigDecimal(3110.0),
-            harTrygdeavgiftFraAvgiftssystemet = false,
+            harInnbetaltTrygdeavgift = false,
             trygdeavgiftFraAvgiftssystemet = null,
             endeligAvgiftValg = null,
             manueltAvgiftBeloep = null,
@@ -274,7 +274,7 @@ internal class ÅrsavregningControllerTest {
     "trygdeavgiftFraAvgiftssystemet": null,
     "manueltAvgiftBeloep": null
   },
-  "harTrygdeavgiftFraAvgiftssystemet": false,
+  "harInnbetaltTrygdeavgift": false,
   "endeligAvgiftValg": null,
   "harSkjoennsfastsattInntekt": false
 }"""
@@ -391,7 +391,7 @@ internal class ÅrsavregningControllerTest {
             tidligereFakturertBeloep = BigDecimal(80580.0),
             beregnetAvgiftBelop = BigDecimal(6708.0),
             tilFaktureringBeloep = BigDecimal(-73872.0),
-            harTrygdeavgiftFraAvgiftssystemet = false,
+            harInnbetaltTrygdeavgift = false,
             trygdeavgiftFraAvgiftssystemet = null,
             endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
             manueltAvgiftBeloep = null,
@@ -511,7 +511,7 @@ internal class ÅrsavregningControllerTest {
         "trygdeavgiftFraAvgiftssystemet": null,
         "manueltAvgiftBeloep": null
     },
-    "harTrygdeavgiftFraAvgiftssystemet": false,
+    "harInnbetaltTrygdeavgift": false,
     "endeligAvgiftValg": "OPPLYSNINGER_ENDRET",
     "harSkjoennsfastsattInntekt": false
 }"""
