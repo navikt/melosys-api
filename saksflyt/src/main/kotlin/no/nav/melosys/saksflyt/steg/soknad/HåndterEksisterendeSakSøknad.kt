@@ -4,6 +4,7 @@ import tools.jackson.databind.json.JsonMapper
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -72,7 +73,7 @@ class HåndterEksisterendeSakSøknad(
 
         val åpenBehandling = finnÅpenSøknadsbehandling(fagsak)
 
-        val (behandling, mottatteOpplysningerId) = if (åpenBehandling != null) {
+        val (behandling, mottatteOpplysninger) = if (åpenBehandling != null) {
             håndterÅpenBehandling(åpenBehandling, søknadsdata)
         } else {
             opprettNyVurdering(fagsak, søknadsdata)
@@ -81,8 +82,8 @@ class HåndterEksisterendeSakSøknad(
         val originalData = jsonMapper.writeValueAsString(søknadsdata)
         val innsendtDato = søknadsdata.innsendtTidspunkt.atZone(OSLO_ZONE).toInstant()
         skjemaSakMappingService.lagreMapping(
-            søknadsdata.skjema.id, saksnummer,
-            mottatteOpplysningerId = mottatteOpplysningerId,
+            søknadsdata.skjema.id, fagsak,
+            mottatteOpplysninger = mottatteOpplysninger,
             originalData = originalData,
             innsendtDato = innsendtDato
         )
@@ -99,7 +100,7 @@ class HåndterEksisterendeSakSøknad(
     private fun håndterÅpenBehandling(
         behandling: Behandling,
         søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
-    ): Pair<Behandling, Long?> {
+    ): Pair<Behandling, MottatteOpplysninger?> {
         val skalResetteStegvelger = behandling.status in setOf(
             Behandlingsstatus.UNDER_BEHANDLING,
             Behandlingsstatus.AVVENT_DOK_PART
@@ -117,13 +118,13 @@ class HåndterEksisterendeSakSøknad(
         )
 
         val mottatteOpplysninger = mottatteOpplysningerService.hentMottatteOpplysninger(behandling.id)
-        return behandling to mottatteOpplysninger.id
+        return behandling to mottatteOpplysninger
     }
 
     private fun opprettNyVurdering(
         fagsak: Fagsak,
         søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
-    ): Pair<Behandling, Long?> {
+    ): Pair<Behandling, MottatteOpplysninger?> {
         val saksnummer = fagsak.saksnummer
         val referanseId = søknadsdata.referanseId
 
@@ -155,6 +156,6 @@ class HåndterEksisterendeSakSøknad(
         )
         log.info { "Opprettet oppgave for ny behandling ${nyBehandling.id}" }
 
-        return nyBehandling to mottatteOpplysninger.id
+        return nyBehandling to mottatteOpplysninger
     }
 }

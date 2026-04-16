@@ -91,8 +91,8 @@ class OpprettSakOgBehandlingDigitalSøknad(
         val innsendtDato = søknadsdata.innsendtTidspunkt.atZone(OSLO_ZONE).toInstant()
         skjemaSakMappingService.lagreMapping(
             søknadsdata.skjema.id,
-            fagsak.saksnummer,
-            mottatteOpplysningerId = mottatteOpplysninger.id,
+            fagsak,
+            mottatteOpplysninger = mottatteOpplysninger,
             originalData = originalData,
             innsendtDato = innsendtDato
         )

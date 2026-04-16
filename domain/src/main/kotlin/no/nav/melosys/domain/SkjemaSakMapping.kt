@@ -1,9 +1,7 @@
 package no.nav.melosys.domain
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import java.time.Instant
 import java.util.UUID
 
@@ -14,11 +12,13 @@ class SkjemaSakMapping(
     @Column(name = "skjema_id", nullable = false)
     val skjemaId: UUID,
 
-    @Column(name = "saksnummer", nullable = false)
-    val saksnummer: String,
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "saksnummer", nullable = false, updatable = false)
+    val fagsak: Fagsak,
 
-    @Column(name = "mottatte_opplysninger_id")
-    var mottatteOpplysningerId: Long? = null,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mottatte_opplysninger_id")
+    var mottatteOpplysninger: MottatteOpplysninger? = null,
 
     @Column(name = "original_data", columnDefinition = "CLOB")
     var originalData: String? = null,
@@ -31,4 +31,6 @@ class SkjemaSakMapping(
 
     @Column(name = "opprettet_dato", nullable = false, updatable = false)
     val opprettetDato: Instant = Instant.now()
-)
+) {
+    val saksnummer: String get() = fagsak.saksnummer
+}

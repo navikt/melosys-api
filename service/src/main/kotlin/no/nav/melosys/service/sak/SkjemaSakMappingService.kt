@@ -1,8 +1,10 @@
 package no.nav.melosys.service.sak
 
 import mu.KotlinLogging
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.SkjemaSakMapping
 import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.SkjemaSakMappingRepository
 import org.springframework.dao.DataIntegrityViolationException
@@ -56,8 +58,8 @@ class SkjemaSakMappingService(
     @Transactional
     fun lagreMapping(
         skjemaId: UUID,
-        saksnummer: String,
-        mottatteOpplysningerId: Long? = null,
+        fagsak: Fagsak,
+        mottatteOpplysninger: MottatteOpplysninger? = null,
         originalData: String? = null,
         innsendtDato: Instant? = null
     ) {
@@ -65,13 +67,13 @@ class SkjemaSakMappingService(
             skjemaSakMappingRepository.save(
                 SkjemaSakMapping(
                     skjemaId = skjemaId,
-                    saksnummer = saksnummer,
-                    mottatteOpplysningerId = mottatteOpplysningerId,
+                    fagsak = fagsak,
+                    mottatteOpplysninger = mottatteOpplysninger,
                     originalData = originalData,
                     innsendtDato = innsendtDato
                 )
             )
-            log.info { "Lagret mapping: skjemaId=$skjemaId → saksnummer=$saksnummer" }
+            log.info { "Lagret mapping: skjemaId=$skjemaId → saksnummer=${fagsak.saksnummer}" }
         } catch (_: DataIntegrityViolationException) {
             log.info { "Mapping for skjemaId=$skjemaId eksisterer allerede (PK-constraint)" }
         }
