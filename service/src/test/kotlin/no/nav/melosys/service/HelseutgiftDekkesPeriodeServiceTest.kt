@@ -54,7 +54,7 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
 
     @Test
     fun finnHelseutgiftDekkesPerioder_ingenPeriode_returnerTomListe() {
-        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatIdAndKilde(BEH_ID, HelseutgiftDekkesPeriodeKilde.MELOSYS) } returns emptyList()
+        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns emptyList()
 
         helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(BEH_ID).shouldBeEmpty()
     }
@@ -62,7 +62,7 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
     @Test
     fun finnHelseutgiftDekkesPerioder_periodeEksisterer_girResultat() {
         val helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode()
-        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatIdAndKilde(BEH_ID, HelseutgiftDekkesPeriodeKilde.MELOSYS) } returns listOf(helseutgiftDekkesPeriode)
+        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns listOf(helseutgiftDekkesPeriode)
 
         helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(BEH_ID).single().run {
             this.behandlingsresultat shouldBe helseutgiftDekkesPeriode.behandlingsresultat

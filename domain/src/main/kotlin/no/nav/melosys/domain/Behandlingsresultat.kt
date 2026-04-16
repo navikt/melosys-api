@@ -99,7 +99,6 @@ open class Behandlingsresultat : RegistreringsInfo() {
     var årsavregning: Årsavregning? = null
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
-    @org.hibernate.annotations.SQLRestriction("kilde = 'MELOSYS'")
     var helseutgiftDekkesPerioder: MutableList<HelseutgiftDekkesPeriode> = mutableListOf()
 
     @Column(name = "trygdeavgift_type")

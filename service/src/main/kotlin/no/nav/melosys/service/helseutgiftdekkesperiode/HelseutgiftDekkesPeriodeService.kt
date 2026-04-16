@@ -60,12 +60,12 @@ class HelseutgiftDekkesPeriodeService(
 
     @Transactional(readOnly = true)
     fun finnHelseutgiftDekkesPerioder(behandlingID: Long): List<HelseutgiftDekkesPeriode> {
-        return helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatIdAndKilde(behandlingID, HelseutgiftDekkesPeriodeKilde.MELOSYS)
+        return helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(behandlingID)
     }
 
     @Transactional(readOnly = true)
     fun hentHelseutgiftDekkesPerioder(behandlingID: Long): List<HelseutgiftDekkesPeriode> {
-        val perioder = helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatIdAndKilde(behandlingID, HelseutgiftDekkesPeriodeKilde.MELOSYS)
+        val perioder = helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(behandlingID)
         if (perioder.isEmpty()) {
             throw IkkeFunnetException("Fant ikke helseutgift dekkes perioder for behandling $behandlingID.")
         }
