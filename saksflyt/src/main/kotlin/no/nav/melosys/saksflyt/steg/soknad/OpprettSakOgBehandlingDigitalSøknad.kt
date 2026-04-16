@@ -72,7 +72,7 @@ class OpprettSakOgBehandlingDigitalSøknad(
             .medMottaksdato(søknadsdata.innsendtTidspunkt.toLocalDate())
             .build()
 
-        //TODO: Legg til fullmakt, kommer i egen oppgave.
+        //TODO: Legg til fullmakt - egen oppgave: MELOSYS-8031
 
         val fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest)
         val behandling = fagsak.hentAktivBehandling()

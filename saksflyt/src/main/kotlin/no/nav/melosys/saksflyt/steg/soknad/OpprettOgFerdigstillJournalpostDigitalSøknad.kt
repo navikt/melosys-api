@@ -66,7 +66,7 @@ class OpprettOgFerdigstillJournalpostDigitalSøknad(
         val pdf = melosysSkjemaApiClient.hentPdf(skjemaId)
         val innsenderNavn = persondataFasade.hentSammensattNavn(innsenderFnr)
 
-        //TODO: Hent vedlegg fra melosys-skjema-api og legg til som vedleggsdokumenter på journalposten (egen PR)
+        //TODO: Hent vedlegg fra melosys-skjema-api og legg til som vedleggsdokumenter på journalposten (egen task/PR - MELOSYS-8030)
         val opprettJournalpost = OpprettJournalpost().apply {
             hoveddokument = FysiskDokument.lagFysiskDokumentDigitalSøknad(pdf, tittel)
             innhold = tittel
