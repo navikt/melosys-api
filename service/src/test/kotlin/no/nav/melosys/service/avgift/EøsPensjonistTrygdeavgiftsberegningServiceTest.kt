@@ -137,8 +137,8 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     private fun setupMocksForBehandling(behandling: Behandling, behandlingsresultat: Behandlingsresultat) {
         every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
         every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandling)
-        every { helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(BEHANDLING_ID) }.returns(
-            behandlingsresultat.hentHelseutgiftDekkesPeriode()
+        every { helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(BEHANDLING_ID) }.returns(
+            behandlingsresultat.helseutgiftDekkesPerioder.toList()
         )
     }
 
@@ -267,7 +267,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                     trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
                     trygdesats = BigDecimal("7.9"),
                     grunnlagInntekstperiode = inntektsperiode,
-                    grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode,
+                    grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPerioder.first(),
                     grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
                 ),
                 ignorePrivateFields = false,
@@ -277,7 +277,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         verify { trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
 
         verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
-        behandlingsresultat.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.shouldNotBeEmpty()
+        behandlingsresultat.helseutgiftDekkesPerioder.first().trygdeavgiftsperioder.shouldNotBeEmpty()
     }
 
     @Test
@@ -340,7 +340,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                     trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
                     trygdesats = BigDecimal("7.9"),
                     grunnlagInntekstperiode = inntektsperiode,
-                    grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode,
+                    grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPerioder.first(),
                     grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
                 ),
                 ignorePrivateFields = false,
@@ -350,7 +350,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         verify { trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
 
         verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
-        behandlingsresultat.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.shouldNotBeEmpty()
+        behandlingsresultat.helseutgiftDekkesPerioder.first().trygdeavgiftsperioder.shouldNotBeEmpty()
     }
 
     @Test
@@ -455,7 +455,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                 skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
             }
             grunnlagHelseutgiftDekkesPeriode.shouldNotBeNull()
-                .shouldBe(behandlingsresultat.hentHelseutgiftDekkesPeriode())
+                .shouldBe(behandlingsresultat.helseutgiftDekkesPerioder.first())
         }
     }
 

@@ -34,20 +34,31 @@ class InformasjonTrygdeavgiftMapper(
     internal fun mapInformasjonTrygdeavgift(brevbestilling: DokgenBrevbestilling): InformasjonTrygdeavgift {
         val behandlingId = brevbestilling.behandlingNonNull().id
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandlingId)
-        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandlingId)
+        val helseutgiftDekkesPerioder = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(behandlingId)
 
-        if (helseutgiftDekkesPeriode == null) {
-            throw IkkeFunnetException("Finner ingen helseutgift-periode med behandlingID: $behandlingId")
+        if (helseutgiftDekkesPerioder.isEmpty()) {
+            throw IkkeFunnetException("Finner ingen helseutgift-perioder med behandlingID: $behandlingId")
         }
+
+        val distinctLandkoder = helseutgiftDekkesPerioder.map { it.bostedLandkode }.distinct()
+        if (distinctLandkoder.size > 1) {
+            throw IllegalStateException(
+                "Forventer at alle helseutgift-perioder har samme landkode, men fant: ${distinctLandkoder.map { it.kode }}"
+            )
+        }
+
+        val fomDato = helseutgiftDekkesPerioder.minOf { it.fomDato }
+        val tomDato = helseutgiftDekkesPerioder.maxOf { it.tomDato }
+        val førstePeriode = helseutgiftDekkesPerioder.first()
 
         return InformasjonTrygdeavgift(
             brevbestilling = brevbestilling,
-            fomDato = helseutgiftDekkesPeriode.fomDato,
-            tomDato = helseutgiftDekkesPeriode.tomDato,
-            bostedLand = helseutgiftDekkesPeriode.bostedLandkode.beskrivelse,
+            fomDato = fomDato,
+            tomDato = tomDato,
+            bostedLand = førstePeriode.bostedLandkode.beskrivelse,
             begrunnelseFritekst = behandlingsresultat.begrunnelseFritekst,
             trygdeavgiftMottaker = utledTrygdeavgiftsmottaker(behandlingsresultat),
-            erNordisk = NordiskeLand.erNordiskLand(helseutgiftDekkesPeriode.bostedLandkode),
+            erNordisk = NordiskeLand.erNordiskLand(førstePeriode.bostedLandkode),
             betalingsvalg = hentBetalingsvalg(behandlingsresultat.hentBehandling()),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.hentBehandling()),
             avgiftsperioder = mapAvgiftsperioderPensjonist(behandlingsresultat),

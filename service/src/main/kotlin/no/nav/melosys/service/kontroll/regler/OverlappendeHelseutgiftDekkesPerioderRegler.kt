@@ -11,23 +11,25 @@ object OverlappendeHelseutgiftDekkesPerioderRegler {
         medlemskapDokument: MedlemskapDokument,
         helseutgiftDekkesPeriodeData: HelseutgiftDekkesPeriodeData
     ): Boolean {
-        val nyHelseutgiftDekkesPeriode = helseutgiftDekkesPeriodeData.nyHelseutgiftDekkesPeriode
-        val kontrollperiode = Periode(nyHelseutgiftDekkesPeriode.fomDato, nyHelseutgiftDekkesPeriode.tomDato)
+        return helseutgiftDekkesPeriodeData.nyeHelseutgiftDekkesPerioder.any { nyHelseutgiftDekkesPeriode ->
+            val kontrollperiode = Periode(nyHelseutgiftDekkesPeriode.fomDato, nyHelseutgiftDekkesPeriode.tomDato)
 
-        return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen()
-            .filter { medlemsperiode -> PeriodestatusMedl.AVST.kode != medlemsperiode.status }
-            .any { medlemsperiode -> PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.periode) }
+            medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen()
+                .filter { medlemsperiode -> PeriodestatusMedl.AVST.kode != medlemsperiode.status }
+                .any { medlemsperiode -> PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.periode) }
+        }
     }
 
     fun harOverlappendeHelseutgiftDekkesPeriode(
         helseutgiftDekkesPeriodeData: HelseutgiftDekkesPeriodeData
     ): Boolean {
-        val nyHelseutgiftDekkesPeriode = helseutgiftDekkesPeriodeData.nyHelseutgiftDekkesPeriode
-        val kontrollperiode = Periode(nyHelseutgiftDekkesPeriode.fomDato, nyHelseutgiftDekkesPeriode.tomDato)
+        return helseutgiftDekkesPeriodeData.nyeHelseutgiftDekkesPerioder.any { nyHelseutgiftDekkesPeriode ->
+            val kontrollperiode = Periode(nyHelseutgiftDekkesPeriode.fomDato, nyHelseutgiftDekkesPeriode.tomDato)
 
-        return helseutgiftDekkesPeriodeData.tidligereHelseutgiftDekkesPerioder.any { helseutgiftDekkesPeriode ->
-            val tidligerePeriode = Periode(helseutgiftDekkesPeriode.fomDato, helseutgiftDekkesPeriode.tomDato)
-            PeriodeRegler.periodeOverlapper(kontrollperiode, tidligerePeriode)
+            helseutgiftDekkesPeriodeData.tidligereHelseutgiftDekkesPerioder.any { helseutgiftDekkesPeriode ->
+                val tidligerePeriode = Periode(helseutgiftDekkesPeriode.fomDato, helseutgiftDekkesPeriode.tomDato)
+                PeriodeRegler.periodeOverlapper(kontrollperiode, tidligerePeriode)
+            }
         }
     }
 }
