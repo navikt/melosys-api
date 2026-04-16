@@ -27,6 +27,8 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.sak.FagsakService
@@ -147,7 +149,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
             mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
                 eq(behandlingId), any(), capture(soeknadSlot), eq(referanseId)
             )
-        } returns mockk<MottatteOpplysninger>()
+        } returns mockk<MottatteOpplysninger> { every { id } returns 99L }
 
         opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
 
@@ -169,5 +171,76 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
 
         verify { skjemaSakMappingService.lagreMapping(any(), eq("MEL-1234"), any(), any(), any()) }
+    }
+
+    @Test
+    fun `utfør setter AVVENT_DOK_PART når kun arbeidsgiver-del uten koblet motpart`() {
+        val arbeidsgiverSøknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+            data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
+            fnr = this@OpprettSakOgBehandlingDigitalSøknadTest.fnr
+            referanseId = this@OpprettSakOgBehandlingDigitalSøknadTest.referanseId
+        }
+        val arbeidsgiverProsessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.DIGITAL_SØKNADSDATA, arbeidsgiverSøknadsdata)
+        }
+
+        val behandling = mockk<Behandling>(relaxed = true)
+        every { behandling.id } returns behandlingId
+        every { behandling.status } returns Behandlingsstatus.OPPRETTET
+        every { persondataFasade.hentAktørIdForIdent(fnr) } returns aktørId
+        every { fagsakService.nyFagsakOgBehandling(any()) } returns mockk<Fagsak>().also {
+            every { it.hentAktivBehandling() } returns behandling
+            every { it.saksnummer } returns "MEL-1234"
+        }
+        every { behandlingService.lagre(any()) } just Runs
+        every { jsonMapper.writeValueAsString(arbeidsgiverSøknadsdata) } returns "{}"
+        every { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any()) } returns
+            mockk<MottatteOpplysninger> { every { id } returns 99L }
+
+        opprettSakOgBehandlingDigitalSøknad.utfør(arbeidsgiverProsessinstans)
+
+        verify { behandling.status = Behandlingsstatus.AVVENT_DOK_PART }
+        verify { behandlingService.lagre(behandling) }
+    }
+
+    @Test
+    fun `utfør setter IKKE AVVENT_DOK_PART for arbeidstaker-del`() {
+        val behandling = mockFagsakOgBehandling()
+        mockMottatteOpplysninger()
+
+        opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
+
+        verify(exactly = 0) { behandling.status = Behandlingsstatus.AVVENT_DOK_PART }
+    }
+
+    @Test
+    fun `utfør setter IKKE AVVENT_DOK_PART for arbeidsgiver-del med koblet motpart`() {
+        val arbeidsgiverMedKoblet = lagUtsendtArbeidstakerSkjemaM2MDto {
+            skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+            data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
+            fnr = this@OpprettSakOgBehandlingDigitalSøknadTest.fnr
+            referanseId = this@OpprettSakOgBehandlingDigitalSøknadTest.referanseId
+            medKobletArbeidsgiverSkjema()
+        }
+        val kobletProsessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.DIGITAL_SØKNADSDATA, arbeidsgiverMedKoblet)
+        }
+
+        val behandling = mockk<Behandling>(relaxed = true)
+        every { behandling.id } returns behandlingId
+        every { behandling.status } returns Behandlingsstatus.OPPRETTET
+        every { persondataFasade.hentAktørIdForIdent(fnr) } returns aktørId
+        every { fagsakService.nyFagsakOgBehandling(any()) } returns mockk<Fagsak>().also {
+            every { it.hentAktivBehandling() } returns behandling
+            every { it.saksnummer } returns "MEL-1234"
+        }
+        every { jsonMapper.writeValueAsString(arbeidsgiverMedKoblet) } returns "{}"
+        every { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any()) } returns
+            mockk<MottatteOpplysninger> { every { id } returns 99L }
+
+        opprettSakOgBehandlingDigitalSøknad.utfør(kobletProsessinstans)
+
+        verify(exactly = 0) { behandlingService.lagre(any()) }
     }
 }

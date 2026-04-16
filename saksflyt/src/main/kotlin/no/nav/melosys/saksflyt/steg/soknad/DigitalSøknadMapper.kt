@@ -7,6 +7,12 @@ import no.nav.melosys.skjema.types.felles.LandKode
 import no.nav.melosys.skjema.types.felles.PeriodeDto
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 
+internal fun mapPeriode(periodeDto: PeriodeDto?): Periode =
+    periodeDto?.let { Periode(it.fraDato, it.tilDato) } ?: Periode()
+
+internal fun mapSoeknadsland(landkode: LandKode?): Soeknadsland =
+    Soeknadsland(landkode?.let { listOf(it.name) } ?: emptyList(), false)
+
 /**
  * Forenklet mapper som kun mapper periode og land fra skjemadata til [Soeknad].
  *
@@ -28,10 +34,4 @@ object DigitalSøknadMapper {
         return mapPeriode(data.utsendingsperiodeOgLand?.utsendelsePeriode) to
             mapSoeknadsland(data.utsendingsperiodeOgLand?.utsendelseLand)
     }
-
-    private fun mapPeriode(periodeDto: PeriodeDto?): Periode =
-        periodeDto?.let { Periode(it.fraDato, it.tilDato) } ?: Periode()
-
-    private fun mapSoeknadsland(landkode: LandKode?): Soeknadsland =
-        Soeknadsland(landkode?.let { listOf(it.name) } ?: emptyList(), false)
 }

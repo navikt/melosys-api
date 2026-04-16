@@ -145,6 +145,35 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
             every { melosysSkjemaApiClient.hentPdf(it.skjema.id) } returns pdfBytes
         }
 
+    @Test
+    fun `utfør overskriver ikke initierendeJournalpostId når den allerede er satt`() {
+        val søknadsdata = lagSøknadsdata(Skjemadel.ARBEIDSTAKERS_DEL)
+        val eksisterendeJournalpostId = "JOARK-EKSISTERENDE"
+        val behandling = Behandling.forTest {
+            fagsak { saksnummer = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.saksnummer }
+            initierendeJournalpostId = eksisterendeJournalpostId
+        }
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.DIGITAL_SØKNADSDATA, søknadsdata)
+            this.behandling = behandling
+        }
+
+        opprettOgFerdigstillJournalpostDigitalSøknad.utfør(prosessinstans)
+
+        behandling.initierendeJournalpostId shouldBe eksisterendeJournalpostId
+        verify(exactly = 0) { behandlingService.lagre(any()) }
+    }
+
+    @Test
+    fun `utfør kaller oppdaterJournalpostId på skjemaSakMappingService`() {
+        val søknadsdata = lagSøknadsdata(Skjemadel.ARBEIDSTAKERS_DEL)
+        val prosessinstans = lagProsessinstans(søknadsdata)
+
+        opprettOgFerdigstillJournalpostDigitalSøknad.utfør(prosessinstans)
+
+        verify { skjemaSakMappingService.oppdaterJournalpostId(søknadsdata.skjema.id, journalpostId) }
+    }
+
     private fun lagProsessinstans(søknadsdata: no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto): Prosessinstans {
         val behandling = Behandling.forTest {
             fagsak { saksnummer = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.saksnummer }

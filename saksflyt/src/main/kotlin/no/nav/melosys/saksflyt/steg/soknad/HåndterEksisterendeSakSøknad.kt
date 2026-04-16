@@ -106,16 +106,11 @@ class HåndterEksisterendeSakSøknad(
         )
 
         if (skalResetteStegvelger) {
-            log.info { "Endre behandlingsstatus til VURDER_DOKUMENT for behandling ${behandling.id}" }
-            behandling.status = Behandlingsstatus.VURDER_DOKUMENT
-            behandlingService.lagre(behandling)
-
-            log.info { "Reset stegvelger (tømBehandlingsresultat) for behandling ${behandling.id}" }
+            behandlingService.endreStatus(behandling, Behandlingsstatus.VURDER_DOKUMENT)
             behandlingsresultatService.tømBehandlingsresultat(behandling.id)
         }
 
         val (periode, land) = DigitalSøknadMapper.hentPeriodeOgLand(søknadsdata)
-        log.info { "Oppdater mottatte opplysninger for behandling ${behandling.id}" }
 
         mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(
             behandling.id, periode, land

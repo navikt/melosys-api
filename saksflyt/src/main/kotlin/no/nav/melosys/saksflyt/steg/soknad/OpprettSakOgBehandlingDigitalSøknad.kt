@@ -20,10 +20,8 @@ import no.nav.melosys.service.sak.OpprettSakRequest
 import no.nav.melosys.service.sak.SkjemaSakMappingService
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerMetadata
 import org.springframework.stereotype.Component
 import java.time.LocalDate
-import java.time.ZoneOffset
 
 private val log = KotlinLogging.logger { }
 
@@ -84,13 +82,11 @@ class OpprettSakOgBehandlingDigitalSøknad(
             log.info { "Satt behandlingsstatus til AVVENT_DOK_PART (kun arbeidsgiver-del mottatt)" }
         }
 
-        // Lagre mottatte opplysninger
         val søknad = DigitalSøknadMapper.tilSoeknad(søknadsdata)
         val mottatteOpplysninger = mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
             behandling.id, null, søknad, referanseId
         )
 
-        // Lagre mapping med kobling til mottatte opplysninger
         val originalData = jsonMapper.writeValueAsString(søknadsdata)
         val innsendtDato = søknadsdata.innsendtTidspunkt.atZone(OSLO_ZONE).toInstant()
         skjemaSakMappingService.lagreMapping(

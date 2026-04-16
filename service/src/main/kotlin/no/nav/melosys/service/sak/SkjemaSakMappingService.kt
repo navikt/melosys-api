@@ -7,7 +7,6 @@ import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.SkjemaSakMappingRepository
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.util.UUID
@@ -54,8 +53,7 @@ class SkjemaSakMappingService(
         }
     }
 
-    //TODO: Hvorfor er det REQUIRES_NEW?
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     fun lagreMapping(
         skjemaId: UUID,
         saksnummer: String,
@@ -76,18 +74,6 @@ class SkjemaSakMappingService(
             log.info { "Lagret mapping: skjemaId=$skjemaId → saksnummer=$saksnummer" }
         } catch (_: DataIntegrityViolationException) {
             log.info { "Mapping for skjemaId=$skjemaId eksisterer allerede (PK-constraint)" }
-        }
-    }
-
-    fun lagreMappinger(
-        skjemaIder: Collection<UUID>,
-        saksnummer: String,
-        mottatteOpplysningerId: Long? = null,
-        originalData: String? = null,
-        innsendtDato: Instant? = null
-    ) {
-        skjemaIder.forEach { skjemaId ->
-            lagreMapping(skjemaId, saksnummer, mottatteOpplysningerId, originalData, innsendtDato)
         }
     }
 

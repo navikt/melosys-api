@@ -73,15 +73,14 @@ internal class HåndterEksisterendeSakSøknadTest {
             val prosessinstans = lagProsessinstans()
 
             mockFagsakService(fagsak)
-            mockBehandlingLagring()
+            mockEndreStatus()
             mockTømBehandlingsresultat()
             mockOppdaterMottatteOpplysninger()
             mockHentMottatteOpplysninger(behandlingId)
 
             steg.utfør(prosessinstans)
 
-            behandling.status shouldBe Behandlingsstatus.VURDER_DOKUMENT
-            verify { behandlingService.lagre(behandling) }
+            verify { behandlingService.endreStatus(behandling, Behandlingsstatus.VURDER_DOKUMENT) }
             verify { behandlingsresultatService.tømBehandlingsresultat(behandlingId) }
             verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingId, any(), any()) }
             verify { skjemaSakMappingService.lagreMapping(any(), eq(saksnummer), any(), any(), any()) }
@@ -99,15 +98,14 @@ internal class HåndterEksisterendeSakSøknadTest {
             val prosessinstans = lagProsessinstans()
 
             mockFagsakService(fagsak)
-            mockBehandlingLagring()
+            mockEndreStatus()
             mockTømBehandlingsresultat()
             mockOppdaterMottatteOpplysninger()
             mockHentMottatteOpplysninger(behandlingId)
 
             steg.utfør(prosessinstans)
 
-            behandling.status shouldBe Behandlingsstatus.VURDER_DOKUMENT
-            verify { behandlingService.lagre(behandling) }
+            verify { behandlingService.endreStatus(behandling, Behandlingsstatus.VURDER_DOKUMENT) }
             verify { behandlingsresultatService.tømBehandlingsresultat(behandlingId) }
         }
     }
@@ -127,12 +125,62 @@ internal class HåndterEksisterendeSakSøknadTest {
 
             steg.utfør(prosessinstans)
 
-            behandling.status shouldBe Behandlingsstatus.OPPRETTET
-            verify(exactly = 0) { behandlingService.lagre(any()) }
+            verify(exactly = 0) { behandlingService.endreStatus(any<Behandling>(), any()) }
             verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any()) }
             verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingId, any(), any()) }
             verify { skjemaSakMappingService.lagreMapping(any(), eq(saksnummer), any(), any(), any()) }
             prosessinstans.behandling shouldBe behandling
+        }
+    }
+
+    @Nested
+    inner class ÅpenBehandlingVurderDokument {
+
+        @Test
+        fun `oppdaterer kun mottatte opplysninger uten statusendring eller reset`() {
+            val behandling = lagBehandling(Behandlingsstatus.VURDER_DOKUMENT)
+            val fagsak = lagFagsakMedBehandling(behandling)
+            val prosessinstans = lagProsessinstans()
+
+            mockFagsakService(fagsak)
+            mockOppdaterMottatteOpplysninger()
+            mockHentMottatteOpplysninger(behandlingId)
+
+            steg.utfør(prosessinstans)
+
+            verify(exactly = 0) { behandlingService.endreStatus(any<Behandling>(), any()) }
+            verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any()) }
+            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingId, any(), any()) }
+            prosessinstans.behandling shouldBe behandling
+        }
+    }
+
+    @Nested
+    inner class IkkeSøknadsbehandlingstype {
+
+        @Test
+        fun `aktiv behandling med annen type faller gjennom til opprettNyVurdering`() {
+            val eksisterendeBehandling = lagBehandling(Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.HENVENDELSE)
+            val fagsak = mockk<Fagsak>(relaxed = true)
+            every { fagsak.saksnummer } returns saksnummer
+            every { fagsak.finnAktivBehandlingIkkeÅrsavregning() } returns eksisterendeBehandling
+            every { fagsak.finnBrukersAktørID() } returns "1234567890123"
+            every { fagsak.finnVirksomhetsOrgnr() } returns "123456789"
+
+            val nyBehandling = mockk<Behandling>(relaxed = true)
+            every { nyBehandling.id } returns 99L
+            val prosessinstans = lagProsessinstans()
+
+            mockFagsakService(fagsak)
+            every { behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns nyBehandling
+            every { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any()) } returns
+                mockk<MottatteOpplysninger> { every { id } returns mottatteOpplysningerId }
+            every { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any()) } just Runs
+
+            steg.utfør(prosessinstans)
+
+            verify { behandlingService.nyBehandling(fagsak, any(), eq(Behandlingstyper.NY_VURDERING), any(), any(), any(), any(), any(), any()) }
+            prosessinstans.behandling shouldBe nyBehandling
         }
     }
 
@@ -174,11 +222,14 @@ internal class HåndterEksisterendeSakSøknadTest {
 
     // --- Helpers ---
 
-    private fun lagBehandling(status: Behandlingsstatus): Behandling {
+    private fun lagBehandling(
+        status: Behandlingsstatus,
+        behandlingstype: Behandlingstyper = Behandlingstyper.FØRSTEGANG
+    ): Behandling {
         return Behandling.forTest {
             id = this@HåndterEksisterendeSakSøknadTest.behandlingId
             this.status = status
-            type = Behandlingstyper.FØRSTEGANG
+            type = behandlingstype
             this.fagsak = Fagsak.forTest { this.saksnummer = this@HåndterEksisterendeSakSøknadTest.saksnummer }
         }
     }
@@ -203,8 +254,8 @@ internal class HåndterEksisterendeSakSøknadTest {
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
     }
 
-    private fun mockBehandlingLagring() {
-        every { behandlingService.lagre(any()) } just Runs
+    private fun mockEndreStatus() {
+        every { behandlingService.endreStatus(any<Behandling>(), any()) } just Runs
     }
 
     private fun mockTømBehandlingsresultat() {

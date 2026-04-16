@@ -12,7 +12,5 @@ public interface SkjemaSakMappingRepository extends CrudRepository<SkjemaSakMapp
 
     List<SkjemaSakMapping> findBySkjemaIdIn(Collection<UUID> skjemaIds);
 
-    List<SkjemaSakMapping> findBySaksnummer(String saksnummer);
-
     Optional<SkjemaSakMapping> findBySkjemaId(UUID skjemaId);
 }
