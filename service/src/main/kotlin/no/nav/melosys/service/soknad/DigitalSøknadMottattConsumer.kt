@@ -17,7 +17,7 @@ private val log = KotlinLogging.logger { }
 
 @Profile("!local-q1 & !local-q2")
 @Service
-class SkjemaMottattConsumer(
+class DigitalSøknadMottattConsumer(
     private val unleash: Unleash,
     private val prosessinstansService: ProsessinstansService,
     private val skjemaSakMappingService: SkjemaSakMappingService
