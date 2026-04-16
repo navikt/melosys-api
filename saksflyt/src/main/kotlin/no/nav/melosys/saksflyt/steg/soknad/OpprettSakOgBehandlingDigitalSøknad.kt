@@ -70,7 +70,7 @@ class OpprettSakOgBehandlingDigitalSøknad(
             .medBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
             .medBehandlingstype(Behandlingstyper.FØRSTEGANG)
             .medBehandlingsårsaktype(Behandlingsaarsaktyper.SØKNAD)
-            .medMottaksdato(LocalDate.now())
+            .medMottaksdato(søknadsdata.innsendtTidspunkt.toLocalDate())
             .build()
 
         val fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest)
@@ -86,20 +86,24 @@ class OpprettSakOgBehandlingDigitalSøknad(
         }
 
         // Lagre hoved-skjemaId med originalData, og kun mapping for relaterte IDs
+        //TODO: Se spørsmål rundt mottatte opplysninger. Dette kan kanskje tas etter at mottatte opplysninger er opprettet, slik at man kan lagre mappingen riktig med en gang?
         val originalData = jsonMapper.writeValueAsString(søknadsdata)
         val innsendtDato = søknadsdata.innsendtTidspunkt.atZone(OSLO_ZONE).toInstant()
         skjemaSakMappingService.lagreMapping(
-            søknadsdata.skjema.id, fagsak.saksnummer,
+            søknadsdata.skjema.id,
+            fagsak.saksnummer,
             originalData = originalData,
-            innsendtDato = innsendtDato
+            innsendtDato = innsendtDato //TODO: Endre til LocalDate
         )
+
         val andreRelatertIder = samleRelaterteSkjemaIder(søknadsdata) - søknadsdata.skjema.id
         if (andreRelatertIder.isNotEmpty()) {
             skjemaSakMappingService.lagreMappinger(andreRelatertIder, fagsak.saksnummer)
         }
 
-        // Lagre mottatte opplysninger (kun periode + land)
+        // Lagre mottatte opplysninger
         val søknad = ForenkletSøknadMapper.tilSoeknad(søknadsdata)
+
         mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
             behandling.id, null, søknad, referanseId
         )
@@ -113,8 +117,8 @@ class OpprettSakOgBehandlingDigitalSøknad(
             val ider = mutableSetOf<UUID>()
             ider.add(søknadsdata.skjema.id)
             søknadsdata.kobletSkjema?.let { ider.add(it.id) }
-            (søknadsdata.skjema.metadata as? UtsendtArbeidstakerMetadata)?.erstatterSkjemaId?.let { ider.add(it) }
-            (søknadsdata.kobletSkjema?.metadata as? UtsendtArbeidstakerMetadata)?.erstatterSkjemaId?.let { ider.add(it) }
+            (søknadsdata.skjema.metadata)?.erstatterSkjemaId?.let { ider.add(it) }
+            (søknadsdata.kobletSkjema?.metadata)?.erstatterSkjemaId?.let { ider.add(it) }
             søknadsdata.tidligereInnsendteSkjema.forEach { ider.add(it.id) }
             return ider
         }

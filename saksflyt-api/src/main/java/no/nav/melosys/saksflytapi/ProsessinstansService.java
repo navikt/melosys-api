@@ -600,10 +600,9 @@ public class ProsessinstansService {
             .medType(prosessType)
             .medLåsReferanse(låsReferanse)
             .build();
+
         prosessinstans.setData(DIGITAL_SØKNAD_MOTTATT_MELDING, melding);
-        if (saksnummer != null) {
-            prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
-        }
+        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
 
         lagre(prosessinstans);
     }
@@ -787,4 +786,3 @@ public class ProsessinstansService {
         return !prosessinstansRepo.findBySatsendringAndOpprinneligBehandlingIdNotFerdig(behandlingID).isEmpty();
     }
 }
-|

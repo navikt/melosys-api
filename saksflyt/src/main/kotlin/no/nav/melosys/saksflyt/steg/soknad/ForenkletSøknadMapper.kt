@@ -13,6 +13,7 @@ import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
  * Full skjemadata lagres som original_data (JSON) i skjema_sak_mapping,
  * og saksbehandler bruker PDF for å se detaljene.
  */
+//TODO: Rename til DigitalSøknadMapper
 object ForenkletSøknadMapper {
 
     fun tilSoeknad(dto: UtsendtArbeidstakerSkjemaM2MDto): Soeknad {

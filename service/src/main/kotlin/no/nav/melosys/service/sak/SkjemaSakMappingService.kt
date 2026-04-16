@@ -54,6 +54,7 @@ class SkjemaSakMappingService(
         }
     }
 
+    //TODO: Hvorfor er det REQUIRES_NEW?
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun lagreMapping(
         skjemaId: UUID,
@@ -73,7 +74,7 @@ class SkjemaSakMappingService(
                 )
             )
             log.info { "Lagret mapping: skjemaId=$skjemaId → saksnummer=$saksnummer" }
-        } catch (e: DataIntegrityViolationException) {
+        } catch (_: DataIntegrityViolationException) {
             log.info { "Mapping for skjemaId=$skjemaId eksisterer allerede (PK-constraint)" }
         }
     }

@@ -35,7 +35,7 @@ class SkjemaMottattConsumer(
         val melding = consumerRecord.value()
         log.info { "Mottatt skjema-melding med skjemaId: ${melding.skjemaId}" }
 
-        if (unleash.isEnabled(ToggleName.MELOSYS_SKJEMA_MOTTATT_CONSUMER)) {
+        if (unleash.isEnabled(ToggleName.MELOSYS_SKJEMA_MOTTATT_CONSUMER)) { //TODO: Er toggle nødvendig?
             val alleIder = melding.relaterteSkjemaIder + melding.skjemaId
             val eksisterendeSaksnummer = skjemaSakMappingService.finnSaksnummerForGyldigSak(alleIder)
 

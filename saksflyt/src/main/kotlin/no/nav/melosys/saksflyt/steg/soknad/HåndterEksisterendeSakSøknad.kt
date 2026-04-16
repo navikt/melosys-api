@@ -78,6 +78,7 @@ class HåndterEksisterendeSakSøknad(
             opprettNyVurdering(fagsak, søknadsdata)
         }
 
+        //TODO: Igjen, her trenger vi å ta stilling til i forhold til mottatte opplysninger
         val originalData = jsonMapper.writeValueAsString(søknadsdata)
         val innsendtDato = søknadsdata.innsendtTidspunkt.atZone(OSLO_ZONE).toInstant()
         skjemaSakMappingService.lagreMapping(
@@ -85,6 +86,8 @@ class HåndterEksisterendeSakSøknad(
             originalData = originalData,
             innsendtDato = innsendtDato
         )
+
+        //TODO: Mottatte opplysninger lagring?
 
         prosessinstans.behandling = behandling
         log.info { "Ferdig med eksisterende sak $saksnummer, behandling=${behandling.id}" }
@@ -105,19 +108,20 @@ class HåndterEksisterendeSakSøknad(
         )
 
         if (skalResetteStegvelger) {
+            log.info { "Endre behandlingsstatus til VURDER_DOKUMENT for behandling ${behandling.id}" }
             behandling.status = Behandlingsstatus.VURDER_DOKUMENT
             behandlingService.lagre(behandling)
-            log.info { "Endret behandlingsstatus til VURDER_DOKUMENT for behandling ${behandling.id}" }
 
-            behandlingsresultatService.tømBehandlingsresultat(behandling.id)
             log.info { "Reset stegvelger (tømBehandlingsresultat) for behandling ${behandling.id}" }
+            behandlingsresultatService.tømBehandlingsresultat(behandling.id)
         }
 
         val (periode, land) = ForenkletSøknadMapper.hentPeriodeOgLand(søknadsdata)
+        log.info { "Oppdater mottatte opplysninger for behandling ${behandling.id}" }
+
         mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(
             behandling.id, periode, land
         )
-        log.info { "Oppdatert mottatte opplysninger (periode + land) for behandling ${behandling.id}" }
 
         return behandling
     }
@@ -134,7 +138,8 @@ class HåndterEksisterendeSakSøknad(
             Behandlingsstatus.OPPRETTET,
             Behandlingstyper.NY_VURDERING,
             Behandlingstema.UTSENDT_ARBEIDSTAKER,
-            null, null,
+            null,  //TODO: Burde vi ikke ha journalpostid her?
+            null,
             LocalDate.now(),
             Behandlingsaarsaktyper.SØKNAD,
             null

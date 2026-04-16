@@ -66,6 +66,7 @@ class OpprettOgFerdigstillJournalpostDigitalSøknad(
         val pdf = melosysSkjemaApiClient.hentPdf(skjemaId)
         val innsenderNavn = persondataFasade.hentSammensattNavn(innsenderFnr)
 
+        //TODO: Hva med vedleggene? Vi har glemt å hente vedlegg.
         val opprettJournalpost = OpprettJournalpost().apply {
             hoveddokument = FysiskDokument.lagFysiskDokumentDigitalSøknad(pdf, tittel)
             innhold = tittel
