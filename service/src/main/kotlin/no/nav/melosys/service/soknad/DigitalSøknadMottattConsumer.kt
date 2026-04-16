@@ -1,6 +1,5 @@
 package no.nav.melosys.service.soknad
 
-import io.getunleash.Unleash
 import mu.KotlinLogging
 import no.nav.melosys.config.MDCOperations.Companion.withKafkaCorrelationId
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -17,7 +16,6 @@ private val log = KotlinLogging.logger { }
 @Profile("!local-q1 & !local-q2")
 @Service
 class DigitalSøknadMottattConsumer(
-    private val unleash: Unleash,
     private val prosessinstansService: ProsessinstansService,
     private val skjemaSakMappingService: SkjemaSakMappingService
 ) {
