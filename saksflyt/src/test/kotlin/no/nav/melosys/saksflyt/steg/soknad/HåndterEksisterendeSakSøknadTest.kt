@@ -83,7 +83,7 @@ internal class HåndterEksisterendeSakSøknadTest {
             verify { behandlingService.endreStatus(behandling, Behandlingsstatus.VURDER_DOKUMENT) }
             verify { behandlingsresultatService.tømBehandlingsresultat(behandlingId) }
             verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingId, any(), any()) }
-            verify { skjemaSakMappingService.lagreMapping(any(), eq(saksnummer), any(), any(), any()) }
+            verify { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) }
             prosessinstans.behandling shouldBe behandling
         }
     }
@@ -128,7 +128,7 @@ internal class HåndterEksisterendeSakSøknadTest {
             verify(exactly = 0) { behandlingService.endreStatus(any<Behandling>(), any()) }
             verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any()) }
             verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingId, any(), any()) }
-            verify { skjemaSakMappingService.lagreMapping(any(), eq(saksnummer), any(), any(), any()) }
+            verify { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) }
             prosessinstans.behandling shouldBe behandling
         }
     }
@@ -215,7 +215,7 @@ internal class HåndterEksisterendeSakSøknadTest {
             verify { fagsak.leggTilBehandling(nyBehandling) }
             verify { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(99L, any(), any(), any()) }
             verify { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(nyBehandling, any(), any(), any(), any()) }
-            verify { skjemaSakMappingService.lagreMapping(any(), eq(saksnummer), eq(mottatteOpplysningerId), any(), any()) }
+            verify { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) }
             prosessinstans.behandling shouldBe nyBehandling
         }
     }

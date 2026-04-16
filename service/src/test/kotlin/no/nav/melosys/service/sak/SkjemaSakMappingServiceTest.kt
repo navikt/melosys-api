@@ -10,6 +10,7 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.SkjemaSakMapping
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.SkjemaSakMappingRepository
 import org.junit.jupiter.api.BeforeEach
@@ -52,7 +53,7 @@ internal class SkjemaSakMappingServiceTest {
         fun `en mapping med sak OPPRETTET returnerer saksnummer`() {
             val skjemaId = UUID.randomUUID()
             val saksnummer = "MEL-100"
-            val mapping = SkjemaSakMapping(skjemaId = skjemaId, saksnummer = saksnummer)
+            val mapping = SkjemaSakMapping(skjemaId = skjemaId, fagsak = Fagsak.forTest { this.saksnummer = saksnummer })
             val fagsak = Fagsak.forTest { this.saksnummer = saksnummer; status = Saksstatuser.OPPRETTET }
 
             every { skjemaSakMappingRepository.findBySkjemaIdIn(listOf(skjemaId)) } returns listOf(mapping)
@@ -65,7 +66,7 @@ internal class SkjemaSakMappingServiceTest {
         fun `en mapping med sak LOVVALG_AVKLART returnerer saksnummer`() {
             val skjemaId = UUID.randomUUID()
             val saksnummer = "MEL-200"
-            val mapping = SkjemaSakMapping(skjemaId = skjemaId, saksnummer = saksnummer)
+            val mapping = SkjemaSakMapping(skjemaId = skjemaId, fagsak = Fagsak.forTest { this.saksnummer = saksnummer })
             val fagsak = Fagsak.forTest { this.saksnummer = saksnummer; status = Saksstatuser.LOVVALG_AVKLART }
 
             every { skjemaSakMappingRepository.findBySkjemaIdIn(listOf(skjemaId)) } returns listOf(mapping)
@@ -78,7 +79,7 @@ internal class SkjemaSakMappingServiceTest {
         fun `en mapping med sak AVSLUTTET returnerer null`() {
             val skjemaId = UUID.randomUUID()
             val saksnummer = "MEL-300"
-            val mapping = SkjemaSakMapping(skjemaId = skjemaId, saksnummer = saksnummer)
+            val mapping = SkjemaSakMapping(skjemaId = skjemaId, fagsak = Fagsak.forTest { this.saksnummer = saksnummer })
             val fagsak = Fagsak.forTest { this.saksnummer = saksnummer; status = Saksstatuser.AVSLUTTET }
 
             every { skjemaSakMappingRepository.findBySkjemaIdIn(listOf(skjemaId)) } returns listOf(mapping)
@@ -93,8 +94,8 @@ internal class SkjemaSakMappingServiceTest {
             val skjemaId2 = UUID.randomUUID()
             val saksnummer1 = "MEL-400"
             val saksnummer2 = "MEL-500"
-            val mapping1 = SkjemaSakMapping(skjemaId = skjemaId1, saksnummer = saksnummer1)
-            val mapping2 = SkjemaSakMapping(skjemaId = skjemaId2, saksnummer = saksnummer2)
+            val mapping1 = SkjemaSakMapping(skjemaId = skjemaId1, fagsak = Fagsak.forTest { this.saksnummer = saksnummer1 })
+            val mapping2 = SkjemaSakMapping(skjemaId = skjemaId2, fagsak = Fagsak.forTest { this.saksnummer = saksnummer2 })
 
             val fagsakOpprettet = Fagsak.forTest { this.saksnummer = saksnummer1; status = Saksstatuser.OPPRETTET }
             val fagsakAvsluttet = Fagsak.forTest { this.saksnummer = saksnummer2; status = Saksstatuser.AVSLUTTET }
@@ -111,8 +112,8 @@ internal class SkjemaSakMappingServiceTest {
             val skjemaId2 = UUID.randomUUID()
             val saksnummer1 = "MEL-600"
             val saksnummer2 = "MEL-700"
-            val mapping1 = SkjemaSakMapping(skjemaId = skjemaId1, saksnummer = saksnummer1)
-            val mapping2 = SkjemaSakMapping(skjemaId = skjemaId2, saksnummer = saksnummer2)
+            val mapping1 = SkjemaSakMapping(skjemaId = skjemaId1, fagsak = Fagsak.forTest { this.saksnummer = saksnummer1 })
+            val mapping2 = SkjemaSakMapping(skjemaId = skjemaId2, fagsak = Fagsak.forTest { this.saksnummer = saksnummer2 })
 
             val fagsak1 = Fagsak.forTest { this.saksnummer = saksnummer1; status = Saksstatuser.OPPRETTET }
             val fagsak2 = Fagsak.forTest { this.saksnummer = saksnummer2; status = Saksstatuser.LOVVALG_AVKLART }
@@ -132,27 +133,29 @@ internal class SkjemaSakMappingServiceTest {
         @Test
         fun `lagrer mapping med alle felter`() {
             val skjemaId = UUID.randomUUID()
-            val saksnummer = "MEL-100"
+            val fagsak = Fagsak.forTest { saksnummer = "MEL-100" }
+            val mottatteOpplysninger = mockk<MottatteOpplysninger>()
             val mappingSlot = slot<SkjemaSakMapping>()
 
             every { skjemaSakMappingRepository.save(capture(mappingSlot)) } answers { mappingSlot.captured }
 
-            service.lagreMapping(skjemaId, saksnummer, mottatteOpplysningerId = 42L, originalData = "{}", innsendtDato = null)
+            service.lagreMapping(skjemaId, fagsak, mottatteOpplysninger = mottatteOpplysninger, originalData = "{}", innsendtDato = null)
 
             val saved = mappingSlot.captured
             saved.skjemaId shouldBe skjemaId
-            saved.saksnummer shouldBe saksnummer
-            saved.mottatteOpplysningerId shouldBe 42L
+            saved.saksnummer shouldBe "MEL-100"
+            saved.mottatteOpplysninger shouldBe mottatteOpplysninger
             saved.originalData shouldBe "{}"
         }
 
         @Test
         fun `duplikat PK fanges stille`() {
             val skjemaId = UUID.randomUUID()
+            val fagsak = Fagsak.forTest { saksnummer = "MEL-100" }
             every { skjemaSakMappingRepository.save(any()) } throws DataIntegrityViolationException("PK constraint")
 
             // Skal ikke kaste exception
-            service.lagreMapping(skjemaId, "MEL-100")
+            service.lagreMapping(skjemaId, fagsak)
         }
     }
 
@@ -162,7 +165,7 @@ internal class SkjemaSakMappingServiceTest {
         @Test
         fun `mapping finnes - oppdaterer journalpostId`() {
             val skjemaId = UUID.randomUUID()
-            val mapping = SkjemaSakMapping(skjemaId = skjemaId, saksnummer = "MEL-100")
+            val mapping = SkjemaSakMapping(skjemaId = skjemaId, fagsak = Fagsak.forTest { saksnummer = "MEL-100" })
 
             every { skjemaSakMappingRepository.findBySkjemaId(skjemaId) } returns Optional.of(mapping)
             every { skjemaSakMappingRepository.save(any()) } answers { firstArg() }

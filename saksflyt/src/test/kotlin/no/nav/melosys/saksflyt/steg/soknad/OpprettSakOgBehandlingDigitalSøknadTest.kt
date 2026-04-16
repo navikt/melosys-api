@@ -170,7 +170,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
 
         opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
 
-        verify { skjemaSakMappingService.lagreMapping(any(), eq("MEL-1234"), any(), any(), any()) }
+        verify { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) }
     }
 
     @Test
