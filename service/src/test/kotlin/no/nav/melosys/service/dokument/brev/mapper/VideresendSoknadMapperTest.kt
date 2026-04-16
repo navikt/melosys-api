@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldMatch
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
@@ -31,6 +32,19 @@ class VideresendSoknadMapperTest {
 
 
         resultat shouldMatch "(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\\n.*"
+    }
+
+    @Test
+    fun `fritekst med linjeskift konverteres til Metaforce-format`() {
+        val brevdata = lagBrevDataVideresend().apply {
+            fritekst = "Linje 1\nLinje 2"
+        }
+
+        val xml = instans.mapTilBrevXML(
+            lagFellesType(), lagNAVFelles(), Behandling.forTest { }, Behandlingsresultat.forTest { }, brevdata
+        )
+
+        xml shouldContain "Linje 1[_¶_]Linje 2"
     }
 
     private fun lagBrevDataVideresend() =

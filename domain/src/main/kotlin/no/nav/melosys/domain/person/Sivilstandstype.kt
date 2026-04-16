@@ -1,5 +1,7 @@
 package no.nav.melosys.domain.person
 
+import com.fasterxml.jackson.annotation.JsonValue
+
 enum class Sivilstandstype {
     ENKE_ELLER_ENKEMANN,
     GIFT,
@@ -14,6 +16,9 @@ enum class Sivilstandstype {
     UOPPGITT;
 
     fun erUdefinert(): Boolean = this == UDEFINERT
+
+    @JsonValue
+    fun jsonValue(): String = name
 
     override fun toString(): String = when (this) {
         ENKE_ELLER_ENKEMANN -> "Enke eller enkemann"

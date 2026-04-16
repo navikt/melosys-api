@@ -12,6 +12,10 @@
     <artifactId>melosys-statistikk</artifactId>
     <dependencies>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-jackson</artifactId>
+        </dependency>
+        <dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-service</artifactId>
         </dependency>

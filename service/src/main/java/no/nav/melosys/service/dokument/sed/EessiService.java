@@ -50,6 +50,11 @@ import static java.util.function.Predicate.not;
 public class EessiService {
     private static final Logger log = LoggerFactory.getLogger(EessiService.class);
 
+    public static final Set<Land_iso2> LAND_UTEN_SED_MOTTAK = Set.of(Land_iso2.FO, Land_iso2.GL);
+    private static final Set<String> LAND_UTEN_SED_MOTTAK_KODER = LAND_UTEN_SED_MOTTAK.stream()
+        .map(Land_iso2::getKode)
+        .collect(Collectors.toUnmodifiableSet());
+
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final JoarkFasade joarkFasade;
@@ -80,8 +85,8 @@ public class EessiService {
         final Collection<Vedlegg> vedlegg = new ArrayList<>();
         for (DokumentReferanse dokumentReferanse : dokumentReferanser) {
             Journalpost journalpost = findJournalPost(dokumentReferanse.getJournalpostID(), journalposter)
-                .orElseThrow(() -> new IkkeFunnetException(String.format("Finner ikke journalpost %s for sak %s",
-                    dokumentReferanse.getJournalpostID(), fagsak.getSaksnummer())));
+                .orElseThrow(() -> new IkkeFunnetException("Finner ikke journalpost %s for sak %s".formatted(
+                dokumentReferanse.getJournalpostID(), fagsak.getSaksnummer())));
             vedlegg.add(lagEessiVedlegg(journalpost, dokumentReferanse));
         }
         return vedlegg;
@@ -98,8 +103,8 @@ public class EessiService {
 
         return dokumentReferanser.stream().map(dokumentReferanse -> {
             Journalpost journalpost = findJournalPost(dokumentReferanse.getJournalpostID(), journalposter)
-                .orElseThrow(() -> new IkkeFunnetException(String.format("Finner ikke journalpost %s for sak %s",
-                    dokumentReferanse.getJournalpostID(), fagsak.getSaksnummer())));
+                .orElseThrow(() -> new IkkeFunnetException("Finner ikke journalpost %s for sak %s".formatted(
+                dokumentReferanse.getJournalpostID(), fagsak.getSaksnummer())));
 
             return new VedleggReferanse(
                 journalpost.getJournalpostId(),
@@ -141,6 +146,7 @@ public class EessiService {
                 sedData.setErFjernarbeidTWFA(erFjernarbeidTWFA);
             }
         }
+        filtrerIkkeEessiLandFraSed(sedData);
 
         log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
 
@@ -217,6 +223,19 @@ public class EessiService {
 
     private boolean landErEessiReady(String bucType, String landkode) {
         return !hentEessiMottakerinstitusjoner(bucType, Set.of(landkode)).isEmpty();
+    }
+
+    /**
+     * Muterer sedData in-place ved å fjerne arbeidsland og arbeidssteder for land som ikke kan motta SED (FO/GL).
+     * sedData sendes videre til eessiClient etter kallet.
+     */
+    private static void filtrerIkkeEessiLandFraSed(SedDataDto sedData) {
+        sedData.setArbeidsland(sedData.getArbeidsland().stream()
+            .filter(al -> !LAND_UTEN_SED_MOTTAK_KODER.contains(al.getLand()))
+            .collect(Collectors.toCollection(ArrayList::new)));
+        sedData.setArbeidssteder(sedData.getArbeidssteder().stream()
+            .filter(a -> a.getAdresse() == null || !LAND_UTEN_SED_MOTTAK_KODER.contains(a.getAdresse().getLand()))
+            .collect(Collectors.toCollection(ArrayList::new)));
     }
 
     public boolean landErEessiReady(String bucType, Collection<Land_iso2> landkoder) {
@@ -478,7 +497,7 @@ public class EessiService {
         try {
             eessiClient.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, SedType.X008);
         } catch (Exception e) {
-            log.warn(String.format("Forsøkte å sende SED %s for behandling %s, men det feilet i melosys-eessi.", SedType.X008, behandling.getId()), e);
+            log.warn("Forsøkte å sende SED %s for behandling %s, men det feilet i melosys-eessi.".formatted(SedType.X008, behandling.getId()), e);
         }
     }
 

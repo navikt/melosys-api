@@ -14,4 +14,19 @@ class BrevMapperUtilsTest {
         val xmlGregorianCalendar = BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone(april_1)
         xmlGregorianCalendar.day shouldBe 1
     }
+
+    @Test
+    fun `tilMetaforceLinjeskift erstatter newlines med pilcrow-markør`() {
+        BrevMapperUtils.tilMetaforceLinjeskift("Linje 1\nLinje 2\nLinje 3") shouldBe "Linje 1[_¶_]Linje 2[_¶_]Linje 3"
+    }
+
+    @Test
+    fun `tilMetaforceLinjeskift returnerer null for null-input`() {
+        BrevMapperUtils.tilMetaforceLinjeskift(null) shouldBe null
+    }
+
+    @Test
+    fun `tilMetaforceLinjeskift returnerer uendret tekst uten newlines`() {
+        BrevMapperUtils.tilMetaforceLinjeskift("Ingen linjeskift her") shouldBe "Ingen linjeskift her"
+    }
 }

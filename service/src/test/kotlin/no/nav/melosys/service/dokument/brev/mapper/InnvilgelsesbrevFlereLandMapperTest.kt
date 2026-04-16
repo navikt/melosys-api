@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldMatch
 import no.nav.dok.melosysbrev._000108.SakstypeKode
 import no.nav.melosys.domain.Behandling
@@ -63,6 +64,27 @@ class InnvilgelsesbrevFlereLandMapperTest {
         val resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse)
 
         resultat shouldMatch """(?s)<\?xml version="\d\.\d+" .*>\n.*"""
+    }
+
+    @Test
+    fun `fritekst med linjeskift konverteres til Metaforce-format`() {
+        val behandling = lagBehandling()
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            lovvalgsperiode {
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A
+                fom = LocalDate.now()
+                tom = LocalDate.now()
+                lovvalgsland = Land_iso2.AT
+                tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
+            }
+        }
+        val brevdata = lagBrevdataInnvilgelse(lagLovvalgsperiode()).apply {
+            fritekst = "Linje 1\nLinje 2"
+        }
+
+        val xml = instans.mapTilBrevXML(lagFellesType(), lagNAVFelles(), behandling, behandlingsresultat, brevdata)
+
+        xml shouldContain "Linje 1[_¶_]Linje 2"
     }
 
     private fun lagBrevdataInnvilgelse(lovvalgsperiode: no.nav.melosys.domain.Lovvalgsperiode): BrevDataInnvilgelseFlereLand {

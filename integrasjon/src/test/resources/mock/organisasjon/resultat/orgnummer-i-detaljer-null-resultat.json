@@ -8,19 +8,11 @@
         "navn": [
             {
                 "bruksperiode": {
-                    "fom": [
-                        2021,
-                        6,
-                        2
-                    ],
+                    "fom": "2021-06-02",
                     "tom": null
                 },
                 "gyldighetsperiode": {
-                    "fom": [
-                        2021,
-                        6,
-                        2
-                    ],
+                    "fom": "2021-06-02",
                     "tom": null
                 },
                 "navn": [

@@ -4,12 +4,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import no.nav.melosys.domain.Anmodningsperiode;
 
 public final class AnmodningsperiodePostDto {
 
     private List<AnmodningsperiodeSkrivDto> anmodningsperioder;
 
+    @JsonCreator
     public AnmodningsperiodePostDto(){
     }
 

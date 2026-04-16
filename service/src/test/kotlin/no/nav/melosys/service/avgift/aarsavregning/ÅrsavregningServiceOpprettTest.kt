@@ -2,6 +2,7 @@ package no.nav.melosys.service.avgift.aarsavregning
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -317,11 +318,12 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             årsavregningID shouldBe 51L
             år shouldBe 2024
 
-            årsavregningBehandlingsresultat.helseutgiftDekkesPeriode.shouldNotBeNull().run {
-                fomDato shouldBe LocalDate.of(2024, 1, 1)
-                tomDato shouldBe LocalDate.of(2024, 12, 31)
-                behandlingsresultat shouldBe årsavregningBehandlingsresultat
-                trygdeavgiftsperioder shouldHaveSize 0
+            årsavregningBehandlingsresultat.helseutgiftDekkesPerioder.shouldNotBeEmpty()
+            årsavregningBehandlingsresultat.helseutgiftDekkesPerioder.first().let { periode ->
+                periode.fomDato shouldBe LocalDate.of(2024, 1, 1)
+                periode.tomDato shouldBe LocalDate.of(2024, 12, 31)
+                periode.behandlingsresultat shouldBe årsavregningBehandlingsresultat
+                periode.trygdeavgiftsperioder shouldHaveSize 0
             }
         }
     }
@@ -390,11 +392,12 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             år shouldBe 2023
 
             // Verifiser at helseutgiftDekkesPeriode ble replikert til det nye behandlingsresultatet
-            årsavregningBehandlingsresultat.helseutgiftDekkesPeriode.shouldNotBeNull().run {
-                fomDato shouldBe LocalDate.of(2023, 1, 1)
-                tomDato shouldBe LocalDate.of(2023, 12, 31)
-                behandlingsresultat shouldBe årsavregningBehandlingsresultat
-                trygdeavgiftsperioder shouldHaveSize 0
+            årsavregningBehandlingsresultat.helseutgiftDekkesPerioder.shouldNotBeEmpty()
+            årsavregningBehandlingsresultat.helseutgiftDekkesPerioder.first().let { periode ->
+                periode.fomDato shouldBe LocalDate.of(2023, 1, 1)
+                periode.tomDato shouldBe LocalDate.of(2023, 12, 31)
+                periode.behandlingsresultat shouldBe årsavregningBehandlingsresultat
+                periode.trygdeavgiftsperioder shouldHaveSize 0
             }
 
             // Verifiser at sisteGjeldendeAvgiftspliktigPerioder inneholder HelseutgiftDekkesPeriodeForAvgift

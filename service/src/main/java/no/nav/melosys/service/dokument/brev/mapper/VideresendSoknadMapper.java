@@ -15,6 +15,8 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataVideresend;
 import org.xml.sax.SAXException;
 
+import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.tilMetaforceLinjeskift;
+
 public class VideresendSoknadMapper implements BrevDataMapper {
     private static final String XSD_LOCATION = "melosysbrev/melosys_000146.xsd";
 
@@ -27,7 +29,7 @@ public class VideresendSoknadMapper implements BrevDataMapper {
         StrukturertAdresse myndighetensAdresse = brevDataVideresend.getTrygdemyndighet().getAdresse();
         String utenlandskMyndighetsNavnOgAdresse = brevDataVideresend.getTrygdemyndighet().getNavn() + ", " + myndighetensAdresse.toString();
         fag.setTrygdemyndighet(utenlandskMyndighetsNavnOgAdresse);
-        fag.setFritekst(brevData.getFritekst());
+        fag.setFritekst(tilMetaforceLinjeskift(brevData.getFritekst()));
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);

@@ -3,7 +3,7 @@ package no.nav.melosys
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.TopicPartition
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties
 
 class KafkaOffsetChecker(
     private val kafkaProperties: KafkaProperties
@@ -12,7 +12,7 @@ class KafkaOffsetChecker(
     private fun getCommittedOffset(topic: String, groupId: String): Long {
         val topicPartition = TopicPartition(topic, 0)
         val consumer: KafkaConsumer<String, String> = KafkaConsumer<String, String>(
-            kafkaProperties.buildConsumerProperties(null) + mapOf(
+            kafkaProperties.buildConsumerProperties() + mapOf(
                 ConsumerConfig.GROUP_ID_CONFIG to groupId
             )
         ).apply { assign(listOf(topicPartition)) }

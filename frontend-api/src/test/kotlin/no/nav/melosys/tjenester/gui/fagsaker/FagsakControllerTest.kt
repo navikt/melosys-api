@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.fagsaker
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.getunleash.Unleash
 import io.mockk.every
@@ -49,7 +49,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
@@ -1080,6 +1080,7 @@ internal class FagsakControllerTest {
         private fun mockBehandlingsresultat(behandlingsresultat: Behandlingsresultat) {
             every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultat.hentId()) } returns behandlingsresultat
             every { behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(behandlingsresultat.hentId()) } returns behandlingsresultat
+            every { behandlingsresultatService.hentBehandlingsresultatMedHelseutgiftDekkesPerioder(behandlingsresultat.hentId()) } returns behandlingsresultat
         }
 
         private fun lagDefaultBehandlingResultat(

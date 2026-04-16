@@ -35,20 +35,20 @@ public record BrevbestillingRequest(
     String fritekstTittel,
     String fritekst,
     Distribusjonstype distribusjonstype,
-    boolean skalViseStandardTekstOmkontaktopplysninger,
+    Boolean skalViseStandardTekstOmkontaktopplysninger,
     String nyVurderingBakgrunn,
     List<SaksvedleggDto> saksvedlegg,
     StandardvedleggType standardvedleggType,
     List<FritekstvedleggDto> fritekstvedlegg,
     String dokumentTittel,
     String saksbehandlerNrToIdent,
-    boolean skalViseStandardTekstOmOpplysninger,
+    Boolean skalViseStandardTekstOmOpplysninger,
     String begrunnelseKode,
     String ytterligereInformasjon,
     LocalDate opphoerDato,
-    boolean erInnvilgelse,
-    boolean erEøsPensjonist,
-    boolean erEøsLovvalg) {
+    Boolean erInnvilgelse,
+    Boolean erEøsPensjonist,
+    Boolean erEøsLovvalg) {
 
     public BrevbestillingDto tilBrevbestillingDto(String bestillersId) {
         return new BrevbestillingDto(
@@ -113,14 +113,14 @@ public record BrevbestillingRequest(
             this.fritekstTittel(),
             this.fritekst(),
             this.distribusjonstype(),
-            this.skalViseStandardTekstOmkontaktopplysninger(),
+            Boolean.TRUE.equals(this.skalViseStandardTekstOmkontaktopplysninger()),
             this.nyVurderingBakgrunn(),
             konverterListeTil(this.saksvedlegg(), SaksvedleggDto::tilUtkast),
             this.standardvedleggType(),
             konverterListeTil(this.fritekstvedlegg(), FritekstvedleggDto::tilUtkast),
             this.dokumentTittel(),
             this.saksbehandlerNrToIdent(),
-            this.skalViseStandardTekstOmOpplysninger()
+            Boolean.TRUE.equals(this.skalViseStandardTekstOmOpplysninger())
         );
     }
 

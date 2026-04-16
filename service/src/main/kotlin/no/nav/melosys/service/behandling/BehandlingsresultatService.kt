@@ -29,7 +29,7 @@ class BehandlingsresultatService(
         behandlingsresultatRepository.findById(behandlingID)
             .orElseThrowIkkeFunnetException(behandlingID).apply {
                 clearMedlemskapsperioder()
-                clearTrygdevgiftPåHelseutgiftDekkesPeriode()
+                clearTrygdeavgiftPåHelseutgiftDekkesPerioder()
                 if (!erEøsPensjonist()) avklartefakta.clear()
                 clearLovvalgsperioder()
                 vilkaarsresultater.clear()
@@ -73,6 +73,10 @@ class BehandlingsresultatService(
 
     fun hentBehandlingsresultatMedAvklartefakta(behandlingsid: Long): Behandlingsresultat =
         behandlingsresultatRepository.findWithAvklartefaktaById(behandlingsid)
+            .orElseThrowIkkeFunnetException(behandlingsid)
+
+    fun hentBehandlingsresultatMedHelseutgiftDekkesPerioder(behandlingsid: Long): Behandlingsresultat =
+        behandlingsresultatRepository.findWithHelseutgiftDekkesPerioderById(behandlingsid)
             .orElseThrowIkkeFunnetException(behandlingsid)
 
     fun lagre(resultat: Behandlingsresultat): Behandlingsresultat = behandlingsresultatRepository.save(resultat)
@@ -185,7 +189,6 @@ class BehandlingsresultatService(
         when (utfallregistreringunntak) {
             Utfallregistreringunntak.GODKJENT, Utfallregistreringunntak.DELVIS_GODKJENT -> Behandlingsresultattyper.REGISTRERT_UNNTAK
             Utfallregistreringunntak.IKKE_GODKJENT -> Behandlingsresultattyper.FERDIGBEHANDLET
-            else -> Behandlingsresultattyper.IKKE_FASTSATT
         }
 
     private fun <T> Optional<T>.orElseThrowIkkeFunnetException(behandlingsid: Long): T =

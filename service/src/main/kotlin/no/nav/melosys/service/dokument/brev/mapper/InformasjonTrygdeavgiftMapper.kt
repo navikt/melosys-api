@@ -34,20 +34,31 @@ class InformasjonTrygdeavgiftMapper(
     internal fun mapInformasjonTrygdeavgift(brevbestilling: DokgenBrevbestilling): InformasjonTrygdeavgift {
         val behandlingId = brevbestilling.behandlingNonNull().id
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandlingId)
-        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandlingId)
+        val helseutgiftDekkesPerioder = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(behandlingId)
 
-        if (helseutgiftDekkesPeriode == null) {
-            throw IkkeFunnetException("Finner ingen helseutgift-periode med behandlingID: $behandlingId")
+        if (helseutgiftDekkesPerioder.isEmpty()) {
+            throw IkkeFunnetException("Finner ingen helseutgift-perioder med behandlingID: $behandlingId")
         }
+
+        val distinctLandkoder = helseutgiftDekkesPerioder.map { it.bostedLandkode }.distinct()
+        if (distinctLandkoder.size > 1) {
+            throw IllegalStateException(
+                "Forventer at alle helseutgift-perioder har samme landkode, men fant: ${distinctLandkoder.map { it.kode }}"
+            )
+        }
+
+        val fomDato = helseutgiftDekkesPerioder.minOf { it.fomDato }
+        val tomDato = helseutgiftDekkesPerioder.maxOf { it.tomDato }
+        val førstePeriode = helseutgiftDekkesPerioder.first()
 
         return InformasjonTrygdeavgift(
             brevbestilling = brevbestilling,
-            fomDato = helseutgiftDekkesPeriode.fomDato,
-            tomDato = helseutgiftDekkesPeriode.tomDato,
-            bostedLand = helseutgiftDekkesPeriode.bostedLandkode.beskrivelse,
+            fomDato = fomDato,
+            tomDato = tomDato,
+            bostedLand = førstePeriode.bostedLandkode.beskrivelse,
             begrunnelseFritekst = behandlingsresultat.begrunnelseFritekst,
             trygdeavgiftMottaker = utledTrygdeavgiftsmottaker(behandlingsresultat),
-            erNordisk = NordiskeLand.erNordiskLand(helseutgiftDekkesPeriode.bostedLandkode),
+            erNordisk = NordiskeLand.erNordiskLand(førstePeriode.bostedLandkode),
             betalingsvalg = hentBetalingsvalg(behandlingsresultat.hentBehandling()),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.hentBehandling()),
             avgiftsperioder = mapAvgiftsperioderPensjonist(behandlingsresultat),
@@ -57,6 +68,9 @@ class InformasjonTrygdeavgiftMapper(
                 } ?: false
             } else {
                 false
+            },
+            erSkattemessigEmigrert = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.any {
+                it.grunnlagSkatteforholdTilNorge?.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG
             }
         )
     }
@@ -71,13 +85,17 @@ class InformasjonTrygdeavgiftMapper(
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodeEøsPensjonist> {
         val perioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toSet()
 
-        if (perioder.all { it.trygdeavgiftsbeløpMd.verdi == BigDecimal.ZERO && it.trygdesats == BigDecimal.ZERO }) {
+        if (perioder.isEmpty()) {
             return emptyList()
         }
 
         val inneværendeÅr = LocalDate.now().year
         val gruppertePerioder = perioder.groupBy { it.periodeTil.year }
-        val valgtÅr = velgRelevantÅr(gruppertePerioder.keys, inneværendeÅr)
+        val årMedAvgift = gruppertePerioder.filterValues { årsperioder ->
+            årsperioder.any { !(it.trygdeavgiftsbeløpMd.verdi == BigDecimal.ZERO && it.trygdesats == BigDecimal.ZERO) }
+        }.keys
+        val valgtÅr = velgRelevantÅr(årMedAvgift, inneværendeÅr)
+            ?: return emptyList()
 
         return gruppertePerioder[valgtÅr]
             ?.map {
@@ -95,11 +113,12 @@ class InformasjonTrygdeavgiftMapper(
             ?: emptyList()
     }
 
-    private fun velgRelevantÅr(tilgjengeligeÅr: Set<Int>, inneværendeÅr: Int): Int {
+    private fun velgRelevantÅr(tilgjengeligeÅr: Set<Int>, inneværendeÅr: Int): Int? {
+        if (tilgjengeligeÅr.isEmpty()) return null
         return when {
             inneværendeÅr in tilgjengeligeÅr -> inneværendeÅr
-            tilgjengeligeÅr.all { it < inneværendeÅr } -> tilgjengeligeÅr.maxOrNull() ?: inneværendeÅr
-            else -> tilgjengeligeÅr.minOrNull() ?: inneværendeÅr
+            tilgjengeligeÅr.all { it < inneværendeÅr } -> tilgjengeligeÅr.maxOrNull()
+            else -> tilgjengeligeÅr.minOrNull()
         }
     }
 

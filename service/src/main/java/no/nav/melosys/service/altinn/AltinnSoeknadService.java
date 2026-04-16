@@ -1,7 +1,7 @@
 package no.nav.melosys.service.altinn;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.dataformat.xml.XmlMapper;
 import com.google.common.collect.MoreCollectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -91,7 +91,7 @@ public class AltinnSoeknadService {
         String søknadXml;
         try {
             søknadXml = new XmlMapper().writeValueAsString(søknad);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new TekniskException(e);
         }
         return søknadXml;

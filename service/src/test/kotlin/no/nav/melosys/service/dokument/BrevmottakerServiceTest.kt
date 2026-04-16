@@ -155,7 +155,7 @@ class BrevmottakerServiceTest {
             medVirksomhet { orgnr = "orgnr" }
         }
         val behandling = lagBehandlingMed(fagsak)
-        val virksomhet = fagsak.hentVirksomhet()!!
+        val virksomhet = fagsak.hentVirksomhet()
 
         val mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(VIRKSOMHET), behandling)
 
@@ -328,6 +328,33 @@ class BrevmottakerServiceTest {
         )
 
         myndigheter.map { it.institusjonID } shouldContainExactly listOf("CZ:SZUC10416")
+    }
+
+    @Test
+    fun `avklarMottakere med trygdemyndighetLand satt - returnerer kun mottaker for spesifikt land`() {
+        val behandling = Behandling.forTest { id = 123L }
+        val foMyndighet = UtenlandskMyndighet().apply {
+            landkode = Land_iso2.FO
+            institusjonskode = "FO:ALMANN"
+        }
+        val glMyndighet = UtenlandskMyndighet().apply {
+            landkode = Land_iso2.GL
+            institusjonskode = "GL:FAMDIRGL"
+        }
+        val foMottaker = Mottaker.medRolle(UTENLANDSK_TRYGDEMYNDIGHET).apply { institusjonID = "FO:ALMANN" }
+        val glMottaker = Mottaker.medRolle(UTENLANDSK_TRYGDEMYNDIGHET).apply { institusjonID = "GL:FAMDIRGL" }
+        every { utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling) } returns
+                mapOf(foMyndighet to foMottaker, glMyndighet to glMottaker)
+
+        val mottakerMedFO = Mottaker.medRolle(UTENLANDSK_TRYGDEMYNDIGHET).apply { trygdemyndighetLand = Land_iso2.FO }
+        val resultat = brevmottakerService.avklarMottakere(
+            Produserbaredokumenter.ATTEST_A1,
+            mottakerMedFO,
+            behandling
+        )
+
+        resultat shouldHaveSize 1
+        resultat.first().institusjonID shouldBe "FO:ALMANN"
     }
 
     @Test

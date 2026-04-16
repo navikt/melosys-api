@@ -1,9 +1,11 @@
 package no.nav.melosys.domain.brev.utkast
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import tools.jackson.core.JacksonException
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.KotlinModule
+import tools.jackson.module.kotlin.readValue
 import jakarta.persistence.*
 import no.nav.melosys.exception.TekniskException
 import java.time.LocalDateTime
@@ -29,20 +31,23 @@ class UtkastBrev(
 
     fun getBrevbestillingUtkast(): BrevbestillingUtkast = try {
         objectMapper.readValue<BrevbestillingUtkast>(brevbestillingUtkast)
-    } catch (e: JsonProcessingException) {
+    } catch (e: JacksonException) {
         throw TekniskException("Klarte ikke lese brevbestillingUtkast med ID $id", e)
     }
 
     fun setBrevbestillingUtkast(brevBestillingUtkast: BrevbestillingUtkast?) {
         try {
             this.brevbestillingUtkast = objectMapper.writeValueAsString(brevBestillingUtkast)
-        } catch (e: JsonProcessingException) {
+        } catch (e: JacksonException) {
             throw TekniskException("Klarte ikke skrive brevbestillingUtkast med ID $id", e)
         }
     }
 
     companion object {
-        val objectMapper: ObjectMapper = jacksonObjectMapper()
+        val objectMapper: ObjectMapper = JsonMapper.builder()
+            .addModule(KotlinModule.Builder().build())
+            .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+            .build()
     }
 
     class Builder {

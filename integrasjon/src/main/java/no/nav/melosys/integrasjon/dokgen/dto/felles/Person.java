@@ -3,8 +3,8 @@ package no.nav.melosys.integrasjon.dokgen.dto.felles;
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import tools.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.ext.javatime.ser.LocalDateSerializer;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 

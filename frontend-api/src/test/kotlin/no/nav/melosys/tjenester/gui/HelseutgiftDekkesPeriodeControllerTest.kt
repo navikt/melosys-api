@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import no.nav.melosys.domain.Behandlingsresultat
@@ -17,7 +17,7 @@ import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
@@ -46,14 +46,14 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
     fun `skal finne helseutgift dekkes periode`() {
         val helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode()
         every { aksesskontroll.autoriser(any()) } returns Unit
-        every { helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(any()) } returns helseutgiftDekkesPeriode
+        every { helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(any()) } returns listOf(helseutgiftDekkesPeriode)
 
         mockMvc.perform(
             get(BASE_URL, 1L)
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk)
-            .andExpectResponseBody(lagHelseutgiftDekkesPeriodeDto(helseutgiftDekkesPeriode))
+            .andExpectResponseBody(listOf(lagHelseutgiftDekkesPeriodeDto(helseutgiftDekkesPeriode)))
     }
 
     @Test
@@ -96,7 +96,7 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
         every { aksesskontroll.autoriserSkriv(any()) } returns Unit
 
         mockMvc.perform(
-            put(BASE_URL, 1L)
+            put("$BASE_URL/{periodeId}", 1L, 99L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(lagHelseutgiftDekkesPeriodeDtoMedFeilBostedlandkode()))
         )
@@ -114,6 +114,7 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
         every {
             helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(
                 any(),
+                any(),
                 helseutgiftDekkesPeriodeDto.fomDato,
                 helseutgiftDekkesPeriodeDto.tomDato,
                 Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode)
@@ -121,7 +122,7 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
         } returns ny
 
         mockMvc.perform(
-            put(BASE_URL, 1L)
+            put("$BASE_URL/{periodeId}", 1L, 99L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(helseutgiftDekkesPeriodeDto))
         )

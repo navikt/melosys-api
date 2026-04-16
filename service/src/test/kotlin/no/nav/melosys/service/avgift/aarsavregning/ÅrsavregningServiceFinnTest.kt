@@ -388,6 +388,87 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
     }
 
     @Test
+    fun `finnÅrsavregning filtrerer sisteGjeldendeAvgiftspliktigPerioder basert på vedtaksDato`() {
+        // Tidligere behandlingsresultat 1 - vedtatt 2023-03-01 (FØR årsavregningens vedtaksDato)
+        val tidligBehandlingsresultat = lagTidligereBehandlingsresultat {
+            id = 10L
+            behandling {
+                id = 10L
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak {
+                    saksnummer = "123456"
+                    type = Sakstyper.FTRL
+                }
+            }
+            registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            vedtakMetadata {
+                vedtaksdato = LocalDate.of(2023, 3, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            medlemskapsperiode("2023-01-01", "2023-06-30")
+        }
+        val fagsak = tidligBehandlingsresultat.hentBehandling().fagsak
+
+        // Tidligere behandlingsresultat 2 - vedtatt 2023-09-01 (ETTER årsavregningens vedtaksDato)
+        val senBehandlingsresultat = lagTidligereBehandlingsresultat {
+            id = 20L
+            behandling {
+                id = 20L
+                status = Behandlingsstatus.AVSLUTTET
+                this.fagsak = fagsak
+            }
+            registrertDato = LocalDate.of(2023, 8, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            vedtakMetadata {
+                vedtaksdato = LocalDate.of(2023, 9, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            medlemskapsperiode("2023-01-01", "2023-12-31")
+        }
+
+        // Årsavregning med vedtaksDato 2023-07-01 - mellom de to behandlingsresultatene
+        val årsavregningBehandlingsresultat = Behandlingsresultat.forTest {
+            id = 30L
+            behandling {
+                id = 30L
+                type = Behandlingstyper.ÅRSAVREGNING
+                this.fagsak = fagsak
+            }
+            vedtakMetadata {
+                vedtaksdato = LocalDate.of(2023, 7, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+                vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
+            }
+            type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
+            registrertDato = LocalDate.of(2023, 6, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            årsavregning {
+                id = 200
+                aar = 2023
+            }
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(10L) } returns tidligBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(20L) } returns senBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(30L) } returns årsavregningBehandlingsresultat
+        every { fagsakService.hentFagsak("123456") } returns fagsak
+
+        val result = årsavregningService.finnÅrsavregningForBehandling(30L)
+
+        result.shouldNotBeNull().run {
+            årsavregningID shouldBe 200
+            år shouldBe 2023
+
+            // Skal kun inneholde perioder fra tidligBehandlingsresultat (vedtaksdato 2023-03-01 < 2023-07-01)
+            // senBehandlingsresultat (vedtaksdato 2023-09-01) skal filtreres bort
+            sisteGjeldendeAvgiftspliktigPerioder.shouldHaveSize(1)
+                .single() shouldBe MedlemskapsperiodeForAvgift(
+                fom = LocalDate.of(2023, 1, 1),
+                tom = LocalDate.of(2023, 6, 30),
+                dekning = Trygdedekninger.FULL_DEKNING_FTRL,
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
+                medlemskapstyper = Medlemskapstyper.FRIVILLIG,
+                InnvilgelsesResultat.INNVILGET
+            )
+        }
+    }
+
+    @Test
     fun `returnerer null når ingen årsavregning finnes på behandling`() {
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
