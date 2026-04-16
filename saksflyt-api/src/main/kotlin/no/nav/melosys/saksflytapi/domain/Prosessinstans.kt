@@ -222,6 +222,7 @@ class Prosessinstans(
             .addMixIn(UtsendtArbeidstakerSkjemaData::class.java, UtsendtArbeidstakerSkjemaDataMixin::class.java)
             .addMixIn(UtsendtArbeidstakerSkjemaDto::class.java, UtsendtArbeidstakerSkjemaDtoMixin::class.java)
             .addMixIn(UtsendtArbeidstakerSkjemaM2MDto::class.java, UtsendtArbeidstakerSkjemaM2MDtoMixin::class.java)
+            .disable(tools.jackson.databind.DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
             .build()
 
         @JvmStatic
