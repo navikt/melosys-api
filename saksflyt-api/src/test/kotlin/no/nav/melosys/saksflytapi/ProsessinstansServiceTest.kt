@@ -812,7 +812,7 @@ class ProsessinstansServiceTest {
         lagretInstans.run {
             type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
             låsReferanse shouldBe skjemaId.toString()
-            hentData<SkjemaMottattMelding>(ProsessDataKey.DIGITAL_SØKNAD_MOTTATT_MELDING).skjemaId shouldBe skjemaId
+            hentData<SkjemaMottattMelding>(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID).skjemaId shouldBe skjemaId
         }
     }
 
@@ -842,7 +842,7 @@ class ProsessinstansServiceTest {
         lagretInstans.run {
             type shouldBe ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
             låsReferanse shouldBe skjemaId.toString()
-            hentData<SkjemaMottattMelding>(ProsessDataKey.DIGITAL_SØKNAD_MOTTATT_MELDING).skjemaId shouldBe skjemaId
+            hentData<SkjemaMottattMelding>(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID).skjemaId shouldBe skjemaId
             getData(ProsessDataKey.SAKSNUMMER) shouldBe saksnummer
         }
     }

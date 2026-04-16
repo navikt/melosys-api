@@ -34,7 +34,7 @@ internal class HentDigitalSøknadsdataTest {
         hentDigitalSøknadsdata = HentDigitalSøknadsdata(melosysSkjemaApiClient)
 
         prosessinstans = Prosessinstans.forTest {
-            medData(ProsessDataKey.DIGITAL_SØKNAD_MOTTATT_MELDING, SkjemaMottattMelding(skjemaId))
+            medData(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID, SkjemaMottattMelding(skjemaId))
         }
     }
 

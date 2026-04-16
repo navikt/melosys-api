@@ -56,7 +56,7 @@ class OpprettSakOgBehandlingDigitalSøknad(
         val fnr = skjema.fnr
         val referanseId = søknadsdata.referanseId
 
-        log.info { "Oppretter fagsak og behandling for digital søknad, referanseId=$referanseId" }
+        log.info { "Oppretter fagsak og behandling for digital søknad,  referanseId=$referanseId, skjemaId=${skjema.id}" }
 
         val aktørId = persondataFasade.hentAktørIdForIdent(fnr)
 
@@ -70,10 +70,12 @@ class OpprettSakOgBehandlingDigitalSøknad(
             .medMottaksdato(søknadsdata.innsendtTidspunkt.toLocalDate())
             .build()
 
+        //TODO: Legg til fullmakt, kommer i egen oppgave.
+
         val fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest)
         val behandling = fagsak.hentAktivBehandling()
 
-        log.info { "Opprettet fagsak ${fagsak.saksnummer} med behandling ${behandling.id} for digital søknad referanseId=$referanseId" }
+        log.info { "Opprettet fagsak ${fagsak.saksnummer} med behandling ${behandling.id} for digital søknad" }
 
         // Sett AVVENT_DOK_PART hvis kun arbeidsgiver-del og ingen koblet motpart
         if (metadata.skjemadel == Skjemadel.ARBEIDSGIVERS_DEL && søknadsdata.kobletSkjema == null) {
@@ -87,6 +89,7 @@ class OpprettSakOgBehandlingDigitalSøknad(
             behandling.id, null, søknad, referanseId
         )
 
+        //TODO: lag privat metode for lagring av mapping
         val originalData = jsonMapper.writeValueAsString(søknadsdata)
         val innsendtDato = søknadsdata.innsendtTidspunkt.atZone(OSLO_ZONE).toInstant()
         skjemaSakMappingService.lagreMapping(

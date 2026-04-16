@@ -6,8 +6,9 @@ import java.time.Instant
 import java.util.UUID
 
 @Entity
-@Table(name = "skjema_sak_mapping")
+@Table(name = "skjema_sak_mapping") //TODO: rename?
 class SkjemaSakMapping(
+
     @Id
     @Column(name = "skjema_id", nullable = false)
     val skjemaId: UUID,
@@ -18,16 +19,16 @@ class SkjemaSakMapping(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mottatte_opplysninger_id")
-    var mottatteOpplysninger: MottatteOpplysninger? = null,
+    var mottatteOpplysninger: MottatteOpplysninger,
 
     @Column(name = "original_data", columnDefinition = "CLOB")
-    var originalData: String? = null,
+    var originalData: String, //TODO: Nødvendig med nullable?
 
     @Column(name = "journalpost_id")
-    var journalpostId: String? = null,
+    var journalpostId: String? = null, //TODO: Nødvendig med nullable?
 
     @Column(name = "innsendt_dato")
-    var innsendtDato: Instant? = null,
+    var innsendtDato: Instant? = null, //TODO: Hvorfor brukes det ikke?
 
     @Column(name = "opprettet_dato", nullable = false, updatable = false)
     val opprettetDato: Instant = Instant.now()

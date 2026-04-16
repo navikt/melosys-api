@@ -28,8 +28,8 @@ class SkjemaApiTypeMixinsTest {
         val skjemaId = UUID.randomUUID()
         val melding = SkjemaMottattMelding(skjemaId)
 
-        prosessinstans.setData(ProsessDataKey.DIGITAL_SØKNAD_MOTTATT_MELDING, melding)
-        val hentet = prosessinstans.getData(ProsessDataKey.DIGITAL_SØKNAD_MOTTATT_MELDING, SkjemaMottattMelding::class.java)
+        prosessinstans.setData(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID, melding)
+        val hentet = prosessinstans.getData(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID, SkjemaMottattMelding::class.java)
 
         hentet?.skjemaId shouldBe skjemaId
     }
@@ -46,8 +46,8 @@ class SkjemaApiTypeMixinsTest {
             erstatterSkjemaId = null,
         )
 
-        prosessinstans.setData(ProsessDataKey.DIGITAL_SØKNAD_MOTTATT_MELDING, metadata)
-        val hentet = prosessinstans.getData(ProsessDataKey.DIGITAL_SØKNAD_MOTTATT_MELDING, DegSelvMetadata::class.java)
+        prosessinstans.setData(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID, metadata)
+        val hentet = prosessinstans.getData(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID, DegSelvMetadata::class.java)
 
         hentet.shouldBeInstanceOf<DegSelvMetadata>()
         hentet.skjemadel shouldBe Skjemadel.ARBEIDSTAKERS_DEL

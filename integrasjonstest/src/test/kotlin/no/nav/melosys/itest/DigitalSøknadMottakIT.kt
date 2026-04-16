@@ -102,7 +102,7 @@ class DigitalSøknadMottakIT(
         prosessinstans.hendelser.shouldHaveSize(0)
 
         // Verify data stored by consumer (SØKNAD_MOTTATT_MELDING)
-        val mottattMelding = prosessinstans.hentData<SkjemaMottattMelding>(ProsessDataKey.DIGITAL_SØKNAD_MOTTATT_MELDING)
+        val mottattMelding = prosessinstans.hentData<SkjemaMottattMelding>(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID)
         mottattMelding shouldBe melding
 
         // Verify data stored by step 1 (SØKNADSDATA)

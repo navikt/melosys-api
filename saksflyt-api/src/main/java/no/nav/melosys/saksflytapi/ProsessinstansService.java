@@ -601,7 +601,7 @@ public class ProsessinstansService {
             .medLåsReferanse(låsReferanse)
             .build();
 
-        prosessinstans.setData(DIGITAL_SØKNAD_MOTTATT_MELDING, melding);
+        prosessinstans.setData(DIGITAL_SØKNAD_SKJEMA_ID, melding.getSkjemaId());
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
 
         lagre(prosessinstans);

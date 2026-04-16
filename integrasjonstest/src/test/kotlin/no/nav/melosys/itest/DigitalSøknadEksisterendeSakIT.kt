@@ -93,7 +93,7 @@ class DigitalSøknadEksisterendeSakIT(
         andreProsessinstans.hendelser.shouldHaveSize(0)
 
         // Verifiser at meldingdata ble lagret
-        val mottattMelding = andreProsessinstans.hentData<SkjemaMottattMelding>(ProsessDataKey.DIGITAL_SØKNAD_MOTTATT_MELDING)
+        val mottattMelding = andreProsessinstans.hentData<SkjemaMottattMelding>(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID)
         mottattMelding.skjemaId shouldBe andreSkjemaId
 
         // Verifiser søknadsdata ble hentet og lagret

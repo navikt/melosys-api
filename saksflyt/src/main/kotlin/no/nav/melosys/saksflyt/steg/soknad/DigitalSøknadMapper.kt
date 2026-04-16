@@ -26,6 +26,7 @@ object DigitalSøknadMapper {
         return Soeknad().apply {
             this.periode = periode
             this.soeknadsland = land
+            //TODO: Sett flere felter - MELOSYS-8016
         }
     }
 

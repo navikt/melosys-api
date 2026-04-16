@@ -20,6 +20,8 @@ class SkjemaSakMappingService(
     private val skjemaSakMappingRepository: SkjemaSakMappingRepository,
     private val fagsakRepository: FagsakRepository
 ) {
+    //TODO: Er det faktisk mulig å opprette ny vurdering med statusene lovvalg_avklart?
+    // Og er det flere andre statuser der man kan lage ny vurdering utover lovvalg_avklart?
     private val gyldigeSaksstatuser = setOf(Saksstatuser.OPPRETTET, Saksstatuser.LOVVALG_AVKLART)
 
     /**
@@ -29,7 +31,7 @@ class SkjemaSakMappingService(
      * Kaster exception hvis flere åpne saker finnes — det indikerer datainkonsistens.
      */
     @Transactional(readOnly = true)
-    fun finnSaksnummerForGyldigSak(skjemaIder: Collection<UUID>): String? {
+    fun finnGyldigSaksnummerForSkjemaIder(skjemaIder: Collection<UUID>): String? {
         if (skjemaIder.isEmpty()) return null
 
         val mappinger = skjemaSakMappingRepository.findBySkjemaIdIn(skjemaIder)
@@ -45,10 +47,12 @@ class SkjemaSakMappingService(
                 log.info { "Fant ${mappinger.size} mappinger men ingen sak med gyldig status" }
                 null
             }
+
             gyldige.size == 1 -> {
                 log.info { "Fant gyldig sak ${gyldige.first()} for skjemaIder" }
                 gyldige.first()
             }
+
             else -> throw IllegalStateException(
                 "Fant ${gyldige.size} åpne saker (${gyldige.joinToString()}) for relaterte skjemaIder — forventet maks 1"
             )
@@ -59,24 +63,20 @@ class SkjemaSakMappingService(
     fun lagreMapping(
         skjemaId: UUID,
         fagsak: Fagsak,
-        mottatteOpplysninger: MottatteOpplysninger? = null,
-        originalData: String? = null,
-        innsendtDato: Instant? = null
+        mottatteOpplysninger: MottatteOpplysninger,
+        originalData: String,
+        innsendtDato: Instant
     ) {
-        try {
-            skjemaSakMappingRepository.save(
-                SkjemaSakMapping(
-                    skjemaId = skjemaId,
-                    fagsak = fagsak,
-                    mottatteOpplysninger = mottatteOpplysninger,
-                    originalData = originalData,
-                    innsendtDato = innsendtDato
-                )
+        skjemaSakMappingRepository.save(
+            SkjemaSakMapping(
+                skjemaId = skjemaId,
+                fagsak = fagsak,
+                mottatteOpplysninger = mottatteOpplysninger,
+                originalData = originalData,
+                innsendtDato = innsendtDato
             )
-            log.info { "Lagret mapping: skjemaId=$skjemaId → saksnummer=${fagsak.saksnummer}" }
-        } catch (_: DataIntegrityViolationException) {
-            log.info { "Mapping for skjemaId=$skjemaId eksisterer allerede (PK-constraint)" }
-        }
+        )
+        log.info { "Lagret mapping: skjemaId=$skjemaId → saksnummer=${fagsak.saksnummer}" }
     }
 
     @Transactional

@@ -3,12 +3,12 @@ package no.nav.melosys.saksflyt.steg.soknad
 import mu.KotlinLogging
 import no.nav.melosys.integrasjon.melosysskjema.MelosysSkjemaApiClient
 import no.nav.melosys.saksflyt.steg.StegBehandler
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey.DIGITAL_SØKNAD_MOTTATT_MELDING
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey.DIGITAL_SØKNADSDATA
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import org.springframework.stereotype.Component
+import java.util.UUID
 
 private val log = KotlinLogging.logger { }
 
@@ -17,6 +17,9 @@ private val log = KotlinLogging.logger { }
  *
  * Henter skjemaId fra Kafka-meldingen og bruker MelosysSkjemaApiClient til å hente
  * komplett søknadsdata (UtsendtArbeidstakerSkjemaM2MDto) for videre behandling.
+ *
+ * TODO: Dette steget bør gjenbrukes når vi har flere skjematyper. Vi bør endre klient/skjema-api endepunkt for å SkjemaDto istf UtsendtArbeidstakerSKjemaDto, med type.
+ *
  */
 @Component
 class HentDigitalSøknadsdata(
@@ -26,8 +29,7 @@ class HentDigitalSøknadsdata(
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.HENT_DIGITAL_SØKNADSDATA
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val søknadMottattMelding = prosessinstans.hentData<SkjemaMottattMelding>(DIGITAL_SØKNAD_MOTTATT_MELDING)
-        val skjemaId = søknadMottattMelding.skjemaId
+        val skjemaId = prosessinstans.hentData<UUID>(DIGITAL_SØKNAD_SKJEMA_ID)
 
         log.info { "Henter søknadsdata for skjemaId $skjemaId" }
 

@@ -45,7 +45,7 @@ class DigitalSøknadMottattConsumerTest {
         val consumerRecord = ConsumerRecord<String, SkjemaMottattMelding>("topic", 0, 0, "key", melding)
 
         every { unleash.isEnabled(ToggleName.MELOSYS_SKJEMA_MOTTATT_CONSUMER) } returns true
-        every { skjemaSakMappingService.finnSaksnummerForGyldigSak(any()) } returns null
+        every { skjemaSakMappingService.finnGyldigSaksnummerForSkjemaIder(any()) } returns null
         every { prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(melding) } just Runs
 
         digitalSøknadMottattConsumer.mottaSkjemaMelding(consumerRecord, emptyMap())
@@ -61,7 +61,7 @@ class DigitalSøknadMottattConsumerTest {
         val consumerRecord = ConsumerRecord<String, SkjemaMottattMelding>("topic", 0, 0, "key", melding)
 
         every { unleash.isEnabled(ToggleName.MELOSYS_SKJEMA_MOTTATT_CONSUMER) } returns true
-        every { skjemaSakMappingService.finnSaksnummerForGyldigSak(any()) } returns "MEL-1"
+        every { skjemaSakMappingService.finnGyldigSaksnummerForSkjemaIder(any()) } returns "MEL-1"
         every { prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding, "MEL-1") } just Runs
 
         digitalSøknadMottattConsumer.mottaSkjemaMelding(consumerRecord, emptyMap())
@@ -79,7 +79,7 @@ class DigitalSøknadMottattConsumerTest {
         val alleIderSlot = slot<Collection<UUID>>()
 
         every { unleash.isEnabled(ToggleName.MELOSYS_SKJEMA_MOTTATT_CONSUMER) } returns true
-        every { skjemaSakMappingService.finnSaksnummerForGyldigSak(capture(alleIderSlot)) } returns "MEL-99"
+        every { skjemaSakMappingService.finnGyldigSaksnummerForSkjemaIder(capture(alleIderSlot)) } returns "MEL-99"
         every { prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding, "MEL-99") } just Runs
 
         digitalSøknadMottattConsumer.mottaSkjemaMelding(consumerRecord, emptyMap())

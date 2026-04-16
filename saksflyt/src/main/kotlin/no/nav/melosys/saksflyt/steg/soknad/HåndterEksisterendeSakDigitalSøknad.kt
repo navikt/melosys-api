@@ -51,7 +51,7 @@ private val SØKNADSBEHANDLING_TYPER = setOf(
  * 5. Sett behandling på prosessinstansen
  */
 @Component
-class HåndterEksisterendeSakSøknad(
+class HåndterEksisterendeSakDigitalSøknad(
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
     private val behandlingsresultatService: BehandlingsresultatService,
@@ -79,6 +79,7 @@ class HåndterEksisterendeSakSøknad(
             opprettNyVurdering(fagsak, søknadsdata)
         }
 
+        //TODO: lag privat metode for lagring av mapping
         val originalData = jsonMapper.writeValueAsString(søknadsdata)
         val innsendtDato = søknadsdata.innsendtTidspunkt.atZone(OSLO_ZONE).toInstant()
         skjemaSakMappingService.lagreMapping(
@@ -100,7 +101,7 @@ class HåndterEksisterendeSakSøknad(
     private fun håndterÅpenBehandling(
         behandling: Behandling,
         søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
-    ): Pair<Behandling, MottatteOpplysninger?> {
+    ): Pair<Behandling, MottatteOpplysninger> {
         val skalResetteStegvelger = behandling.status in setOf(
             Behandlingsstatus.UNDER_BEHANDLING,
             Behandlingsstatus.AVVENT_DOK_PART
@@ -124,7 +125,7 @@ class HåndterEksisterendeSakSøknad(
     private fun opprettNyVurdering(
         fagsak: Fagsak,
         søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
-    ): Pair<Behandling, MottatteOpplysninger?> {
+    ): Pair<Behandling, MottatteOpplysninger> {
         val saksnummer = fagsak.saksnummer
         val referanseId = søknadsdata.referanseId
 

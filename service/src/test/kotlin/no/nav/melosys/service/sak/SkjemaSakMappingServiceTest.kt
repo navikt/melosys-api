@@ -38,7 +38,7 @@ internal class SkjemaSakMappingServiceTest {
 
         @Test
         fun `tom skjemaIder returnerer null`() {
-            service.finnSaksnummerForGyldigSak(emptyList()).shouldBeNull()
+            service.finnGyldigSaksnummerForSkjemaIder(emptyList()).shouldBeNull()
         }
 
         @Test
@@ -46,7 +46,7 @@ internal class SkjemaSakMappingServiceTest {
             val skjemaIder = listOf(UUID.randomUUID())
             every { skjemaSakMappingRepository.findBySkjemaIdIn(skjemaIder) } returns emptyList()
 
-            service.finnSaksnummerForGyldigSak(skjemaIder).shouldBeNull()
+            service.finnGyldigSaksnummerForSkjemaIder(skjemaIder).shouldBeNull()
         }
 
         @Test
@@ -59,7 +59,7 @@ internal class SkjemaSakMappingServiceTest {
             every { skjemaSakMappingRepository.findBySkjemaIdIn(listOf(skjemaId)) } returns listOf(mapping)
             every { fagsakRepository.findAllBySaksnummerIn(listOf(saksnummer)) } returns listOf(fagsak)
 
-            service.finnSaksnummerForGyldigSak(listOf(skjemaId)) shouldBe saksnummer
+            service.finnGyldigSaksnummerForSkjemaIder(listOf(skjemaId)) shouldBe saksnummer
         }
 
         @Test
@@ -72,7 +72,7 @@ internal class SkjemaSakMappingServiceTest {
             every { skjemaSakMappingRepository.findBySkjemaIdIn(listOf(skjemaId)) } returns listOf(mapping)
             every { fagsakRepository.findAllBySaksnummerIn(listOf(saksnummer)) } returns listOf(fagsak)
 
-            service.finnSaksnummerForGyldigSak(listOf(skjemaId)) shouldBe saksnummer
+            service.finnGyldigSaksnummerForSkjemaIder(listOf(skjemaId)) shouldBe saksnummer
         }
 
         @Test
@@ -85,7 +85,7 @@ internal class SkjemaSakMappingServiceTest {
             every { skjemaSakMappingRepository.findBySkjemaIdIn(listOf(skjemaId)) } returns listOf(mapping)
             every { fagsakRepository.findAllBySaksnummerIn(listOf(saksnummer)) } returns listOf(fagsak)
 
-            service.finnSaksnummerForGyldigSak(listOf(skjemaId)).shouldBeNull()
+            service.finnGyldigSaksnummerForSkjemaIder(listOf(skjemaId)).shouldBeNull()
         }
 
         @Test
@@ -103,7 +103,7 @@ internal class SkjemaSakMappingServiceTest {
             every { skjemaSakMappingRepository.findBySkjemaIdIn(listOf(skjemaId1, skjemaId2)) } returns listOf(mapping1, mapping2)
             every { fagsakRepository.findAllBySaksnummerIn(listOf(saksnummer1, saksnummer2)) } returns listOf(fagsakOpprettet, fagsakAvsluttet)
 
-            service.finnSaksnummerForGyldigSak(listOf(skjemaId1, skjemaId2)) shouldBe saksnummer1
+            service.finnGyldigSaksnummerForSkjemaIder(listOf(skjemaId1, skjemaId2)) shouldBe saksnummer1
         }
 
         @Test
@@ -122,7 +122,7 @@ internal class SkjemaSakMappingServiceTest {
             every { fagsakRepository.findAllBySaksnummerIn(listOf(saksnummer1, saksnummer2)) } returns listOf(fagsak1, fagsak2)
 
             shouldThrow<IllegalStateException> {
-                service.finnSaksnummerForGyldigSak(listOf(skjemaId1, skjemaId2))
+                service.finnGyldigSaksnummerForSkjemaIder(listOf(skjemaId1, skjemaId2))
             }
         }
     }

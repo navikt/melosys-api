@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
-internal class HåndterEksisterendeSakSøknadTest {
+internal class HåndterEksisterendeSakDigitalSøknadTest {
 
     @MockK lateinit var fagsakService: FagsakService
     @MockK lateinit var behandlingService: BehandlingService
@@ -39,7 +39,7 @@ internal class HåndterEksisterendeSakSøknadTest {
     @MockK lateinit var skjemaSakMappingService: SkjemaSakMappingService
     @MockK lateinit var jsonMapper: JsonMapper
 
-    private lateinit var steg: HåndterEksisterendeSakSøknad
+    private lateinit var steg: HåndterEksisterendeSakDigitalSøknad
 
     private val saksnummer = "MEL-1234"
     private val behandlingId = 42L
@@ -49,7 +49,7 @@ internal class HåndterEksisterendeSakSøknadTest {
 
     @BeforeEach
     fun setup() {
-        steg = HåndterEksisterendeSakSøknad(
+        steg = HåndterEksisterendeSakDigitalSøknad(
             fagsakService, behandlingService, behandlingsresultatService,
             mottatteOpplysningerService, oppgaveService, skjemaSakMappingService, jsonMapper
         )
@@ -227,10 +227,10 @@ internal class HåndterEksisterendeSakSøknadTest {
         behandlingstype: Behandlingstyper = Behandlingstyper.FØRSTEGANG
     ): Behandling {
         return Behandling.forTest {
-            id = this@HåndterEksisterendeSakSøknadTest.behandlingId
+            id = this@HåndterEksisterendeSakDigitalSøknadTest.behandlingId
             this.status = status
             type = behandlingstype
-            this.fagsak = Fagsak.forTest { this.saksnummer = this@HåndterEksisterendeSakSøknadTest.saksnummer }
+            this.fagsak = Fagsak.forTest { this.saksnummer = this@HåndterEksisterendeSakDigitalSøknadTest.saksnummer }
         }
     }
 
