@@ -43,7 +43,7 @@ class SkjemaMottattConsumer(
                 log.info { "Fant eksisterende sak $eksisterendeSaksnummer for skjemaId ${melding.skjemaId}" }
                 prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding, eksisterendeSaksnummer)
             } else {
-                prosessinstansService.opprettProsessinstansMelosysSøknadMottatt(melding)
+                prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(melding)
             }
         }
     }

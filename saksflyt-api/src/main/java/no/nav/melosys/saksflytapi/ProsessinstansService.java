@@ -579,7 +579,7 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public void opprettProsessinstansMelosysSøknadMottatt(SkjemaMottattMelding melding) {
+    public void opprettProsessinstansMelosysDigitalSøknadMottatt(SkjemaMottattMelding melding) {
         opprettSøknadProsessinstans(melding, ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD, null);
     }
 

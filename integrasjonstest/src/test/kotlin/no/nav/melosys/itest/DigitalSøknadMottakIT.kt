@@ -72,6 +72,12 @@ class DigitalSøknadMottakIT(
                 )
         )
 
+        // Stub melosys-skjema-api endpoint for saksnummer-registrering
+        mockServer.stubFor(
+            WireMock.post(WireMock.urlPathEqualTo("/m2m/api/skjema/$skjemaId/saksnummer"))
+                .willReturn(WireMock.aResponse().withStatus(204))
+        )
+
         val melding = SkjemaMottattMelding(skjemaId)
 
         // Send Kafka message
@@ -91,8 +97,8 @@ class DigitalSøknadMottakIT(
         prosessinstans.status shouldBe ProsessStatus.FERDIG
         prosessinstans.låsReferanse shouldBe skjemaId.toString()
 
-        // All steps completed successfully
-        prosessinstans.sistFullførtSteg shouldBe ProsessSteg.OPPRETT_OPPGAVE
+        // All steps completed successfully (SEND_SAKSNUMMER_TIL_SKJEMA is the last step)
+        prosessinstans.sistFullførtSteg shouldBe ProsessSteg.SEND_SAKSNUMMER_TIL_MELOSYS_SKJEMA_API
         prosessinstans.hendelser.shouldHaveSize(0)
 
         // Verify data stored by consumer (SØKNAD_MOTTATT_MELDING)

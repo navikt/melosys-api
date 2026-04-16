@@ -60,7 +60,7 @@ class HåndterEksisterendeSakSøknad(
     private val jsonMapper: JsonMapper
 ) : StegBehandler {
 
-    override fun inngangsSteg(): ProsessSteg = ProsessSteg.HÅNDTER_EKSISTERENDE_SAK_SØKNAD
+    override fun inngangsSteg(): ProsessSteg = ProsessSteg.HÅNDTER_EKSISTERENDE_SAK_DIGITAL_SØKNAD
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.DIGITAL_SØKNADSDATA)

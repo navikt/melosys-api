@@ -44,11 +44,11 @@ class SkjemaMottattConsumerTest {
 
         every { unleash.isEnabled(ToggleName.MELOSYS_SKJEMA_MOTTATT_CONSUMER) } returns true
         every { skjemaSakMappingService.finnSaksnummerForGyldigSak(any()) } returns null
-        every { prosessinstansService.`opprettProsessinstansMelosysSøknadMottatt`(melding) } just Runs
+        every { prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(melding) } just Runs
 
         skjemaMottattConsumer.mottaSkjemaMelding(consumerRecord, emptyMap())
 
-        verify { prosessinstansService.`opprettProsessinstansMelosysSøknadMottatt`(melding) }
+        verify { prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(melding) }
         verify(exactly = 0) { prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(any(), any()) }
     }
 
@@ -65,7 +65,7 @@ class SkjemaMottattConsumerTest {
         skjemaMottattConsumer.mottaSkjemaMelding(consumerRecord, emptyMap())
 
         verify { prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding, "MEL-1") }
-        verify(exactly = 0) { prosessinstansService.`opprettProsessinstansMelosysSøknadMottatt`(any()) }
+        verify(exactly = 0) { prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(any()) }
     }
 
     @Test
@@ -78,6 +78,6 @@ class SkjemaMottattConsumerTest {
 
         skjemaMottattConsumer.mottaSkjemaMelding(consumerRecord, emptyMap())
 
-        verify(exactly = 0) { prosessinstansService.`opprettProsessinstansMelosysSøknadMottatt`(any<SkjemaMottattMelding>()) }
+        verify(exactly = 0) { prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(any<SkjemaMottattMelding>()) }
     }
 }

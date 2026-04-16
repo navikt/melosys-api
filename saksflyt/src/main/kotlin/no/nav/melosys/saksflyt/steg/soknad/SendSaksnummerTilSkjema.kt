@@ -20,7 +20,7 @@ class SendSaksnummerTilSkjema(
     private val melosysSkjemaApiClient: MelosysSkjemaApiClient
 ) : StegBehandler {
 
-    override fun inngangsSteg(): ProsessSteg = ProsessSteg.SEND_SAKSNUMMER_TIL_SKJEMA
+    override fun inngangsSteg(): ProsessSteg = ProsessSteg.SEND_SAKSNUMMER_TIL_MELOSYS_SKJEMA_API
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandling = requireNotNull(prosessinstans.behandling) {
