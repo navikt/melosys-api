@@ -2,6 +2,8 @@ package no.nav.melosys.saksflyt.steg.soknad
 
 import tools.jackson.databind.json.JsonMapper
 import mu.KotlinLogging
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
@@ -89,18 +91,23 @@ class OpprettSakOgBehandlingDigitalSøknad(
             behandling.id, null, søknad, referanseId
         )
 
-        //TODO: lag privat metode for lagring av mapping
-        val originalData = jsonMapper.writeValueAsString(søknadsdata)
-        val innsendtDato = søknadsdata.innsendtTidspunkt.atZone(OSLO_ZONE).toInstant()
-        skjemaSakMappingService.lagreMapping(
-            søknadsdata.skjema.id,
-            fagsak,
-            mottatteOpplysninger = mottatteOpplysninger,
-            originalData = originalData,
-            innsendtDato = innsendtDato
-        )
+        lagreSkjemaSakMapping(søknadsdata, fagsak, mottatteOpplysninger)
 
         prosessinstans.behandling = behandling
         log.info { "Lagret mottatte opplysninger for digital søknad referanseId=$referanseId" }
+    }
+
+    private fun lagreSkjemaSakMapping(
+        søknadsdata: UtsendtArbeidstakerSkjemaM2MDto,
+        fagsak: Fagsak,
+        mottatteOpplysninger: MottatteOpplysninger
+    ) {
+        skjemaSakMappingService.lagreMapping(
+            skjemaId = søknadsdata.skjema.id,
+            fagsak = fagsak,
+            mottatteOpplysninger = mottatteOpplysninger,
+            originalData = jsonMapper.writeValueAsString(søknadsdata),
+            innsendtDato = søknadsdata.innsendtTidspunkt.atZone(OSLO_ZONE).toInstant()
+        )
     }
 }
