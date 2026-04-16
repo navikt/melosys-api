@@ -19,28 +19,28 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
 
 @ExtendWith(MockKExtension::class)
-internal class HentSøknadsdataTest {
+internal class HentDigitalSøknadsdataTest {
 
     @MockK
     lateinit var melosysSkjemaApiClient: MelosysSkjemaApiClient
 
-    private lateinit var hentSøknadsdata: HentSøknadsdata
+    private lateinit var hentDigitalSøknadsdata: HentDigitalSøknadsdata
     private lateinit var prosessinstans: Prosessinstans
 
     private val skjemaId = UUID.randomUUID()
 
     @BeforeEach
     fun setup() {
-        hentSøknadsdata = HentSøknadsdata(melosysSkjemaApiClient)
+        hentDigitalSøknadsdata = HentDigitalSøknadsdata(melosysSkjemaApiClient)
 
         prosessinstans = Prosessinstans.forTest {
-            medData(ProsessDataKey.SØKNAD_MOTTATT_MELDING, SkjemaMottattMelding(skjemaId))
+            medData(ProsessDataKey.DIGITAL_SØKNAD_MOTTATT_MELDING, SkjemaMottattMelding(skjemaId))
         }
     }
 
     @Test
     fun `inngangsSteg returnerer HENT_SØKNADSDATA`() {
-        hentSøknadsdata.inngangsSteg() shouldBe ProsessSteg.HENT_SØKNADSDATA
+        hentDigitalSøknadsdata.inngangsSteg() shouldBe ProsessSteg.HENT_DIGITAL_SØKNADSDATA
     }
 
     @Test
@@ -51,11 +51,11 @@ internal class HentSøknadsdataTest {
 
         every { melosysSkjemaApiClient.hentUtsendtArbeidstakerSkjema(skjemaId) } returns søknadsdata
 
-        hentSøknadsdata.utfør(prosessinstans)
+        hentDigitalSøknadsdata.utfør(prosessinstans)
 
         verify { melosysSkjemaApiClient.hentUtsendtArbeidstakerSkjema(skjemaId) }
 
-        val lagretData = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.SØKNADSDATA)
+        val lagretData = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.DIGITAL_SØKNADSDATA)
         lagretData shouldBe søknadsdata
     }
 }

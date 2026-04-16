@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.soknad
 import mu.KotlinLogging
 import no.nav.melosys.integrasjon.melosysskjema.MelosysSkjemaApiClient
 import no.nav.melosys.saksflyt.steg.StegBehandler
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey.SØKNADSDATA
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey.DIGITAL_SØKNADSDATA
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
@@ -27,7 +27,7 @@ class SendSaksnummerTilSkjema(
             "Behandling må være satt for å sende saksnummer"
         }
         val saksnummer = behandling.fagsak.saksnummer
-        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(SØKNADSDATA)
+        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(DIGITAL_SØKNADSDATA)
         val skjemaId = søknadsdata.skjema.id
 
         log.info { "Sender saksnummer $saksnummer til melosys-skjema-api for skjema $skjemaId" }

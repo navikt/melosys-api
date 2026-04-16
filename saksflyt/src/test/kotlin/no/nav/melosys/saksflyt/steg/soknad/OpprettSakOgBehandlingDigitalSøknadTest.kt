@@ -37,7 +37,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
-internal class OpprettSakOgBehandlingSøknadTest {
+internal class OpprettSakOgBehandlingDigitalSøknadTest {
 
     @MockK lateinit var fagsakService: FagsakService
     @MockK lateinit var persondataFasade: PersondataFasade
@@ -46,7 +46,7 @@ internal class OpprettSakOgBehandlingSøknadTest {
     @MockK lateinit var skjemaSakMappingService: SkjemaSakMappingService
     @MockK lateinit var behandlingService: BehandlingService
 
-    private lateinit var opprettSakOgBehandlingSøknad: OpprettSakOgBehandlingSøknad
+    private lateinit var opprettSakOgBehandlingDigitalSøknad: OpprettSakOgBehandlingDigitalSøknad
     private lateinit var prosessinstans: Prosessinstans
 
     private val fnr = "12345678901"
@@ -57,21 +57,21 @@ internal class OpprettSakOgBehandlingSøknadTest {
     private val behandlingId = 42L
 
     private val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
-        fnr = this@OpprettSakOgBehandlingSøknadTest.fnr
-        orgnr = this@OpprettSakOgBehandlingSøknadTest.orgnr
-        juridiskEnhetOrgnr = this@OpprettSakOgBehandlingSøknadTest.juridiskEnhetOrgnr
-        referanseId = this@OpprettSakOgBehandlingSøknadTest.referanseId
+        fnr = this@OpprettSakOgBehandlingDigitalSøknadTest.fnr
+        orgnr = this@OpprettSakOgBehandlingDigitalSøknadTest.orgnr
+        juridiskEnhetOrgnr = this@OpprettSakOgBehandlingDigitalSøknadTest.juridiskEnhetOrgnr
+        referanseId = this@OpprettSakOgBehandlingDigitalSøknadTest.referanseId
     }
 
     @BeforeEach
     fun setup() {
-        opprettSakOgBehandlingSøknad = OpprettSakOgBehandlingSøknad(
+        opprettSakOgBehandlingDigitalSøknad = OpprettSakOgBehandlingDigitalSøknad(
             fagsakService, persondataFasade, mottatteOpplysningerService, jsonMapper,
             skjemaSakMappingService, behandlingService
         )
 
         prosessinstans = Prosessinstans.forTest {
-            medData(ProsessDataKey.SØKNADSDATA, søknadsdata)
+            medData(ProsessDataKey.DIGITAL_SØKNADSDATA, søknadsdata)
         }
 
         every { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) } just Runs
@@ -101,7 +101,7 @@ internal class OpprettSakOgBehandlingSøknadTest {
 
     @Test
     fun `inngangsSteg returnerer OPPRETT_SAK_OG_BEHANDLING_SØKNAD`() {
-        opprettSakOgBehandlingSøknad.inngangsSteg() shouldBe ProsessSteg.OPPRETT_SAK_OG_BEHANDLING_SØKNAD
+        opprettSakOgBehandlingDigitalSøknad.inngangsSteg() shouldBe ProsessSteg.OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD
     }
 
     @Test
@@ -117,7 +117,7 @@ internal class OpprettSakOgBehandlingSøknadTest {
             every { it.saksnummer } returns "MEL-1234"
         }
 
-        opprettSakOgBehandlingSøknad.utfør(prosessinstans)
+        opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
 
         val capturedRequest = requestSlot.captured
         capturedRequest.aktørID shouldBe aktørId
@@ -133,7 +133,7 @@ internal class OpprettSakOgBehandlingSøknadTest {
         val behandling = mockFagsakOgBehandling()
         mockMottatteOpplysninger()
 
-        opprettSakOgBehandlingSøknad.utfør(prosessinstans)
+        opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
 
         prosessinstans.behandling shouldBe behandling
     }
@@ -150,7 +150,7 @@ internal class OpprettSakOgBehandlingSøknadTest {
             )
         } returns mockk<MottatteOpplysninger>()
 
-        opprettSakOgBehandlingSøknad.utfør(prosessinstans)
+        opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
 
         soeknadSlot.captured.shouldNotBeNull()
 
@@ -167,7 +167,7 @@ internal class OpprettSakOgBehandlingSøknadTest {
         mockFagsakOgBehandling()
         mockMottatteOpplysninger()
 
-        opprettSakOgBehandlingSøknad.utfør(prosessinstans)
+        opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
 
         verify { skjemaSakMappingService.lagreMapping(any(), eq("MEL-1234"), any(), any(), any()) }
     }

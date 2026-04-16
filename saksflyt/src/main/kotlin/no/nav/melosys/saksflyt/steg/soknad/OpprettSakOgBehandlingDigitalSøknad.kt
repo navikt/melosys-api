@@ -9,7 +9,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflyt.steg.StegBehandler
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey.SØKNADSDATA
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey.DIGITAL_SØKNADSDATA
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingService
@@ -23,6 +23,7 @@ import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerMetadata
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.time.ZoneOffset
 import java.util.UUID
 
 private val log = KotlinLogging.logger { }
@@ -40,7 +41,7 @@ private val log = KotlinLogging.logger { }
  * 5. Lagrer mottatte opplysninger og setter behandling på prosessinstansen
  */
 @Component
-class OpprettSakOgBehandlingSøknad(
+class OpprettSakOgBehandlingDigitalSøknad(
     private val fagsakService: FagsakService,
     private val persondataFasade: PersondataFasade,
     private val mottatteOpplysningerService: MottatteOpplysningerService,
@@ -49,12 +50,12 @@ class OpprettSakOgBehandlingSøknad(
     private val behandlingService: BehandlingService
 ) : StegBehandler {
 
-    override fun inngangsSteg(): ProsessSteg = ProsessSteg.OPPRETT_SAK_OG_BEHANDLING_SØKNAD
+    override fun inngangsSteg(): ProsessSteg = ProsessSteg.OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(SØKNADSDATA)
+        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(DIGITAL_SØKNADSDATA)
         val skjema = søknadsdata.skjema
-        val metadata = skjema.metadata as UtsendtArbeidstakerMetadata
+        val metadata = skjema.metadata
         val fnr = skjema.fnr
         val referanseId = søknadsdata.referanseId
 

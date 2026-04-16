@@ -600,7 +600,7 @@ public class ProsessinstansService {
             .medType(prosessType)
             .medLåsReferanse(låsReferanse)
             .build();
-        prosessinstans.setData(SØKNAD_MOTTATT_MELDING, melding);
+        prosessinstans.setData(DIGITAL_SØKNAD_MOTTATT_MELDING, melding);
         if (saksnummer != null) {
             prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
         }

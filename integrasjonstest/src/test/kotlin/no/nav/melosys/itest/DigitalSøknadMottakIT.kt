@@ -96,11 +96,11 @@ class DigitalSøknadMottakIT(
         prosessinstans.hendelser.shouldHaveSize(0)
 
         // Verify data stored by consumer (SØKNAD_MOTTATT_MELDING)
-        val mottattMelding = prosessinstans.hentData<SkjemaMottattMelding>(ProsessDataKey.SØKNAD_MOTTATT_MELDING)
+        val mottattMelding = prosessinstans.hentData<SkjemaMottattMelding>(ProsessDataKey.DIGITAL_SØKNAD_MOTTATT_MELDING)
         mottattMelding shouldBe melding
 
         // Verify data stored by step 1 (SØKNADSDATA)
-        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.SØKNADSDATA)
+        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.DIGITAL_SØKNADSDATA)
         søknadsdata.referanseId shouldBe forventetSøknadsdata.referanseId
         søknadsdata.skjema.fnr shouldBe forventetSøknadsdata.skjema.fnr
 

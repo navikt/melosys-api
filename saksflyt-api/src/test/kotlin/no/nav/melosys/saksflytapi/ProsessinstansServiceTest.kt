@@ -812,7 +812,7 @@ class ProsessinstansServiceTest {
         lagretInstans.run {
             type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
             låsReferanse shouldBe skjemaId.toString()
-            hentData<SkjemaMottattMelding>(ProsessDataKey.SØKNAD_MOTTATT_MELDING).skjemaId shouldBe skjemaId
+            hentData<SkjemaMottattMelding>(ProsessDataKey.DIGITAL_SØKNAD_MOTTATT_MELDING).skjemaId shouldBe skjemaId
         }
     }
 

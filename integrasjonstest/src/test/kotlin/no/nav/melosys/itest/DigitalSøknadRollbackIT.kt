@@ -97,7 +97,7 @@ class DigitalSøknadRollbackIT(
         prosessinstans.type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
         prosessinstans.status shouldBe ProsessStatus.FEILET
         prosessinstans.hendelser.shouldHaveSize(1)
-        prosessinstans.hendelser.first().steg shouldBe ProsessSteg.OPPRETT_SAK_OG_BEHANDLING_SØKNAD
+        prosessinstans.hendelser.first().steg shouldBe ProsessSteg.OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD
 
         // KJERNEASSERTION: Verifiser at @Transactional(REQUIRES_NEW) på StegBehandler.utfør()
         // har rullet tilbake fagsak+behandling som ble opprettet av fagsakService.nyFagsakOgBehandling().

@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
-internal class OpprettOgFerdigstillJournalpostSøknadTest {
+internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
 
     @MockK
     lateinit var melosysSkjemaApiClient: MelosysSkjemaApiClient
@@ -43,7 +43,7 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
     @MockK
     lateinit var skjemaSakMappingService: no.nav.melosys.service.sak.SkjemaSakMappingService
 
-    private lateinit var opprettOgFerdigstillJournalpostSøknad: OpprettOgFerdigstillJournalpostSøknad
+    private lateinit var opprettOgFerdigstillJournalpostDigitalSøknad: OpprettOgFerdigstillJournalpostDigitalSøknad
 
     private val fnr = "12345678901"
     private val innsenderFnr = "98765432100"
@@ -59,7 +59,7 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
 
     @BeforeEach
     fun setup() {
-        opprettOgFerdigstillJournalpostSøknad = OpprettOgFerdigstillJournalpostSøknad(
+        opprettOgFerdigstillJournalpostDigitalSøknad = OpprettOgFerdigstillJournalpostDigitalSøknad(
             melosysSkjemaApiClient, joarkFasade, behandlingService, persondataFasade, skjemaSakMappingService
         )
 
@@ -71,7 +71,7 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
 
     @Test
     fun `inngangsSteg returnerer OPPRETT_OG_FERDIGSTILL_JOURNALPOST_SØKNAD`() {
-        opprettOgFerdigstillJournalpostSøknad.inngangsSteg() shouldBe ProsessSteg.OPPRETT_OG_FERDIGSTILL_JOURNALPOST_SØKNAD
+        opprettOgFerdigstillJournalpostDigitalSøknad.inngangsSteg() shouldBe ProsessSteg.OPPRETT_OG_FERDIGSTILL_JOURNALPOST_DIGITAL_SØKNAD
     }
 
     @Test
@@ -79,7 +79,7 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
         val søknadsdata = lagSøknadsdata(Skjemadel.ARBEIDSTAKERS_DEL)
         val prosessinstans = lagProsessinstans(søknadsdata)
 
-        opprettOgFerdigstillJournalpostSøknad.utfør(prosessinstans)
+        opprettOgFerdigstillJournalpostDigitalSøknad.utfør(prosessinstans)
 
         verify { melosysSkjemaApiClient.hentPdf(søknadsdata.skjema.id) }
         verify { joarkFasade.opprettJournalpost(any(), eq(true)) }
@@ -104,7 +104,7 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
         val søknadsdata = lagSøknadsdata(Skjemadel.ARBEIDSGIVERS_DEL)
         val prosessinstans = lagProsessinstans(søknadsdata)
 
-        opprettOgFerdigstillJournalpostSøknad.utfør(prosessinstans)
+        opprettOgFerdigstillJournalpostDigitalSøknad.utfør(prosessinstans)
 
         val opprettJournalpost = capturedJournalpost.captured
         opprettJournalpost.innhold shouldBe "Bekreftelse på utsending i EØS eller Sveits"
@@ -117,7 +117,7 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
         val prosessinstans = lagProsessinstans(søknadsdata)
         val behandling = prosessinstans.behandling!!
 
-        opprettOgFerdigstillJournalpostSøknad.utfør(prosessinstans)
+        opprettOgFerdigstillJournalpostDigitalSøknad.utfør(prosessinstans)
 
         behandling.initierendeJournalpostId shouldBe journalpostId
     }
@@ -127,7 +127,7 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
         val søknadsdata = lagSøknadsdata(Skjemadel.ARBEIDSTAKERS_DEL)
         val prosessinstans = lagProsessinstans(søknadsdata)
 
-        opprettOgFerdigstillJournalpostSøknad.utfør(prosessinstans)
+        opprettOgFerdigstillJournalpostDigitalSøknad.utfør(prosessinstans)
 
         verify { joarkFasade.opprettJournalpost(any(), eq(true)) }
     }
@@ -135,9 +135,9 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
     private fun lagSøknadsdata(skjemadel: Skjemadel) =
         lagUtsendtArbeidstakerSkjemaM2MDto {
             this.skjemadel = skjemadel
-            fnr = this@OpprettOgFerdigstillJournalpostSøknadTest.fnr
-            referanseId = this@OpprettOgFerdigstillJournalpostSøknadTest.referanseId
-            innsenderFnr = this@OpprettOgFerdigstillJournalpostSøknadTest.innsenderFnr
+            fnr = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.fnr
+            referanseId = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.referanseId
+            innsenderFnr = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.innsenderFnr
             if (skjemadel == Skjemadel.ARBEIDSGIVERS_DEL) {
                 data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
             }
@@ -147,11 +147,11 @@ internal class OpprettOgFerdigstillJournalpostSøknadTest {
 
     private fun lagProsessinstans(søknadsdata: no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto): Prosessinstans {
         val behandling = Behandling.forTest {
-            fagsak { saksnummer = this@OpprettOgFerdigstillJournalpostSøknadTest.saksnummer }
+            fagsak { saksnummer = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.saksnummer }
         }
 
         return Prosessinstans.forTest {
-            medData(ProsessDataKey.SØKNADSDATA, søknadsdata)
+            medData(ProsessDataKey.DIGITAL_SØKNADSDATA, søknadsdata)
             this.behandling = behandling
         }
     }

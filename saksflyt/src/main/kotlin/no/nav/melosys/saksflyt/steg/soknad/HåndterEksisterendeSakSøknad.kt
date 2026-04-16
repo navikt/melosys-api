@@ -63,7 +63,7 @@ class HåndterEksisterendeSakSøknad(
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.HÅNDTER_EKSISTERENDE_SAK_SØKNAD
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.SØKNADSDATA)
+        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.DIGITAL_SØKNADSDATA)
         val saksnummer = prosessinstans.hentData(ProsessDataKey.SAKSNUMMER)
         val referanseId = søknadsdata.referanseId
 
