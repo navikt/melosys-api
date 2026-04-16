@@ -354,7 +354,7 @@ object ProsessflytDefinisjon {
             prosessType = MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD,
             HENT_DIGITAL_SØKNADSDATA,
             HÅNDTER_EKSISTERENDE_SAK_SØKNAD,
-            OPPRETT_OG_FERDIGSTILL_JOURNALPOST_DIGITAL_SØKNAD, //TODO: Journalføring burde komme først siden vi allerede har saksID? På den måten har vi initierendeJournalpostId som vi kan legge på behandlingen også hvis det blir ny behandling?
+            OPPRETT_OG_FERDIGSTILL_JOURNALPOST_DIGITAL_SØKNAD,
             HENT_REGISTEROPPLYSNINGER,
             VURDER_INNGANGSVILKÅR,
             SEND_SAKSNUMMER_TIL_SKJEMA

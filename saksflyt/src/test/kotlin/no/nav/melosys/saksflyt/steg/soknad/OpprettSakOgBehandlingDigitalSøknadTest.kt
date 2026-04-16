@@ -75,7 +75,6 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         }
 
         every { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) } just Runs
-        every { skjemaSakMappingService.lagreMappinger(any(), any()) } just Runs
     }
 
     private fun mockFagsakOgBehandling(): Behandling {
@@ -96,7 +95,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         every { jsonMapper.writeValueAsString(søknadsdata) } returns """{"referanseId":"$referanseId"}"""
         every {
             mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any())
-        } returns mockk<MottatteOpplysninger>()
+        } returns mockk<MottatteOpplysninger> { every { id } returns 99L }
     }
 
     @Test

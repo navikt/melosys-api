@@ -72,22 +72,20 @@ class HåndterEksisterendeSakSøknad(
 
         val åpenBehandling = finnÅpenSøknadsbehandling(fagsak)
 
-        val behandling = if (åpenBehandling != null) {
+        val (behandling, mottatteOpplysningerId) = if (åpenBehandling != null) {
             håndterÅpenBehandling(åpenBehandling, søknadsdata)
         } else {
             opprettNyVurdering(fagsak, søknadsdata)
         }
 
-        //TODO: Igjen, her trenger vi å ta stilling til i forhold til mottatte opplysninger
         val originalData = jsonMapper.writeValueAsString(søknadsdata)
         val innsendtDato = søknadsdata.innsendtTidspunkt.atZone(OSLO_ZONE).toInstant()
         skjemaSakMappingService.lagreMapping(
             søknadsdata.skjema.id, saksnummer,
+            mottatteOpplysningerId = mottatteOpplysningerId,
             originalData = originalData,
             innsendtDato = innsendtDato
         )
-
-        //TODO: Mottatte opplysninger lagring?
 
         prosessinstans.behandling = behandling
         log.info { "Ferdig med eksisterende sak $saksnummer, behandling=${behandling.id}" }
@@ -101,7 +99,7 @@ class HåndterEksisterendeSakSøknad(
     private fun håndterÅpenBehandling(
         behandling: Behandling,
         søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
-    ): Behandling {
+    ): Pair<Behandling, Long?> {
         val skalResetteStegvelger = behandling.status in setOf(
             Behandlingsstatus.UNDER_BEHANDLING,
             Behandlingsstatus.AVVENT_DOK_PART
@@ -116,20 +114,21 @@ class HåndterEksisterendeSakSøknad(
             behandlingsresultatService.tømBehandlingsresultat(behandling.id)
         }
 
-        val (periode, land) = ForenkletSøknadMapper.hentPeriodeOgLand(søknadsdata)
+        val (periode, land) = DigitalSøknadMapper.hentPeriodeOgLand(søknadsdata)
         log.info { "Oppdater mottatte opplysninger for behandling ${behandling.id}" }
 
         mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(
             behandling.id, periode, land
         )
 
-        return behandling
+        val mottatteOpplysninger = mottatteOpplysningerService.hentMottatteOpplysninger(behandling.id)
+        return behandling to mottatteOpplysninger.id
     }
 
     private fun opprettNyVurdering(
         fagsak: Fagsak,
         søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
-    ): Behandling {
+    ): Pair<Behandling, Long?> {
         val saksnummer = fagsak.saksnummer
         val referanseId = søknadsdata.referanseId
 
@@ -138,7 +137,7 @@ class HåndterEksisterendeSakSøknad(
             Behandlingsstatus.OPPRETTET,
             Behandlingstyper.NY_VURDERING,
             Behandlingstema.UTSENDT_ARBEIDSTAKER,
-            null,  //TODO: Burde vi ikke ha journalpostid her?
+            null, // journalpostId settes i journalpost-steget etterpå
             null,
             LocalDate.now(),
             Behandlingsaarsaktyper.SØKNAD,
@@ -147,8 +146,8 @@ class HåndterEksisterendeSakSøknad(
         fagsak.leggTilBehandling(nyBehandling)
         log.info { "Opprettet behandling ${nyBehandling.id} (NY_VURDERING) på sak $saksnummer" }
 
-        val søknad = ForenkletSøknadMapper.tilSoeknad(søknadsdata)
-        mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
+        val søknad = DigitalSøknadMapper.tilSoeknad(søknadsdata)
+        val mottatteOpplysninger = mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
             nyBehandling.id, null, søknad, referanseId
         )
 
@@ -161,6 +160,6 @@ class HåndterEksisterendeSakSøknad(
         )
         log.info { "Opprettet oppgave for ny behandling ${nyBehandling.id}" }
 
-        return nyBehandling
+        return nyBehandling to mottatteOpplysninger.id
     }
 }

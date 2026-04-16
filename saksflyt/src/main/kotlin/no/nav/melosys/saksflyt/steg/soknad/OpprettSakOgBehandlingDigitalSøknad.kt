@@ -24,7 +24,6 @@ import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerMetada
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.ZoneOffset
-import java.util.UUID
 
 private val log = KotlinLogging.logger { }
 
@@ -85,42 +84,24 @@ class OpprettSakOgBehandlingDigitalSøknad(
             log.info { "Satt behandlingsstatus til AVVENT_DOK_PART (kun arbeidsgiver-del mottatt)" }
         }
 
-        // Lagre hoved-skjemaId med originalData, og kun mapping for relaterte IDs
-        //TODO: Se spørsmål rundt mottatte opplysninger. Dette kan kanskje tas etter at mottatte opplysninger er opprettet, slik at man kan lagre mappingen riktig med en gang?
+        // Lagre mottatte opplysninger
+        val søknad = DigitalSøknadMapper.tilSoeknad(søknadsdata)
+        val mottatteOpplysninger = mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
+            behandling.id, null, søknad, referanseId
+        )
+
+        // Lagre mapping med kobling til mottatte opplysninger
         val originalData = jsonMapper.writeValueAsString(søknadsdata)
         val innsendtDato = søknadsdata.innsendtTidspunkt.atZone(OSLO_ZONE).toInstant()
         skjemaSakMappingService.lagreMapping(
             søknadsdata.skjema.id,
             fagsak.saksnummer,
+            mottatteOpplysningerId = mottatteOpplysninger.id,
             originalData = originalData,
-            innsendtDato = innsendtDato //TODO: Endre til LocalDate
-        )
-
-        val andreRelatertIder = samleRelaterteSkjemaIder(søknadsdata) - søknadsdata.skjema.id
-        if (andreRelatertIder.isNotEmpty()) {
-            skjemaSakMappingService.lagreMappinger(andreRelatertIder, fagsak.saksnummer)
-        }
-
-        // Lagre mottatte opplysninger
-        val søknad = ForenkletSøknadMapper.tilSoeknad(søknadsdata)
-
-        mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
-            behandling.id, null, søknad, referanseId
+            innsendtDato = innsendtDato
         )
 
         prosessinstans.behandling = behandling
         log.info { "Lagret mottatte opplysninger for digital søknad referanseId=$referanseId" }
-    }
-
-    companion object {
-        fun samleRelaterteSkjemaIder(søknadsdata: UtsendtArbeidstakerSkjemaM2MDto): Set<UUID> {
-            val ider = mutableSetOf<UUID>()
-            ider.add(søknadsdata.skjema.id)
-            søknadsdata.kobletSkjema?.let { ider.add(it.id) }
-            (søknadsdata.skjema.metadata)?.erstatterSkjemaId?.let { ider.add(it) }
-            (søknadsdata.kobletSkjema?.metadata)?.erstatterSkjemaId?.let { ider.add(it) }
-            søknadsdata.tidligereInnsendteSkjema.forEach { ider.add(it.id) }
-            return ider
-        }
     }
 }
