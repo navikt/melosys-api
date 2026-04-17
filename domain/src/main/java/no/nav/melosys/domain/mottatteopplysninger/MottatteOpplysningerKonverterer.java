@@ -3,6 +3,7 @@ package no.nav.melosys.domain.mottatteopplysninger;
 import java.util.EnumMap;
 
 import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.module.kotlin.KotlinModule;
@@ -12,6 +13,7 @@ public final class MottatteOpplysningerKonverterer {
 
     private static final ObjectMapper objectMapper = JsonMapper.builder()
         .addModule(new KotlinModule.Builder().build())
+        .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
         .build();
 
     private static final EnumMap<Mottatteopplysningertyper, Class<? extends MottatteOpplysningerData>> mapper = new EnumMap<>(Mottatteopplysningertyper.class);

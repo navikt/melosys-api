@@ -4,10 +4,32 @@ import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import kotlin.test.Test
 
 class MottatteOpplysningerKonvertererTest {
+
+    @Test
+    fun `skal tåle null for boolean-felt i søknad (Jackson 2-kompatibilitet)`() {
+        val json = javaClass.classLoader.getResource("soeknad/soeknad.json")?.readText()
+            ?: throw IllegalArgumentException("Kunne ikke lese json fra 'soeknad/soeknad.json'")
+
+        val mapper = JsonMapper.builder().build()
+        val tree = mapper.readTree(json) as ObjectNode
+        (tree.get("soeknadsland") as ObjectNode).putNull("flereLandUkjentHvilke")
+        val jsonMedNullBoolean = mapper.writeValueAsString(tree)
+
+        MottatteOpplysninger().apply {
+            type = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
+            jsonData = jsonMedNullBoolean
+        }.also { mottatteOpplysninger ->
+            MottatteOpplysningerKonverterer.lastMottatteOpplysninger(mottatteOpplysninger)
+            val soeknad = mottatteOpplysninger.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
+            soeknad.soeknadsland.isFlereLandUkjentHvilke shouldBe false
+        }
+    }
 
     @Test
     fun `skal fungere å konverte fra json til dto og tilbake til json`() {

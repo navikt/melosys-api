@@ -48,16 +48,20 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         dagensDato: LocalDate = LocalDate.now()
     ): Set<Trygdeavgiftsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-        val helseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode
+        val helseutgiftDekkesPerioder = behandlingsresultat.helseutgiftDekkesPerioder
 
-        EøsPensjonistTrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
-            helseutgiftDekkesPeriode!!,
-            skatteforholdsperioder,
-            inntektsperioder,
-            behandlingsresultat,
-            unleash,
-            dagensDato
-        )
+        require(helseutgiftDekkesPerioder.isNotEmpty()) { "Ingen helseutgift dekkes perioder funnet for behandling $behandlingID" }
+
+        helseutgiftDekkesPerioder.forEach { periode ->
+            EøsPensjonistTrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
+                periode,
+                skatteforholdsperioder,
+                inntektsperioder,
+                behandlingsresultat,
+                unleash,
+                dagensDato
+            )
+        }
 
         val nyeTrygdeavgiftsperioder =
             lagNyeTrygdeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
@@ -86,9 +90,23 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         inntektsperioder: List<Inntektsperiode>,
         dagensDato: LocalDate = LocalDate.now()
     ): List<Trygdeavgiftsperiode> {
+        val helseutgiftDekkesPerioder = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(behandlingsresultat.hentBehandling().id)
+        require(helseutgiftDekkesPerioder.isNotEmpty()) { "Ingen helseutgift dekkes perioder funnet" }
+
+        return helseutgiftDekkesPerioder.flatMap { helseutgiftDekkesPeriode ->
+            beregnTrygdeavgiftForEnkeltPeriode(behandlingsresultat, helseutgiftDekkesPeriode, skatteforholdsperioder, inntektsperioder, dagensDato)
+        }
+    }
+
+    private fun beregnTrygdeavgiftForEnkeltPeriode(
+        behandlingsresultat: Behandlingsresultat,
+        helseutgiftDekkesPeriode: no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode,
+        skatteforholdsperioder: List<SkatteforholdTilNorge>,
+        inntektsperioder: List<Inntektsperiode>,
+        dagensDato: LocalDate
+    ): List<Trygdeavgiftsperiode> {
         // UUID brukes til å identifisere periodene som danner grunnlag for trygdeavgiftsberegningen
-        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandlingsresultat.hentBehandling().id)
-        val helseutgiftDekkesPeriodeDto = helseutgiftDekkesPeriode!!.tilHelseutgiftDekkesPeriodeDto()
+        val helseutgiftDekkesPeriodeDto = helseutgiftDekkesPeriode.tilHelseutgiftDekkesPeriodeDto()
         val inntektsperioderMedUUID = inntektsperioder.map { UUID.randomUUID() to it }
         val skatteforholdsperioderMedUUID = skatteforholdsperioder.map { UUID.randomUUID() to it }
         val skatteforholdsperiodeDtoSet =
@@ -200,7 +218,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
     @Transactional(readOnly = true)
     fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-            .hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder
+            .eøsPensjonistTrygdeavgiftsperioder
     }
 
 

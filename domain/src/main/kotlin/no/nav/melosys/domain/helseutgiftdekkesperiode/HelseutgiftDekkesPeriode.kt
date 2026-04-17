@@ -19,7 +19,7 @@ import java.time.LocalDate
 @Entity
 @Table(name = "helseutgift_dekkes_periode")
 class HelseutgiftDekkesPeriode(
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "beh_resultat_id", nullable = false)
     var behandlingsresultat: Behandlingsresultat,
 
@@ -36,6 +36,10 @@ class HelseutgiftDekkesPeriode(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "kilde", nullable = false)
+    var kilde: HelseutgiftDekkesPeriodeKilde = HelseutgiftDekkesPeriodeKilde.MELOSYS
 
     @OneToMany(mappedBy = "grunnlagHelseutgiftDekkesPeriode", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
     var trygdeavgiftsperioder: MutableSet<Trygdeavgiftsperiode> = HashSet(1)

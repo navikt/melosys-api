@@ -182,6 +182,7 @@ spring:
     default-property-inclusion: ALWAYS
     deserialization:
       fail-on-unknown-properties: false
+      fail-on-null-for-primitives: false
     mapper:
       default-view-inclusion: true
   jpa:

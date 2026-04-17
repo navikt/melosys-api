@@ -229,7 +229,7 @@ class Kontroll(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
         val medlemskapsDokument = behandling.hentMedlemskapDokument()
 
-        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandling.id)
+        val helseutgiftDekkesPerioder = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPerioder(behandling.id)
 
         val tidligereHelseutgiftDekkesPerioder = hentTidligereHelseutgiftDekkesPerioderIAndreFagsaker(behandling)
 
@@ -240,7 +240,7 @@ class Kontroll(
         return FerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsDokument,
             helseutgiftDekkesPeriodeData = HelseutgiftDekkesPeriodeData(
-                helseutgiftDekkesPeriode,
+                helseutgiftDekkesPerioder,
                 tidligereHelseutgiftDekkesPerioder
             ),
             behandlingstyper = behandling.type,
@@ -310,7 +310,7 @@ class Kontroll(
         return tidligereBehandlingsResultat
             .filter { it.hentBehandling().fagsak.saksnummer != behandling.fagsak.saksnummer }
             .filter { it.hentBehandling().fagsak.status !in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT }
-            .mapNotNull { it.helseutgiftDekkesPeriode }
+            .flatMap { it.helseutgiftDekkesPerioder }
     }
 
     private fun hentPersondata(behandling: Behandling): Persondata = persondataFasade.hentPerson(behandling.fagsak.hentBrukersAktørID())

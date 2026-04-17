@@ -2,6 +2,7 @@ package no.nav.melosys.service.avgift
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -52,8 +53,9 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
         behandlingsresultatService.lagreOgFlush(behandlingsresultat)
 
         trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
-            trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode
-            behandlingsresultat.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+            val matchingPeriode = finnMatchendeHelseutgiftDekkesPeriode(behandlingsresultat, trygdeavgiftsperiode, behandlingsresultatId)
+            trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode = matchingPeriode
+            matchingPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
         }
 
         val saved = behandlingsresultatService.lagre(behandlingsresultat)
@@ -69,6 +71,22 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
 
     private fun nullstillEøsPensjonistTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat) {
         behandlingsresultat.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
-        behandlingsresultat.hentHelseutgiftDekkesPeriode().clearTrygdeavgiftsperioder()
+        behandlingsresultat.helseutgiftDekkesPerioder.forEach { it.clearTrygdeavgiftsperioder() }
+    }
+
+    private fun finnMatchendeHelseutgiftDekkesPeriode(
+        behandlingsresultat: Behandlingsresultat,
+        trygdeavgiftsperiode: Trygdeavgiftsperiode,
+        behandlingsresultatId: Long
+    ) : HelseutgiftDekkesPeriode {
+        val grunnlagId = trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode?.id
+
+        if (grunnlagId != null) {
+            return behandlingsresultat.helseutgiftDekkesPerioder.firstOrNull { it.id == grunnlagId }
+                ?: error("Fant ingen helseutgift dekkes periode med id $grunnlagId for behandlingsresultat $behandlingsresultatId")
+        }
+
+        return behandlingsresultat.helseutgiftDekkesPerioder.singleOrNull()
+            ?: error("Forventet nøyaktig én helseutgift dekkes periode for behandlingsresultat $behandlingsresultatId, men fant ${behandlingsresultat.helseutgiftDekkesPerioder.size}")
     }
 }

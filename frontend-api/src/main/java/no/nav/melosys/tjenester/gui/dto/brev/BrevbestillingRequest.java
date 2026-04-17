@@ -113,14 +113,14 @@ public record BrevbestillingRequest(
             this.fritekstTittel(),
             this.fritekst(),
             this.distribusjonstype(),
-            this.skalViseStandardTekstOmkontaktopplysninger(),
+            Boolean.TRUE.equals(this.skalViseStandardTekstOmkontaktopplysninger()),
             this.nyVurderingBakgrunn(),
             konverterListeTil(this.saksvedlegg(), SaksvedleggDto::tilUtkast),
             this.standardvedleggType(),
             konverterListeTil(this.fritekstvedlegg(), FritekstvedleggDto::tilUtkast),
             this.dokumentTittel(),
             this.saksbehandlerNrToIdent(),
-            this.skalViseStandardTekstOmOpplysninger()
+            Boolean.TRUE.equals(this.skalViseStandardTekstOmOpplysninger())
         );
     }
 

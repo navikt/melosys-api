@@ -125,7 +125,7 @@ class AnnullerSakServiceTest {
 
 
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingId) }
-        verify { helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(behandlingsresultat.hentId()) }
+        verify { helseutgiftDekkesPeriodeService.slettAlleHelseutgiftDekkesPerioder(behandlingsresultat.hentId()) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.ANNULLERT) }
         verify { prosessinstansService.opprettAnnullerFagsakProsessflyt(fagsak.finnAktivBehandlingIkkeÅrsavregning()) }
     }
