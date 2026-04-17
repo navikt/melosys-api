@@ -48,11 +48,11 @@ WHERE t.inntektsperiode_id IS NOT NULL
   AND t.skatteforhold_id IS NOT NULL;
 
 -- ---------------------------------------------------------------------------
--- MELOSYS-7969: Ny kolonne for beregningstype
+-- MELOSYS-7969: Ny kolonne for beregningsregel
 -- ---------------------------------------------------------------------------
-ALTER TABLE trygdeavgiftsperiode ADD beregningstype VARCHAR2(50);
+ALTER TABLE trygdeavgiftsperiode ADD beregningsregel VARCHAR2(50);
 
-UPDATE trygdeavgiftsperiode SET beregningstype = 'ORDINÆR';
+UPDATE trygdeavgiftsperiode SET beregningsregel = 'ORDINÆR';
 
 -- Gjør trygdesats nullable (25%-regel og minstebeløp har ingen sats)
 ALTER TABLE trygdeavgiftsperiode MODIFY trygdesats NULL;

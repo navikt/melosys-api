@@ -50,7 +50,6 @@ class Trygdeavgiftsperiode(
     @JoinColumn(name = "skatteforhold_id")
     val grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = null,
 
-    @Column(name = "beregningstype")
     @Enumerated(EnumType.STRING)
     val beregningsregel: Avgiftsberegningsregel = Avgiftsberegningsregel.ORDINÆR,
 
