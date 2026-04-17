@@ -6,10 +6,9 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import java.math.RoundingMode
-import no.nav.melosys.domain.avgift.satsTekst
+import no.nav.melosys.saksflyt.steg.fakturering.satsTekst
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenClient
@@ -191,7 +190,7 @@ class OpprettFakturaserie(
                 it.periodeTil,
                 listOfNotNull(
                     "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}",
-                    "Dekning: ${mapDekning(it)}",
+                    "Dekning: ${it.dekningTekst()}",
                     it.satsTekst(),
                 ).joinToString(", ")
             )
@@ -212,17 +211,4 @@ class OpprettFakturaserie(
         }
     }
 
-    private fun mapDekning(trygdeavgiftsperiode: Trygdeavgiftsperiode): String {
-        if (trygdeavgiftsperiode.hentGrunnlagInntekstperiode().type === Inntektskildetype.PENSJON_UFØRETRYGD ||
-            trygdeavgiftsperiode.hentGrunnlagInntekstperiode().type === Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
-        ) {
-            return DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL
-        }
-
-        return trygdeavgiftsperiode.hentGrunnlagMedlemskapsperiode().hentTrygdedekning().beskrivelse
-    }
-
-    companion object {
-        const val DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL = "Helsedel"
-    }
 }
