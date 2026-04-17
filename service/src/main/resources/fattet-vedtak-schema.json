@@ -49,16 +49,18 @@
           "type": "integer"
         },
         "trygdesats": {
-          "type": "number"
+          "type": ["number", "null"]
         },
         "avgiftskode": {
           "type": "string"
+        },
+        "beregningsregel": {
+          "type": ["string", "null"]
         }
       },
       "required": [
         "avgiftspliktigInntekt",
         "avgiftsbeløpMd",
-        "trygdesats",
         "avgiftskode"
       ]
     },

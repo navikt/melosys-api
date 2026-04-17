@@ -16,6 +16,7 @@ import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 
 @Protected
@@ -224,8 +225,8 @@ class ÅrsavregningController(
                 inntektskildetype = periode.grunnlagInntekstperiode?.type,
                 inntektPerMd = avgiftspliktigMndInntekt,
                 arbeidsgiversavgiftBetales = periode.grunnlagInntekstperiode?.isArbeidsgiversavgiftBetalesTilSkatt,
-                avgiftssats = periode.trygdesats.toDouble(),
-                avgiftPerMd = periode.trygdeavgiftsbeløpMd.hentVerdi().intValueExact()
+                avgiftssats = periode.trygdesats?.toDouble(),
+                avgiftPerMd = periode.trygdeavgiftsbeløpMd.hentVerdi().setScale(0, RoundingMode.HALF_UP).intValueExact()
             )
         }
 
@@ -344,7 +345,7 @@ data class TrygdeavgiftsperiodeDto(
     val inntektskildetype: Inntektskildetype?,
     val arbeidsgiversavgiftBetales: Boolean?,
     val inntektPerMd: BigDecimal,
-    val avgiftssats: Double,
+    val avgiftssats: Double?,
     val avgiftPerMd: Int
 )
 
