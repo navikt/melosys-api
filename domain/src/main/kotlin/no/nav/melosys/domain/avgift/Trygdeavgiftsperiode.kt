@@ -77,11 +77,9 @@ class Trygdeavgiftsperiode(
     fun harAvgift(): Boolean =
         BigDecimal.ZERO.compareTo(trygdeavgiftsbeløpMd.verdi) != 0
 
-    fun erBegrenset(): Boolean = beregningsregel != Avgiftsberegningsregel.ORDINÆR
-
-    fun leggTilGrunnlag(g: TrygdeavgiftsperiodeGrunnlag) {
-        g.trygdeavgiftsperiode = this
-        grunnlagListe.add(g)
+    fun leggTilGrunnlag(grunnlag: TrygdeavgiftsperiodeGrunnlag) {
+        grunnlag.trygdeavgiftsperiode = this
+        grunnlagListe.add(grunnlag)
     }
 
     override fun getFom(): LocalDate = periodeFra
