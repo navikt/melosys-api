@@ -69,7 +69,7 @@ class HåndterEksisterendeSakDigitalSøknad(
         val referanseId = søknadsdata.referanseId
 
         val fagsak = fagsakService.hentFagsak(saksnummer)
-        log.info { "Håndterer eksisterende sak $saksnummer for digital søknad referanseId=$referanseId" }
+        log.info { "Håndterer eksisterende sak $saksnummer for digital søknad referanseId=$referanseId, skjemaId=${søknadsdata.skjema.id}" }
 
         val åpenBehandling = finnÅpenSøknadsbehandling(fagsak)
 
