@@ -94,7 +94,7 @@
         <jakarta.jaxb.version>4.0.5</jakarta.jaxb.version>
         <javaparser.version>1.0.11</javaparser.version>
         <google.errorprone.version>2.49.0</google.errorprone.version>
-        <checkerframework.version>3.55.1</checkerframework.version>
+        <checkerframework.version>4.0.0</checkerframework.version>
         <threeten.version>1.8.0</threeten.version>
         <jetbrains.annotations.version>26.1.0</jetbrains.annotations.version>
         <snappy.java.version>1.1.10.8</snappy.java.version>
