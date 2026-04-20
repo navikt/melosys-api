@@ -158,7 +158,11 @@ class ReplikerBehandlingsresultatService(
             trygdeavgiftsperiodeReplika.grunnlagInntekstperiode?.id = null
             trygdeavgiftsperiodeReplika.grunnlagSkatteforholdTilNorge?.id = null
             trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode?.id = null
-            trygdeavgiftsperiodeReplika.grunnlagListe.forEach { it.id = null }
+            trygdeavgiftsperiodeReplika.grunnlagListe.forEach {
+                it.id = null
+                it.inntektsperiode.id = null
+                it.skatteforhold.id = null
+            }
         }
     }
 
@@ -216,7 +220,11 @@ class ReplikerBehandlingsresultatService(
             trygdeavgiftsperiodeReplika.grunnlagHelseutgiftDekkesPeriode?.id = null
             trygdeavgiftsperiodeReplika.grunnlagInntekstperiode?.id = null
             trygdeavgiftsperiodeReplika.grunnlagSkatteforholdTilNorge?.id = null
-            trygdeavgiftsperiodeReplika.grunnlagListe.forEach { it.id = null }
+            trygdeavgiftsperiodeReplika.grunnlagListe.forEach {
+                it.id = null
+                it.inntektsperiode.id = null
+                it.skatteforhold.id = null
+            }
         }
     }
 
