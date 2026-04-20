@@ -11,7 +11,6 @@ import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
-import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,7 +33,7 @@ internal class HentDigitalSøknadsdataTest {
         hentDigitalSøknadsdata = HentDigitalSøknadsdata(melosysSkjemaApiClient)
 
         prosessinstans = Prosessinstans.forTest {
-            medData(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID, SkjemaMottattMelding(skjemaId))
+            medData(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID, skjemaId)
         }
     }
 
