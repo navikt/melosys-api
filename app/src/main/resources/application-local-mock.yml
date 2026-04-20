@@ -14,13 +14,13 @@ APP_NAME_DOKDISTFORDELING: dokdistfordeling-q1
 AZURE_APP_CLIENT_ID: '"lol"'
 AZURE_APP_CLIENT_SECRET: '"lol"'
 AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: http://host.docker.internal:8082/isso/token
-MELOSYS_SKJEMA_API_URL: http://placeholder-inntil-lagt-til-i-melosys-docker-compose
+MELOSYS_SKJEMA_API_URL: http://localhost:8090
 DistribuerJournalpost_v1:
   url: http://localhost:8083/rest/v1/distribuerjournalpost
 Dokumentproduksjon_v3:
   url: http://localhost:8083/soap/services/dokumentproduksjon/v3
 Inngangsvilkaar:
-  url: https://melosys-inngangsvilkar.intern.dev.nav.no/api
+  url: http://localhost:8089/api
 JournalpostApi_v1:
   url: http://localhost:8083/rest/journalpostapi/v1
 KodeverkAPI_v1:
@@ -117,6 +117,8 @@ microsoft:
             melosys-eessi:
               scope: melosys-localhost
             tilgangsmaskinen:
+              scope: melosys-localhost
+            melosys-skjema:
               scope: melosys-localhost
         issuer:
           aad:

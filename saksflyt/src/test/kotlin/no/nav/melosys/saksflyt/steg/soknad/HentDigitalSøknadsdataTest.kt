@@ -11,7 +11,6 @@ import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
-import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -19,28 +18,28 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
 
 @ExtendWith(MockKExtension::class)
-internal class HentSøknadsdataTest {
+internal class HentDigitalSøknadsdataTest {
 
     @MockK
     lateinit var melosysSkjemaApiClient: MelosysSkjemaApiClient
 
-    private lateinit var hentSøknadsdata: HentSøknadsdata
+    private lateinit var hentDigitalSøknadsdata: HentDigitalSøknadsdata
     private lateinit var prosessinstans: Prosessinstans
 
     private val skjemaId = UUID.randomUUID()
 
     @BeforeEach
     fun setup() {
-        hentSøknadsdata = HentSøknadsdata(melosysSkjemaApiClient)
+        hentDigitalSøknadsdata = HentDigitalSøknadsdata(melosysSkjemaApiClient)
 
         prosessinstans = Prosessinstans.forTest {
-            medData(ProsessDataKey.SØKNAD_MOTTATT_MELDING, SkjemaMottattMelding(skjemaId))
+            medData(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID, skjemaId)
         }
     }
 
     @Test
     fun `inngangsSteg returnerer HENT_SØKNADSDATA`() {
-        hentSøknadsdata.inngangsSteg() shouldBe ProsessSteg.HENT_SØKNADSDATA
+        hentDigitalSøknadsdata.inngangsSteg() shouldBe ProsessSteg.HENT_DIGITAL_SØKNADSDATA
     }
 
     @Test
@@ -51,11 +50,11 @@ internal class HentSøknadsdataTest {
 
         every { melosysSkjemaApiClient.hentUtsendtArbeidstakerSkjema(skjemaId) } returns søknadsdata
 
-        hentSøknadsdata.utfør(prosessinstans)
+        hentDigitalSøknadsdata.utfør(prosessinstans)
 
         verify { melosysSkjemaApiClient.hentUtsendtArbeidstakerSkjema(skjemaId) }
 
-        val lagretData = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.SØKNADSDATA)
+        val lagretData = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.DIGITAL_SØKNADSDATA)
         lagretData shouldBe søknadsdata
     }
 }

@@ -806,13 +806,13 @@ class ProsessinstansServiceTest {
 
         every { prosessinstansRepo.existsByLåsReferanseAndType(skjemaId.toString(), ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD) } returns false
 
-        prosessinstansService.`opprettProsessinstansMelosysSøknadMottatt`(melding)
+        prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(melding)
 
         val lagretInstans = piListCaptor.last()
         lagretInstans.run {
             type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
             låsReferanse shouldBe skjemaId.toString()
-            hentData<SkjemaMottattMelding>(ProsessDataKey.SØKNAD_MOTTATT_MELDING).skjemaId shouldBe skjemaId
+            hentData<UUID>(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID) shouldBe skjemaId
         }
     }
 
@@ -823,7 +823,38 @@ class ProsessinstansServiceTest {
 
         every { prosessinstansRepo.existsByLåsReferanseAndType(skjemaId.toString(), ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD) } returns true
 
-        prosessinstansService.`opprettProsessinstansMelosysSøknadMottatt`(melding)
+        prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(melding)
+
+        verify(exactly = 0) { prosessinstansRepo.save(any<Prosessinstans>()) }
+    }
+
+    @Test
+    fun `opprett prosessinstans for eksisterende digital søknad skal opprette med korrekt type og saksnummer`() {
+        val skjemaId = UUID.randomUUID()
+        val melding = SkjemaMottattMelding(skjemaId)
+        val saksnummer = "MEL-42"
+
+        every { prosessinstansRepo.existsByLåsReferanseAndType(skjemaId.toString(), ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD) } returns false
+
+        prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding, saksnummer)
+
+        val lagretInstans = piListCaptor.last()
+        lagretInstans.run {
+            type shouldBe ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
+            låsReferanse shouldBe skjemaId.toString()
+            hentData<UUID>(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID) shouldBe skjemaId
+            getData(ProsessDataKey.SAKSNUMMER) shouldBe saksnummer
+        }
+    }
+
+    @Test
+    fun `opprett prosessinstans for eksisterende digital søknad skal ikke opprette duplikat`() {
+        val skjemaId = UUID.randomUUID()
+        val melding = SkjemaMottattMelding(skjemaId)
+
+        every { prosessinstansRepo.existsByLåsReferanseAndType(skjemaId.toString(), ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD) } returns true
+
+        prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding, "MEL-42")
 
         verify(exactly = 0) { prosessinstansRepo.save(any<Prosessinstans>()) }
     }
