@@ -249,8 +249,10 @@ class ReplikerBehandlingsresultatService(
                     avgiftspliktigePerioder.find { it.hentId() == lp.hentId() } as? Lovvalgsperiode
                 },
                 helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeReplika ?: orig.helseutgiftDekkesPeriode,
-                inntektsperiode = inntektMap[orig.inntektsperiode.id] ?: orig.inntektsperiode,
-                skatteforhold = skatteforholdMap[orig.skatteforhold.id] ?: orig.skatteforhold,
+                inntektsperiode = inntektMap[orig.inntektsperiode.id]
+                    ?: error("Inntektsperiode ${orig.inntektsperiode.id} mangler i replika-map — ville koblet replika til original entitet"),
+                skatteforhold = skatteforholdMap[orig.skatteforhold.id]
+                    ?: error("Skatteforhold ${orig.skatteforhold.id} mangler i replika-map — ville koblet replika til original entitet"),
             )
             replika.leggTilGrunnlag(grunnlagReplika)
         }
@@ -283,9 +285,9 @@ class ReplikerBehandlingsresultatService(
     private fun cloneOgJusterInntektsperioder(
         trygdeavgiftsperioderTilReplikering: List<Trygdeavgiftsperiode>
     ): List<Inntektsperiode> {
-        val inntektsperioderTilReplikering = trygdeavgiftsperioderTilReplikering
-            .mapNotNull { it.grunnlagInntekstperiode }
-            .distinctBy { it.id }
+        val legacyInntekter = trygdeavgiftsperioderTilReplikering.mapNotNull { it.grunnlagInntekstperiode }
+        val grunnlagInntekter = trygdeavgiftsperioderTilReplikering.flatMap { it.grunnlagListe }.map { it.inntektsperiode }
+        val inntektsperioderTilReplikering = (legacyInntekter + grunnlagInntekter).distinctBy { it.id }
 
         return if (skalBrukeNyÅrfiltrering()) {
             val førsteJanuar = LocalDate.now().withDayOfYear(1)
@@ -312,9 +314,9 @@ class ReplikerBehandlingsresultatService(
     private fun cloneOgJusterSkatteforhold(
         trygdeavgiftsperioderTilReplikering: List<Trygdeavgiftsperiode>
     ): List<SkatteforholdTilNorge> {
-        val skatteforholdTilReplikering = trygdeavgiftsperioderTilReplikering
-            .mapNotNull { it.grunnlagSkatteforholdTilNorge }
-            .distinctBy { it.id }
+        val legacySkatteforhold = trygdeavgiftsperioderTilReplikering.mapNotNull { it.grunnlagSkatteforholdTilNorge }
+        val grunnlagSkatteforhold = trygdeavgiftsperioderTilReplikering.flatMap { it.grunnlagListe }.map { it.skatteforhold }
+        val skatteforholdTilReplikering = (legacySkatteforhold + grunnlagSkatteforhold).distinctBy { it.id }
 
         return if (skalBrukeNyÅrfiltrering()) {
             val førsteJanuar = LocalDate.now().withDayOfYear(1)
