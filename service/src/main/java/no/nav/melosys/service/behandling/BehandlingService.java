@@ -348,11 +348,21 @@ public class BehandlingService {
 
     private void avsluttBehandling(Behandling behandling) {
         validerKanAvslutteBehandling(behandling);
+        oppdaterAnmodningOmUnntakTilFerdigbehandlet(behandling);
 
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandlingRepository.save(behandling);
         behandlingerAvsluttet.increment();
         applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(AVSLUTTET, behandling));
+    }
+
+    private void oppdaterAnmodningOmUnntakTilFerdigbehandlet(Behandling behandling) {
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        if (behandlingsresultat.getType() == Behandlingsresultattyper.ANMODNING_OM_UNNTAK) {
+            log.info("Oppdaterer behandlingsresultattype fra {} til {} for behandling {} ved avslutning",
+                Behandlingsresultattyper.ANMODNING_OM_UNNTAK, Behandlingsresultattyper.FERDIGBEHANDLET, behandling.getId());
+            behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
+        }
     }
 
     public void avsluttAndregangsbehandling(long behandlingId, Behandlingsresultattyper nyBehandlingsResultatType) {
