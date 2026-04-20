@@ -16,7 +16,6 @@ import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
-import java.math.RoundingMode
 import java.time.LocalDate
 
 @Protected
@@ -226,7 +225,7 @@ class ÅrsavregningController(
                 inntektPerMd = avgiftspliktigMndInntekt,
                 arbeidsgiversavgiftBetales = periode.grunnlagInntekstperiode?.isArbeidsgiversavgiftBetalesTilSkatt,
                 avgiftssats = periode.trygdesats?.toDouble(),
-                avgiftPerMd = periode.trygdeavgiftsbeløpMd.hentVerdi().setScale(0, RoundingMode.HALF_UP).intValueExact()
+                avgiftPerMd = periode.trygdeavgiftsbeløpMd.hentVerdi().intValueExact()
             )
         }
 
