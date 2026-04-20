@@ -2,6 +2,7 @@ package no.nav.melosys.service.saksopplysninger;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
@@ -134,12 +135,18 @@ public class OppfriskSaksopplysningerService {
 
 
     private ErPeriode hentPeriodeForEøsPensjonist(Long behandlingID) {
-        HelseutgiftDekkesPeriode helseutgiftDekkesPeriode =
-            helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandlingID);
+        List<HelseutgiftDekkesPeriode> helseutgiftDekkesPerioder =
+            helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(behandlingID);
 
-        if (helseutgiftDekkesPeriode != null) {
-            LocalDate fomDato = helseutgiftDekkesPeriode.getFomDato();
-            LocalDate tomDato = helseutgiftDekkesPeriode.getTomDato();
+        if (!helseutgiftDekkesPerioder.isEmpty()) {
+            LocalDate fomDato = helseutgiftDekkesPerioder.stream()
+                .map(HelseutgiftDekkesPeriode::getFomDato)
+                .min(LocalDate::compareTo)
+                .orElse(LocalDate.now());
+            LocalDate tomDato = helseutgiftDekkesPerioder.stream()
+                .map(HelseutgiftDekkesPeriode::getTomDato)
+                .max(LocalDate::compareTo)
+                .orElse(LocalDate.now());
 
             if (fomDato.isAfter(LocalDate.now())) {
                 fomDato = LocalDate.now();

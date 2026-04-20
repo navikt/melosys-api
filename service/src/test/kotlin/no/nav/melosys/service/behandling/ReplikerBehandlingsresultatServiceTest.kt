@@ -7,6 +7,7 @@ import io.kotest.inspectors.forAll
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldExist
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -580,7 +581,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
         helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
 
-        behandlingsresultatOriginal.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
+        behandlingsresultatOriginal.addHelseutgiftDekkesPeriode(helseutgiftDekkesPeriode)
         behandlingsresultatOriginal.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
 
         val behandlingReplika = Behandling.forTest {
@@ -602,20 +603,20 @@ class ReplikerBehandlingsresultatServiceTest {
 
 
         val behandlingsresultatReplika = slot.captured
-        behandlingsresultatOriginal.helseutgiftDekkesPeriode.shouldNotBeNull()
+        behandlingsresultatOriginal.helseutgiftDekkesPerioder.shouldNotBeEmpty()
 
         behandlingsresultatReplika.run {
             behandling!!.erEøsPensjonist() shouldBe true
             behandling!!.type shouldBe Behandlingstyper.NY_VURDERING
         }
 
-        behandlingsresultatReplika.hentHelseutgiftDekkesPeriode()
+        behandlingsresultatReplika.helseutgiftDekkesPerioder.first()
             .run {
                 behandlingsresultat shouldBe behandlingsresultatReplika
                 trygdeavgiftsperioder shouldBe trygdeavgiftsperioder
-                fomDato shouldBe behandlingsresultatOriginal.hentHelseutgiftDekkesPeriode().fomDato
-                tomDato shouldBe behandlingsresultatOriginal.hentHelseutgiftDekkesPeriode().tomDato
-                bostedLandkode shouldBe behandlingsresultatOriginal.hentHelseutgiftDekkesPeriode().bostedLandkode
+                fomDato shouldBe behandlingsresultatOriginal.helseutgiftDekkesPerioder.first().fomDato
+                tomDato shouldBe behandlingsresultatOriginal.helseutgiftDekkesPerioder.first().tomDato
+                bostedLandkode shouldBe behandlingsresultatOriginal.helseutgiftDekkesPerioder.first().bostedLandkode
             }
     }
 
@@ -912,7 +913,7 @@ class ReplikerBehandlingsresultatServiceTest {
         )
 
         helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
-        behandlingsresultatOriginal.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
+        behandlingsresultatOriginal.addHelseutgiftDekkesPeriode(helseutgiftDekkesPeriode)
 
         val behandlingReplika = Behandling.forTest {
             id = 2L
@@ -993,7 +994,7 @@ class ReplikerBehandlingsresultatServiceTest {
         helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode1)
         helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode2)
 
-        behandlingsresultatOriginal.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
+        behandlingsresultatOriginal.addHelseutgiftDekkesPeriode(helseutgiftDekkesPeriode)
 
         val behandlingReplika = Behandling.forTest {
             id = 2L
@@ -1014,8 +1015,8 @@ class ReplikerBehandlingsresultatServiceTest {
         val behandlingsresultatReplika = slot.captured
 
         // Trygdeavgiftsperioden skal beholdes men miste sin gamle inntektsperiode
-        behandlingsresultatReplika.helseutgiftDekkesPeriode!!.trygdeavgiftsperioder shouldHaveSize 1
-        val replisertPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode!!.trygdeavgiftsperioder.first()
+        behandlingsresultatReplika.helseutgiftDekkesPerioder.first().trygdeavgiftsperioder shouldHaveSize 1
+        val replisertPeriode = behandlingsresultatReplika.helseutgiftDekkesPerioder.first().trygdeavgiftsperioder.first()
 
         // Trygdeavgiftsperiode skal være avkortet
         replisertPeriode.periodeFra shouldBe LocalDate.of(inneværendeÅr, 1, 1) // Avkortet
@@ -1242,7 +1243,7 @@ class ReplikerBehandlingsresultatServiceTest {
         )
 
         helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
-        behandlingsresultatOriginal.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
+        behandlingsresultatOriginal.addHelseutgiftDekkesPeriode(helseutgiftDekkesPeriode)
 
         val behandlingReplika = Behandling.forTest {
             id = 2L
@@ -1263,8 +1264,8 @@ class ReplikerBehandlingsresultatServiceTest {
         val behandlingsresultatReplika = slot.captured
 
         // Med toggle AV skal alle perioder replikeres uendret
-        behandlingsresultatReplika.helseutgiftDekkesPeriode!!.trygdeavgiftsperioder shouldHaveSize 1
-        val replisertPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode!!.trygdeavgiftsperioder.first()
+        behandlingsresultatReplika.helseutgiftDekkesPerioder.first().trygdeavgiftsperioder shouldHaveSize 1
+        val replisertPeriode = behandlingsresultatReplika.helseutgiftDekkesPerioder.first().trygdeavgiftsperioder.first()
 
         // Perioden skal være uendret
         replisertPeriode.periodeFra shouldBe LocalDate.of(inneværendeÅr - 2, 1, 1)

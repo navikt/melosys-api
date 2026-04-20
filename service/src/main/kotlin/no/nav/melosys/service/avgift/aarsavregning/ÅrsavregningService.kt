@@ -108,7 +108,7 @@ class ÅrsavregningService(
             behandlingsresultat.årsavregning?.behandlingsresultat = null
             behandlingsresultat.årsavregning = null
             behandlingsresultat.medlemskapsperioder.clear()
-            behandlingsresultat.helseutgiftDekkesPeriode = null
+            behandlingsresultat.clearHelseutgiftDekkesPerioder()
             behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         }
 
@@ -215,7 +215,7 @@ class ÅrsavregningService(
 
         if (!harTrygdeavgiftFraAvgiftssystemet) {
             behandlingsresultat.clearMedlemskapsperioder()
-            behandlingsresultat.helseutgiftDekkesPeriode = null
+            behandlingsresultat.clearHelseutgiftDekkesPerioder()
 
             if (årsavregning.tidligereBehandlingsresultat != null) {
                 val tidligereResult = årsavregning.hentTidligereBehandlingsresultat
@@ -264,15 +264,16 @@ class ÅrsavregningService(
         tidligereBehandlingsresultat: Behandlingsresultat,
         gjelderÅr: Int
     ) {
-        if (tidligereBehandlingsresultat.helseutgiftDekkesPeriode?.overlapperMedÅr(gjelderÅr) ?: return) {
-            val helseutgiftDekkesReplika = BeanUtils.cloneBean(tidligereBehandlingsresultat.helseutgiftDekkesPeriode) as HelseutgiftDekkesPeriode
-            helseutgiftDekkesReplika.behandlingsresultat = behandlingsresultat
-            helseutgiftDekkesReplika.trygdeavgiftsperioder = HashSet()
-            helseutgiftDekkesReplika.avkortFomDato(gjelderÅr)
-            helseutgiftDekkesReplika.avkortTomDato(gjelderÅr)
-            helseutgiftDekkesReplika.id = null
-            behandlingsresultat.helseutgiftDekkesPeriode = helseutgiftDekkesReplika
-        }
+        tidligereBehandlingsresultat.helseutgiftDekkesPerioder
+            .filter { it.overlapperMedÅr(gjelderÅr) }
+            .forEach { originalPeriode ->
+                val replika = BeanUtils.cloneBean(originalPeriode) as HelseutgiftDekkesPeriode
+                replika.id = null
+                replika.trygdeavgiftsperioder = HashSet()
+                replika.avkortFomDato(gjelderÅr)
+                replika.avkortTomDato(gjelderÅr)
+                behandlingsresultat.addHelseutgiftDekkesPeriode(replika)
+            }
     }
 
     private fun lagÅrsavregningModelFraÅrsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
