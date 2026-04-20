@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.core.KafkaTemplate
 
 import java.time.Duration
+import java.util.UUID
 
 class DigitalSøknadMottakIT(
     @Autowired @Qualifier("skjemaMottattMelding")
@@ -93,9 +94,9 @@ class DigitalSøknadMottakIT(
         prosessinstans.sistFullførtSteg shouldBe ProsessSteg.SEND_SAKSNUMMER_TIL_MELOSYS_SKJEMA_API
         prosessinstans.hendelser.shouldHaveSize(0)
 
-        // Verify data stored by consumer (SØKNAD_MOTTATT_MELDING)
-        val mottattMelding = prosessinstans.hentData<SkjemaMottattMelding>(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID)
-        mottattMelding shouldBe melding
+        // Verify data stored by consumer (DIGITAL_SØKNAD_SKJEMA_ID)
+        val lagretSkjemaId = prosessinstans.hentData<UUID>(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID)
+        lagretSkjemaId shouldBe skjemaId
 
         // Verify data stored by step 1 (SØKNADSDATA)
         val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.DIGITAL_SØKNADSDATA)

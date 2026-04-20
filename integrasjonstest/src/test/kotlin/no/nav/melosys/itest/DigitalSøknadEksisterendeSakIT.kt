@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.Duration
+import java.util.UUID
 
 /**
  * Integrasjonstest for MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD-flyten.
@@ -85,9 +86,9 @@ class DigitalSøknadEksisterendeSakIT(
         andreProsessinstans.sistFullførtSteg shouldBe ProsessSteg.SEND_SAKSNUMMER_TIL_MELOSYS_SKJEMA_API
         andreProsessinstans.hendelser.shouldHaveSize(0)
 
-        // Verifiser at meldingdata ble lagret
-        val mottattMelding = andreProsessinstans.hentData<SkjemaMottattMelding>(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID)
-        mottattMelding.skjemaId shouldBe andreSkjemaId
+        // Verifiser at skjemaId ble lagret
+        val lagretSkjemaId = andreProsessinstans.hentData<UUID>(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID)
+        lagretSkjemaId shouldBe andreSkjemaId
 
         // Verifiser søknadsdata ble hentet og lagret
         val søknadsdata = andreProsessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.DIGITAL_SØKNADSDATA)
@@ -103,7 +104,7 @@ class DigitalSøknadEksisterendeSakIT(
         behandling.mottatteOpplysninger.shouldNotBeNull()
     }
 
-    private fun stubSkjemaEndpoints(skjemaId: java.util.UUID, søknadsdata: UtsendtArbeidstakerSkjemaM2MDto) {
+    private fun stubSkjemaEndpoints(skjemaId: UUID, søknadsdata: UtsendtArbeidstakerSkjemaM2MDto) {
         mockServer.stubFor(
             WireMock.get(WireMock.urlPathEqualTo("/m2m/api/skjema/utsendt-arbeidstaker/$skjemaId/data"))
                 .willReturn(
