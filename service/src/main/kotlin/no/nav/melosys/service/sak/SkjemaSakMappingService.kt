@@ -7,7 +7,6 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.SkjemaSakMappingRepository
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
