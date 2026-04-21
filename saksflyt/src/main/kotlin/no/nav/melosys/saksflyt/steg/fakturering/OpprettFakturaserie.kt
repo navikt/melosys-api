@@ -189,9 +189,11 @@ class OpprettFakturaserie(
                 it.trygdeavgiftsbeløpMd.hentVerdi().setScale(0, RoundingMode.HALF_UP),
                 it.periodeFra,
                 it.periodeTil,
-                "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}, " +
-                    "Dekning: ${mapDekning(it)}, " +
-                    "${it.satsTekst()}"
+                listOfNotNull(
+                    "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}",
+                    "Dekning: ${mapDekning(it)}",
+                    it.satsTekst(),
+                ).joinToString(", ")
             )
         }
     }
@@ -202,8 +204,10 @@ class OpprettFakturaserie(
                 it.trygdeavgiftsbeløpMd.hentVerdi().setScale(0, RoundingMode.HALF_UP),
                 it.periodeFra,
                 it.periodeTil,
-                "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}, " +
-                    "${it.satsTekst()}"
+                listOfNotNull(
+                    "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}",
+                    it.satsTekst(),
+                ).joinToString(", ")
             )
         }
     }

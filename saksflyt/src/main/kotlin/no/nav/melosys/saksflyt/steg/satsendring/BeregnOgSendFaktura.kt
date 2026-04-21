@@ -84,10 +84,12 @@ class BeregnOgSendFaktura(
                 it.trygdeavgiftsbeløpMd.hentVerdi().setScale(0, RoundingMode.HALF_UP),
                 it.periodeFra,
                 it.periodeTil,
-                "Faktura for årlig satsoppdatering av trygdeavgift, " +
-                    "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}, " +
-                    "Dekning: ${mapDekning(it)}, " +
-                    "${it.satsTekst()}"
+                listOfNotNull(
+                    "Faktura for årlig satsoppdatering av trygdeavgift",
+                    "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}",
+                    "Dekning: ${mapDekning(it)}",
+                    it.satsTekst(),
+                ).joinToString(", ")
             )
         }
     }
