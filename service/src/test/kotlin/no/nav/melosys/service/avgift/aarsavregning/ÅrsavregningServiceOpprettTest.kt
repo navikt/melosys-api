@@ -240,10 +240,10 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             beregnetAvgiftBelop = null,
             tilFaktureringBeloep = null,
             harInnbetaltTrygdeavgift = true,
-            trygdeavgiftFraAvgiftssystemet = BigDecimal("5000"),
+            innbetaltTrygdeavgift = BigDecimal("5000"),
             endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
             manueltAvgiftBeloep = null,
-            tidligereTrygdeavgiftFraAvgiftssystemet = BigDecimal("5000"),
+            tidligereInnbetaltTrygdeavgift = BigDecimal("5000"),
             tidligereÅrsavregningmanueltAvgiftBeloep = null,
             harSkjoennsfastsattInntektsgrunnlag = false
         )

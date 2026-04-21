@@ -39,7 +39,7 @@ object ÅrsavregningTestFactory {
             beregnetAvgiftBelop = beregnetAvgiftBelop,
             tilFaktureringBeloep = tilFaktureringBeloep,
             harInnbetaltTrygdeavgift = harInnbetaltTrygdeavgift,
-            trygdeavgiftFraAvgiftssystemet = trygdeavgiftFraAvgiftssystemet,
+            innbetaltTrygdeavgift = trygdeavgiftFraAvgiftssystemet,
             manueltAvgiftBeloep = manueltAvgiftBeloep,
             endeligAvgiftValg = endeligAvgiftValg,
             harSkjoennsfastsattInntektsgrunnlag = harSkjoennsfastsattInntektsgrunnlag

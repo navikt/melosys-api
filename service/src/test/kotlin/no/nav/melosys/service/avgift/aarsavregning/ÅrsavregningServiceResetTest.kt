@@ -179,10 +179,10 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
             beregnetAvgiftBelop = null,
             tilFaktureringBeloep = null,
             harInnbetaltTrygdeavgift = null,
-            trygdeavgiftFraAvgiftssystemet = null,
+            innbetaltTrygdeavgift = null,
             endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
             manueltAvgiftBeloep = null,
-            tidligereTrygdeavgiftFraAvgiftssystemet = null,
+            tidligereInnbetaltTrygdeavgift = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null,
             harSkjoennsfastsattInntektsgrunnlag = false
         )

@@ -162,10 +162,10 @@ class ÅrsavregningVedtakMapperTest {
             beregnetAvgiftBelop = BigDecimal(11699.91),
             tilFaktureringBeloep = BigDecimal(7047.91),
             harInnbetaltTrygdeavgift = true,
-            trygdeavgiftFraAvgiftssystemet = BigDecimal(2000),
+            innbetaltTrygdeavgift = BigDecimal(2000),
             manueltAvgiftBeloep = BigDecimal(0),
             endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
-            tidligereTrygdeavgiftFraAvgiftssystemet = null,
+            tidligereInnbetaltTrygdeavgift = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null,
             harSkjoennsfastsattInntektsgrunnlag = false
         )
@@ -204,10 +204,10 @@ class ÅrsavregningVedtakMapperTest {
             beregnetAvgiftBelop = BigDecimal(11699.91),
             tilFaktureringBeloep = BigDecimal(7047.91),
             harInnbetaltTrygdeavgift = true,
-            trygdeavgiftFraAvgiftssystemet = BigDecimal(2000),
+            innbetaltTrygdeavgift = BigDecimal(2000),
             manueltAvgiftBeloep = BigDecimal(1652),
             endeligAvgiftValg = EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT,
-            tidligereTrygdeavgiftFraAvgiftssystemet = null,
+            tidligereInnbetaltTrygdeavgift = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null,
             harSkjoennsfastsattInntektsgrunnlag = false
         )
@@ -289,10 +289,10 @@ class ÅrsavregningVedtakMapperTest {
             beregnetAvgiftBelop = BigDecimal(11699.91),
             tilFaktureringBeloep = BigDecimal(7047.91),
             harInnbetaltTrygdeavgift = true,
-            trygdeavgiftFraAvgiftssystemet = BigDecimal(2000),
+            innbetaltTrygdeavgift = BigDecimal(2000),
             manueltAvgiftBeloep = BigDecimal(1652),
             endeligAvgiftValg = EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT,
-            tidligereTrygdeavgiftFraAvgiftssystemet = null,
+            tidligereInnbetaltTrygdeavgift = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = BigDecimal(1500), // Dette gjør at erNyÅrsavregning blir true
             harSkjoennsfastsattInntektsgrunnlag = false
         )
@@ -358,10 +358,10 @@ class ÅrsavregningVedtakMapperTest {
             beregnetAvgiftBelop = BigDecimal(11699.91),
             tilFaktureringBeloep = BigDecimal(7047.91),
             harInnbetaltTrygdeavgift = true,
-            trygdeavgiftFraAvgiftssystemet = BigDecimal(2000),
+            innbetaltTrygdeavgift = BigDecimal(2000),
             manueltAvgiftBeloep = BigDecimal(0),
             endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
-            tidligereTrygdeavgiftFraAvgiftssystemet = null,
+            tidligereInnbetaltTrygdeavgift = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null,
             harSkjoennsfastsattInntektsgrunnlag = false
         )
@@ -423,10 +423,10 @@ class ÅrsavregningVedtakMapperTest {
             tidligereFakturertBeloep = tidligereFakturertBeloep,
             tidligereTrygdeavgiftsGrunnlag = grunnlagMedlemskap,
             harInnbetaltTrygdeavgift = false,
-            trygdeavgiftFraAvgiftssystemet = null,
+            innbetaltTrygdeavgift = null,
             manueltAvgiftBeloep = BigDecimal(0),
             endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
-            tidligereTrygdeavgiftFraAvgiftssystemet = null,
+            tidligereInnbetaltTrygdeavgift = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null,
             harSkjoennsfastsattInntektsgrunnlag = false
         )

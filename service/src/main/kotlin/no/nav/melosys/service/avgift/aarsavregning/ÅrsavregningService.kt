@@ -156,7 +156,7 @@ class ÅrsavregningService(
                     ),
             endeligAvgiftValg = sisteÅrsavregning?.endeligAvgiftValg ?: EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
             harInnbetaltTrygdeavgift = sisteÅrsavregning?.let { it.harInnbetaltTrygdeavgift ?: true },
-            trygdeavgiftFraAvgiftssystemet = sisteÅrsavregning?.trygdeavgiftFraAvgiftssystemet,
+            innbetaltTrygdeavgift = sisteÅrsavregning?.innbetaltTrygdeavgift,
             manueltAvgiftBeloep = sisteÅrsavregning?.manueltAvgiftBeloep
         ).let { årsavregning ->
             behandlingsresultat.årsavregning = årsavregning
@@ -209,7 +209,7 @@ class ÅrsavregningService(
             behandlingsresultat.årsavregning ?: throw FunksjonellException("Ingen årsavregning funnet for behandling med id: $behandlingID")
         årsavregning.harInnbetaltTrygdeavgift = harInnbetaltTrygdeavgift
         årsavregning.tilFaktureringBeloep = null
-        årsavregning.trygdeavgiftFraAvgiftssystemet = null
+        årsavregning.innbetaltTrygdeavgift = null
         årsavregning.endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
         årsavregning.manueltAvgiftBeloep = null
 
@@ -303,10 +303,10 @@ class ÅrsavregningService(
             beregnetAvgiftBelop = årsavregning.beregnetAvgiftBelop,
             tilFaktureringBeloep = årsavregning.tilFaktureringBeloep,
             harInnbetaltTrygdeavgift = årsavregning.harInnbetaltTrygdeavgift,
-            trygdeavgiftFraAvgiftssystemet = årsavregning.trygdeavgiftFraAvgiftssystemet,
+            innbetaltTrygdeavgift = årsavregning.innbetaltTrygdeavgift,
             endeligAvgiftValg = årsavregning.endeligAvgiftValg,
             manueltAvgiftBeloep = årsavregning.manueltAvgiftBeloep,
-            tidligereTrygdeavgiftFraAvgiftssystemet = sisteÅrsavregning?.trygdeavgiftFraAvgiftssystemet,
+            tidligereInnbetaltTrygdeavgift = sisteÅrsavregning?.innbetaltTrygdeavgift,
             tidligereÅrsavregningmanueltAvgiftBeloep = sisteÅrsavregning?.manueltAvgiftBeloep,
             harSkjoennsfastsattInntektsgrunnlag = årsavregning.harSkjoennsfastsattInntektsgrunnlag
         )
@@ -466,7 +466,7 @@ class ÅrsavregningService(
         behandlingID: Long,
         aarsavregningId: Long,
         beregnetAvgiftBelop: BigDecimal?,
-        trygdeavgiftFraAvgiftssystemet: BigDecimal? = null,
+        innbetaltTrygdeavgift: BigDecimal? = null,
         endeligAvgift: EndeligAvgiftValg? = null,
         manueltAvgiftBeloep: BigDecimal? = null,
     ): ÅrsavregningModel {
@@ -476,7 +476,7 @@ class ÅrsavregningService(
             throw RuntimeException("Årsavregning med id: $aarsavregningId hører ikke til Behandling med Id: $behandlingID")
         }
 
-        if (trygdeavgiftFraAvgiftssystemet != null) årsavregning.trygdeavgiftFraAvgiftssystemet = trygdeavgiftFraAvgiftssystemet
+        if (innbetaltTrygdeavgift != null) årsavregning.innbetaltTrygdeavgift = innbetaltTrygdeavgift
         if (beregnetAvgiftBelop != null) årsavregning.beregnetAvgiftBelop = beregnetAvgiftBelop
         if (manueltAvgiftBeloep != null) årsavregning.manueltAvgiftBeloep = manueltAvgiftBeloep
         if (endeligAvgift != null) {
@@ -511,10 +511,10 @@ data class ÅrsavregningModel(
     val beregnetAvgiftBelop: BigDecimal? = null,
     val tilFaktureringBeloep: BigDecimal? = null,
     val harInnbetaltTrygdeavgift: Boolean? = null,
-    val trygdeavgiftFraAvgiftssystemet: BigDecimal? = null,
+    val innbetaltTrygdeavgift: BigDecimal? = null,
     val endeligAvgiftValg: EndeligAvgiftValg? = null,
     val manueltAvgiftBeloep: BigDecimal? = null,
-    val tidligereTrygdeavgiftFraAvgiftssystemet: BigDecimal? = null,
+    val tidligereInnbetaltTrygdeavgift: BigDecimal? = null,
     val tidligereÅrsavregningmanueltAvgiftBeloep: BigDecimal? = null,
     val harSkjoennsfastsattInntektsgrunnlag: Boolean
 )

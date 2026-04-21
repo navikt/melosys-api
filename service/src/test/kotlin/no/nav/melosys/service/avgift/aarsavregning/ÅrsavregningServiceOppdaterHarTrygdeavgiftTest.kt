@@ -68,7 +68,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
                 harInnbetaltTrygdeavgift shouldBe true
                 tilFaktureringBeloep shouldBe null
                 tidligereFakturertBeloep shouldBe BigDecimal.ONE
-                trygdeavgiftFraAvgiftssystemet shouldBe null
+                innbetaltTrygdeavgift shouldBe null
             }
 
         }
@@ -150,7 +150,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
             harInnbetaltTrygdeavgift shouldBe false
             tilFaktureringBeloep shouldBe null
             tidligereFakturertBeloep shouldBe BigDecimal(50)
-            trygdeavgiftFraAvgiftssystemet shouldBe null
+            innbetaltTrygdeavgift shouldBe null
         }
     }
 
@@ -192,7 +192,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
                 harInnbetaltTrygdeavgift shouldBe true
                 tilFaktureringBeloep shouldBe null
                 tidligereFakturertBeloep shouldBe BigDecimal(50)
-                trygdeavgiftFraAvgiftssystemet shouldBe null
+                innbetaltTrygdeavgift shouldBe null
             }
             medlemskapsperioder.shouldHaveSize(2) shouldBe eksisterendeMedlemskapsperioder
         }
@@ -231,7 +231,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
             harInnbetaltTrygdeavgift shouldBe true
             tilFaktureringBeloep shouldBe null
             tidligereFakturertBeloep shouldBe BigDecimal(50)
-            trygdeavgiftFraAvgiftssystemet shouldBe null
+            innbetaltTrygdeavgift shouldBe null
         }
     }
 
@@ -304,7 +304,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
         behandlingsresultatCaptor.captured.årsavregning.shouldNotBeNull().run {
             harInnbetaltTrygdeavgift shouldBe false
             tilFaktureringBeloep shouldBe null
-            trygdeavgiftFraAvgiftssystemet shouldBe null
+            innbetaltTrygdeavgift shouldBe null
         }
     }
 }

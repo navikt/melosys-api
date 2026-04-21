@@ -69,7 +69,7 @@ class ÅrsavregningController(
             behandlingID,
             aarsavregningID,
             årsavregningOppdaterRequest.avregning.beregnetAvgiftBelop,
-            årsavregningOppdaterRequest.avregning.trygdeavgiftFraAvgiftssystemet,
+            årsavregningOppdaterRequest.avregning.innbetaltTrygdeavgift,
             manueltAvgiftBeloep = årsavregningOppdaterRequest.avregning.manueltAvgiftBeloep
         )
 
@@ -173,7 +173,7 @@ class ÅrsavregningController(
                 beregnetAvgiftBelop = årsavregningModel.beregnetAvgiftBelop,
                 tidligereFakturertBeloep = årsavregningModel.tidligereFakturertBeloep,
                 tilFaktureringBeloep = årsavregningModel.tilFaktureringBeloep,
-                trygdeavgiftFraAvgiftssystemet = årsavregningModel.trygdeavgiftFraAvgiftssystemet,
+                innbetaltTrygdeavgift = årsavregningModel.innbetaltTrygdeavgift,
                 manueltAvgiftBeloep = årsavregningModel.manueltAvgiftBeloep,
             ),
             harInnbetaltTrygdeavgift = årsavregningModel.harInnbetaltTrygdeavgift,
@@ -208,7 +208,7 @@ class ÅrsavregningController(
                     totalInntekt = TotalbeløpBeregner.hentTotalinntekt(årsavregningModel.tidligereAvgift),
                     totalAvgift = TotalbeløpBeregner.hentTotalavgift(årsavregningModel.tidligereAvgift) ?: BigDecimal.ZERO
                 ),
-                tidligereTrygdeavgiftFraAvgiftssystemet = årsavregningModel.tidligereTrygdeavgiftFraAvgiftssystemet,
+                tidligereInnbetaltTrygdeavgift = årsavregningModel.tidligereInnbetaltTrygdeavgift,
                 tidligereÅrsavregningManueltAvgiftBeloep = årsavregningModel.tidligereÅrsavregningmanueltAvgiftBeloep
             )
         }
@@ -317,7 +317,7 @@ data class ÅrsavregningOppdaterRequest(
 data class TidligereGrunnlagsOpplysningerDto(
     val trygdeavgiftsgrunnlag: TrygdeavgiftsgrunnlagDto,
     val avgift: AvgiftDto,
-    val tidligereTrygdeavgiftFraAvgiftssystemet: BigDecimal?,
+    val tidligereInnbetaltTrygdeavgift: BigDecimal?,
     val tidligereÅrsavregningManueltAvgiftBeloep: BigDecimal?,
 )
 
@@ -352,6 +352,6 @@ data class AvregningDto(
     val beregnetAvgiftBelop: BigDecimal?,
     val tidligereFakturertBeloep: BigDecimal?,
     val tilFaktureringBeloep: BigDecimal?,
-    val trygdeavgiftFraAvgiftssystemet: BigDecimal?,
+    val innbetaltTrygdeavgift: BigDecimal?,
     val manueltAvgiftBeloep: BigDecimal?,
 )

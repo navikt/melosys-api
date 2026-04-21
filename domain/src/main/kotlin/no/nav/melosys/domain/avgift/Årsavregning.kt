@@ -35,8 +35,8 @@ class Årsavregning(
     @Column(name = "har_innbetalt_trygdeavgift")
     var harInnbetaltTrygdeavgift: Boolean? = null,
 
-    @Column(name = "trygdeavgift_fra_avgiftssystemet")
-    var trygdeavgiftFraAvgiftssystemet: BigDecimal? = null,
+    @Column(name = "innbetalt_trygdeavgift")
+    var innbetaltTrygdeavgift: BigDecimal? = null,
 
     @Column(name = "manuelt_avgift_beloep")
     var manueltAvgiftBeloep: BigDecimal? = null,
@@ -70,16 +70,16 @@ class Årsavregning(
 
         tilFaktureringBeloep = (manueltAvgiftBeloep ?: beregnetAvgiftBelop)!!
             .subtract(tidligereFakturertBeloep ?: BigDecimal.ZERO)
-            .subtract(trygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO)
-            .add(hentTidligereTrygdeavgiftFraAvgiftssystemet())
+            .subtract(innbetaltTrygdeavgift ?: BigDecimal.ZERO)
+            .add(hentTidligereInnbetaltTrygdeavgift())
     }
 
-    private fun hentTidligereTrygdeavgiftFraAvgiftssystemet(): BigDecimal {
+    private fun hentTidligereInnbetaltTrygdeavgift(): BigDecimal {
         if (tidligereBehandlingsresultat?.årsavregning == null) {
             return BigDecimal.ZERO
         }
 
-        return tidligereBehandlingsresultat!!.årsavregning!!.trygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO
+        return tidligereBehandlingsresultat!!.årsavregning!!.innbetaltTrygdeavgift ?: BigDecimal.ZERO
     }
 
     companion object // for å kunne legge på test forTest DSL

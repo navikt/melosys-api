@@ -134,7 +134,7 @@ class ÅrsavregningVedtakMapper(
         (årsavregning.harInnbetaltTrygdeavgift == null || årsavregning.harInnbetaltTrygdeavgift != true) && årsavregning.tidligereTrygdeavgiftsGrunnlag != null
 
     private fun totaltTidligereFakturertBeloep(årsavregning: ÅrsavregningModel): BigDecimal {
-        return (årsavregning.tidligereFakturertBeloep ?: BigDecimal.ZERO) + (årsavregning.trygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO)
+        return (årsavregning.tidligereFakturertBeloep ?: BigDecimal.ZERO) + (årsavregning.innbetaltTrygdeavgift ?: BigDecimal.ZERO)
     }
 
     private fun finnFullmektigTrygdeavgift(behandling: Behandling): String? =

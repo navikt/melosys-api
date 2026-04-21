@@ -71,7 +71,7 @@ class SendFakturaÅrsavregning(
         val sluttDatoFormatert = FORMATTER.format(sluttDato)
         val harTidligereÅrsavregning = årsavregning.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
         val tidligereFakturertSum = (årsavregning.tidligereFakturertBeloep ?: BigDecimal.ZERO).add(
-            årsavregning.trygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO
+            årsavregning.innbetaltTrygdeavgift ?: BigDecimal.ZERO
         )
 
         return FakturaDto(
