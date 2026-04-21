@@ -3,11 +3,9 @@ package no.nav.melosys.service
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.TidligereMedlemsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us
@@ -47,8 +45,8 @@ class LovvalgsperiodeService(
 
     @Transactional
     fun oppdaterLovvalgsperiode(lovvalgsperiodeId: Long, lovvalgsperiode: Lovvalgsperiode): Lovvalgsperiode {
-        val lagretLovvalgsperiode = lovvalgsperiodeRepo.findById(lovvalgsperiodeId)
-            .orElseThrow { FunksjonellException("Lovvalgsperiode med id $lovvalgsperiodeId finnes ikke") }
+        val lagretLovvalgsperiode = lovvalgsperiodeRepo.findById(lovvalgsperiodeId).getOrNull()
+            ?: throw FunksjonellException("Lovvalgsperiode med id $lovvalgsperiodeId finnes ikke")
 
         lagretLovvalgsperiode.apply {
             fom = lovvalgsperiode.fom
@@ -75,19 +73,12 @@ class LovvalgsperiodeService(
     }
 
     @Transactional
-    fun slettLovvalgsperioder(behandlingsresultatID: Long) {
-        val behandlingsresultat = behandlingsresultatRepo.findById(behandlingsresultatID)
-            .orElseThrow { FunksjonellException("Fant ikke behandlingsresultat med id $behandlingsresultatID") }
-        behandlingsresultat.clearLovvalgsperioder()
-    }
-
-    @Transactional
     fun lagreLovvalgsperioder(
         behandlingID: Long,
         lovvalgsperioder: Collection<Lovvalgsperiode>
     ): Collection<Lovvalgsperiode> {
-        val behandlingsresultat = behandlingsresultatRepo.findById(behandlingID)
-            .orElseThrow { IllegalStateException("Behandling med id $behandlingID fins ikke.") }
+        val behandlingsresultat = behandlingsresultatRepo.findById(behandlingID).getOrNull()
+            ?: throw IllegalStateException("Behandlingsresultat med id $behandlingID fins ikke.")
 
         // Må kopiere FØR sletting siden trygdeavgiftsperioder kopieres fra eksisterende lovvalgsperioder
         val nyePerioder = lovvalgsperioder.map {
@@ -112,7 +103,7 @@ class LovvalgsperiodeService(
 
     fun hentTidligereLovvalgsperioder(behandling: Behandling): Collection<Lovvalgsperiode> {
         val utvalgtePeriodeIDer = tidligereMedlemsperiodeRepository.findById_BehandlingId(behandling.id)
-            .map { utvalgtPeriode: TidligereMedlemsperiode -> utvalgtPeriode.id.periodeId }
+            .map { it.id.periodeId }
             .toSet()
 
         if (utvalgtePeriodeIDer.isEmpty()) {
@@ -121,7 +112,7 @@ class LovvalgsperiodeService(
 
         val perioder = behandling.hentMedlemskapDokument()
             .medlemsperiode
-            .filter { periode: Medlemsperiode -> utvalgtePeriodeIDer.contains(periode.id) }
+            .filter { utvalgtePeriodeIDer.contains(it.id) }
             .toSet()
 
         return perioder.map { periode ->
@@ -140,16 +131,15 @@ class LovvalgsperiodeService(
     }
 
     fun hentOpprinneligLovvalgsperiode(behandlingId: Long): Lovvalgsperiode {
-        val behandling = behandlingRepository.findById(behandlingId)
-            .orElseThrow { IkkeFunnetException("Fant ingen behandling for $behandlingId") }
+        val behandling = behandlingRepository.findById(behandlingId).getOrNull()
+            ?: throw IkkeFunnetException("Fant ingen behandling for $behandlingId")
 
         val opprinneligBehandling = behandling.opprinneligBehandling
             ?: throw IkkeFunnetException("Fant ingen opprinnelig behandling for $behandlingId")
 
-        val lovvalgsperiodeList = lovvalgsperiodeRepo.findByBehandlingsresultatId(opprinneligBehandling.id)
-
-        return lovvalgsperiodeList
-            .firstOrNull() ?: throw IkkeFunnetException("Fant ingen opprinnelig lovvalgsperiode for $behandlingId")
+        return lovvalgsperiodeRepo.findByBehandlingsresultatId(opprinneligBehandling.id)
+            .firstOrNull()
+            ?: throw IkkeFunnetException("Fant ingen opprinnelig lovvalgsperiode for $behandlingId")
     }
 
     fun finnOpprinneligLovvalgsperiode(behandlingId: Long): Lovvalgsperiode? =
