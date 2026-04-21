@@ -96,12 +96,12 @@ class LovvalgsperiodeService(
 
         slettEksisterendeLovvalgsperioder(behandlingsresultat)
 
-        return lovvalgsperiodeRepo.saveAllAndFlush(nyePerioder)
+        behandlingsresultat.lovvalgsperioder.addAll(nyePerioder)
+        return nyePerioder
     }
 
     private fun slettEksisterendeLovvalgsperioder(behandlingsresultat: Behandlingsresultat) {
-        val eksisterende = lovvalgsperiodeRepo.findByBehandlingsresultatId(behandlingsresultat.hentId())
-        if (eksisterende.isEmpty()) {
+        if (behandlingsresultat.lovvalgsperioder.isEmpty()) {
             return
         }
 
