@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.melosysskjema
 
 import mu.KotlinLogging
+import no.nav.melosys.skjema.types.m2m.RegistrerSaksnummerRequest
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
@@ -21,6 +22,18 @@ class MelosysSkjemaApiClient(private val melosysSkjemaApiWebClient: WebClient) {
             .retrieve()
             .bodyToMono(UtsendtArbeidstakerSkjemaM2MDto::class.java)
             .block() ?: error("Kunne ikke hente skjema for ID $skjemaId")
+    }
+
+    fun registrerSaksnummer(skjemaId: UUID, saksnummer: String) {
+        log.info("Registrerer saksnummer {} for skjema {}", saksnummer, skjemaId)
+
+        melosysSkjemaApiWebClient.post()
+            .uri("/m2m/api/skjema/{id}/saksnummer", skjemaId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(RegistrerSaksnummerRequest(saksnummer))
+            .retrieve()
+            .toBodilessEntity()
+            .block()
     }
 
     fun hentPdf(skjemaId: UUID): ByteArray {

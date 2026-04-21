@@ -8,11 +8,12 @@ import no.nav.melosys.domain.arkiv.OpprettJournalpost
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.integrasjon.melosysskjema.MelosysSkjemaApiClient
 import no.nav.melosys.saksflyt.steg.StegBehandler
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey.SØKNADSDATA
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey.DIGITAL_SØKNADSDATA
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.service.sak.SkjemaSakMappingService
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.springframework.stereotype.Component
@@ -36,14 +37,15 @@ private const val NAV_NO = "NAV_NO"
  * - OPPRETT_SAK_OG_BEHANDLING_SØKNAD har kjørt og satt behandling på prosessinstansen
  */
 @Component
-class OpprettOgFerdigstillJournalpostSøknad(
+class OpprettOgFerdigstillJournalpostDigitalSøknad(
     private val melosysSkjemaApiClient: MelosysSkjemaApiClient,
     private val joarkFasade: JoarkFasade,
     private val behandlingService: BehandlingService,
-    private val persondataFasade: PersondataFasade
+    private val persondataFasade: PersondataFasade,
+    private val skjemaSakMappingService: SkjemaSakMappingService
 ) : StegBehandler {
 
-    override fun inngangsSteg(): ProsessSteg = ProsessSteg.OPPRETT_OG_FERDIGSTILL_JOURNALPOST_SØKNAD
+    override fun inngangsSteg(): ProsessSteg = ProsessSteg.OPPRETT_OG_FERDIGSTILL_JOURNALPOST_DIGITAL_SØKNAD
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandling = requireNotNull(prosessinstans.behandling) {
@@ -51,7 +53,7 @@ class OpprettOgFerdigstillJournalpostSøknad(
         }
         val fagsak = behandling.fagsak
 
-        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(SØKNADSDATA)
+        val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(DIGITAL_SØKNADSDATA)
         val skjema = søknadsdata.skjema
         val skjemaId = skjema.id
         val brukerFnr = skjema.fnr
@@ -64,6 +66,7 @@ class OpprettOgFerdigstillJournalpostSøknad(
         val pdf = melosysSkjemaApiClient.hentPdf(skjemaId)
         val innsenderNavn = persondataFasade.hentSammensattNavn(innsenderFnr)
 
+        //TODO: Hent vedlegg fra melosys-skjema-api og legg til som vedleggsdokumenter på journalposten (egen task/PR - MELOSYS-8030)
         val opprettJournalpost = OpprettJournalpost().apply {
             hoveddokument = FysiskDokument.lagFysiskDokumentDigitalSøknad(pdf, tittel)
             innhold = tittel
@@ -82,8 +85,13 @@ class OpprettOgFerdigstillJournalpostSøknad(
 
         val journalpostId = joarkFasade.opprettJournalpost(opprettJournalpost, true)
 
-        behandling.initierendeJournalpostId = journalpostId
-        behandlingService.lagre(behandling)
+        // Eksisterende-sak-flyten gjenbruker behandling som allerede kan ha en journalpost
+        if (behandling.initierendeJournalpostId == null) {
+            behandling.initierendeJournalpostId = journalpostId
+            behandlingService.lagre(behandling)
+        }
+
+        skjemaSakMappingService.oppdaterJournalpostId(skjemaId, journalpostId)
 
         log.info { "Opprettet journalpost $journalpostId for digital søknad referanseId=$referanseId" }
     }
