@@ -109,16 +109,6 @@ object UtsendtArbeidstakerSøknadMapper {
         søknad.arbeidssituasjonOgOevrig = mapArbeidssituasjonOgOevrig(data)
     }
 
-    // --- Søknadsland ---
-
-    private fun mapSoeknadsland(landkode: LandKode?): Soeknadsland =
-        Soeknadsland(landkode?.let { listOf(it.name) } ?: emptyList(), false)
-
-    // --- Periode ---
-
-    private fun mapPeriode(periodeDto: PeriodeDto?): Periode =
-        periodeDto?.let { Periode(it.fraDato, it.tilDato) } ?: Periode()
-
     // --- Personopplysninger ---
 
     private fun mapPersonopplysninger(

@@ -105,4 +105,5 @@ abstract class UtsendtArbeidstakerSkjemaM2MDtoMixin @JsonCreator constructor(
 
 abstract class SkjemaMottattMeldingMixin @JsonCreator constructor(
     @JsonProperty("skjemaId") skjemaId: UUID,
+    @JsonProperty("relaterteSkjemaIder") relaterteSkjemaIder: List<UUID>,
 )

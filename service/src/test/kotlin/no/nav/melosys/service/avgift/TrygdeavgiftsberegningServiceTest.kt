@@ -480,8 +480,8 @@ internal class TrygdeavgiftsberegningServiceTest {
                     trygdesats.shouldBe(BigDecimal.ZERO)
                     trygdeavgiftsbeløpMd.shouldBe(Penger(BigDecimal.ZERO))
                     grunnlagSkatteforholdTilNorge.shouldNotBeNull().run {
-                        fomDato.shouldBe(LocalDate.of(2024, 3, 1))
-                        tomDato.shouldBe(LocalDate.of(2024, 12, 31))
+                        fomDato.shouldBe(fomToÅr)
+                        tomDato.shouldBe(tomToÅr)
                         skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
                     }
                     grunnlagInntekstperiode.shouldBeNull()
@@ -492,8 +492,8 @@ internal class TrygdeavgiftsberegningServiceTest {
                     periodeFra.shouldBe(LocalDate.of(2025, 1, 1))
                     periodeTil.shouldBe(LocalDate.of(2025, 6, 30))
                     grunnlagSkatteforholdTilNorge.shouldNotBeNull().run {
-                        fomDato.shouldBe(LocalDate.of(2025, 1, 1))
-                        tomDato.shouldBe(LocalDate.of(2025, 6, 30))
+                        fomDato.shouldBe(fomToÅr)
+                        tomDato.shouldBe(tomToÅr)
                         skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
                     }
                     grunnlagInntekstperiode.shouldBeNull()
