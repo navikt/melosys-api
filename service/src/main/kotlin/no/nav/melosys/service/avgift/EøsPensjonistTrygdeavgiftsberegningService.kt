@@ -50,16 +50,14 @@ class EøsPensjonistTrygdeavgiftsberegningService(
 
         require(helseutgiftDekkesPerioder.isNotEmpty()) { "Ingen helseutgift dekkes perioder funnet for behandling $behandlingID" }
 
-        helseutgiftDekkesPerioder.forEach { periode ->
-            EøsPensjonistTrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
-                periode,
-                skatteforholdsperioder,
-                inntektsperioder,
-                behandlingsresultat,
-                unleash,
-                dagensDato
-            )
-        }
+        EøsPensjonistTrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
+            helseutgiftDekkesPerioder.toList(),
+            skatteforholdsperioder,
+            inntektsperioder,
+            behandlingsresultat,
+            unleash,
+            dagensDato
+        )
 
         val nyeTrygdeavgiftsperioder =
             lagNyeTrygdeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
@@ -93,6 +91,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
 
         return helseutgiftDekkesPerioder.flatMap { helseutgiftDekkesPeriode ->
             beregnTrygdeavgiftForEnkeltPeriode(behandlingsresultat, helseutgiftDekkesPeriode, skatteforholdsperioder, inntektsperioder, dagensDato)
+                .onEach { it.grunnlagHelseutgiftDekkesPeriode = helseutgiftDekkesPeriode }
         }
     }
 

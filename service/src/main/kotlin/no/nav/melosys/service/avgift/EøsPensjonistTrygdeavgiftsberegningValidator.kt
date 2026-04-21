@@ -27,13 +27,17 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
     val log = mu.KotlinLogging.logger {}
 
     fun validerForTrygdeavgiftberegning(
-        helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode,
+        helseutgiftDekkesPerioder: List<HelseutgiftDekkesPeriode>,
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsperioder: List<Inntektsperiode>,
         behandlingsresultat: Behandlingsresultat,
         unleash: Unleash,
         dagensDato: LocalDate = LocalDate.now()
     ) {
+        require(helseutgiftDekkesPerioder.isNotEmpty()) { "Ingen helseutgift dekkes perioder" }
+
+        val samletFom = helseutgiftDekkesPerioder.minOf { it.fomDato }
+        val samletTom = helseutgiftDekkesPerioder.maxOf { it.tomDato }
 
         validerInntektsperioder(inntektsperioder, skatteforholdsperioder)
         validerSkatteforholdsperioder(skatteforholdsperioder)
@@ -45,19 +49,20 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
         ) && unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
 
         if (harIkkeTidligerePerioderValidering) {
-            validerIkkeTidligerePerioder(skatteforholdsperioder, inntektsperioder, helseutgiftDekkesPeriode, dagensDato)
+            validerIkkeTidligerePerioder(skatteforholdsperioder, inntektsperioder, samletFom, samletTom, dagensDato)
         } else {
             validerPerioderDekkerSammenlignetPeriode(
                 kanOverlappe = false,
                 skatteforholdsperioder,
-                helseutgiftDekkesPeriode,
+                samletFom,
+                samletTom,
                 SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
             )
         }
 
         if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && inntektsperioder.isNotEmpty()) {
             validerInntektsperioderErIkkeUtenforMedlemskapPeriode(
-                inntektsperioder, helseutgiftDekkesPeriode
+                inntektsperioder, samletFom, samletTom
             )
         }
 
@@ -66,7 +71,8 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
             validerPerioderDekkerSammenlignetPeriode(
                 kanOverlappe = true,
                 inntektsperioder,
-                helseutgiftDekkesPeriode,
+                samletFom,
+                samletTom,
                 INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
             )
         }
@@ -76,30 +82,26 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
     private fun validerIkkeTidligerePerioder(
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsperioder: List<Inntektsperiode>,
-        helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode,
+        samletFom: LocalDate,
+        samletTom: LocalDate,
         dagensDato: LocalDate = LocalDate.now()
     ) {
         if (skatteforholdsperioder.any { it.fom.year < dagensDato.year } || inntektsperioder.any { it.fom.year < dagensDato.year }) {
             throw FunksjonellException(INNTEKT_OG_SKATT_IKKE_TIDLIGERE_ÅR)
         }
 
-        val helseutgiftDekkesPeriodeIDetteOgFremtidigÅr =
-            if (helseutgiftDekkesPeriode.fomDato.year < dagensDato.year) {
-                HelseutgiftDekkesPeriode(
-                    behandlingsresultat = helseutgiftDekkesPeriode.behandlingsresultat,
-                    fomDato = LocalDate.of(dagensDato.year, 1, 1),
-                    tomDato = helseutgiftDekkesPeriode.tomDato,
-                    bostedLandkode = helseutgiftDekkesPeriode.bostedLandkode
-                )
-            } else {
-                helseutgiftDekkesPeriode
-            }
+        val justerFom = if (samletFom.year < dagensDato.year) {
+            LocalDate.of(dagensDato.year, 1, 1)
+        } else {
+            samletFom
+        }
 
 
         validerPerioderDekkerSammenlignetPeriode(
             kanOverlappe = false,
             skatteforholdsperioder,
-            helseutgiftDekkesPeriodeIDetteOgFremtidigÅr,
+            justerFom,
+            samletTom,
             INNTEKT_OG_SKATT_MÅ_DEKKE_HELSEUTGIFTPERIODE_FOR_INNEVÆRENDE_OG_FREMTIDIG
         )
         val erSkattepliktigIHelePerioden = skatteforholdsperioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
@@ -107,7 +109,8 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
             validerPerioderDekkerSammenlignetPeriode(
                 kanOverlappe = true,
                 inntektsperioder,
-                helseutgiftDekkesPeriodeIDetteOgFremtidigÅr,
+                justerFom,
+                samletTom,
                 INNTEKT_OG_SKATT_MÅ_DEKKE_HELSEUTGIFTPERIODE_FOR_INNEVÆRENDE_OG_FREMTIDIG
             )
         }
@@ -115,18 +118,16 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
 
     private fun validerInntektsperioderErIkkeUtenforMedlemskapPeriode(
         kildeperioder: List<ErPeriode>,
-        helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode,
+        samletFom: LocalDate,
+        samletTom: LocalDate,
     ) {
         val kildeperiodeStart = kildeperioder.minOf { it.fom }
         val kildeperiodeEnd = kildeperioder.maxOf { it.tom }
 
-        val helseutgiftDekkesPeriodeStart = helseutgiftDekkesPeriode.fomDato
-        val helseutgiftDekkesPeriodeSlutt = helseutgiftDekkesPeriode.tomDato
-
-        if (kildeperiodeStart.isBefore(helseutgiftDekkesPeriodeStart)) throw FunksjonellException(
+        if (kildeperiodeStart.isBefore(samletFom)) throw FunksjonellException(
             INNTEKTSPERIODE_ER_UTENFOR_HELSEUTGIFT_DEKKES_PERIODE
         )
-        if (kildeperiodeEnd.isAfter(helseutgiftDekkesPeriodeSlutt)) throw FunksjonellException(INNTEKTSPERIODE_ER_UTENFOR_HELSEUTGIFT_DEKKES_PERIODE)
+        if (kildeperiodeEnd.isAfter(samletTom)) throw FunksjonellException(INNTEKTSPERIODE_ER_UTENFOR_HELSEUTGIFT_DEKKES_PERIODE)
     }
 
     fun erAllePerioderSkattepliktige(skatteforholdsPerioder: List<SkatteforholdTilNorge>): Boolean {
@@ -136,16 +137,14 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
     private fun validerPerioderDekkerSammenlignetPeriode(
         kanOverlappe: Boolean,
         kildeperioder: List<ErPeriode>,
-        helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode,
+        samletFom: LocalDate,
+        samletTom: LocalDate,
         feilmelding: String
     ) {
         val kildeperiodeStart = kildeperioder.minOf { it.fom }
         val kildeperiodeEnd = kildeperioder.maxOf { it.tom }
 
-        val helseutgiftDekkesPeriodeStart = helseutgiftDekkesPeriode.fomDato
-        val helseutgiftDekkesPeriodeSlutt = helseutgiftDekkesPeriode.tomDato
-
-        if (!(kildeperiodeStart.isEqual(helseutgiftDekkesPeriodeStart) && kildeperiodeEnd.isEqual(helseutgiftDekkesPeriodeSlutt))) {
+        if (!(kildeperiodeStart.isEqual(samletFom) && kildeperiodeEnd.isEqual(samletTom))) {
             throw FunksjonellException(feilmelding)
         }
 
