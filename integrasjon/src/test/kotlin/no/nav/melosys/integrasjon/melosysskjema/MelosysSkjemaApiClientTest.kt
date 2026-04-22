@@ -161,4 +161,24 @@ class MelosysSkjemaApiClientTest(
                 .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
         )
     }
+
+    @Test
+    fun `registrerSaksnummer - sender POST med saksnummer`() {
+        val skjemaId = UUID.randomUUID()
+        val saksnummer = "MEL-1234"
+
+        wireMockServer.stubFor(
+            WireMock.post(WireMock.urlPathEqualTo("/m2m/api/skjema/$skjemaId/saksnummer"))
+                .willReturn(WireMock.aResponse().withStatus(204))
+        )
+
+        melosysSkjemaApiClient.registrerSaksnummer(skjemaId, saksnummer)
+
+        wireMockServer.verify(
+            WireMock.postRequestedFor(WireMock.urlPathEqualTo("/m2m/api/skjema/$skjemaId/saksnummer"))
+                .withHeader("Authorization", WireMock.matching("Bearer .+"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withRequestBody(WireMock.matchingJsonPath("$.saksnummer", WireMock.equalTo(saksnummer)))
+        )
+    }
 }
