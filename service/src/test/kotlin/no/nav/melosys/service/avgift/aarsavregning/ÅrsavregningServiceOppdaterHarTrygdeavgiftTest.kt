@@ -38,7 +38,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
     }
 
     @Test
-    fun `setter harTrygdeavgiftFraAvgiftssystemet og nullstiller felt`() {
+    fun `setter harInnbetaltTrygdeavgift og nullstiller felt`() {
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 id = 1L
@@ -51,7 +51,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
                 tidligereBehandlingsresultat = Behandlingsresultat.forTest()
                 tilFaktureringBeloep = BigDecimal.TEN
                 tidligereFakturertBeloep = BigDecimal.ONE
-                trygdeavgiftFraAvgiftssystemet = BigDecimal.ONE
+                innbetaltTrygdeavgift = BigDecimal.ONE
             }
         }
 
@@ -75,7 +75,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
     }
 
     @Test
-    fun `tilbakestiller medlemskapsperioder når harTrygdeavgiftFraAvgiftssystemet settes til false`() {
+    fun `tilbakestiller medlemskapsperioder når harInnbetaltTrygdeavgift settes til false`() {
 
         // Lag tidligereBehandlingsresultat med medlemskapsperioder for 2023
         val tidligereBehandlingsresultat = Behandlingsresultat.forTest {
@@ -107,7 +107,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
             this.harInnbetaltTrygdeavgift = true
             this.tilFaktureringBeloep = BigDecimal.valueOf(100)
             this.tidligereFakturertBeloep = BigDecimal.valueOf(50)
-            this.trygdeavgiftFraAvgiftssystemet = BigDecimal.valueOf(50)
+            this.innbetaltTrygdeavgift = BigDecimal.valueOf(50)
         }
 
         behandlingsresultat.årsavregning = årsavregning
@@ -155,7 +155,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
     }
 
     @Test
-    fun `beholder eksisterende medlemskapsperioder når harTrygdeavgiftFraAvgiftssystemet settes til true`() {
+    fun `beholder eksisterende medlemskapsperioder når harInnbetaltTrygdeavgift settes til true`() {
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 id = 1L
@@ -169,7 +169,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
                 harInnbetaltTrygdeavgift = false
                 tilFaktureringBeloep = BigDecimal.valueOf(100)
                 tidligereFakturertBeloep = BigDecimal.valueOf(50)
-                trygdeavgiftFraAvgiftssystemet = BigDecimal.valueOf(50)
+                innbetaltTrygdeavgift = BigDecimal.valueOf(50)
             }
 
             medlemskapsperiode("2023-01-01", "2023-05-31")
@@ -212,7 +212,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
                 this.tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
                 this.tilFaktureringBeloep = BigDecimal.valueOf(100)
                 this.tidligereFakturertBeloep = BigDecimal.valueOf(50)
-                this.trygdeavgiftFraAvgiftssystemet = BigDecimal.valueOf(50)
+                this.innbetaltTrygdeavgift = BigDecimal.valueOf(50)
                 this.harInnbetaltTrygdeavgift = false
             }
             medlemskapsperiode("2023-01-01", "2023-05-31")
@@ -236,7 +236,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
     }
 
     @Test
-    fun `tilbakestiller helseutgiftDekkesPeriode når harTrygdeavgiftFraAvgiftssystemet settes til false for EØS pensjonist`() {
+    fun `tilbakestiller helseutgiftDekkesPeriode når harInnbetaltTrygdeavgift settes til false for EØS pensjonist`() {
         val fagsak = Fagsak.forTest {
             saksnummer = "123456"
             type = Sakstyper.EU_EOS

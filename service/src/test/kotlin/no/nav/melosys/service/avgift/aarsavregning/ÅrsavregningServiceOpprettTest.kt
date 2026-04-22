@@ -154,7 +154,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             årsavregning {
                 id = 112
                 aar = 2023
-                trygdeavgiftFraAvgiftssystemet = BigDecimal("5000")
+                innbetaltTrygdeavgift = BigDecimal("5000")
             }
             registrertDato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
             vedtakMetadata {

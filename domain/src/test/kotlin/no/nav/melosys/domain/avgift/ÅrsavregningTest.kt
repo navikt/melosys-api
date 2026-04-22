@@ -22,7 +22,7 @@ class ÅrsavregningTest {
         val årsavregning = Årsavregning.forTest {
             beregnetAvgiftBelop = BigDecimal(1000)
             harInnbetaltTrygdeavgift = true
-            trygdeavgiftFraAvgiftssystemet = BigDecimal(200)
+            innbetaltTrygdeavgift = BigDecimal(200)
         }
 
         årsavregning.beregnTilFaktureringsBeloep()
@@ -47,7 +47,7 @@ class ÅrsavregningTest {
         val årsavregning = Årsavregning.forTest {
             beregnetAvgiftBelop = BigDecimal(1000)
             harInnbetaltTrygdeavgift = true
-            trygdeavgiftFraAvgiftssystemet = BigDecimal(200)
+            innbetaltTrygdeavgift = BigDecimal(200)
             tidligereFakturertBeloep = BigDecimal(200)
         }
 

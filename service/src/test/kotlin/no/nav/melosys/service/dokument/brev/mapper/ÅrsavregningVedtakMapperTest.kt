@@ -150,7 +150,7 @@ class ÅrsavregningVedtakMapperTest {
         val grunnlagMedlemskap = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
 
 
-        // kun reelle verdier for (tidligereFakturertBeloep, trygdeavgiftFraAvgiftssystemet, beregnetAvgiftBelop, tilFaktureringBeloep)
+        // kun reelle verdier for (tidligereFakturertBeloep, innbetaltTrygdeavgift, beregnetAvgiftBelop, tilFaktureringBeloep)
         val årsavregningModel = ÅrsavregningModel(
             årsavregningID = 112,
             år = 2024,
@@ -192,7 +192,7 @@ class ÅrsavregningVedtakMapperTest {
         val grunnlagMedlemskap = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
 
 
-        // kun reelle verdier for (tidligereFakturertBeloep, trygdeavgiftFraAvgiftssystemet, nyttTotalbeloep, tilFaktureringBeloep)
+        // kun reelle verdier for (tidligereFakturertBeloep, innbetaltTrygdeavgift, nyttTotalbeloep, tilFaktureringBeloep)
         val årsavregningModel = ÅrsavregningModel(
             årsavregningID = 112,
             år = 2024,

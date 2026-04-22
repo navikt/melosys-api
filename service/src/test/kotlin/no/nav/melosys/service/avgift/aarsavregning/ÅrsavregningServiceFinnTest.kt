@@ -151,7 +151,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             årsavregning {
                 id = 101
                 aar = 2023
-                trygdeavgiftFraAvgiftssystemet = BigDecimal("5000.00")
+                innbetaltTrygdeavgift = BigDecimal("5000.00")
                 manueltAvgiftBeloep = BigDecimal("5500.00")
             }
         }
@@ -184,7 +184,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
                 beregnetAvgiftBelop = BigDecimal("6500.00")
                 tilFaktureringBeloep = BigDecimal("500.00")
                 harInnbetaltTrygdeavgift = true
-                trygdeavgiftFraAvgiftssystemet = BigDecimal("6200.00")
+                innbetaltTrygdeavgift = BigDecimal("6200.00")
                 endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
                 manueltAvgiftBeloep = null
                 harSkjoennsfastsattInntektsgrunnlag = false
@@ -210,7 +210,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             årsavregning {
                 id = 103
                 aar = 2023
-                trygdeavgiftFraAvgiftssystemet = BigDecimal("7000.00")
+                innbetaltTrygdeavgift = BigDecimal("7000.00")
                 manueltAvgiftBeloep = BigDecimal("7500.00")
             }
         }
@@ -266,7 +266,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
                 beregnetAvgiftBelop = BigDecimal("1500.00")
                 tilFaktureringBeloep = BigDecimal("500.00")
                 harInnbetaltTrygdeavgift = true
-                trygdeavgiftFraAvgiftssystemet = BigDecimal("1200.00")
+                innbetaltTrygdeavgift = BigDecimal("1200.00")
                 endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
                 manueltAvgiftBeloep = null
                 harSkjoennsfastsattInntektsgrunnlag = false
@@ -328,7 +328,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
                 beregnetAvgiftBelop = BigDecimal("1500.00")
                 tilFaktureringBeloep = BigDecimal("500.00")
                 harInnbetaltTrygdeavgift = true
-                trygdeavgiftFraAvgiftssystemet = BigDecimal("1200.00")
+                innbetaltTrygdeavgift = BigDecimal("1200.00")
                 endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
                 manueltAvgiftBeloep = null
                 harSkjoennsfastsattInntektsgrunnlag = false
@@ -353,7 +353,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             årsavregning {
                 id = 50
                 aar = 2023
-                trygdeavgiftFraAvgiftssystemet = BigDecimal("8000.00")
+                innbetaltTrygdeavgift = BigDecimal("8000.00")
                 manueltAvgiftBeloep = BigDecimal("9000.00")
             }
             type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT

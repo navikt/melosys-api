@@ -55,7 +55,7 @@ internal class ÅrsavregningServiceOppdaterTest : ÅrsavregningServiceTestBase()
     }
 
     @Test
-    fun `tilFaktureringBeloep skal settes hvis avgift i avgiftssystemet og ny avgift ikke er null`() {
+    fun `tilFaktureringBeloep skal settes hvis innbetalt trygdeavgift og ny avgift ikke er null`() {
         val fagsak = Fagsak.forTest { }
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
@@ -78,7 +78,7 @@ internal class ÅrsavregningServiceOppdaterTest : ÅrsavregningServiceTestBase()
     }
 
     @Test
-    fun `tilFaktureringBeloep skal settes til diff mellom beregnetAvgiftBelop og avgift i avgiftssystemet og melosys`() {
+    fun `tilFaktureringBeloep skal settes til diff mellom beregnetAvgiftBelop og innbetalt trygdeavgift og melosys`() {
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 fagsak { }
@@ -101,7 +101,7 @@ internal class ÅrsavregningServiceOppdaterTest : ÅrsavregningServiceTestBase()
     }
 
     @Test
-    fun `harTrygdeavgiftFraAvgiftssystemet skal ikke settes hvis null`() {
+    fun `harInnbetaltTrygdeavgift skal ikke settes hvis null`() {
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 fagsak { }

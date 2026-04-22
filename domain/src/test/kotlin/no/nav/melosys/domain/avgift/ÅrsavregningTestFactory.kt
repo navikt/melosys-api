@@ -25,7 +25,7 @@ object ÅrsavregningTestFactory {
         var beregnetAvgiftBelop: BigDecimal? = null
         var tilFaktureringBeloep: BigDecimal? = null
         var harInnbetaltTrygdeavgift: Boolean? = null
-        var trygdeavgiftFraAvgiftssystemet: BigDecimal? = null
+        var innbetaltTrygdeavgift: BigDecimal? = null
         var manueltAvgiftBeloep: BigDecimal? = null
         var endeligAvgiftValg: EndeligAvgiftValg? = null
         var harSkjoennsfastsattInntektsgrunnlag: Boolean = false
@@ -39,7 +39,7 @@ object ÅrsavregningTestFactory {
             beregnetAvgiftBelop = beregnetAvgiftBelop,
             tilFaktureringBeloep = tilFaktureringBeloep,
             harInnbetaltTrygdeavgift = harInnbetaltTrygdeavgift,
-            innbetaltTrygdeavgift = trygdeavgiftFraAvgiftssystemet,
+            innbetaltTrygdeavgift = innbetaltTrygdeavgift,
             manueltAvgiftBeloep = manueltAvgiftBeloep,
             endeligAvgiftValg = endeligAvgiftValg,
             harSkjoennsfastsattInntektsgrunnlag = harSkjoennsfastsattInntektsgrunnlag
