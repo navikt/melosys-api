@@ -576,7 +576,7 @@ graph TD
 
 | # | Fil | Endring |
 |---|-----|---------|
-| 18 | `TrygdeavgiftsgrunnlagDto.kt` (integrasjon) | `medlemskapsperiodeId: UUID` → `medlemskapsperiodeId: UUID?` (nullable — kan være lovvalgsperiode eller helseutgiftDekkesPeriode i stedet). Vurder å legge til `lovvalgsperiodeId: UUID?` og `helseutgiftDekkesPeriodeId: UUID?` for fullstendig dekning. |
+| 18 | `TrygdeavgiftsgrunnlagDto.kt` (integrasjon) | Ingen endring — `medlemskapsperiodeId: UUID` forblir ikke-nullable. (Tidligere utkast foreslo nullable, men produsenten `melosys-trygdeavgift-beregning` sender alltid en gyldig UUID i denne flyten, og pensjonistflyten bruker sin egen `EøsPensjonistTrygdeavgiftsgrunnlagDto`.) |
 | 19 | `TrygdeavgiftsberegningResponse.kt` (integrasjon) | Behold `grunnlag`, legg til `grunnlagListe: List<TrygdeavgiftsgrunnlagDto>?` og `beregningstype: String?` |
 
 ##### Reverse relationships (JPA)

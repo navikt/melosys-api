@@ -5,7 +5,6 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.*
-import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
@@ -201,21 +200,21 @@ class TrygdeavgiftsberegningService(
         )
 
         // Legacy: sett avgiftspliktig periode via gamle FK-felt
-        legacyGrunnlag.medlemskapsperiodeId?.let { mpId ->
-            val avgiftspliktig = avgiftspliktigMap[mpId]
-                ?: error("Fant ingen avgiftspliktig periode med UUID $mpId")
-            trygdeavgiftsperiode.addGrunnlag(avgiftspliktig)
-        }
+        val legacyAvgiftspliktig = avgiftspliktigMap[legacyGrunnlag.medlemskapsperiodeId]
+            ?: error("Fant ingen avgiftspliktig periode med UUID ${legacyGrunnlag.medlemskapsperiodeId}")
+        trygdeavgiftsperiode.addGrunnlag(legacyAvgiftspliktig)
 
-        // Ny: opprett TrygdeavgiftsperiodeGrunnlag for hvert element
+        // Ny: opprett TrygdeavgiftsperiodeGrunnlag for hvert element.
+        // I denne flyten kan avgiftspliktig-periode kun være Medlemskapsperiode eller Lovvalgsperiode —
+        // pensjonistflyten bruker EøsPensjonistTrygdeavgiftsberegningService og går aldri hit.
         alleGrunnlag.forEach { grunnlagDto ->
-            val avgiftspliktig = grunnlagDto.medlemskapsperiodeId?.let { avgiftspliktigMap[it] }
+            val avgiftspliktig = avgiftspliktigMap[grunnlagDto.medlemskapsperiodeId]
+                ?: error("Fant ingen avgiftspliktig periode med UUID ${grunnlagDto.medlemskapsperiodeId}")
 
             val grunnlagEntitet = TrygdeavgiftsperiodeGrunnlag(
                 trygdeavgiftsperiode = trygdeavgiftsperiode,
                 medlemskapsperiode = avgiftspliktig as? Medlemskapsperiode,
                 lovvalgsperiode = avgiftspliktig as? Lovvalgsperiode,
-                helseutgiftDekkesPeriode = avgiftspliktig as? HelseutgiftDekkesPeriode,
                 inntektsperiode = inntektsperiodeMap[grunnlagDto.inntektsperiodeId]
                     ?: throw IllegalStateException("Fant ikke inntektsperiode ${grunnlagDto.inntektsperiodeId}"),
                 skatteforhold = skatteforholdMap[grunnlagDto.skatteforholdsperiodeId]
