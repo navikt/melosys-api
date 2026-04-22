@@ -109,9 +109,7 @@ internal class LovvalgsperiodeServiceTest {
     @Test
     fun lagreLovvalgsperioderReturnererLovvalgsperiodeMedBehandlingsresultat() {
         val lagretBehandlingsresultat = Behandlingsresultat.forTest { id = BEH_ID }
-        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(BEH_ID) } returns emptyList()
         every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.of(lagretBehandlingsresultat)
-        every { lovvalgsperiodeRepository.saveAllAndFlush(any<List<Lovvalgsperiode>>()) } answers { firstArg() }
 
 
         val lovvalgsPerioder = listOf(lovvalgsperiodeForTest())
@@ -131,7 +129,7 @@ internal class LovvalgsperiodeServiceTest {
         shouldThrow<IllegalStateException> {
             lovvalgsperiodeService
                 .lagreLovvalgsperioder(BEH_ID, lovvalgsperioder)
-        }.message shouldBe "Behandling med id 1 fins ikke."
+        }.message shouldBe "Behandlingsresultat med id 1 fins ikke."
     }
 
     @Test
