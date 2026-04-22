@@ -3,9 +3,7 @@ package no.nav.melosys.saksflyt.steg.satsendring
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import java.math.RoundingMode
-import no.nav.melosys.saksflyt.steg.fakturering.dekningTekst
-import no.nav.melosys.saksflyt.steg.fakturering.satsTekst
+import no.nav.melosys.saksflyt.steg.fakturering.mapTilFakturaperioder
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenClient
@@ -67,7 +65,10 @@ class BeregnOgSendFaktura(
             fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
             intervall = FaktureringIntervall.KVARTAL,
             referanseBruker = "Faktura for årlig satsoppdatering av trygdeavgift",
-            perioder = mapFakturaseriePeriodeDto(trygdeavgiftsperioder.filter { it.harAvgift() })
+            perioder = mapTilFakturaperioder(
+                    trygdeavgiftsperioder.filter { it.harAvgift() },
+                    prefiks = "Faktura for årlig satsoppdatering av trygdeavgift"
+                )
         )
     }
 
@@ -76,22 +77,6 @@ class BeregnOgSendFaktura(
             return behandlingsresultatService.hentBehandlingsresultat(behandling.hentOpprinneligBehandling().id).fakturaserieReferanse
         }
         return null
-    }
-
-    private fun mapFakturaseriePeriodeDto(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
-        return trygdeavgiftsperioder.map {
-            FakturaseriePeriodeDto(
-                it.trygdeavgiftsbeløpMd.hentVerdi().setScale(0, RoundingMode.HALF_UP),
-                it.periodeFra,
-                it.periodeTil,
-                listOfNotNull(
-                    "Faktura for årlig satsoppdatering av trygdeavgift",
-                    "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}",
-                    "Dekning: ${it.dekningTekst()}",
-                    it.satsTekst(),
-                ).joinToString(", ")
-            )
-        }
     }
 
 }

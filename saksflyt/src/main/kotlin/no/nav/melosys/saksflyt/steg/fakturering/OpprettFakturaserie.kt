@@ -5,8 +5,6 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import java.math.RoundingMode
-import no.nav.melosys.saksflyt.steg.fakturering.satsTekst
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.exception.FunksjonellException
@@ -151,10 +149,10 @@ class OpprettFakturaserie(
             fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
             intervall = hentBetalingsIntervall(prosessinstans),
             referanseBruker = if (erEøsPensjonist) "Informasjon om trygdeavgift datert $vedtaksdato" else "Vedtak om medlemskap datert $vedtaksdato",
-            perioder = if (erEøsPensjonist || erLovvalg)
-                mapFakturaseriePeriodeDtoUtenDekning(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() })
-            else
-                mapFakturaseriePeriodeDto(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() })
+            perioder = mapTilFakturaperioder(
+                    behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() },
+                    inkluderDekning = !erEøsPensjonist && !erLovvalg
+                )
         )
     }
 
@@ -181,34 +179,5 @@ class OpprettFakturaserie(
             .sortedByDescending { it.vedtakMetadata?.vedtaksdato }
             .map { it.fakturaserieReferanse }
             .firstOrNull()
-
-    private fun mapFakturaseriePeriodeDto(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
-        return trygdeavgiftsperioder.map {
-            FakturaseriePeriodeDto(
-                it.trygdeavgiftsbeløpMd.hentVerdi().setScale(0, RoundingMode.HALF_UP),
-                it.periodeFra,
-                it.periodeTil,
-                listOfNotNull(
-                    "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}",
-                    "Dekning: ${it.dekningTekst()}",
-                    it.satsTekst(),
-                ).joinToString(", ")
-            )
-        }
-    }
-
-    private fun mapFakturaseriePeriodeDtoUtenDekning(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
-        return trygdeavgiftsperioder.map {
-            FakturaseriePeriodeDto(
-                it.trygdeavgiftsbeløpMd.hentVerdi().setScale(0, RoundingMode.HALF_UP),
-                it.periodeFra,
-                it.periodeTil,
-                listOfNotNull(
-                    "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}",
-                    it.satsTekst(),
-                ).joinToString(", ")
-            )
-        }
-    }
 
 }
