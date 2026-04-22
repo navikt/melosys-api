@@ -4,7 +4,6 @@ import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import java.math.RoundingMode
 import java.time.LocalDate
 
 data class TrygdeavgiftsperiodeDto(
@@ -25,7 +24,7 @@ data class TrygdeavgiftsperiodeDto(
             trygdedekning = trygdeavgiftsperiode.hentGrunnlagAvgiftsperiode().hentTrygdedekning(),
             trygdeavgiftsperiode.grunnlagInntekstperiode?.type,
             trygdeavgiftsperiode.trygdesats?.toDouble(),
-            trygdeavgiftsperiode.trygdeavgiftsbeløpMd.hentVerdi().setScale(0, RoundingMode.HALF_UP).intValueExact(),
+            trygdeavgiftsperiode.trygdeavgiftsbeløpMd.hentVerdi().toInt(),
             trygdeavgiftsperiode.beregningsregel.takeIf { it != Avgiftsberegningsregel.ORDINÆR }?.name,
             harSammenslåtteInntektskilder = trygdeavgiftsperiode.grunnlagListe
                 .map { it.inntektsperiode.type }
