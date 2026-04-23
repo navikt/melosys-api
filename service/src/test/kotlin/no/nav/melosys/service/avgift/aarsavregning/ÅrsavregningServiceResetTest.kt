@@ -178,11 +178,11 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
             tidligereFakturertBeloep = BigDecimal.valueOf(4500000, 2),
             beregnetAvgiftBelop = null,
             tilFaktureringBeloep = null,
-            harTrygdeavgiftFraAvgiftssystemet = null,
-            trygdeavgiftFraAvgiftssystemet = null,
+            harInnbetaltTrygdeavgift = null,
+            innbetaltTrygdeavgift = null,
             endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
             manueltAvgiftBeloep = null,
-            tidligereTrygdeavgiftFraAvgiftssystemet = null,
+            tidligereInnbetaltTrygdeavgift = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null,
             harSkjoennsfastsattInntektsgrunnlag = false
         )
