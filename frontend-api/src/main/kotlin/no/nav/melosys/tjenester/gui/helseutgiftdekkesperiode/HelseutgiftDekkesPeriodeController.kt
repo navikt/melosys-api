@@ -85,8 +85,8 @@ class HelseutgiftDekkesPeriodeController(
         return ResponseEntity.noContent().build()
     }
 
-    private fun validerOgParseLandkode(bostedLandkode: String?): Land_iso2 {
-        if (bostedLandkode.isNullOrBlank()) {
+    private fun validerOgParseLandkode(bostedLandkode: String): Land_iso2 {
+        if (bostedLandkode.isBlank()) {
             throw FunksjonellException("Bosted landkode er påkrevd")
         }
         if (!Land_iso2.values().any { it.kode == bostedLandkode }) {
@@ -101,7 +101,7 @@ data class HelseutgiftDekkesPeriodeDto(
     val id: Long? = null,
     val fomDato: LocalDate,
     val tomDato: LocalDate,
-    val bostedLandkode: String? = null,
+    val bostedLandkode: String,
 ) {
     companion object {
         fun av(helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode): HelseutgiftDekkesPeriodeDto {

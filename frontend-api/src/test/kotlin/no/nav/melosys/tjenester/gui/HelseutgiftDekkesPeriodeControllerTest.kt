@@ -66,7 +66,7 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
                 any(),
                 helseutgiftDekkesPeriodeDto.fomDato,
                 helseutgiftDekkesPeriodeDto.tomDato,
-                Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode!!)
+                Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode)
             )
         } returns helseutgiftDekkesPeriode
 
@@ -117,7 +117,7 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
                 any(),
                 helseutgiftDekkesPeriodeDto.fomDato,
                 helseutgiftDekkesPeriodeDto.tomDato,
-                Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode!!)
+                Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode)
             )
         } returns ny
 
