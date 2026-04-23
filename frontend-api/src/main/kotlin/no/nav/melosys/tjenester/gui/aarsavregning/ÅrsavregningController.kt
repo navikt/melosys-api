@@ -154,7 +154,7 @@ class ÅrsavregningController(
                     )
 
                     is HelseutgiftDekkesPeriodeForAvgift -> AvgiftspliktigPeriodeDto(
-                        id = it.id ?: 0,
+                        id = it.id,
                         fomDato = it.fom,
                         tomDato = it.tom,
                         bestemmelse = null,
@@ -245,7 +245,7 @@ class ÅrsavregningController(
                     )
 
                     is HelseutgiftDekkesPeriodeForAvgift -> AvgiftspliktigPeriodeDto(
-                        id = it.id ?: 0,
+                        id = it.id,
                         fomDato = it.fom,
                         tomDato = it.tom,
                         bestemmelse = null,

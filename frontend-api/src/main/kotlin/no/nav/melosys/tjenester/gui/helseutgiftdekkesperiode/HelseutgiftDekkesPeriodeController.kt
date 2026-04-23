@@ -89,10 +89,8 @@ class HelseutgiftDekkesPeriodeController(
         if (bostedLandkode.isBlank()) {
             throw FunksjonellException("Bosted landkode er påkrevd")
         }
-        if (!Land_iso2.values().any { it.kode == bostedLandkode }) {
-            throw FunksjonellException("Landkode er ikke gyldig")
-        }
-        return Land_iso2.valueOf(bostedLandkode)
+        return Land_iso2.values().firstOrNull { it.kode == bostedLandkode }
+            ?: throw FunksjonellException("Landkode er ikke gyldig")
     }
 }
 
