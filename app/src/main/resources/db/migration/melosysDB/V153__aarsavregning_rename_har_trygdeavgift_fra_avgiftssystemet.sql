@@ -1,0 +1,2 @@
+ALTER TABLE aarsavregning RENAME COLUMN har_trygdeavgift_fra_avgiftssystemet TO har_innbetalt_trygdeavgift;
+ALTER TABLE aarsavregning RENAME COLUMN trygdeavgift_fra_avgiftssystemet TO innbetalt_trygdeavgift;

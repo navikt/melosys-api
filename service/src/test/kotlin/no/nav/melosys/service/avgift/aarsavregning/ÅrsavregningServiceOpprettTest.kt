@@ -154,7 +154,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             årsavregning {
                 id = 112
                 aar = 2023
-                trygdeavgiftFraAvgiftssystemet = BigDecimal("5000")
+                innbetaltTrygdeavgift = BigDecimal("5000")
             }
             registrertDato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
             vedtakMetadata {
@@ -239,11 +239,11 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             tidligereFakturertBeloep = BigDecimal("25000.00"),
             beregnetAvgiftBelop = null,
             tilFaktureringBeloep = null,
-            harTrygdeavgiftFraAvgiftssystemet = true,
-            trygdeavgiftFraAvgiftssystemet = BigDecimal("5000"),
+            harInnbetaltTrygdeavgift = true,
+            innbetaltTrygdeavgift = BigDecimal("5000"),
             endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
             manueltAvgiftBeloep = null,
-            tidligereTrygdeavgiftFraAvgiftssystemet = BigDecimal("5000"),
+            tidligereInnbetaltTrygdeavgift = BigDecimal("5000"),
             tidligereÅrsavregningmanueltAvgiftBeloep = null,
             harSkjoennsfastsattInntektsgrunnlag = false
         )
