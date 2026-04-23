@@ -32,6 +32,8 @@ import no.nav.melosys.service.oppgave.OppgaveService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.context.ApplicationEventPublisher
 import java.time.Instant
 import java.time.LocalDate
@@ -532,6 +534,10 @@ class BehandlingServiceTest {
         }
 
         every { behandlingRepository.findById(BEHANDLING_ID) } returns Optional.of(behandling)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns Behandlingsresultat.forTest {
+            id = BEHANDLING_ID
+            type = Behandlingsresultattyper.IKKE_FASTSATT
+        }
         every { behandlingRepository.save(any()) } answers { firstArg() }
         every { utkastBrevService.hentUtkast(BEHANDLING_ID) } returns emptyList()
         every { lovligeKombinasjonerSaksbehandlingService.validerNyStatusMulig(any(), AVSLUTTET) } just Runs
@@ -549,6 +555,32 @@ class BehandlingServiceTest {
         savedSlot.captured.status shouldBe AVSLUTTET
         eventSlot.captured.behandlingID shouldBe BEHANDLING_ID
         eventSlot.captured.behandlingsstatus shouldBe AVSLUTTET
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Behandlingstyper::class, names = ["FØRSTEGANG", "NY_VURDERING"])
+    fun `avsluttBehandling med anmodning om unntak oppdaterer behandlingsresultat til ferdigbehandlet`(behandlingstype: Behandlingstyper) {
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            status = UNDER_BEHANDLING
+            type = behandlingstype
+        }
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = BEHANDLING_ID
+            type = Behandlingsresultattyper.ANMODNING_OM_UNNTAK
+        }
+
+        every { behandlingRepository.findById(BEHANDLING_ID) } returns Optional.of(behandling)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET) } just Runs
+        every { behandlingRepository.save(any()) } answers { firstArg() }
+        every { utkastBrevService.hentUtkast(BEHANDLING_ID) } returns emptyList()
+
+        behandlingService.avsluttBehandling(BEHANDLING_ID)
+
+        verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET) }
+        verify { behandlingRepository.save(any()) }
+        verify { applicationEventPublisher.publishEvent(any<BehandlingEndretStatusEvent>()) }
     }
 
     @Test
@@ -589,6 +621,10 @@ class BehandlingServiceTest {
         }
 
         every { behandlingRepository.findById(BEHANDLING_ID) } returns Optional.of(behandling)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns Behandlingsresultat.forTest {
+            id = BEHANDLING_ID
+            type = Behandlingsresultattyper.IKKE_FASTSATT
+        }
         every { behandlingRepository.save(any()) } answers { firstArg() }
         every { utkastBrevService.hentUtkast(BEHANDLING_ID) } returns emptyList()
         every { lovligeKombinasjonerSaksbehandlingService.validerNyStatusMulig(any(), AVSLUTTET) } just Runs
@@ -618,6 +654,10 @@ class BehandlingServiceTest {
         }
 
         every { behandlingRepository.findById(BEHANDLING_ID) } returns Optional.of(behandling)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns Behandlingsresultat.forTest {
+            id = BEHANDLING_ID
+            type = Behandlingsresultattyper.IKKE_FASTSATT
+        }
         every { behandlingRepository.save(any()) } answers { firstArg() }
         every { utkastBrevService.hentUtkast(BEHANDLING_ID) } returns emptyList()
         every { lovligeKombinasjonerSaksbehandlingService.validerNyStatusMulig(any(), AVSLUTTET) } just Runs
@@ -636,6 +676,10 @@ class BehandlingServiceTest {
         }
 
         every { behandlingRepository.findById(BEHANDLING_ID) } returns Optional.of(behandling)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns Behandlingsresultat.forTest {
+            id = BEHANDLING_ID
+            type = Behandlingsresultattyper.IKKE_FASTSATT
+        }
         every { behandlingRepository.save(any()) } answers { firstArg() }
         every { utkastBrevService.hentUtkast(BEHANDLING_ID) } returns emptyList()
         every { lovligeKombinasjonerSaksbehandlingService.validerNyStatusMulig(any(), AVSLUTTET) } just Runs
