@@ -585,14 +585,14 @@ data class HelseutgiftDekkesPeriodeForAvgift(
         fom = helseutgiftDekkesPeriode.fomDato,
         tom = helseutgiftDekkesPeriode.tomDato,
         dekning = helseutgiftDekkesPeriode.hentTrygdedekning(),
-        id = helseutgiftDekkesPeriode.id!!,
+        id = helseutgiftDekkesPeriode.id ?: 0,
     )
 
     constructor(gjeldendeÅr: Int, helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode) : this(
         fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, helseutgiftDekkesPeriode.fomDato),
         tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, helseutgiftDekkesPeriode.tomDato),
         dekning = helseutgiftDekkesPeriode.hentTrygdedekning(),
-        id = helseutgiftDekkesPeriode.id!!,
+        id = helseutgiftDekkesPeriode.id ?: 0,
     )
 }
 
