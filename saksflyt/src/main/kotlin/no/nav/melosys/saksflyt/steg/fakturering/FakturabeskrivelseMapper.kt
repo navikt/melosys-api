@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.fakturering
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
+import java.math.RoundingMode
 
 internal const val DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL = "Helsedel"
 
@@ -24,7 +25,9 @@ private fun mapTilFakturaperiode(
     prefiks: String?,
     inkluderDekning: Boolean,
 ) = FakturaseriePeriodeDto(
-    enhetsprisPerManed = periode.trygdeavgiftsbeløpMd.hentVerdi(),
+    // Faktureringskomponenten bruker RoundingMode.UNNECESSARY ved sin interne beregning
+    // og kaster ArithmeticException hvis beløpet har flere desimaler enn forventet.
+    enhetsprisPerManed = periode.trygdeavgiftsbeløpMd.hentVerdi().setScale(0, RoundingMode.HALF_UP),
     startDato = periode.periodeFra,
     sluttDato = periode.periodeTil,
     beskrivelse = listOfNotNull(
