@@ -30,7 +30,10 @@ class HelseutgiftDekkesPeriodeService(
             fomDato = fomDato,
             tomDato = tomDato,
             bostedLandkode = bostedLandkode
-        )
+        ).apply {
+            val harEksisterendePeriode = behandlingsresultat.helseutgiftDekkesPerioder.isNotEmpty()
+            kilde = if (harEksisterendePeriode) HelseutgiftDekkesPeriodeKilde.AVGIFT_SYSTEMET else HelseutgiftDekkesPeriodeKilde.MELOSYS
+        }
 
         return helseutgiftDekkesPeriodeRepository.save(nyHelseutgiftDekkesPeriode)
     }
@@ -75,8 +78,17 @@ class HelseutgiftDekkesPeriodeService(
     @Transactional
     fun slettHelseutgiftDekkesPeriode(behandlingID: Long, periodeId: Long) {
         val periode = hentOgValiderPeriode(periodeId, behandlingID)
-        periode.clearTrygdeavgiftsperioder()
-        helseutgiftDekkesPeriodeRepository.delete(periode)
+        val behandlingsresultat = periode.behandlingsresultat
+
+        // Må fjerne trygdeavgiftsperioder på ALLE helseutgift-perioder for denne behandlingen,
+        // fordi de kan dele inntektsperioder/skatteforhold via CascadeType.ALL.
+        // Ellers får vi FK-brudd (ORA-02292) når orphanRemoval prøver å slette delte rader.
+        behandlingsresultat.clearTrygdeavgiftPåHelseutgiftDekkesPerioder()
+
+        // Fjerner fra samlingen — orphanRemoval på Behandlingsresultat.helseutgiftDekkesPerioder
+        // sørger for at Hibernate sletter perioden fra databasen
+        behandlingsresultat.helseutgiftDekkesPerioder.remove(periode)
+        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
     }
 
     @Transactional
@@ -94,10 +106,6 @@ class HelseutgiftDekkesPeriodeService(
             .orElseThrow { IkkeFunnetException(ikkeFunnetMelding) }
 
         if (periode.behandlingsresultat.hentId() != behandlingID) {
-            throw IkkeFunnetException(ikkeFunnetMelding)
-        }
-
-        if (periode.kilde != HelseutgiftDekkesPeriodeKilde.MELOSYS) {
             throw IkkeFunnetException(ikkeFunnetMelding)
         }
 

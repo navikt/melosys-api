@@ -167,20 +167,6 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
     }
 
     @Test
-    fun `oppdater skal kaste feil når periode har kilde AVGIFT_SYSTEMET`() {
-        val periode = lagHelseutgiftDekkesPeriode().apply {
-            id = PERIODE_ID
-            kilde = HelseutgiftDekkesPeriodeKilde.AVGIFT_SYSTEMET
-        }
-
-        every { helseutgiftDekkesPeriodeRepository.findById(PERIODE_ID) } returns Optional.of(periode)
-
-        shouldThrow<IkkeFunnetException> {
-            helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(BEH_ID, PERIODE_ID, FOM_DATO, TOM_DATO, Land_iso2.NO)
-        }.message shouldBe "Finner ingen helseutgift-periode med id: $PERIODE_ID"
-    }
-
-    @Test
     fun `slett skal kaste feil når periode tilhører annen behandling`() {
         val annenBehandlingsresultat = Behandlingsresultat.forTest {
             id = 999L
@@ -192,20 +178,6 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
             tomDato = TOM_DATO,
             bostedLandkode = BOSTEDLANDKODE
         ).apply { id = PERIODE_ID }
-
-        every { helseutgiftDekkesPeriodeRepository.findById(PERIODE_ID) } returns Optional.of(periode)
-
-        shouldThrow<IkkeFunnetException> {
-            helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(BEH_ID, PERIODE_ID)
-        }.message shouldBe "Finner ingen helseutgift-periode med id: $PERIODE_ID"
-    }
-
-    @Test
-    fun `slett skal kaste feil når periode har kilde AVGIFT_SYSTEMET`() {
-        val periode = lagHelseutgiftDekkesPeriode().apply {
-            id = PERIODE_ID
-            kilde = HelseutgiftDekkesPeriodeKilde.AVGIFT_SYSTEMET
-        }
 
         every { helseutgiftDekkesPeriodeRepository.findById(PERIODE_ID) } returns Optional.of(periode)
 

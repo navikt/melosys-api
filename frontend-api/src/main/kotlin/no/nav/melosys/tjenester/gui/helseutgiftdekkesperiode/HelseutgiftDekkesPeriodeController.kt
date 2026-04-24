@@ -30,15 +30,13 @@ class HelseutgiftDekkesPeriodeController(
     ): ResponseEntity<HelseutgiftDekkesPeriodeDto> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
-        if (!erGyldigLand(helseutgiftDekkesPeriodeDto.bostedLandkode)) {
-            throw FunksjonellException("Landkode er ikke gyldig")
-        }
+        val bostedLandkode = validerOgParseLandkode(helseutgiftDekkesPeriodeDto.bostedLandkode)
 
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.opprettHelseutgiftDekkesPeriode(
             behandlingID,
             helseutgiftDekkesPeriodeDto.fomDato,
             helseutgiftDekkesPeriodeDto.tomDato,
-            Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode)
+            bostedLandkode
         )
         return ResponseEntity.ok(HelseutgiftDekkesPeriodeDto.av(helseutgiftDekkesPeriode))
     }
@@ -51,16 +49,14 @@ class HelseutgiftDekkesPeriodeController(
     ): ResponseEntity<HelseutgiftDekkesPeriodeDto> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
-        if (!erGyldigLand(helseutgiftDekkesPeriodeDto.bostedLandkode)) {
-            throw FunksjonellException("Landkode er ikke gyldig")
-        }
+        val bostedLandkode = validerOgParseLandkode(helseutgiftDekkesPeriodeDto.bostedLandkode)
 
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(
             behandlingID,
             periodeId,
             helseutgiftDekkesPeriodeDto.fomDato,
             helseutgiftDekkesPeriodeDto.tomDato,
-            Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode)
+            bostedLandkode
         )
 
         return ResponseEntity.ok(HelseutgiftDekkesPeriodeDto.av(helseutgiftDekkesPeriode))
@@ -89,8 +85,12 @@ class HelseutgiftDekkesPeriodeController(
         return ResponseEntity.noContent().build()
     }
 
-    private fun erGyldigLand(land: String): Boolean {
-        return Land_iso2.values().any { it.kode == land }
+    private fun validerOgParseLandkode(bostedLandkode: String): Land_iso2 {
+        if (bostedLandkode.isBlank()) {
+            throw FunksjonellException("Bosted landkode er påkrevd")
+        }
+        return Land_iso2.values().firstOrNull { it.kode == bostedLandkode }
+            ?: throw FunksjonellException("Landkode er ikke gyldig")
     }
 }
 
