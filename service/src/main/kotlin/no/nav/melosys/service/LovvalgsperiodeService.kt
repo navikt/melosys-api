@@ -167,7 +167,7 @@ class LovvalgsperiodeService(
 
         nyLovvalgsperiode.trygdeavgiftsperioder = mutableSetOf()
         behandlingsresultat.trygdeavgiftsperioder
-            .map { kopierTrygdeavgiftsperiode(it) }
+            .map { kopierTrygdeavgiftsperiode(it, nyLovvalgsperiode) }
             .forEach(nyLovvalgsperiode::addTrygdeavgiftsperiode)
 
         return nyLovvalgsperiode
@@ -175,6 +175,7 @@ class LovvalgsperiodeService(
 
     private fun kopierTrygdeavgiftsperiode(
         trygdeavgiftsperiode: Trygdeavgiftsperiode,
+        lovvalgsperiode: Lovvalgsperiode,
     ): Trygdeavgiftsperiode {
         val kopi = trygdeavgiftsperiode.copyEntity(
             id = null,
@@ -186,7 +187,7 @@ class LovvalgsperiodeService(
             kopi.leggTilGrunnlag(
                 TrygdeavgiftsperiodeGrunnlag(
                     trygdeavgiftsperiode = kopi,
-                    lovvalgsperiode = null,
+                    lovvalgsperiode = lovvalgsperiode,
                     inntektsperiode = kopierInntektsperiode(orig.inntektsperiode)!!,
                     skatteforhold = kopierSkatteforhold(orig.skatteforhold)!!,
                 )
