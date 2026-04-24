@@ -2,10 +2,9 @@ package no.nav.melosys.service.avgift
 
 import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
@@ -174,34 +173,71 @@ class TrygdeavgiftsberegningService(
         behandlingsresultat: Behandlingsresultat,
         dagensDato: LocalDate = LocalDate.now()
     ): Trygdeavgiftsperiode {
-        val skatteforholdsperiodeID = response.grunnlag.skatteforholdsperiodeId
-        val inntektsperiodeID = response.grunnlag.inntektsperiodeId
+        val alleGrunnlag = response.grunnlagListe?.takeIf { it.isNotEmpty() } ?: listOf(response.grunnlag)
+        val beregningsregel = response.beregningsregel
+            ?.let { parseBeregningsregel(it) }
+            ?: Avgiftsberegningsregel.ORDINÆR
 
-        val grunnlagSkatteforholdTilNorge = skatteforholdsperioderMedUUID
-            .find { it.first == skatteforholdsperiodeID }?.second
-            ?: throw IllegalStateException("Fant ikke skatteforholdsperiode $skatteforholdsperiodeID")
+        val skatteforholdMap = skatteforholdsperioderMedUUID.toMap()
+        val inntektsperiodeMap = inntektsperioderMedUUID.toMap()
+        val avgiftspliktigMap = behandlingsresultat.finnAvgiftspliktigPerioder()
+            .associateBy { idToUUid(it.hentId()) }
 
-        val grunnlagInntekstperiode = inntektsperioderMedUUID
-            .find { it.first == inntektsperiodeID }?.second
-            ?: throw IllegalStateException("Fant ikke inntektsperiode $inntektsperiodeID")
+        // Legacy FK-felt speiler response.grunnlag ("siste/eneste") for bakoverkompatibilitet
+        val legacyGrunnlag = response.grunnlag
 
         val trygdeavgiftsperiode = Trygdeavgiftsperiode(
             periodeFra = response.beregnetPeriode.periode.fom,
             periodeTil = response.beregnetPeriode.periode.tom,
             trygdesats = response.beregnetPeriode.sats,
-            trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger(),
-            grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
-            grunnlagInntekstperiode = grunnlagInntekstperiode,
+            trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger().avrundTilHelKroner(),
+            grunnlagSkatteforholdTilNorge = skatteforholdMap[legacyGrunnlag.skatteforholdsperiodeId]
+                ?: throw IllegalStateException("Fant ikke skatteforholdsperiode ${legacyGrunnlag.skatteforholdsperiodeId}"),
+            grunnlagInntekstperiode = inntektsperiodeMap[legacyGrunnlag.inntektsperiodeId]
+                ?: throw IllegalStateException("Fant ikke inntektsperiode ${legacyGrunnlag.inntektsperiodeId}"),
+            beregningsregel = beregningsregel,
+            avgiftsdel = response.avgiftsdel?.let { parseAvgiftsdel(it) },
         )
 
-        val grunnlag = behandlingsresultat.finnAvgiftspliktigPerioder()
-            .find { idToUUid(it.hentId()) == response.grunnlag.medlemskapsperiodeId }
-            ?: error("Fant ingen avgiftspliktig periode med UUID ${response.grunnlag.medlemskapsperiodeId}")
+        // Legacy: sett avgiftspliktig periode via gamle FK-felt
+        val legacyAvgiftspliktig = avgiftspliktigMap[legacyGrunnlag.medlemskapsperiodeId]
+            ?: error("Fant ingen avgiftspliktig periode med UUID ${legacyGrunnlag.medlemskapsperiodeId}")
+        trygdeavgiftsperiode.addGrunnlag(legacyAvgiftspliktig)
 
-        trygdeavgiftsperiode.addGrunnlag(grunnlag)
+        // Ny: opprett TrygdeavgiftsperiodeGrunnlag for hvert element.
+        // I denne flyten kan avgiftspliktig-periode kun være Medlemskapsperiode eller Lovvalgsperiode —
+        // pensjonistflyten bruker EøsPensjonistTrygdeavgiftsberegningService og går aldri hit.
+        alleGrunnlag.forEach { grunnlagDto ->
+            val avgiftspliktig = avgiftspliktigMap[grunnlagDto.medlemskapsperiodeId]
+                ?: error("Fant ingen avgiftspliktig periode med UUID ${grunnlagDto.medlemskapsperiodeId}")
+
+            val grunnlagEntitet = TrygdeavgiftsperiodeGrunnlag(
+                trygdeavgiftsperiode = trygdeavgiftsperiode,
+                medlemskapsperiode = avgiftspliktig as? Medlemskapsperiode,
+                lovvalgsperiode = avgiftspliktig as? Lovvalgsperiode,
+                inntektsperiode = inntektsperiodeMap[grunnlagDto.inntektsperiodeId]
+                    ?: throw IllegalStateException("Fant ikke inntektsperiode ${grunnlagDto.inntektsperiodeId}"),
+                skatteforhold = skatteforholdMap[grunnlagDto.skatteforholdsperiodeId]
+                    ?: throw IllegalStateException("Fant ikke skatteforholdsperiode ${grunnlagDto.skatteforholdsperiodeId}"),
+            )
+            trygdeavgiftsperiode.leggTilGrunnlag(grunnlagEntitet)
+        }
 
         return trygdeavgiftsperiode
     }
+
+    private fun parseBeregningsregel(verdi: String): Avgiftsberegningsregel {
+        // Tolerant parsing: upstream-versjoner før norske tegn-oppdateringen sendte ASCII-aliaser
+        val normalisert = verdi.uppercase()
+            .replace("AE", "Æ")
+            .replace("OE", "Ø")
+        return Avgiftsberegningsregel.entries.firstOrNull { it.name == normalisert }
+            ?: Avgiftsberegningsregel.valueOf(verdi)
+    }
+
+    private fun parseAvgiftsdel(verdi: String): Avgiftsdel =
+        Avgiftsdel.entries.firstOrNull { it.name.equals(verdi, ignoreCase = true) }
+            ?: Avgiftsdel.valueOf(verdi)
 
     private fun hentFødselsdatoOmViHarTjenstligBehov(
         behandlingsresultatID: Long,

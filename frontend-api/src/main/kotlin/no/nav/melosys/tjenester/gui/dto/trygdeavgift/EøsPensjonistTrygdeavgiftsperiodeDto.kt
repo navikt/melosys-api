@@ -8,15 +8,22 @@ data class EøsPensjonistTrygdeavgiftsperiodeDto(
     val fom: LocalDate,
     val tom: LocalDate,
     val inntektskildetype: Inntektskildetype?,
-    val avgiftssats: Double,
-    val avgiftPerMd: Int
+    val avgiftssats: Double?,
+    val avgiftPerMd: Int,
+    val beregningsregel: String,
+    val harSammenslåtteInntektskilder: Boolean = false
 ) {
     constructor(trygdeavgiftsperiode: Trygdeavgiftsperiode) :
         this(
             trygdeavgiftsperiode.periodeFra,
             trygdeavgiftsperiode.periodeTil,
             trygdeavgiftsperiode.grunnlagInntekstperiode?.type,
-            trygdeavgiftsperiode.trygdesats.toDouble(),
-            trygdeavgiftsperiode.trygdeavgiftsbeløpMd.hentVerdi().toInt()
+            trygdeavgiftsperiode.trygdesats?.toDouble(),
+            trygdeavgiftsperiode.trygdeavgiftsbeløpMd.hentVerdi().intValueExact(),
+            trygdeavgiftsperiode.beregningsregel.name,
+            harSammenslåtteInntektskilder = trygdeavgiftsperiode.grunnlagListe
+                .map { it.inntektsperiode.type }
+                .distinct()
+                .size > 1
         )
 }

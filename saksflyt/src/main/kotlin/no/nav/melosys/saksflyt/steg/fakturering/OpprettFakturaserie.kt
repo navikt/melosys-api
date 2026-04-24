@@ -7,7 +7,6 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenClient
@@ -150,10 +149,10 @@ class OpprettFakturaserie(
             fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
             intervall = hentBetalingsIntervall(prosessinstans),
             referanseBruker = if (erEøsPensjonist) "Informasjon om trygdeavgift datert $vedtaksdato" else "Vedtak om medlemskap datert $vedtaksdato",
-            perioder = if (erEøsPensjonist || erLovvalg)
-                mapFakturaseriePeriodeDtoUtenDekning(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() })
-            else
-                mapFakturaseriePeriodeDto(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() })
+            perioder = mapTilFakturaperioder(
+                    behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() },
+                    inkluderDekning = !erEøsPensjonist && !erLovvalg
+                )
         )
     }
 
@@ -181,42 +180,4 @@ class OpprettFakturaserie(
             .map { it.fakturaserieReferanse }
             .firstOrNull()
 
-    private fun mapFakturaseriePeriodeDto(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
-        return trygdeavgiftsperioder.map {
-            FakturaseriePeriodeDto(
-                it.trygdeavgiftsbeløpMd.hentVerdi(),
-                it.periodeFra,
-                it.periodeTil,
-                "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}, " +
-                    "Dekning: ${mapDekning(it)}, " +
-                    "Sats: ${it.trygdesats} %"
-            )
-        }
-    }
-
-    private fun mapFakturaseriePeriodeDtoUtenDekning(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
-        return trygdeavgiftsperioder.map {
-            FakturaseriePeriodeDto(
-                it.trygdeavgiftsbeløpMd.hentVerdi(),
-                it.periodeFra,
-                it.periodeTil,
-                "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}, " +
-                    "Sats: ${it.trygdesats} %"
-            )
-        }
-    }
-
-    private fun mapDekning(trygdeavgiftsperiode: Trygdeavgiftsperiode): String {
-        if (trygdeavgiftsperiode.hentGrunnlagInntekstperiode().type === Inntektskildetype.PENSJON_UFØRETRYGD ||
-            trygdeavgiftsperiode.hentGrunnlagInntekstperiode().type === Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
-        ) {
-            return DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL
-        }
-
-        return trygdeavgiftsperiode.hentGrunnlagMedlemskapsperiode().hentTrygdedekning().beskrivelse
-    }
-
-    companion object {
-        const val DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL = "Helsedel"
-    }
 }

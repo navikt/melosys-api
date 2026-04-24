@@ -130,6 +130,6 @@ class SendPensjonsopptjeningHendelse(
             ?: error("Både manuelt og beregnet avgiftsbeløp mangler for årsavregning ${årsavregning.id}")
 
         // Konverter BigDecimal til Long (NOK-beløp)
-        return beløp.toLong()
+        return beløp.longValueExact()
     }
 }

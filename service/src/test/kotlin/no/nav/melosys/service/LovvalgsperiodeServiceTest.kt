@@ -4,6 +4,9 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.types.shouldBeSameInstanceAs
+import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.RelaxedMockK
@@ -11,9 +14,14 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.SaksopplysningType
 import no.nav.melosys.domain.TidligereMedlemsperiode
+import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeGrunnlag
+import no.nav.melosys.domain.avgift.forTest
+import no.nav.melosys.domain.avgift.inntektForTest
+import no.nav.melosys.domain.avgift.skatteforholdForTest
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
@@ -119,6 +127,48 @@ internal class LovvalgsperiodeServiceTest {
             }
     }
 
+
+    @Test
+    fun `lagreLovvalgsperioder kopierer grunnlagListe fra eksisterende trygdeavgiftsperioder`() {
+        val originalInntektsperiode = inntektForTest {}
+        val originalSkatteforhold = skatteforholdForTest {}
+
+        val behandling = Behandling.forTest { id = BEH_ID }
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = BEH_ID
+            this.behandling = behandling
+        }
+
+        val eksisterendeLovvalgsperiode = lovvalgsperiodeForTest { trygdeavgiftsperiode {} }
+        eksisterendeLovvalgsperiode.behandlingsresultat = behandlingsresultat
+        behandlingsresultat.lovvalgsperioder.add(eksisterendeLovvalgsperiode)
+
+        val eksisterendeTrygdeavgiftsperiode = eksisterendeLovvalgsperiode.trygdeavgiftsperioder.single()
+        eksisterendeTrygdeavgiftsperiode.leggTilGrunnlag(
+            TrygdeavgiftsperiodeGrunnlag(
+                trygdeavgiftsperiode = eksisterendeTrygdeavgiftsperiode,
+                inntektsperiode = originalInntektsperiode,
+                skatteforhold = originalSkatteforhold,
+            )
+        )
+
+        every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.of(behandlingsresultat)
+
+
+        val resultat = lovvalgsperiodeService.lagreLovvalgsperioder(BEH_ID, listOf(lovvalgsperiodeForTest()))
+
+
+        val kopiertLovvalgsperiode = resultat.single()
+        val kopiertAvgiftsperiode = kopiertLovvalgsperiode.trygdeavgiftsperioder.single()
+        kopiertAvgiftsperiode.grunnlagListe shouldHaveSize 1
+
+        with(kopiertAvgiftsperiode.grunnlagListe.single()) {
+            inntektsperiode shouldNotBeSameInstanceAs originalInntektsperiode
+            skatteforhold shouldNotBeSameInstanceAs originalSkatteforhold
+            trygdeavgiftsperiode shouldBe kopiertAvgiftsperiode
+            lovvalgsperiode shouldBeSameInstanceAs kopiertLovvalgsperiode
+        }
+    }
 
     @Test
     fun lagreLovvalgsperioderUtenBehandlingsresultatKasterException() {

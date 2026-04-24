@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeGrunnlag
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us
@@ -166,7 +167,7 @@ class LovvalgsperiodeService(
 
         nyLovvalgsperiode.trygdeavgiftsperioder = mutableSetOf()
         behandlingsresultat.trygdeavgiftsperioder
-            .map { kopierTrygdeavgiftsperiode(it) }
+            .map { kopierTrygdeavgiftsperiode(it, nyLovvalgsperiode) }
             .forEach(nyLovvalgsperiode::addTrygdeavgiftsperiode)
 
         return nyLovvalgsperiode
@@ -174,13 +175,26 @@ class LovvalgsperiodeService(
 
     private fun kopierTrygdeavgiftsperiode(
         trygdeavgiftsperiode: Trygdeavgiftsperiode,
-    ): Trygdeavgiftsperiode =
-        trygdeavgiftsperiode.copyEntity(
+        lovvalgsperiode: Lovvalgsperiode,
+    ): Trygdeavgiftsperiode {
+        val kopi = trygdeavgiftsperiode.copyEntity(
             id = null,
             grunnlagInntekstperiode = kopierInntektsperiode(trygdeavgiftsperiode.grunnlagInntekstperiode),
             grunnlagLovvalgsPeriode = null,
             grunnlagSkatteforholdTilNorge = kopierSkatteforhold(trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge),
         )
+        trygdeavgiftsperiode.grunnlagListe.forEach { orig ->
+            kopi.leggTilGrunnlag(
+                TrygdeavgiftsperiodeGrunnlag(
+                    trygdeavgiftsperiode = kopi,
+                    lovvalgsperiode = lovvalgsperiode,
+                    inntektsperiode = kopierInntektsperiode(orig.inntektsperiode)!!,
+                    skatteforhold = kopierSkatteforhold(orig.skatteforhold)!!,
+                )
+            )
+        }
+        return kopi
+    }
 
     private fun kopierInntektsperiode(original: Inntektsperiode?): Inntektsperiode? =
         original?.copyEntity(

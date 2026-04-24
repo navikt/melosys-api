@@ -3,8 +3,8 @@ package no.nav.melosys.saksflyt.steg.satsendring
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.saksflyt.steg.fakturering.mapTilFakturaperioder
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenClient
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
@@ -65,7 +65,10 @@ class BeregnOgSendFaktura(
             fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
             intervall = FaktureringIntervall.KVARTAL,
             referanseBruker = "Faktura for årlig satsoppdatering av trygdeavgift",
-            perioder = mapFakturaseriePeriodeDto(trygdeavgiftsperioder.filter { it.harAvgift() })
+            perioder = mapTilFakturaperioder(
+                    trygdeavgiftsperioder.filter { it.harAvgift() },
+                    prefiks = "Faktura for årlig satsoppdatering av trygdeavgift"
+                )
         )
     }
 
@@ -76,31 +79,4 @@ class BeregnOgSendFaktura(
         return null
     }
 
-    private fun mapFakturaseriePeriodeDto(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
-        return trygdeavgiftsperioder.map {
-            FakturaseriePeriodeDto(
-                it.trygdeavgiftsbeløpMd.hentVerdi(),
-                it.periodeFra,
-                it.periodeTil,
-                "Faktura for årlig satsoppdatering av trygdeavgift, " +
-                    "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}, " +
-                    "Dekning: ${mapDekning(it)}, " +
-                    "Sats: ${it.trygdesats} %"
-            )
-        }
-    }
-
-    private fun mapDekning(trygdeavgiftsperiode: Trygdeavgiftsperiode): String {
-        if (trygdeavgiftsperiode.hentGrunnlagInntekstperiode().type === Inntektskildetype.PENSJON_UFØRETRYGD ||
-            trygdeavgiftsperiode.hentGrunnlagInntekstperiode().type === Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
-        ) {
-            return DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL
-        }
-
-        return trygdeavgiftsperiode.hentGrunnlagMedlemskapsperiode().hentTrygdedekning().beskrivelse
-    }
-
-    companion object {
-        const val DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL = "Helsedel"
-    }
 }

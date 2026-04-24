@@ -2,6 +2,7 @@ package no.nav.melosys.domain.avgift
 
 import jakarta.persistence.Embeddable
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.util.*
 
 @Embeddable
@@ -15,6 +16,9 @@ class Penger(
     constructor(verdi: Double) : this(BigDecimal.valueOf(verdi))
 
     fun hentVerdi() = verdi ?: error("Verdi er påkrevd for Penger")
+
+    fun avrundTilHelKroner(): Penger =
+        Penger(verdi?.setScale(0, RoundingMode.DOWN), valuta)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
