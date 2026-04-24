@@ -36,8 +36,10 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
     ) {
         require(helseutgiftDekkesPerioder.isNotEmpty()) { "Ingen helseutgift dekkes perioder" }
 
-        val samletFom = helseutgiftDekkesPerioder.minOf { it.fomDato }
-        val samletTom = helseutgiftDekkesPerioder.maxOf { it.tomDato }
+        val avgiftsperiode = LocalDateRange.ofClosed(
+            helseutgiftDekkesPerioder.minOf { it.fomDato },
+            helseutgiftDekkesPerioder.maxOf { it.tomDato }
+        )
 
         validerInntektsperioder(inntektsperioder, skatteforholdsperioder)
         validerSkatteforholdsperioder(skatteforholdsperioder)
@@ -49,20 +51,19 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
         ) && unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
 
         if (harIkkeTidligerePerioderValidering) {
-            validerIkkeTidligerePerioder(skatteforholdsperioder, inntektsperioder, samletFom, samletTom, dagensDato)
+            validerIkkeTidligerePerioder(skatteforholdsperioder, inntektsperioder, avgiftsperiode, dagensDato)
         } else {
             validerPerioderDekkerSammenlignetPeriode(
                 kanOverlappe = false,
                 skatteforholdsperioder,
-                samletFom,
-                samletTom,
+                avgiftsperiode,
                 SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
             )
         }
 
         if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && inntektsperioder.isNotEmpty()) {
             validerInntektsperioderErIkkeUtenforMedlemskapPeriode(
-                inntektsperioder, samletFom, samletTom
+                inntektsperioder, avgiftsperiode
             )
         }
 
@@ -71,8 +72,7 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
             validerPerioderDekkerSammenlignetPeriode(
                 kanOverlappe = true,
                 inntektsperioder,
-                samletFom,
-                samletTom,
+                avgiftsperiode,
                 INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
             )
         }
@@ -82,26 +82,24 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
     private fun validerIkkeTidligerePerioder(
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsperioder: List<Inntektsperiode>,
-        samletFom: LocalDate,
-        samletTom: LocalDate,
+        avgiftsperiode: LocalDateRange,
         dagensDato: LocalDate = LocalDate.now()
     ) {
         if (skatteforholdsperioder.any { it.fom.year < dagensDato.year } || inntektsperioder.any { it.fom.year < dagensDato.year }) {
             throw FunksjonellException(INNTEKT_OG_SKATT_IKKE_TIDLIGERE_ÅR)
         }
 
-        val justerFom = if (samletFom.year < dagensDato.year) {
+        val justerFom = if (avgiftsperiode.start.year < dagensDato.year) {
             LocalDate.of(dagensDato.year, 1, 1)
         } else {
-            samletFom
+            avgiftsperiode.start
         }
-
+        val justertPeriode = LocalDateRange.ofClosed(justerFom, avgiftsperiode.endInclusive)
 
         validerPerioderDekkerSammenlignetPeriode(
             kanOverlappe = false,
             skatteforholdsperioder,
-            justerFom,
-            samletTom,
+            justertPeriode,
             INNTEKT_OG_SKATT_MÅ_DEKKE_HELSEUTGIFTPERIODE_FOR_INNEVÆRENDE_OG_FREMTIDIG
         )
         val erSkattepliktigIHelePerioden = skatteforholdsperioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
@@ -109,8 +107,7 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
             validerPerioderDekkerSammenlignetPeriode(
                 kanOverlappe = true,
                 inntektsperioder,
-                justerFom,
-                samletTom,
+                justertPeriode,
                 INNTEKT_OG_SKATT_MÅ_DEKKE_HELSEUTGIFTPERIODE_FOR_INNEVÆRENDE_OG_FREMTIDIG
             )
         }
@@ -118,16 +115,15 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
 
     private fun validerInntektsperioderErIkkeUtenforMedlemskapPeriode(
         kildeperioder: List<ErPeriode>,
-        samletFom: LocalDate,
-        samletTom: LocalDate,
+        avgiftsperiode: LocalDateRange,
     ) {
         val kildeperiodeStart = kildeperioder.minOf { it.fom }
         val kildeperiodeEnd = kildeperioder.maxOf { it.tom }
 
-        if (kildeperiodeStart.isBefore(samletFom)) throw FunksjonellException(
+        if (kildeperiodeStart.isBefore(avgiftsperiode.start)) throw FunksjonellException(
             INNTEKTSPERIODE_ER_UTENFOR_HELSEUTGIFT_DEKKES_PERIODE
         )
-        if (kildeperiodeEnd.isAfter(samletTom)) throw FunksjonellException(INNTEKTSPERIODE_ER_UTENFOR_HELSEUTGIFT_DEKKES_PERIODE)
+        if (kildeperiodeEnd.isAfter(avgiftsperiode.endInclusive)) throw FunksjonellException(INNTEKTSPERIODE_ER_UTENFOR_HELSEUTGIFT_DEKKES_PERIODE)
     }
 
     fun erAllePerioderSkattepliktige(skatteforholdsPerioder: List<SkatteforholdTilNorge>): Boolean {
@@ -137,14 +133,13 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
     private fun validerPerioderDekkerSammenlignetPeriode(
         kanOverlappe: Boolean,
         kildeperioder: List<ErPeriode>,
-        samletFom: LocalDate,
-        samletTom: LocalDate,
+        avgiftsperiode: LocalDateRange,
         feilmelding: String
     ) {
         val kildeperiodeStart = kildeperioder.minOf { it.fom }
         val kildeperiodeEnd = kildeperioder.maxOf { it.tom }
 
-        if (!(kildeperiodeStart.isEqual(samletFom) && kildeperiodeEnd.isEqual(samletTom))) {
+        if (!(kildeperiodeStart.isEqual(avgiftsperiode.start) && kildeperiodeEnd.isEqual(avgiftsperiode.endInclusive))) {
             throw FunksjonellException(feilmelding)
         }
 
