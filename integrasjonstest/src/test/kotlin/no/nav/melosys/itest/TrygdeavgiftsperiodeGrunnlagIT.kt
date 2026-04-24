@@ -49,14 +49,15 @@ class TrygdeavgiftsperiodeGrunnlagIT(
     fun `trygdeavgiftsperiode med grunnlagListe persisteres og lastes korrekt`() {
         val (original, _) = lagFagsakMedBehandlinger()
         val br = lagBehandlingsresultatMedTrygdeavgift(original, antallGrunnlag = 1)
-        behandlingsresultatRepository.save(br)
+        behandlingsresultatRepository.saveAndFlush(br)
+        entityManager.clear()
 
         val lastet = behandlingsresultatRepository.findById(original.id).get()
         val tap = lastet.trygdeavgiftsperioder.single()
 
         tap.grunnlagListe shouldHaveSize 1
         tap.beregningsregel shouldBe Avgiftsberegningsregel.ORDINÆR
-        tap.trygdesats shouldBe BigDecimal("6.80")
+        tap.trygdesats shouldBe BigDecimal("6.8")
 
         val grunnlag = tap.grunnlagListe.first()
         grunnlag.inntektsperiode.shouldNotBeNull()
@@ -68,7 +69,8 @@ class TrygdeavgiftsperiodeGrunnlagIT(
     fun `trygdeavgiftsperiode med flere grunnlag og nullable sats persisteres korrekt`() {
         val (original, _) = lagFagsakMedBehandlinger()
         val br = lagBehandlingsresultatMedTrygdeavgift(original, antallGrunnlag = 3, begrenset = true)
-        behandlingsresultatRepository.save(br)
+        behandlingsresultatRepository.saveAndFlush(br)
+        entityManager.clear()
 
         val lastet = behandlingsresultatRepository.findById(original.id).get()
         val tap = lastet.trygdeavgiftsperioder.single()
