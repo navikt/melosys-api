@@ -196,7 +196,7 @@ class TrygdeavgiftsberegningService(
             grunnlagInntekstperiode = inntektsperiodeMap[legacyGrunnlag.inntektsperiodeId]
                 ?: throw IllegalStateException("Fant ikke inntektsperiode ${legacyGrunnlag.inntektsperiodeId}"),
             beregningsregel = beregningsregel,
-            avgiftsdel = response.avgiftsdel,
+            avgiftsdel = response.avgiftsdel?.let { parseAvgiftsdel(it) },
         )
 
         // Legacy: sett avgiftspliktig periode via gamle FK-felt
@@ -234,6 +234,10 @@ class TrygdeavgiftsberegningService(
         return Avgiftsberegningsregel.entries.firstOrNull { it.name == normalisert }
             ?: Avgiftsberegningsregel.valueOf(verdi)
     }
+
+    private fun parseAvgiftsdel(verdi: String): Avgiftsdel =
+        Avgiftsdel.entries.firstOrNull { it.name.equals(verdi, ignoreCase = true) }
+            ?: Avgiftsdel.valueOf(verdi)
 
     private fun hentFødselsdatoOmViHarTjenstligBehov(
         behandlingsresultatID: Long,

@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 
+import no.nav.melosys.domain.avgift.Avgiftsdel
 import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
@@ -15,7 +16,7 @@ data class TrygdeavgiftsperiodeDto(
     val avgiftPerMd: Int,
     val beregningsregel: String? = null,
     val harSammenslåtteInntektskilder: Boolean = false,
-    val avgiftsdel: String? = null
+    val avgiftsdel: Avgiftsdel? = null
 ) {
     constructor(trygdeavgiftsperiode: Trygdeavgiftsperiode) :
         this(

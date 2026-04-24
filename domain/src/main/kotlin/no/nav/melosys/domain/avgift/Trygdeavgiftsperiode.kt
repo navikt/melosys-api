@@ -53,8 +53,9 @@ class Trygdeavgiftsperiode(
     @Enumerated(EnumType.STRING)
     val beregningsregel: Avgiftsberegningsregel = Avgiftsberegningsregel.ORDINÆR,
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "avgiftsdel")
-    val avgiftsdel: String? = null,
+    val avgiftsdel: Avgiftsdel? = null,
 
     ) : ErPeriode {
 
@@ -98,7 +99,7 @@ class Trygdeavgiftsperiode(
         grunnlagLovvalgsPeriode: Lovvalgsperiode? = this.grunnlagLovvalgsPeriode,
         grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = this.grunnlagSkatteforholdTilNorge,
         beregningsregel: Avgiftsberegningsregel = this.beregningsregel,
-        avgiftsdel: String? = this.avgiftsdel,
+        avgiftsdel: Avgiftsdel? = this.avgiftsdel,
     ) = Trygdeavgiftsperiode(
         id = id,
         periodeFra = periodeFra,
