@@ -4,11 +4,10 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import com.github.tomakehurst.wiremock.matching.UrlPattern
-import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.shouldBe
-import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.ClientWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -23,6 +22,7 @@ import org.springframework.test.context.ContextConfiguration
 @ContextConfiguration(
     classes = [
         SakClientConfig::class,
+        GenericAuthFilterFactory::class,
         OAuthMockServer::class
     ]
 )
@@ -38,28 +38,37 @@ class SakClientTokenTest(
     fun authorizationSkalKommeFraSystem() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Basic dGVzdDp0ZXN0")),
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
             )
         )
         executeFromSystem()
     }
 
     @Test
-    fun authorizationFraBruker_kasterException() {
-        setupWireMock()
-        shouldThrow<TekniskException> {
-            executeFromController()
-        }.message.shouldBe("Sak kan kun bli kalt i fra prosess")
+    fun authorizationSkalKommeFraBruker() {
+        verifyHeaders(
+            mapOf<String, StringValuePattern>(
+                Pair("Authorization", WireMock.equalTo("Bearer -- user_access_token --")),
+            )
+        )
+        executeFromController()
     }
 
     @Test
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Basic dGVzdDp0ZXN0")),
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
             )
         )
         executeRequest()
+    }
+
+    @Test
+    fun skalBrukeErrorFilterOgGiRiktigFeilmelding() {
+        executeErrorFromServer { error ->
+            Assertions.assertThat(error).startsWith("Kall mot Sak API feilet")
+        }
     }
 
     @Test
