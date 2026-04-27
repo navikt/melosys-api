@@ -140,7 +140,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         inntektsperioderMedUUID: List<Pair<UUID, Inntektsperiode>>,
         dagensDato: LocalDate
     ): Trygdeavgiftsperiode {
-        val alleGrunnlag = response.grunnlagListe ?: listOfNotNull(response.grunnlag)
+        val alleGrunnlag = response.grunnlagListe.ifEmpty { listOfNotNull(response.grunnlag) }
         val beregningsregel = response.beregningsregel
             ?.let { Avgiftsberegningsregel.valueOf(it) }
             ?: Avgiftsberegningsregel.ORDINÆR

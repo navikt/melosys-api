@@ -247,11 +247,19 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                 EøsPensjonistTrygdeavgiftsberegningResponse(
                     TrygdeavgiftsperiodeDto(
                         DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
-                    ), EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                    ),
+                    EøsPensjonistTrygdeavgiftsgrunnlagDto(
                         datoPeriodeDto,
                         notSoRandomUuid,
                         notSoRandomUuid
-                    )
+                    ),
+                    grunnlagListe = listOf(
+                        EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                            datoPeriodeDto,
+                            notSoRandomUuid,
+                            notSoRandomUuid
+                        )
+                    ),
                 )
             )
         )
@@ -322,11 +330,19 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                 EøsPensjonistTrygdeavgiftsberegningResponse(
                     TrygdeavgiftsperiodeDto(
                         DatoPeriodeDto(fomIFjor, tomIFjor), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
-                    ), EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                    ),
+                    EøsPensjonistTrygdeavgiftsgrunnlagDto(
                         datoPeriodeDto,
                         notSoRandomUuid,
                         notSoRandomUuid
-                    )
+                    ),
+                    grunnlagListe = listOf(
+                        EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                            datoPeriodeDto,
+                            notSoRandomUuid,
+                            notSoRandomUuid
+                        )
+                    ),
                 )
             )
         )
@@ -395,11 +411,19 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                 EøsPensjonistTrygdeavgiftsberegningResponse(
                     TrygdeavgiftsperiodeDto(
                         DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(0.0), NOK)
-                    ), EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                    ),
+                    EøsPensjonistTrygdeavgiftsgrunnlagDto(
                         datoPeriodeDto,
                         notSoRandomUuid,
                         notSoRandomUuid
-                    )
+                    ),
+                    grunnlagListe = listOf(
+                        EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                            datoPeriodeDto,
+                            notSoRandomUuid,
+                            notSoRandomUuid
+                        )
+                    ),
                 )
             )
         )
@@ -562,11 +586,19 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                 EøsPensjonistTrygdeavgiftsberegningResponse(
                     TrygdeavgiftsperiodeDto(
                         DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(123.0), NOK)
-                    ), EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                    ),
+                    EøsPensjonistTrygdeavgiftsgrunnlagDto(
                         datoPeriodeDto,
                         notSoRandomUuid,
                         notSoRandomUuid
-                    )
+                    ),
+                    grunnlagListe = listOf(
+                        EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                            datoPeriodeDto,
+                            notSoRandomUuid,
+                            notSoRandomUuid
+                        )
+                    ),
                 )
             )
         )

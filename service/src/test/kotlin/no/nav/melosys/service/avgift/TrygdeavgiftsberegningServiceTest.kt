@@ -150,11 +150,19 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
                         )
                     )
                 )
@@ -222,11 +230,19 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
                         )
                     )
                 )
@@ -287,11 +303,19 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
                         )
                     )
                 )
@@ -352,11 +376,19 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
                         )
                     )
                 )
@@ -589,11 +621,19 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(0.0), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
                         )
                     )
                 )
@@ -662,11 +702,19 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(0.0), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
                         )
                     )
                 )
@@ -735,11 +783,19 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(0.0), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
                         )
                     )
                 )
@@ -808,11 +864,19 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
                         )
                     )
                 )
@@ -887,11 +951,19 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(fomIFjor, tomIFjor), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
                         )
                     )
                 )
@@ -1167,11 +1239,19 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(123.0), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
                         )
                     )
                 )
@@ -2274,7 +2354,14 @@ internal class TrygdeavgiftsberegningServiceTest {
                             idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                             notSoRandomUuid,
                             notSoRandomUuid
-                        )
+                        ),
+                        grunnlagListe = listOf(
+                            TrygdeavgiftsgrunnlagDto(
+                                idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                notSoRandomUuid,
+                                notSoRandomUuid
+                            )
+                        ),
                     )
                 )
             )
@@ -2359,7 +2446,14 @@ internal class TrygdeavgiftsberegningServiceTest {
                             idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                             notSoRandomUuid,
                             notSoRandomUuid
-                        )
+                        ),
+                        grunnlagListe = listOf(
+                            TrygdeavgiftsgrunnlagDto(
+                                idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                notSoRandomUuid,
+                                notSoRandomUuid
+                            )
+                        ),
                     )
                 )
             )

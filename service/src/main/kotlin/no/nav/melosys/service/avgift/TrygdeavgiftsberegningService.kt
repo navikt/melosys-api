@@ -173,7 +173,7 @@ class TrygdeavgiftsberegningService(
         behandlingsresultat: Behandlingsresultat,
         dagensDato: LocalDate = LocalDate.now()
     ): Trygdeavgiftsperiode {
-        val alleGrunnlag = response.grunnlagListe?.takeIf { it.isNotEmpty() } ?: listOf(response.grunnlag)
+        val alleGrunnlag = response.grunnlagListe.ifEmpty { listOf(response.grunnlag) }
         val beregningsregel = response.beregningsregel
             ?.let { parseBeregningsregel(it) }
             ?: Avgiftsberegningsregel.ORDINÆR
