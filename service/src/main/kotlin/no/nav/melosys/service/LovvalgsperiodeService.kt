@@ -177,19 +177,26 @@ class LovvalgsperiodeService(
         trygdeavgiftsperiode: Trygdeavgiftsperiode,
         lovvalgsperiode: Lovvalgsperiode,
     ): Trygdeavgiftsperiode {
+        val origInntekter = (listOfNotNull(trygdeavgiftsperiode.grunnlagInntekstperiode) +
+            trygdeavgiftsperiode.grunnlagListe.map { it.inntektsperiode }).distinctBy { it.id }
+        val origSkatteforhold = (listOfNotNull(trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge) +
+            trygdeavgiftsperiode.grunnlagListe.map { it.skatteforhold }).distinctBy { it.id }
+        val inntektMap = origInntekter.associateBy({ it.id }, { kopierInntektsperiode(it)!! })
+        val skatteforholdMap = origSkatteforhold.associateBy({ it.id }, { kopierSkatteforhold(it)!! })
+
         val kopi = trygdeavgiftsperiode.copyEntity(
             id = null,
-            grunnlagInntekstperiode = kopierInntektsperiode(trygdeavgiftsperiode.grunnlagInntekstperiode),
+            grunnlagInntekstperiode = trygdeavgiftsperiode.grunnlagInntekstperiode?.let { inntektMap[it.id] },
             grunnlagLovvalgsPeriode = null,
-            grunnlagSkatteforholdTilNorge = kopierSkatteforhold(trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge),
+            grunnlagSkatteforholdTilNorge = trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge?.let { skatteforholdMap[it.id] },
         )
         trygdeavgiftsperiode.grunnlagListe.forEach { orig ->
             kopi.leggTilGrunnlag(
                 TrygdeavgiftsperiodeGrunnlag(
                     trygdeavgiftsperiode = kopi,
                     lovvalgsperiode = lovvalgsperiode,
-                    inntektsperiode = kopierInntektsperiode(orig.inntektsperiode)!!,
-                    skatteforhold = kopierSkatteforhold(orig.skatteforhold)!!,
+                    inntektsperiode = inntektMap[orig.inntektsperiode.id]!!,
+                    skatteforhold = skatteforholdMap[orig.skatteforhold.id]!!,
                 )
             )
         }

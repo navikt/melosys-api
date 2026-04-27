@@ -171,6 +171,48 @@ internal class LovvalgsperiodeServiceTest {
     }
 
     @Test
+    fun `lagreLovvalgsperioder dedupliserer Inntektsperiode og Skatteforhold delt mellom legacy FK og grunnlag`() {
+        val behandling = Behandling.forTest { id = BEH_ID }
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = BEH_ID
+            this.behandling = behandling
+        }
+
+        val eksisterendeLovvalgsperiode = lovvalgsperiodeForTest {
+            trygdeavgiftsperiode {
+                grunnlagInntekstperiode { id = 1L }
+                grunnlagSkatteforholdTilNorge { id = 2L }
+            }
+        }
+        eksisterendeLovvalgsperiode.behandlingsresultat = behandlingsresultat
+        behandlingsresultat.lovvalgsperioder.add(eksisterendeLovvalgsperiode)
+
+        val eksisterendeTrygdeavgiftsperiode = eksisterendeLovvalgsperiode.trygdeavgiftsperioder.single()
+        val sharedInntekt = eksisterendeTrygdeavgiftsperiode.grunnlagInntekstperiode!!
+        val sharedSkatteforhold = eksisterendeTrygdeavgiftsperiode.grunnlagSkatteforholdTilNorge!!
+        eksisterendeTrygdeavgiftsperiode.leggTilGrunnlag(
+            TrygdeavgiftsperiodeGrunnlag(
+                trygdeavgiftsperiode = eksisterendeTrygdeavgiftsperiode,
+                inntektsperiode = sharedInntekt,
+                skatteforhold = sharedSkatteforhold,
+            )
+        )
+
+        every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.of(behandlingsresultat)
+
+
+        val kopiertAvgiftsperiode = lovvalgsperiodeService.lagreLovvalgsperioder(BEH_ID, listOf(lovvalgsperiodeForTest()))
+            .single().trygdeavgiftsperioder.single()
+        val grunnlagKopi = kopiertAvgiftsperiode.grunnlagListe.single()
+
+
+        kopiertAvgiftsperiode.grunnlagInntekstperiode shouldBeSameInstanceAs grunnlagKopi.inntektsperiode
+        kopiertAvgiftsperiode.grunnlagSkatteforholdTilNorge shouldBeSameInstanceAs grunnlagKopi.skatteforhold
+        grunnlagKopi.inntektsperiode shouldNotBeSameInstanceAs sharedInntekt
+        grunnlagKopi.skatteforhold shouldNotBeSameInstanceAs sharedSkatteforhold
+    }
+
+    @Test
     fun lagreLovvalgsperioderUtenBehandlingsresultatKasterException() {
         val lovvalgsperioder = mutableSetOf(lovvalgsperiodeForTest())
         every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.empty()
