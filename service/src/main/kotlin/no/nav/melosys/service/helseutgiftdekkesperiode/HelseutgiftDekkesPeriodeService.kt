@@ -1,7 +1,7 @@
 package no.nav.melosys.service.helseutgiftdekkesperiode
 
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
-import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeKilde
+import no.nav.melosys.domain.PeriodeKilde
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.HelseutgiftDekkesPeriodeRepository
@@ -32,7 +32,7 @@ class HelseutgiftDekkesPeriodeService(
             bostedLandkode = bostedLandkode
         ).apply {
             val harEksisterendePeriode = behandlingsresultat.helseutgiftDekkesPerioder.isNotEmpty()
-            kilde = if (harEksisterendePeriode) HelseutgiftDekkesPeriodeKilde.AVGIFT_SYSTEMET else HelseutgiftDekkesPeriodeKilde.MELOSYS
+            kilde = if (harEksisterendePeriode) PeriodeKilde.AVGIFT_SYSTEMET else PeriodeKilde.MELOSYS
         }
 
         return helseutgiftDekkesPeriodeRepository.save(nyHelseutgiftDekkesPeriode)
@@ -55,7 +55,7 @@ class HelseutgiftDekkesPeriodeService(
         val behandlingsresultat = eksisterendePeriode.behandlingsresultat
 
         if (!behandlingsresultat.hentBehandling().erNyVurdering()) {
-            eksisterendePeriode.clearTrygdeavgiftsperioder()
+            behandlingsresultat.clearTrygdeavgiftPåHelseutgiftDekkesPerioder()
         }
 
         return helseutgiftDekkesPeriodeRepository.save(eksisterendePeriode)
@@ -96,6 +96,17 @@ class HelseutgiftDekkesPeriodeService(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         if (behandlingsresultat.helseutgiftDekkesPerioder.isEmpty()) return
         behandlingsresultat.clearHelseutgiftDekkesPerioder()
+        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+    }
+
+    @Transactional
+    fun slettHelseutgiftDekkesPeriodeMedKilde(behandlingID: Long, kilde: PeriodeKilde) {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        val perioderMedKilde = behandlingsresultat.helseutgiftDekkesPerioder.filter { it.kilde == kilde }
+        if (perioderMedKilde.isEmpty()) return
+
+        behandlingsresultat.clearTrygdeavgiftPåHelseutgiftDekkesPerioder()
+        perioderMedKilde.forEach { behandlingsresultat.helseutgiftDekkesPerioder.remove(it) }
         behandlingsresultatService.lagreOgFlush(behandlingsresultat)
     }
 

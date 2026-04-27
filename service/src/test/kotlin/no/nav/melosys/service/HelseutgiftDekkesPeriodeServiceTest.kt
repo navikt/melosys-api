@@ -14,7 +14,6 @@ import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
-import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeKilde
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.HelseutgiftDekkesPeriodeRepository

@@ -3,6 +3,7 @@ package no.nav.melosys.service
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.PeriodeKilde
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
@@ -66,6 +67,16 @@ class LovvalgsperiodeService(
     @Transactional
     fun slettLovvalgsperiode(lovvalgsperiodeId: Long) {
         lovvalgsperiodeRepo.findById(lovvalgsperiodeId).ifPresent { lovvalgsperiode ->
+            lovvalgsperiode.clearTrygdeavgiftsperioder()
+            lovvalgsperiode.getBehandlingsresultat()?.lovvalgsperioder?.remove(lovvalgsperiode)
+            lovvalgsperiodeRepo.delete(lovvalgsperiode)
+        }
+    }
+
+    @Transactional
+    fun slettLovvalgsperioderMedKilde(behandlingID: Long, kilde: PeriodeKilde) {
+        val perioder = lovvalgsperiodeRepo.findByBehandlingsresultatIdAndKilde(behandlingID, kilde)
+        perioder.forEach { lovvalgsperiode ->
             lovvalgsperiode.clearTrygdeavgiftsperioder()
             lovvalgsperiode.getBehandlingsresultat()?.lovvalgsperioder?.remove(lovvalgsperiode)
             lovvalgsperiodeRepo.delete(lovvalgsperiode)

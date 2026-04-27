@@ -104,7 +104,11 @@ class EøsPensjonistTrygdeavgiftsberegningService(
     ): List<Trygdeavgiftsperiode> {
         // UUID brukes til å identifisere periodene som danner grunnlag for trygdeavgiftsberegningen
         val helseutgiftDekkesPeriodeDto = helseutgiftDekkesPeriode.tilHelseutgiftDekkesPeriodeDto()
-        val inntektsperioderMedUUID = inntektsperioder.map { UUID.randomUUID() to it }
+        val filtrerteInntektsperioder = inntektsperioder.filter { inntektsperiode ->
+            inntektsperiode.fomDato.isBefore(helseutgiftDekkesPeriode.tomDato) &&
+                inntektsperiode.tomDato.isAfter(helseutgiftDekkesPeriode.fomDato)
+        }
+        val inntektsperioderMedUUID = filtrerteInntektsperioder.map { UUID.randomUUID() to it }
         val skatteforholdsperioderMedUUID = skatteforholdsperioder.map { UUID.randomUUID() to it }
         val skatteforholdsperiodeDtoSet =
             skatteforholdsperioderMedUUID.map { it.second.tilSkatteforholdDto(it.first) }.toSet()
@@ -121,7 +125,12 @@ class EøsPensjonistTrygdeavgiftsberegningService(
             )
         )
 
-        return beregnetTrygdeavgiftList.map { beregnetAvgiftPerPeriode ->
+        return beregnetTrygdeavgiftList
+            .filter { response ->
+                !response.beregnetPeriode.periode.fom.isAfter(helseutgiftDekkesPeriode.tomDato) &&
+                    !response.beregnetPeriode.periode.tom.isBefore(helseutgiftDekkesPeriode.fomDato)
+            }
+            .map { beregnetAvgiftPerPeriode ->
             lagTrygdeavgiftsperiode(
                 beregnetAvgiftPerPeriode,
                 skatteforholdsperioderMedUUID,

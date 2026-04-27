@@ -2,6 +2,7 @@ package no.nav.melosys.service.lovvalgsperiode
 
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.PeriodeKilde
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us
@@ -109,6 +110,8 @@ class OpprettLovvalgsperiodeService(
             val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
             this.behandlingsresultat = behandlingsresultat
             behandlingsresultat.lovvalgsperioder.add(this)
+            val harEksisterendePeriode = behandlingsresultat.lovvalgsperioder.size > 1
+            kilde = if (harEksisterendePeriode) PeriodeKilde.AVGIFT_SYSTEMET else PeriodeKilde.MELOSYS
         }
 
         lovvalgsperiode.apply {
@@ -146,6 +149,8 @@ class OpprettLovvalgsperiodeService(
 
         val lovvalgsperiode = eksisterendeLovvalgsperiode ?: Lovvalgsperiode().apply {
             behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
+            val harEksisterendePeriode = behandlingsresultat!!.lovvalgsperioder.isNotEmpty()
+            kilde = if (harEksisterendePeriode) PeriodeKilde.AVGIFT_SYSTEMET else PeriodeKilde.MELOSYS
         }
         lovvalgsperiode.fom = mottatteOpplysningerData.periode.fom
         lovvalgsperiode.tom = mottatteOpplysningerData.periode.tom
@@ -166,6 +171,8 @@ class OpprettLovvalgsperiodeService(
     ): Lovvalgsperiode {
         val lovvalgsperiode = eksisterendeLovvalgsperiode ?: Lovvalgsperiode().apply {
             behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
+            val harEksisterendePeriode = behandlingsresultat!!.lovvalgsperioder.isNotEmpty()
+            kilde = if (harEksisterendePeriode) PeriodeKilde.AVGIFT_SYSTEMET else PeriodeKilde.MELOSYS
         }
         lovvalgsperiode.fom = fomDato
         lovvalgsperiode.tom = tomDato

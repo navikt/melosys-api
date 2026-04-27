@@ -104,6 +104,10 @@ class Lovvalgsperiode : PeriodeOmLovvalg, AvgiftspliktigPeriode {
     @Column(name = "medlperiode_id")
     private var medlPeriodeID: Long? = null
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "kilde")
+    var kilde: PeriodeKilde? = null
+
     override fun getMedlPeriodeID(): Long? = medlPeriodeID
 
     fun setMedlPeriodeID(medlPeriodeID: Long?) {
@@ -127,6 +131,7 @@ class Lovvalgsperiode : PeriodeOmLovvalg, AvgiftspliktigPeriode {
         medlemskapstype: Medlemskapstyper? = this.medlemskapstype,
         dekning: Trygdedekninger? = this.dekning,
         medlPeriodeID: Long? = this.medlPeriodeID,
+        kilde: PeriodeKilde? = this.kilde,
     ) = Lovvalgsperiode().apply {
         this.id = id
         this.behandlingsresultat = behandlingsresultat
@@ -139,6 +144,7 @@ class Lovvalgsperiode : PeriodeOmLovvalg, AvgiftspliktigPeriode {
         this.medlemskapstype = medlemskapstype
         this.dekning = dekning
         this.medlPeriodeID = medlPeriodeID
+        this.kilde = kilde
     }
 
     override fun equals(other: Any?): Boolean {
