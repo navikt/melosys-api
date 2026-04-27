@@ -2,9 +2,11 @@ package no.nav.melosys.itest
 
 import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeIn
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
@@ -119,9 +121,13 @@ class TrygdeavgiftsperiodeGrunnlagIT(
     fun `replikerBehandlingsresultat kopierer grunnlagListe korrekt`() {
         val (original, replika) = lagFagsakMedBehandlinger()
         val br = lagBehandlingsresultatMedTrygdeavgift(original, antallGrunnlag = 2, begrenset = true)
-        behandlingsresultatRepository.save(br)
+        behandlingsresultatRepository.saveAndFlush(br)
+
+        val originalGrunnlagIder = br.trygdeavgiftsperioder.single().grunnlagListe.map { it.id }.toSet()
+        val originalMedlemskapsperiodeId = br.medlemskapsperioder.single().hentId()
 
         replikerBehandlingsresultatService.replikerBehandlingsresultat(original, replika)
+        entityManager.clear()
 
         val replikaResultat = behandlingsresultatRepository.findById(replika.id).get()
         val tap = replikaResultat.trygdeavgiftsperioder.single()
@@ -130,11 +136,11 @@ class TrygdeavgiftsperiodeGrunnlagIT(
         tap.beregningsregel shouldBe Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL
         tap.trygdesats.shouldBeNull()
 
-        // Verifiser at grunnlag er deep-copier (nye IDer)
         tap.grunnlagListe.forEach { grunnlag ->
-            grunnlag.id.shouldNotBeNull()
+            grunnlag.id.shouldNotBeNull() shouldNotBeIn originalGrunnlagIder
             grunnlag.inntektsperiode.shouldNotBeNull()
             grunnlag.skatteforhold.shouldNotBeNull()
+            grunnlag.medlemskapsperiode.shouldNotBeNull().hentId() shouldNotBe originalMedlemskapsperiodeId
         }
     }
 
