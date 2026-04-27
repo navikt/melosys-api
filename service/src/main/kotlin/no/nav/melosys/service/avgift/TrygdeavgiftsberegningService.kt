@@ -175,7 +175,7 @@ class TrygdeavgiftsberegningService(
     ): Trygdeavgiftsperiode {
         val alleGrunnlag = response.grunnlagListe.ifEmpty { listOf(response.grunnlag) }
         val beregningsregel = response.beregningsregel
-            ?.let { parseBeregningsregel(it) }
+            ?.let { Avgiftsberegningsregel.parse(it) }
             ?: Avgiftsberegningsregel.ORDINÆR
 
         val skatteforholdMap = skatteforholdsperioderMedUUID.toMap()
@@ -224,15 +224,6 @@ class TrygdeavgiftsberegningService(
         }
 
         return trygdeavgiftsperiode
-    }
-
-    private fun parseBeregningsregel(verdi: String): Avgiftsberegningsregel {
-        // Tolerant parsing: upstream-versjoner før norske tegn-oppdateringen sendte ASCII-aliaser
-        val normalisert = verdi.uppercase()
-            .replace("AE", "Æ")
-            .replace("OE", "Ø")
-        return Avgiftsberegningsregel.entries.firstOrNull { it.name == normalisert }
-            ?: Avgiftsberegningsregel.valueOf(verdi)
     }
 
     private fun parseAvgiftsdel(verdi: String): Avgiftsdel =
