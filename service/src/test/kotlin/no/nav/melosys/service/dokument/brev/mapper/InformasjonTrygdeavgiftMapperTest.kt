@@ -529,7 +529,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
     }
 
     @Test
-    fun `velger år med ordinær avgift framfor senere år med kun MINSTEBELØP-perioder (null sats)`() {
+    fun `år med null sats og beløp 0 regnes ikke som år med avgift ved valg av brevår`() {
         unleash.enableAll()
         val inneværendeÅr = LocalDate.now().year
         val forrigeÅr = inneværendeÅr - 1
