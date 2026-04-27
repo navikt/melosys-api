@@ -92,7 +92,7 @@ class InformasjonTrygdeavgiftMapper(
         val inneværendeÅr = LocalDate.now().year
         val gruppertePerioder = perioder.groupBy { it.periodeTil.year }
         val årMedAvgift = gruppertePerioder.filterValues { årsperioder ->
-            årsperioder.any { !(it.trygdeavgiftsbeløpMd.verdi == BigDecimal.ZERO && it.trygdesats == BigDecimal.ZERO) }
+            årsperioder.any { it.harAvgift() }
         }.keys
         val valgtÅr = velgRelevantÅr(årMedAvgift, inneværendeÅr)
             ?: return emptyList()
