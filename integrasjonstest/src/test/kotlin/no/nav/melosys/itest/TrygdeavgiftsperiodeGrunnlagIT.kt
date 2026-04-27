@@ -7,6 +7,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import jakarta.persistence.EntityManager
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
@@ -20,11 +21,10 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.ReplikerBehandlingsresultatService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
-import jakarta.persistence.EntityManager
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.context.annotation.Import
+import org.springframework.jdbc.core.JdbcTemplate
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -88,14 +88,17 @@ class TrygdeavgiftsperiodeGrunnlagIT(
         val (original, _) = lagFagsakMedBehandlinger()
         val br = lagBehandlingsresultatMedTrygdeavgift(
             original,
+            antallGrunnlag = 1,
             beregningsregelOverride = Avgiftsberegningsregel.MINSTEBELØP
         )
-        behandlingsresultatRepository.save(br)
+        behandlingsresultatRepository.saveAndFlush(br)
+        entityManager.clear()
 
         val lastet = behandlingsresultatRepository.findById(original.id).get()
         val tap = lastet.trygdeavgiftsperioder.single()
 
         tap.beregningsregel shouldBe Avgiftsberegningsregel.MINSTEBELØP
+        tap.grunnlagListe shouldHaveSize 1
     }
 
     @Test
