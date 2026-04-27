@@ -4,9 +4,11 @@ import io.getunleash.Unleash
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenClient
@@ -19,6 +21,7 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -34,7 +37,8 @@ class OpprettFakturaserie(
     private val faktureringskomponentenClient: FaktureringskomponentenClient,
     private val pdlService: PersondataService,
     private val trygdeavgiftService: TrygdeavgiftService,
-    private val unleash: Unleash
+    private val unleash: Unleash,
+    private val oppgaveService: OppgaveService
 ) : StegBehandler {
 
     override fun inngangsSteg() = ProsessSteg.OPPRETT_FAKTURASERIE
@@ -55,8 +59,13 @@ class OpprettFakturaserie(
         if (behandlingsresultat.erOpphørt()) {
             val opprinneligFakturaserieReferanse =
                 behandlingsresultatService.hentBehandlingsresultat(behandling.hentOpprinneligBehandling().id).hentFakturaserieReferanse()
-            log.info("Kansellerer fakturaserie for behandling: $behandlingID med fakturaseriereferanse: $opprinneligFakturaserieReferanse")
-            kansellerFakturaserieOgLagreReferanse(behandlingsresultat, opprinneligFakturaserieReferanse, saksbehandlerIdent)
+            if (behandlingsresultat.fakturaserieReferanse == null || behandlingsresultat.fakturaserieReferanse == opprinneligFakturaserieReferanse) {
+                log.info("Kansellerer fakturaserie for behandling: $behandlingID med fakturaseriereferanse: $opprinneligFakturaserieReferanse")
+                kansellerFakturaserieOgLagreReferanse(behandlingsresultat, opprinneligFakturaserieReferanse, saksbehandlerIdent)
+            } else {
+                log.info("Fakturaserie allerede kansellert for behandling: $behandlingID, hopper over kansellering")
+            }
+            avsluttAktiveÅrsavregninger(behandling.fagsak)
         } else if (skalOppretteFakturaserie(behandlingsresultat) || andregangsvurderingHarFjernetFakturerbarTrygdeavgift(
                 behandling,
                 behandlingsresultat
@@ -86,6 +95,15 @@ class OpprettFakturaserie(
             faktureringskomponentenClient.kansellerFakturaserie(opprinneligFakturaserieReferanse, saksbehandlerIdent, årsavregningRefs)
         behandlingsresultat.fakturaserieReferanse = fakturaserieResponse.fakturaserieReferanse
         behandlingsresultatService.lagre(behandlingsresultat)
+    }
+
+    private fun avsluttAktiveÅrsavregninger(fagsak: Fagsak) {
+        fagsak.hentAktiveÅrsavregninger().forEach {
+            log.info("Avslutter årsavregning ved opphør, behandlingId: ${it.id}")
+            oppgaveService.ferdigstillOppgaveMedBehandlingID(it.id)
+            behandlingsresultatService.oppdaterBehandlingsresultattype(it.id, Behandlingsresultattyper.FERDIGBEHANDLET)
+            behandlingService.avsluttBehandling(it.id)
+        }
     }
 
     private fun skalOppretteFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean =
