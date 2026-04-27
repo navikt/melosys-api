@@ -260,6 +260,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                             notSoRandomUuid
                         )
                     ),
+                    beregningsregel = "ORDINÆR",
                 )
             )
         )
@@ -343,6 +344,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                             notSoRandomUuid
                         )
                     ),
+                    beregningsregel = "ORDINÆR",
                 )
             )
         )
@@ -424,6 +426,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                             notSoRandomUuid
                         )
                     ),
+                    beregningsregel = "ORDINÆR",
                 )
             )
         )
@@ -599,6 +602,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                             notSoRandomUuid
                         )
                     ),
+                    beregningsregel = "ORDINÆR",
                 )
             )
         )

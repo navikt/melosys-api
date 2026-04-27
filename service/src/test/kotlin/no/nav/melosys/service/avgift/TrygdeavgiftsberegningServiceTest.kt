@@ -163,6 +163,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                                     notSoRandomUuid
                                 )
                             ),
+                            beregningsregel = "ORDINÆR",
                         )
                     )
                 )
@@ -243,6 +244,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                                     notSoRandomUuid
                                 )
                             ),
+                            beregningsregel = "ORDINÆR",
                         )
                     )
                 )
@@ -316,6 +318,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                                     notSoRandomUuid
                                 )
                             ),
+                            beregningsregel = "ORDINÆR",
                         )
                     )
                 )
@@ -389,6 +392,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                                     notSoRandomUuid
                                 )
                             ),
+                            beregningsregel = "ORDINÆR",
                         )
                     )
                 )
@@ -634,6 +638,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                                     notSoRandomUuid
                                 )
                             ),
+                            beregningsregel = "ORDINÆR",
                         )
                     )
                 )
@@ -715,6 +720,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                                     notSoRandomUuid
                                 )
                             ),
+                            beregningsregel = "ORDINÆR",
                         )
                     )
                 )
@@ -796,6 +802,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                                     notSoRandomUuid
                                 )
                             ),
+                            beregningsregel = "ORDINÆR",
                         )
                     )
                 )
@@ -877,6 +884,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                                     notSoRandomUuid
                                 )
                             ),
+                            beregningsregel = "ORDINÆR",
                         )
                     )
                 )
@@ -964,6 +972,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                                     notSoRandomUuid
                                 )
                             ),
+                            beregningsregel = "ORDINÆR",
                         )
                     )
                 )
@@ -1252,6 +1261,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                                     notSoRandomUuid
                                 )
                             ),
+                            beregningsregel = "ORDINÆR",
                         )
                     )
                 )
@@ -2362,6 +2372,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                                 notSoRandomUuid
                             )
                         ),
+                        beregningsregel = "ORDINÆR",
                     )
                 )
             )
@@ -2454,6 +2465,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                                 notSoRandomUuid
                             )
                         ),
+                        beregningsregel = "ORDINÆR",
                     )
                 )
             )
