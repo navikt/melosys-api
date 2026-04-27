@@ -68,7 +68,9 @@ class ÅrsavregningVedtakMapper(
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.hentBehandling()),
             harSkjoennsfastsattInntektsgrunnlag = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag,
             erNyÅrsavregning = erNyÅrsavregning,
-            harMisjonaerInntekt = harMisjonaerInntekt(årsavregningModel.endeligAvgift, årsavregningModel.tidligereAvgift)
+            harMisjonaerInntekt = harMisjonaerInntekt(årsavregningModel.endeligAvgift, årsavregningModel.tidligereAvgift),
+            minstebelopVerdi = finnMinstebelopVerdi(årsavregningModel.endeligAvgift, årsavregningModel.tidligereAvgift),
+            minstebelopAar = finnMinstebelopAar(årsavregningModel.endeligAvgift, årsavregningModel.tidligereAvgift)
         )
     }
 
@@ -100,7 +102,9 @@ class ÅrsavregningVedtakMapper(
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandling),
             harSkjoennsfastsattInntektsgrunnlag = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag,
             erNyÅrsavregning = erNyÅrsavregning,
-            harMisjonaerInntekt = harMisjonaerInntekt(emptyList(), årsavregningModel.tidligereAvgift)
+            harMisjonaerInntekt = harMisjonaerInntekt(emptyList(), årsavregningModel.tidligereAvgift),
+            minstebelopVerdi = finnMinstebelopVerdi(emptyList(), årsavregningModel.tidligereAvgift),
+            minstebelopAar = finnMinstebelopAar(emptyList(), årsavregningModel.tidligereAvgift)
         )
     }
 
@@ -168,6 +172,20 @@ class ÅrsavregningVedtakMapper(
         tidligereAvgift: List<Trygdeavgiftsperiode>
     ): Boolean = (endeligAvgift + tidligereAvgift)
         .any { it.grunnlagInntekstperiode?.type == MISJONÆR }
+
+    private fun finnMinstebelopVerdi(
+        endeligAvgift: List<Trygdeavgiftsperiode>,
+        tidligereAvgift: List<Trygdeavgiftsperiode>
+    ): BigDecimal? = (endeligAvgift + tidligereAvgift)
+        .firstOrNull { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }
+        ?.minstebelopVerdi
+
+    private fun finnMinstebelopAar(
+        endeligAvgift: List<Trygdeavgiftsperiode>,
+        tidligereAvgift: List<Trygdeavgiftsperiode>
+    ): Int? = (endeligAvgift + tidligereAvgift)
+        .firstOrNull { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }
+        ?.minstebelopAar
 
     private fun harPliktigMedlemskap(avgiftspliktigPerioder: List<AvgiftsperiodeForAvgift>?): Boolean {
         return avgiftspliktigPerioder?.takeIf { it.isNotEmpty() }

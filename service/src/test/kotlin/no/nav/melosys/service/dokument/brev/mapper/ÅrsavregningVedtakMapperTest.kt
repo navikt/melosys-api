@@ -453,6 +453,33 @@ class ÅrsavregningVedtakMapperTest {
     }
 
     @Test
+    fun `mapÅrsavregning setter minstebelopVerdi og minstebelopAar på rot når en periode har beregningsregel`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
+        val årsavregningModel = lagÅrsavregningModelMedPerioder(
+            endeligAvgift = listOf(lagMinstebelopTrygdeavgiftsperiode()),
+            tidligereAvgift = listOf(lagTidligereTrygdeavgiftsperiode())
+        )
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.minstebelopVerdi shouldBe BigDecimal(7000)
+        result.minstebelopAar shouldBe 2024
+    }
+
+    @Test
+    fun `mapÅrsavregning setter minstebelopVerdi og minstebelopAar til null når ingen perioder har beregningsregel`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
+        val årsavregningModel = lagÅrsavregningModel(BigDecimal(2000), BigDecimal(1000))
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.minstebelopVerdi shouldBe null
+        result.minstebelopAar shouldBe null
+    }
+
+    @Test
     fun `mapÅrsavregning setter harMisjonaerInntekt false når ingen perioder har MISJONÆR-inntekt`() {
         val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
         val årsavregningModel = lagÅrsavregningModel(BigDecimal(2000), BigDecimal(1000))
