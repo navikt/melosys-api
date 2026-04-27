@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
 
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -373,6 +374,178 @@ class ÅrsavregningVedtakMapperTest {
         behandlingsresultat.hentÅrsavregning().aar shouldBe result.årsavregningsår
 
         result.endeligTrygdeavgift[0].arbeidsgiveravgiftBetalt shouldBe forventetVerdi
+    }
+
+    @Test
+    fun `mapÅrsavregning mapper MINSTEBELØP beregningsregel og minstebeløp i endeligTrygdeavgift`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
+        val årsavregningModel = lagÅrsavregningModelMedPerioder(
+            endeligAvgift = listOf(lagMinstebelopTrygdeavgiftsperiode()),
+            tidligereAvgift = listOf(lagTidligereTrygdeavgiftsperiode())
+        )
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.endeligTrygdeavgift shouldHaveSize 1
+        result.endeligTrygdeavgift[0].beregningsregel shouldBe "MINSTEBELØP"
+        result.endeligTrygdeavgift[0].minstebelopVerdi shouldBe BigDecimal(7000)
+        result.endeligTrygdeavgift[0].minstebelopAar shouldBe 2024
+    }
+
+    @Test
+    fun `mapÅrsavregning mapper TJUEFEM_PROSENT_REGEL beregningsregel i endeligTrygdeavgift`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
+        val årsavregningModel = lagÅrsavregningModelMedPerioder(
+            endeligAvgift = listOf(lagTjuefemProsentTrygdeavgiftsperiode()),
+            tidligereAvgift = listOf(lagTidligereTrygdeavgiftsperiode())
+        )
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.endeligTrygdeavgift shouldHaveSize 1
+        result.endeligTrygdeavgift[0].beregningsregel shouldBe "TJUEFEM_PROSENT_REGEL"
+        result.endeligTrygdeavgift[0].minstebelopVerdi shouldBe BigDecimal(7000)
+        result.endeligTrygdeavgift[0].minstebelopAar shouldBe 2024
+    }
+
+    @Test
+    fun `mapÅrsavregning mapper beregningsregel og minstebeløp i forskuddsvisFakturertTrygdeavgift`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
+        val årsavregningModel = lagÅrsavregningModelMedPerioder(
+            endeligAvgift = listOf(lagEndeligTrygdeavgiftsperiode()),
+            tidligereAvgift = listOf(lagMinstebelopTrygdeavgiftsperiode())
+        )
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.forskuddsvisFakturertTrygdeavgift shouldHaveSize 1
+        result.forskuddsvisFakturertTrygdeavgift[0].beregningsregel shouldBe "MINSTEBELØP"
+        result.forskuddsvisFakturertTrygdeavgift[0].minstebelopVerdi shouldBe BigDecimal(7000)
+    }
+
+    @Test
+    fun `mapÅrsavregning mapper ORDINÆR beregningsregel til null på DTO`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
+        val årsavregningModel = lagÅrsavregningModel(BigDecimal(2000), BigDecimal(1000))
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.endeligTrygdeavgift[0].beregningsregel shouldBe null
+        result.forskuddsvisFakturertTrygdeavgift[0].beregningsregel shouldBe null
+    }
+
+    @Test
+    fun `mapÅrsavregning setter harMisjonaerInntekt true når en periode har MISJONÆR-inntekt`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
+        val årsavregningModel = lagÅrsavregningModelMedPerioder(
+            endeligAvgift = listOf(lagMisjonaerTrygdeavgiftsperiode()),
+            tidligereAvgift = listOf(lagTidligereTrygdeavgiftsperiode())
+        )
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.harMisjonaerInntekt shouldBe true
+    }
+
+    @Test
+    fun `mapÅrsavregning setter harMisjonaerInntekt false når ingen perioder har MISJONÆR-inntekt`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
+        val årsavregningModel = lagÅrsavregningModel(BigDecimal(2000), BigDecimal(1000))
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.harMisjonaerInntekt shouldBe false
+    }
+
+    private fun lagÅrsavregningModelMedPerioder(
+        endeligAvgift: List<Trygdeavgiftsperiode>,
+        tidligereAvgift: List<Trygdeavgiftsperiode>
+    ): ÅrsavregningModel {
+        val grunnlagMedlemskap = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
+        return ÅrsavregningModel(
+            årsavregningID = 112,
+            år = 2024,
+            tilFaktureringBeloep = BigDecimal(1000),
+            endeligAvgift = endeligAvgift,
+            tidligereAvgift = tidligereAvgift,
+            nyttTrygdeavgiftsGrunnlag = grunnlagMedlemskap,
+            beregnetAvgiftBelop = BigDecimal(2000),
+            tidligereFakturertBeloep = BigDecimal(1000),
+            tidligereTrygdeavgiftsGrunnlag = grunnlagMedlemskap,
+            harInnbetaltTrygdeavgift = false,
+            innbetaltTrygdeavgift = null,
+            manueltAvgiftBeloep = BigDecimal(0),
+            endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
+            tidligereInnbetaltTrygdeavgift = null,
+            tidligereÅrsavregningmanueltAvgiftBeloep = null,
+            harSkjoennsfastsattInntektsgrunnlag = false
+        )
+    }
+
+    private fun lagMinstebelopTrygdeavgiftsperiode(): Trygdeavgiftsperiode = Trygdeavgiftsperiode.forTest {
+        periodeFra = LocalDate.of(2024, 1, 1)
+        periodeTil = LocalDate.of(2024, 12, 31)
+        trygdesats = null
+        trygdeavgiftsbeløpMd = BigDecimal.ZERO
+        beregningsregel = Avgiftsberegningsregel.MINSTEBELØP
+        minstebelopVerdi = BigDecimal(7000)
+        minstebelopAar = 2024
+        medlemskapsperiode = medlemskapsperiodeForTest {
+            trygdedekning = Trygdedekninger.FULL_DEKNING
+        }
+        grunnlagInntekstperiode {
+            avgiftspliktigMndInntekt = Penger(BigDecimal(500), NOK.kode)
+            type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+            arbeidsgiversavgiftBetalesTilSkatt = false
+        }
+        grunnlagSkatteforholdTilNorge {
+            skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+        }
+    }
+
+    private fun lagTjuefemProsentTrygdeavgiftsperiode(): Trygdeavgiftsperiode = Trygdeavgiftsperiode.forTest {
+        periodeFra = LocalDate.of(2024, 1, 1)
+        periodeTil = LocalDate.of(2024, 12, 31)
+        trygdesats = null
+        trygdeavgiftsbeløpMd = BigDecimal(250)
+        beregningsregel = Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL
+        minstebelopVerdi = BigDecimal(7000)
+        minstebelopAar = 2024
+        medlemskapsperiode = medlemskapsperiodeForTest {
+            trygdedekning = Trygdedekninger.FULL_DEKNING
+        }
+        grunnlagInntekstperiode {
+            avgiftspliktigMndInntekt = Penger(BigDecimal(8000), NOK.kode)
+            type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+            arbeidsgiversavgiftBetalesTilSkatt = false
+        }
+        grunnlagSkatteforholdTilNorge {
+            skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+        }
+    }
+
+    private fun lagMisjonaerTrygdeavgiftsperiode(): Trygdeavgiftsperiode = Trygdeavgiftsperiode.forTest {
+        periodeFra = LocalDate.of(2024, 1, 1)
+        periodeTil = LocalDate.of(2024, 12, 31)
+        trygdesats = BigDecimal(900)
+        trygdeavgiftsbeløpMd = BigDecimal(450)
+        medlemskapsperiode = medlemskapsperiodeForTest {
+            trygdedekning = Trygdedekninger.FULL_DEKNING
+        }
+        grunnlagInntekstperiode {
+            avgiftspliktigMndInntekt = Penger(BigDecimal(2800), NOK.kode)
+            type = Inntektskildetype.MISJONÆR
+            arbeidsgiversavgiftBetalesTilSkatt = false
+        }
+        grunnlagSkatteforholdTilNorge {
+            skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+        }
     }
 
     private fun lagGrunnlagMedlemskap(endeligAvgiftTrygdeavgiftsperiode: Trygdeavgiftsperiode) =
