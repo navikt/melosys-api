@@ -120,6 +120,7 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
                 )
             )
         }
+        behandlingsresultat.helseutgiftDekkesPerioder.add(lagretHelseutgiftDekkesPeriode)
 
         val oppdatertHelseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(bostedsland = Land_iso2.NO)
 
