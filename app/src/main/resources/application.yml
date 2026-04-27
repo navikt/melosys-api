@@ -108,7 +108,7 @@ management:
                 client-id: ${AZURE_APP_CLIENT_ID}
                 client-secret: ${AZURE_APP_CLIENT_SECRET}
               grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-              scope: api://${NAIS_CLUSTER_NAME_GCP}.teammelosys.${APP_NAME_SAK}/.default
+              scope: api://${NAIS_CLUSTER_NAME}.teamdokumenthandtering.${APP_NAME_SAK}/.default
               token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
             saf:
               authentication:
