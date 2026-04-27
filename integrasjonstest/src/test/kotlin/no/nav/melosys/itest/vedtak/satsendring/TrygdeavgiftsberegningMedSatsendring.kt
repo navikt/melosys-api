@@ -43,18 +43,21 @@ class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
         val sats = bestemSats(skatteforhold, periodeString, antallKall)
         val månedsavgift = sats * 10000
 
+        val grunnlag = TrygdeavgiftsgrunnlagDto(
+            UUID.fromString(requestBody["medlemskapsperioder"][0]["id"].asText()),
+            UUID.fromString(requestBody["skatteforholdsperioder"][0]["id"].asText()),
+            UUID.fromString(requestBody["inntektsperioder"][0]["id"].asText())
+        )
         val trygdeavgiftsberegningResponse =
             TrygdeavgiftsberegningResponse(
-                TrygdeavgiftsperiodeDto(
+                beregnetPeriode = TrygdeavgiftsperiodeDto(
                     DatoPeriodeDto(localDateFromRequest("fom", requestBody), localDateFromRequest("tom", requestBody)),
                     sats.toBigDecimal(),
                     PengerDto(månedsavgift.toBigDecimal(), NOK)
                 ),
-                TrygdeavgiftsgrunnlagDto(
-                    UUID.fromString(requestBody["medlemskapsperioder"][0]["id"].asText()),
-                    UUID.fromString(requestBody["skatteforholdsperioder"][0]["id"].asText()),
-                    UUID.fromString(requestBody["inntektsperioder"][0]["id"].asText())
-                )
+                grunnlag = grunnlag,
+                grunnlagListe = listOf(grunnlag),
+                beregningsregel = "ORDINÆR"
             )
 
         return objectMapper.writeValueAsString(listOf(trygdeavgiftsberegningResponse))

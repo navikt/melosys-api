@@ -32,18 +32,21 @@ class TrygdeavgiftsberegningTransformer() : ResponseTransformerV2 {
             1000.toBigDecimal(),
             NOK
         ) else PengerDto(0.toBigDecimal(), NOK)
+        val grunnlag = TrygdeavgiftsgrunnlagDto(
+            UUID.fromString(medlemskapsperioderUuid),
+            UUID.fromString(skatteforholdsperioderUuid),
+            UUID.fromString(inntektsperioderUuid)
+        )
         val responsBodyFraTrygdeavgiftsberegning = listOf(
             TrygdeavgiftsberegningResponse(
-                TrygdeavgiftsperiodeDto(
+                beregnetPeriode = TrygdeavgiftsperiodeDto(
                     DatoPeriodeDto(LocalDate.of(skatteforholdÅr, 1, 1), LocalDate.of(skatteforholdÅr, 2, 1)),
                     sats,
                     månedsavgift
                 ),
-                TrygdeavgiftsgrunnlagDto(
-                    UUID.fromString(medlemskapsperioderUuid),
-                    UUID.fromString(skatteforholdsperioderUuid),
-                    UUID.fromString(inntektsperioderUuid)
-                )
+                grunnlag = grunnlag,
+                grunnlagListe = listOf(grunnlag),
+                beregningsregel = "ORDINÆR"
             )
         )
 

@@ -39,18 +39,21 @@ class EøsPensjonistTrygdeavgiftsberegningTransformer : ResponseTransformerV2 {
                 NOK
             ) else PengerDto(0.toBigDecimal(), NOK)
 
+            val grunnlag = EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                DatoPeriodeDto(fom = mappetDatoFom, tom = mappetDatoTom),
+                UUID.fromString(skatteforholdsperioderUuid),
+                UUID.fromString(inntektsperioderUuid)
+            )
             val responsBodyFraTrygdeavgiftsberegning = listOf(
                 EøsPensjonistTrygdeavgiftsberegningResponse(
-                    TrygdeavgiftsperiodeDto(
+                    beregnetPeriode = TrygdeavgiftsperiodeDto(
                         DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1)),
                         sats,
                         månedsavgift
                     ),
-                    EøsPensjonistTrygdeavgiftsgrunnlagDto(
-                        DatoPeriodeDto(fom = mappetDatoFom, tom = mappetDatoTom),
-                        UUID.fromString(skatteforholdsperioderUuid),
-                        UUID.fromString(inntektsperioderUuid)
-                    )
+                    grunnlag = grunnlag,
+                    grunnlagListe = listOf(grunnlag),
+                    beregningsregel = "ORDINÆR"
                 )
             )
 
