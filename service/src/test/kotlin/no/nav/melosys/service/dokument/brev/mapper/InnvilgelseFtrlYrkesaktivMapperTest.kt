@@ -770,6 +770,77 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
         }
     }
 
+    @Test
+    fun `mapYrkesaktivPliktig med MINSTEBELØP beregningsregel mapper beregningsregel til DTO`() {
+        val behandlingsresultat = lagPliktigBehandlingsresultatMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP)
+        mockHappyCase(Case.paragraf_2_8, behandlingsresultat)
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(LocalDate.of(1980, 1, 1))
+
+        innvilgelseFtrlMapper.mapYrkesaktivPliktig(lagBrevbestilling()).apply {
+            avgiftsperioder.shouldNotBeEmpty()
+            avgiftsperioder.any { it.beregningsregel == "MINSTEBELØP" }.shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun `mapYrkesaktivPliktig med TJUEFEM_PROSENT_REGEL beregningsregel mapper beregningsregel til DTO`() {
+        val behandlingsresultat = lagPliktigBehandlingsresultatMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+        mockHappyCase(Case.paragraf_2_8, behandlingsresultat)
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(LocalDate.of(1980, 1, 1))
+
+        innvilgelseFtrlMapper.mapYrkesaktivPliktig(lagBrevbestilling()).apply {
+            avgiftsperioder.shouldNotBeEmpty()
+            avgiftsperioder.any { it.beregningsregel == "TJUEFEM_PROSENT_REGEL" }.shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun `mapYrkesaktivPliktig med ORDINÆR beregningsregel mapper null som beregningsregel`() {
+        val behandlingsresultat = lagPliktigBehandlingsresultatMedBeregningsregel(Avgiftsberegningsregel.ORDINÆR)
+        mockHappyCase(Case.paragraf_2_8, behandlingsresultat)
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(LocalDate.of(1980, 1, 1))
+
+        innvilgelseFtrlMapper.mapYrkesaktivPliktig(lagBrevbestilling()).apply {
+            avgiftsperioder.shouldNotBeEmpty()
+            avgiftsperioder.all { it.beregningsregel == null }.shouldBeTrue()
+        }
+    }
+
+    private fun lagPliktigBehandlingsresultatMedBeregningsregel(regel: Avgiftsberegningsregel): Behandlingsresultat =
+        Behandlingsresultat.forTest {
+            id = 1L
+            nyVurderingBakgrunn = "NYE_OPPLYSNINGER"
+            behandling {
+                fagsak = DokgenTestData.lagFagsak()
+                mottatteOpplysninger { soeknad { landkoder("AT") } }
+            }
+            medlemskapsperiode {
+                fom = LocalDate.EPOCH.plusMonths(1)
+                tom = LocalDate.EPOCH.plusMonths(4)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.PLIKTIG
+                trygdedekning = Trygdedekninger.FULL_DEKNING
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.EPOCH.plusMonths(1)
+                    periodeTil = LocalDate.EPOCH.plusMonths(4)
+                    trygdesats = BigDecimal(0.05)
+                    trygdeavgiftsbeløpMd = BigDecimal(500)
+                    beregningsregel = regel
+                    grunnlagSkatteforholdTilNorge { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG }
+                    grunnlagInntekstperiode {
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        arbeidsgiversavgiftBetalesTilSkatt = true
+                    }
+                }
+            }
+            vilkaarsresultat {
+                vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
+                begrunnelseFritekst = VILKAAR_BEGRUNNELSE_FRITEKST
+                begrunnelse(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN.kode)
+            }
+        }
+
     private fun lagBehandlingsresultatMedBeregningsregel(regel: Avgiftsberegningsregel): Behandlingsresultat =
         Behandlingsresultat.forTest {
             id = 1L
