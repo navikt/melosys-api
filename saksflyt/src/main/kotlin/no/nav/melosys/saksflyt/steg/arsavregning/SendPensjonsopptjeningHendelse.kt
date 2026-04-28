@@ -129,7 +129,10 @@ class SendPensjonsopptjeningHendelse(
             ?: årsavregning.beregnetAvgiftBelop
             ?: error("Både manuelt og beregnet avgiftsbeløp mangler for årsavregning ${årsavregning.id}")
 
-        // Konverter BigDecimal til Long (NOK-beløp)
-        return beløp.longValueExact()
+        // beregnetAvgiftBelop kan ha desimaler fordi TotalbeløpBeregner ganger månedsavgift
+        // med en delbrøk antallMåneder for delperioder, selv om månedsavgift er hel NOK
+        // (Penger.avrundTilHelKroner). Bruker .toLong() (trunkerer) i stedet for
+        // .longValueExact() for å unngå ArithmeticException her.
+        return beløp.toLong()
     }
 }
