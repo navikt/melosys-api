@@ -236,7 +236,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             tidligereAvgift = behandlingsresultatNyVurdering.trygdeavgiftsperioder.filter { it.overlapperMedÅr(2023) },
             nyttTrygdeavgiftsGrunnlag = null,
             endeligAvgift = emptyList(),
-            tidligereFakturertBeloep = BigDecimal("25000.00"),
+            tidligereFakturertBeloep = BigDecimal("25000"),
             beregnetAvgiftBelop = null,
             tilFaktureringBeloep = null,
             harInnbetaltTrygdeavgift = true,

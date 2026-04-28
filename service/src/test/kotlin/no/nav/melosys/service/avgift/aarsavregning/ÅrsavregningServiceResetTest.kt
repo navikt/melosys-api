@@ -175,7 +175,7 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
             tidligereAvgift = result.tidligereAvgift, // Use actual value (avoids bidirectional relationship comparison)
             nyttTrygdeavgiftsGrunnlag = null,
             endeligAvgift = emptyList(),
-            tidligereFakturertBeloep = BigDecimal.valueOf(4500000, 2),
+            tidligereFakturertBeloep = BigDecimal("45000"),
             beregnetAvgiftBelop = null,
             tilFaktureringBeloep = null,
             harInnbetaltTrygdeavgift = null,

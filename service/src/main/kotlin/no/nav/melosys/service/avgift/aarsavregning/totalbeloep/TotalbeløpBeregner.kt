@@ -22,7 +22,10 @@ object TotalbeløpBeregner {
                 beløp = it.trygdeavgiftsbeløpMd.hentVerdi(),
             )
         }
-        return totalbeløpForAllePerioder(periodeMedBeløpList)
+        // Trygdeavgift føres alltid i hele kroner. Avrunder her med samme
+        // modus som Penger.avrundTilHelKroner (RoundingMode.DOWN), slik at
+        // longValueExact()/intValueExact() nedstrøms avdekker uventede desimaler.
+        return totalbeløpForAllePerioder(periodeMedBeløpList).setScale(0, RoundingMode.DOWN)
     }
 
     fun hentTotalinntekt(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): BigDecimal {
