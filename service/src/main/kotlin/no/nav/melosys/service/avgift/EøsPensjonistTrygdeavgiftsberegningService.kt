@@ -140,7 +140,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         inntektsperioderMedUUID: List<Pair<UUID, Inntektsperiode>>,
         dagensDato: LocalDate
     ): Trygdeavgiftsperiode {
-        val alleGrunnlag = response.grunnlagListe.ifEmpty { listOfNotNull(response.grunnlag) }
+        val alleGrunnlag = response.grunnlagListe.ifEmpty { listOf(response.grunnlag) }
         val beregningsregel = Avgiftsberegningsregel.valueOf(response.beregningsregel)
 
         val skatteforholdMap = skatteforholdsperioderMedUUID.toMap()

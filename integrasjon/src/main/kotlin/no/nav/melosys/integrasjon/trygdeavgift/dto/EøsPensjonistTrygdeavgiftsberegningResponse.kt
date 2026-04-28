@@ -2,7 +2,7 @@ package no.nav.melosys.integrasjon.trygdeavgift.dto
 
 data class EøsPensjonistTrygdeavgiftsberegningResponse(
     val beregnetPeriode: TrygdeavgiftsperiodeDto,
-    val grunnlag: EøsPensjonistTrygdeavgiftsgrunnlagDto? = null,
+    val grunnlag: EøsPensjonistTrygdeavgiftsgrunnlagDto,
     val grunnlagListe: List<EøsPensjonistTrygdeavgiftsgrunnlagDto>,
     val beregningsregel: String,
 )
