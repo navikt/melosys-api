@@ -248,7 +248,7 @@ class TrygdeavgiftControllerTest(
             medlemskapsperiode = periode.grunnlagMedlemskapsperiode,
         ))
 
-        // Grunnlag 2: ARBEIDSINNTEKT — gjør harSammenslåtteInntektskilder = true
+        // Grunnlag 2: gjør harSammenslåtteInntektskilder = true (mer enn ett grunnlag)
         val inntekt2 = Inntektsperiode().apply {
             fomDato = LocalDate.now()
             tomDato = LocalDate.now()

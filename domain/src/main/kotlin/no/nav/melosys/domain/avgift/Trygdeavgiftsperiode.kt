@@ -74,6 +74,8 @@ class Trygdeavgiftsperiode(
     fun hentGrunnlagSkatteforholdTilNorge(): SkatteforholdTilNorge =
         grunnlagSkatteforholdTilNorge ?: error("grunnlagSkatteforholdTilNorge er påkrevd for Trygdeavgiftsperiode")
 
+    val harSammenslåtteInntektskilder: Boolean get() = grunnlagListe.size > 1
+
     /** 25%-regel har sats=null men positivt beløp — de *har* avgift. Kun beløp-basert sjekk. */
     fun harAvgift(): Boolean =
         BigDecimal.ZERO.compareTo(trygdeavgiftsbeløpMd.verdi) != 0

@@ -27,10 +27,7 @@ data class TrygdeavgiftsperiodeDto(
             trygdeavgiftsperiode.trygdesats?.toDouble(),
             trygdeavgiftsperiode.trygdeavgiftsbeløpMd.hentVerdi().intValueExact(),
             trygdeavgiftsperiode.beregningsregel.takeIf { it != Avgiftsberegningsregel.ORDINÆR }?.name,
-            harSammenslåtteInntektskilder = trygdeavgiftsperiode.grunnlagListe
-                .map { it.inntektsperiode.type }
-                .distinct()
-                .size > 1,
+            harSammenslåtteInntektskilder = trygdeavgiftsperiode.harSammenslåtteInntektskilder,
             avgiftsdel = trygdeavgiftsperiode.avgiftsdel
         )
 }
