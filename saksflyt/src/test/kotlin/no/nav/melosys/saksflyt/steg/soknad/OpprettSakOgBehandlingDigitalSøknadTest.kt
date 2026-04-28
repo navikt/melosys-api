@@ -27,6 +27,7 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverensVirksomhetINorgeDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
@@ -127,6 +128,40 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         capturedRequest.behandlingstema shouldBe Behandlingstema.UTSENDT_ARBEIDSTAKER
         capturedRequest.behandlingstype shouldBe Behandlingstyper.FØRSTEGANG
         capturedRequest.behandlingsårsaktype shouldBe Behandlingsaarsaktyper.SØKNAD
+    }
+
+    @Test
+    fun `utfør setter behandlingstema ARBEID_TJENESTEPERSON_ELLER_FLY for offentlig virksomhet`() {
+        val offentligSøknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+            data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto(
+                arbeidsgiverensVirksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(
+                    erArbeidsgiverenOffentligVirksomhet = true
+                )
+            )
+            fnr = this@OpprettSakOgBehandlingDigitalSøknadTest.fnr
+            referanseId = this@OpprettSakOgBehandlingDigitalSøknadTest.referanseId
+        }
+        val offentligProsessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.DIGITAL_SØKNADSDATA, offentligSøknadsdata)
+        }
+
+        val requestSlot = slot<OpprettSakRequest>()
+        every { persondataFasade.hentAktørIdForIdent(fnr) } returns aktørId
+        every { fagsakService.nyFagsakOgBehandling(capture(requestSlot)) } returns mockk<Fagsak>().also {
+            every { it.hentAktivBehandling() } returns mockk<Behandling>(relaxed = true).also { b ->
+                every { b.id } returns behandlingId
+                every { b.status } returns Behandlingsstatus.OPPRETTET
+            }
+            every { it.saksnummer } returns "MEL-1234"
+        }
+        every { jsonMapper.writeValueAsString(offentligSøknadsdata) } returns "{}"
+        every { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any()) } returns
+            mockk<MottatteOpplysninger> { every { id } returns 99L }
+
+        opprettSakOgBehandlingDigitalSøknad.utfør(offentligProsessinstans)
+
+        requestSlot.captured.behandlingstema shouldBe Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
     }
 
     @Test
