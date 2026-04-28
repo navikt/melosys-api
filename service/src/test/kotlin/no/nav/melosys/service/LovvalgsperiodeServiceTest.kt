@@ -171,45 +171,48 @@ internal class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    fun `lagreLovvalgsperioder dedupliserer Inntektsperiode og Skatteforhold delt mellom legacy FK og grunnlag`() {
-        val behandling = Behandling.forTest { id = BEH_ID }
+    fun `lagreLovvalgsperioder kopierer delte Inntektsperiode og Skatteforhold som én felles instans`() {
+        // Arrange: eksisterende avgiftsperiode der FK-felt og grunnlagListe peker på SAMME instanser
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = BEH_ID
-            this.behandling = behandling
+            this.behandling = Behandling.forTest { id = BEH_ID }
         }
-
         val eksisterendeLovvalgsperiode = lovvalgsperiodeForTest {
             trygdeavgiftsperiode {
                 grunnlagInntekstperiode { id = 1L }
                 grunnlagSkatteforholdTilNorge { id = 2L }
             }
+        }.also {
+            it.behandlingsresultat = behandlingsresultat
+            behandlingsresultat.lovvalgsperioder.add(it)
         }
-        eksisterendeLovvalgsperiode.behandlingsresultat = behandlingsresultat
-        behandlingsresultat.lovvalgsperioder.add(eksisterendeLovvalgsperiode)
 
         val eksisterendeTrygdeavgiftsperiode = eksisterendeLovvalgsperiode.trygdeavgiftsperioder.single()
-        val sharedInntekt = eksisterendeTrygdeavgiftsperiode.grunnlagInntekstperiode!!
-        val sharedSkatteforhold = eksisterendeTrygdeavgiftsperiode.grunnlagSkatteforholdTilNorge!!
+        val deltInntektsperiode = eksisterendeTrygdeavgiftsperiode.grunnlagInntekstperiode!!
+        val deltSkatteforhold = eksisterendeTrygdeavgiftsperiode.grunnlagSkatteforholdTilNorge!!
+
+        // Legg til grunnlagListe-innslag som peker på de SAMME instansene som FK-feltene
         eksisterendeTrygdeavgiftsperiode.leggTilGrunnlag(
             TrygdeavgiftsperiodeGrunnlag(
                 trygdeavgiftsperiode = eksisterendeTrygdeavgiftsperiode,
-                inntektsperiode = sharedInntekt,
-                skatteforhold = sharedSkatteforhold,
+                inntektsperiode = deltInntektsperiode,
+                skatteforhold = deltSkatteforhold,
             )
         )
 
         every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.of(behandlingsresultat)
 
-
+        // Act
         val kopiertAvgiftsperiode = lovvalgsperiodeService.lagreLovvalgsperioder(BEH_ID, listOf(lovvalgsperiodeForTest()))
             .single().trygdeavgiftsperioder.single()
         val grunnlagKopi = kopiertAvgiftsperiode.grunnlagListe.single()
 
-
+        // Assert: grunnlag-felt og grunnlagListe peker på samme instans — sikrer at JPA ikke forsøker å lagre to rader for samme objekt
         kopiertAvgiftsperiode.grunnlagInntekstperiode shouldBeSameInstanceAs grunnlagKopi.inntektsperiode
         kopiertAvgiftsperiode.grunnlagSkatteforholdTilNorge shouldBeSameInstanceAs grunnlagKopi.skatteforhold
-        grunnlagKopi.inntektsperiode shouldNotBeSameInstanceAs sharedInntekt
-        grunnlagKopi.skatteforhold shouldNotBeSameInstanceAs sharedSkatteforhold
+        // Instansen er en ny kopi, ikke originalen — slik at den får id=null og persisteres som ny rad
+        grunnlagKopi.inntektsperiode shouldNotBeSameInstanceAs deltInntektsperiode
+        grunnlagKopi.skatteforhold shouldNotBeSameInstanceAs deltSkatteforhold
     }
 
     @Test
