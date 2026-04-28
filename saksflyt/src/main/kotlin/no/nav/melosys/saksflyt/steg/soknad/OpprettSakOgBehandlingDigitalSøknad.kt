@@ -22,8 +22,9 @@ import no.nav.melosys.service.sak.OpprettSakRequest
 import no.nav.melosys.service.sak.SkjemaSakMappingService
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
 import org.springframework.stereotype.Component
-import java.time.LocalDate
 
 private val log = KotlinLogging.logger { }
 
@@ -62,11 +63,13 @@ class OpprettSakOgBehandlingDigitalSøknad(
 
         val aktørId = persondataFasade.hentAktørIdForIdent(fnr)
 
+        val behandlingstema = utledBehandlingstema(søknadsdata)
+
         val opprettSakRequest = OpprettSakRequest.Builder()
             .medAktørID(aktørId)
             .medSakstype(Sakstyper.EU_EOS)
             .medSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG)
-            .medBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .medBehandlingstema(behandlingstema)
             .medBehandlingstype(Behandlingstyper.FØRSTEGANG)
             .medBehandlingsårsaktype(Behandlingsaarsaktyper.SØKNAD)
             .medMottaksdato(søknadsdata.innsendtTidspunkt.toLocalDate())
@@ -110,4 +113,21 @@ class OpprettSakOgBehandlingDigitalSøknad(
             innsendtDato = søknadsdata.innsendtTidspunkt.atZone(OSLO_ZONE).toInstant()
         )
     }
+
+    private fun utledBehandlingstema(dto: UtsendtArbeidstakerSkjemaM2MDto): Behandlingstema {
+        val erOffentligVirksomhet = when (val data = dto.skjema.data) {
+            is UtsendtArbeidstakerArbeidsgiversSkjemaDataDto ->
+                data.arbeidsgiverensVirksomhetINorge?.erArbeidsgiverenOffentligVirksomhet
+            is UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto ->
+                data.arbeidsgiversData.arbeidsgiverensVirksomhetINorge?.erArbeidsgiverenOffentligVirksomhet
+            else -> null
+        }
+
+        return if (erOffentligVirksomhet == true) {
+            Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+        } else {
+            Behandlingstema.UTSENDT_ARBEIDSTAKER
+        }
+    }
+
 }
