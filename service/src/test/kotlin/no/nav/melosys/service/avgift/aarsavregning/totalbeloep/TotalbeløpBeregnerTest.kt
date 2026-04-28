@@ -1,6 +1,8 @@
 package no.nav.melosys.service.avgift.aarsavregning.totalbeloep
 
 import io.kotest.matchers.shouldBe
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.forTest
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -165,5 +167,26 @@ class TotalbeløpBeregnerTest {
 
         val forventetBeløp = BigDecimal("12285.00")
         result.shouldBe(forventetBeløp)
+    }
+
+    @Test
+    fun `hentTotalavgift avrunder til hele kroner ned for fractional sum`() {
+        val periode = Trygdeavgiftsperiode.forTest {
+            periodeFra = LocalDate.of(2023, 1, 21)
+            periodeTil = LocalDate.of(2023, 1, 31)
+            trygdeavgiftsbeløpMd = BigDecimal(1234)
+        }
+
+
+        val result = TotalbeløpBeregner.hentTotalavgift(listOf(periode))
+
+
+        // 1234 * 0.35 mnd = 431.90, RoundingMode.DOWN → 431
+        result shouldBe BigDecimal("431")
+    }
+
+    @Test
+    fun `hentTotalavgift returnerer null når listen er tom`() {
+        TotalbeløpBeregner.hentTotalavgift(emptyList()) shouldBe null
     }
 }

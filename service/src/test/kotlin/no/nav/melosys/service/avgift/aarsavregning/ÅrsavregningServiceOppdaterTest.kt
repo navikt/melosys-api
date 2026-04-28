@@ -19,17 +19,17 @@ internal class ÅrsavregningServiceOppdaterTest : ÅrsavregningServiceTestBase()
             årsavregning {
                 id = 1
                 aar = 2023
-                tidligereFakturertBeloep = BigDecimal.valueOf(12.4)
+                tidligereFakturertBeloep = BigDecimal(12)
             }
         }
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.hentÅrsavregning()))
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
 
-        årsavregningService.oppdater(1L, 1L, BigDecimal.valueOf(5.2))
+        årsavregningService.oppdater(1L, 1L, BigDecimal(5))
 
 
-        behandlingsresultat.hentÅrsavregning().tilFaktureringBeloep shouldBe BigDecimal.valueOf(-7.2)
+        behandlingsresultat.hentÅrsavregning().tilFaktureringBeloep shouldBe BigDecimal(-7)
     }
 
     @Test
