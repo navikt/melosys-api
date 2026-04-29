@@ -26,7 +26,7 @@ data class TrygdeavgiftsperiodeDto(
             trygdeavgiftsperiode.grunnlagInntekstperiode?.type,
             trygdeavgiftsperiode.trygdesats?.toDouble(),
             trygdeavgiftsperiode.trygdeavgiftsbeløpMd.hentVerdi().intValueExact(),
-            trygdeavgiftsperiode.beregningsregel.takeIf { it != Avgiftsberegningsregel.ORDINÆR },
+            trygdeavgiftsperiode.beregningsregel,
             harSammenslåtteInntektskilder = trygdeavgiftsperiode.harSammenslåtteInntektskilder,
             avgiftsdel = trygdeavgiftsperiode.avgiftsdel
         )
