@@ -339,6 +339,7 @@ class InnvilgelseFtrlMapper(
         trygdesats,
         trygdeavgiftsbeløpMd.hentVerdi(),
         hentGrunnlagInntekstperiode().type,
+        hentGrunnlagInntekstperiode().type.beskrivelse,
         hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
         beregningsregel = beregningsregel.name,
     )
