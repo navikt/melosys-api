@@ -4,6 +4,7 @@ import tools.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import java.time.LocalDate
 import java.util.*
@@ -53,7 +54,7 @@ class EøsPensjonistTrygdeavgiftsberegningTransformer : ResponseTransformerV2 {
                     ),
                     grunnlag = grunnlag,
                     grunnlagListe = listOf(grunnlag),
-                    beregningsregel = "ORDINÆR"
+                    beregningsregel = Avgiftsberegningsregel.ORDINÆR
                 )
             )
 

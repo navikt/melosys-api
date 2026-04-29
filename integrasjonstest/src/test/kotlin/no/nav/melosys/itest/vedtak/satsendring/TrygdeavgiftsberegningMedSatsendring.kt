@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
 import mu.KotlinLogging
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.vedtak.satsendring.SatsendringIT.Companion.GAMMEL_SATS
 import no.nav.melosys.itest.vedtak.satsendring.SatsendringIT.Companion.NY_SATS
@@ -57,7 +58,7 @@ class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
                 ),
                 grunnlag = grunnlag,
                 grunnlagListe = listOf(grunnlag),
-                beregningsregel = "ORDINÆR"
+                beregningsregel = Avgiftsberegningsregel.ORDINÆR
             )
 
         return objectMapper.writeValueAsString(listOf(trygdeavgiftsberegningResponse))
