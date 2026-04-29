@@ -2,7 +2,6 @@ package no.nav.melosys.service.avgift
 
 import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
@@ -141,8 +140,6 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         dagensDato: LocalDate
     ): Trygdeavgiftsperiode {
         val alleGrunnlag = response.grunnlagListe.ifEmpty { listOf(response.grunnlag) }
-        val beregningsregel = Avgiftsberegningsregel.valueOf(response.beregningsregel)
-
         val skatteforholdMap = skatteforholdsperioderMedUUID.toMap()
         val inntektsperiodeMap = inntektsperioderMedUUID.toMap()
         val førsteGrunnlag = alleGrunnlag.first()
@@ -156,7 +153,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
                 ?: throw IllegalStateException("Fant ikke skatteforholdsperiode ${førsteGrunnlag.skatteforholdsperiodeId}"),
             grunnlagInntekstperiode = inntektsperiodeMap[førsteGrunnlag.inntektsperiodeId]
                 ?: throw IllegalStateException("Fant ikke inntektsperiode ${førsteGrunnlag.inntektsperiodeId}"),
-            beregningsregel = beregningsregel,
+            beregningsregel = response.beregningsregel,
         )
 
         alleGrunnlag.forEach { grunnlagDto ->

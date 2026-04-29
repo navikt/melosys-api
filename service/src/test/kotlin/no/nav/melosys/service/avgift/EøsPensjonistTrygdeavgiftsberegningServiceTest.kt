@@ -14,6 +14,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.inntektForTest
@@ -260,7 +261,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                             notSoRandomUuid
                         )
                     ),
-                    beregningsregel = "ORDINÆR",
+                    beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                 )
             )
         )
@@ -344,7 +345,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                             notSoRandomUuid
                         )
                     ),
-                    beregningsregel = "ORDINÆR",
+                    beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                 )
             )
         )
@@ -426,7 +427,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                             notSoRandomUuid
                         )
                     ),
-                    beregningsregel = "ORDINÆR",
+                    beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                 )
             )
         )
@@ -602,7 +603,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                             notSoRandomUuid
                         )
                     ),
-                    beregningsregel = "ORDINÆR",
+                    beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                 )
             )
         )
