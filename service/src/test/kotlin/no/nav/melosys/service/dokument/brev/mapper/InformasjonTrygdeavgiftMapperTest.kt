@@ -614,13 +614,13 @@ internal class InformasjonTrygdeavgiftMapperTest {
     }
 
     @Test
-    fun `mapInformasjonTrygdeavgift med ORDINÆR beregningsregel mapper null som beregningsregel`() {
+    fun `mapInformasjonTrygdeavgift med ORDINÆR beregningsregel mapper ORDINÆR som beregningsregel`() {
         val behandlingsresultat = lagBehandlingsresultatMedBeregningsregel(Avgiftsberegningsregel.ORDINÆR)
         mockHappyCase(behandlingsresultat)
 
         informasjonTrygdeavgiftMapper.mapInformasjonTrygdeavgift(lagBrevbestilling()).shouldNotBeNull().apply {
             avgiftsperioder.shouldNotBeEmpty()
-            avgiftsperioder.all { it.beregningsregel == null }.shouldBeTrue()
+            avgiftsperioder.all { it.beregningsregel == "ORDINÆR" }.shouldBeTrue()
         }
     }
 

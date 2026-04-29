@@ -340,7 +340,7 @@ class InnvilgelseFtrlMapper(
         trygdeavgiftsbeløpMd.hentVerdi(),
         hentGrunnlagInntekstperiode().type,
         hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
-        beregningsregel = beregningsregel.takeIf { it != Avgiftsberegningsregel.ORDINÆR }?.name,
+        beregningsregel = beregningsregel.name,
     )
 
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodePensjonist> {
@@ -364,7 +364,7 @@ class InnvilgelseFtrlMapper(
                     avgiftspliktigInntektPerMd = it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
                     arbeidsgiveravgiftBetalt = SvarAlternativ.IKKE_RELEVANT,
                     skatteplikt = it.hentGrunnlagSkatteforholdTilNorge().skatteplikttype == Skatteplikttype.SKATTEPLIKTIG,
-                    beregningsregel = it.beregningsregel.takeIf { regel -> regel != Avgiftsberegningsregel.ORDINÆR }?.name,
+                    beregningsregel = it.beregningsregel.name,
                 )
             }
             ?.sortedByDescending { it.fom }

@@ -761,12 +761,12 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
     }
 
     @Test
-    fun `mapYrkesaktivFrivillig med ORDINÆR beregningsregel mapper null som beregningsregel`() {
+    fun `mapYrkesaktivFrivillig med ORDINÆR beregningsregel mapper ORDINÆR som beregningsregel`() {
         mockHappyCase(Case.paragraf_2_8)
 
         innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldNotBeEmpty()
-            avgiftsperioder.all { it.beregningsregel == null }.shouldBeTrue()
+            avgiftsperioder.all { it.beregningsregel == "ORDINÆR" }.shouldBeTrue()
         }
     }
 
@@ -795,14 +795,14 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
     }
 
     @Test
-    fun `mapYrkesaktivPliktig med ORDINÆR beregningsregel mapper null som beregningsregel`() {
+    fun `mapYrkesaktivPliktig med ORDINÆR beregningsregel mapper ORDINÆR som beregningsregel`() {
         val behandlingsresultat = lagPliktigBehandlingsresultatMedBeregningsregel(Avgiftsberegningsregel.ORDINÆR)
         mockHappyCase(Case.paragraf_2_8, behandlingsresultat)
         every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(LocalDate.of(1980, 1, 1))
 
         innvilgelseFtrlMapper.mapYrkesaktivPliktig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldNotBeEmpty()
-            avgiftsperioder.all { it.beregningsregel == null }.shouldBeTrue()
+            avgiftsperioder.all { it.beregningsregel == "ORDINÆR" }.shouldBeTrue()
         }
     }
 

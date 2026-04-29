@@ -518,7 +518,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
     }
 
     @Test
-    fun `mapPensjonistFrivillig med ORDINÆR beregningsregel mapper null som beregningsregel`() {
+    fun `mapPensjonistFrivillig med ORDINÆR beregningsregel mapper ORDINÆR som beregningsregel`() {
         val behandlingsresultat = lagPensjonistBehandlingsresultatMedBeregningsregel(
             Medlemskapstyper.FRIVILLIG, Avgiftsberegningsregel.ORDINÆR
         )
@@ -526,7 +526,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
 
         innvilgelseFtrlMapper.mapPensjonistFrivillig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldNotBeEmpty()
-            avgiftsperioder.all { it.beregningsregel == null }.shouldBeTrue()
+            avgiftsperioder.all { it.beregningsregel == "ORDINÆR" }.shouldBeTrue()
         }
     }
 
@@ -557,7 +557,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
     }
 
     @Test
-    fun `mapPensjonistPliktig med ORDINÆR beregningsregel mapper null som beregningsregel`() {
+    fun `mapPensjonistPliktig med ORDINÆR beregningsregel mapper ORDINÆR som beregningsregel`() {
         val behandlingsresultat = lagPensjonistBehandlingsresultatMedBeregningsregel(
             Medlemskapstyper.PLIKTIG, Avgiftsberegningsregel.ORDINÆR
         )
@@ -565,7 +565,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
 
         innvilgelseFtrlMapper.mapPensjonistPliktig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldNotBeEmpty()
-            avgiftsperioder.all { it.beregningsregel == null }.shouldBeTrue()
+            avgiftsperioder.all { it.beregningsregel == "ORDINÆR" }.shouldBeTrue()
         }
     }
 

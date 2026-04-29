@@ -133,8 +133,7 @@ class ÅrsavregningVedtakMapper(
                 ),
                 skatteplikt = trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge!!
                     .skatteplikttype == Skatteplikttype.SKATTEPLIKTIG,
-                beregningsregel = trygdeavgiftsperiode.beregningsregel
-                    .takeIf { it != Avgiftsberegningsregel.ORDINÆR }?.name
+                beregningsregel = trygdeavgiftsperiode.beregningsregel.name
             )
         }
     }

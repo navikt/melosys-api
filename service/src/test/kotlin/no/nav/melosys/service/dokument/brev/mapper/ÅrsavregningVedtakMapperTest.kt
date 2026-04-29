@@ -100,7 +100,8 @@ class ÅrsavregningVedtakMapperTest {
             inntektskilde = Inntektskildetype.INNTEKT_FRA_UTLANDET.beskrivelse,
             trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
             arbeidsgiveravgiftBetalt = SvarAlternativ.JA,
-            skatteplikt = true
+            skatteplikt = true,
+            beregningsregel = "ORDINÆR"
         )
         result.forskuddsvisFakturertTrygdeavgift[0] shouldBe Avgiftsperiode(
             fom = LocalDate.of(2023, 1, 1),
@@ -111,7 +112,8 @@ class ÅrsavregningVedtakMapperTest {
             inntektskilde = Inntektskildetype.INNTEKT_FRA_UTLANDET.beskrivelse,
             trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
             arbeidsgiveravgiftBetalt = SvarAlternativ.NEI,
-            skatteplikt = false
+            skatteplikt = false,
+            beregningsregel = "ORDINÆR"
         )
 
         result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.beregnetAvgiftBelop
@@ -427,15 +429,15 @@ class ÅrsavregningVedtakMapperTest {
     }
 
     @Test
-    fun `mapÅrsavregning mapper ORDINÆR beregningsregel til null på DTO`() {
+    fun `mapÅrsavregning mapper ORDINÆR beregningsregel som streng på DTO`() {
         val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
         val årsavregningModel = lagÅrsavregningModel(BigDecimal(2000), BigDecimal(1000))
         every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
 
         val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
 
-        result.endeligTrygdeavgift[0].beregningsregel shouldBe null
-        result.forskuddsvisFakturertTrygdeavgift[0].beregningsregel shouldBe null
+        result.endeligTrygdeavgift[0].beregningsregel shouldBe "ORDINÆR"
+        result.forskuddsvisFakturertTrygdeavgift[0].beregningsregel shouldBe "ORDINÆR"
     }
 
     @Test
