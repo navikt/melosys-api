@@ -108,9 +108,9 @@ class OpprettLovvalgsperiodeService(
 
         val lovvalgsperiode = eksisterendeLovvalgsperiode ?: Lovvalgsperiode().apply {
             val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
+            val harEksisterendePeriode = behandlingsresultat.lovvalgsperioder.isNotEmpty()
             this.behandlingsresultat = behandlingsresultat
             behandlingsresultat.lovvalgsperioder.add(this)
-            val harEksisterendePeriode = behandlingsresultat.lovvalgsperioder.size > 1
             kilde = if (harEksisterendePeriode) PeriodeKilde.AVGIFT_SYSTEMET else PeriodeKilde.MELOSYS
         }
 
