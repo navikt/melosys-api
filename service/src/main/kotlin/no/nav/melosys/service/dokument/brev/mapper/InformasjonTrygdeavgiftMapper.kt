@@ -72,7 +72,11 @@ class InformasjonTrygdeavgiftMapper(
             },
             erSkattemessigEmigrert = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.any {
                 it.grunnlagSkatteforholdTilNorge?.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG
-            }
+            },
+            minstebelopVerdi = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder
+                .firstOrNull { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }?.minstebelopVerdi,
+            minstebelopAar = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder
+                .firstOrNull { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }?.minstebelopAar
         )
     }
 
@@ -110,8 +114,6 @@ class InformasjonTrygdeavgiftMapper(
                     avgiftspliktigInntektPerMd = inntektsperiode.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
                     skatteplikt = it.hentGrunnlagSkatteforholdTilNorge().skatteplikttype == Skatteplikttype.SKATTEPLIKTIG,
                     beregningsregel = it.beregningsregel.takeIf { regel -> regel != Avgiftsberegningsregel.ORDINÆR }?.name,
-                    minstebelopVerdi = it.minstebelopVerdi,
-                    minstebelopAar = it.minstebelopAar,
                 )
             }
             ?.sortedByDescending { it.fom }

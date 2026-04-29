@@ -26,7 +26,9 @@ class InformasjonTrygdeavgift(
     val fullmektigTrygdeavgift: String?,
     val avgiftsperioder: List<AvgiftsperiodeEøsPensjonist>,
     val harAvgiftspliktigePerioderIForegåendeÅr: Boolean,
-    val erSkattemessigEmigrert: Boolean
+    val erSkattemessigEmigrert: Boolean,
+    val minstebelopVerdi: BigDecimal? = null,
+    val minstebelopAar: Int? = null
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
 }
@@ -40,6 +42,4 @@ data class AvgiftsperiodeEøsPensjonist(
     val inntektskilde: String,
     val skatteplikt: Boolean,
     val beregningsregel: String? = null,
-    val minstebelopVerdi: java.math.BigDecimal? = null,
-    val minstebelopAar: Int? = null,
 )

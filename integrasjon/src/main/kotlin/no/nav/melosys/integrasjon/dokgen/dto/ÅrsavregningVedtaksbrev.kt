@@ -81,9 +81,7 @@ data class Avgiftsperiode(
     val trygdedekning: String,
     val arbeidsgiveravgiftBetalt: SvarAlternativ,
     val skatteplikt: Boolean,
-    val beregningsregel: String? = null,
-    val minstebelopVerdi: BigDecimal? = null,
-    val minstebelopAar: Int? = null
+    val beregningsregel: String? = null
 )
 
 
