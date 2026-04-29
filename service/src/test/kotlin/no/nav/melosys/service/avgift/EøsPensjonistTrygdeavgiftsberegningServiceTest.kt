@@ -127,6 +127,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         this.behandling = behandling
         type = Behandlingsresultattyper.IKKE_FASTSATT
         helseutgiftDekkesPeriode {
+            id = 100L
             fomDato = fom
             tomDato = tom
             bostedLandkode = Land_iso2.DK
@@ -285,7 +286,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                 }
             }
 
-        verify { trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
+        verify { trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
 
         verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
         behandlingsresultat.helseutgiftDekkesPerioder.first().trygdeavgiftsperioder.shouldNotBeEmpty()
@@ -368,7 +369,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                 Trygdeavgiftsperiode::grunnlagListe
             )
 
-        verify { trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
+        verify { trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
 
         verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
         behandlingsresultat.helseutgiftDekkesPerioder.first().trygdeavgiftsperioder.shouldNotBeEmpty()

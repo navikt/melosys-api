@@ -36,6 +36,7 @@ object HelseutgiftDekkesPeriodeTestFactory {
             tomDato = this.tomDato,
             bostedLandkode = this.bostedLandkode
         ).apply {
+            id = this@Builder.id.takeIf { it != 0L }
             kilde = this@Builder.kilde
             trygdeavgiftsperioder.addAll(this@Builder.trygdeavgiftsperioder)
         }

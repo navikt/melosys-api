@@ -18,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -91,7 +92,7 @@ class TrygdeavgiftperiodeErstatterTest() {
         val eksisterendeTrygdeavgiftsperiode = lagTrygdeavgiftsperioder(helseutgiftDekkesPeriodeId, 1L, erEøsPensjonist = true).single()
         val nyTrygdeavgiftsperiode = lagTrygdeavgiftsperioder(helseutgiftDekkesPeriodeId, 2L, erEøsPensjonist = true).single()
 
-        val behandlingsresultat = lagBehandlingsresultat()
+        val behandlingsresultat = lagEøsPensjonistBehandlingsresultat()
         val helseutgiftDekkesPeriode =
             lagHelseutgiftDekkesPeriode(
                 behandlingsresultat,
@@ -101,21 +102,15 @@ class TrygdeavgiftperiodeErstatterTest() {
                 TOM,
                 bostedLand
             )
-        behandlingsresultat.apply {
-            this.addHelseutgiftDekkesPeriode(helseutgiftDekkesPeriode)
-        }
+        behandlingsresultat.addHelseutgiftDekkesPeriode(helseutgiftDekkesPeriode)
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
 
         val nyeTrygdeavgiftsperioder = listOf(nyTrygdeavgiftsperiode)
 
 
-        trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
+        trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
 
-
-        nyeTrygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
-            trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode?.id?.shouldBeEqual(helseutgiftDekkesPeriodeId)
-        }
         behandlingsresultat.trygdeavgiftType.shouldNotBeNull() shouldBeEqual Trygdeavgift_typer.FORELØPIG
         helseutgiftDekkesPeriode.trygdeavgiftsperioder shouldContainExactly nyeTrygdeavgiftsperioder.toSet()
     }
@@ -125,7 +120,7 @@ class TrygdeavgiftperiodeErstatterTest() {
         val FOM = LocalDate.now()
         val TOM = LocalDate.now().plusMonths(2)
 
-        val behandlingsresultat = lagBehandlingsresultat()
+        val behandlingsresultat = lagEøsPensjonistBehandlingsresultat()
         val danmarkHelsePeriode = lagHelseutgiftDekkesPeriode(behandlingsresultat, 1L, emptyList(), FOM, TOM, Land_iso2.DK)
         val sverigeHelsePeriode = lagHelseutgiftDekkesPeriode(behandlingsresultat, 2L, emptyList(), FOM.plusMonths(3), TOM.plusMonths(3), Land_iso2.SE)
         behandlingsresultat.addHelseutgiftDekkesPeriode(danmarkHelsePeriode)
@@ -135,7 +130,7 @@ class TrygdeavgiftperiodeErstatterTest() {
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
 
-        trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(1337L, listOf(nyTrygdeavgiftsperiode))
+        trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(1337L, listOf(nyTrygdeavgiftsperiode))
 
         danmarkHelsePeriode.trygdeavgiftsperioder shouldContainExactly setOf(nyTrygdeavgiftsperiode)
         sverigeHelsePeriode.trygdeavgiftsperioder.shouldBeEmpty()
@@ -263,6 +258,16 @@ class TrygdeavgiftperiodeErstatterTest() {
         ).apply {
             id = helseutgiftDekkesPeriodeId
             trygdeavgiftsperioder.forEach { this.trygdeavgiftsperioder.add(it) }
+        }
+    }
+
+    private fun lagEøsPensjonistBehandlingsresultat() = Behandlingsresultat.forTest {
+        behandling {
+            tema = Behandlingstema.PENSJONIST
+            fagsak {
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
         }
     }
 
