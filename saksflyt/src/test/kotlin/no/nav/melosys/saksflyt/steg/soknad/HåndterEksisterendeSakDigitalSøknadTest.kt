@@ -130,10 +130,29 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             steg.utfør(prosessinstans)
 
             verify(exactly = 0) { behandlingService.endreStatus(any<Behandling>(), any()) }
+            verify(exactly = 0) { behandlingService.endreTema(any<Behandling>(), any()) }
             verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any()) }
             verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingId, any(), any()) }
             verify { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) }
             prosessinstans.behandling shouldBe behandling
+        }
+
+        @Test
+        fun `oppdaterer behandlingstema for åpen behandling når tema utledes annerledes`() {
+            val behandling = lagBehandling(Behandlingsstatus.OPPRETTET, behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            val fagsak = lagFagsakMedBehandling(behandling)
+            val (offentligSøknadsdata, prosessinstans) = lagProsessinstansMedOffentligSøknad()
+
+            mockFagsakService(fagsak)
+            every { jsonMapper.writeValueAsString(offentligSøknadsdata) } returns "{}"
+            mockEndreTema()
+            mockOppdaterMottatteOpplysninger()
+            mockHentMottatteOpplysninger(behandlingId)
+
+            steg.utfør(prosessinstans)
+
+            verify { behandlingService.endreTema(behandling, Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY) }
+            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingId, any(), any()) }
         }
     }
 
@@ -256,12 +275,14 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
 
     private fun lagBehandling(
         status: Behandlingsstatus,
-        behandlingstype: Behandlingstyper = Behandlingstyper.FØRSTEGANG
+        behandlingstype: Behandlingstyper = Behandlingstyper.FØRSTEGANG,
+        behandlingstema: Behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER
     ): Behandling {
         return Behandling.forTest {
             id = this@HåndterEksisterendeSakDigitalSøknadTest.behandlingId
             this.status = status
             type = behandlingstype
+            tema = behandlingstema
             this.fagsak = Fagsak.forTest { this.saksnummer = this@HåndterEksisterendeSakDigitalSøknadTest.saksnummer }
         }
     }
@@ -288,6 +309,10 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
 
     private fun mockEndreStatus() {
         every { behandlingService.endreStatus(any<Behandling>(), any()) } just Runs
+    }
+
+    private fun mockEndreTema() {
+        every { behandlingService.endreTema(any<Behandling>(), any()) } just Runs
     }
 
     private fun mockTømBehandlingsresultat() {

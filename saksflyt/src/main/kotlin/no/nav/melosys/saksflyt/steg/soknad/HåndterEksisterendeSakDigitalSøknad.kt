@@ -110,6 +110,11 @@ class HåndterEksisterendeSakDigitalSøknad(
         behandling: Behandling,
         søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
     ): Pair<Behandling, MottatteOpplysninger> {
+        val utledetBehandlingstema = utledBehandlingstema(søknadsdata)
+        if (behandling.tema != utledetBehandlingstema) {
+            behandlingService.endreTema(behandling, utledetBehandlingstema)
+        }
+
         val skalResetteStegvelger = behandling.status in setOf(
             Behandlingsstatus.UNDER_BEHANDLING,
             Behandlingsstatus.AVVENT_DOK_PART
