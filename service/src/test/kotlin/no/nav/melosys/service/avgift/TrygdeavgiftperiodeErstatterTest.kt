@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avgift
 
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -9,7 +10,9 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeGrunnlag
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -19,6 +22,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.math.BigDecimal
 import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
@@ -114,6 +118,27 @@ class TrygdeavgiftperiodeErstatterTest() {
         }
         behandlingsresultat.trygdeavgiftType.shouldNotBeNull() shouldBeEqual Trygdeavgift_typer.FORELØPIG
         helseutgiftDekkesPeriode.trygdeavgiftsperioder shouldContainExactly nyeTrygdeavgiftsperioder.toSet()
+    }
+
+    @Test
+    fun `erstatter trygdeavgiftsperiode på riktig helseutgiftDekkesPeriode blant flere`() {
+        val FOM = LocalDate.now()
+        val TOM = LocalDate.now().plusMonths(2)
+
+        val behandlingsresultat = lagBehandlingsresultat()
+        val danmarkHelsePeriode = lagHelseutgiftDekkesPeriode(behandlingsresultat, 1L, emptyList(), FOM, TOM, Land_iso2.DK)
+        val sverigeHelsePeriode = lagHelseutgiftDekkesPeriode(behandlingsresultat, 2L, emptyList(), FOM.plusMonths(3), TOM.plusMonths(3), Land_iso2.SE)
+        behandlingsresultat.addHelseutgiftDekkesPeriode(danmarkHelsePeriode)
+        behandlingsresultat.addHelseutgiftDekkesPeriode(sverigeHelsePeriode)
+
+        val nyTrygdeavgiftsperiode = lagTrygdeavgiftsperiodeMedGrunnlag(danmarkHelsePeriode, FOM, TOM)
+
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+
+        trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(1337L, listOf(nyTrygdeavgiftsperiode))
+
+        danmarkHelsePeriode.trygdeavgiftsperioder shouldContainExactly setOf(nyTrygdeavgiftsperiode)
+        sverigeHelsePeriode.trygdeavgiftsperioder.shouldBeEmpty()
     }
 
     @Test
@@ -279,5 +304,27 @@ class TrygdeavgiftperiodeErstatterTest() {
         }
     }.also {
         it.lovvalgsperioder = lovvalgsperioder.filterNotNull().toMutableSet()
+    }
+
+    private fun lagTrygdeavgiftsperiodeMedGrunnlag(
+        helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode,
+        fom: LocalDate,
+        tom: LocalDate
+    ): Trygdeavgiftsperiode {
+        val periode = Trygdeavgiftsperiode(
+            periodeFra = fom,
+            periodeTil = tom,
+            trygdeavgiftsbeløpMd = Penger(BigDecimal.valueOf(790)),
+            trygdesats = BigDecimal.valueOf(7.9),
+        )
+        periode.leggTilGrunnlag(
+            TrygdeavgiftsperiodeGrunnlag(
+                trygdeavgiftsperiode = periode,
+                helseutgiftDekkesPeriode = helseutgiftDekkesPeriode,
+                inntektsperiode = mockk(relaxed = true),
+                skatteforhold = mockk(relaxed = true),
+            )
+        )
+        return periode
     }
 }

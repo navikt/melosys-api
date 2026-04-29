@@ -267,23 +267,23 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         )
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
+        val helseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPerioder.first()
+
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, listOf(skatteforholdsperiode), listOf(inntektsperiode))
-            .single()
-            .shouldBeEqualToIgnoringFields(
-                Trygdeavgiftsperiode(
-                    id = null,
-                    periodeFra = FOM,
-                    periodeTil = TOM,
-                    trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
-                    trygdesats = BigDecimal("7.9"),
-                    grunnlagInntekstperiode = inntektsperiode,
-                    grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPerioder.first(),
-                    grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
-                ),
-                ignorePrivateFields = false,
-                Trygdeavgiftsperiode::grunnlagMedlemskapsperiode,
-                Trygdeavgiftsperiode::grunnlagListe
-            )
+            .single().run {
+                periodeFra shouldBe FOM
+                periodeTil shouldBe TOM
+                trygdeavgiftsbeløpMd shouldBe Penger(BigDecimal(790), NOK.kode)
+                trygdesats shouldBe BigDecimal("7.9")
+                grunnlagInntekstperiode shouldBe inntektsperiode
+                grunnlagSkatteforholdTilNorge shouldBe skatteforholdsperiode
+                grunnlagHelseutgiftDekkesPeriode shouldBe helseutgiftDekkesPeriode
+
+                grunnlagListe.shouldNotBeEmpty()
+                grunnlagListe.forEach { grunnlag ->
+                    grunnlag.helseutgiftDekkesPeriode.shouldNotBeNull() shouldBe helseutgiftDekkesPeriode
+                }
+            }
 
         verify { trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
 
