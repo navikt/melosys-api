@@ -78,6 +78,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         }
 
         every { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) } just Runs
+        every { behandlingService.lagre(any()) } just Runs
     }
 
     private fun mockFagsakOgBehandling(): Behandling {
