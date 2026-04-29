@@ -14,7 +14,7 @@ data class TrygdeavgiftsperiodeDto(
     val inntektskildetype: Inntektskildetype?,
     val avgiftssats: Double?,
     val avgiftPerMd: Int,
-    val beregningsregel: Avgiftsberegningsregel? = null,
+    val beregningsregel: Avgiftsberegningsregel,
     val harSammenslåtteInntektskilder: Boolean = false,
     val avgiftsdel: Avgiftsdel? = null
 ) {
