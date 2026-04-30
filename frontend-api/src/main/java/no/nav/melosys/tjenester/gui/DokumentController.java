@@ -2,11 +2,9 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.DokumentVariant;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -31,9 +29,6 @@ import org.springframework.web.context.WebApplicationContext;
 @Tag(name = "dokumenter")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class DokumentController {
-    private static final String APPLICATION_PDF = "application/pdf";
-    private static final String IMAGE_PNG = "image/png";
-    private static final String IMAGE_JPEG = "image/jpeg";
     private static final String APPLICATION_JSON_UTF8 = MediaType.APPLICATION_JSON_VALUE + "; charset=UTF-8";
 
     private final DokumentHentingService dokumentHentingService;
@@ -48,7 +43,8 @@ public class DokumentController {
         this.aksesskontroll = aksesskontroll;
     }
 
-    @GetMapping(value = "/{journalpostID}/{dokumentID}", produces = {APPLICATION_PDF, IMAGE_PNG, IMAGE_JPEG, APPLICATION_JSON_UTF8})
+    @GetMapping(value = "/{journalpostID}/{dokumentID}",
+        produces = {MediaType.APPLICATION_PDF_VALUE, MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE, APPLICATION_JSON_UTF8})
     @Operation(summary = "hent dokument knyttet til journalpost")
     public ResponseEntity<byte[]> hentDokument(@PathVariable("journalpostID") String journalpostID,
                                                @PathVariable("dokumentID") String dokumentID) {
@@ -57,12 +53,14 @@ public class DokumentController {
         auditerInnsyn(journalpost);
 
         byte[] dokument = dokumentHentingService.hentDokument(journalpostID, dokumentID);
-        Visning visning = Visning.av(finnArkivFiltype(journalpost, dokumentID));
-        return lagResponseAvDokument(dokument, "journalpost-dok-" + dokumentID, visning);
+        DokumentVariant.Filtype filtype = journalpost.finnArkivDokument(dokumentID)
+            .map(d -> d.arkivVariantFiltype())
+            .orElse(null);
+        return lagResponseAvDokument(dokument, "journalpost-dok-" + dokumentID, Visning.av(filtype));
     }
 
     @Deprecated(since = "MELOSYS-5899")
-    @GetMapping(value = "/pdf/{journalpostID}/{dokumentID}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
+    @GetMapping(value = "/pdf/{journalpostID}/{dokumentID}", produces = {MediaType.APPLICATION_PDF_VALUE, APPLICATION_JSON_UTF8})
     @Operation(summary = "hent dokument knyttet til journalpost")
     public ResponseEntity<byte[]> hentDokumentDeprecated(@PathVariable("journalpostID") String journalpostID,
                                                @PathVariable("dokumentID") String dokumentID) {
@@ -110,26 +108,6 @@ public class DokumentController {
         }
     }
 
-    private static DokumentVariant.Filtype finnArkivFiltype(Journalpost journalpost, String dokumentID) {
-        return finnDokument(journalpost, dokumentID)
-            .flatMap(d -> d.getDokumentVarianter().stream()
-                .filter(DokumentVariant::erVariantArkiv)
-                .map(DokumentVariant::getFiltype)
-                .filter(java.util.Objects::nonNull)
-                .findFirst())
-            .orElse(null);
-    }
-
-    private static Optional<ArkivDokument> finnDokument(Journalpost journalpost, String dokumentID) {
-        ArkivDokument hoved = journalpost.getHoveddokument();
-        if (hoved != null && dokumentID.equals(hoved.getDokumentId())) {
-            return Optional.of(hoved);
-        }
-        return journalpost.getVedleggListe().stream()
-            .filter(v -> dokumentID.equals(v.getDokumentId()))
-            .findFirst();
-    }
-
     private static ResponseEntity<byte[]> lagResponseAvDokument(byte[] dokument, String filnavnUtenExt, Visning visning) {
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_TYPE, visning.contentType)
@@ -139,9 +117,9 @@ public class DokumentController {
     }
 
     private enum Visning {
-        PDF(APPLICATION_PDF, "pdf"),
-        PNG(IMAGE_PNG, "png"),
-        JPEG(IMAGE_JPEG, "jpg");
+        PDF(MediaType.APPLICATION_PDF_VALUE, "pdf"),
+        PNG(MediaType.IMAGE_PNG_VALUE, "png"),
+        JPEG(MediaType.IMAGE_JPEG_VALUE, "jpg");
 
         final String contentType;
         final String extension;

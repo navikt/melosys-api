@@ -19,10 +19,6 @@ public class DokumentDto {
         this.filtype = null;
     }
 
-    public DokumentDto(String dokumentID, String tittel, List<String> logiskeVedlegg) {
-        this(dokumentID, tittel, logiskeVedlegg, null);
-    }
-
     public DokumentDto(String dokumentID, String tittel, List<String> logiskeVedlegg, DokumentVariant.Filtype filtype) {
         this.dokumentID = dokumentID;
         this.tittel = tittel;
@@ -35,16 +31,7 @@ public class DokumentDto {
             dokument.getDokumentId(),
             dokument.getTittel(),
             dokument.hentLogiskeVedleggTitler(),
-            arkivVariantFiltype(dokument)
+            dokument.arkivVariantFiltype()
         );
-    }
-
-    private static DokumentVariant.Filtype arkivVariantFiltype(ArkivDokument dokument) {
-        return dokument.getDokumentVarianter().stream()
-            .filter(DokumentVariant::erVariantArkiv)
-            .map(DokumentVariant::getFiltype)
-            .filter(java.util.Objects::nonNull)
-            .findFirst()
-            .orElse(null);
     }
 }

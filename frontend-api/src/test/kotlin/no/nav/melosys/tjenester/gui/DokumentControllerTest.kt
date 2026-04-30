@@ -13,6 +13,7 @@ import no.nav.melosys.service.dokument.DokumentHentingService
 import no.nav.melosys.service.dokument.brev.SedPdfData
 import no.nav.melosys.service.dokument.sed.EessiService
 import no.nav.melosys.service.tilgang.Aksesskontroll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
@@ -43,12 +44,15 @@ class DokumentControllerTest {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
+    @BeforeEach
+    fun setup() {
+        every { dokumentHentingService.hentDokument(any(), any()) } returns ByteArray(1)
+        every { aksesskontroll.auditAutoriserFolkeregisterIdent(any(), any()) } returns Unit
+    }
+
     @Test
     fun `skal hente dokument`() {
         every { dokumentHentingService.hentJournalpost(any()) } returns Journalpost("jpID")
-        val dokument = ByteArray(1)
-        every { dokumentHentingService.hentDokument(any(), any()) } returns dokument
-
 
         mockMvc.perform(
             get("$BASE_URL/{journalpostID}/{dokumentID}", "1", "2", "3")
@@ -62,29 +66,22 @@ class DokumentControllerTest {
         val journalpost = Journalpost("jpID").apply {
             brukerIdType = BrukerIdType.FOLKEREGISTERIDENT
             brukerId = "fnr"
-            hoveddokument = ArkivDokument()
+            hoveddokument = ArkivDokument().apply { dokumentId = "HOVED" }
         }
         every { dokumentHentingService.hentJournalpost(any()) } returns journalpost
-        every { dokumentHentingService.hentDokument(any(), any()) } returns ByteArray(1)
-        every { aksesskontroll.auditAutoriserFolkeregisterIdent(any(), any()) } returns Unit
-
 
         mockMvc.perform(
-            get("$BASE_URL/{journalpostID}/{dokumentID}", "1", "2", "3")
+            get("$BASE_URL/{journalpostID}/{dokumentID}", "1", "HOVED", "3")
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk)
-
 
         verify { aksesskontroll.auditAutoriserFolkeregisterIdent("fnr", any()) }
     }
 
     @Test
     fun `hentDokument PDF-vedlegg returnerer application-pdf`() {
-        val journalpost = lagJournalpostMedVedlegg(vedleggID = "VED-1", filtype = DokumentVariant.Filtype.PDFA)
-        every { dokumentHentingService.hentJournalpost(any()) } returns journalpost
-        every { dokumentHentingService.hentDokument(any(), any()) } returns ByteArray(1)
-        every { aksesskontroll.auditAutoriserFolkeregisterIdent(any(), any()) } returns Unit
+        every { dokumentHentingService.hentJournalpost(any()) } returns lagJournalpostMedVedlegg("VED-1", DokumentVariant.Filtype.PDFA)
 
         mockMvc.perform(get("$BASE_URL/{j}/{d}", "JP-1", "VED-1"))
             .andExpect(status().isOk)
@@ -94,10 +91,7 @@ class DokumentControllerTest {
 
     @Test
     fun `hentDokument PNG-vedlegg returnerer image-png`() {
-        val journalpost = lagJournalpostMedVedlegg(vedleggID = "VED-2", filtype = DokumentVariant.Filtype.PNG)
-        every { dokumentHentingService.hentJournalpost(any()) } returns journalpost
-        every { dokumentHentingService.hentDokument(any(), any()) } returns ByteArray(1)
-        every { aksesskontroll.auditAutoriserFolkeregisterIdent(any(), any()) } returns Unit
+        every { dokumentHentingService.hentJournalpost(any()) } returns lagJournalpostMedVedlegg("VED-2", DokumentVariant.Filtype.PNG)
 
         mockMvc.perform(get("$BASE_URL/{j}/{d}", "JP-1", "VED-2"))
             .andExpect(status().isOk)
@@ -107,10 +101,7 @@ class DokumentControllerTest {
 
     @Test
     fun `hentDokument JPEG-vedlegg returnerer image-jpeg med jpg-extension`() {
-        val journalpost = lagJournalpostMedVedlegg(vedleggID = "VED-3", filtype = DokumentVariant.Filtype.JPEG)
-        every { dokumentHentingService.hentJournalpost(any()) } returns journalpost
-        every { dokumentHentingService.hentDokument(any(), any()) } returns ByteArray(1)
-        every { aksesskontroll.auditAutoriserFolkeregisterIdent(any(), any()) } returns Unit
+        every { dokumentHentingService.hentJournalpost(any()) } returns lagJournalpostMedVedlegg("VED-3", DokumentVariant.Filtype.JPEG)
 
         mockMvc.perform(get("$BASE_URL/{j}/{d}", "JP-1", "VED-3"))
             .andExpect(status().isOk)
@@ -123,11 +114,9 @@ class DokumentControllerTest {
         val journalpost = Journalpost("JP-1").apply {
             brukerIdType = BrukerIdType.FOLKEREGISTERIDENT
             brukerId = "fnr"
-            hoveddokument = ArkivDokument()
+            hoveddokument = ArkivDokument().apply { dokumentId = "HOVED" }
         }
         every { dokumentHentingService.hentJournalpost(any()) } returns journalpost
-        every { dokumentHentingService.hentDokument(any(), any()) } returns ByteArray(1)
-        every { aksesskontroll.auditAutoriserFolkeregisterIdent(any(), any()) } returns Unit
 
         mockMvc.perform(get("$BASE_URL/{j}/{d}", "JP-1", "UKJENT"))
             .andExpect(status().isOk)
@@ -138,7 +127,6 @@ class DokumentControllerTest {
     @Test
     fun `skal hente dokumenter oversikt`() {
         every { dokumentHentingService.hentJournalposter(any()) } returns emptyList()
-
 
         mockMvc.perform(
             get("$BASE_URL/oversikt/{saksnummer}", "1")
@@ -153,14 +141,12 @@ class DokumentControllerTest {
         every { eessiService.genererSedPdf(any(), any<SedType>(), any()) } returns ByteArray(1)
         every { aksesskontroll.autoriser(any()) } returns Unit
 
-
         mockMvc.perform(
             post("$BASE_URL/pdf/sed/utkast/{behandlingID}/{sedType}", 1L, SedType.A003)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(sedPdfData))
         )
             .andExpect(status().isOk)
-
 
         verify { eessiService.genererSedPdf(any(), any<SedType>(), any()) }
     }
@@ -180,7 +166,7 @@ class DokumentControllerTest {
         return Journalpost("JP-1").apply {
             brukerIdType = BrukerIdType.FOLKEREGISTERIDENT
             brukerId = "fnr"
-            hoveddokument = ArkivDokument()
+            hoveddokument = ArkivDokument().apply { dokumentId = "HOVED" }
             vedleggListe.add(vedlegg)
         }
     }
