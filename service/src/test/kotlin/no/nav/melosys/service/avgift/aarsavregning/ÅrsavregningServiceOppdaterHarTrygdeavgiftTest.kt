@@ -50,6 +50,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
                 tidligereBehandlingsresultat = Behandlingsresultat.forTest()
                 tilFaktureringBeloep = BigDecimal.TEN
                 tidligereFakturertBeloep = BigDecimal.ONE
+                beregnetAvgiftBelop = BigDecimal("5000")
                 trygdeavgiftFraAvgiftssystemet = BigDecimal.ONE
             }
         }
@@ -67,6 +68,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
                 harTrygdeavgiftFraAvgiftssystemet shouldBe true
                 tilFaktureringBeloep shouldBe null
                 tidligereFakturertBeloep shouldBe BigDecimal.ONE
+                beregnetAvgiftBelop shouldBe null
                 trygdeavgiftFraAvgiftssystemet shouldBe null
             }
 

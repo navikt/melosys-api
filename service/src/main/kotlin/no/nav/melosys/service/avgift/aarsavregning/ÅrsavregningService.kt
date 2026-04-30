@@ -321,7 +321,10 @@ class ÅrsavregningService(
      * uavhengig av om periodene overlapper med det aktuelle året. Dette sikrer at en ny vurdering som fjerner
      * eller forkorter en periode korrekt reflekteres i årsavregningen.
      *
-     * førVedtaksdato: Filtrer bort behandlingsresultater som er innvilget etter denne datoen. Dette er nødvendig for å vise hva tidlgiere grunnlag var for en årsavregning som allerede er vedtatt.
+     * førVedtaksdato: Filtrer bort behandlingsresultater som er innvilget etter denne datoen. Dette er nødvendig for å vise hva tidlgiere
+     * grunnlag var for en årsavregning som allerede er vedtatt.
+     *
+     * Returnerer null hvis ingen felter kan populeres
      */
     fun hentGjeldendeBehandlingsresultaterForÅrsavregning(
         saksnummer: String,
@@ -348,9 +351,6 @@ class ÅrsavregningService(
             .filter { førVedtaksdato == null || it.hentVedtakMetadata().vedtaksdato < førVedtaksdato }
             .sortedBy { it.hentVedtakMetadata().vedtaksdato }
 
-        if (alleRelevanteBehandlinger.isEmpty()) {
-            return null
-        }
 
         // Behandlinger med periodeoverlapp for året, brukes til avgiftsgrunnlag og årsavregning
         val behandlingsresultaterMedOverlapp = alleRelevanteBehandlinger
