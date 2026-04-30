@@ -123,11 +123,8 @@ class HåndterEksisterendeSakDigitalSøknad(
             behandlingsresultatService.tømBehandlingsresultat(behandling.id)
         }
 
-        val (periode, land) = DigitalSøknadMapper.hentPeriodeOgLand(søknadsdata)
-
-        mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(
-            behandling.id, periode, land
-        )
+        val nySoeknad = DigitalSøknadMapper.tilSoeknad(søknadsdata)
+        mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandling.id, nySoeknad)
 
         val mottatteOpplysninger = mottatteOpplysningerService.hentMottatteOpplysninger(behandling.id)
         return behandling to mottatteOpplysninger

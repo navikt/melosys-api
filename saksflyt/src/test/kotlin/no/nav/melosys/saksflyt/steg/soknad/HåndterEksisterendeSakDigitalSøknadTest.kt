@@ -86,7 +86,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
 
             verify { behandlingService.endreStatus(behandling, Behandlingsstatus.VURDER_DOKUMENT) }
             verify { behandlingsresultatService.tømBehandlingsresultat(behandlingId) }
-            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingId, any(), any()) }
+            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any()) }
             verify { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) }
             prosessinstans.behandling shouldBe behandling
         }
@@ -132,7 +132,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             verify(exactly = 0) { behandlingService.endreStatus(any<Behandling>(), any()) }
             verify(exactly = 0) { behandlingService.endreTema(any<Behandling>(), any()) }
             verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any()) }
-            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingId, any(), any()) }
+            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any()) }
             verify { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) }
             prosessinstans.behandling shouldBe behandling
         }
@@ -152,7 +152,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             steg.utfør(prosessinstans)
 
             verify { behandlingService.endreTema(behandling, Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY) }
-            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingId, any(), any()) }
+            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any()) }
         }
     }
 
@@ -173,7 +173,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
 
             verify(exactly = 0) { behandlingService.endreStatus(any<Behandling>(), any()) }
             verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any()) }
-            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingId, any(), any()) }
+            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any()) }
             prosessinstans.behandling shouldBe behandling
         }
     }
@@ -320,7 +320,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
     }
 
     private fun mockOppdaterMottatteOpplysninger() {
-        every { mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(any(), any(), any()) } just Runs
+        every { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(any(), any()) } just Runs
     }
 
     private fun mockHentMottatteOpplysninger(behandlingId: Long) {
