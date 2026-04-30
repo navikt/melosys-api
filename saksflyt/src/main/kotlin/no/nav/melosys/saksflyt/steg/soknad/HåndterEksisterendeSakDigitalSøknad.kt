@@ -7,7 +7,6 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
@@ -108,7 +107,7 @@ class HåndterEksisterendeSakDigitalSøknad(
         behandling: Behandling,
         søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
     ): Pair<Behandling, MottatteOpplysninger> {
-        val utledetBehandlingstema = utledBehandlingstema(søknadsdata)
+        val utledetBehandlingstema = BehandlingstemaUtleder.utled(søknadsdata)
         if (behandling.tema != utledetBehandlingstema) {
             behandlingService.endreTema(behandling, utledetBehandlingstema)
         }
@@ -139,7 +138,7 @@ class HåndterEksisterendeSakDigitalSøknad(
     ): Pair<Behandling, MottatteOpplysninger> {
         val saksnummer = fagsak.saksnummer
         val referanseId = søknadsdata.referanseId
-        val behandlingstema = utledBehandlingstema(søknadsdata)
+        val behandlingstema = BehandlingstemaUtleder.utled(søknadsdata)
 
         val nyBehandling = behandlingService.nyBehandling(
             fagsak,
