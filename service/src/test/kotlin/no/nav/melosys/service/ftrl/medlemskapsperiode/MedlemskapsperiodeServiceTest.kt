@@ -23,6 +23,7 @@ import no.nav.melosys.domain.medlemskapsperiodeForTest
 import no.nav.melosys.domain.mottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.domain.PeriodeKilde
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.MedlemskapsperiodeRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -649,6 +650,30 @@ class MedlemskapsperiodeServiceTest {
 
         behandlingsresultat.trygdeavgiftsperioder.shouldBeEmpty()
         behandlingsresultat.medlemskapsperioder.shouldBeEmpty()
+    }
+
+    @Test
+    fun slettMedlemskapsperioderMedKilde_sletterKunPerioderMedMatchendeKilde() {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            medlemskapsperiode {
+                id = 1L
+                kilde = PeriodeKilde.MELOSYS
+            }
+            medlemskapsperiode {
+                id = 2L
+                kilde = PeriodeKilde.AVGIFT_SYSTEMET
+            }
+            medlemskapsperiode {
+                id = 3L
+                kilde = PeriodeKilde.AVGIFT_SYSTEMET
+            }
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
+
+        medlemskapsperiodeService.slettMedlemskapsperioderMedKilde(BEHANDLING_ID_1, PeriodeKilde.AVGIFT_SYSTEMET)
+
+        behandlingsresultat.medlemskapsperioder.shouldHaveSize(1)
+        behandlingsresultat.medlemskapsperioder.first().kilde shouldBe PeriodeKilde.MELOSYS
     }
 
     private fun lagBehandlingsresultat(land: Land_iso2 = Land_iso2.AU): Behandlingsresultat = Behandlingsresultat.forTest {
