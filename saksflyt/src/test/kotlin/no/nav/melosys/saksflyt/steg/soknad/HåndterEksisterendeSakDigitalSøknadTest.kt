@@ -152,7 +152,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             steg.utfør(prosessinstans)
 
             verify { behandlingService.endreTema(behandling, Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY) }
-            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingId, any(), any()) }
+            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any()) }
         }
     }
 
