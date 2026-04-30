@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.soknad
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.arkiv.BrukerIdType
+import no.nav.melosys.domain.arkiv.DokumentVariant
 import no.nav.melosys.domain.arkiv.FysiskDokument
 import no.nav.melosys.domain.arkiv.Journalposttype
 import no.nav.melosys.domain.arkiv.OpprettJournalpost
@@ -16,7 +17,10 @@ import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.sak.SkjemaSakMappingService
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
+import no.nav.melosys.skjema.types.vedlegg.VedleggDto
+import no.nav.melosys.skjema.types.vedlegg.VedleggFiltype
 import org.springframework.stereotype.Component
+import java.util.UUID
 
 private val log = KotlinLogging.logger { }
 
@@ -25,6 +29,7 @@ private const val TITTEL_ARBEIDSGIVER = "Bekreftelse på utsending i EØS eller 
 private const val MEDLEMSKAP_OG_AVGIFT = "4530"
 private const val MEDLEMSKAP = "MED"
 private const val NAV_NO = "NAV_NO"
+private const val DOKUMENT_KATEGORI_SOKNAD = "SOK"
 
 /**
  * Saga-steg som oppretter og ferdigstiller journalpost i Joark for digital søknad.
@@ -65,10 +70,11 @@ class OpprettOgFerdigstillJournalpostDigitalSøknad(
 
         val pdf = melosysSkjemaApiClient.hentPdf(skjemaId)
         val innsenderNavn = persondataFasade.hentSammensattNavn(innsenderFnr)
+        val vedleggsdokumenter = hentVedleggsdokumenter(skjemaId, søknadsdata.vedlegg)
 
-        //TODO: Hent vedlegg fra melosys-skjema-api og legg til som vedleggsdokumenter på journalposten (egen task/PR - MELOSYS-8030)
         val opprettJournalpost = OpprettJournalpost().apply {
             hoveddokument = FysiskDokument.lagFysiskDokumentDigitalSøknad(pdf, tittel)
+            vedlegg = vedleggsdokumenter
             innhold = tittel
             saksnummer = fagsak.saksnummer
             mottaksKanal = NAV_NO
@@ -101,4 +107,26 @@ class OpprettOgFerdigstillJournalpostDigitalSøknad(
         Skjemadel.ARBEIDSGIVERS_DEL -> TITTEL_ARBEIDSGIVER
         Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL -> TITTEL_ARBEIDSTAKER
     }
+
+    private fun hentVedleggsdokumenter(skjemaId: UUID, vedlegg: List<VedleggDto>): List<FysiskDokument> =
+        vedlegg.map { dto ->
+            val innhold = melosysSkjemaApiClient.hentVedleggInnhold(skjemaId, dto.id)
+            FysiskDokument().apply {
+                tittel = dto.filnavn
+                dokumentKategori = DOKUMENT_KATEGORI_SOKNAD
+                addDokumentVariant(
+                    DokumentVariant.lagDokumentVariant(
+                        innhold,
+                        dto.filtype.tilDokumentVariantFiltype(),
+                        DokumentVariant.VariantFormat.ARKIV
+                    )
+                )
+            }
+        }
+}
+
+private fun VedleggFiltype.tilDokumentVariantFiltype(): DokumentVariant.Filtype = when (this) {
+    VedleggFiltype.PDF -> DokumentVariant.Filtype.PDFA
+    VedleggFiltype.JPEG -> DokumentVariant.Filtype.JPEG
+    VedleggFiltype.PNG -> DokumentVariant.Filtype.PNG
 }
