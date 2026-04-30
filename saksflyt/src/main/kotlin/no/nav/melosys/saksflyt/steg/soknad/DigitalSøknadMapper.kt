@@ -1,14 +1,11 @@
 package no.nav.melosys.saksflyt.steg.soknad
 
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.skjema.types.felles.LandKode
 import no.nav.melosys.skjema.types.felles.PeriodeDto
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
 
 internal fun mapPeriode(periodeDto: PeriodeDto?): Periode =
     periodeDto?.let { Periode(it.fraDato, it.tilDato) } ?: Periode()
@@ -37,17 +34,5 @@ object DigitalSøknadMapper {
         val data = dto.skjema.data
         return mapPeriode(data.utsendingsperiodeOgLand?.utsendelsePeriode) to
             mapSoeknadsland(data.utsendingsperiodeOgLand?.utsendelseLand)
-    }
-
-    fun utledBehandlingstema(dto: UtsendtArbeidstakerSkjemaM2MDto): Behandlingstema {
-        val erOffentligVirksomhet = when (val data = dto.skjema.data) {
-            is UtsendtArbeidstakerArbeidsgiversSkjemaDataDto ->
-                data.arbeidsgiverensVirksomhetINorge?.erArbeidsgiverenOffentligVirksomhet
-            is UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto ->
-                data.arbeidsgiversData.arbeidsgiverensVirksomhetINorge?.erArbeidsgiverenOffentligVirksomhet
-            else -> false
-        }
-        return if (erOffentligVirksomhet == true) Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
-        else Behandlingstema.UTSENDT_ARBEIDSTAKER
     }
 }

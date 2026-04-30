@@ -108,7 +108,7 @@ class HåndterEksisterendeSakDigitalSøknad(
         behandling: Behandling,
         søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
     ): Pair<Behandling, MottatteOpplysninger> {
-        val utledetBehandlingstema = DigitalSøknadMapper.utledBehandlingstema(søknadsdata)
+        val utledetBehandlingstema = utledBehandlingstema(søknadsdata)
         if (behandling.tema != utledetBehandlingstema) {
             behandlingService.endreTema(behandling, utledetBehandlingstema)
         }
@@ -139,7 +139,7 @@ class HåndterEksisterendeSakDigitalSøknad(
     ): Pair<Behandling, MottatteOpplysninger> {
         val saksnummer = fagsak.saksnummer
         val referanseId = søknadsdata.referanseId
-        val behandlingstema = DigitalSøknadMapper.utledBehandlingstema(søknadsdata)
+        val behandlingstema = utledBehandlingstema(søknadsdata)
 
         val nyBehandling = behandlingService.nyBehandling(
             fagsak,
