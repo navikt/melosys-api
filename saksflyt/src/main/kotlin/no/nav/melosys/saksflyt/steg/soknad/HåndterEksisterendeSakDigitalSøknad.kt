@@ -20,8 +20,6 @@ import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.SkjemaSakMappingService
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.ZoneId
@@ -110,7 +108,7 @@ class HåndterEksisterendeSakDigitalSøknad(
         behandling: Behandling,
         søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
     ): Pair<Behandling, MottatteOpplysninger> {
-        val utledetBehandlingstema = utledBehandlingstema(søknadsdata)
+        val utledetBehandlingstema = DigitalSøknadMapper.utledBehandlingstema(søknadsdata)
         if (behandling.tema != utledetBehandlingstema) {
             behandlingService.endreTema(behandling, utledetBehandlingstema)
         }
@@ -141,7 +139,7 @@ class HåndterEksisterendeSakDigitalSøknad(
     ): Pair<Behandling, MottatteOpplysninger> {
         val saksnummer = fagsak.saksnummer
         val referanseId = søknadsdata.referanseId
-        val behandlingstema = utledBehandlingstema(søknadsdata)
+        val behandlingstema = DigitalSøknadMapper.utledBehandlingstema(søknadsdata)
 
         val nyBehandling = behandlingService.nyBehandling(
             fagsak,
@@ -174,20 +172,5 @@ class HåndterEksisterendeSakDigitalSøknad(
         return nyBehandling to mottatteOpplysninger
     }
 
-    private fun utledBehandlingstema(dto: UtsendtArbeidstakerSkjemaM2MDto): Behandlingstema {
-        val erOffentligVirksomhet = when (val data = dto.skjema.data) {
-            is UtsendtArbeidstakerArbeidsgiversSkjemaDataDto ->
-                data.arbeidsgiverensVirksomhetINorge?.erArbeidsgiverenOffentligVirksomhet
-            is UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto ->
-                data.arbeidsgiversData.arbeidsgiverensVirksomhetINorge?.erArbeidsgiverenOffentligVirksomhet
-            else -> null
-        }
-
-        return if (erOffentligVirksomhet == true) {
-            Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
-        } else {
-            Behandlingstema.UTSENDT_ARBEIDSTAKER
-        }
-    }
 
 }
