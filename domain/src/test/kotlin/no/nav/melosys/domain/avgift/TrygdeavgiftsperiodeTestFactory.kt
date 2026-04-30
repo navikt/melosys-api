@@ -73,6 +73,8 @@ object TrygdeavgiftsperiodeTestFactory {
         var trygdesats: BigDecimal? = TRYGDESATS
         var trygdeavgiftsbeløpMd: BigDecimal = TRYGDEAVGIFTSBELØP_MD
         var beregningsregel: Avgiftsberegningsregel = Avgiftsberegningsregel.ORDINÆR
+        var minstebelopVerdi: BigDecimal? = null
+        var minstebelopAar: Int? = null
         var medlemskapsperiode: Medlemskapsperiode? = null
 
         private val skatteforholdBuilder = SkatteforholdTilNorgeBuilder()
@@ -107,6 +109,8 @@ object TrygdeavgiftsperiodeTestFactory {
                 grunnlagInntekstperiode = inntektsperiodeBuilder.build(),
                 grunnlagMedlemskapsperiode = medlemskapsperiode,
                 beregningsregel = beregningsregel,
+                minstebelopVerdi = minstebelopVerdi,
+                minstebelopAar = minstebelopAar,
             )
         }
     }

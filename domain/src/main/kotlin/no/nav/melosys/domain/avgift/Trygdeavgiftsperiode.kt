@@ -57,6 +57,12 @@ class Trygdeavgiftsperiode(
     @Column(name = "avgiftsdel")
     val avgiftsdel: Avgiftsdel? = null,
 
+    @Column(name = "minstebelop_verdi")
+    val minstebelopVerdi: BigDecimal? = null,
+
+    @Column(name = "minstebelop_aar")
+    val minstebelopAar: Int? = null,
+
     ) : ErPeriode {
 
     @OneToMany(mappedBy = "trygdeavgiftsperiode", cascade = [CascadeType.PERSIST, CascadeType.MERGE], fetch = FetchType.LAZY)
@@ -102,6 +108,8 @@ class Trygdeavgiftsperiode(
         grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = this.grunnlagSkatteforholdTilNorge,
         beregningsregel: Avgiftsberegningsregel = this.beregningsregel,
         avgiftsdel: Avgiftsdel? = this.avgiftsdel,
+        minstebelopVerdi: BigDecimal? = this.minstebelopVerdi,
+        minstebelopAar: Int? = this.minstebelopAar,
     ) = Trygdeavgiftsperiode(
         id = id,
         periodeFra = periodeFra,
@@ -115,6 +123,8 @@ class Trygdeavgiftsperiode(
         grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
         beregningsregel = beregningsregel,
         avgiftsdel = avgiftsdel,
+        minstebelopVerdi = minstebelopVerdi,
+        minstebelopAar = minstebelopAar,
     )
 
     fun erLikForSatsendring(other: Trygdeavgiftsperiode): Boolean =

@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.mapper
 import jakarta.transaction.Transactional
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
 import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT
@@ -66,7 +67,10 @@ class ÅrsavregningVedtakMapper(
             eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale(),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.hentBehandling()),
             harSkjoennsfastsattInntektsgrunnlag = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag,
-            erNyÅrsavregning = erNyÅrsavregning
+            erNyÅrsavregning = erNyÅrsavregning,
+            harMisjonaerInntekt = harMisjonaerInntekt(årsavregningModel.endeligAvgift, årsavregningModel.tidligereAvgift),
+            minstebelopVerdi = finnMinstebelopVerdi(årsavregningModel.endeligAvgift, årsavregningModel.tidligereAvgift),
+            minstebelopAar = finnMinstebelopAar(årsavregningModel.endeligAvgift, årsavregningModel.tidligereAvgift)
         )
     }
 
@@ -97,7 +101,10 @@ class ÅrsavregningVedtakMapper(
             eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale(),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandling),
             harSkjoennsfastsattInntektsgrunnlag = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag,
-            erNyÅrsavregning = erNyÅrsavregning
+            erNyÅrsavregning = erNyÅrsavregning,
+            harMisjonaerInntekt = harMisjonaerInntekt(emptyList(), årsavregningModel.tidligereAvgift),
+            minstebelopVerdi = finnMinstebelopVerdi(emptyList(), årsavregningModel.tidligereAvgift),
+            minstebelopAar = finnMinstebelopAar(emptyList(), årsavregningModel.tidligereAvgift)
         )
     }
 
@@ -105,7 +112,7 @@ class ÅrsavregningVedtakMapper(
         medlemskapsTypePliktig: Boolean,
         trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
     ): List<Avgiftsperiode> {
-        if (trygdeavgiftsperioder.all { !it.harAvgift() }) return emptyList()
+        if (trygdeavgiftsperioder.all { !it.harAvgift() && it.beregningsregel == Avgiftsberegningsregel.ORDINÆR }) return emptyList()
 
         return trygdeavgiftsperioder.map { trygdeavgiftsperiode ->
             val grunnlagsInntektsperiode = trygdeavgiftsperiode.grunnlagInntekstperiode
@@ -125,7 +132,8 @@ class ÅrsavregningVedtakMapper(
                     grunnlagsInntektsperiode.type
                 ),
                 skatteplikt = trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge!!
-                    .skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
+                    .skatteplikttype == Skatteplikttype.SKATTEPLIKTIG,
+                beregningsregel = trygdeavgiftsperiode.beregningsregel.name
             )
         }
     }
@@ -155,6 +163,26 @@ class ÅrsavregningVedtakMapper(
     private fun arbAvgBetalesKreves(medlemskapsTypeErPliktig: Boolean, inntektskildeType: Inntektskildetype): Boolean {
         return !medlemskapsTypeErPliktig && inntektskildeType !== MISJONÆR
     }
+
+    private fun harMisjonaerInntekt(
+        endeligAvgift: List<Trygdeavgiftsperiode>,
+        tidligereAvgift: List<Trygdeavgiftsperiode>
+    ): Boolean = (endeligAvgift + tidligereAvgift)
+        .any { it.grunnlagInntekstperiode?.type == MISJONÆR }
+
+    private fun finnMinstebelopVerdi(
+        endeligAvgift: List<Trygdeavgiftsperiode>,
+        tidligereAvgift: List<Trygdeavgiftsperiode>
+    ): BigDecimal? = (endeligAvgift + tidligereAvgift)
+        .firstOrNull { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }
+        ?.minstebelopVerdi
+
+    private fun finnMinstebelopAar(
+        endeligAvgift: List<Trygdeavgiftsperiode>,
+        tidligereAvgift: List<Trygdeavgiftsperiode>
+    ): Int? = (endeligAvgift + tidligereAvgift)
+        .firstOrNull { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }
+        ?.minstebelopAar
 
     private fun harPliktigMedlemskap(avgiftspliktigPerioder: List<AvgiftsperiodeForAvgift>?): Boolean {
         return avgiftspliktigPerioder?.takeIf { it.isNotEmpty() }

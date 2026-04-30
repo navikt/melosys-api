@@ -25,7 +25,10 @@ class ÅrsavregningVedtaksbrev(
     val eøsEllerTrygdeavtale: Boolean,
     val fullmektigTrygdeavgift: String?,
     val harSkjoennsfastsattInntektsgrunnlag: Boolean,
-    val erNyÅrsavregning: Boolean
+    val erNyÅrsavregning: Boolean,
+    val harMisjonaerInntekt: Boolean = false,
+    val minstebelopVerdi: BigDecimal? = null,
+    val minstebelopAar: Int? = null
 ) : DokgenDto(brevBestilling, Mottakerroller.BRUKER) {
     constructor(
         brevBestilling: ÅrsavregningVedtakBrevBestilling,
@@ -41,7 +44,10 @@ class ÅrsavregningVedtaksbrev(
         eøsEllerTrygdeavtale: Boolean,
         fullmektigTrygdeavgift: String?,
         harSkjoennsfastsattInntektsgrunnlag: Boolean,
-        erNyÅrsavregning: Boolean = false
+        erNyÅrsavregning: Boolean = false,
+        harMisjonaerInntekt: Boolean = false,
+        minstebelopVerdi: BigDecimal? = null,
+        minstebelopAar: Int? = null
     ) : this(
         brevBestilling = brevBestilling,
         årsavregningsår = årsavregningsår,
@@ -58,7 +64,10 @@ class ÅrsavregningVedtaksbrev(
         eøsEllerTrygdeavtale = eøsEllerTrygdeavtale,
         fullmektigTrygdeavgift = fullmektigTrygdeavgift,
         harSkjoennsfastsattInntektsgrunnlag = harSkjoennsfastsattInntektsgrunnlag,
-        erNyÅrsavregning = erNyÅrsavregning
+        erNyÅrsavregning = erNyÅrsavregning,
+        harMisjonaerInntekt = harMisjonaerInntekt,
+        minstebelopVerdi = minstebelopVerdi,
+        minstebelopAar = minstebelopAar
     )
 }
 
@@ -71,7 +80,8 @@ data class Avgiftsperiode(
     val inntektskilde: String,
     val trygdedekning: String,
     val arbeidsgiveravgiftBetalt: SvarAlternativ,
-    val skatteplikt: Boolean
+    val skatteplikt: Boolean,
+    val beregningsregel: String? = null
 )
 
 

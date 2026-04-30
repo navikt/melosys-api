@@ -8,4 +8,6 @@ data class TrygdeavgiftsberegningResponse(
     val grunnlagListe: List<TrygdeavgiftsgrunnlagDto>,
     val beregningsregel: Avgiftsberegningsregel,
     val avgiftsdel: String? = null,
+    val minstebelopVerdi: java.math.BigDecimal? = null,
+    val minstebelopAar: Int? = null,
 )
