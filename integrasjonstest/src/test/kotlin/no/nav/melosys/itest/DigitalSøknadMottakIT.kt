@@ -1,9 +1,11 @@
 package no.nav.melosys.itest
 
 import com.github.tomakehurst.wiremock.client.WireMock
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -40,6 +42,7 @@ class DigitalSøknadMottakIT(
 
         val forventetSøknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
             fnr = testFnr
+            orgnr = "AGORG12345"
         }
         val skjemaId = forventetSøknadsdata.skjema.id
 
@@ -115,6 +118,10 @@ class DigitalSøknadMottakIT(
         behandling.initierendeJournalpostId.shouldNotBeNull()
 
         // Verify mottatteOpplysninger was created on behandling (step 4)
-        behandling.mottatteOpplysninger.shouldNotBeNull()
+        val mottatteOpplysninger = behandling.mottatteOpplysninger.shouldNotBeNull()
+
+        // Verify sidemeny-mapping: hovedarbeidsgivers orgnr pre-fylt i juridiskArbeidsgiverNorge
+        val soeknad = mottatteOpplysninger.mottatteOpplysningerData as Soeknad
+        soeknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere shouldContainExactly listOf("AGORG12345")
     }
 }

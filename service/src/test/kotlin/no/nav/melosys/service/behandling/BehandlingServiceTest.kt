@@ -495,6 +495,43 @@ class BehandlingServiceTest {
     }
 
     @Test
+    fun `replikerBehandling bevarer sidemeny-felter fra Soeknad`() {
+        val opprinnelig = Behandling.forTest {
+            id = 777L
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            status = AVSLUTTET
+            fagsak { }
+            mottatteOpplysninger {
+                soeknad {
+                    landkoder("DE")
+                    periode(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31))
+                    ekstraArbeidsgiver("111111111")
+                    foretakUtland("DE-1", selvstendig = false)
+                    fysiskeArbeidssted {
+                        virksomhetNavn = "Berlin GmbH"
+                        gatenavn = "Hauptstraße"
+                        postnummer = "10115"
+                    }
+                }
+            }
+        }
+        every { behandlingRepository.save(any()) } answers { firstArg() }
+
+        val replika = behandlingService.replikerBehandling(opprinnelig, Behandlingstyper.NY_VURDERING)
+
+        val replikertSoeknad = replika.mottatteOpplysninger?.mottatteOpplysningerData
+            as no.nav.melosys.domain.mottatteopplysninger.Soeknad
+        replikertSoeknad.soeknadsland.landkoder shouldBe listOf("DE")
+        replikertSoeknad.periode.fom shouldBe LocalDate.of(2025, 1, 1)
+        replikertSoeknad.periode.tom shouldBe LocalDate.of(2025, 12, 31)
+        replikertSoeknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere shouldContainExactly listOf("111111111")
+        replikertSoeknad.foretakUtland.size shouldBe 1
+        replikertSoeknad.foretakUtland.first().orgnr shouldBe "DE-1"
+        replikertSoeknad.arbeidPaaLand.fysiskeArbeidssteder.size shouldBe 1
+        replikertSoeknad.arbeidPaaLand.fysiskeArbeidssteder.first().virksomhetNavn shouldBe "Berlin GmbH"
+    }
+
+    @Test
     fun `replikerBehandling utenMottatteOpplysninger blirReplikert`() {
         val tidligsteInaktiveBehandling = opprettBehandlingUtenMottatteOpplysninger()
 
