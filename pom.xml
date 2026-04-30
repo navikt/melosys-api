@@ -37,7 +37,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>21</java.version>
-        <kotlin.version>2.3.20</kotlin.version>
+        <kotlin.version>2.3.21</kotlin.version>
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
@@ -49,11 +49,11 @@
         <nav.tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</nav.tjenestespesifikasjoner.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
         <doksys.dokumentproduksjon.version>44-7d14e70</doksys.dokumentproduksjon.version>
-        <token-support.version>6.0.5</token-support.version>
+        <token-support.version>6.0.6</token-support.version>
 
 
         <!-- Versjoner av eksterne biblioteker -->
-        <archunit.version>1.4.1</archunit.version>
+        <archunit.version>1.4.2</archunit.version>
         <apache-httpclients.version>4.5.13</apache-httpclients.version>
         <caffeine.version>3.2.3</caffeine.version>
         <cxf.version>4.2.0</cxf.version>
@@ -85,11 +85,11 @@
         <shedlock.version>4.48.0</shedlock.version>
         <slf4j.version>2.0.17</slf4j.version>
         <spring-retry.version>2.0.12</spring-retry.version>
-        <unleash.version>12.2.0</unleash.version>
+        <unleash.version>12.2.1</unleash.version>
         <bcpkix-jdk15on.version>1.84</bcpkix-jdk15on.version>
         <bouncycastle-jdk18on.version>1.84</bouncycastle-jdk18on.version>
         <nimbus-jose-jwt.version>10.9</nimbus-jose-jwt.version>
-        <neethi.version>3.2.1</neethi.version>
+        <neethi.version>3.2.2</neethi.version>
         <jaxws-rt.version>4.0.4</jaxws-rt.version>
         <jakarta.jaxb.version>4.0.5</jakarta.jaxb.version>
         <javaparser.version>1.0.11</javaparser.version>
@@ -106,7 +106,7 @@
         <commons-cli.version>1.11.0</commons-cli.version>
         <graphql-spring-boot-starter.version>15.1.0</graphql-spring-boot-starter.version>
         <scala.version>2.13.18</scala.version>
-        <testcontainers.version>2.0.4</testcontainers.version>
+        <testcontainers.version>2.0.5</testcontainers.version>
         <jna.version>5.18.1</jna.version>
         <graphql.java.extended.scalars.version>24.0</graphql.java.extended.scalars.version>
         <ulid-java>5.2.3</ulid-java>

@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.soknad
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.kodeverk.Innretningstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
@@ -19,6 +20,12 @@ import no.nav.melosys.skjema.types.felles.UtenlandskVirksomhetBase
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.*
 import java.util.*
+
+internal fun mapPeriode(periodeDto: PeriodeDto?): Periode =
+    periodeDto?.let { Periode(it.fraDato, it.tilDato) } ?: Periode()
+
+internal fun mapSoeknadsland(landkode: LandKode?): Soeknadsland =
+    Soeknadsland(landkode?.let { listOf(it.name) } ?: emptyList(), false)
 
 /**
  * Mapper digital søknadsdata til [Soeknad] for pre-utfylling av sidemeny i Melosys.
@@ -257,9 +264,15 @@ object DigitalSøknadMapper {
         )
     }
 
-    private fun mapPeriode(periodeDto: PeriodeDto?): Periode =
-        periodeDto?.let { Periode(it.fraDato, it.tilDato) } ?: Periode()
-
-    private fun mapSoeknadsland(landkode: LandKode?): Soeknadsland =
-        Soeknadsland(landkode?.let { listOf(it.name) } ?: emptyList(), false)
+    fun utledBehandlingstema(dto: UtsendtArbeidstakerSkjemaM2MDto): Behandlingstema {
+        val erOffentligVirksomhet = when (val data = dto.skjema.data) {
+            is UtsendtArbeidstakerArbeidsgiversSkjemaDataDto ->
+                data.arbeidsgiverensVirksomhetINorge?.erArbeidsgiverenOffentligVirksomhet
+            is UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto ->
+                data.arbeidsgiversData.arbeidsgiverensVirksomhetINorge?.erArbeidsgiverenOffentligVirksomhet
+            else -> false
+        }
+        return if (erOffentligVirksomhet == true) Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+        else Behandlingstema.UTSENDT_ARBEIDSTAKER
+    }
 }

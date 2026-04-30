@@ -108,6 +108,11 @@ class HåndterEksisterendeSakDigitalSøknad(
         behandling: Behandling,
         søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
     ): Pair<Behandling, MottatteOpplysninger> {
+        val utledetBehandlingstema = DigitalSøknadMapper.utledBehandlingstema(søknadsdata)
+        if (behandling.tema != utledetBehandlingstema) {
+            behandlingService.endreTema(behandling, utledetBehandlingstema)
+        }
+
         val skalResetteStegvelger = behandling.status in setOf(
             Behandlingsstatus.UNDER_BEHANDLING,
             Behandlingsstatus.AVVENT_DOK_PART
@@ -131,12 +136,13 @@ class HåndterEksisterendeSakDigitalSøknad(
     ): Pair<Behandling, MottatteOpplysninger> {
         val saksnummer = fagsak.saksnummer
         val referanseId = søknadsdata.referanseId
+        val behandlingstema = DigitalSøknadMapper.utledBehandlingstema(søknadsdata)
 
         val nyBehandling = behandlingService.nyBehandling(
             fagsak,
             Behandlingsstatus.OPPRETTET,
             Behandlingstyper.NY_VURDERING,
-            Behandlingstema.UTSENDT_ARBEIDSTAKER,
+            behandlingstema,
             null, // journalpostId settes i journalpost-steget etterpå
             null,
             LocalDate.now(),
@@ -162,4 +168,6 @@ class HåndterEksisterendeSakDigitalSøknad(
 
         return nyBehandling to mottatteOpplysninger
     }
+
+
 }
