@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.verify
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.arkiv.BrukerIdType
+import no.nav.melosys.domain.arkiv.DokumentVariant
 import no.nav.melosys.domain.arkiv.Journalpost
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.service.dokument.DokumentHentingService
@@ -15,10 +16,13 @@ import no.nav.melosys.service.tilgang.Aksesskontroll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @WebMvcTest(controllers = [DokumentController::class])
@@ -76,6 +80,62 @@ class DokumentControllerTest {
     }
 
     @Test
+    fun `hentDokument PDF-vedlegg returnerer application-pdf`() {
+        val journalpost = lagJournalpostMedVedlegg(vedleggID = "VED-1", filtype = DokumentVariant.Filtype.PDFA)
+        every { dokumentHentingService.hentJournalpost(any()) } returns journalpost
+        every { dokumentHentingService.hentDokument(any(), any()) } returns ByteArray(1)
+        every { aksesskontroll.auditAutoriserFolkeregisterIdent(any(), any()) } returns Unit
+
+        mockMvc.perform(get("$BASE_URL/{j}/{d}", "JP-1", "VED-1"))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType("application/pdf"))
+            .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "inline; attachment; filename=journalpost-dok-VED-1.pdf"))
+    }
+
+    @Test
+    fun `hentDokument PNG-vedlegg returnerer image-png`() {
+        val journalpost = lagJournalpostMedVedlegg(vedleggID = "VED-2", filtype = DokumentVariant.Filtype.PNG)
+        every { dokumentHentingService.hentJournalpost(any()) } returns journalpost
+        every { dokumentHentingService.hentDokument(any(), any()) } returns ByteArray(1)
+        every { aksesskontroll.auditAutoriserFolkeregisterIdent(any(), any()) } returns Unit
+
+        mockMvc.perform(get("$BASE_URL/{j}/{d}", "JP-1", "VED-2"))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType("image/png"))
+            .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "inline; attachment; filename=journalpost-dok-VED-2.png"))
+    }
+
+    @Test
+    fun `hentDokument JPEG-vedlegg returnerer image-jpeg med jpg-extension`() {
+        val journalpost = lagJournalpostMedVedlegg(vedleggID = "VED-3", filtype = DokumentVariant.Filtype.JPEG)
+        every { dokumentHentingService.hentJournalpost(any()) } returns journalpost
+        every { dokumentHentingService.hentDokument(any(), any()) } returns ByteArray(1)
+        every { aksesskontroll.auditAutoriserFolkeregisterIdent(any(), any()) } returns Unit
+
+        mockMvc.perform(get("$BASE_URL/{j}/{d}", "JP-1", "VED-3"))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType("image/jpeg"))
+            .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "inline; attachment; filename=journalpost-dok-VED-3.jpg"))
+    }
+
+    @Test
+    fun `hentDokument uten kjent filtype defaulter til pdf`() {
+        val journalpost = Journalpost("JP-1").apply {
+            brukerIdType = BrukerIdType.FOLKEREGISTERIDENT
+            brukerId = "fnr"
+            hoveddokument = ArkivDokument()
+        }
+        every { dokumentHentingService.hentJournalpost(any()) } returns journalpost
+        every { dokumentHentingService.hentDokument(any(), any()) } returns ByteArray(1)
+        every { aksesskontroll.auditAutoriserFolkeregisterIdent(any(), any()) } returns Unit
+
+        mockMvc.perform(get("$BASE_URL/{j}/{d}", "JP-1", "UKJENT"))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType("application/pdf"))
+            .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "inline; attachment; filename=journalpost-dok-UKJENT.pdf"))
+    }
+
+    @Test
     fun `skal hente dokumenter oversikt`() {
         every { dokumentHentingService.hentJournalposter(any()) } returns emptyList()
 
@@ -103,6 +163,26 @@ class DokumentControllerTest {
 
 
         verify { eessiService.genererSedPdf(any(), any<SedType>(), any()) }
+    }
+
+    private fun lagJournalpostMedVedlegg(vedleggID: String, filtype: DokumentVariant.Filtype): Journalpost {
+        val vedlegg = ArkivDokument().apply {
+            dokumentId = vedleggID
+            tittel = "vedlegg.$filtype"
+            addDokumentVariant(
+                DokumentVariant.lagDokumentVariant(
+                    ByteArray(0),
+                    filtype,
+                    DokumentVariant.VariantFormat.ARKIV
+                )
+            )
+        }
+        return Journalpost("JP-1").apply {
+            brukerIdType = BrukerIdType.FOLKEREGISTERIDENT
+            brukerId = "fnr"
+            hoveddokument = ArkivDokument()
+            vedleggListe.add(vedlegg)
+        }
     }
 
     companion object {

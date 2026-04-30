@@ -40,13 +40,12 @@ public class JournalpostInfoDto {
             journalpost.getForsendelseJournalfoert(),
             av(journalpost.getJournalposttype()),
             journalpost.getKorrespondansepartNavn(),
-            new DokumentDto(journalpost.getHoveddokument().getDokumentId(),
-                journalpost.getHoveddokument().getTittel(), journalpost.getHoveddokument().hentLogiskeVedleggTitler()),
+            DokumentDto.av(journalpost.getHoveddokument()),
             lagVedlegg(journalpost.getVedleggListe()));
     }
 
     private static List<DokumentDto> lagVedlegg(List<ArkivDokument> vedlegg) {
-        return vedlegg.stream().map(v -> new DokumentDto(v.getDokumentId(), v.getTittel(), v.hentLogiskeVedleggTitler())).collect(Collectors.toList());
+        return vedlegg.stream().map(DokumentDto::av).collect(Collectors.toList());
     }
 
     public Instant hentGjeldendeTidspunkt() {

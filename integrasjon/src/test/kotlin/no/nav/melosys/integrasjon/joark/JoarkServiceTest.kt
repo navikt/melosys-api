@@ -520,7 +520,7 @@ class JoarkServiceTest {
 
     private fun safJournalpost(journalpostID: String, journalstatus: Journalstatus, medLogiskVedlegg: Boolean): Journalpost {
         val logiskVedlegg = LogiskVedlegg("4143", "Tittel logisk vedlegg")
-        val dokumentVedlegg = DokumentVariant(true, Variantformat.ARKIV.name)
+        val dokumentVedlegg = DokumentVariant(true, Variantformat.ARKIV.name, "PDFA")
         return Journalpost(
             journalpostID,
             "Tittel",
@@ -542,12 +542,12 @@ class JoarkServiceTest {
                 ),
                 DokumentInfo(
                     VEDLEGG_MED_TILGANG_ID, "vedlegg kommer etterpå", null, emptyList(), listOf(
-                        DokumentVariant(true, Variantformat.ARKIV.name)
+                        DokumentVariant(true, Variantformat.ARKIV.name, "PDFA")
                     )
                 ),
                 DokumentInfo(
                     VEDLEGG_UTEN_TILGANG_ID, "tredje dokument", null, emptyList(), listOf(
-                        DokumentVariant(false, Variantformat.ARKIV.name)
+                        DokumentVariant(false, Variantformat.ARKIV.name, "PDFA")
                     )
                 )
             )
