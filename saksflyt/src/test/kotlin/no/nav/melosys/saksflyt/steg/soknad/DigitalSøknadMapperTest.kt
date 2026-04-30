@@ -8,7 +8,6 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.melosys.domain.kodeverk.Flyvningstyper
 import no.nav.melosys.domain.kodeverk.Innretningstyper
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader
 import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
@@ -609,7 +608,6 @@ internal class DigitalSøknadMapperTest {
             val base = søknad.luftfartBaser.first()
             base.hjemmebaseNavn shouldBe "Arlanda"
             base.hjemmebaseLand shouldBe "SE"
-            base.typeFlyvninger shouldBe Flyvningstyper.INTERNASJONAL
             base.erVanligHjemmebase shouldBe true
             base.vanligHjemmebaseNavn.shouldBeNull()
             base.vanligHjemmebaseLand.shouldBeNull()

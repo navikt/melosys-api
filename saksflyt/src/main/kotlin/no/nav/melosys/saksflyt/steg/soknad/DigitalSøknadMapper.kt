@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.soknad
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse
-import no.nav.melosys.domain.kodeverk.Flyvningstyper
 import no.nav.melosys.domain.kodeverk.Innretningstyper
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
@@ -251,7 +250,6 @@ object DigitalSøknadMapper {
             LuftfartBase(
                 hjemmebaseNavn = omBordPaFly.hjemmebaseNavn,
                 hjemmebaseLand = omBordPaFly.hjemmebaseLand.name,
-                typeFlyvninger = Flyvningstyper.INTERNASJONAL,
                 erVanligHjemmebase = omBordPaFly.erVanligHjemmebase,
                 vanligHjemmebaseLand = omBordPaFly.vanligHjemmebaseLand?.name,
                 vanligHjemmebaseNavn = omBordPaFly.vanligHjemmebaseNavn
