@@ -9,7 +9,10 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.*
+import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.forTest
+import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -280,7 +283,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             årsavregning {
                 id = 112
                 aar = 2025
-                trygdeavgiftFraAvgiftssystemet = BigDecimal("5000")
+                innbetaltTrygdeavgift = BigDecimal("5000")
             }
             registrertDato = LocalDate.of(2025, 3, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
             vedtakMetadata {
@@ -337,11 +340,11 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             nyttTrygdeavgiftsGrunnlag shouldBe null
             beregnetAvgiftBelop shouldBe null
             tilFaktureringBeloep shouldBe null
-            trygdeavgiftFraAvgiftssystemet shouldBe BigDecimal("5000")
+            innbetaltTrygdeavgift shouldBe BigDecimal("5000")
         }
 
         nyÅrsavregningBehandlingsresultat.medlemskapsperioder.shouldHaveSize(0)
-        nyÅrsavregningBehandlingsresultat.helseutgiftDekkesPeriode shouldBe null
+        nyÅrsavregningBehandlingsresultat.helseutgiftDekkesPerioder.size shouldBe 0
         nyÅrsavregningBehandlingsresultat.årsavregning.shouldNotBeNull().run {
             tidligereBehandlingsresultat shouldBe nyVurderingKun2026
             tidligereFakturertBeloep shouldNotBe null
