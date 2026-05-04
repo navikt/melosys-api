@@ -92,7 +92,7 @@ class DigitalSøknadEksisterendeSakIT(
 
         andreProsessinstans.type shouldBe ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
         andreProsessinstans.status shouldBe ProsessStatus.FERDIG
-        andreProsessinstans.sistFullførtSteg shouldBe ProsessSteg.SEND_SAKSNUMMER_TIL_MELOSYS_SKJEMA_API
+        andreProsessinstans.sistFullførtSteg shouldBe ProsessSteg.SEND_FORVALTNINGSMELDING
         andreProsessinstans.hendelser.shouldHaveSize(0)
 
         // Verifiser at skjemaId ble lagret

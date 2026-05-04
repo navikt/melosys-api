@@ -93,8 +93,8 @@ class DigitalSøknadMottakIT(
         prosessinstans.status shouldBe ProsessStatus.FERDIG
         prosessinstans.låsReferanse shouldBe skjemaId.toString()
 
-        // All steps completed successfully (SEND_SAKSNUMMER_TIL_SKJEMA is the last step)
-        prosessinstans.sistFullførtSteg shouldBe ProsessSteg.SEND_SAKSNUMMER_TIL_MELOSYS_SKJEMA_API
+        // All steps completed successfully (SEND_FORVALTNINGSMELDING is the last step)
+        prosessinstans.sistFullførtSteg shouldBe ProsessSteg.SEND_FORVALTNINGSMELDING
         prosessinstans.hendelser.shouldHaveSize(0)
 
         // Verify data stored by consumer (DIGITAL_SØKNAD_SKJEMA_ID)
