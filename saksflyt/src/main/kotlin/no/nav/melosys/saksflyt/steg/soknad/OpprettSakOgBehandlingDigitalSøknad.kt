@@ -60,7 +60,7 @@ class OpprettSakOgBehandlingDigitalSøknad(
 
         val aktørId = persondataFasade.hentAktørIdForIdent(fnr)
 
-        val behandlingstema = DigitalSøknadMapper.utledBehandlingstema(søknadsdata)
+        val behandlingstema = BehandlingstemaUtleder.utled(søknadsdata)
 
         val opprettSakRequest = OpprettSakRequest.Builder()
             .medAktørID(aktørId)
