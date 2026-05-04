@@ -1,6 +1,5 @@
 package no.nav.melosys.service.avgift
 
-import org.hibernate.Hibernate
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
@@ -34,14 +33,12 @@ class TrygdeavgiftService(
     fun hentTrygdeavgiftsperioder(behandlingID: Long): Set<Trygdeavgiftsperiode> {
         return behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(behandlingID)
             .trygdeavgiftsperioder
-            .onEach { Hibernate.initialize(it.grunnlagListe) }
     }
 
     @Transactional(readOnly = true)
     fun hentTrygdeavgiftsperioderForEosPensjonist(behandlingID: Long): Set<Trygdeavgiftsperiode> {
         return behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(behandlingID)
             .eøsPensjonistTrygdeavgiftsperioder
-            .onEach { Hibernate.initialize(it.grunnlagListe) }
     }
 
     @Transactional(readOnly = true)
