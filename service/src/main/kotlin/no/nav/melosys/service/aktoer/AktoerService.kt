@@ -84,6 +84,12 @@ class AktoerService(
     }
 
     @Transactional
+    fun slettAlleFullmektige(fagsak: Fagsak) {
+        aktørRepository.deleteAllByFagsakAndRolle(fagsak, Aktoersroller.FULLMEKTIG)
+        aktørRepository.flush()
+    }
+
+    @Transactional
     fun endreAktørIdForBruker(fagsak: Fagsak, nyAktørId: String) {
         val eksisterendeBrukerAktør = fagsak.aktører.firstOrNull { it.rolle == Aktoersroller.BRUKER }
             ?: throw IllegalArgumentException("Finner ikke BRUKER aktør for ${fagsak.saksnummer}")

@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.soknad
 
 import tools.jackson.databind.json.JsonMapper
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
@@ -18,12 +19,19 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
+import no.nav.melosys.service.aktoer.AktoerDto
+import no.nav.melosys.service.aktoer.AktoerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.SkjemaSakMappingService
+import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.Fullmaktstype
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.AnnenPersonMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMedFullmaktMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverfirmaInfo
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverensVirksomhetINorgeDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
@@ -42,6 +50,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
     @MockK lateinit var oppgaveService: OppgaveService
     @MockK lateinit var skjemaSakMappingService: SkjemaSakMappingService
     @MockK lateinit var jsonMapper: JsonMapper
+    @MockK(relaxed = true) lateinit var aktoerService: AktoerService
 
     private lateinit var steg: HåndterEksisterendeSakDigitalSøknad
 
@@ -55,7 +64,8 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
     fun setup() {
         steg = HåndterEksisterendeSakDigitalSøknad(
             fagsakService, behandlingService, behandlingsresultatService,
-            mottatteOpplysningerService, oppgaveService, skjemaSakMappingService, jsonMapper
+            mottatteOpplysningerService, oppgaveService, skjemaSakMappingService, jsonMapper,
+            aktoerService
         )
 
         every { jsonMapper.writeValueAsString(søknadsdata) } returns """{"referanseId":"test"}"""
@@ -268,6 +278,110 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
                     null
                 )
             }
+        }
+    }
+
+    @Nested
+    inner class AktørOppdatering {
+
+        @Test
+        fun `DEG_SELV-erstatter sletter alle FULLMEKTIG og rebygger arbeidsgivere uten å legge til nye fullmektige`() {
+            // Standard søknadsdata fra felt-oppsett er DEG_SELV
+            val behandling = lagBehandling(Behandlingsstatus.UNDER_BEHANDLING)
+            val fagsak = lagFagsakMedBehandling(behandling)
+            val prosessinstans = lagProsessinstans()
+
+            mockFagsakService(fagsak)
+            mockEndreStatus()
+            mockTømBehandlingsresultat()
+            mockOppdaterMottatteOpplysninger()
+            mockHentMottatteOpplysninger(behandlingId)
+
+            steg.utfør(prosessinstans)
+
+            verify { aktoerService.slettAlleFullmektige(fagsak) }
+            verify { aktoerService.erstattEksisterendeArbeidsgiveraktører(fagsak, listOf("123456789")) }
+            verify(exactly = 0) { aktoerService.lagEllerOppdaterAktoer(any(), any()) }
+        }
+
+        @Test
+        fun `RADGIVER_MED_FULLMAKT-erstatter lagrer to fullmektige (person + radgiverfirma)`() {
+            val fullmektigFnr = "10987654321"
+            val radgiverOrgnr = "333333333"
+            val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+                metadata = RadgiverMedFullmaktMetadata(
+                    skjemadel = Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL,
+                    arbeidsgiverNavn = "Test AS",
+                    juridiskEnhetOrgnr = "987654321",
+                    fullmektigFnr = fullmektigFnr,
+                    radgiverfirma = RadgiverfirmaInfo(orgnr = radgiverOrgnr, navn = "Rådgiver AS")
+                )
+            }
+            val prosessinstans = Prosessinstans.forTest {
+                medData(ProsessDataKey.DIGITAL_SØKNADSDATA, søknadsdata)
+                medData(ProsessDataKey.SAKSNUMMER, saksnummer)
+            }
+
+            val behandling = lagBehandling(Behandlingsstatus.OPPRETTET)
+            val fagsak = lagFagsakMedBehandling(behandling)
+
+            mockFagsakService(fagsak)
+            every { jsonMapper.writeValueAsString(søknadsdata) } returns "{}"
+            mockOppdaterMottatteOpplysninger()
+            mockHentMottatteOpplysninger(behandlingId)
+
+            val aktørSlots = mutableListOf<AktoerDto>()
+            every { aktoerService.lagEllerOppdaterAktoer(eq(fagsak), capture(aktørSlots)) } returns 1L
+
+            steg.utfør(prosessinstans)
+
+            verify { aktoerService.slettAlleFullmektige(fagsak) }
+            verify { aktoerService.erstattEksisterendeArbeidsgiveraktører(fagsak, listOf("123456789")) }
+
+            aktørSlots shouldHaveSize 2
+            val personFullmektig = aktørSlots.first { it.personIdent != null }
+            personFullmektig.rolleKode shouldBe Aktoersroller.FULLMEKTIG.name
+            personFullmektig.personIdent shouldBe fullmektigFnr
+            personFullmektig.fullmakter shouldBe setOf(Fullmaktstype.FULLMEKTIG_SØKNAD)
+
+            val orgFullmektig = aktørSlots.first { it.orgnr != null }
+            orgFullmektig.rolleKode shouldBe Aktoersroller.FULLMEKTIG.name
+            orgFullmektig.orgnr shouldBe radgiverOrgnr
+            orgFullmektig.fullmakter shouldBe setOf(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
+        }
+
+        @Test
+        fun `ANNEN_PERSON-erstatter lagrer én fullmektig`() {
+            val fullmektigFnr = "10987654321"
+            val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+                metadata = AnnenPersonMetadata(
+                    skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
+                    arbeidsgiverNavn = "Test AS",
+                    juridiskEnhetOrgnr = "987654321",
+                    fullmektigFnr = fullmektigFnr
+                )
+            }
+            val prosessinstans = Prosessinstans.forTest {
+                medData(ProsessDataKey.DIGITAL_SØKNADSDATA, søknadsdata)
+                medData(ProsessDataKey.SAKSNUMMER, saksnummer)
+            }
+
+            val behandling = lagBehandling(Behandlingsstatus.OPPRETTET)
+            val fagsak = lagFagsakMedBehandling(behandling)
+
+            mockFagsakService(fagsak)
+            every { jsonMapper.writeValueAsString(søknadsdata) } returns "{}"
+            mockOppdaterMottatteOpplysninger()
+            mockHentMottatteOpplysninger(behandlingId)
+
+            val aktørSlot = slot<AktoerDto>()
+            every { aktoerService.lagEllerOppdaterAktoer(eq(fagsak), capture(aktørSlot)) } returns 1L
+
+            steg.utfør(prosessinstans)
+
+            aktørSlot.captured.rolleKode shouldBe Aktoersroller.FULLMEKTIG.name
+            aktørSlot.captured.personIdent shouldBe fullmektigFnr
+            aktørSlot.captured.fullmakter shouldBe setOf(Fullmaktstype.FULLMEKTIG_SØKNAD)
         }
     }
 

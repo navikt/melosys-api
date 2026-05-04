@@ -9,10 +9,13 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey.DIGITAL_SØKNADSDATA
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.service.aktoer.AktoerDto
+import no.nav.melosys.service.aktoer.AktoerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
@@ -44,7 +47,8 @@ class OpprettSakOgBehandlingDigitalSøknad(
     private val mottatteOpplysningerService: MottatteOpplysningerService,
     private val jsonMapper: JsonMapper,
     private val skjemaSakMappingService: SkjemaSakMappingService,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
+    private val aktoerService: AktoerService
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD
@@ -62,6 +66,8 @@ class OpprettSakOgBehandlingDigitalSøknad(
 
         val behandlingstema = BehandlingstemaUtleder.utled(søknadsdata)
 
+        val aktører = DigitalSøknadAktørerMapper.utled(søknadsdata)
+
         val opprettSakRequest = OpprettSakRequest.Builder()
             .medAktørID(aktørId)
             .medSakstype(Sakstyper.EU_EOS)
@@ -70,14 +76,16 @@ class OpprettSakOgBehandlingDigitalSøknad(
             .medBehandlingstype(Behandlingstyper.FØRSTEGANG)
             .medBehandlingsårsaktype(Behandlingsaarsaktyper.SØKNAD)
             .medMottaksdato(søknadsdata.innsendtTidspunkt.toLocalDate())
+            .medArbeidsgiver(aktører.arbeidsgiverOrgnumre.first())
+            .medFullmektig(aktører.fullmektige.firstOrNull())
             .build()
-
-        //TODO: Legg til fullmakt - egen oppgave: MELOSYS-8031
 
         val fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest)
         val behandling = fagsak.hentAktivBehandling()
 
         log.info { "Opprettet fagsak ${fagsak.saksnummer} med behandling ${behandling.id} for digital søknad" }
+
+        leggTilEkstraAktører(fagsak, aktører)
 
         // Sett AVVENT_DOK_PART hvis kun arbeidsgiver-del og ingen koblet motpart
         if (metadata.skjemadel == Skjemadel.ARBEIDSGIVERS_DEL && søknadsdata.kobletSkjema == null) {
@@ -95,6 +103,23 @@ class OpprettSakOgBehandlingDigitalSøknad(
 
         prosessinstans.behandling = behandling
         log.info { "Lagret mottatte opplysninger for digital søknad referanseId=$referanseId" }
+    }
+
+    private fun leggTilEkstraAktører(fagsak: Fagsak, aktører: AktørerFraSøknad) {
+        // OpprettSakRequest tar ett orgnr og én fullmektig. For ARBEIDSGIVER/RADGIVER med
+        // koblet skjema med annet orgnr, og for MED_FULLMAKT-typene med to fullmektige,
+        // legger vi til de øvrige her.
+        aktører.arbeidsgiverOrgnumre.drop(1).forEach { orgnr ->
+            aktoerService.lagEllerOppdaterAktoer(fagsak, arbeidsgiverDto(orgnr))
+        }
+        aktører.fullmektige.drop(1).forEach { fullmektig ->
+            aktoerService.lagEllerOppdaterAktoer(fagsak, fullmektig.tilAktoerDto())
+        }
+    }
+
+    private fun arbeidsgiverDto(orgnr: String) = AktoerDto().apply {
+        rolleKode = Aktoersroller.ARBEIDSGIVER.name
+        this.orgnr = orgnr
     }
 
     private fun lagreSkjemaSakMapping(

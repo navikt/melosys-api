@@ -12,6 +12,7 @@ import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.service.aktoer.AktoerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
@@ -57,7 +58,8 @@ class HåndterEksisterendeSakDigitalSøknad(
     private val mottatteOpplysningerService: MottatteOpplysningerService,
     private val oppgaveService: OppgaveService,
     private val skjemaSakMappingService: SkjemaSakMappingService,
-    private val jsonMapper: JsonMapper
+    private val jsonMapper: JsonMapper,
+    private val aktoerService: AktoerService
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.HÅNDTER_EKSISTERENDE_SAK_DIGITAL_SØKNAD
@@ -78,10 +80,29 @@ class HåndterEksisterendeSakDigitalSøknad(
             opprettNyVurdering(fagsak, søknadsdata)
         }
 
+        oppdaterAktørerFraNyInnsending(fagsak, søknadsdata)
+
         lagreSkjemaSakMapping(søknadsdata, fagsak, mottatteOpplysninger)
 
         prosessinstans.behandling = behandling
         log.info { "Ferdig med eksisterende sak $saksnummer, behandling=${behandling.id}" }
+    }
+
+    private fun oppdaterAktørerFraNyInnsending(
+        fagsak: Fagsak,
+        søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
+    ) {
+        // Siste mottatte del er gjeldende: slett alle FULLMEKTIG og ARBEIDSGIVER,
+        // behold BRUKER, og rebygg fra ny innsending. Mapper-en utleder ARBEIDSGIVER fra
+        // både primært og koblet skjema, så delete+rebuild trengs for å fange opp evt.
+        // nytt orgnr fra motpart-delen.
+        val aktører = DigitalSøknadAktørerMapper.utled(søknadsdata)
+
+        aktoerService.slettAlleFullmektige(fagsak)
+        aktoerService.erstattEksisterendeArbeidsgiveraktører(fagsak, aktører.arbeidsgiverOrgnumre)
+        aktører.fullmektige.forEach { fullmektig ->
+            aktoerService.lagEllerOppdaterAktoer(fagsak, fullmektig.tilAktoerDto())
+        }
     }
 
     private fun lagreSkjemaSakMapping(
