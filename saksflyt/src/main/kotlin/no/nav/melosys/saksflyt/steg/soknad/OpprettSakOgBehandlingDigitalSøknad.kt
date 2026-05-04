@@ -8,7 +8,6 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey.DIGITAL_SØKNADSDATA
@@ -23,7 +22,6 @@ import no.nav.melosys.service.sak.SkjemaSakMappingService
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import org.springframework.stereotype.Component
-import java.time.LocalDate
 
 private val log = KotlinLogging.logger { }
 
@@ -62,11 +60,13 @@ class OpprettSakOgBehandlingDigitalSøknad(
 
         val aktørId = persondataFasade.hentAktørIdForIdent(fnr)
 
+        val behandlingstema = BehandlingstemaUtleder.utled(søknadsdata)
+
         val opprettSakRequest = OpprettSakRequest.Builder()
             .medAktørID(aktørId)
             .medSakstype(Sakstyper.EU_EOS)
             .medSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG)
-            .medBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .medBehandlingstema(behandlingstema)
             .medBehandlingstype(Behandlingstyper.FØRSTEGANG)
             .medBehandlingsårsaktype(Behandlingsaarsaktyper.SØKNAD)
             .medMottaksdato(søknadsdata.innsendtTidspunkt.toLocalDate())
@@ -110,4 +110,6 @@ class OpprettSakOgBehandlingDigitalSøknad(
             innsendtDato = søknadsdata.innsendtTidspunkt.atZone(OSLO_ZONE).toInstant()
         )
     }
+
+
 }

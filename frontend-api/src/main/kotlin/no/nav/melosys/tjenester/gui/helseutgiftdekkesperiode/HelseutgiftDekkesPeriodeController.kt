@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.helseutgiftdekkesperiode
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
+import no.nav.melosys.domain.PeriodeKilde
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.exception.FunksjonellException
@@ -30,15 +31,13 @@ class HelseutgiftDekkesPeriodeController(
     ): ResponseEntity<HelseutgiftDekkesPeriodeDto> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
-        if (!erGyldigLand(helseutgiftDekkesPeriodeDto.bostedLandkode)) {
-            throw FunksjonellException("Landkode er ikke gyldig")
-        }
+        val bostedLandkode = validerOgParseLandkode(helseutgiftDekkesPeriodeDto.bostedLandkode)
 
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.opprettHelseutgiftDekkesPeriode(
             behandlingID,
             helseutgiftDekkesPeriodeDto.fomDato,
             helseutgiftDekkesPeriodeDto.tomDato,
-            Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode)
+            bostedLandkode
         )
         return ResponseEntity.ok(HelseutgiftDekkesPeriodeDto.av(helseutgiftDekkesPeriode))
     }
@@ -51,16 +50,14 @@ class HelseutgiftDekkesPeriodeController(
     ): ResponseEntity<HelseutgiftDekkesPeriodeDto> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
-        if (!erGyldigLand(helseutgiftDekkesPeriodeDto.bostedLandkode)) {
-            throw FunksjonellException("Landkode er ikke gyldig")
-        }
+        val bostedLandkode = validerOgParseLandkode(helseutgiftDekkesPeriodeDto.bostedLandkode)
 
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(
             behandlingID,
             periodeId,
             helseutgiftDekkesPeriodeDto.fomDato,
             helseutgiftDekkesPeriodeDto.tomDato,
-            Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode)
+            bostedLandkode
         )
 
         return ResponseEntity.ok(HelseutgiftDekkesPeriodeDto.av(helseutgiftDekkesPeriode))
@@ -89,8 +86,28 @@ class HelseutgiftDekkesPeriodeController(
         return ResponseEntity.noContent().build()
     }
 
-    private fun erGyldigLand(land: String): Boolean {
-        return Land_iso2.values().any { it.kode == land }
+    @DeleteMapping
+    fun slettHelseutgiftDekkesPerioder(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @RequestParam("kilde", required = false) kilde: PeriodeKilde?
+    ): ResponseEntity<Void> {
+        aksesskontroll.autoriserSkriv(behandlingID)
+
+        if (kilde != null) {
+            helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriodeMedKilde(behandlingID, kilde)
+        } else {
+            helseutgiftDekkesPeriodeService.slettAlleHelseutgiftDekkesPerioder(behandlingID)
+        }
+
+        return ResponseEntity.noContent().build()
+    }
+
+    private fun validerOgParseLandkode(bostedLandkode: String): Land_iso2 {
+        if (bostedLandkode.isBlank()) {
+            throw FunksjonellException("Bosted landkode er påkrevd")
+        }
+        return Land_iso2.values().firstOrNull { it.kode == bostedLandkode }
+            ?: throw FunksjonellException("Landkode er ikke gyldig")
     }
 }
 

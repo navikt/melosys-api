@@ -1,13 +1,17 @@
 package no.nav.melosys.saksflyt.steg.soknad
 
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import java.util.UUID
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.arkiv.BrukerIdType
+import no.nav.melosys.domain.arkiv.DokumentVariant
 import no.nav.melosys.domain.arkiv.Journalposttype
 import no.nav.melosys.domain.arkiv.OpprettJournalpost
 import no.nav.melosys.integrasjon.joark.JoarkFasade
@@ -21,6 +25,7 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
+import no.nav.melosys.skjema.types.vedlegg.VedleggFiltype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -162,6 +167,57 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
 
         behandling.initierendeJournalpostId shouldBe eksisterendeJournalpostId
         verify(exactly = 0) { behandlingService.lagre(any()) }
+    }
+
+    @Test
+    fun `utfør uten vedlegg gir tom vedleggsliste på journalpost`() {
+        val søknadsdata = lagSøknadsdata(Skjemadel.ARBEIDSTAKERS_DEL)
+        val prosessinstans = lagProsessinstans(søknadsdata)
+
+        opprettOgFerdigstillJournalpostDigitalSøknad.utfør(prosessinstans)
+
+        verify(exactly = 0) { melosysSkjemaApiClient.hentVedleggInnhold(any(), any()) }
+        capturedJournalpost.captured.vedlegg.shouldBeEmpty()
+    }
+
+    @Test
+    fun `utfør henter og legger til vedlegg av ulike filtyper på journalpost`() {
+        val pdfVedleggId = UUID.randomUUID()
+        val pngVedleggId = UUID.randomUUID()
+        val jpegVedleggId = UUID.randomUUID()
+        val pdfBytes = "pdf-innhold".toByteArray()
+        val pngBytes = "png-innhold".toByteArray()
+        val jpegBytes = "jpeg-innhold".toByteArray()
+
+        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
+            fnr = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.fnr
+            referanseId = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.referanseId
+            innsenderFnr = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.innsenderFnr
+            medVedlegg(
+                lagVedleggDto(id = pdfVedleggId, filnavn = "kontrakt.pdf", filtype = VedleggFiltype.PDF),
+                lagVedleggDto(id = pngVedleggId, filnavn = "skjermbilde.png", filtype = VedleggFiltype.PNG),
+                lagVedleggDto(id = jpegVedleggId, filnavn = "foto.jpeg", filtype = VedleggFiltype.JPEG)
+            )
+        }
+        every { melosysSkjemaApiClient.hentPdf(søknadsdata.skjema.id) } returns pdfBytes
+        every { melosysSkjemaApiClient.hentVedleggInnhold(søknadsdata.skjema.id, pdfVedleggId) } returns pdfBytes
+        every { melosysSkjemaApiClient.hentVedleggInnhold(søknadsdata.skjema.id, pngVedleggId) } returns pngBytes
+        every { melosysSkjemaApiClient.hentVedleggInnhold(søknadsdata.skjema.id, jpegVedleggId) } returns jpegBytes
+
+        val prosessinstans = lagProsessinstans(søknadsdata)
+
+        opprettOgFerdigstillJournalpostDigitalSøknad.utfør(prosessinstans)
+
+        val vedlegg = capturedJournalpost.captured.vedlegg
+        vedlegg shouldHaveSize 3
+        vedlegg[0].tittel shouldBe "kontrakt.pdf"
+        vedlegg[0].dokumentVarianter.first().filtype shouldBe DokumentVariant.Filtype.PDFA
+        vedlegg[0].dokumentVarianter.first().data shouldBe pdfBytes
+        vedlegg[1].tittel shouldBe "skjermbilde.png"
+        vedlegg[1].dokumentVarianter.first().filtype shouldBe DokumentVariant.Filtype.PNG
+        vedlegg[2].tittel shouldBe "foto.jpeg"
+        vedlegg[2].dokumentVarianter.first().filtype shouldBe DokumentVariant.Filtype.JPEG
     }
 
     @Test

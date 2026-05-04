@@ -14,6 +14,7 @@ class ForetakUtland {
     var navn: String? = null
     var orgnr: String? = null
     var adresse = StrukturertAdresse()
+    var tilhorerSammeKonsern: Boolean? = null
 
     @JsonProperty("selvstendigNaeringsvirksomhet")
     var selvstendigNæringsvirksomhet: Boolean? = null

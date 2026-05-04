@@ -2,6 +2,7 @@ package no.nav.melosys.domain.helseutgiftdekkesperiode
 
 import jakarta.persistence.*
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.PeriodeKilde
 import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
@@ -39,7 +40,7 @@ class HelseutgiftDekkesPeriode(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "kilde", nullable = false)
-    var kilde: HelseutgiftDekkesPeriodeKilde = HelseutgiftDekkesPeriodeKilde.MELOSYS
+    var kilde: PeriodeKilde = PeriodeKilde.MELOSYS
 
     @OneToMany(mappedBy = "grunnlagHelseutgiftDekkesPeriode", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
     var trygdeavgiftsperioder: MutableSet<Trygdeavgiftsperiode> = HashSet(1)
