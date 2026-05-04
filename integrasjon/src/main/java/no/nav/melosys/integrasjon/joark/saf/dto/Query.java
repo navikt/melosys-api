@@ -44,6 +44,7 @@ public final class Query {
                 dokumentvarianter {
                   saksbehandlerHarTilgang
                   variantformat
+                  filtype
                 }
               }
             }
@@ -102,6 +103,7 @@ public final class Query {
                 dokumentvarianter {
                   saksbehandlerHarTilgang
                   variantformat
+                  filtype
                 }
               }
             }
