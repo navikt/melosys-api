@@ -43,6 +43,7 @@ class ReplikerBehandlingsresultatService(
         behandlingsresultatReplika.type = Behandlingsresultattyper.IKKE_FASTSATT
         behandlingsresultatReplika.medlemskapsperioder = HashSet()
         behandlingsresultatReplika.lovvalgsperioder = HashSet()
+        behandlingsresultatReplika.helseutgiftDekkesPerioder = mutableListOf()
 
         replikerAvklartefakta(behandlingsresultatOriginal, behandlingsresultatReplika)
         replikerLovvalgsperioder(behandlingsresultatOriginal, behandlingsresultatReplika, behandlingReplika.type)
@@ -53,9 +54,9 @@ class ReplikerBehandlingsresultatService(
         replikerUtpekingsperioder(behandlingsresultatOriginal, behandlingsresultatReplika)
 
         if (behandlingReplika.erEøsPensjonist()) {
-            replikerHelseutgiftDekkesPeriode(behandlingsresultatOriginal, behandlingsresultatReplika)
+            replikerHelseutgiftDekkesPerioder(behandlingsresultatOriginal, behandlingsresultatReplika)
             replikerTrygdeavgiftForPensjonist(behandlingsresultatOriginal, behandlingsresultatReplika)
-            behandlingsresultatReplika.hentHelseutgiftDekkesPeriode().id = null
+            behandlingsresultatReplika.helseutgiftDekkesPerioder.forEach { it.id = null }
         } else if (behandlingReplika.fagsak.erLovvalg() && behandlingsresultatOriginal.trygdeavgiftsperioder.isNotEmpty()) {
             replikerTrygdeavgift(behandlingsresultatOriginal, behandlingsresultatReplika)
             behandlingsresultatReplika.lovvalgsperioder.onEach { it.id = null }
@@ -157,21 +158,34 @@ class ReplikerBehandlingsresultatService(
         behandlingsresultatOriginal: Behandlingsresultat,
         behandlingsresultatReplika: Behandlingsresultat
     ) {
-        val trygdeavgiftsperioderTilReplikering = filtrerTrygdeavgiftsperioder(
-            behandlingsresultatOriginal.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder
-        )
+        // Samle alle trygdeavgiftsperioder fra alle originale helseutgift-perioder
+        val alleTrygdeavgiftsperioderOriginal = behandlingsresultatOriginal.helseutgiftDekkesPerioder
+            .flatMap { it.trygdeavgiftsperioder }
+
+        val trygdeavgiftsperioderTilReplikering = filtrerTrygdeavgiftsperioder(alleTrygdeavgiftsperioderOriginal)
 
         // Bruker nye metoder som kloner og justerer datoer
         val inntektsperioderReplika = cloneOgJusterInntektsperioder(trygdeavgiftsperioderTilReplikering)
         val skatteforholdTilNorgeReplika = cloneOgJusterSkatteforhold(trygdeavgiftsperioderTilReplikering)
 
         behandlingsresultatReplika.medlemskapsperioder = HashSet()
-        behandlingsresultatReplika.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder = HashSet()
+        behandlingsresultatReplika.helseutgiftDekkesPerioder.forEach { it.trygdeavgiftsperioder = HashSet() }
+
+        // Bygg mapping fra original helseutgift-periode ID til replica helseutgift-periode
+        val origTilReplikaHelseutgiftMap = behandlingsresultatOriginal.helseutgiftDekkesPerioder
+            .associate { origPeriode ->
+                origPeriode.id to behandlingsresultatReplika.helseutgiftDekkesPerioder
+                    .find { it.fomDato == origPeriode.fomDato && it.tomDato == origPeriode.tomDato && it.bostedLandkode == origPeriode.bostedLandkode }
+            }
 
         trygdeavgiftsperioderTilReplikering.forEach { trygdeavgiftsperiodeOriginal ->
+            val origHelseutgiftPeriodeId = trygdeavgiftsperiodeOriginal.grunnlagHelseutgiftDekkesPeriode?.id
+            val replikaHelseutgiftPeriode = origTilReplikaHelseutgiftMap[origHelseutgiftPeriodeId]
+                ?: throw IllegalStateException("Helseutgift dekkes periode ikke funnet for original id $origHelseutgiftPeriodeId")
+
             val trygdeavgiftsperiodeReplika = trygdeavgiftsperiodeOriginal.copyEntity(
                 id = trygdeavgiftsperiodeOriginal.id,
-                grunnlagHelseutgiftDekkesPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode,
+                grunnlagHelseutgiftDekkesPeriode = replikaHelseutgiftPeriode,
                 grunnlagInntekstperiode = inntektsperioderReplika
                     .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode?.id },
                 grunnlagSkatteforholdTilNorge = skatteforholdTilNorgeReplika
@@ -179,12 +193,10 @@ class ReplikerBehandlingsresultatService(
                     ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),
             )
 
-            trygdeavgiftsperiodeReplika.grunnlagHelseutgiftDekkesPeriode?.run {
-                trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
-            } ?: throw IllegalStateException("Helseutgift dekkes periode ikke funnet")
+            replikaHelseutgiftPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
         }
 
-        behandlingsresultatReplika.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeReplika ->
+        behandlingsresultatReplika.helseutgiftDekkesPerioder.flatMap { it.trygdeavgiftsperioder }.forEach { trygdeavgiftsperiodeReplika ->
             trygdeavgiftsperiodeReplika.id = null
             trygdeavgiftsperiodeReplika.grunnlagHelseutgiftDekkesPeriode?.id = null
             trygdeavgiftsperiodeReplika.grunnlagInntekstperiode?.id = null
@@ -370,24 +382,24 @@ private fun replikerLovvalgsperioder(
     }
 }
 
-private fun replikerHelseutgiftDekkesPeriode(
+private fun replikerHelseutgiftDekkesPerioder(
     behandlingsresultatOrig: Behandlingsresultat,
     behandlingsresultatReplika: Behandlingsresultat
 ) {
-    behandlingsresultatReplika.helseutgiftDekkesPeriode = null
+    behandlingsresultatReplika.clearHelseutgiftDekkesPerioder()
 
-    val orig = behandlingsresultatOrig.helseutgiftDekkesPeriode ?: return
+    for (orig in behandlingsresultatOrig.helseutgiftDekkesPerioder) {
+        val helseutgiftDekkesPeriodeReplika = HelseutgiftDekkesPeriode(
+            behandlingsresultat = behandlingsresultatReplika,
+            fomDato = orig.fomDato,
+            tomDato = orig.tomDato,
+            bostedLandkode = orig.bostedLandkode
+        ).apply {
+            id = null
+        }
 
-    val helseutgiftDekkesPeriodeReplika = HelseutgiftDekkesPeriode(
-        behandlingsresultat = behandlingsresultatReplika,
-        fomDato = orig.fomDato,
-        tomDato = orig.tomDato,
-        bostedLandkode = orig.bostedLandkode
-    ).apply {
-        id = null
+        behandlingsresultatReplika.addHelseutgiftDekkesPeriode(helseutgiftDekkesPeriodeReplika)
     }
-
-    behandlingsresultatReplika.helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeReplika
 }
 
 @Throws(

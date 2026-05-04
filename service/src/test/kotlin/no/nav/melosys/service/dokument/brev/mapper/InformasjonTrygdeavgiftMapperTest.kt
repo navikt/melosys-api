@@ -102,14 +102,14 @@ internal class InformasjonTrygdeavgiftMapperTest {
         }
 
 
-        every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(any()) } returns behandlingsresultat.helseutgiftDekkesPeriode
+        every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(any()) } returns behandlingsresultat.helseutgiftDekkesPerioder.toList()
         every { mockTrygdeavgiftMottakerService.getTrygdeavgiftMottaker(any<List<Trygdeavgiftsperiode>>()) } returns Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
 
 
         informasjonTrygdeavgiftMapper.mapInformasjonTrygdeavgift(lagBrevbestilling()).shouldNotBeNull().apply {
-            fomDato shouldBe behandlingsresultat.hentHelseutgiftDekkesPeriode().fomDato
-            tomDato shouldBe behandlingsresultat.hentHelseutgiftDekkesPeriode().tomDato
+            fomDato shouldBe behandlingsresultat.helseutgiftDekkesPerioder.first().fomDato
+            tomDato shouldBe behandlingsresultat.helseutgiftDekkesPerioder.first().tomDato
             trygdeavgiftMottaker shouldBe Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
             betalingsvalg shouldBe Betalingstype.TREKK
             bostedLand shouldBe "Danmark"
@@ -168,14 +168,14 @@ internal class InformasjonTrygdeavgiftMapperTest {
         }
 
 
-        every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(any()) } returns behandlingsresultat.helseutgiftDekkesPeriode
+        every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(any()) } returns behandlingsresultat.helseutgiftDekkesPerioder.toList()
         every { mockTrygdeavgiftMottakerService.getTrygdeavgiftMottaker(any<List<Trygdeavgiftsperiode>>()) } returns Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
 
 
         informasjonTrygdeavgiftMapper.mapInformasjonTrygdeavgift(lagBrevbestilling()).shouldNotBeNull().apply {
-            fomDato shouldBe behandlingsresultat.hentHelseutgiftDekkesPeriode().fomDato
-            tomDato shouldBe behandlingsresultat.hentHelseutgiftDekkesPeriode().tomDato
+            fomDato shouldBe behandlingsresultat.helseutgiftDekkesPerioder.first().fomDato
+            tomDato shouldBe behandlingsresultat.helseutgiftDekkesPerioder.first().tomDato
             trygdeavgiftMottaker shouldBe Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
             betalingsvalg shouldBe Betalingstype.TREKK
             bostedLand shouldBe "Danmark"
@@ -234,14 +234,14 @@ internal class InformasjonTrygdeavgiftMapperTest {
         }
 
 
-        every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(any()) } returns behandlingsresultat.helseutgiftDekkesPeriode
+        every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(any()) } returns behandlingsresultat.helseutgiftDekkesPerioder.toList()
         every { mockTrygdeavgiftMottakerService.getTrygdeavgiftMottaker(any<List<Trygdeavgiftsperiode>>()) } returns Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
 
 
         informasjonTrygdeavgiftMapper.mapInformasjonTrygdeavgift(lagBrevbestilling()).shouldNotBeNull().apply {
-            fomDato shouldBe behandlingsresultat.hentHelseutgiftDekkesPeriode().fomDato
-            tomDato shouldBe behandlingsresultat.hentHelseutgiftDekkesPeriode().tomDato
+            fomDato shouldBe behandlingsresultat.helseutgiftDekkesPerioder.first().fomDato
+            tomDato shouldBe behandlingsresultat.helseutgiftDekkesPerioder.first().tomDato
             trygdeavgiftMottaker shouldBe Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
             betalingsvalg shouldBe Betalingstype.TREKK
             bostedLand shouldBe "Danmark"
@@ -274,14 +274,14 @@ internal class InformasjonTrygdeavgiftMapperTest {
         }
 
 
-        every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(any()) } returns behandlingsresultat.helseutgiftDekkesPeriode
+        every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(any()) } returns behandlingsresultat.helseutgiftDekkesPerioder.toList()
         every { mockTrygdeavgiftMottakerService.getTrygdeavgiftMottaker(any<List<Trygdeavgiftsperiode>>()) } returns Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
 
 
         informasjonTrygdeavgiftMapper.mapInformasjonTrygdeavgift(lagBrevbestilling()).shouldNotBeNull().apply {
-            fomDato shouldBe behandlingsresultat.hentHelseutgiftDekkesPeriode().fomDato
-            tomDato shouldBe behandlingsresultat.hentHelseutgiftDekkesPeriode().tomDato
+            fomDato shouldBe behandlingsresultat.helseutgiftDekkesPerioder.first().fomDato
+            tomDato shouldBe behandlingsresultat.helseutgiftDekkesPerioder.first().tomDato
             trygdeavgiftMottaker shouldBe null
             betalingsvalg shouldBe Betalingstype.TREKK
             bostedLand shouldBe "Danmark"
@@ -340,7 +340,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
             }
         }
 
-        every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(any()) } returns behandlingsresultat.helseutgiftDekkesPeriode
+        every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(any()) } returns behandlingsresultat.helseutgiftDekkesPerioder.toList()
         every { mockTrygdeavgiftMottakerService.getTrygdeavgiftMottaker(any<List<Trygdeavgiftsperiode>>()) } returns Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
 
@@ -399,7 +399,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
             }
         }
 
-        every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(any()) } returns behandlingsresultat.helseutgiftDekkesPeriode
+        every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(any()) } returns behandlingsresultat.helseutgiftDekkesPerioder.toList()
         every { mockTrygdeavgiftMottakerService.getTrygdeavgiftMottaker(any<List<Trygdeavgiftsperiode>>()) } returns Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
 
@@ -459,7 +459,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
             }
         }
 
-        every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(any()) } returns behandlingsresultat.helseutgiftDekkesPeriode
+        every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(any()) } returns behandlingsresultat.helseutgiftDekkesPerioder.toList()
         every { mockTrygdeavgiftMottakerService.getTrygdeavgiftMottaker(any<List<Trygdeavgiftsperiode>>()) } returns Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
 
@@ -518,7 +518,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
             }
         }
 
-        every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(any()) } returns behandlingsresultat.helseutgiftDekkesPeriode
+        every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(any()) } returns behandlingsresultat.helseutgiftDekkesPerioder.toList()
         every { mockTrygdeavgiftMottakerService.getTrygdeavgiftMottaker(any<List<Trygdeavgiftsperiode>>()) } returns Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
 

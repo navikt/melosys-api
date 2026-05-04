@@ -37,23 +37,23 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>21</java.version>
-        <kotlin.version>2.3.20</kotlin.version>
+        <kotlin.version>2.3.21</kotlin.version>
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.329</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.332-0c0d718</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.154-midlertidig</melosys.brev.version>
-        <melosys-skjema-api-types.version>2026.03.27-7e257c148ee6</melosys-skjema-api-types.version>
+        <melosys-skjema-api-types.version>2026.04.20-6d9c22a34cdf</melosys-skjema-api-types.version>
 
         <!-- NAV -->
         <nav.tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</nav.tjenestespesifikasjoner.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
         <doksys.dokumentproduksjon.version>44-7d14e70</doksys.dokumentproduksjon.version>
-        <token-support.version>6.0.5</token-support.version>
+        <token-support.version>6.0.6</token-support.version>
 
 
         <!-- Versjoner av eksterne biblioteker -->
-        <archunit.version>1.4.1</archunit.version>
+        <archunit.version>1.4.2</archunit.version>
         <apache-httpclients.version>4.5.13</apache-httpclients.version>
         <caffeine.version>3.2.3</caffeine.version>
         <cxf.version>4.2.0</cxf.version>
@@ -61,7 +61,7 @@
         <commons-lang3.version>3.20.0</commons-lang3.version>
         <commons-text.version>1.15.0</commons-text.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
-        <guava.version>33.5.0-jre</guava.version>
+        <guava.version>33.6.0-jre</guava.version>
         <graphql-java.version>21.5</graphql-java.version>
         <logback.version>1.5.32</logback.version>
         <logstash.version>8.1</logstash.version>
@@ -74,7 +74,7 @@
         <mockito-kotlin.version>6.3.0</mockito-kotlin.version>
         <mockk.version>1.14.9</mockk.version>
         <micrometer-jvm-extras.version>0.3.0</micrometer-jvm-extras.version>
-        <networknt.json-schema-validator.version>3.0.1</networknt.json-schema-validator.version>
+        <networknt.json-schema-validator.version>3.0.2</networknt.json-schema-validator.version>
         <ojdbc.version>21.16.0.0</ojdbc.version>
         <okhttp.version>5.3.2</okhttp.version>
         <oracle.version>18</oracle.version>
@@ -85,16 +85,16 @@
         <shedlock.version>4.48.0</shedlock.version>
         <slf4j.version>2.0.17</slf4j.version>
         <spring-retry.version>2.0.12</spring-retry.version>
-        <unleash.version>12.2.0</unleash.version>
-        <bcpkix-jdk15on.version>1.83</bcpkix-jdk15on.version>
-        <bouncycastle-jdk18on.version>1.83</bouncycastle-jdk18on.version>
+        <unleash.version>12.2.1</unleash.version>
+        <bcpkix-jdk15on.version>1.84</bcpkix-jdk15on.version>
+        <bouncycastle-jdk18on.version>1.84</bouncycastle-jdk18on.version>
         <nimbus-jose-jwt.version>10.9</nimbus-jose-jwt.version>
-        <neethi.version>3.2.1</neethi.version>
+        <neethi.version>3.2.2</neethi.version>
         <jaxws-rt.version>4.0.4</jaxws-rt.version>
         <jakarta.jaxb.version>4.0.5</jakarta.jaxb.version>
         <javaparser.version>1.0.11</javaparser.version>
-        <google.errorprone.version>2.48.0</google.errorprone.version>
-        <checkerframework.version>3.55.1</checkerframework.version>
+        <google.errorprone.version>2.49.0</google.errorprone.version>
+        <checkerframework.version>4.0.0</checkerframework.version>
         <threeten.version>1.8.0</threeten.version>
         <jetbrains.annotations.version>26.1.0</jetbrains.annotations.version>
         <snappy.java.version>1.1.10.8</snappy.java.version>
@@ -106,7 +106,7 @@
         <commons-cli.version>1.11.0</commons-cli.version>
         <graphql-spring-boot-starter.version>15.1.0</graphql-spring-boot-starter.version>
         <scala.version>2.13.18</scala.version>
-        <testcontainers.version>2.0.4</testcontainers.version>
+        <testcontainers.version>2.0.5</testcontainers.version>
         <jna.version>5.18.1</jna.version>
         <graphql.java.extended.scalars.version>24.0</graphql.java.extended.scalars.version>
         <ulid-java>5.2.3</ulid-java>
@@ -114,7 +114,7 @@
 
         <hibernate.version>7.1.16.Final</hibernate.version>
         <antlr4.version>4.13.2</antlr4.version>
-        <springdoc-openapi.version>3.0.2</springdoc-openapi.version>
+        <springdoc-openapi.version>3.0.3</springdoc-openapi.version>
 
         <!-- Transitive avhengigheter -->
         <asm.version>9.9.1</asm.version>

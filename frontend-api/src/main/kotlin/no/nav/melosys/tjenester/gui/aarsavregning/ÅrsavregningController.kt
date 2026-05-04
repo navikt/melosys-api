@@ -69,7 +69,7 @@ class ÅrsavregningController(
             behandlingID,
             aarsavregningID,
             årsavregningOppdaterRequest.avregning.beregnetAvgiftBelop,
-            årsavregningOppdaterRequest.avregning.trygdeavgiftFraAvgiftssystemet,
+            årsavregningOppdaterRequest.avregning.innbetaltTrygdeavgift,
             manueltAvgiftBeloep = årsavregningOppdaterRequest.avregning.manueltAvgiftBeloep
         )
 
@@ -79,15 +79,15 @@ class ÅrsavregningController(
     }
 
     @PostMapping("/grunnlagstype")
-    fun oppdaterHarTrygdeavgiftFraAvgiftssystemet(
+    fun oppdaterHarInnbetaltTrygdeavgift(
         @PathVariable("behandlingID") behandlingID: Long,
-        @RequestBody harTrygdeavgiftFraAvgiftssystemetRequest: HarTrygdeavgiftFraAvgiftssystemetRequest
+        @RequestBody harInnbetaltTrygdeavgiftRequest: HarInnbetaltTrygdeavgiftRequest
     ): ResponseEntity<ÅrsavregningResponse> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
-        val årsavregning = årsavregningService.oppdaterHarTrygdeavgiftFraAvgiftssystemet(
+        val årsavregning = årsavregningService.oppdaterHarInnbetaltTrygdeavgift(
             behandlingID,
-            harTrygdeavgiftFraAvgiftssystemetRequest.harTrygdeavgiftFraAvgiftssystemet
+            harInnbetaltTrygdeavgiftRequest.harInnbetaltTrygdeavgift
         )
 
         return ResponseEntity.ok(
@@ -154,7 +154,7 @@ class ÅrsavregningController(
                     )
 
                     is HelseutgiftDekkesPeriodeForAvgift -> AvgiftspliktigPeriodeDto(
-                        id = 0,
+                        id = it.id,
                         fomDato = it.fom,
                         tomDato = it.tom,
                         bestemmelse = null,
@@ -173,10 +173,10 @@ class ÅrsavregningController(
                 beregnetAvgiftBelop = årsavregningModel.beregnetAvgiftBelop,
                 tidligereFakturertBeloep = årsavregningModel.tidligereFakturertBeloep,
                 tilFaktureringBeloep = årsavregningModel.tilFaktureringBeloep,
-                trygdeavgiftFraAvgiftssystemet = årsavregningModel.trygdeavgiftFraAvgiftssystemet,
+                innbetaltTrygdeavgift = årsavregningModel.innbetaltTrygdeavgift,
                 manueltAvgiftBeloep = årsavregningModel.manueltAvgiftBeloep,
             ),
-            harTrygdeavgiftFraAvgiftssystemet = årsavregningModel.harTrygdeavgiftFraAvgiftssystemet,
+            harInnbetaltTrygdeavgift = årsavregningModel.harInnbetaltTrygdeavgift,
             endeligAvgiftValg = årsavregningModel.endeligAvgiftValg?.name,
             harSkjoennsfastsattInntekt = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag
         )
@@ -208,7 +208,7 @@ class ÅrsavregningController(
                     totalInntekt = TotalbeløpBeregner.hentTotalinntekt(årsavregningModel.tidligereAvgift),
                     totalAvgift = TotalbeløpBeregner.hentTotalavgift(årsavregningModel.tidligereAvgift) ?: BigDecimal.ZERO
                 ),
-                tidligereTrygdeavgiftFraAvgiftssystemet = årsavregningModel.tidligereTrygdeavgiftFraAvgiftssystemet,
+                tidligereInnbetaltTrygdeavgift = årsavregningModel.tidligereInnbetaltTrygdeavgift,
                 tidligereÅrsavregningManueltAvgiftBeloep = årsavregningModel.tidligereÅrsavregningmanueltAvgiftBeloep
             )
         }
@@ -245,7 +245,7 @@ class ÅrsavregningController(
                     )
 
                     is HelseutgiftDekkesPeriodeForAvgift -> AvgiftspliktigPeriodeDto(
-                        id = 0,
+                        id = it.id,
                         fomDato = it.fom,
                         tomDato = it.tom,
                         bestemmelse = null,
@@ -289,8 +289,8 @@ data class LagÅrsavregningRequest(
     val aar: Int,
 )
 
-data class HarTrygdeavgiftFraAvgiftssystemetRequest(
-    val harTrygdeavgiftFraAvgiftssystemet: Boolean
+data class HarInnbetaltTrygdeavgiftRequest(
+    val harInnbetaltTrygdeavgift: Boolean
 )
 
 data class HarSkjoennsfastsattInntektRequest(
@@ -305,7 +305,7 @@ data class ÅrsavregningResponse(
     val nyttTrygdeavgiftsGrunnlag: GrunnlagsOpplysningerDto?,
     val endeligAvgift: AvgiftDto?,
     val avregning: AvregningDto?,
-    val harTrygdeavgiftFraAvgiftssystemet: Boolean?,
+    val harInnbetaltTrygdeavgift: Boolean?,
     val endeligAvgiftValg: String?,
     val harSkjoennsfastsattInntekt: Boolean?,
 )
@@ -317,7 +317,7 @@ data class ÅrsavregningOppdaterRequest(
 data class TidligereGrunnlagsOpplysningerDto(
     val trygdeavgiftsgrunnlag: TrygdeavgiftsgrunnlagDto,
     val avgift: AvgiftDto,
-    val tidligereTrygdeavgiftFraAvgiftssystemet: BigDecimal?,
+    val tidligereInnbetaltTrygdeavgift: BigDecimal?,
     val tidligereÅrsavregningManueltAvgiftBeloep: BigDecimal?,
 )
 
@@ -352,6 +352,6 @@ data class AvregningDto(
     val beregnetAvgiftBelop: BigDecimal?,
     val tidligereFakturertBeloep: BigDecimal?,
     val tilFaktureringBeloep: BigDecimal?,
-    val trygdeavgiftFraAvgiftssystemet: BigDecimal?,
+    val innbetaltTrygdeavgift: BigDecimal?,
     val manueltAvgiftBeloep: BigDecimal?,
 )

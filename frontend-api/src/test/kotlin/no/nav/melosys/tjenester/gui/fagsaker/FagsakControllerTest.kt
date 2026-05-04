@@ -1080,6 +1080,7 @@ internal class FagsakControllerTest {
         private fun mockBehandlingsresultat(behandlingsresultat: Behandlingsresultat) {
             every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultat.hentId()) } returns behandlingsresultat
             every { behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(behandlingsresultat.hentId()) } returns behandlingsresultat
+            every { behandlingsresultatService.hentBehandlingsresultatMedHelseutgiftDekkesPerioder(behandlingsresultat.hentId()) } returns behandlingsresultat
         }
 
         private fun lagDefaultBehandlingResultat(

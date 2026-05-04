@@ -579,12 +579,20 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public void opprettProsessinstansMelosysSøknadMottatt(SkjemaMottattMelding melding) {
+    public void opprettProsessinstansMelosysDigitalSøknadMottatt(SkjemaMottattMelding melding) {
+        opprettSøknadProsessinstans(melding, ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD, null);
+    }
+
+    @Transactional
+    public void opprettProsessinstansEksisterendeDigitalSøknad(SkjemaMottattMelding melding, String saksnummer) {
+        opprettSøknadProsessinstans(melding, ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD, saksnummer);
+    }
+
+    private void opprettSøknadProsessinstans(SkjemaMottattMelding melding, ProsessType prosessType, String saksnummer) {
         String låsReferanse = melding.getSkjemaId().toString();
-        ProsessType prosessType = ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD;
 
         if (prosessinstansRepo.existsByLåsReferanseAndType(låsReferanse, prosessType)) {
-            logger.error("Skjema med skjemaId {} har vært mottatt tidligere. Dette skal ikke skje.", melding.getSkjemaId());
+            logger.error("Skjema med skjemaId {} har vært mottatt tidligere for prosesstype {}.", melding.getSkjemaId(), prosessType);
             return;
         }
 
@@ -592,7 +600,9 @@ public class ProsessinstansService {
             .medType(prosessType)
             .medLåsReferanse(låsReferanse)
             .build();
-        prosessinstans.setData(SØKNAD_MOTTATT_MELDING, melding);
+
+        prosessinstans.setData(DIGITAL_SØKNAD_SKJEMA_ID, melding.getSkjemaId());
+        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
 
         lagre(prosessinstans);
     }

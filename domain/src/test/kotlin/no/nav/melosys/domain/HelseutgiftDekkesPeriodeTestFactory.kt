@@ -18,6 +18,7 @@ object HelseutgiftDekkesPeriodeTestFactory {
         var fomDato = LocalDate.now()
         var tomDato = LocalDate.now().plusDays(1)
         var bostedLandkode = Land_iso2.NO
+        var kilde = PeriodeKilde.MELOSYS
 
         var trygdeavgiftsperioder: MutableSet<Trygdeavgiftsperiode> = mutableSetOf()
 
@@ -33,7 +34,10 @@ object HelseutgiftDekkesPeriodeTestFactory {
             fomDato = this.fomDato,
             tomDato = this.tomDato,
             bostedLandkode = this.bostedLandkode
-        ).apply { trygdeavgiftsperioder.addAll(this@Builder.trygdeavgiftsperioder) }
+        ).apply {
+            kilde = this@Builder.kilde
+            trygdeavgiftsperioder.addAll(this@Builder.trygdeavgiftsperioder)
+        }
     }
 
 }

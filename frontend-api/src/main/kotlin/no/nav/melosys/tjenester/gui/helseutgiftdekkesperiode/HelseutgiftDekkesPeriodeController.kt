@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.helseutgiftdekkesperiode
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
+import no.nav.melosys.domain.PeriodeKilde
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.exception.FunksjonellException
@@ -30,59 +31,89 @@ class HelseutgiftDekkesPeriodeController(
     ): ResponseEntity<HelseutgiftDekkesPeriodeDto> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
-        if (!erGyldigLand(helseutgiftDekkesPeriodeDto.bostedLandkode)) {
-            throw FunksjonellException("Landkode er ikke gyldig")
-        }
+        val bostedLandkode = validerOgParseLandkode(helseutgiftDekkesPeriodeDto.bostedLandkode)
 
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.opprettHelseutgiftDekkesPeriode(
             behandlingID,
             helseutgiftDekkesPeriodeDto.fomDato,
             helseutgiftDekkesPeriodeDto.tomDato,
-            Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode)
+            bostedLandkode
         )
         return ResponseEntity.ok(HelseutgiftDekkesPeriodeDto.av(helseutgiftDekkesPeriode))
     }
 
-    @PutMapping
+    @PutMapping("/{periodeId}")
     fun oppdaterHelseutgiftDekkesPeriode(
         @PathVariable("behandlingID") behandlingID: Long,
+        @PathVariable("periodeId") periodeId: Long,
         @RequestBody helseutgiftDekkesPeriodeDto: HelseutgiftDekkesPeriodeDto
     ): ResponseEntity<HelseutgiftDekkesPeriodeDto> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
-        if (!erGyldigLand(helseutgiftDekkesPeriodeDto.bostedLandkode)) {
-            throw FunksjonellException("Landkode er ikke gyldig")
-        }
+        val bostedLandkode = validerOgParseLandkode(helseutgiftDekkesPeriodeDto.bostedLandkode)
 
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(
             behandlingID,
+            periodeId,
             helseutgiftDekkesPeriodeDto.fomDato,
             helseutgiftDekkesPeriodeDto.tomDato,
-            Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode)
+            bostedLandkode
         )
 
         return ResponseEntity.ok(HelseutgiftDekkesPeriodeDto.av(helseutgiftDekkesPeriode))
     }
 
     @GetMapping
-    fun finnHelseutgiftDekkesPeriode(
+    fun finnHelseutgiftDekkesPerioder(
         @PathVariable("behandlingID") behandlingID: Long
-    ): ResponseEntity<HelseutgiftDekkesPeriodeDto> {
+    ): ResponseEntity<List<HelseutgiftDekkesPeriodeDto>> {
         aksesskontroll.autoriser(behandlingID)
 
-        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandlingID)
-            ?: return ResponseEntity.noContent().build<HelseutgiftDekkesPeriodeDto>()
+        val perioder = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(behandlingID)
 
-        return ResponseEntity.ok(HelseutgiftDekkesPeriodeDto.av(helseutgiftDekkesPeriode))
+        return ResponseEntity.ok(perioder.map { HelseutgiftDekkesPeriodeDto.av(it) })
     }
 
-    private fun erGyldigLand(land: String): Boolean {
-        return Land_iso2.values().any { it.kode == land }
+    @DeleteMapping("/{periodeId}")
+    fun slettHelseutgiftDekkesPeriode(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @PathVariable("periodeId") periodeId: Long
+    ): ResponseEntity<Void> {
+        aksesskontroll.autoriserSkriv(behandlingID)
+
+        helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(behandlingID, periodeId)
+
+        return ResponseEntity.noContent().build()
+    }
+
+    @DeleteMapping
+    fun slettHelseutgiftDekkesPerioder(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @RequestParam("kilde", required = false) kilde: PeriodeKilde?
+    ): ResponseEntity<Void> {
+        aksesskontroll.autoriserSkriv(behandlingID)
+
+        if (kilde != null) {
+            helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriodeMedKilde(behandlingID, kilde)
+        } else {
+            helseutgiftDekkesPeriodeService.slettAlleHelseutgiftDekkesPerioder(behandlingID)
+        }
+
+        return ResponseEntity.noContent().build()
+    }
+
+    private fun validerOgParseLandkode(bostedLandkode: String): Land_iso2 {
+        if (bostedLandkode.isBlank()) {
+            throw FunksjonellException("Bosted landkode er påkrevd")
+        }
+        return Land_iso2.values().firstOrNull { it.kode == bostedLandkode }
+            ?: throw FunksjonellException("Landkode er ikke gyldig")
     }
 }
 
 
 data class HelseutgiftDekkesPeriodeDto(
+    val id: Long? = null,
     val fomDato: LocalDate,
     val tomDato: LocalDate,
     val bostedLandkode: String,
@@ -90,6 +121,7 @@ data class HelseutgiftDekkesPeriodeDto(
     companion object {
         fun av(helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode): HelseutgiftDekkesPeriodeDto {
             return HelseutgiftDekkesPeriodeDto(
+                id = helseutgiftDekkesPeriode.id,
                 fomDato = helseutgiftDekkesPeriode.fomDato,
                 tomDato = helseutgiftDekkesPeriode.tomDato,
                 bostedLandkode = helseutgiftDekkesPeriode.bostedLandkode.kode

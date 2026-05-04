@@ -46,10 +46,12 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         dagensDato: LocalDate = LocalDate.now()
     ): Set<Trygdeavgiftsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-        val helseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode
+        val helseutgiftDekkesPerioder = behandlingsresultat.helseutgiftDekkesPerioder
+
+        require(helseutgiftDekkesPerioder.isNotEmpty()) { "Ingen helseutgift dekkes perioder funnet for behandling $behandlingID" }
 
         EøsPensjonistTrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
-            helseutgiftDekkesPeriode!!,
+            helseutgiftDekkesPerioder.toList(),
             skatteforholdsperioder,
             inntektsperioder,
             behandlingsresultat,
@@ -84,10 +86,29 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         inntektsperioder: List<Inntektsperiode>,
         dagensDato: LocalDate = LocalDate.now()
     ): List<Trygdeavgiftsperiode> {
+        val helseutgiftDekkesPerioder = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(behandlingsresultat.hentBehandling().id)
+        require(helseutgiftDekkesPerioder.isNotEmpty()) { "Ingen helseutgift dekkes perioder funnet" }
+
+        return helseutgiftDekkesPerioder.flatMap { helseutgiftDekkesPeriode ->
+            beregnTrygdeavgiftForEnkeltPeriode(behandlingsresultat, helseutgiftDekkesPeriode, skatteforholdsperioder, inntektsperioder, dagensDato)
+                .onEach { it.grunnlagHelseutgiftDekkesPeriode = helseutgiftDekkesPeriode }
+        }
+    }
+
+    private fun beregnTrygdeavgiftForEnkeltPeriode(
+        behandlingsresultat: Behandlingsresultat,
+        helseutgiftDekkesPeriode: no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode,
+        skatteforholdsperioder: List<SkatteforholdTilNorge>,
+        inntektsperioder: List<Inntektsperiode>,
+        dagensDato: LocalDate
+    ): List<Trygdeavgiftsperiode> {
         // UUID brukes til å identifisere periodene som danner grunnlag for trygdeavgiftsberegningen
-        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandlingsresultat.hentBehandling().id)
-        val helseutgiftDekkesPeriodeDto = helseutgiftDekkesPeriode!!.tilHelseutgiftDekkesPeriodeDto()
-        val inntektsperioderMedUUID = inntektsperioder.map { UUID.randomUUID() to it }
+        val helseutgiftDekkesPeriodeDto = helseutgiftDekkesPeriode.tilHelseutgiftDekkesPeriodeDto()
+        val filtrerteInntektsperioder = inntektsperioder.filter { inntektsperiode ->
+            inntektsperiode.fomDato.isBefore(helseutgiftDekkesPeriode.tomDato) &&
+                inntektsperiode.tomDato.isAfter(helseutgiftDekkesPeriode.fomDato)
+        }
+        val inntektsperioderMedUUID = filtrerteInntektsperioder.map { UUID.randomUUID() to it }
         val skatteforholdsperioderMedUUID = skatteforholdsperioder.map { UUID.randomUUID() to it }
         val skatteforholdsperiodeDtoSet =
             skatteforholdsperioderMedUUID.map { it.second.tilSkatteforholdDto(it.first) }.toSet()
@@ -104,7 +125,12 @@ class EøsPensjonistTrygdeavgiftsberegningService(
             )
         )
 
-        return beregnetTrygdeavgiftList.map { beregnetAvgiftPerPeriode ->
+        return beregnetTrygdeavgiftList
+            .filter { response ->
+                !response.beregnetPeriode.periode.fom.isAfter(helseutgiftDekkesPeriode.tomDato) &&
+                    !response.beregnetPeriode.periode.tom.isBefore(helseutgiftDekkesPeriode.fomDato)
+            }
+            .map { beregnetAvgiftPerPeriode ->
             lagTrygdeavgiftsperiode(
                 beregnetAvgiftPerPeriode,
                 skatteforholdsperioderMedUUID,
@@ -184,7 +210,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
     @Transactional(readOnly = true)
     fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-            .hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder
+            .eøsPensjonistTrygdeavgiftsperioder
     }
 
 

@@ -21,30 +21,35 @@ object SkattepliktigTrygdeavgiftsperiodeSplitter {
         val totalFom = avgiftspliktigperiode.fom
         val totalTom = avgiftspliktigperiode.tom
 
+        val filtrertFom = if (fraOgMedÅr != null && totalFom.year < fraOgMedÅr) LocalDate.of(fraOgMedÅr, 1, 1) else totalFom
+
+        val skatteforhold = SkatteforholdTilNorge().apply {
+            fomDato = filtrertFom
+            tomDato = totalTom
+            skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+        }
+
         return (totalFom.year..totalTom.year)
             .filter { år -> fraOgMedÅr == null || år >= fraOgMedÅr }
             .map { år ->
                 val periodeFom = if (totalFom.year == år) totalFom else LocalDate.of(år, 1, 1)
                 val periodeTom = if (totalTom.year == år) totalTom else LocalDate.of(år, 12, 31)
-                opprettSkattepliktigTrygdeavgiftsperiode(avgiftspliktigperiode, periodeFom, periodeTom)
+                opprettSkattepliktigTrygdeavgiftsperiode(avgiftspliktigperiode, periodeFom, periodeTom, skatteforhold)
             }
     }
 
     private fun opprettSkattepliktigTrygdeavgiftsperiode(
         avgiftspliktigperiode: AvgiftspliktigPeriode,
         fom: LocalDate,
-        tom: LocalDate
+        tom: LocalDate,
+        skatteforhold: SkatteforholdTilNorge
     ): Trygdeavgiftsperiode {
         val trygdeavgiftsperiode = Trygdeavgiftsperiode(
             periodeFra = fom,
             periodeTil = tom,
             trygdesats = BigDecimal.ZERO,
             trygdeavgiftsbeløpMd = Penger(BigDecimal.ZERO),
-            grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
-                fomDato = fom
-                tomDato = tom
-                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-            }
+            grunnlagSkatteforholdTilNorge = skatteforhold
         )
         trygdeavgiftsperiode.addGrunnlag(avgiftspliktigperiode)
         return trygdeavgiftsperiode

@@ -50,7 +50,7 @@ class EøsPensjonistTrygdeavgiftsberegningValidatorTest {
         if (expectedError != null) {
             shouldThrow<FunksjonellException> {
                 EøsPensjonistTrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
-                    behandlingsresultat.helseutgiftDekkesPeriode!!,
+                    behandlingsresultat.helseutgiftDekkesPerioder.toList(),
                     testCase.skatteforholdsperioder,
                     testCase.inntektsperioder,
                     behandlingsresultat,
@@ -60,7 +60,7 @@ class EøsPensjonistTrygdeavgiftsberegningValidatorTest {
         } else {
             shouldNotThrow<FunksjonellException> {
                 EøsPensjonistTrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
-                    behandlingsresultat.helseutgiftDekkesPeriode!!,
+                    behandlingsresultat.helseutgiftDekkesPerioder.toList(),
                     testCase.skatteforholdsperioder,
                     testCase.inntektsperioder,
                     behandlingsresultat,
@@ -69,6 +69,8 @@ class EøsPensjonistTrygdeavgiftsberegningValidatorTest {
             }
         }
     }
+
+
 
     @Test
     fun `ny vurdering - inntekt og skatteperioder skal kun dekke inneværende og fremtidige perioder`() {
@@ -101,7 +103,7 @@ class EøsPensjonistTrygdeavgiftsberegningValidatorTest {
 
         shouldNotThrow<FunksjonellException> {
             EøsPensjonistTrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
-                behandlingsresultat.helseutgiftDekkesPeriode!!,
+                behandlingsresultat.helseutgiftDekkesPerioder.toList(),
                 testCase.skatteforholdsperioder,
                 testCase.inntektsperioder,
                 behandlingsresultat,
