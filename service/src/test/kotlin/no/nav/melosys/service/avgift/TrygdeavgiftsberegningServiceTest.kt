@@ -113,6 +113,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             }
 
             every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
             every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
             trygdeavgiftService.hentTrygdeavgiftsperioder(BEHANDLING_ID).shouldNotBeNull().shouldBeEmpty()
@@ -143,6 +144,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
                 every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
                 every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -150,11 +152,20 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
+                            beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                         )
                     )
                 )
@@ -185,7 +196,8 @@ internal class TrygdeavgiftsberegningServiceTest {
                             grunnlagSkatteforholdTilNorge = skatteforhold { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG },
                         ),
                         ignorePrivateFields = false,
-                        property = Trygdeavgiftsperiode::id
+                        Trygdeavgiftsperiode::id,
+                        Trygdeavgiftsperiode::grunnlagListe
                     )
                 verify { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
 
@@ -214,6 +226,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
                 every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
                 every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -221,11 +234,20 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
+                            beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                         )
                     )
                 )
@@ -279,6 +301,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
                 every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
                 every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -286,11 +309,20 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
+                            beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                         )
                     )
                 )
@@ -344,6 +376,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
                 every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
                 every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -351,11 +384,20 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
+                            beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                         )
                     )
                 )
@@ -402,6 +444,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
 
@@ -454,6 +497,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 val resultat = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
@@ -520,6 +564,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 val resultat = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
@@ -581,6 +626,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -588,11 +634,20 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(0.0), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
+                            beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                         )
                     )
                 )
@@ -654,6 +709,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -661,11 +717,20 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(0.0), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
+                            beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                         )
                     )
                 )
@@ -727,6 +792,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -734,11 +800,20 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(0.0), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
+                            beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                         )
                     )
                 )
@@ -799,6 +874,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
                 every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
@@ -807,11 +883,20 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
+                            beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                         )
                     )
                 )
@@ -879,6 +964,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 val skatteforholdsperioder = listOf(skatteforhold)
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
                 every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
                 every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -886,11 +972,20 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(fomIFjor, tomIFjor), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
+                            beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                         )
                     )
                 )
@@ -919,7 +1014,8 @@ internal class TrygdeavgiftsberegningServiceTest {
                             grunnlagSkatteforholdTilNorge = skatteforhold,
                         ),
                         ignorePrivateFields = false,
-                        property = Trygdeavgiftsperiode::id
+                        Trygdeavgiftsperiode::id,
+                        Trygdeavgiftsperiode::grunnlagListe
                     )
 
 
@@ -968,6 +1064,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 shouldThrow<FunksjonellException> {
@@ -1020,6 +1117,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 shouldThrow<FunksjonellException> {
@@ -1065,6 +1163,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
 
@@ -1107,6 +1206,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 shouldThrow<FunksjonellException> {
@@ -1158,6 +1258,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -1165,11 +1266,20 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsberegningResponse(
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(123.0), NOK)
-                            ), TrygdeavgiftsgrunnlagDto(
+                            ),
+                            TrygdeavgiftsgrunnlagDto(
                                 idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
-                            )
+                            ),
+                            grunnlagListe = listOf(
+                                TrygdeavgiftsgrunnlagDto(
+                                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                    notSoRandomUuid,
+                                    notSoRandomUuid
+                                )
+                            ),
+                            beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                         )
                     )
                 )
@@ -1205,6 +1315,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 shouldThrow<FunksjonellException> {
@@ -1246,6 +1357,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 shouldThrow<FunksjonellException> {
@@ -1285,6 +1397,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 shouldThrow<FunksjonellException> {
@@ -1330,6 +1443,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 behandlingsresultat.medlemskapsperioder.first().fom = null
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 shouldThrow<FunksjonellException> {
@@ -1380,6 +1494,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 shouldThrow<FunksjonellException> {
@@ -2257,6 +2372,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             val forventetMånedsavgift = BigDecimal("500.00")
 
             every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
             every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
             every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
 
@@ -2272,7 +2388,15 @@ internal class TrygdeavgiftsberegningServiceTest {
                             idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                             notSoRandomUuid,
                             notSoRandomUuid
-                        )
+                        ),
+                        grunnlagListe = listOf(
+                            TrygdeavgiftsgrunnlagDto(
+                                idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                notSoRandomUuid,
+                                notSoRandomUuid
+                            )
+                        ),
+                        beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                     )
                 )
             )
@@ -2342,6 +2466,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             }
 
             every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
             every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
             every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
 
@@ -2357,7 +2482,15 @@ internal class TrygdeavgiftsberegningServiceTest {
                             idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
                             notSoRandomUuid,
                             notSoRandomUuid
-                        )
+                        ),
+                        grunnlagListe = listOf(
+                            TrygdeavgiftsgrunnlagDto(
+                                idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                                notSoRandomUuid,
+                                notSoRandomUuid
+                            )
+                        ),
+                        beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                     )
                 )
             )

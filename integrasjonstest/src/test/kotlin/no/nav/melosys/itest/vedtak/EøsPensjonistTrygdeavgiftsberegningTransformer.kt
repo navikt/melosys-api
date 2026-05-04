@@ -4,6 +4,7 @@ import tools.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import java.time.LocalDate
 import java.util.*
@@ -39,18 +40,21 @@ class EøsPensjonistTrygdeavgiftsberegningTransformer : ResponseTransformerV2 {
                 NOK
             ) else PengerDto(0.toBigDecimal(), NOK)
 
+            val grunnlag = EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                DatoPeriodeDto(fom = mappetDatoFom, tom = mappetDatoTom),
+                UUID.fromString(skatteforholdsperioderUuid),
+                UUID.fromString(inntektsperioderUuid)
+            )
             val responsBodyFraTrygdeavgiftsberegning = listOf(
                 EøsPensjonistTrygdeavgiftsberegningResponse(
-                    TrygdeavgiftsperiodeDto(
+                    beregnetPeriode = TrygdeavgiftsperiodeDto(
                         DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1)),
                         sats,
                         månedsavgift
                     ),
-                    EøsPensjonistTrygdeavgiftsgrunnlagDto(
-                        DatoPeriodeDto(fom = mappetDatoFom, tom = mappetDatoTom),
-                        UUID.fromString(skatteforholdsperioderUuid),
-                        UUID.fromString(inntektsperioderUuid)
-                    )
+                    grunnlag = grunnlag,
+                    grunnlagListe = listOf(grunnlag),
+                    beregningsregel = Avgiftsberegningsregel.ORDINÆR
                 )
             )
 

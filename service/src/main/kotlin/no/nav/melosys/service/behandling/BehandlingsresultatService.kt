@@ -79,6 +79,10 @@ class BehandlingsresultatService(
         behandlingsresultatRepository.findWithHelseutgiftDekkesPerioderById(behandlingsid)
             .orElseThrowIkkeFunnetException(behandlingsid)
 
+    fun hentBehandlingsresultatMedTrygdeavgiftsperioder(behandlingsid: Long): Behandlingsresultat =
+        behandlingsresultatRepository.findWithTrygdeavgiftsperioderAndGrunnlagById(behandlingsid)
+            .orElseThrowIkkeFunnetException(behandlingsid)
+
     fun lagre(resultat: Behandlingsresultat): Behandlingsresultat = behandlingsresultatRepository.save(resultat)
 
     fun lagreOgFlush(resultat: Behandlingsresultat): Behandlingsresultat = behandlingsresultatRepository.saveAndFlush(resultat)

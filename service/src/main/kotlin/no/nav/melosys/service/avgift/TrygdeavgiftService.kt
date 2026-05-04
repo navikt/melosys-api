@@ -31,13 +31,13 @@ class TrygdeavgiftService(
 
     @Transactional(readOnly = true)
     fun hentTrygdeavgiftsperioder(behandlingID: Long): Set<Trygdeavgiftsperiode> {
-        return behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        return behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(behandlingID)
             .trygdeavgiftsperioder
     }
 
     @Transactional(readOnly = true)
     fun hentTrygdeavgiftsperioderForEosPensjonist(behandlingID: Long): Set<Trygdeavgiftsperiode> {
-        return behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        return behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(behandlingID)
             .eøsPensjonistTrygdeavgiftsperioder
     }
 
