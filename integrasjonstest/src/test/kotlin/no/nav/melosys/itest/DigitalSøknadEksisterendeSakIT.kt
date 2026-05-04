@@ -5,9 +5,12 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.brev.DokgenBrevbestilling
+import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
@@ -92,7 +95,7 @@ class DigitalSøknadEksisterendeSakIT(
 
         andreProsessinstans.type shouldBe ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
         andreProsessinstans.status shouldBe ProsessStatus.FERDIG
-        andreProsessinstans.sistFullførtSteg shouldBe ProsessSteg.SEND_SAKSNUMMER_TIL_MELOSYS_SKJEMA_API
+        andreProsessinstans.sistFullførtSteg shouldBe ProsessSteg.SEND_FORVALTNINGSMELDING
         andreProsessinstans.hendelser.shouldHaveSize(0)
 
         // Verifiser at skjemaId ble lagret
@@ -113,6 +116,19 @@ class DigitalSøknadEksisterendeSakIT(
         val mottatteOpplysninger = behandling.mottatteOpplysninger.shouldNotBeNull()
         val soeknad = mottatteOpplysninger.mottatteOpplysningerData as Soeknad
         soeknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere shouldContainExactly listOf("ANDRE-ORG")
+
+        // Verifiser at forvaltningsmelding ble bestilt for begge søknader (default skjemadel = ARBEIDSTAKERS_DEL → BRUKER)
+        await.atMost(Duration.ofSeconds(5)).until {
+            prosessinstansRepository.findAll().count { it.type == ProsessType.OPPRETT_OG_DISTRIBUER_BREV } == 2
+        }
+        val brevProsessinstanser = prosessinstansRepository.findAll()
+            .filter { it.type == ProsessType.OPPRETT_OG_DISTRIBUER_BREV }
+        brevProsessinstanser shouldHaveSize 2
+        brevProsessinstanser.forEach { brev ->
+            brev.hentData<Mottakerroller>(ProsessDataKey.MOTTAKER) shouldBe Mottakerroller.BRUKER
+            brev.hentData<DokgenBrevbestilling>(ProsessDataKey.BREVBESTILLING)
+                .produserbartdokument shouldBe Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD
+        }
     }
 
     private fun stubSkjemaEndpoints(skjemaId: UUID, søknadsdata: UtsendtArbeidstakerSkjemaM2MDto) {
