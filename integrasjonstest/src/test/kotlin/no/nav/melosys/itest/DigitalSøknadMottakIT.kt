@@ -5,7 +5,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.melosys.domain.brev.Brevbestilling
+import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -135,7 +135,7 @@ class DigitalSøknadMottakIT(
             .single { it.type == ProsessType.OPPRETT_OG_DISTRIBUER_BREV }
         brevProsessinstans.behandling?.id shouldBe behandling.id
         brevProsessinstans.hentData<Mottakerroller>(ProsessDataKey.MOTTAKER) shouldBe Mottakerroller.BRUKER
-        brevProsessinstans.hentData<Brevbestilling>(ProsessDataKey.BREVBESTILLING)
+        brevProsessinstans.hentData<DokgenBrevbestilling>(ProsessDataKey.BREVBESTILLING)
             .produserbartdokument shouldBe Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD
     }
 }
