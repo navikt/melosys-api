@@ -182,7 +182,9 @@ object ProsessflytDefinisjon {
             SEND_VEDTAK_UTLAND,
             DISTRIBUER_JOURNALPOST_UTLAND,
             AVSLUTT_SAK_OG_BEHANDLING,
-            SEND_MELDING_OM_VEDTAK
+            SEND_MELDING_OM_VEDTAK,
+            OPPRETTE_AARSAVREGNING_ENDRING,
+            RESET_ÅPNE_ÅRSAVREGNINGER,
         ),
         IVERKSETT_EOS_PENSJONIST_AVGIFT to ProsessFlyt(
             prosessType = IVERKSETT_EOS_PENSJONIST_AVGIFT,

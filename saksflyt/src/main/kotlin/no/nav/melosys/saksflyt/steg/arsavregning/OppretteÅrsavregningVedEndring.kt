@@ -33,8 +33,12 @@ class OppretteÅrsavregningVedEndring(
     }
 
     // Er egne oppgaver som skal legge til FTRL.penjonist, EØS.pensjonist|offentlig-tjenesteperson år årsavregning er ok
-    fun harTemaOgTypeSomSkalBehandles(behandling: Behandling, fagsak: Fagsak) =
-        behandling.tema == Behandlingstema.YRKESAKTIV && fagsak.type == Sakstyper.FTRL
+    fun harTemaOgTypeSomSkalBehandles(behandling: Behandling, fagsak: Fagsak) : Boolean {
+        val ftrl_Yrkesaktiv = behandling.tema == Behandlingstema.YRKESAKTIV && fagsak.type == Sakstyper.FTRL
+        val eøs_OffentligTjenesteperson = behandling.tema == Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY && fagsak.type == Sakstyper.EU_EOS
+
+        return ftrl_Yrkesaktiv || eøs_OffentligTjenesteperson
+    }
 
     override fun utfør(prosessinstans: Prosessinstans) {
         if (!unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
