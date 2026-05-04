@@ -320,12 +320,14 @@ public class BehandlingService {
     }
 
 
+    @Transactional
     public void avsluttBehandling(long behandlingId) {
         Behandling behandling = hentBehandling(behandlingId);
 
         avsluttBehandling(behandling);
     }
 
+    @Transactional
     public void avsluttBehandling(long behandlingId, Behandlingsresultattyper behandlingsresultattype) {
         if (behandlingsresultattype != null) {
             var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
@@ -365,6 +367,7 @@ public class BehandlingService {
         }
     }
 
+    @Transactional
     public void avsluttAndregangsbehandling(long behandlingId, Behandlingsresultattyper nyBehandlingsResultatType) {
         Behandling behandling = hentBehandling(behandlingId);
         avsluttAndregangsbehandling(behandling, nyBehandlingsResultatType);
