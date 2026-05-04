@@ -122,6 +122,11 @@ open class Behandlingsresultat : RegistreringsInfo() {
         medlemskapsperiode.behandlingsresultat = this
     }
 
+    fun addLovvalgsperiode(lovvalgsperiode: Lovvalgsperiode) {
+        lovvalgsperioder.add(lovvalgsperiode)
+        lovvalgsperiode.behandlingsresultat = this
+    }
+
     fun hentBehandling() = behandling ?: error("behandling er påkrevd for Behandlingsresultat")
 
     fun hentVedtakMetadata() = vedtakMetadata ?: error("vedtakMetadata er påkrevd for Behandlingsresultat")

@@ -1,7 +1,9 @@
 package no.nav.melosys.saksflyt.steg.arsavregning
 
 import io.getunleash.FakeUnleash
+import io.kotest.matchers.shouldBe
 import io.mockk.Called
+import io.mockk.clearMocks
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -50,6 +52,7 @@ class OppretteÅrsavregningVedEndringTest {
 
     @BeforeEach
     fun setUp() {
+        clearMocks(prosessInstansService, årsavregningService, behandlingsresultatService)
         val fakeUnleash = FakeUnleash().apply { enableAll() }
         oppretteÅrsavregningVedEndring = OppretteÅrsavregningVedEndring(
             årsavregningService,
@@ -381,8 +384,113 @@ class OppretteÅrsavregningVedEndringTest {
         confirmVerified(prosessInstansService)
     }
 
+    @Test
+    fun `oppretter årsavregninger for EØS offentlig tjenesteperson førstegangsbehandling tilbake i tid`() {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            behandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+                fagsak {
+                    saksnummer = SAKSNUMMER
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                }
+            }
+            lovvalgsperiode {
+                fom = MARS2026.minusYears(2)
+                tom = MARS2026.plusYears(1)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                dekning = Trygdedekninger.FULL_DEKNING
+            }
+        }
 
-    @Disabled("Egen jira sak for eøs saker")
+        val prosessinstans = Prosessinstans.forTest {
+            behandling = behandlingsresultat.behandling
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+
+        oppretteÅrsavregningVedEndring.utfør(prosessinstans)
+
+        verify {
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
+                SAKSNUMMER, "2024", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+            )
+        }
+        verify {
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
+                SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+            )
+        }
+        confirmVerified(prosessInstansService)
+    }
+
+    @Test
+    fun `oppretter ikke årsavregninger for EØS offentlig tjenesteperson kun frem i tid`() {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            behandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+                fagsak {
+                    saksnummer = SAKSNUMMER
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                }
+            }
+            lovvalgsperiode {
+                fom = MARS2026
+                tom = MARS2026.plusYears(1)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                dekning = Trygdedekninger.FULL_DEKNING
+            }
+        }
+
+        val prosessinstans = Prosessinstans.forTest {
+            behandling = behandlingsresultat.behandling
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+
+        oppretteÅrsavregningVedEndring.utfør(prosessinstans)
+
+        verify { prosessInstansService wasNot Called }
+    }
+
+    @Test
+    fun `harTemaOgTypeSomSkalBehandles returnerer true for EØS offentlig tjenesteperson`() {
+        val behandling = Behandlingsresultat.forTest {
+            behandling {
+                tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+                fagsak { type = Sakstyper.EU_EOS }
+            }
+        }.behandling!!
+
+        oppretteÅrsavregningVedEndring.harTemaOgTypeSomSkalBehandles(
+            behandling, behandling.fagsak
+        ) shouldBe true
+    }
+
+    @Test
+    fun `harTemaOgTypeSomSkalBehandles returnerer false for EØS pensjonist`() {
+        val behandling = Behandlingsresultat.forTest {
+            behandling {
+                tema = Behandlingstema.PENSJONIST
+                fagsak { type = Sakstyper.EU_EOS }
+            }
+        }.behandling!!
+
+        oppretteÅrsavregningVedEndring.harTemaOgTypeSomSkalBehandles(
+            behandling, behandling.fagsak
+        ) shouldBe false
+    }
+
+
     @ParameterizedTest(name = "{0}")
     @MethodSource("endringITidligereLovvalgsperiodeScenarios")
     fun `ny vurdering lovvalgsperiode scenario`(scenario: PeriodeEndringScenario) {
@@ -391,9 +499,11 @@ class OppretteÅrsavregningVedEndringTest {
             behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
                 fagsak {
                     saksnummer = SAKSNUMMER
                     type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
                 }
             }
             lovvalgsperiode {
@@ -410,9 +520,11 @@ class OppretteÅrsavregningVedEndringTest {
             behandling {
                 id = 2L
                 type = Behandlingstyper.NY_VURDERING
+                tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
                 fagsak {
                     saksnummer = SAKSNUMMER
                     type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
                 }
                 opprinneligBehandling = opprinneligBehandlingsresultat.behandling
             }
@@ -628,8 +740,8 @@ class OppretteÅrsavregningVedEndringTest {
                     dekning = Trygdedekninger.FULL_DEKNING
                 )
             ),
-            forventedeÅr = listOf("2024", "2025"),
-            beskrivelse = "Endring i fom dato innenfor samme år tidligere - 2 årsavregninger"
+            forventedeÅr = listOf("2024"),
+            beskrivelse = "Endring i fom dato innenfor samme år tidligere - 1 årsavregning"
         ),
         PeriodeEndringScenario(
             ny = listOf(
