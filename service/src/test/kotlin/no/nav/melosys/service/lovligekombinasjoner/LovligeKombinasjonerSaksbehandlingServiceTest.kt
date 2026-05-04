@@ -15,6 +15,7 @@ import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -1460,6 +1461,29 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingsstatus.AVVENT_FAGLIG_AVKLARING
         )
         muligeStatuser shouldNotContain Behandlingsstatus.AVSLUTTET
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak_videresendt_returnererKunHenvendelse`() {
+        val behandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG) {
+            status = Behandlingsstatus.AVSLUTTET
+            fagsak {
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                status = Saksstatuser.VIDERESENDT
+            }
+        }
+        every { fagsakService.hentFagsak(behandling.fagsak.saksnummer) } returns behandling.fagsak
+
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            behandling.fagsak.saksnummer,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER
+        )
+
+
+        muligeTyper shouldContainExactlyInAnyOrder listOf(Behandlingstyper.HENVENDELSE)
     }
 
     /**

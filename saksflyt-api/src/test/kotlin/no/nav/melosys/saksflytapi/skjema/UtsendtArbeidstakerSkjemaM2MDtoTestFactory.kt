@@ -10,6 +10,8 @@ import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeid
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaDto
 import no.nav.melosys.skjema.types.common.SkjemaStatus
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
+import no.nav.melosys.skjema.types.vedlegg.VedleggDto
+import java.time.Instant
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -32,6 +34,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
         var referanseId: String = "MEL-${UUID.randomUUID()}"
         var innsenderFnr: String? = null
         var innsendtTidspunkt: LocalDateTime = LocalDateTime.now()
+        var vedlegg: List<VedleggDto> = emptyList()
 
         private var kobletSkjemaBuilder: ArbeidsgiverSkjemaBuilder? = null
 
@@ -56,9 +59,28 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
                 tidligereInnsendteSkjema = emptyList(),
                 referanseId = referanseId,
                 innsendtTidspunkt = innsendtTidspunkt,
-                innsenderFnr = innsenderFnr ?: fnr
+                innsenderFnr = innsenderFnr ?: fnr,
+                vedlegg = vedlegg
             )
         }
+
+        fun medVedlegg(vararg vedleggDto: VedleggDto) {
+            vedlegg = vedleggDto.toList()
+        }
+
+        fun lagVedleggDto(
+            id: UUID = UUID.randomUUID(),
+            filnavn: String = "vedlegg-$id.pdf",
+            filtype: no.nav.melosys.skjema.types.vedlegg.VedleggFiltype =
+                no.nav.melosys.skjema.types.vedlegg.VedleggFiltype.PDF,
+            filstorrelse: Long = 1024
+        ) = VedleggDto(
+            id = id,
+            filnavn = filnavn,
+            filtype = filtype,
+            filstorrelse = filstorrelse,
+            opprettetDato = Instant.now()
+        )
 
         private fun lagSkjemaDto(
             skjemadel: Skjemadel,

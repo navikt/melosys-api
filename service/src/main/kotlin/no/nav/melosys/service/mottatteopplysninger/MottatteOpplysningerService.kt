@@ -236,6 +236,28 @@ class MottatteOpplysningerService(
         mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger)
     }
 
+    /**
+     * Oppdaterer sidemeny-feltene på eksisterende MottatteOpplysninger fra en ny Soeknad.
+     * Brukes når ny digital søknad mottas på åpen behandling (siste-vinner-regel).
+     *
+     * Felter som ikke mappes fra søknaden (f.eks. loennOgGodtgjoerelse, utenlandsoppdraget)
+     * beholdes urørt.
+     */
+    @Transactional
+    fun oppdaterMottatteOpplysningerFraSøknad(behandlingID: Long, nySoeknad: Soeknad) {
+        val mottatteOpplysninger = hentMottatteOpplysninger(behandlingID).apply {
+            mottatteOpplysningerData.periode = nySoeknad.periode
+            mottatteOpplysningerData.soeknadsland = nySoeknad.soeknadsland
+            mottatteOpplysningerData.juridiskArbeidsgiverNorge = nySoeknad.juridiskArbeidsgiverNorge
+            mottatteOpplysningerData.foretakUtland = nySoeknad.foretakUtland
+            mottatteOpplysningerData.arbeidPaaLand = nySoeknad.arbeidPaaLand
+            mottatteOpplysningerData.maritimtArbeid = nySoeknad.maritimtArbeid
+            mottatteOpplysningerData.luftfartBaser = nySoeknad.luftfartBaser
+        }
+        MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger)
+        mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger)
+    }
+
     @Transactional
     fun slettOpplysninger(behandlingID: Long) {
         val behandling = behandlingService.hentBehandling(behandlingID)

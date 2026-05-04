@@ -1,7 +1,7 @@
 package no.nav.melosys.service.helseutgiftdekkesperiode
 
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
-import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeKilde
+import no.nav.melosys.domain.PeriodeKilde
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.HelseutgiftDekkesPeriodeRepository
@@ -30,7 +30,10 @@ class HelseutgiftDekkesPeriodeService(
             fomDato = fomDato,
             tomDato = tomDato,
             bostedLandkode = bostedLandkode
-        )
+        ).apply {
+            val harEksisterendePeriode = behandlingsresultat.helseutgiftDekkesPerioder.isNotEmpty()
+            kilde = if (harEksisterendePeriode) PeriodeKilde.AVGIFT_SYSTEMET else PeriodeKilde.MELOSYS
+        }
 
         return helseutgiftDekkesPeriodeRepository.save(nyHelseutgiftDekkesPeriode)
     }
@@ -52,7 +55,7 @@ class HelseutgiftDekkesPeriodeService(
         val behandlingsresultat = eksisterendePeriode.behandlingsresultat
 
         if (!behandlingsresultat.hentBehandling().erNyVurdering()) {
-            eksisterendePeriode.clearTrygdeavgiftsperioder()
+            behandlingsresultat.clearTrygdeavgiftPåHelseutgiftDekkesPerioder()
         }
 
         return helseutgiftDekkesPeriodeRepository.save(eksisterendePeriode)
@@ -75,8 +78,17 @@ class HelseutgiftDekkesPeriodeService(
     @Transactional
     fun slettHelseutgiftDekkesPeriode(behandlingID: Long, periodeId: Long) {
         val periode = hentOgValiderPeriode(periodeId, behandlingID)
-        periode.clearTrygdeavgiftsperioder()
-        helseutgiftDekkesPeriodeRepository.delete(periode)
+        val behandlingsresultat = periode.behandlingsresultat
+
+        // Må fjerne trygdeavgiftsperioder på ALLE helseutgift-perioder for denne behandlingen,
+        // fordi de kan dele inntektsperioder/skatteforhold via CascadeType.ALL.
+        // Ellers får vi FK-brudd (ORA-02292) når orphanRemoval prøver å slette delte rader.
+        behandlingsresultat.clearTrygdeavgiftPåHelseutgiftDekkesPerioder()
+
+        // Fjerner fra samlingen — orphanRemoval på Behandlingsresultat.helseutgiftDekkesPerioder
+        // sørger for at Hibernate sletter perioden fra databasen
+        behandlingsresultat.helseutgiftDekkesPerioder.remove(periode)
+        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
     }
 
     @Transactional
@@ -87,6 +99,17 @@ class HelseutgiftDekkesPeriodeService(
         behandlingsresultatService.lagreOgFlush(behandlingsresultat)
     }
 
+    @Transactional
+    fun slettHelseutgiftDekkesPeriodeMedKilde(behandlingID: Long, kilde: PeriodeKilde) {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        val perioderMedKilde = behandlingsresultat.helseutgiftDekkesPerioder.filter { it.kilde == kilde }
+        if (perioderMedKilde.isEmpty()) return
+
+        behandlingsresultat.clearTrygdeavgiftPåHelseutgiftDekkesPerioder()
+        perioderMedKilde.forEach { behandlingsresultat.helseutgiftDekkesPerioder.remove(it) }
+        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+    }
+
     private fun hentOgValiderPeriode(periodeId: Long, behandlingID: Long): HelseutgiftDekkesPeriode {
         val ikkeFunnetMelding = "Finner ingen helseutgift-periode med id: $periodeId"
 
@@ -94,10 +117,6 @@ class HelseutgiftDekkesPeriodeService(
             .orElseThrow { IkkeFunnetException(ikkeFunnetMelding) }
 
         if (periode.behandlingsresultat.hentId() != behandlingID) {
-            throw IkkeFunnetException(ikkeFunnetMelding)
-        }
-
-        if (periode.kilde != HelseutgiftDekkesPeriodeKilde.MELOSYS) {
             throw IkkeFunnetException(ikkeFunnetMelding)
         }
 

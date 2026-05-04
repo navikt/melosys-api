@@ -66,7 +66,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: pre-deploy
-        uses: navikt/digihot-deploy/actions/pre-deploy@v2
+        uses: navikt/digihot-deploy/actions/pre-deploy@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: deploy new Unleash Apikey to ${{github.event.inputs.environment}}
@@ -106,12 +106,12 @@ jobs:
           SLACK_MESSAGE: ${{ env.COMMIT_MSG }}
       - name: post-deploy
         if: steps.deployment-check.outcome == 'success'
-        uses: navikt/digihot-deploy/actions/post-deploy@v2
+        uses: navikt/digihot-deploy/actions/post-deploy@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: draft release
         if: steps.deployment-check.outcome == 'success'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

@@ -161,4 +161,50 @@ class MelosysSkjemaApiClientTest(
                 .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
         )
     }
+
+    @Test
+    fun `hentVedleggInnhold - returnerer raw bytes fra M2M-endepunkt`() {
+        val skjemaId = UUID.randomUUID()
+        val vedleggId = UUID.randomUUID()
+        val pdfBytes = byteArrayOf(0x25, 0x50, 0x44, 0x46, 0x2D)
+
+        wireMockServer.stubFor(
+            WireMock.get(WireMock.urlPathEqualTo("/m2m/api/skjema/$skjemaId/vedlegg/$vedleggId/innhold"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE)
+                        .withBody(pdfBytes)
+                )
+        )
+
+        val result = melosysSkjemaApiClient.hentVedleggInnhold(skjemaId, vedleggId)
+
+        result shouldBe pdfBytes
+
+        wireMockServer.verify(
+            WireMock.getRequestedFor(WireMock.urlPathEqualTo("/m2m/api/skjema/$skjemaId/vedlegg/$vedleggId/innhold"))
+                .withHeader("Authorization", WireMock.matching("Bearer .+"))
+        )
+    }
+
+    @Test
+    fun `registrerSaksnummer - sender POST med saksnummer`() {
+        val skjemaId = UUID.randomUUID()
+        val saksnummer = "MEL-1234"
+
+        wireMockServer.stubFor(
+            WireMock.post(WireMock.urlPathEqualTo("/m2m/api/skjema/$skjemaId/saksnummer"))
+                .willReturn(WireMock.aResponse().withStatus(204))
+        )
+
+        melosysSkjemaApiClient.registrerSaksnummer(skjemaId, saksnummer)
+
+        wireMockServer.verify(
+            WireMock.postRequestedFor(WireMock.urlPathEqualTo("/m2m/api/skjema/$skjemaId/saksnummer"))
+                .withHeader("Authorization", WireMock.matching("Bearer .+"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withRequestBody(WireMock.matchingJsonPath("$.saksnummer", WireMock.equalTo(saksnummer)))
+        )
+    }
 }
