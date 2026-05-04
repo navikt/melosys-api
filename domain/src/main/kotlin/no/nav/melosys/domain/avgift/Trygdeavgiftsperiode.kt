@@ -61,7 +61,7 @@ class Trygdeavgiftsperiode(
 
     @OneToMany(mappedBy = "trygdeavgiftsperiode", cascade = [CascadeType.PERSIST, CascadeType.MERGE], fetch = FetchType.LAZY)
     @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
-    val grunnlagListe: MutableList<TrygdeavgiftsperiodeGrunnlag> = mutableListOf()
+    val grunnlagListe: MutableSet<TrygdeavgiftsperiodeGrunnlag> = mutableSetOf()
 
     fun hentGrunnlagMedlemskapsperiode(): Medlemskapsperiode = grunnlagMedlemskapsperiode ?: error("grunnlagMedlemskapsperiode er null")
 
