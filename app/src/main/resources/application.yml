@@ -102,6 +102,14 @@ management:
               grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
               scope: api://${NAIS_CLUSTER_NAME}.pdl.${APP_NAME_PDL}/.default
               token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+            sak:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: ${AZURE_APP_CLIENT_ID}
+                client-secret: ${AZURE_APP_CLIENT_SECRET}
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://${NAIS_CLUSTER_NAME}.teamdokumenthandtering.${APP_NAME_SAK}/.default
+              token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
             saf:
               authentication:
                 client-auth-method: client_secret_basic
