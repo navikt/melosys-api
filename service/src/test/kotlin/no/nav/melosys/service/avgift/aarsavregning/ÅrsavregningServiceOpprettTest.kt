@@ -9,7 +9,10 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.*
+import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.forTest
+import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -247,6 +250,108 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             tidligereÅrsavregningmanueltAvgiftBeloep = null,
             harSkjoennsfastsattInntektsgrunnlag = false
         )
+    }
+
+    @Test
+    fun `opprettÅrsavregning - ny vurdering som fjerner perioden for året replikerer ingen medlemskapsperioder`() {
+        val fagsak = Fagsak.forTest {
+            saksnummer = "123456"
+            behandling {
+                id = 1L
+                type = Behandlingstyper.ÅRSAVREGNING
+                registrertDato = LocalDate.of(2025, 3, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+                status = Behandlingsstatus.AVSLUTTET
+            }
+            behandling {
+                id = 2L
+                type = Behandlingstyper.NY_VURDERING
+                registrertDato = LocalDate.of(2025, 6, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+                status = Behandlingsstatus.AVSLUTTET
+            }
+            behandling {
+                id = 3L
+                type = Behandlingstyper.ÅRSAVREGNING
+                registrertDato = LocalDate.of(2025, 7, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+                status = Behandlingsstatus.OPPRETTET
+            }
+            tema = Sakstemaer.UNNTAK
+        }
+
+        val tidligereÅrsavregningsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
+            årsavregning {
+                id = 112
+                aar = 2025
+                innbetaltTrygdeavgift = BigDecimal("5000")
+            }
+            registrertDato = LocalDate.of(2025, 3, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            vedtakMetadata {
+                vedtaksdato = LocalDate.of(2025, 3, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            behandling = fagsak.behandlinger[0]
+
+            medlemskapsperiode("2025-01-01", "2025-12-31")
+        }
+
+        val nyVurderingKun2026 = Behandlingsresultat.forTest {
+            id = 2L
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+            registrertDato = LocalDate.of(2025, 6, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            vedtakMetadata {
+                vedtaksdato = LocalDate.of(2025, 6, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            behandling = fagsak.behandlinger[1]
+
+            medlemskapsperiode("2026-01-01", "2026-12-31", medTrygdeavgift = false)
+        }
+
+        val nyÅrsavregningBehandlingsresultat = Behandlingsresultat.forTest {
+            id = 3L
+            registrertDato = LocalDate.of(2025, 7, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            behandling = fagsak.behandlinger[2]
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } answers {
+            when (firstArg<Long>()) {
+                1L -> tidligereÅrsavregningsresultat
+                2L -> nyVurderingKun2026
+                3L -> nyÅrsavregningBehandlingsresultat
+                else -> null
+            }.shouldNotBeNull()
+        }
+
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+        every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(3, 2025) } returns 0
+        every { behandlingsresultatService.lagre(any()) } answers {
+            firstArg<Behandlingsresultat>().apply {
+                årsavregning?.id = 50L
+            }
+        }
+
+        val resultat = årsavregningService.opprettÅrsavregning(3, 2025)
+
+        resultat.shouldNotBeNull().run {
+            årsavregningID shouldBe 50L
+            år shouldBe 2025
+            sisteGjeldendeAvgiftspliktigPerioder shouldHaveSize 0
+            tidligereTrygdeavgiftsGrunnlag.shouldNotBeNull().avgiftspliktigperioder.shouldHaveSize(1)
+            tidligereAvgift.shouldHaveSize(1)
+            nyttTrygdeavgiftsGrunnlag shouldBe null
+            beregnetAvgiftBelop shouldBe null
+            tilFaktureringBeloep shouldBe null
+            innbetaltTrygdeavgift shouldBe BigDecimal("5000")
+        }
+
+        nyÅrsavregningBehandlingsresultat.medlemskapsperioder.shouldHaveSize(0)
+        nyÅrsavregningBehandlingsresultat.helseutgiftDekkesPerioder.size shouldBe 0
+        nyÅrsavregningBehandlingsresultat.årsavregning.shouldNotBeNull().run {
+            tidligereBehandlingsresultat shouldBe nyVurderingKun2026
+            tidligereFakturertBeloep shouldNotBe null
+            beregnetAvgiftBelop shouldBe null
+            tilFaktureringBeloep shouldBe null
+            manueltAvgiftBeloep shouldBe null
+        }
     }
 
     @Test

@@ -212,6 +212,7 @@ class ÅrsavregningService(
         årsavregning.innbetaltTrygdeavgift = null
         årsavregning.endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
         årsavregning.manueltAvgiftBeloep = null
+        årsavregning.beregnetAvgiftBelop = null
 
         if (!harInnbetaltTrygdeavgift) {
             behandlingsresultat.clearMedlemskapsperioder()
@@ -317,7 +318,14 @@ class ÅrsavregningService(
      * Returnerer separate behandlinger for medlemskapsperiode og avgiftsgrunnlag,
      * siden disse kan komme fra forskjellige behandlinger i noen tilfeller.
      *
-     * førVedtaksdato: Filtrer bort behandlingsresultater som er innvilget etter denne datoen. Dette er nødvendig for å vise hva tidlgiere grunnlag var for en årsavregning som allerede er vedtatt.
+     * For å finne gjeldende avgiftspliktig periode brukes den nyeste behandlingen med avgiftspliktige perioder,
+     * uavhengig av om periodene overlapper med det aktuelle året. Dette sikrer at en ny vurdering som fjerner
+     * eller forkorter en periode korrekt reflekteres i årsavregningen.
+     *
+     * førVedtaksdato: Filtrer bort behandlingsresultater som er innvilget etter denne datoen. Dette er nødvendig for å vise hva tidlgiere
+     * grunnlag var for en årsavregning som allerede er vedtatt.
+     *
+     * Returnerer null hvis ingen felter kan populeres
      */
     fun hentGjeldendeBehandlingsresultaterForÅrsavregning(
         saksnummer: String,
@@ -336,33 +344,42 @@ class ÅrsavregningService(
             Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
         )
 
-        val behandlingsresultater = fagsak.behandlinger
+        // Alle relevante avsluttede behandlinger, uten periodekrav
+        val alleRelevanteBehandlinger = fagsak.behandlinger
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.type in behandlingsresultattyper }
-            .filter { it.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
             .filter { førVedtaksdato == null || it.hentVedtakMetadata().vedtaksdato < førVedtaksdato }
             .sortedBy { it.hentVedtakMetadata().vedtaksdato }
 
 
-        if (behandlingsresultater.isEmpty()) {
-            return null
-        }
+        // Behandlinger med periodeoverlapp for året, brukes til avgiftsgrunnlag og årsavregning
+        val behandlingsresultaterMedOverlapp = alleRelevanteBehandlinger
+            .filter { it.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
 
-        // Finner siste behandling med medlemskapsperioder (brukes for gjeldende medlemskap)
-        val sisteBehandlingsresultatMedAvgiftspliktigPeriode = behandlingsresultater.lastOrNull { it.finnAvgiftspliktigPerioder().isNotEmpty() }
+        // Finner siste behandling med avgiftspliktige perioder (uavhengig av årsoverlapp),
+        // slik at en ny vurdering som fjerner perioden for året korrekt gir null perioder
+        val sisteBehandlingsresultatMedAvgiftspliktigPeriode = alleRelevanteBehandlinger
+            .lastOrNull { it.finnAvgiftspliktigPerioder().isNotEmpty() }
 
         // Finner siste behandling med trygdeavgiftsperioder (brukes for avgiftsgrunnlag)
-        val sisteBehandlingsresultatMedAvgiftsgrunnlag = behandlingsresultater
+        val sisteBehandlingsresultatMedAvgiftsgrunnlag = behandlingsresultaterMedOverlapp
             .filter { it.harTrygdeavgiftsperioderSomOverlapperMedÅr(år) }
             .sortedBy {
                 it.hentVedtakMetadata().vedtaksdato
             }
 
-        val sisteÅrsavregning = behandlingsresultater
+        val sisteÅrsavregning = behandlingsresultaterMedOverlapp
             .filter { it.type == Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT }
             .filter { it.årsavregning != null && it.hentÅrsavregning().aar == år }
             .maxByOrNull { it.hentVedtakMetadata().vedtaksdato }
+
+        if (sisteBehandlingsresultatMedAvgiftspliktigPeriode == null
+            && sisteBehandlingsresultatMedAvgiftsgrunnlag.isEmpty()
+            && sisteÅrsavregning == null
+        ) {
+            return null
+        }
 
         return GjeldendeBehandlingsresultaterForÅrsavregning(
             sisteBehandlingsresultatMedAvgiftspliktigPeriode = sisteBehandlingsresultatMedAvgiftspliktigPeriode,
