@@ -23,23 +23,34 @@ class SkattepliktigeAarsavregningDryrunController(
 ) {
 
     @Operation(
-        summary = "Dryrun for skattehendelser",
-        description = "Simulerer behandling av skattehendelser og teller opp antall saker som ville blitt berørt. " +
-            "Ingen prosessinstanser opprettes. Bruk /status for å følge fremdrift og /rapport for detaljert resultat."
+        summary = "Kjøring av skattehendelser (dryrun eller skarpt)",
+        description = "Prosesserer skattehendelser for skattepliktige. " +
+            "Med skarp=false (default) er det en simulering — ingen prosessinstanser opprettes. " +
+            "Med skarp=true opprettes faktiske AARSAVREGNING-prosessinstanser, kappet av maksAntall. " +
+            "Bruk /status for fremdrift og /rapport for detaljert resultat."
     )
-    @PostMapping("/dryrun")
-    fun dryrun(
+    @PostMapping("/run")
+    fun run(
         @RequestBody
-        @Parameter(description = "Liste med skattehendelser som skal simuleres")
-        request: SkattehendelseDryrunRequest
+        @Parameter(description = "Liste med skattehendelser, skarp-flagg, og valgfritt maksAntall")
+        request: SkattehendelseRunRequest
     ): ResponseEntity<Map<String, Any?>> {
-        log.info { "Starter dryrun for ${request.skattehendelser.size} skattehendelser" }
+        val modus = if (request.skarp) "SKARP" else "DRYRUN"
+        log.info {
+            "Starter $modus for ${request.skattehendelser.size} skattehendelser, maksAntall=${request.maksAntall}"
+        }
 
-        skattepliktigeAarsavregningDryrunService.prosesserSkattehendelserAsynkront(request.skattehendelser)
+        skattepliktigeAarsavregningDryrunService.prosesserSkattehendelserAsynkront(
+            request.skattehendelser,
+            request.skarp,
+            request.maksAntall,
+        )
 
         return ResponseEntity.ok(
             mapOf(
-                "melding" to "Dryrun startet",
+                "melding" to "$modus startet",
+                "skarp" to request.skarp,
+                "maksAntall" to request.maksAntall,
                 "antallHendelser" to request.skattehendelser.size,
                 "statusEndpoint" to "/admin/aarsavregninger/saker/skattepliktige/status",
                 "rapportEndpoint" to "/admin/aarsavregninger/saker/skattepliktige/rapport"
@@ -58,6 +69,8 @@ class SkattepliktigeAarsavregningDryrunController(
         ResponseEntity(skattepliktigeAarsavregningDryrunService.rapportJsonString(), HttpStatus.OK)
 }
 
-data class SkattehendelseDryrunRequest(
-    val skattehendelser: List<SkattehendelseDryrunItem>
+data class SkattehendelseRunRequest(
+    val skattehendelser: List<SkattehendelseDryrunItem>,
+    val skarp: Boolean = false,
+    val maksAntall: Int? = null,
 )
