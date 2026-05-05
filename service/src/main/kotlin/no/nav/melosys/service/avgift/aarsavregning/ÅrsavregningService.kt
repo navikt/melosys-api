@@ -425,6 +425,7 @@ class ÅrsavregningService(
                     when (periode) {
                         is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(år, periode)
                         is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(år, periode)
+                        is Lovvalgsperiode -> LovvalgsperiodeForAvgift(år, periode)
                         else -> throw FunksjonellException("Periodetype støttes ikke")
                     }
                 },

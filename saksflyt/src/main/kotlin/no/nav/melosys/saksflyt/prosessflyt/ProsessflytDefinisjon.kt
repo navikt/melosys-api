@@ -191,7 +191,9 @@ object ProsessflytDefinisjon {
             LAGRE_PERSONOPPLYSNINGER,
             OPPRETT_FAKTURASERIE,
             AVSLUTT_SAK_OG_BEHANDLING,
-            SEND_ORIENTERINGSBREV_TRYGDEAVGIFT
+            SEND_ORIENTERINGSBREV_TRYGDEAVGIFT,
+            OPPRETTE_AARSAVREGNING_ENDRING,
+            RESET_ÅPNE_ÅRSAVREGNINGER,
         ),
         IVERKSETT_VEDTAK_FTRL to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_FTRL,

@@ -4,6 +4,7 @@ import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
@@ -36,8 +37,10 @@ class OppretteÅrsavregningVedEndring(
     fun harTemaOgTypeSomSkalBehandles(behandling: Behandling, fagsak: Fagsak) : Boolean {
         val ftrl_Yrkesaktiv = behandling.tema == Behandlingstema.YRKESAKTIV && fagsak.type == Sakstyper.FTRL
         val eøs_OffentligTjenesteperson = behandling.tema == Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY && fagsak.type == Sakstyper.EU_EOS
+        val ftrl_pensjonist = behandling.tema == Behandlingstema.PENSJONIST && fagsak.type == Sakstyper.FTRL
+        val eøs_trygdeavgift_pensjonist = behandling.tema == Behandlingstema.PENSJONIST && fagsak.type == Sakstyper.EU_EOS && fagsak.tema == Sakstemaer.TRYGDEAVGIFT
 
-        return ftrl_Yrkesaktiv || eøs_OffentligTjenesteperson
+        return ftrl_Yrkesaktiv || eøs_OffentligTjenesteperson || eøs_trygdeavgift_pensjonist || ftrl_pensjonist
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {

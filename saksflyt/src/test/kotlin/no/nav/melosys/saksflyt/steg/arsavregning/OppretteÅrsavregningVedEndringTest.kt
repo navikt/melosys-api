@@ -490,6 +490,174 @@ class OppretteÅrsavregningVedEndringTest {
         ) shouldBe false
     }
 
+    @Test
+    fun `harTemaOgTypeSomSkalBehandles returnerer true for FTRL pensjonist`() {
+        val behandling = Behandlingsresultat.forTest {
+            behandling {
+                tema = Behandlingstema.PENSJONIST
+                fagsak { type = Sakstyper.FTRL }
+            }
+        }.behandling!!
+
+        oppretteÅrsavregningVedEndring.harTemaOgTypeSomSkalBehandles(
+            behandling, behandling.fagsak
+        ) shouldBe true
+    }
+
+    @Test
+    fun `harTemaOgTypeSomSkalBehandles returnerer true for EØS trygdeavgift pensjonist`() {
+        val behandling = Behandlingsresultat.forTest {
+            behandling {
+                tema = Behandlingstema.PENSJONIST
+                fagsak {
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                }
+            }
+        }.behandling!!
+
+        oppretteÅrsavregningVedEndring.harTemaOgTypeSomSkalBehandles(
+            behandling, behandling.fagsak
+        ) shouldBe true
+    }
+
+    @Test
+    fun `harTemaOgTypeSomSkalBehandles returnerer false for EØS medlemskap pensjonist`() {
+        val behandling = Behandlingsresultat.forTest {
+            behandling {
+                tema = Behandlingstema.PENSJONIST
+                fagsak {
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                }
+            }
+        }.behandling!!
+
+        oppretteÅrsavregningVedEndring.harTemaOgTypeSomSkalBehandles(
+            behandling, behandling.fagsak
+        ) shouldBe false
+    }
+
+    @Test
+    fun `oppretter årsavregninger for FTRL pensjonist førstegangsbehandling tilbake i tid`() {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            behandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.PENSJONIST
+                fagsak {
+                    saksnummer = SAKSNUMMER
+                    type = Sakstyper.FTRL
+                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                }
+            }
+            medlemskapsperiode {
+                fom = MARS2026.minusYears(2)
+                tom = MARS2026.plusYears(1)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+            }
+        }
+
+        val prosessinstans = Prosessinstans.forTest {
+            behandling = behandlingsresultat.behandling
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+
+        oppretteÅrsavregningVedEndring.utfør(prosessinstans)
+
+        verify {
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
+                SAKSNUMMER, "2024", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+            )
+        }
+        verify {
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
+                SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+            )
+        }
+        confirmVerified(prosessInstansService)
+    }
+
+    @Test
+    fun `oppretter årsavregninger for EØS trygdeavgift pensjonist førstegangsbehandling tilbake i tid`() {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            behandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.PENSJONIST
+                fagsak {
+                    saksnummer = SAKSNUMMER
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                }
+            }
+            helseutgiftDekkesPeriode {
+                fomDato = MARS2026.minusYears(2)
+                tomDato = MARS2026.plusYears(1)
+            }
+        }
+
+        val prosessinstans = Prosessinstans.forTest {
+            behandling = behandlingsresultat.behandling
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+
+        oppretteÅrsavregningVedEndring.utfør(prosessinstans)
+
+        verify {
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
+                SAKSNUMMER, "2024", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+            )
+        }
+        verify {
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
+                SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+            )
+        }
+        confirmVerified(prosessInstansService)
+    }
+
+    @Test
+    fun `oppretter ikke årsavregninger for FTRL pensjonist kun frem i tid`() {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            behandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.PENSJONIST
+                fagsak {
+                    saksnummer = SAKSNUMMER
+                    type = Sakstyper.FTRL
+                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                }
+            }
+            medlemskapsperiode {
+                fom = MARS2026
+                tom = MARS2026.plusYears(1)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+            }
+        }
+
+        val prosessinstans = Prosessinstans.forTest {
+            behandling = behandlingsresultat.behandling
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+
+        oppretteÅrsavregningVedEndring.utfør(prosessinstans)
+
+        verify { prosessInstansService wasNot Called }
+    }
+
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("endringITidligereLovvalgsperiodeScenarios")
