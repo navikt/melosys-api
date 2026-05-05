@@ -7,10 +7,12 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
+import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
@@ -29,6 +31,7 @@ class SkattepliktigeAarsavregningDryrunService(
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val prosessinstansService: ProsessinstansService,
+    private val behandlingService: BehandlingService,
 ) {
     val resultater: MutableList<SakDryrunResultat> = mutableListOf()
 
@@ -69,8 +72,10 @@ class SkattepliktigeAarsavregningDryrunService(
 
             skattehendelser.forEach hendelseLoop@{ hendelse ->
                 if (jobMonitor.shouldStop) return@execute
-                if (maksAntall != null && antallVilleOpprettetProsessinstans >= maksAntall) {
-                    log.info { "Nådde maksAntall=$maksAntall, stopper" }
+                if (maksAntall != null &&
+                    (antallVilleOpprettetProsessinstans + antallVilleOppdatertStatus) >= maksAntall
+                ) {
+                    log.info { "Nådde maksAntall=$maksAntall side-effekter, stopper" }
                     return@execute
                 }
 
@@ -94,9 +99,13 @@ class SkattepliktigeAarsavregningDryrunService(
                         antallSakerFunnet++
                         val aktivÅrsavregning = finnAktivÅrsavregningBehandling(fagsak, år)
                         val villeOpprettetProsessinstans = aktivÅrsavregning == null
+                        val villeOppdatertStatus = aktivÅrsavregning != null &&
+                            aktivÅrsavregning.status != Behandlingsstatus.OPPRETTET
+                        val villeHattSideEffekt = villeOpprettetProsessinstans || villeOppdatertStatus
 
-                        if (villeOpprettetProsessinstans &&
-                            maksAntall != null && antallVilleOpprettetProsessinstans >= maksAntall
+                        if (villeHattSideEffekt &&
+                            maksAntall != null &&
+                            (antallVilleOpprettetProsessinstans + antallVilleOppdatertStatus) >= maksAntall
                         ) {
                             return@sakLoop
                         }
@@ -106,8 +115,10 @@ class SkattepliktigeAarsavregningDryrunService(
                         } else {
                             antallMedEksisterendeAarsavregning++
                         }
+                        if (villeOppdatertStatus) antallVilleOppdatertStatus++
 
                         var prosessinstansOpprettet: Boolean? = null
+                        var statusOppdatert: Boolean? = null
                         var skarpFeilmelding: String? = null
                         if (skarp && villeOpprettetProsessinstans) {
                             try {
@@ -124,6 +135,22 @@ class SkattepliktigeAarsavregningDryrunService(
                                 prosessinstansOpprettet = false
                                 skarpFeilmelding = e.message
                                 log.warn(e) { "SKARP: feilet ved opprettelse for sak ${fagsak.saksnummer}, år $år" }
+                                jobMonitor.registerException(e)
+                            }
+                        } else if (skarp && villeOppdatertStatus && aktivÅrsavregning != null) {
+                            try {
+                                log.info {
+                                    "SKARP: oppdaterer status fra ${aktivÅrsavregning.status} til VURDER_DOKUMENT for behandling ${aktivÅrsavregning.id}"
+                                }
+                                aktivÅrsavregning.status = Behandlingsstatus.VURDER_DOKUMENT
+                                behandlingService.lagre(aktivÅrsavregning)
+                                antallStatusOppdatert++
+                                statusOppdatert = true
+                            } catch (e: Exception) {
+                                antallSkarpFeilet++
+                                statusOppdatert = false
+                                skarpFeilmelding = e.message
+                                log.warn(e) { "SKARP: feilet ved status-oppdatering for sak ${fagsak.saksnummer}, år $år" }
                                 jobMonitor.registerException(e)
                             }
                         }
@@ -145,8 +172,10 @@ class SkattepliktigeAarsavregningDryrunService(
                                 aarsavregningBehandlingStatus = aktivÅrsavregning?.status?.name,
                                 trygdeavgiftMottaker = trygdeavgiftMottaker?.name,
                                 villeOpprettetProsessinstans = villeOpprettetProsessinstans,
+                                villeOppdatertStatus = villeOppdatertStatus,
                                 behandlingId = aktivÅrsavregning?.id,
                                 prosessinstansOpprettet = prosessinstansOpprettet,
+                                statusOppdatert = statusOppdatert,
                                 feilmelding = skarpFeilmelding,
                             )
                         )
@@ -167,7 +196,9 @@ class SkattepliktigeAarsavregningDryrunService(
                 "antallSakerFunnet" to antallSakerFunnet,
                 "antallVilleOpprettetProsessinstans" to antallVilleOpprettetProsessinstans,
                 "antallMedEksisterendeAarsavregning" to antallMedEksisterendeAarsavregning,
+                "antallVilleOppdatertStatus" to antallVilleOppdatertStatus,
                 "antallOpprettet" to antallOpprettet,
+                "antallStatusOppdatert" to antallStatusOppdatert,
                 "antallSkarpFeilet" to antallSkarpFeilet,
             )
         }
@@ -218,8 +249,10 @@ class SkattepliktigeAarsavregningDryrunService(
         @Volatile var antallSakerFunnet: Int = 0,
         @Volatile var antallVilleOpprettetProsessinstans: Int = 0,
         @Volatile var antallMedEksisterendeAarsavregning: Int = 0,
+        @Volatile var antallVilleOppdatertStatus: Int = 0,
         @Volatile var antallUtenTreff: Int = 0,
         @Volatile var antallOpprettet: Int = 0,
+        @Volatile var antallStatusOppdatert: Int = 0,
         @Volatile var antallSkarpFeilet: Int = 0,
         @Volatile var result: Map<String, Any?> = emptyMap(),
         @Volatile var dbQueryStoppedAt: LocalDateTime? = null,
@@ -232,8 +265,10 @@ class SkattepliktigeAarsavregningDryrunService(
             antallSakerFunnet = 0
             antallVilleOpprettetProsessinstans = 0
             antallMedEksisterendeAarsavregning = 0
+            antallVilleOppdatertStatus = 0
             antallUtenTreff = 0
             antallOpprettet = 0
+            antallStatusOppdatert = 0
             antallSkarpFeilet = 0
             dbQueryStoppedAt = null
             result = emptyMap()
@@ -248,8 +283,10 @@ class SkattepliktigeAarsavregningDryrunService(
             "antallSakerFunnet" to antallSakerFunnet,
             "antallVilleOpprettetProsessinstans" to antallVilleOpprettetProsessinstans,
             "antallMedEksisterendeAarsavregning" to antallMedEksisterendeAarsavregning,
+            "antallVilleOppdatertStatus" to antallVilleOppdatertStatus,
             "antallUtenTreff" to antallUtenTreff,
             "antallOpprettet" to antallOpprettet,
+            "antallStatusOppdatert" to antallStatusOppdatert,
             "antallSkarpFeilet" to antallSkarpFeilet,
             "result" to result,
         )
@@ -263,8 +300,10 @@ class SkattepliktigeAarsavregningDryrunService(
         val aarsavregningBehandlingStatus: String?,
         val trygdeavgiftMottaker: String?,
         val villeOpprettetProsessinstans: Boolean,
+        val villeOppdatertStatus: Boolean,
         val behandlingId: Long?,
         val prosessinstansOpprettet: Boolean? = null,
+        val statusOppdatert: Boolean? = null,
         val feilmelding: String? = null,
     )
 }
