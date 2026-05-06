@@ -17,7 +17,6 @@ import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMetadata
  * BRUKER (arbeidstaker) håndteres separat via OpprettSakRequest.medAktørID,
  * så denne strukturen dekker kun ARBEIDSGIVER- og FULLMEKTIG-aktører.
  *
- * Se arkitektur-aktorer-MELOSYS-8029.md for mapping-tabellen.
  */
 data class AktørerFraSøknad(
     val arbeidsgiverOrgnumre: List<String>,
