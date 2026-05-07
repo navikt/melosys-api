@@ -35,15 +35,18 @@ class OppretteÅrsavregningVedEndring(
     }
 
     private fun erArtikkel11_3B(behandlingsresultat: Behandlingsresultat): Boolean {
-        return (behandlingsresultat.hentValidertPeriodeOmLovvalg().getBestemmelse()
-            === Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B)
+        return behandlingsresultat.lovvalgsperioder.any {
+            it.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B
+        }
     }
 
     // Er egne oppgaver som skal legge til FTRL.penjonist, EØS.pensjonist|offentlig-tjenesteperson år årsavregning er ok
     fun harTemaOgTypeSomSkalBehandles(behandling: Behandling, fagsak: Fagsak, behandlingsresultat: Behandlingsresultat) : Boolean {
         val ftrlYrkesaktiv = behandling.tema == Behandlingstema.YRKESAKTIV && fagsak.type == Sakstyper.FTRL
         val ftrlPensjonist = behandling.tema == Behandlingstema.PENSJONIST && fagsak.type == Sakstyper.FTRL
-        val eøsOffentligtjenesteperson = erArtikkel11_3B(behandlingsresultat) && behandling.tema == Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY && fagsak.type == Sakstyper.EU_EOS
+        val eøsOffentligtjenesteperson = behandling.tema == Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+            && fagsak.type == Sakstyper.EU_EOS
+            && erArtikkel11_3B(behandlingsresultat)
         val eøsTrygdeavgiftpensjonist = behandling.tema == Behandlingstema.PENSJONIST && fagsak.type == Sakstyper.EU_EOS && fagsak.tema == Sakstemaer.TRYGDEAVGIFT
 
         return ftrlYrkesaktiv || eøsOffentligtjenesteperson || eøsTrygdeavgiftpensjonist || ftrlPensjonist

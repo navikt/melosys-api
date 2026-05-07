@@ -13,6 +13,7 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
@@ -403,6 +404,7 @@ class OppretteÅrsavregningVedEndringTest {
                 tom = MARS2026.plusYears(1)
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 dekning = Trygdedekninger.FULL_DEKNING
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B
             }
         }
 
@@ -447,6 +449,7 @@ class OppretteÅrsavregningVedEndringTest {
                 tom = MARS2026.plusYears(1)
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 dekning = Trygdedekninger.FULL_DEKNING
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B
             }
         }
 
@@ -464,49 +467,58 @@ class OppretteÅrsavregningVedEndringTest {
 
     @Test
     fun `harTemaOgTypeSomSkalBehandles returnerer true for EØS offentlig tjenesteperson`() {
-        val behandling = Behandlingsresultat.forTest {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
                 fagsak { type = Sakstyper.EU_EOS }
             }
-        }.behandling!!
+            lovvalgsperiode {
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B
+            }
+        }
+
+        val behandling = behandlingsresultat.behandling!!
 
         oppretteÅrsavregningVedEndring.harTemaOgTypeSomSkalBehandles(
-            behandling, behandling.fagsak
+            behandling, behandling.fagsak, behandlingsresultat
         ) shouldBe true
     }
 
     @Test
     fun `harTemaOgTypeSomSkalBehandles returnerer false for EØS pensjonist`() {
-        val behandling = Behandlingsresultat.forTest {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 tema = Behandlingstema.PENSJONIST
                 fagsak { type = Sakstyper.EU_EOS }
             }
-        }.behandling!!
+        }
+
+        val behandling = behandlingsresultat.behandling!!
 
         oppretteÅrsavregningVedEndring.harTemaOgTypeSomSkalBehandles(
-            behandling, behandling.fagsak
+            behandling, behandling.fagsak, behandlingsresultat
         ) shouldBe false
     }
 
     @Test
     fun `harTemaOgTypeSomSkalBehandles returnerer true for FTRL pensjonist`() {
-        val behandling = Behandlingsresultat.forTest {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 tema = Behandlingstema.PENSJONIST
                 fagsak { type = Sakstyper.FTRL }
             }
-        }.behandling!!
+        }
+
+        val behandling = behandlingsresultat.behandling!!
 
         oppretteÅrsavregningVedEndring.harTemaOgTypeSomSkalBehandles(
-            behandling, behandling.fagsak
+            behandling, behandling.fagsak, behandlingsresultat
         ) shouldBe true
     }
 
     @Test
     fun `harTemaOgTypeSomSkalBehandles returnerer true for EØS trygdeavgift pensjonist`() {
-        val behandling = Behandlingsresultat.forTest {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 tema = Behandlingstema.PENSJONIST
                 fagsak {
@@ -514,16 +526,18 @@ class OppretteÅrsavregningVedEndringTest {
                     tema = Sakstemaer.TRYGDEAVGIFT
                 }
             }
-        }.behandling!!
+        }
+
+        val behandling = behandlingsresultat.behandling!!
 
         oppretteÅrsavregningVedEndring.harTemaOgTypeSomSkalBehandles(
-            behandling, behandling.fagsak
+            behandling, behandling.fagsak, behandlingsresultat
         ) shouldBe true
     }
 
     @Test
     fun `harTemaOgTypeSomSkalBehandles returnerer false for EØS medlemskap pensjonist`() {
-        val behandling = Behandlingsresultat.forTest {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 tema = Behandlingstema.PENSJONIST
                 fagsak {
@@ -531,10 +545,12 @@ class OppretteÅrsavregningVedEndringTest {
                     tema = Sakstemaer.MEDLEMSKAP_LOVVALG
                 }
             }
-        }.behandling!!
+        }
+
+        val behandling = behandlingsresultat.behandling!!
 
         oppretteÅrsavregningVedEndring.harTemaOgTypeSomSkalBehandles(
-            behandling, behandling.fagsak
+            behandling, behandling.fagsak, behandlingsresultat
         ) shouldBe false
     }
 
@@ -680,6 +696,7 @@ class OppretteÅrsavregningVedEndringTest {
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 medlemskapstype = Medlemskapstyper.FRIVILLIG
                 dekning = Trygdedekninger.FULL_DEKNING
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B
             }
         }
 
@@ -703,6 +720,7 @@ class OppretteÅrsavregningVedEndringTest {
                     innvilgelsesresultat = periode.innvilgelsesresultat!!
                     medlemskapstype = periode.medlemskapstype
                     dekning = periode.dekning
+                    bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B
                 }
             }
         }
