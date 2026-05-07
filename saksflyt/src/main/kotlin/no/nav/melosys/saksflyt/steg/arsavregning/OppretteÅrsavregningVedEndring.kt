@@ -41,12 +41,12 @@ class OppretteÅrsavregningVedEndring(
 
     // Er egne oppgaver som skal legge til FTRL.penjonist, EØS.pensjonist|offentlig-tjenesteperson år årsavregning er ok
     fun harTemaOgTypeSomSkalBehandles(behandling: Behandling, fagsak: Fagsak, behandlingsresultat: Behandlingsresultat) : Boolean {
-        val ftrl_Yrkesaktiv = behandling.tema == Behandlingstema.YRKESAKTIV && fagsak.type == Sakstyper.FTRL
-        val ftrl_Pensjonist = behandling.tema == Behandlingstema.PENSJONIST && fagsak.type == Sakstyper.FTRL
-        val eøs_OffentligTjenesteperson = erArtikkel11_3B(behandlingsresultat) && behandling.tema == Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY && fagsak.type == Sakstyper.EU_EOS
-        val eøs_TrygdeavgiftPensjonist = behandling.tema == Behandlingstema.PENSJONIST && fagsak.type == Sakstyper.EU_EOS && fagsak.tema == Sakstemaer.TRYGDEAVGIFT
+        val ftrlYrkesaktiv = behandling.tema == Behandlingstema.YRKESAKTIV && fagsak.type == Sakstyper.FTRL
+        val ftrlPensjonist = behandling.tema == Behandlingstema.PENSJONIST && fagsak.type == Sakstyper.FTRL
+        val eøsOffentligtjenesteperson = erArtikkel11_3B(behandlingsresultat) && behandling.tema == Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY && fagsak.type == Sakstyper.EU_EOS
+        val eøsTrygdeavgiftpensjonist = behandling.tema == Behandlingstema.PENSJONIST && fagsak.type == Sakstyper.EU_EOS && fagsak.tema == Sakstemaer.TRYGDEAVGIFT
 
-        return ftrl_Yrkesaktiv || eøs_OffentligTjenesteperson || eøs_TrygdeavgiftPensjonist || ftrl_Pensjonist
+        return ftrlYrkesaktiv || eøsOffentligtjenesteperson || eøsTrygdeavgiftpensjonist || ftrlPensjonist
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
