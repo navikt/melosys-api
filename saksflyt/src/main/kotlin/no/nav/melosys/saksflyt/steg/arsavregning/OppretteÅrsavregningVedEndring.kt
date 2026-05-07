@@ -10,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -33,14 +34,19 @@ class OppretteÅrsavregningVedEndring(
         return ProsessSteg.OPPRETTE_AARSAVREGNING_ENDRING
     }
 
-    // Er egne oppgaver som skal legge til FTRL.penjonist, EØS.pensjonist|offentlig-tjenesteperson år årsavregning er ok
-    fun harTemaOgTypeSomSkalBehandles(behandling: Behandling, fagsak: Fagsak) : Boolean {
-        val ftrl_Yrkesaktiv = behandling.tema == Behandlingstema.YRKESAKTIV && fagsak.type == Sakstyper.FTRL
-        val eøs_OffentligTjenesteperson = behandling.tema == Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY && fagsak.type == Sakstyper.EU_EOS
-        val ftrl_pensjonist = behandling.tema == Behandlingstema.PENSJONIST && fagsak.type == Sakstyper.FTRL
-        val eøs_trygdeavgift_pensjonist = behandling.tema == Behandlingstema.PENSJONIST && fagsak.type == Sakstyper.EU_EOS && fagsak.tema == Sakstemaer.TRYGDEAVGIFT
+    private fun erArtikkel11_3B(behandlingsresultat: Behandlingsresultat): Boolean {
+        return (behandlingsresultat.hentValidertPeriodeOmLovvalg().getBestemmelse()
+            === Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B)
+    }
 
-        return ftrl_Yrkesaktiv || eøs_OffentligTjenesteperson || eøs_trygdeavgift_pensjonist || ftrl_pensjonist
+    // Er egne oppgaver som skal legge til FTRL.penjonist, EØS.pensjonist|offentlig-tjenesteperson år årsavregning er ok
+    fun harTemaOgTypeSomSkalBehandles(behandling: Behandling, fagsak: Fagsak, behandlingsresultat: Behandlingsresultat) : Boolean {
+        val ftrl_Yrkesaktiv = behandling.tema == Behandlingstema.YRKESAKTIV && fagsak.type == Sakstyper.FTRL
+        val ftrl_Pensjonist = behandling.tema == Behandlingstema.PENSJONIST && fagsak.type == Sakstyper.FTRL
+        val eøs_OffentligTjenesteperson = erArtikkel11_3B(behandlingsresultat) && behandling.tema == Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY && fagsak.type == Sakstyper.EU_EOS
+        val eøs_TrygdeavgiftPensjonist = behandling.tema == Behandlingstema.PENSJONIST && fagsak.type == Sakstyper.EU_EOS && fagsak.tema == Sakstemaer.TRYGDEAVGIFT
+
+        return ftrl_Yrkesaktiv || eøs_OffentligTjenesteperson || eøs_TrygdeavgiftPensjonist || ftrl_Pensjonist
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
@@ -50,12 +56,13 @@ class OppretteÅrsavregningVedEndring(
 
         val behandling = prosessinstans.hentBehandling
         val fagsak = behandling.fagsak
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
-        if (!harTemaOgTypeSomSkalBehandles(behandling, fagsak)) {
+
+        if (!harTemaOgTypeSomSkalBehandles(behandling, fagsak, behandlingsresultat)) {
             return
         }
 
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
         val potensielleÅrsavregningÅrNy: Set<Int> = hentPotensielleÅrsavregningÅrFraAvgiftsperioder(behandlingsresultat)
 
         if (behandling.erFørstegangsvurdering()) {
