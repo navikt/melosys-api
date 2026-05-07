@@ -194,6 +194,19 @@ class Lovvalgsperiode : PeriodeOmLovvalg, AvgiftspliktigPeriode {
 
     fun hentMedlPeriodeID() = medlPeriodeID ?: error("medlPeriodeID er påkrevd for Lovvalgsperiode")
 
+
+    fun avkortTomDato(gjelderÅr: Int) {
+        if (this.overlapperMedÅr(gjelderÅr) && this.hentTom().year > gjelderÅr) {
+            this.tom = LocalDate.of(gjelderÅr, 12, 31)
+        }
+    }
+
+    fun avkortFomDato(gjelderÅr: Int) {
+        if (this.overlapperMedÅr(gjelderÅr) && this.hentFom().year < gjelderÅr) {
+            this.fom = LocalDate.of(gjelderÅr, 1, 1)
+        }
+    }
+
     companion object {
         @JvmStatic
         fun av(
