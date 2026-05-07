@@ -117,7 +117,10 @@ class DigitalSøknadMottakIT(
         behandling.tema shouldBe Behandlingstema.UTSENDT_ARBEIDSTAKER
         behandling.type shouldBe Behandlingstyper.FØRSTEGANG
 
-        // Verify journalpostId was set on behandling (step 3)
+        // Verify arkivsak was created and gsakSaksnummer set on fagsak (step 3 — OPPRETT_ARKIVSAK)
+        fagsak.gsakSaksnummer.shouldNotBeNull()
+
+        // Verify journalpostId was set on behandling (step 4)
         behandling.initierendeJournalpostId.shouldNotBeNull()
 
         // Verify mottatteOpplysninger was created on behandling (step 4)
