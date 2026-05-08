@@ -9,6 +9,7 @@ import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.repository.AktoerRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
 
 @Service
 class AktoerService(
@@ -81,6 +82,11 @@ class AktoerService(
         for (orgnummer in orgnumre) {
             lagArbeidsgiveraktør(fagsak, orgnummer)
         }
+    }
+
+    @Transactional
+    fun overstyrRegistrertDato(databaseId: Long, dato: Instant) {
+        aktørRepository.overstyrRegistrertDato(databaseId, dato)
     }
 
     @Transactional

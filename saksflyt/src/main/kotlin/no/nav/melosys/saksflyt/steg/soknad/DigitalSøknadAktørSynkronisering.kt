@@ -12,6 +12,7 @@ import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
 
 private val log = KotlinLogging.logger { }
 
@@ -31,11 +32,11 @@ class DigitalSøknadAktørSynkronisering(
 ) {
 
     @Transactional
-    fun synkroniser(fagsak: Fagsak, aktører: AktørerFraSøknad) {
+    fun synkroniser(fagsak: Fagsak, aktører: AktørerFraSøknad, mottaksdato: Instant) {
         if (dekkerArbeidsgiverside(aktører.skjemadel)) {
-            synkroniserArbeidsgivere(fagsak, aktører.arbeidsgiverOrgnumre)
+            synkroniserArbeidsgivere(fagsak, aktører.arbeidsgiverOrgnumre, mottaksdato)
         }
-        synkroniserFullmektige(fagsak, aktører)
+        synkroniserFullmektige(fagsak, aktører, mottaksdato)
     }
 
     private fun dekkerArbeidsgiverside(skjemadel: Skjemadel): Boolean =
@@ -44,17 +45,20 @@ class DigitalSøknadAktørSynkronisering(
     private fun dekkerArbeidstakerside(skjemadel: Skjemadel): Boolean =
         skjemadel == Skjemadel.ARBEIDSTAKERS_DEL || skjemadel == Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL
 
-    private fun synkroniserArbeidsgivere(fagsak: Fagsak, ønskede: List<String>) {
-        val eksisterende = aktoerService.hentfagsakAktører(fagsak, Aktoersroller.ARBEIDSGIVER)
+    private fun synkroniserArbeidsgivere(fagsak: Fagsak, ønskede: List<String>, mottaksdato: Instant) {
+        val eksisterendeOrgnr = aktoerService.hentfagsakAktører(fagsak, Aktoersroller.ARBEIDSGIVER)
             .mapNotNull { it.orgnr }.toSet()
-        if (eksisterende == ønskede.toSet()) {
+        if (eksisterendeOrgnr == ønskede.toSet()) {
             log.debug { "Arbeidsgiver-aktører uendret på sak ${fagsak.saksnummer}, hopper over" }
             return
         }
         aktoerService.erstattEksisterendeArbeidsgiveraktører(fagsak, ønskede)
+        aktoerService.hentfagsakAktører(fagsak, Aktoersroller.ARBEIDSGIVER).forEach { aktør ->
+            aktoerService.overstyrRegistrertDato(aktør.id!!, mottaksdato)
+        }
     }
 
-    private fun synkroniserFullmektige(fagsak: Fagsak, aktører: AktørerFraSøknad) {
+    private fun synkroniserFullmektige(fagsak: Fagsak, aktører: AktørerFraSøknad, mottaksdato: Instant) {
         val berørteFullmaktstyper = berørteFullmaktstyper(aktører.skjemadel)
         val eksisterende = aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG)
         val ønskedeIder = aktører.fullmektige.map(::identifikator).toSet()
@@ -69,7 +73,7 @@ class DigitalSøknadAktørSynkronisering(
         // 2. Lagre/oppdatere ønskede fullmektige + tilhørende kontaktopplysninger
         aktører.fullmektige.forEach { spec ->
             val eksAkt = eksisterende.firstOrNull { identifikator(it) == identifikator(spec) }
-            lagEllerOppdaterFullmektig(fagsak, spec, eksAkt)
+            lagEllerOppdaterFullmektig(fagsak, spec, eksAkt, mottaksdato)
             spec.kontaktpersonFnr?.let {
                 lagreKontaktopplysning(fagsak, spec.orgnr!!, it)
             }
@@ -119,7 +123,12 @@ class DigitalSøknadAktørSynkronisering(
         }
     }
 
-    private fun lagEllerOppdaterFullmektig(fagsak: Fagsak, spec: FullmektigSpec, eksisterende: Aktoer?) {
+    private fun lagEllerOppdaterFullmektig(
+        fagsak: Fagsak,
+        spec: FullmektigSpec,
+        eksisterende: Aktoer?,
+        mottaksdato: Instant
+    ) {
         val aktørIdForPerson = spec.personIdent?.let { persondataFasade.hentAktørIdForIdent(it) }
         val ønsketFullmakter = if (eksisterende != null) {
             // Bevar fullmaktstyper på "den andre siden" som ikke er berørt av denne synkroniseringen
@@ -145,7 +154,8 @@ class DigitalSøknadAktørSynkronisering(
             aktoerID = aktørIdForPerson
             fullmakter = ønsketFullmakter
         }
-        aktoerService.lagEllerOppdaterAktoer(fagsak, dto)
+        val savedId = aktoerService.lagEllerOppdaterAktoer(fagsak, dto)
+        aktoerService.overstyrRegistrertDato(savedId, mottaksdato)
     }
 
     private fun lagreKontaktopplysning(fagsak: Fagsak, orgnr: String, kontaktpersonFnr: String) {
