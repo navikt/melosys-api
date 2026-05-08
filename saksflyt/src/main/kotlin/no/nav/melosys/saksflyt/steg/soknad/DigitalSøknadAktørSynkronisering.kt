@@ -57,17 +57,16 @@ class DigitalSøknadAktørSynkronisering(
     private fun synkroniserFullmektige(fagsak: Fagsak, aktører: AktørerFraSøknad) {
         val berørteFullmaktstyper = berørteFullmaktstyper(aktører.skjemadel)
         val eksisterende = aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG)
+        val ønskedeIder = aktører.fullmektige.map(::identifikator).toSet()
 
         // 1. Behandle eksisterende: fjern fullmaktstyper som er innenfor "vår side" og ikke matches av ønsket
-        val ønskedeIder = aktører.fullmektige.map(::identifikator).toSet()
         eksisterende.forEach { eksAkt ->
-            val matches = identifikator(eksAkt) in ønskedeIder
-            if (!matches) {
+            if (identifikator(eksAkt) !in ønskedeIder) {
                 fjernBerørteFullmaktstyperEllerSlett(fagsak, eksAkt, berørteFullmaktstyper)
             }
         }
 
-        // 2. Lagre/oppdatere ønskede fullmektige
+        // 2. Lagre/oppdatere ønskede fullmektige + tilhørende kontaktopplysninger
         aktører.fullmektige.forEach { spec ->
             val eksAkt = eksisterende.firstOrNull { identifikator(it) == identifikator(spec) }
             lagEllerOppdaterFullmektig(fagsak, spec, eksAkt)
@@ -76,10 +75,15 @@ class DigitalSøknadAktørSynkronisering(
             }
         }
 
-        // 3. Slett kontaktopplysninger for fullmektige som forsvant helt (orgnr ikke lenger aktiv)
-        val fortsattAktiveOrgnr = aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG)
-            .mapNotNull { it.orgnr }.toSet()
-        eksisterende.mapNotNull { it.orgnr }.filterNot { it in fortsattAktiveOrgnr }
+        // 3. Slett kontaktopplysninger for orgnr som forsvant — beregnes deterministisk fra
+        //    eksisterende aktører som ble slettet (alle fullmaktstyper innenfor vår side fjernet)
+        //    og som ikke gjenoppstår i nye spec-er.
+        val nyeOrgnr = aktører.fullmektige.mapNotNull { it.orgnr }.toSet()
+        eksisterende
+            .filter { identifikator(it) !in ønskedeIder }
+            .filter { (it.fullmaktstyper - berørteFullmaktstyper).isEmpty() }
+            .mapNotNull { it.orgnr }
+            .filterNot { it in nyeOrgnr }
             .forEach { slettKontaktopplysning(fagsak, it) }
     }
 
@@ -132,13 +136,14 @@ class DigitalSøknadAktørSynkronisering(
             return
         }
 
-        val dto = AktoerDto().apply {
+        // Starter fra eksisterende DTO når aktøren finnes — bevarer felter som
+        // institusjonsID/utenlandskPersonID som ikke skal endres her.
+        val dto = (eksisterende?.let { AktoerDto.tilDto(it) } ?: AktoerDto()).apply {
             rolleKode = Aktoersroller.FULLMEKTIG.name
             orgnr = spec.orgnr
             personIdent = spec.personIdent
             aktoerID = aktørIdForPerson
             fullmakter = ønsketFullmakter
-            databaseID = eksisterende?.id
         }
         aktoerService.lagEllerOppdaterAktoer(fagsak, dto)
     }
