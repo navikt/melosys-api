@@ -111,17 +111,9 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
         }
 
     /**
-     * Defensiv lesning av år fra en åpen ÅRSAVREGNING-behandling.
-     *
-     * `Behandlingsresultat.hentÅrsavregning()` kaster `IllegalStateException`
-     * ("årsavregning er påkrevd for Behandlingsresultat") hvis aarsavregning-raden
-     * mangler. Dette skjer i prod for noen åpne ÅRSAVREGNING-behandlinger
-     * (Bug 2 i MELOSYS-8045-rapporten — MEL-436385, MEL-498817, MEL-559926).
-     *
-     * Per fag-avklaring (Yvonne, 2026-05-08): hvis åpen mangler år, skal ny opprettes.
-     * Returnerer null → matcher ikke gjelderÅr → ny ÅRSAVREGNING opprettes.
-     *
-     * Logger på WARN-nivå for å gjøre akkumulering av Bug 2-saker synlig over tid.
+     * Returnerer null hvis åpen ÅRSAVREGNING-behandling mangler aarsavregning-rad
+     * (hentÅrsavregning() kaster), slik at ny ÅRSAVREGNING blir opprettet for året
+     * per fag-avklaring. WARN-logger så akkumulering av slike saker blir synlig.
      */
     private fun hentÅrFraBehandlingDefensivt(behandling: Behandling): Int? =
         runCatching {

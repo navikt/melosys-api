@@ -1,9 +1,9 @@
 package no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig
 
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
@@ -80,8 +80,8 @@ class ÅrsavregningIkkeSkattepliktigeProsessGeneratorTest {
             prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any())
         }
         val status = generator.status()
-        assert(status["antallHoppetOver"] == 1) { "Forventet antallHoppetOver = 1, var ${status["antallHoppetOver"]}" }
-        assert(status["antallProsessert"] == 1) { "Forventet antallProsessert = 1, var ${status["antallProsessert"]}" }
+        status["antallHoppetOver"] shouldBe 1
+        status["antallProsessert"] shouldBe 1
     }
 
     @Test
@@ -107,7 +107,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGeneratorTest {
 
         every {
             prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any())
-        } returns mockk<UUID>()
+        } returns UUID.randomUUID()
 
         generator.finnSakerOgLagProsessinstanser(
             dryrun = false,
@@ -123,8 +123,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGeneratorTest {
                 Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE,
             )
         }
-        val status = generator.status()
-        assert(status["antallHoppetOver"] == 0) { "Forventet antallHoppetOver = 0, var ${status["antallHoppetOver"]}" }
+        generator.status()["antallHoppetOver"] shouldBe 0
     }
 
     @Test
@@ -149,7 +148,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGeneratorTest {
 
         every {
             prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any())
-        } returns mockk<UUID>()
+        } returns UUID.randomUUID()
 
         generator.finnSakerOgLagProsessinstanser(
             dryrun = false,
@@ -165,8 +164,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGeneratorTest {
                 Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE,
             )
         }
-        val status = generator.status()
-        assert(status["antallHoppetOver"] == 0) { "Forventet antallHoppetOver = 0, var ${status["antallHoppetOver"]}" }
+        generator.status()["antallHoppetOver"] shouldBe 0
     }
 
     @Test
@@ -192,7 +190,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGeneratorTest {
 
         every {
             prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any())
-        } returns mockk<UUID>()
+        } returns UUID.randomUUID()
 
         // Skal IKKE kaste exception fra generatoren — runCatching håndterer den
         generator.finnSakerOgLagProsessinstanser(
@@ -210,8 +208,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGeneratorTest {
                 Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE,
             )
         }
-        val status = generator.status()
-        assert(status["antallHoppetOver"] == 0) { "Forventet antallHoppetOver = 0, var ${status["antallHoppetOver"]}" }
+        generator.status()["antallHoppetOver"] shouldBe 0
     }
 
     private fun lagFagsakMedÅrsavregning(behandlingId: Long): Fagsak = Fagsak.forTest {
