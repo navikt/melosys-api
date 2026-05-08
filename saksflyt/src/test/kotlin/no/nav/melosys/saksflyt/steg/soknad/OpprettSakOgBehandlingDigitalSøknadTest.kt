@@ -13,8 +13,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.kodeverk.Aktoersroller
-import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
@@ -28,18 +26,15 @@ import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
-import no.nav.melosys.service.aktoer.AktoerDto
-import no.nav.melosys.service.aktoer.AktoerService
 import no.nav.melosys.service.behandling.BehandlingService
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMedFullmaktMetadata
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverensVirksomhetINorgeDto
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.OpprettSakRequest
 import no.nav.melosys.service.sak.SkjemaSakMappingService
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverensVirksomhetINorgeDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -53,7 +48,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
     @MockK lateinit var jsonMapper: JsonMapper
     @MockK lateinit var skjemaSakMappingService: SkjemaSakMappingService
     @MockK lateinit var behandlingService: BehandlingService
-    @MockK(relaxed = true) lateinit var aktoerService: AktoerService
+    @MockK(relaxed = true) lateinit var aktørSynkronisering: DigitalSøknadAktørSynkronisering
 
     private lateinit var opprettSakOgBehandlingDigitalSøknad: OpprettSakOgBehandlingDigitalSøknad
     private lateinit var prosessinstans: Prosessinstans
@@ -76,7 +71,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
     fun setup() {
         opprettSakOgBehandlingDigitalSøknad = OpprettSakOgBehandlingDigitalSøknad(
             fagsakService, persondataFasade, mottatteOpplysningerService, jsonMapper,
-            skjemaSakMappingService, behandlingService, aktoerService
+            skjemaSakMappingService, behandlingService, aktørSynkronisering
         )
 
         prosessinstans = Prosessinstans.forTest {
@@ -109,22 +104,23 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
     }
 
     @Test
-    fun `inngangsSteg returnerer OPPRETT_SAK_OG_BEHANDLING_SØKNAD`() {
+    fun `inngangsSteg returnerer OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD`() {
         opprettSakOgBehandlingDigitalSøknad.inngangsSteg() shouldBe ProsessSteg.OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD
     }
 
     @Test
     fun `utfør oppretter fagsak og behandling med korrekte verdier`() {
-        mockFagsakOgBehandling()
         mockMottatteOpplysninger()
         val requestSlot = slot<OpprettSakRequest>()
-        every { fagsakService.nyFagsakOgBehandling(capture(requestSlot)) } returns mockk<Fagsak>().also {
+        val fagsak = mockk<Fagsak>().also {
             every { it.hentAktivBehandling() } returns mockk<Behandling>(relaxed = true).also { b ->
                 every { b.id } returns behandlingId
                 every { b.status } returns Behandlingsstatus.OPPRETTET
             }
             every { it.saksnummer } returns "MEL-1234"
         }
+        every { persondataFasade.hentAktørIdForIdent(fnr) } returns aktørId
+        every { fagsakService.nyFagsakOgBehandling(capture(requestSlot)) } returns fagsak
 
         opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
 
@@ -135,6 +131,20 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         capturedRequest.behandlingstema shouldBe Behandlingstema.UTSENDT_ARBEIDSTAKER
         capturedRequest.behandlingstype shouldBe Behandlingstyper.FØRSTEGANG
         capturedRequest.behandlingsårsaktype shouldBe Behandlingsaarsaktyper.SØKNAD
+    }
+
+    @Test
+    fun `utfør kaller aktørSynkronisering med utledet AktørerFraSøknad`() {
+        val fagsak = mockFagsakOgBehandling()
+        mockMottatteOpplysninger()
+        val aktørerSlot = slot<AktørerFraSøknad>()
+        every { aktørSynkronisering.synkroniser(any(), capture(aktørerSlot)) } just Runs
+
+        opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
+
+        aktørerSlot.captured.arbeidsgiverOrgnumre shouldBe listOf(orgnr)
+        aktørerSlot.captured.skjemadel shouldBe Skjemadel.ARBEIDSTAKERS_DEL
+        verify { aktørSynkronisering.synkroniser(any(), any()) }
     }
 
     @Test
@@ -254,150 +264,6 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
 
         verify(exactly = 0) { behandling.status = Behandlingsstatus.AVVENT_DOK_PART }
-    }
-
-    @Test
-    fun `utfør setter arbeidsgiver-orgnr og ingen fullmektig for DEG_SELV`() {
-        mockMottatteOpplysninger()
-        val requestSlot = slot<OpprettSakRequest>()
-        every { persondataFasade.hentAktørIdForIdent(fnr) } returns aktørId
-        every { fagsakService.nyFagsakOgBehandling(capture(requestSlot)) } returns mockk<Fagsak>().also {
-            every { it.hentAktivBehandling() } returns mockk<Behandling>(relaxed = true).also { b ->
-                every { b.id } returns behandlingId
-                every { b.status } returns Behandlingsstatus.OPPRETTET
-            }
-            every { it.saksnummer } returns "MEL-1234"
-        }
-
-        opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
-
-        requestSlot.captured.arbeidsgiver shouldBe orgnr
-        requestSlot.captured.fullmektig shouldBe null
-        verify(exactly = 0) { aktoerService.lagEllerOppdaterAktoer(any(), any()) }
-    }
-
-    @Test
-    fun `utfør setter fullmektig på request for ANNEN_PERSON`() {
-        val annenPersonFnr = "10987654321"
-        val annenPersonSøknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
-            metadata = no.nav.melosys.skjema.types.utsendtarbeidstaker.AnnenPersonMetadata(
-                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
-                arbeidsgiverNavn = "Test AS",
-                juridiskEnhetOrgnr = juridiskEnhetOrgnr,
-                fullmektigFnr = annenPersonFnr
-            )
-            fnr = this@OpprettSakOgBehandlingDigitalSøknadTest.fnr
-            orgnr = this@OpprettSakOgBehandlingDigitalSøknadTest.orgnr
-            referanseId = this@OpprettSakOgBehandlingDigitalSøknadTest.referanseId
-        }
-        val annenPersonProsessinstans = Prosessinstans.forTest {
-            medData(ProsessDataKey.DIGITAL_SØKNADSDATA, annenPersonSøknadsdata)
-        }
-
-        val requestSlot = slot<OpprettSakRequest>()
-        every { persondataFasade.hentAktørIdForIdent(fnr) } returns aktørId
-        every { fagsakService.nyFagsakOgBehandling(capture(requestSlot)) } returns mockk<Fagsak>().also {
-            every { it.hentAktivBehandling() } returns mockk<Behandling>(relaxed = true).also { b ->
-                every { b.id } returns behandlingId
-                every { b.status } returns Behandlingsstatus.OPPRETTET
-            }
-            every { it.saksnummer } returns "MEL-1234"
-        }
-        every { jsonMapper.writeValueAsString(annenPersonSøknadsdata) } returns "{}"
-        every { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any()) } returns
-            mockk<MottatteOpplysninger> { every { id } returns 99L }
-
-        opprettSakOgBehandlingDigitalSøknad.utfør(annenPersonProsessinstans)
-
-        requestSlot.captured.fullmektig?.personident shouldBe annenPersonFnr
-        requestSlot.captured.fullmektig?.fullmakter shouldBe listOf(Fullmaktstype.FULLMEKTIG_SØKNAD)
-        verify(exactly = 0) { aktoerService.lagEllerOppdaterAktoer(any(), any()) }
-    }
-
-    @Test
-    fun `utfør lagrer ekstra fullmektig via AktoerService for ARBEIDSGIVER_MED_FULLMAKT`() {
-        val fullmektigFnr = "10987654321"
-        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
-            metadata = ArbeidsgiverMedFullmaktMetadata(
-                skjemadel = Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL,
-                arbeidsgiverNavn = "Test AS",
-                juridiskEnhetOrgnr = juridiskEnhetOrgnr,
-                fullmektigFnr = fullmektigFnr
-            )
-            fnr = this@OpprettSakOgBehandlingDigitalSøknadTest.fnr
-            orgnr = this@OpprettSakOgBehandlingDigitalSøknadTest.orgnr
-            referanseId = this@OpprettSakOgBehandlingDigitalSøknadTest.referanseId
-        }
-        val pi = Prosessinstans.forTest {
-            medData(ProsessDataKey.DIGITAL_SØKNADSDATA, søknadsdata)
-        }
-
-        val requestSlot = slot<OpprettSakRequest>()
-        val ekstraAktørSlot = slot<AktoerDto>()
-        val fagsak = mockk<Fagsak>().also {
-            every { it.hentAktivBehandling() } returns mockk<Behandling>(relaxed = true).also { b ->
-                every { b.id } returns behandlingId
-                every { b.status } returns Behandlingsstatus.OPPRETTET
-            }
-            every { it.saksnummer } returns "MEL-1234"
-        }
-        every { persondataFasade.hentAktørIdForIdent(fnr) } returns aktørId
-        every { fagsakService.nyFagsakOgBehandling(capture(requestSlot)) } returns fagsak
-        every { jsonMapper.writeValueAsString(søknadsdata) } returns "{}"
-        every { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any()) } returns
-            mockk<MottatteOpplysninger> { every { id } returns 99L }
-        every { aktoerService.lagEllerOppdaterAktoer(eq(fagsak), capture(ekstraAktørSlot)) } returns 1L
-
-        opprettSakOgBehandlingDigitalSøknad.utfør(pi)
-
-        // Person-fullmektig settes via OpprettSakRequest (fullmektig nr. 1)
-        requestSlot.captured.fullmektig?.personident shouldBe fullmektigFnr
-        requestSlot.captured.fullmektig?.fullmakter shouldBe listOf(Fullmaktstype.FULLMEKTIG_SØKNAD)
-
-        // Organisasjons-fullmektig (arbeidsgiver) lagres via AktoerService (fullmektig nr. 2)
-        ekstraAktørSlot.captured.rolleKode shouldBe Aktoersroller.FULLMEKTIG.name
-        ekstraAktørSlot.captured.orgnr shouldBe orgnr
-        ekstraAktørSlot.captured.fullmakter shouldBe setOf(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
-    }
-
-    @Test
-    fun `utfør lagrer ekstra arbeidsgiver via AktoerService når koblet skjema har annet orgnr`() {
-        val annenOrgnr = "555555555"
-        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
-            skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
-            data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
-            fnr = this@OpprettSakOgBehandlingDigitalSøknadTest.fnr
-            orgnr = this@OpprettSakOgBehandlingDigitalSøknadTest.orgnr
-            referanseId = this@OpprettSakOgBehandlingDigitalSøknadTest.referanseId
-            medKobletArbeidsgiverSkjema {
-                orgnr = annenOrgnr
-            }
-        }
-        val pi = Prosessinstans.forTest {
-            medData(ProsessDataKey.DIGITAL_SØKNADSDATA, søknadsdata)
-        }
-
-        val requestSlot = slot<OpprettSakRequest>()
-        val ekstraAktørSlot = slot<AktoerDto>()
-        val fagsak = mockk<Fagsak>().also {
-            every { it.hentAktivBehandling() } returns mockk<Behandling>(relaxed = true).also { b ->
-                every { b.id } returns behandlingId
-                every { b.status } returns Behandlingsstatus.OPPRETTET
-            }
-            every { it.saksnummer } returns "MEL-1234"
-        }
-        every { persondataFasade.hentAktørIdForIdent(fnr) } returns aktørId
-        every { fagsakService.nyFagsakOgBehandling(capture(requestSlot)) } returns fagsak
-        every { jsonMapper.writeValueAsString(søknadsdata) } returns "{}"
-        every { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any()) } returns
-            mockk<MottatteOpplysninger> { every { id } returns 99L }
-        every { aktoerService.lagEllerOppdaterAktoer(eq(fagsak), capture(ekstraAktørSlot)) } returns 1L
-
-        opprettSakOgBehandlingDigitalSøknad.utfør(pi)
-
-        requestSlot.captured.arbeidsgiver shouldBe orgnr
-        ekstraAktørSlot.captured.rolleKode shouldBe Aktoersroller.ARBEIDSGIVER.name
-        ekstraAktørSlot.captured.orgnr shouldBe annenOrgnr
     }
 
     @Test

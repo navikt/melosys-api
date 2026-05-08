@@ -172,18 +172,6 @@ internal class AktoerServiceTest {
         verify(exactly = 0) { aktoerRepository.save(any()) }
     }
 
-    @Test
-    fun slettAlleFullmektige_sletterAlleFullmektigeForFagsak() {
-        val fagsak = Fagsak.forTest()
-
-
-        aktoerService.slettAlleFullmektige(fagsak)
-
-
-        verify { aktoerRepository.deleteAllByFagsakAndRolle(fagsak, Aktoersroller.FULLMEKTIG) }
-        verify { aktoerRepository.flush() }
-    }
-
     private fun lagAktoer(): Aktoer = Aktoer().apply {
         id = 234L
     }

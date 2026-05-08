@@ -1,9 +1,6 @@
 package no.nav.melosys.saksflyt.steg.soknad
 
-import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.service.aktoer.AktoerDto
-import no.nav.melosys.service.sak.FullmektigDto
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.AnnenPersonMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMedFullmaktMetadata
@@ -11,26 +8,47 @@ import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.DegSelvMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMedFullmaktMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 
 /**
- * Aktørene som skal ligge på fagsaken etter at denne innsendingen er behandlet.
- * BRUKER (arbeidstaker) håndteres separat via OpprettSakRequest.medAktørID,
- * så denne strukturen dekker kun ARBEIDSGIVER- og FULLMEKTIG-aktører.
- *
+ * Aktørene som en innsending skal sette opp på saken (BRUKER håndteres separat).
  */
 data class AktørerFraSøknad(
     val arbeidsgiverOrgnumre: List<String>,
-    val fullmektige: List<FullmektigDto>
+    val fullmektige: List<FullmektigSpec>,
+    val skjemadel: Skjemadel
 )
+
+/**
+ * En FULLMEKTIG-aktør som skal lagres. orgnr og/eller personIdent er satt.
+ * Når orgnr finnes og innsender er identifisert, får vi også [kontaktpersonFnr]
+ * som brukes til å slå opp navn til KONTAKTOPPLYSNING via PDL.
+ */
+data class FullmektigSpec(
+    val orgnr: String?,
+    val personIdent: String?,
+    val kontaktpersonFnr: String?,
+    val fullmakter: Set<Fullmaktstype>
+) {
+    init {
+        require(orgnr != null || personIdent != null) {
+            "Fullmektig må ha minst orgnr eller personIdent"
+        }
+        require(orgnr != null || kontaktpersonFnr == null) {
+            "Kontaktperson-info krever at fullmektig har orgnr (lagres på (sak, orgnr))"
+        }
+        require(fullmakter.isNotEmpty()) { "Fullmektig må ha minst én fullmaktstype" }
+    }
+}
 
 object DigitalSøknadAktørerMapper {
 
-    fun utled(søknadsdata: UtsendtArbeidstakerSkjemaM2MDto): AktørerFraSøknad {
-        return AktørerFraSøknad(
+    fun utled(søknadsdata: UtsendtArbeidstakerSkjemaM2MDto): AktørerFraSøknad =
+        AktørerFraSøknad(
             arbeidsgiverOrgnumre = utledArbeidsgivere(søknadsdata),
-            fullmektige = utledFullmektige(søknadsdata)
+            fullmektige = utledFullmektige(søknadsdata),
+            skjemadel = søknadsdata.skjema.metadata.skjemadel
         )
-    }
 
     private fun utledArbeidsgivere(søknadsdata: UtsendtArbeidstakerSkjemaM2MDto): List<String> {
         // Tar orgnr fra både primært og koblet skjema. AT-del og AG-del kan ha ulike orgnr
@@ -44,40 +62,50 @@ object DigitalSøknadAktørerMapper {
         }
     }
 
-    private fun utledFullmektige(søknadsdata: UtsendtArbeidstakerSkjemaM2MDto): List<FullmektigDto> {
+    private fun utledFullmektige(søknadsdata: UtsendtArbeidstakerSkjemaM2MDto): List<FullmektigSpec> {
         val metadata = søknadsdata.skjema.metadata
+        val innsenderFnr = søknadsdata.innsenderFnr
         val arbeidsgiverOrgnr = søknadsdata.skjema.orgnr
+
         return when (metadata) {
             is DegSelvMetadata,
-            is ArbeidsgiverMetadata,
-            is RadgiverMetadata -> emptyList()
+            is ArbeidsgiverMetadata -> emptyList()
 
             is AnnenPersonMetadata -> listOf(
-                personFullmektig(metadata.fullmektigFnr, Fullmaktstype.FULLMEKTIG_SØKNAD)
+                FullmektigSpec(
+                    orgnr = null,
+                    personIdent = metadata.fullmektigFnr,
+                    kontaktpersonFnr = null,
+                    fullmakter = setOf(Fullmaktstype.FULLMEKTIG_SØKNAD)
+                )
             )
 
             is ArbeidsgiverMedFullmaktMetadata -> listOf(
-                personFullmektig(metadata.fullmektigFnr, Fullmaktstype.FULLMEKTIG_SØKNAD),
-                organisasjonFullmektig(arbeidsgiverOrgnr, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
+                FullmektigSpec(
+                    orgnr = arbeidsgiverOrgnr,
+                    personIdent = metadata.fullmektigFnr,
+                    kontaktpersonFnr = metadata.fullmektigFnr,
+                    fullmakter = setOf(Fullmaktstype.FULLMEKTIG_SØKNAD)
+                )
+            )
+
+            is RadgiverMetadata -> listOf(
+                FullmektigSpec(
+                    orgnr = metadata.radgiverfirma.orgnr,
+                    personIdent = null,
+                    kontaktpersonFnr = innsenderFnr,
+                    fullmakter = setOf(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
+                )
             )
 
             is RadgiverMedFullmaktMetadata -> listOf(
-                personFullmektig(metadata.fullmektigFnr, Fullmaktstype.FULLMEKTIG_SØKNAD),
-                organisasjonFullmektig(metadata.radgiverfirma.orgnr, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
+                FullmektigSpec(
+                    orgnr = metadata.radgiverfirma.orgnr,
+                    personIdent = metadata.fullmektigFnr,
+                    kontaktpersonFnr = metadata.fullmektigFnr,
+                    fullmakter = setOf(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
+                )
             )
         }
     }
-
-    private fun personFullmektig(fnr: String, fullmaktstype: Fullmaktstype): FullmektigDto =
-        FullmektigDto(orgnr = null, personident = fnr, fullmakter = listOf(fullmaktstype))
-
-    private fun organisasjonFullmektig(orgnr: String, fullmaktstype: Fullmaktstype): FullmektigDto =
-        FullmektigDto(orgnr = orgnr, personident = null, fullmakter = listOf(fullmaktstype))
-}
-
-internal fun FullmektigDto.tilAktoerDto(): AktoerDto = AktoerDto().apply {
-    rolleKode = Aktoersroller.FULLMEKTIG.name
-    orgnr = this@tilAktoerDto.orgnr
-    personIdent = personident
-    fullmakter = this@tilAktoerDto.fullmakter.toSet()
 }

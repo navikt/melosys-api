@@ -5,7 +5,6 @@ import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
-import no.nav.melosys.service.sak.FullmektigDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.AnnenPersonMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMedFullmaktMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMetadata
@@ -36,17 +35,18 @@ internal class DigitalSøknadAktørerMapperTest {
             )
             fnr = arbeidstakerFnr
             orgnr = arbeidsgiverOrgnr
-            innsenderFnr = arbeidstakerFnr // arbeidstaker fyller selv
+            innsenderFnr = arbeidstakerFnr
         }
 
         val resultat = DigitalSøknadAktørerMapper.utled(søknadsdata)
 
         resultat.arbeidsgiverOrgnumre shouldBe listOf(arbeidsgiverOrgnr)
         resultat.fullmektige.shouldBeEmpty()
+        resultat.skjemadel shouldBe Skjemadel.ARBEIDSTAKERS_DEL
     }
 
     @Test
-    fun `ARBEIDSGIVER gir kun arbeidsgiver, ingen fullmektige`() {
+    fun `ARBEIDSGIVER (uten fullmakt) gir kun arbeidsgiver, ingen fullmektige`() {
         val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
             metadata = ArbeidsgiverMetadata(
                 skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
@@ -85,26 +85,7 @@ internal class DigitalSøknadAktørerMapperTest {
     }
 
     @Test
-    fun `ARBEIDSGIVER med koblet skjema med samme orgnr gir kun én arbeidsgiver`() {
-        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
-            metadata = ArbeidsgiverMetadata(
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
-                arbeidsgiverNavn = "Test AS",
-                juridiskEnhetOrgnr = juridiskEnhet
-            )
-            data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
-            fnr = arbeidstakerFnr
-            orgnr = arbeidsgiverOrgnr
-            medKobletArbeidsgiverSkjema { orgnr = arbeidsgiverOrgnr }
-        }
-
-        val resultat = DigitalSøknadAktørerMapper.utled(søknadsdata)
-
-        resultat.arbeidsgiverOrgnumre shouldBe listOf(arbeidsgiverOrgnr)
-    }
-
-    @Test
-    fun `ARBEIDSGIVER_MED_FULLMAKT gir to fullmektige - person og arbeidsgiver-orgnr`() {
+    fun `ARBEIDSGIVER_MED_FULLMAKT gir én FULLMEKTIG-aktør med orgnr + personIdent + FULLMEKTIG_SØKNAD`() {
         val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
             metadata = ArbeidsgiverMedFullmaktMetadata(
                 skjemadel = Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL,
@@ -114,19 +95,24 @@ internal class DigitalSøknadAktørerMapperTest {
             )
             fnr = arbeidstakerFnr
             orgnr = arbeidsgiverOrgnr
+            innsenderFnr = fullmektigFnr
         }
 
         val resultat = DigitalSøknadAktørerMapper.utled(søknadsdata)
 
         resultat.arbeidsgiverOrgnumre shouldBe listOf(arbeidsgiverOrgnr)
-        resultat.fullmektige shouldContainExactlyInAnyOrder listOf(
-            FullmektigDto(orgnr = null, personident = fullmektigFnr, fullmakter = listOf(Fullmaktstype.FULLMEKTIG_SØKNAD)),
-            FullmektigDto(orgnr = arbeidsgiverOrgnr, personident = null, fullmakter = listOf(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER))
+        resultat.fullmektige shouldBe listOf(
+            FullmektigSpec(
+                orgnr = arbeidsgiverOrgnr,
+                personIdent = fullmektigFnr,
+                kontaktpersonFnr = fullmektigFnr,
+                fullmakter = setOf(Fullmaktstype.FULLMEKTIG_SØKNAD)
+            )
         )
     }
 
     @Test
-    fun `RADGIVER (uten fullmakt) gir kun arbeidsgiver, radgiverfirma lagres ikke`() {
+    fun `RADGIVER (uten fullmakt) gir én FULLMEKTIG-aktør med orgnr + FULLMEKTIG_ARBEIDSGIVER`() {
         val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
             metadata = RadgiverMetadata(
                 skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
@@ -137,16 +123,24 @@ internal class DigitalSøknadAktørerMapperTest {
             data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
             fnr = arbeidstakerFnr
             orgnr = arbeidsgiverOrgnr
+            innsenderFnr = fullmektigFnr
         }
 
         val resultat = DigitalSøknadAktørerMapper.utled(søknadsdata)
 
         resultat.arbeidsgiverOrgnumre shouldBe listOf(arbeidsgiverOrgnr)
-        resultat.fullmektige.shouldBeEmpty()
+        resultat.fullmektige shouldBe listOf(
+            FullmektigSpec(
+                orgnr = radgiverfirmaOrgnr,
+                personIdent = null,
+                kontaktpersonFnr = fullmektigFnr,
+                fullmakter = setOf(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
+            )
+        )
     }
 
     @Test
-    fun `RADGIVER_MED_FULLMAKT gir to fullmektige - person og radgiverfirma`() {
+    fun `RADGIVER_MED_FULLMAKT gir én FULLMEKTIG-aktør med orgnr + personIdent + begge fullmaktstyper`() {
         val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
             metadata = RadgiverMedFullmaktMetadata(
                 skjemadel = Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL,
@@ -157,19 +151,24 @@ internal class DigitalSøknadAktørerMapperTest {
             )
             fnr = arbeidstakerFnr
             orgnr = arbeidsgiverOrgnr
+            innsenderFnr = fullmektigFnr
         }
 
         val resultat = DigitalSøknadAktørerMapper.utled(søknadsdata)
 
         resultat.arbeidsgiverOrgnumre shouldBe listOf(arbeidsgiverOrgnr)
-        resultat.fullmektige shouldContainExactlyInAnyOrder listOf(
-            FullmektigDto(orgnr = null, personident = fullmektigFnr, fullmakter = listOf(Fullmaktstype.FULLMEKTIG_SØKNAD)),
-            FullmektigDto(orgnr = radgiverfirmaOrgnr, personident = null, fullmakter = listOf(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER))
+        resultat.fullmektige shouldBe listOf(
+            FullmektigSpec(
+                orgnr = radgiverfirmaOrgnr,
+                personIdent = fullmektigFnr,
+                kontaktpersonFnr = fullmektigFnr,
+                fullmakter = setOf(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
+            )
         )
     }
 
     @Test
-    fun `ANNEN_PERSON gir én fullmektig - kun person med FULLMEKTIG_SØKNAD`() {
+    fun `ANNEN_PERSON gir én FULLMEKTIG-aktør med kun personIdent + FULLMEKTIG_SØKNAD`() {
         val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
             metadata = AnnenPersonMetadata(
                 skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
@@ -179,13 +178,19 @@ internal class DigitalSøknadAktørerMapperTest {
             )
             fnr = arbeidstakerFnr
             orgnr = arbeidsgiverOrgnr
+            innsenderFnr = fullmektigFnr
         }
 
         val resultat = DigitalSøknadAktørerMapper.utled(søknadsdata)
 
         resultat.arbeidsgiverOrgnumre shouldBe listOf(arbeidsgiverOrgnr)
         resultat.fullmektige shouldBe listOf(
-            FullmektigDto(orgnr = null, personident = fullmektigFnr, fullmakter = listOf(Fullmaktstype.FULLMEKTIG_SØKNAD))
+            FullmektigSpec(
+                orgnr = null,
+                personIdent = fullmektigFnr,
+                kontaktpersonFnr = null,
+                fullmakter = setOf(Fullmaktstype.FULLMEKTIG_SØKNAD)
+            )
         )
     }
 }

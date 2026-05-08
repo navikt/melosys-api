@@ -9,13 +9,10 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey.DIGITAL_SØKNADSDATA
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.service.aktoer.AktoerDto
-import no.nav.melosys.service.aktoer.AktoerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
@@ -32,13 +29,12 @@ private val log = KotlinLogging.logger { }
  * Saga-steg som oppretter ny fagsak og behandling fra mottatt digital søknad.
  *
  * Brukes i MELOSYS_MOTTAK_DIGITAL_SØKNAD-flyten (ny sak).
- * For eksisterende sak brukes HåndterEksisterendeSakSøknad i MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD-flyten.
+ * For eksisterende sak brukes HåndterEksisterendeSakDigitalSøknad.
  *
- * 1. Oppretter fagsak med sakstype EU/EØS og tema MEDLEMSKAP_LOVVALG
- * 2. Oppretter behandling med tema UTSENDT_ARBEIDSTAKER
+ * 1. Oppretter fagsak med sakstype EU/EØS og tema MEDLEMSKAP_LOVVALG, og BRUKER-aktør
+ * 2. Synkroniserer ARBEIDSGIVER + FULLMEKTIG-aktører + kontaktopplysninger fra søknaden
  * 3. Setter AVVENT_DOK_PART hvis kun arbeidsgiver-del uten motpart
- * 4. Lagrer alle relaterte skjemaId-er i mapping-tabellen
- * 5. Lagrer mottatte opplysninger og setter behandling på prosessinstansen
+ * 4. Lagrer mottatte opplysninger og skjema-sak-mapping
  */
 @Component
 class OpprettSakOgBehandlingDigitalSøknad(
@@ -48,7 +44,7 @@ class OpprettSakOgBehandlingDigitalSøknad(
     private val jsonMapper: JsonMapper,
     private val skjemaSakMappingService: SkjemaSakMappingService,
     private val behandlingService: BehandlingService,
-    private val aktoerService: AktoerService
+    private val aktørSynkronisering: DigitalSøknadAktørSynkronisering
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD
@@ -60,13 +56,10 @@ class OpprettSakOgBehandlingDigitalSøknad(
         val fnr = skjema.fnr
         val referanseId = søknadsdata.referanseId
 
-        log.info { "Oppretter fagsak og behandling for digital søknad,  referanseId=$referanseId, skjemaId=${skjema.id}" }
+        log.info { "Oppretter fagsak og behandling for digital søknad, referanseId=$referanseId, skjemaId=${skjema.id}" }
 
         val aktørId = persondataFasade.hentAktørIdForIdent(fnr)
-
         val behandlingstema = BehandlingstemaUtleder.utled(søknadsdata)
-
-        val aktører = DigitalSøknadAktørerMapper.utled(søknadsdata)
 
         val opprettSakRequest = OpprettSakRequest.Builder()
             .medAktørID(aktørId)
@@ -76,8 +69,6 @@ class OpprettSakOgBehandlingDigitalSøknad(
             .medBehandlingstype(Behandlingstyper.FØRSTEGANG)
             .medBehandlingsårsaktype(Behandlingsaarsaktyper.SØKNAD)
             .medMottaksdato(søknadsdata.innsendtTidspunkt.toLocalDate())
-            .medArbeidsgiver(aktører.arbeidsgiverOrgnumre.first())
-            .medFullmektig(aktører.fullmektige.firstOrNull())
             .build()
 
         val fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest)
@@ -85,7 +76,8 @@ class OpprettSakOgBehandlingDigitalSøknad(
 
         log.info { "Opprettet fagsak ${fagsak.saksnummer} med behandling ${behandling.id} for digital søknad" }
 
-        leggTilEkstraAktører(fagsak, aktører)
+        val aktører = DigitalSøknadAktørerMapper.utled(søknadsdata)
+        aktørSynkronisering.synkroniser(fagsak, aktører)
 
         // Sett AVVENT_DOK_PART hvis kun arbeidsgiver-del og ingen koblet motpart
         if (metadata.skjemadel == Skjemadel.ARBEIDSGIVERS_DEL && søknadsdata.kobletSkjema == null) {
@@ -105,23 +97,6 @@ class OpprettSakOgBehandlingDigitalSøknad(
         log.info { "Lagret mottatte opplysninger for digital søknad referanseId=$referanseId" }
     }
 
-    private fun leggTilEkstraAktører(fagsak: Fagsak, aktører: AktørerFraSøknad) {
-        // OpprettSakRequest tar ett orgnr og én fullmektig. For ARBEIDSGIVER/RADGIVER med
-        // koblet skjema med annet orgnr, og for MED_FULLMAKT-typene med to fullmektige,
-        // legger vi til de øvrige her.
-        aktører.arbeidsgiverOrgnumre.drop(1).forEach { orgnr ->
-            aktoerService.lagEllerOppdaterAktoer(fagsak, arbeidsgiverDto(orgnr))
-        }
-        aktører.fullmektige.drop(1).forEach { fullmektig ->
-            aktoerService.lagEllerOppdaterAktoer(fagsak, fullmektig.tilAktoerDto())
-        }
-    }
-
-    private fun arbeidsgiverDto(orgnr: String) = AktoerDto().apply {
-        rolleKode = Aktoersroller.ARBEIDSGIVER.name
-        this.orgnr = orgnr
-    }
-
     private fun lagreSkjemaSakMapping(
         søknadsdata: UtsendtArbeidstakerSkjemaM2MDto,
         fagsak: Fagsak,
@@ -135,6 +110,4 @@ class OpprettSakOgBehandlingDigitalSøknad(
             innsendtDato = søknadsdata.innsendtTidspunkt.atZone(OSLO_ZONE).toInstant()
         )
     }
-
-
 }
