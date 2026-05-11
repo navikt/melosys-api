@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.mapper
 import jakarta.transaction.Transactional
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
 import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT
@@ -15,6 +16,8 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
 import no.nav.melosys.integrasjon.dokgen.dto.ÅrsavregningVedtaksbrev
+import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
+import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebelopResponse
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.aarsavregning.AvgiftsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
@@ -28,7 +31,8 @@ import java.math.BigDecimal
 @Component
 class ÅrsavregningVedtakMapper(
     private val årsavregningService: ÅrsavregningService,
-    private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService
+    private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
+    private val trygdeavgiftClient: TrygdeavgiftClient
 ) {
     @Transactional
     internal fun mapÅrsavregning(
@@ -48,6 +52,7 @@ class ÅrsavregningVedtakMapper(
         val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.avgiftspliktigperioder)
         val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttTrygdeavgiftsGrunnlag?.avgiftspliktigperioder)
         val erNyÅrsavregning = behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
+        val minstebelop = hentMinstebelop(behandlingsresultat.hentÅrsavregning().aar, årsavregningModel.endeligAvgift, årsavregningModel.tidligereAvgift)
 
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
@@ -66,7 +71,10 @@ class ÅrsavregningVedtakMapper(
             eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale(),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.hentBehandling()),
             harSkjoennsfastsattInntektsgrunnlag = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag,
-            erNyÅrsavregning = erNyÅrsavregning
+            erNyÅrsavregning = erNyÅrsavregning,
+            harMisjonaerInntekt = harMisjonaerInntekt(årsavregningModel.endeligAvgift, årsavregningModel.tidligereAvgift),
+            minstebelopVerdi = minstebelop?.beloep,
+            minstebelopAar = minstebelop?.aar
         )
     }
 
@@ -79,6 +87,7 @@ class ÅrsavregningVedtakMapper(
         val fagsak = behandling.fagsak
         val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.avgiftspliktigperioder)
         val erNyÅrsavregning = årsavregningModel.tidligereÅrsavregningmanueltAvgiftBeloep != null
+        val minstebelop = hentMinstebelop(årsavregningModel.år, emptyList(), årsavregningModel.tidligereAvgift)
 
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
@@ -97,7 +106,10 @@ class ÅrsavregningVedtakMapper(
             eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale(),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandling),
             harSkjoennsfastsattInntektsgrunnlag = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag,
-            erNyÅrsavregning = erNyÅrsavregning
+            erNyÅrsavregning = erNyÅrsavregning,
+            harMisjonaerInntekt = harMisjonaerInntekt(emptyList(), årsavregningModel.tidligereAvgift),
+            minstebelopVerdi = minstebelop?.beloep,
+            minstebelopAar = minstebelop?.aar
         )
     }
 
@@ -105,7 +117,7 @@ class ÅrsavregningVedtakMapper(
         medlemskapsTypePliktig: Boolean,
         trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
     ): List<Avgiftsperiode> {
-        if (trygdeavgiftsperioder.all { !it.harAvgift() }) return emptyList()
+        if (trygdeavgiftsperioder.all { !it.harAvgift() && it.beregningsregel == Avgiftsberegningsregel.ORDINÆR }) return emptyList()
 
         return trygdeavgiftsperioder.map { trygdeavgiftsperiode ->
             val grunnlagsInntektsperiode = trygdeavgiftsperiode.grunnlagInntekstperiode
@@ -125,7 +137,8 @@ class ÅrsavregningVedtakMapper(
                     grunnlagsInntektsperiode.type
                 ),
                 skatteplikt = trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge!!
-                    .skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
+                    .skatteplikttype == Skatteplikttype.SKATTEPLIKTIG,
+                beregningsregel = trygdeavgiftsperiode.beregningsregel.name
             )
         }
     }
@@ -154,6 +167,23 @@ class ÅrsavregningVedtakMapper(
 
     private fun arbAvgBetalesKreves(medlemskapsTypeErPliktig: Boolean, inntektskildeType: Inntektskildetype): Boolean {
         return !medlemskapsTypeErPliktig && inntektskildeType !== MISJONÆR
+    }
+
+    private fun harMisjonaerInntekt(
+        endeligAvgift: List<Trygdeavgiftsperiode>,
+        tidligereAvgift: List<Trygdeavgiftsperiode>
+    ): Boolean = (endeligAvgift + tidligereAvgift)
+        .any { it.grunnlagInntekstperiode?.type == MISJONÆR }
+
+    private fun hentMinstebelop(
+        årsavregningsår: Int,
+        endeligAvgift: List<Trygdeavgiftsperiode>,
+        tidligereAvgift: List<Trygdeavgiftsperiode>
+    ): MinstebelopResponse? {
+        val harIkkeOrdinærPeriode = (endeligAvgift + tidligereAvgift)
+            .any { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }
+        if (!harIkkeOrdinærPeriode) return null
+        return trygdeavgiftClient.hentMinstebelop(årsavregningsår)
     }
 
     private fun harPliktigMedlemskap(avgiftspliktigPerioder: List<AvgiftsperiodeForAvgift>?): Boolean {
