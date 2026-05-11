@@ -12,6 +12,7 @@ import io.mockk.verify
 import java.util.Optional
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.Kontaktopplysning
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
@@ -47,10 +48,74 @@ internal class DigitalSøknadAktørSynkroniseringTest {
     }
 
     @Test
+    fun `kontaktopplysning med samme navn beholdes uendret — manuelt registrert telefon overskrives ikke`() {
+        val fagsak = Fagsak.forTest { this.saksnummer = this@DigitalSøknadAktørSynkroniseringTest.saksnummer }
+        val eksisterendeKontakt = mockk<Kontaktopplysning>(relaxed = true).apply {
+            every { kontaktNavn } returns fullmektigNavn
+            every { kontaktOrgnr } returns null
+            every { kontaktTelefon } returns "12345678" // manuelt registrert
+        }
+        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.ARBEIDSGIVER) } returns emptyList()
+        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returns emptyList()
+        every { persondataFasade.hentSammensattNavn(fullmektigFnr) } returns fullmektigNavn
+        every { kontaktopplysningService.hentKontaktopplysning(saksnummer, rådgiverOrgnr) } returns
+            Optional.of(eksisterendeKontakt)
+        every { aktoerService.lagEllerOppdaterAktoer(eq(fagsak), any()) } returns 1L
+
+        synkronisering.synkroniser(fagsak, AktørerFraSøknad(
+            arbeidsgiverOrgnumre = listOf(arbeidsgiverOrgnr),
+            fullmektige = listOf(FullmektigSpec(
+                orgnr = rådgiverOrgnr,
+                personIdent = null,
+                kontaktpersonFnr = fullmektigFnr,
+                fullmakter = setOf(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
+            )),
+            skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+        ))
+
+        verify(exactly = 0) {
+            kontaktopplysningService.lagEllerOppdaterKontaktopplysning(any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `kontaktopplysning med nytt navn overskrives — gammel telefon og orgnr er ikke lenger relevant`() {
+        val fagsak = Fagsak.forTest { this.saksnummer = this@DigitalSøknadAktørSynkroniseringTest.saksnummer }
+        val nyttFnr = "20202020202"
+        val nyttNavn = "Kari Hansen"
+        val eksisterendeKontakt = mockk<Kontaktopplysning>(relaxed = true).apply {
+            every { kontaktNavn } returns fullmektigNavn
+            every { kontaktOrgnr } returns null
+            every { kontaktTelefon } returns "12345678"
+        }
+        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.ARBEIDSGIVER) } returns emptyList()
+        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returns emptyList()
+        every { persondataFasade.hentSammensattNavn(nyttFnr) } returns nyttNavn
+        every { kontaktopplysningService.hentKontaktopplysning(saksnummer, rådgiverOrgnr) } returns
+            Optional.of(eksisterendeKontakt)
+        every { aktoerService.lagEllerOppdaterAktoer(eq(fagsak), any()) } returns 1L
+
+        synkronisering.synkroniser(fagsak, AktørerFraSøknad(
+            arbeidsgiverOrgnumre = listOf(arbeidsgiverOrgnr),
+            fullmektige = listOf(FullmektigSpec(
+                orgnr = rådgiverOrgnr,
+                personIdent = null,
+                kontaktpersonFnr = nyttFnr,
+                fullmakter = setOf(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
+            )),
+            skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+        ))
+
+        verify {
+            kontaktopplysningService.lagEllerOppdaterKontaktopplysning(saksnummer, rådgiverOrgnr, null, nyttNavn, null)
+        }
+    }
+
+    @Test
     fun `RADGIVER_UTEN_FULLMAKT lagrer FULLMEKTIG-aktør med orgnr og kontaktopplysning`() {
         val fagsak = Fagsak.forTest { this.saksnummer = this@DigitalSøknadAktørSynkroniseringTest.saksnummer }
         every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.ARBEIDSGIVER) } returns emptyList()
-        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returnsMany listOf(emptyList(), emptyList())
+        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returns emptyList()
         every { persondataFasade.hentSammensattNavn(fullmektigFnr) } returns fullmektigNavn
 
         val aktørSlot = slot<AktoerDto>()
@@ -77,7 +142,7 @@ internal class DigitalSøknadAktørSynkroniseringTest {
     fun `RADGIVER_MED_FULLMAKT lagrer én aktør med både orgnr og personIdent`() {
         val fagsak = Fagsak.forTest { this.saksnummer = this@DigitalSøknadAktørSynkroniseringTest.saksnummer }
         every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.ARBEIDSGIVER) } returns emptyList()
-        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returnsMany listOf(emptyList(), emptyList())
+        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returns emptyList()
         every { persondataFasade.hentAktørIdForIdent(fullmektigFnr) } returns fullmektigAktørId
         every { persondataFasade.hentSammensattNavn(fullmektigFnr) } returns fullmektigNavn
 
@@ -105,7 +170,7 @@ internal class DigitalSøknadAktørSynkroniseringTest {
     fun `ANNEN_PERSON lagrer FULLMEKTIG-aktør med kun personIdent (ingen kontaktopplysning)`() {
         val fagsak = Fagsak.forTest { this.saksnummer = this@DigitalSøknadAktørSynkroniseringTest.saksnummer }
         every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.ARBEIDSGIVER) } returns emptyList()
-        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returnsMany listOf(emptyList(), emptyList())
+        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returns emptyList()
         every { persondataFasade.hentAktørIdForIdent(fullmektigFnr) } returns fullmektigAktørId
 
         val aktørSlot = slot<AktoerDto>()
@@ -136,7 +201,7 @@ internal class DigitalSøknadAktørSynkroniseringTest {
             rolle = Aktoersroller.ARBEIDSGIVER
         }
         every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.ARBEIDSGIVER) } returns listOf(eksisterendeArbeidsgiver)
-        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returnsMany listOf(emptyList(), emptyList())
+        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returns emptyList()
 
         synkronisering.synkroniser(fagsak, AktørerFraSøknad(
             arbeidsgiverOrgnumre = listOf(arbeidsgiverOrgnr),
@@ -150,7 +215,7 @@ internal class DigitalSøknadAktørSynkroniseringTest {
     @Test
     fun `AG-del med samme rådgiver etter komplett RADGIVER_MED_FULLMAKT — erstatter fullmaktstyper med spec, mister FULLMEKTIG_SØKNAD`() {
         val fagsak = Fagsak.forTest { this.saksnummer = this@DigitalSøknadAktørSynkroniseringTest.saksnummer }
-        val eksisterende = mockk<Aktoer>(relaxed = true).apply {
+        val eksisterendeAktør = mockk<Aktoer>(relaxed = true).apply {
             every { id } returns 1L
             every { orgnr } returns rådgiverOrgnr
             every { personIdent } returns fullmektigFnr
@@ -161,7 +226,7 @@ internal class DigitalSøknadAktørSynkroniseringTest {
             every { utenlandskPersonId } returns null
         }
         every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.ARBEIDSGIVER) } returns emptyList()
-        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returns listOf(eksisterende)
+        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returns listOf(eksisterendeAktør)
         every { persondataFasade.hentSammensattNavn(fullmektigFnr) } returns fullmektigNavn
 
         val dtoSlot = slot<AktoerDto>()
@@ -187,7 +252,7 @@ internal class DigitalSøknadAktørSynkroniseringTest {
     @Test
     fun `AG-del ARBEIDSGIVER uten rådgiver etter komplett RADGIVER_MED_FULLMAKT — sletter aktør (mister begge fullmaktstyper)`() {
         val fagsak = Fagsak.forTest { this.saksnummer = this@DigitalSøknadAktørSynkroniseringTest.saksnummer }
-        val eksisterende = mockk<Aktoer>(relaxed = true).apply {
+        val eksisterendeAktør = mockk<Aktoer>(relaxed = true).apply {
             every { id } returns 1L
             every { orgnr } returns rådgiverOrgnr
             every { personIdent } returns fullmektigFnr
@@ -195,7 +260,7 @@ internal class DigitalSøknadAktørSynkroniseringTest {
             every { rolle } returns Aktoersroller.FULLMEKTIG
         }
         every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.ARBEIDSGIVER) } returns emptyList()
-        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returns listOf(eksisterende)
+        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returns listOf(eksisterendeAktør)
         every { kontaktopplysningService.hentKontaktopplysning(saksnummer, rådgiverOrgnr) } returns
             Optional.of(mockk(relaxed = true))
 
@@ -215,7 +280,7 @@ internal class DigitalSøknadAktørSynkroniseringTest {
         val fagsak = Fagsak.forTest { this.saksnummer = this@DigitalSøknadAktørSynkroniseringTest.saksnummer }
         val annenPersonFnr = "20202020202"
         val annenPersonAktørId = "9999999999999"
-        val eksisterende = mockk<Aktoer>(relaxed = true).apply {
+        val eksisterendeAktør = mockk<Aktoer>(relaxed = true).apply {
             every { id } returns 1L
             every { orgnr } returns rådgiverOrgnr
             every { personIdent } returns fullmektigFnr
@@ -226,7 +291,7 @@ internal class DigitalSøknadAktørSynkroniseringTest {
             every { utenlandskPersonId } returns null
         }
         every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.ARBEIDSGIVER) } returns emptyList()
-        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returns listOf(eksisterende)
+        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returns listOf(eksisterendeAktør)
         every { persondataFasade.hentAktørIdForIdent(annenPersonFnr) } returns annenPersonAktørId
 
         val dtoSlots = mutableListOf<AktoerDto>()
@@ -262,7 +327,7 @@ internal class DigitalSøknadAktørSynkroniseringTest {
         val annenRådgiverOrgnr = "444444444"
         val annenInnsenderFnr = "30303030303"
         val annenNavn = "Kari Hansen"
-        val eksisterende = mockk<Aktoer>(relaxed = true).apply {
+        val eksisterendeAktør = mockk<Aktoer>(relaxed = true).apply {
             every { id } returns 1L
             every { orgnr } returns rådgiverOrgnr
             every { personIdent } returns fullmektigFnr
@@ -270,7 +335,7 @@ internal class DigitalSøknadAktørSynkroniseringTest {
             every { rolle } returns Aktoersroller.FULLMEKTIG
         }
         every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.ARBEIDSGIVER) } returns emptyList()
-        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returns listOf(eksisterende)
+        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returns listOf(eksisterendeAktør)
         every { persondataFasade.hentSammensattNavn(annenInnsenderFnr) } returns annenNavn
         every { kontaktopplysningService.hentKontaktopplysning(saksnummer, rådgiverOrgnr) } returns
             Optional.of(mockk(relaxed = true))
@@ -298,7 +363,7 @@ internal class DigitalSøknadAktørSynkroniseringTest {
     @Test
     fun `AT-del DEG_SELV etter komplett ARBEIDSGIVER_MED_FULLMAKT — arbeidsgiver-virksomhet mister SØKNAD, blir slettet`() {
         val fagsak = Fagsak.forTest { this.saksnummer = this@DigitalSøknadAktørSynkroniseringTest.saksnummer }
-        val eksisterende = mockk<Aktoer>(relaxed = true).apply {
+        val eksisterendeAktør = mockk<Aktoer>(relaxed = true).apply {
             every { id } returns 1L
             every { orgnr } returns arbeidsgiverOrgnr
             every { personIdent } returns fullmektigFnr
@@ -306,7 +371,7 @@ internal class DigitalSøknadAktørSynkroniseringTest {
             every { rolle } returns Aktoersroller.FULLMEKTIG
         }
         every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.ARBEIDSGIVER) } returns emptyList()
-        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returns listOf(eksisterende)
+        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returns listOf(eksisterendeAktør)
         every { kontaktopplysningService.hentKontaktopplysning(saksnummer, arbeidsgiverOrgnr) } returns
             Optional.of(mockk(relaxed = true))
 
@@ -323,7 +388,7 @@ internal class DigitalSøknadAktørSynkroniseringTest {
     @Test
     fun `AT-del DEG_SELV på sak med tidligere RADGIVER_MED_FULLMAKT fjerner FULLMEKTIG_SØKNAD-fullmaktstype og personIdent`() {
         val fagsak = Fagsak.forTest { this.saksnummer = this@DigitalSøknadAktørSynkroniseringTest.saksnummer }
-        val eksisterende = mockk<Aktoer>(relaxed = true).apply {
+        val eksisterendeAktør = mockk<Aktoer>(relaxed = true).apply {
             every { id } returns 1L
             every { orgnr } returns rådgiverOrgnr
             every { personIdent } returns fullmektigFnr
@@ -334,7 +399,7 @@ internal class DigitalSøknadAktørSynkroniseringTest {
             every { utenlandskPersonId } returns null
         }
         every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.ARBEIDSGIVER) } returns emptyList()
-        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returnsMany listOf(listOf(eksisterende), listOf(eksisterende))
+        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returns listOf(eksisterendeAktør)
 
         val dtoSlot = slot<AktoerDto>()
         every { aktoerService.lagEllerOppdaterAktoer(eq(fagsak), capture(dtoSlot)) } returns 1L

@@ -19,7 +19,7 @@ private val log = KotlinLogging.logger { }
  * Synkroniserer aktører + kontaktopplysninger fra digital søknad.
  *
  * Hver innsending er en autoritativ erklæring om den representasjonen den dekker:
- * - Match på orgnr → eksisterende aktør oppdateres med spec.fullmakter (ikke union).
+ * - Match på orgnr → eksisterende aktør oppdateres med spec.fullmakter.
  * - Eksisterende virksomhet-fullmektig uten match: slett ved AG-del; fjern kun FULLMEKTIG_SØKNAD ved ren AT-del.
  * - Eksisterende person-fullmektig uten match: slett ved AT-del; ellers behold urørt.
  * - KONTAKTOPPLYSNING speiler virksomhet-fullmektige.
@@ -45,36 +45,36 @@ class DigitalSøknadAktørSynkronisering(
     private fun dekkerArbeidstakerside(skjemadel: Skjemadel): Boolean =
         skjemadel == Skjemadel.ARBEIDSTAKERS_DEL || skjemadel == Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL
 
-    private fun synkroniserArbeidsgivere(fagsak: Fagsak, ønskede: List<String>) {
+    private fun synkroniserArbeidsgivere(fagsak: Fagsak, ønskedeOrgnumre: List<String>) {
         val eksisterende = aktoerService.hentfagsakAktører(fagsak, Aktoersroller.ARBEIDSGIVER)
             .mapNotNull { it.orgnr }.toSet()
-        if (eksisterende == ønskede.toSet()) {
+        if (eksisterende == ønskedeOrgnumre.toSet()) {
             log.debug { "Arbeidsgiver-aktører uendret på sak ${fagsak.saksnummer}, hopper over" }
             return
         }
-        aktoerService.erstattEksisterendeArbeidsgiveraktører(fagsak, ønskede)
+        aktoerService.erstattEksisterendeArbeidsgiveraktører(fagsak, ønskedeOrgnumre)
     }
 
-    private fun synkroniserFullmektige(fagsak: Fagsak, aktører: AktørerFraSøknad) {
-        val eksisterende = aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG)
-        val ønskedeIder = aktører.fullmektige.map(::identifikator).toSet()
-        val nyeOrgnr = aktører.fullmektige.mapNotNull { it.orgnr }.toSet()
+    private fun synkroniserFullmektige(fagsak: Fagsak, aktørerFraSøknad: AktørerFraSøknad) {
+        val eksisterendeAktører = aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG)
+        val ønskedeIdentifikatorer = aktørerFraSøknad.fullmektige.map(::identifikator).toSet()
+        val nyeOrgnr = aktørerFraSøknad.fullmektige.mapNotNull { it.orgnr }.toSet()
 
-        // 1. Behandle eksisterende uten match — slett eller reduser fullmakter avhengig av side
+        // 1. Eksisterende aktører som ikke finnes i ny innsending — slett eller oppdater
         val slettedeOrgnr = mutableSetOf<String>()
-        eksisterende.forEach { eksAkt ->
-            if (identifikator(eksAkt) !in ønskedeIder) {
-                val bleSlettet = håndterEksisterendeUtenMatch(fagsak, eksAkt, aktører.skjemadel)
-                if (bleSlettet) eksAkt.orgnr?.let { slettedeOrgnr.add(it) }
+        eksisterendeAktører.forEach { eksisterendeAktør ->
+            if (identifikator(eksisterendeAktør) !in ønskedeIdentifikatorer) {
+                val bleSlettet = fjernEllerOppdaterEksisterendeAktør(fagsak, eksisterendeAktør, aktørerFraSøknad.skjemadel)
+                if (bleSlettet) eksisterendeAktør.orgnr?.let { slettedeOrgnr.add(it) }
             }
         }
 
         // 2. Lagre/oppdatere ønskede fullmektige + tilhørende kontaktopplysninger
-        aktører.fullmektige.forEach { spec ->
-            val eksAkt = eksisterende.firstOrNull { identifikator(it) == identifikator(spec) }
-            lagEllerErstattFullmektig(fagsak, spec, eksAkt)
-            spec.kontaktpersonFnr?.let {
-                lagreKontaktopplysning(fagsak, spec.orgnr!!, it)
+        aktørerFraSøknad.fullmektige.forEach { fullmektigSpec ->
+            val eksisterendeAktør = eksisterendeAktører.firstOrNull { identifikator(it) == identifikator(fullmektigSpec) }
+            lagEllerErstattFullmektig(fagsak, fullmektigSpec, eksisterendeAktør)
+            fullmektigSpec.kontaktpersonFnr?.let {
+                lagreKontaktopplysning(fagsak, requireNotNull(fullmektigSpec.orgnr), it)
             }
         }
 
@@ -85,10 +85,10 @@ class DigitalSøknadAktørSynkronisering(
     }
 
     /**
-     * Behandler en eksisterende FULLMEKTIG-aktør som ikke matches av noen ny spec.
+     * Behandler en eksisterende FULLMEKTIG-aktør som ikke finnes i ny innsending.
      * Returnerer true hvis aktøren ble slettet.
      */
-    private fun håndterEksisterendeUtenMatch(
+    private fun fjernEllerOppdaterEksisterendeAktør(
         fagsak: Fagsak,
         aktør: Aktoer,
         skjemadel: Skjemadel
@@ -97,28 +97,27 @@ class DigitalSøknadAktørSynkronisering(
         val erPerson = aktør.orgnr == null && aktør.personIdent != null
 
         return when {
-            // Virksomhet + AG-del (med eller uten AT) → slett.
             // Innsendingen er autoritativ for hvem som er fullmektig-virksomhet,
-            // og denne aktøren er ikke i ny spec.
+            // og denne aktøren finnes ikke i innsendingen.
             erVirksomhet && dekkerArbeidsgiverside(skjemadel) -> {
-                log.info { "Sletter FULLMEKTIG-aktør ${aktør.id} (virksomhet uten match, AG-del) på sak ${fagsak.saksnummer}" }
-                aktoerService.slettAktoer(aktør.id!!)
+                log.info { "Sletter FULLMEKTIG-aktør ${aktør.id} (virksomhet ikke i innsending, AG-del) på sak ${fagsak.saksnummer}" }
+                aktoerService.slettAktoer(requireNotNull(aktør.id))
                 true
             }
-            // Person + AT-del → slett. AT-delen er autoritativ for person-fullmektig.
+            // AT-delen er autoritativ for person-fullmektig, og denne aktøren finnes ikke i innsendingen.
             erPerson && dekkerArbeidstakerside(skjemadel) -> {
-                log.info { "Sletter FULLMEKTIG-aktør ${aktør.id} (person uten match, AT-del) på sak ${fagsak.saksnummer}" }
-                aktoerService.slettAktoer(aktør.id!!)
+                log.info { "Sletter FULLMEKTIG-aktør ${aktør.id} (person ikke i innsending, AT-del) på sak ${fagsak.saksnummer}" }
+                aktoerService.slettAktoer(requireNotNull(aktør.id))
                 true
             }
-            // Virksomhet + kun AT-del → fjern FULLMEKTIG_SØKNAD og tøm personIdent.
-            // AG-fullmakten på denne virksomheten er ikke berørt av en AT-del.
+            // AG-fullmakten på denne virksomheten er ikke berørt av en AT-del,
+            // så vi fjerner kun FULLMEKTIG_SØKNAD og tømmer personIdent.
             erVirksomhet && dekkerArbeidstakerside(skjemadel) -> {
                 val nyeFullmakter = aktør.fullmaktstyper - Fullmaktstype.FULLMEKTIG_SØKNAD
                 if (nyeFullmakter == aktør.fullmaktstyper) return false
                 if (nyeFullmakter.isEmpty()) {
                     log.info { "Sletter FULLMEKTIG-aktør ${aktør.id} (tom etter AT-del) på sak ${fagsak.saksnummer}" }
-                    aktoerService.slettAktoer(aktør.id!!)
+                    aktoerService.slettAktoer(requireNotNull(aktør.id))
                     return true
                 }
                 log.info { "Fjerner FULLMEKTIG_SØKNAD fra ${aktør.id} på sak ${fagsak.saksnummer}" }
@@ -130,29 +129,27 @@ class DigitalSøknadAktørSynkronisering(
                 aktoerService.lagEllerOppdaterAktoer(fagsak, dto)
                 false
             }
-            // Person + AG-del (uten AT) → behold urørt. AG-delen sier ingenting om bruker-fullmakt.
+            // AG-del sier ingenting om bruker-fullmakt; person-aktøren forblir urørt.
             else -> false
         }
     }
 
-    private fun lagEllerErstattFullmektig(fagsak: Fagsak, spec: FullmektigSpec, eksisterende: Aktoer?) {
+    private fun lagEllerErstattFullmektig(fagsak: Fagsak, spec: FullmektigSpec, eksisterendeAktør: Aktoer?) {
         val aktørIdForPerson = spec.personIdent?.let { persondataFasade.hentAktørIdForIdent(it) }
-        // Innsendingen er autoritativ — fullmaktstypene erstattes, ikke unioneres med eksisterende.
         val ønsketFullmakter = spec.fullmakter
 
-        val erUendret = eksisterende != null &&
-            eksisterende.orgnr == spec.orgnr &&
-            eksisterende.personIdent == spec.personIdent &&
-            eksisterende.aktørId == aktørIdForPerson &&
-            eksisterende.fullmaktstyper == ønsketFullmakter
+        val erUendret = eksisterendeAktør != null &&
+            eksisterendeAktør.orgnr == spec.orgnr &&
+            eksisterendeAktør.personIdent == spec.personIdent &&
+            eksisterendeAktør.aktørId == aktørIdForPerson &&
+            eksisterendeAktør.fullmaktstyper == ønsketFullmakter
         if (erUendret) {
-            log.debug { "FULLMEKTIG ${eksisterende.id} uendret, hopper over" }
+            log.debug { "FULLMEKTIG ${eksisterendeAktør.id} uendret, hopper over" }
             return
         }
 
-        // Starter fra eksisterende DTO når aktøren finnes — bevarer felter som
-        // institusjonsID/utenlandskPersonID som ikke skal endres her.
-        val dto = (eksisterende?.let { AktoerDto.tilDto(it) } ?: AktoerDto()).apply {
+        // Bevarer felter som ikke styres herfra (institusjonsID, utenlandskPersonID).
+        val dto = (eksisterendeAktør?.let { AktoerDto.tilDto(it) } ?: AktoerDto()).apply {
             rolleKode = Aktoersroller.FULLMEKTIG.name
             orgnr = spec.orgnr
             personIdent = spec.personIdent
@@ -165,7 +162,8 @@ class DigitalSøknadAktørSynkronisering(
     private fun lagreKontaktopplysning(fagsak: Fagsak, orgnr: String, kontaktpersonFnr: String) {
         val navn = persondataFasade.hentSammensattNavn(kontaktpersonFnr)
         val eksisterende = kontaktopplysningService.hentKontaktopplysning(fagsak.saksnummer, orgnr).orElse(null)
-        if (eksisterende != null && eksisterende.kontaktNavn == navn && eksisterende.kontaktOrgnr == null && eksisterende.kontaktTelefon == null) {
+        // Samme navn → behold raden uendret (slik at manuelt registrert telefon/orgnr ikke nullstilles).
+        if (eksisterende != null && eksisterende.kontaktNavn == navn) {
             return
         }
         kontaktopplysningService.lagEllerOppdaterKontaktopplysning(
@@ -189,5 +187,7 @@ class DigitalSøknadAktørSynkronisering(
             ?: error("FULLMEKTIG-aktør ${aktør.id} mangler både orgnr og personIdent")
 
     private fun identifikator(spec: FullmektigSpec): String =
-        spec.orgnr ?: spec.personIdent!!  // init i FullmektigSpec krever at minst én er satt
+        spec.orgnr ?: requireNotNull(spec.personIdent) {
+            "FullmektigSpec uten orgnr må ha personIdent"
+        }
 }

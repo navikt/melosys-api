@@ -164,7 +164,7 @@ class HåndterEksisterendeSakDigitalSøknad(
 
         val søknad = DigitalSøknadMapper.tilSoeknad(søknadsdata)
         val mottatteOpplysninger = mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
-            nyBehandling.id, null, søknad, referanseId
+            nyBehandling.id, null, søknad, referanseId // 2. parameter er XML-form fra Altinn; ikke aktuelt for digital søknad
         )
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(

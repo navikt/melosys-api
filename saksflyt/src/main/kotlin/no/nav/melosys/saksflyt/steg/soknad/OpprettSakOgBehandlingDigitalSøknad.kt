@@ -79,7 +79,6 @@ class OpprettSakOgBehandlingDigitalSøknad(
         val aktører = DigitalSøknadAktørerMapper.utled(søknadsdata)
         aktørSynkronisering.synkroniser(fagsak, aktører)
 
-        // Sett AVVENT_DOK_PART hvis kun arbeidsgiver-del og ingen koblet motpart
         if (metadata.skjemadel == Skjemadel.ARBEIDSGIVERS_DEL && søknadsdata.kobletSkjema == null) {
             behandling.status = Behandlingsstatus.AVVENT_DOK_PART
             behandlingService.lagre(behandling)
@@ -88,7 +87,7 @@ class OpprettSakOgBehandlingDigitalSøknad(
 
         val søknad = DigitalSøknadMapper.tilSoeknad(søknadsdata)
         val mottatteOpplysninger = mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
-            behandling.id, null, søknad, referanseId
+            behandling.id, null, søknad, referanseId // 2. parameter er XML-form fra Altinn; ikke aktuelt for digital søknad
         )
 
         lagreSkjemaSakMapping(søknadsdata, fagsak, mottatteOpplysninger)

@@ -29,9 +29,8 @@ class TilBrevAdresseService(
         when (mottaker.rolle) {
             Mottakerroller.BRUKER -> persondata = persondataFasade.hentPerson(behandling.fagsak.hentBrukersAktørID())
             Mottakerroller.FULLMEKTIG -> {
-                // En FULLMEKTIG-aktør kan ha både orgnr og personIdent satt. Når begge er satt,
-                // prioriterer vi virksomhet — brev skal til orgnr. PersonIdent fungerer da som
-                // referanse til kontaktpersonen, ikke brevmottaker.
+                // Når både orgnr og personIdent er satt går brevet til virksomheten;
+                // personIdent identifiserer da kontaktpersonen, ikke brevmottakeren.
                 if (mottaker.orgnr != null) {
                     kontaktopplysning = hentKontaktopplysninger(behandling, mottaker)
                     orgDokument = hentOrganisasjonsDokument(kontaktopplysning, mottaker.orgnr!!)
