@@ -29,13 +29,12 @@ private val log = KotlinLogging.logger { }
  * Saga-steg som oppretter ny fagsak og behandling fra mottatt digital søknad.
  *
  * Brukes i MELOSYS_MOTTAK_DIGITAL_SØKNAD-flyten (ny sak).
- * For eksisterende sak brukes HåndterEksisterendeSakSøknad i MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD-flyten.
+ * For eksisterende sak brukes HåndterEksisterendeSakDigitalSøknad.
  *
- * 1. Oppretter fagsak med sakstype EU/EØS og tema MEDLEMSKAP_LOVVALG
- * 2. Oppretter behandling med tema UTSENDT_ARBEIDSTAKER
+ * 1. Oppretter fagsak med sakstype EU/EØS og tema MEDLEMSKAP_LOVVALG, og BRUKER-aktør
+ * 2. Synkroniserer ARBEIDSGIVER + FULLMEKTIG-aktører + kontaktopplysninger fra søknaden
  * 3. Setter AVVENT_DOK_PART hvis kun arbeidsgiver-del uten motpart
- * 4. Lagrer alle relaterte skjemaId-er i mapping-tabellen
- * 5. Lagrer mottatte opplysninger og setter behandling på prosessinstansen
+ * 4. Lagrer mottatte opplysninger og skjema-sak-mapping
  */
 @Component
 class OpprettSakOgBehandlingDigitalSøknad(
@@ -44,7 +43,8 @@ class OpprettSakOgBehandlingDigitalSøknad(
     private val mottatteOpplysningerService: MottatteOpplysningerService,
     private val jsonMapper: JsonMapper,
     private val skjemaSakMappingService: SkjemaSakMappingService,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
+    private val aktørSynkronisering: DigitalSøknadAktørSynkronisering
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD
@@ -56,10 +56,9 @@ class OpprettSakOgBehandlingDigitalSøknad(
         val fnr = skjema.fnr
         val referanseId = søknadsdata.referanseId
 
-        log.info { "Oppretter fagsak og behandling for digital søknad,  referanseId=$referanseId, skjemaId=${skjema.id}" }
+        log.info { "Oppretter fagsak og behandling for digital søknad, referanseId=$referanseId, skjemaId=${skjema.id}" }
 
         val aktørId = persondataFasade.hentAktørIdForIdent(fnr)
-
         val behandlingstema = BehandlingstemaUtleder.utled(søknadsdata)
 
         val opprettSakRequest = OpprettSakRequest.Builder()
@@ -72,14 +71,14 @@ class OpprettSakOgBehandlingDigitalSøknad(
             .medMottaksdato(søknadsdata.innsendtTidspunkt.toLocalDate())
             .build()
 
-        //TODO: Legg til fullmakt - egen oppgave: MELOSYS-8031
-
         val fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest)
         val behandling = fagsak.hentAktivBehandling()
 
         log.info { "Opprettet fagsak ${fagsak.saksnummer} med behandling ${behandling.id} for digital søknad" }
 
-        // Sett AVVENT_DOK_PART hvis kun arbeidsgiver-del og ingen koblet motpart
+        val aktører = DigitalSøknadAktørerMapper.utled(søknadsdata)
+        aktørSynkronisering.synkroniser(fagsak, aktører)
+
         if (metadata.skjemadel == Skjemadel.ARBEIDSGIVERS_DEL && søknadsdata.kobletSkjema == null) {
             behandling.status = Behandlingsstatus.AVVENT_DOK_PART
             behandlingService.lagre(behandling)
@@ -88,7 +87,7 @@ class OpprettSakOgBehandlingDigitalSøknad(
 
         val søknad = DigitalSøknadMapper.tilSoeknad(søknadsdata)
         val mottatteOpplysninger = mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
-            behandling.id, null, søknad, referanseId
+            behandling.id, null, søknad, referanseId // 2. parameter er XML-form fra Altinn; ikke aktuelt for digital søknad
         )
 
         lagreSkjemaSakMapping(søknadsdata, fagsak, mottatteOpplysninger)
@@ -110,6 +109,4 @@ class OpprettSakOgBehandlingDigitalSøknad(
             innsendtDato = søknadsdata.innsendtTidspunkt.atZone(OSLO_ZONE).toInstant()
         )
     }
-
-
 }

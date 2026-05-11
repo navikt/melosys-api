@@ -42,6 +42,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
     @MockK lateinit var oppgaveService: OppgaveService
     @MockK lateinit var skjemaSakMappingService: SkjemaSakMappingService
     @MockK lateinit var jsonMapper: JsonMapper
+    @MockK(relaxed = true) lateinit var aktørSynkronisering: DigitalSøknadAktørSynkronisering
 
     private lateinit var steg: HåndterEksisterendeSakDigitalSøknad
 
@@ -55,7 +56,8 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
     fun setup() {
         steg = HåndterEksisterendeSakDigitalSøknad(
             fagsakService, behandlingService, behandlingsresultatService,
-            mottatteOpplysningerService, oppgaveService, skjemaSakMappingService, jsonMapper
+            mottatteOpplysningerService, oppgaveService, skjemaSakMappingService, jsonMapper,
+            aktørSynkronisering
         )
 
         every { jsonMapper.writeValueAsString(søknadsdata) } returns """{"referanseId":"test"}"""
@@ -268,6 +270,31 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
                     null
                 )
             }
+        }
+    }
+
+    @Nested
+    inner class AktørOppdatering {
+
+        @Test
+        fun `kaller aktørSynkronisering med utledet AktørerFraSøknad`() {
+            val behandling = lagBehandling(Behandlingsstatus.UNDER_BEHANDLING)
+            val fagsak = lagFagsakMedBehandling(behandling)
+            val prosessinstans = lagProsessinstans()
+
+            mockFagsakService(fagsak)
+            mockEndreStatus()
+            mockTømBehandlingsresultat()
+            mockOppdaterMottatteOpplysninger()
+            mockHentMottatteOpplysninger(behandlingId)
+
+            val aktørerSlot = slot<AktørerFraSøknad>()
+            every { aktørSynkronisering.synkroniser(eq(fagsak), capture(aktørerSlot)) } just Runs
+
+            steg.utfør(prosessinstans)
+
+            aktørerSlot.captured.skjemadel shouldBe Skjemadel.ARBEIDSTAKERS_DEL
+            verify { aktørSynkronisering.synkroniser(fagsak, any()) }
         }
     }
 
