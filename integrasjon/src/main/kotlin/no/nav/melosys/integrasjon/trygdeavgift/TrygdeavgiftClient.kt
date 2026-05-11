@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.trygdeavgift
 
 import no.nav.melosys.integrasjon.trygdeavgift.dto.EøsPensjonistTrygdeavgiftsberegningRequest
 import no.nav.melosys.integrasjon.trygdeavgift.dto.EøsPensjonistTrygdeavgiftsberegningResponse
+import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebelopResponse
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningRequest
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
 import org.springframework.beans.factory.annotation.Value
@@ -54,4 +55,11 @@ class TrygdeavgiftClient(
             .retrieve()
             .bodyToMono<List<EøsPensjonistTrygdeavgiftsberegningResponse>>()
             .block() ?: throw IllegalStateException("Ingen body fra /v2/eos-pensjonist/beregn")
+
+    fun hentMinstebelop(aar: Int): MinstebelopResponse =
+        webClient.get()
+            .uri("/v2/minstebeloep/{aar}", aar)
+            .retrieve()
+            .bodyToMono<MinstebelopResponse>()
+            .block() ?: throw IllegalStateException("Ingen body fra /v2/minstebeloep/$aar")
 }
