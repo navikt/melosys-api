@@ -605,7 +605,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
 
         informasjonTrygdeavgiftMapper.mapInformasjonTrygdeavgift(lagBrevbestilling()).shouldNotBeNull().apply {
             avgiftsperioder.shouldNotBeEmpty()
-            avgiftsperioder.any { it.beregningsregel == "MINSTEBELØP" }.shouldBeTrue()
+            avgiftsperioder.any { it.beregningsregel == Avgiftsberegningsregel.MINSTEBELØP }.shouldBeTrue()
         }
     }
 
@@ -616,7 +616,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
 
         informasjonTrygdeavgiftMapper.mapInformasjonTrygdeavgift(lagBrevbestilling()).shouldNotBeNull().apply {
             avgiftsperioder.shouldNotBeEmpty()
-            avgiftsperioder.any { it.beregningsregel == "TJUEFEM_PROSENT_REGEL" }.shouldBeTrue()
+            avgiftsperioder.any { it.beregningsregel == Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL }.shouldBeTrue()
         }
     }
 
@@ -627,7 +627,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
 
         informasjonTrygdeavgiftMapper.mapInformasjonTrygdeavgift(lagBrevbestilling()).shouldNotBeNull().apply {
             avgiftsperioder.shouldNotBeEmpty()
-            avgiftsperioder.all { it.beregningsregel == "ORDINÆR" }.shouldBeTrue()
+            avgiftsperioder.all { it.beregningsregel == Avgiftsberegningsregel.ORDINÆR }.shouldBeTrue()
         }
     }
 
