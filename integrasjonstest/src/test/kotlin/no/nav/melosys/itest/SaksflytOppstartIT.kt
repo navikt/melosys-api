@@ -36,6 +36,7 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.TestPropertySource
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
@@ -54,6 +55,9 @@ import java.time.LocalDateTime
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext
 @EnableMockOAuth2Server
+// Pinner gjenopprettelsesvinduet eksplisitt slik at testen er uavhengig av default-verdien
+// (se melosys.saksflyt.gjenopprettelse.vindu i application.yml - default PT2H, kan endres).
+@TestPropertySource(properties = ["melosys.saksflyt.gjenopprettelse.vindu=PT2H"])
 class SaksflytOppstartIT(
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
@@ -81,6 +85,7 @@ class SaksflytOppstartIT(
             ProsessType.MOTTAK_SED,
             ProsessStatus.PÅ_VENT,
             behandling,
+            // Eldre enn gjenopprettelsesvinduet (PT2H, se @TestPropertySource over) - skal rekjøres
             LocalDateTime.now().minusDays(2),
             LÅSREFERANSE_PROSESSINSTANS_SOM_TRENGER_REKJØRING
         ).apply {
@@ -91,7 +96,8 @@ class SaksflytOppstartIT(
             ProsessType.MOTTAK_SED,
             ProsessStatus.PÅ_VENT,
             behandling,
-            LocalDateTime.now().minusHours(3),
+            // Innenfor gjenopprettelsesvinduet (PT2H, se @TestPropertySource over) - skal ikke rekjøres
+            LocalDateTime.now().minusMinutes(30),
             LÅSREFERANSE_PROSESSINSTANS_SOM_IKKE_SKAL_REKJØRES_ENDA
         ).apply {
             this.setData(ProsessDataKey.EESSI_MELDING, eessiMelding())
