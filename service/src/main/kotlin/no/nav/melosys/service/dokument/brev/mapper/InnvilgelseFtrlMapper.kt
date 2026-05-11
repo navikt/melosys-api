@@ -20,7 +20,7 @@ import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.dokgen.dto.*
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
-import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebelopResponse
+import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebeløpResponse
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklartUkjentSluttdatoMedlemskapsperiodeService
@@ -334,13 +334,13 @@ class InnvilgelseFtrlMapper(
         else -> tilgjengeligeÅr.minOrNull() ?: inneværendeÅr
     }
 
-    private fun hentMinstebelop(perioder: Collection<Trygdeavgiftsperiode>): MinstebelopResponse? {
+    private fun hentMinstebelop(perioder: Collection<Trygdeavgiftsperiode>): MinstebeløpResponse? {
         val aar = perioder
             .filter { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }
             .maxByOrNull { it.periodeTil }
             ?.periodeTil?.year
             ?: return null
-        return trygdeavgiftClient.hentMinstebelop(aar)
+        return trygdeavgiftClient.hentMinstebeløp(aar)
     }
 
     private fun Trygdeavgiftsperiode.toAvgiftsperiodeDto() = AvgiftsperiodeDto(

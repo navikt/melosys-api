@@ -16,7 +16,7 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
-import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebelopResponse
+import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebeløpResponse
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.dokument.DokgenTestData
@@ -53,7 +53,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
     @BeforeEach
     fun setup() {
         unleash.disableAll()
-        every { mockTrygdeavgiftClient.hentMinstebelop(any()) } returns MinstebelopResponse(2024, BigDecimal(7000))
+        every { mockTrygdeavgiftClient.hentMinstebeløp(any()) } returns MinstebeløpResponse(2024, BigDecimal(7000))
         informasjonTrygdeavgiftMapper = InformasjonTrygdeavgiftMapper(
             mockDokgenMapperDatahenter,
             mockHelseutgiftDekkesPeriodeService,
