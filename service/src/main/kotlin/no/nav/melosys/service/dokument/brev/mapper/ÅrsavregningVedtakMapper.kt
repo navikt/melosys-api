@@ -19,13 +19,8 @@ import no.nav.melosys.integrasjon.dokgen.dto.ÅrsavregningVedtaksbrev
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
 import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebelopResponse
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
-import no.nav.melosys.service.avgift.aarsavregning.AvgiftsperiodeForAvgift
-import no.nav.melosys.service.avgift.aarsavregning.HelseutgiftDekkesPeriodeForAvgift
-import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
+import no.nav.melosys.service.avgift.aarsavregning.*
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
-import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningKonstanter
-import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
-import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 
@@ -144,7 +139,7 @@ class ÅrsavregningVedtakMapper(
                 ),
                 skatteplikt = trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge!!
                     .skatteplikttype == Skatteplikttype.SKATTEPLIKTIG,
-                beregningsregel = trygdeavgiftsperiode.beregningsregel.name
+                beregningsregel = trygdeavgiftsperiode.beregningsregel
             )
         }
     }

@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.dokgen.dto
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import java.math.BigDecimal
@@ -75,7 +76,7 @@ data class Avgiftsperiode(
     val trygdedekning: String,
     val arbeidsgiveravgiftBetalt: SvarAlternativ,
     val skatteplikt: Boolean,
-    val beregningsregel: String
+    val beregningsregel: Avgiftsberegningsregel
 )
 
 

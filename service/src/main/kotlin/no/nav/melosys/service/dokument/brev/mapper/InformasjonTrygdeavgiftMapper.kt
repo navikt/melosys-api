@@ -117,7 +117,7 @@ class InformasjonTrygdeavgiftMapper(
                     inntektskilde = inntektsperiode.type.beskrivelse,
                     avgiftspliktigInntektPerMd = inntektsperiode.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
                     skatteplikt = it.hentGrunnlagSkatteforholdTilNorge().skatteplikttype == Skatteplikttype.SKATTEPLIKTIG,
-                    beregningsregel = it.beregningsregel.name,
+                    beregningsregel = it.beregningsregel,
                 )
             }
             ?.sortedByDescending { it.fom }

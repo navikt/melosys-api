@@ -2,12 +2,13 @@ package no.nav.melosys.integrasjon.dokgen.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonInclude
-import tools.jackson.databind.annotation.JsonSerialize
-import tools.jackson.databind.ext.javatime.ser.LocalDateSerializer
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto
+import tools.jackson.databind.annotation.JsonSerialize
+import tools.jackson.databind.ext.javatime.ser.LocalDateSerializer
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -109,5 +110,5 @@ data class AvgiftsperiodePensjonist(
     val trygdedekning: String,
     val arbeidsgiveravgiftBetalt: SvarAlternativ,
     val skatteplikt: Boolean,
-    val beregningsregel: String
+    val beregningsregel: Avgiftsberegningsregel
 )
