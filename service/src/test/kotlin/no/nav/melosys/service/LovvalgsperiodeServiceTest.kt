@@ -33,6 +33,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.domain.lovvalgsperiodeForTest
+import no.nav.melosys.domain.PeriodeKilde
 import no.nav.melosys.domain.saksopplysning
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
@@ -439,6 +440,28 @@ internal class LovvalgsperiodeServiceTest {
             status = PeriodestatusMedl.GYLD.kode,
             grunnlagstype = grunnlagMedlKode
         )
+    }
+
+    @Test
+    fun slettLovvalgsperioderMedKilde_sletterKunPerioderMedMatchendeKilde() {
+        val behandlingsresultat = Behandlingsresultat.forTest {}
+        val periodeMelosys = lovvalgsperiodeForTest {
+            id = 1L
+            kilde = PeriodeKilde.MELOSYS
+        }.apply { this.behandlingsresultat = behandlingsresultat }
+        val periodeAvgift = lovvalgsperiodeForTest {
+            id = 2L
+            kilde = PeriodeKilde.AVGIFT_SYSTEMET
+        }.apply { this.behandlingsresultat = behandlingsresultat }
+
+        behandlingsresultat.lovvalgsperioder.addAll(listOf(periodeMelosys, periodeAvgift))
+
+        every { lovvalgsperiodeRepository.findByBehandlingsresultatIdAndKilde(BEH_ID, PeriodeKilde.AVGIFT_SYSTEMET) } returns listOf(periodeAvgift)
+
+        lovvalgsperiodeService.slettLovvalgsperioderMedKilde(BEH_ID, PeriodeKilde.AVGIFT_SYSTEMET)
+
+        behandlingsresultat.lovvalgsperioder.shouldHaveSize(1)
+        behandlingsresultat.lovvalgsperioder.first().kilde shouldBe PeriodeKilde.MELOSYS
     }
 
     companion object {

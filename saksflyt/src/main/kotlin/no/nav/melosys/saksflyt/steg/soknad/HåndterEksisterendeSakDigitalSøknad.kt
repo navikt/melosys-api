@@ -7,7 +7,6 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
@@ -108,6 +107,11 @@ class HåndterEksisterendeSakDigitalSøknad(
         behandling: Behandling,
         søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
     ): Pair<Behandling, MottatteOpplysninger> {
+        val utledetBehandlingstema = BehandlingstemaUtleder.utled(søknadsdata)
+        if (behandling.tema != utledetBehandlingstema) {
+            behandlingService.endreTema(behandling, utledetBehandlingstema)
+        }
+
         val skalResetteStegvelger = behandling.status in setOf(
             Behandlingsstatus.UNDER_BEHANDLING,
             Behandlingsstatus.AVVENT_DOK_PART
@@ -118,11 +122,8 @@ class HåndterEksisterendeSakDigitalSøknad(
             behandlingsresultatService.tømBehandlingsresultat(behandling.id)
         }
 
-        val (periode, land) = DigitalSøknadMapper.hentPeriodeOgLand(søknadsdata)
-
-        mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(
-            behandling.id, periode, land
-        )
+        val nySoeknad = DigitalSøknadMapper.tilSoeknad(søknadsdata)
+        mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandling.id, nySoeknad)
 
         val mottatteOpplysninger = mottatteOpplysningerService.hentMottatteOpplysninger(behandling.id)
         return behandling to mottatteOpplysninger
@@ -134,12 +135,13 @@ class HåndterEksisterendeSakDigitalSøknad(
     ): Pair<Behandling, MottatteOpplysninger> {
         val saksnummer = fagsak.saksnummer
         val referanseId = søknadsdata.referanseId
+        val behandlingstema = BehandlingstemaUtleder.utled(søknadsdata)
 
         val nyBehandling = behandlingService.nyBehandling(
             fagsak,
             Behandlingsstatus.OPPRETTET,
             Behandlingstyper.NY_VURDERING,
-            Behandlingstema.UTSENDT_ARBEIDSTAKER,
+            behandlingstema,
             null, // journalpostId settes i journalpost-steget etterpå
             null,
             LocalDate.now(),
@@ -165,4 +167,6 @@ class HåndterEksisterendeSakDigitalSøknad(
 
         return nyBehandling to mottatteOpplysninger
     }
+
+
 }

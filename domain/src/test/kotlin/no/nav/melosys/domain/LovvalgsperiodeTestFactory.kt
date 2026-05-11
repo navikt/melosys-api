@@ -34,6 +34,7 @@ object LovvalgsperiodeTestFactory {
         var medlemskapstype: Medlemskapstyper? = null
         var dekning: Trygdedekninger? = null
         var medlPeriodeID: Long? = null
+        var kilde: PeriodeKilde? = null
         val trygdeavgiftsperioder = mutableListOf<Trygdeavgiftsperiode>()
 
 
@@ -61,6 +62,7 @@ object LovvalgsperiodeTestFactory {
             this.medlemskapstype = this@Builder.medlemskapstype
             this.dekning = this@Builder.dekning
             this.medlPeriodeID = this@Builder.medlPeriodeID
+            this.kilde = this@Builder.kilde
             // Legg til trygdeavgiftsperioder
             this@Builder.trygdeavgiftsperioder.forEach { periode ->
                 this.addTrygdeavgiftsperiode(periode)

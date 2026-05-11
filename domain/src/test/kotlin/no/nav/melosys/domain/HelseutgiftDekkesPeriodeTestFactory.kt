@@ -3,7 +3,6 @@ package no.nav.melosys.domain
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeTestFactory
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
-import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeKilde
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import java.time.LocalDate
 
@@ -19,7 +18,7 @@ object HelseutgiftDekkesPeriodeTestFactory {
         var fomDato = LocalDate.now()
         var tomDato = LocalDate.now().plusDays(1)
         var bostedLandkode = Land_iso2.NO
-        var kilde = HelseutgiftDekkesPeriodeKilde.MELOSYS
+        var kilde = PeriodeKilde.MELOSYS
 
         var trygdeavgiftsperioder: MutableSet<Trygdeavgiftsperiode> = mutableSetOf()
 

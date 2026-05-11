@@ -3,6 +3,7 @@ package no.nav.melosys.service.mottatteopplysninger
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.ObjectMapper
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -276,6 +277,55 @@ internal class MottatteOpplysningerServiceTest {
                 this["tom"].toString().shouldBe("\"2010-01-01\"")
             }
         }
+    }
+
+    @Test
+    fun oppdaterMottatteOpplysningerFraSøknad_erstatterSidemenyfelterOgBeholderOevrige() {
+        val opprinneligLoenn = no.nav.melosys.domain.mottatteopplysninger.data.LoennOgGodtgjoerelse(
+            norskArbgUtbetalerLoenn = true
+        )
+        val eksisterende = no.nav.melosys.domain.mottatteopplysninger.Soeknad().apply {
+            periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31))
+            soeknadsland = Soeknadsland(listOf("NL"), false)
+            loennOgGodtgjoerelse = opprinneligLoenn
+        }
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = eksisterende
+        }
+
+        val nySoeknad = no.nav.melosys.domain.mottatteopplysninger.Soeknad().apply {
+            periode = Periode(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31))
+            soeknadsland = Soeknadsland(listOf("DE"), false)
+            juridiskArbeidsgiverNorge = no.nav.melosys.domain.mottatteopplysninger.data.JuridiskArbeidsgiverNorge().apply {
+                ekstraArbeidsgivere = listOf("111111111")
+            }
+            foretakUtland = listOf(
+                no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland().apply {
+                    navn = "Berlin GmbH"
+                    orgnr = "DE-1"
+                }
+            )
+            arbeidPaaLand = no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.ArbeidPaaLand().apply {
+                erFastArbeidssted = true
+            }
+        }
+
+        every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.of(mottatteOpplysninger)
+        every { mottatteOpplysningerRepositoryMock.saveAndFlush(any()) } returns mockk()
+
+        mottatteOpplysningerServiceSpy.oppdaterMottatteOpplysningerFraSøknad(behandlingID, nySoeknad)
+
+        val slot = slot<MottatteOpplysninger>()
+        verify { mottatteOpplysningerRepositoryMock.saveAndFlush(capture(slot)) }
+        val oppdatert = slot.captured.mottatteOpplysningerData as no.nav.melosys.domain.mottatteopplysninger.Soeknad
+        oppdatert.periode.fom.shouldBe(LocalDate.of(2025, 1, 1))
+        oppdatert.soeknadsland.landkoder.shouldBe(listOf("DE"))
+        oppdatert.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.shouldBe(listOf("111111111"))
+        oppdatert.foretakUtland.shouldHaveSize(1)
+        oppdatert.foretakUtland.first().navn.shouldBe("Berlin GmbH")
+        oppdatert.arbeidPaaLand.erFastArbeidssted.shouldBe(true)
+        // Soeknad-spesifikke felter som ikke mappes fra søknad skal beholdes
+        oppdatert.loennOgGodtgjoerelse.shouldBe(opprinneligLoenn)
     }
 
     @Test

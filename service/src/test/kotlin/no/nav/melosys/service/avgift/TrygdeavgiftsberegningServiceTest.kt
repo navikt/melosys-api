@@ -113,6 +113,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             }
 
             every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
             every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
             trygdeavgiftService.hentTrygdeavgiftsperioder(BEHANDLING_ID).shouldNotBeNull().shouldBeEmpty()
@@ -143,6 +144,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
                 every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
                 every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -224,6 +226,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
                 every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
                 every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -298,6 +301,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
                 every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
                 every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -372,6 +376,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
                 every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
                 every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -439,6 +444,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
 
@@ -491,6 +497,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 val resultat = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
@@ -557,6 +564,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 val resultat = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
@@ -618,6 +626,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -700,6 +709,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -782,6 +792,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -863,6 +874,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
                 every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
@@ -952,6 +964,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 val skatteforholdsperioder = listOf(skatteforhold)
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
                 every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
                 every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -1051,6 +1064,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 shouldThrow<FunksjonellException> {
@@ -1103,6 +1117,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 shouldThrow<FunksjonellException> {
@@ -1148,6 +1163,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
 
@@ -1190,6 +1206,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 shouldThrow<FunksjonellException> {
@@ -1241,6 +1258,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -1297,6 +1315,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 shouldThrow<FunksjonellException> {
@@ -1338,6 +1357,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 shouldThrow<FunksjonellException> {
@@ -1377,6 +1397,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 shouldThrow<FunksjonellException> {
@@ -1422,6 +1443,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 behandlingsresultat.medlemskapsperioder.first().fom = null
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 shouldThrow<FunksjonellException> {
@@ -1472,6 +1494,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
 
                 shouldThrow<FunksjonellException> {
@@ -2349,6 +2372,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             val forventetMånedsavgift = BigDecimal("500.00")
 
             every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
             every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
             every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
 
@@ -2442,6 +2466,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             }
 
             every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
             every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
             every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
 

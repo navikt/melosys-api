@@ -1,6 +1,7 @@
 package no.nav.melosys.service.ftrl.medlemskapsperiode
 
 import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.PeriodeKilde
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
@@ -56,6 +57,8 @@ class MedlemskapsperiodeService(
             this.trygdedekning = trygdedekning
             this.bestemmelse = bestemmelse
             medlemskapstype = UtledMedlemskapstype.av(requireNotNull(bestemmelse) { "bestemmelse er påkrevd" })
+            val harEksisterendePeriode = behandlingsresultat.medlemskapsperioder.isNotEmpty()
+            kilde = if (harEksisterendePeriode) PeriodeKilde.AVGIFT_SYSTEMET else PeriodeKilde.MELOSYS
         }
         behandlingsresultat.addMedlemskapsperiode(nyMedlemskapsperiode)
 
@@ -207,5 +210,12 @@ class MedlemskapsperiodeService(
     fun slettMedlemskapsperioder(behandlingsresultatID: Long) {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         behandlingsresultat.clearMedlemskapsperioder()
+    }
+
+    @Transactional
+    fun slettMedlemskapsperioderMedKilde(behandlingsresultatID: Long, kilde: PeriodeKilde) {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
+        val perioderMedKilde = behandlingsresultat.medlemskapsperioder.filter { it.kilde == kilde }
+        perioderMedKilde.forEach { behandlingsresultat.removeMedlemskapsperiode(it) }
     }
 }

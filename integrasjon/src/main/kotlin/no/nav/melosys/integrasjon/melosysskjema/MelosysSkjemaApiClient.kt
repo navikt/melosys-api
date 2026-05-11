@@ -46,4 +46,15 @@ class MelosysSkjemaApiClient(private val melosysSkjemaApiWebClient: WebClient) {
             .bodyToMono(ByteArray::class.java)
             .block() ?: error("Kunne ikke hente PDF for skjema $skjemaId")
     }
+
+    fun hentVedleggInnhold(skjemaId: UUID, vedleggId: UUID): ByteArray {
+        log.info("Henter vedlegg {} for skjema {}", vedleggId, skjemaId)
+
+        return melosysSkjemaApiWebClient.get()
+            .uri("/m2m/api/skjema/{skjemaId}/vedlegg/{vedleggId}/innhold", skjemaId, vedleggId)
+            .accept(MediaType.APPLICATION_OCTET_STREAM)
+            .retrieve()
+            .bodyToMono(ByteArray::class.java)
+            .block() ?: error("Kunne ikke hente vedlegg $vedleggId for skjema $skjemaId")
+    }
 }

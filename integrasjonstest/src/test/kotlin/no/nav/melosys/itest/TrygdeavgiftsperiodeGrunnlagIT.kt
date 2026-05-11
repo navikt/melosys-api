@@ -264,6 +264,22 @@ class TrygdeavgiftsperiodeGrunnlagIT(
         endelig.trygdeavgiftsperioder.single().grunnlagListe shouldHaveSize 1
     }
 
+    @Test
+    fun `findWithTrygdeavgiftsperioderAndGrunnlagById initialiserer grunnlagListe slik at den er tilgjengelig etter detach`() {
+        val (original, _) = lagFagsakMedBehandlinger()
+        val br = lagBehandlingsresultatMedTrygdeavgift(original, antallGrunnlag = 2)
+        behandlingsresultatRepository.saveAndFlush(br)
+        entityManager.clear()
+
+        val lastet = behandlingsresultatRepository.findWithTrygdeavgiftsperioderAndGrunnlagById(original.id).get()
+
+        // Detach alle perioder — hvis entity graph ikke initialiserte grunnlagListe
+        // vil tilgang nedenfor kaste LazyInitializationException
+        lastet.trygdeavgiftsperioder.forEach { entityManager.detach(it) }
+
+        lastet.trygdeavgiftsperioder.single().grunnlagListe shouldHaveSize 2
+    }
+
     // --- Hjelpemetoder ---
 
     private data class Behandlinger(val original: Behandling, val replika: Behandling)

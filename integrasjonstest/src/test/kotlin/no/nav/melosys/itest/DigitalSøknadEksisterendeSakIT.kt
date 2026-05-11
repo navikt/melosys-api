@@ -1,9 +1,11 @@
 package no.nav.melosys.itest
 
 import com.github.tomakehurst.wiremock.client.WireMock
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflyt.ProsessinstansRepository
@@ -44,7 +46,10 @@ class DigitalSøknadEksisterendeSakIT(
     @Test
     fun `mottak av digital søknad på eksisterende sak gjenbruker åpen behandling`() {
         // --- Steg 1: Send første søknad som oppretter fagsak ---
-        val førsteSøknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto { fnr = testFnr }
+        val førsteSøknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            fnr = testFnr
+            orgnr = "FØRSTE-ORG"
+        }
         val førsteSkjemaId = førsteSøknadsdata.skjema.id
 
         stubSkjemaEndpoints(førsteSkjemaId, førsteSøknadsdata)
@@ -63,7 +68,11 @@ class DigitalSøknadEksisterendeSakIT(
         val saksnummer = førsteProsessinstans.behandling.shouldNotBeNull().fagsak.saksnummer
 
         // --- Steg 2: Send ny søknad med referanse til den første ---
-        val andreSøknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto { fnr = testFnr }
+        // Bytt orgnr for å verifisere at oppdaterMottatteOpplysningerFraSøknad overskriver
+        val andreSøknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            fnr = testFnr
+            orgnr = "ANDRE-ORG"
+        }
         val andreSkjemaId = andreSøknadsdata.skjema.id
 
         stubSkjemaEndpoints(andreSkjemaId, andreSøknadsdata)
@@ -100,8 +109,10 @@ class DigitalSøknadEksisterendeSakIT(
         behandling.type shouldBe Behandlingstyper.FØRSTEGANG
         behandling.tema shouldBe Behandlingstema.UTSENDT_ARBEIDSTAKER
 
-        // Verifiser at mottatte opplysninger ble oppdatert
-        behandling.mottatteOpplysninger.shouldNotBeNull()
+        // Verifiser at mottatte opplysninger ble oppdatert med orgnr fra siste søknad
+        val mottatteOpplysninger = behandling.mottatteOpplysninger.shouldNotBeNull()
+        val soeknad = mottatteOpplysninger.mottatteOpplysningerData as Soeknad
+        soeknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere shouldContainExactly listOf("ANDRE-ORG")
     }
 
     private fun stubSkjemaEndpoints(skjemaId: UUID, søknadsdata: UtsendtArbeidstakerSkjemaM2MDto) {

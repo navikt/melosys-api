@@ -32,3 +32,10 @@ local-q2.env
 # JaCoCo coverage
 *.exec
 jacoco-report/
+
+# nav-pilot collection files
+.github/.nav-pilot-state.json
+.github/agents/
+.github/instructions/
+.github/prompts/
+.github/skills/

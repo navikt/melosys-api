@@ -11,6 +11,7 @@ class MaritimtArbeid {
     var flaggLandkode: String? = null
     var innretningLandkode: String? = null
     var innretningstype: Innretningstyper? = null
+    var yrke: String? = null
 
     @JsonProperty("territorialfarvann")
     var territorialfarvannLandkode: String? = null

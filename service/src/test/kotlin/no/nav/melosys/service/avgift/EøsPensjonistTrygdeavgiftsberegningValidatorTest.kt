@@ -50,7 +50,7 @@ class EøsPensjonistTrygdeavgiftsberegningValidatorTest {
         if (expectedError != null) {
             shouldThrow<FunksjonellException> {
                 EøsPensjonistTrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
-                    behandlingsresultat.helseutgiftDekkesPerioder.first(),
+                    behandlingsresultat.helseutgiftDekkesPerioder.toList(),
                     testCase.skatteforholdsperioder,
                     testCase.inntektsperioder,
                     behandlingsresultat,
@@ -60,7 +60,7 @@ class EøsPensjonistTrygdeavgiftsberegningValidatorTest {
         } else {
             shouldNotThrow<FunksjonellException> {
                 EøsPensjonistTrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
-                    behandlingsresultat.helseutgiftDekkesPerioder.first(),
+                    behandlingsresultat.helseutgiftDekkesPerioder.toList(),
                     testCase.skatteforholdsperioder,
                     testCase.inntektsperioder,
                     behandlingsresultat,
@@ -103,7 +103,7 @@ class EøsPensjonistTrygdeavgiftsberegningValidatorTest {
 
         shouldNotThrow<FunksjonellException> {
             EøsPensjonistTrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
-                behandlingsresultat.helseutgiftDekkesPerioder.first(),
+                behandlingsresultat.helseutgiftDekkesPerioder.toList(),
                 testCase.skatteforholdsperioder,
                 testCase.inntektsperioder,
                 behandlingsresultat,
