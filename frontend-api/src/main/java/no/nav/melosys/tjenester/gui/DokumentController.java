@@ -54,7 +54,7 @@ public class DokumentController {
 
         byte[] dokument = dokumentHentingService.hentDokument(journalpostID, dokumentID);
         DokumentVariant.Filtype filtype = journalpost.finnArkivDokument(dokumentID)
-            .map(d -> d.arkivVariantFiltype())
+            .map(ArkivDokument::arkivVariantFiltype)
             .orElse(null);
         return lagResponseAvDokument(dokument, "journalpost-dok-" + dokumentID, Visning.av(filtype));
     }
