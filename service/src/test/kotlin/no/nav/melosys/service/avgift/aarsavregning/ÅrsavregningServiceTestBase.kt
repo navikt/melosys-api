@@ -7,12 +7,8 @@ import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeTestFactory
 import no.nav.melosys.domain.kodeverk.*
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
-import no.nav.melosys.domain.kodeverk.Land_iso2
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
-import no.nav.melosys.domain.medlemskapsperiodeForTest
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -118,6 +114,39 @@ abstract class ÅrsavregningServiceTestBase {
             fomDato = LocalDate.parse(start)
             tomDato = LocalDate.parse(slutt)
             bostedLandkode = Land_iso2.DK
+
+            if (medTrygdeavgift) {
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.parse(start)
+                    periodeTil = LocalDate.parse(slutt)
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+            init()
+        }
+    }
+
+    protected fun BehandlingsresultatTestFactory.Builder.lovvalgsperiode(
+        start: String,
+        slutt: String,
+        medTrygdeavgift: Boolean = true,
+        init: LovvalgsperiodeTestFactory.Builder.() -> Unit = {}
+    ) {
+        lovvalgsperiode {
+            fom = LocalDate.parse(start)
+            tom = LocalDate.parse(slutt)
+            dekning = Trygdedekninger.FULL_DEKNING
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.PLIKTIG
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
 
             if (medTrygdeavgift) {
                 trygdeavgiftsperiode {
