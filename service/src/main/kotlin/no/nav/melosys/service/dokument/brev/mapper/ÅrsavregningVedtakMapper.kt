@@ -47,7 +47,12 @@ class ÅrsavregningVedtakMapper(
 
         val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.avgiftspliktigperioder)
         val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttTrygdeavgiftsGrunnlag?.avgiftspliktigperioder)
-        val erNyÅrsavregning = behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
+        val erNyÅrsavregning =
+            behandlingsresultat.årsavregning?.tidligereBehandlingsresultat
+                ?.let {
+                    it.behandling?.erÅrsavregning() == true &&
+                        it.årsavregning?.aar == behandlingsresultat.hentÅrsavregning().aar
+                } ?: false
 
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
