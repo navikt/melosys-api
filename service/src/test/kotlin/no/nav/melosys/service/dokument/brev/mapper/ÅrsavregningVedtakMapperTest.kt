@@ -37,6 +37,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.stream.Stream
@@ -104,7 +105,7 @@ class ÅrsavregningVedtakMapperTest {
             trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
             arbeidsgiveravgiftBetalt = SvarAlternativ.JA,
             skatteplikt = true,
-            beregningsregel = "ORDINÆR"
+            beregningsregel = Avgiftsberegningsregel.ORDINÆR
         )
         result.forskuddsvisFakturertTrygdeavgift[0] shouldBe Avgiftsperiode(
             fom = LocalDate.of(2023, 1, 1),
@@ -116,7 +117,7 @@ class ÅrsavregningVedtakMapperTest {
             trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
             arbeidsgiveravgiftBetalt = SvarAlternativ.NEI,
             skatteplikt = false,
-            beregningsregel = "ORDINÆR"
+            beregningsregel = Avgiftsberegningsregel.ORDINÆR
         )
 
         result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.beregnetAvgiftBelop
