@@ -33,9 +33,11 @@ class TilBrevAdresseService(
                 // personIdent identifiserer da kontaktpersonen, ikke brevmottakeren.
                 if (mottaker.orgnr != null) {
                     kontaktopplysning = hentKontaktopplysninger(behandling, mottaker)
-                    orgDokument = hentOrganisasjonsDokument(kontaktopplysning, mottaker.orgnr!!)
+                    orgDokument = hentOrganisasjonsDokument(kontaktopplysning, mottaker.orgnrNonNull())
                 } else if (mottaker.personIdent != null) {
                     persondata = persondataFasade.hentPerson(mottaker.personIdent)
+                } else {
+                    throw FunksjonellException("Fullmektig-mottaker må ha orgnr eller personIdent")
                 }
             }
 
