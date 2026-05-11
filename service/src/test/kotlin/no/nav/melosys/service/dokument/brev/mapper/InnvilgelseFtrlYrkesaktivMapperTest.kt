@@ -12,12 +12,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.avgift.inntektForTest
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
@@ -30,7 +25,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.domain.mottatteopplysninger.soeknad
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
-import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebelopResponse
+import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebeløpResponse
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklartUkjentSluttdatoMedlemskapsperiodeService
@@ -76,7 +71,7 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
     @BeforeEach
     fun setup() {
         unleash.resetAll()
-        every { trygdeavgiftClient.hentMinstebelop(any()) } returns MinstebelopResponse(2024, BigDecimal(7000))
+        every { trygdeavgiftClient.hentMinstebeløp(any()) } returns MinstebeløpResponse(2024, BigDecimal(7000))
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
             mockAvklarteVirksomheterService,

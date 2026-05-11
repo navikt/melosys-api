@@ -7,25 +7,21 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.BehandlingsresultatTestFactory
-import no.nav.melosys.domain.behandling
-import no.nav.melosys.domain.fagsak
-import no.nav.melosys.domain.avgift.*
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
+import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.forTest
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
 import no.nav.melosys.domain.dokument.personDokumentForTest
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
-import no.nav.melosys.domain.medlemskapsperiodeForTest
-import no.nav.melosys.domain.tidligereBehandlingsresultat
-import no.nav.melosys.domain.årsavregning
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
-import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebelopResponse
+import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebeløpResponse
 import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -62,7 +58,7 @@ class ÅrsavregningVedtakMapperTest {
 
     @BeforeEach
     fun setUp() {
-        every { trygdeavgiftClient.hentMinstebelop(any()) } returns MinstebelopResponse(2024, BigDecimal(7000))
+        every { trygdeavgiftClient.hentMinstebeløp(any()) } returns MinstebeløpResponse(2024, BigDecimal(7000))
         mapper = ÅrsavregningVedtakMapper(årsavregningService, trygdeavgiftsberegningService, trygdeavgiftClient)
         every { trygdeavgiftsberegningService.finnFakturamottakerNavn(any()) } returns "Fakturamannen"
     }

@@ -17,7 +17,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
 import no.nav.melosys.integrasjon.dokgen.dto.ÅrsavregningVedtaksbrev
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
-import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebelopResponse
+import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebeløpResponse
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.aarsavregning.*
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
@@ -175,11 +175,11 @@ class ÅrsavregningVedtakMapper(
         årsavregningsår: Int,
         endeligAvgift: List<Trygdeavgiftsperiode>,
         tidligereAvgift: List<Trygdeavgiftsperiode>
-    ): MinstebelopResponse? {
+    ): MinstebeløpResponse? {
         val harIkkeOrdinærPeriode = (endeligAvgift + tidligereAvgift)
             .any { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }
         if (!harIkkeOrdinærPeriode) return null
-        return trygdeavgiftClient.hentMinstebelop(årsavregningsår)
+        return trygdeavgiftClient.hentMinstebeløp(årsavregningsår)
     }
 
     private fun harPliktigMedlemskap(avgiftspliktigPerioder: List<AvgiftsperiodeForAvgift>?): Boolean {
