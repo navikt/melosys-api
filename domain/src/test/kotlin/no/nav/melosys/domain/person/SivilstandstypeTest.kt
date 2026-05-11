@@ -19,6 +19,16 @@ class SivilstandstypeTest {
     }
 
     @Test
+    fun `deserialiserer case-insensitivt`() {
+        val varianter = listOf("\"Uoppgitt\"", "\"uoppgitt\"", "\"UOPPGITT\"")
+
+        for (json in varianter) {
+            val type: Sivilstandstype = objectMapper.readValue(json)
+            type shouldBe Sivilstandstype.UOPPGITT
+        }
+    }
+
+    @Test
     fun `serialiserer til enum-konstantnavn`() {
         val json = objectMapper.writeValueAsString(Sivilstandstype.UOPPGITT)
 
