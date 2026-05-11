@@ -208,6 +208,60 @@ internal class TrygdeavgiftsberegningServiceTest {
             }
 
             @Test
+            fun `minstebelopVerdi og minstebelopAar fra respons propageres til Trygdeavgiftsperiode`() {
+                val notSoRandomUuid = UUID.randomUUID()
+                mockkStatic(UUID::class)
+                every { UUID.randomUUID() } returns notSoRandomUuid
+
+                val behandlingsresultat = defaultBehandlingsresultat {
+                    medlemskapsperiode {
+                        id = 1L
+                        fom = FOM
+                        tom = TOM
+                        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG
+                        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
+                    }
+                }
+                val grunnlagDto = TrygdeavgiftsgrunnlagDto(
+                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                    notSoRandomUuid,
+                    notSoRandomUuid
+                )
+
+                every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
+                every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
+                every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
+                    listOf(
+                        TrygdeavgiftsberegningResponse(
+                            TrygdeavgiftsperiodeDto(
+                                DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.ZERO, NOK)
+                            ),
+                            grunnlagDto,
+                            grunnlagListe = listOf(grunnlagDto),
+                            beregningsregel = Avgiftsberegningsregel.MINSTEBELØP,
+                            minstebelopVerdi = BigDecimal(99650),
+                            minstebelopAar = 2026,
+                        )
+                    )
+                )
+                every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
+
+                val periode = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+                    behandlingID = BEHANDLING_ID,
+                    listOf(skatteforhold { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG }),
+                    inntektsperioder = listOf(inntekt { type = Inntektskildetype.INNTEKT_FRA_UTLANDET })
+                ).single()
+
+                periode.beregningsregel shouldBe Avgiftsberegningsregel.MINSTEBELØP
+                periode.minstebelopVerdi shouldBe BigDecimal(99650)
+                periode.minstebelopAar shouldBe 2026
+            }
+
+            @Test
             fun `pliktig medlem skal beregne og lagre trygdeavgift`() {
                 val notSoRandomUuid = UUID.randomUUID()
                 mockkStatic(UUID::class)

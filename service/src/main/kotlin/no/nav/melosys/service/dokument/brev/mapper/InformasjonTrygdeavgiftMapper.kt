@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
@@ -51,7 +52,9 @@ class InformasjonTrygdeavgiftMapper(
         val fomDato = helseutgiftDekkesPerioder.minOf { it.fomDato }
         val tomDato = helseutgiftDekkesPerioder.maxOf { it.tomDato }
         val førstePeriode = helseutgiftDekkesPerioder.first()
-        val avgiftsperioder = mapAvgiftsperioderPensjonist(behandlingsresultat)
+        val valgtePerioder = valgteTrygdeavgiftsperioder(behandlingsresultat)
+        val avgiftsperioder = mapAvgiftsperioderPensjonist(valgtePerioder)
+        val periodeMedMinstebelop = finnPeriodeMedMinstebelop(valgtePerioder)
 
         return InformasjonTrygdeavgift(
             brevbestilling = brevbestilling,
@@ -74,8 +77,8 @@ class InformasjonTrygdeavgiftMapper(
             erSkattemessigEmigrert = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.any {
                 it.grunnlagSkatteforholdTilNorge?.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG
             },
-            minstebelopVerdi = finnPeriodeMedMinstebelop(behandlingsresultat)?.minstebelopVerdi,
-            minstebelopAar = finnPeriodeMedMinstebelop(behandlingsresultat)?.minstebelopAar,
+            minstebelopVerdi = periodeMedMinstebelop?.minstebelopVerdi,
+            minstebelopAar = periodeMedMinstebelop?.minstebelopAar,
             harMinstebelopPeriode = avgiftsperioder.any { it.beregningsregel == Avgiftsberegningsregel.MINSTEBELØP.name },
             har25ProsentRegelPeriode = avgiftsperioder.any { it.beregningsregel == Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL.name }
         )
@@ -88,7 +91,7 @@ class InformasjonTrygdeavgiftMapper(
         return trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toList())
     }
 
-    private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodeEøsPensjonist> {
+    private fun valgteTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat): List<Trygdeavgiftsperiode> {
         val perioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toSet()
 
         if (perioder.all { !it.harAvgift() && it.beregningsregel == Avgiftsberegningsregel.ORDINÆR }) {
@@ -97,29 +100,29 @@ class InformasjonTrygdeavgiftMapper(
 
         val inneværendeÅr = LocalDate.now().year
         val gruppertePerioder = perioder.groupBy { it.periodeTil.year }
-        val årMedAvgift = gruppertePerioder.filterValues { årsperioder ->
-            årsperioder.any { it.harAvgift() }
+        val årMedRelevantData = gruppertePerioder.filterValues { årsperioder ->
+            årsperioder.any { it.harAvgift() || it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }
         }.keys
-        val valgtÅr = velgRelevantÅr(årMedAvgift, inneværendeÅr)
+        val valgtÅr = velgRelevantÅr(årMedRelevantData, inneværendeÅr)
             ?: return emptyList()
 
-        return gruppertePerioder[valgtÅr]
-            ?.map {
-                val inntektsperiode = it.hentGrunnlagInntekstperiode()
-                AvgiftsperiodeEøsPensjonist(
-                    fom = it.periodeFra,
-                    tom = it.periodeTil,
-                    avgiftssats = it.trygdesats,
-                    avgiftPerMd = it.trygdeavgiftsbeløpMd.hentVerdi(),
-                    inntektskilde = inntektsperiode.type.beskrivelse,
-                    avgiftspliktigInntektPerMd = inntektsperiode.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
-                    skatteplikt = it.hentGrunnlagSkatteforholdTilNorge().skatteplikttype == Skatteplikttype.SKATTEPLIKTIG,
-                    beregningsregel = it.beregningsregel.name,
-                )
-            }
-            ?.sortedByDescending { it.fom }
-            ?: emptyList()
+        return gruppertePerioder[valgtÅr] ?: emptyList()
     }
+
+    private fun mapAvgiftsperioderPensjonist(perioder: List<Trygdeavgiftsperiode>): List<AvgiftsperiodeEøsPensjonist> =
+        perioder.map {
+            val inntektsperiode = it.hentGrunnlagInntekstperiode()
+            AvgiftsperiodeEøsPensjonist(
+                fom = it.periodeFra,
+                tom = it.periodeTil,
+                avgiftssats = it.trygdesats,
+                avgiftPerMd = it.trygdeavgiftsbeløpMd.hentVerdi(),
+                inntektskilde = inntektsperiode.type.beskrivelse,
+                avgiftspliktigInntektPerMd = inntektsperiode.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
+                skatteplikt = it.hentGrunnlagSkatteforholdTilNorge().skatteplikttype == Skatteplikttype.SKATTEPLIKTIG,
+                beregningsregel = it.beregningsregel.name,
+            )
+        }.sortedByDescending { it.fom }
 
     private fun velgRelevantÅr(tilgjengeligeÅr: Set<Int>, inneværendeÅr: Int): Int? {
         if (tilgjengeligeÅr.isEmpty()) return null
@@ -140,8 +143,8 @@ class InformasjonTrygdeavgiftMapper(
         return trygdeavgiftsberegningService.finnFakturamottakerNavn(behandling.id)
     }
 
-    private fun finnPeriodeMedMinstebelop(behandlingsresultat: Behandlingsresultat) =
-        behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder
+    private fun finnPeriodeMedMinstebelop(perioder: List<Trygdeavgiftsperiode>): Trygdeavgiftsperiode? =
+        perioder
             .sortedBy { it.periodeFra }
             .firstOrNull { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR && it.minstebelopVerdi != null }
 }

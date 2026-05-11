@@ -503,6 +503,8 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
             avgiftsperioder.any { it.beregningsregel == "MINSTEBELØP" }.shouldBeTrue()
             harMinstebelopPeriode.shouldBeTrue()
             har25ProsentRegelPeriode.shouldBeFalse()
+            minstebelopVerdi shouldBe BigDecimal(99650)
+            minstebelopAar shouldBe LocalDate.now().year
         }
     }
 
@@ -548,6 +550,8 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
             avgiftsperioder.any { it.beregningsregel == "MINSTEBELØP" }.shouldBeTrue()
             harMinstebelopPeriode.shouldBeTrue()
             har25ProsentRegelPeriode.shouldBeFalse()
+            minstebelopVerdi shouldBe BigDecimal(99650)
+            minstebelopAar shouldBe LocalDate.now().year
         }
     }
 
@@ -616,6 +620,10 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
                 trygdesats = BigDecimal(0.05)
                 trygdeavgiftsbeløpMd = BigDecimal(500.0)
                 beregningsregel = regel
+                if (regel != Avgiftsberegningsregel.ORDINÆR) {
+                    minstebelopVerdi = BigDecimal(99650)
+                    minstebelopAar = LocalDate.now().year
+                }
                 grunnlagInntekstperiode {
                     fomDato = LocalDate.now().minusYears(1).withMonth(1)
                     tomDato = LocalDate.now().withMonth(4)

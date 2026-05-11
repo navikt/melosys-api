@@ -602,6 +602,8 @@ internal class InformasjonTrygdeavgiftMapperTest {
             avgiftsperioder.any { it.beregningsregel == "MINSTEBELØP" }.shouldBeTrue()
             harMinstebelopPeriode.shouldBeTrue()
             har25ProsentRegelPeriode.shouldBeFalse()
+            minstebelopVerdi shouldBe BigDecimal(99650)
+            minstebelopAar shouldBe LocalDate.now().year
         }
     }
 
@@ -615,6 +617,8 @@ internal class InformasjonTrygdeavgiftMapperTest {
             avgiftsperioder.any { it.beregningsregel == "TJUEFEM_PROSENT_REGEL" }.shouldBeTrue()
             har25ProsentRegelPeriode.shouldBeTrue()
             harMinstebelopPeriode.shouldBeFalse()
+            minstebelopVerdi shouldBe BigDecimal(99650)
+            minstebelopAar shouldBe LocalDate.now().year
         }
     }
 
@@ -654,6 +658,10 @@ internal class InformasjonTrygdeavgiftMapperTest {
                     trygdesats = BigDecimal(0.05)
                     trygdeavgiftsbeløpMd = BigDecimal(500.0)
                     beregningsregel = regel
+                    if (regel != Avgiftsberegningsregel.ORDINÆR) {
+                        minstebelopVerdi = BigDecimal(99650)
+                        minstebelopAar = år
+                    }
                     grunnlagInntekstperiode {
                         fomDato = LocalDate.of(år, 1, 1)
                         tomDato = LocalDate.of(år, 12, 1)

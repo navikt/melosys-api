@@ -748,6 +748,8 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
             avgiftsperioder.any { it.beregningsregel == "MINSTEBELØP" }.shouldBeTrue()
             harMinstebelopPeriode.shouldBeTrue()
             har25ProsentRegelPeriode.shouldBeFalse()
+            minstebelopVerdi shouldBe BigDecimal(99650)
+            minstebelopAar shouldBe LocalDate.EPOCH.plusMonths(1).year
         }
     }
 
@@ -787,6 +789,8 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
             avgiftsperioder.any { it.beregningsregel == "MINSTEBELØP" }.shouldBeTrue()
             harMinstebelopPeriode.shouldBeTrue()
             har25ProsentRegelPeriode.shouldBeFalse()
+            minstebelopVerdi shouldBe BigDecimal(99650)
+            minstebelopAar shouldBe LocalDate.EPOCH.plusMonths(1).year
         }
     }
 
@@ -839,6 +843,10 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
                     trygdesats = BigDecimal(0.05)
                     trygdeavgiftsbeløpMd = BigDecimal(500)
                     beregningsregel = regel
+                    if (regel != Avgiftsberegningsregel.ORDINÆR) {
+                        minstebelopVerdi = BigDecimal(99650)
+                        minstebelopAar = LocalDate.EPOCH.plusMonths(1).year
+                    }
                     grunnlagSkatteforholdTilNorge { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG }
                     grunnlagInntekstperiode {
                         type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
@@ -874,6 +882,10 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
                     trygdesats = null
                     trygdeavgiftsbeløpMd = BigDecimal.ZERO
                     beregningsregel = regel
+                    if (regel != Avgiftsberegningsregel.ORDINÆR) {
+                        minstebelopVerdi = BigDecimal(99650)
+                        minstebelopAar = LocalDate.EPOCH.plusMonths(1).year
+                    }
                     grunnlagSkatteforholdTilNorge { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG }
                     grunnlagInntekstperiode {
                         type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
