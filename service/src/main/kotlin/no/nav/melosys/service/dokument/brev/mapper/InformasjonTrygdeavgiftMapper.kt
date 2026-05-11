@@ -51,6 +51,7 @@ class InformasjonTrygdeavgiftMapper(
         val fomDato = helseutgiftDekkesPerioder.minOf { it.fomDato }
         val tomDato = helseutgiftDekkesPerioder.maxOf { it.tomDato }
         val førstePeriode = helseutgiftDekkesPerioder.first()
+        val avgiftsperioder = mapAvgiftsperioderPensjonist(behandlingsresultat)
 
         return InformasjonTrygdeavgift(
             brevbestilling = brevbestilling,
@@ -62,7 +63,7 @@ class InformasjonTrygdeavgiftMapper(
             erNordisk = NordiskeLand.erNordiskLand(førstePeriode.bostedLandkode),
             betalingsvalg = hentBetalingsvalg(behandlingsresultat.hentBehandling()),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.hentBehandling()),
-            avgiftsperioder = mapAvgiftsperioderPensjonist(behandlingsresultat),
+            avgiftsperioder = avgiftsperioder,
             harAvgiftspliktigePerioderIForegåendeÅr = if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
                 behandlingsresultat.utledAvgiftspliktigperioderFom()?.let { fom ->
                     fom.year < LocalDate.now().year
@@ -76,7 +77,9 @@ class InformasjonTrygdeavgiftMapper(
             minstebelopVerdi = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder
                 .firstOrNull { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }?.minstebelopVerdi,
             minstebelopAar = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder
-                .firstOrNull { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }?.minstebelopAar
+                .firstOrNull { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }?.minstebelopAar,
+            harMinstebelopPeriode = avgiftsperioder.any { it.beregningsregel == Avgiftsberegningsregel.MINSTEBELØP.name },
+            har25ProsentRegelPeriode = avgiftsperioder.any { it.beregningsregel == Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL.name }
         )
     }
 

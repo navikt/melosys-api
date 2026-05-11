@@ -49,12 +49,14 @@ class ÅrsavregningVedtakMapper(
         val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.avgiftspliktigperioder)
         val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttTrygdeavgiftsGrunnlag?.avgiftspliktigperioder)
         val erNyÅrsavregning = behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
+        val endeligTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskapNyttgrunnlag, årsavregningModel.endeligAvgift)
+        val forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskap, årsavregningModel.tidligereAvgift)
 
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
             årsavregningsår = behandlingsresultat.hentÅrsavregning().aar,
-            endeligTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskapNyttgrunnlag, årsavregningModel.endeligAvgift),
-            forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskap, årsavregningModel.tidligereAvgift),
+            endeligTrygdeavgift = endeligTrygdeavgift,
+            forskuddsvisFakturertTrygdeavgift = forskuddsvisFakturertTrygdeavgift,
             endeligTrygdeavgiftTotalbeløp = årsavregningModel.beregnetAvgiftBelop
                 ?: throw FunksjonellException("BeregnetAvgiftBelop finnes ikke for behandling $behandlingsId"),
             forskuddsvisFakturertTrygdeavgiftTotalbeløp = totaltTidligereFakturertBeloep(årsavregningModel),
@@ -70,7 +72,11 @@ class ÅrsavregningVedtakMapper(
             erNyÅrsavregning = erNyÅrsavregning,
             harMisjonaerInntekt = harMisjonaerInntekt(årsavregningModel.endeligAvgift, årsavregningModel.tidligereAvgift),
             minstebelopVerdi = finnMinstebelopVerdi(årsavregningModel.endeligAvgift, årsavregningModel.tidligereAvgift),
-            minstebelopAar = finnMinstebelopAar(årsavregningModel.endeligAvgift, årsavregningModel.tidligereAvgift)
+            minstebelopAar = finnMinstebelopAar(årsavregningModel.endeligAvgift, årsavregningModel.tidligereAvgift),
+            harMinstebelopEndelig = endeligTrygdeavgift.any { it.beregningsregel == Avgiftsberegningsregel.MINSTEBELØP.name },
+            har25ProsentRegelEndelig = endeligTrygdeavgift.any { it.beregningsregel == Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL.name },
+            harMinstebelopForskuddsvis = forskuddsvisFakturertTrygdeavgift.any { it.beregningsregel == Avgiftsberegningsregel.MINSTEBELØP.name },
+            har25ProsentRegelForskuddsvis = forskuddsvisFakturertTrygdeavgift.any { it.beregningsregel == Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL.name }
         )
     }
 
@@ -83,12 +89,13 @@ class ÅrsavregningVedtakMapper(
         val fagsak = behandling.fagsak
         val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.avgiftspliktigperioder)
         val erNyÅrsavregning = årsavregningModel.tidligereÅrsavregningmanueltAvgiftBeloep != null
+        val forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskap, årsavregningModel.tidligereAvgift)
 
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
             årsavregningsår = årsavregningModel.år,
             endeligTrygdeavgift = emptyList(),
-            forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskap, årsavregningModel.tidligereAvgift),
+            forskuddsvisFakturertTrygdeavgift = forskuddsvisFakturertTrygdeavgift,
             endeligTrygdeavgiftTotalbeløp = årsavregningModel.manueltAvgiftBeloep
                 ?: throw FunksjonellException("Manuelt beregnet avgift finnes ikke for behandling ${behandling.id}"),
             forskuddsvisFakturertTrygdeavgiftTotalbeløp = totaltTidligereFakturertBeloep(årsavregningModel),
@@ -104,7 +111,11 @@ class ÅrsavregningVedtakMapper(
             erNyÅrsavregning = erNyÅrsavregning,
             harMisjonaerInntekt = harMisjonaerInntekt(emptyList(), årsavregningModel.tidligereAvgift),
             minstebelopVerdi = finnMinstebelopVerdi(emptyList(), årsavregningModel.tidligereAvgift),
-            minstebelopAar = finnMinstebelopAar(emptyList(), årsavregningModel.tidligereAvgift)
+            minstebelopAar = finnMinstebelopAar(emptyList(), årsavregningModel.tidligereAvgift),
+            harMinstebelopEndelig = false,
+            har25ProsentRegelEndelig = false,
+            harMinstebelopForskuddsvis = forskuddsvisFakturertTrygdeavgift.any { it.beregningsregel == Avgiftsberegningsregel.MINSTEBELØP.name },
+            har25ProsentRegelForskuddsvis = forskuddsvisFakturertTrygdeavgift.any { it.beregningsregel == Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL.name }
         )
     }
 
@@ -191,4 +202,5 @@ class ÅrsavregningVedtakMapper(
                 else -> throw FunksjonellException("Ukjent periodetype: ${it.javaClass.simpleName}")
             } } == true
     }
+
 }

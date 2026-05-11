@@ -28,7 +28,11 @@ class ÅrsavregningVedtaksbrev(
     val erNyÅrsavregning: Boolean,
     val harMisjonaerInntekt: Boolean = false,
     val minstebelopVerdi: BigDecimal? = null,
-    val minstebelopAar: Int? = null
+    val minstebelopAar: Int? = null,
+    val harMinstebelopEndelig: Boolean = false,
+    val har25ProsentRegelEndelig: Boolean = false,
+    val harMinstebelopForskuddsvis: Boolean = false,
+    val har25ProsentRegelForskuddsvis: Boolean = false
 ) : DokgenDto(brevBestilling, Mottakerroller.BRUKER) {
     constructor(
         brevBestilling: ÅrsavregningVedtakBrevBestilling,
@@ -47,7 +51,11 @@ class ÅrsavregningVedtaksbrev(
         erNyÅrsavregning: Boolean = false,
         harMisjonaerInntekt: Boolean = false,
         minstebelopVerdi: BigDecimal? = null,
-        minstebelopAar: Int? = null
+        minstebelopAar: Int? = null,
+        harMinstebelopEndelig: Boolean = false,
+        har25ProsentRegelEndelig: Boolean = false,
+        harMinstebelopForskuddsvis: Boolean = false,
+        har25ProsentRegelForskuddsvis: Boolean = false
     ) : this(
         brevBestilling = brevBestilling,
         årsavregningsår = årsavregningsår,
@@ -67,7 +75,11 @@ class ÅrsavregningVedtaksbrev(
         erNyÅrsavregning = erNyÅrsavregning,
         harMisjonaerInntekt = harMisjonaerInntekt,
         minstebelopVerdi = minstebelopVerdi,
-        minstebelopAar = minstebelopAar
+        minstebelopAar = minstebelopAar,
+        harMinstebelopEndelig = harMinstebelopEndelig,
+        har25ProsentRegelEndelig = har25ProsentRegelEndelig,
+        harMinstebelopForskuddsvis = harMinstebelopForskuddsvis,
+        har25ProsentRegelForskuddsvis = har25ProsentRegelForskuddsvis
     )
 }
 

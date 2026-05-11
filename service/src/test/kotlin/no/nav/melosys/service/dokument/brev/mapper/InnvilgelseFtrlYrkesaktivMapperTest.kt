@@ -746,6 +746,8 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
         innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldNotBeEmpty()
             avgiftsperioder.any { it.beregningsregel == "MINSTEBELØP" }.shouldBeTrue()
+            harMinstebelopPeriode.shouldBeTrue()
+            har25ProsentRegelPeriode.shouldBeFalse()
         }
     }
 
@@ -757,6 +759,8 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
         innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldNotBeEmpty()
             avgiftsperioder.any { it.beregningsregel == "TJUEFEM_PROSENT_REGEL" }.shouldBeTrue()
+            har25ProsentRegelPeriode.shouldBeTrue()
+            harMinstebelopPeriode.shouldBeFalse()
         }
     }
 
@@ -767,6 +771,8 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
         innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldNotBeEmpty()
             avgiftsperioder.all { it.beregningsregel == "ORDINÆR" }.shouldBeTrue()
+            harMinstebelopPeriode.shouldBeFalse()
+            har25ProsentRegelPeriode.shouldBeFalse()
         }
     }
 
@@ -779,6 +785,8 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
         innvilgelseFtrlMapper.mapYrkesaktivPliktig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldNotBeEmpty()
             avgiftsperioder.any { it.beregningsregel == "MINSTEBELØP" }.shouldBeTrue()
+            harMinstebelopPeriode.shouldBeTrue()
+            har25ProsentRegelPeriode.shouldBeFalse()
         }
     }
 
@@ -791,6 +799,8 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
         innvilgelseFtrlMapper.mapYrkesaktivPliktig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldNotBeEmpty()
             avgiftsperioder.any { it.beregningsregel == "TJUEFEM_PROSENT_REGEL" }.shouldBeTrue()
+            har25ProsentRegelPeriode.shouldBeTrue()
+            harMinstebelopPeriode.shouldBeFalse()
         }
     }
 
@@ -803,6 +813,8 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
         innvilgelseFtrlMapper.mapYrkesaktivPliktig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldNotBeEmpty()
             avgiftsperioder.all { it.beregningsregel == "ORDINÆR" }.shouldBeTrue()
+            harMinstebelopPeriode.shouldBeFalse()
+            har25ProsentRegelPeriode.shouldBeFalse()
         }
     }
 

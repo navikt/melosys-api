@@ -501,6 +501,8 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
         innvilgelseFtrlMapper.mapPensjonistFrivillig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldNotBeEmpty()
             avgiftsperioder.any { it.beregningsregel == "MINSTEBELØP" }.shouldBeTrue()
+            harMinstebelopPeriode.shouldBeTrue()
+            har25ProsentRegelPeriode.shouldBeFalse()
         }
     }
 
@@ -514,6 +516,8 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
         innvilgelseFtrlMapper.mapPensjonistFrivillig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldNotBeEmpty()
             avgiftsperioder.any { it.beregningsregel == "TJUEFEM_PROSENT_REGEL" }.shouldBeTrue()
+            har25ProsentRegelPeriode.shouldBeTrue()
+            harMinstebelopPeriode.shouldBeFalse()
         }
     }
 
@@ -527,6 +531,8 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
         innvilgelseFtrlMapper.mapPensjonistFrivillig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldNotBeEmpty()
             avgiftsperioder.all { it.beregningsregel == "ORDINÆR" }.shouldBeTrue()
+            harMinstebelopPeriode.shouldBeFalse()
+            har25ProsentRegelPeriode.shouldBeFalse()
         }
     }
 
@@ -540,6 +546,8 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
         innvilgelseFtrlMapper.mapPensjonistPliktig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldNotBeEmpty()
             avgiftsperioder.any { it.beregningsregel == "MINSTEBELØP" }.shouldBeTrue()
+            harMinstebelopPeriode.shouldBeTrue()
+            har25ProsentRegelPeriode.shouldBeFalse()
         }
     }
 
@@ -553,6 +561,8 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
         innvilgelseFtrlMapper.mapPensjonistPliktig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldNotBeEmpty()
             avgiftsperioder.any { it.beregningsregel == "TJUEFEM_PROSENT_REGEL" }.shouldBeTrue()
+            har25ProsentRegelPeriode.shouldBeTrue()
+            harMinstebelopPeriode.shouldBeFalse()
         }
     }
 
@@ -566,6 +576,8 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
         innvilgelseFtrlMapper.mapPensjonistPliktig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldNotBeEmpty()
             avgiftsperioder.all { it.beregningsregel == "ORDINÆR" }.shouldBeTrue()
+            harMinstebelopPeriode.shouldBeFalse()
+            har25ProsentRegelPeriode.shouldBeFalse()
         }
     }
 

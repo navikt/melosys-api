@@ -393,6 +393,10 @@ class ÅrsavregningVedtakMapperTest {
         result.endeligTrygdeavgift[0].beregningsregel shouldBe "MINSTEBELØP"
         result.minstebelopVerdi shouldBe BigDecimal(7000)
         result.minstebelopAar shouldBe 2024
+        result.harMinstebelopEndelig shouldBe true
+        result.har25ProsentRegelEndelig shouldBe false
+        result.harMinstebelopForskuddsvis shouldBe false
+        result.har25ProsentRegelForskuddsvis shouldBe false
     }
 
     @Test
@@ -410,6 +414,10 @@ class ÅrsavregningVedtakMapperTest {
         result.endeligTrygdeavgift[0].beregningsregel shouldBe "TJUEFEM_PROSENT_REGEL"
         result.minstebelopVerdi shouldBe BigDecimal(7000)
         result.minstebelopAar shouldBe 2024
+        result.har25ProsentRegelEndelig shouldBe true
+        result.harMinstebelopEndelig shouldBe false
+        result.har25ProsentRegelForskuddsvis shouldBe false
+        result.harMinstebelopForskuddsvis shouldBe false
     }
 
     @Test
@@ -426,6 +434,8 @@ class ÅrsavregningVedtakMapperTest {
         result.forskuddsvisFakturertTrygdeavgift shouldHaveSize 1
         result.forskuddsvisFakturertTrygdeavgift[0].beregningsregel shouldBe "MINSTEBELØP"
         result.minstebelopVerdi shouldBe BigDecimal(7000)
+        result.harMinstebelopForskuddsvis shouldBe true
+        result.harMinstebelopEndelig shouldBe false
     }
 
     @Test
@@ -438,6 +448,10 @@ class ÅrsavregningVedtakMapperTest {
 
         result.endeligTrygdeavgift[0].beregningsregel shouldBe "ORDINÆR"
         result.forskuddsvisFakturertTrygdeavgift[0].beregningsregel shouldBe "ORDINÆR"
+        result.harMinstebelopEndelig shouldBe false
+        result.har25ProsentRegelEndelig shouldBe false
+        result.harMinstebelopForskuddsvis shouldBe false
+        result.har25ProsentRegelForskuddsvis shouldBe false
     }
 
     @Test

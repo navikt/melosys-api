@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
 import io.getunleash.FakeUnleash
+import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
@@ -599,6 +600,8 @@ internal class InformasjonTrygdeavgiftMapperTest {
         informasjonTrygdeavgiftMapper.mapInformasjonTrygdeavgift(lagBrevbestilling()).shouldNotBeNull().apply {
             avgiftsperioder.shouldNotBeEmpty()
             avgiftsperioder.any { it.beregningsregel == "MINSTEBELØP" }.shouldBeTrue()
+            harMinstebelopPeriode.shouldBeTrue()
+            har25ProsentRegelPeriode.shouldBeFalse()
         }
     }
 
@@ -610,6 +613,8 @@ internal class InformasjonTrygdeavgiftMapperTest {
         informasjonTrygdeavgiftMapper.mapInformasjonTrygdeavgift(lagBrevbestilling()).shouldNotBeNull().apply {
             avgiftsperioder.shouldNotBeEmpty()
             avgiftsperioder.any { it.beregningsregel == "TJUEFEM_PROSENT_REGEL" }.shouldBeTrue()
+            har25ProsentRegelPeriode.shouldBeTrue()
+            harMinstebelopPeriode.shouldBeFalse()
         }
     }
 
@@ -621,6 +626,8 @@ internal class InformasjonTrygdeavgiftMapperTest {
         informasjonTrygdeavgiftMapper.mapInformasjonTrygdeavgift(lagBrevbestilling()).shouldNotBeNull().apply {
             avgiftsperioder.shouldNotBeEmpty()
             avgiftsperioder.all { it.beregningsregel == "ORDINÆR" }.shouldBeTrue()
+            harMinstebelopPeriode.shouldBeFalse()
+            har25ProsentRegelPeriode.shouldBeFalse()
         }
     }
 
