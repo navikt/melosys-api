@@ -13,5 +13,5 @@ data class AvgiftsperiodeDto(
     val avgiftPerMd: BigDecimal,
     val inntektskildetype: Inntektskildetype,
     val avgiftspliktigInntektPerMd: BigDecimal,
-    val beregningsregel: String? = null
+    val beregningsregel: String
 )
