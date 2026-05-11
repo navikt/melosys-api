@@ -37,7 +37,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.context.ApplicationEventPublisher
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import java.time.LocalDate
 import java.util.UUID
 
@@ -50,9 +49,6 @@ class ProsessinstansServiceTest {
     @RelaxedMockK
     private lateinit var prosessinstansRepo: ProsessinstansForServiceRepository
 
-    @RelaxedMockK
-    private lateinit var threadPoolTaskExecutor: ThreadPoolTaskExecutor
-
     private lateinit var prosessinstansService: ProsessinstansService
     private val piListCaptor = mutableListOf<Prosessinstans>()
 
@@ -62,8 +58,7 @@ class ProsessinstansServiceTest {
 
         prosessinstansService = ProsessinstansService(
             applicationEventPublisher,
-            prosessinstansRepo,
-            threadPoolTaskExecutor
+            prosessinstansRepo
         )
 
         every { prosessinstansRepo.save(any<Prosessinstans>()) } answers {
@@ -796,6 +791,35 @@ class ProsessinstansServiceTest {
             getData(ProsessDataKey.SAKSNUMMER) shouldBe "MEL-2"
             getData(ProsessDataKey.GJELDER_ÅR) shouldBe "2023"
             hentData<Behandlingsaarsaktyper>(ProsessDataKey.ÅRSAK_TYPE) shouldBe Behandlingsaarsaktyper.MELDING_FRA_SKATT
+        }
+    }
+
+    @Test
+    fun `opprett satsendringsprosess med eksplisitt LAV-prioritet skal lagre prioritetsoverstyring på instansen`() {
+        val behandling = Behandling.forTest { }
+
+
+        prosessinstansService.opprettSatsendringBehandlingFor(behandling, 2024, Prioritet.LAV)
+
+
+        piListCaptor.last().run {
+            type shouldBe ProsessType.SATSENDRING
+            finnData<Prioritet>(ProsessDataKey.PRIORITET) shouldBe Prioritet.LAV
+            hentPrioritet() shouldBe Prioritet.LAV
+        }
+    }
+
+    @Test
+    fun `opprett satsendringsprosess uten eksplisitt prioritet skal falle tilbake til ProsessType sin default`() {
+        val behandling = Behandling.forTest { }
+
+
+        prosessinstansService.opprettSatsendringBehandlingFor(behandling, 2024)
+
+
+        piListCaptor.last().run {
+            finnData<Prioritet>(ProsessDataKey.PRIORITET) shouldBe null
+            hentPrioritet() shouldBe ProsessType.SATSENDRING.prioritet
         }
     }
 

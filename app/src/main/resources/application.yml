@@ -229,6 +229,13 @@ melosys:
   kodeverk:
     scheduler:
       enabled: true  # Standard aktivert for produksjon
+  saksflyt:
+    gjenopprettelse:
+      # Hvor lenge en aktiv prosessinstans må ha vært urørt (endretDato) før den gjenopprettes automatisk ved oppstart.
+      # MERK: stopgap. melosys-api kjører 2 podder; vinduet må være lengre enn både lengste saga-kjøretid OG verste
+      # kø-ventetid (timer under en batch-flom), ellers kan begge podder gjenoppta samme saga. Ikke 15 min.
+      # Ekte fiks: DB-basert kø med FOR UPDATE SKIP LOCKED (MELOSYS-7790 / jf. MELOSYS-8066).
+      vindu: PT2H  # ISO-8601 Duration
   service:
     fagsak:
       arbeidsforholdhistorikk:

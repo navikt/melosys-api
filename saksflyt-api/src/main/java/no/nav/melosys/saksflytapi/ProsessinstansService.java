@@ -34,9 +34,7 @@ import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -50,14 +48,11 @@ public class ProsessinstansService {
 
     private final ApplicationEventPublisher applicationEventPublisher;
     private final ProsessinstansForServiceRepository prosessinstansRepo;
-    private final ThreadPoolTaskExecutor saksflytThreadPoolTaskExecutor;
 
     public ProsessinstansService(ApplicationEventPublisher applicationEventPublisher,
-                                 ProsessinstansForServiceRepository prosessinstansRepo,
-                                 @Qualifier("saksflytThreadPoolTaskExecutor") ThreadPoolTaskExecutor saksflytThreadPoolTaskExecutor) {
+                                 ProsessinstansForServiceRepository prosessinstansRepo) {
         this.applicationEventPublisher = applicationEventPublisher;
         this.prosessinstansRepo = prosessinstansRepo;
-        this.saksflytThreadPoolTaskExecutor = saksflytThreadPoolTaskExecutor;
     }
 
     @Transactional
@@ -149,6 +144,14 @@ public class ProsessinstansService {
     public UUID opprettArsavregningsBehandlingProsessflyt(String saksnummer,
                                                           String gjelderPeriode,
                                                           Behandlingsaarsaktyper behandlingsaarsaktype) {
+        return opprettArsavregningsBehandlingProsessflyt(saksnummer, gjelderPeriode, behandlingsaarsaktype, null);
+    }
+
+    @Transactional
+    public UUID opprettArsavregningsBehandlingProsessflyt(String saksnummer,
+                                                          String gjelderPeriode,
+                                                          Behandlingsaarsaktyper behandlingsaarsaktype,
+                                                          @Nullable Prioritet prioritet) {
         Prosessinstans prosessinstans = Prosessinstans.builder()
             .medType(ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING)
             .medStatus(ProsessStatus.KLAR)
@@ -156,7 +159,7 @@ public class ProsessinstansService {
             .medData(SAKSNUMMER, saksnummer)
             .medData(ÅRSAK_TYPE, behandlingsaarsaktype)
             .build();
-
+        settPrioritetOverstyring(prosessinstans, prioritet);
         return lagre(prosessinstans);
     }
 
@@ -308,9 +311,6 @@ public class ProsessinstansService {
         }
 
         applicationEventPublisher.publishEvent(new ProsessinstansOpprettetEvent(prosessinstans));
-        int prosessinstanseriKø = saksflytThreadPoolTaskExecutor.getThreadPoolExecutor().getQueue().size();
-        if (prosessinstanseriKø > 0)
-            logger.info("Antall prosessinstanser i saksflytThreadPoolTaskExecutor kø: {}", prosessinstanseriKø);
 
         Metrics.counter(MetrikkerNavn.PROSESSINSTANSER_OPPRETTET, MetrikkerNavn.TAG_TYPE, prosessinstans.getType().name()).increment();
         return prosessinstans.getId();
@@ -753,12 +753,18 @@ public class ProsessinstansService {
 
     @Transactional
     public UUID opprettSatsendringBehandlingFor(Behandling behandling, int aar) {
+        return opprettSatsendringBehandlingFor(behandling, aar, null);
+    }
+
+    @Transactional
+    public UUID opprettSatsendringBehandlingFor(Behandling behandling, int aar, @Nullable Prioritet prioritet) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.SATSENDRING)
             .build();
 
         prosessinstans.setData(OPPRINNELIG_BEH, behandling.getId());
         prosessinstans.setData(GJELDER_ÅR, aar);
+        settPrioritetOverstyring(prosessinstans, prioritet);
 
         if (harPågåendeProsess(behandling.getId())) {
             throw new FunksjonellException("Det finnes allerede en aktiv prosess for satsendring av behandling " + behandling.getId());
@@ -769,11 +775,17 @@ public class ProsessinstansService {
 
     @Transactional
     public UUID opprettSatsendringBehandlingMedTilbakestillingAvAvgift(Behandling behandling, int aar) {
+        return opprettSatsendringBehandlingMedTilbakestillingAvAvgift(behandling, aar, null);
+    }
+
+    @Transactional
+    public UUID opprettSatsendringBehandlingMedTilbakestillingAvAvgift(Behandling behandling, int aar, @Nullable Prioritet prioritet) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING)
             .build();
         prosessinstans.setData(OPPRINNELIG_BEH, behandling.getId());
         prosessinstans.setData(GJELDER_ÅR, aar);
+        settPrioritetOverstyring(prosessinstans, prioritet);
 
         if (harPågåendeProsess(behandling.getId())) {
             throw new FunksjonellException("Det finnes allerede en aktiv prosess for satsendring av behandling " + behandling.getId());
@@ -784,5 +796,16 @@ public class ProsessinstansService {
 
     private boolean harPågåendeProsess(Long behandlingID) {
         return !prosessinstansRepo.findBySatsendringAndOpprinneligBehandlingIdNotFerdig(behandlingID).isEmpty();
+    }
+
+    /**
+     * Lagrer en per-kall-overstyring av prioritet på instansen (lest igjen av {@link Prosessinstans#hentPrioritet()}).
+     * Brukes av batch-generatorene som setter {@link Prioritet#LAV} eksplisitt, slik at de aldri sulter
+     * saksbehandler-trigget arbeid selv om {@link ProsessType} skulle ha en høyere default-prioritet.
+     */
+    private static void settPrioritetOverstyring(Prosessinstans prosessinstans, @Nullable Prioritet prioritet) {
+        if (prioritet != null) {
+            prosessinstans.setData(PRIORITET, prioritet);
+        }
     }
 }

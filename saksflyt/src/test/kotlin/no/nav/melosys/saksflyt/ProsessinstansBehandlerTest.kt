@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.context.ApplicationEventPublisher
+import java.time.Duration
 import java.time.LocalDateTime
 import java.util.*
 
@@ -52,7 +53,8 @@ class ProsessinstansBehandlerTest {
             setOf(stegbehandler),
             prosessinstansRepository,
             applicationEventPublisher,
-            meterRegistry
+            meterRegistry,
+            Duration.ofHours(2)
         )
 
         prosessinstans.type = ProsessType.MOTTAK_SED
@@ -60,11 +62,11 @@ class ProsessinstansBehandlerTest {
     }
 
     @Test
-    fun `behandleProsessinstans ny prosessinstans steg null blir behandlet`() {
+    fun `behandleProsessinstansNå ny prosessinstans steg null blir behandlet`() {
         every { prosessinstansRepository.save(any<Prosessinstans>()) } returnsArgument 0
 
 
-        prosessinstansBehandler.behandleProsessinstans(prosessinstans)
+        prosessinstansBehandler.behandleProsessinstansNå(prosessinstans)
 
 
         prosessinstans.run {
@@ -76,12 +78,12 @@ class ProsessinstansBehandlerTest {
     }
 
     @Test
-    fun `behandleProsessinstans ny prosessinstans steg null stegbehandler kaster feil status feilet blir lagret med hendelse`() {
+    fun `behandleProsessinstansNå ny prosessinstans steg null stegbehandler kaster feil status feilet blir lagret med hendelse`() {
         every { prosessinstansRepository.save(any<Prosessinstans>()) } returnsArgument 0
         every { stegbehandler.utfør(prosessinstans) } throws FunksjonellException("FEIL!")
 
 
-        prosessinstansBehandler.behandleProsessinstans(prosessinstans)
+        prosessinstansBehandler.behandleProsessinstansNå(prosessinstans)
 
 
         prosessinstans.run {
@@ -96,11 +98,11 @@ class ProsessinstansBehandlerTest {
     }
 
     @Test
-    fun `behandleProsessinstans prosessinstans med status feilet blir ikke behandlet`() {
+    fun `behandleProsessinstansNå prosessinstans med status feilet blir ikke behandlet`() {
         prosessinstans.status = ProsessStatus.FEILET
 
 
-        prosessinstansBehandler.behandleProsessinstans(prosessinstans)
+        prosessinstansBehandler.behandleProsessinstansNå(prosessinstans)
 
 
         verify(exactly = 0) { stegbehandler.utfør(any()) }
@@ -108,17 +110,18 @@ class ProsessinstansBehandlerTest {
     }
 
     @Test
-    fun `gjenopprett prosesser som henger ved oppstart`() {
-        val prosessinstans1 = lagProsessinstans(LocalDateTime.now().minusHours(12))
-        val prosessinstans2 = lagProsessinstans(LocalDateTime.MIN)
-        every { prosessinstansRepository.findAllByStatusIn(any<Set<ProsessStatus>>()) } returns setOf(prosessinstans1, prosessinstans2)
+    fun `gjenopprett prosesser som henger ved oppstart - kun de eldre enn gjenopprettelsesvinduet`() {
+        val ferskProsessinstans = lagProsessinstans(LocalDateTime.now().minusMinutes(30)) // innenfor 2t-vinduet
+        val hengendeProsessinstans = lagProsessinstans(LocalDateTime.MIN)
+        every { prosessinstansRepository.findAllByStatusIn(any<Set<ProsessStatus>>()) } returns setOf(ferskProsessinstans, hengendeProsessinstans)
 
 
         prosessinstansBehandler.gjenopprettProsesserSomHengerVedOppstart(null)
 
 
-        verify { prosessinstansRepository.save(prosessinstans2) }
-        verify { applicationEventPublisher.publishEvent(any()) }
+        verify { prosessinstansRepository.save(hengendeProsessinstans) }
+        verify(exactly = 0) { prosessinstansRepository.save(ferskProsessinstans) }
+        verify(exactly = 1) { applicationEventPublisher.publishEvent(any()) }
     }
 
     private fun lagProsessinstans(endretDato: LocalDateTime) = Prosessinstans.forTest {

@@ -1,14 +1,16 @@
 package no.nav.melosys.itest
 
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.Application
-import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.ProsessinstansTestManager
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.saksflyt.PrioritertProsessinstansOppgave
 import no.nav.melosys.saksflyt.steg.sed.mottak.SedMottakRuting
 import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.saksflytapi.domain.Prioritet
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
@@ -42,7 +44,7 @@ import org.springframework.test.context.ActiveProfiles
 @DirtiesContext
 @EnableMockOAuth2Server
 @Import(SaksflyThreadPoolTaskExecutorIT.TestConfig::class)
-@Disabled("Brukes lokalt for å teste at saksflytThreadPoolTaskExecutor fungerer som forventet")
+@Disabled("Brukes lokalt for å teste at saksflytThreadPoolTaskExecutor (prioritetskøen) fungerer som forventet")
 class SaksflyThreadPoolTaskExecutorIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
     @Autowired private val prosessinstansTestManager: ProsessinstansTestManager,
@@ -56,31 +58,47 @@ class SaksflyThreadPoolTaskExecutorIT(
     }
 
     @Test
-    fun test() {
-        val events = LoggingTestUtils.captureLog<ProsessinstansService> {
-            prosessinstansTestManager.executeAndWait(
-                mapOf(
-                    ProsessType.MOTTAK_SED to 10
-                )
-            ) {
-                for (i in 1..10) {
-                    val msg = MelosysEessiMelding().apply {
-                        this.rinaSaksnummer = i.toString()
-                        sedId = SedType.A009.name
-                        sedVersjon = "1"
-                    }
-                    prosessinstansService.opprettProsessinstansSedMottak(msg)
+    fun `prosessinstanser kjøres til de er ferdige og køen tømmes`() {
+        prosessinstansTestManager.executeAndWait(
+            mapOf(
+                ProsessType.MOTTAK_SED to 10
+            )
+        ) {
+            for (i in 1..10) {
+                val msg = MelosysEessiMelding().apply {
+                    this.rinaSaksnummer = i.toString()
+                    sedId = SedType.A009.name
+                    sedVersjon = "1"
                 }
+                prosessinstansService.opprettProsessinstansSedMottak(msg)
             }
-        }
-        events.filter { it.formattedMessage.contains("Antall prosessinstanser i saksflytThreadPoolTaskExecutor") }.forEach {
-            println(it.formattedMessage)
         }
         await.atMost(java.time.Duration.ofSeconds(2)).until {
             taskExecutor.threadPoolExecutor.queue.size == 0
         }
     }
 
+    @Test
+    fun `oppgaver i køen er innpakket som PrioritertProsessinstansOppgave med prioritet`() {
+        // Detaljert HØY-foran-LAV-ordning er dekket av PrioritertProsessinstansOppgaveTest (rene enhetstester);
+        // her bekreftes kun at den faktiske bønnen pakker sagaer som PrioritertProsessinstansOppgave.
+        prosessinstansTestManager.executeAndWait(
+            mapOf(ProsessType.MOTTAK_SED to 10)
+        ) {
+            repeat(10) { i ->
+                prosessinstansService.opprettProsessinstansSedMottak(MelosysEessiMelding().apply {
+                    rinaSaksnummer = "ko-$i"
+                    sedId = SedType.A009.name
+                    sedVersjon = "1"
+                })
+            }
+            Thread.sleep(100)
+            taskExecutor.threadPoolExecutor.queue
+                .filterIsInstance<PrioritertProsessinstansOppgave>()
+                .forEach { it.prioritet shouldBe Prioritet.NORMAL }
+        }
+        await.atMost(java.time.Duration.ofSeconds(5)).until { taskExecutor.threadPoolExecutor.queue.size == 0 }
+    }
 
     @TestConfiguration
     class TestConfig {
@@ -89,7 +107,6 @@ class SaksflyThreadPoolTaskExecutorIT(
             every { inngangsSteg() } returns ProsessSteg.SED_MOTTAK_RUTING
             every { utfør(any()) } answers {
                 Thread.sleep(500)
-
             }
         }
     }

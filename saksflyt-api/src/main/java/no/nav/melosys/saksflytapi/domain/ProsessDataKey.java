@@ -50,6 +50,7 @@ public enum ProsessDataKey {
     OPPHOLDSLAND("oppholdsland"),
     ORGNR("orgnr"),
     PERSON_IDENT("personIdent"),
+    PRIORITET("prioritet"),
     PRODUSERBART_BREV("produserbartBrev"),
     SAKSBEHANDLER("saksbehandler"),
     SAKSBEHANDLER_NAVN("saksbehandlerNavn"),

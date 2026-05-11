@@ -164,6 +164,12 @@ class Prosessinstans(
     fun hentMelosysEessiMelding(): MelosysEessiMelding? =
         getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding::class.java)
 
+    /**
+     * Effektiv prioritet: en eventuell per-kall-overstyring lagret på instansen, ellers
+     * default-prioriteten for [ProsessType]. Brukes av saksflyt-køen til å plukke HØY/NORMAL foran LAV.
+     */
+    fun hentPrioritet(): Prioritet = getData(ProsessDataKey.PRIORITET, Prioritet::class.java) ?: type.prioritet
+
     fun leggTilHendelse(steg: ProsessSteg, t: Throwable) {
         hendelser.add(
             ProsessinstansHendelse(
