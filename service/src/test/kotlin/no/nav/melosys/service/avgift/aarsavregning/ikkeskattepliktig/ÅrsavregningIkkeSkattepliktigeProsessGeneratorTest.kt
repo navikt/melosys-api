@@ -201,6 +201,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGeneratorTest {
         )
 
         // Per Yvonnes avklaring C: ny ÅRSAVREGNING SKAL opprettes når åpen mangler år
+        // https://jira.adeo.no/browse/MELOSYS-8045
         verify(exactly = 1) {
             prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
                 fagsak.saksnummer,
