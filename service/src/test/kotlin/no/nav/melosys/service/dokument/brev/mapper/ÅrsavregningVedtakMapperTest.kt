@@ -43,7 +43,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.stream.Stream
