@@ -77,8 +77,7 @@ class OpprettSakOgBehandlingDigitalSøknad(
         log.info { "Opprettet fagsak ${fagsak.saksnummer} med behandling ${behandling.id} for digital søknad" }
 
         val aktører = DigitalSøknadAktørerMapper.utled(søknadsdata)
-        val mottaksdato = søknadsdata.innsendtTidspunkt.atZone(OSLO_ZONE).toInstant()
-        aktørSynkronisering.synkroniser(fagsak, aktører, mottaksdato)
+        aktørSynkronisering.synkroniser(fagsak, aktører)
 
         // Sett AVVENT_DOK_PART hvis kun arbeidsgiver-del og ingen koblet motpart
         if (metadata.skjemadel == Skjemadel.ARBEIDSGIVERS_DEL && søknadsdata.kobletSkjema == null) {

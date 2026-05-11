@@ -289,12 +289,12 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             mockHentMottatteOpplysninger(behandlingId)
 
             val aktørerSlot = slot<AktørerFraSøknad>()
-            every { aktørSynkronisering.synkroniser(eq(fagsak), capture(aktørerSlot), any()) } just Runs
+            every { aktørSynkronisering.synkroniser(eq(fagsak), capture(aktørerSlot)) } just Runs
 
             steg.utfør(prosessinstans)
 
             aktørerSlot.captured.skjemadel shouldBe Skjemadel.ARBEIDSTAKERS_DEL
-            verify { aktørSynkronisering.synkroniser(fagsak, any(), any()) }
+            verify { aktørSynkronisering.synkroniser(fagsak, any()) }
         }
     }
 

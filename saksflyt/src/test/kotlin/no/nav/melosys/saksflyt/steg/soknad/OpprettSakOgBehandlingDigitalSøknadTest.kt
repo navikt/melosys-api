@@ -138,13 +138,13 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         val fagsak = mockFagsakOgBehandling()
         mockMottatteOpplysninger()
         val aktørerSlot = slot<AktørerFraSøknad>()
-        every { aktørSynkronisering.synkroniser(any(), capture(aktørerSlot), any()) } just Runs
+        every { aktørSynkronisering.synkroniser(any(), capture(aktørerSlot)) } just Runs
 
         opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
 
         aktørerSlot.captured.arbeidsgiverOrgnumre shouldBe listOf(orgnr)
         aktørerSlot.captured.skjemadel shouldBe Skjemadel.ARBEIDSTAKERS_DEL
-        verify { aktørSynkronisering.synkroniser(any(), any(), any()) }
+        verify { aktørSynkronisering.synkroniser(any(), any()) }
     }
 
     @Test

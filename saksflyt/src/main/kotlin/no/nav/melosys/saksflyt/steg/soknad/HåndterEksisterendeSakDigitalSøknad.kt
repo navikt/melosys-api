@@ -92,8 +92,7 @@ class HåndterEksisterendeSakDigitalSøknad(
         søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
     ) {
         val aktører = DigitalSøknadAktørerMapper.utled(søknadsdata)
-        val mottaksdato = søknadsdata.innsendtTidspunkt.atZone(OSLO_ZONE).toInstant()
-        aktørSynkronisering.synkroniser(fagsak, aktører, mottaksdato)
+        aktørSynkronisering.synkroniser(fagsak, aktører)
     }
 
     private fun lagreSkjemaSakMapping(

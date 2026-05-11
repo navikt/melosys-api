@@ -1,13 +1,14 @@
 package no.nav.melosys.saksflyt.steg.soknad
 
 import io.kotest.matchers.shouldBe
+import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import java.time.Instant
 import java.util.Optional
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Fagsak
@@ -38,7 +39,6 @@ internal class DigitalSøknadAktørSynkroniseringTest {
     private val fullmektigFnr = "10987654321"
     private val fullmektigAktørId = "1234567890123"
     private val fullmektigNavn = "Ola Nordmann"
-    private val mottaksdato: Instant = Instant.parse("2026-05-08T10:00:00Z")
 
     @BeforeEach
     fun setup() {
@@ -65,7 +65,7 @@ internal class DigitalSøknadAktørSynkroniseringTest {
                 fullmakter = setOf(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
             )),
             skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
-        ), mottaksdato)
+        ))
 
         aktørSlot.captured.orgnr shouldBe rådgiverOrgnr
         aktørSlot.captured.personIdent shouldBe null
@@ -93,7 +93,7 @@ internal class DigitalSøknadAktørSynkroniseringTest {
                 fullmakter = setOf(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
             )),
             skjemadel = Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL
-        ), mottaksdato)
+        ))
 
         aktørSlot.captured.orgnr shouldBe rådgiverOrgnr
         aktørSlot.captured.personIdent shouldBe fullmektigFnr
@@ -120,7 +120,7 @@ internal class DigitalSøknadAktørSynkroniseringTest {
                 fullmakter = setOf(Fullmaktstype.FULLMEKTIG_SØKNAD)
             )),
             skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
-        ), mottaksdato)
+        ))
 
         aktørSlot.captured.orgnr shouldBe null
         aktørSlot.captured.personIdent shouldBe fullmektigFnr
@@ -142,31 +142,9 @@ internal class DigitalSøknadAktørSynkroniseringTest {
             arbeidsgiverOrgnumre = listOf(arbeidsgiverOrgnr),
             fullmektige = emptyList(),
             skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
-        ), mottaksdato)
+        ))
 
         verify(exactly = 0) { aktoerService.erstattEksisterendeArbeidsgiveraktører(any(), any()) }
-    }
-
-    @Test
-    fun `nye FULLMEKTIG-aktører får registrertDato satt til mottaksdato`() {
-        val fagsak = Fagsak.forTest { this.saksnummer = this@DigitalSøknadAktørSynkroniseringTest.saksnummer }
-        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.ARBEIDSGIVER) } returns emptyList()
-        every { aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG) } returns emptyList()
-        every { persondataFasade.hentAktørIdForIdent(fullmektigFnr) } returns fullmektigAktørId
-        every { aktoerService.lagEllerOppdaterAktoer(eq(fagsak), any()) } returns 42L
-
-        synkronisering.synkroniser(fagsak, AktørerFraSøknad(
-            arbeidsgiverOrgnumre = listOf(arbeidsgiverOrgnr),
-            fullmektige = listOf(FullmektigSpec(
-                orgnr = null,
-                personIdent = fullmektigFnr,
-                kontaktpersonFnr = null,
-                fullmakter = setOf(Fullmaktstype.FULLMEKTIG_SØKNAD)
-            )),
-            skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
-        ), mottaksdato)
-
-        verify { aktoerService.overstyrRegistrertDato(42L, mottaksdato) }
     }
 
     @Test
@@ -192,7 +170,7 @@ internal class DigitalSøknadAktørSynkroniseringTest {
             arbeidsgiverOrgnumre = listOf(arbeidsgiverOrgnr),
             fullmektige = emptyList(), // DEG_SELV produserer ingen fullmektige
             skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
-        ), mottaksdato)
+        ))
 
         // Skal ha oppdatert eksisterende: fjernet FULLMEKTIG_SØKNAD og personIdent
         dtoSlot.captured.fullmakter shouldBe setOf(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
