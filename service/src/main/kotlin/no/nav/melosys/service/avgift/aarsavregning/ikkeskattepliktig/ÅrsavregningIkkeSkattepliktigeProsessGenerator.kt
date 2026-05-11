@@ -33,7 +33,6 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
     )
 
     fun sakerFunnetJsonString(): String = jacksonObjectMapper()
-        
         .valueToTree<JsonNode>(sakerFunnet.map { it.toMap() }).toPrettyString()
 
     @Async("taskExecutor")
@@ -105,6 +104,9 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
     private fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate): List<SakMedBehandlinger> =
         årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(fomDato = fomDato, tomDato = tomDato)
 
+    // I motsetning til SkattehendelserConsumer.finnAktivÅrsavregningBehandling kaster vi ikke ved
+    // flere aktive ÅRSAVREGNING-behandlinger for samme år — her er målet kun å unngå duplikat-opprettelse,
+    // så da hopper vi over.
     private fun skalOppretteForSak(fagsak: Fagsak, gjelderÅr: Int): Boolean =
         fagsak.hentAktiveÅrsavregninger().none { behandling ->
             hentÅrFraBehandlingDefensivt(behandling) == gjelderÅr
