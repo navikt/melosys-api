@@ -339,11 +339,16 @@ class InnvilgelseFtrlMapper(
         else -> tilgjengeligeÅr.minOrNull() ?: inneværendeÅr
     }
 
+    private fun finnPeriodeMedMinstebelop(behandlingsresultat: Behandlingsresultat): Trygdeavgiftsperiode? =
+        behandlingsresultat.trygdeavgiftsperioder
+            .sortedBy { it.periodeFra }
+            .firstOrNull { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR && it.minstebelopVerdi != null }
+
     private fun finnMinstebelopVerdi(behandlingsresultat: Behandlingsresultat): BigDecimal? =
-        behandlingsresultat.trygdeavgiftsperioder.firstOrNull { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }?.minstebelopVerdi
+        finnPeriodeMedMinstebelop(behandlingsresultat)?.minstebelopVerdi
 
     private fun finnMinstebelopAar(behandlingsresultat: Behandlingsresultat): Int? =
-        behandlingsresultat.trygdeavgiftsperioder.firstOrNull { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }?.minstebelopAar
+        finnPeriodeMedMinstebelop(behandlingsresultat)?.minstebelopAar
 
     private fun Trygdeavgiftsperiode.toAvgiftsperiodeDto() = AvgiftsperiodeDto(
         periodeFra,

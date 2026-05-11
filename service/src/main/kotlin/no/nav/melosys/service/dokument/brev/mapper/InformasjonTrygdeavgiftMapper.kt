@@ -74,10 +74,8 @@ class InformasjonTrygdeavgiftMapper(
             erSkattemessigEmigrert = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.any {
                 it.grunnlagSkatteforholdTilNorge?.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG
             },
-            minstebelopVerdi = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder
-                .firstOrNull { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }?.minstebelopVerdi,
-            minstebelopAar = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder
-                .firstOrNull { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }?.minstebelopAar,
+            minstebelopVerdi = finnPeriodeMedMinstebelop(behandlingsresultat)?.minstebelopVerdi,
+            minstebelopAar = finnPeriodeMedMinstebelop(behandlingsresultat)?.minstebelopAar,
             harMinstebelopPeriode = avgiftsperioder.any { it.beregningsregel == Avgiftsberegningsregel.MINSTEBELØP.name },
             har25ProsentRegelPeriode = avgiftsperioder.any { it.beregningsregel == Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL.name }
         )
@@ -141,4 +139,9 @@ class InformasjonTrygdeavgiftMapper(
 
         return trygdeavgiftsberegningService.finnFakturamottakerNavn(behandling.id)
     }
+
+    private fun finnPeriodeMedMinstebelop(behandlingsresultat: Behandlingsresultat) =
+        behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder
+            .sortedBy { it.periodeFra }
+            .firstOrNull { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR && it.minstebelopVerdi != null }
 }

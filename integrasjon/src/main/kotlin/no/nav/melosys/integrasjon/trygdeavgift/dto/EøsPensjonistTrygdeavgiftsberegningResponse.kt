@@ -7,4 +7,6 @@ data class EøsPensjonistTrygdeavgiftsberegningResponse(
     val grunnlag: EøsPensjonistTrygdeavgiftsgrunnlagDto,
     val grunnlagListe: List<EøsPensjonistTrygdeavgiftsgrunnlagDto>,
     val beregningsregel: Avgiftsberegningsregel,
+    val minstebelopVerdi: java.math.BigDecimal? = null,
+    val minstebelopAar: Int? = null,
 )

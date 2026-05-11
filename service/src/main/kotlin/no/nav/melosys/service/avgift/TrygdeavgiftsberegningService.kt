@@ -193,6 +193,8 @@ class TrygdeavgiftsberegningService(
                 ?: throw IllegalStateException("Fant ikke inntektsperiode ${legacyGrunnlag.inntektsperiodeId}"),
             beregningsregel = response.beregningsregel,
             avgiftsdel = response.avgiftsdel?.let { Avgiftsdel.valueOf(it) },
+            minstebelopVerdi = response.minstebelopVerdi,
+            minstebelopAar = response.minstebelopAar,
         )
 
         // Legacy: sett avgiftspliktig periode via gamle FK-felt

@@ -159,6 +159,8 @@ class EøsPensjonistTrygdeavgiftsberegningService(
             grunnlagInntekstperiode = inntektsperiodeMap[førsteGrunnlag.inntektsperiodeId]
                 ?: throw IllegalStateException("Fant ikke inntektsperiode ${førsteGrunnlag.inntektsperiodeId}"),
             beregningsregel = response.beregningsregel,
+            minstebelopVerdi = response.minstebelopVerdi,
+            minstebelopAar = response.minstebelopAar,
         )
 
         alleGrunnlag.forEach { grunnlagDto ->
