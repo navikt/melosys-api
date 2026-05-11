@@ -185,8 +185,9 @@ class DigitalSøknadAktørSynkronisering(
      * - For ren person-fullmektig (ingen orgnr): personIdent
      */
     private fun identifikator(aktør: Aktoer): String =
-        aktør.orgnr ?: aktør.personIdent ?: ""
+        aktør.orgnr ?: aktør.personIdent
+            ?: error("FULLMEKTIG-aktør ${aktør.id} mangler både orgnr og personIdent")
 
     private fun identifikator(spec: FullmektigSpec): String =
-        spec.orgnr ?: spec.personIdent ?: ""
+        spec.orgnr ?: spec.personIdent!!  // init i FullmektigSpec krever at minst én er satt
 }
