@@ -2,6 +2,7 @@ package no.nav.melosys.service.avgift.aarsavregning
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
@@ -130,6 +131,12 @@ class ÅrsavregningService(
                 )
 
                 is HelseutgiftDekkesPeriode -> replikerHelseutgiftDekkesPeriode(
+                    behandlingsresultat,
+                    sisteBehandlingsresultatMedAvgiftspliktigPeriode,
+                    gjelderÅr
+                )
+
+                is Lovvalgsperiode -> replikerLovvalgsPeriode(
                     behandlingsresultat,
                     sisteBehandlingsresultatMedAvgiftspliktigPeriode,
                     gjelderÅr
@@ -276,6 +283,23 @@ class ÅrsavregningService(
             }
     }
 
+    private fun replikerLovvalgsPeriode(
+        behandlingsresultat: Behandlingsresultat,
+        tidligereBehandlingsresultat: Behandlingsresultat,
+        gjelderÅr: Int
+    ) {
+        tidligereBehandlingsresultat.lovvalgsperioder
+            .filter { it.overlapperMedÅr(gjelderÅr) }
+            .forEach { originalPeriode ->
+                val replika = BeanUtils.cloneBean(originalPeriode) as Lovvalgsperiode
+                replika.id = null
+                replika.trygdeavgiftsperioder = HashSet()
+                replika.avkortFomDato(gjelderÅr)
+                replika.avkortTomDato(gjelderÅr)
+                behandlingsresultat.addLovvalgsperiode(replika)
+            }
+    }
+
     private fun lagÅrsavregningModelFraÅrsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
         val år = årsavregning.aar
 
@@ -401,6 +425,7 @@ class ÅrsavregningService(
                     when (periode) {
                         is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(år, periode)
                         is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(år, periode)
+                        is Lovvalgsperiode -> LovvalgsperiodeForAvgift(år, periode)
                         else -> throw FunksjonellException("Periodetype støttes ikke")
                     }
                 },
@@ -425,6 +450,7 @@ class ÅrsavregningService(
                 when (it) {
                     is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(år, it)
                     is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(år, it)
+                    is Lovvalgsperiode -> LovvalgsperiodeForAvgift(år, it)
                     else -> throw FunksjonellException("Ukjent periodetype: ${it.javaClass.simpleName}")
                 }
             }
@@ -560,6 +586,36 @@ data class MedlemskapsperiodeForAvgift(
         innvilgelsesresultat = medlemskapsperiode.hentInnvilgelsesresultat()
     )
 }
+
+
+data class LovvalgsperiodeForAvgift(
+    override val fom: LocalDate,
+    override val tom: LocalDate,
+    override val dekning: Trygdedekninger,
+    val bestemmelse: Bestemmelse,
+    val medlemskapstyper: Medlemskapstyper,
+    val innvilgelsesresultat: InnvilgelsesResultat,
+    override val type: AvgiftsperiodeForAvgiftType = AvgiftsperiodeForAvgiftType.LOVVALGSPERIODE,
+) : AvgiftsperiodeForAvgift {
+    constructor(lovvalgsperiode: Lovvalgsperiode) : this(
+        fom = lovvalgsperiode.hentFom(),
+        tom = lovvalgsperiode.hentTom(),
+        dekning = lovvalgsperiode.hentTrygdedekning(),
+        bestemmelse = lovvalgsperiode.hentBestemmelse(),
+        medlemskapstyper = lovvalgsperiode.hentMedlemskapstype(),
+        innvilgelsesresultat = lovvalgsperiode.hentInnvilgelsesresultat(),
+    )
+
+    constructor(gjeldendeÅr: Int, lovvalgsperiode: Lovvalgsperiode) : this(
+        fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, lovvalgsperiode.hentFom()),
+        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, lovvalgsperiode.hentTom()),
+        dekning = lovvalgsperiode.hentTrygdedekning(),
+        bestemmelse = lovvalgsperiode.hentBestemmelse(),
+        medlemskapstyper = lovvalgsperiode.hentMedlemskapstype(),
+        innvilgelsesresultat = lovvalgsperiode.hentInnvilgelsesresultat()
+    )
+}
+
 
 enum class AvgiftsperiodeForAvgiftType {
     MEDLEMSKAPSPERIODE,

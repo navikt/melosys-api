@@ -320,12 +320,14 @@ public class BehandlingService {
     }
 
 
+    @Transactional
     public void avsluttBehandling(long behandlingId) {
         Behandling behandling = hentBehandling(behandlingId);
 
         avsluttBehandling(behandling);
     }
 
+    @Transactional
     public void avsluttBehandling(long behandlingId, Behandlingsresultattyper behandlingsresultattype) {
         if (behandlingsresultattype != null) {
             var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
@@ -348,6 +350,7 @@ public class BehandlingService {
 
     private void avsluttBehandling(Behandling behandling) {
         validerKanAvslutteBehandling(behandling);
+        oppdaterAnmodningOmUnntakTilFerdigbehandlet(behandling);
 
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandlingRepository.save(behandling);
@@ -355,6 +358,16 @@ public class BehandlingService {
         applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(AVSLUTTET, behandling));
     }
 
+    private void oppdaterAnmodningOmUnntakTilFerdigbehandlet(Behandling behandling) {
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        if (behandlingsresultat.getType() == Behandlingsresultattyper.ANMODNING_OM_UNNTAK) {
+            log.info("Oppdaterer behandlingsresultattype fra {} til {} for behandling {} ved avslutning",
+                Behandlingsresultattyper.ANMODNING_OM_UNNTAK, Behandlingsresultattyper.FERDIGBEHANDLET, behandling.getId());
+            behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
+        }
+    }
+
+    @Transactional
     public void avsluttAndregangsbehandling(long behandlingId, Behandlingsresultattyper nyBehandlingsResultatType) {
         Behandling behandling = hentBehandling(behandlingId);
         avsluttAndregangsbehandling(behandling, nyBehandlingsResultatType);
