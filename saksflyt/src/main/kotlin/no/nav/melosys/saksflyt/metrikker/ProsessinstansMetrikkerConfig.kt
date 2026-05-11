@@ -90,7 +90,5 @@ class ProsessinstansMetrikkerConfig(
     }
 
     private fun antallIKøMedPrioritet(executor: ThreadPoolTaskExecutor, prioritet: Prioritet): Int =
-        executor.threadPoolExecutor.queue.count { runnable ->
-            ((runnable as? PrioritertProsessinstansOppgave)?.prioritet ?: Prioritet.NORMAL) == prioritet
-        }
+        executor.threadPoolExecutor.queue.count { PrioritertProsessinstansOppgave.prioritetAv(it) == prioritet }
 }

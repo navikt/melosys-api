@@ -61,8 +61,13 @@ public final class PrioritertProsessinstansOppgave implements Runnable, Comparab
         return prosessinstansId;
     }
 
+    /** Prioriteten til en {@link Runnable} i køen — {@link Prioritet#NORMAL} for alt som ikke er en {@code PrioritertProsessinstansOppgave}. */
+    public static Prioritet prioritetAv(Runnable runnable) {
+        return runnable instanceof PrioritertProsessinstansOppgave oppgave ? oppgave.prioritet : Prioritet.NORMAL;
+    }
+
     private static int prioritetOrdinalAv(Runnable runnable) {
-        return (runnable instanceof PrioritertProsessinstansOppgave oppgave ? oppgave.prioritet : Prioritet.NORMAL).ordinal();
+        return prioritetAv(runnable).ordinal();
     }
 
     private static LocalDateTime registrertDatoAv(Runnable runnable) {
