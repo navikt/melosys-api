@@ -453,7 +453,7 @@ class ÅrsavregningVedtakMapperTest {
         val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
 
         result.endeligTrygdeavgift shouldHaveSize 1
-        result.endeligTrygdeavgift[0].beregningsregel shouldBe "MINSTEBELØP"
+        result.endeligTrygdeavgift[0].beregningsregel shouldBe Avgiftsberegningsregel.MINSTEBELØP
         result.minstebelopVerdi shouldBe BigDecimal(7000)
         result.minstebelopAar shouldBe 2024
     }
@@ -470,7 +470,7 @@ class ÅrsavregningVedtakMapperTest {
         val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
 
         result.endeligTrygdeavgift shouldHaveSize 1
-        result.endeligTrygdeavgift[0].beregningsregel shouldBe "TJUEFEM_PROSENT_REGEL"
+        result.endeligTrygdeavgift[0].beregningsregel shouldBe Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL
         result.minstebelopVerdi shouldBe BigDecimal(7000)
         result.minstebelopAar shouldBe 2024
     }
@@ -487,7 +487,7 @@ class ÅrsavregningVedtakMapperTest {
         val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
 
         result.forskuddsvisFakturertTrygdeavgift shouldHaveSize 1
-        result.forskuddsvisFakturertTrygdeavgift[0].beregningsregel shouldBe "MINSTEBELØP"
+        result.forskuddsvisFakturertTrygdeavgift[0].beregningsregel shouldBe Avgiftsberegningsregel.MINSTEBELØP
         result.minstebelopVerdi shouldBe BigDecimal(7000)
     }
 
@@ -499,8 +499,8 @@ class ÅrsavregningVedtakMapperTest {
 
         val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
 
-        result.endeligTrygdeavgift[0].beregningsregel shouldBe "ORDINÆR"
-        result.forskuddsvisFakturertTrygdeavgift[0].beregningsregel shouldBe "ORDINÆR"
+        result.endeligTrygdeavgift[0].beregningsregel shouldBe Avgiftsberegningsregel.ORDINÆR
+        result.forskuddsvisFakturertTrygdeavgift[0].beregningsregel shouldBe Avgiftsberegningsregel.ORDINÆR
     }
 
     @Test
