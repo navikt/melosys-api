@@ -6,7 +6,6 @@ import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.binder.MeterBinder
 import jakarta.annotation.PostConstruct
 import no.nav.melosys.metrics.MetrikkerNavn
-import no.nav.melosys.saksflyt.PrioritertProsessinstansOppgave
 import no.nav.melosys.saksflytapi.domain.Prioritet
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
@@ -15,8 +14,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
-import java.util.EnumMap
-import java.util.Queue
 
 @Configuration
 class ProsessinstansMetrikkerConfig(
@@ -91,36 +88,5 @@ class ProsessinstansMetrikkerConfig(
         Gauge.builder(MetrikkerNavn.PROSESSINSTANSER_KO_AKTIVE, saksflytThreadPoolTaskExecutor) { executor ->
             executor.activeCount.toDouble()
         }.register(meterRegistry)
-    }
-
-    /**
-     * Teller køelementene per [Prioritet] i ett løp og cacher resultatet kortvarig. Én Prometheus-scrape leser
-     * alle prioritet-gaugene rett etter hverandre, så vi gjør da bare én weakly-consistent O(n)-iterasjon over
-     * køen i stedet for én per [Prioritet].
-     */
-    private class KøstørrelseSnapshot(private val kø: Queue<Runnable>) {
-        @Volatile private var harBeregnet = false
-        @Volatile private var beregnetTidspunktMs = 0L
-        @Volatile private var antallPerPrioritet: Map<Prioritet, Int> = emptyMap()
-
-        fun antall(prioritet: Prioritet): Int {
-            oppfriskVedBehov()
-            return antallPerPrioritet[prioritet] ?: 0
-        }
-
-        @Synchronized
-        private fun oppfriskVedBehov() {
-            val nå = System.currentTimeMillis()
-            if (harBeregnet && nå - beregnetTidspunktMs < GYLDIGHET_MS) return
-            val telling = EnumMap<Prioritet, Int>(Prioritet::class.java)
-            kø.forEach { telling.merge(PrioritertProsessinstansOppgave.prioritetAv(it), 1, Int::plus) }
-            antallPerPrioritet = telling
-            beregnetTidspunktMs = nå
-            harBeregnet = true
-        }
-
-        private companion object {
-            const val GYLDIGHET_MS = 1_000L
-        }
     }
 }

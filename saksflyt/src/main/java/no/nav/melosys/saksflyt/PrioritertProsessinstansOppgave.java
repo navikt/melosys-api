@@ -50,6 +50,8 @@ public final class PrioritertProsessinstansOppgave implements Runnable, Comparab
 
     @Override
     public int compareTo(PrioritertProsessinstansOppgave annen) {
+        // Kun for fullstendighet — køen i PrioritertSaksflytTaskExecutor konstrueres med KOMPARATOR direkte,
+        // så naturlig ordning (compareTo) brukes ikke. Beholdt for en konsistent Comparable-kontrakt.
         return KOMPARATOR.compare(this, annen);
     }
 
@@ -71,7 +73,9 @@ public final class PrioritertProsessinstansOppgave implements Runnable, Comparab
     }
 
     private static LocalDateTime registrertDatoAv(Runnable runnable) {
-        return runnable instanceof PrioritertProsessinstansOppgave oppgave ? oppgave.registrertDato : LocalDateTime.MIN;
+        // Ukjente Runnable-er (skal ikke forekomme på denne executoren) sorteres bakerst i NORMAL-båndet, ikke
+        // fremst — en uventet oppgave skal ikke kunne snike seg foran legitimt NORMAL-arbeid.
+        return runnable instanceof PrioritertProsessinstansOppgave oppgave ? oppgave.registrertDato : LocalDateTime.MAX;
     }
 
     @Override

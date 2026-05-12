@@ -62,6 +62,17 @@ class PrioritertProsessinstansOppgaveTest {
     }
 
     @Test
+    fun `ukjent Runnable sorteres bakerst i NORMAL-båndet - snyter seg ikke foran legitimt NORMAL-arbeid`() {
+        val kø = nyKø()
+        val normal = oppgave(Prioritet.NORMAL, LocalDateTime.now()) // nyere registrertDato enn "naturlig" MIN
+        val ukjent = Runnable { }
+        kø.put(ukjent); kø.put(normal)
+
+        kø.take() shouldBe normal
+        kø.take() shouldBe ukjent
+    }
+
+    @Test
     fun `run delegerer til den underliggende oppgaven`() {
         var kjørt = false
         PrioritertProsessinstansOppgave(UUID.randomUUID(), Prioritet.NORMAL, LocalDateTime.now()) { kjørt = true }.run()
