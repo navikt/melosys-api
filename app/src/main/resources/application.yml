@@ -232,11 +232,15 @@ melosys:
   saksflyt:
     gjenopprettelse:
       # Hvor lenge en aktiv prosessinstans må ha vært urørt (endretDato) før den gjenopprettes automatisk ved oppstart.
-      # MERK: stopgap. melosys-api kjører 2 podder; vinduet må være lengre enn både lengste saga-kjøretid OG verste
-      # kø-ventetid (timer under en batch-flom), ellers kan begge podder gjenoppta samme saga. Ikke 15 min.
-      # Konservativ default = dagens oppførsel (24 t); kan senkes per miljø når verste batch-flom-drenering er målt
-      # (og helst etter at Prosessinstans har fått @Version, jf. MELOSYS-7790).
-      # Ekte fiks: DB-basert kø med FOR UPDATE SKIP LOCKED (MELOSYS-7790 / jf. MELOSYS-8066).
+      # Default holdes uendret på dagens oppførsel, 24 timer — denne endringen gjør bare verdien konfigurerbar, den
+      # senker den ikke.
+      # MERK: dette er en midlertidig løsning. melosys-api kjører to podder, og gjenopprettelsen kjører kun ved
+      # oppstart. Vinduet må derfor være lengre enn både den lengste saga-kjøretiden og hvor lenge køen er full etter
+      # at en stor batch er lagt på den (kan være timer) — ellers kan begge poddene gjenoppta den samme sagaen. Et
+      # veldig kort vindu (minutter) er derfor utrygt med dagens løsning.
+      # Verdien kan settes lavere per miljø når man har målt hvor lenge køen faktisk holder seg full etter en stor
+      # batch — og helst først etter at Prosessinstans har fått @Version (jf. MELOSYS-7790).
+      # Den varige løsningen er en DB-basert kø med FOR UPDATE SKIP LOCKED (MELOSYS-7790 / jf. MELOSYS-8066).
       vindu: PT24H  # ISO-8601 Duration
   service:
     fagsak:
