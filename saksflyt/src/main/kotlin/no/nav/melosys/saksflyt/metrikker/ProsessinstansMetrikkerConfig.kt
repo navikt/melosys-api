@@ -23,6 +23,10 @@ class ProsessinstansMetrikkerConfig(
     @Qualifier("saksflytThreadPoolTaskExecutor") private val saksflytThreadPoolTaskExecutor: ThreadPoolTaskExecutor
 ) {
 
+    // Må holdes som felt: Micrometer holder gauge-state-objektet med en WeakReference, så et lokalt snapshot
+    // ville blitt GC-et og gaugene rapportert NaN.
+    private val køstørrelseSnapshot = KøstørrelseSnapshot(saksflytThreadPoolTaskExecutor.threadPoolExecutor.queue)
+
     @Bean
     fun prosessinstansMetrikker(statusCache: ProsessinstansStatusCache): MeterBinder = MeterBinder { registry ->
         registrerAntallFeiledeProsessinstanserGruppertPåType(registry, statusCache)
@@ -75,9 +79,8 @@ class ProsessinstansMetrikkerConfig(
 
     /** Antall prosessinstanser som venter i [saksflytThreadPoolTaskExecutor]-køen, brutt ned per [Prioritet]. */
     private fun registrerKøstørrelsePerPrioritet(meterRegistry: MeterRegistry) {
-        val snapshot = KøstørrelseSnapshot(saksflytThreadPoolTaskExecutor.threadPoolExecutor.queue)
         Prioritet.values().forEach { prioritet ->
-            Gauge.builder(MetrikkerNavn.PROSESSINSTANSER_KO, snapshot) { it.antall(prioritet).toDouble() }
+            Gauge.builder(MetrikkerNavn.PROSESSINSTANSER_KO, køstørrelseSnapshot) { it.antall(prioritet).toDouble() }
                 .tag(MetrikkerNavn.TAG_PRIORITET, prioritet.name)
                 .register(meterRegistry)
         }
