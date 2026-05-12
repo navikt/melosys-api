@@ -24,8 +24,8 @@ import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.domain.mottatteopplysninger.soeknad
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
-import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
 import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebeløpResponse
+import no.nav.melosys.service.avgift.MinstebeløpService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklartUkjentSluttdatoMedlemskapsperiodeService
@@ -60,7 +60,7 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
     private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 
     @MockK
-    private lateinit var trygdeavgiftClient: TrygdeavgiftClient
+    private lateinit var minstebeløpService: MinstebeløpService
 
     private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
@@ -71,7 +71,7 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
     @BeforeEach
     fun setup() {
         unleash.resetAll()
-        every { trygdeavgiftClient.hentMinstebeløp(any()) } returns MinstebeløpResponse(2024, BigDecimal(7000))
+        every { minstebeløpService.finnMinstebeløp(any()) } returns MinstebeløpResponse(2024, BigDecimal(7000))
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
             mockAvklarteVirksomheterService,
@@ -79,7 +79,7 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
             mockDokgenMapperDatahenter,
             trygdeavgiftMottakerService,
             trygdeavgiftsberegningService,
-            trygdeavgiftClient,
+            minstebeløpService,
             unleash
         )
     }

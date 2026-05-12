@@ -21,10 +21,10 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
-import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
 import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebeløpResponse
 import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling
+import no.nav.melosys.service.avgift.MinstebeløpService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.aarsavregning.HelseutgiftDekkesPeriodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
@@ -54,14 +54,14 @@ class ÅrsavregningVedtakMapperTest {
     private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 
     @MockK
-    private lateinit var trygdeavgiftClient: TrygdeavgiftClient
+    private lateinit var minstebeløpService: MinstebeløpService
 
     private lateinit var mapper: ÅrsavregningVedtakMapper
 
     @BeforeEach
     fun setUp() {
-        every { trygdeavgiftClient.hentMinstebeløp(any()) } returns MinstebeløpResponse(2024, BigDecimal(7000))
-        mapper = ÅrsavregningVedtakMapper(årsavregningService, trygdeavgiftsberegningService, trygdeavgiftClient)
+        every { minstebeløpService.finnMinstebeløp(any()) } returns MinstebeløpResponse(2024, BigDecimal(7000))
+        mapper = ÅrsavregningVedtakMapper(årsavregningService, trygdeavgiftsberegningService, minstebeløpService)
         every { trygdeavgiftsberegningService.finnFakturamottakerNavn(any()) } returns "Fakturamannen"
     }
 
@@ -537,6 +537,7 @@ class ÅrsavregningVedtakMapperTest {
         val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
         val årsavregningModel = lagÅrsavregningModel(BigDecimal(2000), BigDecimal(1000))
         every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+        every { minstebeløpService.finnMinstebeløp(any()) } returns null
 
         val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
 
