@@ -86,8 +86,8 @@ class OpprettSakOgBehandlingDigitalSøknad(
         }
 
         val søknad = DigitalSøknadMapper.tilSoeknad(søknadsdata)
-        val mottatteOpplysninger = mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
-            behandling.id, null, søknad, referanseId // 2. parameter er XML-form fra Altinn; ikke aktuelt for digital søknad
+        val mottatteOpplysninger = mottatteOpplysningerService.opprettSøknadDigital(
+            behandling.id, null, søknad, referanseId
         )
 
         lagreSkjemaSakMapping(søknadsdata, fagsak, mottatteOpplysninger)

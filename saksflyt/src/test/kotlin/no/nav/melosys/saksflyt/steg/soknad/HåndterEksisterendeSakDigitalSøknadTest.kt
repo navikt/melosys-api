@@ -198,7 +198,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
 
             mockFagsakService(fagsak)
             every { behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns nyBehandling
-            every { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any()) } returns
+            every { mottatteOpplysningerService.opprettSøknadDigital(any(), any(), any(), any()) } returns
                 mockk<MottatteOpplysninger> { every { id } returns mottatteOpplysningerId }
             every { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any()) } just Runs
 
@@ -229,7 +229,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             } returns nyBehandling
 
             every {
-                mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(eq(99L), any(), any(), any())
+                mottatteOpplysningerService.opprettSøknadDigital(eq(99L), any(), any(), any())
             } returns mockk<MottatteOpplysninger> { every { id } returns mottatteOpplysningerId }
 
             every { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any()) } just Runs
@@ -238,7 +238,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
 
             verify { behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING, Behandlingstema.UTSENDT_ARBEIDSTAKER, null, null, any(), any(), null) }
             verify { fagsak.leggTilBehandling(nyBehandling) }
-            verify { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(99L, any(), any(), any()) }
+            verify { mottatteOpplysningerService.opprettSøknadDigital(99L, any(), any(), any()) }
             verify { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(nyBehandling, any(), any(), any(), any()) }
             verify { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) }
             prosessinstans.behandling shouldBe nyBehandling
@@ -378,7 +378,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
 
     private fun mockOpprettMottatteOpplysningerForNyBehandling() {
         every {
-            mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(eq(99L), any(), any(), any())
+            mottatteOpplysningerService.opprettSøknadDigital(eq(99L), any(), any(), any())
         } returns mockk<MottatteOpplysninger> { every { id } returns mottatteOpplysningerId }
     }
 

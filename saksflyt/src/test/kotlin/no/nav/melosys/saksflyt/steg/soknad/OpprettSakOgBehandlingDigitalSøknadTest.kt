@@ -99,7 +99,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
     private fun mockMottatteOpplysninger() {
         every { jsonMapper.writeValueAsString(søknadsdata) } returns """{"referanseId":"$referanseId"}"""
         every {
-            mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any())
+            mottatteOpplysningerService.opprettSøknadDigital(any(), any(), any(), any())
         } returns mockk<MottatteOpplysninger> { every { id } returns 99L }
     }
 
@@ -173,7 +173,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
             every { it.saksnummer } returns "MEL-1234"
         }
         every { jsonMapper.writeValueAsString(offentligSøknadsdata) } returns "{}"
-        every { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any()) } returns
+        every { mottatteOpplysningerService.opprettSøknadDigital(any(), any(), any(), any()) } returns
             mockk<MottatteOpplysninger> { every { id } returns 99L }
 
         opprettSakOgBehandlingDigitalSøknad.utfør(offentligProsessinstans)
@@ -198,7 +198,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         val soeknadSlot = slot<Soeknad>()
 
         every {
-            mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
+            mottatteOpplysningerService.opprettSøknadDigital(
                 eq(behandlingId), any(), capture(soeknadSlot), eq(referanseId)
             )
         } returns mockk<MottatteOpplysninger> { every { id } returns 99L }
@@ -209,7 +209,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
 
         verify(exactly = 1) {
             jsonMapper.writeValueAsString(søknadsdata)
-            mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
+            mottatteOpplysningerService.opprettSøknadDigital(
                 behandlingId, any(), any(), referanseId
             )
         }
@@ -247,7 +247,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         }
         every { behandlingService.lagre(any()) } just Runs
         every { jsonMapper.writeValueAsString(arbeidsgiverSøknadsdata) } returns "{}"
-        every { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any()) } returns
+        every { mottatteOpplysningerService.opprettSøknadDigital(any(), any(), any(), any()) } returns
             mockk<MottatteOpplysninger> { every { id } returns 99L }
 
         opprettSakOgBehandlingDigitalSøknad.utfør(arbeidsgiverProsessinstans)
@@ -288,7 +288,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
             every { it.saksnummer } returns "MEL-1234"
         }
         every { jsonMapper.writeValueAsString(arbeidsgiverMedKoblet) } returns "{}"
-        every { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any()) } returns
+        every { mottatteOpplysningerService.opprettSøknadDigital(any(), any(), any(), any()) } returns
             mockk<MottatteOpplysninger> { every { id } returns 99L }
 
         opprettSakOgBehandlingDigitalSøknad.utfør(kobletProsessinstans)
