@@ -11,8 +11,9 @@ import org.springframework.stereotype.Component;
 /**
  * Legger en saksflyt-saga inn på prioritetskøen ({@code saksflytThreadPoolTaskExecutor}).
  *
- * <p>Tidligere ble dette gjort via {@code @Async} på {@link ProsessinstansBehandler#behandleProsessinstansNå};
- * nå pakkes sagaen i en {@link PrioritertProsessinstansOppgave} og sendes via {@code execute(Runnable)} (ikke
+ * <p>Tidligere ble behandlingen startet via {@code @Async} på {@code ProsessinstansBehandler.behandleProsessinstans};
+ * den metoden er nå synkron ({@link ProsessinstansBehandler#behandleProsessinstansNå}) og selve dispatchingen er
+ * flyttet hit: sagaen pakkes i en {@link PrioritertProsessinstansOppgave} og sendes via {@code execute(Runnable)} (ikke
  * {@code submit(...)}, som ville pakket den i en ikke-{@code Comparable} {@code FutureTask}), slik at køen kan
  * prioritere HØY/NORMAL foran LAV (batch). Effektiv prioritet hentes fra prosessinstansen
  * ({@link Prosessinstans#hentPrioritet()}).

@@ -12,6 +12,10 @@ public enum ProsessType {
     ARBEID_FLERE_LAND_NY_BEHANDLING("ARBEID_FLERE_LAND_NY_BEHANDLING", "Mottak av A003 - ny behandling"),
     ARBEID_FLERE_LAND_NY_SAK("ARBEID_FLERE_LAND_NY_SAK", "Mottak av A003 - ny sak"),
     HENLEGG_SAK("HENLEGG_SAK", "Henlegg en sak"),
+    // IVERKSETT_EOS_PENSJONIST_AVGIFT og IVERKSETT_VEDTAK_AARSAVREGNING beholdes bevisst på NORMAL (ikke HØY):
+    // dette er avgifts-/årsavregning-iverksettelse, ikke saksbehandler-trigget lovvalgs-/folketrygd-vedtak. Et
+    // manuelt fattet årsavregning-vedtak går også gjennom IVERKSETT_VEDTAK_AARSAVREGNING; trengs HØY i et enkelttilfelle,
+    // settes det per kall (ProsessinstansService.opprett...(prioritet)). Batch-presset ligger på OPPRETT_NY_BEHANDLING_AARSAVREGNING (LAV).
     IVERKSETT_EOS_PENSJONIST_AVGIFT("IVERKSETT_EOS_PENSJONIST_AVGIFT", "Iverksett EØS pensjonist avgift"),
     IVERKSETT_VEDTAK_AARSAVREGNING("IVERKSETT_VEDTAK_AARSAVREGNING", "Iverksett vedtak for en årsavregning"),
     IVERKSETT_VEDTAK_EOS("IVERKSETT_VEDTAK_EOS", "Iverksett vedtak EOS", Prioritet.HØY),
