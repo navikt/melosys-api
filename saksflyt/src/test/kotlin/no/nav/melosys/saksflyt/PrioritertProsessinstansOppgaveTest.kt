@@ -18,9 +18,9 @@ class PrioritertProsessinstansOppgaveTest {
     fun `HØY plukkes før NORMAL plukkes før LAV - uavhengig av innleggingsrekkefølge`() {
         val kø = nyKø()
         val lav = oppgave(Prioritet.LAV)
-        val hoy = oppgave(Prioritet.HØY, LocalDateTime.now().plusSeconds(5)) // lagt inn senere, men HØY
+        val høy = oppgave(Prioritet.HØY, LocalDateTime.now().plusSeconds(5)) // lagt inn senere, men HØY
         val normal = oppgave(Prioritet.NORMAL)
-        kø.put(lav); kø.put(hoy); kø.put(normal)
+        kø.put(lav); kø.put(høy); kø.put(normal)
 
         (kø.take() as PrioritertProsessinstansOppgave).prioritet shouldBe Prioritet.HØY
         (kø.take() as PrioritertProsessinstansOppgave).prioritet shouldBe Prioritet.NORMAL
@@ -42,21 +42,21 @@ class PrioritertProsessinstansOppgaveTest {
     fun `en HØY-oppgave lagt inn etter mange LAV kjøres før de gjenværende LAV`() {
         val kø = nyKø()
         repeat(50) { kø.put(oppgave(Prioritet.LAV)) }
-        val hoy = oppgave(Prioritet.HØY)
-        kø.put(hoy)
+        val høy = oppgave(Prioritet.HØY)
+        kø.put(høy)
 
-        kø.take() shouldBe hoy
+        kø.take() shouldBe høy
     }
 
     @Test
     fun `ukjent Runnable behandles som NORMAL`() {
         val kø = nyKø()
         val lav = oppgave(Prioritet.LAV)
-        val hoy = oppgave(Prioritet.HØY)
+        val høy = oppgave(Prioritet.HØY)
         val ukjent = Runnable { }
-        kø.put(lav); kø.put(ukjent); kø.put(hoy)
+        kø.put(lav); kø.put(ukjent); kø.put(høy)
 
-        kø.take() shouldBe hoy    // HØY først
+        kø.take() shouldBe høy    // HØY først
         kø.take() shouldBe ukjent // NORMAL (ukjent) før LAV
         kø.take() shouldBe lav
     }
@@ -64,7 +64,7 @@ class PrioritertProsessinstansOppgaveTest {
     @Test
     fun `ukjent Runnable sorteres bakerst i NORMAL-båndet - snyter seg ikke foran legitimt NORMAL-arbeid`() {
         val kø = nyKø()
-        val normal = oppgave(Prioritet.NORMAL, LocalDateTime.now()) // nyere registrertDato enn "naturlig" MIN
+        val normal = oppgave(Prioritet.NORMAL, LocalDateTime.now()) // tidligere registrertDato enn MAX-fallback for ukjente
         val ukjent = Runnable { }
         kø.put(ukjent); kø.put(normal)
 
