@@ -19,8 +19,7 @@ import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.dokgen.dto.*
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
-import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
-import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebeløpResponse
+import no.nav.melosys.service.avgift.MinstebeløpService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklartUkjentSluttdatoMedlemskapsperiodeService
@@ -38,7 +37,7 @@ class InnvilgelseFtrlMapper(
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
-    private val trygdeavgiftClient: TrygdeavgiftClient,
+    private val minstebeløpService: MinstebeløpService,
     private val unleash: Unleash
 ) {
 
@@ -55,7 +54,7 @@ class InnvilgelseFtrlMapper(
             mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(behandlingsresultat, brevbestilling.forsendelseMottattNonNull())
         val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.hentBehandling().id)
         val bestemmelse = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().hentBestemmelse()
-        val minstebelop = hentMinstebelop(behandlingsresultat.trygdeavgiftsperioder)
+        val minstebelop = minstebeløpService.finnMinstebeløp(behandlingsresultat.trygdeavgiftsperioder)
         return InnvilgelseFtrlPensjonistFrivillig(
             brevbestilling = brevbestilling,
             behandlingstype = behandlingsresultat.hentBehandling().type,
@@ -95,7 +94,7 @@ class InnvilgelseFtrlMapper(
         val søknadsland = behandling.hentMottatteOpplysninger().mottatteOpplysningerData.soeknadsland
         val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.single()
         val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.hentBehandling().id)
-        val minstebelop = hentMinstebelop(behandlingsresultat.trygdeavgiftsperioder)
+        val minstebelop = minstebeløpService.finnMinstebeløp(behandlingsresultat.trygdeavgiftsperioder)
 
         return InnvilgelsePensjonistPliktigFtrl(
             brevbestilling = brevbestilling,
@@ -140,7 +139,7 @@ class InnvilgelseFtrlMapper(
         val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(behandlingsresultat, brevbestilling.forsendelseMottattNonNull())
         val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.hentBehandling().id)
-        val minstebelop = hentMinstebelop(behandlingsresultat.trygdeavgiftsperioder)
+        val minstebelop = minstebeløpService.finnMinstebeløp(behandlingsresultat.trygdeavgiftsperioder)
 
         return InnvilgelseFtrlYrkesaktivFrivillig(
             brevbestilling = brevbestilling,
@@ -240,7 +239,7 @@ class InnvilgelseFtrlMapper(
                 harLavSatsPgaAlderIMinstEnPeriode(fødselsdato, medlemskapsperiode)
             }
         val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.hentBehandling().id)
-        val minstebelop = hentMinstebelop(behandlingsresultat.trygdeavgiftsperioder)
+        val minstebelop = minstebeløpService.finnMinstebeløp(behandlingsresultat.trygdeavgiftsperioder)
 
         return InnvilgelseYrkesaktivPliktigFtrl(
             brevbestilling = brevbestilling,
@@ -334,14 +333,6 @@ class InnvilgelseFtrlMapper(
         else -> tilgjengeligeÅr.minOrNull() ?: inneværendeÅr
     }
 
-    private fun hentMinstebelop(perioder: Collection<Trygdeavgiftsperiode>): MinstebeløpResponse? {
-        val aar = perioder
-            .filter { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }
-            .maxByOrNull { it.periodeTil }
-            ?.periodeTil?.year
-            ?: return null
-        return trygdeavgiftClient.hentMinstebeløp(aar)
-    }
 
     private fun Trygdeavgiftsperiode.toAvgiftsperiodeDto() = AvgiftsperiodeDto(
         fom = periodeFra,

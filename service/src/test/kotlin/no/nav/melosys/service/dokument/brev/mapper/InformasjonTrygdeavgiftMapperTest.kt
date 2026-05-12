@@ -15,8 +15,8 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
 import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebeløpResponse
+import no.nav.melosys.service.avgift.MinstebeløpService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.dokument.DokgenTestData
@@ -45,7 +45,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
     private lateinit var mockTrygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
     @MockK
-    private lateinit var mockTrygdeavgiftClient: TrygdeavgiftClient
+    private lateinit var mockMinstebeløpService: MinstebeløpService
 
     private lateinit var informasjonTrygdeavgiftMapper: InformasjonTrygdeavgiftMapper
     private val unleash = FakeUnleash()
@@ -53,13 +53,13 @@ internal class InformasjonTrygdeavgiftMapperTest {
     @BeforeEach
     fun setup() {
         unleash.disableAll()
-        every { mockTrygdeavgiftClient.hentMinstebeløp(any()) } returns MinstebeløpResponse(2024, BigDecimal(7000))
+        every { mockMinstebeløpService.finnMinstebeløp(any()) } returns MinstebeløpResponse(2024, BigDecimal(7000))
         informasjonTrygdeavgiftMapper = InformasjonTrygdeavgiftMapper(
             mockDokgenMapperDatahenter,
             mockHelseutgiftDekkesPeriodeService,
             mockTrygdeavgiftMottakerService,
             mockTrygdeavgiftsberegningService,
-            mockTrygdeavgiftClient,
+            mockMinstebeløpService,
             unleash
         )
     }

@@ -5,7 +5,6 @@ import jakarta.transaction.Transactional
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
@@ -15,8 +14,7 @@ import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.dokgen.dto.AvgiftsperiodeEøsPensjonist
 import no.nav.melosys.integrasjon.dokgen.dto.InformasjonTrygdeavgift
-import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
-import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebeløpResponse
+import no.nav.melosys.service.avgift.MinstebeløpService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
@@ -31,7 +29,7 @@ class InformasjonTrygdeavgiftMapper(
     private val helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
-    private val trygdeavgiftClient: TrygdeavgiftClient,
+    private val minstebeløpService: MinstebeløpService,
     private val unleash: Unleash
 ) {
 
@@ -56,7 +54,7 @@ class InformasjonTrygdeavgiftMapper(
         val tomDato = helseutgiftDekkesPerioder.maxOf { it.tomDato }
         val førstePeriode = helseutgiftDekkesPerioder.first()
 
-        val minstebelop = hentMinstebelop(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder)
+        val minstebeløp = minstebeløpService.finnMinstebeløp(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder)
 
         return InformasjonTrygdeavgift(
             brevbestilling = brevbestilling,
@@ -79,8 +77,8 @@ class InformasjonTrygdeavgiftMapper(
             erSkattemessigEmigrert = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.any {
                 it.grunnlagSkatteforholdTilNorge?.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG
             },
-            minstebelopVerdi = minstebelop?.beloep,
-            minstebelopAar = minstebelop?.aar
+            minstebelopVerdi = minstebeløp?.beloep,
+            minstebelopAar = minstebeløp?.aar
         )
     }
 
@@ -141,14 +139,5 @@ class InformasjonTrygdeavgiftMapper(
         if (behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT) == null) return null
 
         return trygdeavgiftsberegningService.finnFakturamottakerNavn(behandling.id)
-    }
-
-    private fun hentMinstebelop(perioder: Collection<Trygdeavgiftsperiode>): MinstebeløpResponse? {
-        val aar = perioder
-            .filter { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }
-            .maxByOrNull { it.periodeTil }
-            ?.periodeTil?.year
-            ?: return null
-        return trygdeavgiftClient.hentMinstebeløp(aar)
     }
 }
