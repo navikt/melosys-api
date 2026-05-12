@@ -87,7 +87,9 @@ class SaksflyThreadPoolTaskExecutorIT(
         ) {
             repeat(10) { i ->
                 prosessinstansService.opprettProsessinstansSedMottak(MelosysEessiMelding().apply {
-                    rinaSaksnummer = "ko-$i"
+                    // rinaSaksnummer må være rent numerisk (LåsReferanseType.SED: ^\d+_[a-zA-Z0-9]+_\d+$);
+                    // egen 1000-serie så det ikke kolliderer med rina-numrene i testet over (klassen rydder ikke DB mellom metodene).
+                    rinaSaksnummer = (1000 + i).toString()
                     sedId = SedType.A009.name
                     sedVersjon = "1"
                 })
