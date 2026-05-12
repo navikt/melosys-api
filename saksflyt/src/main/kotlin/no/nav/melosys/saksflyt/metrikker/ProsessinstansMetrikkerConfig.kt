@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+import java.util.EnumMap
+import java.util.Queue
 
 @Configuration
 class ProsessinstansMetrikkerConfig(
@@ -73,10 +75,9 @@ class ProsessinstansMetrikkerConfig(
 
     /** Antall prosessinstanser som venter i [saksflytThreadPoolTaskExecutor]-køen, brutt ned per [Prioritet]. */
     private fun registrerKøstørrelsePerPrioritet(meterRegistry: MeterRegistry) {
+        val snapshot = KøstørrelseSnapshot(saksflytThreadPoolTaskExecutor.threadPoolExecutor.queue)
         Prioritet.values().forEach { prioritet ->
-            Gauge.builder(MetrikkerNavn.PROSESSINSTANSER_KO, saksflytThreadPoolTaskExecutor) { executor ->
-                antallIKøMedPrioritet(executor, prioritet).toDouble()
-            }
+            Gauge.builder(MetrikkerNavn.PROSESSINSTANSER_KO, snapshot) { it.antall(prioritet).toDouble() }
                 .tag(MetrikkerNavn.TAG_PRIORITET, prioritet.name)
                 .register(meterRegistry)
         }
@@ -89,6 +90,34 @@ class ProsessinstansMetrikkerConfig(
         }.register(meterRegistry)
     }
 
-    private fun antallIKøMedPrioritet(executor: ThreadPoolTaskExecutor, prioritet: Prioritet): Int =
-        executor.threadPoolExecutor.queue.count { PrioritertProsessinstansOppgave.prioritetAv(it) == prioritet }
+    /**
+     * Teller køelementene per [Prioritet] i ett løp og cacher resultatet kortvarig. Én Prometheus-scrape leser
+     * alle prioritet-gaugene rett etter hverandre, så vi gjør da bare én weakly-consistent O(n)-iterasjon over
+     * køen i stedet for én per [Prioritet].
+     */
+    private class KøstørrelseSnapshot(private val kø: Queue<Runnable>) {
+        @Volatile private var harBeregnet = false
+        @Volatile private var beregnetTidspunktMs = 0L
+        @Volatile private var antallPerPrioritet: Map<Prioritet, Int> = emptyMap()
+
+        fun antall(prioritet: Prioritet): Int {
+            oppfriskVedBehov()
+            return antallPerPrioritet[prioritet] ?: 0
+        }
+
+        @Synchronized
+        private fun oppfriskVedBehov() {
+            val nå = System.currentTimeMillis()
+            if (harBeregnet && nå - beregnetTidspunktMs < GYLDIGHET_MS) return
+            val telling = EnumMap<Prioritet, Int>(Prioritet::class.java)
+            kø.forEach { telling.merge(PrioritertProsessinstansOppgave.prioritetAv(it), 1, Int::plus) }
+            antallPerPrioritet = telling
+            beregnetTidspunktMs = nå
+            harBeregnet = true
+        }
+
+        private companion object {
+            const val GYLDIGHET_MS = 1_000L
+        }
+    }
 }

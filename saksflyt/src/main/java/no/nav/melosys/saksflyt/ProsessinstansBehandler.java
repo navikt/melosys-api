@@ -49,7 +49,8 @@ public class ProsessinstansBehandler {
      * pr. oppstart (ApplicationReadyEvent) og filtrerer også UNDER_BEHANDLING. Vinduet må derfor være lengre enn
      * både lengste saga-kjøretid og verste tid-i-kø (timer under en batch-flom), ellers kan begge podder gjenoppta
      * samme saga. Trygg umiddelbar recovery krever en per-pod-eierskapsmarkør på raden — i praksis Alternativ B
-     * (DB-kø med {@code FOR UPDATE SKIP LOCKED}, MELOSYS-7790 / MELOSYS-8066). Default 2 t (ikke 24 t, ikke 15 min).
+     * (DB-kø med {@code FOR UPDATE SKIP LOCKED}, MELOSYS-7790 / MELOSYS-8066). Konservativ default 24 t (= dagens oppførsel);
+     * kan senkes per miljø via {@code melosys.saksflyt.gjenopprettelse.vindu} (ikke 15 min).
      */
     private final Duration gjenopprettelseVindu;
 
@@ -57,7 +58,7 @@ public class ProsessinstansBehandler {
                                    ProsessinstansRepository prosessinstansRepository,
                                    ApplicationEventPublisher applicationEventPublisher,
                                    MeterRegistry meterRegistry,
-                                   @Value("${melosys.saksflyt.gjenopprettelse.vindu:PT2H}") Duration gjenopprettelseVindu
+                                   @Value("${melosys.saksflyt.gjenopprettelse.vindu:PT24H}") Duration gjenopprettelseVindu
     ) {
         this.meterRegistry = meterRegistry;
         stegbehandlere.forEach(s -> stegbehandlerMap.put(s.inngangsSteg(), s));

@@ -56,7 +56,7 @@ import java.time.LocalDateTime
 @DirtiesContext
 @EnableMockOAuth2Server
 // Pinner gjenopprettelsesvinduet eksplisitt slik at testen er uavhengig av default-verdien
-// (se melosys.saksflyt.gjenopprettelse.vindu i application.yml - default PT2H, kan endres).
+// (se melosys.saksflyt.gjenopprettelse.vindu i application.yml - default PT24H, kan endres per miljø).
 @TestPropertySource(properties = ["melosys.saksflyt.gjenopprettelse.vindu=PT2H"])
 class SaksflytOppstartIT(
     @Autowired private val fagsakRepository: FagsakRepository,
