@@ -45,13 +45,14 @@ public class ProsessinstansBehandler {
     /**
      * Hvor lenge en aktiv prosessinstans må ha vært urørt (endretDato) før den gjenopprettes ved oppstart.
      *
-     * <p><b>Dette er en midlertidig løsning, ikke den endelige.</b> melosys-api kjører to podder, og gjenopprettelsen
-     * kjører kun én gang per oppstart (ApplicationReadyEvent) og tar også med UNDER_BEHANDLING. Vinduet må derfor være
-     * lengre enn både den lengste saga-kjøretiden og hvor lenge køen holder seg full etter at en stor batch er lagt på
-     * den (kan være timer) — ellers kan begge poddene gjenoppta den samme sagaen. Trygg umiddelbar gjenoppretting
-     * krever en per-pod-eierskapsmarkør på raden, dvs. i praksis Alternativ B (DB-kø med {@code FOR UPDATE SKIP LOCKED},
-     * MELOSYS-7790 / MELOSYS-8066). Default holdes uendret på 24 timer (= dagens oppførsel); kan settes lavere per
-     * miljø via {@code melosys.saksflyt.gjenopprettelse.vindu} (men ikke ned til minutter).
+     * <p><b>Dette er en midlertidig løsning.</b> melosys-api kjører to podder, og gjenopprettelsen kjører kun én gang
+     * per oppstart (ApplicationReadyEvent) og tar også med UNDER_BEHANDLING. Vinduet må derfor være lengre enn både
+     * den lengste saga-kjøretiden og hvor lenge køen holder seg full etter at en stor batch er lagt på den (kan være
+     * timer) — ellers kan begge poddene gjenoppta den samme sagaen. Trygg umiddelbar gjenoppretting krever en
+     * per-pod-eierskapsmarkør på raden, dvs. den varige løsningen Alternativ B (DB-basert kø med
+     * {@code FOR UPDATE SKIP LOCKED} — MELOSYS-8068). Default holdes uendret på
+     * 24 timer (= dagens oppførsel); kan settes lavere per miljø via {@code melosys.saksflyt.gjenopprettelse.vindu}
+     * (men ikke ned til minutter).
      */
     private final Duration gjenopprettelseVindu;
 

@@ -239,8 +239,8 @@ melosys:
       # at en stor batch er lagt på den (kan være timer) — ellers kan begge poddene gjenoppta den samme sagaen. Et
       # veldig kort vindu (minutter) er derfor utrygt med dagens løsning.
       # Verdien kan settes lavere per miljø når man har målt hvor lenge køen faktisk holder seg full etter en stor
-      # batch — og helst først etter at Prosessinstans har fått @Version (jf. MELOSYS-7790).
-      # Den varige løsningen er en DB-basert kø med FOR UPDATE SKIP LOCKED (MELOSYS-7790 / jf. MELOSYS-8066).
+      # batch — og helst først etter at Prosessinstans har fått @Version.
+      # Den varige løsningen er en DB-basert kø med FOR UPDATE SKIP LOCKED (MELOSYS-8068; @Version er første steg der).
       vindu: PT24H  # ISO-8601 Duration
   service:
     fagsak:
