@@ -18,16 +18,16 @@ public enum ProsessType {
     // settes det per kall (ProsessinstansService.opprett...(prioritet)). Batch-presset ligger på OPPRETT_NY_BEHANDLING_AARSAVREGNING (LAV).
     IVERKSETT_EOS_PENSJONIST_AVGIFT("IVERKSETT_EOS_PENSJONIST_AVGIFT", "Iverksett EØS pensjonist avgift"),
     IVERKSETT_VEDTAK_AARSAVREGNING("IVERKSETT_VEDTAK_AARSAVREGNING", "Iverksett vedtak for en årsavregning"),
-    IVERKSETT_VEDTAK_EOS("IVERKSETT_VEDTAK_EOS", "Iverksett vedtak EOS", Prioritet.HØY),
-    IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE("IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE", "Iverksett nytt vedtak etter lovvalgsperioden har blitt forkortet", Prioritet.HØY),
-    IVERKSETT_VEDTAK_FTRL("IVERKSETT_VEDTAK_FTRL", "Iverksett vedtak Folketrygdloven", Prioritet.HØY),
-    IVERKSETT_VEDTAK_IKKE_YRKESAKTIV("IVERKSETT_VEDTAK_IKKE_YRKESAKTIV", "Iverksett vedtak Ikke yrkesaktiv", Prioritet.HØY),
-    IVERKSETT_VEDTAK_TRYGDEAVTALE("IVERKSETT_VEDTAK_TRYGDEAVTALE", "Iverksett vedtak Trygdeavtale", Prioritet.HØY),
-    JFR_ANDREGANG_NY_BEHANDLING("JFR_ANDREGANG_NY_BEHANDLING", "Journalføring på eksisterende sak og opprett ny behandling", Prioritet.HØY),
-    JFR_ANDREGANG_REPLIKER_BEHANDLING("JFR_ANDREGANG_REPLIKER_BEHANDLING", "Journalføring på eksisterende sak og repliker tidligere behandling", Prioritet.HØY),
-    JFR_KNYTT("JFR_KNYTT", "Journalføring på eksisterende sak", Prioritet.HØY),
-    JFR_NY_SAK_BRUKER("JFR_NY_SAK_BRUKER", "Journalføring med ny sak og søknad for bruker", Prioritet.HØY),
-    JFR_NY_SAK_VIRKSOMHET("JFR_NY_SAK_VIRKSOMHET", "Journalføring med ny sak for virksomhet", Prioritet.HØY),
+    IVERKSETT_VEDTAK_EOS("IVERKSETT_VEDTAK_EOS", "Iverksett vedtak EOS", ProsessPrioritet.HØY),
+    IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE("IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE", "Iverksett nytt vedtak etter lovvalgsperioden har blitt forkortet", ProsessPrioritet.HØY),
+    IVERKSETT_VEDTAK_FTRL("IVERKSETT_VEDTAK_FTRL", "Iverksett vedtak Folketrygdloven", ProsessPrioritet.HØY),
+    IVERKSETT_VEDTAK_IKKE_YRKESAKTIV("IVERKSETT_VEDTAK_IKKE_YRKESAKTIV", "Iverksett vedtak Ikke yrkesaktiv", ProsessPrioritet.HØY),
+    IVERKSETT_VEDTAK_TRYGDEAVTALE("IVERKSETT_VEDTAK_TRYGDEAVTALE", "Iverksett vedtak Trygdeavtale", ProsessPrioritet.HØY),
+    JFR_ANDREGANG_NY_BEHANDLING("JFR_ANDREGANG_NY_BEHANDLING", "Journalføring på eksisterende sak og opprett ny behandling", ProsessPrioritet.HØY),
+    JFR_ANDREGANG_REPLIKER_BEHANDLING("JFR_ANDREGANG_REPLIKER_BEHANDLING", "Journalføring på eksisterende sak og repliker tidligere behandling", ProsessPrioritet.HØY),
+    JFR_KNYTT("JFR_KNYTT", "Journalføring på eksisterende sak", ProsessPrioritet.HØY),
+    JFR_NY_SAK_BRUKER("JFR_NY_SAK_BRUKER", "Journalføring med ny sak og søknad for bruker", ProsessPrioritet.HØY),
+    JFR_NY_SAK_VIRKSOMHET("JFR_NY_SAK_VIRKSOMHET", "Journalføring med ny sak for virksomhet", ProsessPrioritet.HØY),
     MANGLENDE_INNBETALING_VARSELBREV("MANGLENDE_INNBETALING_VARSELBREV","Send brev om manglende innbetaling"),
     MOTTAK_SED("MOTTAK_SED", "Mottak av SED for journalføring og videre ruting"),
     MOTTAK_SED_JOURNALFØRING("MOTTAK_SED_JOURNALFØRING", "Mottak av SED som kun skal journalføres"),
@@ -35,7 +35,7 @@ public enum ProsessType {
     MELOSYS_MOTTAK_DIGITAL_SØKNAD("MELOSYS_MOTTAK_DIGITAL_SØKNAD", "Mottak av digital søknad"),
     MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD("MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD", "Mottak av digital søknad for eksisterende sak"),
     OPPDATER_FAKTURAMOTTAKER("OPPDATER_FAKTURAMOTTAKER", "Oppdaterer fakturamottaker i faktureringskomponent"),
-    OPPRETT_NY_BEHANDLING_AARSAVREGNING("OPPRETT_NY_BEHANDLING_ARSAVREGNING", "Oppretter årsavregningbehandling på aktuell bruker", Prioritet.LAV),
+    OPPRETT_NY_BEHANDLING_AARSAVREGNING("OPPRETT_NY_BEHANDLING_ARSAVREGNING", "Oppretter årsavregningbehandling på aktuell bruker", ProsessPrioritet.LAV),
     OPPRETT_NY_BEHANDLING_FOR_SAK("OPPRETT_NY_BEHANDLING_FOR_SAK", "Oppretter ny behandling og ny oppgave for eksisterende sak"),
     OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING("OPPRETT_NY_BEHANDLING_FTRL_MANGLENDE_INNBETALING", "Oppretter ny behandling og send varselbrev om manglende innbetaling"),
     OPPRETT_NY_SAK_EOS_FRA_OPPGAVE("OPPRETT_NY_SAK_EOS_FRA_OPPGAVE", "Oppretter ny sak (fra journalført dokument) for EU/EØS"),
@@ -48,21 +48,21 @@ public enum ProsessType {
     REGISTRERING_UNNTAK_GODKJENN("REGISTRERING_UNNTAK_GODKJENN", "Godkjenner en untaksperiode og avslutter behandling"),
     REGISTRERING_UNNTAK_NY_BEHANDLING("REGISTRERING_UNNTAK_NY_BEHANDLING", "Registrering av unntak - ny behandling"),
     REGISTRERING_UNNTAK_NY_SAK("REGISTRERING_UNNTAK_NY_SAK", "Registrering av unntak - ny sak"),
-    SATSENDRING("SATSENDRING", "Oppretter og behandler en satsendring - iverksetter og fakturerer", Prioritet.LAV),
-    SATSENDRING_TILBAKESTILL_NY_VURDERING("SATSENDRING_TILBAKESTILL_NY_VURDERING", "Behandler satsendring hvor aktiv ny vurdering tilbakestilles, slik at nye satser brukes", Prioritet.LAV),
+    SATSENDRING("SATSENDRING", "Oppretter og behandler en satsendring - iverksetter og fakturerer", ProsessPrioritet.LAV),
+    SATSENDRING_TILBAKESTILL_NY_VURDERING("SATSENDRING_TILBAKESTILL_NY_VURDERING", "Behandler satsendring hvor aktiv ny vurdering tilbakestilles, slik at nye satser brukes", ProsessPrioritet.LAV),
     SEND_BREV("SEND_BREV", "Send brev til én mottaker via doksys"),
     UTPEKING_AVVIS("UTPEKING_AVVIS", "Avviser utpeking mottatt i en A003"),
     VIDERESEND_SOKNAD("VIDERESEND_SOKNAD", "Videresend søknad");
 
     private final String kode;
     private final String beskrivelse;
-    private final Prioritet prioritet;
+    private final ProsessPrioritet prioritet;
 
     ProsessType(String kode, String beskrivelse) {
-        this(kode, beskrivelse, Prioritet.NORMAL);
+        this(kode, beskrivelse, ProsessPrioritet.NORMAL);
     }
 
-    ProsessType(String kode, String beskrivelse, Prioritet prioritet) {
+    ProsessType(String kode, String beskrivelse, ProsessPrioritet prioritet) {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
         this.prioritet = prioritet;
@@ -80,7 +80,7 @@ public enum ProsessType {
      * Default-prioritet for prosesstypen. Kan overstyres per kall ved opprettelse
      * (se {@code ProsessinstansService} og {@link Prosessinstans#hentPrioritet()}).
      */
-    public Prioritet getPrioritet() {
+    public ProsessPrioritet getPrioritet() {
         return prioritet;
     }
 }

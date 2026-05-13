@@ -10,7 +10,6 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.ProsessinstansService
-import no.nav.melosys.saksflytapi.domain.Prioritet
 import no.nav.melosys.service.behandling.BehandlingService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -96,14 +95,14 @@ class SatsendringProsessGeneratorTest {
         every { satsendringFinner.finnBehandlingerMedSatsendring(år) } returns avgiftSatsendringInfo
         every { behandlingService.hentBehandling(behandlingID1) } returns behandling1
         every { behandlingService.hentBehandling(behandlingID2) } returns behandling2
-        every { prosessinstansService.opprettSatsendringBehandlingFor(behandling1, år, Prioritet.LAV) } returns UUID.fromString("123e4567-e89b-12d3-a456-426614174000")
-        every { prosessinstansService.opprettSatsendringBehandlingMedTilbakestillingAvAvgift(behandling2, år, Prioritet.LAV) } returns UUID.fromString("123e4567-e89b-12d3-a456-426614174001")
+        every { prosessinstansService.opprettSatsendringBehandlingFor(behandling1, år) } returns UUID.fromString("123e4567-e89b-12d3-a456-426614174000")
+        every { prosessinstansService.opprettSatsendringBehandlingMedTilbakestillingAvAvgift(behandling2, år) } returns UUID.fromString("123e4567-e89b-12d3-a456-426614174001")
 
         satsendringProsessGenerator.opprettSatsendringsprosesserForÅr(år, dryRun = false)
 
         // Then
-        verify(exactly = 1) { prosessinstansService.opprettSatsendringBehandlingFor(behandling1, år, Prioritet.LAV) }
-        verify(exactly = 1) { prosessinstansService.opprettSatsendringBehandlingMedTilbakestillingAvAvgift(behandling2, år, Prioritet.LAV) }
+        verify(exactly = 1) { prosessinstansService.opprettSatsendringBehandlingFor(behandling1, år) }
+        verify(exactly = 1) { prosessinstansService.opprettSatsendringBehandlingMedTilbakestillingAvAvgift(behandling2, år) }
     }
 
     @Test

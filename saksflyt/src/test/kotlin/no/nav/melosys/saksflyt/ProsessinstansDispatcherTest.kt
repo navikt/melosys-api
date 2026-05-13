@@ -7,8 +7,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.saksflytapi.domain.Prioritet
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.ProsessPrioritet
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
@@ -25,17 +24,14 @@ class ProsessinstansDispatcherTest {
     fun `dispatch legger oppgave på køen med ProsessType sin default-prioritet`() {
         dispatcher.dispatch(Prosessinstans.forTest { type = ProsessType.IVERKSETT_VEDTAK_EOS })
 
-        captureOppgave().prioritet shouldBe Prioritet.HØY
+        captureOppgave().prioritet shouldBe ProsessPrioritet.HØY
     }
 
     @Test
-    fun `dispatch bruker per-kall-overstyring lagret på prosessinstansen`() {
-        dispatcher.dispatch(Prosessinstans.forTest {
-            type = ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING // default NORMAL
-            medData(ProsessDataKey.PRIORITET, Prioritet.LAV)
-        })
+    fun `dispatch legger LAV-prioriterte batch-typer bakerst i køen`() {
+        dispatcher.dispatch(Prosessinstans.forTest { type = ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING })
 
-        captureOppgave().prioritet shouldBe Prioritet.LAV
+        captureOppgave().prioritet shouldBe ProsessPrioritet.LAV
     }
 
     @Test
@@ -50,9 +46,9 @@ class ProsessinstansDispatcherTest {
         verify { prosessinstansBehandler.behandleProsessinstansNå(prosessinstans) }
     }
 
-    private fun captureOppgave(): PrioritertProsessinstansOppgave {
+    private fun captureOppgave(): PrioritertSaksflytTask {
         val oppgave = slot<Runnable>()
         verify { executor.execute(capture(oppgave)) }
-        return oppgave.captured as PrioritertProsessinstansOppgave
+        return oppgave.captured as PrioritertSaksflytTask
     }
 }

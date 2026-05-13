@@ -15,8 +15,8 @@ object MetrikkerNavn {
     const val PROSESSINSTANSER_STEG_UTFØRT = "$PROSESSINSTANSER.steg.utfoert"
     const val PROSESSINSTANSER_STEG_FEILET = "$PROSESSINSTANSER.steg.feilet"
     const val PROSESSINSTANSER_STEG_TID_BRUKT = "$PROSESSINSTANSER.steg.tid.brukt"
-    const val PROSESSINSTANSER_KO = "$PROSESSINSTANSER.ko"
-    const val PROSESSINSTANSER_KO_AKTIVE = "$PROSESSINSTANSER.ko.aktive"
+    const val PROSESSINSTANSER_KØ = "$PROSESSINSTANSER.koe"
+    const val PROSESSINSTANSER_KØ_AKTIVE = "$PROSESSINSTANSER.koe.aktive"
 
     const val UNNTAKSPERIODE_KONTROLL_TREFF = "$METRIKKER_NAMESPACE.unntakperiode.treffbegrunnelse"
     const val SVAR_AOU = "$METRIKKER_NAMESPACE.svar.aou"

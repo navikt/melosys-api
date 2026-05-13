@@ -7,7 +7,6 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.saksflytapi.ProsessinstansService
-import no.nav.melosys.saksflytapi.domain.Prioritet
 import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
@@ -82,8 +81,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
                     prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
                         it.sak.saksnummer,
                         år,
-                        Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE,
-                        Prioritet.LAV // auto-batch — skal ikke sulte saksbehandler-trigget arbeid
+                        Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
                     )
                 }
             result = sakerFunnet

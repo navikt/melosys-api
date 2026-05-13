@@ -231,16 +231,8 @@ melosys:
       enabled: true  # Standard aktivert for produksjon
   saksflyt:
     gjenopprettelse:
-      # Hvor lenge en aktiv prosessinstans må ha vært urørt (endretDato) før den gjenopprettes automatisk ved oppstart.
-      # Default holdes uendret på dagens oppførsel, 24 timer — denne endringen gjør bare verdien konfigurerbar, den
-      # senker den ikke.
-      # MERK: dette er en midlertidig løsning. melosys-api kjører to podder, og gjenopprettelsen kjører kun ved
-      # oppstart. Vinduet må derfor være lengre enn både den lengste saga-kjøretiden og hvor lenge køen er full etter
-      # at en stor batch er lagt på den (kan være timer) — ellers kan begge poddene gjenoppta den samme sagaen. Et
-      # veldig kort vindu (minutter) er derfor utrygt med dagens løsning.
-      # Verdien kan settes lavere per miljø når man har målt hvor lenge køen faktisk holder seg full etter en stor
-      # batch — og helst først etter at Prosessinstans har fått @Version.
-      # Den varige løsningen er en DB-basert kø med FOR UPDATE SKIP LOCKED (MELOSYS-8068; @Version er første steg der).
+      # Hvor lenge en aktiv prosessinstans må ha vært urørt før den gjenopprettes ved oppstart. Se javadoc på
+      # ProsessinstansBehandler#gjenopprettelseVindu for hvorfor 24 timer er minimum med dagens 2-podders-løsning.
       vindu: PT24H  # ISO-8601 Duration
   service:
     fagsak:

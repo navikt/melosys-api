@@ -6,7 +6,7 @@ import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.binder.MeterBinder
 import jakarta.annotation.PostConstruct
 import no.nav.melosys.metrics.MetrikkerNavn
-import no.nav.melosys.saksflytapi.domain.Prioritet
+import no.nav.melosys.saksflytapi.domain.ProsessPrioritet
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -74,10 +74,10 @@ class ProsessinstansMetrikkerConfig(
         }
     }
 
-    /** Antall prosessinstanser som venter i [saksflytThreadPoolTaskExecutor]-køen, brutt ned per [Prioritet]. */
+    /** Antall prosessinstanser som venter i [saksflytThreadPoolTaskExecutor]-køen, brutt ned per [ProsessPrioritet]. */
     private fun registrerKøstørrelsePerPrioritet(meterRegistry: MeterRegistry) {
-        Prioritet.values().forEach { prioritet ->
-            Gauge.builder(MetrikkerNavn.PROSESSINSTANSER_KO, køstørrelseSnapshot) { it.antall(prioritet).toDouble() }
+        ProsessPrioritet.values().forEach { prioritet ->
+            Gauge.builder(MetrikkerNavn.PROSESSINSTANSER_KØ, køstørrelseSnapshot) { it.antall(prioritet).toDouble() }
                 .tag(MetrikkerNavn.TAG_PRIORITET, prioritet.name)
                 .register(meterRegistry)
         }
@@ -85,7 +85,7 @@ class ProsessinstansMetrikkerConfig(
 
     /** Antall pooltråder som akkurat nå kjører en saga (uavhengig av prioritet — en kjørende oppgave er ikke i køen). */
     private fun registrerAntallAktiveTråder(meterRegistry: MeterRegistry) {
-        Gauge.builder(MetrikkerNavn.PROSESSINSTANSER_KO_AKTIVE, saksflytThreadPoolTaskExecutor) { executor ->
+        Gauge.builder(MetrikkerNavn.PROSESSINSTANSER_KØ_AKTIVE, saksflytThreadPoolTaskExecutor) { executor ->
             executor.activeCount.toDouble()
         }.register(meterRegistry)
     }

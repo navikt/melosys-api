@@ -35,20 +35,10 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `hentPrioritet faller tilbake til ProsessType sin default når ingen overstyring er satt`() {
-        Prosessinstans.forTest { type = ProsessType.IVERKSETT_VEDTAK_EOS }.hentPrioritet() shouldBe Prioritet.HØY
-        Prosessinstans.forTest { type = ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING }.hentPrioritet() shouldBe Prioritet.LAV
-        Prosessinstans.forTest { type = ProsessType.MOTTAK_SED }.hentPrioritet() shouldBe Prioritet.NORMAL
-    }
-
-    @Test
-    fun `hentPrioritet bruker per-kall-overstyring når den er lagret på instansen`() {
-        val prosessinstans = Prosessinstans.forTest {
-            type = ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING // default NORMAL
-            medData(ProsessDataKey.PRIORITET, Prioritet.LAV)
-        }
-
-        prosessinstans.hentPrioritet() shouldBe Prioritet.LAV
+    fun `hentPrioritet returnerer ProsessType sin default-prioritet`() {
+        Prosessinstans.forTest { type = ProsessType.IVERKSETT_VEDTAK_EOS }.hentPrioritet() shouldBe ProsessPrioritet.HØY
+        Prosessinstans.forTest { type = ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING }.hentPrioritet() shouldBe ProsessPrioritet.LAV
+        Prosessinstans.forTest { type = ProsessType.MOTTAK_SED }.hentPrioritet() shouldBe ProsessPrioritet.NORMAL
     }
 
     @Test

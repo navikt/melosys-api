@@ -795,22 +795,7 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    fun `opprett satsendringsprosess med eksplisitt LAV-prioritet skal lagre prioritetsoverstyring på instansen`() {
-        val behandling = Behandling.forTest { }
-
-
-        prosessinstansService.opprettSatsendringBehandlingFor(behandling, 2024, Prioritet.LAV)
-
-
-        piListCaptor.last().run {
-            type shouldBe ProsessType.SATSENDRING
-            finnData<Prioritet>(ProsessDataKey.PRIORITET) shouldBe Prioritet.LAV
-            hentPrioritet() shouldBe Prioritet.LAV
-        }
-    }
-
-    @Test
-    fun `opprett satsendringsprosess uten eksplisitt prioritet skal falle tilbake til ProsessType sin default`() {
+    fun `opprett satsendringsprosess skal bruke ProsessType sin default-prioritet`() {
         val behandling = Behandling.forTest { }
 
 
@@ -818,7 +803,7 @@ class ProsessinstansServiceTest {
 
 
         piListCaptor.last().run {
-            finnData<Prioritet>(ProsessDataKey.PRIORITET) shouldBe null
+            type shouldBe ProsessType.SATSENDRING
             hentPrioritet() shouldBe ProsessType.SATSENDRING.prioritet
         }
     }

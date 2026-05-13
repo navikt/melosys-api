@@ -7,10 +7,10 @@ import no.nav.melosys.Application
 import no.nav.melosys.ProsessinstansTestManager
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
-import no.nav.melosys.saksflyt.PrioritertProsessinstansOppgave
+import no.nav.melosys.saksflyt.PrioritertSaksflytTask
 import no.nav.melosys.saksflyt.steg.sed.mottak.SedMottakRuting
 import no.nav.melosys.saksflytapi.ProsessinstansService
-import no.nav.melosys.saksflytapi.domain.Prioritet
+import no.nav.melosys.saksflytapi.domain.ProsessPrioritet
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
@@ -79,9 +79,9 @@ class SaksflyThreadPoolTaskExecutorIT(
     }
 
     @Test
-    fun `oppgaver i køen er innpakket som PrioritertProsessinstansOppgave med prioritet`() {
-        // Detaljert HØY-foran-LAV-ordning er dekket av PrioritertProsessinstansOppgaveTest (rene enhetstester);
-        // her bekreftes kun at den faktiske bønnen pakker sagaer som PrioritertProsessinstansOppgave.
+    fun `oppgaver i køen er innpakket som PrioritertSaksflytTask med prioritet`() {
+        // Detaljert HØY-foran-LAV-ordning er dekket av PrioritertSaksflytTaskTest (rene enhetstester);
+        // her bekreftes kun at den faktiske bønnen pakker sagaer som PrioritertSaksflytTask.
         prosessinstansTestManager.executeAndWait(
             mapOf(ProsessType.MOTTAK_SED to 10)
         ) {
@@ -96,8 +96,8 @@ class SaksflyThreadPoolTaskExecutorIT(
             }
             Thread.sleep(100)
             taskExecutor.threadPoolExecutor.queue
-                .filterIsInstance<PrioritertProsessinstansOppgave>()
-                .forEach { it.prioritet shouldBe Prioritet.NORMAL }
+                .filterIsInstance<PrioritertSaksflytTask>()
+                .forEach { it.prioritet shouldBe ProsessPrioritet.NORMAL }
         }
         await.atMost(java.time.Duration.ofSeconds(5)).until { taskExecutor.threadPoolExecutor.queue.size == 0 }
     }

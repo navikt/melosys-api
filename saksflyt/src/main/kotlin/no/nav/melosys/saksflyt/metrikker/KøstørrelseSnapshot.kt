@@ -1,15 +1,13 @@
 package no.nav.melosys.saksflyt.metrikker
 
-import no.nav.melosys.saksflyt.PrioritertProsessinstansOppgave
-import no.nav.melosys.saksflytapi.domain.Prioritet
+import no.nav.melosys.saksflyt.PrioritertSaksflytTask
+import no.nav.melosys.saksflytapi.domain.ProsessPrioritet
 import java.util.EnumMap
 import java.util.Queue
 
 /**
- * Teller [Runnable]-ene i [kø] gruppert per [Prioritet] i ett løp og cacher resultatet i [gyldighetMs] ms.
- *
- * Én Prometheus-scrape leser alle `melosys.prosessinstanser.ko{prioritet=…}`-gaugene rett etter hverandre, så
- * cachen gjør at det blir kun én weakly-consistent O(n)-iterasjon over køen per scrape i stedet for én per [Prioritet].
+ * Cacher antall [Runnable]-er i [kø] per [ProsessPrioritet] i [gyldighetMs] ms, slik at én Prometheus-scrape kun
+ * itererer over køen én gang i stedet for én gang per prioritet.
  *
  * Brukeren ([ProsessinstansMetrikkerConfig]) må holde instansen som et felt — Micrometer holder gauge-state-objektet
  * med en `WeakReference`, så et lokalt snapshot ville blitt GC-et og gaugene rapportert `NaN`.
@@ -21,9 +19,9 @@ internal class KøstørrelseSnapshot(
 ) {
     @Volatile private var harBeregnet = false
     @Volatile private var beregnetTidspunktMs = 0L
-    @Volatile private var antallPerPrioritet: Map<Prioritet, Int> = emptyMap()
+    @Volatile private var antallPerPrioritet: Map<ProsessPrioritet, Int> = emptyMap()
 
-    fun antall(prioritet: Prioritet): Int {
+    fun antall(prioritet: ProsessPrioritet): Int {
         oppfriskVedBehov()
         return antallPerPrioritet[prioritet] ?: 0
     }
@@ -32,8 +30,8 @@ internal class KøstørrelseSnapshot(
     private fun oppfriskVedBehov() {
         val nå = nåMs()
         if (harBeregnet && nå - beregnetTidspunktMs < gyldighetMs) return
-        val telling = EnumMap<Prioritet, Int>(Prioritet::class.java)
-        kø.forEach { telling.merge(PrioritertProsessinstansOppgave.prioritetAv(it), 1, Int::plus) }
+        val telling = EnumMap<ProsessPrioritet, Int>(ProsessPrioritet::class.java)
+        kø.forEach { telling.merge(PrioritertSaksflytTask.prioritetAv(it), 1, Int::plus) }
         antallPerPrioritet = telling
         beregnetTidspunktMs = nå
         harBeregnet = true
