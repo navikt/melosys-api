@@ -120,8 +120,6 @@ class ÅrsavregningVedtakMapper(
         medlemskapsTypePliktig: Boolean,
         trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
     ): List<Avgiftsperiode> {
-        if (trygdeavgiftsperioder.all { !it.harAvgift() && it.beregningsregel == Avgiftsberegningsregel.ORDINÆR }) return emptyList()
-
         return trygdeavgiftsperioder.map { trygdeavgiftsperiode ->
             val grunnlagsInntektsperiode = trygdeavgiftsperiode.grunnlagInntekstperiode
                 ?: throw IllegalStateException("trygdeavgiftsperioden må ha en inntektsperiode")

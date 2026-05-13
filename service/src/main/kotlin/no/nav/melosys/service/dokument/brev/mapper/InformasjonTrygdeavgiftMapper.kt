@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
@@ -95,16 +96,12 @@ class InformasjonTrygdeavgiftMapper(
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodeEøsPensjonist> {
         val perioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toSet()
 
-        if (perioder.all { !it.harAvgift() && it.beregningsregel == Avgiftsberegningsregel.ORDINÆR }) {
-            return emptyList()
-        }
-
         val inneværendeÅr = LocalDate.now().year
         val gruppertePerioder = perioder.groupBy { it.periodeTil.year }
-        val årMedAvgift = gruppertePerioder.filterValues { årsperioder ->
-            årsperioder.any { it.harAvgift() }
+        val årMedSynligeData = gruppertePerioder.filterValues { årsperioder ->
+            årsperioder.any { it.skalMedIBrev() }
         }.keys
-        val valgtÅr = velgRelevantÅr(årMedAvgift, inneværendeÅr)
+        val valgtÅr = velgRelevantÅr(årMedSynligeData, inneværendeÅr)
             ?: return emptyList()
 
         return gruppertePerioder[valgtÅr]
@@ -143,4 +140,7 @@ class InformasjonTrygdeavgiftMapper(
 
         return trygdeavgiftsberegningService.finnFakturamottakerNavn(behandling.id)
     }
+
+    private fun Trygdeavgiftsperiode.skalMedIBrev(): Boolean =
+        harAvgift() || beregningsregel != Avgiftsberegningsregel.ORDINÆR
 }
