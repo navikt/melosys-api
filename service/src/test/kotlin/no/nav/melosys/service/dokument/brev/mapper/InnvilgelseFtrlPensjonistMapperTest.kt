@@ -105,33 +105,33 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
                 }
             }
             medlemskapsperiode {
-                fom = LocalDate.now().minusYears(1).withMonth(1)
-                tom = LocalDate.now().withMonth(4)
+                fom = nå.minusYears(1).withMonth(1)
+                tom = nå.withMonth(4)
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 medlemskapstype = Medlemskapstyper.FRIVILLIG
                 trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().minusYears(1).withMonth(1)
-                    periodeTil = LocalDate.now().withMonth(4)
+                    periodeFra = nå.minusYears(1).withMonth(1)
+                    periodeTil = nå.withMonth(4)
                     trygdesats = BigDecimal.ZERO
                     trygdeavgiftsbeløpMd = BigDecimal(0.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.minusYears(1).withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     }
                 }
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().minusYears(1).withMonth(5)
-                    periodeTil = LocalDate.now().withMonth(8)
+                    periodeFra = nå.minusYears(1).withMonth(5)
+                    periodeTil = nå.withMonth(8)
                     trygdesats = BigDecimal(0.05)
                     trygdeavgiftsbeløpMd = BigDecimal(500.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.minusYears(1).withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
@@ -169,7 +169,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
                     postnr().shouldBe(DokgenTestData.POSTNR_BRUKER)
                     poststed().shouldBe(DokgenTestData.POSTSTED_BRUKER)
                 }
-                datoMottatt.shouldBe(LocalDate.now())
+                datoMottatt.shouldBe(nå)
                 innledningFritekst.shouldBe(INNLEDNING_FRITEKST)
                 begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
                 trygdeavgiftFritekst.shouldBe(TRYGDEAVGIFT_FRITEKST)
@@ -206,33 +206,33 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
                 }
             }
             medlemskapsperiode {
-                fom = LocalDate.now().minusYears(1).withMonth(1)
-                tom = LocalDate.now().withMonth(4)
+                fom = nå.minusYears(1).withMonth(1)
+                tom = nå.withMonth(4)
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 medlemskapstype = Medlemskapstyper.FRIVILLIG
                 trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().minusYears(1).withMonth(1)
-                    periodeTil = LocalDate.now().withMonth(4)
+                    periodeFra = nå.minusYears(1).withMonth(1)
+                    periodeTil = nå.withMonth(4)
                     trygdesats = BigDecimal.ZERO
                     trygdeavgiftsbeløpMd = BigDecimal(0.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.minusYears(1).withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     }
                 }
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().minusYears(1).withMonth(5)
-                    periodeTil = LocalDate.now().withMonth(8)
+                    periodeFra = nå.minusYears(1).withMonth(5)
+                    periodeTil = nå.withMonth(8)
                     trygdesats = BigDecimal(0.05)
                     trygdeavgiftsbeløpMd = BigDecimal(500.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.minusYears(1).withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
@@ -270,7 +270,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
                     postnr().shouldBe(DokgenTestData.POSTNR_BRUKER)
                     poststed().shouldBe(DokgenTestData.POSTSTED_BRUKER)
                 }
-                datoMottatt.shouldBe(LocalDate.now())
+                datoMottatt.shouldBe(nå)
                 innledningFritekst.shouldBe(INNLEDNING_FRITEKST)
                 begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
                 trygdeavgiftFritekst.shouldBe(TRYGDEAVGIFT_FRITEKST)
@@ -307,33 +307,33 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
                 }
             }
             medlemskapsperiode {
-                fom = LocalDate.now().minusYears(1).withMonth(1)
-                tom = LocalDate.now().withMonth(4)
+                fom = nå.minusYears(1).withMonth(1)
+                tom = nå.withMonth(4)
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 medlemskapstype = Medlemskapstyper.FRIVILLIG
                 trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().minusYears(1).withMonth(1)
-                    periodeTil = LocalDate.now().withMonth(4)
+                    periodeFra = nå.minusYears(1).withMonth(1)
+                    periodeTil = nå.withMonth(4)
                     trygdesats = BigDecimal.ZERO
                     trygdeavgiftsbeløpMd = BigDecimal(0.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.minusYears(1).withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     }
                 }
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().minusYears(1).withMonth(5)
-                    periodeTil = LocalDate.now().withMonth(8)
+                    periodeFra = nå.minusYears(1).withMonth(5)
+                    periodeTil = nå.withMonth(8)
                     trygdesats = BigDecimal(0.05)
                     trygdeavgiftsbeløpMd = BigDecimal(500.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.minusYears(1).withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
@@ -372,7 +372,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
                     postnr().shouldBe(DokgenTestData.POSTNR_BRUKER)
                     poststed().shouldBe(DokgenTestData.POSTSTED_BRUKER)
                 }
-                datoMottatt.shouldBe(LocalDate.now())
+                datoMottatt.shouldBe(nå)
                 innledningFritekst.shouldBe(INNLEDNING_FRITEKST)
                 begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
                 trygdeavgiftFritekst.shouldBe(TRYGDEAVGIFT_FRITEKST)
@@ -413,33 +413,33 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
                 }
             }
             medlemskapsperiode {
-                fom = LocalDate.now().minusYears(1).withMonth(1)
-                tom = LocalDate.now().withMonth(4)
+                fom = nå.minusYears(1).withMonth(1)
+                tom = nå.withMonth(4)
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 medlemskapstype = Medlemskapstyper.FRIVILLIG
                 trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().minusYears(1).withMonth(1)
-                    periodeTil = LocalDate.now().withMonth(4)
+                    periodeFra = nå.minusYears(1).withMonth(1)
+                    periodeTil = nå.withMonth(4)
                     trygdesats = BigDecimal.ZERO
                     trygdeavgiftsbeløpMd = BigDecimal(0.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.minusYears(1).withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     }
                 }
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().minusYears(1).withMonth(5)
-                    periodeTil = LocalDate.now().withMonth(8)
+                    periodeFra = nå.minusYears(1).withMonth(5)
+                    periodeTil = nå.withMonth(8)
                     trygdesats = BigDecimal(0.05)
                     trygdeavgiftsbeløpMd = BigDecimal(500.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.minusYears(1).withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
@@ -478,7 +478,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
                     postnr().shouldBe(DokgenTestData.POSTNR_BRUKER)
                     poststed().shouldBe(DokgenTestData.POSTSTED_BRUKER)
                 }
-                datoMottatt.shouldBe(LocalDate.now())
+                datoMottatt.shouldBe(nå)
                 innledningFritekst.shouldBe(INNLEDNING_FRITEKST)
                 begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
                 trygdeavgiftFritekst.shouldBe(TRYGDEAVGIFT_FRITEKST)
@@ -597,8 +597,8 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
             }
         }
         medlemskapsperiode {
-            fom = LocalDate.now().minusYears(1).withMonth(1)
-            tom = LocalDate.now().withMonth(4)
+            fom = nå.minusYears(1).withMonth(1)
+            tom = nå.withMonth(4)
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             medlemskapstype = medlemskapsType
             trygdedekning = if (medlemskapsType == Medlemskapstyper.PLIKTIG) Trygdedekninger.FULL_DEKNING_FTRL
@@ -606,14 +606,14 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
             bestemmelse = if (medlemskapsType == Medlemskapstyper.PLIKTIG) Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                 else Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D
             trygdeavgiftsperiode {
-                periodeFra = LocalDate.now().minusYears(1).withMonth(1)
-                periodeTil = LocalDate.now().withMonth(4)
+                periodeFra = nå.minusYears(1).withMonth(1)
+                periodeTil = nå.withMonth(4)
                 trygdesats = BigDecimal(0.05)
                 trygdeavgiftsbeløpMd = BigDecimal(500.0)
                 beregningsregel = regel
                 grunnlagInntekstperiode {
-                    fomDato = LocalDate.now().minusYears(1).withMonth(1)
-                    tomDato = LocalDate.now().withMonth(4)
+                    fomDato = nå.minusYears(1).withMonth(1)
+                    tomDato = nå.withMonth(4)
                 }
                 grunnlagSkatteforholdTilNorge {
                     skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
@@ -667,6 +667,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
     }
 
     companion object {
+        private val nå: LocalDate = LocalDate.now()
         const val INNLEDNING_FRITEKST = "<p>Innledning fritekst</p>"
         const val BEGRUNNELSE_FRITEKST = "<p>Begrunnelse fritekst</p>"
         const val TRYGDEAVGIFT_FRITEKST = "<p>Trygdeavgift fritekst</p>"
