@@ -338,16 +338,19 @@ class InnvilgelseFtrlMapper(
     }
 
 
-    private fun Trygdeavgiftsperiode.toAvgiftsperiodeDto() = AvgiftsperiodeDto(
-        fom = periodeFra,
-        tom = periodeTil,
-        avgiftssats = trygdesats,
-        avgiftPerMd = trygdeavgiftsbeløpMd.hentVerdi(),
-        inntektskildetype = hentGrunnlagInntekstperiode().type,
-        inntektskilde = hentGrunnlagInntekstperiode().type.beskrivelse,
-        avgiftspliktigInntektPerMd = hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
-        beregningsregel = beregningsregel,
-    )
+    private fun Trygdeavgiftsperiode.toAvgiftsperiodeDto(): AvgiftsperiodeDto {
+        val inntektsperiode = hentGrunnlagInntekstperiode()
+        return AvgiftsperiodeDto(
+            fom = periodeFra,
+            tom = periodeTil,
+            avgiftssats = trygdesats,
+            avgiftPerMd = trygdeavgiftsbeløpMd.hentVerdi(),
+            inntektskildetype = inntektsperiode.type,
+            inntektskilde = inntektsperiode.type.beskrivelse,
+            avgiftspliktigInntektPerMd = inntektsperiode.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
+            beregningsregel = beregningsregel,
+        )
+    }
 
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodePensjonist> {
         val gruppertePerioder = behandlingsresultat.trygdeavgiftsperioder.groupBy { it.periodeTil.year }
