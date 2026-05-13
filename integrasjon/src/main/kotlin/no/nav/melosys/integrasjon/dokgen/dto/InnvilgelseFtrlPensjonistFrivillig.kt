@@ -42,7 +42,9 @@ class InnvilgelseFtrlPensjonistFrivillig(
     val betalingsvalg: Betalingstype,
     val harMedlemskapsperioderIForegåendeÅr: Boolean,
     val minstebelopVerdi: BigDecimal? = null,
-    val minstebelopAar: Int? = null
+    val minstebelopAar: Int? = null,
+    val harMinstebelopPeriode: Boolean = false,
+    val har25ProsentRegelPeriode: Boolean = false
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
@@ -69,7 +71,9 @@ class InnvilgelseFtrlPensjonistFrivillig(
         betalingsvalg: Betalingstype,
         harMedlemskapsperioderIForegåendeÅr: Boolean,
         minstebelopVerdi: BigDecimal? = null,
-        minstebelopAar: Int? = null
+        minstebelopAar: Int? = null,
+        harMinstebelopPeriode: Boolean = false,
+        har25ProsentRegelPeriode: Boolean = false
     ) : this(
         brevbestilling,
         behandlingstype,
@@ -95,7 +99,9 @@ class InnvilgelseFtrlPensjonistFrivillig(
         betalingsvalg,
         harMedlemskapsperioderIForegåendeÅr,
         minstebelopVerdi,
-        minstebelopAar
+        minstebelopAar,
+        harMinstebelopPeriode,
+        har25ProsentRegelPeriode
     )
 }
 

@@ -13,6 +13,7 @@ data class AvgiftsperiodeDto(
     val avgiftssats: BigDecimal?,
     val avgiftPerMd: BigDecimal,
     val inntektskildetype: Inntektskildetype,
+    val inntektskilde: String,
     val avgiftspliktigInntektPerMd: BigDecimal,
     val beregningsregel: Avgiftsberegningsregel
 )
