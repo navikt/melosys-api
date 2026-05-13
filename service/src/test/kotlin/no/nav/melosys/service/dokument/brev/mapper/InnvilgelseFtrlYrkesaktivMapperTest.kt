@@ -372,7 +372,7 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
     }
 
     @Test
-    fun mapYrkesaktivFrivillig_innvilgetOgAvslaatt_populererFelter_ingen_avgiftsperioder() {
+    fun `mapYrkesaktivFrivillig tar med ORDINÆR-periode uten avgift slik at dokgen kan vise alt`() {
         mockHappyCase(Case.paragraf_2_8)
         val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_8)
         val trygdeavgiftsperioder = mutableSetOf(
@@ -401,7 +401,7 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
         }
 
         innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
-            avgiftsperioder.shouldHaveSize(0)
+            avgiftsperioder.shouldHaveSize(1)
             medlemskapsperioder.shouldHaveSize(1)
                 .map { it.innvilgelsesResultat }
                 .shouldContainExactlyInAnyOrder(InnvilgelsesResultat.INNVILGET)
