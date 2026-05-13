@@ -55,6 +55,7 @@ class InformasjonTrygdeavgiftMapper(
         val førstePeriode = helseutgiftDekkesPerioder.first()
 
         val minstebeløp = minstebeløpService.finnMinstebeløp(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder)
+        val perioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder
 
         return InformasjonTrygdeavgift(
             brevbestilling = brevbestilling,
@@ -78,7 +79,9 @@ class InformasjonTrygdeavgiftMapper(
                 it.grunnlagSkatteforholdTilNorge?.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG
             },
             minstebelopVerdi = minstebeløp?.beloep,
-            minstebelopAar = minstebeløp?.aar
+            minstebelopAar = minstebeløp?.aar,
+            harMinstebelopPeriode = perioder.any { it.beregningsregel == Avgiftsberegningsregel.MINSTEBELØP },
+            har25ProsentRegelPeriode = perioder.any { it.beregningsregel == Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL }
         )
     }
 
