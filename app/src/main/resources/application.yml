@@ -163,7 +163,7 @@ server:
   shutdown: graceful
 spring:
   cache:
-    cache-names: aktoerID,folkeregisterIdent,kodeverk,tilgangsmaskinen,minstebeloep
+    cache-names: aktoerID,folkeregisterIdent,kodeverk,tilgangsmaskinen, minstebeloep
     caffeine:
       spec:
         expireAfterWrite: 480m
