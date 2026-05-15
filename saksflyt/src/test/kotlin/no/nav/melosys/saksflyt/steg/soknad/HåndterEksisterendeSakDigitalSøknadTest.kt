@@ -42,6 +42,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
     @MockK lateinit var oppgaveService: OppgaveService
     @MockK lateinit var skjemaSakMappingService: SkjemaSakMappingService
     @MockK lateinit var jsonMapper: JsonMapper
+    @MockK(relaxed = true) lateinit var aktørSynkronisering: DigitalSøknadAktørSynkronisering
 
     private lateinit var steg: HåndterEksisterendeSakDigitalSøknad
 
@@ -55,7 +56,8 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
     fun setup() {
         steg = HåndterEksisterendeSakDigitalSøknad(
             fagsakService, behandlingService, behandlingsresultatService,
-            mottatteOpplysningerService, oppgaveService, skjemaSakMappingService, jsonMapper
+            mottatteOpplysningerService, oppgaveService, skjemaSakMappingService, jsonMapper,
+            aktørSynkronisering
         )
 
         every { jsonMapper.writeValueAsString(søknadsdata) } returns """{"referanseId":"test"}"""
@@ -196,7 +198,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
 
             mockFagsakService(fagsak)
             every { behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns nyBehandling
-            every { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any()) } returns
+            every { mottatteOpplysningerService.opprettSøknadDigital(any(), any(), any(), any()) } returns
                 mockk<MottatteOpplysninger> { every { id } returns mottatteOpplysningerId }
             every { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any()) } just Runs
 
@@ -227,7 +229,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             } returns nyBehandling
 
             every {
-                mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(eq(99L), any(), any(), any())
+                mottatteOpplysningerService.opprettSøknadDigital(eq(99L), any(), any(), any())
             } returns mockk<MottatteOpplysninger> { every { id } returns mottatteOpplysningerId }
 
             every { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any()) } just Runs
@@ -236,7 +238,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
 
             verify { behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING, Behandlingstema.UTSENDT_ARBEIDSTAKER, null, null, any(), any(), null) }
             verify { fagsak.leggTilBehandling(nyBehandling) }
-            verify { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(99L, any(), any(), any()) }
+            verify { mottatteOpplysningerService.opprettSøknadDigital(99L, any(), any(), any()) }
             verify { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(nyBehandling, any(), any(), any(), any()) }
             verify { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) }
             prosessinstans.behandling shouldBe nyBehandling
@@ -268,6 +270,31 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
                     null
                 )
             }
+        }
+    }
+
+    @Nested
+    inner class AktørOppdatering {
+
+        @Test
+        fun `kaller aktørSynkronisering med utledet AktørerFraSøknad`() {
+            val behandling = lagBehandling(Behandlingsstatus.UNDER_BEHANDLING)
+            val fagsak = lagFagsakMedBehandling(behandling)
+            val prosessinstans = lagProsessinstans()
+
+            mockFagsakService(fagsak)
+            mockEndreStatus()
+            mockTømBehandlingsresultat()
+            mockOppdaterMottatteOpplysninger()
+            mockHentMottatteOpplysninger(behandlingId)
+
+            val aktørerSlot = slot<AktørerFraSøknad>()
+            every { aktørSynkronisering.synkroniser(eq(fagsak), capture(aktørerSlot)) } just Runs
+
+            steg.utfør(prosessinstans)
+
+            aktørerSlot.captured.skjemadel shouldBe Skjemadel.ARBEIDSTAKERS_DEL
+            verify { aktørSynkronisering.synkroniser(fagsak, any()) }
         }
     }
 
@@ -351,7 +378,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
 
     private fun mockOpprettMottatteOpplysningerForNyBehandling() {
         every {
-            mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(eq(99L), any(), any(), any())
+            mottatteOpplysningerService.opprettSøknadDigital(eq(99L), any(), any(), any())
         } returns mockk<MottatteOpplysninger> { every { id } returns mottatteOpplysningerId }
     }
 

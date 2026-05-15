@@ -234,6 +234,67 @@ internal class SaksopplysningDokumentConverterTest {
     }
 
     @Test
+    fun `konverterFraDatabase kan deserialisere PersonMedHistorikk med Sivilstandstype som toString-verdi`() {
+        // I databasen finnes rader der Sivilstandstype ble serialisert med toString() (f.eks. "Ugift")
+        // i stedet for enum-konstantnavn ("UGIFT"). Jackson 3 må kunne deserialisere begge varianter.
+        val json = """
+            {
+              "type":"PersonMedHistorikk",
+              "bostedsadresser":[],
+              "dødsfall":null,
+              "fødsel":null,
+              "folkeregisteridentifikator":{"identifikasjonsnummer":"12345678901"},
+              "folkeregisterpersonstatuser":[],
+              "kjønn":"UKJENT",
+              "kontaktadresser":[],
+              "navn":{"fornavn":"Ola","mellomnavn":null,"etternavn":"Nordmann"},
+              "oppholdsadresser":[],
+              "sivilstand":[{"type":"Ugift","tekstHvisTypeErUdefinert":null,"relatertVedSivilstand":null,"gyldigFraOgMed":"2020-01-01","bekreftelsesdato":null,"master":"PDL","kilde":"Dolly","erHistorisk":false}],
+              "statsborgerskap":[]
+            }
+        """.trimIndent()
+
+        val deserialisert = converter.convertToEntityAttribute(json) as no.nav.melosys.domain.person.PersonMedHistorikk
+
+        deserialisert.sivilstand.first().type shouldBe no.nav.melosys.domain.person.Sivilstandstype.UGIFT
+    }
+
+    @Test
+    fun `konverterFraDatabase kan deserialisere PersonMedHistorikk med Sivilstandstype som enum-konstantnavn`() {
+        val json = """
+            {
+              "type":"PersonMedHistorikk",
+              "bostedsadresser":[],
+              "dødsfall":null,
+              "fødsel":null,
+              "folkeregisteridentifikator":{"identifikasjonsnummer":"12345678901"},
+              "folkeregisterpersonstatuser":[],
+              "kjønn":"UKJENT",
+              "kontaktadresser":[],
+              "navn":{"fornavn":"Ola","mellomnavn":null,"etternavn":"Nordmann"},
+              "oppholdsadresser":[],
+              "sivilstand":[{"type":"UGIFT","tekstHvisTypeErUdefinert":null,"relatertVedSivilstand":null,"gyldigFraOgMed":"2020-01-01","bekreftelsesdato":null,"master":"PDL","kilde":"Dolly","erHistorisk":false}],
+              "statsborgerskap":[]
+            }
+        """.trimIndent()
+
+        val deserialisert = converter.convertToEntityAttribute(json) as no.nav.melosys.domain.person.PersonMedHistorikk
+
+        deserialisert.sivilstand.first().type shouldBe no.nav.melosys.domain.person.Sivilstandstype.UGIFT
+    }
+
+    @Test
+    fun `konverterTilDatabase serialiserer Sivilstandstype med enum-konstantnavn ikke toString`() {
+        val personMedHistorikk = lagPersonMedHistorikk()
+
+        val json = converter.convertToDatabaseColumn(personMedHistorikk)!!
+
+        // Skal serialisere som "REGISTRERT_PARTNER", ikke "Registrert partner"
+        json shouldContain """"REGISTRERT_PARTNER""""
+        json shouldNotContain """"Registrert partner""""
+    }
+
+    @Test
     fun `konverterFraDatabase kan deserialisere LocalDateTime fra gammelt Jackson2 array-format`() {
         // Jackson 2 med WRITE_DATES_AS_TIMESTAMPS=true lagret LocalDateTime som arrays [år,måned,dag,time,minutt,sekund].
         // Jackson 3 skriver ISO-strenger, men må fortsatt kunne lese gammel data fra DB.

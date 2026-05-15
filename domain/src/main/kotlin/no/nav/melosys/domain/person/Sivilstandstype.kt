@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.person
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 
 enum class Sivilstandstype {
@@ -14,6 +15,14 @@ enum class Sivilstandstype {
     UDEFINERT,
     UGIFT,
     UOPPGITT;
+
+    companion object {
+        @JvmStatic
+        @JsonCreator
+        fun fraJson(verdi: String): Sivilstandstype =
+            entries.firstOrNull { it.name.equals(verdi, ignoreCase = true) }
+                ?: throw IllegalArgumentException("Ukjent sivilstandstype: $verdi")
+    }
 
     fun erUdefinert(): Boolean = this == UDEFINERT
 

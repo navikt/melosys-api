@@ -243,6 +243,9 @@ class ÅrsavregningVedtakMapperTest {
                         id = 999L
                         type = Behandlingstyper.ÅRSAVREGNING
                     }
+                    årsavregning {
+                        aar = 2023
+                    }
                 }
             }
         }
@@ -254,6 +257,32 @@ class ÅrsavregningVedtakMapperTest {
 
         result.shouldNotBeNull()
         result.erNyÅrsavregning shouldBe true
+    }
+
+    @Test
+    fun `mapÅrsavregning skal ignorere tidligere årsavregning for annet år`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata {
+            årsavregning {
+                aar = 2023
+                tidligereBehandlingsresultat {
+                    behandling {
+                        id = 999L
+                        type = Behandlingstyper.ÅRSAVREGNING
+                    }
+                    årsavregning {
+                        aar = 2022
+                    }
+                }
+            }
+        }
+
+        val årsavregningModel = lagÅrsavregningModel(BigDecimal(1000), BigDecimal(500))
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.shouldNotBeNull()
+        result.erNyÅrsavregning shouldBe false
     }
 
     @Test
