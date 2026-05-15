@@ -99,7 +99,7 @@ class InformasjonTrygdeavgiftMapper(
         val inneværendeÅr = LocalDate.now().year
         val gruppertePerioder = perioder.groupBy { it.periodeTil.year }
         val årMedSynligeData = gruppertePerioder.filterValues { årsperioder ->
-            årsperioder.any { it.skalMedIBrev() }
+            årsperioder.any { it.vilVisesIBeregningstabell() }
         }.keys
         val valgtÅr = velgRelevantÅr(årMedSynligeData, inneværendeÅr)
             ?: return emptyList()
@@ -141,6 +141,6 @@ class InformasjonTrygdeavgiftMapper(
         return trygdeavgiftsberegningService.finnFakturamottakerNavn(behandling.id)
     }
 
-    private fun Trygdeavgiftsperiode.skalMedIBrev(): Boolean =
+    private fun Trygdeavgiftsperiode.vilVisesIBeregningstabell(): Boolean =
         harAvgift() || beregningsregel != Avgiftsberegningsregel.ORDINÆR
 }
