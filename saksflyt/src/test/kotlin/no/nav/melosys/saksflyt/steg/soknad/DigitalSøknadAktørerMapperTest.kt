@@ -31,7 +31,8 @@ internal class DigitalSøknadAktørerMapperTest {
             metadata = DegSelvMetadata(
                 skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
                 arbeidsgiverNavn = "Test AS",
-                juridiskEnhetOrgnr = juridiskEnhet
+                juridiskEnhetOrgnr = juridiskEnhet,
+                arbeidstakerNavn = "Test Arbeidstaker"
             )
             fnr = arbeidstakerFnr
             orgnr = arbeidsgiverOrgnr
@@ -51,7 +52,8 @@ internal class DigitalSøknadAktørerMapperTest {
             metadata = ArbeidsgiverMetadata(
                 skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
                 arbeidsgiverNavn = "Test AS",
-                juridiskEnhetOrgnr = juridiskEnhet
+                juridiskEnhetOrgnr = juridiskEnhet,
+                arbeidstakerNavn = "Test Arbeidstaker"
             )
             data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
             fnr = arbeidstakerFnr
@@ -70,7 +72,8 @@ internal class DigitalSøknadAktørerMapperTest {
             metadata = ArbeidsgiverMetadata(
                 skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
                 arbeidsgiverNavn = "Test AS",
-                juridiskEnhetOrgnr = juridiskEnhet
+                juridiskEnhetOrgnr = juridiskEnhet,
+                arbeidstakerNavn = "Test Arbeidstaker"
             )
             data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
             fnr = arbeidstakerFnr
@@ -91,7 +94,8 @@ internal class DigitalSøknadAktørerMapperTest {
                 skjemadel = Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL,
                 arbeidsgiverNavn = "Test AS",
                 juridiskEnhetOrgnr = juridiskEnhet,
-                fullmektigFnr = fullmektigFnr
+                fullmektigFnr = fullmektigFnr,
+                arbeidstakerNavn = "Test Arbeidstaker"
             )
             fnr = arbeidstakerFnr
             orgnr = arbeidsgiverOrgnr
@@ -118,6 +122,7 @@ internal class DigitalSøknadAktørerMapperTest {
                 skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
                 arbeidsgiverNavn = "Test AS",
                 juridiskEnhetOrgnr = juridiskEnhet,
+                arbeidstakerNavn = "Test Arbeidstaker",
                 radgiverfirma = RadgiverfirmaInfo(orgnr = radgiverfirmaOrgnr, navn = "Rådgiver AS")
             )
             data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
@@ -147,6 +152,7 @@ internal class DigitalSøknadAktørerMapperTest {
                 arbeidsgiverNavn = "Test AS",
                 juridiskEnhetOrgnr = juridiskEnhet,
                 fullmektigFnr = fullmektigFnr,
+                arbeidstakerNavn = "Test Arbeidstaker",
                 radgiverfirma = RadgiverfirmaInfo(orgnr = radgiverfirmaOrgnr, navn = "Rådgiver AS")
             )
             fnr = arbeidstakerFnr
@@ -174,7 +180,8 @@ internal class DigitalSøknadAktørerMapperTest {
                 skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
                 arbeidsgiverNavn = "Test AS",
                 juridiskEnhetOrgnr = juridiskEnhet,
-                fullmektigFnr = fullmektigFnr
+                fullmektigFnr = fullmektigFnr,
+                arbeidstakerNavn = "Test Arbeidstaker"
             )
             fnr = arbeidstakerFnr
             orgnr = arbeidsgiverOrgnr

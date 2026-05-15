@@ -6,7 +6,6 @@ import no.nav.melosys.skjema.types.utsendtarbeidstaker.DegSelvMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaDto
 import no.nav.melosys.skjema.types.common.SkjemaStatus
@@ -29,6 +28,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
         var orgnr: String = "123456789"
         var juridiskEnhetOrgnr: String = "987654321"
         var arbeidsgiverNavn: String = "Test AS"
+        var arbeidstakerNavn: String = "Test Arbeidstaker"
         var skjemadel: Skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
         var metadata: UtsendtArbeidstakerMetadata? = null
         var data: no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaData =
@@ -45,7 +45,8 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
                 fnr = fnr,
                 orgnr = orgnr,
                 juridiskEnhetOrgnr = juridiskEnhetOrgnr,
-                arbeidsgiverNavn = arbeidsgiverNavn
+                arbeidsgiverNavn = arbeidsgiverNavn,
+                arbeidstakerNavn = arbeidstakerNavn
             ).apply(init)
         }
 
@@ -53,7 +54,15 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
             val effektivSkjemadel = metadata?.skjemadel ?: skjemadel
             val skjema = lagSkjemaDto(effektivSkjemadel, data, metadataOverride = metadata)
             val kobletSkjema = kobletSkjemaBuilder?.let {
-                lagSkjemaDto(Skjemadel.ARBEIDSGIVERS_DEL, it.data, it.fnr, it.orgnr, it.juridiskEnhetOrgnr, it.arbeidsgiverNavn)
+                lagSkjemaDto(
+                    Skjemadel.ARBEIDSGIVERS_DEL,
+                    it.data,
+                    it.fnr,
+                    it.orgnr,
+                    it.juridiskEnhetOrgnr,
+                    it.arbeidsgiverNavn,
+                    it.arbeidstakerNavn
+                )
             }
 
             return UtsendtArbeidstakerSkjemaM2MDto(
@@ -92,6 +101,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
             orgnr: String = this.orgnr,
             juridiskEnhetOrgnr: String = this.juridiskEnhetOrgnr,
             arbeidsgiverNavn: String = this.arbeidsgiverNavn,
+            arbeidstakerNavn: String = this.arbeidstakerNavn,
             metadataOverride: UtsendtArbeidstakerMetadata? = null
         ) = UtsendtArbeidstakerSkjemaDto(
             id = UUID.randomUUID(),
@@ -104,17 +114,20 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
                 Skjemadel.ARBEIDSTAKERS_DEL -> DegSelvMetadata(
                     skjemadel = skjemadel,
                     arbeidsgiverNavn = arbeidsgiverNavn,
-                    juridiskEnhetOrgnr = juridiskEnhetOrgnr
+                    juridiskEnhetOrgnr = juridiskEnhetOrgnr,
+                    arbeidstakerNavn = arbeidstakerNavn
                 )
                 Skjemadel.ARBEIDSGIVERS_DEL -> ArbeidsgiverMetadata(
                     skjemadel = skjemadel,
                     arbeidsgiverNavn = arbeidsgiverNavn,
-                    juridiskEnhetOrgnr = juridiskEnhetOrgnr
+                    juridiskEnhetOrgnr = juridiskEnhetOrgnr,
+                    arbeidstakerNavn = arbeidstakerNavn
                 )
                 Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL -> DegSelvMetadata(
                     skjemadel = skjemadel,
                     arbeidsgiverNavn = arbeidsgiverNavn,
-                    juridiskEnhetOrgnr = juridiskEnhetOrgnr
+                    juridiskEnhetOrgnr = juridiskEnhetOrgnr,
+                    arbeidstakerNavn = arbeidstakerNavn
                 )
             },
             data = data
@@ -127,6 +140,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
         var orgnr: String = "123456789",
         var juridiskEnhetOrgnr: String = "987654321",
         var arbeidsgiverNavn: String = "Test AS",
+        var arbeidstakerNavn: String = "Test Arbeidstaker",
         var data: UtsendtArbeidstakerArbeidsgiversSkjemaDataDto = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
     )
 }
