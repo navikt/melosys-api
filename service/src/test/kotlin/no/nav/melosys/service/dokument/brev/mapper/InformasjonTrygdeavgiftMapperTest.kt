@@ -79,30 +79,30 @@ internal class InformasjonTrygdeavgiftMapperTest {
                 }
             }
             helseutgiftDekkesPeriode {
-                fomDato = LocalDate.now().withMonth(1)
-                tomDato = LocalDate.now().withMonth(4)
+                fomDato = nå.withMonth(1)
+                tomDato = nå.withMonth(4)
                 bostedLandkode = Land_iso2.DK
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().withMonth(1)
-                    periodeTil = LocalDate.now().withMonth(4)
+                    periodeFra = nå.withMonth(1)
+                    periodeTil = nå.withMonth(4)
                     trygdesats = BigDecimal.ZERO
                     trygdeavgiftsbeløpMd = BigDecimal(0.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     }
                 }
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().withMonth(5)
-                    periodeTil = LocalDate.now().withMonth(8)
+                    periodeFra = nå.withMonth(5)
+                    periodeTil = nå.withMonth(8)
                     trygdesats = BigDecimal(0.05)
                     trygdeavgiftsbeløpMd = BigDecimal(500.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
@@ -145,30 +145,30 @@ internal class InformasjonTrygdeavgiftMapperTest {
                 }
             }
             helseutgiftDekkesPeriode {
-                fomDato = LocalDate.now().minusYears(1).withMonth(1).minusYears(1)
-                tomDato = LocalDate.now().withMonth(4)
+                fomDato = nå.minusYears(1).withMonth(1).minusYears(1)
+                tomDato = nå.withMonth(4)
                 bostedLandkode = Land_iso2.DK
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().minusYears(1).withMonth(1)
-                    periodeTil = LocalDate.now().withMonth(4)
+                    periodeFra = nå.minusYears(1).withMonth(1)
+                    periodeTil = nå.withMonth(4)
                     trygdesats = BigDecimal.ZERO
                     trygdeavgiftsbeløpMd = BigDecimal(0.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.minusYears(1).withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     }
                 }
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().minusYears(1).withMonth(5)
-                    periodeTil = LocalDate.now().withMonth(8)
+                    periodeFra = nå.minusYears(1).withMonth(5)
+                    periodeTil = nå.withMonth(8)
                     trygdesats = BigDecimal(0.05)
                     trygdeavgiftsbeløpMd = BigDecimal(500.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.minusYears(1).withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
@@ -211,30 +211,30 @@ internal class InformasjonTrygdeavgiftMapperTest {
                 }
             }
             helseutgiftDekkesPeriode {
-                fomDato = LocalDate.now().minusYears(1).withMonth(1).minusYears(1)
-                tomDato = LocalDate.now().withMonth(4)
+                fomDato = nå.minusYears(1).withMonth(1).minusYears(1)
+                tomDato = nå.withMonth(4)
                 bostedLandkode = Land_iso2.DK
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().minusYears(1).withMonth(1)
-                    periodeTil = LocalDate.now().withMonth(4)
+                    periodeFra = nå.minusYears(1).withMonth(1)
+                    periodeTil = nå.withMonth(4)
                     trygdesats = BigDecimal.ZERO
                     trygdeavgiftsbeløpMd = BigDecimal(0.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.minusYears(1).withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     }
                 }
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().minusYears(1).withMonth(5)
-                    periodeTil = LocalDate.now().withMonth(8)
+                    periodeFra = nå.minusYears(1).withMonth(5)
+                    periodeTil = nå.withMonth(8)
                     trygdesats = BigDecimal(0.05)
                     trygdeavgiftsbeløpMd = BigDecimal(500.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.minusYears(1).withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
@@ -277,8 +277,8 @@ internal class InformasjonTrygdeavgiftMapperTest {
                 }
             }
             helseutgiftDekkesPeriode {
-                fomDato = LocalDate.now().withMonth(1)
-                tomDato = LocalDate.now().withMonth(4)
+                fomDato = nå.withMonth(1)
+                tomDato = nå.withMonth(4)
                 bostedLandkode = Land_iso2.DK
             }
         }
@@ -305,7 +305,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
     @Test
     fun `erSkattemessigEmigrert er true når en periode har IKKE_SKATTEPLIKTIG`() {
         unleash.enableAll()
-        val år = LocalDate.now().year
+        val år = nå.year
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
             behandling {
@@ -363,7 +363,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
     @Test
     fun `erSkattemessigEmigrert sjekker alle år ikke bare valgt år`() {
         unleash.enableAll()
-        val inneværendeÅr = LocalDate.now().year
+        val inneværendeÅr = nå.year
         val nesteÅr = inneværendeÅr + 1
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
@@ -423,7 +423,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
     @Test
     fun `flerårige perioder velger år med avgift og ignorerer år med kun avgift 0`() {
         unleash.enableAll()
-        val inneværendeÅr = LocalDate.now().year
+        val inneværendeÅr = nå.year
         val nesteÅr = inneværendeÅr + 1
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
@@ -483,7 +483,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
     @Test
     fun `avgiftsperioder er tom når alle perioder har avgift 0 og sats 0`() {
         unleash.enableAll()
-        val år = LocalDate.now().year
+        val år = nå.year
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
             behandling {
@@ -541,7 +541,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
     @Test
     fun `år med null sats og beløp 0 regnes ikke som år med avgift ved valg av brevår`() {
         unleash.enableAll()
-        val inneværendeÅr = LocalDate.now().year
+        val inneværendeÅr = nå.year
         val forrigeÅr = inneværendeÅr - 1
         val forforrigeÅr = inneværendeÅr - 2
         val behandlingsresultat = Behandlingsresultat.forTest {
@@ -632,7 +632,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
     }
 
     private fun lagBehandlingsresultatMedBeregningsregel(regel: Avgiftsberegningsregel): Behandlingsresultat {
-        val år = LocalDate.now().year
+        val år = nå.year
         return Behandlingsresultat.forTest {
             id = 1L
             behandling {
@@ -682,4 +682,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
             .build()
     }
 
+    companion object {
+        private val nå: LocalDate = LocalDate.now()
+    }
 }

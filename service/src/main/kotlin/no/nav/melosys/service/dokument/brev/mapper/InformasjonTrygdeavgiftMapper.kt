@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
@@ -55,6 +56,7 @@ class InformasjonTrygdeavgiftMapper(
         val førstePeriode = helseutgiftDekkesPerioder.first()
 
         val minstebeløp = minstebeløpService.finnMinstebeløp(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder)
+        val perioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder
 
         return InformasjonTrygdeavgift(
             brevbestilling = brevbestilling,
@@ -78,7 +80,9 @@ class InformasjonTrygdeavgiftMapper(
                 it.grunnlagSkatteforholdTilNorge?.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG
             },
             minstebelopVerdi = minstebeløp?.beloep,
-            minstebelopAar = minstebeløp?.aar
+            minstebelopAar = minstebeløp?.aar,
+            harMinstebelopPeriode = perioder.any { it.beregningsregel == Avgiftsberegningsregel.MINSTEBELØP },
+            har25ProsentRegelPeriode = perioder.any { it.beregningsregel == Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL }
         )
     }
 
@@ -92,16 +96,12 @@ class InformasjonTrygdeavgiftMapper(
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodeEøsPensjonist> {
         val perioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toSet()
 
-        if (perioder.all { !it.harAvgift() && it.beregningsregel == Avgiftsberegningsregel.ORDINÆR }) {
-            return emptyList()
-        }
-
         val inneværendeÅr = LocalDate.now().year
         val gruppertePerioder = perioder.groupBy { it.periodeTil.year }
-        val årMedAvgift = gruppertePerioder.filterValues { årsperioder ->
-            årsperioder.any { it.harAvgift() }
+        val årMedSynligeData = gruppertePerioder.filterValues { årsperioder ->
+            årsperioder.any { it.vilVisesIBeregningstabell() }
         }.keys
-        val valgtÅr = velgRelevantÅr(årMedAvgift, inneværendeÅr)
+        val valgtÅr = velgRelevantÅr(årMedSynligeData, inneværendeÅr)
             ?: return emptyList()
 
         return gruppertePerioder[valgtÅr]
@@ -140,4 +140,7 @@ class InformasjonTrygdeavgiftMapper(
 
         return trygdeavgiftsberegningService.finnFakturamottakerNavn(behandling.id)
     }
+
+    private fun Trygdeavgiftsperiode.vilVisesIBeregningstabell(): Boolean =
+        harAvgift() || beregningsregel != Avgiftsberegningsregel.ORDINÆR
 }
