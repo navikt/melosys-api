@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt
 
+import mu.KotlinLogging
 import no.nav.melosys.saksflytapi.domain.ProsessPrioritet
-import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.Comparator
 import java.util.UUID
@@ -12,9 +12,11 @@ import java.util.concurrent.PriorityBlockingQueue
  *
  * Implementerer [Comparable] slik at den underliggende [PriorityBlockingQueue] sorterer på
  * `(prioritet, registrertDato)`: HØY/NORMAL kjøres foran LAV, og FIFO innen samme prioritet.
- * Bruk [KOMPARATOR] for køen — den er defensiv mot [Runnable]-er som ikke er av denne typen
+ * Bruk [PrioritertSaksflytTask.KOMPARATOR] for køen — den er defensiv mot [Runnable]-er som ikke er av denne typen
  * (behandles som [ProsessPrioritet.NORMAL]).
  */
+private val log = KotlinLogging.logger { }
+
 class PrioritertSaksflytTask(
     val prosessinstansId: UUID,
     prioritet: ProsessPrioritet?,
@@ -40,8 +42,6 @@ class PrioritertSaksflytTask(
         "PrioritertSaksflytTask{prosessinstansId=$prosessinstansId, prioritet=$prioritet, registrertDato=$registrertDato}"
 
     companion object {
-        private val log = LoggerFactory.getLogger(PrioritertSaksflytTask::class.java)
-
         /** Komparator for prioritetskøen. Defensiv: ukjente [Runnable]-er behandles som [ProsessPrioritet.NORMAL]. */
         @JvmField
         val KOMPARATOR: Comparator<Runnable> = Comparator

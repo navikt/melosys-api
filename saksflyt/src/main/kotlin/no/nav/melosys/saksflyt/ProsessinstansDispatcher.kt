@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt
 
+import mu.KotlinLogging
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.stereotype.Component
@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component
  * i en ikke-`Comparable` `FutureTask`), slik at køen kan prioritere HØY/NORMAL foran LAV (batch).
  * Effektiv prioritet hentes fra prosessinstansens [ProsessType][no.nav.melosys.saksflytapi.domain.ProsessType].
  */
+// kotlin logger
+private val log = KotlinLogging.logger { }
+
 @Component
 class ProsessinstansDispatcher(
     @param:Qualifier("saksflytThreadPoolTaskExecutor")
@@ -31,9 +34,5 @@ class ProsessinstansDispatcher(
                 prosessinstansBehandler.behandleProsessinstansNå(prosessinstans)
             }
         )
-    }
-
-    private companion object {
-        private val log = LoggerFactory.getLogger(ProsessinstansDispatcher::class.java)
     }
 }
