@@ -4,7 +4,10 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.matchers.shouldBe
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsinntektKilde
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.DegSelvMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.InntektType
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.SkatteforholdOgInntektDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import no.nav.melosys.skjema.types.SkjemaType
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendingsperiodeOgLandDto
@@ -102,6 +105,14 @@ class MelosysSkjemaApiClientTest(
                       "fraDato": "2024-01-01",
                       "tilDato": "2024-12-31"
                     }
+                  },
+                  "skatteforholdOgInntekt": {
+                    "erSkattepliktigTilNorgeIHeleutsendingsperioden": true,
+                    "mottarPengestotteFraAnnetEosLandEllerSveits": false,
+                    "inntektFraNorskEllerUtenlandskVirksomhet": ["NORSK_VIRKSOMHET", "UTENLANDSK_VIRKSOMHET"],
+                    "hvilkeTyperInntektHarDu": ["LOENN", "INNTEKT_FRA_EGEN_VIRKSOMHET"],
+                    "inntekt": "65000",
+                    "inntektFraEgenVirksomhet": "12000"
                   }
                 }
               },
@@ -147,6 +158,17 @@ class MelosysSkjemaApiClientTest(
                             fraDato = LocalDate.of(2024, 1, 1),
                             tilDato = LocalDate.of(2024, 12, 31)
                         )
+                    ),
+                    skatteforholdOgInntekt = SkatteforholdOgInntektDto(
+                        erSkattepliktigTilNorgeIHeleutsendingsperioden = true,
+                        mottarPengestotteFraAnnetEosLandEllerSveits = false,
+                        landSomUtbetalerPengestotte = null,
+                        pengestotteSomMottasFraAndreLandBelop = null,
+                        pengestotteSomMottasFraAndreLandBeskrivelse = null,
+                        inntektFraNorskEllerUtenlandskVirksomhet = setOf(ArbeidsinntektKilde.NORSK_VIRKSOMHET, ArbeidsinntektKilde.UTENLANDSK_VIRKSOMHET),
+                        hvilkeTyperInntektHarDu = setOf(InntektType.LOENN, InntektType.INNTEKT_FRA_EGEN_VIRKSOMHET),
+                        inntekt = "65000",
+                        inntektFraEgenVirksomhet = "12000"
                     )
                 )
             ),

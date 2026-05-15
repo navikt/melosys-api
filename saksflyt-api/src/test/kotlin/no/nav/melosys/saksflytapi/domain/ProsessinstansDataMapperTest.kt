@@ -7,11 +7,14 @@ import no.nav.melosys.skjema.types.common.SkjemaStatus
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.AnnenPersonMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsinntektKilde
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMedFullmaktMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.DegSelvMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.InntektType
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMedFullmaktMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.SkatteforholdOgInntektDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
@@ -209,7 +212,15 @@ class ProsessinstansDataMapperTest {
                 "arbeidstakerNavn": "Test Arbeidstaker"
               },
               "data": {
-                "type": "UTSENDT_ARBEIDSTAKER_ARBEIDSTAKERS_DEL"
+                "type": "UTSENDT_ARBEIDSTAKER_ARBEIDSTAKERS_DEL",
+                "skatteforholdOgInntekt": {
+                  "erSkattepliktigTilNorgeIHeleutsendingsperioden": true,
+                  "mottarPengestotteFraAnnetEosLandEllerSveits": false,
+                  "inntektFraNorskEllerUtenlandskVirksomhet": ["NORSK_VIRKSOMHET", "UTENLANDSK_VIRKSOMHET"],
+                  "hvilkeTyperInntektHarDu": ["LOENN", "INNTEKT_FRA_EGEN_VIRKSOMHET"],
+                  "inntekt": "65000",
+                  "inntektFraEgenVirksomhet": "12000"
+                }
               }
             }
         """.trimIndent()
@@ -221,7 +232,18 @@ class ProsessinstansDataMapperTest {
         result.type shouldBe SkjemaType.UTSENDT_ARBEIDSTAKER
         result.fnr shouldBe "12345678901"
         result.metadata.shouldBeInstanceOf<DegSelvMetadata>()
-        result.data.shouldBeInstanceOf<UtsendtArbeidstakerArbeidstakersSkjemaDataDto>()
+        result.data.shouldBeInstanceOf<UtsendtArbeidstakerArbeidstakersSkjemaDataDto>().skatteforholdOgInntekt shouldBe
+            SkatteforholdOgInntektDto(
+                erSkattepliktigTilNorgeIHeleutsendingsperioden = true,
+                mottarPengestotteFraAnnetEosLandEllerSveits = false,
+                landSomUtbetalerPengestotte = null,
+                pengestotteSomMottasFraAndreLandBelop = null,
+                pengestotteSomMottasFraAndreLandBeskrivelse = null,
+                inntektFraNorskEllerUtenlandskVirksomhet = setOf(ArbeidsinntektKilde.NORSK_VIRKSOMHET, ArbeidsinntektKilde.UTENLANDSK_VIRKSOMHET),
+                hvilkeTyperInntektHarDu = setOf(InntektType.LOENN, InntektType.INNTEKT_FRA_EGEN_VIRKSOMHET),
+                inntekt = "65000",
+                inntektFraEgenVirksomhet = "12000"
+            )
     }
 
     // --- SkjemaMottattMelding ---
