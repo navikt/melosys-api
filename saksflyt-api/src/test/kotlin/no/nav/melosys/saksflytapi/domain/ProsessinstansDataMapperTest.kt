@@ -10,8 +10,10 @@ import no.nav.melosys.skjema.types.utsendtarbeidstaker.AnnenPersonMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMedFullmaktMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.DegSelvMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMedFullmaktMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerMetadata
@@ -33,7 +35,8 @@ class ProsessinstansDataMapperTest {
               "metadatatype": "UTSENDT_ARBEIDSTAKER_DEG_SELV",
               "skjemadel": "ARBEIDSTAKERS_DEL",
               "arbeidsgiverNavn": "TestAS",
-              "juridiskEnhetOrgnr": "123456789"
+              "juridiskEnhetOrgnr": "123456789",
+              "arbeidstakerNavn": "Test Arbeidstaker"
             }
         """.trimIndent()
 
@@ -53,7 +56,8 @@ class ProsessinstansDataMapperTest {
               "metadatatype": "UTSENDT_ARBEIDSTAKER_ARBEIDSGIVER",
               "skjemadel": "ARBEIDSGIVERS_DEL",
               "arbeidsgiverNavn": "Arbeidsgiver AS",
-              "juridiskEnhetOrgnr": "987654321"
+              "juridiskEnhetOrgnr": "987654321",
+              "arbeidstakerNavn": "Test Arbeidstaker"
             }
         """.trimIndent()
 
@@ -73,6 +77,7 @@ class ProsessinstansDataMapperTest {
               "skjemadel": "ARBEIDSTAKERS_DEL",
               "arbeidsgiverNavn": "TestAS",
               "juridiskEnhetOrgnr": "123456789",
+              "arbeidstakerNavn": "Test Arbeidstaker",
               "fullmektigFnr": "12345678901"
             }
         """.trimIndent()
@@ -92,6 +97,7 @@ class ProsessinstansDataMapperTest {
               "skjemadel": "ARBEIDSGIVERS_DEL",
               "arbeidsgiverNavn": "Arbeidsgiver AS",
               "juridiskEnhetOrgnr": "123456789",
+              "arbeidstakerNavn": "Test Arbeidstaker",
               "fullmektigFnr": "98765432109"
             }
         """.trimIndent()
@@ -104,6 +110,30 @@ class ProsessinstansDataMapperTest {
     }
 
     @Test
+    fun `deserialiser UtsendtArbeidstakerMetadata som RadgiverMetadata`() {
+        val json = """
+            {
+              "metadatatype": "UTSENDT_ARBEIDSTAKER_RADGIVER",
+              "skjemadel": "ARBEIDSTAKERS_DEL",
+              "arbeidsgiverNavn": "TestAS",
+              "juridiskEnhetOrgnr": "123456789",
+              "arbeidstakerNavn": "Test Arbeidstaker",
+              "radgiverfirma": {
+                "orgnr": "999888777",
+                "navn": "Rådgiver AS"
+              }
+            }
+        """.trimIndent()
+
+        val result = mapper.readValue(json, UtsendtArbeidstakerMetadata::class.java)
+
+        result.shouldBeInstanceOf<RadgiverMetadata>().also {
+            it.arbeidstakerNavn shouldBe "Test Arbeidstaker"
+            it.radgiverfirma.navn shouldBe "Rådgiver AS"
+        }
+    }
+
+    @Test
     fun `deserialiser UtsendtArbeidstakerMetadata som RadgiverMedFullmaktMetadata`() {
         val json = """
             {
@@ -111,6 +141,7 @@ class ProsessinstansDataMapperTest {
               "skjemadel": "ARBEIDSTAKERS_DEL",
               "arbeidsgiverNavn": "TestAS",
               "juridiskEnhetOrgnr": "123456789",
+              "arbeidstakerNavn": "Test Arbeidstaker",
               "fullmektigFnr": "11223344556",
               "radgiverfirma": {
                 "orgnr": "999888777",
@@ -147,6 +178,15 @@ class ProsessinstansDataMapperTest {
         result.shouldBeInstanceOf<UtsendtArbeidstakerArbeidsgiversSkjemaDataDto>()
     }
 
+    @Test
+    fun `deserialiser UtsendtArbeidstakerSkjemaData som arbeidsgiver og arbeidstakers del`() {
+        val json = """{"type": "UTSENDT_ARBEIDSTAKER_ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL"}"""
+
+        val result = mapper.readValue(json, UtsendtArbeidstakerSkjemaData::class.java)
+
+        result.shouldBeInstanceOf<UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto>()
+    }
+
     // --- UtsendtArbeidstakerSkjemaDto round-trip ---
 
     @Test
@@ -165,7 +205,8 @@ class ProsessinstansDataMapperTest {
                 "metadatatype": "UTSENDT_ARBEIDSTAKER_DEG_SELV",
                 "skjemadel": "ARBEIDSTAKERS_DEL",
                 "arbeidsgiverNavn": "NorgeAS",
-                "juridiskEnhetOrgnr": "987654321"
+                "juridiskEnhetOrgnr": "987654321",
+                "arbeidstakerNavn": "Test Arbeidstaker"
               },
               "data": {
                 "type": "UTSENDT_ARBEIDSTAKER_ARBEIDSTAKERS_DEL"
@@ -214,7 +255,8 @@ class ProsessinstansDataMapperTest {
                   "metadatatype": "UTSENDT_ARBEIDSTAKER_DEG_SELV",
                   "skjemadel": "ARBEIDSTAKERS_DEL",
                   "arbeidsgiverNavn": "TestAS",
-                  "juridiskEnhetOrgnr": "987654321"
+                  "juridiskEnhetOrgnr": "987654321",
+                  "arbeidstakerNavn": "Test Arbeidstaker"
                 },
                 "data": {
                   "type": "UTSENDT_ARBEIDSTAKER_ARBEIDSTAKERS_DEL"

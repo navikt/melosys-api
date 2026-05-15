@@ -42,6 +42,7 @@ class SkjemaApiTypeMixinsTest {
             skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
             arbeidsgiverNavn = "Testbedrift AS",
             juridiskEnhetOrgnr = "123456789",
+            arbeidstakerNavn = "Test Arbeidstaker",
             kobletSkjemaId = null,
             erstatterSkjemaId = null,
         )
@@ -53,5 +54,6 @@ class SkjemaApiTypeMixinsTest {
         hentet.skjemadel shouldBe Skjemadel.ARBEIDSTAKERS_DEL
         hentet.arbeidsgiverNavn shouldBe "Testbedrift AS"
         hentet.juridiskEnhetOrgnr shouldBe "123456789"
+        hentet.arbeidstakerNavn shouldBe "Test Arbeidstaker"
     }
 }

@@ -377,7 +377,6 @@ internal class DigitalSøknadMapperTest {
                             navnPaVirksomhet = "Berlin GmbH",
                             fastEllerVekslendeArbeidssted = FastEllerVekslendeArbeidssted.FAST,
                             fastArbeidssted = PaLandFastArbeidsstedDto("Hauptstraße", "42", "10115", "Berlin"),
-                            beskrivelseVekslende = null,
                             erHjemmekontor = false
                         )
                     )
@@ -408,7 +407,6 @@ internal class DigitalSøknadMapperTest {
                             navnPaVirksomhet = "Reise AS",
                             fastEllerVekslendeArbeidssted = FastEllerVekslendeArbeidssted.VEKSLENDE,
                             fastArbeidssted = null,
-                            beskrivelseVekslende = "Diverse steder",
                             erHjemmekontor = false
                         )
                     )
@@ -433,7 +431,6 @@ internal class DigitalSøknadMapperTest {
                             navnPaVirksomhet = "Home Office AS",
                             fastEllerVekslendeArbeidssted = FastEllerVekslendeArbeidssted.FAST,
                             fastArbeidssted = PaLandFastArbeidsstedDto("Street", "1", "00000", "By"),
-                            beskrivelseVekslende = null,
                             erHjemmekontor = true
                         )
                     )
@@ -663,7 +660,6 @@ internal class DigitalSøknadMapperTest {
                                 navnPaVirksomhet = "Berlin GmbH",
                                 fastEllerVekslendeArbeidssted = FastEllerVekslendeArbeidssted.FAST,
                                 fastArbeidssted = PaLandFastArbeidsstedDto("Hauptstraße", "1", "10115", "Berlin"),
-                                beskrivelseVekslende = null,
                                 erHjemmekontor = false
                             )
                         )
@@ -712,7 +708,6 @@ internal class DigitalSøknadMapperTest {
                             navnPaVirksomhet = "Stockholm AB",
                             fastEllerVekslendeArbeidssted = FastEllerVekslendeArbeidssted.FAST,
                             fastArbeidssted = PaLandFastArbeidsstedDto("Drottninggatan", "5", "11151", "Stockholm"),
-                            beskrivelseVekslende = null,
                             erHjemmekontor = false
                         )
                     )

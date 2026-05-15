@@ -16,6 +16,7 @@ import no.nav.melosys.skjema.types.utsendtarbeidstaker.AnnenPersonMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMedFullmaktMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.DegSelvMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMedFullmaktMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaData
@@ -218,6 +219,7 @@ class Prosessinstans(
             .addMixIn(ArbeidsgiverMetadata::class.java, ArbeidsgiverMetadataMixin::class.java)
             .addMixIn(AnnenPersonMetadata::class.java, AnnenPersonMetadataMixin::class.java)
             .addMixIn(ArbeidsgiverMedFullmaktMetadata::class.java, ArbeidsgiverMedFullmaktMetadataMixin::class.java)
+            .addMixIn(RadgiverMetadata::class.java, RadgiverMetadataMixin::class.java)
             .addMixIn(RadgiverMedFullmaktMetadata::class.java, RadgiverMedFullmaktMetadataMixin::class.java)
             .addMixIn(UtsendtArbeidstakerSkjemaData::class.java, UtsendtArbeidstakerSkjemaDataMixin::class.java)
             .addMixIn(UtsendtArbeidstakerSkjemaDto::class.java, UtsendtArbeidstakerSkjemaDtoMixin::class.java)

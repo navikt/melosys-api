@@ -28,6 +28,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
         var orgnr: String = "123456789"
         var juridiskEnhetOrgnr: String = "987654321"
         var arbeidsgiverNavn: String = "Test AS"
+        var arbeidstakerNavn: String = "Test Arbeidstaker"
         var skjemadel: Skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
         var data: no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaData =
             UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
@@ -43,14 +44,23 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
                 fnr = fnr,
                 orgnr = orgnr,
                 juridiskEnhetOrgnr = juridiskEnhetOrgnr,
-                arbeidsgiverNavn = arbeidsgiverNavn
+                arbeidsgiverNavn = arbeidsgiverNavn,
+                arbeidstakerNavn = arbeidstakerNavn
             ).apply(init)
         }
 
         fun build(): UtsendtArbeidstakerSkjemaM2MDto {
             val skjema = lagSkjemaDto(skjemadel, data)
             val kobletSkjema = kobletSkjemaBuilder?.let {
-                lagSkjemaDto(Skjemadel.ARBEIDSGIVERS_DEL, it.data, it.fnr, it.orgnr, it.juridiskEnhetOrgnr, it.arbeidsgiverNavn)
+                lagSkjemaDto(
+                    Skjemadel.ARBEIDSGIVERS_DEL,
+                    it.data,
+                    it.fnr,
+                    it.orgnr,
+                    it.juridiskEnhetOrgnr,
+                    it.arbeidsgiverNavn,
+                    it.arbeidstakerNavn
+                )
             }
 
             return UtsendtArbeidstakerSkjemaM2MDto(
@@ -88,7 +98,8 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
             fnr: String = this.fnr,
             orgnr: String = this.orgnr,
             juridiskEnhetOrgnr: String = this.juridiskEnhetOrgnr,
-            arbeidsgiverNavn: String = this.arbeidsgiverNavn
+            arbeidsgiverNavn: String = this.arbeidsgiverNavn,
+            arbeidstakerNavn: String = this.arbeidstakerNavn
         ) = UtsendtArbeidstakerSkjemaDto(
             id = UUID.randomUUID(),
             status = SkjemaStatus.SENDT,
@@ -100,17 +111,20 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
                 Skjemadel.ARBEIDSTAKERS_DEL -> DegSelvMetadata(
                     skjemadel = skjemadel,
                     arbeidsgiverNavn = arbeidsgiverNavn,
-                    juridiskEnhetOrgnr = juridiskEnhetOrgnr
+                    juridiskEnhetOrgnr = juridiskEnhetOrgnr,
+                    arbeidstakerNavn = arbeidstakerNavn
                 )
                 Skjemadel.ARBEIDSGIVERS_DEL -> ArbeidsgiverMetadata(
                     skjemadel = skjemadel,
                     arbeidsgiverNavn = arbeidsgiverNavn,
-                    juridiskEnhetOrgnr = juridiskEnhetOrgnr
+                    juridiskEnhetOrgnr = juridiskEnhetOrgnr,
+                    arbeidstakerNavn = arbeidstakerNavn
                 )
                 Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL -> DegSelvMetadata(
                     skjemadel = skjemadel,
                     arbeidsgiverNavn = arbeidsgiverNavn,
-                    juridiskEnhetOrgnr = juridiskEnhetOrgnr
+                    juridiskEnhetOrgnr = juridiskEnhetOrgnr,
+                    arbeidstakerNavn = arbeidstakerNavn
                 )
             },
             data = data
@@ -123,6 +137,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
         var orgnr: String = "123456789",
         var juridiskEnhetOrgnr: String = "987654321",
         var arbeidsgiverNavn: String = "Test AS",
+        var arbeidstakerNavn: String = "Test Arbeidstaker",
         var data: UtsendtArbeidstakerArbeidsgiversSkjemaDataDto = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
     )
 }

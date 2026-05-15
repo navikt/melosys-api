@@ -91,7 +91,8 @@ class MelosysSkjemaApiClientTest(
                   "metadatatype": "UTSENDT_ARBEIDSTAKER_DEG_SELV",
                   "skjemadel": "ARBEIDSTAKERS_DEL",
                   "arbeidsgiverNavn": "Test Bedrift AS",
-                  "juridiskEnhetOrgnr": "987654321"
+                  "juridiskEnhetOrgnr": "987654321",
+                  "arbeidstakerNavn": "Test Arbeidstaker"
                 },
                 "data": {
                   "type": "UTSENDT_ARBEIDSTAKER_ARBEIDSTAKERS_DEL",
@@ -136,7 +137,8 @@ class MelosysSkjemaApiClientTest(
                 metadata = DegSelvMetadata(
                     skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
                     arbeidsgiverNavn = "Test Bedrift AS",
-                    juridiskEnhetOrgnr = "987654321"
+                    juridiskEnhetOrgnr = "987654321",
+                    arbeidstakerNavn = "Test Arbeidstaker"
                 ),
                 data = UtsendtArbeidstakerArbeidstakersSkjemaDataDto(
                     utsendingsperiodeOgLand = UtsendingsperiodeOgLandDto(
