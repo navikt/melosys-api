@@ -8,12 +8,21 @@ data class TrygdeavgiftsgrunnlagDto(
     val inntektskilder: List<InntektskildeDto>
 ) {
 
-    constructor(trygdeavgiftsperiode: Set<Trygdeavgiftsperiode>) : this(
-        trygdeavgiftsperiode.map { SkatteforholdTilNorgeDto(it.grunnlagSkatteforholdTilNorge!!) }.distinct(),
-        trygdeavgiftsperiode
-            .filter { it.grunnlagInntekstperiode != null }
-            .map { InntektskildeDto(it.grunnlagInntekstperiode!!) }
-            .distinct()
+    constructor(trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>) : this(
+        trygdeavgiftsperioder.flatMap { periode ->
+            if (periode.grunnlagListe.isNotEmpty()) {
+                periode.grunnlagListe.map { SkatteforholdTilNorgeDto(it.skatteforhold) }
+            } else {
+                listOfNotNull(periode.grunnlagSkatteforholdTilNorge?.let { SkatteforholdTilNorgeDto(it) })
+            }
+        }.distinct(),
+        trygdeavgiftsperioder.flatMap { periode ->
+            if (periode.grunnlagListe.isNotEmpty()) {
+                periode.grunnlagListe.map { InntektskildeDto(it.inntektsperiode) }
+            } else {
+                listOfNotNull(periode.grunnlagInntekstperiode?.let { InntektskildeDto(it) })
+            }
+        }.distinct()
     )
 
     constructor(grunnlagModel: TrygdeavgiftsgrunnlagModel) : this(

@@ -7,6 +7,7 @@ import no.nav.melosys.domain.PeriodeKilde
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeGrunnlag
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us
@@ -177,7 +178,7 @@ class LovvalgsperiodeService(
 
         nyLovvalgsperiode.trygdeavgiftsperioder = mutableSetOf()
         behandlingsresultat.trygdeavgiftsperioder
-            .map { kopierTrygdeavgiftsperiode(it) }
+            .map { kopierTrygdeavgiftsperiode(it, nyLovvalgsperiode) }
             .forEach(nyLovvalgsperiode::addTrygdeavgiftsperiode)
 
         return nyLovvalgsperiode
@@ -185,13 +186,33 @@ class LovvalgsperiodeService(
 
     private fun kopierTrygdeavgiftsperiode(
         trygdeavgiftsperiode: Trygdeavgiftsperiode,
-    ): Trygdeavgiftsperiode =
-        trygdeavgiftsperiode.copyEntity(
+        lovvalgsperiode: Lovvalgsperiode,
+    ): Trygdeavgiftsperiode {
+        val origInntekter = (listOfNotNull(trygdeavgiftsperiode.grunnlagInntekstperiode) +
+            trygdeavgiftsperiode.grunnlagListe.map { it.inntektsperiode }).distinctBy { it.id }
+        val origSkatteforhold = (listOfNotNull(trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge) +
+            trygdeavgiftsperiode.grunnlagListe.map { it.skatteforhold }).distinctBy { it.id }
+        val inntektMap = origInntekter.associateBy({ it.id }, { kopierInntektsperiode(it)!! })
+        val skatteforholdMap = origSkatteforhold.associateBy({ it.id }, { kopierSkatteforhold(it)!! })
+
+        val kopi = trygdeavgiftsperiode.copyEntity(
             id = null,
-            grunnlagInntekstperiode = kopierInntektsperiode(trygdeavgiftsperiode.grunnlagInntekstperiode),
+            grunnlagInntekstperiode = trygdeavgiftsperiode.grunnlagInntekstperiode?.let { inntektMap[it.id] },
             grunnlagLovvalgsPeriode = null,
-            grunnlagSkatteforholdTilNorge = kopierSkatteforhold(trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge),
+            grunnlagSkatteforholdTilNorge = trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge?.let { skatteforholdMap[it.id] },
         )
+        trygdeavgiftsperiode.grunnlagListe.forEach { orig ->
+            kopi.leggTilGrunnlag(
+                TrygdeavgiftsperiodeGrunnlag(
+                    trygdeavgiftsperiode = kopi,
+                    lovvalgsperiode = lovvalgsperiode,
+                    inntektsperiode = inntektMap[orig.inntektsperiode.id]!!,
+                    skatteforhold = skatteforholdMap[orig.skatteforhold.id]!!,
+                )
+            )
+        }
+        return kopi
+    }
 
     private fun kopierInntektsperiode(original: Inntektsperiode?): Inntektsperiode? =
         original?.copyEntity(

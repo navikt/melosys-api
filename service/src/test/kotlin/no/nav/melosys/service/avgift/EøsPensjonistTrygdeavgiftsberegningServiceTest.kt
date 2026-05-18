@@ -14,6 +14,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.inntektForTest
@@ -126,6 +127,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         this.behandling = behandling
         type = Behandlingsresultattyper.IKKE_FASTSATT
         helseutgiftDekkesPeriode {
+            id = 100L
             fomDato = fom
             tomDato = tom
             bostedLandkode = Land_iso2.DK
@@ -247,34 +249,44 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                 EøsPensjonistTrygdeavgiftsberegningResponse(
                     TrygdeavgiftsperiodeDto(
                         DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
-                    ), EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                    ),
+                    EøsPensjonistTrygdeavgiftsgrunnlagDto(
                         datoPeriodeDto,
                         notSoRandomUuid,
                         notSoRandomUuid
-                    )
+                    ),
+                    grunnlagListe = listOf(
+                        EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                            datoPeriodeDto,
+                            notSoRandomUuid,
+                            notSoRandomUuid
+                        )
+                    ),
+                    beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                 )
             )
         )
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, listOf(skatteforholdsperiode), listOf(inntektsperiode))
-            .single()
-            .shouldBeEqualToIgnoringFields(
-                Trygdeavgiftsperiode(
-                    id = null,
-                    periodeFra = FOM,
-                    periodeTil = TOM,
-                    trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
-                    trygdesats = BigDecimal("7.9"),
-                    grunnlagInntekstperiode = inntektsperiode,
-                    grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPerioder.first(),
-                    grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
-                ),
-                ignorePrivateFields = false,
-                property = Trygdeavgiftsperiode::grunnlagMedlemskapsperiode
-            )
+        val helseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPerioder.first()
 
-        verify { trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, listOf(skatteforholdsperiode), listOf(inntektsperiode))
+            .single().run {
+                periodeFra shouldBe FOM
+                periodeTil shouldBe TOM
+                trygdeavgiftsbeløpMd shouldBe Penger(BigDecimal(790), NOK.kode)
+                trygdesats shouldBe BigDecimal("7.9")
+                grunnlagInntekstperiode shouldBe inntektsperiode
+                grunnlagSkatteforholdTilNorge shouldBe skatteforholdsperiode
+                grunnlagHelseutgiftDekkesPeriode shouldBe helseutgiftDekkesPeriode
+
+                grunnlagListe.shouldNotBeEmpty()
+                grunnlagListe.forEach { grunnlag ->
+                    grunnlag.helseutgiftDekkesPeriode.shouldNotBeNull() shouldBe helseutgiftDekkesPeriode
+                }
+            }
+
+        verify { trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
 
         verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
         behandlingsresultat.helseutgiftDekkesPerioder.first().trygdeavgiftsperioder.shouldNotBeEmpty()
@@ -321,11 +333,20 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                 EøsPensjonistTrygdeavgiftsberegningResponse(
                     TrygdeavgiftsperiodeDto(
                         DatoPeriodeDto(fomIFjor, tomIFjor), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
-                    ), EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                    ),
+                    EøsPensjonistTrygdeavgiftsgrunnlagDto(
                         datoPeriodeDto,
                         notSoRandomUuid,
                         notSoRandomUuid
-                    )
+                    ),
+                    grunnlagListe = listOf(
+                        EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                            datoPeriodeDto,
+                            notSoRandomUuid,
+                            notSoRandomUuid
+                        )
+                    ),
+                    beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                 )
             )
         )
@@ -344,10 +365,11 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                     grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
                 ),
                 ignorePrivateFields = false,
-                property = Trygdeavgiftsperiode::grunnlagMedlemskapsperiode
+                Trygdeavgiftsperiode::grunnlagMedlemskapsperiode,
+                Trygdeavgiftsperiode::grunnlagListe
             )
 
-        verify { trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
+        verify { trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
 
         verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
         behandlingsresultat.helseutgiftDekkesPerioder.first().trygdeavgiftsperioder.shouldNotBeEmpty()
@@ -393,11 +415,20 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                 EøsPensjonistTrygdeavgiftsberegningResponse(
                     TrygdeavgiftsperiodeDto(
                         DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(0.0), NOK)
-                    ), EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                    ),
+                    EøsPensjonistTrygdeavgiftsgrunnlagDto(
                         datoPeriodeDto,
                         notSoRandomUuid,
                         notSoRandomUuid
-                    )
+                    ),
+                    grunnlagListe = listOf(
+                        EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                            datoPeriodeDto,
+                            notSoRandomUuid,
+                            notSoRandomUuid
+                        )
+                    ),
+                    beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                 )
             )
         )
@@ -560,11 +591,20 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                 EøsPensjonistTrygdeavgiftsberegningResponse(
                     TrygdeavgiftsperiodeDto(
                         DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(123.0), NOK)
-                    ), EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                    ),
+                    EøsPensjonistTrygdeavgiftsgrunnlagDto(
                         datoPeriodeDto,
                         notSoRandomUuid,
                         notSoRandomUuid
-                    )
+                    ),
+                    grunnlagListe = listOf(
+                        EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                            datoPeriodeDto,
+                            notSoRandomUuid,
+                            notSoRandomUuid
+                        )
+                    ),
+                    beregningsregel = Avgiftsberegningsregel.ORDINÆR,
                 )
             )
         )

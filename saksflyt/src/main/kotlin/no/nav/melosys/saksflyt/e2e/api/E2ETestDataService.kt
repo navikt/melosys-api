@@ -73,7 +73,7 @@ class E2ETestDataService(
      * Henter full metadata for alle test-saker.
      */
     fun hentFullMetadata(): Map<String, SakMetadata> {
-        val saksnummerListe = (1001..1071).map { "MEL-$it" }
+        val saksnummerListe = (1001..1074).map { "MEL-$it" }
         val saksnummerIn = saksnummerListe.joinToString(",") { "'$it'" }
 
         @Suppress("UNCHECKED_CAST")
@@ -211,6 +211,16 @@ class E2ETestDataService(
             if (opprettSak("MEL-1071", Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG,
                     behandlingstema = Behandlingstema.IKKE_YRKESAKTIV)) created++
 
+            // MEL-1072 til MEL-1073: EU/EØS Pensjonist med trygdeavgift (ekstra for parallelle E2E-tester)
+            (1072..1073).forEach {
+                if (opprettSak("MEL-$it", Sakstyper.EU_EOS, Sakstemaer.TRYGDEAVGIFT,
+                        behandlingstema = Behandlingstema.PENSJONIST)) created++
+            }
+
+            // MEL-1074: FTRL Pensjonist med trygdeavgift (AC3: helse/pensjonsdel-splitting)
+            if (opprettSak("MEL-1074", Sakstyper.FTRL, Sakstemaer.TRYGDEAVGIFT,
+                    behandlingstema = Behandlingstema.PENSJONIST)) created++
+
             log.info { "Suksessfullt initialisert $created test-saker for testperson: $TEST_FNR" }
             return InitResult(created = created, skipped = TOTAL_CASES - created, alreadyExisted = false)
 
@@ -306,7 +316,7 @@ class E2ETestDataService(
         const val TEST_AKTOR_ID = "1111111111111"
         const val TEST_SAKSBEHANDLER = "Z123456"
         const val FIRST_CASE_ID = "MEL-1001"
-        const val LAST_CASE_ID = "MEL-1071"
-        const val TOTAL_CASES = 71
+        const val LAST_CASE_ID = "MEL-1074"
+        const val TOTAL_CASES = 74
     }
 }
