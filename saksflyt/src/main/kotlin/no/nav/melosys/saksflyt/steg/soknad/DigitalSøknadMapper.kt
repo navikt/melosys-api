@@ -48,7 +48,7 @@ object DigitalSøknadMapper {
         søknad.soeknadsland = mapSoeknadsland(periodeOgLand?.utsendelseLand)
 
         // Arbeidssted kommer kun fra arbeidsgivers del
-        mapArbeidssteder(søknad, arbeidsgiversDel?.arbeidsstedIUtlandet)
+        mapArbeidssteder(søknad, arbeidsgiversDel?.arbeidsstedIUtlandet, periodeOgLand?.utsendelseLand)
 
         // Norsk arbeidsgiver (hovedarbeidsgivers orgnr: AT vinner, AG fallback)
         søknad.juridiskArbeidsgiverNorge = mapJuridiskArbeidsgiverNorge(dto, arbeidsgiversDel?.arbeidsgiverensVirksomhetINorge)
@@ -184,30 +184,31 @@ object DigitalSøknadMapper {
             )
         }
 
-    private fun mapArbeidssteder(søknad: Soeknad, arbeidssted: ArbeidsstedIUtlandetDto?) {
+    private fun mapArbeidssteder(søknad: Soeknad, arbeidssted: ArbeidsstedIUtlandetDto?, utsendelseLand: LandKode?) {
         if (arbeidssted == null) return
         when (arbeidssted.arbeidsstedType) {
-            ArbeidsstedType.PA_LAND -> søknad.arbeidPaaLand = mapArbeidPaaLand(arbeidssted)
+            ArbeidsstedType.PA_LAND -> søknad.arbeidPaaLand = mapArbeidPaaLand(arbeidssted, utsendelseLand)
             ArbeidsstedType.OFFSHORE -> søknad.maritimtArbeid = mapOffshore(arbeidssted)
             ArbeidsstedType.PA_SKIP -> søknad.maritimtArbeid = mapPaaSkip(arbeidssted)
             ArbeidsstedType.OM_BORD_PA_FLY -> søknad.luftfartBaser = mapLuftfart(arbeidssted)
         }
     }
 
-    private fun mapArbeidPaaLand(arbeidssted: ArbeidsstedIUtlandetDto): ArbeidPaaLand {
+    private fun mapArbeidPaaLand(arbeidssted: ArbeidsstedIUtlandetDto, utsendelseLand: LandKode?): ArbeidPaaLand {
         val paLand = arbeidssted.paLand ?: return ArbeidPaaLand()
+        val erFastArbeidssted = paLand.fastEllerVekslendeArbeidssted == FastEllerVekslendeArbeidssted.FAST
         return ArbeidPaaLand().apply {
             erHjemmekontor = paLand.erHjemmekontor
-            erFastArbeidssted = paLand.fastEllerVekslendeArbeidssted == FastEllerVekslendeArbeidssted.FAST
+            this.erFastArbeidssted = erFastArbeidssted
 
-            val adresse = paLand.fastArbeidssted?.let {
+            val adresse = paLand.fastArbeidssted?.takeIf { erFastArbeidssted }?.let {
                 StrukturertAdresse(
                     gatenavn = it.vegadresse,
                     husnummerEtasjeLeilighet = it.nummer,
                     postnummer = it.postkode,
                     poststed = it.bySted,
                     region = null,
-                    landkode = null
+                    landkode = utsendelseLand?.name
                 )
             } ?: StrukturertAdresse()
 
