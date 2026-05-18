@@ -104,9 +104,9 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
     private fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate): List<SakMedBehandlinger> =
         årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(fomDato = fomDato, tomDato = tomDato)
 
-    // I motsetning til SkattehendelserConsumer.finnAktivÅrsavregningBehandling kaster vi ikke ved
-    // flere aktive ÅRSAVREGNING-behandlinger for samme år — her er målet kun å unngå duplikat-opprettelse,
-    // så da hopper vi over.
+    // SkattehendelserConsumer.finnAktivÅrsavregningBehandling kaster TekniskException
+    // hvis det finnes flere aktive ÅRSAVREGNING-behandlinger for samme år. Her hopper
+    // vi bare over i stedet — målet er kun å unngå duplikat-opprettelse, ikke å feile.
     private fun skalOppretteForSak(fagsak: Fagsak, gjelderÅr: Int): Boolean =
         fagsak.hentAktiveÅrsavregninger().none { behandling ->
             hentÅrFraBehandlingDefensivt(behandling) == gjelderÅr
@@ -114,8 +114,9 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
 
     /**
      * Returnerer null hvis åpen ÅRSAVREGNING-behandling mangler aarsavregning-rad
-     * (hentÅrsavregning() kaster), slik at ny ÅRSAVREGNING blir opprettet for året
-     * per fag-avklaring. WARN-logger så akkumulering av slike saker blir synlig.
+     * (hentÅrsavregning() kaster IllegalStateException), slik at ny ÅRSAVREGNING blir
+     * opprettet for året per fag-avklaring. WARN-logger så akkumulering av slike saker
+     * blir synlig.
      */
     private fun hentÅrFraBehandlingDefensivt(behandling: Behandling): Int? =
         runCatching {
