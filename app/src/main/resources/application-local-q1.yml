@@ -7,6 +7,7 @@ APP_NAME_MELOSYS_EESSI: melosys-eessi-q1
 APP_NAME_OPPGAVE: oppgave-q1
 APP_NAME_PDL: pdl-api
 APP_NAME_SAF: saf-q1
+APP_NAME_SAK: sak-q1
 APP_NAME_TILGANGSMASKINEN: populasjonstilgangskontroll
 APP_NAME_UTBETALING: sokos-utbetaldata
 APP_NAME_MELOSYS_SOKNAD_MOTTAK: melosys-soknad-mottak
