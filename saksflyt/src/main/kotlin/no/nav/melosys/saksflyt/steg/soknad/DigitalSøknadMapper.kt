@@ -201,16 +201,20 @@ object DigitalSøknadMapper {
             erHjemmekontor = paLand.erHjemmekontor
             this.erFastArbeidssted = erFastArbeidssted
 
-            val adresse = paLand.fastArbeidssted?.takeIf { erFastArbeidssted }?.let {
-                StrukturertAdresse(
-                    gatenavn = it.vegadresse,
-                    husnummerEtasjeLeilighet = it.nummer,
-                    postnummer = it.postkode,
-                    poststed = it.bySted,
-                    region = null,
-                    landkode = utsendelseLand?.name
-                )
-            } ?: StrukturertAdresse()
+            val adresse = if (erFastArbeidssted) {
+                paLand.fastArbeidssted?.let {
+                    StrukturertAdresse(
+                        gatenavn = it.vegadresse,
+                        husnummerEtasjeLeilighet = it.nummer,
+                        postnummer = it.postkode,
+                        poststed = it.bySted,
+                        region = null,
+                        landkode = utsendelseLand?.name
+                    )
+                } ?: StrukturertAdresse(landkode = utsendelseLand?.name)
+            } else {
+                StrukturertAdresse()
+            }
 
             fysiskeArbeidssteder = listOf(
                 FysiskArbeidssted(virksomhetNavn = paLand.navnPaVirksomhet, adresse = adresse)
