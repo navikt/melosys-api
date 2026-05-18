@@ -34,9 +34,7 @@ import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -50,14 +48,11 @@ public class ProsessinstansService {
 
     private final ApplicationEventPublisher applicationEventPublisher;
     private final ProsessinstansForServiceRepository prosessinstansRepo;
-    private final ThreadPoolTaskExecutor saksflytThreadPoolTaskExecutor;
 
     public ProsessinstansService(ApplicationEventPublisher applicationEventPublisher,
-                                 ProsessinstansForServiceRepository prosessinstansRepo,
-                                 @Qualifier("saksflytThreadPoolTaskExecutor") ThreadPoolTaskExecutor saksflytThreadPoolTaskExecutor) {
+                                 ProsessinstansForServiceRepository prosessinstansRepo) {
         this.applicationEventPublisher = applicationEventPublisher;
         this.prosessinstansRepo = prosessinstansRepo;
-        this.saksflytThreadPoolTaskExecutor = saksflytThreadPoolTaskExecutor;
     }
 
     @Transactional
@@ -156,7 +151,6 @@ public class ProsessinstansService {
             .medData(SAKSNUMMER, saksnummer)
             .medData(ÅRSAK_TYPE, behandlingsaarsaktype)
             .build();
-
         return lagre(prosessinstans);
     }
 
@@ -308,9 +302,6 @@ public class ProsessinstansService {
         }
 
         applicationEventPublisher.publishEvent(new ProsessinstansOpprettetEvent(prosessinstans));
-        int prosessinstanseriKø = saksflytThreadPoolTaskExecutor.getThreadPoolExecutor().getQueue().size();
-        if (prosessinstanseriKø > 0)
-            logger.info("Antall prosessinstanser i saksflytThreadPoolTaskExecutor kø: {}", prosessinstanseriKø);
 
         Metrics.counter(MetrikkerNavn.PROSESSINSTANSER_OPPRETTET, MetrikkerNavn.TAG_TYPE, prosessinstans.getType().name()).increment();
         return prosessinstans.getId();

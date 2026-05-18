@@ -13,14 +13,14 @@ private val log = KotlinLogging.logger { }
 
 @Component
 class ProsessinstansBehandlerDelegate(
-    private val prosessinstansBehandler: ProsessinstansBehandler,
+    private val prosessinstansDispatcher: ProsessinstansDispatcher,
     private val prosessinstansRepository: ProsessinstansRepository
 ) {
 
     fun behandleProsessinstans(prosessinstans: Prosessinstans) {
         oppdaterStatusOmSkalPåVent(prosessinstans)
         if (!prosessinstans.erPåVent()) {
-            prosessinstansBehandler.behandleProsessinstans(prosessinstans)
+            prosessinstansDispatcher.dispatch(prosessinstans)
         }
     }
 

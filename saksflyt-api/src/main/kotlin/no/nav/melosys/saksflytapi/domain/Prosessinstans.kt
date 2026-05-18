@@ -165,6 +165,8 @@ class Prosessinstans(
     fun hentMelosysEessiMelding(): MelosysEessiMelding? =
         getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding::class.java)
 
+    fun hentPrioritet(): ProsessPrioritet = type.prioritet
+
     fun leggTilHendelse(steg: ProsessSteg, t: Throwable) {
         hendelser.add(
             ProsessinstansHendelse(
