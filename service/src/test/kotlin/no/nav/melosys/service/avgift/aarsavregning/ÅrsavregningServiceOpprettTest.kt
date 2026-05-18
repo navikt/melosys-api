@@ -253,6 +253,100 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
     }
 
     @Test
+    fun `opprettÅrsavregning for 2024 etter årsavregning for 2023 bruker ikke avkortet årsavregning som siste gjeldende periode`() {
+        val fagsak = Fagsak.forTest {
+            saksnummer = "123456"
+            behandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+                status = Behandlingsstatus.AVSLUTTET
+            }
+            behandling {
+                id = 2L
+                type = Behandlingstyper.NY_VURDERING
+                registrertDato = LocalDate.of(2023, 6, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+                status = Behandlingsstatus.AVSLUTTET
+            }
+            behandling {
+                id = 3L
+                type = Behandlingstyper.ÅRSAVREGNING
+                registrertDato = LocalDate.of(2024, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+                status = Behandlingsstatus.AVSLUTTET
+            }
+            behandling {
+                id = 4L
+                type = Behandlingstyper.ÅRSAVREGNING
+                registrertDato = LocalDate.of(2025, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+                status = Behandlingsstatus.OPPRETTET
+            }
+            tema = Sakstemaer.UNNTAK
+        }
+
+        val førstegangsbehandling = Behandlingsresultat.forTest {
+            id = 1L
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+            behandling = fagsak.behandlinger[0]
+            vedtakMetadata {
+                vedtaksdato = LocalDate.of(2023, 1, 10).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            medlemskapsperiode("2023-01-01", "2025-12-31")
+        }
+
+        val nyVurderingUtenEndring = Behandlingsresultat.forTest {
+            id = 2L
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+            behandling = fagsak.behandlinger[1]
+            vedtakMetadata {
+                vedtaksdato = LocalDate.of(2023, 6, 10).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            medlemskapsperiode("2023-01-01", "2025-12-31", medTrygdeavgift = false)
+        }
+
+        val årsavregning2023 = Behandlingsresultat.forTest {
+            id = 3L
+            type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
+            behandling = fagsak.behandlinger[2]
+            vedtakMetadata {
+                vedtaksdato = LocalDate.of(2024, 1, 10).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            årsavregning {
+                aar = 2023
+            }
+            medlemskapsperiode("2023-01-01", "2023-12-31")
+        }
+
+        val årsavregning2024 = Behandlingsresultat.forTest {
+            id = 4L
+            behandling = fagsak.behandlinger[3]
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } answers {
+            when (firstArg<Long>()) {
+                1L -> førstegangsbehandling
+                2L -> nyVurderingUtenEndring
+                3L -> årsavregning2023
+                4L -> årsavregning2024
+                else -> null
+            }.shouldNotBeNull()
+        }
+
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+        every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(4, 2024) } returns 0
+        every { behandlingsresultatService.lagre(any()) } answers {
+            firstArg<Behandlingsresultat>().apply {
+                årsavregning?.id = 77L
+            }
+        }
+
+        val resultat = årsavregningService.opprettÅrsavregning(4, 2024)
+
+        resultat.sisteGjeldendeAvgiftspliktigPerioder.size shouldBe 1
+        resultat.sisteGjeldendeAvgiftspliktigPerioder.single().fom shouldBe LocalDate.of(2024, 1, 1)
+        resultat.sisteGjeldendeAvgiftspliktigPerioder.single().tom shouldBe LocalDate.of(2024, 12, 31)
+    }
+
+    @Test
     fun `opprettÅrsavregning - ny vurdering som fjerner perioden for året replikerer ingen medlemskapsperioder`() {
         val fagsak = Fagsak.forTest {
             saksnummer = "123456"
