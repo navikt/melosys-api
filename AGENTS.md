@@ -16,6 +16,9 @@ Use this to run tests in a single module with minimal noise and automatic depend
 # Unit tests (fast, ~5-10s if no changes to dependencies)
 scripts/run-tests.sh -pl saksflyt -Dtest=LagreMedlemsperiodeMedlTest
 
+# Unit tests with dependency rebuild (use for saksflyt changes or upstream compile errors)
+scripts/run-tests.sh -pl saksflyt -am -Dtest=LagreMedlemsperiodeMedlTest
+
 # Integration tests WITHOUT dependency rebuild (fast, ~20-30s)
 scripts/run-tests.sh -pl integrasjonstest --integration -Dtest=HibernateProxyVsEmbeddableIT
 
@@ -29,6 +32,7 @@ scripts/run-tests.sh -pl integrasjonstest -am --integration -Dtest=HibernateProx
 - For integration tests without `-am`: uses fast `failsafe:integration-test` (no compilation)
 - You can pass `-pl` and `-am` just like with mvn to scope build and test
 - **IMPORTANT**: Use `-am` when testing modules after changing dependencies (service, domain, etc.)
+- **IMPORTANT**: For `saksflyt` tests, isolated `-pl saksflyt` can fail on upstream/generated symbols even when the code under review is OK. If compilation fails with unresolved upstream symbols, rerun with `-am`; for targeted test filters across upstream modules, add `-Dsurefire.failIfNoSpecifiedTests=false`.
 - Summarizes output to reduce context usage
 - Prints clear errors if tests or compilation fail
 - Saves full logs at `/tmp/mvn.log`
