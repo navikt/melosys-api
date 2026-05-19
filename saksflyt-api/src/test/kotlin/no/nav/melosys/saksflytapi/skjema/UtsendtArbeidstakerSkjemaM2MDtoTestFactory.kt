@@ -15,6 +15,9 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.util.UUID
 
+const val DEFAULT_DOKUMENTTITTEL_ARBEIDSTAKER =
+    "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits"
+
 fun lagUtsendtArbeidstakerSkjemaM2MDto(
     init: UtsendtArbeidstakerSkjemaM2MDtoTestFactory.Builder.() -> Unit = {}
 ): UtsendtArbeidstakerSkjemaM2MDto =
@@ -36,6 +39,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
         var referanseId: String = "MEL-${UUID.randomUUID()}"
         var innsenderFnr: String? = null
         var innsendtTidspunkt: LocalDateTime = LocalDateTime.now()
+        var dokumentTittel: String = DEFAULT_DOKUMENTTITTEL_ARBEIDSTAKER
         var vedlegg: List<VedleggDto> = emptyList()
 
         private var kobletSkjemaBuilder: ArbeidsgiverSkjemaBuilder? = null
@@ -72,6 +76,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
                 referanseId = referanseId,
                 innsendtTidspunkt = innsendtTidspunkt,
                 innsenderFnr = innsenderFnr ?: fnr,
+                dokumentTittel = dokumentTittel,
                 vedlegg = vedlegg
             )
         }

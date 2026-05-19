@@ -120,7 +120,8 @@ class MelosysSkjemaApiClientTest(
               "tidligereInnsendteSkjema": [],
               "referanseId": "MEL-5CA141",
               "innsendtTidspunkt": "2024-01-15T10:30:00",
-              "innsenderFnr": "12345678901"
+              "innsenderFnr": "12345678901",
+              "dokumentTittel": "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits"
             }
         """.trimIndent()
 
@@ -176,7 +177,8 @@ class MelosysSkjemaApiClientTest(
             tidligereInnsendteSkjema = emptyList(),
             referanseId = "MEL-5CA141",
             innsendtTidspunkt = LocalDateTime.parse("2024-01-15T10:30:00"),
-            innsenderFnr = "12345678901"
+            innsenderFnr = "12345678901",
+            dokumentTittel = "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits"
         )
 
         wireMockServer.verify(

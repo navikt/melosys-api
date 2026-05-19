@@ -105,15 +105,23 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
     }
 
     @Test
-    fun `utfør oppretter journalpost med korrekt tittel for arbeidsgiver-del`() {
-        val søknadsdata = lagSøknadsdata(Skjemadel.ARBEIDSGIVERS_DEL)
+    fun `utfør bruker dokumentTittel fra søknadsdata på journalpost`() {
+        val tittelFraSkjemaApi = "Bekreftelse fra arbeidsgiver på utsending til annet EØS-land eller Sveits"
+        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+            fnr = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.fnr
+            referanseId = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.referanseId
+            innsenderFnr = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.innsenderFnr
+            dokumentTittel = tittelFraSkjemaApi
+            data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
+        }.also { every { melosysSkjemaApiClient.hentPdf(it.skjema.id) } returns pdfBytes }
         val prosessinstans = lagProsessinstans(søknadsdata)
 
         opprettOgFerdigstillJournalpostDigitalSøknad.utfør(prosessinstans)
 
         val opprettJournalpost = capturedJournalpost.captured
-        opprettJournalpost.innhold shouldBe "Bekreftelse på utsending i EØS eller Sveits"
-        opprettJournalpost.hoveddokument.tittel shouldBe "Bekreftelse på utsending i EØS eller Sveits"
+        opprettJournalpost.innhold shouldBe tittelFraSkjemaApi
+        opprettJournalpost.hoveddokument.tittel shouldBe tittelFraSkjemaApi
     }
 
     @Test

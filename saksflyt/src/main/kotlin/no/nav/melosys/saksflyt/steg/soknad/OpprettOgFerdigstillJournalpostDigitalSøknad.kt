@@ -15,7 +15,6 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.sak.SkjemaSakMappingService
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.vedlegg.VedleggDto
 import no.nav.melosys.skjema.types.vedlegg.VedleggFiltype
@@ -24,8 +23,6 @@ import java.util.UUID
 
 private val log = KotlinLogging.logger { }
 
-private const val TITTEL_ARBEIDSTAKER = "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits"
-private const val TITTEL_ARBEIDSGIVER = "Bekreftelse på utsending i EØS eller Sveits"
 private const val MEDLEMSKAP_OG_AVGIFT = "4530"
 private const val MEDLEMSKAP = "MED"
 private const val NAV_NO = "NAV_NO"
@@ -64,7 +61,7 @@ class OpprettOgFerdigstillJournalpostDigitalSøknad(
         val brukerFnr = skjema.fnr
         val innsenderFnr = søknadsdata.innsenderFnr
         val referanseId = søknadsdata.referanseId
-        val tittel = utledTittel(skjema.metadata.skjemadel)
+        val tittel = søknadsdata.dokumentTittel
 
         log.info { "Henter PDF og oppretter journalpost for digital søknad, referanseId=$referanseId, saksnummer=${fagsak.saksnummer}" }
 
@@ -100,12 +97,6 @@ class OpprettOgFerdigstillJournalpostDigitalSøknad(
         skjemaSakMappingService.oppdaterJournalpostId(skjemaId, journalpostId)
 
         log.info { "Opprettet journalpost $journalpostId for digital søknad referanseId=$referanseId" }
-    }
-
-    private fun utledTittel(skjemadel: Skjemadel): String = when (skjemadel) {
-        Skjemadel.ARBEIDSTAKERS_DEL -> TITTEL_ARBEIDSTAKER
-        Skjemadel.ARBEIDSGIVERS_DEL -> TITTEL_ARBEIDSGIVER
-        Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL -> TITTEL_ARBEIDSTAKER
     }
 
     private fun hentVedleggsdokumenter(skjemaId: UUID, vedlegg: List<VedleggDto>): List<FysiskDokument> =
