@@ -104,10 +104,10 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
                 tidligereFakturertBeloep = null,
                 beregnetAvgiftBelop = null,
                 tilFaktureringBeloep = null,
-                harTrygdeavgiftFraAvgiftssystemet = null,
-                trygdeavgiftFraAvgiftssystemet = null,
+                harInnbetaltTrygdeavgift = null,
+                innbetaltTrygdeavgift = null,
                 manueltAvgiftBeloep = null,
-                tidligereTrygdeavgiftFraAvgiftssystemet = null,
+                tidligereInnbetaltTrygdeavgift = null,
                 tidligereÅrsavregningmanueltAvgiftBeloep = null,
                 harSkjoennsfastsattInntektsgrunnlag = false
             )
@@ -202,10 +202,10 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
                 tidligereFakturertBeloep = null,
                 beregnetAvgiftBelop = null,
                 tilFaktureringBeloep = null,
-                harTrygdeavgiftFraAvgiftssystemet = null,
-                trygdeavgiftFraAvgiftssystemet = null,
+                harInnbetaltTrygdeavgift = null,
+                innbetaltTrygdeavgift = null,
                 manueltAvgiftBeloep = null,
-                tidligereTrygdeavgiftFraAvgiftssystemet = null,
+                tidligereInnbetaltTrygdeavgift = null,
                 tidligereÅrsavregningmanueltAvgiftBeloep = null,
                 harSkjoennsfastsattInntektsgrunnlag = false
             )

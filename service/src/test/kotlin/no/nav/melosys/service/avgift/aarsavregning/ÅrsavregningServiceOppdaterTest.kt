@@ -55,7 +55,7 @@ internal class ÅrsavregningServiceOppdaterTest : ÅrsavregningServiceTestBase()
     }
 
     @Test
-    fun `tilFaktureringBeloep skal settes hvis avgift i avgiftssystemet og ny avgift ikke er null`() {
+    fun `tilFaktureringBeloep skal settes hvis innbetalt trygdeavgift og ny avgift ikke er null`() {
         val fagsak = Fagsak.forTest { }
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
@@ -64,7 +64,7 @@ internal class ÅrsavregningServiceOppdaterTest : ÅrsavregningServiceTestBase()
             årsavregning {
                 id = 1L
                 aar = 2023
-                harTrygdeavgiftFraAvgiftssystemet = true
+                harInnbetaltTrygdeavgift = true
             }
         }
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.hentÅrsavregning()))
@@ -78,7 +78,7 @@ internal class ÅrsavregningServiceOppdaterTest : ÅrsavregningServiceTestBase()
     }
 
     @Test
-    fun `tilFaktureringBeloep skal settes til diff mellom beregnetAvgiftBelop og avgift i avgiftssystemet og melosys`() {
+    fun `tilFaktureringBeloep skal settes til diff mellom beregnetAvgiftBelop og innbetalt trygdeavgift og melosys`() {
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 fagsak { }
@@ -87,7 +87,7 @@ internal class ÅrsavregningServiceOppdaterTest : ÅrsavregningServiceTestBase()
                 id = 1L
                 aar = 2023
                 tidligereFakturertBeloep = BigDecimal(37.0)
-                harTrygdeavgiftFraAvgiftssystemet = true
+                harInnbetaltTrygdeavgift = true
             }
         }
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.hentÅrsavregning()))
@@ -101,7 +101,7 @@ internal class ÅrsavregningServiceOppdaterTest : ÅrsavregningServiceTestBase()
     }
 
     @Test
-    fun `harTrygdeavgiftFraAvgiftssystemet skal ikke settes hvis null`() {
+    fun `harInnbetaltTrygdeavgift skal ikke settes hvis null`() {
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 fagsak { }
@@ -113,12 +113,12 @@ internal class ÅrsavregningServiceOppdaterTest : ÅrsavregningServiceTestBase()
         }
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.hentÅrsavregning()))
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
-        behandlingsresultat.hentÅrsavregning().harTrygdeavgiftFraAvgiftssystemet shouldBe null
+        behandlingsresultat.hentÅrsavregning().harInnbetaltTrygdeavgift shouldBe null
 
 
         årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE)
 
 
-        behandlingsresultat.hentÅrsavregning().harTrygdeavgiftFraAvgiftssystemet shouldBe null
+        behandlingsresultat.hentÅrsavregning().harInnbetaltTrygdeavgift shouldBe null
     }
 }

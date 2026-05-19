@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.PeriodeKilde
 import no.nav.melosys.domain.jpa.konverterTilBestemmelse
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
@@ -82,9 +83,16 @@ class MedlemskapsperiodeController(
     }
 
     @DeleteMapping("/behandlinger/{behandlingID}/medlemskapsperioder")
-    fun slettMedlemskapsperiode(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Unit> {
+    fun slettMedlemskapsperiode(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @RequestParam("kilde", required = false) kilde: PeriodeKilde?
+    ): ResponseEntity<Unit> {
         aksesskontroll.autoriserSkriv(behandlingID)
-        medlemskapsperiodeService.slettMedlemskapsperioder(behandlingID)
+        if (kilde != null) {
+            medlemskapsperiodeService.slettMedlemskapsperioderMedKilde(behandlingID, kilde)
+        } else {
+            medlemskapsperiodeService.slettMedlemskapsperioder(behandlingID)
+        }
         return ResponseEntity.noContent().build()
     }
 

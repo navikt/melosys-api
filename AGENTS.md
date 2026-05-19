@@ -4,7 +4,7 @@ This file provides guidance to AI coding agents working with code in this reposi
 
 ## Skills
 
-Domain-specific skills are available in `.agent/skills/`. Each skill contains a `SKILL.md` with expert knowledge about a specific area of the codebase.
+Domain-specific skills are available in `.agents/skills/`. Each skill contains a `SKILL.md` with expert knowledge about a specific area of the codebase.
 
 ## Common Development Commands
 

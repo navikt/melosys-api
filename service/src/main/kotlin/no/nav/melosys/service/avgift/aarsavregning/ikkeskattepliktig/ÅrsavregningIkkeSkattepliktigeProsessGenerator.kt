@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.JobMonitor
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
@@ -21,7 +22,8 @@ private val log = KotlinLogging.logger { }
 @Component
 class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
     private val årsavregningIkkeSkattepliktigeFinner: ÅrsavregningIkkeSkattepliktigeFinner,
-    private val prosessinstansService: ProsessinstansService
+    private val prosessinstansService: ProsessinstansService,
+    private val behandlingsresultatService: BehandlingsresultatService,
 ) {
     val sakerFunnet: MutableList<SakMedBehandlinger> = mutableListOf()
 
@@ -31,7 +33,6 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
     )
 
     fun sakerFunnetJsonString(): String = jacksonObjectMapper()
-        
         .valueToTree<JsonNode>(sakerFunnet.map { it.toMap() }).toPrettyString()
 
     @Async("taskExecutor")
@@ -78,6 +79,14 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
                     sakerFunnet.add(it)
                     antallProsessert++
                     if (dryrun) return@forEach
+                    if (!skalOppretteForSak(it.sak, fomDato.year)) {
+                        antallHoppetOver++
+                        log.info {
+                            "Hopper over duplikat ÅRSAVREGNING-opprettelse for sak ${it.sak.saksnummer} år ${fomDato.year} " +
+                                "— eksisterende aktiv ÅRSAVREGNING funnet"
+                        }
+                        return@forEach
+                    }
                     prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
                         it.sak.saksnummer,
                         år,
@@ -95,6 +104,32 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
     private fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate): List<SakMedBehandlinger> =
         årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(fomDato = fomDato, tomDato = tomDato)
 
+    // SkattehendelserConsumer.finnAktivÅrsavregningBehandling kaster TekniskException
+    // hvis det finnes flere aktive ÅRSAVREGNING-behandlinger for samme år. Her hopper
+    // vi bare over i stedet — målet er kun å unngå duplikat-opprettelse, ikke å feile.
+    private fun skalOppretteForSak(fagsak: Fagsak, gjelderÅr: Int): Boolean =
+        fagsak.hentAktiveÅrsavregninger().none { behandling ->
+            hentÅrFraBehandlingDefensivt(behandling) == gjelderÅr
+        }
+
+    /**
+     * Returnerer null hvis åpen ÅRSAVREGNING-behandling mangler aarsavregning-rad
+     * (hentÅrsavregning() kaster IllegalStateException), slik at ny ÅRSAVREGNING blir
+     * opprettet for året per fag-avklaring. WARN-logger så akkumulering av slike saker
+     * blir synlig.
+     */
+    private fun hentÅrFraBehandlingDefensivt(behandling: Behandling): Int? =
+        runCatching {
+            behandlingsresultatService.hentBehandlingsresultat(behandling.id)
+                .hentÅrsavregning().aar
+        }.getOrElse { e ->
+            log.warn(e) {
+                "Kunne ikke hente år fra åpen ÅRSAVREGNING-behandling ${behandling.id} " +
+                    "(sak ${behandling.fagsak.saksnummer}) — antar ikke duplikat, ny ÅRSAVREGNING vil opprettes"
+            }
+            null
+        }
+
     private fun <T> runAsSystem(prosessSteg: String = "finnSakerHvorÅrsavregningSkalOpprettes", block: () -> T): T {
         val processId = UUID.randomUUID()
         ThreadLocalAccessInfo.beforeExecuteProcess(processId, prosessSteg)
@@ -110,6 +145,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
     inner class JobStatus(
         @Volatile var antallFunnet: Int = 0,
         @Volatile var antallProsessert: Int = 0,
+        @Volatile var antallHoppetOver: Int = 0,
         @Volatile var result: Map<String, Any?> = emptyMap(),
         @Volatile var finnBehandlingerdbQueryStoppedAt: LocalDateTime? = null,
         @Volatile var finnSakerMedTidligereÅrsavregningQueryStoppedAt: LocalDateTime? = null,
@@ -117,6 +153,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
         override fun reset() {
             antallFunnet = 0
             antallProsessert = 0
+            antallHoppetOver = 0
             finnBehandlingerdbQueryStoppedAt = null
             finnSakerMedTidligereÅrsavregningQueryStoppedAt = null
             result = emptyMap()
@@ -127,6 +164,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
             "dbQueryRuntime-finnSakerMedTidligereÅrsavregning" to jobMonitor.durationUntil(finnSakerMedTidligereÅrsavregningQueryStoppedAt),
             "antallFunnet" to antallFunnet,
             "antallProsessert" to antallProsessert,
+            "antallHoppetOver" to antallHoppetOver,
             "result" to result,
         )
     }

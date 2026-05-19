@@ -2,6 +2,7 @@ package no.nav.melosys.service.avgift.aarsavregning
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
@@ -135,6 +136,12 @@ class ÅrsavregningService(
                     gjelderÅr
                 )
 
+                is Lovvalgsperiode -> replikerLovvalgsPeriode(
+                    behandlingsresultat,
+                    sisteBehandlingsresultatMedAvgiftspliktigPeriode,
+                    gjelderÅr
+                )
+
                 else -> throw FunksjonellException("Ukjent type avgiftspliktigPeriode: ${sisteBehandlingsresultatMedAvgiftspliktigPeriode.finnAvgiftspliktigPerioder().first()}")
             }
         }
@@ -155,8 +162,8 @@ class ÅrsavregningService(
                         }.orEmpty()
                     ),
             endeligAvgiftValg = sisteÅrsavregning?.endeligAvgiftValg ?: EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
-            harTrygdeavgiftFraAvgiftssystemet = sisteÅrsavregning?.let { it.harTrygdeavgiftFraAvgiftssystemet ?: true },
-            trygdeavgiftFraAvgiftssystemet = sisteÅrsavregning?.trygdeavgiftFraAvgiftssystemet,
+            harInnbetaltTrygdeavgift = sisteÅrsavregning?.let { it.harInnbetaltTrygdeavgift ?: true },
+            innbetaltTrygdeavgift = sisteÅrsavregning?.innbetaltTrygdeavgift,
             manueltAvgiftBeloep = sisteÅrsavregning?.manueltAvgiftBeloep
         ).let { årsavregning ->
             behandlingsresultat.årsavregning = årsavregning
@@ -200,20 +207,21 @@ class ÅrsavregningService(
     }
 
     @Transactional
-    fun oppdaterHarTrygdeavgiftFraAvgiftssystemet(
+    fun oppdaterHarInnbetaltTrygdeavgift(
         behandlingID: Long,
-        harTrygdeavgiftFraAvgiftssystemet: Boolean
+        harInnbetaltTrygdeavgift: Boolean
     ): ÅrsavregningModel {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         val årsavregning =
             behandlingsresultat.årsavregning ?: throw FunksjonellException("Ingen årsavregning funnet for behandling med id: $behandlingID")
-        årsavregning.harTrygdeavgiftFraAvgiftssystemet = harTrygdeavgiftFraAvgiftssystemet
+        årsavregning.harInnbetaltTrygdeavgift = harInnbetaltTrygdeavgift
         årsavregning.tilFaktureringBeloep = null
-        årsavregning.trygdeavgiftFraAvgiftssystemet = null
+        årsavregning.innbetaltTrygdeavgift = null
         årsavregning.endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
         årsavregning.manueltAvgiftBeloep = null
+        årsavregning.beregnetAvgiftBelop = null
 
-        if (!harTrygdeavgiftFraAvgiftssystemet) {
+        if (!harInnbetaltTrygdeavgift) {
             behandlingsresultat.clearMedlemskapsperioder()
             behandlingsresultat.clearHelseutgiftDekkesPerioder()
 
@@ -276,6 +284,23 @@ class ÅrsavregningService(
             }
     }
 
+    private fun replikerLovvalgsPeriode(
+        behandlingsresultat: Behandlingsresultat,
+        tidligereBehandlingsresultat: Behandlingsresultat,
+        gjelderÅr: Int
+    ) {
+        tidligereBehandlingsresultat.lovvalgsperioder
+            .filter { it.overlapperMedÅr(gjelderÅr) }
+            .forEach { originalPeriode ->
+                val replika = BeanUtils.cloneBean(originalPeriode) as Lovvalgsperiode
+                replika.id = null
+                replika.trygdeavgiftsperioder = HashSet()
+                replika.avkortFomDato(gjelderÅr)
+                replika.avkortTomDato(gjelderÅr)
+                behandlingsresultat.addLovvalgsperiode(replika)
+            }
+    }
+
     private fun lagÅrsavregningModelFraÅrsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
         val år = årsavregning.aar
 
@@ -302,11 +327,11 @@ class ÅrsavregningService(
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
             beregnetAvgiftBelop = årsavregning.beregnetAvgiftBelop,
             tilFaktureringBeloep = årsavregning.tilFaktureringBeloep,
-            harTrygdeavgiftFraAvgiftssystemet = årsavregning.harTrygdeavgiftFraAvgiftssystemet,
-            trygdeavgiftFraAvgiftssystemet = årsavregning.trygdeavgiftFraAvgiftssystemet,
+            harInnbetaltTrygdeavgift = årsavregning.harInnbetaltTrygdeavgift,
+            innbetaltTrygdeavgift = årsavregning.innbetaltTrygdeavgift,
             endeligAvgiftValg = årsavregning.endeligAvgiftValg,
             manueltAvgiftBeloep = årsavregning.manueltAvgiftBeloep,
-            tidligereTrygdeavgiftFraAvgiftssystemet = sisteÅrsavregning?.trygdeavgiftFraAvgiftssystemet,
+            tidligereInnbetaltTrygdeavgift = sisteÅrsavregning?.innbetaltTrygdeavgift,
             tidligereÅrsavregningmanueltAvgiftBeloep = sisteÅrsavregning?.manueltAvgiftBeloep,
             harSkjoennsfastsattInntektsgrunnlag = årsavregning.harSkjoennsfastsattInntektsgrunnlag
         )
@@ -317,7 +342,14 @@ class ÅrsavregningService(
      * Returnerer separate behandlinger for medlemskapsperiode og avgiftsgrunnlag,
      * siden disse kan komme fra forskjellige behandlinger i noen tilfeller.
      *
-     * førVedtaksdato: Filtrer bort behandlingsresultater som er innvilget etter denne datoen. Dette er nødvendig for å vise hva tidlgiere grunnlag var for en årsavregning som allerede er vedtatt.
+     * For å finne gjeldende avgiftspliktig periode brukes den nyeste behandlingen med avgiftspliktige perioder,
+     * uavhengig av om periodene overlapper med det aktuelle året. Dette sikrer at en ny vurdering som fjerner
+     * eller forkorter en periode korrekt reflekteres i årsavregningen.
+     *
+     * førVedtaksdato: Filtrer bort behandlingsresultater som er innvilget etter denne datoen. Dette er nødvendig for å vise hva tidlgiere
+     * grunnlag var for en årsavregning som allerede er vedtatt.
+     *
+     * Returnerer null hvis ingen felter kan populeres
      */
     fun hentGjeldendeBehandlingsresultaterForÅrsavregning(
         saksnummer: String,
@@ -336,33 +368,42 @@ class ÅrsavregningService(
             Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
         )
 
-        val behandlingsresultater = fagsak.behandlinger
+        // Alle relevante avsluttede behandlinger, uten periodekrav
+        val alleRelevanteBehandlinger = fagsak.behandlinger
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.type in behandlingsresultattyper }
-            .filter { it.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
             .filter { førVedtaksdato == null || it.hentVedtakMetadata().vedtaksdato < førVedtaksdato }
             .sortedBy { it.hentVedtakMetadata().vedtaksdato }
 
 
-        if (behandlingsresultater.isEmpty()) {
-            return null
-        }
+        // Behandlinger med periodeoverlapp for året, brukes til avgiftsgrunnlag og årsavregning
+        val behandlingsresultaterMedOverlapp = alleRelevanteBehandlinger
+            .filter { it.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
 
-        // Finner siste behandling med medlemskapsperioder (brukes for gjeldende medlemskap)
-        val sisteBehandlingsresultatMedAvgiftspliktigPeriode = behandlingsresultater.lastOrNull { it.finnAvgiftspliktigPerioder().isNotEmpty() }
+        // Finner siste behandling med avgiftspliktige perioder (uavhengig av årsoverlapp),
+        // slik at en ny vurdering som fjerner perioden for året korrekt gir null perioder
+        val sisteBehandlingsresultatMedAvgiftspliktigPeriode = alleRelevanteBehandlinger
+            .lastOrNull { it.finnAvgiftspliktigPerioder().isNotEmpty() }
 
         // Finner siste behandling med trygdeavgiftsperioder (brukes for avgiftsgrunnlag)
-        val sisteBehandlingsresultatMedAvgiftsgrunnlag = behandlingsresultater
+        val sisteBehandlingsresultatMedAvgiftsgrunnlag = behandlingsresultaterMedOverlapp
             .filter { it.harTrygdeavgiftsperioderSomOverlapperMedÅr(år) }
             .sortedBy {
                 it.hentVedtakMetadata().vedtaksdato
             }
 
-        val sisteÅrsavregning = behandlingsresultater
+        val sisteÅrsavregning = behandlingsresultaterMedOverlapp
             .filter { it.type == Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT }
             .filter { it.årsavregning != null && it.hentÅrsavregning().aar == år }
             .maxByOrNull { it.hentVedtakMetadata().vedtaksdato }
+
+        if (sisteBehandlingsresultatMedAvgiftspliktigPeriode == null
+            && sisteBehandlingsresultatMedAvgiftsgrunnlag.isEmpty()
+            && sisteÅrsavregning == null
+        ) {
+            return null
+        }
 
         return GjeldendeBehandlingsresultaterForÅrsavregning(
             sisteBehandlingsresultatMedAvgiftspliktigPeriode = sisteBehandlingsresultatMedAvgiftspliktigPeriode,
@@ -401,6 +442,7 @@ class ÅrsavregningService(
                     when (periode) {
                         is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(år, periode)
                         is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(år, periode)
+                        is Lovvalgsperiode -> LovvalgsperiodeForAvgift(år, periode)
                         else -> throw FunksjonellException("Periodetype støttes ikke")
                     }
                 },
@@ -425,6 +467,7 @@ class ÅrsavregningService(
                 when (it) {
                     is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(år, it)
                     is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(år, it)
+                    is Lovvalgsperiode -> LovvalgsperiodeForAvgift(år, it)
                     else -> throw FunksjonellException("Ukjent periodetype: ${it.javaClass.simpleName}")
                 }
             }
@@ -466,7 +509,7 @@ class ÅrsavregningService(
         behandlingID: Long,
         aarsavregningId: Long,
         beregnetAvgiftBelop: BigDecimal?,
-        trygdeavgiftFraAvgiftssystemet: BigDecimal? = null,
+        innbetaltTrygdeavgift: BigDecimal? = null,
         endeligAvgift: EndeligAvgiftValg? = null,
         manueltAvgiftBeloep: BigDecimal? = null,
     ): ÅrsavregningModel {
@@ -476,7 +519,7 @@ class ÅrsavregningService(
             throw RuntimeException("Årsavregning med id: $aarsavregningId hører ikke til Behandling med Id: $behandlingID")
         }
 
-        if (trygdeavgiftFraAvgiftssystemet != null) årsavregning.trygdeavgiftFraAvgiftssystemet = trygdeavgiftFraAvgiftssystemet
+        if (innbetaltTrygdeavgift != null) årsavregning.innbetaltTrygdeavgift = innbetaltTrygdeavgift
         if (beregnetAvgiftBelop != null) årsavregning.beregnetAvgiftBelop = beregnetAvgiftBelop
         if (manueltAvgiftBeloep != null) årsavregning.manueltAvgiftBeloep = manueltAvgiftBeloep
         if (endeligAvgift != null) {
@@ -510,11 +553,11 @@ data class ÅrsavregningModel(
     val tidligereFakturertBeloep: BigDecimal? = null,
     val beregnetAvgiftBelop: BigDecimal? = null,
     val tilFaktureringBeloep: BigDecimal? = null,
-    val harTrygdeavgiftFraAvgiftssystemet: Boolean? = null,
-    val trygdeavgiftFraAvgiftssystemet: BigDecimal? = null,
+    val harInnbetaltTrygdeavgift: Boolean? = null,
+    val innbetaltTrygdeavgift: BigDecimal? = null,
     val endeligAvgiftValg: EndeligAvgiftValg? = null,
     val manueltAvgiftBeloep: BigDecimal? = null,
-    val tidligereTrygdeavgiftFraAvgiftssystemet: BigDecimal? = null,
+    val tidligereInnbetaltTrygdeavgift: BigDecimal? = null,
     val tidligereÅrsavregningmanueltAvgiftBeloep: BigDecimal? = null,
     val harSkjoennsfastsattInntektsgrunnlag: Boolean
 )
@@ -561,6 +604,36 @@ data class MedlemskapsperiodeForAvgift(
     )
 }
 
+
+data class LovvalgsperiodeForAvgift(
+    override val fom: LocalDate,
+    override val tom: LocalDate,
+    override val dekning: Trygdedekninger,
+    val bestemmelse: Bestemmelse,
+    val medlemskapstyper: Medlemskapstyper,
+    val innvilgelsesresultat: InnvilgelsesResultat,
+    override val type: AvgiftsperiodeForAvgiftType = AvgiftsperiodeForAvgiftType.LOVVALGSPERIODE,
+) : AvgiftsperiodeForAvgift {
+    constructor(lovvalgsperiode: Lovvalgsperiode) : this(
+        fom = lovvalgsperiode.hentFom(),
+        tom = lovvalgsperiode.hentTom(),
+        dekning = lovvalgsperiode.hentTrygdedekning(),
+        bestemmelse = lovvalgsperiode.hentBestemmelse(),
+        medlemskapstyper = lovvalgsperiode.hentMedlemskapstype(),
+        innvilgelsesresultat = lovvalgsperiode.hentInnvilgelsesresultat(),
+    )
+
+    constructor(gjeldendeÅr: Int, lovvalgsperiode: Lovvalgsperiode) : this(
+        fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, lovvalgsperiode.hentFom()),
+        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, lovvalgsperiode.hentTom()),
+        dekning = lovvalgsperiode.hentTrygdedekning(),
+        bestemmelse = lovvalgsperiode.hentBestemmelse(),
+        medlemskapstyper = lovvalgsperiode.hentMedlemskapstype(),
+        innvilgelsesresultat = lovvalgsperiode.hentInnvilgelsesresultat()
+    )
+}
+
+
 enum class AvgiftsperiodeForAvgiftType {
     MEDLEMSKAPSPERIODE,
     HELSEUTGIFTDEKKESPERIODE,
@@ -579,17 +652,20 @@ data class HelseutgiftDekkesPeriodeForAvgift(
     override val tom: LocalDate,
     override val dekning: Trygdedekninger,
     override val type: AvgiftsperiodeForAvgiftType = AvgiftsperiodeForAvgiftType.HELSEUTGIFTDEKKESPERIODE,
+    val id: Long = 0,
 ) : AvgiftsperiodeForAvgift {
     constructor(helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode) : this(
         fom = helseutgiftDekkesPeriode.fomDato,
         tom = helseutgiftDekkesPeriode.tomDato,
         dekning = helseutgiftDekkesPeriode.hentTrygdedekning(),
+        id = helseutgiftDekkesPeriode.id ?: 0,
     )
 
     constructor(gjeldendeÅr: Int, helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode) : this(
         fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, helseutgiftDekkesPeriode.fomDato),
         tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, helseutgiftDekkesPeriode.tomDato),
         dekning = helseutgiftDekkesPeriode.hentTrygdedekning(),
+        id = helseutgiftDekkesPeriode.id ?: 0,
     )
 }
 

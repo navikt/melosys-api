@@ -12,14 +12,17 @@ import no.nav.melosys.skjema.types.utsendtarbeidstaker.AnnenPersonMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMedFullmaktMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.DegSelvMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMedFullmaktMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverfirmaInfo
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaData
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaDto
+import no.nav.melosys.skjema.types.vedlegg.VedleggDto
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -29,6 +32,7 @@ import java.util.UUID
     JsonSubTypes.Type(value = ArbeidsgiverMetadata::class, name = "UTSENDT_ARBEIDSTAKER_ARBEIDSGIVER"),
     JsonSubTypes.Type(value = AnnenPersonMetadata::class, name = "UTSENDT_ARBEIDSTAKER_ANNEN_PERSON"),
     JsonSubTypes.Type(value = ArbeidsgiverMedFullmaktMetadata::class, name = "UTSENDT_ARBEIDSTAKER_ARBEIDSGIVER_MED_FULLMAKT"),
+    JsonSubTypes.Type(value = RadgiverMetadata::class, name = "UTSENDT_ARBEIDSTAKER_RADGIVER"),
     JsonSubTypes.Type(value = RadgiverMedFullmaktMetadata::class, name = "UTSENDT_ARBEIDSTAKER_RADGIVER_MED_FULLMAKT"),
 )
 abstract class UtsendtArbeidstakerMetadataMixin
@@ -37,6 +41,7 @@ abstract class DegSelvMetadataMixin @JsonCreator constructor(
     @JsonProperty("skjemadel") skjemadel: Skjemadel,
     @JsonProperty("arbeidsgiverNavn") arbeidsgiverNavn: String?,
     @JsonProperty("juridiskEnhetOrgnr") juridiskEnhetOrgnr: String?,
+    @JsonProperty("arbeidstakerNavn") arbeidstakerNavn: String?,
     @JsonProperty("kobletSkjemaId") kobletSkjemaId: UUID?,
     @JsonProperty("erstatterSkjemaId") erstatterSkjemaId: UUID?,
 )
@@ -45,6 +50,7 @@ abstract class ArbeidsgiverMetadataMixin @JsonCreator constructor(
     @JsonProperty("skjemadel") skjemadel: Skjemadel,
     @JsonProperty("arbeidsgiverNavn") arbeidsgiverNavn: String?,
     @JsonProperty("juridiskEnhetOrgnr") juridiskEnhetOrgnr: String?,
+    @JsonProperty("arbeidstakerNavn") arbeidstakerNavn: String?,
     @JsonProperty("kobletSkjemaId") kobletSkjemaId: UUID?,
     @JsonProperty("erstatterSkjemaId") erstatterSkjemaId: UUID?,
 )
@@ -54,6 +60,7 @@ abstract class AnnenPersonMetadataMixin @JsonCreator constructor(
     @JsonProperty("arbeidsgiverNavn") arbeidsgiverNavn: String?,
     @JsonProperty("juridiskEnhetOrgnr") juridiskEnhetOrgnr: String?,
     @JsonProperty("fullmektigFnr") fullmektigFnr: String?,
+    @JsonProperty("arbeidstakerNavn") arbeidstakerNavn: String?,
     @JsonProperty("kobletSkjemaId") kobletSkjemaId: UUID?,
     @JsonProperty("erstatterSkjemaId") erstatterSkjemaId: UUID?,
 )
@@ -63,8 +70,19 @@ abstract class ArbeidsgiverMedFullmaktMetadataMixin @JsonCreator constructor(
     @JsonProperty("arbeidsgiverNavn") arbeidsgiverNavn: String?,
     @JsonProperty("juridiskEnhetOrgnr") juridiskEnhetOrgnr: String?,
     @JsonProperty("fullmektigFnr") fullmektigFnr: String?,
+    @JsonProperty("arbeidstakerNavn") arbeidstakerNavn: String?,
     @JsonProperty("kobletSkjemaId") kobletSkjemaId: UUID?,
     @JsonProperty("erstatterSkjemaId") erstatterSkjemaId: UUID?,
+)
+
+abstract class RadgiverMetadataMixin @JsonCreator constructor(
+    @JsonProperty("skjemadel") skjemadel: Skjemadel,
+    @JsonProperty("arbeidsgiverNavn") arbeidsgiverNavn: String?,
+    @JsonProperty("juridiskEnhetOrgnr") juridiskEnhetOrgnr: String?,
+    @JsonProperty("arbeidstakerNavn") arbeidstakerNavn: String?,
+    @JsonProperty("kobletSkjemaId") kobletSkjemaId: UUID?,
+    @JsonProperty("erstatterSkjemaId") erstatterSkjemaId: UUID?,
+    @JsonProperty("radgiverfirma") radgiverfirma: RadgiverfirmaInfo?,
 )
 
 abstract class RadgiverMedFullmaktMetadataMixin @JsonCreator constructor(
@@ -72,6 +90,7 @@ abstract class RadgiverMedFullmaktMetadataMixin @JsonCreator constructor(
     @JsonProperty("arbeidsgiverNavn") arbeidsgiverNavn: String?,
     @JsonProperty("juridiskEnhetOrgnr") juridiskEnhetOrgnr: String?,
     @JsonProperty("fullmektigFnr") fullmektigFnr: String?,
+    @JsonProperty("arbeidstakerNavn") arbeidstakerNavn: String?,
     @JsonProperty("kobletSkjemaId") kobletSkjemaId: UUID?,
     @JsonProperty("erstatterSkjemaId") erstatterSkjemaId: UUID?,
     @JsonProperty("radgiverfirma") radgiverfirma: RadgiverfirmaInfo?,
@@ -81,6 +100,7 @@ abstract class RadgiverMedFullmaktMetadataMixin @JsonCreator constructor(
 @JsonSubTypes(
     JsonSubTypes.Type(value = UtsendtArbeidstakerArbeidstakersSkjemaDataDto::class, name = "UTSENDT_ARBEIDSTAKER_ARBEIDSTAKERS_DEL"),
     JsonSubTypes.Type(value = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto::class, name = "UTSENDT_ARBEIDSTAKER_ARBEIDSGIVERS_DEL"),
+    JsonSubTypes.Type(value = UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto::class, name = "UTSENDT_ARBEIDSTAKER_ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL"),
 )
 interface UtsendtArbeidstakerSkjemaDataMixin
 
@@ -101,8 +121,10 @@ abstract class UtsendtArbeidstakerSkjemaM2MDtoMixin @JsonCreator constructor(
     @JsonProperty("referanseId") referanseId: String?,
     @JsonProperty("innsendtTidspunkt") innsendtTidspunkt: LocalDateTime?,
     @JsonProperty("innsenderFnr") innsenderFnr: String?,
+    @JsonProperty("vedlegg") vedlegg: List<VedleggDto>?,
 )
 
 abstract class SkjemaMottattMeldingMixin @JsonCreator constructor(
     @JsonProperty("skjemaId") skjemaId: UUID,
+    @JsonProperty("relaterteSkjemaIder") relaterteSkjemaIder: List<UUID>,
 )

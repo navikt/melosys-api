@@ -54,6 +54,10 @@ class Medlemskapsperiode : HarBestemmelse<Bestemmelse?>, AvgiftspliktigPeriode {
     @Column(name = "medlperiode_id")
     var medlPeriodeID: Long? = null
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "kilde")
+    var kilde: PeriodeKilde? = null
+
     override fun getFom(): LocalDate? = fom
 
     fun setFom(fom: LocalDate?) {

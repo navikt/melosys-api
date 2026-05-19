@@ -464,7 +464,8 @@ class LovligeKombinasjonerSaksbehandlingService(
             Saksstatuser.HENLAGT_BORTFALT,
             Saksstatuser.AVSLUTTET,
             Saksstatuser.OPPHØRT,
-            Saksstatuser.ANNULLERT
+            Saksstatuser.ANNULLERT,
+            Saksstatuser.VIDERESENDT
         )
 
         private val ÅRSAVREGNING_TILLATTE_BEHANDLINGSTEMA = setOf(

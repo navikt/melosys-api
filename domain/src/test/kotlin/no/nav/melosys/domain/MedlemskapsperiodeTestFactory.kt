@@ -30,6 +30,7 @@ object MedlemskapsperiodeTestFactory {
         var trygdedekning: Trygdedekninger = TRYGDEDEKNING
         var bestemmelse: Bestemmelse? = BESTEMMELSE
         var medlPeriodeID: Long? = null
+        var kilde: PeriodeKilde? = null
 
         val trygdeavgiftsperioder = mutableListOf<Trygdeavgiftsperiode>()
 
@@ -54,6 +55,7 @@ object MedlemskapsperiodeTestFactory {
             this.trygdedekning = this@Builder.trygdedekning
             this.bestemmelse = this@Builder.bestemmelse
             this.medlPeriodeID = this@Builder.medlPeriodeID
+            this.kilde = this@Builder.kilde
 
             // Bruk addTrygdeavgiftsperiode for å sette grunnlagMedlemskapsperiode back-referanse
             this@Builder.trygdeavgiftsperioder.forEach { periode ->

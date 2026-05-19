@@ -29,6 +29,19 @@ Man henter ut disse verdiene fra melosys-api-q1 poden på dev-fss ved å kjøre:
 `env | grep AZURE_APP_CLIENT_ID` og `env | grep AZURE_APP_CLIENT_SECRET`<br>
 `melosysDB.password` og `systemuser.password` finner man i [vault](https://vault.adeo.no/ui/vault/secrets/kv%2Fpreprod%2Ffss/show/melosys-q1/teammelosys)
 
+### Lokale endringer i `melosys-skjema-api-types`
+
+`melosys-skjema-api-types` blir til vanlig kun publisert ved push til `main` i [melosys-skjema-api](https://github.com/navikt/melosys-skjema-api). For å teste type-endringer mot melosys-api uten å merge til main først:
+
+```bash
+make local-skjema-types          # bygg + oppdater pom.xml
+make local-skjema-types-no-pom   # bygg uten å endre pom.xml
+```
+
+Targeten kaller `scripts/build-local-skjema-types.sh`, som delegerer selve byggingen til `../melosys-skjema-api/scripts/publish-types-local.sh`. Den lokale versjonen får suffiks `-LOCAL` (og `.dirty` hvis working tree har ucommittede endringer), publiseres til `~/.m2/repository`, og pom.xml peker på den.
+
+Forutsetninger: `melosys-skjema-api` må være klonet som søsterkatalog (`../melosys-skjema-api`) eller pekt på via `SKJEMA_API_DIR=...`. Husk å revertere pom.xml-endringen før commit.
+
 ## Feature Toggles
 
 Melosys-api bruker [Unleash](https://www.getunleash.io/) for feature toggles. I lokal utvikling er systemet konfigurert

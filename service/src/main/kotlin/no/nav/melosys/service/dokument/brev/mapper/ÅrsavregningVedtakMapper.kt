@@ -47,7 +47,12 @@ class ÅrsavregningVedtakMapper(
 
         val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.avgiftspliktigperioder)
         val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttTrygdeavgiftsGrunnlag?.avgiftspliktigperioder)
-        val erNyÅrsavregning = behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
+        val erNyÅrsavregning =
+            behandlingsresultat.årsavregning?.tidligereBehandlingsresultat
+                ?.let {
+                    it.behandling?.erÅrsavregning() == true &&
+                        it.årsavregning?.aar == behandlingsresultat.hentÅrsavregning().aar
+                } ?: false
 
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
@@ -131,10 +136,10 @@ class ÅrsavregningVedtakMapper(
     }
 
     private fun harGrunnlagKunFraMelosys(årsavregning: ÅrsavregningModel): Boolean =
-        (årsavregning.harTrygdeavgiftFraAvgiftssystemet == null || årsavregning.harTrygdeavgiftFraAvgiftssystemet != true) && årsavregning.tidligereTrygdeavgiftsGrunnlag != null
+        (årsavregning.harInnbetaltTrygdeavgift == null || årsavregning.harInnbetaltTrygdeavgift != true) && årsavregning.tidligereTrygdeavgiftsGrunnlag != null
 
     private fun totaltTidligereFakturertBeloep(årsavregning: ÅrsavregningModel): BigDecimal {
-        return (årsavregning.tidligereFakturertBeloep ?: BigDecimal.ZERO) + (årsavregning.trygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO)
+        return (årsavregning.tidligereFakturertBeloep ?: BigDecimal.ZERO) + (årsavregning.innbetaltTrygdeavgift ?: BigDecimal.ZERO)
     }
 
     private fun finnFullmektigTrygdeavgift(behandling: Behandling): String? =

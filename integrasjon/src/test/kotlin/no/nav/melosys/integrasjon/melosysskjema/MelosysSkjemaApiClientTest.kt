@@ -4,7 +4,10 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.matchers.shouldBe
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsinntektKilde
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.DegSelvMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.InntektType
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.SkatteforholdOgInntektDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import no.nav.melosys.skjema.types.SkjemaType
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendingsperiodeOgLandDto
@@ -91,7 +94,8 @@ class MelosysSkjemaApiClientTest(
                   "metadatatype": "UTSENDT_ARBEIDSTAKER_DEG_SELV",
                   "skjemadel": "ARBEIDSTAKERS_DEL",
                   "arbeidsgiverNavn": "Test Bedrift AS",
-                  "juridiskEnhetOrgnr": "987654321"
+                  "juridiskEnhetOrgnr": "987654321",
+                  "arbeidstakerNavn": "Test Arbeidstaker"
                 },
                 "data": {
                   "type": "UTSENDT_ARBEIDSTAKER_ARBEIDSTAKERS_DEL",
@@ -101,6 +105,14 @@ class MelosysSkjemaApiClientTest(
                       "fraDato": "2024-01-01",
                       "tilDato": "2024-12-31"
                     }
+                  },
+                  "skatteforholdOgInntekt": {
+                    "erSkattepliktigTilNorgeIHeleutsendingsperioden": true,
+                    "mottarPengestotteFraAnnetEosLandEllerSveits": false,
+                    "inntektFraNorskEllerUtenlandskVirksomhet": ["NORSK_VIRKSOMHET", "UTENLANDSK_VIRKSOMHET"],
+                    "hvilkeTyperInntektHarDu": ["LOENN", "INNTEKT_FRA_EGEN_VIRKSOMHET"],
+                    "inntekt": "65000",
+                    "inntektFraEgenVirksomhet": "12000"
                   }
                 }
               },
@@ -136,7 +148,8 @@ class MelosysSkjemaApiClientTest(
                 metadata = DegSelvMetadata(
                     skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
                     arbeidsgiverNavn = "Test Bedrift AS",
-                    juridiskEnhetOrgnr = "987654321"
+                    juridiskEnhetOrgnr = "987654321",
+                    arbeidstakerNavn = "Test Arbeidstaker"
                 ),
                 data = UtsendtArbeidstakerArbeidstakersSkjemaDataDto(
                     utsendingsperiodeOgLand = UtsendingsperiodeOgLandDto(
@@ -145,6 +158,17 @@ class MelosysSkjemaApiClientTest(
                             fraDato = LocalDate.of(2024, 1, 1),
                             tilDato = LocalDate.of(2024, 12, 31)
                         )
+                    ),
+                    skatteforholdOgInntekt = SkatteforholdOgInntektDto(
+                        erSkattepliktigTilNorgeIHeleutsendingsperioden = true,
+                        mottarPengestotteFraAnnetEosLandEllerSveits = false,
+                        landSomUtbetalerPengestotte = null,
+                        pengestotteSomMottasFraAndreLandBelop = null,
+                        pengestotteSomMottasFraAndreLandBeskrivelse = null,
+                        inntektFraNorskEllerUtenlandskVirksomhet = setOf(ArbeidsinntektKilde.NORSK_VIRKSOMHET, ArbeidsinntektKilde.UTENLANDSK_VIRKSOMHET),
+                        hvilkeTyperInntektHarDu = setOf(InntektType.LOENN, InntektType.INNTEKT_FRA_EGEN_VIRKSOMHET),
+                        inntekt = "65000",
+                        inntektFraEgenVirksomhet = "12000"
                     )
                 )
             ),
@@ -159,6 +183,52 @@ class MelosysSkjemaApiClientTest(
             WireMock.getRequestedFor(WireMock.urlPathEqualTo("/m2m/api/skjema/utsendt-arbeidstaker/$skjemaId/data"))
                 .withHeader("Authorization", WireMock.matching("Bearer .+"))
                 .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+        )
+    }
+
+    @Test
+    fun `hentVedleggInnhold - returnerer raw bytes fra M2M-endepunkt`() {
+        val skjemaId = UUID.randomUUID()
+        val vedleggId = UUID.randomUUID()
+        val pdfBytes = byteArrayOf(0x25, 0x50, 0x44, 0x46, 0x2D)
+
+        wireMockServer.stubFor(
+            WireMock.get(WireMock.urlPathEqualTo("/m2m/api/skjema/$skjemaId/vedlegg/$vedleggId/innhold"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE)
+                        .withBody(pdfBytes)
+                )
+        )
+
+        val result = melosysSkjemaApiClient.hentVedleggInnhold(skjemaId, vedleggId)
+
+        result shouldBe pdfBytes
+
+        wireMockServer.verify(
+            WireMock.getRequestedFor(WireMock.urlPathEqualTo("/m2m/api/skjema/$skjemaId/vedlegg/$vedleggId/innhold"))
+                .withHeader("Authorization", WireMock.matching("Bearer .+"))
+        )
+    }
+
+    @Test
+    fun `registrerSaksnummer - sender POST med saksnummer`() {
+        val skjemaId = UUID.randomUUID()
+        val saksnummer = "MEL-1234"
+
+        wireMockServer.stubFor(
+            WireMock.post(WireMock.urlPathEqualTo("/m2m/api/skjema/$skjemaId/saksnummer"))
+                .willReturn(WireMock.aResponse().withStatus(204))
+        )
+
+        melosysSkjemaApiClient.registrerSaksnummer(skjemaId, saksnummer)
+
+        wireMockServer.verify(
+            WireMock.postRequestedFor(WireMock.urlPathEqualTo("/m2m/api/skjema/$skjemaId/saksnummer"))
+                .withHeader("Authorization", WireMock.matching("Bearer .+"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withRequestBody(WireMock.matchingJsonPath("$.saksnummer", WireMock.equalTo(saksnummer)))
         )
     }
 }

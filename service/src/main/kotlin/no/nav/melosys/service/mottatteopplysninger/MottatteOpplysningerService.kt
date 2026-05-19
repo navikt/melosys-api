@@ -96,6 +96,17 @@ class MottatteOpplysningerService(
         eksternReferanseID
     )
 
+    fun opprettSøknadDigital(
+        behandlingID: Long, originalData: String?, soeknad: Soeknad, eksternReferanseID: String?
+    ): MottatteOpplysninger = opprettMottatteOpplysninger(
+        behandlingID,
+        originalData,
+        soeknad,
+        Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS,
+        VERSJON_SOEKNAD_GRUNNLAG,
+        eksternReferanseID
+    )
+
     private fun opprettAnmodningEllerAttest(
         behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?
     ): MottatteOpplysninger {
@@ -231,6 +242,28 @@ class MottatteOpplysningerService(
         val mottatteOpplysninger = hentMottatteOpplysninger(behandlingID).apply {
             mottatteOpplysningerData.periode = periode
             mottatteOpplysningerData.soeknadsland = soeknadsland
+        }
+        MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger)
+        mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger)
+    }
+
+    /**
+     * Oppdaterer sidemeny-feltene på eksisterende MottatteOpplysninger fra en ny Soeknad.
+     * Brukes når ny digital søknad mottas på åpen behandling (siste-vinner-regel).
+     *
+     * Felter som ikke mappes fra søknaden (f.eks. loennOgGodtgjoerelse, utenlandsoppdraget)
+     * beholdes urørt.
+     */
+    @Transactional
+    fun oppdaterMottatteOpplysningerFraSøknad(behandlingID: Long, nySoeknad: Soeknad) {
+        val mottatteOpplysninger = hentMottatteOpplysninger(behandlingID).apply {
+            mottatteOpplysningerData.periode = nySoeknad.periode
+            mottatteOpplysningerData.soeknadsland = nySoeknad.soeknadsland
+            mottatteOpplysningerData.juridiskArbeidsgiverNorge = nySoeknad.juridiskArbeidsgiverNorge
+            mottatteOpplysningerData.foretakUtland = nySoeknad.foretakUtland
+            mottatteOpplysningerData.arbeidPaaLand = nySoeknad.arbeidPaaLand
+            mottatteOpplysningerData.maritimtArbeid = nySoeknad.maritimtArbeid
+            mottatteOpplysningerData.luftfartBaser = nySoeknad.luftfartBaser
         }
         MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger)
         mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger)

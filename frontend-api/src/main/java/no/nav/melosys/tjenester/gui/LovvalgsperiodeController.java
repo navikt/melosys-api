@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.PeriodeKilde;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.lovvalgsperiode.OpprettLovvalgsperiodeService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -89,6 +90,16 @@ public class LovvalgsperiodeController {
         aksesskontroll.autoriserSkriv(behandlingsid);
 
         lovvalgsperiodeService.slettLovvalgsperiode(lovvalgsperiodeId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/behandlinger/{behandlingID}/lovvalgsperioder")
+    @Operation(summary = "Sletter lovvalgsperioder med en gitt kilde")
+    public ResponseEntity<Void> slettLovvalgsperioderMedKilde(@PathVariable("behandlingID") long behandlingsid,
+                                                               @RequestParam("kilde") PeriodeKilde kilde) {
+        aksesskontroll.autoriserSkriv(behandlingsid);
+
+        lovvalgsperiodeService.slettLovvalgsperioderMedKilde(behandlingsid, kilde);
         return ResponseEntity.noContent().build();
     }
 

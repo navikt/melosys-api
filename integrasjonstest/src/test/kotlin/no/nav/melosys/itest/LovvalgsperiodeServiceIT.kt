@@ -1,5 +1,6 @@
 package no.nav.melosys.itest
 
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.melosys.domain.*
@@ -84,6 +85,22 @@ class LovvalgsperiodeServiceIT(
         }
     }
 
+    @Test
+    fun `lagret lovvalgsperiode er tilgjengelig på behandlingsresultat i samme transaksjon`() {
+        val (behandlingsresultat, _) = lagreBehandlingsresultatMedLovvalgsperiodeSomHarTrygdeavgift()
+
+        val nyLovvalgsperiode = nyLovvalgsperiodeUtenTrygdeavgift()
+        lovvalgsperiodeService.lagreLovvalgsperioder(
+            behandlingsresultat.hentId(),
+            listOf(nyLovvalgsperiode)
+        )
+
+        // Hent behandlingsresultatet fra persistence context (ikke fra DB)
+        // Dette simulerer hva som skjer ved automatisk vedtaksfatting i samme transaksjon
+        val hentetBehandlingsresultat = behandlingsresultatRepository.findById(behandlingsresultat.hentId()).get()
+        hentetBehandlingsresultat.lovvalgsperioder shouldHaveSize 1
+    }
+
     private fun lagreBehandlingsresultatMedLovvalgsperiodeSomHarTrygdeavgift(
         behandlingstema: Behandlingstema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
     ): LagretLovvalgsperiodeMedResultat {
@@ -97,12 +114,12 @@ class LovvalgsperiodeServiceIT(
         }
 
         val lagretBehandlingsresultat = behandlingsresultatRepository.saveAndFlush(behandlingsresultat)
-        val lagretLovvalgsperiode = lagreLovvalgsperiodeMedTrygdeavgiftsperiode(lagretBehandlingsresultat)
-        lagretBehandlingsresultat.lovvalgsperioder.add(lagretLovvalgsperiode)
+        val lovvalgsperiode = lagLovvalgsperiodeMedTrygdeavgiftsperiode(lagretBehandlingsresultat)
+        lagretBehandlingsresultat.lovvalgsperioder.add(lovvalgsperiode)
 
         return LagretLovvalgsperiodeMedResultat(
             behandlingsresultat = lagretBehandlingsresultat,
-            lovvalgsperiode = lagretLovvalgsperiode
+            lovvalgsperiode = lovvalgsperiode
         )
     }
 
@@ -134,10 +151,10 @@ class LovvalgsperiodeServiceIT(
         return behandlingRepository.save(behandling)
     }
 
-    private fun lagreLovvalgsperiodeMedTrygdeavgiftsperiode(
+    private fun lagLovvalgsperiodeMedTrygdeavgiftsperiode(
         lagretBehandlingsresultat: Behandlingsresultat
     ): Lovvalgsperiode {
-        val lovvalgsperiode = Lovvalgsperiode.forTest {
+        return Lovvalgsperiode.forTest {
             behandlingsresultat = lagretBehandlingsresultat
             fom = EKSISTERENDE_LOVVALGSPERIODE_FOM
             tom = EKSISTERENDE_LOVVALGSPERIODE_TOM
@@ -157,8 +174,6 @@ class LovvalgsperiodeServiceIT(
                 }
             )
         }
-
-        return lovvalgsperiodeRepository.saveAndFlush(lovvalgsperiode)
     }
 
     private fun nyLovvalgsperiodeUtenTrygdeavgift() = Lovvalgsperiode.forTest {

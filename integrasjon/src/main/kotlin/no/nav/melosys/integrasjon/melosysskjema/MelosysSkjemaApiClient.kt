@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.melosysskjema
 
 import mu.KotlinLogging
+import no.nav.melosys.skjema.types.m2m.RegistrerSaksnummerRequest
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
@@ -23,6 +24,18 @@ class MelosysSkjemaApiClient(private val melosysSkjemaApiWebClient: WebClient) {
             .block() ?: error("Kunne ikke hente skjema for ID $skjemaId")
     }
 
+    fun registrerSaksnummer(skjemaId: UUID, saksnummer: String) {
+        log.info("Registrerer saksnummer {} for skjema {}", saksnummer, skjemaId)
+
+        melosysSkjemaApiWebClient.post()
+            .uri("/m2m/api/skjema/{id}/saksnummer", skjemaId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(RegistrerSaksnummerRequest(saksnummer))
+            .retrieve()
+            .toBodilessEntity()
+            .block()
+    }
+
     fun hentPdf(skjemaId: UUID): ByteArray {
         log.info("Henter PDF for skjema med ID {}", skjemaId)
 
@@ -32,5 +45,16 @@ class MelosysSkjemaApiClient(private val melosysSkjemaApiWebClient: WebClient) {
             .retrieve()
             .bodyToMono(ByteArray::class.java)
             .block() ?: error("Kunne ikke hente PDF for skjema $skjemaId")
+    }
+
+    fun hentVedleggInnhold(skjemaId: UUID, vedleggId: UUID): ByteArray {
+        log.info("Henter vedlegg {} for skjema {}", vedleggId, skjemaId)
+
+        return melosysSkjemaApiWebClient.get()
+            .uri("/m2m/api/skjema/{skjemaId}/vedlegg/{vedleggId}/innhold", skjemaId, vedleggId)
+            .accept(MediaType.APPLICATION_OCTET_STREAM)
+            .retrieve()
+            .bodyToMono(ByteArray::class.java)
+            .block() ?: error("Kunne ikke hente vedlegg $vedleggId for skjema $skjemaId")
     }
 }

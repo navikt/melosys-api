@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.brev
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -9,7 +10,9 @@ import no.nav.melosys.domain.kodeverk.Mottakerroller.*
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD
 import no.nav.melosys.saksflyt.brev.BrevBestiller
 import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -131,6 +134,200 @@ class SendForvaltningsmeldingTest {
 
         sendForvaltningsmelding.utfør(prosessinstans)
 
+
+        verify(exactly = 0) { brevBestiller.bestill(any()) }
+    }
+
+    @Test
+    fun `utfør skal sende forvaltningsmelding til bruker ved komplett digital søknad i nytt mottak`() {
+        val behandlingID = 21432L
+        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            skjemadel = Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL
+        }
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
+            status = ProsessStatus.KLAR
+            behandling {
+                id = behandlingID
+            }
+            medData(ProsessDataKey.DIGITAL_SØKNADSDATA, søknadsdata)
+            medData(ProsessDataKey.SAKSBEHANDLER, "TEST")
+        }
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns prosessinstans.behandling
+
+        sendForvaltningsmelding.utfør(prosessinstans)
+
+        verify { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) }
+        verify {
+            brevBestiller.bestill(
+                MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
+                listOf(Mottaker.medRolle(BRUKER)),
+                null,
+                "TEST",
+                null,
+                prosessinstans.behandling
+            )
+        }
+    }
+
+    @Test
+    fun `utfør skal sende forvaltningsmelding til bruker når kun arbeidstakerdel i nytt mottak`() {
+        val behandlingID = 21432L
+        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
+        }
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
+            status = ProsessStatus.KLAR
+            behandling {
+                id = behandlingID
+            }
+            medData(ProsessDataKey.DIGITAL_SØKNADSDATA, søknadsdata)
+            medData(ProsessDataKey.SAKSBEHANDLER, "TEST")
+        }
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns prosessinstans.behandling
+
+        sendForvaltningsmelding.utfør(prosessinstans)
+
+        verify { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) }
+        verify {
+            brevBestiller.bestill(
+                MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
+                listOf(Mottaker.medRolle(BRUKER)),
+                null,
+                "TEST",
+                null,
+                prosessinstans.behandling
+            )
+        }
+    }
+
+    @Test
+    fun `utfør skal ikke sende forvaltningsmelding når kun arbeidsgiverdel i nytt mottak`() {
+        val behandlingID = 21432L
+        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+            data = no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
+        }
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
+            status = ProsessStatus.KLAR
+            behandling {
+                id = behandlingID
+            }
+            medData(ProsessDataKey.DIGITAL_SØKNADSDATA, søknadsdata)
+            medData(ProsessDataKey.SAKSBEHANDLER, "TEST")
+        }
+
+        sendForvaltningsmelding.utfør(prosessinstans)
+
+        verify(exactly = 0) { brevBestiller.bestill(any()) }
+        verify(exactly = 0) { behandlingService.hentBehandlingMedSaksopplysninger(any()) }
+    }
+
+    @Test
+    fun `utfør skal sende forvaltningsmelding til bruker ved komplett digital søknad på eksisterende sak`() {
+        val behandlingID = 21432L
+        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            skjemadel = Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL
+        }
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
+            status = ProsessStatus.KLAR
+            behandling {
+                id = behandlingID
+            }
+            medData(ProsessDataKey.DIGITAL_SØKNADSDATA, søknadsdata)
+            medData(ProsessDataKey.SAKSBEHANDLER, "TEST")
+        }
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns prosessinstans.behandling
+
+        sendForvaltningsmelding.utfør(prosessinstans)
+
+        verify {
+            brevBestiller.bestill(
+                MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
+                listOf(Mottaker.medRolle(BRUKER)),
+                null,
+                "TEST",
+                null,
+                prosessinstans.behandling
+            )
+        }
+    }
+
+    @Test
+    fun `utfør skal sende forvaltningsmelding til bruker når kun arbeidstakerdel på eksisterende sak`() {
+        val behandlingID = 21432L
+        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
+        }
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
+            status = ProsessStatus.KLAR
+            behandling {
+                id = behandlingID
+            }
+            medData(ProsessDataKey.DIGITAL_SØKNADSDATA, søknadsdata)
+            medData(ProsessDataKey.SAKSBEHANDLER, "TEST")
+        }
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns prosessinstans.behandling
+
+        sendForvaltningsmelding.utfør(prosessinstans)
+
+        verify {
+            brevBestiller.bestill(
+                MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
+                listOf(Mottaker.medRolle(BRUKER)),
+                null,
+                "TEST",
+                null,
+                prosessinstans.behandling
+            )
+        }
+    }
+
+    @Test
+    fun `utfør skal ikke sende forvaltningsmelding når kun arbeidsgiverdel på eksisterende sak`() {
+        val behandlingID = 21432L
+        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+            data = no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
+        }
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
+            status = ProsessStatus.KLAR
+            behandling {
+                id = behandlingID
+            }
+            medData(ProsessDataKey.DIGITAL_SØKNADSDATA, søknadsdata)
+            medData(ProsessDataKey.SAKSBEHANDLER, "TEST")
+        }
+
+        sendForvaltningsmelding.utfør(prosessinstans)
+
+        verify(exactly = 0) { brevBestiller.bestill(any()) }
+        verify(exactly = 0) { behandlingService.hentBehandlingMedSaksopplysninger(any()) }
+    }
+
+    @Test
+    fun `utfør skal kaste exception når digital søknadsdata mangler for digital søknad-prosess`() {
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
+            status = ProsessStatus.KLAR
+            behandling {
+                id = 21432L
+            }
+            medData(ProsessDataKey.SAKSBEHANDLER, "TEST")
+        }
+
+        shouldThrow<IllegalStateException> {
+            sendForvaltningsmelding.utfør(prosessinstans)
+        }
 
         verify(exactly = 0) { brevBestiller.bestill(any()) }
     }

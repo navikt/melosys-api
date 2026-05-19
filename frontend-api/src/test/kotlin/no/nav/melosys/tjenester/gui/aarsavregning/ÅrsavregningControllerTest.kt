@@ -148,11 +148,11 @@ internal class ÅrsavregningControllerTest {
             tidligereFakturertBeloep = BigDecimal(21170.0),
             beregnetAvgiftBelop = BigDecimal(24280.0),
             tilFaktureringBeloep = BigDecimal(3110.0),
-            harTrygdeavgiftFraAvgiftssystemet = false,
-            trygdeavgiftFraAvgiftssystemet = null,
+            harInnbetaltTrygdeavgift = false,
+            innbetaltTrygdeavgift = null,
             endeligAvgiftValg = null,
             manueltAvgiftBeloep = null,
-            tidligereTrygdeavgiftFraAvgiftssystemet = null,
+            tidligereInnbetaltTrygdeavgift = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null,
             harSkjoennsfastsattInntektsgrunnlag = false
         )
@@ -240,7 +240,7 @@ internal class ÅrsavregningControllerTest {
       "totalInntekt": 355000.0,
       "totalAvgift": 31650.0
     },
-    "tidligereTrygdeavgiftFraAvgiftssystemet": null,
+    "tidligereInnbetaltTrygdeavgift": null,
     "tidligereÅrsavregningManueltAvgiftBeloep": null
   },
   "sisteGjeldendeAvgiftspliktigperioder": [
@@ -271,10 +271,10 @@ internal class ÅrsavregningControllerTest {
     "beregnetAvgiftBelop": 24280,
     "tidligereFakturertBeloep": 21170,
     "tilFaktureringBeloep": 3110,
-    "trygdeavgiftFraAvgiftssystemet": null,
+    "innbetaltTrygdeavgift": null,
     "manueltAvgiftBeloep": null
   },
-  "harTrygdeavgiftFraAvgiftssystemet": false,
+  "harInnbetaltTrygdeavgift": false,
   "endeligAvgiftValg": null,
   "harSkjoennsfastsattInntekt": false
 }"""
@@ -391,11 +391,11 @@ internal class ÅrsavregningControllerTest {
             tidligereFakturertBeloep = BigDecimal(80580.0),
             beregnetAvgiftBelop = BigDecimal(6708.0),
             tilFaktureringBeloep = BigDecimal(-73872.0),
-            harTrygdeavgiftFraAvgiftssystemet = false,
-            trygdeavgiftFraAvgiftssystemet = null,
+            harInnbetaltTrygdeavgift = false,
+            innbetaltTrygdeavgift = null,
             endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
             manueltAvgiftBeloep = null,
-            tidligereTrygdeavgiftFraAvgiftssystemet = null,
+            tidligereInnbetaltTrygdeavgift = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null,
             harSkjoennsfastsattInntektsgrunnlag = false
         )
@@ -451,7 +451,7 @@ internal class ÅrsavregningControllerTest {
             "totalInntekt": 1020000.00,
             "totalAvgift": 80580.00
         },
-        "tidligereTrygdeavgiftFraAvgiftssystemet": null,
+        "tidligereInnbetaltTrygdeavgift": null,
         "tidligereÅrsavregningManueltAvgiftBeloep": null
     },
     "sisteGjeldendeAvgiftspliktigperioder": [],
@@ -508,10 +508,10 @@ internal class ÅrsavregningControllerTest {
         "beregnetAvgiftBelop": 6708,
         "tidligereFakturertBeloep": 80580,
         "tilFaktureringBeloep": -73872,
-        "trygdeavgiftFraAvgiftssystemet": null,
+        "innbetaltTrygdeavgift": null,
         "manueltAvgiftBeloep": null
     },
-    "harTrygdeavgiftFraAvgiftssystemet": false,
+    "harInnbetaltTrygdeavgift": false,
     "endeligAvgiftValg": "OPPLYSNINGER_ENDRET",
     "harSkjoennsfastsattInntekt": false
 }"""

@@ -6,10 +6,12 @@ import no.nav.melosys.skjema.types.utsendtarbeidstaker.DegSelvMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaDto
 import no.nav.melosys.skjema.types.common.SkjemaStatus
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
+import no.nav.melosys.skjema.types.vedlegg.VedleggDto
+import java.time.Instant
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -26,12 +28,15 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
         var orgnr: String = "123456789"
         var juridiskEnhetOrgnr: String = "987654321"
         var arbeidsgiverNavn: String = "Test AS"
+        var arbeidstakerNavn: String = "Test Arbeidstaker"
         var skjemadel: Skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
+        var metadata: UtsendtArbeidstakerMetadata? = null
         var data: no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaData =
             UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
         var referanseId: String = "MEL-${UUID.randomUUID()}"
         var innsenderFnr: String? = null
         var innsendtTidspunkt: LocalDateTime = LocalDateTime.now()
+        var vedlegg: List<VedleggDto> = emptyList()
 
         private var kobletSkjemaBuilder: ArbeidsgiverSkjemaBuilder? = null
 
@@ -40,14 +45,24 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
                 fnr = fnr,
                 orgnr = orgnr,
                 juridiskEnhetOrgnr = juridiskEnhetOrgnr,
-                arbeidsgiverNavn = arbeidsgiverNavn
+                arbeidsgiverNavn = arbeidsgiverNavn,
+                arbeidstakerNavn = arbeidstakerNavn
             ).apply(init)
         }
 
         fun build(): UtsendtArbeidstakerSkjemaM2MDto {
-            val skjema = lagSkjemaDto(skjemadel, data)
+            val effektivSkjemadel = metadata?.skjemadel ?: skjemadel
+            val skjema = lagSkjemaDto(effektivSkjemadel, data, metadataOverride = metadata)
             val kobletSkjema = kobletSkjemaBuilder?.let {
-                lagSkjemaDto(Skjemadel.ARBEIDSGIVERS_DEL, it.data, it.fnr, it.orgnr, it.juridiskEnhetOrgnr, it.arbeidsgiverNavn)
+                lagSkjemaDto(
+                    Skjemadel.ARBEIDSGIVERS_DEL,
+                    it.data,
+                    it.fnr,
+                    it.orgnr,
+                    it.juridiskEnhetOrgnr,
+                    it.arbeidsgiverNavn,
+                    it.arbeidstakerNavn
+                )
             }
 
             return UtsendtArbeidstakerSkjemaM2MDto(
@@ -56,9 +71,28 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
                 tidligereInnsendteSkjema = emptyList(),
                 referanseId = referanseId,
                 innsendtTidspunkt = innsendtTidspunkt,
-                innsenderFnr = innsenderFnr ?: fnr
+                innsenderFnr = innsenderFnr ?: fnr,
+                vedlegg = vedlegg
             )
         }
+
+        fun medVedlegg(vararg vedleggDto: VedleggDto) {
+            vedlegg = vedleggDto.toList()
+        }
+
+        fun lagVedleggDto(
+            id: UUID = UUID.randomUUID(),
+            filnavn: String = "vedlegg-$id.pdf",
+            filtype: no.nav.melosys.skjema.types.vedlegg.VedleggFiltype =
+                no.nav.melosys.skjema.types.vedlegg.VedleggFiltype.PDF,
+            filstorrelse: Long = 1024
+        ) = VedleggDto(
+            id = id,
+            filnavn = filnavn,
+            filtype = filtype,
+            filstorrelse = filstorrelse,
+            opprettetDato = Instant.now()
+        )
 
         private fun lagSkjemaDto(
             skjemadel: Skjemadel,
@@ -66,7 +100,9 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
             fnr: String = this.fnr,
             orgnr: String = this.orgnr,
             juridiskEnhetOrgnr: String = this.juridiskEnhetOrgnr,
-            arbeidsgiverNavn: String = this.arbeidsgiverNavn
+            arbeidsgiverNavn: String = this.arbeidsgiverNavn,
+            arbeidstakerNavn: String = this.arbeidstakerNavn,
+            metadataOverride: UtsendtArbeidstakerMetadata? = null
         ) = UtsendtArbeidstakerSkjemaDto(
             id = UUID.randomUUID(),
             status = SkjemaStatus.SENDT,
@@ -74,21 +110,24 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
             orgnr = orgnr,
             opprettetDato = LocalDateTime.now(),
             endretDato = LocalDateTime.now(),
-            metadata = when (skjemadel) {
+            metadata = metadataOverride ?: when (skjemadel) {
                 Skjemadel.ARBEIDSTAKERS_DEL -> DegSelvMetadata(
                     skjemadel = skjemadel,
                     arbeidsgiverNavn = arbeidsgiverNavn,
-                    juridiskEnhetOrgnr = juridiskEnhetOrgnr
+                    juridiskEnhetOrgnr = juridiskEnhetOrgnr,
+                    arbeidstakerNavn = arbeidstakerNavn
                 )
                 Skjemadel.ARBEIDSGIVERS_DEL -> ArbeidsgiverMetadata(
                     skjemadel = skjemadel,
                     arbeidsgiverNavn = arbeidsgiverNavn,
-                    juridiskEnhetOrgnr = juridiskEnhetOrgnr
+                    juridiskEnhetOrgnr = juridiskEnhetOrgnr,
+                    arbeidstakerNavn = arbeidstakerNavn
                 )
                 Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL -> DegSelvMetadata(
                     skjemadel = skjemadel,
                     arbeidsgiverNavn = arbeidsgiverNavn,
-                    juridiskEnhetOrgnr = juridiskEnhetOrgnr
+                    juridiskEnhetOrgnr = juridiskEnhetOrgnr,
+                    arbeidstakerNavn = arbeidstakerNavn
                 )
             },
             data = data
@@ -101,6 +140,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
         var orgnr: String = "123456789",
         var juridiskEnhetOrgnr: String = "987654321",
         var arbeidsgiverNavn: String = "Test AS",
+        var arbeidstakerNavn: String = "Test Arbeidstaker",
         var data: UtsendtArbeidstakerArbeidsgiversSkjemaDataDto = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
     )
 }

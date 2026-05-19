@@ -1,7 +1,7 @@
 # Makefile for melosys-api local development
 # Usage: make <target>
 
-.PHONY: help build build-fast docker-build docker-build-local clean run test package docker-push docker-tag
+.PHONY: help build build-fast docker-build docker-build-local clean run test package docker-push docker-tag local-skjema-types
 
 # Default target
 .DEFAULT_GOAL := help
@@ -139,6 +139,14 @@ compose-restart: ## Restart melosys-api container
 	fi
 
 compose-rebuild: docker-build compose-down compose-up ## Rebuild and restart with docker-compose
+
+##@ Skjema API Types
+
+local-skjema-types: ## Build melosys-skjema-api-types locally and install to ~/.m2 (requires ../melosys-skjema-api or SKJEMA_API_DIR)
+	@./scripts/build-local-skjema-types.sh
+
+local-skjema-types-no-pom: ## Same as local-skjema-types, but does not modify pom.xml (prints version)
+	@./scripts/build-local-skjema-types.sh --no-pom-update
 
 ##@ Database
 
