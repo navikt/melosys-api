@@ -280,6 +280,20 @@ public class ProsessinstansService {
         return lagre(prosessinstans, getSaksbehandlerIdent(), getSaksbehandlerNavn());
     }
 
+    /**
+     * Løfter prioriteten til {@code prosessinstans} hvis foreldreprosessen har en høyere prioritet enn type-default.
+     * Regelen er {@code prioritet = max(child.prioritet, parent.prioritet)} — child kan løftes opp, aldri senkes.
+     * HØY har lavest {@link Enum#ordinal()}, så vi bruker min på ordinal-verdiene.
+     */
+    private void propagerPrioritetFraParent(Prosessinstans prosessinstans, UUID parentId) {
+        if (parentId == null) return;
+        prosessinstansRepo.findById(parentId).ifPresent(parent -> {
+            int effektivOrdinal = Math.min(prosessinstans.getPrioritet().ordinal(), parent.getPrioritet().ordinal());
+            ProsessPrioritet effektiv = ProsessPrioritet.values()[effektivOrdinal];
+            prosessinstans.setPrioritet(effektiv);
+        });
+    }
+
     UUID lagre(Prosessinstans prosessinstans, String saksbehandler, String saksbehandlerNavn) {
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setEndretDato(nå);
@@ -290,7 +304,9 @@ public class ProsessinstansService {
             prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER_NAVN, saksbehandlerNavn);
         }
         prosessinstans.setData(CORRELATION_ID_SAKSFLYT, MDCOperations.getCorrelationId());
-        prosessinstans.setData(PROCESS_PARENT_ID, ThreadLocalAccessInfo.getProcessId());
+        UUID parentId = ThreadLocalAccessInfo.getProcessId();
+        prosessinstans.setData(PROCESS_PARENT_ID, parentId);
+        propagerPrioritetFraParent(prosessinstans, parentId);
 
         prosessinstansRepo.save(prosessinstans);
         if (saksbehandler != null) {
