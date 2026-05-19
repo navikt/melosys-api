@@ -15,7 +15,7 @@ private val log = KotlinLogging.logger { }
 @Component
 class ProsessinstansFerdigListener(
     private val prosessinstansRepository: ProsessinstansRepository,
-    private val prosessinstansBehandler: ProsessinstansBehandler
+    private val prosessinstansDispatcher: ProsessinstansDispatcher
 ) {
     @EventListener
     fun prosessinstansFerdig(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
@@ -70,7 +70,9 @@ class ProsessinstansFerdigListener(
         prosessinstans.status = ProsessStatus.KLAR
         prosessinstans.endretDato = LocalDateTime.now()
         prosessinstansRepository.save(prosessinstans)
-        prosessinstansBehandler.behandleProsessinstans(prosessinstans)
+        // Kritisk: denne listeneren kjører på saga-pooltråden (eventet publiseres i ProsessinstansBehandler.settTilFerdig).
+        // Et inline synkront kall ville kjedet neste saga på samme tråd; vi må derfor via prioritetskøen (execute(...)).
+        prosessinstansDispatcher.dispatch(prosessinstans)
     }
 }
 
