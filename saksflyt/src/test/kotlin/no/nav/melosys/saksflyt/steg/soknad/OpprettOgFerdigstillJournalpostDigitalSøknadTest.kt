@@ -61,8 +61,6 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
 
     private val fnr = "12345678901"
     private val innsenderFnr = INNSENDER_FNR
-    private val orgnr = "123456789"
-    private val arbeidsgiverNavn = ARBEIDSGIVER_NAVN
     private val referanseId = "MEL-TEST123"
     private val saksnummer = "SAK-12345"
     private val journalpostId = "JOARK-123456"
@@ -127,11 +125,13 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
         opprettJournalpost.hoveddokument.tittel shouldBe "Bekreftelse på utsending i EØS eller Sveits"
     }
 
-    @ParameterizedTest(name = "{0} skal gi arbeidsgiver som avsender")
-    @MethodSource("arbeidsgiverAvsenderMetadata")
-    fun `utfør setter arbeidsgiver som avsender når søknad er sendt på vegne av arbeidsgiver`(
+    @ParameterizedTest(name = "{0} skal gi orgnr som avsender")
+    @MethodSource("organisasjonAvsenderMetadata")
+    fun `utfør setter organisasjon som avsender når søknad er sendt på vegne av arbeidsgiver eller radgiverfirma`(
         @Suppress("UNUSED_PARAMETER") navn: String,
-        metadata: UtsendtArbeidstakerMetadata
+        metadata: UtsendtArbeidstakerMetadata,
+        forventetOrgnr: String,
+        forventetNavn: String
     ) {
         val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
             fnr = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.fnr
@@ -147,8 +147,8 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
         opprettOgFerdigstillJournalpostDigitalSøknad.utfør(prosessinstans)
 
         val opprettJournalpost = capturedJournalpost.captured
-        opprettJournalpost.korrespondansepartId shouldBe orgnr
-        opprettJournalpost.korrespondansepartNavn shouldBe arbeidsgiverNavn
+        opprettJournalpost.korrespondansepartId shouldBe forventetOrgnr
+        opprettJournalpost.korrespondansepartNavn shouldBe forventetNavn
         opprettJournalpost.korrespondansepartIdType shouldBe OpprettJournalpost.KorrespondansepartIdType.ORGNR.kode
         verify(exactly = 0) { persondataFasade.hentSammensattNavn(any()) }
     }
@@ -293,12 +293,15 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
 
     companion object {
         private const val ARBEIDSGIVER_NAVN = "Test AS"
+        private const val ARBEIDSGIVER_ORGNR = "123456789"
         private const val INNSENDER_FNR = "98765432100"
         private const val JURIDISK_ENHET_ORGNR = "987654321"
+        private const val RADGIVER_ORGNR = "111222333"
+        private const val RADGIVER_NAVN = "Rådgivning AS"
 
         @JvmStatic
-        fun arbeidsgiverAvsenderMetadata(): List<Arguments> {
-            val radgiverfirma = RadgiverfirmaInfo(orgnr = "111222333", navn = "Rådgivning AS")
+        fun organisasjonAvsenderMetadata(): List<Arguments> {
+            val radgiverfirma = RadgiverfirmaInfo(orgnr = RADGIVER_ORGNR, navn = RADGIVER_NAVN)
             return listOf(
                 Arguments.of(
                     "ARBEIDSGIVER",
@@ -307,7 +310,9 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
                         arbeidsgiverNavn = ARBEIDSGIVER_NAVN,
                         juridiskEnhetOrgnr = JURIDISK_ENHET_ORGNR,
                         arbeidstakerNavn = "Test Arbeidstaker"
-                    )
+                    ),
+                    ARBEIDSGIVER_ORGNR,
+                    ARBEIDSGIVER_NAVN
                 ),
                 Arguments.of(
                     "ARBEIDSGIVER_MED_FULLMAKT",
@@ -317,7 +322,9 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
                         juridiskEnhetOrgnr = JURIDISK_ENHET_ORGNR,
                         fullmektigFnr = INNSENDER_FNR,
                         arbeidstakerNavn = "Test Arbeidstaker"
-                    )
+                    ),
+                    ARBEIDSGIVER_ORGNR,
+                    ARBEIDSGIVER_NAVN
                 ),
                 Arguments.of(
                     "RADGIVER",
@@ -327,7 +334,9 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
                         juridiskEnhetOrgnr = JURIDISK_ENHET_ORGNR,
                         arbeidstakerNavn = "Test Arbeidstaker",
                         radgiverfirma = radgiverfirma
-                    )
+                    ),
+                    RADGIVER_ORGNR,
+                    RADGIVER_NAVN
                 ),
                 Arguments.of(
                     "RADGIVER_MED_FULLMAKT",
@@ -338,7 +347,9 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
                         fullmektigFnr = INNSENDER_FNR,
                         arbeidstakerNavn = "Test Arbeidstaker",
                         radgiverfirma = radgiverfirma
-                    )
+                    ),
+                    RADGIVER_ORGNR,
+                    RADGIVER_NAVN
                 )
             )
         }

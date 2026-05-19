@@ -115,11 +115,19 @@ class OpprettOgFerdigstillJournalpostDigitalSøknad(
         val metadata = søknadsdata.skjema.metadata
         return when (metadata) {
             is ArbeidsgiverMetadata,
-            is ArbeidsgiverMedFullmaktMetadata,
-            is RadgiverMetadata,
-            is RadgiverMedFullmaktMetadata -> Avsender(
+            is ArbeidsgiverMedFullmaktMetadata -> Avsender(
                 id = søknadsdata.skjema.orgnr,
                 navn = metadata.arbeidsgiverNavn,
+                idType = OpprettJournalpost.KorrespondansepartIdType.ORGNR
+            )
+            is RadgiverMetadata -> Avsender(
+                id = metadata.radgiverfirma.orgnr,
+                navn = metadata.radgiverfirma.navn,
+                idType = OpprettJournalpost.KorrespondansepartIdType.ORGNR
+            )
+            is RadgiverMedFullmaktMetadata -> Avsender(
+                id = metadata.radgiverfirma.orgnr,
+                navn = metadata.radgiverfirma.navn,
                 idType = OpprettJournalpost.KorrespondansepartIdType.ORGNR
             )
             else -> Avsender(
