@@ -6,19 +6,30 @@ import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.binder.MeterBinder
 import jakarta.annotation.PostConstruct
 import no.nav.melosys.metrics.MetrikkerNavn
+import no.nav.melosys.saksflytapi.domain.ProsessPrioritet
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.ProsessType
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 
 @Configuration
-class ProsessinstansMetrikkerConfig {
+class ProsessinstansMetrikkerConfig(
+    @Qualifier("saksflytThreadPoolTaskExecutor") private val saksflytThreadPoolTaskExecutor: ThreadPoolTaskExecutor
+) {
+
+    // Må holdes som felt: Micrometer holder gauge-state-objektet med en WeakReference, så et lokalt snapshot
+    // ville blitt GC-et og gaugene rapportert NaN.
+    private val køstørrelseSnapshot = KøstørrelseSnapshot(saksflytThreadPoolTaskExecutor.threadPoolExecutor.queue)
 
     @Bean
     fun prosessinstansMetrikker(statusCache: ProsessinstansStatusCache): MeterBinder = MeterBinder { registry ->
         registrerAntallFeiledeProsessinstanserGruppertPåType(registry, statusCache)
         registrerAntallFeiledeProsessinstanserGruppertPåSteg(registry, statusCache)
+        registrerKøstørrelsePerPrioritet(registry)
+        registrerAntallAktiveTråder(registry)
     }
 
     @PostConstruct
@@ -61,5 +72,21 @@ class ProsessinstansMetrikkerConfig {
                 .tag(MetrikkerNavn.TAG_PROSESSTEG, prosessSteg.kode)
                 .register(meterRegistry)
         }
+    }
+
+    /** Antall prosessinstanser som venter i [saksflytThreadPoolTaskExecutor]-køen, brutt ned per [ProsessPrioritet]. */
+    private fun registrerKøstørrelsePerPrioritet(meterRegistry: MeterRegistry) {
+        ProsessPrioritet.values().forEach { prioritet ->
+            Gauge.builder(MetrikkerNavn.PROSESSINSTANSER_KØ, køstørrelseSnapshot) { it.antall(prioritet).toDouble() }
+                .tag(MetrikkerNavn.TAG_PRIORITET, prioritet.name)
+                .register(meterRegistry)
+        }
+    }
+
+    /** Antall pooltråder som akkurat nå kjører en saga (uavhengig av prioritet — en kjørende oppgave er ikke i køen). */
+    private fun registrerAntallAktiveTråder(meterRegistry: MeterRegistry) {
+        Gauge.builder(MetrikkerNavn.PROSESSINSTANSER_KØ_AKTIVE, saksflytThreadPoolTaskExecutor) { executor ->
+            executor.activeCount.toDouble()
+        }.register(meterRegistry)
     }
 }

@@ -35,6 +35,13 @@ class ProsessinstansTest {
     }
 
     @Test
+    fun `hentPrioritet returnerer ProsessType sin default-prioritet`() {
+        Prosessinstans.forTest { type = ProsessType.IVERKSETT_VEDTAK_EOS }.hentPrioritet() shouldBe ProsessPrioritet.HØY
+        Prosessinstans.forTest { type = ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING }.hentPrioritet() shouldBe ProsessPrioritet.LAV
+        Prosessinstans.forTest { type = ProsessType.MOTTAK_SED }.hentPrioritet() shouldBe ProsessPrioritet.NORMAL
+    }
+
+    @Test
     fun `skal lagre og hente Periode objekt korrekt`() {
         val periode = Periode(LocalDate.now(), null)
         val prosessinstans = Prosessinstans.forTest {

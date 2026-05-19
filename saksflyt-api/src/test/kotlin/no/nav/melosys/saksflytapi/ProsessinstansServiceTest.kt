@@ -37,7 +37,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.context.ApplicationEventPublisher
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import java.time.LocalDate
 import java.util.UUID
 
@@ -50,9 +49,6 @@ class ProsessinstansServiceTest {
     @RelaxedMockK
     private lateinit var prosessinstansRepo: ProsessinstansForServiceRepository
 
-    @RelaxedMockK
-    private lateinit var threadPoolTaskExecutor: ThreadPoolTaskExecutor
-
     private lateinit var prosessinstansService: ProsessinstansService
     private val piListCaptor = mutableListOf<Prosessinstans>()
 
@@ -62,8 +58,7 @@ class ProsessinstansServiceTest {
 
         prosessinstansService = ProsessinstansService(
             applicationEventPublisher,
-            prosessinstansRepo,
-            threadPoolTaskExecutor
+            prosessinstansRepo
         )
 
         every { prosessinstansRepo.save(any<Prosessinstans>()) } answers {
@@ -796,6 +791,20 @@ class ProsessinstansServiceTest {
             getData(ProsessDataKey.SAKSNUMMER) shouldBe "MEL-2"
             getData(ProsessDataKey.GJELDER_ÅR) shouldBe "2023"
             hentData<Behandlingsaarsaktyper>(ProsessDataKey.ÅRSAK_TYPE) shouldBe Behandlingsaarsaktyper.MELDING_FRA_SKATT
+        }
+    }
+
+    @Test
+    fun `opprett satsendringsprosess skal bruke ProsessType sin default-prioritet`() {
+        val behandling = Behandling.forTest { }
+
+
+        prosessinstansService.opprettSatsendringBehandlingFor(behandling, 2024)
+
+
+        piListCaptor.last().run {
+            type shouldBe ProsessType.SATSENDRING
+            hentPrioritet() shouldBe ProsessType.SATSENDRING.prioritet
         }
     }
 

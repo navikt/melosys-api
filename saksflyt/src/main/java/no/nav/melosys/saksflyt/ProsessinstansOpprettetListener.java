@@ -9,12 +9,12 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 public class ProsessinstansOpprettetListener {
     private final ProsessinstansBehandlerDelegate prosessinstansBehandlerDelegate;
-    private final ProsessinstansBehandler prosessinstansBehandler;
+    private final ProsessinstansDispatcher prosessinstansDispatcher;
 
     public ProsessinstansOpprettetListener(ProsessinstansBehandlerDelegate prosessinstansBehandlerDelegate,
-                                           ProsessinstansBehandler prosessinstansBehandler) {
+                                           ProsessinstansDispatcher prosessinstansDispatcher) {
         this.prosessinstansBehandlerDelegate = prosessinstansBehandlerDelegate;
-        this.prosessinstansBehandler = prosessinstansBehandler;
+        this.prosessinstansDispatcher = prosessinstansDispatcher;
     }
 
     // Oppdatering av entiteten må gjøres før commit, og ikke etter da det ikke finnes en transaksjon da
@@ -27,7 +27,7 @@ public class ProsessinstansOpprettetListener {
     public void behandleOpprettetProsessinstans(ProsessinstansOpprettetEvent event) {
         Prosessinstans prosessinstans = event.hentProsessinstans();
         if (!prosessinstans.erPåVent()) {
-            prosessinstansBehandler.behandleProsessinstans(prosessinstans);
+            prosessinstansDispatcher.dispatch(prosessinstans);
         }
     }
 }
