@@ -281,17 +281,14 @@ public class ProsessinstansService {
     }
 
     /**
-     * Løfter prioriteten til {@code prosessinstans} hvis foreldreprosessen har en høyere prioritet enn type-default.
-     * Regelen er {@code prioritet = max(child.prioritet, parent.prioritet)} — child kan løftes opp, aldri senkes.
-     * HØY har lavest {@link Enum#ordinal()}, så vi bruker min på ordinal-verdiene.
+     * Løfter prioriteten til sub-prosessen opp til foreldreprosessens nivå hvis den er høyere.
+     * En sub-prosess kan løftes opp, men aldri senkes under sin egen type-default.
      */
     private void propagerPrioritetFraParent(Prosessinstans prosessinstans, UUID parentId) {
         if (parentId == null) return;
-        prosessinstansRepo.findById(parentId).ifPresent(parent -> {
-            int effektivOrdinal = Math.min(prosessinstans.getPrioritet().ordinal(), parent.getPrioritet().ordinal());
-            ProsessPrioritet effektiv = ProsessPrioritet.values()[effektivOrdinal];
-            prosessinstans.setPrioritet(effektiv);
-        });
+        prosessinstansRepo.findById(parentId).ifPresent(parent ->
+            prosessinstans.setPrioritet(prosessinstans.getPrioritet().høyesteAv(parent.getPrioritet()))
+        );
     }
 
     UUID lagre(Prosessinstans prosessinstans, String saksbehandler, String saksbehandlerNavn) {

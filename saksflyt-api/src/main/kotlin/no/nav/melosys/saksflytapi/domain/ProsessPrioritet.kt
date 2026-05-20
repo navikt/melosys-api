@@ -15,5 +15,11 @@ enum class ProsessPrioritet {
     NORMAL,
 
     /** Batch / masseopprettelse (årsavregning auto-opprettelse, satsendring) — skal aldri sulte HØY/NORMAL. */
-    LAV,
+    LAV;
+
+    /**
+     * Returnerer den høyeste av to prioriteter. [HØY] har lavest [ordinal], så naturlig
+     * enum-ordning gjør at [minOf] velger den høyeste prioriteten.
+     */
+    infix fun høyesteAv(annen: ProsessPrioritet): ProsessPrioritet = minOf(this, annen)
 }
