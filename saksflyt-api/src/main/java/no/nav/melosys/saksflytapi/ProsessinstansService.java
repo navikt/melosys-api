@@ -287,7 +287,7 @@ public class ProsessinstansService {
     private void propagerPrioritetFraParent(Prosessinstans prosessinstans, UUID parentId) {
         if (parentId == null) return;
         prosessinstansRepo.findById(parentId).ifPresent(parent ->
-            prosessinstans.setPrioritet(prosessinstans.getPrioritet().høyesteAv(parent.getPrioritet()))
+            prosessinstans.setPrioritet(prosessinstans.hentPrioritet().høyesteAv(parent.hentPrioritet()))
         );
     }
 

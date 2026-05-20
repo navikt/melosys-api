@@ -1,4 +1,7 @@
-ALTER TABLE prosessinstans ADD prioritet VARCHAR2(10);
+-- Default 'NORMAL' gjør ADD til en metadata-operasjon (rask, ingen full-tabell-UPDATE) og lukker
+-- NOT NULL-vinduet under rullerende deploy: gamle podder uten prioritet-kolonnen får defaulten ved INSERT.
+-- Backfill-listene under speiler ProsessType.prioritet (kilden til sannhet) per V155.
+ALTER TABLE prosessinstans ADD prioritet VARCHAR2(10) DEFAULT 'NORMAL' NOT NULL;
 
 UPDATE prosessinstans SET prioritet = 'HØY' WHERE prosess_type IN (
     'IVERKSETT_VEDTAK_EOS',
@@ -18,7 +21,3 @@ UPDATE prosessinstans SET prioritet = 'LAV' WHERE prosess_type IN (
     'SATSENDRING',
     'SATSENDRING_TILBAKESTILL_NY_VURDERING'
 );
-
-UPDATE prosessinstans SET prioritet = 'NORMAL' WHERE prioritet IS NULL;
-
-ALTER TABLE prosessinstans MODIFY prioritet VARCHAR2(10) NOT NULL;
