@@ -163,7 +163,7 @@ class SaksflyThreadPoolTaskExecutorIT(
      * [MetrikkerNavn.PROSESSINSTANSER_OPPRETTET] counter), slik at man ser fordelingen når testen kjøres lokalt.
      */
     private fun loggKøMetrikker(merkelapp: String) {
-        val køPerPrioritet = ProsessPrioritet.values().joinToString(", ") { prioritet ->
+        val køPerPrioritet = ProsessPrioritet.entries.joinToString(", ") { prioritet ->
             val antall = meterRegistry.find(MetrikkerNavn.PROSESSINSTANSER_KØ)
                 .tag(MetrikkerNavn.TAG_PRIORITET, prioritet.name).gauge()?.value()?.toInt() ?: 0
             "${prioritet.name}=$antall"
