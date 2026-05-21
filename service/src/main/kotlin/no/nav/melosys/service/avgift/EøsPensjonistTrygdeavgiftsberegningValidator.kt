@@ -16,14 +16,14 @@ import java.time.LocalDate
 
 object EøsPensjonistTrygdeavgiftsberegningValidator {
     const val INNTEKTSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten inntektsperioder"
-    const val SKATTEFORHOLDSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten skatteforholdTilNorge"
+    const val SKATTEFORHOLDSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten skatteforholdsperioder"
     const val SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER = "Alle skatteforholdsperiodene har samme svar på spørsmålet om skatteplikt"
     const val SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE = "Skatteforholdsperiodene kan ikke overlappe"
-    const val SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Skatteforholdsperioden(e) du har lagt inn dekker ikke hele helseutgift periode"
-    const val INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Inntektsperioden(e) du har lagt inn dekker ikke hele helseutgift periode"
-    const val INNTEKTSPERIODE_ER_UTENFOR_HELSEUTGIFT_DEKKES_PERIODE = "Inntektsperioden(e) du har lagt inn er utenfor helseutgift periode"
+    const val SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Skatteforholdsperioden(e) du har lagt inn dekker ikke hele helseutgiftsperioden"
+    const val INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Inntektsperioden(e) du har lagt inn dekker ikke hele helseutgiftsperioden"
+    const val INNTEKTSPERIODE_ER_UTENFOR_HELSEUTGIFT_DEKKES_PERIODE = "Inntektsperioden(e) du har lagt inn er utenfor helseutgiftsperioden"
     const val INNTEKT_OG_SKATT_MÅ_DEKKE_HELSEUTGIFTPERIODE_FOR_INNEVÆRENDE_OG_FREMTIDIG =
-        "Inntektsperiode og skatteforholdsperiode må dekke helseutgiftperiode for inneværende år og fremtidige perioder"
+        "Inntektsperiode og skatteforholdsperiode må dekke helseutgiftsperioden for inneværende år og fremtidige perioder"
     val log = mu.KotlinLogging.logger {}
 
     fun validerForTrygdeavgiftberegning(
