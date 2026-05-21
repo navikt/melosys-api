@@ -1,0 +1,74 @@
+[
+  {
+    "tittel": "Innvilgelse – kort begrunnelse",
+    "type": "TEKSTBLOKK",
+    "tags": ["innvilgelse", "vedtak", "trygd"],
+    "innhold": "<p>Vi har vurdert søknaden din og kommet fram til at du oppfyller vilkårene for medlemskap i folketrygden fra og med [DATO_FRA].</p>"
+  },
+  {
+    "tittel": "Avslag – kort begrunnelse",
+    "type": "TEKSTBLOKK",
+    "tags": ["avslag", "vedtak", "trygd"],
+    "innhold": "<p>Vi har vurdert søknaden din og kommet fram til at du ikke oppfyller vilkårene for [YTELSE] i perioden [DATO_FRA] – [DATO_TIL].</p>"
+  },
+  {
+    "tittel": "Klagefrist – standardparagraf",
+    "type": "TEKSTBLOKK",
+    "tags": ["klage", "frist", "standard"],
+    "innhold": "<p>Du kan klage på dette vedtaket innen seks uker fra du mottok brevet. Klagen sender du til [ENHET]. I klagen må du oppgi hva du klager på og hvorfor du mener vedtaket er feil.</p>"
+  },
+  {
+    "tittel": "Forespørsel om dokumentasjon",
+    "type": "TEKSTBLOKK",
+    "tags": ["dokumentasjon", "forespørsel"],
+    "innhold": "<p>For å kunne behandle saken din trenger vi følgende dokumentasjon:</p><ul><li>[DOKUMENT_1]</li><li>[DOKUMENT_2]</li></ul><p>Vi ber om at du sender dette til oss innen [SVARFRIST].</p>"
+  },
+  {
+    "tittel": "Bekreftelse på medlemskap",
+    "type": "TEKSTBLOKK",
+    "tags": ["bekreftelse", "medlemskap"],
+    "innhold": "<p>Vi bekrefter at [NAVN] (fødselsnummer [FNR]) er medlem i norsk folketrygd i perioden [DATO_FRA] – [DATO_TIL].</p><p>Bekreftelsen er gyldig som dokumentasjon overfor utenlandske trygdemyndigheter.</p>"
+  },
+  {
+    "tittel": "Avsluttende hilsen",
+    "type": "TEKSTBLOKK",
+    "tags": ["hilsen", "avslutning"],
+    "innhold": "<p>Med vennlig hilsen</p><p>[SAKSBEHANDLER]<br>NAV [ENHET]</p>"
+  },
+  {
+    "tittel": "Begrunnelse – medlemskap etter EØS-reglene",
+    "type": "TEKSTBLOKK",
+    "tags": ["begrunnelse", "eøs", "medlemskap", "lovhjemmel", "lang"],
+    "innhold": "<h2>Begrunnelse for vedtaket</h2><p>Etter folketrygdloven § 2-1 er en person pliktig medlem i folketrygden ved opphold i Norge. EØS-avtalens trygderegler, jf. forordning (EF) nr. 883/2004, kan likevel medføre at en person omfattes av lovgivningen i et annet land.</p><p>I din sak har vi lagt vekt på følgende forhold:</p><ul><li>Du arbeider for [ARBEIDSGIVER] i [LAND] i perioden [DATO_FRA] – [DATO_TIL].</li><li>Arbeidet utføres i sin helhet på territoriet til [LAND].</li><li>Du har ikke parallell virksomhet i Norge i samme periode.</li></ul><p>Etter forordningens artikkel 11 nr. 3 bokstav a er du derfor omfattet av trygdelovgivningen i [LAND] i den nevnte perioden, og ikke av norsk folketrygd.</p>"
+  },
+  {
+    "tittel": "Utsending etter artikkel 12",
+    "type": "TEKSTBLOKK",
+    "tags": ["utsending", "eøs", "artikkel 12", "lang"],
+    "innhold": "<h2>Vurdering av utsending</h2><p>Etter forordning (EF) nr. 883/2004 artikkel 12 nr. 1 kan en arbeidstaker som sendes ut av arbeidsgiveren sin for å utføre arbeid i et annet EØS-land, fortsatt være omfattet av trygdelovgivningen i utsenderlandet, forutsatt at arbeidet ikke er forventet å vare mer enn 24 måneder, at arbeidstakeren ikke sendes ut for å erstatte en annen utsendt arbeidstaker, at arbeidsgiveren normalt utøver sin virksomhet i utsenderlandet, og at det består en direkte tilknytning mellom arbeidstaker og arbeidsgiver under hele utsendingsperioden.</p><p>I din sak er følgende lagt til grunn:</p><p>[VURDERING_FAKTA]</p><p>Etter en samlet vurdering finner vi at vilkårene for utsending [ER/IKKE ER] oppfylt for perioden [DATO_FRA] – [DATO_TIL].</p>"
+  },
+  {
+    "tittel": "Forhåndsvarsel om vedtak",
+    "type": "TEKSTBLOKK",
+    "tags": ["forhåndsvarsel", "uttalelse"],
+    "innhold": "<p>NAV vurderer å fatte vedtak om [TILTAK] i din sak. Før vi fatter vedtak, har du rett til å uttale deg, jf. forvaltningsloven § 16.</p><p>Vi ber om at eventuelle merknader sendes til oss innen [SVARFRIST]. Hvis vi ikke har hørt fra deg innen fristen, vil vi fatte vedtak basert på de opplysningene som foreligger.</p>"
+  },
+  {
+    "tittel": "Henvisning til tidligere vedtak",
+    "type": "TEKSTBLOKK",
+    "tags": ["henvisning", "vedtak"],
+    "innhold": "<p>Det vises til vedtak datert [VEDTAKSDATO] med saksnummer [SAKSNR].</p>"
+  },
+  {
+    "tittel": "Vedtak om medlemskap i folketrygden",
+    "type": "BREVMAL",
+    "tags": ["vedtak", "medlemskap", "innvilgelse"],
+    "innhold": "<h2>Vedtak om medlemskap i folketrygden</h2><p>Saksnummer: [SAKSNR]<br>Dato: [DATO_BREV]</p><p>Til: [NAVN]<br>Fødselsnummer: [FNR]</p><h2>Vedtak</h2><p>NAV har vurdert din søknad og innvilget medlemskap i folketrygden i perioden [DATO_FRA] – [DATO_TIL].</p><h2>Begrunnelse</h2><p>Etter folketrygdloven § 2-1 er en person som er bosatt i Norge pliktig medlem i folketrygden. I din sak har vi lagt vekt på følgende forhold:</p><ul><li>Du er bosatt i Norge fra [BOSATT_FRA].</li><li>Du har arbeid hos [ARBEIDSGIVER].</li></ul><h2>Klagerett</h2><p>Du kan klage på dette vedtaket innen seks uker fra du mottok brevet. Klagen sender du til [ENHET].</p><p>Med vennlig hilsen</p><p>[SAKSBEHANDLER]<br>NAV [ENHET]</p>"
+  },
+  {
+    "tittel": "Bekreftelse på medlemskap (kort brev)",
+    "type": "BREVMAL",
+    "tags": ["bekreftelse", "medlemskap"],
+    "innhold": "<h2>Bekreftelse på medlemskap i folketrygden</h2><p>Saksnummer: [SAKSNR]<br>Dato: [DATO_BREV]</p><p>NAV bekrefter at [NAVN] (fødselsnummer [FNR]) er medlem i norsk folketrygd i perioden [DATO_FRA] – [DATO_TIL].</p><p>Bekreftelsen er gyldig som dokumentasjon overfor utenlandske trygdemyndigheter.</p><p>Med vennlig hilsen</p><p>[SAKSBEHANDLER]<br>NAV [ENHET]</p>"
+  }
+]
