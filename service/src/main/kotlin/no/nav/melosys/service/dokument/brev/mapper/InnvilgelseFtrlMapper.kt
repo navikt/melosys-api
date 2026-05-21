@@ -85,8 +85,8 @@ class InnvilgelseFtrlMapper(
             harMedlemskapsperioderIForegåendeÅr = utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat),
             minstebelopVerdi = minstebelop?.beloep,
             minstebelopAar = minstebelop?.aar,
-            harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
-            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+            harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
+            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
         )
     }
 
@@ -121,8 +121,8 @@ class InnvilgelseFtrlMapper(
             harMedlemskapsperioderIForegåendeÅr = utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat),
             minstebelopVerdi = minstebelop?.beloep,
             minstebelopAar = minstebelop?.aar,
-            harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
-            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+            harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
+            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
         )
     }
 
@@ -171,8 +171,8 @@ class InnvilgelseFtrlMapper(
             harMedlemskapsperioderIForegåendeÅr = utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat),
             minstebelopVerdi = minstebelop?.beloep,
             minstebelopAar = minstebelop?.aar,
-            harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
-            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+            harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
+            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
         )
     }
 
@@ -273,8 +273,8 @@ class InnvilgelseFtrlMapper(
             harMedlemskapsperioderIForegåendeÅr = utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat),
             minstebelopVerdi = minstebelop?.beloep,
             minstebelopAar = minstebelop?.aar,
-            harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
-            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+            harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
+            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
         )
     }
 
@@ -444,7 +444,7 @@ class InnvilgelseFtrlMapper(
     private fun Medlemskapsperiode.fomErFør(instant: Instant): Boolean =
         this.hentFom().isBefore(LocalDate.ofInstant(instant, ZoneId.systemDefault()))
 
-    private fun Collection<Trygdeavgiftsperiode>.harBeregningsregel(regel: Avgiftsberegningsregel): Boolean =
+    private fun Collection<Trygdeavgiftsperiode>.harPeriodeMedBeregningsregel(regel: Avgiftsberegningsregel): Boolean =
         any { it.beregningsregel == regel }
 }
 
