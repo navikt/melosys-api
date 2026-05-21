@@ -29,7 +29,9 @@ class InformasjonTrygdeavgift(
     val harAvgiftspliktigePerioderIForegåendeÅr: Boolean,
     val erSkattemessigEmigrert: Boolean,
     val minstebelopVerdi: BigDecimal? = null,
-    val minstebelopAar: Int? = null
+    val minstebelopAar: Int? = null,
+    val harMinstebelopPeriode: Boolean = false,
+    val har25ProsentRegelPeriode: Boolean = false
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
 }

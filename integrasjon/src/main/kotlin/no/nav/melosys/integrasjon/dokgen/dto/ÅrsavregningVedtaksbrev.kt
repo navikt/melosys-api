@@ -29,7 +29,11 @@ class ÅrsavregningVedtaksbrev(
     val erNyÅrsavregning: Boolean,
     val harMisjonaerInntekt: Boolean = false,
     val minstebelopVerdi: BigDecimal? = null,
-    val minstebelopAar: Int? = null
+    val minstebelopAar: Int? = null,
+    val harMinstebelopEndelig: Boolean = false,
+    val har25ProsentRegelEndelig: Boolean = false,
+    val harMinstebelopForskuddsvis: Boolean = false,
+    val har25ProsentRegelForskuddsvis: Boolean = false
 ) : DokgenDto(brevBestilling, Mottakerroller.BRUKER) {
     constructor(
         brevBestilling: ÅrsavregningVedtakBrevBestilling,
