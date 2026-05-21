@@ -77,10 +77,10 @@ class ÅrsavregningVedtakMapper(
             harMisjonaerInntekt = harMisjonaerInntekt(årsavregningModel.endeligAvgift, årsavregningModel.tidligereAvgift),
             minstebelopVerdi = minstebelop?.beloep,
             minstebelopAar = minstebelop?.aar,
-            harMinstebelopEndelig = årsavregningModel.endeligAvgift.harBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
-            har25ProsentRegelEndelig = årsavregningModel.endeligAvgift.harBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL),
-            harMinstebelopForskuddsvis = årsavregningModel.tidligereAvgift.harBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
-            har25ProsentRegelForskuddsvis = årsavregningModel.tidligereAvgift.harBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+            harMinstebelopEndelig = årsavregningModel.endeligAvgift.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
+            har25ProsentRegelEndelig = årsavregningModel.endeligAvgift.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL),
+            harMinstebelopForskuddsvis = årsavregningModel.tidligereAvgift.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
+            har25ProsentRegelForskuddsvis = årsavregningModel.tidligereAvgift.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
         )
     }
 
@@ -116,8 +116,8 @@ class ÅrsavregningVedtakMapper(
             harMisjonaerInntekt = harMisjonaerInntekt(emptyList(), årsavregningModel.tidligereAvgift),
             minstebelopVerdi = minstebelop?.beloep,
             minstebelopAar = minstebelop?.aar,
-            harMinstebelopForskuddsvis = årsavregningModel.tidligereAvgift.harBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
-            har25ProsentRegelForskuddsvis = årsavregningModel.tidligereAvgift.harBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+            harMinstebelopForskuddsvis = årsavregningModel.tidligereAvgift.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
+            har25ProsentRegelForskuddsvis = årsavregningModel.tidligereAvgift.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
         )
     }
 
@@ -181,7 +181,7 @@ class ÅrsavregningVedtakMapper(
     ): Boolean = (endeligAvgift + tidligereAvgift)
         .any { it.grunnlagInntekstperiode?.type == MISJONÆR }
 
-    private fun List<Trygdeavgiftsperiode>.harBeregningsregel(regel: Avgiftsberegningsregel): Boolean =
+    private fun List<Trygdeavgiftsperiode>.harPeriodeMedBeregningsregel(regel: Avgiftsberegningsregel): Boolean =
         any { it.beregningsregel == regel }
 
     private fun harPliktigMedlemskap(avgiftspliktigPerioder: List<AvgiftsperiodeForAvgift>?): Boolean {
