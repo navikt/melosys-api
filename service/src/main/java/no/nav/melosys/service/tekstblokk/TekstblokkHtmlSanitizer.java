@@ -4,8 +4,13 @@ import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.stereotype.Component;
 
+/**
+ * Sanitering av HTML lagret som en tekstblokk eller brevmal.
+ * Skal ikke gjenbrukes for annen funksjonalitet – safelisten er tilpasset Quill-editoren
+ * i Send brev og admin-siden for tekstblokker.
+ */
 @Component
-public class HtmlSanitizer {
+public class TekstblokkHtmlSanitizer {
 
     // Tillatte tagger matcher Quill-toolbarens output. Hold synkronisert med
     // src/felleskomponenter/htmlEditor/htmlEditor.tsx (formats-listen) i melosys-web.

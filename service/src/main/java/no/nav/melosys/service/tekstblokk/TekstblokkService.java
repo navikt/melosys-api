@@ -20,9 +20,9 @@ public class TekstblokkService {
     public record Input(String tittel, String innhold, TekstblokkType type, Collection<String> tags) {}
 
     private final TekstblokkRepository tekstblokkRepository;
-    private final HtmlSanitizer htmlSanitizer;
+    private final TekstblokkHtmlSanitizer htmlSanitizer;
 
-    public TekstblokkService(TekstblokkRepository tekstblokkRepository, HtmlSanitizer htmlSanitizer) {
+    public TekstblokkService(TekstblokkRepository tekstblokkRepository, TekstblokkHtmlSanitizer htmlSanitizer) {
         this.tekstblokkRepository = tekstblokkRepository;
         this.htmlSanitizer = htmlSanitizer;
     }
