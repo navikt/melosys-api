@@ -2,14 +2,15 @@ package no.nav.melosys.tjenester.gui.dto.tekstblokk;
 
 import java.util.List;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import no.nav.melosys.domain.tekstblokk.TekstblokkType;
 
-/**
- * Body for POST og PUT. Tags lagres normalisert (lowercase + trim) på server.
- */
 public record TekstblokkRequestDto(
-    String tittel,
-    String innhold,
-    TekstblokkType type,
+    @NotBlank @Size(max = 200) String tittel,
+    @NotBlank String innhold,
+    @NotNull TekstblokkType type,
     List<String> tags
 ) {}

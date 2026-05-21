@@ -7,9 +7,10 @@ import java.util.List;
 import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import no.nav.melosys.domain.tekstblokk.Tekstblokk;
 import no.nav.melosys.domain.tekstblokk.TekstblokkType;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.tekstblokk.TekstblokkService;
 import no.nav.melosys.tjenester.gui.dto.tekstblokk.TekstblokkDto;
@@ -45,10 +46,7 @@ public class TekstblokkController {
     @Operation(summary = "Henter oversikt over tekstblokker og brevmaler (uten innhold)")
     public ResponseEntity<List<TekstblokkOversiktDto>> hentAlle(@RequestParam(value = "type", required = false) TekstblokkType type) {
         sjekkToggle();
-        List<TekstblokkOversiktDto> oversikt = tekstblokkService.hentAlle(type).stream()
-            .map(this::tilOversiktDto)
-            .toList();
-        return ResponseEntity.ok(oversikt);
+        return ResponseEntity.ok(tekstblokkService.hentAlle(type).stream().map(this::tilOversiktDto).toList());
     }
 
     @GetMapping("/{id}")
@@ -60,29 +58,16 @@ public class TekstblokkController {
 
     @PostMapping
     @Operation(summary = "Oppretter en ny tekstblokk eller brevmal")
-    public ResponseEntity<TekstblokkDto> opprett(@RequestBody TekstblokkRequestDto request) {
+    public ResponseEntity<TekstblokkDto> opprett(@Valid @RequestBody TekstblokkRequestDto request) {
         sjekkToggle();
-        Tekstblokk opprettet = tekstblokkService.opprett(
-            request.tittel(),
-            request.innhold(),
-            request.type(),
-            request.tags() == null ? Collections.emptySet() : new java.util.HashSet<>(request.tags())
-        );
-        return ResponseEntity.ok(tilDto(opprettet));
+        return ResponseEntity.ok(tilDto(tekstblokkService.opprett(tilInput(request))));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Oppdaterer en eksisterende tekstblokk")
-    public ResponseEntity<TekstblokkDto> oppdater(@PathVariable("id") Long id, @RequestBody TekstblokkRequestDto request) {
+    public ResponseEntity<TekstblokkDto> oppdater(@PathVariable("id") Long id, @Valid @RequestBody TekstblokkRequestDto request) {
         sjekkToggle();
-        Tekstblokk oppdatert = tekstblokkService.oppdater(
-            id,
-            request.tittel(),
-            request.innhold(),
-            request.type(),
-            request.tags() == null ? Collections.emptySet() : new java.util.HashSet<>(request.tags())
-        );
-        return ResponseEntity.ok(tilDto(oppdatert));
+        return ResponseEntity.ok(tilDto(tekstblokkService.oppdater(id, tilInput(request))));
     }
 
     @DeleteMapping("/{id}")
@@ -95,19 +80,16 @@ public class TekstblokkController {
 
     private void sjekkToggle() {
         if (!unleash.isEnabled(ToggleName.MELOSYS_TEKSTBLOKKER)) {
-            throw new SikkerhetsbegrensningException("Tekstblokker-funksjonalitet er ikke aktivert");
+            throw new IkkeFunnetException("Tekstblokker-funksjonalitet er ikke aktivert");
         }
     }
 
+    private TekstblokkService.Input tilInput(TekstblokkRequestDto request) {
+        return new TekstblokkService.Input(request.tittel(), request.innhold(), request.type(), request.tags());
+    }
+
     private TekstblokkOversiktDto tilOversiktDto(Tekstblokk t) {
-        return new TekstblokkOversiktDto(
-            t.getId(),
-            t.getTittel(),
-            t.getType(),
-            sorterteTags(t),
-            t.getEndretDato(),
-            t.getEndretAv()
-        );
+        return new TekstblokkOversiktDto(t.getId(), t.getTittel(), t.getType(), sorterteTags(t), t.getEndretDato(), t.getEndretAv());
     }
 
     private TekstblokkDto tilDto(Tekstblokk t) {

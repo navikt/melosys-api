@@ -1,13 +1,14 @@
 package no.nav.melosys.service.tekstblokk;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.tekstblokk.Tekstblokk;
 import no.nav.melosys.domain.tekstblokk.TekstblokkType;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.tekstblokk.TekstblokkRepository;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TekstblokkService {
+
+    public record Input(String tittel, String innhold, TekstblokkType type, Collection<String> tags) {}
 
     private final TekstblokkRepository tekstblokkRepository;
     private final HtmlSanitizer htmlSanitizer;
@@ -39,59 +42,38 @@ public class TekstblokkService {
     }
 
     @Transactional
-    public Tekstblokk opprett(String tittel, String innhold, TekstblokkType type, Set<String> tags) {
-        validerTittel(tittel);
-        validerInnhold(innhold);
-
+    public Tekstblokk opprett(Input input) {
         Tekstblokk tekstblokk = new Tekstblokk();
-        tekstblokk.setTittel(tittel.trim());
-        tekstblokk.setInnhold(htmlSanitizer.saniter(innhold));
-        tekstblokk.setType(type);
-        tekstblokk.setTags(normaliserTags(tags));
+        populerFraInput(tekstblokk, input);
         return tekstblokkRepository.save(tekstblokk);
     }
 
     @Transactional
-    public Tekstblokk oppdater(Long id, String tittel, String innhold, TekstblokkType type, Set<String> tags) {
-        validerTittel(tittel);
-        validerInnhold(innhold);
-
+    public Tekstblokk oppdater(Long id, Input input) {
         Tekstblokk tekstblokk = hent(id);
-        tekstblokk.setTittel(tittel.trim());
-        tekstblokk.setInnhold(htmlSanitizer.saniter(innhold));
-        tekstblokk.setType(type);
-        tekstblokk.setTags(normaliserTags(tags));
+        populerFraInput(tekstblokk, input);
         return tekstblokkRepository.save(tekstblokk);
     }
 
     @Transactional
     public void slett(Long id) {
-        Tekstblokk tekstblokk = hent(id);
-        tekstblokkRepository.delete(tekstblokk);
+        tekstblokkRepository.delete(hent(id));
     }
 
-    private void validerTittel(String tittel) {
-        if (tittel == null || tittel.trim().isEmpty()) {
-            throw new FunksjonellException("Tittel kan ikke være tom");
-        }
-        if (tittel.length() > 200) {
-            throw new FunksjonellException("Tittel kan ikke være lengre enn 200 tegn");
-        }
+    private void populerFraInput(Tekstblokk tekstblokk, Input input) {
+        tekstblokk.setTittel(input.tittel().trim());
+        tekstblokk.setInnhold(htmlSanitizer.saniter(input.innhold()));
+        tekstblokk.setType(input.type());
+        tekstblokk.setTags(normaliserTags(input.tags()));
     }
 
-    private void validerInnhold(String innhold) {
-        if (innhold == null || innhold.trim().isEmpty()) {
-            throw new FunksjonellException("Innhold kan ikke være tomt");
-        }
-    }
-
-    private Set<String> normaliserTags(Set<String> tags) {
+    private Set<String> normaliserTags(Collection<String> tags) {
         if (tags == null) {
             return new HashSet<>();
         }
         return tags.stream()
             .filter(t -> t != null && !t.trim().isEmpty())
-            .map(t -> t.trim().toLowerCase())
+            .map(t -> t.trim().toLowerCase(Locale.ROOT))
             .filter(t -> t.length() <= 60)
             .collect(Collectors.toSet());
     }

@@ -19,6 +19,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 
 import no.nav.melosys.domain.RegistreringsInfo;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -44,14 +45,11 @@ public class Tekstblokk extends RegistreringsInfo {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "TEKSTBLOKK_TAG", joinColumns = @JoinColumn(name = "tekstblokk_id"))
     @Column(name = "tag", nullable = false)
+    @BatchSize(size = 50)
     private Set<String> tags = new HashSet<>();
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getTittel() {
