@@ -652,12 +652,14 @@ data class HelseutgiftDekkesPeriodeForAvgift(
     override val tom: LocalDate,
     override val dekning: Trygdedekninger,
     override val type: AvgiftsperiodeForAvgiftType = AvgiftsperiodeForAvgiftType.HELSEUTGIFTDEKKESPERIODE,
+    val medlemskapstype: Medlemskapstyper,
     val id: Long = 0,
 ) : AvgiftsperiodeForAvgift {
     constructor(helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode) : this(
         fom = helseutgiftDekkesPeriode.fomDato,
         tom = helseutgiftDekkesPeriode.tomDato,
         dekning = helseutgiftDekkesPeriode.hentTrygdedekning(),
+        medlemskapstype = helseutgiftDekkesPeriode.hentMedlemskapstype(),
         id = helseutgiftDekkesPeriode.id ?: 0,
     )
 
@@ -665,6 +667,7 @@ data class HelseutgiftDekkesPeriodeForAvgift(
         fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, helseutgiftDekkesPeriode.fomDato),
         tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, helseutgiftDekkesPeriode.tomDato),
         dekning = helseutgiftDekkesPeriode.hentTrygdedekning(),
+        medlemskapstype = helseutgiftDekkesPeriode.hentMedlemskapstype(),
         id = helseutgiftDekkesPeriode.id ?: 0,
     )
 }
