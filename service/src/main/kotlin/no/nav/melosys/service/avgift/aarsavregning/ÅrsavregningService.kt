@@ -381,7 +381,7 @@ class ÅrsavregningService(
         val behandlingsresultaterMedOverlapp = alleRelevanteBehandlinger
             .filter { it.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
 
-        // Finner siste behandling med avgiftspliktige perioder.
+        // Finner siste behandling med avgiftspliktige perioder som ikke er årsavregning
         // Årsavregning brukes kun når den overlapper med aktuelt år.
         val sisteBehandlingsresultatMedAvgiftspliktigPeriode = alleRelevanteBehandlinger
             .lastOrNull {
