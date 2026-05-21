@@ -96,6 +96,17 @@ class MottatteOpplysningerService(
         eksternReferanseID
     )
 
+    fun opprettSøknadDigital(
+        behandlingID: Long, originalData: String?, soeknad: Soeknad, eksternReferanseID: String?
+    ): MottatteOpplysninger = opprettMottatteOpplysninger(
+        behandlingID,
+        originalData,
+        soeknad,
+        Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS,
+        VERSJON_SOEKNAD_GRUNNLAG,
+        eksternReferanseID
+    )
+
     private fun opprettAnmodningEllerAttest(
         behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?
     ): MottatteOpplysninger {

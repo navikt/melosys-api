@@ -670,4 +670,60 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
 
         verify(exactly = 1) { behandlingsresultatService.hentBehandlingsresultat(any()) }
     }
+
+    @Test
+    fun `ny vurdering som fjerner perioden for året gir nyeste behandling som avgiftspliktig periode`() {
+        // Behandling 1: Medlemskap 2025-2026
+        val behandlingMedToÅr = lagTidligereBehandlingsresultat {
+            id = 1
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+            behandling {
+                id = 1
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak {
+                    saksnummer = "123456"
+                    type = Sakstyper.FTRL
+                }
+            }
+            registrertDato = LocalDate.of(2025, 3, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            vedtakMetadata {
+                vedtaksdato = LocalDate.of(2025, 3, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            medlemskapsperiode("2025-01-01", "2026-12-31", medTrygdeavgift = false)
+        }
+        val aktivFagsak = behandlingMedToÅr.hentBehandling().fagsak
+
+        // Behandling 2 (ny vurdering): Kun 2026, perioden for 2025 er fjernet
+        val nyVurderingKun2026 = lagTidligereBehandlingsresultat {
+            id = 2
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+            behandling {
+                id = 2
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak = aktivFagsak
+            }
+            registrertDato = LocalDate.of(2025, 6, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            vedtakMetadata {
+                vedtaksdato = LocalDate.of(2025, 6, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            medlemskapsperiode("2026-01-01", "2026-12-31", medTrygdeavgift = false)
+        }
+
+        every { fagsakService.hentFagsak("123456") } returns aktivFagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(1) } returns behandlingMedToÅr
+        every { behandlingsresultatService.hentBehandlingsresultat(2) } returns nyVurderingKun2026
+
+        val resultat = årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2025)
+
+        // Skal bruke nyeste behandling selv om den ikke overlapper 2025,
+        // slik at årsavregningen korrekt gjenspeiler at perioden er fjernet
+        resultat.shouldNotBeNull()
+        with(resultat) {
+            sisteBehandlingsresultatMedAvgiftspliktigPeriode shouldBe nyVurderingKun2026
+            sisteBehandlingsresultatMedAvgift shouldBe null
+            sisteÅrsavregning shouldBe null
+        }
+
+        verify(exactly = 2) { behandlingsresultatService.hentBehandlingsresultat(any()) }
+    }
 }

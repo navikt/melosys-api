@@ -229,6 +229,11 @@ melosys:
   kodeverk:
     scheduler:
       enabled: true  # Standard aktivert for produksjon
+  saksflyt:
+    gjenopprettelse:
+      # Hvor lenge en aktiv prosessinstans må ha vært urørt før den gjenopprettes ved oppstart. Se javadoc på
+      # ProsessinstansBehandler#gjenopprettelseVindu for hvorfor 24 timer er minimum med dagens 2-podders-løsning.
+      vindu: PT24H  # ISO-8601 Duration
   service:
     fagsak:
       arbeidsforholdhistorikk:

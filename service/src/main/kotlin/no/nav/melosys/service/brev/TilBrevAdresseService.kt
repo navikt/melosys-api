@@ -29,11 +29,15 @@ class TilBrevAdresseService(
         when (mottaker.rolle) {
             Mottakerroller.BRUKER -> persondata = persondataFasade.hentPerson(behandling.fagsak.hentBrukersAktørID())
             Mottakerroller.FULLMEKTIG -> {
-                if (mottaker.personIdent != null) {
-                    persondata = persondataFasade.hentPerson(mottaker.personIdent)
-                } else {
+                // Når både orgnr og personIdent er satt går brevet til virksomheten;
+                // personIdent identifiserer da kontaktpersonen, ikke brevmottakeren.
+                if (mottaker.orgnr != null) {
                     kontaktopplysning = hentKontaktopplysninger(behandling, mottaker)
                     orgDokument = hentOrganisasjonsDokument(kontaktopplysning, mottaker.orgnrNonNull())
+                } else if (mottaker.personIdent != null) {
+                    persondata = persondataFasade.hentPerson(mottaker.personIdent)
+                } else {
+                    throw FunksjonellException("Fullmektig-mottaker må ha orgnr eller personIdent")
                 }
             }
 

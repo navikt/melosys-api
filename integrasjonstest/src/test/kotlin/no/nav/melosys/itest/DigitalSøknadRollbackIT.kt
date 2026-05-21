@@ -54,7 +54,7 @@ class DigitalSøknadRollbackIT(
         // På dette tidspunktet har fagsakService.nyFagsakOgBehandling() allerede skrevet
         // fagsak+behandling til databasen innenfor stegets REQUIRES_NEW-transaksjon.
         every {
-            mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any())
+            mottatteOpplysningerService.opprettSøknadDigital(any(), any(), any(), any())
         } throws RuntimeException("Simulert feil for å teste rollback")
 
         // Stub melosys-skjema-api endpoint for søknadsdata

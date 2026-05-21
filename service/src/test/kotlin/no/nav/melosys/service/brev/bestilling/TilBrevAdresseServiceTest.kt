@@ -126,6 +126,24 @@ class TilBrevAdresseServiceTest {
     }
 
     @Test
+    fun `tilBrevAdresse FULLMEKTIG med både orgnr og personIdent prioriterer orgnr`() {
+        every { kontaktopplysningService.hentKontaktopplysning(any(), any()) } returns java.util.Optional.empty()
+        every { eregFasade.hentOrganisasjon("orgnr") } returns lagOrgSaksopplysning("orgnr", "Rådgiver AS")
+        val mottaker = Mottaker.medRolle(Mottakerroller.FULLMEKTIG).apply {
+            orgnr = "orgnr"
+            personIdent = "fnr"
+        }
+
+
+        val brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling)
+
+
+        brevAdresser.mottakerNavn shouldBe "Rådgiver AS"
+        brevAdresser.orgnr shouldBe "orgnr"
+        verify(exactly = 0) { persondataFasade.hentPerson(any()) }
+    }
+
+    @Test
     fun `tilBrevAdresse arbeidsgiverSomMottaker returnererArbeidsgiverAdresser`() {
         every { kontaktopplysningService.hentKontaktopplysning(any(), any()) } returns java.util.Optional.empty()
         every { eregFasade.hentOrganisasjon("orgnr") } returns lagOrgSaksopplysning("orgnr", "Ola Nordmann Rørleggerfirma")

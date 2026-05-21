@@ -57,7 +57,8 @@ class HåndterEksisterendeSakDigitalSøknad(
     private val mottatteOpplysningerService: MottatteOpplysningerService,
     private val oppgaveService: OppgaveService,
     private val skjemaSakMappingService: SkjemaSakMappingService,
-    private val jsonMapper: JsonMapper
+    private val jsonMapper: JsonMapper,
+    private val aktørSynkronisering: DigitalSøknadAktørSynkronisering
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.HÅNDTER_EKSISTERENDE_SAK_DIGITAL_SØKNAD
@@ -78,10 +79,20 @@ class HåndterEksisterendeSakDigitalSøknad(
             opprettNyVurdering(fagsak, søknadsdata)
         }
 
+        oppdaterAktørerFraNyInnsending(fagsak, søknadsdata)
+
         lagreSkjemaSakMapping(søknadsdata, fagsak, mottatteOpplysninger)
 
         prosessinstans.behandling = behandling
         log.info { "Ferdig med eksisterende sak $saksnummer, behandling=${behandling.id}" }
+    }
+
+    private fun oppdaterAktørerFraNyInnsending(
+        fagsak: Fagsak,
+        søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
+    ) {
+        val aktører = DigitalSøknadAktørerMapper.utled(søknadsdata)
+        aktørSynkronisering.synkroniser(fagsak, aktører)
     }
 
     private fun lagreSkjemaSakMapping(
@@ -152,7 +163,7 @@ class HåndterEksisterendeSakDigitalSøknad(
         log.info { "Opprettet behandling ${nyBehandling.id} (NY_VURDERING) på sak $saksnummer" }
 
         val søknad = DigitalSøknadMapper.tilSoeknad(søknadsdata)
-        val mottatteOpplysninger = mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
+        val mottatteOpplysninger = mottatteOpplysningerService.opprettSøknadDigital(
             nyBehandling.id, null, søknad, referanseId
         )
 

@@ -27,14 +27,14 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.service.behandling.BehandlingService
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverensVirksomhetINorgeDto
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.OpprettSakRequest
 import no.nav.melosys.service.sak.SkjemaSakMappingService
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverensVirksomhetINorgeDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -48,6 +48,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
     @MockK lateinit var jsonMapper: JsonMapper
     @MockK lateinit var skjemaSakMappingService: SkjemaSakMappingService
     @MockK lateinit var behandlingService: BehandlingService
+    @MockK(relaxed = true) lateinit var aktørSynkronisering: DigitalSøknadAktørSynkronisering
 
     private lateinit var opprettSakOgBehandlingDigitalSøknad: OpprettSakOgBehandlingDigitalSøknad
     private lateinit var prosessinstans: Prosessinstans
@@ -70,7 +71,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
     fun setup() {
         opprettSakOgBehandlingDigitalSøknad = OpprettSakOgBehandlingDigitalSøknad(
             fagsakService, persondataFasade, mottatteOpplysningerService, jsonMapper,
-            skjemaSakMappingService, behandlingService
+            skjemaSakMappingService, behandlingService, aktørSynkronisering
         )
 
         prosessinstans = Prosessinstans.forTest {
@@ -98,27 +99,28 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
     private fun mockMottatteOpplysninger() {
         every { jsonMapper.writeValueAsString(søknadsdata) } returns """{"referanseId":"$referanseId"}"""
         every {
-            mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any())
+            mottatteOpplysningerService.opprettSøknadDigital(any(), any(), any(), any())
         } returns mockk<MottatteOpplysninger> { every { id } returns 99L }
     }
 
     @Test
-    fun `inngangsSteg returnerer OPPRETT_SAK_OG_BEHANDLING_SØKNAD`() {
+    fun `inngangsSteg returnerer OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD`() {
         opprettSakOgBehandlingDigitalSøknad.inngangsSteg() shouldBe ProsessSteg.OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD
     }
 
     @Test
     fun `utfør oppretter fagsak og behandling med korrekte verdier`() {
-        mockFagsakOgBehandling()
         mockMottatteOpplysninger()
         val requestSlot = slot<OpprettSakRequest>()
-        every { fagsakService.nyFagsakOgBehandling(capture(requestSlot)) } returns mockk<Fagsak>().also {
+        val fagsak = mockk<Fagsak>().also {
             every { it.hentAktivBehandling() } returns mockk<Behandling>(relaxed = true).also { b ->
                 every { b.id } returns behandlingId
                 every { b.status } returns Behandlingsstatus.OPPRETTET
             }
             every { it.saksnummer } returns "MEL-1234"
         }
+        every { persondataFasade.hentAktørIdForIdent(fnr) } returns aktørId
+        every { fagsakService.nyFagsakOgBehandling(capture(requestSlot)) } returns fagsak
 
         opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
 
@@ -129,6 +131,20 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         capturedRequest.behandlingstema shouldBe Behandlingstema.UTSENDT_ARBEIDSTAKER
         capturedRequest.behandlingstype shouldBe Behandlingstyper.FØRSTEGANG
         capturedRequest.behandlingsårsaktype shouldBe Behandlingsaarsaktyper.SØKNAD
+    }
+
+    @Test
+    fun `utfør kaller aktørSynkronisering med utledet AktørerFraSøknad`() {
+        val fagsak = mockFagsakOgBehandling()
+        mockMottatteOpplysninger()
+        val aktørerSlot = slot<AktørerFraSøknad>()
+        every { aktørSynkronisering.synkroniser(any(), capture(aktørerSlot)) } just Runs
+
+        opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
+
+        aktørerSlot.captured.arbeidsgiverOrgnumre shouldBe listOf(orgnr)
+        aktørerSlot.captured.skjemadel shouldBe Skjemadel.ARBEIDSTAKERS_DEL
+        verify { aktørSynkronisering.synkroniser(any(), any()) }
     }
 
     @Test
@@ -157,7 +173,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
             every { it.saksnummer } returns "MEL-1234"
         }
         every { jsonMapper.writeValueAsString(offentligSøknadsdata) } returns "{}"
-        every { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any()) } returns
+        every { mottatteOpplysningerService.opprettSøknadDigital(any(), any(), any(), any()) } returns
             mockk<MottatteOpplysninger> { every { id } returns 99L }
 
         opprettSakOgBehandlingDigitalSøknad.utfør(offentligProsessinstans)
@@ -182,7 +198,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         val soeknadSlot = slot<Soeknad>()
 
         every {
-            mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
+            mottatteOpplysningerService.opprettSøknadDigital(
                 eq(behandlingId), any(), capture(soeknadSlot), eq(referanseId)
             )
         } returns mockk<MottatteOpplysninger> { every { id } returns 99L }
@@ -193,7 +209,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
 
         verify(exactly = 1) {
             jsonMapper.writeValueAsString(søknadsdata)
-            mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
+            mottatteOpplysningerService.opprettSøknadDigital(
                 behandlingId, any(), any(), referanseId
             )
         }
@@ -231,7 +247,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         }
         every { behandlingService.lagre(any()) } just Runs
         every { jsonMapper.writeValueAsString(arbeidsgiverSøknadsdata) } returns "{}"
-        every { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any()) } returns
+        every { mottatteOpplysningerService.opprettSøknadDigital(any(), any(), any(), any()) } returns
             mockk<MottatteOpplysninger> { every { id } returns 99L }
 
         opprettSakOgBehandlingDigitalSøknad.utfør(arbeidsgiverProsessinstans)
@@ -272,7 +288,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
             every { it.saksnummer } returns "MEL-1234"
         }
         every { jsonMapper.writeValueAsString(arbeidsgiverMedKoblet) } returns "{}"
-        every { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(any(), any(), any(), any()) } returns
+        every { mottatteOpplysningerService.opprettSøknadDigital(any(), any(), any(), any()) } returns
             mockk<MottatteOpplysninger> { every { id } returns 99L }
 
         opprettSakOgBehandlingDigitalSøknad.utfør(kobletProsessinstans)

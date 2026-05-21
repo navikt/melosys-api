@@ -15,15 +15,15 @@ import java.util.*
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class ProsessinstansBehandlerDelegateTest {
     private lateinit var prosessinstansRepository: ProsessinstansRepository
-    private lateinit var prosessinstansBehandler: ProsessinstansBehandler
+    private lateinit var prosessinstansDispatcher: ProsessinstansDispatcher
     private lateinit var prosessinstansBehandlerDelegate: ProsessinstansBehandlerDelegate
     private lateinit var prosessinstans: Prosessinstans
 
     @BeforeEach
     fun setup() {
         prosessinstansRepository = mockk<ProsessinstansRepository>()
-        prosessinstansBehandler = mockk<ProsessinstansBehandler>()
-        prosessinstansBehandlerDelegate = ProsessinstansBehandlerDelegate(prosessinstansBehandler, prosessinstansRepository)
+        prosessinstansDispatcher = mockk<ProsessinstansDispatcher>()
+        prosessinstansBehandlerDelegate = ProsessinstansBehandlerDelegate(prosessinstansDispatcher, prosessinstansRepository)
         prosessinstans = Prosessinstans.forTest { id = UUID.randomUUID() }
     }
 
@@ -38,8 +38,21 @@ internal class ProsessinstansBehandlerDelegateTest {
 
         verify {
             prosessinstansRepository wasNot Called
-            prosessinstansBehandler wasNot Called
+            prosessinstansDispatcher wasNot Called
         }
+        prosessinstans.status.shouldBe(ProsessStatus.KLAR)
+    }
+
+    @Test
+    fun `behandleProsessinstans dispatcher prosessinstans til kø når den ikke skal på vent`() {
+        prosessinstans.status = ProsessStatus.KLAR
+        every { prosessinstansDispatcher.dispatch(prosessinstans) } returns Unit
+
+
+        prosessinstansBehandlerDelegate.behandleProsessinstans(prosessinstans)
+
+
+        verify { prosessinstansDispatcher.dispatch(prosessinstans) }
         prosessinstans.status.shouldBe(ProsessStatus.KLAR)
     }
 

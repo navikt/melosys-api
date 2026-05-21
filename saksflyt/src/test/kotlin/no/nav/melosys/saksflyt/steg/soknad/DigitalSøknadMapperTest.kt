@@ -20,17 +20,20 @@ import no.nav.melosys.skjema.types.felles.PeriodeDto
 import no.nav.melosys.skjema.types.felles.UtenlandskVirksomhet
 import no.nav.melosys.skjema.types.felles.UtenlandskVirksomhetMedAnsettelsesform
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverensVirksomhetINorgeDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsinntektKilde
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidssituasjonDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsstedIUtlandetDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsstedType
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidstakerensLonnDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Farvann
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.FastEllerVekslendeArbeidssted
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.InntektType
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.OffshoreDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.OmBordPaFlyDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.PaLandDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.PaLandFastArbeidsstedDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.PaSkipDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.SkatteforholdOgInntektDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.TypeInnretning
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendingsperiodeOgLandDto
@@ -52,7 +55,10 @@ internal class DigitalSøknadMapperTest {
             val tom = LocalDate.of(2025, 12, 31)
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
-                data = arbeidstakerData(utsendingsperiodeOgLand = landOgPeriode(LandKode.DE, fom, tom))
+                data = arbeidstakerData(
+                    utsendingsperiodeOgLand = landOgPeriode(LandKode.DE, fom, tom),
+                    skatteforholdOgInntekt = skatteforholdOgInntekt()
+                )
             }
 
             val søknad = DigitalSøknadMapper.tilSoeknad(dto)
@@ -377,7 +383,6 @@ internal class DigitalSøknadMapperTest {
                             navnPaVirksomhet = "Berlin GmbH",
                             fastEllerVekslendeArbeidssted = FastEllerVekslendeArbeidssted.FAST,
                             fastArbeidssted = PaLandFastArbeidsstedDto("Hauptstraße", "42", "10115", "Berlin"),
-                            beskrivelseVekslende = null,
                             erHjemmekontor = false
                         )
                     )
@@ -408,7 +413,6 @@ internal class DigitalSøknadMapperTest {
                             navnPaVirksomhet = "Reise AS",
                             fastEllerVekslendeArbeidssted = FastEllerVekslendeArbeidssted.VEKSLENDE,
                             fastArbeidssted = null,
-                            beskrivelseVekslende = "Diverse steder",
                             erHjemmekontor = false
                         )
                     )
@@ -433,7 +437,6 @@ internal class DigitalSøknadMapperTest {
                             navnPaVirksomhet = "Home Office AS",
                             fastEllerVekslendeArbeidssted = FastEllerVekslendeArbeidssted.FAST,
                             fastArbeidssted = PaLandFastArbeidsstedDto("Street", "1", "00000", "By"),
-                            beskrivelseVekslende = null,
                             erHjemmekontor = true
                         )
                     )
@@ -663,7 +666,6 @@ internal class DigitalSøknadMapperTest {
                                 navnPaVirksomhet = "Berlin GmbH",
                                 fastEllerVekslendeArbeidssted = FastEllerVekslendeArbeidssted.FAST,
                                 fastArbeidssted = PaLandFastArbeidsstedDto("Hauptstraße", "1", "10115", "Berlin"),
-                                beskrivelseVekslende = null,
                                 erHjemmekontor = false
                             )
                         )
@@ -712,7 +714,6 @@ internal class DigitalSøknadMapperTest {
                             navnPaVirksomhet = "Stockholm AB",
                             fastEllerVekslendeArbeidssted = FastEllerVekslendeArbeidssted.FAST,
                             fastArbeidssted = PaLandFastArbeidsstedDto("Drottninggatan", "5", "11151", "Stockholm"),
-                            beskrivelseVekslende = null,
                             erHjemmekontor = false
                         )
                     )
@@ -735,10 +736,24 @@ internal class DigitalSøknadMapperTest {
 
     private fun arbeidstakerData(
         utsendingsperiodeOgLand: UtsendingsperiodeOgLandDto? = null,
-        arbeidssituasjon: ArbeidssituasjonDto? = null
+        arbeidssituasjon: ArbeidssituasjonDto? = null,
+        skatteforholdOgInntekt: SkatteforholdOgInntektDto? = null
     ) = UtsendtArbeidstakerArbeidstakersSkjemaDataDto(
         utsendingsperiodeOgLand = utsendingsperiodeOgLand,
-        arbeidssituasjon = arbeidssituasjon
+        arbeidssituasjon = arbeidssituasjon,
+        skatteforholdOgInntekt = skatteforholdOgInntekt
+    )
+
+    private fun skatteforholdOgInntekt() = SkatteforholdOgInntektDto(
+        erSkattepliktigTilNorgeIHeleutsendingsperioden = true,
+        mottarPengestotteFraAnnetEosLandEllerSveits = false,
+        landSomUtbetalerPengestotte = null,
+        pengestotteSomMottasFraAndreLandBelop = null,
+        pengestotteSomMottasFraAndreLandBeskrivelse = null,
+        inntektFraNorskEllerUtenlandskVirksomhet = setOf(ArbeidsinntektKilde.NORSK_VIRKSOMHET, ArbeidsinntektKilde.UTENLANDSK_VIRKSOMHET),
+        hvilkeTyperInntektHarDu = setOf(InntektType.LOENN, InntektType.INNTEKT_FRA_EGEN_VIRKSOMHET),
+        inntekt = "65000",
+        inntektFraEgenVirksomhet = "12000"
     )
 
     private fun arbeidsgiverData(

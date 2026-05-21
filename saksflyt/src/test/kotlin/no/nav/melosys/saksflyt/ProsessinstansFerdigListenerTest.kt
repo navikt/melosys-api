@@ -15,14 +15,14 @@ import java.util.*
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class ProsessinstansFerdigListenerTest {
     private lateinit var prosessinstansRepository: ProsessinstansRepository
-    private lateinit var prosessinstansBehandler: ProsessinstansBehandler
+    private lateinit var prosessinstansDispatcher: ProsessinstansDispatcher
     private lateinit var prosessinstansFerdigListener: ProsessinstansFerdigListener
 
     @BeforeEach
     fun setup() {
         prosessinstansRepository = mockk<ProsessinstansRepository>()
-        prosessinstansBehandler = mockk<ProsessinstansBehandler>()
-        prosessinstansFerdigListener = ProsessinstansFerdigListener(prosessinstansRepository, prosessinstansBehandler)
+        prosessinstansDispatcher = mockk<ProsessinstansDispatcher>()
+        prosessinstansFerdigListener = ProsessinstansFerdigListener(prosessinstansRepository, prosessinstansDispatcher)
     }
 
     @Test
@@ -35,7 +35,7 @@ internal class ProsessinstansFerdigListenerTest {
 
         verify {
             prosessinstansRepository wasNot Called
-            prosessinstansBehandler wasNot Called
+            prosessinstansDispatcher wasNot Called
         }
     }
 
@@ -49,7 +49,7 @@ internal class ProsessinstansFerdigListenerTest {
 
 
         verify {
-            prosessinstansBehandler wasNot Called
+            prosessinstansDispatcher wasNot Called
         }
     }
 
@@ -69,7 +69,7 @@ internal class ProsessinstansFerdigListenerTest {
             låsReferanse = "12_14_1"
             registrertDato = LocalDateTime.now()
         }
-        every { prosessinstansBehandler.behandleProsessinstans(any()) } returns Unit
+        every { prosessinstansDispatcher.dispatch(any()) } returns Unit
         every { prosessinstansRepository.save(any()) } returns mockk()
         every { prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT) } returns setOf(
             prosessinstansUlikReferanse,
@@ -81,9 +81,9 @@ internal class ProsessinstansFerdigListenerTest {
         prosessinstansFerdigListener.prosessinstansFerdig(ProsessinstansFerdigEvent(ferdigProsessinstans))
 
 
-        verify { prosessinstansBehandler.behandleProsessinstans(tidligstOpprettetProsessinstans) }
+        verify { prosessinstansDispatcher.dispatch(tidligstOpprettetProsessinstans) }
         tidligstOpprettetProsessinstans.status.shouldBe(ProsessStatus.KLAR)
-        confirmVerified(prosessinstansBehandler)
+        confirmVerified(prosessinstansDispatcher)
     }
 
     @Test
@@ -117,14 +117,14 @@ internal class ProsessinstansFerdigListenerTest {
             subProsessinstansNy
 
         )
-        every { prosessinstansBehandler.behandleProsessinstans(any()) } returns Unit
+        every { prosessinstansDispatcher.dispatch(any()) } returns Unit
 
 
         prosessinstansFerdigListener.prosessinstansFerdig(ProsessinstansFerdigEvent(rootProsessinstans))
 
 
-        verify(exactly = 1) { prosessinstansBehandler.behandleProsessinstans(subProsessinstansEldst) }
-        confirmVerified(prosessinstansBehandler)
+        verify(exactly = 1) { prosessinstansDispatcher.dispatch(subProsessinstansEldst) }
+        confirmVerified(prosessinstansDispatcher)
     }
 
     @Test
@@ -155,14 +155,14 @@ internal class ProsessinstansFerdigListenerTest {
             tidligstOpprettetProsessinstans,
             subProsessinstansNy,
         )
-        every { prosessinstansBehandler.behandleProsessinstans(any()) } returns Unit
+        every { prosessinstansDispatcher.dispatch(any()) } returns Unit
 
 
         prosessinstansFerdigListener.prosessinstansFerdig(ProsessinstansFerdigEvent(subProsessinstansEldst))
 
 
-        verify(exactly = 1) { prosessinstansBehandler.behandleProsessinstans(subProsessinstansNy) }
-        confirmVerified(prosessinstansBehandler)
+        verify(exactly = 1) { prosessinstansDispatcher.dispatch(subProsessinstansNy) }
+        confirmVerified(prosessinstansDispatcher)
     }
 
 
@@ -196,14 +196,14 @@ internal class ProsessinstansFerdigListenerTest {
             subProsessinstansNy
 
         )
-        every { prosessinstansBehandler.behandleProsessinstans(any()) } returns Unit
+        every { prosessinstansDispatcher.dispatch(any()) } returns Unit
 
 
         prosessinstansFerdigListener.prosessinstansFerdig(ProsessinstansFerdigEvent(rootProsessinstans))
 
 
-        verify(exactly = 1) { prosessinstansBehandler.behandleProsessinstans(subProsessinstansEldst) }
-        confirmVerified(prosessinstansBehandler)
+        verify(exactly = 1) { prosessinstansDispatcher.dispatch(subProsessinstansEldst) }
+        confirmVerified(prosessinstansDispatcher)
     }
 
     @Test
@@ -235,14 +235,14 @@ internal class ProsessinstansFerdigListenerTest {
             subProsessinstans2,
 
         )
-        every { prosessinstansBehandler.behandleProsessinstans(any()) } returns Unit
+        every { prosessinstansDispatcher.dispatch(any()) } returns Unit
 
 
         prosessinstansFerdigListener.prosessinstansFerdig(ProsessinstansFerdigEvent(subProsessinstans1))
 
 
-        verify(exactly = 1) { prosessinstansBehandler.behandleProsessinstans(subProsessinstans2) }
-        confirmVerified(prosessinstansBehandler)
+        verify(exactly = 1) { prosessinstansDispatcher.dispatch(subProsessinstans2) }
+        confirmVerified(prosessinstansDispatcher)
     }
 
     @Test
@@ -265,14 +265,14 @@ internal class ProsessinstansFerdigListenerTest {
             tidligstOpprettetProsessinstans,
             nyesteOpprettetProsessinstans,
         )
-        every { prosessinstansBehandler.behandleProsessinstans(any()) } returns Unit
+        every { prosessinstansDispatcher.dispatch(any()) } returns Unit
 
 
         prosessinstansFerdigListener.prosessinstansFerdig(ProsessinstansFerdigEvent(rootProsessinstans))
 
 
-        verify(exactly = 1) { prosessinstansBehandler.behandleProsessinstans(tidligstOpprettetProsessinstans) }
-        confirmVerified(prosessinstansBehandler)
+        verify(exactly = 1) { prosessinstansDispatcher.dispatch(tidligstOpprettetProsessinstans) }
+        confirmVerified(prosessinstansDispatcher)
     }
 
     private fun lagProsessInstans(block: Prosessinstans.() -> Unit = {}) = Prosessinstans.forTest {
