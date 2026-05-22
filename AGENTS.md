@@ -30,6 +30,6 @@ Full logs saved at `/tmp/mvn.log`.
 ## Key Conventions
 
 - Write new code in **Kotlin**; convert Java when touched
-- Spring Boot 3.3, Jakarta EE, Oracle DB with Flyway
+- Spring Boot, Jakarta EE, Oracle DB with Flyway
 - Architecture details: see `.agents/skills/architecture/SKILL.md`
 - Module dependency graph for Kotlin conversion: see `.agents/skills/architecture/SKILL.md`
