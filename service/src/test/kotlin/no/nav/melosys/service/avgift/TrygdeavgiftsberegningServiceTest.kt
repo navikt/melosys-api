@@ -1260,7 +1260,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                             }
                         )
                     )
-                }.message.shouldContain("Kan ikke beregne trygdeavgift uten skatteforholdTilNorge")
+                }.message.shouldContain("Kan ikke beregne trygdeavgift uten skatteforholdsperioder")
             }
 
             @Test
