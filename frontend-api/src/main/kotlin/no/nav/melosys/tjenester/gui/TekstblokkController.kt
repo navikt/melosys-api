@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Protected
 @RestController
-@RequestMapping("/tekstblokker")
+@RequestMapping("/brev/tekstblokker")
 @Tag(name = "tekstblokker")
 class TekstblokkController(
     private val tekstblokkService: TekstblokkService,

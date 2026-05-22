@@ -17,9 +17,8 @@ import org.springframework.web.bind.annotation.RestController
 private const val MAKS_BULK = 500
 
 @RestController
-@RequestMapping("/admin/tekstblokker")
+@RequestMapping("/admin/brev/tekstblokker")
 @Tag(name = "admin-tekstblokker")
-@Unprotected
 class TekstblokkAdminController(
     private val tekstblokkService: TekstblokkService,
 ) {
