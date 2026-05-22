@@ -4,8 +4,6 @@ import io.getunleash.Unleash
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import no.nav.melosys.domain.tekstblokk.Tekstblokk
-import no.nav.melosys.domain.tekstblokk.TekstblokkOversikt
 import no.nav.melosys.domain.tekstblokk.TekstblokkType
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.SikkerhetsbegrensningException
@@ -39,28 +37,28 @@ class TekstblokkController(
     @Operation(summary = "Henter oversikt over tekstblokker og brevmaler (uten innhold)")
     fun hentAlle(@RequestParam(value = "type", required = false) type: TekstblokkType?): ResponseEntity<List<TekstblokkOversiktDto>> {
         sjekkLesetilgang()
-        return ResponseEntity.ok(tekstblokkService.hentAlleOversikter(type).map(::tilOversiktDto))
+        return ResponseEntity.ok(tekstblokkService.hentAlleOversikter(type).map(TekstblokkOversiktDto::av))
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Henter én tekstblokk med fullt innhold")
     fun hent(@PathVariable("id") id: Long): ResponseEntity<TekstblokkDto> {
         sjekkLesetilgang()
-        return ResponseEntity.ok(tilDto(tekstblokkService.hent(id)))
+        return ResponseEntity.ok(TekstblokkDto.av(tekstblokkService.hent(id)))
     }
 
     @PostMapping
     @Operation(summary = "Oppretter en ny tekstblokk eller brevmal")
     fun opprett(@Valid @RequestBody request: TekstblokkRequestDto): ResponseEntity<TekstblokkDto> {
         sjekkAdministrasjon()
-        return ResponseEntity.ok(tilDto(tekstblokkService.opprett(tilInput(request))))
+        return ResponseEntity.ok(TekstblokkDto.av(tekstblokkService.opprett(request.tilInput())))
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Oppdaterer en eksisterende tekstblokk")
     fun oppdater(@PathVariable("id") id: Long, @Valid @RequestBody request: TekstblokkRequestDto): ResponseEntity<TekstblokkDto> {
         sjekkAdministrasjon()
-        return ResponseEntity.ok(tilDto(tekstblokkService.oppdater(id, tilInput(request))))
+        return ResponseEntity.ok(TekstblokkDto.av(tekstblokkService.oppdater(id, request.tilInput())))
     }
 
     @DeleteMapping("/{id}")
@@ -93,21 +91,4 @@ class TekstblokkController(
         }
     }
 
-    private fun tilInput(request: TekstblokkRequestDto): TekstblokkService.Input =
-        TekstblokkService.Input(request.tittel, request.innhold, request.type, request.tags)
-
-    private fun tilOversiktDto(o: TekstblokkOversikt): TekstblokkOversiktDto =
-        TekstblokkOversiktDto(o.id, o.tittel, o.type, o.tags.sorted(), o.endretDato, o.endretAv)
-
-    private fun tilDto(t: Tekstblokk): TekstblokkDto = TekstblokkDto(
-        id = t.id!!,
-        tittel = t.tittel,
-        innhold = t.innhold,
-        type = t.type,
-        tags = t.tags.sorted(),
-        registrertDato = t.registrertDato,
-        registrertAv = t.registrertAv,
-        endretDato = t.endretDato,
-        endretAv = t.endretAv,
-    )
 }

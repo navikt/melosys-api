@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 
 import no.nav.melosys.domain.tekstblokk.TekstblokkType
+import no.nav.melosys.service.tekstblokk.TekstblokkService
 
 /**
  * Body for POST og PUT. Tags lagres normalisert (lowercase + trim) på server.
@@ -14,4 +15,6 @@ data class TekstblokkRequestDto(
     @field:NotBlank val innhold: String,
     @field:NotNull val type: TekstblokkType,
     val tags: List<@Size(max = 60) String>?,
-)
+) {
+    fun tilInput(): TekstblokkService.Input = TekstblokkService.Input(tittel, innhold, type, tags)
+}

@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.dto.tekstblokk
 
 import java.time.Instant
+import no.nav.melosys.domain.tekstblokk.TekstblokkOversikt
 import no.nav.melosys.domain.tekstblokk.TekstblokkType
 
 /**
@@ -13,4 +14,15 @@ data class TekstblokkOversiktDto(
     val tags: List<String>,
     val endretDato: Instant,
     val endretAv: String,
-)
+) {
+    companion object {
+        fun av(o: TekstblokkOversikt): TekstblokkOversiktDto = TekstblokkOversiktDto(
+            id = o.id,
+            tittel = o.tittel,
+            type = o.type,
+            tags = o.tags.sorted(),
+            endretDato = o.endretDato,
+            endretAv = o.endretAv,
+        )
+    }
+}

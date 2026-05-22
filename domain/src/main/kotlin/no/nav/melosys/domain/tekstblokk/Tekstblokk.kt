@@ -40,5 +40,5 @@ class Tekstblokk(
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "TEKSTBLOKK_TAG", joinColumns = [JoinColumn(name = "tekstblokk_id")])
     @Column(name = "tag", nullable = false)
-    var tags: MutableSet<String> = mutableSetOf(),
+    val tags: MutableSet<String> = mutableSetOf(),
 ) : RegistreringsInfo()

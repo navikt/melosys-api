@@ -20,7 +20,7 @@ class TekstblokkService(
         val tittel: String,
         val innhold: String,
         val type: TekstblokkType,
-        val tags: Collection<String>?,
+        val tags: List<String>?,
     )
 
     @Transactional(readOnly = true)
@@ -28,13 +28,9 @@ class TekstblokkService(
         val oversikter = tekstblokkRepository.finnOversikt(type)
         if (oversikter.isEmpty()) return oversikter
 
-        val tagsPerId: Map<Long, MutableSet<String>> = oversikter.associate { it.id to mutableSetOf<String>() }
-        tekstblokkRepository.finnTagsForIds(tagsPerId.keys).forEach { rad ->
-            val id = rad[0] as Long
-            val tag = rad[1] as String
-            tagsPerId[id]?.add(tag)
-        }
-        oversikter.forEach { it.tags = tagsPerId[it.id] ?: emptySet() }
+        val tagsPerId = tekstblokkRepository.finnTagsForIds(oversikter.map { it.id })
+            .groupBy({ it[0] as Long }, { it[1] as String })
+        oversikter.forEach { it.tags = tagsPerId[it.id]?.toSet() ?: emptySet() }
         return oversikter
     }
 
@@ -76,10 +72,11 @@ class TekstblokkService(
         tekstblokk.tittel = input.tittel.trim()
         tekstblokk.innhold = htmlSanitizer.saniter(input.innhold) ?: ""
         tekstblokk.type = input.type
-        tekstblokk.tags = normaliserTags(input.tags).toMutableSet()
+        tekstblokk.tags.clear()
+        tekstblokk.tags.addAll(normaliserTags(input.tags))
     }
 
-    private fun normaliserTags(tags: Collection<String>?): Set<String> =
+    private fun normaliserTags(tags: List<String>?): Set<String> =
         tags
             ?.asSequence()
             ?.filter { it.isNotBlank() }

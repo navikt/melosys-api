@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.dto.tekstblokk
 
 import java.time.Instant
+import no.nav.melosys.domain.tekstblokk.Tekstblokk
 import no.nav.melosys.domain.tekstblokk.TekstblokkType
 
 /**
@@ -16,4 +17,18 @@ data class TekstblokkDto(
     val registrertAv: String,
     val endretDato: Instant,
     val endretAv: String,
-)
+) {
+    companion object {
+        fun av(t: Tekstblokk): TekstblokkDto = TekstblokkDto(
+            id = requireNotNull(t.id) { "Tekstblokk uten id kan ikke mappes til DTO" },
+            tittel = t.tittel,
+            innhold = t.innhold,
+            type = t.type,
+            tags = t.tags.sorted(),
+            registrertDato = t.registrertDato,
+            registrertAv = t.registrertAv,
+            endretDato = t.endretDato,
+            endretAv = t.endretAv,
+        )
+    }
+}
