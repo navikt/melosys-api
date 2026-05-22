@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 
-import no.nav.melosys.domain.tekstblokk.TekstblokkType
+import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
 import no.nav.melosys.service.tekstblokk.TekstblokkService
 
 /**

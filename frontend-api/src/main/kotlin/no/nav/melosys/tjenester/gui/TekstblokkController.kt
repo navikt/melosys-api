@@ -4,7 +4,7 @@ import io.getunleash.Unleash
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import no.nav.melosys.domain.tekstblokk.TekstblokkType
+import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.SikkerhetsbegrensningException
 import no.nav.melosys.featuretoggle.ToggleName

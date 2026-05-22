@@ -2,9 +2,9 @@ package no.nav.melosys.service.tekstblokk
 
 import java.util.Locale
 
-import no.nav.melosys.domain.tekstblokk.Tekstblokk
-import no.nav.melosys.domain.tekstblokk.TekstblokkOversikt
-import no.nav.melosys.domain.tekstblokk.TekstblokkType
+import no.nav.melosys.domain.brev.tekstblokk.Tekstblokk
+import no.nav.melosys.domain.brev.tekstblokk.TekstblokkOversikt
+import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.tekstblokk.TekstblokkRepository
 import org.springframework.stereotype.Service

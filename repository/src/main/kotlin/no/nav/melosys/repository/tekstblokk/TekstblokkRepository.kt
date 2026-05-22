@@ -2,9 +2,9 @@ package no.nav.melosys.repository.tekstblokk
 
 import java.util.Optional
 
-import no.nav.melosys.domain.tekstblokk.Tekstblokk
-import no.nav.melosys.domain.tekstblokk.TekstblokkOversikt
-import no.nav.melosys.domain.tekstblokk.TekstblokkType
+import no.nav.melosys.domain.brev.tekstblokk.Tekstblokk
+import no.nav.melosys.domain.brev.tekstblokk.TekstblokkOversikt
+import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query

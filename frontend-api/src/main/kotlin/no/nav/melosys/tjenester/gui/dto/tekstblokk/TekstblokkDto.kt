@@ -1,8 +1,8 @@
 package no.nav.melosys.tjenester.gui.dto.tekstblokk
 
 import java.time.Instant
-import no.nav.melosys.domain.tekstblokk.Tekstblokk
-import no.nav.melosys.domain.tekstblokk.TekstblokkType
+import no.nav.melosys.domain.brev.tekstblokk.Tekstblokk
+import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
 
 /**
  * Full DTO med innhold. Brukes ved henting av enkelt tekstblokk for visning eller redigering.

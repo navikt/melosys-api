@@ -1,8 +1,8 @@
 package no.nav.melosys.tjenester.gui.dto.tekstblokk
 
 import java.time.Instant
-import no.nav.melosys.domain.tekstblokk.TekstblokkOversikt
-import no.nav.melosys.domain.tekstblokk.TekstblokkType
+import no.nav.melosys.domain.brev.tekstblokk.TekstblokkOversikt
+import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
 
 /**
  * Lett DTO uten innhold. Brukes for liste-visning og søk i frontend.

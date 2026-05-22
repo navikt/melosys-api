@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.tekstblokk
+package no.nav.melosys.domain.brev.tekstblokk
 
 import jakarta.persistence.CollectionTable
 import jakarta.persistence.Column
