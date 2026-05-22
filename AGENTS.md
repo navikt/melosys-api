@@ -1,4 +1,4 @@
-# AGENT.md
+# AGENTS.md
 
 Domain-specific skills are in `.agents/skills/` (each has a `SKILL.md`).
 
