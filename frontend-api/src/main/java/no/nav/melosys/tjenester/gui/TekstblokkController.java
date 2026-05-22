@@ -1,7 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import io.getunleash.Unleash;
@@ -124,8 +122,6 @@ public class TekstblokkController {
     }
 
     private List<String> sorterteTags(Tekstblokk t) {
-        List<String> sortert = new ArrayList<>(t.getTags());
-        Collections.sort(sortert);
-        return sortert;
+        return t.getTags().stream().sorted().toList();
     }
 }

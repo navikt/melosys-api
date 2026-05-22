@@ -12,5 +12,5 @@ public record TekstblokkRequestDto(
     @NotBlank @Size(max = 200) String tittel,
     @NotBlank String innhold,
     @NotNull TekstblokkType type,
-    List<String> tags
+    List<@Size(max = 60) String> tags
 ) {}
