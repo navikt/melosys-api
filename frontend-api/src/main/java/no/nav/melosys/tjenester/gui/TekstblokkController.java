@@ -45,42 +45,56 @@ public class TekstblokkController {
     @GetMapping
     @Operation(summary = "Henter oversikt over tekstblokker og brevmaler (uten innhold)")
     public ResponseEntity<List<TekstblokkOversiktDto>> hentAlle(@RequestParam(value = "type", required = false) TekstblokkType type) {
-        sjekkToggle();
+        sjekkLesetilgang();
         return ResponseEntity.ok(tekstblokkService.hentAlle(type).stream().map(this::tilOversiktDto).toList());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Henter én tekstblokk med fullt innhold")
     public ResponseEntity<TekstblokkDto> hent(@PathVariable("id") Long id) {
-        sjekkToggle();
+        sjekkLesetilgang();
         return ResponseEntity.ok(tilDto(tekstblokkService.hent(id)));
     }
 
     @PostMapping
     @Operation(summary = "Oppretter en ny tekstblokk eller brevmal")
     public ResponseEntity<TekstblokkDto> opprett(@Valid @RequestBody TekstblokkRequestDto request) {
-        sjekkToggle();
+        sjekkAdministrasjon();
         return ResponseEntity.ok(tilDto(tekstblokkService.opprett(tilInput(request))));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Oppdaterer en eksisterende tekstblokk")
     public ResponseEntity<TekstblokkDto> oppdater(@PathVariable("id") Long id, @Valid @RequestBody TekstblokkRequestDto request) {
-        sjekkToggle();
+        sjekkAdministrasjon();
         return ResponseEntity.ok(tilDto(tekstblokkService.oppdater(id, tilInput(request))));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Sletter en tekstblokk")
     public ResponseEntity<Void> slett(@PathVariable("id") Long id) {
-        sjekkToggle();
+        sjekkAdministrasjon();
         tekstblokkService.slett(id);
         return ResponseEntity.noContent().build();
     }
 
-    private void sjekkToggle() {
+    /**
+     * Lesetilgang krever kun melosys.tekstblokker – brukes i Send brev-popoveren.
+     */
+    private void sjekkLesetilgang() {
         if (!unleash.isEnabled(ToggleName.MELOSYS_TEKSTBLOKKER)) {
             throw new IkkeFunnetException("Tekstblokker-funksjonalitet er ikke aktivert");
+        }
+    }
+
+    /**
+     * Administrasjon (opprett/endre/slett) krever i tillegg melosys.administrasjon.
+     * Slik kan vi rulle ut popoveren bredt mens kun et utvalg får full admin-tilgang.
+     */
+    private void sjekkAdministrasjon() {
+        sjekkLesetilgang();
+        if (!unleash.isEnabled(ToggleName.MELOSYS_ADMINISTRASJON)) {
+            throw new IkkeFunnetException("Administrasjon av tekstblokker er ikke aktivert");
         }
     }
 
