@@ -12,6 +12,7 @@ import org.slf4j.MDC
 import org.slf4j.event.Level
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.reactive.function.client.WebClientResponseException
@@ -48,6 +49,12 @@ class ExceptionMapper {
     @ExceptionHandler(ValideringException::class)
     fun håndter(e: ValideringException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> =
         håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, e.feilkoder)
+
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun håndter(e: MethodArgumentNotValidException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {
+        val feilmeldinger = e.bindingResult.fieldErrors.map { "${it.field}: ${it.defaultMessage}" }
+        return håndter(e, request, HttpStatus.BAD_REQUEST, Level.WARN, feilmeldinger)
+    }
 
     @ExceptionHandler(WebClientResponseException::class)
     fun håndter(e: WebClientResponseException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {
