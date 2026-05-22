@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import no.nav.melosys.domain.tekstblokk.Tekstblokk;
 import no.nav.melosys.domain.tekstblokk.TekstblokkType;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.tekstblokk.TekstblokkService;
 import no.nav.melosys.tjenester.gui.dto.tekstblokk.TekstblokkDto;
@@ -80,6 +81,7 @@ public class TekstblokkController {
 
     /**
      * Lesetilgang krever kun melosys.tekstblokker – brukes i Send brev-popoveren.
+     * Returnerer 404 når feature er av: endepunktet finnes ikke for denne brukeren.
      */
     private void sjekkLesetilgang() {
         if (!unleash.isEnabled(ToggleName.MELOSYS_TEKSTBLOKKER)) {
@@ -90,11 +92,12 @@ public class TekstblokkController {
     /**
      * Administrasjon (opprett/endre/slett) krever i tillegg melosys.administrasjon.
      * Slik kan vi rulle ut popoveren bredt mens kun et utvalg får full admin-tilgang.
+     * Returnerer 403 når toggle er av: brukeren kan lese, men ikke administrere.
      */
     private void sjekkAdministrasjon() {
         sjekkLesetilgang();
         if (!unleash.isEnabled(ToggleName.MELOSYS_ADMINISTRASJON)) {
-            throw new IkkeFunnetException("Administrasjon av tekstblokker er ikke aktivert");
+            throw new SikkerhetsbegrensningException("Du har ikke tilgang til å administrere tekstblokker");
         }
     }
 
