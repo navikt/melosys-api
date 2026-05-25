@@ -54,6 +54,7 @@
 
         <!-- Versjoner av eksterne biblioteker -->
         <archunit.version>1.4.2</archunit.version>
+        <jsoup.version>1.18.3</jsoup.version>
         <apache-httpclients.version>4.5.13</apache-httpclients.version>
         <caffeine.version>3.2.3</caffeine.version>
         <cxf.version>4.2.0</cxf.version>
@@ -677,6 +678,11 @@
                 <groupId>com.sun.xml.ws</groupId>
                 <artifactId>jaxws-rt</artifactId>
                 <version>${jaxws-rt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>${jsoup.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
