@@ -34,7 +34,7 @@ class TekstblokkController(
 ) {
 
     @GetMapping
-    @Operation(summary = "Henter oversikt over tekstblokker og brevmaler (uten innhold)")
+    @Operation(summary = "Henter oversikt over tekstblokker og brevmaler")
     fun hentAlle(@RequestParam(value = "type", required = false) type: TekstblokkType?): ResponseEntity<List<TekstblokkOversiktDto>> {
         sjekkLesetilgang()
         return ResponseEntity.ok(tekstblokkService.hentAlleOversikter(type).map(TekstblokkOversiktDto::av))
