@@ -14,7 +14,7 @@ interface TekstblokkRepository : JpaRepository<Tekstblokk, Long> {
 
     @Query(
         """
-        SELECT new no.nav.melosys.domain.brev.tekstblokk.TekstblokkOversikt(t.id, t.tittel, t.type, t.endretDato, t.endretAv)
+        SELECT new no.nav.melosys.domain.brev.tekstblokk.TekstblokkOversikt(t.id, t.tittel, t.innhold, t.type, t.endretDato, t.endretAv)
         FROM Tekstblokk t
         WHERE (:type IS NULL OR t.type = :type)
         ORDER BY t.tittel ASC

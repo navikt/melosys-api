@@ -43,13 +43,19 @@ Tillatt sett av tagger speiler det Quill-editoren produserer (`p`, `br`, `strong
 server-siden er ikke-omgåelig — frontend-only sanitering ville vært trivielt å
 omgå via curl.
 
-### Lett liste-DTO via JPQL-projeksjon
-`GET /tekstblokker` returnerer `TekstblokkOversiktDto` uten innhold. Repository
-bruker JPQL constructor-projeksjon (`finnOversikt`) som hopper over `@Lob innhold`
-fra DB-spørringen, og en separat `finnTagsForIds` slår sammen tags. For 200 rader
-sparer det ~750 KB DB-IO ved hver liste-fetch. `GET /tekstblokker/{id}` returnerer
-full `TekstblokkDto` med innhold; `@EntityGraph(attributePaths = "tags")` unngår
-N+1 på tags-collection.
+### Liste-DTO med innhold for client-side søk
+`GET /tekstblokker` returnerer `TekstblokkOversiktDto` med innhold. Repository
+bruker JPQL constructor-projeksjon (`finnOversikt`), og en separat `finnTagsForIds`
+slår sammen tags. Innholdet tas med slik at frontend kan søke i brødteksten og
+vise forhåndsvisning uten et ekstra kall per blokk. Med ~600 blokker som tak er
+payload ~180 KB gzippet og caches i frontend. `GET /tekstblokker/{id}` returnerer
+full `TekstblokkDto` (med registreringsfelter for redigering); `@EntityGraph`
+unngår N+1 på tags-collection.
+
+Vi vurderte å holde innhold ute av lista og søke server-side (Oracle `LIKE` på
+CLOB), men på denne skalaen gir client-side søk enklere kode, fler-ords-AND og
+umiddelbar respons. Hvis blokk-antallet en gang passerer ~10k, bytter vi til et
+Oracle Text-basert søkeendepunkt uten å endre frontend-kontrakten.
 
 ### To feature toggles: lese vs administrasjon
 - `melosys.tekstblokker` (lese): styrer GET-endepunktene. 404 hvis av (endepunktet
@@ -87,7 +93,8 @@ frontend-api), i tråd med ADR-0002.
 - To-toggle-modellen lar oss rulle ut lese-funksjonalitet bredt mens admin
   begrenses til et utvalg
 - Bulk-endepunkt gir effektiv seeding fra melosys-console
-- Lett liste-DTO sparer ~750 KB DB-IO per liste-fetch
+- Liste med innhold gir client-side fritekstsøk (tittel + innhold + tags) uten
+  ekstra kall per blokk
 
 **Avveininger**
 - Tag-join-tabellen krever et JOIN ved aggregering (akseptabelt med <60 unike tags)

@@ -5,11 +5,13 @@ import no.nav.melosys.domain.brev.tekstblokk.TekstblokkOversikt
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
 
 /**
- * Lett DTO uten innhold. Brukes for liste-visning og søk i frontend.
+ * DTO for liste-visning. Inkluderer innhold slik at frontend kan søke i
+ * brødteksten og vise forhåndsvisning uten et ekstra kall per blokk.
  */
 data class TekstblokkOversiktDto(
     val id: Long,
     val tittel: String,
+    val innhold: String,
     val type: TekstblokkType,
     val tags: List<String>,
     val endretDato: Instant,
@@ -19,6 +21,7 @@ data class TekstblokkOversiktDto(
         fun av(o: TekstblokkOversikt): TekstblokkOversiktDto = TekstblokkOversiktDto(
             id = o.id,
             tittel = o.tittel,
+            innhold = o.innhold,
             type = o.type,
             tags = o.tags.sorted(),
             endretDato = o.endretDato,
