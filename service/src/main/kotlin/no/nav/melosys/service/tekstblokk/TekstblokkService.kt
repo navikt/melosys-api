@@ -80,7 +80,9 @@ class TekstblokkService(
         tags
             ?.asSequence()
             ?.filter { it.isNotBlank() }
-            ?.map { it.trim().lowercase(Locale.ROOT) }
+            // Mellomrom -> bindestrek: holder tags som enkle slugs uten mellomrom, slik at
+            // de fungerer som ett ledd i frontends ord-baserte søk.
+            ?.map { it.trim().lowercase(Locale.ROOT).replace(Regex("\\s+"), "-") }
             ?.toSet()
             ?: emptySet()
 }
