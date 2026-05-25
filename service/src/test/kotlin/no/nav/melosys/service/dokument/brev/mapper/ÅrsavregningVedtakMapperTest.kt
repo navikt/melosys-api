@@ -14,6 +14,7 @@ import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
 import no.nav.melosys.domain.dokument.personDokumentForTest
 import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
@@ -26,6 +27,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
 import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.avgift.aarsavregning.HelseutgiftDekkesPeriodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
@@ -337,6 +339,35 @@ class ÅrsavregningVedtakMapperTest {
     }
 
 
+    @Test
+    fun `mapÅrsavregning skal mappe trygdedekning fra helseutgiftDekkesPeriode når grunnlaget er helseutgift (EØS pensjonist)`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
+
+        val endeligAvgift = listOf(lagHelseutgiftTrygdeavgiftsperiode(trygdesats = BigDecimal(1000), trygdeavgiftsbeløpMd = BigDecimal(500)))
+        val tidligereAvgift = listOf(lagHelseutgiftTrygdeavgiftsperiode(trygdesats = BigDecimal(900), trygdeavgiftsbeløpMd = BigDecimal(450)))
+
+        val grunnlag = lagHelseutgiftGrunnlag()
+
+        val årsavregningModel = lagÅrsavregningModel(
+            beregnetAvgiftBelop = BigDecimal(2000),
+            tidligereFakturertBeloep = BigDecimal(1000),
+            endeligAvgift = endeligAvgift,
+            tidligereAvgift = tidligereAvgift,
+            tidligereGrunnlag = grunnlag,
+            nyttGrunnlag = grunnlag,
+        )
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.shouldNotBeNull()
+        result.endeligTrygdeavgift[0].trygdedekning shouldBe Trygdedekninger.FULL_DEKNING_EOSFO.beskrivelse.orEmpty()
+        result.forskuddsvisFakturertTrygdeavgift[0].trygdedekning shouldBe Trygdedekninger.FULL_DEKNING_EOSFO.beskrivelse.orEmpty()
+        result.pliktigMedlemskap shouldBe true
+    }
+
+
+
     fun svaralternativpermutations(): Stream<Arguments> = Stream.of(
         Arguments.of(Medlemskapstyper.PLIKTIG, false, SvarAlternativ.IKKE_RELEVANT),
         Arguments.of(Medlemskapstyper.FRIVILLIG, false, SvarAlternativ.NEI),
@@ -436,29 +467,76 @@ class ÅrsavregningVedtakMapperTest {
     }
 
     private fun lagÅrsavregningModel(beregnetAvgiftBelop: BigDecimal, tidligereFakturertBeloep: BigDecimal): ÅrsavregningModel {
-        val endeligAvgift = listOf(lagEndeligTrygdeavgiftsperiode())
-        val tidligereAvgift = listOf(lagTidligereTrygdeavgiftsperiode())
-
         val grunnlagMedlemskap = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
-
-        return ÅrsavregningModel(
-            årsavregningID = 112,
-            år = 2024,
-            tilFaktureringBeloep = beregnetAvgiftBelop.subtract(tidligereFakturertBeloep),
-            endeligAvgift = endeligAvgift,
-            tidligereAvgift = tidligereAvgift,
-            nyttTrygdeavgiftsGrunnlag = grunnlagMedlemskap,
+        return lagÅrsavregningModel(
             beregnetAvgiftBelop = beregnetAvgiftBelop,
             tidligereFakturertBeloep = tidligereFakturertBeloep,
-            tidligereTrygdeavgiftsGrunnlag = grunnlagMedlemskap,
-            harInnbetaltTrygdeavgift = false,
-            innbetaltTrygdeavgift = null,
-            manueltAvgiftBeloep = BigDecimal(0),
-            endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
-            tidligereInnbetaltTrygdeavgift = null,
-            tidligereÅrsavregningmanueltAvgiftBeloep = null,
-            harSkjoennsfastsattInntektsgrunnlag = false
+            endeligAvgift = listOf(lagEndeligTrygdeavgiftsperiode()),
+            tidligereAvgift = listOf(lagTidligereTrygdeavgiftsperiode()),
+            tidligereGrunnlag = grunnlagMedlemskap,
+            nyttGrunnlag = grunnlagMedlemskap,
         )
+    }
+
+    private fun lagÅrsavregningModel(
+        beregnetAvgiftBelop: BigDecimal,
+        tidligereFakturertBeloep: BigDecimal,
+        endeligAvgift: List<Trygdeavgiftsperiode>,
+        tidligereAvgift: List<Trygdeavgiftsperiode>,
+        tidligereGrunnlag: Trygdeavgiftsgrunnlag,
+        nyttGrunnlag: Trygdeavgiftsgrunnlag,
+    ): ÅrsavregningModel = ÅrsavregningModel(
+        årsavregningID = 112,
+        år = 2024,
+        tilFaktureringBeloep = beregnetAvgiftBelop.subtract(tidligereFakturertBeloep),
+        endeligAvgift = endeligAvgift,
+        tidligereAvgift = tidligereAvgift,
+        nyttTrygdeavgiftsGrunnlag = nyttGrunnlag,
+        beregnetAvgiftBelop = beregnetAvgiftBelop,
+        tidligereFakturertBeloep = tidligereFakturertBeloep,
+        tidligereTrygdeavgiftsGrunnlag = tidligereGrunnlag,
+        harInnbetaltTrygdeavgift = false,
+        innbetaltTrygdeavgift = null,
+        manueltAvgiftBeloep = BigDecimal(0),
+        endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
+        tidligereInnbetaltTrygdeavgift = null,
+        tidligereÅrsavregningmanueltAvgiftBeloep = null,
+        harSkjoennsfastsattInntektsgrunnlag = false
+    )
+
+    private fun lagHelseutgiftTrygdeavgiftsperiode(
+        trygdesats: BigDecimal,
+        trygdeavgiftsbeløpMd: BigDecimal,
+    ): Trygdeavgiftsperiode {
+        val helseutgiftDekkesPeriode = HelseutgiftDekkesPeriode.forTest {
+            fomDato = LocalDate.of(2023, 1, 1)
+            tomDato = LocalDate.of(2023, 12, 31)
+        }
+
+        return Trygdeavgiftsperiode.forTest {
+            periodeFra = LocalDate.of(2023, 1, 1)
+            periodeTil = LocalDate.of(2023, 12, 31)
+            this.trygdeavgiftsbeløpMd = trygdeavgiftsbeløpMd
+            this.trygdesats = trygdesats
+            grunnlagInntekstperiode {
+                avgiftspliktigMndInntekt = Penger(BigDecimal(2800), NOK.kode)
+                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                arbeidsgiversavgiftBetalesTilSkatt = true
+            }
+            grunnlagSkatteforholdTilNorge {
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
+        }.copyEntity(grunnlagHelseutgiftDekkesPeriode = helseutgiftDekkesPeriode)
+    }
+
+    private fun lagHelseutgiftGrunnlag(): Trygdeavgiftsgrunnlag {
+        val helseutgiftPeriode = HelseutgiftDekkesPeriodeForAvgift(
+            fom = LocalDate.of(2023, 1, 1),
+            tom = LocalDate.of(2023, 12, 31),
+            dekning = Trygdedekninger.FULL_DEKNING_EOSFO,
+            medlemskapstype = Medlemskapstyper.PLIKTIG,
+        )
+        return Trygdeavgiftsgrunnlag(listOf(helseutgiftPeriode), emptyList(), emptyList())
     }
 
     private fun lagEndeligTrygdeavgiftsperiode(): Trygdeavgiftsperiode {

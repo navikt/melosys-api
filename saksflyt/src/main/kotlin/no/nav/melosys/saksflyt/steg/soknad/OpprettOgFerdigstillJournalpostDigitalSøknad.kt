@@ -15,6 +15,10 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.sak.SkjemaSakMappingService
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMedFullmaktMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMedFullmaktMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMetadata
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.vedlegg.VedleggDto
 import no.nav.melosys.skjema.types.vedlegg.VedleggFiltype
@@ -59,14 +63,13 @@ class OpprettOgFerdigstillJournalpostDigitalSøknad(
         val skjema = søknadsdata.skjema
         val skjemaId = skjema.id
         val brukerFnr = skjema.fnr
-        val innsenderFnr = søknadsdata.innsenderFnr
         val referanseId = søknadsdata.referanseId
         val tittel = søknadsdata.dokumentTittel
 
         log.info { "Henter PDF og oppretter journalpost for digital søknad, referanseId=$referanseId, saksnummer=${fagsak.saksnummer}" }
 
         val pdf = melosysSkjemaApiClient.hentPdf(skjemaId)
-        val innsenderNavn = persondataFasade.hentSammensattNavn(innsenderFnr)
+        val avsender = utledAvsender(søknadsdata)
         val vedleggsdokumenter = hentVedleggsdokumenter(skjemaId, søknadsdata.vedlegg)
 
         val opprettJournalpost = OpprettJournalpost().apply {
@@ -81,9 +84,9 @@ class OpprettOgFerdigstillJournalpostDigitalSøknad(
             brukerId = brukerFnr
             brukerIdType = BrukerIdType.FOLKEREGISTERIDENT
             eksternReferanseId = referanseId
-            korrespondansepartId = innsenderFnr
-            korrespondansepartNavn = innsenderNavn
-            setKorrespondansepartIdType(OpprettJournalpost.KorrespondansepartIdType.FNR)
+            korrespondansepartId = avsender.id
+            korrespondansepartNavn = avsender.navn
+            setKorrespondansepartIdType(avsender.idType)
         }
 
         val journalpostId = joarkFasade.opprettJournalpost(opprettJournalpost, true)
@@ -98,6 +101,39 @@ class OpprettOgFerdigstillJournalpostDigitalSøknad(
 
         log.info { "Opprettet journalpost $journalpostId for digital søknad referanseId=$referanseId" }
     }
+
+    private fun utledAvsender(søknadsdata: UtsendtArbeidstakerSkjemaM2MDto): Avsender {
+        val metadata = søknadsdata.skjema.metadata
+        return when (metadata) {
+            is ArbeidsgiverMetadata,
+            is ArbeidsgiverMedFullmaktMetadata -> Avsender(
+                id = søknadsdata.skjema.orgnr,
+                navn = metadata.arbeidsgiverNavn,
+                idType = OpprettJournalpost.KorrespondansepartIdType.ORGNR
+            )
+            is RadgiverMetadata -> Avsender(
+                id = metadata.radgiverfirma.orgnr,
+                navn = metadata.radgiverfirma.navn,
+                idType = OpprettJournalpost.KorrespondansepartIdType.ORGNR
+            )
+            is RadgiverMedFullmaktMetadata -> Avsender(
+                id = metadata.radgiverfirma.orgnr,
+                navn = metadata.radgiverfirma.navn,
+                idType = OpprettJournalpost.KorrespondansepartIdType.ORGNR
+            )
+            else -> Avsender(
+                id = søknadsdata.innsenderFnr,
+                navn = persondataFasade.hentSammensattNavn(søknadsdata.innsenderFnr),
+                idType = OpprettJournalpost.KorrespondansepartIdType.FNR
+            )
+        }
+    }
+
+    private data class Avsender(
+        val id: String,
+        val navn: String,
+        val idType: OpprettJournalpost.KorrespondansepartIdType
+    )
 
     private fun hentVedleggsdokumenter(skjemaId: UUID, vedlegg: List<VedleggDto>): List<FysiskDokument> =
         vedlegg.map { dto ->

@@ -17,6 +17,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
 import no.nav.melosys.integrasjon.dokgen.dto.ÅrsavregningVedtaksbrev
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.aarsavregning.AvgiftsperiodeForAvgift
+import no.nav.melosys.service.avgift.aarsavregning.HelseutgiftDekkesPeriodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningKonstanter
@@ -123,7 +124,7 @@ class ÅrsavregningVedtakMapper(
                 avgiftPerMd = trygdeavgiftsperiode.trygdeavgiftsbeløpMd.hentVerdi(),
                 avgiftspliktigInntektPerMd = grunnlagsInntektsperiode.kalkulertMndInntekt(),
                 inntektskilde = grunnlagsInntektsperiode.type.beskrivelse,
-                trygdedekning = trygdeavgiftsperiode.hentGrunnlagMedlemskapsperiode().hentTrygdedekning().beskrivelse,
+                trygdedekning = trygdeavgiftsperiode.hentGrunnlagAvgiftsperiode().hentTrygdedekning().beskrivelse.orEmpty(),
                 arbeidsgiveravgiftBetalt = arbeidsGiverAvgiftBetalesTilSkatt(
                     medlemskapsTypePliktig,
                     grunnlagsInntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
@@ -165,6 +166,7 @@ class ÅrsavregningVedtakMapper(
         return avgiftspliktigPerioder?.takeIf { it.isNotEmpty() }
             ?.all { when (it) {
                 is MedlemskapsperiodeForAvgift -> it.medlemskapstyper == Medlemskapstyper.PLIKTIG
+                is HelseutgiftDekkesPeriodeForAvgift -> it.medlemskapstype == Medlemskapstyper.PLIKTIG
                 else -> throw FunksjonellException("Ukjent periodetype: ${it.javaClass.simpleName}")
             } } == true
     }

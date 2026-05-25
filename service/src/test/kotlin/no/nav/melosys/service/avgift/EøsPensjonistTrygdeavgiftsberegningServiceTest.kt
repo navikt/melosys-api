@@ -178,7 +178,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
-        }.message.shouldContain("Inntektsperiode og skatteforholdsperiode må dekke helseutgiftperiode for inneværende år og fremtidige perioder")
+        }.message.shouldContain("Inntektsperiode og skatteforholdsperiode må dekke helseutgiftsperioden for inneværende år og fremtidige perioder")
     }
 
     @Test
@@ -207,7 +207,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
-        }.message.shouldContain("Inntektsperiode og skatteforholdsperiode må dekke helseutgiftperiode for inneværende år og fremtidige perioder")
+        }.message.shouldContain("Inntektsperiode og skatteforholdsperiode må dekke helseutgiftsperioden for inneværende år og fremtidige perioder")
     }
 
     @Test
@@ -595,7 +595,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, emptyList(), inntektsperioder)
-        }.message.shouldContain("Kan ikke beregne trygdeavgift uten skatteforholdTilNorge")
+        }.message.shouldContain("Kan ikke beregne trygdeavgift uten skatteforholdsperioder")
     }
 
     @Test

@@ -506,12 +506,14 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             }
 
             // Verifiser at sisteGjeldendeAvgiftspliktigPerioder inneholder HelseutgiftDekkesPeriodeForAvgift
-            sisteGjeldendeAvgiftspliktigPerioder.shouldHaveSize(1).single().run {
-                shouldBeInstanceOf<HelseutgiftDekkesPeriodeForAvgift>()
-                fom shouldBe LocalDate.of(2023, 1, 1)
-                tom shouldBe LocalDate.of(2023, 12, 31)
-                dekning shouldBe Trygdedekninger.FULL_DEKNING_EOSFO
-            }
+            sisteGjeldendeAvgiftspliktigPerioder.shouldHaveSize(1).single()
+                .shouldBeInstanceOf<HelseutgiftDekkesPeriodeForAvgift>()
+                .run {
+                    fom shouldBe LocalDate.of(2023, 1, 1)
+                    tom shouldBe LocalDate.of(2023, 12, 31)
+                    dekning shouldBe Trygdedekninger.FULL_DEKNING_EOSFO
+                    medlemskapstype shouldBe Medlemskapstyper.PLIKTIG
+                }
 
             tidligereFakturertBeloep shouldNotBe null
         }
