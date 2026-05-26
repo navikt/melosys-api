@@ -1,10 +1,8 @@
 package no.nav.melosys.tjenester.gui
 
 import com.ninjasquad.springmockk.MockkBean
-import io.getunleash.Unleash
 import io.mockk.every
 import io.mockk.verify
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.popp.Pensjonsopptjening
 import no.nav.melosys.service.popp.PensjonsopptjeningOppslag
 import no.nav.melosys.service.popp.PensjonsopptjeningPeriode
@@ -33,9 +31,6 @@ internal class PensjonsopptjeningControllerTest(
     @MockkBean
     private lateinit var pensjonsopptjeningOppslag: PensjonsopptjeningOppslag
 
-    @MockkBean
-    private lateinit var unleash: Unleash
-
     @BeforeEach
     fun setUp() {
         SpringSubjectHandler.set(TestSubjectHandler())
@@ -43,20 +38,7 @@ internal class PensjonsopptjeningControllerTest(
     }
 
     @Test
-    fun `autoriser kjores foer toggle-sjekk og toggle av gir 204`() {
-        every { unleash.isEnabled(ToggleName.MELOSYS_VIS_PENSJONSOPPTJENING_POPP) } returns false
-
-        mockMvc.perform(
-            get(BASE_URL, BEH_ID).contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isNoContent)
-
-        verify(exactly = 1) { aksesskontroll.autoriser(BEH_ID) }
-        verify(exactly = 0) { pensjonsopptjeningOppslag.hent(any()) }
-    }
-
-    @Test
-    fun `toggle paa - returnerer pensjonsopptjening DTO uten behandletAr`() {
-        every { unleash.isEnabled(ToggleName.MELOSYS_VIS_PENSJONSOPPTJENING_POPP) } returns true
+    fun `returnerer pensjonsopptjening DTO`() {
         every { pensjonsopptjeningOppslag.hent(BEH_ID) } returns Pensjonsopptjening(
             inntektsAr = 2024,
             perioder = listOf(
@@ -80,8 +62,7 @@ internal class PensjonsopptjeningControllerTest(
     }
 
     @Test
-    fun `toggle paa - tom liste fra POPP - returnerer tom perioder`() {
-        every { unleash.isEnabled(ToggleName.MELOSYS_VIS_PENSJONSOPPTJENING_POPP) } returns true
+    fun `tom liste fra POPP - returnerer tom perioder`() {
         every { pensjonsopptjeningOppslag.hent(BEH_ID) } returns Pensjonsopptjening(
             inntektsAr = 2024,
             perioder = emptyList(),
