@@ -381,10 +381,13 @@ class ÅrsavregningService(
         val behandlingsresultaterMedOverlapp = alleRelevanteBehandlinger
             .filter { it.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
 
-        // Finner siste behandling med avgiftspliktige perioder (uavhengig av årsoverlapp),
-        // slik at en ny vurdering som fjerner perioden for året korrekt gir null perioder
+        // Finner siste behandling med avgiftspliktige perioder som ikke er årsavregning
+        // Årsavregning brukes kun når den overlapper med aktuelt år.
         val sisteBehandlingsresultatMedAvgiftspliktigPeriode = alleRelevanteBehandlinger
-            .lastOrNull { it.finnAvgiftspliktigPerioder().isNotEmpty() }
+            .lastOrNull {
+                it.finnAvgiftspliktigPerioder().isNotEmpty() &&
+                    (!it.hentBehandling().erÅrsavregning() || it.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år))
+            }
 
         // Finner siste behandling med trygdeavgiftsperioder (brukes for avgiftsgrunnlag)
         val sisteBehandlingsresultatMedAvgiftsgrunnlag = behandlingsresultaterMedOverlapp
