@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size
 import no.nav.melosys.service.tekstblokk.TekstblokkService
 import no.nav.melosys.tjenester.gui.dto.tekstblokk.TekstblokkDto
 import no.nav.melosys.tjenester.gui.dto.tekstblokk.TekstblokkRequestDto
-import no.nav.security.token.support.core.api.Unprotected
+import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 
 private const val MAKS_BULK = 500
 
+@Protected
 @RestController
 @RequestMapping("/admin/brev/tekstblokker")
 @Tag(name = "admin-tekstblokker")
