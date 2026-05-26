@@ -75,6 +75,9 @@ kafka:
 medlemskap:
   rest:
     url: ${MEDL_REST_API_BASE_URL}
+popp:
+  rest:
+    url: ${POPP_REST_URL}
 melosysdokgen:
   v1:
     url: ${MELOSYS_DOKGEN_URL}
