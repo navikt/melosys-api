@@ -405,30 +405,6 @@ internal class DigitalSøknadMapperTest {
         }
 
         @Test
-        fun `mapper land p fast arbeidssted selv nr adresse mangler`() {
-            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
-                data = arbeidsgiverData(
-                    utsendingsperiodeOgLand = landOgPeriode(LandKode.DE, LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31)),
-                    arbeidssted = ArbeidsstedIUtlandetDto(
-                        arbeidsstedType = ArbeidsstedType.PA_LAND,
-                        paLand = PaLandDto(
-                            navnPaVirksomhet = "Berlin GmbH",
-                            fastEllerVekslendeArbeidssted = FastEllerVekslendeArbeidssted.FAST,
-                            fastArbeidssted = null,
-                            erHjemmekontor = false
-                        )
-                    )
-                )
-            }
-
-            val søknad = DigitalSøknadMapper.tilSoeknad(dto)
-
-            søknad.arbeidPaaLand.erFastArbeidssted shouldBe true
-            søknad.arbeidPaaLand.fysiskeArbeidssteder.first().adresse.landkode shouldBe "DE"
-        }
-
-        @Test
         fun `mapper vekslende arbeidssted på land`() {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
