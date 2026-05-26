@@ -25,5 +25,8 @@
   "NAIS_CLUSTER_NAME_GCP": "prod-gcp",
   "APP_NAME_UTBETALING": "sokos-utbetaldata",
   "UNLEASH_ENVIRONMENT": "production",
-  "APP_NAME_MELOSYS_SKJEMA_API": "melosys-skjema-api"
+  "APP_NAME_MELOSYS_SKJEMA_API": "melosys-skjema-api",
+  "APP_NAME_POPP": "popp",
+  "POPP_NAMESPACE": "pensjonopptjening",
+  "POPP_REST_URL": "https://popp.intern.nav.no/popp-api/popp"
 }

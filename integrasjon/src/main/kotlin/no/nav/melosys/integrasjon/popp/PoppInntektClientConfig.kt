@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.popp
 
-import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.felles.CallIdAware
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.errorFilter
@@ -32,8 +31,8 @@ class PoppInntektClientConfig(
             .filter(headerFilter())
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Henting av pensjonsopptjening fra POPP feilet") { feilmelding, statusCode, errorBody ->
-                if (statusCode == HttpStatus.NOT_FOUND)
-                    IkkeFunnetException("$feilmelding $statusCode - $errorBody")
+                if (statusCode == HttpStatus.NOT_FOUND && errorBody.contains(PERSON_IKKE_FUNNET_CODE))
+                    PoppPersonIkkeFunnetException("$feilmelding $statusCode - $errorBody")
                 else
                     lagException(feilmelding, statusCode, errorBody)
             })
@@ -53,5 +52,6 @@ class PoppInntektClientConfig(
     companion object {
         private const val CONSUMER_ID = "srvmelosys"
         private const val CLIENT_NAME = "popp"
+        private const val PERSON_IKKE_FUNNET_CODE = "PERSON_IKKE_FUNNET"
     }
 }

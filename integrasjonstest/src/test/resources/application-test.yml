@@ -45,6 +45,9 @@ inntekt:
 medlemskap:
   rest:
     url: http://localhost:8083
+popp:
+  rest:
+    url: http://localhost:8083/popp
 microsoft:
   graph:
     rest:
@@ -215,6 +218,14 @@ melosystrygdeavgift:
                 client-id: lol
                 client-secret: lol
               grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+            popp:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: client_credentials
               scope: api:///dummy
               token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
             melosys-soknad-mottak:

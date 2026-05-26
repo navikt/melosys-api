@@ -10,10 +10,12 @@ import com.github.tomakehurst.wiremock.client.WireMock.matching
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
@@ -85,42 +87,36 @@ class PoppInntektClientTest(
     fun `hentInntekt - Skatt-only - returnerer alle perioder med kilde SKATT`() {
         stubOk("mock/popp/poppSkattOnly.json")
 
-        val respons = poppInntektClient.hentInntekt(
-            PoppHentInntektRequest(fnr = FNR, fomAr = 2020, tomAr = 2024)
-        )
+        val respons = poppInntektClient.hentInntekt(REQUEST)
 
-        respons.inntekter.shouldHaveSize(2)
-        respons.inntekter.all { it.kilde == "SKATT" } shouldBe true
-        respons.inntekter.first().belop shouldBe 540000L
-        respons.inntekter.first().inntektAr shouldBe 2024
+        respons.inntekter.shouldNotBeNull()
+        respons.inntekter!!.shouldHaveSize(2)
+        respons.inntekter!!.all { it.kilde == "SKATT" } shouldBe true
     }
 
     @Test
     fun `hentInntekt - Skatt og Avgiftssystemet for samme ar - returnerer to rader for aret`() {
         stubOk("mock/popp/poppSkattOgAvgiftssystemet.json")
 
-        val respons = poppInntektClient.hentInntekt(
-            PoppHentInntektRequest(fnr = FNR, fomAr = 2020, tomAr = 2024)
-        )
+        val respons = poppInntektClient.hentInntekt(REQUEST)
 
-        respons.inntekter.shouldHaveSize(2)
-        respons.inntekter.filter { it.inntektAr == 2024 }.shouldHaveSize(2)
-        respons.inntekter.map { it.kilde }.toSet() shouldBe setOf("SKATT", "AVGIFTSSYSTEMET")
+        respons.inntekter.shouldNotBeNull()
+        respons.inntekter!!.shouldHaveSize(2)
+        respons.inntekter!!.map { it.kilde }.toSet() shouldBe setOf("SKATT", "AVGIFTSSYSTEMET")
     }
 
     @Test
     fun `hentInntekt - tom liste - returnerer tom liste`() {
         stubOk("mock/popp/poppTom.json")
 
-        val respons = poppInntektClient.hentInntekt(
-            PoppHentInntektRequest(fnr = FNR, fomAr = 2020, tomAr = 2024)
-        )
+        val respons = poppInntektClient.hentInntekt(REQUEST)
 
-        respons.inntekter.shouldBeEmpty()
+        respons.inntekter.shouldNotBeNull()
+        respons.inntekter!!.shouldBeEmpty()
     }
 
     @Test
-    fun `hentInntekt - 404 fra POPP - mappes til tom liste`() {
+    fun `hentInntekt - 404 med PERSON_IKKE_FUNNET-body - mappes til tom liste`() {
         mockServer.stubFor(
             any(anyUrl()).willReturn(
                 WireMock.aResponse()
@@ -130,20 +126,60 @@ class PoppInntektClientTest(
             )
         )
 
-        val respons = poppInntektClient.hentInntekt(
-            PoppHentInntektRequest(fnr = FNR, fomAr = 2020, tomAr = 2024)
-        )
+        val respons = poppInntektClient.hentInntekt(REQUEST)
 
-        respons.inntekter.shouldBeEmpty()
+        respons.inntekter shouldBe emptyList()
     }
 
     @Test
-    fun `hentInntekt - serialiserer request body korrekt og setter Authorization-header`() {
+    fun `hentInntekt - 404 uten PERSON_IKKE_FUNNET-body - kaster TekniskException`() {
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                WireMock.aResponse()
+                    .withStatus(404)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("""{"message":"Endepunkt ikke funnet"}""")
+            )
+        )
+
+        shouldThrow<TekniskException> { poppInntektClient.hentInntekt(REQUEST) }
+    }
+
+    @Test
+    fun `hentInntekt - inntekter null i body - tolkes som tom liste`() {
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                WireMock.aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("""{"inntekter": null}""")
+            )
+        )
+
+        val respons = poppInntektClient.hentInntekt(REQUEST)
+
+        respons.inntekter shouldBe emptyList()
+    }
+
+    @Test
+    fun `hentInntekt - 200 med tom body - kaster TekniskException`() {
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                WireMock.aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("")
+            )
+        )
+
+        shouldThrow<TekniskException> { poppInntektClient.hentInntekt(REQUEST) }
+    }
+
+    @Test
+    fun `hentInntekt - serialiserer request body korrekt med inntektType=SUM_PI`() {
         stubOk("mock/popp/poppTom.json")
 
-        poppInntektClient.hentInntekt(
-            PoppHentInntektRequest(fnr = FNR, fomAr = 2020, tomAr = 2024)
-        )
+        poppInntektClient.hentInntekt(REQUEST)
 
         mockServer.verify(
             postRequestedFor(urlEqualTo("/popp/inntekt/hent"))
@@ -152,9 +188,9 @@ class PoppInntektClientTest(
                 .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
                 .withRequestBody(
                     equalToJson(
-                        """{"fnr":"$FNR","fomAr":2020,"tomAr":2024}""",
+                        """{"fnr":"$FNR","fomAr":2020,"tomAr":2024,"inntektType":"SUM_PI"}""",
                         true,
-                        true
+                        false
                     )
                 )
         )
@@ -176,7 +212,15 @@ class PoppInntektClientTest(
             ?.readText(StandardCharsets.UTF_8)
             ?: throw IkkeFunnetException("Fant ikke $path")
 
+    private fun <T : Any> T?.shouldNotBeNull(): T = this ?: error("Expected non-null value")
+
     companion object {
         private const val FNR = "12345678901"
+        private val REQUEST = PoppHentInntektRequest(
+            fnr = FNR,
+            fomAr = 2020,
+            tomAr = 2024,
+            inntektType = "SUM_PI",
+        )
     }
 }

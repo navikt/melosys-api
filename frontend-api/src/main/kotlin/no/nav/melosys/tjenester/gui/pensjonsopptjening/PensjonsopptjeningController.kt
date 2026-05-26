@@ -26,18 +26,17 @@ class PensjonsopptjeningController(
     fun hentPensjonsopptjening(
         @PathVariable("behandlingID") behandlingID: Long,
     ): ResponseEntity<PensjonsopptjeningResponse> {
+        aksesskontroll.autoriser(behandlingID)
+
         if (!unleash.isEnabled(ToggleName.MELOSYS_VIS_PENSJONSOPPTJENING_POPP)) {
             return ResponseEntity.noContent().build()
         }
-
-        aksesskontroll.autoriser(behandlingID)
 
         val pensjonsopptjening = pensjonsopptjeningOppslag.hent(behandlingID)
 
         return ResponseEntity.ok(
             PensjonsopptjeningResponse(
                 inntektsAr = pensjonsopptjening.inntektsAr,
-                behandletAr = pensjonsopptjening.behandletAr,
                 perioder = pensjonsopptjening.perioder.map {
                     PensjonsopptjeningPeriodeDto(aar = it.aar, pgi = it.pgi, kilde = it.kilde)
                 },
@@ -48,7 +47,6 @@ class PensjonsopptjeningController(
 
 data class PensjonsopptjeningResponse(
     val inntektsAr: Int,
-    val behandletAr: Int,
     val perioder: List<PensjonsopptjeningPeriodeDto>,
 )
 

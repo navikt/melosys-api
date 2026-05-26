@@ -43,23 +43,22 @@ internal class PensjonsopptjeningControllerTest(
     }
 
     @Test
-    fun `toggle av - returnerer 204 No Content`() {
+    fun `autoriser kjores foer toggle-sjekk og toggle av gir 204`() {
         every { unleash.isEnabled(ToggleName.MELOSYS_VIS_PENSJONSOPPTJENING_POPP) } returns false
 
         mockMvc.perform(
             get(BASE_URL, BEH_ID).contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isNoContent)
 
-        verify(exactly = 0) { aksesskontroll.autoriser(any()) }
+        verify(exactly = 1) { aksesskontroll.autoriser(BEH_ID) }
         verify(exactly = 0) { pensjonsopptjeningOppslag.hent(any()) }
     }
 
     @Test
-    fun `toggle paa - returnerer pensjonsopptjening DTO`() {
+    fun `toggle paa - returnerer pensjonsopptjening DTO uten behandletAr`() {
         every { unleash.isEnabled(ToggleName.MELOSYS_VIS_PENSJONSOPPTJENING_POPP) } returns true
         every { pensjonsopptjeningOppslag.hent(BEH_ID) } returns Pensjonsopptjening(
             inntektsAr = 2024,
-            behandletAr = 2024,
             perioder = listOf(
                 PensjonsopptjeningPeriode(aar = 2024, pgi = 540000, kilde = "SKATT"),
                 PensjonsopptjeningPeriode(aar = 2023, pgi = 510000, kilde = "SKATT"),
@@ -71,7 +70,7 @@ internal class PensjonsopptjeningControllerTest(
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.inntektsAr").value(2024))
-            .andExpect(jsonPath("$.behandletAr").value(2024))
+            .andExpect(jsonPath("$.behandletAr").doesNotExist())
             .andExpect(jsonPath("$.perioder.length()").value(2))
             .andExpect(jsonPath("$.perioder[0].aar").value(2024))
             .andExpect(jsonPath("$.perioder[0].pgi").value(540000))
@@ -85,7 +84,6 @@ internal class PensjonsopptjeningControllerTest(
         every { unleash.isEnabled(ToggleName.MELOSYS_VIS_PENSJONSOPPTJENING_POPP) } returns true
         every { pensjonsopptjeningOppslag.hent(BEH_ID) } returns Pensjonsopptjening(
             inntektsAr = 2024,
-            behandletAr = 2024,
             perioder = emptyList(),
         )
 

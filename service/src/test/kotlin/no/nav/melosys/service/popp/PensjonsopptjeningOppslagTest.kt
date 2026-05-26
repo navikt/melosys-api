@@ -1,15 +1,18 @@
 package no.nav.melosys.service.popp
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.popp.PoppHentInntektRequest
 import no.nav.melosys.integrasjon.popp.PoppHentInntektResponse
 import no.nav.melosys.integrasjon.popp.PoppInntektClient
@@ -47,10 +50,10 @@ internal class PensjonsopptjeningOppslagTest {
             poppInntektClient,
         )
 
-        val fagsak = io.mockk.mockk<Fagsak> {
+        val fagsak = mockk<Fagsak> {
             every { hentBrukersAktørID() } returns AKTOR_ID
         }
-        val behandling = io.mockk.mockk<Behandling> {
+        val behandling = mockk<Behandling> {
             every { this@mockk.fagsak } returns fagsak
         }
         every { behandlingService.hentBehandling(BEH_ID) } returns behandling
@@ -58,7 +61,7 @@ internal class PensjonsopptjeningOppslagTest {
     }
 
     @Test
-    fun `hent - bruker 5-ars vindu fomAr=ar-4 tomAr=ar`() {
+    fun `hent - bruker 5-ars vindu og inntektType=SUM_PI`() {
         every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
         every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(emptyList())
 
@@ -70,25 +73,35 @@ internal class PensjonsopptjeningOppslagTest {
         capturedRequest.captured.fnr shouldBe FNR
         capturedRequest.captured.fomAr shouldBe 2020
         capturedRequest.captured.tomAr shouldBe 2024
+        capturedRequest.captured.inntektType shouldBe "SUM_PI"
     }
 
     @Test
-    fun `hent - mapper poster og sorterer nyeste ar forst`() {
+    fun `hent - manglende arsavregning - kaster IkkeFunnetException`() {
+        every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns null
+
+        shouldThrow<IkkeFunnetException> { oppslag.hent(BEH_ID) }
+    }
+
+    @Test
+    fun `hent - sorterer nyeste ar forst og SKATT foran AVGIFTSSYSTEMET innen samme ar`() {
         every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
         every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(
             listOf(
+                PoppInntektPost(inntektAr = 2024, belop = 120000, kilde = "AVGIFTSSYSTEMET"),
                 PoppInntektPost(inntektAr = 2022, belop = 100, kilde = "SKATT"),
                 PoppInntektPost(inntektAr = 2024, belop = 540000, kilde = "SKATT"),
-                PoppInntektPost(inntektAr = 2024, belop = 120000, kilde = "AVGIFTSSYSTEMET"),
             )
         )
 
-        val resultat = oppslag.hent(BEH_ID)
+        val perioder = oppslag.hent(BEH_ID).perioder
 
-        resultat.inntektsAr shouldBe 2024
-        resultat.perioder.shouldHaveSize(3)
-        resultat.perioder.first().aar shouldBe 2024
-        resultat.perioder.map { it.aar } shouldBe listOf(2024, 2024, 2022)
+        perioder.shouldHaveSize(3)
+        perioder.map { it.aar to it.kilde } shouldBe listOf(
+            2024 to "SKATT",
+            2024 to "AVGIFTSSYSTEMET",
+            2022 to "SKATT",
+        )
     }
 
     @Test
@@ -102,6 +115,19 @@ internal class PensjonsopptjeningOppslagTest {
         )
 
         oppslag.hent(BEH_ID).perioder.shouldBeEmpty()
+    }
+
+    @Test
+    fun `hent - null kilde mappes til UKJENT`() {
+        every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
+        every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(
+            listOf(PoppInntektPost(inntektAr = 2024, belop = 100, kilde = null))
+        )
+
+        val perioder = oppslag.hent(BEH_ID).perioder
+
+        perioder.shouldHaveSize(1)
+        perioder.first().kilde shouldBe "UKJENT"
     }
 
     @Test

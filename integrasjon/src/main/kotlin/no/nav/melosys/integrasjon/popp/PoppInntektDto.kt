@@ -13,7 +13,7 @@ data class PoppHentInntektRequest(
 )
 
 data class PoppHentInntektResponse(
-    val inntekter: List<PoppInntektPost> = emptyList(),
+    val inntekter: List<PoppInntektPost>? = null,
 )
 
 data class PoppInntektPost(
@@ -35,3 +35,5 @@ data class PoppChangeStamp(
     val updatedBy: String? = null,
     val updatedDate: Date? = null,
 )
+
+class PoppPersonIkkeFunnetException(message: String) : RuntimeException(message)
