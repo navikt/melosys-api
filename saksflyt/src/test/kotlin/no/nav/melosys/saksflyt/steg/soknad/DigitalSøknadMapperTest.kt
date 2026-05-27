@@ -377,6 +377,7 @@ internal class DigitalSøknadMapperTest {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = arbeidsgiverData(
+                    utsendingsperiodeOgLand = landOgPeriode(LandKode.DE, LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31)),
                     arbeidssted = ArbeidsstedIUtlandetDto(
                         arbeidsstedType = ArbeidsstedType.PA_LAND,
                         paLand = PaLandDto(
@@ -400,6 +401,7 @@ internal class DigitalSøknadMapperTest {
             sted.adresse.husnummerEtasjeLeilighet shouldBe "42"
             sted.adresse.postnummer shouldBe "10115"
             sted.adresse.poststed shouldBe "Berlin"
+            sted.adresse.landkode shouldBe "DE"
         }
 
         @Test
@@ -407,6 +409,7 @@ internal class DigitalSøknadMapperTest {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
                 data = arbeidsgiverData(
+                    utsendingsperiodeOgLand = landOgPeriode(LandKode.SE, LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31)),
                     arbeidssted = ArbeidsstedIUtlandetDto(
                         arbeidsstedType = ArbeidsstedType.PA_LAND,
                         paLand = PaLandDto(
@@ -424,6 +427,7 @@ internal class DigitalSøknadMapperTest {
             søknad.arbeidPaaLand.erFastArbeidssted.shouldBeFalse()
             søknad.arbeidPaaLand.fysiskeArbeidssteder shouldHaveSize 1
             søknad.arbeidPaaLand.fysiskeArbeidssteder.first().virksomhetNavn shouldBe "Reise AS"
+            søknad.arbeidPaaLand.fysiskeArbeidssteder.first().adresse.landkode.shouldBeNull()
         }
 
         @Test
@@ -682,6 +686,7 @@ internal class DigitalSøknadMapperTest {
             søknad.juridiskArbeidsgiverNorge.erOffentligVirksomhet shouldBe false
             søknad.arbeidPaaLand.fysiskeArbeidssteder shouldHaveSize 1
             søknad.arbeidPaaLand.fysiskeArbeidssteder.first().virksomhetNavn shouldBe "Berlin GmbH"
+            søknad.arbeidPaaLand.fysiskeArbeidssteder.first().adresse.landkode shouldBe "DE"
         }
 
         @Test
@@ -724,6 +729,7 @@ internal class DigitalSøknadMapperTest {
 
             søknad.soeknadsland.landkoder shouldBe listOf("SE")
             søknad.arbeidPaaLand.fysiskeArbeidssteder shouldHaveSize 1
+            søknad.arbeidPaaLand.fysiskeArbeidssteder.first().adresse.landkode shouldBe "SE"
             søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere shouldContainExactly listOf("AG-KUN")
             søknad.foretakUtland.shouldBeEmpty()
         }
