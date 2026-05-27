@@ -107,8 +107,8 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
         opprettJournalpost.brukerIdType shouldBe BrukerIdType.FOLKEREGISTERIDENT
         opprettJournalpost.eksternReferanseId shouldBe referanseId
         opprettJournalpost.journalposttype shouldBe Journalposttype.INN
-        opprettJournalpost.innhold shouldBe "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits"
-        opprettJournalpost.hoveddokument.tittel shouldBe "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits"
+        opprettJournalpost.innhold shouldBe "Søknad om A1 for utsendte arbeidstakere i EØS eller Sveits"
+        opprettJournalpost.hoveddokument.tittel shouldBe "Søknad om A1 for utsendte arbeidstakere i EØS eller Sveits"
         opprettJournalpost.korrespondansepartId shouldBe innsenderFnr
         opprettJournalpost.korrespondansepartNavn shouldBe innsenderNavn
     }
@@ -201,6 +201,7 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
             fnr = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.fnr
             referanseId = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.referanseId
             innsenderFnr = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.innsenderFnr
+            dokumentTittel = "Søknad om A1 for utsendte arbeidstakere i EØS eller Sveits"
             if (skjemadel == Skjemadel.ARBEIDSGIVERS_DEL) {
                 data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
             }

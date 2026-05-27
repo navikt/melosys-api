@@ -15,15 +15,14 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.util.UUID
 
-const val DEFAULT_DOKUMENTTITTEL_ARBEIDSTAKER =
-    "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits"
-
 fun lagUtsendtArbeidstakerSkjemaM2MDto(
     init: UtsendtArbeidstakerSkjemaM2MDtoTestFactory.Builder.() -> Unit = {}
 ): UtsendtArbeidstakerSkjemaM2MDto =
     UtsendtArbeidstakerSkjemaM2MDtoTestFactory.Builder().apply(init).build()
 
 object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
+
+    private const val DEFAULT_DOKUMENTTITTEL = "Test dokumenttittel"
 
     @MelosysTestDsl
     class Builder {
@@ -39,7 +38,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
         var referanseId: String = "MEL-${UUID.randomUUID()}"
         var innsenderFnr: String? = null
         var innsendtTidspunkt: LocalDateTime = LocalDateTime.now()
-        var dokumentTittel: String = DEFAULT_DOKUMENTTITTEL_ARBEIDSTAKER
+        var dokumentTittel: String = DEFAULT_DOKUMENTTITTEL
         var vedlegg: List<VedleggDto> = emptyList()
 
         private var kobletSkjemaBuilder: ArbeidsgiverSkjemaBuilder? = null
