@@ -13,6 +13,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.integrasjon.popp.PoppChangeStamp
 import no.nav.melosys.integrasjon.popp.PoppHentInntektRequest
 import no.nav.melosys.integrasjon.popp.PoppHentInntektResponse
 import no.nav.melosys.integrasjon.popp.PoppInntektClient
@@ -23,6 +24,8 @@ import no.nav.melosys.service.persondata.PersondataService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
+import java.util.Date
 
 @ExtendWith(MockKExtension::class)
 internal class PensjonsopptjeningOppslagTest {
@@ -128,6 +131,53 @@ internal class PensjonsopptjeningOppslagTest {
 
         perioder.shouldHaveSize(1)
         perioder.first().kilde shouldBe "UKJENT"
+    }
+
+    @Test
+    fun `hent - mapper changeStamp til Oslo LocalDate for registrert og oppdatert`() {
+        every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
+        // 2026-07-31 23:30 UTC = 2026-08-01 01:30 Europe/Oslo (CEST, +02:00)
+        val createdUtc = Date.from(java.time.Instant.parse("2026-07-31T23:30:00Z"))
+        // 2026-01-31 23:30 UTC = 2026-02-01 00:30 Europe/Oslo (CET, +01:00)
+        val updatedUtc = Date.from(java.time.Instant.parse("2026-01-31T23:30:00Z"))
+        every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(
+            listOf(
+                PoppInntektPost(
+                    inntektAr = 2024,
+                    belop = 540000,
+                    kilde = "SKATT",
+                    changeStamp = PoppChangeStamp(createdDate = createdUtc, updatedDate = updatedUtc),
+                ),
+            )
+        )
+
+        val periode = oppslag.hent(BEH_ID).perioder.single()
+
+        periode.registrert shouldBe LocalDate.of(2026, 8, 1)
+        periode.oppdatert shouldBe LocalDate.of(2026, 2, 1)
+    }
+
+    @Test
+    fun `hent - manglende changeStamp gir null registrert og oppdatert`() {
+        every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
+        every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(
+            listOf(
+                PoppInntektPost(inntektAr = 2024, belop = 540000, kilde = "SKATT", changeStamp = null),
+                PoppInntektPost(
+                    inntektAr = 2023,
+                    belop = 510000,
+                    kilde = "SKATT",
+                    changeStamp = PoppChangeStamp(createdDate = null, updatedDate = null),
+                ),
+            )
+        )
+
+        val perioder = oppslag.hent(BEH_ID).perioder
+
+        perioder.forEach {
+            it.registrert shouldBe null
+            it.oppdatert shouldBe null
+        }
     }
 
     @Test

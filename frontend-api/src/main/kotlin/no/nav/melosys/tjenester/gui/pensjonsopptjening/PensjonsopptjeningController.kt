@@ -29,7 +29,13 @@ class PensjonsopptjeningController(
             PensjonsopptjeningResponse(
                 inntektsAr = pensjonsopptjening.inntektsAr,
                 perioder = pensjonsopptjening.perioder.map {
-                    PensjonsopptjeningPeriodeDto(aar = it.aar, pgi = it.pgi, kilde = it.kilde)
+                    PensjonsopptjeningPeriodeDto(
+                        aar = it.aar,
+                        pgi = it.pgi,
+                        kilde = it.kilde,
+                        registrert = it.registrert?.toString(),
+                        oppdatert = it.oppdatert?.toString(),
+                    )
                 },
             )
         )
@@ -45,4 +51,6 @@ data class PensjonsopptjeningPeriodeDto(
     val aar: Int,
     val pgi: Long,
     val kilde: String,
+    val registrert: String? = null,
+    val oppdatert: String? = null,
 )

@@ -8,6 +8,7 @@ import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 private val log = KotlinLogging.logger { }
 
@@ -44,7 +45,13 @@ class PensjonsopptjeningOppslag(
                 log.warn { "POPP-post uten kilde for behandling $behandlingID, år=$aar — markeres som UKJENT" }
             }
             val kilde = post.kilde ?: UKJENT_KILDE
-            PensjonsopptjeningPeriode(aar = aar, pgi = pgi, kilde = kilde)
+            PensjonsopptjeningPeriode(
+                aar = aar,
+                pgi = pgi,
+                kilde = kilde,
+                registrert = post.changeStamp?.createdDate.toOsloLocalDate(),
+                oppdatert = post.changeStamp?.updatedDate.toOsloLocalDate(),
+            )
         }.sortedWith(
             compareByDescending<PensjonsopptjeningPeriode> { it.aar }
                 .thenBy { kildePrioritet(it.kilde) }
@@ -77,4 +84,6 @@ data class PensjonsopptjeningPeriode(
     val aar: Int,
     val pgi: Long,
     val kilde: String,
+    val registrert: LocalDate? = null,
+    val oppdatert: LocalDate? = null,
 )

@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.time.LocalDate
 
 @WebMvcTest(controllers = [PensjonsopptjeningController::class])
 internal class PensjonsopptjeningControllerTest(
@@ -38,12 +39,24 @@ internal class PensjonsopptjeningControllerTest(
     }
 
     @Test
-    fun `returnerer pensjonsopptjening DTO`() {
+    fun `returnerer pensjonsopptjening DTO med registrert og oppdatert som ISO-string`() {
         every { pensjonsopptjeningOppslag.hent(BEH_ID) } returns Pensjonsopptjening(
             inntektsAr = 2024,
             perioder = listOf(
-                PensjonsopptjeningPeriode(aar = 2024, pgi = 540000, kilde = "SKATT"),
-                PensjonsopptjeningPeriode(aar = 2023, pgi = 510000, kilde = "SKATT"),
+                PensjonsopptjeningPeriode(
+                    aar = 2024,
+                    pgi = 540000,
+                    kilde = "SKATT",
+                    registrert = LocalDate.of(2026, 5, 1),
+                    oppdatert = LocalDate.of(2026, 5, 15),
+                ),
+                PensjonsopptjeningPeriode(
+                    aar = 2023,
+                    pgi = 510000,
+                    kilde = "SKATT",
+                    registrert = null,
+                    oppdatert = null,
+                ),
             ),
         )
 
@@ -57,6 +70,10 @@ internal class PensjonsopptjeningControllerTest(
             .andExpect(jsonPath("$.perioder[0].aar").value(2024))
             .andExpect(jsonPath("$.perioder[0].pgi").value(540000))
             .andExpect(jsonPath("$.perioder[0].kilde").value("SKATT"))
+            .andExpect(jsonPath("$.perioder[0].registrert").value("2026-05-01"))
+            .andExpect(jsonPath("$.perioder[0].oppdatert").value("2026-05-15"))
+            .andExpect(jsonPath("$.perioder[1].registrert").isEmpty)
+            .andExpect(jsonPath("$.perioder[1].oppdatert").isEmpty)
 
         verify { aksesskontroll.autoriser(BEH_ID) }
     }
