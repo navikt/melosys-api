@@ -64,7 +64,7 @@ internal class PensjonsopptjeningOppslagTest {
     }
 
     @Test
-    fun `hent - bruker 5-ars vindu og inntektType=SUM_PI`() {
+    fun `hent - bruker 5-ars vindu og ber om alle inntektTyper`() {
         every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
         every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(emptyList())
 
@@ -76,7 +76,7 @@ internal class PensjonsopptjeningOppslagTest {
         capturedRequest.captured.fnr shouldBe FNR
         capturedRequest.captured.fomAr shouldBe 2020
         capturedRequest.captured.tomAr shouldBe 2024
-        capturedRequest.captured.inntektType shouldBe "SUM_PI"
+        capturedRequest.captured.inntektType shouldBe null
     }
 
     @Test
@@ -91,9 +91,9 @@ internal class PensjonsopptjeningOppslagTest {
         every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
         every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(
             listOf(
-                PoppInntektPost(inntektAr = 2024, belop = 120000, kilde = "AVGIFTSSYSTEMET"),
-                PoppInntektPost(inntektAr = 2022, belop = 100, kilde = "SKATT"),
-                PoppInntektPost(inntektAr = 2024, belop = 540000, kilde = "SKATT"),
+                PoppInntektPost(inntektAr = 2024, belop = 120000, kilde = "AVGIFTSSYSTEMET", inntektType = "SUM_PI"),
+                PoppInntektPost(inntektAr = 2022, belop = 100, kilde = "SKATT", inntektType = "SUM_PI"),
+                PoppInntektPost(inntektAr = 2024, belop = 540000, kilde = "SKATT", inntektType = "SUM_PI"),
             )
         )
 
@@ -108,12 +108,46 @@ internal class PensjonsopptjeningOppslagTest {
     }
 
     @Test
+    fun `hent - SUM_PI sorteres forst innen samme ar og kilde, deretter PGI-typer alfabetisk`() {
+        every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
+        every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(
+            listOf(
+                PoppInntektPost(inntektAr = 2024, belop = 100, kilde = "SKATT", inntektType = "KSL_PGI_LOENN"),
+                PoppInntektPost(inntektAr = 2024, belop = 540000, kilde = "SKATT", inntektType = "SUM_PI"),
+                PoppInntektPost(inntektAr = 2024, belop = 200, kilde = "SKATT", inntektType = "FL_PGI_LOENN"),
+            )
+        )
+
+        val perioder = oppslag.hent(BEH_ID).perioder
+
+        perioder.map { it.inntektType } shouldBe listOf("SUM_PI", "FL_PGI_LOENN", "KSL_PGI_LOENN")
+    }
+
+    @Test
+    fun `hent - filtrerer bort ikke-PGI inntektTyper`() {
+        every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
+        every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(
+            listOf(
+                PoppInntektPost(inntektAr = 2024, belop = 540000, kilde = "SKATT", inntektType = "SUM_PI"),
+                PoppInntektPost(inntektAr = 2024, belop = 400000, kilde = "SKATT", inntektType = "INN_LON"),
+                PoppInntektPost(inntektAr = 2024, belop = 50000, kilde = "SKATT", inntektType = "DIP_SEL"),
+                PoppInntektPost(inntektAr = 2024, belop = 200000, kilde = "SKATT", inntektType = "FL_PGI_LOENN"),
+                PoppInntektPost(inntektAr = 2024, belop = 30000, kilde = "SKATT", inntektType = null),
+            )
+        )
+
+        val perioder = oppslag.hent(BEH_ID).perioder
+
+        perioder.map { it.inntektType } shouldBe listOf("SUM_PI", "FL_PGI_LOENN")
+    }
+
+    @Test
     fun `hent - hopper over poster uten ar eller belop`() {
         every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
         every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(
             listOf(
-                PoppInntektPost(inntektAr = null, belop = 100, kilde = "SKATT"),
-                PoppInntektPost(inntektAr = 2024, belop = null, kilde = "SKATT"),
+                PoppInntektPost(inntektAr = null, belop = 100, kilde = "SKATT", inntektType = "SUM_PI"),
+                PoppInntektPost(inntektAr = 2024, belop = null, kilde = "SKATT", inntektType = "SUM_PI"),
             )
         )
 
@@ -124,13 +158,34 @@ internal class PensjonsopptjeningOppslagTest {
     fun `hent - null kilde mappes til UKJENT`() {
         every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
         every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(
-            listOf(PoppInntektPost(inntektAr = 2024, belop = 100, kilde = null))
+            listOf(PoppInntektPost(inntektAr = 2024, belop = 100, kilde = null, inntektType = "SUM_PI"))
         )
 
         val perioder = oppslag.hent(BEH_ID).perioder
 
         perioder.shouldHaveSize(1)
         perioder.first().kilde shouldBe "UKJENT"
+    }
+
+    @Test
+    fun `hent - mapper inntektTypeDekode fra POPP-post`() {
+        every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
+        every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(
+            listOf(
+                PoppInntektPost(
+                    inntektAr = 2024,
+                    belop = 200000,
+                    kilde = "SKATT",
+                    inntektType = "FL_PGI_LOENN",
+                    inntektTypeDekode = "Lønn frilanser",
+                ),
+            )
+        )
+
+        val periode = oppslag.hent(BEH_ID).perioder.single()
+
+        periode.inntektType shouldBe "FL_PGI_LOENN"
+        periode.inntektTypeDekode shouldBe "Lønn frilanser"
     }
 
     @Test
@@ -146,6 +201,7 @@ internal class PensjonsopptjeningOppslagTest {
                     inntektAr = 2024,
                     belop = 540000,
                     kilde = "SKATT",
+                    inntektType = "SUM_PI",
                     changeStamp = PoppChangeStamp(createdDate = createdUtc, updatedDate = updatedUtc),
                 ),
             )
@@ -162,11 +218,12 @@ internal class PensjonsopptjeningOppslagTest {
         every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
         every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(
             listOf(
-                PoppInntektPost(inntektAr = 2024, belop = 540000, kilde = "SKATT", changeStamp = null),
+                PoppInntektPost(inntektAr = 2024, belop = 540000, kilde = "SKATT", inntektType = "SUM_PI", changeStamp = null),
                 PoppInntektPost(
                     inntektAr = 2023,
                     belop = 510000,
                     kilde = "SKATT",
+                    inntektType = "SUM_PI",
                     changeStamp = PoppChangeStamp(createdDate = null, updatedDate = null),
                 ),
             )

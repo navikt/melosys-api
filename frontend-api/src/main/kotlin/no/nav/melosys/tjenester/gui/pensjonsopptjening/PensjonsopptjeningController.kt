@@ -33,6 +33,8 @@ class PensjonsopptjeningController(
                         aar = it.aar,
                         pgi = it.pgi,
                         kilde = it.kilde,
+                        inntektType = it.inntektType,
+                        inntektTypeDekode = it.inntektTypeDekode,
                         registrert = it.registrert?.toString(),
                         oppdatert = it.oppdatert?.toString(),
                     )
@@ -51,6 +53,8 @@ data class PensjonsopptjeningPeriodeDto(
     val aar: Int,
     val pgi: Long,
     val kilde: String,
+    val inntektType: String,
+    val inntektTypeDekode: String? = null,
     val registrert: String? = null,
     val oppdatert: String? = null,
 )

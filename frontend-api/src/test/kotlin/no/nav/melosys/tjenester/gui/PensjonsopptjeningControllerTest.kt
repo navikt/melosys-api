@@ -47,13 +47,17 @@ internal class PensjonsopptjeningControllerTest(
                     aar = 2024,
                     pgi = 540000,
                     kilde = "SKATT",
+                    inntektType = "SUM_PI",
+                    inntektTypeDekode = "Sum personinntekt",
                     registrert = LocalDate.of(2026, 5, 1),
                     oppdatert = LocalDate.of(2026, 5, 15),
                 ),
                 PensjonsopptjeningPeriode(
-                    aar = 2023,
-                    pgi = 510000,
+                    aar = 2024,
+                    pgi = 200000,
                     kilde = "SKATT",
+                    inntektType = "FL_PGI_LOENN",
+                    inntektTypeDekode = null,
                     registrert = null,
                     oppdatert = null,
                 ),
@@ -70,8 +74,12 @@ internal class PensjonsopptjeningControllerTest(
             .andExpect(jsonPath("$.perioder[0].aar").value(2024))
             .andExpect(jsonPath("$.perioder[0].pgi").value(540000))
             .andExpect(jsonPath("$.perioder[0].kilde").value("SKATT"))
+            .andExpect(jsonPath("$.perioder[0].inntektType").value("SUM_PI"))
+            .andExpect(jsonPath("$.perioder[0].inntektTypeDekode").value("Sum personinntekt"))
             .andExpect(jsonPath("$.perioder[0].registrert").value("2026-05-01"))
             .andExpect(jsonPath("$.perioder[0].oppdatert").value("2026-05-15"))
+            .andExpect(jsonPath("$.perioder[1].inntektType").value("FL_PGI_LOENN"))
+            .andExpect(jsonPath("$.perioder[1].inntektTypeDekode").isEmpty)
             .andExpect(jsonPath("$.perioder[1].registrert").isEmpty)
             .andExpect(jsonPath("$.perioder[1].oppdatert").isEmpty)
 
