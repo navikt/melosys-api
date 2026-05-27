@@ -107,8 +107,8 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
         opprettJournalpost.brukerIdType shouldBe BrukerIdType.FOLKEREGISTERIDENT
         opprettJournalpost.eksternReferanseId shouldBe referanseId
         opprettJournalpost.journalposttype shouldBe Journalposttype.INN
-        opprettJournalpost.innhold shouldBe "Søknad om A1 for utsendte arbeidstakere i EØS eller Sveits"
-        opprettJournalpost.hoveddokument.tittel shouldBe "Søknad om A1 for utsendte arbeidstakere i EØS eller Sveits"
+        opprettJournalpost.innhold shouldBe søknadsdata.dokumentTittel
+        opprettJournalpost.hoveddokument.tittel shouldBe søknadsdata.dokumentTittel
         opprettJournalpost.korrespondansepartId shouldBe innsenderFnr
         opprettJournalpost.korrespondansepartNavn shouldBe innsenderNavn
     }
