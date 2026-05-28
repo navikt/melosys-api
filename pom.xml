@@ -54,10 +54,10 @@
 
         <!-- Versjoner av eksterne biblioteker -->
         <archunit.version>1.4.2</archunit.version>
-        <jsoup.version>1.18.3</jsoup.version>
+        <jsoup.version>1.22.2</jsoup.version>
         <apache-httpclients.version>4.5.13</apache-httpclients.version>
         <caffeine.version>3.2.3</caffeine.version>
-        <cxf.version>4.2.0</cxf.version>
+        <cxf.version>4.2.1</cxf.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
         <commons-text.version>1.15.0</commons-text.version>
@@ -118,9 +118,9 @@
         <springdoc-openapi.version>3.0.3</springdoc-openapi.version>
 
         <!-- Transitive avhengigheter -->
-        <asm.version>9.9.1</asm.version>
+        <asm.version>9.10</asm.version>
         <joda-time.version>2.14.2</joda-time.version>
-        <woodstox.version>7.1.1</woodstox.version>
+        <woodstox.version>7.2.0</woodstox.version>
         <woodstox.stax2.version>4.3.0</woodstox.stax2.version>
         <xmlsec.version>4.0.4</xmlsec.version>
         <wiremock-standalone.version>3.13.2</wiremock-standalone.version>
