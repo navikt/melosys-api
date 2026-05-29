@@ -22,6 +22,8 @@ fun lagUtsendtArbeidstakerSkjemaM2MDto(
 
 object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
 
+    private const val DEFAULT_DOKUMENTTITTEL = "Test dokumenttittel"
+
     @MelosysTestDsl
     class Builder {
         var fnr: String = "12345678901"
@@ -36,6 +38,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
         var referanseId: String = "MEL-${UUID.randomUUID()}"
         var innsenderFnr: String? = null
         var innsendtTidspunkt: LocalDateTime = LocalDateTime.now()
+        var dokumentTittel: String = DEFAULT_DOKUMENTTITTEL
         var vedlegg: List<VedleggDto> = emptyList()
 
         private var kobletSkjemaBuilder: ArbeidsgiverSkjemaBuilder? = null
@@ -72,6 +75,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
                 referanseId = referanseId,
                 innsendtTidspunkt = innsendtTidspunkt,
                 innsenderFnr = innsenderFnr ?: fnr,
+                dokumentTittel = dokumentTittel,
                 vedlegg = vedlegg
             )
         }

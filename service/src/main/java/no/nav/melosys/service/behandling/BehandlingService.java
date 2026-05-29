@@ -361,9 +361,10 @@ public class BehandlingService {
     private void oppdaterAnmodningOmUnntakTilFerdigbehandlet(Behandling behandling) {
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         if (behandlingsresultat.getType() == Behandlingsresultattyper.ANMODNING_OM_UNNTAK) {
-            log.info("Oppdaterer behandlingsresultattype fra {} til {} for behandling {} ved avslutning",
+            log.info("Oppdaterer behandlingsresultattype fra {} til {} for behandling {} ved avslutning, og ferdigstiller oppgaven",
                 Behandlingsresultattyper.ANMODNING_OM_UNNTAK, Behandlingsresultattyper.FERDIGBEHANDLET, behandling.getId());
             behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
+            oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
         }
     }
 
