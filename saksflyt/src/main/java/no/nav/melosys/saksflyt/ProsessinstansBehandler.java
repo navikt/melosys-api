@@ -12,6 +12,7 @@ import no.nav.melosys.saksflyt.prosessflyt.ProsessFlyt;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.saksflytapi.ProsessinstansOpprettetEvent;
+import no.nav.melosys.saksflytapi.UtførendeProsessKontekst;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessSteg;
@@ -154,6 +155,8 @@ public class ProsessinstansBehandler {
         String saksbehandler = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER);
         String saksbehandlerNavn = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER_NAVN);
         ThreadLocalAccessInfo.beforeExecuteProcess(prosessinstans.getId(), stegBehandler.inngangsSteg().getKode(), saksbehandler, saksbehandlerNavn);
+        // Gjør parentens prioritet tilgjengelig for propagering til sub-prosesser opprettet under steget.
+        UtførendeProsessKontekst.settPrioritet(prosessinstans.hentPrioritet());
         long start = System.nanoTime();
         try {
             stegBehandler.utfør(prosessinstans);
@@ -174,6 +177,7 @@ public class ProsessinstansBehandler {
                 .tag(MetrikkerNavn.TAG_PROSESSTEG, stegBehandler.inngangsSteg().getKode())
                 .register(meterRegistry)
                 .record(System.nanoTime() - start, java.util.concurrent.TimeUnit.NANOSECONDS);
+            UtførendeProsessKontekst.nullstill();
             ThreadLocalAccessInfo.afterExecuteProcess(prosessinstans.getId());
         }
         prosessinstans.setSistFullførtSteg(stegBehandler.inngangsSteg());

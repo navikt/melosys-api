@@ -283,14 +283,18 @@ public class ProsessinstansService {
     /**
      * Løfter prioriteten til sub-prosessen opp til foreldreprosessens nivå hvis den er høyere.
      * En sub-prosess kan løftes opp, men aldri senkes under sin egen type-default.
+     *
+     * <p>Parentens prioritet leses fra {@link UtførendeProsessKontekst}, som settes rundt utførelsen
+     * av et steg i {@code ProsessinstansBehandler}. Når en sub-prosess opprettes der, arver den
+     * parentens prioritet uten et databaseoppslag. I system-/batch-kontekster (satsendring,
+     * årsavregning osv.) er konteksten tom, så dette er en ren no-op uten oppslag.
      */
-    private void propagerPrioritetFraParent(Prosessinstans prosessinstans, UUID parentId) {
-        if (parentId == null) return;
-        prosessinstansRepo.findById(parentId).ifPresent(parent ->
-            prosessinstans.setPrioritet(prosessinstans.getType().getPrioritet()
-                .høyesteAv(prosessinstans.hentPrioritet())
-                .høyesteAv(parent.hentPrioritet()))
-        );
+    private void propagerPrioritetFraParent(Prosessinstans prosessinstans) {
+        ProsessPrioritet parentPrioritet = UtførendeProsessKontekst.gjeldendePrioritet();
+        if (parentPrioritet == null) return;
+        prosessinstans.setPrioritet(prosessinstans.getType().getPrioritet()
+            .høyesteAv(prosessinstans.hentPrioritet())
+            .høyesteAv(parentPrioritet));
     }
 
     UUID lagre(Prosessinstans prosessinstans, String saksbehandler, String saksbehandlerNavn) {
@@ -303,9 +307,8 @@ public class ProsessinstansService {
             prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER_NAVN, saksbehandlerNavn);
         }
         prosessinstans.setData(CORRELATION_ID_SAKSFLYT, MDCOperations.getCorrelationId());
-        UUID parentId = ThreadLocalAccessInfo.getProcessId();
-        prosessinstans.setData(PROCESS_PARENT_ID, parentId);
-        propagerPrioritetFraParent(prosessinstans, parentId);
+        prosessinstans.setData(PROCESS_PARENT_ID, ThreadLocalAccessInfo.getProcessId());
+        propagerPrioritetFraParent(prosessinstans);
 
         prosessinstansRepo.save(prosessinstans);
         if (saksbehandler != null) {

@@ -14,6 +14,7 @@ import no.nav.melosys.saksflyt.PrioritertSaksflytTask
 import no.nav.melosys.saksflyt.steg.sed.mottak.SedMottakRuting
 import no.nav.melosys.saksflytapi.ProsessinstansForServiceRepository
 import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.saksflytapi.UtførendeProsessKontekst
 import no.nav.melosys.saksflytapi.domain.ProsessPrioritet
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
@@ -120,7 +121,7 @@ class SaksflyThreadPoolTaskExecutorIT(
 
     @Test
     fun `sub-prosess arver HØY-prioritet fra parent og dispatches som HØY`() {
-        // Persistér en HØY parent direkte (uten dispatch via event) slik at findById i propageringen finner den.
+        // Persistér en HØY parent som representerer prosessinstansen som utfører steget.
         val parent = Prosessinstans.builder()
             .medType(ProsessType.MOTTAK_SED)
             .medStatus(ProsessStatus.KLAR)
@@ -135,8 +136,8 @@ class SaksflyThreadPoolTaskExecutorIT(
             prosessinstansService.opprettProsessinstansSedMottak(sedMottak(2000 + i))
         }
 
-        // Opprett en NORMAL sub-prosess i parentens kontekst -> skal løftes til HØY.
-        val childId = medProsessKontekst(parentId) {
+        // Opprett en NORMAL sub-prosess i parentens kontekst (slik ProsessinstansBehandler setter den) -> skal løftes til HØY.
+        val childId = medProsessKontekst(parentId, ProsessPrioritet.HØY) {
             prosessinstansService.opprettProsessinstansSedMottak(sedMottak(2999))
         }
 
@@ -181,11 +182,13 @@ class SaksflyThreadPoolTaskExecutorIT(
         sedVersjon = "1"
     }
 
-    private fun <T> medProsessKontekst(parentId: UUID, block: () -> T): T {
+    private fun <T> medProsessKontekst(parentId: UUID, prioritet: ProsessPrioritet, block: () -> T): T {
         ThreadLocalAccessInfo.beforeExecuteProcess(parentId, "test-parent")
+        UtførendeProsessKontekst.settPrioritet(prioritet)
         return try {
             block()
         } finally {
+            UtførendeProsessKontekst.nullstill()
             ThreadLocalAccessInfo.afterExecuteProcess(parentId)
         }
     }

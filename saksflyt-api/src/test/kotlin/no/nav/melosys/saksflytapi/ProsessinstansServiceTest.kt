@@ -34,7 +34,6 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
-import java.util.Optional
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -881,12 +880,8 @@ class ProsessinstansServiceTest {
 
     @Test
     fun `lagre med HØY parent og NORMAL child skal løfte child til HØY`() {
-        val parentId = UUID.randomUUID()
-        val parent = Prosessinstans.forTest { type = ProsessType.IVERKSETT_VEDTAK_EOS } // HØY
-        every { prosessinstansRepo.findById(parentId) } returns Optional.of(parent)
-
         val child = Prosessinstans.forTest { type = ProsessType.SEND_BREV } // NORMAL
-        kjørSomBarnAv(parentId) {
+        medUtførendeProsess(ProsessPrioritet.HØY) {
             prosessinstansService.lagre(child, "Z123", "Z123")
         }
 
@@ -895,12 +890,8 @@ class ProsessinstansServiceTest {
 
     @Test
     fun `lagre med NORMAL parent og LAV child skal løfte child til NORMAL`() {
-        val parentId = UUID.randomUUID()
-        val parent = Prosessinstans.forTest { type = ProsessType.SEND_BREV } // NORMAL
-        every { prosessinstansRepo.findById(parentId) } returns Optional.of(parent)
-
         val child = Prosessinstans.forTest { type = ProsessType.SATSENDRING } // LAV
-        kjørSomBarnAv(parentId) {
+        medUtførendeProsess(ProsessPrioritet.NORMAL) {
             prosessinstansService.lagre(child, "Z123", "Z123")
         }
 
@@ -909,12 +900,8 @@ class ProsessinstansServiceTest {
 
     @Test
     fun `lagre med LAV parent og HØY child skal beholde child sin HØY (typen vinner)`() {
-        val parentId = UUID.randomUUID()
-        val parent = Prosessinstans.forTest { type = ProsessType.SATSENDRING } // LAV
-        every { prosessinstansRepo.findById(parentId) } returns Optional.of(parent)
-
         val child = Prosessinstans.forTest { type = ProsessType.IVERKSETT_VEDTAK_EOS } // HØY
-        kjørSomBarnAv(parentId) {
+        medUtførendeProsess(ProsessPrioritet.LAV) {
             prosessinstansService.lagre(child, "Z123", "Z123")
         }
 
@@ -922,24 +909,33 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    fun `lagre med parent som ikke finnes skal beholde type-default-prioritet`() {
-        val parentId = UUID.randomUUID()
-        every { prosessinstansRepo.findById(parentId) } returns Optional.empty()
-
+    fun `lagre i system-kontekst uten utførende prosess skal beholde type-default og ikke slå opp parent`() {
+        // Batch-/systemjobber (satsendring, årsavregning ...) setter en syntetisk prosess-id, men ingen
+        // utførende prioritet. Propageringen skal da være en ren no-op uten databaseoppslag.
         val child = Prosessinstans.forTest { type = ProsessType.SEND_BREV } // NORMAL
-        kjørSomBarnAv(parentId) {
+        kjørISystemkontekst(UUID.randomUUID()) {
             prosessinstansService.lagre(child, "Z123", "Z123")
         }
 
         piListCaptor.last().hentPrioritet() shouldBe ProsessPrioritet.NORMAL
+        verify(exactly = 0) { prosessinstansRepo.findById(any()) }
     }
 
-    private fun kjørSomBarnAv(parentId: UUID, block: () -> Unit) {
-        ThreadLocalAccessInfo.beforeExecuteProcess(parentId, "test-parent")
+    private fun medUtførendeProsess(prioritet: ProsessPrioritet, block: () -> Unit) {
+        UtførendeProsessKontekst.settPrioritet(prioritet)
         try {
             block()
         } finally {
-            ThreadLocalAccessInfo.afterExecuteProcess(parentId)
+            UtførendeProsessKontekst.nullstill()
+        }
+    }
+
+    private fun kjørISystemkontekst(prosessId: UUID, block: () -> Unit) {
+        ThreadLocalAccessInfo.beforeExecuteProcess(prosessId, "test-system")
+        try {
+            block()
+        } finally {
+            ThreadLocalAccessInfo.afterExecuteProcess(prosessId)
         }
     }
 
