@@ -47,8 +47,8 @@ internal class PensjonsopptjeningControllerTest(
                     aar = 2024,
                     pgi = 540000,
                     kilde = "SKATT",
-                    inntektType = "SUM_PI",
-                    inntektTypeDekode = "Sum personinntekt",
+                    inntektType = "FL_PGI_NAERING",
+                    inntektTypeDekode = "Pensjonsgivende inntekt av næring, frilanser",
                     registrert = LocalDate.of(2026, 5, 1),
                     oppdatert = LocalDate.of(2026, 5, 15),
                 ),
@@ -74,8 +74,8 @@ internal class PensjonsopptjeningControllerTest(
             .andExpect(jsonPath("$.perioder[0].aar").value(2024))
             .andExpect(jsonPath("$.perioder[0].pgi").value(540000))
             .andExpect(jsonPath("$.perioder[0].kilde").value("SKATT"))
-            .andExpect(jsonPath("$.perioder[0].inntektType").value("SUM_PI"))
-            .andExpect(jsonPath("$.perioder[0].inntektTypeDekode").value("Sum personinntekt"))
+            .andExpect(jsonPath("$.perioder[0].inntektType").value("FL_PGI_NAERING"))
+            .andExpect(jsonPath("$.perioder[0].inntektTypeDekode").value("Pensjonsgivende inntekt av næring, frilanser"))
             .andExpect(jsonPath("$.perioder[0].registrert").value("2026-05-01"))
             .andExpect(jsonPath("$.perioder[0].oppdatert").value("2026-05-15"))
             .andExpect(jsonPath("$.perioder[1].inntektType").value("FL_PGI_LOENN"))

@@ -19,7 +19,7 @@ open class PoppInntektClient(private val webClient: WebClient) {
     open fun hentInntekt(request: PoppHentInntektRequest): PoppHentInntektResponse =
         try {
             val respons = webClient.post()
-                .uri("/inntekt/hent")
+                .uri("/inntekt/hentgrunnlag")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .retrieve()

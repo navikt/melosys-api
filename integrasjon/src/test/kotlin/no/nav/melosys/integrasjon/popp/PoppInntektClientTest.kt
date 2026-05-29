@@ -182,7 +182,7 @@ class PoppInntektClientTest(
         poppInntektClient.hentInntekt(REQUEST)
 
         mockServer.verify(
-            postRequestedFor(urlEqualTo("/popp/inntekt/hent"))
+            postRequestedFor(urlEqualTo("/popp/inntekt/hentgrunnlag"))
                 .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))

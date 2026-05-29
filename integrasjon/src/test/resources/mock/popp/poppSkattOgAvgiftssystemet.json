@@ -1,21 +1,33 @@
 {
   "inntekter": [
     {
+      "changeStamp": {
+        "createdBy": "POPP",
+        "createdDate": "2025-03-01T08:00:00Z",
+        "updatedBy": "POPP",
+        "updatedDate": "2025-03-15T08:00:00Z"
+      },
       "inntektId": 202401,
       "fnr": "12345678901",
       "inntektAr": 2024,
       "kilde": "SKATT",
-      "inntektType": "SUM_PI",
-      "inntektTypeDekode": "Sum pensjonsgivende inntekt",
+      "inntektType": "FL_PGI_LOENN",
+      "inntektTypeDekode": "Pensjonsgivende inntekt av lønn, frilanser",
       "belop": 540000
     },
     {
+      "changeStamp": {
+        "createdBy": "POPP",
+        "createdDate": "2025-03-01T08:00:00Z",
+        "updatedBy": "POPP",
+        "updatedDate": "2025-03-15T08:00:00Z"
+      },
       "inntektId": 202402,
       "fnr": "12345678901",
       "inntektAr": 2024,
       "kilde": "AVGIFTSSYSTEMET",
-      "inntektType": "SUM_PI",
-      "inntektTypeDekode": "Sum pensjonsgivende inntekt",
+      "inntektType": "FL_PGI_NAERING",
+      "inntektTypeDekode": "Pensjonsgivende inntekt av næring, frilanser",
       "belop": 120000
     }
   ]
