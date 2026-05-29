@@ -1,6 +1,5 @@
 package no.nav.melosys.migrering
 
-import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.saksflytapi.domain.ProsessPrioritet
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -20,17 +19,24 @@ class V155PrioritetBackfillTest {
         }.readText()
 
     @Test
-    fun `backfill-literaler er gyldige ProsessType-navn med riktig prioritet`() {
+    fun `backfill-listene matcher ProsessType-prioritet eksakt`() {
         assertBlokk(ProsessPrioritet.HØY)
         assertBlokk(ProsessPrioritet.LAV)
     }
 
+    /**
+     * Låser begge retninger: hver SQL-literal må være et gyldig ProsessType-navn med riktig prioritet,
+     * OG settet av literaler må være identisk med settet av ProsessType-er med den prioriteten. Sistnevnte
+     * fanger at en ny HØY/LAV-type legges til i ProsessType uten å oppdatere backfillen (NORMAL backfilles
+     * via kolonne-default, så den blokken finnes ikke i SQL-en).
+     */
     private fun assertBlokk(forventet: ProsessPrioritet) {
-        val literaler = prosessTypeLiteralerForBlokk(forventet)
-        literaler.shouldNotBeEmpty()
-        literaler.forEach { navn ->
-            ProsessType.valueOf(navn).prioritet shouldBe forventet
-        }
+        val literaler = prosessTypeLiteralerForBlokk(forventet).toSet()
+        val forventedeTyper = ProsessType.values()
+            .filter { it.prioritet == forventet }
+            .map { it.name }
+            .toSet()
+        literaler shouldBe forventedeTyper
     }
 
     private fun prosessTypeLiteralerForBlokk(prioritet: ProsessPrioritet): List<String> {
