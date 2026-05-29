@@ -107,22 +107,30 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
         opprettJournalpost.brukerIdType shouldBe BrukerIdType.FOLKEREGISTERIDENT
         opprettJournalpost.eksternReferanseId shouldBe referanseId
         opprettJournalpost.journalposttype shouldBe Journalposttype.INN
-        opprettJournalpost.innhold shouldBe "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits"
-        opprettJournalpost.hoveddokument.tittel shouldBe "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits"
+        opprettJournalpost.innhold shouldBe søknadsdata.dokumentTittel
+        opprettJournalpost.hoveddokument.tittel shouldBe søknadsdata.dokumentTittel
         opprettJournalpost.korrespondansepartId shouldBe innsenderFnr
         opprettJournalpost.korrespondansepartNavn shouldBe innsenderNavn
     }
 
     @Test
-    fun `utfør oppretter journalpost med korrekt tittel for arbeidsgiver-del`() {
-        val søknadsdata = lagSøknadsdata(Skjemadel.ARBEIDSGIVERS_DEL)
+    fun `utfør bruker dokumentTittel fra søknadsdata på journalpost`() {
+        val tittelFraSkjemaApi = "Bekreftelse fra arbeidsgiver på utsending til annet EØS-land eller Sveits"
+        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+            fnr = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.fnr
+            referanseId = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.referanseId
+            innsenderFnr = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.innsenderFnr
+            dokumentTittel = tittelFraSkjemaApi
+            data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
+        }.also { every { melosysSkjemaApiClient.hentPdf(it.skjema.id) } returns pdfBytes }
         val prosessinstans = lagProsessinstans(søknadsdata)
 
         opprettOgFerdigstillJournalpostDigitalSøknad.utfør(prosessinstans)
 
         val opprettJournalpost = capturedJournalpost.captured
-        opprettJournalpost.innhold shouldBe "Bekreftelse på utsending i EØS eller Sveits"
-        opprettJournalpost.hoveddokument.tittel shouldBe "Bekreftelse på utsending i EØS eller Sveits"
+        opprettJournalpost.innhold shouldBe tittelFraSkjemaApi
+        opprettJournalpost.hoveddokument.tittel shouldBe tittelFraSkjemaApi
     }
 
     @ParameterizedTest(name = "{0} skal gi orgnr som avsender")
@@ -193,6 +201,7 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
             fnr = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.fnr
             referanseId = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.referanseId
             innsenderFnr = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.innsenderFnr
+            dokumentTittel = "Søknad om A1 for utsendte arbeidstakere i EØS eller Sveits"
             if (skjemadel == Skjemadel.ARBEIDSGIVERS_DEL) {
                 data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
             }
