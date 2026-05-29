@@ -1,6 +1,6 @@
 -- Default 'NORMAL' gjør ADD til en metadata-operasjon (rask, ingen full-tabell-UPDATE) og lukker
 -- NOT NULL-vinduet under rullerende deploy: gamle podder uten prioritet-kolonnen får defaulten ved INSERT.
--- Backfill-listene under speiler ProsessType.prioritet (kilden til sannhet) per V155.
+-- Backfill-listene under speiler ProsessType.prioritet (kilden til sannhet) per V156.
 -- Merk: backfill setter type-default. Allerede køede sub-prosesser blir ikke retroaktivt løftet til
 -- parentens prioritet — det gjelder kun nye prosesser fra og med denne endringen. Akseptabelt da
 -- prosessinstans er en kortlevd arbeidstabell.
