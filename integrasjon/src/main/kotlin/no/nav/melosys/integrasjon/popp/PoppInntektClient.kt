@@ -27,8 +27,8 @@ open class PoppInntektClient(private val webClient: WebClient) {
                 .block()
                 ?: throw TekniskException("POPP returnerte tom respons (200 uten body)")
             respons.copy(inntekter = respons.inntekter ?: emptyList())
-        } catch (ex: PoppPersonIkkeFunnetException) {
-            log.info { "POPP returnerte PERSON_IKKE_FUNNET — tolker som tom liste (${ex.message})" }
+        } catch (_: PoppPersonIkkeFunnetException) {
+            log.info { "POPP returnerte PERSON_IKKE_FUNNET — tolker som tom liste" }
             PoppHentInntektResponse(inntekter = emptyList())
         }
 }

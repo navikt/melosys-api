@@ -63,6 +63,9 @@ faktureringskomponenten:
 inntekt:
   rest:
     url: https://team-inntekt-proxy.dev-fss-pub.nais.io/proxy/inntektskomponenten-q2/rs/api/v1
+popp:
+  rest:
+    url: https://pensjon-popp-q2.dev.intern.nav.no/popp
 kafka:
   aiven:
     a1-utstedt:
