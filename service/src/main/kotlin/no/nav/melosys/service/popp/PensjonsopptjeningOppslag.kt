@@ -27,7 +27,7 @@ class PensjonsopptjeningOppslag(
         val behandling = behandlingService.hentBehandling(behandlingID)
         val fnr = persondataService.hentFolkeregisterident(behandling.fagsak.hentBrukersAktørID())
 
-        val fomAr = inntektsÅr - ANTALL_ÅR_TILBAKE
+        val fomAr = inntektsÅr - (ANTALL_INNTEKTSÅR - 1)
         val tomAr = inntektsÅr
 
         log.info {
@@ -79,7 +79,7 @@ class PensjonsopptjeningOppslag(
     }
 
     companion object {
-        private const val ANTALL_ÅR_TILBAKE = 4
+        private const val ANTALL_INNTEKTSÅR = 5 // 5 inntektsår inklusivt inneværende år
         private const val UKJENT_KILDE = "UKJENT"
 
         private val PGI_TYPER_INKLUDER = setOf(

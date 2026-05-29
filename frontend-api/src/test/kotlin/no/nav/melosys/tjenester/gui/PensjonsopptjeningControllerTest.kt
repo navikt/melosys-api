@@ -69,7 +69,6 @@ internal class PensjonsopptjeningControllerTest(
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.inntektsAr").value(2024))
-            .andExpect(jsonPath("$.behandletAr").doesNotExist())
             .andExpect(jsonPath("$.perioder.length()").value(2))
             .andExpect(jsonPath("$.perioder[0].aar").value(2024))
             .andExpect(jsonPath("$.perioder[0].pgi").value(540000))

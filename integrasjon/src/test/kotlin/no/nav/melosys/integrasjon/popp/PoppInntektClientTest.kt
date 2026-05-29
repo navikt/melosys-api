@@ -176,7 +176,7 @@ class PoppInntektClientTest(
     }
 
     @Test
-    fun `hentInntekt - serialiserer request body korrekt med inntektType=SUM_PI`() {
+    fun `hentInntekt - serialiserer request body korrekt`() {
         stubOk("mock/popp/poppTom.json")
 
         poppInntektClient.hentInntekt(REQUEST)
@@ -188,7 +188,7 @@ class PoppInntektClientTest(
                 .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
                 .withRequestBody(
                     equalToJson(
-                        """{"fnr":"$FNR","fomAr":2020,"tomAr":2024,"inntektType":"SUM_PI"}""",
+                        """{"fnr":"$FNR","fomAr":2020,"tomAr":2024}""",
                         true,
                         false
                     )
@@ -220,7 +220,6 @@ class PoppInntektClientTest(
             fnr = FNR,
             fomAr = 2020,
             tomAr = 2024,
-            inntektType = "SUM_PI",
         )
     }
 }
