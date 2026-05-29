@@ -16,10 +16,8 @@ import no.nav.melosys.saksflytapi.ProsessinstansForServiceRepository
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.UtførendeProsessKontekst
 import no.nav.melosys.saksflytapi.domain.ProsessPrioritet
-import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.ProsessType
-import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.awaitility.kotlin.await
@@ -28,7 +26,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.Duration
-import java.time.LocalDateTime
 import java.util.UUID
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -121,15 +118,10 @@ class SaksflyThreadPoolTaskExecutorIT(
 
     @Test
     fun `sub-prosess arver HØY-prioritet fra parent og dispatches som HØY`() {
-        // Persistér en HØY parent som representerer prosessinstansen som utfører steget.
-        val parent = Prosessinstans.builder()
-            .medType(ProsessType.MOTTAK_SED)
-            .medStatus(ProsessStatus.KLAR)
-            .medPrioritet(ProsessPrioritet.HØY)
-            .medRegistrertDato(LocalDateTime.now())
-            .medEndretDato(LocalDateTime.now())
-            .build()
-        val parentId = requireNotNull(prosessinstansRepo.save(parent).id)
+        // Simuler at en HØY parent utfører et steg: ProsessinstansBehandler setter ThreadLocalAccessInfo
+        // (prosess-id) + UtførendeProsessKontekst (HØY) rundt steget – det er konteksten propageringen leser,
+        // ikke en DB-rad. medProsessKontekst speiler det. (Prioriteten kommer fra argumentet, ikke en lagret parent.)
+        val parentId = UUID.randomUUID()
 
         // Mett trådpoolen (corePoolSize=3) med trege NORMAL-oppgaver så barnet blir liggende i køen når vi sjekker.
         repeat(10) { i ->

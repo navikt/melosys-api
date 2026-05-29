@@ -12,6 +12,7 @@ import io.mockk.just
 import io.mockk.verify
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflyt.steg.StegBehandler
+import no.nav.melosys.saksflytapi.UtførendeProsessKontekst
 import no.nav.melosys.saksflytapi.domain.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -122,6 +123,18 @@ class ProsessinstansBehandlerTest {
         verify { prosessinstansRepository.save(hengendeProsessinstans) }
         verify(exactly = 0) { prosessinstansRepository.save(ferskProsessinstans) }
         verify(exactly = 1) { applicationEventPublisher.publishEvent(any()) }
+    }
+
+    @Test
+    fun `utførSteg eksponerer prosessinstansens prioritet i UtførendeProsessKontekst under steget og rydder opp etterpå`() {
+        prosessinstans.prioritet = ProsessPrioritet.HØY // typisk løftet via parent-propagering
+        var prioritetUnderSteg: ProsessPrioritet? = null
+        every { stegbehandler.utfør(any()) } answers { prioritetUnderSteg = UtførendeProsessKontekst.gjeldendePrioritet() }
+
+        prosessinstansBehandler.behandleProsessinstansNå(prosessinstans)
+
+        prioritetUnderSteg shouldBe ProsessPrioritet.HØY // sub-prosesser opprettet under steget arver denne
+        UtførendeProsessKontekst.gjeldendePrioritet().shouldBeNull() // ryddet opp etter steget
     }
 
     private fun lagProsessinstans(endretDato: LocalDateTime) = Prosessinstans.forTest {
