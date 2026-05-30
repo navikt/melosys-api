@@ -124,7 +124,7 @@ internal class PensjonsopptjeningOppslagTest {
     }
 
     @Test
-    fun `hent - filtrerer bort ikke-PGI inntektTyper inkludert SUM_PI`() {
+    fun `hent - inkluderer alle inntektTyper og hopper kun over poster uten inntektType`() {
         every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
         every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(
             listOf(
@@ -138,7 +138,8 @@ internal class PensjonsopptjeningOppslagTest {
 
         val perioder = oppslag.hent(BEH_ID).perioder
 
-        perioder.map { it.inntektType } shouldBe listOf("FL_PGI_LOENN")
+        // Alt unntatt posten med null inntektType beholdes; POPP ekskluderer SUM_PI server-side.
+        perioder.map { it.inntektType } shouldBe listOf("DIP_SEL", "FL_PGI_LOENN", "INN_LON", "SUM_PI")
     }
 
     @Test

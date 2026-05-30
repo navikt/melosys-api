@@ -41,13 +41,7 @@ class PensjonsopptjeningOppslag(
         val perioder = (respons.inntekter ?: emptyList()).mapNotNull { post ->
             val aar = post.inntektAr ?: return@mapNotNull null
             val pgi = post.belop ?: return@mapNotNull null
-            val inntektType = post.inntektType
-            if (inntektType == null || inntektType !in PGI_TYPER_INKLUDER) {
-                if (inntektType != null) {
-                    log.warn { "POPP-post med ikke-PGI inntektType=$inntektType for behandling $behandlingID, år=$aar — filtrert bort" }
-                }
-                return@mapNotNull null
-            }
+            val inntektType = post.inntektType ?: return@mapNotNull null
             if (post.kilde == null) {
                 log.warn { "POPP-post uten kilde for behandling $behandlingID, år=$aar — markeres som UKJENT" }
             }
@@ -81,12 +75,6 @@ class PensjonsopptjeningOppslag(
     companion object {
         private const val ANTALL_INNTEKTSÅR = 5 // 5 inntektsår inklusivt inneværende år
         private const val UKJENT_KILDE = "UKJENT"
-
-        private val PGI_TYPER_INKLUDER = setOf(
-            "FL_PGI_LOENN", "FL_PGI_LOENN_PD", "FL_PGI_NAERING", "FL_PGI_NAERING_FFF",
-            "KSL_PGI_LOENN", "KSL_PGI_LOENN_PD", "KSL_PGI_NAERING", "KSL_PGI_NAERING_FFF",
-            "SVA_PGI_LOENN", "SVA_PGI_LOENN_PD", "SVA_PGI_NAERING", "SVA_PGI_NAERING_FFF",
-        )
     }
 }
 
