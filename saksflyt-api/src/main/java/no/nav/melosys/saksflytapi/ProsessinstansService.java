@@ -288,10 +288,17 @@ public class ProsessinstansService {
      * av et steg i {@code ProsessinstansBehandler}. Når en sub-prosess opprettes der, arver den
      * parentens prioritet uten et databaseoppslag. I system-/batch-kontekster (satsendring,
      * årsavregning osv.) er konteksten tom, så dette er en ren no-op uten oppslag.
+     *
+     * <p><b>Batch-typer ({@link ProsessPrioritet#LAV}) løftes aldri.</b> De er bevisst deprioritert for
+     * å ikke sulte HØY/NORMAL, og det gjelder uavhengig av opphav: også når en LAV-type opprettes som et
+     * bivirkning-steg inne i en HØY/NORMAL-flyt (f.eks. {@code OPPRETT_NY_BEHANDLING_AARSAVREGNING} fra
+     * steget {@code OPPRETTE_AARSAVREGNING_ENDRING} under en iverksett-vedtak-flyt) skal den forbli LAV.
      */
     private void propagerPrioritetFraParent(Prosessinstans prosessinstans) {
         ProsessPrioritet parentPrioritet = UtførendeProsessKontekst.gjeldendePrioritet();
         if (parentPrioritet == null) return;
+        // Batch (LAV) skal aldri løftes – for disse er type-default et tak, ikke bare et gulv.
+        if (prosessinstans.getType().getPrioritet() == ProsessPrioritet.LAV) return;
         prosessinstans.setPrioritet(prosessinstans.getType().getPrioritet()
             .høyesteAv(prosessinstans.hentPrioritet())
             .høyesteAv(parentPrioritet));

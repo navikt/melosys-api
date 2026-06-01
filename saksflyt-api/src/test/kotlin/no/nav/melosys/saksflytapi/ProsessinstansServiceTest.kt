@@ -889,13 +889,25 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    fun `lagre med NORMAL parent og LAV child skal løfte child til NORMAL`() {
+    fun `lagre med NORMAL parent og LAV (batch) child skal beholde LAV - batch løftes aldri`() {
         val child = Prosessinstans.forTest { type = ProsessType.SATSENDRING } // LAV
         medUtførendeProsess(ProsessPrioritet.NORMAL) {
             prosessinstansService.lagre(child, "Z123", "Z123")
         }
 
-        piListCaptor.last().hentPrioritet() shouldBe ProsessPrioritet.NORMAL
+        piListCaptor.last().hentPrioritet() shouldBe ProsessPrioritet.LAV
+    }
+
+    @Test
+    fun `lagre med HØY parent og LAV (batch) child skal beholde LAV - batch løftes aldri`() {
+        // Konkret scenario: OPPRETT_NY_BEHANDLING_AARSAVREGNING (LAV) opprettes som bivirkning-steg
+        // inne i en HØY iverksett-vedtak-flyt. Batch skal forbli LAV, ikke flomme HØY-båndet.
+        val child = Prosessinstans.forTest { type = ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING } // LAV
+        medUtførendeProsess(ProsessPrioritet.HØY) {
+            prosessinstansService.lagre(child, "Z123", "Z123")
+        }
+
+        piListCaptor.last().hentPrioritet() shouldBe ProsessPrioritet.LAV
     }
 
     @Test
