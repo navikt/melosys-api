@@ -4,6 +4,8 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.Metrics
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -11,9 +13,11 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.just
 import io.mockk.verify
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.metrics.MetrikkerNavn
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.UtførendeProsessKontekst
 import no.nav.melosys.saksflytapi.domain.*
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -37,6 +41,9 @@ class ProsessinstansBehandlerTest {
     @MockK(relaxed = true)
     private lateinit var meterRegistry: MeterRegistry
 
+    // Throughput-counteren går via global Metrics-registry (som steg.utfoert), så vi henger på en ekte registry å asserte mot.
+    private val metrikkRegistry = SimpleMeterRegistry()
+
     private lateinit var prosessinstansBehandler: ProsessinstansBehandler
 
     private val prosessinstans = Prosessinstans.forTest {
@@ -46,6 +53,7 @@ class ProsessinstansBehandlerTest {
 
     @BeforeEach
     fun setup() {
+        Metrics.globalRegistry.add(metrikkRegistry)
         every { stegbehandler.inngangsSteg() } returns ProsessSteg.SED_MOTTAK_RUTING
         every { stegbehandler.utfør(any()) } just Runs
         every { prosessinstansRepository.save(any<Prosessinstans>()) } returnsArgument 0
@@ -60,6 +68,12 @@ class ProsessinstansBehandlerTest {
 
         prosessinstans.type = ProsessType.MOTTAK_SED
         prosessinstans.status = ProsessStatus.KLAR
+    }
+
+    @AfterEach
+    fun tearDown() {
+        Metrics.globalRegistry.remove(metrikkRegistry)
+        metrikkRegistry.clear()
     }
 
     @Test
@@ -136,6 +150,34 @@ class ProsessinstansBehandlerTest {
         prioritetUnderSteg shouldBe ProsessPrioritet.HØY // sub-prosesser opprettet under steget arver denne
         UtførendeProsessKontekst.gjeldendePrioritet().shouldBeNull() // ryddet opp etter steget
     }
+
+    @Test
+    fun `behandleProsessinstansNå teller throughput på prosessinstansens prioritet med status FERDIG`() {
+        prosessinstans.prioritet = ProsessPrioritet.HØY
+
+        prosessinstansBehandler.behandleProsessinstansNå(prosessinstans)
+
+        throughputTeller(ProsessPrioritet.HØY, ProsessStatus.FERDIG) shouldBe 1.0
+        throughputTeller(ProsessPrioritet.NORMAL, ProsessStatus.FERDIG) shouldBe 0.0
+    }
+
+    @Test
+    fun `behandleProsessinstansNå teller throughput med status FEILET når et steg feiler`() {
+        prosessinstans.prioritet = ProsessPrioritet.LAV
+        every { stegbehandler.utfør(prosessinstans) } throws FunksjonellException("FEIL!")
+
+        prosessinstansBehandler.behandleProsessinstansNå(prosessinstans)
+
+        throughputTeller(ProsessPrioritet.LAV, ProsessStatus.FEILET) shouldBe 1.0
+        throughputTeller(ProsessPrioritet.LAV, ProsessStatus.FERDIG) shouldBe 0.0
+    }
+
+    private fun throughputTeller(prioritet: ProsessPrioritet, status: ProsessStatus): Double =
+        metrikkRegistry.counter(
+            MetrikkerNavn.PROSESSINSTANSER_BEHANDLET,
+            MetrikkerNavn.TAG_PRIORITET, prioritet.name,
+            MetrikkerNavn.TAG_STATUS, status.name
+        ).count()
 
     private fun lagProsessinstans(endretDato: LocalDateTime) = Prosessinstans.forTest {
         id = UUID.randomUUID()

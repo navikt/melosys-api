@@ -138,6 +138,14 @@ public class ProsessinstansBehandler {
                 .register(meterRegistry)
                 .record(System.nanoTime() - start, java.util.concurrent.TimeUnit.NANOSECONDS);
 
+            // Throughput per prioritet (HØY/NORMAL/LAV) + terminalstatus. Speiler executor_completed_tasks_total,
+            // men med prioritetsdimensjonen 8066/parent-propagering trenger for å vise effekten i Grafana.
+            Metrics.counter(
+                MetrikkerNavn.PROSESSINSTANSER_BEHANDLET,
+                MetrikkerNavn.TAG_PRIORITET, prosessinstans.hentPrioritet().name(),
+                MetrikkerNavn.TAG_STATUS, prosessinstans.getStatus().name()
+            ).increment();
+
             MDC.remove("pid");
             MDC.remove(CORRELATION_ID);
             SaksflytSubjektHolder.reset();
