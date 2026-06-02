@@ -138,13 +138,7 @@ public class ProsessinstansBehandler {
                 .register(meterRegistry)
                 .record(System.nanoTime() - start, java.util.concurrent.TimeUnit.NANOSECONDS);
 
-            // Throughput per prioritet (HØY/NORMAL/LAV) + terminalstatus. Speiler executor_completed_tasks_total,
-            // men med prioritetsdimensjonen 8066/parent-propagering trenger for å vise effekten i Grafana.
-            Metrics.counter(
-                MetrikkerNavn.PROSESSINSTANSER_BEHANDLET,
-                MetrikkerNavn.TAG_PRIORITET, prosessinstans.hentPrioritet().name(),
-                MetrikkerNavn.TAG_STATUS, prosessinstans.getStatus().name()
-            ).increment();
+            tellBehandlet(prosessinstans);
 
             MDC.remove("pid");
             MDC.remove(CORRELATION_ID);
@@ -156,6 +150,21 @@ public class ProsessinstansBehandler {
         log.error("Finner ingen definert flyt for ProsessType {}", prosessinstans.getType());
         prosessinstans.setStatus(ProsessStatus.FEILET);
         lagreProsessinstans(prosessinstans);
+        tellBehandlet(prosessinstans);
+    }
+
+    /**
+     * Throughput per prioritet (HØY/NORMAL/LAV) + terminalstatus (FERDIG/FEILET). Speiler
+     * {@code executor_completed_tasks_total}, men med prioritetsdimensjonen 8066/parent-propagering trenger
+     * for å vise effekten i Grafana. Telles for alle terminale behandlingsforsøk — både fullført flyt og
+     * flyt-ikke-funnet — slik at FEILET-per-prioritet ikke får skjevhet.
+     */
+    private void tellBehandlet(Prosessinstans prosessinstans) {
+        Metrics.counter(
+            MetrikkerNavn.PROSESSINSTANSER_BEHANDLET,
+            MetrikkerNavn.TAG_PRIORITET, prosessinstans.hentPrioritet().name(),
+            MetrikkerNavn.TAG_STATUS, prosessinstans.getStatus().name()
+        ).increment();
     }
 
     private Prosessinstans utførSteg(StegBehandler stegBehandler, Prosessinstans prosessinstans) {
