@@ -25,7 +25,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
-import java.util.Date
 
 @ExtendWith(MockKExtension::class)
 internal class PensjonsopptjeningOppslagTest {
@@ -124,6 +123,22 @@ internal class PensjonsopptjeningOppslagTest {
     }
 
     @Test
+    fun `hent - identiske aar kilde og inntektType sorteres deterministisk paa pgi hoyest forst`() {
+        every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
+        every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(
+            listOf(
+                PoppInntektPost(inntektAr = 2024, belop = 100, kilde = "SKATT", inntektType = "FL_PGI_LOENN"),
+                PoppInntektPost(inntektAr = 2024, belop = 540000, kilde = "SKATT", inntektType = "FL_PGI_LOENN"),
+                PoppInntektPost(inntektAr = 2024, belop = 200000, kilde = "SKATT", inntektType = "FL_PGI_LOENN"),
+            )
+        )
+
+        val perioder = oppslag.hent(BEH_ID).perioder
+
+        perioder.map { it.pgi } shouldBe listOf(540000L, 200000L, 100L)
+    }
+
+    @Test
     fun `hent - inkluderer alle inntektTyper og hopper kun over poster uten inntektType`() {
         every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
         every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(
@@ -193,9 +208,9 @@ internal class PensjonsopptjeningOppslagTest {
     fun `hent - mapper changeStamp til Oslo LocalDate for registrert og oppdatert`() {
         every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
         // 2026-07-31 23:30 UTC = 2026-08-01 01:30 Europe/Oslo (CEST, +02:00)
-        val createdUtc = Date.from(java.time.Instant.parse("2026-07-31T23:30:00Z"))
+        val createdUtc = "2026-07-31T23:30:00Z"
         // 2026-01-31 23:30 UTC = 2026-02-01 00:30 Europe/Oslo (CET, +01:00)
-        val updatedUtc = Date.from(java.time.Instant.parse("2026-01-31T23:30:00Z"))
+        val updatedUtc = "2026-01-31T23:30:00Z"
         every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(
             listOf(
                 PoppInntektPost(
@@ -212,6 +227,27 @@ internal class PensjonsopptjeningOppslagTest {
 
         periode.registrert shouldBe LocalDate.of(2026, 8, 1)
         periode.oppdatert shouldBe LocalDate.of(2026, 2, 1)
+    }
+
+    @Test
+    fun `hent - ugyldig eller tom changeStamp-dato gir null registrert og oppdatert`() {
+        every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
+        every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(
+            listOf(
+                PoppInntektPost(
+                    inntektAr = 2024,
+                    belop = 540000,
+                    kilde = "SKATT",
+                    inntektType = "FL_PGI_LOENN",
+                    changeStamp = PoppChangeStamp(createdDate = "", updatedDate = "ikke-en-dato"),
+                ),
+            )
+        )
+
+        val periode = oppslag.hent(BEH_ID).perioder.single()
+
+        periode.registrert shouldBe null
+        periode.oppdatert shouldBe null
     }
 
     @Test

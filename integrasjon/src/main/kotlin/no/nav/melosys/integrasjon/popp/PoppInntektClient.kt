@@ -6,12 +6,13 @@ import org.springframework.http.MediaType
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientRequestException
 import org.springframework.web.reactive.function.client.bodyToMono
 
 private val log = KotlinLogging.logger { }
 
 @Retryable(
-    retryFor = [TekniskException::class],
+    retryFor = [TekniskException::class, WebClientRequestException::class],
     maxAttempts = 3,
     backoff = Backoff(delay = 500, multiplier = 2.0, maxDelay = 4000),
 )

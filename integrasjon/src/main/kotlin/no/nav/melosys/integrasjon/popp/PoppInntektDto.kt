@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.popp
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import java.util.Date
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class PoppHentInntektRequest(
@@ -31,9 +30,9 @@ data class PoppInntektPost(
 
 data class PoppChangeStamp(
     val createdBy: String? = null,
-    val createdDate: Date? = null,
+    val createdDate: String? = null,
     val updatedBy: String? = null,
-    val updatedDate: Date? = null,
+    val updatedDate: String? = null,
 )
 
 class PoppPersonIkkeFunnetException(message: String) : RuntimeException(message)

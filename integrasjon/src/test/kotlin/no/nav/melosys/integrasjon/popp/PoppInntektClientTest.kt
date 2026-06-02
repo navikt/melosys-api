@@ -162,6 +162,24 @@ class PoppInntektClientTest(
     }
 
     @Test
+    fun `hentInntekt - tom changeStamp-dato i body - deserialiseres uten feil`() {
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                WireMock.aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(
+                        """{"inntekter":[{"inntektAr":2024,"kilde":"SKATT","inntektType":"FL_PGI_LOENN","belop":540000,"changeStamp":{"createdDate":"","updatedDate":""}}]}"""
+                    )
+            )
+        )
+
+        val respons = poppInntektClient.hentInntekt(REQUEST)
+
+        respons.inntekter!!.shouldHaveSize(1)
+    }
+
+    @Test
     fun `hentInntekt - 200 med tom body - kaster TekniskException`() {
         mockServer.stubFor(
             any(anyUrl()).willReturn(

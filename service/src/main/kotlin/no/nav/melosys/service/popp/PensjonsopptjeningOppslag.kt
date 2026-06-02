@@ -60,6 +60,7 @@ class PensjonsopptjeningOppslag(
                 .thenBy { kildePrioritet(it.kilde) }
                 .thenBy { it.kilde }
                 .thenBy { it.inntektType }
+                .thenByDescending { it.pgi }
         )
 
         return Pensjonsopptjening(inntektsAr = inntektsÅr, perioder = perioder)
