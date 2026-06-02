@@ -89,7 +89,8 @@ class OpprettOgFerdigstillJournalpostDigitalSøknad(
             setKorrespondansepartIdType(avsender.idType)
         }
 
-        val journalpostId = joarkFasade.opprettJournalpost(opprettJournalpost, true)
+        // Idempotent: redelivery av samme skjema gir 409 fra Joark, da gjenbrukes eksisterende journalpost
+        val journalpostId = joarkFasade.opprettJournalpostIdempotent(opprettJournalpost, true)
 
         // Eksisterende-sak-flyten gjenbruker behandling som allerede kan ha en journalpost
         if (behandling.initierendeJournalpostId == null) {

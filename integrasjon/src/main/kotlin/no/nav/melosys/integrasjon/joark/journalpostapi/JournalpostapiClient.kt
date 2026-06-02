@@ -1,20 +1,25 @@
 package no.nav.melosys.integrasjon.joark.journalpostapi
 
 import mu.KotlinLogging
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.felles.JsonRestIntegrasjon
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.FerdigstillJournalpostRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.LogiskVedleggRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OppdaterJournalpostRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostResponse
+import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import tools.jackson.databind.ObjectMapper
 
 private val log = KotlinLogging.logger { }
 
 @Service
 class JournalpostapiClient(
-    private val journalpostapiWebClient: WebClient
+    private val journalpostapiWebClient: WebClient,
+    private val objectMapper: ObjectMapper
 ) : JsonRestIntegrasjon {
 
     fun opprettJournalpost(
@@ -36,6 +41,20 @@ class JournalpostapiClient(
             .bodyToMono(OpprettJournalpostResponse::class.java)
             .block() ?: error("Kunne ikke hente body for POST /journalpost")
     }
+
+    /**
+     * Som [opprettJournalpost], men en 409 (journalposten finnes allerede) returnerer den eksisterende
+     * journalposten i stedet for å kaste feil.
+     */
+    fun opprettJournalpostIdempotent(
+        request: OpprettJournalpostRequest,
+        forsøkEndeligJfr: Boolean
+    ): OpprettJournalpostResponse =
+        try {
+            opprettJournalpost(request, forsøkEndeligJfr)
+        } catch (e: JournalpostConflictException) {
+            objectMapper.readValue(e.responseBody, OpprettJournalpostResponse::class.java)
+        }
 
     fun oppdaterJournalpost(request: OppdaterJournalpostRequest, journalpostId: String) {
         if (log.isInfoEnabled) {
@@ -90,3 +109,18 @@ class JournalpostapiClient(
             .block()
     }
 }
+
+/**
+ * Joark svarer 409 når en journalpost med samme eksternReferanseId allerede finnes.
+ * Responsbodyen inneholder den eksisterende journalposten (inkludert journalpostId).
+ */
+class JournalpostConflictException(val responseBody: String) :
+    TekniskException("Journalpost finnes allerede i Joark (409 CONFLICT)")
+
+fun lagJournalpostApiException(feilmelding: String, statusCode: HttpStatusCode, errorBody: String): Exception =
+    if (statusCode == HttpStatus.CONFLICT) {
+        JournalpostConflictException(errorBody)
+    } else {
+        TekniskException("$feilmelding $statusCode - $errorBody")
+    }
+

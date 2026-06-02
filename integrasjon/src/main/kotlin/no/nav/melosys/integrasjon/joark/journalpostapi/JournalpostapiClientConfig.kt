@@ -22,7 +22,7 @@ class JournalpostapiClientConfig {
         .baseUrl(url)
         .filter(genericAuthFilterFactory.getAzureFilter("dokarkiv"))
         .filter(correlationIdOutgoingFilter)
-        .filter(errorFilter("Kall mot journalpostapi feilet."))
+        .filter(errorFilter("Kall mot journalpostapi feilet.", ::lagJournalpostApiException))
         .defaultHeaders { httpHeaders ->
             httpHeaders.accept = listOf(MediaType.APPLICATION_JSON)
             httpHeaders.contentType = MediaType.APPLICATION_JSON

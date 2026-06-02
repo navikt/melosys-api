@@ -38,6 +38,12 @@ public interface JoarkFasade {
     String opprettJournalpost(OpprettJournalpost opprettJournalpost, boolean forsøkEndeligJfr);
 
     /**
+     * Som {@link #opprettJournalpost}, men 409 (journalposten finnes allerede) gjenbruker eksisterende
+     * journalpostId i stedet for å kaste en feil
+     */
+    String opprettJournalpostIdempotent(OpprettJournalpost opprettJournalpost, boolean forsøkEndeligJfr);
+
+    /**
      * Oppdaterer en journalpost og forsøker å ferdigstille
      */
     void oppdaterOgFerdigstillJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering);

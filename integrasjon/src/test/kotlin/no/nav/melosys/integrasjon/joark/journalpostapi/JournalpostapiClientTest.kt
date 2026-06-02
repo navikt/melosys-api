@@ -21,7 +21,10 @@ import no.nav.melosys.integrasjon.joark.journalpostapi.dto.FerdigstillJournalpos
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.LogiskVedleggRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OppdaterJournalpostRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -235,5 +238,71 @@ class JournalpostapiClientTest(
                 .withRequestBody(equalToJson("""{"journalpostType":"INNGAAENDE","avsenderMottaker":null,"bruker":null,"tema":null,"behandlingstema":null,"tittel":null,"kanal":null,"journalfoerendeEnhet":null,"eksternReferanseId":null,"tilleggsopplysninger":null,"sak":null,"dokumenter":null,"datoMottatt":"1970-01-01"}""", true, false))
         )
     }
-}
 
+    @Test
+    fun `opprettJournalpostIdempotent behandler 409 CONFLICT som suksess og returnerer eksisterende journalpost`() {
+        mockServer.stubFor(
+            any(anyUrl())
+                .willReturn(
+                    aResponse()
+                        .withStatus(409)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(
+                            """{"journalpostId":"754627337","journalstatus":"ENDELIG","journalpostferdigstilt":true,"dokumenter":[{"dokumentInfoId":"792575139"}]}"""
+                        )
+                )
+        )
+
+        val req = OpprettJournalpostRequest.OpprettJournalpostRequestBuilder()
+            .journalpostType(OpprettJournalpostRequest.JournalpostType.INNGAAENDE)
+            .build()
+
+        val response = journalpostapiClient.opprettJournalpostIdempotent(req, true)
+
+        response.journalpostId shouldBe "754627337"
+        response.erFerdigstilt() shouldBe true
+        response.dokumenter.first().dokumentInfoId shouldBe "792575139"
+    }
+
+    @Test
+    fun `opprettJournalpost kaster JournalpostConflictException ved 409 CONFLICT`() {
+        mockServer.stubFor(
+            any(anyUrl())
+                .willReturn(
+                    aResponse()
+                        .withStatus(409)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("""{"journalpostId":"754627337","journalstatus":"ENDELIG"}""")
+                )
+        )
+
+        val req = OpprettJournalpostRequest.OpprettJournalpostRequestBuilder()
+            .journalpostType(OpprettJournalpostRequest.JournalpostType.INNGAAENDE)
+            .build()
+
+        shouldThrow<JournalpostConflictException> {
+            journalpostapiClient.opprettJournalpost(req, true)
+        }
+    }
+
+    @Test
+    fun `opprettJournalpost kaster TekniskException ved andre feil enn 409`() {
+        mockServer.stubFor(
+            any(anyUrl())
+                .willReturn(
+                    aResponse()
+                        .withStatus(500)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("""{"melding":"Intern feil i Joark"}""")
+                )
+        )
+
+        val req = OpprettJournalpostRequest.OpprettJournalpostRequestBuilder()
+            .journalpostType(OpprettJournalpostRequest.JournalpostType.INNGAAENDE)
+            .build()
+
+        shouldThrow<TekniskException> {
+            journalpostapiClient.opprettJournalpost(req, true)
+        }
+    }
+}

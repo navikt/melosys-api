@@ -77,7 +77,7 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
             melosysSkjemaApiClient, joarkFasade, behandlingService, persondataFasade, skjemaSakMappingService
         )
 
-        every { joarkFasade.opprettJournalpost(capture(capturedJournalpost), eq(true)) } returns journalpostId
+        every { joarkFasade.opprettJournalpostIdempotent(capture(capturedJournalpost), eq(true)) } returns journalpostId
         every { behandlingService.lagre(any()) } just Runs
         every { persondataFasade.hentSammensattNavn(innsenderFnr) } returns innsenderNavn
         every { skjemaSakMappingService.oppdaterJournalpostId(any(), any()) } just Runs
@@ -96,7 +96,7 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
         opprettOgFerdigstillJournalpostDigitalSøknad.utfør(prosessinstans)
 
         verify { melosysSkjemaApiClient.hentPdf(søknadsdata.skjema.id) }
-        verify { joarkFasade.opprettJournalpost(any(), eq(true)) }
+        verify { joarkFasade.opprettJournalpostIdempotent(any(), eq(true)) }
         verify { behandlingService.lagre(any()) }
 
         val opprettJournalpost = capturedJournalpost.captured
@@ -192,7 +192,7 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
 
         opprettOgFerdigstillJournalpostDigitalSøknad.utfør(prosessinstans)
 
-        verify { joarkFasade.opprettJournalpost(any(), eq(true)) }
+        verify { joarkFasade.opprettJournalpostIdempotent(any(), eq(true)) }
     }
 
     private fun lagSøknadsdata(skjemadel: Skjemadel) =

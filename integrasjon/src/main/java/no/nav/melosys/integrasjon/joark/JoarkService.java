@@ -110,6 +110,16 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
+    public String opprettJournalpostIdempotent(OpprettJournalpost opprettJournalpost, boolean forsøkEndeligJfr) {
+        OpprettJournalpostRequest request = OpprettJournalpostRequest.av(opprettJournalpost);
+        if (forsøkEndeligJfr) {
+            JournalpostRequestValidator.validerJournalpostForEndeligJfr(request);
+        }
+
+        return journalpostapiClient.opprettJournalpostIdempotent(request, forsøkEndeligJfr).getJournalpostId();
+    }
+
+    @Override
     public void oppdaterOgFerdigstillJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering) {
         fjernEksisterendeLogiskeVedleggPåHoveddokument(journalpostID);
 
