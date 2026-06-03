@@ -5,14 +5,16 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenClient
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringIntervall
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FullmektigDto
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.Innbetalingstype
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
@@ -158,7 +160,6 @@ class OpprettFakturaserie(
             DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault()).format(behandlingsresultat.hentVedtakMetadata().vedtaksdato)
         val erEøsPensjonist = behandling.erEøsPensjonist()
         val erLovvalg = fagsak.erLovvalg()
-
         return FakturaserieDto(
             fodselsnummer = foedselsNr,
             fakturaserieReferanse = hentSisteFakturaserieReferanse(behandling),
@@ -168,9 +169,9 @@ class OpprettFakturaserie(
             intervall = hentBetalingsIntervall(prosessinstans),
             referanseBruker = if (erEøsPensjonist) "Informasjon om trygdeavgift datert $vedtaksdato" else "Vedtak om medlemskap datert $vedtaksdato",
             perioder = mapTilFakturaperioder(
-                    behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() },
-                    inkluderDekning = !erEøsPensjonist && !erLovvalg
-                )
+                behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() },
+                inkluderDekning = !erEøsPensjonist && !erLovvalg,
+            )
         )
     }
 
