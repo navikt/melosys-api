@@ -23,10 +23,10 @@ Trygdeavtaler are bilateral social security agreements that Norway has with coun
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| `TrygdeavtaleVedtakService` | `service/.../vedtak/` | Handles vedtak for trygdeavtale cases |
-| `LovvalgsbestemmelseMapperAvtaleland` | `service/.../lovvalgsbestemmelse/` | Maps countries to their agreement articles |
-| `LovvalgsbestemmelseService` | `service/.../lovvalgsbestemmelse/` | Routes to correct mapper based on sakstype |
-| `GyldigeKombinasjoner` | `service/.../lovligekombinasjoner/` | Defines valid combinations for TRYGDEAVTALE |
+| `TrygdeavtaleVedtakService` | `service/src/main/java/no/nav/melosys/service/vedtak/` (Java) | Handles vedtak for trygdeavtale cases |
+| `LovvalgsbestemmelseMapperAvtaleland` | `service/src/main/kotlin/.../lovvalgsbestemmelse/` | Maps countries to their agreement articles |
+| `LovvalgsbestemmelseService` | `service/src/main/kotlin/.../lovvalgsbestemmelse/` | Routes to correct mapper based on sakstype |
+| `GyldigeKombinasjoner` | `service/src/main/kotlin/.../lovligekombinasjoner/` | Defines valid combinations for TRYGDEAVTALE |
 
 ### Agreement Countries
 
@@ -54,26 +54,35 @@ Norway has bilateral agreements with these countries:
 | Turkey | TR | Limited | ART3-6 |
 | USA | US | Full agreement | ART5 variants |
 
+> The "Agreement Type" and "Key Articles" columns are editorial summaries for quick orientation, not exact reproductions of the code. The authoritative mapping of country to lovvalgsbestemmelser lives in `LovvalgsbestemmelseMapperAvtaleland.mapToLovvalgsbestemmelse(...)`, which cites the Confluence kodeverk page (`confluence.adeo.no/display/TEESSI/Spesifikke+kodeverk+Trygdeavtaler`). Note some "Full agreement" countries collapse YRKESAKTIV and IKKE_YRKESAKTIV into one branch (e.g. India). Verify exact articles in the mapper before relying on them.
+
 ### Mapping Types
 
-Each agreement supports different behandlingstema scenarios:
+`LovvalgsbestemmelseMappingType.utledType(sakstema, behandlingstema)` derives the mapping type that selects the article set:
 
-| Mapping Type | Description | Behandlingstema |
-|--------------|-------------|-----------------|
-| `YRKESAKTIV` | Employed persons | YRKESAKTIV |
-| `IKKE_YRKESAKTIV` | Non-employed | IKKE_YRKESAKTIV, PENSJONIST |
-| `UNNTAK` | Exception requests | REGISTRERING_UNNTAK, ANMODNING_OM_UNNTAK_* |
+| Mapping Type | Description | Derived from (sakstema + behandlingstema) |
+|--------------|-------------|-------------------------------------------|
+| `YRKESAKTIV` | Employed persons | MEDLEMSKAP_LOVVALG + YRKESAKTIV |
+| `IKKE_YRKESAKTIV` | Non-employed | MEDLEMSKAP_LOVVALG + IKKE_YRKESAKTIV |
+| `UNNTAK` | Exception requests | UNNTAK + (ANMODNING_OM_UNNTAK_HOVEDREGEL or REGISTRERING_UNNTAK) |
+
+Any other combination (including PENSJONIST) throws `FunksjonellException` from `utledType` — there is no lovvalgsbestemmelse mapping for it.
 
 ### Sakstype TRYGDEAVTALE
 
 Cases with `Sakstyper.TRYGDEAVTALE` differ from EU_EOS:
 
 ```kotlin
-// Routing in FattVedtakVelger
-when (sakstype) {
+// Routing in FattVedtakVelger.getFattVedtakService(behandling)
+// ÅRSAVREGNING short-circuits before the sakstype switch
+if (behandling.type == Behandlingstyper.ÅRSAVREGNING) {
+    return årsavregningVedtakService
+}
+
+when (behandling.fagsak.type) {
     Sakstyper.EU_EOS -> eosVedtakService
-    Sakstyper.TRYGDEAVTALE -> trygdeavtaleVedtakService
     Sakstyper.FTRL -> ftrlVedtakService
+    Sakstyper.TRYGDEAVTALE -> trygdeavtaleVedtakService
 }
 ```
 
@@ -121,25 +130,33 @@ when (sakstype) {
 
 ## Valid Combinations
 
+Per `GyldigeKombinasjoner` / `LovligeBehandlingsKombinasjoner`:
+
 ### TRYGDEAVTALE + MEDLEMSKAP_LOVVALG
 
 | Behandlingstema | Behandlingstyper |
 |-----------------|------------------|
 | YRKESAKTIV | FØRSTEGANG, NY_VURDERING, KLAGE, HENVENDELSE |
 | IKKE_YRKESAKTIV | FØRSTEGANG, NY_VURDERING, KLAGE, HENVENDELSE |
+| PENSJONIST | FØRSTEGANG, NY_VURDERING, KLAGE, HENVENDELSE |
+| FORESPØRSEL_TRYGDEMYNDIGHET | HENVENDELSE |
 
 ### TRYGDEAVTALE + UNNTAK
 
 | Behandlingstema | Behandlingstyper |
 |-----------------|------------------|
-| REGISTRERING_UNNTAK | FØRSTEGANG, NY_VURDERING |
-| ANMODNING_OM_UNNTAK_HOVEDREGEL | FØRSTEGANG, NY_VURDERING |
+| ANMODNING_OM_UNNTAK_HOVEDREGEL | FØRSTEGANG, NY_VURDERING, KLAGE, HENVENDELSE |
+| REGISTRERING_UNNTAK | FØRSTEGANG, NY_VURDERING, KLAGE, HENVENDELSE |
+| FORESPØRSEL_TRYGDEMYNDIGHET | HENVENDELSE |
 
 ### TRYGDEAVTALE + TRYGDEAVGIFT
 
 | Behandlingstema | Behandlingstyper |
 |-----------------|------------------|
-| AVGIFT | FØRSTEGANG, NY_VURDERING, ÅRSAVREGNING |
+| YRKESAKTIV | FØRSTEGANG, NY_VURDERING, KLAGE, HENVENDELSE |
+| PENSJONIST | FØRSTEGANG, NY_VURDERING, KLAGE, HENVENDELSE |
+
+Note: ÅRSAVREGNING is **not** a valid behandlingstype for TRYGDEAVTALE. In the matrix, ÅRSAVREGNING only attaches to EU_EOS+TRYGDEAVGIFT+PENSJONIST and FTRL+TRYGDEAVGIFT+YRKESAKTIV.
 
 ## Key Differences from EU/EEA
 
@@ -174,6 +191,10 @@ JOIN fagsak f ON b.fagsak_id = f.id
 WHERE f.sakstype = 'TRYGDEAVTALE'
 AND lp.bestemmelse LIKE '%_ART%';
 ```
+
+## References
+
+For symptom-based troubleshooting, the per-mapping-type support matrix (which countries support YRKESAKTIV / IKKE_YRKESAKTIV / UNNTAK), full per-country article tables (GB, US, CA, AU), SQL debug queries, and the `STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND` feature toggle, see [references/debugging.md](references/debugging.md).
 
 ## Related Skills
 

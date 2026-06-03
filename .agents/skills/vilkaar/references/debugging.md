@@ -1,5 +1,12 @@
 # Vilkår Debugging Guide
 
+## Schema notes (read first)
+
+- `vilkaarsresultat.beh_resultat_id` is the FK; it references `behandlingsresultat.behandling_id` (behandlingsresultat has a 1:1 PK = `behandling_id`).
+- Begrunnelse-koder live in `vilkaar_begrunnelse` (`vilkaar_resultat_id` FK, `kode` value) — there is no `vilkaarsresultat_begrunnelser` table.
+- `behandling` links to `fagsak` via `saksnummer` (fagsak PK is `saksnummer`, not a numeric `id`); behandling has no `fagsak_id`.
+- There is no `bestemmelse` column on `behandlingsresultat`; bestemmelse lives on `medlemskapsperiode`.
+
 ## SQL Queries
 
 ### Vilkår Analysis
@@ -12,59 +19,53 @@ SELECT
     vr.oppfylt,
     vr.begrunnelse_fritekst,
     b.id as behandling_id,
-    b.status as behandling_status,
-    br.bestemmelse
+    b.status as behandling_status
 FROM vilkaarsresultat vr
-JOIN behandlingsresultat br ON vr.behandlingsresultat_id = br.id
+JOIN behandlingsresultat br ON vr.beh_resultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
 WHERE b.id = :behandlingId;
 
--- Vilkår with their begrunnelser
+-- Vilkår with their begrunnelse-koder
 SELECT
     vr.id,
     vr.vilkaar,
     vr.oppfylt,
-    vrb.begrunnelse
+    vb.kode
 FROM vilkaarsresultat vr
-LEFT JOIN vilkaarsresultat_begrunnelser vrb ON vrb.vilkaarsresultat_id = vr.id
-JOIN behandlingsresultat br ON vr.behandlingsresultat_id = br.id
-WHERE br.behandling_id = :behandlingId;
+LEFT JOIN vilkaar_begrunnelse vb ON vb.vilkaar_resultat_id = vr.id
+WHERE vr.beh_resultat_id = :behandlingId;
 ```
 
 ### Missing Vilkår Detection
 
 ```sql
--- Behandlinger with bestemmelse but no vilkår evaluated
+-- Behandlinger (med behandlingsresultat) som mangler vilkårsresultater
 SELECT
     b.id as behandling_id,
-    f.saksnummer,
-    br.bestemmelse,
+    b.saksnummer,
     b.status
 FROM behandling b
-JOIN fagsak f ON b.fagsak_id = f.id
 JOIN behandlingsresultat br ON br.behandling_id = b.id
-WHERE br.bestemmelse IS NOT NULL
-AND b.status != 'AVSLUTTET'
+WHERE b.status != 'AVSLUTTET'
 AND NOT EXISTS (
     SELECT 1 FROM vilkaarsresultat vr
-    WHERE vr.behandlingsresultat_id = br.id
+    WHERE vr.beh_resultat_id = br.behandling_id
 );
 
--- Avslåtte vilkår without begrunnelse
+-- Avslåtte vilkår uten begrunnelse (verken kode eller fritekst)
 SELECT
     vr.id,
     vr.vilkaar,
     b.id as behandling_id,
-    f.saksnummer
+    b.saksnummer
 FROM vilkaarsresultat vr
-JOIN behandlingsresultat br ON vr.behandlingsresultat_id = br.id
+JOIN behandlingsresultat br ON vr.beh_resultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
 WHERE vr.oppfylt = 0
 AND vr.begrunnelse_fritekst IS NULL
 AND NOT EXISTS (
-    SELECT 1 FROM vilkaarsresultat_begrunnelser vrb
-    WHERE vrb.vilkaarsresultat_id = vr.id
+    SELECT 1 FROM vilkaar_begrunnelse vb
+    WHERE vb.vilkaar_resultat_id = vr.id
 );
 ```
 
@@ -75,14 +76,12 @@ AND NOT EXISTS (
 WITH original AS (
     SELECT vr.vilkaar, vr.oppfylt, 'ORIGINAL' as source
     FROM vilkaarsresultat vr
-    JOIN behandlingsresultat br ON vr.behandlingsresultat_id = br.id
-    WHERE br.behandling_id = :opprinneligBehandlingId
+    WHERE vr.beh_resultat_id = :opprinneligBehandlingId
 ),
 ny AS (
     SELECT vr.vilkaar, vr.oppfylt, 'NY' as source
     FROM vilkaarsresultat vr
-    JOIN behandlingsresultat br ON vr.behandlingsresultat_id = br.id
-    WHERE br.behandling_id = :nyBehandlingId
+    WHERE vr.beh_resultat_id = :nyBehandlingId
 )
 SELECT * FROM original
 UNION ALL
@@ -90,49 +89,30 @@ SELECT * FROM ny
 ORDER BY vilkaar, source;
 ```
 
-### Validation Queries
-
-```sql
--- Find conflicting citizenship vilkår (both NORSK and ANNEN oppfylt)
-SELECT
-    b.id as behandling_id,
-    f.saksnummer,
-    MAX(CASE WHEN vr.vilkaar = 'NORSK_STATSBORGER' THEN vr.oppfylt END) as norsk,
-    MAX(CASE WHEN vr.vilkaar = 'ANNEN_STATSBORGER' THEN vr.oppfylt END) as annen
-FROM vilkaarsresultat vr
-JOIN behandlingsresultat br ON vr.behandlingsresultat_id = br.id
-JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE vr.vilkaar IN ('NORSK_STATSBORGER', 'ANNEN_STATSBORGER')
-GROUP BY b.id, f.saksnummer
-HAVING MAX(CASE WHEN vr.vilkaar = 'NORSK_STATSBORGER' THEN vr.oppfylt END) = 1
-   AND MAX(CASE WHEN vr.vilkaar = 'ANNEN_STATSBORGER' THEN vr.oppfylt END) = 1;
-```
-
 ## Common Error Messages
 
 | Message | Cause | Solution |
 |---------|-------|----------|
-| "Vilkår X er påkrevd for bestemmelse Y" | Vilkår not evaluated | Complete vilkår evaluation |
-| "Begrunnelse mangler for avslått vilkår" | oppfylt=false without reason | Add begrunnelse |
-| "Kan ikke fatte vedtak før alle vilkår er vurdert" | Incomplete evaluation | Complete all vilkår |
-| "Ugyldig kombinasjon av vilkår" | Conflicting selections | Review vilkår logic |
-| "Bestemmelse må være satt før vilkårsvurdering" | No bestemmelse selected | Select bestemmelse first |
+| `Kan ikke endre vilkår <X>` | Attempt to register an `IMMUTABLE_VILKAAR` (`FO_883_2004_INNGANGSVILKAAR`) | Don't send immutable vilkår in the POST body |
+| `Kan ikke finne behandlingsresultat for behandling: <id>` | No behandlingsresultat exists yet | Ensure behandlingsresultat is created first |
+| `Arbeidssituasjon <X> er ugyldig` | Missing/invalid `ARBEIDSSITUASJON` avklart faktum for 2-1/2-2 | Send a valid `Arbeidssituasjontype` |
+| `FamilieRelasjon <X> er ugyldig` | Missing/invalid `IKKE_YRKESAKTIV_RELASJON` for 2-5/2-8 | Send a valid `Ikkeyrkesaktivrelasjontype` |
+| `BehandlingID trengs for å avgjøre land for ftrlKap2_1` | `behandlingID` null for FTRL_KAP2_2_1 routing | Pass behandlingID into `hentVilkår` |
 
 ## Log Patterns
 
 ```bash
-# VilkaarsvurderingService operations
-grep "VilkaarsvurderingService" application.log | grep -E "lagre|hent|valider"
+# Vilkår save/read service
+grep "VilkaarsresultatService" application.log
 
-# Vilkår validation failures
-grep "FunksjonellException.*ilkår" application.log
-
-# Vilkår fetching
+# Vilkår routing
 grep "VilkårForBestemmelse" application.log
 
-# AvklarteFakta operations
-grep "AvklartefaktaService" application.log
+# Avklarte fakta
+grep "AvklarteFaktaForBestemmelse" application.log
+
+# Funksjonelle feil knyttet til vilkår
+grep "FunksjonellException" application.log | grep -i "vilkår\|arbeidssituasjon\|familierelasjon"
 ```
 
 ## Troubleshooting Flowchart
@@ -142,27 +122,20 @@ Vilkår not appearing in UI?
 ├── Is bestemmelse selected?
 │   └── No → Select bestemmelse first
 ├── Is behandlingstema correct?
-│   └── Check behandling.behandlingstema matches expected
-├── Are conditions for vilkår met?
-│   └── Some vilkår depend on land/statsborgerskap
+│   └── Check behandling.tema matches expected (YRKESAKTIV/IKKE_YRKESAKTIV/PENSJONIST)
+├── Does the bestemmelse need avklarte fakta first?
+│   └── Some (2-1, 2-2, 2-5 andre ledd, 2-8 fjerde ledd) branch on
+│       arbeidssituasjon / relasjon / søknadsland before returning vilkår
 └── Is VilkårForBestemmelse* returning the vilkår?
-    └── Debug in VilkårForBestemmelseYrkesaktiv etc.
+    └── Debug in VilkårForBestemmelseYrkesaktiv / IkkeYrkesaktiv / Pensjonist
 
 Cannot save vilkår?
-├── Is behandling in editable state?
-│   └── Status must not be AVSLUTTET
-├── Are required fields filled?
-│   └── Check begrunnelse for avslag
-└── Is oppfylt set?
-    └── Must be true or false, not null
-
-Vedtak blocked by vilkår?
-├── Are all required vilkår evaluated?
-│   └── Check SQL for missing vilkår
-├── Are avslåtte vilkår begrunnet?
-│   └── Check SQL for missing begrunnelser
-└── Are there conflicting vilkår?
-    └── Check citizenship mutual exclusion
+├── Is an IMMUTABLE_VILKAAR being changed?
+│   └── FO_883_2004_INNGANGSVILKAAR cannot be registered via this path
+├── Does behandlingsresultat exist?
+│   └── registrerVilkår throws IkkeFunnetException otherwise
+└── Is the Vilkaar.kode valid?
+    └── VilkaarDto.vilkaar must map via Vilkaar.valueOf(...)
 ```
 
 ## Code Entry Points
@@ -170,17 +143,17 @@ Vedtak blocked by vilkår?
 | Scenario | Entry Point |
 |----------|-------------|
 | Get vilkår for bestemmelse | `VilkårForBestemmelse.hentVilkår()` |
-| Save vilkår evaluation | `VilkaarsvurderingService.lagreVilkaarsvurdering()` |
-| Validate before vedtak | `VilkaarsvurderingService.validerVilkårFørVedtak()` |
-| Get avklartefakta | `AvklarteFaktaForBestemmelse.hentAvklarteFakta()` |
-| Check all oppfylt | `VilkaarsvurderingService.alleVilkårOppfylt()` |
+| Get avklarte fakta | `AvklarteFaktaForBestemmelse.hentAvklarteFakta()` |
+| Read stored vilkårsresultater | `VilkaarsresultatService.hentVilkaar()` / `VilkaarController` GET |
+| Save vilkår evaluation | `VilkaarsresultatService.registrerVilkår()` / `VilkaarController` POST |
+| Overstyr inngangsvilkår | `InngangsvilkaarService.overstyrInngangsvilkårTilOppfylt()` |
+| Check a vilkår is oppfylt | `VilkaarsresultatService.oppfyllerVilkaar()` |
 
 ## Testing Vilkår Changes
 
 When adding/modifying vilkår:
 
-1. Unit test the `VilkårForBestemmelse*` class
+1. Unit test the relevant `VilkårForBestemmelse*` class (see `VilkårForBestemmelse{Yrkesaktiv,IkkeYrkesaktiv,Pensjonist}Test.kt`)
 2. Verify frontend displays the vilkår correctly
-3. Test saving with different combinations
-4. Test vedtak validation catches incomplete vilkår
-5. Test re-assessment carries over vilkår correctly
+3. Test saving with different begrunnelse-kode combinations
+4. Test that re-assessment (EØS vs non-EØS) carries over / resets vilkår as expected

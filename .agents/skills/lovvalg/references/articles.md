@@ -174,7 +174,7 @@ Voluntary insurance provisions - rarely used in Melosys context.
 
 **SED Flow:**
 - Send A001 (exception request)
-- Receive A002 (response)
+- Receive response: A011 = approval, A002 = full/partial rejection
 
 ### Art. 16.2 - Pensioner Exception
 > "A person receiving one or more pensions under the legislation of

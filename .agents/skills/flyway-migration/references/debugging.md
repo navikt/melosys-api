@@ -170,10 +170,13 @@ export MELOSYS_ORACLE_DB_NAME=XEPDB1
 ### Fresh Database
 
 ```bash
-# 1. Start local Oracle (from melosys-docker-compose)
-docker-compose up -d oracle
+# 1. Start local Oracle from the melosys-docker-compose repo
+#    (the service is named "melosys-oracle", not "oracle")
+#    Run from the melosys-docker-compose checkout:
+make start-all              # full local stack, or
+make start melosys-oracle   # just the Oracle container
 
-# 2. Run migrations
+# 2. Run migrations (back in melosys-api)
 make db-migrate
 # or
 mvn flyway:migrate -pl app

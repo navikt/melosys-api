@@ -32,7 +32,8 @@ CREATE TABLE lovvalg_periode (
     innvilgelse_resultat VARCHAR2(99) NOT NULL,     -- INNVILGET, AVSLÅTT, etc.
     medlemskapstype     VARCHAR2(99),               -- PLIKTIG, FRIVILLIG
     trygde_dekning      VARCHAR2(99),               -- Coverage type
-    medlperiode_id      NUMBER                      -- MEDL external reference
+    medlperiode_id      NUMBER,                     -- MEDL external reference
+    kilde               VARCHAR2(30)                -- Source system (V154, nullable). E.g., 'MELOSYS', 'MEDL'
 );
 ```
 
@@ -64,7 +65,8 @@ CREATE TABLE medlemskapsperiode (
     medlemskapstype         VARCHAR2(99) NOT NULL,  -- PLIKTIG, FRIVILLIG
     trygde_dekning          VARCHAR2(99) NOT NULL,  -- Full/partial coverage
     bestemmelse             VARCHAR2(99) NOT NULL,  -- Legal basis
-    medlperiode_id          NUMBER                  -- MEDL external ID (synced to MEDL register)
+    medlperiode_id          NUMBER,                 -- MEDL external ID (synced to MEDL register)
+    kilde                   VARCHAR2(30)            -- Source system (V154, nullable)
 );
 ```
 
@@ -166,7 +168,8 @@ CREATE TABLE helseutgift_dekkes_periode (
     beh_resultat_id NUMBER NOT NULL REFERENCES behandlingsresultat(behandling_id),
     fom_dato        DATE NOT NULL,
     tom_dato        DATE NOT NULL,
-    dekkes          NUMBER(1) NOT NULL              -- 1 = covered
+    dekkes          NUMBER(1) NOT NULL,             -- 1 = covered
+    kilde           VARCHAR2(30) DEFAULT 'MELOSYS' NOT NULL  -- V151: source system
 );
 ```
 

@@ -66,13 +66,15 @@ FakturaMottakerDto {
 
 ### Operations
 
+`FaktureringskomponentenClient` exposes:
+
 | Method | Description |
 |--------|-------------|
-| `opprettFakturaserie()` | Create new invoice series |
+| `lagFakturaserie()` | Create new invoice series |
 | `kansellerFakturaserie()` | Cancel existing series |
 | `oppdaterFakturaMottaker()` | Update recipient |
-| `hentFakturaserie()` | Get series details |
-| `beregnTotalBeloep()` | Calculate total amount |
+| `hentTotalTrygdeavgiftForPeriode()` | Get total trygdeavgift for a period |
+| `lagFaktura()` | Create a single faktura |
 
 ## Saksflyt Steps
 
@@ -88,7 +90,7 @@ Location: `saksflyt/src/main/kotlin/.../steg/fakturering/OpprettFakturaserie.kt`
 1. Check if behandling already has fakturaserieReferanse
 2. If exists and periods changed: kanseller old, create new
 3. Build FakturaserieDto from trygdeavgiftsperioder
-4. Call faktureringskomponenten.opprettFakturaserie()
+4. Call FaktureringskomponentenClient.lagFakturaserie()
 5. Store fakturaserieReferanse on behandlingsresultat
 
 ### KANSELLER_FAKTURASERIE
@@ -101,7 +103,7 @@ Location: `saksflyt/src/main/kotlin/.../steg/fakturering/KansellerFakturaserie.k
 
 **Actions:**
 1. Get existing fakturaserieReferanse
-2. Call faktureringskomponenten.kansellerFakturaserie()
+2. Call FaktureringskomponentenClient.kansellerFakturaserie()
 3. Store new referanse if returned
 
 ### SEND_FAKTURA_AARSAVREGNING
@@ -126,8 +128,8 @@ Location: `saksflyt/src/main/kotlin/.../steg/fakturering/OppdaterFakturamottaker
 
 ```kotlin
 enum class Betalingstype {
-    FAKTURA,      // Invoice to mottaker
-    KONTONUMMER   // Direct bank transfer (pensjonister)
+    FAKTURA,   // Invoice to mottaker
+    TREKK      // Collected via trekk
 }
 ```
 
@@ -136,7 +138,8 @@ Stored on `Fagsak.betalingsvalg` and affects whether faktura is created.
 ## Fakturamottaker
 
 ### Determination Logic
-`TrygdeavgiftMottakerService.finnFakturamottaker()`:
+`TrygdeavgiftMottakerService.getTrygdeavgiftMottaker()` (the recipient *name* is resolved by
+`TrygdeavgiftsberegningService.finnFakturamottakerNavn()`):
 
 1. Check if arbeidsgiver is fullmektig
 2. Check fagsak.fullmektig
@@ -160,11 +163,12 @@ Location: `service/src/main/kotlin/.../avgift/ManglendeFakturabetalingConsumer.k
 
 ### Message Processing
 ```kotlin
-@KafkaListener(topics = ["melosys.manglende-fakturabetaling"])
-fun handleMessage(message: ManglendeFakturabetalingDto) {
-    // Find behandling by fakturaserieReferanse
-    // Create new behandling
-    // Create oppgave
+@KafkaListener(topics = ["\${kafka.aiven.manglende-fakturabetaling.topic}"], ...)
+fun lesManglendeFakturabetalingMelding(
+    consumerRecord: ConsumerRecord<String, ManglendeFakturabetalingMelding>
+) {
+    // Find behandlingsresultat by fakturaserieReferanse
+    // Start OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING prosess
 }
 ```
 
@@ -192,13 +196,13 @@ curl "http://localhost:8083/api/v1/fakturaserie/{referanse}"
 SELECT br.fakturaserie_referanse, b.type, b.status, b.registrert_dato
 FROM behandlingsresultat br
 JOIN behandling b ON br.behandling_id = b.id
-WHERE b.fagsak_id = :fagsakId
+WHERE b.saksnummer = :saksnummer
 AND br.fakturaserie_referanse IS NOT NULL;
 
 -- Find behandling for faktura
 SELECT b.*, f.saksnummer
 FROM behandling b
-JOIN fagsak f ON b.fagsak_id = f.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
 JOIN behandlingsresultat br ON br.behandling_id = b.id
 WHERE br.fakturaserie_referanse = :referanse;
 ```

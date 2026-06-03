@@ -10,7 +10,7 @@ Behandlingsresultat contains multiple period types representing different aspect
 | `Medlemskapsperiode` | Membership in Norwegian NI | AvgiftspliktigPeriode | Yes |
 | `Anmodningsperiode` | Article 16 exception request | PeriodeOmLovvalg | Yes (but usually 1) |
 | `Utpekingsperiode` | Provisional designation | PeriodeOmLovvalg | Yes |
-| `HelseutgiftDekkesPeriode` | EEA pensioner health coverage | - | No (OneToOne) |
+| `HelseutgiftDekkesPeriode` | EEA pensioner health coverage | - | Yes (OneToMany) |
 
 ## Common Interfaces
 
@@ -170,24 +170,24 @@ behandlingsresultatService.tømBehandlingsresultat(resultat)
 
 ### Find all periods for a result
 ```sql
--- Lovvalgsperioder
-SELECT * FROM lovvalgsperiode WHERE behandlingsresultat_id = :id;
+-- Lovvalgsperioder (table lovvalg_periode, FK beh_resultat_id)
+SELECT * FROM lovvalg_periode WHERE beh_resultat_id = :id;
 
--- Medlemskapsperioder
+-- Medlemskapsperioder (FK behandlingsresultat_id)
 SELECT * FROM medlemskapsperiode WHERE behandlingsresultat_id = :id;
 
--- Anmodningsperioder
-SELECT * FROM anmodningsperiode WHERE behandlingsresultat_id = :id;
+-- Anmodningsperioder (FK beh_resultat_id)
+SELECT * FROM anmodningsperiode WHERE beh_resultat_id = :id;
 
--- Utpekingsperioder
-SELECT * FROM utpekingsperiode WHERE behandlingsresultat_id = :id;
+-- Utpekingsperioder (FK beh_resultat_id)
+SELECT * FROM utpekingsperiode WHERE beh_resultat_id = :id;
 ```
 
 ### Find overlapping periods
 ```sql
-SELECT p1.id, p2.id, p1.fom, p1.tom, p2.fom, p2.tom
-FROM lovvalgsperiode p1
-JOIN lovvalgsperiode p2 ON p1.behandlingsresultat_id = p2.behandlingsresultat_id
+SELECT p1.id, p2.id, p1.fom_dato, p1.tom_dato, p2.fom_dato, p2.tom_dato
+FROM lovvalg_periode p1
+JOIN lovvalg_periode p2 ON p1.beh_resultat_id = p2.beh_resultat_id
 WHERE p1.id < p2.id
-AND p1.fom <= COALESCE(p2.tom, DATE '9999-12-31')
-AND COALESCE(p1.tom, DATE '9999-12-31') >= p2.fom;
+AND p1.fom_dato <= COALESCE(p2.tom_dato, DATE '9999-12-31')
+AND COALESCE(p1.tom_dato, DATE '9999-12-31') >= p2.fom_dato;

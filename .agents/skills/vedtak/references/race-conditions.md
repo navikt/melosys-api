@@ -45,9 +45,9 @@ T8      Both saga instances now running
 ```sql
 -- Find duplicate vedtak processes
 SELECT behandling_id, COUNT(*) as count,
-       LISTAGG(id, ', ') WITHIN GROUP (ORDER BY registrert_dato) as prosess_ids
+       LISTAGG(uuid, ', ') WITHIN GROUP (ORDER BY registrert_dato) as prosess_ids
 FROM prosessinstans
-WHERE type LIKE 'IVERKSETT_VEDTAK%'
+WHERE prosess_type LIKE 'IVERKSETT_VEDTAK%'
 AND status NOT IN ('FEILET')
 GROUP BY behandling_id
 HAVING COUNT(*) > 1;
@@ -89,10 +89,10 @@ T5      Set: status=AVSLUTTET       Overwrite or OptimisticLock!
 ```sql
 -- Find behandlinger stuck in IVERKSETTER_VEDTAK
 SELECT b.id, b.status, b.endret_dato,
-       p.id as prosess_id, p.status as prosess_status, p.sist_utforte_steg
+       p.uuid as prosess_id, p.status as prosess_status, p.sist_fullfort_steg
 FROM behandling b
 LEFT JOIN prosessinstans p ON p.behandling_id = b.id
-    AND p.type LIKE 'IVERKSETT_VEDTAK%'
+    AND p.prosess_type LIKE 'IVERKSETT_VEDTAK%'
 WHERE b.status = 'IVERKSETTER_VEDTAK'
 AND b.endret_dato < SYSDATE - INTERVAL '1' HOUR;
 ```
@@ -131,9 +131,9 @@ T6      Success                     Success - but overwrote vedtak period!
 Compare behandlingsresultat periods with MEDL:
 ```sql
 -- Check for period mismatches
-SELECT br.id, mp.fom, mp.tom, mp.status as melosys_status
+SELECT br.behandling_id, mp.fom_dato, mp.tom_dato, mp.innvilgelse_resultat
 FROM behandlingsresultat br
-JOIN medlemskapsperiode mp ON mp.behandlingsresultat_id = br.id
+JOIN medlemskapsperiode mp ON mp.behandlingsresultat_id = br.behandling_id
 WHERE br.behandling_id = :behandlingId;
 -- Then compare with MEDL query via REST/SQL
 ```
@@ -169,14 +169,11 @@ T7      Success - but first call also succeeded!
 - Duplicate invoices sent to user
 - faktureringskomponenten shows duplicate entries
 
-### Detection Query
-```sql
--- Check for duplicate fakturaserier
-SELECT behandlingsresultat_id, COUNT(*)
-FROM fakturaserie
-GROUP BY behandlingsresultat_id
-HAVING COUNT(*) > 1;
-```
+### Detection
+There is no `fakturaserie` table in melosys-api — the series lives in faktureringskomponenten,
+and melosys-api only keeps `behandlingsresultat.fakturaserie_referanse`. Detect duplicates by
+checking faktureringskomponenten for the behandling's reference, or look for repeated
+`OPPRETT_FAKTURASERIE` executions in the prosessinstans hendelser / logs.
 
 ### Root Cause
 - Network timeout interpreted as failure
@@ -214,14 +211,14 @@ T7      Set sak.status = AVKLART
 
 ### Detection
 ```sql
--- Find ny vurdering created during vedtak
+-- Find ny vurdering created during vedtak (behandling links fagsak via saksnummer)
 SELECT b1.id as vedtak_behandling, b2.id as ny_vurdering,
        p.registrert_dato as vedtak_start, p.endret_dato as vedtak_end,
        b2.registrert_dato as ny_vurdering_created
 FROM behandling b1
 JOIN prosessinstans p ON p.behandling_id = b1.id
-    AND p.type LIKE 'IVERKSETT_VEDTAK%'
-JOIN behandling b2 ON b2.fagsak_id = b1.fagsak_id AND b2.id > b1.id
+    AND p.prosess_type LIKE 'IVERKSETT_VEDTAK%'
+JOIN behandling b2 ON b2.saksnummer = b1.saksnummer AND b2.id > b1.id
 WHERE b2.registrert_dato BETWEEN p.registrert_dato AND p.endret_dato;
 ```
 
@@ -240,9 +237,9 @@ No blocking mechanism to prevent ny vurdering during active vedtak.
 
 1. **Monitor for duplicate prosessinstanser**:
 ```sql
-SELECT behandling_id, type, COUNT(*)
+SELECT behandling_id, prosess_type, COUNT(*)
 FROM prosessinstans
-GROUP BY behandling_id, type
+GROUP BY behandling_id, prosess_type
 HAVING COUNT(*) > 1;
 ```
 
@@ -254,12 +251,13 @@ AND endret_dato < SYSDATE - INTERVAL '2' HOUR;
 ```
 
 3. **Monitor concurrent modifications**:
+There is no `behandling_audit` table and no optimistic-lock `versjon` column on `behandling`,
+so this cannot be queried directly. Use `endret_dato`/`endret_av` on `behandling` plus the
+application logs (and `prosessinstans_hendelser`) to spot overlapping modifications:
 ```sql
-SELECT b.id, b.versjon,
-       LAG(b.versjon) OVER (PARTITION BY b.id ORDER BY audit.tidspunkt) as prev_version
-FROM behandling_audit audit
-JOIN behandling b ON b.id = audit.behandling_id
-WHERE audit.tidspunkt > SYSDATE - INTERVAL '1' HOUR;
+SELECT id, status, endret_dato, endret_av
+FROM behandling
+WHERE id = :behandlingId;
 ```
 
 ### Prevention Strategies

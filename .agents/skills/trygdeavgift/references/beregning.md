@@ -14,12 +14,11 @@ and coordinated by `TrygdeavgiftsberegningService` in melosys-api.
    - Trygdedekning (coverage type)
 
 2. **Skatteforhold til Norge**
-   - Skatteplikttype: BEGRENSET or FULL
-   - Skattepliktig til Norge flag
+   - Skatteplikttype: SKATTEPLIKTIG or IKKE_SKATTEPLIKTIG (whether the person is skattepliktig til Norge)
 
 3. **Inntektsperiode**
    - Avgiftspliktig månedsinntekt
-   - Avgiftspliktig totalinntekt (for 25% rule)
+   - Avgiftspliktig totalinntekt (used by the 25% rule)
    - Arbeidsgiveravgift betales til skatt flag
 
 ### Avgiftsdekning Types
@@ -70,27 +69,23 @@ total_avgift = sum(månedlig_avgift for each month in period)
 ## 25% Rule (25-prosentregelen)
 
 ### Purpose
-Limits avgift to 25% of total income for voluntary members.
+Hjemmel: folketrygdloven § 23-3 fjerde ledd. Caps the avgift at 25% of the part of income that
+**exceeds the minstebeløp** (not 25% of total income). It applies to pliktig medlemskap, frivillig
+medlemskap and EØS-pensjonister — applied differently per group (e.g. frivillig: helsedel/pensjonsdel
+handled separately; misjonær has its own rule).
 
 ### Implementation
-Location: `service/src/main/kotlin/.../avgift/aarsavregning/totalbeloep/TotalbeløpBeregner.kt`
-
-### Logic
-```kotlin
-if (frivilligMedlemskap && totalAvgift > totalInntekt * 0.25) {
-    avgift = totalInntekt * 0.25
-}
-```
-
-### Variations by Regulation
-- Different implementations exist for different regelverks
-- Check Confluence for specific rules per member type
+The cap is **not** computed in melosys-api. It is enforced in the external
+`melosys-trygdeavgift-beregning` service (constant `MAKS_PROSENTDEL_AV_INNTEKT = 0.25` in
+`MaksimalAvgift.kt`). In this repo, `TotalbeløpBeregner` only aggregates avgift and inntekt across
+periods for årsavregning (`hentTotalavgift`, `hentTotalinntekt`); it contains no 0.25 cap or
+minstebeløp logic.
 
 ## Minstebeløp (Minimum Amount)
 
-A minimum threshold exists before invoicing:
-- If calculated avgift < minstebeløp, no invoice is sent
-- Threshold defined per regulation
+Hjemmel: folketrygdloven § 23-3 fjerde ledd. A minimum threshold exists:
+- The 25% cap applies to income above the minstebeløp
+- Threshold defined per year in the external beregning service
 
 ## Special Cases
 
@@ -143,14 +138,17 @@ External service `melosys-trygdeavgift-beregning`:
 
 ### Check Input Data
 ```sql
+-- skatteforhold_til_norge and inntektsperiode have no FK to medlemskapsperiode;
+-- they are linked through trygdeavgiftsperiode (skatteforhold_id / inntektsperiode_id).
 SELECT mp.id, mp.trygdedekning,
-       s.skatteplikttype, s.skattepliktig_til_norge,
-       i.avgiftspliktig_mnd_inntekt_verdi,
-       i.avgiftspliktig_totalinntekt_verdi,
-       i.arbeidsgiversavgift_betales_til_skatt
+       s.skatteplikt_type,
+       i.avgiftspliktig_inntekt_mnd_verdi,
+       i.avgiftspliktig_inntekt_total_verdi,
+       i.aga_betales_til_skatt
 FROM medlemskapsperiode mp
-LEFT JOIN skatteforhold_til_norge s ON s.medlemskapsperiode_id = mp.id
-LEFT JOIN inntektsperiode i ON i.medlemskapsperiode_id = mp.id
+JOIN trygdeavgiftsperiode t ON t.medlemskapsperiode_id = mp.id
+LEFT JOIN skatteforhold_til_norge s ON t.skatteforhold_id = s.id
+LEFT JOIN inntektsperiode i ON t.inntektsperiode_id = i.id
 WHERE mp.behandlingsresultat_id = :id;
 ```
 
@@ -159,7 +157,7 @@ WHERE mp.behandlingsresultat_id = :id;
 SELECT t.periode_fra, t.periode_til,
        t.trygdesats, t.trygdeavgift_beloep_mnd_verdi
 FROM trygdeavgiftsperiode t
-WHERE t.grunnlag_medlemskapsperiode_id = :medlemskapsperiodeId;
+WHERE t.medlemskapsperiode_id = :medlemskapsperiodeId;
 ```
 
 ## Related Confluence Pages

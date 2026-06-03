@@ -25,6 +25,8 @@ Expert knowledge of testing patterns and strategies in melosys-api.
 | Integration tests | Spring Boot Test | `integrasjonstest/` | `IT.kt` |
 | Architecture tests | ArchUnit | `arkitektur/` | `IT.kt` |
 
+`*Test.kt` classes can be plain Spring-free unit tests — they may still use the `forTest` DSL to build in-memory domain objects (no DB, no `truncateAllTables`). Only `*IT.kt` boot Spring and require the Testcontainers Oracle DB.
+
 ### Test Commands
 
 ```bash
@@ -42,38 +44,55 @@ scripts/run-tests.sh -pl integrasjonstest -am --integration -Dtest=MyIT
 
 | Class | Purpose | Key Features |
 |-------|---------|--------------|
-| `OracleTestContainerBase` | Oracle DB container | Testcontainers, cleanup |
+| `OracleTestContainerBase` | Oracle DB container | Testcontainers, `@BeforeEach truncateAllTables()` |
 | `ComponentTestBase` | Full component tests | EmbeddedKafka, MockOAuth2 |
 | `DataJpaTestBase` | JPA-only tests | Lighter setup |
-| `MockServerTestBaseWithProsessManager` | Saga testing | ProsessManager |
+| `MockServerTestBaseWithProsessManager` | Saga testing + WireMock | ProsessManager (most ITs extend this) |
+| `JournalfoeringBase` | Journalføring flows | JournalfoeringService, OppgaveService |
 | `AvgiftFaktureringTestBase` | Avgift tests | Billing setup |
 
 ## Test Base Class Hierarchy
 
+The chain is linear — each class extends the one above it:
+
 ```
 OracleTestContainerBase
     └── ComponentTestBase (@SpringBootTest)
-            ├── MockServerTestBaseWithProsessManager
-            ├── AvgiftFaktureringTestBase
-            └── JournalfoeringBase
+            └── MockServerTestBaseWithProsessManager (+ WireMock, ProsessManager)
+                    └── JournalfoeringBase
+                            └── AvgiftFaktureringTestBase
 ```
+
+Most integration tests extend `MockServerTestBaseWithProsessManager`, not `ComponentTestBase` directly. `DataJpaTestBase` is a separate, lighter JPA-only base for repository tests.
 
 ## OracleTestContainerBase
 
-Base class for tests needing Oracle database.
+Base class for tests needing Oracle database. Every integration test gets a **clean database automatically**: a `@BeforeEach truncateAllTables()` disables all foreign-key constraints, `TRUNCATE`s an explicit list of test-data tables (kodeverk/static tables are left alone), then re-enables the constraints. There is no per-test cleanup-registration API — tests do not need to register anything to clean up after themselves.
 
 ```kotlin
 open class OracleTestContainerBase {
-    @Autowired
-    var dbCleanup: DBCleanup? = null
 
-    protected fun addCleanUpAction(deleteAction: DBCleanup.() -> Unit) {
-        dbCleanUpActions.add { dbCleanup?.deleteAction() }
+    @Autowired
+    private lateinit var jdbcTemplate: JdbcTemplate
+
+    /**
+     * Tømmer alle tabeller før hver test for å sikre isolasjon.
+     * BeforeEach (ikke AfterEach) gjør at man kan inspisere DB etter en test for feilsøking.
+     */
+    @BeforeEach
+    fun truncateAllTables() {
+        val tablesToTruncate = listOf(
+            "PROSESSINSTANS_HENDELSER", "PROSESSINSTANS",  // Saksflyt først pga FK
+            "AARSAVREGNING", "TRYGDEAVGIFTSPERIODE", "MEDLEMSKAPSPERIODE", "LOVVALG_PERIODE",
+            // ... eksplisitt liste, child før parent ...
+            "BEHANDLINGSRESULTAT", "BEHANDLING", "AKTOER", "FAGSAK"
+        )
+        // Deaktiver FK-constraints, TRUNCATE hver tabell, reaktiver constraints (via jdbcTemplate)
     }
 
     companion object {
         val oracleContainer = OracleContainer(
-            DockerImageName.parse("ghcr.io/navikt/.../oracle-xe:18.4.0-slim")
+            DockerImageName.parse("ghcr.io/navikt/melosys-legacy-avhengigheter/oracle-xe:18.4.0-slim")
                 .asCompatibleSubstituteFor("gvenzl/oracle-xe")
         )
 
@@ -82,6 +101,8 @@ open class OracleTestContainerBase {
         fun oracleProperties(registry: DynamicPropertyRegistry) {
             if (useTestContainer()) {
                 registry.add("spring.datasource.url") { oracleContainer.jdbcUrl }
+                registry.add("spring.datasource.username") { oracleContainer.username }
+                registry.add("spring.datasource.password") { oracleContainer.password }
                 oracleContainer.start()
             }
         }
@@ -130,13 +151,20 @@ fakeUnleash.disable("MY_FEATURE")
 
 ### Mock Verification
 
+`ComponentTestBase` exposes a `mockVerificationClient` and calls `clear()` in `@BeforeEach`, so each test starts with empty mock state. The client exposes domain queries — there is no generic `verify(path, count)` method.
+
 ```kotlin
 protected val mockVerificationClient: MockVerificationClient by lazy {
     MockVerificationClient(MelosysMockContainerConfig.getBaseUrl())
 }
 
-// Verify mock calls
-mockVerificationClient.verify("/api/endpoint", 1)
+// Verify what was sent to the mock via domain queries:
+mockVerificationClient.sakCount() shouldBe 1
+mockVerificationClient.sedForRinaSak(rinaSaksnummer)
+    .shouldContainInOrder("A012", "X008", "A004")
+mockVerificationClient.medl().shouldHaveSize(1)
+// Other queries: saker(), sakByFagsakNr(), oppgaver(), oppgaverByType(),
+// journalposter(), bucInfo(), saksrelasjoner(), summary()
 ```
 
 ## ArchUnit Tests
@@ -264,18 +292,17 @@ class MyServiceTest : FunSpec({
 
 ## Integration Test Pattern
 
+Most integration tests extend `MockServerTestBaseWithProsessManager`. The DB is truncated in `@BeforeEach` (via `OracleTestContainerBase.truncateAllTables()`), so each test starts from an empty database — there is no per-test cleanup to register.
+
 ```kotlin
-class MyServiceIT : ComponentTestBase() {
+class MyServiceIT : MockServerTestBaseWithProsessManager() {
 
     @Autowired
     private lateinit var service: MyService
 
     @Test
     fun `should integrate with database`() {
-        // Setup cleanup
-        addCleanUpAction { deleteBehandling(behandlingId) }
-
-        // Given
+        // Given — DB is already empty (truncateAllTables ran in @BeforeEach)
         val fagsak = createTestFagsak()
 
         // When
@@ -289,17 +316,9 @@ class MyServiceIT : ComponentTestBase() {
 
 ## Test Utilities
 
-### DBCleanup
+### Database isolation
 
-```kotlin
-@Autowired
-var dbCleanup: DBCleanup? = null
-
-addCleanUpAction {
-    deleteBehandling(behandlingId)
-    deleteFagsak(fagsakId)
-}
-```
+Integration tests do not register cleanup. `OracleTestContainerBase.truncateAllTables()` runs in `@BeforeEach`: it reads all enabled foreign-key constraints from `user_constraints`, disables them, `TRUNCATE`s an explicit list of test-data tables (child tables before parents), then re-enables the constraints. Kodeverk and other static-data tables are deliberately excluded from the truncate list. The net effect: every test starts with a clean, empty set of business tables and can inspect leftover data afterwards for debugging.
 
 ### Test Data Builders
 
@@ -362,12 +381,14 @@ val behandlingsresultat = Behandlingsresultat.forTest {
 
 ### KafkaOffsetChecker
 
+`offsetIncreased(topic, groupId) { ... }` runs the block, then returns how much the consumer group's committed offset grew — useful to assert that a message was (or was NOT) consumed.
+
 ```kotlin
-kafkaOffsetChecker.waitForConsumerToCatchUp(
-    topic = "teammelosys.xxx",
-    groupId = "test-group",
-    timeout = Duration.ofSeconds(30)
-)
+val delta = kafkaOffsetChecker.offsetIncreased(topic, groupId) {
+    kafkaTemplate.send("teammelosys.eessi.v1-local", message)
+    // wait for processing to complete...
+}
+delta shouldBe 0  // e.g. assert the message was NOT committed because it failed
 ```
 
 ## Test Profiles

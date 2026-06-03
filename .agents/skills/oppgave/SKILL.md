@@ -18,36 +18,55 @@ when behandlinger are created or need attention.
 
 ### Module Structure
 ```
-service/oppgave/
-├── OppgaveService.kt           # Main service orchestrating operations
+service/oppgave/                # Kotlin
+├── OppgaveService.kt           # Service facade orchestrating operations
 ├── OppgaveFactory.kt           # Builds tasks with correct metadata
 ├── OppgaveGosysMapping.kt      # Complex mapping table for task properties
+├── OppgaveBehandlingstema.kt   # ab-code enum (EU_EOS_YRKESAKTIV = "ab0483", …)
+├── OppgaveBehandlingstemaUtleder.kt
 ├── OppgaveBeskrivelseUtleder.kt
 ├── OppgaveTemaUtleder.kt
-└── OppgavetypeUtleder.kt
+├── OppgavetypeUtleder.kt
+├── Oppgaveplukker.kt
+├── OppgaveSoekFilter.kt
+└── migrering/                  # Oppgave-ID backfill jobs
 
-integrasjon/oppgave/
-├── OppgaveFasade.java          # Interface for oppgave operations
-├── OppgaveFasadeImpl.java      # REST client implementation
-├── OppgaveConsumer.kt          # WebClient-based consumer
-└── OppgaveOppdatering.kt       # Builder DTO for updates
+integrasjon/oppgave/            # Java
+├── OppgaveFasade.java          # Integration interface (calls Oppgave REST API)
+├── OppgaveFasadeImpl.java      # Fasade implementation
+├── OppgaveOppdatering.java     # Builder DTO for updates
+└── konsument/
+    └── OppgaveClient.java      # REST client for the Oppgave API
 
-domain/
-└── Oppgave.kt                  # Immutable task entity
+domain/oppgave/                 # Java
+└── Oppgave.java                # Immutable task entity (Builder)
 ```
+
+There are two layers: `OppgaveService` (service-module facade exposing domain-friendly
+operations) delegates to `OppgaveFasade`/`OppgaveFasadeImpl` (integration layer that calls
+the external Oppgave REST API via `konsument/OppgaveClient`).
 
 ### Key Operations
 
-| Operation | Method | Description |
-|-----------|--------|-------------|
-| Create | `opprettOppgave()` | Create standard task |
-| Create sensitive | `opprettSensitivOppgave()` | Create task for protected persons |
-| Fetch | `hentOppgave()` | Get task by ID |
-| Update | `oppdaterOppgave()` | Update task properties |
-| Complete | `ferdigstillOppgave()` | Mark task as done |
-| Return | `leggTilbakeOppgave()` | Unassign task |
-| Assign | `tildelOppgave()` | Assign to saksbehandler |
-| Reuse | `opprettEllerGjenbrukBehandlingsoppgave()` | Create or reuse existing |
+`OppgaveService` (service layer) and `OppgaveFasade` (integration layer) expose different
+method names. Use `OppgaveService` from business code; it delegates to the fasade.
+
+| Operation | OppgaveService method | Description |
+|-----------|-----------------------|-------------|
+| Create | `opprettOppgave(oppgave)` | Create standard task |
+| Fetch | `hentOppgaveMedOppgaveID(oppgaveID)` | Get task by ID |
+| Update | `oppdaterOppgave(oppgaveID, oppdatering)` | Update task properties |
+| Complete | `ferdigstillOppgave(oppgaveID)` | Mark task as done |
+| Return | `leggTilbakeBehandlingsoppgaveMedSaksnummer(saksnummer)` | Unassign task on a case |
+| Assign | `tildelOppgave(oppgaveID, saksbehandler)` | Assign to saksbehandler |
+| Reuse | `opprettEllerGjenbrukBehandlingsoppgave(...)` | Create or reuse existing |
+| Find open | `finnÅpneBehandlingsoppgaverMedFagsaksnummer(saksnummer)` | Open tasks for case |
+
+`OppgaveFasade` exposes the raw integration calls used by the service, including
+`opprettSensitivOppgave(oppgave)` (routes to NAV Viken), `hentOppgave(oppgaveId)`,
+`leggTilbakeOppgave(oppgaveId)`, `finnOppgaverMedAktørId(aktørID, oppgavetyper)`,
+`finnUtildelteOppgaverEtterFrist(behandlingstema)` and
+`finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer)`.
 
 ### Task Types (Oppgavetyper)
 
@@ -109,9 +128,9 @@ oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
 
 ### Update Task
 ```kotlin
-val oppdatering = OppgaveOppdatering.Builder()
-    .medBeskrivelse("Anmodning om unntak er sendt")
-    .medFrist(dokumentasjonSvarfrist)
+val oppdatering = OppgaveOppdatering.builder()
+    .beskrivelse("Anmodning om unntak er sendt")
+    .fristFerdigstillelse(dokumentasjonSvarfrist)
     .build()
 
 oppgaveService.oppdaterOppgave(oppgaveId, oppdatering)
@@ -124,14 +143,14 @@ oppgaveService.ferdigstillOppgave(oppgaveId)
 
 ### Find Tasks
 ```kotlin
-// Open tasks for case
-val åpne = oppgaveService.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer)
+// Open tasks for case (service layer)
+val åpne = oppgaveService.finnÅpneBehandlingsoppgaverMedFagsaksnummer(saksnummer)
 
-// Tasks by actor
-val oppgaver = oppgaveService.finnOppgaverMedAktørId(aktørId, oppgavetyper)
+// Tasks by actor (integration fasade)
+val oppgaver = oppgaveFasade.finnOppgaverMedAktørId(aktørId, oppgavetyper)
 
-// Unassigned past deadline
-val forfalt = oppgaveService.finnUtildelteOppgaverEtterFrist(behandlingstema)
+// Unassigned past deadline (integration fasade)
+val forfalt = oppgaveFasade.finnUtildelteOppgaverEtterFrist(behandlingstema)
 ```
 
 ## Task Reuse Logic
@@ -152,7 +171,10 @@ if (harEksisterendeÅpenOppgave && !erÅrsavregning) {
 
 ## Sensitive Case Handling
 
-Tasks for protected persons route to NAV Viken (unit 2103) instead of Melosys (unit 4863):
+Tasks for protected persons route to NAV Viken (`NAV_VIKEN_ENHET_ID = 2103`) instead of
+Melosys / NAV Medlemskap og avgift (`MELOSYS_ENHET_ID = 4530`). Both are defined in
+`integrasjon/Konstanter.java`; `OppgaveFasadeImpl` picks the enhet via
+`erSensitiv ? NAV_VIKEN_ENHET_ID : MELOSYS_ENHET_ID`.
 
 ```kotlin
 // Sensitive when:
@@ -160,18 +182,18 @@ Tasks for protected persons route to NAV Viken (unit 2103) instead of Melosys (u
 // - OR child has Diskresjonskode.STRENGT_FORTROLIG
 
 if (erSensitiv) {
-    oppgaveService.opprettSensitivOppgave(oppgave)  // Routes to NAV Viken
+    oppgaveFasade.opprettSensitivOppgave(oppgave)  // Routes to NAV Viken (2103)
 } else {
-    oppgaveService.opprettOppgave(oppgave)  // Routes to Melosys
+    oppgaveFasade.opprettOppgave(oppgave)          // Routes to Melosys (4530)
 }
 ```
 
 ### Unit IDs
 
-| Unit | ID | Usage |
-|------|-----|-------|
-| Melosys | 4863 | Standard tasks |
-| NAV Viken | 2103 | Sensitive/protected persons |
+| Unit | ID | Constant | Usage |
+|------|-----|----------|-------|
+| Melosys (NAV Medlemskap og avgift) | 4530 | `Konstanter.MELOSYS_ENHET_ID` | Standard tasks |
+| NAV Viken | 2103 | `Konstanter.NAV_VIKEN_ENHET_ID` | Sensitive/protected persons |
 
 ## Saga Steps
 
@@ -200,16 +222,22 @@ OPPRETT_FAGSAK_OG_BEHANDLING
 
 ## OppgaveGosysMapping
 
-Complex mapping determines task properties from behandling context:
+A lookup table (`rows: List<TableRow>`) maps the behandling context to a Gosys oppgave.
+`finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype)` returns an internal
+`Oppgave(oppgaveBehandlingstema, tema, oppgaveType, beskrivelsefelt)` and throws if no row
+matches. `finnOppgaveOrNull` falls back through `finnOppgaveFraTabell` →
+`finnOppgaveVedBehandlingstypeHenvendelseOgVirksomhet` →
+`finnOppgaveVedBehandlingstypeHenvendelse`.
 
-| Input | Output |
-|-------|--------|
-| Sakstype | → Oppgavetype |
-| Sakstema | → Tema |
-| Behandlingstema | → Behandlingstema code |
-| Behandlingstype | → Priority |
+| Input (TableRow match) | Output (Oppgave) |
+|------------------------|------------------|
+| Sakstyper | → oppgaveType (Oppgavetyper) |
+| Sakstemaer | → tema (MED / UFM / TRY) |
+| Set\<Behandlingstema\> | → oppgaveBehandlingstema (ab-code) |
+| Set\<Behandlingstyper\> | → beskrivelsefelt |
 
-**Location**: `OppgaveGosysMapping.kt` with mapping table from Confluence.
+**Location**: `service/oppgave/OppgaveGosysMapping.kt`; rows mirror the Confluence
+"Oppgaver i Gosys" table and are generated by `OppgaveGosysMappingCodeGenerator`.
 
 ## Common Issues
 
@@ -219,12 +247,11 @@ Complex mapping determines task properties from behandling context:
 
 **Cause**: Data quality issue, duplicate tasks created
 
-**Investigation**:
-```sql
-SELECT o.oppgave_id, o.status, o.oppgavetype
-FROM oppgave o
-WHERE o.saksnummer = 'MEL-12345'
-AND o.status IN ('OPPRETTET', 'AAPNET', 'UNDER_BEHANDLING');
+**Investigation**: Oppgave data lives in the external Oppgave system, not in a local table
+(the only local oppgave-related table is `oppgave_tilbakelegging`). Query via the service:
+```kotlin
+val åpne = oppgaveService.finnÅpneBehandlingsoppgaverMedFagsaksnummer("MEL-12345")
+log.info("Fant ${åpne.size} åpne oppgaver: ${åpne.map { it.oppgaveId }}")
 ```
 
 ### 2. Task Not Found
@@ -264,25 +291,27 @@ val barnMedBeskyttelse = // query dependent children
 
 ### Find Task for Behandling
 ```sql
+-- behandling joins fagsak via the saksnummer FK (no fagsak_saksnummer column)
 SELECT b.id, b.oppgave_id, b.status, f.saksnummer
 FROM behandling b
-JOIN fagsak f ON f.saksnummer = b.fagsak_saksnummer
+JOIN fagsak f ON f.saksnummer = b.saksnummer
 WHERE b.id = :behandlingId;
 ```
 
 ### Check Task Status in Oppgave System
 ```kotlin
-val oppgave = oppgaveService.hentOppgave(oppgaveId)
+val oppgave = oppgaveService.hentOppgaveMedOppgaveID(oppgaveId)
 log.info("Status: ${oppgave.status}, tilordnet: ${oppgave.tilordnetRessurs}")
 ```
 
 ### Find All Tasks for Person
-```sql
--- Via Oppgave API search
-oppgaveService.finnOppgaverMedAktørId(aktørId, arrayOf("BEH_SAK_MK", "VUR"))
+```kotlin
+// Via Oppgave API search (integration fasade)
+oppgaveFasade.finnOppgaverMedAktørId(aktørId, arrayOf("BEH_SAK_MK", "VUR"))
 ```
 
 ## Detailed Documentation
 
 - **[Task Types](references/task-types.md)**: Complete oppgavetype reference
 - **[Mapping](references/mapping.md)**: OppgaveGosysMapping details
+- **[Debugging](references/debugging.md)**: SQL queries, log patterns, and common-issue recipes

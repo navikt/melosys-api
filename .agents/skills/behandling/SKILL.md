@@ -6,7 +6,7 @@ description: |
   (2) Debugging issues with behandling creation, status changes, or closure,
   (3) Understanding relationships between Fagsak, Behandling, and Behandlingsresultat,
   (4) Investigating why a behandling is stuck or has wrong status,
-  (5) Understanding Behandlingstype, Behandlingstema, Behandlingsstatus enums,
+  (5) Understanding Behandlingstyper, Behandlingstema, Behandlingsstatus enums,
   (6) Debugging journalføring or SED-triggered behandling creation,
   (7) Understanding behandling creation via saksflyt sagas.
 ---
@@ -23,22 +23,22 @@ decision-making process from creation through to closure.
 
 ```
 Fagsak (Case)
-├── saksnummer: String
-├── type: Sakstype (EOS, FTRL, TRYGDEAVTALE)
-├── tema: Sakstema
+├── saksnummer: String (PK — no numeric id)
+├── type: Sakstyper (EU_EOS, FTRL, TRYGDEAVTALE)
+├── tema: Sakstemaer
 ├── status: Saksstatuser
-└── behandlinger: List<Behandling>
+└── behandlinger: List<Behandling>  (linked via saksnummer FK)
 
     Behandling (Treatment)
     ├── id: Long
     ├── status: Behandlingsstatus
-    ├── type: Behandlingstype
+    ├── type: Behandlingstyper
     ├── tema: Behandlingstema
-    ├── mottattDato: LocalDate
     ├── behandlingsfrist: LocalDate
+    ├── registrertDato / endretDato: Instant
     └── behandlingsresultat: Behandlingsresultat
 
-        Behandlingsresultat
+        Behandlingsresultat  (PK is behandling_id — no separate id)
         ├── type: Behandlingsresultattyper
         ├── medlemskapsperioder: List<Medlemskapsperiode>
         ├── lovvalgsperioder: List<Lovvalgsperiode>
@@ -50,7 +50,7 @@ Fagsak (Case)
 | Enum | Values | Description |
 |------|--------|-------------|
 | **Behandlingsstatus** | OPPRETTET, UNDER_BEHANDLING, AVSLUTTET, IVERKSETTER_VEDTAK, MIDLERTIDIG_LOVVALGSBESLUTNING, AVVENT_DOK_UTL, AVVENT_DOK_PART | Current processing state |
-| **Behandlingstype** | FØRSTEGANG, NY_VURDERING, KLAGE, ENDRET_PERIODE, HENVENDELSE, MANGLENDE_INNBETALING_TRYGDEAVGIFT | Type of processing |
+| **Behandlingstyper** | FØRSTEGANG, NY_VURDERING, HENVENDELSE, KLAGE, ENDRET_PERIODE, MANGLENDE_INNBETALING_TRYGDEAVGIFT, ÅRSAVREGNING, SATSENDRING | Type of processing |
 | **Behandlingstema** | YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST, UTSENDT_ARBEIDSTAKER, ARBEID_FLERE_LAND, etc. | Subject matter |
 
 ### Behandling Lifecycle
@@ -60,7 +60,10 @@ OPPRETTET → UNDER_BEHANDLING → IVERKSETTER_VEDTAK → AVSLUTTET
                    │                                    ↑
                    ├── AVVENT_DOK_UTL ─────────────────┤
                    ├── AVVENT_DOK_PART ────────────────┤
-                   └── MIDLERTIDIG_LOVVALGSBESLUTNING ─┘
+                   └── MIDLERTIDIG_LOVVALGSBESLUTNING
+
+MIDLERTIDIG_LOVVALGSBESLUTNING counts as INACTIVE (erInaktiv()) and is
+not editable; it does not flow straight to AVSLUTTET like the AVVENT_* states.
 ```
 
 ## Behandling Creation Paths
@@ -81,8 +84,10 @@ sedMottakOpprettFagsakOgBehandling.utfør(prosessinstans)
 
 ### 3. Ny Vurdering (Re-evaluation)
 ```kotlin
-// From behandlingsmeny or journalføring to existing sak
-behandlingService.opprettNyVurdering(fagsak, behandlingsårsak)
+// From journalføring/digital søknad to an existing sak.
+// opprettNyVurdering is a private helper inside the saksflyt step
+// HåndterEksisterendeSakDigitalSøknad; it ultimately calls
+// BehandlingService.nyBehandling(fagsak, status, type, tema, ...).
 ```
 
 ### 4. Automatic Creation
@@ -110,31 +115,34 @@ prosessinstansService.opprettProsessinstansNyBehandlingManglendeInnbetaling(...)
 ### Status Helper Methods
 
 ```kotlin
-behandling.erAktiv()        // OPPRETTET or UNDER_BEHANDLING
-behandling.erInaktiv()      // Not erAktiv()
+behandling.erInaktiv()      // AVSLUTTET or MIDLERTIDIG_LOVVALGSBESLUTNING
+behandling.erAktiv()        // !erInaktiv() (everything except those two)
 behandling.erAvsluttet()    // AVSLUTTET
-behandling.erRedigerbar()   // Can be edited
-behandling.erVenterForDokumentasjon()  // AVVENT_*
+behandling.erRedigerbar()   // erAktiv() && status != IVERKSETTER_VEDTAK
+                            //   && !(ANMODNING_UNNTAK_SENDT && tema != IKKE_YRKESAKTIV)
+behandling.erVenterForDokumentasjon()  // AVVENT_DOK_PART, AVVENT_DOK_UTL, ANMODNING_UNNTAK_SENDT
 ```
 
 ## Service Layer
 
 ### BehandlingService
-Location: `service/src/main/kotlin/.../behandling/BehandlingService.kt`
+Location: `service/src/main/java/no/nav/melosys/service/behandling/BehandlingService.java`
 
 Key operations:
-- `hentBehandling(id)` - Get by ID
-- `endreStatus(behandling, status)` - Change status
-- `opprettNyVurdering(fagsak, årsak)` - Create new evaluation
-- `avsluttBehandling(id, resultat)` - Close treatment
+- `hentBehandling(behandlingId)` - Get by ID
+- `nyBehandling(fagsak, status, type, tema, ...)` - Create a new behandling
+- `endreStatus(behandling, status)` / `endreStatus(behandlingID, status)` - Change status
+- `endreBehandling(behandlingID, nyType, nyTema, nyStatus, nyMottaksdato)` - Edit type/tema/status/frist
+- `avsluttBehandling(behandlingId)` / `avsluttBehandling(behandlingId, behandlingsresultattype: Behandlingsresultattyper)` - Close treatment
 
 ### BehandlingsresultatService
-Location: `service/src/main/kotlin/.../behandling/BehandlingsresultatService.kt`
+Location: `service/src/main/kotlin/no/nav/melosys/service/behandling/BehandlingsresultatService.kt`
 
 Key operations:
-- `hentBehandlingsresultat(behandlingId)` - Get result
-- `lagre(behandlingsresultat)` - Save result
-- `oppdaterMedlemskapsperioder(...)` - Update periods
+- `hentBehandlingsresultat(behandlingsid)` - Get result
+- `lagre(resultat)` - Save result
+- `lagreNyttBehandlingsresultat(behandling)` - Create a fresh (IKKE_FASTSATT) result for a behandling
+- `oppdaterBehandlingsresultattype(id, type)` - Set the result type
 
 ## Debugging Queries
 
@@ -142,16 +150,18 @@ Key operations:
 ```sql
 SELECT b.*, f.saksnummer
 FROM behandling b
-JOIN fagsak f ON b.fagsak_id = f.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE b.id = :behandlingId;
 ```
 
 ### Find Active Behandlinger for Person
 ```sql
+-- behandling links to fagsak via saksnummer; the actor (aktoer_id) lives in aktoer
 SELECT b.*, f.saksnummer
 FROM behandling b
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE f.bruker_aktor_id = :aktorId
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+JOIN aktoer a ON a.saksnummer = f.saksnummer AND a.rolle = 'BRUKER'
+WHERE a.aktoer_id = :aktorId
 AND b.status NOT IN ('AVSLUTTET');
 ```
 
@@ -159,14 +169,15 @@ AND b.status NOT IN ('AVSLUTTET');
 ```sql
 SELECT b.id, b.status, b.endret_dato, f.saksnummer
 FROM behandling b
-JOIN fagsak f ON b.fagsak_id = f.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE b.status = 'IVERKSETTER_VEDTAK'
 AND b.endret_dato < SYSDATE - INTERVAL '2' HOUR;
 ```
 
 ### Check Behandling with Prosessinstans
 ```sql
-SELECT b.id, b.status, p.type, p.status as prosess_status
+-- prosessinstans has no status column; saga progress is tracked via steg + antall_retry/sover_til
+SELECT b.id, b.status, p.prosess_type, p.steg, p.antall_retry, p.sover_til
 FROM behandling b
 LEFT JOIN prosessinstans p ON p.behandling_id = b.id
 WHERE b.id = :behandlingId
@@ -177,7 +188,7 @@ ORDER BY p.registrert_dato DESC;
 
 | Issue | Symptoms | Investigation |
 |-------|----------|---------------|
-| Stuck in IVERKSETTER_VEDTAK | Can't edit behandling | Check prosessinstans status |
+| Stuck in IVERKSETTER_VEDTAK | Can't edit behandling | Check prosessinstans steg / antall_retry / sover_til |
 | Wrong behandlingstype | Validation errors | Check journalføring logic |
 | Missing behandlingsresultat | NullPointer | Check saga completed successfully |
 | Can't create ny vurdering | FunksjonellException | Check fagsak.status and existing active behandling |

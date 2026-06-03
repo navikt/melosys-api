@@ -21,8 +21,14 @@ Melosys writes periods to MEDL when vedtak is made.
 integrasjon/
 ├── medl/
 │   ├── MedlService.kt              # Core service orchestrating operations
-│   ├── MedlemskapRestConsumer.kt   # REST client with @Retryable
-│   └── dto/                        # Request/response DTOs
+│   ├── MedlemskapClient.kt         # REST client (open class, @Retryable)
+│   ├── MedlPeriodeKonverter.kt     # Domain → MEDL enum mapping (object)
+│   └── api/v1/                     # Request/response DTOs
+│       ├── MedlemskapsunntakForPost.kt
+│       ├── MedlemskapsunntakForPut.kt
+│       ├── MedlemskapsunntakForGet.kt
+│       ├── MedlemskapsunntakSoekRequest.kt
+│       └── Sporingsinformasjon.kt
 
 service/medl/
 ├── MedlPeriodeService.java         # Business logic for period operations
@@ -114,18 +120,21 @@ For Article 16 exception request periods.
 
 ### Domain → MEDL
 
-**Lovvalgsbestemmelse → GrunnlagMedl**:
+**Lovvalgsbestemmelse → GrunnlagMedl** (see `MedlPeriodeKonverter.kt` / `GrunnlagMedl.kt` for the authoritative table):
 ```kotlin
 // EU Regulation 883/2004
-ART_11_3_A → FO_11_3_A
-ART_12_1 → FO_12_1
-ART_13_1 → FO_13_1
-ART_16_1 → FO_16_1
+FO_883_2004_ART11_3A → GrunnlagMedl.FO_11_3_A   // .kode = "FO_11_3_a"
+FO_883_2004_ART12_1  → GrunnlagMedl.FO_12_1
+FO_883_2004_ART13_1A → GrunnlagMedl.FO_13_1_A   // .kode = "FO_13_1_a"
+FO_883_2004_ART16_1  → GrunnlagMedl.FO_16       // ART16_1 and ART16_2 both map to FO_16
 
-// Bilateral treaties
-TRYGDEAVTALE_AUSTRALIA → KONV_AUSTRALIA_*
-TRYGDEAVTALE_USA → KONV_USA_*
+// Bilateral treaties (constant names are the country name, no KONV_ prefix)
+Lovvalgsbestemmelser_trygdeavtale_au.AUS → GrunnlagMedl.AUSTRALIA  // .kode = "Australia"
+Lovvalgsbestemmelser_trygdeavtale_us.USA → GrunnlagMedl.USA        // .kode = "USA"
+// (KONV_STORBRIT_NIRLAND_* values exist only for the EFTA/Storbritannia konvensjon)
 ```
+Note: GrunnlagMedl constants carry a `.kode` string that often differs from the constant name
+(e.g. `FO_11_3_A.kode == "FO_11_3_a"`). Production code transmits `.kode`, not `.name`.
 
 **Trygdedekninger → DekningMedl**:
 ```kotlin
@@ -143,21 +152,24 @@ Land_iso2.DK → "DNK"
 
 ### DTOs
 
-**For POST (Create)**:
+**For POST (Create)** — `MedlService.opprettPeriode` builds the request in two stages: the
+constructor sets `fraOgMed`/`tilOgMed`/`dekning`/`lovvalgsland`/`grunnlag`, then `.apply{}`
+sets `sporingsinformasjon`/`ident`/`lovvalg`/`status`/`statusaarsak`. All wire values use `.kode`:
 ```kotlin
 MedlemskapsunntakForPost(
-    ident = fnr,
     fraOgMed = periode.fom,
     tilOgMed = periode.tom,
-    status = PeriodestatusMedl.GYLD.name,
-    dekning = DekningMedl.FULL.name,
-    lovvalgsland = "SWE",  // ISO3
-    lovvalg = LovvalgMedl.ENDL.name,
-    grunnlag = GrunnlagMedl.FO_12_1.name,
-    sporingsinformasjon = SporingsinformasjonForPost(
-        kildedokument = KildedokumenttypeMedl.SED.name
+    dekning = DekningMedl.FULL.kode,
+    lovvalgsland = "SWE",                 // ISO3
+    grunnlag = GrunnlagMedl.FO_12_1.kode  // .kode == "FO_12_1"
+).apply {
+    ident = fnr
+    lovvalg = LovvalgMedl.ENDL.kode
+    status = PeriodestatusMedl.GYLD.kode
+    sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
+        kildedokument = KildedokumenttypeMedl.SED.kode
     )
-)
+}
 ```
 
 **For PUT (Update)**:
@@ -165,7 +177,7 @@ MedlemskapsunntakForPost(
 MedlemskapsunntakForPut(
     unntakId = medlPeriodeID,  // Required!
     // ... same fields as POST
-    sporingsinformasjon = SporingsinformasjonForPut(
+    sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(
         kildedokument = "...",
         versjon = existingVersjon  // Required for optimistic locking!
     )
@@ -181,9 +193,8 @@ MedlemskapsunntakForPut(
 
 **Investigation**:
 ```sql
--- Check if period was actually created
-SELECT * FROM lovvalgsperiode WHERE behandlingsresultat_id = :id;
--- Check medl_periode_id column
+-- Check if period was actually created (table is lovvalg_periode; MEDL id col is medlperiode_id)
+SELECT * FROM lovvalg_periode WHERE beh_resultat_id = :id;
 ```
 
 ### 2. Version Mismatch
@@ -227,36 +238,38 @@ val erForeløpig = harBestemmelse(ART_13_*) && !erGodkjentRegistreringUnntak
 
 ### Find Period in MEDL
 ```kotlin
-// Via MedlService
-val perioder = medlService.hentPerioder(fnr, fom, tom)
-val periode = medlService.hentEksisterendePeriode(medlPeriodeID)
+// Via MedlService (public entry point — returns a Saksopplysning)
+val saksopplysning = medlService.hentPeriodeListe(fnr, fom, tom)
+// Note: hentEksisterendePeriode(medlPeriodeID) is a PRIVATE helper in MedlService;
+// to fetch a single period directly, call MedlemskapClient.hentPeriode(periodeId).
 ```
 
 ### Check Domain Entity
 ```sql
--- Lovvalgsperiode with MEDL ID
-SELECT lp.id, lp.medl_periode_id, lp.fom, lp.tom, lp.lovvalgsland
-FROM lovvalgsperiode lp
-WHERE lp.behandlingsresultat_id = :behandlingId;
+-- Lovvalgsperiode (table lovvalg_periode; FK beh_resultat_id, MEDL id medlperiode_id)
+SELECT lp.id, lp.medlperiode_id, lp.fom_dato, lp.tom_dato, lp.lovvalgsland
+FROM lovvalg_periode lp
+WHERE lp.beh_resultat_id = :behandlingsresultatId;
 
--- Medlemskapsperiode with MEDL ID
-SELECT mp.id, mp.medl_periode_id, mp.fom, mp.tom
+-- Medlemskapsperiode (table medlemskapsperiode; FK behandlingsresultat_id, MEDL id medlperiode_id)
+SELECT mp.id, mp.medlperiode_id, mp.fom_dato, mp.tom_dato
 FROM medlemskapsperiode mp
-WHERE mp.behandlingsresultat_id = :behandlingId;
+WHERE mp.behandlingsresultat_id = :behandlingsresultatId;
 ```
 
 ### Check Saga Step Execution
 ```sql
-SELECT pi.id, pi.type, pi.status, pi.sist_utforte_steg
+-- Columns: prosess_type (entity field `type`), sist_fullfort_steg (field `sistFullførtSteg`)
+SELECT pi.id, pi.prosess_type, pi.status, pi.sist_fullfort_steg
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId
-AND pi.type LIKE 'IVERKSETT_VEDTAK%';
+AND pi.prosess_type LIKE 'IVERKSETT_VEDTAK%';
 ```
 
 ### Logs
 ```bash
 # MEDL REST calls
-grep "MedlemskapRestConsumer" application.log
+grep "MedlemskapClient" application.log
 
 # Saga step execution
 grep "LagreMedlemsperiodeMedl\|LagreLovvalgsperiodeMedl" application.log
@@ -266,3 +279,4 @@ grep "LagreMedlemsperiodeMedl\|LagreLovvalgsperiodeMedl" application.log
 
 - **[Enums](references/enums.md)**: Complete MEDL enum reference
 - **[Mapping](references/mapping.md)**: Domain to MEDL data mapping
+- **[Debugging](references/debugging.md)**: SQL queries, log patterns, and failure-mode playbook

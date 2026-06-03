@@ -55,8 +55,8 @@ log.info("Template: $malnavn, Data: ${objectMapper.writeValueAsString(data)}")
 
 **Investigation**:
 ```kotlin
-// Log intermediate data
-val dto = dokgenMalMapper.lagDokgenDtoFraBestilling(produserbartDokument, behandling, bestilling)
+// Log intermediate data (mapBehandling is the public entry point on DokgenMalMapper)
+val dto = dokgenMalMapper.mapBehandling(dokgenBrevbestilling, mottaker)
 log.info("Generated DTO: ${objectMapper.writeValueAsString(dto)}")
 ```
 
@@ -73,11 +73,9 @@ log.info("Generated DTO: ${objectMapper.writeValueAsString(dto)}")
 
 **Investigation**:
 ```kotlin
-// Check recipient logic
-val mottakere = dokgenService.hentMottakere(behandling, brevbestillingDto)
-mottakere.forEach { m ->
-    log.info("Recipient: rolle=${m.rolle}, id=${m.id}, navn=${m.navn}")
-}
+// Check recipient logic (BrevmottakerService is the public entry point)
+val mottakerliste = brevmottakerService.hentMottakerliste(produserbartDokument, behandlingId)
+log.info("Mottakerliste: $mottakerliste")
 ```
 
 **Check**:
@@ -101,7 +99,7 @@ AND so.type = 'DOKUMENT';
 -- Check prosessinstans if in saga
 SELECT pi.* FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId
-AND pi.type LIKE '%BREV%';
+AND pi.prosess_type LIKE '%BREV%';
 ```
 
 **Check**:
@@ -119,7 +117,7 @@ AND pi.type LIKE '%BREV%';
 ```kotlin
 // Check distribution type
 log.info("Distribusjonstype: ${brevbestillingDto.distribusjonstype}")
-// VEDTAK_FYSISK, VIKTIG, ANNET
+// VEDTAK, VIKTIG, ANNET
 ```
 
 **Check**:
@@ -147,12 +145,12 @@ log.info("Letter $produserbartDokument uses Dokgen: $erDokgen")
 
 ### DokgenService Operations
 ```bash
-grep "DokgenService\|dokgenConsumer" application.log
+grep "DokgenService\|DokgenClient" application.log
 ```
 
 ### Template Mapping
 ```bash
-grep "DokgenMalMapper\|lagDokgenDtoFraBestilling" application.log
+grep "DokgenMalMapper\|mapBehandling" application.log
 ```
 
 ### PDF Generation
@@ -162,7 +160,7 @@ grep "lagPdf\|create-pdf" application.log
 
 ### Recipients
 ```bash
-grep "hentMottakere\|BrevmottakerService" application.log
+grep "hentMottakerliste\|BrevmottakerService" application.log
 ```
 
 ## SQL Queries
@@ -179,10 +177,10 @@ ORDER BY so.registrert_dato DESC;
 
 ### Find Saga Steps for Letters
 ```sql
-SELECT pi.id, pi.type, pi.sist_utforte_steg, pi.status
+SELECT pi.id, pi.prosess_type, pi.sist_fullfort_steg, pi.status
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId
-AND (pi.type LIKE '%BREV%' OR pi.sist_utforte_steg LIKE '%BREV%')
+AND (pi.prosess_type LIKE '%BREV%' OR pi.sist_fullfort_steg LIKE '%BREV%')
 ORDER BY pi.registrert_dato DESC;
 ```
 
@@ -201,7 +199,7 @@ ORDER BY pi.registrert_dato DESC;
 | Template Mapper | `service/.../dokument/brev/mapper/DokgenMalMapper.kt` |
 | Production Info | `service/.../dokument/brev/mapper/DokumentproduksjonsInfoMapper.java` |
 | Recipient Service | `service/.../dokument/BrevmottakerService.java` |
-| REST Consumer | `integrasjon/.../dokgen/DokgenConsumer.java` |
+| REST Client | `integrasjon/.../dokgen/DokgenClient.java` |
 | Saga Steps | `saksflyt/.../steg/brev/*.kt` |
 
 ## Manual Operations
@@ -222,11 +220,7 @@ val pdf = dokgenService.produserUtkast(behandlingId, bestilling)
 
 ### Check Template Data
 ```kotlin
-val dto = dokgenMalMapper.lagDokgenDtoFraBestilling(
-    INNVILGELSE_FOLKETRYGDLOVEN,
-    behandling,
-    bestilling
-)
+val dto = dokgenMalMapper.mapBehandling(dokgenBrevbestilling, mottaker)
 println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(dto))
 ```
 

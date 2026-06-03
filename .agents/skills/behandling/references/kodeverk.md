@@ -2,15 +2,21 @@
 
 ## Table of Contents
 1. [Behandlingsstatus](#behandlingsstatus)
-2. [Behandlingstype](#behandlingstype)
+2. [Behandlingstyper](#behandlingstyper)
 3. [Behandlingstema](#behandlingstema)
 4. [Behandlingsresultattyper](#behandlingsresultattyper)
-5. [Sakstype and Sakstema](#sakstype-and-sakstema)
+5. [Sakstyper and Sakstemaer](#sakstyper-and-sakstemaer)
 6. [Legal Combinations](#legal-combinations)
+
+> All enums below come from the external `melosys-internt-kodeverk` artifact
+> (package `no.nav.melosys.domain.kodeverk` and `...kodeverk.behandlinger`),
+> not from source under `domain/src/main/`.
 
 ## Behandlingsstatus
 
-Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingsstatus.java`
+Enum: `no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus` (melosys-internt-kodeverk).
+The predicate methods below live on the `Behandling` entity
+(`domain/src/main/kotlin/no/nav/melosys/domain/Behandling.kt`).
 
 | Status | Description | UI Text |
 |--------|-------------|---------|
@@ -25,29 +31,31 @@ Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingsstatus.java
 ### Status Predicates
 
 ```kotlin
-// In Behandling entity
-fun erAktiv() = status in listOf(OPPRETTET, UNDER_BEHANDLING)
-fun erInaktiv() = !erAktiv()
+// In Behandling entity (Behandling.kt)
+fun erInaktiv() = erAvsluttet() || status == MIDLERTIDIG_LOVVALGSBESLUTNING
+fun erAktiv() = !erInaktiv()
 fun erAvsluttet() = status == AVSLUTTET
-fun erRedigerbar() = status in listOf(OPPRETTET, UNDER_BEHANDLING, AVVENT_DOK_PART, AVVENT_DOK_UTL)
-fun erVenterForDokumentasjon() = status in listOf(AVVENT_DOK_PART, AVVENT_DOK_UTL)
+fun erRedigerbar() = erAktiv() && status != IVERKSETTER_VEDTAK &&
+    !(status == ANMODNING_UNNTAK_SENDT && tema != IKKE_YRKESAKTIV)
+fun erVenterForDokumentasjon() = status in listOf(AVVENT_DOK_PART, AVVENT_DOK_UTL, ANMODNING_UNNTAK_SENDT)
 ```
 
 ---
 
-## Behandlingstype
+## Behandlingstyper
 
-Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingstype.java`
+Enum: `no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper` (melosys-internt-kodeverk).
 
 | Type | Description | When Used |
 |------|-------------|-----------|
 | `FØRSTEGANG` | First-time treatment | New case, first behandling |
 | `NY_VURDERING` | Re-evaluation | New documents/info for existing case |
+| `HENVENDELSE` | Inquiry | General inquiry, no verdict expected |
 | `KLAGE` | Complaint/appeal | User disagrees with verdict |
 | `ENDRET_PERIODE` | Changed period | Period modification request |
-| `HENVENDELSE` | Inquiry | General inquiry, no verdict expected |
 | `MANGLENDE_INNBETALING_TRYGDEAVGIFT` | Missing payment | Auto-created for unpaid fees |
 | `ÅRSAVREGNING` | Annual reconciliation | Year-end settlement |
+| `SATSENDRING` | Rate change | Avgiftssats changed |
 
 ### Type Restrictions
 
@@ -60,7 +68,7 @@ Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingstype.java`
 
 ## Behandlingstema
 
-Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingstema.java`
+Enum: `no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema` (melosys-internt-kodeverk).
 
 ### EU/EØS Themes
 
@@ -97,7 +105,7 @@ Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingstema.java`
 
 ## Behandlingsresultattyper
 
-Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingsresultattyper.java`
+Enum: `no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper` (melosys-internt-kodeverk).
 
 ### Positive Outcomes
 
@@ -105,8 +113,8 @@ Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingsresultattyp
 |------|-------------|
 | `MEDLEM_I_FOLKETRYGDEN` | Approved membership |
 | `FASTSATT_LOVVALGSLAND` | Law selection established |
-| `GODKJENT_PERIODE` | Period approved |
-| `DELVIS_GODKJENT` | Partially approved |
+| `FORELOEPIG_FASTSATT_LOVVALGSLAND` | Law selection provisionally established |
+| `DELVIS_GODKJENT_UNNTAK` | Partially approved exception |
 
 ### Negative Outcomes
 
@@ -134,9 +142,11 @@ Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingsresultattyp
 
 ---
 
-## Sakstype and Sakstema
+## Sakstyper and Sakstemaer
 
-### Sakstype
+### Sakstyper
+
+Enum: `no.nav.melosys.domain.kodeverk.Sakstyper`.
 
 | Type | Description |
 |------|-------------|
@@ -144,7 +154,9 @@ Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingsresultattyp
 | `FTRL` | Folketrygdloven cases |
 | `TRYGDEAVTALE` | Bilateral agreement cases |
 
-### Sakstema
+### Sakstemaer
+
+Enum: `no.nav.melosys.domain.kodeverk.Sakstemaer`.
 
 | Tema | Description |
 |------|-------------|
@@ -179,7 +191,7 @@ Location: `domain/src/main/java/.../kodeverk/behandlinger/Behandlingsresultattyp
 **TRYGDEAVTALE + MEDLEMSKAP_LOVVALG**:
 - YRKESAKTIV, IKKE_YRKESAKTIV
 
-### Behandlingstype Restrictions
+### Behandlingstyper Restrictions
 
 | Cannot change to | When |
 |------------------|------|

@@ -23,24 +23,24 @@ legislation applies to a person working across EU/EEA borders. This is governed 
 
 ```
 Behandlingsresultat
-├── lovvalgsperioder: List<Lovvalgsperiode>
+├── lovvalgsperioder: List<Lovvalgsperiode>   (@Table "lovvalg_periode")
 │   ├── fom/tom: LocalDate
-│   ├── lovvalgsland: String (country code)
-│   ├── bestemmelse: LovvalgsBestemmelser
-│   ├── tilleggsbestemmelse: TilleggsBestemmelser?
-│   ├── innvilgelsesresultat: Innvilgelsesresultater
+│   ├── lovvalgsland: Land_iso2
+│   ├── bestemmelse: LovvalgBestemmelse
+│   ├── tilleggsbestemmelse: LovvalgBestemmelse?
+│   ├── innvilgelsesresultat: InnvilgelsesResultat
 │   ├── medlemskapstype: Medlemskapstyper
-│   ├── dekning: Trygdedekning
+│   ├── dekning: Trygdedekninger
+│   ├── kilde: PeriodeKilde?
 │   └── trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>
 └── vedtakMetadata: VedtakMetadata
-
-Unntaksperiode
-├── id: Long
-├── fom/tom: LocalDate
-├── unntakFraBestemmelse: UnntaksBestemmelser
-├── unntakFraLovvalgsland: String
-└── innvilgelsesresultat: Innvilgelsesresultater
 ```
+
+Unntak (registered exception) is **not** a separate entity. It is stored as the
+`unntak_fra_lovvalgsland` and `unntak_fra_bestemmelse` columns on the
+`lovvalg_periode` table (mapped on the `Lovvalgsperiode` entity). The only
+`Unntaksperiode` type in the codebase is a trivial service record
+`record Unntaksperiode(LocalDate fom, LocalDate tom)`.
 
 ### Key Articles (EU Regulation 883/2004)
 
@@ -130,34 +130,52 @@ Key operations:
 
 ## Kodeverk
 
-### LovvalgsBestemmelser (883/2004)
+Bestemmelse values implement the `LovvalgBestemmelse` interface
+(`domain.kodeverk`). The main concrete enums are `Lovvalgbestemmelser_883_2004`
+and `Tilleggsbestemmelser_883_2004`, plus `Lovvalgbestemmelser_987_2009`,
+`Overgangsregelbestemmelser` (1408/71) and the EFTA/Storbritannia konvensjon
+enums. Note the constant spelling has **no underscore before the article
+letter/sub-number**: it is `FO_883_2004_ART11_3A`, not `FO_883_2004_ART11_3_A`.
+
+### Lovvalgbestemmelser_883_2004
 
 ```
-FO_883_2004_ART11_3_A   - Employed in one country
-FO_883_2004_ART11_3_B   - Civil servant
-FO_883_2004_ART11_3_C   - Unemployed
-FO_883_2004_ART11_3_D   - Military service
-FO_883_2004_ART11_3_E   - Other non-employed
+FO_883_2004_ART11_1     - General rule
+FO_883_2004_ART11_3A    - Employed in one country
+FO_883_2004_ART11_3B    - Civil servant
+FO_883_2004_ART11_3C    - Unemployed
+FO_883_2004_ART11_3D    - Military service
+FO_883_2004_ART11_3E    - Other non-employed
 FO_883_2004_ART11_4     - Maritime worker
-FO_883_2004_ART11_5     - Air crew
 FO_883_2004_ART12_1     - Posted worker
 FO_883_2004_ART12_2     - Posted self-employed
-FO_883_2004_ART13_1     - Multi-state employee
-FO_883_2004_ART13_2     - Multi-state self-employed
-FO_883_2004_ART13_3     - Multi-state both
+FO_883_2004_ART13_1A    - Multi-state employee
+FO_883_2004_ART13_1B1   - Multi-state employee (sub-case i)
+FO_883_2004_ART13_1B2   - Multi-state employee (sub-case ii)
+FO_883_2004_ART13_1B3   - Multi-state employee (sub-case iii)
+FO_883_2004_ART13_1B4   - Multi-state employee (sub-case iv)
+FO_883_2004_ART13_2A    - Multi-state self-employed
+FO_883_2004_ART13_2B    - Multi-state self-employed
+FO_883_2004_ART13_3     - Multi-state both employed and self-employed
 FO_883_2004_ART13_4     - Multi-state civil servant
-FO_883_2004_ART14_11    - Business outside EEA (987/2009)
 FO_883_2004_ART15       - EU contract staff
 FO_883_2004_ART16_1     - Exception agreement
 FO_883_2004_ART16_2     - Pensioner exception
+FO_883_2004_ANNET       - Other
 ```
 
-### TilleggsBestemmelser
+`Art 14 nr. 11` (business/employer outside EU/EEA, multi-state work) belongs to
+the implementing regulation 987/2009, so the constant lives in
+`Lovvalgbestemmelser_987_2009` as `FO_987_2009_ART14_11` (not 883/2004).
+
+### Tilleggsbestemmelser_883_2004
 
 ```
 FO_883_2004_ART11_2     - Receiving cash benefits
 FO_883_2004_ART11_4_1   - Maritime - flag state
 FO_883_2004_ART11_5     - Air crew
+FO_883_2004_ART87A      - Transitional
+FO_883_2004_ART87_8     - Transitional
 ```
 
 ## A1 Attestation
@@ -170,7 +188,8 @@ Vedtaksfatting
     ▼
 ┌─────────────────┐
 │ Generer A1      │
-│ (A1Generator)   │
+│ (A1Mapper /     │
+│  BrevDataByggerA1)│
 └────────┬────────┘
          │
          ▼
@@ -210,49 +229,66 @@ The A1 certificate confirms:
 
 | SED | Source | Action |
 |-----|--------|--------|
-| A002 | Response to A001 | Agreement/rejection of exception |
-| A004 | Response to A003 | Confirmation/objection to decision |
+| A011 | Response to A001 | Approval (full agreement) of the art. 16 exception |
+| A002 | Response to A001 | Full or partial rejection of the exception request |
+| A004 | Response to A003 | Objection to the art. 13 decision |
 | A007 | Objection | Dispute of legislation decision |
 
 ## Debugging Queries
 
+Key schema facts (verified against Flyway migrations):
+- The table is `lovvalg_periode`; its FK to behandlingsresultat is `beh_resultat_id`.
+- `behandlingsresultat` has **no `id` column** — its PK is `behandling_id`
+  (shared with `behandling.id`), so `beh_resultat_id` effectively equals `behandling.id`.
+- `behandling` references `fagsak` via the **`saksnummer`** column (no `fagsak_id`);
+  `fagsak`'s PK is `saksnummer`, not `id`.
+- There are no `buc_case`, `sed` or `dokumentproduksjon` tables. BUC/SED state
+  lives in RINA (queried via EUX, not the DB). The saksrelasjon linking a
+  behandling/arkivsak to a RINA case is owned by melosys-eessi and reached
+  through `EessiClient` (see `EessiService.finnSakForRinasaksnummer` /
+  `lagreSaksrelasjon`), not stored in the melosys-api Oracle DB.
+
 ### Find Lovvalgsperiode by Behandling
 ```sql
-SELECT lp.*, br.id as br_id, b.status
-FROM lovvalgsperiode lp
-JOIN behandlingsresultat br ON lp.behandlingsresultat_id = br.id
-JOIN behandling b ON br.behandling_id = b.id
+SELECT lp.*, b.status
+FROM lovvalg_periode lp
+JOIN behandling b ON lp.beh_resultat_id = b.id
 WHERE b.id = :behandlingId;
 ```
 
-### Check A1 Generation Status
+### Find Lovvalgsperioder for Fagsak
 ```sql
-SELECT dp.*, b.id as behandling_id, f.saksnummer
-FROM dokumentproduksjon dp
-JOIN behandling b ON dp.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE dp.type = 'A1'
-AND f.saksnummer = :saksnummer
-ORDER BY dp.registrert_dato DESC;
+SELECT lp.id, lp.fom_dato, lp.tom_dato, lp.lovvalgsland,
+       lp.lovvalg_bestemmelse, lp.innvilgelse_resultat, lp.medlemskapstype,
+       lp.trygde_dekning, lp.medlperiode_id, b.status
+FROM lovvalg_periode lp
+JOIN behandling b ON lp.beh_resultat_id = b.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+WHERE f.saksnummer = :saksnummer
+ORDER BY lp.fom_dato DESC;
 ```
 
-### Find LA_BUC for Fagsak
+### Inspect a registered unntak (exception)
 ```sql
-SELECT bc.*, f.saksnummer
-FROM buc_case bc
-JOIN fagsak f ON bc.fagsak_id = f.id
-WHERE f.saksnummer = :saksnummer
-AND bc.type LIKE 'LA_BUC%';
+-- Unntak is stored as columns on lovvalg_periode, not a separate table
+SELECT lp.id, lp.fom_dato, lp.tom_dato,
+       lp.unntak_fra_lovvalgsland, lp.unntak_fra_bestemmelse,
+       lp.lovvalg_bestemmelse, lp.innvilgelse_resultat
+FROM lovvalg_periode lp
+WHERE lp.beh_resultat_id = :behandlingId
+AND (lp.unntak_fra_bestemmelse IS NOT NULL OR lp.unntak_fra_lovvalgsland IS NOT NULL);
 ```
 
-### Check SED Status
+### Check the iverksett-vedtak prosessinstans (A1 / SED / MEDL steps)
 ```sql
-SELECT sed.*, bc.type as buc_type, f.saksnummer
-FROM sed sed
-JOIN buc_case bc ON sed.buc_case_id = bc.id
-JOIN fagsak f ON bc.fagsak_id = f.id
-WHERE f.saksnummer = :saksnummer
-ORDER BY sed.registrert_dato DESC;
+-- Confirm the vedtak saga ran and which step it stopped on.
+-- A1 sending and MEDL registration happen as saga steps, not as DB rows.
+SELECT pi.uuid, pi.prosess_type, pi.steg, pi.antall_retry, pi.sover_til,
+       pi.endret_dato
+FROM prosessinstans pi
+WHERE pi.behandling_id = :behandlingId
+AND pi.prosess_type LIKE 'IVERKSETT_VEDTAK%'
+ORDER BY pi.endret_dato DESC;
 ```
 
 ## Common Issues
@@ -260,7 +296,7 @@ ORDER BY sed.registrert_dato DESC;
 | Issue | Symptoms | Investigation |
 |-------|----------|---------------|
 | Wrong article selected | Incorrect lovvalgsbestemmelse | Check vilkårsvurdering logic |
-| A1 not generated | No dokumentproduksjon | Check vedtak saga completed |
+| A1 not generated | A1 step not completed | Check vedtak saga (IVERKSETT_VEDTAK prosessinstans) completed |
 | SED not sent | BUC not updated | Check EUX integration logs |
 | Lovvalgsland wrong | Wrong country in period | Check søknad arbeidsland data |
 | Period overlap | Validation error | Check existing lovvalgsperioder |
@@ -281,7 +317,8 @@ ORDER BY sed.registrert_dato DESC;
 3. If yes: residence country legislation
 4. If no: employer establishment country
 5. Notify other countries via A003
-6. 2-month objection period
+6. Receiving country may object with A004; otherwise the BUC auto-closes
+   passively after ~8 weeks and the decision stands
 7. Result: One country's legislation applies
 
 ### Article 16 (Exception)
@@ -289,12 +326,10 @@ ORDER BY sed.registrert_dato DESC;
 2. Both countries must agree
 3. Must be in worker's interest
 4. Send A001 to other country
-5. Wait for A002 response
+5. Wait for response: A011 = approval, A002 = full/partial rejection
 6. Result: Agreed exception period
 
 ## Detailed Documentation
 
 - **[Articles](references/articles.md)**: Detailed article explanations
-- **[LA BUC](references/la-buc.md)**: BUC types and SED flows
-- **[A1 Attest](references/a1-attest.md)**: A1 generation details
 - **[Debugging Guide](references/debugging.md)**: SQL queries and troubleshooting

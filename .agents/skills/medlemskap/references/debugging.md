@@ -71,9 +71,10 @@ SELECT
     tp.id as avgift_id,
     tp.periode_fra,
     tp.periode_til,
-    tp.trygdeavgiftsbeloep_md
+    tp.trygdeavgift_beloep_mnd_verdi,
+    tp.trygdeavgift_beloep_mnd_valuta
 FROM medlemskapsperiode mp
-LEFT JOIN trygdeavgiftsperiode tp ON tp.grunnlag_medlemskapsperiode_id = mp.id
+LEFT JOIN trygdeavgiftsperiode tp ON tp.medlemskapsperiode_id = mp.id
 WHERE mp.behandlingsresultat_id = :behandlingsresultatId
 ORDER BY mp.fom_dato, tp.periode_fra;
 
@@ -86,7 +87,7 @@ WHERE mp.innvilgelse_resultat = 'INNVILGET'
 AND mp.medlemskapstype = 'FRIVILLIG'  -- Frivillig requires avgift
 AND NOT EXISTS (
     SELECT 1 FROM trygdeavgiftsperiode tp
-    WHERE tp.grunnlag_medlemskapsperiode_id = mp.id
+    WHERE tp.medlemskapsperiode_id = mp.id
 )
 AND b.status = 'AVSLUTTET';
 ```
@@ -202,7 +203,7 @@ MEDL sync failing?
 ├── Check prosessinstans for LAGRE_MEDLEMSKAPSPERIODE_MEDL
 ├── Check medlPeriodeID on period
 ├── Check MEDL API availability
-└── Check MedlemskapRestConsumer logs
+└── Check MedlemskapClient logs (integrasjon/medl)
 ```
 
 ## Code Entry Points

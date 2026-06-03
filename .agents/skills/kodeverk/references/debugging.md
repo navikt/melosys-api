@@ -14,14 +14,14 @@ FunksjonellException: "Ugyldig kombinasjon av sakstype, sakstema, behandlingstyp
 1. **Check valid combinations**:
 ```kotlin
 val gyldige = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(
-    sakstype, sakstema, hovedpart, behandlingstyper, sisteBehTema
+    hovedpart, sakstype, sakstema, aktivBehandlingID, sistBehandlingstema
 )
 log.info("Valid temaer for $sakstype/$sakstema: $gyldige")
 ```
 
 2. **Check if it's a second treatment restriction**:
 ```kotlin
-val ANNENGANGS_TEMAER = setOf(
+val BEHANDLINGSTEMA_FOR_ANNENGANGS_BEHANDLING = setOf(
     REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
     REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
     BESLUTNING_LOVVALG_NORGE,

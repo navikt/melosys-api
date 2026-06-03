@@ -19,7 +19,11 @@ Complete reference of all result types and when they're used.
 | `MEDHOLD` | Appeal upheld | KLAGE | Yes |
 | `KLAGEINNSTILLING` | Appeal recommendation | KLAGE | No |
 | `AVVIST_KLAGE` | Appeal rejected | KLAGE | Yes |
-| `OMGJORT` | Decision reversed | KLAGE | Yes |
+| `OMGJORT` | Decision reversed (fvl § 35), no klage required | NY_VURDERING | Yes |
+
+> The enum has more values than listed here, e.g. `FORELOEPIG_FASTSATT_LOVVALGSLAND` (backs `erUtpeking()`),
+> `REGISTRERT_UNNTAK`, `DELVIS_GODKJENT_UNNTAK`, `UTPEKING_NORGE_AVVIST`, `AVSLAG_MANGLENDE_OPPL`, `ANNULLERT`,
+> `AVBRUTT`, `DELVIS_OPPHØRT`, `FASTSATT_TRYGDEAVGIFT`, `HENLEGGELSE_BORTFALT`.
 
 ## Result Type by Case Type
 
@@ -41,13 +45,18 @@ IKKE_FASTSATT → HENLEGGELSE  (dismissed)
 *             → OPPHØRT  (termination)
 ```
 
-### Klage Cases (Appeals)
+### Klage Cases (Appeals, behandlingstype KLAGE)
 ```
 IKKE_FASTSATT → MEDHOLD  (appeal granted)
 IKKE_FASTSATT → AVVIST_KLAGE  (appeal rejected)
-IKKE_FASTSATT → OMGJORT  (decision reversed)
 IKKE_FASTSATT → KLAGEINNSTILLING  (recommendation made)
 ```
+
+### Ny vurdering Cases (behandlingstype NY_VURDERING)
+```
+IKKE_FASTSATT → OMGJORT  (decision reversed, fvl § 35 - no klage required)
+```
+OMGJORT is validated against `NY_VURDERING` in `AngiBehandlingsresultatService`, not against KLAGE.
 
 ## Checking Result Type
 
@@ -72,18 +81,19 @@ when (resultat.type) {
 
 ### Via Service (with validation)
 ```kotlin
-// Sets type and closes case
+// Sets type and closes case (takes behandlingID: Long, behandlingsresultattype)
 angiBehandlingsresultatService.oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(
-    behandling = behandling,
-    type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+    behandlingId,
+    Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
 )
 ```
 
 ### Direct Update
 ```kotlin
+// Takes (id: Long, behandlingsresultattype)
 behandlingsresultatService.oppdaterBehandlingsresultattype(
-    resultat = resultat,
-    type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+    id,
+    Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
 )
 ```
 
@@ -121,8 +131,9 @@ Each result also tracks how it was processed:
 ```kotlin
 resultat.erAutomatisert()  // Check if automated
 
+// Takes (id: Long, behandlingsmaate: Behandlingsmaate)
 behandlingsresultatService.oppdaterBehandlingsMaate(
-    resultat,
+    id,
     Behandlingsmaate.AUTOMATISERT
 )
 ```
@@ -131,11 +142,11 @@ behandlingsresultatService.oppdaterBehandlingsMaate(
 
 ### Find results by type
 ```sql
-SELECT br.id, br.type, b.status, f.saksnummer
+SELECT br.id, br.resultat_type, b.status, f.saksnummer
 FROM behandlingsresultat br
 JOIN behandling b ON b.id = br.id
-JOIN fagsak f ON f.saksnummer = b.fagsak_saksnummer
-WHERE br.type = 'FASTSATT_LOVVALGSLAND';
+JOIN fagsak f ON f.saksnummer = b.saksnummer
+WHERE br.resultat_type = 'FASTSATT_LOVVALGSLAND';
 ```
 
 ### Find IKKE_FASTSATT results (incomplete)
@@ -143,8 +154,8 @@ WHERE br.type = 'FASTSATT_LOVVALGSLAND';
 SELECT br.id, f.saksnummer, b.status, b.registrert_dato
 FROM behandlingsresultat br
 JOIN behandling b ON b.id = br.id
-JOIN fagsak f ON f.saksnummer = b.fagsak_saksnummer
-WHERE br.type = 'IKKE_FASTSATT'
+JOIN fagsak f ON f.saksnummer = b.saksnummer
+WHERE br.resultat_type = 'IKKE_FASTSATT'
 AND b.status NOT IN ('AVSLUTTET', 'LUKKET')
 ORDER BY b.registrert_dato;
 ```

@@ -13,13 +13,17 @@ Trygdeavgiftsperiode entities are attached to:
 
 ```kotlin
 @Entity
-class Trygdeavgiftsperiode {
-    var fom: LocalDate
-    var tom: LocalDate?
-    var skattepliktig: Skatteplikttype?  // Tax liability type
-    var avgiftsgruppe: Avgiftsgrupper?   // Charge group
-    var beregnetAvgift: BigDecimal?      // Calculated charge amount
-}
+@Table(name = "trygdeavgiftsperiode")
+class Trygdeavgiftsperiode(
+    val periodeFra: LocalDate,                       // @Column periode_fra
+    val periodeTil: LocalDate,                       // @Column periode_til
+    val trygdeavgiftsbeløpMd: Penger,                // embedded amount
+    val trygdesats: BigDecimal,                      // @Column trygdesats
+    // Grunnlag references (FK columns):
+    var grunnlagMedlemskapsperiode: Medlemskapsperiode? = null,        // medlemskapsperiode_id
+    var grunnlagLovvalgsPeriode: Lovvalgsperiode? = null,              // lovvalg_periode_id
+    var grunnlagHelseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = null, // helseutgift_dekkes_periode_id
+) : ErPeriode
 ```
 
 ## Getting Charge Periods
@@ -118,13 +122,13 @@ Charge groups determine the rate applied:
 
 ### Find charge periods for a behandling
 ```sql
--- Via lovvalgsperiode
+-- Via lovvalg_periode (FK column lovvalg_periode_id)
 SELECT tp.*
 FROM trygdeavgiftsperiode tp
-JOIN lovvalgsperiode lp ON lp.id = tp.lovvalgsperiode_id
-WHERE lp.behandlingsresultat_id = :behandlingId;
+JOIN lovvalg_periode lp ON lp.id = tp.lovvalg_periode_id
+WHERE lp.beh_resultat_id = :behandlingId;
 
--- Via medlemskapsperiode
+-- Via medlemskapsperiode (FK column medlemskapsperiode_id)
 SELECT tp.*
 FROM trygdeavgiftsperiode tp
 JOIN medlemskapsperiode mp ON mp.id = tp.medlemskapsperiode_id
@@ -133,23 +137,23 @@ WHERE mp.behandlingsresultat_id = :behandlingId;
 
 ### Find cases with charge periods in specific year
 ```sql
-SELECT DISTINCT f.saksnummer, br.type
+SELECT DISTINCT f.saksnummer, br.resultat_type
 FROM fagsak f
-JOIN behandling b ON b.fagsak_saksnummer = f.saksnummer
+JOIN behandling b ON b.saksnummer = f.saksnummer
 JOIN behandlingsresultat br ON br.id = b.id
-JOIN lovvalgsperiode lp ON lp.behandlingsresultat_id = br.id
-JOIN trygdeavgiftsperiode tp ON tp.lovvalgsperiode_id = lp.id
-WHERE EXTRACT(YEAR FROM tp.fom) <= 2024
-AND (tp.tom IS NULL OR EXTRACT(YEAR FROM tp.tom) >= 2024);
+JOIN lovvalg_periode lp ON lp.beh_resultat_id = br.id
+JOIN trygdeavgiftsperiode tp ON tp.lovvalg_periode_id = lp.id
+WHERE EXTRACT(YEAR FROM tp.periode_fra) <= 2024
+AND EXTRACT(YEAR FROM tp.periode_til) >= 2024;
 ```
 
 ### Find missing charge periods
 ```sql
 -- Lovvalgsperioder with INNVILGET but no charge periods
-SELECT lp.id, lp.fom, lp.tom, lp.innvilgelsesresultat
-FROM lovvalgsperiode lp
-LEFT JOIN trygdeavgiftsperiode tp ON tp.lovvalgsperiode_id = lp.id
-WHERE lp.innvilgelsesresultat = 'INNVILGET'
+SELECT lp.id, lp.fom_dato, lp.tom_dato, lp.innvilgelse_resultat
+FROM lovvalg_periode lp
+LEFT JOIN trygdeavgiftsperiode tp ON tp.lovvalg_periode_id = lp.id
+WHERE lp.innvilgelse_resultat = 'INNVILGET'
 AND tp.id IS NULL;
 ```
 

@@ -85,7 +85,7 @@ val query = ArbeidsforholdQuery(
     ansettelsesperiodeTom = null  // No end date filter
 )
 
-val response = arbeidsforholdConsumer.finnArbeidsforholdPrArbeidstaker(fnr, query)
+val response = arbeidsforholdClient.finnArbeidsforholdPrArbeidstaker(fnr, query)
 log.info("Found ${response.arbeidsforhold.size} employment relationships")
 
 response.arbeidsforhold.forEach { arb ->
@@ -168,13 +168,13 @@ AND so.type IN ('ARBFORH', 'ORG');
 ### EREG Operations
 
 ```bash
-grep "EregRestService\|OrganisasjonRestConsumer\|eregFasade" application.log
+grep "EregRestService\|OrganisasjonRestClient\|eregFasade" application.log
 ```
 
 ### AAREG Operations
 
 ```bash
-grep "ArbeidsforholdService\|ArbeidsforholdConsumer\|AAREG" application.log
+grep "ArbeidsforholdService\|ArbeidsforholdClient\|AAREG" application.log
 ```
 
 ### Register Operations
@@ -226,10 +226,10 @@ ORDER BY so.type;
 |-----------|----------|
 | EREG Facade | `integrasjon/.../ereg/EregFasade.kt` |
 | EREG Service | `integrasjon/.../ereg/EregRestService.kt` |
-| EREG Consumer | `integrasjon/.../ereg/organisasjon/OrganisasjonRestConsumer.kt` |
+| EREG Client | `integrasjon/.../ereg/organisasjon/OrganisasjonRestClient.kt` |
 | EREG Converter | `integrasjon/.../ereg/EregDtoTilSaksopplysningKonverter.kt` |
 | AAREG Service | `service/.../aareg/ArbeidsforholdService.kt` |
-| AAREG Consumer | `integrasjon/.../aareg/arbeidsforhold/ArbeidsforholdConsumer.kt` |
+| AAREG Client | `integrasjon/.../aareg/arbeidsforhold/ArbeidsforholdClient.kt` |
 | AAREG Converter | `service/.../aareg/ArbeidsforholdKonverter.kt` |
 | Register Service | `service/.../registeropplysninger/RegisteropplysningerService.java` |
 | Org Lookup | `service/.../registeropplysninger/OrganisasjonOppslagService.java` |
