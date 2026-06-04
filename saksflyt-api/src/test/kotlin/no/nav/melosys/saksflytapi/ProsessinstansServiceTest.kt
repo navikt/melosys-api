@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflytapi
 
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.maps.shouldContainKey
 import io.kotest.matchers.maps.shouldContainValue
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -813,10 +814,17 @@ class ProsessinstansServiceTest {
     fun `opprett prosessinstans for melosys skjema mottatt skal opprette prosessinstans med korrekt type og låsReferanse`() {
         val skjemaId = UUID.randomUUID()
         val melding = SkjemaMottattMelding(skjemaId)
+        val typeSlot = slot<Collection<ProsessType>>()
 
-        every { prosessinstansRepo.existsByLåsReferanseAndTypeIn(skjemaId.toString(), any()) } returns false
+        every { prosessinstansRepo.existsByLåsReferanseAndTypeIn(skjemaId.toString(), capture(typeSlot)) } returns false
 
         prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(melding)
+
+        // Dedupen skal sjekke på tvers av nøyaktig begge digital-søknad-typene, også på NY-flyten
+        typeSlot.captured shouldContainExactlyInAnyOrder listOf(
+            ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD,
+            ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
+        )
 
         val lagretInstans = piListCaptor.last()
         lagretInstans.run {
@@ -869,12 +877,10 @@ class ProsessinstansServiceTest {
 
         prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding, "MEL-42")
 
-        typeSlot.captured.containsAll(
-            listOf(
-                ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD,
-                ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
-            )
-        ) shouldBe true
+        typeSlot.captured shouldContainExactlyInAnyOrder listOf(
+            ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD,
+            ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
+        )
         verify(exactly = 0) { prosessinstansRepo.save(any<Prosessinstans>()) }
     }
 
