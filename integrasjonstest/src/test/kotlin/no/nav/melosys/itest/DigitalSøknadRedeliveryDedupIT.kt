@@ -24,15 +24,6 @@ import java.time.Duration
 import java.util.UUID
 
 /**
- * Regresjonstest for prod-hendelsen 2. juni 2026 (sak MEL-1200370): samme digitale søknad ble
- * levert to ganger på Kafka med samme correlation-id.
- *
- * Scenariet:
- * 1. Levering 1 finner ingen sak → MELOSYS_MOTTAK_DIGITAL_SØKNAD (NY), oppretter sak + behandling
- *    + skjema→sak-mapping og fullfører (sender ett forvaltningsmelding-brev).
- * 2. Redelivery av SAMME skjemaId finner nå saken via mappingen → rutes til
- *    MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD (en ANNEN prosesstype).
- *
  * Verifiserer cross-type-dedupen (existsByLåsReferanseAndTypeIn over begge digital-søknad-typene):
  * redeliveryen oppretter IKKE en duplikat-prosess, selv om den rutes til en annen type enn første
  * levering. Dermed unngås både dobbelt forvaltningsmelding og 409 fra journalføringen.
