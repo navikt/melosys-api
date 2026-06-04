@@ -35,6 +35,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.LuftfartBase
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid
 import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.LandvelgerService
@@ -466,6 +467,74 @@ class SedDataByggerTest {
         val sedData = lagSedData()
 
         sedData.arbeidssteder.map { it.adresse.shouldNotBeNull().gateadresse } shouldContain IKKE_TILGJENGELIG
+    }
+
+    @Test
+    fun `lag medMaritimtArbeid bruker maritimt arbeidssted frem for IkkeFastArbeidssted`() {
+        every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) } returns listOf(Land_iso2.DK)
+        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns mutableMapOf(
+            "Stena Don" to AvklartMaritimtArbeid(
+                "Stena Don",
+                listOf(Avklartefakta().apply {
+                    this.fakta = "DK"
+                    this.type = Avklartefaktatyper.ARBEIDSLAND
+                })
+            )
+        )
+        val behandling = DataByggerStubs.hentBehandlingStub().apply {
+            mottatteOpplysninger!!.mottatteOpplysningerData.maritimtArbeid = listOf(MaritimtArbeid().apply {
+                enhetNavn = "Stena Don"
+                innretningLandkode = "DK"
+                innretningstype = Innretningstyper.PLATTFORM
+            })
+        }
+        val behandlingsresultat = lagStandardBehandlingsresultat(behandling)
+        val dataGrunnlag = lagGrunnlagMedSøknad(behandling)
+
+        val sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
+
+        sedData.arbeidssteder.any {
+            it.navn == "Stena Don" &&
+                it.adresse?.land == "DK" &&
+                it.adresse?.poststed != INGEN_FAST_ADRESSE
+        } shouldBe true
+        sedData.arbeidssteder.any {
+            it.navn == INGEN_FAST_ADRESSE && it.adresse?.land == "DK"
+        } shouldBe false
+    }
+
+    @Test
+    fun `lag medMaritimtArbeid bruker maritimt arbeidssted når avklartefakta har annen subjekt nøkkel`() {
+        every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) } returns listOf(Land_iso2.DK)
+        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns mutableMapOf(
+            "annen-nøkkel" to AvklartMaritimtArbeid(
+                "Stena Don",
+                listOf(Avklartefakta().apply {
+                    this.fakta = "DK"
+                    this.type = Avklartefaktatyper.ARBEIDSLAND
+                })
+            )
+        )
+        val behandling = DataByggerStubs.hentBehandlingStub().apply {
+            mottatteOpplysninger!!.mottatteOpplysningerData.maritimtArbeid = listOf(MaritimtArbeid().apply {
+                enhetNavn = "Stena Don"
+                innretningLandkode = "DK"
+                innretningstype = Innretningstyper.PLATTFORM
+            })
+        }
+        val behandlingsresultat = lagStandardBehandlingsresultat(behandling)
+        val dataGrunnlag = lagGrunnlagMedSøknad(behandling)
+
+        val sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
+
+        sedData.arbeidssteder.any {
+            it.navn == "Stena Don" &&
+                it.adresse?.land == "DK" &&
+                it.adresse?.poststed != INGEN_FAST_ADRESSE
+        } shouldBe true
+        sedData.arbeidssteder.any {
+            it.navn == INGEN_FAST_ADRESSE && it.adresse?.land == "DK"
+        } shouldBe false
     }
 
     @Test
