@@ -176,8 +176,8 @@ AND b.endret_dato < SYSDATE - INTERVAL '2' HOUR;
 
 ### Check Behandling with Prosessinstans
 ```sql
--- prosessinstans has no status column; saga progress is tracked via steg + antall_retry/sover_til
-SELECT b.id, b.status, p.prosess_type, p.steg, p.antall_retry, p.sover_til
+-- saga progress is tracked via prosessinstans.status + sist_fullfort_steg
+SELECT b.id, b.status, p.prosess_type, p.status as prosess_status, p.sist_fullfort_steg
 FROM behandling b
 LEFT JOIN prosessinstans p ON p.behandling_id = b.id
 WHERE b.id = :behandlingId
@@ -188,7 +188,7 @@ ORDER BY p.registrert_dato DESC;
 
 | Issue | Symptoms | Investigation |
 |-------|----------|---------------|
-| Stuck in IVERKSETTER_VEDTAK | Can't edit behandling | Check prosessinstans steg / antall_retry / sover_til |
+| Stuck in IVERKSETTER_VEDTAK | Can't edit behandling | Check prosessinstans status / sist_fullfort_steg |
 | Wrong behandlingstype | Validation errors | Check journalføring logic |
 | Missing behandlingsresultat | NullPointer | Check saga completed successfully |
 | Can't create ny vurdering | FunksjonellException | Check fagsak.status and existing active behandling |

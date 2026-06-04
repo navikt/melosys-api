@@ -185,9 +185,9 @@ For members not required to file Norwegian tax return:
 
 ### Find Årsavregning Status
 ```sql
-SELECT aa.*, b.status, b.type, f.saksnummer
+SELECT aa.*, b.status, b.beh_type, f.saksnummer
 FROM aarsavregning aa
-JOIN behandlingsresultat br ON aa.behandlingsresultat_id = br.id
+JOIN behandlingsresultat br ON aa.behandlingsresultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
 JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE f.saksnummer = :saksnummer
@@ -205,8 +205,8 @@ them there (or via Kafka), not via a melosys-api table.
 SELECT t.*, mp.id as mp_id
 FROM trygdeavgiftsperiode t
 JOIN medlemskapsperiode mp ON t.medlemskapsperiode_id = mp.id
-JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.id
-WHERE br.id = (
+JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.behandling_id
+WHERE br.behandling_id = (
     SELECT aa.tidligere_resultat_id
     FROM aarsavregning aa WHERE aa.behandlingsresultat_id = :aarsavregningBehandlingsresultatId
 );
@@ -215,8 +215,8 @@ WHERE br.id = (
 SELECT t.*, mp.id as mp_id
 FROM trygdeavgiftsperiode t
 JOIN medlemskapsperiode mp ON t.medlemskapsperiode_id = mp.id
-JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.id
-WHERE br.id = :aarsavregningBehandlingsresultatId;
+JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.behandling_id
+WHERE br.behandling_id = :aarsavregningBehandlingsresultatId;
 ```
 
 ## Common Issues

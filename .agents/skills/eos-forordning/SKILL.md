@@ -210,7 +210,7 @@ FETCH FIRST 50 ROWS ONLY;
 ```sql
 SELECT lp.id, lp.lovvalg_bestemmelse, lp.fom_dato, lp.tom_dato, f.gsak_saksnummer
 FROM lovvalg_periode lp
-JOIN behandlingsresultat br ON lp.beh_resultat_id = br.id
+JOIN behandlingsresultat br ON lp.beh_resultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
 JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE f.fagsak_type = 'EU_EOS'

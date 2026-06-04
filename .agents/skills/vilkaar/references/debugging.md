@@ -122,7 +122,7 @@ Vilkår not appearing in UI?
 ├── Is bestemmelse selected?
 │   └── No → Select bestemmelse first
 ├── Is behandlingstema correct?
-│   └── Check behandling.tema matches expected (YRKESAKTIV/IKKE_YRKESAKTIV/PENSJONIST)
+│   └── Check behandling.beh_tema matches expected (YRKESAKTIV/IKKE_YRKESAKTIV/PENSJONIST)
 ├── Does the bestemmelse need avklarte fakta first?
 │   └── Some (2-1, 2-2, 2-5 andre ledd, 2-8 fjerde ledd) branch on
 │       arbeidssituasjon / relasjon / søknadsland before returning vilkår

@@ -153,10 +153,10 @@ FROM behandling b
 WHERE b.id = :behandlingId;
 
 -- Check stored saksopplysninger
-SELECT so.type, so.registrert_dato, so.versjon
+SELECT so.opplysning_type, so.registrert_dato, so.versjon
 FROM saksopplysning so
 WHERE so.behandling_id = :behandlingId
-AND so.type IN ('ARBFORH', 'ORG');
+AND so.opplysning_type IN ('ARBFORH', 'ORG');
 ```
 
 **Resolution**:
@@ -189,22 +189,26 @@ grep "RegisteropplysningerService\|hentOgLagreOpplysninger" application.log
 
 ```sql
 -- Find organization data for a behandling
+-- (kildesystem/mottatt_dokument live on saksopplysning_kilde, joined via saksopplysning_id)
 SELECT so.id, so.registrert_dato, so.versjon,
-       so.kildesystem, so.mottatt_dokument
+       sk.kildesystem, sk.mottatt_dokument
 FROM saksopplysning so
+LEFT JOIN saksopplysning_kilde sk ON sk.saksopplysning_id = so.id
 WHERE so.behandling_id = :behandlingId
-AND so.type = 'ORG';
+AND so.opplysning_type = 'ORG';
 ```
 
 ### Find Employment Saksopplysninger
 
 ```sql
 -- Find employment data for a behandling
+-- (kildesystem/mottatt_dokument live on saksopplysning_kilde, joined via saksopplysning_id)
 SELECT so.id, so.registrert_dato, so.versjon,
-       so.kildesystem, so.mottatt_dokument
+       sk.kildesystem, sk.mottatt_dokument
 FROM saksopplysning so
+LEFT JOIN saksopplysning_kilde sk ON sk.saksopplysning_id = so.id
 WHERE so.behandling_id = :behandlingId
-AND so.type = 'ARBFORH';
+AND so.opplysning_type = 'ARBFORH';
 ```
 
 ### Find All Register Data Timestamps
@@ -212,12 +216,12 @@ AND so.type = 'ARBFORH';
 ```sql
 SELECT b.id as behandling_id,
        b.siste_opplysninger_hentet_dato,
-       so.type,
+       so.opplysning_type,
        so.registrert_dato
 FROM behandling b
 LEFT JOIN saksopplysning so ON so.behandling_id = b.id
 WHERE b.id = :behandlingId
-ORDER BY so.type;
+ORDER BY so.opplysning_type;
 ```
 
 ## Key Code Locations

@@ -140,7 +140,7 @@ External service `melosys-trygdeavgift-beregning`:
 ```sql
 -- skatteforhold_til_norge and inntektsperiode have no FK to medlemskapsperiode;
 -- they are linked through trygdeavgiftsperiode (skatteforhold_id / inntektsperiode_id).
-SELECT mp.id, mp.trygdedekning,
+SELECT mp.id, mp.trygde_dekning,
        s.skatteplikt_type,
        i.avgiftspliktig_inntekt_mnd_verdi,
        i.avgiftspliktig_inntekt_total_verdi,

@@ -173,23 +173,23 @@ Note: ÅRSAVREGNING is **not** a valid behandlingstype for TRYGDEAVTALE. In the 
 ### Find Trygdeavtale Cases
 
 ```sql
-SELECT f.id, f.gsak_saksnr, f.sakstype, b.id as behandling_id
+SELECT f.saksnummer, f.gsak_saksnummer, f.fagsak_type, b.id as behandling_id
 FROM fagsak f
-JOIN behandling b ON b.fagsak_id = f.id
-WHERE f.sakstype = 'TRYGDEAVTALE'
-ORDER BY b.opprettet_tid DESC;
+JOIN behandling b ON b.saksnummer = f.saksnummer
+WHERE f.fagsak_type = 'TRYGDEAVTALE'
+ORDER BY b.registrert_dato DESC;
 ```
 
 ### Check Lovvalgsperiode for Agreement
 
 ```sql
-SELECT lp.id, lp.bestemmelse, lp.fom, lp.tom, f.gsak_saksnr
-FROM lovvalgsperiode lp
-JOIN behandlingsresultat br ON lp.behandlingsresultat_id = br.id
+SELECT lp.id, lp.lovvalg_bestemmelse, lp.fom_dato, lp.tom_dato, f.gsak_saksnummer
+FROM lovvalg_periode lp
+JOIN behandlingsresultat br ON lp.beh_resultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE f.sakstype = 'TRYGDEAVTALE'
-AND lp.bestemmelse LIKE '%_ART%';
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+WHERE f.fagsak_type = 'TRYGDEAVTALE'
+AND lp.lovvalg_bestemmelse LIKE '%_ART%';
 ```
 
 ## References

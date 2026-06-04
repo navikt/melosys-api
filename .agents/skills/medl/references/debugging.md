@@ -28,7 +28,7 @@ WHERE ap.beh_resultat_id = :behandlingsresultatId;
 -- Joins: behandlingsresultat.behandling_id = behandling.id; behandling.saksnummer = fagsak.saksnummer
 SELECT lp.id, b.beh_type, b.status, f.saksnummer
 FROM lovvalg_periode lp
-JOIN behandlingsresultat br ON br.id = lp.beh_resultat_id
+JOIN behandlingsresultat br ON br.behandling_id = lp.beh_resultat_id
 JOIN behandling b ON b.id = br.behandling_id
 JOIN fagsak f ON f.saksnummer = b.saksnummer
 WHERE lp.medlperiode_id IS NULL
@@ -40,7 +40,7 @@ AND b.status = 'AVSLUTTET';
 
 ```sql
 -- Columns: prosess_type (entity field `type`), sist_fullfort_steg (field `sistFullførtSteg`)
-SELECT pi.id, pi.prosess_type, pi.status, pi.sist_fullfort_steg, pi.endret_dato
+SELECT pi.uuid, pi.prosess_type, pi.status, pi.sist_fullfort_steg, pi.endret_dato
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId
 AND pi.prosess_type LIKE 'IVERKSETT_VEDTAK%'
@@ -50,7 +50,7 @@ ORDER BY pi.registrert_dato DESC;
 ### Find Failed MEDL Steps
 
 ```sql
-SELECT pi.id, pi.prosess_type, pi.sist_fullfort_steg, pi.status, pi.endret_dato
+SELECT pi.uuid, pi.prosess_type, pi.sist_fullfort_steg, pi.status, pi.endret_dato
 FROM prosessinstans pi
 WHERE pi.sist_fullfort_steg IN (
     'LAGRE_MEDLEMSKAPSPERIODE_MEDL',
@@ -130,8 +130,8 @@ WHERE lp.beh_resultat_id = :behandlingsresultatId;
 SELECT br.resultat_type, br.utfall_registrering_unntak,
        lp.lovvalg_bestemmelse, lp.innvilgelse_resultat
 FROM behandlingsresultat br
-JOIN lovvalg_periode lp ON lp.beh_resultat_id = br.id
-WHERE br.id = :behandlingsresultatId;
+JOIN lovvalg_periode lp ON lp.beh_resultat_id = br.behandling_id
+WHERE br.behandling_id = :behandlingsresultatId;
 ```
 
 **Logic**:

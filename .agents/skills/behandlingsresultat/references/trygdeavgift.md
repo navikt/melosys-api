@@ -140,8 +140,8 @@ WHERE mp.behandlingsresultat_id = :behandlingId;
 SELECT DISTINCT f.saksnummer, br.resultat_type
 FROM fagsak f
 JOIN behandling b ON b.saksnummer = f.saksnummer
-JOIN behandlingsresultat br ON br.id = b.id
-JOIN lovvalg_periode lp ON lp.beh_resultat_id = br.id
+JOIN behandlingsresultat br ON br.behandling_id = b.id
+JOIN lovvalg_periode lp ON lp.beh_resultat_id = br.behandling_id
 JOIN trygdeavgiftsperiode tp ON tp.lovvalg_periode_id = lp.id
 WHERE EXTRACT(YEAR FROM tp.periode_fra) <= 2024
 AND EXTRACT(YEAR FROM tp.periode_til) >= 2024;

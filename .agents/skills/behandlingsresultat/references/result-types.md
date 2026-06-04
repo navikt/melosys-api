@@ -142,18 +142,18 @@ behandlingsresultatService.oppdaterBehandlingsMaate(
 
 ### Find results by type
 ```sql
-SELECT br.id, br.resultat_type, b.status, f.saksnummer
+SELECT br.behandling_id, br.resultat_type, b.status, f.saksnummer
 FROM behandlingsresultat br
-JOIN behandling b ON b.id = br.id
+JOIN behandling b ON b.id = br.behandling_id
 JOIN fagsak f ON f.saksnummer = b.saksnummer
 WHERE br.resultat_type = 'FASTSATT_LOVVALGSLAND';
 ```
 
 ### Find IKKE_FASTSATT results (incomplete)
 ```sql
-SELECT br.id, f.saksnummer, b.status, b.registrert_dato
+SELECT br.behandling_id, f.saksnummer, b.status, b.registrert_dato
 FROM behandlingsresultat br
-JOIN behandling b ON b.id = br.id
+JOIN behandling b ON b.id = br.behandling_id
 JOIN fagsak f ON f.saksnummer = b.saksnummer
 WHERE br.resultat_type = 'IKKE_FASTSATT'
 AND b.status NOT IN ('AVSLUTTET', 'LUKKET')

@@ -198,12 +198,12 @@ FROM trygdeavgiftsperiode t
 LEFT JOIN medlemskapsperiode mp ON t.medlemskapsperiode_id = mp.id
 LEFT JOIN lovvalg_periode lp ON t.lovvalg_periode_id = lp.id
 WHERE mp.behandlingsresultat_id = :behandlingsresultatId
-   OR lp.behandlingsresultat_id = :behandlingsresultatId;
+   OR lp.beh_resultat_id = :behandlingsresultatId;
 ```
 
 ### Check Fakturaserie Status
 ```sql
-SELECT br.id, br.fakturaserie_referanse, b.status, f.saksnummer
+SELECT br.behandling_id, br.fakturaserie_referanse, b.status, f.saksnummer
 FROM behandlingsresultat br
 JOIN behandling b ON br.behandling_id = b.id
 JOIN fagsak f ON b.saksnummer = f.saksnummer
@@ -213,9 +213,9 @@ AND f.saksnummer = :saksnummer;
 
 ### Find Årsavregning for Year
 ```sql
-SELECT aa.*, br.id as behandlingsresultat_id, b.id as behandling_id
+SELECT aa.*, br.behandling_id as behandlingsresultat_id, b.id as behandling_id
 FROM aarsavregning aa
-JOIN behandlingsresultat br ON aa.behandlingsresultat_id = br.id
+JOIN behandlingsresultat br ON aa.behandlingsresultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
 WHERE aa.aar = :year
 AND b.saksnummer = :saksnummer;

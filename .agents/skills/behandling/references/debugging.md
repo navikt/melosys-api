@@ -87,11 +87,11 @@ ORDER BY b.endret_dato ASC;
 
 ```sql
 -- behandlingsresultat PK is behandling_id (no separate id).
--- Period tables reference it via beh_resultat_id.
+-- Most period tables reference it via beh_resultat_id, but medlemskapsperiode uses behandlingsresultat_id.
 SELECT
     b.id, b.status, b.beh_type, b.beh_tema,
     br.behandling_id as resultat_behandling_id, br.resultat_type,
-    (SELECT COUNT(*) FROM medlemskapsperiode mp WHERE mp.beh_resultat_id = br.behandling_id) as medlemskapsperioder,
+    (SELECT COUNT(*) FROM medlemskapsperiode mp WHERE mp.behandlingsresultat_id = br.behandling_id) as medlemskapsperioder,
     (SELECT COUNT(*) FROM lovvalg_periode lp WHERE lp.beh_resultat_id = br.behandling_id) as lovvalgsperioder
 FROM behandling b
 LEFT JOIN behandlingsresultat br ON br.behandling_id = b.id
@@ -101,8 +101,8 @@ WHERE b.id = :behandlingId;
 ### Check Prosessinstanser for Behandling
 
 ```sql
--- prosessinstans has no status column; progress = steg + antall_retry/sover_til. PK is uuid.
-SELECT p.uuid, p.prosess_type, p.steg, p.antall_retry, p.sist_forsoekt, p.sover_til,
+-- progress = status + sist_fullfort_steg (last completed step). PK is uuid.
+SELECT p.uuid, p.prosess_type, p.status, p.sist_fullfort_steg,
        p.registrert_dato, p.endret_dato
 FROM prosessinstans p
 WHERE p.behandling_id = :behandlingId
@@ -118,14 +118,16 @@ FROM behandling b
 WHERE b.id = :behandlingId;
 ```
 
-### Check Status History (behandling_historikk)
+### Check Status History (behandling_dvh)
 
 ```sql
--- behandling_historikk is the status-change audit trail (there is no Envers behandling_aud table).
-SELECT id, behandling_id, dato, status, ident, kommentar
-FROM behandling_historikk
+-- There is no behandling_historikk or Envers behandling_aud table; the live audit
+-- trail for status changes is the data-warehouse mirror behandling_dvh.
+SELECT trans_id, behandling_id, status, beh_type, resultat_type,
+       funksjonell_tid, registrert_av, dml_flagg
+FROM behandling_dvh
 WHERE behandling_id = :behandlingId
-ORDER BY dato DESC
+ORDER BY trans_tid DESC
 FETCH FIRST 10 ROWS ONLY;
 ```
 
@@ -147,8 +149,8 @@ ORDER BY b.registrert_dato DESC;
 
 **Investigation**:
 ```sql
--- Check prosessinstans progress (steg + retry/sover_til; no status column)
-SELECT p.uuid, p.prosess_type, p.steg, p.antall_retry, p.sist_forsoekt, p.sover_til
+-- Check prosessinstans progress (status + sist_fullfort_steg)
+SELECT p.uuid, p.prosess_type, p.status, p.sist_fullfort_steg
 FROM prosessinstans p
 WHERE p.behandling_id = :behandlingId
 AND p.prosess_type LIKE 'IVERKSETT_VEDTAK%';
@@ -213,11 +215,12 @@ WHERE b.id = :behandlingId;
 
 **Investigation**:
 ```sql
--- Check the status-change history
-SELECT id, behandling_id, dato, status, ident, kommentar
-FROM behandling_historikk
+-- Check the status-change history (data-warehouse mirror; no behandling_historikk table)
+SELECT trans_id, behandling_id, status, beh_type, resultat_type,
+       funksjonell_tid, registrert_av, dml_flagg
+FROM behandling_dvh
 WHERE behandling_id = :behandlingId
-ORDER BY dato DESC;
+ORDER BY trans_tid DESC;
 ```
 
 **Possible Causes**:
@@ -293,13 +296,13 @@ WHERE behandling_id = :behandlingId
 AND prosess_type LIKE 'IVERKSETT_VEDTAK%';
 ```
 
-2. If the saga has stalled (high antall_retry / past sover_til): Restart via admin
+2. If the saga has stalled (status FEILET, or stuck on a sist_fullfort_steg): Restart via admin
 ```
 POST /admin/prosessinstanser/restart        (body: {"uuids": ["<uuid>"]})
 POST /admin/prosessinstanser/feilede/restart (restart all failed)
 ```
 
-3. If the saga has not advanced its steg for >2h: Check for external service issues, restart
+3. If the saga has not advanced its sist_fullfort_steg for >2h: Check for external service issues, restart
 
 4. If no saga but status is IVERKSETTER_VEDTAK:
 ```sql

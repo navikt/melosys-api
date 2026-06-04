@@ -193,7 +193,7 @@ curl "http://localhost:8083/api/v1/fakturaserie/{referanse}"
 ### SQL Queries
 ```sql
 -- All fakturaseriereferanser for case
-SELECT br.fakturaserie_referanse, b.type, b.status, b.registrert_dato
+SELECT br.fakturaserie_referanse, b.beh_type, b.status, b.registrert_dato
 FROM behandlingsresultat br
 JOIN behandling b ON br.behandling_id = b.id
 WHERE b.saksnummer = :saksnummer

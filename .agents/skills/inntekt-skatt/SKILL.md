@@ -201,9 +201,9 @@ ORDER BY b.registrert_dato DESC;
 ### Check Prosessinstans for Årsavregning
 
 ```sql
--- prosessinstans stores prosess_type and the current steg inline (PK is uuid).
+-- prosessinstans stores prosess_type and the last completed step inline (PK is uuid).
 -- prosess_steg is just a (kode, navn) lookup table.
-SELECT pi.uuid, pi.prosess_type, pi.steg, pi.endret_dato
+SELECT pi.uuid, pi.prosess_type, pi.sist_fullfort_steg, pi.endret_dato
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId
 AND pi.prosess_type IN ('OPPRETT_NY_BEHANDLING_AARSAVREGNING', 'IVERKSETT_VEDTAK_AARSAVREGNING')

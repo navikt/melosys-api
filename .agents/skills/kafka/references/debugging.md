@@ -61,10 +61,12 @@ val result = future[15L, TimeUnit.SECONDS]
 
 **Debug**:
 ```sql
--- Check for duplicate handling
+-- Check for duplicate handling. prosessinstans has no kafka_key column;
+-- the SED lock key is stored in sed_laas_referanse, and the timestamp
+-- column is registrert_dato (PK is uuid).
 SELECT * FROM prosessinstans
-WHERE kafka_key = :key
-ORDER BY opprettet_tid;
+WHERE sed_laas_referanse = :key
+ORDER BY registrert_dato;
 ```
 
 **Solution**: Ensure idempotent processing

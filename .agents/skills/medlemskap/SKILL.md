@@ -219,19 +219,22 @@ Refer to `medl` skill for detailed MEDL integration patterns.
 ```sql
 SELECT mp.*, br.behandling_id
 FROM medlemskapsperiode mp
-JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.id
+JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.behandling_id
 WHERE br.behandling_id = :behandlingId
 ORDER BY mp.fom_dato;
 ```
 
 ### Find Periods by Person
 ```sql
+-- The person/aktør is not a column on fagsak; it lives in the aktoer table
+-- (rolle BRUKER) joined on saksnummer.
 SELECT mp.*, b.id as behandling_id, f.saksnummer
 FROM medlemskapsperiode mp
-JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.id
+JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE f.bruker_aktor_id = :aktorId
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+JOIN aktoer a ON a.saksnummer = f.saksnummer AND a.rolle = 'BRUKER'
+WHERE a.aktoer_id = :aktorId
 ORDER BY mp.fom_dato DESC;
 ```
 
@@ -240,7 +243,7 @@ ORDER BY mp.fom_dato DESC;
 SELECT mp.id, mp.fom_dato, mp.tom_dato, mp.innvilgelse_resultat,
        mp.medlemskapstype, mp.medlperiode_id
 FROM medlemskapsperiode mp
-JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.id
+JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.behandling_id
 WHERE br.behandling_id = :behandlingId
 AND mp.medlperiode_id IS NULL;  -- Not synced to MEDL
 ```
@@ -255,11 +258,11 @@ WHERE mp.behandlingsresultat_id = :behandlingsresultatId;
 
 ### Check Period Validation Issues
 ```sql
-SELECT mp.*, b.tema, f.type as sakstype
+SELECT mp.*, b.beh_tema, f.fagsak_type as sakstype
 FROM medlemskapsperiode mp
-JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.id
+JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE mp.tom_dato IS NULL
 AND mp.bestemmelse != 'FTRL_KAP2_2_1';  -- Open-ended but not bosatt
 ```

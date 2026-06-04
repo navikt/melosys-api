@@ -100,12 +100,15 @@ Designation periods for Article 13 cases (working in multiple countries).
 
 ```sql
 CREATE TABLE utpekingsperiode (
-    id              NUMBER NOT NULL PRIMARY KEY,
-    beh_resultat_id NUMBER NOT NULL REFERENCES behandlingsresultat(behandling_id),
-    fom_dato        DATE NOT NULL,
-    tom_dato        DATE,
-    utpekt_land     VARCHAR2(99),                   -- Designated country
-    bestemmelse     VARCHAR2(99)                    -- Legal basis
+    id                  NUMBER NOT NULL PRIMARY KEY,
+    beh_resultat_id     NUMBER NOT NULL REFERENCES behandlingsresultat(behandling_id),
+    fom_dato            DATE NOT NULL,
+    tom_dato            DATE,
+    lovvalgsland        VARCHAR2(99),               -- Designated country
+    lovvalgsbestemmelse VARCHAR2(99),               -- Legal basis
+    tilleggsbestemmelse VARCHAR2(99),               -- Additional article
+    medlperiode_id      NUMBER,                     -- MEDL external reference
+    sendt_utland        DATE                        -- Sent to foreign authority
 );
 ```
 
@@ -137,11 +140,15 @@ Income periods used for charge calculation.
 
 ```sql
 CREATE TABLE inntektsperiode (
-    id              NUMBER NOT NULL PRIMARY KEY,
-    fom_dato        DATE NOT NULL,
-    tom_dato        DATE NOT NULL,
-    inntekt_verdi   NUMBER NOT NULL,
-    inntekt_valuta  VARCHAR2(3) NOT NULL
+    id                                NUMBER NOT NULL PRIMARY KEY,
+    fom_dato                          DATE NOT NULL,
+    tom_dato                          DATE NOT NULL,
+    inntektskilde_type                VARCHAR2(99),
+    avgiftspliktig_inntekt_mnd_verdi  NUMBER,           -- Monthly chargeable income
+    avgiftspliktig_inntekt_mnd_valuta VARCHAR2(3),      -- Currency code
+    aga_betales_til_skatt             NUMBER(1),
+    avgiftspliktig_inntekt_total_verdi  NUMBER,         -- Total chargeable income
+    avgiftspliktig_inntekt_total_valuta VARCHAR2(3)     -- Currency code
 );
 ```
 
@@ -154,7 +161,7 @@ CREATE TABLE skatteforhold_til_norge (
     id                  NUMBER NOT NULL PRIMARY KEY,
     fom_dato            DATE NOT NULL,
     tom_dato            DATE NOT NULL,
-    skattepliktig       NUMBER(1) NOT NULL          -- 1 = tax liable to Norway
+    skatteplikt_type    VARCHAR2(99)                -- Tax liability type (SKATTEPLIKTIG_I_NORGE, etc.)
 );
 ```
 
@@ -168,7 +175,7 @@ CREATE TABLE helseutgift_dekkes_periode (
     beh_resultat_id NUMBER NOT NULL REFERENCES behandlingsresultat(behandling_id),
     fom_dato        DATE NOT NULL,
     tom_dato        DATE NOT NULL,
-    dekkes          NUMBER(1) NOT NULL,             -- 1 = covered
+    bosted_landkode VARCHAR2(99),                   -- Country of residence
     kilde           VARCHAR2(30) DEFAULT 'MELOSYS' NOT NULL  -- V151: source system
 );
 ```

@@ -152,9 +152,9 @@ FETCH FIRST 20 ROWS ONLY;
 ### Trace Årsavregning Prosessinstans
 
 ```sql
--- prosessinstans (PK uuid) stores prosess_type and current steg inline.
+-- prosessinstans (PK uuid) stores prosess_type and the last completed step inline.
 -- prosessinstans_hendelser holds the per-step history (steg, type, melding).
-SELECT pi.uuid, pi.prosess_type, pi.steg AS naavaerende_steg,
+SELECT pi.uuid, pi.prosess_type, pi.sist_fullfort_steg AS naavaerende_steg,
        h.steg AS hendelse_steg, h.type, h.melding, h.registrert_dato
 FROM prosessinstans pi
 JOIN prosessinstans_hendelser h ON h.prosessinstans_id = pi.uuid

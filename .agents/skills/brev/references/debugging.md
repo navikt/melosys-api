@@ -94,7 +94,7 @@ log.info("Mottakerliste: $mottakerliste")
 -- Check for saksopplysning with document
 SELECT so.* FROM saksopplysning so
 WHERE so.behandling_id = :behandlingId
-AND so.type = 'DOKUMENT';
+AND so.opplysning_type = 'DOKUMENT';
 
 -- Check prosessinstans if in saga
 SELECT pi.* FROM prosessinstans pi
@@ -168,16 +168,16 @@ grep "hentMottakerliste\|BrevmottakerService" application.log
 ### Find Letters for Behandling
 ```sql
 -- Via saksopplysning
-SELECT so.id, so.type, so.verdi, so.registrert_dato
+SELECT so.id, so.opplysning_type, so.dokument, so.registrert_dato
 FROM saksopplysning so
 WHERE so.behandling_id = :behandlingId
-AND so.type = 'DOKUMENT'
+AND so.opplysning_type = 'DOKUMENT'
 ORDER BY so.registrert_dato DESC;
 ```
 
 ### Find Saga Steps for Letters
 ```sql
-SELECT pi.id, pi.prosess_type, pi.sist_fullfort_steg, pi.status
+SELECT pi.uuid, pi.prosess_type, pi.sist_fullfort_steg, pi.status
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId
 AND (pi.prosess_type LIKE '%BREV%' OR pi.sist_fullfort_steg LIKE '%BREV%')

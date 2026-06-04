@@ -283,7 +283,7 @@ AND (lp.unntak_fra_bestemmelse IS NOT NULL OR lp.unntak_fra_lovvalgsland IS NOT 
 ```sql
 -- Confirm the vedtak saga ran and which step it stopped on.
 -- A1 sending and MEDL registration happen as saga steps, not as DB rows.
-SELECT pi.uuid, pi.prosess_type, pi.steg, pi.antall_retry, pi.sover_til,
+SELECT pi.uuid, pi.prosess_type, pi.sist_fullfort_steg, pi.status,
        pi.endret_dato
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId

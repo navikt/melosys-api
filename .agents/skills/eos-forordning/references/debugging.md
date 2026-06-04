@@ -37,7 +37,7 @@ if (erEuEllerEøsLand && sakstype != Sakstyper.EU_EOS) {
 ```sql
 SELECT lp.lovvalg_bestemmelse, f.fagsak_type
 FROM lovvalg_periode lp
-JOIN behandlingsresultat br ON lp.beh_resultat_id = br.id
+JOIN behandlingsresultat br ON lp.beh_resultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
 JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE b.id = :behandlingId;
@@ -54,7 +54,7 @@ WHERE b.id = :behandlingId;
 **Debug**: BUC/SED documents are NOT stored in the melosys-api database — they live in melosys-eessi. From melosys-api, inspect the SED saga via `prosessinstans` (it links to behandling via `behandling_id`; the current step is the `sist_fullfort_steg` column, and the saga type is `prosess_type`).
 
 ```sql
-SELECT pi.id, pi.prosess_type, pi.status, pi.sist_fullfort_steg, pi.registrert_dato
+SELECT pi.uuid, pi.prosess_type, pi.status, pi.sist_fullfort_steg, pi.registrert_dato
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId
 ORDER BY pi.registrert_dato DESC;
@@ -67,7 +67,7 @@ ORDER BY pi.registrert_dato DESC;
 **Check the resultat type**: whether an A1 is produced is decided in code by `Behandlingsresultat.a1Produseres()` (`erInnvilgelse() && !erUtpeking() && harVedtak()`), not by a single column. Inspect the result type and whether a vedtak exists:
 
 ```sql
-SELECT br.id, br.resultat_type
+SELECT br.behandling_id, br.resultat_type
 FROM behandlingsresultat br
 WHERE br.behandling_id = :behandlingId;
 ```
@@ -90,7 +90,7 @@ WHERE mo.behandling_id = :behandlingId;
 ```sql
 SELECT lp.lovvalgsland, lp.lovvalg_bestemmelse
 FROM lovvalg_periode lp
-JOIN behandlingsresultat br ON lp.beh_resultat_id = br.id
+JOIN behandlingsresultat br ON lp.beh_resultat_id = br.behandling_id
 WHERE br.behandling_id = :behandlingId;
 ```
 
@@ -125,7 +125,7 @@ SELECT
     lp.tom_dato,
     lp.innvilgelse_resultat
 FROM lovvalg_periode lp
-JOIN behandlingsresultat br ON lp.beh_resultat_id = br.id
+JOIN behandlingsresultat br ON lp.beh_resultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
 JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE f.fagsak_type = 'EU_EOS'
@@ -139,7 +139,7 @@ FETCH FIRST 50 ROWS ONLY;
 BUC and SED documents are NOT stored in the melosys-api database — they are owned by melosys-eessi (queried there via the `saksrelasjon`/RINA tables). From melosys-api, trace the SED saga via `prosessinstans` instead:
 
 ```sql
-SELECT pi.id, pi.prosess_type, pi.status, pi.sist_fullfort_steg
+SELECT pi.uuid, pi.prosess_type, pi.status, pi.sist_fullfort_steg
 FROM prosessinstans pi
 JOIN behandling b ON pi.behandling_id = b.id
 JOIN fagsak f ON b.saksnummer = f.saksnummer
@@ -163,7 +163,7 @@ SELECT
     ap.unntak_fra_lovvalgsland,
     f.gsak_saksnummer
 FROM anmodningsperiode ap
-JOIN behandlingsresultat br ON ap.beh_resultat_id = br.id
+JOIN behandlingsresultat br ON ap.beh_resultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
 JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE f.fagsak_type = 'EU_EOS'
@@ -179,7 +179,7 @@ SELECT
     lp.lovvalg_bestemmelse,
     lp.lovvalgsland
 FROM lovvalg_periode lp
-JOIN behandlingsresultat br ON lp.beh_resultat_id = br.id
+JOIN behandlingsresultat br ON lp.beh_resultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
 JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE lp.lovvalg_bestemmelse LIKE 'FO_883_2004_ART13%'
@@ -195,7 +195,7 @@ SELECT
     lp.lovvalg_bestemmelse,
     COUNT(*) as antall
 FROM lovvalg_periode lp
-JOIN behandlingsresultat br ON lp.beh_resultat_id = br.id
+JOIN behandlingsresultat br ON lp.beh_resultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
 JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE f.fagsak_type = 'EU_EOS'
@@ -211,7 +211,7 @@ SELECT
     lp.lovvalgsland,
     COUNT(*) as antall
 FROM lovvalg_periode lp
-JOIN behandlingsresultat br ON lp.beh_resultat_id = br.id
+JOIN behandlingsresultat br ON lp.beh_resultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
 JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE f.fagsak_type = 'EU_EOS'

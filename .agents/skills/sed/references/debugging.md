@@ -7,15 +7,15 @@
 There is **no** `seddokument` / `sed_dokument` table and no
 `opplysningstype = 'RINA_SAKSNUMMER'` row (that literal only exists in test code).
 SED data is stored as a SED-opplysning in the `saksopplysning` table
-(`opplysning_type = 'SEDOPPL'`), serialized as XML in the `dokument_xml` column
+(`opplysning_type = 'SEDOPPL'`), serialized as XML in the `dokument` column
 (domain type `SedDokument`, a `SaksopplysningDokument`). The RINA saksnummer lives
 **inside that XML blob** (path `/sedDokument/...`), so it is not a plain column.
 It is also embedded as the prefix of the saga lock reference
 (`prosessinstans.sed_laas_referanse`, form `rinaSaksnummer_sedId_versjon`).
 
 ```sql
--- Locate the SED saksopplysning for a behandling (inspect dokument_xml for the rina saksnummer)
-SELECT s.id, s.opplysning_type, s.registrert_dato, s.dokument_xml
+-- Locate the SED saksopplysning for a behandling (inspect dokument for the rina saksnummer)
+SELECT s.id, s.opplysning_type, s.registrert_dato, s.dokument
 FROM saksopplysning s
 WHERE s.behandling_id = :behandlingId
 AND s.opplysning_type = 'SEDOPPL'
@@ -57,21 +57,26 @@ ORDER BY pi.endret_dato DESC;
 ```
 
 ### Find Incoming SEDs (Journalposter)
+
+There is **no** `journalpost` table in melosys-api — journalpost metadata lives in
+SAF/Joark (external). melosys-api only keeps the initierende journalpost id on the
+behandling (`behandling.initierende_journalpost_id`, plus
+`behandling.initierende_dokument_id`):
 ```sql
-SELECT jp.id, jp.mottakskanal, jp.registrert_dato, jp.tittel
-FROM journalpost jp
-WHERE jp.behandling_id = :behandlingId
-AND jp.mottakskanal = 'EESSI'
-ORDER BY jp.registrert_dato DESC;
+SELECT b.id, b.initierende_journalpost_id, b.initierende_dokument_id, b.registrert_dato
+FROM behandling b
+WHERE b.id = :behandlingId;
 ```
 
 ### Find SED Documents
 
 SED documents are SED-opplysninger in the `saksopplysning` table (no dedicated
-`sed_dokument` table); `sed_type` and `rina_saksnummer` live inside `dokument_xml`:
+`sed_dokument` table); `sed_type` and `rina_saksnummer` live inside `dokument`
+(the kildesystem is on the related `saksopplysning_kilde.kildesystem`):
 ```sql
-SELECT s.id, s.registrert_dato, s.kilde, s.dokument_xml
+SELECT s.id, s.registrert_dato, sk.kildesystem, s.dokument
 FROM saksopplysning s
+LEFT JOIN saksopplysning_kilde sk ON sk.saksopplysning_id = s.id
 WHERE s.behandling_id = :behandlingId
 AND s.opplysning_type = 'SEDOPPL'
 ORDER BY s.registrert_dato DESC;

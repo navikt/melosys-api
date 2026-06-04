@@ -115,7 +115,10 @@ AND b.status != 'AVSLUTTET';
 
 ### Status change audit
 ```sql
--- If using Hibernate Envers auditing
-SELECT * FROM fagsak_aud
-WHERE saksnummer = 'MEL-12345'
-ORDER BY rev DESC;
+-- NOTE: fagsak is NOT Envers-audited - there is no fagsak_aud table.
+-- The only audit (*_AUD) tables are aktoer_aud and fullmakt_aud.
+-- Fagsak status history is not tracked in a dedicated audit table;
+-- inspect endret_dato/endret_av on the fagsak row instead.
+SELECT saksnummer, status, endret_dato, endret_av
+FROM fagsak
+WHERE saksnummer = 'MEL-12345';

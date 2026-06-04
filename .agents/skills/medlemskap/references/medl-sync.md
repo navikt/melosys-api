@@ -138,10 +138,10 @@ nyeMedlemskapsperioder
 ### Check Prosessinstans Status
 
 ```sql
-SELECT pi.id, pi.type, pi.status, pi.sist_utforte_steg, pi.feil_melding
+SELECT pi.uuid, pi.prosess_type, pi.status, pi.sist_fullfort_steg
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId
-AND pi.type LIKE 'IVERKSETT_VEDTAK%';
+AND pi.prosess_type LIKE 'IVERKSETT_VEDTAK%';
 ```
 
 ### Check Period MEDL Status
@@ -185,10 +185,11 @@ val periode = medlService.hentEksisterendePeriode(medlPeriodeID)
 -- Check prosessinstans
 SELECT * FROM prosessinstans
 WHERE behandling_id = :id
-AND type = 'IVERKSETT_VEDTAK_FTRL';
+AND prosess_type = 'IVERKSETT_VEDTAK_FTRL';
 
--- Check step status
-SELECT sist_utforte_steg, feil_melding FROM prosessinstans
+-- Check step status (prosessinstans has no feil_melding column; failure surfaces via status,
+-- and per-step history/error text lives in prosessinstans_hendelser.melding)
+SELECT sist_fullfort_steg, status FROM prosessinstans
 WHERE behandling_id = :id;
 ```
 

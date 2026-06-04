@@ -260,7 +260,7 @@ WHERE mp.behandlingsresultat_id = :behandlingsresultatId;
 ### Check Saga Step Execution
 ```sql
 -- Columns: prosess_type (entity field `type`), sist_fullfort_steg (field `sistFullførtSteg`)
-SELECT pi.id, pi.prosess_type, pi.status, pi.sist_fullfort_steg
+SELECT pi.uuid, pi.prosess_type, pi.status, pi.sist_fullfort_steg
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId
 AND pi.prosess_type LIKE 'IVERKSETT_VEDTAK%';

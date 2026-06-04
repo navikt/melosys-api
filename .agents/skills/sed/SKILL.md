@@ -294,12 +294,12 @@ The RINA saksnummer is **not** stored as a `saksopplysning` row with
 `opplysningstype = 'RINA_SAKSNUMMER'` (that string only exists in test code) and
 there is no `seddokument`/`sed_dokument` table. SED data is a SED-opplysning in the
 `saksopplysning` table (`opplysning_type = 'SEDOPPL'`), serialized as XML in
-`dokument_xml`; the RINA saksnummer lives inside that XML (domain type
+`dokument`; the RINA saksnummer lives inside that XML (domain type
 `SedDokument`). It is also the prefix of the saga lock reference
 (`prosessinstans.sed_laas_referanse`, see below).
 
 ```sql
-SELECT s.id, s.registrert_dato, s.dokument_xml
+SELECT s.id, s.registrert_dato, s.dokument
 FROM saksopplysning s
 WHERE s.behandling_id = :behandlingId
 AND s.opplysning_type = 'SEDOPPL'

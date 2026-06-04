@@ -30,8 +30,8 @@ ORDER BY b.registrert_dato DESC;
 
 ### Find Saga Steps Related to Oppgave
 ```sql
--- prosessinstans columns: prosess_type, steg (FK to prosess_steg); no status/sist_utforte_steg
-SELECT pi.uuid, pi.prosess_type, pi.steg, pi.antall_retry
+-- prosessinstans columns: prosess_type, status, sist_fullfort_steg (steg renamed and antall_retry dropped in V7.1_01)
+SELECT pi.uuid, pi.prosess_type, pi.status, pi.sist_fullfort_steg
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId
 ORDER BY pi.registrert_dato DESC;

@@ -4,11 +4,11 @@
 
 ### Find All Trygdeavgiftsperioder for a Person
 ```sql
-SELECT t.*, mp.periode_fra as mp_fra, mp.periode_til as mp_til,
+SELECT t.*, mp.fom_dato as mp_fra, mp.tom_dato as mp_til,
        f.saksnummer, b.id as behandling_id, b.status
 FROM trygdeavgiftsperiode t
 JOIN medlemskapsperiode mp ON t.medlemskapsperiode_id = mp.id
-JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.id
+JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
 JOIN fagsak f ON b.saksnummer = f.saksnummer
 JOIN aktoer a ON a.saksnummer = f.saksnummer AND a.rolle = 'BRUKER'
@@ -32,7 +32,7 @@ WHERE t.id = :trygdeavgiftsperiodeId;
 
 ### Check Fakturaserie Status
 ```sql
-SELECT br.fakturaserie_referanse, br.id as br_id,
+SELECT br.fakturaserie_referanse, br.behandling_id as br_id,
        b.id as behandling_id, b.status as beh_status,
        f.saksnummer, f.betalingsvalg
 FROM behandlingsresultat br
@@ -47,9 +47,9 @@ SELECT aa.aar, aa.beregnet_avgift_belop,
        aa.manuelt_avgift_beloep, aa.endelig_avgift_valg,
        aa.tidligere_fakturert_beloep, aa.innbetalt_trygdeavgift,
        aa.til_fakturering_beloep,
-       b.id as behandling_id, b.status, b.type
+       b.id as behandling_id, b.status, b.beh_type
 FROM aarsavregning aa
-JOIN behandlingsresultat br ON aa.behandlingsresultat_id = br.id
+JOIN behandlingsresultat br ON aa.behandlingsresultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
 JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE f.saksnummer = :saksnummer
@@ -58,7 +58,7 @@ ORDER BY aa.aar DESC, b.registrert_dato DESC;
 
 ### Check Manglende Innbetaling Prosess
 ```sql
-SELECT pi.id, pi.prosess_type, pi.status, pi.sist_fullfort_steg,
+SELECT pi.uuid, pi.prosess_type, pi.status, pi.sist_fullfort_steg,
        pi.data, pi.registrert_dato, pi.endret_dato
 FROM prosessinstans pi
 WHERE pi.prosess_type = 'OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING'
@@ -86,12 +86,13 @@ service — inspect them there (or on the Kafka topic), not via a melosys-api ta
 4. Verify melosys-trygdeavgift-beregning service is accessible
 
 ```sql
--- Check grunnlag exists
-SELECT mp.id, mp.trygdedekning,
-       (SELECT COUNT(*) FROM skatteforhold_til_norge s
-        WHERE s.medlemskapsperiode_id = mp.id) as skatteforhold_count,
-       (SELECT COUNT(*) FROM inntektsperiode i
-        WHERE i.medlemskapsperiode_id = mp.id) as inntekt_count
+-- Check grunnlag exists. skatteforhold_til_norge and inntektsperiode have no FK to
+-- medlemskapsperiode; they are linked via trygdeavgiftsperiode (skatteforhold_id / inntektsperiode_id).
+SELECT mp.id, mp.trygde_dekning,
+       (SELECT COUNT(*) FROM trygdeavgiftsperiode t
+        WHERE t.medlemskapsperiode_id = mp.id AND t.skatteforhold_id IS NOT NULL) as skatteforhold_count,
+       (SELECT COUNT(*) FROM trygdeavgiftsperiode t
+        WHERE t.medlemskapsperiode_id = mp.id AND t.inntektsperiode_id IS NOT NULL) as inntekt_count
 FROM medlemskapsperiode mp
 WHERE mp.behandlingsresultat_id = :behandlingsresultatId;
 ```
@@ -136,7 +137,7 @@ WHERE t.medlemskapsperiode_id IN (
 
 ```sql
 -- Find all fakturaserie for case
-SELECT br.fakturaserie_referanse, b.id, b.type, b.status,
+SELECT br.fakturaserie_referanse, b.id, b.beh_type, b.status,
        b.registrert_dato, b.endret_dato
 FROM behandlingsresultat br
 JOIN behandling b ON br.behandling_id = b.id
@@ -161,7 +162,7 @@ ORDER BY b.registrert_dato;
 -- check the melosys-skattehendelser service / Kafka instead.
 
 -- Check for blocking active behandling
-SELECT b.id, b.type, b.status
+SELECT b.id, b.beh_type, b.status
 FROM behandling b
 WHERE b.saksnummer = :saksnummer
 AND b.status NOT IN ('AVSLUTTET');

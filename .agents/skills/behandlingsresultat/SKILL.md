@@ -253,7 +253,7 @@ hentResultatMedMedlemskapOgLovvalg()
 ### Find Behandlingsresultat
 ```sql
 SELECT br.* FROM behandlingsresultat br
-WHERE br.id = :behandlingId;
+WHERE br.behandling_id = :behandlingId;
 ```
 
 ### Find All Periods for a Result
@@ -270,20 +270,20 @@ SELECT * FROM anmodningsperiode WHERE beh_resultat_id = :id;
 
 ### Find Results Without Decision
 ```sql
-SELECT br.id, b.status
+SELECT br.behandling_id, b.status
 FROM behandlingsresultat br
-JOIN behandling b ON b.id = br.id
-LEFT JOIN vedtak_metadata vm ON vm.behandlingsresultat_id = br.id
-WHERE vm.id IS NULL
+JOIN behandling b ON b.id = br.behandling_id
+LEFT JOIN vedtak_metadata vm ON vm.behandlingsresultat_id = br.behandling_id
+WHERE vm.behandlingsresultat_id IS NULL
 AND br.resultat_type != 'IKKE_FASTSATT';
 ```
 
 ### Find Results with Multiple Periods (potential issue)
 ```sql
-SELECT br.id, COUNT(*) as period_count
+SELECT br.behandling_id, COUNT(*) as period_count
 FROM behandlingsresultat br
-JOIN lovvalg_periode lp ON lp.beh_resultat_id = br.id
-GROUP BY br.id
+JOIN lovvalg_periode lp ON lp.beh_resultat_id = br.behandling_id
+GROUP BY br.behandling_id
 HAVING COUNT(*) > 1;
 ```
 

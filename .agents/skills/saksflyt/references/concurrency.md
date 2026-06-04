@@ -239,7 +239,7 @@ WHERE behandling_id = ?
 With `@DynamicUpdate`:
 ```sql
 UPDATE behandlingsresultat
-SET lovvalgsperiode_fom = ?  -- Only the column that actually changed
+SET begrunnelse_fritekst = ?  -- Only the column that actually changed
 WHERE behandling_id = ?
 ```
 
@@ -326,16 +326,16 @@ Long-running issues may not be noticed.
 
 Find active sagas for a RINA case:
 ```sql
-SELECT id, type, status, lås_referanse, endret_dato
+SELECT uuid, prosess_type, status, sed_laas_referanse, endret_dato
 FROM prosessinstans
-WHERE lås_referanse LIKE '12345%'  -- RINA case number
+WHERE sed_laas_referanse LIKE '12345%'  -- RINA case number
 AND status NOT IN ('FERDIG', 'FEILET')
 ORDER BY registrert_dato;
 ```
 
 Find stuck sagas:
 ```sql
-SELECT id, type, status, lås_referanse, registrert_dato, endret_dato
+SELECT uuid, prosess_type, status, sed_laas_referanse, registrert_dato, endret_dato
 FROM prosessinstans
 WHERE status = 'UNDER_BEHANDLING'
 AND endret_dato < SYSDATE - INTERVAL '1' HOUR;
@@ -343,11 +343,11 @@ AND endret_dato < SYSDATE - INTERVAL '1' HOUR;
 
 Check for overlapping active sagas:
 ```sql
-SELECT p1.id as saga1, p2.id as saga2,
-       p1.lås_referanse, p1.status as status1, p2.status as status2
+SELECT p1.uuid as saga1, p2.uuid as saga2,
+       p1.sed_laas_referanse, p1.status as status1, p2.status as status2
 FROM prosessinstans p1
-JOIN prosessinstans p2 ON p1.id < p2.id
-WHERE p1.lås_referanse LIKE SUBSTR(p2.lås_referanse, 1, INSTR(p2.lås_referanse, '_') - 1) || '%'
+JOIN prosessinstans p2 ON p1.uuid < p2.uuid
+WHERE p1.sed_laas_referanse LIKE SUBSTR(p2.sed_laas_referanse, 1, INSTR(p2.sed_laas_referanse, '_') - 1) || '%'
 AND p1.status = 'UNDER_BEHANDLING'
 AND p2.status = 'UNDER_BEHANDLING';
 ```

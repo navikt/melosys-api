@@ -216,7 +216,7 @@ fun removeMedlemskapsperiode(periode: Medlemskapsperiode)
 ```sql
 CREATE TABLE medlemskapsperiode (
     id                    NUMBER PRIMARY KEY,
-    behandlingsresultat_id NUMBER NOT NULL REFERENCES behandlingsresultat(id),
+    behandlingsresultat_id NUMBER NOT NULL REFERENCES behandlingsresultat(behandling_id),
     fom_dato              DATE NOT NULL,
     tom_dato              DATE,
     innvilgelse_resultat  VARCHAR2(50) NOT NULL,  -- INNVILGET, AVSLAATT, OPPHØRT

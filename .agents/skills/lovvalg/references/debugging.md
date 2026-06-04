@@ -52,7 +52,7 @@ AND (lp.unntak_fra_bestemmelse IS NOT NULL OR lp.unntak_fra_lovvalgsland IS NOT 
 ### Check the iverksett-vedtak saga (A1 / SED / MEDL steps)
 ```sql
 -- A1 sending, SED sending and MEDL registration are saga steps, not DB rows.
-SELECT pi.uuid, pi.prosess_type, pi.steg, pi.antall_retry, pi.sover_til, pi.endret_dato
+SELECT pi.uuid, pi.prosess_type, pi.sist_fullfort_steg, pi.status, pi.endret_dato
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId
 AND pi.prosess_type LIKE 'IVERKSETT_VEDTAK%'
@@ -97,12 +97,12 @@ WHERE lp.beh_resultat_id = :behandlingId;
 
 **Investigation:**
 1. Check the IVERKSETT_VEDTAK saga status
-2. Verify which `steg` the prosessinstans stopped on
+2. Verify which step (`sist_fullfort_steg`) the prosessinstans stopped on
 3. Check dokgen / A1 brev mapping (`A1Mapper`, `BrevDataByggerA1`)
 
 ```sql
 -- Check vedtak prosessinstans (no separate dokumentproduksjon table exists)
-SELECT pi.uuid, pi.prosess_type, pi.steg, pi.antall_retry, pi.sover_til, pi.endret_dato
+SELECT pi.uuid, pi.prosess_type, pi.sist_fullfort_steg, pi.status, pi.endret_dato
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId
 AND pi.prosess_type LIKE 'IVERKSETT_VEDTAK%';
@@ -117,12 +117,12 @@ AND pi.prosess_type LIKE 'IVERKSETT_VEDTAK%';
 **Investigation:**
 1. Check EUX logs (`EessiClient` / `EessiService`)
 2. Verify BUC and SED status directly in RINA (not in the DB)
-3. Check the prosessinstans `steg` for the relevant SED-sending step
+3. Check the prosessinstans `sist_fullfort_steg` for the relevant SED-sending step
 
 ```sql
 -- SED/BUC state lives in RINA, not the melosys-api DB. From the DB side you can
 -- only inspect the saga step that should have sent the SED.
-SELECT pi.uuid, pi.prosess_type, pi.steg, pi.antall_retry, pi.sover_til
+SELECT pi.uuid, pi.prosess_type, pi.sist_fullfort_steg, pi.status
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId;
 ```
@@ -184,8 +184,8 @@ AND COALESCE(lp1.tom_dato, DATE '9999-12-31') >= lp2.fom_dato;
 
 ```sql
 -- Check the vedtak saga step (prosessinstans has no feilmelding column;
--- failed steps surface via antall_retry / sover_til)
-SELECT pi.uuid, pi.steg, pi.antall_retry, pi.sover_til
+-- failed steps surface via the status column; step history lives in prosessinstans_hendelser)
+SELECT pi.uuid, pi.sist_fullfort_steg, pi.status
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId
 AND pi.prosess_type LIKE 'IVERKSETT_VEDTAK%';
