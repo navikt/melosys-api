@@ -579,16 +579,12 @@ public class ProsessinstansService {
         opprettSøknadProsessinstans(melding, ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD, saksnummer);
     }
 
-    private static final Set<ProsessType> DIGITALE_SØKNAD_TYPER = Set.of(
-        ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD,
-        ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD);
-
     private void opprettSøknadProsessinstans(SkjemaMottattMelding melding, ProsessType prosessType, String saksnummer) {
         String låsReferanse = melding.getSkjemaId().toString();
 
         // Redelivery av samme skjema kan rutes til en annen prosesstype (NY → EKSISTERENDE etter at saken er opprettet),
         // så dedupen må gjelde på tvers av begge digital-søknad-typene — ikke bare (skjemaId, denne typen).
-        if (prosessinstansRepo.existsByLåsReferanseAndTypeIn(låsReferanse, DIGITALE_SØKNAD_TYPER)) {
+        if (prosessinstansRepo.existsByLåsReferanseAndTypeIn(låsReferanse, ProsessType.digitaleSøknadTyper())) {
             logger.warn("Skjema med skjemaId {} har allerede en digital-søknad-prosess — hopper over redelivery (forsøkt type {}).",
                 melding.getSkjemaId(), prosessType);
             return;
