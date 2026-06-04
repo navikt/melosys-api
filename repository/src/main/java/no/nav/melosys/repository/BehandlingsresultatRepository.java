@@ -26,6 +26,13 @@ public interface BehandlingsresultatRepository extends JpaRepository<Behandlings
     @EntityGraph(attributePaths = {"lovvalgsperioder", "medlemskapsperioder"}, type = EntityGraph.EntityGraphType.LOAD)
     Optional<Behandlingsresultat> findWithLovvalgOgMedlemskapsperioderById(Long behandlingID);
 
+    @EntityGraph(attributePaths = {
+        "lovvalgsperioder", "lovvalgsperioder.trygdeavgiftsperioder", "lovvalgsperioder.trygdeavgiftsperioder.grunnlagListe",
+        "medlemskapsperioder", "medlemskapsperioder.trygdeavgiftsperioder", "medlemskapsperioder.trygdeavgiftsperioder.grunnlagListe",
+        "helseutgiftDekkesPerioder", "helseutgiftDekkesPerioder.trygdeavgiftsperioder", "helseutgiftDekkesPerioder.trygdeavgiftsperioder.grunnlagListe"
+    }, type = EntityGraph.EntityGraphType.LOAD)
+    Optional<Behandlingsresultat> findWithTrygdeavgiftsperioderAndGrunnlagById(Long behandlingID);
+
     @Query(
         """
             SELECT b

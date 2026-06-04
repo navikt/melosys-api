@@ -27,10 +27,10 @@ class Trygdeavgiftsperiode(
     @AttributeOverride(name = "valuta", column = Column(name = "trygdeavgift_beloep_mnd_valuta"))
     val trygdeavgiftsbeløpMd: Penger,
 
-    @Column(name = "trygdesats", nullable = false)
-    val trygdesats: BigDecimal,
+    @Column(name = "trygdesats")
+    val trygdesats: BigDecimal?,
 
-    @ManyToOne(cascade = [CascadeType.ALL])
+    @ManyToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     @JoinColumn(name = "inntektsperiode_id")
     val grunnlagInntekstperiode: Inntektsperiode? = null,
 
@@ -46,11 +46,22 @@ class Trygdeavgiftsperiode(
     @JoinColumn(name = "lovvalg_periode_id")
     var grunnlagLovvalgsPeriode: Lovvalgsperiode? = null,
 
-    @ManyToOne(cascade = [CascadeType.ALL])
+    @ManyToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     @JoinColumn(name = "skatteforhold_id")
     val grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = null,
 
+    @Enumerated(EnumType.STRING)
+    val beregningsregel: Avgiftsberegningsregel = Avgiftsberegningsregel.ORDINÆR,
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "avgiftsdel")
+    val avgiftsdel: Avgiftsdel? = null,
+
     ) : ErPeriode {
+
+    @OneToMany(mappedBy = "trygdeavgiftsperiode", cascade = [CascadeType.PERSIST, CascadeType.MERGE], fetch = FetchType.LAZY)
+    @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
+    val grunnlagListe: MutableSet<TrygdeavgiftsperiodeGrunnlag> = mutableSetOf()
 
     fun hentGrunnlagMedlemskapsperiode(): Medlemskapsperiode = grunnlagMedlemskapsperiode ?: error("grunnlagMedlemskapsperiode er null")
 
@@ -63,9 +74,16 @@ class Trygdeavgiftsperiode(
     fun hentGrunnlagSkatteforholdTilNorge(): SkatteforholdTilNorge =
         grunnlagSkatteforholdTilNorge ?: error("grunnlagSkatteforholdTilNorge er påkrevd for Trygdeavgiftsperiode")
 
-    fun harAvgift(): Boolean =
-        BigDecimal.ZERO.compareTo(trygdesats) != 0 && BigDecimal.ZERO.compareTo(trygdeavgiftsbeløpMd.verdi) != 0
+    val harSammenslåtteInntektskilder: Boolean get() = grunnlagListe.size > 1
 
+    /** 25%-regel har sats=null men positivt beløp — de *har* avgift. Kun beløp-basert sjekk. */
+    fun harAvgift(): Boolean =
+        BigDecimal.ZERO.compareTo(trygdeavgiftsbeløpMd.verdi) != 0
+
+    fun leggTilGrunnlag(grunnlag: TrygdeavgiftsperiodeGrunnlag) {
+        grunnlag.trygdeavgiftsperiode = this
+        grunnlagListe.add(grunnlag)
+    }
 
     override fun getFom(): LocalDate = periodeFra
 
@@ -76,12 +94,14 @@ class Trygdeavgiftsperiode(
         periodeFra: LocalDate = this.periodeFra,
         periodeTil: LocalDate = this.periodeTil,
         trygdeavgiftsbeløpMd: Penger = this.trygdeavgiftsbeløpMd,
-        trygdesats: BigDecimal = this.trygdesats,
+        trygdesats: BigDecimal? = this.trygdesats,
         grunnlagInntekstperiode: Inntektsperiode? = this.grunnlagInntekstperiode,
         grunnlagMedlemskapsperiode: Medlemskapsperiode? = this.grunnlagMedlemskapsperiode,
         grunnlagHelseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = this.grunnlagHelseutgiftDekkesPeriode,
         grunnlagLovvalgsPeriode: Lovvalgsperiode? = this.grunnlagLovvalgsPeriode,
         grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = this.grunnlagSkatteforholdTilNorge,
+        beregningsregel: Avgiftsberegningsregel = this.beregningsregel,
+        avgiftsdel: Avgiftsdel? = this.avgiftsdel,
     ) = Trygdeavgiftsperiode(
         id = id,
         periodeFra = periodeFra,
@@ -93,13 +113,16 @@ class Trygdeavgiftsperiode(
         grunnlagHelseutgiftDekkesPeriode = grunnlagHelseutgiftDekkesPeriode,
         grunnlagLovvalgsPeriode = grunnlagLovvalgsPeriode,
         grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
+        beregningsregel = beregningsregel,
+        avgiftsdel = avgiftsdel,
     )
 
     fun erLikForSatsendring(other: Trygdeavgiftsperiode): Boolean =
         periodeFra == other.periodeFra &&
             periodeTil == other.periodeTil &&
             trygdeavgiftsbeløpMd == other.trygdeavgiftsbeløpMd &&
-            trygdesats.compareTo(other.trygdesats) == 0 &&
+            (trygdesats ?: BigDecimal.ZERO).compareTo(other.trygdesats ?: BigDecimal.ZERO) == 0 &&
+            beregningsregel == other.beregningsregel &&
             grunnlagInntekstperiode == other.grunnlagInntekstperiode &&
             grunnlagMedlemskapsperiode == other.grunnlagMedlemskapsperiode &&
             grunnlagHelseutgiftDekkesPeriode == other.grunnlagHelseutgiftDekkesPeriode &&
@@ -128,7 +151,7 @@ class Trygdeavgiftsperiode(
 
     override fun toString(): String {
         return "Trygdeavgiftsperiode(id=$id, periodeFra=$periodeFra, periodeTil=$periodeTil, " +
-            "trygdeavgiftsbeløpMd=$trygdeavgiftsbeløpMd, trygdesats=$trygdesats)"
+            "trygdeavgiftsbeløpMd=$trygdeavgiftsbeløpMd, trygdesats=$trygdesats, beregningsregel=$beregningsregel)"
     }
 
     override fun equals(other: Any?): Boolean {
