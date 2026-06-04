@@ -2,7 +2,7 @@
 --
 -- Oracle indekserer ikke FK-kolonner automatisk. Uten indeks tar DELETE/UPDATE på
 -- parent-tabellene share-lock på hele grunnlag-tabellen og gjør full table scan
--- for constraint-validering. V154 la kun til indeks for trygdeavgiftsperiode_id;
+-- for constraint-validering. V156 la kun til indeks for trygdeavgiftsperiode_id;
 -- her dekker vi de fem resterende FK-ene. Konvensjon speiler V62 for
 -- trygdeavgiftsperiode-tabellen.
 
