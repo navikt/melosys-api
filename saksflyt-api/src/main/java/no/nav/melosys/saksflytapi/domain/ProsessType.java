@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflytapi.domain;
 
+import java.util.EnumSet;
+import java.util.Set;
 
 public enum ProsessType {
     //alfabetisk rekkefølge
@@ -58,6 +60,13 @@ public enum ProsessType {
     private final String beskrivelse;
     private final ProsessPrioritet prioritet;
 
+    /**
+     * Digital-søknad-mottak: ny sak og eksisterende sak. Samme skjema (skjemaId) skal kun gi
+     * én prosess på tvers av disse to typene — brukes til redelivery-dedup og mottakerutleding.
+     */
+    private static final Set<ProsessType> DIGITALE_SØKNAD_TYPER =
+        EnumSet.of(MELOSYS_MOTTAK_DIGITAL_SØKNAD, MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD);
+
     ProsessType(String kode, String beskrivelse) {
         this(kode, beskrivelse, ProsessPrioritet.NORMAL);
     }
@@ -82,5 +91,17 @@ public enum ProsessType {
      */
     public ProsessPrioritet getPrioritet() {
         return prioritet;
+    }
+
+    /**
+     * De to digital-søknad-mottakstypene (ny sak + eksisterende sak). Ett skjema skal kun gi
+     * én prosess på tvers av disse — brukes som dedup-nøkkel i {@code ProsessinstansService}.
+     */
+    public static Set<ProsessType> digitaleSøknadTyper() {
+        return DIGITALE_SØKNAD_TYPER;
+    }
+
+    public boolean erDigitalSøknadMottak() {
+        return DIGITALE_SØKNAD_TYPER.contains(this);
     }
 }

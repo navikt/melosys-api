@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflytapi
 
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.maps.shouldContainKey
 import io.kotest.matchers.maps.shouldContainValue
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -11,6 +12,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.arkiv.DokumentReferanse
@@ -812,10 +814,17 @@ class ProsessinstansServiceTest {
     fun `opprett prosessinstans for melosys skjema mottatt skal opprette prosessinstans med korrekt type og låsReferanse`() {
         val skjemaId = UUID.randomUUID()
         val melding = SkjemaMottattMelding(skjemaId)
+        val typeSlot = slot<Collection<ProsessType>>()
 
-        every { prosessinstansRepo.existsByLåsReferanseAndType(skjemaId.toString(), ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD) } returns false
+        every { prosessinstansRepo.existsByLåsReferanseAndTypeIn(skjemaId.toString(), capture(typeSlot)) } returns false
 
         prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(melding)
+
+        // Dedupen skal sjekke på tvers av nøyaktig begge digital-søknad-typene, også på NY-flyten
+        typeSlot.captured shouldContainExactlyInAnyOrder listOf(
+            ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD,
+            ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
+        )
 
         val lagretInstans = piListCaptor.last()
         lagretInstans.run {
@@ -830,7 +839,7 @@ class ProsessinstansServiceTest {
         val skjemaId = UUID.randomUUID()
         val melding = SkjemaMottattMelding(skjemaId)
 
-        every { prosessinstansRepo.existsByLåsReferanseAndType(skjemaId.toString(), ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD) } returns true
+        every { prosessinstansRepo.existsByLåsReferanseAndTypeIn(skjemaId.toString(), any()) } returns true
 
         prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(melding)
 
@@ -843,7 +852,7 @@ class ProsessinstansServiceTest {
         val melding = SkjemaMottattMelding(skjemaId)
         val saksnummer = "MEL-42"
 
-        every { prosessinstansRepo.existsByLåsReferanseAndType(skjemaId.toString(), ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD) } returns false
+        every { prosessinstansRepo.existsByLåsReferanseAndTypeIn(skjemaId.toString(), any()) } returns false
 
         prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding, saksnummer)
 
@@ -857,14 +866,21 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    fun `opprett prosessinstans for eksisterende digital søknad skal ikke opprette duplikat`() {
+    fun `eksisterende digital søknad skal ikke opprette duplikat — dedup på tvers av digital-søknad-typene`() {
         val skjemaId = UUID.randomUUID()
         val melding = SkjemaMottattMelding(skjemaId)
+        val typeSlot = slot<Collection<ProsessType>>()
 
-        every { prosessinstansRepo.existsByLåsReferanseAndType(skjemaId.toString(), ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD) } returns true
+        // Skjemaet er alt behandlet (typisk som NY); en redelivery rutes til EKSISTERENDE.
+        // Dedupen skal sjekke på tvers av begge digital-søknad-typene, så duplikat ikke opprettes.
+        every { prosessinstansRepo.existsByLåsReferanseAndTypeIn(skjemaId.toString(), capture(typeSlot)) } returns true
 
         prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding, "MEL-42")
 
+        typeSlot.captured shouldContainExactlyInAnyOrder listOf(
+            ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD,
+            ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
+        )
         verify(exactly = 0) { prosessinstansRepo.save(any<Prosessinstans>()) }
     }
 
