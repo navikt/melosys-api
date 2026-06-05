@@ -470,7 +470,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    fun `lag medMaritimtArbeid bruker maritimt arbeidssted frem for IkkeFastArbeidssted`() {
+    fun `lag medMaritimtArbeid bruker maritimt arbeidssted fremfor IkkeFastArbeidssted`() {
         every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) } returns listOf(Land_iso2.DK)
         every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns mutableMapOf(
             "Stena Don" to AvklartMaritimtArbeid(
