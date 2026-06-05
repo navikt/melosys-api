@@ -19,6 +19,7 @@ public final class MaritimtArbeidssted extends AbstractArbeidssted implements Ik
         this.enhetNavn = maritimtArbeid.getEnhetNavn();
         this.flaggLandKode = maritimtArbeid.getFlaggLandkode();
     }
+
     public MaritimtArbeidssted(MaritimtArbeid maritimtArbeid) {
         super(null, null, hentLandkode(maritimtArbeid));
         this.avklartMaritimtArbeid = null;
@@ -47,7 +48,7 @@ public final class MaritimtArbeidssted extends AbstractArbeidssted implements Ik
     }
 
     public boolean erSokkel() {
-        if(avklartMaritimtArbeid != null) {
+        if (avklartMaritimtArbeid != null) {
             return avklartMaritimtArbeid.getMaritimtype() == Maritimtyper.SOKKEL;
         }
 

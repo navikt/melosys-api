@@ -520,7 +520,7 @@ class SedDataByggerTest {
         val sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
         sedData.arbeidssteder.any {
-            it.navn == "Stena Don" &&
+            it.navn == "Stena Don offshore" &&
                 it.adresse?.land == "DK" &&
                 it.adresse?.poststed != INGEN_FAST_ADRESSE
         } shouldBe true
