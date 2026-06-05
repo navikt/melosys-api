@@ -27,7 +27,9 @@ class BildeTilPdfKonverterer {
 
     private fun konverterBildeTilPdf(innhold: ByteArray, filtype: VedleggFiltype): ByteArray {
         val bilde = ByteArrayInputStream(innhold).use { ImageIO.read(it) }
-            ?: throw IllegalArgumentException("Kunne ikke lese bildevedlegg av type $filtype for konvertering til PDF")
+            ?: throw IllegalArgumentException(
+                "Kunne ikke lese bildevedlegg av type $filtype (bytes=${innhold.size}) for konvertering til PDF"
+            )
 
         PDDocument().use { dokument ->
             val pdImage = when (filtype) {
