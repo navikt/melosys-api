@@ -68,10 +68,21 @@ public class ArbeidsstedGrunnlag {
         if (avklartMaritimtArbeid != null) {
             return new MaritimtArbeidssted(maritimtArbeid, avklartMaritimtArbeid);
         }
+
+        if (maritimtArbeid.getEnhetNavn() != null && harLandkode(maritimtArbeid)) {
+            return new MaritimtArbeidssted(maritimtArbeid);
+        }
+
         return null;
     }
 
     private Arbeidssted utledArbeidsstedFraVirksomhet(AvklartVirksomhet virksomhet) {
         return new FysiskArbeidssted(virksomhet.navn, virksomhet.orgnr, (StrukturertAdresse)virksomhet.adresse);
+    }
+
+    private static boolean harLandkode(MaritimtArbeid maritimtArbeid) {
+        return maritimtArbeid.getInnretningLandkode() != null
+            || maritimtArbeid.getTerritorialfarvannLandkode() != null
+            || maritimtArbeid.getFlaggLandkode() != null;
     }
 }

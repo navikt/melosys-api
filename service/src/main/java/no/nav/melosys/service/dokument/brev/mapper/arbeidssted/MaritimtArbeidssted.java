@@ -8,12 +8,21 @@ import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 
 public final class MaritimtArbeidssted extends AbstractArbeidssted implements IkkeFysiskArbeidssted {
     private final AvklartMaritimtArbeid avklartMaritimtArbeid;
+    private final MaritimtArbeid maritimtArbeid;
     private final String enhetNavn;
     private final String flaggLandKode;
 
     public MaritimtArbeidssted(MaritimtArbeid maritimtArbeid, AvklartMaritimtArbeid avklartMaritimtArbeid) {
         super(null, null, avklartMaritimtArbeid.getLand());
         this.avklartMaritimtArbeid = avklartMaritimtArbeid;
+        this.maritimtArbeid = maritimtArbeid;
+        this.enhetNavn = maritimtArbeid.getEnhetNavn();
+        this.flaggLandKode = maritimtArbeid.getFlaggLandkode();
+    }
+    public MaritimtArbeidssted(MaritimtArbeid maritimtArbeid) {
+        super(null, null, hentLandkode(maritimtArbeid));
+        this.avklartMaritimtArbeid = null;
+        this.maritimtArbeid = maritimtArbeid;
         this.enhetNavn = maritimtArbeid.getEnhetNavn();
         this.flaggLandKode = maritimtArbeid.getFlaggLandkode();
     }
@@ -38,6 +47,21 @@ public final class MaritimtArbeidssted extends AbstractArbeidssted implements Ik
     }
 
     public boolean erSokkel() {
-        return avklartMaritimtArbeid.getMaritimtype() == Maritimtyper.SOKKEL;
+        if(avklartMaritimtArbeid != null) {
+            return avklartMaritimtArbeid.getMaritimtype() == Maritimtyper.SOKKEL;
+        }
+
+        return maritimtArbeid.getInnretningLandkode() != null
+            || maritimtArbeid.getInnretningstype() != null;
+    }
+
+    private static String hentLandkode(MaritimtArbeid maritimtArbeid) {
+        if (maritimtArbeid.getInnretningLandkode() != null) {
+            return maritimtArbeid.getInnretningLandkode();
+        }
+        if (maritimtArbeid.getTerritorialfarvannLandkode() != null) {
+            return maritimtArbeid.getTerritorialfarvannLandkode();
+        }
+        return maritimtArbeid.getFlaggLandkode();
     }
 }
