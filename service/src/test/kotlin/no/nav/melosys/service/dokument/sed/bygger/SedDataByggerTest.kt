@@ -504,17 +504,9 @@ class SedDataByggerTest {
     }
 
     @Test
-    fun `lag medMaritimtArbeid bruker maritimt arbeidssted når avklartefakta har annen subjekt nøkkel`() {
+    fun `lag medMaritimtArbeid bruker mottatteopplysninger når avklartefakta mangler`() {
         every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) } returns listOf(Land_iso2.DK)
-        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns mutableMapOf(
-            "annen-nøkkel" to AvklartMaritimtArbeid(
-                "Stena Don",
-                listOf(Avklartefakta().apply {
-                    this.fakta = "DK"
-                    this.type = Avklartefaktatyper.ARBEIDSLAND
-                })
-            )
-        )
+        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns emptyMap()
         val behandling = DataByggerStubs.hentBehandlingStub().apply {
             mottatteOpplysninger!!.mottatteOpplysningerData.maritimtArbeid = listOf(MaritimtArbeid().apply {
                 enhetNavn = "Stena Don"
