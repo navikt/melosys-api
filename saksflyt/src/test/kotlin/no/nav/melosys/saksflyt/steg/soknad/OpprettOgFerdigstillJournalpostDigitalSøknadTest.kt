@@ -290,13 +290,6 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
         String(data.copyOfRange(0, 4)) shouldBe "%PDF"
     }
 
-    private fun lagBildeBytes(format: String): ByteArray {
-        val bilde = java.awt.image.BufferedImage(20, 20, java.awt.image.BufferedImage.TYPE_INT_RGB)
-        return java.io.ByteArrayOutputStream().use { ut ->
-            javax.imageio.ImageIO.write(bilde, format, ut)
-            ut.toByteArray()
-        }
-    }
 
     @Test
     fun `utfør kaller oppdaterJournalpostId på skjemaSakMappingService`() {

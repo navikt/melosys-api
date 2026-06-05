@@ -3,11 +3,8 @@ package no.nav.melosys.saksflyt.steg.soknad
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.skjema.types.vedlegg.VedleggFiltype
 import org.apache.pdfbox.Loader
+import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.junit.jupiter.api.Test
-import java.awt.Color
-import java.awt.image.BufferedImage
-import java.io.ByteArrayOutputStream
-import javax.imageio.ImageIO
 
 class BildeTilPdfKonvertererTest {
 
@@ -24,33 +21,32 @@ class BildeTilPdfKonvertererTest {
 
     @Test
     fun `JPEG-vedlegg konverteres til en gyldig PDF`() {
-        val resultat = konverterer.konverterTilPdfHvisBilde(lagBilde("jpg"), VedleggFiltype.JPEG)
+        val resultat = konverterer.konverterTilPdfHvisBilde(lagBildeBytes("jpg"), VedleggFiltype.JPEG)
 
         assertErGyldigPdfMedEnSide(resultat)
     }
 
     @Test
     fun `PNG-vedlegg konverteres til en gyldig PDF`() {
-        val resultat = konverterer.konverterTilPdfHvisBilde(lagBilde("png"), VedleggFiltype.PNG)
+        val resultat = konverterer.konverterTilPdfHvisBilde(lagBildeBytes("png"), VedleggFiltype.PNG)
 
         assertErGyldigPdfMedEnSide(resultat)
+    }
+
+    @Test
+    fun `konvertert PDF har A4-sidestoerrelse`() {
+        val resultat = konverterer.konverterTilPdfHvisBilde(lagBildeBytes("jpg"), VedleggFiltype.JPEG)
+
+        Loader.loadPDF(resultat).use { dokument ->
+            val side = dokument.getPage(0)
+            side.mediaBox.width shouldBe PDRectangle.A4.width
+            side.mediaBox.height shouldBe PDRectangle.A4.height
+        }
     }
 
     private fun assertErGyldigPdfMedEnSide(bytes: ByteArray) {
         Loader.loadPDF(bytes).use { dokument ->
             dokument.numberOfPages shouldBe 1
-        }
-    }
-
-    private fun lagBilde(format: String): ByteArray {
-        val bilde = BufferedImage(40, 30, BufferedImage.TYPE_INT_RGB)
-        val grafikk = bilde.createGraphics()
-        grafikk.color = Color.BLUE
-        grafikk.fillRect(0, 0, 40, 30)
-        grafikk.dispose()
-        return ByteArrayOutputStream().use { ut ->
-            ImageIO.write(bilde, format, ut)
-            ut.toByteArray()
         }
     }
 }

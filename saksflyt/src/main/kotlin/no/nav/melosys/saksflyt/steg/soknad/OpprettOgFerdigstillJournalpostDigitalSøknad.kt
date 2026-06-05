@@ -139,7 +139,14 @@ class OpprettOgFerdigstillJournalpostDigitalSøknad(
         vedlegg.map { dto ->
             val innhold = melosysSkjemaApiClient.hentVedleggInnhold(skjemaId, dto.id)
             // Joark krever PDF/PDFA/XLSX som ARKIV-variant; bildevedlegg konverteres til PDF.
-            val pdfInnhold = bildeTilPdfKonverterer.konverterTilPdfHvisBilde(innhold, dto.filtype)
+            val pdfInnhold = try {
+                bildeTilPdfKonverterer.konverterTilPdfHvisBilde(innhold, dto.filtype)
+            } catch (e: Exception) {
+                throw IllegalStateException(
+                    "Klarte ikke konvertere vedlegg ${dto.id} (${dto.filtype}) for skjema $skjemaId til PDF",
+                    e
+                )
+            }
             FysiskDokument().apply {
                 tittel = dto.filnavn
                 dokumentKategori = DOKUMENT_KATEGORI_SOKNAD
