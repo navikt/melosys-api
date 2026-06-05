@@ -111,6 +111,7 @@
         <jna.version>5.18.1</jna.version>
         <graphql.java.extended.scalars.version>24.0</graphql.java.extended.scalars.version>
         <ulid-java>5.2.3</ulid-java>
+        <org.apache.pdfbox.version>3.0.7</org.apache.pdfbox.version>
         <!-- Spring-data-envers, hibernate, antlr4 Downgraded due to: https://hibernate.atlassian.net/browse/HHH-17612 and compatability-->
 
         <hibernate.version>7.1.16.Final</hibernate.version>
@@ -132,6 +133,13 @@
         brukes. -->
     <dependencyManagement>
         <dependencies>
+            <!-- Eksterne biblioteker -->
+            <dependency>
+                <groupId>org.apache.pdfbox</groupId>
+                <artifactId>pdfbox</artifactId>
+                <version>${org.apache.pdfbox.version}</version>
+            </dependency>
+
             <!-- Melosys moduler -->
             <dependency>
                 <groupId>${project.groupId}</groupId>

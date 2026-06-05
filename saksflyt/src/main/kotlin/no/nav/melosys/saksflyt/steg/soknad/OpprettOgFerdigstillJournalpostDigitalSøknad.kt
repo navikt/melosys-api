@@ -21,7 +21,6 @@ import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMedFullmaktMetada
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMetadata
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.vedlegg.VedleggDto
-import no.nav.melosys.skjema.types.vedlegg.VedleggFiltype
 import org.springframework.stereotype.Component
 import java.util.UUID
 
@@ -48,7 +47,8 @@ class OpprettOgFerdigstillJournalpostDigitalSøknad(
     private val joarkFasade: JoarkFasade,
     private val behandlingService: BehandlingService,
     private val persondataFasade: PersondataFasade,
-    private val skjemaSakMappingService: SkjemaSakMappingService
+    private val skjemaSakMappingService: SkjemaSakMappingService,
+    private val bildeTilPdfKonverterer: BildeTilPdfKonverterer
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.OPPRETT_OG_FERDIGSTILL_JOURNALPOST_DIGITAL_SØKNAD
@@ -138,13 +138,22 @@ class OpprettOgFerdigstillJournalpostDigitalSøknad(
     private fun hentVedleggsdokumenter(skjemaId: UUID, vedlegg: List<VedleggDto>): List<FysiskDokument> =
         vedlegg.map { dto ->
             val innhold = melosysSkjemaApiClient.hentVedleggInnhold(skjemaId, dto.id)
+            // Joark krever PDF/PDFA/XLSX som ARKIV-variant; bildevedlegg konverteres til PDF.
+            val pdfInnhold = try {
+                bildeTilPdfKonverterer.konverterTilPdfHvisBilde(innhold, dto.filtype)
+            } catch (e: Exception) {
+                throw IllegalStateException(
+                    "Klarte ikke konvertere vedlegg ${dto.id} (${dto.filtype}) for skjema $skjemaId til PDF",
+                    e
+                )
+            }
             FysiskDokument().apply {
                 tittel = dto.filnavn
                 dokumentKategori = DOKUMENT_KATEGORI_SOKNAD
                 addDokumentVariant(
                     DokumentVariant.lagDokumentVariant(
-                        innhold,
-                        dto.filtype.tilDokumentVariantFiltype(),
+                        pdfInnhold,
+                        DokumentVariant.Filtype.PDFA,
                         DokumentVariant.VariantFormat.ARKIV
                     )
                 )
@@ -152,8 +161,3 @@ class OpprettOgFerdigstillJournalpostDigitalSøknad(
         }
 }
 
-private fun VedleggFiltype.tilDokumentVariantFiltype(): DokumentVariant.Filtype = when (this) {
-    VedleggFiltype.PDF -> DokumentVariant.Filtype.PDFA
-    VedleggFiltype.JPEG -> DokumentVariant.Filtype.JPEG
-    VedleggFiltype.PNG -> DokumentVariant.Filtype.PNG
-}
