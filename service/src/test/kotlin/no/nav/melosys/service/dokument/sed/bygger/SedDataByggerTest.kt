@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.sed.bygger
 
 import io.getunleash.FakeUnleash
+import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.*
 import io.kotest.matchers.nulls.shouldBeNull
@@ -822,6 +823,37 @@ class SedDataByggerTest {
 
         verify(exactly = 1) { landvelgerService.hentBostedsland(any(), any<MottatteOpplysningerData>()) }
         verify(exactly = 0) { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) }
+    }
+
+    @Test
+    fun `lag pensjonistEøsFlyt henterIkkeArbeidslandUtenMarginaltArbeid`() {
+        every { saksbehandlingRegler.harPensjonistUføretrygdetFlyt(any(), any()) } returns true
+
+        lagSedData()
+
+        verify(exactly = 0) { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) }
+    }
+
+    @Test
+    fun `lag pensjonistEøsFlytMedTomtSøknadsland kanByggeSedA005UtenÅKaste`() {
+        every { saksbehandlingRegler.harPensjonistUføretrygdetFlyt(any(), any()) } returns true
+        every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) } throws
+            IllegalStateException("Søknad mangler søknadsland og land er ikke markert som flere land ukjent hvilke.")
+
+        val sedData = shouldNotThrowAny { lagSedData() }
+
+        sedData.shouldNotBeNull()
+        verify(exactly = 0) { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) }
+    }
+
+    @Test
+    fun `lag ikkePensjonistFlytMedTomtSøknadsland kasterFordiArbeidslandUtledes`() {
+        every { saksbehandlingRegler.harPensjonistUføretrygdetFlyt(any(), any()) } returns false
+        every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) } throws
+            IllegalStateException("Søknad mangler søknadsland og land er ikke markert som flere land ukjent hvilke.")
+
+        shouldThrow<IllegalStateException> { lagSedData() }
+            .message.shouldNotBeNull() shouldContain "Søknad mangler søknadsland"
     }
 
     private fun lagUtkastAssertions(sedData: SedDataDto, forventAdresse: Boolean) {
