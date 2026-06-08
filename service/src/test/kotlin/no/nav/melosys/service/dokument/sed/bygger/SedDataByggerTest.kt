@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.sed.bygger
 
 import io.getunleash.FakeUnleash
+import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.*
 import io.kotest.matchers.nulls.shouldBeNull
@@ -865,6 +866,37 @@ class SedDataByggerTest {
 
         verify(exactly = 1) { landvelgerService.hentBostedsland(any(), any<MottatteOpplysningerData>()) }
         verify(exactly = 0) { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) }
+    }
+
+    @Test
+    fun `i pensjonist-EØS-flyt hentes ikke arbeidsland fra landvelger`() {
+        every { saksbehandlingRegler.harPensjonistUføretrygdetFlyt(any()) } returns true
+
+        lagSedData()
+
+        verify(exactly = 0) { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) }
+    }
+
+    @Test
+    fun `pensjonist-EØS-flyt bygger SED A005 uten å kaste selv om arbeidslandutledning ville feilet`() {
+        every { saksbehandlingRegler.harPensjonistUføretrygdetFlyt(any()) } returns true
+        every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) } throws
+            IllegalStateException("Søknad mangler søknadsland og land er ikke markert som flere land ukjent hvilke.")
+
+        val sedData = shouldNotThrowAny { lagSedData() }
+
+        sedData.shouldNotBeNull()
+        verify(exactly = 0) { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) }
+    }
+
+    @Test
+    fun `ikke-pensjonist-flyt kaster når arbeidslandutledning feiler på grunn av manglende søknadsland`() {
+        every { saksbehandlingRegler.harPensjonistUføretrygdetFlyt(any()) } returns false
+        every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) } throws
+            IllegalStateException("Søknad mangler søknadsland og land er ikke markert som flere land ukjent hvilke.")
+
+        shouldThrow<IllegalStateException> { lagSedData() }
+            .message.shouldNotBeNull() shouldContain "Søknad mangler søknadsland"
     }
 
     private fun lagUtkastAssertions(sedData: SedDataDto, forventAdresse: Boolean) {

@@ -133,6 +133,10 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
     ) = (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV
 
     fun harPensjonistUføretrygdetFlyt(
+        behandling: Behandling
+    ) = harPensjonistUføretrygdetFlyt(behandling.fagsak.type, behandling.tema)
+
+    fun harPensjonistUføretrygdetFlyt(
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema
     ) = sakstype == Sakstyper.EU_EOS && behandlingstema == PENSJONIST
