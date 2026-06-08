@@ -288,6 +288,7 @@ class ProsessinstansDataMapperTest {
               "tidligereInnsendteSkjema": [],
               "innsendtTidspunkt": "2024-01-01T12:00:00",
               "innsenderFnr": "12345678901",
+              "dokumentTittel": "Søknad om A1 for utsendte arbeidstakere i EØS eller Sveits",
               "vedlegg": []
             }
         """.trimIndent()
