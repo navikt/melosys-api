@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.brev.datagrunnlag
 
-import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -74,9 +73,7 @@ class BrevDataGrunnlagTest {
         val maritimtArbeidISøknad = lagMaritimtArbeid()
         søknad.maritimtArbeid.add(maritimtArbeidISøknad)
 
-
         val arbeidssteder = dataGrunnlag.arbeidsstedGrunnlag.hentArbeidssteder()
-
 
         arbeidssteder.shouldHaveSize(1)
         val arbeidssted = arbeidssteder[0] as MaritimtArbeidssted
@@ -89,7 +86,7 @@ class BrevDataGrunnlagTest {
     }
 
     @Test
-    fun `skal returnere tom liste når maritim arbeid mangler avklarte fakta`() {
+    fun `skal bruke mottatte opplysninger når maritim arbeid mangler avklarte fakta`() {
         val maritimtArbeidISøknad = lagMaritimtArbeid()
         søknad.maritimtArbeid.add(maritimtArbeidISøknad)
         every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns emptyMap<String, AvklartMaritimtArbeid>()
@@ -107,7 +104,35 @@ class BrevDataGrunnlagTest {
 
         val arbeidssteder = dataGrunnlagUtenAvklartMaritimtArbeid.arbeidsstedGrunnlag.hentArbeidssteder()
 
+        arbeidssteder.shouldHaveSize(1)
+        val arbeidssted = arbeidssteder[0] as MaritimtArbeidssted
+        arbeidssted.run {
+            enhetNavn shouldBe maritimtArbeidISøknad.enhetNavn
+            landkode shouldBe maritimtArbeidISøknad.flaggLandkode
+            foretakNavn.shouldBeNull()
+            idnummer.shouldBeNull()
+            yrkesgruppe.kode shouldBe Yrkesgrupper.SOKKEL_ELLER_SKIP.kode
+        }
+    }
 
-        arbeidssteder.shouldBeEmpty()
+    @Test
+    fun `skal ikke lage maritimt arbeidssted når både avklarte fakta og landkode mangler`() {
+        val maritimtArbeidUtenLandkode = lagMaritimtArbeid().apply { flaggLandkode = null }
+        søknad.maritimtArbeid.add(maritimtArbeidUtenLandkode)
+        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns emptyMap<String, AvklartMaritimtArbeid>()
+        val persondata = PersonopplysningerObjectFactory.lagPersonopplysninger()
+        val avklarteVirksomheterService = mockk<AvklarteVirksomheterService>()
+        every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns emptyList()
+        val dataGrunnlagUtenLandkode = BrevDataGrunnlag(
+            brevbestilling,
+            kodeverkService,
+            avklarteVirksomheterService,
+            avklartefaktaService,
+            persondata
+        )
+
+        val arbeidssteder = dataGrunnlagUtenLandkode.arbeidsstedGrunnlag.hentArbeidssteder()
+
+        arbeidssteder.shouldHaveSize(0)
     }
 }

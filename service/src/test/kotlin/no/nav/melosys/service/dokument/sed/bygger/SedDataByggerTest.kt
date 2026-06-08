@@ -35,6 +35,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.LuftfartBase
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid
 import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.LandvelgerService
@@ -207,6 +208,14 @@ class SedDataByggerTest {
         persondata: Persondata = DataByggerStubs.lagPersonDokument()
     ): SedDataGrunnlagUtenSoknad {
         return SedDataGrunnlagUtenSoknad(behandling, kodeverkService, persondata)
+    }
+
+    private fun behandlingMedMaritimtArbeid(): Behandling = DataByggerStubs.hentBehandlingStub().apply {
+        mottatteOpplysninger!!.mottatteOpplysningerData.maritimtArbeid = listOf(MaritimtArbeid().apply {
+            enhetNavn = "Stena Don"
+            innretningLandkode = "DK"
+            innretningstype = Innretningstyper.PLATTFORM
+        })
     }
 
     private fun lagGrunnlagMedManglendeAdressefelter(
@@ -466,6 +475,40 @@ class SedDataByggerTest {
         val sedData = lagSedData()
 
         sedData.arbeidssteder.map { it.adresse.shouldNotBeNull().gateadresse } shouldContain IKKE_TILGJENGELIG
+    }
+
+    @Test
+    fun `lag medMaritimtArbeid bruker maritimt arbeidssted fremfor IkkeFastArbeidssted`() {
+        val behandling = behandlingMedMaritimtArbeid()
+        every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) } returns listOf(Land_iso2.DK)
+        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns mapOf(
+            "Stena Don" to AvklartMaritimtArbeid(
+                "Stena Don",
+                listOf(Avklartefakta().apply {
+                    fakta = "DK"
+                    type = Avklartefaktatyper.ARBEIDSLAND
+                })
+            )
+        )
+
+        val sedData = dataBygger.lag(lagGrunnlagMedSøknad(behandling), lagStandardBehandlingsresultat(behandling), PeriodeType.LOVVALGSPERIODE)
+
+        sedData.arbeidssteder.map { Triple(it.navn, it.adresse?.land, it.adresse?.poststed) } shouldContain
+            Triple("Stena Don", "DK", IKKE_TILGJENGELIG)
+        sedData.arbeidssteder.map { it.navn to it.adresse?.land } shouldNotContain (INGEN_FAST_ADRESSE to "DK")
+    }
+
+    @Test
+    fun `lag medMaritimtArbeid bruker mottatteopplysninger når avklartefakta mangler`() {
+        val behandling = behandlingMedMaritimtArbeid()
+        every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) } returns listOf(Land_iso2.DK)
+        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns emptyMap()
+
+        val sedData = dataBygger.lag(lagGrunnlagMedSøknad(behandling), lagStandardBehandlingsresultat(behandling), PeriodeType.LOVVALGSPERIODE)
+
+        sedData.arbeidssteder.map { Triple(it.navn, it.adresse?.land, it.adresse?.poststed) } shouldContain
+            Triple("Stena Don offshore", "DK", IKKE_TILGJENGELIG)
+        sedData.arbeidssteder.map { it.navn to it.adresse?.land } shouldNotContain (INGEN_FAST_ADRESSE to "DK")
     }
 
     @Test
