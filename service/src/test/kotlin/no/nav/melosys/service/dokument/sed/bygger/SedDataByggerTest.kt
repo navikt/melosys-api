@@ -826,8 +826,8 @@ class SedDataByggerTest {
     }
 
     @Test
-    fun `lag pensjonistEøsFlyt henterIkkeArbeidslandUtenMarginaltArbeid`() {
-        every { saksbehandlingRegler.harPensjonistUføretrygdetFlyt(any(), any()) } returns true
+    fun `i pensjonist-EØS-flyt hentes ikke arbeidsland fra landvelger`() {
+        every { saksbehandlingRegler.harPensjonistUføretrygdetFlyt(any()) } returns true
 
         lagSedData()
 
@@ -835,8 +835,8 @@ class SedDataByggerTest {
     }
 
     @Test
-    fun `lag pensjonistEøsFlytMedTomtSøknadsland kanByggeSedA005UtenÅKaste`() {
-        every { saksbehandlingRegler.harPensjonistUføretrygdetFlyt(any(), any()) } returns true
+    fun `pensjonist-EØS-flyt bygger SED A005 uten å kaste selv om arbeidslandutledning ville feilet`() {
+        every { saksbehandlingRegler.harPensjonistUføretrygdetFlyt(any()) } returns true
         every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) } throws
             IllegalStateException("Søknad mangler søknadsland og land er ikke markert som flere land ukjent hvilke.")
 
@@ -847,8 +847,8 @@ class SedDataByggerTest {
     }
 
     @Test
-    fun `lag ikkePensjonistFlytMedTomtSøknadsland kasterFordiArbeidslandUtledes`() {
-        every { saksbehandlingRegler.harPensjonistUføretrygdetFlyt(any(), any()) } returns false
+    fun `ikke-pensjonist-flyt kaster når arbeidslandutledning feiler på grunn av manglende søknadsland`() {
+        every { saksbehandlingRegler.harPensjonistUføretrygdetFlyt(any()) } returns false
         every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) } throws
             IllegalStateException("Søknad mangler søknadsland og land er ikke markert som flere land ukjent hvilke.")
 

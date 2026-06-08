@@ -145,10 +145,8 @@ public class SedDataBygger {
         List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder().stream()
             .map(SedDataBygger::mapArbeidssted).collect(Collectors.toList()); //NOSONAR mutable list
 
-        var fagsakType = dataGrunnlag.getBehandling().getFagsak().getType();
-        var behandlingstema = dataGrunnlag.getBehandling().getTema();
         if (!saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(dataGrunnlag.getBehandling())
-            && !saksbehandlingRegler.harPensjonistUføretrygdetFlyt(fagsakType, behandlingstema)) {
+            && !saksbehandlingRegler.harPensjonistUføretrygdetFlyt(dataGrunnlag.getBehandling())) {
             Set<String> arbeidsland = arbeidssteder.stream().map(Arbeidssted::getAdresse).map(Adresse::getLand).collect(Collectors.toSet());
 
             landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(dataGrunnlag.getBehandling().getId()).stream()
