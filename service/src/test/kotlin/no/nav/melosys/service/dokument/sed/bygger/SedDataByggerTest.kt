@@ -210,6 +210,14 @@ class SedDataByggerTest {
         return SedDataGrunnlagUtenSoknad(behandling, kodeverkService, persondata)
     }
 
+    private fun behandlingMedMaritimtArbeid(): Behandling = DataByggerStubs.hentBehandlingStub().apply {
+        mottatteOpplysninger!!.mottatteOpplysningerData.maritimtArbeid = listOf(MaritimtArbeid().apply {
+            enhetNavn = "Stena Don"
+            innretningLandkode = "DK"
+            innretningstype = Innretningstyper.PLATTFORM
+        })
+    }
+
     private fun lagGrunnlagMedManglendeAdressefelter(
         arbeidsstedManglerLandkode: Boolean,
         arbeidsgivendeForetakUtlandManglerLandkode: Boolean,
@@ -471,62 +479,36 @@ class SedDataByggerTest {
 
     @Test
     fun `lag medMaritimtArbeid bruker maritimt arbeidssted fremfor IkkeFastArbeidssted`() {
+        val behandling = behandlingMedMaritimtArbeid()
         every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) } returns listOf(Land_iso2.DK)
-        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns mutableMapOf(
+        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns mapOf(
             "Stena Don" to AvklartMaritimtArbeid(
                 "Stena Don",
                 listOf(Avklartefakta().apply {
-                    this.fakta = "DK"
-                    this.type = Avklartefaktatyper.ARBEIDSLAND
+                    fakta = "DK"
+                    type = Avklartefaktatyper.ARBEIDSLAND
                 })
             )
         )
-        val behandling = DataByggerStubs.hentBehandlingStub().apply {
-            mottatteOpplysninger!!.mottatteOpplysningerData.maritimtArbeid = listOf(MaritimtArbeid().apply {
-                enhetNavn = "Stena Don"
-                innretningLandkode = "DK"
-                innretningstype = Innretningstyper.PLATTFORM
-            })
-        }
-        val behandlingsresultat = lagStandardBehandlingsresultat(behandling)
-        val dataGrunnlag = lagGrunnlagMedSøknad(behandling)
 
-        val sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
+        val sedData = dataBygger.lag(lagGrunnlagMedSøknad(behandling), lagStandardBehandlingsresultat(behandling), PeriodeType.LOVVALGSPERIODE)
 
-        sedData.arbeidssteder.any {
-            it.navn == "Stena Don" &&
-                it.adresse?.land == "DK" &&
-                it.adresse?.poststed != INGEN_FAST_ADRESSE
-        } shouldBe true
-        sedData.arbeidssteder.any {
-            it.navn == INGEN_FAST_ADRESSE && it.adresse?.land == "DK"
-        } shouldBe false
+        sedData.arbeidssteder.map { Triple(it.navn, it.adresse?.land, it.adresse?.poststed) } shouldContain
+            Triple("Stena Don", "DK", IKKE_TILGJENGELIG)
+        sedData.arbeidssteder.map { it.navn to it.adresse?.land } shouldNotContain (INGEN_FAST_ADRESSE to "DK")
     }
 
     @Test
     fun `lag medMaritimtArbeid bruker mottatteopplysninger når avklartefakta mangler`() {
+        val behandling = behandlingMedMaritimtArbeid()
         every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) } returns listOf(Land_iso2.DK)
         every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns emptyMap()
-        val behandling = DataByggerStubs.hentBehandlingStub().apply {
-            mottatteOpplysninger!!.mottatteOpplysningerData.maritimtArbeid = listOf(MaritimtArbeid().apply {
-                enhetNavn = "Stena Don"
-                innretningLandkode = "DK"
-                innretningstype = Innretningstyper.PLATTFORM
-            })
-        }
-        val behandlingsresultat = lagStandardBehandlingsresultat(behandling)
-        val dataGrunnlag = lagGrunnlagMedSøknad(behandling)
 
-        val sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
+        val sedData = dataBygger.lag(lagGrunnlagMedSøknad(behandling), lagStandardBehandlingsresultat(behandling), PeriodeType.LOVVALGSPERIODE)
 
-        sedData.arbeidssteder.any {
-            it.navn == "Stena Don offshore" &&
-                it.adresse?.land == "DK" &&
-                it.adresse?.poststed != INGEN_FAST_ADRESSE
-        } shouldBe true
-        sedData.arbeidssteder.any {
-            it.navn == INGEN_FAST_ADRESSE && it.adresse?.land == "DK"
-        } shouldBe false
+        sedData.arbeidssteder.map { Triple(it.navn, it.adresse?.land, it.adresse?.poststed) } shouldContain
+            Triple("Stena Don offshore", "DK", IKKE_TILGJENGELIG)
+        sedData.arbeidssteder.map { it.navn to it.adresse?.land } shouldNotContain (INGEN_FAST_ADRESSE to "DK")
     }
 
     @Test

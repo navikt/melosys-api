@@ -73,9 +73,7 @@ class BrevDataGrunnlagTest {
         val maritimtArbeidISøknad = lagMaritimtArbeid()
         søknad.maritimtArbeid.add(maritimtArbeidISøknad)
 
-
         val arbeidssteder = dataGrunnlag.arbeidsstedGrunnlag.hentArbeidssteder()
-
 
         arbeidssteder.shouldHaveSize(1)
         val arbeidssted = arbeidssteder[0] as MaritimtArbeidssted
@@ -106,7 +104,6 @@ class BrevDataGrunnlagTest {
 
         val arbeidssteder = dataGrunnlagUtenAvklartMaritimtArbeid.arbeidsstedGrunnlag.hentArbeidssteder()
 
-
         arbeidssteder.shouldHaveSize(1)
         val arbeidssted = arbeidssteder[0] as MaritimtArbeidssted
         arbeidssted.run {
@@ -116,5 +113,26 @@ class BrevDataGrunnlagTest {
             idnummer.shouldBeNull()
             yrkesgruppe.kode shouldBe Yrkesgrupper.SOKKEL_ELLER_SKIP.kode
         }
+    }
+
+    @Test
+    fun `skal ikke lage maritimt arbeidssted når både avklarte fakta og landkode mangler`() {
+        val maritimtArbeidUtenLandkode = lagMaritimtArbeid().apply { flaggLandkode = null }
+        søknad.maritimtArbeid.add(maritimtArbeidUtenLandkode)
+        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns emptyMap<String, AvklartMaritimtArbeid>()
+        val persondata = PersonopplysningerObjectFactory.lagPersonopplysninger()
+        val avklarteVirksomheterService = mockk<AvklarteVirksomheterService>()
+        every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns emptyList()
+        val dataGrunnlagUtenLandkode = BrevDataGrunnlag(
+            brevbestilling,
+            kodeverkService,
+            avklarteVirksomheterService,
+            avklartefaktaService,
+            persondata
+        )
+
+        val arbeidssteder = dataGrunnlagUtenLandkode.arbeidsstedGrunnlag.hentArbeidssteder()
+
+        arbeidssteder.shouldHaveSize(0)
     }
 }

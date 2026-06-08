@@ -21,7 +21,7 @@ public final class MaritimtArbeidssted extends AbstractArbeidssted implements Ik
     }
 
     public MaritimtArbeidssted(MaritimtArbeid maritimtArbeid) {
-        super(null, null, hentLandkode(maritimtArbeid));
+        super(null, null, maritimtArbeid.landkode());
         this.avklartMaritimtArbeid = null;
         this.maritimtArbeid = maritimtArbeid;
         this.enhetNavn = maritimtArbeid.getEnhetNavn();
@@ -48,21 +48,13 @@ public final class MaritimtArbeidssted extends AbstractArbeidssted implements Ik
     }
 
     public boolean erSokkel() {
+        // Med avklarte fakta vet saksbehandler om det er sokkel eller skip.
+        // Uten avklarte fakta utledes sokkel fra søknadens innretningsopplysninger.
         if (avklartMaritimtArbeid != null) {
             return avklartMaritimtArbeid.getMaritimtype() == Maritimtyper.SOKKEL;
         }
 
         return maritimtArbeid.getInnretningLandkode() != null
             || maritimtArbeid.getInnretningstype() != null;
-    }
-
-    private static String hentLandkode(MaritimtArbeid maritimtArbeid) {
-        if (maritimtArbeid.getInnretningLandkode() != null) {
-            return maritimtArbeid.getInnretningLandkode();
-        }
-        if (maritimtArbeid.getTerritorialfarvannLandkode() != null) {
-            return maritimtArbeid.getTerritorialfarvannLandkode();
-        }
-        return maritimtArbeid.getFlaggLandkode();
     }
 }
