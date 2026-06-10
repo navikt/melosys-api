@@ -55,4 +55,13 @@ public interface BehandlingsresultatRepository extends JpaRepository<Behandlings
         """
     )
     List<Behandlingsresultat> findAllByAktorId(String aktorId);
+
+    @Query(
+        """
+            SELECT a.aar
+            FROM Årsavregning a
+            WHERE a.id = :behandlingsresultatId
+        """
+    )
+    Optional<Integer> finnÅrsavregningAar(Long behandlingsresultatId);
 }

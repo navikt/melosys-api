@@ -42,6 +42,8 @@ class OppgaveGosysMappingCodeGenerator {
             val beskrivelsefelt = with(fields[8]) {
                 when {
                     contains("tomt") -> OppgaveGosysMapping.Beskrivelsefelt.TOMT
+                    contains("GJELDER_ÅR", ignoreCase = true) || contains("gjelder år", ignoreCase = true) ->
+                        OppgaveGosysMapping.Beskrivelsefelt.GJELDER_ÅR
                     contains("SED") -> OppgaveGosysMapping.Beskrivelsefelt.SED
                     equals("A1_ANMODNING_OM_UNNTAK_PAPIR") -> OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
                     else -> throw IllegalStateException("Fant ikke ${fields[8]}")

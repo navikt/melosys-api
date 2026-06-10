@@ -84,6 +84,7 @@ internal open class OppgaveGosysMapping {
         TOMT(""),
         SED(""),
         SED_ELLER_TOMT(""),
+            GJELDER_ÅR(""),
         BEHANDLINGSTEMA("Hent behandlingstemaet på behandlingen i Melosys"),
         A1_ANMODNING_OM_UNNTAK_PAPIR(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR.beskrivelse)
     }
@@ -156,7 +157,7 @@ internal open class OppgaveGosysMapping {
                     OppgaveBehandlingstema.EU_EOS_YRKESAKTIV,
                     Tema.TRY,
                     Oppgavetyper.BEH_SAK_MK,
-                    Beskrivelsefelt.TOMT
+                    Beskrivelsefelt.GJELDER_ÅR
                 )
             ),
             TableRow(
@@ -292,7 +293,7 @@ internal open class OppgaveGosysMapping {
                     OppgaveBehandlingstema.UTENFOR_AVTALAND_PENSJONIST_ELLER_UFORETRYGDET, // ab0485
                     Tema.TRY,
                     Oppgavetyper.BEH_ARSAVREG,
-                    Beskrivelsefelt.TOMT
+                    Beskrivelsefelt.GJELDER_ÅR
                 )
             ),
             TableRow(
@@ -320,7 +321,7 @@ internal open class OppgaveGosysMapping {
                     OppgaveBehandlingstema.UTENFOR_AVTALAND_YRKESAKTIV,
                     Tema.TRY,
                     Oppgavetyper.BEH_ARSAVREG,
-                    Beskrivelsefelt.TOMT
+                    Beskrivelsefelt.GJELDER_ÅR
                 )
             ),
             TableRow(
@@ -372,7 +373,7 @@ internal open class OppgaveGosysMapping {
                     OppgaveBehandlingstema.AVTALAND_YRKESAKTIV,
                     Tema.TRY,
                     Oppgavetyper.BEH_SAK_MK,
-                    Beskrivelsefelt.TOMT
+                    Beskrivelsefelt.GJELDER_ÅR
                 )
             ),
             TableRow(
@@ -408,7 +409,7 @@ internal open class OppgaveGosysMapping {
                     OppgaveBehandlingstema.EU_EOS_PENSJONIST_ELLER_UFORETRYGDET, // ab0480
                     Tema.TRY,
                     Oppgavetyper.BEH_ARSAVREG,
-                    Beskrivelsefelt.TOMT
+                    Beskrivelsefelt.GJELDER_ÅR
                 )
             ),
             TableRow(

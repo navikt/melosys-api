@@ -59,6 +59,9 @@ class BehandlingsresultatService(
         behandlingsresultatRepository.findById(behandlingsid)
             .orElseThrowIkkeFunnetException(behandlingsid)
 
+    fun finnÅrsavregningAar(behandlingsresultatId: Long): Int? =
+        behandlingsresultatRepository.finnÅrsavregningAar(behandlingsresultatId).getOrNull()
+
     fun hentBehandlingsresultatMedAnmodningsperioder(behandlingsid: Long): Behandlingsresultat =
         behandlingsresultatRepository.findWithAnmodningsperioderById(behandlingsid)
             .orElseThrowIkkeFunnetException(behandlingsid)

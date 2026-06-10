@@ -108,7 +108,7 @@ class BehandlingEventListenerTest {
         every { oppgaveService.lagBehandlingsoppgave(behandling) } returns oppgaveFactory.lagBehandlingsoppgave(
             behandling,
             LocalDate.now(),
-            behandling::hentSedDokument
+            hentSedDokument = behandling::hentSedDokument
         )
         every { oppgaveService.oppdaterOppgave(any(), any<OppgaveOppdatering>()) } just Runs
 

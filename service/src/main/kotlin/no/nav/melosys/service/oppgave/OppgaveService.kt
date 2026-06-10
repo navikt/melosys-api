@@ -133,8 +133,17 @@ class OppgaveService(
     }
 
     fun lagBehandlingsoppgave(behandling: Behandling): Oppgave.Builder =
-        oppgaveFactory.lagBehandlingsoppgave(behandling, utledMottaksdato.getMottaksdato(behandling))
+        oppgaveFactory.lagBehandlingsoppgave(behandling, utledMottaksdato.getMottaksdato(behandling), finnGjelderÅrForÅrsavregning(behandling))
         { behandlingService.hentBehandlingMedSaksopplysninger(behandling.id).finnSedDokument().orElse(null) }
+
+    // Type-sjekken må dekke alle mappingsrader med Beskrivelsefelt.GJELDER_ÅR —
+    // håndheves av OppgaveGosysMappingTest `beskrivelsefelt GJELDER_ÅR skal kun brukes for behandlingstype ÅRSAVREGNING`
+    private fun finnGjelderÅrForÅrsavregning(behandling: Behandling): String? =
+        if (behandling.type == Behandlingstyper.ÅRSAVREGNING) {
+            behandlingsresultatService.finnÅrsavregningAar(behandling.id)?.toString()
+        } else {
+            null
+        }
 
     fun opprettJournalføringsoppgave(journalpostID: String, aktørID: String?) {
         val oppgaveID = opprettOppgave(lagJournalføringsoppgave(journalpostID).setAktørId(aktørID).build())
