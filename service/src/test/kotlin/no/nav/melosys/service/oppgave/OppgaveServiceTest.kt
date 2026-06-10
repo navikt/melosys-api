@@ -363,9 +363,7 @@ internal class OppgaveServiceTest {
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
         every { behandlingService.lagre(behandling) } returns Unit
-        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns Behandlingsresultat.forTest {
-            årsavregning { aar = 2024 }
-        }
+        every { behandlingsresultatService.finnÅrsavregningAar(behandling.id) } returns 2024
 
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS)

@@ -302,7 +302,7 @@ class OppgaveMigrering(
 
     private fun finnGjelderÅrForÅrsavregning(behandlingstype: Behandlingstyper, behandlingID: Long): String? =
         if (behandlingstype == Behandlingstyper.ÅRSAVREGNING) {
-            behandlingsresultatRepository.findById(behandlingID).orElse(null)?.årsavregning?.aar?.toString()
+            behandlingsresultatRepository.finnÅrsavregningAar(behandlingID).orElse(null)?.toString()
         } else {
             null
         }

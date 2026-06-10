@@ -84,7 +84,7 @@ internal open class OppgaveGosysMapping {
         TOMT(""),
         SED(""),
         SED_ELLER_TOMT(""),
-        GJELDER_ÅR(""),
+            GJELDER_ÅR(""),
         BEHANDLINGSTEMA("Hent behandlingstemaet på behandlingen i Melosys"),
         A1_ANMODNING_OM_UNNTAK_PAPIR(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR.beskrivelse)
     }

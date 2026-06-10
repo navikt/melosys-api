@@ -19,7 +19,7 @@ class OppgaveBeskrivelseUtleder internal constructor(
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper,
         gjelderÅr: String? = null,
-        hentSedDokument: (logHvisManger: Boolean) -> SedDokument?
+        hentSedDokument: (logHvisMangler: Boolean) -> SedDokument?
     ): String {
         val beskrivelsefelt =
             oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype).beskrivelsefelt
@@ -31,13 +31,18 @@ class OppgaveBeskrivelseUtleder internal constructor(
             OppgaveGosysMapping.Beskrivelsefelt.SED -> utledBeskrivelse(behandlingstype, hentSedDokument)
             OppgaveGosysMapping.Beskrivelsefelt.BEHANDLINGSTEMA -> behandlingstema.beskrivelse
             OppgaveGosysMapping.Beskrivelsefelt.GJELDER_ÅR -> gjelderÅr
-                ?: "".also { log.warn("Mangler gjelderÅr for beskrivelse på årsavregningsoppgave") }
+                ?: "".also {
+                    log.warn(
+                        "Mangler gjelderÅr for beskrivelse på årsavregningsoppgave " +
+                            "(sakstype:$sakstype, sakstema:$sakstema, behandlingstema:$behandlingstema, behandlingstype:$behandlingstype)"
+                    )
+                }
         }
     }
 
     private fun utledBeskrivelse(
         behandlingstype: Behandlingstyper,
-        hentSedDokument: (logHvisManger: Boolean) -> SedDokument?
+        hentSedDokument: (logHvisMangler: Boolean) -> SedDokument?
     ): String {
         if (behandlingstype in listOf(Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)) {
             // Vi har valgt å løse dette ved å legge inn ekstra mapping i OppgaveGosysMapping

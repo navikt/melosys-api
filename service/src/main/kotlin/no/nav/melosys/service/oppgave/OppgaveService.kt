@@ -140,7 +140,7 @@ class OppgaveService(
     // håndheves av OppgaveGosysMappingTest `beskrivelsefelt GJELDER_ÅR skal kun brukes for behandlingstype ÅRSAVREGNING`
     private fun finnGjelderÅrForÅrsavregning(behandling: Behandling): String? =
         if (behandling.type == Behandlingstyper.ÅRSAVREGNING) {
-            behandlingsresultatService.hentBehandlingsresultat(behandling.id).årsavregning?.aar?.toString()
+            behandlingsresultatService.finnÅrsavregningAar(behandling.id)?.toString()
         } else {
             null
         }
