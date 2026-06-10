@@ -363,15 +363,19 @@ internal class OppgaveServiceTest {
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
         every { behandlingService.lagre(behandling) } returns Unit
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns Behandlingsresultat.forTest {
+            årsavregning { aar = 2024 }
+        }
 
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS)
 
 
-        verify { oppgaveFasade.opprettOppgave(any()) }
+        verify { oppgaveFasade.opprettOppgave(capture(oppgaveSlot)) }
         verify(exactly = 0) { oppgaveFasade.opprettSensitivOppgave(any()) }
         verify { behandlingService.lagre(behandling) }
         behandling.oppgaveId!! shouldBeEqual oppgave.oppgaveId
+        oppgaveSlot.captured.beskrivelse shouldBeEqual "2024"
     }
 
     @Test

@@ -286,7 +286,7 @@ class OppgaveMigrering(
                 sakstema,
                 behandlingstema,
                 behandlingstype,
-                hentSedDokument
+                hentSedDokument = hentSedDokument
             )
         } catch (e: Exception) {
             val message = e.message ?: "utledBeskrivelse feilet "

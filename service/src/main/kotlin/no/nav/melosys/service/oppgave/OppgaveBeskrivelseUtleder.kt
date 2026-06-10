@@ -18,6 +18,7 @@ class OppgaveBeskrivelseUtleder internal constructor(
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper,
+        gjelderÅr: String? = null,
         hentSedDokument: (logHvisManger: Boolean) -> SedDokument?
     ): String {
         val beskrivelsefelt =
@@ -29,6 +30,8 @@ class OppgaveBeskrivelseUtleder internal constructor(
             OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR -> beskrivelsefelt.beskrivelse
             OppgaveGosysMapping.Beskrivelsefelt.SED -> utledBeskrivelse(behandlingstype, hentSedDokument)
             OppgaveGosysMapping.Beskrivelsefelt.BEHANDLINGSTEMA -> behandlingstema.beskrivelse
+            OppgaveGosysMapping.Beskrivelsefelt.GJELDER_ÅR -> gjelderÅr
+                ?: "".also { log.warn("Mangler gjelderÅr for beskrivelse på årsavregningsoppgave") }
         }
     }
 

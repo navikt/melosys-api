@@ -140,7 +140,7 @@ class DefaultSedRuterTest {
         every { oppgaveService.lagBehandlingsoppgave(any()) } returns oppgaveFactory.lagBehandlingsoppgave(
             behandling,
             LocalDate.now(),
-            behandling::hentSedDokument
+            hentSedDokument = behandling::hentSedDokument
         )
         every { oppgaveService.opprettOppgave(any<Oppgave>()) } returns "test-oppgave-id"
         every { oppgaveService.oppdaterOppgave(any(), any<OppgaveOppdatering>()) } just Runs

@@ -133,8 +133,15 @@ class OppgaveService(
     }
 
     fun lagBehandlingsoppgave(behandling: Behandling): Oppgave.Builder =
-        oppgaveFactory.lagBehandlingsoppgave(behandling, utledMottaksdato.getMottaksdato(behandling))
+        oppgaveFactory.lagBehandlingsoppgave(behandling, utledMottaksdato.getMottaksdato(behandling), finnGjelderÅrForÅrsavregning(behandling))
         { behandlingService.hentBehandlingMedSaksopplysninger(behandling.id).finnSedDokument().orElse(null) }
+
+    private fun finnGjelderÅrForÅrsavregning(behandling: Behandling): String? =
+        if (behandling.type == Behandlingstyper.ÅRSAVREGNING) {
+            behandlingsresultatService.hentBehandlingsresultat(behandling.id).årsavregning?.aar?.toString()
+        } else {
+            null
+        }
 
     fun opprettJournalføringsoppgave(journalpostID: String, aktørID: String?) {
         val oppgaveID = opprettOppgave(lagJournalføringsoppgave(journalpostID).setAktørId(aktørID).build())

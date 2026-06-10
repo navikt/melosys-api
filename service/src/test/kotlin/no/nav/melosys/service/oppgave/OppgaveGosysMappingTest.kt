@@ -114,7 +114,49 @@ class OppgaveGosysMappingTest {
             oppgaveBehandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_PENSJONIST_ELLER_UFORETRYGDET)
             tema.shouldBe(Tema.TRY)
             oppgaveType.shouldBe(Oppgavetyper.BEH_ARSAVREG)
-            beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.TOMT)
+            beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.GJELDER_ÅR)
         }
+    }
+
+    @Test
+    fun `kombo FTRL, MEDLEMSKAP_LOVVALG, PENSJONIST, ÅRSAVREGNING skal gi oppgavetype BEH_ARSAVREG og beskrivelsefelt GJELDER_ÅR`() {
+        val oppgave = oppgaveGosysMapping.finnOppgave(
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.PENSJONIST,
+            Behandlingstyper.ÅRSAVREGNING
+        )
+
+        oppgave.apply {
+            oppgaveBehandlingstema.shouldBe(OppgaveBehandlingstema.UTENFOR_AVTALAND_PENSJONIST_ELLER_UFORETRYGDET)
+            tema.shouldBe(Tema.TRY)
+            oppgaveType.shouldBe(Oppgavetyper.BEH_ARSAVREG)
+            beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.GJELDER_ÅR)
+        }
+    }
+
+    @Test
+    fun `kombo FTRL, MEDLEMSKAP_LOVVALG, YRKESAKTIV, ÅRSAVREGNING skal gi oppgavetype BEH_ARSAVREG og beskrivelsefelt GJELDER_ÅR`() {
+        val oppgave = oppgaveGosysMapping.finnOppgave(
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.YRKESAKTIV,
+            Behandlingstyper.ÅRSAVREGNING
+        )
+
+        oppgave.apply {
+            oppgaveBehandlingstema.shouldBe(OppgaveBehandlingstema.UTENFOR_AVTALAND_YRKESAKTIV)
+            tema.shouldBe(Tema.TRY)
+            oppgaveType.shouldBe(Oppgavetyper.BEH_ARSAVREG)
+            beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.GJELDER_ÅR)
+        }
+    }
+
+    @Test
+    fun `alle rader med behandlingstype ÅRSAVREGNING skal ha beskrivelsefelt GJELDER_ÅR`() {
+        oppgaveGosysMapping.rows
+            .filter { Behandlingstyper.ÅRSAVREGNING in it.behandlingstype }
+            .shouldHaveSize(5)
+            .forEach { it.oppgave.beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.GJELDER_ÅR) }
     }
 }
