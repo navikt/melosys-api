@@ -159,4 +159,13 @@ class OppgaveGosysMappingTest {
             .shouldHaveSize(5)
             .forEach { it.oppgave.beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.GJELDER_ÅR) }
     }
+
+    @Test
+    fun `beskrivelsefelt GJELDER_ÅR skal kun brukes for behandlingstype ÅRSAVREGNING`() {
+        // OppgaveService.finnGjelderÅrForÅrsavregning leverer bare år for behandlingstype ÅRSAVREGNING.
+        // En GJELDER_ÅR-rad for andre behandlingstyper ville gitt tom beskrivelse i det stille.
+        oppgaveGosysMapping.rows
+            .filter { it.oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.GJELDER_ÅR }
+            .forEach { it.behandlingstype.shouldBe(setOf(Behandlingstyper.ÅRSAVREGNING)) }
+    }
 }

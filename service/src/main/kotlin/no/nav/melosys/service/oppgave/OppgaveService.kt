@@ -136,6 +136,8 @@ class OppgaveService(
         oppgaveFactory.lagBehandlingsoppgave(behandling, utledMottaksdato.getMottaksdato(behandling), finnGjelderÅrForÅrsavregning(behandling))
         { behandlingService.hentBehandlingMedSaksopplysninger(behandling.id).finnSedDokument().orElse(null) }
 
+    // Type-sjekken må dekke alle mappingsrader med Beskrivelsefelt.GJELDER_ÅR —
+    // håndheves av OppgaveGosysMappingTest `beskrivelsefelt GJELDER_ÅR skal kun brukes for behandlingstype ÅRSAVREGNING`
     private fun finnGjelderÅrForÅrsavregning(behandling: Behandling): String? =
         if (behandling.type == Behandlingstyper.ÅRSAVREGNING) {
             behandlingsresultatService.hentBehandlingsresultat(behandling.id).årsavregning?.aar?.toString()
