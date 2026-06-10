@@ -10,9 +10,9 @@ import org.springframework.web.reactive.function.client.WebClient
  * Oppgave-id-ene er de samme i v1 og v2, så nøkkelord kan settes på oppgaver opprettet via v1.
  */
 @Retryable
-class OppgaveV2Client(private val webClient: WebClient) {
+open class OppgaveV2Client(private val webClient: WebClient) {
 
-    fun leggTilNøkkelord(oppgaveID: String, nøkkelord: Set<String>) {
+    open fun leggTilNøkkelord(oppgaveID: String, nøkkelord: Set<String>) {
         val oppgave = hentOppgave(oppgaveID)
         // NB: JsonNode.map er en medlemsmetode i Jackson 3 som mapper noden selv,
         // ikke elementene — derfor values() før Kotlin-map.
