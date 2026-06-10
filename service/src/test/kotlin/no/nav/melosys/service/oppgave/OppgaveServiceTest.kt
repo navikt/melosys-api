@@ -10,6 +10,7 @@ import io.kotest.matchers.optional.shouldBeEmpty
 import io.kotest.matchers.optional.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import io.getunleash.Unleash
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -28,6 +29,8 @@ import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie
 import no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest
 import no.nav.melosys.domain.mottatteopplysninger.soeknad
 import no.nav.melosys.domain.oppgave.Oppgave
+import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
@@ -78,6 +81,9 @@ internal class OppgaveServiceTest {
     @MockK
     private lateinit var mottatteOpplysningerService: MottatteOpplysningerService
 
+    @MockK
+    private lateinit var unleash: Unleash
+
     private val oppgaveOppdateringSlot = slot<OppgaveOppdatering>()
     private val oppgaveSlot = slot<Oppgave>()
 
@@ -99,7 +105,8 @@ internal class OppgaveServiceTest {
             persondataFasade,
             eregFasade,
             utledMottaksdato,
-            oppgaveFactory
+            oppgaveFactory,
+            unleash
         )
         oppgave = Oppgave.Builder()
             .setOppgavetype(Oppgavetyper.BEH_SAK_MK)
@@ -115,6 +122,7 @@ internal class OppgaveServiceTest {
         every { oppgaveFasade.opprettOppgave(any<Oppgave>()) } returns BEH_OPPG_ID
         every { oppgaveFasade.opprettSensitivOppgave(any<Oppgave>()) } returns BEH_OPPG_ID
         every { persondataFasade.harStrengtFortroligAdresse(any()) } returns false
+        every { unleash.isEnabled(any<String>()) } returns false
     }
 
     @Test
@@ -374,6 +382,67 @@ internal class OppgaveServiceTest {
         verify { behandlingService.lagre(behandling) }
         behandling.oppgaveId!! shouldBeEqual oppgave.oppgaveId
         oppgaveSlot.captured.beskrivelse shouldBeEqual "2024"
+    }
+
+    @Test
+    fun opprettEllerGjenbrukBehandlingsoppgave_årsavregningMedNøkkelordToggle_nøkkelordSettes() {
+        val behandling = lagÅrsavregningsbehandlingMedMocker()
+        every { unleash.isEnabled(ToggleName.MELOSYS_OPPGAVE_NØKKELORD) } returns true
+        every { oppgaveFasade.leggTilNøkkelord(any(), any()) } returns Unit
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS)
+
+        verify { oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Årsavregning 2024")) }
+    }
+
+    @Test
+    fun opprettEllerGjenbrukBehandlingsoppgave_årsavregningUtenNøkkelordToggle_nøkkelordSettesIkke() {
+        val behandling = lagÅrsavregningsbehandlingMedMocker()
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS)
+
+        verify { oppgaveFasade.opprettOppgave(any<Oppgave>()) }
+        verify(exactly = 0) { oppgaveFasade.leggTilNøkkelord(any(), any()) }
+    }
+
+    @Test
+    fun opprettEllerGjenbrukBehandlingsoppgave_nøkkelordKallFeiler_oppgaveBlirLikevelOpprettet() {
+        val behandling = lagÅrsavregningsbehandlingMedMocker()
+        every { unleash.isEnabled(ToggleName.MELOSYS_OPPGAVE_NØKKELORD) } returns true
+        every { oppgaveFasade.leggTilNøkkelord(any(), any()) } throws TekniskException("Kall mot Oppgave v2 feilet.")
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS)
+
+        verify { oppgaveFasade.opprettOppgave(any<Oppgave>()) }
+        behandling.oppgaveId!! shouldBeEqual BEH_OPPG_ID
+    }
+
+    @Test
+    fun oppdaterOppgave_årsavregningMedNøkkelordToggle_nøkkelordReassertes() {
+        val behandling = lagÅrsavregningsbehandlingMedMocker()
+        every { unleash.isEnabled(ToggleName.MELOSYS_OPPGAVE_NØKKELORD) } returns true
+        every { oppgaveFasade.leggTilNøkkelord(any(), any()) } returns Unit
+
+        oppgaveService.oppdaterOppgave(BEH_OPPG_ID, behandling)
+
+        verify { oppgaveFasade.oppdaterOppgave(BEH_OPPG_ID, any()) }
+        verify { oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Årsavregning 2024")) }
+    }
+
+    private fun lagÅrsavregningsbehandlingMedMocker(): Behandling {
+        val behandling = Behandling.forTest {
+            id = 1L
+            fagsak { medBruker() }
+            type = Behandlingstyper.ÅRSAVREGNING
+            tema = Behandlingstema.YRKESAKTIV
+        }
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns listOf(oppgave)
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandling
+        every { behandlingService.hentBehandling(any<Long>()) } returns behandling
+        every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
+        every { behandlingService.lagre(behandling) } returns Unit
+        every { behandlingsresultatService.finnÅrsavregningAar(behandling.id) } returns 2024
+        return behandling
     }
 
     @Test
