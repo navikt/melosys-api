@@ -162,8 +162,8 @@ class BehandlingsresultatService(
 
     fun oppdaterFritekster(
         behandlingID: Long,
-        begrunnelseFritekst: String,
-        innledningFritekst: String,
+        begrunnelseFritekst: String?,
+        innledningFritekst: String?,
         trygdeavgiftFritekst: String?
     ): Behandlingsresultat = hentBehandlingsresultat(behandlingID).let { behandlingsresultat ->
         behandlingsresultat.begrunnelseFritekst = begrunnelseFritekst
