@@ -37,7 +37,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>21</java.version>
-        <kotlin.version>2.3.21</kotlin.version>
+        <kotlin.version>2.4.0</kotlin.version>
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
@@ -49,7 +49,7 @@
         <nav.tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</nav.tjenestespesifikasjoner.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
         <doksys.dokumentproduksjon.version>44-7d14e70</doksys.dokumentproduksjon.version>
-        <token-support.version>6.0.8</token-support.version>
+        <token-support.version>6.0.10</token-support.version>
 
 
         <!-- Versjoner av eksterne biblioteker -->
@@ -73,7 +73,7 @@
         <kotest.version>6.1.11</kotest.version>
         <kotlin-logging.version>3.0.5</kotlin-logging.version>
         <mockito-kotlin.version>6.3.0</mockito-kotlin.version>
-        <mockk.version>1.14.9</mockk.version>
+        <mockk.version>1.14.11</mockk.version>
         <micrometer-jvm-extras.version>0.3.0</micrometer-jvm-extras.version>
         <networknt.json-schema-validator.version>3.0.3</networknt.json-schema-validator.version>
         <ojdbc.version>21.16.0.0</ojdbc.version>
@@ -89,14 +89,14 @@
         <unleash.version>12.2.2</unleash.version>
         <bcpkix-jdk15on.version>1.84</bcpkix-jdk15on.version>
         <bouncycastle-jdk18on.version>1.84</bouncycastle-jdk18on.version>
-        <nimbus-jose-jwt.version>10.9</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>10.9.1</nimbus-jose-jwt.version>
         <neethi.version>3.2.2</neethi.version>
         <jaxws-rt.version>4.0.4</jaxws-rt.version>
         <jakarta.jaxb.version>4.0.5</jakarta.jaxb.version>
         <javaparser.version>1.0.11</javaparser.version>
         <google.errorprone.version>2.49.0</google.errorprone.version>
-        <checkerframework.version>4.1.0</checkerframework.version>
-        <threeten.version>1.8.0</threeten.version>
+        <checkerframework.version>4.2.0</checkerframework.version>
+        <threeten.version>1.9.0</threeten.version>
         <jetbrains.annotations.version>26.1.0</jetbrains.annotations.version>
         <snappy.java.version>1.1.10.8</snappy.java.version>
         <mockito.inline.version>5.2.0</mockito.inline.version>
@@ -108,7 +108,7 @@
         <graphql-spring-boot-starter.version>15.1.0</graphql-spring-boot-starter.version>
         <scala.version>2.13.18</scala.version>
         <testcontainers.version>2.0.5</testcontainers.version>
-        <jna.version>5.18.1</jna.version>
+        <jna.version>5.19.0</jna.version>
         <graphql.java.extended.scalars.version>24.0</graphql.java.extended.scalars.version>
         <ulid-java>5.2.3</ulid-java>
         <org.apache.pdfbox.version>3.0.7</org.apache.pdfbox.version>
