@@ -381,4 +381,25 @@ class BehandlingsresultatServiceTest {
             trygdeavgiftFritekst shouldBe "fritekst for trygdeavgift"
         }
     }
+
+    @Test
+    fun oppdaterFritekster_kunBegrunnelse_blirLagretUtenFeil() {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            innledningFritekst = "gammel innledning"
+        }
+        every { behandlingsresultatRepo.findById(1L) } returns Optional.of(behandlingsresultat)
+        every { behandlingsresultatRepo.save(any()) } returns behandlingsresultat
+
+
+        behandlingsresultatService.oppdaterFritekster(1L, "fritekst for begrunnelse", null, null)
+
+
+        verify { behandlingsresultatRepo.save(capture(behandlingsresultatCaptor)) }
+        with(behandlingsresultatCaptor.captured) {
+            begrunnelseFritekst shouldBe "fritekst for begrunnelse"
+            innledningFritekst shouldBe null
+            trygdeavgiftFritekst shouldBe null
+        }
+    }
 }
