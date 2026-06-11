@@ -1,0 +1,22 @@
+{
+  "id": 11519,
+  "versjon": 3,
+  "status": "AAPEN",
+  "aktivDato": "2024-01-15",
+  "fristDato": "2024-02-01",
+  "prioritet": "NORMAL",
+  "beskrivelse": "2024",
+  "nokkelord": ["Eksisterende nøkkelord"],
+  "kategorisering": {
+    "tema": { "kode": "TRY", "term": "Trygdeavgift" },
+    "oppgavetype": { "kode": "BEH_ARSAVREG", "term": "Behandle årsavregning" },
+    "behandlingstema": { "kode": "ab0083", "term": "Årsavregning" }
+  },
+  "fordeling": {
+    "enhet": { "nr": "4530" }
+  },
+  "opprettet": {
+    "tidspunkt": "2024-01-15T10:27:26.566Z",
+    "av": "srvmelosys"
+  }
+}

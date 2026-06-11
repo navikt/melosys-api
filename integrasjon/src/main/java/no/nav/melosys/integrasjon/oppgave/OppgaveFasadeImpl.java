@@ -20,6 +20,7 @@ import no.nav.melosys.domain.util.KodeverkUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveClient;
+import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveV2Client;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
@@ -50,9 +51,11 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     private static final String[] OPPGAVE_TEMA = new String[]{Tema.MED.getKode(), Tema.UFM.getKode(), Tema.TRY.getKode()};
 
     private final OppgaveClient oppgaveClient;
+    private final OppgaveV2Client oppgaveV2Client;
 
-    public OppgaveFasadeImpl(OppgaveClient oppgaveClient) {
+    public OppgaveFasadeImpl(OppgaveClient oppgaveClient, OppgaveV2Client oppgaveV2Client) {
         this.oppgaveClient = oppgaveClient;
+        this.oppgaveV2Client = oppgaveV2Client;
     }
 
     @Override
@@ -192,6 +195,11 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         }
 
         oppgaveClient.oppdaterOppgave(oppgaveDto);
+    }
+
+    @Override
+    public void leggTilNøkkelord(String oppgaveID, Set<String> nøkkelord) {
+        oppgaveV2Client.leggTilNøkkelord(oppgaveID, nøkkelord);
     }
 
     private OppgaveDto hentOppgaveDto(String oppgaveID) {
