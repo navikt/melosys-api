@@ -4,9 +4,11 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService
@@ -21,7 +23,8 @@ class OpprettBehandlingForSak(
     private val prosessinstansService: ProsessinstansService,
     private val saksbehandlingRegler: SaksbehandlingRegler,
     private val lovligeKombinasjonerSaksbehandlingService: LovligeKombinasjonerSaksbehandlingService,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
+    private val behandlingsresultatRepository: BehandlingsresultatRepository
 ) {
     @Transactional
     fun opprettBehandling(saksnummer: String?, opprettSakDto: OpprettSakDto) {
@@ -47,15 +50,31 @@ class OpprettBehandlingForSak(
             behandlingstype!!
         )
 
+        val skalReplikeres = saksbehandlingRegler.skalTidligereBehandlingReplikeres(fagsak, behandlingstype, behandlingstema)
+        val behandlingIdForReplikering = finnBehandlingIdForReplikeringVedAnmodningOmUnntak(sistBehandling)
+
         if (sistBehandling.erAktiv() && behandlingstype != Behandlingstyper.ÅRSAVREGNING) {
             behandlingService.avsluttBehandling(sistBehandling.id)
         }
 
-        if (saksbehandlingRegler.skalTidligereBehandlingReplikeres(fagsak, behandlingstype, behandlingstema)) {
-            prosessinstansService.opprettOgReplikerBehandlingForSak(saksnummer, opprettSakDto.tilOpprettSakRequest())
+        if (skalReplikeres) {
+            prosessinstansService.opprettOgReplikerBehandlingForSak(
+                saksnummer, opprettSakDto.tilOpprettSakRequest(), behandlingIdForReplikering
+            )
         } else {
             prosessinstansService.opprettNyBehandlingForSak(saksnummer, opprettSakDto.tilOpprettSakRequest())
         }
+    }
+
+    /**
+     * Når en aktiv behandling med resultat ANMODNING_OM_UNNTAK avsluttes pga ny vurdering,
+     * må vi lagre behandling-ID-en eksplisitt for replikering. Etter avslutning endres resultatet
+     * til FERDIGBEHANDLET, som normalt blokkerer replikering i ReplikerBehandling-sagasteget.
+     */
+    private fun finnBehandlingIdForReplikeringVedAnmodningOmUnntak(behandling: Behandling): Long? {
+        if (!behandling.erAktiv()) return null
+        val resultat = behandlingsresultatRepository.findById(behandling.id).orElse(null) ?: return null
+        return if (resultat.type == Behandlingsresultattyper.ANMODNING_OM_UNNTAK) behandling.id else null
     }
 
     private fun valider(fagsak: Fagsak, opprettSakDto: OpprettSakDto) {
