@@ -793,6 +793,21 @@ class ProsessinstansServiceTest {
             getData(ProsessDataKey.SAKSNUMMER) shouldBe "MEL-2"
             getData(ProsessDataKey.GJELDER_ÅR) shouldBe "2023"
             hentData<Behandlingsaarsaktyper>(ProsessDataKey.ÅRSAK_TYPE) shouldBe Behandlingsaarsaktyper.MELDING_FRA_SKATT
+            // 3-arg-varianten (bl.a. saksbehandlingsflyt) skal ikke utløse innhentingsbrev
+            finnData(ProsessDataKey.SEND_INNHENTINGSBREV, false) shouldBe false
+        }
+    }
+
+    @Test
+    fun `opprett prosessinstanser for årsavregning skal sette SEND_INNHENTINGSBREV når flagget er true`() {
+        prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
+            "MEL-2", "2023", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE, true
+        )
+
+        verify(exactly = 1) { prosessinstansRepo.save(any()) }
+        piListCaptor.last().run {
+            this shouldNotBe null
+            finnData(ProsessDataKey.SEND_INNHENTINGSBREV, false) shouldBe true
         }
     }
 
