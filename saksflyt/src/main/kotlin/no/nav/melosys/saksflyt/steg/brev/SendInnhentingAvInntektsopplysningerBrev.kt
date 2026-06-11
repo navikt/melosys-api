@@ -1,10 +1,8 @@
 package no.nav.melosys.saksflyt.steg.brev
 
-import io.getunleash.Unleash
 import mu.KotlinLogging
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
@@ -23,25 +21,21 @@ private val log = KotlinLogging.logger { }
  * (FULLMEKTIG_SØKNAD) håndteres automatisk nedstrøms i brev-tjenesten, så vi sender alltid med
  * [Mottakerroller.BRUKER].
  *
- * Steget er dobbelt gated:
- *  - prosessdata-flagget [ProsessDataKey.SEND_INNHENTINGSBREV] settes kun av de to in-scope
- *    automatiske flytene, slik at saksbehandlingsflyt-konteksten (OppretteÅrsavregningVedEndring,
- *    «Under avklaring med Nav M&A») ikke sender brev.
- *  - feature toggle [ToggleName.MELOSYS_ÅRSAVREGNING_INNHENTINGSBREV] styrer aktivering per miljø.
+ * Steget gates av prosessdata-flagget [ProsessDataKey.SEND_INNHENTINGSBREV], som settes kun av de to
+ * in-scope automatiske flytene. Saksbehandlingsflyt-konteksten (OppretteÅrsavregningVedEndring,
+ * «Under avklaring med Nav M&A») setter ikke flagget og sender derfor ikke brev. Når og om de to
+ * flytene i det hele tatt oppretter årsavregninger styres allerede oppstrøms (skattepliktige bak
+ * MELOSYS_SKATTEHENDELSE_CONSUMER, ikke-skattepliktige via manuell admin-jobb), så et eget
+ * brev-toggle er ikke nødvendig.
  */
 @Component
 class SendInnhentingAvInntektsopplysningerBrev(
     private val dokumentServiceFasade: DokumentServiceFasade,
-    private val unleash: Unleash,
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.SEND_INNHENTINGSBREV_AARSAVREGNING
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        if (!unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_INNHENTINGSBREV)) {
-            log.debug { "Toggle ${ToggleName.MELOSYS_ÅRSAVREGNING_INNHENTINGSBREV} er av — sender ikke innhentingsbrev" }
-            return
-        }
         if (!prosessinstans.finnData(ProsessDataKey.SEND_INNHENTINGSBREV, false)) {
             log.debug { "SEND_INNHENTINGSBREV er ikke satt for prosessinstans ${prosessinstans.id} — sender ikke innhentingsbrev" }
             return
