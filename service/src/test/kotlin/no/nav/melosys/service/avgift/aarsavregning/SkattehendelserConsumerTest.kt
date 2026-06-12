@@ -91,7 +91,6 @@ class SkattehendelserConsumerTest {
             sisteÅrsavregning = behandlingsresultat
         )
         every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any(), any()) } returns mockk<UUID>()
-        every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any(), any()) } returns mockk<UUID>()
         every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
 
 

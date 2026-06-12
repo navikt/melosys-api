@@ -21,9 +21,9 @@ private val log = KotlinLogging.logger { }
  * (FULLMEKTIG_SØKNAD) håndteres automatisk nedstrøms i brev-tjenesten, så vi sender alltid med
  * [Mottakerroller.BRUKER].
  *
- * Steget gates av prosessdata-flagget [ProsessDataKey.SEND_INNHENTINGSBREV], som settes kun av de to
- * in-scope automatiske flytene. Saksbehandlingsflyt-konteksten (OppretteÅrsavregningVedEndring,
- * «Under avklaring med Nav M&A») setter ikke flagget og sender derfor ikke brev. Når og om de to
+ * Steget gates av prosessdata-flagget [ProsessDataKey.SEND_INNHENTINGSBREV], som settes til `true` kun
+ * av de to in-scope automatiske flytene. Saksbehandlingsflyt-konteksten (OppretteÅrsavregningVedEndring,
+ * «Under avklaring med Nav M&A») setter flagget til `false` og sender derfor ikke brev. Når og om de to
  * flytene i det hele tatt oppretter årsavregninger styres allerede oppstrøms (skattepliktige bak
  * MELOSYS_SKATTEHENDELSE_CONSUMER, ikke-skattepliktige via manuell admin-jobb), så et eget
  * brev-toggle er ikke nødvendig.
@@ -37,7 +37,7 @@ class SendInnhentingAvInntektsopplysningerBrev(
 
     override fun utfør(prosessinstans: Prosessinstans) {
         if (!prosessinstans.finnData(ProsessDataKey.SEND_INNHENTINGSBREV, false)) {
-            log.debug { "SEND_INNHENTINGSBREV er ikke satt for prosessinstans ${prosessinstans.id} — sender ikke innhentingsbrev" }
+            log.debug { "SEND_INNHENTINGSBREV er false eller mangler for prosessinstans ${prosessinstans.id} — sender ikke innhentingsbrev" }
             return
         }
 
