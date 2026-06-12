@@ -71,6 +71,9 @@ internal class EndreSakServiceTest {
     @RelaxedMockK
     lateinit var saksbehandlingRegler: SaksbehandlingRegler
 
+    @RelaxedMockK
+    lateinit var skjemaSakMappingService: SkjemaSakMappingService
+
     private lateinit var endreSakService: EndreSakService
 
     @BeforeEach
@@ -84,6 +87,7 @@ internal class EndreSakServiceTest {
             applicationEventPublisher,
             saksbehandlingRegler,
             behandlingService,
+            skjemaSakMappingService,
         )
     }
 

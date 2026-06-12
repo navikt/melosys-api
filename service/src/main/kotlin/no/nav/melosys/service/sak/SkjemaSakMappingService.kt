@@ -78,6 +78,39 @@ class SkjemaSakMappingService(
         log.info { "Lagret mapping: skjemaId=$skjemaId → saksnummer=${fagsak.saksnummer}" }
     }
 
+    /**
+     * Frikobler skjema_sak_mapping-rader fra en MottatteOpplysninger som skal slettes, slik at
+     * FK_SKJEMA_SAK_MAPPING_MOTTOPP ikke blokkerer slettingen (ORA-02292).
+     *
+     * Endringen flushes umiddelbart slik at FK-en er nullstilt i databasen før mottatteopplysninger
+     * slettes. Returnerer skjemaId-ene som ble frikoblet, slik at de kan re-pekes til ny
+     * MottatteOpplysninger ved gjenoppretting.
+     */
+    @Transactional
+    fun frikobleFraMottatteOpplysninger(mottatteOpplysninger: MottatteOpplysninger): List<UUID> {
+        val mappinger = skjemaSakMappingRepository.findByMottatteOpplysninger_Id(mottatteOpplysninger.id)
+        if (mappinger.isEmpty()) return emptyList()
+
+        mappinger.forEach { it.mottatteOpplysninger = null }
+        skjemaSakMappingRepository.saveAllAndFlush(mappinger)
+        log.info { "Frikoblet ${mappinger.size} skjema-sak-mapping(er) fra mottatteOpplysninger=${mottatteOpplysninger.id}" }
+        return mappinger.map { it.skjemaId }
+    }
+
+    /**
+     * Re-peker skjema_sak_mapping-rader til en ny MottatteOpplysninger etter gjenoppretting,
+     * slik at koblingen skjema → sak/mottatte opplysninger bevares.
+     */
+    @Transactional
+    fun knyttTilMottatteOpplysninger(skjemaIder: Collection<UUID>, mottatteOpplysninger: MottatteOpplysninger) {
+        if (skjemaIder.isEmpty()) return
+
+        val mappinger = skjemaSakMappingRepository.findBySkjemaIdIn(skjemaIder)
+        mappinger.forEach { it.mottatteOpplysninger = mottatteOpplysninger }
+        skjemaSakMappingRepository.saveAll(mappinger)
+        log.info { "Re-pekte ${mappinger.size} skjema-sak-mapping(er) til mottatteOpplysninger=${mottatteOpplysninger.id}" }
+    }
+
     @Transactional
     fun oppdaterJournalpostId(skjemaId: UUID, journalpostId: String) {
         val mapping = skjemaSakMappingRepository.findBySkjemaId(skjemaId).orElse(null)
