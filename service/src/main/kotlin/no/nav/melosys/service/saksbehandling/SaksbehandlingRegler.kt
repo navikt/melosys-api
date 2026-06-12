@@ -40,14 +40,17 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
 
     internal fun finnBehandlingSomKanReplikeres(behandlinger: List<Behandling>) =
         behandlinger
-            .filter { it.erInaktiv() }
             .filter { !harIngenFlyt(it) }
             .filterNot { it.erÅrsavregning() }
-            .firstOrNull {
-                val behandlingsresultat = behandlingsresultatRepository.findById(it.id)
-                BEHANDLINGSTYPER_SOM_KAN_REPLIKERES.contains(it.type)
-                    && behandlingsresultat.isPresent
-                    && !BEHANDLINGSRESULTATTYPER_SOM_IKKE_KAN_REPLIKERES.contains(behandlingsresultat.get().type)
+            .filter { BEHANDLINGSTYPER_SOM_KAN_REPLIKERES.contains(it.type) }
+            .firstOrNull { behandling ->
+                val resultat = behandlingsresultatRepository.findById(behandling.id).orElse(null)
+                    ?: return@firstOrNull false
+                when {
+                    behandling.erInaktiv() -> !BEHANDLINGSRESULTATTYPER_SOM_IKKE_KAN_REPLIKERES.contains(resultat.type)
+                    behandling.erAktiv() && resultat.type == Behandlingsresultattyper.ANMODNING_OM_UNNTAK -> true
+                    else -> false
+                }
             }
 
     fun harIngenFlyt(behandling: Behandling): Boolean =
@@ -157,7 +160,6 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         )
         private val BEHANDLINGSRESULTATTYPER_SOM_IKKE_KAN_REPLIKERES = listOf(
             Behandlingsresultattyper.HENLEGGELSE,
-            Behandlingsresultattyper.ANMODNING_OM_UNNTAK,
             Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL,
             Behandlingsresultattyper.FERDIGBEHANDLET,
             Behandlingsresultattyper.HENLEGGELSE_BORTFALT,
