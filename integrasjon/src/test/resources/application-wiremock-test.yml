@@ -78,6 +78,14 @@ mockserver:
               grant-type: client_credentials
               scope: https://graph.microsoft.com/.default
               token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
+            sak:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: lol
+                client-secret: lol
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
             inntekt:
               authentication:
                 client-auth-method: client_secret_basic

@@ -5,6 +5,7 @@ APP_NAME_MEDL: medlemskap-medl-api-q1
 APP_NAME_OPPGAVE: oppgave-q1
 APP_NAME_PDL: pdl-api
 APP_NAME_SAF: saf
+APP_NAME_SAK: sak
 APP_NAME_TILGANGSMASKINEN: populasjonstilgangkontroll
 APP_NAME_UTBETALING: sokos-utbetaldata
 APP_NAME_MELOSYS_SOKNAD_MOTTAK: melosys-soknad-mottak
@@ -115,6 +116,8 @@ microsoft:
             inntekt:
               scope: melosys-localhost
             melosys-eessi:
+              scope: melosys-localhost
+            sak:
               scope: melosys-localhost
             tilgangsmaskinen:
               scope: melosys-localhost
