@@ -10,13 +10,13 @@
 
 **Debug**:
 ```sql
-SELECT f.id, f.gsak_saksnr, f.sakstype,
-       mo.mottatte_opplysninger_data
+SELECT f.saksnummer, f.gsak_saksnummer, f.fagsak_type,
+       mo.data
 FROM fagsak f
-JOIN behandling b ON b.fagsak_id = f.id
-JOIN mottatte_opplysninger mo ON mo.behandling_id = b.id
-WHERE f.id = :fagsakId;
--- Check søknadsland in mottatte_opplysninger_data
+JOIN behandling b ON b.saksnummer = f.saksnummer
+JOIN mottatteopplysninger mo ON mo.behandling_id = b.id
+WHERE f.saksnummer = :saksnummer;
+-- Check søknadsland in the mottatteopplysninger.data JSON
 ```
 
 **Validation logic**:
@@ -35,11 +35,11 @@ if (erEuEllerEøsLand && sakstype != Sakstyper.EU_EOS) {
 
 **Debug**:
 ```sql
-SELECT lp.bestemmelse, f.sakstype
-FROM lovvalgsperiode lp
-JOIN behandlingsresultat br ON lp.behandlingsresultat_id = br.id
+SELECT lp.lovvalg_bestemmelse, f.fagsak_type
+FROM lovvalg_periode lp
+JOIN behandlingsresultat br ON lp.beh_resultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE b.id = :behandlingId;
 ```
 
@@ -51,46 +51,28 @@ WHERE b.id = :behandlingId;
 
 **Symptom**: SED not sent, BUC not created
 
-**Debug**:
-```sql
-SELECT bc.*, sed.*
-FROM buc_case bc
-LEFT JOIN sed ON sed.buc_case_id = bc.id
-WHERE bc.fagsak_id = :fagsakId
-ORDER BY bc.opprettet_tid DESC;
-```
+**Debug**: BUC/SED documents are NOT stored in the melosys-api database — they live in melosys-eessi. From melosys-api, inspect the SED saga via `prosessinstans` (it links to behandling via `behandling_id`; the current step is the `sist_fullfort_steg` column, and the saga type is `prosess_type`).
 
-**Check prosessinstans**:
 ```sql
-SELECT pi.*, ps.steg, ps.status
+SELECT pi.uuid, pi.prosess_type, pi.status, pi.sist_fullfort_steg, pi.registrert_dato
 FROM prosessinstans pi
-JOIN prosess_steg ps ON ps.prosessinstans_id = pi.id
 WHERE pi.behandling_id = :behandlingId
-AND pi.prosesstype LIKE '%SED%'
-ORDER BY ps.opprettet_tid;
+ORDER BY pi.registrert_dato DESC;
 ```
 
 ### 4. A1 Not Generated
 
 **Symptom**: Vedtak created but no A1 in SAF/Joark
 
-**Check a1Produseres flag**:
+**Check the resultat type**: whether an A1 is produced is decided in code by `Behandlingsresultat.a1Produseres()` (`erInnvilgelse() && !erUtpeking() && harVedtak()`), not by a single column. Inspect the result type and whether a vedtak exists:
+
 ```sql
-SELECT br.id, br.type as resultattype,
-       CASE WHEN br.type IN ('INNVILGELSE', 'REGISTRERING_UNNTAK')
-            THEN 'true' ELSE 'false' END as a1_produseres
+SELECT br.behandling_id, br.resultat_type
 FROM behandlingsresultat br
 WHERE br.behandling_id = :behandlingId;
 ```
 
-**Check dokumentproduksjon**:
-```sql
-SELECT dp.*, b.id as behandling_id
-FROM dokumentproduksjon dp
-JOIN behandling b ON dp.behandling_id = b.id
-WHERE b.id = :behandlingId
-AND dp.type = 'A1';
-```
+The generated A1 document is journalført in SAF/Joark and is not stored as a row in the melosys-api database (there is no `dokumentproduksjon` table here).
 
 ### 5. Wrong Country Determined
 
@@ -98,17 +80,17 @@ AND dp.type = 'A1';
 
 **Debug søknad data**:
 ```sql
-SELECT mo.mottatte_opplysninger_data
-FROM mottatte_opplysninger mo
+SELECT mo.data
+FROM mottatteopplysninger mo
 WHERE mo.behandling_id = :behandlingId;
--- Check arbeidsland, søknadsland fields
+-- Check arbeidsland, søknadsland fields in the data JSON
 ```
 
 **Check behandlingsresultat**:
 ```sql
-SELECT lp.lovvalgsland, lp.bestemmelse
-FROM lovvalgsperiode lp
-JOIN behandlingsresultat br ON lp.behandlingsresultat_id = br.id
+SELECT lp.lovvalgsland, lp.lovvalg_bestemmelse
+FROM lovvalg_periode lp
+JOIN behandlingsresultat br ON lp.beh_resultat_id = br.behandling_id
 WHERE br.behandling_id = :behandlingId;
 ```
 
@@ -118,17 +100,17 @@ WHERE br.behandling_id = :behandlingId;
 
 ```sql
 SELECT
-    f.gsak_saksnr,
-    f.sakstype,
+    f.gsak_saksnummer,
+    f.fagsak_type,
     b.id as behandling_id,
     b.status,
-    b.tema as behandlingstema,
-    br.type as resultattype
+    b.beh_tema as behandlingstema,
+    br.resultat_type
 FROM fagsak f
-JOIN behandling b ON b.fagsak_id = f.id
+JOIN behandling b ON b.saksnummer = f.saksnummer
 LEFT JOIN behandlingsresultat br ON br.behandling_id = b.id
-WHERE f.sakstype = 'EU_EOS'
-ORDER BY b.opprettet_tid DESC
+WHERE f.fagsak_type = 'EU_EOS'
+ORDER BY b.registrert_dato DESC
 FETCH FIRST 100 ROWS ONLY;
 ```
 
@@ -136,73 +118,72 @@ FETCH FIRST 100 ROWS ONLY;
 
 ```sql
 SELECT
-    f.gsak_saksnr,
-    lp.bestemmelse,
+    f.gsak_saksnummer,
+    lp.lovvalg_bestemmelse,
     lp.lovvalgsland,
-    lp.fom,
-    lp.tom,
-    lp.innvilgelsesresultat
-FROM lovvalgsperiode lp
-JOIN behandlingsresultat br ON lp.behandlingsresultat_id = br.id
+    lp.fom_dato,
+    lp.tom_dato,
+    lp.innvilgelse_resultat
+FROM lovvalg_periode lp
+JOIN behandlingsresultat br ON lp.beh_resultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE f.sakstype = 'EU_EOS'
-AND lp.bestemmelse LIKE 'FO_883%'
-ORDER BY b.opprettet_tid DESC
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+WHERE f.fagsak_type = 'EU_EOS'
+AND lp.lovvalg_bestemmelse LIKE 'FO_883%'
+ORDER BY b.registrert_dato DESC
 FETCH FIRST 50 ROWS ONLY;
 ```
 
 ### BUC and SED Status
 
+BUC and SED documents are NOT stored in the melosys-api database — they are owned by melosys-eessi (queried there via the `saksrelasjon`/RINA tables). From melosys-api, trace the SED saga via `prosessinstans` instead:
+
 ```sql
-SELECT
-    f.gsak_saksnr,
-    bc.type as buc_type,
-    bc.status as buc_status,
-    bc.rina_id,
-    sed.type as sed_type,
-    sed.status as sed_status
-FROM buc_case bc
-JOIN fagsak f ON bc.fagsak_id = f.id
-LEFT JOIN sed ON sed.buc_case_id = bc.id
-WHERE f.sakstype = 'EU_EOS'
+SELECT pi.uuid, pi.prosess_type, pi.status, pi.sist_fullfort_steg
+FROM prosessinstans pi
+JOIN behandling b ON pi.behandling_id = b.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+WHERE f.fagsak_type = 'EU_EOS'
 AND f.saksnummer = :saksnummer
-ORDER BY bc.opprettet_tid DESC;
+ORDER BY pi.registrert_dato DESC;
 ```
 
-### Unntaksperioder (Art. 16)
+### Anmodningsperioder / unntak (Art. 16)
+
+Art. 16 exception requests are stored as `anmodningsperiode` rows (there is no `unntaksperiode` table).
 
 ```sql
 SELECT
-    up.id,
-    up.fom,
-    up.tom,
-    up.unntak_fra_bestemmelse,
-    up.unntak_fra_lovvalgsland,
-    up.innvilgelsesresultat,
-    f.gsak_saksnr
-FROM unntaksperiode up
-JOIN behandlingsresultat br ON up.behandlingsresultat_id = br.id
+    ap.id,
+    ap.fom_dato,
+    ap.tom_dato,
+    ap.lovvalg_bestemmelse,
+    ap.lovvalgsland,
+    ap.unntak_fra_bestemmelse,
+    ap.unntak_fra_lovvalgsland,
+    f.gsak_saksnummer
+FROM anmodningsperiode ap
+JOIN behandlingsresultat br ON ap.beh_resultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE f.sakstype = 'EU_EOS'
-ORDER BY b.opprettet_tid DESC;
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+WHERE f.fagsak_type = 'EU_EOS'
+ORDER BY b.registrert_dato DESC;
 ```
 
 ### Multi-State Cases (Art. 13)
 
 ```sql
 SELECT
-    f.gsak_saksnr,
-    b.tema as behandlingstema,
-    lp.bestemmelse,
+    f.gsak_saksnummer,
+    b.beh_tema as behandlingstema,
+    lp.lovvalg_bestemmelse,
     lp.lovvalgsland
-FROM lovvalgsperiode lp
-JOIN behandlingsresultat br ON lp.behandlingsresultat_id = br.id
+FROM lovvalg_periode lp
+JOIN behandlingsresultat br ON lp.beh_resultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE lp.bestemmelse LIKE 'FO_883_2004_ART13%'
-ORDER BY b.opprettet_tid DESC;
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+WHERE lp.lovvalg_bestemmelse LIKE 'FO_883_2004_ART13%'
+ORDER BY b.registrert_dato DESC;
 ```
 
 ## Article Statistics
@@ -211,15 +192,15 @@ ORDER BY b.opprettet_tid DESC;
 
 ```sql
 SELECT
-    lp.bestemmelse,
+    lp.lovvalg_bestemmelse,
     COUNT(*) as antall
-FROM lovvalgsperiode lp
-JOIN behandlingsresultat br ON lp.behandlingsresultat_id = br.id
+FROM lovvalg_periode lp
+JOIN behandlingsresultat br ON lp.beh_resultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE f.sakstype = 'EU_EOS'
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+WHERE f.fagsak_type = 'EU_EOS'
 AND b.status = 'AVSLUTTET'
-GROUP BY lp.bestemmelse
+GROUP BY lp.lovvalg_bestemmelse
 ORDER BY antall DESC;
 ```
 
@@ -229,11 +210,11 @@ ORDER BY antall DESC;
 SELECT
     lp.lovvalgsland,
     COUNT(*) as antall
-FROM lovvalgsperiode lp
-JOIN behandlingsresultat br ON lp.behandlingsresultat_id = br.id
+FROM lovvalg_periode lp
+JOIN behandlingsresultat br ON lp.beh_resultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE f.sakstype = 'EU_EOS'
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+WHERE f.fagsak_type = 'EU_EOS'
 AND b.status = 'AVSLUTTET'
 GROUP BY lp.lovvalgsland
 ORDER BY antall DESC;
@@ -279,10 +260,7 @@ EU/EEA countries that require EU_EOS sakstype:
 
 ## Feature Toggles
 
-| Toggle | Purpose |
-|--------|---------|
-| `EESSI_ENABLED` | Enable EESSI/EUX integration |
-| `UK_POST_BREXIT` | Use UK protocol instead of 883/2004 |
+Feature toggles in melosys-api are Unleash toggles referenced via `ToggleName.*` constants and `unleash.isEnabled(...)`. There is no single `EESSI_ENABLED` or `UK_POST_BREXIT` switch. To find the toggles relevant to a flow, search for `ToggleName.` usages in the relevant `saksflyt`/`service` step (e.g. `ToggleName.MELOSYS_11_3_A_NORGE_ER_UTPEKT`).
 
 ## Related Skills
 

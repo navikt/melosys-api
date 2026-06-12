@@ -47,8 +47,11 @@ saksflyt/        # Execution engine and step implementations
 
 ### Creating a New Saga
 ```java
-// In any service class, inject ProsessinstansService
-prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling);
+// In any service class, inject ProsessinstansService.
+// Real signature (see ProsessinstansService.java) takes the full parameter list:
+prosessinstansService.opprettProsessinstansIverksettVedtakEos(
+    behandling, behandlingsresultatType, fritekst, fritekstSed,
+    mottakerinstitusjoner, arbeidsgiverSkalHaKopi);
 ```
 
 ### Step Implementation Pattern
@@ -85,7 +88,7 @@ public class MyStep implements StegBehandler {
 
 1. **Create**: `ProsessinstansService` creates `Prosessinstans`, publishes `ProsessinstansOpprettetEvent`
 2. **Queue Check**: `ProsessinstansOpprettetListener` checks if saga should wait (låsReferanse) - **BEFORE_COMMIT**
-3. **Execute**: `ProsessinstansBehandler.behandleProsessinstans()` runs steps in sequence - **AFTER_COMMIT**
+3. **Execute**: `ProsessinstansBehandler.behandleProsessinstansNå()` runs steps in sequence - **AFTER_COMMIT** (dispatched via `ProsessinstansDispatcher`; `ProsessinstansBehandlerDelegate.behandleProsessinstans()` does the på-vent check and delegates here)
 4. **Complete/Fail**: Status set to FERDIG or FEILET, `ProsessinstansFerdigEvent` published
 5. **Release**: `ProsessinstansFerdigListener` starts next waiting saga with same lock group
 
@@ -119,10 +122,3 @@ The sync/async split at transaction boundaries causes race conditions:
 - **[Anti-Patterns](references/anti-patterns.md)**: Sync/async race conditions and how to avoid them
 - **[Stale Reference Problem](references/stale-reference-problem.md)**: AFTER_COMMIT misconception and investigation guide
 - **[Common Patterns](references/patterns.md)**: Debugging, adding steps, error handling
-
-### Project-Level Documentation
-
-Investigation reports in `docs/`:
-- `docs/prosessinstans-reload-fix.md` - Proposed fix for stale reference problem
-- `docs/race-condition-analysis.md` - Full sync/async split analysis
-- `docs/saksopplysningkilde-equals-hashcode-fix.md` - @Lob equals/hashCode issue

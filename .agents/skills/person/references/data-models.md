@@ -1,5 +1,15 @@
 # Person Data Models Reference
 
+## Contents
+
+- [Domain Models](#domain-models) — Persondata interface, Personopplysninger, PersonMedHistorikk
+- [Supporting Types](#supporting-types) — Navn, Foedsel, Doedsfall, Statsborgerskap, Sivilstand(stype), Kjoenn, Folkeregister*
+- [Address Models](#address-models) — Adressebeskyttelse, Bostedsadresse, Kontaktadresse, Oppholdsadresse, StrukturertAdresse
+- [Family Models](#family-models) — Familiemedlem, Foreldreansvar
+- [Informasjonsbehov](#informasjonsbehov)
+- [Master Source](#master-source)
+- [Address Priority Rules](#address-priority-rules)
+
 ## Domain Models
 
 Located in `domain/src/main/kotlin/no/nav/melosys/domain/person/`

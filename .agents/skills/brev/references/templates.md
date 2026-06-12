@@ -54,15 +54,21 @@ class DokgenMalMapper(
     private val innvilgelseFtrlMapper: InnvilgelseFtrlMapper,
     // ... other mappers
 ) {
-    fun lagDokgenDtoFraBestilling(
-        produserbardokument: Produserbaredokumenter,
-        behandling: Behandling,
-        bestilling: BrevbestillingDto
-    ): Any {
-        return when (produserbardokument) {
-            MANGELBREV_BRUKER -> lagMangelbrevBruker(behandling, bestilling)
+    // Public entry point used by DokgenService
+    fun mapBehandling(
+        mottattBrevbestilling: DokgenBrevbestilling,
+        mottaker: Mottaker
+    ): DokgenDto {
+        // beriker bestillingen med persondata, deretter:
+        return lagDokgenDtoFraBestilling(brevbestillingBuilder.build())
+    }
+
+    // Internal dispatch on produserbartDokument (single DokgenBrevbestilling arg)
+    private fun lagDokgenDtoFraBestilling(brevbestilling: DokgenBrevbestilling): DokgenDto {
+        return when (brevbestilling.produserbartDokument) {
+            MANGELBREV_BRUKER -> lagMangelbrevBruker(brevbestilling)
             INNVILGELSE_FOLKETRYGDLOVEN -> innvilgelseFtrlMapper.map(...)
-            TRYGDEAVTALE_GB -> lagTrygdeavtaleDokument(behandling, bestilling)
+            TRYGDEAVTALE_GB -> lagTrygdeavtaleDokument(brevbestilling, ...)
             // ... other mappings
         }
     }
@@ -142,30 +148,29 @@ Maps data for annual settlement letters:
 - Adjustments
 - New amounts
 
-## DokgenConsumer
+## DokgenClient
 
-REST client to melosys-dokgen:
+REST client to melosys-dokgen (`integrasjon/.../dokgen/DokgenClient.java`).
+The real contract takes a typed `DokgenDto` (not an untyped `Any`) and posts to
+`/mal/{malNavn}/lag-pdf`:
 
-```kotlin
-@Component
-class DokgenConsumer(
-    private val webClient: WebClient
-) {
-    fun lagPdf(malnavn: String, data: Any): ByteArray {
+```java
+@Retryable
+public class DokgenClient {
+
+    public byte[] lagPdf(String malNavn, DokgenDto dokgenDto,
+                         boolean bestillKopi, boolean bestillUtkast) {
         return webClient.post()
-            .uri("/template/$malnavn/create-pdf")
-            .bodyValue(data)
+            .uri("/mal/{malNavn}/lag-pdf?somKopi={bestillKopi}&utkast={bestillUtkast}",
+                 malNavn, bestillKopi, bestillUtkast)
+            .bodyValue(dokgenDto)
             .retrieve()
-            .bodyToMono<ByteArray>()
-            .block() ?: throw TekniskException("Feil ved PDF-generering")
+            .bodyToMono(byte[].class)
+            .block();
     }
 
-    fun lagPdfForStandardvedlegg(type: StandardvedleggType): ByteArray {
-        return webClient.get()
-            .uri("/standardvedlegg/${type.name.lowercase()}")
-            .retrieve()
-            .bodyToMono<ByteArray>()
-            .block() ?: ByteArray(0)
+    public byte[] lagPdfForStandardvedlegg(String malNavn, StandardvedleggDto standardvedlegg) {
+        // posts to the same /mal/{malNavn}/lag-pdf endpoint with the standardvedlegg body
     }
 }
 ```
@@ -174,15 +179,20 @@ class DokgenConsumer(
 
 Pre-generated PDF attachments:
 
-| Type | Description |
-|------|-------------|
-| `RETTIGHETER_OG_PLIKTER` | Rights and obligations |
-| `KLAGEVEILEDNING` | Appeal guidance |
+| Type | malnavn | Description |
+|------|---------|-------------|
+| `VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE` | info_om_rettigheter_innvilgelse | Rights and obligations (approval) |
+| `VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_AVSLAG` | info_om_rettigheter_avslag | Rights and obligations (rejection) |
 
 ```kotlin
-enum class StandardvedleggType {
-    RETTIGHETER_OG_PLIKTER,
-    KLAGEVEILEDNING
+// domain/.../brev/StandardvedleggType.kt
+enum class StandardvedleggType(
+    val malnavn: String,
+    val journalføringstittel: String,
+    val frontendTittel: String
+) {
+    VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_AVSLAG(...),
+    VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE(...)
 }
 ```
 

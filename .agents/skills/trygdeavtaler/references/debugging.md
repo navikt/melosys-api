@@ -16,13 +16,13 @@
 
 **Debug**:
 ```sql
-SELECT f.id, f.gsak_saksnr, f.sakstype,
-       mo.mottatte_opplysninger_data
+SELECT f.saksnummer, f.gsak_saksnummer, f.fagsak_type,
+       mo.data
 FROM fagsak f
-JOIN behandling b ON b.fagsak_id = f.id
-JOIN mottatte_opplysninger mo ON mo.behandling_id = b.id
-WHERE f.id = :fagsakId;
--- Check søknadsland in mottatte_opplysninger_data
+JOIN behandling b ON b.saksnummer = f.saksnummer
+JOIN mottatteopplysninger mo ON mo.behandling_id = b.id
+WHERE f.saksnummer = :saksnummer;
+-- Check søknadsland in mottatteopplysninger.data
 ```
 
 **Validation**: JournalfoeringValidering checks:
@@ -41,9 +41,9 @@ if (erAvtaleland && !erEuEllerEøsLand && sakstype != Sakstyper.TRYGDEAVTALE) {
 **Debug**:
 ```sql
 -- Check behandlingstema
-SELECT b.id, b.tema as behandlingstema, f.sakstema, f.sakstype
+SELECT b.id, b.beh_tema as behandlingstema, f.tema as sakstema, f.fagsak_type
 FROM behandling b
-JOIN fagsak f ON b.fagsak_id = f.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE b.id = :behandlingId;
 ```
 
@@ -79,62 +79,63 @@ when (soeknadsland) {
 ### Find All Trygdeavtale Cases
 
 ```sql
-SELECT f.id, f.gsak_saksnr, f.sakstype, f.sakstema,
-       b.id as behandling_id, b.status, b.tema
+SELECT f.saksnummer, f.gsak_saksnummer, f.fagsak_type, f.tema,
+       b.id as behandling_id, b.status, b.beh_tema
 FROM fagsak f
-JOIN behandling b ON b.fagsak_id = f.id
-WHERE f.sakstype = 'TRYGDEAVTALE'
-ORDER BY b.opprettet_tid DESC
+JOIN behandling b ON b.saksnummer = f.saksnummer
+WHERE f.fagsak_type = 'TRYGDEAVTALE'
+ORDER BY b.registrert_dato DESC
 FETCH FIRST 50 ROWS ONLY;
 ```
 
 ### Find Cases by Agreement Country
 
 ```sql
-SELECT f.id, f.gsak_saksnr, b.id as behandling_id,
-       JSON_VALUE(mo.mottatte_opplysninger_data, '$.soeknadsland.landkoder[0]') as land
+SELECT f.saksnummer, f.gsak_saksnummer, b.id as behandling_id,
+       JSON_VALUE(mo.data, '$.soeknadsland.landkoder[0]') as land
 FROM fagsak f
-JOIN behandling b ON b.fagsak_id = f.id
-JOIN mottatte_opplysninger mo ON mo.behandling_id = b.id
-WHERE f.sakstype = 'TRYGDEAVTALE'
-AND JSON_VALUE(mo.mottatte_opplysninger_data, '$.soeknadsland.landkoder[0]') = :landkode;
+JOIN behandling b ON b.saksnummer = f.saksnummer
+JOIN mottatteopplysninger mo ON mo.behandling_id = b.id
+WHERE f.fagsak_type = 'TRYGDEAVTALE'
+AND JSON_VALUE(mo.data, '$.soeknadsland.landkoder[0]') = :landkode;
 ```
 
 ### Check Lovvalgsperiode with Agreement Article
 
 ```sql
-SELECT lp.id, lp.bestemmelse, lp.fom, lp.tom,
-       lp.fastsatt_av_land, br.type as resultattype
-FROM lovvalgsperiode lp
-JOIN behandlingsresultat br ON lp.behandlingsresultat_id = br.id
+SELECT lp.id, lp.lovvalg_bestemmelse, lp.fom_dato, lp.tom_dato,
+       br.fastsatt_av_land, br.resultat_type as resultattype
+FROM lovvalg_periode lp
+JOIN behandlingsresultat br ON lp.beh_resultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE f.sakstype = 'TRYGDEAVTALE'
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+WHERE f.fagsak_type = 'TRYGDEAVTALE'
 AND b.id = :behandlingId;
 ```
 
 ### Find Vedtak for Trygdeavtale
 
 ```sql
-SELECT b.id, b.status, br.type as resultattype,
-       vm.vedtakstype, vm.vedtaksdato
+SELECT b.id, b.status, br.resultat_type as resultattype,
+       vm.vedtak_type, vm.vedtak_dato
 FROM behandling b
 JOIN behandlingsresultat br ON br.behandling_id = b.id
-JOIN vedtak_metadata vm ON vm.behandlingsresultat_id = br.id
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE f.sakstype = 'TRYGDEAVTALE'
-ORDER BY vm.vedtaksdato DESC;
+JOIN vedtak_metadata vm ON vm.behandlingsresultat_id = br.behandling_id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+WHERE f.fagsak_type = 'TRYGDEAVTALE'
+ORDER BY vm.vedtak_dato DESC;
 ```
 
 ### Check Prosessinstans for Trygdeavtale Vedtak
 
 ```sql
-SELECT pi.id, pi.prosesstype, pi.status, ps.steg, ps.status as steg_status
+SELECT pi.uuid, pi.prosess_type, pi.status, pi.sist_fullfort_steg,
+       ph.steg, ph.type as hendelse_type, ph.registrert_dato
 FROM prosessinstans pi
-JOIN prosess_steg ps ON ps.prosessinstans_id = pi.id
+LEFT JOIN prosessinstans_hendelser ph ON ph.prosessinstans_id = pi.uuid
 WHERE pi.behandling_id = :behandlingId
-AND pi.prosesstype = 'IVERKSETT_VEDTAK_TRYGDEAVTALE'
-ORDER BY ps.opprettet_tid;
+AND pi.prosess_type = 'IVERKSETT_VEDTAK_TRYGDEAVTALE'
+ORDER BY ph.registrert_dato;
 ```
 
 ## Agreement Article Reference

@@ -1,8 +1,11 @@
 # EESSI API Reference
 
-## EessiConsumer Interface
+## EessiClient
 
-The main interface for communicating with melosys-eessi (which forwards to EUX/RINA).
+The WebClient REST client for communicating with melosys-eessi (which forwards to
+EUX/RINA). Defined as `open class EessiClient(private val webClient: WebClient) :
+JsonRestIntegrasjon` in `integrasjon/.../eessi/EessiClient.kt` (class and methods are
+`open` so Spring `@Retryable` works).
 
 ### Create BUC and SED
 
@@ -11,7 +14,7 @@ fun opprettBucOgSed(
     sedDataDto: SedDataDto,           // SED content
     vedlegg: Collection<Vedlegg>,     // PDF attachments
     bucType: BucType,                 // LA_BUC_02, etc.
-    forsøkSend: Boolean,              // true = send immediately
+    sendAutomatisk: Boolean,          // true = send immediately
     oppdaterEksisterendeOmFinnes: Boolean  // true = update if BUC exists
 ): OpprettSedDto
 
@@ -116,7 +119,7 @@ fun hentSedGrunnlag(
 
 ## EessiService Methods
 
-Higher-level service wrapping EessiConsumer:
+Higher-level service wrapping EessiClient:
 
 ### Send SED with Attachments
 
@@ -162,7 +165,7 @@ fun sendAvslagUtpekingSvar(behandlingId: Long, utpekingAvvis: UtpekingAvvis)
 
 ## REST Endpoints (melosys-eessi)
 
-The EessiConsumerImpl calls these endpoints on melosys-eessi:
+EessiClient calls these endpoints on melosys-eessi:
 
 | Method | Path | Purpose |
 |--------|------|---------|

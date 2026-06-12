@@ -23,7 +23,8 @@ Expert knowledge of EU/EEA social security coordination regulations (EC) No 883/
 | **(EC) No 883/2004** | Basic Regulation | Coordination rules for social security |
 | **(EC) No 987/2009** | Implementing Regulation | Procedures and implementation details |
 | **EEA Agreement** | Annex VI | Extends EU regulations to EEA countries |
-| **EU-UK TCA** | Trade and Cooperation | Post-Brexit social security protocol |
+| **Separasjonsavtalen** | Withdrawal/Separation Agreement (art. 29/30) | Keeps 883/2004 & 987/2009 in force for pre-2021 NO-UK cross-border situations |
+| **EØS/EFTA-UK-konvensjonen** | EEA EFTA Convention (kodeverk `KONV_EFTA_STORBRITANNIA_*`, art. 13-18) | Post-Brexit basis for new NO-UK cases (in force from 01.01.2024). Note: Norway is NOT party to the EU-UK TCA. |
 
 ### Core Principles
 
@@ -44,7 +45,7 @@ The regulations apply to:
 | **Nationals** | EU/EEA/Swiss nationals subject to member state legislation |
 | **Stateless/Refugees** | Residing in EU/EEA, subject to member state legislation |
 | **Family Members** | Covered for derived rights (healthcare, survivors) |
-| **Third-Country Nationals** | When legally resident and moving within EU |
+| **Third-Country Nationals** | At EU level (Reg. 1231/2010) when legally resident and moving within EU. NOT adopted by Norway — for Norwegian cases a plain TCN is generally outside the personkrets of 883/2004, and only covered via the Nordic Convention or the NL/LUX/AT bilateral agreements. |
 
 ### Material Scope (Art. 3)
 
@@ -68,8 +69,8 @@ Benefits covered:
 |-----------|-----------------|-------------|
 | **EU-27** | Direct application of 883/2004 | Full |
 | **EEA (NO, IS, LI)** | EEA Agreement Annex VI | Full |
-| **Switzerland** | EU-Switzerland Agreement | Full |
-| **UK** | EU-UK Trade and Cooperation Agreement | Protocol-based |
+| **Switzerland** | EU-Switzerland Agreement (applies from 01.01.2016) | Full |
+| **UK** | Separasjonsavtalen (pre-2021 cases) + EØS/EFTA-UK-konvensjonen (new cases) | Convention-based (NOT the EU-UK TCA — Norway is not a TCA party) |
 
 ## Sakstype Handling
 
@@ -84,11 +85,16 @@ Benefits covered:
 ### EU_EOS Processing
 
 ```kotlin
-// In FattVedtakVelger
-when (sakstype) {
+// In FattVedtakVelger.getFattVedtakService(behandling)
+// ÅRSAVREGNING short-circuits before the sakstype branch
+if (behandling.type == Behandlingstyper.ÅRSAVREGNING) {
+    return årsavregningVedtakService
+}
+
+return when (behandling.fagsak.type) {
     Sakstyper.EU_EOS -> eosVedtakService
-    Sakstypers.TRYGDEAVTALE -> trygdeavtaleVedtakService
     Sakstyper.FTRL -> ftrlVedtakService
+    Sakstyper.TRYGDEAVTALE -> trygdeavtaleVedtakService
 }
 ```
 
@@ -119,8 +125,8 @@ Key procedural articles:
 
 | Article | Topic | Purpose |
 |---------|-------|---------|
-| Art. 14 | Posted workers details | Criteria for art. 12 posting |
-| Art. 15 | Temporary posting | Specific posting rules |
+| Art. 14 | Supplementary provisions for art. 12 AND art. 13 | Clarifying criteria (e.g. the 25% substantial-activity test is art. 14(8)) |
+| Art. 15 | Procedure for applying art. 12 | Posting procedure |
 | Art. 16 | Multi-state procedure | Art. 13 determination process |
 | Art. 18 | Exception procedure | Art. 16 application process |
 
@@ -134,13 +140,17 @@ Result: Employee's residence country determines legislation
 
 ## EESSI Integration
 
-### Administrative Commission Decisions
+### Portable Documents and AC Decisions
 
-| Decision | Topic | Relevance |
-|----------|-------|-----------|
-| **A1** | Portable Document A1 | Standard attestation format |
-| **A2** | Periods aggregation | Counting periods from other countries |
-| **H5** | Posted workers | Implementation of Art. 12 |
+Do not confuse the Portable Document with Administrative Commission (AC) Decisions:
+
+| Item | Type | Relevance |
+|------|------|-----------|
+| **PD A1** | Portable Document | The attestation of applicable legislation issued for posted/multi-state workers (the result of LA_BUC processing) |
+| **Decision A2** | AC Decision | Interpretation of the posting rules (art. 12) |
+| **Decision A3** | AC Decision | Aggregation of uninterrupted posting periods |
+
+The PD A1 is the document NAV produces; AC Decisions are interpretive guidance from the Administrative Commission, not documents exchanged per case.
 
 ### BUC Types by Article
 
@@ -155,10 +165,11 @@ Result: Employee's residence country determines legislation
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| `EosVedtakService` | service/.../vedtak/ | Vedtak for EU_EOS cases |
-| `Lovvalgbestemmelser_883_2004` | domain/.../kodeverk/ | 883/2004 article enum |
-| `LovvalgsbestemmelseMapperEuEos` | service/.../lovvalgsbestemmelse/ | Maps to bestemmelser |
-| `GyldigeKombinasjoner` | service/.../lovligekombinasjoner/ | Valid EU_EOS combinations |
+| `EosVedtakService` | service/src/main/java/no/nav/melosys/service/vedtak/ | Vedtak for EU_EOS cases |
+| `FattVedtakVelger` | service/src/main/kotlin/no/nav/melosys/service/vedtak/ | Routes behandling to the right vedtak service by sakstype |
+| `Lovvalgbestemmelser_883_2004` | external dependency (package `no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser`, not in-repo) | 883/2004 article enum |
+| `LovvalgsbestemmelseKodeMapper` | service/src/main/kotlin/no/nav/melosys/service/brev/felles/ | Maps lovvalgsbestemmelse enums to brev/A1 codes |
+| `GyldigeKombinasjoner` | service/src/main/kotlin/no/nav/melosys/service/lovligekombinasjoner/ | Valid EU_EOS combinations |
 
 ## Valid Combinations for EU_EOS
 
@@ -181,48 +192,40 @@ Result: Employee's residence country determines legislation
 
 ## Debugging Queries
 
+> Schema note: `fagsak` PK is `saksnummer` (string); the sakstype column is `fagsak_type`. `behandling` joins `fagsak` via the `saksnummer` FK column (there is no `fagsak_id`), and orders by `registrert_dato`. BUC/SED documents are NOT stored in the melosys-api database — they live in melosys-eessi.
+
 ### Find EU_EOS Cases
 
 ```sql
-SELECT f.id, f.gsak_saksnr, b.id as behandling_id, b.status
+SELECT f.saksnummer, f.gsak_saksnummer, b.id as behandling_id, b.status
 FROM fagsak f
-JOIN behandling b ON b.fagsak_id = f.id
-WHERE f.sakstype = 'EU_EOS'
-ORDER BY b.opprettet_tid DESC
+JOIN behandling b ON b.saksnummer = f.saksnummer
+WHERE f.fagsak_type = 'EU_EOS'
+ORDER BY b.registrert_dato DESC
 FETCH FIRST 50 ROWS ONLY;
 ```
 
 ### Check Lovvalgsbestemmelse Used
 
 ```sql
-SELECT lp.id, lp.bestemmelse, lp.fom, lp.tom, f.gsak_saksnr
-FROM lovvalgsperiode lp
-JOIN behandlingsresultat br ON lp.behandlingsresultat_id = br.id
+SELECT lp.id, lp.lovvalg_bestemmelse, lp.fom_dato, lp.tom_dato, f.gsak_saksnummer
+FROM lovvalg_periode lp
+JOIN behandlingsresultat br ON lp.beh_resultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE f.sakstype = 'EU_EOS'
-AND lp.bestemmelse LIKE 'FO_883%'
-ORDER BY b.opprettet_tid DESC;
-```
-
-### Find BUCs for EU_EOS Case
-
-```sql
-SELECT bc.id, bc.type, bc.status, f.gsak_saksnr
-FROM buc_case bc
-JOIN fagsak f ON bc.fagsak_id = f.id
-WHERE f.sakstype = 'EU_EOS'
-AND f.saksnummer = :saksnummer;
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+WHERE f.fagsak_type = 'EU_EOS'
+AND lp.lovvalg_bestemmelse LIKE 'FO_883%'
+ORDER BY b.registrert_dato DESC;
 ```
 
 ## UK Post-Brexit
 
 After Brexit, UK cases use:
 
-| Period | Regulation | Kodeverk |
-|--------|------------|----------|
-| Until 31.12.2020 | EU 883/2004 (withdrawal) | FO_883_2004_* |
-| From 01.01.2021 | EU-UK TCA Protocol | Lovvalgbestemmelser_konv_efta_storbritannia |
+| Period | Legal basis | Kodeverk |
+|--------|-------------|----------|
+| Pre-2021 cross-border situations | Separasjonsavtalen (art. 29/30) keeps 883/2004 & 987/2009 in force | FO_883_2004_* |
+| New cases (EØS/EFTA-UK-konvensjonen, in force from 01.01.2024) | EEA EFTA Convention (art. 13-18) — NOT the EU-UK TCA, which Norway is not party to | Lovvalgbestemmelser_konv_efta_storbritannia |
 
 ```kotlin
 // UK mapping in statistics

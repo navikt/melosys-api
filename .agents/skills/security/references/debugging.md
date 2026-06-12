@@ -23,7 +23,7 @@ echo $TOKEN | cut -d. -f2 | base64 -d | jq
 
 ### 2. Access Denied
 
-**Symptom**: `ManglerTilgangException`
+**Symptom**: `SikkerhetsbegrensningException`
 
 **Cause**: Tilgangsmaskinen denied access
 
@@ -103,7 +103,7 @@ JwtTokenValidatorException: Token validation failed: Invalid audience
 
 ```
 TilgangsmaskinenService: Sjekker tilgang til fnr via Tilgangsmaskinen
-TilgangsmaskinenConsumer: Access check result: true/false
+TilgangsmaskinenClient: Access check result: true/false
 ```
 
 ### Audit Log

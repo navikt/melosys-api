@@ -193,6 +193,62 @@ CREATE TABLE mottatteopplysninger (
 );
 ```
 
+## SKJEMA_SAK_MAPPING (V152)
+
+Bridge table mapping melosys-skjema-api submissions to a melosys-api case.
+Used so re-submissions of the same digital application can be attached to the
+existing case rather than creating a new one.
+
+```sql
+CREATE TABLE skjema_sak_mapping (
+    skjema_id                   RAW(16) NOT NULL PRIMARY KEY,   -- UUID from melosys-skjema-api
+    saksnummer                  VARCHAR2(99) NOT NULL REFERENCES fagsak(saksnummer),
+    mottatte_opplysninger_id    NUMBER(19) REFERENCES mottatteopplysninger(id),
+    original_data               CLOB,
+    journalpost_id              VARCHAR2(99),
+    innsendt_dato               TIMESTAMP,
+    opprettet_dato              TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL
+);
+
+CREATE INDEX idx_skjema_sak_mapping_saksnr  ON skjema_sak_mapping(saksnummer);
+CREATE INDEX idx_skjema_sak_mapping_mottopp ON skjema_sak_mapping(mottatte_opplysninger_id);
+```
+
+**Owning prosess types:** `MELOSYS_MOTTAK_DIGITAL_SØKNAD` (new sak),
+`MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD` (existing sak).
+
+## AARSAVREGNING
+
+Annual reconciliation for trygdeavgift. 1:1 with BEHANDLINGSRESULTAT
+(behandling of type `ÅRSAVREGNING`).
+
+```sql
+CREATE TABLE aarsavregning (
+    behandlingsresultat_id              NUMBER(19) NOT NULL PRIMARY KEY REFERENCES behandlingsresultat,
+    aar                                 NUMBER(4) NOT NULL,
+    tidligere_resultat_id               NUMBER(19) REFERENCES behandlingsresultat,
+    tidligere_fakturert_beloep          DECIMAL(12,2),
+    beregnet_avgift_belop               DECIMAL(12,2),   -- V129 renamed from nytt_totalbeloep
+    til_fakturering_beloep              DECIMAL(12,2) DEFAULT 0,
+    har_innbetalt_trygdeavgift          NUMBER(1),       -- V153 renamed (was har_trygdeavgift_fra_avgiftssystemet)
+    innbetalt_trygdeavgift              DECIMAL(12,2),   -- V153 renamed (was trygdeavgift_fra_avgiftssystemet)
+    endelig_avgift_valg                 VARCHAR2(255),   -- OPPLYSNINGER_ENDRET / OPPLYSNINGER_UENDRET / ...
+    manuelt_avgift_beloep               DECIMAL(12,2),
+    har_skjoennsfastsatt_inntektsgrunnlag NUMBER(1) DEFAULT 0
+);
+```
+
+**Related prosess steg:** `OPPRETTE_AARSAVREGNING_ENDRING` (V145, auto-create
+when membership changes back in time), `AVSLUTT_AARSAVREGNINGER` (V150, close
+open reconciliations when behandling is annulled), `VARSLE_PENSJONSOPPTJENING`
+(V141, notify pension accrual after avgift).
+
+## KONTAKTOPPLYSNING
+
+Contact info for a case. `kontakt_telefon` widened to VARCHAR2(255) in V148
+(was previously narrower) to accept international numbers and free-form
+entries from foreign authorities.
+
 ## Useful Queries
 
 ### Find all data for a case

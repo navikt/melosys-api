@@ -13,12 +13,12 @@
 
 **Debug Steps**:
 ```sql
--- Check if prosessinstans exists
-SELECT pi.*, pi.data
-FROM prosessinstans pi
-WHERE pi.prosesstype = 'MOTTA_SOKNAD_ALTINN'
-ORDER BY opprettet_tid DESC
-LIMIT 10;
+-- Check if prosessinstans exists (Oracle: use FETCH FIRST, not LIMIT)
+SELECT uuid, prosess_type, sist_fullfort_steg, data, registrert_dato, endret_dato
+FROM prosessinstans
+WHERE prosess_type = 'MOTTAK_SOKNAD_ALTINN'
+ORDER BY endret_dato DESC
+FETCH FIRST 10 ROWS ONLY;
 
 -- Check soknad-mottak logs
 -- In Kibana: app:melosys-skjema-api AND søknadID
@@ -42,8 +42,8 @@ LIMIT 10;
 // Common: virksomhetIUtlandet, loennOgGodtgjoerelse, arbeidssted
 
 // Test with sample XML
-AltinnSoeknadService service = ...;
-MedlemskapArbeidEOSM søknad = service.soknadMottakConsumer.hentSøknad(id);
+SoknadMottakClient soknadMottakClient = ...;
+MedlemskapArbeidEOSM søknad = soknadMottakClient.hentSøknad(søknadReferanse);
 // Step through SoeknadMapper.lagSoeknad(søknad)
 ```
 
@@ -53,9 +53,9 @@ MedlemskapArbeidEOSM søknad = service.soknadMottakConsumer.hentSøknad(id);
 
 **Check**:
 ```sql
-SELECT b.tema, mo.mottatte_opplysninger_data
+SELECT b.beh_tema, mo.data
 FROM behandling b
-JOIN mottatte_opplysninger mo ON mo.behandling_id = b.id
+JOIN mottatteopplysninger mo ON mo.behandling_id = b.id
 WHERE b.id = :behandlingId;
 -- Look at arbeidsgiver.offentligVirksomhet in JSON
 ```
@@ -65,64 +65,86 @@ WHERE b.id = :behandlingId;
 ### Find Applications by Period
 
 ```sql
-SELECT f.gsak_saksnr, b.id as behandling_id,
-       mo.mottatte_opplysninger_data
-FROM mottatte_opplysninger mo
+SELECT f.gsak_saksnummer, b.id as behandling_id,
+       mo.data
+FROM mottatteopplysninger mo
 JOIN behandling b ON mo.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE mo.opplysninger_type = 'SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS'
-AND mo.opprettet_tid > SYSDATE - 7
-ORDER BY mo.opprettet_tid DESC;
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+WHERE mo.type = 'SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS'
+AND mo.registrert_dato > SYSDATE - 7
+ORDER BY mo.registrert_dato DESC;
 ```
 
 ### Find by Employer Org Number
 
 ```sql
-SELECT f.gsak_saksnr, b.id as behandling_id
-FROM mottatte_opplysninger mo
+SELECT f.gsak_saksnummer, b.id as behandling_id
+FROM mottatteopplysninger mo
 JOIN behandling b ON mo.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE mo.opplysninger_type = 'SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS'
-AND mo.mottatte_opplysninger_data LIKE '%"virksomhetsnummer":"123456789"%';
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+WHERE mo.type = 'SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS'
+AND mo.data LIKE '%"virksomhetsnummer":"123456789"%';
 ```
 
 ### Check Fullmektig Registration
 
+There is no `fullmektig` table. A power-of-attorney holder is an `aktoer`
+row with `rolle = 'FULLMEKTIG'` (the underlying mandate is in the `fullmakt`
+table). Aktører are joined to the case via `saksnummer`:
+
 ```sql
-SELECT f.gsak_saksnr, fu.*, fu.fullmaktstype
-FROM fullmektig fu
-JOIN fagsak f ON fu.fagsak_id = f.id
-WHERE f.gsak_saksnr = '123456789';
+SELECT f.gsak_saksnummer, a.rolle, a.orgnr, a.person_ident
+FROM aktoer a
+JOIN fagsak f ON a.saksnummer = f.saksnummer
+WHERE f.gsak_saksnummer = '123456789'
+AND a.rolle = 'FULLMEKTIG';
 ```
 
 ### Trace Saga Steps
 
+`prosess_steg` is a kode/navn lookup table - do not join it to find the
+progress of a process. `prosessinstans` stores the last completed step
+directly in `sist_fullfort_steg`, and per-step failures land in
+`prosessinstans_hendelser`:
+
 ```sql
-SELECT ps.steg, ps.status, ps.opprettet_tid, ps.feilmelding
-FROM prosess_steg ps
-JOIN prosessinstans pi ON ps.prosessinstans_id = pi.id
+-- Current state of the process
+SELECT uuid, prosess_type, status, sist_fullfort_steg, endret_dato
+FROM prosessinstans
+WHERE behandling_id = :behandlingId
+AND prosess_type = 'MOTTAK_SOKNAD_ALTINN';
+
+-- Failures/exceptions logged per step
+SELECT h.steg, h.type, h.melding, h.registrert_dato
+FROM prosessinstans_hendelser h
+JOIN prosessinstans pi ON h.prosessinstans_id = pi.uuid
 WHERE pi.behandling_id = :behandlingId
-AND pi.prosesstype = 'MOTTA_SOKNAD_ALTINN'
-ORDER BY ps.opprettet_tid;
+ORDER BY h.registrert_dato;
 ```
 
 ## Kafka Topics
 
 ### Incoming Application Events
 
-Topic: `melosys.soknad-mottatt`
+Topic: `teammelosys.soknad-mottak.v1` (config key `kafka.aiven.soknad-mottak.topic`).
+Deserialized to `SoknadMottatt`, which carries only the søknad reference and the
+event timestamp:
 
 ```json
 {
-  "soknadId": "uuid-from-altinn",
-  "skjemaType": "NAV_MedlemskapArbeidEOS_M",
-  "mottattTidspunkt": "2024-01-15T10:30:00Z"
+  "soknadID": "uuid-from-altinn",
+  "occuredOn": "2024-01-15T10:30:00Z"
 }
 ```
 
+`erForGammelTilForvaltningsmelding()` is true once `occuredOn` is >= 7 days old.
+
 ### Processing
 
-Consumed by `SoknadMottattConsumer` which triggers the `MOTTA_SOKNAD_ALTINN` saga.
+Consumed by `SoknadMottattConsumer` (`service/.../soknad/`), which calls
+`ProsessinstansService.opprettProsessinstansSøknadMottatt(...)` to start the
+`MOTTAK_SOKNAD_ALTINN` saga. The XML is then fetched lazily by the saga via
+`SoknadMottakClient`.
 
 ## Integration Points
 
@@ -141,10 +163,13 @@ Returns: Collection<AltinnDokument>
 ### WebClient Configuration
 
 ```kotlin
-// Configured in SoknadMottakConfig
+// Configured in SoknadMottakClientConfig (integrasjon/.../soknadmottak/)
 @Bean
 fun soknadMottakWebClient(
-    @Value("\${melosys.integrasjon.soknad-mottak.url}") url: String
+    webClientBuilder: WebClient.Builder,
+    correlationIdOutgoingFilter: CorrelationIdOutgoingFilter,
+    genericAuthFilterFactory: GenericAuthFilterFactory,
+    @Value("\${MelosysSoknadMottak.url}") url: String
 ): WebClient
 ```
 

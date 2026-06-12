@@ -28,9 +28,9 @@ SED (Structured Electronic Document) is the standardized document format used in
 - Reference to original A001
 - Reason for refusal
 
-### A003 - Determination of Applicable Legislation
+### A003 - Determination of Applicable Legislation (Art. 13)
 
-**BUC**: LA_BUC_02, LA_BUC_04
+**BUC**: LA_BUC_02
 **Direction**: Both (Norway can send or receive)
 **Purpose**: Request provisional determination of applicable legislation for persons working in multiple countries.
 
@@ -42,7 +42,7 @@ SED (Structured Electronic Document) is the standardized document format used in
 
 ### A004 - Objection to Determination
 
-**BUC**: LA_BUC_02, LA_BUC_04
+**BUC**: LA_BUC_02
 **Direction**: Both
 **Purpose**: Object to a provisional determination made in A003.
 
@@ -51,11 +51,40 @@ SED (Structured Electronic Document) is the standardized document format used in
 - Grounds for objection
 - Alternative proposal
 
-### A005 - Notification of Applicable Legislation
+### A005 - Request for More Information (Anmodning om mer informasjon)
 
-**BUC**: LA_BUC_03, LA_BUC_05
-**Direction**: Outgoing
-**Purpose**: Notify other countries about determined applicable legislation.
+**BUC**: LA_BUC_06 (initiating), and used within LA_BUC_01 / LA_BUC_02
+**Direction**: Both
+**Purpose**: Ask another institution for additional information about a case. Paired
+with A006 (reply). This is the question SED — it is NOT a notification of applicable
+legislation (that is A010).
+
+### A006 - Reply to Request for More Information (Svar på anmodning)
+
+**BUC**: LA_BUC_06 (reply), and within LA_BUC_01 / LA_BUC_02
+**Direction**: Both
+**Purpose**: Answer an A005 request.
+
+### A008 - Notification of Relevant Information (Melding om relevant informasjon)
+
+**BUC**: LA_BUC_03 (also a SED in LA_BUC_01 / LA_BUC_02)
+**Direction**: Both
+**Purpose**: Share relevant information about an already-established case.
+
+### A009 - Notification of Posting (Melding om utstasjonering, Art. 12)
+
+**BUC**: LA_BUC_04
+**Direction**: Both
+**Purpose**: Notify that a worker is posted to another country under Art. 12 but stays
+covered by the home country's legislation. Maps to behandlingstema
+`REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING`.
+
+### A010 - Notification of Applicable Legislation (Melding om lovvalg, Art. 11)
+
+**BUC**: LA_BUC_05 (also follow-up in LA_BUC_04)
+**Direction**: Both
+**Purpose**: Notify the determined applicable legislation under Art. 11 / Art. 15. Maps
+to behandlingstema `REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE`.
 
 ### A011 - Acceptance of Exception Request
 

@@ -6,7 +6,7 @@ description: |
 
 # Melosys-API Architecture
 
-Modular monolith with 12 main modules. Understanding the dependency graph is essential for:
+Modular monolith with 12 core modules plus the `soknad-altinn` types module (JAXB-generated classes from an Altinn XSD; depends on nothing internal, used by `integrasjon`). Understanding the dependency graph is essential for:
 - Knowing where to place new code
 - Understanding what tests to run after changes
 - Avoiding circular dependencies
@@ -64,6 +64,7 @@ Modular monolith with 12 main modules. Understanding the dependency graph is ess
 | **config** | Cross-cutting config | MDC, Unleash, ShedLock, metrics |
 | **statistikk** | DVH reporting | Event listeners, statistics producers |
 | **feil** | Exception hierarchy | TekniskException, FunksjonellException |
+| **soknad-altinn** | Altinn A1 form types | JAXB classes generated from `NAV_MedlemskapArbeidEOS` XSD (no internal deps; used by integrasjon) |
 
 ## Dependency Rules
 
@@ -84,6 +85,8 @@ feil → (none)
 ```
 
 **Forbidden**: Circular dependencies, upward dependencies
+
+> **Source of truth**: These rules are derived from each module's `pom.xml` `<dependencies>` (artifacts under `groupId` `no.nav.melosys`, e.g. `melosys-domain`, `melosys-integrasjon`). They are hand-maintained here — regenerate from the POMs if module dependencies change.
 
 ## Impact Analysis
 
@@ -149,3 +152,7 @@ service → integrasjon (producer)
 | `arkitektur` | ArchUnit architecture tests |
 
 Run integration tests with: `mvn verify -pl integrasjonstest`
+
+## Enforcement
+
+The module-level boundaries above are enforced primarily by Maven: a module can only reference code in modules it declares as `<dependencies>`. The ArchUnit test `arkitektur/src/test/kotlin/no/nav/melosys/ArkitekturTestIT.kt` adds a coarser layering check on packages (Controller `..tjenester.gui..` → Service `..service..` → Integrations `..integrasjon..` / Persistence `..repository..`), so it is weaker than — not a substitute for — the module dependency rules.

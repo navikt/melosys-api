@@ -138,10 +138,10 @@ nyeMedlemskapsperioder
 ### Check Prosessinstans Status
 
 ```sql
-SELECT pi.id, pi.type, pi.status, pi.sist_utforte_steg, pi.feil_melding
+SELECT pi.uuid, pi.prosess_type, pi.status, pi.sist_fullfort_steg
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId
-AND pi.type LIKE 'IVERKSETT_VEDTAK%';
+AND pi.prosess_type LIKE 'IVERKSETT_VEDTAK%';
 ```
 
 ### Check Period MEDL Status
@@ -185,10 +185,11 @@ val periode = medlService.hentEksisterendePeriode(medlPeriodeID)
 -- Check prosessinstans
 SELECT * FROM prosessinstans
 WHERE behandling_id = :id
-AND type = 'IVERKSETT_VEDTAK_FTRL';
+AND prosess_type = 'IVERKSETT_VEDTAK_FTRL';
 
--- Check step status
-SELECT sist_utforte_steg, feil_melding FROM prosessinstans
+-- Check step status (prosessinstans has no feil_melding column; failure surfaces via status,
+-- and per-step history/error text lives in prosessinstans_hendelser.melding)
+SELECT sist_fullfort_steg, status FROM prosessinstans
 WHERE behandling_id = :id;
 ```
 
@@ -224,11 +225,24 @@ fagsak.erLovvalg()            // → true skips (use LagreLovvalgsperiodeMedl)
 
 ### Dekning Mapping
 
-| Melosys Trygdedekning | MEDL Dekning |
-|-----------------------|--------------|
-| FULL_DEKNING | FULL |
-| HELSEDEL_MED_SYKEPENGER | HELSEDEL_MED_SYKE |
-| HELSEDEL_UTEN_SYKEPENGER | HELSEDEL_UTEN_SYKE |
+The FTRL `Trygdedekninger` value maps to a `DekningMedl` code in
+`MedlPeriodeKonverter.tilMedlTrygdedekningForFtrl()` (integrasjon/medl). Each MEDL code is
+the underlying FTRL hjemmel string:
+
+| Melosys Trygdedekning | DekningMedl.kode |
+|-----------------------|------------------|
+| `FULL_DEKNING_FTRL` (also FULL_DEKNING / FULL_DEKNING_EOSFO via `tilMedlTrygdeDekning`) | `Full` |
+| `FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER` | `FTL_2-7_3_ledd_b` |
+| `FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER` | `FTL_2-7a_2_ledd_b` |
+| `FTRL_2_9_FØRSTE_LEDD_A_HELSE` | `FTL_2-9_1_ledd_a` |
+| `FTRL_2_9_FØRSTE_LEDD_B_PENSJON` | `FTL_2-9_1_ledd_b` |
+| `FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON` | `FTL_2-9_1_ledd_c` |
+| `TILLEGGSAVTALE_NATO_HELSEDEL` | `Helsetjenester_sykepenger_...` (NATO) |
+| `UTEN_DEKNING` | `Unntatt` |
+
+(See the full `when` in `tilMedlTrygdedekningForFtrl`/`tilMedlTrygdeDekning` for all
+`FTRL_2_9_*` andre/tredje ledd variants.) Note these are `Trygdedekninger`, not the
+`Avgiftsdekning` values (HELSEDEL_*/PENSJONSDEL_*).
 
 ## Related Skills
 

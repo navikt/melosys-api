@@ -12,15 +12,20 @@ Denormalized case data for reporting.
 
 ```sql
 CREATE TABLE fagsak_dvh (
-    saksnummer      VARCHAR2(99) NOT NULL,
+    trans_id        NUMBER NOT NULL,
+    fagsak_id       VARCHAR2(99),       -- saksnummer of the source fagsak
+    gsak_saksnummer NUMBER,
     fagsak_type     VARCHAR2(99),
     tema            VARCHAR2(20),
     status          VARCHAR2(99),
-    opprettet_dato  TIMESTAMP(6),
-    avsluttet_dato  TIMESTAMP(6),
-    bruker_id       VARCHAR2(99),
+    registrert_tid  TIMESTAMP(6),
+    funksjonell_tid TIMESTAMP(6),
+    trans_tid       TIMESTAMP(6),
+    registrert_av   VARCHAR2(99),
+    funksjonell_av  VARCHAR2(99),
+    dml_flagg       VARCHAR2(1),
     -- Additional denormalized fields
-    CONSTRAINT pk_fagsak_dvh PRIMARY KEY (saksnummer)
+    CONSTRAINT pk_fagsak_dvh PRIMARY KEY (trans_id)
 );
 ```
 
@@ -30,17 +35,25 @@ Denormalized treatment data.
 
 ```sql
 CREATE TABLE behandling_dvh (
-    id                  NUMBER NOT NULL,
-    saksnummer          VARCHAR2(99),
+    trans_id            NUMBER NOT NULL,
+    behandling_id       NUMBER,
+    fagsak_id           VARCHAR2(99),       -- saksnummer of the source fagsak
+    enhet               VARCHAR2(99),
     beh_type            VARCHAR2(99),
     beh_tema            VARCHAR2(99),
     status              VARCHAR2(99),
-    opprettet_dato      TIMESTAMP(6),
-    avsluttet_dato      TIMESTAMP(6),
-    behandlingstid_dager NUMBER,
     resultat_type       VARCHAR2(99),
+    behandlingsmaate    VARCHAR2(99),
+    fastsatt_av_land    VARCHAR2(99),
+    registrert_tid      TIMESTAMP(6),
+    funksjonell_tid     TIMESTAMP(6),
+    trans_tid           TIMESTAMP(6),
+    registrert_av       VARCHAR2(99),
+    funksjonell_av      VARCHAR2(99),
+    dml_flagg           VARCHAR2(1),
+    kildetabell         VARCHAR2(99),
     -- Additional fields
-    CONSTRAINT pk_behandling_dvh PRIMARY KEY (id)
+    CONSTRAINT pk_behandling_dvh PRIMARY KEY (trans_id)
 );
 ```
 
@@ -50,12 +63,24 @@ Denormalized actor data.
 
 ```sql
 CREATE TABLE aktor_dvh (
-    id              NUMBER NOT NULL,
-    saksnummer      VARCHAR2(99),
-    rolle           VARCHAR2(99),
-    aktor_type      VARCHAR2(99),    -- PERSON, ORGANISASJON, etc.
+    trans_id              NUMBER NOT NULL,
+    id                    NUMBER,
+    aktoer_id             VARCHAR2(99),
+    saksnummer            VARCHAR2(99),
+    rolle                 VARCHAR2(99),
+    orgnr                 VARCHAR2(99),
+    eu_eos_institusjon_id VARCHAR2(99),
+    utenlandsk_person_id  VARCHAR2(99),
+    representerer         VARCHAR2(99),
+    trygdemyndighet_land  VARCHAR2(2),
+    registrert_tid        TIMESTAMP(6),
+    funksjonell_tid       TIMESTAMP(6),
+    trans_tid             TIMESTAMP(6),
+    registrert_av         VARCHAR2(99),
+    funksjonell_av        VARCHAR2(99),
+    dml_flagg             VARCHAR2(1),
     -- Additional fields
-    CONSTRAINT pk_aktor_dvh PRIMARY KEY (id)
+    CONSTRAINT pk_aktor_dvh PRIMARY KEY (trans_id)
 );
 ```
 
@@ -65,12 +90,14 @@ Error logging for DVH sync issues.
 
 ```sql
 CREATE TABLE feillogg_dvh (
-    id              NUMBER NOT NULL,
-    saksnummer      VARCHAR2(99),
-    feilmelding     VARCHAR2(4000),
-    feil_tidspunkt  TIMESTAMP(6),
-    -- Additional fields
-    CONSTRAINT pk_feillogg_dvh PRIMARY KEY (id)
+    trans_id        NUMBER NOT NULL,
+    trans_tid       TIMESTAMP(6),
+    kilde_tabell    VARCHAR2(99),
+    kilde_pk        NUMBER,
+    dml_flagg       CHAR(1),
+    sqlcode         VARCHAR2(99),
+    sqlerrm         VARCHAR2(4000),
+    CONSTRAINT pk_feillogg_dvh PRIMARY KEY (trans_id)
 );
 ```
 
@@ -84,20 +111,20 @@ GROUP BY fagsak_type, status
 ORDER BY fagsak_type, status;
 ```
 
-### Average processing time by treatment type
+### Treatments by type and result
 ```sql
-SELECT beh_type, AVG(behandlingstid_dager) as snitt_dager
+SELECT beh_type, resultat_type, COUNT(*) as antall
 FROM behandling_dvh
-WHERE avsluttet_dato IS NOT NULL
-GROUP BY beh_type
-ORDER BY snitt_dager DESC;
+WHERE status = 'AVSLUTTET'
+GROUP BY beh_type, resultat_type
+ORDER BY antall DESC;
 ```
 
-### Cases opened per month
+### Cases registered per month
 ```sql
-SELECT TO_CHAR(opprettet_dato, 'YYYY-MM') as mnd, COUNT(*) as antall
+SELECT TO_CHAR(registrert_tid, 'YYYY-MM') as mnd, COUNT(*) as antall
 FROM fagsak_dvh
-GROUP BY TO_CHAR(opprettet_dato, 'YYYY-MM')
+GROUP BY TO_CHAR(registrert_tid, 'YYYY-MM')
 ORDER BY mnd;
 ```
 

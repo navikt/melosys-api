@@ -7,6 +7,16 @@ description: Build and push multi-platform Docker images to Google Artifact Regi
 
 Build and push multi-platform Docker images to the melosys-api Google Artifact Registry.
 
+> This repo-local skill intentionally overrides the global `docker-build-push`,
+> which auto-detects the image name from the cwd (`basename` of the git root)
+> and would mis-name images in parallel checkouts like `melosys-api-claude`.
+
+## Image name — ALWAYS `melosys-api`
+
+The image repository is **always** `melosys-api`, never the cwd directory name.
+Parallel workspaces may be checked out as `melosys-api-claude`, `melosys-api-2`,
+etc., but the published image name never changes.
+
 ## Registry
 
 ```
@@ -25,9 +35,16 @@ Replace `TAG` with user-specified tag.
 
 ## Workflow
 
-1. If code changed, rebuild JAR first: `make build-fast`
-2. Run buildx build with `--push`
+The `Dockerfile` is single-stage (distroless) and copies a pre-built JAR
+(`COPY /app/target/melosys-sb-execution.jar`) — it does NOT build the JAR
+itself. So you must produce the JAR before the buildx build whenever code
+changed or `app/target/` has no current JAR.
+
+1. Build the JAR first: `make build-fast` (`mvn clean install -DskipTests`)
+2. Run buildx build with `--push` — keep the image path exactly as shown above
 3. Report: tag, platforms, manifest digest
+4. Before reporting "done", verify the `-t` argument ends with `/melosys-api:TAG`
+   (not `/melosys-api-claude:TAG` or any other variant)
 
 ## Setup (if buildx not configured)
 

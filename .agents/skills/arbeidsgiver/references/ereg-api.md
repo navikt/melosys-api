@@ -13,10 +13,10 @@ GET /organisasjon/{orgnummer}
 
 Returns organization details for the given 9-digit organization number.
 
-## OrganisasjonRestConsumer
+## OrganisasjonRestClient
 
 ```kotlin
-open class OrganisasjonRestConsumer(private val webClient: WebClient) {
+open class OrganisasjonRestClient(private val webClient: WebClient) {
     fun hentOrganisasjon(orgnummer: String): OrganisasjonResponse.Organisasjon {
         return webClient.get()
             .uri("/organisasjon/{orgnummer}", orgnummer)

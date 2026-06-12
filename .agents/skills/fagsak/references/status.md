@@ -55,12 +55,16 @@
 
 Certain statuses prevent trygdeavgift (social insurance charge) processing:
 
-```kotlin
-// From FagsakService
-val UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT = setOf(
-    Saksstatuser.ANNULLERT,
-    Saksstatuser.HENLAGT
-)
+```java
+// From FagsakService (a List, not a Set)
+public static final List<Saksstatuser> UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT =
+    Arrays.asList(
+        Saksstatuser.ANNULLERT,
+        Saksstatuser.OPPHØRT,
+        Saksstatuser.HENLAGT,
+        Saksstatuser.HENLAGT_BORTFALT,
+        Saksstatuser.VIDERESENDT
+    );
 ```
 
 ## Changing Status
@@ -85,16 +89,15 @@ Status affects whether type/theme can be changed:
 fagsak.kanEndreTypeOgTema()
 ```
 
-Factors checked:
-1. Must have exactly one active behandling (non-årsavregning)
-2. Status must be OPPRETTET
-3. No completed vedtak on active behandling
+The implementation checks exactly two conditions (both must hold):
+1. There is an active non-årsavregning behandling (`harAktivBehandlingIkkeÅrsavregning()`)
+2. The fagsak has exactly one behandling in total (`behandlinger.size == 1`)
 
 ## Debugging
 
 ### Find cases by status
 ```sql
-SELECT saksnummer, type, tema, status, registrert_dato
+SELECT saksnummer, fagsak_type, tema, status, registrert_dato
 FROM fagsak
 WHERE status = 'OPPRETTET'
 ORDER BY registrert_dato DESC;
@@ -104,15 +107,18 @@ ORDER BY registrert_dato DESC;
 ```sql
 SELECT f.saksnummer, f.registrert_dato, b.status as behandling_status
 FROM fagsak f
-JOIN behandling b ON b.fagsak_saksnummer = f.saksnummer
+JOIN behandling b ON b.saksnummer = f.saksnummer
 WHERE f.status = 'OPPRETTET'
 AND f.registrert_dato < SYSDATE - INTERVAL '30' DAY
-AND b.status NOT IN ('AVSLUTTET', 'LUKKET');
+AND b.status != 'AVSLUTTET';
 ```
 
 ### Status change audit
 ```sql
--- If using Hibernate Envers auditing
-SELECT * FROM fagsak_aud
-WHERE saksnummer = 'MEL-12345'
-ORDER BY rev DESC;
+-- NOTE: fagsak is NOT Envers-audited - there is no fagsak_aud table.
+-- The only audit (*_AUD) tables are aktoer_aud and fullmakt_aud.
+-- Fagsak status history is not tracked in a dedicated audit table;
+-- inspect endret_dato/endret_av on the fagsak row instead.
+SELECT saksnummer, status, endret_dato, endret_av
+FROM fagsak
+WHERE saksnummer = 'MEL-12345';

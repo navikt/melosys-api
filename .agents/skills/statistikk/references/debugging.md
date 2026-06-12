@@ -14,20 +14,20 @@
 **Debug Steps**:
 ```sql
 -- Check if A1 should be produced
-SELECT b.id, br.id as br_id,
-       vm.vedtaksdato, vm.vedtakstype,
-       (SELECT COUNT(*) FROM lovvalgsperiode lp
-        WHERE lp.behandlingsresultat_id = br.id) as lovvalgsperiode_count
+SELECT b.id, br.behandling_id as br_id,
+       vm.vedtak_dato, vm.vedtak_type,
+       (SELECT COUNT(*) FROM lovvalg_periode lp
+        WHERE lp.beh_resultat_id = br.behandling_id) as lovvalg_periode_count
 FROM behandling b
 JOIN behandlingsresultat br ON br.behandling_id = b.id
-LEFT JOIN vedtak_metadata vm ON vm.behandlingsresultat_id = br.id
+LEFT JOIN vedtak_metadata vm ON vm.behandlingsresultat_id = br.behandling_id
 WHERE b.id = :behandlingId;
 
--- Check lovvalgsperiode details
-SELECT lp.id, lp.fom, lp.tom, lp.bestemmelse,
-       lp.behandlingsresultat_id
-FROM lovvalgsperiode lp
-JOIN behandlingsresultat br ON lp.behandlingsresultat_id = br.id
+-- Check lovvalg_periode details
+SELECT lp.id, lp.fom_dato, lp.tom_dato, lp.lovvalg_bestemmelse,
+       lp.beh_resultat_id
+FROM lovvalg_periode lp
+JOIN behandlingsresultat br ON lp.beh_resultat_id = br.behandling_id
 WHERE br.behandling_id = :behandlingId;
 ```
 
@@ -40,9 +40,9 @@ WHERE br.behandling_id = :behandlingId;
 **Debug**:
 ```sql
 -- Check which bestemmelse is used
-SELECT lp.bestemmelse, b.id as behandling_id
-FROM lovvalgsperiode lp
-JOIN behandlingsresultat br ON lp.behandlingsresultat_id = br.id
+SELECT lp.lovvalg_bestemmelse, b.id as behandling_id
+FROM lovvalg_periode lp
+JOIN behandlingsresultat br ON lp.beh_resultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
 WHERE b.id = :behandlingId;
 ```
@@ -64,11 +64,12 @@ WHERE b.id = :behandlingId;
 
 **Debug**:
 ```sql
--- Check trygdemyndighetsland
-SELECT tm.id, tm.land_iso2, tm.behandlingsresultat_id
-FROM trygdemyndighetsland tm
-JOIN behandlingsresultat br ON tm.behandlingsresultat_id = br.id
-WHERE br.behandling_id = :behandlingId;
+-- Check trygdemyndighetsland (stored on aktoer.trygdemyndighet_land, keyed by saksnummer)
+SELECT a.id, a.trygdemyndighet_land, a.rolle, a.saksnummer
+FROM aktoer a
+JOIN behandling b ON b.saksnummer = a.saksnummer
+WHERE b.id = :behandlingId
+AND a.trygdemyndighet_land IS NOT NULL;
 ```
 
 ### 4. No Valid Recipients
@@ -80,15 +81,15 @@ WHERE br.behandling_id = :behandlingId;
 **Debug**:
 ```sql
 -- Check if utsendtTilLand should be set
-SELECT lp.bestemmelse,
+SELECT lp.lovvalg_bestemmelse,
        CASE
-         WHEN lp.bestemmelse LIKE '%ART12%' THEN 'Should have land'
-         WHEN lp.bestemmelse LIKE '%ART13%' THEN 'No land needed'
-         WHEN lp.bestemmelse LIKE '%ART11%' THEN 'No land needed'
+         WHEN lp.lovvalg_bestemmelse LIKE '%ART12%' THEN 'Should have land'
+         WHEN lp.lovvalg_bestemmelse LIKE '%ART13%' THEN 'No land needed'
+         WHEN lp.lovvalg_bestemmelse LIKE '%ART11%' THEN 'No land needed'
          ELSE 'Check logic'
        END as land_required
-FROM lovvalgsperiode lp
-JOIN behandlingsresultat br ON lp.behandlingsresultat_id = br.id
+FROM lovvalg_periode lp
+JOIN behandlingsresultat br ON lp.beh_resultat_id = br.behandling_id
 WHERE br.behandling_id = :behandlingId;
 ```
 
@@ -110,42 +111,42 @@ WHERE br.behandling_id = :behandlingId;
 ```sql
 -- Note: Statistics are not persisted in DB, only sent to Kafka
 -- Use this to find treatments that should have published
-SELECT b.id, f.gsak_saksnr, vm.vedtaksdato, vm.vedtakstype,
-       lp.bestemmelse, lp.fom, lp.tom
+SELECT b.id, f.gsak_saksnummer, vm.vedtak_dato, vm.vedtak_type,
+       lp.lovvalg_bestemmelse, lp.fom_dato, lp.tom_dato
 FROM behandling b
-JOIN fagsak f ON b.fagsak_id = f.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
 JOIN behandlingsresultat br ON br.behandling_id = b.id
-JOIN vedtak_metadata vm ON vm.behandlingsresultat_id = br.id
-JOIN lovvalgsperiode lp ON lp.behandlingsresultat_id = br.id
-WHERE vm.vedtaksdato > SYSDATE - 7
-ORDER BY vm.vedtaksdato DESC;
+JOIN vedtak_metadata vm ON vm.behandlingsresultat_id = br.behandling_id
+JOIN lovvalg_periode lp ON lp.beh_resultat_id = br.behandling_id
+WHERE vm.vedtak_dato > SYSDATE - 7
+ORDER BY vm.vedtak_dato DESC;
 ```
 
 ### Find Treatments Eligible for A1 Publishing
 
 ```sql
-SELECT b.id, f.gsak_saksnr, vm.vedtaksdato,
-       lp.bestemmelse as artikkel
+SELECT b.id, f.gsak_saksnummer, vm.vedtak_dato,
+       lp.lovvalg_bestemmelse as artikkel
 FROM behandling b
-JOIN fagsak f ON b.fagsak_id = f.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
 JOIN behandlingsresultat br ON br.behandling_id = b.id
-JOIN vedtak_metadata vm ON vm.behandlingsresultat_id = br.id
-JOIN lovvalgsperiode lp ON lp.behandlingsresultat_id = br.id
-WHERE vm.vedtaksdato BETWEEN :fom AND :tom
-AND lp.bestemmelse LIKE 'FO_883_2004%'
-ORDER BY vm.vedtaksdato;
+JOIN vedtak_metadata vm ON vm.behandlingsresultat_id = br.behandling_id
+JOIN lovvalg_periode lp ON lp.beh_resultat_id = br.behandling_id
+WHERE vm.vedtak_dato BETWEEN :fom AND :tom
+AND lp.lovvalg_bestemmelse LIKE 'FO_883_2004%'
+ORDER BY vm.vedtak_dato;
 ```
 
 ### Find UK-Related A1 Statistics
 
 ```sql
-SELECT b.id, f.gsak_saksnr, lp.bestemmelse
+SELECT b.id, f.gsak_saksnummer, lp.lovvalg_bestemmelse
 FROM behandling b
-JOIN fagsak f ON b.fagsak_id = f.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
 JOIN behandlingsresultat br ON br.behandling_id = b.id
-JOIN lovvalgsperiode lp ON lp.behandlingsresultat_id = br.id
-WHERE lp.bestemmelse LIKE '%STORBRITANNIA%'
-   OR lp.bestemmelse LIKE '%EFTA_GB%';
+JOIN lovvalg_periode lp ON lp.beh_resultat_id = br.behandling_id
+WHERE lp.lovvalg_bestemmelse LIKE '%STORBRITANNIA%'
+   OR lp.lovvalg_bestemmelse LIKE '%EFTA_GB%';
 ```
 
 ## Logging

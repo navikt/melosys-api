@@ -7,6 +7,7 @@ description: |
   (3) Debugging case creation, closure, or type/theme changes,
   (4) Understanding relationship between fagsak and behandling,
   (5) Working with EU/EEA authorities or bilateral treaty authorities.
+  Triggers: "fagsak", "saksnummer", "MEL-", "aktør", "sakstype", "sakstema", "avslutt sak".
 ---
 
 # Fagsak Domain
@@ -19,14 +20,9 @@ Each fagsak contains one or more behandlinger (treatments) and multiple aktører
 ### Module Structure
 ```
 domain/
-├── Fagsak.kt              # Main entity (saksnummer, type, tema, status)
-├── Aktoer.java            # Actor entity (citizen, employer, authority)
-├── Behandling.kt          # Treatment entity (child of Fagsak)
-└── kodeverk/
-    ├── Sakstyper.java     # EU_EOS, TRYGDEAVTALE, FTRL, etc.
-    ├── Sakstemaer.java    # MEDLEMSKAP_LOVVALG, TRYGDEAVGIFT, etc.
-    ├── Saksstatuser.java  # OPPRETTET, ANNULLERT, OPPHØRT, HENLAGT, etc.
-    └── Aktoersroller.java # BRUKER, VIRKSOMHET, ARBEIDSGIVER, etc.
+├── Fagsak.kt              # Main entity (saksnummer, type, tema, status) - Kotlin
+├── Aktoer.java            # Actor entity (citizen, employer, authority) - Java
+└── Behandling.kt          # Treatment entity (child of Fagsak) - Kotlin
 
 repository/
 └── FagsakRepository.java  # CRUD + custom queries
@@ -34,6 +30,14 @@ repository/
 service/sak/
 └── FagsakService.java     # Business operations
 ```
+
+The kodeverk enums (`Sakstyper`, `Sakstemaer`, `Saksstatuser`, `Aktoersroller`) are
+**not local source files** - they ship from the external `melosys-internt-kodeverk`
+dependency in package `no.nav.melosys.domain.kodeverk`:
+- `Sakstyper`     - EU_EOS, TRYGDEAVTALE, FTRL, etc.
+- `Sakstemaer`    - MEDLEMSKAP_LOVVALG, TRYGDEAVGIFT, etc.
+- `Saksstatuser`  - OPPRETTET, ANNULLERT, OPPHØRT, HENLAGT, VIDERESENDT, etc.
+- `Aktoersroller` - BRUKER, VIRKSOMHET, ARBEIDSGIVER, TRYGDEMYNDIGHET, FULLMEKTIG, etc.
 
 ### Entity Relationships
 ```
@@ -92,14 +96,15 @@ val fagsaker = fagsakService.hentFagsakerMedOrgnr(Aktoersroller.ARBEIDSGIVER, "9
 
 ### Accessing Actors
 ```kotlin
-// Citizen (bruker)
-val bruker: Optional<Aktoer> = fagsak.hentBruker()
+// Citizen (bruker) - Fagsak.kt returns Kotlin nullable types, not Java Optional
+val bruker: Aktoer? = fagsak.hentBruker()
 val aktørId: String = fagsak.hentBrukersAktørID()  // throws if not found
+val aktørIdEllerNull: String? = fagsak.finnBrukersAktørID()
 
 // Company/Employer
-val virksomhet = fagsak.hentVirksomhet()  // throws if not found
-val orgnr: Optional<String> = fagsak.finnVirksomhetsOrgnr()
-val arbeidsgiver: Optional<Aktoer> = fagsak.hentUnikArbeidsgiver()
+val virksomhet: Aktoer = fagsak.hentVirksomhet()  // throws if not found
+val orgnr: String? = fagsak.finnVirksomhetsOrgnr()
+val arbeidsgiver: Aktoer? = fagsak.hentUnikArbeidsgiver()
 
 // Authorities (EU/EEA)
 val myndigheter: List<Aktoer> = fagsak.hentMyndigheter()
@@ -108,7 +113,7 @@ val myndigheter: List<Aktoer> = fagsak.hentMyndigheter()
 ### Accessing Treatments
 ```kotlin
 // Active treatment (non-årsavregning)
-val behandling: Optional<Behandling> = fagsak.finnAktivBehandlingIkkeÅrsavregning()
+val behandling: Behandling? = fagsak.finnAktivBehandlingIkkeÅrsavregning()
 val behandling: Behandling = fagsak.hentAktivBehandling()  // throws if not found
 
 // Annual reconciliations
@@ -156,11 +161,13 @@ Both `aktører` and `behandlinger` use `FetchType.EAGER` - all loaded with case.
 
 ### 4. EU/EEA vs Treaty Authorities
 ```kotlin
+// Both methods take saksnummer (String), not a Fagsak object - they look up the fagsak internally.
+
 // EU/EEA: use institusjonID (format: "landkode:institusjonskode")
-fagsakService.oppdaterMyndigheterForEuEos(fagsak, listOf("SE:1234", "DK:5678"))
+fagsakService.oppdaterMyndigheterForEuEos(saksnummer, listOf("SE:1234", "DK:5678"))
 
 // Treaty: use land code
-fagsakService.oppdaterMyndighetForTrygdeavtale(fagsak, Land_iso2.US)
+fagsakService.oppdaterMyndighetForTrygdeavtale(saksnummer, Land_iso2.US)
 ```
 
 ### 5. Type/Theme Change Constraints
@@ -173,21 +180,20 @@ if (!fagsak.kanEndreTypeOgTema()) {
 
 ## Debugging
 
+> NOTE: both `aktoer` and `behandling` reference `fagsak` via a column named
+> **`saksnummer`** (the FK is named `saksnummer`, not `fagsak_saksnummer`).
+> The behandling type column is **`beh_type`** and `ÅRSAVREGNING` is stored verbatim
+> (with `Å`). There is no `LUKKET` behandlingsstatus - the closed status is `AVSLUTTET`.
+
 ### Find Case by Saksnummer
 ```sql
 SELECT * FROM fagsak WHERE saksnummer = 'MEL-12345';
 ```
 
-### Find All Actors for a Case
-```sql
-SELECT a.* FROM aktoer a
-WHERE a.fagsak_saksnummer = 'MEL-12345';
-```
-
 ### Find Cases for a Person
 ```sql
 SELECT f.* FROM fagsak f
-JOIN aktoer a ON a.fagsak_saksnummer = f.saksnummer
+JOIN aktoer a ON a.saksnummer = f.saksnummer
 WHERE a.rolle = 'BRUKER' AND a.aktoer_id = '2512489212185';
 ```
 
@@ -195,14 +201,18 @@ WHERE a.rolle = 'BRUKER' AND a.aktoer_id = '2512489212185';
 ```sql
 SELECT f.saksnummer, COUNT(*) as count
 FROM fagsak f
-JOIN behandling b ON b.fagsak_saksnummer = f.saksnummer
-WHERE b.status NOT IN ('AVSLUTTET', 'LUKKET')
-AND b.type != 'AARSAVREGNING'
+JOIN behandling b ON b.saksnummer = f.saksnummer
+WHERE b.status != 'AVSLUTTET'
+AND b.beh_type != 'ÅRSAVREGNING'
 GROUP BY f.saksnummer
 HAVING COUNT(*) > 1;
 ```
+
+See **[Debugging Guide](references/debugging.md)** for more SQL queries, common issues,
+log greps, and key code locations.
 
 ## Detailed Documentation
 
 - **[Actors](references/actors.md)**: Actor types, roles, and management
 - **[Status Transitions](references/status.md)**: Valid status changes and constraints
+- **[Debugging Guide](references/debugging.md)**: SQL queries, common issues, and code locations
