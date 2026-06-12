@@ -1,13 +1,17 @@
 package no.nav.melosys.tjenester.gui.behandlinger;
 
+import java.nio.charset.StandardCharsets;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.service.dokument.PdfTittelSetter;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -43,13 +47,17 @@ public class SedUtkastController {
                                                     @RequestBody SedPdfData sedPdfData) {
         aksesskontroll.autoriser(behandlingID);
         byte[] dokument = eessiService.genererSedPdf(behandlingID, sedType, sedPdfData);
-        return lagResponseAvDokument(dokument, sedType.name() + "_utkast.pdf");
+        byte[] dokumentMedTittel = PdfTittelSetter.settTittel(dokument, sedType.name() + " utkast");
+        return lagResponseAvDokument(dokumentMedTittel, sedType.name() + "_utkast.pdf");
     }
 
     private static ResponseEntity<byte[]> lagResponseAvDokument(byte[] dokument, String filnavn) {
+        ContentDisposition disposition = ContentDisposition.inline()
+            .filename(filnavn, StandardCharsets.UTF_8)
+            .build();
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_LENGTH, Integer.toString(dokument.length))
-            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; attachment; filename=" + filnavn)
+            .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
             .body(dokument);
     }
 }

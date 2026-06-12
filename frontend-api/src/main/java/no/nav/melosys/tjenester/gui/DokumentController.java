@@ -1,20 +1,24 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.service.dokument.DokumentHentingService;
+import no.nav.melosys.service.dokument.PdfTittelSetter;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.JournalpostInfoDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -49,17 +53,20 @@ public class DokumentController {
                                                @PathVariable("dokumentID") String dokumentID) {
 
         Journalpost journalpost = dokumentHentingService.hentJournalpost(journalpostID);
+        ArkivDokument arkivDokument = journalpost.finnArkivDokument(dokumentID).orElse(null);
+        String dokumentTittel = dokumenttittel(arkivDokument, dokumentID);
         String saksnummerMelding = (journalpost.getSaksnummer() != null) ? "på sak " + journalpost.getSaksnummer() : "";
 
         if (journalpost.getBrukerIdType() == BrukerIdType.AKTØR_ID) {
-            aksesskontroll.auditAutoriserAktørID(journalpost.getBrukerId(), "Innsyn i dokument %s %s".formatted(journalpost.getHoveddokument().getTittel(), saksnummerMelding));
+            aksesskontroll.auditAutoriserAktørID(journalpost.getBrukerId(), "Innsyn i dokument %s %s".formatted(dokumentTittel, saksnummerMelding));
         }
         if (journalpost.getBrukerIdType() == BrukerIdType.FOLKEREGISTERIDENT) {
-            aksesskontroll.auditAutoriserFolkeregisterIdent(journalpost.getBrukerId(), "Innsyn i dokument %s %s".formatted(journalpost.getHoveddokument().getTittel(), saksnummerMelding));
+            aksesskontroll.auditAutoriserFolkeregisterIdent(journalpost.getBrukerId(), "Innsyn i dokument %s %s".formatted(dokumentTittel, saksnummerMelding));
         }
 
         byte[] dokument = dokumentHentingService.hentDokument(journalpostID, dokumentID);
-        return lagResponseAvDokument(dokument, "journalpost-dok-%s.pdf".formatted(dokumentID));
+        byte[] dokumentMedTittel = PdfTittelSetter.settTittel(dokument, dokumentTittel, true);
+        return lagResponseAvDokument(dokumentMedTittel, Filnavn.saner(dokumentTittel) + ".pdf");
     }
 
     @Deprecated(since = "MELOSYS-5899")
@@ -67,19 +74,7 @@ public class DokumentController {
     @Operation(summary = "hent dokument knyttet til journalpost")
     public ResponseEntity<byte[]> hentDokumentDeprecated(@PathVariable("journalpostID") String journalpostID,
                                                @PathVariable("dokumentID") String dokumentID) {
-
-        Journalpost journalpost = dokumentHentingService.hentJournalpost(journalpostID);
-        String saksnummerMelding = (journalpost.getSaksnummer() != null) ? "på sak " + journalpost.getSaksnummer() : "";
-
-        if (journalpost.getBrukerIdType() == BrukerIdType.AKTØR_ID) {
-            aksesskontroll.auditAutoriserAktørID(journalpost.getBrukerId(), "Innsyn i dokument %s %s".formatted(journalpost.getHoveddokument().getTittel(), saksnummerMelding));
-        }
-        if (journalpost.getBrukerIdType() == BrukerIdType.FOLKEREGISTERIDENT) {
-            aksesskontroll.auditAutoriserFolkeregisterIdent(journalpost.getBrukerId(), "Innsyn i dokument %s %s".formatted(journalpost.getHoveddokument().getTittel(), saksnummerMelding));
-        }
-
-        byte[] dokument = dokumentHentingService.hentDokument(journalpostID, dokumentID);
-        return lagResponseAvDokument(dokument, "journalpost-dok-%s.pdf".formatted(dokumentID));
+        return hentDokument(journalpostID, dokumentID);
     }
 
     @Deprecated(since = "MELOSYS-5899")
@@ -103,14 +98,23 @@ public class DokumentController {
                                                     @RequestBody SedPdfData sedPdfData) {
         aksesskontroll.autoriser(behandlingID);
         byte[] dokument = eessiService.genererSedPdf(behandlingID, sedType, sedPdfData);
-        return lagResponseAvDokument(dokument, sedType.name() + "_utkast.pdf");
+        byte[] dokumentMedTittel = PdfTittelSetter.settTittel(dokument, sedType.name() + " utkast");
+        return lagResponseAvDokument(dokumentMedTittel, sedType.name() + "_utkast.pdf");
     }
 
     private static ResponseEntity<byte[]> lagResponseAvDokument(byte[] dokument, String filnavn) {
+        ContentDisposition disposition = ContentDisposition.inline()
+            .filename(filnavn, StandardCharsets.UTF_8)
+            .build();
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_LENGTH, Integer.toString(dokument.length))
-            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; attachment; filename=" + filnavn)
+            .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
             .body(dokument);
+    }
+
+    private static String dokumenttittel(ArkivDokument arkivDokument, String dokumentID) {
+        String tittel = (arkivDokument != null) ? arkivDokument.getTittel() : null;
+        return (tittel != null && !tittel.isBlank()) ? tittel : "Dokument-" + dokumentID;
     }
 
 }

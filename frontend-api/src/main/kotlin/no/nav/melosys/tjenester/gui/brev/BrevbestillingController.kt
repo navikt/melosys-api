@@ -6,13 +6,16 @@ import no.nav.melosys.domain.brev.NorskMyndighet
 import no.nav.melosys.domain.brev.StandardvedleggType
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.service.brev.BrevbestillingFasade
+import no.nav.melosys.service.dokument.PdfTittelSetter
 import no.nav.melosys.service.dokument.brev.mapper.hentStandardvedlegg
 import no.nav.melosys.service.tilgang.Aksesskontroll
+import no.nav.melosys.tjenester.gui.Filnavn
 import no.nav.melosys.tjenester.gui.dto.brev.*
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.context.annotation.RequestScope
+import java.nio.charset.StandardCharsets
 
 @Protected
 @RestController
@@ -80,7 +83,9 @@ class BrevbestillingController(
 
         val brevbestillingDto = brevbestillingRequest.tilBrevbestillingDto()
         val pdfInBytes = brevbestillingFasade.produserUtkast(behandlingID, brevbestillingDto)
-        return ResponseEntity(pdfInBytes, genPdfHeaders("utkast_$behandlingID"), HttpStatus.OK)
+        val tittel = brevbestillingDto.produserbardokument?.beskrivelse ?: "Brev-utkast"
+        val pdfMedTittel = PdfTittelSetter.settTittel(pdfInBytes, tittel)
+        return ResponseEntity(pdfMedTittel, genPdfHeaders(tittel), HttpStatus.OK)
     }
 
     @GetMapping("pdf/utkast/standardvedlegg/{standardvedleggType}")
@@ -89,7 +94,9 @@ class BrevbestillingController(
         @PathVariable("standardvedleggType") standardvedleggType: StandardvedleggType
     ): ResponseEntity<ByteArray> {
         val pdfInBytes = brevbestillingFasade.produserStandardvedleggPdf(standardvedleggType)
-        return ResponseEntity(pdfInBytes, genPdfHeaders("standardvedlegg_${standardvedleggType.journalføringstittel}"), HttpStatus.OK)
+        val tittel = standardvedleggType.journalføringstittel
+        val pdfMedTittel = PdfTittelSetter.settTittel(pdfInBytes, tittel)
+        return ResponseEntity(pdfMedTittel, genPdfHeaders("standardvedlegg_$tittel"), HttpStatus.OK)
     }
 
     @PostMapping("opprett/{behandlingID}")
@@ -129,7 +136,9 @@ class BrevbestillingController(
     private fun genPdfHeaders(navn: String): HttpHeaders =
         HttpHeaders().apply {
             contentType = MediaType.APPLICATION_PDF
-            contentDisposition = ContentDisposition.builder("inline").filename("$navn.pdf").build()
+            contentDisposition = ContentDisposition.builder("inline")
+                .filename("${Filnavn.saner(navn)}.pdf", StandardCharsets.UTF_8)
+                .build()
             cacheControl = "must-revalidate, post-check=0, pre-check=0"
         }
 }
