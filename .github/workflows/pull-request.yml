@@ -59,7 +59,7 @@ jobs:
           report_paths: '**/target/surefire-reports/TEST-*.xml'
 
       - name: Code Coverage Report
-        uses: madrapps/jacoco-report@v1.7.2
+        uses: madrapps/jacoco-report@v1.8.0
         if: success() || failure()
         with:
           paths: '**/target/site/jacoco/jacoco.xml'
