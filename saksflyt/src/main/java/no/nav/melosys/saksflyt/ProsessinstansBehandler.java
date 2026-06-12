@@ -12,6 +12,7 @@ import no.nav.melosys.saksflyt.prosessflyt.ProsessFlyt;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.saksflytapi.ProsessinstansOpprettetEvent;
+import no.nav.melosys.saksflytapi.UtførendeProsessKontekst;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessSteg;
@@ -137,6 +138,8 @@ public class ProsessinstansBehandler {
                 .register(meterRegistry)
                 .record(System.nanoTime() - start, java.util.concurrent.TimeUnit.NANOSECONDS);
 
+            tellBehandlet(prosessinstans);
+
             MDC.remove("pid");
             MDC.remove(CORRELATION_ID);
             SaksflytSubjektHolder.reset();
@@ -147,6 +150,21 @@ public class ProsessinstansBehandler {
         log.error("Finner ingen definert flyt for ProsessType {}", prosessinstans.getType());
         prosessinstans.setStatus(ProsessStatus.FEILET);
         lagreProsessinstans(prosessinstans);
+        tellBehandlet(prosessinstans);
+    }
+
+    /**
+     * Throughput per prioritet (HØY/NORMAL/LAV) + terminalstatus (FERDIG/FEILET). Speiler
+     * {@code executor_completed_tasks_total}, men med prioritetsdimensjonen 8066/parent-propagering trenger
+     * for å vise effekten i Grafana. Telles for alle terminale behandlingsforsøk — både fullført flyt og
+     * flyt-ikke-funnet — slik at FEILET-per-prioritet ikke får skjevhet.
+     */
+    private void tellBehandlet(Prosessinstans prosessinstans) {
+        Metrics.counter(
+            MetrikkerNavn.PROSESSINSTANSER_BEHANDLET,
+            MetrikkerNavn.TAG_PRIORITET, prosessinstans.hentPrioritet().name(),
+            MetrikkerNavn.TAG_STATUS, prosessinstans.getStatus().name()
+        ).increment();
     }
 
     private Prosessinstans utførSteg(StegBehandler stegBehandler, Prosessinstans prosessinstans) {
@@ -154,6 +172,8 @@ public class ProsessinstansBehandler {
         String saksbehandler = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER);
         String saksbehandlerNavn = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER_NAVN);
         ThreadLocalAccessInfo.beforeExecuteProcess(prosessinstans.getId(), stegBehandler.inngangsSteg().getKode(), saksbehandler, saksbehandlerNavn);
+        // Gjør parentens prioritet tilgjengelig for propagering til sub-prosesser opprettet under steget.
+        UtførendeProsessKontekst.settPrioritet(prosessinstans.hentPrioritet());
         long start = System.nanoTime();
         try {
             stegBehandler.utfør(prosessinstans);
@@ -174,6 +194,7 @@ public class ProsessinstansBehandler {
                 .tag(MetrikkerNavn.TAG_PROSESSTEG, stegBehandler.inngangsSteg().getKode())
                 .register(meterRegistry)
                 .record(System.nanoTime() - start, java.util.concurrent.TimeUnit.NANOSECONDS);
+            UtførendeProsessKontekst.nullstill();
             ThreadLocalAccessInfo.afterExecuteProcess(prosessinstans.getId());
         }
         prosessinstans.setSistFullførtSteg(stegBehandler.inngangsSteg());

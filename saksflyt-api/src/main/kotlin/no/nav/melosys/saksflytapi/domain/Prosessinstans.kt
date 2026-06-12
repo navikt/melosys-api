@@ -66,6 +66,10 @@ class Prosessinstans(
     @Column(name = "sed_laas_referanse")
     var låsReferanse: String? = null,
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "prioritet", nullable = false)
+    var prioritet: ProsessPrioritet = type.prioritet,
+
     @Lob
     @Column(name = "data")
     @Convert(converter = PropertiesConverter::class)
@@ -165,7 +169,7 @@ class Prosessinstans(
     fun hentMelosysEessiMelding(): MelosysEessiMelding? =
         getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding::class.java)
 
-    fun hentPrioritet(): ProsessPrioritet = type.prioritet
+    fun hentPrioritet(): ProsessPrioritet = prioritet
 
     fun leggTilHendelse(steg: ProsessSteg, t: Throwable) {
         hendelser.add(
@@ -208,6 +212,7 @@ class Prosessinstans(
         .medRegistrertDato(registrertDato)
         .medEndretDato(endretDato)
         .medLåsReferanse(låsReferanse)
+        .medPrioritet(prioritet)
         .medData(data)
 
     companion object {
@@ -242,6 +247,7 @@ class Prosessinstans(
         var registrertDato: LocalDateTime? = null
         var endretDato: LocalDateTime? = null
         var låsReferanse: String? = null
+        var prioritet: ProsessPrioritet? = null
         val data: Properties = Properties()
 
         fun medId(id: UUID?) = apply { this.id = id }
@@ -259,6 +265,8 @@ class Prosessinstans(
         fun medEndretDato(endretDato: LocalDateTime?) = apply { this.endretDato = endretDato }
 
         fun medLåsReferanse(låsReferanse: String?) = apply { this.låsReferanse = låsReferanse }
+
+        fun medPrioritet(prioritet: ProsessPrioritet?) = apply { this.prioritet = prioritet }
 
         fun medData(key: ProsessDataKey, value: String?) = apply {
             if (value != null) {
@@ -279,17 +287,21 @@ class Prosessinstans(
 
         fun medData(properties: Properties) = apply { data.putAll(properties) }
 
-        fun build() = Prosessinstans(
-            id = id,
-            type = type ?: error("Type er påkrevd for Prosessinstans"),
-            status = status ?: error("Status er påkrevd for Prosessinstans"),
-            behandling = behandling,
-            sistFullførtSteg = sistFullførtSteg,
-            registrertDato = registrertDato ?: LocalDateTime.now(), // disse settes på nytt ved ProsessinstansService.lagre
-            endretDato = endretDato ?: LocalDateTime.now(), // disse settes på nytt ved ProsessinstansService.lagre
-            låsReferanse = låsReferanse
-        ).apply {
-            this.data.putAll(this@Builder.data)
+        fun build(): Prosessinstans {
+            val type = type ?: error("Type er påkrevd for Prosessinstans")
+            return Prosessinstans(
+                id = id,
+                type = type,
+                status = status ?: error("Status er påkrevd for Prosessinstans"),
+                behandling = behandling,
+                sistFullførtSteg = sistFullførtSteg,
+                registrertDato = registrertDato ?: LocalDateTime.now(), // disse settes på nytt ved ProsessinstansService.lagre
+                endretDato = endretDato ?: LocalDateTime.now(), // disse settes på nytt ved ProsessinstansService.lagre
+                låsReferanse = låsReferanse,
+                prioritet = prioritet ?: type.prioritet
+            ).apply {
+                this.data.putAll(this@Builder.data)
+            }
         }
     }
 }
