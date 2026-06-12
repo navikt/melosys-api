@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.fakturering
 
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
@@ -11,7 +12,7 @@ internal const val DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL = "Helsedel"
  *
  * @param perioder         Trygdeavgiftsperioder som skal mappes.
  * @param prefiks          Valgfri førsteledds-tekst i beskrivelsen (f.eks. satsendring-melding).
- * @param inkluderDekning  Om dekningsbeskrivelse skal med i beskrivelsen.
+ * @param inkluderDekning  Om dekningsbeskrivelse skal med i beskrivelsen (overstyres til false per periode ved 25%-regel).
  */
 internal fun mapTilFakturaperioder(
     perioder: List<Trygdeavgiftsperiode>,
@@ -23,17 +24,21 @@ private fun mapTilFakturaperiode(
     periode: Trygdeavgiftsperiode,
     prefiks: String?,
     inkluderDekning: Boolean,
-) = FakturaseriePeriodeDto(
-    enhetsprisPerManed = periode.trygdeavgiftsbeløpMd.hentVerdi(),
-    startDato = periode.periodeFra,
-    sluttDato = periode.periodeTil,
-    beskrivelse = listOfNotNull(
-        prefiks,
-        "Inntekt: ${periode.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}",
-        if (inkluderDekning) "Dekning: ${periode.dekningTekst()}" else null,
-        periode.satsTekst(),
-    ).joinToString(", ")
-)
+) : FakturaseriePeriodeDto {
+    val erBeregnetEtter25ProsentRegel = periode.beregningsregel == Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL
+
+    return FakturaseriePeriodeDto(
+        enhetsprisPerManed = periode.trygdeavgiftsbeløpMd.hentVerdi(),
+        startDato = periode.periodeFra,
+        sluttDato = periode.periodeTil,
+        beskrivelse = listOfNotNull(
+            prefiks,
+            if (!erBeregnetEtter25ProsentRegel) "Inntekt: ${periode.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}" else null,
+            if (!erBeregnetEtter25ProsentRegel && inkluderDekning) "Dekning: ${periode.dekningTekst()}" else null,
+            if (!erBeregnetEtter25ProsentRegel) periode.satsTekst() else null,
+        ).joinToString(", ")
+    )
+}
 
 /**
  * Formattert sats-tekst for fakturaperiode-beskrivelse (OEBS-faktura).
