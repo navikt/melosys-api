@@ -51,7 +51,9 @@ class OpprettBehandlingForSak(
         )
 
         val skalReplikeres = saksbehandlingRegler.skalTidligereBehandlingReplikeres(fagsak, behandlingstype, behandlingstema)
-        val behandlingIdForReplikering = finnBehandlingIdForReplikeringVedAnmodningOmUnntak(sistBehandling)
+        val behandlingIdForReplikering = if (skalReplikeres) {
+            finnBehandlingIdForReplikeringVedAnmodningOmUnntak(sistBehandling)
+        } else null
 
         if (sistBehandling.erAktiv() && behandlingstype != Behandlingstyper.ÅRSAVREGNING) {
             behandlingService.avsluttBehandling(sistBehandling.id)
