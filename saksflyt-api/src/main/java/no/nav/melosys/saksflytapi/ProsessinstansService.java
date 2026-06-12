@@ -150,9 +150,9 @@ public class ProsessinstansService {
     /**
      * @param sendInnhentingsbrev settes kun av de automatiske flytene som skal sende brevet
      *                            «Innhenting av inntektsopplysninger» (skattepliktige via skattemelding
-     *                            og ikke-skattepliktige via batch). Saksbehandlingsflyten
-     *                            (OppretteÅrsavregningVedEndring) bruker 3-arg-varianten og setter
-     *                            dermed false — den er utenfor scope for MELOSYS-8122.
+     *                            og ikke-skattepliktige via batch). Det automatiske saga-steget ved
+     *                            behandlingsendring (OppretteÅrsavregningVedEndring) bruker 3-arg-varianten
+     *                            og setter dermed false — den er utenfor scope for MELOSYS-8122.
      */
     @Transactional
     public UUID opprettArsavregningsBehandlingProsessflyt(String saksnummer,

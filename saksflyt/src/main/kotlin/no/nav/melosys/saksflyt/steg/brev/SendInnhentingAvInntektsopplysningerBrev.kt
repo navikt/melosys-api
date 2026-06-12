@@ -22,11 +22,12 @@ private val log = KotlinLogging.logger { }
  * [Mottakerroller.BRUKER].
  *
  * Steget gates av prosessdata-flagget [ProsessDataKey.SEND_INNHENTINGSBREV], som settes til `true` kun
- * av de to in-scope automatiske flytene. Saksbehandlingsflyt-konteksten (OppretteÅrsavregningVedEndring,
- * «Under avklaring med Nav M&A») setter flagget til `false` og sender derfor ikke brev. Når og om de to
- * flytene i det hele tatt oppretter årsavregninger styres allerede oppstrøms (skattepliktige bak
- * MELOSYS_SKATTEHENDELSE_CONSUMER, ikke-skattepliktige via manuell admin-jobb), så et eget
- * brev-toggle er ikke nødvendig.
+ * av de to in-scope automatiske flytene. Den tredje flyten som oppretter årsavregninger
+ * (OppretteÅrsavregningVedEndring — et automatisk saga-steg ved behandlingsendring, «Under avklaring
+ * med Nav M&A») bruker 3-arg-varianten som setter flagget til `false`, og sender derfor ikke brev. Når
+ * og om de to in-scope flytene i det hele tatt oppretter årsavregninger styres allerede oppstrøms
+ * (skattepliktige bak MELOSYS_SKATTEHENDELSE_CONSUMER, ikke-skattepliktige via manuell admin-jobb), så
+ * et eget brev-toggle er ikke nødvendig.
  */
 @Component
 class SendInnhentingAvInntektsopplysningerBrev(
