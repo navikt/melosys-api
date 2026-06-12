@@ -109,7 +109,7 @@ class SafClientTest(
             )
         )
 
-        val expectedJson = """{"query":"  query(${'$'}journalpostId: String!) {\n    query: journalpost(journalpostId: ${'$'}journalpostId) {\n      journalpostId\n      tittel\n      journalstatus\n      tema\n      journalposttype\n      sak {\n        fagsakId\n      }\n      bruker {\n        id\n        type\n      }\n      avsenderMottaker {\n        id\n        type\n        navn\n        land\n      }\n      kanal\n      relevanteDatoer {\n        dato\n        datotype\n      }\n      dokumenter {\n        dokumentInfoId\n        tittel\n        brevkode\n        logiskeVedlegg {\n          logiskVedleggId\n          tittel\n        }\n        dokumentvarianter {\n          saksbehandlerHarTilgang\n          variantformat\n        }\n      }\n    }\n  }\n","variables":{"journalpostId":"jp-123"}}"""
+        val expectedJson = """{"query":"  query(${'$'}journalpostId: String!) {\n    query: journalpost(journalpostId: ${'$'}journalpostId) {\n      journalpostId\n      tittel\n      journalstatus\n      tema\n      journalposttype\n      sak {\n        fagsakId\n      }\n      bruker {\n        id\n        type\n      }\n      avsenderMottaker {\n        id\n        type\n        navn\n        land\n      }\n      kanal\n      relevanteDatoer {\n        dato\n        datotype\n      }\n      dokumenter {\n        dokumentInfoId\n        tittel\n        brevkode\n        logiskeVedlegg {\n          logiskVedleggId\n          tittel\n        }\n        dokumentvarianter {\n          saksbehandlerHarTilgang\n          variantformat\n          filtype\n        }\n      }\n    }\n  }\n","variables":{"journalpostId":"jp-123"}}"""
 
         safClient.hentJournalpost("jp-123")
 
@@ -289,7 +289,7 @@ class SafClientTest(
                     "dok-tittel",
                     "brevkode",
                     Collections.emptyList(),
-                    listOf(DokumentVariant(true, "ARKIV"))
+                    listOf(DokumentVariant(true, "ARKIV", "PDFA"))
                 )
             )
         )

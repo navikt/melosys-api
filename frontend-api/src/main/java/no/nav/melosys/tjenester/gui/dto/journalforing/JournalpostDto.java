@@ -42,12 +42,9 @@ public final class JournalpostDto {
     public static JournalpostDto av(Journalpost journalpost, String hovedpartIdent) {
         var hovedpartErBruker = journalpost.getBrukerIdType() != BrukerIdType.ORGNR;
         String avsenderID = journalpost.getAvsenderId();
-        DokumentDto hoveddokument = new DokumentDto(
-            journalpost.getHoveddokument().getDokumentId(),
-            journalpost.getHoveddokument().getTittel(),
-            journalpost.getHoveddokument().hentLogiskeVedleggTitler());
+        DokumentDto hoveddokument = DokumentDto.av(journalpost.getHoveddokument());
         List<DokumentDto> vedlegg = journalpost.getVedleggListe().stream()
-            .map(v -> new DokumentDto(v.getDokumentId(), v.getTittel(), v.hentLogiskeVedleggTitler()))
+            .map(DokumentDto::av)
             .toList();
 
         return new JournalpostDto(

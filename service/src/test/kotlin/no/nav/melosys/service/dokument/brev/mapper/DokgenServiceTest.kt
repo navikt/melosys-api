@@ -361,27 +361,16 @@ class DokgenServiceTest {
 
         dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto)
 
-        verify(exactly = 2) { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) }
-        verify {
+        val mottakere = mutableListOf<Mottaker>()
+        verify(exactly = 2) {
             prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
                 behandling,
-                withArg { m ->
-                    m.rolle shouldBe Mottakerroller.NORSK_MYNDIGHET
-                    m.orgnr shouldBe orgnr1
-                },
+                capture(mottakere),
                 any()
             )
         }
-        verify {
-            prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
-                behandling,
-                withArg { m ->
-                    m.rolle shouldBe Mottakerroller.NORSK_MYNDIGHET
-                    m.orgnr shouldBe orgnr2
-                },
-                any()
-            )
-        }
+        mottakere.map { it.rolle }.toSet() shouldBe setOf(Mottakerroller.NORSK_MYNDIGHET)
+        mottakere.mapNotNull { it.orgnr }.toSet() shouldBe setOf(orgnr1, orgnr2)
     }
 
     @Test
@@ -436,19 +425,19 @@ class DokgenServiceTest {
 
         dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto)
 
-        verify(exactly = 3) { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) }
-        verify {
+        val mottakere = mutableListOf<Mottaker>()
+        val dokumentproduksjonsInfoer = mutableListOf<DokumentproduksjonsInfo>()
+        verify(exactly = 3) {
             prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
                 behandling,
-                withArg { m ->
-                    m.rolle shouldBe Mottakerroller.ARBEIDSGIVER
-                    m.orgnr shouldBe "123456789"
-                },
-                withArg { b ->
-                    b.isBestillKopi() shouldBe true
-                }
+                capture(mottakere),
+                capture(dokumentproduksjonsInfoer)
             )
         }
+        val arbeidsgiverKopi = mottakere.zip(dokumentproduksjonsInfoer)
+            .find { (mottaker, _) -> mottaker.rolle == Mottakerroller.ARBEIDSGIVER && mottaker.orgnr == "123456789" }
+        arbeidsgiverKopi shouldBe instanceOf<Pair<Mottaker, DokumentproduksjonsInfo>>()
+        arbeidsgiverKopi?.second?.isBestillKopi() shouldBe true
     }
 
     @Test

@@ -22,4 +22,9 @@ open class ArkivDokument(
         dokumentVarianter
             .filter { it.erVariantArkiv() }
             .all { it.saksbehandlerHarTilgang }
+
+    fun arkivVariantFiltype(): DokumentVariant.Filtype? =
+        dokumentVarianter
+            .firstOrNull { it.erVariantArkiv() && it.filtype != null }
+            ?.filtype
 }
