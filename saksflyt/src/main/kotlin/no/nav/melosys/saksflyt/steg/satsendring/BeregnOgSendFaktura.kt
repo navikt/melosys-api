@@ -56,7 +56,6 @@ class BeregnOgSendFaktura(
         val fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
         val foedselsNr = pdlService.finnFolkeregisterident(fagsak.hentBrukersAktørID())
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
-
         return FakturaserieDto(
             fodselsnummer = foedselsNr,
             fakturaserieReferanse = hentOpprinneligFakturaserieReferanse(behandling),

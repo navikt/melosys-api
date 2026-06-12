@@ -1,42 +1,26 @@
 package no.nav.melosys.integrasjon.joark.journalpostapi
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import com.github.tomakehurst.wiremock.client.WireMock.any
-import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
-import com.github.tomakehurst.wiremock.client.WireMock.containing
-import com.github.tomakehurst.wiremock.client.WireMock.deleteRequestedFor
-import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
-import com.github.tomakehurst.wiremock.client.WireMock.matching
-import com.github.tomakehurst.wiremock.client.WireMock.patchRequestedFor
-import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
-import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
-import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.FerdigstillJournalpostRequest
-import no.nav.melosys.integrasjon.joark.journalpostapi.dto.LogiskVedleggRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OppdaterJournalpostRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.webclient.test.autoconfigure.AutoConfigureWebClient
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webclient.test.autoconfigure.AutoConfigureWebClient
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 @SpringBootTest
 @ActiveProfiles("wiremock-test")
@@ -149,7 +133,7 @@ class JournalpostapiClientTest(
         journalpostapiClient.leggTilLogiskVedlegg(dokumentInfoId, tittel)
 
         mockServer.verify(
-            postRequestedFor(urlPathEqualTo("/dokumentInfo/$dokumentInfoId/logiskVedlegg/"))
+            postRequestedFor(urlPathEqualTo("/dokumentInfo/$dokumentInfoId/logiskVedlegg"))
                 .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))

@@ -1,5 +1,6 @@
 package no.nav.melosys.service.oppgave
 
+import io.getunleash.Unleash
 import jakarta.annotation.Nullable
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
@@ -10,6 +11,7 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.domain.util.MottatteOpplysningerUtils
 import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
@@ -40,7 +42,8 @@ class OppgaveService(
     private val persondataFasade: PersondataFasade,
     private val eregFasade: EregFasade,
     private val utledMottaksdato: UtledMottaksdato,
-    private val oppgaveFactory: OppgaveFactory
+    private val oppgaveFactory: OppgaveFactory,
+    private val unleash: Unleash
 ) {
     private val log = KotlinLogging.logger {}
 
@@ -168,6 +171,20 @@ class OppgaveService(
                     )
                 ).beskrivelse(behandlingsoppgave.beskrivelse).build()
         )
+        leggTilNøkkelordForÅrsavregning(behandling, oppgaveID)
+    }
+
+    // Nøkkelord finnes kun i Oppgave-API v2 (beta) og settes derfor i et separat kall etter
+    // v1-opprettelse/-oppdatering. Skal aldri blokkere selve oppgaven — året ligger også
+    // i beskrivelsen (MELOSYS-8123). Re-assert etter oppdatering fordi v1-PUT kan påvirke listen.
+    private fun leggTilNøkkelordForÅrsavregning(behandling: Behandling, oppgaveID: String) {
+        if (!unleash.isEnabled(ToggleName.MELOSYS_OPPGAVE_NØKKELORD)) return
+        val gjelderÅr = finnGjelderÅrForÅrsavregning(behandling) ?: return
+        try {
+            oppgaveFasade.leggTilNøkkelord(oppgaveID, setOf("Årsavregning $gjelderÅr"))
+        } catch (e: Exception) {
+            log.warn(e) { "Kunne ikke sette nøkkelord på oppgave $oppgaveID for behandling ${behandling.id}" }
+        }
     }
 
     fun oppdaterOppgaveMedSaksnummer(fagSaksnummer: String, oppgaveOppdatering: OppgaveOppdatering) =
@@ -224,6 +241,7 @@ class OppgaveService(
 
         settOppgaveIdPåBehandling(behandling, oppgaveID)
         log.info("Opprettet oppgave $oppgaveID for behandling ${behandling.id}")
+        leggTilNøkkelordForÅrsavregning(behandling, oppgaveID)
     }
 
     private fun hentEksisterendeOppgaveSomIkkeErTilknyttetBehandling(behandling: Behandling): Oppgave? {
