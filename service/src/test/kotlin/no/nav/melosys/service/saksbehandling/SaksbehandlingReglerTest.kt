@@ -405,7 +405,7 @@ class SaksbehandlingReglerTest {
             arguments(
                 Behandlingsresultattyper.ANMODNING_OM_UNNTAK,
                 listOf(behandlingFørstegangAvsluttet),
-                null
+                0L
             ),
             arguments(
                 null,
@@ -534,6 +534,17 @@ class SaksbehandlingReglerTest {
                     fagsak = Fagsak.forTest()
                 }),
                 1L
+            ),
+            arguments(
+                Behandlingsresultattyper.ANMODNING_OM_UNNTAK,
+                listOf(Behandling.forTest {
+                    id = 0
+                    type = Behandlingstyper.FØRSTEGANG
+                    tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+                    status = Behandlingsstatus.UNDER_BEHANDLING
+                    fagsak = Fagsak.forTest()
+                }),
+                0L
             ),
         )
     }

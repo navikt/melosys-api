@@ -77,9 +77,10 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+
     @Transactional
-    public void opprettOgReplikerBehandlingForSak(String saksnummer, OpprettSakRequest opprettSakRequest) {
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+    public void opprettOgReplikerBehandlingForSak(String saksnummer, OpprettSakRequest opprettSakRequest, Long behandlingIdForReplikering) {
+        var builder = Prosessinstans.builder()
             .medType(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medData(SAKSNUMMER, saksnummer)
@@ -88,10 +89,13 @@ public class ProsessinstansService {
             .medData(BEHANDLINGSÅRSAKTYPE, opprettSakRequest.getBehandlingsaarsakType())
             .medData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakRequest.getBehandlingsaarsakFritekst())
             .medData(MOTTATT_DATO, opprettSakRequest.getMottaksdato())
-            .medData(SKAL_TILORDNES, opprettSakRequest.getSkalTilordnes())
-            .build();
+            .medData(SKAL_TILORDNES, opprettSakRequest.getSkalTilordnes());
 
-        lagre(prosessinstans);
+        if (behandlingIdForReplikering != null) {
+            builder.medData(OPPRINNELIG_BEH, behandlingIdForReplikering);
+        }
+
+        lagre(builder.build());
     }
 
     @Transactional
