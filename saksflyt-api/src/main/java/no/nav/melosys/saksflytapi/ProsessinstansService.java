@@ -148,12 +148,28 @@ public class ProsessinstansService {
     public UUID opprettArsavregningsBehandlingProsessflyt(String saksnummer,
                                                           String gjelderPeriode,
                                                           Behandlingsaarsaktyper behandlingsaarsaktype) {
+        return opprettArsavregningsBehandlingProsessflyt(saksnummer, gjelderPeriode, behandlingsaarsaktype, false);
+    }
+
+    /**
+     * @param sendInnhentingsbrev settes kun av de automatiske flytene som skal sende brevet
+     *                            «Innhenting av inntektsopplysninger» (skattepliktige via skattemelding
+     *                            og ikke-skattepliktige via batch). Det automatiske saga-steget ved
+     *                            behandlingsendring (OppretteÅrsavregningVedEndring) bruker 3-arg-varianten
+     *                            og setter dermed false — den er utenfor scope for MELOSYS-8122.
+     */
+    @Transactional
+    public UUID opprettArsavregningsBehandlingProsessflyt(String saksnummer,
+                                                          String gjelderPeriode,
+                                                          Behandlingsaarsaktyper behandlingsaarsaktype,
+                                                          boolean sendInnhentingsbrev) {
         Prosessinstans prosessinstans = Prosessinstans.builder()
             .medType(ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING)
             .medStatus(ProsessStatus.KLAR)
             .medData(GJELDER_ÅR, gjelderPeriode)
             .medData(SAKSNUMMER, saksnummer)
             .medData(ÅRSAK_TYPE, behandlingsaarsaktype)
+            .medData(SEND_INNHENTINGSBREV, sendInnhentingsbrev)
             .build();
         return lagre(prosessinstans);
     }

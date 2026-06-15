@@ -57,7 +57,8 @@ class SkattehendelserConsumer(
                         prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
                             fagsak.saksnummer,
                             skattehendelse.gjelderPeriode,
-                            Behandlingsaarsaktyper.MELDING_FRA_SKATT
+                            Behandlingsaarsaktyper.MELDING_FRA_SKATT,
+                            true
                         )
                     }
                 }

@@ -90,7 +90,8 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
                     prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
                         it.sak.saksnummer,
                         år,
-                        Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+                        Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE,
+                        true
                     )
                 }
             result = sakerFunnet
