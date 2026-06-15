@@ -87,7 +87,7 @@ query hentDokumentoversikt($saksnummer: String!, $tema: String) {
 }
 ```
 
-## SafConsumer Methods
+## SafClient Methods
 
 ### Fetch Journalpost
 ```kotlin
@@ -107,13 +107,14 @@ fun hentJournalpost(journalpostId: String): Journalpost? {
 ```
 
 ### Fetch Document Content
-```kotlin
-fun hentDokument(journalpostId: String, dokumentInfoId: String, variantformat: String): ByteArray {
+```java
+// SafClient.hentDokument — always fetches the ARKIV variant (no variantformat parameter).
+public byte[] hentDokument(String journalpostID, String dokumentID) {
     return webClient.get()
-        .uri("$HENT_DOKUMENT_ROOT/$journalpostId/$dokumentInfoId/$variantformat")
+        .uri(HENT_DOKUMENT_ROOT, journalpostID, dokumentID, Variantformat.ARKIV)
         .retrieve()
-        .bodyToMono<ByteArray>()
-        .block() ?: ByteArray(0)
+        .bodyToMono(byte[].class)
+        .block();
 }
 ```
 
@@ -265,7 +266,7 @@ fun validerDokumenterTilhørerSakOgHarTilgang(
     saksnummer: String,
     dokumentReferanser: List<DokumentReferanse>
 ) {
-    val saksDokumenter = safConsumer.hentDokumentoversikt(saksnummer)
+    val saksDokumenter = safClient.hentDokumentoversikt(saksnummer)
     dokumentReferanser.forEach { ref ->
         val finnes = saksDokumenter.any { jp ->
             jp.dokumenter.any { it.dokumentInfoId == ref.dokumentInfoId }
@@ -280,7 +281,7 @@ fun validerDokumenterTilhørerSakOgHarTilgang(
 ### Get Document Reception Date
 ```kotlin
 fun hentMottaksDatoForJournalpost(journalpostId: String): LocalDate? {
-    val journalpost = safConsumer.hentJournalpost(journalpostId)
+    val journalpost = safClient.hentJournalpost(journalpostId)
     return journalpost?.relevanteDatoer
         ?.find { it.datotype == Datotype.DATO_REGISTRERT }
         ?.dato?.let { LocalDate.parse(it) }

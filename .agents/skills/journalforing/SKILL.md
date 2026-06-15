@@ -7,6 +7,8 @@ description: |
   (3) Understanding document workflows,
   (4) Debugging journalpost issues,
   (5) Mapping document types and categories.
+  Triggers: "journalpost", "journalføring", "Joark", "dokarkiv", "SAF",
+  "dokumentoversikt", "hentDokument", "ferdigstill journalpost", "Variantformat".
 ---
 
 # Journalføring System
@@ -28,7 +30,7 @@ integrasjon/joark/
 ├── journalpostapi/                # Joark REST API
 │   └── dto/                       # Request/response DTOs
 └── saf/                           # SAF GraphQL API
-    ├── SafConsumer.java           # GraphQL client
+    ├── SafClient.java             # GraphQL client
     └── dto/                       # Response DTOs
         └── journalpost/           # Journalpost domain objects
 
@@ -71,17 +73,13 @@ MOTTATT → UNDER_ARBEID → JOURNALFOERT → FERDIGSTILT → EKSPEDERT
 
 ### Create Journalpost (Outgoing Document)
 ```kotlin
-// JoarkService.opprettJournalpost
-val request = OpprettJournalpostRequest(
-    tittel = "Vedtak om lovvalg",
-    tema = "MED",
-    journalposttype = "U",
-    bruker = Bruker(id = fnr, idType = "FNR"),
-    sak = Sak(sakstype = "FAGSAK", fagsakId = saksnummer, fagsaksystem = "MELOSYS"),
-    dokumenter = listOf(dokument)
-)
-val response = journalpostapiConsumer.opprettJournalpost(request)
-// Returns: journalpostId, dokumenter[].dokumentInfoId
+// Entry point: JoarkService.opprettJournalpost(OpprettJournalpost, forsøkEndeligJfr)
+// Build the domain OpprettJournalpost (tittel, tema "MED", journalposttype "U",
+// bruker, sak (fagsaksystem "MELOSYS"), dokumenter), then:
+val journalpostId: String = joarkService.opprettJournalpost(opprettJournalpost, forsøkEndeligJfr)
+// JoarkService maps to OpprettJournalpostRequest.av(...) and calls
+// journalpostapiClient.opprettJournalpost(request, forsøkEndeligJfr),
+// returning OpprettJournalpostResponse.journalpostId.
 ```
 
 ### Finalize Journalpost (Incoming)
@@ -101,13 +99,13 @@ joarkService.oppdaterOgFerdigstillJournalpost(
 ### Query Documents from SAF
 ```kotlin
 // GraphQL query for documents linked to case
-val dokumenter = safConsumer.hentDokumentoversikt(saksnummer)
+val dokumenter = safClient.hentDokumentoversikt(saksnummer)
 
 // Get specific journalpost
-val journalpost = safConsumer.hentJournalpost(journalpostId)
+val journalpost = safClient.hentJournalpost(journalpostId)
 
-// Download document content
-val bytes = safConsumer.hentDokument(journalpostId, dokumentInfoId, "ARKIV")
+// Download document content (always ARKIV variant; no variantformat arg)
+val bytes = safClient.hentDokument(journalpostId, dokumentInfoId)
 ```
 
 ### Saga Step: Finalize After Behandling
@@ -178,7 +176,7 @@ val bytes = safConsumer.hentDokument(journalpostId, dokumentInfoId, "ARKIV")
 
 **Debug**:
 ```kotlin
-val jp = safConsumer.hentJournalpost(journalpostId)
+val jp = safClient.hentJournalpost(journalpostId)
 log.info("Status: ${jp?.journalstatus}, Tema: ${jp?.tema}")
 ```
 
@@ -194,24 +192,27 @@ log.info("Status: ${jp?.journalstatus}, Tema: ${jp?.tema}")
 **Symptom**: Empty bytes from `hentDokument`
 
 **Check**:
-- Correct `variantformat` (ARKIV vs ORIGINAL)
-- Document exists in journalpost
-- Access permissions
+- Document exists in journalpost (correct `dokumentInfoId`)
+- ARKIV variant is present (`hentDokument` only fetches the ARKIV variant)
+- Access permissions (`saksbehandlerHarTilgang`)
 
 ## SQL Queries
 
 ### Check Journalpost on Behandling
 ```sql
--- Find journalpost linked via saksopplysning
-SELECT so.* FROM saksopplysning so
-WHERE so.behandling_id = :behandlingId
-AND so.type = 'DOKUMENT';
+-- Journalposts are NOT stored as a saksopplysning. The journalpost reference
+-- is carried in the saga's prosessinstans data (JOURNALPOST_ID, DOKUMENT_ID).
+SELECT pi.data
+FROM prosessinstans pi
+WHERE pi.behandling_id = :behandlingId
+AND pi.data LIKE '%JOURNALPOST_ID%';
+-- To list documents for a case, query SAF instead (see below).
 ```
 
 ### Find Documents by Saksnummer
 ```sql
 -- Via SAF GraphQL, not local DB
--- Use: safConsumer.hentDokumentoversikt(saksnummer)
+-- Use: safClient.hentDokumentoversikt(saksnummer)
 ```
 
 ## Key Code Locations
@@ -220,7 +221,8 @@ AND so.type = 'DOKUMENT';
 |-----------|----------|
 | Main Service | `integrasjon/.../joark/JoarkService.java` |
 | Facade Interface | `integrasjon/.../joark/JoarkFasade.java` |
-| SAF Consumer | `integrasjon/.../joark/saf/SafConsumer.java` |
+| Joark write client | `integrasjon/.../joark/journalpostapi/JournalpostapiClient.kt` |
+| SAF Client | `integrasjon/.../joark/saf/SafClient.java` |
 | Saga Step | `saksflyt/.../steg/jfr/OppdaterOgFerdigstillJournalpost.kt` |
 | Document Domain | `domain/.../arkiv/*.kt` |
 | Category Codes | `integrasjon/.../joark/DokumentKategoriKode.java` |
@@ -229,3 +231,4 @@ AND so.type = 'DOKUMENT';
 
 - **[Joark API](references/joark-api.md)**: Creating and updating journalposts
 - **[SAF API](references/saf.md)**: Querying and reading documents
+- **[Debugging](references/debugging.md)**: Common journalføring issues, log patterns, and SQL

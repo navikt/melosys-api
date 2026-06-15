@@ -12,26 +12,30 @@ Central converter class for domain → MEDL mapping.
 
 ### EU Regulation 883/2004
 
-| Lovvalgsbestemmelse | GrunnlagMedl |
-|---------------------|--------------|
-| `ART_11_3_A` | `FO_11_3_A` |
-| `ART_11_3_B` | `FO_11_3_B` |
-| `ART_11_3_C` | `FO_11_3_C` |
-| `ART_11_3_D` | `FO_11_3_D` |
-| `ART_11_3_E` | `FO_11_3_E` |
-| `ART_11_4` | `FO_11_4` |
-| `ART_12_1` | `FO_12_1` |
-| `ART_12_2` | `FO_12_2` |
-| `ART_13_1_A` | `FO_13_1_A` |
-| `ART_13_1_B_I` | `FO_13_1_B_1` |
-| `ART_13_1_B_II` | `FO_13_1_B_2` |
-| `ART_13_1_B_III` | `FO_13_1_B_3` |
-| `ART_13_1_B_IV` | `FO_13_1_B_4` |
-| `ART_13_2_A` | `FO_13_2_A` |
-| `ART_13_2_B` | `FO_13_2_B` |
-| `ART_13_3` | `FO_13_3` |
-| `ART_13_4` | `FO_13_4` |
-| `ART_16_1` | `FO_16_1` |
+Source: the `lovvalgsbestemmelseTilGrunnlagMedlTabell` map in `MedlPeriodeKonverter.kt`.
+Left column is the `Lovvalgbestemmelser_883_2004` enum constant; right column is the `GrunnlagMedl` constant.
+
+| Lovvalgbestemmelse | GrunnlagMedl |
+|--------------------|--------------|
+| `FO_883_2004_ART11_3A` | `FO_11_3_A` |
+| `FO_883_2004_ART11_3B` | `FO_11_3_B` |
+| `FO_883_2004_ART11_3C` | `FO_11_3_C` |
+| `FO_883_2004_ART11_3D` | `FO_11_3_D` |
+| `FO_883_2004_ART11_3E` | `FO_11_3_E` |
+| `FO_883_2004_ART11_4` | `FO_11_4` |
+| `FO_883_2004_ART12_1` | `FO_12_1` |
+| `FO_883_2004_ART12_2` | `FO_12_2` |
+| `FO_883_2004_ART13_1A` | `FO_13_1_A` |
+| `FO_883_2004_ART13_1B1` | `FO_13_1_B` |
+| `FO_883_2004_ART13_1B2` | `FO_13_B_II` |
+| `FO_883_2004_ART13_1B3` | `FO_13_B_III` |
+| `FO_883_2004_ART13_1B4` | `FO_13_B_IV` |
+| `FO_883_2004_ART13_2A` | `FO_13_2_A` |
+| `FO_883_2004_ART13_2B` | `FO_13_2_B` |
+| `FO_883_2004_ART13_3` | `FO_13_3` |
+| `FO_883_2004_ART13_4` | `FO_13_4` |
+| `FO_883_2004_ART15` | `FO_15` |
+| `FO_883_2004_ART16_1` (and `ART16_2`) | `FO_16` |
 
 ### Article 13 with Tilleggsbestemmelse
 
@@ -51,40 +55,44 @@ if (bestemmelse == ART_13_EFTA_* && tilleggsbestemmelse == ART_13_4_1) {
 
 ### Transition Rules (Overgangsregler)
 
-For Art. 87.8 and Art. 87a, uses overgangsregelbestemmelser:
+For Art. 87.8 and Art. 87a, `MedlService` calls
+`MedlPeriodeKonverter.tilGrunnlagMedltypeFraOvergangsregler(overgangsregelbestemmelser[0])`.
+The `Overgangsregelbestemmelser` → `GrunnlagMedl` entries live in the same
+`lovvalgsbestemmelseTilGrunnlagMedlTabell`:
 
 ```kotlin
-when (overgangsregelbestemmelse) {
-    ART_14_1_A -> FO_1408_14_1_A
-    ART_14_1_B -> FO_1408_14_1_B
-    ART_14_2_A_I -> FO_1408_14_2_A_1
-    // ... etc
-}
+Overgangsregelbestemmelser.FO_1408_1971_ART14_2_A -> GrunnlagMedl.FO_1408_14_2_A
+Overgangsregelbestemmelser.FO_1408_1971_ART14_2_B -> GrunnlagMedl.FO_1408_14_2_B
+Overgangsregelbestemmelser.FO_1408_1971_ART14A_2  -> GrunnlagMedl.FO_1408_14_A_2
+Overgangsregelbestemmelser.FO_1408_1971_ART14C_A  -> GrunnlagMedl.FO_1408_14_C_A
+Overgangsregelbestemmelser.FO_1408_1971_ART14C_B  -> GrunnlagMedl.FO_1408_14_C_B
 ```
 
 ## Trygdedekninger → DekningMedl
 
-### EU/EEA Cases (tilMedlTrygdeDekning)
+### EU/EEA Cases (`tilMedlTrygdeDekning`)
 
 | Trygdedekninger | DekningMedl |
 |-----------------|-------------|
-| `FULL_DEKNING` | `FULL` |
-| `FULL_DEKNING_FOLKETRYGDLOVEN` | `FULL` |
-| `FULL_DEKNING_FRIVILLIG` | `FULL` |
+| `FULL_DEKNING_EOSFO`, `FULL_DEKNING_FTRL`, `FULL_DEKNING` | `FULL` |
 | `UTEN_DEKNING` | `UNNTATT` |
-| `MED_RETT_TIL_DEKNING` | `FULL` |
+| `UNNTATT_CAN_7_5_B`, `UNNTATT_USA_5_2_G` | `IKKE_PENSJONSDEL` |
 
-### FTRL Cases (tilMedlTrygdedekningForFtrl)
+Anything else throws `TekniskException("Dekningstype støttes ikke: ...")`.
 
-More specific mapping for Norwegian law:
+### FTRL Cases (`tilMedlTrygdedekningForFtrl`)
+
+More specific mapping for Norwegian law (subset — see `MedlPeriodeKonverter.kt`):
 
 | Trygdedekninger | DekningMedl |
 |-----------------|-------------|
-| `FULL_DEKNING_FOLKETRYGDLOVEN` | `FULL` |
-| `UTEN_PENSJONSDEL_FTRL_2_7_3_B` | `FTRL_2_7_3_LEDD_B` |
-| `UTEN_PENSJONSDEL_FTRL_2_7_2` | `FTRL_2_7_2_LEDD` |
-| `FOLKETRYGDLOVEN_2_14` | `IKKEMED_FTRL_2_14` |
-| `NATO_AVTALEN_FRADRAG` | `FRAVTALE_NATO_FRADRAG` |
+| `FULL_DEKNING_FTRL` | `FULL` |
+| `FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER` | `FTRL_2_7_3_LEDD_B` |
+| `FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER` | `FTRL_2_7A_2_LEDD_B` |
+| `FTRL_2_9_FØRSTE_LEDD_A_HELSE` … (several §2-9 variants) | `FTRL_2_9_1_LEDD_A` … |
+| `TILLEGGSAVTALE_NATO_HELSEDEL` | `TILLEGSAVTALE_NATO_DEKNING` |
+
+Anything else throws `TekniskException("Dekningstype støttes ikke for FTRL: ...")`.
 
 ## Land → ISO3 Country Code
 
@@ -120,37 +128,52 @@ Uses `IsoLandkodeKonverterer`:
 
 ### Create Lovvalgsperiode in MEDL
 
+`MedlService.opprettPeriode` builds the request in two stages — the constructor sets
+`fraOgMed`/`tilOgMed`/`dekning`/`lovvalgsland`/`grunnlag`, then `.apply{}` sets
+`sporingsinformasjon`/`ident`/`lovvalg`/`status`/`statusaarsak`. All wire values use `.kode`:
+
 ```kotlin
-val dto = MedlemskapsunntakForPost(
-    ident = behandling.fagsak.hentBrukersAktørID(),
-    fraOgMed = lovvalgsperiode.fom,
-    tilOgMed = lovvalgsperiode.tom,
-    status = PeriodestatusMedl.GYLD.name,
-    statusaarsak = null,
-    dekning = MedlPeriodeKonverter.tilMedlTrygdeDekning(lovvalgsperiode.dekning).name,
-    lovvalgsland = IsoLandkodeKonverterer.tilIso3(lovvalgsperiode.lovvalgsland),
-    lovvalg = LovvalgMedl.ENDL.name,
-    grunnlag = MedlPeriodeKonverter.tilGrunnlag(lovvalgsperiode.bestemmelse).name,
-    sporingsinformasjon = SporingsinformasjonForPost(
-        kildedokument = hentKildedokumenttype(behandling).name
+val grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(
+    MedlPeriodeKonverter.hentLovvalgBestemmelse(periodeOmLovvalg)
+).kode
+
+MedlemskapsunntakForPost(
+    fraOgMed = periodeOmLovvalg.fom,
+    tilOgMed = periodeOmLovvalg.tom,
+    dekning = MedlPeriodeKonverter.tilMedlTrygdeDekning(periodeOmLovvalg.dekning).kode,
+    lovvalgsland = IsoLandkodeKonverterer.tilIso3(periodeOmLovvalg.lovvalgsland.kode),
+    grunnlag = grunnlag
+).apply {
+    ident = fnr
+    lovvalg = LovvalgMedl.ENDL.kode
+    status = PeriodestatusMedl.GYLD.kode
+    statusaarsak = null
+    sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
+        kildedokument = kildedokumenttypeMedl.kode
     )
-)
+}
 ```
 
 ### Update Existing Period
 
-```kotlin
-// First fetch existing to get version
-val existing = medlService.hentEksisterendePeriode(medlPeriodeID)
+`MedlService.lovvalgRequestForPut` fetches the existing period (via the private helper
+`hentEksisterendePeriode`, which delegates to `MedlemskapClient.hentPeriode`) to read its version:
 
-val dto = MedlemskapsunntakForPut(
+```kotlin
+val eksisterendePeriode = hentEksisterendePeriode(medlPeriodeID)  // private in MedlService
+
+MedlemskapsunntakForPut(
     unntakId = medlPeriodeID,
-    fraOgMed = periode.fom,
-    tilOgMed = periode.tom,
-    // ... other fields
-    sporingsinformasjon = SporingsinformasjonForPut(
-        kildedokument = "...",
-        versjon = existing.sporingsinformasjon.versjon  // Critical!
+    fraOgMed = periodeOmLovvalg.fom,
+    tilOgMed = periodeOmLovvalg.tom,
+    dekning = MedlPeriodeKonverter.tilMedlTrygdeDekning(periodeOmLovvalg.dekning).kode,
+    lovvalgsland = IsoLandkodeKonverterer.tilIso3(periodeOmLovvalg.lovvalgsland.kode),
+    grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(
+        MedlPeriodeKonverter.hentLovvalgBestemmelse(periodeOmLovvalg)
+    ).kode,
+    sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(
+        kildedokument = kildedokumenttypeMedl.kode,
+        versjon = eksisterendePeriode.sporingsinformasjon!!.versjon  // Critical!
     )
 )
 ```

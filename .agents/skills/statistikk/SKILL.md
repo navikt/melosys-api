@@ -56,6 +56,13 @@ Expert knowledge of statistics publishing for issued A1 certificates to the data
 7. UtstedtA1AivenProducer publishes to Kafka topic
 ```
 
+## Debugging
+
+For symptom-by-symptom troubleshooting (message not published, wrong article,
+missing utsendtTilLand, schema validation failures), diagnostic SQL queries, log
+strings to grep for, and curl/Kafka console-consumer commands for republishing and
+inspecting the topic, see [references/debugging.md](references/debugging.md).
+
 ## UtstedtA1Melding Schema
 
 ### Message Structure
@@ -86,7 +93,7 @@ Expert knowledge of statistics publishing for issued A1 certificates to the data
 | `saksnummer` | String | Yes | Fagsak saksnummer (MEL-*) |
 | `behandlingId` | Long | Yes | Treatment ID |
 | `aktorId` | String | Yes | Person's aktør-ID (13 chars) |
-| `artikkel` | String | Yes | EU regulation article |
+| `artikkel` | String | Yes | EU regulation article. On the Java side this is a `Lovvalgsbestemmelse` value object that serializes (via `@JsonValue` on `getKode()`) to the string code on the wire |
 | `periode` | Object | Yes | A1 validity period (fom/tom) |
 | `utsendtTilLand` | String | Conditional | ISO-2 country code (for Art. 12) |
 | `datoUtstedelse` | Date | Yes | Date of issuance/annulment |
@@ -99,9 +106,10 @@ Mapped from EU Regulation 883/2004:
 
 | Value | Description |
 |-------|-------------|
-| `11.3a` | Work in one member state |
-| `11.3b` | Self-employed in one member state |
-| `11.4` | Civil servants |
+| `11.3a` | Work in one member state (employed or self-employed) |
+| `11.3b` | Civil servant (tjenestemann) |
+| `11.4` | Work on a ship under a member state's flag (flaggstatsprinsippet) |
+| `11.5` | Flight or cabin crew (flyvende/kabinpersonell) |
 | `12.1` | Posted workers (employees) |
 | `12.2` | Posted workers (self-employed) |
 | `13.1` | Work in two or more states (employee) |
@@ -109,6 +117,8 @@ Mapped from EU Regulation 883/2004:
 | `13.3` | Work in two or more states (mixed) |
 | `13.4` | Civil servants in multiple states |
 | `16` | Exceptions/agreements |
+
+> The JSON schema enum (`a1-utstedt-schema.json`) accepts all values above, including `11.5`. The Java `Lovvalgsbestemmelse` value object (see below) currently only maps `11.3a`, `11.3b`, `11.4`, `12.1`, `12.2`, `13.1-13.4`, and `16` — so a `11.5` value would need to be added to the enum before it can be produced on the wire.
 
 ### TypeUtstedelse Values
 
@@ -126,13 +136,19 @@ For UK-related cases (EFTA Storbritannia convention), messages are sent twice:
 1. Once with the GB-specific bestemmelse
 2. Once with the standard 883/2004 equivalent
 
+The gate is whether the lovvalgsperiode's bestemmelse is one of the
+`Lovvalgbestemmelser_konv_efta_storbritannia` values. When it is, `lagMelding`
+builds the article via `Lovvalgsbestemmelse.avKonvensjonEftaStorbritannia(...)`;
+otherwise via `Lovvalgsbestemmelse.av(...)`. Actual `UtstedtA1Service` source:
+
 ```java
+var erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values())
+    .anyMatch(bestemmelse -> bestemmelse == lovvalgsbestemmelse);
+
 if (erStorbritannia) {
-    // Send with GB-specific article
-    sendMeldingOmUtstedtA1(behandlingsresultat);
+    sendMeldingOmUtstedtA1(behandlingsresultat); // GB-specific article (avKonvensjonEftaStorbritannia)
 }
-// Send with standard article
-sendMeldingOmUtstedtA1(behandlingsresultat);
+sendMeldingOmUtstedtA1(behandlingsresultat);     // standard 883/2004 article (av)
 ```
 
 ### UtsendtTilLand Logic

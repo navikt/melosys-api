@@ -25,11 +25,11 @@ invoicing (forskuddsfakturering), annual reconciliation (årsavregning), and int
 Behandlingsresultat
 ├── trygdeavgiftType: Trygdeavgift_typer
 ├── trygdeavgiftFritekst: String?
-├── medlemskapsperioder: List<Medlemskapsperiode>
+├── medlemskapsperioder: MutableSet<Medlemskapsperiode>
 │   └── trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>
-├── lovvalgsperioder: List<Lovvalgsperiode>
+├── lovvalgsperioder: MutableSet<Lovvalgsperiode>
 │   └── trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>
-├── helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode?
+├── helseutgiftDekkesPerioder: MutableList<HelseutgiftDekkesPeriode>
 │   └── trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>
 ├── årsavregning: Årsavregning?
 └── fakturaserieReferanse: String?
@@ -48,25 +48,28 @@ Trygdeavgiftsperiode
 
 Årsavregning
 ├── id: Long
-├── år: Int
-├── beregnetAvgiftBeløp: BigDecimal?
-├── harTrygdeavgiftFraAvgiftssystemet: Boolean?
-├── trygdeavgiftFraAvgiftssystemet: BigDecimal?
-├── manueltAvgiftBeløp: BigDecimal?
+├── aar: Int
+├── behandlingsresultat: Behandlingsresultat?      # @MapsId — shares PK with Behandlingsresultat
+├── tidligereBehandlingsresultat: Behandlingsresultat?   # object reference, not an Id
+├── tidligereFakturertBeloep: BigDecimal?
+├── beregnetAvgiftBelop: BigDecimal?
+├── tilFaktureringBeloep: BigDecimal?
+├── harInnbetaltTrygdeavgift: Boolean?
+├── innbetaltTrygdeavgift: BigDecimal?
+├── manueltAvgiftBeloep: BigDecimal?
 ├── endeligAvgiftValg: EndeligAvgiftValg?
-├── tidligereBehandlingsresultatId: Long?
-└── behandlingsresultat: Behandlingsresultat
+└── harSkjoennsfastsattInntektsgrunnlag: Boolean
 ```
 
 ### Key Enums
 
 | Enum | Values | Description |
 |------|--------|-------------|
-| **Trygdeavgift_typer** | ORDINÆR, FORENKLET_SKATT, EØS_PENSJONIST, etc. | Type of avgift calculation |
+| **Trygdeavgift_typer** | FORELØPIG, ENDELIG | Whether the avgift is provisionally or finally set |
 | **Avgiftsdekning** | HELSEDEL_UTEN_SYKEPENGER, HELSEDEL_MED_SYKEPENGER, PENSJONSDEL_UTEN_YRKESSKADETRYGD, PENSJONSDEL_MED_YRKESSKADETRYGD | Coverage affecting calculation |
-| **Skatteplikttyyper** | BEGRENSET, FULL | Tax liability type |
-| **EndeligAvgiftValg** | BEREGNET, MANUELT, FRA_AVGIFTSSYSTEMET | Source of final avgift |
-| **Betalingstype** | FAKTURA, KONTONUMMER | Payment method choice |
+| **Skatteplikttype** | SKATTEPLIKTIG, IKKE_SKATTEPLIKTIG | Whether the person is skattepliktig til Norge (drives NAV vs Skatteetaten collection) |
+| **EndeligAvgiftValg** | OPPLYSNINGER_ENDRET, OPPLYSNINGER_ENDRET_MED_PERIODE_FRA_AVGIFTSSYSTEMET, OPPLYSNINGER_UENDRET, MANUELL_ENDELIG_AVGIFT | How the final avgift for an årsavregning is determined |
+| **Betalingstype** | FAKTURA, TREKK | Payment method choice (stored on Fagsak.betalingsvalg) |
 
 ### Avgift Calculation Flow
 
@@ -108,9 +111,10 @@ Location: `service/src/main/kotlin/.../avgift/TrygdeavgiftsberegningService.kt`
 
 Key operations:
 - `beregnOgLagreTrygdeavgift()` - Calculate and persist avgift periods
-- `lagNyeTrygeavgiftsperioder()` - Create new avgift periods
+- `lagNyeTrygdeavgiftsperioder()` - Create new avgift periods (private helper)
 - `beregnTrygdeavgift()` - Call external beregning module
-- `sjekkTrygdeavgiftSkalBetalesTilNav()` - Determine if NAV collects avgift
+- `finnFakturamottakerNavn()` - Resolve the invoice recipient's name
+- `sjekkTrygdeavgiftSkalBetalesTilNav()` - Determine if NAV collects avgift (private)
 
 ### TrygdeavgiftService
 Location: `service/src/main/kotlin/.../avgift/TrygdeavgiftService.kt`
@@ -134,7 +138,7 @@ Location: `service/src/main/kotlin/.../avgift/TrygdeavgiftMottakerService.kt`
 
 Key operations:
 - `skalBetalesTilNav()` - Determine if avgift is collected by NAV
-- `finnFakturamottaker()` - Find invoice recipient
+- `getTrygdeavgiftMottaker()` - Find invoice recipient (overloaded for behandlingID / trygdeavgiftsperioder / behandlingsresultat)
 
 ## Saksflyt Integration
 
@@ -191,30 +195,30 @@ Location: `integrasjon/src/main/kotlin/.../faktureringskomponenten/`
 ```sql
 SELECT t.*, mp.id as medlemskap_id, lp.id as lovvalg_id
 FROM trygdeavgiftsperiode t
-LEFT JOIN medlemskapsperiode mp ON t.grunnlag_medlemskapsperiode_id = mp.id
-LEFT JOIN lovvalgsperiode lp ON t.grunnlag_lovvalgsperiode_id = lp.id
+LEFT JOIN medlemskapsperiode mp ON t.medlemskapsperiode_id = mp.id
+LEFT JOIN lovvalg_periode lp ON t.lovvalg_periode_id = lp.id
 WHERE mp.behandlingsresultat_id = :behandlingsresultatId
-   OR lp.behandlingsresultat_id = :behandlingsresultatId;
+   OR lp.beh_resultat_id = :behandlingsresultatId;
 ```
 
 ### Check Fakturaserie Status
 ```sql
-SELECT br.id, br.fakturaserie_referanse, b.status, f.saksnummer
+SELECT br.behandling_id, br.fakturaserie_referanse, b.status, f.saksnummer
 FROM behandlingsresultat br
 JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE br.fakturaserie_referanse IS NOT NULL
 AND f.saksnummer = :saksnummer;
 ```
 
 ### Find Årsavregning for Year
 ```sql
-SELECT aa.*, br.id as behandlingsresultat_id, b.id as behandling_id
+SELECT aa.*, br.behandling_id as behandlingsresultat_id, b.id as behandling_id
 FROM aarsavregning aa
-JOIN behandlingsresultat br ON aa.behandlingsresultat_id = br.id
+JOIN behandlingsresultat br ON aa.behandlingsresultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
 WHERE aa.aar = :year
-AND b.fagsak_id = :fagsakId;
+AND b.saksnummer = :saksnummer;
 ```
 
 ### Check Manglende Innbetaling
@@ -222,8 +226,8 @@ AND b.fagsak_id = :fagsakId;
 SELECT pi.*, b.id as behandling_id, f.saksnummer
 FROM prosessinstans pi
 JOIN behandling b ON pi.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE pi.type = 'OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING'
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+WHERE pi.prosess_type = 'OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING'
 ORDER BY pi.registrert_dato DESC;
 ```
 
@@ -236,24 +240,24 @@ ORDER BY pi.registrert_dato DESC;
 | Fakturaserie not created | No fakturaserieReferanse | Check OPPRETT_FAKTURASERIE step |
 | Årsavregning missing | No reconciliation for year | Check skattehendelser received |
 | Double invoicing | Multiple fakturaseriereferanser | Check prosessinstans for duplicate vedtak |
-| 25% rule not applied | Avgift too high | Verify TotalbeløpBeregner logic |
+| 25% rule not applied | Avgift too high | Cap is enforced in the external melosys-trygdeavgift-beregning service; verify request/response there |
 
 ## Calculation Rules
 
 ### Avgiftssatser (2024)
 Rates are defined per year and depend on:
 - Avgiftsdekning (helsedel/pensjonsdel, med/uten sykepenger)
-- Skattepliktttype (begrenset/full)
 - Member type (frivillig/pliktig, yrkesaktiv/pensjonist)
+- Whether the person is skattepliktig til Norge (Skatteplikttype)
 
-### 25% Rule
-- Avgift cannot exceed 25% of total income
-- Applies to voluntary members
-- Implemented in `TotalbeløpBeregner`
+### 25% Rule (hjemmel: folketrygdloven § 23-3 fjerde ledd)
+- Avgift cannot exceed 25% of the part of income that **exceeds the minstebeløp** (not 25% of total income)
+- Applies to pliktig medlemskap, frivillig medlemskap and EØS-pensjonister (applied differently per group)
+- The cap (`MAKS_PROSENTDEL_AV_INNTEKT = 0.25`) is enforced in the external `melosys-trygdeavgift-beregning` service, not in melosys-api. `TotalbeløpBeregner` in this repo only aggregates avgift and inntekt across periods for årsavregning.
 
-### Minstebeløp
-- Minimum amount threshold before invoicing
-- Currently set per regulation
+### Minstebeløp (hjemmel: folketrygdloven § 23-3 fjerde ledd)
+- Minimum amount threshold; the 25% cap applies to income above this amount
+- Defined per year in the external beregning service
 
 ## Detailed Documentation
 

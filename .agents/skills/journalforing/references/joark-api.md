@@ -43,9 +43,11 @@ val request = OpprettJournalpostRequest(
     )
 )
 
-val response = journalpostapiConsumer.opprettJournalpost(request, true)
-// ferdigstill = true → FERDIGSTILT
-// ferdigstill = false → UNDER_ARBEID
+// Real client: JournalpostapiClient.opprettJournalpost(request, forsøkEndeligJfr)
+// (JoarkService wraps this via opprettJournalpost(OpprettJournalpost, forsøkEndeligJfr))
+val response = journalpostapiClient.opprettJournalpost(request, true)
+// forsøkEndeligJfr = true → FERDIGSTILT
+// forsøkEndeligJfr = false → UNDER_ARBEID
 ```
 
 ### Response
@@ -112,18 +114,23 @@ data class OppdaterJournalpostRequest(
 
 ### Direct Finalize
 ```kotlin
-joarkService.ferdigstillJournalføring(
-    journalpostId = "12345",
-    journalfoerendeEnhet = "4863"  // Melosys unit
-)
+// JoarkService.ferdigstillJournalføring takes only the journalpostId.
+joarkService.ferdigstillJournalføring("12345")
 ```
 
 ### Finalize Request
-```kotlin
-data class FerdigstillJournalpostRequest(
-    val journalfoerendeEnhet: String
-)
-// PUT /rest/journalpostapi/v1/journalpost/{id}/ferdigstill
+```java
+// journalfoerendeEnhet is NOT a constructor argument — it is set internally
+// from Konstanter.MELOSYS_ENHET_ID.
+public class FerdigstillJournalpostRequest {
+    public final String journalfoerendeEnhet;
+
+    public FerdigstillJournalpostRequest() {
+        journalfoerendeEnhet = String.valueOf(Konstanter.MELOSYS_ENHET_ID);
+    }
+}
+// JournalpostapiClient.ferdigstillJournalpost(FerdigstillJournalpostRequest, journalpostId)
+// PUT /journalpost/{id}/ferdigstill
 ```
 
 ## Tema Codes

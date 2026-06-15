@@ -45,12 +45,11 @@ Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A -> LA_BUC_02
 // ... etc
 ```
 
-### LA_BUC_04 - Posted Workers (Art. 12)
+### LA_BUC_04 - Posted Workers / Melding om utstasjonering (Art. 12)
 
 **Purpose**: Notification that a worker is posted to another country but remains covered by home country.
 
-**Initiating SED**: A003
-**Response SEDs**: A004, A012
+**Initiating SED**: A009 (Melding om utstasjonering). A010 may also appear as a follow-up.
 
 **Bestemmelser mapping**:
 ```kotlin
@@ -58,26 +57,29 @@ Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1 -> LA_BUC_04
 Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2 -> LA_BUC_04
 ```
 
-### LA_BUC_05 - General Determination (Art. 11)
+### LA_BUC_05 - General Determination / Melding om lovvalg (Art. 11)
 
-**Purpose**: General notification of applicable legislation.
+**Purpose**: General notification of applicable legislation (art. 11, and art. 15).
 
-**Initiating SED**: A005 (notification)
-**Response SEDs**: Various
+**Initiating SED**: A010 (Melding om lovvalg) — the only A-SED in this BUC.
 
 **Bestemmelser mapping**:
 ```kotlin
 Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1 -> LA_BUC_05
 Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A -> LA_BUC_05
 Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B -> LA_BUC_05
-// ... etc
+// ... ART15 and Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5 also map here
 ```
 
-### LA_BUC_06 - Family Member Membership
+### LA_BUC_06 - Forespørsel om mer informasjon (Request for more information)
 
-**Purpose**: Determination of legislation for family members.
+**Purpose**: Request additional information about a lovvalgs case (not a determination of its own).
 
-**Initiating SED**: A003
+**Initiating SED**: A005 (Anmodning om mer informasjon)
+**Reply SED**: A006 (Svar på anmodning om mer informasjon)
+
+> Note: LA_BUC_06 is not produced by `BucType.fraBestemmelse()` — it is an information BUC,
+> not a lovvalgsbestemmelse-driven one.
 
 ## H_BUC (Health Benefits)
 
@@ -93,12 +95,12 @@ Different sub-types for specific health coordination needs.
 
 ```kotlin
 enum class BucType {
-    LA_BUC_01,  // Exception agreements
-    LA_BUC_02,  // Work in multiple countries
-    LA_BUC_03,  // Notification
-    LA_BUC_04,  // Posted workers
-    LA_BUC_05,  // General determination
-    LA_BUC_06,  // Family members
+    LA_BUC_01,  // Exception agreements (Art. 16), initiating SED A001
+    LA_BUC_02,  // Work in multiple countries (Art. 13), initiating SED A003
+    LA_BUC_03,  // Melding om relevant informasjon, SED A008
+    LA_BUC_04,  // Posted workers (Art. 12), initiating SED A009
+    LA_BUC_05,  // General determination (Art. 11), initiating SED A010
+    LA_BUC_06,  // Forespørsel om mer informasjon, SEDs A005 + A006
 
     H_BUC_01, H_BUC_02a, H_BUC_02b, H_BUC_02c,
     H_BUC_03a, H_BUC_03b, H_BUC_04, H_BUC_05,

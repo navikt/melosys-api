@@ -47,7 +47,7 @@ internal class OppgaveFactoryNyMappingTest {
                 val behandling = sak.lagBehandlingMedSpy(SedType.A003)
                 val oppgave =
                     oppgaveFactory.lagBehandlingsoppgave(
-                        behandling, LocalDate.now(), behandling::hentSedDokument
+                        behandling, LocalDate.now(), hentSedDokument = behandling::hentSedDokument
                     ).build()
 
                 withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
@@ -69,7 +69,7 @@ internal class OppgaveFactoryNyMappingTest {
             }.shouldHaveSize(67).forEach { sak ->
                 val behandling = sak.lagBehandlingMedSpy()
                 val oppgave =
-                    oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
+                    oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), hentSedDokument = behandling::hentSedDokument)
                         .build()
 
                 withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
@@ -87,7 +87,7 @@ internal class OppgaveFactoryNyMappingTest {
             }.shouldHaveSize(3).forEach { sak ->
                 val behandling = sak.lagBehandlingMedSpy()
                 val oppgave =
-                    oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
+                    oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), hentSedDokument = behandling::hentSedDokument)
                         .build()
 
                 withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
@@ -244,9 +244,46 @@ internal class OppgaveFactoryNyMappingTest {
             Behandlingstyper.FØRSTEGANG
         )
         val oppgave =
-            oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument).build()
+            oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), hentSedDokument = behandling::hentSedDokument).build()
 
         oppgave.beskrivelse.shouldBe(Behandlingstema.UTSENDT_ARBEIDSTAKER.beskrivelse)
+    }
+
+    @Test
+    fun `gjelderÅr skal brukes som beskrivelse for alle årsavregningskombinasjoner`() {
+        rowsMedAlleKombinasjoner
+            .filter { it.behandlingstype == Behandlingstyper.ÅRSAVREGNING }
+            .shouldHaveSize(10).forEach { sak ->
+                val behandling = sak.lagBehandlingMedSpy()
+                val oppgave =
+                    oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), "2024", behandling::hentSedDokument)
+                        .build()
+
+                withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
+                    oppgave.beskrivelse.shouldBe("2024")
+                    verify(exactly = 0) { behandling.hentSedDokument() }
+                }
+            }
+    }
+
+    @Test
+    fun `tom beskrivelse og warning når gjelderÅr mangler for årsavregning`() {
+        LoggingTestUtils.withLogAppender<OppgaveBeskrivelseUtleder> { oppgaveBeskrivelseListAppender ->
+            val behandling = lagBehandling(
+                Sakstyper.EU_EOS,
+                Sakstemaer.TRYGDEAVGIFT,
+                Behandlingstema.PENSJONIST,
+                Behandlingstyper.ÅRSAVREGNING
+            )
+            val oppgave =
+                oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()) { finnSedDokument(behandling) }
+                    .build()
+
+            oppgave.beskrivelse.shouldBe("")
+            oppgaveBeskrivelseListAppender.list
+                .shouldHaveSize(1)
+                .first().level.shouldBe(Level.WARN)
+        }
     }
 
 

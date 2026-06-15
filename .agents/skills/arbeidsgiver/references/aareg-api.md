@@ -16,11 +16,11 @@ Query params: regelverk, arbeidsforholdType, ansettelsesperiodeFom, ansettelsesp
 
 Returns list of employment relationships for the given person.
 
-## ArbeidsforholdConsumer
+## ArbeidsforholdClient
 
 ```kotlin
 @Retryable
-open class ArbeidsforholdConsumer(private val webClient: WebClient) {
+open class ArbeidsforholdClient(private val webClient: WebClient) {
     open fun finnArbeidsforholdPrArbeidstaker(
         fnr: String,
         arbeidsforholdQuery: ArbeidsforholdQuery
@@ -279,7 +279,7 @@ Service layer wrapper:
 ```kotlin
 @Service
 class ArbeidsforholdService(
-    private val arbeidsforholdConsumer: ArbeidsforholdConsumer,
+    private val arbeidsforholdClient: ArbeidsforholdClient,
     private val kodeverkService: KodeverkService
 ) {
     fun finnArbeidsforholdPrArbeidstaker(
@@ -293,7 +293,7 @@ class ArbeidsforholdService(
             ansettelsesperiodeFom = fom,
             ansettelsesperiodeTom = tom
         )
-        val response = arbeidsforholdConsumer.finnArbeidsforholdPrArbeidstaker(ident, query)
+        val response = arbeidsforholdClient.finnArbeidsforholdPrArbeidstaker(ident, query)
         return ArbeidsforholdKonverter(response, kodeverkService)
             .createSaksopplysning()
             .apply {

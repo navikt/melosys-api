@@ -52,11 +52,7 @@ public class ReplikerBehandling implements StegBehandler {
         var behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
         var behandlingstema = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class);
 
-        Behandling behandlingBruktForReplikering = Optional.ofNullable(
-            saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
-        ).orElseThrow(() ->
-            new FunksjonellException("Finner ikke behandling som kan replikeres. Denne fantes ved opprettelse av prosessen")
-        );
+        Behandling behandlingBruktForReplikering = finnBehandlingForReplikering(prosessinstans, fagsak);
 
         Behandling nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandlingBruktForReplikering, behandlingstype);
 
@@ -75,6 +71,18 @@ public class ReplikerBehandling implements StegBehandler {
 
         log.info("Behandling {} replikert og behandling {} har blitt opprettet for {}",
             behandlingBruktForReplikering.getId(), nyBehandling.getId(), saksnummer);
+    }
+
+    private Behandling finnBehandlingForReplikering(Prosessinstans prosessinstans, Fagsak fagsak) {
+        Long opprinneligBehId = prosessinstans.getData(OPPRINNELIG_BEH, Long.class);
+        if (opprinneligBehId != null) {
+            return behandlingService.hentBehandling(opprinneligBehId);
+        }
+        return Optional.ofNullable(
+            saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
+        ).orElseThrow(() ->
+            new FunksjonellException("Finner ikke behandling som kan replikeres. Denne fantes ved opprettelse av prosessen")
+        );
     }
 
     private void settBehandlingsårsakOgFrist(Behandling nyBehandling, Prosessinstans prosessinstans) {

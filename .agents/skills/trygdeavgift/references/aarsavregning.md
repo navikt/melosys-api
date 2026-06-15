@@ -50,24 +50,29 @@ Location: `domain/src/main/kotlin/.../avgift/Årsavregning.kt`
 @Entity
 @Table(name = "aarsavregning")
 class Årsavregning(
-    @Id var id: Long,
-    var år: Int,
-    var beregnetAvgiftBeløp: BigDecimal?,
-    var harTrygdeavgiftFraAvgiftssystemet: Boolean?,
-    var trygdeavgiftFraAvgiftssystemet: BigDecimal?,
-    var manueltAvgiftBeløp: BigDecimal?,
+    @Id var id: Long = 0,
+    // @MapsId — shares PK (behandlingsresultat_id) with Behandlingsresultat
+    var behandlingsresultat: Behandlingsresultat?,
+    var aar: Int,                                       // column "aar"
+    var tidligereBehandlingsresultat: Behandlingsresultat?,  // @JoinColumn "tidligere_resultat_id" (object, not an Id)
+    var tidligereFakturertBeloep: BigDecimal?,
+    var beregnetAvgiftBelop: BigDecimal?,               // column "beregnet_avgift_belop"
+    var tilFaktureringBeloep: BigDecimal?,
+    var harInnbetaltTrygdeavgift: Boolean?,
+    var innbetaltTrygdeavgift: BigDecimal?,
+    var manueltAvgiftBeloep: BigDecimal?,
     var endeligAvgiftValg: EndeligAvgiftValg?,
-    var tidligereBehandlingsresultatId: Long?,
-    // ...
+    var harSkjoennsfastsattInntektsgrunnlag: Boolean = false,
 )
 ```
 
 ### EndeligAvgiftValg
 ```kotlin
 enum class EndeligAvgiftValg {
-    BEREGNET,           // Use calculated amount
-    MANUELT,            // Use manually entered amount
-    FRA_AVGIFTSSYSTEMET // Use legacy amount from avgiftssystemet
+    OPPLYSNINGER_ENDRET,                                  // "Jeg skal gjøre endringer"
+    OPPLYSNINGER_ENDRET_MED_PERIODE_FRA_AVGIFTSSYSTEMET,  // endringer med periode fra avgiftssystemet
+    OPPLYSNINGER_UENDRET,                                 // "Det er ingen endringer"
+    MANUELL_ENDELIG_AVGIFT,                               // "Jeg vil oppgi endelig avgift selv"
 }
 ```
 
@@ -85,9 +90,10 @@ Key methods:
 ### SkattehendelserConsumer
 Location: `service/src/main/kotlin/.../avgift/aarsavregning/SkattehendelserConsumer.kt`
 
-Listens for Kafka messages about completed skatteoppgjør:
-- Creates skattehendelse record
-- Triggers årsavregning process
+Listens for Kafka messages about completed skatteoppgjør (`lesSkattehendelser`):
+- Finds fagsaker with trygdeavgift for the person/year (`finnSakMedTrygdeavgift`)
+- Triggers the årsavregning prosessflyt — no skattehendelse row is persisted in melosys-api
+  (the skattehendelse store lives in the separate melosys-skattehendelser service)
 
 ## Grunnlag Innhenting (Basis Retrieval)
 
@@ -127,25 +133,31 @@ SEND_MELDING_OM_VEDTAK
 ### SEND_FAKTURA_AARSAVREGNING Step
 Location: `saksflyt/src/main/kotlin/.../steg/arsavregning/SendFakturaÅrsavregning.kt`
 
-Calculates:
+Calculates `tilFaktureringBeloep` via `Årsavregning.beregnTilFaktureringsBeloep()`:
 ```kotlin
-tilFakturering = endeligAvgift - tidligereAvgift - trygdeavgiftFraAvgiftssystemet
+tilFaktureringBeloep = (manueltAvgiftBeloep ?: beregnetAvgiftBelop)
+    - tidligereFakturertBeloep
+    - innbetaltTrygdeavgift
+    + tidligereÅrsavregning?.innbetaltTrygdeavgift   // hentTidligereInnbetaltTrygdeavgift()
 ```
 
 Where:
-- `endeligAvgift`: Final calculated avgift for the year
-- `tidligereAvgift`: Previously invoiced (forskudd)
-- `trygdeavgiftFraAvgiftssystemet`: Amount from legacy system (transition period)
+- `manueltAvgiftBeloep ?: beregnetAvgiftBelop`: manual amount if set, otherwise the calculated avgift
+- `tidligereFakturertBeloep`: previously invoiced (forskudd)
+- `innbetaltTrygdeavgift`: already paid this årsavregning
+- the last term adds back what was paid on the previous årsavregning
 
 ## Totalbeløp Beregning
 
 ### TotalbeløpBeregner
 Location: `service/src/main/kotlin/.../avgift/aarsavregning/totalbeloep/TotalbeløpBeregner.kt`
 
-Calculates total avgift for a year:
-- Sums all trygdeavgiftsperioder for the year
-- Applies 25% rule if applicable
-- Handles partial year periods
+Aggregates totals for a year (no rate/cap logic):
+- Sums avgift across all trygdeavgiftsperioder (`hentTotalavgift`)
+- Sums inntekt across periods (`hentTotalinntekt`)
+- Handles partial year periods via `AntallMdBeregner`
+
+The 25% cap and minstebeløp are enforced in the external `melosys-trygdeavgift-beregning` service, not here.
 
 ### AntallMdBeregner
 Location: `service/src/main/kotlin/.../avgift/aarsavregning/totalbeloep/AntallMdBeregner.kt`
@@ -173,43 +185,38 @@ For members not required to file Norwegian tax return:
 
 ### Find Årsavregning Status
 ```sql
-SELECT aa.*, b.status, b.type, f.saksnummer
+SELECT aa.*, b.status, b.beh_type, f.saksnummer
 FROM aarsavregning aa
-JOIN behandlingsresultat br ON aa.behandlingsresultat_id = br.id
+JOIN behandlingsresultat br ON aa.behandlingsresultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE f.saksnummer = :saksnummer
 ORDER BY aa.aar DESC;
 ```
 
 ### Check Skattehendelse
-```sql
-SELECT * FROM skattehendelse
-WHERE fnr = :fnr
-AND inntekts_aar = :year;
-```
+Skattehendelser are not stored in the melosys-api database — they are consumed from Kafka by
+`SkattehendelserConsumer` and persisted in the separate melosys-skattehendelser service. Inspect
+them there (or via Kafka), not via a melosys-api table.
 
 ### Verify Grunnlag
 ```sql
 -- Tidligere grunnlag
 SELECT t.*, mp.id as mp_id
 FROM trygdeavgiftsperiode t
-JOIN medlemskapsperiode mp ON t.grunnlag_medlemskapsperiode_id = mp.id
-JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.id
-WHERE br.id = (
-    SELECT aa.tidligere_behandlingsresultat_id
-    FROM aarsavregning aa WHERE aa.id = :aarsavregningId
+JOIN medlemskapsperiode mp ON t.medlemskapsperiode_id = mp.id
+JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.behandling_id
+WHERE br.behandling_id = (
+    SELECT aa.tidligere_resultat_id
+    FROM aarsavregning aa WHERE aa.behandlingsresultat_id = :aarsavregningBehandlingsresultatId
 );
 
 -- Endelig grunnlag
 SELECT t.*, mp.id as mp_id
 FROM trygdeavgiftsperiode t
-JOIN medlemskapsperiode mp ON t.grunnlag_medlemskapsperiode_id = mp.id
-JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.id
-WHERE br.id = (
-    SELECT aa.behandlingsresultat_id
-    FROM aarsavregning aa WHERE aa.id = :aarsavregningId
-);
+JOIN medlemskapsperiode mp ON t.medlemskapsperiode_id = mp.id
+JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.behandling_id
+WHERE br.behandling_id = :aarsavregningBehandlingsresultatId;
 ```
 
 ## Common Issues
@@ -219,7 +226,7 @@ WHERE br.id = (
 | Årsavregning not triggered | Skattehendelse not received | Check Kafka, verify person has avgift |
 | Wrong grunnlag | Complex history | Verify behandling chain manually |
 | Double årsavregning | Multiple triggers | Check for duplicate skattehendelser |
-| Missing tidligere beløp | Avgiftssystemet data | Set harTrygdeavgiftFraAvgiftssystemet |
+| Missing tidligere beløp | Previous årsavregning not linked | Verify tidligere_resultat_id / tidligereFakturertBeloep |
 
 ## Related Confluence Pages
 

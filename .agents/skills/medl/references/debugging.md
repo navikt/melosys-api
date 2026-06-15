@@ -5,52 +5,54 @@
 ### Find MEDL Period ID for a Behandling
 
 ```sql
--- Lovvalgsperiode
-SELECT lp.id, lp.medl_periode_id, lp.fom, lp.tom, lp.lovvalgsland, lp.bestemmelse
-FROM lovvalgsperiode lp
-WHERE lp.behandlingsresultat_id = :behandlingId;
+-- Lovvalgsperiode (table lovvalg_periode; FK beh_resultat_id; MEDL id medlperiode_id)
+SELECT lp.id, lp.medlperiode_id, lp.fom_dato, lp.tom_dato, lp.lovvalgsland, lp.lovvalg_bestemmelse
+FROM lovvalg_periode lp
+WHERE lp.beh_resultat_id = :behandlingsresultatId;
 
--- Medlemskapsperiode
-SELECT mp.id, mp.medl_periode_id, mp.fom, mp.tom, mp.medlemskapstype
+-- Medlemskapsperiode (table medlemskapsperiode; FK behandlingsresultat_id; MEDL id medlperiode_id)
+SELECT mp.id, mp.medlperiode_id, mp.fom_dato, mp.tom_dato, mp.medlemskapstype
 FROM medlemskapsperiode mp
-WHERE mp.behandlingsresultat_id = :behandlingId;
+WHERE mp.behandlingsresultat_id = :behandlingsresultatId;
 
--- Anmodningsperiode
-SELECT ap.id, ap.medl_periode_id, ap.fom, ap.tom, ap.sendt_utland
+-- Anmodningsperiode (table anmodningsperiode; FK beh_resultat_id; MEDL id medlperiode_id)
+SELECT ap.id, ap.medlperiode_id, ap.fom_dato, ap.tom_dato, ap.sendt_utland
 FROM anmodningsperiode ap
-WHERE ap.behandlingsresultat_id = :behandlingId;
+WHERE ap.beh_resultat_id = :behandlingsresultatId;
 ```
 
 ### Find Periods Missing MEDL ID
 
 ```sql
--- Lovvalgsperioder that should have MEDL ID but don't
-SELECT lp.id, br.type, b.status, f.saksnummer
-FROM lovvalgsperiode lp
-JOIN behandlingsresultat br ON br.id = lp.behandlingsresultat_id
-JOIN behandling b ON b.id = br.id
-JOIN fagsak f ON f.saksnummer = b.fagsak_saksnummer
-WHERE lp.medl_periode_id IS NULL
-AND lp.innvilgelsesresultat = 'INNVILGET'
+-- Lovvalgsperioder that should have MEDL ID but don't.
+-- Joins: behandlingsresultat.behandling_id = behandling.id; behandling.saksnummer = fagsak.saksnummer
+SELECT lp.id, b.beh_type, b.status, f.saksnummer
+FROM lovvalg_periode lp
+JOIN behandlingsresultat br ON br.behandling_id = lp.beh_resultat_id
+JOIN behandling b ON b.id = br.behandling_id
+JOIN fagsak f ON f.saksnummer = b.saksnummer
+WHERE lp.medlperiode_id IS NULL
+AND lp.innvilgelse_resultat = 'INNVILGET'
 AND b.status = 'AVSLUTTET';
 ```
 
 ### Check Prosessinstans for MEDL Steps
 
 ```sql
-SELECT pi.id, pi.type, pi.status, pi.sist_utforte_steg, pi.endret_dato
+-- Columns: prosess_type (entity field `type`), sist_fullfort_steg (field `sistFullførtSteg`)
+SELECT pi.uuid, pi.prosess_type, pi.status, pi.sist_fullfort_steg, pi.endret_dato
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId
-AND pi.type LIKE 'IVERKSETT_VEDTAK%'
+AND pi.prosess_type LIKE 'IVERKSETT_VEDTAK%'
 ORDER BY pi.registrert_dato DESC;
 ```
 
 ### Find Failed MEDL Steps
 
 ```sql
-SELECT pi.id, pi.type, pi.sist_utforte_steg, pi.status, pi.endret_dato
+SELECT pi.uuid, pi.prosess_type, pi.sist_fullfort_steg, pi.status, pi.endret_dato
 FROM prosessinstans pi
-WHERE pi.sist_utforte_steg IN (
+WHERE pi.sist_fullfort_steg IN (
     'LAGRE_MEDLEMSKAPSPERIODE_MEDL',
     'LAGRE_LOVVALGSPERIODE_MEDL',
     'LAGRE_ANMODNINGSPERIODE_MEDL'
@@ -89,8 +91,8 @@ TekniskException: Opprettelse av periode i MEDL feilet med retur av null medlPer
 ```kotlin
 // Check stored version vs MEDL version
 val stored = lovvalgsperiode.medlPeriodeID
-val medl = medlService.hentEksisterendePeriode(stored)
-// Compare sporingsinformasjon.versjon
+val medl = medlemskapClient.hentPeriode(stored.toString())  // MedlemskapClient.hentPeriode is public
+// Compare medl.sporingsinformasjon.versjon
 ```
 
 **Resolution**:
@@ -106,13 +108,13 @@ TekniskException: Lovvalgsbestemmelse støttes ikke i MEDL: <bestemmelse>
 
 **Investigation**:
 ```sql
-SELECT lp.bestemmelse, lp.tilleggsbestemmelse
-FROM lovvalgsperiode lp
-WHERE lp.behandlingsresultat_id = :behandlingId;
+SELECT lp.lovvalg_bestemmelse, lp.tillegg_bestemmelse
+FROM lovvalg_periode lp
+WHERE lp.beh_resultat_id = :behandlingsresultatId;
 ```
 
 **Resolution**:
-- Add mapping in `MedlPeriodeKonverter`
+- Add mapping in `MedlPeriodeKonverter` (`lovvalgsbestemmelseTilGrunnlagMedlTabell`)
 - Or fix incorrect bestemmelse on period
 
 ### Issue: Article 13 Wrong Status (Provisional vs Final)
@@ -125,11 +127,11 @@ WHERE lp.behandlingsresultat_id = :behandlingId;
 
 **Investigation**:
 ```sql
-SELECT br.type, br.utfall_registrering_unntak,
-       lp.bestemmelse, lp.innvilgelsesresultat
+SELECT br.resultat_type, br.utfall_registrering_unntak,
+       lp.lovvalg_bestemmelse, lp.innvilgelse_resultat
 FROM behandlingsresultat br
-JOIN lovvalgsperiode lp ON lp.behandlingsresultat_id = br.id
-WHERE br.id = :behandlingId;
+JOIN lovvalg_periode lp ON lp.beh_resultat_id = br.behandling_id
+WHERE br.behandling_id = :behandlingsresultatId;
 ```
 
 **Logic**:
@@ -145,29 +147,34 @@ val erForeløpig = erArt13 && utfallRegistreringUnntak != GODKJENT
 FunksjonellException: Grunnlaget <code> og overgangsregler skal benyttes, men er tom
 ```
 
-**Cause**: Art. 87.8 or 87a requires overgangsregelbestemmelser
+**Cause**: The bestemmelse is `FO_883_2004_ART87_8` or `FO_883_2004_ART87A`, which requires
+overgangsregelbestemmelser. These are NOT stored on `lovvalg_periode` — `MedlService` reads them
+from the SED grunnlag (`SedGrunnlag.overgangsregelbestemmelser` on the behandling's
+mottatte opplysninger). If that list is empty, the FunksjonellException is thrown.
 
 **Investigation**:
 ```sql
-SELECT lp.bestemmelse, lp.overgangsregelbestemmelser
-FROM lovvalgsperiode lp
-WHERE lp.behandlingsresultat_id = :behandlingId;
+-- Confirm the bestemmelse on the period
+SELECT lp.lovvalg_bestemmelse, lp.tillegg_bestemmelse
+FROM lovvalg_periode lp
+WHERE lp.beh_resultat_id = :behandlingsresultatId;
+-- Then inspect the mottatte opplysninger (SedGrunnlag) for the behandling for overgangsregelbestemmelser.
 ```
 
-**Resolution**: Set correct overgangsregelbestemmelser on period
+**Resolution**: Ensure the SED grunnlag carries the overgangsregelbestemmelser for the behandling.
 
 ## Log Patterns
 
 ### MEDL REST Calls
 ```bash
 # All MEDL calls
-grep "MedlemskapRestConsumer" application.log
+grep "MedlemskapClient" application.log
 
 # Specific behandling
-grep "MedlemskapRestConsumer" application.log | grep "<behandlingId>"
+grep "MedlemskapClient" application.log | grep "<behandlingId>"
 
 # Errors only
-grep "MedlemskapRestConsumer" application.log | grep -i "error\|exception\|feilet"
+grep "MedlemskapClient" application.log | grep -i "error\|exception\|feilet"
 ```
 
 ### Saga Step Execution
@@ -189,9 +196,10 @@ grep "MedlemskapsunntakFor" application.log
 
 | Component | Location |
 |-----------|----------|
-| REST Client | `integrasjon/.../medl/MedlemskapRestConsumer.kt` |
+| REST Client | `integrasjon/.../medl/MedlemskapClient.kt` |
 | Core Service | `integrasjon/.../medl/MedlService.kt` |
 | Converter | `integrasjon/.../medl/MedlPeriodeKonverter.kt` |
+| DTOs | `integrasjon/.../medl/api/v1/` |
 | Period Service | `service/.../medl/MedlPeriodeService.java` |
 | Membership Step | `saksflyt/.../steg/medl/LagreMedlemsperiodeMedl.kt` |
 | Lovvalg Step | `saksflyt/.../steg/medl/LagreLovvalgsperiodeMedl.kt` |
@@ -199,7 +207,8 @@ grep "MedlemskapsunntakFor" application.log
 
 ## Retry Configuration
 
-`MedlemskapRestConsumer` uses Spring `@Retryable`:
+`MedlemskapClient` is an `open class` annotated with Spring `@Retryable` (methods are `open` so the
+retry proxy works):
 - Automatic retry on transient failures
 - Check Spring Retry logs for retry attempts
 
@@ -211,14 +220,14 @@ If saga fails, manual operations via service:
 // Inject MedlService
 @Autowired lateinit var medlService: MedlService
 
-// Search existing periods
-val perioder = medlService.hentPerioder(fnr, fom, tom)
+// Search existing periods (public; returns a Saksopplysning wrapping the MEDL response)
+val saksopplysning = medlService.hentPeriodeListe(fnr, fom, tom)
 
-// Get specific period
-val periode = medlService.hentEksisterendePeriode(medlPeriodeID)
+// Note: hentEksisterendePeriode(medlPeriodeID) is PRIVATE in MedlService.
+// To fetch a single period directly, inject MedlemskapClient and call hentPeriode(periodeId).
 
-// Create new period
-val nyPeriodeId = medlService.opprettPeriodeEndelig(...)
+// Create new period (fnr, periodeMedBestemmelse, kildedokumenttypeMedl) -> returns medlPeriodeID
+val nyPeriodeId = medlService.opprettPeriodeEndelig(fnr, periodeMedBestemmelse, KildedokumenttypeMedl.SED)
 
-// Update period
-medlService.oppdaterPeriodeEndelig(...)
+// Update period (periodeMedBestemmelse, kildedokumenttypeMedl)
+medlService.oppdaterPeriodeEndelig(periodeMedBestemmelse, KildedokumenttypeMedl.SED)

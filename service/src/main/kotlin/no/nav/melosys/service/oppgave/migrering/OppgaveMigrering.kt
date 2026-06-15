@@ -19,6 +19,7 @@ import no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
+import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner
 import no.nav.melosys.service.oppgave.*
@@ -35,7 +36,8 @@ class OppgaveMigrering(
     private val behandlingRepository: BehandlingRepositoryForOppgaveMigrering,
     private val oppgaveFasade: OppgaveFasade,
     private val migreringsRapport: MigreringsRapport,
-    private val fagsakRepository: FagsakRepository
+    private val fagsakRepository: FagsakRepository,
+    private val behandlingsresultatRepository: BehandlingsresultatRepository
 ) {
     @Volatile
     var stopMigrering: Boolean = false
@@ -286,7 +288,8 @@ class OppgaveMigrering(
                 sakstema,
                 behandlingstema,
                 behandlingstype,
-                hentSedDokument
+                gjelderÅr = finnGjelderÅrForÅrsavregning(behandlingstype, behandlingID),
+                hentSedDokument = hentSedDokument
             )
         } catch (e: Exception) {
             val message = e.message ?: "utledBeskrivelse feilet "
@@ -296,6 +299,13 @@ class OppgaveMigrering(
             return msg
         }
     }
+
+    private fun finnGjelderÅrForÅrsavregning(behandlingstype: Behandlingstyper, behandlingID: Long): String? =
+        if (behandlingstype == Behandlingstyper.ÅRSAVREGNING) {
+            behandlingsresultatRepository.finnÅrsavregningAar(behandlingID).orElse(null)?.toString()
+        } else {
+            null
+        }
 
     private fun sedDokument(behandlingID: Long): SedDokument? =
         hentBehandlingMedSaksoplysninger(behandlingID)

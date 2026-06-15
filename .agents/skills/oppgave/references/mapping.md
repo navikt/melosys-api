@@ -5,38 +5,48 @@ based on behandling context.
 
 ## Mapping Source
 
-Confluence documentation: https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
+Confluence documentation: "Oppgaver i Gosys"
+(https://confluence.adeo.no/spaces/TEESSI/pages/478253092). The `rows` list is generated
+from this table by `OppgaveGosysMappingCodeGenerator`.
 
 ## Mapping Inputs
 
-| Input | Source | Description |
-|-------|--------|-------------|
-| Sakstype | `fagsak.type` | EU_EOS, TRYGDEAVTALE, FTRL, etc. |
-| Sakstema | `fagsak.tema` | MEDLEMSKAP_LOVVALG, TRYGDEAVGIFT, etc. |
-| Behandlingstema | `behandling.tema` | MEDLEMSKAP, LOVVALG, PENSJON, etc. |
-| Behandlingstype | `behandling.type` | FØRSTEGANG, NY_VURDERING, KLAGE, etc. |
+| Input | Type | Description |
+|-------|------|-------------|
+| Sakstype | `Sakstyper` | EU_EOS, TRYGDEAVTALE, FTRL |
+| Sakstema | `Sakstemaer` | MEDLEMSKAP_LOVVALG, TRYGDEAVGIFT, UNNTAK |
+| Behandlingstema | `Behandlingstema` | UTSENDT_ARBEIDSTAKER, ARBEID_FLERE_LAND, PENSJONIST, YRKESAKTIV, … |
+| Behandlingstype | `Behandlingstyper` | FØRSTEGANG, NY_VURDERING, KLAGE, ÅRSAVREGNING, HENVENDELSE, … |
 
-## Mapping Outputs
+## Mapping Outputs (`OppgaveGosysMapping.Oppgave`)
 
-| Output | Target | Description |
-|--------|--------|-------------|
-| Oppgavetype | `oppgave.oppgavetype` | BEH_SAK_MK, VUR, etc. |
-| Tema | `oppgave.tema` | MED, UFM, TRY |
-| Behandlingstema | `oppgave.behandlingstema` | ab0424, ab0483, etc. |
-| Prioritet | `oppgave.prioritet` | LAV, NORM, HOY, KRITISK |
+| Output | Field | Description |
+|--------|-------|-------------|
+| Oppgavetype | `oppgaveType` | BEH_SAK_MK, BEH_SED, VURD_HENV, VURD_MAN_INNB, BEH_ARSAVREG |
+| Tema | `tema` | MED, UFM, TRY |
+| Behandlingstema (ab-code) | `oppgaveBehandlingstema` | `OppgaveBehandlingstema` enum, e.g. EU_EOS_YRKESAKTIV = "ab0483" |
+| Beskrivelsefelt | `beskrivelsefelt` | TOMT, SED, SED_ELLER_TOMT, BEHANDLINGSTEMA, … |
+
+Note: prioritet is set on the `Oppgave` domain entity (defaulting to `PrioritetType.NORM`),
+not by this mapping.
 
 ## Mapping Table Structure
 
 ```kotlin
-data class GosysMappingRow(
-    val sakstype: Sakstyper?,
-    val sakstema: Sakstemaer?,
-    val behandlingstema: Behandlingstema?,
-    val behandlingstype: Behandlingstyper?,
-    val oppgavetype: Oppgavetyper,
+internal data class TableRow(
+    val sakstype: Sakstyper,
+    val sakstema: Sakstemaer,
+    val behandlingstype: Set<Behandlingstyper>,
+    val behandlingstema: Set<Behandlingstema>,
+    val oppgave: Oppgave
+)
+
+internal data class Oppgave(
+    val oppgaveBehandlingstema: OppgaveBehandlingstema?,
     val tema: Tema,
-    val behandlingstemaCode: String,
-    val prioritet: PrioritetType
+    val oppgaveType: Oppgavetyper,
+    val beskrivelsefelt: Beskrivelsefelt,
+    val regelTruffet: Regel = Regel.FRA_TABELL
 )
 ```
 
@@ -48,13 +58,13 @@ data class GosysMappingRow(
 |-------|-------|
 | Sakstype | EU_EOS |
 | Sakstema | MEDLEMSKAP_LOVVALG |
-| Behandlingstema | LOVVALG |
-| Behandlingstype | FØRSTEGANG |
+| Behandlingstema | UTSENDT_ARBEIDSTAKER / ARBEID_FLERE_LAND / ARBEID_KUN_NORGE / … |
+| Behandlingstype | FØRSTEGANG / NY_VURDERING / ENDRET_PERIODE / KLAGE |
 | **Output** | |
-| Oppgavetype | BEH_SAK_MK |
-| Tema | MED |
-| Behandlingstema | ab0483 (EU_EOS_YRKESAKTIV) |
-| Prioritet | NORM |
+| oppgaveType | BEH_SAK_MK |
+| tema | MED |
+| oppgaveBehandlingstema | ab0483 (EU_EOS_YRKESAKTIV) |
+| beskrivelsefelt | BEHANDLINGSTEMA |
 
 ### Trygdeavtale Pensjonist
 
@@ -62,35 +72,38 @@ data class GosysMappingRow(
 |-------|-------|
 | Sakstype | TRYGDEAVTALE |
 | Sakstema | MEDLEMSKAP_LOVVALG |
-| Behandlingstema | PENSJON |
-| Behandlingstype | FØRSTEGANG |
+| Behandlingstema | PENSJONIST |
+| Behandlingstype | FØRSTEGANG / NY_VURDERING / KLAGE |
 | **Output** | |
-| Oppgavetype | BEH_SAK_MK |
-| Tema | MED |
-| Behandlingstema | ab0476 (AVTALAND_PENSJONIST) |
-| Prioritet | NORM |
+| oppgaveType | BEH_SAK_MK |
+| tema | MED |
+| oppgaveBehandlingstema | ab0476 (AVTALAND_PENSJONIST_ELLER_UFORETRYGDET) |
+| beskrivelsefelt | TOMT |
 
-### Anmodning Unntak
+### EU/EØS Anmodning om unntak
 
 | Input | Value |
 |-------|-------|
 | Sakstype | EU_EOS |
-| Sakstema | MEDLEMSKAP_LOVVALG |
-| Behandlingstema | LOVVALG |
-| Behandlingstype | * (any with anmodning) |
+| Sakstema | UNNTAK |
+| Behandlingstema | ANMODNING_OM_UNNTAK_HOVEDREGEL |
+| Behandlingstype | FØRSTEGANG (NY_VURDERING / KLAGE for re-vurdering) |
 | **Output** | |
-| Oppgavetype | BEH_SAK_MK |
-| Tema | MED |
-| Behandlingstema | ab0460 (ANMODNING_UNNTAK) |
-| Prioritet | NORM |
+| oppgaveType | BEH_SED |
+| tema | UFM |
+| oppgaveBehandlingstema | ab0491 (EU_EOS_SOKNAD_OM_UNNTAK) |
+| beskrivelsefelt | SED |
 
 ## Utleder Classes
 
 ### OppgavetypeUtleder
-Determines `oppgavetype` based on behandling characteristics:
+Determines `oppgaveType` by delegating to the mapping:
 ```kotlin
-class OppgavetypeUtleder {
-    fun utled(behandling: Behandling): Oppgavetyper
+class OppgavetypeUtleder(private val oppgaveGosysMapping: OppgaveGosysMapping = OppgaveGosysMapping()) {
+    fun utledOppgavetype(
+        sakstype: Sakstyper, sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema, behandlingstype: Behandlingstyper
+    ): Oppgavetyper = oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype).oppgaveType
 }
 ```
 
@@ -98,51 +111,48 @@ class OppgavetypeUtleder {
 Determines `tema` (MED, UFM, TRY):
 ```kotlin
 class OppgaveTemaUtleder {
-    fun utled(fagsak: Fagsak, behandling: Behandling): Tema
+    fun utledTema(
+        sakstype: Sakstyper, sakstema: Sakstemaer?,
+        behandlingstema: Behandlingstema, behandlingstype: Behandlingstyper
+    ): Tema
 }
 ```
 
 ### OppgaveBeskrivelseUtleder
-Derives task description from context:
-```kotlin
-class OppgaveBeskrivelseUtleder {
-    fun utled(behandling: Behandling): String
-}
-```
+Derives the task description (`utledBeskrivelse(...)`) from the resolved `beskrivelsefelt`
+and behandling context.
 
 ## Fallback Logic
 
-When no exact mapping found:
-1. Try without behandlingstype (wildcard)
-2. Try without behandlingstema
-3. Use default values
+`finnOppgaveOrNull` resolves in order:
+1. `finnOppgaveFraTabell` — exact match on sakstype + sakstema + behandlingstype ∈ set + behandlingstema ∈ set
+2. `finnOppgaveVedBehandlingstypeHenvendelseOgVirksomhet` — special-case VIRKSOMHET + HENVENDELSE
+3. `finnOppgaveVedBehandlingstypeHenvendelse` — HENVENDELSE matched on sakstype + behandlingstema
 
 ```kotlin
-fun finnMapping(sakstype, sakstema, behTema, behType): GosysMappingRow {
-    return rows.find { exact match }
-        ?: rows.find { match without behType }
-        ?: rows.find { match without behTema }
-        ?: defaultMapping
-}
+fun finnOppgaveOrNull(sakstype, sakstema, behandlingstema, behandlingstype): Oppgave? =
+    finnOppgaveFraTabell(sakstype, sakstema, behandlingstema, behandlingstype)
+        ?: finnOppgaveVedBehandlingstypeHenvendelseOgVirksomhet(sakstype, sakstema, behandlingstema, behandlingstype)
+        ?: finnOppgaveVedBehandlingstypeHenvendelse(sakstype, sakstema, behandlingstema, behandlingstype)
 ```
+
+`finnOppgave(...)` calls `finnOppgaveOrNull(...)` and throws `IllegalStateException` if nothing matches.
 
 ## Common Mapping Issues
 
 ### Unsupported Combination
-**Symptom**: `TekniskException: "Fant ikke mapping for ..."`
+**Symptom**: `IllegalStateException: "Fant ikke oppgave mapping for sakstype:… sakstema:… behandlingstema:… behandlingstype:…"`
 
-**Cause**: New sakstype/tema combination not in mapping table
+**Cause**: New sakstype/sakstema/behandlingstema/behandlingstype combination not in the `rows` table
 
-**Resolution**: Add row to OppgaveGosysMapping
+**Resolution**: Add a `TableRow` to `OppgaveGosysMapping` (regenerate from the Confluence table)
 
 ### Wrong Behandlingstema Code
 **Symptom**: Task appears in wrong Gosys queue
 
 **Investigation**:
 ```kotlin
-val mapping = OppgaveGosysMapping.finnMapping(
-    sakstype, sakstema, behTema, behType
-)
-log.info("Mapping: $mapping")
+val oppgave = OppgaveGosysMapping().finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype)
+log.info("oppgaveType=${oppgave.oppgaveType}, tema=${oppgave.tema}, behandlingstema=${oppgave.oppgaveBehandlingstema?.kode}")
 ```
 

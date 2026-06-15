@@ -63,13 +63,13 @@ service/kodeverk/
 
 ```kotlin
 // Get valid options
-val sakstyper = service.hentMuligeSakstyper()
+val sakstyper = service.hentMuligeSakstyper(saksnummer)
 val sakstemaer = service.hentMuligeSakstemaer(hovedpart, sakstype, saksnummer)
-val behandlingstemaer = service.hentMuligeBehandlingstemaer(...)
-val behandlingstyper = service.hentMuligeBehandlingstyper(...)
+val behandlingstemaer = service.hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, aktivBehandlingID, sistBehandlingstema)
+val behandlingstyper = service.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema)
 
-// Validate
-service.validerOpprettelseOgEndring(sakstype, sakstema, behType, behTema)
+// Validate (note param order: behandlingstema before behandlingstype)
+service.validerOpprettelseOgEndring(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype)
 ```
 
 ### Combination Structure
@@ -108,14 +108,18 @@ FTRL + TRYGDEAVGIFT → [VIRKSOMHET]
 | `ARBEID_FLERE_LAND` | Multi-state worker (Art. 13) |
 | `ARBEID_TJENESTEPERSON_ELLER_FLY` | Civil servant or flight crew |
 
-### Exception Handling (Art. 16)
+### Exceptions and Lovvalg Registrations
+
+(Only `ANMODNING_OM_UNNTAK_HOVEDREGEL` is the genuine Art. 16 exception request;
+the `REGISTRERING_UNNTAK_*` themes are lovvalg registrations — UTSTASJONERING under Art. 12,
+ØVRIGE under Art. 11/15.)
 
 | Tema | Description |
 |------|-------------|
-| `ANMODNING_OM_UNNTAK_HOVEDREGEL` | Exception request |
+| `ANMODNING_OM_UNNTAK_HOVEDREGEL` | Exception request (Art. 16) |
 | `REGISTRERING_UNNTAK` | Register exception |
-| `REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING` | Posting exception |
-| `REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE` | Other exception |
+| `REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING` | Posting registration (Art. 12) |
+| `REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE` | Other lovvalg registration (Art. 11/15) |
 
 ### Decision/Designation
 
@@ -150,7 +154,7 @@ FTRL + TRYGDEAVGIFT → [VIRKSOMHET]
 ### Second Treatment Rules
 After certain themes, only limited types allowed:
 ```kotlin
-val BEHANDLINGSTEMA_FOR_ANNENGANGS = setOf(
+val BEHANDLINGSTEMA_FOR_ANNENGANGS_BEHANDLING = setOf(
     REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
     REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
     BESLUTNING_LOVVALG_NORGE,
@@ -237,7 +241,7 @@ Kodeverk availability controlled by toggles:
 **Investigation**:
 ```kotlin
 // Check valid combinations
-val gyldige = service.hentMuligeBehandlingstemaer(sakstype, sakstema, ...)
+val gyldige = service.hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, aktivBehandlingID, sistBehandlingstema)
 log.info("Valid temaer: $gyldige")
 ```
 
@@ -254,3 +258,4 @@ log.info("Valid temaer: $gyldige")
 
 - **[Enums](references/enums.md)**: Complete enum reference
 - **[Combinations](references/combinations.md)**: Legal combination tables
+- **[Debugging](references/debugging.md)**: Troubleshooting invalid combinations, SQL queries, toggle checks

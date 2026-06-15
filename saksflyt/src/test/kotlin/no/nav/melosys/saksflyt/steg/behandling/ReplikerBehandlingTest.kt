@@ -198,6 +198,45 @@ class ReplikerBehandlingTest {
     }
 
     @Test
+    fun `utfør skal bruke OPPRINNELIG_BEH direkte når den er satt på prosessinstansen`() {
+        val avsluttetBehandling = Behandling.forTest {
+            id = 42L
+            status = Behandlingsstatus.AVSLUTTET
+        }
+
+        val replikertBehandling = Behandling.forTest {
+            id = 43L
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            type = Behandlingstyper.NY_VURDERING
+            fagsak = this@ReplikerBehandlingTest.fagsak
+        }
+
+        fagsak.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+
+        prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK
+            status = ProsessStatus.KLAR
+            medData(ProsessDataKey.SAKSNUMMER, FagsakTestFactory.SAKSNUMMER)
+            medData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.NY_VURDERING)
+            medData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD)
+            medData(ProsessDataKey.MOTTATT_DATO, LocalDate.now())
+            medData(ProsessDataKey.OPPRINNELIG_BEH, 42L)
+        }
+
+        every { behandlingService.hentBehandling(42L) } returns avsluttetBehandling
+        every { behandlingService.replikerBehandlingOgBehandlingsresultat(avsluttetBehandling, Behandlingstyper.NY_VURDERING) } returns replikertBehandling
+
+
+        replikerBehandling.utfør(prosessinstans)
+
+
+        verify { behandlingService.hentBehandling(42L) }
+        verify(exactly = 0) { behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(any()) }
+        verify { fagsakService.lagre(fagsak) }
+        prosessinstans.behandling shouldBe replikertBehandling
+    }
+
+    @Test
     fun `utfør skal kaste feil når behandlingsårsak er ikke satt`() {
         val behandling = Behandling.forTest {
             id = 1L

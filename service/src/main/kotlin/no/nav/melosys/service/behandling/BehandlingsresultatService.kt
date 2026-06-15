@@ -59,6 +59,9 @@ class BehandlingsresultatService(
         behandlingsresultatRepository.findById(behandlingsid)
             .orElseThrowIkkeFunnetException(behandlingsid)
 
+    fun finnÅrsavregningAar(behandlingsresultatId: Long): Int? =
+        behandlingsresultatRepository.finnÅrsavregningAar(behandlingsresultatId).getOrNull()
+
     fun hentBehandlingsresultatMedAnmodningsperioder(behandlingsid: Long): Behandlingsresultat =
         behandlingsresultatRepository.findWithAnmodningsperioderById(behandlingsid)
             .orElseThrowIkkeFunnetException(behandlingsid)
@@ -159,8 +162,8 @@ class BehandlingsresultatService(
 
     fun oppdaterFritekster(
         behandlingID: Long,
-        begrunnelseFritekst: String,
-        innledningFritekst: String,
+        begrunnelseFritekst: String?,
+        innledningFritekst: String?,
         trygdeavgiftFritekst: String?
     ): Behandlingsresultat = hentBehandlingsresultat(behandlingID).let { behandlingsresultat ->
         behandlingsresultat.begrunnelseFritekst = begrunnelseFritekst

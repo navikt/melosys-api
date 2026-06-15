@@ -4,37 +4,36 @@
 
 ### Find Task for Behandling
 ```sql
+-- behandling joins fagsak via the saksnummer FK (there is no fagsak_saksnummer column)
 SELECT b.id as behandling_id, b.oppgave_id, b.status, f.saksnummer
 FROM behandling b
-JOIN fagsak f ON f.saksnummer = b.fagsak_saksnummer
+JOIN fagsak f ON f.saksnummer = b.saksnummer
 WHERE b.id = :behandlingId;
 ```
 
 ### Find All Tasks for Case
-```sql
--- Note: Oppgave data is in external system, not local DB
--- Use OppgaveService to query
-oppgaveService.finnÅpneBehandlingsoppgaverMedSaksnummer("MEL-12345")
-oppgaveService.finnAvsluttetBehandlingsoppgaverMedSaksnummer("MEL-12345")
+```kotlin
+// Note: Oppgave data is in the external system, not local DB. Use OppgaveService.
+oppgaveService.finnÅpneBehandlingsoppgaverMedFagsaksnummer("MEL-12345")
+oppgaveService.finnSisteAvsluttetBehandlingsoppgaveMedFagsaksnummer("MEL-12345")
 ```
 
 ### Find Behandlinger Without Tasks
 ```sql
 SELECT b.id, b.status, f.saksnummer, b.oppgave_id
 FROM behandling b
-JOIN fagsak f ON f.saksnummer = b.fagsak_saksnummer
+JOIN fagsak f ON f.saksnummer = b.saksnummer
 WHERE b.oppgave_id IS NULL
-AND b.status NOT IN ('AVSLUTTET', 'LUKKET')
+AND b.status NOT IN ('AVSLUTTET')
 ORDER BY b.registrert_dato DESC;
 ```
 
 ### Find Saga Steps Related to Oppgave
 ```sql
-SELECT pi.id, pi.type, pi.sist_utforte_steg, pi.status
+-- prosessinstans columns: prosess_type, status, sist_fullfort_steg (steg renamed and antall_retry dropped in V7.1_01)
+SELECT pi.uuid, pi.prosess_type, pi.status, pi.sist_fullfort_steg
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId
-AND pi.sist_utforte_steg IN ('OPPRETT_OPPGAVE', 'GJENBRUK_OPPGAVE',
-    'OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT')
 ORDER BY pi.registrert_dato DESC;
 ```
 
@@ -51,7 +50,7 @@ TekniskException: "Fant flere åpne oppgaver for sak MEL-12345"
 
 **Investigation**:
 ```kotlin
-val oppgaver = oppgaveService.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer)
+val oppgaver = oppgaveService.finnÅpneBehandlingsoppgaverMedFagsaksnummer(saksnummer)
 log.info("Found ${oppgaver.size} open tasks: ${oppgaver.map { it.oppgaveId }}")
 ```
 
@@ -80,7 +79,7 @@ SELECT oppgave_id FROM behandling WHERE id = :behandlingId;
 ```kotlin
 // Verify task exists
 try {
-    oppgaveService.hentOppgave(oppgaveId)
+    oppgaveService.hentOppgaveMedOppgaveID(oppgaveId)
 } catch (e: IkkeFunnetException) {
     log.error("Task not found in Oppgave system")
 }
@@ -105,8 +104,8 @@ log.info("Barn med beskyttelse: $barnMedBeskyttelse")
 ```
 
 **Expected routing**:
-- Sensitive → NAV Viken (2103)
-- Standard → Melosys (4863)
+- Sensitive → NAV Viken (2103, `Konstanter.NAV_VIKEN_ENHET_ID`)
+- Standard → Melosys / NAV Medlemskap og avgift (4530, `Konstanter.MELOSYS_ENHET_ID`)
 
 ### Issue: Task Reuse Not Working
 
@@ -115,7 +114,7 @@ log.info("Barn med beskyttelse: $barnMedBeskyttelse")
 **Investigation**:
 ```kotlin
 // Check existing open tasks
-val eksisterende = oppgaveService.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer)
+val eksisterende = oppgaveService.finnÅpneBehandlingsoppgaverMedFagsaksnummer(saksnummer)
 log.info("Existing open tasks: ${eksisterende.size}")
 
 // Check if ÅRSAVREGNING (always new task)
@@ -148,12 +147,12 @@ SELECT id, behandlingsfrist FROM behandling WHERE id = :behandlingId;
 
 **Investigation**:
 ```kotlin
-// Check mapping
-val mapping = OppgaveGosysMapping.finnMapping(
-    fagsak.type, fagsak.tema, behandling.tema, behandling.type
+// Check mapping (returns an internal OppgaveGosysMapping.Oppgave)
+val oppgave = OppgaveGosysMapping().finnOppgave(
+    fagsak.sakstype, fagsak.sakstema, behandling.behandlingstema, behandling.behandlingstype
 )
-log.info("Mapping result: oppgavetype=${mapping.oppgavetype}, " +
-    "tema=${mapping.tema}, behandlingstema=${mapping.behandlingstemaCode}")
+log.info("Mapping result: oppgaveType=${oppgave.oppgaveType}, " +
+    "tema=${oppgave.tema}, behandlingstema=${oppgave.oppgaveBehandlingstema?.kode}")
 ```
 
 ## Log Patterns
@@ -170,13 +169,13 @@ grep "opprettOppgave\|opprettEllerGjenbruk" application.log
 grep "oppdaterOppgave\|ferdigstillOppgave" application.log
 ```
 
-### Oppgave Consumer (REST calls)
+### Oppgave Client (REST calls)
 ```bash
 # REST calls to Oppgave API
-grep "OppgaveConsumer" application.log
+grep "OppgaveClient" application.log
 
 # Errors
-grep "OppgaveConsumer" application.log | grep -i "error\|exception"
+grep "OppgaveClient" application.log | grep -i "error\|exception"
 ```
 
 ### Saga Steps
@@ -188,19 +187,19 @@ grep "OpprettOppgave\|GjenbrukOppgave" application.log
 
 | Component | Location |
 |-----------|----------|
-| Main Service | `service/.../oppgave/OppgaveService.kt` |
+| Service facade | `service/.../oppgave/OppgaveService.kt` |
 | Task Factory | `service/.../oppgave/OppgaveFactory.kt` |
 | Gosys Mapping | `service/.../oppgave/OppgaveGosysMapping.kt` |
-| REST Consumer | `integrasjon/.../oppgave/OppgaveConsumer.kt` |
-| Facade | `integrasjon/.../oppgave/OppgaveFasadeImpl.java` |
-| Domain | `domain/.../Oppgave.kt` |
-| Saga Steps | `saksflyt/.../steg/oppgave/` |
+| REST Client | `integrasjon/.../oppgave/konsument/OppgaveClient.java` |
+| Integration Fasade | `integrasjon/.../oppgave/OppgaveFasadeImpl.java` |
+| Domain | `domain/.../oppgave/Oppgave.java` |
+| Saga Steps | `saksflyt/.../steg/oppgave/` (OpprettOppgave, GjenbrukOppgave, …) |
 
 ## Manual Operations
 
 ### Fetch Task
 ```kotlin
-val oppgave = oppgaveService.hentOppgave(oppgaveId)
+val oppgave = oppgaveService.hentOppgaveMedOppgaveID(oppgaveId)
 ```
 
 ### Complete Task Manually
@@ -215,7 +214,9 @@ oppgaveService.tildelOppgave(oppgaveId, nySaksbehandlerId)
 
 ### Return Task to Pool
 ```kotlin
-oppgaveService.leggTilbakeOppgave(oppgaveId)
+// Service layer works on a case; the integration fasade unassigns by oppgaveId
+oppgaveService.leggTilbakeBehandlingsoppgaveMedSaksnummer(saksnummer)
+oppgaveFasade.leggTilbakeOppgave(oppgaveId)
 ```
 
 ## Oppgave API Endpoints

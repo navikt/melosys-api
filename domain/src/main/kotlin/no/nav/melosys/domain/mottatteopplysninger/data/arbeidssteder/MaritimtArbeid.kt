@@ -15,4 +15,8 @@ class MaritimtArbeid {
 
     @JsonProperty("territorialfarvann")
     var territorialfarvannLandkode: String? = null
+
+    fun landkode(): String? = innretningLandkode ?: territorialfarvannLandkode ?: flaggLandkode
+
+    fun harLandkode(): Boolean = landkode() != null
 }

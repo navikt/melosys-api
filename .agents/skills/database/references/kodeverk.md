@@ -95,6 +95,21 @@ FORESPØRSEL_TRYGDEMYNDIGHET       - Authority inquiry
 ØVRIGE_SED_UFM                    - Other SED - exception
 ```
 
+## Treatment Reasons
+
+### BEHANDLINGSAARSAK_TYPE
+```
+SØKNAD                          - Application
+SED                             - SED document received
+HENVENDELSE                     - Inquiry
+FRITEKST                        - Free-text reason
+ANNET                           - Other
+MELDING_OM_MANGLENDE_INNBETALING - Missing payment notice
+MELDING_FRA_SKATT               - Notice from Skatteetaten
+ÅRLIG_SATSOPPDATERING           - Annual rate update
+AUTOMATISK_OPPRETTELSE          - Automatically created (V140)
+```
+
 ## Actor Roles
 
 ### ROLLE_TYPE
@@ -140,7 +155,7 @@ IKKE_FASTSATT                     - Not determined
 
 ## Process Types
 
-### PROSESS_TYPE (partial list of 47 types)
+### PROSESS_TYPE (partial list)
 ```
 -- Journalføring (document registration)
 JFR_NY_SAK_BRUKER                 - New case from document
@@ -169,6 +184,10 @@ REGISTRERING_UNNTAK_NY_SAK        - Register exception new case
 REGISTRERING_UNNTAK_GODKJENN      - Approve exception
 REGISTRERING_UNNTAK_AVVIS         - Reject exception
 
+-- Digital søknad-mottak (V147, V152) — from melosys-skjema-api
+MELOSYS_MOTTAK_DIGITAL_SØKNAD               - Receive digital application (new sak)
+MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD  - Receive digital application (existing sak)
+
 -- Other
 OPPRETT_SAK                       - Create case
 HENLEGG_SAK                       - Dismiss case
@@ -177,6 +196,29 @@ SEND_BREV                         - Send letter
 OPPRETT_OG_DISTRIBUER_BREV        - Create and distribute letter
 SATSENDRING                       - Rate change processing
 ```
+
+### PROSESS_STEG (selected — added in V144–V152)
+```
+-- Digital søknad (V147 → renamed in V152 to *_DIGITAL_SØKNAD)
+HENT_DIGITAL_SØKNADSDATA                              - Fetch application data
+OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD              - Create sak + behandling
+OPPRETT_OG_FERDIGSTILL_JOURNALPOST_DIGITAL_SØKNAD     - Create + finalize journalpost
+HÅNDTER_EKSISTERENDE_SAK_DIGITAL_SØKNAD               - Attach to existing sak (V152)
+SEND_SAKSNUMMER_TIL_MELOSYS_SKJEMA_API                - Echo saksnummer back (V152)
+
+-- Personopplysninger / saksopplysninger
+LAGRE_PERSONOPPLYSNINGER                              - Save person data as saksopplysning (V144)
+
+-- Årsavregning
+OPPRETTE_AARSAVREGNING_ENDRING                        - Auto-create when membership changes back in time (V145)
+AVSLUTT_AARSAVREGNINGER                               - Close open reconciliations on annulment (V150)
+VARSLE_PENSJONSOPPTJENING                             - Notify pension accrual (V141)
+```
+
+> **Renaming PROSESS_STEG codes:** Oracle has no ON UPDATE CASCADE, and
+> `PROSESSINSTANS.SIST_FULLFORT_STEG` + `PROSESSINSTANS_HENDELSER.STEG` are
+> FK to `PROSESS_STEG(KODE)`. Pattern (see V152, established by V147→V152):
+> INSERT new code → UPDATE child rows → DELETE old code, in that order.
 
 ## Usage Examples
 

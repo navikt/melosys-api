@@ -4,14 +4,15 @@
 
 ### Find All Trygdeavgiftsperioder for a Person
 ```sql
-SELECT t.*, mp.periode_fra as mp_fra, mp.periode_til as mp_til,
+SELECT t.*, mp.fom_dato as mp_fra, mp.tom_dato as mp_til,
        f.saksnummer, b.id as behandling_id, b.status
 FROM trygdeavgiftsperiode t
-JOIN medlemskapsperiode mp ON t.grunnlag_medlemskapsperiode_id = mp.id
-JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.id
+JOIN medlemskapsperiode mp ON t.medlemskapsperiode_id = mp.id
+JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE f.bruker_aktor_id = :aktorId
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+JOIN aktoer a ON a.saksnummer = f.saksnummer AND a.rolle = 'BRUKER'
+WHERE a.aktoer_id = :aktorId
 ORDER BY t.periode_fra DESC;
 ```
 
@@ -20,59 +21,55 @@ ORDER BY t.periode_fra DESC;
 SELECT t.id, t.periode_fra, t.periode_til,
        t.trygdeavgift_beloep_mnd_verdi as mnd_beloep,
        t.trygdesats,
-       s.skatteplikttype, s.skattepliktig_til_norge,
-       i.avgiftspliktig_mnd_inntekt_verdi as inntekt,
-       i.arbeidsgiversavgift_betales_til_skatt
+       s.skatteplikt_type,
+       i.avgiftspliktig_inntekt_mnd_verdi as inntekt,
+       i.aga_betales_til_skatt
 FROM trygdeavgiftsperiode t
-JOIN skatteforhold_til_norge s ON t.grunnlag_skatteforhold_id = s.id
-JOIN inntektsperiode i ON t.grunnlag_inntektsperiode_id = i.id
+JOIN skatteforhold_til_norge s ON t.skatteforhold_id = s.id
+JOIN inntektsperiode i ON t.inntektsperiode_id = i.id
 WHERE t.id = :trygdeavgiftsperiodeId;
 ```
 
 ### Check Fakturaserie Status
 ```sql
-SELECT br.fakturaserie_referanse, br.id as br_id,
+SELECT br.fakturaserie_referanse, br.behandling_id as br_id,
        b.id as behandling_id, b.status as beh_status,
        f.saksnummer, f.betalingsvalg
 FROM behandlingsresultat br
 JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE br.fakturaserie_referanse = :referanse;
 ```
 
 ### Find Årsavregning History
 ```sql
-SELECT aa.id, aa.aar, aa.beregnet_avgift_belop,
+SELECT aa.aar, aa.beregnet_avgift_belop,
        aa.manuelt_avgift_beloep, aa.endelig_avgift_valg,
-       aa.har_trygdeavgift_fra_avgiftssystemet,
-       aa.trygdeavgift_fra_avgiftssystemet,
-       b.id as behandling_id, b.status, b.type
+       aa.tidligere_fakturert_beloep, aa.innbetalt_trygdeavgift,
+       aa.til_fakturering_beloep,
+       b.id as behandling_id, b.status, b.beh_type
 FROM aarsavregning aa
-JOIN behandlingsresultat br ON aa.behandlingsresultat_id = br.id
+JOIN behandlingsresultat br ON aa.behandlingsresultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE f.saksnummer = :saksnummer
 ORDER BY aa.aar DESC, b.registrert_dato DESC;
 ```
 
 ### Check Manglende Innbetaling Prosess
 ```sql
-SELECT pi.id, pi.type, pi.status, pi.sist_utforte_steg,
+SELECT pi.uuid, pi.prosess_type, pi.status, pi.sist_fullfort_steg,
        pi.data, pi.registrert_dato, pi.endret_dato
 FROM prosessinstans pi
-WHERE pi.type = 'OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING'
+WHERE pi.prosess_type = 'OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING'
 AND pi.data LIKE '%"fakturaserieReferanse":":referanse"%'
 ORDER BY pi.registrert_dato DESC;
 ```
 
 ### Find Skattehendelser
-```sql
-SELECT sh.id, sh.fnr, sh.skatteoppgjoer_dato, sh.inntekts_aar,
-       sh.status, sh.registrert_dato
-FROM skattehendelse sh
-WHERE sh.fnr = :fnr
-ORDER BY sh.registrert_dato DESC;
-```
+Skattehendelser are not persisted in the melosys-api database. They are consumed from Kafka by
+`SkattehendelserConsumer.lesSkattehendelser()` and stored in the separate melosys-skattehendelser
+service — inspect them there (or on the Kafka topic), not via a melosys-api table.
 
 ## Common Issues and Solutions
 
@@ -89,12 +86,13 @@ ORDER BY sh.registrert_dato DESC;
 4. Verify melosys-trygdeavgift-beregning service is accessible
 
 ```sql
--- Check grunnlag exists
-SELECT mp.id, mp.trygdedekning,
-       (SELECT COUNT(*) FROM skatteforhold_til_norge s
-        WHERE s.medlemskapsperiode_id = mp.id) as skatteforhold_count,
-       (SELECT COUNT(*) FROM inntektsperiode i
-        WHERE i.medlemskapsperiode_id = mp.id) as inntekt_count
+-- Check grunnlag exists. skatteforhold_til_norge and inntektsperiode have no FK to
+-- medlemskapsperiode; they are linked via trygdeavgiftsperiode (skatteforhold_id / inntektsperiode_id).
+SELECT mp.id, mp.trygde_dekning,
+       (SELECT COUNT(*) FROM trygdeavgiftsperiode t
+        WHERE t.medlemskapsperiode_id = mp.id AND t.skatteforhold_id IS NOT NULL) as skatteforhold_count,
+       (SELECT COUNT(*) FROM trygdeavgiftsperiode t
+        WHERE t.medlemskapsperiode_id = mp.id AND t.inntektsperiode_id IS NOT NULL) as inntekt_count
 FROM medlemskapsperiode mp
 WHERE mp.behandlingsresultat_id = :behandlingsresultatId;
 ```
@@ -114,13 +112,13 @@ WHERE mp.behandlingsresultat_id = :behandlingsresultatId;
 ```sql
 -- Calculate expected avgift
 SELECT t.periode_fra, t.periode_til,
-       i.avgiftspliktig_mnd_inntekt_verdi as inntekt,
+       i.avgiftspliktig_inntekt_mnd_verdi as inntekt,
        t.trygdesats,
        t.trygdeavgift_beloep_mnd_verdi as faktisk_beloep,
-       (i.avgiftspliktig_mnd_inntekt_verdi * t.trygdesats / 100) as forventet_beloep
+       (i.avgiftspliktig_inntekt_mnd_verdi * t.trygdesats / 100) as forventet_beloep
 FROM trygdeavgiftsperiode t
-JOIN inntektsperiode i ON t.grunnlag_inntektsperiode_id = i.id
-WHERE t.grunnlag_medlemskapsperiode_id IN (
+JOIN inntektsperiode i ON t.inntektsperiode_id = i.id
+WHERE t.medlemskapsperiode_id IN (
     SELECT id FROM medlemskapsperiode
     WHERE behandlingsresultat_id = :behandlingsresultatId
 );
@@ -139,11 +137,11 @@ WHERE t.grunnlag_medlemskapsperiode_id IN (
 
 ```sql
 -- Find all fakturaserie for case
-SELECT br.fakturaserie_referanse, b.id, b.type, b.status,
+SELECT br.fakturaserie_referanse, b.id, b.beh_type, b.status,
        b.registrert_dato, b.endret_dato
 FROM behandlingsresultat br
 JOIN behandling b ON br.behandling_id = b.id
-WHERE b.fagsak_id = :fagsakId
+WHERE b.saksnummer = :saksnummer
 AND br.fakturaserie_referanse IS NOT NULL
 ORDER BY b.registrert_dato;
 ```
@@ -160,17 +158,13 @@ ORDER BY b.registrert_dato;
 3. Check for active behandling blocking
 
 ```sql
--- Check if skattehendelse exists and status
-SELECT sh.*, f.saksnummer
-FROM skattehendelse sh
-JOIN fagsak f ON sh.fagsak_id = f.id
-WHERE f.saksnummer = :saksnummer
-AND sh.inntekts_aar = :year;
+-- Skattehendelser are not stored in melosys-api (see "Find Skattehendelser" above) —
+-- check the melosys-skattehendelser service / Kafka instead.
 
 -- Check for blocking active behandling
-SELECT b.id, b.type, b.status
+SELECT b.id, b.beh_type, b.status
 FROM behandling b
-WHERE b.fagsak_id = :fagsakId
+WHERE b.saksnummer = :saksnummer
 AND b.status NOT IN ('AVSLUTTET');
 ```
 
@@ -178,16 +172,18 @@ AND b.status NOT IN ('AVSLUTTET');
 
 **Symptoms:**
 - Fakturaserie created but no invoice
-- FaktureringskomponentenConsumer errors
+- FaktureringskomponentenClient errors
 
 **Investigation:**
 1. Check faktureringskomponenten logs
 2. Verify fakturaserie payload
-3. Check OEBS status via faktureringskomponenten API
+3. Check total via faktureringskomponenten API
 
 ```kotlin
-// Check via FaktureringskomponentenConsumer
-faktureringskomponentenConsumer.hentFakturaserie(referanse)
+// FaktureringskomponentenClient (integrasjon module) exposes:
+//   lagFakturaserie, kansellerFakturaserie, oppdaterFakturaMottaker,
+//   hentTotalTrygdeavgiftForPeriode, lagFaktura
+faktureringskomponentenClient.hentTotalTrygdeavgiftForPeriode(...)
 ```
 
 ## Log Patterns to Search
@@ -199,7 +195,7 @@ grep "TrygdeavgiftsberegningService" app.log | grep -i "error\|exception"
 
 ### Fakturering Issues
 ```
-grep "FaktureringskomponentenConsumer" app.log | grep -i "error\|failed"
+grep "FaktureringskomponentenClient" app.log | grep -i "error\|failed"
 grep "OPPRETT_FAKTURASERIE" app.log
 ```
 
@@ -216,6 +212,6 @@ grep "SkattehendelserConsumer" app.log
 | `TrygdeavgiftsberegningService` | Calculate avgift | `beregnOgLagreTrygdeavgift()` |
 | `TrygdeavgiftService` | Query avgift state | `harFakturerbarTrygdeavgift()` |
 | `ÅrsavregningService` | Annual reconciliation | `opprettÅrsavregning()` |
-| `FaktureringskomponentenConsumer` | OEBS integration | `opprettFakturaserie()` |
-| `ManglendeFakturabetalingConsumer` | Handle unpaid | `handleMessage()` |
-| `SkattehendelserConsumer` | Tax events | `handleMessage()` |
+| `FaktureringskomponentenClient` | OEBS integration (integrasjon module) | `lagFakturaserie()` |
+| `ManglendeFakturabetalingConsumer` | Handle unpaid | `lesManglendeFakturabetalingMelding()` |
+| `SkattehendelserConsumer` | Tax events | `lesSkattehendelser()` |

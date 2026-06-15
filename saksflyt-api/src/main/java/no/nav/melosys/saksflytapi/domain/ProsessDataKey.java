@@ -81,7 +81,8 @@ public enum ProsessDataKey {
     GJELDER_ÅR("gjelderÅr"),
     IDENTIFIKATOR("identifikator"),
     ÅRSAK_TYPE("årsakType"),
-    OPPRINNELIG_BEH("opprinneligBeh");
+    OPPRINNELIG_BEH("opprinneligBeh"),
+    SEND_INNHENTINGSBREV("sendInnhentingsbrev");
 
     private final String kode;
 

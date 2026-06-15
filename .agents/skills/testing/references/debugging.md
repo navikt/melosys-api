@@ -59,20 +59,13 @@ println(embeddedKafkaBroker.brokersAsString)
 @Import(KafkaTestConfig::class, KodeverkTestConfig::class)
 ```
 
-### 5. Database Cleanup Failure
+### 5. Stale data between tests
 
-**Symptom**: Constraint violations or stale data
+**Symptom**: A test sees data created by a previous test
 
-**Cause**: Cleanup order wrong or missing
+**Cause**: The test is not an integration test extending `OracleTestContainerBase`, so the automatic `@BeforeEach truncateAllTables()` does not run
 
-**Solution**:
-```kotlin
-// Add cleanup in correct order (child before parent)
-addCleanUpAction {
-    deleteBehandling(behandlingId)
-    deleteFagsak(fagsakId)
-}
-```
+**Solution**: Integration tests get a clean DB automatically — `OracleTestContainerBase.truncateAllTables()` truncates all test-data tables before each test (FK constraints are disabled/re-enabled around the truncate). Make sure your `*IT.kt` extends `ComponentTestBase` / `MockServerTestBaseWithProsessManager` (or another subclass of `OracleTestContainerBase`) so it inherits this behavior. There is no per-test cleanup to register.
 
 ### 6. Feature Toggle Not Working
 
@@ -109,8 +102,8 @@ await.atMost(Duration.ofSeconds(10)).until {
 // Use @DirtiesContext for context isolation
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 
-// Use KafkaOffsetChecker for Kafka
-kafkaOffsetChecker.waitForConsumerToCatchUp(topic, groupId, timeout)
+// Use KafkaOffsetChecker for Kafka: returns how much the committed offset grew
+kafkaOffsetChecker.offsetIncreased(topic, groupId) { /* send + await processing */ }
 ```
 
 ## Test Execution Commands
@@ -180,7 +173,8 @@ val fagsak = Fagsak().apply {
 }
 fagsakRepository.save(fagsak)
 
-addCleanUpAction { deleteFagsak(fagsak.id) }
+// No cleanup needed — truncateAllTables() (@BeforeEach in OracleTestContainerBase)
+// empties this table before the next test.
 ```
 
 ## Mock Configuration
@@ -199,11 +193,16 @@ companion object {
 
 ### MockVerificationClient
 
-```kotlin
-// Verify endpoint was called
-mockVerificationClient.verify("/api/endpoint", expectedCallCount = 1)
+The client exposes domain queries against melosys-mock (not a generic `verify(path, count)`):
 
-// Clear mock state
+```kotlin
+// Query what was sent to the mock
+mockVerificationClient.sakCount()                 // Int
+mockVerificationClient.sedForRinaSak("123456")    // List<String> of SED types
+mockVerificationClient.medl()                     // medlemskapsunntak sent to MEDL
+mockVerificationClient.oppgaver()                 // tasks created in Oppgave
+
+// Clear mock state (ComponentTestBase already does this in @BeforeEach)
 mockVerificationClient.clear()
 ```
 

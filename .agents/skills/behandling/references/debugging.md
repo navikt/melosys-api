@@ -24,15 +24,15 @@
 SELECT
     b.id as behandling_id,
     b.status as behandling_status,
-    b.type as behandlingstype,
-    b.tema as behandlingstema,
+    b.beh_type as behandlingstype,
+    b.beh_tema as behandlingstema,
     b.registrert_dato,
     b.endret_dato,
     f.saksnummer,
     f.status as fagsak_status,
-    f.type as sakstype
+    f.fagsak_type as sakstype
 FROM behandling b
-JOIN fagsak f ON b.fagsak_id = f.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE b.id = :behandlingId;
 ```
 
@@ -43,7 +43,7 @@ WHERE b.id = :behandlingId;
 ```sql
 SELECT b.*, f.saksnummer
 FROM behandling b
-JOIN fagsak f ON b.fagsak_id = f.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE f.saksnummer = :saksnummer
 ORDER BY b.registrert_dato DESC;
 ```
@@ -51,19 +51,21 @@ ORDER BY b.registrert_dato DESC;
 ### Find All Behandlinger for Person
 
 ```sql
-SELECT b.id, b.status, b.type, b.tema, b.registrert_dato, f.saksnummer
+-- The actor (aktoer_id) is stored in the aktoer table, joined on saksnummer.
+SELECT b.id, b.status, b.beh_type, b.beh_tema, b.registrert_dato, f.saksnummer
 FROM behandling b
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE f.bruker_aktor_id = :aktorId
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+JOIN aktoer a ON a.saksnummer = f.saksnummer AND a.rolle = 'BRUKER'
+WHERE a.aktoer_id = :aktorId
 ORDER BY b.registrert_dato DESC;
 ```
 
 ### Find Active Behandlinger
 
 ```sql
-SELECT b.id, b.status, b.type, f.saksnummer, b.endret_dato
+SELECT b.id, b.status, b.beh_type, f.saksnummer, b.endret_dato
 FROM behandling b
-JOIN fagsak f ON b.fagsak_id = f.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE b.status NOT IN ('AVSLUTTET')
 ORDER BY b.endret_dato DESC
 FETCH FIRST 50 ROWS ONLY;
@@ -75,7 +77,7 @@ FETCH FIRST 50 ROWS ONLY;
 SELECT b.id, f.saksnummer, b.endret_dato,
        ROUND((SYSDATE - b.endret_dato) * 24, 2) as hours_stuck
 FROM behandling b
-JOIN fagsak f ON b.fagsak_id = f.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE b.status = 'IVERKSETTER_VEDTAK'
 AND b.endret_dato < SYSDATE - INTERVAL '1' HOUR
 ORDER BY b.endret_dato ASC;
@@ -84,11 +86,13 @@ ORDER BY b.endret_dato ASC;
 ### Check Behandling with Related Data
 
 ```sql
+-- behandlingsresultat PK is behandling_id (no separate id).
+-- Most period tables reference it via beh_resultat_id, but medlemskapsperiode uses behandlingsresultat_id.
 SELECT
-    b.id, b.status, b.type, b.tema,
-    br.id as resultat_id, br.type as resultat_type,
-    (SELECT COUNT(*) FROM medlemskapsperiode mp WHERE mp.behandlingsresultat_id = br.id) as medlemskapsperioder,
-    (SELECT COUNT(*) FROM lovvalgsperiode lp WHERE lp.behandlingsresultat_id = br.id) as lovvalgsperioder
+    b.id, b.status, b.beh_type, b.beh_tema,
+    br.behandling_id as resultat_behandling_id, br.resultat_type,
+    (SELECT COUNT(*) FROM medlemskapsperiode mp WHERE mp.behandlingsresultat_id = br.behandling_id) as medlemskapsperioder,
+    (SELECT COUNT(*) FROM lovvalg_periode lp WHERE lp.beh_resultat_id = br.behandling_id) as lovvalgsperioder
 FROM behandling b
 LEFT JOIN behandlingsresultat br ON br.behandling_id = b.id
 WHERE b.id = :behandlingId;
@@ -97,7 +101,8 @@ WHERE b.id = :behandlingId;
 ### Check Prosessinstanser for Behandling
 
 ```sql
-SELECT p.id, p.type, p.status, p.sist_utforte_steg,
+-- progress = status + sist_fullfort_steg (last completed step). PK is uuid.
+SELECT p.uuid, p.prosess_type, p.status, p.sist_fullfort_steg,
        p.registrert_dato, p.endret_dato
 FROM prosessinstans p
 WHERE p.behandling_id = :behandlingId
@@ -107,26 +112,31 @@ ORDER BY p.registrert_dato DESC;
 ### Find Oppgave for Behandling
 
 ```sql
-SELECT o.id, o.oppgave_id, o.type, o.status
-FROM oppgave o
-WHERE o.behandling_id = :behandlingId;
+-- There is no oppgave table; the Gosys oppgave reference is the oppgave_id column on behandling.
+SELECT b.id, b.oppgave_id
+FROM behandling b
+WHERE b.id = :behandlingId;
 ```
 
-### Check Version/Audit Trail
+### Check Status History (behandling_dvh)
 
 ```sql
-SELECT * FROM behandling_aud
-WHERE id = :behandlingId
-ORDER BY rev DESC
+-- There is no behandling_historikk or Envers behandling_aud table; the live audit
+-- trail for status changes is the data-warehouse mirror behandling_dvh.
+SELECT trans_id, behandling_id, status, beh_type, resultat_type,
+       funksjonell_tid, registrert_av, dml_flagg
+FROM behandling_dvh
+WHERE behandling_id = :behandlingId
+ORDER BY trans_tid DESC
 FETCH FIRST 10 ROWS ONLY;
 ```
 
 ### Find Behandlinger Created Today
 
 ```sql
-SELECT b.id, b.status, b.type, b.tema, f.saksnummer, b.registrert_dato
+SELECT b.id, b.status, b.beh_type, b.beh_tema, f.saksnummer, b.registrert_dato
 FROM behandling b
-JOIN fagsak f ON b.fagsak_id = f.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE TRUNC(b.registrert_dato) = TRUNC(SYSDATE)
 ORDER BY b.registrert_dato DESC;
 ```
@@ -139,11 +149,11 @@ ORDER BY b.registrert_dato DESC;
 
 **Investigation**:
 ```sql
--- Check prosessinstans status
-SELECT p.id, p.type, p.status, p.sist_utforte_steg
+-- Check prosessinstans progress (status + sist_fullfort_steg)
+SELECT p.uuid, p.prosess_type, p.status, p.sist_fullfort_steg
 FROM prosessinstans p
 WHERE p.behandling_id = :behandlingId
-AND p.type LIKE 'IVERKSETT_VEDTAK%';
+AND p.prosess_type LIKE 'IVERKSETT_VEDTAK%';
 ```
 
 **Possible Causes**:
@@ -162,10 +172,10 @@ AND p.type LIKE 'IVERKSETT_VEDTAK%';
 
 **Investigation**:
 ```sql
--- Check for active behandling
-SELECT b.id, b.status, b.type
+-- Check for active behandling on the same fagsak (joined via saksnummer)
+SELECT b.id, b.status, b.beh_type
 FROM behandling b
-WHERE b.fagsak_id = (SELECT fagsak_id FROM behandling WHERE id = :behandlingId)
+WHERE b.saksnummer = (SELECT saksnummer FROM behandling WHERE id = :behandlingId)
 AND b.status NOT IN ('AVSLUTTET');
 ```
 
@@ -184,7 +194,7 @@ AND b.status NOT IN ('AVSLUTTET');
 
 **Investigation**:
 ```sql
-SELECT b.id, br.id as resultat_id
+SELECT b.id, br.behandling_id as resultat_behandling_id, br.resultat_type
 FROM behandling b
 LEFT JOIN behandlingsresultat br ON br.behandling_id = b.id
 WHERE b.id = :behandlingId;
@@ -205,10 +215,12 @@ WHERE b.id = :behandlingId;
 
 **Investigation**:
 ```sql
--- Check audit trail
-SELECT * FROM behandling_aud
-WHERE id = :behandlingId
-ORDER BY rev DESC;
+-- Check the status-change history (data-warehouse mirror; no behandling_historikk table)
+SELECT trans_id, behandling_id, status, beh_type, resultat_type,
+       funksjonell_tid, registrert_av, dml_flagg
+FROM behandling_dvh
+WHERE behandling_id = :behandlingId
+ORDER BY trans_tid DESC;
 ```
 
 **Possible Causes**:
@@ -228,7 +240,9 @@ ORDER BY rev DESC;
 ```kotlin
 // Check these conditions
 behandling.erRedigerbar()
-// Returns false if status in [AVSLUTTET, IVERKSETTER_VEDTAK, MIDLERTIDIG_LOVVALGSBESLUTNING]
+// false when erInaktiv() (status AVSLUTTET or MIDLERTIDIG_LOVVALGSBESLUTNING),
+// or status == IVERKSETTER_VEDTAK,
+// or (status == ANMODNING_UNNTAK_SENDT && tema != IKKE_YRKESAKTIV)
 ```
 
 **Possible Causes**:
@@ -242,23 +256,21 @@ behandling.erRedigerbar()
 
 ## Log Patterns
 
-### Behandling Creation
-```
-INFO  JournalføringService - Oppretter ny sak og behandling for journalpost {}
-INFO  BehandlingService - Opprettet behandling {} for fagsak {}
-```
-
 ### Status Changes
 ```
-INFO  BehandlingService - Endrer status på behandling {} fra {} til {}
-INFO  BehandlingEventListener - BehandlingEndretStatusEvent: {} -> {}
+# BehandlingService.endreStatus
+INFO  BehandlingService - Oppdaterer status for behandling {} fra {} til {}
+# BehandlingService.endreType / endreTema
+INFO  BehandlingService - Endrer behandlingstypen for behandling {} fra {} til {}
+INFO  BehandlingService - Endrer behandlingstema for behandling {} fra {} til {}
 ```
+Status changes also publish a `BehandlingEndretStatusEvent`, handled by `BehandlingEventListener`.
 
 ### Errors
 ```
-ERROR BehandlingService - Kunne ikke endre status: {}
-ERROR FunksjonellException - Det finnes allerede en aktiv behandling
-WARN  BehandlingService - Behandling {} er ikke redigerbar
+# Thrown as FunksjonellException from BehandlingService
+"Behandlingen må være aktiv for å kunne endres. Status var: {}"
+"Behandling {} er allerede avsluttet!"
 ```
 
 ### Search Patterns
@@ -281,15 +293,16 @@ level: ERROR AND behandling_id: {id}
 ```sql
 SELECT * FROM prosessinstans
 WHERE behandling_id = :behandlingId
-AND type LIKE 'IVERKSETT_VEDTAK%';
+AND prosess_type LIKE 'IVERKSETT_VEDTAK%';
 ```
 
-2. If saga FEILET: Restart via admin
+2. If the saga has stalled (status FEILET, or stuck on a sist_fullfort_steg): Restart via admin
 ```
-POST /api/admin/prosessinstanser/{id}/restart
+POST /admin/prosessinstanser/restart        (body: {"uuids": ["<uuid>"]})
+POST /admin/prosessinstanser/feilede/restart (restart all failed)
 ```
 
-3. If saga stuck UNDER_BEHANDLING for >2h: Check for external service issues, restart
+3. If the saga has not advanced its sist_fullfort_steg for >2h: Check for external service issues, restart
 
 4. If no saga but status is IVERKSETTER_VEDTAK:
 ```sql
@@ -300,8 +313,8 @@ UPDATE behandling SET status = 'UNDER_BEHANDLING' WHERE id = :id;
 ### Create Missing Behandlingsresultat
 
 ```kotlin
-// Via service (preferred)
-behandlingsresultatService.opprettForBehandling(behandlingId)
+// Via service (preferred) - creates a fresh IKKE_FASTSATT result for the behandling
+behandlingsresultatService.lagreNyttBehandlingsresultat(behandling)
 ```
 
 ### Reset Behandling to Active
@@ -327,10 +340,10 @@ WHERE id = :behandlingId;
 
 UPDATE fagsak
 SET status = 'AVSLUTTET'
-WHERE id = (SELECT fagsak_id FROM behandling WHERE id = :behandlingId)
+WHERE saksnummer = (SELECT saksnummer FROM behandling WHERE id = :behandlingId)
 AND NOT EXISTS (
     SELECT 1 FROM behandling
-    WHERE fagsak_id = fagsak.id
+    WHERE saksnummer = fagsak.saksnummer
     AND status NOT IN ('AVSLUTTET')
     AND id != :behandlingId
 );

@@ -9,6 +9,7 @@ description: |
   (5) Understanding membership status transitions and innvilgelsesresultat,
   (6) Working with UtledMedlemskapsperioder for proposal generation,
   (7) Understanding the relationship between bestemmelse, medlemskapstype, and trygdedekning.
+  Triggers: medlemskapsperiode, pliktig, frivillig, trygdedekning, MEDL, innvilgelsesresultat, medlPeriodeID, bestemmelse.
 ---
 
 # Medlemskap Domain
@@ -29,9 +30,9 @@ Behandlingsresultat
     ├── id: Long
     ├── fom: LocalDate               # Period start date
     ├── tom: LocalDate?              # Period end date (nullable for open-ended)
-    ├── innvilgelsesresultat: InnvilgelsesResultat  # INNVILGET, AVSLAATT, OPPHØRT
-    ├── medlemskapstype: Medlemskapstyper           # PLIKTIG, FRIVILLIG
-    ├── trygdedekning: Trygdedekninger              # FULL, HELSEDEL, etc.
+    ├── innvilgelsesresultat: InnvilgelsesResultat  # INNVILGET, DELVIS_INNVILGET, AVSLAATT, OPPHØRT
+    ├── medlemskapstype: Medlemskapstyper           # PLIKTIG, FRIVILLIG, UNNTATT, ...
+    ├── trygdedekning: Trygdedekninger              # FULL_DEKNING_FTRL, FTRL_2_9_*, etc.
     ├── bestemmelse: Bestemmelse                    # FTRL paragraph
     ├── medlPeriodeID: Long?         # Reference to MEDL registry
     └── trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>
@@ -41,9 +42,15 @@ Behandlingsresultat
 
 | Enum | Values | Description |
 |------|--------|-------------|
-| **InnvilgelsesResultat** | INNVILGET, AVSLAATT, OPPHØRT | Period outcome |
-| **Medlemskapstyper** | PLIKTIG, FRIVILLIG | Mandatory vs voluntary membership |
-| **Trygdedekninger** | FULL_DEKNING, HELSEDEL_UTEN_SYKEPENGER, HELSEDEL_MED_SYKEPENGER, PENSJONSDEL_MED_YRKESSKADETRYGD, PENSJONSDEL_UTEN_YRKESSKADETRYGD | Coverage type |
+| **InnvilgelsesResultat** | INNVILGET, DELVIS_INNVILGET, AVSLAATT, OPPHØRT | Period outcome |
+| **Medlemskapstyper** | PLIKTIG, FRIVILLIG, UNNTATT, DELVIS_UNNTATT, IKKE_MEDLEM | Membership type (mandatory/voluntary/exempt) |
+| **Trygdedekninger** | FULL_DEKNING, FULL_DEKNING_FTRL, FULL_DEKNING_EOSFO, UTEN_DEKNING, the FTRL_2_9_* family, FTRL_2_7_*/FTRL_2_7A_*, treaty values (TILLEGGSAVTALE_NATO_HELSEDEL, UNNTATT_USA_5_2_G, UNNTATT_CAN_7_5_B) | Coverage type (stored in column `trygde_dekning`). See `kodeverk` enum `Trygdedekninger` for the full set. |
+
+> **Trygdedekninger vs Avgiftsdekning** — the `HELSEDEL_MED_SYKEPENGER` /
+> `HELSEDEL_UTEN_SYKEPENGER` / `PENSJONSDEL_MED_YRKESSKADETRYGD` /
+> `PENSJONSDEL_UTEN_YRKESSKADETRYGD` constants are NOT `Trygdedekninger`; they are the
+> `Avgiftsdekning` enum, derived from a `Trygdedekninger` value via
+> `AvgiftsdekningerFraTrygdedekning` for trygdeavgift. Don't confuse the two.
 
 ### Medlemskapstype Determination
 
@@ -68,11 +75,14 @@ Determined by bestemmelse via `UtledMedlemskapstype`:
 
 ### Trygdedekning Options
 
+Valid trygdedekninger per behandlingstema are defined in `GyldigeTrygdedekningerService`
+(then intersected with the bestemmelse via `LovligeKombinasjonerTrygdedekningBestemmelse`):
+
 | Behandlingstema | Available Trygdedekninger |
 |-----------------|---------------------------|
-| YRKESAKTIV | FULL_DEKNING, HELSEDEL_MED_SYKEPENGER, HELSEDEL_UTEN_SYKEPENGER |
-| IKKE_YRKESAKTIV | FULL_DEKNING, HELSEDEL_MED_SYKEPENGER, HELSEDEL_UTEN_SYKEPENGER |
-| PENSJONIST | HELSEDEL_UTEN_SYKEPENGER (only health coverage) |
+| YRKESAKTIV | FULL_DEKNING_FTRL, the full FTRL_2_9_* family, FTRL_2_7_TREDJE_LEDD_B_*, FTRL_2_7A_ANDRE_LEDD_B_*, TILLEGGSAVTALE_NATO_HELSEDEL |
+| IKKE_YRKESAKTIV | FULL_DEKNING_FTRL, the FTRL_2_9_* family, FTRL_2_7_TREDJE_LEDD_B_*, TILLEGGSAVTALE_NATO_HELSEDEL |
+| PENSJONIST | FULL_DEKNING_FTRL, FTRL_2_9_* (helse/pensjon variants), FTRL_2_7_TREDJE_LEDD_B_* |
 
 ## Service Layer
 
@@ -209,19 +219,22 @@ Refer to `medl` skill for detailed MEDL integration patterns.
 ```sql
 SELECT mp.*, br.behandling_id
 FROM medlemskapsperiode mp
-JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.id
+JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.behandling_id
 WHERE br.behandling_id = :behandlingId
 ORDER BY mp.fom_dato;
 ```
 
 ### Find Periods by Person
 ```sql
+-- The person/aktør is not a column on fagsak; it lives in the aktoer table
+-- (rolle BRUKER) joined on saksnummer.
 SELECT mp.*, b.id as behandling_id, f.saksnummer
 FROM medlemskapsperiode mp
-JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.id
+JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE f.bruker_aktor_id = :aktorId
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+JOIN aktoer a ON a.saksnummer = f.saksnummer AND a.rolle = 'BRUKER'
+WHERE a.aktoer_id = :aktorId
 ORDER BY mp.fom_dato DESC;
 ```
 
@@ -230,26 +243,26 @@ ORDER BY mp.fom_dato DESC;
 SELECT mp.id, mp.fom_dato, mp.tom_dato, mp.innvilgelse_resultat,
        mp.medlemskapstype, mp.medlperiode_id
 FROM medlemskapsperiode mp
-JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.id
+JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.behandling_id
 WHERE br.behandling_id = :behandlingId
 AND mp.medlperiode_id IS NULL;  -- Not synced to MEDL
 ```
 
 ### Find Periods with Trygdeavgift
 ```sql
-SELECT mp.*, tp.id as avgift_id, tp.trygdeavgiftsbeloep_md
+SELECT mp.*, tp.id as avgift_id, tp.trygdeavgift_beloep_mnd_verdi, tp.trygdeavgift_beloep_mnd_valuta
 FROM medlemskapsperiode mp
-JOIN trygdeavgiftsperiode tp ON tp.grunnlag_medlemskapsperiode_id = mp.id
+JOIN trygdeavgiftsperiode tp ON tp.medlemskapsperiode_id = mp.id
 WHERE mp.behandlingsresultat_id = :behandlingsresultatId;
 ```
 
 ### Check Period Validation Issues
 ```sql
-SELECT mp.*, b.tema, f.type as sakstype
+SELECT mp.*, b.beh_tema, f.fagsak_type as sakstype
 FROM medlemskapsperiode mp
-JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.id
+JOIN behandlingsresultat br ON mp.behandlingsresultat_id = br.behandling_id
 JOIN behandling b ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
 WHERE mp.tom_dato IS NULL
 AND mp.bestemmelse != 'FTRL_KAP2_2_1';  -- Open-ended but not bosatt
 ```
