@@ -4,6 +4,7 @@ import io.getunleash.Unleash
 import jakarta.transaction.Transactional
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
@@ -13,6 +14,7 @@ import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.dokgen.dto.AvgiftsperiodeEøsPensjonist
 import no.nav.melosys.integrasjon.dokgen.dto.InformasjonTrygdeavgift
+import no.nav.melosys.service.avgift.MinstebeløpService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
@@ -27,6 +29,7 @@ class InformasjonTrygdeavgiftMapper(
     private val helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
+    private val minstebeløpService: MinstebeløpService,
     private val unleash: Unleash
 ) {
 
@@ -51,6 +54,8 @@ class InformasjonTrygdeavgiftMapper(
         val tomDato = helseutgiftDekkesPerioder.maxOf { it.tomDato }
         val førstePeriode = helseutgiftDekkesPerioder.first()
 
+        val minstebeløp = minstebeløpService.finnMinstebeløp(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder)
+
         return InformasjonTrygdeavgift(
             brevbestilling = brevbestilling,
             fomDato = fomDato,
@@ -71,7 +76,9 @@ class InformasjonTrygdeavgiftMapper(
             },
             erSkattemessigEmigrert = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.any {
                 it.grunnlagSkatteforholdTilNorge?.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG
-            }
+            },
+            minstebelopVerdi = minstebeløp?.beloep,
+            minstebelopAar = minstebeløp?.aar
         )
     }
 
@@ -85,7 +92,7 @@ class InformasjonTrygdeavgiftMapper(
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodeEøsPensjonist> {
         val perioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toSet()
 
-        if (perioder.all { !it.harAvgift() }) {
+        if (perioder.all { !it.harAvgift() && it.beregningsregel == Avgiftsberegningsregel.ORDINÆR }) {
             return emptyList()
         }
 
@@ -107,7 +114,8 @@ class InformasjonTrygdeavgiftMapper(
                     avgiftPerMd = it.trygdeavgiftsbeløpMd.hentVerdi(),
                     inntektskilde = inntektsperiode.type.beskrivelse,
                     avgiftspliktigInntektPerMd = inntektsperiode.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
-                    skatteplikt = it.hentGrunnlagSkatteforholdTilNorge().skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
+                    skatteplikt = it.hentGrunnlagSkatteforholdTilNorge().skatteplikttype == Skatteplikttype.SKATTEPLIKTIG,
+                    beregningsregel = it.beregningsregel,
                 )
             }
             ?.sortedByDescending { it.fom }

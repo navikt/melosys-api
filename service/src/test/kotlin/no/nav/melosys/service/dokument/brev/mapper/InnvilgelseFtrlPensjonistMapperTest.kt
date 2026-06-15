@@ -13,6 +13,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
@@ -23,6 +24,8 @@ import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
+import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebeløpResponse
+import no.nav.melosys.service.avgift.MinstebeløpService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklartUkjentSluttdatoMedlemskapsperiodeService
@@ -56,6 +59,9 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
     @MockK
     private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 
+    @MockK
+    private lateinit var minstebeløpService: MinstebeløpService
+
     private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
     private lateinit var innvilgelseFtrlMapper: InnvilgelseFtrlMapper
@@ -65,6 +71,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
     @BeforeEach
     fun setup() {
         unleash.resetAll()
+        every { minstebeløpService.finnMinstebeløp(any()) } returns MinstebeløpResponse(2024, BigDecimal(7000))
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
             mockAvklarteVirksomheterService,
@@ -72,6 +79,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
             mockDokgenMapperDatahenter,
             trygdeavgiftMottakerService,
             trygdeavgiftsberegningService,
+            minstebeløpService,
             unleash
         )
     }
@@ -488,6 +496,139 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
                 ukjentSluttdatoMedlemskapsperiode.shouldBeTrue()
                 harMedlemskapsperioderIForegåendeÅr.shouldBeFalse()
             }
+    }
+
+    @Test
+    fun `mapPensjonistFrivillig med MINSTEBELØP beregningsregel mapper beregningsregel til DTO`() {
+        val behandlingsresultat = lagPensjonistBehandlingsresultatMedBeregningsregel(
+            Medlemskapstyper.FRIVILLIG, Avgiftsberegningsregel.MINSTEBELØP
+        )
+        mockHappyCase(behandlingsresultat)
+
+        innvilgelseFtrlMapper.mapPensjonistFrivillig(lagBrevbestilling()).apply {
+            avgiftsperioder.shouldNotBeEmpty()
+            avgiftsperioder.any { it.beregningsregel == Avgiftsberegningsregel.MINSTEBELØP }.shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun `mapPensjonistFrivillig med TJUEFEM_PROSENT_REGEL beregningsregel mapper beregningsregel til DTO`() {
+        val behandlingsresultat = lagPensjonistBehandlingsresultatMedBeregningsregel(
+            Medlemskapstyper.FRIVILLIG, Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL
+        )
+        mockHappyCase(behandlingsresultat)
+
+        innvilgelseFtrlMapper.mapPensjonistFrivillig(lagBrevbestilling()).apply {
+            avgiftsperioder.shouldNotBeEmpty()
+            avgiftsperioder.any { it.beregningsregel == Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL }.shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun `mapPensjonistFrivillig med ORDINÆR beregningsregel mapper ORDINÆR som beregningsregel`() {
+        val behandlingsresultat = lagPensjonistBehandlingsresultatMedBeregningsregel(
+            Medlemskapstyper.FRIVILLIG, Avgiftsberegningsregel.ORDINÆR
+        )
+        mockHappyCase(behandlingsresultat)
+
+        innvilgelseFtrlMapper.mapPensjonistFrivillig(lagBrevbestilling()).apply {
+            avgiftsperioder.shouldNotBeEmpty()
+            avgiftsperioder.all { it.beregningsregel == Avgiftsberegningsregel.ORDINÆR }.shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun `mapPensjonistPliktig med MINSTEBELØP beregningsregel mapper beregningsregel til DTO`() {
+        val behandlingsresultat = lagPensjonistBehandlingsresultatMedBeregningsregel(
+            Medlemskapstyper.PLIKTIG, Avgiftsberegningsregel.MINSTEBELØP
+        )
+        mockHappyCase(behandlingsresultat)
+
+        innvilgelseFtrlMapper.mapPensjonistPliktig(lagBrevbestilling()).apply {
+            avgiftsperioder.shouldNotBeEmpty()
+            avgiftsperioder.any { it.beregningsregel == Avgiftsberegningsregel.MINSTEBELØP }.shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun `mapPensjonistPliktig med TJUEFEM_PROSENT_REGEL beregningsregel mapper beregningsregel til DTO`() {
+        val behandlingsresultat = lagPensjonistBehandlingsresultatMedBeregningsregel(
+            Medlemskapstyper.PLIKTIG, Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL
+        )
+        mockHappyCase(behandlingsresultat)
+
+        innvilgelseFtrlMapper.mapPensjonistPliktig(lagBrevbestilling()).apply {
+            avgiftsperioder.shouldNotBeEmpty()
+            avgiftsperioder.any { it.beregningsregel == Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL }.shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun `mapPensjonistPliktig med ORDINÆR beregningsregel mapper ORDINÆR som beregningsregel`() {
+        val behandlingsresultat = lagPensjonistBehandlingsresultatMedBeregningsregel(
+            Medlemskapstyper.PLIKTIG, Avgiftsberegningsregel.ORDINÆR
+        )
+        mockHappyCase(behandlingsresultat)
+
+        innvilgelseFtrlMapper.mapPensjonistPliktig(lagBrevbestilling()).apply {
+            avgiftsperioder.shouldNotBeEmpty()
+            avgiftsperioder.all { it.beregningsregel == Avgiftsberegningsregel.ORDINÆR }.shouldBeTrue()
+        }
+    }
+
+    private fun lagPensjonistBehandlingsresultatMedBeregningsregel(
+        medlemskapsType: Medlemskapstyper,
+        regel: Avgiftsberegningsregel
+    ): Behandlingsresultat = Behandlingsresultat.forTest {
+        id = 1L
+        behandling {
+            id = 1L
+            tema = Behandlingstema.PENSJONIST
+            fagsak {
+                saksnummer = SAKSNUMMER
+                tema = Sakstemaer.TRYGDEAVGIFT
+                type = Sakstyper.FTRL
+            }
+            mottatteOpplysninger {
+                mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
+                    soeknadsland = Soeknadsland(listOf("AT"), false)
+                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
+                }
+            }
+        }
+        medlemskapsperiode {
+            fom = LocalDate.now().minusYears(1).withMonth(1)
+            tom = LocalDate.now().withMonth(4)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = medlemskapsType
+            trygdedekning = if (medlemskapsType == Medlemskapstyper.PLIKTIG) Trygdedekninger.FULL_DEKNING_FTRL
+                else Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+            bestemmelse = if (medlemskapsType == Medlemskapstyper.PLIKTIG) Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                else Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D
+            trygdeavgiftsperiode {
+                periodeFra = LocalDate.now().minusYears(1).withMonth(1)
+                periodeTil = LocalDate.now().withMonth(4)
+                trygdesats = BigDecimal(0.05)
+                trygdeavgiftsbeløpMd = BigDecimal(500.0)
+                beregningsregel = regel
+                grunnlagInntekstperiode {
+                    fomDato = LocalDate.now().minusYears(1).withMonth(1)
+                    tomDato = LocalDate.now().withMonth(4)
+                }
+                grunnlagSkatteforholdTilNorge {
+                    skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                }
+            }
+        }
+        innledningFritekst = INNLEDNING_FRITEKST
+        begrunnelseFritekst = BEGRUNNELSE_FRITEKST
+        trygdeavgiftFritekst = TRYGDEAVGIFT_FRITEKST
+        nyVurderingBakgrunn = "NYE_OPPLYSNINGER"
+        vilkaarsresultat {
+            vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
+            begrunnelseFritekst = "<p>Vilkårresultat begrunnelse fritekst</p>"
+            begrunnelse(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN.kode)
+        }
     }
 
     private fun lagBrevbestilling(): InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling {

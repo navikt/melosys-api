@@ -12,11 +12,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.avgift.inntektForTest
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
@@ -28,6 +24,8 @@ import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.domain.mottatteopplysninger.soeknad
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
+import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebeløpResponse
+import no.nav.melosys.service.avgift.MinstebeløpService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklartUkjentSluttdatoMedlemskapsperiodeService
@@ -61,6 +59,9 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
     @MockK
     private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 
+    @MockK
+    private lateinit var minstebeløpService: MinstebeløpService
+
     private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
     private lateinit var innvilgelseFtrlMapper: InnvilgelseFtrlMapper
@@ -70,6 +71,7 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
     @BeforeEach
     fun setup() {
         unleash.resetAll()
+        every { minstebeløpService.finnMinstebeløp(any()) } returns MinstebeløpResponse(2024, BigDecimal(7000))
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
             mockAvklarteVirksomheterService,
@@ -77,6 +79,7 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
             mockDokgenMapperDatahenter,
             trygdeavgiftMottakerService,
             trygdeavgiftsberegningService,
+            minstebeløpService,
             unleash
         )
     }
@@ -736,6 +739,144 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
         every { mockBehandlingsresultatService.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
         every { mockAvklartUkjentSluttdatoMedlemskapsperiodeService.hentUkjentSluttdatoMedlemskapsperiode(any()) } returns true
     }
+
+    @Test
+    fun `mapYrkesaktivFrivillig med MINSTEBELØP beregningsregel mapper beregningsregel til DTO`() {
+        val behandlingsresultat = lagBehandlingsresultatMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP)
+        mockHappyCase(Case.paragraf_2_8, behandlingsresultat)
+
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
+            avgiftsperioder.shouldNotBeEmpty()
+            avgiftsperioder.any { it.beregningsregel == Avgiftsberegningsregel.MINSTEBELØP }.shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun `mapYrkesaktivFrivillig med TJUEFEM_PROSENT_REGEL beregningsregel mapper beregningsregel til DTO`() {
+        val behandlingsresultat = lagBehandlingsresultatMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+        mockHappyCase(Case.paragraf_2_8, behandlingsresultat)
+
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
+            avgiftsperioder.shouldNotBeEmpty()
+            avgiftsperioder.any { it.beregningsregel == Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL }.shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun `mapYrkesaktivFrivillig med ORDINÆR beregningsregel mapper ORDINÆR som beregningsregel`() {
+        mockHappyCase(Case.paragraf_2_8)
+
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
+            avgiftsperioder.shouldNotBeEmpty()
+            avgiftsperioder.all { it.beregningsregel == Avgiftsberegningsregel.ORDINÆR }.shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun `mapYrkesaktivPliktig med MINSTEBELØP beregningsregel mapper beregningsregel til DTO`() {
+        val behandlingsresultat = lagPliktigBehandlingsresultatMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP)
+        mockHappyCase(Case.paragraf_2_8, behandlingsresultat)
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(LocalDate.of(1980, 1, 1))
+
+        innvilgelseFtrlMapper.mapYrkesaktivPliktig(lagBrevbestilling()).apply {
+            avgiftsperioder.shouldNotBeEmpty()
+            avgiftsperioder.any { it.beregningsregel == Avgiftsberegningsregel.MINSTEBELØP }.shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun `mapYrkesaktivPliktig med TJUEFEM_PROSENT_REGEL beregningsregel mapper beregningsregel til DTO`() {
+        val behandlingsresultat = lagPliktigBehandlingsresultatMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+        mockHappyCase(Case.paragraf_2_8, behandlingsresultat)
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(LocalDate.of(1980, 1, 1))
+
+        innvilgelseFtrlMapper.mapYrkesaktivPliktig(lagBrevbestilling()).apply {
+            avgiftsperioder.shouldNotBeEmpty()
+            avgiftsperioder.any { it.beregningsregel == Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL }.shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun `mapYrkesaktivPliktig med ORDINÆR beregningsregel mapper ORDINÆR som beregningsregel`() {
+        val behandlingsresultat = lagPliktigBehandlingsresultatMedBeregningsregel(Avgiftsberegningsregel.ORDINÆR)
+        mockHappyCase(Case.paragraf_2_8, behandlingsresultat)
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(LocalDate.of(1980, 1, 1))
+
+        innvilgelseFtrlMapper.mapYrkesaktivPliktig(lagBrevbestilling()).apply {
+            avgiftsperioder.shouldNotBeEmpty()
+            avgiftsperioder.all { it.beregningsregel == Avgiftsberegningsregel.ORDINÆR }.shouldBeTrue()
+        }
+    }
+
+    private fun lagPliktigBehandlingsresultatMedBeregningsregel(regel: Avgiftsberegningsregel): Behandlingsresultat =
+        Behandlingsresultat.forTest {
+            id = 1L
+            nyVurderingBakgrunn = "NYE_OPPLYSNINGER"
+            behandling {
+                fagsak = DokgenTestData.lagFagsak()
+                mottatteOpplysninger { soeknad { landkoder("AT") } }
+            }
+            medlemskapsperiode {
+                fom = LocalDate.EPOCH.plusMonths(1)
+                tom = LocalDate.EPOCH.plusMonths(4)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.PLIKTIG
+                trygdedekning = Trygdedekninger.FULL_DEKNING
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.EPOCH.plusMonths(1)
+                    periodeTil = LocalDate.EPOCH.plusMonths(4)
+                    trygdesats = BigDecimal(0.05)
+                    trygdeavgiftsbeløpMd = BigDecimal(500)
+                    beregningsregel = regel
+                    grunnlagSkatteforholdTilNorge { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG }
+                    grunnlagInntekstperiode {
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        arbeidsgiversavgiftBetalesTilSkatt = true
+                    }
+                }
+            }
+            vilkaarsresultat {
+                vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
+                begrunnelseFritekst = VILKAAR_BEGRUNNELSE_FRITEKST
+                begrunnelse(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN.kode)
+            }
+        }
+
+    private fun lagBehandlingsresultatMedBeregningsregel(regel: Avgiftsberegningsregel): Behandlingsresultat =
+        Behandlingsresultat.forTest {
+            id = 1L
+            nyVurderingBakgrunn = "NYE_OPPLYSNINGER"
+            behandling {
+                fagsak = DokgenTestData.lagFagsak()
+                mottatteOpplysninger { soeknad { landkoder("AT") } }
+            }
+            medlemskapsperiode {
+                fom = LocalDate.EPOCH.plusMonths(1)
+                tom = LocalDate.EPOCH.plusMonths(4)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.EPOCH.plusMonths(1)
+                    periodeTil = LocalDate.EPOCH.plusMonths(4)
+                    trygdesats = null
+                    trygdeavgiftsbeløpMd = BigDecimal.ZERO
+                    beregningsregel = regel
+                    grunnlagSkatteforholdTilNorge { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG }
+                    grunnlagInntekstperiode {
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        arbeidsgiversavgiftBetalesTilSkatt = true
+                    }
+                }
+            }
+            vilkaarsresultat {
+                vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
+                begrunnelseFritekst = VILKAAR_BEGRUNNELSE_FRITEKST
+                begrunnelse(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN.kode)
+            }
+        }
 
     companion object {
         const val BEGRUNNELSE_FRITEKST = "<p>Begrunnelse fritekst</p>"
