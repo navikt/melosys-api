@@ -36,6 +36,8 @@ class PoppInntektClientConfig(
             .filter(headerFilter())
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Henting av pensjonsopptjening fra POPP feilet") { feilmelding, statusCode, errorBody ->
+                // Kontrakt: kun 404 PERSON_IKKE_FUNNET tolkes som "ingen PGI" (→ tom liste i klienten).
+                // Alle andre feil, inkludert andre 404, er tekniske og kastes videre.
                 if (statusCode == HttpStatus.NOT_FOUND && errorBody.contains(PERSON_IKKE_FUNNET_CODE)) {
                     PoppPersonIkkeFunnetException("$feilmelding $statusCode")
                 } else {

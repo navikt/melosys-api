@@ -153,7 +153,9 @@ internal class PensjonsopptjeningOppslagTest {
 
         val perioder = oppslag.hent(BEH_ID).perioder
 
-        // Alt unntatt posten med null inntektType beholdes; POPP ekskluderer SUM_PI server-side.
+        // Servicen filtrerer ikke på inntektType klient-side (ingen allow-list) — selv SUM_PI beholdes om den skulle komme.
+        // I praksis ekskluderer POPP SUM_PI server-side på /inntekt/hentgrunnlag, så den dukker normalt aldri opp her.
+        // Eneste post som hoppes over er den uten inntektType.
         perioder.map { it.inntektType } shouldBe listOf("DIP_SEL", "FL_PGI_LOENN", "INN_LON", "SUM_PI")
     }
 
