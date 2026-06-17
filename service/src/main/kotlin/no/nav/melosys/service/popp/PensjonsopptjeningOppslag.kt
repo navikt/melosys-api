@@ -1,0 +1,113 @@
+package no.nav.melosys.service.popp
+
+import mu.KotlinLogging
+import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.integrasjon.popp.PoppHentInntektRequest
+import no.nav.melosys.integrasjon.popp.PoppInntektClient
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.persondata.PersondataService
+import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneId
+
+private val log = KotlinLogging.logger { }
+private val OSLO: ZoneId = ZoneId.of("Europe/Oslo")
+
+@Service
+class PensjonsopptjeningOppslag(
+    private val behandlingService: BehandlingService,
+    private val årsavregningService: ÅrsavregningService,
+    private val persondataService: PersondataService,
+    private val poppInntektClient: PoppInntektClient,
+) {
+
+    fun hent(behandlingID: Long): Pensjonsopptjening {
+        val inntektsÅr = årsavregningService.finnGjeldendeÅrForÅrsavregning(behandlingID)
+            ?: throw IkkeFunnetException("Fant ingen årsavregning for behandling $behandlingID")
+
+        val behandling = behandlingService.hentBehandling(behandlingID)
+        val fnr = persondataService.hentFolkeregisterident(behandling.fagsak.hentBrukersAktørID())
+
+        val fomAr = inntektsÅr - (ANTALL_INNTEKTSÅR - 1)
+        val tomAr = inntektsÅr
+
+        log.info {
+            "Henter pensjonsopptjening fra POPP for behandling $behandlingID, inntektsÅr=$inntektsÅr, vindu=$fomAr..$tomAr"
+        }
+
+        val respons = poppInntektClient.hentInntekt(
+            PoppHentInntektRequest(fnr = fnr, fomAr = fomAr, tomAr = tomAr)
+        )
+
+        val perioder = (respons.inntekter ?: emptyList()).mapNotNull { post ->
+            val aar = post.inntektAr ?: return@mapNotNull null
+            val pgi = post.belop ?: return@mapNotNull null
+            val inntektType = post.inntektType ?: return@mapNotNull null
+            if (post.kilde == null) {
+                log.warn { "POPP-post uten kilde for behandling $behandlingID, år=$aar — markeres som UKJENT" }
+            }
+            val kilde = post.kilde ?: UKJENT_KILDE
+            PensjonsopptjeningPeriode(
+                aar = aar,
+                pgi = pgi,
+                kilde = kilde,
+                inntektType = inntektType,
+                inntektTypeDekode = post.inntektTypeDekode,
+                registrert = post.changeStamp?.createdDate.toOsloLocalDate(),
+                oppdatert = post.changeStamp?.updatedDate.toOsloLocalDate(),
+            )
+        }.sortedWith(
+            compareByDescending<PensjonsopptjeningPeriode> { it.aar }
+                .thenBy { kildePrioritet(it.kilde) }
+                .thenBy { it.kilde }
+                .thenBy { it.inntektType }
+                .thenByDescending { it.pgi }
+        )
+
+        return Pensjonsopptjening(inntektsAr = inntektsÅr, perioder = perioder)
+    }
+
+    private fun kildePrioritet(kilde: String): Int = when (kilde) {
+        "SKATT" -> 0
+        "MELOSYS" -> 1
+        "AVGIFTSSYSTEMET" -> 2
+        else -> 99
+    }
+
+    companion object {
+        private const val ANTALL_INNTEKTSÅR = 5 // 5 inntektsår inklusivt inneværende år
+        private const val UKJENT_KILDE = "UKJENT"
+    }
+}
+
+data class Pensjonsopptjening(
+    val inntektsAr: Int,
+    val perioder: List<PensjonsopptjeningPeriode>,
+)
+
+data class PensjonsopptjeningPeriode(
+    val aar: Int,
+    val pgi: Long,
+    val kilde: String,
+    val inntektType: String,
+    val inntektTypeDekode: String? = null,
+    val registrert: LocalDate? = null,
+    val oppdatert: LocalDate? = null,
+)
+
+private fun String?.toOsloLocalDate(): LocalDate? =
+    this?.takeIf { it.isNotBlank() }?.let { raw ->
+        // POPP changeStamp er en fri String. Vanligst er ISO med offset/Z (konverteres til Oslo-dato),
+        // men vi tåler også offset-løs LocalDateTime og ren dato slik at en formatvariasjon fra POPP
+        // ikke fører til at vi stille mister registrert/oppdatert.
+        runCatching { OffsetDateTime.parse(raw).atZoneSameInstant(OSLO).toLocalDate() }
+            .recoverCatching { LocalDateTime.parse(raw).toLocalDate() }
+            .recoverCatching { LocalDate.parse(raw) }
+            .getOrElse {
+                log.warn { "Kunne ikke tolke POPP changeStamp-dato '$raw' — settes til null" }
+                null
+            }
+    }

@@ -62,6 +62,7 @@ spec:
         - application: {{APP_NAME_DOKARKIV}}
         - application: {{APP_NAME_DOKDISTFORDELING}}
         - application: {{APP_NAME_MELOSYS_SKJEMA_API}}
+        - application: {{APP_NAME_POPP}}
         - application: logging
           namespace: nais-system
   webproxy: true
@@ -117,6 +118,8 @@ spec:
     value: {{APP_NAME_DOKDISTFORDELING}}
   - name: APP_NAME_MELOSYS_SKJEMA_API
     value: {{APP_NAME_MELOSYS_SKJEMA_API}}
+  - name: APP_NAME_POPP
+    value: {{APP_NAME_POPP}}
   - name: APP_NAME
     value: {{APP_NAME}}
   - name: JDK_JAVA_OPTIONS
