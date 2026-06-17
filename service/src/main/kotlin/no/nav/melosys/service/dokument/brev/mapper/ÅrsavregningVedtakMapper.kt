@@ -53,12 +53,14 @@ class ÅrsavregningVedtakMapper(
                         it.årsavregning?.aar == behandlingsresultat.hentÅrsavregning().aar
                 } ?: false
         val minstebelop = minstebeløpService.finnMinstebeløp(årsavregningModel.endeligAvgift + årsavregningModel.tidligereAvgift)
+        val endeligTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskapNyttgrunnlag, årsavregningModel.endeligAvgift)
+        val forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskap, årsavregningModel.tidligereAvgift)
 
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
             årsavregningsår = behandlingsresultat.hentÅrsavregning().aar,
-            endeligTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskapNyttgrunnlag, årsavregningModel.endeligAvgift),
-            forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskap, årsavregningModel.tidligereAvgift),
+            endeligTrygdeavgift = endeligTrygdeavgift,
+            forskuddsvisFakturertTrygdeavgift = forskuddsvisFakturertTrygdeavgift,
             endeligTrygdeavgiftTotalbeløp = årsavregningModel.beregnetAvgiftBelop
                 ?: throw FunksjonellException("BeregnetAvgiftBelop finnes ikke for behandling $behandlingsId"),
             forskuddsvisFakturertTrygdeavgiftTotalbeløp = totaltTidligereFakturertBeloep(årsavregningModel),
@@ -74,7 +76,11 @@ class ÅrsavregningVedtakMapper(
             erNyÅrsavregning = erNyÅrsavregning,
             harMisjonaerInntekt = harMisjonaerInntekt(årsavregningModel.endeligAvgift, årsavregningModel.tidligereAvgift),
             minstebelopVerdi = minstebelop?.beloep,
-            minstebelopAar = minstebelop?.aar
+            minstebelopAar = minstebelop?.aar,
+            harMinstebelopEndelig = årsavregningModel.endeligAvgift.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
+            har25ProsentRegelEndelig = årsavregningModel.endeligAvgift.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL),
+            harMinstebelopForskuddsvis = årsavregningModel.tidligereAvgift.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
+            har25ProsentRegelForskuddsvis = årsavregningModel.tidligereAvgift.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
         )
     }
 
@@ -109,7 +115,9 @@ class ÅrsavregningVedtakMapper(
             erNyÅrsavregning = erNyÅrsavregning,
             harMisjonaerInntekt = harMisjonaerInntekt(emptyList(), årsavregningModel.tidligereAvgift),
             minstebelopVerdi = minstebelop?.beloep,
-            minstebelopAar = minstebelop?.aar
+            minstebelopAar = minstebelop?.aar,
+            harMinstebelopForskuddsvis = årsavregningModel.tidligereAvgift.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
+            har25ProsentRegelForskuddsvis = årsavregningModel.tidligereAvgift.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
         )
     }
 
@@ -117,8 +125,6 @@ class ÅrsavregningVedtakMapper(
         medlemskapsTypePliktig: Boolean,
         trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
     ): List<Avgiftsperiode> {
-        if (trygdeavgiftsperioder.all { !it.harAvgift() && it.beregningsregel == Avgiftsberegningsregel.ORDINÆR }) return emptyList()
-
         return trygdeavgiftsperioder.map { trygdeavgiftsperiode ->
             val grunnlagsInntektsperiode = trygdeavgiftsperiode.grunnlagInntekstperiode
                 ?: throw IllegalStateException("trygdeavgiftsperioden må ha en inntektsperiode")
@@ -174,6 +180,9 @@ class ÅrsavregningVedtakMapper(
         tidligereAvgift: List<Trygdeavgiftsperiode>
     ): Boolean = (endeligAvgift + tidligereAvgift)
         .any { it.grunnlagInntekstperiode?.type == MISJONÆR }
+
+    private fun List<Trygdeavgiftsperiode>.harPeriodeMedBeregningsregel(regel: Avgiftsberegningsregel): Boolean =
+        any { it.beregningsregel == regel }
 
     private fun harPliktigMedlemskap(avgiftspliktigPerioder: List<AvgiftsperiodeForAvgift>?): Boolean {
         return avgiftspliktigPerioder?.takeIf { it.isNotEmpty() }
