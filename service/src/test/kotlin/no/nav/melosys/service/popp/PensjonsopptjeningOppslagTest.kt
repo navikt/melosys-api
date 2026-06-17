@@ -232,6 +232,28 @@ internal class PensjonsopptjeningOppslagTest {
     }
 
     @Test
+    fun `hent - changeStamp uten offset og ren dato tolkes til LocalDate`() {
+        every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
+        every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(
+            listOf(
+                PoppInntektPost(
+                    inntektAr = 2024,
+                    belop = 540000,
+                    kilde = "SKATT",
+                    inntektType = "FL_PGI_LOENN",
+                    // POPP-format er en fri String: offset-løs LocalDateTime og ren dato skal ikke gi datotap
+                    changeStamp = PoppChangeStamp(createdDate = "2026-03-01T08:00:00", updatedDate = "2026-03-15"),
+                ),
+            )
+        )
+
+        val periode = oppslag.hent(BEH_ID).perioder.single()
+
+        periode.registrert shouldBe LocalDate.of(2026, 3, 1)
+        periode.oppdatert shouldBe LocalDate.of(2026, 3, 15)
+    }
+
+    @Test
     fun `hent - ugyldig eller tom changeStamp-dato gir null registrert og oppdatert`() {
         every { årsavregningService.finnGjeldendeÅrForÅrsavregning(BEH_ID) } returns 2024
         every { poppInntektClient.hentInntekt(any()) } returns PoppHentInntektResponse(

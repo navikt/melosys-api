@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.verify
+import no.nav.melosys.exception.SikkerhetsbegrensningException
 import no.nav.melosys.service.popp.Pensjonsopptjening
 import no.nav.melosys.service.popp.PensjonsopptjeningOppslag
 import no.nav.melosys.service.popp.PensjonsopptjeningPeriode
@@ -97,6 +98,19 @@ internal class PensjonsopptjeningControllerTest(
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.perioder.length()").value(0))
+    }
+
+    @Test
+    fun `uautorisert - svarer 4xx og slaar ikke opp pensjonsopptjening`() {
+        every { aksesskontroll.autoriser(BEH_ID) } throws SikkerhetsbegrensningException("Ikke tilgang")
+
+        mockMvc.perform(
+            get(BASE_URL, BEH_ID).contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().is4xxClientError())
+
+        verify { aksesskontroll.autoriser(BEH_ID) }
+        verify(exactly = 0) { pensjonsopptjeningOppslag.hent(any()) }
     }
 
     companion object {

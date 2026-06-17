@@ -14,6 +14,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldNotContain
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.OAuthMockServer
@@ -177,6 +178,23 @@ class PoppInntektClientTest(
         val respons = poppInntektClient.hentInntekt(REQUEST)
 
         respons.inntekter!!.shouldHaveSize(1)
+    }
+
+    @Test
+    fun `hentInntekt - 500 med fnr i body - kaster TekniskException uten fnr i melding`() {
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                WireMock.aResponse()
+                    .withStatus(500)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("""{"message":"Intern feil for fnr $FNR"}""")
+            )
+        )
+
+        val ex = shouldThrow<TekniskException> { poppInntektClient.hentInntekt(REQUEST) }
+
+        // POPP-feilrespons kan inneholde fnr; det skal kun til team-logs, aldri i exception-meldingen (eksponeres i HTTP-respons)
+        ex.message!! shouldNotContain FNR
     }
 
     @Test
