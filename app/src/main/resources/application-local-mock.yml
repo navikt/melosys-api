@@ -4,6 +4,7 @@ APP_NAME_INNTEKTSKOMPONENTEN: inntektskomponenten
 APP_NAME_MEDL: medlemskap-medl-api-q1
 APP_NAME_OPPGAVE: oppgave-q1
 APP_NAME_PDL: pdl-api
+APP_NAME_POPP: popp-q2
 APP_NAME_SAF: saf
 APP_NAME_SAK: sak
 APP_NAME_TILGANGSMASKINEN: populasjonstilgangkontroll
@@ -92,6 +93,9 @@ logging:
 medlemskap:
   rest:
     url: http://localhost:8083
+popp:
+  rest:
+    url: http://localhost:8083/popp
 melosysdokgen:
   v1:
     url: ${MELOSYSDOKGEN_V1_URL:http://localhost:8888/api/v1}
@@ -120,6 +124,8 @@ microsoft:
             sak:
               scope: melosys-localhost
             tilgangsmaskinen:
+              scope: melosys-localhost
+            popp:
               scope: melosys-localhost
             melosys-skjema:
               scope: melosys-localhost

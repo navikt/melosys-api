@@ -41,12 +41,12 @@ MottatteOpplysninger stores received application data for a Behandling. Data is 
 
 | Mottatteopplysningertyper | Class | Use Case |
 |---------------------------|-------|----------|
-| `SØKNAD_A1_YRKESAKTIVE_EØS` | `Soeknad` | A1 for employed in EEA |
+| `SØKNAD_A1_YRKESAKTIVE_EØS` | `Soeknad` | A1 for occupationally active (employed or self-employed) in EEA |
 | `SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS` | `Soeknad` | A1 for posted workers |
 | `SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS` | `SøknadNorgeEllerUtenforEØS` | FTRL/bilateral |
 | `SØKNAD_IKKE_YRKESAKTIV` | `SøknadIkkeYrkesaktiv` | Non-occupationally active |
 | `SED` | `SedGrunnlag` | From SED documents |
-| `ANMODNING_ELLER_ATTEST` | `AnmodningEllerAttest` | Exception requests |
+| `ANMODNING_ELLER_ATTEST` | `AnmodningEllerAttest` | Exception requests (anmodning) and incoming attests |
 
 ## Key Files
 
@@ -140,7 +140,7 @@ mottatteOpplysningerService.oppdaterMottatteOpplysninger(mo)
 
 ## Serialization Notes
 
-- Uses Jackson with `KotlinModule` and `JavaTimeModule`
+- Uses Jackson 3.x (`tools.jackson`) with only `KotlinModule` registered (`.addModule(new KotlinModule.Builder().build())`)
 - `@JsonIgnoreProperties(ignoreUnknown = true)` on base class
 - Converter uses `EnumMap<Mottatteopplysningertyper, Class>` for type mapping
 - JPA listener auto-converts on load/persist
@@ -152,22 +152,31 @@ mottatteOpplysningerService.oppdaterMottatteOpplysninger(mo)
 hentAlleOrganisasjonsnumre()           // All org numbers
 hentUtenlandskeArbeidsstederLandkode() // Foreign work location countries
 hentUtenlandskeArbeidsgivereUuid()     // Foreign employer UUIDs
-hentFnrMedfolgendeBarn()               // Accompanying children FNR
-hentMedfølgendeBarn()                  // Map<UUID, MedfolgendeFamilie>
-hentMedfølgendeEktefelle()             // Map<UUID, MedfolgendeFamilie>
+hentFnrMedfølgendeBarn()               // Set<String> – accompanying children FNR
+hentMedfølgendeBarn()                  // Map<String, MedfolgendeFamilie> (keyed by UUID)
+hentMedfølgendeEktefelle()             // Map<String, MedfolgendeFamilie> (keyed by UUID)
 ```
 
 ## Testing
 
-Test factory: `domain/src/test/kotlin/.../MottatteOpplysningerTestFactory.kt`
+Test factories (Kotlin DSL builders):
+- `domain/src/test/kotlin/.../MottatteOpplysningerTestFactory.kt` – `mottatteOpplysningerForTest { ... }`
+- `domain/src/test/kotlin/.../SoeknadTestFactory.kt` – `soeknadForTest { ... }`
 
 ```kotlin
-// Create test instance
-val soeknad = Soeknad().apply {
-    periode = Periode().apply {
-        fom = LocalDate.now()
-        tom = LocalDate.now().plusMonths(12)
+// Build a MottatteOpplysninger with a Soeknad payload via the DSL
+val mottatteOpplysninger = mottatteOpplysningerForTest {
+    type = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
+    mottatteOpplysningerData = soeknadForTest {
+        periode(fom = LocalDate.now(), tom = LocalDate.now().plusMonths(12))
+        landkoder("DE")
+        fysiskeArbeidssted { landkode = "DE" }
+        utenlandskIdent(ident = "12345", landkode = "DE")
     }
-    personOpplysninger.fnr = "12345678901"
 }
+
+// Or use the soeknad { ... } extension helper directly:
+val mo = mottatteOpplysningerForTest { soeknad { landkoder("DE") } }
 ```
+
+Note: `OpplysningerOmBrukeren` has no `fnr`; it exposes `utenlandskIdent`, `medfolgendeFamilie` and `foedestedOgLand`.

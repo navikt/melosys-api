@@ -20,28 +20,29 @@ Melosys integrates via melosys-eessi service which communicates with RINA.
 ### Module Structure
 ```
 integrasjon/eessi/
-├── EessiConsumer.java          # Interface for EESSI operations
-├── EessiConsumerImpl.kt        # WebClient REST implementation
+├── EessiClient.kt              # WebClient REST collaborator (calls melosys-eessi)
+├── EessiClientConfig.kt        # WebClient/token config
 └── dto/                        # Request/response DTOs
 
 service/dokument/sed/
-├── EessiService.java           # Main business logic (450+ lines)
+├── EessiService.java           # Main business logic (orchestrates EessiClient)
 ├── bygger/
 │   └── SedDataBygger.java      # Constructs SedDataDto from treatment
 ├── SedTypeTilBehandlingstemaMapper.java
 └── SedDataGrunnlagFactory.java
 
 domain/eessi/
-├── SedType.kt                  # 50+ SED type definitions
+├── SedType.kt                  # 46 SED type definitions
 ├── BucType.kt                  # BUC types with bestemmelse mapping
-└── MelosysEessiMelding.kt      # Incoming message wrapper
+└── melding/
+    └── MelosysEessiMelding.kt  # Incoming message wrapper
 
 saksflyt/steg/sed/
-├── SendVedtakUtland.kt         # Send decision abroad
-├── SendAnmodningOmUnntak.kt    # Send exception request
-├── SedMottakRuting.kt          # Route incoming SEDs
-├── OpprettSedGrunnlag.kt       # Map SED to mottatteopplysninger
-└── ...                         # 14+ SED-related steps
+├── SendVedtakUtland.java       # Send decision abroad
+├── SendAnmodningOmUnntak.java  # Send exception request
+├── OpprettSedGrunnlag.java     # Map SED to mottatteopplysninger
+└── mottak/
+    └── SedMottakRuting.java    # Route incoming SEDs
 ```
 
 ### Key SED Types
@@ -50,12 +51,12 @@ saksflyt/steg/sed/
 
 | SED | Purpose | When Used |
 |-----|---------|-----------|
-| `A001` | Request for applicable legislation | Anmodning om unntak (Art. 16) |
-| `A003` | Certificate of applicable legislation | Vedtak utland (A1) |
-| `A004` | Refusal of certificate | Avslag |
-| `A009` | Pension reminder (Purring) | Follow-up |
-| `A011` | Approval of request | Godkjenning anmodning |
-| `A012` | Information about changes | Endringsmelding |
+| `A001` | Request for exception (Søknad/anmodning om unntak) | Anmodning om unntak (Art. 16), starts LA_BUC_01 |
+| `A003` | Decision on applicable legislation (A1) | Vedtak utland (A1) |
+| `A004` | Refusal of A003 decision (Avslag) | Sent in LA_BUC_02 |
+| `A009` | Posting notification (Melding om utstasjonering, Art. 12) | LA_BUC_04 |
+| `A011` | Approval of exception request (Innvilgelse av søknad om unntak) | Positive response to A001 in LA_BUC_01 |
+| `A012` | Change to decision (Endringsmelding) | Update to a sent A003 |
 
 **H-Series (Healthcare)**:
 
@@ -79,11 +80,12 @@ BUC groups related SEDs into a case workflow:
 
 | BUC | Purpose | Common SEDs |
 |-----|---------|-------------|
-| `LA_BUC_01` | Applicable legislation request | A001, A003, A004, A011 |
-| `LA_BUC_02` | Posted worker notification | A003 |
-| `LA_BUC_04` | Exception agreement (Art. 16) | A001, A011 |
-| `LA_BUC_06` | Certificate correction | A003, X008 |
-| `H_BUC_01` | Healthcare coordination | H001, H003 |
+| `LA_BUC_01` | Søknad om unntak (exception request, Art. 16) | A001, A002, A011 |
+| `LA_BUC_02` | Beslutning om lovvalg / arbeid i flere land (Art. 13) | A003, A004 |
+| `LA_BUC_04` | Melding om utstasjonering (posting notification, Art. 12) | A009 |
+| `LA_BUC_05` | Lovvalg etter hovedregel (Art. 11) | A003 |
+| `LA_BUC_06` | Forespørsel om mer informasjon | A005, A006 |
+| `H_BUC_01` | Healthcare coordination (handled in melosys-eessi) | H001, H003 |
 | `UB_BUC_01` | Unilateral benefits | Various |
 
 ## Sending SEDs
@@ -98,41 +100,43 @@ BUC groups related SEDs into a case workflow:
 
 ### Key Operations
 
-**Create BUC and Send SED**:
-```kotlin
-// Via EessiService
-eessiService.opprettBucOgSed(
-    behandling = behandling,
-    sedType = SedType.A003,
-    mottakerinstitusjoner = listOf("SE:FK"),
-    journalpostID = journalpostId
-)
+**Create BUC and Send SED** (EessiService.java):
+```java
+// Takes behandlingID + BucType (not a Behandling/SedType).
+// The SED type is derived from the behandling's resultat/periode inside the service.
+String rinaUrl = eessiService.opprettBucOgSed(
+    behandlingID,                 // long
+    BucType.LA_BUC_02,            // BucType
+    List.of("SE:FK"),            // mottakerInstitusjoner
+    dokumentReferanser            // Collection<DokumentReferanse>
+);
 ```
 
-**Send SED on Existing BUC**:
-```kotlin
-eessiService.sendSedPåEksisterendeBuc(
-    behandling = behandling,
-    sedType = SedType.A011,
-    rinaSaksnummer = "12345"
-)
+**Send SED on an existing BUC**: EessiService exposes purpose-specific methods
+(e.g. `sendGodkjenningArbeidFlereLand`, `sendAnmodningUnntakSvar`,
+`sendAvslagUtpekingSvar`). These internally call `eessiClient.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, sedType)`
+— note `sendSedPåEksisterendeBuc` lives on `EessiClient`, not on `EessiService`.
+```java
+eessiService.sendGodkjenningArbeidFlereLand(behandlingID, ytterligereInformasjon); // sends A012
 ```
 
-**Get Recipient Institutions**:
-```kotlin
-val institusjoner = eessiService.hentMottakerinstitusjoner(
-    bucType = BucType.LA_BUC_01,
-    landkode = "SE"
-)
+**Get Recipient Institutions** (note: method takes bucType name + a collection of landkoder):
+```java
+List<Institusjon> institusjoner = eessiService.hentEessiMottakerinstitusjoner(
+    BucType.LA_BUC_01.name(),     // String bucType
+    Set.of("SE")                  // Collection<String> landkoder
+);
 ```
 
 ### SedDataBygger
 
-Constructs SED payload from treatment data:
+Constructs the SED payload (`SedDataDto`) from treatment data. The input is a
+`SedDataGrunnlag` produced by `SedDataGrunnlagFactory.av(behandling)`:
 
-```kotlin
-// Builds complete SedDataDto
-val sedData = sedDataBygger.build(behandling, sedType)
+```java
+// SedDataBygger.lag(...) builds the full SedDataDto; lagUtkast(...) builds a draft
+SedDataGrunnlag grunnlag = dataGrunnlagFactory.av(behandling);
+SedDataDto sedData = sedDataBygger.lag(grunnlag, behandlingsresultat, periodeType);
 
 // Contains:
 // - Bruker (person info)
@@ -165,49 +169,58 @@ val sedData = sedDataBygger.build(behandling, sedType)
 
 ### SED Type → Treatment Topic Mapping
 
-```kotlin
-// SedTypeTilBehandlingstemaMapper
-A001 → Behandlingstema.LOVVALG  // Exception request
-A003 → Behandlingstema.LOVVALG  // Certificate
-H001 → Behandlingstema.HELSE    // Healthcare
+Only A001/A003/A009/A010 map to a behandlingstema; every other SED type (including
+the H-series) returns empty. There is no `Behandlingstema.HELSE` — H-series
+healthcare flows are not driven through this mapper in melosys-api.
+
+```java
+// SedTypeTilBehandlingstemaMapper.finnBehandlingstemaForSedType(sedType, lovvalgsland)
+A001 → Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+A003 → BESLUTNING_LOVVALG_NORGE | BESLUTNING_LOVVALG_ANNET_LAND  // depends on lovvalgsland
+A009 → Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
+A010 → Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
+// all other SED types → Optional.empty()
 ```
 
 ## RINA Integration
 
 ### Saksrelasjon (Case Relationship)
 
-Links GSAK (archive case) to RINA case:
+Links the archive case (arkivsakID) to a RINA case. The third argument is the
+**bucType** (as a String), not a SED type:
 
-```kotlin
+```java
 eessiService.lagreSaksrelasjon(
-    gsakSaksnummer = fagsak.gsakSaksnummer,
-    rinaSaksnummer = rinaCaseId,
-    sedType = SedType.A003
-)
+    arkivsakID,                   // Long
+    rinaSaksnummer,               // String
+    BucType.LA_BUC_02.name()      // String bucType
+);
 ```
 
 ### BUC Status Checks
 
-```kotlin
-// Check if BUC is open
-val erÅpen = eessiService.erBucAapen(rinaSaksnummer)
+```java
+// Check if the BUC for an arkivsak is open (takes the long arkivsakID, not a rinaSaksnummer)
+boolean erÅpen = eessiService.erBucAapen(arkivsakID);
 
-// Check available SED types
-val kanOpprettes = eessiService.kanOppretteSedTyperPåBuc(rinaSaksnummer)
+// Check whether a specific SED type can be created on a BUC (returns boolean)
+boolean kanOpprettes = eessiService.kanOppretteSedTyperPåBuc(rinaSaksnummer, SedType.A012);
 
-// Get related BUCs
-val bucer = eessiService.hentTilknyttedeBucer(gsakSaksnummer)
+// Get related BUCs (statuser filter; empty list = all)
+List<BucInformasjon> bucer = eessiService.hentTilknyttedeBucer(arkivsakID, List.of());
 ```
 
 ### LåsReferanse for Concurrency
 
-SEDs use RINA case number as lock reference:
+`Prosessinstans.låsReferanse` is a plain `String` (DB column `sed_laas_referanse`).
+For SEDs it has the form `rinaSaksnummer_sedID_sedVersjon`. `LåsReferanseFactory.lagLåsReferanse(..)`
+parses it into a `SedLåsReferanse`, whose `gruppePrefiks` is the **RINA saksnummer**.
+Prosessinstanser that share a gruppePrefiks (same RINA case) are serialised, so
+concurrent operations on the same RINA case are queued rather than run in parallel.
 
 ```kotlin
-// In Prosessinstans
-låsReferanse = LåsReferanseRinasak(rinaSaksnummer)
-
-// Prevents concurrent operations on same RINA case
+val ref = LåsReferanseFactory.lagLåsReferanse(prosessinstans.hentLåsReferanse) // -> SedLåsReferanse
+ref.gruppePrefiks // == rinaSaksnummer
 ```
 
 ## Common Issues
@@ -219,9 +232,9 @@ låsReferanse = LåsReferanseRinasak(rinaSaksnummer)
 **Cause**: Country not EESSI-ready or wrong BUC type
 
 **Investigation**:
-```kotlin
-val institusjoner = eessiService.hentMottakerinstitusjoner(bucType, landkode)
-// Empty list = country not configured
+```java
+List<Institusjon> institusjoner = eessiService.hentEessiMottakerinstitusjoner(bucType.name(), Set.of(landkode));
+// Empty list = country not configured / not EESSI-ready
 ```
 
 ### 2. Invalid SED Type for BUC
@@ -229,9 +242,9 @@ val institusjoner = eessiService.hentMottakerinstitusjoner(bucType, landkode)
 **Symptom**: Cannot create SED on existing BUC
 
 **Investigation**:
-```kotlin
-val tilgjengelige = eessiService.kanOppretteSedTyperPåBuc(rinaSaksnummer)
-// Check if desired SED type is in list
+```java
+boolean kanOpprettes = eessiService.kanOppretteSedTyperPåBuc(rinaSaksnummer, ønsketSedType);
+// false = the desired SED type cannot be created (Create action) on this BUC
 ```
 
 ### 3. GB/EFTA Convention Special Handling
@@ -276,19 +289,30 @@ val tilgjengelige = eessiService.kanOppretteSedTyperPåBuc(rinaSaksnummer)
 ## Debugging
 
 ### Find RINA Case for Behandling
+
+The RINA saksnummer is **not** stored as a `saksopplysning` row with
+`opplysningstype = 'RINA_SAKSNUMMER'` (that string only exists in test code) and
+there is no `seddokument`/`sed_dokument` table. SED data is a SED-opplysning in the
+`saksopplysning` table (`opplysning_type = 'SEDOPPL'`), serialized as XML in
+`dokument`; the RINA saksnummer lives inside that XML (domain type
+`SedDokument`). It is also the prefix of the saga lock reference
+(`prosessinstans.sed_laas_referanse`, see below).
+
 ```sql
-SELECT so.verdi as rina_saksnummer
-FROM saksopplysning so
-WHERE so.behandling_id = :behandlingId
-AND so.opplysningstype = 'RINA_SAKSNUMMER';
+SELECT s.id, s.registrert_dato, s.dokument
+FROM saksopplysning s
+WHERE s.behandling_id = :behandlingId
+AND s.opplysning_type = 'SEDOPPL'
+ORDER BY s.registrert_dato DESC;
 ```
 
 ### Check SED Sending History
 ```sql
-SELECT pi.id, pi.type, pi.sist_utforte_steg, pi.status
+-- prosessinstans columns: prosess_type, sist_fullfort_steg, status, registrert_dato
+SELECT pi.uuid, pi.prosess_type, pi.sist_fullfort_steg, pi.status
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId
-AND pi.type LIKE '%SED%' OR pi.sist_utforte_steg LIKE '%SED%'
+AND (pi.prosess_type LIKE '%SED%' OR pi.sist_fullfort_steg LIKE '%SED%')
 ORDER BY pi.registrert_dato DESC;
 ```
 
@@ -302,3 +326,4 @@ ORDER BY pi.registrert_dato DESC;
 
 - **[SED Types](references/sed-types.md)**: Complete SED type reference
 - **[BUC Types](references/buc-types.md)**: BUC mapping and workflows
+- **[Debugging](references/debugging.md)**: SQL queries, log grep patterns, common issues

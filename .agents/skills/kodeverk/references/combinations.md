@@ -150,17 +150,18 @@ When treatment created from SED:
 ## Validation Methods
 
 ```kotlin
-// Check if combination is valid
+// Check if combination is valid (param order: hovedpart, sakstype, sakstema, behandlingstema, behandlingstype)
 service.validerOpprettelseOgEndring(
+    hovedpart = Aktoersroller.BRUKER,
     sakstype = Sakstyper.EU_EOS,
     sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
-    behandlingstype = Behandlingstyper.FØRSTEGANG,
-    behandlingstema = Behandlingstema.YRKESAKTIV
+    behandlingstema = Behandlingstema.YRKESAKTIV,
+    behandlingstype = Behandlingstyper.FØRSTEGANG
 )
 
 // Get valid options
 val temaer = service.hentMuligeBehandlingstemaer(
-    sakstype, sakstema, hovedpart, behandlingstyper, sisteBehTema
+    hovedpart, sakstype, sakstema, aktivBehandlingID, sistBehandlingstema
 )
 ```
 

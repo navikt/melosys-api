@@ -2,138 +2,77 @@
 
 ## Overview
 
-AvklarteFakta (clarified facts) are pieces of information that need to be gathered/confirmed before a saksbehandler can evaluate vilkår. They come from external sources (PDL, Aareg, etc.) or manual input.
+Avklarte fakta (clarified facts) are answers the saksbehandler must give before certain vilkår can be presented for a bestemmelse — e.g. what the arbeidssituasjon is, or which familierelasjon applies. They are NOT a fetch of raw facts from PDL/Aareg; they are a small set of choices derived from søknadsland and relasjon, which then steer which vilkår `VilkårForBestemmelse*` returns.
 
 ## AvklarteFaktaForBestemmelse
 
-Routes to theme-specific fact requirements:
+A single `@Component` (no injected per-tema subcomponents). It routes by behandlingstema to internal `hent*` methods and returns `List<AvklarteFaktaType>`:
 
 ```kotlin
 @Component
 class AvklarteFaktaForBestemmelse(
-    val avklarteFaktaYrkesaktiv: AvklarteFaktaYrkesaktiv,
-    val avklarteFaktaIkkeYrkesaktiv: AvklarteFaktaIkkeYrkesaktiv,
-    val avklarteFaktaPensjonist: AvklarteFaktaPensjonist
+    private val mottatteOpplysningerService: MottatteOpplysningerService,
+    private val behandlingService: BehandlingService
 ) {
-    fun hentAvklarteFakta(
-        bestemmelse: Bestemmelse,
-        behandlingstema: Behandlingstema
-    ): List<AvklartFakta> {
+    fun hentAvklarteFakta(bestemmelse: Bestemmelse, behandlingID: Long): List<AvklarteFaktaType> {
+        val behandlingstema = behandlingService.hentBehandling(behandlingID).tema
         return when (behandlingstema) {
-            Behandlingstema.YRKESAKTIV -> avklarteFaktaYrkesaktiv.hentFakta(bestemmelse)
-            Behandlingstema.IKKE_YRKESAKTIV -> avklarteFaktaIkkeYrkesaktiv.hentFakta(bestemmelse)
-            Behandlingstema.PENSJONIST -> avklarteFaktaPensjonist.hentFakta(bestemmelse)
-            else -> emptyList()
+            Behandlingstema.IKKE_YRKESAKTIV -> hentAvklarteFaktaIkkeYrkesaktiv(bestemmelse, behandlingID)
+            Behandlingstema.PENSJONIST      -> hentAvklarteFaktaPensjonist(bestemmelse, behandlingID)
+            else                            -> hentAvklarteFaktaYrkesaktiv(bestemmelse, behandlingID)
         }
     }
+    // hentAvklarteFaktaIkkeYrkesaktiv / hentAvklarteFaktaPensjonist / hentAvklarteFaktaYrkesaktiv ...
 }
+
+data class AvklarteFaktaType(val type: Avklartefaktatyper, val muligeFakta: List<String>)
 ```
 
-## Common AvklartFakta Types
+## Avklartefaktatyper used for FTRL kap. 2
 
-| AvklartFakta | Description | Source |
-|--------------|-------------|--------|
-| `ARBEIDSFORHOLD` | Employment relationships | Aareg |
-| `STATSBORGERSKAP` | Citizenship(s) | PDL |
-| `PENSJON` | Pension information | Manual/Sigrun |
-| `INNTEKT` | Income data | Sigrun |
-| `MEDLEMSKAPSHISTORIKK` | Previous membership | MEDL |
-| `BOSTED` | Residence information | PDL |
-| `FAMILIEFORHOLD` | Family relationships | PDL |
+`Avklartefaktatyper` is a generated kodeverk enum (`no.nav.melosys.domain.kodeverk.Avklartefaktatyper`). The values actually produced by `AvklarteFaktaForBestemmelse`:
 
-## Facts per Behandlingstema
+| Avklartefaktatyper | muligeFakta (enum names) | Source of the branch |
+|--------------------|--------------------------|----------------------|
+| `ARBEIDSSITUASJON` | `Arbeidssituasjontype` values (e.g. `ARBIED_I_NORGE_2_2`, `ARBEID_PÅ_NORSK_SOKKEL_2_2`, `MIDLERTIDIG_ARBEID_2_1_FJERDE_LEDD`, `VEKSELVIS_ARBEID_2_1_FJERDE_LEDD`) | YRKESAKTIV; søknadsland for 2-1 |
+| `IKKE_YRKESAKTIV_RELASJON` | `Ikkeyrkesaktivrelasjontype` values (e.g. `BARN_2_5_ANDRE_LEDD`, `EKTEFELLE_2_5_ANDRE_LEDD_A_TIL_B`, `EKTEFELLE_2_8_FJERDE_LEDD`) | IKKE_YRKESAKTIV / PENSJONIST 2-5 / 2-8 |
+| `IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD` | `Ikkeyrkesaktivoppholdtype` values (`MIDLERTIDIG_2_1_FJERDE_LEDD`, `VEKSELVIS_2_1_FJERDE_LEDD`) | IKKE_YRKESAKTIV 2-1 with utlandsopphold |
 
-### YRKESAKTIV
+## Which bestemmelser require avklarte fakta
 
-Required facts for employed persons abroad:
-- `ARBEIDSFORHOLD` - Current and historical employment
-- `STATSBORGERSKAP` - For citizenship vilkår
-- `INNTEKT` - For trygdeavgift calculation
-- `BOSTED` - Current residence
+Only a subset of bestemmelser produce avklarte fakta; the rest return an empty list (no clarification needed before showing vilkår):
 
-### IKKE_YRKESAKTIV
-
-Required facts for non-employed persons:
-- `STATSBORGERSKAP`
-- `MEDLEMSKAPSHISTORIKK` - Previous membership status
-- `FAMILIEFORHOLD` - For "forsørget av medlem" vilkår
-- `BOSTED`
-
-### PENSJONIST
-
-Required facts for pensioners:
-- `STATSBORGERSKAP`
-- `PENSJON` - Pension type and start date
-- `MEDLEMSKAPSHISTORIKK`
-
-## AvklartefaktaService
-
-```java
-@Service
-public class AvklartefaktaService {
-
-    // Fetches facts from external services
-    public AvklarteFaktaResultat hentAvklarteFakta(
-        Long behandlingId,
-        Set<AvklartFakta> faktaTyper
-    );
-
-    // Stores manually entered facts
-    public void lagreManuelleAvklarteFakta(
-        Long behandlingId,
-        AvklartFakta faktaType,
-        String verdi
-    );
-}
-```
+- **YRKESAKTIV**: `FTRL_KAP2_2_1` (søknadsland → arbeidssituasjon) and `FTRL_KAP2_2_2` (arbeidssituasjon Norge/sokkel).
+- **IKKE_YRKESAKTIV**: `FTRL_KAP2_2_1` (søknadsland → opphold), `FTRL_KAP2_2_5_ANDRE_LEDD` (relasjon barn/ektefelle) and `FTRL_KAP2_2_8_FJERDE_LEDD` (relasjon barn/ektefelle).
+- **PENSJONIST**: `FTRL_KAP2_2_1` and `FTRL_KAP2_2_5_ANDRE_LEDD` (ektefelle-relasjon only).
 
 ## Fact Collection Flow
 
 ```
-1. Bestemmelse selected
+1. Bestemmelse + behandling selected
            │
            ▼
-2. AvklarteFaktaForBestemmelse.hentAvklarteFakta()
+2. AvklarteFaktaForBestemmelse.hentAvklarteFakta(bestemmelse, behandlingID)
+           │  (reads behandlingstema + soeknadsland via MottatteOpplysningerService)
+           ▼
+3. UI presents the avklarte fakta choices (type + muligeFakta)
            │
            ▼
-3. System fetches facts from external services
+4. Saksbehandler picks a value → sent back as avklarteFakta: Map<Avklartefaktatyper, String>
            │
            ▼
-4. Facts displayed in UI
-           │
-           ▼
-5. Saksbehandler verifies/supplements facts
-           │
-           ▼
-6. Vilkår evaluation can proceed
+5. VilkårForBestemmelse.hentVilkår(..., avklarteFakta, behandlingID) returns the matching vilkår
 ```
 
-## Integration with Vilkår
+## How avklarte fakta feed back into vilkår
 
-The relationship between avklartefakta and vilkår:
+The chosen value is passed back into `VilkårForBestemmelse.hentVilkår(...)` as `avklarteFakta: Map<Avklartefaktatyper, String>`. The theme routers read it via:
 
-| Vilkår | Required AvklartFakta |
-|--------|----------------------|
-| `NORSK_STATSBORGER` | `STATSBORGERSKAP` |
-| `ANNEN_STATSBORGER` | `STATSBORGERSKAP` |
-| `ARBEID_FOR_NORSK_ARBEIDSGIVER` | `ARBEIDSFORHOLD` |
-| `TIDLIGERE_MEDLEM` | `MEDLEMSKAPSHISTORIKK` |
-| `FORSØRGET_AV_MEDLEM` | `FAMILIEFORHOLD` |
-| `MOTTOK_PENSJON_FØR_1994` | `PENSJON` |
-| `OPPTJENINGSAAR_PENSJON` | `PENSJON`, `MEDLEMSKAPSHISTORIKK` |
+- `avklarteFakta[Avklartefaktatyper.ARBEIDSSITUASJON]` → `Arbeidssituasjontype.valueOf(...)` (yrkesaktiv 2-1 / 2-2)
+- `avklarteFakta[Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON]` → `Ikkeyrkesaktivrelasjontype.valueOf(...)` (2-5 andre ledd, 2-8 fjerde ledd)
 
-## Manual vs Automatic Facts
+An unknown/missing value throws `FunksjonellException`.
 
-### Automatic (from external services)
-- Statsborgerskap from PDL
-- Arbeidsforhold from Aareg
-- Bosted from PDL
+## Storage
 
-### Manual entry required
-- Confirmation of employment for Norwegian employer abroad
-- Pension details before 1994
-- Specific work types (missionary, au pair, etc.)
-
-## Database Storage
-
-Facts are stored as part of the behandling context, not as separate entities. The evaluation results (what facts were used) appear in vilkaarsresultat begrunnelser.
+Avklarte fakta are a derivation step in the request/response cycle, driven by `soeknadsland` (from `MottatteOpplysningerService`) and the saksbehandler's relasjon choice. They are not persisted as their own entity. The resulting evaluation (which begrunnelse-koder were chosen) is stored as `VilkaarBegrunnelse` rows on the `Vilkaarsresultat`.

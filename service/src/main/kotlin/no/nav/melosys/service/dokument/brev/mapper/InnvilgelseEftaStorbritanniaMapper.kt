@@ -75,7 +75,7 @@ class InnvilgelseEftaStorbritanniaMapper(
             erArtikkel16_1_eller_16_3 = lovvalgsperiode.erArtikkel16_1_eller_16_3(),
             erArtikkel18_1 = lovvalgsperiode.erArtikkel18_1(),
             bosted = bostedsland.beskrivelse,
-            anmodningsperiodeSvarType = if (anmodningsperiode.isPresent) anmodningsperiode.get().anmodningsperiodeSvar.anmodningsperiodeSvarType.name else "",
+            anmodningsperiodeSvarType = anmodningsperiode.getOrNull()?.anmodningsperiodeSvar?.anmodningsperiodeSvarType?.name ?: "",
             innvilgelseFritekst = brevbestilling.innvilgelseFritekst,
             innledningFritekst = brevbestilling.innledningFritekst,
             begrunnelseFritekst = if (brevbestilling.begrunnelseFritekst.isNullOrEmpty()) behandlingsresultat.begrunnelseFritekst else brevbestilling.begrunnelseFritekst,

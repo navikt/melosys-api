@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.sed.bygger
 
 import io.getunleash.FakeUnleash
+import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.*
 import io.kotest.matchers.nulls.shouldBeNull
@@ -35,6 +36,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.LuftfartBase
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid
 import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.LandvelgerService
@@ -207,6 +209,14 @@ class SedDataByggerTest {
         persondata: Persondata = DataByggerStubs.lagPersonDokument()
     ): SedDataGrunnlagUtenSoknad {
         return SedDataGrunnlagUtenSoknad(behandling, kodeverkService, persondata)
+    }
+
+    private fun behandlingMedMaritimtArbeid(): Behandling = DataByggerStubs.hentBehandlingStub().apply {
+        mottatteOpplysninger!!.mottatteOpplysningerData.maritimtArbeid = listOf(MaritimtArbeid().apply {
+            enhetNavn = "Stena Don"
+            innretningLandkode = "DK"
+            innretningstype = Innretningstyper.PLATTFORM
+        })
     }
 
     private fun lagGrunnlagMedManglendeAdressefelter(
@@ -466,6 +476,40 @@ class SedDataByggerTest {
         val sedData = lagSedData()
 
         sedData.arbeidssteder.map { it.adresse.shouldNotBeNull().gateadresse } shouldContain IKKE_TILGJENGELIG
+    }
+
+    @Test
+    fun `lag medMaritimtArbeid bruker maritimt arbeidssted fremfor IkkeFastArbeidssted`() {
+        val behandling = behandlingMedMaritimtArbeid()
+        every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) } returns listOf(Land_iso2.DK)
+        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns mapOf(
+            "Stena Don" to AvklartMaritimtArbeid(
+                "Stena Don",
+                listOf(Avklartefakta().apply {
+                    fakta = "DK"
+                    type = Avklartefaktatyper.ARBEIDSLAND
+                })
+            )
+        )
+
+        val sedData = dataBygger.lag(lagGrunnlagMedSøknad(behandling), lagStandardBehandlingsresultat(behandling), PeriodeType.LOVVALGSPERIODE)
+
+        sedData.arbeidssteder.map { Triple(it.navn, it.adresse?.land, it.adresse?.poststed) } shouldContain
+            Triple("Stena Don", "DK", IKKE_TILGJENGELIG)
+        sedData.arbeidssteder.map { it.navn to it.adresse?.land } shouldNotContain (INGEN_FAST_ADRESSE to "DK")
+    }
+
+    @Test
+    fun `lag medMaritimtArbeid bruker mottatteopplysninger når avklartefakta mangler`() {
+        val behandling = behandlingMedMaritimtArbeid()
+        every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) } returns listOf(Land_iso2.DK)
+        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns emptyMap()
+
+        val sedData = dataBygger.lag(lagGrunnlagMedSøknad(behandling), lagStandardBehandlingsresultat(behandling), PeriodeType.LOVVALGSPERIODE)
+
+        sedData.arbeidssteder.map { Triple(it.navn, it.adresse?.land, it.adresse?.poststed) } shouldContain
+            Triple("Stena Don offshore", "DK", IKKE_TILGJENGELIG)
+        sedData.arbeidssteder.map { it.navn to it.adresse?.land } shouldNotContain (INGEN_FAST_ADRESSE to "DK")
     }
 
     @Test
@@ -822,6 +866,37 @@ class SedDataByggerTest {
 
         verify(exactly = 1) { landvelgerService.hentBostedsland(any(), any<MottatteOpplysningerData>()) }
         verify(exactly = 0) { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) }
+    }
+
+    @Test
+    fun `i pensjonist-EØS-flyt hentes ikke arbeidsland fra landvelger`() {
+        every { saksbehandlingRegler.harPensjonistUføretrygdetFlyt(any()) } returns true
+
+        lagSedData()
+
+        verify(exactly = 0) { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) }
+    }
+
+    @Test
+    fun `pensjonist-EØS-flyt bygger SED A005 uten å kaste selv om arbeidslandutledning ville feilet`() {
+        every { saksbehandlingRegler.harPensjonistUføretrygdetFlyt(any()) } returns true
+        every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) } throws
+            IllegalStateException("Søknad mangler søknadsland og land er ikke markert som flere land ukjent hvilke.")
+
+        val sedData = shouldNotThrowAny { lagSedData() }
+
+        sedData.shouldNotBeNull()
+        verify(exactly = 0) { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) }
+    }
+
+    @Test
+    fun `ikke-pensjonist-flyt kaster når arbeidslandutledning feiler på grunn av manglende søknadsland`() {
+        every { saksbehandlingRegler.harPensjonistUføretrygdetFlyt(any()) } returns false
+        every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) } throws
+            IllegalStateException("Søknad mangler søknadsland og land er ikke markert som flere land ukjent hvilke.")
+
+        shouldThrow<IllegalStateException> { lagSedData() }
+            .message.shouldNotBeNull() shouldContain "Søknad mangler søknadsland"
     }
 
     private fun lagUtkastAssertions(sedData: SedDataDto, forventAdresse: Boolean) {

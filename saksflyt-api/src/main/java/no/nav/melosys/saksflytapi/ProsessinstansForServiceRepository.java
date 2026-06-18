@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflytapi;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,5 +20,5 @@ public interface ProsessinstansForServiceRepository extends JpaRepository<Proses
         "AND DBMS_LOB.INSTR(DATA, 'opprinneligBeh=' || :behandlingID) > 0")
     List<Prosessinstans> findBySatsendringAndOpprinneligBehandlingIdNotFerdig(@Param("behandlingID") Long behandlingID);
 
-    boolean existsByLåsReferanseAndType(String låsReferanse, ProsessType type);
+    boolean existsByLåsReferanseAndTypeIn(String låsReferanse, Collection<ProsessType> typer);
 }

@@ -1,5 +1,15 @@
 # PDL API Reference
 
+## Contents
+
+- [Overview](#overview)
+- [Authentication](#authentication)
+- [GraphQL Queries](#graphql-queries)
+- [PDL DTOs](#pdl-dtos) — Ident, Person, Navn, Statsborgerskap, Sivilstand, ForelderBarnRelasjon, Adressebeskyttelse
+- [Address DTOs](#address-dtos) — Bostedsadresse, Vegadresse, UtenlandskAdresse, Kontaktadresse
+- [Metadata](#metadata)
+- [Error Handling](#error-handling)
+
 ## Overview
 
 PDL (Person Data Lake) is NAV's master data source for person information.
@@ -338,7 +348,7 @@ public record Endring(
 | `bad_request` | Invalid query or parameters |
 | `unauthorized` | Token issues |
 
-### Error Handling in PDLConsumerImpl
+### Error Handling in PDLClientImpl
 
 ```java
 private void håndterFeil(GraphQLResponse<?> response) {

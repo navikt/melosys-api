@@ -11,7 +11,6 @@ import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.ProsessSteg;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto;
@@ -83,9 +82,7 @@ public class SendForvaltningsmelding implements StegBehandler {
     private ForvaltningsmeldingMottaker hentForvaltningsmeldingMottaker(Prosessinstans prosessinstans) {
         var forvaltningsmeldingMottaker = prosessinstans.getData(FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.class);
 
-        if (forvaltningsmeldingMottaker == null &&
-            (prosessinstans.getType() == ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
-                || prosessinstans.getType() == ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD)) {
+        if (forvaltningsmeldingMottaker == null && prosessinstans.getType().erDigitalSøknadMottak()) {
             return hentForvaltningsmeldingMottakerForDigitalSøknad(prosessinstans);
         }
         return forvaltningsmeldingMottaker;

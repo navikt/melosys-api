@@ -18,7 +18,7 @@ IkkeFunnetException: "Fant ikke ident i PDL."
 ```kotlin
 // Check what identities exist
 try {
-    val identer = pdlConsumer.hentIdenter(ident)
+    val identer = pdlClient.hentIdenter(ident)
     log.info("Found identities: ${identer.identer().map { "${it.gruppe()}: ${it.ident()}" }}")
 } catch (e: IkkeFunnetException) {
     log.warn("No identities found for: $ident")
@@ -41,7 +41,7 @@ try {
 
 **Investigation**:
 ```kotlin
-val person = pdlConsumer.hentPerson(ident)
+val person = pdlClient.hentPerson(ident)
 log.info("Adressebeskyttelse: ${person.adressebeskyttelse().map { it.gradering() }}")
 log.info("Bostedsadresse count: ${person.bostedsadresse().size}")
 log.info("Kontaktadresse count: ${person.kontaktadresse().size}")
@@ -64,7 +64,7 @@ if (person.adressebeskyttelse().any { it.erStrengtFortrolig() }) {
 
 **Investigation**:
 ```kotlin
-val person = pdlConsumer.hentFamilierelasjoner(ident)
+val person = pdlClient.hentFamilierelasjoner(ident)
 
 // Check age
 val fødselsdato = person.foedselsdato().firstOrNull()?.foedselsdato()
@@ -96,7 +96,7 @@ person.forelderBarnRelasjon().forEach { relasjon ->
 log.info("Checking caches: aktoerID, folkeregisterIdent")
 
 // Force fresh lookup by calling PDL directly
-val freshIdenter = pdlConsumer.hentIdenter(ident)
+val freshIdenter = pdlClient.hentIdenter(ident)
 log.info("Fresh from PDL: ${freshIdenter.identer()}")
 ```
 
@@ -113,10 +113,10 @@ log.info("Fresh from PDL: ${freshIdenter.identer()}")
 **Fix**:
 ```kotlin
 // For current data only
-val person = pdlConsumer.hentPerson(ident)
+val person = pdlClient.hentPerson(ident)
 
 // For data with history
-val personMedHistorikk = pdlConsumer.hentPersonMedHistorikk(ident)
+val personMedHistorikk = pdlClient.hentPersonMedHistorikk(ident)
 ```
 
 ### Issue: Address Priority Wrong
@@ -147,10 +147,10 @@ log.info("Selected postal address: ${persondata.hentGjeldendePostadresse()}")
 
 ## Log Patterns
 
-### PDL Consumer Operations
+### PDLClient Operations
 
 ```bash
-grep "PDLConsumer\|pdlConsumer" application.log
+grep "PDLClient\|pdlClient" application.log
 ```
 
 ### Identity Lookups
@@ -176,29 +176,35 @@ grep "hentFamilierelasjoner\|FamiliemedlemService\|EktefelleEllerPartner" applic
 ### Find Person References in Behandling
 
 ```sql
--- Find behandlinger for a person (via fagsak)
-SELECT b.id, b.status, f.saksnummer, f.aktor_ident
+-- Find behandlinger for a person (via fagsak).
+-- Behandling references Fagsak by saksnummer (the @JoinColumn is "saksnummer",
+-- not a fagsak_id). The person/aktør is not a column on fagsak; it lives in the
+-- aktoer table (rolle BRUKER) joined on saksnummer.
+SELECT b.id, b.status, f.saksnummer
 FROM behandling b
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE f.aktor_ident = :aktoerId;
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+JOIN aktoer a ON a.saksnummer = f.saksnummer AND a.rolle = 'BRUKER'
+WHERE a.person_ident = :ident;
 ```
 
 ### Check Cached Person Data (Saksopplysninger)
 
 ```sql
--- PDL personopplysninger stored in saksopplysning
-SELECT so.id, so.type, so.registrert_dato, so.verdi
+-- PDL personopplysninger stored in saksopplysning.
+-- Columns: opplysning_type (enum stored as string), registrert_dato, dokument (JSON payload).
+-- PDL types: PDL_PERSOPL (personopplysning) and PDL_PERS_SAKS (til saksbehandler).
+SELECT so.id, so.opplysning_type, so.registrert_dato, so.dokument
 FROM saksopplysning so
 WHERE so.behandling_id = :behandlingId
-AND so.type IN ('PDL_PERSONOPPLYSNINGER', 'PDL_PERSONHISTORIKK_TILSAKSBEHANDLER');
+AND so.opplysning_type IN ('PDL_PERSOPL', 'PDL_PERS_SAKS');
 ```
 
 ## Key Code Locations
 
 | Component | Location |
 |-----------|----------|
-| PDL Consumer | `integrasjon/.../pdl/PDLConsumer.java` |
-| PDL Consumer Impl | `integrasjon/.../pdl/PDLConsumerImpl.java` |
+| PDL Client | `integrasjon/.../pdl/PDLClient.java` |
+| PDL Client Impl | `integrasjon/.../pdl/PDLClientImpl.java` |
 | PersondataService | `service/.../persondata/PersondataService.java` |
 | FamiliemedlemService | `service/.../persondata/familie/FamiliemedlemService.java` |
 | Address Priority | `domain/.../person/Personopplysninger.kt:80-84` |

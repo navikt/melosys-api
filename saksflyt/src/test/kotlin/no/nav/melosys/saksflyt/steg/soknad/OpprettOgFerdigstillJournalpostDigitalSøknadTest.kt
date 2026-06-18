@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.soknad
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -23,9 +24,18 @@ import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMedFullmaktMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMedFullmaktMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverfirmaInfo
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerMetadata
 import no.nav.melosys.skjema.types.vedlegg.VedleggFiltype
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -51,7 +61,7 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
     private lateinit var opprettOgFerdigstillJournalpostDigitalSøknad: OpprettOgFerdigstillJournalpostDigitalSøknad
 
     private val fnr = "12345678901"
-    private val innsenderFnr = "98765432100"
+    private val innsenderFnr = INNSENDER_FNR
     private val referanseId = "MEL-TEST123"
     private val saksnummer = "SAK-12345"
     private val journalpostId = "JOARK-123456"
@@ -65,7 +75,8 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
     @BeforeEach
     fun setup() {
         opprettOgFerdigstillJournalpostDigitalSøknad = OpprettOgFerdigstillJournalpostDigitalSøknad(
-            melosysSkjemaApiClient, joarkFasade, behandlingService, persondataFasade, skjemaSakMappingService
+            melosysSkjemaApiClient, joarkFasade, behandlingService, persondataFasade, skjemaSakMappingService,
+            BildeTilPdfKonverterer()
         )
 
         every { joarkFasade.opprettJournalpost(capture(capturedJournalpost), eq(true)) } returns journalpostId
@@ -98,22 +109,71 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
         opprettJournalpost.brukerIdType shouldBe BrukerIdType.FOLKEREGISTERIDENT
         opprettJournalpost.eksternReferanseId shouldBe referanseId
         opprettJournalpost.journalposttype shouldBe Journalposttype.INN
-        opprettJournalpost.innhold shouldBe "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits"
-        opprettJournalpost.hoveddokument.tittel shouldBe "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits"
+        opprettJournalpost.innhold shouldBe søknadsdata.dokumentTittel
+        opprettJournalpost.hoveddokument.tittel shouldBe søknadsdata.dokumentTittel
         opprettJournalpost.korrespondansepartId shouldBe innsenderFnr
         opprettJournalpost.korrespondansepartNavn shouldBe innsenderNavn
     }
 
     @Test
-    fun `utfør oppretter journalpost med korrekt tittel for arbeidsgiver-del`() {
-        val søknadsdata = lagSøknadsdata(Skjemadel.ARBEIDSGIVERS_DEL)
+    fun `utfør bruker dokumentTittel fra søknadsdata på journalpost`() {
+        val tittelFraSkjemaApi = "Bekreftelse fra arbeidsgiver på utsending til annet EØS-land eller Sveits"
+        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+            fnr = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.fnr
+            referanseId = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.referanseId
+            innsenderFnr = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.innsenderFnr
+            dokumentTittel = tittelFraSkjemaApi
+            data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
+        }.also { every { melosysSkjemaApiClient.hentPdf(it.skjema.id) } returns pdfBytes }
         val prosessinstans = lagProsessinstans(søknadsdata)
 
         opprettOgFerdigstillJournalpostDigitalSøknad.utfør(prosessinstans)
 
         val opprettJournalpost = capturedJournalpost.captured
-        opprettJournalpost.innhold shouldBe "Bekreftelse på utsending i EØS eller Sveits"
-        opprettJournalpost.hoveddokument.tittel shouldBe "Bekreftelse på utsending i EØS eller Sveits"
+        opprettJournalpost.innhold shouldBe tittelFraSkjemaApi
+        opprettJournalpost.hoveddokument.tittel shouldBe tittelFraSkjemaApi
+    }
+
+    @ParameterizedTest(name = "{0} skal gi orgnr som avsender")
+    @MethodSource("organisasjonAvsenderMetadata")
+    fun `utfør setter organisasjon som avsender når søknad er sendt på vegne av arbeidsgiver eller radgiverfirma`(
+        @Suppress("UNUSED_PARAMETER") navn: String,
+        metadata: UtsendtArbeidstakerMetadata,
+        forventetOrgnr: String,
+        forventetNavn: String
+    ) {
+        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            fnr = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.fnr
+            referanseId = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.referanseId
+            innsenderFnr = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.innsenderFnr
+            this.metadata = metadata
+            if (metadata.skjemadel == Skjemadel.ARBEIDSGIVERS_DEL) {
+                data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
+            }
+        }.also { every { melosysSkjemaApiClient.hentPdf(it.skjema.id) } returns pdfBytes }
+        val prosessinstans = lagProsessinstans(søknadsdata)
+
+        opprettOgFerdigstillJournalpostDigitalSøknad.utfør(prosessinstans)
+
+        val opprettJournalpost = capturedJournalpost.captured
+        opprettJournalpost.korrespondansepartId shouldBe forventetOrgnr
+        opprettJournalpost.korrespondansepartNavn shouldBe forventetNavn
+        opprettJournalpost.korrespondansepartIdType shouldBe OpprettJournalpost.KorrespondansepartIdType.ORGNR.kode
+        verify(exactly = 0) { persondataFasade.hentSammensattNavn(any()) }
+    }
+
+    @Test
+    fun `utfør beholder innsender som avsender når representasjonstype er DEG_SELV`() {
+        val søknadsdata = lagSøknadsdata(Skjemadel.ARBEIDSTAKERS_DEL)
+        val prosessinstans = lagProsessinstans(søknadsdata)
+
+        opprettOgFerdigstillJournalpostDigitalSøknad.utfør(prosessinstans)
+
+        val opprettJournalpost = capturedJournalpost.captured
+        opprettJournalpost.korrespondansepartId shouldBe innsenderFnr
+        opprettJournalpost.korrespondansepartNavn shouldBe innsenderNavn
+        opprettJournalpost.korrespondansepartIdType shouldBe OpprettJournalpost.KorrespondansepartIdType.FNR.kode
     }
 
     @Test
@@ -143,6 +203,7 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
             fnr = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.fnr
             referanseId = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.referanseId
             innsenderFnr = this@OpprettOgFerdigstillJournalpostDigitalSøknadTest.innsenderFnr
+            dokumentTittel = "Søknad om A1 for utsendte arbeidstakere i EØS eller Sveits"
             if (skjemadel == Skjemadel.ARBEIDSGIVERS_DEL) {
                 data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
             }
@@ -181,13 +242,13 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
     }
 
     @Test
-    fun `utfør henter og legger til vedlegg av ulike filtyper på journalpost`() {
+    fun `utfør konverterer bildevedlegg til PDFA og beholder PDF-vedlegg for ARKIV-variant`() {
         val pdfVedleggId = UUID.randomUUID()
         val pngVedleggId = UUID.randomUUID()
         val jpegVedleggId = UUID.randomUUID()
         val pdfBytes = "pdf-innhold".toByteArray()
-        val pngBytes = "png-innhold".toByteArray()
-        val jpegBytes = "jpeg-innhold".toByteArray()
+        val pngBytes = lagBildeBytes("png")
+        val jpegBytes = lagBildeBytes("jpg")
 
         val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
             skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
@@ -211,14 +272,24 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
 
         val vedlegg = capturedJournalpost.captured.vedlegg
         vedlegg shouldHaveSize 3
+        // Alle ARKIV-varianter må være PDFA for at Joark skal godta journalposten
+        vedlegg.forEach { it.dokumentVarianter.first().filtype shouldBe DokumentVariant.Filtype.PDFA }
         vedlegg[0].tittel shouldBe "kontrakt.pdf"
-        vedlegg[0].dokumentVarianter.first().filtype shouldBe DokumentVariant.Filtype.PDFA
         vedlegg[0].dokumentVarianter.first().data shouldBe pdfBytes
         vedlegg[1].tittel shouldBe "skjermbilde.png"
-        vedlegg[1].dokumentVarianter.first().filtype shouldBe DokumentVariant.Filtype.PNG
+        // Bildet er konvertert til PDF, så innholdet er ikke lenger de rå bildebytene
+        vedlegg[1].dokumentVarianter.first().data shouldNotBe pngBytes
+        assertErPdf(vedlegg[1].dokumentVarianter.first().data)
         vedlegg[2].tittel shouldBe "foto.jpeg"
-        vedlegg[2].dokumentVarianter.first().filtype shouldBe DokumentVariant.Filtype.JPEG
+        vedlegg[2].dokumentVarianter.first().data shouldNotBe jpegBytes
+        assertErPdf(vedlegg[2].dokumentVarianter.first().data)
     }
+
+    private fun assertErPdf(data: ByteArray) {
+        // PDF-filer starter med magic bytes "%PDF"
+        String(data.copyOfRange(0, 4)) shouldBe "%PDF"
+    }
+
 
     @Test
     fun `utfør kaller oppdaterJournalpostId på skjemaSakMappingService`() {
@@ -238,6 +309,70 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
         return Prosessinstans.forTest {
             medData(ProsessDataKey.DIGITAL_SØKNADSDATA, søknadsdata)
             this.behandling = behandling
+        }
+    }
+
+    companion object {
+        private const val ARBEIDSGIVER_NAVN = "Test AS"
+        private const val ARBEIDSGIVER_ORGNR = "123456789"
+        private const val INNSENDER_FNR = "98765432100"
+        private const val JURIDISK_ENHET_ORGNR = "987654321"
+        private const val RADGIVER_ORGNR = "111222333"
+        private const val RADGIVER_NAVN = "Rådgivning AS"
+
+        @JvmStatic
+        fun organisasjonAvsenderMetadata(): List<Arguments> {
+            val radgiverfirma = RadgiverfirmaInfo(orgnr = RADGIVER_ORGNR, navn = RADGIVER_NAVN)
+            return listOf(
+                Arguments.of(
+                    "ARBEIDSGIVER",
+                    ArbeidsgiverMetadata(
+                        skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+                        arbeidsgiverNavn = ARBEIDSGIVER_NAVN,
+                        juridiskEnhetOrgnr = JURIDISK_ENHET_ORGNR,
+                        arbeidstakerNavn = "Test Arbeidstaker"
+                    ),
+                    ARBEIDSGIVER_ORGNR,
+                    ARBEIDSGIVER_NAVN
+                ),
+                Arguments.of(
+                    "ARBEIDSGIVER_MED_FULLMAKT",
+                    ArbeidsgiverMedFullmaktMetadata(
+                        skjemadel = Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL,
+                        arbeidsgiverNavn = ARBEIDSGIVER_NAVN,
+                        juridiskEnhetOrgnr = JURIDISK_ENHET_ORGNR,
+                        fullmektigFnr = INNSENDER_FNR,
+                        arbeidstakerNavn = "Test Arbeidstaker"
+                    ),
+                    ARBEIDSGIVER_ORGNR,
+                    ARBEIDSGIVER_NAVN
+                ),
+                Arguments.of(
+                    "RADGIVER",
+                    RadgiverMetadata(
+                        skjemadel = Skjemadel.ARBEIDSGIVERS_DEL,
+                        arbeidsgiverNavn = ARBEIDSGIVER_NAVN,
+                        juridiskEnhetOrgnr = JURIDISK_ENHET_ORGNR,
+                        arbeidstakerNavn = "Test Arbeidstaker",
+                        radgiverfirma = radgiverfirma
+                    ),
+                    RADGIVER_ORGNR,
+                    RADGIVER_NAVN
+                ),
+                Arguments.of(
+                    "RADGIVER_MED_FULLMAKT",
+                    RadgiverMedFullmaktMetadata(
+                        skjemadel = Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL,
+                        arbeidsgiverNavn = ARBEIDSGIVER_NAVN,
+                        juridiskEnhetOrgnr = JURIDISK_ENHET_ORGNR,
+                        fullmektigFnr = INNSENDER_FNR,
+                        arbeidstakerNavn = "Test Arbeidstaker",
+                        radgiverfirma = radgiverfirma
+                    ),
+                    RADGIVER_ORGNR,
+                    RADGIVER_NAVN
+                )
+            )
         }
     }
 }

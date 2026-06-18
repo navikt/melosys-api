@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -20,11 +21,11 @@ import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,27 +36,40 @@ import static no.nav.melosys.saksflytapi.domain.ProsessStatus.UNDER_BEHANDLING;
 @Component
 public class ProsessinstansBehandler {
 
-    private static final long ANTALL_TIMER_FØR_GJENOPPRETTELSE = 24;
     private static final Logger log = LoggerFactory.getLogger(ProsessinstansBehandler.class);
 
     private final Map<ProsessSteg, StegBehandler> stegbehandlerMap = new EnumMap<>(ProsessSteg.class);
     private final ProsessinstansRepository prosessinstansRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final MeterRegistry meterRegistry;
+    /**
+     * Hvor lenge en aktiv prosessinstans må ha vært urørt (endretDato) før den gjenopprettes ved oppstart.
+     *
+     * <p><b>Dette er en midlertidig løsning.</b> melosys-api kjører to podder, og gjenopprettelsen kjører kun én gang
+     * per oppstart (ApplicationReadyEvent) og tar også med UNDER_BEHANDLING. Vinduet må derfor være lengre enn både
+     * den lengste saga-kjøretiden og hvor lenge køen holder seg full etter at en stor batch er lagt på den (kan være
+     * timer) — ellers kan begge poddene gjenoppta den samme sagaen. Trygg umiddelbar gjenoppretting krever en
+     * per-pod-eierskapsmarkør på raden, dvs. den varige løsningen Alternativ B (DB-basert kø med
+     * {@code FOR UPDATE SKIP LOCKED} — MELOSYS-8068). Default holdes uendret på
+     * 24 timer (= dagens oppførsel); kan settes lavere per miljø via {@code melosys.saksflyt.gjenopprettelse.vindu}
+     * (men ikke ned til minutter).
+     */
+    private final Duration gjenopprettelseVindu;
 
     public ProsessinstansBehandler(Collection<StegBehandler> stegbehandlere,
                                    ProsessinstansRepository prosessinstansRepository,
                                    ApplicationEventPublisher applicationEventPublisher,
-                                   MeterRegistry meterRegistry
+                                   MeterRegistry meterRegistry,
+                                   @Value("${melosys.saksflyt.gjenopprettelse.vindu:PT24H}") Duration gjenopprettelseVindu
     ) {
         this.meterRegistry = meterRegistry;
         stegbehandlere.forEach(s -> stegbehandlerMap.put(s.inngangsSteg(), s));
         this.prosessinstansRepository = prosessinstansRepository;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.gjenopprettelseVindu = gjenopprettelseVindu;
     }
 
-    @Async("saksflytThreadPoolTaskExecutor")
-    public void behandleProsessinstans(@NotNull Prosessinstans prosessinstans) {
+    public void behandleProsessinstansNå(@NotNull Prosessinstans prosessinstans) {
         log.info("Starter behandling av prosessinstans {} med lås {}", prosessinstans.getId(), prosessinstans.getLåsReferanse());
 
         if (prosessinstans.erFerdig() || prosessinstans.erFeilet()) {
@@ -87,7 +101,7 @@ public class ProsessinstansBehandler {
             ProsessStatus.hentAktiveStatuser());
         List<Prosessinstans> prosessinstansSomHenger = prosesser.stream().filter(
             prosess -> prosess.getEndretDato().isBefore(
-                LocalDateTime.now().minusHours(ANTALL_TIMER_FØR_GJENOPPRETTELSE))).toList();
+                LocalDateTime.now().minus(gjenopprettelseVindu))).toList();
         if (!prosessinstansSomHenger.isEmpty()) {
             log.info("Funnet {} prosessinstanse(r) som har hengt", prosessinstansSomHenger.size());
             prosessinstansSomHenger.forEach(this::gjenopprett);
@@ -99,7 +113,7 @@ public class ProsessinstansBehandler {
         prosessinstans.setEndretDato(LocalDateTime.now());
         prosessinstansRepository.save(prosessinstans);
         applicationEventPublisher.publishEvent(new ProsessinstansOpprettetEvent(prosessinstans));
-        log.warn("Prosessinstans {} gjenopprettet etter {} timer", prosessinstans.getId(), ANTALL_TIMER_FØR_GJENOPPRETTELSE);
+        log.warn("Prosessinstans {} gjenopprettet etter {}", prosessinstans.getId(), gjenopprettelseVindu);
     }
 
     private void utførFlyt(Prosessinstans prosessinstans, ProsessFlyt prosessFlyt) {

@@ -1,5 +1,11 @@
 # Fagsak Debugging Guide
 
+> Column-name notes (verified against Flyway migrations and JPA mappings):
+> - `aktoer` and `behandling` reference `fagsak` via the column **`saksnummer`** (not `fagsak_saksnummer`).
+> - The behandling type column is **`beh_type`** and tema is **`beh_tema`**.
+> - `ÅRSAVREGNING` is stored verbatim (with `Å`).
+> - There is no `LUKKET` behandlingsstatus - the closed/terminal status is `AVSLUTTET`.
+
 ## Common SQL Queries
 
 ### Find Fagsak by Saksnummer
@@ -16,7 +22,7 @@ SELECT * FROM fagsak WHERE gsak_saksnummer = 123456;
 ```sql
 SELECT f.*, a.rolle
 FROM fagsak f
-JOIN aktoer a ON a.fagsak_saksnummer = f.saksnummer
+JOIN aktoer a ON a.saksnummer = f.saksnummer
 WHERE a.aktoer_id = '2512489212185'
 ORDER BY f.registrert_dato DESC;
 ```
@@ -25,7 +31,7 @@ ORDER BY f.registrert_dato DESC;
 ```sql
 SELECT f.*, a.rolle
 FROM fagsak f
-JOIN aktoer a ON a.fagsak_saksnummer = f.saksnummer
+JOIN aktoer a ON a.saksnummer = f.saksnummer
 WHERE a.orgnr = '912345678'
 AND a.rolle IN ('VIRKSOMHET', 'ARBEIDSGIVER')
 ORDER BY f.registrert_dato DESC;
@@ -33,11 +39,11 @@ ORDER BY f.registrert_dato DESC;
 
 ### Find Active Cases (with active behandling)
 ```sql
-SELECT f.saksnummer, f.type, f.tema, f.status, b.status as behandling_status
+SELECT f.saksnummer, f.fagsak_type, f.tema, f.status, b.status as behandling_status
 FROM fagsak f
-JOIN behandling b ON b.fagsak_saksnummer = f.saksnummer
+JOIN behandling b ON b.saksnummer = f.saksnummer
 WHERE f.status = 'OPPRETTET'
-AND b.status NOT IN ('AVSLUTTET', 'LUKKET')
+AND b.status != 'AVSLUTTET'
 ORDER BY f.registrert_dato DESC;
 ```
 
@@ -48,10 +54,10 @@ ORDER BY f.registrert_dato DESC;
 
 **Investigation**:
 ```sql
-SELECT fagsak_saksnummer, rolle, COUNT(*) as count
+SELECT saksnummer, rolle, COUNT(*) as count
 FROM aktoer
 WHERE rolle NOT IN ('TRYGDEMYNDIGHET', 'FULLMEKTIG', 'REPRESENTANT')
-GROUP BY fagsak_saksnummer, rolle
+GROUP BY saksnummer, rolle
 HAVING COUNT(*) > 1;
 ```
 
@@ -64,9 +70,9 @@ HAVING COUNT(*) > 1;
 ```sql
 SELECT f.saksnummer, COUNT(*) as active_count
 FROM fagsak f
-JOIN behandling b ON b.fagsak_saksnummer = f.saksnummer
-WHERE b.status NOT IN ('AVSLUTTET', 'LUKKET')
-AND b.type != 'AARSAVREGNING'
+JOIN behandling b ON b.saksnummer = f.saksnummer
+WHERE b.status != 'AVSLUTTET'
+AND b.beh_type != 'ÅRSAVREGNING'
 GROUP BY f.saksnummer
 HAVING COUNT(*) > 1;
 ```
@@ -102,10 +108,10 @@ lovligeKombinasjonerService.validerKombinasjon(
 
 ```sql
 -- Check current state
-SELECT f.saksnummer, f.type, f.tema,
-       b.type as beh_type, b.tema as beh_tema, b.status
+SELECT f.saksnummer, f.fagsak_type, f.tema,
+       b.beh_type, b.beh_tema, b.status
 FROM fagsak f
-JOIN behandling b ON b.fagsak_saksnummer = f.saksnummer
+JOIN behandling b ON b.saksnummer = f.saksnummer
 WHERE f.saksnummer = 'MEL-12345';
 ```
 

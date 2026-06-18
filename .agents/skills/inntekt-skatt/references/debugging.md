@@ -13,12 +13,13 @@
 
 **Debug Steps**:
 ```sql
--- Check stored income saksopplysning
-SELECT s.id, s.type, s.versjon, s.opprettet_tid,
+-- Check stored income saksopplysning.
+-- Physical columns are opplysning_type and registrert_dato (the JPA field is `type`).
+SELECT s.id, s.opplysning_type, s.versjon, s.registrert_dato,
        LENGTH(s.dokument) as doc_size
 FROM saksopplysning s
 WHERE s.behandling_id = :behandlingId
-AND s.type = 'INNTK';
+AND s.opplysning_type = 'INNTK';
 
 -- Check if any income data exists in document
 SELECT s.id,
@@ -26,7 +27,7 @@ SELECT s.id,
        JSON_QUERY(s.dokument, '$.arbeidsInntektMaanedListe') as months
 FROM saksopplysning s
 WHERE s.behandling_id = :behandlingId
-AND s.type = 'INNTK';
+AND s.opplysning_type = 'INNTK';
 ```
 
 ### 2. Skattehendelse Not Processed
@@ -40,24 +41,32 @@ AND s.type = 'INNTK';
 
 **Debug Steps**:
 ```sql
--- Find fagsaker for person with trygdeavgift
-SELECT f.id, f.gsak_saksnr, f.aktor_id,
-       tap.id as avgiftsperiode_id, tap.aar
+-- Find årsavregning fagsaker/behandlinger for a sak.
+-- fagsak PK is saksnummer; behandling joins via saksnummer; type is beh_type.
+-- The reconciliation year (aar) is in the aarsavregning table,
+-- keyed by behandlingsresultat_id (= behandlingsresultat.behandling_id).
+SELECT f.saksnummer, f.gsak_saksnummer,
+       b.id as behandling_id, b.status, aa.aar
 FROM fagsak f
-JOIN behandling b ON b.fagsak_id = f.id
+JOIN behandling b ON b.saksnummer = f.saksnummer
 JOIN behandlingsresultat br ON br.behandling_id = b.id
-JOIN trygdeavgiftsperiode tap ON tap.behandlingsresultat_id = br.id
-WHERE f.aktor_id = :aktorId
-ORDER BY tap.aar DESC;
+JOIN aarsavregning aa ON aa.behandlingsresultat_id = br.behandling_id
+WHERE b.beh_type = 'ÅRSAVREGNING'
+AND f.saksnummer = :saksnummer
+ORDER BY aa.aar DESC;
 
 -- Check if årsavregning already exists for year
-SELECT b.id, b.status, b.behandlingstype, br.aar
+SELECT b.id, b.status, b.beh_type, aa.aar
 FROM behandling b
 JOIN behandlingsresultat br ON br.behandling_id = b.id
-WHERE b.fagsak_id = :fagsakId
-AND b.behandlingstype = 'AARSAVREGNING'
-AND br.aar = :year;
+JOIN aarsavregning aa ON aa.behandlingsresultat_id = br.behandling_id
+WHERE b.saksnummer = :saksnummer
+AND b.beh_type = 'ÅRSAVREGNING'
+AND aa.aar = :year;
 ```
+
+> Note: the person/aktør lookup is done in code via `FagsakService.hentFagsakerMedAktør`
+> (the aktør lives in the `aktoer` table, not as a column on `fagsak`).
 
 ### 3. Income Amounts Mismatch
 
@@ -81,7 +90,7 @@ FROM saksopplysning s,
          )
      ) inntekt
 WHERE s.behandling_id = :behandlingId
-AND s.type = 'INNTK';
+AND s.opplysning_type = 'INNTK';
 ```
 
 ### 4. Wrong Earning Country
@@ -104,7 +113,7 @@ FROM saksopplysning s,
          )
      ) inntekt
 WHERE s.behandling_id = :behandlingId
-AND s.type = 'INNTK'
+AND s.opplysning_type = 'INNTK'
 AND JSON_VALUE(inntekt.value, '$.opptjeningsland') IS NOT NULL;
 ```
 
@@ -113,40 +122,45 @@ AND JSON_VALUE(inntekt.value, '$.opptjeningsland') IS NOT NULL;
 ### Find Recent Income Lookups
 
 ```sql
-SELECT s.id, s.behandling_id, s.opprettet_tid, s.versjon,
-       f.gsak_saksnr
+SELECT s.id, s.behandling_id, s.registrert_dato, s.versjon,
+       f.gsak_saksnummer
 FROM saksopplysning s
 JOIN behandling b ON s.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE s.type = 'INNTK'
-AND s.opprettet_tid > SYSDATE - 7
-ORDER BY s.opprettet_tid DESC;
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+WHERE s.opplysning_type = 'INNTK'
+AND s.registrert_dato > SYSDATE - 7
+ORDER BY s.registrert_dato DESC;
 ```
 
 ### Find Årsavregning Behandlinger
 
 ```sql
-SELECT b.id, b.status, b.opprettet_tid,
-       br.aar, br.beregnet_avgift_beloep,
-       f.gsak_saksnr
+-- aar and beregnet_avgift_belop live in the aarsavregning table
+-- (keyed by behandlingsresultat_id = behandlingsresultat.behandling_id).
+SELECT b.id, b.status, b.registrert_dato,
+       aa.aar, aa.beregnet_avgift_belop,
+       f.gsak_saksnummer
 FROM behandling b
 JOIN behandlingsresultat br ON br.behandling_id = b.id
-JOIN fagsak f ON b.fagsak_id = f.id
-WHERE b.behandlingstype = 'AARSAVREGNING'
-ORDER BY b.opprettet_tid DESC
+JOIN aarsavregning aa ON aa.behandlingsresultat_id = br.behandling_id
+JOIN fagsak f ON b.saksnummer = f.saksnummer
+WHERE b.beh_type = 'ÅRSAVREGNING'
+ORDER BY b.registrert_dato DESC
 FETCH FIRST 20 ROWS ONLY;
 ```
 
 ### Trace Årsavregning Prosessinstans
 
 ```sql
-SELECT pi.id, pi.status, ps.steg, ps.status as steg_status,
-       ps.opprettet_tid, ps.feilmelding
+-- prosessinstans (PK uuid) stores prosess_type and the last completed step inline.
+-- prosessinstans_hendelser holds the per-step history (steg, type, melding).
+SELECT pi.uuid, pi.prosess_type, pi.sist_fullfort_steg AS naavaerende_steg,
+       h.steg AS hendelse_steg, h.type, h.melding, h.registrert_dato
 FROM prosessinstans pi
-JOIN prosess_steg ps ON ps.prosessinstans_id = pi.id
+JOIN prosessinstans_hendelser h ON h.prosessinstans_id = pi.uuid
 WHERE pi.behandling_id = :behandlingId
-AND pi.prosesstype = 'AARSAVREGNING_BEHANDLING'
-ORDER BY ps.opprettet_tid;
+AND pi.prosess_type IN ('OPPRETT_NY_BEHANDLING_AARSAVREGNING', 'IVERKSETT_VEDTAK_AARSAVREGNING')
+ORDER BY h.registrert_dato;
 ```
 
 ### Check Skattehendelse Processing Status
@@ -161,8 +175,8 @@ ORDER BY ps.opprettet_tid;
 ### Inntektskomponenten API
 
 ```
-Base URL: ${melosys.integrasjon.inntekt.url}
-Endpoint: POST /api/v1/hentinntektliste
+Base URL: ${inntekt.rest.url}  (from env INNTEKT_REST_V1_ENDPOINTURL; base already ends in /rs/api/v1)
+Endpoint: POST /hentinntektliste
 Auth: Azure AD token (scope: api://[env].inntektskomponenten/.default)
 
 Request:
@@ -178,11 +192,11 @@ Request:
 ### Kafka Consumer
 
 ```kotlin
-// Topic configuration
-kafka.aiven.skattehendelser.topic = melosys.skattehendelser
+// Topic configuration (default value)
+kafka.aiven.skattehendelser.topic = teammelosys.skattehendelser.v1
 
 // Consumer group
-spring.kafka.consumer.group-id = melosys-api-skattehendelser
+kafka.aiven.skattehendelser.groupid = teammelosys.skattehendelser-consumer
 ```
 
 ## Logging
@@ -208,17 +222,22 @@ Key log messages to search for:
 
 ## Configuration Properties
 
-```properties
-# Inntektskomponenten
-melosys.integrasjon.inntekt.url=https://inntektskomponenten.intern.nav.no
+```yaml
+# Inntektskomponenten (application-nais.yml)
+inntekt:
+  rest:
+    url: ${INNTEKT_REST_V1_ENDPOINTURL}
 
-# Kafka skattehendelser
-kafka.aiven.skattehendelser.topic=melosys.skattehendelser
-spring.kafka.consumer.group-id=melosys-api-skattehendelser
+# Kafka skattehendelser (application-nais.yml)
+kafka:
+  aiven:
+    skattehendelser:
+      groupid: teammelosys.skattehendelser-consumer
+      topic: ${KAFKA_AIVEN_SKATTEHENDELSER:teammelosys.skattehendelser.v1}
 ```
 
 ## Related Skills
 
 - **trygdeavgift**: Uses income for avgift calculation and årsavregning
-- **saksflyt**: AARSAVREGNING_BEHANDLING saga
+- **saksflyt**: OPPRETT_NY_BEHANDLING_AARSAVREGNING / IVERKSETT_VEDTAK_AARSAVREGNING saga
 - **behandlingsresultat**: Stores årsavregning results

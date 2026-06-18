@@ -77,7 +77,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGeneratorTest {
         )
 
         verify(exactly = 0) {
-            prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any())
+            prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any(), any())
         }
         val status = generator.status()
         status["antallHoppetOver"] shouldBe 1
@@ -106,7 +106,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGeneratorTest {
         )
 
         every {
-            prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any())
+            prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any(), any())
         } returns UUID.randomUUID()
 
         generator.finnSakerOgLagProsessinstanser(
@@ -121,6 +121,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGeneratorTest {
                 fagsak.saksnummer,
                 ÅR.toString(),
                 Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE,
+                true,
             )
         }
         generator.status()["antallHoppetOver"] shouldBe 0
@@ -147,7 +148,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGeneratorTest {
         }
 
         every {
-            prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any())
+            prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any(), any())
         } returns UUID.randomUUID()
 
         generator.finnSakerOgLagProsessinstanser(
@@ -162,6 +163,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGeneratorTest {
                 fagsak.saksnummer,
                 ÅR.toString(),
                 Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE,
+                true,
             )
         }
         generator.status()["antallHoppetOver"] shouldBe 0
@@ -189,7 +191,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGeneratorTest {
         }
 
         every {
-            prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any())
+            prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any(), any())
         } returns UUID.randomUUID()
 
         // Skal IKKE kaste exception fra generatoren — runCatching håndterer den
@@ -207,6 +209,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGeneratorTest {
                 fagsak.saksnummer,
                 ÅR.toString(),
                 Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE,
+                true,
             )
         }
         generator.status()["antallHoppetOver"] shouldBe 0

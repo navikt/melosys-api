@@ -41,6 +41,23 @@ public class OppgaveClientProducer {
         );
     }
 
+    // v2 (beta) brukes kun for nøkkelord, som ikke finnes i v1. Samme API og Azure-scope,
+    // kun versjonssegmentet i URL-en skiller.
+    @Bean
+    public OppgaveV2Client oppgaveV2Client(
+        WebClient.Builder webClientBuilder, CorrelationIdOutgoingFilter correlationIdOutgoingFilter
+    ) {
+        return new OppgaveV2Client(
+            webClientBuilder
+                .defaultHeaders(this::defaultHeaders)
+                .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
+                .filter(correlationIdOutgoingFilter)
+                .filter(errorFilter("Kall mot Oppgave v2 feilet."))
+                .baseUrl(url.replace("/api/v1", "/api/v2"))
+                .build()
+        );
+    }
+
     private void defaultHeaders(HttpHeaders httpHeaders) {
         httpHeaders.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
         httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);

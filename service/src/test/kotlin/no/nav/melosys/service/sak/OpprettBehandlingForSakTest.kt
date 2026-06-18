@@ -61,10 +61,12 @@ internal class OpprettBehandlingForSakTest {
             prosessinstansService,
             saksbehandlingRegler,
             lovligeKombinasjonerSaksbehandlingService,
-            behandlingService
+            behandlingService,
+            behandlingsresultatRepository
         )
 
         every { behandlingService.avsluttBehandling(any()) } just Runs
+        every { behandlingsresultatRepository.findById(any()) } returns Optional.empty()
     }
 
 
@@ -272,7 +274,38 @@ internal class OpprettBehandlingForSakTest {
         opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto)
 
 
-        verify { prosessinstansService.opprettOgReplikerBehandlingForSak(FagsakTestFactory.SAKSNUMMER, opprettSakDto.tilOpprettSakRequest()) }
+        verify { prosessinstansService.opprettOgReplikerBehandlingForSak(FagsakTestFactory.SAKSNUMMER, opprettSakDto.tilOpprettSakRequest(), null) }
+    }
+
+    @Test
+    fun opprettBehandling_aktivBehandlingMedAnmodningOmUnntak_avslutterOgReplikerer() {
+        val opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.NY_VURDERING)
+
+        val aktivBehandling = lagBehandling()
+        aktivBehandling.status = Behandlingsstatus.UNDER_BEHANDLING
+
+        val fagsak = lagFagsak(aktivBehandling)
+        aktivBehandling.fagsak = fagsak
+
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(fagsak)
+
+        val eksisterendeResultat = Behandlingsresultat()
+        eksisterendeResultat.type = Behandlingsresultattyper.ANMODNING_OM_UNNTAK
+
+        every { behandlingsresultatRepository.findById(aktivBehandling.id) }.returns(Optional.of(eksisterendeResultat))
+
+        val anmodningsperiode = Anmodningsperiode()
+        anmodningsperiode.setSendtUtland(true)
+        val behandlingsresultatMedAnmodning = Behandlingsresultat()
+        behandlingsresultatMedAnmodning.anmodningsperioder.add(anmodningsperiode)
+        every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(aktivBehandling.id) }.returns(behandlingsresultatMedAnmodning)
+
+
+        opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto)
+
+
+        verify { behandlingService.avsluttBehandling(aktivBehandling.id) }
+        verify { prosessinstansService.opprettOgReplikerBehandlingForSak(FagsakTestFactory.SAKSNUMMER, opprettSakDto.tilOpprettSakRequest(), aktivBehandling.id) }
     }
 
     private fun lagOpprettSakDto(

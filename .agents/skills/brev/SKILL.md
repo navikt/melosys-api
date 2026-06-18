@@ -33,10 +33,18 @@ service/dokument/
         └── *Mapper.java                 # Specific letter mappers
 
 integrasjon/dokgen/
-├── DokgenConsumer.java          # REST client to melosys-dokgen
+├── DokgenClient.java            # REST client to melosys-dokgen
 └── dto/                         # Template DTOs
 
-saksflyt/steg/brev/
+saksflyt/steg/brev/              # Saga steps orchestrating letter production
+├── BestillBrev.java
+├── OpprettOgJournalforBrev.java
+├── SendVedtaksbrevInnland.java
+├── SendForvaltningsmelding.java
+├── SendHenleggelsesbrev.java
+├── SendOrienteringAnmodningUnntak.java
+├── DistribuerJournalpost.java
+├── DistribuerJournalpostUtland.java
 ├── SendOrienteringsbrevTrygdeavgift.kt
 └── SendManglendeInnbetalingVarselBrev.kt
 ```
@@ -62,9 +70,9 @@ saksflyt/steg/brev/
    ↓ Yes                    ↓ No
 4a. DokgenService          4b. DokumentService (legacy)
    ↓                           ↓
-5. DokgenMalMapper.lagDokgenDtoFraBestilling()
+5. DokgenMalMapper.mapBehandling()
    ↓
-6. DokgenConsumer.lagPdf()
+6. DokgenClient.lagPdf()
    ↓
 7. JoarkService.opprettJournalpost()
    ↓
@@ -122,13 +130,8 @@ saksflyt/steg/brev/
 
 ### Produce Letter
 ```kotlin
-// Via facade (recommended)
-dokumentServiceFasade.produserDokument(
-    produserbartDokument = INNVILGELSE_FOLKETRYGDLOVEN,
-    mottaker = Mottaker.medRolle(BRUKER),
-    behandlingId = 123L,
-    brevbestilling = brevbestillingDto
-)
+// Via facade (recommended) - mottaker/produserbartDokument come from the DTO
+dokumentServiceFasade.produserDokument(123L, brevbestillingDto)
 
 // DokgenService directly
 dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto)
@@ -232,15 +235,16 @@ data class DokumentproduksjonsInfo(
 
 **Check**:
 ```kotlin
-val mottakere = brevmottakerService.hentMottakere(behandling, brevbestillingDto)
-log.info("Recipients: ${mottakere.map { it.rolle }}")
+val mottakerliste = brevmottakerService.hentMottakerliste(produserbartDokument, behandlingId)
+log.info("Recipients: ${mottakerliste}")
 ```
 
 ### Issue: Missing Data in Letter
 
 **Symptom**: Blank fields in generated PDF
 
-**Check**: Data mapping in `DokgenMalMapper.lagDokgenDtoFraBestilling()`
+**Check**: Data mapping in `DokgenMalMapper.mapBehandling()` (and the per-letter
+`lag*`/`*Mapper.map(...)` helpers it delegates to)
 
 ## Key Code Locations
 
@@ -251,7 +255,7 @@ log.info("Recipients: ${mottakere.map { it.rolle }}")
 | Facade | `service/.../dokument/DokumentServiceFasade.java` |
 | Template Mapper | `service/.../dokument/brev/mapper/DokgenMalMapper.kt` |
 | Production Info | `service/.../dokument/brev/mapper/DokumentproduksjonsInfoMapper.java` |
-| REST Consumer | `integrasjon/.../dokgen/DokgenConsumer.java` |
+| REST Client | `integrasjon/.../dokgen/DokgenClient.java` |
 | Recipient Service | `service/.../dokument/BrevmottakerService.java` |
 
 ## Detailed Documentation

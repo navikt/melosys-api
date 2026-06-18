@@ -297,9 +297,7 @@ class InnvilgelseFtrlMapper(
 
 
     private fun mapAvgiftsPerioder(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodeDto> {
-        if (behandlingsresultat.trygdeavgiftsperioder.all {
-                it.trygdeavgiftsbeløpMd.verdi == BigDecimal.ZERO && it.trygdesats == BigDecimal.ZERO
-            }) {
+        if (behandlingsresultat.trygdeavgiftsperioder.all { !it.harAvgift() }) {
             return emptyList()
         }
 
@@ -331,7 +329,7 @@ class InnvilgelseFtrlMapper(
 
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodePensjonist> {
         if (behandlingsresultat.trygdeavgiftsperioder.all {
-                it.trygdeavgiftsbeløpMd.verdi == BigDecimal.ZERO && it.trygdesats == BigDecimal.ZERO
+                !it.harAvgift()
             }) {
             return emptyList()
         }

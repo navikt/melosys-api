@@ -44,6 +44,9 @@ class ÅrsavregningIkkeSkattepliktigeIT(
                         saksnummer = sakOppfyllerKrav
                         type = Sakstyper.FTRL
                         status = Saksstatuser.LOVVALG_AVKLART
+                        // Innhentingsbrevet (MELOSYS-8122) sendes til bruker, så saken må ha en bruker-aktør
+                        // med et gyldig (mock-kjent) fnr slik at PDL-oppslag i OPPRETT_OPPGAVE og brevsending løser opp.
+                        medBruker { aktørId = TEST_FNR }
                     }
                 }
                 medlemskapsperioder.clear() // TODO, finn en mer elegant måte for dette (Vi vil overstyre kun fom tom under)
@@ -70,7 +73,10 @@ class ÅrsavregningIkkeSkattepliktigeIT(
 
             prosessinstansTestManager.executeAndWait(
                 mapOf(
-                    ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING to 1
+                    ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING to 1,
+                    // SEND_INNHENTINGSBREV_AARSAVREGNING-steget sender automatisk innhentingsbrev (MELOSYS-8122),
+                    // som oppretter en egen OPPRETT_OG_DISTRIBUER_BREV-prosessinstans per mottaker.
+                    ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
                 )
             ) {
                 // unngår problem med dobbelt registrering av siden dette også registreres i finnSakerOgLagProsessinstanser
@@ -626,5 +632,6 @@ class ÅrsavregningIkkeSkattepliktigeIT(
         private val FOM = LocalDate.of(LocalDate.now().year, 1, 1)
         private val TOM = LocalDate.of(LocalDate.now().year, 12, 31)
         private val ÅRSAVREGNING_ÅR = FOM.year
+        private const val TEST_FNR = "30056928150"
     }
 }

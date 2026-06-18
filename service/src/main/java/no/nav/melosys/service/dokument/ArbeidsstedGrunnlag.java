@@ -68,6 +68,11 @@ public class ArbeidsstedGrunnlag {
         if (avklartMaritimtArbeid != null) {
             return new MaritimtArbeidssted(maritimtArbeid, avklartMaritimtArbeid);
         }
+
+        if (maritimtArbeid.getEnhetNavn() != null && maritimtArbeid.harLandkode()) {
+            return new MaritimtArbeidssted(maritimtArbeid);
+        }
+
         return null;
     }
 

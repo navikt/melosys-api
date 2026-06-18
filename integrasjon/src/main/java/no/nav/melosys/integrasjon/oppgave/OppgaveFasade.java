@@ -13,6 +13,8 @@ public interface OppgaveFasade {
 
     void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering);
 
+    void leggTilNøkkelord(String oppgaveID, Set<String> nøkkelord);
+
     Set<Oppgave> finnOppgaverMedAnsvarlig(String ansvarligSaksbehandlerID);
 
     List<Oppgave> finnOppgaverMedAktørId(String aktørID, String[] oppgavetyper);

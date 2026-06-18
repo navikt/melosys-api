@@ -381,10 +381,13 @@ class ÅrsavregningService(
         val behandlingsresultaterMedOverlapp = alleRelevanteBehandlinger
             .filter { it.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
 
-        // Finner siste behandling med avgiftspliktige perioder (uavhengig av årsoverlapp),
-        // slik at en ny vurdering som fjerner perioden for året korrekt gir null perioder
+        // Finner siste behandling med avgiftspliktige perioder som ikke er årsavregning
+        // Årsavregning brukes kun når den overlapper med aktuelt år.
         val sisteBehandlingsresultatMedAvgiftspliktigPeriode = alleRelevanteBehandlinger
-            .lastOrNull { it.finnAvgiftspliktigPerioder().isNotEmpty() }
+            .lastOrNull {
+                it.finnAvgiftspliktigPerioder().isNotEmpty() &&
+                    (!it.hentBehandling().erÅrsavregning() || it.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år))
+            }
 
         // Finner siste behandling med trygdeavgiftsperioder (brukes for avgiftsgrunnlag)
         val sisteBehandlingsresultatMedAvgiftsgrunnlag = behandlingsresultaterMedOverlapp
@@ -652,12 +655,14 @@ data class HelseutgiftDekkesPeriodeForAvgift(
     override val tom: LocalDate,
     override val dekning: Trygdedekninger,
     override val type: AvgiftsperiodeForAvgiftType = AvgiftsperiodeForAvgiftType.HELSEUTGIFTDEKKESPERIODE,
+    val medlemskapstype: Medlemskapstyper,
     val id: Long = 0,
 ) : AvgiftsperiodeForAvgift {
     constructor(helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode) : this(
         fom = helseutgiftDekkesPeriode.fomDato,
         tom = helseutgiftDekkesPeriode.tomDato,
         dekning = helseutgiftDekkesPeriode.hentTrygdedekning(),
+        medlemskapstype = helseutgiftDekkesPeriode.hentMedlemskapstype(),
         id = helseutgiftDekkesPeriode.id ?: 0,
     )
 
@@ -665,6 +670,7 @@ data class HelseutgiftDekkesPeriodeForAvgift(
         fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, helseutgiftDekkesPeriode.fomDato),
         tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, helseutgiftDekkesPeriode.tomDato),
         dekning = helseutgiftDekkesPeriode.hentTrygdedekning(),
+        medlemskapstype = helseutgiftDekkesPeriode.hentMedlemskapstype(),
         id = helseutgiftDekkesPeriode.id ?: 0,
     )
 }

@@ -325,7 +325,7 @@ fun `concurrent sagas with same lock should wait`() {
 ### Finding Failed Sagas
 
 ```sql
-SELECT id, type, status, sist_fullfort_steg, registrert_dato, endret_dato
+SELECT uuid, prosess_type, status, sist_fullfort_steg, registrert_dato, endret_dato
 FROM prosessinstans
 WHERE status = 'FEILET'
 ORDER BY endret_dato DESC;
@@ -334,19 +334,19 @@ ORDER BY endret_dato DESC;
 ### Viewing Error Details
 
 ```sql
-SELECT pi.id, pi.type, ph.steg, ph.exception_type, ph.stack_trace
+SELECT pi.uuid, pi.prosess_type, ph.steg, ph.type, ph.melding
 FROM prosessinstans pi
-JOIN prosessinstans_hendelse ph ON pi.uuid = ph.prosessinstans_uuid
+JOIN prosessinstans_hendelser ph ON pi.uuid = ph.prosessinstans_id
 WHERE pi.status = 'FEILET'
-ORDER BY ph.tidspunkt DESC;
+ORDER BY ph.registrert_dato DESC;
 ```
 
 ### Inspecting Saga Data
 
 ```sql
-SELECT id, type, data
+SELECT uuid, prosess_type, data
 FROM prosessinstans
-WHERE id = 'your-uuid-here';
+WHERE uuid = 'your-uuid-here';
 -- Data is JSON in CLOB column
 ```
 
@@ -393,11 +393,11 @@ For detailed race condition investigation, see **[stale-reference-problem.md](st
 1. **Identify the failing entity and field**
    ```sql
    -- Find recent errors
-   SELECT pi.id, pi.type, ph.exception_type, ph.stack_trace
+   SELECT pi.uuid, pi.prosess_type, ph.steg, ph.type, ph.melding
    FROM prosessinstans pi
-   JOIN prosessinstans_hendelse ph ON pi.uuid = ph.prosessinstans_uuid
-   WHERE ph.tidspunkt > SYSDATE - 1
-   ORDER BY ph.tidspunkt DESC;
+   JOIN prosessinstans_hendelser ph ON pi.uuid = ph.prosessinstans_id
+   WHERE ph.registrert_dato > SYSDATE - 1
+   ORDER BY ph.registrert_dato DESC;
    ```
 
 2. **Check for synchronous listeners on same status**

@@ -2,6 +2,10 @@
 
 ## Medlemskapstyper
 
+The `Medlemskapstyper` enum has five constants: `PLIKTIG`, `FRIVILLIG`, `UNNTATT`,
+`DELVIS_UNNTATT`, `IKKE_MEDLEM`. The two below are the common cases; the exempt/non-member
+values are used for unntak (§§2-11 til 2-13) and negative outcomes.
+
 ### PLIKTIG (Mandatory Membership)
 
 Persons who are **required** to be members of folketrygden based on residence or employment in Norway.
@@ -13,14 +17,14 @@ Persons who are **required** to be members of folketrygden based on residence or
 | `FTRL_KAP2_2_1` | Bosatt i Norge | §2-1 |
 | `FTRL_KAP2_2_2` | Arbeidstaker i Norge | §2-2 |
 | `FTRL_KAP2_2_3_ANDRE_LEDD` | Sokkelarbeidere | §2-3 andre ledd |
-| `FTRL_KAP2_2_5_FØRSTE_LEDD_A` | Statens tjenesteperson | §2-5 første ledd a |
-| `FTRL_KAP2_2_5_FØRSTE_LEDD_B` | Tjenesteperson ved utenrikstjenesten | §2-5 første ledd b |
-| `FTRL_KAP2_2_5_FØRSTE_LEDD_C` | Person engasjert av utenrikstjenesten | §2-5 første ledd c |
-| `FTRL_KAP2_2_5_FØRSTE_LEDD_D` | Arbeidstaker i hotell- og restaurantnæring | §2-5 første ledd d |
-| `FTRL_KAP2_2_5_FØRSTE_LEDD_E` | Ansatt i internasjonal organisasjon | §2-5 første ledd e |
-| `FTRL_KAP2_2_5_FØRSTE_LEDD_F` | Misjonær/person i religiøs organisasjon | §2-5 første ledd f |
-| `FTRL_KAP2_2_5_FØRSTE_LEDD_G` | Au pair utenfor EØS | §2-5 første ledd g |
-| `FTRL_KAP2_2_5_FØRSTE_LEDD_H` | Student i utlandet | §2-5 første ledd h |
+| `FTRL_KAP2_2_5_FØRSTE_LEDD_A` | Arbeidstaker i den norske stats tjeneste (offentlig ansatt) | §2-5 første ledd a |
+| `FTRL_KAP2_2_5_FØRSTE_LEDD_B` | Arbeider for en person i den norske stats tjeneste | §2-5 første ledd b |
+| `FTRL_KAP2_2_5_FØRSTE_LEDD_C` | I forsvarets tjeneste i utlandet | §2-5 første ledd c |
+| `FTRL_KAP2_2_5_FØRSTE_LEDD_D` | Fredskorpsdeltaker / ekspert i utviklingsland | §2-5 første ledd d |
+| `FTRL_KAP2_2_5_FØRSTE_LEDD_E` | NATOs sivile krigstidsorganer | §2-5 første ledd e |
+| `FTRL_KAP2_2_5_FØRSTE_LEDD_F` | Arbeid på norskregistrert skip | §2-5 første ledd f |
+| `FTRL_KAP2_2_5_FØRSTE_LEDD_G` | Norsk sivilt luftfartsselskap (flyvende/stasjonsbetjening) | §2-5 første ledd g |
+| `FTRL_KAP2_2_5_FØRSTE_LEDD_H` | Student i utlandet med lån/stipend fra Lånekassen | §2-5 første ledd h |
 | `FTRL_KAP2_2_5_ANDRE_LEDD` | Familiemedlemmer | §2-5 andre ledd |
 
 **Vertslandsavtaler (Host Country Agreements)**:
@@ -52,56 +56,49 @@ Persons who **choose** to be members of folketrygden while abroad.
 
 ## Trygdedekninger (Coverage Types)
 
-### FULL_DEKNING
-Complete coverage including:
-- Helsedel (health benefits)
-- Sykepenger (sick pay)
-- Pensjonsdel (pension accrual)
-- Yrkesskadetrygd (occupational injury insurance)
+`Trygdedekninger` is the enum stored on `Medlemskapsperiode.trygdedekning` (DB column
+`trygde_dekning`). The actual constants describe the FTRL hjemmel for the coverage package,
+not the avgift split. The full enum (`no.nav.melosys.domain.kodeverk.Trygdedekninger`) includes:
 
-**Available for**: YRKESAKTIV, IKKE_YRKESAKTIV
+| Trygdedekning | Meaning |
+|---------------|---------|
+| `FULL_DEKNING_FTRL` | Full coverage under folketrygdloven (helse + sykepenger + pensjon + yrkesskade) |
+| `FULL_DEKNING_EOSFO` | Full coverage under EØS-forordningen |
+| `FULL_DEKNING` | Full coverage (generic) |
+| `UTEN_DEKNING` | No coverage |
+| `FTRL_2_9_FØRSTE_LEDD_A_HELSE` | §2-9 første ledd a — helsedel |
+| `FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER` | §2-9 — helse + sykepenger/foreldrepenger |
+| `FTRL_2_9_FØRSTE_LEDD_B_PENSJON` | §2-9 første ledd b — pensjonsdel |
+| `FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE` | §2-9 — pensjon + yrkesskade |
+| `FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON` | §2-9 første ledd c — helse + pensjon |
+| `FTRL_2_9_FØRSTE_LEDD_C_*` (andre/tredje ledd variants) | §2-9 c with sykepenger and/or yrkesskade added |
+| `FTRL_2_9_TREDJE_LEDD_YRKESSKADE` | §2-9 tredje ledd — yrkesskade |
+| `FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER` | §2-7 tredje ledd b |
+| `FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER` | §2-7a andre ledd b |
+| `TILLEGGSAVTALE_NATO_HELSEDEL` | NATO host-country agreement — helsedel only |
+| `UNNTATT_USA_5_2_G`, `UNNTATT_CAN_7_5_B` | Treaty exception values |
 
-### HELSEDEL_MED_SYKEPENGER
-Health coverage including sick pay:
-- Helseutgifter dekket
-- Sykepenger ved arbeidsuførhet
-- No pension accrual
+The naming convention is `FTRL_<paragraf>_<ledd>_<bokstav>_<dekningsinnhold>` — e.g.
+`FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON` is §2-9 første ledd bokstav c with helse + pensjon.
 
-**Available for**: YRKESAKTIV, IKKE_YRKESAKTIV
+> **Not Trygdedekninger:** `HELSEDEL_MED_SYKEPENGER`, `HELSEDEL_UTEN_SYKEPENGER`,
+> `PENSJONSDEL_MED_YRKESSKADETRYGD`, `PENSJONSDEL_UTEN_YRKESSKADETRYGD` are the
+> **`Avgiftsdekning`** enum, derived from a `Trygdedekninger` value by
+> `AvgiftsdekningerFraTrygdedekning` (in the integrasjon/trygdeavgift module) for trygdeavgift.
+> They are never stored on the medlemskapsperiode.
 
-### HELSEDEL_UTEN_SYKEPENGER
-Health coverage without sick pay:
-- Helseutgifter dekket
-- No sykepenger
-- No pension accrual
+## Valid Trygdedekninger by Behandlingstema
 
-**Available for**: YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST
+Defined in `GyldigeTrygdedekningerService`, then intersected with the bestemmelse via
+`LovligeKombinasjonerTrygdedekningBestemmelse`:
 
-### PENSJONSDEL_MED_YRKESSKADETRYGD
-Pension coverage with occupational injury:
-- Pensjonsopptjening
-- Yrkesskadedekning
-- No health benefits
+| Behandlingstema | Available Trygdedekninger |
+|-----------------|---------------------------|
+| YRKESAKTIV | `FULL_DEKNING_FTRL`, the full `FTRL_2_9_*` family, `FTRL_2_7_TREDJE_LEDD_B_*`, `FTRL_2_7A_ANDRE_LEDD_B_*`, `TILLEGGSAVTALE_NATO_HELSEDEL` |
+| IKKE_YRKESAKTIV | `FULL_DEKNING_FTRL`, the `FTRL_2_9_*` family, `FTRL_2_7_TREDJE_LEDD_B_*`, `TILLEGGSAVTALE_NATO_HELSEDEL` |
+| PENSJONIST | `FULL_DEKNING_FTRL`, `FTRL_2_9_*` (helse/pensjon variants), `FTRL_2_7_TREDJE_LEDD_B_*` |
 
-**Available for**: Special cases
-
-### PENSJONSDEL_UTEN_YRKESSKADETRYGD
-Pension coverage only:
-- Pensjonsopptjening only
-- No yrkesskadedekning
-- No health benefits
-
-**Available for**: Special cases
-
-## Coverage Matrix by Behandlingstema
-
-| Behandlingstema | FULL | HELSE_MED_SYKE | HELSE_UTEN_SYKE | PENSJON_MED | PENSJON_UTEN |
-|-----------------|------|----------------|-----------------|-------------|--------------|
-| YRKESAKTIV | ✓ | ✓ | ✓ | - | - |
-| IKKE_YRKESAKTIV | ✓ | ✓ | ✓ | - | - |
-| PENSJONIST | - | - | ✓ | - | - |
-
-**Note**: Pensjonister can only get helsedel coverage (§2-7, §2-7a).
+**Note**: NATO host-country dekning (`TILLEGGSAVTALE_NATO_HELSEDEL`) gives helsedel only.
 
 ## InnvilgelsesResultat
 
@@ -109,6 +106,9 @@ Pension coverage only:
 - Membership granted
 - Period active and valid
 - Synced to MEDL with status GYLD
+
+### DELVIS_INNVILGET
+- Partially granted (e.g. only part of the requested period innvilget)
 
 ### AVSLAATT
 - Membership denied

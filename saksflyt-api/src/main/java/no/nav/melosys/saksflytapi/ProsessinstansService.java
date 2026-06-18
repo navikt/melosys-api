@@ -34,9 +34,7 @@ import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -50,14 +48,11 @@ public class ProsessinstansService {
 
     private final ApplicationEventPublisher applicationEventPublisher;
     private final ProsessinstansForServiceRepository prosessinstansRepo;
-    private final ThreadPoolTaskExecutor saksflytThreadPoolTaskExecutor;
 
     public ProsessinstansService(ApplicationEventPublisher applicationEventPublisher,
-                                 ProsessinstansForServiceRepository prosessinstansRepo,
-                                 @Qualifier("saksflytThreadPoolTaskExecutor") ThreadPoolTaskExecutor saksflytThreadPoolTaskExecutor) {
+                                 ProsessinstansForServiceRepository prosessinstansRepo) {
         this.applicationEventPublisher = applicationEventPublisher;
         this.prosessinstansRepo = prosessinstansRepo;
-        this.saksflytThreadPoolTaskExecutor = saksflytThreadPoolTaskExecutor;
     }
 
     @Transactional
@@ -82,9 +77,10 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+
     @Transactional
-    public void opprettOgReplikerBehandlingForSak(String saksnummer, OpprettSakRequest opprettSakRequest) {
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+    public void opprettOgReplikerBehandlingForSak(String saksnummer, OpprettSakRequest opprettSakRequest, Long behandlingIdForReplikering) {
+        var builder = Prosessinstans.builder()
             .medType(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medData(SAKSNUMMER, saksnummer)
@@ -93,10 +89,13 @@ public class ProsessinstansService {
             .medData(BEHANDLINGSÅRSAKTYPE, opprettSakRequest.getBehandlingsaarsakType())
             .medData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakRequest.getBehandlingsaarsakFritekst())
             .medData(MOTTATT_DATO, opprettSakRequest.getMottaksdato())
-            .medData(SKAL_TILORDNES, opprettSakRequest.getSkalTilordnes())
-            .build();
+            .medData(SKAL_TILORDNES, opprettSakRequest.getSkalTilordnes());
 
-        lagre(prosessinstans);
+        if (behandlingIdForReplikering != null) {
+            builder.medData(OPPRINNELIG_BEH, behandlingIdForReplikering);
+        }
+
+        lagre(builder.build());
     }
 
     @Transactional
@@ -149,14 +148,29 @@ public class ProsessinstansService {
     public UUID opprettArsavregningsBehandlingProsessflyt(String saksnummer,
                                                           String gjelderPeriode,
                                                           Behandlingsaarsaktyper behandlingsaarsaktype) {
+        return opprettArsavregningsBehandlingProsessflyt(saksnummer, gjelderPeriode, behandlingsaarsaktype, false);
+    }
+
+    /**
+     * @param sendInnhentingsbrev settes kun av de automatiske flytene som skal sende brevet
+     *                            «Innhenting av inntektsopplysninger» (skattepliktige via skattemelding
+     *                            og ikke-skattepliktige via batch). Det automatiske saga-steget ved
+     *                            behandlingsendring (OppretteÅrsavregningVedEndring) bruker 3-arg-varianten
+     *                            og setter dermed false — den er utenfor scope for MELOSYS-8122.
+     */
+    @Transactional
+    public UUID opprettArsavregningsBehandlingProsessflyt(String saksnummer,
+                                                          String gjelderPeriode,
+                                                          Behandlingsaarsaktyper behandlingsaarsaktype,
+                                                          boolean sendInnhentingsbrev) {
         Prosessinstans prosessinstans = Prosessinstans.builder()
             .medType(ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING)
             .medStatus(ProsessStatus.KLAR)
             .medData(GJELDER_ÅR, gjelderPeriode)
             .medData(SAKSNUMMER, saksnummer)
             .medData(ÅRSAK_TYPE, behandlingsaarsaktype)
+            .medData(SEND_INNHENTINGSBREV, sendInnhentingsbrev)
             .build();
-
         return lagre(prosessinstans);
     }
 
@@ -308,9 +322,6 @@ public class ProsessinstansService {
         }
 
         applicationEventPublisher.publishEvent(new ProsessinstansOpprettetEvent(prosessinstans));
-        int prosessinstanseriKø = saksflytThreadPoolTaskExecutor.getThreadPoolExecutor().getQueue().size();
-        if (prosessinstanseriKø > 0)
-            logger.info("Antall prosessinstanser i saksflytThreadPoolTaskExecutor kø: {}", prosessinstanseriKø);
 
         Metrics.counter(MetrikkerNavn.PROSESSINSTANSER_OPPRETTET, MetrikkerNavn.TAG_TYPE, prosessinstans.getType().name()).increment();
         return prosessinstans.getId();
@@ -591,8 +602,11 @@ public class ProsessinstansService {
     private void opprettSøknadProsessinstans(SkjemaMottattMelding melding, ProsessType prosessType, String saksnummer) {
         String låsReferanse = melding.getSkjemaId().toString();
 
-        if (prosessinstansRepo.existsByLåsReferanseAndType(låsReferanse, prosessType)) {
-            logger.error("Skjema med skjemaId {} har vært mottatt tidligere for prosesstype {}.", melding.getSkjemaId(), prosessType);
+        // Redelivery av samme skjema kan rutes til en annen prosesstype (NY → EKSISTERENDE etter at saken er opprettet),
+        // så dedupen må gjelde på tvers av begge digital-søknad-typene — ikke bare (skjemaId, denne typen).
+        if (prosessinstansRepo.existsByLåsReferanseAndTypeIn(låsReferanse, ProsessType.digitaleSøknadTyper())) {
+            logger.warn("Skjema med skjemaId {} har allerede en digital-søknad-prosess — hopper over redelivery (forsøkt type {}).",
+                melding.getSkjemaId(), prosessType);
             return;
         }
 

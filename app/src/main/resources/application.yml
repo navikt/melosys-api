@@ -110,6 +110,14 @@ management:
               grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
               scope: api://${NAIS_CLUSTER_NAME}.teamdokumenthandtering.${APP_NAME_SAK}/.default
               token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+            popp:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: ${AZURE_APP_CLIENT_ID}
+                client-secret: ${AZURE_APP_CLIENT_SECRET}
+              grant-type: client_credentials
+              scope: api://${NAIS_CLUSTER_NAME}.pensjonopptjening.${APP_NAME_POPP}/.default
+              token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
             saf:
               authentication:
                 client-auth-method: client_secret_basic
@@ -237,6 +245,11 @@ melosys:
   kodeverk:
     scheduler:
       enabled: true  # Standard aktivert for produksjon
+  saksflyt:
+    gjenopprettelse:
+      # Hvor lenge en aktiv prosessinstans må ha vært urørt før den gjenopprettes ved oppstart. Se javadoc på
+      # ProsessinstansBehandler#gjenopprettelseVindu for hvorfor 24 timer er minimum med dagens 2-podders-løsning.
+      vindu: PT24H  # ISO-8601 Duration
   service:
     fagsak:
       arbeidsforholdhistorikk:

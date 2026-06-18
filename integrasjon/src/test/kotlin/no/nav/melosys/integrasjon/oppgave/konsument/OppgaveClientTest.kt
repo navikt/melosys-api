@@ -6,7 +6,10 @@ import com.github.tomakehurst.wiremock.client.WireMock.any
 import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
 import com.github.tomakehurst.wiremock.client.WireMock.containing
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.matching
+import com.github.tomakehurst.wiremock.client.WireMock.patch
+import com.github.tomakehurst.wiremock.client.WireMock.patchRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
@@ -57,6 +60,7 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OppgaveClientTest(
     @Autowired private val oppgaveClient: OppgaveClient,
+    @Autowired private val oppgaveV2Client: OppgaveV2Client,
     @Autowired private val oAuthMockServer: OAuthMockServer,
     @Value("\${mockserver.port}") mockServerPort: Int,
 ) {
@@ -297,9 +301,78 @@ class OppgaveClientTest(
         )
     }
 
+    @Test
+    fun `leggTilNøkkelord henter oppgave fra v2 og patcher med eksisterende pluss nye nøkkelord`() {
+        val oppgaveV2Json = readResourceAsString(OPPGAVE_V2_GET_JSON_PATH)
+        mockServer.stubFor(
+            get(urlEqualTo("/api/v2/oppgaver/11519")).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(oppgaveV2Json)
+            )
+        )
+        mockServer.stubFor(
+            patch(urlEqualTo("/api/v2/oppgaver/11519")).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(oppgaveV2Json)
+            )
+        )
+
+        oppgaveV2Client.leggTilNøkkelord("11519", setOf("Årsavregning 2024"))
+
+        mockServer.verify(
+            patchRequestedFor(urlEqualTo("/api/v2/oppgaver/11519"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                .withRequestBody(
+                    equalToJson(
+                        """
+                        {
+                            "aktivDato": "2024-01-15",
+                            "fordeling": {
+                                "enhet": { "nr": "4530" }
+                            },
+                            "kategorisering": {
+                                "tema": { "kode": "TRY", "term": "Trygdeavgift" },
+                                "oppgavetype": { "kode": "BEH_ARSAVREG", "term": "Behandle årsavregning" },
+                                "behandlingstema": { "kode": "ab0083", "term": "Årsavregning" }
+                            },
+                            "prioritet": "NORMAL",
+                            "status": "AAPEN",
+                            "nokkelord": ["Eksisterende nøkkelord", "Årsavregning 2024"]
+                        }
+                        """,
+                        true, false
+                    )
+                )
+        )
+    }
+
+    @Test
+    fun `leggTilNøkkelord feil fra Oppgave v2 kaster TekniskException`() {
+        mockServer.stubFor(
+            get(urlEqualTo("/api/v2/oppgaver/11519")).willReturn(
+                aResponse()
+                    .withStatus(404)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(readResourceAsString(OPPGAVE_FEILMELDING_JSON_PATH))
+            )
+        )
+
+        val exception = shouldThrow<TekniskException> {
+            oppgaveV2Client.leggTilNøkkelord("11519", setOf("Årsavregning 2024"))
+        }
+
+        exception.message shouldContain "Kall mot Oppgave v2 feilet."
+    }
+
     companion object {
         private const val OPPGAVE_GET_JSON_PATH = "mock/oppgave/oppgave_get.json"
         private const val OPPGAVELIST_GET_JSON_PATH = "mock/oppgave/hentOppgaveListe_get.json"
+        private const val OPPGAVE_V2_GET_JSON_PATH = "mock/oppgave/oppgave_v2_get.json"
         private const val OPPGAVE_FEILMELDING_JSON_PATH = "mock/oppgave/feil.json"
     }
 }

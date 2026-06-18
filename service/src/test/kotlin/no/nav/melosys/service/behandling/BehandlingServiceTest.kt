@@ -618,6 +618,7 @@ class BehandlingServiceTest {
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET) }
         verify { behandlingRepository.save(any()) }
         verify { applicationEventPublisher.publishEvent(any<BehandlingEndretStatusEvent>()) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
     }
 
     @Test

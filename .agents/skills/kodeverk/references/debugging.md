@@ -14,14 +14,14 @@ FunksjonellException: "Ugyldig kombinasjon av sakstype, sakstema, behandlingstyp
 1. **Check valid combinations**:
 ```kotlin
 val gyldige = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(
-    sakstype, sakstema, hovedpart, behandlingstyper, sisteBehTema
+    hovedpart, sakstype, sakstema, aktivBehandlingID, sistBehandlingstema
 )
 log.info("Valid temaer for $sakstype/$sakstema: $gyldige")
 ```
 
 2. **Check if it's a second treatment restriction**:
 ```kotlin
-val ANNENGANGS_TEMAER = setOf(
+val BEHANDLINGSTEMA_FOR_ANNENGANGS_BEHANDLING = setOf(
     REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
     REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
     BESLUTNING_LOVVALG_NORGE,
@@ -90,10 +90,10 @@ val tema = when (sedType) {
 
 ### Check Case/Treatment Combination
 ```sql
-SELECT f.saksnummer, f.type as sakstype, f.tema as sakstema,
-       b.type as behtype, b.tema as behtema, b.status
+SELECT f.saksnummer, f.fagsak_type as sakstype, f.tema as sakstema,
+       b.beh_type as behtype, b.beh_tema as behtema, b.status
 FROM fagsak f
-JOIN behandling b ON b.fagsak_saksnummer = f.saksnummer
+JOIN behandling b ON b.saksnummer = f.saksnummer
 WHERE f.saksnummer = 'MEL-12345';
 ```
 
@@ -101,17 +101,17 @@ WHERE f.saksnummer = 'MEL-12345';
 ```sql
 SELECT f.saksnummer, b.id
 FROM fagsak f
-JOIN behandling b ON b.fagsak_saksnummer = f.saksnummer
-WHERE f.type = 'EU_EOS'
+JOIN behandling b ON b.saksnummer = f.saksnummer
+WHERE f.fagsak_type = 'EU_EOS'
 AND f.tema = 'MEDLEMSKAP_LOVVALG'
-AND b.tema = 'ANMODNING_OM_UNNTAK_HOVEDREGEL';
+AND b.beh_tema = 'ANMODNING_OM_UNNTAK_HOVEDREGEL';
 ```
 
 ### Check Previous Behandlingstema
 ```sql
-SELECT b.tema, b.type, b.status, b.registrert_dato
+SELECT b.beh_tema, b.beh_type, b.status, b.registrert_dato
 FROM behandling b
-WHERE b.fagsak_saksnummer = 'MEL-12345'
+WHERE b.saksnummer = 'MEL-12345'
 ORDER BY b.registrert_dato DESC;
 ```
 

@@ -81,7 +81,10 @@ class ÅrsavregningIT(
 
         executeAndWait(
             mapOf(
-                ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING to 2
+                ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING to 2,
+                // SEND_INNHENTINGSBREV_AARSAVREGNING-steget sender automatisk innhentingsbrev (MELOSYS-8122),
+                // som oppretter en egen OPPRETT_OG_DISTRIBUER_BREV-prosessinstans per sak/mottaker.
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 2
             )
         ) {
             skatteHendelseMeldingKafkaTemplate.send(

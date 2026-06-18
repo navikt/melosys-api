@@ -75,7 +75,8 @@ class OppgaveMigreringTest {
             behandlingRepository,
             oppgaveFasade,
             migreringsRapport,
-            fagsakRepository
+            fagsakRepository,
+            mockk()
         ).migrering(null, null, false)
 
         verify(exactly = 0) { oppgaveFasade.oppdaterOppgave(any(), any()) }
@@ -140,7 +141,8 @@ class OppgaveMigreringTest {
             behandlingRepository,
             oppgaveFasade,
             migreringsRapport,
-            fagsakRepository
+            fagsakRepository,
+            mockk()
         ).migrering(null, null, false)
 
         migreringsRapport.status().forEach {

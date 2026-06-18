@@ -95,19 +95,22 @@ Extensive list of 25+ behandlingstema codes:
 
 ## Task Type Selection Logic
 
-The `OppgavetypeUtleder` determines type based on:
+`OppgavetypeUtleder` does not branch on its own; it delegates the entire decision to
+`OppgaveGosysMapping`, which looks up the `oppgaveType` from the mapping table:
 
 ```kotlin
-fun utledOppgavetype(behandling: Behandling): Oppgavetyper {
-    return when {
-        behandling.type == ÅRSAVREGNING -> BEH_ARSAVREG
-        behandling.erSedBehandling() -> BEH_SED
-        behandling.tema == TRYGDEAVGIFT -> VURD_MAN_INNB
-        behandling.harVurderDokument() -> VUR
-        else -> BEH_SAK_MK
-    }
+class OppgavetypeUtleder(private val oppgaveGosysMapping: OppgaveGosysMapping = OppgaveGosysMapping()) {
+    fun utledOppgavetype(
+        sakstype: Sakstyper, sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema, behandlingstype: Behandlingstyper
+    ): Oppgavetyper =
+        oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype).oppgaveType
 }
 ```
+
+The actual type per combination is encoded in the `rows` table (e.g. ÅRSAVREGNING +
+TRYGDEAVGIFT/PENSJONIST → `BEH_ARSAVREG`; UNNTAK rows → `BEH_SED`; MANGLENDE_INNBETALING →
+`VURD_MAN_INNB`; HENVENDELSE → `VURD_HENV`; most others → `BEH_SAK_MK`).
 
 ## Special Rules
 
