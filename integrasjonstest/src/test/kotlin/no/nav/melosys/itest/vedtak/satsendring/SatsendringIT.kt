@@ -343,9 +343,13 @@ class SatsendringIT @Autowired constructor(
         executeAndWait(
             buildMap {
                 put(ProsessType.IVERKSETT_VEDTAK_FTRL, 1)
-                put(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, 1)
                 if (år < LocalDate.now().year) {
                     put(ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING, 1)
+                    // MELOSYS-8148: årsavregningen som opprettes automatisk i saksbehandlingsflyten sender
+                    // innhentingsbrev → en ekstra OPPRETT_OG_DISTRIBUER_BREV i tillegg til vedtaksbrevet.
+                    put(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, 2)
+                } else {
+                    put(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, 1)
                 }
             }
         ) {
