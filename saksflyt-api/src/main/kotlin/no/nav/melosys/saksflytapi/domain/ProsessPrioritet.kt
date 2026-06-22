@@ -15,5 +15,8 @@ enum class ProsessPrioritet {
     NORMAL,
 
     /** Batch / masseopprettelse (årsavregning auto-opprettelse, satsendring) — skal aldri sulte HØY/NORMAL. */
-    LAV,
+    LAV;
+
+    // Ordinal: HØY=0 < NORMAL=1 < LAV=2 — min ordinal = høyeste prioritet.
+    infix fun høyesteAv(annen: ProsessPrioritet): ProsessPrioritet = minOf(this, annen)
 }

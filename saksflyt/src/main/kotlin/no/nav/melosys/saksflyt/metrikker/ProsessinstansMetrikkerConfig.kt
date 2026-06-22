@@ -46,6 +46,15 @@ class ProsessinstansMetrikkerConfig(
                 )
             }
         }
+        ProsessPrioritet.values().forEach { prioritet ->
+            listOf(ProsessStatus.FERDIG.name, ProsessStatus.FEILET.name).forEach { status ->
+                Metrics.counter(
+                    MetrikkerNavn.PROSESSINSTANSER_BEHANDLET,
+                    MetrikkerNavn.TAG_PRIORITET, prioritet.name,
+                    MetrikkerNavn.TAG_STATUS, status
+                )
+            }
+        }
     }
 
     private fun registrerAntallFeiledeProsessinstanserGruppertPåType(

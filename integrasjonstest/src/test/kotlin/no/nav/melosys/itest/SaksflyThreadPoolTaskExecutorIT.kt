@@ -1,23 +1,32 @@
 package no.nav.melosys.itest
 
 import io.kotest.matchers.shouldBe
+import io.micrometer.core.instrument.MeterRegistry
 import io.mockk.every
 import io.mockk.mockk
+import mu.KotlinLogging
 import no.nav.melosys.Application
 import no.nav.melosys.ProsessinstansTestManager
+import no.nav.melosys.metrics.MetrikkerNavn
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.saksflyt.PrioritertSaksflytTask
 import no.nav.melosys.saksflyt.steg.sed.mottak.SedMottakRuting
+import no.nav.melosys.saksflytapi.ProsessinstansForServiceRepository
 import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.saksflytapi.UtførendeProsessKontekst
 import no.nav.melosys.saksflytapi.domain.ProsessPrioritet
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.ProsessType
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.awaitility.kotlin.await
+import org.awaitility.kotlin.untilAsserted
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.time.Duration
+import java.util.UUID
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase
@@ -29,6 +38,8 @@ import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
+
+private val log = KotlinLogging.logger { }
 
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -48,6 +59,8 @@ import org.springframework.test.context.ActiveProfiles
 class SaksflyThreadPoolTaskExecutorIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
     @Autowired private val prosessinstansTestManager: ProsessinstansTestManager,
+    @Autowired private val prosessinstansRepo: ProsessinstansForServiceRepository,
+    @Autowired private val meterRegistry: MeterRegistry,
     @Autowired @Qualifier("saksflytThreadPoolTaskExecutor") private val taskExecutor: ThreadPoolTaskExecutor
 ) : OracleTestContainerBase() {
 
@@ -98,8 +111,78 @@ class SaksflyThreadPoolTaskExecutorIT(
             taskExecutor.threadPoolExecutor.queue
                 .filterIsInstance<PrioritertSaksflytTask>()
                 .forEach { it.prioritet shouldBe ProsessPrioritet.NORMAL }
+            loggKøMetrikker("kun NORMAL i kø")
         }
         await.atMost(java.time.Duration.ofSeconds(5)).until { taskExecutor.threadPoolExecutor.queue.size == 0 }
+    }
+
+    @Test
+    fun `sub-prosess arver HØY-prioritet fra parent og dispatches som HØY`() {
+        // Simuler at en HØY parent utfører et steg: ProsessinstansBehandler setter ThreadLocalAccessInfo
+        // (prosess-id) + UtførendeProsessKontekst (HØY) rundt steget – det er konteksten propageringen leser,
+        // ikke en DB-rad. medProsessKontekst speiler det. (Prioriteten kommer fra argumentet, ikke en lagret parent.)
+        val parentId = UUID.randomUUID()
+
+        // Mett trådpoolen (corePoolSize=3) med trege NORMAL-oppgaver så barnet blir liggende i køen når vi sjekker.
+        repeat(10) { i ->
+            prosessinstansService.opprettProsessinstansSedMottak(sedMottak(2000 + i))
+        }
+
+        // Opprett en NORMAL sub-prosess i parentens kontekst (slik ProsessinstansBehandler setter den) -> skal løftes til HØY.
+        val childId = medProsessKontekst(parentId, ProsessPrioritet.HØY) {
+            prosessinstansService.opprettProsessinstansSedMottak(sedMottak(2999))
+        }
+
+        // Persisteringen bekrefter propagering + round-trip gjennom databasen.
+        prosessinstansRepo.findById(childId).get().hentPrioritet() shouldBe ProsessPrioritet.HØY
+
+        // Den faktiske executoren pakker barnet som en HØY PrioritertSaksflytTask.
+        await.atMost(Duration.ofSeconds(2)).untilAsserted {
+            val childTask = taskExecutor.threadPoolExecutor.queue
+                .filterIsInstance<PrioritertSaksflytTask>()
+                .firstOrNull { it.prosessinstansId == childId }
+            childTask?.prioritet shouldBe ProsessPrioritet.HØY
+        }
+
+        // Vis køfordelingen via de samme metrikkene som i prod (melosys.prosessinstanser.koe{prioritet=...}).
+        loggKøMetrikker("sub-prosess løftet til HØY")
+
+        await.atMost(Duration.ofSeconds(10)).until { taskExecutor.threadPoolExecutor.queue.size == 0 }
+    }
+
+    /**
+     * Logger køfordelingen per prioritet via de samme Micrometer-målerne som eksponeres i prod
+     * ([MetrikkerNavn.PROSESSINSTANSER_KØ] gauge, [MetrikkerNavn.PROSESSINSTANSER_KØ_AKTIVE] gauge og
+     * [MetrikkerNavn.PROSESSINSTANSER_OPPRETTET] counter), slik at man ser fordelingen når testen kjøres lokalt.
+     */
+    private fun loggKøMetrikker(merkelapp: String) {
+        val køPerPrioritet = ProsessPrioritet.entries.joinToString(", ") { prioritet ->
+            val antall = meterRegistry.find(MetrikkerNavn.PROSESSINSTANSER_KØ)
+                .tag(MetrikkerNavn.TAG_PRIORITET, prioritet.name).gauge()?.value()?.toInt() ?: 0
+            "${prioritet.name}=$antall"
+        }
+        val aktiveTråder = meterRegistry.find(MetrikkerNavn.PROSESSINSTANSER_KØ_AKTIVE).gauge()?.value()?.toInt() ?: 0
+        val opprettetMottakSed = meterRegistry.find(MetrikkerNavn.PROSESSINSTANSER_OPPRETTET)
+            .tag(MetrikkerNavn.TAG_TYPE, ProsessType.MOTTAK_SED.name).counter()?.count()?.toInt() ?: 0
+        log.info { "[$merkelapp] kø per prioritet: [$køPerPrioritet], aktive tråder: $aktiveTråder, opprettet MOTTAK_SED (counter): $opprettetMottakSed" }
+    }
+
+    private fun sedMottak(rinaSaksnummer: Int) = MelosysEessiMelding().apply {
+        // rinaSaksnummer må være rent numerisk (LåsReferanseType.SED), og unikt på tvers av testmetodene da DB ikke ryddes mellom dem.
+        this.rinaSaksnummer = rinaSaksnummer.toString()
+        sedId = SedType.A009.name
+        sedVersjon = "1"
+    }
+
+    private fun <T> medProsessKontekst(parentId: UUID, prioritet: ProsessPrioritet, block: () -> T): T {
+        ThreadLocalAccessInfo.beforeExecuteProcess(parentId, "test-parent")
+        UtførendeProsessKontekst.settPrioritet(prioritet)
+        return try {
+            block()
+        } finally {
+            UtførendeProsessKontekst.nullstill()
+            ThreadLocalAccessInfo.afterExecuteProcess(parentId)
+        }
     }
 
     @TestConfiguration
