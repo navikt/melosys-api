@@ -133,16 +133,17 @@ public class ProsessinstansBehandler {
         } catch (Exception e) {
             behandleFeil(prosessinstans, nesteSteg, e);
         } finally {
+            MDC.remove("pid");
+            MDC.remove(CORRELATION_ID);
+            SaksflytSubjektHolder.reset();
+
+            // Metrikk sist: en feil i Micrometer skal ikke hindre opprydding av trådlokal kontekst.
             io.micrometer.core.instrument.Timer.builder(MetrikkerNavn.PROSESSINSTANSER_TID_BRUKT)
                 .tag(MetrikkerNavn.TAG_TYPE, prosessinstans.getType().getKode())
                 .register(meterRegistry)
                 .record(System.nanoTime() - start, java.util.concurrent.TimeUnit.NANOSECONDS);
 
             tellBehandlet(prosessinstans);
-
-            MDC.remove("pid");
-            MDC.remove(CORRELATION_ID);
-            SaksflytSubjektHolder.reset();
         }
     }
 
@@ -190,12 +191,13 @@ public class ProsessinstansBehandler {
             ).increment();
             throw e;
         } finally {
+            UtførendeProsessKontekst.nullstill();
+            ThreadLocalAccessInfo.afterExecuteProcess(prosessinstans.getId());
+            // Metrikk sist: en feil i Micrometer skal ikke hindre opprydding av trådlokal kontekst.
             io.micrometer.core.instrument.Timer.builder(MetrikkerNavn.PROSESSINSTANSER_STEG_TID_BRUKT)
                 .tag(MetrikkerNavn.TAG_PROSESSTEG, stegBehandler.inngangsSteg().getKode())
                 .register(meterRegistry)
                 .record(System.nanoTime() - start, java.util.concurrent.TimeUnit.NANOSECONDS);
-            UtførendeProsessKontekst.nullstill();
-            ThreadLocalAccessInfo.afterExecuteProcess(prosessinstans.getId());
         }
         prosessinstans.setSistFullførtSteg(stegBehandler.inngangsSteg());
         return lagreProsessinstans(prosessinstans);
