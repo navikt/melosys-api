@@ -21,11 +21,11 @@ class RammeavtaleStatistikkService(
      */
     fun hentRammeavtaleFjernarbeidStatistikk(fom: LocalDate?, tom: LocalDate?): RammeavtaleFjernarbeidStatistikk {
         val prosessType = ProsessType.ANMODNING_OM_UNNTAK.kode
-        val dataMonster = "%${ProsessDataKey.ER_FJERNARBEID_TWFA.kode}=true%"
+        val fjernarbeidDataMønster = "%${ProsessDataKey.ER_FJERNARBEID_TWFA.kode}=true%"
 
         val antallPerAar = rammeavtaleStatistikkRepository.tellPerAarMedDataLike(
             prosessType,
-            dataMonster,
+            fjernarbeidDataMønster,
             fom?.atStartOfDay(),
             tom?.plusDays(1)?.atStartOfDay(),
         ).associate { (aar, antall) -> aar as String to (antall as Number).toLong() }

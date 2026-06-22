@@ -22,7 +22,7 @@ interface RammeavtaleStatistikkRepository : Repository<Prosessinstans, UUID> {
         SELECT TO_CHAR(p.registrert_dato, 'YYYY') AS aar, COUNT(*) AS antall
         FROM prosessinstans p
         WHERE p.prosess_type = :prosessType
-          AND p.data LIKE :dataMonster
+          AND p.data LIKE :dataLikePattern
           AND (:fom IS NULL OR p.registrert_dato >= :fom)
           AND (:tom IS NULL OR p.registrert_dato < :tom)
         GROUP BY TO_CHAR(p.registrert_dato, 'YYYY')
@@ -31,7 +31,7 @@ interface RammeavtaleStatistikkRepository : Repository<Prosessinstans, UUID> {
     )
     fun tellPerAarMedDataLike(
         @Param("prosessType") prosessType: String,
-        @Param("dataMonster") dataMonster: String,
+        @Param("dataLikePattern") dataLikePattern: String,
         @Param("fom") fom: LocalDateTime?,
         @Param("tom") tom: LocalDateTime?,
     ): List<Array<Any>>

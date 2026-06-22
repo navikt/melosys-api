@@ -31,9 +31,9 @@ class RammeavtaleStatistikkServiceTest {
     @Test
     fun `summerer per aar og bygger riktig prosesstype og data-monster`() {
         val prosessTypeSlot = slot<String>()
-        val monsterSlot = slot<String>()
+        val dataLikePatternSlot = slot<String>()
         every {
-            rammeavtaleStatistikkRepository.tellPerAarMedDataLike(capture(prosessTypeSlot), capture(monsterSlot), any(), any())
+            rammeavtaleStatistikkRepository.tellPerAarMedDataLike(capture(prosessTypeSlot), capture(dataLikePatternSlot), any(), any())
         } returns listOf(
             arrayOf<Any>("2024", BigDecimal(3)),
             arrayOf<Any>("2025", BigDecimal(7)),
@@ -46,7 +46,7 @@ class RammeavtaleStatistikkServiceTest {
         statistikk.antall shouldBe 10
         statistikk.antallPerAar shouldBe linkedMapOf("2024" to 3L, "2025" to 7L)
         prosessTypeSlot.captured shouldBe ProsessType.ANMODNING_OM_UNNTAK.kode
-        monsterSlot.captured shouldBe "%${ProsessDataKey.ER_FJERNARBEID_TWFA.kode}=true%"
+        dataLikePatternSlot.captured shouldBe "%${ProsessDataKey.ER_FJERNARBEID_TWFA.kode}=true%"
     }
 
     @Test
