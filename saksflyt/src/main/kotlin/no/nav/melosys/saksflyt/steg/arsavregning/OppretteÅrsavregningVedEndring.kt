@@ -52,6 +52,20 @@ class OppretteÅrsavregningVedEndring(
         return ftrlYrkesaktiv || eøsOffentligtjenesteperson || eøsTrygdeavgiftpensjonist || ftrlPensjonist
     }
 
+    /**
+     * MELOSYS-8148: innhentingsbrev skal sendes automatisk for sakstypene i scope (FTRL yrkesaktiv,
+     * FTRL pensjonist og EØS offentlig tjenesteperson), men IKKE for EØS-pensjonist (trygdeavgift) —
+     * de skal ha egen brevtekst og dekkes av en senere oppgave. Kalles kun etter at
+     * [harTemaOgTypeSomSkalBehandles] har returnert true, så det eneste tilfellet som skal unntas er
+     * EØS-pensjonist.
+     */
+    private fun skalSendeInnhentingsbrev(behandling: Behandling, fagsak: Fagsak): Boolean {
+        val erEøsPensjonist = behandling.tema == Behandlingstema.PENSJONIST
+            && fagsak.type == Sakstyper.EU_EOS
+            && fagsak.tema == Sakstemaer.TRYGDEAVGIFT
+        return !erEøsPensjonist
+    }
+
     override fun utfør(prosessinstans: Prosessinstans) {
         if (!unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
             return
@@ -66,17 +80,23 @@ class OppretteÅrsavregningVedEndring(
             return
         }
 
+        // MELOSYS-8148: når årsavregningen opprettes automatisk i saksbehandlingsflyten skal brevet
+        // «Innhenting av inntektsopplysninger» sendes automatisk (samme steg som MELOSYS-8122 — gates av
+        // prosessdata-flagget SEND_INNHENTINGSBREV). EØS-pensjonist er eksplisitt unntatt; de får egen
+        // brevtekst i en senere oppgave.
+        val sendInnhentingsbrev = skalSendeInnhentingsbrev(behandling, fagsak)
+
         val potensielleÅrsavregningÅrNy: Set<Int> = hentPotensielleÅrsavregningÅrFraAvgiftsperioder(behandlingsresultat)
 
         if (behandling.erFørstegangsvurdering()) {
-            opprettÅrsavregning(potensielleÅrsavregningÅrNy, behandling)
+            opprettÅrsavregning(potensielleÅrsavregningÅrNy, behandling, sendInnhentingsbrev)
         } else if (behandling.erNyVurdering()) {
             val opprinneligBehandling = behandling.hentOpprinneligBehandling()
             val opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
 
             val årMedEndringer = finnÅrMedEndringer(behandlingsresultat, opprinneligBehandlingsresultat)
             if (årMedEndringer.isNotEmpty()) {
-                opprettÅrsavregning(årMedEndringer, behandling)
+                opprettÅrsavregning(årMedEndringer, behandling, sendInnhentingsbrev)
             }
         } else {
             log.debug("Behandling ${behandling.id} er verken førstegang eller ny vurdering, oppretter ikke årsavregning")
@@ -121,7 +141,8 @@ class OppretteÅrsavregningVedEndring(
 
     private fun opprettÅrsavregning(
         potensielleÅrsavregningÅr: Set<Int>,
-        behandling: Behandling
+        behandling: Behandling,
+        sendInnhentingsbrev: Boolean
     ) {
         potensielleÅrsavregningÅr.forEach { potensieltÅr ->
             val harAktivÅrsavregningforÅr =
@@ -136,7 +157,8 @@ class OppretteÅrsavregningVedEndring(
                 prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
                     behandling.fagsak.saksnummer,
                     potensieltÅr.toString(),
-                    Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+                    Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE,
+                    sendInnhentingsbrev
                 )
             }
         }
