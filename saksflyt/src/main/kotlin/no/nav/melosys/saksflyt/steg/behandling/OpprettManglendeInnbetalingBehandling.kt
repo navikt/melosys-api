@@ -44,7 +44,7 @@ class OpprettManglendeInnbetalingBehandling(
             throw FunksjonellException("Det skal ikke opprettes behandling ved manglende innbetaling av avgift for pliktig medlemskap")
         }
 
-        val mottaksdato = prosessinstans.finnData<LocalDate>(ProsessDataKey.MOTTATT_DATO)
+        val mottaksdato = prosessinstans.hentData<LocalDate>(ProsessDataKey.MOTTATT_DATO)
 
         if (fagsak.harAktivBehandlingIkkeÅrsavregning()) {
             håndterAktivBehandling(fagsak, prosessinstans, mottaksdato)
@@ -56,7 +56,7 @@ class OpprettManglendeInnbetalingBehandling(
     private fun håndterAktivBehandling(
         fagsak: Fagsak,
         prosessinstans: Prosessinstans,
-        mottaksdato: LocalDate?
+        mottaksdato: LocalDate
     ) {
         val aktivBehandling = fagsak.hentAktivBehandlingIkkeÅrsavregning()
         when {
@@ -88,7 +88,7 @@ class OpprettManglendeInnbetalingBehandling(
         }
     }
 
-    private fun lagNyBehandling(prosessinstans: Prosessinstans, fagsak: Fagsak, mottaksDato: LocalDate?) {
+    private fun lagNyBehandling(prosessinstans: Prosessinstans, fagsak: Fagsak, mottaksDato: LocalDate) {
         val behandlingBruktForReplikering = saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
             ?: throw FunksjonellException(
                 "Finner ikke behandling som skal brukes til replikering. fra fagsak: ${fagsak.saksnummer}" +
