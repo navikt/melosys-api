@@ -16,6 +16,13 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.medlemskapsperiodeForTest
+import no.nav.melosys.integrasjon.trygdeavgift.dto.BeregningsforklaringDto
+import no.nav.melosys.integrasjon.trygdeavgift.dto.Beregningsaarsak
+import no.nav.melosys.integrasjon.trygdeavgift.dto.EkskludertInntektslinjeDto
+import no.nav.melosys.integrasjon.trygdeavgift.dto.Ekskluderingsaarsak
+import no.nav.melosys.integrasjon.trygdeavgift.dto.InntektslinjeDto
+import no.nav.melosys.integrasjon.trygdeavgift.dto.Regelgruppe
+import no.nav.melosys.service.avgift.BeregnetTrygdeavgiftMedForklaring
 import no.nav.melosys.service.avgift.EøsPensjonistTrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
@@ -79,12 +86,12 @@ class TrygdeavgiftControllerTest(
         val trygdeavgiftsgrunnlagDto = lagTrygdeavgiftsgrunnlagDto()
 
         every {
-            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgiftMedForklaring(
                 any(),
                 any<List<SkatteforholdTilNorge>>(),
                 any<List<Inntektsperiode>>()
             )
-        } returns trygdeavgiftsperioder
+        } returns BeregnetTrygdeavgiftMedForklaring(trygdeavgiftsperioder, emptyList())
 
         mockMvc.perform(
             put("$BASE_URL/beregning", 1L)
@@ -93,6 +100,32 @@ class TrygdeavgiftControllerTest(
         )
             .andExpect(status().isOk)
             .andExpectResponseBody(forventetBeregnetTrygdeavgiftDto())
+    }
+
+    @Test
+    fun `skal beregne trygdeavgift og inkludere beregningsforklaringer i responsen`() {
+        every { aksesskontroll.autoriserSkrivOgTilordnet(any()) } returns Unit
+
+        val trygdeavgiftsgrunnlagDto = lagTrygdeavgiftsgrunnlagDto()
+        val forklaring = lagBeregningsforklaringDto()
+
+        every {
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgiftMedForklaring(
+                any(),
+                any<List<SkatteforholdTilNorge>>(),
+                any<List<Inntektsperiode>>()
+            )
+        } returns BeregnetTrygdeavgiftMedForklaring(trygdeavgiftsperioder, listOf(forklaring))
+
+        mockMvc.perform(
+            put("$BASE_URL/beregning", 1L)
+                .content(objectMapper.writeValueAsString(trygdeavgiftsgrunnlagDto))
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpectResponseBody(
+                forventetBeregnetTrygdeavgiftDto().copy(beregningsforklaringer = listOf(forklaring))
+            )
     }
 
     @Test
@@ -160,6 +193,38 @@ class TrygdeavgiftControllerTest(
                 }
             }
     }
+
+    private fun lagBeregningsforklaringDto(): BeregningsforklaringDto = BeregningsforklaringDto(
+        aar = 2025,
+        regelgruppe = Regelgruppe.SAMLET,
+        valgtRegel = Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL,
+        aarsak = Beregningsaarsak.BEREGNET,
+        inntektsgrunnlag = listOf(
+            InntektslinjeDto(
+                inntektskilde = "INNTEKT_FRA_UTLANDET",
+                fom = LocalDate.of(2025, 1, 1),
+                tom = LocalDate.of(2025, 12, 31),
+                maanedsbeloep = 50000,
+                antallMaaneder = 12,
+                sumBeloep = 600000,
+            )
+        ),
+        ekskluderteInntekter = listOf(
+            EkskludertInntektslinjeDto(
+                inntektskilde = "ARBEIDSINNTEKT_FRA_NORGE",
+                fom = LocalDate.of(2025, 1, 1),
+                tom = LocalDate.of(2025, 6, 30),
+                sumBeloep = 102000,
+                aarsak = Ekskluderingsaarsak.SKATTEETATEN_FASTSETTER,
+            )
+        ),
+        sumAarligInntekt = 600000,
+        minstebeloep = 99650,
+        inntektOverMinstebeloep = 500350,
+        maksimalAvgift25Prosent = 125087,
+        ordinaerAvgift = 46200,
+        fastsattAvgift = 46200,
+    )
 
     private fun forventetBeregnetTrygdeavgiftDto(): BeregnetTrygdeavgiftDto {
         return BeregnetTrygdeavgiftDto(
