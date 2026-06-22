@@ -135,7 +135,8 @@ object ProsessflytDefinisjon {
         OPPRETT_NY_BEHANDLING_AARSAVREGNING to ProsessFlyt(
             prosessType = OPPRETT_NY_BEHANDLING_AARSAVREGNING,
             OPPRETT_AARSAVREGNING_BEHANDLING,
-            OPPRETT_OPPGAVE
+            OPPRETT_OPPGAVE,
+            SEND_INNHENTINGSBREV_AARSAVREGNING
         ),
         OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to ProsessFlyt(
             prosessType = OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK,

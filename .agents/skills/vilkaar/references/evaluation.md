@@ -3,10 +3,10 @@
 ## Evaluation Flow
 
 ```
-                    Bestemmelse Selected
+                    Bestemmelse + behandling selected
                             │
                             ▼
-              VilkårForBestemmelse.hentVilkår()
+       VilkårForBestemmelse.hentVilkår(bestemmelse, behandlingstema, avklarteFakta, behandlingID)
                             │
                             ▼
               List<Vilkår> returned to frontend
@@ -19,171 +19,81 @@
           oppfylt = true         oppfylt = false
                 │                       │
                 ▼                       ▼
-          Select begrunnelse      Select begrunnelse
-          (optional)              (required usually)
+          Select begrunnelse-kode(r) / fritekst (optional)
                 │                       │
                 └───────────┬───────────┘
                             ▼
-              VilkaarsvurderingService.lagreVilkår()
+       POST /vilkaar/{behandlingID}  →  VilkaarsresultatService.registrerVilkår(...)
                             │
                             ▼
-              Vilkaarsresultat entities created
+              Vilkaarsresultat (+ VilkaarBegrunnelse) entities created
 ```
 
-## VilkaarsvurderingService
+## Save / read path
 
-```java
-@Service
-public class VilkaarsvurderingService {
+The REST entry point is `VilkaarController` (`frontend-api/.../tjenester/gui/VilkaarController.java`, base path `/vilkaar`):
 
-    // Save vilkår evaluation results
-    public void lagreVilkaarsvurdering(
-        Long behandlingId,
-        List<VilkaarsvurderingRequest> vurderinger
-    );
+- `GET  /vilkaar/{behandlingID}` → `VilkaarsresultatService.hentVilkaar(behandlingID): List<VilkaarDto>`
+- `POST /vilkaar/{behandlingID}` (body `List<VilkaarDto>`) → `VilkaarsresultatService.registrerVilkår(behandlingID, vilkaarDtoer)`, then returns the refreshed list
+- `PUT  /vilkaar/{behandlingID}/inngangsvilkaar/overstyr` → `InngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(behandlingID)`
 
-    // Get current vilkår status for behandling
-    public List<VilkaarsvurderingResponse> hentVilkaarsvurdering(
-        Long behandlingId
-    );
+`VilkaarsresultatService` lives at `service/.../behandling/VilkaarsresultatService.kt`. Relevant methods:
 
-    // Check if all required vilkår are fulfilled
-    public boolean alleVilkårOppfylt(Long behandlingId);
-}
+```kotlin
+fun hentVilkaar(behandlingID: Long): List<VilkaarDto>                 // read
+fun registrerVilkår(behandlingID: Long, vilkaarDtoer: List<VilkaarDto>) // save (validates, resets, re-inserts)
+fun oppdaterVilkaarsresultat(behandlingID, vilkaar, oppfylt, begrunnelseKoder: Set<Kodeverk>)
+fun finnVilkaarsresultat(behandlingID, vilkaar: Vilkaar): Vilkaarsresultat?
+fun oppfyllerVilkaar(behandlingID, vilkaar: Vilkaar): Boolean
+fun harVilkaar(behandlingID, vilkaar: List<Vilkaar>): Boolean
+fun harVilkaarForUtsending(behandlingID): Boolean
+fun harVilkaarForUnntak(behandlingID): Boolean
 ```
 
-## VilkaarsvurderingRequest DTO
+`registrerVilkår` rejects changes to `IMMUTABLE_VILKAAR` (currently `FO_883_2004_INNGANGSVILKAAR`) with a `FunksjonellException`. For EØS-saker it keeps the immutable vilkår and only resets the rest; otherwise it clears all vilkårsresultater before re-inserting.
+
+## VilkaarDto
 
 ```java
-public class VilkaarsvurderingRequest {
-    private Vilkaar vilkaar;
-    private Boolean oppfylt;
-    private Set<String> begrunnelser;
+public class VilkaarDto {
+    private String vilkaar;                  // Vilkaar.kode
+    private Boolean oppfylt = false;
+    private Set<String> begrunnelseKoder;    // VilkaarBegrunnelse.kode values
     private String begrunnelseFritekst;
-}
-```
-
-## Evaluation Rules
-
-### All Vilkår Must Be Evaluated
-
-Before proceeding to vedtak, all required vilkår must have:
-- `oppfylt` set to true or false
-- At least one begrunnelse if `oppfylt = false`
-
-### Citizenship Vilkår (Mutual Exclusion)
-
-Only one of these should be `oppfylt = true`:
-- `NORSK_STATSBORGER`
-- `ANNEN_STATSBORGER`
-
-### Conditional Vilkår
-
-Some vilkår only appear based on previous answers:
-
-```kotlin
-// Example: If ANNEN_STATSBORGER is selected, additional vilkår may appear
-if (statsborgerskapInkludererEØS(statsborgerskap)) {
-    vilkårListe.add(Vilkår(Vilkaar.EØS_BORGER_VILKÅR))
-}
-```
-
-## Validation
-
-### Pre-vedtak Validation
-
-```kotlin
-fun validerVilkårFørVedtak(behandlingId: Long) {
-    val vilkårsresultater = hentVilkårsresultater(behandlingId)
-    val påkrevdeVilkår = hentPåkrevdeVilkår(behandlingId)
-
-    val manglende = påkrevdeVilkår - vilkårsresultater.map { it.vilkaar }
-    if (manglende.isNotEmpty()) {
-        throw FunksjonellException("Mangler evaluering av vilkår: $manglende")
-    }
-
-    val ikkeBegrunnet = vilkårsresultater
-        .filter { !it.oppfylt && it.begrunnelser.isEmpty() }
-    if (ikkeBegrunnet.isNotEmpty()) {
-        throw FunksjonellException("Avslåtte vilkår mangler begrunnelse")
-    }
+    private String begrunnelseFritekstEngelsk; // maps to begrunnelseFritekstEessi
 }
 ```
 
 ## Begrunnelser
 
-### Predefined Begrunnelser
+### Predefined begrunnelse-koder
 
-Loaded from `VilkårForBestemmelse*` classes:
+Set on the `Vilkår.muligeBegrunnelser` list from begrunnelse-kodeverk. Example from the router:
 
 ```kotlin
 Vilkår(
-    vilkår = Vilkaar.ANNEN_STATSBORGER,
-    muligeBegrunnelser = listOf(
-        "EØS-borger",
-        "Tredjelandsborger med lovlig opphold",
-        "Tredjelandsborger fra avtaleland"
-    )
+    FTRL_2_7_RIMELIGHETSVURDERING,
+    muligeBegrunnelser = toStringList(*Ftrl_2_7_begrunnelser.values())
 )
 ```
 
-### Fritekst Begrunnelse
+On save, the chosen `begrunnelseKoder` are stored as `VilkaarBegrunnelse` rows (`kode`) on the `Vilkaarsresultat`.
 
-Always available for additional explanation:
-- Required for non-standard cases
-- Stored in `begrunnelse_fritekst` column
+### Fritekst begrunnelse
 
-## Overriding Default Values
+`begrunnelseFritekst` (and `begrunnelseFritekstEessi`, exposed as `begrunnelseFritekstEngelsk` in the DTO) hold free-text explanation, stored on `vilkaarsresultat`.
 
-When vilkår has `defaultOppfylt`:
+## defaultOppfylt
 
-```kotlin
-// In VilkårForBestemmelseYrkesaktiv
-Vilkår(
-    vilkår = Vilkaar.ARBEID_I_UTLANDET,
-    defaultOppfylt = true  // Pre-checked in UI
-)
-```
+A `Vilkår` may carry `defaultOppfylt = true` (e.g. `FTRL_2_5_MEDFØLGENDE_A_E` for ektefelle-relasjon), pre-marking it as fulfilled in the UI. Saksbehandler can still override.
 
-Saksbehandler can override but must provide begrunnelse.
+## Behandlingsresultat link
 
-## Integration Points
-
-### Stegvelger (Step Selection)
-
-Vilkår status affects which steps are available:
-
-```kotlin
-if (!alleVilkårOppfylt(behandlingId)) {
-    // Cannot proceed to certain steps
-    throw FunksjonellException("Vilkår må være vurdert før dette steget")
-}
-```
-
-### Behandlingsresultat
-
-Vilkår results are attached to behandlingsresultat:
+Vilkår results hang off behandlingsresultat (1:1 with behandling):
 
 ```java
 @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL)
 private Set<Vilkaarsresultat> vilkaarsresultater = new HashSet<>();
 ```
 
-### Medlemskapsperiode Generation
-
-Vilkår outcomes influence period generation:
-
-```kotlin
-if (vilkaarOppfylt(Vilkaar.TIDLIGERE_MEDLEM)) {
-    // May affect period start date logic
-}
-```
-
-## Error Messages
-
-| Error | Cause |
-|-------|-------|
-| "Vilkår X er påkrevd for bestemmelse Y" | Missing vilkår evaluation |
-| "Begrunnelse mangler for avslått vilkår" | oppfylt=false without begrunnelse |
-| "Kan ikke fatte vedtak før alle vilkår er vurdert" | Incomplete evaluation |
-| "Ugyldig kombinasjon av vilkår" | Mutually exclusive vilkår both true |
+Each `Vilkaarsresultat.behandlingsresultat` is mapped via `@JoinColumn(name = "beh_resultat_id")`.

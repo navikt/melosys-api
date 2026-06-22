@@ -15,6 +15,7 @@ import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.domain.oppgave.PrioritetType
 import no.nav.melosys.integrasjon.Konstanter
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveClient
+import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveV2Client
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto
@@ -30,12 +31,22 @@ import java.time.format.DateTimeFormatter
 internal class OppgaveFasadeImplTest {
 
     private val oppgaveClient = mockk<OppgaveClient>()
+    private val oppgaveV2Client = mockk<OppgaveV2Client>()
 
     private lateinit var oppgaveFasadeImpl: OppgaveFasadeImpl
 
     @BeforeEach
     fun setup() {
-        oppgaveFasadeImpl = OppgaveFasadeImpl(oppgaveClient)
+        oppgaveFasadeImpl = OppgaveFasadeImpl(oppgaveClient, oppgaveV2Client)
+    }
+
+    @Test
+    fun `leggTilNøkkelord delegerer til v2-klienten`() {
+        every { oppgaveV2Client.leggTilNøkkelord(any(), any()) } returns Unit
+
+        oppgaveFasadeImpl.leggTilNøkkelord("123", setOf("Årsavregning 2024"))
+
+        verify { oppgaveV2Client.leggTilNøkkelord("123", setOf("Årsavregning 2024")) }
     }
 
     @Test

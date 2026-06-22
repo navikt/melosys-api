@@ -32,7 +32,7 @@ Behandlingsresultat
     ├─ Vilkaarsresultat* (eligibility criteria)
     ├─ Kontrollresultat* (verification results)
     ├─ Avklartefakta* (clarified facts)
-    └─ HelseutgiftDekkesPeriode (EEA pensioner health coverage)
+    └─ HelseutgiftDekkesPeriode* (EEA pensioner health coverage)
 ```
 
 ### Key Attributes
@@ -51,6 +51,7 @@ Behandlingsresultat
 |------|-------------|----------|
 | `IKKE_FASTSATT` | Not determined | Initial state |
 | `FASTSATT_LOVVALGSLAND` | Law choice country set | EU/EEA lovvalg |
+| `FORELOEPIG_FASTSATT_LOVVALGSLAND` | Provisional law choice set | Backs `erUtpeking()` and `erInnvilgelse()` (designation) |
 | `MEDLEM_I_FOLKETRYGDEN` | Member of Norwegian NI | FTRL membership |
 | `UNNTATT_MEDLEMSKAP` | Exempt from membership | Non-member |
 | `AVSLAG_SØKNAD` | Application denied | Rejection |
@@ -60,7 +61,12 @@ Behandlingsresultat
 | `HENLEGGELSE` | Case dismissed | Dropped case |
 | `FERDIGBEHANDLET` | Completed | Generic completion |
 | `MEDHOLD` | Appeal upheld | Klage result |
-| `OMGJORT` | Decision reversed | Klage result |
+| `OMGJORT` | Decision reversed (fvl § 35) | NY_VURDERING result (no klage) |
+
+The enum has more values than shown here, e.g. `FORELOEPIG_FASTSATT_LOVVALGSLAND`, `REGISTRERT_UNNTAK`,
+`DELVIS_GODKJENT_UNNTAK`, `UTPEKING_NORGE_AVVIST`, `AVSLAG_MANGLENDE_OPPL`, `ANNULLERT`, `AVBRUTT`,
+`DELVIS_OPPHØRT`, `FASTSATT_TRYGDEAVGIFT`, `HENLEGGELSE_BORTFALT`. See
+[Result Types](references/result-types.md) for the validation rules.
 
 ## Period Types
 
@@ -152,20 +158,20 @@ val trygdeavgift = resultat.trygdeavgiftsperioder
 ```kotlin
 resultat.harVedtak()  // Has decision metadata
 
-// Set decision
-resultat.settVedtakMetadata(
-    vedtaksdato = Instant.now(),
-    vedtakKlagefrist = LocalDate.now().plusWeeks(6)
-)
+// Set decision (vedtaksdato is set internally to Instant.now())
+resultat.settVedtakMetadata(klagefrist = LocalDate.now().plusWeeks(6))
+
+// Or with an explicit Vedtakstyper
+resultat.settVedtakMetadata(vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK, klagefrist = LocalDate.now().plusWeeks(6))
 ```
 
 ### Clearing for Reprocessing
 ```kotlin
-// Clear all periods and clarifications
-behandlingsresultatService.tømBehandlingsresultat(resultat)
+// Clear all periods and clarifications (takes behandlingID: Long)
+behandlingsresultatService.tømBehandlingsresultat(behandlingId)
 
-// Clear only membership periods
-behandlingsresultatService.tømMedlemskapsperioder(resultat)
+// Clear only membership periods (takes behandlingID: Long)
+behandlingsresultatService.tømMedlemskapsperioder(behandlingId)
 ```
 
 ## Important Interfaces
@@ -192,13 +198,13 @@ interface AvgiftspliktigPeriode {
 ## Key Services
 
 ### BehandlingsresultatService
-- `hentBehandlingsresultat()` - Fetch by ID
-- `lagreNyttBehandlingsresultat()` - Create (initial: IKKE_FASTSATT, MANUELT)
-- `oppdaterBehandlingsresultattype()` - Update type
-- `tømBehandlingsresultat()` - Clear for reprocessing
+- `hentBehandlingsresultat(behandlingId)` - Fetch by ID
+- `lagreNyttBehandlingsresultat(behandling)` - Create (initial: IKKE_FASTSATT, MANUELT)
+- `oppdaterBehandlingsresultattype(id, behandlingsresultattype)` - Update type
+- `tømBehandlingsresultat(behandlingID)` - Clear for reprocessing
 
 ### AngiBehandlingsresultatService
-- `oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling()` - Set type with validation and close case
+- `oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(behandlingID, behandlingsresultattype)` - Set type with validation and close case
 - Validates result type against case type, theme, and treatment type
 
 ### ReplikerBehandlingsresultatService
@@ -247,37 +253,37 @@ hentResultatMedMedlemskapOgLovvalg()
 ### Find Behandlingsresultat
 ```sql
 SELECT br.* FROM behandlingsresultat br
-WHERE br.id = :behandlingId;
+WHERE br.behandling_id = :behandlingId;
 ```
 
 ### Find All Periods for a Result
 ```sql
--- Lovvalgsperioder
-SELECT * FROM lovvalgsperiode WHERE behandlingsresultat_id = :id;
+-- Lovvalgsperioder (table lovvalg_periode, FK beh_resultat_id)
+SELECT * FROM lovvalg_periode WHERE beh_resultat_id = :id;
 
--- Medlemskapsperioder
+-- Medlemskapsperioder (FK behandlingsresultat_id)
 SELECT * FROM medlemskapsperiode WHERE behandlingsresultat_id = :id;
 
--- Anmodningsperioder
-SELECT * FROM anmodningsperiode WHERE behandlingsresultat_id = :id;
+-- Anmodningsperioder (FK beh_resultat_id)
+SELECT * FROM anmodningsperiode WHERE beh_resultat_id = :id;
 ```
 
 ### Find Results Without Decision
 ```sql
-SELECT br.id, b.status
+SELECT br.behandling_id, b.status
 FROM behandlingsresultat br
-JOIN behandling b ON b.id = br.id
-LEFT JOIN vedtak_metadata vm ON vm.behandlingsresultat_id = br.id
-WHERE vm.id IS NULL
-AND br.type != 'IKKE_FASTSATT';
+JOIN behandling b ON b.id = br.behandling_id
+LEFT JOIN vedtak_metadata vm ON vm.behandlingsresultat_id = br.behandling_id
+WHERE vm.behandlingsresultat_id IS NULL
+AND br.resultat_type != 'IKKE_FASTSATT';
 ```
 
 ### Find Results with Multiple Periods (potential issue)
 ```sql
-SELECT br.id, COUNT(*) as period_count
+SELECT br.behandling_id, COUNT(*) as period_count
 FROM behandlingsresultat br
-JOIN lovvalgsperiode lp ON lp.behandlingsresultat_id = br.id
-GROUP BY br.id
+JOIN lovvalg_periode lp ON lp.beh_resultat_id = br.behandling_id
+GROUP BY br.behandling_id
 HAVING COUNT(*) > 1;
 ```
 
@@ -285,3 +291,4 @@ HAVING COUNT(*) > 1;
 
 - **[Period Types](references/periods.md)**: Deep dive into period types and their relationships
 - **[Result Types](references/result-types.md)**: Complete result type reference
+- **[Trygdeavgift](references/trygdeavgift.md)**: Trygdeavgiftsperiode entities attached to result periods

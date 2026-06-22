@@ -2,11 +2,13 @@
 name: eessi-eux
 description: |
   Expert knowledge of EESSI integration via EUX/RINA in melosys-api.
-  Use when: (1) Understanding BUC lifecycle and SED exchange,
-  (2) Debugging SED sending/receiving (A001, A003, A005, etc.),
+  Use when: (1) Understanding BUC lifecycle and SED exchange (A-series A001-A012,
+  X-series X001-X013, plus H_BUC/UB_BUC),
+  (2) Debugging SED sending/receiving via EessiClient (opprettBucOgSed,
+  sendSedPåEksisterendeBuc, X008 invalidation, X009 purring),
   (3) Understanding LA_BUC types and their purposes,
-  (4) Investigating EUX API errors or RINA synchronization,
-  (5) Understanding institution catalog lookup.
+  (4) Investigating EUX API errors, RINA case (rina saksnummer / saksrelasjon) lookup,
+  (5) Understanding mottakerinstitusjoner / institution catalog lookup.
 ---
 
 # EESSI-EUX Skill
@@ -44,7 +46,7 @@ EESSI (Electronic Exchange of Social Security Information) is the EU system for 
            │                                  │
            ▼                                  ▼
 ┌──────────────────────┐           ┌──────────────────────┐
-│ EessiMeldingConsumer │           │   EessiConsumer      │
+│ EessiMeldingConsumer │           │   EessiClient        │
 └──────────────────────┘           └──────────────────────┘
            │                                  │
            └─────────────┬────────────────────┘
@@ -58,8 +60,7 @@ EESSI (Electronic Exchange of Social Security Information) is the EU system for 
 
 | Component | Description | Location |
 |-----------|-------------|----------|
-| `EessiConsumer` | REST client interface to melosys-eessi | integrasjon/.../eessi/ |
-| `EessiConsumerImpl` | WebClient implementation | integrasjon/.../eessi/ |
+| `EessiClient` | WebClient REST client to melosys-eessi (`open class ... : JsonRestIntegrasjon`) | integrasjon/.../eessi/EessiClient.kt |
 | `EessiService` | Main service for EESSI operations | service/.../dokument/sed/ |
 | `EessiMeldingConsumer` | Kafka consumer for incoming SED | service/.../eessi/kafka/ |
 | `SedRuter` | Routes incoming SED to processing | service/.../eessi/ruting/ |
@@ -71,12 +72,16 @@ EESSI (Electronic Exchange of Social Security Information) is the EU system for 
 
 | BUC | Purpose | Initiating SED |
 |-----|---------|----------------|
-| LA_BUC_01 | Art. 16 - Exception agreements | A001 |
-| LA_BUC_02 | Art. 13 - Work in multiple countries | A003 |
-| LA_BUC_03 | Notification of applicable legislation | A005 |
-| LA_BUC_04 | Art. 12 - Posted workers | A003 |
-| LA_BUC_05 | Art. 11 - General determination | A005 |
-| LA_BUC_06 | Family member membership | A003 |
+| LA_BUC_01 | Art. 16 - Exception agreements (Anmodning om unntak) | A001 |
+| LA_BUC_02 | Art. 13 - Work in multiple countries (Beslutning om lovvalg) | A003 |
+| LA_BUC_03 | Melding om relevant informasjon | A008 |
+| LA_BUC_04 | Art. 12 - Posted workers (Melding om utstasjonering) | A009 |
+| LA_BUC_05 | Art. 11 - General determination (Melding om lovvalg) | A010 |
+| LA_BUC_06 | Forespørsel om mer informasjon | A005 (+ A006 reply) |
+
+> `BucType.fraBestemmelse()` only ever maps to LA_BUC_01, LA_BUC_02, LA_BUC_04 and
+> LA_BUC_05 (see `BucType.kt`). LA_BUC_03 and LA_BUC_06 exist in the `BucType` enum
+> but are not produced from a lovvalgsbestemmelse — they are info/notification BUCs.
 
 **H_BUC** - Helytelser (Health benefits):
 Various H_BUC types for health benefit coordination.
@@ -91,7 +96,11 @@ Various H_BUC types for health benefit coordination.
 | A002 | Refusal of exception request |
 | A003 | Determination request (Art. 13) |
 | A004 | Objection to determination |
-| A005 | Notification of applicable legislation |
+| A005 | Request for more information (Anmodning om mer informasjon) |
+| A006 | Reply to request for more information (Svar på anmodning) |
+| A008 | Notification of relevant information (Melding om relevant informasjon) |
+| A009 | Notification of posting, Art. 12 (Melding om utstasjonering) |
+| A010 | Notification of applicable legislation, Art. 11 (Melding om lovvalg) |
 | A011 | Acceptance of exception request |
 | A012 | Confirmation of applicable legislation |
 
@@ -107,23 +116,23 @@ Various H_BUC types for health benefit coordination.
 
 ```kotlin
 // Create BUC and send SED
-eessiConsumer.opprettBucOgSed(
+eessiClient.opprettBucOgSed(
     sedDataDto,      // SED content
     vedlegg,         // Attachments
     bucType,         // LA_BUC_02, etc.
     sendAutomatisk,  // true = send immediately
-    oppdaterEksisterende // true = update if exists
+    oppdaterEksisterendeOmFinnes // true = update if exists
 )
 
 // Send SED on existing BUC
-eessiConsumer.sendSedPåEksisterendeBuc(
+eessiClient.sendSedPåEksisterendeBuc(
     sedDataDto,
     rinaSaksnummer,  // RINA case ID
     sedType          // A012, A004, etc.
 )
 
 // Get recipient institutions
-eessiConsumer.hentMottakerinstitusjoner(
+eessiClient.hentMottakerinstitusjoner(
     bucType,         // "LA_BUC_02"
     landkoder        // Set("DE", "SE")
 )
@@ -172,7 +181,7 @@ eessiConsumer.hentMottakerinstitusjoner(
 5. SedDataBygger builds SED payload
            │
            ▼
-6. EessiConsumer.opprettBucOgSed() / sendSedPåEksisterendeBuc()
+6. EessiClient.opprettBucOgSed() / sendSedPåEksisterendeBuc()
            │
            ▼
 7. melosys-eessi → EUX → RINA
@@ -180,17 +189,26 @@ eessiConsumer.hentMottakerinstitusjoner(
 
 ### Quick Debugging
 
-```sql
--- Find all SEDs for a fagsak
-SELECT sd.*, f.saksnummer
-FROM sed_dokument sd
-JOIN fagsak f ON sd.fagsak_id = f.id
-WHERE f.saksnummer = :saksnummer;
+melosys-api does NOT persist SEDs or the BUC↔NAV-case relationship in its own
+Oracle DB. There is no `sed_dokument` or `saksrelasjon` table here — `saksrelasjon`
+exists only as `SaksrelasjonDto` and as `PROSESS_STEG` name strings (e.g.
+`OPPDATER_SAKSRELASJON`). The actual saksrelasjon data lives in the **melosys-eessi**
+service's own database. To trace SED activity from melosys-api, query the saga tables:
 
--- Check RINA case relationship
-SELECT saksrelasjon_id, rina_saksnummer, gsak_saksnummer, buc_type
-FROM saksrelasjon
-WHERE gsak_saksnummer = :gsakSaksnummer;
+```sql
+-- Find SED-send / SED-mottak saga runs for a behandling.
+-- NB: column is PROSESS_TYPE (not "type") and SIST_FULLFORT_STEG (not "sist_utforte_steg").
+SELECT pi.uuid, pi.prosess_type, pi.status, pi.sist_fullfort_steg, pi.endret_dato
+FROM prosessinstans pi
+JOIN behandling b ON pi.behandling_id = b.id
+WHERE b.id = :behandlingId
+  AND pi.prosess_type LIKE 'IVERKSETT_VEDTAK%'
+ORDER BY pi.endret_dato DESC;
+
+-- The BUC↔NAV-case relationship (rina_saksnummer/gsak_saksnummer) is owned by
+-- melosys-eessi. From melosys-api, look it up at runtime via
+-- EessiClient.hentSakForGsakSaksnummer(gsakSaksnummer) /
+-- EessiClient.hentSakForRinasaksnummer(rinaSaksnummer).
 ```
 
 ## When to Use This Skill
@@ -201,6 +219,15 @@ WHERE gsak_saksnummer = :gsakSaksnummer;
 - Investigating EUX API errors
 - Understanding institution catalog lookup
 - Troubleshooting Kafka message processing
+
+## Reference Files
+
+Deeper detail lives in this skill's `references/` directory:
+
+- [references/api.md](references/api.md) — full `EessiClient` method/endpoint reference and Kafka message shapes
+- [references/buc-types.md](references/buc-types.md) — BUC types, bestemmelse→BUC mapping, BUC lifecycle states
+- [references/sed-types.md](references/sed-types.md) — SED types, content, routing, and SedType enum
+- [references/debugging.md](references/debugging.md) — SQL queries, common error scenarios, log patterns, code entry points
 
 ## Related Skills
 

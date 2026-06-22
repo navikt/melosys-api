@@ -52,10 +52,11 @@ val token = SubjectHandler.getInstance().getOidcTokenString()
 
 ### System User
 
-```kotlin
-companion object {
-    const val SYSTEMBRUKER = "srvmelosys"
-}
+`SubjectHandler` is a Java class; `SYSTEMBRUKER` is a public static field (not a Kotlin companion object).
+
+```java
+// SubjectHandler.java
+public static String SYSTEMBRUKER = "srvmelosys";
 ```
 
 ## Tilgangsmaskinen (Access Control)
@@ -65,32 +66,36 @@ Replaces legacy ABAC system for access control to person data.
 ```kotlin
 @Service
 class TilgangsmaskinenService(
-    private val tilgangsmaskinenConsumer: TilgangsmaskinenConsumer,
+    private val tilgangsmaskinenClient: TilgangsmaskinenClient,
     private val persondataService: PersondataService
 ) {
-    @Cacheable(value = ["tilgangsmaskinen"])
+    @Cacheable(value = ["tilgangsmaskinen"], key = "#fnr + '_' + T(no.nav.melosys.sikkerhet.context.SubjectHandler).getInstance().getUserID()")
     fun sjekkTilgangTilFnr(fnr: String): Boolean {
-        return tilgangsmaskinenConsumer.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
+        return tilgangsmaskinenClient.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
     }
 
-    @Cacheable(value = ["tilgangsmaskinen"])
+    @Cacheable(value = ["tilgangsmaskinen"], key = "#aktørId + '_' + T(no.nav.melosys.sikkerhet.context.SubjectHandler).getInstance().getUserID()")
     fun sjekkTilgangTilAktørId(aktørId: String): Boolean {
         val fnr = hentFnrFraPdl(aktørId)
-        return tilgangsmaskinenConsumer.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
+        return tilgangsmaskinenClient.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
     }
 }
 ```
 
 ### Usage in Services
 
+Inject the `Aksesskontroll` interface (implemented by `TilgangsmaskinenAksesskontroll`).
+Its methods include `auditAutoriser(behandlingID, kontekst)`, `auditAutoriserSkriv(behandlingID, kontekst)`,
+`auditAutoriserAktørID(aktørID, kontekst)` and `autoriserSakstilgang(saksnummer)`.
+
 ```kotlin
 @Service
 class MyService(
-    private val tilgangsmaskinenAksesskontroll: TilgangsmaskinenAksesskontroll
+    private val aksesskontroll: Aksesskontroll
 ) {
-    fun doSomething(fnr: String) {
-        tilgangsmaskinenAksesskontroll.sjekkTilgang(fnr)
-        // Throws ManglerTilgangException if access denied
+    fun doSomething(behandlingID: Long) {
+        aksesskontroll.auditAutoriser(behandlingID, "MyService.doSomething")
+        // Throws SikkerhetsbegrensningException if access denied
     }
 }
 ```
@@ -122,10 +127,14 @@ no.nav.security.jwt:
 
 ### Registered Clients
 
+The authoritative list lives in the `registration:` block of `app/src/main/resources/application.yml`
+(it drifts as integrations are added). As of this writing:
+
 | Client | Grant Type | Target |
 |--------|------------|--------|
-| `arbeidsforhold` | jwt-bearer | Aareg |
+| `aareg` | jwt-bearer | Aareg (arbeidsforhold) |
 | `faktureringskomponenten` | jwt-bearer | Billing |
+| `felleskodeverk` | jwt-bearer | Felles kodeverk |
 | `graph` | client_credentials | Microsoft Graph |
 | `inntekt` | client_credentials | Inntektskomponenten |
 | `medl` | jwt-bearer | MEDL |
@@ -133,7 +142,10 @@ no.nav.security.jwt:
 | `oppgave` | jwt-bearer | Oppgave |
 | `pdl` | jwt-bearer | PDL |
 | `saf` | jwt-bearer | SAF |
+| `sokos-utbetaldata` | jwt-bearer | Utbetalingsdata |
 | `tilgangsmaskinen` | jwt-bearer | Tilgangsmaskinen |
+| `melosys-soknad-mottak` | jwt-bearer | Søknad mottak |
+| `melosys-skjema` | jwt-bearer | Skjema API |
 | `dokarkiv` | jwt-bearer | Joark |
 | `dokdistfordeling` | jwt-bearer | Document distribution |
 
@@ -158,7 +170,7 @@ data class AuditEvent(
 )
 
 enum class AuditEventType {
-    CREATE, READ, UPDATE, DELETE
+    READ, UPDATE
 }
 ```
 
@@ -226,27 +238,44 @@ class MyIT {
 
 ## Admin Endpoints Security
 
-Admin endpoints use API key authentication:
-
-```kotlin
-@PreAuthorize("hasAuthority('ADMIN')")
-@RestController
-@RequestMapping("/admin")
-class AdminController
-```
+Admin endpoints are `@Protected` (token-support) controllers, additionally gated by
+`ApiKeyInterceptor` (`frontend-api/.../tjenester/gui/config/ApiKeyInterceptor.kt`).
 
 ### API Key Validation
 
-Admin endpoints typically check for specific API keys or use elevated permissions.
+`ApiKeyInterceptor` compares the request header `X-MELOSYS-ADMIN-APIKEY` (constant `API_KEY_HEADER`)
+against the configured `Melosys-admin.apikey` value and returns HTTP 403 on mismatch.
+In nais the key comes from the `MELOSYS_ADMIN_API_KEY` env var (`application-nais.yml`:
+`apikey: ${MELOSYS_ADMIN_API_KEY}`).
+
+```kotlin
+@Component
+class ApiKeyInterceptor(
+    @Value("\${Melosys-admin.apikey}") private val apiKey: String
+) : HandlerInterceptor {
+    override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
+        if (request.getHeader(API_KEY_HEADER) != apiKey) {
+            response.status = 403
+            response.writer.write("Invalid API key")
+            return false
+        }
+        return true
+    }
+
+    companion object {
+        const val API_KEY_HEADER = "X-MELOSYS-ADMIN-APIKEY"
+    }
+}
+```
 
 ## Error Handling
 
-### ManglerTilgangException
+### SikkerhetsbegrensningException
 
-Thrown when access is denied:
+Thrown when access is denied (in `TilgangsmaskinenAksesskontroll`, package `no.nav.melosys.exception`):
 
 ```kotlin
-throw ManglerTilgangException("Bruker har ikke tilgang til person")
+throw SikkerhetsbegrensningException("Tilgangsmaskinen: Brukeren har ikke tilgang til ressurs")
 ```
 
 ### TilgangsmaskinenException
@@ -270,6 +299,10 @@ fun sjekkTilgangTilFnr(fnr: String): Boolean
 ```
 
 Cache key includes both the person ID and the user ID to ensure user-specific results.
+
+## References
+
+- [`references/debugging.md`](references/debugging.md) — step-by-step debugging for token validation, access-denied, OAuth2 client, and mock-OAuth issues.
 
 ## Related Skills
 

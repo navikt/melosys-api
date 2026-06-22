@@ -30,7 +30,7 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponse
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringIntervall
 import no.nav.melosys.saksflyt.steg.fakturering.OpprettFakturaserie
-import no.nav.melosys.saksflyt.steg.fakturering.OpprettFakturaserie.Companion.DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL
+import no.nav.melosys.saksflyt.steg.fakturering.DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest

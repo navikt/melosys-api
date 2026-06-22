@@ -7,6 +7,10 @@ description: |
   (3) Working with DTOs and request/response objects,
   (4) Understanding exception handling and HTTP status codes,
   (5) Adding access control to endpoints.
+  Triggers: "new endpoint", "REST controller", "@RestController", "add a DTO",
+  "ResponseEntity", "Aksesskontroll", "access control on endpoint",
+  "Swagger/@Operation", "return 404/403/401/400", "@Protected", "frontend-api",
+  "search endpoint", "/sok".
 ---
 
 # Frontend API Skill
@@ -36,6 +40,10 @@ frontend-api/src/main/kotlin/no/nav/melosys/tjenester/gui/
 | `gui/unntakshandtering/` | Exception handling |
 
 ## Controller Pattern
+
+The examples below use generic placeholders (`MyController`, `MyDto`, `MyService`). For a real,
+canonical implementation — covering the annotations, the search-dispatch `when {}` block, and the
+audit calls — read `frontend-api/src/main/kotlin/no/nav/melosys/tjenester/gui/fagsaker/FagsakController.kt`.
 
 ### Basic Controller
 
@@ -184,6 +192,12 @@ throw ValideringException("Ugyldig periode", listOf("FOM_ETTER_TOM"))
 
 ## Access Control
 
+`Aksesskontroll` is a Java interface in `service/src/main/java/no/nav/melosys/service/tilgang/Aksesskontroll.java`.
+The live implementation is `TilgangsmaskinenAksesskontroll`
+(`service/src/main/kotlin/no/nav/melosys/service/tilgangsmaskinen/TilgangsmaskinenAksesskontroll.kt`),
+which delegates authorization to Tilgangsmaskinen. Controllers inject the interface; when access
+control misbehaves, look at the implementation.
+
 ### Aksesskontroll Service
 
 ```kotlin
@@ -299,6 +313,11 @@ fun doSomething() {
     }
 }
 ```
+
+## Debugging
+
+For HTTP-status triage (401/403/404/400/500), curl recipes, request/user-context logging, and
+MockMvc integration-test setup, see [`references/debugging.md`](references/debugging.md).
 
 ## Related Skills
 

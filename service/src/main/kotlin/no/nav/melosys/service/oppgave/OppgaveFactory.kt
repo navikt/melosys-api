@@ -27,6 +27,7 @@ class OppgaveFactory {
     fun lagBehandlingsoppgave(
         behandling: Behandling,
         mottaksdato: LocalDate?,
+        gjelderÅr: String? = null,
         hentSedDokument: () -> SedDokument?
     ): Oppgave.Builder {
         // Dokumentasjon for regler: https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
@@ -47,7 +48,8 @@ class OppgaveFactory {
                     sakstype,
                     sakstema,
                     behandlingstema,
-                    behandlingstype
+                    behandlingstype,
+                    gjelderÅr
                 ) { logHvisMangler ->
                     hentSedDokument().apply {
                         if (logHvisMangler && this == null) log.warn("Sed dokument mangler for:${behandling.fagsak.saksnummer} behandlingID:${behandling.id}")
@@ -81,12 +83,14 @@ class OppgaveFactory {
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper,
+        gjelderÅr: String? = null,
         hentSedDokument: (logHvisMangler: Boolean) -> SedDokument?
     ): String = oppgaveBeskrivelseUtleder.utledBeskrivelse(
         sakstype,
         sakstema,
         behandlingstema,
         behandlingstype,
+        gjelderÅr,
         hentSedDokument
     )
 

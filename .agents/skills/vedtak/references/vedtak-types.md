@@ -18,11 +18,13 @@
 
 | Order | Step | Implementation | Description |
 |-------|------|----------------|-------------|
-| 1 | LAGRE_MEDLEMSKAPSPERIODE_MEDL | `LagreMedlemsperiodeMedl` | Save membership period to MEDL |
-| 2 | OPPRETT_FAKTURASERIE | `OpprettFakturaserie` | Create invoice series |
-| 3 | AVSLUTT_SAK_OG_BEHANDLING | `AvsluttFagsakOgBehandling` | Close case and treatment |
-| 4 | SEND_MELDING_OM_VEDTAK | `SendMeldingOmVedtak` | Publish Kafka event |
-| 5 | RESET_ÅPNE_ÅRSAVREGNINGER | `ResetÅpneÅrsavregninger` | Reset open annual reconciliations |
+| 1 | LAGRE_PERSONOPPLYSNINGER | `LagrePersonopplysninger` | Save person data snapshot |
+| 2 | LAGRE_MEDLEMSKAPSPERIODE_MEDL | `LagreMedlemsperiodeMedl` | Save membership period to MEDL |
+| 3 | OPPRETT_FAKTURASERIE | `OpprettFakturaserie` | Create invoice series |
+| 4 | AVSLUTT_SAK_OG_BEHANDLING | `AvsluttFagsakOgBehandling` | Close case and treatment |
+| 5 | SEND_MELDING_OM_VEDTAK | `SendMeldingOmVedtak` | Publish Kafka event |
+| 6 | OPPRETTE_AARSAVREGNING_ENDRING | `OppretteÅrsavregningVedEndring` | Trigger årsavregning change behandling |
+| 7 | RESET_ÅPNE_ÅRSAVREGNINGER | `ResetÅpneÅrsavregningBehandlinger` | Reset open annual reconciliations (side effect after vedtak) |
 
 **Data Keys Used**:
 - `VEDTAK_REQUEST` - The vedtak request from frontend
@@ -40,15 +42,18 @@
 
 | Order | Step | Implementation | Description |
 |-------|------|----------------|-------------|
-| 1 | AVKLAR_MYNDIGHET | `AvklarMyndighet` | Clarify foreign authority |
-| 2 | AVKLAR_ARBEIDSGIVER | `AvklarArbeidsgiver` | Clarify Norwegian employer |
-| 3 | LAGRE_LOVVALGSPERIODE_MEDL | `LagreLovvalgsperiodeMedl` | Save law selection period |
-| 4 | OPPRETT_FAKTURASERIE | `OpprettFakturaserie` | Create invoice series |
-| 5 | SEND_VEDTAKSBREV_INNLAND | `SendVedtaksbrevInnland` | Send domestic verdict letter |
-| 6 | SEND_VEDTAK_UTLAND | `SendVedtakUtland` | Send SED to foreign authority |
-| 7 | DISTRIBUER_JOURNALPOST_UTLAND | `DistribuerJournalpostUtland` | Distribute to foreign journal |
-| 8 | AVSLUTT_SAK_OG_BEHANDLING | `AvsluttFagsakOgBehandling` | Close case and treatment |
-| 9 | SEND_MELDING_OM_VEDTAK | `SendMeldingOmVedtak` | Publish Kafka event |
+| 1 | LAGRE_PERSONOPPLYSNINGER | `LagrePersonopplysninger` | Save person data snapshot |
+| 2 | AVKLAR_MYNDIGHET | `AvklarMyndighet` | Clarify foreign authority |
+| 3 | AVKLAR_ARBEIDSGIVER | `AvklarArbeidsgiver` | Clarify Norwegian employer |
+| 4 | LAGRE_LOVVALGSPERIODE_MEDL | `LagreLovvalgsperiodeMedl` | Save law selection period |
+| 5 | OPPRETT_FAKTURASERIE | `OpprettFakturaserie` | Create invoice series |
+| 6 | SEND_VEDTAKSBREV_INNLAND | `SendVedtaksbrevInnland` | Send domestic verdict letter |
+| 7 | SEND_VEDTAK_UTLAND | `SendVedtakUtland` | Send SED to foreign authority |
+| 8 | DISTRIBUER_JOURNALPOST_UTLAND | `DistribuerJournalpostUtland` | Distribute to foreign journal |
+| 9 | AVSLUTT_SAK_OG_BEHANDLING | `AvsluttFagsakOgBehandling` | Close case and treatment |
+| 10 | SEND_MELDING_OM_VEDTAK | `SendMeldingOmVedtak` | Publish Kafka event |
+| 11 | OPPRETTE_AARSAVREGNING_ENDRING | `OppretteÅrsavregningVedEndring` | Trigger årsavregning change behandling |
+| 12 | RESET_ÅPNE_ÅRSAVREGNINGER | `ResetÅpneÅrsavregningBehandlinger` | Reset open annual reconciliations |
 
 ---
 
@@ -62,11 +67,12 @@
 
 | Order | Step | Implementation | Description |
 |-------|------|----------------|-------------|
-| 1 | AVKLAR_MYNDIGHET | `AvklarMyndighet` | Clarify foreign authority |
-| 2 | AVKLAR_ARBEIDSGIVER | `AvklarArbeidsgiver` | Clarify Norwegian employer |
-| 3 | LAGRE_LOVVALGSPERIODE_MEDL | `LagreLovvalgsperiodeMedl` | Save law selection period |
-| 4 | AVSLUTT_SAK_OG_BEHANDLING | `AvsluttFagsakOgBehandling` | Close case and treatment |
-| 5 | SEND_MELDING_OM_VEDTAK | `SendMeldingOmVedtak` | Publish Kafka event |
+| 1 | LAGRE_PERSONOPPLYSNINGER | `LagrePersonopplysninger` | Save person data snapshot |
+| 2 | AVKLAR_MYNDIGHET | `AvklarMyndighet` | Clarify foreign authority |
+| 3 | AVKLAR_ARBEIDSGIVER | `AvklarArbeidsgiver` | Clarify Norwegian employer |
+| 4 | LAGRE_LOVVALGSPERIODE_MEDL | `LagreLovvalgsperiodeMedl` | Save law selection period |
+| 5 | AVSLUTT_SAK_OG_BEHANDLING | `AvsluttFagsakOgBehandling` | Close case and treatment |
+| 6 | SEND_MELDING_OM_VEDTAK | `SendMeldingOmVedtak` | Publish Kafka event |
 
 ---
 
@@ -74,16 +80,19 @@
 
 **Purpose**: Execute non-worker verdict
 
-**Trigger**: `IkkeYrkesaktivVedtakService.fattVedtak()`
+**Trigger**: Selected inside `EosVedtakService.fattVedtak()` when
+`saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)` — there is no dedicated
+`IkkeYrkesaktivVedtakService`. It calls `prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling)`.
 
 **Steps**:
 
 | Order | Step | Implementation | Description |
 |-------|------|----------------|-------------|
-| 1 | LAGRE_LOVVALGSPERIODE_MEDL | `LagreLovvalgsperiodeMedl` | Save law selection period |
-| 2 | SEND_VEDTAKSBREV_INNLAND | `SendVedtaksbrevInnland` | Send domestic verdict letter |
-| 3 | AVSLUTT_SAK_OG_BEHANDLING | `AvsluttFagsakOgBehandling` | Close case and treatment |
-| 4 | SEND_MELDING_OM_VEDTAK | `SendMeldingOmVedtak` | Publish Kafka event |
+| 1 | LAGRE_PERSONOPPLYSNINGER | `LagrePersonopplysninger` | Save person data snapshot |
+| 2 | LAGRE_LOVVALGSPERIODE_MEDL | `LagreLovvalgsperiodeMedl` | Save law selection period |
+| 3 | SEND_VEDTAKSBREV_INNLAND | `SendVedtaksbrevInnland` | Send domestic verdict letter |
+| 4 | AVSLUTT_SAK_OG_BEHANDLING | `AvsluttFagsakOgBehandling` | Close case and treatment |
+| 5 | SEND_MELDING_OM_VEDTAK | `SendMeldingOmVedtak` | Publish Kafka event |
 
 ---
 
@@ -97,10 +106,11 @@
 
 | Order | Step | Implementation | Description |
 |-------|------|----------------|-------------|
-| 1 | SEND_FAKTURA_AARSAVREGNING | `SendFakturaÅrsavregning` | Send annual invoice |
-| 2 | VARSLE_PENSJONSOPPTJENING | `SendPensjonsopptjeningHendelse` | Notify pension accrual |
-| 3 | AVSLUTT_SAK_OG_BEHANDLING | `AvsluttFagsakOgBehandling` | Close case and treatment |
-| 4 | SEND_MELDING_OM_VEDTAK | `SendMeldingOmVedtak` | Publish Kafka event |
+| 1 | LAGRE_PERSONOPPLYSNINGER | `LagrePersonopplysninger` | Save person data snapshot |
+| 2 | SEND_FAKTURA_AARSAVREGNING | `SendFakturaÅrsavregning` | Send annual invoice |
+| 3 | VARSLE_PENSJONSOPPTJENING | `SendPensjonsopptjeningHendelse` | Notify pension accrual |
+| 4 | AVSLUTT_SAK_OG_BEHANDLING | `AvsluttFagsakOgBehandling` | Close case and treatment |
+| 5 | SEND_MELDING_OM_VEDTAK | `SendMeldingOmVedtak` | Publish Kafka event |
 
 ---
 
@@ -112,9 +122,12 @@
 
 | Order | Step | Implementation | Description |
 |-------|------|----------------|-------------|
-| 1 | OPPRETT_FAKTURASERIE | `OpprettFakturaserie` | Create invoice series |
-| 2 | AVSLUTT_SAK_OG_BEHANDLING | `AvsluttFagsakOgBehandling` | Close case and treatment |
-| 3 | SEND_ORIENTERINGSBREV_TRYGDEAVGIFT | - | Send orientation letter |
+| 1 | LAGRE_PERSONOPPLYSNINGER | `LagrePersonopplysninger` | Save person data snapshot |
+| 2 | OPPRETT_FAKTURASERIE | `OpprettFakturaserie` | Create invoice series |
+| 3 | AVSLUTT_SAK_OG_BEHANDLING | `AvsluttFagsakOgBehandling` | Close case and treatment |
+| 4 | SEND_ORIENTERINGSBREV_TRYGDEAVGIFT | - | Send orientation letter |
+| 5 | OPPRETTE_AARSAVREGNING_ENDRING | `OppretteÅrsavregningVedEndring` | Trigger årsavregning change behandling |
+| 6 | RESET_ÅPNE_ÅRSAVREGNINGER | `ResetÅpneÅrsavregningBehandlinger` | Reset open annual reconciliations |
 
 ---
 
@@ -122,26 +135,35 @@
 
 ### VedtaksfattingFasade
 
-Location: `service/src/main/kotlin/.../vedtak/VedtaksfattingFasade.kt`
+Location: `service/src/main/java/no/nav/melosys/service/vedtak/VedtaksfattingFasade.java` (Java; Kotlin-migrering pågår).
 
-Entry point that routes to correct VedtakService based on sakstype:
+Entry point. Validerer at det kan fattes vedtak, og delegerer ruting til `FattVedtakVelger`:
 
-```kotlin
-fun fattVedtak(behandlingID: Long, request: FattVedtakRequest) {
-    val behandling = behandlingService.hentBehandling(behandlingID)
-    val vedtakService = finnVedtakService(behandling.fagsak.type)
-    vedtakService.fattVedtak(behandling, request)
+```java
+@Transactional(noRollbackFor = {ValideringException.class})
+public void fattVedtak(long behandlingID, FattVedtakRequest fattVedtakRequest) throws ValideringException {
+    var behandling = behandlingService.hentBehandling(behandlingID);
+    validerKanFattesVedtak(behandling);
+    FattVedtakInterface fattVedtakInterface = fattVedtakVelger.getFattVedtakService(behandling);
+    fattVedtakInterface.fattVedtak(behandling, fattVedtakRequest);
 }
 ```
+
+`FattVedtakVelger.getFattVedtakService(behandling)` (Kotlin) velger tjeneste: behandlingstype
+`ÅRSAVREGNING` → `ÅrsavregningVedtakService`, ellers etter sakstype `EU_EOS`/`FTRL`/`TRYGDEAVTALE`.
 
 ### VedtakService Implementations
 
 | Sakstype | Service | Location |
 |----------|---------|----------|
-| FTRL | `FtrlVedtakService` | `service/src/main/kotlin/.../vedtak/` |
-| EOS | `EosVedtakService` | `service/src/main/kotlin/.../vedtak/` |
-| TRYGDEAVTALE | `TrygdeavtaleVedtakService` | `service/src/main/kotlin/.../vedtak/` |
-| AARSAVREGNING | `ÅrsavregningVedtakService` | `service/src/main/kotlin/.../vedtak/` |
+| FTRL | `FtrlVedtakService` | `service/src/main/kotlin/.../vedtak/FtrlVedtakService.kt` |
+| EU_EOS | `EosVedtakService` | `service/src/main/java/.../vedtak/EosVedtakService.java` |
+| TRYGDEAVTALE | `TrygdeavtaleVedtakService` | `service/src/main/java/.../vedtak/TrygdeavtaleVedtakService.java` |
+| ÅRSAVREGNING (behandlingstype) | `ÅrsavregningVedtakService` | `service/src/main/kotlin/.../vedtak/ÅrsavregningVedtakService.kt` |
+
+`IVERKSETT_VEDTAK_IKKE_YRKESAKTIV` har ingen egen tjeneste — det velges inne i `EosVedtakService`
+når `saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)`, som da kaller
+`prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling)`.
 
 ### Common VedtakService Pattern
 
@@ -189,14 +211,17 @@ Verdict result types used in vedtak processing:
 ## Key File Locations
 
 ```
+service/src/main/java/no/nav/melosys/service/vedtak/
+├── VedtaksfattingFasade.java    # Entry point (validation + delegation)
+├── EosVedtakService.java        # EØS verdicts (also routes IVERKSETT_VEDTAK_IKKE_YRKESAKTIV)
+├── TrygdeavtaleVedtakService.java # Bilateral agreement verdicts
+└── FattVedtakRequest.java       # Request DTO
+
 service/src/main/kotlin/no/nav/melosys/service/vedtak/
-├── VedtaksfattingFasade.kt      # Entry point/router
+├── FattVedtakVelger.kt          # Router: behandling -> FattVedtakInterface
+├── FattVedtakInterface.kt       # Common interface
 ├── FtrlVedtakService.kt         # FTRL verdicts
-├── EosVedtakService.kt          # EØS verdicts
-├── TrygdeavtaleVedtakService.kt # Bilateral agreement verdicts
-├── ÅrsavregningVedtakService.kt # Annual reconciliation
-├── FattVedtakRequest.kt         # Request DTO
-└── FattVedtakInterface.kt       # Common interface
+└── ÅrsavregningVedtakService.kt # Annual reconciliation
 
 saksflyt/src/main/kotlin/no/nav/melosys/saksflyt/steg/
 ├── medl/                        # MEDL integration steps

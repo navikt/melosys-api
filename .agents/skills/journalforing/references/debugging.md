@@ -13,7 +13,7 @@
 
 **Investigation**:
 ```kotlin
-val jp = safConsumer.hentJournalpost(journalpostId)
+val jp = safClient.hentJournalpost(journalpostId)
 log.info("Status: ${jp?.journalstatus}")
 // If FERDIGSTILT, skip finalization
 ```
@@ -49,13 +49,13 @@ Empty bytes when calling hentDokument
 ```
 
 **Causes**:
-- Wrong variantformat (ARKIV vs ORIGINAL)
 - DocumentInfoId doesn't exist
-- No access to document
+- No ARKIV variant present (`hentDokument` only fetches the ARKIV variant)
+- No access to document (`saksbehandlerHarTilgang` is false)
 
 **Investigation**:
 ```kotlin
-val jp = safConsumer.hentJournalpost(journalpostId)
+val jp = safClient.hentJournalpost(journalpostId)
 jp?.dokumenter?.forEach { dok ->
     log.info("Dokument: ${dok.dokumentInfoId}, tittel: ${dok.tittel}")
     dok.dokumentvarianter.forEach { variant ->
@@ -64,7 +64,7 @@ jp?.dokumenter?.forEach { dok ->
 }
 ```
 
-**Resolution**: Use correct variantformat (usually ARKIV for viewing)
+**Resolution**: Verify the journalpost has an ARKIV variant for the document and that access is granted
 
 ### Issue: Journalpost Not Linked to Case
 
@@ -73,11 +73,11 @@ jp?.dokumenter?.forEach { dok ->
 **Investigation**:
 ```kotlin
 // Check if journalpost has sak set
-val jp = safConsumer.hentJournalpost(journalpostId)
+val jp = safClient.hentJournalpost(journalpostId)
 log.info("Sak: ${jp?.sak?.fagsakId}, system: ${jp?.sak?.fagsaksystem}")
 
 // Check all journalposts for case
-val docs = safConsumer.hentDokumentoversikt(saksnummer)
+val docs = safClient.hentDokumentoversikt(saksnummer)
 log.info("Found ${docs.size} journalposts for $saksnummer")
 ```
 
@@ -91,7 +91,7 @@ log.info("Found ${docs.size} journalposts for $saksnummer")
 
 **Investigation**:
 ```kotlin
-val jp = safConsumer.hentJournalpost(journalpostId)
+val jp = safClient.hentJournalpost(journalpostId)
 log.info("Tema: ${jp?.tema}")
 // Should be MED, TRY, or UFM for Melosys
 ```
@@ -105,7 +105,7 @@ log.info("Tema: ${jp?.tema}")
 **Investigation**:
 ```sql
 -- Check prosessinstans state
-SELECT pi.id, pi.type, pi.sist_utforte_steg, pi.status, pi.data
+SELECT pi.uuid, pi.prosess_type, pi.sist_fullfort_steg, pi.status, pi.data
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId;
 
@@ -126,9 +126,9 @@ WHERE pi.behandling_id = :behandlingId;
 grep "JoarkService\|joarkFasade" application.log
 ```
 
-### SafConsumer Calls
+### SafClient Calls
 ```bash
-grep "SafConsumer\|graphql" application.log
+grep "SafClient\|graphql" application.log
 ```
 
 ### Saga Step
@@ -143,13 +143,16 @@ grep "journalpostId=12345\|journalpost 12345" application.log
 
 ## SQL Queries
 
-### Find Saksopplysning for Documents
+### Find the Journalpost Reference for a Behandling
 ```sql
--- Documents are stored as saksopplysning
-SELECT so.id, so.type, so.verdi, so.behandling_id
-FROM saksopplysning so
-WHERE so.behandling_id = :behandlingId
-AND so.type = 'DOKUMENT';
+-- Documents are NOT stored as a saksopplysning (SaksopplysningType has no
+-- DOKUMENT value). The journalpost reference is carried in the saga's
+-- prosessinstans data (JOURNALPOST_ID, DOKUMENT_ID). To list the actual
+-- documents for a case, query SAF (safClient.hentDokumentoversikt(saksnummer)).
+SELECT pi.data
+FROM prosessinstans pi
+WHERE pi.behandling_id = :behandlingId
+AND pi.data LIKE '%JOURNALPOST_ID%';
 ```
 
 ### Check Behandling Journalpost Link
@@ -164,9 +167,9 @@ AND pi.data LIKE '%JOURNALPOST_ID%';
 ### Find Stuck Prosessinstans
 ```sql
 -- Find prosessinstans stuck at journalføring step
-SELECT pi.id, pi.behandling_id, pi.type, pi.status, pi.registrert_dato
+SELECT pi.uuid, pi.behandling_id, pi.prosess_type, pi.status, pi.registrert_dato
 FROM prosessinstans pi
-WHERE pi.sist_utforte_steg = 'OPPDATER_OG_FERDIGSTILL_JOURNALPOST'
+WHERE pi.sist_fullfort_steg = 'OPPDATER_OG_FERDIGSTILL_JOURNALPOST'
 AND pi.status = 'FEILET'
 ORDER BY pi.registrert_dato DESC;
 ```
@@ -176,7 +179,7 @@ ORDER BY pi.registrert_dato DESC;
 | Component | Location |
 |-----------|----------|
 | Main Service | `integrasjon/.../joark/JoarkService.java:oppdaterOgFerdigstillJournalpost` |
-| SAF Consumer | `integrasjon/.../joark/saf/SafConsumer.java` |
+| SAF Client | `integrasjon/.../joark/saf/SafClient.java` |
 | Saga Step | `saksflyt/.../steg/jfr/OppdaterOgFerdigstillJournalpost.kt:utfør` |
 | Request Validator | `integrasjon/.../joark/JournalpostRequestValidator.java` |
 
@@ -202,7 +205,7 @@ joarkService.oppdaterOgFerdigstillJournalpost(journalpostId, oppdatering)
 ### Verify Journalpost State
 ```kotlin
 // Check current state
-val jp = safConsumer.hentJournalpost(journalpostId)
+val jp = safClient.hentJournalpost(journalpostId)
 println("Status: ${jp?.journalstatus}")
 println("Sak: ${jp?.sak?.fagsakId}")
 println("Bruker: ${jp?.bruker?.id}")

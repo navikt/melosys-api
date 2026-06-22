@@ -85,7 +85,7 @@ val query = ArbeidsforholdQuery(
     ansettelsesperiodeTom = null  // No end date filter
 )
 
-val response = arbeidsforholdConsumer.finnArbeidsforholdPrArbeidstaker(fnr, query)
+val response = arbeidsforholdClient.finnArbeidsforholdPrArbeidstaker(fnr, query)
 log.info("Found ${response.arbeidsforhold.size} employment relationships")
 
 response.arbeidsforhold.forEach { arb ->
@@ -153,10 +153,10 @@ FROM behandling b
 WHERE b.id = :behandlingId;
 
 -- Check stored saksopplysninger
-SELECT so.type, so.registrert_dato, so.versjon
+SELECT so.opplysning_type, so.registrert_dato, so.versjon
 FROM saksopplysning so
 WHERE so.behandling_id = :behandlingId
-AND so.type IN ('ARBFORH', 'ORG');
+AND so.opplysning_type IN ('ARBFORH', 'ORG');
 ```
 
 **Resolution**:
@@ -168,13 +168,13 @@ AND so.type IN ('ARBFORH', 'ORG');
 ### EREG Operations
 
 ```bash
-grep "EregRestService\|OrganisasjonRestConsumer\|eregFasade" application.log
+grep "EregRestService\|OrganisasjonRestClient\|eregFasade" application.log
 ```
 
 ### AAREG Operations
 
 ```bash
-grep "ArbeidsforholdService\|ArbeidsforholdConsumer\|AAREG" application.log
+grep "ArbeidsforholdService\|ArbeidsforholdClient\|AAREG" application.log
 ```
 
 ### Register Operations
@@ -189,22 +189,26 @@ grep "RegisteropplysningerService\|hentOgLagreOpplysninger" application.log
 
 ```sql
 -- Find organization data for a behandling
+-- (kildesystem/mottatt_dokument live on saksopplysning_kilde, joined via saksopplysning_id)
 SELECT so.id, so.registrert_dato, so.versjon,
-       so.kildesystem, so.mottatt_dokument
+       sk.kildesystem, sk.mottatt_dokument
 FROM saksopplysning so
+LEFT JOIN saksopplysning_kilde sk ON sk.saksopplysning_id = so.id
 WHERE so.behandling_id = :behandlingId
-AND so.type = 'ORG';
+AND so.opplysning_type = 'ORG';
 ```
 
 ### Find Employment Saksopplysninger
 
 ```sql
 -- Find employment data for a behandling
+-- (kildesystem/mottatt_dokument live on saksopplysning_kilde, joined via saksopplysning_id)
 SELECT so.id, so.registrert_dato, so.versjon,
-       so.kildesystem, so.mottatt_dokument
+       sk.kildesystem, sk.mottatt_dokument
 FROM saksopplysning so
+LEFT JOIN saksopplysning_kilde sk ON sk.saksopplysning_id = so.id
 WHERE so.behandling_id = :behandlingId
-AND so.type = 'ARBFORH';
+AND so.opplysning_type = 'ARBFORH';
 ```
 
 ### Find All Register Data Timestamps
@@ -212,12 +216,12 @@ AND so.type = 'ARBFORH';
 ```sql
 SELECT b.id as behandling_id,
        b.siste_opplysninger_hentet_dato,
-       so.type,
+       so.opplysning_type,
        so.registrert_dato
 FROM behandling b
 LEFT JOIN saksopplysning so ON so.behandling_id = b.id
 WHERE b.id = :behandlingId
-ORDER BY so.type;
+ORDER BY so.opplysning_type;
 ```
 
 ## Key Code Locations
@@ -226,10 +230,10 @@ ORDER BY so.type;
 |-----------|----------|
 | EREG Facade | `integrasjon/.../ereg/EregFasade.kt` |
 | EREG Service | `integrasjon/.../ereg/EregRestService.kt` |
-| EREG Consumer | `integrasjon/.../ereg/organisasjon/OrganisasjonRestConsumer.kt` |
+| EREG Client | `integrasjon/.../ereg/organisasjon/OrganisasjonRestClient.kt` |
 | EREG Converter | `integrasjon/.../ereg/EregDtoTilSaksopplysningKonverter.kt` |
 | AAREG Service | `service/.../aareg/ArbeidsforholdService.kt` |
-| AAREG Consumer | `integrasjon/.../aareg/arbeidsforhold/ArbeidsforholdConsumer.kt` |
+| AAREG Client | `integrasjon/.../aareg/arbeidsforhold/ArbeidsforholdClient.kt` |
 | AAREG Converter | `service/.../aareg/ArbeidsforholdKonverter.kt` |
 | Register Service | `service/.../registeropplysninger/RegisteropplysningerService.java` |
 | Org Lookup | `service/.../registeropplysninger/OrganisasjonOppslagService.java` |

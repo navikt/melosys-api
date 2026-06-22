@@ -22,11 +22,17 @@ sends letters, creates invoices, and closes the case.
 
 | Service | ProsessType | Key Steps |
 |---------|-------------|-----------|
-| `FtrlVedtakService` | `IVERKSETT_VEDTAK_FTRL` | MEDL → Faktura → Close |
-| `EosVedtakService` | `IVERKSETT_VEDTAK_EOS` | Myndighet → MEDL → Faktura → Brev → Close |
+| `FtrlVedtakService` | `IVERKSETT_VEDTAK_FTRL` | MEDL → Faktura → Close → Årsavregning |
+| `EosVedtakService` | `IVERKSETT_VEDTAK_EOS` | Myndighet → MEDL → Faktura → Brev → Close → Årsavregning |
+| `EosVedtakService` (ikke-yrkesaktiv-flyt) | `IVERKSETT_VEDTAK_IKKE_YRKESAKTIV` | MEDL → Brev → Close |
 | `TrygdeavtaleVedtakService` | `IVERKSETT_VEDTAK_TRYGDEAVTALE` | Myndighet → MEDL → Close |
-| `IkkeYrkesaktivVedtakService` | `IVERKSETT_VEDTAK_IKKE_YRKESAKTIV` | MEDL → Brev → Close |
 | `ÅrsavregningVedtakService` | `IVERKSETT_VEDTAK_AARSAVREGNING` | Faktura → Pensjon → Close |
+
+Routing is done by `FattVedtakVelger.getFattVedtakService(behandling)` (Kotlin): behandlingstype `ÅRSAVREGNING`
+→ `ÅrsavregningVedtakService`, ellers etter sakstype `EU_EOS`/`FTRL`/`TRYGDEAVTALE`. Det finnes ingen egen
+`IkkeYrkesaktivVedtakService` — `IVERKSETT_VEDTAK_IKKE_YRKESAKTIV` velges inne i `EosVedtakService` når
+`saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)`. `VedtaksfattingFasade` (entrypoint) og
+`FtrlVedtakService` ligger i kodebasen, `harVedtakInstans` ligger på `ProsessinstansService` (Java).
 
 ### Vedtak Lifecycle
 
@@ -46,42 +52,58 @@ sends letters, creates invoices, and closes the case.
 prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(behandling, request, nyStatus)
 
 // EØS vedtak
-prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling)
+prosessinstansService.opprettProsessinstansIverksettVedtakEos(
+    behandling, behandlingsresultatType, fritekst, fritekstSed, mottakerinstitusjoner, arbeidsgiverSkalHaKopi
+)
+
+// EØS ikke-yrkesaktiv (valgt inne i EosVedtakService)
+prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling)
 
 // Trygdeavtale vedtak
 prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling)
+
+// Årsavregning vedtak
+prosessinstansService.opprettProsessinstansIverksettVedtakÅrsavregning(behandling)
 ```
 
 ## Vedtak Flow Definitions
 
+Step lists below match `ProsessflytDefinisjon.kt` exactly. Every flow starts with
+`LAGRE_PERSONOPPLYSNINGER`, and FTRL/EØS append the årsavregning-koblingen
+(`OPPRETTE_AARSAVREGNING_ENDRING` og/eller `RESET_ÅPNE_ÅRSAVREGNINGER`) til slutt.
+
 ### IVERKSETT_VEDTAK_FTRL (Folketrygdloven)
 ```
-LAGRE_MEDLEMSKAPSPERIODE_MEDL → OPPRETT_FAKTURASERIE →
-AVSLUTT_SAK_OG_BEHANDLING → SEND_MELDING_OM_VEDTAK → RESET_ÅPNE_ÅRSAVREGNINGER
+LAGRE_PERSONOPPLYSNINGER → LAGRE_MEDLEMSKAPSPERIODE_MEDL → OPPRETT_FAKTURASERIE →
+AVSLUTT_SAK_OG_BEHANDLING → SEND_MELDING_OM_VEDTAK → OPPRETTE_AARSAVREGNING_ENDRING →
+RESET_ÅPNE_ÅRSAVREGNINGER
 ```
+RESET_ÅPNE_ÅRSAVREGNINGER er teknisk en sideeffekt etter vedtakssetting, ikke en del av
+selve vedtaksflyten (se kommentar i ProsessflytDefinisjon.kt).
 
 ### IVERKSETT_VEDTAK_EOS (EU/EØS)
 ```
-AVKLAR_MYNDIGHET → AVKLAR_ARBEIDSGIVER → LAGRE_LOVVALGSPERIODE_MEDL →
+LAGRE_PERSONOPPLYSNINGER → AVKLAR_MYNDIGHET → AVKLAR_ARBEIDSGIVER → LAGRE_LOVVALGSPERIODE_MEDL →
 OPPRETT_FAKTURASERIE → SEND_VEDTAKSBREV_INNLAND → SEND_VEDTAK_UTLAND →
-DISTRIBUER_JOURNALPOST_UTLAND → AVSLUTT_SAK_OG_BEHANDLING → SEND_MELDING_OM_VEDTAK
+DISTRIBUER_JOURNALPOST_UTLAND → AVSLUTT_SAK_OG_BEHANDLING → SEND_MELDING_OM_VEDTAK →
+OPPRETTE_AARSAVREGNING_ENDRING → RESET_ÅPNE_ÅRSAVREGNINGER
 ```
 
 ### IVERKSETT_VEDTAK_TRYGDEAVTALE (Bilateral)
 ```
-AVKLAR_MYNDIGHET → AVKLAR_ARBEIDSGIVER → LAGRE_LOVVALGSPERIODE_MEDL →
+LAGRE_PERSONOPPLYSNINGER → AVKLAR_MYNDIGHET → AVKLAR_ARBEIDSGIVER → LAGRE_LOVVALGSPERIODE_MEDL →
 AVSLUTT_SAK_OG_BEHANDLING → SEND_MELDING_OM_VEDTAK
 ```
 
 ### IVERKSETT_VEDTAK_IKKE_YRKESAKTIV (Non-worker)
 ```
-LAGRE_LOVVALGSPERIODE_MEDL → SEND_VEDTAKSBREV_INNLAND →
+LAGRE_PERSONOPPLYSNINGER → LAGRE_LOVVALGSPERIODE_MEDL → SEND_VEDTAKSBREV_INNLAND →
 AVSLUTT_SAK_OG_BEHANDLING → SEND_MELDING_OM_VEDTAK
 ```
 
 ### IVERKSETT_VEDTAK_AARSAVREGNING (Annual Reconciliation)
 ```
-SEND_FAKTURA_AARSAVREGNING → VARSLE_PENSJONSOPPTJENING →
+LAGRE_PERSONOPPLYSNINGER → SEND_FAKTURA_AARSAVREGNING → VARSLE_PENSJONSOPPTJENING →
 AVSLUTT_SAK_OG_BEHANDLING → SEND_MELDING_OM_VEDTAK
 ```
 
@@ -102,7 +124,8 @@ AVSLUTT_SAK_OG_BEHANDLING → SEND_MELDING_OM_VEDTAK
 ### Check Existing Vedtak Process
 
 ```kotlin
-// In FtrlVedtakService - prevents duplicate vedtak
+// In FtrlVedtakService (and the EOS/Trygdeavtale/Årsavregning services) - prevents duplicate vedtak.
+// harVedtakInstans is defined on ProsessinstansService (Java, saksflyt-api).
 if (prosessinstansService.harVedtakInstans(behandlingID)) {
     throw FunksjonellException("Det finnes allerede en vedtak-prosess for behandling $behandlingID")
 }
@@ -112,19 +135,19 @@ if (prosessinstansService.harVedtakInstans(behandlingID)) {
 
 ```sql
 -- Find vedtak saga for behandling
-SELECT id, type, status, sist_utforte_steg, registrert_dato, endret_dato
+SELECT uuid, prosess_type, status, sist_fullfort_steg, registrert_dato, endret_dato
 FROM prosessinstans
 WHERE behandling_id = :behandlingId
-AND type LIKE 'IVERKSETT_VEDTAK%'
+AND prosess_type LIKE 'IVERKSETT_VEDTAK%'
 ORDER BY registrert_dato DESC;
 ```
 
 ### Check Stuck Vedtak Processes
 
 ```sql
-SELECT id, type, status, sist_utforte_steg, endret_dato
+SELECT uuid, prosess_type, status, sist_fullfort_steg, endret_dato
 FROM prosessinstans
-WHERE type LIKE 'IVERKSETT_VEDTAK%'
+WHERE prosess_type LIKE 'IVERKSETT_VEDTAK%'
 AND status = 'UNDER_BEHANDLING'
 AND endret_dato < SYSDATE - INTERVAL '1' HOUR;
 ```
@@ -134,7 +157,7 @@ AND endret_dato < SYSDATE - INTERVAL '1' HOUR;
 ```sql
 SELECT behandling_id, COUNT(*) as count
 FROM prosessinstans
-WHERE type LIKE 'IVERKSETT_VEDTAK%'
+WHERE prosess_type LIKE 'IVERKSETT_VEDTAK%'
 GROUP BY behandling_id
 HAVING COUNT(*) > 1;
 ```
@@ -177,4 +200,5 @@ T5      Set: status=AVSLUTTET      ← OptimisticLock or overwrite!
 ## Detailed Documentation
 
 - **[Vedtak Types](references/vedtak-types.md)**: Complete vedtak type reference with service mappings
+- **[Debugging Guide](references/debugging.md)**: SQL diagnostics, log patterns, step-by-step troubleshooting, admin endpoints
 - **[Race Conditions](references/race-conditions.md)**: Vedtak-specific race conditions and mitigation

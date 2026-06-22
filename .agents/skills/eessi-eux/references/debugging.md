@@ -2,80 +2,55 @@
 
 ## SQL Queries
 
-### SED Document Analysis
-
-```sql
--- All SED documents for a fagsak
-SELECT
-    sd.id,
-    sd.sed_type,
-    sd.rina_saksnummer,
-    sd.rina_dokument_id,
-    sd.journalpost_id,
-    sd.opprettet_tidspunkt,
-    f.saksnummer
-FROM sed_dokument sd
-JOIN fagsak f ON sd.fagsak_id = f.id
-WHERE f.saksnummer = :saksnummer
-ORDER BY sd.opprettet_tidspunkt DESC;
-
--- Find SED by RINA case number
-SELECT sd.*, f.saksnummer
-FROM sed_dokument sd
-JOIN fagsak f ON sd.fagsak_id = f.id
-WHERE sd.rina_saksnummer = :rinaSaksnummer;
-
--- Find behandlinger created from incoming SED
-SELECT
-    b.id as behandling_id,
-    b.status,
-    b.mottatt_dato,
-    sd.sed_type,
-    sd.rina_saksnummer
-FROM behandling b
-JOIN sed_dokument sd ON b.sed_dokument_id = sd.id
-WHERE sd.sed_type IN ('A001', 'A003');
-```
-
-### Case Relationships
-
-```sql
--- In melosys-eessi database (if accessible)
--- Check saksrelasjon table for BUC to NAV case mapping
-SELECT *
-FROM saksrelasjon
-WHERE gsak_saksnummer = :gsakSaksnummer
-   OR rina_saksnummer = :rinaSaksnummer;
-```
+> **Important:** melosys-api does NOT store SEDs or the BUC↔NAV-case relationship in its
+> own Oracle DB. There is no `sed_dokument` table, and no `saksrelasjon` table —
+> `saksrelasjon` exists here only as `SaksrelasjonDto` and as `PROSESS_STEG` name
+> strings (`OPPDATER_SAKSRELASJON`). The saksrelasjon data lives in the **melosys-eessi**
+> service's own database. From melosys-api, trace SED activity through the saga tables
+> below, and look up the BUC↔case relationship at runtime via
+> `EessiClient.hentSakForGsakSaksnummer` / `hentSakForRinasaksnummer`.
 
 ### Prosessinstans for SED Operations
 
+The `Prosessinstans` entity (`saksflyt-api/.../domain/Prosessinstans.kt`) maps to table
+`prosessinstans`. NB column names: `prosess_type` (not `type`), `sist_fullfort_steg`
+(not `sist_utforte_steg`), `registrert_dato`/`endret_dato` (no `opprettet_tidspunkt`),
+`behandling_id` (FK), and the PK is `uuid`. Step errors are recorded in
+`prosessinstans_hendelser`, not in a column on `prosessinstans`.
+
 ```sql
--- Check SED sending prosessinstans
+-- SED sending saga runs for a behandling
 SELECT
-    pi.id,
-    pi.type,
+    pi.uuid,
+    pi.prosess_type,
     pi.status,
-    pi.sist_utforte_steg,
-    pi.feil_melding,
-    pi.opprettet_tidspunkt
+    pi.sist_fullfort_steg,
+    pi.endret_dato
 FROM prosessinstans pi
 JOIN behandling b ON pi.behandling_id = b.id
 WHERE b.id = :behandlingId
-AND pi.type LIKE 'IVERKSETT_VEDTAK%'
-ORDER BY pi.opprettet_tidspunkt DESC;
+AND pi.prosess_type LIKE 'IVERKSETT_VEDTAK%'
+ORDER BY pi.endret_dato DESC;
 
--- Check SED mottak prosessinstans
+-- SED mottak saga runs (last 7 days)
+-- SED-mottak prosess_type values include ARBEID_FLERE_LAND_NY_SAK,
+-- ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK, REGISTRERING_UNNTAK_NY_SAK, etc.
 SELECT
-    pi.id,
-    pi.type,
+    pi.uuid,
+    pi.prosess_type,
     pi.status,
-    pi.data,
-    pi.feil_melding
+    pi.sist_fullfort_steg,
+    pi.endret_dato
 FROM prosessinstans pi
-WHERE pi.type = 'SED_MOTTAK'
-AND pi.created_date > SYSDATE - 7
-ORDER BY pi.opprettet_tidspunkt DESC;
+WHERE pi.prosess_type LIKE '%MOTTAK%'
+AND pi.endret_dato > SYSDATE - 7
+ORDER BY pi.endret_dato DESC;
+
+-- Error details for a failed saga run live in prosessinstans_hendelser
+SELECT h.registrert_dato, h.steg, h.type, h.melding
+FROM prosessinstans_hendelser h
+WHERE h.prosessinstans_id = :prosessinstansUuid
+ORDER BY h.registrert_dato DESC;
 ```
 
 ## Common Error Scenarios
@@ -90,7 +65,7 @@ ORDER BY pi.opprettet_tidspunkt DESC;
 SELECT pi.data
 FROM prosessinstans pi
 WHERE pi.behandling_id = :behandlingId
-AND pi.type LIKE 'IVERKSETT_VEDTAK%';
+AND pi.prosess_type LIKE 'IVERKSETT_VEDTAK%';
 -- Look for EESSI_MOTTAKERE in data JSON
 ```
 
@@ -175,7 +150,7 @@ grep "EessiMeldingConsumer" application.log | grep "Mottatt ny melding"
 grep "SedRuter" application.log
 
 # EUX API errors
-grep "EessiConsumer" application.log | grep -E "ERROR|Exception"
+grep "EessiClient" application.log | grep -E "ERROR|Exception"
 ```
 
 ## Troubleshooting Flowchart
@@ -183,7 +158,7 @@ grep "EessiConsumer" application.log | grep -E "ERROR|Exception"
 ```
 SED sending failed?
 ├── Check prosessinstans status
-│   └── FEILET → Check feil_melding
+│   └── FEILET → Check prosessinstans_hendelser (steg + melding) for the error
 ├── Check mottakerinstitusjoner in prosessdata
 │   └── Empty → Country not EESSI-ready or no recipients selected
 ├── Check BucType mapping

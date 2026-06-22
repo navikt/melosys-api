@@ -17,6 +17,7 @@ object ToggleName {
     const val MELOSYS_EØS_FAKTURERING_AV_TRYGDEAVGIFT = "melosys.eos_fakturering_av_trygdeavgift"
     const val MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2 = "melosys.bruk_opprett_buc_og_sed_v2"
     const val MELOSYS_CDM_4_4 = "melosys.cdm-4-4"
+    const val MELOSYS_OPPGAVE_NØKKELORD = "melosys.oppgave_nokkelord"
     const val MELOSYS_TEKSTBLOKKER = "melosys.tekstblokker"
     const val MELOSYS_ADMINISTRASJON = "melosys.administrasjon"
 }

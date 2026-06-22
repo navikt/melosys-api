@@ -6,6 +6,7 @@ APP_NAME_MEDL: medlemskap-medl-api
 APP_NAME_MELOSYS_EESSI: melosys-eessi
 APP_NAME_OPPGAVE: oppgave
 APP_NAME_PDL: pdl-api
+APP_NAME_POPP: pensjon-popp-q2
 APP_NAME_SAF: saf
 APP_NAME_TILGANGSMASKINEN: populasjonstilgangskontroll
 APP_NAME_UTBETALING: sokos-utbetaldata
@@ -63,6 +64,9 @@ faktureringskomponenten:
 inntekt:
   rest:
     url: https://team-inntekt-proxy.dev-fss-pub.nais.io/proxy/inntektskomponenten-q2/rs/api/v1
+popp:
+  rest:
+    url: https://pensjon-popp-q2.dev.intern.nav.no/popp
 kafka:
   aiven:
     a1-utstedt:

@@ -6,17 +6,19 @@
 
 **Symptom**: Messages not being processed, no errors in logs
 
-**Cause**: SkippableKafkaErrorHandler stops container on error
+**Cause**: SkippableKafkaErrorHandler stops the container on error
 
 **Debug**:
 ```http
-GET /admin/kafka/containers
+GET /admin/kafka/errors
+# Lists failed messages for this pod; if a message is present its container is stopped
 ```
 
-**Solution**:
-1. Check failed messages: `GET /admin/kafka/failed`
-2. Fix or skip: `POST /admin/kafka/skip/{key}`
-3. Restart: `POST /admin/kafka/container/{topic}/start`
+**Solution** (each of these restarts the stopped container as a side effect):
+1. Check failed messages: `GET /admin/kafka/errors`
+2. Retry once the cause is fixed: `POST /admin/kafka/errors/{key}/retry`
+3. Or skip a poison message: `DELETE /admin/kafka/errors/{key}`
+4. Or clear everything at once: `POST /admin/kafka/errors/resume-all`
 
 ### 2. Deserialization Error
 
@@ -26,7 +28,7 @@ GET /admin/kafka/containers
 
 **Debug**:
 ```http
-GET /admin/kafka/failed
+GET /admin/kafka/errors
 # Check rawMessage field for actual content
 ```
 
@@ -59,10 +61,12 @@ val result = future[15L, TimeUnit.SECONDS]
 
 **Debug**:
 ```sql
--- Check for duplicate handling
+-- Check for duplicate handling. prosessinstans has no kafka_key column;
+-- the SED lock key is stored in sed_laas_referanse, and the timestamp
+-- column is registrert_dato (PK is uuid).
 SELECT * FROM prosessinstans
-WHERE kafka_key = :key
-ORDER BY opprettet_tid;
+WHERE sed_laas_referanse = :key
+ORDER BY registrert_dato;
 ```
 
 **Solution**: Ensure idempotent processing
@@ -83,63 +87,62 @@ openssl s_client -connect kafka-broker:9093
 
 ## Admin API Reference
 
-### List Containers
-
-```http
-GET /admin/kafka/containers
-Authorization: Bearer {token}
-
-Response:
-{
-  "teammelosys.eessi.v1": {
-    "running": true,
-    "paused": false
-  }
-}
-```
+All endpoints are on `KafkaErrorController` under base path `/admin/kafka/errors` and are
+`@Protected`. Keys use the format `topic-partition-offset`. Errors are stored in-memory per pod,
+so a `GET` reflects only the pod that served the request. There are no container start/stop/list
+endpoints — retry, skip, and resume-all restart stopped containers via `KafkaContainerService`.
 
 ### Get Failed Messages
 
 ```http
-GET /admin/kafka/failed
+GET /admin/kafka/errors
 Authorization: Bearer {token}
 
 Response:
 {
-  "teammelosys.eessi.v1-0-12345": {
-    "topic": "teammelosys.eessi.v1",
-    "offset": 12345,
-    "partition": 0,
-    "rawMessage": "...",
-    "errorStack": "..."
+  "podName": "melosys-api-xxxx",
+  "errors": {
+    "teammelosys.eessi.v1-0-12345": {
+      "topic": "teammelosys.eessi.v1",
+      "offset": 12345,
+      "partition": 0,
+      "record": { "...": "..." },
+      "rawMessage": "...",
+      "errorStack": "..."
+    }
   }
 }
+```
+
+### Retry Failed Message
+
+```http
+POST /admin/kafka/errors/teammelosys.eessi.v1-0-12345/retry
+Authorization: Bearer {token}
+
+# Removes the stored error and restarts the topic's container if stopped, so the
+# message is reprocessed from its offset. 404 if the key is unknown.
+Response: 200 OK
 ```
 
 ### Skip Failed Message
 
 ```http
-POST /admin/kafka/skip/teammelosys.eessi.v1-0-12345
+DELETE /admin/kafka/errors/teammelosys.eessi.v1-0-12345
 Authorization: Bearer {token}
 
+# Marks the message to be skipped (committed at offset+1), removes it from the failed
+# cache, and restarts the topic's container if stopped. NOTE: DELETE, not POST.
 Response: 200 OK
 ```
 
-### Start Container
+### Resume All
 
 ```http
-POST /admin/kafka/container/teammelosys.eessi.v1/start
+POST /admin/kafka/errors/resume-all
 Authorization: Bearer {token}
 
-Response: 200 OK
-```
-
-### Stop Container
-
-```http
-POST /admin/kafka/container/teammelosys.eessi.v1/stop
-Authorization: Bearer {token}
-
+# Groups failed messages per topic, clears them, and restarts each topic's stopped container.
 Response: 200 OK
 ```
 

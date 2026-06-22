@@ -2,11 +2,7 @@ package no.nav.melosys.integrasjon.joark.journalpostapi
 
 import mu.KotlinLogging
 import no.nav.melosys.integrasjon.felles.JsonRestIntegrasjon
-import no.nav.melosys.integrasjon.joark.journalpostapi.dto.FerdigstillJournalpostRequest
-import no.nav.melosys.integrasjon.joark.journalpostapi.dto.LogiskVedleggRequest
-import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OppdaterJournalpostRequest
-import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest
-import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostResponse
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 
@@ -58,7 +54,7 @@ class JournalpostapiClient(
         val logiskVedleggRequest = LogiskVedleggRequest(tittel)
 
         journalpostapiWebClient.post()
-            .uri("/dokumentInfo/{dokumentInfoId}/logiskVedlegg/", dokumentInfoId)
+            .uri("/dokumentInfo/{dokumentInfoId}/logiskVedlegg", dokumentInfoId)
             .bodyValue(logiskVedleggRequest)
             .retrieve()
             .toBodilessEntity()

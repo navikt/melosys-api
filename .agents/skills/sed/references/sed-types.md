@@ -8,57 +8,59 @@ EU Regulation 883/2004 applicable legislation documents.
 
 | SED | Name | Purpose | Direction |
 |-----|------|---------|-----------|
-| `A001` | Request for applicable legislation | Start exception agreement process (Art. 16) | Outgoing |
+| `A001` | Request for exception (Søknad/anmodning om unntak) | Start exception process (Art. 16), opens LA_BUC_01 | Outgoing |
 | `A002` | Request for information | Ask for additional info | Both |
-| `A003` | Certificate of applicable legislation | A1 certificate / decision | Outgoing |
-| `A004` | Refusal notification | Refuse certificate request | Outgoing |
+| `A003` | Decision on applicable legislation (A1) | A1 certificate / decision | Outgoing |
+| `A004` | Refusal of A003 decision (Avslag) | Refuse a decision (LA_BUC_02) | Outgoing |
 | `A005` | Reply to request | Response to A002 | Both |
 | `A006` | Notification of termination | End of posting period | Both |
 | `A007` | Notification of changes | Change in circumstances | Both |
 | `A008` | Reply to notification | Response to A006/A007 | Both |
-| `A009` | Reminder (Purring) | Follow-up on pending request | Outgoing |
+| `A009` | Posting notification (Melding om utstasjonering, Art. 12) | Notify about posting (LA_BUC_04) | Outgoing |
 | `A010` | Additional information | Supplement to previous SED | Both |
-| `A011` | Approval notification | Approve exception request | Both |
-| `A012` | Change notification | Notify of changes to decision | Both |
+| `A011` | Approval of exception request (Innvilgelse av søknad om unntak) | Positive response to A001 in LA_BUC_01 | Both |
+| `A012` | Change to decision (Endringsmelding) | Notify of changes to a sent A003 | Both |
 
 ### When to Use
 
 **A001 - Exception Request (Art. 16)**:
 - Worker needs exception from normal rules
 - Sent to country that would normally be competent
-- Starts LA_BUC_04 workflow
+- Starts the LA_BUC_01 (søknad om unntak) workflow
 
-**A003 - A1 Certificate**:
+**A003 - A1 Decision**:
 - Confirms applicable legislation
 - Core decision document
 - Used for posted workers, multi-state workers
 
-**A004 - Refusal**:
-- Reject incoming request
+**A004 - Refusal of A003**:
+- Counterpart's refusal of an A003 decision (LA_BUC_02)
 - Must include reason
+- (The refusal of an A001 *exception* request is A002, not A004)
 
-**A011 - Approval**:
-- Response to A001
-- Confirms exception agreement
+**A011 - Approval of exception request**:
+- Positive response to A001 in LA_BUC_01
+- Confirms the exception agreement (beslutning = innvilgelse)
 
 ## H-Series (Healthcare)
 
-Healthcare coordination under EU Regulation 883/2004.
+Healthcare-coordination documents under EU Regulation 883/2004. These exist in
+the `SedType` enum but melosys-api does **not** drive an H-series healthcare flow
+(it is lovvalg-focused; H_BUC handling lives largely in melosys-eessi). The enum
+members are H001-H006, H010, H011, H012, H020, H061, H065, H066, H070, H120,
+H121, H130 (note: no H021 or H062).
 
-| SED | Name | Purpose |
-|-----|------|---------|
-| `H001` | Request for healthcare | Request coverage confirmation |
-| `H002` | Reply to healthcare request | Response to H001 |
-| `H003` | Healthcare entitlement | S1/E106 equivalent |
-| `H004` | Notification of change | Change in healthcare status |
-| `H005` | Insurance periods | Confirm insurance periods |
-| `H006` | Reply with periods | Response to H005 |
-| `H020` | Insurance statement | Period statement for healthcare |
-| `H021` | Reply to H020 | Confirm periods |
-| `H061` | Direct payment | Healthcare direct payment |
-| `H062` | Settlement | Healthcare cost settlement |
-| `H120` | Cost claim | Healthcare cost reimbursement |
-| `H121` | Reply to cost claim | Response to H120 |
+| SED | Notes |
+|-----|-------|
+| `H001` | Healthcare-coordination document |
+| `H002` | Healthcare-coordination document |
+| `H003` | Healthcare-coordination document (S1/E106-related) |
+| `H004`–`H006` | Healthcare-coordination documents |
+| `H010`, `H011`, `H012` | Healthcare-coordination documents |
+| `H020` | Insurance-period statement |
+| `H061`, `H065`, `H066`, `H070` | Healthcare-coordination documents |
+| `H120`, `H121` | Healthcare cost claim / reply |
+| `H130` | Healthcare-coordination document |
 
 ## X-Series (Administrative)
 
@@ -78,28 +80,21 @@ System and administrative documents.
 | `X010` | Additional information | Supplementary info |
 | `X011` | Rejection | Reject request/claim |
 | `X012` | Reply to rejection | Response to X011 |
+| `X013` | Administrative | (in enum) |
 | `X050` | Institution info | Institution details |
+| `X100` | Administrative | (in enum) |
 
 ### X008 - Invalidation
 
-Used to cancel/correct previous SEDs:
-```kotlin
-// Send invalidation for previous A003
-eessiService.sendSedPåEksisterendeBuc(
-    behandling = behandling,
-    sedType = SedType.X008,
-    rinaSaksnummer = originalRinaCaseId
-)
-```
+Used to cancel/correct previous SEDs. In EessiService this happens internally
+(e.g. when sending a new vurdering) via the private `sendInvalideringSed`, which
+calls `eessiClient.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, SedType.X008)`
+— `sendSedPåEksisterendeBuc` lives on `EessiClient`, not `EessiService`.
 
-## S-Series (Special)
+## S-Series
 
-Special category documents.
-
-| SED | Name | Purpose |
-|-----|------|---------|
-| `S040` | Pension claim | Pension application |
-| `S041` | Pension reply | Response to pension claim |
+`S040` and `S041` are present in the `SedType` enum. They are not part of the
+lovvalg flow that melosys-api drives.
 
 ## SED Type Enum
 
@@ -107,23 +102,28 @@ Special category documents.
 
 ```kotlin
 enum class SedType {
+    X001, X002, X003, X004, X005, X006, X007, X008, X009, X010, X011, X012, X013, X050, X100,
     A001, A002, A003, A004, A005, A006, A007, A008, A009, A010, A011, A012,
-    H001, H002, H003, H004, H005, H006, H020, H021, H061, H062, H120, H121,
-    X001, X002, X003, X004, X005, X006, X007, X008, X009, X010, X011, X012, X050,
-    S040, S041,
-    // ... additional types
+    H001, H002, H003, H004, H005, H006, H010, H011, H012, H020,
+    H061, H065, H066, H070, H120, H121, H130,
+    S040, S041;
+
+    fun erPurring(): Boolean = this == X009
 }
 ```
 
 ## SED → Behandlingstema Mapping
 
-```kotlin
-// SedTypeTilBehandlingstemaMapper
-when (sedType) {
-    A001, A003, A004, A011, A012 -> Behandlingstema.LOVVALG
-    H001, H003, H020, H121 -> Behandlingstema.HELSE
-    // ...
-}
+Only A001/A003/A009/A010 map to a behandlingstema; every other SED type returns
+`Optional.empty()`. There is no `Behandlingstema.LOVVALG` or `Behandlingstema.HELSE`.
+
+```java
+// SedTypeTilBehandlingstemaMapper.finnBehandlingstemaForSedType(sedType, lovvalgsland)
+A001 → Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+A003 → BESLUTNING_LOVVALG_NORGE | BESLUTNING_LOVVALG_ANNET_LAND  // depends on lovvalgsland
+A009 → Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
+A010 → Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
+// all other SED types → Optional.empty()
 ```
 
 ## SED → Period Type Mapping

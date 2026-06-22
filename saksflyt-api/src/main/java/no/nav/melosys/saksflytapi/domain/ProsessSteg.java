@@ -83,7 +83,8 @@ public enum ProsessSteg {
     TILBAKESTILL_TRYGDEAVGIFT("TILBAKESTILL_TRYGDEAVGIFT", "Tilbakestiller trygdeavgift for en behandling slik at nye satser brukes"),
     RESET_ÅPNE_ÅRSAVREGNINGER("RESET_ÅPNE_ÅRSAVREGNINGER", "Resetter åpne årsavregninger for å bruke grunnlag fra ny vurdering."),
     OPPRETTE_AARSAVREGNING_ENDRING("OPPRETTE_AARSAVREGNING_ENDRING", "Oppretter årsavregning ved endring eller opprettelse av medlemskap tilbake i tid."),
-    AVSLUTT_AARSAVREGNINGER("AVSLUTT_AARSAVREGNINGER", "Avslutter åpne årsavregninger på annullert behandling");
+    AVSLUTT_AARSAVREGNINGER("AVSLUTT_AARSAVREGNINGER", "Avslutter åpne årsavregninger på annullert behandling"),
+    SEND_INNHENTINGSBREV_AARSAVREGNING("SEND_INNHENTINGSBREV_AARSAVREGNING", "Sender innhentingsbrev ved automatisk opprettet årsavregning");
 
 
     private final String kode;

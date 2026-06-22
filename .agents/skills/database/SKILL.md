@@ -8,6 +8,9 @@ description: |
   (4) Understanding what data is stored where,
   (5) Creating or modifying Flyway migrations,
   (6) Mapping domain entities to database tables.
+  Triggers: SQL against melosys DB, table/column lookup, FK relationships,
+  "where is X stored", "what column stores X", "why is data missing",
+  beh_resultat_id, behandlingsresultat_id, saksnummer, schema.
 ---
 
 # Melosys Database Schema
@@ -21,6 +24,7 @@ FAGSAK (Case)
 ├── AKTOER (1:N) - Actors (citizen, employer, authorities)
 ├── KONTAKTOPPLYSNING (1:N) - Contact information
 ├── FULLMAKT (via AKTOER) - Power of attorney
+├── SKJEMA_SAK_MAPPING (1:N) - Bridge to melosys-skjema-api (V152)
 └── BEHANDLING (1:N) - Treatments/processing instances
     ├── MOTTATTEOPPLYSNINGER (1:N) - Received documents/info
     ├── SAKSOPPLYSNING (1:N) - Case data (JSON CLOBs)
@@ -34,11 +38,18 @@ FAGSAK (Case)
         ├── ANMODNINGSPERIODE (1:N) - Exception request periods
         ├── UTPEKINGSPERIODE (1:N) - Designation periods (Art. 13)
         ├── TRYGDEAVGIFTSPERIODE (1:N) - Social security charge periods
+        ├── AARSAVREGNING (1:1) - Annual reconciliation (årsavregning)
         ├── VEDTAK_METADATA (1:1) - Decision metadata
         ├── VILKAARSRESULTAT (1:N) - Condition results
         ├── AVKLARTEFAKTA (1:N) - Clarified facts
         └── KONTROLLRESULTAT (1:N) - Control results
 ```
+
+> **Recent changes (V144–V154, Jan–Apr 2026):** New `skjema_sak_mapping` table
+> (bridge to melosys-skjema-api). `kilde` column added to `lovvalg_periode`,
+> `medlemskapsperiode`, `helseutgift_dekkes_periode`. `aarsavregning` columns
+> renamed: `*_fra_avgiftssystemet` → `*innbetalt_trygdeavgift`. New PROSESS_TYPE
+> for digital søknad-mottak. See [Recent Migrations](#recent-migrations) below.
 
 ## Core Tables
 
@@ -98,7 +109,9 @@ Outcome of a treatment. PK: `BEHANDLING_ID` (1:1 with BEHANDLING).
 
 ## Period Tables
 
-All periods belong to BEHANDLINGSRESULTAT via `BEH_RESULTAT_ID`.
+All periods belong to BEHANDLINGSRESULTAT via `BEH_RESULTAT_ID` — **except
+`MEDLEMSKAPSPERIODE`, whose FK column is `BEHANDLINGSRESULTAT_ID`** (renamed in
+V109). Both FK columns reference `BEHANDLINGSRESULTAT(BEHANDLING_ID)`.
 
 ### LOVVALG_PERIODE (Applicable Legislation Period)
 | Column | Type | Description |
@@ -167,9 +180,30 @@ WHERE b.status = 'IVERKSETTER_VEDTAK'
 AND b.endret_dato < SYSDATE - INTERVAL '2' HOUR;
 ```
 
+## Recent Migrations
+
+Latest migration is **V155** (tekstblokker). Changes since V143:
+
+| V    | Date       | What |
+|------|------------|------|
+| V144 | 2026-01-07 | New PROSESS_STEG `LAGRE_PERSONOPPLYSNINGER` |
+| V145 | 2026-01-15 | New PROSESS_STEG `OPPRETTE_AARSAVREGNING_ENDRING` (auto-opprett årsavregning tilbake i tid) |
+| V146 | 2026-01-19 | `saksopplysning_kilde` adds `versjon NUMBER(19) DEFAULT 0` — optimistic locking fix for orphanRemoval race condition |
+| V147 | 2026-02-16 | New PROSESS_TYPE `MELOSYS_MOTTAK_DIGITAL_SØKNAD` + 4 nye steg (HENT_SØKNADSDATA, OPPRETT_SAK_OG_BEHANDLING_SØKNAD, OPPRETT_OG_FERDIGSTILL_JOURNALPOST_SØKNAD, LAGRE_SAKSOPPLYSNINGER_SØKNAD) |
+| V148 | 2026-02-16 | `kontaktopplysning.kontakt_telefon` utvidet til VARCHAR2(255) |
+| V149 | 2026-02-27 | Fjerner steg `LAGRE_SAKSOPPLYSNINGER_SØKNAD` (lagring nå i OPPRETT_SAK_OG_BEHANDLING_SØKNAD) |
+| V150 | 2026-03-16 | New PROSESS_STEG `AVSLUTT_AARSAVREGNINGER` (lukker åpne årsavregninger ved annullering) |
+| V151 | 2026-04-16 | `helseutgift_dekkes_periode` adds `kilde VARCHAR2(30) DEFAULT 'MELOSYS' NOT NULL` |
+| V152 | 2026-04-20 | **NEW TABLE** `skjema_sak_mapping` (RAW(16) skjema_id ↔ saksnummer). New PROSESS_TYPE `MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD`. Steg fra V147 omdøpt til `*_DIGITAL_SØKNAD`-varianter (HENT_DIGITAL_SØKNADSDATA, OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD, OPPRETT_OG_FERDIGSTILL_JOURNALPOST_DIGITAL_SØKNAD) + nye `HÅNDTER_EKSISTERENDE_SAK_DIGITAL_SØKNAD`, `SEND_SAKSNUMMER_TIL_MELOSYS_SKJEMA_API` |
+| V153 | 2026-04-23 | `aarsavregning` columns renamed: `har_trygdeavgift_fra_avgiftssystemet` → `har_innbetalt_trygdeavgift`, `trygdeavgift_fra_avgiftssystemet` → `innbetalt_trygdeavgift` |
+| V154 | 2026-04-30 | `medlemskapsperiode.kilde` + `lovvalg_periode.kilde` added (VARCHAR2(30), nullable) |
+| V155 | —          | **NEW TABLE** `tekstblokker` (`TEKSTBLOKK` + `TEKSTBLOKK_TAG`, reusable text blocks with tags) |
+
+**Note on PROSESS_STEG renames (V152):** Oracle doesn't support ON UPDATE CASCADE, so the pattern is INSERT new code → UPDATE child rows (`PROSESSINSTANS.SIST_FULLFORT_STEG`, `PROSESSINSTANS_HENDELSER.STEG`) → DELETE old code. Use this same pattern for any future PROSESS_STEG rename.
+
 ## Detailed Documentation
 
-- **[Core Tables](references/core-tables.md)**: FAGSAK, BEHANDLING, AKTOER, PROSESSINSTANS
+- **[Core Tables](references/core-tables.md)**: FAGSAK, BEHANDLING, AKTOER, PROSESSINSTANS, SKJEMA_SAK_MAPPING
 - **[Period Tables](references/period-tables.md)**: All period types and relationships
 - **[Kodeverk Tables](references/kodeverk.md)**: Lookup/reference tables with valid values
 - **[DVH Tables](references/dvh-tables.md)**: Data warehouse export tables

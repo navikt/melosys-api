@@ -7,6 +7,7 @@ description: |
   (3) Understanding employer/organization lookup,
   (4) Debugging employer or employment issues,
   (5) Understanding the mapping between register data and domain models.
+  Triggers: orgnummer, arbeidsforhold, EREG, AAREG, Enhetsregisteret, registeropplysninger, ansettelsesperiode, saksopplysning.
 ---
 
 # Arbeidsgiver (Employer/Employment) System
@@ -27,13 +28,13 @@ integrasjon/ereg/
 ├── EregRestService.kt            # Implementation
 ├── EregDtoTilSaksopplysningKonverter.kt  # DTO → domain mapper
 └── organisasjon/
-    ├── OrganisasjonRestConsumer.kt       # REST client
-    ├── OrganisasjonRestConsumerConfig.kt # WebClient config
+    ├── OrganisasjonRestClient.kt       # REST client
+    ├── OrganisasjonRestClientConfig.kt # WebClient config
     └── OrganisasjonResponse.kt           # Response DTOs
 
 integrasjon/aareg/arbeidsforhold/
-├── ArbeidsforholdConsumer.kt     # REST client for AAREG
-├── ArbeidsforholdConsumerConfig.kt
+├── ArbeidsforholdClient.kt     # REST client for AAREG
+├── ArbeidsforholdClientConfig.kt
 ├── ArbeidsforholdQuery.kt        # Query parameters
 └── ArbeidsforholdResponse.kt     # Response DTOs
 
@@ -65,7 +66,7 @@ domain/dokument/organisasjon/
 | `EregFasade` | Lookup organization by orgnummer |
 | `EregRestService` | EREG REST implementation |
 | `ArbeidsforholdService` | Fetch employment history for person |
-| `ArbeidsforholdConsumer` | REST client to AAREG |
+| `ArbeidsforholdClient` | REST client to AAREG |
 | `OrganisasjonOppslagService` | Organization lookup helper |
 | `RegisteropplysningerService` | Coordinates all register lookups |
 
@@ -153,7 +154,7 @@ val arbeidsforholdDokument = saksopplysning.dokument as ArbeidsforholdDokument
 
 ```kotlin
 data class ArbeidsforholdQuery(
-    val regelverk: Regelverk = Regelverk.A_ORDNINGEN,
+    val regelverk: Regelverk = Regelverk.ALLE,
     val arbeidsforholdType: ArbeidsforholdType = ArbeidsforholdType.ALLE,
     val ansettelsesperiodeFom: LocalDate? = null,
     val ansettelsesperiodeTom: LocalDate? = null
@@ -232,7 +233,7 @@ enum class Aktoertype {
 ```
 RegisteropplysningerService.hentOgLagreOpplysninger()
     │
-    ├── ARBFORH → ArbeidsforholdService → ArbeidsforholdConsumer
+    ├── ARBFORH → ArbeidsforholdService → ArbeidsforholdClient
     │                                          ↓
     │                                     ArbeidsforholdResponse
     │                                          ↓
@@ -240,7 +241,7 @@ RegisteropplysningerService.hentOgLagreOpplysninger()
     │                                          ↓
     │                                     ArbeidsforholdDokument
     │
-    └── ORG → EregFasade → OrganisasjonRestConsumer
+    └── ORG → EregFasade → OrganisasjonRestClient
                                ↓
                           OrganisasjonResponse
                                ↓
@@ -322,10 +323,10 @@ log.info("Forretningsadresse: ${org.harRegistrertForretningsadresse()}")
 |-----------|----------|
 | EREG Facade | `integrasjon/.../ereg/EregFasade.kt` |
 | EREG Service | `integrasjon/.../ereg/EregRestService.kt` |
-| EREG Consumer | `integrasjon/.../ereg/organisasjon/OrganisasjonRestConsumer.kt` |
+| EREG Client | `integrasjon/.../ereg/organisasjon/OrganisasjonRestClient.kt` |
 | EREG DTOs | `integrasjon/.../ereg/organisasjon/OrganisasjonResponse.kt` |
 | AAREG Service | `service/.../aareg/ArbeidsforholdService.kt` |
-| AAREG Consumer | `integrasjon/.../aareg/arbeidsforhold/ArbeidsforholdConsumer.kt` |
+| AAREG Client | `integrasjon/.../aareg/arbeidsforhold/ArbeidsforholdClient.kt` |
 | AAREG DTOs | `integrasjon/.../aareg/arbeidsforhold/ArbeidsforholdResponse.kt` |
 | Domain Models | `domain/.../dokument/arbeidsforhold/` |
 | Org Domain | `domain/.../dokument/organisasjon/` |

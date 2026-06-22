@@ -7,6 +7,9 @@ description: |
   (3) Debugging migration failures,
   (4) Understanding Oracle-specific SQL patterns,
   (5) Adding tables, columns, or indexes.
+  Triggers: "create migration", "new Flyway migration", "add column/table/index",
+  "Flyway error", "checksum mismatch", "ORA-00955", "ORA-02292", "ORA-01430",
+  "migration failed", "validate failed".
 ---
 
 # Flyway Migration Skill
@@ -25,9 +28,9 @@ app/src/main/resources/db/migration/melosysDB/
 
 | Pattern | Example | Use Case |
 |---------|---------|----------|
-| `V{N}__` | `V99__name.sql` | Major feature |
-| `V{N}.{M}__` | `V4.4_01__name.sql` | Grouped related changes |
-| `V{N}.{M}_{NN}__` | `V5.1_12__name.sql` | Sub-feature in group |
+| `V{N}__` | `V150__name.sql` | Major feature (current scheme) |
+| `V{N}.{M}__` | `V4.4_01__name.sql` | Grouped related changes (legacy) |
+| `V{N}.{M}_{NN}__` | `V5.1_12__name.sql` | Sub-feature in group (legacy) |
 
 **Rules**:
 - Use double underscore `__` after version
@@ -37,7 +40,14 @@ app/src/main/resources/db/migration/melosysDB/
 
 ### Current Version Range
 
-Versions span V1.0_01 through V99+. Check existing files before creating.
+Versions span from `V1.0_01` (legacy dotted scheme) up through the current
+flat `V15x` series. Newer migrations use plain integer versions (`V150__`,
+`V151__`, ...). Always check the existing files for the true latest version
+before creating a new one — do not assume a fixed top number, it drifts:
+
+```bash
+ls app/src/main/resources/db/migration/melosysDB/ | sort -V | tail -5
+```
 
 ## Common Patterns
 
@@ -196,6 +206,14 @@ mvn flyway:migrate -pl app
 ### Application Startup
 
 Flyway runs automatically on application startup (unless disabled).
+
+## Debugging Migration Failures
+
+For migration failures — checksum mismatch, `ORA-00955` (object already exists),
+`ORA-02292` (child record found), `ORA-01430` (column already exists), partially
+applied migrations, `flyway:repair`/`baseline`, and local rollback — see
+[references/debugging.md](references/debugging.md). It also covers `flyway_schema_history`
+inspection queries and safe column add/remove/rename patterns.
 
 ## Best Practices
 

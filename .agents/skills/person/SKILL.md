@@ -21,9 +21,9 @@ Person data is used throughout the application for case processing and letter ge
 
 ```
 integrasjon/pdl/
-├── PDLConsumer.java              # Main interface for PDL operations
-├── PDLConsumerImpl.java          # Implementation with WebClient
-├── PDLConsumerProducer.java      # Bean configuration
+├── PDLClient.java                # Main interface for PDL operations
+├── PDLClientImpl.java            # Implementation with WebClient
+├── PDLClientProducer.java        # Bean configuration
 ├── PDLAuthFilterAzure.java       # Azure AD authentication
 ├── PDLFeilkode.java              # Error codes
 └── dto/
@@ -50,15 +50,19 @@ integrasjon/pdl/
 service/persondata/
 ├── PersondataService.java        # Main service facade
 ├── PersondataFasade.java         # Interface
-└── mapping/                      # PDL → domain mappers
+└── mapping/                      # PDL → domain mappers (~13 mappers, representative subset)
     ├── PersonopplysningerOversetter.java
     ├── PersonMedHistorikkOversetter.java
     ├── NavnOversetter.java
     ├── StatsborgerskapOversetter.java
+    ├── SivilstandOversetter.java
+    ├── FamiliemedlemOversetter.java
+    ├── ...                       # also Doedsfall/Foedsel/Kjoenn/Foreldreansvar/Folkeregister* Oversetter
     └── adresse/
         ├── BostedsadresseOversetter.java
         ├── KontaktadresseOversetter.java
-        └── OppholdsadresseOversetter.java
+        ├── OppholdsadresseOversetter.java
+        └── PdlAdresseformatOversetter.java
 
 service/persondata/familie/
 ├── FamiliemedlemService.java     # Family relations
@@ -70,7 +74,7 @@ service/persondata/familie/
 
 | Service | Purpose |
 |---------|---------|
-| `PDLConsumer` | GraphQL client for PDL queries |
+| `PDLClient` | GraphQL client for PDL queries |
 | `PersondataService` | Main facade for person data operations |
 | `FamiliemedlemService` | Fetches and filters family members |
 
@@ -82,27 +86,31 @@ service/persondata/familie/
 | `AKTORID` | Internal NAV actor ID | 1000012345678 |
 | `NPID` | NAV person ID (for non-registered) | 01234567890 |
 
-## PDL Consumer Operations
+## PDLClient Operations
 
 ### Main Operations
 
 ```kotlin
 // Fetch identities (fnr ↔ aktørID conversion)
-val identliste = pdlConsumer.hentIdenter(ident)
+val identliste = pdlClient.hentIdenter(ident)
 
 // Fetch person data
-val person = pdlConsumer.hentPerson(ident)
+val person = pdlClient.hentPerson(ident)
 
 // Fetch person with address/citizenship history
-val personMedHistorikk = pdlConsumer.hentPersonMedHistorikk(ident)
+val personMedHistorikk = pdlClient.hentPersonMedHistorikk(ident)
 
-// Fetch family relations
-val familierelasjoner = pdlConsumer.hentFamilierelasjoner(ident)
+// Fetch family relations (the PDLClient interface also exposes
+// hentBarn, hentForelder and hentEktefelleEllerPartner for targeted lookups)
+val familierelasjoner = pdlClient.hentFamilierelasjoner(ident)
+val barn = pdlClient.hentBarn(ident)
+val forelder = pdlClient.hentForelder(ident)
+val ektefelle = pdlClient.hentEktefelleEllerPartner(ident)
 
 // Fetch specific data
-val navn = pdlConsumer.hentNavn(ident)
-val statsborgerskap = pdlConsumer.hentStatsborgerskap(ident)
-val adressebeskyttelser = pdlConsumer.hentAdressebeskyttelser(ident)
+val navn = pdlClient.hentNavn(ident)
+val statsborgerskap = pdlClient.hentStatsborgerskap(ident)
+val adressebeskyttelser = pdlClient.hentAdressebeskyttelser(ident)
 ```
 
 ### PersondataService Operations
@@ -232,7 +240,7 @@ public Optional<String> finnFolkeregisterident(String ident) { ... }
 **Check**:
 ```kotlin
 // Try both identity types
-val identer = pdlConsumer.hentIdenter(ident)
+val identer = pdlClient.hentIdenter(ident)
 log.info("Available identities: ${identer.identer()}")
 ```
 
@@ -242,7 +250,7 @@ log.info("Available identities: ${identer.identer()}")
 
 **Check**:
 ```kotlin
-val adressebeskyttelser = pdlConsumer.hentAdressebeskyttelser(ident)
+val adressebeskyttelser = pdlClient.hentAdressebeskyttelser(ident)
 log.info("Protection levels: ${adressebeskyttelser.map { it.gradering() }}")
 ```
 
@@ -259,7 +267,7 @@ log.info("Protection levels: ${adressebeskyttelser.map { it.gradering() }}")
 
 | Component | Location |
 |-----------|----------|
-| PDL Consumer | `integrasjon/.../pdl/PDLConsumer.java` |
+| PDL Client | `integrasjon/.../pdl/PDLClient.java` |
 | PDL DTOs | `integrasjon/.../pdl/dto/` |
 | GraphQL Queries | `integrasjon/.../pdl/dto/person/Query.java` |
 | PersondataService | `service/.../persondata/PersondataService.java` |

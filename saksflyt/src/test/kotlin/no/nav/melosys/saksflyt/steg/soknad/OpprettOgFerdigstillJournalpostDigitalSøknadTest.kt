@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.soknad
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -74,7 +75,8 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
     @BeforeEach
     fun setup() {
         opprettOgFerdigstillJournalpostDigitalSøknad = OpprettOgFerdigstillJournalpostDigitalSøknad(
-            melosysSkjemaApiClient, joarkFasade, behandlingService, persondataFasade, skjemaSakMappingService
+            melosysSkjemaApiClient, joarkFasade, behandlingService, persondataFasade, skjemaSakMappingService,
+            BildeTilPdfKonverterer()
         )
 
         every { joarkFasade.opprettJournalpost(capture(capturedJournalpost), eq(true)) } returns journalpostId
@@ -240,13 +242,13 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
     }
 
     @Test
-    fun `utfør henter og legger til vedlegg av ulike filtyper på journalpost`() {
+    fun `utfør konverterer bildevedlegg til PDFA og beholder PDF-vedlegg for ARKIV-variant`() {
         val pdfVedleggId = UUID.randomUUID()
         val pngVedleggId = UUID.randomUUID()
         val jpegVedleggId = UUID.randomUUID()
         val pdfBytes = "pdf-innhold".toByteArray()
-        val pngBytes = "png-innhold".toByteArray()
-        val jpegBytes = "jpeg-innhold".toByteArray()
+        val pngBytes = lagBildeBytes("png")
+        val jpegBytes = lagBildeBytes("jpg")
 
         val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
             skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
@@ -270,14 +272,24 @@ internal class OpprettOgFerdigstillJournalpostDigitalSøknadTest {
 
         val vedlegg = capturedJournalpost.captured.vedlegg
         vedlegg shouldHaveSize 3
+        // Alle ARKIV-varianter må være PDFA for at Joark skal godta journalposten
+        vedlegg.forEach { it.dokumentVarianter.first().filtype shouldBe DokumentVariant.Filtype.PDFA }
         vedlegg[0].tittel shouldBe "kontrakt.pdf"
-        vedlegg[0].dokumentVarianter.first().filtype shouldBe DokumentVariant.Filtype.PDFA
         vedlegg[0].dokumentVarianter.first().data shouldBe pdfBytes
         vedlegg[1].tittel shouldBe "skjermbilde.png"
-        vedlegg[1].dokumentVarianter.first().filtype shouldBe DokumentVariant.Filtype.PNG
+        // Bildet er konvertert til PDF, så innholdet er ikke lenger de rå bildebytene
+        vedlegg[1].dokumentVarianter.first().data shouldNotBe pngBytes
+        assertErPdf(vedlegg[1].dokumentVarianter.first().data)
         vedlegg[2].tittel shouldBe "foto.jpeg"
-        vedlegg[2].dokumentVarianter.first().filtype shouldBe DokumentVariant.Filtype.JPEG
+        vedlegg[2].dokumentVarianter.first().data shouldNotBe jpegBytes
+        assertErPdf(vedlegg[2].dokumentVarianter.first().data)
     }
+
+    private fun assertErPdf(data: ByteArray) {
+        // PDF-filer starter med magic bytes "%PDF"
+        String(data.copyOfRange(0, 4)) shouldBe "%PDF"
+    }
+
 
     @Test
     fun `utfør kaller oppdaterJournalpostId på skjemaSakMappingService`() {

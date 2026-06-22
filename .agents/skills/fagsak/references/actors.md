@@ -56,33 +56,37 @@ fagsak.addAktoer(Aktoer().apply {
 
 ### Retrieving Actors
 ```kotlin
+// Fagsak.kt returns Kotlin nullable types, not Java Optional
+
 // Citizen
-val bruker: Optional<Aktoer> = fagsak.hentBruker()
+val bruker: Aktoer? = fagsak.hentBruker()
 val aktørId: String = fagsak.hentBrukersAktørID()  // throws if not found
-val aktørId: Optional<String> = fagsak.finnBrukersAktørID()
+val aktørIdEllerNull: String? = fagsak.finnBrukersAktørID()
 
 // Company/Employer
 val virksomhet: Aktoer = fagsak.hentVirksomhet()  // throws if not found
-val orgnr: Optional<String> = fagsak.finnVirksomhetsOrgnr()
-val arbeidsgiver: Optional<Aktoer> = fagsak.hentUnikArbeidsgiver()
+val orgnr: String? = fagsak.finnVirksomhetsOrgnr()
+val arbeidsgiver: Aktoer? = fagsak.hentUnikArbeidsgiver()
 
 // Authorities
 val myndigheter: List<Aktoer> = fagsak.hentMyndigheter()
-val landkode: String = aktoer.hentMyndighetLandkode()  // parses institusjonID
+val landkode: Land_iso2 = aktoer.hentMyndighetLandkode()  // derives landkode from institusjonID
 ```
 
 ## EU/EEA vs Treaty Authorities
 
+Both `FagsakService` methods take `saksnummer` (String), not a `Fagsak` object - they look up the fagsak internally.
+
 ### EU/EEA Authorities
 Use `institusjonID` with format `"landkode:institusjonskode"`:
 ```kotlin
-fagsakService.oppdaterMyndigheterForEuEos(fagsak, listOf("SE:FK", "DK:ATP"))
+fagsakService.oppdaterMyndigheterForEuEos(saksnummer, listOf("SE:FK", "DK:ATP"))
 ```
 
 ### Bilateral Treaty Authorities
 Use `trygdemyndighetLand` with Land_iso2 enum:
 ```kotlin
-fagsakService.oppdaterMyndighetForTrygdeavtale(fagsak, Land_iso2.US)
+fagsakService.oppdaterMyndighetForTrygdeavtale(saksnummer, Land_iso2.US)
 ```
 
 ## Validation Rules
@@ -97,31 +101,34 @@ fagsakService.oppdaterMyndighetForTrygdeavtale(fagsak, Land_iso2.US)
 
 ## Debugging
 
+> The `aktoer` table's FK to `fagsak` is the column **`saksnummer`** (not `fagsak_saksnummer`),
+> and the EU/EEA institusjon column is **`eu_eos_institusjon_id`** (renamed from `institusjon_id`).
+
 ### Find all actors for a case
 ```sql
-SELECT a.id, a.rolle, a.aktoer_id, a.orgnr, a.institusjon_id, a.trygdemyndighet_land
+SELECT a.id, a.rolle, a.aktoer_id, a.orgnr, a.eu_eos_institusjon_id, a.trygdemyndighet_land
 FROM aktoer a
-WHERE a.fagsak_saksnummer = 'MEL-12345';
+WHERE a.saksnummer = 'MEL-12345';
 ```
 
 ### Find cases by actor
 ```sql
 -- By person
 SELECT f.* FROM fagsak f
-JOIN aktoer a ON a.fagsak_saksnummer = f.saksnummer
+JOIN aktoer a ON a.saksnummer = f.saksnummer
 WHERE a.rolle = 'BRUKER' AND a.aktoer_id = '2512489212185';
 
 -- By organization
 SELECT f.* FROM fagsak f
-JOIN aktoer a ON a.fagsak_saksnummer = f.saksnummer
+JOIN aktoer a ON a.saksnummer = f.saksnummer
 WHERE a.rolle = 'ARBEIDSGIVER' AND a.orgnr = '912345678';
 ```
 
 ### Find cases with duplicate roles (problematic)
 ```sql
-SELECT fagsak_saksnummer, rolle, COUNT(*) as count
+SELECT saksnummer, rolle, COUNT(*) as count
 FROM aktoer
 WHERE rolle NOT IN ('TRYGDEMYNDIGHET', 'FULLMEKTIG', 'REPRESENTANT')
-GROUP BY fagsak_saksnummer, rolle
+GROUP BY saksnummer, rolle
 HAVING COUNT(*) > 1;
 ```
