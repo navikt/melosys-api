@@ -99,14 +99,16 @@ class OppretteÅrsavregningVedEndringTest {
             prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
                 SAKSNUMMER,
                 "2024",
-                Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+                Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE,
+                true
             )
         }
         verify {
             prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
                 SAKSNUMMER,
                 "2025",
-                Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+                Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE,
+                true
             )
         }
         confirmVerified(prosessInstansService)
@@ -154,7 +156,8 @@ class OppretteÅrsavregningVedEndringTest {
             prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
                 SAKSNUMMER,
                 "2025",
-                Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+                Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE,
+                true
             )
         }
         confirmVerified(prosessInstansService)
@@ -256,7 +259,8 @@ class OppretteÅrsavregningVedEndringTest {
                 prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
                     SAKSNUMMER,
                     år,
-                    Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+                    Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE,
+                    true
                 )
             }
         }
@@ -318,7 +322,7 @@ class OppretteÅrsavregningVedEndringTest {
         oppretteÅrsavregningVedEndring.utfør(prosessinstans)
 
         verify {
-            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE)
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE, true)
         }
 
         confirmVerified(prosessInstansService)
@@ -378,8 +382,8 @@ class OppretteÅrsavregningVedEndringTest {
         oppretteÅrsavregningVedEndring.utfør(prosessinstans)
 
         verify {
-            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2024", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE)
-            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE)
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2024", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE, true)
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE, true)
         }
 
         confirmVerified(prosessInstansService)
@@ -419,12 +423,12 @@ class OppretteÅrsavregningVedEndringTest {
 
         verify {
             prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
-                SAKSNUMMER, "2024", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+                SAKSNUMMER, "2024", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE, true
             )
         }
         verify {
             prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
-                SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+                SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE, true
             )
         }
         confirmVerified(prosessInstansService)
@@ -587,12 +591,12 @@ class OppretteÅrsavregningVedEndringTest {
 
         verify {
             prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
-                SAKSNUMMER, "2024", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+                SAKSNUMMER, "2024", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE, true
             )
         }
         verify {
             prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
-                SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+                SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE, true
             )
         }
         confirmVerified(prosessInstansService)
@@ -627,14 +631,15 @@ class OppretteÅrsavregningVedEndringTest {
 
         oppretteÅrsavregningVedEndring.utfør(prosessinstans)
 
+        // MELOSYS-8148: EØS-pensjonist (trygdeavgift) er unntatt automatisk innhentingsbrev → flagg = false
         verify {
             prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
-                SAKSNUMMER, "2024", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+                SAKSNUMMER, "2024", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE, false
             )
         }
         verify {
             prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
-                SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+                SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE, false
             )
         }
         confirmVerified(prosessInstansService)
@@ -740,7 +745,8 @@ class OppretteÅrsavregningVedEndringTest {
                 prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
                     SAKSNUMMER,
                     år,
-                    Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+                    Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE,
+                    true
                 )
             }
         }
@@ -806,7 +812,8 @@ class OppretteÅrsavregningVedEndringTest {
                 prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
                     SAKSNUMMER,
                     år,
-                    Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+                    Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE,
+                    true
                 )
             }
         }

@@ -35,10 +35,20 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `hentPrioritet returnerer ProsessType sin default-prioritet`() {
+    fun `hentPrioritet defaulter til ProsessType sin prioritet når ikke eksplisitt satt`() {
         Prosessinstans.forTest { type = ProsessType.IVERKSETT_VEDTAK_EOS }.hentPrioritet() shouldBe ProsessPrioritet.HØY
         Prosessinstans.forTest { type = ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING }.hentPrioritet() shouldBe ProsessPrioritet.LAV
         Prosessinstans.forTest { type = ProsessType.MOTTAK_SED }.hentPrioritet() shouldBe ProsessPrioritet.NORMAL
+    }
+
+    @Test
+    fun `hentPrioritet returnerer feltet, ikke type sin prioritet, når feltet er overstyrt`() {
+        // Type-default er NORMAL, men feltet kan løftes til HØY (typisk via parent-propagering)
+        val prosessinstans = Prosessinstans.forTest { type = ProsessType.SEND_BREV }
+        prosessinstans.prioritet = ProsessPrioritet.HØY
+
+        prosessinstans.hentPrioritet() shouldBe ProsessPrioritet.HØY
+        prosessinstans.type.prioritet shouldBe ProsessPrioritet.NORMAL
     }
 
     @Test
