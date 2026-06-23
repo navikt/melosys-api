@@ -21,6 +21,7 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.Beregningsaarsak
 import no.nav.melosys.integrasjon.trygdeavgift.dto.EkskludertInntektslinjeDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.Ekskluderingsaarsak
 import no.nav.melosys.integrasjon.trygdeavgift.dto.InntektslinjeDto
+import no.nav.melosys.integrasjon.trygdeavgift.dto.OrdinaerAvgiftslinjeDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.Regelgruppe
 import no.nav.melosys.service.avgift.BeregnetTrygdeavgiftMedForklaring
 import no.nav.melosys.service.avgift.EøsPensjonistTrygdeavgiftsberegningService
@@ -223,7 +224,16 @@ class TrygdeavgiftControllerTest(
         inntektOverMinstebeloep = 500350,
         maksimalAvgift25Prosent = 125087,
         ordinaerAvgift = 46200,
+        ordinaerAvgiftLinjer = listOf(
+            OrdinaerAvgiftslinjeDto(
+                inntektskilde = "INNTEKT_FRA_UTLANDET",
+                grunnlag = 600000,
+                sats = BigDecimal("7.7"),
+                beloep = 46200,
+            )
+        ),
         fastsattAvgift = 46200,
+        fastsattAvgiftPerMaaned = 3850,
     )
 
     private fun forventetBeregnetTrygdeavgiftDto(): BeregnetTrygdeavgiftDto {

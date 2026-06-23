@@ -253,7 +253,11 @@ internal class TrygdeavgiftsberegningServiceTest {
                     inntektOverMinstebeloep = 500350,
                     maksimalAvgift25Prosent = 125087,
                     ordinaerAvgift = 46200,
+                    ordinaerAvgiftLinjer = listOf(
+                        OrdinaerAvgiftslinjeDto("INNTEKT_FRA_UTLANDET", 600000, BigDecimal.valueOf(7.7), 46200)
+                    ),
                     fastsattAvgift = 46200,
+                    fastsattAvgiftPerMaaned = 3850,
                 )
 
                 // To responser med identisk forklaring -> skal dedupliseres til én distinkt forklaring

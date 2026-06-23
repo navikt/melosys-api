@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.trygdeavgift.dto
 
 import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
+import java.math.BigDecimal
 import java.time.LocalDate
 
 /**
@@ -23,7 +24,9 @@ data class BeregningsforklaringDto(
     val inntektOverMinstebeloep: Int?,
     val maksimalAvgift25Prosent: Int?,
     val ordinaerAvgift: Int,
+    val ordinaerAvgiftLinjer: List<OrdinaerAvgiftslinjeDto> = emptyList(),
     val fastsattAvgift: Int,
+    val fastsattAvgiftPerMaaned: Int = 0,
 )
 
 data class InntektslinjeDto(
@@ -33,6 +36,17 @@ data class InntektslinjeDto(
     val maanedsbeloep: Int,
     val antallMaaneder: Int,
     val sumBeloep: Int,
+)
+
+/**
+ * Én linje i utregningen av ordinær avgift (grunnlag × sats). Summen av [beloep]
+ * utgjør [BeregningsforklaringDto.ordinaerAvgift]. [sats] er prosentsats (f.eks. 7.7).
+ */
+data class OrdinaerAvgiftslinjeDto(
+    val inntektskilde: String,
+    val grunnlag: Int,
+    val sats: BigDecimal,
+    val beloep: Int,
 )
 
 data class EkskludertInntektslinjeDto(
