@@ -111,7 +111,6 @@ data class AvgiftsperiodePensjonist(
     val avgiftssats: BigDecimal?,
     val avgiftPerMd: BigDecimal,
     val avgiftspliktigInntektPerMd: BigDecimal,
-    val inntektskilde: String,
     val inntektskildetype: String,
     val trygdedekning: String,
     val arbeidsgiveravgiftBetalt: SvarAlternativ,
