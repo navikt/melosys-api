@@ -46,6 +46,8 @@ class SendInnhentingAvInntektsopplysningerBrevTest {
         verify(exactly = 1) { dokumentServiceFasade.produserDokument(123, capture(capturedDto)) }
         capturedDto.captured.produserbardokument shouldBe Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER
         capturedDto.captured.mottaker shouldBe Mottakerroller.BRUKER
+        // MELOSYS-8125: må være true for at periode-avsnittet skal komme med i brevet
+        capturedDto.captured.isSkalViseStandardTekstOmOpplysninger shouldBe true
     }
 
     @Test

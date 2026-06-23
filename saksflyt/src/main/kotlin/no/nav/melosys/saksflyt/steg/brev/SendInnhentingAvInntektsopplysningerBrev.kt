@@ -48,6 +48,10 @@ class SendInnhentingAvInntektsopplysningerBrev(
         val brevbestillingDto = BrevbestillingDto().apply {
             produserbardokument = Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER
             mottaker = Mottakerroller.BRUKER
+            // MELOSYS-8125: malen gater avsnittet «Perioden du skal sende opplysninger for er …» på dette
+            // flagget (i tillegg til medlemskapsperiode-datoene). Defaulter til false på BrevbestillingDto,
+            // og kun den manuelle brev-menyen satte det – derfor manglet avsnittet i de auto-utsendte brevene.
+            setSkalViseStandardTekstOmOpplysninger(true)
         }
 
         dokumentServiceFasade.produserDokument(behandling.id, brevbestillingDto)
