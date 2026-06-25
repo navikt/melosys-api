@@ -97,7 +97,7 @@ class AvklarArbeidsgiverTest {
     fun `utfør med avklart norsk virksomhet arbeidsgiveraktør opprettes`() {
         val aktoerRepository = mockk<AktoerRepository>()
         val steg = AvklarArbeidsgiver(
-            AktoerService(aktoerRepository),
+            AktoerService(aktoerRepository, mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true)),
             avklarteVirksomheterService,
             behandlingService,
             behandlingsresultatService,
@@ -135,7 +135,7 @@ class AvklarArbeidsgiverTest {
     fun `utfør uten avklart norsk virksomhet arbeidsgiveraktører slettes`() {
         val aktoerRepository = mockk<AktoerRepository>()
         val steg = AvklarArbeidsgiver(
-            AktoerService(aktoerRepository),
+            AktoerService(aktoerRepository, mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true)),
             avklarteVirksomheterService,
             behandlingService,
             behandlingsresultatService,

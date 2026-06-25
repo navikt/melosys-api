@@ -42,8 +42,15 @@ public interface JoarkFasade {
      */
     void oppdaterOgFerdigstillJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering);
 
+    /**
+     * Oppdaterer journalposter knyttet til en sak fra gammel aktørId til ny aktørId.
+     */
+    void oppdaterJournalposterMedNyAktørId(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
+                                           String gammelAktørId,
+                                           String nyAktørId);
+
     void validerDokumenterTilhørerSakOgHarTilgang(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
-                                                  Collection<DokumentReferanse> dokumentReferanser);
+                                                   Collection<DokumentReferanse> dokumentReferanser);
 
     LocalDate hentMottaksDatoForJournalpost(String journalpostID);
 }

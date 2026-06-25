@@ -6,13 +6,20 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.integrasjon.joark.HentJournalposterTilknyttetSakRequest
+import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.repository.AktoerRepository
+import no.nav.melosys.repository.FagsakRepository
+import no.nav.melosys.service.tilgang.Aksesskontroll
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AktoerService(
-    private val aktørRepository: AktoerRepository
+    private val aktørRepository: AktoerRepository,
+    private val fagsakRepository: FagsakRepository,
+    private val aksesskontroll: Aksesskontroll,
+    private val joarkFasade: JoarkFasade
 ) {
     fun hentfagsakAktører(fagsak: Fagsak, aktoersrolle: Aktoersroller?): List<Aktoer> {
         if (aktoersrolle == null) {
@@ -84,6 +91,27 @@ class AktoerService(
     }
 
     @Transactional
+    fun endreAktørIdForBruker(saksnummer: String, nyAktørId: String?) {
+        val validertNyAktørId = nyAktørId?.takeIf { it.length == AKTOER_ID_LENGDE }
+            ?: throw IllegalArgumentException("Aktør ID kan ikke være null og må være 13 tegn lang $nyAktørId")
+        val fagsak = fagsakRepository.findById(saksnummer)
+            .orElseThrow { IllegalArgumentException("Finner ikke fagsak med saksnummer: $saksnummer") }
+        val gammelAktørId = fagsak.hentBrukersAktørID()
+
+        aksesskontroll.auditEndringFraAdminConsole(
+            validertNyAktørId,
+            "Endring av aktør ID for sak $saksnummer fra $gammelAktørId til $validertNyAktørId"
+        )
+
+        joarkFasade.oppdaterJournalposterMedNyAktørId(
+            HentJournalposterTilknyttetSakRequest(fagsak.gsakSaksnummer, fagsak.saksnummer),
+            gammelAktørId,
+            validertNyAktørId
+        )
+        endreAktørIdForBruker(fagsak, validertNyAktørId)
+    }
+
+    @Transactional
     fun endreAktørIdForBruker(fagsak: Fagsak, nyAktørId: String) {
         val eksisterendeBrukerAktør = fagsak.aktører.firstOrNull { it.rolle == Aktoersroller.BRUKER }
             ?: throw IllegalArgumentException("Finner ikke BRUKER aktør for ${fagsak.saksnummer}")
@@ -100,5 +128,9 @@ class AktoerService(
         }
 
         aktørRepository.save(aktør)
+    }
+
+    private companion object {
+        const val AKTOER_ID_LENGDE = 13
     }
 }

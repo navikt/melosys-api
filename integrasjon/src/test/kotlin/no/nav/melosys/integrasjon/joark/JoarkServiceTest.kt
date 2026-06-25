@@ -19,6 +19,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException
 import no.nav.melosys.integrasjon.Konstanter
 import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiClient
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.AvsenderMottaker.IdType
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.Bruker.BrukerIdType.AKTOERID
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.Bruker.BrukerIdType.FNR
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.FerdigstillJournalpostRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OppdaterJournalpostRequest
@@ -229,6 +230,32 @@ class JoarkServiceTest {
 
         verify(exactly = 0) { journalpostapiClient.leggTilLogiskVedlegg(any(), any()) }
         verify { journalpostapiClient.ferdigstillJournalpost(any(), any()) }
+    }
+
+    @Test
+    fun `oppdaterJournalposterMedNyAktørId oppdaterer kun journalposter med gammel aktørId`() {
+        val request = HentJournalposterTilknyttetSakRequest(123L, "MEL-123")
+        val gammelAktørId = "1111111111111"
+        val nyAktørId = "2222222222222"
+
+        every { safClient.hentDokumentoversikt(request.saksnummer()) } returns listOf(
+            safJournalpost("111", gammelAktørId, Brukertype.AKTOERID),
+            safJournalpost("222", "3333333333333", Brukertype.AKTOERID),
+            safJournalpost("333", gammelAktørId, Brukertype.FNR)
+        )
+        every { journalpostapiClient.oppdaterJournalpost(capture(oppdaterJournalpostRequestCaptor), any()) } just Runs
+
+        joarkService.oppdaterJournalposterMedNyAktørId(request, gammelAktørId, nyAktørId)
+
+        val oppdatering = oppdaterJournalpostRequestCaptor.captured
+        oppdatering.bruker.shouldNotBeNull().run {
+            id shouldBe nyAktørId
+            idType shouldBe AKTOERID
+        }
+        oppdatering.dokumenter shouldHaveSize 0
+        verify(exactly = 1) { journalpostapiClient.oppdaterJournalpost(any(), "111") }
+        verify(exactly = 1) { journalpostapiClient.oppdaterJournalpost(any(), any()) }
+        verify(exactly = 0) { journalpostapiClient.ferdigstillJournalpost(any(), any()) }
     }
 
     @Test
@@ -519,6 +546,14 @@ class JoarkServiceTest {
         safJournalpost(journalpostID, Journalstatus.MOTTATT, medLogiskVedlegg)
 
     private fun safJournalpost(journalpostID: String, journalstatus: Journalstatus, medLogiskVedlegg: Boolean): Journalpost {
+        return safJournalpost(journalpostID, journalstatus, medLogiskVedlegg, Bruker("123123", Brukertype.FNR))
+    }
+
+    private fun safJournalpost(journalpostID: String, brukerID: String, brukertype: Brukertype): Journalpost {
+        return safJournalpost(journalpostID, Journalstatus.MOTTATT, false, Bruker(brukerID, brukertype))
+    }
+
+    private fun safJournalpost(journalpostID: String, journalstatus: Journalstatus, medLogiskVedlegg: Boolean, bruker: Bruker): Journalpost {
         val logiskVedlegg = LogiskVedlegg("4143", "Tittel logisk vedlegg")
         val dokumentVedlegg = DokumentVariant(true, Variantformat.ARKIV.name)
         return Journalpost(
@@ -528,7 +563,7 @@ class JoarkServiceTest {
             Tema.MED.kode,
             Journalposttype.I,
             Sak("MEL-123"),
-            Bruker("123123", Brukertype.FNR),
+            bruker,
             AvsenderMottaker("010101", AvsenderMottakerType.ORGNR, "Org AS", "FINLAND"),
             "SKAN_NETS",
             setOf(RelevantDato(LocalDateTime.now(), Datotype.DATO_REGISTRERT)),
