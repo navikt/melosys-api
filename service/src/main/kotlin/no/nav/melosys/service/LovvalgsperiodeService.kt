@@ -92,12 +92,11 @@ class LovvalgsperiodeService(
         val behandlingsresultat = behandlingsresultatRepo.findById(behandlingID).getOrNull()
             ?: throw IllegalStateException("Behandlingsresultat med id $behandlingID fins ikke.")
 
-        // Må kopiere FØR sletting siden trygdeavgiftsperioder kopieres fra eksisterende lovvalgsperioder
+        slettEksisterendeLovvalgsperioder(behandlingsresultat)
+
         val nyePerioder = lovvalgsperioder.map {
             kopierLovvalgsperiodeSamtEksisterendeTrygdeavgift(it, behandlingsresultat)
         }
-
-        slettEksisterendeLovvalgsperioder(behandlingsresultat)
 
         behandlingsresultat.lovvalgsperioder.addAll(nyePerioder)
         return nyePerioder
@@ -108,7 +107,6 @@ class LovvalgsperiodeService(
             return
         }
 
-        // orphanRemoval på lovvalgsperioder håndterer sletting av hele treet inkludert trygdeavgiftsperioder.
         behandlingsresultat.lovvalgsperioder.clear()
         lovvalgsperiodeRepo.flush()
     }
