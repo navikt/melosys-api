@@ -92,7 +92,7 @@ class LovvalgsperiodeService(
         val behandlingsresultat = behandlingsresultatRepo.findById(behandlingID).getOrNull()
             ?: throw IllegalStateException("Behandlingsresultat med id $behandlingID fins ikke.")
 
-        val trygdeavgiftsperioder = behandlingsresultat.trygdeavgiftsperioder
+        val trygdeavgiftsperioder = behandlingsresultat.trygdeavgiftsperioder.map { it.copyEntity(id = null) }
 
         slettEksisterendeLovvalgsperioder(behandlingsresultat)
 
