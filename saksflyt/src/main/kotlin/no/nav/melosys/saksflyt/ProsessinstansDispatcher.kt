@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component
  * Pakker behandling av én prosessinstans som en [PrioritertSaksflytTask] og sender den til
  * `saksflytThreadPoolTaskExecutor`. Bruker `execute(Runnable)` (ikke `submit(...)`, som ville pakket den
  * i en ikke-`Comparable` `FutureTask`), slik at køen kan prioritere HØY/NORMAL foran LAV (batch).
- * Effektiv prioritet hentes fra prosessinstansens [ProsessType][no.nav.melosys.saksflytapi.domain.ProsessType].
+ * Effektiv prioritet hentes fra prosessinstansens persisterte prioritet-felt (default fra
+ * [ProsessType][no.nav.melosys.saksflytapi.domain.ProsessType], men kan være løftet via parent-propagering).
  */
 // kotlin logger
 private val log = KotlinLogging.logger { }

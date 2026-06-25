@@ -34,6 +34,7 @@ import no.nav.melosys.saksflytapi.journalfoering.DokumentRequest
 import no.nav.melosys.saksflytapi.journalfoering.JournalfoeringOpprettRequest
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -897,6 +898,88 @@ class ProsessinstansServiceTest {
             ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
         )
         verify(exactly = 0) { prosessinstansRepo.save(any<Prosessinstans>()) }
+    }
+
+    @Test
+    fun `lagre uten parent skal beholde type-default-prioritet`() {
+        val prosessinstans = Prosessinstans.forTest { type = ProsessType.SEND_BREV }
+
+        prosessinstansService.lagre(prosessinstans, "Z123", "Z123")
+
+        piListCaptor.last().hentPrioritet() shouldBe ProsessPrioritet.NORMAL
+    }
+
+    @Test
+    fun `lagre med HØY parent og NORMAL child skal løfte child til HØY`() {
+        val child = Prosessinstans.forTest { type = ProsessType.SEND_BREV } // NORMAL
+        medUtførendeProsess(ProsessPrioritet.HØY) {
+            prosessinstansService.lagre(child, "Z123", "Z123")
+        }
+
+        piListCaptor.last().hentPrioritet() shouldBe ProsessPrioritet.HØY
+    }
+
+    @Test
+    fun `lagre med NORMAL parent og LAV (batch) child skal beholde LAV - batch løftes aldri`() {
+        val child = Prosessinstans.forTest { type = ProsessType.SATSENDRING } // LAV
+        medUtførendeProsess(ProsessPrioritet.NORMAL) {
+            prosessinstansService.lagre(child, "Z123", "Z123")
+        }
+
+        piListCaptor.last().hentPrioritet() shouldBe ProsessPrioritet.LAV
+    }
+
+    @Test
+    fun `lagre med HØY parent og LAV (batch) child skal beholde LAV - batch løftes aldri`() {
+        // Konkret scenario: OPPRETT_NY_BEHANDLING_AARSAVREGNING (LAV) opprettes som bivirkning-steg
+        // inne i en HØY iverksett-vedtak-flyt. Batch skal forbli LAV, ikke flomme HØY-båndet.
+        val child = Prosessinstans.forTest { type = ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING } // LAV
+        medUtførendeProsess(ProsessPrioritet.HØY) {
+            prosessinstansService.lagre(child, "Z123", "Z123")
+        }
+
+        piListCaptor.last().hentPrioritet() shouldBe ProsessPrioritet.LAV
+    }
+
+    @Test
+    fun `lagre med LAV parent og HØY child skal beholde child sin HØY (typen vinner)`() {
+        val child = Prosessinstans.forTest { type = ProsessType.IVERKSETT_VEDTAK_EOS } // HØY
+        medUtførendeProsess(ProsessPrioritet.LAV) {
+            prosessinstansService.lagre(child, "Z123", "Z123")
+        }
+
+        piListCaptor.last().hentPrioritet() shouldBe ProsessPrioritet.HØY
+    }
+
+    @Test
+    fun `lagre i system-kontekst uten utførende prosess skal beholde type-default og ikke slå opp parent`() {
+        // Batch-/systemjobber (satsendring, årsavregning ...) setter en syntetisk prosess-id, men ingen
+        // utførende prioritet. Propageringen skal da være en ren no-op uten databaseoppslag.
+        val child = Prosessinstans.forTest { type = ProsessType.SEND_BREV } // NORMAL
+        kjørISystemkontekst(UUID.randomUUID()) {
+            prosessinstansService.lagre(child, "Z123", "Z123")
+        }
+
+        piListCaptor.last().hentPrioritet() shouldBe ProsessPrioritet.NORMAL
+        verify(exactly = 0) { prosessinstansRepo.findById(any()) }
+    }
+
+    private fun medUtførendeProsess(prioritet: ProsessPrioritet, block: () -> Unit) {
+        UtførendeProsessKontekst.settPrioritet(prioritet)
+        try {
+            block()
+        } finally {
+            UtførendeProsessKontekst.nullstill()
+        }
+    }
+
+    private fun kjørISystemkontekst(prosessId: UUID, block: () -> Unit) {
+        ThreadLocalAccessInfo.beforeExecuteProcess(prosessId, "test-system")
+        try {
+            block()
+        } finally {
+            ThreadLocalAccessInfo.afterExecuteProcess(prosessId)
+        }
     }
 
     private fun lagMelosysEessiMelding(
