@@ -92,10 +92,12 @@ class LovvalgsperiodeService(
         val behandlingsresultat = behandlingsresultatRepo.findById(behandlingID).getOrNull()
             ?: throw IllegalStateException("Behandlingsresultat med id $behandlingID fins ikke.")
 
+        val trygdeavgiftsperioder = behandlingsresultat.trygdeavgiftsperioder
+
         slettEksisterendeLovvalgsperioder(behandlingsresultat)
 
         val nyePerioder = lovvalgsperioder.map {
-            kopierLovvalgsperiodeSamtEksisterendeTrygdeavgift(it, behandlingsresultat)
+            kopierLovvalgsperiodeSamtEksisterendeTrygdeavgift(it, behandlingsresultat, trygdeavgiftsperioder)
         }
 
         behandlingsresultat.lovvalgsperioder.addAll(nyePerioder)
@@ -168,6 +170,7 @@ class LovvalgsperiodeService(
     private fun kopierLovvalgsperiodeSamtEksisterendeTrygdeavgift(
         lovvalgsperiode: Lovvalgsperiode,
         behandlingsresultat: Behandlingsresultat,
+        trygdeavgiftsperioder: Collection<Trygdeavgiftsperiode>,
     ): Lovvalgsperiode {
         val nyLovvalgsperiode = lovvalgsperiode.copyEntity(
             id = null,
@@ -175,7 +178,7 @@ class LovvalgsperiodeService(
         )
 
         nyLovvalgsperiode.trygdeavgiftsperioder = mutableSetOf()
-        behandlingsresultat.trygdeavgiftsperioder
+        trygdeavgiftsperioder
             .map { kopierTrygdeavgiftsperiode(it, nyLovvalgsperiode) }
             .forEach(nyLovvalgsperiode::addTrygdeavgiftsperiode)
 
