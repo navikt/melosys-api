@@ -93,9 +93,9 @@ class AktoerService(
     @Transactional
     fun endreAktørIdForBruker(saksnummer: String, nyAktørId: String?) {
         val validertNyAktørId = nyAktørId?.takeIf { it.length == AKTOER_ID_LENGDE }
-            ?: throw IllegalArgumentException("Aktør ID kan ikke være null og må være 13 tegn lang $nyAktørId")
+            ?: throw FunksjonellException("Aktør ID kan ikke være null og må være 13 tegn lang $nyAktørId")
         val fagsak = fagsakRepository.findById(saksnummer)
-            .orElseThrow { IllegalArgumentException("Finner ikke fagsak med saksnummer: $saksnummer") }
+            .orElseThrow { IkkeFunnetException("Finner ikke fagsak med saksnummer: $saksnummer") }
         val gammelAktørId = fagsak.hentBrukersAktørID()
 
         aksesskontroll.auditEndringFraAdminConsole(
