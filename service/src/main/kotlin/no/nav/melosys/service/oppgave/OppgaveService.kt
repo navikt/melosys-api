@@ -171,14 +171,23 @@ class OppgaveService(
                     )
                 ).beskrivelse(behandlingsoppgave.beskrivelse).build()
         )
-        leggTilNøkkelordForÅrsavregning(behandling, oppgaveID)
+        leggTilNøkkelordForÅrsavregning(behandling, behandlingsoppgave, oppgaveID)
     }
 
     // Nøkkelord finnes kun i Oppgave-API v2 (beta) og settes derfor i et separat kall etter
-    // v1-opprettelse/-oppdatering. Skal aldri blokkere selve oppgaven — året ligger også
-    // i beskrivelsen (MELOSYS-8123). Re-assert etter oppdatering fordi v1-PUT kan påvirke listen.
-    private fun leggTilNøkkelordForÅrsavregning(behandling: Behandling, oppgaveID: String) {
+    // v1-opprettelse og -oppdatering av oppgaven (kalles fra både lagBehandlingsoppgave og oppdaterOppgave).
+    // Skal aldri blokkere selve oppgaven — året ligger også i beskrivelsen (MELOSYS-8123).
+    //
+    // Settes kun på «Behandle årsavregning»-oppgaver (tema Trygdeavgift + oppgavetype BEH_ARSAVREG) der
+    // året er kjent (MELOSYS-8159):
+    //  - Årsavregning av EU/EØS- og trygdeavtale-yrkesaktive blir manuelle BEH_SAK_MK-oppgaver som ikke skal merkes.
+    //  - Ved manuell opprettelse (journalføring / opprett behandling) settes året senere i flyten, så
+    //    finnGjelderÅrForÅrsavregning er null her og nøkkelordet skal da ikke settes. De automatiske flytene
+    //    (skattehendelse, ikke-skattepliktige-jobb, opprettelse etter vedtak for tidligere år) har året satt før
+    //    oppgaven opprettes, og merkes.
+    private fun leggTilNøkkelordForÅrsavregning(behandling: Behandling, oppgave: Oppgave, oppgaveID: String) {
         if (!unleash.isEnabled(ToggleName.MELOSYS_OPPGAVE_NØKKELORD)) return
+        if (oppgave.tema != Tema.TRY || !oppgave.erÅrsavregning()) return
         val gjelderÅr = finnGjelderÅrForÅrsavregning(behandling) ?: return
         try {
             oppgaveFasade.leggTilNøkkelord(oppgaveID, setOf("Årsavregning $gjelderÅr"))
@@ -225,23 +234,24 @@ class OppgaveService(
         behandling: Behandling, tilordnetRessurs: String?, journalpostID: String?,
         aktørID: String?, orgnr: String?
     ) {
-        val oppgaveBuilder =
+        val oppgave =
             lagBehandlingsoppgave(behandling)
                 .setTilordnetRessurs(tilordnetRessurs)
                 .setJournalpostId(journalpostID)
                 .setAktørId(aktørID)
                 .setOrgnr(orgnr).setSaksnummer(behandling.fagsak.saksnummer)
+                .build()
 
         val oppgaveID =
             if (StringUtils.isNotEmpty(aktørID) && harBeskyttelsesbehov(behandling.id)) {
-                oppgaveFasade.opprettSensitivOppgave(oppgaveBuilder.build())
+                oppgaveFasade.opprettSensitivOppgave(oppgave)
             } else {
-                oppgaveFasade.opprettOppgave(oppgaveBuilder.build())
+                oppgaveFasade.opprettOppgave(oppgave)
             }
 
         settOppgaveIdPåBehandling(behandling, oppgaveID)
         log.info("Opprettet oppgave $oppgaveID for behandling ${behandling.id}")
-        leggTilNøkkelordForÅrsavregning(behandling, oppgaveID)
+        leggTilNøkkelordForÅrsavregning(behandling, oppgave, oppgaveID)
     }
 
     private fun hentEksisterendeOppgaveSomIkkeErTilknyttetBehandling(behandling: Behandling): Oppgave? {

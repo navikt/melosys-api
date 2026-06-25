@@ -21,6 +21,7 @@ import no.nav.melosys.domain.dokument.personDokumentForTest
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -418,6 +419,60 @@ internal class OppgaveServiceTest {
     }
 
     @Test
+    fun opprettEllerGjenbrukBehandlingsoppgave_eøsÅrsavregningGirManuellBehSakOppgave_nøkkelordSettesIkke() {
+        // EU/EØS yrkesaktiv årsavregning blir en manuell «Behandle sak»-oppgave (BEH_SAK_MK, manuell avgift),
+        // ikke en BEH_ARSAVREG-oppgave, og skal derfor ikke få nøkkelordet selv om behandlingstypen er ÅRSAVREGNING.
+        val behandling = Behandling.forTest {
+            id = 1L
+            fagsak {
+                type = Sakstyper.EU_EOS
+                medBruker()
+            }
+            type = Behandlingstyper.ÅRSAVREGNING
+            tema = Behandlingstema.YRKESAKTIV
+        }
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns listOf(oppgave)
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandling
+        every { behandlingService.hentBehandling(any<Long>()) } returns behandling
+        every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
+        every { behandlingService.lagre(behandling) } returns Unit
+        every { behandlingsresultatService.finnÅrsavregningAar(behandling.id) } returns 2024
+        every { unleash.isEnabled(ToggleName.MELOSYS_OPPGAVE_NØKKELORD) } returns true
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS)
+
+        verify { oppgaveFasade.opprettOppgave(any<Oppgave>()) }
+        verify(exactly = 0) { oppgaveFasade.leggTilNøkkelord(any(), any()) }
+    }
+
+    @Test
+    fun opprettEllerGjenbrukBehandlingsoppgave_årsavregningUtenKjentÅr_nøkkelordSettesIkke() {
+        // Manuell opprettelse (journalføring / opprett behandling-menyen): året settes senere i flyten,
+        // så finnÅrsavregningAar er null ved oppgaveopprettelse og nøkkelordet skal ikke settes.
+        val behandling = Behandling.forTest {
+            id = 1L
+            fagsak {
+                type = Sakstyper.FTRL
+                medBruker()
+            }
+            type = Behandlingstyper.ÅRSAVREGNING
+            tema = Behandlingstema.YRKESAKTIV
+        }
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns listOf(oppgave)
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandling
+        every { behandlingService.hentBehandling(any<Long>()) } returns behandling
+        every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
+        every { behandlingService.lagre(behandling) } returns Unit
+        every { behandlingsresultatService.finnÅrsavregningAar(behandling.id) } returns null
+        every { unleash.isEnabled(ToggleName.MELOSYS_OPPGAVE_NØKKELORD) } returns true
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS)
+
+        verify { oppgaveFasade.opprettOppgave(any<Oppgave>()) }
+        verify(exactly = 0) { oppgaveFasade.leggTilNøkkelord(any(), any()) }
+    }
+
+    @Test
     fun oppdaterOppgave_årsavregningMedNøkkelordToggle_nøkkelordReassertes() {
         val behandling = lagÅrsavregningsbehandlingMedMocker()
         every { unleash.isEnabled(ToggleName.MELOSYS_OPPGAVE_NØKKELORD) } returns true
@@ -430,9 +485,13 @@ internal class OppgaveServiceTest {
     }
 
     private fun lagÅrsavregningsbehandlingMedMocker(): Behandling {
+        // FTRL/yrkesaktiv årsavregning gir en «Behandle årsavregning»-oppgave (BEH_ARSAVREG) som skal merkes med nøkkelord.
         val behandling = Behandling.forTest {
             id = 1L
-            fagsak { medBruker() }
+            fagsak {
+                type = Sakstyper.FTRL
+                medBruker()
+            }
             type = Behandlingstyper.ÅRSAVREGNING
             tema = Behandlingstema.YRKESAKTIV
         }
