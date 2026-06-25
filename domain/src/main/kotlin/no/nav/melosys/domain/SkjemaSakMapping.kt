@@ -19,7 +19,7 @@ class SkjemaSakMapping(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mottatte_opplysninger_id")
-    var mottatteOpplysninger: MottatteOpplysninger,
+    var mottatteOpplysninger: MottatteOpplysninger?,
 
     @Column(name = "original_data", columnDefinition = "CLOB")
     var originalData: String, //TODO: Nødvendig med nullable?

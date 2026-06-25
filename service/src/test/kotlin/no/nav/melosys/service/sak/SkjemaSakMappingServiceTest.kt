@@ -192,4 +192,67 @@ internal class SkjemaSakMappingServiceTest {
             verify(exactly = 0) { skjemaSakMappingRepository.save(any()) }
         }
     }
+
+    @Nested
+    inner class FrikobleFraMottatteOpplysninger {
+
+        @Test
+        fun `frikobler mappinger fra mottatte opplysninger og returnerer skjemaIder`() {
+            val mottatteOpplysninger = mockk<MottatteOpplysninger> { every { id } returns 42L }
+            val skjemaId1 = UUID.randomUUID()
+            val skjemaId2 = UUID.randomUUID()
+            val mapping1 = lagSkjemaSakMapping(skjemaId = skjemaId1, saksnummer = "MEL-1")
+            val mapping2 = lagSkjemaSakMapping(skjemaId = skjemaId2, saksnummer = "MEL-2")
+
+            every { skjemaSakMappingRepository.findByMottatteOpplysninger_Id(42L) } returns listOf(mapping1, mapping2)
+            every { skjemaSakMappingRepository.saveAllAndFlush(any<List<SkjemaSakMapping>>()) } answers { firstArg() }
+
+            val resultat = service.frikobleFraMottatteOpplysninger(mottatteOpplysninger)
+
+            resultat shouldBe listOf(skjemaId1, skjemaId2)
+            mapping1.mottatteOpplysninger.shouldBeNull()
+            mapping2.mottatteOpplysninger.shouldBeNull()
+            verify { skjemaSakMappingRepository.saveAllAndFlush(listOf(mapping1, mapping2)) }
+        }
+
+        @Test
+        fun `ingen mappinger - returnerer tom liste og lagrer ingenting`() {
+            val mottatteOpplysninger = mockk<MottatteOpplysninger> { every { id } returns 42L }
+            every { skjemaSakMappingRepository.findByMottatteOpplysninger_Id(42L) } returns emptyList()
+
+            service.frikobleFraMottatteOpplysninger(mottatteOpplysninger) shouldBe emptyList()
+
+            verify(exactly = 0) { skjemaSakMappingRepository.saveAllAndFlush(any<List<SkjemaSakMapping>>()) }
+        }
+    }
+
+    @Nested
+    inner class KnyttTilMottatteOpplysninger {
+
+        @Test
+        fun `re-peker mappinger til ny mottatte opplysninger`() {
+            val nyMottatteOpplysninger = mockk<MottatteOpplysninger> { every { id } returns 99L }
+            val skjemaId1 = UUID.randomUUID()
+            val skjemaId2 = UUID.randomUUID()
+            val mapping1 = lagSkjemaSakMapping(skjemaId = skjemaId1, saksnummer = "MEL-1")
+            val mapping2 = lagSkjemaSakMapping(skjemaId = skjemaId2, saksnummer = "MEL-2")
+
+            every { skjemaSakMappingRepository.findBySkjemaIdIn(listOf(skjemaId1, skjemaId2)) } returns listOf(mapping1, mapping2)
+            every { skjemaSakMappingRepository.saveAll(any<List<SkjemaSakMapping>>()) } answers { firstArg() }
+
+            service.knyttTilMottatteOpplysninger(listOf(skjemaId1, skjemaId2), nyMottatteOpplysninger)
+
+            mapping1.mottatteOpplysninger shouldBe nyMottatteOpplysninger
+            mapping2.mottatteOpplysninger shouldBe nyMottatteOpplysninger
+            verify { skjemaSakMappingRepository.saveAll(listOf(mapping1, mapping2)) }
+        }
+
+        @Test
+        fun `tom skjemaIder - gjoer ingenting`() {
+            service.knyttTilMottatteOpplysninger(emptyList(), mockk())
+
+            verify(exactly = 0) { skjemaSakMappingRepository.findBySkjemaIdIn(any()) }
+            verify(exactly = 0) { skjemaSakMappingRepository.saveAll(any<List<SkjemaSakMapping>>()) }
+        }
+    }
 }
