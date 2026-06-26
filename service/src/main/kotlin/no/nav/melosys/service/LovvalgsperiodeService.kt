@@ -92,15 +92,22 @@ class LovvalgsperiodeService(
         val behandlingsresultat = behandlingsresultatRepo.findById(behandlingID).getOrNull()
             ?: throw IllegalStateException("Behandlingsresultat med id $behandlingID fins ikke.")
 
-        // Må kopiere FØR sletting siden trygdeavgiftsperioder kopieres fra eksisterende lovvalgsperioder
-        val nyePerioder = lovvalgsperioder.map {
-            kopierLovvalgsperiodeSamtEksisterendeTrygdeavgift(it, behandlingsresultat)
-        }
+        val eksisterendeTrygdeavgiftsperioder = hentOgInitialiserEksisterendeTrygdeavgiftsperioder(behandlingsresultat)
 
         slettEksisterendeLovvalgsperioder(behandlingsresultat)
 
+        val nyePerioder = lovvalgsperioder.map {
+            kopierLovvalgsperiodeMedEksisterendeTrygdeavgift(it, behandlingsresultat, eksisterendeTrygdeavgiftsperioder)
+        }
+
         behandlingsresultat.lovvalgsperioder.addAll(nyePerioder)
         return nyePerioder
+    }
+
+    private fun hentOgInitialiserEksisterendeTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat): List<Trygdeavgiftsperiode> {
+        // Må kopiere trygdeavgiftsperioder FØR sletting siden de hentes fra eksisterende lovvalgsperioder.
+        // grunnlagListe er lazy-lastet, så force-initialiseres mens entitetene er managed.
+        return behandlingsresultat.trygdeavgiftsperioder.toList().onEach { it.grunnlagListe.size }
     }
 
     private fun slettEksisterendeLovvalgsperioder(behandlingsresultat: Behandlingsresultat) {
@@ -108,9 +115,54 @@ class LovvalgsperiodeService(
             return
         }
 
-        // orphanRemoval på lovvalgsperioder håndterer sletting av hele treet inkludert trygdeavgiftsperioder.
         behandlingsresultat.lovvalgsperioder.clear()
         lovvalgsperiodeRepo.flush()
+    }
+
+    private fun kopierLovvalgsperiodeMedEksisterendeTrygdeavgift(
+        lovvalgsperiode: Lovvalgsperiode,
+        behandlingsresultat: Behandlingsresultat,
+        eksisterendeTrygdeavgiftsperioder: List<Trygdeavgiftsperiode>,
+    ): Lovvalgsperiode {
+        val ny = lovvalgsperiode.copyEntity(id = null, behandlingsresultat = behandlingsresultat)
+        eksisterendeTrygdeavgiftsperioder.forEach {
+            ny.addTrygdeavgiftsperiode(kopierTrygdeavgiftsperiode(it, ny))
+        }
+        return ny
+    }
+
+
+    private fun kopierTrygdeavgiftsperiode(
+        trygdeavgiftsperiode: Trygdeavgiftsperiode,
+        lovvalgsperiode: Lovvalgsperiode,
+    ): Trygdeavgiftsperiode {
+        val inntektMap = (listOfNotNull(trygdeavgiftsperiode.grunnlagInntekstperiode) +
+            trygdeavgiftsperiode.grunnlagListe.map { it.inntektsperiode })
+            .distinctBy { it.id }
+            .associate { it.id to kopierInntektsperiode(it)!! }
+
+        val skatteforholdMap = (listOfNotNull(trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge) +
+            trygdeavgiftsperiode.grunnlagListe.map { it.skatteforhold })
+            .distinctBy { it.id }
+            .associate { it.id to kopierSkatteforhold(it)!! }
+
+        return trygdeavgiftsperiode.copyEntity(
+            id = null,
+            grunnlagInntekstperiode = trygdeavgiftsperiode.grunnlagInntekstperiode?.let { inntektMap[it.id] },
+            grunnlagLovvalgsPeriode = null,
+            grunnlagSkatteforholdTilNorge = trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge?.let { skatteforholdMap[it.id] },
+        ).apply {
+            trygdeavgiftsperiode.grunnlagListe.forEach { orig ->
+                leggTilGrunnlag(
+                    TrygdeavgiftsperiodeGrunnlag(
+                        trygdeavgiftsperiode = this,
+                        lovvalgsperiode = lovvalgsperiode,
+                        inntektsperiode = inntektMap[orig.inntektsperiode.id]!!,
+                        skatteforhold = skatteforholdMap[orig.skatteforhold.id]!!,
+                    )
+                )
+            }
+        }
     }
 
     fun hentTidligereLovvalgsperioder(behandling: Behandling): Collection<Lovvalgsperiode> {
@@ -135,7 +187,7 @@ class LovvalgsperiodeService(
 
                 periode.grunnlagstype?.let { grunnlagsType ->
                     bestemmelse = GrunnlagMedl.entries.find { it.name == grunnlagsType }
-                        ?.let { tilLovvalgBestemmelse(it) }
+                        ?.let(::tilLovvalgBestemmelse)
                         ?: Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET
                 }
             }
@@ -167,69 +219,11 @@ class LovvalgsperiodeService(
             else -> false
         }
 
-    private fun kopierLovvalgsperiodeSamtEksisterendeTrygdeavgift(
-        lovvalgsperiode: Lovvalgsperiode,
-        behandlingsresultat: Behandlingsresultat,
-    ): Lovvalgsperiode {
-        val nyLovvalgsperiode = lovvalgsperiode.copyEntity(
-            id = null,
-            behandlingsresultat = behandlingsresultat
-        )
-
-        nyLovvalgsperiode.trygdeavgiftsperioder = mutableSetOf()
-        behandlingsresultat.trygdeavgiftsperioder
-            .map { kopierTrygdeavgiftsperiode(it, nyLovvalgsperiode) }
-            .forEach(nyLovvalgsperiode::addTrygdeavgiftsperiode)
-
-        return nyLovvalgsperiode
+    private fun kopierInntektsperiode(original: Inntektsperiode?) = original?.run {
+        copyEntity(null, fomDato, tomDato, type, avgiftspliktigMndInntekt, avgiftspliktigTotalinntekt, isArbeidsgiversavgiftBetalesTilSkatt)
     }
 
-    private fun kopierTrygdeavgiftsperiode(
-        trygdeavgiftsperiode: Trygdeavgiftsperiode,
-        lovvalgsperiode: Lovvalgsperiode,
-    ): Trygdeavgiftsperiode {
-        val origInntekter = (listOfNotNull(trygdeavgiftsperiode.grunnlagInntekstperiode) +
-            trygdeavgiftsperiode.grunnlagListe.map { it.inntektsperiode }).distinctBy { it.id }
-        val origSkatteforhold = (listOfNotNull(trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge) +
-            trygdeavgiftsperiode.grunnlagListe.map { it.skatteforhold }).distinctBy { it.id }
-        val inntektMap = origInntekter.associateBy({ it.id }, { kopierInntektsperiode(it)!! })
-        val skatteforholdMap = origSkatteforhold.associateBy({ it.id }, { kopierSkatteforhold(it)!! })
-
-        val kopi = trygdeavgiftsperiode.copyEntity(
-            id = null,
-            grunnlagInntekstperiode = trygdeavgiftsperiode.grunnlagInntekstperiode?.let { inntektMap[it.id] },
-            grunnlagLovvalgsPeriode = null,
-            grunnlagSkatteforholdTilNorge = trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge?.let { skatteforholdMap[it.id] },
-        )
-        trygdeavgiftsperiode.grunnlagListe.forEach { orig ->
-            kopi.leggTilGrunnlag(
-                TrygdeavgiftsperiodeGrunnlag(
-                    trygdeavgiftsperiode = kopi,
-                    lovvalgsperiode = lovvalgsperiode,
-                    inntektsperiode = inntektMap[orig.inntektsperiode.id]!!,
-                    skatteforhold = skatteforholdMap[orig.skatteforhold.id]!!,
-                )
-            )
-        }
-        return kopi
+    private fun kopierSkatteforhold(original: SkatteforholdTilNorge?) = original?.run {
+        copyEntity(null, fomDato, tomDato, skatteplikttype)
     }
-
-    private fun kopierInntektsperiode(original: Inntektsperiode?): Inntektsperiode? =
-        original?.copyEntity(
-            null,
-            original.fomDato,
-            original.tomDato,
-            original.type,
-            original.avgiftspliktigMndInntekt,
-            original.avgiftspliktigTotalinntekt,
-            original.isArbeidsgiversavgiftBetalesTilSkatt
-        )
-
-    private fun kopierSkatteforhold(original: SkatteforholdTilNorge?): SkatteforholdTilNorge? =
-        original?.copyEntity(
-            null,
-            original.fomDato,
-            original.tomDato,
-            original.skatteplikttype
-        )
 }
