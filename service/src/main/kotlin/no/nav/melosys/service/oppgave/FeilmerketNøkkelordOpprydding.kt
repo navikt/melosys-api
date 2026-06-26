@@ -121,8 +121,6 @@ class FeilmerketNøkkelordOpprydding(
             antallFeilet = feiletIder.size,
             antallHoppet = hoppet,
             antallKorrektMerkede = rapport.antallKorrektMerkede,
-            funnet = feilmerkede,
-            korrektMerkede = rapport.korrektMerkede,
             fjernetIder = fjernetIder,
             feiletIder = feiletIder
         ).also { stats.sisteResultat = it }
@@ -238,6 +236,8 @@ data class NøkkelordRapport(
     val korrektMerkede: List<NøkkelordOppgave>
 )
 
+// Lett resultat for /status og sisteResultat — kun tellere og id-lister, ikke fulle oppgave-objekter
+// (de kan bli mange på prod). Hent de detaljerte listene fra GET /rapport ved behov.
 data class OppryddingResultat(
     val enhet: String,
     val dryRun: Boolean,
@@ -247,8 +247,6 @@ data class OppryddingResultat(
     val antallFeilet: Int,
     val antallHoppet: Int,
     val antallKorrektMerkede: Int,
-    val funnet: List<NøkkelordOppgave>,
-    val korrektMerkede: List<NøkkelordOppgave>,
     val fjernetIder: List<String>,
     val feiletIder: List<String>
 )
