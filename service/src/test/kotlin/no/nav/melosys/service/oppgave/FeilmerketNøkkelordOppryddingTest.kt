@@ -119,6 +119,7 @@ internal class FeilmerketNøkkelordOppryddingTest {
         status["isRunning"] shouldBe false
         status["antallSkannet"] shouldBe 2
         status["antallFunnet"] shouldBe 1
+        status["antallKorrektMerkede"] shouldBe 1
         status["antallFjernet"] shouldBe 1
         status["antallFeilet"] shouldBe 0
         verify(exactly = 1) { oppgaveV2Client.fjernNøkkelord("100", any()) }

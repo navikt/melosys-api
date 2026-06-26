@@ -80,9 +80,10 @@ class FeilmerketNøkkelordOpprydding(
         val rapport = finnFeilmerkede(enhetsnr)
         val feilmerkede = rapport.feilmerkede
         stats.antallFunnet = feilmerkede.size
+        stats.antallKorrektMerkede = rapport.antallKorrektMerkede
         log.info {
             "Starter nøkkelord-opprydding enhet $enhetsnr: skannet ${rapport.antallSkannet}, " +
-                "${feilmerkede.size} feilmerkede, dryRun=$dryRun"
+                "${feilmerkede.size} feilmerkede, ${rapport.antallKorrektMerkede} korrekt merkede, dryRun=$dryRun"
         }
 
         val fjernetIder = mutableListOf<String>()
@@ -119,7 +120,9 @@ class FeilmerketNøkkelordOpprydding(
             antallFjernet = fjernetIder.size,
             antallFeilet = feiletIder.size,
             antallHoppet = hoppet,
+            antallKorrektMerkede = rapport.antallKorrektMerkede,
             funnet = feilmerkede,
+            korrektMerkede = rapport.korrektMerkede,
             fjernetIder = fjernetIder,
             feiletIder = feiletIder
         ).also { stats.sisteResultat = it }
@@ -174,6 +177,7 @@ class FeilmerketNøkkelordOpprydding(
         @Volatile var antallFjernet: Int = 0,
         @Volatile var antallFeilet: Int = 0,
         @Volatile var antallHoppet: Int = 0,
+        @Volatile var antallKorrektMerkede: Int = 0,
         @Volatile var sisteResultat: OppryddingResultat? = null
     ) : JobMonitor.Stats {
         override fun reset() {
@@ -182,6 +186,7 @@ class FeilmerketNøkkelordOpprydding(
             antallFjernet = 0
             antallFeilet = 0
             antallHoppet = 0
+            antallKorrektMerkede = 0
             sisteResultat = null
         }
 
@@ -191,6 +196,7 @@ class FeilmerketNøkkelordOpprydding(
             "antallFjernet" to antallFjernet,
             "antallFeilet" to antallFeilet,
             "antallHoppet" to antallHoppet,
+            "antallKorrektMerkede" to antallKorrektMerkede,
             "sisteResultat" to sisteResultat
         )
     }
@@ -227,7 +233,9 @@ data class OppryddingResultat(
     val antallFjernet: Int,
     val antallFeilet: Int,
     val antallHoppet: Int,
+    val antallKorrektMerkede: Int,
     val funnet: List<NøkkelordOppgave>,
+    val korrektMerkede: List<NøkkelordOppgave>,
     val fjernetIder: List<String>,
     val feiletIder: List<String>
 )
