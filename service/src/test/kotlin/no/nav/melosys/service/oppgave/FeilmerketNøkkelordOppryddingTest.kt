@@ -99,6 +99,24 @@ internal class FeilmerketNøkkelordOppryddingTest {
     }
 
     @Test
+    fun `ryddAsynkront kjører jobben og status reflekterer resultatet`() {
+        every { oppgaveV2Client.søkOppgaverForEnhet(ENHET, null) } returns søkRespons(
+            oppgaveJson(100, "BEH_SAK_MK", listOf("Årsavregning 2024")),
+            oppgaveJson(200, "BEH_ARSAVREG", listOf("Årsavregning 2024"))
+        )
+        every { oppgaveV2Client.fjernNøkkelord("100", any()) } returns Unit
+
+        opprydding.ryddAsynkront(ENHET, dryRun = false)
+
+        val status = opprydding.status()
+        status["isRunning"] shouldBe false
+        status["antallFunnet"] shouldBe 1
+        status["antallFjernet"] shouldBe 1
+        status["antallFeilet"] shouldBe 0
+        verify(exactly = 1) { oppgaveV2Client.fjernNøkkelord("100", any()) }
+    }
+
+    @Test
     fun `finnFeilmerkede paginerer til hasNext er false`() {
         every { oppgaveV2Client.søkOppgaverForEnhet(ENHET, null) } returns søkRespons(
             oppgaveJson(100, "BEH_SAK_MK", listOf("Årsavregning 2024")),

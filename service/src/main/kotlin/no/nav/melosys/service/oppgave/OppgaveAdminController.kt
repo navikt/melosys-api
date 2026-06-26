@@ -44,6 +44,19 @@ class OppgaveAdminController(
     fun ryddFeilmerketNøkkelord(
         @RequestParam(defaultValue = "4530") enhet: String,
         @RequestParam(defaultValue = "true") dryRun: Boolean
-    ): ResponseEntity<OppryddingResultat> =
-        ResponseEntity.ok(feilmerketNøkkelordOpprydding.rydd(enhet, dryRun))
+    ): ResponseEntity<Map<String, Any?>> {
+        log.info("Starter nøkkelord-opprydding for enhet $enhet (dryRun=$dryRun)")
+        feilmerketNøkkelordOpprydding.ryddAsynkront(enhet, dryRun)
+        return ResponseEntity.accepted().body(
+            mapOf(
+                "enhet" to enhet,
+                "dryRun" to dryRun,
+                "melding" to "Oppryddingen er startet. Følg med på /admin/oppgaver/nokkelord-opprydding/status"
+            )
+        )
+    }
+
+    @GetMapping("/nokkelord-opprydding/status")
+    fun nøkkelordOppryddingStatus(): ResponseEntity<Map<String, Any?>> =
+        ResponseEntity.ok(feilmerketNøkkelordOpprydding.status())
 }

@@ -2,8 +2,12 @@ package no.nav.melosys.service.oppgave
 
 import mu.KotlinLogging
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveV2Client
+import no.nav.melosys.service.JobMonitor
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import tools.jackson.databind.JsonNode
+import java.util.UUID
 
 private val log = KotlinLogging.logger {}
 
@@ -16,11 +20,21 @@ private val log = KotlinLogging.logger {}
  *
  * Detektor: en oppgave er feilmerket hvis et nøkkelord matcher `^Årsavregning \d{4}$` OG
  * `kategorisering.oppgavetype.kode != BEH_ARSAVREG`.
+ *
+ * Selve fjerningen kan gjelde flere hundre oppgaver (full enhet-skann + GET+PATCH per oppgave), som
+ * tar for lang tid for en synkron HTTP-request. Derfor kjører [ryddAsynkront] på `taskExecutor` og
+ * status pollere via [status]. [finnFeilmerkede] er read-only og kan kjøres synkront som forhåndssjekk.
  */
 @Service
 class FeilmerketNøkkelordOpprydding(
     private val oppgaveV2Client: OppgaveV2Client
 ) {
+
+    private val jobMonitor = JobMonitor(
+        jobName = "FjernFeilmerketÅrsavregningNøkkelord",
+        stats = OppryddingStats()
+    )
+    private val stats get() = jobMonitor.stats
 
     fun finnFeilmerkede(enhetsnr: String): List<FeilmerketOppgave> {
         val feilmerkede = mutableListOf<FeilmerketOppgave>()
@@ -38,8 +52,19 @@ class FeilmerketNøkkelordOpprydding(
         return feilmerkede
     }
 
+    /**
+     * Kjører oppryddingen på en bakgrunnstråd og returnerer umiddelbart. Status leses via [status].
+     * Må kalles utenfra (fra controlleren) for at @Async-proxyen skal slå inn.
+     */
+    @Async("taskExecutor")
+    fun ryddAsynkront(enhetsnr: String, dryRun: Boolean) = runAsSystem {
+        jobMonitor.execute { rydd(enhetsnr, dryRun) }
+    }
+
+    @Synchronized
     fun rydd(enhetsnr: String, dryRun: Boolean): OppryddingResultat {
         val feilmerkede = finnFeilmerkede(enhetsnr)
+        stats.antallFunnet = feilmerkede.size
         log.info { "Starter nøkkelord-opprydding enhet $enhetsnr: ${feilmerkede.size} feilmerkede, dryRun=$dryRun" }
 
         val fjernetIder = mutableListOf<String>()
@@ -49,15 +74,17 @@ class FeilmerketNøkkelordOpprydding(
         feilmerkede.forEach { oppgave ->
             // Ekstra vakt: skal aldri skje gitt detektoren, men billig sikkerhet mot å røre ekte årsavregninger.
             if (oppgave.oppgavetype == BEH_ARSAVREG) {
-                hoppet++
+                stats.antallHoppet = ++hoppet
                 return@forEach
             }
             if (dryRun) return@forEach
             try {
                 oppgaveV2Client.fjernNøkkelord(oppgave.id) { it.matches(ÅRSAVREGNING_NØKKELORD) }
                 fjernetIder.add(oppgave.id)
+                stats.antallFjernet = fjernetIder.size
             } catch (e: Exception) {
                 feiletIder.add(oppgave.id)
+                stats.antallFeilet = feiletIder.size
                 log.warn(e) { "Klarte ikke fjerne nøkkelord fra oppgave ${oppgave.id}" }
             }
         }
@@ -76,8 +103,10 @@ class FeilmerketNøkkelordOpprydding(
             funnet = feilmerkede,
             fjernetIder = fjernetIder,
             feiletIder = feiletIder
-        )
+        ).also { stats.sisteResultat = it }
     }
+
+    fun status(): Map<String, Any?> = jobMonitor.status()
 
     private fun tilFeilmerketOppgave(oppgave: JsonNode): FeilmerketOppgave? {
         val nøkkelord = oppgave.path("nokkelord").values().map { it.asString() }
@@ -104,6 +133,42 @@ class FeilmerketNøkkelordOpprydding(
 
     private fun JsonNode.tekstEllerNull(): String? =
         if (isMissingNode || isNull) null else asString()
+
+    // Async-tråden mangler request-konteksten, så CorrelationIdOutgoingFilter (brukt av Oppgave-klienten)
+    // trenger at vi setter opp ThreadLocalAccessInfo med en system-prosess.
+    private fun <T> runAsSystem(prosessSteg: String = "fjernFeilmerketNøkkelord", block: () -> T): T {
+        val processId = UUID.randomUUID()
+        ThreadLocalAccessInfo.beforeExecuteProcess(processId, prosessSteg)
+        return try {
+            block()
+        } finally {
+            ThreadLocalAccessInfo.afterExecuteProcess(processId)
+        }
+    }
+
+    inner class OppryddingStats(
+        @Volatile var antallFunnet: Int = 0,
+        @Volatile var antallFjernet: Int = 0,
+        @Volatile var antallFeilet: Int = 0,
+        @Volatile var antallHoppet: Int = 0,
+        @Volatile var sisteResultat: OppryddingResultat? = null
+    ) : JobMonitor.Stats {
+        override fun reset() {
+            antallFunnet = 0
+            antallFjernet = 0
+            antallFeilet = 0
+            antallHoppet = 0
+            sisteResultat = null
+        }
+
+        override fun asMap(): Map<String, Any?> = mapOf(
+            "antallFunnet" to antallFunnet,
+            "antallFjernet" to antallFjernet,
+            "antallFeilet" to antallFeilet,
+            "antallHoppet" to antallHoppet,
+            "sisteResultat" to sisteResultat
+        )
+    }
 
     companion object {
         private const val BEH_ARSAVREG = "BEH_ARSAVREG"
