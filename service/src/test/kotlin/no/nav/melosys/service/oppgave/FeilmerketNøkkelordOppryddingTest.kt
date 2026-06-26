@@ -38,10 +38,12 @@ internal class FeilmerketNøkkelordOppryddingTest {
             oppgaveJson(400, "BEH_SAK_MK", emptyList())
         )
 
-        val feilmerkede = opprydding.finnFeilmerkede(ENHET)
+        val rapport = opprydding.finnFeilmerkede(ENHET)
 
-        feilmerkede.map { it.id } shouldContainExactly listOf("100")
-        feilmerkede.single().oppgavetype shouldBe "BEH_SAK_MK"
+        rapport.antallSkannet shouldBe 4
+        rapport.antallFeilmerkede shouldBe 1
+        rapport.feilmerkede.map { it.id } shouldContainExactly listOf("100")
+        rapport.feilmerkede.single().oppgavetype shouldBe "BEH_SAK_MK"
     }
 
     @Test
@@ -110,6 +112,7 @@ internal class FeilmerketNøkkelordOppryddingTest {
 
         val status = opprydding.status()
         status["isRunning"] shouldBe false
+        status["antallSkannet"] shouldBe 2
         status["antallFunnet"] shouldBe 1
         status["antallFjernet"] shouldBe 1
         status["antallFeilet"] shouldBe 0
@@ -127,9 +130,10 @@ internal class FeilmerketNøkkelordOppryddingTest {
             oppgaveJson(200, "BEH_SAK_MK", listOf("Årsavregning 2025"))
         )
 
-        val feilmerkede = opprydding.finnFeilmerkede(ENHET)
+        val rapport = opprydding.finnFeilmerkede(ENHET)
 
-        feilmerkede.map { it.id } shouldContainExactly listOf("100", "200")
+        rapport.antallSkannet shouldBe 2
+        rapport.feilmerkede.map { it.id } shouldContainExactly listOf("100", "200")
         verify(exactly = 1) { oppgaveV2Client.søkOppgaverForEnhet(ENHET, "side2") }
     }
 

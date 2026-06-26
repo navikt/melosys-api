@@ -37,7 +37,7 @@ class OppgaveAdminController(
     @GetMapping("/nokkelord-opprydding/rapport")
     fun nøkkelordOppryddingRapport(
         @RequestParam(defaultValue = "4530") enhet: String
-    ): ResponseEntity<List<FeilmerketOppgave>> =
+    ): ResponseEntity<FeilmerketRapport> =
         ResponseEntity.ok(feilmerketNøkkelordOpprydding.finnFeilmerkede(enhet))
 
     @PostMapping("/nokkelord-opprydding")

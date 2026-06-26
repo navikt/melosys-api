@@ -36,7 +36,7 @@ class FeilmerketNøkkelordOpprydding(
     )
     private val stats get() = jobMonitor.stats
 
-    fun finnFeilmerkede(enhetsnr: String): List<FeilmerketOppgave> {
+    fun finnFeilmerkede(enhetsnr: String): FeilmerketRapport {
         val feilmerkede = mutableListOf<FeilmerketOppgave>()
         var skannet = 0
         var after: String? = null
@@ -46,10 +46,11 @@ class FeilmerketNøkkelordOpprydding(
                 skannet++
                 tilFeilmerketOppgave(oppgave)?.let(feilmerkede::add)
             }
+            stats.antallSkannet = skannet
             after = nesteSide(respons)
         } while (after != null)
         log.info { "Nøkkelord-opprydding enhet $enhetsnr: skannet $skannet oppgaver, fant ${feilmerkede.size} feilmerkede" }
-        return feilmerkede
+        return FeilmerketRapport(enhetsnr, skannet, feilmerkede.size, feilmerkede)
     }
 
     /**
@@ -63,9 +64,13 @@ class FeilmerketNøkkelordOpprydding(
 
     @Synchronized
     fun rydd(enhetsnr: String, dryRun: Boolean): OppryddingResultat {
-        val feilmerkede = finnFeilmerkede(enhetsnr)
+        val rapport = finnFeilmerkede(enhetsnr)
+        val feilmerkede = rapport.feilmerkede
         stats.antallFunnet = feilmerkede.size
-        log.info { "Starter nøkkelord-opprydding enhet $enhetsnr: ${feilmerkede.size} feilmerkede, dryRun=$dryRun" }
+        log.info {
+            "Starter nøkkelord-opprydding enhet $enhetsnr: skannet ${rapport.antallSkannet}, " +
+                "${feilmerkede.size} feilmerkede, dryRun=$dryRun"
+        }
 
         val fjernetIder = mutableListOf<String>()
         val feiletIder = mutableListOf<String>()
@@ -96,6 +101,7 @@ class FeilmerketNøkkelordOpprydding(
         return OppryddingResultat(
             enhet = enhetsnr,
             dryRun = dryRun,
+            antallSkannet = rapport.antallSkannet,
             antallFunnet = feilmerkede.size,
             antallFjernet = fjernetIder.size,
             antallFeilet = feiletIder.size,
@@ -147,6 +153,7 @@ class FeilmerketNøkkelordOpprydding(
     }
 
     inner class OppryddingStats(
+        @Volatile var antallSkannet: Int = 0,
         @Volatile var antallFunnet: Int = 0,
         @Volatile var antallFjernet: Int = 0,
         @Volatile var antallFeilet: Int = 0,
@@ -154,6 +161,7 @@ class FeilmerketNøkkelordOpprydding(
         @Volatile var sisteResultat: OppryddingResultat? = null
     ) : JobMonitor.Stats {
         override fun reset() {
+            antallSkannet = 0
             antallFunnet = 0
             antallFjernet = 0
             antallFeilet = 0
@@ -162,6 +170,7 @@ class FeilmerketNøkkelordOpprydding(
         }
 
         override fun asMap(): Map<String, Any?> = mapOf(
+            "antallSkannet" to antallSkannet,
             "antallFunnet" to antallFunnet,
             "antallFjernet" to antallFjernet,
             "antallFeilet" to antallFeilet,
@@ -184,9 +193,17 @@ data class FeilmerketOppgave(
     val gjelder: String?
 )
 
+data class FeilmerketRapport(
+    val enhet: String,
+    val antallSkannet: Int,
+    val antallFeilmerkede: Int,
+    val feilmerkede: List<FeilmerketOppgave>
+)
+
 data class OppryddingResultat(
     val enhet: String,
     val dryRun: Boolean,
+    val antallSkannet: Int,
     val antallFunnet: Int,
     val antallFjernet: Int,
     val antallFeilet: Int,
