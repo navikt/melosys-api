@@ -44,6 +44,11 @@ internal class FeilmerketNøkkelordOppryddingTest {
         rapport.antallFeilmerkede shouldBe 1
         rapport.feilmerkede.map { it.id } shouldContainExactly listOf("100")
         rapport.feilmerkede.single().oppgavetype shouldBe "BEH_SAK_MK"
+        rapport.feilmerkede.single().erFeilmerket shouldBe true
+        // Korrekt merkede BEH_ARSAVREG med år-nøkkelord skal vises, men ikke ryddes.
+        rapport.antallKorrektMerkede shouldBe 1
+        rapport.korrektMerkede.map { it.id } shouldContainExactly listOf("200")
+        rapport.korrektMerkede.single().erFeilmerket shouldBe false
     }
 
     @Test

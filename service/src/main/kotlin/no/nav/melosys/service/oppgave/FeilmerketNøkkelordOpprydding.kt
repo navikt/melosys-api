@@ -36,21 +36,34 @@ class FeilmerketNøkkelordOpprydding(
     )
     private val stats get() = jobMonitor.stats
 
-    fun finnFeilmerkede(enhetsnr: String): FeilmerketRapport {
-        val feilmerkede = mutableListOf<FeilmerketOppgave>()
+    fun finnFeilmerkede(enhetsnr: String): NøkkelordRapport {
+        val medÅrsavregningNøkkelord = mutableListOf<NøkkelordOppgave>()
         var skannet = 0
         var after: String? = null
         do {
             val respons = oppgaveV2Client.søkOppgaverForEnhet(enhetsnr, after)
             respons.path("oppgaver").values().forEach { oppgave ->
                 skannet++
-                tilFeilmerketOppgave(oppgave)?.let(feilmerkede::add)
+                klassifiser(oppgave)?.let(medÅrsavregningNøkkelord::add)
             }
             stats.antallSkannet = skannet
             after = nesteSide(respons)
         } while (after != null)
-        log.info { "Nøkkelord-opprydding enhet $enhetsnr: skannet $skannet oppgaver, fant ${feilmerkede.size} feilmerkede" }
-        return FeilmerketRapport(enhetsnr, skannet, feilmerkede.size, feilmerkede)
+
+        val feilmerkede = medÅrsavregningNøkkelord.filter { it.erFeilmerket }
+        val korrektMerkede = medÅrsavregningNøkkelord.filterNot { it.erFeilmerket }
+        log.info {
+            "Nøkkelord-opprydding enhet $enhetsnr: skannet $skannet oppgaver, " +
+                "fant ${feilmerkede.size} feilmerkede og ${korrektMerkede.size} korrekt merkede"
+        }
+        return NøkkelordRapport(
+            enhet = enhetsnr,
+            antallSkannet = skannet,
+            antallFeilmerkede = feilmerkede.size,
+            feilmerkede = feilmerkede,
+            antallKorrektMerkede = korrektMerkede.size,
+            korrektMerkede = korrektMerkede
+        )
     }
 
     /**
@@ -114,17 +127,20 @@ class FeilmerketNøkkelordOpprydding(
 
     fun status(): Map<String, Any?> = jobMonitor.status()
 
-    private fun tilFeilmerketOppgave(oppgave: JsonNode): FeilmerketOppgave? {
+    // Klassifiserer en oppgave som har «Årsavregning <år>»-nøkkelord. erFeilmerket=true når
+    // oppgavetypen ikke er BEH_ARSAVREG (skal ryddes); false for korrekt merkede BEH_ARSAVREG.
+    // Returnerer null for oppgaver uten årsavregning-nøkkelord.
+    private fun klassifiser(oppgave: JsonNode): NøkkelordOppgave? {
         val nøkkelord = oppgave.path("nokkelord").values().map { it.asString() }
         if (nøkkelord.none { it.matches(ÅRSAVREGNING_NØKKELORD) }) return null
 
         val kategorisering = oppgave.path("kategorisering")
         val oppgavetype = kategorisering.path("oppgavetype").path("kode").tekstEllerNull()
-        if (oppgavetype == BEH_ARSAVREG) return null
 
-        return FeilmerketOppgave(
+        return NøkkelordOppgave(
             id = oppgave.path("id").asString(),
             oppgavetype = oppgavetype,
+            erFeilmerket = oppgavetype != BEH_ARSAVREG,
             nokkelord = nøkkelord,
             tema = kategorisering.path("tema").path("kode").tekstEllerNull(),
             gjelder = kategorisering.path("behandlingstema").path("term").tekstEllerNull()
@@ -185,19 +201,22 @@ class FeilmerketNøkkelordOpprydding(
     }
 }
 
-data class FeilmerketOppgave(
+data class NøkkelordOppgave(
     val id: String,
     val oppgavetype: String?,
+    val erFeilmerket: Boolean,
     val nokkelord: List<String>,
     val tema: String?,
     val gjelder: String?
 )
 
-data class FeilmerketRapport(
+data class NøkkelordRapport(
     val enhet: String,
     val antallSkannet: Int,
     val antallFeilmerkede: Int,
-    val feilmerkede: List<FeilmerketOppgave>
+    val feilmerkede: List<NøkkelordOppgave>,
+    val antallKorrektMerkede: Int,
+    val korrektMerkede: List<NøkkelordOppgave>
 )
 
 data class OppryddingResultat(
@@ -208,7 +227,7 @@ data class OppryddingResultat(
     val antallFjernet: Int,
     val antallFeilet: Int,
     val antallHoppet: Int,
-    val funnet: List<FeilmerketOppgave>,
+    val funnet: List<NøkkelordOppgave>,
     val fjernetIder: List<String>,
     val feiletIder: List<String>
 )
