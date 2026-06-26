@@ -43,8 +43,13 @@ internal class FeilmerketNøkkelordOppryddingTest {
         rapport.antallSkannet shouldBe 4
         rapport.antallFeilmerkede shouldBe 1
         rapport.feilmerkede.map { it.id } shouldContainExactly listOf("100")
-        rapport.feilmerkede.single().oppgavetype shouldBe "BEH_SAK_MK"
-        rapport.feilmerkede.single().erFeilmerket shouldBe true
+        rapport.feilmerkede.single().run {
+            oppgavetype shouldBe "BEH_SAK_MK"
+            erFeilmerket shouldBe true
+            status shouldBe "AAPEN"
+            saksreferanse shouldBe "MEL-100"
+            beskrivelse shouldBe "beskrivelse-100"
+        }
         // Korrekt merkede BEH_ARSAVREG med år-nøkkelord skal vises, men ikke ryddes.
         rapport.antallKorrektMerkede shouldBe 1
         rapport.korrektMerkede.map { it.id } shouldContainExactly listOf("200")
@@ -152,13 +157,18 @@ internal class FeilmerketNøkkelordOppryddingTest {
             return """
                 {
                   "id": $id,
+                  "status": "AAPEN",
+                  "saksreferanse": "MEL-$id",
+                  "beskrivelse": "beskrivelse-$id",
+                  "fristDato": "2026-09-23",
                   "nokkelord": [$nokkelordJson],
                   "kategorisering": {
                     "tema": { "kode": "TRY", "term": "Trygdeavgift" },
                     "oppgavetype": { "kode": "$oppgavetype", "term": "$oppgavetype" },
                     "behandlingstema": { "term": "EU/EØS - Yrkesaktiv" }
                   },
-                  "fordeling": { "enhet": { "nr": "4530" } }
+                  "fordeling": { "enhet": { "nr": "4530" } },
+                  "opprettet": { "tidspunkt": "2026-01-15T10:00:00Z" }
                 }
             """.trimIndent()
         }

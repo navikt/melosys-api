@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import tools.jackson.databind.JsonNode
 
 @Protected
 @RestController
@@ -59,4 +60,8 @@ class OppgaveAdminController(
     @GetMapping("/nokkelord-opprydding/status")
     fun nøkkelordOppryddingStatus(): ResponseEntity<Map<String, Any?>> =
         ResponseEntity.ok(feilmerketNøkkelordOpprydding.status())
+
+    @GetMapping("/nokkelord-opprydding/oppgave/{id}")
+    fun visOppgave(@PathVariable id: String): ResponseEntity<JsonNode> =
+        ResponseEntity.ok(feilmerketNøkkelordOpprydding.hentOppgave(id))
 }

@@ -146,9 +146,17 @@ class FeilmerketNøkkelordOpprydding(
             erFeilmerket = oppgavetype != BEH_ARSAVREG,
             nokkelord = nøkkelord,
             tema = kategorisering.path("tema").path("kode").tekstEllerNull(),
-            gjelder = kategorisering.path("behandlingstema").path("term").tekstEllerNull()
+            gjelder = kategorisering.path("behandlingstema").path("term").tekstEllerNull(),
+            status = oppgave.path("status").tekstEllerNull(),
+            saksreferanse = oppgave.path("saksreferanse").tekstEllerNull(),
+            beskrivelse = oppgave.path("beskrivelse").tekstEllerNull(),
+            frist = oppgave.path("fristDato").tekstEllerNull(),
+            opprettet = oppgave.path("opprettet").path("tidspunkt").tekstEllerNull()
         )
     }
+
+    /** Rå v2-oppgave for inspeksjon av enkeltoppgaver (alle felter, inkl. tildeling/på-vent). */
+    fun hentOppgave(oppgaveID: String): JsonNode = oppgaveV2Client.hentOppgaveSomJson(oppgaveID)
 
     private fun nesteSide(respons: JsonNode): String? {
         val pagination = respons.path("pagination")
@@ -213,7 +221,12 @@ data class NøkkelordOppgave(
     val erFeilmerket: Boolean,
     val nokkelord: List<String>,
     val tema: String?,
-    val gjelder: String?
+    val gjelder: String?,
+    val status: String?,
+    val saksreferanse: String?,
+    val beskrivelse: String?,
+    val frist: String?,
+    val opprettet: String?
 )
 
 data class NøkkelordRapport(
