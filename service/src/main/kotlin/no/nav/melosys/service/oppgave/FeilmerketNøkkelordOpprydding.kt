@@ -18,9 +18,6 @@ private val log = KotlinLogging.logger {}
  * årsavregning blir manuelle BEH_SAK_MK-oppgaver som ikke skulle merkes. Oppgave-PATCH kan ikke fjerne
  * nøkkelord, så de feilmerkede må ryddes aktivt herfra (app-identiteten er på Oppgaves innkommende-liste).
  *
- * Detektor: en oppgave er feilmerket hvis et nøkkelord matcher `^Årsavregning \d{4}$` OG
- * `kategorisering.oppgavetype.kode != BEH_ARSAVREG`.
- *
  * Selve fjerningen kan gjelde flere hundre oppgaver (full enhet-skann + GET+PATCH per oppgave), som
  * tar for lang tid for en synkron HTTP-request. Derfor kjører [ryddAsynkront] på `taskExecutor` og
  * status pollere via [status]. [finnFeilmerkede] er read-only og kan kjøres synkront som forhåndssjekk.
@@ -46,12 +43,10 @@ class FeilmerketNøkkelordOpprydding(
                 skannet++
                 klassifiser(oppgave)?.let(medÅrsavregningNøkkelord::add)
             }
-            stats.antallSkannet = skannet
-            after = nesteSide(respons)
+            after = nesteSide(respons, after)
         } while (after != null)
 
-        val feilmerkede = medÅrsavregningNøkkelord.filter { it.erFeilmerket }
-        val korrektMerkede = medÅrsavregningNøkkelord.filterNot { it.erFeilmerket }
+        val (feilmerkede, korrektMerkede) = medÅrsavregningNøkkelord.partition { it.erFeilmerket }
         log.info {
             "Nøkkelord-opprydding enhet $enhetsnr: skannet $skannet oppgaver, " +
                 "fant ${feilmerkede.size} feilmerkede og ${korrektMerkede.size} korrekt merkede"
@@ -79,6 +74,7 @@ class FeilmerketNøkkelordOpprydding(
     fun rydd(enhetsnr: String, dryRun: Boolean): OppryddingResultat {
         val rapport = finnFeilmerkede(enhetsnr)
         val feilmerkede = rapport.feilmerkede
+        stats.antallSkannet = rapport.antallSkannet
         stats.antallFunnet = feilmerkede.size
         stats.antallKorrektMerkede = rapport.antallKorrektMerkede
         log.info {
@@ -88,14 +84,8 @@ class FeilmerketNøkkelordOpprydding(
 
         val fjernetIder = mutableListOf<String>()
         val feiletIder = mutableListOf<String>()
-        var hoppet = 0
 
         feilmerkede.forEach { oppgave ->
-            // Ekstra vakt: skal aldri skje gitt detektoren, men billig sikkerhet mot å røre ekte årsavregninger.
-            if (oppgave.oppgavetype == BEH_ARSAVREG) {
-                stats.antallHoppet = ++hoppet
-                return@forEach
-            }
             if (dryRun) return@forEach
             try {
                 oppgaveV2Client.fjernNøkkelord(oppgave.id) { it.matches(ÅRSAVREGNING_NØKKELORD) }
@@ -110,7 +100,7 @@ class FeilmerketNøkkelordOpprydding(
 
         log.info {
             "Fullført nøkkelord-opprydding enhet $enhetsnr: funnet=${feilmerkede.size} " +
-                "fjernet=${fjernetIder.size} feilet=${feiletIder.size} hoppet=$hoppet dryRun=$dryRun"
+                "fjernet=${fjernetIder.size} feilet=${feiletIder.size} dryRun=$dryRun"
         }
         return OppryddingResultat(
             enhet = enhetsnr,
@@ -119,7 +109,6 @@ class FeilmerketNøkkelordOpprydding(
             antallFunnet = feilmerkede.size,
             antallFjernet = fjernetIder.size,
             antallFeilet = feiletIder.size,
-            antallHoppet = hoppet,
             antallKorrektMerkede = rapport.antallKorrektMerkede,
             fjernetIder = fjernetIder,
             feiletIder = feiletIder
@@ -128,9 +117,7 @@ class FeilmerketNøkkelordOpprydding(
 
     fun status(): Map<String, Any?> = jobMonitor.status()
 
-    // Klassifiserer en oppgave som har «Årsavregning <år>»-nøkkelord. erFeilmerket=true når
-    // oppgavetypen ikke er BEH_ARSAVREG (skal ryddes); false for korrekt merkede BEH_ARSAVREG.
-    // Returnerer null for oppgaver uten årsavregning-nøkkelord.
+    // Returnerer null for oppgaver uten årsavregning-nøkkelord; erFeilmerket = oppgavetype != BEH_ARSAVREG.
     private fun klassifiser(oppgave: JsonNode): NøkkelordOppgave? {
         val nøkkelord = oppgave.path("nokkelord").values().map { it.asString() }
         if (nøkkelord.none { it.matches(ÅRSAVREGNING_NØKKELORD) }) return null
@@ -156,10 +143,18 @@ class FeilmerketNøkkelordOpprydding(
     /** Rå v2-oppgave for inspeksjon av enkeltoppgaver (alle felter, inkl. tildeling/på-vent). */
     fun hentOppgave(oppgaveID: String): JsonNode = oppgaveV2Client.hentOppgaveSomJson(oppgaveID)
 
-    private fun nesteSide(respons: JsonNode): String? {
+    // Returnerer neste sides cursor, eller null når siste side er nådd. Vakt mot et API som
+    // misoppfører seg: stopp (med WARN) hvis hasNext=true men cursoren mangler eller står stille —
+    // ellers ville løkka enten stoppe for tidlig eller gå evig og låse jobben (isRunning frigjøres aldri).
+    private fun nesteSide(respons: JsonNode, forrigeCursor: String?): String? {
         val pagination = respons.path("pagination")
         if (!pagination.path("hasNext").asBoolean()) return null
-        return pagination.path("endCursor").tekstEllerNull()
+        val nesteCursor = pagination.path("endCursor").tekstEllerNull()
+        if (nesteCursor == null || nesteCursor == forrigeCursor) {
+            log.warn { "Avbryter paginering: hasNext=true men endCursor=$nesteCursor (forrige=$forrigeCursor) — stopper for å unngå evig løkke / ufullstendig skann" }
+            return null
+        }
+        return nesteCursor
     }
 
     private fun JsonNode.tekstEllerNull(): String? =
@@ -182,7 +177,6 @@ class FeilmerketNøkkelordOpprydding(
         @Volatile var antallFunnet: Int = 0,
         @Volatile var antallFjernet: Int = 0,
         @Volatile var antallFeilet: Int = 0,
-        @Volatile var antallHoppet: Int = 0,
         @Volatile var antallKorrektMerkede: Int = 0,
         @Volatile var sisteResultat: OppryddingResultat? = null
     ) : JobMonitor.Stats {
@@ -191,7 +185,6 @@ class FeilmerketNøkkelordOpprydding(
             antallFunnet = 0
             antallFjernet = 0
             antallFeilet = 0
-            antallHoppet = 0
             antallKorrektMerkede = 0
             sisteResultat = null
         }
@@ -201,7 +194,6 @@ class FeilmerketNøkkelordOpprydding(
             "antallFunnet" to antallFunnet,
             "antallFjernet" to antallFjernet,
             "antallFeilet" to antallFeilet,
-            "antallHoppet" to antallHoppet,
             "antallKorrektMerkede" to antallKorrektMerkede,
             "sisteResultat" to sisteResultat
         )
@@ -245,7 +237,6 @@ data class OppryddingResultat(
     val antallFunnet: Int,
     val antallFjernet: Int,
     val antallFeilet: Int,
-    val antallHoppet: Int,
     val antallKorrektMerkede: Int,
     val fjernetIder: List<String>,
     val feiletIder: List<String>

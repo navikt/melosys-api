@@ -20,14 +20,14 @@ open class OppgaveV2Client(private val webClient: WebClient) {
         patchNøkkelord(oppgaveID, oppgave, eksisterendeNøkkelord + nøkkelord)
     }
 
+    /** Henter hele v2-oppgaven som rå JSON — for inspeksjon/diagnose av enkeltoppgaver. */
+    open fun hentOppgaveSomJson(oppgaveID: String): JsonNode = hentOppgave(oppgaveID)
+
     /**
      * Fjerner nøkkelord som matcher [skalFjernes] fra en oppgave. PATCH-en til Oppgave kan kun
      * legge til nøkkelord, så feilsatte nøkkelord må fjernes aktivt ved å sende hele lista på nytt
      * uten de matchende termene (merge-patch erstatter hele lista).
      */
-    /** Henter hele v2-oppgaven som rå JSON — for inspeksjon/diagnose av enkeltoppgaver. */
-    open fun hentOppgaveSomJson(oppgaveID: String): JsonNode = hentOppgave(oppgaveID)
-
     open fun fjernNøkkelord(oppgaveID: String, skalFjernes: (String) -> Boolean) {
         val oppgave = hentOppgave(oppgaveID)
         val eksisterendeNøkkelord: Set<String> = oppgave.path("nokkelord").values().map { it.asString() }.toSet()
