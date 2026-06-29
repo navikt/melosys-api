@@ -1,6 +1,11 @@
 package no.nav.melosys.domain.brev
 
 class InnhentingAvInntektsopplysningerBrevbestilling : DokgenBrevbestilling {
+    // Beholdes utelukkende som diskriminator for polymorf deserialisering: DokgenBrevbestilling bruker
+    // JsonTypeInfo.Id.DEDUCTION, og uten et felt som er unikt for denne subtypen blir den ikke entydig
+    // (kun "fritekst" igjen, som deles med bl.a. FritekstbrevBrevbestilling) og faller til defaultImpl.
+    // Se DokgenBrevbestillingTest. Flagget har ingen brev-effekt etter MELOSYS-8158 og settes ikke lenger.
+    var skalViseStandardTekstOmOpplysninger: Boolean = false
     var fritekst: String? = null
 
     constructor() : super()
