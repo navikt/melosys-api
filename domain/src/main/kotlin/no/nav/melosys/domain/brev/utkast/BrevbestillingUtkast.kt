@@ -36,8 +36,7 @@ data class BrevbestillingUtkast(
     val standardvedleggType: StandardvedleggType?,
     val fritekstVedlegg: MutableList<FritekstVedlegg?>?,
     val dokumentTittel: String?,
-    val saksbehandlerNrToIdent: String?,
-    val skalViseStandardTekstOmOpplysninger: Boolean
+    val saksbehandlerNrToIdent: String?
 ) {
     @JsonIgnore
     fun getTittel(): String? = when {

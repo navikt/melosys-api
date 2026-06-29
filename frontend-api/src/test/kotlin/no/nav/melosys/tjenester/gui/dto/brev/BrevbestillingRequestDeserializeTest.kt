@@ -24,7 +24,6 @@ class BrevbestillingRequestDeserializeTest {
               "produserbardokument": null,
               "mottaker": null,
               "skalViseStandardTekstOmkontaktopplysninger": null,
-              "skalViseStandardTekstOmOpplysninger": null,
               "erInnvilgelse": null,
               "erEøsPensjonist": null,
               "erEøsLovvalg": null
@@ -34,7 +33,6 @@ class BrevbestillingRequestDeserializeTest {
         val dto = objectMapper.readValue<BrevbestillingRequest>(json)
 
         dto.skalViseStandardTekstOmkontaktopplysninger().shouldBeNull()
-        dto.skalViseStandardTekstOmOpplysninger().shouldBeNull()
         dto.erInnvilgelse().shouldBeNull()
         dto.erEøsPensjonist().shouldBeNull()
         dto.erEøsLovvalg().shouldBeNull()
@@ -63,7 +61,6 @@ class BrevbestillingRequestDeserializeTest {
               "produserbardokument": null,
               "mottaker": null,
               "skalViseStandardTekstOmkontaktopplysninger": true,
-              "skalViseStandardTekstOmOpplysninger": false,
               "erInnvilgelse": true,
               "erEøsPensjonist": false,
               "erEøsLovvalg": true
@@ -73,7 +70,6 @@ class BrevbestillingRequestDeserializeTest {
         val dto = objectMapper.readValue<BrevbestillingRequest>(json)
 
         dto.skalViseStandardTekstOmkontaktopplysninger() shouldBe true
-        dto.skalViseStandardTekstOmOpplysninger() shouldBe false
         dto.erInnvilgelse() shouldBe true
         dto.erEøsPensjonist() shouldBe false
         dto.erEøsLovvalg() shouldBe true
@@ -85,8 +81,7 @@ class BrevbestillingRequestDeserializeTest {
             {
               "produserbardokument": null,
               "mottaker": null,
-              "skalViseStandardTekstOmkontaktopplysninger": null,
-              "skalViseStandardTekstOmOpplysninger": null
+              "skalViseStandardTekstOmkontaktopplysninger": null
             }
         """.trimIndent()
 
@@ -94,7 +89,6 @@ class BrevbestillingRequestDeserializeTest {
         val utkast = request.tilUtkast()
 
         utkast.kontaktopplysninger shouldBe false
-        utkast.skalViseStandardTekstOmOpplysninger shouldBe false
     }
 
     @Test
@@ -106,8 +100,7 @@ class BrevbestillingRequestDeserializeTest {
               "erInnvilgelse": null,
               "erEøsPensjonist": null,
               "erEøsLovvalg": null,
-              "skalViseStandardTekstOmkontaktopplysninger": null,
-              "skalViseStandardTekstOmOpplysninger": null
+              "skalViseStandardTekstOmkontaktopplysninger": null
             }
         """.trimIndent()
 
@@ -118,6 +111,5 @@ class BrevbestillingRequestDeserializeTest {
         dto.isErEøsPensjonist shouldBe false
         dto.isErEøsLovvalg shouldBe false
         dto.isSkalViseStandardTekstOmKontaktopplysninger shouldBe false
-        dto.isSkalViseStandardTekstOmOpplysninger shouldBe false
     }
 }
