@@ -10,6 +10,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.matching
 import com.github.tomakehurst.wiremock.client.WireMock.patch
 import com.github.tomakehurst.wiremock.client.WireMock.patchRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
@@ -369,10 +370,67 @@ class OppgaveClientTest(
         exception.message shouldContain "Kall mot Oppgave v2 feilet."
     }
 
+    @Test
+    fun `fjernNøkkelord patcher med eksisterende nøkkelord minus de matchende`() {
+        val feilmerketJson = readResourceAsString(OPPGAVE_V2_FEILMERKET_JSON_PATH)
+        mockServer.stubFor(
+            get(urlEqualTo("/api/v2/oppgaver/22222")).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(feilmerketJson)
+            )
+        )
+        mockServer.stubFor(
+            patch(urlEqualTo("/api/v2/oppgaver/22222")).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(feilmerketJson)
+            )
+        )
+
+        oppgaveV2Client.fjernNøkkelord("22222") { it.matches(Regex("^Årsavregning \\d{4}$")) }
+
+        mockServer.verify(
+            patchRequestedFor(urlEqualTo("/api/v2/oppgaver/22222"))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                .withRequestBody(equalToJson("""{ "nokkelord": ["Eksisterende nøkkelord"] }""", true, true))
+        )
+    }
+
+    @Test
+    fun `søkOppgaverForEnhet poster filter og page og leser oppgaver`() {
+        mockServer.stubFor(
+            post(urlEqualTo("/api/v2/oppgaver/sok")).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(readResourceAsString(OPPGAVE_V2_SOK_JSON_PATH))
+            )
+        )
+
+        val respons = oppgaveV2Client.søkOppgaverForEnhet("4530")
+
+        respons.path("oppgaver").size() shouldBe 1
+        mockServer.verify(
+            postRequestedFor(urlEqualTo("/api/v2/oppgaver/sok"))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                .withRequestBody(
+                    equalToJson(
+                        """{ "filter": { "fordeling.enhet.nr": "4530" }, "page": { "limit": 1000 } }""",
+                        true, false
+                    )
+                )
+        )
+    }
+
     companion object {
         private const val OPPGAVE_GET_JSON_PATH = "mock/oppgave/oppgave_get.json"
         private const val OPPGAVELIST_GET_JSON_PATH = "mock/oppgave/hentOppgaveListe_get.json"
         private const val OPPGAVE_V2_GET_JSON_PATH = "mock/oppgave/oppgave_v2_get.json"
+        private const val OPPGAVE_V2_FEILMERKET_JSON_PATH = "mock/oppgave/oppgave_v2_get_feilmerket.json"
+        private const val OPPGAVE_V2_SOK_JSON_PATH = "mock/oppgave/oppgave_v2_sok.json"
         private const val OPPGAVE_FEILMELDING_JSON_PATH = "mock/oppgave/feil.json"
     }
 }

@@ -20,6 +20,44 @@ open class OppgaveV2Client(private val webClient: WebClient) {
         patchNøkkelord(oppgaveID, oppgave, eksisterendeNøkkelord + nøkkelord)
     }
 
+    /** Henter hele v2-oppgaven som rå JSON — for inspeksjon/diagnose av enkeltoppgaver. */
+    open fun hentOppgaveSomJson(oppgaveID: String): JsonNode = hentOppgave(oppgaveID)
+
+    /**
+     * Fjerner nøkkelord som matcher [skalFjernes] fra en oppgave. PATCH-en til Oppgave kan kun
+     * legge til nøkkelord, så feilsatte nøkkelord må fjernes aktivt ved å sende hele lista på nytt
+     * uten de matchende termene (merge-patch erstatter hele lista).
+     */
+    open fun fjernNøkkelord(oppgaveID: String, skalFjernes: (String) -> Boolean) {
+        val oppgave = hentOppgave(oppgaveID)
+        val eksisterendeNøkkelord: Set<String> = oppgave.path("nokkelord").values().map { it.asString() }.toSet()
+        patchNøkkelord(oppgaveID, oppgave, eksisterendeNøkkelord.filterNot(skalFjernes).toSet())
+    }
+
+    /**
+     * Søker opp oppgaver for en enhet via det generelle søke-endepunktet. App-identiteten har tilgang
+     * til dette (i motsetning til det enhets-scopede). Returnerer hele responsen — kallende kode
+     * paginerer via `pagination.hasNext`/`pagination.endCursor` og leser `oppgaver[]`.
+     */
+    open fun søkOppgaverForEnhet(enhetsnr: String, after: String? = null, limit: Int = 1000): JsonNode {
+        val page = buildMap<String, Any> {
+            put("limit", limit)
+            if (after != null) put("after", after)
+        }
+        return webClient.post()
+            .uri(OPPGAVER_SOK_URI)
+            .bodyValue(
+                mapOf(
+                    "filter" to mapOf("fordeling.enhet.nr" to enhetsnr),
+                    "page" to page
+                )
+            )
+            .retrieve()
+            .bodyToMono(JsonNode::class.java)
+            .block()
+            ?: throw TekniskException("Tomt svar fra Oppgave v2 ved søk for enhet $enhetsnr")
+    }
+
     private fun hentOppgave(oppgaveID: String): JsonNode =
         webClient.get()
             .uri(OPPGAVE_URI_MED_ID, oppgaveID)
@@ -50,5 +88,6 @@ open class OppgaveV2Client(private val webClient: WebClient) {
 
     companion object {
         private const val OPPGAVE_URI_MED_ID = "/oppgaver/{oppgaveID}"
+        private const val OPPGAVER_SOK_URI = "/oppgaver/sok"
     }
 }
