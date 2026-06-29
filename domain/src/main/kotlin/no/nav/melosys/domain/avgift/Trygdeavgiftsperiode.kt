@@ -59,10 +59,6 @@ class Trygdeavgiftsperiode(
 
     ) : ErPeriode {
 
-    // CascadeType.ALL (inkl. REMOVE) er nødvendig i tillegg til @OnDelete(CASCADE) for at Hibernate
-    // skal fjerne grunnlag fra persistence context når Trygdeavgiftsperiode slettes — ellers kan
-    // MANAGED grunnlag-entiteter holde referanser til fjernede entiteter og trigge
-    // TransientPropertyValueException under flush.
     @OneToMany(mappedBy = "trygdeavgiftsperiode", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
     val grunnlagListe: MutableSet<TrygdeavgiftsperiodeGrunnlag> = mutableSetOf()
