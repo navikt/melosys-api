@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonSerialize
-// Toleranse for ukjente felter ved lesing av eldre lagrede utkast (utkast_brev). Etter MELOSYS-8162 er
 // skalViseStandardTekstOmOpplysninger fjernet fra modellen, men eksisterende rader inneholder feltet ennå.
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JvmRecord
