@@ -42,7 +42,6 @@ public record BrevbestillingRequest(
     List<FritekstvedleggDto> fritekstvedlegg,
     String dokumentTittel,
     String saksbehandlerNrToIdent,
-    Boolean skalViseStandardTekstOmOpplysninger,
     String begrunnelseKode,
     String ytterligereInformasjon,
     LocalDate opphoerDato,
@@ -76,7 +75,6 @@ public record BrevbestillingRequest(
             this.fritekstvedlegg,
             this.dokumentTittel,
             this.saksbehandlerNrToIdent,
-            this.skalViseStandardTekstOmOpplysninger,
             this.begrunnelseKode,
             this.ytterligereInformasjon,
             null,
@@ -119,8 +117,7 @@ public record BrevbestillingRequest(
             this.standardvedleggType(),
             konverterListeTil(this.fritekstvedlegg(), FritekstvedleggDto::tilUtkast),
             this.dokumentTittel(),
-            this.saksbehandlerNrToIdent(),
-            Boolean.TRUE.equals(this.skalViseStandardTekstOmOpplysninger())
+            this.saksbehandlerNrToIdent()
         );
     }
 
@@ -149,7 +146,6 @@ public record BrevbestillingRequest(
             utkast.fritekstVedlegg().stream().map(FritekstvedleggDto::av).toList(),
             utkast.dokumentTittel(),
             utkast.saksbehandlerNrToIdent(),
-            utkast.skalViseStandardTekstOmOpplysninger(),
             null,
             null,
             null,

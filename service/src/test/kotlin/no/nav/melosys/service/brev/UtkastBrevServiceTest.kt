@@ -58,7 +58,7 @@ class UtkastBrevServiceTest {
     private fun lagBrevbestillingUtkast(dokumentTittel: String?) = BrevbestillingUtkast(
         Produserbaredokumenter.FRITEKSTBREV,
         null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-        false, null, null, null, null, dokumentTittel, null, true
+        false, null, null, null, null, dokumentTittel, null
     )
 
     private fun lagUtkastBrev(dokumentTittel: String?) = UtkastBrev.Builder().apply {
