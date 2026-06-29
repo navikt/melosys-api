@@ -3,6 +3,7 @@ package no.nav.melosys.service.oppgave
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -97,7 +98,8 @@ internal class FeilmerketNøkkelordOppryddingTest {
             oppgaveJson(100, "BEH_SAK_MK", listOf("Årsavregning 2024")),
             oppgaveJson(200, "BEH_SAK_MK", listOf("Årsavregning 2025"))
         )
-        every { oppgaveV2Client.fjernNøkkelord("100", any()) } throws TekniskException("Kall mot Oppgave v2 feilet.")
+        every { oppgaveV2Client.fjernNøkkelord("100", any()) } throws
+            TekniskException("Kall mot Oppgave v2 feilet. 409 CONFLICT - {\"feilmelding\":\"Oppgaven er endret\"}")
         every { oppgaveV2Client.fjernNøkkelord("200", any()) } returns Unit
 
         val resultat = opprydding.rydd(ENHET, dryRun = false)
@@ -106,7 +108,9 @@ internal class FeilmerketNøkkelordOppryddingTest {
         resultat.antallFjernet shouldBe 1
         resultat.antallFeilet shouldBe 1
         resultat.fjernetIder shouldContainExactly listOf("200")
-        resultat.feiletIder shouldContainExactly listOf("100")
+        // Feilårsaken (HTTP-status + body) fanges per oppgave, ikke bare id-en.
+        resultat.feilet.map { it.id } shouldContainExactly listOf("100")
+        resultat.feilet.single().grunn shouldContain "409 CONFLICT"
         verify(exactly = 1) { oppgaveV2Client.fjernNøkkelord("200", any()) }
     }
 
