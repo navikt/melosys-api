@@ -5,9 +5,12 @@ import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.any
 import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
 import com.github.tomakehurst.wiremock.client.WireMock.containing
+import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.matching
+import com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath
+import com.github.tomakehurst.wiremock.client.WireMock.notContaining
 import com.github.tomakehurst.wiremock.client.WireMock.patch
 import com.github.tomakehurst.wiremock.client.WireMock.patchRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.post
@@ -400,6 +403,38 @@ class OppgaveClientTest(
     }
 
     @Test
+    fun `fjernNøkkelord dropper mappe fra fordeling slik at Oppgave v2 ikke avviser PATCH-en`() {
+        val mappeJson = readResourceAsString(OPPGAVE_V2_FEILMERKET_MAPPE_JSON_PATH)
+        mockServer.stubFor(
+            get(urlEqualTo("/api/v2/oppgaver/33333")).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(mappeJson)
+            )
+        )
+        mockServer.stubFor(
+            patch(urlEqualTo("/api/v2/oppgaver/33333")).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(mappeJson)
+            )
+        )
+
+        oppgaveV2Client.fjernNøkkelord("33333") { it.matches(Regex("^Årsavregning \\d{4}$")) }
+
+        mockServer.verify(
+            patchRequestedFor(urlEqualTo("/api/v2/oppgaver/33333"))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
+                // Enhet beholdes, nøkkelordet fjernes, men mappe må IKKE re-sendes (gir 400 fra Oppgave).
+                .withRequestBody(matchingJsonPath("$.fordeling.enhet.nr", equalTo("4530")))
+                .withRequestBody(equalToJson("""{ "nokkelord": ["Eksisterende nøkkelord"] }""", true, true))
+                .withRequestBody(notContaining("mappe"))
+        )
+    }
+
+    @Test
     fun `søkOppgaverForEnhet poster filter og page og leser oppgaver`() {
         mockServer.stubFor(
             post(urlEqualTo("/api/v2/oppgaver/sok")).willReturn(
@@ -430,6 +465,7 @@ class OppgaveClientTest(
         private const val OPPGAVELIST_GET_JSON_PATH = "mock/oppgave/hentOppgaveListe_get.json"
         private const val OPPGAVE_V2_GET_JSON_PATH = "mock/oppgave/oppgave_v2_get.json"
         private const val OPPGAVE_V2_FEILMERKET_JSON_PATH = "mock/oppgave/oppgave_v2_get_feilmerket.json"
+        private const val OPPGAVE_V2_FEILMERKET_MAPPE_JSON_PATH = "mock/oppgave/oppgave_v2_get_feilmerket_mappe.json"
         private const val OPPGAVE_V2_SOK_JSON_PATH = "mock/oppgave/oppgave_v2_sok.json"
         private const val OPPGAVE_FEILMELDING_JSON_PATH = "mock/oppgave/feil.json"
     }
