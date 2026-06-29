@@ -105,7 +105,7 @@ class LovvalgsperiodeService(
     }
 
     private fun hentOgInitialiserEksisterendeTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat): List<Trygdeavgiftsperiode> {
-        // Må kopiere trygdeavgiftsperioder FØR sletting siden de hentes fra eksisterende lovvalgsperioder.
+        // Må hente trygdeavgiftsperioder FØR sletting siden de hentes fra eksisterende lovvalgsperioder.
         // grunnlagListe er lazy-lastet, så force-initialiseres mens entitetene er managed.
         return behandlingsresultat.trygdeavgiftsperioder.toList().onEach { it.grunnlagListe.size }
     }
