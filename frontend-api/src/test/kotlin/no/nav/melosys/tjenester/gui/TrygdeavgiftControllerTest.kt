@@ -18,10 +18,10 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.medlemskapsperiodeForTest
 import no.nav.melosys.integrasjon.trygdeavgift.dto.BeregningsforklaringDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.Beregningsaarsak
-import no.nav.melosys.integrasjon.trygdeavgift.dto.EkskludertInntektslinjeDto
+import no.nav.melosys.integrasjon.trygdeavgift.dto.EkskludertInntektspostDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.Ekskluderingsaarsak
-import no.nav.melosys.integrasjon.trygdeavgift.dto.InntektslinjeDto
-import no.nav.melosys.integrasjon.trygdeavgift.dto.OrdinaerAvgiftslinjeDto
+import no.nav.melosys.integrasjon.trygdeavgift.dto.InntektspostDto
+import no.nav.melosys.integrasjon.trygdeavgift.dto.OrdinaerAvgiftspostDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.Regelgruppe
 import no.nav.melosys.service.avgift.BeregnetTrygdeavgiftMedForklaring
 import no.nav.melosys.service.avgift.EøsPensjonistTrygdeavgiftsberegningService
@@ -201,17 +201,17 @@ class TrygdeavgiftControllerTest(
         valgtRegel = Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL,
         aarsak = Beregningsaarsak.BEREGNET,
         inntektsgrunnlag = listOf(
-            InntektslinjeDto(
+            InntektspostDto(
                 inntektskilde = "INNTEKT_FRA_UTLANDET",
                 fom = LocalDate.of(2025, 1, 1),
                 tom = LocalDate.of(2025, 12, 31),
                 maanedsbeloep = 50000,
-                antallMaaneder = 12,
+                antallMaaneder = BigDecimal("12"),
                 sumBeloep = 600000,
             )
         ),
         ekskluderteInntekter = listOf(
-            EkskludertInntektslinjeDto(
+            EkskludertInntektspostDto(
                 inntektskilde = "ARBEIDSINNTEKT_FRA_NORGE",
                 fom = LocalDate.of(2025, 1, 1),
                 tom = LocalDate.of(2025, 6, 30),
@@ -224,8 +224,8 @@ class TrygdeavgiftControllerTest(
         inntektOverMinstebeloep = 500350,
         maksimalAvgift25Prosent = 125087,
         ordinaerAvgift = 46200,
-        ordinaerAvgiftLinjer = listOf(
-            OrdinaerAvgiftslinjeDto(
+        ordinaerAvgiftPoster = listOf(
+            OrdinaerAvgiftspostDto(
                 inntektskilde = "INNTEKT_FRA_UTLANDET",
                 grunnlag = 600000,
                 sats = BigDecimal("7.7"),

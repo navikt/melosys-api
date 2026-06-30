@@ -243,18 +243,18 @@ internal class TrygdeavgiftsberegningServiceTest {
                     valgtRegel = Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL,
                     aarsak = Beregningsaarsak.BEREGNET,
                     inntektsgrunnlag = listOf(
-                        InntektslinjeDto("INNTEKT_FRA_UTLANDET", LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31), 50000, 12, 600000)
+                        InntektspostDto("INNTEKT_FRA_UTLANDET", LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31), 50000, BigDecimal("12"), 600000)
                     ),
                     ekskluderteInntekter = listOf(
-                        EkskludertInntektslinjeDto("ARBEIDSINNTEKT_FRA_NORGE", LocalDate.of(2025, 1, 1), LocalDate.of(2025, 6, 30), 102000, Ekskluderingsaarsak.SKATTEETATEN_FASTSETTER)
+                        EkskludertInntektspostDto("ARBEIDSINNTEKT_FRA_NORGE", LocalDate.of(2025, 1, 1), LocalDate.of(2025, 6, 30), 102000, Ekskluderingsaarsak.SKATTEETATEN_FASTSETTER)
                     ),
                     sumAarligInntekt = 600000,
                     minstebeloep = 99650,
                     inntektOverMinstebeloep = 500350,
                     maksimalAvgift25Prosent = 125087,
                     ordinaerAvgift = 46200,
-                    ordinaerAvgiftLinjer = listOf(
-                        OrdinaerAvgiftslinjeDto("INNTEKT_FRA_UTLANDET", 600000, BigDecimal.valueOf(7.7), 46200)
+                    ordinaerAvgiftPoster = listOf(
+                        OrdinaerAvgiftspostDto("INNTEKT_FRA_UTLANDET", 600000, BigDecimal.valueOf(7.7), 46200)
                     ),
                     fastsattAvgift = 46200,
                     fastsattAvgiftPerMaaned = 3850,
