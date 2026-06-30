@@ -1,6 +1,7 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
 import mu.KotlinLogging
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
@@ -45,6 +46,32 @@ class ÅrsavregningService(
             .mapNotNull { it.årsavregning }
             .filter { aar == null || it.aar == aar }
     }
+
+    /**
+     * MELOSYS-8161: Sjekker om saken allerede har en aktiv ÅRSAVREGNING-behandling for [år].
+     *
+     * En åpen ÅRSAVREGNING-behandling som ennå mangler aarsavregning-rad (år ikke satt) regnes
+     * IKKE som en eksisterende årsavregning for året og blokkerer derfor ikke automatisk
+     * opprettelse — ny ÅRSAVREGNING skal opprettes (fag-avklaring C, Yvonne Jacobs, jf.
+     * MELOSYS-8045/MELOSYS-8059). Bruker samme defensive mønster som
+     * ÅrsavregningIkkeSkattepliktigeProsessGenerator.
+     */
+    @Transactional(readOnly = true)
+    fun harAktivÅrsavregningForÅr(saksnummer: String, år: Int): Boolean =
+        fagsakService.hentFagsak(saksnummer)
+            .hentAktiveÅrsavregninger()
+            .any { hentÅrFraÅrsavregningDefensivt(it) == år }
+
+    private fun hentÅrFraÅrsavregningDefensivt(behandling: Behandling): Int? =
+        runCatching {
+            behandlingsresultatService.hentBehandlingsresultat(behandling.id).hentÅrsavregning().aar
+        }.getOrElse { e ->
+            log.warn(e) {
+                "Kunne ikke hente år fra åpen ÅRSAVREGNING-behandling ${behandling.id} " +
+                    "(sak ${behandling.fagsak.saksnummer}) — antar ikke duplikat, ny ÅRSAVREGNING vil opprettes"
+            }
+            null
+        }
 
     @Transactional(readOnly = true)
     fun finnÅrsavregningForBehandling(behandlingID: Long): ÅrsavregningModel? {
