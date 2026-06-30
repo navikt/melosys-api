@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -58,6 +59,18 @@ class ÅrsavregningServiceTest {
 
         service.harAktivÅrsavregningForÅr(SAKSNUMMER, 2024) shouldBe true
         service.harAktivÅrsavregningForÅr(SAKSNUMMER, 2025) shouldBe false
+    }
+
+    @Test
+    fun `harAktivÅrsavregningForÅr - ekte feil (ikke manglende aarsavregning-rad) propageres, svelges ikke`() {
+        val behandling = aarsavregningBehandling(id = 100L)
+        every { fagsakService.hentFagsak(SAKSNUMMER) } returns behandling.fagsak
+        // En genuin DB-/infra-feil (ikke IllegalStateException fra hentÅrsavregning) skal IKKE maskeres som «mangler år»
+        every { behandlingsresultatService.hentBehandlingsresultat(100L) } throws RuntimeException("simulert DB-feil")
+
+        shouldThrow<RuntimeException> {
+            service.harAktivÅrsavregningForÅr(SAKSNUMMER, 2024)
+        }
     }
 
     @Test
