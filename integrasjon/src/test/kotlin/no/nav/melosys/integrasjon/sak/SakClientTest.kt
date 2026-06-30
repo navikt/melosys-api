@@ -10,8 +10,8 @@ import com.github.tomakehurst.wiremock.client.WireMock.matching
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import no.nav.melosys.integrasjon.MetricsTestConfig
-import no.nav.melosys.integrasjon.felles.EnvironmentHandler
+import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.AfterAll
@@ -25,7 +25,6 @@ import org.springframework.boot.webclient.test.autoconfigure.AutoConfigureWebCli
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.mock.env.MockEnvironment
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import java.util.UUID
@@ -34,16 +33,18 @@ import java.util.UUID
 @ActiveProfiles("wiremock-test")
 @ContextConfiguration(
     classes = [
+        OAuthMockServer::class,
+        GenericAuthFilterFactory::class,
         CorrelationIdOutgoingFilter::class,
         SakClientConfig::class,
-        MetricsTestConfig::class,
     ]
 )
 @AutoConfigureWebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class BasicAuthSakClientTest(
+class SakClientTest(
     @Autowired private val sakClient: SakClientInterface,
     @Value("\${mockserver.port}") mockServerPort: Int,
+    @Autowired private val oAuthMockServer: OAuthMockServer,
 ) {
     private val processUUID = UUID.randomUUID()
     private val mockServer = WireMockServer(WireMockConfiguration.wireMockConfig().port(mockServerPort))
@@ -52,22 +53,20 @@ class BasicAuthSakClientTest(
     fun beforeAll() {
         ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prosessSteg")
         mockServer.start()
-        val environment = MockEnvironment().apply {
-            setProperty("systemuser.username", "srvmelosys")
-            setProperty("systemuser.password", "dummy")
-        }
-        EnvironmentHandler(environment)
+        oAuthMockServer.start()
     }
 
     @AfterAll
     fun afterAll() {
         mockServer.stop()
+        oAuthMockServer.stop()
         ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
     }
 
     @BeforeEach
     fun beforeEach() {
         mockServer.resetAll()
+        oAuthMockServer.reset()
     }
 
     @Test
@@ -108,7 +107,7 @@ class BasicAuthSakClientTest(
             postRequestedFor(urlEqualTo("/api/v1/saker"))
                 .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
-                .withHeader(HttpHeaders.AUTHORIZATION, matching("Basic .+"))
+                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
                 .withRequestBody(
                     equalToJson(
                         """

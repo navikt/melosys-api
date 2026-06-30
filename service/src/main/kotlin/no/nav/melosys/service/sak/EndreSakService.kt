@@ -38,7 +38,8 @@ class EndreSakService(
     private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     private val applicationEventPublisher: ApplicationEventPublisher,
     private val saksbehandlingRegler: SaksbehandlingRegler,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
+    private val skjemaSakMappingService: SkjemaSakMappingService
 ) {
     @Transactional
     fun endre(
@@ -88,7 +89,10 @@ class EndreSakService(
                 )
             ) {
                 mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id)
-                    .ifPresent { mottatteOpplysningerService.slettOpplysninger(behandling.id) }
+                    .ifPresent {
+                        skjemaSakMappingService.frikobleFraMottatteOpplysninger(it)
+                        mottatteOpplysningerService.slettOpplysninger(behandling.id)
+                    }
             } else {
                 gjenopprettMottatteOpplysninger(nySakstype, behandling)
             }
@@ -181,12 +185,18 @@ class EndreSakService(
         nySakstype: Sakstyper, behandling: Behandling
     ) {
         val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).orElse(null)
+        val frikobledeSkjemaIder = mottatteOpplysninger
+            ?.let { skjemaSakMappingService.frikobleFraMottatteOpplysninger(it) }
+            ?: emptyList()
         mottatteOpplysningerService.slettOpplysninger(behandling.id)
-        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(
+        val nyMottatteOpplysninger = mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(
             behandling,
             mottatteOpplysninger?.mottatteOpplysningerData?.periode ?: Periode(),
             søknadslandTilGjenoppretting(nySakstype, mottatteOpplysninger?.mottatteOpplysningerData?.soeknadsland)
         )
+        nyMottatteOpplysninger?.let {
+            skjemaSakMappingService.knyttTilMottatteOpplysninger(frikobledeSkjemaIder, it)
+        }
     }
 
     private fun søknadslandTilGjenoppretting(nySakstype: Sakstyper, soeknadsland: Soeknadsland?): Soeknadsland {

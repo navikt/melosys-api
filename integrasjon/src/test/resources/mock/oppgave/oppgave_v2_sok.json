@@ -1,0 +1,19 @@
+{
+  "oppgaver": [
+    {
+      "id": 22222,
+      "versjon": 1,
+      "status": "AAPEN",
+      "nokkelord": ["Årsavregning 2024"],
+      "kategorisering": {
+        "tema": { "kode": "TRY", "term": "Trygdeavgift" },
+        "oppgavetype": { "kode": "BEH_SAK_MK", "term": "Behandle sak" },
+        "behandlingstema": { "term": "EU/EØS - Yrkesaktiv" }
+      },
+      "fordeling": {
+        "enhet": { "nr": "4530" }
+      }
+    }
+  ],
+  "pagination": { "hasNext": false, "endCursor": null }
+}

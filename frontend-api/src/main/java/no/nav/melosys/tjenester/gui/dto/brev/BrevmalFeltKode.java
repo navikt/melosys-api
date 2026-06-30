@@ -11,7 +11,6 @@ public enum BrevmalFeltKode {
     INNLEDNING_FRITEKST("Innledningstekst"),
     STANDARDTEKST_KONTAKTINFORMASJON("Legg til standardtekst med kontaktinformasjon nederst i brevet"),
     STANDARDTEKST("Standardtekst søknad/klage"),
-    STANDARDTEKST_INNTEKTSOPPLYSNINGER("Standardtekst for opplysninger om inntekt"),
     VEDLEGG("Vedlegg"),
     UTENLANDSK_TRYGDEMYNDIGHET_MOTTAKER("Trygdemyndighet");
 

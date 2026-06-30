@@ -59,7 +59,7 @@ class Trygdeavgiftsperiode(
 
     ) : ErPeriode {
 
-    @OneToMany(mappedBy = "trygdeavgiftsperiode", cascade = [CascadeType.PERSIST, CascadeType.MERGE], fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "trygdeavgiftsperiode", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
     val grunnlagListe: MutableSet<TrygdeavgiftsperiodeGrunnlag> = mutableSetOf()
 

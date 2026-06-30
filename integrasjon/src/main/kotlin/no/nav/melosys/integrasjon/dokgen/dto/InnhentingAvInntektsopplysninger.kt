@@ -26,8 +26,6 @@ class InnhentingAvInntektsopplysninger(
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     val medlemskapsperiodeTom: LocalDate?,
 
-    val skalViseStandardTekstOmOpplysninger: Boolean,
-
     val fritekst: String?,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
@@ -43,7 +41,6 @@ class InnhentingAvInntektsopplysninger(
         fristdato,
         medlemskapsperiodeFom,
         medlemskapsperiodeTom,
-        brevbestilling.skalViseStandardTekstOmOpplysninger,
         brevbestilling.fritekst
     )
 }
