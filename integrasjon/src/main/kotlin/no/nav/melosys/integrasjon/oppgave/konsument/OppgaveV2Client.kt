@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.oppgave.konsument
 
 import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import no.nav.melosys.exception.TekniskException
 import org.springframework.retry.annotation.Retryable
 import org.springframework.web.reactive.function.client.WebClient
@@ -74,7 +75,7 @@ open class OppgaveV2Client(private val webClient: WebClient) {
             .bodyValue(
                 mapOf(
                     "aktivDato" to oppgave["aktivDato"],
-                    "fordeling" to oppgave["fordeling"],
+                    "fordeling" to fordelingUtenMappe(oppgave["fordeling"]),
                     "kategorisering" to oppgave["kategorisering"],
                     "prioritet" to oppgave["prioritet"],
                     "status" to oppgave["status"],
@@ -85,6 +86,12 @@ open class OppgaveV2Client(private val webClient: WebClient) {
             .toBodilessEntity()
             .block()
     }
+
+    // Oppgave v2 avviser en PATCH som re-sender fordeling.mappe.id ("Det er kun tillatt med manuell
+    // fordeling til mapper", 400), så vi dropper mappe fra den ekkoede fordeling-en. Merge-patch lar
+    // den eksisterende mappe-tilordningen stå urørt — kun nokkelord-arrayet erstattes helt.
+    private fun fordelingUtenMappe(fordeling: JsonNode?): JsonNode? =
+        if (fordeling is ObjectNode) fordeling.deepCopy().apply { remove("mappe") } else fordeling
 
     companion object {
         private const val OPPGAVE_URI_MED_ID = "/oppgaver/{oppgaveID}"

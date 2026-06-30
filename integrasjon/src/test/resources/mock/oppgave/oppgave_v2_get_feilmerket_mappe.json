@@ -1,0 +1,23 @@
+{
+  "id": 33333,
+  "versjon": 1,
+  "status": "AAPEN",
+  "aktivDato": "2024-01-15",
+  "fristDato": "2024-02-01",
+  "prioritet": "NORMAL",
+  "beskrivelse": "2024",
+  "nokkelord": ["Eksisterende nøkkelord", "Årsavregning 2024"],
+  "kategorisering": {
+    "tema": { "kode": "TRY", "term": "Trygdeavgift" },
+    "oppgavetype": { "kode": "BEH_SAK_MK", "term": "Behandle sak" },
+    "behandlingstema": { "term": "EU/EØS - Yrkesaktiv" }
+  },
+  "fordeling": {
+    "enhet": { "nr": "4530" },
+    "mappe": { "id": "100014011", "navn": "Årsavregning" }
+  },
+  "opprettet": {
+    "tidspunkt": "2024-01-15T10:27:26.566Z",
+    "av": "srvmelosys"
+  }
+}

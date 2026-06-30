@@ -83,7 +83,7 @@ class FeilmerketNøkkelordOpprydding(
         }
 
         val fjernetIder = mutableListOf<String>()
-        val feiletIder = mutableListOf<String>()
+        val feilet = mutableListOf<OppgaveFeil>()
 
         feilmerkede.forEach { oppgave ->
             if (dryRun) return@forEach
@@ -92,15 +92,15 @@ class FeilmerketNøkkelordOpprydding(
                 fjernetIder.add(oppgave.id)
                 stats.antallFjernet = fjernetIder.size
             } catch (e: Exception) {
-                feiletIder.add(oppgave.id)
-                stats.antallFeilet = feiletIder.size
+                feilet.add(OppgaveFeil(oppgave.id, beskrivFeil(e)))
+                stats.antallFeilet = feilet.size
                 log.warn(e) { "Klarte ikke fjerne nøkkelord fra oppgave ${oppgave.id}" }
             }
         }
 
         log.info {
             "Fullført nøkkelord-opprydding enhet $enhetsnr: funnet=${feilmerkede.size} " +
-                "fjernet=${fjernetIder.size} feilet=${feiletIder.size} dryRun=$dryRun"
+                "fjernet=${fjernetIder.size} feilet=${feilet.size} dryRun=$dryRun"
         }
         return OppryddingResultat(
             enhet = enhetsnr,
@@ -108,12 +108,18 @@ class FeilmerketNøkkelordOpprydding(
             antallSkannet = rapport.antallSkannet,
             antallFunnet = feilmerkede.size,
             antallFjernet = fjernetIder.size,
-            antallFeilet = feiletIder.size,
+            antallFeilet = feilet.size,
             antallKorrektMerkede = rapport.antallKorrektMerkede,
             fjernetIder = fjernetIder,
-            feiletIder = feiletIder
+            feilet = feilet
         ).also { stats.sisteResultat = it }
     }
+
+    // errorFilter (WebClientUtils) legger HTTP-status + responsbody inn i exception-meldingen
+    // ("Kall mot Oppgave v2 feilet. 409 CONFLICT - {...}"), så meldingen forteller hvorfor PATCH-en
+    // feilet: 409 = samtidig endring, 400 = validering, 429 = rate limit. Kappes for å holde /status lett.
+    private fun beskrivFeil(e: Exception): String =
+        (e.message ?: e.javaClass.simpleName).take(MAKS_FEILGRUNN_LENGDE)
 
     fun status(): Map<String, Any?> = jobMonitor.status()
 
@@ -201,9 +207,17 @@ class FeilmerketNøkkelordOpprydding(
 
     companion object {
         private const val BEH_ARSAVREG = "BEH_ARSAVREG"
+        private const val MAKS_FEILGRUNN_LENGDE = 1000
         private val ÅRSAVREGNING_NØKKELORD = Regex("^Årsavregning \\d{4}$")
     }
 }
+
+// Hvorfor PATCH-en feilet for én oppgave (HTTP-status + responsbody fra Oppgave), så /status og
+// GET /rapport viser årsaken direkte i stedet for at den kun havner i en WARN-logglinje.
+data class OppgaveFeil(
+    val id: String,
+    val grunn: String
+)
 
 data class NøkkelordOppgave(
     val id: String,
@@ -228,8 +242,8 @@ data class NøkkelordRapport(
     val korrektMerkede: List<NøkkelordOppgave>
 )
 
-// Lett resultat for /status og sisteResultat — kun tellere og id-lister, ikke fulle oppgave-objekter
-// (de kan bli mange på prod). Hent de detaljerte listene fra GET /rapport ved behov.
+// Lett resultat for /status og sisteResultat — tellere, id-liste for fjernede og id+grunn for feilede,
+// ikke fulle oppgave-objekter (de kan bli mange på prod). Hent de detaljerte listene fra GET /rapport ved behov.
 data class OppryddingResultat(
     val enhet: String,
     val dryRun: Boolean,
@@ -239,5 +253,5 @@ data class OppryddingResultat(
     val antallFeilet: Int,
     val antallKorrektMerkede: Int,
     val fjernetIder: List<String>,
-    val feiletIder: List<String>
+    val feilet: List<OppgaveFeil>
 )
