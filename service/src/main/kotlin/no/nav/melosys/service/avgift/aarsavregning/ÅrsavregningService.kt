@@ -52,7 +52,7 @@ class ÅrsavregningService(
      *
      * En åpen ÅRSAVREGNING-behandling som ennå mangler aarsavregning-rad (år ikke satt) regnes
      * IKKE som en eksisterende årsavregning for året og blokkerer derfor ikke automatisk
-     * opprettelse — ny ÅRSAVREGNING skal opprettes (fag-avklaring C, Yvonne Jacobs, jf.
+     * opprettelse — ny ÅRSAVREGNING skal opprettes
      * MELOSYS-8045/MELOSYS-8059). Bruker samme defensive mønster som
      * ÅrsavregningIkkeSkattepliktigeProsessGenerator.
      */
