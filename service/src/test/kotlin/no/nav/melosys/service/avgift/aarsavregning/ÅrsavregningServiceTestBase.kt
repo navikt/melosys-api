@@ -1,6 +1,5 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
-import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
