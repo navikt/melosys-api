@@ -224,6 +224,7 @@ class ÅrsavregningService(
         if (!harInnbetaltTrygdeavgift) {
             behandlingsresultat.clearMedlemskapsperioder()
             behandlingsresultat.clearHelseutgiftDekkesPerioder()
+            behandlingsresultat.clearLovvalgsperioder()
 
             if (årsavregning.tidligereBehandlingsresultat != null) {
                 val tidligereResult = årsavregning.hentTidligereBehandlingsresultat
@@ -235,6 +236,12 @@ class ÅrsavregningService(
                     )
 
                     is HelseutgiftDekkesPeriode -> replikerHelseutgiftDekkesPeriode(
+                        behandlingsresultat,
+                        tidligereResult,
+                        årsavregning.aar
+                    )
+
+                    is Lovvalgsperiode -> replikerLovvalgsPeriode(
                         behandlingsresultat,
                         tidligereResult,
                         årsavregning.aar
@@ -499,6 +506,7 @@ class ÅrsavregningService(
                 when (it) {
                     is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(it)
                     is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(it)
+                    is Lovvalgsperiode -> LovvalgsperiodeForAvgift(it)
                     else -> throw FunksjonellException("Ukjent periodetype: ${it.javaClass.simpleName}")
                 }
             },
@@ -643,7 +651,7 @@ enum class AvgiftsperiodeForAvgiftType {
     LOVVALGSPERIODE
 }
 
-interface AvgiftsperiodeForAvgift {
+sealed interface AvgiftsperiodeForAvgift {
     val fom: LocalDate
     val tom: LocalDate?
     val dekning: Trygdedekninger?

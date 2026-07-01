@@ -129,6 +129,50 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
     }
 
     @Test
+    fun `finnÅrsavregning for EØS tjenesteperson med fastsatt trygdeavgift returnerer nyttTrygdeavgiftsGrunnlag uten å kaste feil`() {
+        val fagsak = Fagsak.forTest {
+            saksnummer = "123456"
+            type = Sakstyper.EU_EOS
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        }
+
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            behandling {
+                id = 1L
+                type = Behandlingstyper.ÅRSAVREGNING
+                tema = no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+                this.fagsak = fagsak
+            }
+            årsavregning {
+                id = 112
+                aar = 2023
+            }
+            lovvalgsperiode("2023-01-01", "2023-12-31")
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+        every { fagsakService.hentFagsak("123456") } returns fagsak
+
+
+        val resultat = årsavregningService.finnÅrsavregningForBehandling(1)
+
+
+        resultat.shouldNotBeNull().run {
+            nyttTrygdeavgiftsGrunnlag.shouldNotBeNull().run {
+                avgiftspliktigperioder.shouldHaveSize(1)
+                avgiftspliktigperioder.single() shouldBe LovvalgsperiodeForAvgift(
+                    fom = LocalDate.of(2023, 1, 1),
+                    tom = LocalDate.of(2023, 12, 31),
+                    dekning = Trygdedekninger.FULL_DEKNING,
+                    bestemmelse = no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A,
+                    medlemskapstyper = Medlemskapstyper.PLIKTIG,
+                    InnvilgelsesResultat.INNVILGET
+                )
+            }
+        }
+    }
+
+    @Test
     fun `finnÅrsavregning nr 2 av 3 årsavregninger på samme år - skal hente data fra nr 1 basert på vedtaksdato`() {
         // Årsavregning nr 1 - vedtatt først (10 dager siden)
         val behandlingsresultatÅrsavregning1 = Behandlingsresultat.forTest {
