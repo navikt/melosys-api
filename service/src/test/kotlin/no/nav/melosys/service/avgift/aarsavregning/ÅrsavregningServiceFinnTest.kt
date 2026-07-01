@@ -95,6 +95,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
         }
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(99L) } returns tidligereBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(99L) } returns tidligereBehandlingsresultat
         every { fagsakService.hentFagsak("123456") } returns fagsak
 
         // Test expectations should match what lagTidligereBehandlingsresultat() creates

@@ -89,6 +89,14 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                 else -> null
             }.shouldNotBeNull()
         }
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(any()) } answers {
+            val id = firstArg<Long>()
+            when (id) {
+                1L -> nyVurderingBehandlingsresultat
+                2L -> årsavregningBehandlingsresultat
+                else -> null
+            }.shouldNotBeNull()
+        }
 
         every { fagsakService.hentFagsak(any()) } returns fagsak
         every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(2, 2023) } returns 0
@@ -187,6 +195,15 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } answers {
+            val id = firstArg<Long>()
+            when (id) {
+                1L -> behandlingsresultatÅrsavregningEksisterende
+                2L -> behandlingsresultatNyVurdering
+                3L -> behandlingsresultatÅrsavregningNy
+                else -> null
+            }.shouldNotBeNull()
+        }
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(any()) } answers {
             val id = firstArg<Long>()
             when (id) {
                 1L -> behandlingsresultatÅrsavregningEksisterende
@@ -407,6 +424,14 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } answers {
+            when (firstArg<Long>()) {
+                1L -> tidligereÅrsavregningsresultat
+                2L -> nyVurderingKun2026
+                3L -> nyÅrsavregningBehandlingsresultat
+                else -> null
+            }.shouldNotBeNull()
+        }
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(any()) } answers {
             when (firstArg<Long>()) {
                 1L -> tidligereÅrsavregningsresultat
                 2L -> nyVurderingKun2026

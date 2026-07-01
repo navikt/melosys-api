@@ -308,6 +308,8 @@ class ÅrsavregningService(
 
         val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.hentBehandlingsresultat.hentBehandling().fagsak.saksnummer, år, vedtaksDato)
 
+        val behandlingsresultatMedGrunnlag = hentBehandlingsresultatMedTrygdeavgiftsperioder(årsavregning.hentBehandlingsresultat.hentBehandling().id)
+
         return ÅrsavregningModel(
             årsavregningID = årsavregning.id,
             år = år,
@@ -323,7 +325,7 @@ class ÅrsavregningService(
             ),
             tidligereAvgift = hentTidligereAvgift(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer, vedtaksDato),
             nyttTrygdeavgiftsGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
-            endeligAvgift = årsavregning.hentBehandlingsresultat.trygdeavgiftsperioder.toList(),
+            endeligAvgift = behandlingsresultatMedGrunnlag.trygdeavgiftsperioder.toList(),
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
             beregnetAvgiftBelop = årsavregning.beregnetAvgiftBelop,
             tilFaktureringBeloep = årsavregning.tilFaktureringBeloep,
@@ -481,11 +483,17 @@ class ÅrsavregningService(
 
         val sisteRelevanteBehandlinger = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år, førVedtaksdato)
 
-        val behandlingsresultat = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
+        val behandlingsresultatId = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift?.id
             ?: return emptyList()
+
+        val behandlingsresultat = hentBehandlingsresultatMedTrygdeavgiftsperioder(behandlingsresultatId)
 
         return behandlingsresultat.trygdeavgiftsperioder.filter { it.overlapperMedÅr(år) }
     }
+
+    /** Laster med EntityGraph for å inkludere grunnlagListe på trygdeavgiftsperiodene. */
+    private fun hentBehandlingsresultatMedTrygdeavgiftsperioder(behandlingsresultatId: Long): Behandlingsresultat =
+        behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(behandlingsresultatId)
 
     private fun hentNyttTrygdeavgiftsgrunnlag(årsavregning: Årsavregning): Trygdeavgiftsgrunnlag? {
         val behandlingsresultat = årsavregning.hentBehandlingsresultat
