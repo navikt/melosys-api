@@ -100,7 +100,6 @@ class TrygdeavgiftsberegningService(
         return BeregnetTrygdeavgiftMedForklaring(nyeTrygdeavgiftsperioder.toSet(), beregningsforklaringer)
     }
 
-    @Suppress("SpringTransactionalMethodCallsInspection") // warning på beregnTrygdeavgift ignoreres pga eksisterende transaksjon
     private fun lagNyeTrygdeavgiftsperioderMedForklaring(
         behandlingsresultat: Behandlingsresultat,
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
