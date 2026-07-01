@@ -40,10 +40,11 @@ class InnhentingAvInntektsopplysningerMapper(
     private fun hentFørsteOgSisteAvgiftspliktigPeriode(behandlingsresultat: Behandlingsresultat, årsavregningsår: Int): Pair<LocalDate, LocalDate>? {
         val relevantePerioder = hentAvgiftspliktigPerioderForÅrsavregning(behandlingsresultat, årsavregningsår)
 
-        return if (relevantePerioder.isEmpty()) null
-        else relevantePerioder.first().getFom()!!.tilDatoInnenforÅrsavregningsåret(årsavregningsår) to relevantePerioder.last().getTom()!!.tilDatoInnenforÅrsavregningsåret(
-            årsavregningsår
-        )
+        if (relevantePerioder.isEmpty()) return null
+
+        val fom = checkNotNull(relevantePerioder.first().getFom()) { "fom er påkrevd for avgiftspliktig periode" }
+        val tom = checkNotNull(relevantePerioder.last().getTom()) { "tom er påkrevd for avgiftspliktig periode" }
+        return fom.tilDatoInnenforÅrsavregningsåret(årsavregningsår) to tom.tilDatoInnenforÅrsavregningsåret(årsavregningsår)
     }
 
     private fun hentAvgiftspliktigPerioderForÅrsavregning(behandlingsresultat: Behandlingsresultat, årsavregningsår: Int) =
