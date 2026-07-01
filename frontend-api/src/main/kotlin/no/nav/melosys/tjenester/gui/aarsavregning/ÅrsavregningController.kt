@@ -164,6 +164,17 @@ class ÅrsavregningController(
                         type = it.type
                     )
 
+                    is LovvalgsperiodeForAvgift -> AvgiftspliktigPeriodeDto(
+                        id = 0,
+                        fomDato = it.fom,
+                        tomDato = it.tom,
+                        bestemmelse = it.bestemmelse,
+                        innvilgelsesResultat = it.innvilgelsesresultat,
+                        trygdedekning = it.dekning,
+                        medlemskapstype = it.medlemskapstyper,
+                        type = it.type
+                    )
+
                     else -> throw IllegalArgumentException("Ukjent type for siste gjeldende avgiftspliktig periode")
                 }
             },
@@ -252,6 +263,17 @@ class ÅrsavregningController(
                         innvilgelsesResultat = null,
                         trygdedekning = null,
                         medlemskapstype = null,
+                        type = it.type
+                    )
+
+                    is LovvalgsperiodeForAvgift -> AvgiftspliktigPeriodeDto(
+                        id = 0,
+                        fomDato = it.fom,
+                        tomDato = it.tom,
+                        bestemmelse = it.bestemmelse,
+                        innvilgelsesResultat = it.innvilgelsesresultat,
+                        trygdedekning = it.dekning,
+                        medlemskapstype = it.medlemskapstyper,
                         type = it.type
                     )
 
