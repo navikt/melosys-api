@@ -8,14 +8,18 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.behandling
 import no.nav.melosys.domain.brev.InnhentingAvInntektsopplysningerBrevbestilling
 import no.nav.melosys.domain.dokument.personDokumentForTest
 import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.domain.lovvalgsperiode
 import no.nav.melosys.domain.medlemskapsperiode
 import no.nav.melosys.domain.årsavregning
 import no.nav.melosys.exception.FunksjonellException
@@ -56,6 +60,26 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
     }
 
     @Test
+    fun `hent inntektsopplysninger for årsavregning EØS tjenesteperson henter periode fra lovvalgsperiode`() {
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultatEøsTjenesteperson()
+
+        val personDokument = personDokumentForTest { sammensattNavn = "Hei Test" }
+
+        val brevbestilling =
+            InnhentingAvInntektsopplysningerBrevbestilling.Builder()
+                .medBehandling(lagBehandlingEøsTjenesteperson())
+                .medPersonDokument(personDokument)
+                .medPersonMottaker(personDokument)
+                .build()
+
+        innhentingAvInntektsopplysningerMapper.map(brevbestilling).run {
+            årsavregningsår.shouldBe(2023)
+            medlemskapsperiodeFom.shouldBe(LocalDate.of(2023, 1, 1))
+            medlemskapsperiodeTom.shouldBe(LocalDate.of(2023, 9, 1))
+        }
+    }
+
+    @Test
     fun `hent inntektsopplysninger for årsavregning skal kaste feil når årsavregning er null`() {
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns Behandlingsresultat.forTest { }
 
@@ -80,6 +104,50 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
                 type = Sakstyper.FTRL
             }
             tema = Behandlingstema.YRKESAKTIV
+        }
+
+    private fun lagBehandlingEøsTjenesteperson() =
+        Behandling.forTest {
+            id = 1L
+            fagsak {
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+            tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+        }
+
+    private fun lagBehandlingsResultatEøsTjenesteperson() =
+        Behandlingsresultat.forTest {
+            behandling {
+                id = 1L
+                fagsak {
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                }
+                tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+            }
+            årsavregning { aar = 2023 }
+            lovvalgsperiode {
+                fom = LocalDate.of(2022, 5, 17)
+                tom = LocalDate.of(2022, 8, 17)
+                dekning = Trygdedekninger.FULL_DEKNING
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B
+            }
+            lovvalgsperiode {
+                fom = LocalDate.of(2022, 8, 18)
+                tom = LocalDate.of(2023, 8, 17)
+                dekning = Trygdedekninger.FULL_DEKNING
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B
+            }
+            lovvalgsperiode {
+                fom = LocalDate.of(2023, 8, 18)
+                tom = LocalDate.of(2023, 9, 1)
+                dekning = Trygdedekninger.FULL_DEKNING
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B
+            }
         }
 
     private fun lagBehandlingsResultat() =
