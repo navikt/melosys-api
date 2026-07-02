@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.dokgen.dto
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import java.math.BigDecimal
@@ -25,7 +26,14 @@ class ÅrsavregningVedtaksbrev(
     val eøsEllerTrygdeavtale: Boolean,
     val fullmektigTrygdeavgift: String?,
     val harSkjoennsfastsattInntektsgrunnlag: Boolean,
-    val erNyÅrsavregning: Boolean
+    val erNyÅrsavregning: Boolean,
+    val harMisjonaerInntekt: Boolean = false,
+    val minstebelopVerdi: BigDecimal? = null,
+    val minstebelopAar: Int? = null,
+    val harMinstebelopEndelig: Boolean = false,
+    val har25ProsentRegelEndelig: Boolean = false,
+    val harMinstebelopForskuddsvis: Boolean = false,
+    val har25ProsentRegelForskuddsvis: Boolean = false
 ) : DokgenDto(brevBestilling, Mottakerroller.BRUKER) {
     constructor(
         brevBestilling: ÅrsavregningVedtakBrevBestilling,
@@ -71,7 +79,8 @@ data class Avgiftsperiode(
     val inntektskilde: String,
     val trygdedekning: String,
     val arbeidsgiveravgiftBetalt: SvarAlternativ,
-    val skatteplikt: Boolean
+    val skatteplikt: Boolean,
+    val beregningsregel: Avgiftsberegningsregel
 )
 
 
