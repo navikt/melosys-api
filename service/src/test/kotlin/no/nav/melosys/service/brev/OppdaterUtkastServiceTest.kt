@@ -93,8 +93,7 @@ class OppdaterUtkastServiceTest {
             null,
             null,
             null,
-            null,
-            true
+            null
         )
     )
 

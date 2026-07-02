@@ -2,6 +2,7 @@ package no.nav.melosys.domain.brev.utkast
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import tools.jackson.databind.annotation.JsonSerialize
 import no.nav.melosys.domain.arkiv.Distribusjonstype
 import no.nav.melosys.domain.brev.StandardvedleggType
@@ -12,6 +13,8 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonSerialize
+// skalViseStandardTekstOmOpplysninger fjernet fra modellen, men eksisterende rader inneholder feltet ennå.
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JvmRecord
 data class BrevbestillingUtkast(
     val produserbardokument: Produserbaredokumenter?,
@@ -36,8 +39,7 @@ data class BrevbestillingUtkast(
     val standardvedleggType: StandardvedleggType?,
     val fritekstVedlegg: MutableList<FritekstVedlegg?>?,
     val dokumentTittel: String?,
-    val saksbehandlerNrToIdent: String?,
-    val skalViseStandardTekstOmOpplysninger: Boolean
+    val saksbehandlerNrToIdent: String?
 ) {
     @JsonIgnore
     fun getTittel(): String? = when {
