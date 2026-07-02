@@ -49,14 +49,15 @@ class TrygdeavgiftController(
         val skatteforholdsperioder = trygdeavgiftsgrunnlagDto.skatteforholdsperioder.tilSkatteforholdsPerioder()
         val inntektsperioder = trygdeavgiftsgrunnlagDto.inntektskilder.tilInntektsPerioder()
 
-        val trygdeavgiftsperiodeSet = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+        val resultat = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgiftMedForklaring(
             behandlingID,
             skatteforholdsperioder,
             inntektsperioder
         )
 
         return ResponseEntity.ok(
-            BeregnetTrygdeavgiftDto.av(trygdeavgiftsperiodeSet)
+            BeregnetTrygdeavgiftDto.av(resultat.trygdeavgiftsperioder)
+                .copy(beregningsforklaringer = resultat.beregningsforklaringer)
         )
     }
 

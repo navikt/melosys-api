@@ -4,6 +4,7 @@ import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
@@ -205,6 +206,138 @@ internal class TrygdeavgiftsberegningServiceTest {
 
                 verify(exactly = 0) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
                 trygdeavgiftService.hentTrygdeavgiftsperioder(BEHANDLING_ID).shouldNotBeEmpty()
+            }
+
+            @Test
+            fun `beregningsforklaring fra responsen skal samles distinkt på PUT-resultatet`() {
+                val notSoRandomUuid = UUID.randomUUID()
+                mockkStatic(UUID::class)
+                every { UUID.randomUUID() } returns notSoRandomUuid
+
+                val behandlingsresultat = defaultBehandlingsresultat {
+                    medlemskapsperiode {
+                        id = 1L
+                        fom = FOM
+                        tom = TOM
+                        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG
+                        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
+                    }
+                }
+
+                every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
+                every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
+
+                val grunnlag = TrygdeavgiftsgrunnlagDto(
+                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                    notSoRandomUuid,
+                    notSoRandomUuid
+                )
+                val forklaring = BeregningsforklaringDto(
+                    aar = 2025,
+                    regelgruppe = Regelgruppe.SAMLET,
+                    valgtRegel = Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL,
+                    aarsak = Beregningsaarsak.BEREGNET,
+                    inntektsgrunnlag = listOf(
+                        InntektspostDto("INNTEKT_FRA_UTLANDET", LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31), 50000, BigDecimal("12"), 600000)
+                    ),
+                    ekskluderteInntekter = listOf(
+                        EkskludertInntektspostDto("ARBEIDSINNTEKT_FRA_NORGE", LocalDate.of(2025, 1, 1), LocalDate.of(2025, 6, 30), 102000, Ekskluderingsaarsak.SKATTEETATEN_FASTSETTER)
+                    ),
+                    sumAarligInntekt = 600000,
+                    minstebeloep = 99650,
+                    inntektOverMinstebeloep = 500350,
+                    maksimalAvgift25Prosent = 125087,
+                    ordinaerAvgift = 46200,
+                    ordinaerAvgiftPoster = listOf(
+                        OrdinaerAvgiftspostDto("INNTEKT_FRA_UTLANDET", 600000, BigDecimal.valueOf(7.7), 46200)
+                    ),
+                    fastsattAvgift = 46200,
+                    fastsattAvgiftPerMaaned = 3850,
+                )
+
+                // To responser med identisk forklaring -> skal dedupliseres til én distinkt forklaring
+                every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
+                    listOf(
+                        TrygdeavgiftsberegningResponse(
+                            TrygdeavgiftsperiodeDto(DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)),
+                            grunnlag,
+                            grunnlagListe = listOf(grunnlag),
+                            beregningsregel = Avgiftsberegningsregel.ORDINÆR,
+                            beregningsforklaring = forklaring,
+                        ),
+                        TrygdeavgiftsberegningResponse(
+                            TrygdeavgiftsperiodeDto(DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)),
+                            grunnlag,
+                            grunnlagListe = listOf(grunnlag),
+                            beregningsregel = Avgiftsberegningsregel.ORDINÆR,
+                            beregningsforklaring = forklaring,
+                        )
+                    )
+                )
+
+                val resultat = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgiftMedForklaring(
+                    behandlingID = BEHANDLING_ID,
+                    listOf(skatteforhold { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG }),
+                    inntektsperioder = listOf(inntekt { type = Inntektskildetype.INNTEKT_FRA_UTLANDET })
+                )
+
+                resultat.beregningsforklaringer.shouldContainExactly(forklaring)
+                resultat.trygdeavgiftsperioder.shouldNotBeEmpty()
+            }
+
+            @Test
+            fun `respons uten beregningsforklaring gir tom forklaringsliste`() {
+                val notSoRandomUuid = UUID.randomUUID()
+                mockkStatic(UUID::class)
+                every { UUID.randomUUID() } returns notSoRandomUuid
+
+                val behandlingsresultat = defaultBehandlingsresultat {
+                    medlemskapsperiode {
+                        id = 1L
+                        fom = FOM
+                        tom = TOM
+                        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG
+                        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
+                    }
+                }
+
+                every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(BEHANDLING_ID) }.returns(behandlingsresultat)
+                every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
+                every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
+                every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
+
+                val grunnlag = TrygdeavgiftsgrunnlagDto(
+                    idToUUid(behandlingsresultat.finnAvgiftspliktigPerioder().first().hentId()),
+                    notSoRandomUuid,
+                    notSoRandomUuid
+                )
+                every { mockTrygdeavgiftClient.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
+                    listOf(
+                        TrygdeavgiftsberegningResponse(
+                            TrygdeavgiftsperiodeDto(DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)),
+                            grunnlag,
+                            grunnlagListe = listOf(grunnlag),
+                            beregningsregel = Avgiftsberegningsregel.ORDINÆR,
+                        )
+                    )
+                )
+
+                val resultat = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgiftMedForklaring(
+                    behandlingID = BEHANDLING_ID,
+                    listOf(skatteforhold { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG }),
+                    inntektsperioder = listOf(inntekt { type = Inntektskildetype.INNTEKT_FRA_UTLANDET })
+                )
+
+                resultat.beregningsforklaringer.shouldBeEmpty()
+                resultat.trygdeavgiftsperioder.shouldNotBeEmpty()
             }
 
             @Test
