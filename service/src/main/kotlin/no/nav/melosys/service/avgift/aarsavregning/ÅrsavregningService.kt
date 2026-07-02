@@ -304,27 +304,27 @@ class ÅrsavregningService(
     private fun lagÅrsavregningModelFraÅrsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
         val år = årsavregning.aar
 
-        val vedtaksDato = årsavregning.behandlingsresultat?.vedtakMetadata?.vedtaksdato
-
-        val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.hentBehandlingsresultat.hentBehandling().fagsak.saksnummer, år, vedtaksDato)
-
         // Laster med EntityGraph for å inkludere grunnlagListe på trygdeavgiftsperiodene.
         val behandlingsresultatMedGrunnlag = behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(årsavregning.hentBehandlingsresultat.hentBehandling().id)
+        val saksnummer = behandlingsresultatMedGrunnlag.hentBehandling().fagsak.saksnummer
+        val vedtaksDato = behandlingsresultatMedGrunnlag.vedtakMetadata?.vedtaksdato
+
+        val sisteÅrsavregning = hentSisteÅrsavregning(saksnummer, år, vedtaksDato)
 
         return ÅrsavregningModel(
             årsavregningID = årsavregning.id,
             år = år,
             tidligereTrygdeavgiftsGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(
                 år,
-                årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer,
+                saksnummer,
                 vedtaksDato
             ),
             sisteGjeldendeAvgiftspliktigPerioder = hentSisteGjeldendeAvgiftspliktigePerioder(
                 år,
-                årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer,
+                saksnummer,
                 vedtaksDato
             ),
-            tidligereAvgift = hentTidligereAvgift(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer, vedtaksDato),
+            tidligereAvgift = hentTidligereAvgift(år, saksnummer, vedtaksDato),
             nyttTrygdeavgiftsGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
             endeligAvgift = behandlingsresultatMedGrunnlag.trygdeavgiftsperioder.toList(),
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,

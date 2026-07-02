@@ -347,6 +347,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                 else -> null
             }.shouldNotBeNull()
         }
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(4L) } returns årsavregning2024
 
         every { fagsakService.hentFagsak(any()) } returns fagsak
         every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(4, 2024) } returns 0
@@ -526,6 +527,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                 else -> null
             }.shouldNotBeNull()
         }
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(2L) } returns årsavregningBehandlingsresultat
 
         every { fagsakService.hentFagsak(any()) } returns fagsak
         every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(2, 2024) } returns 0
@@ -599,6 +601,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                 else -> null
             }.shouldNotBeNull()
         }
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(2L) } returns årsavregningBehandlingsresultat
 
         every { fagsakService.hentFagsak(any()) } returns fagsak
         every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(2, 2023) } returns 0
@@ -683,6 +686,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                 else -> null
             }.shouldNotBeNull()
         }
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(2L) } returns årsavregningBehandlingsresultat
 
         every { fagsakService.hentFagsak(any()) } returns fagsak
         every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(2, 2023) } returns 0
@@ -773,6 +777,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                 else -> null
             }.shouldNotBeNull()
         }
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(2L) } returns årsavregningBehandlingsresultat
 
         every { fagsakService.hentFagsak(any()) } returns fagsak
         every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(2, 2024) } returns 0
