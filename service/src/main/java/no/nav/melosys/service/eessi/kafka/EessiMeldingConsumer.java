@@ -34,7 +34,7 @@ public class EessiMeldingConsumer {
     public void mottaMeldingAiven(ConsumerRecord<String, MelosysEessiMelding> consumerRecord, @Headers Map<String, byte[]> header) {
         putToMDC(CORRELATION_ID, getCorrelationId(header));
         MelosysEessiMelding melding = consumerRecord.value();
-        log.info("Mottatt ny melding fra eessi(aiven): {}", melding);
+        log.info("Mottatt ny melding fra eessi(aiven): {}", melding.getSedId());
 
         try {
             prosessinstansService.opprettProsessinstansSedMottak(melding);
