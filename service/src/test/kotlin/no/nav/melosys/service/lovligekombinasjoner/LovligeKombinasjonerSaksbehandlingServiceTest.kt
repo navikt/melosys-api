@@ -804,6 +804,54 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak EU_EØS MEDLEMSKAP_LOVVALG tema Arbeid tjenesteperson eller fly returnerer Årsavregning TOGGLE ÅRSAVREGNING_EØS_TJENESTEPERSON`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_TJENESTEPERSON)
+
+        val behandling = behandlingMedTemaOgType(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY, Behandlingstyper.FØRSTEGANG) {
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            fagsak {
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+        }
+        every { fagsakService.hentFagsak(behandling.fagsak.saksnummer) } returns behandling.fagsak
+
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            behandling.fagsak.saksnummer,
+            Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+        )
+
+
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
+            Behandlingstyper.ÅRSAVREGNING,
+        )
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak EU_EØS MEDLEMSKAP_LOVVALG tema Arbeid tjenesteperson eller fly returnerer IKKE Årsavregning når toggle er av`() {
+        val behandling = behandlingMedTemaOgType(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY, Behandlingstyper.FØRSTEGANG) {
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            fagsak {
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+        }
+        every { fagsakService.hentFagsak(behandling.fagsak.saksnummer) } returns behandling.fagsak
+
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            behandling.fagsak.saksnummer,
+            Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+        )
+
+
+        muligeTyper shouldNotContain Behandlingstyper.ÅRSAVREGNING
+    }
+
+    @Test
     fun hentMuligeBehandlingstemaer_hovedpartVIRKSOMHETIkkeTrygdeavgift_skalReturnereBehandlingsTemaVIRKSOMHET() {
         val behandlingstemas = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(
             Aktoersroller.VIRKSOMHET,

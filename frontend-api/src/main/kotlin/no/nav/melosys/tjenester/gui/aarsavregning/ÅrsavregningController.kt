@@ -140,33 +140,7 @@ class ÅrsavregningController(
             tidligereTrygdeavgiftsGrunnlagsopplysninger = hentTidligereGrunnlagsopplysninger(
                 årsavregningModel
             ),
-            sisteGjeldendeAvgiftspliktigperioder = årsavregningModel.sisteGjeldendeAvgiftspliktigPerioder.map {
-                when (it) {
-                    is MedlemskapsperiodeForAvgift -> AvgiftspliktigPeriodeDto(
-                        id = 0,
-                        fomDato = it.fom,
-                        tomDato = it.tom,
-                        bestemmelse = it.bestemmelse,
-                        innvilgelsesResultat = it.innvilgelsesresultat,
-                        trygdedekning = it.dekning,
-                        medlemskapstype = it.medlemskapstyper,
-                        type = it.type
-                    )
-
-                    is HelseutgiftDekkesPeriodeForAvgift -> AvgiftspliktigPeriodeDto(
-                        id = it.id,
-                        fomDato = it.fom,
-                        tomDato = it.tom,
-                        bestemmelse = null,
-                        innvilgelsesResultat = null,
-                        trygdedekning = null,
-                        medlemskapstype = null,
-                        type = it.type
-                    )
-
-                    else -> throw IllegalArgumentException("Ukjent type for siste gjeldende avgiftspliktig periode")
-                }
-            },
+            sisteGjeldendeAvgiftspliktigperioder = årsavregningModel.sisteGjeldendeAvgiftspliktigPerioder.map(::mapTilAvgiftspliktigPeriodeDto),
             nyttTrygdeavgiftsGrunnlag = hentGrunnlagsopplysninger(årsavregningModel.nyttTrygdeavgiftsGrunnlag, årsavregningModel.endeligAvgift),
             endeligAvgift = null,
             avregning = AvregningDto(
@@ -229,35 +203,47 @@ class ÅrsavregningController(
             )
         }
 
+    private fun mapTilAvgiftspliktigPeriodeDto(periode: AvgiftsperiodeForAvgift): AvgiftspliktigPeriodeDto =
+        when (periode) {
+            is MedlemskapsperiodeForAvgift -> AvgiftspliktigPeriodeDto(
+                id = 0,
+                fomDato = periode.fom,
+                tomDato = periode.tom,
+                bestemmelse = periode.bestemmelse,
+                innvilgelsesResultat = periode.innvilgelsesresultat,
+                trygdedekning = periode.dekning,
+                medlemskapstype = periode.medlemskapstyper,
+                type = periode.type
+            )
+
+            is HelseutgiftDekkesPeriodeForAvgift -> AvgiftspliktigPeriodeDto(
+                id = periode.id,
+                fomDato = periode.fom,
+                tomDato = periode.tom,
+                bestemmelse = null,
+                innvilgelsesResultat = null,
+                trygdedekning = null,
+                medlemskapstype = null,
+                type = periode.type
+            )
+
+            is LovvalgsperiodeForAvgift -> AvgiftspliktigPeriodeDto(
+                id = 0,
+                fomDato = periode.fom,
+                tomDato = periode.tom,
+                bestemmelse = periode.bestemmelse,
+                innvilgelsesResultat = periode.innvilgelsesresultat,
+                trygdedekning = periode.dekning,
+                medlemskapstype = periode.medlemskapstyper,
+                type = periode.type
+            )
+
+            else -> throw IllegalArgumentException("Ukjent type for siste gjeldende avgiftspliktig periode")
+        }
+
     private fun mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag?) =
         TrygdeavgiftsgrunnlagDto(
-            avgiftspliktigperioder = trygdeavgiftsgrunnlag?.avgiftspliktigperioder?.map {
-                when (it) {
-                    is MedlemskapsperiodeForAvgift -> AvgiftspliktigPeriodeDto(
-                        id = 0,
-                        fomDato = it.fom,
-                        tomDato = it.tom,
-                        bestemmelse = it.bestemmelse,
-                        innvilgelsesResultat = it.innvilgelsesresultat,
-                        trygdedekning = it.dekning,
-                        medlemskapstype = it.medlemskapstyper,
-                        type = it.type
-                    )
-
-                    is HelseutgiftDekkesPeriodeForAvgift -> AvgiftspliktigPeriodeDto(
-                        id = it.id,
-                        fomDato = it.fom,
-                        tomDato = it.tom,
-                        bestemmelse = null,
-                        innvilgelsesResultat = null,
-                        trygdedekning = null,
-                        medlemskapstype = null,
-                        type = it.type
-                    )
-
-                    else -> throw IllegalArgumentException("Ukjent type for siste gjeldende avgiftspliktig periode")
-                }
-            }
+            avgiftspliktigperioder = trygdeavgiftsgrunnlag?.avgiftspliktigperioder?.map(::mapTilAvgiftspliktigPeriodeDto)
                 .orEmpty(),
             skatteforholdsperioder = trygdeavgiftsgrunnlag?.skatteforholdsperioder?.map {
                 SkatteforholdTilNorgeDto(
