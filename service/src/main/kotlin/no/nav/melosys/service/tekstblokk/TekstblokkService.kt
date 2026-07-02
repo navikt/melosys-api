@@ -76,14 +76,19 @@ class TekstblokkService(
         tekstblokk.tags.addAll(normaliserTags(input.tags))
     }
 
-    private fun normaliserTags(tags: List<String>?): Set<String> =
+    private fun normaliserTags(tags: List<String>?): List<String> =
         tags
             ?.asSequence()
+            // Bevar bokstavstørrelse (f.eks. "USA-avtale") og tillat mellomrom i tags.
+            // Vi trimmer kun ytterkanter og slår sammen gjentatt blanktegn til ett.
+            ?.map { it.trim().replace(FLERE_BLANKTEGN, " ") }
             ?.filter { it.isNotBlank() }
-            // Mellomrom/bindestrek -> én bindestrek: holder tags som enkle slugs uten
-            // mellomrom, slik at de fungerer som ett ledd i frontends ord-baserte søk.
-            // "art - 15" blir "art-15", ikke "art---15".
-            ?.map { it.trim().lowercase(Locale.ROOT).replace(Regex("[\\s-]+"), "-").trim('-') }
-            ?.toSet()
-            ?: emptySet()
+            // Unngå nær-duplikater som kun skiller seg i bokstavstørrelse; behold første variant.
+            ?.distinctBy { it.lowercase(Locale.ROOT) }
+            ?.toList()
+            ?: emptyList()
+
+    private companion object {
+        private val FLERE_BLANKTEGN = Regex("\\s+")
+    }
 }
