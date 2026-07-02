@@ -308,7 +308,8 @@ class ÅrsavregningService(
 
         val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.hentBehandlingsresultat.hentBehandling().fagsak.saksnummer, år, vedtaksDato)
 
-        val behandlingsresultatMedGrunnlag = hentBehandlingsresultatMedTrygdeavgiftsperioder(årsavregning.hentBehandlingsresultat.hentBehandling().id)
+        // Laster med EntityGraph for å inkludere grunnlagListe på trygdeavgiftsperiodene.
+        val behandlingsresultatMedGrunnlag = behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(årsavregning.hentBehandlingsresultat.hentBehandling().id)
 
         return ÅrsavregningModel(
             årsavregningID = årsavregning.id,
@@ -486,14 +487,10 @@ class ÅrsavregningService(
         val behandlingsresultatId = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift?.id
             ?: return emptyList()
 
-        val behandlingsresultat = hentBehandlingsresultatMedTrygdeavgiftsperioder(behandlingsresultatId)
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(behandlingsresultatId)
 
         return behandlingsresultat.trygdeavgiftsperioder.filter { it.overlapperMedÅr(år) }
     }
-
-    /** Laster med EntityGraph for å inkludere grunnlagListe på trygdeavgiftsperiodene. */
-    private fun hentBehandlingsresultatMedTrygdeavgiftsperioder(behandlingsresultatId: Long): Behandlingsresultat =
-        behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(behandlingsresultatId)
 
     private fun hentNyttTrygdeavgiftsgrunnlag(årsavregning: Årsavregning): Trygdeavgiftsgrunnlag? {
         val behandlingsresultat = årsavregning.hentBehandlingsresultat
