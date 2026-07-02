@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
@@ -153,6 +154,26 @@ public class JoarkService implements JoarkFasade {
 
         journalpostapiClient.oppdaterJournalpost(request.build(), journalpostID);
         journalpostapiClient.ferdigstillJournalpost(new FerdigstillJournalpostRequest(), journalpostID);
+    }
+
+    @Override
+    public void oppdaterJournalposterMedNyAktørId(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
+                                                  String gammelAktørId,
+                                                  String nyAktørId) {
+        hentJournalposterTilknyttetSak(hentJournalposterTilknyttetSakRequest)
+            .stream()
+            .filter(journalpost -> journalpost.getBrukerIdType() == BrukerIdType.AKTØR_ID)
+            .filter(journalpost -> gammelAktørId.equals(journalpost.getBrukerId()))
+            .map(Journalpost::getJournalpostId)
+            .forEach(journalpostID -> oppdaterJournalpostBrukerAktørId(journalpostID, nyAktørId));
+    }
+
+    private void oppdaterJournalpostBrukerAktørId(String journalpostID, String aktørId) {
+        OppdaterJournalpostRequest request = new OppdaterJournalpostRequest.Builder()
+            .medBruker(aktørId, Bruker.BrukerIdType.AKTOERID)
+            .build();
+
+        journalpostapiClient.oppdaterJournalpost(request, journalpostID);
     }
 
     private boolean harAvsenderMottakerFelt(JournalpostOppdatering journalpostOppdatering) {

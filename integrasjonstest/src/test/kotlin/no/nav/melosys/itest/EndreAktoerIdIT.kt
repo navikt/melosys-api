@@ -1,8 +1,11 @@
 package no.nav.melosys.itest
 
+import com.ninjasquad.springmockk.MockkBean
 import io.kotest.matchers.shouldBe
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.melosys.Application
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Fagsak
@@ -10,6 +13,8 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.integrasjon.joark.HentJournalposterTilknyttetSakRequest
+import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.repository.AktoerRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.tilgang.Aksesskontroll
@@ -59,9 +64,13 @@ class EndreAktoerIdIT(
         fun aksesskontroll(): Aksesskontroll = mockk(relaxed = true)
     }
 
+    @MockkBean
+    lateinit var joarkFasade: JoarkFasade
+
     @AfterEach
     fun resetSubjectHandler() {
         SubjectHandler.set(SpringSubjectHandler(SpringTokenValidationContextHolder()))
+        clearMocks(joarkFasade)
     }
 
     private fun hentBearerToken(): String {
@@ -104,6 +113,7 @@ class EndreAktoerIdIT(
         aktoerRepository.save(brukerAktor)
         fagsak.aktører.add(brukerAktor)
         fagsakRepository.save(fagsak)
+        every { joarkFasade.oppdaterJournalposterMedNyAktørId(any(), any(), any()) } returns Unit
 
         mockMvc.perform(
             MockMvcRequestBuilders.put("/admin/fagsaker/$saksnummer/endreAktoerId/$nyAktoerid")
@@ -125,5 +135,12 @@ class EndreAktoerIdIT(
         fagsakBrukerAktorer.size shouldBe 1
         fagsakBrukerAktorer.first().aktørId shouldBe nyAktoerid
         fagsakBrukerAktorer.first().id shouldBe brukerAktor.id
+        verify(exactly = 1) {
+            joarkFasade.oppdaterJournalposterMedNyAktørId(
+                HentJournalposterTilknyttetSakRequest(fagsak.gsakSaksnummer, saksnummer),
+                gammelAktoerid,
+                nyAktoerid
+            )
+        }
     }
 }
