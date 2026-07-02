@@ -34,6 +34,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             }
         }
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(1L) } returns behandlingsresultat
 
 
         val result = årsavregningService.finnÅrsavregningForBehandling(1)
@@ -95,6 +96,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
         }
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(99L) } returns tidligereBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(1L) } returns behandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(99L) } returns tidligereBehandlingsresultat
         every { fagsakService.hentFagsak("123456") } returns fagsak
 
@@ -277,6 +279,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
         val fagsak = behandlingsresultat.hentBehandling().fagsak
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(1L) } returns behandlingsresultat
         every { fagsakService.hentFagsak("12345678") } returns fagsak
 
 
@@ -363,6 +366,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(50L) } returns behandlingsresultatTidligereÅrsavregning
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(1L) } returns behandlingsresultat
         every { fagsakService.hentFagsak("12345678") } returns fagsak
 
         val result = årsavregningService.finnÅrsavregningForBehandling(1)
