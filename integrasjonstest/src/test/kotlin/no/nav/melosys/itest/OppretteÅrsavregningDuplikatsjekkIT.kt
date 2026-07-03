@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 /** Verifiserer mot ekte DB at [ÅrsavregningService.harAktivÅrsavregningForÅr] er konsistent med SQL-guarden i [AarsavregningRepository]. */
-class ÅrsavregningDuplikatGateIT(
+class OppretteÅrsavregningDuplikatsjekkIT(
     @Autowired private val årsavregningService: ÅrsavregningService,
     @Autowired private val aarsavregningRepository: AarsavregningRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
