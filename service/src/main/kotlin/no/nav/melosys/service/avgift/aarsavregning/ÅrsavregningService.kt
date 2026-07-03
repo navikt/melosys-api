@@ -304,26 +304,29 @@ class ÅrsavregningService(
     private fun lagÅrsavregningModelFraÅrsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
         val år = årsavregning.aar
 
-        val vedtaksDato = årsavregning.behandlingsresultat?.vedtakMetadata?.vedtaksdato
+        // Laster med EntityGraph for å inkludere grunnlagListe på trygdeavgiftsperiodene.
+        val behandlingsresultatMedGrunnlag = behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(årsavregning.hentBehandlingsresultat.hentBehandling().id)
+        val saksnummer = behandlingsresultatMedGrunnlag.hentBehandling().fagsak.saksnummer
+        val vedtaksDato = behandlingsresultatMedGrunnlag.vedtakMetadata?.vedtaksdato
 
-        val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.hentBehandlingsresultat.hentBehandling().fagsak.saksnummer, år, vedtaksDato)
+        val sisteÅrsavregning = hentSisteÅrsavregning(saksnummer, år, vedtaksDato)
 
         return ÅrsavregningModel(
             årsavregningID = årsavregning.id,
             år = år,
             tidligereTrygdeavgiftsGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(
                 år,
-                årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer,
+                saksnummer,
                 vedtaksDato
             ),
             sisteGjeldendeAvgiftspliktigPerioder = hentSisteGjeldendeAvgiftspliktigePerioder(
                 år,
-                årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer,
+                saksnummer,
                 vedtaksDato
             ),
-            tidligereAvgift = hentTidligereAvgift(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer, vedtaksDato),
+            tidligereAvgift = hentTidligereAvgift(år, saksnummer, vedtaksDato),
             nyttTrygdeavgiftsGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
-            endeligAvgift = årsavregning.hentBehandlingsresultat.trygdeavgiftsperioder.toList(),
+            endeligAvgift = behandlingsresultatMedGrunnlag.trygdeavgiftsperioder.toList(),
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
             beregnetAvgiftBelop = årsavregning.beregnetAvgiftBelop,
             tilFaktureringBeloep = årsavregning.tilFaktureringBeloep,
@@ -481,8 +484,10 @@ class ÅrsavregningService(
 
         val sisteRelevanteBehandlinger = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år, førVedtaksdato)
 
-        val behandlingsresultat = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
+        val behandlingsresultatId = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift?.id
             ?: return emptyList()
+
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(behandlingsresultatId)
 
         return behandlingsresultat.trygdeavgiftsperioder.filter { it.overlapperMedÅr(år) }
     }
