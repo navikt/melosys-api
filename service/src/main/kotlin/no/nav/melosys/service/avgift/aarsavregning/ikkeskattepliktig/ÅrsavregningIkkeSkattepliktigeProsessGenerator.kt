@@ -120,10 +120,10 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
      * blir synlig.
      */
     private fun hentÅrFraBehandlingDefensivt(behandling: Behandling): Int? =
-        runCatching {
+        try {
             behandlingsresultatService.hentBehandlingsresultat(behandling.id)
                 .hentÅrsavregning().aar
-        }.getOrElse { e ->
+        } catch (e: IllegalStateException) {
             log.warn(e) {
                 "Kunne ikke hente år fra åpen ÅRSAVREGNING-behandling ${behandling.id} " +
                     "(sak ${behandling.fagsak.saksnummer}) — antar ikke duplikat, ny ÅRSAVREGNING vil opprettes"

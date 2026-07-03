@@ -89,7 +89,7 @@ class OppretteÅrsavregningVedEndringTest {
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
-        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+        every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
 
 
         oppretteÅrsavregningVedEndring.utfør(prosessinstans)
@@ -103,6 +103,51 @@ class OppretteÅrsavregningVedEndringTest {
                 true
             )
         }
+        verify {
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
+                SAKSNUMMER,
+                "2025",
+                Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE,
+                true
+            )
+        }
+        confirmVerified(prosessInstansService)
+    }
+
+    @Test
+    fun `oppretter ikke årsavregning for år som allerede har aktiv årsavregning, men oppretter for de andre`() {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            behandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.YRKESAKTIV
+                fagsak {
+                    saksnummer = SAKSNUMMER
+                    type = Sakstyper.FTRL
+                }
+            }
+            medlemskapsperiode {
+                fom = MARS2026.minusYears(2)
+                tom = MARS2026.plusYears(1)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                trygdedekning = Trygdedekninger.FULL_DEKNING
+            }
+        }
+
+        val prosessinstans = Prosessinstans.forTest {
+            behandling = behandlingsresultat.behandling
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+        // 2024 har allerede en aktiv årsavregning, 2025 har ikke
+        every { årsavregningService.harAktivÅrsavregningForÅr(SAKSNUMMER, 2024) } returns true
+        every { årsavregningService.harAktivÅrsavregningForÅr(SAKSNUMMER, 2025) } returns false
+
+
+        oppretteÅrsavregningVedEndring.utfør(prosessinstans)
+
+
         verify {
             prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
                 SAKSNUMMER,
@@ -146,7 +191,7 @@ class OppretteÅrsavregningVedEndringTest {
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
-        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+        every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
 
 
         oppretteÅrsavregningVedEndring.utfør(prosessinstans)
@@ -189,7 +234,7 @@ class OppretteÅrsavregningVedEndringTest {
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
-        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+        every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
 
 
         oppretteÅrsavregningVedEndring.utfør(prosessinstans)
@@ -250,7 +295,7 @@ class OppretteÅrsavregningVedEndringTest {
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns opprinneligBehandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat
-        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+        every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
 
         oppretteÅrsavregningVedEndring.utfør(prosessinstans)
 
@@ -317,7 +362,7 @@ class OppretteÅrsavregningVedEndringTest {
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns opprinneligBehandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat
-        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+        every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
 
         oppretteÅrsavregningVedEndring.utfør(prosessinstans)
 
@@ -377,7 +422,7 @@ class OppretteÅrsavregningVedEndringTest {
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns opprinneligBehandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat
-        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+        every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
 
         oppretteÅrsavregningVedEndring.utfør(prosessinstans)
 
@@ -417,7 +462,7 @@ class OppretteÅrsavregningVedEndringTest {
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
-        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+        every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
 
         oppretteÅrsavregningVedEndring.utfør(prosessinstans)
 
@@ -462,7 +507,7 @@ class OppretteÅrsavregningVedEndringTest {
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
-        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+        every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
 
         oppretteÅrsavregningVedEndring.utfør(prosessinstans)
 
@@ -585,7 +630,7 @@ class OppretteÅrsavregningVedEndringTest {
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
-        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+        every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
 
         oppretteÅrsavregningVedEndring.utfør(prosessinstans)
 
@@ -627,7 +672,7 @@ class OppretteÅrsavregningVedEndringTest {
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
-        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+        every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
 
         oppretteÅrsavregningVedEndring.utfør(prosessinstans)
 
@@ -672,7 +717,7 @@ class OppretteÅrsavregningVedEndringTest {
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
-        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+        every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
 
         oppretteÅrsavregningVedEndring.utfør(prosessinstans)
 
@@ -736,7 +781,7 @@ class OppretteÅrsavregningVedEndringTest {
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns opprinneligBehandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat
-        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+        every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
 
         oppretteÅrsavregningVedEndring.utfør(prosessinstans)
 
@@ -803,7 +848,7 @@ class OppretteÅrsavregningVedEndringTest {
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns opprinneligBehandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat
-        every { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) } returns emptyList()
+        every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
 
         oppretteÅrsavregningVedEndring.utfør(prosessinstans)
 

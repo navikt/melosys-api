@@ -1,6 +1,7 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
 import mu.KotlinLogging
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
@@ -45,6 +46,25 @@ class ÅrsavregningService(
             .mapNotNull { it.årsavregning }
             .filter { aar == null || it.aar == aar }
     }
+
+    /** Sjekker om saken har en aktiv ÅRSAVREGNING-behandling for [år]. Behandlinger uten aarsavregning-rad telles ikke. */
+    @Transactional(readOnly = true)
+    fun harAktivÅrsavregningForÅr(saksnummer: String, år: Int): Boolean =
+        fagsakService.hentFagsak(saksnummer)
+            .hentAktiveÅrsavregninger()
+            .any { hentÅrFraÅrsavregningDefensivt(it) == år }
+
+    /** Returnerer null hvis behandlingen mangler aarsavregning-rad. Ekte feil propageres. */
+    private fun hentÅrFraÅrsavregningDefensivt(behandling: Behandling): Int? =
+        try {
+            behandlingsresultatService.hentBehandlingsresultat(behandling.id).hentÅrsavregning().aar
+        } catch (e: IllegalStateException) {
+            log.warn(e) {
+                "Kunne ikke hente år fra åpen ÅRSAVREGNING-behandling ${behandling.id} " +
+                    "(sak ${behandling.fagsak.saksnummer}) — antar ikke duplikat, ny ÅRSAVREGNING vil opprettes"
+            }
+            null
+        }
 
     @Transactional(readOnly = true)
     fun finnÅrsavregningForBehandling(behandlingID: Long): ÅrsavregningModel? {
