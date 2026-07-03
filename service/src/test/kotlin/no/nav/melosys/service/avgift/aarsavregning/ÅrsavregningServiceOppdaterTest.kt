@@ -24,7 +24,6 @@ internal class ÅrsavregningServiceOppdaterTest : ÅrsavregningServiceTestBase()
         }
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.hentÅrsavregning()))
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
-        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(1L) }.returns(behandlingsresultat)
 
 
         årsavregningService.oppdater(1L, 1L, BigDecimal.valueOf(5.2))
@@ -47,7 +46,6 @@ internal class ÅrsavregningServiceOppdaterTest : ÅrsavregningServiceTestBase()
         }
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.hentÅrsavregning()))
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
-        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(1L) }.returns(behandlingsresultat)
 
 
         årsavregningService.oppdater(1L, 1L, BigDecimal.ONE, null, null)
@@ -71,7 +69,6 @@ internal class ÅrsavregningServiceOppdaterTest : ÅrsavregningServiceTestBase()
         }
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.hentÅrsavregning()))
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
-        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(1L) }.returns(behandlingsresultat)
 
 
         årsavregningService.oppdater(1L, 1L, BigDecimal.valueOf(42.0), BigDecimal.valueOf(4.4))
@@ -95,7 +92,6 @@ internal class ÅrsavregningServiceOppdaterTest : ÅrsavregningServiceTestBase()
         }
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.hentÅrsavregning()))
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
-        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(1L) }.returns(behandlingsresultat)
 
 
         årsavregningService.oppdater(1L, 1L, BigDecimal.valueOf(42.0), BigDecimal.valueOf(4.4))
@@ -117,7 +113,6 @@ internal class ÅrsavregningServiceOppdaterTest : ÅrsavregningServiceTestBase()
         }
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.hentÅrsavregning()))
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
-        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(1L) }.returns(behandlingsresultat)
         behandlingsresultat.hentÅrsavregning().harInnbetaltTrygdeavgift shouldBe null
 
 

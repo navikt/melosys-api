@@ -57,7 +57,6 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
-        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(1L) } returns behandlingsresultat
         every { behandlingsresultatService.lagreOgFlush(any()) } returns behandlingsresultat
 
         årsavregningService.oppdaterHarInnbetaltTrygdeavgift(1L, true)
@@ -123,7 +122,6 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
         )
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
-        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(1L) } returns behandlingsresultat
 
         val behandlingsresultatCaptor = slot<Behandlingsresultat>()
         every { behandlingsresultatService.lagreOgFlush(capture(behandlingsresultatCaptor)) } answers {
@@ -183,7 +181,6 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
         val eksisterendeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
-        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(1L) } returns behandlingsresultat
         every { behandlingsresultatService.lagreOgFlush(any()) } returns behandlingsresultat
 
 
@@ -224,7 +221,6 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
-        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(1L) } returns behandlingsresultat
         every { behandlingsresultatService.lagreOgFlush(any()) } returns behandlingsresultat
 
 
@@ -290,7 +286,6 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns tidligereBehandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat
-        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(2L) } returns behandlingsresultat
 
         val behandlingsresultatCaptor = slot<Behandlingsresultat>()
         every { behandlingsresultatService.lagreOgFlush(capture(behandlingsresultatCaptor)) } answers {
