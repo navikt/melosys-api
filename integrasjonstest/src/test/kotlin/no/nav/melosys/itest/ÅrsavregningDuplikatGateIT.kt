@@ -17,7 +17,6 @@ import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.math.BigDecimal
 import java.time.LocalDate
 
 /** Verifiserer mot ekte DB at [ÅrsavregningService.harAktivÅrsavregningForÅr] er konsistent med SQL-guarden i [AarsavregningRepository]. */
