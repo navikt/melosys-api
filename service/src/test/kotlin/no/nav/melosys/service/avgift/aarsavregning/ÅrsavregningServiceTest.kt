@@ -36,15 +36,10 @@ class ÅrsavregningServiceTest {
         ÅrsavregningService(aarsavregningRepository, behandlingsresultatService, fagsakService, trygdeavgiftService)
     }
 
-    /**
-     * MELOSYS-8161: en åpen ÅRSAVREGNING-behandling som mangler aarsavregning-rad (år ikke satt)
-     * skal IKKE regnes som en eksisterende årsavregning for året — og må ikke kaste.
-     */
     @Test
     fun `harAktivÅrsavregningForÅr - åpen årsavregning uten år (mangler aarsavregning-rad) blokkerer ikke`() {
         val behandling = aarsavregningBehandling(id = 100L)
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns behandling.fagsak
-        // Zombie: ingen årsavregning-rad → hentÅrsavregning() kaster, defensiv håndtering returnerer null
         every { behandlingsresultatService.hentBehandlingsresultat(100L) } returns Behandlingsresultat.forTest { }
 
         service.harAktivÅrsavregningForÅr(SAKSNUMMER, 2024) shouldBe false
@@ -65,7 +60,6 @@ class ÅrsavregningServiceTest {
     fun `harAktivÅrsavregningForÅr - ekte feil (ikke manglende aarsavregning-rad) propageres, svelges ikke`() {
         val behandling = aarsavregningBehandling(id = 100L)
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns behandling.fagsak
-        // En genuin DB-/infra-feil (ikke IllegalStateException fra hentÅrsavregning) skal IKKE maskeres som «mangler år»
         every { behandlingsresultatService.hentBehandlingsresultat(100L) } throws RuntimeException("simulert DB-feil")
 
         shouldThrow<RuntimeException> {

@@ -20,17 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
 
-/**
- * MELOSYS-8161: verifiserer mot ekte DB at gaten i `OppretteÅrsavregningVedEndring`
- * ([ÅrsavregningService.harAktivÅrsavregningForÅr]) er konsistent med den nedstrøms SQL-guarden
- * ([AarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr]) — det er nettopp uenigheten
- * mellom disse to (gammel gate filtrerte på IKKE_FASTSATT, SQL teller alle ikke-AVSLUTTET) som ga
- * den misvisende feilmeldingen.
- *
- * Dekker laget som unit-testene (som mocker repoet) og e2e-en (ren «uten år», grønn også mot master)
- * ikke treffer: den faktiske feilstien der en år-satt, ikke-IKKE_FASTSATT aktiv ÅRSAVREGNING glapp
- * i den gamle gaten men ble telt av SQL-guarden.
- */
+/** Verifiserer mot ekte DB at [ÅrsavregningService.harAktivÅrsavregningForÅr] er konsistent med SQL-guarden i [AarsavregningRepository]. */
 class ÅrsavregningDuplikatGateIT(
     @Autowired private val årsavregningService: ÅrsavregningService,
     @Autowired private val aarsavregningRepository: AarsavregningRepository,

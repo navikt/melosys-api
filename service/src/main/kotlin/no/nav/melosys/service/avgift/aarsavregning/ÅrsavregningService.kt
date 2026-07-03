@@ -47,28 +47,14 @@ class ÅrsavregningService(
             .filter { aar == null || it.aar == aar }
     }
 
-    /**
-     * MELOSYS-8161: Sjekker om saken allerede har en aktiv ÅRSAVREGNING-behandling for [år].
-     *
-     * En åpen ÅRSAVREGNING-behandling som ennå mangler aarsavregning-rad (år ikke satt) regnes
-     * IKKE som en eksisterende årsavregning for året og blokkerer derfor ikke automatisk
-     * opprettelse — ny ÅRSAVREGNING skal opprettes
-     * MELOSYS-8045/MELOSYS-8059). Bruker samme defensive mønster som
-     * ÅrsavregningIkkeSkattepliktigeProsessGenerator.
-     */
+    /** Sjekker om saken har en aktiv ÅRSAVREGNING-behandling for [år]. Behandlinger uten aarsavregning-rad telles ikke. */
     @Transactional(readOnly = true)
     fun harAktivÅrsavregningForÅr(saksnummer: String, år: Int): Boolean =
         fagsakService.hentFagsak(saksnummer)
             .hentAktiveÅrsavregninger()
             .any { hentÅrFraÅrsavregningDefensivt(it) == år }
 
-    /**
-     * Returnerer null KUN når åpen ÅRSAVREGNING-behandling mangler aarsavregning-rad
-     * ([Behandlingsresultat.hentÅrsavregning] kaster IllegalStateException), slik at ny ÅRSAVREGNING
-     * opprettes for året per fag-avklaring. Ekte feil (f.eks. DB-feil fra
-     * [BehandlingsresultatService.hentBehandlingsresultat]) propageres bevisst i stedet for å svelges,
-     * så de ikke maskeres som «mangler år».
-     */
+    /** Returnerer null hvis behandlingen mangler aarsavregning-rad. Ekte feil propageres. */
     private fun hentÅrFraÅrsavregningDefensivt(behandling: Behandling): Int? =
         try {
             behandlingsresultatService.hentBehandlingsresultat(behandling.id).hentÅrsavregning().aar
