@@ -125,8 +125,6 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultatFørstegangsbehandling
         every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultatÅrsavregning
         every { behandlingsresultatService.hentBehandlingsresultat(3L) } returns behandlingsresultatNyVurdering
-        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(2L) } returns behandlingsresultatÅrsavregning
-        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(3L) } returns behandlingsresultatNyVurdering
         every { fagsakService.hentFagsak(any()) } returns fagsak
         every { behandlingsresultatService.lagreOgFlush(behandlingsresultatFørstegangsbehandling) } returns behandlingsresultatFørstegangsbehandling
         every { behandlingsresultatService.lagreOgFlush(behandlingsresultatÅrsavregning) } returns behandlingsresultatÅrsavregning
