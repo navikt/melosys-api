@@ -48,7 +48,7 @@
         <!-- NAV -->
         <nav.tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</nav.tjenestespesifikasjoner.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
-        <doksys.dokumentproduksjon.version>44-7d14e70</doksys.dokumentproduksjon.version>
+        <doksys.dokumentproduksjon.version>45-26485e1</doksys.dokumentproduksjon.version>
         <token-support.version>6.0.8</token-support.version>
 
 
@@ -76,7 +76,7 @@
         <mockk.version>1.14.9</mockk.version>
         <micrometer-jvm-extras.version>0.3.0</micrometer-jvm-extras.version>
         <networknt.json-schema-validator.version>3.0.3</networknt.json-schema-validator.version>
-        <ojdbc.version>21.16.0.0</ojdbc.version>
+        <ojdbc.version>23.26.2.0.0</ojdbc.version>
         <okhttp.version>5.3.2</okhttp.version>
         <oracle.version>18</oracle.version>
         <oxmlparserv2.version>11.2.0.1.nojaxpservice</oxmlparserv2.version>

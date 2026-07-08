@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.0
       - name: Setup Maven
         uses: actions/cache@v5
         with:
@@ -27,7 +27,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Set up JDK 21
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v5.2.0
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -45,21 +45,21 @@ jobs:
         run: mvn clean verify --threads=8 -B -e -U --settings .github/settings.xml
 
       - name: Integration Test Report
-        uses: mikepenz/action-junit-report@v6.4.1
+        uses: mikepenz/action-junit-report@v6.4.2
         if: success() || failure()
         with:
           check_name: 'Integration Tests'
           report_paths: '**/target/failsafe-reports/TEST-*.xml'
 
       - name: Unit Test Report
-        uses: mikepenz/action-junit-report@v6.4.1
+        uses: mikepenz/action-junit-report@v6.4.2
         if: success() || failure()
         with:
           check_name: 'Unit Tests'
           report_paths: '**/target/surefire-reports/TEST-*.xml'
 
       - name: Code Coverage Report
-        uses: madrapps/jacoco-report@v1.7.2
+        uses: madrapps/jacoco-report@v1.8.0
         if: success() || failure()
         with:
           paths: '**/target/site/jacoco/jacoco.xml'
