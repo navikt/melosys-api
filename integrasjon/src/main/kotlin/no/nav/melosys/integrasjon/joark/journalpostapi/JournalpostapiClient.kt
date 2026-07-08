@@ -5,6 +5,7 @@ import no.nav.melosys.integrasjon.felles.JsonRestIntegrasjon
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 
 private val log = KotlinLogging.logger { }
 
@@ -108,7 +109,7 @@ class JournalpostapiClient(
             .uri("/journalpost/{kildeJournalpostId}/knyttTilAnnenSak", kildeJournalpostId)
             .bodyValue(request)
             .retrieve()
-            .bodyToMono(KnyttTilAnnenSakResponse::class.java)
+            .bodyToMono<KnyttTilAnnenSakResponse>()
             .block() ?: error("Kunne ikke hente body for PUT /journalpost/$kildeJournalpostId/knyttTilAnnenSak")
     }
 }

@@ -22,6 +22,8 @@ import no.nav.melosys.integrasjon.joark.journalpostapi.dto.AvsenderMottaker.IdTy
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.Bruker.BrukerIdType.AKTOERID
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.Bruker.BrukerIdType.FNR
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.FerdigstillJournalpostRequest
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.KnyttTilAnnenSakRequest
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.KnyttTilAnnenSakResponse
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OppdaterJournalpostRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostResponse
@@ -42,6 +44,7 @@ class JoarkServiceTest {
 
     private val ferdigstillJournalpostCaptor = slot<FerdigstillJournalpostRequest>()
     private val oppdaterJournalpostRequestCaptor = slot<OppdaterJournalpostRequest>()
+    private val knyttTilAnnenSakRequestCaptor = slot<KnyttTilAnnenSakRequest>()
     private val logiskVedleggTittelCaptor = mutableListOf<String>()
 
     @BeforeEach
@@ -244,6 +247,8 @@ class JoarkServiceTest {
             safJournalpost("333", gammelAktørId, Brukertype.FNR)
         )
         every { journalpostapiClient.oppdaterJournalpost(capture(oppdaterJournalpostRequestCaptor), any()) } just Runs
+        every { journalpostapiClient.feilregistrerSakstilknytning(any()) } just Runs
+        every { journalpostapiClient.knyttTilAnnenSak(any(), capture(knyttTilAnnenSakRequestCaptor)) } returns KnyttTilAnnenSakResponse("999")
 
         joarkService.oppdaterJournalposterMedNyAktørId(request, gammelAktørId, nyAktørId)
 
@@ -253,8 +258,19 @@ class JoarkServiceTest {
             idType shouldBe AKTOERID
         }
         oppdatering.dokumenter shouldHaveSize 0
+
+        knyttTilAnnenSakRequestCaptor.captured.run {
+            sakstype shouldBe KnyttTilAnnenSakRequest.Sakstype.FAGSAK
+            fagsakId shouldBe "MEL-123"
+            tema shouldBe Tema.MED.kode
+            bruker.id shouldBe nyAktørId
+            bruker.idType shouldBe AKTOERID
+        }
+
         verify(exactly = 1) { journalpostapiClient.oppdaterJournalpost(any(), "111") }
         verify(exactly = 1) { journalpostapiClient.oppdaterJournalpost(any(), any()) }
+        verify(exactly = 1) { journalpostapiClient.feilregistrerSakstilknytning("111") }
+        verify(exactly = 1) { journalpostapiClient.knyttTilAnnenSak("111", any()) }
         verify(exactly = 0) { journalpostapiClient.ferdigstillJournalpost(any(), any()) }
     }
 

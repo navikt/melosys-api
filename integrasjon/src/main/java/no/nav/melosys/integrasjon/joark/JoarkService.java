@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -26,6 +27,8 @@ import org.springframework.util.CollectionUtils;
 @Service
 @Primary
 public class JoarkService implements JoarkFasade {
+    private static final String AUTOMATISK_JOURNALFOERENDE_ENHET = "9999";
+
     private final JournalpostapiClient journalpostapiClient;
     private final SafClient safClient;
 
@@ -164,8 +167,27 @@ public class JoarkService implements JoarkFasade {
             .stream()
             .filter(journalpost -> journalpost.getBrukerIdType() == BrukerIdType.AKTØR_ID)
             .filter(journalpost -> gammelAktørId.equals(journalpost.getBrukerId()))
-            .map(Journalpost::getJournalpostId)
-            .forEach(journalpostID -> oppdaterJournalpostBrukerAktørId(journalpostID, nyAktørId));
+            .forEach(journalpost -> flyttJournalpostTilNyAktørId(journalpost, nyAktørId));
+    }
+
+    private void flyttJournalpostTilNyAktørId(Journalpost journalpost, String nyAktørId) {
+        String journalpostID = journalpost.getJournalpostId();
+        feilregistrerSakstilknytning(journalpostID);
+        var nyJournalPostId = knyttTilAnnenSak(journalpostID, byggKnyttTilAnnenSakRequest(journalpost, nyAktørId));
+        oppdaterJournalpostBrukerAktørId(nyJournalPostId, nyAktørId);
+
+    }
+
+    private KnyttTilAnnenSakRequest byggKnyttTilAnnenSakRequest(Journalpost journalpost, String nyAktørId) {
+        return new KnyttTilAnnenSakRequest(
+            KnyttTilAnnenSakRequest.Sakstype.FAGSAK,
+            journalpost.getSaksnummer(),
+            Fagsystem.MELOSYS.getKode(),
+            journalpost.getTema(),
+            new Bruker(Bruker.BrukerIdType.AKTOERID, nyAktørId),
+            AUTOMATISK_JOURNALFOERENDE_ENHET,
+            null
+        );
     }
 
     @Override
