@@ -267,7 +267,7 @@ class JoarkServiceTest {
             bruker.idType shouldBe AKTOERID
         }
 
-        verify(exactly = 1) { journalpostapiClient.oppdaterJournalpost(any(), "111") }
+        verify(exactly = 1) { journalpostapiClient.oppdaterJournalpost(any(), "999") }
         verify(exactly = 1) { journalpostapiClient.oppdaterJournalpost(any(), any()) }
         verify(exactly = 1) { journalpostapiClient.feilregistrerSakstilknytning("111") }
         verify(exactly = 1) { journalpostapiClient.knyttTilAnnenSak("111", any()) }
