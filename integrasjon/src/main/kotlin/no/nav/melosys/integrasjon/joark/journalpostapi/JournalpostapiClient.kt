@@ -92,26 +92,23 @@ class JournalpostapiClient(
         }
 
         journalpostapiWebClient.patch()
-        .uri("/journalpost/{journalpostId}/feilregistrer/feilregistrerSakstilknytning", journalpostId)
-        .retrieve()
-        .toBodilessEntity()
-        .block()
+            .uri("/journalpost/{journalpostId}/feilregistrer/feilregistrerSakstilknytning", journalpostId)
+            .retrieve()
+            .toBodilessEntity()
+            .block()
 
     }
 
-    fun kopierJournalpost(kildeJournalpostId: String) {
+    fun knyttTilAnnenSak(kildeJournalpostId: String, request: KnyttTilAnnenSakRequest): KnyttTilAnnenSakResponse {
         if (log.isInfoEnabled) {
-            log.info("Kloner journalposten med id {} og setter den nye journalposten i en midlertidig status slik at den kan knyttes til en annen sak/bruker", kildeJournalpostId)
+            log.info("Knytter dokumentene på journalpost med id {} til en annen sak", kildeJournalpostId)
         }
 
-        journalpostapiWebClient.post()
-        .uri("/journalpost/kopierJournalpost?kildeJournalpostId={kildeJournalpostId}")
-        .retrieve()
-        .toBodilessEntity()
-        .block()
+        return journalpostapiWebClient.put()
+            .uri("/journalpost/{kildeJournalpostId}/knyttTilAnnenSak", kildeJournalpostId)
+            .bodyValue(request)
+            .retrieve()
+            .bodyToMono(KnyttTilAnnenSakResponse::class.java)
+            .block() ?: error("Kunne ikke hente body for PUT /journalpost/$kildeJournalpostId/knyttTilAnnenSak")
     }
 }
-
-data class kopierJournalpostResponse(
-    val journalpostId: String,
-)

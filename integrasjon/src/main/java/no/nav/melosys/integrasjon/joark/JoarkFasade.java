@@ -7,6 +7,7 @@ import java.util.List;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.KnyttTilAnnenSakRequest;
 import org.springframework.retry.annotation.Retryable;
 
 @Retryable
@@ -48,21 +49,16 @@ public interface JoarkFasade {
     void oppdaterJournalposterMedNyAktørId(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
                                            String gammelAktørId,
                                            String nyAktørId);
-
     /**
      * Feilregistrerer sakstilknytning på journalpost. Skal brukes når en journalpost feilaktig har blitt knyttet til en sak.
      */
     void feilregistrerSakstilknytning(String journalpostId);
 
     /**
-     *
+     * Knytter dokumentene på en kildejournalpost til en annen sak. Joark utfører selv tilgangssjekk,
+     * validering og kopiering, og returnerer ID-en til den nye journalposten.
      */
-    void knyttTilAnnenSak(String kildeJournalpostId);
-
-    /**
-     *
-     */
-    void kopierJournalpost(String kildeJournalpostId);
+    String knyttTilAnnenSak(String kildeJournalpostId, KnyttTilAnnenSakRequest request);
 
     void validerDokumenterTilhørerSakOgHarTilgang(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
                                                    Collection<DokumentReferanse> dokumentReferanser);
