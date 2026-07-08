@@ -8,10 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.arkiv.BrukerIdType;
-import no.nav.melosys.domain.arkiv.DokumentReferanse;
-import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.arkiv.OpprettJournalpost;
+import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -166,6 +163,42 @@ public class JoarkService implements JoarkFasade {
             .filter(journalpost -> gammelAktørId.equals(journalpost.getBrukerId()))
             .map(Journalpost::getJournalpostId)
             .forEach(journalpostID -> oppdaterJournalpostBrukerAktørId(journalpostID, nyAktørId));
+    }
+
+    @Override
+    public void feilregistrerSakstilknytning(String journalpostId) {
+
+    }
+
+    @Override
+    public void knyttTilAnnenSak(String kildeJournalpostId) {
+        var journalpost = hentJournalpost(kildeJournalpostId);
+        harTilgangTilDokumenter(journalpost);
+
+
+
+    }
+
+    @Override
+    public void kopierJournalpost(String kildeJournalpostId) {
+
+    }
+
+
+    private Boolean harTilgangTilDokumenter(Journalpost journalpost){
+        var hovedDokument = journalpost.getHoveddokument();
+        var dokumenter = journalpost.getVedleggListe();
+
+        if (hovedDokument.harTilgangTilArkivVariant()) return true;
+
+        for ( ArkivDokument dokument : dokumenter ) {
+            if (dokument.harTilgangTilArkivVariant()) {
+                return true;
+            }
+        }
+
+        //Feilmelding
+        return false;
     }
 
     private void oppdaterJournalpostBrukerAktørId(String journalpostID, String aktørId) {

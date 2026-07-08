@@ -85,4 +85,33 @@ class JournalpostapiClient(
             .toBodilessEntity()
             .block()
     }
+
+    fun feilregistrerSakstilknytning(journalpostId: String) {
+        if (log.isInfoEnabled) {
+            log.info("Feilregistrer sakstilknytning for journalpost med id {}", journalpostId)
+        }
+
+        journalpostapiWebClient.patch()
+        .uri("/journalpost/{journalpostId}/feilregistrer/feilregistrerSakstilknytning", journalpostId)
+        .retrieve()
+        .toBodilessEntity()
+        .block()
+
+    }
+
+    fun kopierJournalpost(kildeJournalpostId: String) {
+        if (log.isInfoEnabled) {
+            log.info("Kloner journalposten med id {} og setter den nye journalposten i en midlertidig status slik at den kan knyttes til en annen sak/bruker", kildeJournalpostId)
+        }
+
+        journalpostapiWebClient.post()
+        .uri("/journalpost/kopierJournalpost?kildeJournalpostId={kildeJournalpostId}")
+        .retrieve()
+        .toBodilessEntity()
+        .block()
+    }
 }
+
+data class kopierJournalpostResponse(
+    val journalpostId: String,
+)

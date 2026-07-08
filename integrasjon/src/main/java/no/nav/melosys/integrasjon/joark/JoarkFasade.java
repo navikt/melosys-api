@@ -49,6 +49,21 @@ public interface JoarkFasade {
                                            String gammelAktørId,
                                            String nyAktørId);
 
+    /**
+     * Feilregistrerer sakstilknytning på journalpost. Skal brukes når en journalpost feilaktig har blitt knyttet til en sak.
+     */
+    void feilregistrerSakstilknytning(String journalpostId);
+
+    /**
+     *
+     */
+    void knyttTilAnnenSak(String kildeJournalpostId);
+
+    /**
+     *
+     */
+    void kopierJournalpost(String kildeJournalpostId);
+
     void validerDokumenterTilhørerSakOgHarTilgang(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
                                                    Collection<DokumentReferanse> dokumentReferanser);
 
