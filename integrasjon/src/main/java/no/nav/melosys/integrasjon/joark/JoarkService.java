@@ -23,11 +23,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 @Service
 @Primary
 public class JoarkService implements JoarkFasade {
+    private static final Logger log = LoggerFactory.getLogger(JoarkService.class);
     private static final String AUTOMATISK_JOURNALFOERENDE_ENHET = "9999";
 
     private final JournalpostapiClient journalpostapiClient;
@@ -164,21 +167,35 @@ public class JoarkService implements JoarkFasade {
     public void oppdaterJournalposterMedNyAktørId(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
                                                   String gammelAktørId,
                                                   String nyAktørId) {
-        hentJournalposterTilknyttetSak(hentJournalposterTilknyttetSakRequest)
+        String saksnummer = hentJournalposterTilknyttetSakRequest.saksnummer();
+
+        List<Journalpost> journalposterSomSkalFlyttes = hentJournalposterTilknyttetSak(hentJournalposterTilknyttetSakRequest)
             .stream()
             .filter(journalpost -> journalpost.getBrukerIdType() == BrukerIdType.AKTØR_ID)
             .filter(journalpost -> gammelAktørId.equals(journalpost.getBrukerId()))
-            .forEach(journalpost -> flyttJournalpostTilNyAktørId(journalpost, nyAktørId, hentJournalposterTilknyttetSakRequest.saksnummer()));
+            .toList();
+
+        log.info("Fant {} journalpost(er) med gammel aktørId som skal flyttes til ny aktørId for sak {}",
+            journalposterSomSkalFlyttes.size(), saksnummer);
+
+        journalposterSomSkalFlyttes.forEach(journalpost -> flyttJournalpostTilNyAktørId(journalpost, nyAktørId, saksnummer));
+
+        log.info("Ferdig med å flytte {} journalpost(er) til ny aktørId for sak {}",
+            journalposterSomSkalFlyttes.size(), saksnummer);
     }
 
     private void flyttJournalpostTilNyAktørId(Journalpost journalpost, String nyAktørId, String saksnummer) {
         String journalpostId = journalpost.getJournalpostId();
+        log.info("Flytter journalpost {} til ny aktørId for sak {}", journalpostId, saksnummer); //Slette til slutt.
+
         journalpostapiClient.feilregistrerSakstilknytning(journalpostId);
 
         KnyttTilAnnenSakRequest knyttTilAnnenSakRequest = byggKnyttTilAnnenSakRequest(journalpost, saksnummer);
         String nyJournalpostId = journalpostapiClient.knyttTilAnnenSak(journalpostId, knyttTilAnnenSakRequest).getNyJournalpostId();
+        log.info("Journalpost {} kopiert til ny journalpost {} for sak {}", journalpostId, nyJournalpostId, saksnummer); //Slette til slutt.
 
         oppdaterJournalpostBrukerAktørId(nyJournalpostId, nyAktørId);
+        log.info("Oppdaterte ny journalpost {} med ny aktørId for sak {}", nyJournalpostId, saksnummer); //Slette til slutt.
     }
 
     private KnyttTilAnnenSakRequest byggKnyttTilAnnenSakRequest(Journalpost journalpost, String saksnummer) {
