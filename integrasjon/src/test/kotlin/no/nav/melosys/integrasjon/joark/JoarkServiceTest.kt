@@ -236,7 +236,7 @@ class JoarkServiceTest {
     }
 
     @Test
-    fun `oppdaterJournalposterMedNyAktørId oppdaterer kun journalposter med gammel aktørId`() {
+    fun `oppdaterJournalposterMedNyAktørId flytter kun journalposter med gammel aktørId`() {
         val request = HentJournalposterTilknyttetSakRequest(123L, "MEL-123")
         val gammelAktørId = "1111111111111"
         val nyAktørId = "2222222222222"
@@ -246,31 +246,22 @@ class JoarkServiceTest {
             safJournalpost("222", "3333333333333", Brukertype.AKTOERID),
             safJournalpost("333", gammelAktørId, Brukertype.FNR)
         )
-        every { journalpostapiClient.oppdaterJournalpost(capture(oppdaterJournalpostRequestCaptor), any()) } just Runs
         every { journalpostapiClient.feilregistrerSakstilknytning(any()) } just Runs
         every { journalpostapiClient.knyttTilAnnenSak(any(), capture(knyttTilAnnenSakRequestCaptor)) } returns KnyttTilAnnenSakResponse("999")
 
         joarkService.oppdaterJournalposterMedNyAktørId(request, gammelAktørId, nyAktørId)
 
-        val oppdatering = oppdaterJournalpostRequestCaptor.captured
-        oppdatering.bruker.shouldNotBeNull().run {
-            id shouldBe nyAktørId
-            idType shouldBe AKTOERID
-        }
-        oppdatering.dokumenter shouldHaveSize 0
-
         knyttTilAnnenSakRequestCaptor.captured.run {
             sakstype shouldBe KnyttTilAnnenSakRequest.Sakstype.FAGSAK
             fagsakId shouldBe "MEL-123"
             tema shouldBe Tema.MED.kode
-            bruker.id shouldBe gammelAktørId
+            bruker.id shouldBe nyAktørId
             bruker.idType shouldBe AKTOERID
         }
 
-        verify(exactly = 1) { journalpostapiClient.oppdaterJournalpost(any(), "999") }
-        verify(exactly = 1) { journalpostapiClient.oppdaterJournalpost(any(), any()) }
         verify(exactly = 1) { journalpostapiClient.feilregistrerSakstilknytning("111") }
         verify(exactly = 1) { journalpostapiClient.knyttTilAnnenSak("111", any()) }
+        verify(exactly = 0) { journalpostapiClient.oppdaterJournalpost(any(), any()) }
         verify(exactly = 0) { journalpostapiClient.ferdigstillJournalpost(any(), any()) }
     }
 

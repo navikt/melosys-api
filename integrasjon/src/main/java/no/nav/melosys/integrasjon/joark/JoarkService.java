@@ -190,35 +190,24 @@ public class JoarkService implements JoarkFasade {
 
         journalpostapiClient.feilregistrerSakstilknytning(journalpostId);
 
-        KnyttTilAnnenSakRequest knyttTilAnnenSakRequest = byggKnyttTilAnnenSakRequest(journalpost, saksnummer);
+        KnyttTilAnnenSakRequest knyttTilAnnenSakRequest = byggKnyttTilAnnenSakRequest(journalpost, nyAktørId, saksnummer);
         String nyJournalpostId = journalpostapiClient.knyttTilAnnenSak(journalpostId, knyttTilAnnenSakRequest).getNyJournalpostId();
-        log.info("Journalpost {} kopiert til ny journalpost {} for sak {}", journalpostId, nyJournalpostId, saksnummer); //Slette til slutt.
-
-        oppdaterJournalpostBrukerAktørId(nyJournalpostId, nyAktørId);
-        log.info("Oppdaterte ny journalpost {} med ny aktørId for sak {}", nyJournalpostId, saksnummer); //Slette til slutt.
+        log.info("Journalpost {} kopiert til ny journalpost {} med ny aktørId for sak {}", journalpostId, nyJournalpostId, saksnummer); //Slette til slutt.
     }
 
-    private KnyttTilAnnenSakRequest byggKnyttTilAnnenSakRequest(Journalpost journalpost, String saksnummer) {
+    private KnyttTilAnnenSakRequest byggKnyttTilAnnenSakRequest(Journalpost journalpost, String nyAktørId, String saksnummer) {
         return new KnyttTilAnnenSakRequest(
             KnyttTilAnnenSakRequest.Sakstype.FAGSAK,
             saksnummer,
             Fagsystem.MELOSYS.getKode(),
             journalpost.getTema(),
             Bruker.builder()
-                .id(journalpost.getBrukerId())
+                .id(nyAktørId)
                 .idType(Bruker.BrukerIdType.AKTOERID)
                 .build(),
             AUTOMATISK_JOURNALFOERENDE_ENHET, //Ved automatisk journalføring uten mennesker involvert, skal enhet settes til "9999".
             null //Dersom man ikke oppgir noen dokumenter, kopieres hele journalposten over
         );
-    }
-
-    private void oppdaterJournalpostBrukerAktørId(String journalpostID, String nyAktørId) {
-        OppdaterJournalpostRequest request = new OppdaterJournalpostRequest.Builder()
-            .medBruker(nyAktørId, Bruker.BrukerIdType.AKTOERID)
-            .build();
-
-        journalpostapiClient.oppdaterJournalpost(request, journalpostID);
     }
 
     private boolean harAvsenderMottakerFelt(JournalpostOppdatering journalpostOppdatering) {
