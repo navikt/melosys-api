@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
-import no.nav.melosys.integrasjon.trygdeavgift.dto.BeregningsforklaringDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningRequest
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
@@ -28,15 +27,6 @@ import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
-
-/**
- * Resultatet av en trygdeavgiftsberegning på PUT-veien: de persisterte periodene samt de
- * distinkte beregningsforklaringene fra beregningsmotoren. Forklaringene persisteres ikke.
- */
-data class BeregnetTrygdeavgiftMedForklaring(
-    val trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>,
-    val beregningsforklaringer: List<BeregningsforklaringDto>,
-)
 
 @Service
 class TrygdeavgiftsberegningService(
