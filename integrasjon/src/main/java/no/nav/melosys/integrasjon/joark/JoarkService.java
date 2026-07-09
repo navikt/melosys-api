@@ -190,14 +190,14 @@ public class JoarkService implements JoarkFasade {
                 .id(journalpost.getBrukerId())
                 .idType(Bruker.BrukerIdType.AKTOERID)
                 .build(),
-            AUTOMATISK_JOURNALFOERENDE_ENHET,
-            null
+            AUTOMATISK_JOURNALFOERENDE_ENHET, //Ved automatisk journalføring uten mennesker involvert, skal enhet settes til "9999".
+            null //Dersom man ikke oppgir noen dokumenter, kopieres hele journalposten over
         );
     }
 
-    private void oppdaterJournalpostBrukerAktørId(String journalpostID, String aktørId) {
+    private void oppdaterJournalpostBrukerAktørId(String journalpostID, String nyAktørId) {
         OppdaterJournalpostRequest request = new OppdaterJournalpostRequest.Builder()
-            .medBruker(aktørId, Bruker.BrukerIdType.AKTOERID)
+            .medBruker(nyAktørId, Bruker.BrukerIdType.AKTOERID)
             .build();
 
         journalpostapiClient.oppdaterJournalpost(request, journalpostID);
