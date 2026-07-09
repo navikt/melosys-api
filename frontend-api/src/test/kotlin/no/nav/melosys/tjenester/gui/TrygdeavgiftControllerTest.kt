@@ -22,7 +22,7 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.EkskludertInntektspostDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.Ekskluderingsaarsak
 import no.nav.melosys.integrasjon.trygdeavgift.dto.InntektspostDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.OrdinaerAvgiftspostDto
-import no.nav.melosys.integrasjon.trygdeavgift.dto.Regelgruppe
+import no.nav.melosys.integrasjon.trygdeavgift.dto.Inntektsgruppe
 import no.nav.melosys.service.avgift.BeregnetTrygdeavgiftMedForklaring
 import no.nav.melosys.service.avgift.EøsPensjonistTrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
@@ -197,7 +197,7 @@ class TrygdeavgiftControllerTest(
 
     private fun lagBeregningsforklaringDto(): BeregningsforklaringDto = BeregningsforklaringDto(
         aar = 2025,
-        regelgruppe = Regelgruppe.SAMLET,
+        inntektsgruppe = Inntektsgruppe.SAMLET,
         valgtRegel = Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL,
         aarsak = Beregningsaarsak.BEREGNET,
         inntektsgrunnlag = listOf(

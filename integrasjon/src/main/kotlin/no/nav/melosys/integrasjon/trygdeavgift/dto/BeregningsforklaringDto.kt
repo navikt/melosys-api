@@ -5,7 +5,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 /**
- * Forklaring på hvordan trygdeavgiften ble beregnet for et gitt år/regelgruppe.
+ * Forklaring på hvordan trygdeavgiften ble beregnet for et gitt år/inntektsgruppe.
  *
  * Speiler eksakt kontrakten fra melosys-trygdeavgift-beregning sin
  * [BeregnetTrygdeavgiftResponse]. Feltnavn/casing er ASCII og endres kun ved en
@@ -16,7 +16,7 @@ import java.time.LocalDate
  */
 data class BeregningsforklaringDto(
     val aar: Int,
-    val regelgruppe: Regelgruppe,
+    val inntektsgruppe: Inntektsgruppe,
     val valgtRegel: Avgiftsberegningsregel,
     val aarsak: Beregningsaarsak,
     val inntektsgrunnlag: List<InntektspostDto>,
@@ -59,7 +59,7 @@ data class EkskludertInntektspostDto(
     val aarsak: Ekskluderingsaarsak,
 )
 
-enum class Regelgruppe {
+enum class Inntektsgruppe {
     SAMLET,
     HELSEDEL,
     PENSJONSDEL,

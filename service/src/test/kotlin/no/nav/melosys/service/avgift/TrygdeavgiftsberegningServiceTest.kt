@@ -239,7 +239,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 )
                 val forklaring = BeregningsforklaringDto(
                     aar = 2025,
-                    regelgruppe = Regelgruppe.SAMLET,
+                    inntektsgruppe = Inntektsgruppe.SAMLET,
                     valgtRegel = Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL,
                     aarsak = Beregningsaarsak.BEREGNET,
                     inntektsgrunnlag = listOf(
