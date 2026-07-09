@@ -21,6 +21,7 @@ import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*;
 import no.nav.melosys.integrasjon.joark.saf.SafClient;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Primary;
+import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -167,23 +168,23 @@ public class JoarkService implements JoarkFasade {
             .stream()
             .filter(journalpost -> journalpost.getBrukerIdType() == BrukerIdType.AKTØR_ID)
             .filter(journalpost -> gammelAktørId.equals(journalpost.getBrukerId()))
-            .forEach(journalpost -> flyttJournalpostTilNyAktørId(journalpost, nyAktørId));
+            .forEach(journalpost -> flyttJournalpostTilNyAktørId(journalpost, nyAktørId, hentJournalposterTilknyttetSakRequest.saksnummer()));
     }
 
-    private void flyttJournalpostTilNyAktørId(Journalpost journalpost, String nyAktørId) {
+    private void flyttJournalpostTilNyAktørId(Journalpost journalpost, String nyAktørId, String saksnummer) {
         String journalpostId = journalpost.getJournalpostId();
         journalpostapiClient.feilregistrerSakstilknytning(journalpostId);
 
-        KnyttTilAnnenSakRequest knyttTilAnnenSakRequest = byggKnyttTilAnnenSakRequest(journalpost);
+        KnyttTilAnnenSakRequest knyttTilAnnenSakRequest = byggKnyttTilAnnenSakRequest(journalpost, saksnummer);
         String nyJournalpostId = journalpostapiClient.knyttTilAnnenSak(journalpostId, knyttTilAnnenSakRequest).getNyJournalpostId();
 
         oppdaterJournalpostBrukerAktørId(nyJournalpostId, nyAktørId);
     }
 
-    private KnyttTilAnnenSakRequest byggKnyttTilAnnenSakRequest(Journalpost journalpost) {
+    private KnyttTilAnnenSakRequest byggKnyttTilAnnenSakRequest(Journalpost journalpost, String saksnummer) {
         return new KnyttTilAnnenSakRequest(
             KnyttTilAnnenSakRequest.Sakstype.FAGSAK,
-            journalpost.getSaksnummer(),
+            saksnummer,
             Fagsystem.MELOSYS.getKode(),
             journalpost.getTema(),
             Bruker.builder()
