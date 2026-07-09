@@ -125,7 +125,7 @@ class TrygdeavgiftControllerTest(
         )
             .andExpect(status().isOk)
             .andExpectResponseBody(
-                forventetBeregnetTrygdeavgiftDto().copy(beregningsforklaringer = listOf(forklaring))
+                forventetBeregnetTrygdeavgiftDto(beregningsforklaringer = listOf(forklaring))
             )
     }
 
@@ -236,10 +236,13 @@ class TrygdeavgiftControllerTest(
         fastsattAvgiftPerMaaned = 3850,
     )
 
-    private fun forventetBeregnetTrygdeavgiftDto(): BeregnetTrygdeavgiftDto {
+    private fun forventetBeregnetTrygdeavgiftDto(
+        beregningsforklaringer: List<BeregningsforklaringDto> = emptyList(),
+    ): BeregnetTrygdeavgiftDto {
         return BeregnetTrygdeavgiftDto(
             trygdeavgiftsperioder.map { TrygdeavgiftsperiodeDto(it) },
-            lagTrygdeavgiftsgrunnlagDto()
+            lagTrygdeavgiftsgrunnlagDto(),
+            beregningsforklaringer,
         )
     }
 

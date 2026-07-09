@@ -56,8 +56,7 @@ class TrygdeavgiftController(
         )
 
         return ResponseEntity.ok(
-            BeregnetTrygdeavgiftDto.av(resultat.trygdeavgiftsperioder)
-                .copy(beregningsforklaringer = resultat.beregningsforklaringer)
+            BeregnetTrygdeavgiftDto.av(resultat.trygdeavgiftsperioder, resultat.beregningsforklaringer)
         )
     }
 

@@ -11,9 +11,13 @@ data class BeregnetTrygdeavgiftDto(
     val beregningsforklaringer: List<BeregningsforklaringDto> = emptyList(),
 ) {
     companion object {
-        fun av(trygdeavgiftsperiodeSet: Set<Trygdeavgiftsperiode>) = BeregnetTrygdeavgiftDto(
+        fun av(
+            trygdeavgiftsperiodeSet: Set<Trygdeavgiftsperiode>,
+            beregningsforklaringer: List<BeregningsforklaringDto> = emptyList(),
+        ) = BeregnetTrygdeavgiftDto(
             trygdeavgiftsperiodeSet.map { TrygdeavgiftsperiodeDto(it) }.sortedWith(compareBy { it.fom }),
-            TrygdeavgiftsgrunnlagDto(trygdeavgiftsperiodeSet)
+            TrygdeavgiftsgrunnlagDto(trygdeavgiftsperiodeSet),
+            beregningsforklaringer,
         )
     }
 }
