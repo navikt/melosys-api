@@ -171,33 +171,28 @@ public class JoarkService implements JoarkFasade {
     }
 
     private void flyttJournalpostTilNyAktørId(Journalpost journalpost, String nyAktørId) {
-        String journalpostID = journalpost.getJournalpostId();
-        feilregistrerSakstilknytning(journalpostID);
-        var nyJournalPostId = knyttTilAnnenSak(journalpostID, byggKnyttTilAnnenSakRequest(journalpost, nyAktørId));
-        oppdaterJournalpostBrukerAktørId(nyJournalPostId, nyAktørId);
+        String journalpostId = journalpost.getJournalpostId();
+        journalpostapiClient.feilregistrerSakstilknytning(journalpostId);
 
+        KnyttTilAnnenSakRequest knyttTilAnnenSakRequest = byggKnyttTilAnnenSakRequest(journalpost);
+        String nyJournalpostId = journalpostapiClient.knyttTilAnnenSak(journalpostId, knyttTilAnnenSakRequest).getNyJournalpostId();
+
+        oppdaterJournalpostBrukerAktørId(nyJournalpostId, nyAktørId);
     }
 
-    private KnyttTilAnnenSakRequest byggKnyttTilAnnenSakRequest(Journalpost journalpost, String nyAktørId) {
+    private KnyttTilAnnenSakRequest byggKnyttTilAnnenSakRequest(Journalpost journalpost) {
         return new KnyttTilAnnenSakRequest(
             KnyttTilAnnenSakRequest.Sakstype.FAGSAK,
             journalpost.getSaksnummer(),
             Fagsystem.MELOSYS.getKode(),
             journalpost.getTema(),
-            new Bruker(Bruker.BrukerIdType.AKTOERID, nyAktørId),
+            Bruker.builder()
+                .id(journalpost.getBrukerId())
+                .idType(Bruker.BrukerIdType.AKTOERID)
+                .build(),
             AUTOMATISK_JOURNALFOERENDE_ENHET,
             null
         );
-    }
-
-    @Override
-    public void feilregistrerSakstilknytning(String journalpostId) {
-        journalpostapiClient.feilregistrerSakstilknytning(journalpostId);
-    }
-
-    @Override
-    public String knyttTilAnnenSak(String kildeJournalpostId, KnyttTilAnnenSakRequest request) {
-        return journalpostapiClient.knyttTilAnnenSak(kildeJournalpostId, request).getNyJournalpostId();
     }
 
     private void oppdaterJournalpostBrukerAktørId(String journalpostID, String aktørId) {

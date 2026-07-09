@@ -263,7 +263,7 @@ class JoarkServiceTest {
             sakstype shouldBe KnyttTilAnnenSakRequest.Sakstype.FAGSAK
             fagsakId shouldBe "MEL-123"
             tema shouldBe Tema.MED.kode
-            bruker.id shouldBe nyAktørId
+            bruker.id shouldBe gammelAktørId
             bruker.idType shouldBe AKTOERID
         }
 

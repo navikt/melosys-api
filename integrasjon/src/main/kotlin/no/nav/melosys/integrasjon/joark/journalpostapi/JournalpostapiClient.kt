@@ -97,7 +97,6 @@ class JournalpostapiClient(
             .retrieve()
             .toBodilessEntity()
             .block()
-
     }
 
     fun knyttTilAnnenSak(kildeJournalpostId: String, request: KnyttTilAnnenSakRequest): KnyttTilAnnenSakResponse {
