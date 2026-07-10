@@ -20,11 +20,10 @@ import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiClient;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*;
 import no.nav.melosys.integrasjon.joark.saf.SafClient;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.annotation.Primary;
-import org.springframework.scheduling.support.SimpleTriggerContext;
-import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
@@ -179,20 +178,16 @@ public class JoarkService implements JoarkFasade {
             journalposterSomSkalFlyttes.size(), saksnummer);
 
         journalposterSomSkalFlyttes.forEach(journalpost -> flyttJournalpostTilNyAktørId(journalpost, nyAktørId, saksnummer));
-
-        log.info("Ferdig med å flytte {} journalpost(er) til ny aktørId for sak {}",
-            journalposterSomSkalFlyttes.size(), saksnummer);
     }
 
     private void flyttJournalpostTilNyAktørId(Journalpost journalpost, String nyAktørId, String saksnummer) {
         String journalpostId = journalpost.getJournalpostId();
-        log.info("Flytter journalpost {} til ny aktørId for sak {}", journalpostId, saksnummer); //Slette til slutt.
 
         journalpostapiClient.feilregistrerSakstilknytning(journalpostId);
 
         KnyttTilAnnenSakRequest knyttTilAnnenSakRequest = byggKnyttTilAnnenSakRequest(journalpost, nyAktørId, saksnummer);
         String nyJournalpostId = journalpostapiClient.knyttTilAnnenSak(journalpostId, knyttTilAnnenSakRequest).getNyJournalpostId();
-        log.info("Journalpost {} kopiert til ny journalpost {} med ny aktørId for sak {}", journalpostId, nyJournalpostId, saksnummer); //Slette til slutt.
+        log.info("Journalpost {} kopiert til ny journalpost {} med ny aktørId for sak {}", journalpostId, nyJournalpostId, saksnummer);
     }
 
     private KnyttTilAnnenSakRequest byggKnyttTilAnnenSakRequest(Journalpost journalpost, String nyAktørId, String saksnummer) {

@@ -1,5 +1,6 @@
 package no.nav.melosys.service.aktoer
 
+import mu.KotlinLogging
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Aktoersroller
@@ -13,6 +14,8 @@ import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+
+private val log = KotlinLogging.logger { }
 
 @Service
 class AktoerService(
@@ -108,6 +111,7 @@ class AktoerService(
             gammelAktørId,
             validertNyAktørId
         )
+
         endreAktørIdForBruker(fagsak, validertNyAktørId)
     }
 
