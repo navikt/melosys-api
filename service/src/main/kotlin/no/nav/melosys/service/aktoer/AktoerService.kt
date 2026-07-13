@@ -95,27 +95,28 @@ class AktoerService(
      *
      * Bevisst IKKE @Transactional: oppdatering av journalposter i Joark er eksterne HTTP-kall
      * som ikke skal holde en DB-transaksjon (og DB-tilkobling) åpen mens de pågår. Selve
-     * aktør-oppdateringen kjører i sin egen transaksjon via [endreAktørIdForBruker].
+     * aktør-oppdateringen persisteres via [AktoerRepository.save], som kjører i sin egen transaksjon.
      */
-    fun endreAktørIdForBruker(saksnummer: String, nyAktørId: String?) {
-        val validertNyAktørId = nyAktørId?.takeIf { it.length == AKTOER_ID_LENGDE }
-            ?: throw FunksjonellException("Aktør ID kan ikke være null og må være $AKTOER_ID_LENGDE tegn lang $nyAktørId")
+    fun endreAktørIdForBruker(saksnummer: String, nyAktørId: String) {
+        if (nyAktørId.length != AKTOER_ID_LENGDE) {
+            throw FunksjonellException("Aktør ID må være $AKTOER_ID_LENGDE tegn lang: $nyAktørId")
+        }
         val fagsak = fagsakRepository.findById(saksnummer)
             .orElseThrow { IkkeFunnetException("Finner ikke fagsak med saksnummer: $saksnummer") }
         val gammelAktørId = fagsak.hentBrukersAktørID()
 
         aksesskontroll.auditEndringFraAdminConsole(
-            validertNyAktørId,
-            "Endring av aktør ID for sak $saksnummer fra $gammelAktørId til $validertNyAktørId"
+            nyAktørId,
+            "Endring av aktør ID for sak $saksnummer fra $gammelAktørId til $nyAktørId"
         )
 
         joarkFasade.oppdaterJournalposterMedNyAktørId(
             HentJournalposterTilknyttetSakRequest(fagsak.gsakSaksnummer, fagsak.saksnummer),
             gammelAktørId,
-            validertNyAktørId
+            nyAktørId
         )
 
-        endreAktørIdForBruker(fagsak, validertNyAktørId)
+        endreAktørIdForBruker(fagsak, nyAktørId)
     }
 
     @Transactional
