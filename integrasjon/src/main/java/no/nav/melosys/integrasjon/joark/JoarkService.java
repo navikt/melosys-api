@@ -30,7 +30,6 @@ import org.springframework.util.CollectionUtils;
 @Primary
 public class JoarkService implements JoarkFasade {
     private static final Logger log = LoggerFactory.getLogger(JoarkService.class);
-    private static final String AUTOMATISK_JOURNALFOERENDE_ENHET = "9999";
 
     private final JournalpostapiClient journalpostapiClient;
     private final SafClient safClient;
@@ -200,8 +199,7 @@ public class JoarkService implements JoarkFasade {
                 .id(nyAktørId)
                 .idType(Bruker.BrukerIdType.AKTOERID)
                 .build(),
-            AUTOMATISK_JOURNALFOERENDE_ENHET, //Ved automatisk journalføring uten mennesker involvert, skal enhet settes til "9999".
-            null //Dersom man ikke oppgir noen dokumenter, kopieres hele journalposten over
+            null
         );
     }
 

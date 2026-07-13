@@ -1,6 +1,5 @@
 package no.nav.melosys.service.aktoer
 
-import mu.KotlinLogging
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Aktoersroller
@@ -14,8 +13,6 @@ import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-
-private val log = KotlinLogging.logger { }
 
 @Service
 class AktoerService(
@@ -93,10 +90,16 @@ class AktoerService(
         }
     }
 
-    @Transactional
+    /**
+     * Orkestrerer endring av aktørId for bruker på en fagsak.
+     *
+     * Bevisst IKKE @Transactional: oppdatering av journalposter i Joark er eksterne HTTP-kall
+     * som ikke skal holde en DB-transaksjon (og DB-tilkobling) åpen mens de pågår. Selve
+     * aktør-oppdateringen kjører i sin egen transaksjon via [endreAktørIdForBruker].
+     */
     fun endreAktørIdForBruker(saksnummer: String, nyAktørId: String?) {
         val validertNyAktørId = nyAktørId?.takeIf { it.length == AKTOER_ID_LENGDE }
-            ?: throw FunksjonellException("Aktør ID kan ikke være null og må være 13 tegn lang $nyAktørId")
+            ?: throw FunksjonellException("Aktør ID kan ikke være null og må være $AKTOER_ID_LENGDE tegn lang $nyAktørId")
         val fagsak = fagsakRepository.findById(saksnummer)
             .orElseThrow { IkkeFunnetException("Finner ikke fagsak med saksnummer: $saksnummer") }
         val gammelAktørId = fagsak.hentBrukersAktørID()
