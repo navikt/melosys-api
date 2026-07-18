@@ -17,7 +17,11 @@ import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.integrasjon.joark.HentJournalposterTilknyttetSakRequest
+import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.repository.AktoerRepository
+import no.nav.melosys.repository.FagsakRepository
+import no.nav.melosys.service.tilgang.Aksesskontroll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -28,13 +32,22 @@ internal class AktoerServiceTest {
     @MockK(relaxed = true)
     private lateinit var aktoerRepository: AktoerRepository
 
+    @MockK(relaxed = true)
+    private lateinit var fagsakRepository: FagsakRepository
+
+    @MockK(relaxed = true)
+    private lateinit var aksesskontroll: Aksesskontroll
+
+    @MockK(relaxed = true)
+    private lateinit var joarkFasade: JoarkFasade
+
     private lateinit var aktoerService: AktoerService
 
     private val aktoerSlot = slot<Aktoer>()
 
     @BeforeEach
     fun setUp() {
-        aktoerService = AktoerService(aktoerRepository)
+        aktoerService = AktoerService(aktoerRepository, fagsakRepository, aksesskontroll, joarkFasade)
     }
 
     @Test
@@ -170,6 +183,64 @@ internal class AktoerServiceTest {
 
         verify { aktoerRepository.deleteAllByFagsakAndRolle(fagsak, Aktoersroller.ARBEIDSGIVER) }
         verify(exactly = 0) { aktoerRepository.save(any()) }
+    }
+
+    @Test
+    fun `endreAktørIdForBruker oppdaterer aktør`() {
+        val gammelAktørId = "1111111111111"
+        val nyAktørId = "2222222222222"
+        val fagsak = Fagsak.forTest().apply {
+            gsakSaksnummer = 123L
+        }
+        val brukerAktør = Aktoer().apply {
+            rolle = Aktoersroller.BRUKER
+            aktørId = gammelAktørId
+            this.fagsak = fagsak
+        }
+        fagsak.aktører.add(brukerAktør)
+        every { aktoerRepository.save(brukerAktør) } returns brukerAktør
+
+        aktoerService.endreAktørIdForBruker(fagsak, nyAktørId)
+
+        brukerAktør.aktørId shouldBe nyAktørId
+        verify(exactly = 1) { aktoerRepository.save(brukerAktør) }
+    }
+
+    @Test
+    fun `endreAktørIdForBruker med saksnummer auditerer, oppdaterer journalposter og aktør`() {
+        val saksnummer = "MEL-123"
+        val gammelAktørId = "1111111111111"
+        val nyAktørId = "2222222222222"
+        val fagsak = Fagsak.forTest {
+            this.saksnummer = saksnummer
+            gsakSaksnummer = 123L
+        }
+        val brukerAktør = Aktoer().apply {
+            rolle = Aktoersroller.BRUKER
+            aktørId = gammelAktørId
+            this.fagsak = fagsak
+        }
+        fagsak.aktører.add(brukerAktør)
+        every { fagsakRepository.findById(saksnummer) } returns Optional.of(fagsak)
+        every { aktoerRepository.save(brukerAktør) } returns brukerAktør
+
+        aktoerService.endreAktørIdForBruker(saksnummer, nyAktørId)
+
+        verify(exactly = 1) {
+            aksesskontroll.auditEndringFraAdminConsole(
+                nyAktørId,
+                "Endring av aktør ID for sak $saksnummer fra $gammelAktørId til $nyAktørId"
+            )
+        }
+        verify(exactly = 1) {
+            joarkFasade.oppdaterJournalposterMedNyAktørId(
+                HentJournalposterTilknyttetSakRequest(fagsak.gsakSaksnummer, saksnummer),
+                gammelAktørId,
+                nyAktørId
+            )
+        }
+        brukerAktør.aktørId shouldBe nyAktørId
+        verify(exactly = 1) { aktoerRepository.save(brukerAktør) }
     }
 
     private fun lagAktoer(): Aktoer = Aktoer().apply {

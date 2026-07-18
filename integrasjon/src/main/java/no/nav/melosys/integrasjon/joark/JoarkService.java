@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.Fagsystem;
+import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
@@ -18,6 +20,8 @@ import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiClient;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*;
 import no.nav.melosys.integrasjon.joark.saf.SafClient;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -25,6 +29,8 @@ import org.springframework.util.CollectionUtils;
 @Service
 @Primary
 public class JoarkService implements JoarkFasade {
+    private static final Logger log = LoggerFactory.getLogger(JoarkService.class);
+
     private final JournalpostapiClient journalpostapiClient;
     private final SafClient safClient;
 
@@ -153,6 +159,48 @@ public class JoarkService implements JoarkFasade {
 
         journalpostapiClient.oppdaterJournalpost(request.build(), journalpostID);
         journalpostapiClient.ferdigstillJournalpost(new FerdigstillJournalpostRequest(), journalpostID);
+    }
+
+    @Override
+    public void oppdaterJournalposterMedNyAktørId(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
+                                                  String gammelAktørId,
+                                                  String nyAktørId) {
+        String saksnummer = hentJournalposterTilknyttetSakRequest.saksnummer();
+
+        List<Journalpost> journalposterSomSkalFlyttes = hentJournalposterTilknyttetSak(hentJournalposterTilknyttetSakRequest)
+            .stream()
+            .filter(journalpost -> journalpost.getBrukerIdType() == BrukerIdType.AKTØR_ID)
+            .filter(journalpost -> gammelAktørId.equals(journalpost.getBrukerId()))
+            .toList();
+
+        log.info("Fant {} journalpost(er) med gammel aktørId som skal flyttes til ny aktørId for sak {}",
+            journalposterSomSkalFlyttes.size(), saksnummer);
+
+        journalposterSomSkalFlyttes.forEach(journalpost -> flyttJournalpostTilNyAktørId(journalpost, nyAktørId, saksnummer));
+    }
+
+    private void flyttJournalpostTilNyAktørId(Journalpost journalpost, String nyAktørId, String saksnummer) {
+        String journalpostId = journalpost.getJournalpostId();
+
+        journalpostapiClient.feilregistrerSakstilknytning(journalpostId);
+
+        KnyttTilAnnenSakRequest knyttTilAnnenSakRequest = byggKnyttTilAnnenSakRequest(journalpost, nyAktørId, saksnummer);
+        String nyJournalpostId = journalpostapiClient.knyttTilAnnenSak(journalpostId, knyttTilAnnenSakRequest).getNyJournalpostId();
+        log.info("Journalpost {} kopiert til ny journalpost {} med ny aktørId for sak {}", journalpostId, nyJournalpostId, saksnummer);
+    }
+
+    private KnyttTilAnnenSakRequest byggKnyttTilAnnenSakRequest(Journalpost journalpost, String nyAktørId, String saksnummer) {
+        return new KnyttTilAnnenSakRequest(
+            KnyttTilAnnenSakRequest.Sakstype.FAGSAK,
+            saksnummer,
+            Fagsystem.MELOSYS.getKode(),
+            journalpost.getTema(),
+            Bruker.builder()
+                .id(nyAktørId)
+                .idType(Bruker.BrukerIdType.AKTOERID)
+                .build(),
+            null
+        );
     }
 
     private boolean harAvsenderMottakerFelt(JournalpostOppdatering journalpostOppdatering) {

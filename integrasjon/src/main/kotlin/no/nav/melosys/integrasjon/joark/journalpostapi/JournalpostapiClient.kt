@@ -5,6 +5,7 @@ import no.nav.melosys.integrasjon.felles.JsonRestIntegrasjon
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 
 private val log = KotlinLogging.logger { }
 
@@ -84,5 +85,30 @@ class JournalpostapiClient(
             .retrieve()
             .toBodilessEntity()
             .block()
+    }
+
+    fun feilregistrerSakstilknytning(journalpostId: String) {
+        if (log.isInfoEnabled) {
+            log.info("Feilregistrer sakstilknytning for journalpost med id {}", journalpostId)
+        }
+
+        journalpostapiWebClient.patch()
+            .uri("/journalpost/{journalpostId}/feilregistrer/feilregistrerSakstilknytning", journalpostId)
+            .retrieve()
+            .toBodilessEntity()
+            .block()
+    }
+
+    fun knyttTilAnnenSak(kildeJournalpostId: String, request: KnyttTilAnnenSakRequest): KnyttTilAnnenSakResponse {
+        if (log.isInfoEnabled) {
+            log.info("Knytter dokumentene på journalpost med id {} til en annen sak", kildeJournalpostId)
+        }
+
+        return journalpostapiWebClient.put()
+            .uri("/journalpost/{kildeJournalpostId}/knyttTilAnnenSak", kildeJournalpostId)
+            .bodyValue(request)
+            .retrieve()
+            .bodyToMono<KnyttTilAnnenSakResponse>()
+            .block() ?: error("Kunne ikke hente body for PUT /journalpost/$kildeJournalpostId/knyttTilAnnenSak")
     }
 }
