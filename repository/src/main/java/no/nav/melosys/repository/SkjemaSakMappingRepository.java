@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import no.nav.melosys.domain.SkjemaSakMapping;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 public interface SkjemaSakMappingRepository extends JpaRepository<SkjemaSakMapping, UUID> {
 
@@ -15,4 +16,9 @@ public interface SkjemaSakMappingRepository extends JpaRepository<SkjemaSakMappi
     Optional<SkjemaSakMapping> findBySkjemaId(UUID skjemaId);
 
     List<SkjemaSakMapping> findByMottatteOpplysninger_Id(Long mottatteOpplysningerId);
+
+    List<SkjemaSakMapping> findByFagsak_Saksnummer(String saksnummer);
+
+    @Query("select m from SkjemaSakMapping m join fetch m.fagsak")
+    List<SkjemaSakMapping> findAllMedFagsak();
 }
