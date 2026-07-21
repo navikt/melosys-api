@@ -2,9 +2,11 @@ package no.nav.melosys.service.sak
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.FagsakStatusEndretEvent
+import no.nav.melosys.repository.SkjemaSakMappingRepository
+import no.nav.melosys.saksflytapi.ProsessinstansService
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
-import org.springframework.transaction.event.TransactionPhase
-import org.springframework.transaction.event.TransactionalEventListener
+import org.springframework.transaction.annotation.Transactional
 
 private val log = KotlinLogging.logger { }
 
@@ -15,27 +17,31 @@ private val log = KotlinLogging.logger { }
  * bortfalt, annullering av sak med kun inaktive behandlinger), som behandlings-eventene
  * ikke dekker.
  *
- * Kjøres AFTER_COMMIT slik at HTTP-kallet går utenfor transaksjonen: en rollback etter kallet
- * kan ikke gi permanent feil status i skjema-api, og kallet holder ikke DB-tilkoblingen.
- * fallbackExecution=true håndterer eventer publisert utenfor transaksjon.
+ * Selve synken kjøres som egen prosessinstans (SYNK_SKJEMA_SAKSSTATUS, jf. mønsteret i
+ * FaktureringEventListener/OPPDATER_FAKTURAMOTTAKER): bestillingen committes ATOMISK i samme
+ * transaksjon som statusendringen (outbox-semantikk — synken kan ikke tapes ved krasj), mens
+ * HTTP-kallet skjer i steget etter commit, med rekjøringsstøtte fra prosessrammeverket.
  *
- * Feil her skal ALDRI velte saksbehandlingsflyten — de logges, og den idempotente massesynken
- * (admin-endepunktet /admin/skjema-saksstatus/synk) er sikkerhetsnettet for tapte oppdateringer.
+ * Flere raske statusendringer på samme sak gir flere prosessinstanser — det er OK: mottaket i
+ * skjema-api er idempotent og steget leser gjeldende status ved kjøring. (låsReferanse-dedup
+ * brukes ikke: OPPDATER_FAKTURAMOTTAKER-mønsteret bruker det heller ikke, og referansetypene
+ * er format-validerte for SED/søknad — saksnummer passer ikke uten ny referansetype.)
  */
 @Component
 class SkjemaSaksstatusEventListener(
-    private val skjemaSaksstatusSyncService: SkjemaSaksstatusSyncService
+    private val skjemaSakMappingRepository: SkjemaSakMappingRepository,
+    private val prosessinstansService: ProsessinstansService
 ) {
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
+    @EventListener
+    @Transactional
     fun fagsakStatusEndret(event: FagsakStatusEndretEvent) {
-        try {
-            skjemaSaksstatusSyncService.synkroniserSaksstatusForFagsak(event.fagsak)
-        } catch (e: Exception) {
-            log.error(e) {
-                "Kunne ikke synkronisere saksstatus til skjema-api for sak ${event.fagsak.saksnummer}. " +
-                    "Kan rettes med massesynk (/admin/skjema-saksstatus/synk)."
-            }
+        val saksnummer = event.fagsak.saksnummer
+        if (skjemaSakMappingRepository.finnSkjemaIderForSaksnummer(saksnummer).isEmpty()) {
+            return
         }
+
+        log.info { "Bestiller synk av saksstatus til skjema-api for sak $saksnummer" }
+        prosessinstansService.opprettProsessinstansSynkSkjemaSaksstatus(saksnummer)
     }
 }

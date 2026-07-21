@@ -1,7 +1,6 @@
 package no.nav.melosys.service.sak
 
 import io.kotest.matchers.nulls.shouldNotBeNull
-import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -11,55 +10,61 @@ import io.mockk.verify
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakStatusEndretEvent
 import no.nav.melosys.domain.forTest
+import no.nav.melosys.repository.SkjemaSakMappingRepository
+import no.nav.melosys.saksflytapi.ProsessinstansService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.transaction.event.TransactionPhase
-import org.springframework.transaction.event.TransactionalEventListener
+import org.springframework.context.event.EventListener
+import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
 
 @ExtendWith(MockKExtension::class)
 internal class SkjemaSaksstatusEventListenerTest {
 
     @MockK
-    lateinit var skjemaSaksstatusSyncService: SkjemaSaksstatusSyncService
+    lateinit var skjemaSakMappingRepository: SkjemaSakMappingRepository
+
+    @MockK
+    lateinit var prosessinstansService: ProsessinstansService
 
     private lateinit var listener: SkjemaSaksstatusEventListener
 
     @BeforeEach
     fun setup() {
-        listener = SkjemaSaksstatusEventListener(skjemaSaksstatusSyncService)
+        listener = SkjemaSaksstatusEventListener(skjemaSakMappingRepository, prosessinstansService)
     }
 
     @Test
-    fun `delegerer til sync-servicen med fagsaken fra eventet`() {
+    fun `bestiller synk-prosessinstans for sak med skjema-mapping`() {
         val fagsak = Fagsak.forTest()
-        every { skjemaSaksstatusSyncService.synkroniserSaksstatusForFagsak(fagsak) } just runs
+        every { skjemaSakMappingRepository.finnSkjemaIderForSaksnummer(fagsak.saksnummer) } returns
+            listOf(UUID.randomUUID())
+        every { prosessinstansService.opprettProsessinstansSynkSkjemaSaksstatus(fagsak.saksnummer) } just runs
 
         listener.fagsakStatusEndret(FagsakStatusEndretEvent(fagsak))
 
-        verify(exactly = 1) { skjemaSaksstatusSyncService.synkroniserSaksstatusForFagsak(fagsak) }
+        verify(exactly = 1) { prosessinstansService.opprettProsessinstansSynkSkjemaSaksstatus(fagsak.saksnummer) }
     }
 
     @Test
-    fun `feil fra synkronisering kastes ikke videre og velter ikke saksbehandlingsflyten`() {
+    fun `bestiller ikke synk for sak uten skjema-mapping`() {
         val fagsak = Fagsak.forTest()
-        every { skjemaSaksstatusSyncService.synkroniserSaksstatusForFagsak(fagsak) } throws
-            RuntimeException("skjema-api er nede")
+        every { skjemaSakMappingRepository.finnSkjemaIderForSaksnummer(fagsak.saksnummer) } returns emptyList()
 
-        assertDoesNotThrow {
-            listener.fagsakStatusEndret(FagsakStatusEndretEvent(fagsak))
-        }
+        listener.fagsakStatusEndret(FagsakStatusEndretEvent(fagsak))
+
+        verify(exactly = 0) { prosessinstansService.opprettProsessinstansSynkSkjemaSaksstatus(any()) }
     }
 
     @Test
-    fun `lytter etter commit slik at rollback ikke kan gi feil status i skjema-api og feil ikke ruller tilbake statusendringen`() {
-        val annotasjon = SkjemaSaksstatusEventListener::class.java
+    fun `bestillingen skjer transaksjonelt i samme transaksjon som statusendringen`() {
+        // Outbox-semantikk: @EventListener (synkront, i pågående transaksjon) + @Transactional —
+        // bestillingen committes atomisk med statusendringen og kan ikke tapes ved krasj.
+        val metode = SkjemaSaksstatusEventListener::class.java
             .getMethod("fagsakStatusEndret", FagsakStatusEndretEvent::class.java)
-            .getAnnotation(TransactionalEventListener::class.java)
 
-        annotasjon.shouldNotBeNull()
-        annotasjon.phase shouldBe TransactionPhase.AFTER_COMMIT
-        annotasjon.fallbackExecution shouldBe true
+        metode.getAnnotation(EventListener::class.java).shouldNotBeNull()
+        metode.getAnnotation(Transactional::class.java).shouldNotBeNull()
     }
 }

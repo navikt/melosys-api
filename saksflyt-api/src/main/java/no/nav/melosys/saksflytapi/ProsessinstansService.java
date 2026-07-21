@@ -790,6 +790,22 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    /**
+     * Bestiller synk av saksstatus til melosys-skjema-api for en fagsak. Bestilles typisk i samme
+     * transaksjon som statusendringen (outbox-semantikk), slik at synken ikke tapes ved krasj og
+     * får rekjøringsstøtte via prosessrammeverket. Uten behandling — statusendringer kan skje på
+     * saker uten aktiv behandling.
+     */
+    @Transactional
+    public void opprettProsessinstansSynkSkjemaSaksstatus(String saksnummer) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.SYNK_SKJEMA_SAKSSTATUS)
+            .build();
+        prosessinstans.setData(SAKSNUMMER, saksnummer);
+
+        lagre(prosessinstans);
+    }
+
     @Transactional
     public UUID opprettSatsendringBehandlingFor(Behandling behandling, int aar) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()

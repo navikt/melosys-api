@@ -370,6 +370,10 @@ object ProsessflytDefinisjon {
         ProsessType.OPPDATER_FAKTURAMOTTAKER to ProsessFlyt(
             prosessType = ProsessType.OPPDATER_FAKTURAMOTTAKER,
             ProsessSteg.OPPDATER_FAKTURAMOTTAKER
+        ),
+        ProsessType.SYNK_SKJEMA_SAKSSTATUS to ProsessFlyt(
+            prosessType = ProsessType.SYNK_SKJEMA_SAKSSTATUS,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         )
     )
 

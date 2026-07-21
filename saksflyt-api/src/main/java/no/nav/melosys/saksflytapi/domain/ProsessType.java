@@ -53,6 +53,7 @@ public enum ProsessType {
     SATSENDRING("SATSENDRING", "Oppretter og behandler en satsendring - iverksetter og fakturerer", ProsessPrioritet.LAV),
     SATSENDRING_TILBAKESTILL_NY_VURDERING("SATSENDRING_TILBAKESTILL_NY_VURDERING", "Behandler satsendring hvor aktiv ny vurdering tilbakestilles, slik at nye satser brukes", ProsessPrioritet.LAV),
     SEND_BREV("SEND_BREV", "Send brev til én mottaker via doksys"),
+    SYNK_SKJEMA_SAKSSTATUS("SYNK_SKJEMA_SAKSSTATUS", "Synkroniserer saksstatus til melosys-skjema-api"),
     UTPEKING_AVVIS("UTPEKING_AVVIS", "Avviser utpeking mottatt i en A003"),
     VIDERESEND_SOKNAD("VIDERESEND_SOKNAD", "Videresend søknad");
 
