@@ -18,9 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 
 /**
- * Verifiserer harAktivBehandling-semantikken i SAKSSTATUS_SYNK_PROJEKSJON (JPQL) mot ekte
- * database — den avviker BEVISST fra Behandling.erInaktiv(), se javadoc på projeksjonskonstanten
- * i [SkjemaSakMappingRepository].
+ * Verifiserer SAKSSTATUS_SYNK_PROJEKSJON (JPQL) mot ekte database: utledet skjema-status er en
+ * REN funksjon av fagsakstatus (produkteierbeslutning 2026-07-21) — sakens behandlinger inngår
+ * ikke i projeksjonen. Se javadoc på projeksjonskonstanten i [SkjemaSakMappingRepository].
  */
 class SaksstatusSynkProjeksjonIT(
     @Autowired private val skjemaSakMappingRepository: SkjemaSakMappingRepository,
@@ -43,60 +43,40 @@ class SaksstatusSynkProjeksjonIT(
 
     private fun utledSkjemaSaksstatus(fagsak: Fagsak): Saksstatus {
         val rad = skjemaSakMappingRepository.finnSaksstatusSynkRaderForSaksnummer(fagsak.saksnummer).single()
-        return SkjemaSaksstatusSyncService.tilSkjemaSaksstatus(rad.saksstatus, rad.harAktivBehandling)
+        return SkjemaSaksstatusSyncService.tilSkjemaSaksstatus(rad.saksstatus)
     }
 
     @Test
-    fun `behandling i art13-vinduet (MIDLERTIDIG_LOVVALGSBESLUTNING) regnes som aktiv og gir MOTTATT`() {
-        // Art13-innvilgelse: behandlingen står i MIDLERTIDIG_LOVVALGSBESLUTNING i ~2 mnd uten at
-        // fagsakstatus endres. Løpende synk tier i vinduet — massesynk må da også gi MOTTATT,
-        // ellers divergerer de (Behandling.erInaktiv() ville regnet den som inaktiv → AVSLUTTET).
+    fun `sak i OPPRETTET gir MOTTATT`() {
         val fagsak = lagSkjemakobletFagsak(
             Saksstatuser.OPPRETTET,
-            Behandlingstyper.FØRSTEGANG to Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
+            Behandlingstyper.FØRSTEGANG to Behandlingsstatus.UNDER_BEHANDLING
         )
 
-        val rad = skjemaSakMappingRepository.finnSaksstatusSynkRaderForSaksnummer(fagsak.saksnummer).single()
-        rad.harAktivBehandling shouldBe true
         utledSkjemaSaksstatus(fagsak) shouldBe Saksstatus.MOTTATT
     }
 
     @Test
-    fun `åpen årsavregning på avsluttet sak teller ikke som aktiv behandling og gir AVSLUTTET`() {
-        val fagsak = lagSkjemakobletFagsak(
-            Saksstatuser.AVSLUTTET,
-            Behandlingstyper.FØRSTEGANG to Behandlingsstatus.AVSLUTTET,
-            Behandlingstyper.ÅRSAVREGNING to Behandlingsstatus.UNDER_BEHANDLING
-        )
-
-        val rad = skjemaSakMappingRepository.finnSaksstatusSynkRaderForSaksnummer(fagsak.saksnummer).single()
-        rad.harAktivBehandling shouldBe false
-        utledSkjemaSaksstatus(fagsak) shouldBe Saksstatus.AVSLUTTET
-    }
-
-    @Test
-    fun `åpen satsendring på avsluttet sak teller ikke som aktiv behandling og gir AVSLUTTET`() {
-        val fagsak = lagSkjemakobletFagsak(
-            Saksstatuser.AVSLUTTET,
-            Behandlingstyper.FØRSTEGANG to Behandlingsstatus.AVSLUTTET,
-            Behandlingstyper.SATSENDRING to Behandlingsstatus.OPPRETTET
-        )
-
-        val rad = skjemaSakMappingRepository.finnSaksstatusSynkRaderForSaksnummer(fagsak.saksnummer).single()
-        rad.harAktivBehandling shouldBe false
-        utledSkjemaSaksstatus(fagsak) shouldBe Saksstatus.AVSLUTTET
-    }
-
-    @Test
-    fun `åpen søknadsbehandling på gjenbrukt sak regnes som aktiv og gir MOTTATT`() {
+    fun `gjenbrukt sak i LOVVALG_AVKLART gir AVSLUTTET selv med åpen søknadsbehandling`() {
+        // Revurdering/ny søknad på ferdigbehandlet sak endrer ikke utledet status — at
+        // ferdigbehandlede innsendinger ikke resettes garanteres av monotoni-guarden i skjema-api
         val fagsak = lagSkjemakobletFagsak(
             Saksstatuser.LOVVALG_AVKLART,
             Behandlingstyper.FØRSTEGANG to Behandlingsstatus.AVSLUTTET,
             Behandlingstyper.NY_VURDERING to Behandlingsstatus.UNDER_BEHANDLING
         )
 
-        val rad = skjemaSakMappingRepository.finnSaksstatusSynkRaderForSaksnummer(fagsak.saksnummer).single()
-        rad.harAktivBehandling shouldBe true
-        utledSkjemaSaksstatus(fagsak) shouldBe Saksstatus.MOTTATT
+        utledSkjemaSaksstatus(fagsak) shouldBe Saksstatus.AVSLUTTET
+    }
+
+    @Test
+    fun `avsluttet sak gir AVSLUTTET uavhengig av åpne interne behandlinger`() {
+        val fagsak = lagSkjemakobletFagsak(
+            Saksstatuser.AVSLUTTET,
+            Behandlingstyper.FØRSTEGANG to Behandlingsstatus.AVSLUTTET,
+            Behandlingstyper.ÅRSAVREGNING to Behandlingsstatus.UNDER_BEHANDLING
+        )
+
+        utledSkjemaSaksstatus(fagsak) shouldBe Saksstatus.AVSLUTTET
     }
 }

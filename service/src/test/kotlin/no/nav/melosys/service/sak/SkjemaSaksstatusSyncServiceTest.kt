@@ -46,23 +46,19 @@ internal class SkjemaSaksstatusSyncServiceTest {
     private fun lagSynkRad(
         saksnummer: String,
         status: Saksstatuser,
-        skjemaId: UUID = UUID.randomUUID(),
-        harAktivBehandling: Boolean = false
+        skjemaId: UUID = UUID.randomUUID()
     ): SaksstatusSynkRad = object : SaksstatusSynkRad {
         override fun getSkjemaId(): UUID = skjemaId
         override fun getSaksnummer(): String = saksnummer
         override fun getSaksstatus(): Saksstatuser = status
-        override fun getHarAktivBehandling(): Boolean = harAktivBehandling
     }
 
     @Nested
     inner class Statusmapping {
 
         @Test
-        fun `OPPRETTET uten aktiv behandling mappes til MOTTATT`() {
-            SkjemaSaksstatusSyncService.tilSkjemaSaksstatus(
-                Saksstatuser.OPPRETTET, harAktivBehandling = false
-            ) shouldBe Saksstatus.MOTTATT
+        fun `OPPRETTET mappes til MOTTATT`() {
+            SkjemaSaksstatusSyncService.tilSkjemaSaksstatus(Saksstatuser.OPPRETTET) shouldBe Saksstatus.MOTTATT
         }
 
         @ParameterizedTest
@@ -74,20 +70,10 @@ internal class SkjemaSaksstatusSyncServiceTest {
             ],
             mode = EnumSource.Mode.INCLUDE
         )
-        fun `de ni andre statusene uten aktiv behandling mappes til AVSLUTTET`(saksstatus: Saksstatuser) {
-            SkjemaSaksstatusSyncService.tilSkjemaSaksstatus(
-                saksstatus, harAktivBehandling = false
-            ) shouldBe Saksstatus.AVSLUTTET
-        }
-
-        @ParameterizedTest
-        @EnumSource(Saksstatuser::class)
-        fun `aktiv behandling gir MOTTATT uansett fagsakstatus`(saksstatus: Saksstatuser) {
-            // Gjenbrukt sak (f.eks. LOVVALG_AVKLART) kan få ny søknad og ny aktiv behandling
-            // uten at fagsakstatus endres — da er saken under behandling og skal vises som MOTTATT
-            SkjemaSaksstatusSyncService.tilSkjemaSaksstatus(
-                saksstatus, harAktivBehandling = true
-            ) shouldBe Saksstatus.MOTTATT
+        fun `de ni andre statusene mappes til AVSLUTTET`(saksstatus: Saksstatuser) {
+            // Ren fagsak-mapping per produkteierbeslutning 2026-07-21 — at en revurdering ikke
+            // resetter ferdigbehandlede innsendinger håndheves av monotoni-guarden i skjema-api
+            SkjemaSaksstatusSyncService.tilSkjemaSaksstatus(saksstatus) shouldBe Saksstatus.AVSLUTTET
         }
     }
 
@@ -126,22 +112,6 @@ internal class SkjemaSaksstatusSyncServiceTest {
             service.synkroniserSaksstatusForSaksnummer(saksnummer)
 
             verify(exactly = 0) { melosysSkjemaApiClient.bulkOppdaterSaksstatus(any()) }
-        }
-
-        @Test
-        fun `gjenbrukt sak i LOVVALG_AVKLART med ny aktiv behandling synkes som MOTTATT`() {
-            // Eksisterende-sak-scenariet: ny digital søknad på sak i LOVVALG_AVKLART åpner
-            // NY_VURDERING uten å endre fagsakstatus — statusmappingen alene ville gitt AVSLUTTET
-            every { skjemaSakMappingRepository.finnSaksstatusSynkRaderForSaksnummer(saksnummer) } returns
-                listOf(lagSynkRad(saksnummer, Saksstatuser.LOVVALG_AVKLART, harAktivBehandling = true))
-
-            val requests = mutableListOf<BulkOppdaterSaksstatusRequest>()
-            every { melosysSkjemaApiClient.bulkOppdaterSaksstatus(capture(requests)) } returns
-                BulkOppdaterSaksstatusResultat(1, emptyList())
-
-            service.synkroniserSaksstatusForSaksnummer(saksnummer)
-
-            requests.single().oppdateringer.single().saksstatus shouldBe Saksstatus.MOTTATT
         }
 
         @Test
@@ -228,6 +198,7 @@ internal class SkjemaSaksstatusSyncServiceTest {
             )
             rapport.antallOppdatert shouldBe null
             rapport.ukjenteSkjemaIder shouldBe null
+            rapport.konfliktSkjemaIder shouldBe null
             rapport.feiletBatch shouldBe null
             rapport.feilmelding shouldBe null
 
@@ -237,19 +208,22 @@ internal class SkjemaSaksstatusSyncServiceTest {
         @Test
         fun `reell synk sender bulk-kall og aggregerer resultat i rapporten`() {
             val ukjentSkjemaId = UUID.randomUUID()
+            val konfliktSkjemaId = UUID.randomUUID()
             every { skjemaSakMappingRepository.finnAlleSaksstatusSynkRader() } returns listOf(
                 lagSynkRad("MEL-1", Saksstatuser.OPPRETTET),
-                lagSynkRad("MEL-1", Saksstatuser.OPPRETTET, ukjentSkjemaId)
+                lagSynkRad("MEL-1", Saksstatuser.OPPRETTET, ukjentSkjemaId),
+                lagSynkRad("MEL-2", Saksstatuser.OPPRETTET, konfliktSkjemaId)
             )
             every { melosysSkjemaApiClient.bulkOppdaterSaksstatus(any()) } returns
-                BulkOppdaterSaksstatusResultat(3, listOf(ukjentSkjemaId))
+                BulkOppdaterSaksstatusResultat(3, listOf(ukjentSkjemaId), listOf(konfliktSkjemaId))
 
             val rapport = service.massesynk(dryRun = false)
 
             rapport.dryRun shouldBe false
-            rapport.antallTotalt shouldBe 2
+            rapport.antallTotalt shouldBe 3
             rapport.antallOppdatert shouldBe 3
             rapport.ukjenteSkjemaIder shouldContainExactly listOf(ukjentSkjemaId)
+            rapport.konfliktSkjemaIder shouldContainExactly listOf(konfliktSkjemaId)
             rapport.feiletBatch shouldBe null
 
             verify(exactly = 1) { melosysSkjemaApiClient.bulkOppdaterSaksstatus(any()) }
@@ -271,6 +245,7 @@ internal class SkjemaSaksstatusSyncServiceTest {
             rapport.antallTotalt shouldBe 1500
             rapport.antallOppdatert shouldBe 1500
             rapport.ukjenteSkjemaIder shouldBe emptyList()
+            rapport.konfliktSkjemaIder shouldBe emptyList()
         }
 
         @Test

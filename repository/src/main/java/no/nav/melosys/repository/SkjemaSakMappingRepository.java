@@ -24,31 +24,15 @@ public interface SkjemaSakMappingRepository extends JpaRepository<SkjemaSakMappi
     /**
      * Projeksjon for saksstatus-synk: henter kun feltene synken trenger, i én spørring.
      * Unngår å laste hele SkjemaSakMapping (originalData-CLOB) og Fagsak med EAGER-samlinger.
-     * harAktivBehandling trengs fordi gjenbrukte saker kan få ny behandling uten at fagsakstatus
-     * endres.
      *
-     * <p>harAktivBehandling avviker BEVISST fra {@code Behandling.erInaktiv()} — semantikken her
-     * er brukervendt («er saken ferdig for innsender?»), ikke saksbehandlingsintern:
-     * <ul>
-     *   <li>Inaktiv = KUN AVSLUTTET: en behandling i MIDLERTIDIG_LOVVALGSBESLUTNING (art
-     *       13-vinduet, ~2 mnd før endelig avslutting) regnes som aktiv, slik at saken vises som
-     *       MOTTATT. Ellers ville massesynken (AVSLUTTET) divergere fra løpende synk, som tier i
-     *       dette vinduet fordi verken fagsak- eller behandlingslukking har skjedd.</li>
-     *   <li>Interne behandlingstyper teller ikke: speiler
-     *       {@code Fagsak.finnAktivBehandlingIkkeÅrsavregning} (ekskluderer ÅRSAVREGNING) pluss
-     *       SATSENDRING, som er samme kategori intern batch-behandling (jf.
-     *       AvsluttFagsakOgBehandling som behandler dem likt). En åpen årsavregning/satsendring
-     *       skal ikke få en avsluttet sak til å vises som MOTTATT.</li>
-     * </ul>
+     * <p>Ren fagsak-mapping per produkteierbeslutning 2026-07-21: utledet skjema-status er en
+     * funksjon av fagsakstatus alene — behandlingsnivået inngår ikke. At en revurdering ikke
+     * resetter ferdigbehandlede innsendinger håndheves i mottaket i melosys-skjema-api
+     * (monotoni: AVSLUTTET nedgraderes aldri). Se plan-dokumentet «faglige-avklaringer» for
+     * art13- og gjenbrukssak-spørsmålene.
      */
     String SAKSSTATUS_SYNK_PROJEKSJON =
-        "select m.skjemaId as skjemaId, f.saksnummer as saksnummer, f.status as saksstatus, "
-            + "exists (select b from Behandling b where b.fagsak = f "
-            + "and b.status <> no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.AVSLUTTET "
-            + "and b.type not in ("
-            + "no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ÅRSAVREGNING, "
-            + "no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.SATSENDRING"
-            + ")) as harAktivBehandling "
+        "select m.skjemaId as skjemaId, f.saksnummer as saksnummer, f.status as saksstatus "
             + "from SkjemaSakMapping m join m.fagsak f";
 
     /** Sortert på saksnummer slik at rader for samme sak sjelden krysser batch-grenser i massesynk. */
@@ -65,7 +49,5 @@ public interface SkjemaSakMappingRepository extends JpaRepository<SkjemaSakMappi
         String getSaksnummer();
 
         Saksstatuser getSaksstatus();
-
-        boolean getHarAktivBehandling();
     }
 }

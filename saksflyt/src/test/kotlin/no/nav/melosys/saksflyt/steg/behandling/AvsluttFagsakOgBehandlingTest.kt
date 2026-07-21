@@ -174,8 +174,8 @@ class AvsluttFagsakOgBehandlingTest {
 
 
         verify { behandlingService.avsluttBehandling(behandling.id) }
-        // Også ren behandlingslukking markerer for synk — utledet skjema-status avhenger av sakens behandlinger
-        prosessinstans.getData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER) shouldBe fagsak.saksnummer
+        // Ren behandlingslukking endrer ikke fagsakstatus — utledet skjema-status er uendret, ingen synk-markering
+        prosessinstans.getData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER).shouldBeNull()
     }
 
     @Test

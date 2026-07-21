@@ -46,9 +46,6 @@ internal class HenleggelseServiceTest {
     @RelaxedMockK
     private lateinit var behandlingService: BehandlingService
 
-    @RelaxedMockK
-    private lateinit var skjemaSaksstatusSyncService: SkjemaSaksstatusSyncService
-
     private lateinit var henleggelseService: HenleggelseService
 
     private val BEGRUNNELSE_FRITEKST = "Dette er grunnen til at jeg henla saken"
@@ -60,8 +57,7 @@ internal class HenleggelseServiceTest {
             behandlingsresultatService,
             prosessinstansService,
             oppgaveService,
-            behandlingService,
-            skjemaSaksstatusSyncService
+            behandlingService
         )
     }
 
@@ -102,8 +98,6 @@ internal class HenleggelseServiceTest {
             verify { prosessinstansService.opprettProsessinstansFagsakHenlagt(behandling) }
             verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
             verify(exactly = 0) { behandlingService.avsluttAndregangsbehandling(any(), any()) }
-            // Fagsak-statusendringen med SYNKRONISER trigger synk via event — ingen ekstra bestilling her
-            verify(exactly = 0) { skjemaSaksstatusSyncService.bestillSynkHvisSkjemakoblet(any()) }
         }
 
         @Test
@@ -121,8 +115,6 @@ internal class HenleggelseServiceTest {
             verify { prosessinstansService.opprettProsessinstansFagsakHenlagt(annengangsBehandling) }
             verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
             verify { behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE) }
-            // Kun behandlingen lukkes (ingen fagsak-statusendring/event) — synk må bestilles eksplisitt
-            verify { skjemaSaksstatusSyncService.bestillSynkHvisSkjemakoblet(FagsakTestFactory.SAKSNUMMER) }
         }
 
         @Test
@@ -159,8 +151,6 @@ internal class HenleggelseServiceTest {
             verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
             verify { behandlingService.avsluttBehandling(BEHANDLING_ID) }
             fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
-            // Kun behandlingen lukkes (ingen fagsak-statusendring/event) — synk må bestilles eksplisitt
-            verify { skjemaSaksstatusSyncService.bestillSynkHvisSkjemakoblet(fagsak.saksnummer) }
         }
 
         @Test
@@ -179,8 +169,6 @@ internal class HenleggelseServiceTest {
             verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
             verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
             verify { behandlingService.avsluttBehandling(BEHANDLING_ID) }
-            // Fagsak-statusendringen med SYNKRONISER trigger synk via event — ingen ekstra bestilling her
-            verify(exactly = 0) { skjemaSaksstatusSyncService.bestillSynkHvisSkjemakoblet(any()) }
         }
     }
 }

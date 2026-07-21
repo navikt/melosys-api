@@ -76,11 +76,11 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         if (sakLukkes) {
             // HÅNDTERES_AV_PROSESSFLYT: flyten eier selv SYNK_SKJEMA_SAKSSTATUS-steget sist i flyten
             fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT);
+            prosessinstans.markerForSkjemaSaksstatusSynk(fagsak.getSaksnummer());
         } else {
+            // Ren behandlingslukking uten fagsak-statusendring: utledet skjema-status er en ren
+            // funksjon av fagsakstatus og endres ikke — ingen synk-markering
             behandlingService.avsluttBehandling(behandling.getId());
         }
-        // Markeres i BEGGE grener: også ren behandlingslukking krever synk-stillingtagen (utledet
-        // skjema-status avhenger av sakens behandlinger, og synken er idempotent), jf. SkjemaSaksstatusSynk
-        prosessinstans.markerForSkjemaSaksstatusSynk(fagsak.getSaksnummer());
     }
 }

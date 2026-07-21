@@ -10,15 +10,13 @@ internal class ProsessflytDefinisjonTest {
 
     /**
      * Steg som setter SYNK_SAKSSTATUS_SAKSNUMMER-markøren (via
-     * Prosessinstans.markerForSkjemaSaksstatusSynk) fordi de endrer fagsakstatus eller lukker
-     * behandlinger. Legger et steg til her når det begynner å sette markøren — testen under
-     * håndhever da at flytene det inngår i får synk-steget sist.
+     * Prosessinstans.markerForSkjemaSaksstatusSynk) fordi de endrer fagsakstatus. Legger et steg
+     * til her når det begynner å sette markøren — testen under håndhever da at flytene det inngår
+     * i får synk-steget sist.
      */
     private val markørSettendeSteg = listOf(
         ProsessSteg.AVSLUTT_SAK_OG_BEHANDLING,
-        ProsessSteg.SED_MOTTAK_RUTING,
-        ProsessSteg.HÅNDTER_EKSISTERENDE_SAK_DIGITAL_SØKNAD,
-        ProsessSteg.OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD
+        ProsessSteg.SED_MOTTAK_RUTING
     )
 
     /**

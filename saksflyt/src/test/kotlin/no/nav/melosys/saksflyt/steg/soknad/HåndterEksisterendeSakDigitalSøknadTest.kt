@@ -91,7 +91,6 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any()) }
             verify { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) }
             prosessinstans.behandling shouldBe behandling
-            prosessinstans.getData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER) shouldBe saksnummer
         }
     }
 
@@ -243,9 +242,6 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             verify { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(nyBehandling, any(), any(), any(), any()) }
             verify { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) }
             prosessinstans.behandling shouldBe nyBehandling
-            // Gjenbrukt sak: fagsakstatus endres ikke (ingen event) — steget må selv markere for synk,
-            // slik at SYNK_SKJEMA_SAKSSTATUS sist i flyten sender MOTTATT (saken har ny aktiv behandling)
-            prosessinstans.getData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER) shouldBe saksnummer
         }
 
         @Test

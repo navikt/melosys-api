@@ -93,8 +93,6 @@ class OpprettSakOgBehandlingDigitalSøknad(
         lagreSkjemaSakMapping(søknadsdata, fagsak, mottatteOpplysninger)
 
         prosessinstans.behandling = behandling
-        // Trigger SYNK_SKJEMA_SAKSSTATUS sist i flyten - synker MOTTATT til skjema-api ved mottak
-        prosessinstans.markerForSkjemaSaksstatusSynk(fagsak.saksnummer)
         log.info { "Lagret mottatte opplysninger for digital søknad referanseId=$referanseId" }
     }
 

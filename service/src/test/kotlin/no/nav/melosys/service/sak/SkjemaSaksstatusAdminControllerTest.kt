@@ -48,10 +48,12 @@ class SkjemaSaksstatusAdminControllerTest {
     @Test
     fun `synk med dryRun=false kjoerer reell synk og returnerer aggregert resultat`() {
         val ukjentSkjemaId = UUID.fromString("550e8400-e29b-41d4-a716-446655440000")
+        val konfliktSkjemaId = UUID.fromString("650e8400-e29b-41d4-a716-446655440000")
         every { skjemaSaksstatusSyncService.massesynk(dryRun = false) } returns lagRapport(
             dryRun = false,
             antallOppdatert = 5,
-            ukjenteSkjemaIder = listOf(ukjentSkjemaId)
+            ukjenteSkjemaIder = listOf(ukjentSkjemaId),
+            konfliktSkjemaIder = listOf(konfliktSkjemaId)
         )
 
         mockMvc.perform(post("$BASE_URL/synk").param("dryRun", "false"))
@@ -62,7 +64,8 @@ class SkjemaSaksstatusAdminControllerTest {
                         "dryRun": false,
                         "antallTotalt": 3,
                         "antallOppdatert": 5,
-                        "ukjenteSkjemaIder": ["550e8400-e29b-41d4-a716-446655440000"]
+                        "ukjenteSkjemaIder": ["550e8400-e29b-41d4-a716-446655440000"],
+                        "konfliktSkjemaIder": ["650e8400-e29b-41d4-a716-446655440000"]
                     }"""
                 )
             )
@@ -73,7 +76,8 @@ class SkjemaSaksstatusAdminControllerTest {
     private fun lagRapport(
         dryRun: Boolean,
         antallOppdatert: Int? = null,
-        ukjenteSkjemaIder: List<UUID>? = null
+        ukjenteSkjemaIder: List<UUID>? = null,
+        konfliktSkjemaIder: List<UUID>? = null
     ) = SkjemaSaksstatusSynkRapport(
         dryRun = dryRun,
         antallTotalt = 3,
@@ -84,7 +88,8 @@ class SkjemaSaksstatusAdminControllerTest {
             Saksstatuser.LOVVALG_AVKLART to 2
         ),
         antallOppdatert = antallOppdatert,
-        ukjenteSkjemaIder = ukjenteSkjemaIder
+        ukjenteSkjemaIder = ukjenteSkjemaIder,
+        konfliktSkjemaIder = konfliktSkjemaIder
     )
 
     companion object {

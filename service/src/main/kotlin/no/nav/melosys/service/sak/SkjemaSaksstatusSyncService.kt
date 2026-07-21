@@ -34,25 +34,19 @@ class SkjemaSaksstatusSyncService(
         const val MAKS_OPPDATERINGER_PER_BATCH = 1000
 
         /**
-         * Mapper intern saksstatus til brukervendt skjema-api-status. Intensjonen er
-         * «MOTTATT = aktiv/under behandling»: statusmappingen alene er utilstrekkelig for
-         * gjenbrukte saker — en sak i f.eks. LOVVALG_AVKLART kan få ny søknad og dermed en ny
-         * aktiv behandling UTEN at fagsakstatus endres. Derfor: har saken minst én aktiv
-         * behandling (brukervendt definisjon, jf. SAKSSTATUS_SYNK_PROJEKSJON i
-         * SkjemaSakMappingRepository: ikke AVSLUTTET, og ikke intern ÅRSAVREGNING/SATSENDRING)
-         * er den MOTTATT uansett fagsakstatus.
+         * Mapper intern saksstatus til brukervendt skjema-api-status — REN fagsak-mapping per
+         * produkteierbeslutning 2026-07-21: kun OPPRETTET vises som MOTTATT — alt annet,
+         * inkludert LOVVALG_AVKLART og henlagt/annullert, vises som AVSLUTTET for innsender.
          *
-         * Ellers gjelder statusmappingen besluttet av produkteier: kun OPPRETTET vises som
-         * MOTTATT — alt annet, inkludert LOVVALG_AVKLART og henlagt/annullert, vises som
-         * AVSLUTTET for innsender.
+         * Behandlingsnivået inngår bevisst IKKE: at en revurdering på saken ikke resetter
+         * ferdigbehandlede innsendinger garanteres av mottakssiden i melosys-skjema-api
+         * (monotoni: AVSLUTTET nedgraderes aldri, oppdatering per skjemaId). Se
+         * plan-dokumentet «faglige-avklaringer» for art13- og gjenbrukssak-spørsmålene.
          *
          * Uttømmende when uten else med vilje: en fremtidig kodeverk-bump med ny status skal gi
          * kompileringsfeil her (bevisst mapping-beslutning), ikke stille bli AVSLUTTET.
          */
-        fun tilSkjemaSaksstatus(saksstatus: Saksstatuser, harAktivBehandling: Boolean): Saksstatus {
-            if (harAktivBehandling) {
-                return Saksstatus.MOTTATT
-            }
+        fun tilSkjemaSaksstatus(saksstatus: Saksstatuser): Saksstatus {
             return when (saksstatus) {
                 Saksstatuser.OPPRETTET -> Saksstatus.MOTTATT
 
@@ -75,9 +69,8 @@ class SkjemaSaksstatusSyncService(
      * status-/behandlingsendringen (outbox-semantikk: bestillingen committes atomisk og kan ikke
      * tapes ved krasj), mens selve HTTP-kallet skjer i steget etter commit med rekjøringsstøtte.
      *
-     * Brukes av [SkjemaSaksstatusEventListener] (fagsak-statusendringer) og av REST-stier som kun
-     * lukker en behandling uten å endre fagsakstatus — utledet skjema-status avhenger også av om
-     * saken har aktiv behandling, så behandlingslukking krever synk selv uten statusendring.
+     * Brukes av [SkjemaSaksstatusEventListener] — synk trigges kun av fagsak-statusendringer,
+     * siden utledet skjema-status er en ren funksjon av fagsakstatus.
      */
     fun bestillSynkHvisSkjemakoblet(saksnummer: String) {
         if (!skjemaSakMappingRepository.existsByFagsak_Saksnummer(saksnummer)) {
@@ -88,7 +81,7 @@ class SkjemaSaksstatusSyncService(
     }
 
     private fun tilOppdateringer(rader: List<SaksstatusSynkRad>): List<SaksstatusOppdatering> =
-        rader.map { SaksstatusOppdatering(it.skjemaId, it.saksnummer, tilSkjemaSaksstatus(it.saksstatus, it.harAktivBehandling)) }
+        rader.map { SaksstatusOppdatering(it.skjemaId, it.saksnummer, tilSkjemaSaksstatus(it.saksstatus)) }
 
     /**
      * Løpende synk: sender fagsakens GJELDENDE saksstatus til skjema-api for alle skjema koblet
@@ -135,18 +128,21 @@ class SkjemaSaksstatusSyncService(
 
         var antallOppdatert = 0
         val ukjenteSkjemaIder = mutableListOf<UUID>()
+        val konfliktSkjemaIder = mutableListOf<UUID>()
         val batcher = oppdateringer.chunked(MAKS_OPPDATERINGER_PER_BATCH)
         batcher.forEachIndexed { indeks, batch ->
             try {
                 val resultat = melosysSkjemaApiClient.bulkOppdaterSaksstatus(BulkOppdaterSaksstatusRequest(batch))
                 antallOppdatert += resultat.antallOppdatert
                 ukjenteSkjemaIder += resultat.ukjenteSkjemaIder
+                konfliktSkjemaIder += resultat.konfliktSkjemaIder
             } catch (e: Exception) {
                 val feiletBatch = indeks + 1
                 log.error(e) { "Saksstatus-massesynk feilet i batch $feiletBatch av ${batcher.size} — stopper videre sending" }
                 return rapport.copy(
                     antallOppdatert = antallOppdatert,
                     ukjenteSkjemaIder = ukjenteSkjemaIder,
+                    konfliktSkjemaIder = konfliktSkjemaIder,
                     feiletBatch = feiletBatch,
                     feilmelding = "Batch $feiletBatch av ${batcher.size} feilet (${e.javaClass.simpleName}) — " +
                         "resten ble ikke sendt. Synken er idempotent og kan trygt kjøres på nytt. Se logg for detaljer."
@@ -156,15 +152,21 @@ class SkjemaSaksstatusSyncService(
 
         log.info {
             "Saksstatus-massesynk fullført: ${rapport.antallTotalt} skjema sendt, $antallOppdatert innsendinger oppdatert, " +
-                "${ukjenteSkjemaIder.size} ukjente skjemaId-er"
+                "${ukjenteSkjemaIder.size} ukjente skjemaId-er, ${konfliktSkjemaIder.size} saksnummer-konflikter"
         }
-        return rapport.copy(antallOppdatert = antallOppdatert, ukjenteSkjemaIder = ukjenteSkjemaIder)
+        return rapport.copy(
+            antallOppdatert = antallOppdatert,
+            ukjenteSkjemaIder = ukjenteSkjemaIder,
+            konfliktSkjemaIder = konfliktSkjemaIder
+        )
     }
 }
 
 /**
- * Rapport fra massesynk. [antallOppdatert] og [ukjenteSkjemaIder] settes kun ved reell synk
- * (dryRun=false) og aggregeres fra skjema-api-responsene. [antallOppdatert] kan avvike fra
+ * Rapport fra massesynk. [antallOppdatert], [ukjenteSkjemaIder] og [konfliktSkjemaIder] settes
+ * kun ved reell synk (dryRun=false) og aggregeres fra skjema-api-responsene.
+ * [konfliktSkjemaIder] er rader skjema-api hoppet over fordi innsendingen allerede har et annet
+ * saksnummer (saksnummer er immutabelt på mottakssiden). [antallOppdatert] kan avvike fra
  * [antallTotalt] siden skjema-api oppdaterer alle innsendinger på samme saksnummer per rad —
  * radene er sortert på saksnummer nettopp for å begrense at én sak krysser en batch-grense,
  * men når det likevel skjer kan [antallOppdatert] avvike marginalt (dobbelttelling av
@@ -179,6 +181,7 @@ data class SkjemaSaksstatusSynkRapport(
     val perMelosysStatus: Map<Saksstatuser, Int>,
     val antallOppdatert: Int? = null,
     val ukjenteSkjemaIder: List<UUID>? = null,
+    val konfliktSkjemaIder: List<UUID>? = null,
     val feiletBatch: Int? = null,
     val feilmelding: String? = null
 )
