@@ -6,6 +6,15 @@ package no.nav.melosys.service.sak;
  *
  * Ingen defaultverdi med vilje: hvert kallsted må ta eksplisitt stilling, slik at nye kallsteder
  * ikke stille kan bryte SAGA-prinsippet om at prosessinstans-steg ikke bestiller barneprosesser.
+ *
+ * <p>OBS: også ren BEHANDLINGS-lukking uten fagsak-statusendring krever synk-stillingtagen —
+ * utledet skjema-status avhenger av om saken har aktiv behandling, så en sti som kun lukker en
+ * behandling passerer aldri FagsakService.oppdaterStatus og trigger dermed ingen event. Slike
+ * stier må enten sette SYNK_SAKSSTATUS_SAKSNUMMER-markøren (prosessinstans-steg, jf.
+ * Prosessinstans.markerForSkjemaSaksstatusSynk) eller kalle
+ * SkjemaSaksstatusSyncService.bestillSynkHvisSkjemakoblet (REST-/admin-stier). Glemmes dette i en
+ * fremtidig kun-behandling-sti, er den idempotente massesynken
+ * (/admin/skjema-saksstatus/synk) sikkerhetsnettet.
  */
 public enum SkjemaSaksstatusSynk {
 

@@ -7,7 +7,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
@@ -69,7 +68,7 @@ public abstract class AdminSedRuter {
             log.info("Saksstatus settes til annullert for behandling {}", behandling.getId());
             fagsakService.oppdaterStatus(behandling.getFagsak(), Saksstatuser.ANNULLERT, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT);
         }
-        prosessinstans.setData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER, behandling.getFagsak().getSaksnummer());
+        prosessinstans.markerForSkjemaSaksstatusSynk(behandling.getFagsak().getSaksnummer());
         avvisMedPeriodeOpphørt(behandling);
     }
 }

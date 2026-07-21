@@ -9,40 +9,44 @@ import org.junit.jupiter.api.Test
 internal class ProsessflytDefinisjonTest {
 
     /**
-     * Arkitekturregel: enhver flyt som avslutter sak/behandling skal synkronisere saksstatus til
-     * melosys-skjema-api som SISTE steg (AvsluttFagsakOgBehandling-steget bruker
-     * HÅNDTERES_AV_PROSESSFLYT og er avhengig av at flyten selv eier synk-steget; steget ligger
-     * sist slik at en synk-feil ikke stopper forretningskritiske steg). Uten denne regelen kan en
-     * fremtidig flyt stille glemme steget, og skjema-api vil vise utdatert status til innsender.
+     * Steg som setter SYNK_SAKSSTATUS_SAKSNUMMER-markøren (via
+     * Prosessinstans.markerForSkjemaSaksstatusSynk) fordi de endrer fagsakstatus eller lukker
+     * behandlinger. Legger et steg til her når det begynner å sette markøren — testen under
+     * håndhever da at flytene det inngår i får synk-steget sist.
+     */
+    private val markørSettendeSteg = listOf(
+        ProsessSteg.AVSLUTT_SAK_OG_BEHANDLING,
+        ProsessSteg.SED_MOTTAK_RUTING,
+        ProsessSteg.HÅNDTER_EKSISTERENDE_SAK_DIGITAL_SØKNAD,
+        ProsessSteg.OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD
+    )
+
+    /**
+     * Arkitekturregel: enhver flyt som inneholder et markør-settende steg skal synkronisere
+     * saksstatus til melosys-skjema-api som SISTE steg. Stegene bruker
+     * HÅNDTERES_AV_PROSESSFLYT/markør-idiomet og er avhengige av at flyten selv eier synk-steget;
+     * steget ligger sist slik at en synk-feil ikke stopper forretningskritiske steg. Uten denne
+     * regelen kan en fremtidig flyt stille glemme steget, og skjema-api vil vise utdatert status
+     * til innsender.
      */
     @Test
-    fun `alle flyter med AVSLUTT_SAK_OG_BEHANDLING har SYNK_SKJEMA_SAKSSTATUS som siste steg`() {
-        val flyterMedAvslutt = ProsessType.entries
+    fun `alle flyter med markør-settende steg har SYNK_SKJEMA_SAKSSTATUS som siste steg`() {
+        val flyterMedMarkørSettendeSteg = ProsessType.entries
             .mapNotNull { type -> hentStegListe(type)?.let { type to it } }
-            .filter { (_, steg) -> ProsessSteg.AVSLUTT_SAK_OG_BEHANDLING in steg }
+            .filter { (_, steg) -> steg.any { it in markørSettendeSteg } }
 
-        withClue("Fant ingen flyter med AVSLUTT_SAK_OG_BEHANDLING — testen er feilkonfigurert") {
-            flyterMedAvslutt.isNotEmpty() shouldBe true
+        withClue("Fant ingen flyter med markør-settende steg — testen er feilkonfigurert") {
+            flyterMedMarkørSettendeSteg.isNotEmpty() shouldBe true
         }
 
-        flyterMedAvslutt.forEach { (type, steg) ->
-            withClue("Flyten $type avslutter sak/behandling, men mangler SYNK_SKJEMA_SAKSSTATUS som siste steg") {
+        flyterMedMarkørSettendeSteg.forEach { (type, steg) ->
+            withClue(
+                "Flyten $type inneholder et steg som kan markere for saksstatus-synk " +
+                    "(${steg.filter { it in markørSettendeSteg }}), men mangler SYNK_SKJEMA_SAKSSTATUS som siste steg"
+            ) {
                 steg.last() shouldBe ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
             }
         }
-    }
-
-    @Test
-    fun `MOTTAK_SED har SYNK_SKJEMA_SAKSSTATUS som siste steg`() {
-        // SED-rutingen annullerer saker og markerer instansen med SYNK_SAKSSTATUS_SAKSNUMMER
-        hentStegListe(ProsessType.MOTTAK_SED)!!.last() shouldBe ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
-    }
-
-    @Test
-    fun `digital-søknad-mottaksflytene har SYNK_SKJEMA_SAKSSTATUS som siste steg`() {
-        // Mottak (særlig på eksisterende sak) endrer ikke fagsakstatus — synken må trigges av flyten
-        hentStegListe(ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD)!!.last() shouldBe ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
-        hentStegListe(ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD)!!.last() shouldBe ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
     }
 
     /** Bygger flytens stegliste via det offentlige nesteSteg-API-et. */

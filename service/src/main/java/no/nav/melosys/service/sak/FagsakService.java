@@ -294,7 +294,7 @@ public class FagsakService {
         fagsak.setStatus(saksstatus);
         fagsakRepository.save(fagsak);
         if (skjemaSaksstatusSynk == SkjemaSaksstatusSynk.SYNKRONISER) {
-            applicationEventPublisher.publishEvent(new FagsakStatusEndretEvent(fagsak));
+            applicationEventPublisher.publishEvent(new FagsakStatusEndretEvent(fagsak.getSaksnummer()));
         }
     }
 

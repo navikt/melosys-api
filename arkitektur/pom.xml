@@ -48,6 +48,12 @@
             <artifactId>saksflyt</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Håndterer Fagsak (compile-avhengighet til service) og må dekkes av setStatus-regelen -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>melosys-statistikk</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>

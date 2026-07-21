@@ -137,6 +137,16 @@ class Prosessinstans(
     }
 
     /**
+     * Markerer instansen for synk av saksstatus til melosys-skjema-api:
+     * SYNK_SKJEMA_SAKSSTATUS-steget sist i flyten synker kun når
+     * [ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER] er satt. Kalles av steg som endrer
+     * fagsakstatus eller lukker behandlinger (begge påvirker utledet skjema-status).
+     */
+    fun markerForSkjemaSaksstatusSynk(saksnummer: String) {
+        setData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER, saksnummer)
+    }
+
+    /**
      * Setter et dataelement til et object (ved json serialisering)
      */
     fun setData(key: ProsessDataKey, value: Any?) {

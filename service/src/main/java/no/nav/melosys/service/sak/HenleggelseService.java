@@ -27,17 +27,20 @@ public class HenleggelseService {
     private final ProsessinstansService prosessinstansService;
     private final OppgaveService oppgaveService;
     private final BehandlingService behandlingService;
+    private final SkjemaSaksstatusSyncService skjemaSaksstatusSyncService;
 
     public HenleggelseService(FagsakService fagsakService,
                               BehandlingsresultatService behandlingsresultatService,
                               ProsessinstansService prosessinstansService,
                               OppgaveService oppgaveService,
-                              BehandlingService behandlingService) {
+                              BehandlingService behandlingService,
+                              SkjemaSaksstatusSyncService skjemaSaksstatusSyncService) {
         this.fagsakService = fagsakService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.prosessinstansService = prosessinstansService;
         this.oppgaveService = oppgaveService;
         this.behandlingService = behandlingService;
+        this.skjemaSaksstatusSyncService = skjemaSaksstatusSyncService;
     }
 
     /**
@@ -62,6 +65,9 @@ public class HenleggelseService {
             fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT, SkjemaSaksstatusSynk.SYNKRONISER);
         } else {
             behandlingService.avsluttAndregangsbehandling(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
+            // Kun behandlingen lukkes (ingen fagsak-statusendring/event), men utledet skjema-status
+            // avhenger også av om saken har aktiv behandling — bestill synk eksplisitt
+            skjemaSaksstatusSyncService.bestillSynkHvisSkjemakoblet(saksnummer);
         }
         prosessinstansService.opprettProsessinstansFagsakHenlagt(aktivBehandling);
         oppgaveService.ferdigstillOppgaveMedBehandlingID(aktivBehandling.getId());
@@ -76,6 +82,9 @@ public class HenleggelseService {
             henleggSakSomBortfalt(fagsak);
         } else {
             henleggBehandlingSomBortfalt(behandling);
+            // Kun behandlingen lukkes (ingen fagsak-statusendring/event), men utledet skjema-status
+            // avhenger også av om saken har aktiv behandling — bestill synk eksplisitt
+            skjemaSaksstatusSyncService.bestillSynkHvisSkjemakoblet(fagsak.getSaksnummer());
         }
     }
 

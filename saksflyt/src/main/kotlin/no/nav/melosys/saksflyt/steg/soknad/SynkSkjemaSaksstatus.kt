@@ -16,8 +16,9 @@ private val log = KotlinLogging.logger { }
  * SkjemaSaksstatusEventListener, og sist i MOTTAK_SED-flyten.
  *
  * Steget synker KUN når [ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER] er satt — nøkkelen settes
- * eksplisitt av stegene som faktisk endrer fagsakstatus (AvsluttFagsakOgBehandling og
- * SED-rutingens annullering). Ingen fallback til prosessinstansens behandling: SED-ruterne
+ * eksplisitt (via Prosessinstans.markerForSkjemaSaksstatusSynk) av stegene som endrer
+ * fagsakstatus eller lukker behandlinger (AvsluttFagsakOgBehandling, SED-rutingens annullering
+ * og digital-søknad-mottaksstegene). Ingen fallback til prosessinstansens behandling: SED-ruterne
  * setter behandling på instansen under ruting, og en fallback ville gitt et reelt
  * skjema-api-kall for hver innkommende SED på en skjema-koblet sak (og latt skjema-api-nedetid
  * feile SED-mottak). Uten nøkkelen er steget deterministisk no-op.

@@ -5,10 +5,13 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.just
+import io.mockk.runs
 import io.mockk.verify
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.integrasjon.melosysskjema.MelosysSkjemaApiClient
 import no.nav.melosys.repository.SkjemaSakMappingRepository
+import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.repository.SkjemaSakMappingRepository.SaksstatusSynkRad
 import no.nav.melosys.skjema.types.common.Saksstatus
 import no.nav.melosys.skjema.types.m2m.BulkOppdaterSaksstatusRequest
@@ -30,11 +33,14 @@ internal class SkjemaSaksstatusSyncServiceTest {
     @MockK
     lateinit var melosysSkjemaApiClient: MelosysSkjemaApiClient
 
+    @MockK
+    lateinit var prosessinstansService: ProsessinstansService
+
     private lateinit var service: SkjemaSaksstatusSyncService
 
     @BeforeEach
     fun setup() {
-        service = SkjemaSaksstatusSyncService(skjemaSakMappingRepository, melosysSkjemaApiClient)
+        service = SkjemaSaksstatusSyncService(skjemaSakMappingRepository, melosysSkjemaApiClient, prosessinstansService)
     }
 
     private fun lagSynkRad(
@@ -82,6 +88,29 @@ internal class SkjemaSaksstatusSyncServiceTest {
             SkjemaSaksstatusSyncService.tilSkjemaSaksstatus(
                 saksstatus, harAktivBehandling = true
             ) shouldBe Saksstatus.MOTTATT
+        }
+    }
+
+    @Nested
+    inner class BestillSynkHvisSkjemakoblet {
+
+        @Test
+        fun `bestiller synk-prosessinstans for sak med skjema-mapping`() {
+            every { skjemaSakMappingRepository.existsByFagsak_Saksnummer("MEL-100") } returns true
+            every { prosessinstansService.opprettProsessinstansSynkSkjemaSaksstatus("MEL-100") } just runs
+
+            service.bestillSynkHvisSkjemakoblet("MEL-100")
+
+            verify(exactly = 1) { prosessinstansService.opprettProsessinstansSynkSkjemaSaksstatus("MEL-100") }
+        }
+
+        @Test
+        fun `bestiller ikke synk for sak uten skjema-mapping`() {
+            every { skjemaSakMappingRepository.existsByFagsak_Saksnummer("MEL-100") } returns false
+
+            service.bestillSynkHvisSkjemakoblet("MEL-100")
+
+            verify(exactly = 0) { prosessinstansService.opprettProsessinstansSynkSkjemaSaksstatus(any()) }
         }
     }
 

@@ -350,10 +350,10 @@ class FagsakServiceTest {
 
         verify {
             applicationEventPublisher.publishEvent(withArg<FagsakStatusEndretEvent> {
-                it.fagsak shouldBe fagsak
-                it.fagsak.status shouldBe Saksstatuser.ANNULLERT
+                it.saksnummer shouldBe fagsak.saksnummer
             })
         }
+        fagsak.status shouldBe Saksstatuser.ANNULLERT
     }
 
     @Test
@@ -375,9 +375,10 @@ class FagsakServiceTest {
 
         verify {
             applicationEventPublisher.publishEvent(withArg<FagsakStatusEndretEvent> {
-                it.fagsak.status shouldBe Saksstatuser.HENLAGT_BORTFALT
+                it.saksnummer shouldBe fagsak.saksnummer
             })
         }
+        fagsak.status shouldBe Saksstatuser.HENLAGT_BORTFALT
     }
 
     @Test
@@ -392,9 +393,10 @@ class FagsakServiceTest {
 
         verify {
             applicationEventPublisher.publishEvent(withArg<FagsakStatusEndretEvent> {
-                it.fagsak.status shouldBe Saksstatuser.LOVVALG_AVKLART
+                it.saksnummer shouldBe fagsak.saksnummer
             })
         }
+        fagsak.status shouldBe Saksstatuser.LOVVALG_AVKLART
     }
 
     @Test

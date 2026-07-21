@@ -14,7 +14,8 @@ class FerdigbehandleService(
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val oppgaveService: OppgaveService
+    private val oppgaveService: OppgaveService,
+    private val skjemaSaksstatusSyncService: SkjemaSaksstatusSyncService
 ) {
 
     @Transactional
@@ -34,6 +35,9 @@ class FerdigbehandleService(
             fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET, SkjemaSaksstatusSynk.SYNKRONISER)
         } else {
             behandlingService.avsluttBehandling(behandlingId)
+            // Kun behandlingen lukkes (ingen fagsak-statusendring/event), men utledet skjema-status
+            // avhenger også av om saken har aktiv behandling — bestill synk eksplisitt
+            skjemaSaksstatusSyncService.bestillSynkHvisSkjemakoblet(fagsak.saksnummer)
         }
 
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingId)

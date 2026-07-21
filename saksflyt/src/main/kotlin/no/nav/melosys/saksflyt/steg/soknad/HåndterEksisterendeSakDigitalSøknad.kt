@@ -86,7 +86,7 @@ class HåndterEksisterendeSakDigitalSøknad(
         prosessinstans.behandling = behandling
         // Trigger SYNK_SKJEMA_SAKSSTATUS sist i flyten: mottak på eksisterende sak endrer ikke
         // fagsakstatus (ingen event), men saken har nå aktiv behandling og skal vises som MOTTATT
-        prosessinstans.setData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER, fagsak.saksnummer)
+        prosessinstans.markerForSkjemaSaksstatusSynk(fagsak.saksnummer)
         log.info { "Ferdig med eksisterende sak $saksnummer, behandling=${behandling.id}" }
     }
 

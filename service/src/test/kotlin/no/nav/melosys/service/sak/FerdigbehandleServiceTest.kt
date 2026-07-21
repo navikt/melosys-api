@@ -38,11 +38,16 @@ class FerdigbehandleServiceTest {
     @RelaxedMockK
     lateinit var prosessinstansService: ProsessinstansService
 
+    @RelaxedMockK
+    lateinit var skjemaSaksstatusSyncService: SkjemaSaksstatusSyncService
+
     private lateinit var ferdigbehandleService: FerdigbehandleService
 
     @BeforeEach
     fun setup() {
-        ferdigbehandleService = FerdigbehandleService(fagsakService, behandlingService, behandlingsresultatService, oppgaveService)
+        ferdigbehandleService = FerdigbehandleService(
+            fagsakService, behandlingService, behandlingsresultatService, oppgaveService, skjemaSaksstatusSyncService
+        )
     }
 
     @Test
@@ -64,6 +69,8 @@ class FerdigbehandleServiceTest {
         verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.AVSLUTTET, SkjemaSaksstatusSynk.SYNKRONISER) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.id, Behandlingsresultattyper.FERDIGBEHANDLET) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingID) }
+        // Fagsak-statusendringen med SYNKRONISER trigger synk via event — ingen ekstra bestilling her
+        verify(exactly = 0) { skjemaSaksstatusSyncService.bestillSynkHvisSkjemakoblet(any()) }
     }
 
     @Test
@@ -92,6 +99,8 @@ class FerdigbehandleServiceTest {
         verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(fagsak, any<Behandling>(), any(), any()) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingID) }
+        // Kun behandlingen lukkes (ingen fagsak-statusendring/event) — synk må bestilles eksplisitt
+        verify { skjemaSaksstatusSyncService.bestillSynkHvisSkjemakoblet(fagsak.saksnummer) }
     }
 
     @Test

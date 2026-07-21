@@ -5,6 +5,7 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.integrasjon.melosysskjema.MelosysSkjemaApiClient
 import no.nav.melosys.repository.SkjemaSakMappingRepository
 import no.nav.melosys.repository.SkjemaSakMappingRepository.SaksstatusSynkRad
+import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.skjema.types.common.Saksstatus
 import no.nav.melosys.skjema.types.m2m.BulkOppdaterSaksstatusRequest
 import no.nav.melosys.skjema.types.m2m.SaksstatusOppdatering
@@ -24,7 +25,8 @@ private val log = KotlinLogging.logger { }
 @Service
 class SkjemaSaksstatusSyncService(
     private val skjemaSakMappingRepository: SkjemaSakMappingRepository,
-    private val melosysSkjemaApiClient: MelosysSkjemaApiClient
+    private val melosysSkjemaApiClient: MelosysSkjemaApiClient,
+    private val prosessinstansService: ProsessinstansService
 ) {
 
     companion object {
@@ -36,7 +38,8 @@ class SkjemaSaksstatusSyncService(
          * «MOTTATT = aktiv/under behandling»: statusmappingen alene er utilstrekkelig for
          * gjenbrukte saker — en sak i f.eks. LOVVALG_AVKLART kan få ny søknad og dermed en ny
          * aktiv behandling UTEN at fagsakstatus endres. Derfor: har saken minst én aktiv
-         * behandling (jf. Behandling.erAktiv — inaktiv = AVSLUTTET/MIDLERTIDIG_LOVVALGSBESLUTNING)
+         * behandling (brukervendt definisjon, jf. SAKSSTATUS_SYNK_PROJEKSJON i
+         * SkjemaSakMappingRepository: ikke AVSLUTTET, og ikke intern ÅRSAVREGNING/SATSENDRING)
          * er den MOTTATT uansett fagsakstatus.
          *
          * Ellers gjelder statusmappingen besluttet av produkteier: kun OPPRETTET vises som
@@ -64,6 +67,24 @@ class SkjemaSaksstatusSyncService(
                 Saksstatuser.ANNULLERT -> Saksstatus.AVSLUTTET
             }
         }
+    }
+
+    /**
+     * Bestiller en SYNK_SKJEMA_SAKSSTATUS-prosessinstans for saken hvis den er skjema-koblet
+     * (har rader i skjema_sak_mapping) — no-op ellers. Kalles i samme transaksjon som
+     * status-/behandlingsendringen (outbox-semantikk: bestillingen committes atomisk og kan ikke
+     * tapes ved krasj), mens selve HTTP-kallet skjer i steget etter commit med rekjøringsstøtte.
+     *
+     * Brukes av [SkjemaSaksstatusEventListener] (fagsak-statusendringer) og av REST-stier som kun
+     * lukker en behandling uten å endre fagsakstatus — utledet skjema-status avhenger også av om
+     * saken har aktiv behandling, så behandlingslukking krever synk selv uten statusendring.
+     */
+    fun bestillSynkHvisSkjemakoblet(saksnummer: String) {
+        if (!skjemaSakMappingRepository.existsByFagsak_Saksnummer(saksnummer)) {
+            return
+        }
+        log.info { "Bestiller synk av saksstatus til skjema-api for sak $saksnummer" }
+        prosessinstansService.opprettProsessinstansSynkSkjemaSaksstatus(saksnummer)
     }
 
     private fun tilOppdateringer(rader: List<SaksstatusSynkRad>): List<SaksstatusOppdatering> =

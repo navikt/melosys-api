@@ -68,7 +68,7 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         log.info("Avslutter behandling {}, og setter saksstatus til {} på tilhørende fagsak", behandlingID, saksstatus);
         // HÅNDTERES_AV_PROSESSFLYT: flyten eier selv SYNK_SKJEMA_SAKSSTATUS-steget sist i flyten
         fagsakService.avsluttFagsakOgBehandling(fagsak, saksstatus, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT);
-        markerForSaksstatusSynk(prosessinstans, fagsak);
+        prosessinstans.markerForSkjemaSaksstatusSynk(fagsak.getSaksnummer());
     }
 
     private void avsluttÅrsavregningEllerSatsendring(Prosessinstans prosessinstans, Fagsak fagsak, Behandling behandling) {
@@ -76,14 +76,11 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         if (sakLukkes) {
             // HÅNDTERES_AV_PROSESSFLYT: flyten eier selv SYNK_SKJEMA_SAKSSTATUS-steget sist i flyten
             fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT);
-            markerForSaksstatusSynk(prosessinstans, fagsak);
         } else {
             behandlingService.avsluttBehandling(behandling.getId());
         }
-    }
-
-    private void markerForSaksstatusSynk(Prosessinstans prosessinstans, Fagsak fagsak) {
-        // Settes kun når fagsakstatus faktisk endres — trigger SYNK_SKJEMA_SAKSSTATUS-steget sist i flyten
-        prosessinstans.setData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER, fagsak.getSaksnummer());
+        // Markeres i BEGGE grener: også ren behandlingslukking krever synk-stillingtagen (utledet
+        // skjema-status avhenger av sakens behandlinger, og synken er idempotent), jf. SkjemaSaksstatusSynk
+        prosessinstans.markerForSkjemaSaksstatusSynk(fagsak.getSaksnummer());
     }
 }
