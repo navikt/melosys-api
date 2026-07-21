@@ -54,9 +54,12 @@ public abstract class AdminSedRuter {
 
     /**
      * Annullerer sak og behandling fra SED-ruting (kjøres i et prosessinstans-steg). Bruker
-     * HÅNDTERES_AV_PROSESSFLYT og markerer i stedet prosessinstansen med SAKSNUMMER-prosessdata, slik
+     * HÅNDTERES_AV_PROSESSFLYT og markerer i stedet prosessinstansen med SYNK_SAKSSTATUS_SAKSNUMMER-prosessdata, slik
      * at SYNK_SKJEMA_SAKSSTATUS-steget sist i MOTTAK_SED-flyten plukker opp synken — et
      * prosessinstans-steg skal ikke bestille barneprosesser via event-stien.
+     *
+     * Merk: prosessdata persisteres først når steget fullfører, så et krasj mellom annullering og
+     * persistering kan miste synk-markeringen (lite vindu) — den idempotente massesynken er nettet.
      */
     protected void annullerSakOgBehandling(Prosessinstans prosessinstans, Behandling behandling) {
         if (behandling.erAktiv()) {
@@ -66,7 +69,7 @@ public abstract class AdminSedRuter {
             log.info("Saksstatus settes til annullert for behandling {}", behandling.getId());
             fagsakService.oppdaterStatus(behandling.getFagsak(), Saksstatuser.ANNULLERT, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT);
         }
-        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, behandling.getFagsak().getSaksnummer());
+        prosessinstans.setData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER, behandling.getFagsak().getSaksnummer());
         avvisMedPeriodeOpphørt(behandling);
     }
 }

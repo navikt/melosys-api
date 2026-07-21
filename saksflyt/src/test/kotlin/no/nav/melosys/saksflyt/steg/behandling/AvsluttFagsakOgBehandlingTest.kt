@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.steg.behandling
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -97,6 +99,7 @@ class AvsluttFagsakOgBehandlingTest {
 
 
         verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT) }
+        prosessinstans.getData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER) shouldBe fagsak.saksnummer
     }
 
     @Test
@@ -110,6 +113,7 @@ class AvsluttFagsakOgBehandlingTest {
 
 
         verify { behandlingService.endreStatus(behandling.id, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING) }
+        prosessinstans.getData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER).shouldBeNull()
     }
 
     @Test
@@ -144,6 +148,7 @@ class AvsluttFagsakOgBehandlingTest {
 
 
         verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.AVSLUTTET, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT) }
+        prosessinstans.getData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER) shouldBe fagsak.saksnummer
     }
 
     @Test
@@ -169,6 +174,7 @@ class AvsluttFagsakOgBehandlingTest {
 
 
         verify { behandlingService.avsluttBehandling(behandling.id) }
+        prosessinstans.getData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER).shouldBeNull()
     }
 
     @Test
@@ -188,5 +194,6 @@ class AvsluttFagsakOgBehandlingTest {
 
 
         verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT) }
+        prosessinstans.getData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER) shouldBe fagsak.saksnummer
     }
 }

@@ -3,7 +3,6 @@ package no.nav.melosys.service.sak
 import mu.KotlinLogging
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.integrasjon.melosysskjema.MelosysSkjemaApiClient
-import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.SkjemaSakMappingRepository
 import no.nav.melosys.skjema.types.common.Saksstatus
 import no.nav.melosys.skjema.types.m2m.BulkOppdaterSaksstatusRequest
@@ -24,7 +23,6 @@ private val log = KotlinLogging.logger { }
 @Service
 class SkjemaSaksstatusSyncService(
     private val skjemaSakMappingRepository: SkjemaSakMappingRepository,
-    private val fagsakRepository: FagsakRepository,
     private val melosysSkjemaApiClient: MelosysSkjemaApiClient
 ) {
 
@@ -36,35 +34,43 @@ class SkjemaSaksstatusSyncService(
          * Mapper intern saksstatus til brukervendt skjema-api-status.
          * Besluttet av produkteier: kun OPPRETTET vises som MOTTATT — alt annet, inkludert
          * LOVVALG_AVKLART og henlagt/annullert, vises som AVSLUTTET for innsender.
+         *
+         * Uttømmende when uten else med vilje: en fremtidig kodeverk-bump med ny status skal gi
+         * kompileringsfeil her (bevisst mapping-beslutning), ikke stille bli AVSLUTTET.
          */
         fun tilSkjemaSaksstatus(saksstatus: Saksstatuser): Saksstatus = when (saksstatus) {
             Saksstatuser.OPPRETTET -> Saksstatus.MOTTATT
-            else -> Saksstatus.AVSLUTTET
+
+            Saksstatuser.LOVVALG_AVKLART,
+            Saksstatuser.MEDLEMSKAP_AVKLART,
+            Saksstatuser.TRYGDEAVGIFT_AVKLART,
+            Saksstatuser.AVSLUTTET,
+            Saksstatuser.VIDERESENDT,
+            Saksstatuser.OPPHØRT,
+            Saksstatuser.HENLAGT,
+            Saksstatuser.HENLAGT_BORTFALT,
+            Saksstatuser.ANNULLERT -> Saksstatus.AVSLUTTET
         }
     }
 
     /**
-     * Løpende synk: sender fagsakens GJELDENDE saksstatus til skjema-api hvis saken har
-     * skjema-mapping. No-op for saker uten mapping-rad (saker som ikke stammer fra skjema-api).
-     * Bruker slanke oppslag (exists + status-projeksjon) — hydrerer ikke fagsakens EAGER-samlinger.
+     * Løpende synk: sender fagsakens GJELDENDE saksstatus til skjema-api for alle skjema koblet
+     * til saken. No-op for saker uten mapping-rad (saker som ikke stammer fra skjema-api).
+     * Ett slankt projeksjonoppslag — hydrerer ikke fagsakens EAGER-samlinger.
      */
     fun synkroniserSaksstatusForSaksnummer(saksnummer: String) {
-        if (!skjemaSakMappingRepository.existsByFagsak_Saksnummer(saksnummer)) {
+        val rader = skjemaSakMappingRepository.finnSaksstatusSynkRaderForSaksnummer(saksnummer)
+        if (rader.isEmpty()) {
             log.debug { "Sak $saksnummer har ingen skjema-mapping — hopper over saksstatus-synk" }
             return
         }
 
-        val melosysStatus = fagsakRepository.finnStatusForSaksnummer(saksnummer)
-            .orElseThrow { IllegalStateException("Fant ikke fagsak $saksnummer for saksstatus-synk") }
-        val saksstatus = tilSkjemaSaksstatus(melosysStatus)
-        val skjemaIder = skjemaSakMappingRepository.finnSkjemaIderForSaksnummer(saksnummer)
-
-        skjemaIder
-            .map { SaksstatusOppdatering(it, saksnummer, saksstatus) }
+        rader
+            .map { SaksstatusOppdatering(it.skjemaId, it.saksnummer, tilSkjemaSaksstatus(it.saksstatus)) }
             .chunked(MAKS_OPPDATERINGER_PER_BATCH)
             .forEach { melosysSkjemaApiClient.bulkOppdaterSaksstatus(BulkOppdaterSaksstatusRequest(it)) }
 
-        log.info { "Synkroniserte saksstatus $saksstatus til skjema-api for ${skjemaIder.size} skjema på sak $saksnummer" }
+        log.info { "Synkroniserte saksstatus til skjema-api for ${rader.size} skjema på sak $saksnummer" }
     }
 
     /**

@@ -21,9 +21,6 @@ public interface SkjemaSakMappingRepository extends JpaRepository<SkjemaSakMappi
 
     boolean existsByFagsak_Saksnummer(String saksnummer);
 
-    @Query("select m.skjemaId from SkjemaSakMapping m where m.fagsak.saksnummer = :saksnummer")
-    List<UUID> finnSkjemaIderForSaksnummer(@Param("saksnummer") String saksnummer);
-
     /**
      * Projeksjon for saksstatus-synk: henter kun feltene synken trenger, i én spørring.
      * Unngår å laste hele SkjemaSakMapping (originalData-CLOB) og Fagsak med EAGER-samlinger.
@@ -31,6 +28,11 @@ public interface SkjemaSakMappingRepository extends JpaRepository<SkjemaSakMappi
     @Query("select m.skjemaId as skjemaId, f.saksnummer as saksnummer, f.status as saksstatus "
         + "from SkjemaSakMapping m join m.fagsak f")
     List<SaksstatusSynkRad> finnAlleSaksstatusSynkRader();
+
+    /** Som {@link #finnAlleSaksstatusSynkRader()}, men for én sak — brukes av løpende synk. */
+    @Query("select m.skjemaId as skjemaId, f.saksnummer as saksnummer, f.status as saksstatus "
+        + "from SkjemaSakMapping m join m.fagsak f where f.saksnummer = :saksnummer")
+    List<SaksstatusSynkRad> finnSaksstatusSynkRaderForSaksnummer(@Param("saksnummer") String saksnummer);
 
     interface SaksstatusSynkRad {
         UUID getSkjemaId();

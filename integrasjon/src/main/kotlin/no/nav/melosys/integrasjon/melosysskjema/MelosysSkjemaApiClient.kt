@@ -13,7 +13,7 @@ import java.util.UUID
 
 private val log = KotlinLogging.logger { }
 
-private val SAKSSTATUS_TIMEOUT = Duration.ofSeconds(10)
+private val SAKSSTATUS_TIMEOUT = Duration.ofSeconds(30)
 
 @Service
 class MelosysSkjemaApiClient(private val melosysSkjemaApiWebClient: WebClient) {

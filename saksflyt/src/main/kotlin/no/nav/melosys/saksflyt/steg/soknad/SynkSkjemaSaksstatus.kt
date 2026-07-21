@@ -11,15 +11,22 @@ import org.springframework.stereotype.Component
 private val log = KotlinLogging.logger { }
 
 /**
- * Synkroniserer saksstatus til melosys-skjema-api. Ligger som eget steg i alle flyter som
- * avslutter sak/behandling (rett etter AVSLUTT_SAK_OG_BEHANDLING), i den frittstående
- * SYNK_SKJEMA_SAKSSTATUS-flyten bestilt fra SkjemaSaksstatusEventListener, og sist i
- * MOTTAK_SED-flyten (der SED-rutingen setter SAKSNUMMER-prosessdata ved annullering).
+ * Synkroniserer saksstatus til melosys-skjema-api. Ligger som SISTE steg i alle flyter som
+ * avslutter sak/behandling, i den frittstående SYNK_SKJEMA_SAKSSTATUS-flyten bestilt fra
+ * SkjemaSaksstatusEventListener, og sist i MOTTAK_SED-flyten.
  *
- * Saksnummer hentes fra SAKSNUMMER-prosessdata, ellers fra prosessinstansens behandling
- * (samme kilde som AvsluttFagsakOgBehandling-steget bruker for fagsaken). Finnes ingen av
- * delene, eller saken ikke har skjema-mapping, er steget no-op. Feil gir rekjøringsstøtte
- * fra prosessrammeverket.
+ * Steget synker KUN når [ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER] er satt — nøkkelen settes
+ * eksplisitt av stegene som faktisk endrer fagsakstatus (AvsluttFagsakOgBehandling og
+ * SED-rutingens annullering). Ingen fallback til prosessinstansens behandling: SED-ruterne
+ * setter behandling på instansen under ruting, og en fallback ville gitt et reelt
+ * skjema-api-kall for hver innkommende SED på en skjema-koblet sak (og latt skjema-api-nedetid
+ * feile SED-mottak). Uten nøkkelen er steget deterministisk no-op.
+ *
+ * Steget ligger sist i flytene slik at alle forretningskritiske steg er fullført før synken —
+ * en synk-feil (f.eks. skjema-api-nedetid) feiler da instansen isolert og kan rekjøres uten å
+ * berøre vedtaks-/avsluttingsstegene. Ulempen er at feil i mellomsteg utsetter synken til
+ * rekjøring, og at prosessdata persisteres først etter steget (lite crash-vindu i SED-ruting) —
+ * den idempotente massesynken (/admin/skjema-saksstatus/synk) er sikkerhetsnettet for begge.
  */
 @Component
 class SynkSkjemaSaksstatus(
@@ -29,11 +36,10 @@ class SynkSkjemaSaksstatus(
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER)
-            ?: prosessinstans.behandling?.fagsak?.saksnummer
+        val saksnummer = prosessinstans.getData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER)
 
         if (saksnummer == null) {
-            log.debug { "Verken SAKSNUMMER-prosessdata eller behandling er satt — hopper over saksstatus-synk" }
+            log.debug { "SYNK_SAKSSTATUS_SAKSNUMMER-prosessdata er ikke satt — hopper over saksstatus-synk" }
             return
         }
 

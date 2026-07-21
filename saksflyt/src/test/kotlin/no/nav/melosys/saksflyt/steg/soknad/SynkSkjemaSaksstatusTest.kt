@@ -40,9 +40,9 @@ internal class SynkSkjemaSaksstatusTest {
     }
 
     @Test
-    fun `utfør bruker saksnummer fra prosessdata når satt`() {
+    fun `utfør synker når SYNK_SAKSSTATUS_SAKSNUMMER-prosessdata er satt`() {
         val prosessinstans = Prosessinstans.forTest {
-            medData(ProsessDataKey.SAKSNUMMER, saksnummer)
+            medData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER, saksnummer)
         }
         every { skjemaSaksstatusSyncService.synkroniserSaksstatusForSaksnummer(saksnummer) } just Runs
 
@@ -52,23 +52,26 @@ internal class SynkSkjemaSaksstatusTest {
     }
 
     @Test
-    fun `utfør faller tilbake til behandlingens fagsak når SAKSNUMMER-prosessdata mangler`() {
+    fun `utfør er no-op når nøkkelen mangler SELV OM behandling er satt`() {
+        // Regresjonstest: SED-ruterne setter behandling på MOTTAK_SED-instansen under ruting —
+        // en behandling-fallback ville synket for hver innkommende SED på en skjema-koblet sak
         val behandling = Behandling.forTest {
             fagsak { this.saksnummer = this@SynkSkjemaSaksstatusTest.saksnummer }
         }
         val prosessinstans = Prosessinstans.forTest {
             this.behandling = behandling
         }
-        every { skjemaSaksstatusSyncService.synkroniserSaksstatusForSaksnummer(saksnummer) } just Runs
 
         synkSkjemaSaksstatus.utfør(prosessinstans)
 
-        verify(exactly = 1) { skjemaSaksstatusSyncService.synkroniserSaksstatusForSaksnummer(saksnummer) }
+        verify(exactly = 0) { skjemaSaksstatusSyncService.synkroniserSaksstatusForSaksnummer(any()) }
     }
 
     @Test
-    fun `utfør er no-op når verken SAKSNUMMER-prosessdata eller behandling er satt`() {
-        val prosessinstans = Prosessinstans.forTest { }
+    fun `utfør er no-op når nøkkelen mangler og generisk SAKSNUMMER-prosessdata er satt`() {
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.SAKSNUMMER, saksnummer)
+        }
 
         synkSkjemaSaksstatus.utfør(prosessinstans)
 

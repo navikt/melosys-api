@@ -57,7 +57,7 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         if (behandlingsresultat.erGodkjenningEllerInnvilgelseArt13() && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandlingsresultat.getBehandling())) {
             behandlingService.endreStatus(behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         } else if (Arrays.asList(Behandlingstyper.SATSENDRING, Behandlingstyper.ÅRSAVREGNING).contains(behandling.getType())) {
-            avsluttÅrsavregningEllerSatsendring(fagsak, behandling);
+            avsluttÅrsavregningEllerSatsendring(prosessinstans, fagsak, behandling);
         } else {
             avsluttFagsak(prosessinstans, behandlingID, fagsak);
         }
@@ -66,17 +66,24 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
     private void avsluttFagsak(Prosessinstans prosessinstans, long behandlingID, Fagsak fagsak) {
         var saksstatus = prosessinstans.getData(ProsessDataKey.SAKSSTATUS, Saksstatuser.class, Saksstatuser.LOVVALG_AVKLART);
         log.info("Avslutter behandling {}, og setter saksstatus til {} på tilhørende fagsak", behandlingID, saksstatus);
-        // HÅNDTERES_AV_PROSESSFLYT: flyten eier selv SYNK_SKJEMA_SAKSSTATUS-steget rett etter dette steget
+        // HÅNDTERES_AV_PROSESSFLYT: flyten eier selv SYNK_SKJEMA_SAKSSTATUS-steget sist i flyten
         fagsakService.avsluttFagsakOgBehandling(fagsak, saksstatus, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT);
+        markerForSaksstatusSynk(prosessinstans, fagsak);
     }
 
-    private void avsluttÅrsavregningEllerSatsendring(Fagsak fagsak, Behandling behandling) {
+    private void avsluttÅrsavregningEllerSatsendring(Prosessinstans prosessinstans, Fagsak fagsak, Behandling behandling) {
         boolean sakLukkes = fagsak.erEnesteBehandling(behandling.getId());
         if (sakLukkes) {
-            // HÅNDTERES_AV_PROSESSFLYT: flyten eier selv SYNK_SKJEMA_SAKSSTATUS-steget rett etter dette steget
+            // HÅNDTERES_AV_PROSESSFLYT: flyten eier selv SYNK_SKJEMA_SAKSSTATUS-steget sist i flyten
             fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT);
+            markerForSaksstatusSynk(prosessinstans, fagsak);
         } else {
             behandlingService.avsluttBehandling(behandling.getId());
         }
+    }
+
+    private void markerForSaksstatusSynk(Prosessinstans prosessinstans, Fagsak fagsak) {
+        // Settes kun når fagsakstatus faktisk endres — trigger SYNK_SKJEMA_SAKSSTATUS-steget sist i flyten
+        prosessinstans.setData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER, fagsak.getSaksnummer());
     }
 }

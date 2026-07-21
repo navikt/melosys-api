@@ -165,8 +165,8 @@ object ProsessflytDefinisjon {
             OPPRETT_SATSBEHANDLING,
             BEREGN_OG_SEND_FAKTURA,
             AVSLUTT_SAK_OG_BEHANDLING,
-            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS,
-            TILBAKESTILL_TRYGDEAVGIFT
+            TILBAKESTILL_TRYGDEAVGIFT,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         IVERKSETT_VEDTAK_AARSAVREGNING to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_AARSAVREGNING,
@@ -174,8 +174,8 @@ object ProsessflytDefinisjon {
             SEND_FAKTURA_AARSAVREGNING,
             VARSLE_PENSJONSOPPTJENING,
             AVSLUTT_SAK_OG_BEHANDLING,
-            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS,
             SEND_MELDING_OM_VEDTAK,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         IVERKSETT_VEDTAK_EOS to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_EOS,
@@ -188,20 +188,20 @@ object ProsessflytDefinisjon {
             SEND_VEDTAK_UTLAND,
             DISTRIBUER_JOURNALPOST_UTLAND,
             AVSLUTT_SAK_OG_BEHANDLING,
-            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS,
             SEND_MELDING_OM_VEDTAK,
             OPPRETTE_AARSAVREGNING_ENDRING,
             RESET_ÅPNE_ÅRSAVREGNINGER,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         IVERKSETT_EOS_PENSJONIST_AVGIFT to ProsessFlyt(
             prosessType = IVERKSETT_EOS_PENSJONIST_AVGIFT,
             LAGRE_PERSONOPPLYSNINGER,
             OPPRETT_FAKTURASERIE,
             AVSLUTT_SAK_OG_BEHANDLING,
-            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS,
             SEND_ORIENTERINGSBREV_TRYGDEAVGIFT,
             OPPRETTE_AARSAVREGNING_ENDRING,
             RESET_ÅPNE_ÅRSAVREGNINGER,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         IVERKSETT_VEDTAK_FTRL to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_FTRL,
@@ -209,13 +209,13 @@ object ProsessflytDefinisjon {
             LAGRE_MEDLEMSKAPSPERIODE_MEDL,
             OPPRETT_FAKTURASERIE,
             AVSLUTT_SAK_OG_BEHANDLING,
-            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS,
             SEND_MELDING_OM_VEDTAK,
             OPPRETTE_AARSAVREGNING_ENDRING,
             //  Steget nedenfor (RESET_ÅPNE_ÅRSAVREGNINGER) er ikke direkte en del av flyt for vedtakssetting, men mer en slags sideeffekt som må
             //  utføres etter at vedtaket er satt.
             //  Les mer her for hva vi burde heller gjøre på sikt: https://github.com/navikt/melosys-api/pull/2870#issuecomment-3056956566
             RESET_ÅPNE_ÅRSAVREGNINGER,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
@@ -223,8 +223,8 @@ object ProsessflytDefinisjon {
             LAGRE_LOVVALGSPERIODE_MEDL,
             SEND_VEDTAKSBREV_INNLAND,
             AVSLUTT_SAK_OG_BEHANDLING,
-            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS,
-            SEND_MELDING_OM_VEDTAK
+            SEND_MELDING_OM_VEDTAK,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         IVERKSETT_VEDTAK_TRYGDEAVTALE to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_TRYGDEAVTALE,
@@ -233,13 +233,13 @@ object ProsessflytDefinisjon {
             AVKLAR_ARBEIDSGIVER,
             LAGRE_LOVVALGSPERIODE_MEDL,
             AVSLUTT_SAK_OG_BEHANDLING,
-            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS,
-            SEND_MELDING_OM_VEDTAK
+            SEND_MELDING_OM_VEDTAK,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         MOTTAK_SED to ProsessFlyt(
             prosessType = MOTTAK_SED,
             SED_MOTTAK_RUTING,
-            // No-op uten SAKSNUMMER-prosessdata — settes av SED-rutingen når den annullerer sak
+            // No-op uten SYNK_SAKSSTATUS_SAKSNUMMER-prosessdata — settes av SED-rutingen når den annullerer sak
             ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         MOTTAK_SED_JOURNALFØRING to ProsessFlyt(

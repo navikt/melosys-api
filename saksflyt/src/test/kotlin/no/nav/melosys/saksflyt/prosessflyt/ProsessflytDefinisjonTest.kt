@@ -10,12 +10,13 @@ internal class ProsessflytDefinisjonTest {
 
     /**
      * Arkitekturregel: enhver flyt som avslutter sak/behandling skal synkronisere saksstatus til
-     * melosys-skjema-api ETTERPÅ (AvsluttFagsakOgBehandling-steget bruker HÅNDTERES_AV_PROSESSFLYT
-     * og er avhengig av at flyten selv eier synk-steget). Uten denne regelen kan en fremtidig flyt
-     * stille glemme steget, og skjema-api vil vise utdatert status til innsender.
+     * melosys-skjema-api som SISTE steg (AvsluttFagsakOgBehandling-steget bruker
+     * HÅNDTERES_AV_PROSESSFLYT og er avhengig av at flyten selv eier synk-steget; steget ligger
+     * sist slik at en synk-feil ikke stopper forretningskritiske steg). Uten denne regelen kan en
+     * fremtidig flyt stille glemme steget, og skjema-api vil vise utdatert status til innsender.
      */
     @Test
-    fun `alle flyter med AVSLUTT_SAK_OG_BEHANDLING har SYNK_SKJEMA_SAKSSTATUS rett etterpå`() {
+    fun `alle flyter med AVSLUTT_SAK_OG_BEHANDLING har SYNK_SKJEMA_SAKSSTATUS som siste steg`() {
         val flyterMedAvslutt = ProsessType.entries
             .mapNotNull { type -> hentStegListe(type)?.let { type to it } }
             .filter { (_, steg) -> ProsessSteg.AVSLUTT_SAK_OG_BEHANDLING in steg }
@@ -25,11 +26,16 @@ internal class ProsessflytDefinisjonTest {
         }
 
         flyterMedAvslutt.forEach { (type, steg) ->
-            val etterAvslutt = steg.getOrNull(steg.indexOf(ProsessSteg.AVSLUTT_SAK_OG_BEHANDLING) + 1)
-            withClue("Flyten $type avslutter sak/behandling, men mangler SYNK_SKJEMA_SAKSSTATUS rett etter AVSLUTT_SAK_OG_BEHANDLING") {
-                etterAvslutt shouldBe ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
+            withClue("Flyten $type avslutter sak/behandling, men mangler SYNK_SKJEMA_SAKSSTATUS som siste steg") {
+                steg.last() shouldBe ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
             }
         }
+    }
+
+    @Test
+    fun `MOTTAK_SED har SYNK_SKJEMA_SAKSSTATUS som siste steg`() {
+        // SED-rutingen annullerer saker og markerer instansen med SYNK_SAKSSTATUS_SAKSNUMMER
+        hentStegListe(ProsessType.MOTTAK_SED)!!.last() shouldBe ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
     }
 
     /** Bygger flytens stegliste via det offentlige nesteSteg-API-et. */

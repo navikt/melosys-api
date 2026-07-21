@@ -107,7 +107,9 @@ public class TrygdeavtaleVedtakService implements FattVedtakInterface {
             behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
             prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling);
         } else {
-            fagsakService.oppdaterStatus(behandling.getFagsak(), Saksstatuser.MEDLEMSKAP_AVKLART, SkjemaSaksstatusSynk.SYNKRONISER); // TODO: Egen oppgave for fjerne denne som ikke brukes
+            // HÅNDTERES_AV_PROSESSFLYT: IVERKSETT_VEDTAK_TRYGDEAVTALE-flyten som bestilles rett under eier synk-steget —
+            // event-synk her ville sendt status før iverksettelsen og er unødvendig.
+            fagsakService.oppdaterStatus(behandling.getFagsak(), Saksstatuser.MEDLEMSKAP_AVKLART, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT); // TODO: Egen oppgave for fjerne denne som ikke brukes
             oppdaterBehandlingsresultat(behandlingsresultat, request);
             prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling);
             BrevbestillingDto brevbestillingDto = lagBrevbestilling(behandling, request);

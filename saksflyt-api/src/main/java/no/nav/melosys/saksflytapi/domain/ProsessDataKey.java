@@ -58,6 +58,8 @@ public enum ProsessDataKey {
     BETALINGSSTATUS("betalingsstatus"),
     FAKTURANUMMER("fakturanummer"),
     SAKSSTATUS("saksstatus"),
+    /** Settes eksplisitt av steg som endrer fagsakstatus — trigger SYNK_SKJEMA_SAKSSTATUS-steget. */
+    SYNK_SAKSSTATUS_SAKSNUMMER("synkSaksstatusSaksnummer"),
     SAKSTYPE("sakstype"),
     SAKSTEMA("sakstema"),
     SED_DOKUMENT("sedDokument"),

@@ -801,7 +801,7 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.SYNK_SKJEMA_SAKSSTATUS)
             .build();
-        prosessinstans.setData(SAKSNUMMER, saksnummer);
+        prosessinstans.setData(SYNK_SAKSSTATUS_SAKSNUMMER, saksnummer);
 
         lagre(prosessinstans);
     }
