@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.integrasjon.melosysskjema.MelosysSkjemaApiClient
 import no.nav.melosys.repository.SkjemaSakMappingRepository
+import no.nav.melosys.repository.SkjemaSakMappingRepository.SaksstatusSynkRad
 import no.nav.melosys.skjema.types.common.Saksstatus
 import no.nav.melosys.skjema.types.m2m.BulkOppdaterSaksstatusRequest
 import no.nav.melosys.skjema.types.m2m.SaksstatusOppdatering
@@ -31,27 +32,42 @@ class SkjemaSaksstatusSyncService(
         const val MAKS_OPPDATERINGER_PER_BATCH = 1000
 
         /**
-         * Mapper intern saksstatus til brukervendt skjema-api-status.
-         * Besluttet av produkteier: kun OPPRETTET vises som MOTTATT — alt annet, inkludert
-         * LOVVALG_AVKLART og henlagt/annullert, vises som AVSLUTTET for innsender.
+         * Mapper intern saksstatus til brukervendt skjema-api-status. Intensjonen er
+         * «MOTTATT = aktiv/under behandling»: statusmappingen alene er utilstrekkelig for
+         * gjenbrukte saker — en sak i f.eks. LOVVALG_AVKLART kan få ny søknad og dermed en ny
+         * aktiv behandling UTEN at fagsakstatus endres. Derfor: har saken minst én aktiv
+         * behandling (jf. Behandling.erAktiv — inaktiv = AVSLUTTET/MIDLERTIDIG_LOVVALGSBESLUTNING)
+         * er den MOTTATT uansett fagsakstatus.
+         *
+         * Ellers gjelder statusmappingen besluttet av produkteier: kun OPPRETTET vises som
+         * MOTTATT — alt annet, inkludert LOVVALG_AVKLART og henlagt/annullert, vises som
+         * AVSLUTTET for innsender.
          *
          * Uttømmende when uten else med vilje: en fremtidig kodeverk-bump med ny status skal gi
          * kompileringsfeil her (bevisst mapping-beslutning), ikke stille bli AVSLUTTET.
          */
-        fun tilSkjemaSaksstatus(saksstatus: Saksstatuser): Saksstatus = when (saksstatus) {
-            Saksstatuser.OPPRETTET -> Saksstatus.MOTTATT
+        fun tilSkjemaSaksstatus(saksstatus: Saksstatuser, harAktivBehandling: Boolean): Saksstatus {
+            if (harAktivBehandling) {
+                return Saksstatus.MOTTATT
+            }
+            return when (saksstatus) {
+                Saksstatuser.OPPRETTET -> Saksstatus.MOTTATT
 
-            Saksstatuser.LOVVALG_AVKLART,
-            Saksstatuser.MEDLEMSKAP_AVKLART,
-            Saksstatuser.TRYGDEAVGIFT_AVKLART,
-            Saksstatuser.AVSLUTTET,
-            Saksstatuser.VIDERESENDT,
-            Saksstatuser.OPPHØRT,
-            Saksstatuser.HENLAGT,
-            Saksstatuser.HENLAGT_BORTFALT,
-            Saksstatuser.ANNULLERT -> Saksstatus.AVSLUTTET
+                Saksstatuser.LOVVALG_AVKLART,
+                Saksstatuser.MEDLEMSKAP_AVKLART,
+                Saksstatuser.TRYGDEAVGIFT_AVKLART,
+                Saksstatuser.AVSLUTTET,
+                Saksstatuser.VIDERESENDT,
+                Saksstatuser.OPPHØRT,
+                Saksstatuser.HENLAGT,
+                Saksstatuser.HENLAGT_BORTFALT,
+                Saksstatuser.ANNULLERT -> Saksstatus.AVSLUTTET
+            }
         }
     }
+
+    private fun tilOppdateringer(rader: List<SaksstatusSynkRad>): List<SaksstatusOppdatering> =
+        rader.map { SaksstatusOppdatering(it.skjemaId, it.saksnummer, tilSkjemaSaksstatus(it.saksstatus, it.harAktivBehandling)) }
 
     /**
      * Løpende synk: sender fagsakens GJELDENDE saksstatus til skjema-api for alle skjema koblet
@@ -65,8 +81,7 @@ class SkjemaSaksstatusSyncService(
             return
         }
 
-        rader
-            .map { SaksstatusOppdatering(it.skjemaId, it.saksnummer, tilSkjemaSaksstatus(it.saksstatus)) }
+        tilOppdateringer(rader)
             .chunked(MAKS_OPPDATERINGER_PER_BATCH)
             .forEach { melosysSkjemaApiClient.bulkOppdaterSaksstatus(BulkOppdaterSaksstatusRequest(it)) }
 
@@ -81,15 +96,14 @@ class SkjemaSaksstatusSyncService(
      */
     fun massesynk(dryRun: Boolean): SkjemaSaksstatusSynkRapport {
         val rader = skjemaSakMappingRepository.finnAlleSaksstatusSynkRader()
-        val oppdateringer = rader.map {
-            SaksstatusOppdatering(it.skjemaId, it.saksnummer, tilSkjemaSaksstatus(it.saksstatus))
-        }
+        val oppdateringer = tilOppdateringer(rader)
+        val fordeling = oppdateringer.groupingBy { it.saksstatus }.eachCount()
 
         val rapport = SkjemaSaksstatusSynkRapport(
             dryRun = dryRun,
             antallTotalt = oppdateringer.size,
-            antallMottatt = oppdateringer.count { it.saksstatus == Saksstatus.MOTTATT },
-            antallAvsluttet = oppdateringer.count { it.saksstatus == Saksstatus.AVSLUTTET },
+            antallMottatt = fordeling[Saksstatus.MOTTATT] ?: 0,
+            antallAvsluttet = fordeling[Saksstatus.AVSLUTTET] ?: 0,
             perMelosysStatus = rader.groupingBy { it.saksstatus }.eachCount()
         )
 
@@ -130,7 +144,10 @@ class SkjemaSaksstatusSyncService(
 /**
  * Rapport fra massesynk. [antallOppdatert] og [ukjenteSkjemaIder] settes kun ved reell synk
  * (dryRun=false) og aggregeres fra skjema-api-responsene. [antallOppdatert] kan avvike fra
- * [antallTotalt] siden skjema-api oppdaterer alle innsendinger på samme saksnummer per rad.
+ * [antallTotalt] siden skjema-api oppdaterer alle innsendinger på samme saksnummer per rad —
+ * radene er sortert på saksnummer nettopp for å begrense at én sak krysser en batch-grense,
+ * men når det likevel skjer kan [antallOppdatert] avvike marginalt (dobbelttelling av
+ * innsendinger som oppdateres i begge batchene).
  * [feiletBatch]/[feilmelding] settes hvis en batch feilet — tallene gjelder da batchene før feilen.
  */
 data class SkjemaSaksstatusSynkRapport(

@@ -30,7 +30,8 @@ class SkjemaSaksstatusAdminController(
         description = "Synkroniserer brukervendt saksstatus (MOTTATT/AVSLUTTET) for alle saker med skjema-sak-mapping " +
             "til melosys-skjema-api, og backfiller samtidig saksnummer på innsendinger som mangler det. " +
             "Med dryRun=true (default) bygges kun rapporten uten kall til skjema-api. " +
-            "Idempotent — trygt å kjøre flere ganger."
+            "Idempotent — trygt å kjøre flere ganger. Merk: statusendringer som skjer samtidig med " +
+            "synken kan gi enkeltavvik i rapporten — en ny kjøring retter dem."
     )
     fun synkroniserSaksstatus(
         @RequestParam(defaultValue = "true") dryRun: Boolean

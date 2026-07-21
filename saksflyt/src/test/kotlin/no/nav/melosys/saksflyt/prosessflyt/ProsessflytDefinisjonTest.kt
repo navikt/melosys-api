@@ -38,6 +38,13 @@ internal class ProsessflytDefinisjonTest {
         hentStegListe(ProsessType.MOTTAK_SED)!!.last() shouldBe ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
     }
 
+    @Test
+    fun `digital-søknad-mottaksflytene har SYNK_SKJEMA_SAKSSTATUS som siste steg`() {
+        // Mottak (særlig på eksisterende sak) endrer ikke fagsakstatus — synken må trigges av flyten
+        hentStegListe(ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD)!!.last() shouldBe ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
+        hentStegListe(ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD)!!.last() shouldBe ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
+    }
+
     /** Bygger flytens stegliste via det offentlige nesteSteg-API-et. */
     private fun hentStegListe(prosessType: ProsessType): List<ProsessSteg>? {
         val flyt = ProsessflytDefinisjon.finnFlytForProsessType(prosessType).orElse(null) ?: return null

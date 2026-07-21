@@ -371,7 +371,9 @@ object ProsessflytDefinisjon {
             VURDER_INNGANGSVILKÅR,
             OPPRETT_OPPGAVE,
             SEND_SAKSNUMMER_TIL_MELOSYS_SKJEMA_API,
-            SEND_FORVALTNINGSMELDING
+            SEND_FORVALTNINGSMELDING,
+            // Synker MOTTATT til skjema-api også ved mottak (korrigerer bl.a. arvet status fra søsken-innsendinger)
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD to ProsessFlyt(
             prosessType = MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD,
@@ -381,7 +383,9 @@ object ProsessflytDefinisjon {
             HENT_REGISTEROPPLYSNINGER,
             VURDER_INNGANGSVILKÅR,
             SEND_SAKSNUMMER_TIL_MELOSYS_SKJEMA_API,
-            SEND_FORVALTNINGSMELDING
+            SEND_FORVALTNINGSMELDING,
+            // Mottak på eksisterende sak endrer ikke fagsakstatus (ingen event) — synken må trigges av flyten
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         ProsessType.OPPDATER_FAKTURAMOTTAKER to ProsessFlyt(
             prosessType = ProsessType.OPPDATER_FAKTURAMOTTAKER,

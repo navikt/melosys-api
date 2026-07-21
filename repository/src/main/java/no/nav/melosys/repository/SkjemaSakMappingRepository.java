@@ -24,14 +24,24 @@ public interface SkjemaSakMappingRepository extends JpaRepository<SkjemaSakMappi
     /**
      * Projeksjon for saksstatus-synk: henter kun feltene synken trenger, i én spørring.
      * Unngår å laste hele SkjemaSakMapping (originalData-CLOB) og Fagsak med EAGER-samlinger.
+     * harAktivBehandling speiler {@code Behandling.erAktiv()} (inaktiv = AVSLUTTET eller
+     * MIDLERTIDIG_LOVVALGSBESLUTNING) — trengs fordi gjenbrukte saker kan få ny behandling uten
+     * at fagsakstatus endres.
      */
-    @Query("select m.skjemaId as skjemaId, f.saksnummer as saksnummer, f.status as saksstatus "
-        + "from SkjemaSakMapping m join m.fagsak f")
+    String SAKSSTATUS_SYNK_PROJEKSJON =
+        "select m.skjemaId as skjemaId, f.saksnummer as saksnummer, f.status as saksstatus, "
+            + "exists (select b from Behandling b where b.fagsak = f and b.status not in ("
+            + "no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.AVSLUTTET, "
+            + "no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING"
+            + ")) as harAktivBehandling "
+            + "from SkjemaSakMapping m join m.fagsak f";
+
+    /** Sortert på saksnummer slik at rader for samme sak sjelden krysser batch-grenser i massesynk. */
+    @Query(SAKSSTATUS_SYNK_PROJEKSJON + " order by f.saksnummer")
     List<SaksstatusSynkRad> finnAlleSaksstatusSynkRader();
 
     /** Som {@link #finnAlleSaksstatusSynkRader()}, men for én sak — brukes av løpende synk. */
-    @Query("select m.skjemaId as skjemaId, f.saksnummer as saksnummer, f.status as saksstatus "
-        + "from SkjemaSakMapping m join m.fagsak f where f.saksnummer = :saksnummer")
+    @Query(SAKSSTATUS_SYNK_PROJEKSJON + " where f.saksnummer = :saksnummer")
     List<SaksstatusSynkRad> finnSaksstatusSynkRaderForSaksnummer(@Param("saksnummer") String saksnummer);
 
     interface SaksstatusSynkRad {
@@ -40,5 +50,7 @@ public interface SkjemaSakMappingRepository extends JpaRepository<SkjemaSakMappi
         String getSaksnummer();
 
         Saksstatuser getSaksstatus();
+
+        boolean getHarAktivBehandling();
     }
 }

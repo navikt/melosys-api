@@ -40,19 +40,23 @@ internal class SkjemaSaksstatusSyncServiceTest {
     private fun lagSynkRad(
         saksnummer: String,
         status: Saksstatuser,
-        skjemaId: UUID = UUID.randomUUID()
+        skjemaId: UUID = UUID.randomUUID(),
+        harAktivBehandling: Boolean = false
     ): SaksstatusSynkRad = object : SaksstatusSynkRad {
         override fun getSkjemaId(): UUID = skjemaId
         override fun getSaksnummer(): String = saksnummer
         override fun getSaksstatus(): Saksstatuser = status
+        override fun getHarAktivBehandling(): Boolean = harAktivBehandling
     }
 
     @Nested
     inner class Statusmapping {
 
         @Test
-        fun `OPPRETTET mappes til MOTTATT`() {
-            SkjemaSaksstatusSyncService.tilSkjemaSaksstatus(Saksstatuser.OPPRETTET) shouldBe Saksstatus.MOTTATT
+        fun `OPPRETTET uten aktiv behandling mappes til MOTTATT`() {
+            SkjemaSaksstatusSyncService.tilSkjemaSaksstatus(
+                Saksstatuser.OPPRETTET, harAktivBehandling = false
+            ) shouldBe Saksstatus.MOTTATT
         }
 
         @ParameterizedTest
@@ -64,8 +68,20 @@ internal class SkjemaSaksstatusSyncServiceTest {
             ],
             mode = EnumSource.Mode.INCLUDE
         )
-        fun `de ni andre statusene mappes til AVSLUTTET`(saksstatus: Saksstatuser) {
-            SkjemaSaksstatusSyncService.tilSkjemaSaksstatus(saksstatus) shouldBe Saksstatus.AVSLUTTET
+        fun `de ni andre statusene uten aktiv behandling mappes til AVSLUTTET`(saksstatus: Saksstatuser) {
+            SkjemaSaksstatusSyncService.tilSkjemaSaksstatus(
+                saksstatus, harAktivBehandling = false
+            ) shouldBe Saksstatus.AVSLUTTET
+        }
+
+        @ParameterizedTest
+        @EnumSource(Saksstatuser::class)
+        fun `aktiv behandling gir MOTTATT uansett fagsakstatus`(saksstatus: Saksstatuser) {
+            // Gjenbrukt sak (f.eks. LOVVALG_AVKLART) kan få ny søknad og ny aktiv behandling
+            // uten at fagsakstatus endres — da er saken under behandling og skal vises som MOTTATT
+            SkjemaSaksstatusSyncService.tilSkjemaSaksstatus(
+                saksstatus, harAktivBehandling = true
+            ) shouldBe Saksstatus.MOTTATT
         }
     }
 
@@ -81,6 +97,22 @@ internal class SkjemaSaksstatusSyncServiceTest {
             service.synkroniserSaksstatusForSaksnummer(saksnummer)
 
             verify(exactly = 0) { melosysSkjemaApiClient.bulkOppdaterSaksstatus(any()) }
+        }
+
+        @Test
+        fun `gjenbrukt sak i LOVVALG_AVKLART med ny aktiv behandling synkes som MOTTATT`() {
+            // Eksisterende-sak-scenariet: ny digital søknad på sak i LOVVALG_AVKLART åpner
+            // NY_VURDERING uten å endre fagsakstatus — statusmappingen alene ville gitt AVSLUTTET
+            every { skjemaSakMappingRepository.finnSaksstatusSynkRaderForSaksnummer(saksnummer) } returns
+                listOf(lagSynkRad(saksnummer, Saksstatuser.LOVVALG_AVKLART, harAktivBehandling = true))
+
+            val requests = mutableListOf<BulkOppdaterSaksstatusRequest>()
+            every { melosysSkjemaApiClient.bulkOppdaterSaksstatus(capture(requests)) } returns
+                BulkOppdaterSaksstatusResultat(1, emptyList())
+
+            service.synkroniserSaksstatusForSaksnummer(saksnummer)
+
+            requests.single().oppdateringer.single().saksstatus shouldBe Saksstatus.MOTTATT
         }
 
         @Test

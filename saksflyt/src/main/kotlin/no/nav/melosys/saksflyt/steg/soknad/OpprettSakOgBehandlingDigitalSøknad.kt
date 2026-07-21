@@ -10,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflyt.steg.StegBehandler
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey.DIGITAL_SØKNADSDATA
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
@@ -93,6 +94,8 @@ class OpprettSakOgBehandlingDigitalSøknad(
         lagreSkjemaSakMapping(søknadsdata, fagsak, mottatteOpplysninger)
 
         prosessinstans.behandling = behandling
+        // Trigger SYNK_SKJEMA_SAKSSTATUS sist i flyten - synker MOTTATT til skjema-api ved mottak
+        prosessinstans.setData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER, fagsak.saksnummer)
         log.info { "Lagret mottatte opplysninger for digital søknad referanseId=$referanseId" }
     }
 

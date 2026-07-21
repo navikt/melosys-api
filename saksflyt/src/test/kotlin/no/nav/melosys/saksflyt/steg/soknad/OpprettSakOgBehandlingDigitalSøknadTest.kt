@@ -189,6 +189,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
 
         prosessinstans.behandling shouldBe behandling
+        prosessinstans.getData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER) shouldBe "MEL-1234"
     }
 
     @Test
