@@ -200,6 +200,14 @@ class LovligeKombinasjonerSaksbehandlingService(
             behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
         }
 
+        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_TJENESTEPERSON)
+            && fagsak.type == Sakstyper.EU_EOS
+            && fagsak.tema == Sakstemaer.MEDLEMSKAP_LOVVALG
+            && behandlingstema == Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+        ) {
+            behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
+        }
+
         return behandlingstyper
     }
 
