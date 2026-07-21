@@ -35,6 +35,7 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import no.nav.melosys.service.dokument.brev.KopiMottakerDto
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade
 import no.nav.melosys.service.oppgave.OppgaveService
+import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
@@ -67,6 +68,9 @@ class TrygdeavtaleVedtakServiceTest {
     @RelaxedMockK
     private lateinit var saksbehandlingRegler: SaksbehandlingRegler
 
+    @RelaxedMockK
+    private lateinit var fagsakService: FagsakService
+
     private val unleash = FakeUnleash()
 
     private lateinit var trygdeavtaleVedtakService: TrygdeavtaleVedtakService
@@ -81,8 +85,14 @@ class TrygdeavtaleVedtakServiceTest {
             dokgenService,
             ferdigbehandlingKontrollFacade,
             saksbehandlingRegler,
-            unleash
+            unleash,
+            fagsakService
         )
+
+        // Speiler FagsakService.oppdaterStatus slik at eksisterende status-assertions fortsatt gjelder
+        every { fagsakService.oppdaterStatus(any(), any()) } answers {
+            firstArg<Fagsak>().status = secondArg()
+        }
 
         unleash.enable(ToggleName.STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND)
         SpringSubjectHandler.set(TestSubjectHandler())

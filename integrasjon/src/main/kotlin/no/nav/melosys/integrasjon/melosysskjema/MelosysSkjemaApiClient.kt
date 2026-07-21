@@ -1,10 +1,8 @@
 package no.nav.melosys.integrasjon.melosysskjema
 
 import mu.KotlinLogging
-import no.nav.melosys.skjema.types.common.Saksstatus
 import no.nav.melosys.skjema.types.m2m.BulkOppdaterSaksstatusRequest
 import no.nav.melosys.skjema.types.m2m.BulkOppdaterSaksstatusResultat
-import no.nav.melosys.skjema.types.m2m.OppdaterSaksstatusRequest
 import no.nav.melosys.skjema.types.m2m.RegistrerSaksnummerRequest
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.springframework.http.MediaType
@@ -35,18 +33,6 @@ class MelosysSkjemaApiClient(private val melosysSkjemaApiWebClient: WebClient) {
             .uri("/m2m/api/skjema/{id}/saksnummer", skjemaId)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(RegistrerSaksnummerRequest(saksnummer))
-            .retrieve()
-            .toBodilessEntity()
-            .block()
-    }
-
-    fun oppdaterSaksstatus(skjemaId: UUID, saksnummer: String, saksstatus: Saksstatus) {
-        log.info("Oppdaterer saksstatus til {} for skjema {} på sak {}", saksstatus, skjemaId, saksnummer)
-
-        melosysSkjemaApiWebClient.put()
-            .uri("/m2m/api/skjema/{id}/saksstatus", skjemaId)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(OppdaterSaksstatusRequest(saksnummer, saksstatus))
             .retrieve()
             .toBodilessEntity()
             .block()

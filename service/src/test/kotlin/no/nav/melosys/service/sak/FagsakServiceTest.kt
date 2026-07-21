@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import org.springframework.context.ApplicationEventPublisher
 import java.time.Instant
 import java.util.*
 
@@ -58,6 +59,9 @@ class FagsakServiceTest {
 
     @RelaxedMockK
     lateinit var lovligeKombinasjonerSaksbehandlingService: LovligeKombinasjonerSaksbehandlingService
+
+    @RelaxedMockK
+    lateinit var applicationEventPublisher: ApplicationEventPublisher
 
     private lateinit var fagsakService: FagsakService
 
@@ -99,7 +103,8 @@ class FagsakServiceTest {
             behandlingService,
             kontaktopplysningService,
             persondataFasade,
-            lovligeKombinasjonerSaksbehandlingService
+            lovligeKombinasjonerSaksbehandlingService,
+            applicationEventPublisher
         )
     }
 
@@ -335,6 +340,50 @@ class FagsakServiceTest {
         fagsak.status shouldBe Saksstatuser.AVSLUTTET
         verify { fagsakRepo.save(fagsak) }
         verify(exactly = 0) { behandlingService.avsluttBehandling(any()) }
+    }
+
+    @Test
+    fun `oppdaterStatus publiserer FagsakStatusEndretEvent etter lagring`() {
+        val fagsak = Fagsak.forTest()
+
+        fagsakService.oppdaterStatus(fagsak, Saksstatuser.ANNULLERT)
+
+        verify {
+            applicationEventPublisher.publishEvent(withArg<FagsakStatusEndretEvent> {
+                it.fagsak shouldBe fagsak
+                it.fagsak.status shouldBe Saksstatuser.ANNULLERT
+            })
+        }
+    }
+
+    @Test
+    fun `henleggelse av sak uten aktiv behandling publiserer FagsakStatusEndretEvent med riktig status`() {
+        val fagsak = Fagsak.forTest()
+
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT_BORTFALT)
+
+        verify {
+            applicationEventPublisher.publishEvent(withArg<FagsakStatusEndretEvent> {
+                it.fagsak.status shouldBe Saksstatuser.HENLAGT_BORTFALT
+            })
+        }
+    }
+
+    @Test
+    fun `avslutting av fagsak med aktiv behandling publiserer FagsakStatusEndretEvent`() {
+        val behandling = Behandling.forTest {
+            id = 1L
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        val fagsak = behandling.fagsak
+
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART)
+
+        verify {
+            applicationEventPublisher.publishEvent(withArg<FagsakStatusEndretEvent> {
+                it.fagsak.status shouldBe Saksstatuser.LOVVALG_AVKLART
+            })
+        }
     }
 
     @Test

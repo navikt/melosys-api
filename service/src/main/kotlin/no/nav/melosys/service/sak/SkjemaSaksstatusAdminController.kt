@@ -2,6 +2,7 @@ package no.nav.melosys.service.sak
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.swagger.v3.oas.annotations.tags.Tags
 import mu.KotlinLogging
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
@@ -14,7 +15,10 @@ private val log = KotlinLogging.logger { }
 
 @Protected
 @RestController
-@Tag(name = "admin")
+@Tags(
+    Tag(name = "fagsak"),
+    Tag(name = "admin")
+)
 @RequestMapping("/admin/skjema-saksstatus")
 class SkjemaSaksstatusAdminController(
     private val skjemaSaksstatusSyncService: SkjemaSaksstatusSyncService

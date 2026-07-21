@@ -165,7 +165,7 @@ internal class HenleggelseServiceTest {
             henleggelseService.henleggSakEllerBehandlingSomBortfalt(BEHANDLING_ID)
 
 
-            verify { fagsakService.lagre(withArg { it.status shouldBe Saksstatuser.HENLAGT_BORTFALT }) }
+            verify { fagsakService.oppdaterStatus(fagsak, Saksstatuser.HENLAGT_BORTFALT) }
             verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
             verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
             verify { behandlingService.avsluttBehandling(BEHANDLING_ID) }

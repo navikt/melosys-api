@@ -27,6 +27,7 @@ import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.slf4j.Logger;
@@ -48,6 +49,7 @@ public class TrygdeavtaleVedtakService implements FattVedtakInterface {
     private final FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
     private final SaksbehandlingRegler saksbehandlingRegler;
     private final Unleash unleash;
+    private final FagsakService fagsakService;
 
 
     public TrygdeavtaleVedtakService(BehandlingsresultatService behandlingsresultatService,
@@ -57,7 +59,8 @@ public class TrygdeavtaleVedtakService implements FattVedtakInterface {
                                      DokgenService dokgenService,
                                      FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade,
                                      SaksbehandlingRegler saksbehandlingRegler,
-                                     Unleash unleash) {
+                                     Unleash unleash,
+                                     FagsakService fagsakService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.behandlingService = behandlingService;
         this.prosessinstansService = prosessinstansService;
@@ -66,6 +69,7 @@ public class TrygdeavtaleVedtakService implements FattVedtakInterface {
         this.ferdigbehandlingKontrollFacade = ferdigbehandlingKontrollFacade;
         this.saksbehandlingRegler = saksbehandlingRegler;
         this.unleash = unleash;
+        this.fagsakService = fagsakService;
     }
 
     @Override
@@ -102,7 +106,7 @@ public class TrygdeavtaleVedtakService implements FattVedtakInterface {
             behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
             prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling);
         } else {
-            behandling.getFagsak().setStatus(Saksstatuser.MEDLEMSKAP_AVKLART); // TODO: Egen oppgave for fjerne denne som ikke brukes
+            fagsakService.oppdaterStatus(behandling.getFagsak(), Saksstatuser.MEDLEMSKAP_AVKLART); // TODO: Egen oppgave for fjerne denne som ikke brukes
             oppdaterBehandlingsresultat(behandlingsresultat, request);
             prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling);
             BrevbestillingDto brevbestillingDto = lagBrevbestilling(behandling, request);

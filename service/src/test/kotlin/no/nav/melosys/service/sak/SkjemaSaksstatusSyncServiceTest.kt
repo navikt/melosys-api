@@ -1,18 +1,17 @@
 package no.nav.melosys.service.sak
 
 import io.kotest.matchers.collections.shouldContainExactly
-import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.SkjemaSakMapping
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.integrasjon.melosysskjema.MelosysSkjemaApiClient
 import no.nav.melosys.repository.SkjemaSakMappingRepository
+import no.nav.melosys.repository.SkjemaSakMappingRepository.SaksstatusSynkRad
 import no.nav.melosys.skjema.types.common.Saksstatus
 import no.nav.melosys.skjema.types.m2m.BulkOppdaterSaksstatusRequest
 import no.nav.melosys.skjema.types.m2m.BulkOppdaterSaksstatusResultat
@@ -46,13 +45,15 @@ internal class SkjemaSaksstatusSyncServiceTest {
             this.status = status
         }
 
-    private fun lagMapping(fagsak: Fagsak, skjemaId: UUID = UUID.randomUUID()): SkjemaSakMapping =
-        SkjemaSakMapping(
-            skjemaId = skjemaId,
-            fagsak = fagsak,
-            mottatteOpplysninger = null,
-            originalData = "{}"
-        )
+    private fun lagSynkRad(
+        saksnummer: String,
+        status: Saksstatuser,
+        skjemaId: UUID = UUID.randomUUID()
+    ): SaksstatusSynkRad = object : SaksstatusSynkRad {
+        override fun getSkjemaId(): UUID = skjemaId
+        override fun getSaksnummer(): String = saksnummer
+        override fun getSaksstatus(): Saksstatuser = status
+    }
 
     @Nested
     inner class Statusmapping {
@@ -75,48 +76,50 @@ internal class SkjemaSaksstatusSyncServiceTest {
         @Test
         fun `sak uten mapping-rad gir ingen kall til skjema-api`() {
             val fagsak = lagFagsak()
-            every { skjemaSakMappingRepository.findByFagsak_Saksnummer(fagsak.saksnummer) } returns emptyList()
+            every { skjemaSakMappingRepository.finnSkjemaIderForSaksnummer(fagsak.saksnummer) } returns emptyList()
 
             service.synkroniserSaksstatusForFagsak(fagsak)
 
-            verify(exactly = 0) { melosysSkjemaApiClient.oppdaterSaksstatus(any(), any(), any()) }
             verify(exactly = 0) { melosysSkjemaApiClient.bulkOppdaterSaksstatus(any()) }
         }
 
         @Test
-        fun `en mapping-rad gir enkeltkall med mappet status`() {
-            val fagsak = lagFagsak(status = Saksstatuser.LOVVALG_AVKLART)
+        fun `henlagt sak med mapping gir bulk-kall med AVSLUTTET`() {
+            val fagsak = lagFagsak(status = Saksstatuser.HENLAGT_BORTFALT)
             val skjemaId = UUID.randomUUID()
-            every { skjemaSakMappingRepository.findByFagsak_Saksnummer(fagsak.saksnummer) } returns
-                listOf(lagMapping(fagsak, skjemaId))
-            every { melosysSkjemaApiClient.oppdaterSaksstatus(any(), any(), any()) } returns Unit
+            every { skjemaSakMappingRepository.finnSkjemaIderForSaksnummer(fagsak.saksnummer) } returns listOf(skjemaId)
+
+            val requests = mutableListOf<BulkOppdaterSaksstatusRequest>()
+            every { melosysSkjemaApiClient.bulkOppdaterSaksstatus(capture(requests)) } returns
+                BulkOppdaterSaksstatusResultat(1, emptyList())
 
             service.synkroniserSaksstatusForFagsak(fagsak)
 
-            verify(exactly = 1) {
-                melosysSkjemaApiClient.oppdaterSaksstatus(skjemaId, fagsak.saksnummer, Saksstatus.AVSLUTTET)
+            requests.size shouldBe 1
+            requests.first().oppdateringer.single().let {
+                it.skjemaId shouldBe skjemaId
+                it.saksnummer shouldBe fagsak.saksnummer
+                it.saksstatus shouldBe Saksstatus.AVSLUTTET
             }
-            verify(exactly = 0) { melosysSkjemaApiClient.bulkOppdaterSaksstatus(any()) }
         }
 
         @Test
-        fun `flere mapping-rader gir bulk-kall med alle skjemaId-ene`() {
+        fun `flere mapping-rader gir ett bulk-kall med alle skjemaId-ene og mappet status`() {
             val fagsak = lagFagsak(status = Saksstatuser.OPPRETTET)
             val skjemaId1 = UUID.randomUUID()
             val skjemaId2 = UUID.randomUUID()
-            every { skjemaSakMappingRepository.findByFagsak_Saksnummer(fagsak.saksnummer) } returns
-                listOf(lagMapping(fagsak, skjemaId1), lagMapping(fagsak, skjemaId2))
+            every { skjemaSakMappingRepository.finnSkjemaIderForSaksnummer(fagsak.saksnummer) } returns
+                listOf(skjemaId1, skjemaId2)
 
-            val requestSlot = mutableListOf<BulkOppdaterSaksstatusRequest>()
-            every { melosysSkjemaApiClient.bulkOppdaterSaksstatus(capture(requestSlot)) } returns
+            val requests = mutableListOf<BulkOppdaterSaksstatusRequest>()
+            every { melosysSkjemaApiClient.bulkOppdaterSaksstatus(capture(requests)) } returns
                 BulkOppdaterSaksstatusResultat(2, emptyList())
 
             service.synkroniserSaksstatusForFagsak(fagsak)
 
-            verify(exactly = 0) { melosysSkjemaApiClient.oppdaterSaksstatus(any(), any(), any()) }
-            requestSlot.size shouldBe 1
-            requestSlot.first().oppdateringer.map { it.skjemaId } shouldContainExactlyInAnyOrder listOf(skjemaId1, skjemaId2)
-            requestSlot.first().oppdateringer.forEach {
+            requests.size shouldBe 1
+            requests.first().oppdateringer.map { it.skjemaId } shouldContainExactly listOf(skjemaId1, skjemaId2)
+            requests.first().oppdateringer.forEach {
                 it.saksnummer shouldBe fagsak.saksnummer
                 it.saksstatus shouldBe Saksstatus.MOTTATT
             }
@@ -128,14 +131,11 @@ internal class SkjemaSaksstatusSyncServiceTest {
 
         @Test
         fun `dry-run bygger rapport uten kall til skjema-api`() {
-            val opprettetSak = lagFagsak(saksnummer = "MEL-1", status = Saksstatuser.OPPRETTET)
-            val avsluttetSak = lagFagsak(saksnummer = "MEL-2", status = Saksstatuser.AVSLUTTET)
-            val henlagtSak = lagFagsak(saksnummer = "MEL-3", status = Saksstatuser.HENLAGT)
-            every { skjemaSakMappingRepository.findAllMedFagsak() } returns listOf(
-                lagMapping(opprettetSak),
-                lagMapping(avsluttetSak),
-                lagMapping(avsluttetSak),
-                lagMapping(henlagtSak)
+            every { skjemaSakMappingRepository.finnAlleSaksstatusSynkRader() } returns listOf(
+                lagSynkRad("MEL-1", Saksstatuser.OPPRETTET),
+                lagSynkRad("MEL-2", Saksstatuser.AVSLUTTET),
+                lagSynkRad("MEL-2", Saksstatuser.AVSLUTTET),
+                lagSynkRad("MEL-3", Saksstatuser.HENLAGT)
             )
 
             val rapport = service.massesynk(dryRun = true)
@@ -151,18 +151,18 @@ internal class SkjemaSaksstatusSyncServiceTest {
             )
             rapport.antallOppdatert shouldBe null
             rapport.ukjenteSkjemaIder shouldBe null
+            rapport.feiletBatch shouldBe null
+            rapport.feilmelding shouldBe null
 
             verify(exactly = 0) { melosysSkjemaApiClient.bulkOppdaterSaksstatus(any()) }
-            verify(exactly = 0) { melosysSkjemaApiClient.oppdaterSaksstatus(any(), any(), any()) }
         }
 
         @Test
         fun `reell synk sender bulk-kall og aggregerer resultat i rapporten`() {
-            val fagsak = lagFagsak(saksnummer = "MEL-1", status = Saksstatuser.OPPRETTET)
             val ukjentSkjemaId = UUID.randomUUID()
-            every { skjemaSakMappingRepository.findAllMedFagsak() } returns listOf(
-                lagMapping(fagsak),
-                lagMapping(fagsak, ukjentSkjemaId)
+            every { skjemaSakMappingRepository.finnAlleSaksstatusSynkRader() } returns listOf(
+                lagSynkRad("MEL-1", Saksstatuser.OPPRETTET),
+                lagSynkRad("MEL-1", Saksstatuser.OPPRETTET, ukjentSkjemaId)
             )
             every { melosysSkjemaApiClient.bulkOppdaterSaksstatus(any()) } returns
                 BulkOppdaterSaksstatusResultat(3, listOf(ukjentSkjemaId))
@@ -173,15 +173,15 @@ internal class SkjemaSaksstatusSyncServiceTest {
             rapport.antallTotalt shouldBe 2
             rapport.antallOppdatert shouldBe 3
             rapport.ukjenteSkjemaIder shouldContainExactly listOf(ukjentSkjemaId)
+            rapport.feiletBatch shouldBe null
 
             verify(exactly = 1) { melosysSkjemaApiClient.bulkOppdaterSaksstatus(any()) }
         }
 
         @Test
         fun `over 1000 rader batches i flere bulk-kall`() {
-            val fagsak = lagFagsak(saksnummer = "MEL-1", status = Saksstatuser.AVSLUTTET)
-            val mappinger = (1..1500).map { lagMapping(fagsak) }
-            every { skjemaSakMappingRepository.findAllMedFagsak() } returns mappinger
+            every { skjemaSakMappingRepository.finnAlleSaksstatusSynkRader() } returns
+                (1..1500).map { lagSynkRad("MEL-1", Saksstatuser.AVSLUTTET) }
 
             val requests = mutableListOf<BulkOppdaterSaksstatusRequest>()
             every { melosysSkjemaApiClient.bulkOppdaterSaksstatus(capture(requests)) } answers {
@@ -197,8 +197,33 @@ internal class SkjemaSaksstatusSyncServiceTest {
         }
 
         @Test
+        fun `feilet batch stopper videre sending og gir delrapport med tallene saa langt`() {
+            every { skjemaSakMappingRepository.finnAlleSaksstatusSynkRader() } returns
+                (1..2500).map { lagSynkRad("MEL-1", Saksstatuser.OPPRETTET) }
+
+            var kall = 0
+            every { melosysSkjemaApiClient.bulkOppdaterSaksstatus(any()) } answers {
+                kall++
+                if (kall == 2) {
+                    throw RuntimeException("skjema-api er nede")
+                }
+                BulkOppdaterSaksstatusResultat(1000, emptyList())
+            }
+
+            val rapport = service.massesynk(dryRun = false)
+
+            // Batch 1 gikk gjennom, batch 2 feilet, batch 3 skal ikke sendes
+            verify(exactly = 2) { melosysSkjemaApiClient.bulkOppdaterSaksstatus(any()) }
+            rapport.antallTotalt shouldBe 2500
+            rapport.antallOppdatert shouldBe 1000
+            rapport.feiletBatch shouldBe 2
+            rapport.feilmelding!!.contains("Batch 2 av 3") shouldBe true
+            rapport.feilmelding!!.contains("skjema-api er nede") shouldBe false
+        }
+
+        @Test
         fun `ingen mapping-rader gir tom rapport`() {
-            every { skjemaSakMappingRepository.findAllMedFagsak() } returns emptyList()
+            every { skjemaSakMappingRepository.finnAlleSaksstatusSynkRader() } returns emptyList()
 
             val rapport = service.massesynk(dryRun = false)
 

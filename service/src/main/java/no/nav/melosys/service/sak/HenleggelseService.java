@@ -92,8 +92,7 @@ public class HenleggelseService {
         fagsak.getBehandlinger().forEach(behandling -> {
             henleggBehandlingSomBortfalt(behandling);
         });
-        fagsak.setStatus(Saksstatuser.HENLAGT_BORTFALT);
-        fagsakService.lagre(fagsak);
+        fagsakService.oppdaterStatus(fagsak, Saksstatuser.HENLAGT_BORTFALT);
     }
 
     private void oppdaterBehandlingsresultat(long behandlingID, Henleggelsesgrunner begrunnelseKode, String fritekst) {

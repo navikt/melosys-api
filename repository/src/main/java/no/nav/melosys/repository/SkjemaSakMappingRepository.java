@@ -6,8 +6,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 import no.nav.melosys.domain.SkjemaSakMapping;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface SkjemaSakMappingRepository extends JpaRepository<SkjemaSakMapping, UUID> {
 
@@ -17,8 +19,22 @@ public interface SkjemaSakMappingRepository extends JpaRepository<SkjemaSakMappi
 
     List<SkjemaSakMapping> findByMottatteOpplysninger_Id(Long mottatteOpplysningerId);
 
-    List<SkjemaSakMapping> findByFagsak_Saksnummer(String saksnummer);
+    @Query("select m.skjemaId from SkjemaSakMapping m where m.fagsak.saksnummer = :saksnummer")
+    List<UUID> finnSkjemaIderForSaksnummer(@Param("saksnummer") String saksnummer);
 
-    @Query("select m from SkjemaSakMapping m join fetch m.fagsak")
-    List<SkjemaSakMapping> findAllMedFagsak();
+    /**
+     * Projeksjon for saksstatus-synk: henter kun feltene synken trenger, i én spørring.
+     * Unngår å laste hele SkjemaSakMapping (originalData-CLOB) og Fagsak med EAGER-samlinger.
+     */
+    @Query("select m.skjemaId as skjemaId, f.saksnummer as saksnummer, f.status as saksstatus "
+        + "from SkjemaSakMapping m join m.fagsak f")
+    List<SaksstatusSynkRad> finnAlleSaksstatusSynkRader();
+
+    interface SaksstatusSynkRad {
+        UUID getSkjemaId();
+
+        String getSaksnummer();
+
+        Saksstatuser getSaksstatus();
+    }
 }

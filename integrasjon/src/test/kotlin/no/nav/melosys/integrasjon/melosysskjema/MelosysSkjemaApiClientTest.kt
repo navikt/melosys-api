@@ -239,27 +239,6 @@ class MelosysSkjemaApiClientTest(
     }
 
     @Test
-    fun `oppdaterSaksstatus - sender PUT med saksnummer og saksstatus`() {
-        val skjemaId = UUID.randomUUID()
-        val saksnummer = "MEL-1234"
-
-        wireMockServer.stubFor(
-            WireMock.put(WireMock.urlPathEqualTo("/m2m/api/skjema/$skjemaId/saksstatus"))
-                .willReturn(WireMock.aResponse().withStatus(204))
-        )
-
-        melosysSkjemaApiClient.oppdaterSaksstatus(skjemaId, saksnummer, Saksstatus.AVSLUTTET)
-
-        wireMockServer.verify(
-            WireMock.putRequestedFor(WireMock.urlPathEqualTo("/m2m/api/skjema/$skjemaId/saksstatus"))
-                .withHeader("Authorization", WireMock.matching("Bearer .+"))
-                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .withRequestBody(WireMock.matchingJsonPath("$.saksnummer", WireMock.equalTo(saksnummer)))
-                .withRequestBody(WireMock.matchingJsonPath("$.saksstatus", WireMock.equalTo("AVSLUTTET")))
-        )
-    }
-
-    @Test
     fun `bulkOppdaterSaksstatus - sender PUT og deserialiserer resultatet`() {
         val skjemaId1 = UUID.randomUUID()
         val skjemaId2 = UUID.randomUUID()

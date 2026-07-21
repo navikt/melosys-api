@@ -9,6 +9,7 @@ import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakStatusEndretEvent;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
@@ -25,6 +26,7 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +43,7 @@ public class FagsakService {
     private final KontaktopplysningService kontaktopplysningService;
     private final PersondataFasade persondataFasade;
     private final LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private final Counter sakerOpprettet = Metrics.counter(SAKER_OPPRETTET);
 
@@ -51,12 +54,14 @@ public class FagsakService {
                          BehandlingService behandlingService,
                          KontaktopplysningService kontaktopplysningService,
                          PersondataFasade persondataFasade,
-                         @Lazy LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService) {
+                         @Lazy LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService,
+                         ApplicationEventPublisher applicationEventPublisher) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
         this.persondataFasade = persondataFasade;
         this.lovligeKombinasjonerSaksbehandlingService = lovligeKombinasjonerSaksbehandlingService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public Fagsak hentFagsak(String saksnummer) {
@@ -276,6 +281,7 @@ public class FagsakService {
     public void oppdaterStatus(Fagsak fagsak, Saksstatuser saksstatus) {
         fagsak.setStatus(saksstatus);
         fagsakRepository.save(fagsak);
+        applicationEventPublisher.publishEvent(new FagsakStatusEndretEvent(fagsak));
     }
 
     public void oppdaterSakstema(Fagsak fagsak, Sakstemaer nySakstema) {

@@ -47,33 +47,30 @@ class SkjemaSaksstatusSyncService(
      * Gjør ingenting for saker uten mapping-rad (saker som ikke stammer fra skjema-api).
      */
     fun synkroniserSaksstatusForFagsak(fagsak: Fagsak) {
-        val mappinger = skjemaSakMappingRepository.findByFagsak_Saksnummer(fagsak.saksnummer)
-        if (mappinger.isEmpty()) {
+        val skjemaIder = skjemaSakMappingRepository.finnSkjemaIderForSaksnummer(fagsak.saksnummer)
+        if (skjemaIder.isEmpty()) {
             return
         }
 
         val saksstatus = tilSkjemaSaksstatus(fagsak.status)
-        if (mappinger.size == 1) {
-            melosysSkjemaApiClient.oppdaterSaksstatus(mappinger.first().skjemaId, fagsak.saksnummer, saksstatus)
-        } else {
-            melosysSkjemaApiClient.bulkOppdaterSaksstatus(
-                BulkOppdaterSaksstatusRequest(
-                    mappinger.map { SaksstatusOppdatering(it.skjemaId, fagsak.saksnummer, saksstatus) }
-                )
+        melosysSkjemaApiClient.bulkOppdaterSaksstatus(
+            BulkOppdaterSaksstatusRequest(
+                skjemaIder.map { SaksstatusOppdatering(it, fagsak.saksnummer, saksstatus) }
             )
-        }
-        log.info { "Synkroniserte saksstatus $saksstatus til skjema-api for ${mappinger.size} skjema på sak ${fagsak.saksnummer}" }
+        )
+        log.info { "Synkroniserte saksstatus $saksstatus til skjema-api for ${skjemaIder.size} skjema på sak ${fagsak.saksnummer}" }
     }
 
     /**
      * Massesynk av alle skjema-sak-mappinger. Med [dryRun] bygges kun rapporten — ingen kall til
      * skjema-api. Uten dry-run sendes bulk-kall i batcher à [MAKS_OPPDATERINGER_PER_BATCH].
-     * Idempotent — trygt å kjøre flere ganger (resynk ved drift/avvik og tapte events).
+     * Feiler en batch, stoppes videre sending og rapporten returneres med tallene så langt pluss
+     * feilinformasjon. Idempotent — trygt å kjøre flere ganger (resynk ved drift/avvik).
      */
     fun massesynk(dryRun: Boolean): SkjemaSaksstatusSynkRapport {
-        val mappinger = skjemaSakMappingRepository.findAllMedFagsak()
-        val oppdateringer = mappinger.map {
-            SaksstatusOppdatering(it.skjemaId, it.saksnummer, tilSkjemaSaksstatus(it.fagsak.status))
+        val rader = skjemaSakMappingRepository.finnAlleSaksstatusSynkRader()
+        val oppdateringer = rader.map {
+            SaksstatusOppdatering(it.skjemaId, it.saksnummer, tilSkjemaSaksstatus(it.saksstatus))
         }
 
         val rapport = SkjemaSaksstatusSynkRapport(
@@ -81,7 +78,7 @@ class SkjemaSaksstatusSyncService(
             antallTotalt = oppdateringer.size,
             antallMottatt = oppdateringer.count { it.saksstatus == Saksstatus.MOTTATT },
             antallAvsluttet = oppdateringer.count { it.saksstatus == Saksstatus.AVSLUTTET },
-            perMelosysStatus = mappinger.groupingBy { it.fagsak.status }.eachCount()
+            perMelosysStatus = rader.groupingBy { it.saksstatus }.eachCount()
         )
 
         if (dryRun) {
@@ -91,10 +88,23 @@ class SkjemaSaksstatusSyncService(
 
         var antallOppdatert = 0
         val ukjenteSkjemaIder = mutableListOf<UUID>()
-        oppdateringer.chunked(MAKS_OPPDATERINGER_PER_BATCH).forEach { batch ->
-            val resultat = melosysSkjemaApiClient.bulkOppdaterSaksstatus(BulkOppdaterSaksstatusRequest(batch))
-            antallOppdatert += resultat.antallOppdatert
-            ukjenteSkjemaIder += resultat.ukjenteSkjemaIder
+        val batcher = oppdateringer.chunked(MAKS_OPPDATERINGER_PER_BATCH)
+        batcher.forEachIndexed { indeks, batch ->
+            try {
+                val resultat = melosysSkjemaApiClient.bulkOppdaterSaksstatus(BulkOppdaterSaksstatusRequest(batch))
+                antallOppdatert += resultat.antallOppdatert
+                ukjenteSkjemaIder += resultat.ukjenteSkjemaIder
+            } catch (e: Exception) {
+                val feiletBatch = indeks + 1
+                log.error(e) { "Saksstatus-massesynk feilet i batch $feiletBatch av ${batcher.size} — stopper videre sending" }
+                return rapport.copy(
+                    antallOppdatert = antallOppdatert,
+                    ukjenteSkjemaIder = ukjenteSkjemaIder,
+                    feiletBatch = feiletBatch,
+                    feilmelding = "Batch $feiletBatch av ${batcher.size} feilet (${e.javaClass.simpleName}) — " +
+                        "resten ble ikke sendt. Synken er idempotent og kan trygt kjøres på nytt. Se logg for detaljer."
+                )
+            }
         }
 
         log.info {
@@ -109,6 +119,7 @@ class SkjemaSaksstatusSyncService(
  * Rapport fra massesynk. [antallOppdatert] og [ukjenteSkjemaIder] settes kun ved reell synk
  * (dryRun=false) og aggregeres fra skjema-api-responsene. [antallOppdatert] kan avvike fra
  * [antallTotalt] siden skjema-api oppdaterer alle innsendinger på samme saksnummer per rad.
+ * [feiletBatch]/[feilmelding] settes hvis en batch feilet — tallene gjelder da batchene før feilen.
  */
 data class SkjemaSaksstatusSynkRapport(
     val dryRun: Boolean,
@@ -117,5 +128,7 @@ data class SkjemaSaksstatusSynkRapport(
     val antallAvsluttet: Int,
     val perMelosysStatus: Map<Saksstatuser, Int>,
     val antallOppdatert: Int? = null,
-    val ukjenteSkjemaIder: List<UUID>? = null
+    val ukjenteSkjemaIder: List<UUID>? = null,
+    val feiletBatch: Int? = null,
+    val feilmelding: String? = null
 )
