@@ -2,8 +2,8 @@ package no.nav.melosys.audit;
 
 import java.util.Optional;
 
-import no.nav.melosys.sikkerhet.context.SaksflytSubjektHolder;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.sikkerhet.tilgang.SaksflytSubjektHolder;
+import no.nav.melosys.sikkerhet.tilgang.SubjectHandler;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.util.ObjectUtils;
 

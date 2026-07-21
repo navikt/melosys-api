@@ -36,8 +36,8 @@ import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehan
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.TestSubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.TestSubjectHandler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

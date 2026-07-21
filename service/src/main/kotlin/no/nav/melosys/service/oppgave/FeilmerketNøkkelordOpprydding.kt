@@ -3,7 +3,7 @@ package no.nav.melosys.service.oppgave
 import mu.KotlinLogging
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveV2Client
 import no.nav.melosys.service.JobMonitor
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import no.nav.melosys.sikkerhet.tilgang.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import tools.jackson.databind.JsonNode

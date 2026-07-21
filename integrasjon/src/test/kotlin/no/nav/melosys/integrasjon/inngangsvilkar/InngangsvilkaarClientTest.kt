@@ -13,7 +13,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import no.nav.melosys.sikkerhet.tilgang.ThreadLocalAccessInfo
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach

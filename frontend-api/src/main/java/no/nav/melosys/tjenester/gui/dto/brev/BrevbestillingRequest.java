@@ -14,7 +14,7 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
 import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.sikkerhet.tilgang.SubjectHandler;
 
 import static java.util.Optional.ofNullable;
 

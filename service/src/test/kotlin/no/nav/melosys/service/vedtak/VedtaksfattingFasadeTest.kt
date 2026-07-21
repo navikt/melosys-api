@@ -17,9 +17,9 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.behandling.BehandlingService
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.SubjectHandler
-import no.nav.melosys.sikkerhet.context.TestSubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.TestSubjectHandler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

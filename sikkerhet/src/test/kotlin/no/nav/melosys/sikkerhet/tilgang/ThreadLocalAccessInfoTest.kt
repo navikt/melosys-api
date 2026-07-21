@@ -1,4 +1,4 @@
-package no.nav.melosys.sikkerhet.context
+package no.nav.melosys.sikkerhet.tilgang
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
@@ -22,7 +22,7 @@ class ThreadLocalAccessInfoTest {
 
     @BeforeAll
     fun setUp() {
-        val logger = LoggerFactory.getLogger("no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo") as Logger
+        val logger = LoggerFactory.getLogger("no.nav.melosys.sikkerhet.tilgang.ThreadLocalAccessInfo") as Logger
         listAppender.setContext(LoggerFactory.getILoggerFactory() as LoggerContext)
         logger.level = Level.WARN
         logger.addAppender(listAppender)

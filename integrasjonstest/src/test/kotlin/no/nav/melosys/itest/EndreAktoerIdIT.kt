@@ -13,8 +13,8 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.repository.AktoerRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.tilgang.Aksesskontroll
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.SubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SubjectHandler
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server

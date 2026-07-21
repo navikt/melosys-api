@@ -71,8 +71,8 @@ import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService
 import no.nav.melosys.service.unntak.AnmodningsperiodeService
 import no.nav.melosys.service.utpeking.UtpekingService
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.TestSubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.TestSubjectHandler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

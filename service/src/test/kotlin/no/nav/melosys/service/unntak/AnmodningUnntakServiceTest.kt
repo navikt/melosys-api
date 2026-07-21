@@ -32,8 +32,8 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.sed.EessiService
 import no.nav.melosys.service.kontroll.feature.anmodningomunntak.AnmodningUnntakKontrollService
 import no.nav.melosys.service.oppgave.OppgaveService
-import no.nav.melosys.sikkerhet.context.SubjectHandler
-import no.nav.melosys.sikkerhet.context.TestSubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.TestSubjectHandler
 import org.apache.commons.lang3.RandomStringUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

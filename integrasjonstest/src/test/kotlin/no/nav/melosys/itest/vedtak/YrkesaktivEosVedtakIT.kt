@@ -37,8 +37,8 @@ import no.nav.melosys.service.utpeking.UtpekingService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.SubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SubjectHandler
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding

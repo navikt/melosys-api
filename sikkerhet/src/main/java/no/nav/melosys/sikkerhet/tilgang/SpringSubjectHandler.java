@@ -1,4 +1,4 @@
-package no.nav.melosys.sikkerhet.context;
+package no.nav.melosys.sikkerhet.tilgang;
 
 import java.util.ArrayList;
 import java.util.List;

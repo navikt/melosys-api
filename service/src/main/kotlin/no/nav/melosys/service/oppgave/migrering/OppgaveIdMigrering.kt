@@ -7,7 +7,7 @@ import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import no.nav.melosys.sikkerhet.tilgang.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional

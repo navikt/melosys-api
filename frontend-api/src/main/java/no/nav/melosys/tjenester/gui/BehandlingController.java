@@ -13,7 +13,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.bruker.SaksbehandlerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.sikkerhet.tilgang.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.BehandlingOppsummeringDto;
 import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;

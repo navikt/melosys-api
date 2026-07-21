@@ -20,7 +20,7 @@ import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
-import no.nav.melosys.sikkerhet.context.SubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SubjectHandler
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate

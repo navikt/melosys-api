@@ -8,8 +8,8 @@ import no.nav.melosys.service.popp.Pensjonsopptjening
 import no.nav.melosys.service.popp.PensjonsopptjeningOppslag
 import no.nav.melosys.service.popp.PensjonsopptjeningPeriode
 import no.nav.melosys.service.tilgang.Aksesskontroll
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.TestSubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.TestSubjectHandler
 import no.nav.melosys.tjenester.gui.pensjonsopptjening.PensjonsopptjeningController
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

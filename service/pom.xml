@@ -306,7 +306,7 @@
                     </execution>
                     <execution>
                         <id>java-compile</id>
-                        <phase>process-classes</phase>
+                        <phase>compile</phase>
                         <goals>
                             <goal>compile</goal>
                         </goals>

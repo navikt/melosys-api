@@ -4,7 +4,7 @@ import mu.KotlinLogging
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.service.behandling.BehandlingService
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import no.nav.melosys.sikkerhet.tilgang.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional

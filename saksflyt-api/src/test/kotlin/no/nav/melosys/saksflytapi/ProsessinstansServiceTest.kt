@@ -32,9 +32,9 @@ import no.nav.melosys.domain.mottatteOpplysninger
 import no.nav.melosys.saksflytapi.domain.*
 import no.nav.melosys.saksflytapi.journalfoering.DokumentRequest
 import no.nav.melosys.saksflytapi.journalfoering.JournalfoeringOpprettRequest
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.SubjectHandler
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import no.nav.melosys.sikkerhet.tilgang.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.ThreadLocalAccessInfo
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

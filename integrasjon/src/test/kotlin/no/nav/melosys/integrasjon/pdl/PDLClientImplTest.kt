@@ -35,7 +35,7 @@ import no.nav.melosys.integrasjon.pdl.dto.person.adresse.PostadresseIFrittFormat
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.UtenlandskAdresse
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.UtenlandskAdresseIFrittFormat
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Vegadresse
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import no.nav.melosys.sikkerhet.tilgang.ThreadLocalAccessInfo
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach

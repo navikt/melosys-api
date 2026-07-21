@@ -16,8 +16,8 @@ import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.oppgave.OppgaveSoekFilter
 import no.nav.melosys.service.oppgave.Oppgaveplukker
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.TestSubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.TestSubjectHandler
 import no.nav.melosys.tjenester.gui.dto.OppgaveSokDto
 import no.nav.melosys.tjenester.gui.dto.oppgave.PlukketOppgaveDto
 import no.nav.melosys.tjenester.gui.util.responseBody

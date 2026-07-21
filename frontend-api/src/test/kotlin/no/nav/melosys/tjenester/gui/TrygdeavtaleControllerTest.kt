@@ -34,8 +34,8 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.service.trygdeavtale.TrygdeavtaleResultat
 import no.nav.melosys.service.trygdeavtale.TrygdeavtaleService
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.TestSubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.TestSubjectHandler
 import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleInfoDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleResultatDto
 import no.nav.melosys.tjenester.gui.util.responseBody

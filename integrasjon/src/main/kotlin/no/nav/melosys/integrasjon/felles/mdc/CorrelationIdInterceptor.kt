@@ -3,7 +3,7 @@ package no.nav.melosys.integrasjon.felles.mdc
 import no.nav.melosys.config.MDCOperations
 import no.nav.melosys.config.MDCOperations.Companion.CORRELATION_ID
 import no.nav.melosys.config.MDCOperations.Companion.getCorrelationId
-import no.nav.melosys.sikkerhet.context.SubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SubjectHandler
 import org.slf4j.LoggerFactory
 import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.ModelAndView

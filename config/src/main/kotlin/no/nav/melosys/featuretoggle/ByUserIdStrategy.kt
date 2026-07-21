@@ -3,8 +3,8 @@ package no.nav.melosys.featuretoggle
 import io.getunleash.UnleashContext
 import io.getunleash.strategy.Strategy
 import mu.KotlinLogging
-import no.nav.melosys.sikkerhet.context.SubjectHandler
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import no.nav.melosys.sikkerhet.tilgang.SubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.ThreadLocalAccessInfo
 import java.util.*
 
 internal class ByUserIdStrategy : Strategy {

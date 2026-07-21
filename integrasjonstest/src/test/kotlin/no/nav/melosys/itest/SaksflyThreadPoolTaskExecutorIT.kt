@@ -18,7 +18,7 @@ import no.nav.melosys.saksflytapi.UtførendeProsessKontekst
 import no.nav.melosys.saksflytapi.domain.ProsessPrioritet
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.ProsessType
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import no.nav.melosys.sikkerhet.tilgang.ThreadLocalAccessInfo
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.untilAsserted

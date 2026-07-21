@@ -8,8 +8,8 @@ import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import no.nav.melosys.service.tilgang.Aksesskontroll
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.TestSubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.TestSubjectHandler
 import no.nav.melosys.tjenester.gui.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeController
 import no.nav.melosys.tjenester.gui.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeDto
 import no.nav.melosys.tjenester.gui.util.responseBody

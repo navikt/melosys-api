@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.pdl;
 
 import no.nav.melosys.integrasjon.felles.AzureContextExchangeFilter;
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
+import no.nav.melosys.sikkerhet.tilgang.ThreadLocalAccessInfo;
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService;
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties;
 import org.springframework.stereotype.Component;

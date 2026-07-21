@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
+import no.nav.melosys.sikkerhet.tilgang.ThreadLocalAccessInfo;
 import no.nav.melosys.tjenester.gui.config.ApiKeyInterceptor;
 import org.springframework.web.servlet.HandlerInterceptor;
 

@@ -27,7 +27,7 @@ import no.nav.melosys.service.sak.OpprettSakDto
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import no.nav.melosys.sikkerhet.tilgang.ThreadLocalAccessInfo
 import no.nav.melosys.tjenester.gui.config.ApiKeyInterceptor
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.Test

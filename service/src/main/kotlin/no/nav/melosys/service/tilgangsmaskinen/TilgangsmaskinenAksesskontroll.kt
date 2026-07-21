@@ -13,7 +13,7 @@ import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.service.tilgang.Aksesstype
 import no.nav.melosys.service.tilgang.RedigerbarKontroll
 import no.nav.melosys.service.tilgang.Ressurs
-import no.nav.melosys.sikkerhet.context.SubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SubjectHandler
 import no.nav.melosys.sikkerhet.logging.AuditEvent
 import no.nav.melosys.sikkerhet.logging.AuditEventType
 import no.nav.melosys.sikkerhet.logging.AuditLogger

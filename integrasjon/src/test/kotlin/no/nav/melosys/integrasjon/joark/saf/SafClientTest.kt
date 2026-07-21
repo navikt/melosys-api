@@ -37,7 +37,7 @@ import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost
 import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalposttype
 import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalstatus
 import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Sak
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import no.nav.melosys.sikkerhet.tilgang.ThreadLocalAccessInfo
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach

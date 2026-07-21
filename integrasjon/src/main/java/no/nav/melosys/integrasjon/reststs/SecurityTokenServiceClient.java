@@ -3,8 +3,8 @@ package no.nav.melosys.integrasjon.reststs;
 import java.util.Map;
 
 import no.nav.melosys.integrasjon.felles.BasicAuthAware;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
+import no.nav.melosys.sikkerhet.tilgang.SubjectHandler;
+import no.nav.melosys.sikkerhet.tilgang.ThreadLocalAccessInfo;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;

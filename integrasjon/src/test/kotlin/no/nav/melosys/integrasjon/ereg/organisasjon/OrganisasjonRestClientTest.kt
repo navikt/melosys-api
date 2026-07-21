@@ -13,7 +13,7 @@ import io.kotest.matchers.types.shouldBeTypeOf
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonResponse.*
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import no.nav.melosys.sikkerhet.tilgang.ThreadLocalAccessInfo
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value

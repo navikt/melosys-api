@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.service.brev.UtkastBrevService
 import no.nav.melosys.service.brev.bestilling.OppdaterUtkastService
 import no.nav.melosys.service.tilgang.Aksesskontroll
-import no.nav.melosys.sikkerhet.context.SubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SubjectHandler
 import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingRequest
 import no.nav.melosys.tjenester.gui.dto.brev.UtkastBrevResponse
 import no.nav.security.token.support.core.api.Protected

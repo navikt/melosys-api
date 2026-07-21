@@ -2,7 +2,7 @@ package no.nav.melosys.integrasjon.sak
 
 import mu.KotlinLogging
 import no.nav.melosys.exception.TekniskException
-import no.nav.melosys.sikkerhet.context.SubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SubjectHandler
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 

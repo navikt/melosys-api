@@ -31,7 +31,7 @@ import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import no.nav.melosys.sikkerhet.tilgang.ThreadLocalAccessInfo
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach

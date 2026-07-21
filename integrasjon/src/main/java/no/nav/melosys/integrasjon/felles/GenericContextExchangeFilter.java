@@ -3,7 +3,7 @@ package no.nav.melosys.integrasjon.felles;
 import java.util.Optional;
 import jakarta.annotation.Nonnull;
 
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
+import no.nav.melosys.sikkerhet.tilgang.ThreadLocalAccessInfo;
 import no.nav.security.token.support.client.core.ClientProperties;
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService;
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties;

@@ -25,7 +25,7 @@ import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
 import no.nav.melosys.service.sak.*
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService
 import no.nav.melosys.service.tilgang.Aksesskontroll
-import no.nav.melosys.sikkerhet.context.SubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SubjectHandler
 import no.nav.melosys.tjenester.gui.dto.*
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto
 import no.nav.security.token.support.core.api.Protected

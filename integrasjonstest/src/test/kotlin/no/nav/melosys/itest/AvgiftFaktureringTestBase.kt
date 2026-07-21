@@ -5,8 +5,8 @@ import com.github.tomakehurst.wiremock.extension.Extension
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.SubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SubjectHandler
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 

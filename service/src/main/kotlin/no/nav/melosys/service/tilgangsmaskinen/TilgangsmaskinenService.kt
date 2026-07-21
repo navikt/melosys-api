@@ -35,7 +35,7 @@ class TilgangsmaskinenService(
      * @return true hvis bruker har tilgang, false hvis ikke
      * @throws TilgangsmaskinenException ved tekniske feil
      */
-    @Cacheable(value = ["tilgangsmaskinen"], key = "#fnr + '_' + T(no.nav.melosys.sikkerhet.context.SubjectHandler).getInstance().getUserID()")
+    @Cacheable(value = ["tilgangsmaskinen"], key = "#fnr + '_' + T(no.nav.melosys.sikkerhet.tilgang.SubjectHandler).getInstance().getUserID()")
     fun sjekkTilgangTilFnr(fnr: String): Boolean {
         log.debug("Sjekker tilgang til fnr via Tilgangsmaskinen med KOMPLETT_REGELTYPE")
 
@@ -55,7 +55,7 @@ class TilgangsmaskinenService(
      * @return true hvis bruker har tilgang, false hvis ikke
      * @throws TilgangsmaskinenException ved tekniske feil eller manglende mapping
      */
-    @Cacheable(value = ["tilgangsmaskinen"], key = "#aktørId + '_' + T(no.nav.melosys.sikkerhet.context.SubjectHandler).getInstance().getUserID()")
+    @Cacheable(value = ["tilgangsmaskinen"], key = "#aktørId + '_' + T(no.nav.melosys.sikkerhet.tilgang.SubjectHandler).getInstance().getUserID()")
     fun sjekkTilgangTilAktørId(aktørId: String): Boolean {
         log.debug("Sjekker tilgang til aktørId via Tilgangsmaskinen med KOMPLETT_REGELTYPE")
 

@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.service.sak.AvslagService
 import no.nav.melosys.service.tilgang.Aksesskontroll
-import no.nav.melosys.sikkerhet.context.SubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SubjectHandler
 import no.nav.melosys.tjenester.gui.dto.AvslagDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.context.annotation.Scope

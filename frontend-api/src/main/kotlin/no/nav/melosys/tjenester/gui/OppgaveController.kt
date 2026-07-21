@@ -13,7 +13,7 @@ import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto
 import no.nav.melosys.service.oppgave.dto.JournalfoeringsoppgaveDto
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto
-import no.nav.melosys.sikkerhet.context.SubjectHandler
+import no.nav.melosys.sikkerhet.tilgang.SubjectHandler
 import no.nav.melosys.tjenester.gui.dto.OppgaveSokDto
 import no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto
 import no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveOversiktDto

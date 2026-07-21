@@ -10,7 +10,7 @@ import com.github.tomakehurst.wiremock.matching.UrlPattern
 import io.mockk.spyk
 import no.nav.melosys.integrasjon.felles.EnvironmentHandler
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import no.nav.melosys.sikkerhet.tilgang.ThreadLocalAccessInfo
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.*
 import org.springframework.context.annotation.Import
