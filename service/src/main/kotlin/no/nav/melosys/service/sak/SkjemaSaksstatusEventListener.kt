@@ -37,7 +37,7 @@ class SkjemaSaksstatusEventListener(
     @Transactional
     fun fagsakStatusEndret(event: FagsakStatusEndretEvent) {
         val saksnummer = event.fagsak.saksnummer
-        if (skjemaSakMappingRepository.finnSkjemaIderForSaksnummer(saksnummer).isEmpty()) {
+        if (!skjemaSakMappingRepository.existsByFagsak_Saksnummer(saksnummer)) {
             return
         }
 

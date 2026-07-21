@@ -14,6 +14,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler.datoEldreEnn2Mnd
 import no.nav.melosys.service.medl.MedlPeriodeService
 import no.nav.melosys.service.sak.FagsakService
+import no.nav.melosys.service.sak.SkjemaSaksstatusSynk
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -91,7 +92,7 @@ class AvsluttArt13BehandlingService(
 
         validerLovvalgsperiodeKanAvsluttes(behandling.id, lovvalgsperiode)
 
-        fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART)
+        fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART, SkjemaSaksstatusSynk.SYNKRONISER)
         medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode)
 
         log.info { "Behandling ${behandling.id} avsluttet og satt til endelig i Medl." }

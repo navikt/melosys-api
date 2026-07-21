@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
 
 import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
@@ -25,6 +26,10 @@ public interface FagsakRepository extends CrudRepository<Fagsak, String> {
 
     @Query("select f from Fagsak f, Aktoer a where a.fagsak = f and a.rolle = :rolle  and a.orgnr = :id")
     List<Fagsak> findByRolleAndOrgnr(@Param("rolle") Aktoersroller rolle, @Param("id") String orgnr);
+
+    /** Slankt statusoppslag uten å hydrere fagsakens EAGER-samlinger (aktører/behandlinger). */
+    @Query("select f.status from Fagsak f where f.saksnummer = :saksnummer")
+    Optional<Saksstatuser> finnStatusForSaksnummer(@Param("saksnummer") String saksnummer);
 
     @NativeQuery("SELECT saksnummer_seq.nextval FROM dual")
     Long hentNesteSekvensVerdi();

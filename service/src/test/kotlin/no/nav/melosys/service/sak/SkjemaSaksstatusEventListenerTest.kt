@@ -38,8 +38,7 @@ internal class SkjemaSaksstatusEventListenerTest {
     @Test
     fun `bestiller synk-prosessinstans for sak med skjema-mapping`() {
         val fagsak = Fagsak.forTest()
-        every { skjemaSakMappingRepository.finnSkjemaIderForSaksnummer(fagsak.saksnummer) } returns
-            listOf(UUID.randomUUID())
+        every { skjemaSakMappingRepository.existsByFagsak_Saksnummer(fagsak.saksnummer) } returns true
         every { prosessinstansService.opprettProsessinstansSynkSkjemaSaksstatus(fagsak.saksnummer) } just runs
 
         listener.fagsakStatusEndret(FagsakStatusEndretEvent(fagsak))
@@ -50,7 +49,7 @@ internal class SkjemaSaksstatusEventListenerTest {
     @Test
     fun `bestiller ikke synk for sak uten skjema-mapping`() {
         val fagsak = Fagsak.forTest()
-        every { skjemaSakMappingRepository.finnSkjemaIderForSaksnummer(fagsak.saksnummer) } returns emptyList()
+        every { skjemaSakMappingRepository.existsByFagsak_Saksnummer(fagsak.saksnummer) } returns false
 
         listener.fagsakStatusEndret(FagsakStatusEndretEvent(fagsak))
 

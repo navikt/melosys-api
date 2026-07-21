@@ -8,9 +8,12 @@ import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import java.time.Duration
 import java.util.UUID
 
 private val log = KotlinLogging.logger { }
+
+private val SAKSSTATUS_TIMEOUT = Duration.ofSeconds(10)
 
 @Service
 class MelosysSkjemaApiClient(private val melosysSkjemaApiWebClient: WebClient) {
@@ -47,6 +50,9 @@ class MelosysSkjemaApiClient(private val melosysSkjemaApiWebClient: WebClient) {
             .bodyValue(request)
             .retrieve()
             .bodyToMono(BulkOppdaterSaksstatusResultat::class.java)
+            // Timeout kun på saksstatus-kallet (kjøres fra prosessinstans-steg) — de øvrige
+            // kallene (PDF/vedlegg) kan legitimt ta lengre tid og deler WebClient uten timeout
+            .timeout(SAKSSTATUS_TIMEOUT)
             .block() ?: error("Tomt svar fra bulk-oppdatering av saksstatus")
     }
 

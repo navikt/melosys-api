@@ -257,31 +257,45 @@ public class FagsakService {
     }
 
 
-    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) {
+    @Transactional
+    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus, SkjemaSaksstatusSynk skjemaSaksstatusSynk) {
         Behandling aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         if (aktivBehandling == null) {
             log.warn("Forsøker å lukke behandling for fagsak {} som ikke har noen aktiv behandling", fagsak.getSaksnummer());
-            oppdaterStatus(fagsak, saksstatus);
+            oppdaterStatus(fagsak, saksstatus, skjemaSaksstatusSynk);
         } else {
-            avsluttFagsakOgBehandling(fagsak, aktivBehandling, saksstatus);
+            avsluttFagsakOgBehandling(fagsak, aktivBehandling, saksstatus, skjemaSaksstatusSynk);
         }
     }
 
+    @Transactional
     public void avsluttFagsakOgBehandling(Fagsak fagsak,
                                           Behandling behandling,
-                                          Saksstatuser saksstatus) {
+                                          Saksstatuser saksstatus,
+                                          SkjemaSaksstatusSynk skjemaSaksstatusSynk) {
         if (!behandling.getFagsak().getSaksnummer().equals(fagsak.getSaksnummer())) {
             throw new FunksjonellException("Behandling " + behandling.getId() + " tilhører ikke fagsak " + fagsak.getSaksnummer());
         }
-        oppdaterStatus(fagsak, saksstatus);
+        oppdaterStatus(fagsak, saksstatus, skjemaSaksstatusSynk);
         behandlingService.avsluttBehandling(behandling.getId());
         log.info("Fagsak {} med behandling avsluttet", fagsak.getSaksnummer());
     }
 
-    public void oppdaterStatus(Fagsak fagsak, Saksstatuser saksstatus) {
+    /**
+     * Oppdaterer fagsakstatus. {@code skjemaSaksstatusSynk} er påkrevd og styrer om det publiseres
+     * {@link FagsakStatusEndretEvent}, som bestiller synk av saksstatus til melosys-skjema-api for
+     * saker med skjema-mapping: bruk {@link SkjemaSaksstatusSynk#SYNKRONISER} fra
+     * REST-/admin-/scheduler-stier, og {@link SkjemaSaksstatusSynk#HÅNDTERES_AV_PROSESSFLYT} fra
+     * prosessinstans-steg der flyten selv eier SYNK_SKJEMA_SAKSSTATUS-steget (et prosessinstans-steg
+     * skal ikke bestille barneprosesser).
+     */
+    @Transactional
+    public void oppdaterStatus(Fagsak fagsak, Saksstatuser saksstatus, SkjemaSaksstatusSynk skjemaSaksstatusSynk) {
         fagsak.setStatus(saksstatus);
         fagsakRepository.save(fagsak);
-        applicationEventPublisher.publishEvent(new FagsakStatusEndretEvent(fagsak));
+        if (skjemaSaksstatusSynk == SkjemaSaksstatusSynk.SYNKRONISER) {
+            applicationEventPublisher.publishEvent(new FagsakStatusEndretEvent(fagsak));
+        }
     }
 
     public void oppdaterSakstema(Fagsak fagsak, Sakstemaer nySakstema) {

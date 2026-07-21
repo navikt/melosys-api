@@ -19,6 +19,8 @@ public interface SkjemaSakMappingRepository extends JpaRepository<SkjemaSakMappi
 
     List<SkjemaSakMapping> findByMottatteOpplysninger_Id(Long mottatteOpplysningerId);
 
+    boolean existsByFagsak_Saksnummer(String saksnummer);
+
     @Query("select m.skjemaId from SkjemaSakMapping m where m.fagsak.saksnummer = :saksnummer")
     List<UUID> finnSkjemaIderForSaksnummer(@Param("saksnummer") String saksnummer);
 

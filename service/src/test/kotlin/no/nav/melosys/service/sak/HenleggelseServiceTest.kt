@@ -94,7 +94,7 @@ internal class HenleggelseServiceTest {
             henleggelseService.henleggFagsakEllerBehandling(FagsakTestFactory.SAKSNUMMER, Henleggelsesgrunner.ANNET.kode, BEGRUNNELSE_FRITEKST)
 
 
-            verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT) }
+            verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT, SkjemaSaksstatusSynk.SYNKRONISER) }
             verify { prosessinstansService.opprettProsessinstansFagsakHenlagt(behandling) }
             verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
             verify(exactly = 0) { behandlingService.avsluttAndregangsbehandling(any(), any()) }
@@ -111,7 +111,7 @@ internal class HenleggelseServiceTest {
             henleggelseService.henleggFagsakEllerBehandling(FagsakTestFactory.SAKSNUMMER, Henleggelsesgrunner.ANNET.kode, BEGRUNNELSE_FRITEKST)
 
 
-            verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT) }
+            verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT, any()) }
             verify { prosessinstansService.opprettProsessinstansFagsakHenlagt(annengangsBehandling) }
             verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
             verify { behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE) }
@@ -165,7 +165,7 @@ internal class HenleggelseServiceTest {
             henleggelseService.henleggSakEllerBehandlingSomBortfalt(BEHANDLING_ID)
 
 
-            verify { fagsakService.oppdaterStatus(fagsak, Saksstatuser.HENLAGT_BORTFALT) }
+            verify { fagsakService.oppdaterStatus(fagsak, Saksstatuser.HENLAGT_BORTFALT, SkjemaSaksstatusSynk.SYNKRONISER) }
             verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
             verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
             verify { behandlingService.avsluttBehandling(BEHANDLING_ID) }

@@ -47,14 +47,14 @@ class ProsessinstansBehandlerTest {
     private lateinit var prosessinstansBehandler: ProsessinstansBehandler
 
     private val prosessinstans = Prosessinstans.forTest {
-        type = ProsessType.MOTTAK_SED
+        type = ProsessType.MOTTAK_SED_JOURNALFØRING
         status = ProsessStatus.KLAR
     }
 
     @BeforeEach
     fun setup() {
         Metrics.globalRegistry.add(metrikkRegistry)
-        every { stegbehandler.inngangsSteg() } returns ProsessSteg.SED_MOTTAK_RUTING
+        every { stegbehandler.inngangsSteg() } returns ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST
         every { stegbehandler.utfør(any()) } just Runs
         every { prosessinstansRepository.save(any<Prosessinstans>()) } returnsArgument 0
         every { applicationEventPublisher.publishEvent(any()) } just Runs
@@ -66,7 +66,7 @@ class ProsessinstansBehandlerTest {
             Duration.ofHours(2)
         )
 
-        prosessinstans.type = ProsessType.MOTTAK_SED
+        prosessinstans.type = ProsessType.MOTTAK_SED_JOURNALFØRING
         prosessinstans.status = ProsessStatus.KLAR
     }
 
@@ -85,7 +85,7 @@ class ProsessinstansBehandlerTest {
 
 
         prosessinstans.run {
-            sistFullførtSteg shouldBe ProsessSteg.SED_MOTTAK_RUTING
+            sistFullførtSteg shouldBe ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST
             status shouldBe ProsessStatus.FERDIG
         }
         verify { stegbehandler.utfør(prosessinstans) }
@@ -105,7 +105,7 @@ class ProsessinstansBehandlerTest {
             sistFullførtSteg.shouldBeNull()
             status shouldBe ProsessStatus.FEILET
             hendelser.shouldHaveSize(1).single().run {
-                steg shouldBe ProsessSteg.SED_MOTTAK_RUTING
+                steg shouldBe ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST
                 prosessinstans shouldBe this@ProsessinstansBehandlerTest.prosessinstans
             }
         }
@@ -183,7 +183,7 @@ class ProsessinstansBehandlerTest {
         id = UUID.randomUUID()
         behandling = null
         status = ProsessStatus.FEILET
-        type = ProsessType.MOTTAK_SED
+        type = ProsessType.MOTTAK_SED_JOURNALFØRING
         sistFullførtSteg = null
         registrertDato = LocalDateTime.MIN
         this.endretDato = endretDato

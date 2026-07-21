@@ -15,6 +15,7 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.sak.SkjemaSaksstatusSynk;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,13 +66,15 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
     private void avsluttFagsak(Prosessinstans prosessinstans, long behandlingID, Fagsak fagsak) {
         var saksstatus = prosessinstans.getData(ProsessDataKey.SAKSSTATUS, Saksstatuser.class, Saksstatuser.LOVVALG_AVKLART);
         log.info("Avslutter behandling {}, og setter saksstatus til {} på tilhørende fagsak", behandlingID, saksstatus);
-        fagsakService.avsluttFagsakOgBehandling(fagsak, saksstatus);
+        // HÅNDTERES_AV_PROSESSFLYT: flyten eier selv SYNK_SKJEMA_SAKSSTATUS-steget rett etter dette steget
+        fagsakService.avsluttFagsakOgBehandling(fagsak, saksstatus, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT);
     }
 
     private void avsluttÅrsavregningEllerSatsendring(Fagsak fagsak, Behandling behandling) {
         boolean sakLukkes = fagsak.erEnesteBehandling(behandling.getId());
         if (sakLukkes) {
-            fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET);
+            // HÅNDTERES_AV_PROSESSFLYT: flyten eier selv SYNK_SKJEMA_SAKSSTATUS-steget rett etter dette steget
+            fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT);
         } else {
             behandlingService.avsluttBehandling(behandling.getId());
         }

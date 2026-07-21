@@ -1,9 +1,9 @@
 package no.nav.melosys.service.sak
 
 import mu.KotlinLogging
-import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.integrasjon.melosysskjema.MelosysSkjemaApiClient
+import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.SkjemaSakMappingRepository
 import no.nav.melosys.skjema.types.common.Saksstatus
 import no.nav.melosys.skjema.types.m2m.BulkOppdaterSaksstatusRequest
@@ -24,6 +24,7 @@ private val log = KotlinLogging.logger { }
 @Service
 class SkjemaSaksstatusSyncService(
     private val skjemaSakMappingRepository: SkjemaSakMappingRepository,
+    private val fagsakRepository: FagsakRepository,
     private val melosysSkjemaApiClient: MelosysSkjemaApiClient
 ) {
 
@@ -43,22 +44,27 @@ class SkjemaSaksstatusSyncService(
     }
 
     /**
-     * Løpende synk: sender oppdatert saksstatus til skjema-api hvis fagsaken har skjema-mapping.
-     * Gjør ingenting for saker uten mapping-rad (saker som ikke stammer fra skjema-api).
+     * Løpende synk: sender fagsakens GJELDENDE saksstatus til skjema-api hvis saken har
+     * skjema-mapping. No-op for saker uten mapping-rad (saker som ikke stammer fra skjema-api).
+     * Bruker slanke oppslag (exists + status-projeksjon) — hydrerer ikke fagsakens EAGER-samlinger.
      */
-    fun synkroniserSaksstatusForFagsak(fagsak: Fagsak) {
-        val skjemaIder = skjemaSakMappingRepository.finnSkjemaIderForSaksnummer(fagsak.saksnummer)
-        if (skjemaIder.isEmpty()) {
+    fun synkroniserSaksstatusForSaksnummer(saksnummer: String) {
+        if (!skjemaSakMappingRepository.existsByFagsak_Saksnummer(saksnummer)) {
+            log.debug { "Sak $saksnummer har ingen skjema-mapping — hopper over saksstatus-synk" }
             return
         }
 
-        val saksstatus = tilSkjemaSaksstatus(fagsak.status)
-        melosysSkjemaApiClient.bulkOppdaterSaksstatus(
-            BulkOppdaterSaksstatusRequest(
-                skjemaIder.map { SaksstatusOppdatering(it, fagsak.saksnummer, saksstatus) }
-            )
-        )
-        log.info { "Synkroniserte saksstatus $saksstatus til skjema-api for ${skjemaIder.size} skjema på sak ${fagsak.saksnummer}" }
+        val melosysStatus = fagsakRepository.finnStatusForSaksnummer(saksnummer)
+            .orElseThrow { IllegalStateException("Fant ikke fagsak $saksnummer for saksstatus-synk") }
+        val saksstatus = tilSkjemaSaksstatus(melosysStatus)
+        val skjemaIder = skjemaSakMappingRepository.finnSkjemaIderForSaksnummer(saksnummer)
+
+        skjemaIder
+            .map { SaksstatusOppdatering(it, saksnummer, saksstatus) }
+            .chunked(MAKS_OPPDATERINGER_PER_BATCH)
+            .forEach { melosysSkjemaApiClient.bulkOppdaterSaksstatus(BulkOppdaterSaksstatusRequest(it)) }
+
+        log.info { "Synkroniserte saksstatus $saksstatus til skjema-api for ${skjemaIder.size} skjema på sak $saksnummer" }
     }
 
     /**

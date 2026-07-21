@@ -90,7 +90,7 @@ class TrygdeavtaleVedtakServiceTest {
         )
 
         // Speiler FagsakService.oppdaterStatus slik at eksisterende status-assertions fortsatt gjelder
-        every { fagsakService.oppdaterStatus(any(), any()) } answers {
+        every { fagsakService.oppdaterStatus(any(), any(), any()) } answers {
             firstArg<Fagsak>().status = secondArg()
         }
 

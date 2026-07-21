@@ -61,7 +61,7 @@ class FerdigbehandleServiceTest {
         ferdigbehandleService.ferdigbehandle(BEHANDLING_ID)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.AVSLUTTET) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.AVSLUTTET, SkjemaSaksstatusSynk.SYNKRONISER) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.id, Behandlingsresultattyper.FERDIGBEHANDLET) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingID) }
     }
@@ -89,7 +89,7 @@ class FerdigbehandleServiceTest {
         ferdigbehandleService.ferdigbehandle(BEHANDLING_ID)
 
 
-        verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(fagsak, any(), any()) }
+        verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(fagsak, any<Behandling>(), any(), any()) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingID) }
     }
