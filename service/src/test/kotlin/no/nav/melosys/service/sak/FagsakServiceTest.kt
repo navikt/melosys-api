@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import org.springframework.context.ApplicationEventPublisher
 import java.time.Instant
 import java.util.*
 
@@ -58,6 +59,9 @@ class FagsakServiceTest {
 
     @RelaxedMockK
     lateinit var lovligeKombinasjonerSaksbehandlingService: LovligeKombinasjonerSaksbehandlingService
+
+    @RelaxedMockK
+    lateinit var applicationEventPublisher: ApplicationEventPublisher
 
     private lateinit var fagsakService: FagsakService
 
@@ -99,7 +103,8 @@ class FagsakServiceTest {
             behandlingService,
             kontaktopplysningService,
             persondataFasade,
-            lovligeKombinasjonerSaksbehandlingService
+            lovligeKombinasjonerSaksbehandlingService,
+            applicationEventPublisher
         )
     }
 
@@ -304,7 +309,7 @@ class FagsakServiceTest {
             status = Behandlingsstatus.UNDER_BEHANDLING
         }
         val fagsak = behandling.fagsak
-        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART)
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART, SkjemaSaksstatusSynk.SYNKRONISER)
         fagsak.status shouldBe Saksstatuser.LOVVALG_AVKLART
         verify { fagsakRepo.save(fagsak) }
         verify { behandlingService.avsluttBehandling(behandling.id) }
@@ -321,7 +326,7 @@ class FagsakServiceTest {
         behandling.fagsak = Fagsak.forTest { saksnummer = "MEL-annenId" }
 
         val exception = shouldThrow<FunksjonellException> {
-            fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART)
+            fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART, SkjemaSaksstatusSynk.SYNKRONISER)
         }
         exception.message shouldContain "tilhører ikke fagsak"
     }
@@ -330,11 +335,83 @@ class FagsakServiceTest {
     fun `skal avslutte fagsak når behandling mangler`() {
         val fagsak = Fagsak.forTest()
 
-        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.AVSLUTTET)
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.AVSLUTTET, SkjemaSaksstatusSynk.SYNKRONISER)
 
         fagsak.status shouldBe Saksstatuser.AVSLUTTET
         verify { fagsakRepo.save(fagsak) }
         verify(exactly = 0) { behandlingService.avsluttBehandling(any()) }
+    }
+
+    @Test
+    fun `oppdaterStatus med SYNKRONISER publiserer FagsakStatusEndretEvent etter lagring`() {
+        val fagsak = Fagsak.forTest()
+
+        fagsakService.oppdaterStatus(fagsak, Saksstatuser.ANNULLERT, SkjemaSaksstatusSynk.SYNKRONISER)
+
+        verify {
+            applicationEventPublisher.publishEvent(withArg<FagsakStatusEndretEvent> {
+                it.saksnummer shouldBe fagsak.saksnummer
+            })
+        }
+        fagsak.status shouldBe Saksstatuser.ANNULLERT
+    }
+
+    @Test
+    fun `oppdaterStatus med HÅNDTERES_AV_PROSESSFLYT oppdaterer status men publiserer IKKE event`() {
+        val fagsak = Fagsak.forTest()
+
+        fagsakService.oppdaterStatus(fagsak, Saksstatuser.ANNULLERT, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT)
+
+        fagsak.status shouldBe Saksstatuser.ANNULLERT
+        verify { fagsakRepo.save(fagsak) }
+        verify(exactly = 0) { applicationEventPublisher.publishEvent(any<FagsakStatusEndretEvent>()) }
+    }
+
+    @Test
+    fun `henleggelse av sak uten aktiv behandling publiserer FagsakStatusEndretEvent med riktig status`() {
+        val fagsak = Fagsak.forTest()
+
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT_BORTFALT, SkjemaSaksstatusSynk.SYNKRONISER)
+
+        verify {
+            applicationEventPublisher.publishEvent(withArg<FagsakStatusEndretEvent> {
+                it.saksnummer shouldBe fagsak.saksnummer
+            })
+        }
+        fagsak.status shouldBe Saksstatuser.HENLAGT_BORTFALT
+    }
+
+    @Test
+    fun `avslutting av fagsak med aktiv behandling publiserer FagsakStatusEndretEvent`() {
+        val behandling = Behandling.forTest {
+            id = 1L
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        val fagsak = behandling.fagsak
+
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART, SkjemaSaksstatusSynk.SYNKRONISER)
+
+        verify {
+            applicationEventPublisher.publishEvent(withArg<FagsakStatusEndretEvent> {
+                it.saksnummer shouldBe fagsak.saksnummer
+            })
+        }
+        fagsak.status shouldBe Saksstatuser.LOVVALG_AVKLART
+    }
+
+    @Test
+    fun `avslutting med HÅNDTERES_AV_PROSESSFLYT avslutter behandling men publiserer IKKE event`() {
+        val behandling = Behandling.forTest {
+            id = 1L
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        val fagsak = behandling.fagsak
+
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT)
+
+        fagsak.status shouldBe Saksstatuser.LOVVALG_AVKLART
+        verify { behandlingService.avsluttBehandling(behandling.id) }
+        verify(exactly = 0) { applicationEventPublisher.publishEvent(any<FagsakStatusEndretEvent>()) }
     }
 
     @Test

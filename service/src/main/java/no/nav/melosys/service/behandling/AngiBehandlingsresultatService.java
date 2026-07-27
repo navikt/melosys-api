@@ -14,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.sak.SkjemaSaksstatusSynk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -52,7 +53,7 @@ public class AngiBehandlingsresultatService {
         behandlingsresultat.setType(behandlingsresultattype);
         slettMedlemskapsperioderNårBehandlingAvsluttesOgSakstypeErFTRL(behandlingsresultat.getType(), fagsak.erSakstypeFtrl(), behandlingID);
         behandlingsresultatService.lagre(behandlingsresultat);
-        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART, SkjemaSaksstatusSynk.SYNKRONISER);
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingID);
     }
 

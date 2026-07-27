@@ -39,7 +39,8 @@ object ProsessflytDefinisjon {
         REGISTRERE_UNNTAK_FRA_MEDLEMSKAP to ProsessFlyt(
             prosessType = REGISTRERE_UNNTAK_FRA_MEDLEMSKAP,
             LAGRE_LOVVALGSPERIODE_MEDL,
-            AVSLUTT_SAK_OG_BEHANDLING
+            AVSLUTT_SAK_OG_BEHANDLING,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         JFR_NY_SAK_BRUKER to ProsessFlyt(
             prosessType = JFR_NY_SAK_BRUKER,
@@ -85,7 +86,8 @@ object ProsessflytDefinisjon {
             LAGRE_LOVVALGSPERIODE_MEDL,
             KANSELLER_FAKTURASERIE,
             AVSLUTT_AARSAVREGNINGER,
-            AVSLUTT_SAK_OG_BEHANDLING
+            AVSLUTT_SAK_OG_BEHANDLING,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         JFR_KNYTT to ProsessFlyt(
             prosessType = JFR_KNYTT,
@@ -155,14 +157,16 @@ object ProsessflytDefinisjon {
             prosessType = SATSENDRING,
             OPPRETT_SATSBEHANDLING,
             BEREGN_OG_SEND_FAKTURA,
-            AVSLUTT_SAK_OG_BEHANDLING
+            AVSLUTT_SAK_OG_BEHANDLING,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         SATSENDRING_TILBAKESTILL_NY_VURDERING to ProsessFlyt(
             prosessType = SATSENDRING_TILBAKESTILL_NY_VURDERING,
             OPPRETT_SATSBEHANDLING,
             BEREGN_OG_SEND_FAKTURA,
             AVSLUTT_SAK_OG_BEHANDLING,
-            TILBAKESTILL_TRYGDEAVGIFT
+            TILBAKESTILL_TRYGDEAVGIFT,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         IVERKSETT_VEDTAK_AARSAVREGNING to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_AARSAVREGNING,
@@ -171,6 +175,7 @@ object ProsessflytDefinisjon {
             VARSLE_PENSJONSOPPTJENING,
             AVSLUTT_SAK_OG_BEHANDLING,
             SEND_MELDING_OM_VEDTAK,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         IVERKSETT_VEDTAK_EOS to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_EOS,
@@ -186,6 +191,7 @@ object ProsessflytDefinisjon {
             SEND_MELDING_OM_VEDTAK,
             OPPRETTE_AARSAVREGNING_ENDRING,
             RESET_ÅPNE_ÅRSAVREGNINGER,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         IVERKSETT_EOS_PENSJONIST_AVGIFT to ProsessFlyt(
             prosessType = IVERKSETT_EOS_PENSJONIST_AVGIFT,
@@ -195,6 +201,7 @@ object ProsessflytDefinisjon {
             SEND_ORIENTERINGSBREV_TRYGDEAVGIFT,
             OPPRETTE_AARSAVREGNING_ENDRING,
             RESET_ÅPNE_ÅRSAVREGNINGER,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         IVERKSETT_VEDTAK_FTRL to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_FTRL,
@@ -208,6 +215,7 @@ object ProsessflytDefinisjon {
             //  utføres etter at vedtaket er satt.
             //  Les mer her for hva vi burde heller gjøre på sikt: https://github.com/navikt/melosys-api/pull/2870#issuecomment-3056956566
             RESET_ÅPNE_ÅRSAVREGNINGER,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
@@ -215,7 +223,8 @@ object ProsessflytDefinisjon {
             LAGRE_LOVVALGSPERIODE_MEDL,
             SEND_VEDTAKSBREV_INNLAND,
             AVSLUTT_SAK_OG_BEHANDLING,
-            SEND_MELDING_OM_VEDTAK
+            SEND_MELDING_OM_VEDTAK,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         IVERKSETT_VEDTAK_TRYGDEAVTALE to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_TRYGDEAVTALE,
@@ -224,11 +233,14 @@ object ProsessflytDefinisjon {
             AVKLAR_ARBEIDSGIVER,
             LAGRE_LOVVALGSPERIODE_MEDL,
             AVSLUTT_SAK_OG_BEHANDLING,
-            SEND_MELDING_OM_VEDTAK
+            SEND_MELDING_OM_VEDTAK,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         MOTTAK_SED to ProsessFlyt(
             prosessType = MOTTAK_SED,
-            SED_MOTTAK_RUTING
+            SED_MOTTAK_RUTING,
+            // No-op uten SYNK_SAKSSTATUS_SAKSNUMMER-prosessdata — settes av SED-rutingen når den annullerer sak
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         MOTTAK_SED_JOURNALFØRING to ProsessFlyt(
             prosessType = MOTTAK_SED_JOURNALFØRING,
@@ -318,22 +330,26 @@ object ProsessflytDefinisjon {
             prosessType = REGISTRERING_UNNTAK_GODKJENN,
             LAGRE_LOVVALGSPERIODE_MEDL,
             SEND_GODKJENNING_REGISTRERING_UNNTAK,
-            AVSLUTT_SAK_OG_BEHANDLING
+            AVSLUTT_SAK_OG_BEHANDLING,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         REGISTRERING_UNNTAK_AVVIS to ProsessFlyt(
             prosessType = REGISTRERING_UNNTAK_AVVIS,
-            AVSLUTT_SAK_OG_BEHANDLING
+            AVSLUTT_SAK_OG_BEHANDLING,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         UTPEKING_AVVIS to ProsessFlyt(
             prosessType = UTPEKING_AVVIS,
             UTPEKING_SEND_AVSLAG,
-            AVSLUTT_SAK_OG_BEHANDLING
+            AVSLUTT_SAK_OG_BEHANDLING,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         ANMODNING_OM_UNNTAK_MOTTAK_SVAR to ProsessFlyt(
             prosessType = ANMODNING_OM_UNNTAK_MOTTAK_SVAR,
             LAGRE_LOVVALGSPERIODE_MEDL,
             SEND_SVAR_ANMODNING_UNNTAK,
-            AVSLUTT_SAK_OG_BEHANDLING
+            AVSLUTT_SAK_OG_BEHANDLING,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
         MOTTAK_SOKNAD_ALTINN to ProsessFlyt(
             prosessType = MOTTAK_SOKNAD_ALTINN,
@@ -370,6 +386,10 @@ object ProsessflytDefinisjon {
         ProsessType.OPPDATER_FAKTURAMOTTAKER to ProsessFlyt(
             prosessType = ProsessType.OPPDATER_FAKTURAMOTTAKER,
             ProsessSteg.OPPDATER_FAKTURAMOTTAKER
+        ),
+        ProsessType.SYNK_SKJEMA_SAKSSTATUS to ProsessFlyt(
+            prosessType = ProsessType.SYNK_SKJEMA_SAKSSTATUS,
+            ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         )
     )
 
