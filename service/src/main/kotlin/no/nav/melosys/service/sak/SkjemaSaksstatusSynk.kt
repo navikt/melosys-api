@@ -1,4 +1,4 @@
-package no.nav.melosys.service.sak;
+package no.nav.melosys.service.sak
 
 /**
  * Styrer om en fagsak-statusendring skal utløse synkronisering av saksstatus til
@@ -7,12 +7,12 @@ package no.nav.melosys.service.sak;
  * Ingen defaultverdi med vilje: hvert kallsted må ta eksplisitt stilling, slik at nye kallsteder
  * ikke stille kan bryte SAGA-prinsippet om at prosessinstans-steg ikke bestiller barneprosesser.
  *
- * <p>Utledet skjema-status er en ren funksjon av fagsakstatus (produkteierbeslutning
- * 2026-07-21) — kun fagsak-statusendringer trigger synk. Ren behandlingslukking uten
- * fagsak-statusendring krever ingen synk. Den idempotente massesynken
- * (/admin/skjema-saksstatus/synk) er sikkerhetsnettet ved drift/avvik.
+ * Utledet skjema-status er en ren funksjon av fagsakstatus (produkteierbeslutning 2026-07-21)
+ * — kun fagsak-statusendringer trigger synk. Ren behandlingslukking uten fagsak-statusendring
+ * krever ingen synk. Den idempotente massesynken (/admin/skjema-saksstatus/synk) er
+ * sikkerhetsnettet ved drift/avvik.
  */
-public enum SkjemaSaksstatusSynk {
+enum class SkjemaSaksstatusSynk {
 
     /**
      * Endringen skjer utenfor en prosessinstans (REST/admin/scheduler): publiser
