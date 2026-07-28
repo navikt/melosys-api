@@ -13,10 +13,21 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.core.MethodParameter
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.mock.http.MockHttpInputMessage
+import org.springframework.validation.BeanPropertyBindingResult
+import org.springframework.validation.FieldError
+import org.springframework.web.HttpMediaTypeNotSupportedException
+import org.springframework.web.bind.MethodArgumentNotValidException
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.reactive.function.client.WebClientResponseException
+
+private const val UGYLDIG_FORESPØRSEL = "Ugyldig format på forespørselen"
 
 @ExtendWith(MockKExtension::class)
 class ExceptionMapperTest {
@@ -116,6 +127,60 @@ class ExceptionMapperTest {
 
         assertResponse(responseEntity, HttpStatus.INTERNAL_SERVER_ERROR, "Client error")
     }
+
+    @Test
+    fun `skal håndtere HttpMessageNotReadableException med sanert melding`() {
+        val exception = HttpMessageNotReadableException(
+            "JSON parse error: Cannot deserialize value of type `java.time.LocalDate` from String \"Invalid date\"",
+            MockHttpInputMessage(ByteArray(0))
+        )
+        assertResponse(exceptionMapper.håndter(exception, request), HttpStatus.BAD_REQUEST, UGYLDIG_FORESPØRSEL)
+    }
+
+    @Test
+    fun `skal håndtere MethodArgumentTypeMismatchException med sanert melding`() {
+        val exception = MethodArgumentTypeMismatchException("abc", Long::class.java, "behandlingID", dummyMetodeParameter(), null)
+        assertResponse(exceptionMapper.håndter(exception, request), HttpStatus.BAD_REQUEST, UGYLDIG_FORESPØRSEL)
+    }
+
+    @Test
+    fun `skal håndtere MethodArgumentNotValidException med sanert melding og bevarte feilkoder`() {
+        val bindingResult = BeanPropertyBindingResult(Any(), "unntaksperiodeRequestDto")
+        bindingResult.addError(FieldError("unntaksperiodeRequestDto", "periodeFom", "must not be null"))
+        val exception = MethodArgumentNotValidException(dummyMetodeParameter(), bindingResult)
+
+        assertResponse(
+            exceptionMapper.håndter(exception, request),
+            HttpStatus.BAD_REQUEST,
+            UGYLDIG_FORESPØRSEL,
+            listOf("periodeFom: must not be null")
+        )
+    }
+
+    @Test
+    fun `skal utlede status fra ErrorResponse i catch-all`() {
+        val exception = HttpMediaTypeNotSupportedException(
+            MediaType.TEXT_PLAIN,
+            listOf(MediaType.APPLICATION_JSON)
+        )
+        assertResponse(
+            exceptionMapper.håndter(exception as Exception, request),
+            HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+            UGYLDIG_FORESPØRSEL
+        )
+    }
+
+    @Test
+    fun `catch-all gir fortsatt 500 for exceptions uten ErrorResponse`() {
+        val melding = "Noe gikk galt"
+        assertResponse(exceptionMapper.håndter(RuntimeException(melding) as Exception, request), HttpStatus.INTERNAL_SERVER_ERROR, melding)
+    }
+
+    @Suppress("unused", "UNUSED_PARAMETER")
+    private fun dummyMetodeForBinding(argument: String) = Unit
+
+    private fun dummyMetodeParameter() =
+        MethodParameter(ExceptionMapperTest::class.java.getDeclaredMethod("dummyMetodeForBinding", String::class.java), 0)
 
     private fun assertResponse(
         responseEntity: ResponseEntity<Map<String, Any>>,

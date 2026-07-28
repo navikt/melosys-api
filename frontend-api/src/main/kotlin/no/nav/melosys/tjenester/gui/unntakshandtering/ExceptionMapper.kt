@@ -13,6 +13,7 @@ import org.slf4j.event.Level
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.web.ErrorResponse
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -57,16 +58,17 @@ class ExceptionMapper {
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun håndter(e: MethodArgumentNotValidException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {
         val feilmeldinger = e.bindingResult.fieldErrors.map { "${it.field}: ${it.defaultMessage}" }
-        return håndter(e, request, HttpStatus.BAD_REQUEST, Level.WARN, feilmeldinger)
+        // Meldingen fra Spring inneholder full metodesignatur og klassesti - kun feilkodene er trygge å eksponere
+        return håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, feilmeldinger, UGYLDIG_FORESPØRSEL)
     }
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun håndter(e: HttpMessageNotReadableException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> =
-        håndter(e, request, HttpStatus.BAD_REQUEST, Level.WARN, responsMelding = UGYLDIG_FORESPØRSEL)
+        håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, responsMelding = UGYLDIG_FORESPØRSEL)
 
     @ExceptionHandler(MethodArgumentTypeMismatchException::class)
     fun håndter(e: MethodArgumentTypeMismatchException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> =
-        håndter(e, request, HttpStatus.BAD_REQUEST, Level.WARN, responsMelding = UGYLDIG_FORESPØRSEL)
+        håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, responsMelding = UGYLDIG_FORESPØRSEL)
 
     @ExceptionHandler(WebClientResponseException::class)
     fun håndter(e: WebClientResponseException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {
@@ -90,8 +92,19 @@ class ExceptionMapper {
     }
 
     @ExceptionHandler(Exception::class)
-    fun håndter(e: Exception, request: HttpServletRequest): ResponseEntity<Map<String, Any>> =
-        håndter(e, request, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR)
+    fun håndter(e: Exception, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {
+        // Spring-exceptions som implementerer ErrorResponse bærer sin egen HTTP-status (415, 405, 400 osv.).
+        // Uten dette ville denne catch-allen gjort alle rene klientfeil om til 500.
+        val status = (e as? ErrorResponse)?.let { HttpStatus.resolve(it.statusCode.value()) } ?: HttpStatus.INTERNAL_SERVER_ERROR
+        val erKlientfeil = status.is4xxClientError
+        return håndter(
+            e,
+            request,
+            status,
+            if (erKlientfeil) Level.WARN else Level.ERROR,
+            responsMelding = if (erKlientfeil) UGYLDIG_FORESPØRSEL else null
+        )
+    }
 
     private fun håndter(
         e: Exception,
