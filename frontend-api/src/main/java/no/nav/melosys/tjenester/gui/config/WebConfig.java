@@ -1,6 +1,11 @@
 package no.nav.melosys.tjenester.gui.config;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.cfg.CoercionAction;
+import tools.jackson.databind.cfg.CoercionInputShape;
 import tools.jackson.module.kotlin.KotlinModule;
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdInterceptor;
@@ -32,6 +37,10 @@ public class WebConfig implements WebMvcConfigurer {
         return builder -> builder
             .addModule(new KotlinModule.Builder().build())
             .addModule(new MelosysModule(kodeverkService))
+            // Jackson tolker tall som epoch-day: {"periodeFom": 12345} ble stille til 2003-10-20.
+            // Avvis heller tall som dato, slik at klienten får 400 i stedet for en feil dato.
+            .withCoercionConfig(LocalDate.class, cfg -> cfg.setCoercion(CoercionInputShape.Integer, CoercionAction.Fail))
+            .withCoercionConfig(LocalDateTime.class, cfg -> cfg.setCoercion(CoercionInputShape.Integer, CoercionAction.Fail))
             .enable(MapperFeature.DEFAULT_VIEW_INCLUSION);
     }
 
