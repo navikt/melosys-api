@@ -12,9 +12,11 @@ import org.slf4j.MDC
 import org.slf4j.event.Level
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException
@@ -22,6 +24,8 @@ import org.springframework.web.servlet.resource.NoResourceFoundException
 import java.io.IOException
 
 private val log = KotlinLogging.logger { }
+
+private const val UGYLDIG_FORESPØRSEL = "Ugyldig format på forespørselen"
 
 @ControllerAdvice
 class ExceptionMapper {
@@ -56,6 +60,14 @@ class ExceptionMapper {
         return håndter(e, request, HttpStatus.BAD_REQUEST, Level.WARN, feilmeldinger)
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun håndter(e: HttpMessageNotReadableException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> =
+        håndter(e, request, HttpStatus.BAD_REQUEST, Level.WARN, responsMelding = UGYLDIG_FORESPØRSEL)
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException::class)
+    fun håndter(e: MethodArgumentTypeMismatchException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> =
+        håndter(e, request, HttpStatus.BAD_REQUEST, Level.WARN, responsMelding = UGYLDIG_FORESPØRSEL)
+
     @ExceptionHandler(WebClientResponseException::class)
     fun håndter(e: WebClientResponseException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {
         val feilmeldingFraRespons = hentMessageFraJsonStreng(e.responseBodyAsString)
@@ -86,7 +98,8 @@ class ExceptionMapper {
         request: HttpServletRequest,
         httpStatus: HttpStatus,
         loggnivå: Level,
-        begrunnelser: Collection<*>? = emptyList<Any>()
+        begrunnelser: Collection<*>? = emptyList<Any>(),
+        responsMelding: String? = null
     ): ResponseEntity<Map<String, Any>> {
         val message = e.message ?: e.javaClass.simpleName
         val errorMessage = buildString {
@@ -104,7 +117,7 @@ class ExceptionMapper {
         val body = mapOf(
             "status" to httpStatus.value(),
             "error" to httpStatus.reasonPhrase,
-            "message" to message,
+            "message" to (responsMelding ?: message),
             "correlationId" to MDC.get(MDCOperations.CORRELATION_ID)
         ) + if (!begrunnelser.isNullOrEmpty()) mapOf("feilkoder" to begrunnelser) else emptyMap<String, Any>()
 
