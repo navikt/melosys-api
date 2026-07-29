@@ -67,17 +67,25 @@ class TekstblokkService(
      * blokker samtidig. Enten lagres alle, eller ingen (én transaksjon).
      */
     @Transactional
-    fun opprettBulk(inputs: List<Input>): List<Tekstblokk> = inputs.map { input ->
-        val tekstblokk = Tekstblokk()
-        populerFraInput(tekstblokk, input)
-        tekstblokkRepository.save(tekstblokk)
+    fun opprettBulk(inputs: List<Input>): List<Tekstblokk> {
+        // Ett navneoppslag for hele bulken, ikke ett per blokk.
+        val endretAvNavn = hentNavnForInnloggetBruker()
+        return inputs.map { input ->
+            val tekstblokk = Tekstblokk()
+            populerFraInput(tekstblokk, input, endretAvNavn)
+            tekstblokkRepository.save(tekstblokk)
+        }
     }
 
-    private fun populerFraInput(tekstblokk: Tekstblokk, input: Input) {
+    private fun populerFraInput(
+        tekstblokk: Tekstblokk,
+        input: Input,
+        endretAvNavn: String? = hentNavnForInnloggetBruker(),
+    ) {
         tekstblokk.tittel = input.tittel.trim()
         tekstblokk.innhold = htmlSanitizer.saniter(input.innhold) ?: ""
         tekstblokk.type = input.type
-        tekstblokk.endretAvNavn = hentNavnForInnloggetBruker()
+        tekstblokk.endretAvNavn = endretAvNavn
         tekstblokk.tags.clear()
         tekstblokk.tags.addAll(normaliserTags(input.tags))
     }

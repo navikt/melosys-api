@@ -10,6 +10,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
+import io.mockk.verify
 import no.nav.melosys.domain.brev.tekstblokk.Tekstblokk
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
 import no.nav.melosys.repository.tekstblokk.TekstblokkRepository
@@ -132,6 +133,15 @@ class TekstblokkServiceTest {
         opprett()
 
         lagret.captured.endretAvNavn.shouldBeNull()
+    }
+
+    @Test
+    fun `slaar opp navn kun en gang for hele bulken`() {
+        val input = TekstblokkService.Input("Tittel", "<p>Innhold</p>", TekstblokkType.TEKSTBLOKK, null)
+
+        service.opprettBulk(List(20) { input })
+
+        verify(exactly = 1) { saksbehandlerService.finnNavnForIdent(IDENT) }
     }
 
     private companion object {
