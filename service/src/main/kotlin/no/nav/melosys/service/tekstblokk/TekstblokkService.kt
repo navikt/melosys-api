@@ -1,5 +1,6 @@
 package no.nav.melosys.service.tekstblokk
 
+import java.time.Instant
 import java.util.Locale
 
 import no.nav.melosys.domain.brev.tekstblokk.Tekstblokk
@@ -7,6 +8,9 @@ import no.nav.melosys.domain.brev.tekstblokk.TekstblokkOversikt
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.tekstblokk.TekstblokkRepository
+import no.nav.melosys.service.bruker.SaksbehandlerService
+import org.slf4j.LoggerFactory
+import org.springframework.data.domain.AuditorAware
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -14,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional
 class TekstblokkService(
     private val tekstblokkRepository: TekstblokkRepository,
     private val htmlSanitizer: TekstblokkHtmlSanitizer,
+    private val saksbehandlerService: SaksbehandlerService,
+    private val auditorAware: AuditorAware<String>,
 ) {
 
     data class Input(
@@ -35,26 +41,37 @@ class TekstblokkService(
     }
 
     @Transactional(readOnly = true)
-    fun hent(id: Long): Tekstblokk = tekstblokkRepository.findById(id)
+    fun hent(id: Long): Tekstblokk = tekstblokkRepository.findByIdAndSlettetDatoIsNull(id)
         .orElseThrow { IkkeFunnetException("Finner ikke tekstblokk med id $id") }
 
     @Transactional
     fun opprett(input: Input): Tekstblokk {
         val tekstblokk = Tekstblokk()
         populerFraInput(tekstblokk, input)
-        return tekstblokkRepository.save(tekstblokk)
+        return tekstblokkRepository.save(tekstblokk).also {
+            log.info("Opprettet {} med id {}: '{}'", it.type, it.id, it.tittel)
+        }
     }
 
     @Transactional
     fun oppdater(id: Long, input: Input): Tekstblokk {
         val tekstblokk = hent(id)
         populerFraInput(tekstblokk, input)
-        return tekstblokkRepository.save(tekstblokk)
+        return tekstblokkRepository.save(tekstblokk).also {
+            log.info("Endret {} med id {}: '{}'", it.type, it.id, it.tittel)
+        }
     }
 
+    /**
+     * Soft delete: raden blir liggende med slettetDato satt, og filtreres bort i
+     * spørringene. En admin som sletter ved en feil mister dermed ikke innholdet.
+     */
     @Transactional
     fun slett(id: Long) {
-        tekstblokkRepository.delete(hent(id))
+        val tekstblokk = hent(id)
+        tekstblokk.slettetDato = Instant.now()
+        tekstblokkRepository.save(tekstblokk)
+        log.info("Slettet {} med id {}: '{}'", tekstblokk.type, id, tekstblokk.tittel)
     }
 
     /**
@@ -62,28 +79,48 @@ class TekstblokkService(
      * blokker samtidig. Enten lagres alle, eller ingen (én transaksjon).
      */
     @Transactional
-    fun opprettBulk(inputs: List<Input>): List<Tekstblokk> = inputs.map { input ->
-        val tekstblokk = Tekstblokk()
-        populerFraInput(tekstblokk, input)
-        tekstblokkRepository.save(tekstblokk)
+    fun opprettBulk(inputs: List<Input>): List<Tekstblokk> {
+        // Ett navneoppslag for hele bulken, ikke ett per blokk.
+        val endretAvNavn = hentNavnForInnloggetBruker()
+        return inputs.map { input ->
+            val tekstblokk = Tekstblokk()
+            populerFraInput(tekstblokk, input, endretAvNavn)
+            tekstblokkRepository.save(tekstblokk)
+        }.also { log.info("Opprettet {} tekstblokker i bulk", it.size) }
     }
 
-    private fun populerFraInput(tekstblokk: Tekstblokk, input: Input) {
+    private fun populerFraInput(
+        tekstblokk: Tekstblokk,
+        input: Input,
+        endretAvNavn: String? = hentNavnForInnloggetBruker(),
+    ) {
         tekstblokk.tittel = input.tittel.trim()
         tekstblokk.innhold = htmlSanitizer.saniter(input.innhold) ?: ""
         tekstblokk.type = input.type
+        tekstblokk.endretAvNavn = endretAvNavn
         tekstblokk.tags.clear()
         tekstblokk.tags.addAll(normaliserTags(input.tags))
     }
 
-    private fun normaliserTags(tags: List<String>?): Set<String> =
+    // Et feilet navneoppslag skal ikke hindre lagring – frontend viser ident i stedet.
+    private fun hentNavnForInnloggetBruker(): String? = runCatching {
+        auditorAware.currentAuditor.orElse(null)?.let { saksbehandlerService.finnNavnForIdent(it).orElse(null) }
+    }.onFailure { log.warn("Kunne ikke hente navn for innlogget bruker", it) }.getOrNull()
+
+    private fun normaliserTags(tags: List<String>?): List<String> =
         tags
             ?.asSequence()
+            // Bevar bokstavstørrelse (f.eks. "USA-avtale") og tillat mellomrom i tags.
+            // Vi trimmer kun ytterkanter og slår sammen gjentatt blanktegn til ett.
+            ?.map { it.trim().replace(FLERE_BLANKTEGN, " ") }
             ?.filter { it.isNotBlank() }
-            // Mellomrom/bindestrek -> én bindestrek: holder tags som enkle slugs uten
-            // mellomrom, slik at de fungerer som ett ledd i frontends ord-baserte søk.
-            // "art - 15" blir "art-15", ikke "art---15".
-            ?.map { it.trim().lowercase(Locale.ROOT).replace(Regex("[\\s-]+"), "-").trim('-') }
-            ?.toSet()
-            ?: emptySet()
+            // Unngå nær-duplikater som kun skiller seg i bokstavstørrelse; behold første variant.
+            ?.distinctBy { it.lowercase(Locale.ROOT) }
+            ?.toList()
+            ?: emptyList()
+
+    private companion object {
+        private val log = LoggerFactory.getLogger(TekstblokkService::class.java)
+        private val FLERE_BLANKTEGN = Regex("\\s+")
+    }
 }
