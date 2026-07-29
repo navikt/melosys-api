@@ -48,14 +48,18 @@ class TekstblokkService(
     fun opprett(input: Input): Tekstblokk {
         val tekstblokk = Tekstblokk()
         populerFraInput(tekstblokk, input)
-        return tekstblokkRepository.save(tekstblokk)
+        return tekstblokkRepository.save(tekstblokk).also {
+            log.info("Opprettet {} med id {}: '{}'", it.type, it.id, it.tittel)
+        }
     }
 
     @Transactional
     fun oppdater(id: Long, input: Input): Tekstblokk {
         val tekstblokk = hent(id)
         populerFraInput(tekstblokk, input)
-        return tekstblokkRepository.save(tekstblokk)
+        return tekstblokkRepository.save(tekstblokk).also {
+            log.info("Endret {} med id {}: '{}'", it.type, it.id, it.tittel)
+        }
     }
 
     /**
@@ -67,6 +71,7 @@ class TekstblokkService(
         val tekstblokk = hent(id)
         tekstblokk.slettetDato = Instant.now()
         tekstblokkRepository.save(tekstblokk)
+        log.info("Slettet {} med id {}: '{}'", tekstblokk.type, id, tekstblokk.tittel)
     }
 
     /**
@@ -81,7 +86,7 @@ class TekstblokkService(
             val tekstblokk = Tekstblokk()
             populerFraInput(tekstblokk, input, endretAvNavn)
             tekstblokkRepository.save(tekstblokk)
-        }
+        }.also { log.info("Opprettet {} tekstblokker i bulk", it.size) }
     }
 
     private fun populerFraInput(
