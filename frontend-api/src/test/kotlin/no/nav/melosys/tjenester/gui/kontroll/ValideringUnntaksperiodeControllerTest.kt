@@ -103,6 +103,7 @@ class ValideringUnntaksperiodeControllerTest {
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message").value(UGYLDIG_FORESPØRSEL))
             .andExpect(jsonPath("$.feilkoder[0]").value(containsString("periodeTom")))
+            .also { assertIngenInterneDetaljer(it) }
 
         verify { aksesskontroll wasNot Called }
         verify { unntaksperiodeKontrollService wasNot Called }
@@ -135,6 +136,8 @@ class ValideringUnntaksperiodeControllerTest {
                 .content("""{"periodeFom": "2020-01-01", "periodeTom": "2021-05-15"}"""))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message").value(UGYLDIG_FORESPØRSEL))
+            // Springs egen melding her inneholder både typenavn og metodesignatur
+            .also { assertIngenInterneDetaljer(it) }
 
         verify { unntaksperiodeKontrollService wasNot Called }
     }
@@ -149,6 +152,8 @@ class ValideringUnntaksperiodeControllerTest {
         assertThat(body).doesNotContain("Invalid date")
         assertThat(body).doesNotContain("no.nav.melosys")
         assertThat(body).doesNotContain("org.springframework")
+        assertThat(body).doesNotContain("java.lang")
+        assertThat(body).doesNotContain("java.time")
     }
 
     companion object {

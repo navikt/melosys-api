@@ -166,7 +166,7 @@ class ExceptionMapperTest {
         assertResponse(
             exceptionMapper.håndter(exception as Exception, request),
             HttpStatus.UNSUPPORTED_MEDIA_TYPE,
-            UGYLDIG_FORESPØRSEL
+            HttpStatus.UNSUPPORTED_MEDIA_TYPE.reasonPhrase
         )
     }
 

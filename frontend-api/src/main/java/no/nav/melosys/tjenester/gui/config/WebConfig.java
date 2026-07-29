@@ -39,6 +39,10 @@ public class WebConfig implements WebMvcConfigurer {
             .addModule(new MelosysModule(kodeverkService))
             // Jackson tolker tall som epoch-day: {"periodeFom": 12345} ble stille til 2003-10-20.
             // Avvis heller tall som dato, slik at klienten får 400 i stedet for en feil dato.
+            // NB: denne bygger Boots delte ObjectMapper, så konfigurasjonen gjelder HELE appen -
+            // også Kafka-consumere/producere (se KafkaConfig) og WebClient-integrasjonene. Det er tilsiktet:
+            // en numerisk verdi i et datofelt er like galt uansett avsender, og bør feile synlig fremfor
+            // å bli en stille feil dato. Eksisterende epoch-millis fra EUX ligger i Long-felter og berøres ikke.
             .withCoercionConfig(LocalDate.class, cfg -> cfg.setCoercion(CoercionInputShape.Integer, CoercionAction.Fail))
             .withCoercionConfig(LocalDateTime.class, cfg -> cfg.setCoercion(CoercionInputShape.Integer, CoercionAction.Fail))
             .enable(MapperFeature.DEFAULT_VIEW_INCLUSION);

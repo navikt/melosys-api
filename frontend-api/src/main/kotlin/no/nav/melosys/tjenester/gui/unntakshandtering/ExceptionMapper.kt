@@ -57,18 +57,21 @@ class ExceptionMapper {
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun håndter(e: MethodArgumentNotValidException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {
-        val feilmeldinger = e.bindingResult.fieldErrors.map { "${it.field}: ${it.defaultMessage}" }
+        // Både felt-constraints (@NotNull på et felt) og klasse-constraints (globalErrors) må med,
+        // ellers ville en klasse-constraint gitt 400 helt uten informasjon til klienten.
+        val feilmeldinger = e.bindingResult.fieldErrors.map { "${it.field}: ${it.defaultMessage}" } +
+            e.bindingResult.globalErrors.map { "${it.objectName}: ${it.defaultMessage}" }
         // Meldingen fra Spring inneholder full metodesignatur og klassesti - kun feilkodene er trygge å eksponere
-        return håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, feilmeldinger, UGYLDIG_FORESPØRSEL)
+        return håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, feilmeldinger, UGYLDIG_FORESPØRSEL, loggStacktrace = false)
     }
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun håndter(e: HttpMessageNotReadableException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> =
-        håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, responsMelding = UGYLDIG_FORESPØRSEL)
+        håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, responsMelding = UGYLDIG_FORESPØRSEL, loggStacktrace = false)
 
     @ExceptionHandler(MethodArgumentTypeMismatchException::class)
     fun håndter(e: MethodArgumentTypeMismatchException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> =
-        håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, responsMelding = UGYLDIG_FORESPØRSEL)
+        håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, responsMelding = UGYLDIG_FORESPØRSEL, loggStacktrace = false)
 
     @ExceptionHandler(WebClientResponseException::class)
     fun håndter(e: WebClientResponseException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {
@@ -102,7 +105,11 @@ class ExceptionMapper {
             request,
             status,
             if (erKlientfeil) Level.WARN else Level.ERROR,
-            responsMelding = if (erKlientfeil) UGYLDIG_FORESPØRSEL else null
+            // Meldingen fra Spring kan inneholde klassesti og metodesignatur. Statusteksten ("Method Not Allowed",
+            // "Unsupported Media Type") sier hva som er galt uten å lekke internt, og er riktigere enn en fast
+            // formatmelding for statuser som 405 og 413.
+            responsMelding = if (erKlientfeil) status.reasonPhrase else null,
+            loggStacktrace = !erKlientfeil
         )
     }
 
@@ -112,7 +119,8 @@ class ExceptionMapper {
         httpStatus: HttpStatus,
         loggnivå: Level,
         begrunnelser: Collection<*>? = emptyList<Any>(),
-        responsMelding: String? = null
+        responsMelding: String? = null,
+        loggStacktrace: Boolean = true
     ): ResponseEntity<Map<String, Any>> {
         val message = e.message ?: e.javaClass.simpleName
         val errorMessage = buildString {
@@ -121,10 +129,21 @@ class ExceptionMapper {
             append("requestURI: ${request.requestURI}")
         }
 
-        when (loggnivå) {
-            Level.ERROR -> log.error(errorMessage, e)
-            Level.WARN -> log.warn(errorMessage, e)
-            else -> log.info(errorMessage, e)
+        // Klientfeil (ugyldig JSON, feil datoformat) skjer per tastetrykk fra frontend. Stacktrace der er ren
+        // logstøy uten diagnostisk verdi - selve meldingen sier alt vi trenger.
+        if (loggStacktrace) {
+            when (loggnivå) {
+                Level.ERROR -> log.error(errorMessage, e)
+                Level.WARN -> log.warn(errorMessage, e)
+                else -> log.info(errorMessage, e)
+            }
+        } else {
+            val utenStacktrace = "$errorMessage${System.lineSeparator()}exception: ${e.javaClass.simpleName}"
+            when (loggnivå) {
+                Level.ERROR -> log.error { utenStacktrace }
+                Level.WARN -> log.warn { utenStacktrace }
+                else -> log.info { utenStacktrace }
+            }
         }
 
         val body = mapOf(

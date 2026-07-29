@@ -31,7 +31,9 @@ public final class PeriodeRegler {
     }
 
     public static boolean periodeOver2ÅrOgEnDag(LocalDate fom, LocalDate tom) {
-        // Null fom fanges av feilIPeriode/harFeilIPeriode før regelsettet kjøres, så regelen skal ikke gi utslag her.
+        // Regelen kan ikke uttale seg om lengden på en periode uten startdato. Kallerne sikrer at fom er satt
+        // (@NotNull i controlleren, feilIPeriode/harFeilIPeriode i de øvrige kontrollsettene), så dette er en
+        // ren sikring mot NPE - ikke en validering av at fom finnes.
         if (fom == null) return false;
         if (tom == null) return true;
         return antallÅr(fom, tom) > 2 || antallÅr(fom, tom) >= 2 && antallDager(fom, tom) > 0;
