@@ -17,6 +17,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.web.bind.annotation.RestController;
@@ -60,6 +62,10 @@ public class WebConfig implements WebMvcConfigurer {
      * opprydding. Problemet vi løser er rent frontend-vendt, så rekkevidden holdes til MVC.
      * <p>
      * Mapperen bygges videre fra den delte, slik at moduler og features ikke kan drifte fra hverandre.
+     * <p>
+     * Vi fjerner samtidig de øvrige Jackson-formatene (YAML, XML, Smile, CBOR). De har egne mappere uten
+     * coercion-reglene, så {@code Content-Type: application/yaml} kunne ellers levere {@code periodeFom: 12345}
+     * rett forbi vernet. Frontend sender kun JSON, så alternativene er ren angrepsflate.
      */
     @Override
     public void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
@@ -68,6 +74,12 @@ public class WebConfig implements WebMvcConfigurer {
             .withCoercionConfig(LocalDateTime.class, cfg -> cfg.setCoercion(CoercionInputShape.Integer, CoercionAction.Fail))
             .build();
         builder.withJsonConverter(new JacksonJsonHttpMessageConverter(mvcMapper));
+        builder.configureMessageConvertersList(converters -> converters.removeIf(WebConfig::erAlternativtJacksonFormat));
+    }
+
+    private static boolean erAlternativtJacksonFormat(HttpMessageConverter<?> converter) {
+        return converter instanceof AbstractJacksonHttpMessageConverter
+            && !(converter instanceof JacksonJsonHttpMessageConverter);
     }
 
     @Bean

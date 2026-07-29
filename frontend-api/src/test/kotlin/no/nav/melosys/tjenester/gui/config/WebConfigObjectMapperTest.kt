@@ -10,16 +10,16 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldMatch
 import io.kotest.matchers.string.shouldStartWith
 import io.kotest.matchers.types.shouldBeInstanceOf
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.service.kodeverk.KodeverkService
 import no.nav.melosys.tjenester.gui.dto.BehandlingOppsummeringDto
 import org.junit.jupiter.api.Test
+import org.springframework.http.converter.AbstractJacksonHttpMessageConverter
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.http.converter.HttpMessageConverters
+import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import java.time.Instant
 import java.time.LocalDate
@@ -35,18 +35,20 @@ class WebConfigObjectMapperTest {
         builder.build()
     }
 
+    /** Converterne configureMessageConverters faktisk setter opp, bygget med Springs ekte builder. */
+    private val mvcConvertere: List<HttpMessageConverter<*>> = run {
+        val builder = HttpMessageConverters.forServer().registerDefaults()
+        webConfig.configureMessageConverters(builder)
+        builder.build().toList()
+    }
+
     /**
      * Mapperen configureMessageConverters bygger. NB: basen her er bygget kun av vår egen customizer, ikke av
      * Boot, så denne verifiserer coercion-reglene og at rebuild() bevarer basen - ikke hele produksjonskjeden.
      * Den ekte kjeden er dekket ende-til-ende av @WebMvcTest-en i ValideringUnntaksperiodeControllerTest.
      */
-    private val mvcMapper: JsonMapper = run {
-        val converter = slot<HttpMessageConverter<*>>()
-        val builder = mockk<HttpMessageConverters.ServerBuilder>()
-        every { builder.withJsonConverter(capture(converter)) } returns builder
-        webConfig.configureMessageConverters(builder)
-        (converter.captured as JacksonJsonHttpMessageConverter).mapper
-    }
+    private val mvcMapper: JsonMapper =
+        mvcConvertere.filterIsInstance<JacksonJsonHttpMessageConverter>().single().mapper
 
     @Test
     fun `objectMapper should be a JsonMapper instance`() {
@@ -140,6 +142,16 @@ class WebConfigObjectMapperTest {
         mvcMapper.readValue("""{"dato": "2025-01-15"}""", DatoDto::class.java).dato shouldBe LocalDate.of(2025, 1, 15)
         mvcMapper.readValue("""{"tidspunkt": "2025-01-15T10:30:00"}""", TidspunktDto::class.java)
             .tidspunkt shouldBe LocalDateTime.of(2025, 1, 15, 10, 30, 0)
+    }
+
+    @Test
+    fun `configureMessageConverters skal fjerne Jackson-convertere for andre formater enn JSON`() {
+        // De har egne mappere uten coercion-reglene, og ville dermed vært en vei rundt datovernet
+        mvcConvertere.filterIsInstance<AbstractJacksonHttpMessageConverter<*>>()
+            .map { it::class.java } shouldBe listOf(JacksonJsonHttpMessageConverter::class.java)
+        // Ikke-Jackson-converterne (String, Resource, ByteArray) skal fortsatt være der - PDF-nedlasting
+        // og lignende avhenger av dem
+        mvcConvertere.any { it is StringHttpMessageConverter } shouldBe true
     }
 
     @Test

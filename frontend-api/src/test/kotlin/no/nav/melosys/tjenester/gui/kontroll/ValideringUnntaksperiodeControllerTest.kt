@@ -122,6 +122,18 @@ class ValideringUnntaksperiodeControllerTest {
     }
 
     @Test
+    fun `skal ikke kunne omgå datovernet ved å sende YAML i stedet for JSON`() {
+        // YAML-converteren har egen mapper uten coercion-reglene. Uten at den er fjernet ville dette gitt 204
+        // og kalt tjenesten med den stille feiltolkede datoen 2003-10-20.
+        mockMvc.perform(post("$BASE_URL/{behandlingID}/unntaksperiode", 22L)
+                .contentType(MediaType.parseMediaType("application/yaml"))
+                .content("periodeFom: 12345\nperiodeTom: 2021-05-15\n"))
+            .andExpect(status().isUnsupportedMediaType())
+
+        verify { unntaksperiodeKontrollService wasNot Called }
+    }
+
+    @Test
     fun `skal gi 415 med Accept-header når Content-Type ikke er JSON`() {
         mockMvc.perform(post("$BASE_URL/{behandlingID}/unntaksperiode", 22L)
                 .contentType(MediaType.TEXT_PLAIN)
