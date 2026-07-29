@@ -8,7 +8,7 @@ import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
 import no.nav.melosys.service.tekstblokk.TekstblokkService
 
 /**
- * Body for POST og PUT. Tags lagres normalisert (lowercase + trim) på server.
+ * Body for POST og PUT. Tags trimmes på server, men beholder bokstavstørrelse.
  */
 data class TekstblokkRequestDto(
     @field:NotBlank @field:Size(max = 200) val tittel: String,
