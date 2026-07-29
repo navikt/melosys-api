@@ -23,11 +23,10 @@ open class AzureAdClient(
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .bodyToMono<AzureAdGraphResponseDTO>()
-            .mapNotNull {
-                if (!it.value.isEmpty()) {
-                    val azureUser = it.value[0]
-                    "${azureUser.givenName} ${azureUser.surname}"
-                } else null
+            .mapNotNull { response ->
+                response.value.firstOrNull()
+                    ?.let { listOfNotNull(it.givenName, it.surname).joinToString(" ") }
+                    ?.ifBlank { null }
             }
             .block()
     }
