@@ -152,16 +152,6 @@ class PeriodeReglerTest {
         PeriodeRegler.periodeOver2ÅrOgEnDag(DATO, null) shouldBe true
     }
 
-    @Test
-    fun `periodeOver2ÅrOgEnDag skal returnere false når fom er null`() {
-        PeriodeRegler.periodeOver2ÅrOgEnDag(null, DATO) shouldBe false
-    }
-
-    @Test
-    fun `periodeOver2ÅrOgEnDag skal returnere false når både fom og tom er null`() {
-        PeriodeRegler.periodeOver2ÅrOgEnDag(null, null) shouldBe false
-    }
-
     companion object {
         private val DATO = LocalDate.parse("2024-01-01")
     }

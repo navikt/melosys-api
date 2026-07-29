@@ -98,17 +98,18 @@ class ExceptionMapper {
     fun håndter(e: Exception, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {
         // Spring-exceptions som implementerer ErrorResponse bærer sin egen HTTP-status (415, 405, 400 osv.).
         // Uten dette ville denne catch-allen gjort alle rene klientfeil om til 500.
-        val status = (e as? ErrorResponse)?.let { HttpStatus.resolve(it.statusCode.value()) } ?: HttpStatus.INTERNAL_SERVER_ERROR
+        val errorResponse = e as? ErrorResponse
+        val status = errorResponse?.let { HttpStatus.resolve(it.statusCode.value()) } ?: HttpStatus.INTERNAL_SERVER_ERROR
         val erKlientfeil = status.is4xxClientError
         return håndter(
             e,
             request,
             status,
             if (erKlientfeil) Level.WARN else Level.ERROR,
-            // Meldingen fra Spring kan inneholde klassesti og metodesignatur. Statusteksten ("Method Not Allowed",
-            // "Unsupported Media Type") sier hva som er galt uten å lekke internt, og er riktigere enn en fast
-            // formatmelding for statuser som 405 og 413.
-            responsMelding = if (erKlientfeil) status.reasonPhrase else null,
+            // e.message kan inneholde klassesti og metodesignatur, men ProblemDetail-teksten fra Spring er laget
+            // for å vises til klienten ("Required parameter 'x' is not present."). Den er både trygg og mer
+            // presis enn en fast melding, så vi bruker den når den finnes.
+            responsMelding = if (erKlientfeil) errorResponse?.body?.detail ?: status.reasonPhrase else null,
             loggStacktrace = !erKlientfeil
         )
     }

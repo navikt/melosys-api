@@ -22,6 +22,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.mock.http.MockHttpInputMessage
 import org.springframework.validation.BeanPropertyBindingResult
 import org.springframework.validation.FieldError
+import org.springframework.validation.ObjectError
 import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
@@ -158,15 +159,31 @@ class ExceptionMapperTest {
     }
 
     @Test
-    fun `skal utlede status fra ErrorResponse i catch-all`() {
+    fun `skal ta med klasse-constraints fra globalErrors i feilkoder`() {
+        val bindingResult = BeanPropertyBindingResult(Any(), "unntaksperiodeRequestDto")
+        bindingResult.addError(ObjectError("unntaksperiodeRequestDto", "periodeFom må være før periodeTom"))
+        val exception = MethodArgumentNotValidException(dummyMetodeParameter(), bindingResult)
+
+        assertResponse(
+            exceptionMapper.håndter(exception, request),
+            HttpStatus.BAD_REQUEST,
+            UGYLDIG_FORESPØRSEL,
+            listOf("unntaksperiodeRequestDto: periodeFom må være før periodeTom")
+        )
+    }
+
+    @Test
+    fun `skal utlede status og klientvennlig melding fra ErrorResponse i catch-all`() {
         val exception = HttpMediaTypeNotSupportedException(
             MediaType.TEXT_PLAIN,
             listOf(MediaType.APPLICATION_JSON)
         )
+        // ProblemDetail-teksten fra Spring er laget for klienten og sier noe konkret, i motsetning til
+        // statusteksten "Unsupported Media Type"
         assertResponse(
             exceptionMapper.håndter(exception as Exception, request),
             HttpStatus.UNSUPPORTED_MEDIA_TYPE,
-            HttpStatus.UNSUPPORTED_MEDIA_TYPE.reasonPhrase
+            exception.body.detail!!
         )
     }
 

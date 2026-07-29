@@ -1,8 +1,10 @@
 package no.nav.melosys.tjenester.gui.config
 
+import tools.jackson.databind.DatabindException
 import tools.jackson.databind.DeserializationFeature
 import tools.jackson.databind.MapperFeature
 import tools.jackson.databind.json.JsonMapper
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldMatch
@@ -16,6 +18,7 @@ import no.nav.melosys.tjenester.gui.dto.BehandlingOppsummeringDto
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class WebConfigObjectMapperTest {
 
@@ -99,4 +102,29 @@ class WebConfigObjectMapperTest {
         node["term"] shouldNotBe null
         node["kode"].asText() shouldBe Sakstyper.EU_EOS.kode
     }
+
+    @Test
+    fun `objectMapper skal avvise tall som LocalDate i stedet for å tolke det som epoch-day`() {
+        shouldThrow<DatabindException> {
+            objectMapper.readValue("""{"dato": 12345}""", DatoDto::class.java)
+        }
+    }
+
+    @Test
+    fun `objectMapper skal avvise tall som LocalDateTime i stedet for å tolke det som timestamp`() {
+        shouldThrow<DatabindException> {
+            objectMapper.readValue("""{"tidspunkt": 12345}""", TidspunktDto::class.java)
+        }
+    }
+
+    @Test
+    fun `objectMapper skal fortsatt lese datoer på ISO-format`() {
+        objectMapper.readValue("""{"dato": "2025-01-15"}""", DatoDto::class.java).dato shouldBe LocalDate.of(2025, 1, 15)
+        objectMapper.readValue("""{"tidspunkt": "2025-01-15T10:30:00"}""", TidspunktDto::class.java)
+            .tidspunkt shouldBe LocalDateTime.of(2025, 1, 15, 10, 30, 0)
+    }
+
+    data class DatoDto(val dato: LocalDate?)
+
+    data class TidspunktDto(val tidspunkt: LocalDateTime?)
 }
