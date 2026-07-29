@@ -164,9 +164,10 @@ class ExceptionMapper {
     }
 
     // HttpStatus dekker kun standardkodene. Et ukjent statusnummer skal fortsatt beholde sin egen status
-    // i stedet for å degraderes til 500, så teksten faller tilbake til statusnummeret.
+    // i stedet for å degraderes til 500, men error-feltet må gi en lesbar tekst og ikke et tall.
     private fun statustekst(status: HttpStatusCode): String =
-        HttpStatus.resolve(status.value())?.reasonPhrase ?: status.value().toString()
+        HttpStatus.resolve(status.value())?.reasonPhrase
+            ?: if (status.is4xxClientError) "Client Error" else "Server Error"
 
     private fun hentMessageFraJsonStreng(jsonString: String): String? =
         runCatching {

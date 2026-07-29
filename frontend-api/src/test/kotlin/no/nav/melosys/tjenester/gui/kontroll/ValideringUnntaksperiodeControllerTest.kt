@@ -13,10 +13,12 @@ import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.LocalDate
@@ -120,11 +122,14 @@ class ValideringUnntaksperiodeControllerTest {
     }
 
     @Test
-    fun `skal gi 415 når Content-Type ikke er JSON`() {
+    fun `skal gi 415 med Accept-header når Content-Type ikke er JSON`() {
         mockMvc.perform(post("$BASE_URL/{behandlingID}/unntaksperiode", 22L)
                 .contentType(MediaType.TEXT_PLAIN)
                 .content("""{"periodeFom": "2020-01-01", "periodeTom": "2021-05-15"}"""))
             .andExpect(status().isUnsupportedMediaType())
+            // RFC 9110: 415 skal si hvilke formater som støttes. Headeren kommer fra ErrorResponse
+            .andExpect(header().string(HttpHeaders.ACCEPT, containsString(MediaType.APPLICATION_JSON_VALUE)))
+            .also { assertIngenInterneDetaljer(it) }
 
         verify { unntaksperiodeKontrollService wasNot Called }
     }

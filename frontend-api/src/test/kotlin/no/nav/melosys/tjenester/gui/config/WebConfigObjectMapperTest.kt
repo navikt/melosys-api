@@ -35,7 +35,11 @@ class WebConfigObjectMapperTest {
         builder.build()
     }
 
-    /** Mapperen MVC faktisk bruker - den delte, utvidet med coercion-reglene i configureMessageConverters. */
+    /**
+     * Mapperen configureMessageConverters bygger. NB: basen her er bygget kun av vår egen customizer, ikke av
+     * Boot, så denne verifiserer coercion-reglene og at rebuild() bevarer basen - ikke hele produksjonskjeden.
+     * Den ekte kjeden er dekket ende-til-ende av @WebMvcTest-en i ValideringUnntaksperiodeControllerTest.
+     */
     private val mvcMapper: JsonMapper = run {
         val converter = slot<HttpMessageConverter<*>>()
         val builder = mockk<HttpMessageConverters.ServerBuilder>()
@@ -139,8 +143,15 @@ class WebConfigObjectMapperTest {
     }
 
     @Test
-    fun `mvcMapper skal arve moduler og features fra den delte mapperen`() {
-        // Bygges videre fra den delte mapperen, så MelosysModule og DEFAULT_VIEW_INCLUSION skal følge med
+    fun `mvcMapper skal fortsatt godta tall som Instant, siden epoch-tid er en gyldig representasjon der`() {
+        // Til forskjell fra epoch-day for LocalDate er et tall for Instant veldefinert. Å avvise det ville
+        // brutt gyldige requester i stedet for å fange en feil.
+        mvcMapper.readValue("""{"tidspunkt": 12345}""", InstantDto::class.java).tidspunkt shouldNotBe null
+    }
+
+    @Test
+    fun `mvcMapper skal beholde konfigurasjonen fra mapperen den bygges videre fra`() {
+        // rebuild() skal bevare moduler og features, slik at MVC ikke drifter fra resten av appen
         mvcMapper.isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION) shouldBe true
         mvcMapper.writeValueAsString(InnvilgelsesResultat.INNVILGET) shouldBe "\"${InnvilgelsesResultat.INNVILGET.kode}\""
     }
@@ -153,6 +164,8 @@ class WebConfigObjectMapperTest {
     }
 
     data class DatoDto(val dato: LocalDate?)
+
+    data class InstantDto(val tidspunkt: Instant?)
 
     data class TidspunktDto(val tidspunkt: LocalDateTime?)
 }

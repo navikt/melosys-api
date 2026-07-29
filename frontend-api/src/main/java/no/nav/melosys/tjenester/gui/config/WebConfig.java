@@ -50,6 +50,10 @@ public class WebConfig implements WebMvcConfigurer {
      * Jackson tolker tall som epoch-day: {@code {"periodeFom": 12345}} ble stille til 2003-10-20.
      * Vi avviser heller tall som dato, slik at klienten får 400 i stedet for en feil dato.
      * <p>
+     * Gjelder bevisst kun LocalDate/LocalDateTime. For Instant og OffsetDateTime er et tall epoch-tid, altså
+     * en veldefinert og vanlig representasjon - der ville en avvisning brutt gyldige requester i stedet for
+     * å fange en feil. (De går uansett utenom coercion-mekanismen, verifisert.)
+     * <p>
      * Konfigurasjonen ligger bevisst på HTTP-converteren og ikke på {@code JsonMapperBuilderCustomizer}:
      * den customizeren bygger Boots delte ObjectMapper, som også brukes av Kafka-consumerne (se KafkaConfig).
      * Der ville en deserialiseringsfeil stoppet containeren via SkippableKafkaErrorHandler og krevd manuell
