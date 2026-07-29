@@ -1,5 +1,6 @@
 package no.nav.melosys.service.tekstblokk
 
+import java.time.Instant
 import java.util.Locale
 
 import no.nav.melosys.domain.brev.tekstblokk.Tekstblokk
@@ -40,7 +41,7 @@ class TekstblokkService(
     }
 
     @Transactional(readOnly = true)
-    fun hent(id: Long): Tekstblokk = tekstblokkRepository.findById(id)
+    fun hent(id: Long): Tekstblokk = tekstblokkRepository.findByIdAndSlettetDatoIsNull(id)
         .orElseThrow { IkkeFunnetException("Finner ikke tekstblokk med id $id") }
 
     @Transactional
@@ -57,9 +58,15 @@ class TekstblokkService(
         return tekstblokkRepository.save(tekstblokk)
     }
 
+    /**
+     * Soft delete: raden blir liggende med slettetDato satt, og filtreres bort i
+     * spørringene. En admin som sletter ved en feil mister dermed ikke innholdet.
+     */
     @Transactional
     fun slett(id: Long) {
-        tekstblokkRepository.delete(hent(id))
+        val tekstblokk = hent(id)
+        tekstblokk.slettetDato = Instant.now()
+        tekstblokkRepository.save(tekstblokk)
     }
 
     /**

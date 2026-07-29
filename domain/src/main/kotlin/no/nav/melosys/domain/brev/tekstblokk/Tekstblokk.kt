@@ -14,6 +14,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.Lob
 import jakarta.persistence.Table
+import java.time.Instant
 
 import no.nav.melosys.domain.RegistreringsInfo
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -40,6 +41,10 @@ class Tekstblokk(
     // Denormalisert fra Azure AD ved lagring, så listevisningen slipper oppslag per rad.
     @Column(name = "endret_av_navn")
     var endretAvNavn: String? = null,
+
+    // Null = aktiv. Se V164 – sletting skjuler raden i stedet for å fjerne den.
+    @Column(name = "slettet_dato")
+    var slettetDato: Instant? = null,
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "TEKSTBLOKK_TAG", joinColumns = [JoinColumn(name = "tekstblokk_id")])

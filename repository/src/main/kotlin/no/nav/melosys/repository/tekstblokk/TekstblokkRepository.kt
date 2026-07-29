@@ -17,6 +17,7 @@ interface TekstblokkRepository : JpaRepository<Tekstblokk, Long> {
         SELECT new no.nav.melosys.domain.brev.tekstblokk.TekstblokkOversikt(t.id, t.tittel, t.innhold, t.type, t.endretDato, t.endretAv, t.endretAvNavn)
         FROM Tekstblokk t
         WHERE (:type IS NULL OR t.type = :type)
+          AND t.slettetDato IS NULL
         ORDER BY t.tittel ASC
         """,
     )
@@ -26,5 +27,5 @@ interface TekstblokkRepository : JpaRepository<Tekstblokk, Long> {
     fun finnTagsForIds(@Param("ids") ids: Collection<Long>): List<Array<Any>>
 
     @EntityGraph(attributePaths = ["tags"])
-    override fun findById(id: Long): Optional<Tekstblokk>
+    fun findByIdAndSlettetDatoIsNull(id: Long): Optional<Tekstblokk>
 }

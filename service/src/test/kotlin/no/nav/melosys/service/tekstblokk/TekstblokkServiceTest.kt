@@ -1,9 +1,11 @@
 package no.nav.melosys.service.tekstblokk
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.CapturingSlot
 import io.mockk.every
@@ -13,6 +15,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.brev.tekstblokk.Tekstblokk
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
+import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.tekstblokk.TekstblokkRepository
 import no.nav.melosys.service.bruker.SaksbehandlerService
 import org.junit.jupiter.api.BeforeEach
@@ -142,6 +145,33 @@ class TekstblokkServiceTest {
         service.opprettBulk(List(20) { input })
 
         verify(exactly = 1) { saksbehandlerService.finnNavnForIdent(IDENT) }
+    }
+
+    @Test
+    fun `sletting markerer raden i stedet for aa fjerne den`() {
+        val tekstblokk = Tekstblokk(id = 1)
+        every { tekstblokkRepository.findByIdAndSlettetDatoIsNull(1) } returns Optional.of(tekstblokk)
+
+        service.slett(1)
+
+        lagret.captured.slettetDato.shouldNotBeNull()
+        verify(exactly = 0) { tekstblokkRepository.delete(any()) }
+    }
+
+    @Test
+    fun `sletting av en allerede slettet blokk gir IkkeFunnet`() {
+        every { tekstblokkRepository.findByIdAndSlettetDatoIsNull(1) } returns Optional.empty()
+
+        shouldThrow<IkkeFunnetException> { service.slett(1) }
+    }
+
+    @Test
+    fun `oppdatering av en slettet blokk gir IkkeFunnet`() {
+        every { tekstblokkRepository.findByIdAndSlettetDatoIsNull(1) } returns Optional.empty()
+
+        shouldThrow<IkkeFunnetException> {
+            service.oppdater(1, TekstblokkService.Input("Tittel", "<p>Tekst</p>", TekstblokkType.TEKSTBLOKK, null))
+        }
     }
 
     private companion object {
