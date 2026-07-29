@@ -3,6 +3,7 @@ package no.nav.melosys.service.tekstblokk
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.CapturingSlot
 import io.mockk.every
@@ -12,9 +13,12 @@ import io.mockk.slot
 import no.nav.melosys.domain.brev.tekstblokk.Tekstblokk
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
 import no.nav.melosys.repository.tekstblokk.TekstblokkRepository
+import no.nav.melosys.service.bruker.SaksbehandlerService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.data.domain.AuditorAware
+import java.util.Optional
 
 @ExtendWith(MockKExtension::class)
 class TekstblokkServiceTest {
@@ -22,25 +26,36 @@ class TekstblokkServiceTest {
     @MockK
     private lateinit var tekstblokkRepository: TekstblokkRepository
 
+    @MockK
+    private lateinit var saksbehandlerService: SaksbehandlerService
+
+    @MockK
+    private lateinit var auditorAware: AuditorAware<String>
+
     private lateinit var service: TekstblokkService
     private lateinit var lagret: CapturingSlot<Tekstblokk>
 
     @BeforeEach
     fun setup() {
-        service = TekstblokkService(tekstblokkRepository, TekstblokkHtmlSanitizer())
+        service = TekstblokkService(tekstblokkRepository, TekstblokkHtmlSanitizer(), saksbehandlerService, auditorAware)
         lagret = slot()
         every { tekstblokkRepository.save(capture(lagret)) } answers { lagret.captured }
+        every { auditorAware.currentAuditor } returns Optional.of(IDENT)
+        every { saksbehandlerService.finnNavnForIdent(IDENT) } returns Optional.of(NAVN)
     }
 
-    private fun opprettMedTags(vararg tags: String): List<String> {
+    private fun opprett(tittel: String = "Tittel", innhold: String = "<p>Innhold</p>", tags: List<String>? = null) =
         service.opprett(
             TekstblokkService.Input(
-                tittel = "Tittel",
-                innhold = "<p>Innhold</p>",
+                tittel = tittel,
+                innhold = innhold,
                 type = TekstblokkType.TEKSTBLOKK,
-                tags = tags.toList(),
+                tags = tags,
             ),
         )
+
+    private fun opprettMedTags(vararg tags: String): List<String> {
+        opprett(tags = tags.toList())
         return lagret.captured.tags.toList()
     }
 
@@ -72,30 +87,55 @@ class TekstblokkServiceTest {
 
     @Test
     fun `tags kan vaere null`() {
-        service.opprett(
-            TekstblokkService.Input(
-                tittel = "Tittel",
-                innhold = "<p>Innhold</p>",
-                type = TekstblokkType.TEKSTBLOKK,
-                tags = null,
-            ),
-        )
+        opprett()
 
         lagret.captured.tags.shouldBeEmpty()
     }
 
     @Test
     fun `sanitererer innhold ved lagring`() {
-        service.opprett(
-            TekstblokkService.Input(
-                tittel = "  Tittel med mellomrom  ",
-                innhold = "<p>Tekst</p><script>alert('x')</script>",
-                type = TekstblokkType.TEKSTBLOKK,
-                tags = null,
-            ),
-        )
+        opprett(tittel = "  Tittel med mellomrom  ", innhold = "<p>Tekst</p><script>alert('x')</script>")
 
         lagret.captured.tittel shouldBe "Tittel med mellomrom"
         lagret.captured.innhold shouldBe "<p>Tekst</p>"
+    }
+
+    @Test
+    fun `lagrer navnet til den som endrer`() {
+        opprett()
+
+        lagret.captured.endretAvNavn shouldBe NAVN
+    }
+
+    @Test
+    fun `lagrer uten navn naar identen ikke har treff`() {
+        every { saksbehandlerService.finnNavnForIdent(IDENT) } returns Optional.empty()
+
+        opprett()
+
+        lagret.captured.endretAvNavn.shouldBeNull()
+    }
+
+    @Test
+    fun `lagrer uten navn naar oppslaget feiler`() {
+        every { saksbehandlerService.finnNavnForIdent(IDENT) } throws RuntimeException("Azure AD er nede")
+
+        opprett()
+
+        lagret.captured.endretAvNavn.shouldBeNull()
+    }
+
+    @Test
+    fun `lagrer uten navn naar ingen bruker er innlogget`() {
+        every { auditorAware.currentAuditor } returns Optional.empty()
+
+        opprett()
+
+        lagret.captured.endretAvNavn.shouldBeNull()
+    }
+
+    private companion object {
+        const val IDENT = "A146170"
+        const val NAVN = "Margareth Bjørgum"
     }
 }

@@ -7,6 +7,9 @@ import no.nav.melosys.domain.brev.tekstblokk.TekstblokkOversikt
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.tekstblokk.TekstblokkRepository
+import no.nav.melosys.service.bruker.SaksbehandlerService
+import org.slf4j.LoggerFactory
+import org.springframework.data.domain.AuditorAware
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -14,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional
 class TekstblokkService(
     private val tekstblokkRepository: TekstblokkRepository,
     private val htmlSanitizer: TekstblokkHtmlSanitizer,
+    private val saksbehandlerService: SaksbehandlerService,
+    private val auditorAware: AuditorAware<String>,
 ) {
 
     data class Input(
@@ -72,9 +77,15 @@ class TekstblokkService(
         tekstblokk.tittel = input.tittel.trim()
         tekstblokk.innhold = htmlSanitizer.saniter(input.innhold) ?: ""
         tekstblokk.type = input.type
+        tekstblokk.endretAvNavn = hentNavnForInnloggetBruker()
         tekstblokk.tags.clear()
         tekstblokk.tags.addAll(normaliserTags(input.tags))
     }
+
+    // Et feilet navneoppslag skal ikke hindre lagring – frontend viser ident i stedet.
+    private fun hentNavnForInnloggetBruker(): String? = runCatching {
+        auditorAware.currentAuditor.orElse(null)?.let { saksbehandlerService.finnNavnForIdent(it).orElse(null) }
+    }.onFailure { log.warn("Kunne ikke hente navn for innlogget bruker", it) }.getOrNull()
 
     private fun normaliserTags(tags: List<String>?): List<String> =
         tags
@@ -89,6 +100,7 @@ class TekstblokkService(
             ?: emptyList()
 
     private companion object {
+        private val log = LoggerFactory.getLogger(TekstblokkService::class.java)
         private val FLERE_BLANKTEGN = Regex("\\s+")
     }
 }

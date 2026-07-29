@@ -37,6 +37,10 @@ class Tekstblokk(
     @Column(name = "type", nullable = false)
     var type: TekstblokkType = TekstblokkType.TEKSTBLOKK,
 
+    // Denormalisert fra Azure AD ved lagring, så listevisningen slipper oppslag per rad.
+    @Column(name = "endret_av_navn")
+    var endretAvNavn: String? = null,
+
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "TEKSTBLOKK_TAG", joinColumns = [JoinColumn(name = "tekstblokk_id")])
     @Column(name = "tag", nullable = false)
