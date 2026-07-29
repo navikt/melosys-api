@@ -10,12 +10,17 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldMatch
 import io.kotest.matchers.string.shouldStartWith
 import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.service.kodeverk.KodeverkService
 import no.nav.melosys.tjenester.gui.dto.BehandlingOppsummeringDto
 import org.junit.jupiter.api.Test
+import org.springframework.http.converter.HttpMessageConverter
+import org.springframework.http.converter.HttpMessageConverters
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -23,11 +28,20 @@ import java.time.LocalDateTime
 class WebConfigObjectMapperTest {
 
     private val kodeverkService = mockk<KodeverkService>(relaxed = true)
-    private val webConfig = WebConfig(mockk())
+    private val webConfig = WebConfig(mockk()) { objectMapper }
     private val objectMapper: JsonMapper = run {
         val builder = JsonMapper.builder()
         webConfig.melosysJsonMapperCustomizer(kodeverkService).customize(builder)
         builder.build()
+    }
+
+    /** Mapperen MVC faktisk bruker - den delte, utvidet med coercion-reglene i configureMessageConverters. */
+    private val mvcMapper: JsonMapper = run {
+        val converter = slot<HttpMessageConverter<*>>()
+        val builder = mockk<HttpMessageConverters.ServerBuilder>()
+        every { builder.withJsonConverter(capture(converter)) } returns builder
+        webConfig.configureMessageConverters(builder)
+        (converter.captured as JacksonJsonHttpMessageConverter).mapper
     }
 
     @Test
@@ -104,24 +118,38 @@ class WebConfigObjectMapperTest {
     }
 
     @Test
-    fun `objectMapper skal avvise tall som LocalDate i stedet for å tolke det som epoch-day`() {
+    fun `mvcMapper skal avvise tall som LocalDate i stedet for å tolke det som epoch-day`() {
         shouldThrow<DatabindException> {
-            objectMapper.readValue("""{"dato": 12345}""", DatoDto::class.java)
+            mvcMapper.readValue("""{"dato": 12345}""", DatoDto::class.java)
         }
     }
 
     @Test
-    fun `objectMapper skal avvise tall som LocalDateTime i stedet for å tolke det som timestamp`() {
+    fun `mvcMapper skal avvise tall som LocalDateTime i stedet for å tolke det som timestamp`() {
         shouldThrow<DatabindException> {
-            objectMapper.readValue("""{"tidspunkt": 12345}""", TidspunktDto::class.java)
+            mvcMapper.readValue("""{"tidspunkt": 12345}""", TidspunktDto::class.java)
         }
     }
 
     @Test
-    fun `objectMapper skal fortsatt lese datoer på ISO-format`() {
-        objectMapper.readValue("""{"dato": "2025-01-15"}""", DatoDto::class.java).dato shouldBe LocalDate.of(2025, 1, 15)
-        objectMapper.readValue("""{"tidspunkt": "2025-01-15T10:30:00"}""", TidspunktDto::class.java)
+    fun `mvcMapper skal fortsatt lese datoer på ISO-format`() {
+        mvcMapper.readValue("""{"dato": "2025-01-15"}""", DatoDto::class.java).dato shouldBe LocalDate.of(2025, 1, 15)
+        mvcMapper.readValue("""{"tidspunkt": "2025-01-15T10:30:00"}""", TidspunktDto::class.java)
             .tidspunkt shouldBe LocalDateTime.of(2025, 1, 15, 10, 30, 0)
+    }
+
+    @Test
+    fun `mvcMapper skal arve moduler og features fra den delte mapperen`() {
+        // Bygges videre fra den delte mapperen, så MelosysModule og DEFAULT_VIEW_INCLUSION skal følge med
+        mvcMapper.isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION) shouldBe true
+        mvcMapper.writeValueAsString(InnvilgelsesResultat.INNVILGET) shouldBe "\"${InnvilgelsesResultat.INNVILGET.kode}\""
+    }
+
+    @Test
+    fun `coercion-reglene skal IKKE gjelde den delte mapperen som Kafka og WebClient bruker`() {
+        // Kafka-consumerne deler denne mapperen, og en deserialiseringsfeil der stopper containeren.
+        // Coercion-reglene hører derfor kun hjemme på MVC-mapperen.
+        objectMapper.readValue("""{"dato": 12345}""", DatoDto::class.java).dato shouldNotBe null
     }
 
     data class DatoDto(val dato: LocalDate?)

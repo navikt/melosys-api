@@ -10,7 +10,9 @@ import no.nav.melosys.exception.ValideringException
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
 import org.slf4j.MDC
 import org.slf4j.event.Level
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.ErrorResponse
@@ -99,7 +101,7 @@ class ExceptionMapper {
         // Spring-exceptions som implementerer ErrorResponse bærer sin egen HTTP-status (415, 405, 400 osv.).
         // Uten dette ville denne catch-allen gjort alle rene klientfeil om til 500.
         val errorResponse = e as? ErrorResponse
-        val status = errorResponse?.let { HttpStatus.resolve(it.statusCode.value()) } ?: HttpStatus.INTERNAL_SERVER_ERROR
+        val status: HttpStatusCode = errorResponse?.statusCode ?: HttpStatus.INTERNAL_SERVER_ERROR
         val erKlientfeil = status.is4xxClientError
         return håndter(
             e,
@@ -109,19 +111,23 @@ class ExceptionMapper {
             // e.message kan inneholde klassesti og metodesignatur, men ProblemDetail-teksten fra Spring er laget
             // for å vises til klienten ("Required parameter 'x' is not present."). Den er både trygg og mer
             // presis enn en fast melding, så vi bruker den når den finnes.
-            responsMelding = if (erKlientfeil) errorResponse?.body?.detail ?: status.reasonPhrase else null,
-            loggStacktrace = !erKlientfeil
+            responsMelding = if (erKlientfeil) errorResponse?.body?.detail ?: statustekst(status) else null,
+            loggStacktrace = !erKlientfeil,
+            // 405 og 415 er ikke gyldige uten Allow/Accept (RFC 9110). Headerne ligger på ErrorResponse,
+            // og forsvant tidligere fordi vi bare plukket status derfra.
+            headere = errorResponse?.headers ?: HttpHeaders.EMPTY
         )
     }
 
     private fun håndter(
         e: Exception,
         request: HttpServletRequest,
-        httpStatus: HttpStatus,
+        httpStatus: HttpStatusCode,
         loggnivå: Level,
         begrunnelser: Collection<*>? = emptyList<Any>(),
         responsMelding: String? = null,
-        loggStacktrace: Boolean = true
+        loggStacktrace: Boolean = true,
+        headere: HttpHeaders = HttpHeaders.EMPTY
     ): ResponseEntity<Map<String, Any>> {
         val message = e.message ?: e.javaClass.simpleName
         val errorMessage = buildString {
@@ -149,13 +155,18 @@ class ExceptionMapper {
 
         val body = mapOf(
             "status" to httpStatus.value(),
-            "error" to httpStatus.reasonPhrase,
+            "error" to statustekst(httpStatus),
             "message" to (responsMelding ?: message),
             "correlationId" to MDC.get(MDCOperations.CORRELATION_ID)
         ) + if (!begrunnelser.isNullOrEmpty()) mapOf("feilkoder" to begrunnelser) else emptyMap<String, Any>()
 
-        return ResponseEntity(body, httpStatus)
+        return ResponseEntity(body, headere, httpStatus)
     }
+
+    // HttpStatus dekker kun standardkodene. Et ukjent statusnummer skal fortsatt beholde sin egen status
+    // i stedet for å degraderes til 500, så teksten faller tilbake til statusnummeret.
+    private fun statustekst(status: HttpStatusCode): String =
+        HttpStatus.resolve(status.value())?.reasonPhrase ?: status.value().toString()
 
     private fun hentMessageFraJsonStreng(jsonString: String): String? =
         runCatching {

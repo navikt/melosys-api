@@ -24,6 +24,7 @@ import org.springframework.validation.BeanPropertyBindingResult
 import org.springframework.validation.FieldError
 import org.springframework.validation.ObjectError
 import org.springframework.web.HttpMediaTypeNotSupportedException
+import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.reactive.function.client.WebClientResponseException
@@ -185,6 +186,17 @@ class ExceptionMapperTest {
             HttpStatus.UNSUPPORTED_MEDIA_TYPE,
             exception.body.detail!!
         )
+    }
+
+    @Test
+    fun `skal videreføre headere fra ErrorResponse slik at 405 får Allow`() {
+        val exception = HttpRequestMethodNotSupportedException("DELETE", listOf("GET", "POST"))
+
+        val responseEntity = exceptionMapper.håndter(exception as Exception, request)
+
+        assertEquals(HttpStatus.METHOD_NOT_ALLOWED, responseEntity.statusCode)
+        // RFC 9110 krever Allow på 405. Headerne ligger på ErrorResponse, ikke bare statuskoden.
+        assertEquals("GET, POST", responseEntity.headers.getFirst(HttpHeaders.ALLOW))
     }
 
     @Test
