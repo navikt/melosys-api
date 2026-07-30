@@ -39,12 +39,12 @@ class TekstblokkHtmlSanitizerTest {
     @Test
     fun `utfylt placeholder lagres som raa noekkel`() {
         // Biblioteket er delt: behandlingens verdi skal aldri bli liggende i tekstblokken
-        val html = """<p>Sak <span class="placeholder-utfylt" data-placeholder="saksnummer">2024/123456</span></p>"""
+        val html = """<p>Sak <span class="placeholder-utfylt" data-placeholder="saksnummer">MEL-12345</span></p>"""
 
         val resultat = sanitizer.saniter(html)
 
         resultat shouldContain "{saksnummer}"
-        resultat shouldNotContain "2024/123456"
+        resultat shouldNotContain "MEL-12345"
         resultat shouldNotContain "data-placeholder"
     }
 
@@ -79,22 +79,22 @@ class TekstblokkHtmlSanitizerTest {
     @Test
     fun `misformet placeholder-noekkel skrives ikke om, men markeringen pakkes ut`() {
         // Et misformet attributt ville ellers gitt et korrupt token i lagret innhold
-        val html = """<p><span class="placeholder-utfylt" data-placeholder="saksnummer}">2024/123456</span></p>"""
+        val html = """<p><span class="placeholder-utfylt" data-placeholder="saksnummer}">MEL-12345</span></p>"""
 
         val resultat = sanitizer.saniter(html)
 
-        resultat shouldContain "<p>2024/123456</p>"
+        resultat shouldContain "<p>MEL-12345</p>"
         resultat shouldNotContain "{"
         resultat shouldNotContain "span"
     }
 
     @Test
     fun `placeholder-noekkel med mellomrom skrives ikke om`() {
-        val html = """<p><span class="placeholder-utfylt" data-placeholder="saks nummer">2024/123456</span></p>"""
+        val html = """<p><span class="placeholder-utfylt" data-placeholder="saks nummer">MEL-12345</span></p>"""
 
         val resultat = sanitizer.saniter(html)
 
-        resultat shouldContain "<p>2024/123456</p>"
+        resultat shouldContain "<p>MEL-12345</p>"
         resultat shouldNotContain "{"
         resultat shouldNotContain "span"
     }

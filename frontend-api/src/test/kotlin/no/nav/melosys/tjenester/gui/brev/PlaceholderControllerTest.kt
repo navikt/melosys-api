@@ -54,7 +54,7 @@ internal class PlaceholderControllerTest(
             .andExpect(jsonPath("$.placeholdere[0].nokkel").value("saksnummer"))
             .andExpect(jsonPath("$.placeholdere[0].visningsnavn").value("Saksnummer"))
             .andExpect(jsonPath("$.placeholdere[0].beskrivelse").value("Sakens saksnummer i Melosys"))
-            .andExpect(jsonPath("$.placeholdere[0].eksempel").value("2024/123456"))
+            .andExpect(jsonPath("$.placeholdere[0].eksempel").value("MEL-12345"))
             .andExpect(jsonPath("$.placeholdere[0].sakstyper.length()").value(0))
 
         // Katalogen har ingen sakskontekst og skal derfor verken autorisere eller auditlogge
@@ -65,14 +65,14 @@ internal class PlaceholderControllerTest(
     @Test
     fun `verdier returnerer resolvede noekler for behandlingen`() {
         every { placeholderService.hentVerdier(BEH_ID) } returns listOf(
-            PlaceholderVerdi(nokkel = "saksnummer", verdi = "2024/123456"),
+            PlaceholderVerdi(nokkel = "saksnummer", verdi = "MEL-12345"),
         )
 
         mockMvc.perform(get(VERDIER_URL, BEH_ID).contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.verdier.length()").value(1))
             .andExpect(jsonPath("$.verdier[0].nokkel").value("saksnummer"))
-            .andExpect(jsonPath("$.verdier[0].verdi").value("2024/123456"))
+            .andExpect(jsonPath("$.verdier[0].verdi").value("MEL-12345"))
 
         verify { aksesskontroll.auditAutoriser(BEH_ID, any()) }
     }
@@ -113,7 +113,7 @@ internal class PlaceholderControllerTest(
         nokkel: String = "saksnummer",
         visningsnavn: String = "Saksnummer",
         beskrivelse: String = "Sakens saksnummer i Melosys",
-        eksempel: () -> String = { "2024/123456" },
+        eksempel: () -> String = { "MEL-12345" },
     ) = PlaceholderDefinisjon(
         nokkel = nokkel,
         visningsnavn = visningsnavn,

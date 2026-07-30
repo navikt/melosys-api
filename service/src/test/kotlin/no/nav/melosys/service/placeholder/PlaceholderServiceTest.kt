@@ -43,7 +43,7 @@ class PlaceholderServiceTest {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns
             Behandling.forTest {
                 fagsak {
-                    saksnummer = "2024/123456"
+                    saksnummer = "MEL-12345"
                     medBruker()
                 }
             }
@@ -56,7 +56,7 @@ class PlaceholderServiceTest {
         katalog.map { it.nokkel } shouldContainExactly
             listOf("saksnummer", "dagens-dato", "fornavn", "etternavn", "fodselsdato", "fodselsnummer")
         katalog.forEach { it.sakstyper.shouldBeEmpty() }
-        katalog.single { it.nokkel == "saksnummer" }.eksempel() shouldBe "2024/123456"
+        katalog.single { it.nokkel == "saksnummer" }.eksempel() shouldBe "MEL-12345"
         katalog.single { it.nokkel == "fornavn" }.eksempel() shouldBe "Ola"
         katalog.single { it.nokkel == "etternavn" }.eksempel() shouldBe "Nordmann"
         katalog.single { it.nokkel == "fodselsdato" }.eksempel() shouldBe "15.03.2024"
@@ -76,7 +76,7 @@ class PlaceholderServiceTest {
 
         val verdier = service.hentVerdier(BEHANDLING_ID).associate { it.nokkel to it.verdi }
 
-        verdier["saksnummer"] shouldBe "2024/123456"
+        verdier["saksnummer"] shouldBe "MEL-12345"
         verdier["fornavn"] shouldBe "Ola"
         verdier["etternavn"] shouldBe "Nordmann"
         verdier["fodselsdato"] shouldBe "15.03.2024"
@@ -158,7 +158,7 @@ class PlaceholderServiceTest {
         )
 
         service(register).hentVerdier(BEHANDLING_ID) shouldContainExactly
-            listOf(PlaceholderVerdi(nokkel = "saksnummer", verdi = "2024/123456"))
+            listOf(PlaceholderVerdi(nokkel = "saksnummer", verdi = "MEL-12345"))
     }
 
     @Test
@@ -179,7 +179,7 @@ class PlaceholderServiceTest {
 
         service(register).hentVerdier(BEHANDLING_ID) shouldContainExactly listOf(
             PlaceholderVerdi(nokkel = "med-blanktegn", verdi = "Ola Nordmann"),
-            PlaceholderVerdi(nokkel = "saksnummer", verdi = "2024/123456"),
+            PlaceholderVerdi(nokkel = "saksnummer", verdi = "MEL-12345"),
         )
     }
 
@@ -210,7 +210,7 @@ class PlaceholderServiceTest {
     )
 
     private fun fagsakUtenBruker(): Behandling = Behandling.forTest {
-        fagsak { saksnummer = "2024/123456" }
+        fagsak { saksnummer = "MEL-12345" }
     }
 
     private fun persondata(fødselsdatoVerdi: LocalDate? = LocalDate.of(2024, 3, 15)): Persondata = mockk {
