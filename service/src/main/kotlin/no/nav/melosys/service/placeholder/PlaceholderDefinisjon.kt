@@ -25,7 +25,14 @@ class PlaceholderKontekst(
     val behandling: Behandling,
     persondataOppslag: (Behandling) -> Persondata,
 ) {
-    private val persondataResultat: Result<Persondata> by lazy { runCatching { persondataOppslag(behandling) } }
+    // Fanger Exception og ikke Throwable, slik at Error får velte kallet
+    private val persondataResultat: Result<Persondata> by lazy {
+        try {
+            Result.success(persondataOppslag(behandling))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
     val persondata: Persondata get() = persondataResultat.getOrThrow()
 }

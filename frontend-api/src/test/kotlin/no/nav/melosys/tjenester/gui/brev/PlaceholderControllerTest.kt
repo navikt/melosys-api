@@ -41,7 +41,7 @@ internal class PlaceholderControllerTest(
         SpringSubjectHandler.set(TestSubjectHandler())
         every { unleash.isEnabled(ToggleName.MELOSYS_TEKSTBLOKKER) } returns true
         every { unleash.isEnabled(ToggleName.MELOSYS_TEKSTBLOKKER_DYNAMISK_PLACEHOLDER) } returns true
-        every { aksesskontroll.autoriser(any()) } returns Unit
+        every { aksesskontroll.auditAutoriser(any(), any()) } returns Unit
     }
 
     @Test
@@ -64,6 +64,10 @@ internal class PlaceholderControllerTest(
             .andExpect(jsonPath("$.placeholdere[0].beskrivelse").value("Sakens saksnummer i Melosys"))
             .andExpect(jsonPath("$.placeholdere[0].eksempel").value("2024/123456"))
             .andExpect(jsonPath("$.placeholdere[0].sakstyper.length()").value(0))
+
+        // Katalogen har ingen sakskontekst og skal derfor verken autorisere eller auditlogge
+        verify(exactly = 0) { aksesskontroll.autoriser(any()) }
+        verify(exactly = 0) { aksesskontroll.auditAutoriser(any(), any()) }
     }
 
     @Test
@@ -78,7 +82,7 @@ internal class PlaceholderControllerTest(
             .andExpect(jsonPath("$.verdier[0].nokkel").value("saksnummer"))
             .andExpect(jsonPath("$.verdier[0].verdi").value("2024/123456"))
 
-        verify { aksesskontroll.autoriser(BEH_ID) }
+        verify { aksesskontroll.auditAutoriser(BEH_ID, any()) }
     }
 
     @Test
@@ -105,7 +109,7 @@ internal class PlaceholderControllerTest(
 
     @Test
     fun `uautorisert - svarer 403 og henter ikke verdier`() {
-        every { aksesskontroll.autoriser(BEH_ID) } throws SikkerhetsbegrensningException("Ikke tilgang")
+        every { aksesskontroll.auditAutoriser(BEH_ID, any()) } throws SikkerhetsbegrensningException("Ikke tilgang")
 
         mockMvc.perform(get(VERDIER_URL, BEH_ID).contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isForbidden)

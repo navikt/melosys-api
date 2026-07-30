@@ -102,6 +102,19 @@ class PlaceholderServiceTest {
     }
 
     @Test
+    fun `fagsak uten bruker utelater persondatafeltene men leverer de ovrige`() {
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns
+            Behandling.forTest {
+                fagsak { saksnummer = "2024/123456" }
+            }
+
+        val verdier = service.hentVerdier(BEHANDLING_ID)
+
+        verdier.map { it.nokkel } shouldContainExactly listOf("saksnummer", "dagens-dato")
+        verify(exactly = 0) { persondataFasade.hentPerson(any()) }
+    }
+
+    @Test
     fun `manglende fodselsdato utelater feltet`() {
         every { persondataFasade.hentPerson(FagsakTestFactory.BRUKER_AKTØR_ID) } returns
             persondata(fødselsdatoVerdi = null)
@@ -149,6 +162,38 @@ class PlaceholderServiceTest {
         }
 
         PlaceholderService(behandlingService, persondataFasade, register).hentVerdier(BEHANDLING_ID).shouldBeEmpty()
+    }
+
+    @Test
+    fun `resolver som gir tom eller blank verdi utelater feltet`() {
+        val register = mockk<PlaceholderRegister> {
+            every { definisjoner } returns listOf(
+                PlaceholderDefinisjon(
+                    nokkel = "tom",
+                    visningsnavn = "Tom",
+                    beskrivelse = "Gir tom streng",
+                    eksempel = { "x" },
+                    resolver = { "" },
+                ),
+                PlaceholderDefinisjon(
+                    nokkel = "blank",
+                    visningsnavn = "Blank",
+                    beskrivelse = "Gir bare blanktegn",
+                    eksempel = { "x" },
+                    resolver = { "   " },
+                ),
+                PlaceholderDefinisjon(
+                    nokkel = "saksnummer",
+                    visningsnavn = "Saksnummer",
+                    beskrivelse = "Sakens saksnummer i Melosys",
+                    eksempel = { "2024/123456" },
+                    resolver = { it.behandling.fagsak.saksnummer },
+                ),
+            )
+        }
+
+        PlaceholderService(behandlingService, persondataFasade, register).hentVerdier(BEHANDLING_ID) shouldContainExactly
+            listOf(PlaceholderVerdi(nokkel = "saksnummer", verdi = "2024/123456"))
     }
 
     @Test

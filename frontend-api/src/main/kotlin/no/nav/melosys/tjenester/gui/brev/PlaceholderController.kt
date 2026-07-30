@@ -28,23 +28,24 @@ class PlaceholderController(
     @GetMapping("/brev/placeholdere")
     @Operation(summary = "Henter katalogen over placeholdere til brev")
     fun hentKatalog(): ResponseEntity<PlaceholderKatalogDto> {
-        sjekkTilgang()
+        krevPlaceholderToggles()
         return ResponseEntity.ok(PlaceholderKatalogDto.av(placeholderService.hentKatalog()))
     }
 
     @GetMapping("/behandlinger/{behandlingID}/placeholdere")
     @Operation(summary = "Henter placeholder-verdier for en behandling")
     fun hentVerdier(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<PlaceholderVerdierDto> {
-        sjekkTilgang()
-        aksesskontroll.autoriser(behandlingID)
+        krevPlaceholderToggles()
+        aksesskontroll.auditAutoriser(behandlingID, "Innsyn i persondata for placeholder-verdier i brev.")
         return ResponseEntity.ok(PlaceholderVerdierDto.av(placeholderService.hentVerdier(behandlingID)))
     }
 
     /**
      * Krever både melosys.tekstblokker og melosys.tekstblokker.dynamisk-placeholder.
      * Returnerer 404 når en av dem er av: endepunktet finnes ikke for denne brukeren.
+     * Dette er kun togglesjekk – tilgangskontroll gjøres av aksesskontrollen.
      */
-    private fun sjekkTilgang() {
+    private fun krevPlaceholderToggles() {
         if (!unleash.isEnabled(ToggleName.MELOSYS_TEKSTBLOKKER) ||
             !unleash.isEnabled(ToggleName.MELOSYS_TEKSTBLOKKER_DYNAMISK_PLACEHOLDER)
         ) {

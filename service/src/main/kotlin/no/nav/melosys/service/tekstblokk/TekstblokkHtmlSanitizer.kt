@@ -16,7 +16,8 @@ class TekstblokkHtmlSanitizer {
     // src/felleskomponenter/htmlEditor/htmlEditor.tsx (formats-listen) i melosys-web.
     private val safelist: Safelist = Safelist()
         .addTags("p", "br", "strong", "em", "u", "h2", "ul", "ol", "li", "span", "table", "thead", "tbody", "tr", "th", "td")
-        .addAttributes("span", "class")
+        // data-placeholder bærer nøkkelen til en utfylt placeholder (PlaceholderBlot i web)
+        .addAttributes("span", "class", "data-placeholder")
         .addAttributes("p", "class")
         // Quill 2 lagrer både punkt- og nummerliste som <ol> og skiller dem via
         // <li data-list="bullet"> / <li data-list="ordered">. class brukes til innrykk

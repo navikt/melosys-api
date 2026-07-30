@@ -37,6 +37,13 @@ class TekstblokkHtmlSanitizerTest {
     }
 
     @Test
+    fun `beholder data-placeholder paa utfylt placeholder`() {
+        val html = """<span class="placeholder-utfylt" data-placeholder="saksnummer">2024/123456</span>"""
+
+        sanitizer.saniter(html) shouldContain html
+    }
+
+    @Test
     fun `fjerner script og andre tagger utenfor safelisten`() {
         val html = "<p>Tekst</p><script>alert('x')</script><iframe src='//example.com'></iframe>"
 
