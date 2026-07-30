@@ -16,6 +16,7 @@ import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiClient;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*;
 import no.nav.melosys.integrasjon.joark.saf.SafClient;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 
 @Service
 @Primary
@@ -183,10 +185,20 @@ public class JoarkService implements JoarkFasade {
         String journalpostId = journalpost.getJournalpostId();
 
         journalpostapiClient.feilregistrerSakstilknytning(journalpostId);
-
         KnyttTilAnnenSakRequest knyttTilAnnenSakRequest = byggKnyttTilAnnenSakRequest(journalpost, nyAktørId, saksnummer);
-        String nyJournalpostId = journalpostapiClient.knyttTilAnnenSak(journalpostId, knyttTilAnnenSakRequest).getNyJournalpostId();
-        log.info("Journalpost {} kopiert til ny journalpost {} med ny aktørId for sak {}", journalpostId, nyJournalpostId, saksnummer);
+
+        try {
+            String nyJournalpostId = journalpostapiClient.knyttTilAnnenSak(journalpostId, knyttTilAnnenSakRequest).getNyJournalpostId();
+            log.info("Journalpost {} kopiert til ny journalpost {} med ny aktørId for sak {}", journalpostId, nyJournalpostId, saksnummer);
+        } catch (TekniskException | WebClientRequestException e) {
+            try {
+                journalpostapiClient.opphevFeilregistrertSakstilknytning(journalpostId);
+            } catch (RuntimeException opphevFeilet) {
+                e.addSuppressed(opphevFeilet);
+                log.error("Journalpost {} på sak {} står feilregistrert uten kopi og må rettes manuelt.", journalpostId, saksnummer, opphevFeilet);
+            }
+            throw e;
+        }
     }
 
     private KnyttTilAnnenSakRequest byggKnyttTilAnnenSakRequest(Journalpost journalpost, String nyAktørId, String saksnummer) {

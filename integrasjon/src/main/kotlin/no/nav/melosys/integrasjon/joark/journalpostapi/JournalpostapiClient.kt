@@ -99,6 +99,18 @@ class JournalpostapiClient(
             .block()
     }
 
+    fun opphevFeilregistrertSakstilknytning(journalpostId: String) {
+        if (log.isInfoEnabled) {
+            log.info("Opphever feilregistrert sakstilknytning for journalpost med id {}", journalpostId)
+        }
+
+        journalpostapiWebClient.patch()
+            .uri("/journalpost/{journalpostId}/feilregistrer/opphevFeilregistrertSakstilknytning", journalpostId)
+            .retrieve()
+            .toBodilessEntity()
+            .block()
+    }
+
     fun knyttTilAnnenSak(kildeJournalpostId: String, request: KnyttTilAnnenSakRequest): KnyttTilAnnenSakResponse {
         if (log.isInfoEnabled) {
             log.info("Knytter dokumentene på journalpost med id {} til en annen sak", kildeJournalpostId)
