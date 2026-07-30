@@ -47,7 +47,7 @@ class OpprettFakturaserie(
         val behandlingID = behandling.id
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         val erLovvalgMedTrygdeavgiftsperiode =
-            unleash.isEnabled(ToggleName.MELOSYS_EØS_FAKTURERING_AV_TRYGDEAVGIFT) && behandling.fagsak.erLovvalg() && behandlingsresultat.trygdeavgiftsperioder.isNotEmpty()
+            behandling.fagsak.erLovvalg() && behandlingsresultat.trygdeavgiftsperioder.isNotEmpty()
 
         if (!erLovvalgMedTrygdeavgiftsperiode && prosessinstans.type == ProsessType.IVERKSETT_VEDTAK_EOS) {
             return
