@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.Collections
 import java.util.IdentityHashMap
 
 @Service
@@ -28,28 +27,31 @@ class PlaceholderService(
         val kontekst = PlaceholderKontekst(sakskontekst.saksnummer, sakskontekst.brukersAktørID) { aktørID ->
             persondataFasade.hentPerson(aktørID)
         }
-        // Samme cachede feil kastes til hvert persondatafelt – logg den kun én gang per kall
-        val loggedeFeil = Collections.newSetFromMap(IdentityHashMap<Throwable, Boolean>())
-        return placeholderRegister.definisjoner.mapNotNull { definisjon ->
+        // Samme cachede feil kastes til hvert persondatafelt – samles her og logges én gang per feil
+        val utelatteNokler = IdentityHashMap<Exception, MutableList<String>>()
+        val verdier = placeholderRegister.definisjoner.mapNotNull { definisjon ->
             val verdi = try {
                 definisjon.resolver(kontekst)
             } catch (e: Exception) {
-                if (loggedeFeil.add(e)) loggUtelattFelt(definisjon.nokkel, e)
+                utelatteNokler.getOrPut(e) { mutableListOf() } += definisjon.nokkel
                 null
             }
             // Kontrakten lover at en manglende verdi utelates, aldri leveres som tom streng
             verdi?.trim()?.takeIf { it.isNotEmpty() }?.let { PlaceholderVerdi(nokkel = definisjon.nokkel, verdi = it) }
         }
+        utelatteNokler.forEach { (feil, nokler) -> loggUtelatteFelt(nokler, feil) }
+        return verdier
     }
 
-    // Aldri verdier eller feilmeldinger i logg – de kan inneholde persondata
-    private fun loggUtelattFelt(nokkel: String, e: Exception) {
-        val melding = "Kunne ikke hente verdi for placeholder '{}' ({}), feltet utelates"
+    // Nøklene er trygge å logge, men aldri verdier eller feilmeldinger – de kan inneholde persondata
+    private fun loggUtelatteFelt(nokler: List<String>, e: Exception) {
+        val melding = "Kunne ikke hente verdi for placeholderne [{}] ({}), feltene utelates"
+        val nokkelListe = nokler.joinToString()
         // Fagsak uten bruker er en forventet tilstand, ikke en driftsfeil
         if (e is FunksjonellException) {
-            log.info(melding, nokkel, e.javaClass.simpleName)
+            log.info(melding, nokkelListe, e.javaClass.simpleName)
         } else {
-            log.warn(melding, nokkel, e.javaClass.simpleName)
+            log.warn(melding, nokkelListe, e.javaClass.simpleName)
         }
     }
 

@@ -60,6 +60,46 @@ class TekstblokkHtmlSanitizerTest {
     }
 
     @Test
+    fun `ukjent placeholder-markering pakkes ut ved lagring`() {
+        val html = """<p>Sak <span class="placeholder-ukjent">{tullenokkel}</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>Sak {tullenokkel}</p>"
+        resultat shouldNotContain "span"
+    }
+
+    @Test
+    fun `markeringsklasse fjernes, men oevrige klasser paa spanen beholdes`() {
+        val html = """<p><span class="placeholder-uerstattet annen-klasse">x</span></p>"""
+
+        sanitizer.saniter(html) shouldContain """<span class="annen-klasse">x</span>"""
+    }
+
+    @Test
+    fun `misformet placeholder-noekkel skrives ikke om, men markeringen pakkes ut`() {
+        // Et misformet attributt ville ellers gitt et korrupt token i lagret innhold
+        val html = """<p><span class="placeholder-utfylt" data-placeholder="saksnummer}">2024/123456</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>2024/123456</p>"
+        resultat shouldNotContain "{"
+        resultat shouldNotContain "span"
+    }
+
+    @Test
+    fun `placeholder-noekkel med mellomrom skrives ikke om`() {
+        val html = """<p><span class="placeholder-utfylt" data-placeholder="saks nummer">2024/123456</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>2024/123456</p>"
+        resultat shouldNotContain "{"
+        resultat shouldNotContain "span"
+    }
+
+    @Test
     fun `dobbeltnoestet bracketed-text pakkes ut`() {
         val html = """<p><span class="bracketed-text"><span class="bracketed-text">[dato]</span></span></p>"""
 

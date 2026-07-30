@@ -44,15 +44,29 @@ class TekstblokkHtmlSanitizer {
         val markeringer = spans.filter { !it.erUtfyltPlaceholder() && it.classNames().any(MARKERINGSKLASSER::contains) }
         if (utfylte.isEmpty() && markeringer.isEmpty()) return html
 
+        // Innholdet forkastes bevisst: å beholde den utfylte verdien ville persistert
+        // behandlingsspesifikke persondata i det delte biblioteket
         utfylte.forEach { it.replaceWith(TextNode("{${it.attr("data-placeholder").trim()}}")) }
         // Dokumentrekkefølge: ytterste span pakkes ut først, nøstede markeringer henger fortsatt med
-        markeringer.forEach { it.unwrap() }
+        markeringer.forEach { it.fjernMarkeringsklasser() }
         return dokument.body().html()
     }
 
-    private fun Element.erUtfyltPlaceholder(): Boolean = attr("data-placeholder").isNotBlank()
+    // Ugyldig nøkkel skrives ikke om – et misformet attributt ville gitt et korrupt token i lagret innhold
+    private fun Element.erUtfyltPlaceholder(): Boolean = NØKKELMØNSTER.matches(attr("data-placeholder").trim())
+
+    /** Andre klasser kan bære formatering, så spanen beholdes hvis det er noen igjen. */
+    private fun Element.fjernMarkeringsklasser() {
+        val øvrige = classNames().filterNot(MARKERINGSKLASSER::contains)
+        if (øvrige.isEmpty()) unwrap() else classNames(LinkedHashSet(øvrige))
+    }
 
     private companion object {
-        private val MARKERINGSKLASSER = setOf("placeholder-uerstattet", "placeholder-utfylt", "bracketed-text")
+        // Må speile MARKERINGSKLASSER i melosys-web src/services/modules/placeholdere.ts
+        private val MARKERINGSKLASSER =
+            setOf("placeholder-uerstattet", "placeholder-ukjent", "placeholder-utfylt", "bracketed-text")
+
+        // Konservativt mønster som dekker alle nøklene i PlaceholderRegister
+        private val NØKKELMØNSTER = Regex("^[a-z0-9-]+\$")
     }
 }

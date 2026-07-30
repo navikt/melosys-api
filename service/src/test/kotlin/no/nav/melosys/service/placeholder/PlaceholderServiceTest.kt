@@ -6,6 +6,7 @@ import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -104,7 +105,7 @@ class PlaceholderServiceTest {
     }
 
     @Test
-    fun `feilet persondataoppslag logges kun en gang selv om flere felter utelates`() {
+    fun `feilet persondataoppslag logges paa en linje med alle utelatte noekler`() {
         every { persondataFasade.hentPerson(FagsakTestFactory.BRUKER_AKTØR_ID) } throws
             IllegalStateException("PDL feilet")
 
@@ -112,6 +113,7 @@ class PlaceholderServiceTest {
             service.hentVerdier(BEHANDLING_ID)
 
             appender.list.map { it.level } shouldContainExactly listOf(Level.WARN)
+            appender.list.single().formattedMessage.shouldNevneAllePersondataNokler()
         }
     }
 
@@ -133,8 +135,12 @@ class PlaceholderServiceTest {
             service.hentVerdier(BEHANDLING_ID)
 
             appender.list.map { it.level } shouldContainExactly listOf(Level.INFO)
+            appender.list.single().formattedMessage.shouldNevneAllePersondataNokler()
         }
     }
+
+    private fun String.shouldNevneAllePersondataNokler() =
+        listOf("fornavn", "etternavn", "fodselsdato", "fodselsnummer").forEach { this shouldContain it }
 
     @Test
     fun `manglende fodselsdato utelater feltet`() {
