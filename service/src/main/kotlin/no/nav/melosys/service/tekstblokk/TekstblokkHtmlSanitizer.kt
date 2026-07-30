@@ -1,6 +1,7 @@
 package no.nav.melosys.service.tekstblokk
 
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 import org.jsoup.nodes.TextNode
 import org.jsoup.safety.Safelist
 import org.springframework.stereotype.Component
@@ -28,20 +29,30 @@ class TekstblokkHtmlSanitizer {
         .addAttributes("th", "colspan", "rowspan")
         .addAttributes("td", "colspan", "rowspan")
 
-    fun saniter(html: String?): String? = html?.let { Jsoup.clean(tilRåPlaceholder(it), safelist) }
+    fun saniter(html: String?): String? = html?.let { Jsoup.clean(tilLagretForm(it), safelist) }
 
     /**
-     * En utfylt placeholder (PlaceholderBlot i web) skrives tilbake til rå {nøkkel} før lagring.
-     * Slik blir aldri én behandlings verdier liggende i det delte biblioteket, og neste
-     * innsetting resolver verdien på nytt.
+     * Placeholder-markeringene er rendering-artefakter som utledes ved visning og skal aldri lagres:
+     * en utfylt placeholder (PlaceholderBlot i web) skrives tilbake til rå {nøkkel}, slik at én
+     * behandlings verdier ikke blir liggende i det delte biblioteket, og rene markerings-spans
+     * pakkes ut. Én parse dekker begge transformene.
      */
-    private fun tilRåPlaceholder(html: String): String {
+    private fun tilLagretForm(html: String): String {
         val dokument = Jsoup.parseBodyFragment(html)
-        val utfylte = dokument.body().select("span[data-placeholder]")
-            .filter { it.attr("data-placeholder").isNotBlank() }
-        if (utfylte.isEmpty()) return html
+        val spans = dokument.body().select("span")
+        val utfylte = spans.filter { it.erUtfyltPlaceholder() }
+        val markeringer = spans.filter { !it.erUtfyltPlaceholder() && it.classNames().any(MARKERINGSKLASSER::contains) }
+        if (utfylte.isEmpty() && markeringer.isEmpty()) return html
 
         utfylte.forEach { it.replaceWith(TextNode("{${it.attr("data-placeholder").trim()}}")) }
+        // Dokumentrekkefølge: ytterste span pakkes ut først, nøstede markeringer henger fortsatt med
+        markeringer.forEach { it.unwrap() }
         return dokument.body().html()
+    }
+
+    private fun Element.erUtfyltPlaceholder(): Boolean = attr("data-placeholder").isNotBlank()
+
+    private companion object {
+        private val MARKERINGSKLASSER = setOf("placeholder-uerstattet", "placeholder-utfylt", "bracketed-text")
     }
 }

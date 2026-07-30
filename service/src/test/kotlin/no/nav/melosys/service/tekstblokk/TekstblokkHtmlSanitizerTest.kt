@@ -49,10 +49,31 @@ class TekstblokkHtmlSanitizerTest {
     }
 
     @Test
-    fun `beholder span med kun class`() {
-        val html = """<p><span class="ql-cursor">Tekst</span></p>"""
+    fun `uerstattet placeholder-markering pakkes ut ved lagring`() {
+        // Markeringene utledes ved visning og skal aldri bli persistert
+        val html = """<p>Sak <span class="placeholder-uerstattet">{saksnummer}</span></p>"""
 
-        sanitizer.saniter(html) shouldContain """<span class="ql-cursor">Tekst</span>"""
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>Sak {saksnummer}</p>"
+        resultat shouldNotContain "span"
+    }
+
+    @Test
+    fun `dobbeltnoestet bracketed-text pakkes ut`() {
+        val html = """<p><span class="bracketed-text"><span class="bracketed-text">[dato]</span></span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>[dato]</p>"
+        resultat shouldNotContain "span"
+    }
+
+    @Test
+    fun `beholder span med kun class`() {
+        val html = """<p><span class="ql-indent-1">Tekst</span></p>"""
+
+        sanitizer.saniter(html) shouldContain """<span class="ql-indent-1">Tekst</span>"""
     }
 
     @Test
