@@ -210,8 +210,7 @@ public class JoarkService implements JoarkFasade {
             Bruker.builder()
                 .id(nyAktørId)
                 .idType(Bruker.BrukerIdType.AKTOERID)
-                .build(),
-            null
+                .build()
         );
     }
 
