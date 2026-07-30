@@ -24,7 +24,7 @@ data class PlaceholderBeskrivelseDto(
             nokkel = definisjon.nokkel,
             visningsnavn = definisjon.visningsnavn,
             beskrivelse = definisjon.beskrivelse,
-            eksempel = definisjon.eksempel,
+            eksempel = definisjon.eksempel(),
             sakstyper = definisjon.sakstyper,
         )
     }

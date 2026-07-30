@@ -51,8 +51,8 @@ internal class PlaceholderControllerTest(
                 nokkel = "saksnummer",
                 visningsnavn = "Saksnummer",
                 beskrivelse = "Sakens saksnummer i Melosys",
-                eksempel = "2024/123456",
-                resolver = { it.fagsak.saksnummer },
+                eksempel = { "2024/123456" },
+                resolver = { it.behandling.fagsak.saksnummer },
             ),
         )
 
