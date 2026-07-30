@@ -47,7 +47,9 @@ class TekstblokkHtmlSanitizer {
         // Innholdet forkastes bevisst: å beholde den utfylte verdien ville persistert
         // behandlingsspesifikke persondata i det delte biblioteket
         utfylte.forEach { it.replaceWith(TextNode("{${it.attr("data-placeholder").trim()}}")) }
-        // Dokumentrekkefølge: ytterste span pakkes ut først, nøstede markeringer henger fortsatt med
+        // Dokumentrekkefølge: ytterste span pakkes ut først, nøstede markeringer henger fortsatt med.
+        // En utfylt span uten gyldig nøkkel havner her og beholder teksten sin: den er ikke skillbar
+        // fra manuelt skrevet tekst, og å slette innhold admin ser i editoren ville vært stille datatap.
         markeringer.forEach { it.fjernMarkeringsklasser() }
         return dokument.body().html()
     }
