@@ -100,13 +100,15 @@ class TekstblokkHtmlSanitizerTest {
     }
 
     @Test
-    fun `dobbeltnoestet bracketed-text pakkes ut`() {
+    fun `bracketed-text beholdes ved lagring`() {
+        // Klassen kommer fra dagens editor og ligger allerede lagret i biblioteket: å pakke den ut
+        // ville endret eksisterende innhold og fjernet klamme-spans forhåndsvisningen trenger
         val html = """<p><span class="bracketed-text"><span class="bracketed-text">[dato]</span></span></p>"""
 
         val resultat = sanitizer.saniter(html)
 
-        resultat shouldContain "<p>[dato]</p>"
-        resultat shouldNotContain "span"
+        resultat shouldContain """<span class="bracketed-text">"""
+        resultat shouldContain "[dato]"
     }
 
     @Test

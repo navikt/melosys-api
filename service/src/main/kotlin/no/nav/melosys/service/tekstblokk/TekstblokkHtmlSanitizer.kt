@@ -62,9 +62,11 @@ class TekstblokkHtmlSanitizer {
     }
 
     private companion object {
-        // Må speile MARKERINGSKLASSER i melosys-web src/services/modules/placeholdere.ts
-        private val MARKERINGSKLASSER =
-            setOf("placeholder-uerstattet", "placeholder-ukjent", "placeholder-utfylt", "bracketed-text")
+        // Må speile placeholder-klassene i MARKERINGSKLASSER i melosys-web
+        // src/services/modules/placeholdere.ts. Web-listen har i tillegg bracketed-text for
+        // opprydding ved innsetting – den er master-editorens egen klasse og skal ikke fjernes
+        // ved lagring her, ellers endres innhold som finnes i biblioteket fra før.
+        private val MARKERINGSKLASSER = setOf("placeholder-uerstattet", "placeholder-ukjent", "placeholder-utfylt")
 
         // Konservativt mønster som dekker alle nøklene i PlaceholderRegister
         private val NØKKELMØNSTER = Regex("^[a-z0-9-]+\$")
