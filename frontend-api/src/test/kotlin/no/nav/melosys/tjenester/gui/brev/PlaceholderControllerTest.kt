@@ -46,15 +46,7 @@ internal class PlaceholderControllerTest(
 
     @Test
     fun `katalogen returnerer placeholdere med kontraktens feltnavn`() {
-        every { placeholderService.hentKatalog() } returns listOf(
-            PlaceholderDefinisjon(
-                nokkel = "saksnummer",
-                visningsnavn = "Saksnummer",
-                beskrivelse = "Sakens saksnummer i Melosys",
-                eksempel = { "2024/123456" },
-                resolver = { it.behandling.fagsak.saksnummer },
-            ),
-        )
+        every { placeholderService.hentKatalog() } returns listOf(definisjon())
 
         mockMvc.perform(get(KATALOG_URL).contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk)
@@ -116,6 +108,19 @@ internal class PlaceholderControllerTest(
 
         verify(exactly = 0) { placeholderService.hentVerdier(any()) }
     }
+
+    private fun definisjon(
+        nokkel: String = "saksnummer",
+        visningsnavn: String = "Saksnummer",
+        beskrivelse: String = "Sakens saksnummer i Melosys",
+        eksempel: () -> String = { "2024/123456" },
+    ) = PlaceholderDefinisjon(
+        nokkel = nokkel,
+        visningsnavn = visningsnavn,
+        beskrivelse = beskrivelse,
+        eksempel = eksempel,
+        resolver = { it.saksnummer },
+    )
 
     companion object {
         private const val KATALOG_URL = "/api/brev/placeholdere"

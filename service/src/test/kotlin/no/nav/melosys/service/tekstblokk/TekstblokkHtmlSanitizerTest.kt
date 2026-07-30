@@ -37,10 +37,22 @@ class TekstblokkHtmlSanitizerTest {
     }
 
     @Test
-    fun `beholder data-placeholder paa utfylt placeholder`() {
-        val html = """<span class="placeholder-utfylt" data-placeholder="saksnummer">2024/123456</span>"""
+    fun `utfylt placeholder lagres som raa noekkel`() {
+        // Biblioteket er delt: behandlingens verdi skal aldri bli liggende i tekstblokken
+        val html = """<p>Sak <span class="placeholder-utfylt" data-placeholder="saksnummer">2024/123456</span></p>"""
 
-        sanitizer.saniter(html) shouldContain html
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "{saksnummer}"
+        resultat shouldNotContain "2024/123456"
+        resultat shouldNotContain "data-placeholder"
+    }
+
+    @Test
+    fun `beholder span med kun class`() {
+        val html = """<p><span class="ql-cursor">Tekst</span></p>"""
+
+        sanitizer.saniter(html) shouldContain """<span class="ql-cursor">Tekst</span>"""
     }
 
     @Test

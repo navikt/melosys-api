@@ -1,8 +1,8 @@
 package no.nav.melosys.service.placeholder
 
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.person.Persondata
+import no.nav.melosys.exception.FunksjonellException
 
 /**
  * Én placeholder i registeret. Tom sakstyper-liste betyr at feltet gjelder alle sakstyper.
@@ -18,17 +18,20 @@ data class PlaceholderDefinisjon(
 )
 
 /**
- * Sakskonteksten resolverne får. Persondata hentes ved første bruk og gjenbrukes, slik at ett
- * oppslag dekker alle persondatafeltene. Feiler oppslaget, kastes samme feil til hver resolver.
+ * Sakskonteksten resolverne får. Sakens egne felter er lest ut av databasen på forhånd, mens
+ * persondata hentes ved første bruk og gjenbrukes, slik at ett oppslag dekker alle
+ * persondatafeltene. Feiler oppslaget, kastes samme feil til hver resolver.
  */
 class PlaceholderKontekst(
-    val behandling: Behandling,
-    persondataOppslag: (Behandling) -> Persondata,
+    val saksnummer: String,
+    brukersAktørID: String?,
+    persondataOppslag: (String) -> Persondata,
 ) {
     // Fanger Exception og ikke Throwable, slik at Error får velte kallet
     private val persondataResultat: Result<Persondata> by lazy {
         try {
-            Result.success(persondataOppslag(behandling))
+            val aktørID = brukersAktørID ?: throw FunksjonellException("Finner ikke bruker på fagsak $saksnummer")
+            Result.success(persondataOppslag(aktørID))
         } catch (e: Exception) {
             Result.failure(e)
         }

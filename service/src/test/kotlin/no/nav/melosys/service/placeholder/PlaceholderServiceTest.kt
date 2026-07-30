@@ -1,5 +1,6 @@
 package no.nav.melosys.service.placeholder
 
+import ch.qos.logback.classic.Level
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.collections.shouldContainExactly
@@ -15,6 +16,7 @@ import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.person.Persondata
+import no.nav.melosys.service.LoggingTestUtils.withLogAppender
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataFasade
 import org.junit.jupiter.api.BeforeEach
@@ -36,7 +38,7 @@ class PlaceholderServiceTest {
 
     @BeforeEach
     fun setup() {
-        service = PlaceholderService(behandlingService, persondataFasade, PlaceholderRegister())
+        service = service(PlaceholderRegister())
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns
             Behandling.forTest {
                 fagsak {
@@ -102,16 +104,36 @@ class PlaceholderServiceTest {
     }
 
     @Test
+    fun `feilet persondataoppslag logges kun en gang selv om flere felter utelates`() {
+        every { persondataFasade.hentPerson(FagsakTestFactory.BRUKER_AKTØR_ID) } throws
+            IllegalStateException("PDL feilet")
+
+        withLogAppender<PlaceholderService> { appender ->
+            service.hentVerdier(BEHANDLING_ID)
+
+            appender.list.map { it.level } shouldContainExactly listOf(Level.WARN)
+        }
+    }
+
+    @Test
     fun `fagsak uten bruker utelater persondatafeltene men leverer de ovrige`() {
-        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns
-            Behandling.forTest {
-                fagsak { saksnummer = "2024/123456" }
-            }
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns fagsakUtenBruker()
 
         val verdier = service.hentVerdier(BEHANDLING_ID)
 
         verdier.map { it.nokkel } shouldContainExactly listOf("saksnummer", "dagens-dato")
         verify(exactly = 0) { persondataFasade.hentPerson(any()) }
+    }
+
+    @Test
+    fun `fagsak uten bruker er en forventet tilstand og logges som info`() {
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns fagsakUtenBruker()
+
+        withLogAppender<PlaceholderService> { appender ->
+            service.hentVerdier(BEHANDLING_ID)
+
+            appender.list.map { it.level } shouldContainExactly listOf(Level.INFO)
+        }
     }
 
     @Test
@@ -124,76 +146,35 @@ class PlaceholderServiceTest {
 
     @Test
     fun `resolver som kaster utelater feltet uten aa velte kallet`() {
-        val register = mockk<PlaceholderRegister> {
-            every { definisjoner } returns listOf(
-                PlaceholderDefinisjon(
-                    nokkel = "kaster",
-                    visningsnavn = "Kaster",
-                    beskrivelse = "Feiler alltid",
-                    eksempel = { "x" },
-                    resolver = { error("Oppslag feilet") },
-                ),
-                PlaceholderDefinisjon(
-                    nokkel = "saksnummer",
-                    visningsnavn = "Saksnummer",
-                    beskrivelse = "Sakens saksnummer i Melosys",
-                    eksempel = { "2024/123456" },
-                    resolver = { it.behandling.fagsak.saksnummer },
-                ),
-            )
-        }
+        val register = register(
+            definisjon(nokkel = "kaster", resolver = { error("Oppslag feilet") }),
+            definisjon(),
+        )
 
-        PlaceholderService(behandlingService, persondataFasade, register).hentVerdier(BEHANDLING_ID) shouldContainExactly
+        service(register).hentVerdier(BEHANDLING_ID) shouldContainExactly
             listOf(PlaceholderVerdi(nokkel = "saksnummer", verdi = "2024/123456"))
     }
 
     @Test
     fun `resolver som gir null utelater feltet`() {
-        val register = mockk<PlaceholderRegister> {
-            every { definisjoner } returns listOf(
-                PlaceholderDefinisjon(
-                    nokkel = "mangler",
-                    visningsnavn = "Mangler",
-                    beskrivelse = "Finnes ikke for behandlingen",
-                    eksempel = { "x" },
-                    resolver = { null },
-                ),
-            )
-        }
+        val register = register(definisjon(nokkel = "mangler", resolver = { null }))
 
-        PlaceholderService(behandlingService, persondataFasade, register).hentVerdier(BEHANDLING_ID).shouldBeEmpty()
+        service(register).hentVerdier(BEHANDLING_ID).shouldBeEmpty()
     }
 
     @Test
-    fun `resolver som gir tom eller blank verdi utelater feltet`() {
-        val register = mockk<PlaceholderRegister> {
-            every { definisjoner } returns listOf(
-                PlaceholderDefinisjon(
-                    nokkel = "tom",
-                    visningsnavn = "Tom",
-                    beskrivelse = "Gir tom streng",
-                    eksempel = { "x" },
-                    resolver = { "" },
-                ),
-                PlaceholderDefinisjon(
-                    nokkel = "blank",
-                    visningsnavn = "Blank",
-                    beskrivelse = "Gir bare blanktegn",
-                    eksempel = { "x" },
-                    resolver = { "   " },
-                ),
-                PlaceholderDefinisjon(
-                    nokkel = "saksnummer",
-                    visningsnavn = "Saksnummer",
-                    beskrivelse = "Sakens saksnummer i Melosys",
-                    eksempel = { "2024/123456" },
-                    resolver = { it.behandling.fagsak.saksnummer },
-                ),
-            )
-        }
+    fun `resolver som gir tom eller blank verdi utelater feltet, og verdien trimmes`() {
+        val register = register(
+            definisjon(nokkel = "tom", resolver = { "" }),
+            definisjon(nokkel = "blank", resolver = { "   " }),
+            definisjon(nokkel = "med-blanktegn", resolver = { "  Ola Nordmann \n" }),
+            definisjon(),
+        )
 
-        PlaceholderService(behandlingService, persondataFasade, register).hentVerdier(BEHANDLING_ID) shouldContainExactly
-            listOf(PlaceholderVerdi(nokkel = "saksnummer", verdi = "2024/123456"))
+        service(register).hentVerdier(BEHANDLING_ID) shouldContainExactly listOf(
+            PlaceholderVerdi(nokkel = "med-blanktegn", verdi = "Ola Nordmann"),
+            PlaceholderVerdi(nokkel = "saksnummer", verdi = "2024/123456"),
+        )
     }
 
     @Test
@@ -202,6 +183,28 @@ class PlaceholderServiceTest {
 
         verify(exactly = 0) { behandlingService.hentBehandling(any()) }
         verify(exactly = 0) { persondataFasade.hentPerson(any()) }
+    }
+
+    private fun service(register: PlaceholderRegister) =
+        PlaceholderService(PlaceholderSakskontekstHenter(behandlingService), persondataFasade, register)
+
+    private fun register(vararg definisjoner: PlaceholderDefinisjon): PlaceholderRegister = mockk {
+        every { this@mockk.definisjoner } returns definisjoner.toList()
+    }
+
+    private fun definisjon(
+        nokkel: String = "saksnummer",
+        resolver: (PlaceholderKontekst) -> String? = { it.saksnummer },
+    ) = PlaceholderDefinisjon(
+        nokkel = nokkel,
+        visningsnavn = "Visningsnavn for $nokkel",
+        beskrivelse = "Beskrivelse av $nokkel",
+        eksempel = { "eksempel" },
+        resolver = resolver,
+    )
+
+    private fun fagsakUtenBruker(): Behandling = Behandling.forTest {
+        fagsak { saksnummer = "2024/123456" }
     }
 
     private fun persondata(fødselsdatoVerdi: LocalDate? = LocalDate.of(2024, 3, 15)): Persondata = mockk {

@@ -16,7 +16,7 @@ class PlaceholderRegister {
             visningsnavn = "Saksnummer",
             beskrivelse = "Sakens saksnummer i Melosys",
             eksempel = { "2024/123456" },
-            resolver = { it.behandling.fagsak.saksnummer },
+            resolver = { it.saksnummer },
         ),
         PlaceholderDefinisjon(
             nokkel = "dagens-dato",
