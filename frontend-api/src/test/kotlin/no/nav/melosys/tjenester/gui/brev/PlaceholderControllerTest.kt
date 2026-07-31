@@ -4,6 +4,7 @@ import com.ninjasquad.springmockk.MockkBean
 import io.getunleash.Unleash
 import io.mockk.every
 import io.mockk.verify
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.exception.SikkerhetsbegrensningException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.placeholder.PlaceholderDefinisjon
@@ -12,6 +13,7 @@ import no.nav.melosys.service.placeholder.PlaceholderVerdi
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
+import org.hamcrest.Matchers.contains
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -60,6 +62,18 @@ internal class PlaceholderControllerTest(
         // Katalogen har ingen sakskontekst og skal derfor verken autorisere eller auditlogge
         verify(exactly = 0) { aksesskontroll.autoriser(any()) }
         verify(exactly = 0) { aksesskontroll.auditAutoriser(any(), any()) }
+    }
+
+    // Rå Sakstyper-enum ville KodeSerializer gjort om til {kode, term}; web typer string[].
+    @Test
+    fun `sakstyper i katalogen serialiseres som kode-strenger`() {
+        every { placeholderService.hentKatalog() } returns listOf(
+            definisjon().copy(sakstyper = listOf(Sakstyper.EU_EOS, Sakstyper.FTRL)),
+        )
+
+        mockMvc.perform(get(KATALOG_URL).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.placeholdere[0].sakstyper", contains("EU_EOS", "FTRL")))
     }
 
     @Test

@@ -17,6 +17,8 @@ import jakarta.persistence.Table
 import java.time.Instant
 
 import no.nav.melosys.domain.RegistreringsInfo
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
 @Entity
@@ -50,4 +52,18 @@ class Tekstblokk(
     @CollectionTable(name = "TEKSTBLOKK_TAG", joinColumns = [JoinColumn(name = "tekstblokk_id")])
     @Column(name = "tag", nullable = false)
     val tags: MutableSet<String> = mutableSetOf(),
+
+    // Tom = gjelder alle sakstyper. Se V165.
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "TEKSTBLOKK_SAKSTYPE", joinColumns = [JoinColumn(name = "tekstblokk_id")])
+    @Enumerated(EnumType.STRING)
+    @Column(name = "sakstype", nullable = false)
+    val sakstyper: MutableSet<Sakstyper> = mutableSetOf(),
+
+    // Tom = gjelder alle behandlingstemaer. Se V165.
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "TEKSTBLOKK_BEHANDLINGSTEMA", joinColumns = [JoinColumn(name = "tekstblokk_id")])
+    @Enumerated(EnumType.STRING)
+    @Column(name = "behandlingstema", nullable = false)
+    val behandlingstemaer: MutableSet<Behandlingstema> = mutableSetOf(),
 ) : RegistreringsInfo()

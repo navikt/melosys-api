@@ -6,9 +6,12 @@ import java.util.Locale
 import no.nav.melosys.domain.brev.tekstblokk.Tekstblokk
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkOversikt
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.tekstblokk.TekstblokkRepository
 import no.nav.melosys.service.bruker.SaksbehandlerService
+import org.hibernate.Hibernate
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.AuditorAware
 import org.springframework.stereotype.Service
@@ -27,6 +30,9 @@ class TekstblokkService(
         val innhold: String,
         val type: TekstblokkType,
         val tags: List<String>?,
+        // Tomme lister betyr «gjelder alle» – avgrensningen er valgfri.
+        val sakstyper: List<Sakstyper>? = null,
+        val behandlingstemaer: List<Behandlingstema>? = null,
     )
 
     @Transactional(readOnly = true)
@@ -34,15 +40,30 @@ class TekstblokkService(
         val oversikter = tekstblokkRepository.finnOversikt(type)
         if (oversikter.isEmpty()) return oversikter
 
-        val tagsPerId = tekstblokkRepository.finnTagsForIds(oversikter.map { it.id })
+        val ider = oversikter.map { it.id }
+        val tagsPerId = tekstblokkRepository.finnTagsForIds(ider)
             .groupBy({ it[0] as Long }, { it[1] as String })
-        oversikter.forEach { it.tags = tagsPerId[it.id]?.toSet() ?: emptySet() }
+        val sakstyperPerId = tekstblokkRepository.finnSakstyperForIds(ider)
+            .groupBy({ it[0] as Long }, { it[1] as Sakstyper })
+        val behandlingstemaerPerId = tekstblokkRepository.finnBehandlingstemaerForIds(ider)
+            .groupBy({ it[0] as Long }, { it[1] as Behandlingstema })
+        oversikter.forEach {
+            it.tags = tagsPerId[it.id]?.toSet() ?: emptySet()
+            it.sakstyper = sakstyperPerId[it.id]?.toSet() ?: emptySet()
+            it.behandlingstemaer = behandlingstemaerPerId[it.id]?.toSet() ?: emptySet()
+        }
         return oversikter
     }
 
     @Transactional(readOnly = true)
     fun hent(id: Long): Tekstblokk = tekstblokkRepository.findByIdAndSlettetDatoIsNull(id)
         .orElseThrow { IkkeFunnetException("Finner ikke tekstblokk med id $id") }
+        // open-in-view er av, og avgrensningene ligger utenfor EntityGraph-en for å
+        // unngå kartesisk produkt – de må derfor lastes her, inne i transaksjonen.
+        .also {
+            Hibernate.initialize(it.sakstyper)
+            Hibernate.initialize(it.behandlingstemaer)
+        }
 
     @Transactional
     fun opprett(input: Input): Tekstblokk {
@@ -100,6 +121,10 @@ class TekstblokkService(
         tekstblokk.endretAvNavn = endretAvNavn
         tekstblokk.tags.clear()
         tekstblokk.tags.addAll(normaliserTags(input.tags))
+        tekstblokk.sakstyper.clear()
+        tekstblokk.sakstyper.addAll(input.sakstyper.orEmpty())
+        tekstblokk.behandlingstemaer.clear()
+        tekstblokk.behandlingstemaer.addAll(input.behandlingstemaer.orEmpty())
     }
 
     // Et feilet navneoppslag skal ikke hindre lagring – frontend viser ident i stedet.

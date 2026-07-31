@@ -26,6 +26,14 @@ interface TekstblokkRepository : JpaRepository<Tekstblokk, Long> {
     @Query("SELECT t.id, tag FROM Tekstblokk t JOIN t.tags tag WHERE t.id IN :ids")
     fun finnTagsForIds(@Param("ids") ids: Collection<Long>): List<Array<Any>>
 
+    @Query("SELECT t.id, sakstype FROM Tekstblokk t JOIN t.sakstyper sakstype WHERE t.id IN :ids")
+    fun finnSakstyperForIds(@Param("ids") ids: Collection<Long>): List<Array<Any>>
+
+    @Query("SELECT t.id, behandlingstema FROM Tekstblokk t JOIN t.behandlingstemaer behandlingstema WHERE t.id IN :ids")
+    fun finnBehandlingstemaerForIds(@Param("ids") ids: Collection<Long>): List<Array<Any>>
+
+    // Kun tags i grafen: flere @ElementCollection i samme join gir kartesisk produkt.
+    // Sakstyper og behandlingstemaer lastes lazy innenfor transaksjonen i servicen.
     @EntityGraph(attributePaths = ["tags"])
     fun findByIdAndSlettetDatoIsNull(id: Long): Optional<Tekstblokk>
 }
