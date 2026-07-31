@@ -5,6 +5,7 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.service.LandvelgerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
@@ -85,16 +86,31 @@ class PlaceholderSakskontekstHenter(
             .filter { it.isNotEmpty() }
     }.orEmpty()
 
-    // De to arbeidsgiveroppslagene henter hver sin kopi av de avklarte orgnumrene; gjenbruk krever endring i AvklarteVirksomheterService
+    // De to arbeidsgiveroppslagene henter hver sin kopi av de avklarte orgnumrene; gjenbruk krever endring i AvklarteVirksomheterService.
+    // Avklarte virksomheter når de finnes, ellers søknadens oppgitte – samme fallback-semantikk som arbeidsland får av LandvelgerService,
+    // slik at nøklene også resolver før avklaringssteget (de avklarte faktaene snevrer bare inn et allerede kjent utvalg).
     private fun utenlandskeArbeidsgivere(behandlingId: Long, behandling: Behandling): List<String> =
         delfelt(behandlingId, "utenlandske arbeidsgivere") {
-            avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling).mapNotNull { it.navn }
+            avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling)
+                .ifEmpty { oppgitteUtenlandskeForetak(behandling) }
+                .mapNotNull { it.navn }
         }.orEmpty()
 
     private fun norskeArbeidsgivereOrgnumre(behandlingId: Long, behandling: Behandling): Set<String> =
         delfelt(behandlingId, "norske arbeidsgivere") {
             avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)
+                .ifEmpty { oppgitteNorskeArbeidsgivereOrgnumre(behandling) }
         }.orEmpty()
+
+    /** Kildene AvklarteVirksomheterService snitter mot de avklarte fakta: Aa-reg-arbeidsforholdene og søknadens ekstra arbeidsgivere. */
+    private fun oppgitteNorskeArbeidsgivereOrgnumre(behandling: Behandling): Set<String> {
+        val fraArbeidsforhold = behandling.finnArbeidsforholdDokument().getOrNull()?.hentOrgnumre().orEmpty()
+        val fraSøknad = behandling.mottatteOpplysninger?.mottatteOpplysningerData?.juridiskArbeidsgiverNorge?.ekstraArbeidsgivere.orEmpty()
+        return fraArbeidsforhold + fraSøknad
+    }
+
+    private fun oppgitteUtenlandskeForetak(behandling: Behandling): List<AvklartVirksomhet> =
+        behandling.mottatteOpplysninger?.mottatteOpplysningerData?.foretakUtland.orEmpty().map(::AvklartVirksomhet)
 
     private fun periodeData(periode: ErPeriode): PeriodeData =
         PeriodeData(fom = periode.fom, tom = periode.tom, erInnvilget = (periode as? AvgiftspliktigPeriode)?.erInnvilget() == true)

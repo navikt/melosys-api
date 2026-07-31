@@ -2,6 +2,7 @@ package no.nav.melosys.service.placeholder
 
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -10,10 +11,14 @@ import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.SaksopplysningType
+import no.nav.melosys.domain.arbeidsforholdDokument
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.behandling
+import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype
 import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.saksopplysning
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -140,6 +145,51 @@ class PlaceholderSakskontekstHenterTest {
     }
 
     @Test
+    fun `arbeidsgiverne faller tilbake til soknadens oppgitte naar ingenting er avklart enda`() {
+        medBehandling(
+            behandling(
+                arbeidsforholdOrgnumre = listOf("999888777"),
+                ekstraArbeidsgivere = listOf("111222333"),
+                utenlandskeForetaksnavn = listOf("Nordwerk GmbH"),
+            )
+        )
+        every { avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any()) } returns emptySet()
+        every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns emptyList()
+
+        val sakskontekst = henter.hent(BEHANDLING_ID)
+
+        sakskontekst.norskeArbeidsgivereOrgnumre shouldContainExactlyInAnyOrder setOf("999888777", "111222333")
+        sakskontekst.utenlandskeArbeidsgivere shouldContainExactly listOf("Nordwerk GmbH")
+    }
+
+    @Test
+    fun `avklarte arbeidsgivere gjelder foran soknadens oppgitte`() {
+        medBehandling(
+            behandling(
+                arbeidsforholdOrgnumre = listOf("999888777"),
+                ekstraArbeidsgivere = listOf("111222333"),
+                utenlandskeForetaksnavn = listOf("Nordwerk GmbH", "Sydwerk GmbH"),
+            )
+        )
+
+        val sakskontekst = henter.hent(BEHANDLING_ID)
+
+        sakskontekst.norskeArbeidsgivereOrgnumre shouldContainExactly setOf("123456789")
+        sakskontekst.utenlandskeArbeidsgivere shouldContainExactly listOf("Nordwerk GmbH")
+    }
+
+    @Test
+    fun `uten avklarte og uten oppgitte arbeidsgivere blir feltene tomme`() {
+        every { avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any()) } returns emptySet()
+        every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns emptyList()
+
+        val sakskontekst = henter.hent(BEHANDLING_ID)
+
+        sakskontekst.norskeArbeidsgivereOrgnumre.shouldBeEmpty()
+        sakskontekst.utenlandskeArbeidsgivere.shouldBeEmpty()
+    }
+
+    @Test
     fun `et deloppslag som feiler utelater bare sitt eget felt`() {
         every { behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(BEHANDLING_ID) } throws
             IkkeFunnetException("Fant ikke behandlingsresultat")
@@ -169,6 +219,9 @@ class PlaceholderSakskontekstHenterTest {
     private fun behandling(
         utsendingsperiode: Periode = Periode(LocalDate.of(2024, 4, 1), LocalDate.of(2027, 3, 31)),
         sakstema: Sakstemaer = Sakstemaer.TRYGDEAVGIFT,
+        arbeidsforholdOrgnumre: List<String> = emptyList(),
+        ekstraArbeidsgivere: List<String> = emptyList(),
+        utenlandskeForetaksnavn: List<String> = emptyList(),
     ): Behandling = Behandling.forTest {
         id = BEHANDLING_ID
         fagsak {
@@ -177,7 +230,29 @@ class PlaceholderSakskontekstHenterTest {
             medBruker()
         }
         mottatteOpplysninger {
-            soeknad { periode(LocalDate.of(2024, 3, 1), LocalDate.of(2027, 2, 28)) }
+            soeknad {
+                periode(LocalDate.of(2024, 3, 1), LocalDate.of(2027, 2, 28))
+                ekstraArbeidsgivere.forEach { ekstraArbeidsgiver(it) }
+                utenlandskeForetaksnavn.forEachIndexed { indeks, foretaksnavn ->
+                    foretakUtlandMedDetaljer {
+                        navn = foretaksnavn
+                        uuid = "uuid-$indeks"
+                    }
+                }
+            }
+        }
+        if (arbeidsforholdOrgnumre.isNotEmpty()) {
+            saksopplysning {
+                type = SaksopplysningType.ARBFORH
+                arbeidsforholdDokument {
+                    arbeidsforholdOrgnumre.forEach { orgnr ->
+                        arbeidsforhold {
+                            arbeidsgivertype = Aktoertype.ORGANISASJON
+                            arbeidsgiverID = orgnr
+                        }
+                    }
+                }
+            }
         }
     }.apply {
         (hentMottatteOpplysninger().mottatteOpplysningerData as Soeknad).utenlandsoppdraget.samletUtsendingsperiode = utsendingsperiode
