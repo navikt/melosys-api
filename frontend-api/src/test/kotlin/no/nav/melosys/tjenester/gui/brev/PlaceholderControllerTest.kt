@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.exception.SikkerhetsbegrensningException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.placeholder.PlaceholderDefinisjon
+import no.nav.melosys.service.placeholder.PlaceholderResultat
 import no.nav.melosys.service.placeholder.PlaceholderService
 import no.nav.melosys.service.placeholder.PlaceholderVerdi
 import no.nav.melosys.service.tilgang.Aksesskontroll
@@ -92,6 +93,26 @@ internal class PlaceholderControllerTest(
     }
 
     @Test
+    fun `flertydig verdi far kandidatliste, entydig verdi far ikke feltet i det hele tatt`() {
+        every { placeholderService.hentVerdier(BEH_ID) } returns listOf(
+            PlaceholderVerdi(
+                nokkel = "medlemskapsperiode-fra",
+                verdi = "01.03.2024",
+                kandidater = listOf("01.03.2024", "01.01.2023"),
+            ),
+            PlaceholderVerdi(nokkel = "saksnummer", verdi = "MEL-12345"),
+        )
+
+        mockMvc.perform(get(VERDIER_URL, BEH_ID).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.verdier[0].verdi").value("01.03.2024"))
+            .andExpect(jsonPath("$.verdier[0].kandidater.length()").value(2))
+            .andExpect(jsonPath("$.verdier[0].kandidater[0]").value("01.03.2024"))
+            .andExpect(jsonPath("$.verdier[0].kandidater[1]").value("01.01.2023"))
+            .andExpect(jsonPath("$.verdier[1].kandidater").doesNotExist())
+    }
+
+    @Test
     fun `placeholder-toggle av - begge endepunkter svarer 404`() {
         every { unleash.isEnabled(ToggleName.MELOSYS_TEKSTBLOKKER_DYNAMISK_PLACEHOLDER) } returns false
 
@@ -133,7 +154,7 @@ internal class PlaceholderControllerTest(
         visningsnavn = visningsnavn,
         beskrivelse = beskrivelse,
         eksempel = eksempel,
-        resolver = { it.saksnummer },
+        resolver = { PlaceholderResultat(it.saksnummer) },
     )
 
     companion object {
