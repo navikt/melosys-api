@@ -71,6 +71,18 @@ class TekstblokkHtmlSanitizerTest {
     }
 
     @Test
+    fun `betingelsesmarkering pakkes ut, men tokenet bestaar`() {
+        val html = """<p><span class="placeholder-betingelse">{#hvis innvilgelse}</span></p>""" +
+            """<p>Vedtaket er innvilget.</p><p><span class="placeholder-betingelse">{/hvis}</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>{#hvis innvilgelse}</p>"
+        resultat shouldContain "<p>{/hvis}</p>"
+        resultat shouldNotContain "span"
+    }
+
+    @Test
     fun `markeringsklasse fjernes, men oevrige klasser paa spanen beholdes`() {
         val html = """<p><span class="placeholder-uerstattet annen-klasse">x</span></p>"""
 
