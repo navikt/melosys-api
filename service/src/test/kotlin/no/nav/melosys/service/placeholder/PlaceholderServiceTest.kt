@@ -5,8 +5,10 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldNotContain
+import io.kotest.matchers.collections.shouldNotContainAnyOf
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldMatch
 import io.kotest.matchers.string.shouldNotBeBlank
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -66,7 +68,7 @@ class PlaceholderServiceTest {
 
     @Test
     fun `katalogen inneholder alle placeholderne med eksempel`() {
-        val katalog = service.hentKatalog()
+        val katalog = service.hentKatalog().placeholdere
 
         katalog.map { it.nokkel } shouldContainExactly listOf(
             "saksnummer", "dagens-dato", "fornavn", "etternavn", "fodselsdato", "fodselsnummer",
@@ -81,7 +83,7 @@ class PlaceholderServiceTest {
 
     @Test
     fun `bare lovvalgsperiodene er avgrenset til sakstyper med lovvalg`() {
-        val katalog = service.hentKatalog()
+        val katalog = service.hentKatalog().placeholdere
 
         katalog.filter { it.sakstyper.isNotEmpty() }.map { it.nokkel } shouldContainExactly
             listOf("lovvalgsperiode-fra", "lovvalgsperiode-til")
@@ -91,7 +93,7 @@ class PlaceholderServiceTest {
 
     @Test
     fun `katalogens eksempel for dagens dato er dagens faktiske dato`() {
-        val eksempel = service.hentKatalog().single { it.nokkel == "dagens-dato" }.eksempel()
+        val eksempel = service.hentKatalog().placeholdere.single { it.nokkel == "dagens-dato" }.eksempel()
 
         eksempel shouldBeIn dagensDatoAlternativer()
     }
@@ -120,7 +122,7 @@ class PlaceholderServiceTest {
         every { persondataFasade.hentPerson(FagsakTestFactory.BRUKER_AKTØR_ID) } throws
             IllegalStateException("PDL feilet")
 
-        val verdier = service.hentVerdier(BEHANDLING_ID)
+        val verdier = service.hentVerdier(BEHANDLING_ID).verdier
 
         verdier.map { it.nokkel } shouldContainExactly listOf("saksnummer", "dagens-dato")
         verify(exactly = 1) { persondataFasade.hentPerson(FagsakTestFactory.BRUKER_AKTØR_ID) }
@@ -143,7 +145,7 @@ class PlaceholderServiceTest {
     fun `fagsak uten bruker utelater persondatafeltene men leverer de ovrige`() {
         medSakskontekst(sakskontekst(brukersAktørID = null))
 
-        val verdier = service.hentVerdier(BEHANDLING_ID)
+        val verdier = service.hentVerdier(BEHANDLING_ID).verdier
 
         verdier.map { it.nokkel } shouldContainExactly listOf("saksnummer", "dagens-dato")
         verify(exactly = 0) { persondataFasade.hentPerson(any()) }
@@ -169,7 +171,7 @@ class PlaceholderServiceTest {
         every { persondataFasade.hentPerson(FagsakTestFactory.BRUKER_AKTØR_ID) } returns
             persondata(fødselsdatoVerdi = null)
 
-        service.hentVerdier(BEHANDLING_ID).map { it.nokkel } shouldNotContain "fodselsdato"
+        service.hentVerdier(BEHANDLING_ID).verdier.map { it.nokkel } shouldNotContain "fodselsdato"
     }
 
     @Test
@@ -438,7 +440,7 @@ class PlaceholderServiceTest {
             definisjon(),
         )
 
-        service(register).hentVerdier(BEHANDLING_ID) shouldContainExactly
+        service(register).hentVerdier(BEHANDLING_ID).verdier shouldContainExactly
             listOf(PlaceholderVerdi(nokkel = "saksnummer", verdi = "MEL-12345"))
     }
 
@@ -446,7 +448,7 @@ class PlaceholderServiceTest {
     fun `resolver som gir null utelater feltet`() {
         val register = register(definisjon(nokkel = "mangler", resolver = { null }))
 
-        service(register).hentVerdier(BEHANDLING_ID).shouldBeEmpty()
+        service(register).hentVerdier(BEHANDLING_ID).verdier.shouldBeEmpty()
     }
 
     @Test
@@ -458,7 +460,7 @@ class PlaceholderServiceTest {
             definisjon(),
         )
 
-        service(register).hentVerdier(BEHANDLING_ID) shouldContainExactly listOf(
+        service(register).hentVerdier(BEHANDLING_ID).verdier shouldContainExactly listOf(
             PlaceholderVerdi(nokkel = "med-blanktegn", verdi = "Ola Nordmann"),
             PlaceholderVerdi(nokkel = "saksnummer", verdi = "MEL-12345"),
         )
@@ -471,7 +473,7 @@ class PlaceholderServiceTest {
             definisjon(nokkel = "flere", resolver = { PlaceholderResultat("Oslo", listOf("Oslo", " Bergen ")) }),
         )
 
-        service(register).hentVerdier(BEHANDLING_ID) shouldContainExactly listOf(
+        service(register).hentVerdier(BEHANDLING_ID).verdier shouldContainExactly listOf(
             PlaceholderVerdi(nokkel = "duplikat", verdi = "Oslo"),
             PlaceholderVerdi(nokkel = "flere", verdi = "Oslo", kandidater = listOf("Oslo", "Bergen")),
         )
@@ -486,7 +488,117 @@ class PlaceholderServiceTest {
         verify(exactly = 0) { organisasjonOppslagService.hentOrganisasjoner(any()) }
     }
 
-    private fun verdier(): Map<String, PlaceholderVerdi> = service.hentVerdier(BEHANDLING_ID).associateBy { it.nokkel }
+    @Test
+    fun `katalogen inneholder alle betingelsene med visningsnavn og beskrivelse`() {
+        val betingelser = service.hentKatalog().betingelser
+
+        betingelser.map { it.nokkel } shouldContainExactly listOf(
+            "innvilgelse", "avslag", "opphort", "delvis-innvilgelse", "apen-sluttdato", "skattepliktig",
+            "har-lonn-fra-norge", "har-inntekt-fra-utlandet", "trygdeavgift-til-skatt", "utsending",
+            "pensjonist", "forstegangsvurdering", "ny-vurdering",
+        )
+        betingelser.forEach {
+            it.visningsnavn.shouldNotBeBlank()
+            it.beskrivelse.shouldNotBeBlank()
+        }
+    }
+
+    // Nøklene skrives rått i tekstblokkene og må tåle samme mønster som placeholdernøklene
+    @Test
+    fun `betingelsesnoklene folger nokkelmonsteret og kolliderer ikke med placeholdernoklene`() {
+        val katalog = service.hentKatalog()
+
+        katalog.betingelser.forEach { it.nokkel shouldMatch Regex("^[a-z0-9-]+$") }
+        katalog.betingelser.map { it.nokkel } shouldNotContainAnyOf katalog.placeholdere.map { it.nokkel }
+    }
+
+    @Test
+    fun `lovvalgsbegrepene er avgrenset til sakstyper med lovvalg`() {
+        val betingelser = service.hentKatalog().betingelser
+
+        betingelser.filter { it.sakstyper.isNotEmpty() }.map { it.nokkel } shouldContainExactly
+            listOf("innvilgelse", "delvis-innvilgelse")
+        betingelser.single { it.nokkel == "delvis-innvilgelse" }.sakstyper.map { it.name } shouldContainExactly
+            listOf("EU_EOS", "TRYGDEAVTALE")
+    }
+
+    @Test
+    fun `oppfylte fakta gir oppfylt betingelse`() {
+        medSakskontekst(sakskontekst(fakta = fakta(oppfylt = true)))
+
+        betingelser().values.forEach { it shouldBe true }
+        betingelser().keys.toList() shouldContainExactly service.hentKatalog().betingelser.map { it.nokkel }
+    }
+
+    @Test
+    fun `usanne fakta gir betingelser som ikke er oppfylt`() {
+        medSakskontekst(sakskontekst(fakta = fakta(oppfylt = false)))
+
+        betingelser().values.forEach { it shouldBe false }
+    }
+
+    @Test
+    fun `utilgjengelige fakta utelates fra betingelsene`() {
+        medSakskontekst(sakskontekst(fakta = BetingelseFakta()))
+
+        service.hentVerdier(BEHANDLING_ID).betingelser.shouldBeEmpty()
+    }
+
+    @Test
+    fun `bare de faktaene som er tilgjengelige svares ut`() {
+        medSakskontekst(sakskontekst(fakta = BetingelseFakta(erAvslag = true, erUtsending = false)))
+
+        service.hentVerdier(BEHANDLING_ID).betingelser shouldContainExactly listOf(
+            BetingelseVerdi("avslag", true),
+            BetingelseVerdi("utsending", false),
+        )
+    }
+
+    @Test
+    fun `betingelse som kaster utelates og logges sammen med de ovrige utelatte noklene`() {
+        val register = register(
+            definisjon(),
+            betingelser = listOf(
+                betingelse(nokkel = "kaster", vurdering = { error("Vurderingen feilet") }),
+                betingelse(nokkel = "oppfylt", vurdering = { true }),
+            ),
+        )
+
+        withLogAppender<PlaceholderService> { appender ->
+            service(register).hentVerdier(BEHANDLING_ID).betingelser shouldContainExactly
+                listOf(BetingelseVerdi("oppfylt", true))
+
+            appender.list.single().formattedMessage shouldContain "kaster"
+        }
+    }
+
+    private fun verdier(): Map<String, PlaceholderVerdi> = service.hentVerdier(BEHANDLING_ID).verdier.associateBy { it.nokkel }
+
+    private fun betingelser(): Map<String, Boolean> =
+        service.hentVerdier(BEHANDLING_ID).betingelser.associate { it.nokkel to it.oppfylt }
+
+    private fun fakta(oppfylt: Boolean) = BetingelseFakta(
+        erInnvilgelse = oppfylt,
+        erAvslag = oppfylt,
+        erOpphørt = oppfylt,
+        erDelvisInnvilgelse = oppfylt,
+        harÅpenSluttdato = oppfylt,
+        erSkattepliktig = oppfylt,
+        harLønnFraNorge = oppfylt,
+        harInntektFraUtlandet = oppfylt,
+        trygdeavgiftTilSkatt = oppfylt,
+        erUtsending = oppfylt,
+        erPensjonist = oppfylt,
+        erFørstegangsvurdering = oppfylt,
+        erNyVurdering = oppfylt,
+    )
+
+    private fun betingelse(nokkel: String, vurdering: (PlaceholderKontekst) -> Boolean?) = BetingelseDefinisjon(
+        nokkel = nokkel,
+        visningsnavn = "Visningsnavn for $nokkel",
+        beskrivelse = "Beskrivelse av $nokkel",
+        vurdering = vurdering,
+    )
 
     private fun service(register: PlaceholderRegister) = PlaceholderService(
         sakskontekstHenter,
@@ -511,6 +623,7 @@ class PlaceholderServiceTest {
         arbeidsland: List<String> = emptyList(),
         utenlandskeArbeidsgivere: List<String> = emptyList(),
         norskeArbeidsgivereOrgnumre: Set<String> = emptySet(),
+        fakta: BetingelseFakta = BetingelseFakta(),
     ) = PlaceholderSakskontekst(
         saksnummer = "MEL-12345",
         brukersAktørID = brukersAktørID,
@@ -523,10 +636,15 @@ class PlaceholderServiceTest {
         arbeidsland = arbeidsland,
         utenlandskeArbeidsgivere = utenlandskeArbeidsgivere,
         norskeArbeidsgivereOrgnumre = norskeArbeidsgivereOrgnumre,
+        fakta = fakta,
     )
 
-    private fun register(vararg definisjoner: PlaceholderDefinisjon): PlaceholderRegister = mockk {
+    private fun register(
+        vararg definisjoner: PlaceholderDefinisjon,
+        betingelser: List<BetingelseDefinisjon> = emptyList(),
+    ): PlaceholderRegister = mockk {
         every { this@mockk.definisjoner } returns definisjoner.toList()
+        every { this@mockk.betingelser } returns betingelser
     }
 
     private fun definisjon(

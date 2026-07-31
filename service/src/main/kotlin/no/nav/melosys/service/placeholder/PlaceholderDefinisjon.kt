@@ -18,6 +18,19 @@ data class PlaceholderDefinisjon(
 )
 
 /**
+ * Én betingelse i registeret, brukt av `{#hvis nokkel}` i tekstblokkene. Tom sakstyper-liste betyr
+ * alle sakstyper. Vurderingen svarer null når faktumet ikke er tilgjengelig for behandlingen –
+ * betingelsen utelates da fra svaret, og web beholder innholdet uerstattet.
+ */
+data class BetingelseDefinisjon(
+    val nokkel: String,
+    val visningsnavn: String,
+    val beskrivelse: String,
+    val sakstyper: List<Sakstyper> = emptyList(),
+    val vurdering: (PlaceholderKontekst) -> Boolean?,
+)
+
+/**
  * Verdien er forhåndsvalget, og kandidatlisten inneholder den. Ett eller ingen alternativ betyr
  * at feltet ikke er flertydig – servicen utelater da kandidatene fra svaret, som kontrakten krever.
  */
@@ -38,6 +51,8 @@ class PlaceholderKontekst(
     norskeArbeidsgivernavnOppslag: (Set<String>) -> List<String>,
 ) {
     val saksnummer: String get() = sakskontekst.saksnummer
+
+    val fakta: BetingelseFakta get() = sakskontekst.fakta
 
     // Fanger Exception og ikke Throwable, slik at Error får velte kallet
     private val persondataResultat: Result<Persondata> by lazy {

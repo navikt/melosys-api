@@ -7,10 +7,14 @@ import io.mockk.verify
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.exception.SikkerhetsbegrensningException
 import no.nav.melosys.featuretoggle.ToggleName
+import no.nav.melosys.service.placeholder.BetingelseDefinisjon
+import no.nav.melosys.service.placeholder.BetingelseVerdi
 import no.nav.melosys.service.placeholder.PlaceholderDefinisjon
+import no.nav.melosys.service.placeholder.PlaceholderKatalog
 import no.nav.melosys.service.placeholder.PlaceholderResultat
 import no.nav.melosys.service.placeholder.PlaceholderService
 import no.nav.melosys.service.placeholder.PlaceholderVerdi
+import no.nav.melosys.service.placeholder.PlaceholderVerdier
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
@@ -49,7 +53,7 @@ internal class PlaceholderControllerTest(
 
     @Test
     fun `katalogen returnerer placeholdere med kontraktens feltnavn`() {
-        every { placeholderService.hentKatalog() } returns listOf(definisjon())
+        every { placeholderService.hentKatalog() } returns katalog(listOf(definisjon()))
 
         mockMvc.perform(get(KATALOG_URL).contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk)
@@ -68,8 +72,8 @@ internal class PlaceholderControllerTest(
     // Rå Sakstyper-enum ville KodeSerializer gjort om til {kode, term}; web typer string[].
     @Test
     fun `sakstyper i katalogen serialiseres som kode-strenger`() {
-        every { placeholderService.hentKatalog() } returns listOf(
-            definisjon().copy(sakstyper = listOf(Sakstyper.EU_EOS, Sakstyper.FTRL)),
+        every { placeholderService.hentKatalog() } returns katalog(
+            listOf(definisjon().copy(sakstyper = listOf(Sakstyper.EU_EOS, Sakstyper.FTRL))),
         )
 
         mockMvc.perform(get(KATALOG_URL).contentType(MediaType.APPLICATION_JSON))
@@ -79,8 +83,8 @@ internal class PlaceholderControllerTest(
 
     @Test
     fun `verdier returnerer resolvede noekler for behandlingen`() {
-        every { placeholderService.hentVerdier(BEH_ID) } returns listOf(
-            PlaceholderVerdi(nokkel = "saksnummer", verdi = "MEL-12345"),
+        every { placeholderService.hentVerdier(BEH_ID) } returns verdier(
+            listOf(PlaceholderVerdi(nokkel = "saksnummer", verdi = "MEL-12345")),
         )
 
         mockMvc.perform(get(VERDIER_URL, BEH_ID).contentType(MediaType.APPLICATION_JSON))
@@ -94,13 +98,15 @@ internal class PlaceholderControllerTest(
 
     @Test
     fun `flertydig verdi far kandidatliste, entydig verdi far ikke feltet i det hele tatt`() {
-        every { placeholderService.hentVerdier(BEH_ID) } returns listOf(
-            PlaceholderVerdi(
-                nokkel = "medlemskapsperiode-fra",
-                verdi = "01.03.2024",
-                kandidater = listOf("01.03.2024", "01.01.2023"),
+        every { placeholderService.hentVerdier(BEH_ID) } returns verdier(
+            listOf(
+                PlaceholderVerdi(
+                    nokkel = "medlemskapsperiode-fra",
+                    verdi = "01.03.2024",
+                    kandidater = listOf("01.03.2024", "01.01.2023"),
+                ),
+                PlaceholderVerdi(nokkel = "saksnummer", verdi = "MEL-12345"),
             ),
-            PlaceholderVerdi(nokkel = "saksnummer", verdi = "MEL-12345"),
         )
 
         mockMvc.perform(get(VERDIER_URL, BEH_ID).contentType(MediaType.APPLICATION_JSON))
@@ -143,6 +149,67 @@ internal class PlaceholderControllerTest(
 
         verify(exactly = 0) { placeholderService.hentVerdier(any()) }
     }
+
+    @Test
+    fun `katalogen returnerer betingelsene med kontraktens feltnavn`() {
+        every { placeholderService.hentKatalog() } returns katalog(
+            listOf(definisjon()),
+            listOf(betingelse().copy(sakstyper = listOf(Sakstyper.EU_EOS))),
+        )
+
+        mockMvc.perform(get(KATALOG_URL).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.betingelser.length()").value(1))
+            .andExpect(jsonPath("$.betingelser[0].nokkel").value("delvis-innvilgelse"))
+            .andExpect(jsonPath("$.betingelser[0].visningsnavn").value("Delvis innvilgelse"))
+            .andExpect(jsonPath("$.betingelser[0].beskrivelse").value("Utlandet svarte delvis"))
+            .andExpect(jsonPath("$.betingelser[0].sakstyper", contains("EU_EOS")))
+    }
+
+    @Test
+    fun `verdier returnerer betingelsene med oppfylt-flagget`() {
+        every { placeholderService.hentVerdier(BEH_ID) } returns verdier(
+            listOf(PlaceholderVerdi(nokkel = "saksnummer", verdi = "MEL-12345")),
+            listOf(BetingelseVerdi("innvilgelse", true), BetingelseVerdi("avslag", false)),
+        )
+
+        mockMvc.perform(get(VERDIER_URL, BEH_ID).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.betingelser.length()").value(2))
+            .andExpect(jsonPath("$.betingelser[0].nokkel").value("innvilgelse"))
+            .andExpect(jsonPath("$.betingelser[0].oppfylt").value(true))
+            .andExpect(jsonPath("$.betingelser[1].oppfylt").value(false))
+    }
+
+    // Kontrakten lover alltid feltet, også når ingen betingelse lot seg vurdere
+    @Test
+    fun `betingelser er en tom liste, ikke fravaerende, naar ingen kunne vurderes`() {
+        every { placeholderService.hentVerdier(BEH_ID) } returns verdier(
+            listOf(PlaceholderVerdi(nokkel = "saksnummer", verdi = "MEL-12345")),
+        )
+
+        mockMvc.perform(get(VERDIER_URL, BEH_ID).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.betingelser").isArray)
+            .andExpect(jsonPath("$.betingelser.length()").value(0))
+    }
+
+    private fun katalog(
+        placeholdere: List<PlaceholderDefinisjon>,
+        betingelser: List<BetingelseDefinisjon> = emptyList(),
+    ) = PlaceholderKatalog(placeholdere, betingelser)
+
+    private fun verdier(
+        verdier: List<PlaceholderVerdi>,
+        betingelser: List<BetingelseVerdi> = emptyList(),
+    ) = PlaceholderVerdier(verdier, betingelser)
+
+    private fun betingelse() = BetingelseDefinisjon(
+        nokkel = "delvis-innvilgelse",
+        visningsnavn = "Delvis innvilgelse",
+        beskrivelse = "Utlandet svarte delvis",
+        vurdering = { true },
+    )
 
     private fun definisjon(
         nokkel: String = "saksnummer",
