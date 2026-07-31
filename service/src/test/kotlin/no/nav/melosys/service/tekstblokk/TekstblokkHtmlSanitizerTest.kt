@@ -100,6 +100,62 @@ class TekstblokkHtmlSanitizerTest {
     }
 
     @Test
+    fun `gjort valg lagres som raatt valgtoken`() {
+        // Et lagret valg ville låst malen til ett alternativ for alle som gjenbruker blokken
+        val html = """<p>Land: <span class="placeholder-valgt" data-valg="Bosnia-Hercegovina|Montenegro|Serbia">Montenegro</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "{velg:Bosnia-Hercegovina|Montenegro|Serbia}"
+        resultat shouldNotContain "span"
+        resultat shouldNotContain "data-valg"
+    }
+
+    @Test
+    fun `uvalgt valgtoken-markering pakkes ut ved lagring`() {
+        val html = """<p>Land: <span class="placeholder-valg">{velg:Norge|Sverige}</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>Land: {velg:Norge|Sverige}</p>"
+        resultat shouldNotContain "span"
+    }
+
+    @Test
+    fun `tomt data-valg skrives ikke om, men markeringen pakkes ut`() {
+        val html = """<p><span class="placeholder-valgt" data-valg="">Montenegro</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>Montenegro</p>"
+        resultat shouldNotContain "{"
+        resultat shouldNotContain "span"
+    }
+
+    @Test
+    fun `data-valg med klammer skrives ikke om`() {
+        // Ville ellers gitt et korrupt token i lagret innhold
+        val html = """<p><span class="placeholder-valgt" data-valg="A}|B">A</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>A</p>"
+        resultat shouldNotContain "{"
+        resultat shouldNotContain "span"
+    }
+
+    @Test
+    fun `data-valg med bare ett alternativ skrives ikke om`() {
+        val html = """<p><span class="placeholder-valgt" data-valg="Norge">Norge</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>Norge</p>"
+        resultat shouldNotContain "{"
+        resultat shouldNotContain "span"
+    }
+
+    @Test
     fun `bracketed-text beholdes ved lagring`() {
         // Klassen kommer fra dagens editor og ligger allerede lagret i biblioteket: å pakke den ut
         // ville endret eksisterende innhold og fjernet klamme-spans forhåndsvisningen trenger
