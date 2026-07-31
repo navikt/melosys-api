@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -15,6 +16,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.brev.tekstblokk.Tekstblokk
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkOversikt
+import no.nav.melosys.domain.brev.tekstblokk.TekstblokkStatus
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -58,6 +60,7 @@ class TekstblokkServiceTest {
         tags: List<String>? = null,
         sakstyper: List<Sakstyper>? = null,
         behandlingstemaer: List<Behandlingstema>? = null,
+        status: TekstblokkStatus = TekstblokkStatus.PUBLISERT,
     ) = service.opprett(
         TekstblokkService.Input(
             tittel = tittel,
@@ -66,6 +69,7 @@ class TekstblokkServiceTest {
             tags = tags,
             sakstyper = sakstyper,
             behandlingstemaer = behandlingstemaer,
+            status = status,
         ),
     )
 
@@ -142,14 +146,14 @@ class TekstblokkServiceTest {
 
     @Test
     fun `oversikten faar avgrensningene slaatt sammen per blokk`() {
-        val oversikt = TekstblokkOversikt(1, "Tittel", "<p>Tekst</p>", TekstblokkType.TEKSTBLOKK, NÅ, IDENT, NAVN)
-        every { tekstblokkRepository.finnOversikt(null) } returns listOf(oversikt)
+        val oversikt = oversikt()
+        every { tekstblokkRepository.finnOversikt(null, true) } returns listOf(oversikt)
         every { tekstblokkRepository.finnTagsForIds(listOf(1L)) } returns emptyList()
         every { tekstblokkRepository.finnSakstyperForIds(listOf(1L)) } returns listOf(arrayOf(1L, Sakstyper.FTRL))
         every { tekstblokkRepository.finnBehandlingstemaerForIds(listOf(1L)) } returns
             listOf(arrayOf(1L, Behandlingstema.YRKESAKTIV))
 
-        service.hentAlleOversikter(null)
+        service.hentAlleOversikter(null, inkluderUtkast = true)
 
         oversikt.sakstyper shouldContainExactly setOf(Sakstyper.FTRL)
         oversikt.behandlingstemaer shouldContainExactly setOf(Behandlingstema.YRKESAKTIV)
@@ -240,6 +244,82 @@ class TekstblokkServiceTest {
             service.oppdater(1, TekstblokkService.Input("Tittel", "<p>Tekst</p>", TekstblokkType.TEKSTBLOKK, null))
         }
     }
+
+    @Test
+    fun `nye blokker er publiserte med mindre annet er oppgitt`() {
+        opprett()
+
+        lagret.captured.status shouldBe TekstblokkStatus.PUBLISERT
+    }
+
+    @Test
+    fun `bulk uten status lagrer publiserte blokker`() {
+        service.opprettBulk(listOf(TekstblokkService.Input("Tittel", "<p>Innhold</p>", TekstblokkType.TEKSTBLOKK, null)))
+
+        lagret.captured.status shouldBe TekstblokkStatus.PUBLISERT
+    }
+
+    @Test
+    fun `blokk kan opprettes som utkast`() {
+        opprett(status = TekstblokkStatus.UTKAST)
+
+        lagret.captured.status shouldBe TekstblokkStatus.UTKAST
+    }
+
+    @Test
+    fun `publisering setter status til publisert`() {
+        every { tekstblokkRepository.findByIdAndSlettetDatoIsNull(1) } returns
+            Optional.of(Tekstblokk(id = 1, status = TekstblokkStatus.UTKAST))
+
+        service.publiser(1)
+
+        lagret.captured.status shouldBe TekstblokkStatus.PUBLISERT
+    }
+
+    @Test
+    fun `publisering av en slettet blokk gir IkkeFunnet`() {
+        every { tekstblokkRepository.findByIdAndSlettetDatoIsNull(1) } returns Optional.empty()
+
+        shouldThrow<IkkeFunnetException> { service.publiser(1) }
+    }
+
+    @Test
+    fun `administrator faar utkast med i oversikten`() {
+        every { tekstblokkRepository.finnOversikt(null, true) } returns listOf(oversikt(status = TekstblokkStatus.UTKAST))
+        every { tekstblokkRepository.finnTagsForIds(listOf(1L)) } returns emptyList()
+        every { tekstblokkRepository.finnSakstyperForIds(listOf(1L)) } returns emptyList()
+        every { tekstblokkRepository.finnBehandlingstemaerForIds(listOf(1L)) } returns emptyList()
+
+        service.hentAlleOversikter(null, inkluderUtkast = true) shouldHaveSize 1
+    }
+
+    @Test
+    fun `saksbehandler spoer databasen uten utkast`() {
+        every { tekstblokkRepository.finnOversikt(null, false) } returns emptyList()
+
+        service.hentAlleOversikter(null, inkluderUtkast = false).shouldBeEmpty()
+
+        verify(exactly = 1) { tekstblokkRepository.finnOversikt(null, false) }
+    }
+
+    @Test
+    fun `detaljvisning av utkast uten admin gir IkkeFunnet`() {
+        every { tekstblokkRepository.findByIdAndSlettetDatoIsNull(1) } returns
+            Optional.of(Tekstblokk(id = 1, status = TekstblokkStatus.UTKAST))
+
+        shouldThrow<IkkeFunnetException> { service.hent(1, inkluderUtkast = false) }
+    }
+
+    @Test
+    fun `detaljvisning av utkast med admin gaar bra`() {
+        every { tekstblokkRepository.findByIdAndSlettetDatoIsNull(1) } returns
+            Optional.of(Tekstblokk(id = 1, status = TekstblokkStatus.UTKAST))
+
+        service.hent(1, inkluderUtkast = true).status shouldBe TekstblokkStatus.UTKAST
+    }
+
+    private fun oversikt(status: TekstblokkStatus = TekstblokkStatus.PUBLISERT) =
+        TekstblokkOversikt(1, "Tittel", "<p>Tekst</p>", TekstblokkType.TEKSTBLOKK, status, NÅ, IDENT, NAVN)
 
     private companion object {
         const val IDENT = "A146170"

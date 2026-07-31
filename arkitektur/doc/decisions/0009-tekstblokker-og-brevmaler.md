@@ -75,10 +75,33 @@ batch (én transaksjon), `@Size(max = 500)` som DoS-cap.
 
 ### Global eierskap
 Alle saksbehandlere med `melosys.administrasjon` ser og kan endre alle blokker.
-`registrertAv` og `endretAv` spores via `RegistreringsInfo` (Spring Data Auditing)
-for revisjon. Lavfriksjon for delt forvaltning; ulykker kan gjenopprettes via
-audit-data. Hvis dette viser seg å være for åpent, kan vi senere innføre
-eierskaps-policy uten skjema-endring.
+`registrertAv` og `endretAv` på raden viser hvem som sist rørte blokken (Spring
+Data Auditing via `RegistreringsInfo`), mens versjonshistorikken under gir
+gjenoppretting. Lavfriksjon for delt forvaltning; hvis dette viser seg å være for
+åpent, kan vi senere innføre eierskaps-policy uten skjema-endring.
+
+### Versjonshistorikk med Envers (tillegg 2026-07)
+`RegistreringsInfo` alene gir bare siste endring – de tidligere verdiene ble
+overskrevet. Tekstblokk er derfor `@Audited` (Envers), med `tekstblokk_aud` og
+tilsvarende `_aud`-tabeller for element-collectionene i `V166`. Historikken
+eksponeres av `TekstblokkHistorikkService` på `GET /brev/tekstblokker/{id}/historikk`
+bak admin-gatingen, med per-blokk versjonsnummer utledet i servicen (Envers'
+revisjonsnummer deles med alle andre auditerte entiteter).
+`hentVersjonPaaTidspunkt` svarer på «hva sa blokken da vedtaket ble fattet».
+Skrivesiden koster ingenting: alle mutasjoner går allerede gjennom
+`TekstblokkService`.
+
+Avgrensning: malhistorikk er ikke det samme som en kobling brev↔malversjon. Det
+journalførte brevet er fasit for hva som faktisk ble sendt; en eksplisitt kobling
+tas kun hvis fagsiden ber om det.
+
+### Utkast-status (tillegg 2026-07)
+`status` (`UTKAST` | `PUBLISERT`, `V167`, ingen `CHECK` – som for `type`).
+Utkast er ukvalitetssikret vedtakstekst, og liste-DTO-en bærer hele innholdet;
+filtreringen skjer derfor server-side i `finnOversikt`, styrt av admin-togglen i
+controlleren, ikke i klienten. Publisering er en egen operasjon
+(`POST /brev/tekstblokker/{id}/publiser`) – en beslutning, ikke en sideeffekt av
+lagring. Bulk-seeding uten `status` gir `PUBLISERT`, så melosys-console er uendret.
 
 ### Kotlin
 Hele tekstblokk-modulen er skrevet i Kotlin (domain, repository, service,
@@ -95,6 +118,8 @@ frontend-api), i tråd med ADR-0002.
 - Bulk-endepunkt gir effektiv seeding fra melosys-console
 - Liste med innhold gir client-side fritekstsøk (tittel + innhold + tags) uten
   ekstra kall per blokk
+- Envers gir full versjonshistorikk uten kode på skrivesiden, og gjør det mulig å
+  slå opp hvordan en blokk så ut på et gitt tidspunkt
 
 **Avveininger**
 - Tag-join-tabellen krever et JOIN ved aggregering (akseptabelt med <60 unike tags)
@@ -107,7 +132,8 @@ frontend-api), i tråd med ADR-0002.
 
 ## Filer
 
-- Migrasjon: `app/src/main/resources/db/migration/melosysDB/V155__tekstblokker.sql`
+- Migrasjoner: `app/src/main/resources/db/migration/melosysDB/V155__tekstblokker.sql`,
+  `V166__tekstblokk_envers.sql`, `V167__tekstblokk_status.sql`
 - Entity: `domain/src/main/kotlin/no/nav/melosys/domain/tekstblokk/`
 - Repository: `repository/src/main/kotlin/no/nav/melosys/repository/tekstblokk/`
 - Service + sanitizer: `service/src/main/kotlin/no/nav/melosys/service/tekstblokk/`

@@ -5,6 +5,7 @@ import java.util.Locale
 
 import no.nav.melosys.domain.brev.tekstblokk.Tekstblokk
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkOversikt
+import no.nav.melosys.domain.brev.tekstblokk.TekstblokkStatus
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -33,11 +34,14 @@ class TekstblokkService(
         // Tomme lister betyr «gjelder alle» – avgrensningen er valgfri.
         val sakstyper: List<Sakstyper>? = null,
         val behandlingstemaer: List<Behandlingstema>? = null,
+        // PUBLISERT som default holder bulk-seedingen bakoverkompatibel; admin-UI-et
+        // sender UTKAST eksplisitt for nye blokker.
+        val status: TekstblokkStatus = TekstblokkStatus.PUBLISERT,
     )
 
     @Transactional(readOnly = true)
-    fun hentAlleOversikter(type: TekstblokkType?): List<TekstblokkOversikt> {
-        val oversikter = tekstblokkRepository.finnOversikt(type)
+    fun hentAlleOversikter(type: TekstblokkType?, inkluderUtkast: Boolean): List<TekstblokkOversikt> {
+        val oversikter = tekstblokkRepository.finnOversikt(type, inkluderUtkast)
         if (oversikter.isEmpty()) return oversikter
 
         val ider = oversikter.map { it.id }
@@ -56,13 +60,16 @@ class TekstblokkService(
     }
 
     @Transactional(readOnly = true)
-    fun hent(id: Long): Tekstblokk = finnAktiv(id)
+    fun hent(id: Long, inkluderUtkast: Boolean = true): Tekstblokk = finnAktiv(id)
+        // Utkast skjules for ikke-admin på samme måte som slettede blokker: samme 404.
+        .takeIf { inkluderUtkast || it.status != TekstblokkStatus.UTKAST }
         // open-in-view er av, og avgrensningene ligger utenfor EntityGraph-en for å
         // unngå kartesisk produkt – de må derfor lastes her, inne i transaksjonen.
-        .also {
+        ?.also {
             Hibernate.initialize(it.sakstyper)
             Hibernate.initialize(it.behandlingstemaer)
         }
+        ?: throw IkkeFunnetException("Finner ikke tekstblokk med id $id")
 
     private fun finnAktiv(id: Long): Tekstblokk = tekstblokkRepository.findByIdAndSlettetDatoIsNull(id)
         .orElseThrow { IkkeFunnetException("Finner ikke tekstblokk med id $id") }
@@ -82,6 +89,19 @@ class TekstblokkService(
         populerFraInput(tekstblokk, input)
         return tekstblokkRepository.save(tekstblokk).also {
             log.info("Endret {} med id {}: '{}'", it.type, it.id, it.tittel)
+        }
+    }
+
+    /**
+     * Publisering er en egen beslutning, ikke en sideeffekt av lagring: et utkast blir
+     * synlig for saksbehandlere først når en administrator aktivt slipper det ut.
+     */
+    @Transactional
+    fun publiser(id: Long): Tekstblokk {
+        val tekstblokk = hent(id)
+        tekstblokk.status = TekstblokkStatus.PUBLISERT
+        return tekstblokkRepository.save(tekstblokk).also {
+            log.info("Publiserte {} med id {}: '{}'", it.type, id, it.tittel)
         }
     }
 
@@ -121,6 +141,7 @@ class TekstblokkService(
         tekstblokk.tittel = input.tittel.trim()
         tekstblokk.innhold = htmlSanitizer.saniter(input.innhold) ?: ""
         tekstblokk.type = input.type
+        tekstblokk.status = input.status
         tekstblokk.endretAvNavn = endretAvNavn
         tekstblokk.tags.clear()
         tekstblokk.tags.addAll(normaliserTags(input.tags))

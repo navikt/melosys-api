@@ -19,10 +19,16 @@ import java.time.Instant
 import no.nav.melosys.domain.RegistreringsInfo
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import org.hibernate.envers.AuditOverride
+import org.hibernate.envers.Audited
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
 @Entity
 @Table(name = "TEKSTBLOKK")
+// Envers gir versjonshistorikk uten skriveside-kode – alle mutasjoner går gjennom
+// TekstblokkService. AuditOverride tar med registreringsfeltene fra superklassen.
+@Audited
+@AuditOverride(forClass = RegistreringsInfo::class)
 @EntityListeners(AuditingEntityListener::class)
 class Tekstblokk(
     @Id
@@ -47,6 +53,11 @@ class Tekstblokk(
     // Null = aktiv. Se V164 – sletting skjuler raden i stedet for å fjerne den.
     @Column(name = "slettet_dato")
     var slettetDato: Instant? = null,
+
+    // Utkast er ukvalitetssikret vedtakstekst og vises kun for administratorer. Se V167.
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    var status: TekstblokkStatus = TekstblokkStatus.PUBLISERT,
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "TEKSTBLOKK_TAG", joinColumns = [JoinColumn(name = "tekstblokk_id")])
