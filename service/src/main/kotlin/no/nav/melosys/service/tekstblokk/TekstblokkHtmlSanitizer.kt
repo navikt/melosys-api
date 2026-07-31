@@ -45,8 +45,8 @@ class TekstblokkHtmlSanitizer {
         val markeringer = spans.filter { !it.erRåttToken() && it.classNames().any(MARKERINGSKLASSER::contains) }
         if (tokener.isEmpty() && markeringer.isEmpty()) return html
 
-        // Innholdet forkastes bevisst: å beholde den utfylte verdien ville persistert
-        // behandlingsspesifikke persondata i det delte biblioteket
+        // Innholdet forkastes bevisst: den utfylte verdien ville persistert behandlingsspesifikke
+        // persondata i det delte biblioteket, og det gjorte valget ville låst blokken til ett alternativ
         tokener.forEach { it.replaceWith(TextNode(it.råttToken())) }
         // Dokumentrekkefølge: ytterste span pakkes ut først, nøstede markeringer henger fortsatt med.
         // En utfylt span uten gyldig nøkkel havner her og beholder teksten sin: den er ikke skillbar
@@ -57,18 +57,25 @@ class TekstblokkHtmlSanitizer {
 
     private fun Element.erRåttToken(): Boolean = erUtfyltPlaceholder() || erValgtPlaceholder()
 
+    // Valgtokenet bygges av de filtrerte alternativene, ikke av rå-attributtet, så et normalisert
+    // valg (data-valg="A||B|") lagres på samme form som web ville skrevet det: {velg:A|B}
     private fun Element.råttToken(): String =
-        if (erUtfyltPlaceholder()) "{${attr("data-placeholder").trim()}}" else "{$VELG_PREFIKS${attr("data-valg").trim()}}"
+        if (erUtfyltPlaceholder()) "{${attr("data-placeholder").trim()}}"
+        else "{$VELG_PREFIKS${attr("data-valg").tilValgAlternativer().joinToString("|")}}"
 
     // Ugyldig nøkkel skrives ikke om – et misformet attributt ville gitt et korrupt token i lagret innhold
     private fun Element.erUtfyltPlaceholder(): Boolean = NØKKELMØNSTER.matches(attr("data-placeholder").trim())
 
     // Egen validering enn for nøkler: | og : hører hjemme i en alternativliste, men ikke i NØKKELMØNSTER
     private fun Element.erValgtPlaceholder(): Boolean =
-        hasClass(VALGT_KLASSE) && attr("data-valg").trim().erAlternativliste()
+        hasClass(VALGT_KLASSE) && attr("data-valg").tilValgAlternativer().isNotEmpty()
 
-    private fun String.erAlternativliste(): Boolean =
-        none(UGYLDIGE_VALGTEGN::contains) && split("|").let { it.size >= 2 && it.all(String::isNotBlank) }
+    // Speiler parseValgAlternativer i melosys-web src/services/modules/placeholdere.ts: blanke deler
+    // filtreres bort før kravet om minst to alternativer, slik at et valg web regner som gyldig ikke
+    // forsvinner stille ved lagring. Tom liste betyr ugyldig.
+    private fun String.tilValgAlternativer(): List<String> =
+        if (any(UGYLDIGE_VALGTEGN::contains)) emptyList()
+        else split("|").map(String::trim).filter(String::isNotBlank).takeIf { it.size >= 2 }.orEmpty()
 
     /** Andre klasser kan bære formatering, så spanen beholdes hvis det er noen igjen. */
     private fun Element.fjernMarkeringsklasser() {
@@ -79,7 +86,7 @@ class TekstblokkHtmlSanitizer {
     private companion object {
         private const val VALGT_KLASSE = "placeholder-valgt"
 
-        // Må speile placeholder-klassene i MARKERINGSKLASSER i melosys-web
+        // Må speile placeholder-klassene i PLACEHOLDER_MARKERINGSKLASSER i melosys-web
         // src/services/modules/placeholdere.ts. Web-listen har i tillegg bracketed-text for
         // opprydding ved innsetting – den er master-editorens egen klasse og skal ikke fjernes
         // ved lagring her, ellers endres innhold som finnes i biblioteket fra før.
