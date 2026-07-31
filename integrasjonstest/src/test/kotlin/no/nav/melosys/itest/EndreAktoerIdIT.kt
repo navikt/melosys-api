@@ -17,6 +17,7 @@ import no.nav.melosys.integrasjon.joark.HentJournalposterTilknyttetSakRequest
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.repository.AktoerRepository
 import no.nav.melosys.repository.FagsakRepository
+import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
@@ -67,6 +68,9 @@ class EndreAktoerIdIT(
     @MockkBean
     lateinit var joarkFasade: JoarkFasade
 
+    @MockkBean(relaxed = true)
+    lateinit var persondataFasade: PersondataFasade
+
     @AfterEach
     fun resetSubjectHandler() {
         SubjectHandler.set(SpringSubjectHandler(SpringTokenValidationContextHolder()))
@@ -113,7 +117,7 @@ class EndreAktoerIdIT(
         aktoerRepository.save(brukerAktor)
         fagsak.aktører.add(brukerAktor)
         fagsakRepository.save(fagsak)
-        every { joarkFasade.oppdaterJournalposterMedNyAktørId(any(), any(), any()) } returns Unit
+        every { joarkFasade.oppdaterJournalposterMedNyAktørId(any(), any(), any()) } returns emptyMap()
 
         mockMvc.perform(
             MockMvcRequestBuilders.put("/admin/fagsaker/$saksnummer/endreAktoerId/$nyAktoerid")

@@ -2,7 +2,9 @@ package no.nav.melosys.integrasjon.joark;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -164,9 +166,9 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public void oppdaterJournalposterMedNyAktørId(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
-                                                  String gammelAktørId,
-                                                  String nyAktørId) {
+    public Map<String, String> oppdaterJournalposterMedNyAktørId(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
+                                                                 String gammelAktørId,
+                                                                 String nyAktørId) {
         String saksnummer = hentJournalposterTilknyttetSakRequest.saksnummer();
 
         List<Journalpost> journalposterSomSkalFlyttes = hentJournalposterTilknyttetSak(hentJournalposterTilknyttetSakRequest)
@@ -178,10 +180,28 @@ public class JoarkService implements JoarkFasade {
         log.info("Fant {} journalpost(er) med gammel aktørId som skal flyttes til ny aktørId for sak {}",
             journalposterSomSkalFlyttes.size(), saksnummer);
 
-        journalposterSomSkalFlyttes.forEach(journalpost -> flyttJournalpostTilNyAktørId(journalpost, nyAktørId, saksnummer));
+        Map<String, String> flyttedeJournalposter = new LinkedHashMap<>();
+        List<String> feilendeJournalposter = new ArrayList<>();
+
+        for (Journalpost journalpost : journalposterSomSkalFlyttes) {
+            String journalpostId = journalpost.getJournalpostId();
+            try {
+                flyttedeJournalposter.put(journalpostId, flyttJournalpostTilNyAktørId(journalpost, nyAktørId, saksnummer));
+            } catch (TekniskException | WebClientRequestException e) {
+                feilendeJournalposter.add(journalpostId);
+                log.error("Klarte ikke flytte journalpost {} til ny aktørId for sak {}", journalpostId, saksnummer, e);
+            }
+        }
+
+        if (!feilendeJournalposter.isEmpty()) {
+            log.error("{} av {} journalpost(er) ble ikke flyttet til ny aktørId for sak {}: {}",
+                feilendeJournalposter.size(), journalposterSomSkalFlyttes.size(), saksnummer, feilendeJournalposter);
+        }
+
+        return flyttedeJournalposter;
     }
 
-    private void flyttJournalpostTilNyAktørId(Journalpost journalpost, String nyAktørId, String saksnummer) {
+    private String flyttJournalpostTilNyAktørId(Journalpost journalpost, String nyAktørId, String saksnummer) {
         String journalpostId = journalpost.getJournalpostId();
 
         journalpostapiClient.feilregistrerSakstilknytning(journalpostId);
@@ -190,6 +210,7 @@ public class JoarkService implements JoarkFasade {
         try {
             String nyJournalpostId = journalpostapiClient.knyttTilAnnenSak(journalpostId, knyttTilAnnenSakRequest).getNyJournalpostId();
             log.info("Journalpost {} kopiert til ny journalpost {} med ny aktørId for sak {}", journalpostId, nyJournalpostId, saksnummer);
+            return nyJournalpostId;
         } catch (TekniskException | WebClientRequestException e) {
             try {
                 journalpostapiClient.opphevFeilregistrertSakstilknytning(journalpostId);

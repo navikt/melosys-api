@@ -1,5 +1,6 @@
 package no.nav.melosys.service.aktoer
 
+import mu.KotlinLogging
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Aktoersroller
@@ -10,16 +11,20 @@ import no.nav.melosys.integrasjon.joark.HentJournalposterTilknyttetSakRequest
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.repository.AktoerRepository
 import no.nav.melosys.repository.FagsakRepository
+import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+
+private val log = KotlinLogging.logger { }
 
 @Service
 class AktoerService(
     private val aktørRepository: AktoerRepository,
     private val fagsakRepository: FagsakRepository,
     private val aksesskontroll: Aksesskontroll,
-    private val joarkFasade: JoarkFasade
+    private val joarkFasade: JoarkFasade,
+    private val persondataFasade: PersondataFasade
 ) {
     fun hentfagsakAktører(fagsak: Fagsak, aktoersrolle: Aktoersroller?): List<Aktoer> {
         if (aktoersrolle == null) {
@@ -93,39 +98,70 @@ class AktoerService(
     /**
      * Orkestrerer endring av aktørId for bruker på en fagsak.
      *
-     * Bevisst IKKE @Transactional: oppdatering av journalposter i Joark er eksterne HTTP-kall
-     * som ikke skal holde en DB-transaksjon (og DB-tilkobling) åpen mens de pågår. Selve
-     * aktør-oppdateringen persisteres via [AktoerRepository.save], som kjører i sin egen transaksjon.
+     * Rekkefølgen er bevisst: journalpostene flyttes i Joark FØR endringene skrives til databasen.
+     * Feiler DB-skrivingen står gammel aktørId fortsatt på fagsaken, og et nytt forsøk finner ingen
+     * journalposter å flytte (de er allerede flyttet) og fullfører kun DB-delen. Motsatt rekkefølge
+     * ville mistet gammel aktørId, og en feilet Joark-oppdatering kunne ikke gjenopptas.
+     *
+     * Bevisst IKKE @Transactional: Joark-kallene er eksterne HTTP-kall som ikke skal holde en
+     * DB-transaksjon (og DB-tilkobling) åpen mens de pågår. Endringene skrives til slutt med ett
+     * [FagsakRepository.save], som cascader til både aktører og behandlinger i én transaksjon.
      */
     fun endreAktørIdForBruker(saksnummer: String, nyAktørId: String) {
-        if (nyAktørId.length != AKTOER_ID_LENGDE) {
-            throw FunksjonellException("Aktør ID må være $AKTOER_ID_LENGDE tegn lang: $nyAktørId")
+        if (nyAktørId.length != AKTOER_ID_LENGDE || !nyAktørId.all(Char::isDigit)) {
+            throw FunksjonellException("Aktør ID må være $AKTOER_ID_LENGDE siffer, var: $nyAktørId")
         }
         val fagsak = fagsakRepository.findById(saksnummer)
             .orElseThrow { IkkeFunnetException("Finner ikke fagsak med saksnummer: $saksnummer") }
-        val gammelAktørId = fagsak.hentBrukersAktørID()
+        val bruker = fagsak.hentBruker()
+            ?: throw FunksjonellException("Finner ikke bruker på fagsak $saksnummer")
+        val gammelAktørId = bruker.aktørId
+            ?: throw FunksjonellException("Bruker på sak $saksnummer mangler aktørId")
+
+        if (gammelAktørId == nyAktørId) {
+            throw FunksjonellException("Bruker på sak $saksnummer har allerede aktørId $nyAktørId")
+        }
+
+        // Verifiser at aktørId-en finnes i PDL før journalpostene flyttes. Uten dette flytter en
+        // tastefeil på 13 siffer alle dokumentene på saken til en ukjent aktør, og journalpostene
+        // får nye IDer i arkivet på veien.
+        persondataFasade.hentAktørIdForIdent(nyAktørId)
 
         aksesskontroll.auditEndringFraAdminConsole(
             nyAktørId,
             "Endring av aktør ID for sak $saksnummer fra $gammelAktørId til $nyAktørId"
         )
 
-        joarkFasade.oppdaterJournalposterMedNyAktørId(
+        val flyttedeJournalposter = joarkFasade.oppdaterJournalposterMedNyAktørId(
             HentJournalposterTilknyttetSakRequest(fagsak.gsakSaksnummer, fagsak.saksnummer),
             gammelAktørId,
             nyAktørId
         )
 
-        endreAktørIdForBruker(fagsak, nyAktørId)
+        oppdaterInitierendeJournalpostIder(fagsak, flyttedeJournalposter)
+        bruker.aktørId = nyAktørId
+        fagsakRepository.save(fagsak)
     }
 
-    @Transactional
-    fun endreAktørIdForBruker(fagsak: Fagsak, nyAktørId: String) {
-        val eksisterendeBrukerAktør = fagsak.aktører.firstOrNull { it.rolle == Aktoersroller.BRUKER }
-            ?: throw IllegalArgumentException("Finner ikke BRUKER aktør for ${fagsak.saksnummer}")
+    /**
+     * Journalpostene har fått nye IDer i arkivet, så behandlinger som peker på en flyttet journalpost
+     * må oppdateres. Uten dette peker initierendeJournalpostId på en journalpost som ikke lenger er
+     * knyttet til saken. Endringene lagres av kalleren.
+     */
+    private fun oppdaterInitierendeJournalpostIder(fagsak: Fagsak, flyttedeJournalposter: Map<String, String>) {
+        if (flyttedeJournalposter.isEmpty()) return
 
-        eksisterendeBrukerAktør.aktørId = nyAktørId
-        aktørRepository.save(eksisterendeBrukerAktør)
+        val oppdaterteBehandlinger = fagsak.behandlinger.mapNotNull { behandling ->
+            val nyJournalpostId = flyttedeJournalposter[behandling.initierendeJournalpostId] ?: return@mapNotNull null
+            behandling.initierendeJournalpostId = nyJournalpostId
+            behandling
+        }
+
+        if (oppdaterteBehandlinger.isNotEmpty()) {
+            log.info {
+                "Oppdaterte initierendeJournalpostId på ${oppdaterteBehandlinger.size} behandling(er) for sak ${fagsak.saksnummer}"
+            }
+        }
     }
 
     private fun lagArbeidsgiveraktør(fagsak: Fagsak, orgnummer: String) {
