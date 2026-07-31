@@ -209,13 +209,32 @@ class PlaceholderServiceTest {
         verdier["medlemskapsperiode-fra"] shouldBe PlaceholderVerdi(
             nokkel = "medlemskapsperiode-fra",
             verdi = "01.01.2023",
-            kandidater = listOf("01.03.2024", "01.01.2023"),
+            kandidater = listOf("01.01.2023", "01.03.2024"),
         )
         verdier["medlemskapsperiode-til"] shouldBe PlaceholderVerdi(
             nokkel = "medlemskapsperiode-til",
             verdi = "28.02.2027",
             kandidater = listOf("28.02.2027", "29.02.2024"),
         )
+    }
+
+    @Test
+    fun `lovvalgssaker utelater medlemskapsnoklene, som ellers ville duplisert lovvalgsperioden`() {
+        medSakskontekst(
+            sakskontekst(
+                erLovvalg = true,
+                lovvalgsperiode = PeriodeData(dato(1, 3, 2024), dato(28, 2, 2027)),
+                medlemskapsperiodeFom = dato(1, 3, 2024),
+                medlemskapsperiodeTom = dato(28, 2, 2027),
+                avgiftspliktigPerioder = listOf(innvilget(dato(1, 3, 2024), dato(28, 2, 2027))),
+            )
+        )
+
+        val verdier = verdier()
+
+        verdier["lovvalgsperiode-fra"]?.verdi shouldBe "01.03.2024"
+        verdier.keys shouldNotContain "medlemskapsperiode-fra"
+        verdier.keys shouldNotContain "medlemskapsperiode-til"
     }
 
     @Test
@@ -269,6 +288,27 @@ class PlaceholderServiceTest {
     }
 
     @Test
+    fun `apen forhaandsvalgt soknadsperiode utelater til-feltet i stedet for aa laane sluttdato fra alternativet`() {
+        medSakskontekst(
+            sakskontekst(
+                soknadsperioder = listOf(
+                    PeriodeData(dato(1, 3, 2024), null),
+                    PeriodeData(dato(1, 4, 2024), dato(31, 3, 2027)),
+                ),
+            )
+        )
+
+        val verdier = verdier()
+
+        verdier["soknadsperiode-fra"] shouldBe PlaceholderVerdi(
+            nokkel = "soknadsperiode-fra",
+            verdi = "01.03.2024",
+            kandidater = listOf("01.03.2024", "01.04.2024"),
+        )
+        verdier.keys shouldNotContain "soknadsperiode-til"
+    }
+
+    @Test
     fun `bostedsadressen leveres som en linje med postnummer og poststed hver for seg`() {
         val verdier = verdier()
 
@@ -306,6 +346,28 @@ class PlaceholderServiceTest {
             "Eldst 1, 0155, Oslo, Norge",
             "Uten dato 1, 0155, Oslo, Norge",
         )
+    }
+
+    @Test
+    fun `ugyldig adresse er ikke kandidat`() {
+        every { persondataFasade.hentPerson(FagsakTestFactory.BRUKER_AKTØR_ID) } returns persondata(
+            oppholdsadresser = listOf(
+                oppholdsadresse("Gyldig", registrertDato = LocalDateTime.of(2020, 1, 1, 0, 0)),
+                // Norsk adresse uten postnummer er utgått eller ufullstendig i PDL – erGyldig() er false
+                oppholdsadresse("Uten postnummer", registrertDato = LocalDateTime.of(2026, 1, 1, 0, 0), postnummer = null),
+            )
+        )
+
+        verdier()["oppholdsadresse"] shouldBe PlaceholderVerdi("oppholdsadresse", "Gyldig 1, 0155, Oslo, Norge")
+    }
+
+    @Test
+    fun `c-o-adressenavnet kommer forst i adresselinjen`() {
+        every { persondataFasade.hentPerson(FagsakTestFactory.BRUKER_AKTØR_ID) } returns
+            persondata(bostedsadresse = bostedsadresse(coAdressenavn = "c/o Kari Nordmann"))
+
+        verdier()["bostedsadresse"] shouldBe
+            PlaceholderVerdi("bostedsadresse", "c/o Kari Nordmann, Storgata 1, 0155, Oslo, Norge")
     }
 
     @Test
@@ -440,6 +502,7 @@ class PlaceholderServiceTest {
 
     private fun sakskontekst(
         brukersAktørID: String? = FagsakTestFactory.BRUKER_AKTØR_ID,
+        erLovvalg: Boolean = false,
         lovvalgsperiode: PeriodeData? = null,
         medlemskapsperiodeFom: LocalDate? = null,
         medlemskapsperiodeTom: LocalDate? = null,
@@ -451,6 +514,7 @@ class PlaceholderServiceTest {
     ) = PlaceholderSakskontekst(
         saksnummer = "MEL-12345",
         brukersAktørID = brukersAktørID,
+        erLovvalg = erLovvalg,
         lovvalgsperiode = lovvalgsperiode,
         medlemskapsperiodeFom = medlemskapsperiodeFom,
         medlemskapsperiodeTom = medlemskapsperiodeTom,
@@ -499,19 +563,30 @@ class PlaceholderServiceTest {
         emptySet(),
     )
 
-    private fun strukturertAdresse(gatenavn: String = "Storgata", landkode: String = "NO") = StrukturertAdresse(
+    private fun strukturertAdresse(
+        gatenavn: String = "Storgata",
+        landkode: String = "NO",
+        postnummer: String? = "0155",
+    ) = StrukturertAdresse(
         gatenavn = gatenavn,
         husnummerEtasjeLeilighet = "1",
-        postnummer = "0155",
+        postnummer = postnummer,
         poststed = "Oslo",
         landkode = landkode,
     )
 
-    private fun bostedsadresse(landkode: String = "NO") =
-        Bostedsadresse(strukturertAdresse(landkode = landkode), null, null, null, Master.PDL.name, null, false)
+    private fun bostedsadresse(landkode: String = "NO", coAdressenavn: String? = null) =
+        Bostedsadresse(strukturertAdresse(landkode = landkode), coAdressenavn, null, null, Master.PDL.name, null, false)
 
-    private fun oppholdsadresse(gatenavn: String, registrertDato: LocalDateTime?, erHistorisk: Boolean = false) =
-        Oppholdsadresse(strukturertAdresse(gatenavn), null, null, null, Master.PDL.name, null, registrertDato, erHistorisk)
+    private fun oppholdsadresse(
+        gatenavn: String,
+        registrertDato: LocalDateTime?,
+        erHistorisk: Boolean = false,
+        postnummer: String? = "0155",
+    ) = Oppholdsadresse(
+        strukturertAdresse(gatenavn, postnummer = postnummer),
+        null, null, null, Master.PDL.name, null, registrertDato, erHistorisk,
+    )
 
     private fun kontaktadresse(
         registrertDato: LocalDateTime?,

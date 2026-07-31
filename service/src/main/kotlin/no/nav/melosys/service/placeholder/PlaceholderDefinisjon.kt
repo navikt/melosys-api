@@ -50,7 +50,7 @@ class PlaceholderKontekst(
         }
     }
 
-    // Egen lazy for EREG: HTTP-kallet skjer kun når {arbeidsgiver-norge} faktisk er i bruk
+    // Egen lazy for EREG: ett HTTP-kall per oppslag, og ingen når saken mangler orgnumre eller registeret ikke spør
     private val norskeArbeidsgivernavnResultat: Result<List<String>> by lazy {
         val orgnumre = sakskontekst.norskeArbeidsgivereOrgnumre
         try {

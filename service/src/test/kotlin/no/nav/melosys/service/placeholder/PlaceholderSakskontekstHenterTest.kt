@@ -77,6 +77,7 @@ class PlaceholderSakskontekstHenterTest {
 
         sakskontekst.saksnummer shouldBe "MEL-12345"
         sakskontekst.brukersAktørID shouldBe FagsakTestFactory.BRUKER_AKTØR_ID
+        sakskontekst.erLovvalg shouldBe false
         sakskontekst.medlemskapsperiodeFom shouldBe LocalDate.of(2023, 1, 1)
         sakskontekst.medlemskapsperiodeTom shouldBe LocalDate.of(2027, 2, 28)
         sakskontekst.avgiftspliktigPerioder shouldContainExactly listOf(
@@ -110,6 +111,7 @@ class PlaceholderSakskontekstHenterTest {
 
     @Test
     fun `lovvalgssaker henter lovvalgsperioden som eneste avgiftspliktige periode`() {
+        medBehandling(behandling(sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG))
         every { behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(BEHANDLING_ID) } returns
             Behandlingsresultat.forTest {
                 behandling { fagsak { tema = Sakstemaer.MEDLEMSKAP_LOVVALG } }
@@ -121,8 +123,20 @@ class PlaceholderSakskontekstHenterTest {
 
         val sakskontekst = henter.hent(BEHANDLING_ID)
 
+        sakskontekst.erLovvalg shouldBe true
         sakskontekst.lovvalgsperiode shouldBe PeriodeData(LocalDate.of(2024, 3, 1), LocalDate.of(2027, 2, 28), erInnvilget = true)
         sakskontekst.avgiftspliktigPerioder shouldContainExactly listOf(sakskontekst.lovvalgsperiode!!)
+        // Periodene er lovvalgsperioder, så medlemskapsnøklene skal ikke få dem under sitt navn
+        sakskontekst.medlemskapsperioder().shouldBeNull()
+    }
+
+    @Test
+    fun `arbeidslandene sorteres paa landkode slik at forhaandsvalget er det samme hver gang`() {
+        every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(BEHANDLING_ID) } returns
+            setOf(Land_iso2.SE, Land_iso2.DE)
+        every { landnavnOppslag.landnavn(Land_iso2.SE.kode) } returns "Sverige"
+
+        henter.hent(BEHANDLING_ID).arbeidsland shouldContainExactly listOf("Tyskland", "Sverige")
     }
 
     @Test
@@ -154,11 +168,12 @@ class PlaceholderSakskontekstHenterTest {
 
     private fun behandling(
         utsendingsperiode: Periode = Periode(LocalDate.of(2024, 4, 1), LocalDate.of(2027, 3, 31)),
+        sakstema: Sakstemaer = Sakstemaer.TRYGDEAVGIFT,
     ): Behandling = Behandling.forTest {
         id = BEHANDLING_ID
         fagsak {
             saksnummer = "MEL-12345"
-            tema = Sakstemaer.TRYGDEAVGIFT
+            tema = sakstema
             medBruker()
         }
         mottatteOpplysninger {
