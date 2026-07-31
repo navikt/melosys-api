@@ -25,6 +25,7 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
@@ -323,6 +324,46 @@ class PlaceholderSakskontekstHenterTest {
         val fakta = henter.hent(BEHANDLING_ID).fakta
 
         fakta.erDelvisInnvilgelse.shouldBeNull()
+        fakta.erOpphørt shouldBe false
+    }
+
+    // Vakuumfellen: predikatene svarer FALSE på et resultat som ikke er vurdert, og ville slettet vedtaksteksten
+    @Test
+    fun `ufastsatt behandlingsresultat utelater innvilgelse, avslag og opphort`() {
+        medBehandlingsresultat(
+            Behandlingsresultat.forTest {
+                behandling { fagsak { tema = Sakstemaer.TRYGDEAVGIFT } }
+                type = Behandlingsresultattyper.IKKE_FASTSATT
+            }
+        )
+
+        val fakta = henter.hent(BEHANDLING_ID).fakta
+
+        fakta.erInnvilgelse.shouldBeNull()
+        fakta.erAvslag.shouldBeNull()
+        fakta.erOpphørt.shouldBeNull()
+        // De øvrige faktaene henger ikke på resultattypen
+        fakta.erFørstegangsvurdering shouldBe true
+    }
+
+    @Test
+    fun `fastsatt innvilgelse gir innvilgelse og ikke avslag`() {
+        medBehandling(behandling(sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG))
+        medBehandlingsresultat(
+            Behandlingsresultat.forTest {
+                behandling { fagsak { tema = Sakstemaer.MEDLEMSKAP_LOVVALG } }
+                type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+                lovvalgsperiode {
+                    fom = LocalDate.of(2024, 3, 1)
+                    tom = LocalDate.of(2027, 2, 28)
+                }
+            }
+        )
+
+        val fakta = henter.hent(BEHANDLING_ID).fakta
+
+        fakta.erInnvilgelse shouldBe true
+        fakta.erAvslag shouldBe false
         fakta.erOpphørt shouldBe false
     }
 

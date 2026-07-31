@@ -10,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.service.LandvelgerService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
@@ -69,9 +70,10 @@ class PlaceholderSakskontekstHenter(
     /** Betingelsene beregnes ferdig til Boolean her, i transaksjonen: alt under Behandlingsresultat er lazy. */
     private fun betingelseFakta(behandlingId: Long, behandling: Behandling, behandlingsresultat: Behandlingsresultat?) =
         BetingelseFakta(
-            erInnvilgelse = fraResultat(behandlingId, behandlingsresultat, "innvilgelse") { it.erInnvilgelse() },
-            erAvslag = fraResultat(behandlingId, behandlingsresultat, "avslag") { it.erAvslag() },
-            erOpphørt = fraResultat(behandlingId, behandlingsresultat, "opphørt") { it.erOpphørt() },
+            // Vedtaksnøklene hviler på resultattypen, som står IKKE_FASTSATT til vedtaket er vurdert – der er ingen av dem kjent
+            erInnvilgelse = fraFastsattResultat(behandlingId, behandlingsresultat, "innvilgelse") { it.erInnvilgelse() },
+            erAvslag = fraFastsattResultat(behandlingId, behandlingsresultat, "avslag") { it.erAvslag() },
+            erOpphørt = fraFastsattResultat(behandlingId, behandlingsresultat, "opphørt") { it.erOpphørt() },
             // finnAnmodningsperiode() kaster ved flere perioder – delfeltet fanger, og betingelsen utelates
             erDelvisInnvilgelse = fraResultat(behandlingId, behandlingsresultat, "delvis innvilgelse") { resultat ->
                 resultat.finnAnmodningsperiode()
@@ -112,6 +114,19 @@ class PlaceholderSakskontekstHenter(
         navn: String,
         oppslag: (Behandlingsresultat) -> T,
     ): T? = behandlingsresultat?.let { resultat -> delfelt(behandlingId, navn) { oppslag(resultat) } }
+
+    private fun fraFastsattResultat(
+        behandlingId: Long,
+        behandlingsresultat: Behandlingsresultat?,
+        navn: String,
+        oppslag: (Behandlingsresultat) -> Boolean,
+    ): Boolean? = fraResultat(behandlingId, behandlingsresultat, navn) { resultat ->
+        if (resultat.erResultattypeFastsatt()) oppslag(resultat) else null
+    }
+
+    /** Nye behandlingsresultater opprettes som IKKE_FASTSATT, og da svarer resultatpredikatene FALSE i vakuum. */
+    private fun Behandlingsresultat.erResultattypeFastsatt(): Boolean =
+        type != null && type != Behandlingsresultattyper.IKKE_FASTSATT
 
     /** Null når saken ikke har inntektsgrunnlag: da er ingen av inntektsbetingelsene kjent. */
     private fun Behandlingsresultat.inntektskilder(): Set<Inntektskildetype>? =
