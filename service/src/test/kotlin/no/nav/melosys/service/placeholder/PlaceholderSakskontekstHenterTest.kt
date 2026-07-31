@@ -180,15 +180,32 @@ class PlaceholderSakskontekstHenterTest {
         fakta.erOpphørt shouldBe false
         fakta.erDelvisInnvilgelse shouldBe false
         fakta.harÅpenSluttdato shouldBe false
-        fakta.harLønnFraNorge shouldBe false
-        fakta.harInntektFraUtlandet shouldBe false
         fakta.erUtsending shouldBe false
         fakta.erPensjonist shouldBe false
         fakta.erFørstegangsvurdering shouldBe true
         fakta.erNyVurdering shouldBe false
-        // Uten trygdeavgiftsperioder er hverken skatteplikt eller mottaker kjent
+        // Uten trygdeavgiftsperioder er verken skatteplikt, inntektskilde eller mottaker kjent
         fakta.erSkattepliktig.shouldBeNull()
+        fakta.harLønnFraNorge.shouldBeNull()
+        fakta.harInntektFraUtlandet.shouldBeNull()
         fakta.trygdeavgiftTilSkatt.shouldBeNull()
+    }
+
+    // Åpen sluttdato er en påstand om de innvilgede periodene – uten dem finnes ingen påstand
+    @Test
+    fun `avslag uten innvilgede perioder utelater apen sluttdato`() {
+        medBehandlingsresultat(
+            Behandlingsresultat.forTest {
+                behandling { fagsak { tema = Sakstemaer.TRYGDEAVGIFT } }
+                medlemskapsperiode {
+                    fom = LocalDate.of(2024, 3, 1)
+                    tom = null
+                    innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
+                }
+            }
+        )
+
+        henter.hent(BEHANDLING_ID).fakta.harÅpenSluttdato.shouldBeNull()
     }
 
     @Test

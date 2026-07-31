@@ -16,7 +16,9 @@ import java.time.Instant
 
 /**
  * Verifiserer at Envers-oppsettet (V166) faktisk skriver revisjoner for tekstblokker.
- * Hver lagring skjer i sin egen transaksjon, så den gir én revisjon hver.
+ * Hver lagring skjer i sin egen transaksjon, så den gir én revisjon hver. Rekkefølgen
+ * i historikken følger revisjonsnummeret, ikke tidsstempelet – to lagringer på rad
+ * lander gjerne på samme millisekund.
  */
 class TekstblokkHistorikkServiceIT(
     @Autowired val tekstblokkHistorikkService: TekstblokkHistorikkService,
@@ -46,6 +48,8 @@ class TekstblokkHistorikkServiceIT(
         val id = requireNotNull(lagret.id)
         val førEndring = Instant.now()
 
+        // Oppslaget er tidsbasert (le på timestamp), så endringen må lande på et senere millisekund
+        Thread.sleep(2)
         lagret.tittel = "Andre utgave"
         tekstblokkRepository.save(lagret)
 

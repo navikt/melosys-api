@@ -6,6 +6,7 @@ import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
@@ -46,6 +47,7 @@ class PlaceholderSakskontekstHenter(
         return PlaceholderSakskontekst(
             saksnummer = fagsak.saksnummer,
             brukersAktørID = fagsak.finnBrukersAktørID(),
+            sakstype = fagsak.type,
             erLovvalg = fagsak.erLovvalg(),
             lovvalgsperiode = behandlingsresultat?.let { lovvalgsperiode(behandlingId, it) },
             medlemskapsperiodeFom = behandlingsresultat?.let {
@@ -75,18 +77,21 @@ class PlaceholderSakskontekstHenter(
                     .map { it.anmodningsperiodeSvar?.erGyldigDelvisInnvilgelse() == true }
                     .orElse(false)
             },
-            harÅpenSluttdato = fraResultat(behandlingId, behandlingsresultat, "åpen sluttdato") {
-                it.utledAvgiftspliktigperioderTom() == null
+            // Uten innvilgede perioder finnes ingen sluttdato å ha åpen, og betingelsen utelates
+            harÅpenSluttdato = fraResultat(behandlingId, behandlingsresultat, "åpen sluttdato") { resultat ->
+                if (resultat.finnAvgiftspliktigPerioder().none { it.erInnvilget() }) null
+                else resultat.utledAvgiftspliktigperioderTom() == null
             },
-            // Ukjent skatteplikttype er ikke det samme som «ikke skattepliktig» – da utelates betingelsen
+            // utledSkatteplikttype() svarer SKATTEPLIKTIG i vakuum – uten perioder er faktumet ukjent
             erSkattepliktig = fraResultat(behandlingId, behandlingsresultat, "skattepliktig") { resultat ->
-                resultat.utledSkatteplikttype()?.let { it == Skatteplikttype.SKATTEPLIKTIG }
+                resultat.trygdeavgiftsperioder.takeIf { it.isNotEmpty() }
+                    ?.let { resultat.utledSkatteplikttype() == Skatteplikttype.SKATTEPLIKTIG }
             },
             harLønnFraNorge = fraResultat(behandlingId, behandlingsresultat, "lønn fra Norge") { resultat ->
-                resultat.hentInntektsperioder().any { it.type == Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE }
+                resultat.inntektskilder()?.contains(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE)
             },
             harInntektFraUtlandet = fraResultat(behandlingId, behandlingsresultat, "inntekt fra utlandet") { resultat ->
-                resultat.hentInntektsperioder().any { it.type == Inntektskildetype.INNTEKT_FRA_UTLANDET }
+                resultat.inntektskilder()?.contains(Inntektskildetype.INNTEKT_FRA_UTLANDET)
             },
             // Ren beregning over trygdeavgiftsperiodene; uten perioder har mottakeren ingen mening
             trygdeavgiftTilSkatt = fraResultat(behandlingId, behandlingsresultat, "trygdeavgift til skatt") { resultat ->
@@ -106,6 +111,10 @@ class PlaceholderSakskontekstHenter(
         navn: String,
         oppslag: (Behandlingsresultat) -> T,
     ): T? = behandlingsresultat?.let { resultat -> delfelt(behandlingId, navn) { oppslag(resultat) } }
+
+    /** Null når saken ikke har inntektsgrunnlag: da er ingen av inntektsbetingelsene kjent. */
+    private fun Behandlingsresultat.inntektskilder(): Set<Inntektskildetype>? =
+        hentInntektsperioder().mapNotNull { it.type }.toSet().takeIf { it.isNotEmpty() }
 
     private fun lovvalgsperiode(behandlingId: Long, behandlingsresultat: Behandlingsresultat): PeriodeData? =
         delfelt(behandlingId, "lovvalgsperiode") { behandlingsresultat.finnLovvalgsperiode().getOrNull()?.let(::periodeData) }
@@ -182,6 +191,7 @@ class PlaceholderLandnavnOppslag(private val kodeverkService: KodeverkService) {
 data class PlaceholderSakskontekst(
     val saksnummer: String,
     val brukersAktørID: String?,
+    val sakstype: Sakstyper? = null,
     val erLovvalg: Boolean = false,
     val lovvalgsperiode: PeriodeData? = null,
     val medlemskapsperiodeFom: LocalDate? = null,

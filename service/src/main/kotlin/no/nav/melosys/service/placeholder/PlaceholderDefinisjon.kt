@@ -28,7 +28,11 @@ data class BetingelseDefinisjon(
     val beskrivelse: String,
     val sakstyper: List<Sakstyper> = emptyList(),
     val vurdering: (PlaceholderKontekst) -> Boolean?,
-)
+) {
+    /** Ukjent sakstype slipper gjennom: fakta avgjør da alene, framfor at betingelsen forsvinner stille. */
+    fun gjelderFor(sakstype: Sakstyper?): Boolean =
+        sakstyper.isEmpty() || sakstype == null || sakstype in sakstyper
+}
 
 /**
  * Verdien er forhåndsvalget, og kandidatlisten inneholder den. Ett eller ingen alternativ betyr

@@ -30,6 +30,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
@@ -186,8 +187,9 @@ class TekstblokkControllerTest(
         input.captured.status shouldBe TekstblokkStatus.UTKAST
     }
 
+    // Utelatt status propagerer som null; servicen avgjør PUBLISERT ved opprettelse og «uendret» ved PUT
     @Test
-    fun `opprettelse uten status blir publisert`() {
+    fun `utelatt status sendes videre som null ved opprettelse`() {
         val input = slot<TekstblokkService.Input>()
         every { tekstblokkService.opprett(capture(input)) } returns tekstblokk()
 
@@ -196,7 +198,20 @@ class TekstblokkControllerTest(
                 .content("""{"tittel":"Tittel","innhold":"<p>Tekst</p>","type":"TEKSTBLOKK"}"""),
         ).andExpect(status().isOk)
 
-        input.captured.status shouldBe TekstblokkStatus.PUBLISERT
+        input.captured.status.shouldBeNull()
+    }
+
+    @Test
+    fun `utelatt status sendes videre som null ved oppdatering`() {
+        val input = slot<TekstblokkService.Input>()
+        every { tekstblokkService.oppdater(eq(1L), capture(input)) } returns tekstblokk()
+
+        mockMvc.perform(
+            put("$BASE_URL/1").contentType(MediaType.APPLICATION_JSON)
+                .content("""{"tittel":"Tittel","innhold":"<p>Tekst</p>","type":"TEKSTBLOKK"}"""),
+        ).andExpect(status().isOk)
+
+        input.captured.status.shouldBeNull()
     }
 
     @Test

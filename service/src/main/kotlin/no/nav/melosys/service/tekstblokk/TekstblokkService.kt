@@ -34,9 +34,9 @@ class TekstblokkService(
         // Tomme lister betyr «gjelder alle» – avgrensningen er valgfri.
         val sakstyper: List<Sakstyper>? = null,
         val behandlingstemaer: List<Behandlingstema>? = null,
-        // PUBLISERT som default holder bulk-seedingen bakoverkompatibel; admin-UI-et
-        // sender UTKAST eksplisitt for nye blokker.
-        val status: TekstblokkStatus = TekstblokkStatus.PUBLISERT,
+        // Null betyr «uendret» ved oppdatering. Ved opprettelse og bulk-seeding faller den
+        // tilbake på entitetens PUBLISERT, slik at melosys-console er uendret.
+        val status: TekstblokkStatus? = null,
     )
 
     @Transactional(readOnly = true)
@@ -60,7 +60,7 @@ class TekstblokkService(
     }
 
     @Transactional(readOnly = true)
-    fun hent(id: Long, inkluderUtkast: Boolean = true): Tekstblokk = finnAktiv(id)
+    fun hent(id: Long, inkluderUtkast: Boolean): Tekstblokk = finnAktiv(id)
         // Utkast skjules for ikke-admin på samme måte som slettede blokker: samme 404.
         .takeIf { inkluderUtkast || it.status != TekstblokkStatus.UTKAST }
         // open-in-view er av, og avgrensningene ligger utenfor EntityGraph-en for å
@@ -85,7 +85,7 @@ class TekstblokkService(
 
     @Transactional
     fun oppdater(id: Long, input: Input): Tekstblokk {
-        val tekstblokk = hent(id)
+        val tekstblokk = hent(id, inkluderUtkast = true)
         populerFraInput(tekstblokk, input)
         return tekstblokkRepository.save(tekstblokk).also {
             log.info("Endret {} med id {}: '{}'", it.type, it.id, it.tittel)
@@ -98,7 +98,7 @@ class TekstblokkService(
      */
     @Transactional
     fun publiser(id: Long): Tekstblokk {
-        val tekstblokk = hent(id)
+        val tekstblokk = hent(id, inkluderUtkast = true)
         tekstblokk.status = TekstblokkStatus.PUBLISERT
         return tekstblokkRepository.save(tekstblokk).also {
             log.info("Publiserte {} med id {}: '{}'", it.type, id, it.tittel)
@@ -141,7 +141,8 @@ class TekstblokkService(
         tekstblokk.tittel = input.tittel.trim()
         tekstblokk.innhold = htmlSanitizer.saniter(input.innhold) ?: ""
         tekstblokk.type = input.type
-        tekstblokk.status = input.status
+        // Utelatt status lar statusen stå: en redigering skal ikke publisere et utkast
+        input.status?.let { tekstblokk.status = it }
         tekstblokk.endretAvNavn = endretAvNavn
         tekstblokk.tags.clear()
         tekstblokk.tags.addAll(normaliserTags(input.tags))

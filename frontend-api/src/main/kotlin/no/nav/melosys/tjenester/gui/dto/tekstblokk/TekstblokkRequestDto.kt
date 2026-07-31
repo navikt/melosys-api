@@ -15,8 +15,9 @@ import no.nav.melosys.service.tekstblokk.TekstblokkService
  * Kontekstavgrensningene tas imot som enum – KodeDeserializer godtar rene koder
  * og gir 400 på ukjente verdier. Utelatt eller tom = «gjelder alle».
  *
- * Utelatt status betyr PUBLISERT, slik at bulk-seeding fra melosys-console er
- * uendret. Admin-UI-et sender UTKAST eksplisitt for nye blokker.
+ * Utelatt status betyr PUBLISERT ved opprettelse (bulk-seeding fra melosys-console er
+ * uendret) og «uendret» ved oppdatering, slik at en redigering aldri publiserer et utkast
+ * i vanvare. Admin-UI-et sender status eksplisitt når den skal endres.
  */
 data class TekstblokkRequestDto(
     @field:NotBlank @field:Size(max = 200) val tittel: String,
@@ -30,5 +31,5 @@ data class TekstblokkRequestDto(
     val status: TekstblokkStatus? = null,
 ) {
     fun tilInput(): TekstblokkService.Input =
-        TekstblokkService.Input(tittel, innhold, type, tags, sakstyper, behandlingstemaer, status ?: TekstblokkStatus.PUBLISERT)
+        TekstblokkService.Input(tittel, innhold, type, tags, sakstyper, behandlingstemaer, status)
 }

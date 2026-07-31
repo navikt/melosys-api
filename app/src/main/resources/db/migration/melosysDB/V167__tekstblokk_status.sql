@@ -4,6 +4,7 @@
 ALTER TABLE TEKSTBLOKK
     ADD status VARCHAR2(20) DEFAULT 'PUBLISERT' NOT NULL;
 
--- Nullbar i audit-tabellen: revisjoner fra før V167 har ingen status.
+-- Nullbar i audit-tabellen: Envers krever nullbare audit-kolonner, og revisjoner
+-- fra før V167 har uansett ingen status.
 ALTER TABLE TEKSTBLOKK_AUD
     ADD status VARCHAR2(20) NULL;

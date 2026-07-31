@@ -40,10 +40,12 @@ class PlaceholderService(
                 ?.let { tilVerdi(definisjon.nokkel, it) }
         }
         // En betingelse uten tilgjengelig faktum utelates helt, slik at web beholder innholdet uerstattet
-        val betingelser = placeholderRegister.betingelser.mapNotNull { betingelse ->
-            utelatVedFeil(utelatteNokler, betingelse.nokkel) { betingelse.vurdering(kontekst) }
-                ?.let { BetingelseVerdi(betingelse.nokkel, it) }
-        }
+        val betingelser = placeholderRegister.betingelser
+            .filter { it.gjelderFor(kontekst.sakskontekst.sakstype) }
+            .mapNotNull { betingelse ->
+                utelatVedFeil(utelatteNokler, betingelse.nokkel) { betingelse.vurdering(kontekst) }
+                    ?.let { BetingelseVerdi(betingelse.nokkel, it) }
+            }
         utelatteNokler.forEach { (feil, nokler) -> loggUtelatteFelt(nokler, feil) }
         return PlaceholderVerdier(verdier, betingelser)
     }
@@ -71,7 +73,7 @@ class PlaceholderService(
 
     // Nøklene er trygge å logge, men aldri verdier eller feilmeldinger – de kan inneholde persondata
     private fun loggUtelatteFelt(nokler: List<String>, e: Exception) {
-        val melding = "Kunne ikke hente verdi for placeholderne [{}] ({}), feltene utelates"
+        val melding = "Kunne ikke slå opp nøklene [{}] ({}), feltene utelates"
         val nokkelListe = nokler.joinToString()
         // Fagsak uten bruker er en forventet tilstand, ikke en driftsfeil
         if (e is FunksjonellException) {

@@ -60,7 +60,7 @@ class TekstblokkServiceTest {
         tags: List<String>? = null,
         sakstyper: List<Sakstyper>? = null,
         behandlingstemaer: List<Behandlingstema>? = null,
-        status: TekstblokkStatus = TekstblokkStatus.PUBLISERT,
+        status: TekstblokkStatus? = null,
     ) = service.opprett(
         TekstblokkService.Input(
             tittel = tittel,
@@ -264,6 +264,33 @@ class TekstblokkServiceTest {
         opprett(status = TekstblokkStatus.UTKAST)
 
         lagret.captured.status shouldBe TekstblokkStatus.UTKAST
+    }
+
+    // Uten dette ville enhver redigering av et utkast publisert det i vanvare
+    @Test
+    fun `oppdatering uten status lar statusen staa`() {
+        every { tekstblokkRepository.findByIdAndSlettetDatoIsNull(1) } returns
+            Optional.of(Tekstblokk(id = 1, status = TekstblokkStatus.UTKAST))
+
+        service.oppdater(1, TekstblokkService.Input("Ny tittel", "<p>Tekst</p>", TekstblokkType.TEKSTBLOKK, null))
+
+        lagret.captured.status shouldBe TekstblokkStatus.UTKAST
+        lagret.captured.tittel shouldBe "Ny tittel"
+    }
+
+    @Test
+    fun `oppdatering med status endrer statusen`() {
+        every { tekstblokkRepository.findByIdAndSlettetDatoIsNull(1) } returns
+            Optional.of(Tekstblokk(id = 1, status = TekstblokkStatus.UTKAST))
+
+        service.oppdater(
+            1,
+            TekstblokkService.Input(
+                "Tittel", "<p>Tekst</p>", TekstblokkType.TEKSTBLOKK, null, status = TekstblokkStatus.PUBLISERT,
+            ),
+        )
+
+        lagret.captured.status shouldBe TekstblokkStatus.PUBLISERT
     }
 
     @Test

@@ -3,6 +3,7 @@ package no.nav.melosys.service.placeholder
 import ch.qos.logback.classic.Level
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldBeIn
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.collections.shouldNotContainAnyOf
@@ -17,6 +18,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.FellesKodeverk
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.OrganisasjonDokumentTestFactory
 import no.nav.melosys.domain.adresse.SemistrukturertAdresse
 import no.nav.melosys.domain.adresse.StrukturertAdresse
@@ -572,6 +574,23 @@ class PlaceholderServiceTest {
         }
     }
 
+    // Uten filteret ville en FTRL-sak fatt «innvilgelse: false», som er noe annet enn «gjelder ikke her»
+    @Test
+    fun `betingelser avgrenset til lovvalgssaker utelates for andre sakstyper`() {
+        medSakskontekst(sakskontekst(sakstype = Sakstyper.FTRL, fakta = fakta(oppfylt = true)))
+
+        val nokler = betingelser().keys
+        nokler shouldNotContainAnyOf listOf("innvilgelse", "delvis-innvilgelse")
+        nokler shouldContainAll listOf("avslag", "opphort", "utsending")
+    }
+
+    @Test
+    fun `lovvalgssak far ogsaa de avgrensede betingelsene`() {
+        medSakskontekst(sakskontekst(sakstype = Sakstyper.EU_EOS, fakta = fakta(oppfylt = true)))
+
+        betingelser().keys shouldContainAll listOf("innvilgelse", "delvis-innvilgelse")
+    }
+
     private fun verdier(): Map<String, PlaceholderVerdi> = service.hentVerdier(BEHANDLING_ID).verdier.associateBy { it.nokkel }
 
     private fun betingelser(): Map<String, Boolean> =
@@ -614,6 +633,7 @@ class PlaceholderServiceTest {
 
     private fun sakskontekst(
         brukersAktørID: String? = FagsakTestFactory.BRUKER_AKTØR_ID,
+        sakstype: Sakstyper? = null,
         erLovvalg: Boolean = false,
         lovvalgsperiode: PeriodeData? = null,
         medlemskapsperiodeFom: LocalDate? = null,
@@ -627,6 +647,7 @@ class PlaceholderServiceTest {
     ) = PlaceholderSakskontekst(
         saksnummer = "MEL-12345",
         brukersAktørID = brukersAktørID,
+        sakstype = sakstype,
         erLovvalg = erLovvalg,
         lovvalgsperiode = lovvalgsperiode,
         medlemskapsperiodeFom = medlemskapsperiodeFom,

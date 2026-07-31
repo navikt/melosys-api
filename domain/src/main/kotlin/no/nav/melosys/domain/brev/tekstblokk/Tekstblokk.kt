@@ -38,8 +38,11 @@ class Tekstblokk(
     @Column(name = "tittel", nullable = false)
     var tittel: String = "",
 
+    // columnDefinition i tillegg til @Lob: Envers viderefører den eksplisitte typen til
+    // tekstblokk_aud, mens @Lob alene bare traff hovedtabellen (audit-kolonnen ble validert
+    // som varchar2 og veltet oppstarten).
     @Lob
-    @Column(name = "innhold", nullable = false)
+    @Column(name = "innhold", nullable = false, columnDefinition = "clob")
     var innhold: String = "",
 
     @Enumerated(EnumType.STRING)

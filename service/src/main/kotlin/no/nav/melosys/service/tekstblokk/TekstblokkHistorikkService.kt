@@ -30,7 +30,8 @@ class TekstblokkHistorikkService(
             ?.takeIf { it.endringstype != Endringstype.SLETTET }
 
     private fun lagVersjoner(revisjoner: List<EntityRevision<Tekstblokk>>): List<TekstblokkVersjon> {
-        val kronologisk = revisjoner.sortedBy { it.revisionInfo.timestamp }
+        // Revisjonsnummeret er monotont; timestamp har millisekundoppløsning og kan kollidere
+        val kronologisk = revisjoner.sortedBy { it.revisionInfo.id }
         return kronologisk.mapIndexed { indeks, revisjon ->
             TekstblokkVersjon(
                 // Versjonsnummeret er per blokk, ikke globalt: revisjonsnummeret i Envers

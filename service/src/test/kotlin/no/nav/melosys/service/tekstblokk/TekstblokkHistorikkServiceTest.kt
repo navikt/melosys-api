@@ -108,6 +108,17 @@ class TekstblokkHistorikkServiceTest {
         service.hentVersjonPaaTidspunkt(1L, dato(3)).shouldBeNull()
     }
 
+    // To lagringer rett etter hverandre havner gjerne på samme millisekund; revisjonsnummeret er monotont
+    @Test
+    fun `rekkefolgen folger revisjonsnummeret naar tidsstemplene er like`() {
+        every { auditRepository.getRevisions(Tekstblokk::class.java, mapOf("id" to 1L)) } returns listOf(
+            revisjon(12, tekstblokk("Andre utgave"), RevisionType.MOD, dato(1)),
+            revisjon(7, tekstblokk("Første utgave"), RevisionType.ADD, dato(1)),
+        )
+
+        service.hentHistorikk(1L).map { it.tittel } shouldContainExactly listOf("Første utgave", "Andre utgave")
+    }
+
     @Test
     fun `blokk uten revisjoner gir tom historikk`() {
         every { auditRepository.getRevisions(Tekstblokk::class.java, mapOf("id" to 1L)) } returns emptyList()
