@@ -118,6 +118,15 @@ class TekstblokkControllerTest(
         ).andExpect(status().isBadRequest)
     }
 
+    @Test
+    fun `tom streng i kodelisten gir 400, ikke 500`() {
+        mockMvc.perform(
+            post(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(
+                """{"tittel":"Tittel","innhold":"<p>Tekst</p>","type":"TEKSTBLOKK","sakstyper":[""]}""",
+            ),
+        ).andExpect(status().isBadRequest)
+    }
+
     private fun tekstblokk(
         sakstyper: Set<Sakstyper> = setOf(Sakstyper.TRYGDEAVTALE, Sakstyper.EU_EOS),
         behandlingstemaer: Set<Behandlingstema> = setOf(Behandlingstema.ARBEID_FLERE_LAND),

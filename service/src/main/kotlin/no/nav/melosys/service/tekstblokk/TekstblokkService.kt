@@ -56,14 +56,16 @@ class TekstblokkService(
     }
 
     @Transactional(readOnly = true)
-    fun hent(id: Long): Tekstblokk = tekstblokkRepository.findByIdAndSlettetDatoIsNull(id)
-        .orElseThrow { IkkeFunnetException("Finner ikke tekstblokk med id $id") }
+    fun hent(id: Long): Tekstblokk = finnAktiv(id)
         // open-in-view er av, og avgrensningene ligger utenfor EntityGraph-en for å
         // unngå kartesisk produkt – de må derfor lastes her, inne i transaksjonen.
         .also {
             Hibernate.initialize(it.sakstyper)
             Hibernate.initialize(it.behandlingstemaer)
         }
+
+    private fun finnAktiv(id: Long): Tekstblokk = tekstblokkRepository.findByIdAndSlettetDatoIsNull(id)
+        .orElseThrow { IkkeFunnetException("Finner ikke tekstblokk med id $id") }
 
     @Transactional
     fun opprett(input: Input): Tekstblokk {
@@ -89,7 +91,8 @@ class TekstblokkService(
      */
     @Transactional
     fun slett(id: Long) {
-        val tekstblokk = hent(id)
+        // Slettingen rører ikke avgrensningene, så vi hopper over initialiseringen av dem.
+        val tekstblokk = finnAktiv(id)
         tekstblokk.slettetDato = Instant.now()
         tekstblokkRepository.save(tekstblokk)
         log.info("Slettet {} med id {}: '{}'", tekstblokk.type, id, tekstblokk.tittel)

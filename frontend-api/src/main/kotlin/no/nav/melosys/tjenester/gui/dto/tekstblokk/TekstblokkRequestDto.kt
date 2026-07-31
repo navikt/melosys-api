@@ -19,6 +19,8 @@ data class TekstblokkRequestDto(
     @field:NotBlank val innhold: String,
     @field:NotNull val type: TekstblokkType,
     val tags: List<@Size(max = 60) String>?,
+    // KodeDeserializer gir null for tom streng. Elementtypen er ikke-nullbar, så Jackson
+    // avviser den allerede ved deserialisering – nullen når aldri en not null-kolonne.
     val sakstyper: List<Sakstyper>? = null,
     val behandlingstemaer: List<Behandlingstema>? = null,
 ) {
