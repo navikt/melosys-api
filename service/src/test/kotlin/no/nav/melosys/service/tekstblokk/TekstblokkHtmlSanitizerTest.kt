@@ -37,6 +37,88 @@ class TekstblokkHtmlSanitizerTest {
     }
 
     @Test
+    fun `utfylt placeholder lagres som raa noekkel`() {
+        // Biblioteket er delt: behandlingens verdi skal aldri bli liggende i tekstblokken
+        val html = """<p>Sak <span class="placeholder-utfylt" data-placeholder="saksnummer">MEL-12345</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "{saksnummer}"
+        resultat shouldNotContain "MEL-12345"
+        resultat shouldNotContain "data-placeholder"
+    }
+
+    @Test
+    fun `uerstattet placeholder-markering pakkes ut ved lagring`() {
+        // Markeringene utledes ved visning og skal aldri bli persistert
+        val html = """<p>Sak <span class="placeholder-uerstattet">{saksnummer}</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>Sak {saksnummer}</p>"
+        resultat shouldNotContain "span"
+    }
+
+    @Test
+    fun `ukjent placeholder-markering pakkes ut ved lagring`() {
+        val html = """<p>Sak <span class="placeholder-ukjent">{tullenokkel}</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>Sak {tullenokkel}</p>"
+        resultat shouldNotContain "span"
+    }
+
+    @Test
+    fun `markeringsklasse fjernes, men oevrige klasser paa spanen beholdes`() {
+        val html = """<p><span class="placeholder-uerstattet annen-klasse">x</span></p>"""
+
+        sanitizer.saniter(html) shouldContain """<span class="annen-klasse">x</span>"""
+    }
+
+    @Test
+    fun `misformet placeholder-noekkel skrives ikke om, men markeringen pakkes ut`() {
+        // Et misformet attributt ville ellers gitt et korrupt token i lagret innhold
+        val html = """<p><span class="placeholder-utfylt" data-placeholder="saksnummer}">MEL-12345</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>MEL-12345</p>"
+        resultat shouldNotContain "{"
+        resultat shouldNotContain "span"
+    }
+
+    @Test
+    fun `placeholder-noekkel med mellomrom skrives ikke om`() {
+        val html = """<p><span class="placeholder-utfylt" data-placeholder="saks nummer">MEL-12345</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>MEL-12345</p>"
+        resultat shouldNotContain "{"
+        resultat shouldNotContain "span"
+    }
+
+    @Test
+    fun `bracketed-text beholdes ved lagring`() {
+        // Klassen kommer fra dagens editor og ligger allerede lagret i biblioteket: å pakke den ut
+        // ville endret eksisterende innhold og fjernet klamme-spans forhåndsvisningen trenger
+        val html = """<p><span class="bracketed-text"><span class="bracketed-text">[dato]</span></span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain """<span class="bracketed-text">"""
+        resultat shouldContain "[dato]"
+    }
+
+    @Test
+    fun `beholder span med kun class`() {
+        val html = """<p><span class="ql-indent-1">Tekst</span></p>"""
+
+        sanitizer.saniter(html) shouldContain """<span class="ql-indent-1">Tekst</span>"""
+    }
+
+    @Test
     fun `fjerner script og andre tagger utenfor safelisten`() {
         val html = "<p>Tekst</p><script>alert('x')</script><iframe src='//example.com'></iframe>"
 

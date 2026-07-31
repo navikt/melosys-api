@@ -171,6 +171,16 @@ class MinService(
 }
 ```
 
+### Toggles for tekstblokker
+
+Tekstblokk-funksjonaliteten gates av flere toggles i kombinasjon:
+
+| Toggle | Styrer |
+|--------|--------|
+| `melosys.tekstblokker` | Lesing av tekstblokker i Send brev-popoveren (404 hvis av) |
+| `melosys.administrasjon` | Opprett/endre/slett tekstblokker (403 hvis av) |
+| `melosys.tekstblokker.dynamisk-placeholder` | Placeholder-registeret (katalog- og verdiendepunktene). Krever i tillegg at `melosys.tekstblokker` er på; 404 hvis en av dem er av |
+
 ### Konfigurere toggles i Unleash UI
 
 For å legge til en ny toggle i Unleash admin UI:
