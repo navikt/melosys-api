@@ -194,12 +194,16 @@ internal class AktoerServiceTest {
 
     @Test
     fun `endreAktørIdForBruker avviser aktørId som ikke er 13 siffer`() {
+        val saksnummer = "MEL-201"
+        every { fagsakRepository.findById(saksnummer) } returns Optional.of(lagFagsakMedBruker(saksnummer, "1111111111111"))
+
         val exception = shouldThrow<FunksjonellException> {
-            aktoerService.endreAktørIdForBruker("MEL-201", "22222222222x")
+            aktoerService.endreAktørIdForBruker(saksnummer, "22222222222x")
         }
 
         exception.message shouldContain "13 siffer"
-        verify(exactly = 0) { fagsakRepository.findById(any()) }
+        verify(exactly = 0) { persondataFasade.hentAktørIdForIdent(any()) }
+        verify(exactly = 0) { joarkFasade.oppdaterJournalposterMedNyAktørId(any(), any(), any()) }
         verify(exactly = 0) { fagsakRepository.save(any<Fagsak>()) }
     }
 

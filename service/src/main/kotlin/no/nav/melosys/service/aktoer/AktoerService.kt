@@ -96,21 +96,17 @@ class AktoerService(
     }
 
     /**
-     * Orkestrerer endring av aktørId for bruker på en fagsak.
+     * Journalpostene flyttes i Joark før endringene skrives til databasen, fordi gammel aktørId er det
+     * eneste vi har for å finne dem igjen. Skrives aktøren først og Joark-flyttingen feiler, er det ikke
+     * lenger mulig å se hvilke journalposter som skulle vært flyttet. Feiler derimot DB-skrivingen etter
+     * en vellykket flytting, retter et nytt forsøk kun aktørId — journalpostene filtreres da bort på
+     * gammel aktørId, så initierendeJournalpostId på behandlingene må rettes manuelt.
      *
-     * Rekkefølgen er bevisst: journalpostene flyttes i Joark FØR endringene skrives til databasen.
-     * Feiler DB-skrivingen står gammel aktørId fortsatt på fagsaken, og et nytt forsøk finner ingen
-     * journalposter å flytte (de er allerede flyttet) og fullfører kun DB-delen. Motsatt rekkefølge
-     * ville mistet gammel aktørId, og en feilet Joark-oppdatering kunne ikke gjenopptas.
-     *
-     * Bevisst IKKE @Transactional: Joark-kallene er eksterne HTTP-kall som ikke skal holde en
-     * DB-transaksjon (og DB-tilkobling) åpen mens de pågår. Endringene skrives til slutt med ett
-     * [FagsakRepository.save], som cascader til både aktører og behandlinger i én transaksjon.
+     * Bevisst ikke @Transactional: Joark-kallene er eksterne HTTP-kall som ikke skal holde en
+     * DB-transaksjon åpen mens de pågår. Endringene skrives til slutt med ett [FagsakRepository.save],
+     * som cascader til både aktør og behandlinger.
      */
     fun endreAktørIdForBruker(saksnummer: String, nyAktørId: String) {
-        if (nyAktørId.length != AKTOER_ID_LENGDE || !nyAktørId.all(Char::isDigit)) {
-            throw FunksjonellException("Aktør ID må være $AKTOER_ID_LENGDE siffer, var: $nyAktørId")
-        }
         val fagsak = fagsakRepository.findById(saksnummer)
             .orElseThrow { IkkeFunnetException("Finner ikke fagsak med saksnummer: $saksnummer") }
         val bruker = fagsak.hentBruker()
@@ -118,20 +114,12 @@ class AktoerService(
         val gammelAktørId = bruker.aktørId
             ?: throw FunksjonellException("Bruker på sak $saksnummer mangler aktørId")
 
-        if (gammelAktørId == nyAktørId) {
-            throw FunksjonellException("Bruker på sak $saksnummer har allerede aktørId $nyAktørId")
-        }
-
-        // Verifiser at aktørId-en finnes i PDL før journalpostene flyttes. Uten dette flytter en
-        // tastefeil på 13 siffer alle dokumentene på saken til en ukjent aktør, og journalpostene
-        // får nye IDer i arkivet på veien.
-        persondataFasade.hentAktørIdForIdent(nyAktørId)
+        validerNyAktørId(nyAktørId, gammelAktørId, saksnummer)
 
         aksesskontroll.auditEndringFraAdminConsole(
             nyAktørId,
             "Endring av aktør ID for sak $saksnummer fra $gammelAktørId til $nyAktørId"
         )
-
         val flyttedeJournalposter = joarkFasade.oppdaterJournalposterMedNyAktørId(
             HentJournalposterTilknyttetSakRequest(fagsak.gsakSaksnummer, fagsak.saksnummer),
             gammelAktørId,
@@ -144,9 +132,24 @@ class AktoerService(
     }
 
     /**
-     * Journalpostene har fått nye IDer i arkivet, så behandlinger som peker på en flyttet journalpost
-     * må oppdateres. Uten dette peker initierendeJournalpostId på en journalpost som ikke lenger er
-     * knyttet til saken. Endringene lagres av kalleren.
+     * Alt må være avklart før journalpostene flyttes, for flyttingen gir dem nye IDer i arkivet og kan ikke
+     * reverseres. Uten oppslaget mot PDL ville en tastefeil på 13 siffer flyttet alle dokumentene på saken
+     * til en ukjent aktør; oppslaget kaster [IkkeFunnetException] hvis aktøren ikke finnes.
+     */
+    private fun validerNyAktørId(nyAktørId: String, gammelAktørId: String, saksnummer: String) {
+        if (nyAktørId.length != AKTOER_ID_LENGDE || !nyAktørId.all(Char::isDigit)) {
+            throw FunksjonellException("Aktør ID må være $AKTOER_ID_LENGDE siffer, var: $nyAktørId")
+        }
+        if (nyAktørId == gammelAktørId) {
+            throw FunksjonellException("Bruker på sak $saksnummer har allerede aktørId $nyAktørId")
+        }
+        persondataFasade.hentAktørIdForIdent(nyAktørId)
+    }
+
+    /**
+     * Journalpostene har fått nye IDer i arkivet, så behandlinger som peker på en flyttet journalpost må
+     * oppdateres. Uten dette peker initierendeJournalpostId på en journalpost som ikke lenger er knyttet
+     * til saken. Endringene lagres av kalleren.
      */
     private fun oppdaterInitierendeJournalpostIder(fagsak: Fagsak, flyttedeJournalposter: Map<String, String>) {
         if (flyttedeJournalposter.isEmpty()) return

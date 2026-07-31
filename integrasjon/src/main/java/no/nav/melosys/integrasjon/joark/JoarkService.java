@@ -170,55 +170,73 @@ public class JoarkService implements JoarkFasade {
                                                                  String gammelAktørId,
                                                                  String nyAktørId) {
         String saksnummer = hentJournalposterTilknyttetSakRequest.saksnummer();
-
-        List<Journalpost> journalposterSomSkalFlyttes = hentJournalposterTilknyttetSak(hentJournalposterTilknyttetSakRequest)
-            .stream()
-            .filter(journalpost -> journalpost.getBrukerIdType() == BrukerIdType.AKTØR_ID)
-            .filter(journalpost -> gammelAktørId.equals(journalpost.getBrukerId()))
-            .toList();
+        List<Journalpost> journalposterSomSkalFlyttes = finnJournalposterMedAktørId(hentJournalposterTilknyttetSakRequest, gammelAktørId);
 
         log.info("Fant {} journalpost(er) med gammel aktørId som skal flyttes til ny aktørId for sak {}",
             journalposterSomSkalFlyttes.size(), saksnummer);
 
         Map<String, String> flyttedeJournalposter = new LinkedHashMap<>();
-        List<String> feilendeJournalposter = new ArrayList<>();
+        List<String> feilendeJournalpostIder = new ArrayList<>();
 
         for (Journalpost journalpost : journalposterSomSkalFlyttes) {
-            String journalpostId = journalpost.getJournalpostId();
+            String gammelJournalpostId = journalpost.getJournalpostId();
             try {
-                flyttedeJournalposter.put(journalpostId, flyttJournalpostTilNyAktørId(journalpost, nyAktørId, saksnummer));
+                String nyJournalpostId = flyttJournalpostTilNyAktørId(journalpost, nyAktørId, saksnummer);
+                flyttedeJournalposter.put(gammelJournalpostId, nyJournalpostId);
             } catch (TekniskException | WebClientRequestException e) {
-                feilendeJournalposter.add(journalpostId);
-                log.error("Klarte ikke flytte journalpost {} til ny aktørId for sak {}", journalpostId, saksnummer, e);
+                feilendeJournalpostIder.add(gammelJournalpostId);
+                log.error("Klarte ikke flytte journalpost {} til ny aktørId for sak {}", gammelJournalpostId, saksnummer, e);
             }
         }
 
-        if (!feilendeJournalposter.isEmpty()) {
+        if (!feilendeJournalpostIder.isEmpty()) {
             log.error("{} av {} journalpost(er) ble ikke flyttet til ny aktørId for sak {}: {}",
-                feilendeJournalposter.size(), journalposterSomSkalFlyttes.size(), saksnummer, feilendeJournalposter);
+                feilendeJournalpostIder.size(), journalposterSomSkalFlyttes.size(), saksnummer, feilendeJournalpostIder);
         }
 
         return flyttedeJournalposter;
     }
 
+    private List<Journalpost> finnJournalposterMedAktørId(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
+                                                          String aktørId) {
+        return hentJournalposterTilknyttetSak(hentJournalposterTilknyttetSakRequest)
+            .stream()
+            .filter(journalpost -> journalpost.getBrukerIdType() == BrukerIdType.AKTØR_ID)
+            .filter(journalpost -> aktørId.equals(journalpost.getBrukerId()))
+            .toList();
+    }
+
+    /**
+     * Journalposter er uforanderlige i arkivet, så flyttingen skjer i to steg: kilden feilregistreres fra
+     * saken, og deretter knyttes en kopi med ny aktørId til den samme saken.
+     *
+     * @return journalpostId til kopien
+     */
     private String flyttJournalpostTilNyAktørId(Journalpost journalpost, String nyAktørId, String saksnummer) {
         String journalpostId = journalpost.getJournalpostId();
-
-        journalpostapiClient.feilregistrerSakstilknytning(journalpostId);
         KnyttTilAnnenSakRequest knyttTilAnnenSakRequest = byggKnyttTilAnnenSakRequest(journalpost, nyAktørId, saksnummer);
 
+        journalpostapiClient.feilregistrerSakstilknytning(journalpostId);
         try {
             String nyJournalpostId = journalpostapiClient.knyttTilAnnenSak(journalpostId, knyttTilAnnenSakRequest).getNyJournalpostId();
             log.info("Journalpost {} kopiert til ny journalpost {} med ny aktørId for sak {}", journalpostId, nyJournalpostId, saksnummer);
             return nyJournalpostId;
         } catch (TekniskException | WebClientRequestException e) {
-            try {
-                journalpostapiClient.opphevFeilregistrertSakstilknytning(journalpostId);
-            } catch (RuntimeException opphevFeilet) {
-                e.addSuppressed(opphevFeilet);
-                log.error("Journalpost {} på sak {} står feilregistrert uten kopi og må rettes manuelt.", journalpostId, saksnummer, opphevFeilet);
-            }
+            opphevFeilregistrering(journalpostId, saksnummer, e);
             throw e;
+        }
+    }
+
+    /**
+     * Ingen kopi ble opprettet, så kilde-journalposten knyttes tilbake til saken. Feiler også dette står
+     * journalposten løsrevet fra saken og må rettes manuelt.
+     */
+    private void opphevFeilregistrering(String journalpostId, String saksnummer, RuntimeException opprinneligFeil) {
+        try {
+            journalpostapiClient.opphevFeilregistrertSakstilknytning(journalpostId);
+        } catch (RuntimeException opphevFeilet) {
+            opprinneligFeil.addSuppressed(opphevFeilet);
+            log.error("Journalpost {} på sak {} står feilregistrert uten kopi og må rettes manuelt.", journalpostId, saksnummer, opphevFeilet);
         }
     }
 
