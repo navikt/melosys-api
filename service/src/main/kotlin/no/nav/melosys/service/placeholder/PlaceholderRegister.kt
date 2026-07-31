@@ -127,7 +127,7 @@ class PlaceholderRegister {
         PlaceholderDefinisjon(
             nokkel = "bosted-poststed",
             visningsnavn = "Poststed i bostedsadressen",
-            beskrivelse = "Poststedet i brukerens gjeldende bostedsadresse",
+            beskrivelse = "Poststedet i brukerens gjeldende bostedsadresse (settes kun for norske adresser)",
             eksempel = { "Oslo" },
             resolver = { verdi(it.bostedsadresse()?.strukturertAdresse?.poststed) },
         ),
@@ -148,14 +148,16 @@ class PlaceholderRegister {
         PlaceholderDefinisjon(
             nokkel = "arbeidsgiver-norge",
             visningsnavn = "Arbeidsgiver i Norge",
-            beskrivelse = "Navnet på den norske arbeidsgiveren i saken. Alle avklarte arbeidsgivere er alternativer",
+            beskrivelse = "Navnet på den norske arbeidsgiveren i saken. Avklarte arbeidsgivere brukes når de finnes, " +
+                "ellers de oppgitte fra søknaden. Alle er alternativer",
             eksempel = { "Nordisk Verksted AS" },
             resolver = { tekster(it.norskeArbeidsgivernavn) },
         ),
         PlaceholderDefinisjon(
             nokkel = "arbeidsgiver-utland",
             visningsnavn = "Arbeidsgiver i utlandet",
-            beskrivelse = "Navnet på den utenlandske arbeidsgiveren i saken. Alle avklarte arbeidsgivere er alternativer",
+            beskrivelse = "Navnet på den utenlandske arbeidsgiveren i saken. Avklarte arbeidsgivere brukes når de finnes, " +
+                "ellers de oppgitte fra søknaden. Alle er alternativer",
             eksempel = { "Nordwerk GmbH" },
             resolver = { tekster(it.sakskontekst.utenlandskeArbeidsgivere) },
         ),
