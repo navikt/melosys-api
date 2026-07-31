@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.CacheManager
 import org.springframework.context.annotation.Profile
-import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
@@ -43,8 +42,15 @@ class E2ESupportController(
     private val prosessinstansRepository: ProsessinstansRepository,
     @Qualifier("saksflytThreadPoolTaskExecutor") private val taskExecutor: ThreadPoolTaskExecutor,
     private val e2eTestDataService: E2ETestDataService,
-    @Value("\${melosys.e2e.initial-settling-delay-ms:200}") private val initialSettlingDelayMs: Long = DEFAULT_SETTLING_DELAY_MS
+    @Value("\${melosys.e2e.initial-settling-delay-ms:200}") initialSettlingDelayMs: Long
 ) {
+    /**
+     * How long /await waits before its first look, for callers on the legacy contract (no marker).
+     * Settable with `melosys.e2e.initial-settling-delay-ms`; setting it to 0 makes the race the marker
+     * contract fixes reproducible on demand.
+     */
+    private val initialSettlingDelayMs: Long = initialSettlingDelayMs.coerceAtLeast(0)
+
     @PersistenceContext
     private lateinit var entityManager: EntityManager
 
@@ -78,28 +84,32 @@ class E2ESupportController(
         description = "Without 'after': waits for every instance registered in the last 60 seconds " +
             "(legacy contract — it cannot tell the caller's own work apart from the previous step's). " +
             "With 'after': waits until at least 'expectedNew' instances registered after the marker " +
-            "exist AND all of them are FERDIG."
+            "exist AND all of them are FERDIG. Unfinished work from BEFORE the marker is then not " +
+            "waited for; failures are still reported from the whole recent window, so a marker never " +
+            "hides a backend failure. 'after' and 'expectedInstances' are mutually exclusive."
     )
     fun awaitProcessInstances(
         @RequestParam(defaultValue = "30") timeoutSeconds: Long,
         @RequestParam(required = false) expectedInstances: Int? = null,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) after: LocalDateTime? = null,
+        @RequestParam(required = false) after: String? = null,
         @RequestParam(required = false) expectedNew: Int? = null
     ): ResponseEntity<Map<String, Any>> {
         val startTime = Instant.now()
         val timeout = Duration.ofSeconds(timeoutSeconds)
-        val criteria = AwaitCriteria(
-            after = after,
-            expectedNew = expectedNew ?: if (after != null) DEFAULT_EXPECTED_NEW else null,
-            expectedInstances = expectedInstances
-        )
+        val criteria = try {
+            AwaitCriteria.of(after, expectedNew, expectedInstances)
+        } catch (e: IllegalArgumentException) {
+            log.warn { "Rejected await request: ${e.message}" }
+            return buildBadRequestResponse(e.message)
+        }
 
         log.info { "Starting wait for prosessinstanser to complete (timeout: ${timeoutSeconds}s, $criteria)" }
 
         return try {
             // The settling delay gives transactions time to commit and tasks time to reach the executor.
-            // With an explicit marker, correctness no longer depends on it — start polling right away.
-            if (criteria.after == null) {
+            // When the caller demands new instances after a marker, that requirement subsumes the delay,
+            // so we start polling right away. A pure drain (expectedNew=0) still needs it.
+            if (!criteria.demandsNewInstances()) {
                 Thread.sleep(initialSettlingDelayMs)
                 log.debug { "Initial settling delay of ${initialSettlingDelayMs}ms completed" }
             }
@@ -156,9 +166,11 @@ class E2ESupportController(
         criteria: AwaitCriteria
     ): ResponseEntity<Map<String, Any>> {
         var hasSeenActiveInstances = false
-        // Poll rapidly at first, then back off: waiting for a marker starts before the instance is
-        // even registered, and the common case resolves within a few tens of milliseconds.
-        var pollIntervalMs = INITIAL_POLL_INTERVAL_MS
+        // Marker-based waits start before the instance is even registered, and the common case resolves
+        // within tens of milliseconds — so poll rapidly, then back off. The legacy contract keeps its
+        // fixed cadence: polling it more often would widen its race, since a short window where the
+        // previous step's work looks finished is exactly what makes it answer COMPLETED too early.
+        var pollIntervalMs = if (criteria.after != null) INITIAL_POLL_INTERVAL_MS else MAX_POLL_INTERVAL_MS
 
         while (Duration.between(startTime, Instant.now()) < timeout) {
             val status = checkProcessStatus(criteria.after)
@@ -201,8 +213,10 @@ class E2ESupportController(
     ): String = buildString {
         append("threads=0, queue=0, notFinished=0")
         if (criteria.after != null) {
+            // Only the marker rule was evaluated — expectedInstances cannot be combined with it.
             append(", ${status.newInstances.size} new instance(s) after ${criteria.after} all FERDIG")
             append(" (expectedNew=${criteria.expectedNew})")
+            return@buildString
         }
         if (criteria.expectedInstances != null) {
             append(", expected=${criteria.expectedInstances} instances found")
@@ -334,6 +348,12 @@ class E2ESupportController(
         })
     }
 
+    private fun buildBadRequestResponse(message: String?): ResponseEntity<Map<String, Any>> =
+        ResponseEntity.badRequest().body(buildMap {
+            put("status", "BAD_REQUEST")
+            put("message", message ?: "Invalid parameters")
+        })
+
     private fun buildInterruptedResponse(startTime: Instant, e: Exception): ResponseEntity<Map<String, Any>> =
         ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(buildMap {
             put("status", "INTERRUPTED")
@@ -429,7 +449,8 @@ class E2ESupportController(
      *
      * [after] is a marker taken before the action that starts the process. When set, only instances
      * registered after it count — which is what makes the wait race-free. [expectedNew] is then how
-     * many such instances must exist (defaults to 1).
+     * many such instances must exist (defaults to 1). `expectedNew=0` means "drain whatever has been
+     * registered since the marker" without requiring anything new — used to clean up between tests.
      *
      * [expectedInstances] belongs to the legacy contract and means "at least N instances in the last
      * $RECENT_INSTANCE_CUTOFF_SECONDS seconds" — which the previous step's instances satisfy just as
@@ -439,7 +460,53 @@ class E2ESupportController(
         val after: LocalDateTime?,
         val expectedNew: Int?,
         val expectedInstances: Int?
-    )
+    ) {
+        /** True when the caller waits for work that may not be registered yet. */
+        fun demandsNewInstances(): Boolean = after != null && (expectedNew ?: DEFAULT_EXPECTED_NEW) > 0
+
+        companion object {
+            /**
+             * Validates the parameter combination. Every rejection here is a case where the wait would
+             * otherwise have looked like it was coordinating, but silently degraded to the racy contract.
+             */
+            fun of(after: String?, expectedNew: Int?, expectedInstances: Int?): AwaitCriteria {
+                val marker = after?.let(::parseMarker)
+
+                require(!(after != null && marker == null)) { "'after' must not be blank" }
+                require(!(expectedNew != null && marker == null)) {
+                    "'expectedNew' requires 'after' — without a marker there is nothing to count new instances from"
+                }
+                require(expectedNew == null || expectedNew >= 0) { "'expectedNew' must not be negative (was $expectedNew)" }
+                require(!(marker != null && expectedInstances != null)) {
+                    "'after' and 'expectedInstances' are mutually exclusive: 'expectedInstances' counts everything " +
+                        "in the recent window, 'after' counts only instances registered after the marker"
+                }
+
+                return AwaitCriteria(
+                    after = marker,
+                    expectedNew = expectedNew ?: marker?.let { DEFAULT_EXPECTED_NEW },
+                    expectedInstances = expectedInstances
+                )
+            }
+
+            /**
+             * Only the exact format handed out by /process-instances/marker is accepted. A value carrying
+             * an offset or 'Z' is rejected rather than silently reinterpreted as server-local time — the
+             * container clock is not necessarily the caller's, and a marker in the past would let every
+             * pre-existing instance count as new.
+             */
+            private fun parseMarker(raw: String): LocalDateTime? {
+                val trimmed = raw.trim()
+                if (trimmed.isEmpty()) return null
+                return runCatching { LocalDateTime.parse(trimmed) }.getOrElse {
+                    throw IllegalArgumentException(
+                        "'after' must be a local date-time exactly as returned by " +
+                            "/internal/e2e/process-instances/marker (e.g. 2026-07-31T14:35:19.249748805), was '$trimmed'"
+                    )
+                }
+            }
+        }
+    }
 
     private data class ProcessStatus(
         val activeThreads: Int,
@@ -499,7 +566,6 @@ class E2ESupportController(
     companion object {
         private const val INITIAL_POLL_INTERVAL_MS = 25L
         private const val MAX_POLL_INTERVAL_MS = 500L
-        private const val DEFAULT_SETTLING_DELAY_MS = 200L
         private const val DEFAULT_EXPECTED_NEW = 1
         private const val RECENT_INSTANCE_CUTOFF_SECONDS = 60L
         private const val ERROR_MESSAGE_MAX_LENGTH = 500

@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.e2e.api
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.saksflyt.ProsessinstansRepository
@@ -88,7 +89,7 @@ class E2ESupportControllerAwaitTest {
         val svar = controller.awaitProcessInstances(
             timeoutSeconds = 1,
             expectedInstances = null,
-            after = markør,
+            after = markør.toString(),
             expectedNew = 2
         )
 
@@ -109,6 +110,37 @@ class E2ESupportControllerAwaitTest {
     }
 
     @Test
+    fun `markør med expectedNew 0 er en ren tømming - krever ingen ny instans`() {
+        val markør = LocalDateTime.now()
+        girInstanser(ferdigInstans(registrert = markør.minusSeconds(5)))
+
+        val svar = controller.awaitProcessInstances(
+            timeoutSeconds = 1,
+            expectedInstances = null,
+            after = markør.toString(),
+            expectedNew = 0
+        )
+
+        svar.statusCode shouldBe HttpStatus.OK
+        svar.body!!["newInstances"] shouldBe 0
+    }
+
+    @Test
+    fun `markør med expectedNew 0 venter likevel på uferdig arbeid etter markøren`() {
+        val markør = LocalDateTime.now()
+        girInstanser(instans(ProsessStatus.KLAR, registrert = markør.plusNanos(1)))
+
+        val svar = controller.awaitProcessInstances(
+            timeoutSeconds = 1,
+            expectedInstances = null,
+            after = markør.toString(),
+            expectedNew = 0
+        )
+
+        svar.statusCode shouldBe HttpStatus.REQUEST_TIMEOUT
+    }
+
+    @Test
     fun `uten markør - forrige stegs instans fullfører ventingen (bevart gammel oppførsel)`() {
         girInstanser(ferdigInstans(registrert = LocalDateTime.now().minusSeconds(5)))
 
@@ -118,8 +150,91 @@ class E2ESupportControllerAwaitTest {
         svar.body!!["status"] shouldBe "COMPLETED"
     }
 
+    @Test
+    fun `markør - instans som registreres MENS vi venter fullfører ventingen (selve racet)`() {
+        val markør = LocalDateTime.now()
+        val nyInstans = ferdigInstans(registrert = markør.plusNanos(1))
+        // Første oppslag: bare forrige stegs instans finnes — handlingens egen er ikke registrert ennå.
+        // Det er nøyaktig situasjonen der den gamle kontrakten svarte COMPLETED.
+        every { prosessinstansRepository.findAll() } returnsMany listOf(
+            listOf(ferdigInstans(registrert = markør.minusSeconds(5))),
+            listOf(ferdigInstans(registrert = markør.minusSeconds(5))),
+            listOf(ferdigInstans(registrert = markør.minusSeconds(5)), nyInstans)
+        )
+
+        val svar = ventMedMarkør(markør)
+
+        svar.statusCode shouldBe HttpStatus.OK
+        svar.body!!["newInstances"] shouldBe 1
+    }
+
+    @Test
+    fun `markør - instans registrert på nøyaktig samme tidspunkt teller ikke som ny`() {
+        val markør = LocalDateTime.now()
+        girInstanser(ferdigInstans(registrert = markør))
+
+        ventMedMarkør(markør).statusCode shouldBe HttpStatus.REQUEST_TIMEOUT
+    }
+
+    @Test
+    fun `markør - feilet instans fra FØR markøren rapporteres fortsatt`() {
+        val markør = LocalDateTime.now()
+        girInstanser(instans(ProsessStatus.FEILET, registrert = markør.minusSeconds(5)))
+
+        val svar = ventMedMarkør(markør)
+
+        svar.statusCode shouldBe HttpStatus.INTERNAL_SERVER_ERROR
+        svar.body!!["status"] shouldBe "FAILED"
+    }
+
+    @Test
+    fun `blank after avvises i stedet for å falle stille tilbake til gammel kontrakt`() {
+        avvises(after = "", expectedNew = 1) shouldContain "must not be blank"
+    }
+
+    @Test
+    fun `ugyldig after avvises med 400, ikke 500`() {
+        avvises(after = "tull") shouldContain "must be a local date-time"
+    }
+
+    @Test
+    fun `after med tidssone avvises - containerklokka er ikke kallerens klokke`() {
+        avvises(after = "2026-07-31T14:36:00Z") shouldContain "must be a local date-time"
+    }
+
+    @Test
+    fun `expectedNew uten after avvises`() {
+        avvises(expectedNew = 3) shouldContain "requires 'after'"
+    }
+
+    @Test
+    fun `negativ expectedNew avvises`() {
+        avvises(after = LocalDateTime.now().toString(), expectedNew = -1) shouldContain "must not be negative"
+    }
+
+    @Test
+    fun `after kombinert med expectedInstances avvises - de teller forskjellige ting`() {
+        avvises(after = LocalDateTime.now().toString(), expectedInstances = 3) shouldContain "mutually exclusive"
+    }
+
+    private fun avvises(after: String? = null, expectedNew: Int? = null, expectedInstances: Int? = null): String {
+        val svar = controller.awaitProcessInstances(
+            timeoutSeconds = 1,
+            expectedInstances = expectedInstances,
+            after = after,
+            expectedNew = expectedNew
+        )
+        svar.statusCode shouldBe HttpStatus.BAD_REQUEST
+        return svar.body!!["message"].toString()
+    }
+
     private fun ventMedMarkør(markør: LocalDateTime) =
-        controller.awaitProcessInstances(timeoutSeconds = 1, expectedInstances = null, after = markør, expectedNew = null)
+        controller.awaitProcessInstances(
+            timeoutSeconds = 1,
+            expectedInstances = null,
+            after = markør.toString(),
+            expectedNew = null
+        )
 
     private fun girInstanser(vararg instanser: Prosessinstans) {
         every { prosessinstansRepository.findAll() } returns instanser.toList()
