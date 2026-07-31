@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.Avsendertyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.SikkerhetsbegrensningException
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.Konstanter
 import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiClient
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.AvsenderMottaker.IdType
@@ -249,7 +250,9 @@ class JoarkServiceTest {
         every { journalpostapiClient.feilregistrerSakstilknytning(any()) } just Runs
         every { journalpostapiClient.knyttTilAnnenSak(any(), capture(knyttTilAnnenSakRequestCaptor)) } returns KnyttTilAnnenSakResponse("999")
 
-        joarkService.oppdaterJournalposterMedNyAktørId(request, gammelAktørId, nyAktørId)
+        val flyttedeJournalposter = joarkService.oppdaterJournalposterMedNyAktørId(request, gammelAktørId, nyAktørId)
+
+        flyttedeJournalposter shouldBe mapOf("111" to "999")
 
         knyttTilAnnenSakRequestCaptor.captured.run {
             sakstype shouldBe KnyttTilAnnenSakRequest.Sakstype.FAGSAK
@@ -259,10 +262,66 @@ class JoarkServiceTest {
             bruker.idType shouldBe AKTOERID
         }
 
-        verify(exactly = 1) { journalpostapiClient.feilregistrerSakstilknytning("111") }
-        verify(exactly = 1) { journalpostapiClient.knyttTilAnnenSak("111", any()) }
-        verify(exactly = 0) { journalpostapiClient.oppdaterJournalpost(any(), any()) }
-        verify(exactly = 0) { journalpostapiClient.ferdigstillJournalpost(any(), any()) }
+        // Rekkefølgen er påkrevd av dokarkiv: kilden må feilregistreres før kopien knyttes til saken.
+        verifyOrder {
+            journalpostapiClient.feilregistrerSakstilknytning("111")
+            journalpostapiClient.knyttTilAnnenSak("111", any())
+        }
+        // Fanger opp at «222» og «333» ble rørt, uansett hvilken klientmetode som eventuelt lekket.
+        confirmVerified(journalpostapiClient)
+    }
+
+    @Test
+    fun `oppdaterJournalposterMedNyAktørId opphever feilregistrering og fortsetter når knyttTilAnnenSak feiler`() {
+        val request = HentJournalposterTilknyttetSakRequest(123L, "MEL-123")
+        val gammelAktørId = "1111111111111"
+        val nyAktørId = "2222222222222"
+
+        every { safClient.hentDokumentoversikt(request.saksnummer()) } returns listOf(
+            safJournalpost("111", gammelAktørId, Brukertype.AKTOERID),
+            safJournalpost("222", gammelAktørId, Brukertype.AKTOERID)
+        )
+        every { journalpostapiClient.feilregistrerSakstilknytning(any()) } just Runs
+        every { journalpostapiClient.opphevFeilregistrertSakstilknytning(any()) } just Runs
+        every { journalpostapiClient.knyttTilAnnenSak("111", any()) } throws TekniskException("Kall mot journalpostapi feilet. 500")
+        every { journalpostapiClient.knyttTilAnnenSak("222", any()) } returns KnyttTilAnnenSakResponse("999")
+
+        val flyttedeJournalposter = joarkService.oppdaterJournalposterMedNyAktørId(request, gammelAktørId, nyAktørId)
+
+        flyttedeJournalposter shouldBe mapOf("222" to "999")
+
+        verifyOrder {
+            journalpostapiClient.feilregistrerSakstilknytning("111")
+            journalpostapiClient.knyttTilAnnenSak("111", any())
+            journalpostapiClient.opphevFeilregistrertSakstilknytning("111")
+        }
+        verifyOrder {
+            journalpostapiClient.feilregistrerSakstilknytning("222")
+            journalpostapiClient.knyttTilAnnenSak("222", any())
+        }
+        // Bekrefter at «222» ikke ble opphevet – ingen andre kall enn de verifiserte er gjort.
+        confirmVerified(journalpostapiClient)
+    }
+
+    @Test
+    fun `oppdaterJournalposterMedNyAktørId kaster ikke videre når oppheving av feilregistrering også feiler`() {
+        val request = HentJournalposterTilknyttetSakRequest(123L, "MEL-123")
+        val gammelAktørId = "1111111111111"
+        val nyAktørId = "2222222222222"
+
+        every { safClient.hentDokumentoversikt(request.saksnummer()) } returns listOf(
+            safJournalpost("111", gammelAktørId, Brukertype.AKTOERID)
+        )
+        every { journalpostapiClient.feilregistrerSakstilknytning(any()) } just Runs
+        every { journalpostapiClient.knyttTilAnnenSak(any(), any()) } throws TekniskException("Kall mot journalpostapi feilet. 500")
+        every { journalpostapiClient.opphevFeilregistrertSakstilknytning(any()) } throws
+            TekniskException("Kall mot journalpostapi feilet. 500")
+
+        val flyttedeJournalposter = joarkService.oppdaterJournalposterMedNyAktørId(request, gammelAktørId, nyAktørId)
+
+        flyttedeJournalposter shouldBe emptyMap()
+
+        verify(exactly = 1) { journalpostapiClient.opphevFeilregistrertSakstilknytning("111") }
     }
 
     @Test
