@@ -10,8 +10,10 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.CacheManager
 import org.springframework.context.annotation.Profile
+import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
@@ -40,7 +42,8 @@ class E2ESupportController(
     private val cacheManager: CacheManager?,
     private val prosessinstansRepository: ProsessinstansRepository,
     @Qualifier("saksflytThreadPoolTaskExecutor") private val taskExecutor: ThreadPoolTaskExecutor,
-    private val e2eTestDataService: E2ETestDataService
+    private val e2eTestDataService: E2ETestDataService,
+    @Value("\${melosys.e2e.initial-settling-delay-ms:200}") private val initialSettlingDelayMs: Long = DEFAULT_SETTLING_DELAY_MS
 ) {
     @PersistenceContext
     private lateinit var entityManager: EntityManager
@@ -56,26 +59,52 @@ class E2ESupportController(
         })
     }
 
+    @GetMapping("/process-instances/marker")
+    @Operation(
+        summary = "Returns a marker (server timestamp) for use with the 'after' parameter on /await",
+        description = "Take a marker BEFORE the action that starts a process, then call " +
+            "/await?after=<marker>&expectedNew=<N>. That makes the wait race-free: instances registered " +
+            "before the action can no longer satisfy it."
+    )
+    fun processInstanceMarker(): ResponseEntity<Map<String, Any>> {
+        val marker = LocalDateTime.now()
+        log.debug { "Handed out prosessinstans marker: $marker" }
+        return ResponseEntity.ok(mapOf("marker" to marker.toString()))
+    }
+
     @GetMapping("/process-instances/await")
-    @Operation(summary = "Waits for all process instances to complete")
+    @Operation(
+        summary = "Waits for process instances to complete",
+        description = "Without 'after': waits for every instance registered in the last 60 seconds " +
+            "(legacy contract — it cannot tell the caller's own work apart from the previous step's). " +
+            "With 'after': waits until at least 'expectedNew' instances registered after the marker " +
+            "exist AND all of them are FERDIG."
+    )
     fun awaitProcessInstances(
         @RequestParam(defaultValue = "30") timeoutSeconds: Long,
-        @RequestParam(required = false) expectedInstances: Int? = null
+        @RequestParam(required = false) expectedInstances: Int? = null,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) after: LocalDateTime? = null,
+        @RequestParam(required = false) expectedNew: Int? = null
     ): ResponseEntity<Map<String, Any>> {
         val startTime = Instant.now()
         val timeout = Duration.ofSeconds(timeoutSeconds)
+        val criteria = AwaitCriteria(
+            after = after,
+            expectedNew = expectedNew ?: if (after != null) DEFAULT_EXPECTED_NEW else null,
+            expectedInstances = expectedInstances
+        )
 
-        log.info {
-            "Starting wait for prosessinstanser to complete " +
-                "(timeout: ${timeoutSeconds}s, expectedInstances: ${expectedInstances ?: "any"})"
-        }
+        log.info { "Starting wait for prosessinstanser to complete (timeout: ${timeoutSeconds}s, $criteria)" }
 
         return try {
-            // Initial settling delay to allow transactions to commit and tasks to be submitted
-            Thread.sleep(INITIAL_SETTLING_DELAY_MS)
-            log.debug { "Initial settling delay of ${INITIAL_SETTLING_DELAY_MS}ms completed" }
+            // The settling delay gives transactions time to commit and tasks time to reach the executor.
+            // With an explicit marker, correctness no longer depends on it — start polling right away.
+            if (criteria.after == null) {
+                Thread.sleep(initialSettlingDelayMs)
+                log.debug { "Initial settling delay of ${initialSettlingDelayMs}ms completed" }
+            }
 
-            pollUntilComplete(startTime, timeout, expectedInstances)
+            pollUntilComplete(startTime, timeout, criteria)
         } catch (e: InterruptedException) {
             Thread.currentThread().interrupt()
             log.error(e) { "Interrupted while waiting for prosessinstanser" }
@@ -124,12 +153,15 @@ class E2ESupportController(
     private fun pollUntilComplete(
         startTime: Instant,
         timeout: Duration,
-        expectedInstances: Int?
+        criteria: AwaitCriteria
     ): ResponseEntity<Map<String, Any>> {
         var hasSeenActiveInstances = false
+        // Poll rapidly at first, then back off: waiting for a marker starts before the instance is
+        // even registered, and the common case resolves within a few tens of milliseconds.
+        var pollIntervalMs = INITIAL_POLL_INTERVAL_MS
 
         while (Duration.between(startTime, Instant.now()) < timeout) {
-            val status = checkProcessStatus()
+            val status = checkProcessStatus(criteria.after)
 
             // Track if we've ever seen active instances
             if (status.hasActiveInstances) {
@@ -138,9 +170,9 @@ class E2ESupportController(
 
             log.debug {
                 "Status: activeThreads=${status.activeThreads}, queueSize=${status.queueSize}, " +
-                    "recent=${status.recentInstances.size}, total=${status.allInstances.size}, " +
-                    "notFinished=${status.notFinished.size}, failed=${status.failed.size}, " +
-                    "hasSeenActive=$hasSeenActiveInstances"
+                    "recent=${status.recentInstances.size}, new=${status.newInstances.size}, " +
+                    "total=${status.allInstances.size}, notFinished=${status.notFinished.size}, " +
+                    "failed=${status.failed.size}, hasSeenActive=$hasSeenActiveInstances"
             }
 
             when {
@@ -149,27 +181,31 @@ class E2ESupportController(
                     return buildFailedResponse(startTime, status.failed)
                 }
 
-                status.isComplete(hasSeenActiveInstances, expectedInstances) -> {
-                    val completionReason = buildCompletionReason(status, hasSeenActiveInstances, expectedInstances)
-                    log.info { "Completion criteria met: $completionReason" }
-                    return buildCompletedResponse(startTime, status.allInstances)
+                status.isComplete(hasSeenActiveInstances, criteria) -> {
+                    log.info { "Completion criteria met: ${buildCompletionReason(status, hasSeenActiveInstances, criteria)}" }
+                    return buildCompletedResponse(startTime, status)
                 }
             }
 
-            Thread.sleep(POLL_INTERVAL_MS)
+            Thread.sleep(pollIntervalMs)
+            pollIntervalMs = (pollIntervalMs * 2).coerceAtMost(MAX_POLL_INTERVAL_MS)
         }
 
-        return buildTimeoutResponse(startTime, timeout.seconds)
+        return buildTimeoutResponse(startTime, timeout.seconds, criteria)
     }
 
     private fun buildCompletionReason(
         status: ProcessStatus,
         hasSeenActiveInstances: Boolean,
-        expectedInstances: Int?
+        criteria: AwaitCriteria
     ): String = buildString {
         append("threads=0, queue=0, notFinished=0")
-        if (expectedInstances != null) {
-            append(", expected=$expectedInstances instances found")
+        if (criteria.after != null) {
+            append(", ${status.newInstances.size} new instance(s) after ${criteria.after} all FERDIG")
+            append(" (expectedNew=${criteria.expectedNew})")
+        }
+        if (criteria.expectedInstances != null) {
+            append(", expected=${criteria.expectedInstances} instances found")
         }
         if (hasSeenActiveInstances) {
             append(", seen active instances")
@@ -177,14 +213,22 @@ class E2ESupportController(
         append(", recent=${status.recentInstances.size}")
     }
 
-    private fun checkProcessStatus(): ProcessStatus {
+    private fun checkProcessStatus(after: LocalDateTime?): ProcessStatus {
         val allInstances = prosessinstansRepository.findAll().toList()
         val cutoffTime = LocalDateTime.now().minusSeconds(RECENT_INSTANCE_CUTOFF_SECONDS)
 
         // Filter for recent instances only (ignore old test data)
         val recentInstances = allInstances.filter { it.registrertDato.isAfter(cutoffTime) }
-        val notFinished = recentInstances.filterNot { it.status == ProsessStatus.FERDIG }
-        val failed = notFinished.filter { it.status == ProsessStatus.FEILET }
+
+        // Instances registered after the caller's marker — the only ones that can be the caller's own work
+        val newInstances = after?.let { marker -> allInstances.filter { it.registrertDato.isAfter(marker) } }.orEmpty()
+
+        // Unfinished work is judged on the caller's own instances when a marker is given, on the
+        // recent window otherwise. Failures are reported from both, so a marker never hides a
+        // failure the legacy contract would have caught.
+        val watched = if (after != null) newInstances else recentInstances
+        val notFinished = watched.filterNot { it.status == ProsessStatus.FERDIG }
+        val failed = (recentInstances + newInstances).distinctBy { it.id }.filter { it.status == ProsessStatus.FEILET }
 
         // Check if there are any active (non-finished, non-failed) instances
         val active = notFinished.filterNot { it.status == ProsessStatus.FEILET }
@@ -194,6 +238,7 @@ class E2ESupportController(
             queueSize = taskExecutor.threadPoolExecutor.queue.size,
             allInstances = allInstances,
             recentInstances = recentInstances,
+            newInstances = newInstances,
             notFinished = notFinished,
             failed = failed,
             hasActiveInstances = active.isNotEmpty() || taskExecutor.activeCount > 0 || taskExecutor.threadPoolExecutor.queue.isNotEmpty()
@@ -241,7 +286,7 @@ class E2ESupportController(
 
     private fun buildCompletedResponse(
         startTime: Instant,
-        allInstances: List<Prosessinstans>
+        status: ProcessStatus
     ): ResponseEntity<Map<String, Any>> {
         val elapsed = Duration.between(startTime, Instant.now())
         log.info { "All prosessinstanser completed successfully in ${elapsed.seconds}s" }
@@ -249,26 +294,40 @@ class E2ESupportController(
         return ResponseEntity.ok(buildMap {
             put("status", "COMPLETED")
             put("message", "All process instances completed successfully")
-            put("totalInstances", allInstances.size)
+            put("totalInstances", status.allInstances.size)
+            put("newInstances", status.newInstances.size)
             put("elapsedSeconds", elapsed.seconds)
         })
     }
 
-    private fun buildTimeoutResponse(startTime: Instant, timeoutSeconds: Long): ResponseEntity<Map<String, Any>> {
-        val status = checkProcessStatus()
+    private fun buildTimeoutResponse(
+        startTime: Instant,
+        timeoutSeconds: Long,
+        criteria: AwaitCriteria
+    ): ResponseEntity<Map<String, Any>> {
+        val status = checkProcessStatus(criteria.after)
 
         log.warn {
             "Timeout reached after ${timeoutSeconds}s: " +
                 "activeThreads=${status.activeThreads}, queueSize=${status.queueSize}, " +
-                "notFinished=${status.notFinished.size}/${status.allInstances.size}"
+                "notFinished=${status.notFinished.size}/${status.allInstances.size}, " +
+                "new=${status.newInstances.size} ($criteria)"
+        }
+
+        val message = if (criteria.after != null && status.newInstances.size < criteria.expectedNew!!) {
+            "Timeout after ${timeoutSeconds}s: only ${status.newInstances.size} of ${criteria.expectedNew} " +
+                "expected new process instance(s) were registered after ${criteria.after}"
+        } else {
+            "Timeout after ${timeoutSeconds}s waiting for process instances to complete"
         }
 
         return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body(buildMap {
             put("status", "TIMEOUT")
-            put("message", "Timeout after ${timeoutSeconds}s waiting for process instances to complete")
+            put("message", message)
             put("activeThreads", status.activeThreads)
             put("queueSize", status.queueSize)
             put("totalInstances", status.allInstances.size)
+            put("newInstances", status.newInstances.size)
             put("notFinished", status.notFinished.size)
             put("notFinishedIds", status.notFinished.map { it.id.toString() })
             put("elapsedSeconds", Duration.between(startTime, Instant.now()).seconds)
@@ -365,30 +424,60 @@ class E2ESupportController(
         }
     }
 
+    /**
+     * What the caller is waiting for.
+     *
+     * [after] is a marker taken before the action that starts the process. When set, only instances
+     * registered after it count — which is what makes the wait race-free. [expectedNew] is then how
+     * many such instances must exist (defaults to 1).
+     *
+     * [expectedInstances] belongs to the legacy contract and means "at least N instances in the last
+     * $RECENT_INSTANCE_CUTOFF_SECONDS seconds" — which the previous step's instances satisfy just as
+     * well as the caller's own. Prefer [after].
+     */
+    private data class AwaitCriteria(
+        val after: LocalDateTime?,
+        val expectedNew: Int?,
+        val expectedInstances: Int?
+    )
+
     private data class ProcessStatus(
         val activeThreads: Int,
         val queueSize: Int,
         val allInstances: List<Prosessinstans>,
         val recentInstances: List<Prosessinstans>,
+        val newInstances: List<Prosessinstans>,
         val notFinished: List<Prosessinstans>,
         val failed: List<Prosessinstans>,
         val hasActiveInstances: Boolean
     ) {
         /**
-         * Determines if all process instances are complete.
+         * Determines if the work the caller is waiting for is complete.
          *
-         * Completion criteria:
+         * With a marker ([AwaitCriteria.after]):
          * 1. No active threads or queue items
-         * 2. No unfinished recent instances
-         * 3. If expectedInstances is specified, must have seen at least that many
-         * 4. Must have seen active instances OR have finished instances (prevents false-positive from empty DB)
+         * 2. At least expectedNew instances registered after the marker
+         * 3. All of those are FERDIG
+         *
+         * Without a marker (legacy contract):
+         * 1. No active threads or queue items
+         * 2. No unfinished instances in the recent window
+         * 3. If expectedInstances is specified, at least that many recent instances
+         * 4. Must have seen active instances OR have recent instances (prevents false-positive from empty DB)
          */
-        fun isComplete(hasSeenActiveInstances: Boolean, expectedInstances: Int?): Boolean {
+        fun isComplete(hasSeenActiveInstances: Boolean, criteria: AwaitCriteria): Boolean {
             val threadsAndQueueEmpty = activeThreads == 0 && queueSize == 0
             val noUnfinishedInstances = notFinished.isEmpty()
 
+            if (criteria.after != null) {
+                // The marker IS the coordination: instances from before the action cannot satisfy this,
+                // and an empty database cannot either.
+                val expectedNewMet = newInstances.size >= (criteria.expectedNew ?: DEFAULT_EXPECTED_NEW)
+                return threadsAndQueueEmpty && expectedNewMet && noUnfinishedInstances
+            }
+
             // If expected count specified, verify we have at least that many recent instances
-            val expectedCountMet = expectedInstances?.let { recentInstances.size >= it } ?: true
+            val expectedCountMet = criteria.expectedInstances?.let { recentInstances.size >= it } ?: true
 
             // If there are NO process instances at all (not even old ones), return complete immediately
             // This handles the "fresh start" case where the database is clean
@@ -400,7 +489,7 @@ class E2ESupportController(
             // UNLESS expectedInstances is specified and met (explicit coordination)
             // OR we have recent instances (proves work was done even if it completed very quickly)
             val hasSeenWork = hasSeenActiveInstances ||
-                (expectedInstances != null && expectedCountMet) ||
+                (criteria.expectedInstances != null && expectedCountMet) ||
                 recentInstances.isNotEmpty()
 
             return threadsAndQueueEmpty && noUnfinishedInstances && expectedCountMet && hasSeenWork
@@ -408,8 +497,10 @@ class E2ESupportController(
     }
 
     companion object {
-        private const val POLL_INTERVAL_MS = 500L
-        private const val INITIAL_SETTLING_DELAY_MS = 200L
+        private const val INITIAL_POLL_INTERVAL_MS = 25L
+        private const val MAX_POLL_INTERVAL_MS = 500L
+        private const val DEFAULT_SETTLING_DELAY_MS = 200L
+        private const val DEFAULT_EXPECTED_NEW = 1
         private const val RECENT_INSTANCE_CUTOFF_SECONDS = 60L
         private const val ERROR_MESSAGE_MAX_LENGTH = 500
     }
