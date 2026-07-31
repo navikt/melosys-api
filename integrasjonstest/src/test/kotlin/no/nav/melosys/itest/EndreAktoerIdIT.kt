@@ -17,7 +17,7 @@ import no.nav.melosys.integrasjon.joark.HentJournalposterTilknyttetSakRequest
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.repository.AktoerRepository
 import no.nav.melosys.repository.FagsakRepository
-import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.service.persondata.PersondataService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
@@ -68,8 +68,10 @@ class EndreAktoerIdIT(
     @MockkBean
     lateinit var joarkFasade: JoarkFasade
 
+    // Må mocke den konkrete klassen, ikke PersondataFasade: TrygdeavgiftsberegningService injiserer
+    // PersondataService, og en mock av interfacet gjør at den bønnen ikke lenger matcher.
     @MockkBean(relaxed = true)
-    lateinit var persondataFasade: PersondataFasade
+    lateinit var persondataService: PersondataService
 
     @AfterEach
     fun resetSubjectHandler() {
