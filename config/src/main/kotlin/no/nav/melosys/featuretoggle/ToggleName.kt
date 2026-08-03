@@ -19,5 +19,6 @@ object ToggleName {
     const val MELOSYS_CDM_4_4 = "melosys.cdm-4-4"
     const val MELOSYS_OPPGAVE_NØKKELORD = "melosys.oppgave_nokkelord"
     const val MELOSYS_TEKSTBLOKKER = "melosys.tekstblokker"
+    const val MELOSYS_TEKSTBLOKKER_DYNAMISK_PLACEHOLDER = "melosys.tekstblokker.dynamisk-placeholder"
     const val MELOSYS_ADMINISTRASJON = "melosys.administrasjon"
 }

@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.steg.behandling
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -21,6 +23,7 @@ import no.nav.melosys.saksflytapi.domain.*
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
+import no.nav.melosys.service.sak.SkjemaSaksstatusSynk
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -88,14 +91,15 @@ class AvsluttFagsakOgBehandlingTest {
     @Test
     fun `utfør skal avslutte behandling og fagsak når er artikkel 12`() {
         every { fagsakService.hentFagsak(any()) } returns fagsak
-        every { fagsakService.avsluttFagsakOgBehandling(any(), any<Saksstatuser>()) } just Runs
+        every { fagsakService.avsluttFagsakOgBehandling(any(), any<Saksstatuser>(), any()) } just Runs
         lovvalgsperiode.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
 
 
         avsluttFagsakOgBehandling.utfør(prosessinstans)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT) }
+        prosessinstans.getData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER) shouldBe fagsak.saksnummer
     }
 
     @Test
@@ -109,6 +113,7 @@ class AvsluttFagsakOgBehandlingTest {
 
 
         verify { behandlingService.endreStatus(behandling.id, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING) }
+        prosessinstans.getData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER).shouldBeNull()
     }
 
     @Test
@@ -117,20 +122,20 @@ class AvsluttFagsakOgBehandlingTest {
         behandling.tema = Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
         fagsak.tema = Sakstemaer.UNNTAK
         every { fagsakService.hentFagsak(any()) } returns fagsak
-        every { fagsakService.avsluttFagsakOgBehandling(any(), any<Saksstatuser>()) } just Runs
+        every { fagsakService.avsluttFagsakOgBehandling(any(), any<Saksstatuser>(), any()) } just Runs
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns true
 
 
         avsluttFagsakOgBehandling.utfør(prosessinstans)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT) }
     }
 
     @Test
     fun `utfør skal sette behandlingsstatus når saksstatus i prosess data`() {
         every { fagsakService.hentFagsak(any()) } returns fagsak
-        every { fagsakService.avsluttFagsakOgBehandling(any(), any<Saksstatuser>()) } just Runs
+        every { fagsakService.avsluttFagsakOgBehandling(any(), any<Saksstatuser>(), any()) } just Runs
         prosessinstans = Prosessinstans.forTest {
             type = ProsessType.IVERKSETT_VEDTAK_EOS
             status = ProsessStatus.KLAR
@@ -142,7 +147,8 @@ class AvsluttFagsakOgBehandlingTest {
         avsluttFagsakOgBehandling.utfør(prosessinstans)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.AVSLUTTET) }
+        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.AVSLUTTET, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT) }
+        prosessinstans.getData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER) shouldBe fagsak.saksnummer
     }
 
     @Test
@@ -168,6 +174,8 @@ class AvsluttFagsakOgBehandlingTest {
 
 
         verify { behandlingService.avsluttBehandling(behandling.id) }
+        // Ren behandlingslukking endrer ikke fagsakstatus — utledet skjema-status er uendret, ingen synk-markering
+        prosessinstans.getData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER).shouldBeNull()
     }
 
     @Test
@@ -180,12 +188,13 @@ class AvsluttFagsakOgBehandlingTest {
         behandling.type = Behandlingstyper.ÅRSAVREGNING
 
         every { fagsakService.hentFagsak(any()) } returns fagsak
-        every { fagsakService.avsluttFagsakOgBehandling(any(), any<Behandling>(), any<Saksstatuser>()) } just Runs
+        every { fagsakService.avsluttFagsakOgBehandling(any(), any<Behandling>(), any<Saksstatuser>(), any()) } just Runs
 
 
         avsluttFagsakOgBehandling.utfør(prosessinstans)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET) }
+        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT) }
+        prosessinstans.getData(ProsessDataKey.SYNK_SAKSSTATUS_SAKSNUMMER) shouldBe fagsak.saksnummer
     }
 }

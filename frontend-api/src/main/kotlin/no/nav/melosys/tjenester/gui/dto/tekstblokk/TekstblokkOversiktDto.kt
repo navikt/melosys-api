@@ -16,6 +16,7 @@ data class TekstblokkOversiktDto(
     val tags: List<String>,
     val endretDato: Instant,
     val endretAv: String,
+    val endretAvNavn: String?,
 ) {
     companion object {
         fun av(o: TekstblokkOversikt): TekstblokkOversiktDto = TekstblokkOversiktDto(
@@ -26,6 +27,7 @@ data class TekstblokkOversiktDto(
             tags = o.tags.sorted(),
             endretDato = o.endretDato,
             endretAv = o.endretAv,
+            endretAvNavn = o.endretAvNavn,
         )
     }
 }

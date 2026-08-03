@@ -105,7 +105,7 @@ class VideresendSoknadServiceTest {
 
         videresendSoknadService.videresend(SAKSNUMMER, "", "fritekst", setOf(dokumentReferanse), "ytterligereInfo", "arbeid_flere_land")
 
-        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.VIDERESENDT) }
+        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.VIDERESENDT, SkjemaSaksstatusSynk.SYNKRONISER) }
         verify {
             prosessinstansService.opprettProsessinstansVideresendSoknad(
                 behandling,

@@ -90,9 +90,11 @@ class SedLåsreferanseIT(
                 .check { next ->
                     next { it shouldBe "Starter behandling av prosessinstans <sed1Prosess> med lås <sed1Lås>" }
                     next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <sed1Prosess>" }
+                    next { it shouldBe "Utfører steg SYNK_SKJEMA_SAKSSTATUS for prosessinstans <sed1Prosess>" }
                     next { it shouldBe "Prosessinstans <sed1Prosess> behandlet ferdig" }
                     next { it shouldBe "Starter behandling av prosessinstans <sed2Prosess> med lås <sed2Lås>" }
                     next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <sed2Prosess>" }
+                    next { it shouldBe "Utfører steg SYNK_SKJEMA_SAKSSTATUS for prosessinstans <sed2Prosess>" }
                     next { it shouldBe "Prosessinstans <sed2Prosess> behandlet ferdig" }
                 }
         }
@@ -125,9 +127,11 @@ class SedLåsreferanseIT(
                 .check { next ->
                     next { it shouldBe "Starter behandling av prosessinstans <førsteProsess> med lås <sed1Lås>" }
                     next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <førsteProsess>" }
+                    next { it shouldBe "Utfører steg SYNK_SKJEMA_SAKSSTATUS for prosessinstans <førsteProsess>" }
                     next { it shouldBe "Prosessinstans <førsteProsess> behandlet ferdig" }
                     next { it shouldBe "Starter behandling av prosessinstans <duplikatProsess> med lås <sed1Lås>" }
                     next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <duplikatProsess>" }
+                    next { it shouldBe "Utfører steg SYNK_SKJEMA_SAKSSTATUS for prosessinstans <duplikatProsess>" }
                     next { it shouldBe "Prosessinstans <duplikatProsess> behandlet ferdig" }
                 }
         }

@@ -16,6 +16,10 @@ import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjema
 import no.nav.melosys.skjema.types.common.SkjemaStatus
 import no.nav.melosys.skjema.types.felles.LandKode
 import no.nav.melosys.skjema.types.felles.PeriodeDto
+import no.nav.melosys.skjema.types.common.Saksstatus
+import no.nav.melosys.skjema.types.m2m.BulkOppdaterSaksstatusRequest
+import no.nav.melosys.skjema.types.m2m.BulkOppdaterSaksstatusResultat
+import no.nav.melosys.skjema.types.m2m.SaksstatusOppdatering
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
@@ -231,6 +235,45 @@ class MelosysSkjemaApiClientTest(
                 .withHeader("Authorization", WireMock.matching("Bearer .+"))
                 .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .withRequestBody(WireMock.matchingJsonPath("$.saksnummer", WireMock.equalTo(saksnummer)))
+        )
+    }
+
+    @Test
+    fun `bulkOppdaterSaksstatus - sender PUT og deserialiserer resultatet`() {
+        val skjemaId1 = UUID.randomUUID()
+        val skjemaId2 = UUID.randomUUID()
+
+        wireMockServer.stubFor(
+            WireMock.put(WireMock.urlPathEqualTo("/m2m/api/skjema/saksstatus/bulk"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("""{"antallOppdatert": 1, "ukjenteSkjemaIder": ["$skjemaId2"]}""")
+                )
+        )
+
+        val resultat = melosysSkjemaApiClient.bulkOppdaterSaksstatus(
+            BulkOppdaterSaksstatusRequest(
+                listOf(
+                    SaksstatusOppdatering(skjemaId1, "MEL-1", Saksstatus.MOTTATT),
+                    SaksstatusOppdatering(skjemaId2, "MEL-2", Saksstatus.AVSLUTTET)
+                )
+            )
+        )
+
+        resultat shouldBe BulkOppdaterSaksstatusResultat(
+            antallOppdatert = 1,
+            ukjenteSkjemaIder = listOf(skjemaId2)
+        )
+
+        wireMockServer.verify(
+            WireMock.putRequestedFor(WireMock.urlPathEqualTo("/m2m/api/skjema/saksstatus/bulk"))
+                .withHeader("Authorization", WireMock.matching("Bearer .+"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withRequestBody(WireMock.matchingJsonPath("$.oppdateringer[0].skjemaId", WireMock.equalTo(skjemaId1.toString())))
+                .withRequestBody(WireMock.matchingJsonPath("$.oppdateringer[0].saksstatus", WireMock.equalTo("MOTTATT")))
+                .withRequestBody(WireMock.matchingJsonPath("$.oppdateringer[1].skjemaId", WireMock.equalTo(skjemaId2.toString())))
         )
     }
 }

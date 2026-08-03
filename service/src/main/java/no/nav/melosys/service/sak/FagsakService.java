@@ -9,6 +9,7 @@ import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakStatusEndretEvent;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
@@ -25,6 +26,7 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +43,7 @@ public class FagsakService {
     private final KontaktopplysningService kontaktopplysningService;
     private final PersondataFasade persondataFasade;
     private final LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private final Counter sakerOpprettet = Metrics.counter(SAKER_OPPRETTET);
 
@@ -51,12 +54,14 @@ public class FagsakService {
                          BehandlingService behandlingService,
                          KontaktopplysningService kontaktopplysningService,
                          PersondataFasade persondataFasade,
-                         @Lazy LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService) {
+                         @Lazy LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService,
+                         ApplicationEventPublisher applicationEventPublisher) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
         this.persondataFasade = persondataFasade;
         this.lovligeKombinasjonerSaksbehandlingService = lovligeKombinasjonerSaksbehandlingService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public Fagsak hentFagsak(String saksnummer) {
@@ -252,30 +257,45 @@ public class FagsakService {
     }
 
 
-    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) {
+    @Transactional
+    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus, SkjemaSaksstatusSynk skjemaSaksstatusSynk) {
         Behandling aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         if (aktivBehandling == null) {
             log.warn("Forsøker å lukke behandling for fagsak {} som ikke har noen aktiv behandling", fagsak.getSaksnummer());
-            oppdaterStatus(fagsak, saksstatus);
+            oppdaterStatus(fagsak, saksstatus, skjemaSaksstatusSynk);
         } else {
-            avsluttFagsakOgBehandling(fagsak, aktivBehandling, saksstatus);
+            avsluttFagsakOgBehandling(fagsak, aktivBehandling, saksstatus, skjemaSaksstatusSynk);
         }
     }
 
+    @Transactional
     public void avsluttFagsakOgBehandling(Fagsak fagsak,
                                           Behandling behandling,
-                                          Saksstatuser saksstatus) {
+                                          Saksstatuser saksstatus,
+                                          SkjemaSaksstatusSynk skjemaSaksstatusSynk) {
         if (!behandling.getFagsak().getSaksnummer().equals(fagsak.getSaksnummer())) {
             throw new FunksjonellException("Behandling " + behandling.getId() + " tilhører ikke fagsak " + fagsak.getSaksnummer());
         }
-        oppdaterStatus(fagsak, saksstatus);
+        oppdaterStatus(fagsak, saksstatus, skjemaSaksstatusSynk);
         behandlingService.avsluttBehandling(behandling.getId());
         log.info("Fagsak {} med behandling avsluttet", fagsak.getSaksnummer());
     }
 
-    public void oppdaterStatus(Fagsak fagsak, Saksstatuser saksstatus) {
+    /**
+     * Oppdaterer fagsakstatus. {@code skjemaSaksstatusSynk} er påkrevd og styrer om det publiseres
+     * {@link FagsakStatusEndretEvent}, som bestiller synk av saksstatus til melosys-skjema-api for
+     * saker med skjema-mapping: bruk {@link SkjemaSaksstatusSynk#SYNKRONISER} fra
+     * REST-/admin-/scheduler-stier, og {@link SkjemaSaksstatusSynk#HÅNDTERES_AV_PROSESSFLYT} fra
+     * prosessinstans-steg der flyten selv eier SYNK_SKJEMA_SAKSSTATUS-steget (et prosessinstans-steg
+     * skal ikke bestille barneprosesser).
+     */
+    @Transactional
+    public void oppdaterStatus(Fagsak fagsak, Saksstatuser saksstatus, SkjemaSaksstatusSynk skjemaSaksstatusSynk) {
         fagsak.setStatus(saksstatus);
         fagsakRepository.save(fagsak);
+        if (skjemaSaksstatusSynk == SkjemaSaksstatusSynk.SYNKRONISER) {
+            applicationEventPublisher.publishEvent(new FagsakStatusEndretEvent(fagsak.getSaksnummer()));
+        }
     }
 
     public void oppdaterSakstema(Fagsak fagsak, Sakstemaer nySakstema) {

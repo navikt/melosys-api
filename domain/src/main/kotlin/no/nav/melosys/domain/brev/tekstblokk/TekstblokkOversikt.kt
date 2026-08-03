@@ -14,6 +14,7 @@ class TekstblokkOversikt(
     val type: TekstblokkType,
     val endretDato: Instant,
     val endretAv: String,
+    val endretAvNavn: String?,
 ) {
     var tags: Set<String> = emptySet()
 }

@@ -31,7 +31,7 @@ class FerdigbehandleService(
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.FERDIGBEHANDLET)
 
         if (fagsak.erEnesteBehandling(behandlingId)) {
-            fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET)
+            fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET, SkjemaSaksstatusSynk.SYNKRONISER)
         } else {
             behandlingService.avsluttBehandling(behandlingId)
         }
