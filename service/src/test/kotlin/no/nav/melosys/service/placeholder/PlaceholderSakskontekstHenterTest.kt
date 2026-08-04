@@ -12,16 +12,22 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.SaksopplysningType
+import no.nav.melosys.domain.anmodningsperiode
 import no.nav.melosys.domain.arbeidsforholdDokument
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.behandling
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype
 import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
-import no.nav.melosys.domain.saksopplysning
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.lovvalgsperiode
 import no.nav.melosys.domain.medlemskapsperiode
@@ -29,8 +35,10 @@ import no.nav.melosys.domain.mottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.soeknad
+import no.nav.melosys.domain.saksopplysning
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.service.LandvelgerService
+import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -66,6 +74,8 @@ class PlaceholderSakskontekstHenterTest {
             behandlingsresultatService,
             landvelgerService,
             avklarteVirksomheterService,
+            // Ekte tjeneste: mottakeren utledes rent av trygdeavgiftsperiodene, uten databaseoppslag
+            TrygdeavgiftMottakerService(behandlingsresultatService),
             landnavnOppslag,
         )
         medBehandling(behandling())
@@ -212,18 +222,218 @@ class PlaceholderSakskontekstHenterTest {
         sakskontekst.utenlandskeArbeidsgivere shouldContainExactly listOf("Nordwerk GmbH")
     }
 
+    @Test
+    fun `materialiserer betingelsesfakta fra behandlingen og behandlingsresultatet`() {
+        val fakta = henter.hent(BEHANDLING_ID).fakta
+
+        fakta.erInnvilgelse shouldBe false
+        fakta.erAvslag shouldBe false
+        fakta.erOpphørt shouldBe false
+        fakta.erDelvisInnvilgelse shouldBe false
+        fakta.harÅpenSluttdato shouldBe false
+        fakta.erUtsending shouldBe false
+        fakta.erPensjonist shouldBe false
+        fakta.erFørstegangsvurdering shouldBe true
+        fakta.erNyVurdering shouldBe false
+        // Uten trygdeavgiftsperioder er verken skatteplikt, inntektskilde eller mottaker kjent
+        fakta.erSkattepliktig.shouldBeNull()
+        fakta.harLønnFraNorge.shouldBeNull()
+        fakta.harInntektFraUtlandet.shouldBeNull()
+        fakta.trygdeavgiftTilSkatt.shouldBeNull()
+    }
+
+    // Åpen sluttdato er en påstand om de innvilgede periodene – uten dem finnes ingen påstand
+    @Test
+    fun `avslag uten innvilgede perioder utelater apen sluttdato`() {
+        medBehandlingsresultat(
+            Behandlingsresultat.forTest {
+                behandling { fagsak { tema = Sakstemaer.TRYGDEAVGIFT } }
+                medlemskapsperiode {
+                    fom = LocalDate.of(2024, 3, 1)
+                    tom = null
+                    innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
+                }
+            }
+        )
+
+        henter.hent(BEHANDLING_ID).fakta.harÅpenSluttdato.shouldBeNull()
+    }
+
+    @Test
+    fun `behandlingens tema og type gir utsending, pensjonist og ny vurdering`() {
+        medBehandling(behandling(behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER, behandlingstype = Behandlingstyper.NY_VURDERING))
+
+        val fakta = henter.hent(BEHANDLING_ID).fakta
+
+        fakta.erUtsending shouldBe true
+        fakta.erPensjonist shouldBe false
+        fakta.erFørstegangsvurdering shouldBe false
+        fakta.erNyVurdering shouldBe true
+    }
+
+    @Test
+    fun `innvilget periode uten sluttdato gir apen sluttdato`() {
+        medBehandlingsresultat(
+            Behandlingsresultat.forTest {
+                behandling { fagsak { tema = Sakstemaer.TRYGDEAVGIFT } }
+                medlemskapsperiode {
+                    fom = LocalDate.of(2024, 3, 1)
+                    tom = null
+                }
+            }
+        )
+
+        henter.hent(BEHANDLING_ID).fakta.harÅpenSluttdato shouldBe true
+    }
+
+    @Test
+    fun `trygdeavgiftsperiodene gir skatteplikt, inntektskilde og trygdeavgift til skatt`() {
+        medBehandlingsresultat(medTrygdeavgift(Skatteplikttype.SKATTEPLIKTIG, Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, tilSkatt = true))
+
+        val fakta = henter.hent(BEHANDLING_ID).fakta
+
+        fakta.erSkattepliktig shouldBe true
+        fakta.harLønnFraNorge shouldBe true
+        fakta.harInntektFraUtlandet shouldBe false
+        fakta.trygdeavgiftTilSkatt shouldBe true
+    }
+
+    @Test
+    fun `ikke skattepliktig inntekt fra utlandet gir trygdeavgift til Nav`() {
+        medBehandlingsresultat(medTrygdeavgift(Skatteplikttype.IKKE_SKATTEPLIKTIG, Inntektskildetype.INNTEKT_FRA_UTLANDET, tilSkatt = false))
+
+        val fakta = henter.hent(BEHANDLING_ID).fakta
+
+        fakta.erSkattepliktig shouldBe false
+        fakta.harLønnFraNorge shouldBe false
+        fakta.harInntektFraUtlandet shouldBe true
+        fakta.trygdeavgiftTilSkatt shouldBe false
+    }
+
+    @Test
+    fun `delvis innvilgelse leses av svaret pa anmodningsperioden`() {
+        medBehandlingsresultat(medAnmodningsperioder(1))
+
+        henter.hent(BEHANDLING_ID).fakta.erDelvisInnvilgelse shouldBe true
+    }
+
+    @Test
+    fun `flere anmodningsperioder utelater delvis innvilgelse uten a velte de ovrige faktaene`() {
+        medBehandlingsresultat(medAnmodningsperioder(2))
+
+        val fakta = henter.hent(BEHANDLING_ID).fakta
+
+        fakta.erDelvisInnvilgelse.shouldBeNull()
+        fakta.erOpphørt shouldBe false
+    }
+
+    // Vakuumfellen: predikatene svarer FALSE på et resultat som ikke er vurdert, og ville slettet vedtaksteksten
+    @Test
+    fun `ufastsatt behandlingsresultat utelater innvilgelse, avslag og opphort`() {
+        medBehandlingsresultat(
+            Behandlingsresultat.forTest {
+                behandling { fagsak { tema = Sakstemaer.TRYGDEAVGIFT } }
+                type = Behandlingsresultattyper.IKKE_FASTSATT
+            }
+        )
+
+        val fakta = henter.hent(BEHANDLING_ID).fakta
+
+        fakta.erInnvilgelse.shouldBeNull()
+        fakta.erAvslag.shouldBeNull()
+        fakta.erOpphørt.shouldBeNull()
+        // De øvrige faktaene henger ikke på resultattypen
+        fakta.erFørstegangsvurdering shouldBe true
+    }
+
+    @Test
+    fun `fastsatt innvilgelse gir innvilgelse og ikke avslag`() {
+        medBehandling(behandling(sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG))
+        medBehandlingsresultat(
+            Behandlingsresultat.forTest {
+                behandling { fagsak { tema = Sakstemaer.MEDLEMSKAP_LOVVALG } }
+                type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+                lovvalgsperiode {
+                    fom = LocalDate.of(2024, 3, 1)
+                    tom = LocalDate.of(2027, 2, 28)
+                }
+            }
+        )
+
+        val fakta = henter.hent(BEHANDLING_ID).fakta
+
+        fakta.erInnvilgelse shouldBe true
+        fakta.erAvslag shouldBe false
+        fakta.erOpphørt shouldBe false
+    }
+
+    @Test
+    fun `uten behandlingsresultat star bare behandlingens egne fakta igjen`() {
+        every { behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(BEHANDLING_ID) } throws
+            IkkeFunnetException("Fant ikke behandlingsresultat")
+
+        val fakta = henter.hent(BEHANDLING_ID).fakta
+
+        fakta.erInnvilgelse.shouldBeNull()
+        fakta.erAvslag.shouldBeNull()
+        fakta.erDelvisInnvilgelse.shouldBeNull()
+        fakta.harÅpenSluttdato.shouldBeNull()
+        fakta.erFørstegangsvurdering shouldBe true
+    }
+
     private fun medBehandling(behandling: Behandling) {
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
+    }
+
+    private fun medBehandlingsresultat(behandlingsresultat: Behandlingsresultat) {
+        every { behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(BEHANDLING_ID) } returns behandlingsresultat
+    }
+
+    private fun medTrygdeavgift(
+        skatteplikt: Skatteplikttype,
+        inntektskilde: Inntektskildetype,
+        tilSkatt: Boolean,
+    ): Behandlingsresultat = Behandlingsresultat.forTest {
+        behandling { fagsak { tema = Sakstemaer.TRYGDEAVGIFT } }
+        medlemskapsperiode {
+            fom = LocalDate.of(2024, 3, 1)
+            tom = LocalDate.of(2027, 2, 28)
+            trygdeavgiftsperiode {
+                grunnlagSkatteforholdTilNorge { skatteplikttype = skatteplikt }
+                grunnlagInntekstperiode {
+                    type = inntektskilde
+                    arbeidsgiversavgiftBetalesTilSkatt = tilSkatt
+                }
+            }
+        }
+    }
+
+    private fun medAnmodningsperioder(antall: Int): Behandlingsresultat = Behandlingsresultat.forTest {
+        behandling { fagsak { tema = Sakstemaer.MEDLEMSKAP_LOVVALG } }
+        repeat(antall) { nummer ->
+            anmodningsperiode {
+                fom = LocalDate.of(2024, 3, 1).plusYears(nummer.toLong())
+                anmodningsperiodeSvar {
+                    anmodningsperiodeSvarType = Anmodningsperiodesvartyper.DELVIS_INNVILGELSE
+                    innvilgetFom = LocalDate.of(2024, 3, 1)
+                    innvilgetTom = LocalDate.of(2025, 2, 28)
+                }
+            }
+        }
     }
 
     private fun behandling(
         utsendingsperiode: Periode = Periode(LocalDate.of(2024, 4, 1), LocalDate.of(2027, 3, 31)),
         sakstema: Sakstemaer = Sakstemaer.TRYGDEAVGIFT,
+        behandlingstema: Behandlingstema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
+        behandlingstype: Behandlingstyper = Behandlingstyper.FØRSTEGANG,
         arbeidsforholdOrgnumre: List<String> = emptyList(),
         ekstraArbeidsgivere: List<String> = emptyList(),
         utenlandskeForetaksnavn: List<String> = emptyList(),
     ): Behandling = Behandling.forTest {
         id = BEHANDLING_ID
+        tema = behandlingstema
+        type = behandlingstype
         fagsak {
             saksnummer = "MEL-12345"
             tema = sakstema

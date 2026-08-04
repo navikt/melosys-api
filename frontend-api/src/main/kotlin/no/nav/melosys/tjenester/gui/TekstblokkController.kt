@@ -8,10 +8,12 @@ import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.SikkerhetsbegrensningException
 import no.nav.melosys.featuretoggle.ToggleName
+import no.nav.melosys.service.tekstblokk.TekstblokkHistorikkService
 import no.nav.melosys.service.tekstblokk.TekstblokkService
 import no.nav.melosys.tjenester.gui.dto.tekstblokk.TekstblokkDto
 import no.nav.melosys.tjenester.gui.dto.tekstblokk.TekstblokkOversiktDto
 import no.nav.melosys.tjenester.gui.dto.tekstblokk.TekstblokkRequestDto
+import no.nav.melosys.tjenester.gui.dto.tekstblokk.TekstblokkVersjonDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "tekstblokker")
 class TekstblokkController(
     private val tekstblokkService: TekstblokkService,
+    private val tekstblokkHistorikkService: TekstblokkHistorikkService,
     private val unleash: Unleash,
 ) {
 
@@ -37,14 +40,21 @@ class TekstblokkController(
     @Operation(summary = "Henter oversikt over tekstblokker og brevmaler")
     fun hentAlle(@RequestParam(value = "type", required = false) type: TekstblokkType?): ResponseEntity<List<TekstblokkOversiktDto>> {
         sjekkLesetilgang()
-        return ResponseEntity.ok(tekstblokkService.hentAlleOversikter(type).map(TekstblokkOversiktDto::av))
+        return ResponseEntity.ok(tekstblokkService.hentAlleOversikter(type, erAdministrator()).map(TekstblokkOversiktDto::av))
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Henter én tekstblokk med fullt innhold")
     fun hent(@PathVariable("id") id: Long): ResponseEntity<TekstblokkDto> {
         sjekkLesetilgang()
-        return ResponseEntity.ok(TekstblokkDto.av(tekstblokkService.hent(id)))
+        return ResponseEntity.ok(TekstblokkDto.av(tekstblokkService.hent(id, erAdministrator())))
+    }
+
+    @GetMapping("/{id}/historikk")
+    @Operation(summary = "Henter versjonshistorikken for en tekstblokk")
+    fun hentHistorikk(@PathVariable("id") id: Long): ResponseEntity<List<TekstblokkVersjonDto>> {
+        sjekkAdministrasjon()
+        return ResponseEntity.ok(tekstblokkHistorikkService.hentHistorikk(id).map(TekstblokkVersjonDto::av))
     }
 
     @PostMapping
@@ -59,6 +69,13 @@ class TekstblokkController(
     fun oppdater(@PathVariable("id") id: Long, @Valid @RequestBody request: TekstblokkRequestDto): ResponseEntity<TekstblokkDto> {
         sjekkAdministrasjon()
         return ResponseEntity.ok(TekstblokkDto.av(tekstblokkService.oppdater(id, request.tilInput())))
+    }
+
+    @PostMapping("/{id}/publiser")
+    @Operation(summary = "Publiserer et utkast slik at saksbehandlere ser det")
+    fun publiser(@PathVariable("id") id: Long): ResponseEntity<TekstblokkDto> {
+        sjekkAdministrasjon()
+        return ResponseEntity.ok(TekstblokkDto.av(tekstblokkService.publiser(id)))
     }
 
     @DeleteMapping("/{id}")
@@ -86,9 +103,15 @@ class TekstblokkController(
      */
     private fun sjekkAdministrasjon() {
         sjekkLesetilgang()
-        if (!unleash.isEnabled(ToggleName.MELOSYS_ADMINISTRASJON)) {
+        if (!erAdministrator()) {
             throw SikkerhetsbegrensningException("Du har ikke tilgang til å administrere tekstblokker")
         }
     }
+
+    /**
+     * Styrer også om utkast er synlige: de er ukvalitetssikret vedtakstekst, og
+     * liste-DTO-en bærer hele innholdet. Filtreringen må derfor skje server-side.
+     */
+    private fun erAdministrator() = unleash.isEnabled(ToggleName.MELOSYS_ADMINISTRASJON)
 
 }

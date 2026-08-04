@@ -15,6 +15,7 @@ class TekstblokkOversikt(
     val tittel: String,
     val innhold: String,
     val type: TekstblokkType,
+    val status: TekstblokkStatus,
     val endretDato: Instant,
     val endretAv: String,
     val endretAvNavn: String?,

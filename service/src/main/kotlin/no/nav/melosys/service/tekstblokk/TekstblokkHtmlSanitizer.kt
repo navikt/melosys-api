@@ -91,8 +91,12 @@ class TekstblokkHtmlSanitizer {
         // opprydding ved innsetting – den er master-editorens egen klasse og skal ikke fjernes
         // ved lagring her, ellers endres innhold som finnes i biblioteket fra før.
         // placeholder-valgt står her for fallbacken: uten gyldig data-valg er spanen ren markering.
-        private val MARKERINGSKLASSER =
-            setOf("placeholder-uerstattet", "placeholder-ukjent", "placeholder-utfylt", "placeholder-valg", VALGT_KLASSE)
+        // placeholder-betingelse markerer {#hvis}/{/hvis}-tokenene og er rent boolsk: teksten er
+        // selve tokenet og består ved unwrap, som de øvrige markeringene uten eget dataattributt.
+        private val MARKERINGSKLASSER = setOf(
+            "placeholder-uerstattet", "placeholder-ukjent", "placeholder-utfylt", "placeholder-valg",
+            "placeholder-betingelse", VALGT_KLASSE,
+        )
 
         // Konservativt mønster som dekker alle nøklene i PlaceholderRegister
         private val NØKKELMØNSTER = Regex("^[a-z0-9-]+\$")

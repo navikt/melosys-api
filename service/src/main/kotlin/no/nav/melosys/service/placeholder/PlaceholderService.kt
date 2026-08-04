@@ -16,13 +16,14 @@ class PlaceholderService(
     private val placeholderRegister: PlaceholderRegister,
 ) {
 
-    fun hentKatalog(): List<PlaceholderDefinisjon> = placeholderRegister.definisjoner
+    fun hentKatalog(): PlaceholderKatalog =
+        PlaceholderKatalog(placeholderRegister.definisjoner, placeholderRegister.betingelser)
 
     /**
      * Uten transaksjon: DB-tilkoblingen er sluppet før persondata og arbeidsgivernavn hentes, slik at
      * et tregt PDL- eller EREG-kall ikke legger beslag på en tilkobling fra poolen.
      */
-    fun hentVerdier(behandlingId: Long): List<PlaceholderVerdi> {
+    fun hentVerdier(behandlingId: Long): PlaceholderVerdier {
         val kontekst = PlaceholderKontekst(
             sakskontekst = sakskontekstHenter.hent(behandlingId),
             landnavn = landnavnOppslag::landnavn,
@@ -35,16 +36,29 @@ class PlaceholderService(
         // Samme cachede feil kastes til hvert persondatafelt – samles her og logges én gang per feil
         val utelatteNokler = IdentityHashMap<Exception, MutableList<String>>()
         val verdier = placeholderRegister.definisjoner.mapNotNull { definisjon ->
-            val resultat = try {
-                definisjon.resolver(kontekst)
-            } catch (e: Exception) {
-                utelatteNokler.getOrPut(e) { mutableListOf() } += definisjon.nokkel
-                null
-            }
-            resultat?.let { tilVerdi(definisjon.nokkel, it) }
+            utelatVedFeil(utelatteNokler, definisjon.nokkel) { definisjon.resolver(kontekst) }
+                ?.let { tilVerdi(definisjon.nokkel, it) }
         }
+        // En betingelse uten tilgjengelig faktum utelates helt, slik at web beholder innholdet uerstattet
+        val betingelser = placeholderRegister.betingelser
+            .filter { it.gjelderFor(kontekst.sakskontekst.sakstype) }
+            .mapNotNull { betingelse ->
+                utelatVedFeil(utelatteNokler, betingelse.nokkel) { betingelse.vurdering(kontekst) }
+                    ?.let { BetingelseVerdi(betingelse.nokkel, it) }
+            }
         utelatteNokler.forEach { (feil, nokler) -> loggUtelatteFelt(nokler, feil) }
-        return verdier
+        return PlaceholderVerdier(verdier, betingelser)
+    }
+
+    private fun <T> utelatVedFeil(
+        utelatteNokler: IdentityHashMap<Exception, MutableList<String>>,
+        nokkel: String,
+        oppslag: () -> T?,
+    ): T? = try {
+        oppslag()
+    } catch (e: Exception) {
+        utelatteNokler.getOrPut(e) { mutableListOf() } += nokkel
+        null
     }
 
     /**
@@ -59,7 +73,7 @@ class PlaceholderService(
 
     // Nøklene er trygge å logge, men aldri verdier eller feilmeldinger – de kan inneholde persondata
     private fun loggUtelatteFelt(nokler: List<String>, e: Exception) {
-        val melding = "Kunne ikke hente verdi for placeholderne [{}] ({}), feltene utelates"
+        val melding = "Kunne ikke slå opp nøklene [{}] ({}), feltene utelates"
         val nokkelListe = nokler.joinToString()
         // Fagsak uten bruker er en forventet tilstand, ikke en driftsfeil
         if (e is FunksjonellException) {
@@ -74,8 +88,23 @@ class PlaceholderService(
     }
 }
 
+data class PlaceholderKatalog(
+    val placeholdere: List<PlaceholderDefinisjon>,
+    val betingelser: List<BetingelseDefinisjon>,
+)
+
+data class PlaceholderVerdier(
+    val verdier: List<PlaceholderVerdi>,
+    val betingelser: List<BetingelseVerdi>,
+)
+
 data class PlaceholderVerdi(
     val nokkel: String,
     val verdi: String,
     val kandidater: List<String>? = null,
+)
+
+data class BetingelseVerdi(
+    val nokkel: String,
+    val oppfylt: Boolean,
 )

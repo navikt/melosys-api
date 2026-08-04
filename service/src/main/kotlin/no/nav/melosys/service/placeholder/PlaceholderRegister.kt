@@ -170,6 +170,93 @@ class PlaceholderRegister {
         ),
     )
 
+    /**
+     * Betingelsene `{#hvis nokkel}` kan spørre om. Sammensatte fakta blir egne nøkler her – det
+     * finnes ingen og/eller-syntaks i tekstblokkene.
+     */
+    val betingelser: List<BetingelseDefinisjon> = listOf(
+        BetingelseDefinisjon(
+            nokkel = "innvilgelse",
+            visningsnavn = "Innvilgelse",
+            beskrivelse = "Behandlingsresultatet er en innvilgelse",
+            sakstyper = LOVVALGSSAKER,
+            vurdering = { it.fakta.erInnvilgelse },
+        ),
+        BetingelseDefinisjon(
+            nokkel = "avslag",
+            visningsnavn = "Avslag",
+            beskrivelse = "Behandlingsresultatet er et avslag",
+            vurdering = { it.fakta.erAvslag },
+        ),
+        BetingelseDefinisjon(
+            nokkel = "opphort",
+            visningsnavn = "Opphør",
+            beskrivelse = "Behandlingsresultatet er et opphør",
+            vurdering = { it.fakta.erOpphørt },
+        ),
+        BetingelseDefinisjon(
+            nokkel = "delvis-innvilgelse",
+            visningsnavn = "Delvis innvilgelse",
+            beskrivelse = "Utlandet svarte delvis innvilgelse på anmodningen om unntak",
+            sakstyper = LOVVALGSSAKER,
+            vurdering = { it.fakta.erDelvisInnvilgelse },
+        ),
+        BetingelseDefinisjon(
+            nokkel = "apen-sluttdato",
+            visningsnavn = "Åpen sluttdato",
+            beskrivelse = "De innvilgede periodene har ingen sluttdato",
+            vurdering = { it.fakta.harÅpenSluttdato },
+        ),
+        BetingelseDefinisjon(
+            nokkel = "skattepliktig",
+            visningsnavn = "Skattepliktig til Norge",
+            beskrivelse = "Brukeren er skattepliktig til Norge",
+            vurdering = { it.fakta.erSkattepliktig },
+        ),
+        BetingelseDefinisjon(
+            nokkel = "har-lonn-fra-norge",
+            visningsnavn = "Lønn fra Norge",
+            beskrivelse = "Trygdeavgiften er beregnet av arbeidsinntekt fra Norge",
+            vurdering = { it.fakta.harLønnFraNorge },
+        ),
+        BetingelseDefinisjon(
+            nokkel = "har-inntekt-fra-utlandet",
+            visningsnavn = "Inntekt fra utlandet",
+            beskrivelse = "Trygdeavgiften er beregnet av inntekt fra utlandet",
+            vurdering = { it.fakta.harInntektFraUtlandet },
+        ),
+        BetingelseDefinisjon(
+            nokkel = "trygdeavgift-til-skatt",
+            visningsnavn = "Trygdeavgift betales til Skatteetaten",
+            beskrivelse = "Trygdeavgiften betales i sin helhet til Skatteetaten, ikke til Nav",
+            vurdering = { it.fakta.trygdeavgiftTilSkatt },
+        ),
+        BetingelseDefinisjon(
+            nokkel = "utsending",
+            visningsnavn = "Utsending",
+            beskrivelse = "Behandlingen gjelder en utsendt arbeidstaker eller selvstendig næringsdrivende",
+            vurdering = { it.fakta.erUtsending },
+        ),
+        BetingelseDefinisjon(
+            nokkel = "pensjonist",
+            visningsnavn = "Pensjonist",
+            beskrivelse = "Behandlingen gjelder en pensjonist",
+            vurdering = { it.fakta.erPensjonist },
+        ),
+        BetingelseDefinisjon(
+            nokkel = "forstegangsvurdering",
+            visningsnavn = "Førstegangsvurdering",
+            beskrivelse = "Behandlingen er en førstegangsvurdering",
+            vurdering = { it.fakta.erFørstegangsvurdering },
+        ),
+        BetingelseDefinisjon(
+            nokkel = "ny-vurdering",
+            visningsnavn = "Ny vurdering",
+            beskrivelse = "Behandlingen er en ny vurdering av et tidligere vedtak",
+            vurdering = { it.fakta.erNyVurdering },
+        ),
+    )
+
     private companion object {
         private val DATOFORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
         private val LOVVALGSSAKER = listOf(Sakstyper.EU_EOS, Sakstyper.TRYGDEAVTALE)

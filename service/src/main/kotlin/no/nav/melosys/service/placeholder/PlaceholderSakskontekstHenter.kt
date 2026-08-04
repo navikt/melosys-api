@@ -6,8 +6,14 @@ import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
+import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.service.LandvelgerService
+import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -29,6 +35,7 @@ class PlaceholderSakskontekstHenter(
     private val behandlingsresultatService: BehandlingsresultatService,
     private val landvelgerService: LandvelgerService,
     private val avklarteVirksomheterService: AvklarteVirksomheterService,
+    private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val landnavnOppslag: PlaceholderLandnavnOppslag,
 ) {
 
@@ -42,6 +49,7 @@ class PlaceholderSakskontekstHenter(
         return PlaceholderSakskontekst(
             saksnummer = fagsak.saksnummer,
             brukersAktørID = fagsak.finnBrukersAktørID(),
+            sakstype = fagsak.type,
             erLovvalg = fagsak.erLovvalg(),
             lovvalgsperiode = behandlingsresultat?.let { lovvalgsperiode(behandlingId, it) },
             medlemskapsperiodeFom = behandlingsresultat?.let {
@@ -55,8 +63,74 @@ class PlaceholderSakskontekstHenter(
             arbeidsland = arbeidsland(behandlingId),
             utenlandskeArbeidsgivere = utenlandskeArbeidsgivere(behandlingId, behandling),
             norskeArbeidsgivereOrgnumre = norskeArbeidsgivereOrgnumre(behandlingId, behandling),
+            fakta = betingelseFakta(behandlingId, behandling, behandlingsresultat),
         )
     }
+
+    /** Betingelsene beregnes ferdig til Boolean her, i transaksjonen: alt under Behandlingsresultat er lazy. */
+    private fun betingelseFakta(behandlingId: Long, behandling: Behandling, behandlingsresultat: Behandlingsresultat?) =
+        BetingelseFakta(
+            // Vedtaksnøklene hviler på resultattypen, som står IKKE_FASTSATT til vedtaket er vurdert – der er ingen av dem kjent
+            erInnvilgelse = fraFastsattResultat(behandlingId, behandlingsresultat, "innvilgelse") { it.erInnvilgelse() },
+            erAvslag = fraFastsattResultat(behandlingId, behandlingsresultat, "avslag") { it.erAvslag() },
+            erOpphørt = fraFastsattResultat(behandlingId, behandlingsresultat, "opphørt") { it.erOpphørt() },
+            // finnAnmodningsperiode() kaster ved flere perioder – delfeltet fanger, og betingelsen utelates
+            erDelvisInnvilgelse = fraResultat(behandlingId, behandlingsresultat, "delvis innvilgelse") { resultat ->
+                resultat.finnAnmodningsperiode()
+                    .map { it.anmodningsperiodeSvar?.erGyldigDelvisInnvilgelse() == true }
+                    .orElse(false)
+            },
+            // Uten innvilgede perioder finnes ingen sluttdato å ha åpen, og betingelsen utelates
+            harÅpenSluttdato = fraResultat(behandlingId, behandlingsresultat, "åpen sluttdato") { resultat ->
+                if (resultat.finnAvgiftspliktigPerioder().none { it.erInnvilget() }) null
+                else resultat.utledAvgiftspliktigperioderTom() == null
+            },
+            // utledSkatteplikttype() svarer SKATTEPLIKTIG i vakuum – uten perioder er faktumet ukjent
+            erSkattepliktig = fraResultat(behandlingId, behandlingsresultat, "skattepliktig") { resultat ->
+                resultat.trygdeavgiftsperioder.takeIf { it.isNotEmpty() }
+                    ?.let { resultat.utledSkatteplikttype() == Skatteplikttype.SKATTEPLIKTIG }
+            },
+            harLønnFraNorge = fraResultat(behandlingId, behandlingsresultat, "lønn fra Norge") { resultat ->
+                resultat.inntektskilder()?.contains(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE)
+            },
+            harInntektFraUtlandet = fraResultat(behandlingId, behandlingsresultat, "inntekt fra utlandet") { resultat ->
+                resultat.inntektskilder()?.contains(Inntektskildetype.INNTEKT_FRA_UTLANDET)
+            },
+            // Ren beregning over trygdeavgiftsperiodene; uten perioder har mottakeren ingen mening
+            trygdeavgiftTilSkatt = fraResultat(behandlingId, behandlingsresultat, "trygdeavgift til skatt") { resultat ->
+                resultat.trygdeavgiftsperioder.toList().takeIf { it.isNotEmpty() }?.let {
+                    trygdeavgiftMottakerService.getTrygdeavgiftMottaker(it) == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+                }
+            },
+            erUtsending = behandling.erUtsending(),
+            erPensjonist = behandling.erPensjonist(),
+            erFørstegangsvurdering = behandling.erFørstegangsvurdering(),
+            erNyVurdering = behandling.erNyVurdering(),
+        )
+
+    private fun <T> fraResultat(
+        behandlingId: Long,
+        behandlingsresultat: Behandlingsresultat?,
+        navn: String,
+        oppslag: (Behandlingsresultat) -> T,
+    ): T? = behandlingsresultat?.let { resultat -> delfelt(behandlingId, navn) { oppslag(resultat) } }
+
+    private fun fraFastsattResultat(
+        behandlingId: Long,
+        behandlingsresultat: Behandlingsresultat?,
+        navn: String,
+        oppslag: (Behandlingsresultat) -> Boolean,
+    ): Boolean? = fraResultat(behandlingId, behandlingsresultat, navn) { resultat ->
+        if (resultat.erResultattypeFastsatt()) oppslag(resultat) else null
+    }
+
+    /** Nye behandlingsresultater opprettes som IKKE_FASTSATT, og da svarer resultatpredikatene FALSE i vakuum. */
+    private fun Behandlingsresultat.erResultattypeFastsatt(): Boolean =
+        type != null && type != Behandlingsresultattyper.IKKE_FASTSATT
+
+    /** Null når saken ikke har inntektsgrunnlag: da er ingen av inntektsbetingelsene kjent. */
+    private fun Behandlingsresultat.inntektskilder(): Set<Inntektskildetype>? =
+        hentInntektsperioder().mapNotNull { it.type }.toSet().takeIf { it.isNotEmpty() }
 
     private fun lovvalgsperiode(behandlingId: Long, behandlingsresultat: Behandlingsresultat): PeriodeData? =
         delfelt(behandlingId, "lovvalgsperiode") { behandlingsresultat.finnLovvalgsperiode().getOrNull()?.let(::periodeData) }
@@ -148,6 +222,7 @@ class PlaceholderLandnavnOppslag(private val kodeverkService: KodeverkService) {
 data class PlaceholderSakskontekst(
     val saksnummer: String,
     val brukersAktørID: String?,
+    val sakstype: Sakstyper? = null,
     val erLovvalg: Boolean = false,
     val lovvalgsperiode: PeriodeData? = null,
     val medlemskapsperiodeFom: LocalDate? = null,
@@ -158,6 +233,7 @@ data class PlaceholderSakskontekst(
     val arbeidsland: List<String> = emptyList(),
     val utenlandskeArbeidsgivere: List<String> = emptyList(),
     val norskeArbeidsgivereOrgnumre: Set<String> = emptySet(),
+    val fakta: BetingelseFakta = BetingelseFakta(),
 ) {
     /** Brev-listenes konvensjon: bare innvilgede perioder, i rekkefølgen henteren materialiserte dem (nyeste først). */
     fun innvilgedePerioder(): List<PeriodeData> = avgiftspliktigPerioder.filter { it.erInnvilget }
@@ -165,6 +241,23 @@ data class PlaceholderSakskontekst(
     /** Null for lovvalgssaker: der er de avgiftspliktige periodene lovvalgsperioder, som lovvalgsnøklene allerede dekker. */
     fun medlemskapsperioder(): List<PeriodeData>? = if (erLovvalg) null else innvilgedePerioder()
 }
+
+/** De ferdig beregnede fakta betingelsene i registeret svarer på. Null betyr utilgjengelig for behandlingen. */
+data class BetingelseFakta(
+    val erInnvilgelse: Boolean? = null,
+    val erAvslag: Boolean? = null,
+    val erOpphørt: Boolean? = null,
+    val erDelvisInnvilgelse: Boolean? = null,
+    val harÅpenSluttdato: Boolean? = null,
+    val erSkattepliktig: Boolean? = null,
+    val harLønnFraNorge: Boolean? = null,
+    val harInntektFraUtlandet: Boolean? = null,
+    val trygdeavgiftTilSkatt: Boolean? = null,
+    val erUtsending: Boolean? = null,
+    val erPensjonist: Boolean? = null,
+    val erFørstegangsvurdering: Boolean? = null,
+    val erNyVurdering: Boolean? = null,
+)
 
 data class PeriodeData(
     val fom: LocalDate?,
