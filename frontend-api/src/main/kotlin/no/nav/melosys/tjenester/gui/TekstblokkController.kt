@@ -38,9 +38,16 @@ class TekstblokkController(
 
     @GetMapping
     @Operation(summary = "Henter oversikt over tekstblokker og brevmaler")
-    fun hentAlle(@RequestParam(value = "type", required = false) type: TekstblokkType?): ResponseEntity<List<TekstblokkOversiktDto>> {
+    fun hentAlle(
+        @RequestParam(value = "type", required = false) type: TekstblokkType?,
+        // Utkast leveres kun når klienten eksplisitt ber om dem (admin-lista). Uten dette
+        // ville en eldre web-bundle fått utkast i Send brev-søket i deploy-vinduet mellom
+        // api og web – før klientfilteret som stopper dem finnes.
+        @RequestParam(value = "inkluderUtkast", required = false, defaultValue = "false") inkluderUtkast: Boolean,
+    ): ResponseEntity<List<TekstblokkOversiktDto>> {
         sjekkLesetilgang()
-        return ResponseEntity.ok(tekstblokkService.hentAlleOversikter(type, erAdministrator()).map(TekstblokkOversiktDto::av))
+        val medUtkast = inkluderUtkast && erAdministrator()
+        return ResponseEntity.ok(tekstblokkService.hentAlleOversikter(type, medUtkast).map(TekstblokkOversiktDto::av))
     }
 
     @GetMapping("/{id}")
