@@ -71,11 +71,12 @@ class TekstblokkHtmlSanitizer {
         hasClass(VALGT_KLASSE) && attr("data-valg").tilValgAlternativer().isNotEmpty()
 
     // Speiler parseValgAlternativer i melosys-web src/services/modules/placeholdere.ts: blanke deler
-    // filtreres bort før kravet om minst to alternativer, slik at et valg web regner som gyldig ikke
-    // forsvinner stille ved lagring. Tom liste betyr ugyldig.
+    // filtreres bort og duplikater slås sammen før kravet om minst to alternativer, slik at et valg
+    // web regner som gyldig ikke forsvinner stille ved lagring – og et valg web ville avvist
+    // (data-valg="A|A") ikke round-tripper til et token web rødmarkerer. Tom liste betyr ugyldig.
     private fun String.tilValgAlternativer(): List<String> =
         if (any(UGYLDIGE_VALGTEGN::contains)) emptyList()
-        else split("|").map(String::trim).filter(String::isNotBlank).takeIf { it.size >= 2 }.orEmpty()
+        else split("|").map(String::trim).filter(String::isNotBlank).distinct().takeIf { it.size >= 2 }.orEmpty()
 
     /** Andre klasser kan bære formatering, så spanen beholdes hvis det er noen igjen. */
     private fun Element.fjernMarkeringsklasser() {

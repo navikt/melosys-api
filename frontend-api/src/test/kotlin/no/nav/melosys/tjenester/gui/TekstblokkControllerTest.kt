@@ -68,7 +68,7 @@ class TekstblokkControllerTest(
     fun `oversikten leverer avgrensningene som kode-strenger`() {
         every { tekstblokkService.hentAlleOversikter(null, true) } returns listOf(oversikt())
 
-        mockMvc.perform(get(BASE_URL).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(BASE_URL).param("inkluderUtkast", "true").contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$[0].sakstyper", contains("FTRL")))
             .andExpect(jsonPath("$[0].behandlingstemaer", contains("PENSJONIST", "YRKESAKTIV")))
@@ -146,19 +146,31 @@ class TekstblokkControllerTest(
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.status").value("UTKAST"))
 
-        mockMvc.perform(get(BASE_URL).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(BASE_URL).param("inkluderUtkast", "true").contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$[0].status").value("UTKAST"))
     }
 
     @Test
-    fun `saksbehandler uten admin-toggle faar oversikten uten utkast`() {
+    fun `saksbehandler uten admin-toggle faar oversikten uten utkast selv om parameteren bes om dem`() {
         every { unleash.isEnabled(ToggleName.MELOSYS_ADMINISTRASJON) } returns false
+        every { tekstblokkService.hentAlleOversikter(null, false) } returns emptyList()
+
+        mockMvc.perform(get(BASE_URL).param("inkluderUtkast", "true").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.length()").value(0))
+
+        verify { tekstblokkService.hentAlleOversikter(null, false) }
+    }
+
+    @Test
+    fun `oversikten uten inkluderUtkast faar aldri utkast, selv med admin-toggle`() {
+        // Vernet for deploy-vinduet: en eldre web-bundle sender ikke parameteren og skal
+        // aldri få utkast i Send brev-søket, uansett hvilke toggles brukeren har.
         every { tekstblokkService.hentAlleOversikter(null, false) } returns emptyList()
 
         mockMvc.perform(get(BASE_URL).contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.length()").value(0))
 
         verify { tekstblokkService.hentAlleOversikter(null, false) }
     }

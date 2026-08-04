@@ -192,6 +192,30 @@ class TekstblokkHtmlSanitizerTest {
     }
 
     @Test
+    fun `duplikater slaas sammen slik web gjoer`() {
+        // Web dedupliserer før tokravet, så data-valg="A|A|B" er gyldig og round-tripper som {velg:A|B}
+        val html = """<p><span class="placeholder-valgt" data-valg="A|A|B">A</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "{velg:A|B}"
+        resultat shouldNotContain "data-valg"
+    }
+
+    @Test
+    fun `data-valg med bare duplikater er ugyldig og pakkes ut som tekst`() {
+        // Web ville deduplisert til ett alternativ og avvist – da må ikke lagringen skrive
+        // et token web etterpå rødmarkerer som ukjent nøkkel
+        val html = """<p><span class="placeholder-valgt" data-valg="A|A">A</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldNotContain "{velg:"
+        resultat shouldContain "A"
+        resultat shouldNotContain "data-valg"
+    }
+
+    @Test
     fun `valgt placeholder inni bracketed-text gir raatt token og beholder klamme-spanen`() {
         val html =
             """<p><span class="bracketed-text"><span class="placeholder-valgt" data-valg="Norge|Sverige">Norge</span></span></p>"""
