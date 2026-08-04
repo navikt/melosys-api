@@ -30,10 +30,10 @@ class TekstblokkService(
         val tittel: String,
         val innhold: String,
         val type: TekstblokkType,
-        val tags: List<String>?,
-        // Null betyr «uendret» ved oppdatering, tom liste nullstiller avgrensningen
-        // – altså «gjelder alle». Eldre klienter som utelater feltene mister dermed
-        // ikke avgrensningen ved en PUT.
+        // Null betyr «uendret» ved oppdatering for tags, avgrensninger og status; tom
+        // liste er den eksplisitte nullstillingen («gjelder alle» for avgrensningene).
+        // Eldre klienter som utelater felter mister dermed ingenting ved en PUT.
+        val tags: List<String>? = null,
         val sakstyper: List<Sakstyper>? = null,
         val behandlingstemaer: List<Behandlingstema>? = null,
         // Null betyr «uendret» ved oppdatering. Ved opprettelse og bulk-seeding faller den
@@ -149,10 +149,9 @@ class TekstblokkService(
         // Utelatt status lar statusen stå: en redigering skal ikke publisere et utkast
         input.status?.let { tekstblokk.status = it }
         tekstblokk.endretAvNavn = endretAvNavn
-        tekstblokk.tags.clear()
-        tekstblokk.tags.addAll(normaliserTags(input.tags))
-        // Utelatt avgrensning lar avgrensningen stå, på samme måte som status. Tom liste
+        // Utelatte tags og avgrensninger lar dem stå, på samme måte som status. Tom liste
         // er den eksplisitte nullstillingen.
+        input.tags?.let { tekstblokk.tags.erstattMed(normaliserTags(it)) }
         input.sakstyper?.let { tekstblokk.sakstyper.erstattMed(it) }
         input.behandlingstemaer?.let { tekstblokk.behandlingstemaer.erstattMed(it) }
     }
