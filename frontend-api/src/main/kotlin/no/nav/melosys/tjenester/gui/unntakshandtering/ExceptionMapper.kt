@@ -12,6 +12,7 @@ import org.slf4j.MDC
 import org.slf4j.event.Level
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -55,6 +56,12 @@ class ExceptionMapper {
         val feilmeldinger = e.bindingResult.fieldErrors.map { "${it.field}: ${it.defaultMessage}" }
         return håndter(e, request, HttpStatus.BAD_REQUEST, Level.WARN, feilmeldinger)
     }
+
+    // Uten denne fanges ulesbar JSON (f.eks. ukjent kodeverkverdi) av Exception-handleren
+    // under og blir 500 + ERROR-logg, selv om feilen ligger hos klienten.
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun håndter(e: HttpMessageNotReadableException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> =
+        håndter(e, request, HttpStatus.BAD_REQUEST, Level.WARN)
 
     @ExceptionHandler(WebClientResponseException::class)
     fun håndter(e: WebClientResponseException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {

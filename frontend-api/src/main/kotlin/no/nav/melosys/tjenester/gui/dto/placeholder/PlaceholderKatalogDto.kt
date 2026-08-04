@@ -1,6 +1,5 @@
 package no.nav.melosys.tjenester.gui.dto.placeholder
 
-import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.service.placeholder.PlaceholderDefinisjon
 
 data class PlaceholderKatalogDto(
@@ -17,7 +16,8 @@ data class PlaceholderBeskrivelseDto(
     val visningsnavn: String,
     val beskrivelse: String,
     val eksempel: String,
-    val sakstyper: List<Sakstyper>,
+    // Koder, ikke rå enum: KodeSerializer ville ellers gitt {kode, term}-objekter.
+    val sakstyper: List<String>,
 ) {
     companion object {
         fun av(definisjon: PlaceholderDefinisjon): PlaceholderBeskrivelseDto = PlaceholderBeskrivelseDto(
@@ -25,7 +25,7 @@ data class PlaceholderBeskrivelseDto(
             visningsnavn = definisjon.visningsnavn,
             beskrivelse = definisjon.beskrivelse,
             eksempel = definisjon.eksempel(),
-            sakstyper = definisjon.sakstyper,
+            sakstyper = definisjon.sakstyper.map { it.kode },
         )
     }
 }

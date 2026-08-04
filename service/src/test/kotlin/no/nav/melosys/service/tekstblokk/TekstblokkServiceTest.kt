@@ -14,7 +14,10 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.brev.tekstblokk.Tekstblokk
+import no.nav.melosys.domain.brev.tekstblokk.TekstblokkOversikt
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.tekstblokk.TekstblokkRepository
 import no.nav.melosys.service.bruker.SaksbehandlerService
@@ -22,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.data.domain.AuditorAware
+import java.time.Instant
 import java.util.Optional
 
 @ExtendWith(MockKExtension::class)
@@ -48,15 +52,22 @@ class TekstblokkServiceTest {
         every { saksbehandlerService.finnNavnForIdent(IDENT) } returns Optional.of(NAVN)
     }
 
-    private fun opprett(tittel: String = "Tittel", innhold: String = "<p>Innhold</p>", tags: List<String>? = null) =
-        service.opprett(
-            TekstblokkService.Input(
-                tittel = tittel,
-                innhold = innhold,
-                type = TekstblokkType.TEKSTBLOKK,
-                tags = tags,
-            ),
-        )
+    private fun opprett(
+        tittel: String = "Tittel",
+        innhold: String = "<p>Innhold</p>",
+        tags: List<String>? = null,
+        sakstyper: List<Sakstyper>? = null,
+        behandlingstemaer: List<Behandlingstema>? = null,
+    ) = service.opprett(
+        TekstblokkService.Input(
+            tittel = tittel,
+            innhold = innhold,
+            type = TekstblokkType.TEKSTBLOKK,
+            tags = tags,
+            sakstyper = sakstyper,
+            behandlingstemaer = behandlingstemaer,
+        ),
+    )
 
     private fun opprettMedTags(vararg tags: String): List<String> {
         opprett(tags = tags.toList())
@@ -94,6 +105,62 @@ class TekstblokkServiceTest {
         opprett()
 
         lagret.captured.tags.shouldBeEmpty()
+    }
+
+    @Test
+    fun `lagrer kontekstavgrensning`() {
+        opprett(
+            sakstyper = listOf(Sakstyper.EU_EOS, Sakstyper.TRYGDEAVTALE),
+            behandlingstemaer = listOf(Behandlingstema.ARBEID_FLERE_LAND),
+        )
+
+        lagret.captured.sakstyper.shouldContainExactlyInAnyOrder(setOf(Sakstyper.EU_EOS, Sakstyper.TRYGDEAVTALE))
+        lagret.captured.behandlingstemaer shouldContainExactly setOf(Behandlingstema.ARBEID_FLERE_LAND)
+    }
+
+    @Test
+    fun `uten avgrensning er blokken tom - altsaa gjelder alle`() {
+        opprett()
+
+        lagret.captured.sakstyper.shouldBeEmpty()
+        lagret.captured.behandlingstemaer.shouldBeEmpty()
+    }
+
+    @Test
+    fun `oppdatering uten avgrensning fjerner en tidligere avgrensning`() {
+        val eksisterende = Tekstblokk(id = 1).apply {
+            sakstyper += Sakstyper.EU_EOS
+            behandlingstemaer += Behandlingstema.ARBEID_FLERE_LAND
+        }
+        every { tekstblokkRepository.findByIdAndSlettetDatoIsNull(1) } returns Optional.of(eksisterende)
+
+        service.oppdater(1, TekstblokkService.Input("Tittel", "<p>Tekst</p>", TekstblokkType.TEKSTBLOKK, null))
+
+        lagret.captured.sakstyper.shouldBeEmpty()
+        lagret.captured.behandlingstemaer.shouldBeEmpty()
+    }
+
+    @Test
+    fun `oversikten faar avgrensningene slaatt sammen per blokk`() {
+        val oversikt = TekstblokkOversikt(1, "Tittel", "<p>Tekst</p>", TekstblokkType.TEKSTBLOKK, NÅ, IDENT, NAVN)
+        every { tekstblokkRepository.finnOversikt(null) } returns listOf(oversikt)
+        every { tekstblokkRepository.finnTagsForIds(listOf(1L)) } returns emptyList()
+        every { tekstblokkRepository.finnSakstyperForIds(listOf(1L)) } returns listOf(arrayOf(1L, Sakstyper.FTRL))
+        every { tekstblokkRepository.finnBehandlingstemaerForIds(listOf(1L)) } returns
+            listOf(arrayOf(1L, Behandlingstema.YRKESAKTIV))
+
+        service.hentAlleOversikter(null)
+
+        oversikt.sakstyper shouldContainExactly setOf(Sakstyper.FTRL)
+        oversikt.behandlingstemaer shouldContainExactly setOf(Behandlingstema.YRKESAKTIV)
+    }
+
+    @Test
+    fun `bulk uten avgrensningsfelter lagrer blokker uten avgrensning`() {
+        service.opprettBulk(listOf(TekstblokkService.Input("Tittel", "<p>Innhold</p>", TekstblokkType.TEKSTBLOKK, null)))
+
+        lagret.captured.sakstyper.shouldBeEmpty()
+        lagret.captured.behandlingstemaer.shouldBeEmpty()
     }
 
     @Test
@@ -177,5 +244,6 @@ class TekstblokkServiceTest {
     private companion object {
         const val IDENT = "A146170"
         const val NAVN = "Margareth Bjørgum"
+        val NÅ: Instant = Instant.parse("2026-07-31T10:00:00Z")
     }
 }
