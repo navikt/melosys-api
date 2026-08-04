@@ -174,6 +174,26 @@ class TekstblokkServiceTest {
         lagret.captured.behandlingstemaer shouldContainExactly setOf(Behandlingstema.YRKESAKTIV)
     }
 
+    @Test
+    fun `oppdatering uten tags-felt bevarer taggene`() {
+        val eksisterende = Tekstblokk(id = 1).apply { tags += "skip" }
+        every { tekstblokkRepository.findByIdAndSlettetDatoIsNull(1) } returns Optional.of(eksisterende)
+
+        service.oppdater(1, TekstblokkService.Input("Tittel", "<p>Tekst</p>", TekstblokkType.TEKSTBLOKK))
+
+        lagret.captured.tags shouldContainExactly setOf("skip")
+    }
+
+    @Test
+    fun `oppdatering med tom tagliste nullstiller taggene`() {
+        val eksisterende = Tekstblokk(id = 1).apply { tags += "skip" }
+        every { tekstblokkRepository.findByIdAndSlettetDatoIsNull(1) } returns Optional.of(eksisterende)
+
+        service.oppdater(1, TekstblokkService.Input("Tittel", "<p>Tekst</p>", TekstblokkType.TEKSTBLOKK, tags = emptyList()))
+
+        lagret.captured.tags.shouldBeEmpty()
+    }
+
     private fun avgrensetBlokk() {
         val eksisterende = Tekstblokk(id = 1).apply {
             sakstyper += Sakstyper.EU_EOS

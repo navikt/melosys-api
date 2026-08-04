@@ -13,9 +13,9 @@ import no.nav.melosys.service.tekstblokk.TekstblokkService
 /**
  * Body for POST og PUT. Tags trimmes på server, men beholder bokstavstørrelse.
  * Kontekstavgrensningene tas imot som enum – KodeDeserializer godtar rene koder
- * og gir 400 på ukjente verdier. Tom liste = «gjelder alle». Utelatt felt betyr
- * «uendret» ved oppdatering (eldre klienter mister ikke avgrensningen) og «gjelder
- * alle» ved opprettelse.
+ * og gir 400 på ukjente verdier. Tom liste = «gjelder alle». Utelatte tags- og
+ * avgrensningsfelter betyr «uendret» ved oppdatering (eldre klienter mister
+ * ingenting) og tomt/«gjelder alle» ved opprettelse.
  *
  * Utelatt status betyr PUBLISERT ved opprettelse (bulk-seeding fra melosys-console er
  * uendret) og «uendret» ved oppdatering, slik at en redigering aldri publiserer et utkast
