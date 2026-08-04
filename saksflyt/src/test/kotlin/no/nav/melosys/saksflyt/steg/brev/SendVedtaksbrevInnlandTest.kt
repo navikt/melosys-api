@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.brev
 
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -51,13 +50,11 @@ class SendVedtaksbrevInnlandTest {
     @MockK
     private lateinit var avklarteVirksomheterService: AvklarteVirksomheterService
 
-    private val fakeUnleash = FakeUnleash()
     private lateinit var sendVedtaksbrevInnland: SendVedtaksbrevInnland
     private val doksysBrevbestillingSlot = slot<DoksysBrevbestilling>()
 
     @BeforeEach
     fun setUp() {
-        fakeUnleash.resetAll()
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGID) } returns lagBehandling()
         every { avklarteVirksomheterService.hentNorskeSelvstendigeForetak(any()) } returns emptyList()
         every { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), any()) } just Runs
@@ -69,8 +66,7 @@ class SendVedtaksbrevInnlandTest {
             behandlingsresultatService,
             prosessinstansService,
             saksbehandlingRegler,
-            avklarteVirksomheterService,
-            fakeUnleash
+            avklarteVirksomheterService
         )
     }
 

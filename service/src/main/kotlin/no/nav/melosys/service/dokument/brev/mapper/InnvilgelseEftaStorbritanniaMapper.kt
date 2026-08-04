@@ -1,13 +1,11 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
-import io.getunleash.Unleash
 import no.nav.melosys.domain.brev.InnvilgelseEftaStorbritanniaBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseEftaStorbritannia
 import no.nav.melosys.service.LandvelgerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
@@ -23,8 +21,7 @@ class InnvilgelseEftaStorbritanniaMapper(
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
     private val virksomheterService: AvklarteVirksomheterService,
     private val avklartefaktaService: AvklartefaktaService,
-    private val landvelgerService: LandvelgerService,
-    private val unleash: Unleash
+    private val landvelgerService: LandvelgerService
 ) {
     @Transactional(readOnly = true)
     internal fun mapInnvilgelseEftaStorbritannia(brevbestilling: InnvilgelseEftaStorbritanniaBrevbestilling): InnvilgelseEftaStorbritannia {
@@ -52,9 +49,7 @@ class InnvilgelseEftaStorbritanniaMapper(
         val er11_3_a_eller_13_a_arbeid_norge = if (arbeidINorge) {
             lovvalgsperiode.erArtikkel11_3_a_eller_13_3a()
         } else {
-            lovvalgsperiode.erArtikkel11_3_a() && behandlingsresultat.hentBehandling().erNorgeUtpekt() && !er11_3_a_og_flereArbeidsland && unleash.isEnabled(
-                ToggleName.MELOSYS_11_3_A_NORGE_ER_UTPEKT
-            )
+            lovvalgsperiode.erArtikkel11_3_a() && behandlingsresultat.hentBehandling().erNorgeUtpekt() && !er11_3_a_og_flereArbeidsland
         }
 
         return InnvilgelseEftaStorbritannia(
