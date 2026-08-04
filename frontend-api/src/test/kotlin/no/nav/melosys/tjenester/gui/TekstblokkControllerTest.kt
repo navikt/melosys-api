@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 
 import com.ninjasquad.springmockk.MockkBean
 import io.getunleash.Unleash
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -117,6 +118,57 @@ class TekstblokkControllerTest(
 
         input.captured.sakstyper.shouldBeNull()
         input.captured.behandlingstemaer.shouldBeNull()
+    }
+
+    // Servicen skiller null fra tom liste: utelatt = uendret, tom = nullstill
+    @Test
+    fun `utelatt avgrensning sendes videre som null ved oppdatering`() {
+        val input = slot<TekstblokkService.Input>()
+        every { tekstblokkService.oppdater(eq(1L), capture(input)) } returns tekstblokk()
+
+        mockMvc.perform(
+            put("$BASE_URL/1").contentType(MediaType.APPLICATION_JSON)
+                .content("""{"tittel":"Tittel","innhold":"<p>Tekst</p>","type":"TEKSTBLOKK"}"""),
+        ).andExpect(status().isOk)
+
+        input.captured.sakstyper.shouldBeNull()
+        input.captured.behandlingstemaer.shouldBeNull()
+    }
+
+    @Test
+    fun `tomme avgrensningslister sendes videre som tomme lister ved oppdatering`() {
+        val input = slot<TekstblokkService.Input>()
+        every { tekstblokkService.oppdater(eq(1L), capture(input)) } returns tekstblokk()
+
+        mockMvc.perform(
+            put("$BASE_URL/1").contentType(MediaType.APPLICATION_JSON).content(
+                """
+                {"tittel":"Tittel","innhold":"<p>Tekst</p>","type":"TEKSTBLOKK",
+                 "sakstyper":[],"behandlingstemaer":[]}
+                """.trimIndent(),
+            ),
+        ).andExpect(status().isOk)
+
+        input.captured.sakstyper.shouldBeEmpty()
+        input.captured.behandlingstemaer.shouldBeEmpty()
+    }
+
+    @Test
+    fun `sendt avgrensning sendes videre som liste ved oppdatering`() {
+        val input = slot<TekstblokkService.Input>()
+        every { tekstblokkService.oppdater(eq(1L), capture(input)) } returns tekstblokk()
+
+        mockMvc.perform(
+            put("$BASE_URL/1").contentType(MediaType.APPLICATION_JSON).content(
+                """
+                {"tittel":"Tittel","innhold":"<p>Tekst</p>","type":"TEKSTBLOKK",
+                 "sakstyper":["FTRL"],"behandlingstemaer":["YRKESAKTIV"]}
+                """.trimIndent(),
+            ),
+        ).andExpect(status().isOk)
+
+        input.captured.sakstyper shouldBe listOf(Sakstyper.FTRL)
+        input.captured.behandlingstemaer shouldBe listOf(Behandlingstema.YRKESAKTIV)
     }
 
     @Test

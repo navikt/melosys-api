@@ -130,18 +130,56 @@ class TekstblokkServiceTest {
         lagret.captured.behandlingstemaer.shouldBeEmpty()
     }
 
+    // Vernet for deploy-vinduet og for melosys-console: en klient som ikke kjenner
+    // avgrensningsfeltene skal ikke fjerne avgrensningen ved en PUT.
     @Test
-    fun `oppdatering uten avgrensning fjerner en tidligere avgrensning`() {
+    fun `oppdatering uten avgrensningsfelter bevarer avgrensningen`() {
+        avgrensetBlokk()
+
+        service.oppdater(1, TekstblokkService.Input("Tittel", "<p>Tekst</p>", TekstblokkType.TEKSTBLOKK, null))
+
+        lagret.captured.sakstyper shouldContainExactly setOf(Sakstyper.EU_EOS)
+        lagret.captured.behandlingstemaer shouldContainExactly setOf(Behandlingstema.ARBEID_FLERE_LAND)
+    }
+
+    @Test
+    fun `oppdatering med tomme lister nullstiller avgrensningen`() {
+        avgrensetBlokk()
+
+        service.oppdater(
+            1,
+            TekstblokkService.Input(
+                "Tittel", "<p>Tekst</p>", TekstblokkType.TEKSTBLOKK, null,
+                sakstyper = emptyList(), behandlingstemaer = emptyList(),
+            ),
+        )
+
+        lagret.captured.sakstyper.shouldBeEmpty()
+        lagret.captured.behandlingstemaer.shouldBeEmpty()
+    }
+
+    @Test
+    fun `oppdatering med ny avgrensning erstatter den gamle`() {
+        avgrensetBlokk()
+
+        service.oppdater(
+            1,
+            TekstblokkService.Input(
+                "Tittel", "<p>Tekst</p>", TekstblokkType.TEKSTBLOKK, null,
+                sakstyper = listOf(Sakstyper.FTRL), behandlingstemaer = listOf(Behandlingstema.YRKESAKTIV),
+            ),
+        )
+
+        lagret.captured.sakstyper shouldContainExactly setOf(Sakstyper.FTRL)
+        lagret.captured.behandlingstemaer shouldContainExactly setOf(Behandlingstema.YRKESAKTIV)
+    }
+
+    private fun avgrensetBlokk() {
         val eksisterende = Tekstblokk(id = 1).apply {
             sakstyper += Sakstyper.EU_EOS
             behandlingstemaer += Behandlingstema.ARBEID_FLERE_LAND
         }
         every { tekstblokkRepository.findByIdAndSlettetDatoIsNull(1) } returns Optional.of(eksisterende)
-
-        service.oppdater(1, TekstblokkService.Input("Tittel", "<p>Tekst</p>", TekstblokkType.TEKSTBLOKK, null))
-
-        lagret.captured.sakstyper.shouldBeEmpty()
-        lagret.captured.behandlingstemaer.shouldBeEmpty()
     }
 
     @Test
@@ -303,6 +341,33 @@ class TekstblokkServiceTest {
         lagret.captured.status shouldBe TekstblokkStatus.PUBLISERT
     }
 
+    // Uten dette viste «Av»-kolonnen forrige redaktør ved siden av publisererens ident
+    @Test
+    fun `publisering av en annens utkast setter publisererens navn og ident`() {
+        every { tekstblokkRepository.findByIdAndSlettetDatoIsNull(1) } returns Optional.of(
+            Tekstblokk(id = 1, status = TekstblokkStatus.UTKAST, endretAvNavn = ANNET_NAVN)
+                .apply { endretAv = ANNEN_IDENT },
+        )
+
+        service.publiser(1)
+
+        lagret.captured.endretAvNavn shouldBe NAVN
+        // Navnet slås opp for identen auditingen skriver, så raden blir ikke selvmotsigende
+        verify { saksbehandlerService.finnNavnForIdent(IDENT) }
+    }
+
+    @Test
+    fun `publisering uten navnetreff lar ikke forrige redaktoers navn staa igjen`() {
+        every { saksbehandlerService.finnNavnForIdent(IDENT) } returns Optional.empty()
+        every { tekstblokkRepository.findByIdAndSlettetDatoIsNull(1) } returns Optional.of(
+            Tekstblokk(id = 1, status = TekstblokkStatus.UTKAST, endretAvNavn = ANNET_NAVN),
+        )
+
+        service.publiser(1)
+
+        lagret.captured.endretAvNavn.shouldBeNull()
+    }
+
     @Test
     fun `publisering av en slettet blokk gir IkkeFunnet`() {
         every { tekstblokkRepository.findByIdAndSlettetDatoIsNull(1) } returns Optional.empty()
@@ -351,6 +416,8 @@ class TekstblokkServiceTest {
     private companion object {
         const val IDENT = "A146170"
         const val NAVN = "Margareth Bjørgum"
+        const val ANNEN_IDENT = "Z224234"
+        const val ANNET_NAVN = "Torbjørn Kvaale"
         val NÅ: Instant = Instant.parse("2026-07-31T10:00:00Z")
     }
 }
