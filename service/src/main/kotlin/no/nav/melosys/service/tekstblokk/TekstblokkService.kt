@@ -167,17 +167,18 @@ class TekstblokkService(
         auditorAware.currentAuditor.orElse(null)?.let { saksbehandlerService.finnNavnForIdent(it).orElse(null) }
     }.onFailure { log.warn("Kunne ikke hente navn for innlogget bruker", it) }.getOrNull()
 
-    private fun normaliserTags(tags: List<String>?): List<String> =
+    // Ikke-nullbar med vilje: null betyr «uendret» og håndteres av kalleren – en ny kaller
+    // skal ikke kunne sende null hit og forvente tom liste.
+    private fun normaliserTags(tags: List<String>): List<String> =
         tags
-            ?.asSequence()
+            .asSequence()
             // Bevar bokstavstørrelse (f.eks. "USA-avtale") og tillat mellomrom i tags.
             // Vi trimmer kun ytterkanter og slår sammen gjentatt blanktegn til ett.
-            ?.map { it.trim().replace(FLERE_BLANKTEGN, " ") }
-            ?.filter { it.isNotBlank() }
+            .map { it.trim().replace(FLERE_BLANKTEGN, " ") }
+            .filter { it.isNotBlank() }
             // Unngå nær-duplikater som kun skiller seg i bokstavstørrelse; behold første variant.
-            ?.distinctBy { it.lowercase(Locale.ROOT) }
-            ?.toList()
-            ?: emptyList()
+            .distinctBy { it.lowercase(Locale.ROOT) }
+            .toList()
 
     private companion object {
         private val log = LoggerFactory.getLogger(TekstblokkService::class.java)
