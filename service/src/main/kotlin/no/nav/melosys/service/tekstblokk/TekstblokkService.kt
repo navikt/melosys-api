@@ -31,7 +31,9 @@ class TekstblokkService(
         val innhold: String,
         val type: TekstblokkType,
         val tags: List<String>?,
-        // Tomme lister betyr «gjelder alle» – avgrensningen er valgfri.
+        // Null betyr «uendret» ved oppdatering, tom liste nullstiller avgrensningen
+        // – altså «gjelder alle». Eldre klienter som utelater feltene mister dermed
+        // ikke avgrensningen ved en PUT.
         val sakstyper: List<Sakstyper>? = null,
         val behandlingstemaer: List<Behandlingstema>? = null,
         // Null betyr «uendret» ved oppdatering. Ved opprettelse og bulk-seeding faller den
@@ -100,6 +102,9 @@ class TekstblokkService(
     fun publiser(id: Long): Tekstblokk {
         val tekstblokk = hent(id, inkluderUtkast = true)
         tekstblokk.status = TekstblokkStatus.PUBLISERT
+        // Auditingen setter identen til publisereren; navnet må følge med, ellers står
+        // forrige redaktørs navn igjen ved siden av publisererens ident.
+        tekstblokk.endretAvNavn = hentNavnForInnloggetBruker()
         return tekstblokkRepository.save(tekstblokk).also {
             log.info("Publiserte {} med id {}: '{}'", it.type, id, it.tittel)
         }
@@ -146,10 +151,16 @@ class TekstblokkService(
         tekstblokk.endretAvNavn = endretAvNavn
         tekstblokk.tags.clear()
         tekstblokk.tags.addAll(normaliserTags(input.tags))
-        tekstblokk.sakstyper.clear()
-        tekstblokk.sakstyper.addAll(input.sakstyper.orEmpty())
-        tekstblokk.behandlingstemaer.clear()
-        tekstblokk.behandlingstemaer.addAll(input.behandlingstemaer.orEmpty())
+        // Utelatt avgrensning lar avgrensningen stå, på samme måte som status. Tom liste
+        // er den eksplisitte nullstillingen.
+        input.sakstyper?.let { tekstblokk.sakstyper.erstattMed(it) }
+        input.behandlingstemaer?.let { tekstblokk.behandlingstemaer.erstattMed(it) }
+    }
+
+    // Hibernate følger endringer på selve samlingen, så den byttes ikke ut.
+    private fun <T> MutableSet<T>.erstattMed(nye: Collection<T>) {
+        clear()
+        addAll(nye)
     }
 
     // Et feilet navneoppslag skal ikke hindre lagring – frontend viser ident i stedet.
