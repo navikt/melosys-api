@@ -4,6 +4,9 @@ import java.time.Instant
 import java.time.LocalDateTime
 
 import no.nav.melosys.domain.brev.tekstblokk.Tekstblokk
+import no.nav.melosys.domain.brev.tekstblokk.TekstblokkStatus
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.repository.AuditRepository
 import no.nav.melosys.repository.EntityRevision
 import org.hibernate.envers.RevisionType
@@ -33,17 +36,25 @@ class TekstblokkHistorikkService(
         // Revisjonsnummeret er monotont; timestamp har millisekundoppløsning og kan kollidere
         val kronologisk = revisjoner.sortedBy { it.revisionInfo.id }
         return kronologisk.mapIndexed { indeks, revisjon ->
+            val blokk = revisjon.entity
+            // Nullbar her, men ikke på entiteten: aud-rader fra før V167 mangler status
+            val status: TekstblokkStatus? = blokk.status
             TekstblokkVersjon(
                 // Versjonsnummeret er per blokk, ikke globalt: revisjonsnummeret i Envers
                 // deles med alle andre auditerte entiteter.
                 versjon = indeks + 1,
                 gyldigFra = revisjon.revisionLocalDateTime,
                 gyldigTil = kronologisk.getOrNull(indeks + 1)?.revisionLocalDateTime,
-                endretAv = revisjon.entity.endretAv,
-                endretAvNavn = revisjon.entity.endretAvNavn,
+                endretAv = blokk.endretAv,
+                endretAvNavn = blokk.endretAvNavn,
                 endringstype = endringstype(revisjon),
-                tittel = revisjon.entity.tittel,
-                innhold = revisjon.entity.innhold,
+                tittel = blokk.tittel,
+                innhold = blokk.innhold,
+                // Envers slår opp collections i _aud-tabellene først ved traversering – kopien må tas i transaksjonen
+                tags = blokk.tags.toList(),
+                sakstyper = blokk.sakstyper.toList(),
+                behandlingstemaer = blokk.behandlingstemaer.toList(),
+                status = status ?: TekstblokkStatus.PUBLISERT,
             )
         }
     }
@@ -65,6 +76,10 @@ data class TekstblokkVersjon(
     val endringstype: Endringstype,
     val tittel: String,
     val innhold: String,
+    val tags: List<String>,
+    val sakstyper: List<Sakstyper>,
+    val behandlingstemaer: List<Behandlingstema>,
+    val status: TekstblokkStatus,
 )
 
 enum class Endringstype {

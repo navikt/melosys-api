@@ -255,6 +255,10 @@ class TekstblokkControllerTest(
                 endringstype = Endringstype.OPPRETTET,
                 tittel = "Tittel",
                 innhold = "<p>Tekst</p>",
+                tags = listOf("vedtak"),
+                sakstyper = listOf(Sakstyper.TRYGDEAVTALE, Sakstyper.EU_EOS),
+                behandlingstemaer = listOf(Behandlingstema.ARBEID_FLERE_LAND),
+                status = TekstblokkStatus.UTKAST,
             ),
         )
 
@@ -264,6 +268,51 @@ class TekstblokkControllerTest(
             .andExpect(jsonPath("$[0].endringstype").value("OPPRETTET"))
             .andExpect(jsonPath("$[0].endretAvNavn").value("Margareth Bjørgum"))
             .andExpect(jsonPath("$[0].gyldigTil").doesNotExist())
+    }
+
+    @Test
+    fun `historikk leverer avgrensning og status som koder`() {
+        every { tekstblokkHistorikkService.hentHistorikk(1L) } returns listOf(
+            TekstblokkVersjon(
+                versjon = 1,
+                gyldigFra = LocalDateTime.of(2026, 7, 31, 12, 0),
+                gyldigTil = null,
+                endretAv = IDENT,
+                endretAvNavn = null,
+                endringstype = Endringstype.ENDRET,
+                tittel = "Tittel",
+                innhold = "<p>Tekst</p>",
+                tags = listOf("vedtak"),
+                sakstyper = listOf(Sakstyper.TRYGDEAVTALE, Sakstyper.EU_EOS),
+                behandlingstemaer = listOf(Behandlingstema.ARBEID_FLERE_LAND),
+                status = TekstblokkStatus.UTKAST,
+            ),
+            TekstblokkVersjon(
+                versjon = 2,
+                gyldigFra = LocalDateTime.of(2026, 8, 1, 12, 0),
+                gyldigTil = null,
+                endretAv = IDENT,
+                endretAvNavn = null,
+                endringstype = Endringstype.ENDRET,
+                tittel = "Tittel",
+                innhold = "<p>Tekst</p>",
+                tags = emptyList(),
+                sakstyper = emptyList(),
+                behandlingstemaer = emptyList(),
+                status = TekstblokkStatus.PUBLISERT,
+            ),
+        )
+
+        mockMvc.perform(get("$BASE_URL/{id}/historikk", 1L).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$[0].tags", contains("vedtak")))
+            .andExpect(jsonPath("$[0].sakstyper", contains("EU_EOS", "TRYGDEAVTALE")))
+            .andExpect(jsonPath("$[0].behandlingstemaer", contains("ARBEID_FLERE_LAND")))
+            .andExpect(jsonPath("$[0].status").value("UTKAST"))
+            .andExpect(jsonPath("$[1].tags.length()").value(0))
+            .andExpect(jsonPath("$[1].sakstyper.length()").value(0))
+            .andExpect(jsonPath("$[1].behandlingstemaer.length()").value(0))
+            .andExpect(jsonPath("$[1].status").value("PUBLISERT"))
     }
 
     @Test

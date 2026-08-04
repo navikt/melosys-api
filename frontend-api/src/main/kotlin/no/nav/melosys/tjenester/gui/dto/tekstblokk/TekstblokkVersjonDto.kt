@@ -8,6 +8,8 @@ import no.nav.melosys.service.tekstblokk.TekstblokkVersjon
 /**
  * Én revisjon av en tekstblokk. Versjonsnummeret er per blokk og telles opp av
  * servicen – Envers' revisjonsnummer deles med alle andre auditerte entiteter.
+ * Avgrensninger og status er med så web kan vise hva som skiller versjonene, og
+ * leveres som rene koder på samme form som TekstblokkDto.
  */
 data class TekstblokkVersjonDto(
     val versjon: Int,
@@ -18,6 +20,10 @@ data class TekstblokkVersjonDto(
     val endringstype: Endringstype,
     val tittel: String,
     val innhold: String,
+    val tags: List<String>,
+    val sakstyper: List<String>,
+    val behandlingstemaer: List<String>,
+    val status: String,
 ) {
     companion object {
         fun av(v: TekstblokkVersjon): TekstblokkVersjonDto = TekstblokkVersjonDto(
@@ -29,6 +35,10 @@ data class TekstblokkVersjonDto(
             endringstype = v.endringstype,
             tittel = v.tittel,
             innhold = v.innhold,
+            tags = v.tags.sorted(),
+            sakstyper = v.sakstyper.map { it.kode }.sorted(),
+            behandlingstemaer = v.behandlingstemaer.map { it.kode }.sorted(),
+            status = v.status.name,
         )
     }
 }

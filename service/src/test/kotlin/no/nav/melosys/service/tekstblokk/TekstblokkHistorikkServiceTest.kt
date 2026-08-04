@@ -9,6 +9,9 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.brev.tekstblokk.Tekstblokk
+import no.nav.melosys.domain.brev.tekstblokk.TekstblokkStatus
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.repository.AuditRepository
 import no.nav.melosys.repository.EntityRevision
 import org.hibernate.envers.DefaultRevisionEntity
@@ -120,6 +123,33 @@ class TekstblokkHistorikkServiceTest {
     }
 
     @Test
+    fun `historikken tar med tags, avgrensning og status per versjon`() {
+        every { auditRepository.getRevisions(Tekstblokk::class.java, mapOf("id" to 1L)) } returns listOf(
+            revisjon(1, tekstblokk("Tittel"), RevisionType.ADD, dato(1)),
+        )
+
+        val versjon = service.hentHistorikk(1L).single()
+
+        versjon.tags shouldContainExactly listOf("historikk")
+        versjon.sakstyper shouldContainExactly listOf(Sakstyper.EU_EOS)
+        versjon.behandlingstemaer shouldContainExactly listOf(Behandlingstema.ARBEID_FLERE_LAND)
+        versjon.status shouldBe TekstblokkStatus.UTKAST
+    }
+
+    // Aud-rader fra før V167 har ingen status – Hibernate setter feltet til null forbi Kotlins nullsjekk
+    @Test
+    fun `revisjon uten status regnes som publisert`() {
+        val utenStatus = tekstblokk("Tittel").apply {
+            Tekstblokk::class.java.getDeclaredField("status").also { it.isAccessible = true }.set(this, null)
+        }
+        every { auditRepository.getRevisions(Tekstblokk::class.java, mapOf("id" to 1L)) } returns listOf(
+            revisjon(1, utenStatus, RevisionType.ADD, dato(1)),
+        )
+
+        service.hentHistorikk(1L).single().status shouldBe TekstblokkStatus.PUBLISERT
+    }
+
+    @Test
     fun `blokk uten revisjoner gir tom historikk`() {
         every { auditRepository.getRevisions(Tekstblokk::class.java, mapOf("id" to 1L)) } returns emptyList()
 
@@ -135,6 +165,10 @@ class TekstblokkHistorikkServiceTest {
         innhold = "<p>$tittel</p>",
         endretAvNavn = NAVN,
         slettetDato = if (slettet) Instant.now() else null,
+        status = TekstblokkStatus.UTKAST,
+        tags = mutableSetOf("historikk"),
+        sakstyper = mutableSetOf(Sakstyper.EU_EOS),
+        behandlingstemaer = mutableSetOf(Behandlingstema.ARBEID_FLERE_LAND),
     ).apply { endretAv = IDENT }
 
     private fun revisjon(revID: Int, tekstblokk: Tekstblokk, revisionType: RevisionType, tidspunkt: Instant) =
