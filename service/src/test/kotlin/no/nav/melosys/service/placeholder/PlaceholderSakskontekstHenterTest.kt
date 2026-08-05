@@ -327,7 +327,7 @@ class PlaceholderSakskontekstHenterTest {
         fakta.erOpphørt shouldBe false
     }
 
-    // Vakuumfellen: predikatene svarer FALSE på et resultat som ikke er vurdert, og ville slettet vedtaksteksten
+    // Predikatene svarer FALSE på et resultat som ikke er vurdert, og ville slettet vedtaksteksten
     @Test
     fun `ufastsatt behandlingsresultat utelater innvilgelse, avslag og opphort`() {
         medBehandlingsresultat(
