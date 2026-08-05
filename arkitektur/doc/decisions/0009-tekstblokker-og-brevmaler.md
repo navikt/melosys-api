@@ -124,7 +124,7 @@ frontend-api), i tråd med ADR-0002.
 **Avveininger**
 - Tag-join-tabellen krever et JOIN ved aggregering (akseptabelt med <60 unike tags)
 - Sanitering kan strippe legitime tagger hvis Quill-konfig utvides; safelist må
-  oppdateres parallelt med `htmlEditor.tsx` i melosys-web
+  oppdateres parallelt med `placeholderMarkering.ts` i melosys-web
 - Lese-toggle av i prod blokkerer både popoveren og admin-siden, så toggle må
   aktiveres før saksbehandlere kan ta i bruk featuren
 - `TekstblokkOversikt` har mutbar `var tags` for å støtte to-stegs JPQL+tag-join

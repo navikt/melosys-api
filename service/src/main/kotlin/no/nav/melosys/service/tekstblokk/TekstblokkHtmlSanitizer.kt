@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component
 @Component
 class TekstblokkHtmlSanitizer {
 
-    // Tillatte tagger matcher Quill-toolbarens output. Hold synkronisert med
-    // src/felleskomponenter/htmlEditor/htmlEditor.tsx (formats-listen) i melosys-web.
+    // Tillatte tagger matcher Quill-toolbarens output. Speiler EDITOR_FORMATS i melosys-web
+    // src/felleskomponenter/htmlEditor/placeholderMarkering.ts.
     private val safelist: Safelist = Safelist()
         .addTags("p", "br", "strong", "em", "u", "h2", "ul", "ol", "li", "span", "table", "thead", "tbody", "tr", "th", "td")
         .addAttributes("span", "class")
@@ -70,10 +70,9 @@ class TekstblokkHtmlSanitizer {
     private fun Element.erValgtPlaceholder(): Boolean =
         hasClass(VALGT_KLASSE) && attr("data-valg").tilValgAlternativer().isNotEmpty()
 
-    // Speiler parseValgAlternativer i melosys-web src/services/modules/placeholdere.ts: blanke deler
-    // filtreres bort og duplikater slås sammen før kravet om minst to alternativer, slik at et valg
-    // web regner som gyldig ikke forsvinner stille ved lagring – og et valg web ville avvist
-    // (data-valg="A|A") ikke round-tripper til et token web rødmarkerer. Tom liste betyr ugyldig.
+    // Speiler parseValgAlternativer i melosys-web src/services/modules/placeholdere.ts: blanke
+    // deler filtreres bort og duplikater slås sammen før kravet om minst to alternativer.
+    // Tom liste betyr ugyldig.
     private fun String.tilValgAlternativer(): List<String> =
         if (any(UGYLDIGE_VALGTEGN::contains)) emptyList()
         else split("|").map(String::trim).filter(String::isNotBlank).distinct().takeIf { it.size >= 2 }.orEmpty()
@@ -88,9 +87,8 @@ class TekstblokkHtmlSanitizer {
         private const val VALGT_KLASSE = "placeholder-valgt"
 
         // Må speile placeholder-klassene i PLACEHOLDER_MARKERINGSKLASSER i melosys-web
-        // src/services/modules/placeholdere.ts. Web-listen har i tillegg bracketed-text for
-        // opprydding ved innsetting – den er master-editorens egen klasse og skal ikke fjernes
-        // ved lagring her, ellers endres innhold som finnes i biblioteket fra før.
+        // src/services/modules/placeholdere.ts. Web-listen har i tillegg bracketed-text, som er
+        // webs klammemarkering – den fjernes ikke her, så lagret innhold står urørt.
         // placeholder-valgt står her for fallbacken: uten gyldig data-valg er spanen ren markering.
         // placeholder-betingelse markerer {#hvis}/{/hvis}-tokenene og er rent boolsk: teksten er
         // selve tokenet og består ved unwrap, som de øvrige markeringene uten eget dataattributt.
