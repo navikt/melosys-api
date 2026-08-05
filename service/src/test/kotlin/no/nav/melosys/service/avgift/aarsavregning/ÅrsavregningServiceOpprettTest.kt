@@ -458,8 +458,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             tidligereTrygdeavgiftsGrunnlag.shouldNotBeNull().avgiftspliktigperioder.shouldHaveSize(1)
             tidligereAvgift.shouldHaveSize(1)
             nyttTrygdeavgiftsGrunnlag shouldBe null
-            beregnetAvgiftBelop shouldBe null
-            tilFaktureringBeloep shouldBe null
+            beregnetAvgiftBelop shouldBe BigDecimal.ZERO
             innbetaltTrygdeavgift shouldBe BigDecimal("5000")
         }
 
@@ -468,8 +467,11 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
         nyÅrsavregningBehandlingsresultat.årsavregning.shouldNotBeNull().run {
             tidligereBehandlingsresultat shouldBe nyVurderingKun2026
             tidligereFakturertBeloep shouldNotBe null
-            beregnetAvgiftBelop shouldBe null
-            tilFaktureringBeloep shouldBe null
+            beregnetAvgiftBelop shouldBe BigDecimal.ZERO
+            // Full kreditering: 0 - tidligereFakturert - innbetalt
+            tilFaktureringBeloep shouldBe BigDecimal.ZERO
+                .subtract(tidligereFakturertBeloep)
+                .subtract(BigDecimal("5000"))
             manueltAvgiftBeloep shouldBe null
         }
     }
