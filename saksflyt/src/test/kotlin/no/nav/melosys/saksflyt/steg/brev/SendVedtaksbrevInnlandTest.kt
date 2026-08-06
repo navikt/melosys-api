@@ -164,6 +164,22 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
+    fun `utfør innvilgelse 11_3_a med tema BESLUTNING_LOVVALG_NORGE sender EFTA-brev og attest A1`() {
+        val behandling = lagBehandling { tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGID) } returns behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID) } returns
+            lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART11_3A))
+        every { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), any()) } just Runs
+
+
+        sendVedtaksbrevInnland.utfør(lagProsessinstans())
+
+
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), match { it.produserbartdokument == INNVILGELSE_EFTA_STORBRITANNIA }, any()) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), match { it.produserbartdokument == ATTEST_A1 }, any()) }
+    }
+
+    @Test
     fun `utfør innvilgelse Efta vedtak sender ikke ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK når selvstendig lovvalgsbestemmelse`() {
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID) } returns
             lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_2))
