@@ -33,6 +33,9 @@ interface TekstblokkRepository : JpaRepository<Tekstblokk, Long> {
     @Query("SELECT t.id, sakstype FROM Tekstblokk t JOIN t.sakstyper sakstype WHERE t.id IN :ids")
     fun finnSakstyperForIds(@Param("ids") ids: Collection<Long>): List<Array<Any>>
 
+    @Query("SELECT t.id, sakstema FROM Tekstblokk t JOIN t.sakstemaer sakstema WHERE t.id IN :ids")
+    fun finnSakstemaerForIds(@Param("ids") ids: Collection<Long>): List<Array<Any>>
+
     @Query("SELECT t.id, behandlingstema FROM Tekstblokk t JOIN t.behandlingstemaer behandlingstema WHERE t.id IN :ids")
     fun finnBehandlingstemaerForIds(@Param("ids") ids: Collection<Long>): List<Array<Any>>
 

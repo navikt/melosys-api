@@ -15,6 +15,7 @@ import no.nav.melosys.domain.brev.tekstblokk.Tekstblokk
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkOversikt
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkStatus
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.featuretoggle.ToggleName
@@ -309,6 +310,7 @@ class TekstblokkControllerTest(
                 innhold = "<p>Tekst</p>",
                 tags = listOf("vedtak"),
                 sakstyper = listOf(Sakstyper.TRYGDEAVTALE, Sakstyper.EU_EOS),
+                sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG),
                 behandlingstemaer = listOf(Behandlingstema.ARBEID_FLERE_LAND),
                 status = TekstblokkStatus.UTKAST,
             ),
@@ -336,6 +338,7 @@ class TekstblokkControllerTest(
                 innhold = "<p>Tekst</p>",
                 tags = listOf("vedtak"),
                 sakstyper = listOf(Sakstyper.TRYGDEAVTALE, Sakstyper.EU_EOS),
+                sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG),
                 behandlingstemaer = listOf(Behandlingstema.ARBEID_FLERE_LAND),
                 status = TekstblokkStatus.UTKAST,
             ),
@@ -350,6 +353,7 @@ class TekstblokkControllerTest(
                 innhold = "<p>Tekst</p>",
                 tags = emptyList(),
                 sakstyper = emptyList(),
+                sakstemaer = emptyList(),
                 behandlingstemaer = emptyList(),
                 status = TekstblokkStatus.PUBLISERT,
             ),
@@ -359,10 +363,12 @@ class TekstblokkControllerTest(
             .andExpect(status().isOk)
             .andExpect(jsonPath("$[0].tags", contains("vedtak")))
             .andExpect(jsonPath("$[0].sakstyper", contains("EU_EOS", "TRYGDEAVTALE")))
+            .andExpect(jsonPath("$[0].sakstemaer", contains("MEDLEMSKAP_LOVVALG")))
             .andExpect(jsonPath("$[0].behandlingstemaer", contains("ARBEID_FLERE_LAND")))
             .andExpect(jsonPath("$[0].status").value("UTKAST"))
             .andExpect(jsonPath("$[1].tags.length()").value(0))
             .andExpect(jsonPath("$[1].sakstyper.length()").value(0))
+            .andExpect(jsonPath("$[1].sakstemaer.length()").value(0))
             .andExpect(jsonPath("$[1].behandlingstemaer.length()").value(0))
             .andExpect(jsonPath("$[1].status").value("PUBLISERT"))
     }

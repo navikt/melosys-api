@@ -55,6 +55,41 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
+    fun `kombinasjonstreet inneholder alle sakstyper`() {
+        val tre = lovligeKombinasjonerSaksbehandlingService.hentKombinasjonstre()
+
+        tre.map { it.sakstype } shouldContainExactlyInAnyOrder listOf(Sakstyper.EU_EOS, Sakstyper.FTRL, Sakstyper.TRYGDEAVTALE)
+    }
+
+    @Test
+    fun `hver node i kombinasjonstreet er lik det tilsvarende enkeltoppslaget`() {
+        val tre = lovligeKombinasjonerSaksbehandlingService.hentKombinasjonstre()
+
+        tre.forEach { sakstypeNode ->
+            sakstypeNode.sakstemaer.map { it.sakstema } shouldContainExactlyInAnyOrder
+                lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstemaer(null, sakstypeNode.sakstype, null).toList()
+
+            sakstypeNode.sakstemaer.forEach { sakstemaNode ->
+                sakstemaNode.behandlingstemaer shouldContainExactlyInAnyOrder
+                    lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(
+                        null, sakstypeNode.sakstype, sakstemaNode.sakstema, null, null,
+                    ).toList()
+            }
+        }
+    }
+
+    // Treet skal kunne brukes til å kaskadere nedtrekk, så hver gren må faktisk ha innhold.
+    @Test
+    fun `ingen gren i kombinasjonstreet er tom`() {
+        val tre = lovligeKombinasjonerSaksbehandlingService.hentKombinasjonstre()
+
+        tre.forEach { sakstypeNode ->
+            sakstypeNode.sakstemaer.shouldNotBeEmpty()
+            sakstypeNode.sakstemaer.forEach { it.behandlingstemaer.shouldNotBeEmpty() }
+        }
+    }
+
+    @Test
     fun hentMuligeSakstyper_saksnummerErNull_returnererAlleSakstyper() {
         val muligeSakstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstyper(null)
 

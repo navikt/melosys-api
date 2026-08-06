@@ -17,6 +17,7 @@ import jakarta.persistence.Table
 import java.time.Instant
 
 import no.nav.melosys.domain.RegistreringsInfo
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import org.hibernate.envers.AuditOverride
@@ -73,6 +74,13 @@ class Tekstblokk(
     @Enumerated(EnumType.STRING)
     @Column(name = "sakstype", nullable = false)
     val sakstyper: MutableSet<Sakstyper> = mutableSetOf(),
+
+    // Tom = gjelder alle sakstemaer. Se V168.
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "TEKSTBLOKK_SAKSTEMA", joinColumns = [JoinColumn(name = "tekstblokk_id")])
+    @Enumerated(EnumType.STRING)
+    @Column(name = "sakstema", nullable = false)
+    val sakstemaer: MutableSet<Sakstemaer> = mutableSetOf(),
 
     // Tom = gjelder alle behandlingstemaer. Se V165.
     @ElementCollection(fetch = FetchType.LAZY)

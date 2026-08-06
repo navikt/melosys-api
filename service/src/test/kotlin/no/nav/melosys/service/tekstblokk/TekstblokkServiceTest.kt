@@ -18,6 +18,7 @@ import no.nav.melosys.domain.brev.tekstblokk.Tekstblokk
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkOversikt
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkStatus
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.IkkeFunnetException
@@ -59,6 +60,7 @@ class TekstblokkServiceTest {
         innhold: String = "<p>Innhold</p>",
         tags: List<String>? = null,
         sakstyper: List<Sakstyper>? = null,
+        sakstemaer: List<Sakstemaer>? = null,
         behandlingstemaer: List<Behandlingstema>? = null,
         status: TekstblokkStatus? = null,
     ) = service.opprett(
@@ -68,6 +70,7 @@ class TekstblokkServiceTest {
             type = TekstblokkType.TEKSTBLOKK,
             tags = tags,
             sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
             behandlingstemaer = behandlingstemaer,
             status = status,
         ),
@@ -115,10 +118,12 @@ class TekstblokkServiceTest {
     fun `lagrer kontekstavgrensning`() {
         opprett(
             sakstyper = listOf(Sakstyper.EU_EOS, Sakstyper.TRYGDEAVTALE),
+            sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG),
             behandlingstemaer = listOf(Behandlingstema.ARBEID_FLERE_LAND),
         )
 
         lagret.captured.sakstyper.shouldContainExactlyInAnyOrder(setOf(Sakstyper.EU_EOS, Sakstyper.TRYGDEAVTALE))
+        lagret.captured.sakstemaer shouldContainExactly setOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
         lagret.captured.behandlingstemaer shouldContainExactly setOf(Behandlingstema.ARBEID_FLERE_LAND)
     }
 
@@ -127,6 +132,7 @@ class TekstblokkServiceTest {
         opprett()
 
         lagret.captured.sakstyper.shouldBeEmpty()
+        lagret.captured.sakstemaer.shouldBeEmpty()
         lagret.captured.behandlingstemaer.shouldBeEmpty()
     }
 
@@ -139,6 +145,7 @@ class TekstblokkServiceTest {
         service.oppdater(1, TekstblokkService.Input("Tittel", "<p>Tekst</p>", TekstblokkType.TEKSTBLOKK, null))
 
         lagret.captured.sakstyper shouldContainExactly setOf(Sakstyper.EU_EOS)
+        lagret.captured.sakstemaer shouldContainExactly setOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
         lagret.captured.behandlingstemaer shouldContainExactly setOf(Behandlingstema.ARBEID_FLERE_LAND)
     }
 
@@ -150,11 +157,12 @@ class TekstblokkServiceTest {
             1,
             TekstblokkService.Input(
                 "Tittel", "<p>Tekst</p>", TekstblokkType.TEKSTBLOKK, null,
-                sakstyper = emptyList(), behandlingstemaer = emptyList(),
+                sakstyper = emptyList(), sakstemaer = emptyList(), behandlingstemaer = emptyList(),
             ),
         )
 
         lagret.captured.sakstyper.shouldBeEmpty()
+        lagret.captured.sakstemaer.shouldBeEmpty()
         lagret.captured.behandlingstemaer.shouldBeEmpty()
     }
 
@@ -166,11 +174,13 @@ class TekstblokkServiceTest {
             1,
             TekstblokkService.Input(
                 "Tittel", "<p>Tekst</p>", TekstblokkType.TEKSTBLOKK, null,
-                sakstyper = listOf(Sakstyper.FTRL), behandlingstemaer = listOf(Behandlingstema.YRKESAKTIV),
+                sakstyper = listOf(Sakstyper.FTRL), sakstemaer = listOf(Sakstemaer.TRYGDEAVGIFT),
+                behandlingstemaer = listOf(Behandlingstema.YRKESAKTIV),
             ),
         )
 
         lagret.captured.sakstyper shouldContainExactly setOf(Sakstyper.FTRL)
+        lagret.captured.sakstemaer shouldContainExactly setOf(Sakstemaer.TRYGDEAVGIFT)
         lagret.captured.behandlingstemaer shouldContainExactly setOf(Behandlingstema.YRKESAKTIV)
     }
 
@@ -197,6 +207,7 @@ class TekstblokkServiceTest {
     private fun avgrensetBlokk() {
         val eksisterende = Tekstblokk(id = 1).apply {
             sakstyper += Sakstyper.EU_EOS
+            sakstemaer += Sakstemaer.MEDLEMSKAP_LOVVALG
             behandlingstemaer += Behandlingstema.ARBEID_FLERE_LAND
         }
         every { tekstblokkRepository.findByIdAndSlettetDatoIsNull(1) } returns Optional.of(eksisterende)
@@ -208,12 +219,14 @@ class TekstblokkServiceTest {
         every { tekstblokkRepository.finnOversikt(null, true) } returns listOf(oversikt)
         every { tekstblokkRepository.finnTagsForIds(listOf(1L)) } returns emptyList()
         every { tekstblokkRepository.finnSakstyperForIds(listOf(1L)) } returns listOf(arrayOf(1L, Sakstyper.FTRL))
+        every { tekstblokkRepository.finnSakstemaerForIds(listOf(1L)) } returns listOf(arrayOf(1L, Sakstemaer.TRYGDEAVGIFT))
         every { tekstblokkRepository.finnBehandlingstemaerForIds(listOf(1L)) } returns
             listOf(arrayOf(1L, Behandlingstema.YRKESAKTIV))
 
         service.hentAlleOversikter(null, inkluderUtkast = true)
 
         oversikt.sakstyper shouldContainExactly setOf(Sakstyper.FTRL)
+        oversikt.sakstemaer shouldContainExactly setOf(Sakstemaer.TRYGDEAVGIFT)
         oversikt.behandlingstemaer shouldContainExactly setOf(Behandlingstema.YRKESAKTIV)
     }
 
@@ -222,6 +235,7 @@ class TekstblokkServiceTest {
         service.opprettBulk(listOf(TekstblokkService.Input("Tittel", "<p>Innhold</p>", TekstblokkType.TEKSTBLOKK, null)))
 
         lagret.captured.sakstyper.shouldBeEmpty()
+        lagret.captured.sakstemaer.shouldBeEmpty()
         lagret.captured.behandlingstemaer.shouldBeEmpty()
     }
 
@@ -400,6 +414,7 @@ class TekstblokkServiceTest {
         every { tekstblokkRepository.finnOversikt(null, true) } returns listOf(oversikt(status = TekstblokkStatus.UTKAST))
         every { tekstblokkRepository.finnTagsForIds(listOf(1L)) } returns emptyList()
         every { tekstblokkRepository.finnSakstyperForIds(listOf(1L)) } returns emptyList()
+        every { tekstblokkRepository.finnSakstemaerForIds(listOf(1L)) } returns emptyList()
         every { tekstblokkRepository.finnBehandlingstemaerForIds(listOf(1L)) } returns emptyList()
 
         service.hentAlleOversikter(null, inkluderUtkast = true) shouldHaveSize 1

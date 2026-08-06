@@ -149,6 +149,32 @@ class LovligeKombinasjonerSaksbehandlingService(
 
 
     /**
+     * Hele kombinasjonstreet sakstype -> sakstema -> behandlingstema i ett kall.
+     *
+     * Kilden er de statiske tabellene i [LovligeSakskombinasjoner], så dette er ren
+     * oppslagslogikk uten databasetreff. Ment for klienter som trenger å validere eller
+     * kaskadere over flere valg samtidig (f.eks. avgrensning av tekstblokker i admin),
+     * der ett kall per kombinasjon ville gitt et N*M-antall kall.
+     *
+     * Treet er saksuavhengig: ingen hovedpart, saksnummer eller behandling er med, så
+     * resultatet er unionen over BRUKER, VIRKSOMHET og SED – altså alt som er lovlig et
+     * eller annet sted. Det skal ikke brukes til å avgjøre hva som er lovlig i én konkret
+     * sak; til det finnes hent-lovlige-kombinasjoner-endepunktene.
+     */
+    fun hentKombinasjonstre(): List<SakstypeKombinasjoner> =
+        hentMuligeSakstyper(null).map { sakstype ->
+            SakstypeKombinasjoner(
+                sakstype = sakstype,
+                sakstemaer = hentMuligeSakstemaer(null, sakstype, null).map { sakstema ->
+                    SakstemaKombinasjoner(
+                        sakstema = sakstema,
+                        behandlingstemaer = hentMuligeBehandlingstemaer(null, sakstype, sakstema, null, null).toList(),
+                    )
+                },
+            )
+        }
+
+    /**
      * Henter mulige behandlingstyper for knytting til eksisterende sak
      *
      * @param hovedpart         Den valgte hovedpart knyttet til fagsaken.
@@ -478,3 +504,17 @@ class LovligeKombinasjonerSaksbehandlingService(
         )
     }
 }
+
+/**
+ * En sakstype med alle sakstemaene den kan kombineres med. Kodeverket serialiseres som
+ * {kode, term} av KodeSerializer, slik at klienten får visningstekstene med på kjøpet.
+ */
+data class SakstypeKombinasjoner(
+    val sakstype: Sakstyper,
+    val sakstemaer: List<SakstemaKombinasjoner>,
+)
+
+data class SakstemaKombinasjoner(
+    val sakstema: Sakstemaer,
+    val behandlingstemaer: List<Behandlingstema>,
+)

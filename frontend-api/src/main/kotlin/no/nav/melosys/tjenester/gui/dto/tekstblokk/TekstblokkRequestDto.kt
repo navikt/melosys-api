@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size
 
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkStatus
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.service.tekstblokk.TekstblokkService
@@ -29,9 +30,10 @@ data class TekstblokkRequestDto(
     // KodeDeserializer gir null for tom streng. Elementtypen er ikke-nullbar, så Jackson
     // avviser den allerede ved deserialisering – nullen når aldri en not null-kolonne.
     val sakstyper: List<Sakstyper>? = null,
+    val sakstemaer: List<Sakstemaer>? = null,
     val behandlingstemaer: List<Behandlingstema>? = null,
     val status: TekstblokkStatus? = null,
 ) {
     fun tilInput(): TekstblokkService.Input =
-        TekstblokkService.Input(tittel, innhold, type, tags, sakstyper, behandlingstemaer, status)
+        TekstblokkService.Input(tittel, innhold, type, tags, sakstyper, sakstemaer, behandlingstemaer, status)
 }

@@ -26,7 +26,7 @@ class TekstblokkOversiktIT(
     // Tekstblokk-tabellene står ikke i basisklassens truncate-liste
     @BeforeEach
     fun tømTekstblokker() {
-        listOf("TEKSTBLOKK_TAG", "TEKSTBLOKK_SAKSTYPE", "TEKSTBLOKK_BEHANDLINGSTEMA", "TEKSTBLOKK").forEach {
+        listOf("TEKSTBLOKK_TAG", "TEKSTBLOKK_SAKSTYPE", "TEKSTBLOKK_SAKSTEMA", "TEKSTBLOKK_BEHANDLINGSTEMA", "TEKSTBLOKK").forEach {
             jdbcTemplate.execute("DELETE FROM $it")
         }
     }

@@ -9,6 +9,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.brev.tekstblokk.Tekstblokk
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkStatus
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.repository.tekstblokk.TekstblokkRepository
@@ -78,6 +79,23 @@ class TekstblokkHistorikkServiceIT(
         historikk.last().sakstyper shouldContainExactlyInAnyOrder listOf(Sakstyper.EU_EOS, Sakstyper.TRYGDEAVTALE)
         historikk.last().tags shouldContainExactly listOf("historikk")
         historikk.last().behandlingstemaer shouldContainExactly listOf(Behandlingstema.ARBEID_FLERE_LAND)
+        historikk.last().sakstemaer shouldContainExactly listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
+    }
+
+    @Test
+    fun `endring av kun sakstemaer gir en ny versjon med den nye avgrensningen`() {
+        val lagret = tekstblokkRepository.save(nyTekstblokk("Avgrenset paa sakstema"))
+        val id = requireNotNull(lagret.id)
+
+        lagret.sakstemaer.add(Sakstemaer.TRYGDEAVGIFT)
+        tekstblokkRepository.save(lagret)
+
+        val historikk = tekstblokkHistorikkService.hentHistorikk(id)
+
+        historikk shouldHaveSize 2
+        historikk.first().sakstemaer shouldContainExactly listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        historikk.last().sakstemaer shouldContainExactlyInAnyOrder
+            listOf(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstemaer.TRYGDEAVGIFT)
     }
 
     @Test
@@ -85,6 +103,7 @@ class TekstblokkHistorikkServiceIT(
         val lagret = tekstblokkRepository.save(
             nyTekstblokk("Uten avgrensning").apply {
                 sakstyper.clear()
+                sakstemaer.clear()
                 behandlingstemaer.clear()
                 tags.clear()
             },
@@ -93,6 +112,7 @@ class TekstblokkHistorikkServiceIT(
         val versjon = tekstblokkHistorikkService.hentHistorikk(requireNotNull(lagret.id)).single()
 
         versjon.sakstyper.shouldBeEmpty()
+        versjon.sakstemaer.shouldBeEmpty()
         versjon.behandlingstemaer.shouldBeEmpty()
         versjon.tags.shouldBeEmpty()
     }
@@ -125,6 +145,7 @@ class TekstblokkHistorikkServiceIT(
         type = TekstblokkType.TEKSTBLOKK,
         tags = mutableSetOf("historikk"),
         sakstyper = mutableSetOf(Sakstyper.EU_EOS),
+        sakstemaer = mutableSetOf(Sakstemaer.MEDLEMSKAP_LOVVALG),
         behandlingstemaer = mutableSetOf(Behandlingstema.ARBEID_FLERE_LAND),
     ).apply {
         registrertDato = Instant.now()

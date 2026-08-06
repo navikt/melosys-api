@@ -22,6 +22,7 @@ data class TekstblokkVersjonDto(
     val innhold: String,
     val tags: List<String>,
     val sakstyper: List<String>,
+    val sakstemaer: List<String>,
     val behandlingstemaer: List<String>,
     val status: String,
 ) {
@@ -37,6 +38,7 @@ data class TekstblokkVersjonDto(
             innhold = v.innhold,
             tags = v.tags.sorted(),
             sakstyper = v.sakstyper.map { it.kode }.sorted(),
+            sakstemaer = v.sakstemaer.map { it.kode }.sorted(),
             behandlingstemaer = v.behandlingstemaer.map { it.kode }.sorted(),
             status = v.status.name,
         )
