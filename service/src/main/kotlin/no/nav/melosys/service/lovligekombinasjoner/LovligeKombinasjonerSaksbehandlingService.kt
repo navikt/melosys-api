@@ -151,15 +151,13 @@ class LovligeKombinasjonerSaksbehandlingService(
     /**
      * Hele kombinasjonstreet sakstype -> sakstema -> behandlingstema i ett kall.
      *
-     * Kilden er de statiske tabellene i [LovligeSakskombinasjoner], så dette er ren
-     * oppslagslogikk uten databasetreff. Ment for klienter som trenger å validere eller
-     * kaskadere over flere valg samtidig (f.eks. avgrensning av tekstblokker i admin),
-     * der ett kall per kombinasjon ville gitt et N*M-antall kall.
+     * Finnes for klienter som skal kaskadere over flere valg samtidig (avgrensning av
+     * tekstblokker i admin); ett kall per kombinasjon ville der blitt N*M kall per valg.
      *
-     * Treet er saksuavhengig: ingen hovedpart, saksnummer eller behandling er med, så
-     * resultatet er unionen over BRUKER, VIRKSOMHET og SED – altså alt som er lovlig et
-     * eller annet sted. Det skal ikke brukes til å avgjøre hva som er lovlig i én konkret
-     * sak; til det finnes hent-lovlige-kombinasjoner-endepunktene.
+     * Treet er saksuavhengig: uten hovedpart, saksnummer og behandling blir resultatet
+     * unionen over BRUKER, VIRKSOMHET og SED – alt som er lovlig et eller annet sted.
+     * Det skal derfor ikke brukes til å avgjøre hva som er lovlig i én konkret sak; til
+     * det finnes hent-lovlige-kombinasjoner-endepunktene.
      */
     fun hentKombinasjonstre(): List<SakstypeKombinasjoner> =
         hentMuligeSakstyper(null).map { sakstype ->
@@ -168,7 +166,7 @@ class LovligeKombinasjonerSaksbehandlingService(
                 sakstemaer = hentMuligeSakstemaer(null, sakstype, null).map { sakstema ->
                     SakstemaKombinasjoner(
                         sakstema = sakstema,
-                        behandlingstemaer = hentMuligeBehandlingstemaer(null, sakstype, sakstema, null, null).toList(),
+                        behandlingstemaer = hentMuligeBehandlingstemaer(null, sakstype, sakstema, null, null),
                     )
                 },
             )
@@ -505,10 +503,7 @@ class LovligeKombinasjonerSaksbehandlingService(
     }
 }
 
-/**
- * En sakstype med alle sakstemaene den kan kombineres med. Kodeverket serialiseres som
- * {kode, term} av KodeSerializer, slik at klienten får visningstekstene med på kjøpet.
- */
+/** En sakstype med alle sakstemaene den kan kombineres med. Wire-formen eies av KombinasjonstreDto. */
 data class SakstypeKombinasjoner(
     val sakstype: Sakstyper,
     val sakstemaer: List<SakstemaKombinasjoner>,
@@ -516,5 +511,5 @@ data class SakstypeKombinasjoner(
 
 data class SakstemaKombinasjoner(
     val sakstema: Sakstemaer,
-    val behandlingstemaer: List<Behandlingstema>,
+    val behandlingstemaer: Set<Behandlingstema>,
 )

@@ -68,6 +68,9 @@ class Tekstblokk(
     @Column(name = "tag", nullable = false)
     val tags: MutableSet<String> = mutableSetOf(),
 
+    // De tre avgrensningene er uavhengige mengder som AND-es, ikke et hierarki: en blokk
+    // kan si "EU_EOS og FTRL" + "UNNTAK", men ikke "UNNTAK bare under EU_EOS". Bevisst
+    // forenkling – avgrensningen er støyreduksjon i et søk, ikke en tilgangsregel.
     // Tom = gjelder alle sakstyper. Se V165.
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "TEKSTBLOKK_SAKSTYPE", joinColumns = [JoinColumn(name = "tekstblokk_id")])

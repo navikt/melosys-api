@@ -40,7 +40,7 @@ interface TekstblokkRepository : JpaRepository<Tekstblokk, Long> {
     fun finnBehandlingstemaerForIds(@Param("ids") ids: Collection<Long>): List<Array<Any>>
 
     // Kun tags i grafen: flere @ElementCollection i samme join gir kartesisk produkt.
-    // Sakstyper og behandlingstemaer lastes lazy innenfor transaksjonen i servicen.
+    // De tre avgrensningssamlingene lastes lazy innenfor transaksjonen i servicen.
     @EntityGraph(attributePaths = ["tags"])
     fun findByIdAndSlettetDatoIsNull(id: Long): Optional<Tekstblokk>
 }
