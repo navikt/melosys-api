@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 
 import no.nav.melosys.domain.brev.tekstblokk.Tekstblokk
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkStatus
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.repository.AuditRepository
@@ -53,6 +54,7 @@ class TekstblokkHistorikkService(
                 // Envers slår opp collections i _aud-tabellene først ved traversering – kopien må tas i transaksjonen
                 tags = blokk.tags.toList(),
                 sakstyper = blokk.sakstyper.toList(),
+                sakstemaer = blokk.sakstemaer.toList(),
                 behandlingstemaer = blokk.behandlingstemaer.toList(),
                 status = status ?: TekstblokkStatus.PUBLISERT,
             )
@@ -78,6 +80,7 @@ data class TekstblokkVersjon(
     val innhold: String,
     val tags: List<String>,
     val sakstyper: List<Sakstyper>,
+    val sakstemaer: List<Sakstemaer>,
     val behandlingstemaer: List<Behandlingstema>,
     val status: TekstblokkStatus,
 )

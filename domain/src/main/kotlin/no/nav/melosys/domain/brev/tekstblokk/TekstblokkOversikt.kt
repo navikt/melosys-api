@@ -2,6 +2,7 @@ package no.nav.melosys.domain.brev.tekstblokk
 
 import java.time.Instant
 
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 
@@ -22,5 +23,6 @@ class TekstblokkOversikt(
 ) {
     var tags: Set<String> = emptySet()
     var sakstyper: Set<Sakstyper> = emptySet()
+    var sakstemaer: Set<Sakstemaer> = emptySet()
     var behandlingstemaer: Set<Behandlingstema> = emptySet()
 }

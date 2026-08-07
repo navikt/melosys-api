@@ -7,6 +7,7 @@ import no.nav.melosys.domain.brev.tekstblokk.Tekstblokk
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkOversikt
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkStatus
 import no.nav.melosys.domain.brev.tekstblokk.TekstblokkType
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.IkkeFunnetException
@@ -35,6 +36,7 @@ class TekstblokkService(
         // Eldre klienter som utelater felter mister dermed ingenting ved en PUT.
         val tags: List<String>? = null,
         val sakstyper: List<Sakstyper>? = null,
+        val sakstemaer: List<Sakstemaer>? = null,
         val behandlingstemaer: List<Behandlingstema>? = null,
         // Null betyr «uendret» ved oppdatering. Ved opprettelse og bulk-seeding faller den
         // tilbake på entitetens PUBLISERT, slik at melosys-console er uendret.
@@ -51,11 +53,14 @@ class TekstblokkService(
             .groupBy({ it[0] as Long }, { it[1] as String })
         val sakstyperPerId = tekstblokkRepository.finnSakstyperForIds(ider)
             .groupBy({ it[0] as Long }, { it[1] as Sakstyper })
+        val sakstemaerPerId = tekstblokkRepository.finnSakstemaerForIds(ider)
+            .groupBy({ it[0] as Long }, { it[1] as Sakstemaer })
         val behandlingstemaerPerId = tekstblokkRepository.finnBehandlingstemaerForIds(ider)
             .groupBy({ it[0] as Long }, { it[1] as Behandlingstema })
         oversikter.forEach {
             it.tags = tagsPerId[it.id]?.toSet() ?: emptySet()
             it.sakstyper = sakstyperPerId[it.id]?.toSet() ?: emptySet()
+            it.sakstemaer = sakstemaerPerId[it.id]?.toSet() ?: emptySet()
             it.behandlingstemaer = behandlingstemaerPerId[it.id]?.toSet() ?: emptySet()
         }
         return oversikter
@@ -69,6 +74,7 @@ class TekstblokkService(
         // unngå kartesisk produkt – de må derfor lastes her, inne i transaksjonen.
         ?.also {
             Hibernate.initialize(it.sakstyper)
+            Hibernate.initialize(it.sakstemaer)
             Hibernate.initialize(it.behandlingstemaer)
         }
         ?: throw IkkeFunnetException("Finner ikke tekstblokk med id $id")
@@ -153,6 +159,7 @@ class TekstblokkService(
         // er den eksplisitte nullstillingen.
         input.tags?.let { tekstblokk.tags.erstattMed(normaliserTags(it)) }
         input.sakstyper?.let { tekstblokk.sakstyper.erstattMed(it) }
+        input.sakstemaer?.let { tekstblokk.sakstemaer.erstattMed(it) }
         input.behandlingstemaer?.let { tekstblokk.behandlingstemaer.erstattMed(it) }
     }
 

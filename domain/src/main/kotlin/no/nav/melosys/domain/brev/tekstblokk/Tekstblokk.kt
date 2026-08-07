@@ -17,6 +17,7 @@ import jakarta.persistence.Table
 import java.time.Instant
 
 import no.nav.melosys.domain.RegistreringsInfo
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import org.hibernate.envers.AuditOverride
@@ -67,12 +68,22 @@ class Tekstblokk(
     @Column(name = "tag", nullable = false)
     val tags: MutableSet<String> = mutableSetOf(),
 
+    // De tre avgrensningene er uavhengige mengder som AND-es, ikke et hierarki: en blokk
+    // kan si "EU_EOS og FTRL" + "UNNTAK", men ikke "UNNTAK bare under EU_EOS". Bevisst
+    // forenkling – avgrensningen er støyreduksjon i et søk, ikke en tilgangsregel.
     // Tom = gjelder alle sakstyper. Se V165.
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "TEKSTBLOKK_SAKSTYPE", joinColumns = [JoinColumn(name = "tekstblokk_id")])
     @Enumerated(EnumType.STRING)
     @Column(name = "sakstype", nullable = false)
     val sakstyper: MutableSet<Sakstyper> = mutableSetOf(),
+
+    // Tom = gjelder alle sakstemaer. Se V168.
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "TEKSTBLOKK_SAKSTEMA", joinColumns = [JoinColumn(name = "tekstblokk_id")])
+    @Enumerated(EnumType.STRING)
+    @Column(name = "sakstema", nullable = false)
+    val sakstemaer: MutableSet<Sakstemaer> = mutableSetOf(),
 
     // Tom = gjelder alle behandlingstemaer. Se V165.
     @ElementCollection(fetch = FetchType.LAZY)
