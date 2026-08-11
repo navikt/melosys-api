@@ -14,7 +14,6 @@ object ToggleName {
     const val MELOSYS_SEND_POPP_HENDELSE = "melosys.send_popp_hendelse"
     const val MELOSYS_SORTER_SOK_PA_REDIGERINGSDATO = "melosys.sorter_sok_pa_redigeringsdato"
     const val MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2 = "melosys.bruk_opprett_buc_og_sed_v2"
-    const val MELOSYS_CDM_4_4 = "melosys.cdm-4-4"
     const val MELOSYS_OPPGAVE_NØKKELORD = "melosys.oppgave_nokkelord"
     const val MELOSYS_TEKSTBLOKKER = "melosys.tekstblokker"
     const val MELOSYS_TEKSTBLOKKER_DYNAMISK_PLACEHOLDER = "melosys.tekstblokker.dynamisk-placeholder"
