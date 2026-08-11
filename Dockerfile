@@ -1,4 +1,4 @@
-FROM europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/jre:openjdk-21
+FROM europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/jre@sha256:7e54b85b5d9bb53b33d17584d6007b2cf27acdcf7d55da1cfc0570c4c347e821
 LABEL maintainer="Team Melosys"
 WORKDIR /app
 
