@@ -79,4 +79,24 @@ class SaksstatusSynkProjeksjonIT(
 
         utledSkjemaSaksstatus(fagsak) shouldBe Saksstatus.AVSLUTTET
     }
+
+    @Test
+    fun `claim-rad uten originalData er ikke med i saksstatus-synken`() {
+        // Claim-rader (SkjemaSakMappingService.claimRelaterteSkjemaIder) er reservasjoner av
+        // relaterte skjemaId-er mot saken før skjemaet selv er mottatt (MELOSYS-8151). De
+        // representerer ingen mottatt innsending og skal derfor ikke rapportere saksstatus tilbake
+        // til skjema-api — filtreres bort av `originalData is not null` i projeksjonen.
+        val fagsak = fagsakRepository.save(Fagsak.forTest { status = Saksstatuser.OPPRETTET })
+        val vanligSkjemaId = UUID.randomUUID()
+        val claimetSkjemaId = UUID.randomUUID()
+        skjemaSakMappingRepository.save(SkjemaSakMapping(vanligSkjemaId, fagsak, null, "{}"))
+        skjemaSakMappingRepository.save(SkjemaSakMapping(claimetSkjemaId, fagsak))
+
+        skjemaSakMappingRepository.finnSaksstatusSynkRaderForSaksnummer(fagsak.saksnummer)
+            .map { it.skjemaId } shouldBe listOf(vanligSkjemaId)
+
+        val alleSkjemaIder = skjemaSakMappingRepository.finnAlleSaksstatusSynkRader().map { it.skjemaId }
+        alleSkjemaIder.contains(vanligSkjemaId) shouldBe true
+        alleSkjemaIder.contains(claimetSkjemaId) shouldBe false
+    }
 }

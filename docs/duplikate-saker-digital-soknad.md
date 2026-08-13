@@ -143,6 +143,14 @@ Da faller vi tilbake til dagens oppførsel (ingen kryss-serialisering), og lag 1
   `ProsessinstansFerdigListener` parser låsreferansen til alle prosessinstanser som står PÅ_VENT ved
   hvert ferdig-event, så én gammel rad i det gamle formatet ville kastet exception og stanset
   opplåsingen for alle prosesstyper.
+- **Asymmetri i deploy-vinduet.** De to låsreferanse-formatene grupperes ikke sømløst mot hverandre.
+  `ProsessinstansFerdigListener` sammenligner `gruppePrefiks` med LIKHET (`X` != `X_`), mens
+  PÅ_VENT-oppslaget bruker `startsWith` (`X` fanger `X_Y`). Gamle rader og nye havner derfor ikke i
+  samme gruppe ved opplåsing. Konsekvensen er avgrenset til utrullingsvinduet: en redelivery av et
+  skjema som allerede har en aktiv prosessinstans i gammelt format kan i teorien få opprettet en
+  ny prosessinstans, siden dedupen (`existsByLåsReferanseAndTypeIn`) sammenligner referansen
+  eksakt og `X` != `X_X`. Vurdert som akseptabelt: vinduet er kort, og lag 1 (DB-låsen) hindrer
+  uansett at det blir duplikate saker.
 - `spring.jackson.deserialization.fail-on-unknown-properties: false` gjør at rekkefølgen på utrulling
   ikke velter konsumenten. Dekket av `KafkaSerializationTest`.
 - Anbefalt rekkefølge likevel: **melosys-api først**, deretter skjema-api.
