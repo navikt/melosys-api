@@ -94,7 +94,9 @@ class DigitalSøknadMottakIT(
         // Basic prosessinstans info
         prosessinstans.type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
         prosessinstans.status shouldBe ProsessStatus.FERDIG
-        prosessinstans.låsReferanse shouldBe skjemaId.toString()
+        // Låsreferansen er "{gruppeId}_{skjemaId}". Meldingen her har ingen gruppeId, og da er
+        // skjemaet sin egen gruppe (ingen kryss-serialisering med andre deler).
+        prosessinstans.låsReferanse shouldBe "${skjemaId}_$skjemaId"
 
         // All steps completed successfully (SEND_FORVALTNINGSMELDING is the last step)
         prosessinstans.sistFullførtSteg shouldBe ProsessSteg.SEND_FORVALTNINGSMELDING
