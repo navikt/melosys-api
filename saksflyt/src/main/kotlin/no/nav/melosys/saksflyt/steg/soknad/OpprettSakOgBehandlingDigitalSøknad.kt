@@ -9,7 +9,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.repository.DigitalSøknadSakLockRepository
+import no.nav.melosys.repository.DigitalSøknadSakLås
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey.DIGITAL_SØKNADSDATA
@@ -48,7 +48,7 @@ class OpprettSakOgBehandlingDigitalSøknad(
     private val skjemaSakMappingService: SkjemaSakMappingService,
     private val behandlingService: BehandlingService,
     private val aktørSynkronisering: DigitalSøknadAktørSynkronisering,
-    private val sakLockRepository: DigitalSøknadSakLockRepository,
+    private val sakLås: DigitalSøknadSakLås,
     private val eksisterendeSakHåndterer: DigitalSøknadEksisterendeSakHåndterer
 ) : StegBehandler {
 
@@ -69,8 +69,7 @@ class OpprettSakOgBehandlingDigitalSøknad(
         // kan ha opprettet saken i mellomtiden. Lås på aktørId og re-sjekk om saken finnes — låsen
         // holdes til dette stegets transaksjon committer (StegBehandler.utfør = REQUIRES_NEW), så
         // opprett-eller-fest + mapping skjer serielt per person og kan ikke gi duplikate saker.
-        sakLockRepository.sikreLåsRad(aktørId)
-        sakLockRepository.taRadlås(aktørId)
+        sakLås.lås(aktørId)
 
         val relaterteSkjemaIder = utledRelaterteSkjemaIder(prosessinstans, søknadsdata)
         val eksisterendeSaksnummer = skjemaSakMappingService.finnGyldigSaksnummerForSkjemaIder(relaterteSkjemaIder)
@@ -79,7 +78,10 @@ class OpprettSakOgBehandlingDigitalSøknad(
                 "Sak $eksisterendeSaksnummer finnes likevel (tapte kappløpet) for skjemaId=${skjema.id} — " +
                     "fester søknaden på eksisterende sak i stedet for å opprette ny"
             }
-            prosessinstans.behandling = eksisterendeSakHåndterer.håndter(eksisterendeSaksnummer, søknadsdata)
+            // opprettOppgave = false: vi står under DB-låsen, og NY-flyten har et eget
+            // OPPRETT_OPPGAVE-steg senere som gjør kallet mot Oppgave-API-et utenfor låsen.
+            prosessinstans.behandling =
+                eksisterendeSakHåndterer.håndter(eksisterendeSaksnummer, søknadsdata, opprettOppgave = false)
             prosessinstans.setData(ProsessDataKey.DIGITAL_SØKNAD_ATTACHED_EKSISTERENDE, true)
             return
         }

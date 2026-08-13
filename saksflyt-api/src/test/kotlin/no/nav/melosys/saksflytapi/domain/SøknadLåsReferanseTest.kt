@@ -27,14 +27,26 @@ class SøknadLåsReferanseTest {
     fun `initier SøknadLåsReferanse med ugyldig referanse skal kaste exception`() {
         shouldThrow<IllegalArgumentException> {
             SøknadLåsReferanse(UGYLDIG_REFERANSE)
-        }.message shouldBe "$UGYLDIG_REFERANSE er ikke gyldig SØKNAD-referanse ({gruppeId}_{skjemaId})"
+        }.message shouldBe "$UGYLDIG_REFERANSE er ikke gyldig SØKNAD-referanse ({gruppeId}_{skjemaId} eller {skjemaId})"
     }
 
     @Test
-    fun `bar UUID uten skjemaId-del er ikke lenger gyldig`() {
-        shouldThrow<IllegalArgumentException> {
-            SøknadLåsReferanse(GRUPPE_ID)
+    fun `bar UUID er fortsatt gyldig og beholder hele referansen som gruppePrefiks`() {
+        // Prosessinstanser opprettet før MELOSYS-8151 lever videre i databasen med dette formatet,
+        // og parses av ProsessinstansFerdigListener ved hvert ferdig-event.
+        SøknadLåsReferanse(GRUPPE_ID).apply {
+            toString() shouldBe GRUPPE_ID
+            gruppePrefiks shouldBe GRUPPE_ID
         }
+    }
+
+    @Test
+    fun `bar UUID grupperes sammen med ny referanse der den er gruppeId`() {
+        val gammel = SøknadLåsReferanse(GRUPPE_ID)
+        val ny = SøknadLåsReferanse("$GRUPPE_ID" + "_" + SKJEMA_ID)
+
+        // Prefiks-oppslaget er startsWith, så den gamle referansen fanger den nye gruppen.
+        ny.toString().startsWith(gammel.gruppePrefiks) shouldBe true
     }
 
     @Test

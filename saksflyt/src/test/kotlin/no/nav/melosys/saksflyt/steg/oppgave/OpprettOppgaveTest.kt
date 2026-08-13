@@ -85,7 +85,10 @@ internal class OpprettOppgaveTest {
     }
 
     @Test
-    fun `hopper over oppgave når digital søknad ble festet på eksisterende sak`() {
+    fun `oppretter oppgave også når digital søknad ble festet på eksisterende sak`() {
+        // NY-flyten kan under DB-låsen ha festet seg på en eksisterende sak (MELOSYS-8151).
+        // Oppgaven opprettes bevisst her, utenfor låsen, og ikke i attach-logikken — det ville
+        // holdt en Oracle-radlås over et HTTP-kall mot Oppgave-API-et.
         val prosessinstans = Prosessinstans.forTest {
             behandling {
                 id = 243L
@@ -96,7 +99,7 @@ internal class OpprettOppgaveTest {
 
         opprettOppgave.utfør(prosessinstans)
 
-        verify(exactly = 0) {
+        verify(exactly = 1) {
             oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any())
         }
     }

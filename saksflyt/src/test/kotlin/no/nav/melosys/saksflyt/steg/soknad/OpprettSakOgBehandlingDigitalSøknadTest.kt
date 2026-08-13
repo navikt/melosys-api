@@ -23,7 +23,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
-import no.nav.melosys.repository.DigitalSøknadSakLockRepository
+import no.nav.melosys.repository.DigitalSøknadSakLås
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
@@ -52,7 +52,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
     @MockK lateinit var skjemaSakMappingService: SkjemaSakMappingService
     @MockK lateinit var behandlingService: BehandlingService
     @MockK(relaxed = true) lateinit var aktørSynkronisering: DigitalSøknadAktørSynkronisering
-    @MockK(relaxed = true) lateinit var sakLockRepository: DigitalSøknadSakLockRepository
+    @MockK(relaxed = true) lateinit var sakLås: DigitalSøknadSakLås
     @MockK(relaxed = true) lateinit var eksisterendeSakHåndterer: DigitalSøknadEksisterendeSakHåndterer
 
     private lateinit var opprettSakOgBehandlingDigitalSøknad: OpprettSakOgBehandlingDigitalSøknad
@@ -77,7 +77,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         opprettSakOgBehandlingDigitalSøknad = OpprettSakOgBehandlingDigitalSøknad(
             fagsakService, persondataFasade, mottatteOpplysningerService, jsonMapper,
             skjemaSakMappingService, behandlingService, aktørSynkronisering,
-            sakLockRepository, eksisterendeSakHåndterer
+            sakLås, eksisterendeSakHåndterer
         )
 
         prosessinstans = Prosessinstans.forTest {
@@ -310,11 +310,14 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         val behandling = mockk<Behandling>(relaxed = true)
         every { persondataFasade.hentAktørIdForIdent(fnr) } returns aktørId
         every { skjemaSakMappingService.finnGyldigSaksnummerForSkjemaIder(any()) } returns "MEL-EKSISTERENDE"
-        every { eksisterendeSakHåndterer.håndter("MEL-EKSISTERENDE", søknadsdata) } returns behandling
+        every {
+            eksisterendeSakHåndterer.håndter("MEL-EKSISTERENDE", søknadsdata, opprettOppgave = false)
+        } returns behandling
 
         opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
 
-        verify { eksisterendeSakHåndterer.håndter("MEL-EKSISTERENDE", søknadsdata) }
+        // Oppgaven skal IKKE opprettes under DB-låsen; OPPRETT_OPPGAVE-steget tar den etterpå.
+        verify { eksisterendeSakHåndterer.håndter("MEL-EKSISTERENDE", søknadsdata, opprettOppgave = false) }
         verify(exactly = 0) { fagsakService.nyFagsakOgBehandling(any()) }
         prosessinstans.behandling shouldBe behandling
         prosessinstans.finnData(ProsessDataKey.DIGITAL_SØKNAD_ATTACHED_EKSISTERENDE, false).shouldBeTrue()
@@ -328,8 +331,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
 
         verifyOrder {
-            sakLockRepository.sikreLåsRad(aktørId)
-            sakLockRepository.taRadlås(aktørId)
+            sakLås.lås(aktørId)
             skjemaSakMappingService.finnGyldigSaksnummerForSkjemaIder(any())
         }
     }

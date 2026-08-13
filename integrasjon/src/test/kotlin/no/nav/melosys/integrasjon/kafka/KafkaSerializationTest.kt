@@ -9,7 +9,10 @@ import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
+import tools.jackson.module.kotlin.kotlinModule
 import java.time.LocalDate
+import java.util.UUID
 
 class KafkaSerializationTest {
 
@@ -115,6 +118,55 @@ class KafkaSerializationTest {
             exception.cause shouldNotBe null
             exception.message shouldContain "my-topic"
             exception.message shouldContain "bad"
+        }
+    }
+
+    /**
+     * Kompatibilitet for SkjemaMottattMelding ved utrulling av gruppeId (MELOSYS-8151).
+     *
+     * De to appene rulles ikke ut samtidig, så meldinger må kunne leses både med og uten det nye
+     * feltet. Mapperen speiler produksjonsoppsettet i application.yml
+     * (spring.jackson.deserialization.fail-on-unknown-properties: false).
+     */
+    @Nested
+    inner class SkjemaMottattMeldingKompatibilitetTest {
+
+        private val produksjonslikMapper: ObjectMapper = JsonMapper.builder()
+            .addModule(kotlinModule())
+            .disable(tools.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .build()
+
+        private val deserializer =
+            LoggingDeserializer(produksjonslikMapper, SkjemaMottattMelding::class.java)
+
+        @Test
+        fun `melding uten gruppeId leses med gruppeId null - gammel produsent, ny konsument`() {
+            val skjemaId = UUID.randomUUID()
+            val json = """{"skjemaId":"$skjemaId","relaterteSkjemaIder":[]}"""
+
+            val melding = deserializer.deserialize("topic", json.toByteArray())
+
+            melding.skjemaId shouldBe skjemaId
+            melding.gruppeId shouldBe null
+        }
+
+        @Test
+        fun `melding med gruppeId leses - ny produsent, ny konsument`() {
+            val skjemaId = UUID.randomUUID()
+            val gruppeId = UUID.randomUUID()
+            val json = """{"skjemaId":"$skjemaId","relaterteSkjemaIder":[],"gruppeId":"$gruppeId"}"""
+
+            deserializer.deserialize("topic", json.toByteArray()).gruppeId shouldBe gruppeId
+        }
+
+        @Test
+        fun `ukjent felt kaster ikke - ny produsent, gammel konsument`() {
+            // Sikrer at rekkefølgen på utrulling ikke kan velte konsumenten. Skulle noen slå på
+            // FAIL_ON_UNKNOWN_PROPERTIES, feiler denne testen i stedet for produksjon.
+            val skjemaId = UUID.randomUUID()
+            val json = """{"skjemaId":"$skjemaId","relaterteSkjemaIder":[],"etHeltNyttFelt":"verdi"}"""
+
+            deserializer.deserialize("topic", json.toByteArray()).skjemaId shouldBe skjemaId
         }
     }
 
