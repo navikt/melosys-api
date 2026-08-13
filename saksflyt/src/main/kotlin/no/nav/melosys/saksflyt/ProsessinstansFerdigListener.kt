@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt
 
 import mu.KotlinLogging
 import no.nav.melosys.saksflytapi.domain.LåsReferanseFactory
+import no.nav.melosys.saksflytapi.domain.SøknadLåsReferanse
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
@@ -27,6 +28,27 @@ class ProsessinstansFerdigListener(
         log.info("Prosessinstans ${prosessinstansFerdigEvent.uuid} ferdig, sjekker om neste med låsreferanse:${prosessinstansFerdigEvent.låsReferanse} kan startes")
         if (kanNesteProsessinstansStartes(prosessinstansFerdigEvent)) {
             startNesteProsessinstans(prosessinstansFerdigEvent)
+        }
+    }
+
+    /**
+     * Slipper fram neste i søknadsgruppen når en prosessinstans FEILER.
+     *
+     * Avgrenset til SØKNAD-låsreferanser med vilje. For digital søknad serialiseres hele
+     * søknadsgruppen (MELOSYS-8151), så en feilet del ville ellers holdt de øvrige delene på vent
+     * til neste oppstart. For andre prosesstyper beholdes dagens oppførsel — der er rekkefølgen
+     * mellom instanser i samme gruppe faglig viktigere enn framdrift, og en feilet prosess
+     * håndteres av restart/gjenoppretting.
+     */
+    @EventListener
+    fun prosessinstansFeilet(feiletEvent: ProsessinstansFeiletEvent) {
+        val låsReferanse = feiletEvent.låsReferanse ?: return
+        if (LåsReferanseFactory.lagLåsReferanse(låsReferanse) !is SøknadLåsReferanse) return
+
+        log.info("Prosessinstans ${feiletEvent.uuid} feilet, slipper fram neste i søknadsgruppen")
+        val ferdigEvent = ProsessinstansFerdigEvent(feiletEvent.hentProsessinstans())
+        if (kanNesteProsessinstansStartes(ferdigEvent)) {
+            startNesteProsessinstans(ferdigEvent)
         }
     }
 

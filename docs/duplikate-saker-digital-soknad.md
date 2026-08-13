@@ -1,7 +1,8 @@
 # Duplikate saker ved samtidige digital-søknad-meldinger
 
-**Status:** Implementert (MELOSYS-8151). Verifisert e2e mot lokal benk med `SLEEP=0` (alt sendt på
-én gang): begge reproduksjons-skript gir nå **én sak** uten feilede prosessinstanser.
+**Status:** Implementert (MELOSYS-8151). Enhets- og integrasjonstester grønne i begge repoer.
+E2E mot lokal benk med `SLEEP=0` bør kjøres på nytt etter at gruppeId ble lagt om til persistert
+tildeling.
 **Gjelder:** melosys-api + melosys-skjema-api, mottak av digitale søknader (`UTSENDT_ARBEIDSTAKER`).
 **Relatert:** [[skjema-sak-mapping]], MEL-16515 (journalføring/kobling — egen sak).
 
@@ -94,26 +95,76 @@ Da unngår man duplikatsakene. Innebygd i
 
 ## Implementasjon (MELOSYS-8151)
 
-Tre lag som utfyller hverandre (defense-in-depth), verifisert e2e med `SLEEP=0`:
+Tre lag som utfyller hverandre (defense-in-depth):
 
 1. **Atomisk sak-resolusjon (melosys-api).** Ny cross-instance DB-lås `DIGITAL_SOKNAD_SAK_LOCK(aktoer_id)`
-   (`DigitalSøknadSakLockRepository`, Flyway `V161`). NY-steget `OpprettSakOgBehandlingDigitalSøknad` tar
-   låsen på aktørId, re-sjekker `finnGyldigSaksnummerForSkjemaIder(...)` under låsen, og fester på
-   eksisterende sak hvis den finnes (delt `DigitalSøknadEksisterendeSakHåndterer`) — ellers oppretter sak.
-   Markøren `DIGITAL_SØKNAD_ATTACHED_EKSISTERENDE` får `OPPRETT_ARKIVSAK`/`OPPRETT_OPPGAVE` til å hoppe over.
+   (`DigitalSøknadSakLockRepository` + `DigitalSøknadSakLås`, Flyway `V161`). NY-steget
+   `OpprettSakOgBehandlingDigitalSøknad` tar låsen på aktørId, re-sjekker
+   `finnGyldigSaksnummerForSkjemaIder(...)` under låsen, og fester på eksisterende sak hvis den
+   finnes (delt `DigitalSøknadEksisterendeSakHåndterer`) — ellers oppretter sak. Markøren
+   `DIGITAL_SØKNAD_ATTACHED_EKSISTERENDE` får `OPPRETT_ARKIVSAK` til å hoppe over, siden den
+   eksisterende saken allerede har arkivsak.
 2. **Symmetrisk «claim» (melosys-api).** Ved opprettelse av ny sak reserveres de øvrige relaterte
    skjemaId-ene mot saken (tomme mapping-rader, `SkjemaSakMappingService.claimRelaterteSkjemaIder`), slik
    at en del som prosesseres senere — også rot-innsendingen som ikke selv refererer de andre — finner saken
    uavhengig av rekkefølge.
-3. **Full serialisering per gruppe.** skjema-api beregner en stabil `gruppeId` (id-en til det tidligst
-   opprettede skjemaet i fnr+enhet+periode-gruppen) og legger den på `SkjemaMottattMelding`. melosys-api
-   bruker `{gruppeId}_{skjemaId}` som låsreferanse, der `gruppeId` er `gruppePrefiks`. Den eksisterende
-   (DB-baserte, cross-instance) PÅ_VENT-mekanismen serialiserer da hele gruppens flyt — én del om gangen —
-   som også fjerner det sekundære `UQ_VILKAARSRESULTAT`-racet (samtidig `VURDER_INNGANGSVILKÅR` på delt
-   behandling). gruppeId er en opak skjema-UUID → ingen person-ID i lås-nøkkelen.
+3. **Full serialisering per gruppe.** skjema-api tildeler en stabil `gruppeId` som legges på
+   `SkjemaMottattMelding`. melosys-api bruker `{gruppeId}_{skjemaId}` som låsreferanse, der
+   `gruppeId` er `gruppePrefiks`. Den eksisterende (DB-baserte, cross-instance) PÅ_VENT-mekanismen
+   serialiserer da hele gruppens flyt — én del om gangen — som også fjerner det sekundære
+   `UQ_VILKAARSRESULTAT`-racet (samtidig `VURDER_INNGANGSVILKÅR` på delt behandling). gruppeId er en
+   opak skjema-UUID → ingen person-ID i lås-nøkkelen.
+
+### gruppeId må persisteres, ikke regnes ut
+
+gruppeId er «id-en til det tidligst opprettede skjemaet i gruppen», men den kan ikke regnes ut på
+nytt per melding. Gruppen ses via skjemaer med status `SENDT`, så et tidligere opprettet **utkast**
+som sendes inn senere flytter «tidligst opprettede» og endrer gruppe-ID-en underveis:
+
+| Hendelse | Gruppe sett fra avsender | Utregnet gruppeId |
+|---|---|---|
+| AG sendes (v1 er fortsatt utkast) | `{AG}` | `AG` |
+| v1 sendes senere | `{v1, AG}` | `v1` — ulik! |
+
+Det er nøyaktig rot-innsendings-scenarioet serialiseringen skal fange. Derfor tildeles gruppeId én
+gang og lagres på `skjema.gruppe_id` (skjema-api, Flyway `V21`): finnes det allerede en gruppe-ID på
+noen i gruppen — også på et utkast — gjenbrukes den; ellers tildeles tidligst opprettede med
+skjema-ID som deterministisk tie-break.
+
+Restrisiko: to deler som sendes helt samtidig og ikke ser hverandre kan tildele hver sin gruppe-ID.
+Da faller vi tilbake til dagens oppførsel (ingen kryss-serialisering), og lag 1 fanger duplikatsaken.
+
+### Kompatibilitet og utrulling
+
+- `gruppeId` er nullable. Mangler det, faller melosys-api tilbake til `{skjemaId}` som låsreferanse.
+- Låsreferanse-formatet er bakoverkompatibelt: `LåsReferanseType.SØKNAD` godtar både
+  `{gruppeId}_{skjemaId}` og bar `{skjemaId}`. Det er **påkrevd**, ikke pynt:
+  `ProsessinstansFerdigListener` parser låsreferansen til alle prosessinstanser som står PÅ_VENT ved
+  hvert ferdig-event, så én gammel rad i det gamle formatet ville kastet exception og stanset
+  opplåsingen for alle prosesstyper.
+- `spring.jackson.deserialization.fail-on-unknown-properties: false` gjør at rekkefølgen på utrulling
+  ikke velter konsumenten. Dekket av `KafkaSerializationTest`.
+- Anbefalt rekkefølge likevel: **melosys-api først**, deretter skjema-api.
+
+### Andre forhold håndtert
+
+- **Låsen holdes ikke over HTTP-kall.** Attach-veien fra NY-flyten kaller
+  `DigitalSøknadEksisterendeSakHåndterer.håndter(..., opprettOppgave = false)`; oppgaven opprettes av
+  det etterfølgende `OPPRETT_OPPGAVE`-steget, utenfor låsen. WebClient har ingen response-timeout, så
+  et hengende Oppgave-kall ville ellers kunne holdt en Oracle-radlås i det uendelige.
+- **`FOR UPDATE WAIT 10`** i stedet for ubegrenset venting.
+- **Claim-rader ekskluderes fra saksstatus-synken** (`originalData is not null` i
+  `SAKSSTATUS_SYNK_PROJEKSJON`). Ellers ville skjema som ennå ikke er mottatt rapportert saksstatus
+  tilbake til skjema-api.
+- **Feilet prosess blokkerer ikke gruppen.** `ProsessinstansFeiletEvent` slipper fram neste i
+  gruppen, avgrenset til SØKNAD-låsreferanser slik at andre prosesstyper beholder dagens oppførsel.
 
 ## Avklaringer
 - Personvern: serialiseringsnøkkel = `gruppeId` (opak skjema-UUID), ikke fnr/aktørId. DB-låsen låser på
   aktørId (intern pseudonym ID), som fagsak allerede nøkles på.
 - Endringen spenner over melosys-api + melosys-skjema-api (+ `melosys-skjema-api-types`): det opprinnelige
   «melosys-api alene» ble utvidet bevisst for å få en personvernvennlig felles gruppe-ID.
+
+## Gjenstår
+- Lås-tabellen `DIGITAL_SOKNAD_SAK_LOCK` vokser monotont (én rad per aktørId). Ingen opprydding er
+  satt opp; radene er små, men bør ryddes hvis tabellen blir stor.

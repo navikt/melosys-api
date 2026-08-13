@@ -59,8 +59,18 @@ class DigitalSøknadEksisterendeSakHåndterer(
     /**
      * Håndterer en mottatt digital søknad på saken [saksnummer] og returnerer behandlingen
      * søknaden ble knyttet til.
+     *
+     * [opprettOppgave] styrer om en eventuell ny behandling også får opprettet oppgave her.
+     * EKSISTERENDE-flyten har ikke noe eget OPPRETT_OPPGAVE-steg og må ha den satt. NY-flyten har
+     * steget senere i flyten og setter den til false: der kalles vi under DB-låsen på aktørId, og
+     * oppgave-opprettelsen går mot Oppgave-API-et over HTTP. Å holde en radlås over et nettverkskall
+     * uten response-timeout ville kunne bundet opp en saksflyt-tråd i det uendelige.
      */
-    fun håndter(saksnummer: String, søknadsdata: UtsendtArbeidstakerSkjemaM2MDto): Behandling {
+    fun håndter(
+        saksnummer: String,
+        søknadsdata: UtsendtArbeidstakerSkjemaM2MDto,
+        opprettOppgave: Boolean = true
+    ): Behandling {
         val referanseId = søknadsdata.referanseId
         val fagsak = fagsakService.hentFagsak(saksnummer)
         log.info { "Håndterer eksisterende sak $saksnummer for digital søknad referanseId=$referanseId, skjemaId=${søknadsdata.skjema.id}" }
@@ -70,7 +80,7 @@ class DigitalSøknadEksisterendeSakHåndterer(
         val (behandling, mottatteOpplysninger) = if (åpenBehandling != null) {
             håndterÅpenBehandling(åpenBehandling, søknadsdata)
         } else {
-            opprettNyVurdering(fagsak, søknadsdata)
+            opprettNyVurdering(fagsak, søknadsdata, opprettOppgave)
         }
 
         oppdaterAktørerFraNyInnsending(fagsak, søknadsdata)
@@ -136,7 +146,8 @@ class DigitalSøknadEksisterendeSakHåndterer(
 
     private fun opprettNyVurdering(
         fagsak: Fagsak,
-        søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
+        søknadsdata: UtsendtArbeidstakerSkjemaM2MDto,
+        opprettOppgave: Boolean
     ): Pair<Behandling, MottatteOpplysninger> {
         val saksnummer = fagsak.saksnummer
         val referanseId = søknadsdata.referanseId
@@ -161,14 +172,18 @@ class DigitalSøknadEksisterendeSakHåndterer(
             nyBehandling.id, null, søknad, referanseId
         )
 
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
-            nyBehandling,
-            null,
-            fagsak.finnBrukersAktørID(),
-            null,
-            fagsak.finnVirksomhetsOrgnr()
-        )
-        log.info { "Opprettet oppgave for ny behandling ${nyBehandling.id}" }
+        if (opprettOppgave) {
+            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
+                nyBehandling,
+                null,
+                fagsak.finnBrukersAktørID(),
+                null,
+                fagsak.finnVirksomhetsOrgnr()
+            )
+            log.info { "Opprettet oppgave for ny behandling ${nyBehandling.id}" }
+        } else {
+            log.info { "Hopper over oppgave for behandling ${nyBehandling.id} — opprettes av OPPRETT_OPPGAVE-steget" }
+        }
 
         return nyBehandling to mottatteOpplysninger
     }
