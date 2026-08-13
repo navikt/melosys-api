@@ -41,12 +41,19 @@ class SøknadLåsReferanseTest {
     }
 
     @Test
-    fun `bar UUID grupperes sammen med ny referanse der den er gruppeId`() {
+    fun `bar UUID og ny referanse er IKKE samme gruppe`() {
         val gammel = SøknadLåsReferanse(GRUPPE_ID)
         val ny = SøknadLåsReferanse("$GRUPPE_ID" + "_" + SKJEMA_ID)
 
-        // Prefiks-oppslaget er startsWith, så den gamle referansen fanger den nye gruppen.
-        ny.toString().startsWith(gammel.gruppePrefiks) shouldBe true
+        // De to formatene sameksisterer kun i deploy-vinduet. ProsessinstansFerdigListener
+        // sammenligner gruppePrefiks med LIKHET, så "X" og "X_" er ulike grupper — mens
+        // PÅ_VENT-oppslaget bruker startsWith og ville sett dem som samme. Asymmetrien er
+        // dokumentert i docs/duplikate-saker-digital-soknad.md; den er akseptert fordi den kun
+        // gjelder gamle rader under utrulling. Testen fastholder den faktiske oppførselen, slik at
+        // ingen tror grupperingen er sømløs på tvers av formatene.
+        gammel.gruppePrefiks shouldBe GRUPPE_ID
+        ny.gruppePrefiks shouldBe "$GRUPPE_ID" + "_"
+        (gammel.gruppePrefiks == ny.gruppePrefiks) shouldBe false
     }
 
     @Test
