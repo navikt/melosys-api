@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.ProsessSteg;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
@@ -37,6 +38,13 @@ public class OpprettArkivsak implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
+        // Digital søknad i NY-flyten kan under DB-låsen ha festet seg på en eksisterende sak (MELOSYS-8151).
+        // Den saken har allerede arkivsak, så dette steget skal da hoppes over (ellers ville sjekken under kaste).
+        if (Boolean.TRUE.equals(prosessinstans.getData(ProsessDataKey.DIGITAL_SØKNAD_ATTACHED_EKSISTERENDE, Boolean.class, false))) {
+            log.info("Hopper over opprettelse av arkivsak — digital søknad ble festet på eksisterende sak");
+            return;
+        }
+
         Behandling behandling = prosessinstans.getBehandling();
         Fagsak fagsak = behandling.getFagsak();
         String saksnummer = fagsak.getSaksnummer();

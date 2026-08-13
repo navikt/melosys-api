@@ -83,4 +83,21 @@ internal class OpprettOppgaveTest {
             )
         }
     }
+
+    @Test
+    fun `hopper over oppgave når digital søknad ble festet på eksisterende sak`() {
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = 243L
+                fagsak { medBruker() }
+            }
+            medData(ProsessDataKey.DIGITAL_SØKNAD_ATTACHED_EKSISTERENDE, true)
+        }
+
+        opprettOppgave.utfør(prosessinstans)
+
+        verify(exactly = 0) {
+            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any())
+        }
+    }
 }

@@ -46,6 +46,8 @@ public enum ProsessDataKey {
     MOTTATT_SOKNAD_ID("mottattSoknadID"),
     DIGITAL_SØKNAD_SKJEMA_ID("digitalSøknadSkjemaId"),
     DIGITAL_SØKNADSDATA("digitalSøknadsdata"),
+    DIGITAL_SØKNAD_ATTACHED_EKSISTERENDE("digitalSøknadAttachedEksisterende"),
+    DIGITAL_SØKNAD_RELATERTE_SKJEMA_IDER("digitalSøknadRelaterteSkjemaIder"),
     OPPGAVE_ID("oppgaveID"),
     OPPHOLDSLAND("oppholdsland"),
     ORGNR("orgnr"),

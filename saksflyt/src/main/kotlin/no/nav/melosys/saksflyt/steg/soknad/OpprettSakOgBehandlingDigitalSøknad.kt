@@ -9,7 +9,9 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.repository.DigitalSøknadSakLockRepository
 import no.nav.melosys.saksflyt.steg.StegBehandler
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey.DIGITAL_SØKNADSDATA
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
@@ -22,6 +24,7 @@ import no.nav.melosys.service.sak.SkjemaSakMappingService
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import org.springframework.stereotype.Component
+import java.util.UUID
 
 private val log = KotlinLogging.logger { }
 
@@ -44,7 +47,9 @@ class OpprettSakOgBehandlingDigitalSøknad(
     private val jsonMapper: JsonMapper,
     private val skjemaSakMappingService: SkjemaSakMappingService,
     private val behandlingService: BehandlingService,
-    private val aktørSynkronisering: DigitalSøknadAktørSynkronisering
+    private val aktørSynkronisering: DigitalSøknadAktørSynkronisering,
+    private val sakLockRepository: DigitalSøknadSakLockRepository,
+    private val eksisterendeSakHåndterer: DigitalSøknadEksisterendeSakHåndterer
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD
@@ -59,6 +64,26 @@ class OpprettSakOgBehandlingDigitalSøknad(
         log.info { "Oppretter fagsak og behandling for digital søknad, referanseId=$referanseId, skjemaId=${skjema.id}" }
 
         val aktørId = persondataFasade.hentAktørIdForIdent(fnr)
+
+        // Atomisk sak-resolusjon (MELOSYS-8151): consumeren avgjorde NY-flyt, men en relatert melding
+        // kan ha opprettet saken i mellomtiden. Lås på aktørId og re-sjekk om saken finnes — låsen
+        // holdes til dette stegets transaksjon committer (StegBehandler.utfør = REQUIRES_NEW), så
+        // opprett-eller-fest + mapping skjer serielt per person og kan ikke gi duplikate saker.
+        sakLockRepository.sikreLåsRad(aktørId)
+        sakLockRepository.taRadlås(aktørId)
+
+        val relaterteSkjemaIder = utledRelaterteSkjemaIder(prosessinstans, søknadsdata)
+        val eksisterendeSaksnummer = skjemaSakMappingService.finnGyldigSaksnummerForSkjemaIder(relaterteSkjemaIder)
+        if (eksisterendeSaksnummer != null) {
+            log.info {
+                "Sak $eksisterendeSaksnummer finnes likevel (tapte kappløpet) for skjemaId=${skjema.id} — " +
+                    "fester søknaden på eksisterende sak i stedet for å opprette ny"
+            }
+            prosessinstans.behandling = eksisterendeSakHåndterer.håndter(eksisterendeSaksnummer, søknadsdata)
+            prosessinstans.setData(ProsessDataKey.DIGITAL_SØKNAD_ATTACHED_EKSISTERENDE, true)
+            return
+        }
+
         val behandlingstema = BehandlingstemaUtleder.utled(søknadsdata)
 
         val opprettSakRequest = OpprettSakRequest.Builder()
@@ -92,9 +117,32 @@ class OpprettSakOgBehandlingDigitalSøknad(
 
         lagreSkjemaSakMapping(søknadsdata, fagsak, mottatteOpplysninger)
 
+        // Reserver de øvrige relaterte skjemaId-ene mot den nye saken, slik at en relatert del som
+        // prosesseres senere (også på en annen instans) fester seg på samme sak — uavhengig av
+        // rekkefølge. Spesielt rot-innsendingen, som ikke selv refererer de andre delene (MELOSYS-8151).
+        skjemaSakMappingService.claimRelaterteSkjemaIder(relaterteSkjemaIder - skjema.id, fagsak)
+
         prosessinstans.behandling = behandling
         log.info { "Lagret mottatte opplysninger for digital søknad referanseId=$referanseId" }
     }
+
+    /**
+     * Samler alle skjemaId-er som binder denne innsendingen til en eventuell eksisterende sak:
+     * skjemaet selv, et eventuelt motpart-koblet skjema, og tidligere innsendte versjoner fra den
+     * ferske M2M-DTO-en, union-et med de relaterte id-ene consumeren så (båret videre i prosessdata).
+     * Dekker dermed både DTO-baserte koblinger (kobletSkjema/tidligere versjoner) og koblinger som
+     * kun er kjent på consumer-nivå.
+     */
+    private fun utledRelaterteSkjemaIder(
+        prosessinstans: Prosessinstans,
+        søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
+    ): Set<UUID> =
+        buildSet {
+            add(søknadsdata.skjema.id)
+            søknadsdata.kobletSkjema?.id?.let { add(it) }
+            addAll(søknadsdata.tidligereInnsendteSkjema.map { it.id })
+            addAll(prosessinstans.finnData<List<UUID>>(ProsessDataKey.DIGITAL_SØKNAD_RELATERTE_SKJEMA_IDER) ?: emptyList())
+        }
 
     private fun lagreSkjemaSakMapping(
         søknadsdata: UtsendtArbeidstakerSkjemaM2MDto,
