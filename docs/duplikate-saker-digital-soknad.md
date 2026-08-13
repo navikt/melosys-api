@@ -98,7 +98,7 @@ Da unngår man duplikatsakene. Innebygd i
 Tre lag som utfyller hverandre (defense-in-depth):
 
 1. **Atomisk sak-resolusjon (melosys-api).** Ny cross-instance DB-lås `DIGITAL_SOKNAD_SAK_LOCK(aktoer_id)`
-   (`DigitalSøknadSakLockRepository` + `DigitalSøknadSakLås`, Flyway `V161`). NY-steget
+   (`DigitalSøknadSakLockRepository` + `DigitalSøknadSakLås`, Flyway `V169`). NY-steget
    `OpprettSakOgBehandlingDigitalSøknad` tar låsen på aktørId, re-sjekker
    `finnGyldigSaksnummerForSkjemaIder(...)` under låsen, og fester på eksisterende sak hvis den
    finnes (delt `DigitalSøknadEksisterendeSakHåndterer`) — ellers oppretter sak. Markøren
@@ -136,7 +136,8 @@ Da faller vi tilbake til dagens oppførsel (ingen kryss-serialisering), og lag 1
 
 ### Kompatibilitet og utrulling
 
-- `gruppeId` er nullable. Mangler det, faller melosys-api tilbake til `{skjemaId}` som låsreferanse.
+- `gruppeId` er nullable. Mangler det, er skjemaet sin egen gruppe: låsreferansen blir
+  `{skjemaId}_{skjemaId}`, altså ingen kryss-serialisering med andre deler.
 - Låsreferanse-formatet er bakoverkompatibelt: `LåsReferanseType.SØKNAD` godtar både
   `{gruppeId}_{skjemaId}` og bar `{skjemaId}`. Det er **påkrevd**, ikke pynt:
   `ProsessinstansFerdigListener` parser låsreferansen til alle prosessinstanser som står PÅ_VENT ved
