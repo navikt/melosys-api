@@ -102,7 +102,7 @@ class MottatteOpplysningerService(
         behandlingID,
         originalData,
         soeknad,
-        Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS,
+        Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS,
         VERSJON_SOEKNAD_GRUNNLAG,
         eksternReferanseID
     )
