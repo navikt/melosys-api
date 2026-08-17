@@ -10,6 +10,7 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.service.avgift.aarsavregning.*
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.tilgang.Aksesskontroll
@@ -297,6 +298,57 @@ internal class ÅrsavregningControllerTest {
         mockMvc.perform(
             MockMvcRequestBuilders.get("$BASE_URL/{behandlingID}/aarsavregninger", 1).contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk()).andExpect(content().json(expectedJson, JsonCompareMode.STRICT))
+    }
+
+    @Test
+    fun `hent avregning basert på ID for EØS tjenesteperson mapper lovvalgsperiode uten å kaste feil`() {
+        val lovvalgsperiodeForAvgift = LovvalgsperiodeForAvgift(
+            LocalDate.parse("2023-01-01"),
+            LocalDate.parse("2023-12-31"),
+            Trygdedekninger.FULL_DEKNING,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B,
+            Medlemskapstyper.PLIKTIG,
+            InnvilgelsesResultat.INNVILGET
+        )
+
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns ÅrsavregningModel(
+            årsavregningID = 113,
+            år = 2023,
+            tidligereTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(
+                avgiftspliktigperioder = listOf(lovvalgsperiodeForAvgift),
+                skatteforholdsperioder = emptyList(),
+                innteksperioder = emptyList()
+            ),
+            sisteGjeldendeAvgiftspliktigPerioder = listOf(lovvalgsperiodeForAvgift),
+            tidligereAvgift = emptyList(),
+            endeligAvgift = emptyList(),
+            harSkjoennsfastsattInntektsgrunnlag = false
+        )
+
+        val lovvalgsperiodeJson = """{
+        "id": 0,
+        "fomDato": "2023-01-01",
+        "tomDato": "2023-12-31",
+        "bestemmelse": {"kode": "FO_883_2004_ART11_3B"},
+        "innvilgelsesResultat": "INNVILGET",
+        "trygdedekning": "FULL_DEKNING",
+        "medlemskapstype": "PLIKTIG",
+        "type": "LOVVALGSPERIODE"
+    }"""
+
+        val expectedJson = """{
+  "aarsavregningID": 113,
+  "tidligereTrygdeavgiftsGrunnlagsopplysninger": {
+    "trygdeavgiftsgrunnlag": {
+      "avgiftspliktigperioder": [$lovvalgsperiodeJson]
+    }
+  },
+  "sisteGjeldendeAvgiftspliktigperioder": [$lovvalgsperiodeJson]
+}"""
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("$BASE_URL/{behandlingID}/aarsavregninger", 1).contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk()).andExpect(content().json(expectedJson, JsonCompareMode.LENIENT))
     }
 
     @Test

@@ -314,4 +314,77 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
             innbetaltTrygdeavgift shouldBe null
         }
     }
+
+    @Test
+    fun `tilbakestiller lovvalgsperioder når harInnbetaltTrygdeavgift settes til false for EØS tjenesteperson`() {
+        val fagsak = Fagsak.forTest {
+            saksnummer = "123456"
+            type = Sakstyper.EU_EOS
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            behandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+                status = Behandlingsstatus.AVSLUTTET
+            }
+            behandling {
+                id = 2L
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.OPPRETTET
+            }
+        }
+
+        val tidligereBehandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            vedtakMetadata {
+                vedtaksdato = LocalDate.now().minusDays(30).atStartOfDay().toInstant(java.time.ZoneOffset.UTC)
+            }
+            behandling = fagsak.behandlinger[0]
+
+            lovvalgsperiode("2023-01-01", "2023-12-31")
+        }
+
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 2L
+            behandling = fagsak.behandlinger[1]
+
+            lovvalgsperiode("2023-01-01", "2023-12-31", medTrygdeavgift = false)
+        }
+
+        val årsavregning = Årsavregning.forTest {
+            id = 112
+            aar = 2023
+            this.behandlingsresultat = behandlingsresultat
+            this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
+            this.harInnbetaltTrygdeavgift = true
+        }
+
+        behandlingsresultat.årsavregning = årsavregning
+
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns tidligereBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat
+
+        val behandlingsresultatCaptor = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagreOgFlush(capture(behandlingsresultatCaptor)) } answers {
+            behandlingsresultatCaptor.captured
+        }
+
+        årsavregningService.oppdaterHarInnbetaltTrygdeavgift(2L, false)
+
+        verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(any()) }
+
+        behandlingsresultatCaptor.captured.lovvalgsperioder.shouldNotBeEmpty()
+        behandlingsresultatCaptor.captured.lovvalgsperioder.first().run {
+            getFom() shouldBe LocalDate.of(2023, 1, 1)
+            getTom() shouldBe LocalDate.of(2023, 12, 31)
+            trygdeavgiftsperioder shouldHaveSize 0
+        }
+
+        behandlingsresultatCaptor.captured.årsavregning.shouldNotBeNull().run {
+            harInnbetaltTrygdeavgift shouldBe false
+            tilFaktureringBeloep shouldBe null
+            innbetaltTrygdeavgift shouldBe null
+        }
+    }
 }

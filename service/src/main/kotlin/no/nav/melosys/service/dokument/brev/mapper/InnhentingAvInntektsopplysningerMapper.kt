@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument.brev.mapper
 import jakarta.transaction.Transactional
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.brev.InnhentingAvInntektsopplysningerBrevbestilling
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.InnhentingAvInntektsopplysninger
 import org.springframework.stereotype.Component
@@ -24,10 +23,10 @@ class InnhentingAvInntektsopplysningerMapper(
         val årsavregningsår = behandlingsresultat.hentÅrsavregning().aar
 
         val fristdato = LocalDate.now().plusWeeks(4)
-        val medlemskapsperiode = hentFørsteOgSisteMedlemskapsperiode(behandlingsresultat, årsavregningsår)
+        val avgiftspliktigPeriode = hentFørsteOgSisteAvgiftspliktigPeriode(behandlingsresultat, årsavregningsår)
 
-        val medlemskapsperiodeFom = medlemskapsperiode?.first
-        val medlemskapsperiodeTom = medlemskapsperiode?.second
+        val medlemskapsperiodeFom = avgiftspliktigPeriode?.first
+        val medlemskapsperiodeTom = avgiftspliktigPeriode?.second
 
         return InnhentingAvInntektsopplysninger(
             brevbestilling,
@@ -38,20 +37,21 @@ class InnhentingAvInntektsopplysningerMapper(
         )
     }
 
-    private fun hentFørsteOgSisteMedlemskapsperiode(behandlingsresultat: Behandlingsresultat, årsavregningsår: Int): Pair<LocalDate, LocalDate>? {
-        val relevantePerioder = hentMedlemskapsPerioderForÅrsavregning(behandlingsresultat, årsavregningsår)
+    private fun hentFørsteOgSisteAvgiftspliktigPeriode(behandlingsresultat: Behandlingsresultat, årsavregningsår: Int): Pair<LocalDate, LocalDate>? {
+        val relevantePerioder = hentAvgiftspliktigPerioderForÅrsavregning(behandlingsresultat, årsavregningsår)
 
-        return if (relevantePerioder.isEmpty()) null
-        else relevantePerioder.first().hentFom().tilDatoInnenforÅrsavregningsåret(årsavregningsår) to relevantePerioder.last().hentTom().tilDatoInnenforÅrsavregningsåret(
-            årsavregningsår
-        )
+        if (relevantePerioder.isEmpty()) return null
+
+        val fom = checkNotNull(relevantePerioder.first().getFom()) { "fom er påkrevd for avgiftspliktig periode" }
+        val tom = checkNotNull(relevantePerioder.last().getTom()) { "tom er påkrevd for avgiftspliktig periode" }
+        return fom.tilDatoInnenforÅrsavregningsåret(årsavregningsår) to tom.tilDatoInnenforÅrsavregningsåret(årsavregningsår)
     }
 
-    private fun hentMedlemskapsPerioderForÅrsavregning(behandlingsresultat: Behandlingsresultat, årsavregningsår: Int) =
-        behandlingsresultat.medlemskapsperioder
-            .filter { it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
+    private fun hentAvgiftspliktigPerioderForÅrsavregning(behandlingsresultat: Behandlingsresultat, årsavregningsår: Int) =
+        behandlingsresultat.finnAvgiftspliktigPerioder()
+            .filter { it.erInnvilget() }
             .filter { it.overlapperMedÅr(årsavregningsår) }
-            .sortedBy { it.fom }
+            .sortedBy { it.getFom() }
 
     private fun LocalDate.tilDatoInnenforÅrsavregningsåret(årsavregningsår: Int): LocalDate =
         when {

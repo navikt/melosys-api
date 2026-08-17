@@ -366,7 +366,39 @@ class ÅrsavregningVedtakMapperTest {
         result.pliktigMedlemskap shouldBe true
     }
 
+    @Test
+    fun `mapÅrsavregning skal mappe pliktigMedlemskap fra lovvalgsperiode uten å kaste feil (EØS tjenesteperson)`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
 
+        val grunnlag = lagLovvalgGrunnlag()
+
+        val årsavregningModel = lagÅrsavregningModel(
+            beregnetAvgiftBelop = BigDecimal(2000),
+            tidligereFakturertBeloep = BigDecimal(1000),
+            endeligAvgift = listOf(lagEndeligTrygdeavgiftsperiode()),
+            tidligereAvgift = listOf(lagTidligereTrygdeavgiftsperiode()),
+            tidligereGrunnlag = grunnlag,
+            nyttGrunnlag = grunnlag,
+        )
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.shouldNotBeNull()
+        result.pliktigMedlemskap shouldBe true
+    }
+
+    private fun lagLovvalgGrunnlag(): Trygdeavgiftsgrunnlag {
+        val lovvalgsperiode = no.nav.melosys.service.avgift.aarsavregning.LovvalgsperiodeForAvgift(
+            fom = LocalDate.of(2023, 1, 1),
+            tom = LocalDate.of(2023, 12, 31),
+            dekning = Trygdedekninger.FULL_DEKNING,
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B,
+            medlemskapstyper = Medlemskapstyper.PLIKTIG,
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET,
+        )
+        return Trygdeavgiftsgrunnlag(listOf(lovvalgsperiode), emptyList(), emptyList())
+    }
 
     fun svaralternativpermutations(): Stream<Arguments> = Stream.of(
         Arguments.of(Medlemskapstyper.PLIKTIG, false, SvarAlternativ.IKKE_RELEVANT),
