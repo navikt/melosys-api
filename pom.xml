@@ -37,11 +37,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>21</java.version>
-        <kotlin.version>2.3.21</kotlin.version>
+        <kotlin.version>2.4.10</kotlin.version>
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.337</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.339</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.154-midlertidig</melosys.brev.version>
         <melosys-skjema-api-types.version>2026.07.27-5ebbe9e2e4ae</melosys-skjema-api-types.version>
 
@@ -49,15 +49,15 @@
         <nav.tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</nav.tjenestespesifikasjoner.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
         <doksys.dokumentproduksjon.version>45-26485e1</doksys.dokumentproduksjon.version>
-        <token-support.version>6.0.11</token-support.version>
+        <token-support.version>6.0.12</token-support.version>
 
 
         <!-- Versjoner av eksterne biblioteker -->
-        <archunit.version>1.4.2</archunit.version>
+        <archunit.version>1.5.0</archunit.version>
         <jsoup.version>1.23.1</jsoup.version>
         <apache-httpclients.version>4.5.13</apache-httpclients.version>
         <caffeine.version>3.2.3</caffeine.version>
-        <cxf.version>4.2.2</cxf.version>
+        <cxf.version>4.2.3</cxf.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
         <commons-text.version>1.15.0</commons-text.version>
@@ -116,12 +116,12 @@
 
         <hibernate.version>7.1.16.Final</hibernate.version>
         <antlr4.version>4.13.2</antlr4.version>
-        <springdoc-openapi.version>3.0.3</springdoc-openapi.version>
+        <springdoc-openapi.version>3.1.0</springdoc-openapi.version>
 
         <!-- Transitive avhengigheter -->
         <asm.version>9.10.1</asm.version>
         <joda-time.version>2.14.3</joda-time.version>
-        <woodstox.version>7.2.1</woodstox.version>
+        <woodstox.version>7.2.2</woodstox.version>
         <woodstox.stax2.version>4.3.0</woodstox.stax2.version>
         <xmlsec.version>4.0.4</xmlsec.version>
         <wiremock-standalone.version>3.13.2</wiremock-standalone.version>
