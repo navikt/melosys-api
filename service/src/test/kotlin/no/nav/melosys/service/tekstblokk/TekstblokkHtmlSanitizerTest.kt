@@ -3,6 +3,7 @@ package no.nav.melosys.service.tekstblokk
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
+import org.jsoup.Jsoup
 import org.junit.jupiter.api.Test
 
 class TekstblokkHtmlSanitizerTest {
@@ -70,6 +71,18 @@ class TekstblokkHtmlSanitizerTest {
     }
 
     @Test
+    fun `betingelsesmarkering pakkes ut, men tokenet bestaar`() {
+        val html = """<p><span class="placeholder-betingelse">{#hvis innvilgelse}</span></p>""" +
+            """<p>Vedtaket er innvilget.</p><p><span class="placeholder-betingelse">{/hvis}</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>{#hvis innvilgelse}</p>"
+        resultat shouldContain "<p>{/hvis}</p>"
+        resultat shouldNotContain "span"
+    }
+
+    @Test
     fun `markeringsklasse fjernes, men oevrige klasser paa spanen beholdes`() {
         val html = """<p><span class="placeholder-uerstattet annen-klasse">x</span></p>"""
 
@@ -95,6 +108,142 @@ class TekstblokkHtmlSanitizerTest {
         val resultat = sanitizer.saniter(html)
 
         resultat shouldContain "<p>MEL-12345</p>"
+        resultat shouldNotContain "{"
+        resultat shouldNotContain "span"
+    }
+
+    @Test
+    fun `gjort valg lagres som raatt valgtoken`() {
+        // Et lagret valg ville låst malen til ett alternativ for alle som gjenbruker blokken
+        val html = """<p>Land: <span class="placeholder-valgt" data-valg="Bosnia-Hercegovina|Montenegro|Serbia">Montenegro</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "{velg:Bosnia-Hercegovina|Montenegro|Serbia}"
+        resultat shouldNotContain "span"
+        resultat shouldNotContain "data-valg"
+    }
+
+    @Test
+    fun `uvalgt valgtoken-markering pakkes ut ved lagring`() {
+        val html = """<p>Land: <span class="placeholder-valg">{velg:Norge|Sverige}</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>Land: {velg:Norge|Sverige}</p>"
+        resultat shouldNotContain "span"
+    }
+
+    @Test
+    fun `tomt data-valg skrives ikke om, men markeringen pakkes ut`() {
+        val html = """<p><span class="placeholder-valgt" data-valg="">Montenegro</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>Montenegro</p>"
+        resultat shouldNotContain "{"
+        resultat shouldNotContain "span"
+    }
+
+    @Test
+    fun `data-valg med klammer skrives ikke om`() {
+        // Ville ellers gitt et korrupt token i lagret innhold
+        val html = """<p><span class="placeholder-valgt" data-valg="A}|B">A</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>A</p>"
+        resultat shouldNotContain "{"
+        resultat shouldNotContain "span"
+    }
+
+    @Test
+    fun `data-valg med vinkelparenteser skrives ikke om`() {
+        // Ville ellers gitt et token som blir tolket som markup ved visning
+        val html = """<p><span class="placeholder-valgt" data-valg="&lt;A&gt;|B">A</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>A</p>"
+        resultat shouldNotContain "{"
+        resultat shouldNotContain "data-valg"
+    }
+
+    @Test
+    fun `escapede tegn i data-valg round-tripper til valgtoken som ren tekst`() {
+        val html = """<p><span class="placeholder-valgt" data-valg="A &amp; B|C">A &amp; B</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        // Tokenet skal være tekst, ikke markup, så vi sammenligner på dekodet tekstinnhold
+        Jsoup.parse(resultat!!).text() shouldBe "{velg:A & B|C}"
+        resultat shouldNotContain "data-valg"
+    }
+
+    @Test
+    fun `blanke alternativer filtreres bort slik web gjoer`() {
+        // Web (parseValgAlternativer) godtar dette valget, og da skal det ikke forsvinne ved lagring
+        val html = """<p><span class="placeholder-valgt" data-valg="A||B|">A</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "{velg:A|B}"
+        resultat shouldNotContain "data-valg"
+    }
+
+    @Test
+    fun `duplikater slaas sammen slik web gjoer`() {
+        // Web dedupliserer før tokravet, så data-valg="A|A|B" er gyldig og round-tripper som {velg:A|B}
+        val html = """<p><span class="placeholder-valgt" data-valg="A|A|B">A</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "{velg:A|B}"
+        resultat shouldNotContain "data-valg"
+    }
+
+    @Test
+    fun `data-valg med bare duplikater er ugyldig og pakkes ut som tekst`() {
+        // Web ville deduplisert til ett alternativ og avvist – da må ikke lagringen skrive
+        // et token web etterpå rødmarkerer som ukjent nøkkel
+        val html = """<p><span class="placeholder-valgt" data-valg="A|A">A</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldNotContain "{velg:"
+        resultat shouldContain "A"
+        resultat shouldNotContain "data-valg"
+    }
+
+    @Test
+    fun `valgt placeholder inni bracketed-text gir raatt token og beholder klamme-spanen`() {
+        val html =
+            """<p><span class="bracketed-text"><span class="placeholder-valgt" data-valg="Norge|Sverige">Norge</span></span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain """<span class="bracketed-text">{velg:Norge|Sverige}</span>"""
+        resultat shouldNotContain "data-valg"
+    }
+
+    @Test
+    fun `placeholder-valgt uten data-valg mister klassen, men beholder teksten`() {
+        val html = """<p><span class="placeholder-valgt">Montenegro</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>Montenegro</p>"
+        resultat shouldNotContain "placeholder-valgt"
+        resultat shouldNotContain "{"
+    }
+
+    @Test
+    fun `data-valg med bare ett alternativ skrives ikke om`() {
+        val html = """<p><span class="placeholder-valgt" data-valg="Norge">Norge</span></p>"""
+
+        val resultat = sanitizer.saniter(html)
+
+        resultat shouldContain "<p>Norge</p>"
         resultat shouldNotContain "{"
         resultat shouldNotContain "span"
     }
