@@ -2,13 +2,12 @@ package no.nav.melosys.integrasjon.dokgen.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonInclude
-import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
+import tools.jackson.databind.annotation.JsonSerialize
+import tools.jackson.databind.ext.javatime.ser.LocalDateSerializer
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto
-import tools.jackson.databind.annotation.JsonSerialize
-import tools.jackson.databind.ext.javatime.ser.LocalDateSerializer
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -40,11 +39,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
     val trygdeavtaleLand: List<String>,
     val ukjentSluttdatoMedlemskapsperiode: Boolean,
     val betalingsvalg: Betalingstype,
-    val harMedlemskapsperioderIForegåendeÅr: Boolean,
-    val minstebelopVerdi: BigDecimal? = null,
-    val minstebelopAar: Int? = null,
-    val harMinstebelopPeriode: Boolean = false,
-    val har25ProsentRegelPeriode: Boolean = false
+    val harMedlemskapsperioderIForegåendeÅr: Boolean
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
@@ -69,11 +64,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
         trygdeavtaleLand: List<String>,
         ukjentSluttdatoMedlemskapsperiode: Boolean,
         betalingsvalg: Betalingstype,
-        harMedlemskapsperioderIForegåendeÅr: Boolean,
-        minstebelopVerdi: BigDecimal? = null,
-        minstebelopAar: Int? = null,
-        harMinstebelopPeriode: Boolean = false,
-        har25ProsentRegelPeriode: Boolean = false
+        harMedlemskapsperioderIForegåendeÅr: Boolean
     ) : this(
         brevbestilling,
         behandlingstype,
@@ -97,11 +88,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
         trygdeavtaleLand,
         ukjentSluttdatoMedlemskapsperiode,
         betalingsvalg,
-        harMedlemskapsperioderIForegåendeÅr,
-        minstebelopVerdi,
-        minstebelopAar,
-        harMinstebelopPeriode,
-        har25ProsentRegelPeriode
+        harMedlemskapsperioderIForegåendeÅr
     )
 }
 
@@ -111,9 +98,9 @@ data class AvgiftsperiodePensjonist(
     val avgiftssats: BigDecimal?,
     val avgiftPerMd: BigDecimal,
     val avgiftspliktigInntektPerMd: BigDecimal,
+    val inntektskilde: String,
     val inntektskildetype: String,
     val trygdedekning: String,
     val arbeidsgiveravgiftBetalt: SvarAlternativ,
-    val skatteplikt: Boolean,
-    val beregningsregel: Avgiftsberegningsregel
+    val skatteplikt: Boolean
 )

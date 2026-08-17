@@ -6,7 +6,6 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.Vilkaarsresultat
-import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
@@ -19,7 +18,6 @@ import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.dokgen.dto.*
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
-import no.nav.melosys.service.avgift.MinstebeløpService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklartUkjentSluttdatoMedlemskapsperiodeService
@@ -37,7 +35,6 @@ class InnvilgelseFtrlMapper(
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
-    private val minstebeløpService: MinstebeløpService,
     private val unleash: Unleash
 ) {
 
@@ -54,7 +51,6 @@ class InnvilgelseFtrlMapper(
             mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(behandlingsresultat, brevbestilling.forsendelseMottattNonNull())
         val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.hentBehandling().id)
         val bestemmelse = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().hentBestemmelse()
-        val minstebelop = minstebeløpService.finnMinstebeløp(behandlingsresultat.trygdeavgiftsperioder)
         return InnvilgelseFtrlPensjonistFrivillig(
             brevbestilling = brevbestilling,
             behandlingstype = behandlingsresultat.hentBehandling().type,
@@ -82,11 +78,7 @@ class InnvilgelseFtrlMapper(
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
             ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
             betalingsvalg = hentBetalingsvalg(brevbestilling.behandlingNonNull()),
-            harMedlemskapsperioderIForegåendeÅr = utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat),
-            minstebelopVerdi = minstebelop?.beloep,
-            minstebelopAar = minstebelop?.aar,
-            harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
-            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+            harMedlemskapsperioderIForegåendeÅr = utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat)
         )
     }
 
@@ -96,7 +88,6 @@ class InnvilgelseFtrlMapper(
         val søknadsland = behandling.hentMottatteOpplysninger().mottatteOpplysningerData.soeknadsland
         val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.single()
         val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.hentBehandling().id)
-        val minstebelop = minstebeløpService.finnMinstebeløp(behandlingsresultat.trygdeavgiftsperioder)
 
         return InnvilgelsePensjonistPliktigFtrl(
             brevbestilling = brevbestilling,
@@ -118,11 +109,7 @@ class InnvilgelseFtrlMapper(
             ikkeYrkesaktivOppholdType = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD),
             ikkeYrkesaktivRelasjonType = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON),
             betalingsvalg = hentBetalingsvalg(behandling),
-            harMedlemskapsperioderIForegåendeÅr = utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat),
-            minstebelopVerdi = minstebelop?.beloep,
-            minstebelopAar = minstebelop?.aar,
-            harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
-            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+            harMedlemskapsperioderIForegåendeÅr = utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat)
         )
     }
 
@@ -143,7 +130,6 @@ class InnvilgelseFtrlMapper(
         val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(behandlingsresultat, brevbestilling.forsendelseMottattNonNull())
         val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.hentBehandling().id)
-        val minstebelop = minstebeløpService.finnMinstebeløp(behandlingsresultat.trygdeavgiftsperioder)
 
         return InnvilgelseFtrlYrkesaktivFrivillig(
             brevbestilling = brevbestilling,
@@ -168,11 +154,7 @@ class InnvilgelseFtrlMapper(
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
             betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(behandlingsresultat),
             ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
-            harMedlemskapsperioderIForegåendeÅr = utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat),
-            minstebelopVerdi = minstebelop?.beloep,
-            minstebelopAar = minstebelop?.aar,
-            harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
-            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+            harMedlemskapsperioderIForegåendeÅr = utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat)
         )
     }
 
@@ -245,7 +227,6 @@ class InnvilgelseFtrlMapper(
                 harLavSatsPgaAlderIMinstEnPeriode(fødselsdato, medlemskapsperiode)
             }
         val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.hentBehandling().id)
-        val minstebelop = minstebeløpService.finnMinstebeløp(behandlingsresultat.trygdeavgiftsperioder)
 
         return InnvilgelseYrkesaktivPliktigFtrl(
             brevbestilling = brevbestilling,
@@ -270,11 +251,7 @@ class InnvilgelseFtrlMapper(
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
             betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(behandlingsresultat),
             ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
-            harMedlemskapsperioderIForegåendeÅr = utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat),
-            minstebelopVerdi = minstebelop?.beloep,
-            minstebelopAar = minstebelop?.aar,
-            harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
-            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+            harMedlemskapsperioderIForegåendeÅr = utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat)
         )
     }
 
@@ -320,6 +297,10 @@ class InnvilgelseFtrlMapper(
 
 
     private fun mapAvgiftsPerioder(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodeDto> {
+        if (behandlingsresultat.trygdeavgiftsperioder.all { !it.harAvgift() }) {
+            return emptyList()
+        }
+
         val perioder = if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
             val gruppertePerioder = behandlingsresultat.trygdeavgiftsperioder.groupBy { it.periodeTil.year }
             val valgtÅr = velgRelevantÅr(gruppertePerioder.keys, LocalDate.now().year)
@@ -337,21 +318,22 @@ class InnvilgelseFtrlMapper(
         else -> tilgjengeligeÅr.minOrNull() ?: inneværendeÅr
     }
 
-
-    private fun Trygdeavgiftsperiode.toAvgiftsperiodeDto(): AvgiftsperiodeDto {
-        val inntektsperiode = hentGrunnlagInntekstperiode()
-        return AvgiftsperiodeDto(
-            fom = periodeFra,
-            tom = periodeTil,
-            avgiftssats = trygdesats,
-            avgiftPerMd = trygdeavgiftsbeløpMd.hentVerdi(),
-            inntektskildetype = inntektsperiode.type,
-            avgiftspliktigInntektPerMd = inntektsperiode.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
-            beregningsregel = beregningsregel,
-        )
-    }
+    private fun Trygdeavgiftsperiode.toAvgiftsperiodeDto() = AvgiftsperiodeDto(
+        periodeFra,
+        periodeTil,
+        trygdesats,
+        trygdeavgiftsbeløpMd.hentVerdi(),
+        hentGrunnlagInntekstperiode().type,
+        hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
+    )
 
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodePensjonist> {
+        if (behandlingsresultat.trygdeavgiftsperioder.all {
+                !it.harAvgift()
+            }) {
+            return emptyList()
+        }
+
         val gruppertePerioder = behandlingsresultat.trygdeavgiftsperioder.groupBy { it.periodeTil.year }
         val valgtÅr = velgRelevantÅr(gruppertePerioder.keys, LocalDate.now().year)
 
@@ -362,12 +344,12 @@ class InnvilgelseFtrlMapper(
                     tom = it.periodeTil,
                     avgiftssats = it.trygdesats,
                     avgiftPerMd = it.trygdeavgiftsbeløpMd.hentVerdi(),
+                    inntektskilde = it.hentGrunnlagInntekstperiode().type.beskrivelse,
                     inntektskildetype = it.hentGrunnlagInntekstperiode().type.name,
                     trygdedekning = it.hentGrunnlagMedlemskapsperiode().hentTrygdedekning().beskrivelse,
                     avgiftspliktigInntektPerMd = it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
                     arbeidsgiveravgiftBetalt = SvarAlternativ.IKKE_RELEVANT,
-                    skatteplikt = it.hentGrunnlagSkatteforholdTilNorge().skatteplikttype == Skatteplikttype.SKATTEPLIKTIG,
-                    beregningsregel = it.beregningsregel,
+                    skatteplikt = it.hentGrunnlagSkatteforholdTilNorge().skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
                 )
             }
             ?.sortedByDescending { it.fom }
@@ -441,8 +423,5 @@ class InnvilgelseFtrlMapper(
 
     private fun Medlemskapsperiode.fomErFør(instant: Instant): Boolean =
         this.hentFom().isBefore(LocalDate.ofInstant(instant, ZoneId.systemDefault()))
-
-    private fun Collection<Trygdeavgiftsperiode>.harPeriodeMedBeregningsregel(regel: Avgiftsberegningsregel): Boolean =
-        any { it.beregningsregel == regel }
 }
 
