@@ -384,6 +384,28 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
+    fun opprettSøknadDigital_setterTypeUtsendteArbeidstakereEøs() {
+        val behandling = setupMock(
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER
+        )
+        every { mottatteOpplysningerRepositoryMock.findByEksternReferanseID(any()) } returns emptyList()
+
+        mottatteOpplysningerServiceSpy.opprettSøknadDigital(behandlingID, null, Soeknad(), "ref-123")
+
+        val slot = slot<MottatteOpplysninger>()
+        verify {
+            mottatteOpplysningerRepositoryMock.save(capture(slot))
+        }
+        slot.captured.apply {
+            type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS)
+            this.behandling.shouldBe(behandling)
+            mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
+        }
+    }
+
+    @Test
     fun opprettSøknadFolketrygden_harPeriodeOgLand_setterPeriodeOgLandOgHarRettType() {
         val behandling = setupMock(
             Sakstyper.FTRL,
