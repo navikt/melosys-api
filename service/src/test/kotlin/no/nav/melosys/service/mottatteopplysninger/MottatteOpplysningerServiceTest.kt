@@ -291,6 +291,7 @@ internal class MottatteOpplysningerServiceTest {
         }
         val mottatteOpplysninger = MottatteOpplysninger().apply {
             mottatteOpplysningerData = eksisterende
+            type = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
         }
 
         val nySoeknad = no.nav.melosys.domain.mottatteopplysninger.Soeknad().apply {
@@ -318,6 +319,7 @@ internal class MottatteOpplysningerServiceTest {
         val slot = slot<MottatteOpplysninger>()
         verify { mottatteOpplysningerRepositoryMock.saveAndFlush(capture(slot)) }
         val oppdatert = slot.captured.mottatteOpplysningerData as no.nav.melosys.domain.mottatteopplysninger.Soeknad
+        slot.captured.type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS)
         oppdatert.periode.fom.shouldBe(LocalDate.of(2025, 1, 1))
         oppdatert.soeknadsland.landkoder.shouldBe(listOf("DE"))
         oppdatert.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.shouldBe(listOf("111111111"))
@@ -401,6 +403,7 @@ internal class MottatteOpplysningerServiceTest {
         slot.captured.apply {
             type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS)
             this.behandling.shouldBe(behandling)
+            eksternReferanseID.shouldBe("ref-123")
             mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
         }
     }
