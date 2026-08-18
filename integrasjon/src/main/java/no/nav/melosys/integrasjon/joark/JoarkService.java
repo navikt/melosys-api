@@ -2,29 +2,39 @@ package no.nav.melosys.integrasjon.joark;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.Fagsystem;
+import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiClient;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*;
 import no.nav.melosys.integrasjon.joark.saf.SafClient;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 
 @Service
 @Primary
 public class JoarkService implements JoarkFasade {
+    private static final Logger log = LoggerFactory.getLogger(JoarkService.class);
+
     private final JournalpostapiClient journalpostapiClient;
     private final SafClient safClient;
 
@@ -153,6 +163,94 @@ public class JoarkService implements JoarkFasade {
 
         journalpostapiClient.oppdaterJournalpost(request.build(), journalpostID);
         journalpostapiClient.ferdigstillJournalpost(new FerdigstillJournalpostRequest(), journalpostID);
+    }
+
+    @Override
+    public Map<String, String> oppdaterJournalposterMedNyAktørId(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
+                                                                 String gammelAktørId,
+                                                                 String nyAktørId) {
+        String saksnummer = hentJournalposterTilknyttetSakRequest.saksnummer();
+        List<Journalpost> journalposterSomSkalFlyttes = finnJournalposterMedAktørId(hentJournalposterTilknyttetSakRequest, gammelAktørId);
+
+        log.info("Fant {} journalpost(er) med gammel aktørId som skal flyttes til ny aktørId for sak {}",
+            journalposterSomSkalFlyttes.size(), saksnummer);
+
+        Map<String, String> flyttedeJournalposter = new LinkedHashMap<>();
+        List<String> feilendeJournalpostIder = new ArrayList<>();
+
+        for (Journalpost journalpost : journalposterSomSkalFlyttes) {
+            String gammelJournalpostId = journalpost.getJournalpostId();
+            try {
+                String nyJournalpostId = flyttJournalpostTilNyAktørId(journalpost, nyAktørId, saksnummer);
+                flyttedeJournalposter.put(gammelJournalpostId, nyJournalpostId);
+            } catch (TekniskException | WebClientRequestException e) {
+                feilendeJournalpostIder.add(gammelJournalpostId);
+                log.error("Klarte ikke flytte journalpost {} til ny aktørId for sak {}", gammelJournalpostId, saksnummer, e);
+            }
+        }
+
+        if (!feilendeJournalpostIder.isEmpty()) {
+            log.error("{} av {} journalpost(er) ble ikke flyttet til ny aktørId for sak {}: {}",
+                feilendeJournalpostIder.size(), journalposterSomSkalFlyttes.size(), saksnummer, feilendeJournalpostIder);
+        }
+
+        return flyttedeJournalposter;
+    }
+
+    private List<Journalpost> finnJournalposterMedAktørId(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
+                                                          String aktørId) {
+        return hentJournalposterTilknyttetSak(hentJournalposterTilknyttetSakRequest)
+            .stream()
+            .filter(journalpost -> journalpost.getBrukerIdType() == BrukerIdType.AKTØR_ID)
+            .filter(journalpost -> aktørId.equals(journalpost.getBrukerId()))
+            .toList();
+    }
+
+    /**
+     * Journalposter er uforanderlige i arkivet, så flyttingen skjer i to steg: kilden feilregistreres fra
+     * saken, og deretter knyttes en kopi med ny aktørId til den samme saken.
+     *
+     * @return journalpostId til kopien
+     */
+    private String flyttJournalpostTilNyAktørId(Journalpost journalpost, String nyAktørId, String saksnummer) {
+        String journalpostId = journalpost.getJournalpostId();
+        KnyttTilAnnenSakRequest knyttTilAnnenSakRequest = byggKnyttTilAnnenSakRequest(journalpost, nyAktørId, saksnummer);
+
+        journalpostapiClient.feilregistrerSakstilknytning(journalpostId);
+        try {
+            String nyJournalpostId = journalpostapiClient.knyttTilAnnenSak(journalpostId, knyttTilAnnenSakRequest).getNyJournalpostId();
+            log.info("Journalpost {} kopiert til ny journalpost {} med ny aktørId for sak {}", journalpostId, nyJournalpostId, saksnummer);
+            return nyJournalpostId;
+        } catch (TekniskException | WebClientRequestException e) {
+            opphevFeilregistrering(journalpostId, saksnummer, e);
+            throw e;
+        }
+    }
+
+    /**
+     * Ingen kopi ble opprettet, så kilde-journalposten knyttes tilbake til saken. Feiler også dette står
+     * journalposten løsrevet fra saken og må rettes manuelt.
+     */
+    private void opphevFeilregistrering(String journalpostId, String saksnummer, RuntimeException opprinneligFeil) {
+        try {
+            journalpostapiClient.opphevFeilregistrertSakstilknytning(journalpostId);
+        } catch (RuntimeException opphevFeilet) {
+            opprinneligFeil.addSuppressed(opphevFeilet);
+            log.error("Journalpost {} på sak {} står feilregistrert uten kopi og må rettes manuelt.", journalpostId, saksnummer, opphevFeilet);
+        }
+    }
+
+    private KnyttTilAnnenSakRequest byggKnyttTilAnnenSakRequest(Journalpost journalpost, String nyAktørId, String saksnummer) {
+        return new KnyttTilAnnenSakRequest(
+            KnyttTilAnnenSakRequest.Sakstype.FAGSAK,
+            saksnummer,
+            Fagsystem.MELOSYS.getKode(),
+            journalpost.getTema(),
+            Bruker.builder()
+                .id(nyAktørId)
+                .idType(Bruker.BrukerIdType.AKTOERID)
+                .build()
+        );
     }
 
     private boolean harAvsenderMottakerFelt(JournalpostOppdatering journalpostOppdatering) {

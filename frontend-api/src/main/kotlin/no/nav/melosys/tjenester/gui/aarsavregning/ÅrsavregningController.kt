@@ -2,9 +2,12 @@ package no.nav.melosys.tjenester.gui.aarsavregning
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
+import no.nav.melosys.domain.avgift.Avgiftsdel
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.service.avgift.aarsavregning.*
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
@@ -221,11 +224,15 @@ class ÅrsavregningController(
             TrygdeavgiftsperiodeDto(
                 fom = periode.fom,
                 tom = periode.tom,
+                trygdedekning = periode.hentGrunnlagAvgiftsperiode().hentTrygdedekning(),
                 inntektskildetype = periode.grunnlagInntekstperiode?.type,
                 inntektPerMd = avgiftspliktigMndInntekt,
                 arbeidsgiversavgiftBetales = periode.grunnlagInntekstperiode?.isArbeidsgiversavgiftBetalesTilSkatt,
                 avgiftssats = periode.trygdesats?.toDouble(),
-                avgiftPerMd = periode.trygdeavgiftsbeløpMd.hentVerdi().intValueExact()
+                avgiftPerMd = periode.trygdeavgiftsbeløpMd.hentVerdi().intValueExact(),
+                beregningsregel = periode.beregningsregel,
+                harSammenslåtteInntektskilder = periode.harSammenslåtteInntektskilder,
+                avgiftsdel = periode.avgiftsdel,
             )
         }
 
@@ -341,11 +348,15 @@ data class AvgiftDto(
 data class TrygdeavgiftsperiodeDto(
     val fom: LocalDate,
     val tom: LocalDate,
+    val trygdedekning: Trygdedekninger?,
     val inntektskildetype: Inntektskildetype?,
     val arbeidsgiversavgiftBetales: Boolean?,
     val inntektPerMd: BigDecimal,
     val avgiftssats: Double?,
-    val avgiftPerMd: Int
+    val avgiftPerMd: Int,
+    val beregningsregel: Avgiftsberegningsregel,
+    val harSammenslåtteInntektskilder: Boolean,
+    val avgiftsdel: Avgiftsdel?,
 )
 
 data class AvregningDto(

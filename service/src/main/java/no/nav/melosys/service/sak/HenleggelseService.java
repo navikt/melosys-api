@@ -59,7 +59,7 @@ public class HenleggelseService {
         oppdaterBehandlingsresultat(aktivBehandling.getId(), begrunnelseKode, fritekst);
 
         if (fagsak.erEnesteBehandling(aktivBehandling.getId())) {
-            fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT);
+            fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT, SkjemaSaksstatusSynk.SYNKRONISER);
         } else {
             behandlingService.avsluttAndregangsbehandling(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
         }
@@ -92,8 +92,7 @@ public class HenleggelseService {
         fagsak.getBehandlinger().forEach(behandling -> {
             henleggBehandlingSomBortfalt(behandling);
         });
-        fagsak.setStatus(Saksstatuser.HENLAGT_BORTFALT);
-        fagsakService.lagre(fagsak);
+        fagsakService.oppdaterStatus(fagsak, Saksstatuser.HENLAGT_BORTFALT, SkjemaSaksstatusSynk.SYNKRONISER);
     }
 
     private void oppdaterBehandlingsresultat(long behandlingID, Henleggelsesgrunner begrunnelseKode, String fritekst) {

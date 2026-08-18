@@ -1,6 +1,7 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
 import mu.KotlinLogging
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
@@ -45,6 +46,25 @@ class ÅrsavregningService(
             .mapNotNull { it.årsavregning }
             .filter { aar == null || it.aar == aar }
     }
+
+    /** Sjekker om saken har en aktiv ÅRSAVREGNING-behandling for [år]. Behandlinger uten aarsavregning-rad telles ikke. */
+    @Transactional(readOnly = true)
+    fun harAktivÅrsavregningForÅr(saksnummer: String, år: Int): Boolean =
+        fagsakService.hentFagsak(saksnummer)
+            .hentAktiveÅrsavregninger()
+            .any { hentÅrFraÅrsavregningDefensivt(it) == år }
+
+    /** Returnerer null hvis behandlingen mangler aarsavregning-rad. Ekte feil propageres. */
+    private fun hentÅrFraÅrsavregningDefensivt(behandling: Behandling): Int? =
+        try {
+            behandlingsresultatService.hentBehandlingsresultat(behandling.id).hentÅrsavregning().aar
+        } catch (e: IllegalStateException) {
+            log.warn(e) {
+                "Kunne ikke hente år fra åpen ÅRSAVREGNING-behandling ${behandling.id} " +
+                    "(sak ${behandling.fagsak.saksnummer}) — antar ikke duplikat, ny ÅRSAVREGNING vil opprettes"
+            }
+            null
+        }
 
     @Transactional(readOnly = true)
     fun finnÅrsavregningForBehandling(behandlingID: Long): ÅrsavregningModel? {
@@ -304,26 +324,29 @@ class ÅrsavregningService(
     private fun lagÅrsavregningModelFraÅrsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
         val år = årsavregning.aar
 
-        val vedtaksDato = årsavregning.behandlingsresultat?.vedtakMetadata?.vedtaksdato
+        // Laster med EntityGraph for å inkludere grunnlagListe på trygdeavgiftsperiodene.
+        val behandlingsresultatMedGrunnlag = behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(årsavregning.hentBehandlingsresultat.hentBehandling().id)
+        val saksnummer = behandlingsresultatMedGrunnlag.hentBehandling().fagsak.saksnummer
+        val vedtaksDato = behandlingsresultatMedGrunnlag.vedtakMetadata?.vedtaksdato
 
-        val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.hentBehandlingsresultat.hentBehandling().fagsak.saksnummer, år, vedtaksDato)
+        val sisteÅrsavregning = hentSisteÅrsavregning(saksnummer, år, vedtaksDato)
 
         return ÅrsavregningModel(
             årsavregningID = årsavregning.id,
             år = år,
             tidligereTrygdeavgiftsGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(
                 år,
-                årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer,
+                saksnummer,
                 vedtaksDato
             ),
             sisteGjeldendeAvgiftspliktigPerioder = hentSisteGjeldendeAvgiftspliktigePerioder(
                 år,
-                årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer,
+                saksnummer,
                 vedtaksDato
             ),
-            tidligereAvgift = hentTidligereAvgift(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer, vedtaksDato),
+            tidligereAvgift = hentTidligereAvgift(år, saksnummer, vedtaksDato),
             nyttTrygdeavgiftsGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
-            endeligAvgift = årsavregning.hentBehandlingsresultat.trygdeavgiftsperioder.toList(),
+            endeligAvgift = behandlingsresultatMedGrunnlag.trygdeavgiftsperioder.toList(),
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
             beregnetAvgiftBelop = årsavregning.beregnetAvgiftBelop,
             tilFaktureringBeloep = årsavregning.tilFaktureringBeloep,
@@ -481,8 +504,10 @@ class ÅrsavregningService(
 
         val sisteRelevanteBehandlinger = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år, førVedtaksdato)
 
-        val behandlingsresultat = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
+        val behandlingsresultatId = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift?.id
             ?: return emptyList()
+
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(behandlingsresultatId)
 
         return behandlingsresultat.trygdeavgiftsperioder.filter { it.overlapperMedÅr(år) }
     }

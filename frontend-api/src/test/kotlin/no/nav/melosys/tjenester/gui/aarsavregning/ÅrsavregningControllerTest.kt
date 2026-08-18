@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.aarsavregning
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
@@ -127,7 +128,10 @@ internal class ÅrsavregningControllerTest {
                         avgiftspliktigMndInntekt = Penger(40000.0)
                     },
                     trygdesats = BigDecimal(0.0),
-                    trygdeavgiftsbeløpMd = Penger(0.0)
+                    trygdeavgiftsbeløpMd = Penger(0.0),
+                    grunnlagMedlemskapsperiode = Medlemskapsperiode().apply {
+                        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
+                    }
                 ),
                 Trygdeavgiftsperiode(
                     periodeFra = LocalDate.parse("2023-08-01"),
@@ -140,7 +144,10 @@ internal class ÅrsavregningControllerTest {
                         avgiftspliktigMndInntekt = Penger(15000.0)
                     },
                     trygdesats = BigDecimal(42.2),
-                    trygdeavgiftsbeløpMd = Penger(6330.0)
+                    trygdeavgiftsbeløpMd = Penger(6330.0),
+                    grunnlagMedlemskapsperiode = Medlemskapsperiode().apply {
+                        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                    }
                 )
             ),
             nyttTrygdeavgiftsGrunnlag = null,
@@ -221,20 +228,28 @@ internal class ÅrsavregningControllerTest {
         {
           "fom": "2023-01-01",
           "tom": "2023-07-31",
+          "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_B_PENSJON",
           "inntektskildetype": "ARBEIDSINNTEKT_FRA_NORGE",
           "arbeidsgiversavgiftBetales": true,
           "inntektPerMd": 40000,
           "avgiftssats": 0.0,
-          "avgiftPerMd": 0
+          "avgiftPerMd": 0,
+          "beregningsregel": "ORDINÆR",
+          "harSammenslåtteInntektskilder": false,
+          "avgiftsdel": null
         },
         {
           "fom": "2023-08-01",
           "tom": "2023-12-31",
+          "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER",
           "inntektskildetype": "INNTEKT_FRA_UTLANDET",
           "arbeidsgiversavgiftBetales": false,
           "inntektPerMd": 15000,
           "avgiftssats": 42.2,
-          "avgiftPerMd": 6330
+          "avgiftPerMd": 6330,
+          "beregningsregel": "ORDINÆR",
+          "harSammenslåtteInntektskilder": false,
+          "avgiftsdel": null
         }
       ],
       "totalInntekt": 355000.0,
@@ -332,7 +347,10 @@ internal class ÅrsavregningControllerTest {
                         avgiftspliktigMndInntekt = Penger(85000.0)
                     },
                     trygdesats = BigDecimal(7.9),
-                    trygdeavgiftsbeløpMd = Penger(6715.0)
+                    trygdeavgiftsbeløpMd = Penger(6715.0),
+                    grunnlagMedlemskapsperiode = Medlemskapsperiode().apply {
+                        trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                    }
                 )
             ),
             nyttTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(
@@ -386,7 +404,11 @@ internal class ÅrsavregningControllerTest {
                         fomDato = LocalDate.of(2023, 1, 1)
                         tomDato = LocalDate.of(2023, 12, 31)
                         skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-                    })
+                    },
+                    grunnlagMedlemskapsperiode = Medlemskapsperiode().apply {
+                        trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                    }
+                )
             ),
             tidligereFakturertBeloep = BigDecimal(80580.0),
             beregnetAvgiftBelop = BigDecimal(6708.0),
@@ -441,11 +463,15 @@ internal class ÅrsavregningControllerTest {
                 {
                     "fom": "2023-01-01",
                     "tom": "2023-12-31",
+                    "trygdedekning": "FULL_DEKNING_FTRL",
                     "inntektskildetype": "ARBEIDSINNTEKT",
                     "arbeidsgiversavgiftBetales": false,
                     "inntektPerMd": 85000,
                     "avgiftssats": 7.9,
-                    "avgiftPerMd": 6715
+                    "avgiftPerMd": 6715,
+                    "beregningsregel": "ORDINÆR",
+                    "harSammenslåtteInntektskilder": false,
+                    "avgiftsdel": null
                 }
             ],
             "totalInntekt": 1020000.00,
@@ -492,11 +518,15 @@ internal class ÅrsavregningControllerTest {
                 {
                     "fom": "2023-01-01",
                     "tom": "2023-12-31",
+                    "trygdedekning": "FULL_DEKNING_FTRL",
                     "inntektskildetype": "ARBEIDSINNTEKT",
                     "arbeidsgiversavgiftBetales": false,
                     "inntektPerMd": 7083,
                     "avgiftssats": 7.9,
-                    "avgiftPerMd": 559
+                    "avgiftPerMd": 559,
+                    "beregningsregel": "ORDINÆR",
+                    "harSammenslåtteInntektskilder": false,
+                    "avgiftsdel": null
                 }
             ],
             "totalInntekt": 1020000.00,

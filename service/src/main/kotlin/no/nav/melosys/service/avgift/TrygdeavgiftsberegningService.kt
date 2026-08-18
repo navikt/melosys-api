@@ -46,7 +46,22 @@ class TrygdeavgiftsberegningService(
         skatteforholdsperioder: List<SkatteforholdTilNorge> = emptyList(),
         inntektsperioder: List<Inntektsperiode> = emptyList(),
         dagensDato: LocalDate = LocalDate.now()
-    ): Set<Trygdeavgiftsperiode> {
+    ): Set<Trygdeavgiftsperiode> =
+        beregnOgLagreTrygdeavgiftMedForklaring(behandlingID, skatteforholdsperioder, inntektsperioder, dagensDato)
+            .trygdeavgiftsperioder
+
+    /**
+     * Som [beregnOgLagreTrygdeavgift], men returnerer i tillegg de distinkte
+     * beregningsforklaringene fra beregningsmotoren. Forklaringene persisteres ikke –
+     * de føres kun gjennom på PUT-veien (beregning) til frontend.
+     */
+    @Transactional
+    fun beregnOgLagreTrygdeavgiftMedForklaring(
+        behandlingID: Long,
+        skatteforholdsperioder: List<SkatteforholdTilNorge> = emptyList(),
+        inntektsperioder: List<Inntektsperiode> = emptyList(),
+        dagensDato: LocalDate = LocalDate.now()
+    ): BeregnetTrygdeavgiftMedForklaring {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
             behandlingsresultat,
@@ -56,8 +71,9 @@ class TrygdeavgiftsberegningService(
             dagensDato,
         )
 
-        val nyeTrygdeavgiftsperioder =
-            lagNyeTrygdeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
+        val resultat =
+            lagNyeTrygdeavgiftsperioderMedForklaring(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
+        val nyeTrygdeavgiftsperioder = resultat.trygdeavgiftsperioder.toList()
         trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
 
         behandlingsresultat.årsavregning?.let { årsavregning ->
@@ -72,16 +88,15 @@ class TrygdeavgiftsberegningService(
             }
         }
 
-        return nyeTrygdeavgiftsperioder.toSet()
+        return BeregnetTrygdeavgiftMedForklaring(nyeTrygdeavgiftsperioder.toSet(), resultat.beregningsforklaringer)
     }
 
-    @Suppress("SpringTransactionalMethodCallsInspection") // warning på beregnTrygdeavgift ignoreres pga eksisterende transaksjon
-    private fun lagNyeTrygdeavgiftsperioder(
+    private fun lagNyeTrygdeavgiftsperioderMedForklaring(
         behandlingsresultat: Behandlingsresultat,
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsperioder: List<Inntektsperiode>,
         dagensDato: LocalDate = LocalDate.now()
-    ): List<Trygdeavgiftsperiode> {
+    ): BeregnetTrygdeavgiftMedForklaring {
         if (erPliktigMedlemskapSkattepliktig(
                 skatteforholdsperioder,
                 inntektsperioder,
@@ -89,16 +104,20 @@ class TrygdeavgiftsberegningService(
             )
         ) {
             require(behandlingsresultat.finnAvgiftspliktigPerioder().size == 1 && skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en avgiftspliktig- og skatteforholdsperiode når perioden er pliktig og skattepliktig" }
-            return skattepliktigTrygdeavgiftsperioderAvAvgiftspliktigperioder(
-                behandlingsresultat.finnAvgiftspliktigPerioder().filter { it.erInnvilget() },
-                dagensDato
+            // Skattepliktig-snarveien kaller ikke beregningsmotoren, og har derfor ingen forklaring.
+            return BeregnetTrygdeavgiftMedForklaring(
+                skattepliktigTrygdeavgiftsperioderAvAvgiftspliktigperioder(
+                    behandlingsresultat.finnAvgiftspliktigPerioder().filter { it.erInnvilget() },
+                    dagensDato
+                ).toSet(),
+                emptyList()
             )
         }
 
-        val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
-        sjekkTrygdeavgiftSkalBetalesTilNav(nyeTrygdeavgiftsperioder)
+        val resultat = beregnTrygdeavgiftMedForklaring(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
+        sjekkTrygdeavgiftSkalBetalesTilNav(resultat.trygdeavgiftsperioder.toList())
 
-        return nyeTrygdeavgiftsperioder
+        return resultat
     }
 
     /*
@@ -135,7 +154,16 @@ class TrygdeavgiftsberegningService(
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsperioder: List<Inntektsperiode>,
         dagensDato: LocalDate = LocalDate.now()
-    ): List<Trygdeavgiftsperiode> {
+    ): List<Trygdeavgiftsperiode> =
+        beregnTrygdeavgiftMedForklaring(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
+            .trygdeavgiftsperioder.toList()
+
+    private fun beregnTrygdeavgiftMedForklaring(
+        behandlingsresultat: Behandlingsresultat,
+        skatteforholdsperioder: List<SkatteforholdTilNorge>,
+        inntektsperioder: List<Inntektsperiode>,
+        dagensDato: LocalDate = LocalDate.now()
+    ): BeregnetTrygdeavgiftMedForklaring {
         // UUID brukes til å identifisere periodene som danner grunnlag for trygdeavgiftsberegningen
         val inntektsperioderMedUUID = inntektsperioder.map { UUID.randomUUID() to it }
         val skatteforholdsperioderMedUUID = skatteforholdsperioder.map { UUID.randomUUID() to it }
@@ -155,7 +183,7 @@ class TrygdeavgiftsberegningService(
             )
         )
 
-        return beregnetTrygdeavgiftList.map { beregnetAvgiftPerPeriode ->
+        val trygdeavgiftsperioder = beregnetTrygdeavgiftList.map { beregnetAvgiftPerPeriode ->
             lagTrygdeavgiftsperiode(
                 beregnetAvgiftPerPeriode,
                 skatteforholdsperioderMedUUID,
@@ -164,6 +192,11 @@ class TrygdeavgiftsberegningService(
                 dagensDato
             )
         }
+
+        // Forklaringen persisteres ikke – samler de distinkte forklaringene for PUT-responsen.
+        val beregningsforklaringer = beregnetTrygdeavgiftList.mapNotNull { it.beregningsforklaring }.distinct()
+
+        return BeregnetTrygdeavgiftMedForklaring(trygdeavgiftsperioder.toSet(), beregningsforklaringer)
     }
 
     fun lagTrygdeavgiftsperiode(
