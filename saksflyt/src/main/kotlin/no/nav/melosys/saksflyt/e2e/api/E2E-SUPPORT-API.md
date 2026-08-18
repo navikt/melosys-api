@@ -38,27 +38,76 @@ curl -X POST http://localhost:8080/internal/e2e/caches/clear
 
 ---
 
-### 2. Await Process Instances
+### 2. Process Instance Marker
 
-Waits for all saga process instances to complete, with failure detection.
+Returns a server timestamp to use as the `after` parameter on `/await`. Take it **before** the
+action that starts a process.
+
+**Endpoint:** `GET /internal/e2e/process-instances/marker`
+
+```bash
+curl http://localhost:8080/internal/e2e/process-instances/marker
+# {"marker":"2026-07-31T14:35:19.249748"}
+```
+
+The value is truncated to microseconds to match the precision of the `REGISTRERT_DATO` column
+(Oracle `TIMESTAMP(6)`), so an instance saved just after the marker can never round below it.
+
+---
+
+### 3. Await Process Instances
+
+Waits for saga process instances to complete, with failure detection.
 
 **Endpoint:** `GET /internal/e2e/process-instances/await`
 
 **Parameters:**
-- `timeoutSeconds` (optional, default: 30) - Maximum time to wait
-- `expectedInstances` (optional) - Minimum number of process instances expected. Useful for explicit coordination when you know exactly how many instances will be created.
+- `timeoutSeconds` (optional, default: 30) - Maximum time to wait. Also bounds the server-side wait.
+- `after` (optional) - A marker from `/process-instances/marker`, taken **before** the action.
+  Only instances registered strictly after it count as the caller's own work.
+- `expectedNew` (optional, default: 1 when `after` is given) - How many post-marker instances must
+  exist. `0` means "drain": everything registered after the marker must be finished, but nothing new
+  is required.
+- `expectedInstances` (optional, **legacy**) - Minimum number of instances *in the whole 60-second
+  window*. Note the semantics: instances from a previous test step satisfy it just as well as your
+  own, so it does not coordinate on the action you just triggered. Prefer `after`. Mutually
+  exclusive with `after`.
+
+**Two contracts:**
+
+| | Without `after` (legacy) | With `after` (recommended) |
+|---|---|---|
+| What is waited for | everything registered in the last 60 s | only instances registered after the marker |
+| Can the previous step's work satisfy it? | **yes — this is the race** | no |
+| Initial settling delay | 200 ms (see config below) | skipped when `expectedNew > 0` |
+| Poll cadence | fixed 500 ms | 25 ms, backing off to 500 ms |
 
 **Usage:**
 ```bash
-# Wait up to 30 seconds (default)
+# Legacy: wait up to 30 seconds (default)
 curl http://localhost:8080/internal/e2e/process-instances/await
 
-# Wait up to 60 seconds
-curl http://localhost:8080/internal/e2e/process-instances/await?timeoutSeconds=60
+# Legacy: wait up to 60 seconds
+curl "http://localhost:8080/internal/e2e/process-instances/await?timeoutSeconds=60"
 
-# Wait for at least 2 specific instances to be created and completed
-curl http://localhost:8080/internal/e2e/process-instances/await?expectedInstances=2&timeoutSeconds=60
+# Race-free: marker BEFORE the action, then wait for what the action started
+MARKER=$(curl -s http://localhost:8080/internal/e2e/process-instances/marker | jq -r .marker)
+# ... trigger the action ...
+curl "http://localhost:8080/internal/e2e/process-instances/await?after=$MARKER&expectedNew=1"
+
+# Drain between tests: everything since the marker must be finished, nothing new required
+curl "http://localhost:8080/internal/e2e/process-instances/await?after=$MARKER&expectedNew=0"
 ```
+
+**Known limitations of the marker contract:**
+- Unfinished work registered *before* the marker is not waited for at all.
+- `expectedNew` is a minimum (`>=`). An action that fans out to N instances needs `expectedNew=N`;
+  there is no way to say "and nothing more will arrive".
+- A restarted instance (`ProsessStatus.RESTARTET`) reuses its row, and `REGISTRERT_DATO` is
+  `updatable = false`, so a restart is invisible to the marker and will time out with
+  "only 0 of 1 expected new process instance(s)".
+- The marker excludes the *previous step's* work, not any unrelated instance registered after it.
+  That is exact only because melosys-e2e-tests runs `workers: 1`.
 
 #### Response Scenarios
 
@@ -69,9 +118,11 @@ All process instances completed successfully:
   "status": "COMPLETED",
   "message": "All process instances completed successfully",
   "totalInstances": 10,
+  "newInstances": 1,
   "elapsedSeconds": 5
 }
 ```
+`newInstances` is the number of instances registered after `after`; it is `0` on the legacy contract.
 
 ##### ❌ Failure (HTTP 500)
 One or more process instances failed:
@@ -106,11 +157,35 @@ Timeout reached before completion:
   "activeThreads": 2,
   "queueSize": 5,
   "totalInstances": 20,
+  "newInstances": 0,
   "notFinished": 7,
   "notFinishedIds": ["uuid1", "uuid2", ...],
   "elapsedSeconds": 30
 }
 ```
+With `after`, a timeout caused by too few new instances says so instead:
+`"Timeout after 30s: only 0 of 1 expected new process instance(s) were registered after <marker>"`.
+
+##### 🚫 Bad request (HTTP 400)
+Invalid parameter combinations are rejected rather than silently falling back to the racy path:
+blank `after`, `expectedNew` without `after`, negative `expectedNew`, `after` together with
+`expectedInstances`, a marker carrying a timezone or offset (the container clock is not the
+caller's), a marker in the future, and any `after` that is not the exact format handed out by
+`/process-instances/marker`.
+```json
+{
+  "status": "BAD_REQUEST",
+  "message": "'after' and 'expectedInstances' are mutually exclusive: ..."
+}
+```
+
+---
+
+## Configuration
+
+| Property | Default | Purpose |
+|---|---|---|
+| `melosys.e2e.initial-settling-delay-ms` | `200` | How long `/await` waits before its first look on the legacy contract (and on `expectedNew=0` drains). Setting it to `0` makes the race the marker contract fixes reproducible on demand. |
 
 ---
 
@@ -118,7 +193,7 @@ Timeout reached before completion:
 
 ### Location
 ```
-saksflyt/src/main/kotlin/no/nav/melosys/saksflyt/e2esupport/E2ESupportController.kt
+saksflyt/src/main/kotlin/no/nav/melosys/saksflyt/e2e/api/E2ESupportController.kt
 ```
 
 ### Security
@@ -134,11 +209,25 @@ The endpoint monitors:
 4. **Event History**: `ProsessinstansHendelse` records for failure details
 
 ### Race Condition Protection
-The endpoint includes multiple safeguards to prevent false-positives:
-1. **Initial settling delay** (200ms) - allows database transactions to commit and tasks to be submitted to thread pool
+
+**With a marker (`after`)** — the marker *is* the coordination. Instances registered before the
+caller's action cannot satisfy the wait, and neither can an empty database, so `expectedNew`
+subsumes the safeguards below.
+
+**Without a marker (legacy)** the endpoint falls back to heuristics, and they are heuristics:
+1. **Initial settling delay** (200 ms) - allows database transactions to commit and tasks to be submitted to the thread pool
 2. **Recent instance filtering** - only monitors instances created within the last 60 seconds, ignoring stale test data
 3. **Active instance tracking** - must observe at least one active instance before claiming completion (unless `expectedInstances` is specified)
 4. **Expected count verification** - when `expectedInstances` is specified, ensures at least that many instances were created
+
+Safeguards 1–3 are what the marker replaces: the settling delay was in practice the only thing
+separating the caller's own work from the previous step's, and in a multi-step e2e test the
+60-second window is never empty, so 3 is trivially satisfied.
+
+**Sampling order matters:** `checkProcessStatus` reads the thread pool *before* the database.
+The reverse order can miss work entirely — a task that is running at the database read, then
+registers a child instance and finishes before the thread count is read, yields "nothing pending
+in the database" and "executor idle" at the same time.
 
 ---
 
@@ -240,8 +329,13 @@ curl "http://localhost:8080/internal/e2e/process-instances/await?timeoutSeconds=
 ## Implementation Notes
 
 ### Polling Configuration
-- **Polling interval**: 500ms - balances responsiveness with system load
-- **Initial settling delay**: 200ms - allows transactions to commit before first check
+- **Polling interval, legacy contract**: fixed 500 ms. Deliberately *not* faster: polling the legacy
+  path more often makes its race worse, since it more often samples the short window where the
+  previous step's work looks finished.
+- **Polling interval, marker contract**: 25 ms, doubling up to 500 ms. The marker wait starts before
+  the instance is even registered and usually resolves in tens of milliseconds.
+- **Initial settling delay**: 200 ms, configurable — skipped when `expectedNew > 0`, since demanding
+  new instances subsumes it
 - **Recent instance cutoff**: 60 seconds - only monitors recently created instances
 
 ### Error Message Truncation

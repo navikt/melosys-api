@@ -141,6 +141,40 @@ class E2ESupportControllerAwaitTest {
     }
 
     @Test
+    fun `uten markør - expectedInstances teller HELE 60-sekundersvinduet, ikke nye`() {
+        // Gammel kontrakt, fortsatt i bruk av tests/core/sed-mottak.spec.ts. Kravet er «minst N
+        // instanser i vinduet» — to instanser fra forrige steg oppfyller expectedInstances=2 selv
+        // om kalleren ikke har startet noe. Dokumenterer nettopp hvorfor markøren finnes.
+        girInstanser(
+            ferdigInstans(registrert = LocalDateTime.now().minusSeconds(5)),
+            ferdigInstans(registrert = LocalDateTime.now().minusSeconds(5))
+        )
+
+        val svar = controller.awaitProcessInstances(timeoutSeconds = 1, expectedInstances = 2)
+
+        svar.statusCode shouldBe HttpStatus.OK
+        svar.body!!["status"] shouldBe "COMPLETED"
+    }
+
+    @Test
+    fun `uten markør - expectedInstances som ikke er oppfylt gir timeout`() {
+        girInstanser(ferdigInstans(registrert = LocalDateTime.now().minusSeconds(5)))
+
+        val svar = controller.awaitProcessInstances(timeoutSeconds = 1, expectedInstances = 3)
+
+        svar.statusCode shouldBe HttpStatus.REQUEST_TIMEOUT
+    }
+
+    @Test
+    fun `uten markør - expectedInstances ser bort fra instanser eldre enn vinduet`() {
+        girInstanser(ferdigInstans(registrert = LocalDateTime.now().minusSeconds(120)))
+
+        val svar = controller.awaitProcessInstances(timeoutSeconds = 1, expectedInstances = 1)
+
+        svar.statusCode shouldBe HttpStatus.REQUEST_TIMEOUT
+    }
+
+    @Test
     fun `uten markør - forrige stegs instans fullfører ventingen (bevart gammel oppførsel)`() {
         girInstanser(ferdigInstans(registrert = LocalDateTime.now().minusSeconds(5)))
 
@@ -173,7 +207,31 @@ class E2ESupportControllerAwaitTest {
         val markør = LocalDateTime.now()
         girInstanser(ferdigInstans(registrert = markør))
 
-        ventMedMarkør(markør).statusCode shouldBe HttpStatus.REQUEST_TIMEOUT
+        val svar = ventMedMarkør(markør)
+
+        svar.statusCode shouldBe HttpStatus.REQUEST_TIMEOUT
+        // Ikke bare «ikke ferdig» — den skal ikke telles som ny i det hele tatt.
+        svar.body!!["newInstances"] shouldBe 0
+    }
+
+    @Test
+    fun `markør fra framtiden avvises - kan ikke stamme fra denne serveren`() {
+        avvises(after = LocalDateTime.now().plusMinutes(5).toString()) shouldContain "is in the future"
+    }
+
+    @Test
+    fun `gammel markør er lovlig - tømmingen bruker en markør tatt før hele testen`() {
+        val gammelMarkør = LocalDateTime.now().minusMinutes(10)
+        girInstanser(ferdigInstans(registrert = gammelMarkør.plusMinutes(1)))
+
+        val svar = controller.awaitProcessInstances(
+            timeoutSeconds = 1,
+            expectedInstances = null,
+            after = gammelMarkør.toString(),
+            expectedNew = 0
+        )
+
+        svar.statusCode shouldBe HttpStatus.OK
     }
 
     @Test

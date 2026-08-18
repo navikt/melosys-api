@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 private val log = KotlinLogging.logger { }
 
@@ -73,7 +74,11 @@ class E2ESupportController(
             "before the action can no longer satisfy it."
     )
     fun processInstanceMarker(): ResponseEntity<Map<String, Any>> {
-        val marker = LocalDateTime.now()
+        // Kappes til mikrosekunder fordi `registrert_dato` er Oracle TIMESTAMP(6). På en JVM med
+        // nanosekundsklokke ville en instans lagret rett etter markøren kunne bli lagret som en
+        // verdi som avrundes UNDER markøren, og da ville `isAfter` aldri se den — ventingen ville
+        // gå i timeout på arbeid som faktisk var ferdig.
+        val marker = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
         log.debug { "Handed out prosessinstans marker: $marker" }
         return ResponseEntity.ok(mapOf("marker" to marker.toString()))
     }
@@ -228,6 +233,17 @@ class E2ESupportController(
     }
 
     private fun checkProcessStatus(after: LocalDateTime?): ProcessStatus {
+        // Rekkefølgen er en del av korrektheten: eksekutoren samples FØR databasen.
+        //
+        // Et kjørende steg kan opprette en ny prosessinstans og så bli ferdig. Leses databasen
+        // først, kan et slikt steg rekke å både lagre barnet og avslutte før vi teller tråder —
+        // og da ser vi «ingenting uferdig i basen» + «eksekutoren er tom» samtidig, altså
+        // COMPLETED mens barnet nettopp ble registrert. Samples eksekutoren først, er den
+        // fortsatt opptatt på det tidspunktet, og alt den rakk å produsere er med i den
+        // etterfølgende lesningen.
+        val activeThreads = taskExecutor.activeCount
+        val queueSize = taskExecutor.threadPoolExecutor.queue.size
+
         val allInstances = prosessinstansRepository.findAll().toList()
         val cutoffTime = LocalDateTime.now().minusSeconds(RECENT_INSTANCE_CUTOFF_SECONDS)
 
@@ -248,14 +264,14 @@ class E2ESupportController(
         val active = notFinished.filterNot { it.status == ProsessStatus.FEILET }
 
         return ProcessStatus(
-            activeThreads = taskExecutor.activeCount,
-            queueSize = taskExecutor.threadPoolExecutor.queue.size,
+            activeThreads = activeThreads,
+            queueSize = queueSize,
             allInstances = allInstances,
             recentInstances = recentInstances,
             newInstances = newInstances,
             notFinished = notFinished,
             failed = failed,
-            hasActiveInstances = active.isNotEmpty() || taskExecutor.activeCount > 0 || taskExecutor.threadPoolExecutor.queue.isNotEmpty()
+            hasActiveInstances = active.isNotEmpty() || activeThreads > 0 || queueSize > 0
         )
     }
 
@@ -481,12 +497,41 @@ class E2ESupportController(
                     "'after' and 'expectedInstances' are mutually exclusive: 'expectedInstances' counts everything " +
                         "in the recent window, 'after' counts only instances registered after the marker"
                 }
+                // En markør fra framtiden kan ikke stamme fra /marker på denne serveren, og ville
+                // gjort at ingenting noensinne teller som nytt — altså garantert timeout med en
+                // misvisende melding. Slingringsmonn fordi systemklokka kan justeres bakover.
+                require(marker == null || !marker.isAfter(LocalDateTime.now().plusSeconds(MARKER_FUTURE_TOLERANCE_SECONDS))) {
+                    "'after' is in the future ($marker) — a marker must come from " +
+                        "/internal/e2e/process-instances/marker on this server"
+                }
+
+                advarOmGammelMarkør(marker, expectedNew)
 
                 return AwaitCriteria(
                     after = marker,
                     expectedNew = expectedNew ?: marker?.let { DEFAULT_EXPECTED_NEW },
                     expectedInstances = expectedInstances
                 )
+            }
+
+            /**
+             * En gjenbrukt markør gir tilbake nøyaktig bugen denne kontrakten fjerner: er markøren
+             * eldre enn handlingen kalleren venter på, oppfyller forrige stegs instanser den igjen.
+             *
+             * Det kan ikke avvises, for tømmingen i cleanup-fixturen bruker med vilje en markør som
+             * er eldre enn $RECENT_INSTANCE_CUTOFF_SECONDS s — den tas før testkroppen og brukes etter
+             * den. Men en gammel markør kombinert med `expectedNew > 0` («vent på det handlingen min
+             * startet») er nesten alltid en markør som skulle vært hentet på nytt, så den logges.
+             */
+            private fun advarOmGammelMarkør(marker: LocalDateTime?, expectedNew: Int?) {
+                if (marker == null || (expectedNew ?: DEFAULT_EXPECTED_NEW) == 0) return
+                if (marker.isBefore(LocalDateTime.now().minusSeconds(RECENT_INSTANCE_CUTOFF_SECONDS))) {
+                    log.warn {
+                        "Markøren '$marker' er eldre enn ${RECENT_INSTANCE_CUTOFF_SECONDS}s. Er den gjenbrukt fra et " +
+                            "tidligere steg, kan instanser fra FØR handlingen oppfylle ventingen — hent en ny markør " +
+                            "rett før hver handling. (Gjelder ikke tømming, som bruker expectedNew=0.)"
+                    }
+                }
             }
 
             /**
@@ -580,5 +625,6 @@ class E2ESupportController(
         private const val RECENT_INSTANCE_CUTOFF_SECONDS = 60L
         private const val ERROR_MESSAGE_MAX_LENGTH = 500
         private const val ECHOED_INPUT_MAX_LENGTH = 100
+        private const val MARKER_FUTURE_TOLERANCE_SECONDS = 5L
     }
 }
