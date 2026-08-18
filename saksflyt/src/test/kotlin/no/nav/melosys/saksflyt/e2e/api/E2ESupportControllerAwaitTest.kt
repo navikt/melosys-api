@@ -198,6 +198,17 @@ class E2ESupportControllerAwaitTest {
     }
 
     @Test
+    fun `ugyldig after ekkoes uten kontrolltegn og avkortet`() {
+        // Meldingen både logges og returneres. Et `%0A` i `after` skal ikke kunne legge inn en
+        // egen logglinje, og kallerens input skal ikke kunne blåse opp verken logg eller svar.
+        val melding = avvises(after = "tull\nINFO injisert logglinje ${"x".repeat(200)}")
+
+        melding shouldContain "must be a local date-time"
+        melding.contains('\n') shouldBe false
+        melding shouldContain "... (truncated)"
+    }
+
+    @Test
     fun `after med tidssone avvises - containerklokka er ikke kallerens klokke`() {
         avvises(after = "2026-07-31T14:36:00Z") shouldContain "must be a local date-time"
     }

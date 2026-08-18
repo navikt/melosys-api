@@ -501,10 +501,20 @@ class E2ESupportController(
                 return runCatching { LocalDateTime.parse(trimmed) }.getOrElse {
                     throw IllegalArgumentException(
                         "'after' must be a local date-time exactly as returned by " +
-                            "/internal/e2e/process-instances/marker (e.g. 2026-07-31T14:35:19.249748805), was '$trimmed'"
+                            "/internal/e2e/process-instances/marker (e.g. 2026-07-31T14:35:19.249748805), " +
+                            "was '${trimmed.forEkko()}'"
                     )
                 }
             }
+
+            /**
+             * Ekko av kallerens egen input i en 400-melding. Meldingen både logges og returneres,
+             * så kontrolltegn strippes (et `%0A` i `after` ville ellers splittet logglinjen) og
+             * lengden kappes. Endepunktet er `local-mock`-only, så dette er hygiene, ikke et
+             * sikkerhetstiltak — men en avkortet melding er uansett den lesbare.
+             */
+            private fun String.forEkko(): String = filterNot { it.isISOControl() }
+                .let { if (it.length > ECHOED_INPUT_MAX_LENGTH) "${it.take(ECHOED_INPUT_MAX_LENGTH)}... (truncated)" else it }
         }
     }
 
@@ -569,5 +579,6 @@ class E2ESupportController(
         private const val DEFAULT_EXPECTED_NEW = 1
         private const val RECENT_INSTANCE_CUTOFF_SECONDS = 60L
         private const val ERROR_MESSAGE_MAX_LENGTH = 500
+        private const val ECHOED_INPUT_MAX_LENGTH = 100
     }
 }
