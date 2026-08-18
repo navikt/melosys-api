@@ -87,22 +87,22 @@ class E2ESupportController(
     @Operation(
         summary = "Waits for process instances to complete",
         description = "Without 'after': waits for every instance registered in the last 60 seconds " +
-            "(legacy contract — it cannot tell the caller's own work apart from the previous step's). " +
+            "(legacy contract — it cannot tell the caller's own work apart from the previous step's; " +
+            "only for draining trailing work before an assertion). " +
             "With 'after': waits until at least 'expectedNew' instances registered after the marker " +
             "exist AND all of them are FERDIG. Unfinished work from BEFORE the marker is then not " +
             "waited for; failures are still reported from the whole recent window, so a marker never " +
-            "hides a backend failure. 'after' and 'expectedInstances' are mutually exclusive."
+            "hides a backend failure."
     )
     fun awaitProcessInstances(
         @RequestParam(defaultValue = "30") timeoutSeconds: Long,
-        @RequestParam(required = false) expectedInstances: Int? = null,
         @RequestParam(required = false) after: String? = null,
         @RequestParam(required = false) expectedNew: Int? = null
     ): ResponseEntity<Map<String, Any>> {
         val startTime = Instant.now()
         val timeout = Duration.ofSeconds(timeoutSeconds)
         val criteria = try {
-            AwaitCriteria.of(after, expectedNew, expectedInstances)
+            AwaitCriteria.of(after, expectedNew)
         } catch (e: IllegalArgumentException) {
             log.warn { "Rejected await request: ${e.message}" }
             return buildBadRequestResponse(e.message)
@@ -218,13 +218,9 @@ class E2ESupportController(
     ): String = buildString {
         append("threads=0, queue=0, notFinished=0")
         if (criteria.after != null) {
-            // Only the marker rule was evaluated — expectedInstances cannot be combined with it.
             append(", ${status.newInstances.size} new instance(s) after ${criteria.after} all FERDIG")
             append(" (expectedNew=${criteria.expectedNew})")
             return@buildString
-        }
-        if (criteria.expectedInstances != null) {
-            append(", expected=${criteria.expectedInstances} instances found")
         }
         if (hasSeenActiveInstances) {
             append(", seen active instances")
@@ -468,14 +464,14 @@ class E2ESupportController(
      * many such instances must exist (defaults to 1). `expectedNew=0` means "drain whatever has been
      * registered since the marker" without requiring anything new — used to clean up between tests.
      *
-     * [expectedInstances] belongs to the legacy contract and means "at least N instances in the last
-     * $RECENT_INSTANCE_CUTOFF_SECONDS seconds" — which the previous step's instances satisfy just as
-     * well as the caller's own. Prefer [after].
+     * Without [after] the wait falls back to "everything registered in the last
+     * $RECENT_INSTANCE_CUTOFF_SECONDS seconds is FERDIG", which the previous step's instances satisfy
+     * just as well as the caller's own. That contract is only sound for draining trailing work
+     * (oppgave, brev) before an assertion — never for waiting on a specific action.
      */
     private data class AwaitCriteria(
         val after: LocalDateTime?,
-        val expectedNew: Int?,
-        val expectedInstances: Int?
+        val expectedNew: Int?
     ) {
         /** True when the caller waits for work that may not be registered yet. */
         fun demandsNewInstances(): Boolean = after != null && (expectedNew ?: DEFAULT_EXPECTED_NEW) > 0
@@ -485,7 +481,7 @@ class E2ESupportController(
              * Validates the parameter combination. Every rejection here is a case where the wait would
              * otherwise have looked like it was coordinating, but silently degraded to the racy contract.
              */
-            fun of(after: String?, expectedNew: Int?, expectedInstances: Int?): AwaitCriteria {
+            fun of(after: String?, expectedNew: Int?): AwaitCriteria {
                 val marker = after?.let(::parseMarker)
 
                 require(!(after != null && marker == null)) { "'after' must not be blank" }
@@ -493,10 +489,6 @@ class E2ESupportController(
                     "'expectedNew' requires 'after' — without a marker there is nothing to count new instances from"
                 }
                 require(expectedNew == null || expectedNew >= 0) { "'expectedNew' must not be negative (was $expectedNew)" }
-                require(!(marker != null && expectedInstances != null)) {
-                    "'after' and 'expectedInstances' are mutually exclusive: 'expectedInstances' counts everything " +
-                        "in the recent window, 'after' counts only instances registered after the marker"
-                }
                 // En markør fra framtiden kan ikke stamme fra /marker på denne serveren, og ville
                 // gjort at ingenting noensinne teller som nytt — altså garantert timeout med en
                 // misvisende melding. Slingringsmonn fordi systemklokka kan justeres bakover.
@@ -509,8 +501,7 @@ class E2ESupportController(
 
                 return AwaitCriteria(
                     after = marker,
-                    expectedNew = expectedNew ?: marker?.let { DEFAULT_EXPECTED_NEW },
-                    expectedInstances = expectedInstances
+                    expectedNew = expectedNew ?: marker?.let { DEFAULT_EXPECTED_NEW }
                 )
             }
 
@@ -584,8 +575,7 @@ class E2ESupportController(
          * Without a marker (legacy contract):
          * 1. No active threads or queue items
          * 2. No unfinished instances in the recent window
-         * 3. If expectedInstances is specified, at least that many recent instances
-         * 4. Must have seen active instances OR have recent instances (prevents false-positive from empty DB)
+         * 3. Must have seen active instances OR have recent instances (prevents false-positive from empty DB)
          */
         fun isComplete(hasSeenActiveInstances: Boolean, criteria: AwaitCriteria): Boolean {
             val threadsAndQueueEmpty = activeThreads == 0 && queueSize == 0
@@ -598,9 +588,6 @@ class E2ESupportController(
                 return threadsAndQueueEmpty && expectedNewMet && noUnfinishedInstances
             }
 
-            // If expected count specified, verify we have at least that many recent instances
-            val expectedCountMet = criteria.expectedInstances?.let { recentInstances.size >= it } ?: true
-
             // If there are NO process instances at all (not even old ones), return complete immediately
             // This handles the "fresh start" case where the database is clean
             if (allInstances.isEmpty() && threadsAndQueueEmpty) {
@@ -608,13 +595,10 @@ class E2ESupportController(
             }
 
             // Prevent false-positive: if we've never seen any active work, don't claim completion
-            // UNLESS expectedInstances is specified and met (explicit coordination)
-            // OR we have recent instances (proves work was done even if it completed very quickly)
-            val hasSeenWork = hasSeenActiveInstances ||
-                (criteria.expectedInstances != null && expectedCountMet) ||
-                recentInstances.isNotEmpty()
+            // unless recent instances prove work was done (even if it completed very quickly)
+            val hasSeenWork = hasSeenActiveInstances || recentInstances.isNotEmpty()
 
-            return threadsAndQueueEmpty && noUnfinishedInstances && expectedCountMet && hasSeenWork
+            return threadsAndQueueEmpty && noUnfinishedInstances && hasSeenWork
         }
     }
 

@@ -68,10 +68,11 @@ Waits for saga process instances to complete, with failure detection.
 - `expectedNew` (optional, default: 1 when `after` is given) - How many post-marker instances must
   exist. `0` means "drain": everything registered after the marker must be finished, but nothing new
   is required.
-- `expectedInstances` (optional, **legacy**) - Minimum number of instances *in the whole 60-second
-  window*. Note the semantics: instances from a previous test step satisfy it just as well as your
-  own, so it does not coordinate on the action you just triggered. Prefer `after`. Mutually
-  exclusive with `after`.
+There is no longer an `expectedInstances` parameter. It counted instances in the whole 60-second
+window, which a previous test step satisfies just as well as the caller's own work — so it never
+coordinated on the action you had just triggered. Its last caller (`tests/core/sed-mottak.spec.ts`)
+moved to `after`, and the parameter was removed. A stale caller still sending it gets no error:
+Spring ignores unknown query parameters, so the wait silently degrades to the legacy contract.
 
 **Two contracts:**
 
@@ -168,14 +169,13 @@ With `after`, a timeout caused by too few new instances says so instead:
 
 ##### 🚫 Bad request (HTTP 400)
 Invalid parameter combinations are rejected rather than silently falling back to the racy path:
-blank `after`, `expectedNew` without `after`, negative `expectedNew`, `after` together with
-`expectedInstances`, a marker carrying a timezone or offset (the container clock is not the
-caller's), a marker in the future, and any `after` that is not the exact format handed out by
-`/process-instances/marker`.
+blank `after`, `expectedNew` without `after`, negative `expectedNew`, a marker carrying a timezone
+or offset (the container clock is not the caller's), a marker in the future, and any `after` that is
+not the exact format handed out by `/process-instances/marker`.
 ```json
 {
   "status": "BAD_REQUEST",
-  "message": "'after' and 'expectedInstances' are mutually exclusive: ..."
+  "message": "'expectedNew' requires 'after' — without a marker there is nothing to count new instances from"
 }
 ```
 
@@ -217,12 +217,16 @@ subsumes the safeguards below.
 **Without a marker (legacy)** the endpoint falls back to heuristics, and they are heuristics:
 1. **Initial settling delay** (200 ms) - allows database transactions to commit and tasks to be submitted to the thread pool
 2. **Recent instance filtering** - only monitors instances created within the last 60 seconds, ignoring stale test data
-3. **Active instance tracking** - must observe at least one active instance before claiming completion (unless `expectedInstances` is specified)
-4. **Expected count verification** - when `expectedInstances` is specified, ensures at least that many instances were created
+3. **Active instance tracking** - must observe at least one active instance, or at least one recent
+   instance, before claiming completion
 
-Safeguards 1–3 are what the marker replaces: the settling delay was in practice the only thing
+All three are what the marker replaces: the settling delay was in practice the only thing
 separating the caller's own work from the previous step's, and in a multi-step e2e test the
 60-second window is never empty, so 3 is trivially satisfied.
+
+The legacy contract is still sound for one job — draining trailing work (oppgave, brev) before an
+assertion, where there is no single action to take a marker around. It must not be used to wait on
+a specific action.
 
 **Sampling order matters:** `checkProcessStatus` reads the thread pool *before* the database.
 The reverse order can miss work entirely — a task that is running at the database read, then

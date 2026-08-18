@@ -88,7 +88,6 @@ class E2ESupportControllerAwaitTest {
 
         val svar = controller.awaitProcessInstances(
             timeoutSeconds = 1,
-            expectedInstances = null,
             after = markør.toString(),
             expectedNew = 2
         )
@@ -116,7 +115,6 @@ class E2ESupportControllerAwaitTest {
 
         val svar = controller.awaitProcessInstances(
             timeoutSeconds = 1,
-            expectedInstances = null,
             after = markør.toString(),
             expectedNew = 0
         )
@@ -132,7 +130,6 @@ class E2ESupportControllerAwaitTest {
 
         val svar = controller.awaitProcessInstances(
             timeoutSeconds = 1,
-            expectedInstances = null,
             after = markør.toString(),
             expectedNew = 0
         )
@@ -141,35 +138,12 @@ class E2ESupportControllerAwaitTest {
     }
 
     @Test
-    fun `uten markør - expectedInstances teller HELE 60-sekundersvinduet, ikke nye`() {
-        // Gammel kontrakt, fortsatt i bruk av tests/core/sed-mottak.spec.ts. Kravet er «minst N
-        // instanser i vinduet» — to instanser fra forrige steg oppfyller expectedInstances=2 selv
-        // om kalleren ikke har startet noe. Dokumenterer nettopp hvorfor markøren finnes.
-        girInstanser(
-            ferdigInstans(registrert = LocalDateTime.now().minusSeconds(5)),
-            ferdigInstans(registrert = LocalDateTime.now().minusSeconds(5))
-        )
-
-        val svar = controller.awaitProcessInstances(timeoutSeconds = 1, expectedInstances = 2)
-
-        svar.statusCode shouldBe HttpStatus.OK
-        svar.body!!["status"] shouldBe "COMPLETED"
-    }
-
-    @Test
-    fun `uten markør - expectedInstances som ikke er oppfylt gir timeout`() {
-        girInstanser(ferdigInstans(registrert = LocalDateTime.now().minusSeconds(5)))
-
-        val svar = controller.awaitProcessInstances(timeoutSeconds = 1, expectedInstances = 3)
-
-        svar.statusCode shouldBe HttpStatus.REQUEST_TIMEOUT
-    }
-
-    @Test
-    fun `uten markør - expectedInstances ser bort fra instanser eldre enn vinduet`() {
+    fun `uten markør - instanser eldre enn vinduet teller ikke som arbeid`() {
+        // Bare gamle instanser (utenfor 60-sekundersvinduet) og ingen aktivitet: da har
+        // serveren ikke sett noe arbeid, og skal ikke påstå at kallerens venting er oppfylt.
         girInstanser(ferdigInstans(registrert = LocalDateTime.now().minusSeconds(120)))
 
-        val svar = controller.awaitProcessInstances(timeoutSeconds = 1, expectedInstances = 1)
+        val svar = controller.awaitProcessInstances(timeoutSeconds = 1)
 
         svar.statusCode shouldBe HttpStatus.REQUEST_TIMEOUT
     }
@@ -226,7 +200,6 @@ class E2ESupportControllerAwaitTest {
 
         val svar = controller.awaitProcessInstances(
             timeoutSeconds = 1,
-            expectedInstances = null,
             after = gammelMarkør.toString(),
             expectedNew = 0
         )
@@ -281,15 +254,9 @@ class E2ESupportControllerAwaitTest {
         avvises(after = LocalDateTime.now().toString(), expectedNew = -1) shouldContain "must not be negative"
     }
 
-    @Test
-    fun `after kombinert med expectedInstances avvises - de teller forskjellige ting`() {
-        avvises(after = LocalDateTime.now().toString(), expectedInstances = 3) shouldContain "mutually exclusive"
-    }
-
-    private fun avvises(after: String? = null, expectedNew: Int? = null, expectedInstances: Int? = null): String {
+    private fun avvises(after: String? = null, expectedNew: Int? = null): String {
         val svar = controller.awaitProcessInstances(
             timeoutSeconds = 1,
-            expectedInstances = expectedInstances,
             after = after,
             expectedNew = expectedNew
         )
@@ -300,7 +267,6 @@ class E2ESupportControllerAwaitTest {
     private fun ventMedMarkør(markør: LocalDateTime) =
         controller.awaitProcessInstances(
             timeoutSeconds = 1,
-            expectedInstances = null,
             after = markør.toString(),
             expectedNew = null
         )
