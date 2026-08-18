@@ -125,10 +125,17 @@ curl "http://localhost:8080/internal/e2e/process-instances/await?after=$MARKER&e
   An instance that never reaches `FERDIG` therefore blocks the drain for the rest of the test
   instead of ageing out of the window. That is deliberate — ageing out is how a stuck process used
   to pass unnoticed — but it means a long test with a genuinely stuck process now fails in teardown.
-- The marker is a `LocalDateTime` in the **server's** zone. The container runs UTC, so that is safe
-  in normal use, but an api started directly on a developer machine (`mvn spring-boot:run`) runs in
-  Europe/Oslo — and during the autumn DST fallback one hour of markers compares wrong and every
-  wait times out. Run the container, or don't debug e2e waits between 02:00 and 03:00 that night.
+- The marker is a `LocalDateTime` in the **JVM's own zone**. That is normally harmless — the marker
+  and `REGISTRERT_DATO` come from the same JVM — except during the autumn DST fallback, where local
+  time steps backwards from 02:59 to 02:00. An instance registered *after* the marker then compares
+  as *before* it, and every wait in that hour times out.
+  Whether that hour is live depends on the zone, and the answer is not the obvious one: the
+  Dockerfile sets `-Duser.timezone=Europe/Oslo`, but melosys-docker-compose overwrites the whole
+  variable (`JAVA_TOOL_OPTIONS: ${JACOCO_AGENT_OPTS:-}`, docker-compose.yml), so the local stack
+  actually runs UTC and is safe. Verified 2026-08-18: host 21:06 CEST, marker `19:06`.
+  An api started directly on a developer machine (`mvn spring-boot:run`) runs Europe/Oslo and is
+  exposed. Don't rely on the compose override staying in place — if a wait times out inexplicably
+  on the night of the change, this is why.
 
 #### Response Scenarios
 
