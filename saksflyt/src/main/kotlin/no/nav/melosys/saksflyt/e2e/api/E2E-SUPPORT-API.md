@@ -63,6 +63,9 @@ Waits for saga process instances to complete, with failure detection.
 
 **Parameters:**
 - `timeoutSeconds` (optional, default: 30) - Maximum time to wait. Also bounds the server-side wait.
+  Must be between 1 and 300; anything else is rejected with 400 rather than producing a nonsense
+  wait. Note that Playwright's own test timeout still applies on top: a call asking for 60 s inside
+  a test with the default 60 s budget gets killed before the server can report *why* it waited.
 - `after` (optional) - A marker from `/process-instances/marker`, taken **before** the action.
   Only instances registered strictly after it count as the caller's own work.
 - `expectedNew` (optional, default: 1 when `after` is given) - How many post-marker instances must
@@ -71,8 +74,9 @@ Waits for saga process instances to complete, with failure detection.
 There is no longer an `expectedInstances` parameter. It counted instances in the whole 60-second
 window, which a previous test step satisfies just as well as the caller's own work — so it never
 coordinated on the action you had just triggered. Its last caller (`tests/core/sed-mottak.spec.ts`)
-moved to `after`, and the parameter was removed. A stale caller still sending it gets no error:
-Spring ignores unknown query parameters, so the wait silently degrades to the legacy contract.
+moved to `after`, and the parameter was removed. A stale caller still sending it is **rejected with
+400** — the parameter is still declared for exactly that purpose, because Spring ignores unknown
+query parameters and the wait would otherwise degrade to the legacy contract without a sound.
 
 **Two contracts:**
 
@@ -109,6 +113,22 @@ curl "http://localhost:8080/internal/e2e/process-instances/await?after=$MARKER&e
   "only 0 of 1 expected new process instance(s)".
 - The marker excludes the *previous step's* work, not any unrelated instance registered after it.
   That is exact only because melosys-e2e-tests runs `workers: 1`.
+- **A reused marker is not rejected, only warned about.** A marker older than 60 s combined with
+  `expectedNew > 0` usually means it was hoisted out of a loop or reused for a second action — and
+  then instances from *before* the action satisfy the wait, which is the original race restored.
+  It cannot be a hard 400, because a slow action (a full UI flow) legitimately leaves the marker
+  more than 60 s old by the time `/await` is called. The response therefore carries a `warning`
+  field in addition to the server log, so it shows up in the test output where the author can see
+  it. Drains (`expectedNew=0`) never warn — their marker is old by design.
+- **The 60-second window does not apply in marker mode.** Legacy waits only on instances from the
+  last 60 s; with a marker, everything after the marker is watched no matter how old the test gets.
+  An instance that never reaches `FERDIG` therefore blocks the drain for the rest of the test
+  instead of ageing out of the window. That is deliberate — ageing out is how a stuck process used
+  to pass unnoticed — but it means a long test with a genuinely stuck process now fails in teardown.
+- The marker is a `LocalDateTime` in the **server's** zone. The container runs UTC, so that is safe
+  in normal use, but an api started directly on a developer machine (`mvn spring-boot:run`) runs in
+  Europe/Oslo — and during the autumn DST fallback one hour of markers compares wrong and every
+  wait times out. Run the container, or don't debug e2e waits between 02:00 and 03:00 that night.
 
 #### Response Scenarios
 
@@ -124,6 +144,10 @@ All process instances completed successfully:
 }
 ```
 `newInstances` is the number of instances registered after `after`; it is `0` on the legacy contract.
+
+A `warning` field is added (on both `COMPLETED` and `TIMEOUT`) when the marker was more than 60 s
+old and `expectedNew > 0` — see "reused marker" above. Callers should surface it; the e2e helper
+prints it.
 
 ##### ❌ Failure (HTTP 500)
 One or more process instances failed:

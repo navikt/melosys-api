@@ -11,6 +11,7 @@ import no.nav.melosys.saksflytapi.domain.forTest
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import java.time.LocalDateTime
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -254,11 +255,82 @@ class E2ESupportControllerAwaitTest {
         avvises(after = LocalDateTime.now().toString(), expectedNew = -1) shouldContain "must not be negative"
     }
 
-    private fun avvises(after: String? = null, expectedNew: Int? = null): String {
+    @Test
+    fun `expectedInstances avvises i stedet for å bli ignorert av Spring`() {
+        // Parameteren er fjernet. Ignoreres den, faller kalleren stille tilbake til legacy-kontrakten
+        // — nøyaktig den stille degraderingen resten av endepunktet avviser.
+        avvises(expectedInstances = 2) shouldContain "'expectedInstances' is gone"
+    }
+
+    @Test
+    fun `timeoutSeconds utenfor intervallet avvises`() {
+        avvises(timeoutSeconds = 0) shouldContain "'timeoutSeconds' must be between"
+        avvises(timeoutSeconds = -5) shouldContain "'timeoutSeconds' must be between"
+        avvises(timeoutSeconds = 3600) shouldContain "'timeoutSeconds' must be between"
+    }
+
+    @Test
+    fun `utypet query-parameter gir 400, ikke 500`() {
+        val svar = controller.håndterTypefeil(
+            MethodArgumentTypeMismatchException("abc", Long::class.java, "timeoutSeconds", mockk(), null)
+        )
+
+        svar.statusCode shouldBe HttpStatus.BAD_REQUEST
+        svar.body!!["message"].toString() shouldContain "timeoutSeconds"
+    }
+
+    @Test
+    fun `gammel markør med expectedNew over 0 gir advarsel i svaret, ikke bare i serverloggen`() {
+        // En gjenbrukt markør kan ikke avvises (en treg handling gir legitimt gammel markør), men
+        // serverloggen er usynlig i CI. Advarselen må følge svaret for å nå testforfatteren.
+        val gammelMarkør = LocalDateTime.now().minusMinutes(10)
+        girInstanser(ferdigInstans(registrert = gammelMarkør.plusMinutes(1)))
+
         val svar = controller.awaitProcessInstances(
             timeoutSeconds = 1,
+            after = gammelMarkør.toString(),
+            expectedNew = 1
+        )
+
+        svar.statusCode shouldBe HttpStatus.OK
+        svar.body!!["warning"].toString() shouldContain "hent en ny markør"
+    }
+
+    @Test
+    fun `tømming med gammel markør advarer ikke - den er per design gammel`() {
+        val gammelMarkør = LocalDateTime.now().minusMinutes(10)
+        girInstanser(ferdigInstans(registrert = gammelMarkør.plusMinutes(1)))
+
+        val svar = controller.awaitProcessInstances(
+            timeoutSeconds = 1,
+            after = gammelMarkør.toString(),
+            expectedNew = 0
+        )
+
+        svar.body!!.containsKey("warning") shouldBe false
+    }
+
+    @Test
+    fun `fersk markør advarer ikke`() {
+        val markør = LocalDateTime.now()
+        girInstanser(ferdigInstans(registrert = markør.plusSeconds(1)))
+
+        val svar = ventMedMarkør(markør)
+
+        svar.body!!.containsKey("warning") shouldBe false
+    }
+
+    private fun avvises(
+        after: String? = null,
+        expectedNew: Int? = null,
+        expectedInstances: Int? = null,
+        timeoutSeconds: Long = 1
+    ): String {
+        val svar = controller.awaitProcessInstances(
+            timeoutSeconds = timeoutSeconds,
             after = after,
-            expectedNew = expectedNew
+            expectedNew = expectedNew,
+            expectedInstances = expectedInstances
         )
         svar.statusCode shouldBe HttpStatus.BAD_REQUEST
         return svar.body!!["message"].toString()

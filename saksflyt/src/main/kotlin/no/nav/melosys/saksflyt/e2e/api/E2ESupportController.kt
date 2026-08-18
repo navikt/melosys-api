@@ -17,11 +17,13 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
@@ -97,11 +99,24 @@ class E2ESupportController(
     fun awaitProcessInstances(
         @RequestParam(defaultValue = "30") timeoutSeconds: Long,
         @RequestParam(required = false) after: String? = null,
-        @RequestParam(required = false) expectedNew: Int? = null
+        @RequestParam(required = false) expectedNew: Int? = null,
+        /**
+         * Fjernet parameter. Tas fortsatt imot for å kunne avvises: Spring ignorerer ukjente
+         * query-parametre, så en utdatert kaller ville ellers falt stille tilbake til
+         * legacy-kontrakten — den stille degraderingen resten av endepunktet nå 400-er på.
+         */
+        @RequestParam(required = false) expectedInstances: Int? = null
     ): ResponseEntity<Map<String, Any>> {
         val startTime = Instant.now()
         val timeout = Duration.ofSeconds(timeoutSeconds)
         val criteria = try {
+            require(expectedInstances == null) {
+                "'expectedInstances' is gone — use 'after' (a marker from " +
+                    "/internal/e2e/process-instances/marker) with 'expectedNew'"
+            }
+            require(timeoutSeconds in 1..MAX_TIMEOUT_SECONDS) {
+                "'timeoutSeconds' must be between 1 and $MAX_TIMEOUT_SECONDS (was $timeoutSeconds)"
+            }
             AwaitCriteria.of(after, expectedNew)
         } catch (e: IllegalArgumentException) {
             log.warn { "Rejected await request: ${e.message}" }
@@ -200,7 +215,7 @@ class E2ESupportController(
 
                 status.isComplete(hasSeenActiveInstances, criteria) -> {
                     log.info { "Completion criteria met: ${buildCompletionReason(status, hasSeenActiveInstances, criteria)}" }
-                    return buildCompletedResponse(startTime, status)
+                    return buildCompletedResponse(startTime, status, criteria)
                 }
             }
 
@@ -237,8 +252,14 @@ class E2ESupportController(
         // COMPLETED mens barnet nettopp ble registrert. Samples eksekutoren først, er den
         // fortsatt opptatt på det tidspunktet, og alt den rakk å produsere er med i den
         // etterfølgende lesningen.
+        // Rekkefølgen internt i eksekutoren teller også: køen leses FØR aktive tråder. En task som
+        // er på vei fra kø til worker er usynlig i det motsatte tilfellet — activeCount=0 leses mens
+        // tasken ennå står i køen, worker plukker den, og queue.size=0 leses etterpå: begge null mens
+        // tasken kjører. Leses køen først, er en slik task alltid talt av minst én av lesningene.
+        // Køen leses en gang til etterpå, så en task som ankommer under samplingen heller ikke tapes.
+        val queueSizeBeforeThreads = taskExecutor.threadPoolExecutor.queue.size
         val activeThreads = taskExecutor.activeCount
-        val queueSize = taskExecutor.threadPoolExecutor.queue.size
+        val queueSize = maxOf(queueSizeBeforeThreads, taskExecutor.threadPoolExecutor.queue.size)
 
         val allInstances = prosessinstansRepository.findAll().toList()
         val cutoffTime = LocalDateTime.now().minusSeconds(RECENT_INSTANCE_CUTOFF_SECONDS)
@@ -312,7 +333,8 @@ class E2ESupportController(
 
     private fun buildCompletedResponse(
         startTime: Instant,
-        status: ProcessStatus
+        status: ProcessStatus,
+        criteria: AwaitCriteria
     ): ResponseEntity<Map<String, Any>> {
         val elapsed = Duration.between(startTime, Instant.now())
         log.info { "All prosessinstanser completed successfully in ${elapsed.seconds}s" }
@@ -323,6 +345,7 @@ class E2ESupportController(
             put("totalInstances", status.allInstances.size)
             put("newInstances", status.newInstances.size)
             put("elapsedSeconds", elapsed.seconds)
+            criteria.advarsel?.let { put("warning", it) }
         })
     }
 
@@ -340,8 +363,9 @@ class E2ESupportController(
                 "new=${status.newInstances.size} ($criteria)"
         }
 
-        val message = if (criteria.after != null && status.newInstances.size < criteria.expectedNew!!) {
-            "Timeout after ${timeoutSeconds}s: only ${status.newInstances.size} of ${criteria.expectedNew} " +
+        val expectedNew = criteria.expectedNew ?: DEFAULT_EXPECTED_NEW
+        val message = if (criteria.after != null && status.newInstances.size < expectedNew) {
+            "Timeout after ${timeoutSeconds}s: only ${status.newInstances.size} of $expectedNew " +
                 "expected new process instance(s) were registered after ${criteria.after}"
         } else {
             "Timeout after ${timeoutSeconds}s waiting for process instances to complete"
@@ -357,7 +381,18 @@ class E2ESupportController(
             put("notFinished", status.notFinished.size)
             put("notFinishedIds", status.notFinished.map { it.id.toString() })
             put("elapsedSeconds", Duration.between(startTime, Instant.now()).seconds)
+            criteria.advarsel?.let { put("warning", it) }
         })
+    }
+
+    /**
+     * Et utypet query-parameter (`timeoutSeconds=abc`) gir ellers 500 fra Springs konvertering.
+     * Resten av endepunktet svarer 400 på feil input, og en 500 leses som «serveren er nede».
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException::class)
+    fun håndterTypefeil(e: MethodArgumentTypeMismatchException): ResponseEntity<Map<String, Any>> {
+        log.warn { "Rejected request: ${e.name}='${e.value}' could not be converted" }
+        return buildBadRequestResponse("Query parameter '${e.name}' has an invalid value: '${e.value}'")
     }
 
     private fun buildBadRequestResponse(message: String?): ResponseEntity<Map<String, Any>> =
@@ -471,7 +506,9 @@ class E2ESupportController(
      */
     private data class AwaitCriteria(
         val after: LocalDateTime?,
-        val expectedNew: Int?
+        val expectedNew: Int?,
+        /** Se [gammelMarkørAdvarsel]. Følger med i svaret, ikke bare i serverloggen. */
+        val advarsel: String? = null
     ) {
         /** True when the caller waits for work that may not be registered yet. */
         fun demandsNewInstances(): Boolean = after != null && (expectedNew ?: DEFAULT_EXPECTED_NEW) > 0
@@ -497,11 +534,10 @@ class E2ESupportController(
                         "/internal/e2e/process-instances/marker on this server"
                 }
 
-                advarOmGammelMarkør(marker, expectedNew)
-
                 return AwaitCriteria(
                     after = marker,
-                    expectedNew = expectedNew ?: marker?.let { DEFAULT_EXPECTED_NEW }
+                    expectedNew = expectedNew ?: marker?.let { DEFAULT_EXPECTED_NEW },
+                    advarsel = gammelMarkørAdvarsel(marker, expectedNew)?.also { log.warn { it } }
                 )
             }
 
@@ -511,18 +547,17 @@ class E2ESupportController(
              *
              * Det kan ikke avvises, for tømmingen i cleanup-fixturen bruker med vilje en markør som
              * er eldre enn $RECENT_INSTANCE_CUTOFF_SECONDS s — den tas før testkroppen og brukes etter
-             * den. Men en gammel markør kombinert med `expectedNew > 0` («vent på det handlingen min
-             * startet») er nesten alltid en markør som skulle vært hentet på nytt, så den logges.
+             * den. Handlingen kalleren venter på kan dessuten selv ta lengre tid enn det (en full
+             * UI-flyt gjør ofte det), så en aldersgrense ville avvist legitime kall. Advarselen
+             * returneres derfor i svaret i tillegg til å logges: serverloggen er usynlig i CI, mens
+             * svaret havner i testutskriften der forfatteren av det gjenbrukte markørkallet ser den.
              */
-            private fun advarOmGammelMarkør(marker: LocalDateTime?, expectedNew: Int?) {
-                if (marker == null || (expectedNew ?: DEFAULT_EXPECTED_NEW) == 0) return
-                if (marker.isBefore(LocalDateTime.now().minusSeconds(RECENT_INSTANCE_CUTOFF_SECONDS))) {
-                    log.warn {
-                        "Markøren '$marker' er eldre enn ${RECENT_INSTANCE_CUTOFF_SECONDS}s. Er den gjenbrukt fra et " +
-                            "tidligere steg, kan instanser fra FØR handlingen oppfylle ventingen — hent en ny markør " +
-                            "rett før hver handling. (Gjelder ikke tømming, som bruker expectedNew=0.)"
-                    }
-                }
+            private fun gammelMarkørAdvarsel(marker: LocalDateTime?, expectedNew: Int?): String? {
+                if (marker == null || (expectedNew ?: DEFAULT_EXPECTED_NEW) == 0) return null
+                if (!marker.isBefore(LocalDateTime.now().minusSeconds(RECENT_INSTANCE_CUTOFF_SECONDS))) return null
+                return "Markøren '$marker' er eldre enn ${RECENT_INSTANCE_CUTOFF_SECONDS}s. Er den gjenbrukt fra et " +
+                    "tidligere steg, kan instanser fra FØR handlingen oppfylle ventingen — hent en ny markør " +
+                    "rett før hver handling. (Gjelder ikke tømming, som bruker expectedNew=0.)"
             }
 
             /**
@@ -610,5 +645,8 @@ class E2ESupportController(
         private const val ERROR_MESSAGE_MAX_LENGTH = 500
         private const val ECHOED_INPUT_MAX_LENGTH = 100
         private const val MARKER_FUTURE_TOLERANCE_SECONDS = 5L
+
+        /** Taket er der for å ikke holde en Tomcat-tråd vilkårlig lenge; suitens høyeste kall er 90 s. */
+        private const val MAX_TIMEOUT_SECONDS = 300L
     }
 }
