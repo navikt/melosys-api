@@ -735,6 +735,85 @@ internal class DigitalSøknadMapperTest {
         }
     }
 
+    @Nested
+    inner class ArbeidsstedNullstillingOgGuard {
+
+        @Test
+        fun `bytte fra skip til offshore gir kun offshore`() {
+            val søknadMedOffshore = DigitalSøknadMapper.tilSoeknad(arbeidsgiverSøknadMed(offshorePaaTrollA()))
+
+            søknadMedOffshore.maritimtArbeid shouldHaveSize 1
+            val arbeidssted = søknadMedOffshore.maritimtArbeid.first()
+            arbeidssted.enhetNavn shouldBe "Troll A"
+            arbeidssted.innretningLandkode shouldBe "GB"
+            arbeidssted.flaggLandkode.shouldBeNull()
+            søknadMedOffshore.arbeidPaaLand.fysiskeArbeidssteder.shouldBeEmpty()
+            søknadMedOffshore.luftfartBaser.shouldBeEmpty()
+        }
+
+        @Test
+        fun `bytte fra land til fly nullstiller de andre arbeidsstedvariantene`() {
+            val søknad = DigitalSøknadMapper.tilSoeknad(
+                arbeidsgiverSøknadMed(
+                    ArbeidsstedIUtlandetDto(
+                        arbeidsstedType = ArbeidsstedType.OM_BORD_PA_FLY,
+                        omBordPaFly = OmBordPaFlyDto(
+                            navnPaVirksomhet = "SAS",
+                            hjemmebaseLand = LandKode.SE,
+                            hjemmebaseNavn = "Arlanda",
+                            erVanligHjemmebase = true,
+                            vanligHjemmebaseLand = null,
+                            vanligHjemmebaseNavn = null
+                        )
+                    )
+                )
+            )
+
+            søknad.luftfartBaser shouldHaveSize 1
+            søknad.maritimtArbeid.shouldBeEmpty()
+            søknad.arbeidPaaLand.fysiskeArbeidssteder.shouldBeEmpty()
+        }
+
+        @Test
+        fun `innsending med arbeidsgiverdel har arbeidsstedsopplysninger`() {
+            DigitalSøknadMapper.harArbeidsstedsopplysninger(
+                arbeidsgiverSøknadMed(offshorePaaTrollA())
+            ).shouldBeTrue()
+        }
+
+        @Test
+        fun `innsending uten arbeidsgiverdel har ikke arbeidsstedsopplysninger`() {
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
+                data = arbeidstakerData(
+                    utsendingsperiodeOgLand = landOgPeriode(
+                        LandKode.FI,
+                        LocalDate.of(2025, 6, 1),
+                        LocalDate.of(2025, 12, 31)
+                    )
+                )
+            }
+
+            DigitalSøknadMapper.harArbeidsstedsopplysninger(dto).shouldBeFalse()
+        }
+
+        private fun arbeidsgiverSøknadMed(arbeidssted: ArbeidsstedIUtlandetDto) =
+            lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+                data = arbeidsgiverData(arbeidssted = arbeidssted)
+            }
+
+        private fun offshorePaaTrollA() = ArbeidsstedIUtlandetDto(
+            arbeidsstedType = ArbeidsstedType.OFFSHORE,
+            offshore = OffshoreDto(
+                navnPaVirksomhet = "Equinor",
+                navnPaInnretning = "Troll A",
+                typeInnretning = TypeInnretning.PLATTFORM_ELLER_ANNEN_FAST_INNRETNING,
+                sokkelLand = LandKode.GB
+            )
+        )
+    }
+
     // --- Testdata-hjelpere ---
 
     private fun landOgPeriode(land: LandKode, fom: LocalDate, tom: LocalDate) =

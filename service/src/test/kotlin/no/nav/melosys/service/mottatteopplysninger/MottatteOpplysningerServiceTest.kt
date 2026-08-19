@@ -4,6 +4,7 @@ import tools.jackson.databind.JsonNode
 import tools.jackson.databind.ObjectMapper
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -326,6 +327,73 @@ internal class MottatteOpplysningerServiceTest {
         oppdatert.arbeidPaaLand.erFastArbeidssted.shouldBe(true)
         // Soeknad-spesifikke felter som ikke mappes fra søknad skal beholdes
         oppdatert.loennOgGodtgjoerelse.shouldBe(opprinneligLoenn)
+    }
+
+    @Test
+    fun oppdaterMottatteOpplysningerFraSoeknad_erstatterArbeidsstedNaarSoeknadHarArbeidssted() {
+        val skip = no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid().apply {
+            enhetNavn = "MS Nordnorge"
+            flaggLandkode = "DK"
+        }
+        val eksisterende = no.nav.melosys.domain.mottatteopplysninger.Soeknad().apply {
+            maritimtArbeid = listOf(skip)
+        }
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = eksisterende
+        }
+
+        val offshore = no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid().apply {
+            enhetNavn = "Troll A"
+            innretningLandkode = "GB"
+        }
+        val nySoeknad = no.nav.melosys.domain.mottatteopplysninger.Soeknad().apply {
+            maritimtArbeid = listOf(offshore)
+        }
+
+        every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.of(mottatteOpplysninger)
+        every { mottatteOpplysningerRepositoryMock.saveAndFlush(any()) } returns mockk()
+
+        mottatteOpplysningerServiceSpy.oppdaterMottatteOpplysningerFraSøknad(behandlingID, nySoeknad)
+
+        val slot = slot<MottatteOpplysninger>()
+        verify { mottatteOpplysningerRepositoryMock.saveAndFlush(capture(slot)) }
+        val oppdatert = slot.captured.mottatteOpplysningerData
+        oppdatert.maritimtArbeid.shouldHaveSize(1)
+        oppdatert.maritimtArbeid.first().enhetNavn.shouldBe("Troll A")
+        oppdatert.maritimtArbeid.first().flaggLandkode.shouldBeNull()
+    }
+
+    @Test
+    fun oppdaterMottatteOpplysningerFraSoeknad_beholderArbeidsstedNaarSoeknadIkkeHarArbeidssted() {
+        val skip = no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid().apply {
+            enhetNavn = "MS Nordnorge"
+            flaggLandkode = "DK"
+        }
+        val eksisterende = no.nav.melosys.domain.mottatteopplysninger.Soeknad().apply {
+            maritimtArbeid = listOf(skip)
+            soeknadsland = Soeknadsland(listOf("NL"), false)
+        }
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = eksisterende
+        }
+
+        val nySoeknad = no.nav.melosys.domain.mottatteopplysninger.Soeknad().apply {
+            soeknadsland = Soeknadsland(listOf("DE"), false)
+        }
+
+        every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.of(mottatteOpplysninger)
+        every { mottatteOpplysningerRepositoryMock.saveAndFlush(any()) } returns mockk()
+
+        mottatteOpplysningerServiceSpy.oppdaterMottatteOpplysningerFraSøknad(
+            behandlingID, nySoeknad, oppdaterArbeidssteder = false
+        )
+
+        val slot = slot<MottatteOpplysninger>()
+        verify { mottatteOpplysningerRepositoryMock.saveAndFlush(capture(slot)) }
+        val oppdatert = slot.captured.mottatteOpplysningerData
+        oppdatert.soeknadsland.landkoder.shouldBe(listOf("DE"))
+        oppdatert.maritimtArbeid.shouldHaveSize(1)
+        oppdatert.maritimtArbeid.first().enhetNavn.shouldBe("MS Nordnorge")
     }
 
     @Test

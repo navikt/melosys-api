@@ -25,6 +25,11 @@ import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.SkjemaSakMappingService
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverensVirksomhetINorgeDto
+import no.nav.melosys.skjema.types.felles.LandKode
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsstedIUtlandetDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsstedType
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.OffshoreDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.TypeInnretning
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
 import org.junit.jupiter.api.BeforeEach
@@ -88,7 +93,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
 
             verify { behandlingService.endreStatus(behandling, Behandlingsstatus.VURDER_DOKUMENT) }
             verify { behandlingsresultatService.tømBehandlingsresultat(behandlingId) }
-            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any()) }
+            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any(), any()) }
             verify { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) }
             prosessinstans.behandling shouldBe behandling
         }
@@ -134,7 +139,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             verify(exactly = 0) { behandlingService.endreStatus(any<Behandling>(), any()) }
             verify(exactly = 0) { behandlingService.endreTema(any<Behandling>(), any()) }
             verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any()) }
-            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any()) }
+            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any(), any()) }
             verify { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) }
             prosessinstans.behandling shouldBe behandling
         }
@@ -154,7 +159,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             steg.utfør(prosessinstans)
 
             verify { behandlingService.endreTema(behandling, Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY) }
-            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any()) }
+            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any(), any()) }
         }
     }
 
@@ -175,7 +180,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
 
             verify(exactly = 0) { behandlingService.endreStatus(any<Behandling>(), any()) }
             verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any()) }
-            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any()) }
+            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any(), any()) }
             prosessinstans.behandling shouldBe behandling
         }
     }
@@ -325,6 +330,62 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
         return fagsak
     }
 
+    @Nested
+    inner class Arbeidsstedoppdatering {
+
+        @Test
+        fun `innsending uten arbeidsgiverdel oppdaterer ikke arbeidssted`() {
+            val behandling = lagBehandling(Behandlingsstatus.OPPRETTET)
+            val fagsak = lagFagsakMedBehandling(behandling)
+            val prosessinstans = lagProsessinstans()
+
+            mockFagsakService(fagsak)
+            mockOppdaterMottatteOpplysninger()
+            mockHentMottatteOpplysninger(behandlingId)
+
+            steg.utfør(prosessinstans)
+
+            verify {
+                mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any(), false)
+            }
+        }
+
+        @Test
+        fun `innsending med arbeidssted fra arbeidsgiverdel oppdaterer arbeidssted`() {
+            val behandling = lagBehandling(Behandlingsstatus.OPPRETTET)
+            val fagsak = lagFagsakMedBehandling(behandling)
+            val arbeidsgiverSøknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+                data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto(
+                    arbeidsstedIUtlandet = ArbeidsstedIUtlandetDto(
+                        arbeidsstedType = ArbeidsstedType.OFFSHORE,
+                        offshore = OffshoreDto(
+                            navnPaVirksomhet = "Equinor",
+                            navnPaInnretning = "Troll A",
+                            typeInnretning = TypeInnretning.PLATTFORM_ELLER_ANNEN_FAST_INNRETNING,
+                            sokkelLand = LandKode.GB
+                        )
+                    )
+                )
+            }
+            val prosessinstans = Prosessinstans.forTest {
+                medData(ProsessDataKey.DIGITAL_SØKNADSDATA, arbeidsgiverSøknadsdata)
+                medData(ProsessDataKey.SAKSNUMMER, saksnummer)
+            }
+
+            every { jsonMapper.writeValueAsString(arbeidsgiverSøknadsdata) } returns """{"referanseId":"test"}"""
+            mockFagsakService(fagsak)
+            mockOppdaterMottatteOpplysninger()
+            mockHentMottatteOpplysninger(behandlingId)
+
+            steg.utfør(prosessinstans)
+
+            verify {
+                mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any(), true)
+            }
+        }
+    }
+
     private fun lagProsessinstans(): Prosessinstans = Prosessinstans.forTest {
         medData(ProsessDataKey.DIGITAL_SØKNADSDATA, søknadsdata)
         medData(ProsessDataKey.SAKSNUMMER, saksnummer)
@@ -347,7 +408,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
     }
 
     private fun mockOppdaterMottatteOpplysninger() {
-        every { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(any(), any()) } just Runs
+        every { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(any(), any(), any()) } just Runs
     }
 
     private fun mockHentMottatteOpplysninger(behandlingId: Long) {

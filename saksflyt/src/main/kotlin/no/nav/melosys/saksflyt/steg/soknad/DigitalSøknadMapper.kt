@@ -61,6 +61,9 @@ object DigitalSøknadMapper {
         )
     }
 
+    fun harArbeidsstedsopplysninger(dto: UtsendtArbeidstakerSkjemaM2MDto): Boolean =
+        hentArbeidsgiversData(dto)?.arbeidsstedIUtlandet != null
+
     private fun hentArbeidstakersData(dto: UtsendtArbeidstakerSkjemaM2MDto): ArbeidstakersDataLook? {
         return when (val data = dto.skjema.data) {
             is UtsendtArbeidstakerArbeidstakersSkjemaDataDto -> ArbeidstakersDataLook(
@@ -185,12 +188,16 @@ object DigitalSøknadMapper {
         }
 
     private fun mapArbeidssteder(søknad: Soeknad, arbeidssted: ArbeidsstedIUtlandetDto?, utsendelseLand: LandKode?) {
-        if (arbeidssted == null) return
-        when (arbeidssted.arbeidsstedType) {
+        søknad.arbeidPaaLand = ArbeidPaaLand()
+        søknad.maritimtArbeid = emptyList()
+        søknad.luftfartBaser = emptyList()
+
+        when (arbeidssted?.arbeidsstedType) {
             ArbeidsstedType.PA_LAND -> søknad.arbeidPaaLand = mapArbeidPaaLand(arbeidssted, utsendelseLand)
             ArbeidsstedType.OFFSHORE -> søknad.maritimtArbeid = mapOffshore(arbeidssted)
             ArbeidsstedType.PA_SKIP -> søknad.maritimtArbeid = mapPaaSkip(arbeidssted)
             ArbeidsstedType.OM_BORD_PA_FLY -> søknad.luftfartBaser = mapLuftfart(arbeidssted)
+            null -> Unit
         }
     }
 

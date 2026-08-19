@@ -253,17 +253,27 @@ class MottatteOpplysningerService(
      *
      * Felter som ikke mappes fra søknaden (f.eks. loennOgGodtgjoerelse, utenlandsoppdraget)
      * beholdes urørt.
+     *
+     * Når innsendingen ikke inneholder arbeidsstedsopplysninger (`oppdaterArbeidssteder = false`)
+     * beholdes eksisterende arbeidssteder — ellers ville de blitt tømt av en innsending uten
+     * arbeidsgiverdel.
      */
     @Transactional
-    fun oppdaterMottatteOpplysningerFraSøknad(behandlingID: Long, nySoeknad: Soeknad) {
+    fun oppdaterMottatteOpplysningerFraSøknad(
+        behandlingID: Long,
+        nySoeknad: Soeknad,
+        oppdaterArbeidssteder: Boolean = true
+    ) {
         val mottatteOpplysninger = hentMottatteOpplysninger(behandlingID).apply {
             mottatteOpplysningerData.periode = nySoeknad.periode
             mottatteOpplysningerData.soeknadsland = nySoeknad.soeknadsland
             mottatteOpplysningerData.juridiskArbeidsgiverNorge = nySoeknad.juridiskArbeidsgiverNorge
             mottatteOpplysningerData.foretakUtland = nySoeknad.foretakUtland
-            mottatteOpplysningerData.arbeidPaaLand = nySoeknad.arbeidPaaLand
-            mottatteOpplysningerData.maritimtArbeid = nySoeknad.maritimtArbeid
-            mottatteOpplysningerData.luftfartBaser = nySoeknad.luftfartBaser
+            if (oppdaterArbeidssteder) {
+                mottatteOpplysningerData.arbeidPaaLand = nySoeknad.arbeidPaaLand
+                mottatteOpplysningerData.maritimtArbeid = nySoeknad.maritimtArbeid
+                mottatteOpplysningerData.luftfartBaser = nySoeknad.luftfartBaser
+            }
         }
         MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger)
         mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger)
