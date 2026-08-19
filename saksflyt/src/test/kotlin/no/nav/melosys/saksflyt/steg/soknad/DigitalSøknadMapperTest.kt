@@ -735,6 +735,65 @@ internal class DigitalSøknadMapperTest {
         }
     }
 
+    @Nested
+    inner class Arbeidsstedvarianter {
+
+        @Test
+        fun `offshore gir kun maritimt arbeid`() {
+            val søknadMedOffshore = DigitalSøknadMapper.tilSoeknad(arbeidsgiverSøknadMed(offshorePaaTrollA()))
+
+            søknadMedOffshore.maritimtArbeid shouldHaveSize 1
+            val arbeidssted = søknadMedOffshore.maritimtArbeid.first()
+            arbeidssted.enhetNavn shouldBe "Troll A"
+            arbeidssted.innretningLandkode shouldBe "GB"
+            arbeidssted.flaggLandkode.shouldBeNull()
+            arbeidssted.fartsomradeKode.shouldBeNull()
+            søknadMedOffshore.arbeidPaaLand.fysiskeArbeidssteder.shouldBeEmpty()
+            søknadMedOffshore.luftfartBaser.shouldBeEmpty()
+        }
+
+        @Test
+        fun `fly gir kun luftfartbase`() {
+            val søknad = DigitalSøknadMapper.tilSoeknad(
+                arbeidsgiverSøknadMed(
+                    ArbeidsstedIUtlandetDto(
+                        arbeidsstedType = ArbeidsstedType.OM_BORD_PA_FLY,
+                        omBordPaFly = OmBordPaFlyDto(
+                            navnPaVirksomhet = "SAS",
+                            hjemmebaseLand = LandKode.SE,
+                            hjemmebaseNavn = "Arlanda",
+                            erVanligHjemmebase = true,
+                            vanligHjemmebaseLand = null,
+                            vanligHjemmebaseNavn = null
+                        )
+                    )
+                )
+            )
+
+            søknad.luftfartBaser shouldHaveSize 1
+            søknad.maritimtArbeid.shouldBeEmpty()
+            søknad.arbeidPaaLand.fysiskeArbeidssteder.shouldBeEmpty()
+            søknad.arbeidPaaLand.erHjemmekontor.shouldBeNull()
+            søknad.arbeidPaaLand.erFastArbeidssted.shouldBeNull()
+        }
+
+        private fun arbeidsgiverSøknadMed(arbeidssted: ArbeidsstedIUtlandetDto) =
+            lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+                data = arbeidsgiverData(arbeidssted = arbeidssted)
+            }
+
+        private fun offshorePaaTrollA() = ArbeidsstedIUtlandetDto(
+            arbeidsstedType = ArbeidsstedType.OFFSHORE,
+            offshore = OffshoreDto(
+                navnPaVirksomhet = "Equinor",
+                navnPaInnretning = "Troll A",
+                typeInnretning = TypeInnretning.PLATTFORM_ELLER_ANNEN_FAST_INNRETNING,
+                sokkelLand = LandKode.GB
+            )
+        )
+    }
+
     // --- Testdata-hjelpere ---
 
     private fun landOgPeriode(land: LandKode, fom: LocalDate, tom: LocalDate) =
