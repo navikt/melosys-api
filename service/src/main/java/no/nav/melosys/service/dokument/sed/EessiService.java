@@ -140,11 +140,9 @@ public class EessiService {
         sedData.setMottakerIder(mottakerInstitusjoner);
         sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
         sedData.setYtterligereInformasjon(mapYtterligereInformasjon(ytterligereInformasjon, periodeType, behandlingsresultat));
-        if (unleash.isEnabled(ToggleName.MELOSYS_CDM_4_4)) {
-            sedData.setA008Formaal(A008Formaal.hentVerdi(a008Formaal));
-            if (erFjernarbeidTWFA != null) {
-                sedData.setErFjernarbeidTWFA(erFjernarbeidTWFA);
-            }
+        sedData.setA008Formaal(A008Formaal.hentVerdi(a008Formaal));
+        if (erFjernarbeidTWFA != null) {
+            sedData.setErFjernarbeidTWFA(erFjernarbeidTWFA);
         }
         filtrerIkkeEessiLandFraSed(sedData);
 
@@ -361,7 +359,7 @@ public class EessiService {
 
         if (sedPdfData != null) {
             sedPdfData.setFritekst(mapYtterligereInformasjon(sedPdfData.getFritekst(), periodeType, behandlingsresultat));
-            sedPdfData.utfyllSedDataDto(unleash, sedDataDto);
+            sedPdfData.utfyllSedDataDto(sedDataDto);
         }
         log.info("Henter pdf for sed med type {} for behandling {}", sedType, behandlingID);
         return eessiClient.genererSedPdf(sedDataDto, sedType);

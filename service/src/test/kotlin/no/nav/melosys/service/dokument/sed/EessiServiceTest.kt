@@ -965,10 +965,9 @@ class EessiServiceTest {
         eessiService.kanOppretteSedTyperPåBuc("5566", SedType.A011) shouldBe false
     }
 
-    // CDM 4.4 toggle tests
+    // CDM 4.4 tests
     @Test
-    fun `opprettOgSendSed med toggle CDM_4_4 på setter a008Formaal på sedData`() {
-        unleash.enable(ToggleName.MELOSYS_CDM_4_4)
+    fun `opprettOgSendSed setter a008Formaal på sedData`() {
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
         every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
@@ -984,25 +983,7 @@ class EessiServiceTest {
     }
 
     @Test
-    fun `opprettOgSendSed med toggle CDM_4_4 av setter ikke a008Formaal på sedData`() {
-        unleash.disable(ToggleName.MELOSYS_CDM_4_4)
-        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
-        every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
-        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
-        mockBehandling()
-        mockBehandlingsresultat()
-
-        val sedDataDtoSlot = slot<SedDataDto>()
-        every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
-
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "arbeid_flere_land", null)
-
-        sedDataDtoSlot.captured.a008Formaal shouldBe null
-    }
-
-    @Test
     fun `opprettOgSendSed med gyldig a008Formaal endringsmelding setter enum`() {
-        unleash.enable(ToggleName.MELOSYS_CDM_4_4)
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
         every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
@@ -1019,7 +1000,6 @@ class EessiServiceTest {
 
     @Test
     fun `opprettOgSendSed med null a008Formaal bruker default ARBEID_FLERE_LAND`() {
-        unleash.enable(ToggleName.MELOSYS_CDM_4_4)
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
         every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
@@ -1037,7 +1017,6 @@ class EessiServiceTest {
 
     @Test
     fun `opprettOgSendSed med ugyldig a008Formaal bruker default ARBEID_FLERE_LAND`() {
-        unleash.enable(ToggleName.MELOSYS_CDM_4_4)
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
         every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
@@ -1055,7 +1034,6 @@ class EessiServiceTest {
 
     @Test
     fun `opprettOgSendSed med case-sensitiv feil a008Formaal bruker default ARBEID_FLERE_LAND`() {
-        unleash.enable(ToggleName.MELOSYS_CDM_4_4)
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
         every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
@@ -1072,26 +1050,7 @@ class EessiServiceTest {
     }
 
     @Test
-    fun `opprettOgSendSed med ugyldig a008Formaal setter ikke når toggle er av`() {
-        unleash.disable(ToggleName.MELOSYS_CDM_4_4)
-        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
-        every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
-        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
-        mockBehandling()
-        mockBehandlingsresultat()
-
-        val sedDataDtoSlot = slot<SedDataDto>()
-        every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
-
-        // Når toggle er av, settes ikke a008Formaal uansett input
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "ugyldig_formaal", null)
-
-        sedDataDtoSlot.captured.a008Formaal.shouldBeNull()
-    }
-
-    @Test
-    fun `opprettOgSendSed med toggle CDM_4_4 på setter erFjernarbeidTWFA på sedData`() {
-        unleash.enable(ToggleName.MELOSYS_CDM_4_4)
+    fun `opprettOgSendSed setter erFjernarbeidTWFA på sedData`() {
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
         every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
@@ -1104,23 +1063,6 @@ class EessiServiceTest {
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, emptyList(), null, null, true)
 
         sedDataDtoSlot.captured.erFjernarbeidTWFA shouldBe true
-    }
-
-    @Test
-    fun `opprettOgSendSed med toggle CDM_4_4 av setter ikke erFjernarbeidTWFA på sedData`() {
-        unleash.disable(ToggleName.MELOSYS_CDM_4_4)
-        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
-        every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
-        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
-        mockBehandling()
-        mockBehandlingsresultat()
-
-        val sedDataDtoSlot = slot<SedDataDto>()
-        every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
-
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, emptyList(), null, null, true)
-
-        sedDataDtoSlot.captured.erFjernarbeidTWFA.shouldBeNull()
     }
 
     private fun lagJournalpost(dokumenter: List<ArkivDokument>) = Journalpost("jpID").apply {
