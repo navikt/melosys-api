@@ -26,8 +26,10 @@ class RammeavtaleStatistikkController(
     @GetMapping("/rammeavtale-fjernarbeid")
     @Operation(
         summary = "Statistikk for rammeavtale om fjernarbeid (TWA)",
-        description = "Teller behandlinger der rammeavtale om fjernarbeid er huket av, totalt og fordelt på år. " +
-            "Valgfri periode med fom/tom (tom er inklusiv).",
+        description = "Teller ferdigbehandlede behandlinger der rammeavtale om fjernarbeid er huket av og lovvalget " +
+            "er fastsatt, totalt og fordelt på vedtaksår. Valgfri periode med fom/tom mot vedtaksdato " +
+            "(tom er inklusiv). Erstatter den tidligere tellingen som var basert på når anmodningen ble " +
+            "registrert og som også talte anmodninger uten svar.",
     )
     fun hentRammeavtaleFjernarbeidStatistikk(
         @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") fom: LocalDate?,

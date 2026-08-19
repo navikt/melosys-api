@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import org.junit.jupiter.api.BeforeEach
@@ -29,24 +30,46 @@ class RammeavtaleStatistikkServiceTest {
     }
 
     @Test
-    fun `summerer per aar og bygger riktig prosesstype og data-monster`() {
+    fun `summerer per vedtaksaar og bygger riktig prosesstype, data-monster og resultattype`() {
         val prosessTypeSlot = slot<String>()
         val dataLikePatternSlot = slot<String>()
+        val resultatTypeSlot = slot<String>()
         every {
-            rammeavtaleStatistikkRepository.tellPerAarMedDataLike(capture(prosessTypeSlot), capture(dataLikePatternSlot), any(), any())
+            rammeavtaleStatistikkRepository.tellFerdigbehandledePerVedtaksaarMedDataLike(
+                capture(prosessTypeSlot),
+                capture(dataLikePatternSlot),
+                capture(resultatTypeSlot),
+                any(),
+                any(),
+            )
         } returns listOf(
             arrayOf<Any>("2024", BigDecimal(3)),
             arrayOf<Any>("2025", BigDecimal(7)),
         )
 
+        val statistikk = service.hentRammeavtaleFjernarbeidStatistikk(null, null)
+
+        statistikk.antall shouldBe 10
+        statistikk.antallPerVedtaksaar shouldBe linkedMapOf("2024" to 3L, "2025" to 7L)
+        prosessTypeSlot.captured shouldBe ProsessType.ANMODNING_OM_UNNTAK.kode
+        dataLikePatternSlot.captured shouldBe "%${ProsessDataKey.ER_FJERNARBEID_TWFA.kode}=true%"
+        resultatTypeSlot.captured shouldBe Behandlingsresultattyper.FASTSATT_LOVVALGSLAND.name
+    }
+
+    @Test
+    fun `hopper over rader uten vedtaksaar`() {
+        every {
+            rammeavtaleStatistikkRepository.tellFerdigbehandledePerVedtaksaarMedDataLike(any(), any(), any(), any(), any())
+        } returns listOf(
+            @Suppress("UNCHECKED_CAST")
+            (arrayOf(null, BigDecimal(4)) as Array<Any>),
+            arrayOf<Any>("2025", BigDecimal(2)),
+        )
 
         val statistikk = service.hentRammeavtaleFjernarbeidStatistikk(null, null)
 
-
-        statistikk.antall shouldBe 10
-        statistikk.antallPerAar shouldBe linkedMapOf("2024" to 3L, "2025" to 7L)
-        prosessTypeSlot.captured shouldBe ProsessType.ANMODNING_OM_UNNTAK.kode
-        dataLikePatternSlot.captured shouldBe "%${ProsessDataKey.ER_FJERNARBEID_TWFA.kode}=true%"
+        statistikk.antallPerVedtaksaar shouldBe mapOf("2025" to 2L)
+        statistikk.antall shouldBe 2
     }
 
     @Test
@@ -54,18 +77,22 @@ class RammeavtaleStatistikkServiceTest {
         val fomSlot = slot<LocalDateTime?>()
         val tomSlot = slot<LocalDateTime?>()
         every {
-            rammeavtaleStatistikkRepository.tellPerAarMedDataLike(any(), any(), captureNullable(fomSlot), captureNullable(tomSlot))
+            rammeavtaleStatistikkRepository.tellFerdigbehandledePerVedtaksaarMedDataLike(
+                any(),
+                any(),
+                any(),
+                captureNullable(fomSlot),
+                captureNullable(tomSlot),
+            )
         } returns emptyList()
-
 
         val statistikk = service.hentRammeavtaleFjernarbeidStatistikk(
             LocalDate.of(2024, 1, 1),
             LocalDate.of(2024, 12, 31),
         )
 
-
         statistikk.antall shouldBe 0
-        statistikk.antallPerAar.shouldBeEmpty()
+        statistikk.antallPerVedtaksaar.shouldBeEmpty()
         fomSlot.captured shouldBe LocalDate.of(2024, 1, 1).atStartOfDay()
         // tom er inklusiv -> oversettes til starten av neste dag (eksklusiv øvre grense)
         tomSlot.captured shouldBe LocalDate.of(2025, 1, 1).atStartOfDay()
