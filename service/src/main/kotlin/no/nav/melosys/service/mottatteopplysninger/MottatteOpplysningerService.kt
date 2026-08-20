@@ -102,7 +102,7 @@ class MottatteOpplysningerService(
         behandlingID,
         originalData,
         soeknad,
-        Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS,
+        Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS,
         VERSJON_SOEKNAD_GRUNNLAG,
         eksternReferanseID
     )
@@ -253,10 +253,15 @@ class MottatteOpplysningerService(
      *
      * Felter som ikke mappes fra søknaden (f.eks. loennOgGodtgjoerelse, utenlandsoppdraget)
      * beholdes urørt.
+     *
+     * Typen settes til utsendte arbeidstakere fordi opplysningene nå kommer fra en digital
+     * utsendingssøknad. Behandlingen kan ha vært opprettet av saksbehandler med en annen type,
+     * og weben bruker typen som betingelse for å vise søknadsfeltene i sidemenyen.
      */
     @Transactional
     fun oppdaterMottatteOpplysningerFraSøknad(behandlingID: Long, nySoeknad: Soeknad) {
         val mottatteOpplysninger = hentMottatteOpplysninger(behandlingID).apply {
+            type = Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS
             mottatteOpplysningerData.periode = nySoeknad.periode
             mottatteOpplysningerData.soeknadsland = nySoeknad.soeknadsland
             mottatteOpplysningerData.juridiskArbeidsgiverNorge = nySoeknad.juridiskArbeidsgiverNorge
