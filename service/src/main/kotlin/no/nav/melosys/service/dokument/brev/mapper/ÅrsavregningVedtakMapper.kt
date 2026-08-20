@@ -42,9 +42,10 @@ class ÅrsavregningVedtakMapper(
             return mapManueltBeregnetÅrsavregning(brevbestilling, behandlingsresultat.hentBehandling(), årsavregningModel)
         }
 
-        val fagsak = behandlingsresultat.hentBehandling().fagsak
-        val erPensjonist = behandlingsresultat.behandling?.erPensjonist()
-        val sakstype = behandlingsresultat.behandling?.fagsak?.type
+        val behandling = behandlingsresultat.hentBehandling()
+        val fagsak = behandling.fagsak
+        val erPensjonist = behandling.erPensjonist()
+        val sakstype = fagsak.type
         val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.avgiftspliktigperioder)
         val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttTrygdeavgiftsGrunnlag?.avgiftspliktigperioder)
         val erNyÅrsavregning =

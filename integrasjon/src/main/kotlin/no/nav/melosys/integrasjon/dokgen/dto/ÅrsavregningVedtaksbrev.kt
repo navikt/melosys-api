@@ -54,7 +54,7 @@ class ÅrsavregningVedtaksbrev(
         harSkjoennsfastsattInntektsgrunnlag: Boolean,
         erNyÅrsavregning: Boolean = false,
         erPensjonist: Boolean = false,
-        sakstyper: Sakstyper? = null
+        sakstype: Sakstyper? = null
     ) : this(
         brevBestilling = brevBestilling,
         årsavregningsår = årsavregningsår,
@@ -73,7 +73,7 @@ class ÅrsavregningVedtaksbrev(
         harSkjoennsfastsattInntektsgrunnlag = harSkjoennsfastsattInntektsgrunnlag,
         erNyÅrsavregning = erNyÅrsavregning,
         erPensjonist = erPensjonist,
-        sakstype = sakstyper
+        sakstype = sakstype
     )
 }
 
