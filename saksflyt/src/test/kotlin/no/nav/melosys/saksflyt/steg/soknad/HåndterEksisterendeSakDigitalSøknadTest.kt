@@ -351,22 +351,23 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
         }
 
         @Test
-        fun `innsending med arbeidssted fra arbeidsgiverdel oppdaterer arbeidssted`() {
+        fun `innsending med koblet arbeidsgiverdel oppdaterer arbeidssted`() {
             val behandling = lagBehandling(Behandlingsstatus.OPPRETTET)
             val fagsak = lagFagsakMedBehandling(behandling)
             val arbeidsgiverSøknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
-                data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto(
-                    arbeidsstedIUtlandet = ArbeidsstedIUtlandetDto(
-                        arbeidsstedType = ArbeidsstedType.OFFSHORE,
-                        offshore = OffshoreDto(
-                            navnPaVirksomhet = "Equinor",
-                            navnPaInnretning = "Troll A",
-                            typeInnretning = TypeInnretning.PLATTFORM_ELLER_ANNEN_FAST_INNRETNING,
-                            sokkelLand = LandKode.GB
+                medKobletArbeidsgiverSkjema {
+                    data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto(
+                        arbeidsstedIUtlandet = ArbeidsstedIUtlandetDto(
+                            arbeidsstedType = ArbeidsstedType.OFFSHORE,
+                            offshore = OffshoreDto(
+                                navnPaVirksomhet = "Equinor",
+                                navnPaInnretning = "Troll A",
+                                typeInnretning = TypeInnretning.PLATTFORM_ELLER_ANNEN_FAST_INNRETNING,
+                                sokkelLand = LandKode.GB
+                            )
                         )
                     )
-                )
+                }
             }
             val prosessinstans = Prosessinstans.forTest {
                 medData(ProsessDataKey.DIGITAL_SØKNADSDATA, arbeidsgiverSøknadsdata)

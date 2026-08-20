@@ -248,19 +248,15 @@ class MottatteOpplysningerService(
     }
 
     /**
-     * Oppdaterer sidemeny-feltene på eksisterende MottatteOpplysninger fra en ny Soeknad.
-     * Brukes når ny digital søknad mottas på åpen behandling (siste-vinner-regel).
-     *
-     * Felter som ikke mappes fra søknaden (f.eks. loennOgGodtgjoerelse, utenlandsoppdraget)
+     * Oppdaterer sidemeny-feltene fra en ny digital søknad på en åpen behandling.
+     * Den nyeste søknaden erstatter tidligere verdier for feltene som mappes, mens øvrige felt
      * beholdes urørt.
      *
-     * Typen settes til utsendte arbeidstakere fordi opplysningene nå kommer fra en digital
-     * utsendingssøknad. Behandlingen kan ha vært opprettet av saksbehandler med en annen type,
-     * og weben bruker typen som betingelse for å vise søknadsfeltene i sidemenyen.
+     * Typen settes til utsendte arbeidstakere slik at weben viser de relevante søknadsfeltene,
+     * også når behandlingen opprinnelig ble opprettet av en saksbehandler med en annen type.
      *
-     * Når innsendingen ikke inneholder arbeidsstedsopplysninger (`oppdaterArbeidssteder = false`)
-     * beholdes eksisterende arbeidssteder — ellers ville de blitt tømt av en innsending uten
-     * arbeidsgiverdel.
+     * @param oppdaterArbeidssteder om arbeidsstedene skal erstattes med verdiene fra søknaden.
+     * Er flagget `false`, beholdes eksisterende arbeidssteder.
      */
     @Transactional
     fun oppdaterMottatteOpplysningerFraSøknad(

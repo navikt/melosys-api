@@ -779,17 +779,31 @@ internal class DigitalSøknadMapperTest {
     }
 
     @Nested
-    inner class HarArbeidsstedsopplysninger {
+    inner class HarArbeidsgiverdel {
 
         @Test
-        fun `innsending med arbeidsgiverdel har arbeidsstedsopplysninger`() {
-            DigitalSøknadMapper.harArbeidsstedsopplysninger(
-                arbeidsgiverSøknadMed(offshorePaaTrollA())
-            ).shouldBeTrue()
+        fun `innsending med koblet arbeidsgiverdel har arbeidsgiverdel`() {
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                medKobletArbeidsgiverSkjema {
+                    data = arbeidsgiverData(arbeidssted = offshorePaaTrollA())
+                }
+            }
+
+            DigitalSøknadMapper.harArbeidsgiverdel(dto).shouldBeTrue()
         }
 
         @Test
-        fun `innsending uten arbeidsgiverdel har ikke arbeidsstedsopplysninger`() {
+        fun `innsending med arbeidsgiverdel uten arbeidssted har arbeidsgiverdel`() {
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+                data = arbeidsgiverData()
+            }
+
+            DigitalSøknadMapper.harArbeidsgiverdel(dto).shouldBeTrue()
+        }
+
+        @Test
+        fun `innsending uten arbeidsgiverdel har ikke arbeidsgiverdel`() {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
                 data = arbeidstakerData(
@@ -801,7 +815,7 @@ internal class DigitalSøknadMapperTest {
                 )
             }
 
-            DigitalSøknadMapper.harArbeidsstedsopplysninger(dto).shouldBeFalse()
+            DigitalSøknadMapper.harArbeidsgiverdel(dto).shouldBeFalse()
         }
     }
 

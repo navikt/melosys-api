@@ -137,7 +137,7 @@ class HåndterEksisterendeSakDigitalSøknad(
         mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(
             behandling.id,
             nySoeknad,
-            oppdaterArbeidssteder = DigitalSøknadMapper.harArbeidsstedsopplysninger(søknadsdata)
+            oppdaterArbeidssteder = DigitalSøknadMapper.harArbeidsgiverdel(søknadsdata)
         )
 
         val mottatteOpplysninger = mottatteOpplysningerService.hentMottatteOpplysninger(behandling.id)
