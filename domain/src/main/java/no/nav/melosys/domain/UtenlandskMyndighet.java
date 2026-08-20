@@ -67,8 +67,13 @@ public class UtenlandskMyndighet {
     }
 
     public String getKombinertGateadresse() {
-        List<String> gateadresse = getGateadresseAsList();
-        return gateadresse.isEmpty() ? null : String.join(", ", gateadresse);
+        if (gateadresse2 == null || gateadresse2.isEmpty()) {
+            return gateadresse1;
+        }
+        if (gateadresse3 == null || gateadresse3.isEmpty()) {
+            return "%s, %s".formatted(gateadresse1, gateadresse2);
+        }
+        return "%s, %s, %s".formatted(gateadresse1, gateadresse2, gateadresse3);
     }
 
     public List<String> getGateadresseAsList() {
