@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
@@ -23,8 +24,6 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.Test
-import org.springframework.transaction.annotation.Propagation
-import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 /**
@@ -33,6 +32,10 @@ import java.util.UUID
  *  - C1: skarp kjøring må be om innhentingsbrev, slik Kafka-flyten den replayer gjør,
  *  - C2: én sak som feiler skal ikke kunne rulle tilbake de sakene som allerede er kjørt,
  *  - C3: dryrun-stien må være read-only.
+ *
+ * C2 og C3 er transaksjonsoppførsel og kan ikke bevises med mocks — det gjøres i
+ * `SkattepliktigeAarsavregningSkarpIT`. Her dekkes brev-flagget, at løkka går videre etter en
+ * feilet sak, og re-valideringen som REQUIRES_NEW gjorde nødvendig.
  */
 class SkattepliktigeAarsavregningSkarpTest {
 
@@ -70,20 +73,32 @@ class SkattepliktigeAarsavregningSkarpTest {
     }
 
     @Test
-    fun `side-effektene kjører i egen transaksjon slik at en feilet sak ikke ruller tilbake batchen`() {
-        SkattepliktigeAarsavregningSkarpUtfoerer::class.java.declaredMethods
-            .filter { it.name in setOf("opprettProsessinstans", "settStatusVurderDokument") }
-            .also { it.size shouldBe 2 }
-            .forEach { it.getAnnotation(Transactional::class.java).propagation shouldBe Propagation.REQUIRES_NEW }
+    fun `status-bump hopper over behandling som er flyttet videre i mellomtiden`() {
+        // Forutsetningen ble evaluert i den ytre transaksjonen; REQUIRES_NEW skilte sjekk og
+        // skriving, så den ferske raden må sjekkes på nytt før vi skriver.
+        val behandling = Behandling.forTest { status = Behandlingsstatus.AVSLUTTET }
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+
+        val bumpet = SkattepliktigeAarsavregningSkarpUtfoerer(prosessinstansService, behandlingService)
+            .settStatusVurderDokument(BEHANDLING_ID)
+
+        bumpet shouldBe false
+        behandling.status shouldBe Behandlingsstatus.AVSLUTTET
+        verify(exactly = 0) { behandlingService.lagre(any()) }
     }
 
     @Test
-    fun `dryrun-stien er read-only`() {
-        SkattepliktigeAarsavregningDryrunService::class.java.declaredMethods
-            .filter { it.name in setOf("prosesserSkattehendelser", "prosesserSkattehendelserAsynkront") }
-            .mapNotNull { it.getAnnotation(Transactional::class.java) }
-            .also { it.size shouldBe 2 }
-            .forEach { it.readOnly shouldBe true }
+    fun `status-bump skjer når behandlingen fortsatt står der løkka så den`() {
+        val behandling = Behandling.forTest { status = Behandlingsstatus.VURDER_DOKUMENT }
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingService.lagre(behandling) } returns Unit
+
+        val bumpet = SkattepliktigeAarsavregningSkarpUtfoerer(prosessinstansService, behandlingService)
+            .settStatusVurderDokument(BEHANDLING_ID)
+
+        bumpet shouldBe true
+        behandling.status shouldBe Behandlingsstatus.VURDER_DOKUMENT
+        verify { behandlingService.lagre(behandling) }
     }
 
     @Test
@@ -132,5 +147,6 @@ class SkattepliktigeAarsavregningSkarpTest {
     companion object {
         const val AKTØR_ID = FagsakTestFactory.BRUKER_AKTØR_ID
         const val GJELDER_ÅR = 2023
+        const val BEHANDLING_ID = 42L
     }
 }

@@ -47,14 +47,29 @@ class SkattepliktigeAarsavregningSkarpUtfoerer(
      * Behandlingen hentes på nytt her: entiteten kalleren sitter på er lastet i den ytre,
      * read-only persistence-konteksten og er detached for denne transaksjonen.
      *
+     * Forutsetningen gjentas mot den ferske raden. SkattehendelserConsumer gjør sjekk og skriving
+     * atomisk i én transaksjon; her ble de skilt av REQUIRES_NEW, så uten denne re-valideringen
+     * kunne kjøringen skrive en behandling en saksbehandler nettopp har flyttet videre tilbake til
+     * VURDER_DOKUMENT.
+     *
      * Rå `status`-setting + `lagre` (ikke `endreStatus`) er bevisst — det speiler
      * SkattehendelserConsumer, som heller ikke skal trigge svarfrist- eller oppgave-logikk.
+     *
+     * @return true hvis statusen faktisk ble endret, false hvis forutsetningen ikke lenger holdt.
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun settStatusVurderDokument(behandlingId: Long) {
+    fun settStatusVurderDokument(behandlingId: Long): Boolean {
         val behandling = behandlingService.hentBehandling(behandlingId)
+        if (behandling.status == Behandlingsstatus.OPPRETTET || !behandling.erAktiv()) {
+            log.info {
+                "SKARP: hopper over status-bump for behandling $behandlingId — status er nå ${behandling.status}, " +
+                    "aktiv=${behandling.erAktiv()}"
+            }
+            return false
+        }
         log.info { "SKARP: oppdaterer status fra ${behandling.status} til VURDER_DOKUMENT for behandling $behandlingId" }
         behandling.status = Behandlingsstatus.VURDER_DOKUMENT
         behandlingService.lagre(behandling)
+        return true
     }
 }

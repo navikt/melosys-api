@@ -30,8 +30,7 @@ class SkattepliktigeAarsavregningDryrunService(
     private val behandlingsresultatService: BehandlingsresultatService,
     private val skarpUtfoerer: SkattepliktigeAarsavregningSkarpUtfoerer,
 ) {
-    // Skrives fra @Async-tråden mens /rapport kan lese samtidig — uten synkronisering
-    // kan serialiseringen sprekke med ConcurrentModificationException midt i en kjøring.
+    // Skrives fra @Async-tråden mens /rapport kan lese samtidig.
     val resultater: MutableList<SakDryrunResultat> = Collections.synchronizedList(mutableListOf())
 
     private val jobMonitor = JobMonitor(
@@ -39,8 +38,15 @@ class SkattepliktigeAarsavregningDryrunService(
         stats = JobStatus()
     )
 
-    fun rapportJsonString(): String = jacksonObjectMapper()
-        .valueToTree<JsonNode>(resultater).toPrettyString()
+    fun rapportJsonString(): String {
+        // synchronizedList synkroniserer enkeltoperasjoner, ikke traversering. Jackson indekserer
+        // seg gjennom lista (RandomAccess), så et samtidig resultater.clear() — som skjer når ops
+        // starter en ny kjøring mens rapporten hentes — gir IndexOutOfBoundsException midt i
+        // serialiseringen. Målt: 182 av 300 serialiseringer feilet under samtidig skriving.
+        // Derfor snapshot under låsen; monitoren er wrapper-objektet selv, jf. Javadoc.
+        val snapshot = synchronized(resultater) { ArrayList(resultater) }
+        return jacksonObjectMapper().valueToTree<JsonNode>(snapshot).toPrettyString()
+    }
 
     @Async("taskExecutor")
     @Transactional(readOnly = true)
@@ -158,9 +164,8 @@ class SkattepliktigeAarsavregningDryrunService(
                                 }
                             } else if (skarp && villeOppdatertStatus && aktivÅrsavregning != null) {
                                 try {
-                                    skarpUtfoerer.settStatusVurderDokument(aktivÅrsavregning.id)
-                                    antallStatusOppdatert++
-                                    statusOppdatert = true
+                                    statusOppdatert = skarpUtfoerer.settStatusVurderDokument(aktivÅrsavregning.id)
+                                    if (statusOppdatert) antallStatusOppdatert++ else antallStatusHoppetOver++
                                 } catch (e: Exception) {
                                     antallSkarpFeilet++
                                     statusOppdatert = false
@@ -233,6 +238,7 @@ class SkattepliktigeAarsavregningDryrunService(
                 "antallVilleOppdatertStatus" to antallVilleOppdatertStatus,
                 "antallOpprettet" to antallOpprettet,
                 "antallStatusOppdatert" to antallStatusOppdatert,
+                "antallStatusHoppetOver" to antallStatusHoppetOver,
                 "antallOppslagFeilet" to antallOppslagFeilet,
                 "antallSkarpFeilet" to antallSkarpFeilet,
             )
@@ -297,6 +303,7 @@ class SkattepliktigeAarsavregningDryrunService(
         @Volatile var antallUtenTreff: Int = 0,
         @Volatile var antallOpprettet: Int = 0,
         @Volatile var antallStatusOppdatert: Int = 0,
+        @Volatile var antallStatusHoppetOver: Int = 0,
         @Volatile var antallOppslagFeilet: Int = 0,
         @Volatile var antallSkarpFeilet: Int = 0,
         @Volatile var result: Map<String, Any?> = emptyMap(),
@@ -314,6 +321,7 @@ class SkattepliktigeAarsavregningDryrunService(
             antallUtenTreff = 0
             antallOpprettet = 0
             antallStatusOppdatert = 0
+            antallStatusHoppetOver = 0
             antallOppslagFeilet = 0
             antallSkarpFeilet = 0
             dbQueryStoppedAt = null
@@ -333,6 +341,7 @@ class SkattepliktigeAarsavregningDryrunService(
             "antallUtenTreff" to antallUtenTreff,
             "antallOpprettet" to antallOpprettet,
             "antallStatusOppdatert" to antallStatusOppdatert,
+            "antallStatusHoppetOver" to antallStatusHoppetOver,
             "antallOppslagFeilet" to antallOppslagFeilet,
             "antallSkarpFeilet" to antallSkarpFeilet,
             "result" to result,
