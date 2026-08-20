@@ -6,13 +6,10 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Aktoersroller
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
-import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
-import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
@@ -20,6 +17,7 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import java.util.Collections
 import java.util.UUID
 
 private val log = KotlinLogging.logger { }
@@ -30,10 +28,11 @@ class SkattepliktigeAarsavregningDryrunService(
     private val årsavregningService: ÅrsavregningService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val prosessinstansService: ProsessinstansService,
-    private val behandlingService: BehandlingService,
+    private val skarpUtfoerer: SkattepliktigeAarsavregningSkarpUtfoerer,
 ) {
-    val resultater: MutableList<SakDryrunResultat> = mutableListOf()
+    // Skrives fra @Async-tråden mens /rapport kan lese samtidig — uten synkronisering
+    // kan serialiseringen sprekke med ConcurrentModificationException midt i en kjøring.
+    val resultater: MutableList<SakDryrunResultat> = Collections.synchronizedList(mutableListOf())
 
     private val jobMonitor = JobMonitor(
         jobName = "SkattepliktigeAarsavregningDryrun",
@@ -44,7 +43,7 @@ class SkattepliktigeAarsavregningDryrunService(
         .valueToTree<JsonNode>(resultater).toPrettyString()
 
     @Async("taskExecutor")
-    @Transactional
+    @Transactional(readOnly = true)
     fun prosesserSkattehendelserAsynkront(
         skattehendelser: List<SkattehendelseDryrunItem>,
         skarp: Boolean = false,
@@ -53,8 +52,10 @@ class SkattepliktigeAarsavregningDryrunService(
         prosesserSkattehendelser(skattehendelser, skarp, maksAntall)
     }
 
+    // readOnly: alle skrivninger går gjennom skarpUtfoerer i egne transaksjoner, så denne
+    // stien skal være garantert bivirkningsfri — readOnly gir FlushMode.MANUAL og er garantien.
     @Synchronized
-    @Transactional
+    @Transactional(readOnly = true)
     fun prosesserSkattehendelser(
         skattehendelser: List<SkattehendelseDryrunItem>,
         skarp: Boolean = false,
@@ -141,10 +142,9 @@ class SkattepliktigeAarsavregningDryrunService(
                             var skarpFeilmelding: String? = null
                             if (skarp && villeOpprettetProsessinstans) {
                                 try {
-                                    prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
+                                    skarpUtfoerer.opprettProsessinstans(
                                         fagsak.saksnummer,
                                         hendelse.gjelderPeriode,
-                                        Behandlingsaarsaktyper.MELDING_FRA_SKATT,
                                     )
                                     antallOpprettet++
                                     prosessinstansOpprettet = true
@@ -158,11 +158,7 @@ class SkattepliktigeAarsavregningDryrunService(
                                 }
                             } else if (skarp && villeOppdatertStatus && aktivÅrsavregning != null) {
                                 try {
-                                    log.info {
-                                        "SKARP: oppdaterer status fra ${aktivÅrsavregning.status} til VURDER_DOKUMENT for behandling ${aktivÅrsavregning.id}"
-                                    }
-                                    aktivÅrsavregning.status = Behandlingsstatus.VURDER_DOKUMENT
-                                    behandlingService.lagre(aktivÅrsavregning)
+                                    skarpUtfoerer.settStatusVurderDokument(aktivÅrsavregning.id)
                                     antallStatusOppdatert++
                                     statusOppdatert = true
                                 } catch (e: Exception) {
@@ -348,6 +344,7 @@ class SkattepliktigeAarsavregningDryrunService(
         val gjelderAr: Int,
         val identifikator: String,
         val harAktivAarsavregning: Boolean?,
+        /** Status slik den ble observert *før* en eventuell skarp status-bump; se [statusOppdatert]. */
         val aarsavregningBehandlingStatus: String?,
         val trygdeavgiftMottaker: String?,
         val villeOpprettetProsessinstans: Boolean?,
