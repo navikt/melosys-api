@@ -155,7 +155,7 @@ public class HentMuligeBrevmottakereService {
                         return utenlandskMyndighet.getNavn();
                     } else {
                         Mottaker avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET), behandling);
-                        var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(avklartMottaker.hentMyndighetLandkode(), produserbaredokumenter);
+                        var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(avklartMottaker.hentMyndighetLandkode());
                         return utenlandskMyndighet.getNavn();
                     }
                 } else {
