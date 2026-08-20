@@ -291,6 +291,7 @@ internal class MottatteOpplysningerServiceTest {
         }
         val mottatteOpplysninger = MottatteOpplysninger().apply {
             mottatteOpplysningerData = eksisterende
+            type = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
         }
 
         val nySoeknad = no.nav.melosys.domain.mottatteopplysninger.Soeknad().apply {
@@ -318,6 +319,7 @@ internal class MottatteOpplysningerServiceTest {
         val slot = slot<MottatteOpplysninger>()
         verify { mottatteOpplysningerRepositoryMock.saveAndFlush(capture(slot)) }
         val oppdatert = slot.captured.mottatteOpplysningerData as no.nav.melosys.domain.mottatteopplysninger.Soeknad
+        slot.captured.type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS)
         oppdatert.periode.fom.shouldBe(LocalDate.of(2025, 1, 1))
         oppdatert.soeknadsland.landkoder.shouldBe(listOf("DE"))
         oppdatert.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.shouldBe(listOf("111111111"))
@@ -326,6 +328,38 @@ internal class MottatteOpplysningerServiceTest {
         oppdatert.arbeidPaaLand.erFastArbeidssted.shouldBe(true)
         // Soeknad-spesifikke felter som ikke mappes fra søknad skal beholdes
         oppdatert.loennOgGodtgjoerelse.shouldBe(opprinneligLoenn)
+    }
+
+    @Test
+    fun oppdaterMottatteOpplysningerFraSøknad_toemmerTidligereSattArbeidsstedvariant() {
+        val eksisterende = no.nav.melosys.domain.mottatteopplysninger.Soeknad().apply {
+            maritimtArbeid = mutableListOf(
+                no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid().apply {
+                    enhetNavn = "Gammelt skip"
+                }
+            )
+        }
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = eksisterende
+        }
+
+        val nySoeknad = no.nav.melosys.domain.mottatteopplysninger.Soeknad().apply {
+            arbeidPaaLand = no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.ArbeidPaaLand().apply {
+                erFastArbeidssted = true
+            }
+        }
+
+        every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.of(mottatteOpplysninger)
+        every { mottatteOpplysningerRepositoryMock.saveAndFlush(any()) } returns mockk()
+
+        mottatteOpplysningerServiceSpy.oppdaterMottatteOpplysningerFraSøknad(behandlingID, nySoeknad)
+
+        val slot = slot<MottatteOpplysninger>()
+        verify { mottatteOpplysningerRepositoryMock.saveAndFlush(capture(slot)) }
+        val oppdatert = slot.captured.mottatteOpplysningerData as no.nav.melosys.domain.mottatteopplysninger.Soeknad
+        oppdatert.arbeidPaaLand.erFastArbeidssted.shouldBe(true)
+        // Tidligere satt maritimt arbeid skal være tømt
+        oppdatert.maritimtArbeid.shouldHaveSize(0)
     }
 
     @Test
@@ -380,6 +414,29 @@ internal class MottatteOpplysningerServiceTest {
             behandling.shouldBe(behandling)
             mottaksdato.shouldBe(mottattDato)
             mottatteOpplysningerData.shouldBeInstanceOf<SedGrunnlag>()
+        }
+    }
+
+    @Test
+    fun opprettSøknadDigital_setterTypeUtsendteArbeidstakereEøs() {
+        val behandling = setupMock(
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER
+        )
+        every { mottatteOpplysningerRepositoryMock.findByEksternReferanseID(any()) } returns emptyList()
+
+        mottatteOpplysningerServiceSpy.opprettSøknadDigital(behandlingID, null, Soeknad(), "ref-123")
+
+        val slot = slot<MottatteOpplysninger>()
+        verify {
+            mottatteOpplysningerRepositoryMock.save(capture(slot))
+        }
+        slot.captured.apply {
+            type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS)
+            this.behandling.shouldBe(behandling)
+            eksternReferanseID.shouldBe("ref-123")
+            mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
         }
     }
 
