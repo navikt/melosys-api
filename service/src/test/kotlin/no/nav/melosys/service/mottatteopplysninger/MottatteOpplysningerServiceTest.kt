@@ -4,7 +4,6 @@ import tools.jackson.databind.JsonNode
 import tools.jackson.databind.ObjectMapper
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -292,6 +291,7 @@ internal class MottatteOpplysningerServiceTest {
         }
         val mottatteOpplysninger = MottatteOpplysninger().apply {
             mottatteOpplysningerData = eksisterende
+            type = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
         }
 
         val nySoeknad = no.nav.melosys.domain.mottatteopplysninger.Soeknad().apply {
@@ -319,6 +319,7 @@ internal class MottatteOpplysningerServiceTest {
         val slot = slot<MottatteOpplysninger>()
         verify { mottatteOpplysningerRepositoryMock.saveAndFlush(capture(slot)) }
         val oppdatert = slot.captured.mottatteOpplysningerData as no.nav.melosys.domain.mottatteopplysninger.Soeknad
+        slot.captured.type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS)
         oppdatert.periode.fom.shouldBe(LocalDate.of(2025, 1, 1))
         oppdatert.soeknadsland.landkoder.shouldBe(listOf("DE"))
         oppdatert.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.shouldBe(listOf("111111111"))
@@ -330,24 +331,22 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    fun oppdaterMottatteOpplysningerFraSoeknad_erstatterArbeidsstedNaarSoeknadHarArbeidssted() {
-        val skip = no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid().apply {
-            enhetNavn = "MS Nordnorge"
-            flaggLandkode = "DK"
-        }
+    fun oppdaterMottatteOpplysningerFraSøknad_toemmerTidligereSattArbeidsstedvariant() {
         val eksisterende = no.nav.melosys.domain.mottatteopplysninger.Soeknad().apply {
-            maritimtArbeid = listOf(skip)
+            maritimtArbeid = mutableListOf(
+                no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid().apply {
+                    enhetNavn = "Gammelt skip"
+                }
+            )
         }
         val mottatteOpplysninger = MottatteOpplysninger().apply {
             mottatteOpplysningerData = eksisterende
         }
 
-        val offshore = no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid().apply {
-            enhetNavn = "Troll A"
-            innretningLandkode = "GB"
-        }
         val nySoeknad = no.nav.melosys.domain.mottatteopplysninger.Soeknad().apply {
-            maritimtArbeid = listOf(offshore)
+            arbeidPaaLand = no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.ArbeidPaaLand().apply {
+                erFastArbeidssted = true
+            }
         }
 
         every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.of(mottatteOpplysninger)
@@ -357,10 +356,10 @@ internal class MottatteOpplysningerServiceTest {
 
         val slot = slot<MottatteOpplysninger>()
         verify { mottatteOpplysningerRepositoryMock.saveAndFlush(capture(slot)) }
-        val oppdatert = slot.captured.mottatteOpplysningerData
-        oppdatert.maritimtArbeid.shouldHaveSize(1)
-        oppdatert.maritimtArbeid.first().enhetNavn.shouldBe("Troll A")
-        oppdatert.maritimtArbeid.first().flaggLandkode.shouldBeNull()
+        val oppdatert = slot.captured.mottatteOpplysningerData as no.nav.melosys.domain.mottatteopplysninger.Soeknad
+        oppdatert.arbeidPaaLand.erFastArbeidssted.shouldBe(true)
+        // Tidligere satt maritimt arbeid skal være tømt
+        oppdatert.maritimtArbeid.shouldHaveSize(0)
     }
 
     @Test
@@ -448,6 +447,29 @@ internal class MottatteOpplysningerServiceTest {
             behandling.shouldBe(behandling)
             mottaksdato.shouldBe(mottattDato)
             mottatteOpplysningerData.shouldBeInstanceOf<SedGrunnlag>()
+        }
+    }
+
+    @Test
+    fun opprettSøknadDigital_setterTypeUtsendteArbeidstakereEøs() {
+        val behandling = setupMock(
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER
+        )
+        every { mottatteOpplysningerRepositoryMock.findByEksternReferanseID(any()) } returns emptyList()
+
+        mottatteOpplysningerServiceSpy.opprettSøknadDigital(behandlingID, null, Soeknad(), "ref-123")
+
+        val slot = slot<MottatteOpplysninger>()
+        verify {
+            mottatteOpplysningerRepositoryMock.save(capture(slot))
+        }
+        slot.captured.apply {
+            type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS)
+            this.behandling.shouldBe(behandling)
+            eksternReferanseID.shouldBe("ref-123")
+            mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
         }
     }
 
