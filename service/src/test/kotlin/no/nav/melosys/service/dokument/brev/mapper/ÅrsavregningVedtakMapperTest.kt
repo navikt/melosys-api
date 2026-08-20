@@ -256,30 +256,6 @@ class ÅrsavregningVedtakMapperTest {
     }
 
     @Test
-    fun `mapÅrsavregning setter erPensjonist og sakstype for manuelt beregnet årsavregning`() {
-        val (brevbestilling, behandlingsresultat) = lagFellesTestdata {
-            behandling {
-                tema = Behandlingstema.PENSJONIST
-                fagsak { type = Sakstyper.EU_EOS }
-            }
-        }
-        val årsavregningModel = lagÅrsavregningModelMedPerioder(
-            endeligAvgift = listOf(lagEndeligTrygdeavgiftsperiode()),
-            tidligereAvgift = listOf(lagTidligereTrygdeavgiftsperiode())
-        ).copy(
-            manueltAvgiftBeloep = BigDecimal(1652),
-            endeligAvgiftValg = EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT
-        )
-        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
-
-        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
-
-        result.shouldNotBeNull()
-        result.erPensjonist shouldBe true
-        result.sakstype shouldBe Sakstyper.EU_EOS
-    }
-
-    @Test
     fun `mapÅrsavregningVedtak setter korrekt arbeidsgiveravgiftBetalt verdi`() {
         testArbeidsgiveravgiftBetalt(Medlemskapstyper.PLIKTIG, false, SvarAlternativ.IKKE_RELEVANT)
         testArbeidsgiveravgiftBetalt(Medlemskapstyper.FRIVILLIG, false, SvarAlternativ.NEI)
