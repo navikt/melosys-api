@@ -74,54 +74,81 @@ class SkattepliktigeAarsavregningDryrunController(
     @Operation(
         summary = "Datafiks: sett inn manglende vedtaksmetadata (MELOSYS-8174, Q4a/Q4b)",
         description = "Med skarp=false (default) er dette Q4a — en read-only forhåndsvisning av nøyaktig " +
-            "hvilke rader som ville blitt satt inn. Med skarp=true er det Q4b, som endrer data. " +
-            "Innsettingen er idempotent, og alle rader merkes MELOSYS-8174-PATCH slik at de kan " +
-            "slettes igjen med /vedtaksmetadata-fiks/angre. Kjør alltid preview først og kontroller " +
-            "at radene stemmer med fiksplanen før du kjører skarpt."
+            "hvilke rader som ville blitt satt inn, med de tre sakene i fiksplanen som default. " +
+            "Med skarp=true er det Q4b, som endrer data: da må saksnummer angis eksplisitt, " +
+            "antall rader må ligge innenfor maksAntallRader (default 10), og alle kandidater må ha en " +
+            "beh_type vi kan utlede vedtakstype fra. Innsettingen er idempotent, og alle rader merkes " +
+            "MELOSYS-8174-PATCH slik at de kan rulles tilbake med /vedtaksmetadata-fiks/angre."
     )
     @PostMapping("/vedtaksmetadata-fiks")
     fun vedtaksmetadataFiks(
         @RequestBody
-        @Parameter(description = "Saksnummer å fikse (default: de tre sakene fra fiksplanen) og skarp-flagg")
+        @Parameter(description = "Saksnummer, skarp-flagg og valgfritt maksAntallRader")
         request: VedtaksmetadataFiksRequest
     ): ResponseEntity<Any> {
-        val saksnummer = request.saksnummer.ifEmpty { VedtaksmetadataFiksService.STANDARD_SAKER }
+        val saksnummer = if (request.skarp) request.saksnummer else request.saksnummer.ifEmpty { VedtaksmetadataFiksService.STANDARD_SAKER }
 
+        valider(saksnummer)?.let { return it }
+
+        log.info {
+            "Datafiks vedtaksmetadata (${if (request.skarp) "SKARP" else "PREVIEW"}) for saker $saksnummer"
+        }
+
+        return try {
+            val resultat = if (request.skarp) {
+                vedtaksmetadataFiksService.utfoer(saksnummer, request.maksAntallRader)
+            } else {
+                vedtaksmetadataFiksService.forhaandsvis(saksnummer)
+            }
+            ResponseEntity.ok(resultat)
+        } catch (e: VedtaksmetadataFiksAvvist) {
+            log.warn { "Datafiks vedtaksmetadata avvist: ${e.message}" }
+            ResponseEntity.badRequest().body(mapOf("feil" to e.message))
+        }
+    }
+
+    @Operation(
+        summary = "Angre datafiksen: slett rader merket MELOSYS-8174-PATCH",
+        description = "Med skarp=false (default) vises kun hva som ville blitt slettet. " +
+            "Tom saksnummer-liste betyr alle markerte rader; angi saksnummer for å angre én sak om gangen. " +
+            "Rader der markøren er overskrevet av en senere endring (endret_av != MELOSYS-8174-PATCH) " +
+            "røres aldri — de telles i antallEndretEtterpaa."
+    )
+    @PostMapping("/vedtaksmetadata-fiks/angre")
+    fun angreVedtaksmetadataFiks(
+        @RequestBody(required = false)
+        @Parameter(description = "Valgfritt saksnummer-scope og skarp-flagg")
+        request: VedtaksmetadataAngreRequest?
+    ): ResponseEntity<Any> {
+        val angreRequest = request ?: VedtaksmetadataAngreRequest()
+
+        valider(angreRequest.saksnummer)?.let { return it }
+
+        log.info {
+            "Angre datafiks vedtaksmetadata (${if (angreRequest.skarp) "SKARP" else "PREVIEW"}), " +
+                "scope=${angreRequest.saksnummer.ifEmpty { listOf("ALLE") }}"
+        }
+
+        return ResponseEntity.ok(vedtaksmetadataFiksService.angre(angreRequest.saksnummer, angreRequest.skarp))
+    }
+
+    private fun valider(saksnummer: List<String>): ResponseEntity<Any>? {
         val ugyldige = saksnummer.filterNot { SAKSNUMMER_FORMAT.matches(it) }
         if (ugyldige.isNotEmpty()) {
             return ResponseEntity.badRequest().body(
                 mapOf("feil" to "Ugyldig saksnummerformat, forventer MEL-<tall>", "ugyldige" to ugyldige)
             )
         }
-
-        log.info {
-            "Datafiks vedtaksmetadata (${if (request.skarp) "SKARP" else "PREVIEW"}) for saker $saksnummer"
-        }
-
-        val resultat = if (request.skarp) {
-            vedtaksmetadataFiksService.utfoer(saksnummer)
-        } else {
-            vedtaksmetadataFiksService.forhaandsvis(saksnummer)
-        }
-
-        return ResponseEntity.ok(resultat)
-    }
-
-    @Operation(
-        summary = "Angre datafiksen: slett alle rader merket MELOSYS-8174-PATCH",
-        description = "Sletter kun rader datafiksen selv har satt inn (registrert_av = MELOSYS-8174-PATCH). " +
-            "Rører ingen ekte vedtaksmetadata."
-    )
-    @PostMapping("/vedtaksmetadata-fiks/angre")
-    fun angreVedtaksmetadataFiks(): ResponseEntity<Map<String, Any?>> {
-        val antallSlettet = vedtaksmetadataFiksService.angre()
-        return ResponseEntity.ok(
-            mapOf(
-                "melding" to "Datafiks rullet tilbake",
-                "markoer" to VedtaksmetadataFiksService.PATCH_MARKOER,
-                "antallSlettet" to antallSlettet
+        if (saksnummer.size > VedtaksmetadataFiksService.MAKS_ANTALL_SAKER) {
+            return ResponseEntity.badRequest().body(
+                mapOf(
+                    "feil" to "For mange saksnummer i ett kall",
+                    "antall" to saksnummer.size,
+                    "maks" to VedtaksmetadataFiksService.MAKS_ANTALL_SAKER
+                )
             )
-        )
+        }
+        return null
     }
 }
 
@@ -132,6 +159,15 @@ data class SkattehendelseRunRequest(
 )
 
 data class VedtaksmetadataFiksRequest(
+    /** Påkrevd ved skarp = true. I preview brukes de tre sakene fra fiksplanen hvis lista er tom. */
+    val saksnummer: List<String> = emptyList(),
+    val skarp: Boolean = false,
+    /** Sikkerhetssele: skarp kjøring avvises hvis den ville satt inn flere rader enn dette. */
+    val maksAntallRader: Int = VedtaksmetadataFiksService.DEFAULT_MAKS_ANTALL_RADER,
+)
+
+data class VedtaksmetadataAngreRequest(
+    /** Tom liste = alle rader merket MELOSYS-8174-PATCH, uansett sak. */
     val saksnummer: List<String> = emptyList(),
     val skarp: Boolean = false,
 )

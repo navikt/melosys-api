@@ -9,6 +9,11 @@ import org.springframework.transaction.annotation.Transactional
 private val log = KotlinLogging.logger { }
 
 /**
+ * Kastes når en skarp kjøring avvises av en sikkerhetssele. Controlleren gjør dette om til 400.
+ */
+class VedtaksmetadataFiksAvvist(melding: String) : RuntimeException(melding)
+
+/**
  * Datafiks for MELOSYS-8174 (Q4a/Q4b i fiksplanen): setter inn manglende rader i `vedtak_metadata`
  * for avsluttede behandlinger som blokkerer skattepliktig årsavregning.
  *
@@ -17,8 +22,8 @@ private val log = KotlinLogging.logger { }
  * saken med «vedtakMetadata er påkrevd for Behandlingsresultat» før den blir faglig vurdert.
  *
  * Fiksen kjøres med native SQL, ikke via JPA, av to grunner:
- *  - `registrert_av`/`endret_av` må bli [PATCH_MARKOER] slik at fiksen kan rulles tilbake i én
- *    setning ([angre]). JPA-auditing ville satt saksbehandler/«MELOSYS» i stedet.
+ *  - `registrert_av`/`endret_av` må bli [PATCH_MARKOER] slik at fiksen kan rulles tilbake ([angre]).
+ *    JPA-auditing ville satt saksbehandler/«MELOSYS» i stedet.
  *  - `vedtak_dato` skal være proxyen `behandlingsresultat.endret_dato`, ikke `Instant.now()` som
  *    `Behandlingsresultat.settVedtakMetadata` bruker.
  *
@@ -40,14 +45,39 @@ class VedtaksmetadataFiksService {
             antallRaderFunnet = kandidater.size,
             antallRaderInnsatt = 0,
             rader = kandidater,
-            gjenstaaendeUtenMetadata = tellUtenMetadata(saksnummer),
+            utenMetadataPerSak = tellUtenMetadata(saksnummer),
+            ukjentBehType = kandidater.filterNot { it.behType in KJENTE_BEH_TYPER }.map { it.behandlingsresultatId },
         )
     }
 
-    /** Q4b — datafiksen. Endrer prod. */
+    /**
+     * Q4b — datafiksen. Endrer prod.
+     *
+     * Tre sikkerhetsseler, alle bevisste etter review 20.08:
+     *  - tomt scope gjør ingenting i stedet for å falle tilbake på en default,
+     *  - kandidatantallet må ligge innenfor [maksAntallRader] (samme rolle som `maksAntall` på `/run`),
+     *  - alle kandidater må ha en `beh_type` vi vet hvilken vedtakstype hører til; ellers ville
+     *    ELSE-grenen i SQL-en stilltiende skrevet ENDRINGSVEDTAK på f.eks. en KLAGE.
+     */
     @Transactional
-    fun utfoer(saksnummer: List<String>): VedtaksmetadataFiksResultat {
+    fun utfoer(saksnummer: List<String>, maksAntallRader: Int): VedtaksmetadataFiksResultat {
+        if (saksnummer.isEmpty()) throw VedtaksmetadataFiksAvvist("Skarp kjøring krever eksplisitt saksnummer-liste")
+
         val kandidater = hentKandidater(saksnummer)
+        if (kandidater.size > maksAntallRader) {
+            throw VedtaksmetadataFiksAvvist(
+                "Fant ${kandidater.size} rader, men maksAntallRader er $maksAntallRader. " +
+                    "Kjør preview først, og hev maksAntallRader eksplisitt hvis tallet er riktig."
+            )
+        }
+        val ukjente = kandidater.filterNot { it.behType in KJENTE_BEH_TYPER }
+        if (ukjente.isNotEmpty()) {
+            throw VedtaksmetadataFiksAvvist(
+                "Kandidater med ukjent beh_type (vedtakstype kan ikke utledes trygt): " +
+                    ukjente.joinToString { "${it.behandlingsresultatId}=${it.behType}" }
+            )
+        }
+
         log.info {
             "Datafiks $PATCH_MARKOER: setter inn ${kandidater.size} rader i vedtak_metadata for saker $saksnummer " +
                 "(behandlingsresultat ${kandidater.map { it.behandlingsresultatId }})"
@@ -59,13 +89,15 @@ class VedtaksmetadataFiksService {
             .setParameter("markoer", PATCH_MARKOER)
             .executeUpdate()
 
-        if (antallInnsatt != kandidater.size) {
+        val avvik = antallInnsatt != kandidater.size
+        if (avvik) {
             log.warn {
                 "Datafiks $PATCH_MARKOER: satte inn $antallInnsatt rader, men forhåndsvisningen viste " +
-                    "${kandidater.size}. Kontroller resultatet før du går videre."
+                    "${kandidater.size}. Noe har endret dataene under kjøringen — kontroller før du går videre."
             }
+        } else {
+            log.info { "Datafiks $PATCH_MARKOER: satte inn $antallInnsatt rader" }
         }
-        log.info { "Datafiks $PATCH_MARKOER: satte inn $antallInnsatt rader" }
 
         return VedtaksmetadataFiksResultat(
             skarp = true,
@@ -73,18 +105,57 @@ class VedtaksmetadataFiksService {
             antallRaderFunnet = kandidater.size,
             antallRaderInnsatt = antallInnsatt,
             rader = kandidater,
-            gjenstaaendeUtenMetadata = tellUtenMetadata(saksnummer),
+            utenMetadataPerSak = tellUtenMetadata(saksnummer),
+            avvik = avvik,
         )
     }
 
-    /** Angreknappen: sletter alle rader fiksen har satt inn, uansett sak. */
+    /**
+     * Angreknappen. Sletter kun rader der BÅDE `registrert_av` og `endret_av` er [PATCH_MARKOER].
+     *
+     * `registrert_av` alene er ikke nok: den er `@CreatedBy` og settes kun ved insert, så en rad som
+     * senere har fått en ekte vedtaksdato skrevet av en saksbehandler ville blitt slettet med
+     * saksbehandlerens data. Slike rader telles i `antallEndretEtterpaa` og røres ikke.
+     *
+     * Tom `saksnummer`-liste betyr «alle markerte rader»; `skarp = false` viser hva som ville blitt slettet.
+     */
     @Transactional
-    fun angre(): Int {
-        val antallSlettet = entityManager.createNativeQuery(
-            "DELETE FROM vedtak_metadata WHERE registrert_av = :markoer"
-        ).setParameter("markoer", PATCH_MARKOER).executeUpdate()
-        log.info { "Datafiks $PATCH_MARKOER: rullet tilbake $antallSlettet rader" }
-        return antallSlettet
+    fun angre(saksnummer: List<String>, skarp: Boolean): VedtaksmetadataAngreResultat {
+        val kandidater = hentAngreKandidater(saksnummer)
+        val endretEtterpaa = tellEndretEtterpaa(saksnummer)
+
+        if (!skarp) {
+            return VedtaksmetadataAngreResultat(
+                skarp = false,
+                saksnummer = saksnummer,
+                antallRaderFunnet = kandidater.size,
+                antallSlettet = 0,
+                rader = kandidater,
+                antallEndretEtterpaa = endretEtterpaa,
+            )
+        }
+
+        log.info {
+            "Datafiks $PATCH_MARKOER: ruller tilbake ${kandidater.size} rader " +
+                "(scope=${saksnummer.ifEmpty { listOf("ALLE") }}, urørt fordi de er endret etterpå: $endretEtterpaa)"
+        }
+
+        val sql = if (saksnummer.isEmpty()) ANGRE_SQL else ANGRE_SQL + ANGRE_SAKSFILTER
+        val query = entityManager.createNativeQuery(sql).setParameter("markoer", PATCH_MARKOER)
+        if (saksnummer.isNotEmpty()) query.setParameter("saksnummer", saksnummer)
+        val antallSlettet = query.executeUpdate()
+
+        log.info { "Datafiks $PATCH_MARKOER: slettet $antallSlettet rader" }
+
+        return VedtaksmetadataAngreResultat(
+            skarp = true,
+            saksnummer = saksnummer,
+            antallRaderFunnet = kandidater.size,
+            antallSlettet = antallSlettet,
+            rader = kandidater,
+            antallEndretEtterpaa = endretEtterpaa,
+            avvik = antallSlettet != kandidater.size,
+        )
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -109,7 +180,30 @@ class VedtaksmetadataFiksService {
         }
     }
 
-    /** Q6a — etterkontroll: hvor mange defekte rader står igjen per sak. Skal være tom etter fiksen. */
+    @Suppress("UNCHECKED_CAST")
+    private fun hentAngreKandidater(saksnummer: List<String>): List<VedtaksmetadataAngreRad> {
+        val sql = if (saksnummer.isEmpty()) ANGRE_PREVIEW_SQL else ANGRE_PREVIEW_SQL + ANGRE_PREVIEW_SAKSFILTER
+        val query = entityManager.createNativeQuery(sql).setParameter("markoer", PATCH_MARKOER)
+        if (saksnummer.isNotEmpty()) query.setParameter("saksnummer", saksnummer)
+
+        return (query.resultList as List<Array<Any?>>).map { rad ->
+            VedtaksmetadataAngreRad(
+                saksnummer = rad[0] as String,
+                behandlingsresultatId = (rad[1] as Number).toLong(),
+                vedtakDato = rad[2] as String?,
+                vedtakType = rad[3] as String?,
+            )
+        }
+    }
+
+    private fun tellEndretEtterpaa(saksnummer: List<String>): Int {
+        val sql = if (saksnummer.isEmpty()) ENDRET_ETTERPAA_SQL else ENDRET_ETTERPAA_SQL + ANGRE_PREVIEW_SAKSFILTER
+        val query = entityManager.createNativeQuery(sql).setParameter("markoer", PATCH_MARKOER)
+        if (saksnummer.isNotEmpty()) query.setParameter("saksnummer", saksnummer)
+        return (query.singleResult as Number).toInt()
+    }
+
+    /** Q6a — hvor mange defekte rader står igjen per sak. Tom etter en vellykket skarp kjøring. */
     @Suppress("UNCHECKED_CAST")
     private fun tellUtenMetadata(saksnummer: List<String>): Map<String, Int> {
         if (saksnummer.isEmpty()) return emptyMap()
@@ -128,10 +222,24 @@ class VedtaksmetadataFiksService {
 
         /**
          * Sakene fra fiksplanen 18.08.2026 som fag har bekreftet har trygdeavgift til Nav for 2024.
-         * MEL-409394 er tatt ut av scope — den er avklart separat (år-løs årsavregning, ikke
+         * Brukes kun som default i preview — skarp kjøring krever eksplisitt liste.
+         * MEL-409394 er tatt ut av scope; den er avklart separat (år-løs årsavregning, ikke
          * manglende vedtaksmetadata).
          */
         val STANDARD_SAKER = listOf("MEL-448193", "MEL-545776", "MEL-632908")
+
+        /** Maks antall saksnummer per kall. Holder oss også godt unna Oracles grense på 1000 uttrykk i IN. */
+        const val MAKS_ANTALL_SAKER = 25
+
+        /** Default tak på antall rader en skarp kjøring får sette inn. Kan heves eksplisitt i requesten. */
+        const val DEFAULT_MAKS_ANTALL_RADER = 10
+
+        /**
+         * Behandlingstyper vi trygt kan utlede vedtakstype for: FØRSTEGANG gir FØRSTEGANGSVEDTAK,
+         * NY_VURDERING og ENDRET_PERIODE gir ENDRINGSVEDTAK (samme mønster som Flyway-patchen V7.6_04).
+         * Andre typer — KLAGE, ANKE, SATSENDRING … — har egne vedtakstyper i kodeverket og avvises.
+         */
+        val KJENTE_BEH_TYPER = listOf("FØRSTEGANG", "NY_VURDERING", "ENDRET_PERIODE")
 
         /** Resultattypene ÅrsavregningService slår opp på — det er kun disse som kan velte en sak. */
         private val RESULTATTYPER = listOf("FASTSATT_TRYGDEAVGIFT", "FASTSATT_LOVVALGSLAND", "MEDLEM_I_FOLKETRYGDEN")
@@ -188,6 +296,36 @@ class VedtaksmetadataFiksService {
             $KANDIDAT_WHERE
             GROUP BY b.saksnummer
         """
+
+        /** Kun rader som fortsatt er urørte: endret_av flyttes av enhver senere skriving (@LastModifiedBy). */
+        private const val ANGRE_PREVIEW_SQL = """
+            SELECT b.saksnummer,
+                   vm.behandlingsresultat_id,
+                   TO_CHAR(vm.vedtak_dato, 'YYYY-MM-DD HH24:MI:SS'),
+                   vm.vedtak_type
+            FROM vedtak_metadata vm
+            JOIN behandling b ON b.id = vm.behandlingsresultat_id
+            WHERE vm.registrert_av = :markoer
+              AND vm.endret_av = :markoer
+        """
+        private const val ANGRE_PREVIEW_SAKSFILTER = " AND b.saksnummer IN (:saksnummer)"
+
+        private const val ENDRET_ETTERPAA_SQL = """
+            SELECT COUNT(*)
+            FROM vedtak_metadata vm
+            JOIN behandling b ON b.id = vm.behandlingsresultat_id
+            WHERE vm.registrert_av = :markoer
+              AND vm.endret_av <> :markoer
+        """
+
+        private const val ANGRE_SQL = """
+            DELETE FROM vedtak_metadata
+            WHERE registrert_av = :markoer
+              AND endret_av = :markoer
+        """
+        private const val ANGRE_SAKSFILTER = """
+              AND behandlingsresultat_id IN (SELECT b.id FROM behandling b WHERE b.saksnummer IN (:saksnummer))
+        """
     }
 }
 
@@ -206,8 +344,34 @@ data class VedtaksmetadataFiksResultat(
     val saksnummer: List<String>,
     val antallRaderFunnet: Int,
     val antallRaderInnsatt: Int,
+    /** Kandidatene fra preview-spørringen. Ved `avvik = true` er dette ikke det samme som det som ble skrevet. */
     val rader: List<VedtaksmetadataFiksRad>,
-    val gjenstaaendeUtenMetadata: Map<String, Int>,
+    /** Q6a-etterkontrollen, per sak: rader uten vedtaksmetadata slik det står nå. Tom = ingen igjen. */
+    val utenMetadataPerSak: Map<String, Int>,
+    /** Kandidater der vedtakstypen ikke kan utledes trygt. Blokkerer skarp kjøring. */
+    val ukjentBehType: List<Long> = emptyList(),
+    /** True hvis antall innsatte rader ikke stemmer med forhåndsvisningen. */
+    val avvik: Boolean = false,
     val markoer: String = VedtaksmetadataFiksService.PATCH_MARKOER,
     val angreEndepunkt: String = "POST /admin/aarsavregninger/saker/skattepliktige/vedtaksmetadata-fiks/angre",
+)
+
+data class VedtaksmetadataAngreRad(
+    val saksnummer: String,
+    val behandlingsresultatId: Long,
+    val vedtakDato: String?,
+    val vedtakType: String?,
+)
+
+data class VedtaksmetadataAngreResultat(
+    val skarp: Boolean,
+    /** Tom liste = alle markerte rader, uansett sak. */
+    val saksnummer: List<String>,
+    val antallRaderFunnet: Int,
+    val antallSlettet: Int,
+    val rader: List<VedtaksmetadataAngreRad>,
+    /** Patch-rader som er endret etterpå (ekte data skrevet oppå) — disse røres aldri. */
+    val antallEndretEtterpaa: Int,
+    val avvik: Boolean = false,
+    val markoer: String = VedtaksmetadataFiksService.PATCH_MARKOER,
 )
