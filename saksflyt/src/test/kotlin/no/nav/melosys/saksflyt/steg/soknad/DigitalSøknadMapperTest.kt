@@ -102,6 +102,23 @@ internal class DigitalSøknadMapperTest {
             søknad.periode.fom shouldBe atFom
             søknad.periode.tom shouldBe atTom
             søknad.soeknadsland.landkoder shouldBe listOf("DE")
+            søknad.arbeidsgiverOgArbeidstakerHarUlikPeriode.shouldBeTrue()
+        }
+
+        @Test
+        fun `like perioder fra arbeidstaker og arbeidsgiver gir ikke avviksvarsel`() {
+            val fom = LocalDate.of(2025, 1, 1)
+            val tom = LocalDate.of(2025, 6, 30)
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                data = arbeidstakerData(utsendingsperiodeOgLand = landOgPeriode(LandKode.DE, fom, tom))
+                medKobletArbeidsgiverSkjema {
+                    data = arbeidsgiverData(utsendingsperiodeOgLand = landOgPeriode(LandKode.DE, fom, tom))
+                }
+            }
+
+            val søknad = DigitalSøknadMapper.tilSoeknad(dto)
+
+            søknad.arbeidsgiverOgArbeidstakerHarUlikPeriode.shouldBeFalse()
         }
 
         @Test
