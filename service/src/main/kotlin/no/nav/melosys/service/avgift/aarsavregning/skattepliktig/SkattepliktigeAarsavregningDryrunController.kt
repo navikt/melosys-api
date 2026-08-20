@@ -15,11 +15,14 @@ import org.springframework.web.bind.annotation.RestController
 
 private val log = KotlinLogging.logger { }
 
+private val SAKSNUMMER_FORMAT = Regex("^MEL-\\d+$")
+
 @Protected
 @RestController
 @RequestMapping("/admin/aarsavregninger/saker/skattepliktige")
 class SkattepliktigeAarsavregningDryrunController(
-    private val skattepliktigeAarsavregningDryrunService: SkattepliktigeAarsavregningDryrunService
+    private val skattepliktigeAarsavregningDryrunService: SkattepliktigeAarsavregningDryrunService,
+    private val vedtaksmetadataFiksService: VedtaksmetadataFiksService
 ) {
 
     @Operation(
@@ -67,10 +70,68 @@ class SkattepliktigeAarsavregningDryrunController(
     @GetMapping("/rapport", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun rapport(): ResponseEntity<String> =
         ResponseEntity(skattepliktigeAarsavregningDryrunService.rapportJsonString(), HttpStatus.OK)
+
+    @Operation(
+        summary = "Datafiks: sett inn manglende vedtaksmetadata (MELOSYS-8174, Q4a/Q4b)",
+        description = "Med skarp=false (default) er dette Q4a — en read-only forhåndsvisning av nøyaktig " +
+            "hvilke rader som ville blitt satt inn. Med skarp=true er det Q4b, som endrer data. " +
+            "Innsettingen er idempotent, og alle rader merkes MELOSYS-8174-PATCH slik at de kan " +
+            "slettes igjen med /vedtaksmetadata-fiks/angre. Kjør alltid preview først og kontroller " +
+            "at radene stemmer med fiksplanen før du kjører skarpt."
+    )
+    @PostMapping("/vedtaksmetadata-fiks")
+    fun vedtaksmetadataFiks(
+        @RequestBody
+        @Parameter(description = "Saksnummer å fikse (default: de tre sakene fra fiksplanen) og skarp-flagg")
+        request: VedtaksmetadataFiksRequest
+    ): ResponseEntity<Any> {
+        val saksnummer = request.saksnummer.ifEmpty { VedtaksmetadataFiksService.STANDARD_SAKER }
+
+        val ugyldige = saksnummer.filterNot { SAKSNUMMER_FORMAT.matches(it) }
+        if (ugyldige.isNotEmpty()) {
+            return ResponseEntity.badRequest().body(
+                mapOf("feil" to "Ugyldig saksnummerformat, forventer MEL-<tall>", "ugyldige" to ugyldige)
+            )
+        }
+
+        log.info {
+            "Datafiks vedtaksmetadata (${if (request.skarp) "SKARP" else "PREVIEW"}) for saker $saksnummer"
+        }
+
+        val resultat = if (request.skarp) {
+            vedtaksmetadataFiksService.utfoer(saksnummer)
+        } else {
+            vedtaksmetadataFiksService.forhaandsvis(saksnummer)
+        }
+
+        return ResponseEntity.ok(resultat)
+    }
+
+    @Operation(
+        summary = "Angre datafiksen: slett alle rader merket MELOSYS-8174-PATCH",
+        description = "Sletter kun rader datafiksen selv har satt inn (registrert_av = MELOSYS-8174-PATCH). " +
+            "Rører ingen ekte vedtaksmetadata."
+    )
+    @PostMapping("/vedtaksmetadata-fiks/angre")
+    fun angreVedtaksmetadataFiks(): ResponseEntity<Map<String, Any?>> {
+        val antallSlettet = vedtaksmetadataFiksService.angre()
+        return ResponseEntity.ok(
+            mapOf(
+                "melding" to "Datafiks rullet tilbake",
+                "markoer" to VedtaksmetadataFiksService.PATCH_MARKOER,
+                "antallSlettet" to antallSlettet
+            )
+        )
+    }
 }
 
 data class SkattehendelseRunRequest(
     val skattehendelser: List<SkattehendelseDryrunItem>,
     val skarp: Boolean = false,
     val maksAntall: Int? = null,
+)
+
+data class VedtaksmetadataFiksRequest(
+    val saksnummer: List<String> = emptyList(),
+    val skarp: Boolean = false,
 )
