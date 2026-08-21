@@ -61,6 +61,9 @@ object DigitalSøknadMapper {
         )
     }
 
+    fun harArbeidsgiverdel(dto: UtsendtArbeidstakerSkjemaM2MDto): Boolean =
+        hentArbeidsgiversData(dto) != null
+
     private fun hentArbeidstakersData(dto: UtsendtArbeidstakerSkjemaM2MDto): ArbeidstakersDataLook? {
         return when (val data = dto.skjema.data) {
             is UtsendtArbeidstakerArbeidstakersSkjemaDataDto -> ArbeidstakersDataLook(
