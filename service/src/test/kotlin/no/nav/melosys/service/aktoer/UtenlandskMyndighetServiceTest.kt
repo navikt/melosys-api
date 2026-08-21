@@ -128,7 +128,7 @@ class UtenlandskMyndighetServiceTest {
 
 
         val exception = shouldThrow<FunksjonellException> {
-            utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.SE, null)
+            utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.SE)
         }
 
 

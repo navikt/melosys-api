@@ -207,7 +207,7 @@ class DistribuerJournalpostTest {
             landkode = Land_iso2.GB
         }
 
-        every { mockUtenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_iso2.GB), any()) } returns utenlandskMyndighet
+        every { mockUtenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_iso2.GB)) } returns utenlandskMyndighet
 
 
         distribuerJournalpost.utfør(prosessinstans)

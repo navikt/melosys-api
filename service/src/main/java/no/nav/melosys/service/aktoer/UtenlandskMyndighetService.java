@@ -10,7 +10,6 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
@@ -24,22 +23,9 @@ import org.springframework.stereotype.Service;
 public class UtenlandskMyndighetService {
     private static final Logger log = LoggerFactory.getLogger(UtenlandskMyndighetService.class);
 
-    private static final UtenlandskMyndighet utenlandskMyndighetUnntakUSA;
-
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final LandvelgerService landvelgerService;
     private final FagsakService fagsakService;
-
-    static {
-        var utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.setNavn("Social Security Administration");
-        utenlandskMyndighet.setGateadresse1("Division of Training and Program Support");
-        utenlandskMyndighet.setGateadresse2("International Support Branch, NT 03-A-09 6100 Wabash Avenue");
-        utenlandskMyndighet.setPoststed("Baltimore MD 21215");
-        utenlandskMyndighet.setLand("USA");
-        utenlandskMyndighet.setLandkode(Land_iso2.US);
-        utenlandskMyndighetUnntakUSA = utenlandskMyndighet;
-    }
 
     public UtenlandskMyndighetService(UtenlandskMyndighetRepository utenlandskMyndighetRepository,
                                       LandvelgerService landvelgerService, FagsakService fagsakService) {
@@ -72,18 +58,11 @@ public class UtenlandskMyndighetService {
         return eøsLandkodeOptional.flatMap(utenlandskMyndighetRepository::findByLandkode);
     }
 
-    public UtenlandskMyndighet hentUtenlandskMyndighet(Land_iso2 landkode) {
-        return hentUtenlandskMyndighet(landkode, null);
-    }
-
     public List<UtenlandskMyndighet> hentAlleUtenlandskeMyndigheter() {
         return utenlandskMyndighetRepository.findAll();
     }
 
-    public UtenlandskMyndighet hentUtenlandskMyndighet(Land_iso2 landkode, Produserbaredokumenter produserbaredokumenter) {
-        if (landkode == Land_iso2.US && produserbaredokumenter == Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV) {
-            return hentUtenlandskMyndighetUnntakUSA();
-        }
+    public UtenlandskMyndighet hentUtenlandskMyndighet(Land_iso2 landkode) {
         return utenlandskMyndighetRepository.findByLandkode(landkode == Land_iso2.AX ? Land_iso2.FI : landkode)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
     }
@@ -117,7 +96,7 @@ public class UtenlandskMyndighetService {
     }
 
     private String hentEøsInstitusjonID(Land_iso2 landkode) {
-        UtenlandskMyndighet myndighet = hentUtenlandskMyndighet(landkode, null);
+        UtenlandskMyndighet myndighet = hentUtenlandskMyndighet(landkode);
         return myndighet.hentInstitusjonID();
     }
 
@@ -127,9 +106,5 @@ public class UtenlandskMyndighetService {
         }
         return landkoder.stream().findFirst().orElseThrow(
             () -> new FunksjonellException("Fant ingen trygdemyndighetsland for bilaterale trygdeavtaler."));
-    }
-
-    private UtenlandskMyndighet hentUtenlandskMyndighetUnntakUSA() {
-        return utenlandskMyndighetUnntakUSA;
     }
 }
