@@ -208,6 +208,47 @@ class SkattepliktigeAarsavregningSkarpTest {
         }
     }
 
+    @Test
+    fun `flere aktive årsavregninger stopper saken i stedet for å bumpe en vilkårlig`() {
+        val fagsak = Fagsak.forTest {
+            saksnummer = "MEL-1"
+            type = Sakstyper.EU_EOS
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            status(Saksstatuser.OPPRETTET)
+            behandling {
+                id = 1
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.AVVENT_DOK_PART
+            }
+            behandling {
+                id = 2
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.UNDER_BEHANDLING
+            }
+        }
+        val behandlingsresultat = Behandlingsresultat.forTest { årsavregning { aar = GJELDER_ÅR } }
+
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+        every { årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(any(), GJELDER_ÅR) } returns
+            GjeldendeBehandlingsresultaterForÅrsavregning(
+                behandlingsresultat,
+                sisteBehandlingsresultatMedAvgift = behandlingsresultat,
+                sisteÅrsavregning = behandlingsresultat,
+            )
+        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
+
+        service.prosesserSkattehendelser(
+            listOf(SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
+            skarp = true,
+        )
+
+        verify(exactly = 0) { skarpUtfoerer.settStatusVurderDokument(any(), any()) }
+        verify(exactly = 0) { skarpUtfoerer.opprettProsessinstans(any(), any()) }
+        service.resultater.single().feilmelding shouldNotBe null
+        service.status()["antallOppslagFeilet"] shouldBe 1
+    }
+
     private fun utfoerer() = SkattepliktigeAarsavregningSkarpUtfoerer(prosessinstansService, behandlingService)
 
     private fun lagFagsak(saksnummer: String) = Fagsak.forTest {

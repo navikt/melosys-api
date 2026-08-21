@@ -7,6 +7,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
@@ -285,10 +286,11 @@ class SkattepliktigeAarsavregningDryrunService(
 
         return when {
             årsAvregninger.isEmpty() -> null
-            årsAvregninger.size > 1 -> {
-                log.warn { "Flere aktive årsavregninger funnet for sak: ${fagsak.saksnummer} og år: $gjelderÅr" }
-                årsAvregninger.first()
-            }
+            // Som SkattehendelserConsumer: stopp saken i stedet for å velge en vilkårlig behandling.
+            // I en prod-oppryddingsjobb er «bump en av dem og ignorer resten» verre enn å feile —
+            // saken havner i rapporten med feilmelding og kan håndteres manuelt.
+            årsAvregninger.size > 1 ->
+                throw TekniskException("Flere aktive årsavregninger funnet for sak: ${fagsak.saksnummer} og år: $gjelderÅr")
             else -> årsAvregninger.single()
         }
     }

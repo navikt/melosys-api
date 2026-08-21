@@ -44,8 +44,15 @@ class SkattepliktigeAarsavregningSkarpUtfoerer(
         )
 
     /**
-     * Compare-and-set: bumper kun hvis den ferske raden fortsatt står i [forventetStatus] — statusen
-     * løkka faktisk observerte da den bestemte seg for å bumpe.
+     * Bumper kun hvis den ferske raden fortsatt står i [forventetStatus] — statusen løkka faktisk
+     * observerte da den bestemte seg for å bumpe.
+     *
+     * Merk at dette er en read-check-write innenfor én transaksjon, ikke en atomisk compare-and-set:
+     * Behandling har ingen @Version, og UPDATE-en er ikke betinget på status i SQL-en. Et vindu på
+     * lengden av denne transaksjonen består derfor. Det er samme vindu som SkattehendelserConsumer
+     * har i dag, og fire-fem størrelsesordener mindre enn det løkka hadde uten sjekken (der vinduet
+     * var hele batchen). Ekte atomisitet krever @Version på Behandling eller en betinget UPDATE som
+     * omgår auditing — begge er større grep enn denne jobben.
      *
      * SkattehendelserConsumer gjør sjekk og skriving atomisk i én transaksjon og kan aldri handle på
      * utdaterte data. Her ble de to skilt av REQUIRES_NEW, og med 45 saker og tunge oppslag er vinduet
