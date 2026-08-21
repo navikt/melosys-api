@@ -63,6 +63,9 @@ class SkattepliktigeAarsavregningDryrunService(
 
     // readOnly: alle skrivninger går gjennom skarpUtfoerer i egne transaksjoner, så denne
     // stien skal være garantert bivirkningsfri — readOnly gir FlushMode.MANUAL og er garantien.
+    // NB: kalles som selvkall fra metoden over, så denne annotasjonen gjelder KUN direkte kallere
+    // (tester). Garantien for controller-stien ligger på den ytre metoden og er pinnet av
+    // SkattepliktigeAarsavregningSkarpIT.
     @Synchronized
     @Transactional(readOnly = true)
     fun prosesserSkattehendelser(

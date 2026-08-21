@@ -4,8 +4,12 @@ import com.ninjasquad.springmockk.MockkBean
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.Application
+import io.mockk.every
 import no.nav.melosys.saksflyt.ProsessinstansDispatcher
+import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.SkattehendelseDryrunItem
+import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.SkattepliktigeAarsavregningDryrunService
 import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.SkattepliktigeAarsavregningSkarpUtfoerer
+import no.nav.melosys.service.sak.FagsakService
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,7 +20,10 @@ import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 /**
  * Dekker transaksjonsgarantiene i skarp-modus for 8045-kjøringen. De kan ikke bevises med mocks:
@@ -37,6 +44,7 @@ import org.springframework.transaction.support.TransactionTemplate
 @EnableMockOAuth2Server
 class SkattepliktigeAarsavregningSkarpIT(
     @Autowired val skarpUtfoerer: SkattepliktigeAarsavregningSkarpUtfoerer,
+    @Autowired val dryrunService: SkattepliktigeAarsavregningDryrunService,
     @Autowired val transactionManager: PlatformTransactionManager,
     @Autowired val jdbcTemplate: JdbcTemplate
 ) : OracleTestContainerBase() {
@@ -49,6 +57,10 @@ class SkattepliktigeAarsavregningSkarpIT(
      */
     @MockkBean(relaxed = true)
     private lateinit var prosessinstansDispatcher: ProsessinstansDispatcher
+
+    /** Sonde: første oppslag i løkka, brukt til å lese av transaksjonstilstanden inne i kjøringen. */
+    @MockkBean(relaxed = true)
+    private lateinit var fagsakService: FagsakService
 
     private val ytreLesetransaksjon: TransactionTemplate
         get() = TransactionTemplate(transactionManager).apply { isReadOnly = true }
@@ -76,6 +88,41 @@ class SkattepliktigeAarsavregningSkarpIT(
         }
 
         prosessdata("MEL-901", "2023") shouldContain "sendInnhentingsbrev=true"
+    }
+
+    /**
+     * Pinner C3 på stien controlleren faktisk bruker.
+     *
+     * `prosesserSkattehendelserAsynkront` kaller `prosesserSkattehendelser` som selvkall, så
+     * annotasjonen på den indre metoden er død config — hele garantien hviler på den ytre. I tillegg
+     * har @Async- og @Transactional-advisorene begge LOWEST_PRECEDENCE; at async havner ytterst
+     * skyldes at AsyncAnnotationBeanPostProcessor setter beforeExistingAdvisors=true, ikke en
+     * ordning vi selv pinner. Resolves den motsatt vei, ville transaksjonen committet på
+     * kalltråden og batchen kjørt helt uten transaksjon — da feiler denne testen på
+     * `aktivTransaksjon`, ikke stille i prod.
+     */
+    @Test
+    fun `batchen kjører i en aktiv read-only-transaksjon også gjennom Async-proxyen`() {
+        val naaddeLoekka = CountDownLatch(1)
+        var readOnly: Boolean? = null
+        var aktivTransaksjon: Boolean? = null
+
+        every { fagsakService.hentFagsakerMedAktør(any(), any()) } answers {
+            readOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly()
+            aktivTransaksjon = TransactionSynchronizationManager.isActualTransactionActive()
+            naaddeLoekka.countDown()
+            emptyList()
+        }
+
+        dryrunService.prosesserSkattehendelserAsynkront(
+            listOf(SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = "12345678901")),
+            false,
+            null,
+        )
+
+        naaddeLoekka.await(10, TimeUnit.SECONDS) shouldBe true
+        aktivTransaksjon shouldBe true
+        readOnly shouldBe true
     }
 
     private fun antallÅrsavregningsprosesser(): Int = jdbcTemplate.queryForObject(
