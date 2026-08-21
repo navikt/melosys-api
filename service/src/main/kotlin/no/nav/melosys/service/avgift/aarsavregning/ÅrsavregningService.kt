@@ -190,7 +190,28 @@ class ÅrsavregningService(
             behandlingsresultatService.lagre(årsavregning.hentBehandlingsresultat).hentÅrsavregning()
         }
 
+        settEndeligAvgiftTilNullDersomIngenAvgiftspliktigPeriode(behandlingsresultat, årsavregning)
+
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
+    }
+
+    /**
+     * Når behandlingen ikke lenger har avgiftspliktige perioder som overlapper med årsavregningsåret
+     * (f.eks. en ny vurdering som avkorter medlemskapsperioden slik at hele året faller bort),
+     * er endelig trygdeavgift 0. Saksbehandler kan ikke kjøre beregnTrygdeavgift i dette tilfellet
+     * (validatoren blokkerer beregning uten avgiftspliktige perioder), så vi setter beløpet her.
+     * Da blir differansen en full kreditering av tidligere fakturert beløp, og vedtaksbrev/faktura
+     * kan produseres uten manuelle steg.
+     */
+    private fun settEndeligAvgiftTilNullDersomIngenAvgiftspliktigPeriode(
+        behandlingsresultat: Behandlingsresultat,
+        årsavregning: Årsavregning
+    ) {
+        if (årsavregning.manueltAvgiftBeloep != null) return
+        if (behandlingsresultat.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(årsavregning.aar)) return
+
+        årsavregning.beregnetAvgiftBelop = BigDecimal.ZERO
+        årsavregning.beregnTilFaktureringsBeloep()
     }
 
     fun hentSisteÅrsavregning(saksnummer: String, år: Int, førVedtaksdato: Instant? = null): Årsavregning? {
