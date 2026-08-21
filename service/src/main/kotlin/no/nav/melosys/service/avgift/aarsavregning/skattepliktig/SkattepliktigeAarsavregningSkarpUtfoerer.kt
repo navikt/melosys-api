@@ -44,32 +44,41 @@ class SkattepliktigeAarsavregningSkarpUtfoerer(
         )
 
     /**
-     * Behandlingen hentes på nytt her: entiteten kalleren sitter på er lastet i den ytre,
-     * read-only persistence-konteksten og er detached for denne transaksjonen.
+     * Compare-and-set: bumper kun hvis den ferske raden fortsatt står i [forventetStatus] — statusen
+     * løkka faktisk observerte da den bestemte seg for å bumpe.
      *
-     * Forutsetningen gjentas mot den ferske raden. SkattehendelserConsumer gjør sjekk og skriving
-     * atomisk i én transaksjon; her ble de skilt av REQUIRES_NEW, så uten denne re-valideringen
-     * kunne kjøringen skrive en behandling en saksbehandler nettopp har flyttet videre tilbake til
-     * VURDER_DOKUMENT.
+     * SkattehendelserConsumer gjør sjekk og skriving atomisk i én transaksjon og kan aldri handle på
+     * utdaterte data. Her ble de to skilt av REQUIRES_NEW, og med 45 saker og tunge oppslag er vinduet
+     * minutter. Uten CAS-en ville en behandling en saksbehandler flyttet videre i mellomtiden — f.eks.
+     * til IVERKSETTER_VEDTAK — blitt kastet tilbake til VURDER_DOKUMENT. Å gjenta løkkas
+     * inngangsbetingelse (aktiv, ikke OPPRETTET) er ikke nok: den er sann for nettopp de statusene
+     * saksbehandleren flytter til.
+     *
+     * CAS-en subsumerer aktiv-sjekken: både AVSLUTTET og MIDLERTIDIG_LOVVALGSBESLUTNING er statuser,
+     * så en drift dit gir uansett mismatch.
+     *
+     * Behandlingen hentes på nytt fordi entiteten kalleren sitter på er lastet i den ytre, read-only
+     * persistence-konteksten og er detached for denne transaksjonen.
      *
      * Rå `status`-setting + `lagre` (ikke `endreStatus`) er bevisst — det speiler
      * SkattehendelserConsumer, som heller ikke skal trigge svarfrist- eller oppgave-logikk.
-     *
-     * @return true hvis statusen faktisk ble endret, false hvis forutsetningen ikke lenger holdt.
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun settStatusVurderDokument(behandlingId: Long): Boolean {
+    fun settStatusVurderDokument(behandlingId: Long, forventetStatus: Behandlingsstatus): StatusBumpResultat {
         val behandling = behandlingService.hentBehandling(behandlingId)
-        if (behandling.status == Behandlingsstatus.OPPRETTET || !behandling.erAktiv()) {
+        if (behandling.status != forventetStatus) {
             log.info {
-                "SKARP: hopper over status-bump for behandling $behandlingId — status er nå ${behandling.status}, " +
-                    "aktiv=${behandling.erAktiv()}"
+                "SKARP: hopper over status-bump for behandling $behandlingId — status er nå " +
+                    "${behandling.status}, løkka observerte $forventetStatus"
             }
-            return false
+            return StatusBumpResultat(oppdatert = false, faktiskStatus = behandling.status)
         }
         log.info { "SKARP: oppdaterer status fra ${behandling.status} til VURDER_DOKUMENT for behandling $behandlingId" }
         behandling.status = Behandlingsstatus.VURDER_DOKUMENT
         behandlingService.lagre(behandling)
-        return true
+        return StatusBumpResultat(oppdatert = true, faktiskStatus = Behandlingsstatus.VURDER_DOKUMENT)
     }
+
+    /** @property faktiskStatus statusen raden hadde da den indre transaksjonen leste den. */
+    data class StatusBumpResultat(val oppdatert: Boolean, val faktiskStatus: Behandlingsstatus)
 }

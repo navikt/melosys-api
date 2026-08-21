@@ -1,8 +1,10 @@
 package no.nav.melosys.itest
 
+import com.ninjasquad.springmockk.MockkBean
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.Application
+import no.nav.melosys.saksflyt.ProsessinstansDispatcher
 import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.SkattepliktigeAarsavregningSkarpUtfoerer
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Test
@@ -39,6 +41,15 @@ class SkattepliktigeAarsavregningSkarpIT(
     @Autowired val jdbcTemplate: JdbcTemplate
 ) : OracleTestContainerBase() {
 
+    /**
+     * Testen bryr seg om radene, ikke om at saksflyten kjører dem. Uten denne ville
+     * ProsessinstansOpprettetListener (AFTER_COMMIT) sendt instansene til executoren, som ville
+     * feilet på saker vi aldri seeder — ERROR-støy i CI, og en åpen DML som kan gi ORA-00054 mot
+     * TRUNCATE i neste tests truncateAllTables() (som svelger feilen med kun log.warn).
+     */
+    @MockkBean(relaxed = true)
+    private lateinit var prosessinstansDispatcher: ProsessinstansDispatcher
+
     private val ytreLesetransaksjon: TransactionTemplate
         get() = TransactionTemplate(transactionManager).apply { isReadOnly = true }
 
@@ -64,7 +75,7 @@ class SkattepliktigeAarsavregningSkarpIT(
             null
         }
 
-        prosessdata("MEL-901") shouldContain "sendInnhentingsbrev=true"
+        prosessdata("MEL-901", "2023") shouldContain "sendInnhentingsbrev=true"
     }
 
     private fun antallÅrsavregningsprosesser(): Int = jdbcTemplate.queryForObject(
@@ -72,11 +83,14 @@ class SkattepliktigeAarsavregningSkarpIT(
         Int::class.java
     )!!
 
-    private fun prosessdata(saksnummer: String): String = jdbcTemplate.queryForObject(
-        """SELECT dbms_lob.substr(data, 4000, 1) FROM prosessinstans
+    /** Scopet på både sak og år: én sak kan ha flere årsavregningsprosesser. */
+    private fun prosessdata(saksnummer: String, år: String): String = jdbcTemplate.queryForList(
+        """SELECT dbms_lob.substr(data, 4000, 1) AS data FROM prosessinstans
            WHERE prosess_type = 'OPPRETT_NY_BEHANDLING_AARSAVREGNING'
+             AND dbms_lob.instr(data, ?) > 0
              AND dbms_lob.instr(data, ?) > 0""",
         String::class.java,
-        saksnummer
-    )!!
+        saksnummer,
+        "gjelderÅr=$år"
+    ).single()!!
 }

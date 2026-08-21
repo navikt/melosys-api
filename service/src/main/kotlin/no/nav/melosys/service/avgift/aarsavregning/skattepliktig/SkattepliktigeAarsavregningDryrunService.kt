@@ -42,7 +42,7 @@ class SkattepliktigeAarsavregningDryrunService(
         // synchronizedList synkroniserer enkeltoperasjoner, ikke traversering. Jackson indekserer
         // seg gjennom lista (RandomAccess), så et samtidig resultater.clear() — som skjer når ops
         // starter en ny kjøring mens rapporten hentes — gir IndexOutOfBoundsException midt i
-        // serialiseringen. Målt: 182 av 300 serialiseringer feilet under samtidig skriving.
+        // serialiseringen. Målt til å ramme flertallet av serialiseringene under samtidig skriving.
         // Derfor snapshot under låsen; monitoren er wrapper-objektet selv, jf. Javadoc.
         val snapshot = synchronized(resultater) { ArrayList(resultater) }
         return jacksonObjectMapper().valueToTree<JsonNode>(snapshot).toPrettyString()
@@ -145,6 +145,7 @@ class SkattepliktigeAarsavregningDryrunService(
 
                             var prosessinstansOpprettet: Boolean? = null
                             var statusOppdatert: Boolean? = null
+                            var hoppetOverAarsak: String? = null
                             var skarpFeilmelding: String? = null
                             if (skarp && villeOpprettetProsessinstans) {
                                 try {
@@ -164,8 +165,18 @@ class SkattepliktigeAarsavregningDryrunService(
                                 }
                             } else if (skarp && villeOppdatertStatus && aktivÅrsavregning != null) {
                                 try {
-                                    statusOppdatert = skarpUtfoerer.settStatusVurderDokument(aktivÅrsavregning.id)
-                                    if (statusOppdatert) antallStatusOppdatert++ else antallStatusHoppetOver++
+                                    val bump = skarpUtfoerer.settStatusVurderDokument(
+                                        aktivÅrsavregning.id,
+                                        aktivÅrsavregning.status,
+                                    )
+                                    statusOppdatert = bump.oppdatert
+                                    if (bump.oppdatert) {
+                                        antallStatusOppdatert++
+                                    } else {
+                                        antallStatusHoppetOver++
+                                        hoppetOverAarsak = "status var ${bump.faktiskStatus} ved skriving, " +
+                                            "løkka observerte ${aktivÅrsavregning.status}"
+                                    }
                                 } catch (e: Exception) {
                                     antallSkarpFeilet++
                                     statusOppdatert = false
@@ -196,6 +207,7 @@ class SkattepliktigeAarsavregningDryrunService(
                                     behandlingId = aktivÅrsavregning?.id,
                                     prosessinstansOpprettet = prosessinstansOpprettet,
                                     statusOppdatert = statusOppdatert,
+                                    hoppetOverAarsak = hoppetOverAarsak,
                                     feilmelding = skarpFeilmelding,
                                 )
                             )
@@ -361,6 +373,8 @@ class SkattepliktigeAarsavregningDryrunService(
         val behandlingId: Long?,
         val prosessinstansOpprettet: Boolean? = null,
         val statusOppdatert: Boolean? = null,
+        /** Satt når status-bumpen ble hoppet over fordi raden hadde endret seg — skiller det fra [feilmelding]. */
+        val hoppetOverAarsak: String? = null,
         val feilmelding: String? = null,
     )
 }

@@ -59,8 +59,7 @@ class SkattepliktigeAarsavregningSkarpTest {
     fun `skarp opprettelse ber om innhentingsbrev, som SkattehendelserConsumer`() {
         every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any(), any()) } returns UUID.randomUUID()
 
-        SkattepliktigeAarsavregningSkarpUtfoerer(prosessinstansService, behandlingService)
-            .opprettProsessinstans("MEL-1", "2023")
+        utfoerer().opprettProsessinstans("MEL-1", "2023")
 
         verify {
             prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
@@ -74,29 +73,40 @@ class SkattepliktigeAarsavregningSkarpTest {
 
     @Test
     fun `status-bump hopper over behandling som er flyttet videre i mellomtiden`() {
-        // Forutsetningen ble evaluert i den ytre transaksjonen; REQUIRES_NEW skilte sjekk og
-        // skriving, så den ferske raden må sjekkes på nytt før vi skriver.
+        // Saksbehandleren flytter behandlingen etter at løkka leste den. IVERKSETTER_VEDTAK er både
+        // aktiv og ulik OPPRETTET, så bare en compare-and-set mot observert status fanger dette.
+        val behandling = Behandling.forTest { status = Behandlingsstatus.IVERKSETTER_VEDTAK }
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+
+        val bump = utfoerer().settStatusVurderDokument(BEHANDLING_ID, Behandlingsstatus.VURDER_DOKUMENT)
+
+        bump.oppdatert shouldBe false
+        bump.faktiskStatus shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
+        behandling.status shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
+        verify(exactly = 0) { behandlingService.lagre(any()) }
+    }
+
+    @Test
+    fun `status-bump hopper over behandling som er avsluttet i mellomtiden`() {
         val behandling = Behandling.forTest { status = Behandlingsstatus.AVSLUTTET }
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
 
-        val bumpet = SkattepliktigeAarsavregningSkarpUtfoerer(prosessinstansService, behandlingService)
-            .settStatusVurderDokument(BEHANDLING_ID)
+        val bump = utfoerer().settStatusVurderDokument(BEHANDLING_ID, Behandlingsstatus.AVVENT_DOK_PART)
 
-        bumpet shouldBe false
-        behandling.status shouldBe Behandlingsstatus.AVSLUTTET
+        bump.oppdatert shouldBe false
         verify(exactly = 0) { behandlingService.lagre(any()) }
     }
 
     @Test
     fun `status-bump skjer når behandlingen fortsatt står der løkka så den`() {
-        val behandling = Behandling.forTest { status = Behandlingsstatus.VURDER_DOKUMENT }
+        // Startstatus er ulik målstatus, ellers ville testen overlevd at selve tilordningen forsvant.
+        val behandling = Behandling.forTest { status = Behandlingsstatus.AVVENT_DOK_PART }
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { behandlingService.lagre(behandling) } returns Unit
 
-        val bumpet = SkattepliktigeAarsavregningSkarpUtfoerer(prosessinstansService, behandlingService)
-            .settStatusVurderDokument(BEHANDLING_ID)
+        val bump = utfoerer().settStatusVurderDokument(BEHANDLING_ID, Behandlingsstatus.AVVENT_DOK_PART)
 
-        bumpet shouldBe true
+        bump.oppdatert shouldBe true
         behandling.status shouldBe Behandlingsstatus.VURDER_DOKUMENT
         verify { behandlingService.lagre(behandling) }
     }
@@ -135,6 +145,8 @@ class SkattepliktigeAarsavregningSkarpTest {
         }
         service.resultater.size shouldBe 2
     }
+
+    private fun utfoerer() = SkattepliktigeAarsavregningSkarpUtfoerer(prosessinstansService, behandlingService)
 
     private fun lagFagsak(saksnummer: String) = Fagsak.forTest {
         this.saksnummer = saksnummer
