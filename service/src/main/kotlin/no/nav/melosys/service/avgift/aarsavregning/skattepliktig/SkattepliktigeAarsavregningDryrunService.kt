@@ -44,6 +44,8 @@ class SkattepliktigeAarsavregningDryrunService(
         // starter en ny kjøring mens rapporten hentes — gir IndexOutOfBoundsException midt i
         // serialiseringen. Målt til å ramme flertallet av serialiseringene under samtidig skriving.
         // Derfor snapshot under låsen; monitoren er wrapper-objektet selv, jf. Javadoc.
+        // NB: uten regresjonstest — en deterministisk test krever at snapshottet trekkes ut, og en
+        // ekte racetest ville vært flaky i suiten. Fjerner du synchronized-blokka rødner ingenting.
         val snapshot = synchronized(resultater) { ArrayList(resultater) }
         return jacksonObjectMapper().valueToTree<JsonNode>(snapshot).toPrettyString()
     }

@@ -1,6 +1,7 @@
 package no.nav.melosys.service.avgift.aarsavregning.skattepliktig
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -8,7 +9,9 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.behandling
 import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.årsavregning
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -16,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.aarsavregning.GjeldendeBehandlingsresultaterForÅrsavregning
@@ -144,6 +148,64 @@ class SkattepliktigeAarsavregningSkarpTest {
             this["antallSkarpFeilet"] shouldBe 1
         }
         service.resultater.size shouldBe 2
+    }
+
+    @Test
+    fun `hoppet over status-bump rapporteres som hoppet over, ikke som feil`() {
+        // Driver status-grenen i løkka: uten dette har hele grenen null dekning, og en hardkodet
+        // forventetStatus i kallet ville passert alle testene.
+        val fagsak = Fagsak.forTest {
+            saksnummer = "MEL-1"
+            type = Sakstyper.EU_EOS
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            status(Saksstatuser.OPPRETTET)
+            behandling {
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.AVVENT_DOK_PART
+            }
+        }
+        val årsavregningBehandling = fagsak.behandlinger.first()
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            this.behandling { id = årsavregningBehandling.id }
+            årsavregning { aar = GJELDER_ÅR }
+        }
+
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
+        every { behandlingsresultatService.hentBehandlingsresultat(årsavregningBehandling.id) } returns behandlingsresultat
+        every { årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(any(), GJELDER_ÅR) } returns
+            GjeldendeBehandlingsresultaterForÅrsavregning(
+                behandlingsresultat,
+                sisteBehandlingsresultatMedAvgift = behandlingsresultat,
+                sisteÅrsavregning = behandlingsresultat,
+            )
+        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
+        every { trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) } returns
+            Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
+        every { skarpUtfoerer.settStatusVurderDokument(any(), any()) } returns
+            SkattepliktigeAarsavregningSkarpUtfoerer.StatusBumpResultat(
+                oppdatert = false,
+                faktiskStatus = Behandlingsstatus.IVERKSETTER_VEDTAK,
+            )
+
+        service.prosesserSkattehendelser(
+            listOf(SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
+            skarp = true,
+        )
+
+        // Statusen løkka observerte skal sendes med — det er hele poenget med compare-and-set.
+        verify {
+            skarpUtfoerer.settStatusVurderDokument(årsavregningBehandling.id, Behandlingsstatus.AVVENT_DOK_PART)
+        }
+        with(service.resultater.single()) {
+            statusOppdatert shouldBe false
+            hoppetOverAarsak shouldNotBe null
+            feilmelding shouldBe null
+        }
+        with(service.status()) {
+            this["antallStatusHoppetOver"] shouldBe 1
+            this["antallStatusOppdatert"] shouldBe 0
+            this["antallSkarpFeilet"] shouldBe 0
+        }
     }
 
     private fun utfoerer() = SkattepliktigeAarsavregningSkarpUtfoerer(prosessinstansService, behandlingService)

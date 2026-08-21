@@ -29,7 +29,12 @@ class SkattepliktigeAarsavregningDryrunController(
         summary = "Kjøring av skattehendelser (dryrun eller skarpt)",
         description = "Prosesserer skattehendelser for skattepliktige. " +
             "Med skarp=false (default) er det en simulering — ingen prosessinstanser opprettes. " +
-            "Med skarp=true opprettes faktiske AARSAVREGNING-prosessinstanser, kappet av maksAntall. " +
+            "Med skarp=true har kjøringen to side-effekter: den oppretter faktiske " +
+            "AARSAVREGNING-prosessinstanser (kappet av maksAntall) og bumper status til " +
+            "VURDER_DOKUMENT på saker som allerede har en åpen årsavregning. Status-bumpen er en " +
+            "compare-and-set: har saksbehandler flyttet behandlingen siden oppslaget, hoppes den " +
+            "over og telles i antallStatusHoppetOver, med årsak per sak i rapporten. Slike saker " +
+            "er trygge å kjøre om igjen. " +
             "Bruk /status for fremdrift og /rapport for detaljert resultat."
     )
     @PostMapping("/run")
