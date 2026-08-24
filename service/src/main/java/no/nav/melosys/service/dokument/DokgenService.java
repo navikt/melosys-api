@@ -262,7 +262,7 @@ public class DokgenService {
     private void settUtenlandskMyndighetOpplysninger(Land_iso2 landkode, DokgenBrevbestilling.Builder<?> brevbestilling,
                                                      Produserbaredokumenter produserbartdokument) {
         var utenlandskMyndighet =
-            utenlandskMyndighetService.hentUtenlandskMyndighet(landkode);
+            utenlandskMyndighetService.hentUtenlandskMyndighet(landkode, produserbartdokument);
         brevbestilling.medUtenlandskMyndighet(utenlandskMyndighet);
     }
 
