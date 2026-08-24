@@ -204,7 +204,7 @@ class DokgenServiceTest {
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
         every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
         every { dokumentproduksjonsInfoMapper.hentMalnavn(any()) } returns "malnavn"
-        every { utenlandskMyndighetService.hentUtenlandskMyndighet(any()) } returns mockk()
+        every { utenlandskMyndighetService.hentUtenlandskMyndighet(any(), any()) } returns mockk()
         every { dokgenMalMapper.mapBehandling(any(), any()) } returns mockk()
         every { dokgenClient.lagPdf(any(), any(), any(), any()) } returns pdf
         every { utledMottaksdato.getMottaksdato(any(), isNull()) } returns LocalDate.now()

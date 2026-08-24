@@ -97,7 +97,7 @@ public class DistribuerJournalpost implements StegBehandler {
         } else if (hasText(institusjonID)) {
             Land_iso2 landkode = UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonID);
             var utenlandskMyndighet =
-                utenlandskMyndighetService.hentUtenlandskMyndighet(landkode);
+                utenlandskMyndighetService.hentUtenlandskMyndighet(landkode, brevbestilling.getProduserbartdokument());
             bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, utenlandskMyndighet.getAdresse(), brevbestilling.getDistribusjonstype());
         } else {
             bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, brevbestilling.getDistribusjonstype());
