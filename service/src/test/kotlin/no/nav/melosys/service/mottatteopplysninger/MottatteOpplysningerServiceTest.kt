@@ -365,6 +365,39 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
+    fun oppdaterMottatteOpplysningerFraSoeknad_beholderArbeidsstedNaarSoeknadIkkeHarArbeidssted() {
+        val skip = no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid().apply {
+            enhetNavn = "MS Nordnorge"
+            flaggLandkode = "DK"
+        }
+        val eksisterende = no.nav.melosys.domain.mottatteopplysninger.Soeknad().apply {
+            maritimtArbeid = listOf(skip)
+            soeknadsland = Soeknadsland(listOf("NL"), false)
+        }
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = eksisterende
+        }
+
+        val nySoeknad = no.nav.melosys.domain.mottatteopplysninger.Soeknad().apply {
+            soeknadsland = Soeknadsland(listOf("DE"), false)
+        }
+
+        every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.of(mottatteOpplysninger)
+        every { mottatteOpplysningerRepositoryMock.saveAndFlush(any()) } returns mockk()
+
+        mottatteOpplysningerServiceSpy.oppdaterMottatteOpplysningerFraSøknad(
+            behandlingID, nySoeknad, oppdaterArbeidssteder = false
+        )
+
+        val slot = slot<MottatteOpplysninger>()
+        verify { mottatteOpplysningerRepositoryMock.saveAndFlush(capture(slot)) }
+        val oppdatert = slot.captured.mottatteOpplysningerData
+        oppdatert.soeknadsland.landkoder.shouldBe(listOf("DE"))
+        oppdatert.maritimtArbeid.shouldHaveSize(1)
+        oppdatert.maritimtArbeid.first().enhetNavn.shouldBe("MS Nordnorge")
+    }
+
+    @Test
     fun oppdaterMottatteOpplysningerPeriodeOgLand_eksisterer_oppdatererPeriodeOgLand() {
         val mottatteOpplysninger = MottatteOpplysninger().apply {
             mottatteOpplysningerData = MottatteOpplysningerData()
