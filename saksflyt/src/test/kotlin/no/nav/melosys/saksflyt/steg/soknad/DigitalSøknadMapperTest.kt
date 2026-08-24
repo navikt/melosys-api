@@ -776,22 +776,47 @@ internal class DigitalSøknadMapperTest {
             søknad.arbeidPaaLand.erHjemmekontor.shouldBeNull()
             søknad.arbeidPaaLand.erFastArbeidssted.shouldBeNull()
         }
+    }
 
-        private fun arbeidsgiverSøknadMed(arbeidssted: ArbeidsstedIUtlandetDto) =
-            lagUtsendtArbeidstakerSkjemaM2MDto {
-                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
-                data = arbeidsgiverData(arbeidssted = arbeidssted)
+    @Nested
+    inner class HarArbeidsgiverdel {
+
+        @Test
+        fun `innsending med koblet arbeidsgiverdel har arbeidsgiverdel`() {
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                medKobletArbeidsgiverSkjema {
+                    data = arbeidsgiverData(arbeidssted = offshorePaaTrollA())
+                }
             }
 
-        private fun offshorePaaTrollA() = ArbeidsstedIUtlandetDto(
-            arbeidsstedType = ArbeidsstedType.OFFSHORE,
-            offshore = OffshoreDto(
-                navnPaVirksomhet = "Equinor",
-                navnPaInnretning = "Troll A",
-                typeInnretning = TypeInnretning.PLATTFORM_ELLER_ANNEN_FAST_INNRETNING,
-                sokkelLand = LandKode.GB
-            )
-        )
+            DigitalSøknadMapper.harArbeidsgiverdel(dto).shouldBeTrue()
+        }
+
+        @Test
+        fun `innsending med arbeidsgiverdel uten arbeidssted har arbeidsgiverdel`() {
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+                data = arbeidsgiverData()
+            }
+
+            DigitalSøknadMapper.harArbeidsgiverdel(dto).shouldBeTrue()
+        }
+
+        @Test
+        fun `innsending uten arbeidsgiverdel har ikke arbeidsgiverdel`() {
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
+                data = arbeidstakerData(
+                    utsendingsperiodeOgLand = landOgPeriode(
+                        LandKode.FI,
+                        LocalDate.of(2025, 6, 1),
+                        LocalDate.of(2025, 12, 31)
+                    )
+                )
+            }
+
+            DigitalSøknadMapper.harArbeidsgiverdel(dto).shouldBeFalse()
+        }
     }
 
     // --- Testdata-hjelpere ---
@@ -831,6 +856,22 @@ internal class DigitalSøknadMapperTest {
         arbeidsgiverensVirksomhetINorge = virksomhetINorge,
         arbeidstakerensLonn = lonn,
         arbeidsstedIUtlandet = arbeidssted
+    )
+
+    private fun arbeidsgiverSøknadMed(arbeidssted: ArbeidsstedIUtlandetDto) =
+        lagUtsendtArbeidstakerSkjemaM2MDto {
+            skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+            data = arbeidsgiverData(arbeidssted = arbeidssted)
+        }
+
+    private fun offshorePaaTrollA() = ArbeidsstedIUtlandetDto(
+        arbeidsstedType = ArbeidsstedType.OFFSHORE,
+        offshore = OffshoreDto(
+            navnPaVirksomhet = "Equinor",
+            navnPaInnretning = "Troll A",
+            typeInnretning = TypeInnretning.PLATTFORM_ELLER_ANNEN_FAST_INNRETNING,
+            sokkelLand = LandKode.GB
+        )
     )
 
     private fun kombinertData(
