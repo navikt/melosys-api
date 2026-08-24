@@ -87,7 +87,10 @@ class SkattepliktigeAarsavregningDryrunController(
             "VIKTIG: vedtak_dato settes til proxyen behandlingsresultat.endret_dato, og den datoen " +
             "styrer hvilken behandling ÅrsavregningService regner som nyest — altså hvor " +
             "avgiftsgrunnlaget hentes fra. Les sorteringspaavirkning i svaret: er patchenVinnerNyeste " +
-            "true for en sak, skal saken ha ekte vedtaksdato satt manuelt før den patches."
+            "true for en sak, avvises skarp kjøring: sett ekte vedtaksdato manuelt, eller send " +
+            "tillatSorteringsendring=true hvis endringen er vurdert. Merk at false ikke er et " +
+            "frikjenn — sammenligningen er global maks mot global maks, mens den ekte utvelgelsen " +
+            "først filtrerer på år og periodeoverlapp. Se ekteDatoer for hva patchen faktisk slår."
     )
     @PostMapping("/vedtaksmetadata-fiks")
     fun vedtaksmetadataFiks(
@@ -105,7 +108,11 @@ class SkattepliktigeAarsavregningDryrunController(
 
         return try {
             val resultat = if (request.skarp) {
-                vedtaksmetadataFiksService.utfoer(saksnummer, request.maksAntallRader)
+                vedtaksmetadataFiksService.utfoer(
+                    saksnummer,
+                    request.maksAntallRader,
+                    request.tillatSorteringsendring,
+                )
             } else {
                 vedtaksmetadataFiksService.forhaandsvis(saksnummer)
             }
@@ -173,6 +180,11 @@ data class VedtaksmetadataFiksRequest(
     val skarp: Boolean = false,
     /** Sikkerhetssele: skarp kjøring avvises hvis den ville satt inn flere rader enn dette. */
     val maksAntallRader: Int = VedtaksmetadataFiksService.DEFAULT_MAKS_ANTALL_RADER,
+    /**
+     * Kvitterer ut sakene der patchen tar nyeste-plassen i vedtaksdato-sorteringen. Uten denne
+     * avvises slike saker, fordi de bytter hvilken behandling avgiftsgrunnlaget hentes fra.
+     */
+    val tillatSorteringsendring: Boolean = false,
 )
 
 data class VedtaksmetadataAngreRequest(

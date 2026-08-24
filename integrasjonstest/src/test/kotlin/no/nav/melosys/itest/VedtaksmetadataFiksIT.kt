@@ -230,13 +230,17 @@ class VedtaksmetadataFiksIT(
     }
 
     @Test
-    fun `sak uten en eneste ekte vedtaksdato flagges som at patchen vinner`() {
+    fun `sak uten en eneste ekte vedtaksdato skilles ut som eget tilfelle`() {
+        // Ikke det farlige tilfellet, men det tryggeste: etter patchen kommer alle datoene i saken
+        // fra samme klokke, så den interne rekkefølgen er konsistent. Eget felt, ikke «patchen vinner».
         seedDefektBehandling("MEL-912", "NY_VURDERING", "2024-05-10 12:00:00")
 
         kall(fiksUrl, """{"saksnummer":["MEL-912"]}""")
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerId").doesNotExist())
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(true))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].ingenSammenligningsgrunnlag").value(true))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].ekteDatoer").isEmpty)
     }
 
     @Test
@@ -272,6 +276,96 @@ class VedtaksmetadataFiksIT(
             .andExpect(jsonPath("$.sorteringspaavirkning[2].patchenVinnerNyeste").value(false))
 
         antallMetadata() shouldBe 5
+    }
+
+    @Test
+    fun `rad uten vedtaksdato velter ikke rapporten, og teller ikke som nyeste`() {
+        // vedtak_dato er nullbar, og Oracle sorterer NULL først i DESC. Uten NULLS LAST ville en
+        // udatert rad kapret nyeste-plassen — og castet til String hadde gitt 500.
+        seedBehandlingUtenVedtaksdato("MEL-920", "FØRSTEGANG", "2024-01-01 08:00:00")
+        val ekte = seedIntaktBehandling("MEL-920", "NY_VURDERING", "2025-05-05 10:00:00")
+        seedDefektBehandling("MEL-920", "NY_VURDERING", "2024-06-01 12:00:00")
+
+        kall(fiksUrl, """{"saksnummer":["MEL-920"]}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerId").value(ekte))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerDato").value("2025-05-05 10:00:00"))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].ingenSammenligningsgrunnlag").value(false))
+    }
+
+    @Test
+    fun `et halvt sekund teller — sammenligningen har mikrosekunder`() {
+        seedIntaktBehandling("MEL-921", "FØRSTEGANG", "2024-08-16 09:51:06")
+        seedDefektBehandling("MEL-921", "NY_VURDERING", "2024-08-16 09:51:06.5")
+
+        kall(fiksUrl, """{"saksnummer":["MEL-921"]}""")
+            .andExpect(status().isOk)
+            // Samme sekund, men patchen er 500 ms nyere og ville tatt plassen i den ekte sorteringen
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(true))
+    }
+
+    @Test
+    fun `patch et halvt sekund eldre enn ekte vedtak flagges ikke`() {
+        // Motprøven til testen over: uten mikrosekunder ville disse to formatert likt, og den
+        // konservative >=-regelen ville flagget en sak som i virkeligheten ikke rører sorteringen.
+        seedIntaktBehandling("MEL-926", "FØRSTEGANG", "2024-08-16 09:51:06.9")
+        seedDefektBehandling("MEL-926", "NY_VURDERING", "2024-08-16 09:51:06.1")
+
+        kall(fiksUrl, """{"saksnummer":["MEL-926"]}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(false))
+    }
+
+    @Test
+    fun `eksakt likt tidsstempel flagges, fordi utfallet da er vilkårlig`() {
+        seedIntaktBehandling("MEL-922", "FØRSTEGANG", "2024-08-16 09:51:06")
+        seedDefektBehandling("MEL-922", "NY_VURDERING", "2024-08-16 09:51:06")
+
+        kall(fiksUrl, """{"saksnummer":["MEL-922"]}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(true))
+    }
+
+    @Test
+    fun `flere defekte rader i samme sak sammenlignes med den nyeste av dem`() {
+        seedIntaktBehandling("MEL-923", "FØRSTEGANG", "2024-03-01 10:00:00")
+        seedDefektBehandling("MEL-923", "NY_VURDERING", "2024-02-01 10:00:00")
+        val nyesteKandidat = seedDefektBehandling("MEL-923", "NY_VURDERING", "2024-09-01 10:00:00")
+
+        kall(fiksUrl, """{"saksnummer":["MEL-923"]}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.antallRaderFunnet").value(2))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyestePatchetId").value(nyesteKandidat))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(true))
+    }
+
+    @Test
+    fun `åpen behandling med vedtaksmetadata teller ikke som sammenligningsgrunnlag`() {
+        // ÅrsavregningService ser kun avsluttede behandlinger, så en åpen rad skal ikke være
+        // klokka vi måler mot — selv om den har vedtaksmetadata.
+        seedIntaktBehandling("MEL-924", "NY_VURDERING", "2025-12-01 10:00:00", status = "UNDER_BEHANDLING")
+        seedDefektBehandling("MEL-924", "NY_VURDERING", "2024-06-01 12:00:00")
+
+        kall(fiksUrl, """{"saksnummer":["MEL-924"]}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].ingenSammenligningsgrunnlag").value(true))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerId").doesNotExist())
+    }
+
+    @Test
+    fun `skarp avvises når patchen tar nyeste-plassen, og slipper gjennom når det kvitteres ut`() {
+        seedIntaktBehandling("MEL-925", "FØRSTEGANG", "2024-08-16 09:51:06")
+        seedDefektBehandling("MEL-925", "NY_VURDERING", "2024-08-16 09:54:28")
+
+        kall(fiksUrl, """{"saksnummer":["MEL-925"],"skarp":true}""")
+            .andExpect(status().isBadRequest)
+        antallMetadata() shouldBe 1
+
+        kall(fiksUrl, """{"saksnummer":["MEL-925"],"skarp":true,"tillatSorteringsendring":true}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.antallRaderInnsatt").value(1))
+        antallMetadata() shouldBe 2
     }
 
     private fun kall(url: String, body: String) = mockMvc.perform(
@@ -328,8 +422,14 @@ class VedtaksmetadataFiksIT(
      * Behandling som allerede HAR vedtaksmetadata med en ekte vedtaksdato — klokka patch-radene
      * sammenlignes mot.
      */
-    private fun seedIntaktBehandling(saksnummer: String, behType: String, vedtaksdato: String): Long {
-        val behandlingsresultatId = seedDefektBehandling(saksnummer, behType, vedtaksdato)
+    private fun seedIntaktBehandling(
+        saksnummer: String,
+        behType: String,
+        vedtaksdato: String,
+        status: String = "AVSLUTTET",
+        brEndretDato: String = vedtaksdato,
+    ): Long {
+        val behandlingsresultatId = seedDefektBehandling(saksnummer, behType, brEndretDato, status)
         jdbcTemplate.update(
             """INSERT INTO vedtak_metadata (behandlingsresultat_id, vedtak_dato, vedtak_klagefrist, vedtak_type,
                registrert_dato, endret_dato, registrert_av, endret_av)
@@ -337,6 +437,18 @@ class VedtaksmetadataFiksIT(
             behandlingsresultatId,
             java.sql.Timestamp.valueOf(vedtaksdato),
             java.sql.Timestamp.valueOf(vedtaksdato)
+        )
+        return behandlingsresultatId
+    }
+
+    /** Vedtaksmetadata finnes, men uten dato — `vedtak_dato` er nullbar i skjemaet. */
+    private fun seedBehandlingUtenVedtaksdato(saksnummer: String, behType: String, brEndretDato: String): Long {
+        val behandlingsresultatId = seedDefektBehandling(saksnummer, behType, brEndretDato)
+        jdbcTemplate.update(
+            """INSERT INTO vedtak_metadata (behandlingsresultat_id, vedtak_dato, vedtak_type,
+               registrert_dato, endret_dato, registrert_av, endret_av)
+               VALUES (?, NULL, 'FØRSTEGANGSVEDTAK', SYSTIMESTAMP, SYSTIMESTAMP, 'IT', 'IT')""",
+            behandlingsresultatId
         )
         return behandlingsresultatId
     }

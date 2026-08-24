@@ -58,16 +58,20 @@ class VedtaksmetadataFiksService {
      *  - tomt scope gjør ingenting i stedet for å falle tilbake på en default,
      *  - kandidatantallet må ligge innenfor [maksAntallRader] (samme rolle som `maksAntall` på `/run`),
      *  - alle kandidater må ha en `beh_type` vi vet hvilken vedtakstype hører til; ellers ville
-     *    ELSE-grenen i SQL-en stilltiende skrevet ENDRINGSVEDTAK på f.eks. en KLAGE.
+     *    ELSE-grenen i SQL-en stilltiende skrevet ENDRINGSVEDTAK på f.eks. en KLAGE,
+     *  - ingen sak der patchen tar nyeste-plassen i vedtaksdato-sorteringen (se
+     *    [sorteringspaavirkning]) — det bytter hvilken behandling avgiftsgrunnlaget hentes fra, og
+     *    må enten løses med ekte vedtaksdato eller kvitteres ut med `tillatSorteringsendring`.
      */
     @Transactional
-    fun utfoer(saksnummer: List<String>, maksAntallRader: Int): VedtaksmetadataFiksResultat {
+    fun utfoer(
+        saksnummer: List<String>,
+        maksAntallRader: Int,
+        tillatSorteringsendring: Boolean = false,
+    ): VedtaksmetadataFiksResultat {
         if (saksnummer.isEmpty()) throw VedtaksmetadataFiksAvvist("Skarp kjøring krever eksplisitt saksnummer-liste")
 
         val kandidater = hentKandidater(saksnummer)
-        // Måles før innsettingen: etterpå er patch-radene ekte rader i vedtak_metadata, og
-        // «før»-bildet kan ikke gjenskapes.
-        val paavirkning = sorteringspaavirkning(saksnummer)
         if (kandidater.size > maksAntallRader) {
             throw VedtaksmetadataFiksAvvist(
                 "Fant ${kandidater.size} rader, men maksAntallRader er $maksAntallRader. " +
@@ -82,12 +86,25 @@ class VedtaksmetadataFiksService {
             )
         }
 
-        paavirkning.filter { it.patchenVinnerNyeste }.forEach {
+        // Måles her: etter de andre selene (ingen bortkastede spørringer på en kjøring som avvises),
+        // men før INSERT-en — etterpå er patch-radene ekte rader, og «før»-bildet kan ikke gjenskapes.
+        val paavirkning = sorteringspaavirkning(saksnummer)
+        val kaprer = paavirkning.filter { it.patchenVinnerNyeste }
+        if (kaprer.isNotEmpty() && !tillatSorteringsendring) {
+            throw VedtaksmetadataFiksAvvist(
+                "Patchen ville tatt nyeste-plassen i vedtaksdato-sorteringen for " +
+                    kaprer.joinToString { "${it.saksnummer} (${it.nyestePatchetDato} mot ${it.nyesteFoerDato})" } +
+                    ". Da bytter ÅrsavregningService hvilken behandling avgiftsgrunnlaget hentes fra. " +
+                    "Sett ekte vedtaksdato manuelt, eller send tillatSorteringsendring=true hvis " +
+                    "endringen er vurdert og ønsket."
+            )
+        }
+
+        kaprer.forEach {
             log.warn {
-                "Datafiks $PATCH_MARKOER: for sak ${it.saksnummer} blir en patchet rad " +
-                    "(behandlingsresultat ${it.nyestePatchetId}, ${it.nyestePatchetDato}) nyere enn den nyeste " +
-                    "raden med ekte vedtaksdato (${it.nyesteFoerId}, ${it.nyesteFoerDato}). Da bytter " +
-                    "ÅrsavregningService hvilken behandling avgiftsgrunnlaget hentes fra."
+                "Datafiks $PATCH_MARKOER: sak ${it.saksnummer} patches selv om en patchet rad " +
+                    "(behandlingsresultat ${it.nyestePatchetId}, ${it.nyestePatchetDato}) tar nyeste-plassen " +
+                    "fra ${it.nyesteFoerId} (${it.nyesteFoerDato}) — kjørt med tillatSorteringsendring=true."
             }
         }
 
@@ -206,38 +223,73 @@ class VedtaksmetadataFiksService {
      * sorteringen sammenligner to ulike klokker.
      *
      * Merk hva dette *ikke* er: ingen simulering av avgiftsgrunnlaget. Den faktiske utvelgelsen filtrerer
-     * også på år, periodeoverlapp og trygdeavgiftsperioder. Dette er datosorteringen alene — mekanismen
-     * som står i fare — og den er ment å gi operatøren grunnlag for å stoppe, ikke en garanti for at alt
-     * er trygt når [SorteringspaavirkningRad.patchenVinnerNyeste] er false.
+     * også på år, periodeoverlapp og trygdeavgiftsperioder, og sammenligningen her er global maks mot
+     * global maks. [SorteringspaavirkningRad.patchenVinnerNyeste] `true` er derfor en pålitelig grunn
+     * til å stoppe, mens `false` ikke er et frikjenn: taper patchen mot en rad som årsfilteret luker
+     * bort, kan den fortsatt vinne der det teller. Derfor listes alle ekte-daterte rader i
+     * [SorteringspaavirkningRad.ekteDatoer], slik at operatøren kan se hva patchen faktisk slår.
+     *
+     * Saker uten kandidater er ikke med i lista — send N saksnummer og du kan få M ≤ N rader. Bruk
+     * [VedtaksmetadataFiksResultat.utenMetadataPerSak] for å krysskontrollere.
      */
     private fun sorteringspaavirkning(saksnummer: List<String>): List<SorteringspaavirkningRad> {
         if (saksnummer.isEmpty()) return emptyList()
 
-        val foer = nyestePerSak(EKSISTERENDE_NYESTE_SQL, saksnummer)
-        val patchet = nyestePerSak(PATCH_NYESTE_SQL, saksnummer)
+        val foer = radePerSak(EKSISTERENDE_NYESTE_SQL, saksnummer)
+        val patchet = radePerSak(PATCH_NYESTE_SQL, saksnummer)
 
         return patchet.keys.sorted().map { sak ->
-            val foerRad = foer[sak]
-            val patchetRad = patchet.getValue(sak)
+            val ekte = foer[sak].orEmpty()
+            // Rader uten vedtaksdato: ÅrsavregningService sorterer dem først i stigende rekkefølge,
+            // altså som de eldste — de vinner aldri .lastOrNull(). De er derfor ikke noe
+            // sammenligningsgrunnlag, og skal ikke telle som «nyeste før».
+            val nyesteEkte = ekte.firstOrNull { it.sortering != null }
+            val nyestePatchet = patchet.getValue(sak).first()
+
             SorteringspaavirkningRad(
                 saksnummer = sak,
-                nyesteFoerId = foerRad?.first,
-                nyesteFoerDato = foerRad?.second,
-                nyestePatchetId = patchetRad.first,
-                nyestePatchetDato = patchetRad.second,
-                // Datoformatet er sorterbart som tekst (YYYY-MM-DD HH24:MI:SS).
-                patchenVinnerNyeste = foerRad == null || patchetRad.second > foerRad.second,
+                nyesteFoerId = nyesteEkte?.behandlingsresultatId,
+                nyesteFoerDato = nyesteEkte?.visning,
+                nyestePatchetId = nyestePatchet.behandlingsresultatId,
+                nyestePatchetDato = nyestePatchet.visning,
+                // >= og ikke >: ved eksakt likt tidsstempel er utfallet i den ekte sorteringen
+                // vilkårlig (stabil sortering på behandlingsrekkefølgen), og et myntkast skal
+                // flagges, ikke rapporteres som «patchen taper».
+                patchenVinnerNyeste = nyesteEkte != null &&
+                    requireNotNull(nyestePatchet.sortering) >= nyesteEkte.sortering!!,
+                ingenSammenligningsgrunnlag = nyesteEkte == null,
+                ekteDatoer = ekte.mapNotNull { it.visning },
             )
         }
     }
 
+    /** Alle rader per sak, nyest først. */
     @Suppress("UNCHECKED_CAST")
-    private fun nyestePerSak(sql: String, saksnummer: List<String>): Map<String, Pair<Long, String>> =
+    private fun radePerSak(sql: String, saksnummer: List<String>): Map<String, List<SortertRad>> =
         (entityManager.createNativeQuery(sql)
             .setParameter("resultattyper", RESULTATTYPER)
             .setParameter("saksnummer", saksnummer)
             .resultList as List<Array<Any?>>)
-            .associate { rad -> (rad[0] as String) to Pair((rad[1] as Number).toLong(), rad[2] as String) }
+            .map { rad ->
+                SortertRad(
+                    saksnummer = rad[0] as String,
+                    behandlingsresultatId = (rad[1] as Number).toLong(),
+                    visning = rad[2] as String?,
+                    sortering = rad[3] as String?,
+                )
+            }
+            .groupBy { it.saksnummer }
+
+    /**
+     * [visning] er lesbar for operatøren; [sortering] har mikrosekunder og er den som sammenlignes.
+     * Begge er null når raden ikke har vedtaksdato — kolonnen er nullbar.
+     */
+    private data class SortertRad(
+        val saksnummer: String,
+        val behandlingsresultatId: Long,
+        val visning: String?,
+        val sortering: String?,
+    )
 
     private fun hentAngreKandidater(saksnummer: List<String>): List<VedtaksmetadataAngreRad> {
         val sql = if (saksnummer.isEmpty()) ANGRE_PREVIEW_SQL else ANGRE_PREVIEW_SQL + ANGRE_PREVIEW_SAKSFILTER
@@ -347,33 +399,45 @@ class VedtaksmetadataFiksService {
             $KANDIDAT_WHERE
         """
 
-        /** Nyeste rad med ekte vedtaksdato per sak — klokka patch-radene sammenlignes mot. */
+        /**
+         * Radene med ekte vedtaksdato — klokka patch-radene sammenlignes mot. Nyest først.
+         *
+         * `vedtak_dato` er nullbar, og Oracle sorterer NULL først i `DESC`. Det som faktisk hindrer
+         * at en udatert rad kaprer «nyeste»-plassen er filteret i [sorteringspaavirkning] (og
+         * nullbar lesing i [radePerSak]); `NULLS LAST` her gjør SQL-ens egen rekkefølge riktig i
+         * tillegg, slik at [SorteringspaavirkningRad.ekteDatoer] listes nyest først. Tolkningen
+         * følger `ÅrsavregningService`, der `sortedBy` legger null først i stigende rekkefølge —
+         * altså som den eldste. `behandling_id` som sekundærnøkkel gjør rekkefølgen deterministisk.
+         *
+         * Fire kolonner: lesbar dato til rapporten, og en med mikrosekunder til sammenligningen.
+         * Uten mikrosekundene svarer rapporten «patchen vinner ikke» når de to ligger i samme
+         * sekund — og `vedtak_dato` er en TIMESTAMP som ÅrsavregningService sammenligner i full
+         * oppløsning.
+         */
         private const val EKSISTERENDE_NYESTE_SQL = """
-            SELECT saksnummer, behandlingsresultat_id, dato FROM (
-                SELECT b.saksnummer AS saksnummer,
-                       br.behandling_id AS behandlingsresultat_id,
-                       TO_CHAR(vm.vedtak_dato, 'YYYY-MM-DD HH24:MI:SS') AS dato,
-                       ROW_NUMBER() OVER (PARTITION BY b.saksnummer ORDER BY vm.vedtak_dato DESC) AS rn
-                FROM behandling b
-                JOIN behandlingsresultat br ON br.behandling_id = b.id
-                JOIN vedtak_metadata vm ON vm.behandlingsresultat_id = br.behandling_id
-                WHERE b.status = 'AVSLUTTET'
-                  AND br.resultat_type IN (:resultattyper)
-                  AND b.saksnummer IN (:saksnummer)
-            ) WHERE rn = 1
+            SELECT b.saksnummer,
+                   br.behandling_id,
+                   TO_CHAR(vm.vedtak_dato, 'YYYY-MM-DD HH24:MI:SS'),
+                   TO_CHAR(vm.vedtak_dato, 'YYYY-MM-DD HH24:MI:SS.FF6')
+            FROM behandling b
+            JOIN behandlingsresultat br ON br.behandling_id = b.id
+            JOIN vedtak_metadata vm ON vm.behandlingsresultat_id = br.behandling_id
+            WHERE b.status = 'AVSLUTTET'
+              AND br.resultat_type IN (:resultattyper)
+              AND b.saksnummer IN (:saksnummer)
+            ORDER BY b.saksnummer, vm.vedtak_dato DESC NULLS LAST, br.behandling_id DESC
         """
 
-        /** Nyeste kandidat per sak, med datoen patchen faktisk ville skrevet. */
+        /** Kandidatene, med datoen patchen faktisk ville skrevet. Nyest først. */
         private const val PATCH_NYESTE_SQL = """
-            SELECT saksnummer, behandlingsresultat_id, dato FROM (
-                SELECT b.saksnummer AS saksnummer,
-                       br.behandling_id AS behandlingsresultat_id,
-                       TO_CHAR(br.endret_dato, 'YYYY-MM-DD HH24:MI:SS') AS dato,
-                       ROW_NUMBER() OVER (PARTITION BY b.saksnummer ORDER BY br.endret_dato DESC) AS rn
-                FROM behandling b
-                JOIN behandlingsresultat br ON br.behandling_id = b.id
-                $KANDIDAT_WHERE
-            ) WHERE rn = 1
+            SELECT b.saksnummer,
+                   br.behandling_id,
+                   TO_CHAR(br.endret_dato, 'YYYY-MM-DD HH24:MI:SS'),
+                   TO_CHAR(br.endret_dato, 'YYYY-MM-DD HH24:MI:SS.FF6')
+            FROM behandling b
+            JOIN behandlingsresultat br ON br.behandling_id = b.id
+            $KANDIDAT_WHERE
+            ORDER BY b.saksnummer, br.endret_dato DESC, br.behandling_id DESC
         """
 
         private const val ETTERKONTROLL_SQL = """
@@ -439,8 +503,22 @@ data class SorteringspaavirkningRad(
     val nyesteFoerId: Long?,
     val nyesteFoerDato: String?,
     val nyestePatchetId: Long,
-    val nyestePatchetDato: String,
+    val nyestePatchetDato: String?,
+    /** True også ved eksakt likt tidsstempel — da er utfallet vilkårlig, og det skal flagges. */
     val patchenVinnerNyeste: Boolean,
+    /**
+     * Saken har ingen rad med ekte vedtaksdato. Da er ikke dette det farlige tilfellet, men det
+     * tryggeste: alle datoene kommer fra samme klokke etter patchen, så den interne rekkefølgen
+     * er konsistent. Eget felt nettopp for at det ikke skal forveksles med [patchenVinnerNyeste].
+     */
+    val ingenSammenligningsgrunnlag: Boolean = false,
+    /**
+     * Alle ekte vedtaksdatoer i saken, nyest først. [patchenVinnerNyeste] sammenligner mot den
+     * nyeste, mens den ekte utvelgelsen først filtrerer på år og periodeoverlapp — taper patchen
+     * mot en rad som blir luket bort, kan den likevel vinne der det teller. Disse datoene er
+     * materialet for å se det.
+     */
+    val ekteDatoer: List<String> = emptyList(),
 )
 
 data class VedtaksmetadataFiksResultat(
