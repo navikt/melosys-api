@@ -255,4 +255,54 @@ internal class SkjemaSakMappingServiceTest {
             verify(exactly = 0) { skjemaSakMappingRepository.saveAll(any<List<SkjemaSakMapping>>()) }
         }
     }
+
+    @Nested
+    inner class ClaimRelaterteSkjemaIder {
+
+        @Test
+        fun `skriver claim-rad for skjemaIder uten mapping`() {
+            val skjemaId1 = UUID.randomUUID()
+            val skjemaId2 = UUID.randomUUID()
+            val fagsak = Fagsak.forTest { saksnummer = "MEL-800" }
+            val lagrede = mutableListOf<SkjemaSakMapping>()
+
+            every { skjemaSakMappingRepository.findBySkjemaId(any()) } returns Optional.empty()
+            every { skjemaSakMappingRepository.save(capture(lagrede)) } answers { firstArg() }
+
+            service.claimRelaterteSkjemaIder(listOf(skjemaId1, skjemaId2), fagsak)
+
+            lagrede.map { it.skjemaId } shouldBe listOf(skjemaId1, skjemaId2)
+            // Claim-rader er tomme reservasjoner: originalData settes først når innsendingen kommer,
+            // og det er nettopp originalData som holder dem utenfor saksstatus-synken.
+            lagrede.all { it.originalData == null } shouldBe true
+            lagrede.all { it.saksnummer == "MEL-800" } shouldBe true
+        }
+
+        @Test
+        fun `hopper over skjemaIder som allerede er mappet`() {
+            // En eksisterende mapping peker allerede på riktig sak (eller er en ekte innsending).
+            // Den skal ikke overskrives — claim er kun en reservasjon av ledige skjemaId-er.
+            val alleredeMappet = UUID.randomUUID()
+            val ledig = UUID.randomUUID()
+            val fagsak = Fagsak.forTest { saksnummer = "MEL-900" }
+            val lagrede = mutableListOf<SkjemaSakMapping>()
+
+            every { skjemaSakMappingRepository.findBySkjemaId(alleredeMappet) } returns
+                Optional.of(lagSkjemaSakMapping(skjemaId = alleredeMappet, saksnummer = "MEL-111"))
+            every { skjemaSakMappingRepository.findBySkjemaId(ledig) } returns Optional.empty()
+            every { skjemaSakMappingRepository.save(capture(lagrede)) } answers { firstArg() }
+
+            service.claimRelaterteSkjemaIder(listOf(alleredeMappet, ledig), fagsak)
+
+            lagrede.map { it.skjemaId } shouldBe listOf(ledig)
+            verify(exactly = 1) { skjemaSakMappingRepository.save(any()) }
+        }
+
+        @Test
+        fun `tom liste lagrer ingenting`() {
+            service.claimRelaterteSkjemaIder(emptyList(), Fagsak.forTest { saksnummer = "MEL-1000" })
+
+            verify(exactly = 0) { skjemaSakMappingRepository.save(any()) }
+        }
+    }
 }

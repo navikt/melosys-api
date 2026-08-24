@@ -625,7 +625,12 @@ public class ProsessinstansService {
     }
 
     private void opprettSøknadProsessinstans(SkjemaMottattMelding melding, ProsessType prosessType, String saksnummer) {
-        String låsReferanse = melding.getSkjemaId().toString();
+        // Lås på "{gruppeId}_{skjemaId}": gruppeId (felles for alle relaterte deler av samme søknad)
+        // er gruppePrefiks, så hele søknadsgruppen serialiseres per gruppe på tvers av instanser.
+        // skjemaId holder referansen unik per del for redelivery-dedup. Faller tilbake til skjemaId
+        // som gruppe når meldingen mangler gruppeId (eldre meldinger → ingen kryss-serialisering).
+        UUID gruppeId = melding.getGruppeId() != null ? melding.getGruppeId() : melding.getSkjemaId();
+        String låsReferanse = gruppeId + "_" + melding.getSkjemaId();
 
         // Redelivery av samme skjema kan rutes til en annen prosesstype (NY → EKSISTERENDE etter at saken er opprettet),
         // så dedupen må gjelde på tvers av begge digital-søknad-typene — ikke bare (skjemaId, denne typen).
@@ -641,6 +646,9 @@ public class ProsessinstansService {
             .build();
 
         prosessinstans.setData(DIGITAL_SØKNAD_SKJEMA_ID, melding.getSkjemaId());
+        // Bær med relaterte skjemaId-er fra Kafka-meldingen slik at NY-stegets re-sjekk under DB-låsen
+        // (MELOSYS-8151) kan finne en eksisterende sak også når relasjonen kun er kjent på consumer-nivå.
+        prosessinstans.setData(DIGITAL_SØKNAD_RELATERTE_SKJEMA_IDER, melding.getRelaterteSkjemaIder());
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
 
         lagre(prosessinstans);

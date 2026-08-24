@@ -35,9 +35,10 @@ class LåsReferanseFactoryTest {
 
     @Test
     fun `lag låseReferanse for SØKNAD`() {
-        val søknadLåsReferanseString = "550e8400-e29b-41d4-a716-446655440000"
+        val søknadLåsReferanseString = "550e8400-e29b-41d4-a716-446655440000_660e8400-e29b-41d4-a716-446655440000"
         val låsReferanse = LåsReferanseFactory.lagLåsReferanse(søknadLåsReferanseString)
 
         låsReferanse.shouldBeInstanceOf<SøknadLåsReferanse>()
+        låsReferanse.gruppePrefiks shouldBe "550e8400-e29b-41d4-a716-446655440000_"
     }
 }

@@ -17,12 +17,15 @@ class SkjemaSakMapping(
     @JoinColumn(name = "saksnummer", nullable = false, updatable = false)
     val fagsak: Fagsak,
 
+    // Nullable for å støtte «claim»-rader: når en relatert innsending oppretter saken (MELOSYS-8151),
+    // reserveres de øvrige relaterte skjemaId-ene mot saken uten data ennå, slik at en senere prosessert
+    // del (typisk rot-innsendingen som ikke selv refererer de andre) finner saken uavhengig av rekkefølge.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mottatte_opplysninger_id")
-    var mottatteOpplysninger: MottatteOpplysninger?,
+    var mottatteOpplysninger: MottatteOpplysninger? = null,
 
     @Column(name = "original_data", columnDefinition = "CLOB")
-    var originalData: String, //TODO: Nødvendig med nullable?
+    var originalData: String? = null,
 
     @Column(name = "journalpost_id")
     var journalpostId: String? = null, //TODO: Nødvendig med nullable?

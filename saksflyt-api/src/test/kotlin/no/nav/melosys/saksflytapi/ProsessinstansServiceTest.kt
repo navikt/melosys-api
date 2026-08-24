@@ -832,7 +832,7 @@ class ProsessinstansServiceTest {
         val melding = SkjemaMottattMelding(skjemaId)
         val typeSlot = slot<Collection<ProsessType>>()
 
-        every { prosessinstansRepo.existsByLåsReferanseAndTypeIn(skjemaId.toString(), capture(typeSlot)) } returns false
+        every { prosessinstansRepo.existsByLåsReferanseAndTypeIn("${skjemaId}_$skjemaId", capture(typeSlot)) } returns false
 
         prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(melding)
 
@@ -845,9 +845,23 @@ class ProsessinstansServiceTest {
         val lagretInstans = piListCaptor.last()
         lagretInstans.run {
             type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
-            låsReferanse shouldBe skjemaId.toString()
+            låsReferanse shouldBe "${skjemaId}_$skjemaId"
             hentData<UUID>(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID) shouldBe skjemaId
         }
+    }
+
+    @Test
+    fun `opprett prosessinstans for melosys skjema mottatt bruker gruppeId som lås-prefiks når satt`() {
+        val gruppeId = UUID.randomUUID()
+        val skjemaId = UUID.randomUUID()
+        val melding = SkjemaMottattMelding(skjemaId, emptyList(), gruppeId)
+
+        every { prosessinstansRepo.existsByLåsReferanseAndTypeIn("${gruppeId}_$skjemaId", any()) } returns false
+
+        prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(melding)
+
+        // Lås på {gruppeId}_{skjemaId}: gruppeId felles for relaterte deler → serialiseres sammen.
+        piListCaptor.last().låsReferanse shouldBe "${gruppeId}_$skjemaId"
     }
 
     @Test
@@ -855,7 +869,7 @@ class ProsessinstansServiceTest {
         val skjemaId = UUID.randomUUID()
         val melding = SkjemaMottattMelding(skjemaId)
 
-        every { prosessinstansRepo.existsByLåsReferanseAndTypeIn(skjemaId.toString(), any()) } returns true
+        every { prosessinstansRepo.existsByLåsReferanseAndTypeIn("${skjemaId}_$skjemaId", any()) } returns true
 
         prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(melding)
 
@@ -868,14 +882,14 @@ class ProsessinstansServiceTest {
         val melding = SkjemaMottattMelding(skjemaId)
         val saksnummer = "MEL-42"
 
-        every { prosessinstansRepo.existsByLåsReferanseAndTypeIn(skjemaId.toString(), any()) } returns false
+        every { prosessinstansRepo.existsByLåsReferanseAndTypeIn("${skjemaId}_$skjemaId", any()) } returns false
 
         prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding, saksnummer)
 
         val lagretInstans = piListCaptor.last()
         lagretInstans.run {
             type shouldBe ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
-            låsReferanse shouldBe skjemaId.toString()
+            låsReferanse shouldBe "${skjemaId}_$skjemaId"
             hentData<UUID>(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID) shouldBe skjemaId
             getData(ProsessDataKey.SAKSNUMMER) shouldBe saksnummer
         }
@@ -889,7 +903,7 @@ class ProsessinstansServiceTest {
 
         // Skjemaet er alt behandlet (typisk som NY); en redelivery rutes til EKSISTERENDE.
         // Dedupen skal sjekke på tvers av begge digital-søknad-typene, så duplikat ikke opprettes.
-        every { prosessinstansRepo.existsByLåsReferanseAndTypeIn(skjemaId.toString(), capture(typeSlot)) } returns true
+        every { prosessinstansRepo.existsByLåsReferanseAndTypeIn("${skjemaId}_$skjemaId", capture(typeSlot)) } returns true
 
         prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding, "MEL-42")
 

@@ -111,6 +111,23 @@ class SkjemaSakMappingService(
         log.info { "Re-pekte ${mappinger.size} skjema-sak-mapping(er) til mottatteOpplysninger=${mottatteOpplysninger.id}" }
     }
 
+    /**
+     * Reserverer («claimer») relaterte skjemaId-er mot [fagsak] (MELOSYS-8151). Når en relatert
+     * innsending oppretter saken, skrives det tomme mapping-rader for de øvrige relaterte id-ene som
+     * ennå ikke er mappet, slik at en senere prosessert del finner saken uavhengig av rekkefølgen
+     * meldingene konsumeres i (også på tvers av instanser). En claim-rad fylles med ekte data når den
+     * tilhørende delen senere prosesseres og kaller [lagreMapping].
+     */
+    @Transactional
+    fun claimRelaterteSkjemaIder(relaterteSkjemaIder: Collection<UUID>, fagsak: Fagsak) {
+        relaterteSkjemaIder.forEach { skjemaId ->
+            if (skjemaSakMappingRepository.findBySkjemaId(skjemaId).isEmpty) {
+                skjemaSakMappingRepository.save(SkjemaSakMapping(skjemaId = skjemaId, fagsak = fagsak))
+                log.info { "Reserverte (claim) relatert skjemaId=$skjemaId mot sak ${fagsak.saksnummer}" }
+            }
+        }
+    }
+
     @Transactional
     fun oppdaterJournalpostId(skjemaId: UUID, journalpostId: String) {
         val mapping = skjemaSakMappingRepository.findBySkjemaId(skjemaId).orElse(null)
