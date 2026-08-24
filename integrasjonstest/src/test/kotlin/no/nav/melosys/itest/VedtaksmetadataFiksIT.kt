@@ -239,6 +239,41 @@ class VedtaksmetadataFiksIT(
             .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(true))
     }
 
+    @Test
+    fun `preview mot formen på de faktiske prod-sakene i MELOSYS-8174`() {
+        // Tidsstemplene er hentet fra prod (vedtaksdato.csv, uttrekk 2026-08-24). Poenget er ikke
+        // at akkurat disse sakene finnes, men at rapporten svarer riktig på den formen dataene har:
+        // to saker der patchen legger seg midt i sorteringen, og én der den kaprer nyeste-plassen.
+        seedIntaktBehandling("MEL-448193", "FØRSTEGANG", "2024-04-30 15:33:55")
+        seedIntaktBehandling("MEL-448193", "NY_VURDERING", "2025-01-06 10:15:04")
+        seedDefektBehandling("MEL-448193", "NY_VURDERING", "2024-10-23 09:02:15")
+
+        seedIntaktBehandling("MEL-545776", "FØRSTEGANG", "2024-08-16 09:51:06")
+        seedDefektBehandling("MEL-545776", "NY_VURDERING", "2024-08-16 09:54:28")
+
+        seedIntaktBehandling("MEL-632908", "FØRSTEGANG", "2024-11-12 10:51:45")
+        seedIntaktBehandling("MEL-632908", "NY_VURDERING", "2025-06-25 09:56:12")
+        seedDefektBehandling("MEL-632908", "NY_VURDERING", "2024-11-12 10:58:02")
+
+        kall(fiksUrl, """{"saksnummer":["MEL-448193","MEL-545776","MEL-632908"]}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.antallRaderFunnet").value(3))
+            // Patchen havner mellom to ekte vedtak — nyeste-plassen står
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].saksnummer").value("MEL-448193"))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerDato").value("2025-01-06 10:15:04"))
+            // Eneste sak der patchen kaprer nyeste-plassen: NY_VURDERING drøye tre minutter
+            // etter førstegangsvedtaket, så her avgjør ekte vedtaksdato utfallet
+            .andExpect(jsonPath("$.sorteringspaavirkning[1].saksnummer").value("MEL-545776"))
+            .andExpect(jsonPath("$.sorteringspaavirkning[1].patchenVinnerNyeste").value(true))
+            .andExpect(jsonPath("$.sorteringspaavirkning[1].nyesteFoerDato").value("2024-08-16 09:51:06"))
+            .andExpect(jsonPath("$.sorteringspaavirkning[1].nyestePatchetDato").value("2024-08-16 09:54:28"))
+            .andExpect(jsonPath("$.sorteringspaavirkning[2].saksnummer").value("MEL-632908"))
+            .andExpect(jsonPath("$.sorteringspaavirkning[2].patchenVinnerNyeste").value(false))
+
+        antallMetadata() shouldBe 5
+    }
+
     private fun kall(url: String, body: String) = mockMvc.perform(
         post(url)
             .header(AdminControllerApiKeyIT.API_KEY_HEADER, AdminControllerApiKeyIT.GYLDIG_API_NOKKEL)
