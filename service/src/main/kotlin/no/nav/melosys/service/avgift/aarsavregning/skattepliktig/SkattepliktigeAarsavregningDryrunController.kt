@@ -83,7 +83,11 @@ class SkattepliktigeAarsavregningDryrunController(
             "Med skarp=true er det Q4b, som endrer data: da må saksnummer angis eksplisitt, " +
             "antall rader må ligge innenfor maksAntallRader (default 10), og alle kandidater må ha en " +
             "beh_type vi kan utlede vedtakstype fra. Innsettingen er idempotent, og alle rader merkes " +
-            "MELOSYS-8174-PATCH slik at de kan rulles tilbake med /vedtaksmetadata-fiks/angre."
+            "MELOSYS-8174-PATCH slik at de kan rulles tilbake med /vedtaksmetadata-fiks/angre. " +
+            "VIKTIG: vedtak_dato settes til proxyen behandlingsresultat.endret_dato, og den datoen " +
+            "styrer hvilken behandling ÅrsavregningService regner som nyest — altså hvor " +
+            "avgiftsgrunnlaget hentes fra. Les sorteringspaavirkning i svaret: er patchenVinnerNyeste " +
+            "true for en sak, skal saken ha ekte vedtaksdato satt manuelt før den patches."
     )
     @PostMapping("/vedtaksmetadata-fiks")
     fun vedtaksmetadataFiks(

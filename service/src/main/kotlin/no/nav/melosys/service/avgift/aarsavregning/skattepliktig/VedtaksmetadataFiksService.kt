@@ -47,6 +47,7 @@ class VedtaksmetadataFiksService {
             rader = kandidater,
             utenMetadataPerSak = tellUtenMetadata(saksnummer),
             ukjentBehType = kandidater.filterNot { it.behType in KJENTE_BEH_TYPER }.map { it.behandlingsresultatId },
+            sorteringspaavirkning = sorteringspaavirkning(saksnummer),
         )
     }
 
@@ -64,6 +65,9 @@ class VedtaksmetadataFiksService {
         if (saksnummer.isEmpty()) throw VedtaksmetadataFiksAvvist("Skarp kjøring krever eksplisitt saksnummer-liste")
 
         val kandidater = hentKandidater(saksnummer)
+        // Måles før innsettingen: etterpå er patch-radene ekte rader i vedtak_metadata, og
+        // «før»-bildet kan ikke gjenskapes.
+        val paavirkning = sorteringspaavirkning(saksnummer)
         if (kandidater.size > maksAntallRader) {
             throw VedtaksmetadataFiksAvvist(
                 "Fant ${kandidater.size} rader, men maksAntallRader er $maksAntallRader. " +
@@ -76,6 +80,15 @@ class VedtaksmetadataFiksService {
                 "Kandidater med ukjent beh_type (vedtakstype kan ikke utledes trygt): " +
                     ukjente.joinToString { "${it.behandlingsresultatId}=${it.behType}" }
             )
+        }
+
+        paavirkning.filter { it.patchenVinnerNyeste }.forEach {
+            log.warn {
+                "Datafiks $PATCH_MARKOER: for sak ${it.saksnummer} blir en patchet rad " +
+                    "(behandlingsresultat ${it.nyestePatchetId}, ${it.nyestePatchetDato}) nyere enn den nyeste " +
+                    "raden med ekte vedtaksdato (${it.nyesteFoerId}, ${it.nyesteFoerDato}). Da bytter " +
+                    "ÅrsavregningService hvilken behandling avgiftsgrunnlaget hentes fra."
+            }
         }
 
         log.info {
@@ -107,6 +120,7 @@ class VedtaksmetadataFiksService {
             rader = kandidater,
             utenMetadataPerSak = tellUtenMetadata(saksnummer),
             avvik = avvik,
+            sorteringspaavirkning = paavirkning,
         )
     }
 
@@ -181,6 +195,50 @@ class VedtaksmetadataFiksService {
     }
 
     @Suppress("UNCHECKED_CAST")
+    /**
+     * Viser hva patchen gjør med vedtaksdato-sorteringen, per sak.
+     *
+     * `vedtak_dato` er ikke dekorasjon: `ÅrsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning`
+     * sorterer på den og plukker den siste som `sisteBehandlingsresultatMedAvgift` — altså behandlingen
+     * avgiftsgrunnlaget hentes fra. Fiksen bruker `endret_dato` som proxy, og den er `@LastModifiedDate`:
+     * alltid ≥ ekte vedtaksdato, og den driver videre for hver senere skriving på raden. Patchede rader
+     * ser derfor systematisk nyere ut enn de er, mens radene som ikke patches beholder ekte dato —
+     * sorteringen sammenligner to ulike klokker.
+     *
+     * Merk hva dette *ikke* er: ingen simulering av avgiftsgrunnlaget. Den faktiske utvelgelsen filtrerer
+     * også på år, periodeoverlapp og trygdeavgiftsperioder. Dette er datosorteringen alene — mekanismen
+     * som står i fare — og den er ment å gi operatøren grunnlag for å stoppe, ikke en garanti for at alt
+     * er trygt når [SorteringspaavirkningRad.patchenVinnerNyeste] er false.
+     */
+    private fun sorteringspaavirkning(saksnummer: List<String>): List<SorteringspaavirkningRad> {
+        if (saksnummer.isEmpty()) return emptyList()
+
+        val foer = nyestePerSak(EKSISTERENDE_NYESTE_SQL, saksnummer)
+        val patchet = nyestePerSak(PATCH_NYESTE_SQL, saksnummer)
+
+        return patchet.keys.sorted().map { sak ->
+            val foerRad = foer[sak]
+            val patchetRad = patchet.getValue(sak)
+            SorteringspaavirkningRad(
+                saksnummer = sak,
+                nyesteFoerId = foerRad?.first,
+                nyesteFoerDato = foerRad?.second,
+                nyestePatchetId = patchetRad.first,
+                nyestePatchetDato = patchetRad.second,
+                // Datoformatet er sorterbart som tekst (YYYY-MM-DD HH24:MI:SS).
+                patchenVinnerNyeste = foerRad == null || patchetRad.second > foerRad.second,
+            )
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun nyestePerSak(sql: String, saksnummer: List<String>): Map<String, Pair<Long, String>> =
+        (entityManager.createNativeQuery(sql)
+            .setParameter("resultattyper", RESULTATTYPER)
+            .setParameter("saksnummer", saksnummer)
+            .resultList as List<Array<Any?>>)
+            .associate { rad -> (rad[0] as String) to Pair((rad[1] as Number).toLong(), rad[2] as String) }
+
     private fun hentAngreKandidater(saksnummer: List<String>): List<VedtaksmetadataAngreRad> {
         val sql = if (saksnummer.isEmpty()) ANGRE_PREVIEW_SQL else ANGRE_PREVIEW_SQL + ANGRE_PREVIEW_SAKSFILTER
         val query = entityManager.createNativeQuery(sql).setParameter("markoer", PATCH_MARKOER)
@@ -289,6 +347,35 @@ class VedtaksmetadataFiksService {
             $KANDIDAT_WHERE
         """
 
+        /** Nyeste rad med ekte vedtaksdato per sak — klokka patch-radene sammenlignes mot. */
+        private const val EKSISTERENDE_NYESTE_SQL = """
+            SELECT saksnummer, behandlingsresultat_id, dato FROM (
+                SELECT b.saksnummer AS saksnummer,
+                       br.behandling_id AS behandlingsresultat_id,
+                       TO_CHAR(vm.vedtak_dato, 'YYYY-MM-DD HH24:MI:SS') AS dato,
+                       ROW_NUMBER() OVER (PARTITION BY b.saksnummer ORDER BY vm.vedtak_dato DESC) AS rn
+                FROM behandling b
+                JOIN behandlingsresultat br ON br.behandling_id = b.id
+                JOIN vedtak_metadata vm ON vm.behandlingsresultat_id = br.behandling_id
+                WHERE b.status = 'AVSLUTTET'
+                  AND br.resultat_type IN (:resultattyper)
+                  AND b.saksnummer IN (:saksnummer)
+            ) WHERE rn = 1
+        """
+
+        /** Nyeste kandidat per sak, med datoen patchen faktisk ville skrevet. */
+        private const val PATCH_NYESTE_SQL = """
+            SELECT saksnummer, behandlingsresultat_id, dato FROM (
+                SELECT b.saksnummer AS saksnummer,
+                       br.behandling_id AS behandlingsresultat_id,
+                       TO_CHAR(br.endret_dato, 'YYYY-MM-DD HH24:MI:SS') AS dato,
+                       ROW_NUMBER() OVER (PARTITION BY b.saksnummer ORDER BY br.endret_dato DESC) AS rn
+                FROM behandling b
+                JOIN behandlingsresultat br ON br.behandling_id = b.id
+                $KANDIDAT_WHERE
+            ) WHERE rn = 1
+        """
+
         private const val ETTERKONTROLL_SQL = """
             SELECT b.saksnummer, COUNT(*)
             FROM behandling b
@@ -339,6 +426,23 @@ data class VedtaksmetadataFiksRad(
     val blirVedtakType: String,
 )
 
+/**
+ * Hva patchen gjør med vedtaksdato-sorteringen for én sak.
+ *
+ * [patchenVinnerNyeste] = true betyr at en oppdiktet dato legger seg øverst i sorteringen og bytter
+ * hvilken behandling `ÅrsavregningService` regner som nyest. Da skal saken ha ekte vedtaksdato satt
+ * manuelt før den patches — ikke kjøres skarpt.
+ */
+data class SorteringspaavirkningRad(
+    val saksnummer: String,
+    /** Null når saken ikke har én eneste rad med ekte vedtaksdato å sammenligne mot. */
+    val nyesteFoerId: Long?,
+    val nyesteFoerDato: String?,
+    val nyestePatchetId: Long,
+    val nyestePatchetDato: String,
+    val patchenVinnerNyeste: Boolean,
+)
+
 data class VedtaksmetadataFiksResultat(
     val skarp: Boolean,
     val saksnummer: List<String>,
@@ -352,6 +456,8 @@ data class VedtaksmetadataFiksResultat(
     val ukjentBehType: List<Long> = emptyList(),
     /** True hvis antall innsatte rader ikke stemmer med forhåndsvisningen. */
     val avvik: Boolean = false,
+    /** Per sak: bytter patchen ut hvilken behandling som er nyest i vedtaksdato-sorteringen? */
+    val sorteringspaavirkning: List<SorteringspaavirkningRad> = emptyList(),
     val markoer: String = VedtaksmetadataFiksService.PATCH_MARKOER,
     val angreEndepunkt: String = "POST /admin/aarsavregninger/saker/skattepliktige/vedtaksmetadata-fiks/angre",
 )

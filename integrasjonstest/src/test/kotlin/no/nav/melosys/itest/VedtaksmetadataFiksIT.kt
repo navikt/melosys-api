@@ -200,6 +200,45 @@ class VedtaksmetadataFiksIT(
             .andExpect(status().isBadRequest)
     }
 
+    @Test
+    fun `preview varsler når patchen kaprer nyeste-plassen i vedtaksdato-sorteringen`() {
+        // Ekte nyeste vedtak er fra 2023. Den defekte raden er sist rørt i 2024, så proxy-datoen
+        // ville lagt seg øverst og byttet hvilken behandling avgiftsgrunnlaget hentes fra.
+        val ekteNyeste = seedIntaktBehandling("MEL-910", "FØRSTEGANG", "2023-03-01 10:00:00")
+        val defekt = seedDefektBehandling("MEL-910", "NY_VURDERING", "2024-05-10 12:00:00")
+
+        kall(fiksUrl, """{"saksnummer":["MEL-910"]}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].saksnummer").value("MEL-910"))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(true))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerId").value(ekteNyeste))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerDato").value("2023-03-01 10:00:00"))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyestePatchetId").value(defekt))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyestePatchetDato").value("2024-05-10 12:00:00"))
+
+        antallMetadata() shouldBe 1
+    }
+
+    @Test
+    fun `preview melder fra når patchen ikke rører nyeste-plassen`() {
+        seedIntaktBehandling("MEL-911", "FØRSTEGANG", "2025-01-01 10:00:00")
+        seedDefektBehandling("MEL-911", "NY_VURDERING", "2024-05-10 12:00:00")
+
+        kall(fiksUrl, """{"saksnummer":["MEL-911"]}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(false))
+    }
+
+    @Test
+    fun `sak uten en eneste ekte vedtaksdato flagges som at patchen vinner`() {
+        seedDefektBehandling("MEL-912", "NY_VURDERING", "2024-05-10 12:00:00")
+
+        kall(fiksUrl, """{"saksnummer":["MEL-912"]}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerId").doesNotExist())
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(true))
+    }
+
     private fun kall(url: String, body: String) = mockMvc.perform(
         post(url)
             .header(AdminControllerApiKeyIT.API_KEY_HEADER, AdminControllerApiKeyIT.GYLDIG_API_NOKKEL)
@@ -248,6 +287,23 @@ class VedtaksmetadataFiksIT(
             behandlingId, java.sql.Timestamp.valueOf(endretDato), java.sql.Timestamp.valueOf(endretDato)
         )
         return behandlingId
+    }
+
+    /**
+     * Behandling som allerede HAR vedtaksmetadata med en ekte vedtaksdato — klokka patch-radene
+     * sammenlignes mot.
+     */
+    private fun seedIntaktBehandling(saksnummer: String, behType: String, vedtaksdato: String): Long {
+        val behandlingsresultatId = seedDefektBehandling(saksnummer, behType, vedtaksdato)
+        jdbcTemplate.update(
+            """INSERT INTO vedtak_metadata (behandlingsresultat_id, vedtak_dato, vedtak_klagefrist, vedtak_type,
+               registrert_dato, endret_dato, registrert_av, endret_av)
+               VALUES (?, ?, TRUNC(CAST(? AS DATE)) + 42, 'FØRSTEGANGSVEDTAK', SYSTIMESTAMP, SYSTIMESTAMP, 'IT', 'IT')""",
+            behandlingsresultatId,
+            java.sql.Timestamp.valueOf(vedtaksdato),
+            java.sql.Timestamp.valueOf(vedtaksdato)
+        )
+        return behandlingsresultatId
     }
 
     private fun antallMetadata(): Int =
