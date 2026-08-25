@@ -308,7 +308,14 @@ class SkattepliktigeAarsavregningDryrunService(
         }
     }
 
-    fun status() = jobMonitor.status()
+    /**
+     * Jobbtilstanden lever i minnet på én pod, og prod kjører to replikaer (`nais.yml`). Går /run til
+     * pod A og /status til pod B, ser den siste en tom kjøring — og `@Synchronized` på
+     * [prosesserSkattehendelser] er per pod, så den hindrer heller ikke to samtidige skarpe kjøringer.
+     * Riktig medisin for et engangsverktøy er å kjøre mot én pod (port-forward), ikke delt jobbtilstand;
+     * `pod` er her for at operatøren skal kunne se hvilken pod svaret kommer fra.
+     */
+    fun status() = jobMonitor.status() + mapOf("pod" to (System.getenv("HOSTNAME") ?: "ukjent"))
 
     inner class JobStatus(
         @Volatile var skarp: Boolean = false,

@@ -54,9 +54,10 @@ class SkattepliktigeAarsavregningSkarpUtfoerer(
      * var hele batchen). Ekte atomisitet krever @Version på Behandling eller en betinget UPDATE som
      * omgår auditing — begge er større grep enn denne jobben.
      *
-     * SkattehendelserConsumer gjør sjekk og skriving atomisk i én transaksjon og kan aldri handle på
-     * utdaterte data. Her ble de to skilt av REQUIRES_NEW, og med 45 saker og tunge oppslag er vinduet
-     * minutter. Uten CAS-en ville en behandling en saksbehandler flyttet videre i mellomtiden — f.eks.
+     * SkattehendelserConsumer holder sjekk og skriving i én kort transaksjon, men har det samme vinduet
+     * — én transaksjon er ikke atomisk uten lås, versjonskolonne eller betinget UPDATE. Forskjellen er
+     * lengden: der er vinduet én sakslesing, her ble de to skilt av REQUIRES_NEW, og med 45 saker og
+     * tunge oppslag er vinduet minutter. Uten CAS-en ville en behandling en saksbehandler flyttet videre i mellomtiden — f.eks.
      * til IVERKSETTER_VEDTAK — blitt kastet tilbake til VURDER_DOKUMENT. Å gjenta løkkas
      * inngangsbetingelse (aktiv, ikke OPPRETTET) er ikke nok: den er sann for nettopp de statusene
      * saksbehandleren flytter til.

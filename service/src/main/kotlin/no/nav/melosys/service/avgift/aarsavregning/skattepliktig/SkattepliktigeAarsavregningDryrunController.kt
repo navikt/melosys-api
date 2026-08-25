@@ -35,7 +35,10 @@ class SkattepliktigeAarsavregningDryrunController(
             "compare-and-set: har saksbehandler flyttet behandlingen siden oppslaget, hoppes den " +
             "over og telles i antallStatusHoppetOver, med årsak per sak i rapporten. Slike saker " +
             "er trygge å kjøre om igjen. " +
-            "Bruk /status for fremdrift og /rapport for detaljert resultat."
+            "Skarp kjøring krever et positivt maksAntall — uten tak avvises requesten med 400. " +
+            "Bruk /status for fremdrift og /rapport for detaljert resultat. NB: appen kjører to podder, " +
+            "og jobbtilstanden ligger i minnet på den poden som tok imot /run. Kjør derfor mot én pod " +
+            "(port-forward), og kryssjekk pod-feltet i /status."
     )
     @PostMapping("/run")
     fun run(
@@ -43,6 +46,19 @@ class SkattepliktigeAarsavregningDryrunController(
         @Parameter(description = "Liste med skattehendelser, skarp-flagg, og valgfritt maksAntall")
         request: SkattehendelseRunRequest
     ): ResponseEntity<Map<String, Any?>> {
+        // Sikkerhetssele på linje med at /vedtaksmetadata-fiks krever eksplisitt saksnummer-liste for
+        // skarp: uten denne starter `{"skarp": true}` uten maksAntall en prod-kjøring helt uten tak,
+        // fordi løkka kun håndhever taket når verdien ikke er null. En full kjøring sender bare et høyt
+        // tall — poenget er at taket er et bevisst valg, ikke en default.
+        if (request.skarp && (request.maksAntall == null || request.maksAntall <= 0)) {
+            return ResponseEntity.badRequest().body(
+                mapOf(
+                    "feil" to "Skarp kjøring krever et positivt maksAntall — taket kapper antall side-effekter og skal settes bevisst",
+                    "maksAntall" to request.maksAntall
+                )
+            )
+        }
+
         val modus = if (request.skarp) "SKARP" else "DRYRUN"
         log.info {
             "Starter $modus for ${request.skattehendelser.size} skattehendelser, maksAntall=${request.maksAntall}"
@@ -171,6 +187,7 @@ class SkattepliktigeAarsavregningDryrunController(
 data class SkattehendelseRunRequest(
     val skattehendelser: List<SkattehendelseDryrunItem>,
     val skarp: Boolean = false,
+    /** Tak på antall side-effekter. Påkrevd og positiv når [skarp] er true; teller også forsøk som feiler eller hoppes over. */
     val maksAntall: Int? = null,
 )
 

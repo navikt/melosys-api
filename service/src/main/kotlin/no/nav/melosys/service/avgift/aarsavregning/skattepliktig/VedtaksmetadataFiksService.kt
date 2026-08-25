@@ -113,9 +113,18 @@ class VedtaksmetadataFiksService {
                 "(behandlingsresultat ${kandidater.map { it.behandlingsresultatId }})"
         }
 
+        // Bundet til ID-ene fra forhåndsvisningen, ikke til kandidatfilteret på nytt (Copilot-review
+        // 25.08): alle selene over er evaluert på nøyaktig disse radene, og Oracle er READ COMMITTED,
+        // så et statement som revaluerte filteret ville fått sitt eget snapshot og kunne skrive en
+        // kandidat som dukket opp etterpå uten å ha passert noen sele. Uten bindingen kan `avvik`
+        // dessuten forbli false selv om mengden er en annen; nå er `antallInnsatt != kandidater.size`
+        // eksakt. NB: selve kappløpet er ikke dekket av en regresjonstest — det ville krevd en
+        // transaksjonssøm midt i metoden. Tom kandidatliste er derimot dekket: idempotens-ITen kjører
+        // skarp en gang til og treffer `IN ()`-grenen.
         val antallInnsatt = entityManager.createNativeQuery(INSERT_SQL)
             .setParameter("resultattyper", RESULTATTYPER)
             .setParameter("saksnummer", saksnummer)
+            .setParameter("ider", kandidater.map { it.behandlingsresultatId })
             .setParameter("markoer", PATCH_MARKOER)
             .executeUpdate()
 
@@ -362,7 +371,18 @@ class VedtaksmetadataFiksService {
               AND b.saksnummer IN (:saksnummer)
         """
 
-        /** vedtak_type utledes av beh_type — kodeverkskoden er FØRSTEGANG, ikke FØRSTEGANGSBEHANDLING. */
+        /**
+         * vedtak_type utledes av beh_type — kodeverkskoden er FØRSTEGANG, ikke FØRSTEGANGSBEHANDLING.
+         *
+         * Merk at beh_type ikke *bestemmer* vedtakstypen: den sendes separat i FattVedtakRequest, og
+         * kodeverket har også KORRIGERT_VEDTAK, OMGJØRINGSVEDTAK og OPPHØRSVEDTAK — en NY_VURDERING kan
+         * altså ha vært et korrigert vedtak. Utledningen er bevisst likevel, av tre grunner: feltet
+         * leses ikke av ÅrsavregningService (kun som etikett i BehandlingsresultatDto), Flyway-patchen
+         * V7.6_04 gjorde nøyaktig samme utledning for en strukturelt lik populasjon, og alternativet
+         * NULL er verre — A1TypeUtstedelse.av() switcher på enumen uten null-gren. Vi bytter altså en
+         * mulig feil etikett på tre rader mot en ny NPE-flate. Er raden dessuten aldri fattet som
+         * vedtak (se statussiden 25.08), finnes det uansett ingen riktig verdi å skrive.
+         */
         private const val VEDTAK_TYPE_CASE =
             "CASE WHEN b.beh_type = 'FØRSTEGANG' THEN 'FØRSTEGANGSVEDTAK' ELSE 'ENDRINGSVEDTAK' END"
 
@@ -397,6 +417,7 @@ class VedtaksmetadataFiksService {
             FROM behandling b
             JOIN behandlingsresultat br ON br.behandling_id = b.id
             $KANDIDAT_WHERE
+              AND br.behandling_id IN (:ider)
         """
 
         /**

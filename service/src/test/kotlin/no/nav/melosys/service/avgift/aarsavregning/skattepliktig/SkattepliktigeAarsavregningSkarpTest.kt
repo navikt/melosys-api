@@ -21,6 +21,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.aarsavregning.GjeldendeBehandlingsresultaterForÅrsavregning
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
@@ -28,6 +29,7 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpStatus
 import java.util.UUID
 
 /**
@@ -247,6 +249,72 @@ class SkattepliktigeAarsavregningSkarpTest {
         verify(exactly = 0) { skarpUtfoerer.opprettProsessinstans(any(), any()) }
         service.resultater.single().feilmelding shouldNotBe null
         service.status()["antallOppslagFeilet"] shouldBe 1
+    }
+
+    /**
+     * Copilot-review 25.08: `maksAntall` er nullbar, og løkka håndhever taket kun når den ikke er null.
+     * `{"skarp": true}` uten feltet startet dermed en prod-kjøring helt uten tak — i strid med at alle
+     * skarpe skrivninger skal være kappet. Asserten er at requesten avvises *før* jobben startes.
+     */
+    @Test
+    fun `skarp kjøring uten maksAntall avvises uten å starte jobben`() {
+        val dryrunService = mockk<SkattepliktigeAarsavregningDryrunService>(relaxed = true)
+        val controller = SkattepliktigeAarsavregningDryrunController(dryrunService, mockk(relaxed = true))
+
+        val utenTak = controller.run(
+            SkattehendelseRunRequest(
+                skattehendelser = listOf(SkattehendelseDryrunItem("2024", AKTØR_ID)),
+                skarp = true,
+            )
+        )
+        val nullTak = controller.run(
+            SkattehendelseRunRequest(
+                skattehendelser = listOf(SkattehendelseDryrunItem("2024", AKTØR_ID)),
+                skarp = true,
+                maksAntall = 0,
+            )
+        )
+
+        utenTak.statusCode shouldBe HttpStatus.BAD_REQUEST
+        nullTak.statusCode shouldBe HttpStatus.BAD_REQUEST
+        verify(exactly = 0) { dryrunService.prosesserSkattehendelserAsynkront(any(), any(), any()) }
+    }
+
+    @Test
+    fun `dryrun uten maksAntall slipper gjennom, og skarp med tak starter jobben`() {
+        val dryrunService = mockk<SkattepliktigeAarsavregningDryrunService>(relaxed = true)
+        val controller = SkattepliktigeAarsavregningDryrunController(dryrunService, mockk(relaxed = true))
+        val hendelser = listOf(SkattehendelseDryrunItem("2024", AKTØR_ID))
+
+        controller.run(SkattehendelseRunRequest(hendelser, skarp = false)).statusCode shouldBe HttpStatus.OK
+        controller.run(SkattehendelseRunRequest(hendelser, skarp = true, maksAntall = 1)).statusCode shouldBe HttpStatus.OK
+
+        verify(exactly = 1) { dryrunService.prosesserSkattehendelserAsynkront(hendelser, false, null) }
+        verify(exactly = 1) { dryrunService.prosesserSkattehendelserAsynkront(hendelser, true, 1) }
+    }
+
+    /**
+     * Copilot-review 25.08: `/status` serialiserte den levende `JobMonitor.exceptions`-mappen mens den
+     * asynkrone jobben skrev til den. Samme feilklasse som `/rapport` fikk fikset i runde 2 — og verre
+     * her, siden `/status` er det ops poller nettopp mens feil registreres.
+     */
+    @Test
+    fun `status returnerer et øyeblikksbilde av exceptions, ikke den levende mappen`() {
+        val monitor = JobMonitor(jobName = "test", stats = TomStats())
+        monitor.registerException(IllegalStateException("første"))
+
+        @Suppress("UNCHECKED_CAST")
+        val foer = monitor.status()["exceptions"] as Map<String, Int>
+        monitor.registerException(IllegalStateException("andre"))
+
+        foer.keys shouldBe setOf("første")
+        @Suppress("UNCHECKED_CAST")
+        (monitor.status()["exceptions"] as Map<String, Int>).keys shouldBe setOf("første", "andre")
+    }
+
+    private class TomStats : JobMonitor.Stats {
+        override fun reset() = Unit
+        override fun asMap(): Map<String, Any?> = emptyMap()
     }
 
     private fun utfoerer() = SkattepliktigeAarsavregningSkarpUtfoerer(prosessinstansService, behandlingService)
