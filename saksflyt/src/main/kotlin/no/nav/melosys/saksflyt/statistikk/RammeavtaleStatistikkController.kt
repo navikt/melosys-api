@@ -31,21 +31,22 @@ class RammeavtaleStatistikkController(
             "(tom er inklusiv). Med inkluderSaksnummer=true (standard) listes også Melosys saksnummer (MEL-nr) " +
             "per behandling, for sporbarhet ved spørsmål i enkeltsaker. Samme saksnummer kan forekomme flere " +
             "ganger dersom én sak har flere behandlinger med rammeavtalen huket av og eget vedtak — antallet " +
-            "teller behandlinger, ikke saker. Sett inkluderSaksnummer=false for kun oversiktstallene.",
+            "teller behandlinger, ikke saker. Sett inkluderSaksnummer=false for en response med kun " +
+            "oversiktstallene (samme spørring, mindre response).",
     )
     fun hentRammeavtaleFjernarbeidStatistikk(
         @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") fom: LocalDate?,
         @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") tom: LocalDate?,
         @RequestParam(required = false, defaultValue = "true") inkluderSaksnummer: Boolean,
     ): ResponseEntity<RammeavtaleFjernarbeidStatistikk> {
+        val statistikk = rammeavtaleStatistikkService.hentRammeavtaleFjernarbeidStatistikk(fom, tom, inkluderSaksnummer)
         log.info(
-            "Henter statistikk for rammeavtale om fjernarbeid (fom={}, tom={}, inkluderSaksnummer={})",
+            "Hentet statistikk for rammeavtale om fjernarbeid (fom={}, tom={}, inkluderSaksnummer={}): {} behandlinger",
             fom,
             tom,
             inkluderSaksnummer,
+            statistikk.antall,
         )
-        return ResponseEntity.ok(
-            rammeavtaleStatistikkService.hentRammeavtaleFjernarbeidStatistikk(fom, tom, inkluderSaksnummer),
-        )
+        return ResponseEntity.ok(statistikk)
     }
 }

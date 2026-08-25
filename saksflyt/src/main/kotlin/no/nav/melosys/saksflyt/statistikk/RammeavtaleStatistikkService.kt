@@ -43,24 +43,34 @@ class RammeavtaleStatistikkService(
             Behandlingsresultattyper.FASTSATT_LOVVALGSLAND.name,
             fom?.atStartOfDay(),
             tom?.plusDays(1)?.atStartOfDay(),
-        ).mapNotNull { rad -> tilSak(rad) }
+        ).map { rad -> tilSak(rad) }
 
-        // LinkedHashMap-rekkefølge: spørringen sorterer på vedtaksdato, så årene kommer stigende
-        val antallPerVedtaksaar = saker.groupingBy { it.vedtaksaar }.eachCount().mapValues { it.value.toLong() }
+        val antallPerVedtaksaar = saker.groupingBy { it.vedtaksaar }
+            .eachCount()
+            .mapValues { it.value.toLong() }
+            .toSortedMap()
 
         return RammeavtaleFjernarbeidStatistikk(
             antall = saker.size.toLong(),
             fom = fom,
             tom = tom,
             antallPerVedtaksaar = antallPerVedtaksaar,
-            saker = saker.takeIf { inkluderSaksnummer },
+            saker = if (inkluderSaksnummer) saker else null,
         )
     }
 
-    /** Rad fra [RammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike]: `[saksnummer, behandlingId, vedtaksdato]`. */
-    private fun tilSak(rad: Array<Any>): RammeavtaleSak? {
-        val saksnummer = rad.getOrNull(0) as? String ?: return null
-        val vedtaksdato = (rad.getOrNull(2) as? String)?.let(LocalDate::parse) ?: return null
+    /**
+     * Rad fra [RammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike]: `[saksnummer, behandlingId, vedtaksdato]`.
+     *
+     * Begge feltene er non-null ved konstruksjon — `behandling.saksnummer` er NOT NULL i skjemaet og spørringen
+     * krever `vm.vedtak_dato IS NOT NULL`. Vi feiler derfor heller enn å hoppe over raden: å slippe en rad i
+     * stillhet ville underrapportert et tall som brukes i offisiell rapportering, uten noe signal noe sted.
+     */
+    private fun tilSak(rad: Array<Any>): RammeavtaleSak {
+        val saksnummer = rad.getOrNull(0) as? String
+            ?: error("Fikk rad uten saksnummer fra uttrekket for rammeavtale om fjernarbeid")
+        val vedtaksdato = (rad.getOrNull(2) as? String)?.let(LocalDate::parse)
+            ?: error("Fikk rad uten vedtaksdato fra uttrekket for rammeavtale om fjernarbeid (sak $saksnummer)")
         return RammeavtaleSak(
             saksnummer = saksnummer,
             vedtaksaar = vedtaksdato.year.toString(),

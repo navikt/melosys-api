@@ -122,15 +122,19 @@ class RammeavtaleStatistikkIT(
     @Test
     fun `to behandlinger paa samme sak gir to rader med samme saksnummer`() {
         val fagsak = opprettFagsak("MEL-8150-M")
+        // De to første deler vedtaksdato: uten br.behandling_id i select-lista ville SELECT DISTINCT slått dem
+        // sammen til én rad, og antallet ville blitt 2 i stedet for 3
+        lagBehandling(fagsak, erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2025, 4, 1))
         lagBehandling(fagsak, erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2025, 4, 1))
         lagBehandling(fagsak, erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2025, 8, 1))
 
         val statistikk = rammeavtaleStatistikkService.hentRammeavtaleFjernarbeidStatistikk(null, null)
 
         withClue("Statistikken teller behandlinger, ikke saker, så MEL-nummeret gjentas") {
-            statistikk.antall shouldBe 2
-            statistikk.antallPerVedtaksaar shouldBe mapOf("2025" to 2L)
+            statistikk.antall shouldBe 3
+            statistikk.antallPerVedtaksaar shouldBe mapOf("2025" to 3L)
             statistikk.saker shouldBe listOf(
+                RammeavtaleSak("MEL-8150-M", "2025", LocalDate.of(2025, 4, 1)),
                 RammeavtaleSak("MEL-8150-M", "2025", LocalDate.of(2025, 4, 1)),
                 RammeavtaleSak("MEL-8150-M", "2025", LocalDate.of(2025, 8, 1)),
             )

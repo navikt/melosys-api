@@ -36,8 +36,11 @@ interface RammeavtaleStatistikkRepository : Repository<Prosessinstans, UUID> {
      * to rader med samme saksnummer, hvilket er tilsiktet — antallet teller behandlinger, ikke saker.
      *
      * Hver rad er `[saksnummer (String), behandlingId (Number), vedtaksdato (String, ISO-8601)]`. Datoen
-     * formateres som tekst nettopp for å unngå at JDBC-/tidssonekonvertering flytter en vedtaksdato over et
-     * årsskifte. `fom`/`tom` er valgfrie (null = ingen grense) og gjelder vedtaksdatoen.
+     * formateres i databasen så lesingen ikke konverterer den. NB: skrivingen normaliserer `Instant` til
+     * JVM-tidssonen (`hibernate.timezone.default_storage=NORMALIZE`), så vedtaksåret følger norsk lokaltid —
+     * et vedtak fattet 2024-12-31T23:00Z ligger i 2025. Det har vært slik siden første versjon av uttrekket.
+     *
+     * `fom`/`tom` er valgfrie (null = ingen grense) og gjelder vedtaksdatoen.
      */
     @NativeQuery(
         """
@@ -55,9 +58,7 @@ interface RammeavtaleStatistikkRepository : Repository<Prosessinstans, UUID> {
           AND vm.vedtak_dato IS NOT NULL
           AND (:fom IS NULL OR vm.vedtak_dato >= :fom)
           AND (:tom IS NULL OR vm.vedtak_dato < :tom)
-        -- posisjonsreferanser, fordi SELECT DISTINCT begrenser hva ORDER BY kan peke på.
-        -- ISO-formatert dato sorterer identisk med timestampen.
-        ORDER BY 3, 1
+        ORDER BY vedtaksdato, saksnummer
         """,
     )
     fun finnFerdigbehandledeMedDataLike(

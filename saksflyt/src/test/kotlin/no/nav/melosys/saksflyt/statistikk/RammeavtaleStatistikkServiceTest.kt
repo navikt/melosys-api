@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.statistikk
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.maps.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -52,10 +53,26 @@ class RammeavtaleStatistikkServiceTest {
         val statistikk = service.hentRammeavtaleFjernarbeidStatistikk(null, null)
 
         statistikk.antall shouldBe 3
-        statistikk.antallPerVedtaksaar shouldBe linkedMapOf("2024" to 2L, "2025" to 1L)
+        statistikk.antallPerVedtaksaar shouldBe mapOf("2024" to 2L, "2025" to 1L)
         prosessTypeSlot.captured shouldBe ProsessType.ANMODNING_OM_UNNTAK.kode
         dataLikePatternSlot.captured shouldBe "%${ProsessDataKey.ER_FJERNARBEID_TWFA.kode}=true%"
         resultatTypeSlot.captured shouldBe Behandlingsresultattyper.FASTSATT_LOVVALGSLAND.name
+    }
+
+    @Test
+    fun `sorterer aarene stigende uavhengig av radrekkefolgen fra spoerringen`() {
+        every {
+            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike(any(), any(), any(), any(), any())
+        } returns listOf(
+            rad("MEL-1", 1, "2026-01-01"),
+            rad("MEL-2", 2, "2024-01-01"),
+            rad("MEL-3", 3, "2025-01-01"),
+        )
+
+        val statistikk = service.hentRammeavtaleFjernarbeidStatistikk(null, null)
+
+        // shouldBe på Map er rekkefølgeuavhengig, så rekkefølgen må sjekkes på nøklene
+        statistikk.antallPerVedtaksaar.keys.toList() shouldBe listOf("2024", "2025", "2026")
     }
 
     @Test
@@ -109,20 +126,18 @@ class RammeavtaleStatistikkServiceTest {
     }
 
     @Test
-    fun `hopper over rader uten saksnummer eller vedtaksdato`() {
-        every {
-            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike(any(), any(), any(), any(), any())
-        } returns listOf(
-            radMedNull(null, "2025-01-01"),
-            radMedNull("MEL-2", null),
-            rad("MEL-3", 3, "2025-05-05"),
-        )
+    fun `feiler heller enn aa slippe en rad i stillhet`() {
+        // Slike rader er umulige gitt WHERE-klausulen og NOT NULL på behandling.saksnummer, men skulle
+        // spørringen eller skjemaet endres skal vi ikke underrapportere et tall brukt i offisiell rapportering
+        listOf(radMedNull("MEL-2", null), radMedNull(null, "2025-01-01")).forEach { ugyldigRad ->
+            every {
+                rammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike(any(), any(), any(), any(), any())
+            } returns listOf(rad("MEL-1", 1, "2025-01-01"), ugyldigRad)
 
-        val statistikk = service.hentRammeavtaleFjernarbeidStatistikk(null, null)
-
-        statistikk.antall shouldBe 1
-        statistikk.antallPerVedtaksaar shouldBe mapOf("2025" to 1L)
-        statistikk.saker!!.map { it.saksnummer } shouldBe listOf("MEL-3")
+            shouldThrow<IllegalStateException> {
+                service.hentRammeavtaleFjernarbeidStatistikk(null, null)
+            }
+        }
     }
 
     @Test
