@@ -6,13 +6,19 @@ import io.mockk.verify
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+import org.springframework.test.json.JsonCompareMode
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.LocalDate
 
-@WebMvcTest(controllers = [RammeavtaleStatistikkController::class], properties = ["Melosys-admin.apikey=Dummy"])
+@WebMvcTest(
+    controllers = [RammeavtaleStatistikkController::class],
+    // Pinnes eksplisitt: slicen leser ikke app-modulens application.yml, og uten dette ville testen bare
+    // tilfeldigvis stemme med prod fordi Boot sin default også er ALWAYS
+    properties = ["spring.jackson.default-property-inclusion=ALWAYS"],
+)
 class RammeavtaleStatistikkControllerTest {
 
     @Autowired
@@ -39,6 +45,9 @@ class RammeavtaleStatistikkControllerTest {
                             {"saksnummer": "MEL-2", "vedtaksaar": "2025", "vedtaksdato": "2025-06-01"}
                         ]
                     }""",
+                    // STRICT: default (LENIENT) ignorerer både rekkefølgen i saker-lista og ekstra felter,
+                    // og rekkefølgen er nettopp det responsen lover
+                    JsonCompareMode.STRICT,
                 ),
             )
 
@@ -58,6 +67,14 @@ class RammeavtaleStatistikkControllerTest {
         mockMvc.perform(get(BASE_URL).param("fom", "2025-01-01").param("tom", "2025-12-31"))
             .andExpect(status().isOk)
             .andExpect(content().json("""{"fom": "2025-01-01", "tom": "2025-12-31"}"""))
+
+        verify(exactly = 1) {
+            rammeavtaleStatistikkService.hentRammeavtaleFjernarbeidStatistikk(
+                LocalDate.of(2025, 1, 1),
+                LocalDate.of(2025, 12, 31),
+                true,
+            )
+        }
     }
 
     @Test
@@ -69,7 +86,14 @@ class RammeavtaleStatistikkControllerTest {
         mockMvc.perform(get(BASE_URL).param("inkluderSaksnummer", "false"))
             .andExpect(status().isOk)
             // Feltet skal være til stede med null, ikke utelatt — konsumenter deserialiserer mot samme type
-            .andExpect(content().json("""{"antall": 2, "antallPerVedtaksaar": {"2025": 2}, "saker": null}"""))
+            .andExpect(
+                content().json(
+                    """{"antall": 2, "fom": null, "tom": null, "antallPerVedtaksaar": {"2025": 2}, "saker": null}""",
+                    JsonCompareMode.STRICT,
+                ),
+            )
+
+        verify(exactly = 1) { rammeavtaleStatistikkService.hentRammeavtaleFjernarbeidStatistikk(null, null, false) }
     }
 
     private fun statistikk(

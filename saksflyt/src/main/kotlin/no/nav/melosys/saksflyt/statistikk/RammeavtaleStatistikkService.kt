@@ -62,15 +62,20 @@ class RammeavtaleStatistikkService(
     /**
      * Rad fra [RammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike]: `[saksnummer, behandlingId, vedtaksdato]`.
      *
-     * Begge feltene er non-null ved konstruksjon — `behandling.saksnummer` er NOT NULL i skjemaet og spørringen
-     * krever `vm.vedtak_dato IS NOT NULL`. Vi feiler derfor heller enn å hoppe over raden: å slippe en rad i
-     * stillhet ville underrapportert et tall som brukes i offisiell rapportering, uten noe signal noe sted.
+     * `saksnummer` og `vedtaksdato` er non-null ved konstruksjon — `behandling.saksnummer` er NOT NULL i skjemaet og
+     * spørringen krever `vm.vedtak_dato IS NOT NULL`. Vi feiler derfor heller enn å hoppe over raden: å slippe en rad
+     * i stillhet ville underrapportert et tall som brukes i offisiell rapportering, uten noe signal noe sted.
+     *
+     * Feilmeldingen peker på behandling-id og ikke saksnummer, fordi den ender i responsbodyen på en HTTP 500.
+     * `behandlingId` leses ikke ellers — den er med i spørringen for at SELECT DISTINCT skal skille behandlinger.
      */
     private fun tilSak(rad: Array<Any>): RammeavtaleSak {
+        val behandlingId = (rad.getOrNull(1) as? Number)?.toLong()
         val saksnummer = rad.getOrNull(0) as? String
-            ?: error("Fikk rad uten saksnummer fra uttrekket for rammeavtale om fjernarbeid")
-        val vedtaksdato = (rad.getOrNull(2) as? String)?.let(LocalDate::parse)
-            ?: error("Fikk rad uten vedtaksdato fra uttrekket for rammeavtale om fjernarbeid (sak $saksnummer)")
+            ?: error("Rad uten saksnummer fra uttrekket for rammeavtale om fjernarbeid (behandling $behandlingId)")
+        val vedtaksdato = (rad.getOrNull(2) as? String)?.let { tekst ->
+            runCatching { LocalDate.parse(tekst) }.getOrNull()
+        } ?: error("Rad uten gyldig vedtaksdato fra uttrekket for rammeavtale om fjernarbeid (behandling $behandlingId)")
         return RammeavtaleSak(
             saksnummer = saksnummer,
             vedtaksaar = vedtaksdato.year.toString(),

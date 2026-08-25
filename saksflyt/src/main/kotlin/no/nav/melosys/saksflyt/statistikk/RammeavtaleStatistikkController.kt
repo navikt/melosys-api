@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.statistikk
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
+import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.security.token.support.core.api.Protected
 import org.slf4j.LoggerFactory
 import org.springframework.format.annotation.DateTimeFormat
@@ -39,14 +40,18 @@ class RammeavtaleStatistikkController(
         @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") tom: LocalDate?,
         @RequestParam(required = false, defaultValue = "true") inkluderSaksnummer: Boolean,
     ): ResponseEntity<RammeavtaleFjernarbeidStatistikk> {
-        val statistikk = rammeavtaleStatistikkService.hentRammeavtaleFjernarbeidStatistikk(fom, tom, inkluderSaksnummer)
+        // Logges før og etter: uttrekket er upaginert, og en spørring som henger eller feiler er nettopp den
+        // situasjonen sporet trengs i. Identen er med fordi dette er et uttrekk på saksnivå, ikke bare et tall
+        val ident = SubjectHandler.getUserIDOrSystemUser()
         log.info(
-            "Hentet statistikk for rammeavtale om fjernarbeid (fom={}, tom={}, inkluderSaksnummer={}): {} behandlinger",
+            "{} henter statistikk for rammeavtale om fjernarbeid (fom={}, tom={}, inkluderSaksnummer={})",
+            ident,
             fom,
             tom,
             inkluderSaksnummer,
-            statistikk.antall,
         )
+        val statistikk = rammeavtaleStatistikkService.hentRammeavtaleFjernarbeidStatistikk(fom, tom, inkluderSaksnummer)
+        log.info("{} hentet {} behandlinger med rammeavtale om fjernarbeid", ident, statistikk.antall)
         return ResponseEntity.ok(statistikk)
     }
 }

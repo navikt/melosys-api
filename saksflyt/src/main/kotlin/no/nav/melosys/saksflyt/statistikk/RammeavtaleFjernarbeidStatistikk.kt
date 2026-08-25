@@ -26,8 +26,9 @@ data class RammeavtaleFjernarbeidStatistikk(
  * saksnummer (MEL-nr) for sporbarhet ved spørsmål i enkeltsaker.
  *
  * NB: samme [saksnummer] kan forekomme flere ganger. Én fagsak kan ha flere behandlinger som hver er huket av for
- * rammeavtalen og har eget vedtak, og statistikken teller behandlinger — ikke saker. Radene skiller seg da på
- * [vedtaksdato].
+ * rammeavtalen og har eget vedtak, og statistikken teller behandlinger — ikke saker. Skjer det på samme dato blir
+ * radene helt like; behandling-id-en som skiller dem er bevisst holdt utenfor responsen, siden den ikke sier
+ * Medlemskap og avgift noe. Bruk [RammeavtaleFjernarbeidStatistikk.antall] om du trenger tallet.
  *
  * @property saksnummer Melosys saksnummer, f.eks. `MEL-12345`
  * @property vedtaksaar året vedtaket ble fattet, samme bøtte som i [RammeavtaleFjernarbeidStatistikk.antallPerVedtaksaar]

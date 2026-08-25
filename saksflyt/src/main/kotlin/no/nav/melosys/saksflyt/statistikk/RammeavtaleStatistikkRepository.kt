@@ -58,7 +58,9 @@ interface RammeavtaleStatistikkRepository : Repository<Prosessinstans, UUID> {
           AND vm.vedtak_dato IS NOT NULL
           AND (:fom IS NULL OR vm.vedtak_dato >= :fom)
           AND (:tom IS NULL OR vm.vedtak_dato < :tom)
-        ORDER BY vedtaksdato, saksnummer
+        -- ISO-formatert dato sorterer identisk med timestampen. behandling_id er med som tiebreaker slik at to
+        -- behandlinger på samme sak med samme vedtaksdato får en stabil rekkefølge mellom to uttrekk
+        ORDER BY vedtaksdato, saksnummer, behandling_id
         """,
     )
     fun finnFerdigbehandledeMedDataLike(

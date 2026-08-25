@@ -90,7 +90,6 @@ class RammeavtaleStatistikkServiceTest {
             RammeavtaleSak("MEL-1", "2025", LocalDate.of(2025, 3, 4)),
             RammeavtaleSak("MEL-2", "2025", LocalDate.of(2025, 6, 1)),
         )
-        statistikk.saker!!.size.toLong() shouldBe statistikk.antall
     }
 
     @Test

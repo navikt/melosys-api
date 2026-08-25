@@ -123,21 +123,43 @@ class RammeavtaleStatistikkIT(
     fun `to behandlinger paa samme sak gir to rader med samme saksnummer`() {
         val fagsak = opprettFagsak("MEL-8150-M")
         // De to første deler vedtaksdato: uten br.behandling_id i select-lista ville SELECT DISTINCT slått dem
-        // sammen til én rad, og antallet ville blitt 2 i stedet for 3
+        // sammen til én rad, og antallet ville blitt 3 i stedet for 4
         lagBehandling(fagsak, erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2025, 4, 1))
         lagBehandling(fagsak, erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2025, 4, 1))
         lagBehandling(fagsak, erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2025, 8, 1))
+        // Annen sak samme dato: uten saksnummer i ORDER BY er rekkefølgen mellom denne og MEL-8150-M vilkårlig
+        lagSak("MEL-8150-A2", erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2025, 4, 1))
 
         val statistikk = rammeavtaleStatistikkService.hentRammeavtaleFjernarbeidStatistikk(null, null)
 
         withClue("Statistikken teller behandlinger, ikke saker, så MEL-nummeret gjentas") {
-            statistikk.antall shouldBe 3
-            statistikk.antallPerVedtaksaar shouldBe mapOf("2025" to 3L)
+            statistikk.antall shouldBe 4
+            statistikk.antallPerVedtaksaar shouldBe mapOf("2025" to 4L)
             statistikk.saker shouldBe listOf(
+                RammeavtaleSak("MEL-8150-A2", "2025", LocalDate.of(2025, 4, 1)),
                 RammeavtaleSak("MEL-8150-M", "2025", LocalDate.of(2025, 4, 1)),
                 RammeavtaleSak("MEL-8150-M", "2025", LocalDate.of(2025, 4, 1)),
                 RammeavtaleSak("MEL-8150-M", "2025", LocalDate.of(2025, 8, 1)),
             )
+        }
+    }
+
+    @Test
+    fun `vedtak rett foer nyttaar UTC telles i vedtaksaaret etter norsk lokaltid`() {
+        // hibernate.timezone.default_storage=NORMALIZE lagrer Instant som veggklokke i JVM-tidssonen, så
+        // vedtaksåret følger norsk lokaltid. Dette er dokumentert i repository-KDoc-en, og er utestet uten dette
+        lagSak(
+            "MEL-8150-TZ",
+            erFjernarbeid = true,
+            resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+            vedtaksdato = Instant.parse("2024-12-31T23:00:00Z"),
+        )
+
+        val statistikk = rammeavtaleStatistikkService.hentRammeavtaleFjernarbeidStatistikk(null, null)
+
+        withClue("23:00Z 31. desember er 00:00 1. januar i Norge, og skal telles i 2025") {
+            statistikk.antallPerVedtaksaar shouldBe mapOf("2025" to 1L)
+            statistikk.saker shouldBe listOf(RammeavtaleSak("MEL-8150-TZ", "2025", LocalDate.of(2025, 1, 1)))
         }
     }
 
@@ -206,9 +228,8 @@ class RammeavtaleStatistikkIT(
             }
         }
 
-        // Byggingen la behandlingen inn i fagsakens liste. Rydder den toveis relasjonen slik at behandlingen kun
-        // lagres via behandlingsresultatet, og slik at en senere behandling på samme fagsak ikke cascader den på nytt.
-        fagsak.behandlinger.clear()
+        // Fagsaken er allerede lagret og lagres ikke på nytt, så behandlingen persisteres kun via
+        // behandlingsresultatet. Fagsak.behandlinger er inverssiden uten orphanRemoval og trenger ingen opprydding
         val lagret = behandlingsresultatRepository.saveAndFlush(behandlingsresultat)
 
         val behandlingId = lagret.hentBehandling().id
