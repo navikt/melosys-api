@@ -309,6 +309,7 @@ internal class MottatteOpplysningerServiceTest {
             arbeidPaaLand = no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.ArbeidPaaLand().apply {
                 erFastArbeidssted = true
             }
+            arbeidsgiverOgArbeidstakerHarUlikPeriode = true
         }
 
         every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.of(mottatteOpplysninger)
@@ -326,6 +327,7 @@ internal class MottatteOpplysningerServiceTest {
         oppdatert.foretakUtland.shouldHaveSize(1)
         oppdatert.foretakUtland.first().navn.shouldBe("Berlin GmbH")
         oppdatert.arbeidPaaLand.erFastArbeidssted.shouldBe(true)
+        oppdatert.arbeidsgiverOgArbeidstakerHarUlikPeriode.shouldBe(true)
         // Soeknad-spesifikke felter som ikke mappes fra søknad skal beholdes
         oppdatert.loennOgGodtgjoerelse.shouldBe(opprinneligLoenn)
     }
