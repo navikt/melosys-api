@@ -83,7 +83,29 @@ class SkattepliktigeAarsavregningDryrunService(
             this.skarp = skarp
             this.maksAntall = maksAntall
 
-            skattehendelser.forEach hendelseLoop@{ hendelse ->
+            // To hendelser for samme person og år ville gitt to prosessinstanser: opprettelsen er ikke
+            // idempotent på sak/år — `OpprettÅrsavregningBehandling` revaliderer ikke før den oppretter
+            // behandlingen, og `finnAktivÅrsavregningBehandling` ser ingenting så lenge instansen bare
+            // ligger i kø. Resultatet er to årsavregninger og to innhentingsbrev til samme borger.
+            // Input-lista er ekte skattehendelser, og en korrigert skattemelding gir en ny hendelse for
+            // et år vi allerede har sett, så duplikater er forventet, ikke hypotetiske.
+            //
+            // Dette lukker duplikater *innenfor* én kjøring. Overlappende kjøringer — typisk en canary
+            // etterfulgt av full kjøring før køen er tømt — er det samme hullet og må håndteres i
+            // prosedyren: vent til de køede instansene er ferdige, og hold canary-sakene utenfor neste
+            // kjøring. Den varige fiksen hører hjemme i saga-steget og gjelder også Kafka-flyten
+            // (`SkattehendelserConsumer`), som har nøyaktig samme hull — egen oppgave, søster av
+            // MELOSYS-8161.
+            val unikeHendelser = skattehendelser.distinctBy { it.identifikator to it.gjelderPeriode }
+            antallDuplikaterFjernet = skattehendelser.size - unikeHendelser.size
+            if (antallDuplikaterFjernet > 0) {
+                log.warn {
+                    "Fjernet $antallDuplikaterFjernet duplikate hendelser (samme identifikator og år) " +
+                        "av ${skattehendelser.size} — de ville gitt doble årsavregninger og doble brev"
+                }
+            }
+
+            unikeHendelser.forEach hendelseLoop@{ hendelse ->
                 if (jobMonitor.shouldStop) return@execute
                 if (maksAntall != null &&
                     (antallVilleOpprettetProsessinstans + antallVilleOppdatertStatus) >= maksAntall
@@ -248,6 +270,7 @@ class SkattepliktigeAarsavregningDryrunService(
                 "skarp" to skarp,
                 "maksAntall" to maksAntall,
                 "antallInputHendelser" to antallInputHendelser,
+                "antallDuplikaterFjernet" to antallDuplikaterFjernet,
                 "antallUgyldigInput" to antallUgyldigInput,
                 "antallUtenTreff" to antallUtenTreff,
                 "antallSakerFunnet" to antallSakerFunnet,
@@ -321,6 +344,7 @@ class SkattepliktigeAarsavregningDryrunService(
         @Volatile var skarp: Boolean = false,
         @Volatile var maksAntall: Int? = null,
         @Volatile var antallInputHendelser: Int = 0,
+        @Volatile var antallDuplikaterFjernet: Int = 0,
         @Volatile var antallUgyldigInput: Int = 0,
         @Volatile var antallSakerFunnet: Int = 0,
         @Volatile var antallVilleOpprettetProsessinstans: Int = 0,
@@ -339,6 +363,7 @@ class SkattepliktigeAarsavregningDryrunService(
             skarp = false
             maksAntall = null
             antallInputHendelser = 0
+            antallDuplikaterFjernet = 0
             antallUgyldigInput = 0
             antallSakerFunnet = 0
             antallVilleOpprettetProsessinstans = 0
@@ -359,6 +384,7 @@ class SkattepliktigeAarsavregningDryrunService(
             "maksAntall" to maksAntall,
             "dbQueryRuntime" to jobMonitor.durationUntil(dbQueryStoppedAt),
             "antallInputHendelser" to antallInputHendelser,
+            "antallDuplikaterFjernet" to antallDuplikaterFjernet,
             "antallUgyldigInput" to antallUgyldigInput,
             "antallSakerFunnet" to antallSakerFunnet,
             "antallVilleOpprettetProsessinstans" to antallVilleOpprettetProsessinstans,

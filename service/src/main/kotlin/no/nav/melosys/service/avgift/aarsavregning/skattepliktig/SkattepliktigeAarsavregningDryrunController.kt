@@ -36,6 +36,9 @@ class SkattepliktigeAarsavregningDryrunController(
             "over og telles i antallStatusHoppetOver, med årsak per sak i rapporten. Slike saker " +
             "er trygge å kjøre om igjen. " +
             "Skarp kjøring krever et positivt maksAntall — uten tak avvises requesten med 400. " +
+            "Hendelser med samme identifikator og år dedupliseres før kjøring (antallDuplikaterFjernet), " +
+            "fordi opprettelsen ikke er idempotent på sak/år. Overlappende kjøringer har samme hull: " +
+            "vent til køen er tømt og hold canary-sakene utenfor neste kjøring. " +
             "Bruk /status for fremdrift og /rapport for detaljert resultat. NB: appen kjører to podder, " +
             "og jobbtilstanden ligger i minnet på den poden som tok imot /run. Kjør derfor mot én pod " +
             "(port-forward), og kryssjekk pod-feltet i /status."

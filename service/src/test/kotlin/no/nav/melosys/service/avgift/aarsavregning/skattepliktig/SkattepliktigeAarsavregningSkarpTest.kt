@@ -294,6 +294,78 @@ class SkattepliktigeAarsavregningSkarpTest {
     }
 
     /**
+     * Copilot-review 25.08: opprettelsen er ikke idempotent på sak/år — `OpprettÅrsavregningBehandling`
+     * revaliderer ikke, og en prosessinstans som bare ligger i kø er usynlig for
+     * `finnAktivÅrsavregningBehandling`. To hendelser for samme person og år ga derfor to årsavregninger
+     * og to innhentingsbrev til samme borger. En korrigert skattemelding gir nettopp en ny hendelse for
+     * et år vi allerede har sett, så duplikater er forventet i ekte input.
+     */
+    @Test
+    fun `duplikate hendelser for samme person og år gir kun én opprettelse`() {
+        val fagsak = lagFagsak("MEL-1")
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
+
+        val behandlingsresultat = Behandlingsresultat.forTest { }
+        every { årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(any(), GJELDER_ÅR) } returns
+            GjeldendeBehandlingsresultaterForÅrsavregning(
+                behandlingsresultat,
+                sisteBehandlingsresultatMedAvgift = behandlingsresultat,
+                sisteÅrsavregning = behandlingsresultat,
+            )
+        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
+        every { trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) } returns
+            Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
+        every { skarpUtfoerer.opprettProsessinstans("MEL-1", "2023") } returns UUID.randomUUID()
+
+        service.prosesserSkattehendelser(
+            listOf(
+                SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID),
+                SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID),
+            ),
+            skarp = true,
+            maksAntall = 5,
+        )
+
+        verify(exactly = 1) { skarpUtfoerer.opprettProsessinstans("MEL-1", "2023") }
+        with(service.status()) {
+            this["antallInputHendelser"] shouldBe 2
+            this["antallDuplikaterFjernet"] shouldBe 1
+            this["antallOpprettet"] shouldBe 1
+        }
+    }
+
+    @Test
+    fun `ulike år for samme person er ikke duplikater`() {
+        val fagsak = lagFagsak("MEL-1")
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
+
+        val behandlingsresultat = Behandlingsresultat.forTest { }
+        every { årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(any(), any()) } returns
+            GjeldendeBehandlingsresultaterForÅrsavregning(
+                behandlingsresultat,
+                sisteBehandlingsresultatMedAvgift = behandlingsresultat,
+                sisteÅrsavregning = behandlingsresultat,
+            )
+        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
+        every { trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) } returns
+            Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
+        every { skarpUtfoerer.opprettProsessinstans(any(), any()) } returns UUID.randomUUID()
+
+        service.prosesserSkattehendelser(
+            listOf(
+                SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID),
+                SkattehendelseDryrunItem(gjelderPeriode = "2024", identifikator = AKTØR_ID),
+            ),
+            skarp = true,
+            maksAntall = 5,
+        )
+
+        verify(exactly = 1) { skarpUtfoerer.opprettProsessinstans("MEL-1", "2023") }
+        verify(exactly = 1) { skarpUtfoerer.opprettProsessinstans("MEL-1", "2024") }
+        service.status()["antallDuplikaterFjernet"] shouldBe 0
+    }
+
+    /**
      * Copilot-review 25.08: `/status` serialiserte den levende `JobMonitor.exceptions`-mappen mens den
      * asynkrone jobben skrev til den. Samme feilklasse som `/rapport` fikk fikset i runde 2 — og verre
      * her, siden `/status` er det ops poller nettopp mens feil registreres.
