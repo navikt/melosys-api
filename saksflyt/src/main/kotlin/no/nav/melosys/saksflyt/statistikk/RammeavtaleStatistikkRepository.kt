@@ -10,12 +10,12 @@ import java.util.UUID
 interface RammeavtaleStatistikkRepository : Repository<Prosessinstans, UUID> {
 
     /**
-     * Teller ferdigbehandlede behandlinger per vedtaksår, der prosessdataen på anmodningen inneholder en gitt
-     * nøkkel=verdi.
+     * Henter én rad per ferdigbehandlet behandling der prosessdataen på anmodningen inneholder en gitt nøkkel=verdi,
+     * med saksnummer (MEL-nr) og vedtaksdato. Brukes til å hente ut behandlinger der rammeavtale om fjernarbeid
+     * (TWFA) er huket av, både for tellingen per vedtaksår og for listen over saker.
      *
      * Prosessdataen lagres som java.util.Properties-tekst (key=value per linje) i CLOB-kolonnen `data`, derfor
-     * matches det med LIKE mot et `"<kode>=<verdi>"`-mønster. Brukes til å hente ut antall behandlinger der
-     * rammeavtale om fjernarbeid (TWFA) er huket av.
+     * matches det med LIKE mot et `"<kode>=<verdi>"`-mønster.
      *
      * Behandlingen regnes som ferdigbehandlet når lovvalget er fastsatt, dvs. `resultat_type = :resultatType`
      * (FASTSATT_LOVVALGSLAND) og det finnes en vedtaksdato. Både innvilgelse og avslag på anmodningen får denne
@@ -27,16 +27,25 @@ interface RammeavtaleStatistikkRepository : Repository<Prosessinstans, UUID> {
      * HenleggelseService) uten at vedtaksdatoen fjernes. Tallene er derfor ikke stabile over tid — en behandling
      * som annulleres senere forsvinner fra vedtaksåret sitt.
      *
-     * Året er året vedtaket ble fattet (`vedtak_metadata.vedtak_dato`), ikke da anmodningen ble registrert.
-     * Det telles distinkte behandlinger, slik at flere anmodningsprosesser på samme behandling kun teller én gang.
+     * Datoen som gjelder er vedtaksdatoen (`vedtak_metadata.vedtak_dato`), ikke da anmodningen ble registrert.
+     * Vedtaksåret utledes av kaller fra denne datoen.
      *
-     * Hver rad er `[aar (String), antall (Number)]`. `fom`/`tom` er valgfrie (null = ingen grense) og gjelder
-     * vedtaksdatoen.
+     * `DISTINCT` gjør at flere anmodningsprosesser på samme behandling kun gir én rad. `br.behandling_id` **må**
+     * derfor stå i select-lista: uten den ville to ulike behandlinger på samme sak med samme vedtaksdato blitt
+     * slått sammen til én rad, og antallet ville endret seg. Motsatt vei gir én fagsak med to TWFA-behandlinger
+     * to rader med samme saksnummer, hvilket er tilsiktet — antallet teller behandlinger, ikke saker.
+     *
+     * Hver rad er `[saksnummer (String), behandlingId (Number), vedtaksdato (String, ISO-8601)]`. Datoen
+     * formateres som tekst nettopp for å unngå at JDBC-/tidssonekonvertering flytter en vedtaksdato over et
+     * årsskifte. `fom`/`tom` er valgfrie (null = ingen grense) og gjelder vedtaksdatoen.
      */
     @NativeQuery(
         """
-        SELECT TO_CHAR(vm.vedtak_dato, 'YYYY') AS aar, COUNT(DISTINCT br.behandling_id) AS antall
+        SELECT DISTINCT b.saksnummer AS saksnummer,
+                        br.behandling_id AS behandling_id,
+                        TO_CHAR(vm.vedtak_dato, 'YYYY-MM-DD') AS vedtaksdato
         FROM prosessinstans p
+        JOIN behandling b ON b.id = p.behandling_id
         -- behandlingsresultat har behandling_id som PK, og vedtak_metadata deler den via @MapsId
         JOIN behandlingsresultat br ON br.behandling_id = p.behandling_id
         JOIN vedtak_metadata vm ON vm.behandlingsresultat_id = br.behandling_id
@@ -46,11 +55,12 @@ interface RammeavtaleStatistikkRepository : Repository<Prosessinstans, UUID> {
           AND vm.vedtak_dato IS NOT NULL
           AND (:fom IS NULL OR vm.vedtak_dato >= :fom)
           AND (:tom IS NULL OR vm.vedtak_dato < :tom)
-        GROUP BY TO_CHAR(vm.vedtak_dato, 'YYYY')
-        ORDER BY 1
+        -- posisjonsreferanser, fordi SELECT DISTINCT begrenser hva ORDER BY kan peke på.
+        -- ISO-formatert dato sorterer identisk med timestampen.
+        ORDER BY 3, 1
         """,
     )
-    fun tellFerdigbehandledePerVedtaksaarMedDataLike(
+    fun finnFerdigbehandledeMedDataLike(
         @Param("prosessType") prosessType: String,
         @Param("dataLikePattern") dataLikePattern: String,
         @Param("resultatType") resultatType: String,

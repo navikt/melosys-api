@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.statistikk
 
 import io.kotest.matchers.maps.shouldBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -35,7 +36,7 @@ class RammeavtaleStatistikkServiceTest {
         val dataLikePatternSlot = slot<String>()
         val resultatTypeSlot = slot<String>()
         every {
-            rammeavtaleStatistikkRepository.tellFerdigbehandledePerVedtaksaarMedDataLike(
+            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike(
                 capture(prosessTypeSlot),
                 capture(dataLikePatternSlot),
                 capture(resultatTypeSlot),
@@ -43,33 +44,85 @@ class RammeavtaleStatistikkServiceTest {
                 any(),
             )
         } returns listOf(
-            arrayOf<Any>("2024", BigDecimal(3)),
-            arrayOf<Any>("2025", BigDecimal(7)),
+            rad("MEL-1", 1, "2024-02-01"),
+            rad("MEL-2", 2, "2024-11-30"),
+            rad("MEL-3", 3, "2025-01-02"),
         )
 
         val statistikk = service.hentRammeavtaleFjernarbeidStatistikk(null, null)
 
-        statistikk.antall shouldBe 10
-        statistikk.antallPerVedtaksaar shouldBe linkedMapOf("2024" to 3L, "2025" to 7L)
+        statistikk.antall shouldBe 3
+        statistikk.antallPerVedtaksaar shouldBe linkedMapOf("2024" to 2L, "2025" to 1L)
         prosessTypeSlot.captured shouldBe ProsessType.ANMODNING_OM_UNNTAK.kode
         dataLikePatternSlot.captured shouldBe "%${ProsessDataKey.ER_FJERNARBEID_TWFA.kode}=true%"
         resultatTypeSlot.captured shouldBe Behandlingsresultattyper.FASTSATT_LOVVALGSLAND.name
     }
 
     @Test
-    fun `hopper over rader uten vedtaksaar`() {
+    fun `tar med saksnummer og vedtaksdato per behandling som standard`() {
         every {
-            rammeavtaleStatistikkRepository.tellFerdigbehandledePerVedtaksaarMedDataLike(any(), any(), any(), any(), any())
+            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike(any(), any(), any(), any(), any())
         } returns listOf(
-            @Suppress("UNCHECKED_CAST")
-            (arrayOf(null, BigDecimal(4)) as Array<Any>),
-            arrayOf<Any>("2025", BigDecimal(2)),
+            rad("MEL-1", 1, "2025-03-04"),
+            rad("MEL-2", 2, "2025-06-01"),
         )
 
         val statistikk = service.hentRammeavtaleFjernarbeidStatistikk(null, null)
 
-        statistikk.antallPerVedtaksaar shouldBe mapOf("2025" to 2L)
+        statistikk.saker shouldBe listOf(
+            RammeavtaleSak("MEL-1", "2025", LocalDate.of(2025, 3, 4)),
+            RammeavtaleSak("MEL-2", "2025", LocalDate.of(2025, 6, 1)),
+        )
+        statistikk.saker!!.size.toLong() shouldBe statistikk.antall
+    }
+
+    @Test
+    fun `samme sak med to behandlinger telles to ganger og listes to ganger`() {
+        every {
+            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike(any(), any(), any(), any(), any())
+        } returns listOf(
+            rad("MEL-1", 1, "2025-03-04"),
+            rad("MEL-1", 2, "2025-09-09"),
+        )
+
+        val statistikk = service.hentRammeavtaleFjernarbeidStatistikk(null, null)
+
         statistikk.antall shouldBe 2
+        statistikk.antallPerVedtaksaar shouldBe mapOf("2025" to 2L)
+        statistikk.saker!!.map { it.saksnummer } shouldBe listOf("MEL-1", "MEL-1")
+    }
+
+    @Test
+    fun `utelater saksnummerlisten men beholder tallene naar inkluderSaksnummer er false`() {
+        every {
+            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike(any(), any(), any(), any(), any())
+        } returns listOf(
+            rad("MEL-1", 1, "2025-03-04"),
+            rad("MEL-2", 2, "2025-06-01"),
+        )
+
+        val statistikk = service.hentRammeavtaleFjernarbeidStatistikk(null, null, inkluderSaksnummer = false)
+
+        statistikk.saker.shouldBeNull()
+        statistikk.antall shouldBe 2
+        statistikk.antallPerVedtaksaar shouldBe mapOf("2025" to 2L)
+    }
+
+    @Test
+    fun `hopper over rader uten saksnummer eller vedtaksdato`() {
+        every {
+            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike(any(), any(), any(), any(), any())
+        } returns listOf(
+            radMedNull(null, "2025-01-01"),
+            radMedNull("MEL-2", null),
+            rad("MEL-3", 3, "2025-05-05"),
+        )
+
+        val statistikk = service.hentRammeavtaleFjernarbeidStatistikk(null, null)
+
+        statistikk.antall shouldBe 1
+        statistikk.antallPerVedtaksaar shouldBe mapOf("2025" to 1L)
+        statistikk.saker!!.map { it.saksnummer } shouldBe listOf("MEL-3")
     }
 
     @Test
@@ -77,7 +130,7 @@ class RammeavtaleStatistikkServiceTest {
         val fomSlot = slot<LocalDateTime?>()
         val tomSlot = slot<LocalDateTime?>()
         every {
-            rammeavtaleStatistikkRepository.tellFerdigbehandledePerVedtaksaarMedDataLike(
+            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike(
                 any(),
                 any(),
                 any(),
@@ -93,8 +146,18 @@ class RammeavtaleStatistikkServiceTest {
 
         statistikk.antall shouldBe 0
         statistikk.antallPerVedtaksaar.shouldBeEmpty()
+        statistikk.saker shouldBe emptyList()
         fomSlot.captured shouldBe LocalDate.of(2024, 1, 1).atStartOfDay()
         // tom er inklusiv -> oversettes til starten av neste dag (eksklusiv øvre grense)
         tomSlot.captured shouldBe LocalDate.of(2025, 1, 1).atStartOfDay()
     }
+
+    /** Rad slik spørringen leverer den: `[saksnummer, behandlingId, vedtaksdato som ISO-tekst]`. */
+    private fun rad(saksnummer: String, behandlingId: Long, vedtaksdato: String): Array<Any> =
+        arrayOf(saksnummer, BigDecimal(behandlingId), vedtaksdato)
+
+    /** Rad der en kolonne mangler — Hibernate leverer da null i posisjonen. */
+    @Suppress("UNCHECKED_CAST")
+    private fun radMedNull(saksnummer: String?, vedtaksdato: String?): Array<Any> =
+        arrayOf<Any?>(saksnummer, BigDecimal.ONE, vedtaksdato) as Array<Any>
 }
