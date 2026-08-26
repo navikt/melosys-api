@@ -46,10 +46,11 @@ transaksjon som `oppdaterAnmodetAvForBehandling`. Presedens finnes i samme tabel
 Deretter skrives spørringen her om til å joine `anmodningsperiode`, og `AbstraktSendUtland` leser
 flagget derfra i stedet for fra prosessdataen.
 
-**Backfill haster.** Historiske saker kan gjenopprettes fra `prosessinstans` så lenge radene ligger
-der. Blir de ryddet bort før migreringen kjøres, er historikken tapt — Excel-lista hos Medlemskap
-og avgift er da eneste kilde, og RINA kan ikke brukes (`hentSedGrunnlag` returnerer
-`SedGrunnlagDto` uten feltet).
+**Backfill er mulig så lenge prosessinstans-radene finnes.** Det går ingen klokke i dag — det finnes
+ingen slettejobb for `prosessinstans`, bekreftet ved gjennomgang av `@Scheduled`, naisjobs og Flyway
+i august 2026. Men avhengigheten består: blir oppryddingen designet inviterer til implementert før
+migreringen kjøres, er historikken tapt. Excel-lista hos Medlemskap og avgift er da eneste kilde, og
+RINA kan ikke brukes (`hentSedGrunnlag` returnerer `SedGrunnlagDto` uten feltet).
 
 ## Kjent avgrensning
 
