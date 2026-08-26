@@ -26,12 +26,16 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.unntak.AnmodningUnntakKonstanter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.YTTERLIGERE_INFO_SED;
 
 @Component
 public class SendAnmodningOmUnntak extends AbstraktSendUtland {
+    private static final Logger log = LoggerFactory.getLogger(SendAnmodningOmUnntak.class);
+
     private final BrevBestiller brevBestiller;
     private final BehandlingService behandlingService;
     private final AnmodningsperiodeService anmodningsperiodeService;
@@ -85,6 +89,24 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
             .medBehandling(behandling)
             .medYtterligereInformasjon(prosessinstans.getData(YTTERLIGERE_INFO_SED))
             .build();
+    }
+
+    @Override
+    protected Boolean hentErFjernarbeidTWFA(Behandlingsresultat behandlingsresultat, Prosessinstans prosessinstans) {
+        Boolean fraAnmodningsperiode = behandlingsresultat.hentAnmodningsperiode().getErFjernarbeidTWFA();
+        if (fraAnmodningsperiode != null) {
+            return fraAnmodningsperiode;
+        }
+
+        // Fallback til prosessdataen, som var eneste lagringssted før MELOSYS-8150. Treffer anmodninger opprettet
+        // av en pod med forrige versjon i deploy-vinduet, der kolonnen ennå er null. Uten den ville A001 blitt
+        // sendt til utlandet uten rammeavtale-flagget. Kan fjernes når loggmeldingen under er borte fra prod.
+        Boolean fraProsessdata = prosessinstans.getData(ProsessDataKey.ER_FJERNARBEID_TWFA, Boolean.class);
+        if (fraProsessdata != null) {
+            log.info("Behandling {}: er_fjernarbeid_twfa er ikke satt på anmodningsperioden, leser {} fra prosessdataen i stedet",
+                behandlingsresultat.getId(), fraProsessdata);
+        }
+        return fraProsessdata;
     }
 
     @Override

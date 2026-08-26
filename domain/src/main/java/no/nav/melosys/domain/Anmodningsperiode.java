@@ -65,6 +65,13 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
     @Column(name = "anmodet_av")
     private String anmodetAv;
 
+    /**
+     * Rammeavtale om fjernarbeid i EØS (Telework Framework Agreement), avhuket av saksbehandler ved anmodning om unntak.
+     * Nullable med vilje: null betyr at spørsmålet ikke er besvart, og skilles fra et eksplisitt nei.
+     */
+    @Column(name = "er_fjernarbeid_twfa")
+    private Boolean erFjernarbeidTWFA;
+
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "anmodningsperiode")
     private AnmodningsperiodeSvar anmodningsperiodeSvar;
 
@@ -197,6 +204,14 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
         this.anmodetAv = anmodetAv;
     }
 
+    public Boolean getErFjernarbeidTWFA() {
+        return erFjernarbeidTWFA;
+    }
+
+    public void setErFjernarbeidTWFA(Boolean erFjernarbeidTWFA) {
+        this.erFjernarbeidTWFA = erFjernarbeidTWFA;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -212,14 +227,15 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
             && dekning == that.dekning
             && Objects.equals(medlPeriodeID, that.medlPeriodeID)
             && sendtUtland == that.sendtUtland
-            && Objects.equals(anmodetAv, that.anmodetAv);
+            && Objects.equals(anmodetAv, that.anmodetAv)
+            && Objects.equals(erFjernarbeidTWFA, that.erFjernarbeidTWFA);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(behandlingsresultat, fom, tom, lovvalgsland, bestemmelse, tilleggsbestemmelse,
             unntakFraLovvalgsland, unntakFraBestemmelse, dekning, medlPeriodeID, sendtUtland,
-            anmodetAv);
+            anmodetAv, erFjernarbeidTWFA);
     }
 
     @Override
@@ -228,7 +244,8 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
             + ", bestemmelse=" + bestemmelse + ", tilleggsbestemmelse=" + tilleggsbestemmelse
             + ", unntakFraLovvalgsland=" + unntakFraLovvalgsland + ", unntakFraBestemmelse=" + unntakFraBestemmelse
             + ", dekning=" + dekning + ", medlPeriodeID=" + medlPeriodeID + ", sendtUtland=" + sendtUtland
-            + ", anmodetAv='" + anmodetAv + '\'' + ", anmodningsperiodeSvar=" + anmodningsperiodeSvar + '}';
+            + ", anmodetAv='" + anmodetAv + '\'' + ", erFjernarbeidTWFA=" + erFjernarbeidTWFA
+            + ", anmodningsperiodeSvar=" + anmodningsperiodeSvar + '}';
     }
 
     public boolean gjelderSammeLandOgUnntakSom(Anmodningsperiode periode2) {

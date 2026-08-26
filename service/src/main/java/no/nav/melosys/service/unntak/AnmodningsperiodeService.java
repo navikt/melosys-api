@@ -162,7 +162,16 @@ public class AnmodningsperiodeService {
         }
     }
 
-    public void oppdaterAnmodetAvForBehandling(long behandlingID, String subjekt) {
+    /**
+     * Registrerer at anmodning om unntak er sendt: hvem som anmodet, og om saken behandles etter rammeavtalen om
+     * fjernarbeid (TWFA).
+     * <p>
+     * De to feltene settes i samme operasjon med vilje. TWFA-flagget er kilde for offisiell rapportering
+     * (MELOSYS-8150), og en egen metode ville kunne kalles uten sperren mot dobbel anmodning under.
+     *
+     * @param erFjernarbeidTWFA null når spørsmålet ikke er besvart; skilles fra et eksplisitt nei.
+     */
+    public void registrerAnmodning(long behandlingID, String subjekt, Boolean erFjernarbeidTWFA) {
         var anmodningsperiode = hentFørsteAnmodningsperiode(behandlingID);
         if (hasText(anmodningsperiode.getAnmodetAv())) {
             throw new FunksjonellException(
@@ -171,6 +180,7 @@ public class AnmodningsperiodeService {
         }
 
         anmodningsperiode.setAnmodetAv(subjekt);
+        anmodningsperiode.setErFjernarbeidTWFA(erFjernarbeidTWFA);
         anmodningsperiodeRepository.save(anmodningsperiode);
     }
 }

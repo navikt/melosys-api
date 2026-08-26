@@ -115,7 +115,63 @@ class SendAnmodningOmUnntakTest {
     }
 
     @Test
-    fun `utfør med erFjernarbeidTWFA true skal sende sed med TWFA-flagg`() {
+    fun `utfør leser erFjernarbeidTWFA true fra anmodningsperioden`() {
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
+        }
+        val behandlingsresultat = lagBehandlingsresultatMedAnmodningsperiode { erFjernarbeidTWFA = true }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
+        sendAnmodningOmUnntak.utfør(prosessinstans)
+
+        verify {
+            eessiService.opprettOgSendSed(
+                BEHANDLING_ID, listOf(MOTTAKER_INSTITSJON), BucType.LA_BUC_01, any(), null, null, true
+            )
+        }
+    }
+
+    @Test
+    fun `utfør leser erFjernarbeidTWFA false fra anmodningsperioden`() {
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
+        }
+        val behandlingsresultat = lagBehandlingsresultatMedAnmodningsperiode { erFjernarbeidTWFA = false }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
+        sendAnmodningOmUnntak.utfør(prosessinstans)
+
+        verify {
+            eessiService.opprettOgSendSed(
+                BEHANDLING_ID, listOf(MOTTAKER_INSTITSJON), BucType.LA_BUC_01, any(), null, null, false
+            )
+        }
+    }
+
+    @Test
+    fun `utfør lar anmodningsperioden vinne over prosessdataen`() {
+        // Kolonnen er kilden etter MELOSYS-8150. Prosessdataen skal kun brukes når kolonnen er null,
+        // ellers ville en utdatert prosessinstans kunne overstyre det saksbehandler faktisk huket av
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
+            medData(ProsessDataKey.ER_FJERNARBEID_TWFA, true)
+        }
+        val behandlingsresultat = lagBehandlingsresultatMedAnmodningsperiode { erFjernarbeidTWFA = false }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
+        sendAnmodningOmUnntak.utfør(prosessinstans)
+
+        verify {
+            eessiService.opprettOgSendSed(
+                BEHANDLING_ID, listOf(MOTTAKER_INSTITSJON), BucType.LA_BUC_01, any(), null, null, false
+            )
+        }
+    }
+
+    @Test
+    fun `utfør faller tilbake til prosessdata naar kolonnen er null - erFjernarbeidTWFA true`() {
+        // Anmodninger opprettet av en pod med forrige versjon i deploy-vinduet har flagget kun i prosessdataen.
+        // Uten fallbacken ville A001 blitt sendt til utlandet uten rammeavtale-flagget
         val prosessinstans = lagProsessinstans {
             medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
             medData(ProsessDataKey.ER_FJERNARBEID_TWFA, true)
@@ -139,7 +195,7 @@ class SendAnmodningOmUnntakTest {
     }
 
     @Test
-    fun `utfør med erFjernarbeidTWFA false skal sende sed med TWFA false`() {
+    fun `utfør faller tilbake til prosessdata naar kolonnen er null - erFjernarbeidTWFA false`() {
         val prosessinstans = lagProsessinstans {
             medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
             medData(ProsessDataKey.ER_FJERNARBEID_TWFA, false)

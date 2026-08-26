@@ -108,7 +108,7 @@ class AnmodningUnntakServiceTest {
         every { anmodningUnntakKontrollService.utførKontroller(BEHANDLING_ID) } returns emptyList()
         every { eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), any(), any()) } returns setOf(MOTTAKER_INSTITUSJON)
         every { joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(any(), any()) } just Runs
-        every { anmodningsperiodeService.oppdaterAnmodetAvForBehandling(BEHANDLING_ID, "Z990007") } just Runs
+        every { anmodningsperiodeService.registrerAnmodning(BEHANDLING_ID, "Z990007", any()) } just Runs
         every { prosessinstansService.opprettProsessinstansAnmodningOmUnntak(any(), any(), any(), any(), any(), any()) } just Runs
         every { oppgaveService.leggTilbakeBehandlingsoppgaveMedSaksnummer(any()) } just Runs
         every { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK) } just Runs
@@ -123,7 +123,7 @@ class AnmodningUnntakServiceTest {
         )
 
         verify { anmodningUnntakKontrollService.utførKontroller(BEHANDLING_ID) }
-        verify { anmodningsperiodeService.oppdaterAnmodetAvForBehandling(BEHANDLING_ID, "Z990007") }
+        verify { anmodningsperiodeService.registrerAnmodning(BEHANDLING_ID, "Z990007", null) }
         verify {
             prosessinstansService.opprettProsessinstansAnmodningOmUnntak(
                 any(),
@@ -152,7 +152,7 @@ class AnmodningUnntakServiceTest {
         every { anmodningUnntakKontrollService.utførKontroller(BEHANDLING_ID) } returns emptyList()
         every { eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), any(), any()) } returns emptySet()
         every { joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(any(), any()) } just Runs
-        every { anmodningsperiodeService.oppdaterAnmodetAvForBehandling(BEHANDLING_ID, "Z990007") } just Runs
+        every { anmodningsperiodeService.registrerAnmodning(BEHANDLING_ID, "Z990007", any()) } just Runs
         every { prosessinstansService.opprettProsessinstansAnmodningOmUnntak(any(), any(), any(), any(), any(), any()) } just Runs
         every { oppgaveService.leggTilbakeBehandlingsoppgaveMedSaksnummer(any()) } just Runs
         every { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK) } just Runs
@@ -167,7 +167,7 @@ class AnmodningUnntakServiceTest {
         )
 
         verify { anmodningUnntakKontrollService.utførKontroller(BEHANDLING_ID) }
-        verify { anmodningsperiodeService.oppdaterAnmodetAvForBehandling(BEHANDLING_ID, "Z990007") }
+        verify { anmodningsperiodeService.registrerAnmodning(BEHANDLING_ID, "Z990007", null) }
         verify {
             prosessinstansService.opprettProsessinstansAnmodningOmUnntak(
                 any(),
@@ -180,6 +180,70 @@ class AnmodningUnntakServiceTest {
         }
         verify { oppgaveService.leggTilbakeBehandlingsoppgaveMedSaksnummer(any()) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK) }
+    }
+
+    @Test
+    fun `anmodningOmUnntak med rammeavtale om fjernarbeid huket av lagrer flagget paa anmodningsperioden`() {
+        // Flagget er kilden til uttrekket Medlemskap og avgift bruker i offisiell rapportering (MELOSYS-8150).
+        // Faller det på gulvet mellom controller og anmodningsperiode, blir saken usynlig i tallene.
+        val fagsak = FagsakTestFactory.lagFagsak()
+        val behandling = Behandling.forTest {
+            this.fagsak = fagsak
+            mottatteOpplysninger = MottatteOpplysninger()
+        }
+        behandling.saksopplysninger.add(lagPersonSaksopplysning())
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
+        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.SE)
+        every { anmodningUnntakKontrollService.utførKontroller(BEHANDLING_ID) } returns emptyList()
+        every { eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), any(), any()) } returns setOf(MOTTAKER_INSTITUSJON)
+        every { joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(any(), any()) } just Runs
+        every { anmodningsperiodeService.registrerAnmodning(BEHANDLING_ID, "Z990007", any()) } just Runs
+        every { prosessinstansService.opprettProsessinstansAnmodningOmUnntak(any(), any(), any(), any(), any(), any()) } just Runs
+        every { oppgaveService.leggTilbakeBehandlingsoppgaveMedSaksnummer(any()) } just Runs
+        every { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK) } just Runs
+
+        anmodningUnntakService.anmodningOmUnntak(
+            BEHANDLING_ID,
+            MOTTAKER_INSTITUSJON,
+            emptySet(),
+            FRITEKST_SED,
+            BEGRUNNELSE_FRITEKST,
+            true
+        )
+
+        verify { anmodningsperiodeService.registrerAnmodning(BEHANDLING_ID, "Z990007", true) }
+    }
+
+    @Test
+    fun `anmodningOmUnntak lagrer anmodningsperioden foer prosessinstansen opprettes`() {
+        // SendAnmodningOmUnntak leser TWFA-flagget fra anmodningsperioden når prosessinstansen kjøres.
+        // Blir rekkefølgen snudd, kan steget rekke å lese en anmodningsperiode uten flagget.
+        val fagsak = FagsakTestFactory.lagFagsak()
+        val behandling = Behandling.forTest {
+            this.fagsak = fagsak
+            mottatteOpplysninger = MottatteOpplysninger()
+        }
+        behandling.saksopplysninger.add(lagPersonSaksopplysning())
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
+        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.SE)
+        every { anmodningUnntakKontrollService.utførKontroller(BEHANDLING_ID) } returns emptyList()
+        every { eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), any(), any()) } returns setOf(MOTTAKER_INSTITUSJON)
+        every { joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(any(), any()) } just Runs
+        every { anmodningsperiodeService.registrerAnmodning(BEHANDLING_ID, "Z990007", any()) } just Runs
+        every { prosessinstansService.opprettProsessinstansAnmodningOmUnntak(any(), any(), any(), any(), any(), any()) } just Runs
+        every { oppgaveService.leggTilbakeBehandlingsoppgaveMedSaksnummer(any()) } just Runs
+        every { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK) } just Runs
+
+        anmodningUnntakService.anmodningOmUnntak(
+            BEHANDLING_ID, MOTTAKER_INSTITUSJON, emptySet(), FRITEKST_SED, BEGRUNNELSE_FRITEKST, true
+        )
+
+        verifyOrder {
+            anmodningsperiodeService.registrerAnmodning(BEHANDLING_ID, "Z990007", true)
+            prosessinstansService.opprettProsessinstansAnmodningOmUnntak(any(), any(), any(), any(), any(), any())
+        }
     }
 
     @Test
