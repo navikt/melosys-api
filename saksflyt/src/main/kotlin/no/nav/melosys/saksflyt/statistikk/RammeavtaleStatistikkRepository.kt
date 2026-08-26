@@ -7,6 +7,17 @@ import org.springframework.data.repository.query.Param
 import java.time.LocalDateTime
 import java.util.UUID
 
+/**
+ * ⚠️ **Midlertidig løsning — leser fra en arbeidstabell.**
+ *
+ * Spørringen under henter rapporteringstall ut av `prosessinstans.data`, fordi TWFA-avhukingen i dag ikke finnes
+ * noe annet sted. `prosessinstans` er en arbeidstabell som er ment å være kortlevd
+ * (`V161__prosessinstans_prioritet.sql`, `V3.0_01__PROSESSINSTANS.sql`, KDoc-en på [Prosessinstans]). Det virker
+ * kun fordi ingen slettejobb finnes ennå — ikke fordi det er holdbart.
+ *
+ * **Ikke kopier dette mønsteret.** Trengs noe fra en prosessinstans varig, skal det lagres et annet sted i
+ * databasen. Planlagt fiks og backfill: se `README.md` i denne pakken.
+ */
 interface RammeavtaleStatistikkRepository : Repository<Prosessinstans, UUID> {
 
     /**
@@ -15,7 +26,8 @@ interface RammeavtaleStatistikkRepository : Repository<Prosessinstans, UUID> {
      * (TWFA) er huket av, både for tellingen per vedtaksår og for listen over saker.
      *
      * Prosessdataen lagres som java.util.Properties-tekst (key=value per linje) i CLOB-kolonnen `data`, derfor
-     * matches det med LIKE mot et `"<kode>=<verdi>"`-mønster.
+     * matches det med LIKE mot et `"<kode>=<verdi>"`-mønster. Utypet og uindeksert — se pakke-README-en for
+     * hvorfor dette er teknisk gjeld og hva som skal erstatte det.
      *
      * Behandlingen regnes som ferdigbehandlet når lovvalget er fastsatt, dvs. `resultat_type = :resultatType`
      * (FASTSATT_LOVVALGSLAND) og det finnes en vedtaksdato. Både innvilgelse og avslag på anmodningen får denne

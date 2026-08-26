@@ -19,6 +19,10 @@ class RammeavtaleStatistikkService(
      * (java.util.Properties-tekst i CLOB), ikke som egen kolonne. Vi teller derfor behandlinger der prosessdataen
      * inneholder `<kode>=true` for [ProsessDataKey.ER_FJERNARBEID_TWFA].
      *
+     * ⚠️ Det er midlertidig: prosessinstans er en arbeidstabell, og flagget skal flyttes til en egen kolonne på
+     * `anmodningsperiode`. Se `README.md` i denne pakken. Følgen av å lese fra prosesstypen er også en kjent
+     * avgrensning — kun saker Norge selv har sendt telles, ikke innkommende A001 (MELOSYS-8252).
+     *
      * Kun saker som er ferdigbehandlet etter at svar på anmodningen er mottatt telles med, dvs. behandlinger med
      * [Behandlingsresultattyper.FASTSATT_LOVVALGSLAND] og en vedtaksdato. Året er året vedtaket ble fattet.
      *

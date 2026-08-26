@@ -33,7 +33,8 @@ class RammeavtaleStatistikkController(
             "per behandling, for sporbarhet ved spørsmål i enkeltsaker. Samme saksnummer kan forekomme flere " +
             "ganger dersom én sak har flere behandlinger med rammeavtalen huket av og eget vedtak — antallet " +
             "teller behandlinger, ikke saker. Sett inkluderSaksnummer=false for en response med kun " +
-            "oversiktstallene (samme spørring, mindre response).",
+            "oversiktstallene (samme spørring, mindre response). NB: uttrekket dekker kun saker der Norge selv " +
+            "har sendt anmodningen — innkommende A001 fra andre land er ikke med (MELOSYS-8252).",
     )
     fun hentRammeavtaleFjernarbeidStatistikk(
         @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") fom: LocalDate?,
