@@ -280,6 +280,51 @@ class AnmodningsperiodeServiceTest {
         verify(exactly = 0) { anmodningsperiodeRepository.save(any()) }
     }
 
+    @Test
+    fun `reparerManglendeErFjernarbeidTWFA - kolonnen er null - settes og lagres`() {
+        // Reparasjonsstien fra SendAnmodningOmUnntak: uten denne blir raden stående null etter at
+        // fallbacken har reddet SED-en, og saken forsvinner ut av rapporteringstallene
+        val anmodningsperiode = anmodningsperiodeForTest { }
+        every { anmodningsperiodeRepository.findByBehandlingsresultatId(any<Long>()) } returns listOf(anmodningsperiode)
+        every { anmodningsperiodeRepository.save(anmodningsperiode) } returns anmodningsperiode
+
+
+        anmodningsperiodeService.reparerManglendeErFjernarbeidTWFA(1L, true)
+
+
+        anmodningsperiode.erFjernarbeidTWFA shouldBe true
+        verify { anmodningsperiodeRepository.save(anmodningsperiode) }
+    }
+
+    @Test
+    fun `reparerManglendeErFjernarbeidTWFA - kolonnen er allerede satt - no-op uten lagring`() {
+        // Reparasjon skal aldri overskrive saksbehandlerens svar, og skal ikke kaste — den kalles midt i
+        // sending av A001, og en exception her ville veltet hele sendingen i stedet for bare reparasjonen
+        val anmodningsperiode = anmodningsperiodeForTest { erFjernarbeidTWFA = false }
+        every { anmodningsperiodeRepository.findByBehandlingsresultatId(any<Long>()) } returns listOf(anmodningsperiode)
+
+
+        anmodningsperiodeService.reparerManglendeErFjernarbeidTWFA(1L, true)
+
+
+        anmodningsperiode.erFjernarbeidTWFA shouldBe false
+        verify(exactly = 0) { anmodningsperiodeRepository.save(any()) }
+    }
+
+    @Test
+    fun `reparerManglendeErFjernarbeidTWFA - ikke noeyaktig en anmodningsperiode - kaster`() {
+        every { anmodningsperiodeRepository.findByBehandlingsresultatId(any<Long>()) } returns emptyList()
+
+
+        val exception = shouldThrow<FunksjonellException> {
+            anmodningsperiodeService.reparerManglendeErFjernarbeidTWFA(1L, true)
+        }
+
+
+        exception.message shouldBe "Forventet én anmodningsperiode på behandling1, fant 0"
+        verify(exactly = 0) { anmodningsperiodeRepository.save(any()) }
+    }
+
     private fun lagAnmodningsperiode(
         init: no.nav.melosys.domain.AnmodningsperiodeTestFactory.Builder.() -> Unit = {}
     ): Anmodningsperiode = anmodningsperiodeForTest {

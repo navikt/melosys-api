@@ -93,8 +93,7 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
 
     @Override
     protected Boolean hentErFjernarbeidTWFA(Behandlingsresultat behandlingsresultat, Prosessinstans prosessinstans) {
-        Anmodningsperiode anmodningsperiode = behandlingsresultat.hentAnmodningsperiode();
-        Boolean fraAnmodningsperiode = anmodningsperiode.getErFjernarbeidTWFA();
+        Boolean fraAnmodningsperiode = behandlingsresultat.hentAnmodningsperiode().getErFjernarbeidTWFA();
         if (fraAnmodningsperiode != null) {
             return fraAnmodningsperiode;
         }
@@ -105,13 +104,12 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
         // mellom anmodning og sending. Uten fallbacken ville A001 blitt sendt til utlandet uten flagget.
         Boolean fraProsessdata = prosessinstans.getData(ProsessDataKey.ER_FJERNARBEID_TWFA, Boolean.class);
         if (fraProsessdata != null) {
-            // Skriv tilbake. Fallbacken redder SED-en, men uten dette ville raden blitt stående null og saken
+            // Reparer raden. Fallbacken redder SED-en, men uten dette ville kolonnen blitt stående null og saken
             // forsvunnet ut av rapporteringstallene — som er hele grunnen til at kolonnen finnes. Ingen jobb
             // backfiller på nytt etter at V170 har kjørt.
             log.info("Behandling {}: er_fjernarbeid_twfa var ikke satt på anmodningsperioden, leser {} fra "
-                + "prosessdataen og skriver den tilbake", behandlingsresultat.getId(), fraProsessdata);
-            anmodningsperiode.setErFjernarbeidTWFA(fraProsessdata);
-            anmodningsperiodeService.lagre(anmodningsperiode);
+                + "prosessdataen og reparerer raden", behandlingsresultat.getId(), fraProsessdata);
+            anmodningsperiodeService.reparerManglendeErFjernarbeidTWFA(behandlingsresultat.getId(), fraProsessdata);
         }
         return fraProsessdata;
     }
