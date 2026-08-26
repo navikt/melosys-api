@@ -37,8 +37,9 @@ interface RammeavtaleStatistikkRepository : Repository<Prosessinstans, UUID> {
      *
      * Hver rad er `[saksnummer (String), behandlingId (Number), vedtaksdato (String, ISO-8601)]`. Datoen
      * formateres i databasen så lesingen ikke konverterer den. NB: skrivingen normaliserer `Instant` til
-     * JVM-tidssonen (`hibernate.timezone.default_storage=NORMALIZE`), så vedtaksåret følger norsk lokaltid —
-     * et vedtak fattet 2024-12-31T23:00Z ligger i 2025. Det har vært slik siden første versjon av uttrekket.
+     * JVM-tidssonen (`hibernate.timezone.default_storage=NORMALIZE`), som i prod pinnes til Europe/Oslo via
+     * `JAVA_TOOL_OPTIONS` i Dockerfile. Vedtaksåret følger derfor norsk lokaltid — et vedtak fattet
+     * 2024-12-31T23:00Z ligger i 2025. Det har vært slik siden første versjon av uttrekket.
      *
      * `fom`/`tom` er valgfrie (null = ingen grense) og gjelder vedtaksdatoen.
      */

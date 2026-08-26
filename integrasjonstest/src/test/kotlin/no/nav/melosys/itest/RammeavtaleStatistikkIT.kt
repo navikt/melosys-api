@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.util.TimeZone
 
 /**
  * Verifiserer mot ekte Oracle at uttrekket for rammeavtale om fjernarbeid (TWA, MELOSYS-8150) kun teller
@@ -145,21 +146,25 @@ class RammeavtaleStatistikkIT(
     }
 
     @Test
-    fun `vedtak rett foer nyttaar UTC telles i vedtaksaaret etter norsk lokaltid`() {
-        // hibernate.timezone.default_storage=NORMALIZE lagrer Instant som veggklokke i JVM-tidssonen, så
-        // vedtaksåret følger norsk lokaltid. Dette er dokumentert i repository-KDoc-en, og er utestet uten dette
-        lagSak(
-            "MEL-8150-TZ",
-            erFjernarbeid = true,
-            resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
-            vedtaksdato = Instant.parse("2024-12-31T23:00:00Z"),
-        )
+    fun `vedtaksaaret foelger JVM-tidssonen, som i prod er Europe-Oslo`() {
+        // hibernate.timezone.default_storage=NORMALIZE lagrer Instant som veggklokke i JVM-tidssonen, og
+        // TO_CHAR leser den rå. Vedtaksåret følger derfor sonen JVM-en kjører i — Europe/Oslo i prod, satt via
+        // JAVA_TOOL_OPTIONS i Dockerfile. Sonen pinnes her fordi byggene kjører i UTC og ellers ville testet
+        // noe annet enn det som skjer i prod.
+        medTidssone("Europe/Oslo") {
+            lagSak(
+                "MEL-8150-TZ",
+                erFjernarbeid = true,
+                resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+                vedtaksdato = Instant.parse("2024-12-31T23:00:00Z"),
+            )
 
-        val statistikk = rammeavtaleStatistikkService.hentRammeavtaleFjernarbeidStatistikk(null, null)
+            val statistikk = rammeavtaleStatistikkService.hentRammeavtaleFjernarbeidStatistikk(null, null)
 
-        withClue("23:00Z 31. desember er 00:00 1. januar i Norge, og skal telles i 2025") {
-            statistikk.antallPerVedtaksaar shouldBe mapOf("2025" to 1L)
-            statistikk.saker shouldBe listOf(RammeavtaleSak("MEL-8150-TZ", "2025", LocalDate.of(2025, 1, 1)))
+            withClue("23:00Z 31. desember er 00:00 1. januar i Norge, og skal telles i 2025") {
+                statistikk.antallPerVedtaksaar shouldBe mapOf("2025" to 1L)
+                statistikk.saker shouldBe listOf(RammeavtaleSak("MEL-8150-TZ", "2025", LocalDate.of(2025, 1, 1)))
+            }
         }
     }
 
@@ -254,4 +259,15 @@ class RammeavtaleStatistikkIT(
 
     private fun dato(år: Int, måned: Int, dag: Int): Instant =
         LocalDate.of(år, måned, dag).atStartOfDay(ZoneId.systemDefault()).toInstant()
+
+    /** Kjører blokka med en gitt JVM-tidssone og setter den forrige tilbake etterpå. */
+    private fun medTidssone(sone: String, blokk: () -> Unit) {
+        val opprinnelig = TimeZone.getDefault()
+        TimeZone.setDefault(TimeZone.getTimeZone(sone))
+        try {
+            blokk()
+        } finally {
+            TimeZone.setDefault(opprinnelig)
+        }
+    }
 }
