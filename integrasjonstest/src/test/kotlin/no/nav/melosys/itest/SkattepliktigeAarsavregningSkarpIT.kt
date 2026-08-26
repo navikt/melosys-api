@@ -103,14 +103,14 @@ class SkattepliktigeAarsavregningSkarpIT(
      */
     @Test
     fun `batchen kjører i en aktiv read-only-transaksjon også gjennom Async-proxyen`() {
-        val naaddeLoekka = CountDownLatch(1)
+        val transaksjonstilstandLest = CountDownLatch(1)
         var readOnly: Boolean? = null
         var aktivTransaksjon: Boolean? = null
 
         every { fagsakService.hentFagsakerMedAktør(any(), any()) } answers {
             readOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly()
             aktivTransaksjon = TransactionSynchronizationManager.isActualTransactionActive()
-            naaddeLoekka.countDown()
+            transaksjonstilstandLest.countDown()
             emptyList()
         }
 
@@ -120,7 +120,7 @@ class SkattepliktigeAarsavregningSkarpIT(
             null,
         )
 
-        naaddeLoekka.await(10, TimeUnit.SECONDS) shouldBe true
+        transaksjonstilstandLest.await(10, TimeUnit.SECONDS) shouldBe true
         aktivTransaksjon shouldBe true
         readOnly shouldBe true
     }
