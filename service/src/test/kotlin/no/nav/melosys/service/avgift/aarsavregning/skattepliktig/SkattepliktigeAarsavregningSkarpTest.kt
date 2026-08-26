@@ -2,6 +2,7 @@ package no.nav.melosys.service.avgift.aarsavregning.skattepliktig
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -291,6 +292,59 @@ class SkattepliktigeAarsavregningSkarpTest {
 
         verify(exactly = 1) { dryrunService.prosesserSkattehendelserAsynkront(hendelser, false, null) }
         verify(exactly = 1) { dryrunService.prosesserSkattehendelserAsynkront(hendelser, true, 1) }
+    }
+
+    /**
+     * Review 26.08: en aktiv ÅRSAVREGNING-behandling uten `aarsavregning`-rad får `hentÅrsavregning()`
+     * til å kaste. De automatiske flytene (MELOSYS-8059/8161) svelger det kastet og oppretter en ny
+     * årsavregning ved siden av zombien; her stopper vi saken bevisst i stedet — se KDoc-en på
+     * `finnAktivÅrsavregningBehandling`. Testen pinner at det er et valg og ikke et uhell, og at
+     * rapporten navngir behandlingen operatøren må lukke.
+     */
+    @Test
+    fun `årløs aktiv årsavregning stopper saken, og feilmeldingen navngir behandlingen`() {
+        val fagsak = Fagsak.forTest {
+            saksnummer = "MEL-1"
+            type = Sakstyper.EU_EOS
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            status(Saksstatuser.OPPRETTET)
+            behandling {
+                id = BEHANDLING_ID
+                status = Behandlingsstatus.VURDER_DOKUMENT
+                type = Behandlingstyper.ÅRSAVREGNING
+            }
+        }
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
+
+        val behandlingsresultat = Behandlingsresultat.forTest { }
+        every { årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(any(), GJELDER_ÅR) } returns
+            GjeldendeBehandlingsresultaterForÅrsavregning(
+                behandlingsresultat,
+                sisteBehandlingsresultatMedAvgift = behandlingsresultat,
+                sisteÅrsavregning = behandlingsresultat,
+            )
+        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
+        every { trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) } returns
+            Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
+        // Årløs: behandlingsresultatet finnes, men har ingen aarsavregning-rad.
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
+        service.prosesserSkattehendelser(
+            listOf(SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
+            skarp = true,
+            maksAntall = 5,
+        )
+
+        // Ingen ny årsavregning ved siden av zombien, og ingen brev til borgeren.
+        verify(exactly = 0) { skarpUtfoerer.opprettProsessinstans(any(), any()) }
+        verify(exactly = 0) { skarpUtfoerer.settStatusVurderDokument(any(), any()) }
+
+        val feil = service.resultater.single().feilmelding
+        feil shouldNotBe null
+        feil!! shouldContain BEHANDLING_ID.toString()
+        feil shouldContain "MEL-1"
+        feil shouldContain "årløs"
+        service.status()["antallOppslagFeilet"] shouldBe 1
     }
 
     /**

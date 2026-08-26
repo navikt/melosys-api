@@ -31,10 +31,12 @@ class SkattepliktigeAarsavregningDryrunController(
             "Med skarp=false (default) er det en simulering — ingen prosessinstanser opprettes. " +
             "Med skarp=true har kjøringen to side-effekter: den oppretter faktiske " +
             "AARSAVREGNING-prosessinstanser (kappet av maksAntall) og bumper status til " +
-            "VURDER_DOKUMENT på saker som allerede har en åpen årsavregning. Status-bumpen er en " +
-            "compare-and-set: har saksbehandler flyttet behandlingen siden oppslaget, hoppes den " +
-            "over og telles i antallStatusHoppetOver, med årsak per sak i rapporten. Slike saker " +
-            "er trygge å kjøre om igjen. " +
+            "VURDER_DOKUMENT på saker som allerede har en åpen årsavregning. Status-bumpen re-leser " +
+            "statusen og skriver kun hvis den fortsatt står der løkka så den: har saksbehandler flyttet " +
+            "behandlingen siden oppslaget, hoppes den over og telles i antallStatusHoppetOver, med årsak " +
+            "per sak i rapporten. Slike saker er trygge å kjøre om igjen. Merk at dette er en " +
+            "read-check-write i én transaksjon, ikke en atomisk compare-and-set — Behandling har ingen " +
+            "@Version, så et kort vindu består, det samme som SkattehendelserConsumer har i dag. " +
             "Skarp kjøring krever et positivt maksAntall — uten tak avvises requesten med 400. " +
             "Hendelser med samme identifikator og år dedupliseres før kjøring (antallDuplikaterFjernet), " +
             "fordi opprettelsen ikke er idempotent på sak/år. Overlappende kjøringer har samme hull: " +

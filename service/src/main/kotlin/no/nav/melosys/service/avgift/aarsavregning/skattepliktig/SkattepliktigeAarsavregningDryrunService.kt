@@ -306,20 +306,63 @@ class SkattepliktigeAarsavregningDryrunService(
             }
     }
 
+    /**
+     * Stopper saken i to tilfeller der de automatiske flytene i stedet gjetter. Begge er bevisste.
+     *
+     * **Flere aktive årsavregninger:** som `SkattehendelserConsumer` — «bump en av dem og ignorer
+     * resten» er verre enn å feile i en prod-oppryddingsjobb.
+     *
+     * **Årløs aktiv årsavregning:** `hentÅrsavregning()` kaster når en aktiv ÅRSAVREGNING-behandling
+     * mangler `aarsavregning`-raden. `ÅrsavregningService.harAktivÅrsavregningForÅr` (MELOSYS-8161) og
+     * `ÅrsavregningIkkeSkattepliktigeProsessGenerator.hentÅrFraBehandlingDefensivt` (MELOSYS-8059)
+     * svelger det kastet og lar en ny årsavregning opprettes ved siden av zombien. Vi gjør bevisst
+     * det motsatte, av tre grunner:
+     *
+     *  1. De to er *løpende, automatiske* flyter, der «blokker» betyr at saken stilltiende aldri får
+     *     årsavregningen sin. Det var feilen 8161 het etter. Her er hele leveransen en rapport en
+     *     operatør leser, så «stopp og rapporter» er synlig, ikke tapt — feilmodusen som begrunnet
+     *     fag-avklaringen finnes ikke i et engangsverktøy.
+     *  2. Å opprette ved siden av zombien sender et innhentingsbrev til en borger på en sak ingen har
+     *     sett på. Fiksplanen 18.08 tok `MEL-409394` ut av scope nettopp på grunn av en slik zombie
+     *     (behandling 1274231, `UNDER_BEHANDLING`), og anbefalte å *lukke* den — presedens
+     *     MEL-498817/436385, som fikk zombiene AVSLUTTET 13.05.2025.
+     *  3. Det er samme avveining som `.first()` → kast rett over: i denne jobben er et stopp som havner
+     *     i rapporten bedre enn en gjetning som havner i prod.
+     *
+     * De tre sakene i scope har ingen ÅRSAVREGNING-behandling i prod, så grenen skal ikke treffe i den
+     * planlagte kjøringen. Gjør den det, er det en sak som skal håndteres manuelt — og da må rapporten
+     * si hvilken behandling det gjelder, ikke bare «årsavregning er påkrevd».
+     */
     private fun finnAktivÅrsavregningBehandling(fagsak: Fagsak, gjelderÅr: Int): Behandling? {
         val årsAvregninger = fagsak.hentAktiveÅrsavregninger()
-            .filter { behandlingsresultatService.hentBehandlingsresultat(it.id).hentÅrsavregning().aar == gjelderÅr }
+            .filter { årsavregningsbehandling ->
+                årFor(årsavregningsbehandling, fagsak) == gjelderÅr
+            }
 
         return when {
             årsAvregninger.isEmpty() -> null
-            // Som SkattehendelserConsumer: stopp saken i stedet for å velge en vilkårlig behandling.
-            // I en prod-oppryddingsjobb er «bump en av dem og ignorer resten» verre enn å feile —
-            // saken havner i rapporten med feilmelding og kan håndteres manuelt.
             årsAvregninger.size > 1 ->
                 throw TekniskException("Flere aktive årsavregninger funnet for sak: ${fagsak.saksnummer} og år: $gjelderÅr")
             else -> årsAvregninger.single()
         }
     }
+
+    /**
+     * Oversetter det rå `error("årsavregning er påkrevd for Behandlingsresultat")` til noe en operatør
+     * kan handle på. Meldingen havner i rapporten som sakens `feilmelding`, og uten behandlings-id-en
+     * er det ingen vei fra rapporten til zombien som må lukkes.
+     */
+    private fun årFor(årsavregningsbehandling: Behandling, fagsak: Fagsak): Int =
+        try {
+            behandlingsresultatService.hentBehandlingsresultat(årsavregningsbehandling.id).hentÅrsavregning().aar
+        } catch (e: IllegalStateException) {
+            throw TekniskException(
+                "Aktiv ÅRSAVREGNING-behandling ${årsavregningsbehandling.id} på sak ${fagsak.saksnummer} " +
+                    "mangler aarsavregning-rad (årløs). Saken stoppes i stedet for å få en ny årsavregning " +
+                    "ved siden av — lukk den årløse behandlingen først, og kjør saken om igjen.",
+                e
+            )
+        }
 
     private fun <T> runAsSystem(prosessSteg: String = "skattepliktigeAarsavregningDryrun", block: () -> T): T {
         val processId = UUID.randomUUID()
