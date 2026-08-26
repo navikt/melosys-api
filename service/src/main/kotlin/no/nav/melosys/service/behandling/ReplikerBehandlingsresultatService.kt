@@ -372,6 +372,11 @@ private fun replikerAnmodningsperioder(
         anmodningsperiodeReplika.medlPeriodeID = null
         anmodningsperiodeReplika.setSendtUtland(false)
         anmodningsperiodeReplika.anmodningsperiodeSvar = null
+        // BeanUtils.cloneBean kopierer alt. Flagget beskriver anmodningen som faktisk ble sendt, ikke perioden,
+        // og replikaen har ingen sendt anmodning ennå — settes på nytt av registrerAnmodning hvis det anmodes igjen.
+        // Uten nullingen ville uttrekket for rammeavtale om fjernarbeid (MELOSYS-8150) telt revurderingen
+        // som en ekstra sak, siden replikaen får sin egen behandling_id og sitt eget vedtak.
+        anmodningsperiodeReplika.erFjernarbeidTWFA = null
         behandlingsresultatReplika.anmodningsperioder.add(anmodningsperiodeReplika)
     }
 }

@@ -56,6 +56,7 @@ class SendAnmodningOmUnntakTest {
         every { behandlingService.lagre(any()) } returns mockk()
         every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns mockk()
         every { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(any()) } returns Unit
+        every { anmodningsperiodeService.lagre(any()) } returns Unit
         every { eessiService.opprettOgSendSed(any<Long>(), any(), any(), any(), any(), any(), any()) } returns Unit
         every { brevBestiller.bestill(any()) } returns Unit
     }
@@ -219,6 +220,38 @@ class SendAnmodningOmUnntakTest {
     }
 
     @Test
+    fun `utfør skriver fallback-verdien tilbake til anmodningsperioden`() {
+        // Fallbacken redder SED-en, men uten tilbakeskrivingen ville raden blitt stående null og saken forsvunnet
+        // ut av rapporteringstallene. Ingen jobb backfiller på nytt etter at V170 har kjørt
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
+            medData(ProsessDataKey.ER_FJERNARBEID_TWFA, true)
+        }
+        val behandlingsresultat = lagBehandlingsresultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
+        sendAnmodningOmUnntak.utfør(prosessinstans)
+
+        val lagret = slot<Anmodningsperiode>()
+        verify { anmodningsperiodeService.lagre(capture(lagret)) }
+        lagret.captured.erFjernarbeidTWFA shouldBe true
+        behandlingsresultat.hentAnmodningsperiode().erFjernarbeidTWFA shouldBe true
+    }
+
+    @Test
+    fun `utfør skriver ikke tilbake naar kolonnen allerede er satt`() {
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
+        }
+        val behandlingsresultat = lagBehandlingsresultatMedAnmodningsperiode { erFjernarbeidTWFA = false }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
+        sendAnmodningOmUnntak.utfør(prosessinstans)
+
+        verify(exactly = 0) { anmodningsperiodeService.lagre(any()) }
+    }
+
+    @Test
     fun `utfør ingen institusjon eessi klar skal sende brev`() {
         val prosessinstans = lagProsessinstans {
             medData(ProsessDataKey.YTTERLIGERE_INFO_SED, "Mer info")
@@ -268,7 +301,7 @@ class SendAnmodningOmUnntakTest {
 
         prosessinstans.hentBehandling.dokumentasjonSvarfristDato!!.isAfter(nå!!) shouldBe true
         verify(exactly = 0) {
-            eessiService.opprettOgSendSed(any<Long>(), any(), BucType.LA_BUC_01, null, "fritekst", any(), any())
+            eessiService.opprettOgSendSed(any<Long>(), any(), any(), any(), any(), any(), any())
         }
         verify { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(prosessinstans.hentBehandling.id) }
     }

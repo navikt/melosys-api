@@ -93,18 +93,25 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
 
     @Override
     protected Boolean hentErFjernarbeidTWFA(Behandlingsresultat behandlingsresultat, Prosessinstans prosessinstans) {
-        Boolean fraAnmodningsperiode = behandlingsresultat.hentAnmodningsperiode().getErFjernarbeidTWFA();
+        Anmodningsperiode anmodningsperiode = behandlingsresultat.hentAnmodningsperiode();
+        Boolean fraAnmodningsperiode = anmodningsperiode.getErFjernarbeidTWFA();
         if (fraAnmodningsperiode != null) {
             return fraAnmodningsperiode;
         }
 
-        // Fallback til prosessdataen, som var eneste lagringssted før MELOSYS-8150. Treffer anmodninger opprettet
-        // av en pod med forrige versjon i deploy-vinduet, der kolonnen ennå er null. Uten den ville A001 blitt
-        // sendt til utlandet uten rammeavtale-flagget. Kan fjernes når loggmeldingen under er borte fra prod.
+        // Fallback til prosessdataen, som var eneste lagringssted før MELOSYS-8150. Dekker to tilfeller der
+        // kolonnen er null selv om saksbehandler svarte: anmodninger opprettet av en pod med forrige versjon i
+        // deploy-vinduet, og anmodningsperioder som ble slettet og gjenopprettet av lagreAnmodningsperioder
+        // mellom anmodning og sending. Uten fallbacken ville A001 blitt sendt til utlandet uten flagget.
         Boolean fraProsessdata = prosessinstans.getData(ProsessDataKey.ER_FJERNARBEID_TWFA, Boolean.class);
         if (fraProsessdata != null) {
-            log.info("Behandling {}: er_fjernarbeid_twfa er ikke satt på anmodningsperioden, leser {} fra prosessdataen i stedet",
-                behandlingsresultat.getId(), fraProsessdata);
+            // Skriv tilbake. Fallbacken redder SED-en, men uten dette ville raden blitt stående null og saken
+            // forsvunnet ut av rapporteringstallene — som er hele grunnen til at kolonnen finnes. Ingen jobb
+            // backfiller på nytt etter at V170 har kjørt.
+            log.info("Behandling {}: er_fjernarbeid_twfa var ikke satt på anmodningsperioden, leser {} fra "
+                + "prosessdataen og skriver den tilbake", behandlingsresultat.getId(), fraProsessdata);
+            anmodningsperiode.setErFjernarbeidTWFA(fraProsessdata);
+            anmodningsperiodeService.lagre(anmodningsperiode);
         }
         return fraProsessdata;
     }

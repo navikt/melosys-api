@@ -113,6 +113,10 @@ public class AnmodningsperiodeService {
         return anmodningsperioder.iterator().next();
     }
 
+    public void lagre(Anmodningsperiode anmodningsperiode) {
+        anmodningsperiodeRepository.save(anmodningsperiode);
+    }
+
     private AnmodningsperiodeSvar lagreAnmodningsperiodeSvarMedLovvalgsperiode(Anmodningsperiode anmodningsperiode, AnmodningsperiodeSvar anmodningsperiodeSvar) {
         validerSvar(anmodningsperiodeSvar);
 

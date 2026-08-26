@@ -40,15 +40,37 @@ slettejobb var implementert ennå. `V170` flyttet kilden og backfillet historikk
 ## Midlertidig fallback i sendeveien
 
 `SendAnmodningOmUnntak.hentErFjernarbeidTWFA` leser kolonnen, men faller tilbake til prosessdataen
-når den er null, og logger på INFO når det skjer. Det dekker anmodninger opprettet av en pod med
-forrige versjon i deploy-vinduet — uten fallbacken kunne A001 blitt sendt til utlandet uten
-rammeavtale-flagget. **Fallbacken kan fjernes når loggmeldingen er borte fra prod**, sammen med
-`ProsessDataKey.ER_FJERNARBEID_TWFA` og skrivingen i `ProsessinstansBuilder`.
+når den er null — og **skriver verdien tilbake til kolonnen**. Fallbacken alene ville reddet A001-en,
+men latt raden stå null og saken forsvinne ut av rapporteringstallene; ingen jobb backfiller på nytt
+etter at V170 har kjørt.
+
+To tilfeller treffer den:
+
+- anmodninger opprettet av en pod med forrige versjon i deploy-vinduet, og
+- anmodningsperioder som ble slettet og gjenopprettet av `lagreAnmodningsperioder` mellom anmodning
+  og sending. Den metoden sperrer kun på registrert svar og `sendt_utland`, og ingen av delene er
+  satt i det vinduet — så en saksbehandler som redigerer perioden etter å ha anmodet nuller både
+  `er_fjernarbeid_twfa` og `anmodet_av`. Tilbakeskrivingen reparerer flagget ved sending.
+
+Fallbacken (og `ProsessDataKey.ER_FJERNARBEID_TWFA` + skrivingen i `ProsessinstansBuilder`) kan
+fjernes når INFO-loggen «leser … fra prosessdataen og skriver den tilbake» har vært borte fra prod
+gjennom en hel anmodningssyklus.
 
 Merk at avlesningen ligger i `SendAnmodningOmUnntak`, ikke i `AbstraktSendUtland`. Basisklassens
 `hentErFjernarbeidTWFA` returnerer null med vilje: `SendVedtakUtland` og `VideresendSoknad` deler
 `sendUtland`, og flagget skal ikke lekke over på vedtaks-SED-en eller A008 bare fordi behandlingen
-har en anmodningsperiode. Det er pinnet av en test i `VideresendSoknadTest`.
+har en anmodningsperiode. Det er ikke hypotetisk — en artikkel 16-sak som har fått svar får
+lovvalgsperiode på samme behandlingsresultat som anmodningsperioden og havner i `SendVedtakUtland`.
+Pinnet av tester i både `VideresendSoknadTest` og `SendVedtakUtlandTest`.
+
+## Replikering nuller flagget
+
+`ReplikerBehandlingsresultatService.replikerAnmodningsperioder` bruker `BeanUtils.cloneBean`, som
+kopierer alt. `er_fjernarbeid_twfa` nulles der eksplisitt, på linje med `sendtUtland` og
+`anmodningsperiodeSvar`. Uten det ville en revurdering fått sin egen `behandling_id` og sitt eget
+vedtak, og blitt telt som en ekstra sak — den gamle spørringen var immun mot dette fordi replikaen
+aldri har en `ANMODNING_OM_UNNTAK`-prosessinstans.
+
 
 ## Kjent svakhet som ikke løses av kolonnen
 

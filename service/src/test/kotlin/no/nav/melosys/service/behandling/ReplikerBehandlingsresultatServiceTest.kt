@@ -168,6 +168,9 @@ class ReplikerBehandlingsresultatServiceTest {
             medlPeriodeID shouldBe null
             erSendtUtland() shouldBe false
             anmodningsperiodeSvar shouldBe null
+            // Replikaen har ingen sendt anmodning. Blir flagget med, telles revurderingen som en ekstra sak
+            // i uttrekket for rammeavtale om fjernarbeid (MELOSYS-8150)
+            erFjernarbeidTWFA shouldBe null
             fom shouldBe anmodningsperiodeOriginal.fom
             tom shouldBe anmodningsperiodeOriginal.tom
             lovvalgsland shouldBe anmodningsperiodeOriginal.lovvalgsland
@@ -364,6 +367,9 @@ class ReplikerBehandlingsresultatServiceTest {
             medlPeriodeID shouldBe null
             erSendtUtland() shouldBe false
             anmodningsperiodeSvar shouldBe null
+            // Replikaen har ingen sendt anmodning. Blir flagget med, telles revurderingen som en ekstra sak
+            // i uttrekket for rammeavtale om fjernarbeid (MELOSYS-8150)
+            erFjernarbeidTWFA shouldBe null
             fom shouldBe anmodningsperiodeOriginal.fom
             tom shouldBe anmodningsperiodeOriginal.tom
             lovvalgsland shouldBe anmodningsperiodeOriginal.lovvalgsland
@@ -764,6 +770,7 @@ class ReplikerBehandlingsresultatServiceTest {
         unntakFraBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
         tilleggsbestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1
         sendtUtland = true
+        erFjernarbeidTWFA = true
         anmodningsperiodeSvar { }
         dekning = Trygdedekninger.FULL_DEKNING_EOSFO
     }
