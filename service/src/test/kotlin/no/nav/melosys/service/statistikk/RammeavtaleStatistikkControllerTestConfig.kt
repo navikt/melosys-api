@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.statistikk
+package no.nav.melosys.service.statistikk
 
 import org.springframework.boot.SpringBootConfiguration
 import org.springframework.context.annotation.Bean

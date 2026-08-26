@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.statistikk
+package no.nav.melosys.service.statistikk
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag

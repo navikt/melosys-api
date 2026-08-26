@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.statistikk
+package no.nav.melosys.service.statistikk
 
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import org.springframework.data.jpa.repository.NativeQuery

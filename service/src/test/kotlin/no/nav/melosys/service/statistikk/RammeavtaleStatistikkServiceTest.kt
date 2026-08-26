@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.statistikk
+package no.nav.melosys.service.statistikk
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.maps.shouldBeEmpty

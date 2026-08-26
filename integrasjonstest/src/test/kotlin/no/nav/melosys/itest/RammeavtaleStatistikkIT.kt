@@ -23,8 +23,8 @@ import no.nav.melosys.domain.vedtakMetadata
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflyt.ProsessinstansRepository
-import no.nav.melosys.saksflyt.statistikk.RammeavtaleSak
-import no.nav.melosys.saksflyt.statistikk.RammeavtaleStatistikkService
+import no.nav.melosys.service.statistikk.RammeavtaleSak
+import no.nav.melosys.service.statistikk.RammeavtaleStatistikkService
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.ProsessType

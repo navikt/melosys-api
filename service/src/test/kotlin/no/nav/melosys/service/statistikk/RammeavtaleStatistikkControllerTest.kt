@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.statistikk
+package no.nav.melosys.service.statistikk
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
