@@ -12,6 +12,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.featuretoggle.ToggleName
 import org.apache.commons.beanutils.BeanUtils
 import org.hibernate.Hibernate
@@ -68,6 +69,102 @@ class ReplikerBehandlingsresultatService(
 
         behandlingsresultatService.lagre(behandlingsresultatReplika)
     }
+
+    /**
+     * Gjenoppretter et EKSISTERENDE (nettopp tømt) behandlingsresultat til sitt initielle
+     * utgangspunkt ved å re-replikere innhold fra behandlingens opprinneligBehandling.
+     *
+     * I motsetning til [replikerBehandlingsresultat] lager denne IKKE en ny rad, men kopierer
+     * innhold inn i det eksisterende behandlingsresultatet (samme delte PK, jf. @MapsId).
+     * Forutsetter at kalleren allerede har tømt behandlingsresultatet (tømBehandlingsresultat).
+     *
+     * Brukes ved "Oppdater registeropplysninger" for MANGLENDE_INNBETALING_TRYGDEAVGIFT, slik at
+     * medlemskapsperioder (inkl. opphørt), avklartefakta, lovvalgsperioder og vilkårsresultater
+     * gjenopprettes til utgangspunktet.
+     */
+    @Transactional(rollbackFor = [Exception::class])
+    fun gjenopprettBehandlingsresultatTilUtgangspunkt(behandlingID: Long) {
+        val eksisterendeBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        val behandling = eksisterendeBehandlingsresultat.hentBehandling()
+
+        val opprinneligBehandling = behandling.opprinneligBehandling
+            ?: throw TekniskException(
+                "Kan ikke gjenopprette behandlingsresultat for behandling $behandlingID: opprinneligBehandling mangler"
+            )
+
+        val behandlingsresultatOriginal: Behandlingsresultat = Hibernate.unproxy(
+            behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id),
+            Behandlingsresultat::class.java
+        )
+
+        // Bygg innholdet på en midlertidig behandlingsresultatReplika. Del-metodene bytter ut
+        // collection-instansene (f.eks. `avklartefakta = HashSet()`), noe som er trygt på et ikke-managed
+        // objekt, men som ville brutt orphanRemoval hvis vi gjorde det direkte på det managed
+        // eksisterendeBehandlingsresultat ("A collection with orphan deletion was no longer referenced by
+        // the owning entity instance").
+        val behandlingsresultatReplika = Behandlingsresultat().apply { this.behandling = behandling }
+
+        try {
+            replikerAvklartefakta(behandlingsresultatOriginal, behandlingsresultatReplika)
+            replikerVilkaarsresultat(behandlingsresultatOriginal, behandlingsresultatReplika)
+
+            when {
+                behandling.erEøsPensjonist() -> {
+                    replikerHelseutgiftDekkesPerioder(behandlingsresultatOriginal, behandlingsresultatReplika)
+                    replikerTrygdeavgiftForPensjonist(behandlingsresultatOriginal, behandlingsresultatReplika)
+                    behandlingsresultatReplika.helseutgiftDekkesPerioder.forEach { it.id = null }
+                }
+
+                behandling.fagsak.erLovvalg() && behandlingsresultatOriginal.trygdeavgiftsperioder.isNotEmpty() -> {
+                    replikerLovvalgsperioder(behandlingsresultatOriginal, behandlingsresultatReplika, behandling.type)
+                    replikerTrygdeavgift(behandlingsresultatOriginal, behandlingsresultatReplika)
+                    behandlingsresultatReplika.lovvalgsperioder.onEach { it.id = null }
+                }
+
+                else -> {
+                    replikerLovvalgsperioder(behandlingsresultatOriginal, behandlingsresultatReplika, behandling.type)
+                    replikerMedlemAvFolketrygden(behandlingsresultatOriginal, behandlingsresultatReplika, behandling.type)
+                }
+            }
+        } catch (e: ReflectiveOperationException) {
+            throw TekniskException(
+                "Klarte ikke gjenopprette behandlingsresultat for behandling $behandlingID fra opprinnelig behandling ${opprinneligBehandling.id}",
+                e
+            )
+        }
+
+        // Flytt innholdet inn i de eksisterende (managed) samlingene på eksisterendeBehandlingsresultat uten
+        // å bytte ut instansene. Tvinger først tømBehandlingsresultat sin sletting ut til databasen FØR nye
+        // rader settes inn, slik at replikerte avklartefakta ikke kolliderer med de gamle på unique_referanse
+        // (beh_resultat_id, referanse, subjekt) — de deler samme behandlingsresultat-rad (@MapsId).
+        behandlingsresultatService.lagreOgFlush(eksisterendeBehandlingsresultat)
+        flyttInnhold(replika = behandlingsresultatReplika, eksisterendeBehandlingsresultat = eksisterendeBehandlingsresultat)
+
+        behandlingsresultatService.lagre(eksisterendeBehandlingsresultat)
+    }
+
+    private fun flyttInnhold(replika: Behandlingsresultat, eksisterendeBehandlingsresultat: Behandlingsresultat) {
+        eksisterendeBehandlingsresultat.avklartefakta.clear()
+        replika.avklartefakta.forEach { it.behandlingsresultat = eksisterendeBehandlingsresultat }
+        eksisterendeBehandlingsresultat.avklartefakta.addAll(replika.avklartefakta)
+
+        eksisterendeBehandlingsresultat.vilkaarsresultater.clear()
+        replika.vilkaarsresultater.forEach { it.behandlingsresultat = eksisterendeBehandlingsresultat }
+        eksisterendeBehandlingsresultat.vilkaarsresultater.addAll(replika.vilkaarsresultater)
+
+        eksisterendeBehandlingsresultat.lovvalgsperioder.clear()
+        replika.lovvalgsperioder.forEach { it.behandlingsresultat = eksisterendeBehandlingsresultat }
+        eksisterendeBehandlingsresultat.lovvalgsperioder.addAll(replika.lovvalgsperioder)
+
+        eksisterendeBehandlingsresultat.medlemskapsperioder.clear()
+        replika.medlemskapsperioder.forEach { it.behandlingsresultat = eksisterendeBehandlingsresultat }
+        eksisterendeBehandlingsresultat.medlemskapsperioder.addAll(replika.medlemskapsperioder)
+
+        eksisterendeBehandlingsresultat.helseutgiftDekkesPerioder.clear()
+        replika.helseutgiftDekkesPerioder.forEach { it.behandlingsresultat = eksisterendeBehandlingsresultat }
+        eksisterendeBehandlingsresultat.helseutgiftDekkesPerioder.addAll(replika.helseutgiftDekkesPerioder)
+    }
+
 
     @Throws(
         InvocationTargetException::class,

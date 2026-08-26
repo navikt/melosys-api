@@ -1570,6 +1570,88 @@ class ReplikerBehandlingsresultatServiceTest {
         replikerteStatuser shouldNotContain InnvilgelsesResultat.AVSLAATT
     }
 
+    @Test
+    fun `gjenopprettBehandlingsresultatTilUtgangspunkt gjenoppretter perioder og avklartefakta fra opprinnelig behandling`() {
+        val inneværendeÅr = LocalDate.now().year
+
+        val opprinneligBehandling = Behandling.forTest {
+            id = 100L
+            type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+        }
+        val originalResultat = lagBehandlingsresultatMedData(opprinneligBehandling).apply {
+            id = opprinneligBehandling.id
+            medlemskapsperioder.addAll(
+                setOf(
+                    medlemskapsperiodeForTest {
+                        id = 1L
+                        fom = LocalDate.of(inneværendeÅr, 1, 1)
+                        tom = LocalDate.of(inneværendeÅr, 6, 30)
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    },
+                    medlemskapsperiodeForTest {
+                        id = 2L
+                        fom = LocalDate.of(inneværendeÅr, 7, 1)
+                        tom = LocalDate.of(inneværendeÅr, 12, 31)
+                        innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                    }
+                )
+            )
+            avklartefakta.add(lagAvklartefakta())
+        }
+
+        val behandling = Behandling.forTest {
+            id = 200L
+            type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+        }
+        behandling.opprinneligBehandling = opprinneligBehandling
+
+        // Målet: et allerede tømt behandlingsresultat på den gjeldende behandlingen
+        val tømtMål = Behandlingsresultat.forTest {
+            id = behandling.id
+            this.behandling = behandling
+            behandlingsmåte = Behandlingsmaate.MANUELT
+            type = Behandlingsresultattyper.IKKE_FASTSATT
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns tømtMål
+        every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id) } returns originalResultat
+        every { behandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
+        every { behandlingsresultatService.lagre(any()) } returnsArgument 0
+
+        replikerBehandlingsresultatService.gjenopprettBehandlingsresultatTilUtgangspunkt(behandling.id)
+
+        // Perioder gjenopprettet (innvilget + opphørt)
+        tømtMål.medlemskapsperioder shouldHaveSize 2
+        val statuser = tømtMål.medlemskapsperioder.map { it.innvilgelsesresultat }.toSet()
+        statuser shouldContain InnvilgelsesResultat.INNVILGET
+        statuser shouldContain InnvilgelsesResultat.OPPHØRT
+        tømtMål.medlemskapsperioder.forAll { it.id.shouldBeNull() }
+
+        // Avklartefakta gjenopprettet
+        tømtMål.avklartefakta.shouldNotBeEmpty()
+
+        // PK/behandling-referanse er bevart (samme rad)
+        tømtMål.id shouldBe behandling.id
+        tømtMål.hentBehandling() shouldBe behandling
+    }
+
+    @Test
+    fun `gjenopprettBehandlingsresultatTilUtgangspunkt kaster når opprinneligBehandling mangler`() {
+        val behandling = Behandling.forTest {
+            id = 300L
+            type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+        }
+        val mål = Behandlingsresultat.forTest {
+            id = behandling.id
+            this.behandling = behandling
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns mål
+
+        shouldThrow<no.nav.melosys.exception.TekniskException> {
+            replikerBehandlingsresultatService.gjenopprettBehandlingsresultatTilUtgangspunkt(behandling.id)
+        }.message shouldContain "opprinneligBehandling mangler"
+    }
+
     private fun Trygdeavgiftsperiode.erReplikaAv(original: Trygdeavgiftsperiode): Boolean =
         id == null &&
             periodeFra == original.periodeFra &&
