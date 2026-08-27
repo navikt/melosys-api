@@ -280,7 +280,7 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    fun oppdaterMottatteOpplysningerFraSøknad_erstatterSidemenyfelterOgBeholderOevrige() {
+    fun oppdaterMottatteOpplysningerFraSøknad_erstatterSidemenyfelterOgBeholderTypeOgOevrige() {
         val opprinneligLoenn = no.nav.melosys.domain.mottatteopplysninger.data.LoennOgGodtgjoerelse(
             norskArbgUtbetalerLoenn = true
         )
@@ -291,7 +291,7 @@ internal class MottatteOpplysningerServiceTest {
         }
         val mottatteOpplysninger = MottatteOpplysninger().apply {
             mottatteOpplysningerData = eksisterende
-            type = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
+            type = Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS
         }
 
         val nySoeknad = no.nav.melosys.domain.mottatteopplysninger.Soeknad().apply {
@@ -453,7 +453,7 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    fun opprettSøknadDigital_setterTypeUtsendteArbeidstakereEøs() {
+    fun opprettSøknadDigital_setterTypeYrkesaktiveEøs() {
         val behandling = setupMock(
             Sakstyper.EU_EOS,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
@@ -468,7 +468,7 @@ internal class MottatteOpplysningerServiceTest {
             mottatteOpplysningerRepositoryMock.save(capture(slot))
         }
         slot.captured.apply {
-            type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS)
+            type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS)
             this.behandling.shouldBe(behandling)
             eksternReferanseID.shouldBe("ref-123")
             mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
