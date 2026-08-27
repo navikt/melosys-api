@@ -338,6 +338,25 @@ class VedtaksmetadataFiksIT(
     }
 
     @Test
+    fun `over tusen kandidater avvises kontrollert i stedet for å sprekke på Oracles IN-grense`() {
+        // INSERT_SQL binder kandidat-IDene i IN (:ider). Oracle tar maks 1000 uttrykk i en IN-liste,
+        // så en kjøring der maksAntallRader er hevet over det ville gitt ORA-01795 og 500 — midt i
+        // det skrittet som endrer prod. MAKS_ANTALL_SAKER har allerede en kommentar om nøyaktig
+        // denne grensen; :ider-lista manglet den.
+        seedDefekteBehandlingerIBulk("MEL-941", 1001)
+
+        kall(fiksUrl, """{"saksnummer":["MEL-941"],"skarp":true,"maksAntallRader":2000}""")
+            .andExpect(status().isBadRequest)
+
+        antallMetadata() shouldBe 0
+
+        // Preview er read-only og bruker ikke :ider — den skal fortsatt kunne vise omfanget
+        kall(fiksUrl, """{"saksnummer":["MEL-941"]}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.antallRaderFunnet").value(1001))
+    }
+
+    @Test
     fun `endepunktene krever både admin-API-nøkkel og bearer token`() {
         // Endepunktet skriver rett i vedtak_metadata i prod, så transporten pinnes her og ikke bare
         // i AdminControllerApiKeyIT — den går på GET-endepunkter, og disse to er POST.
@@ -621,6 +640,35 @@ class VedtaksmetadataFiksIT(
             behandlingsresultatId
         )
         return behandlingsresultatId
+    }
+
+    /**
+     * Som [seedDefektBehandling], men [antall] behandlinger i to statements i stedet for 3n — en
+     * rad-for-rad-seeding av tusen behandlinger ville dominert kjøretiden til hele suiten.
+     */
+    private fun seedDefekteBehandlingerIBulk(saksnummer: String, antall: Int) {
+        jdbcTemplate.update(
+            """MERGE INTO fagsak f USING (SELECT ? AS saksnummer FROM dual) k ON (f.saksnummer = k.saksnummer)
+               WHEN NOT MATCHED THEN INSERT (saksnummer, fagsak_type, status, tema, registrert_dato, endret_dato, registrert_av, endret_av)
+               VALUES (k.saksnummer, 'EU_EOS', 'LOVVALG_AVKLART', 'UNNTAK', SYSTIMESTAMP, SYSTIMESTAMP, 'IT', 'IT')""",
+            saksnummer
+        )
+        jdbcTemplate.update(
+            """INSERT INTO behandling (saksnummer, status, beh_type, beh_tema, behandlingsfrist,
+               registrert_dato, endret_dato, registrert_av, endret_av)
+               SELECT ?, 'AVSLUTTET', 'NY_VURDERING', 'REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING',
+                      DATE '2024-02-14', SYSTIMESTAMP, SYSTIMESTAMP, 'IT', 'IT'
+               FROM dual CONNECT BY LEVEL <= ?""",
+            saksnummer, antall
+        )
+        jdbcTemplate.update(
+            """INSERT INTO behandlingsresultat (behandling_id, resultat_type, behandlingsmaate,
+               registrert_dato, endret_dato, registrert_av, endret_av)
+               SELECT b.id, 'MEDLEM_I_FOLKETRYGDEN', 'MANUELT',
+                      TIMESTAMP '2024-10-23 09:54:00', TIMESTAMP '2024-10-23 09:54:00', 'IT', 'IT'
+               FROM behandling b WHERE b.saksnummer = ?""",
+            saksnummer
+        )
     }
 
     private fun antallMetadata(): Int =

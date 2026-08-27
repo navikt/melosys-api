@@ -304,6 +304,9 @@ Sikkerhetsselene, alle lagt til etter kodereview:
 - Skarp krever eksplisitt saksnummer-liste; default-listen gjelder kun i preview.
 - Maks 25 saksnummer per kall, og skarp avvises hvis den ville satt inn flere rader enn
   `maksAntallRader` (default 10).
+- Over 1000 kandidatrader avvises uansett hva `maksAntallRader` er satt til: `INSERT_SQL` binder
+  kandidat-IDene i `IN (:ider)`, og Oracle tar maks 1000 uttrykk i en IN-liste (ORA-01795). Del
+  kjøringen opp i flere kall.
 - Ukjent `beh_type` blokkerer.
 - Sorteringsselen (seksjon 5), kvittert ut per saksnummer og ikke som av/på.
 - Angre rører kun rader som fortsatt er urørt patch, og uskopet skarp angre krever `bekreftAlle`.

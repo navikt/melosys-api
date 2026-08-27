@@ -89,6 +89,15 @@ class VedtaksmetadataFiksService {
                     "Kjør preview først, og hev maksAntallRader eksplisitt hvis tallet er riktig."
             )
         }
+        // Etter maksAntallRader-selen, så den mer presise meldingen vinner i det vanlige tilfellet.
+        // Denne fanger kun kjøringer der operatøren har hevet taket over Oracle-grensen.
+        if (kandidater.size > MAKS_UTTRYKK_I_IN) {
+            throw VedtaksmetadataFiksAvvist(
+                "Fant ${kandidater.size} kandidater, men INSERT-en binder dem i en IN-liste, og Oracle " +
+                    "tar maks $MAKS_UTTRYKK_I_IN uttrykk (ORA-01795). Del kjøringen opp i flere kall med " +
+                    "færre saksnummer om gangen."
+            )
+        }
         val ukjente = kandidater.filterNot { it.behType in KJENTE_BEH_TYPER }
         if (ukjente.isNotEmpty()) {
             throw VedtaksmetadataFiksAvvist(
@@ -401,8 +410,19 @@ class VedtaksmetadataFiksService {
          */
         val STANDARD_SAKER = listOf("MEL-448193", "MEL-545776", "MEL-632908")
 
-        /** Maks antall saksnummer per kall. Holder oss også godt unna Oracles grense på 1000 uttrykk i IN. */
+        /** Maks antall saksnummer per kall. Holder oss også godt unna [MAKS_UTTRYKK_I_IN]. */
         const val MAKS_ANTALL_SAKER = 25
+
+        /**
+         * Oracles tak på antall uttrykk i en IN-liste (ORA-01795).
+         *
+         * `MAKS_ANTALL_SAKER` holder `IN (:saksnummer)` trygt under grensen, men `INSERT_SQL` binder
+         * også kandidat-IDene i `IN (:ider)`, og den lista er like lang som antall kandidatrader —
+         * ikke antall saker. Én sak med over tusen defekte behandlingsresultat er nok. Uten selen
+         * feiler INSERT-en med ORA-01795 og gir 500 (verifisert i IT) midt i det skrittet som endrer
+         * prod, i stedet for en 400 operatøren kan handle på.
+         */
+        const val MAKS_UTTRYKK_I_IN = 1000
 
         /** Default tak på antall rader en skarp kjøring får sette inn. Kan heves eksplisitt i requesten. */
         const val DEFAULT_MAKS_ANTALL_RADER = 10
