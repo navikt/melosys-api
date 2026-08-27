@@ -1578,7 +1578,7 @@ class ReplikerBehandlingsresultatServiceTest {
             id = 100L
             type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         }
-        val originalResultat = lagBehandlingsresultatMedData(opprinneligBehandling).apply {
+        val behandlingsresultatOriginal = lagBehandlingsresultatMedData(opprinneligBehandling).apply {
             id = opprinneligBehandling.id
             medlemskapsperioder.addAll(
                 setOf(
@@ -1605,34 +1605,34 @@ class ReplikerBehandlingsresultatServiceTest {
         }
         behandling.opprinneligBehandling = opprinneligBehandling
 
-        // Målet: et allerede tømt behandlingsresultat på den gjeldende behandlingen
-        val tømtMål = Behandlingsresultat.forTest {
+        // Det eksisterende (allerede tømte) behandlingsresultatet på den gjeldende behandlingen
+        val eksisterendeBehandlingsresultat = Behandlingsresultat.forTest {
             id = behandling.id
             this.behandling = behandling
             behandlingsmåte = Behandlingsmaate.MANUELT
             type = Behandlingsresultattyper.IKKE_FASTSATT
         }
 
-        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns tømtMål
-        every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id) } returns originalResultat
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns eksisterendeBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id) } returns behandlingsresultatOriginal
         every { behandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
         every { behandlingsresultatService.lagre(any()) } returnsArgument 0
 
         replikerBehandlingsresultatService.gjenopprettBehandlingsresultatTilUtgangspunkt(behandling.id)
 
         // Perioder gjenopprettet (innvilget + opphørt)
-        tømtMål.medlemskapsperioder shouldHaveSize 2
-        val statuser = tømtMål.medlemskapsperioder.map { it.innvilgelsesresultat }.toSet()
+        eksisterendeBehandlingsresultat.medlemskapsperioder shouldHaveSize 2
+        val statuser = eksisterendeBehandlingsresultat.medlemskapsperioder.map { it.innvilgelsesresultat }.toSet()
         statuser shouldContain InnvilgelsesResultat.INNVILGET
         statuser shouldContain InnvilgelsesResultat.OPPHØRT
-        tømtMål.medlemskapsperioder.forAll { it.id.shouldBeNull() }
+        eksisterendeBehandlingsresultat.medlemskapsperioder.forAll { it.id.shouldBeNull() }
 
         // Avklartefakta gjenopprettet
-        tømtMål.avklartefakta.shouldNotBeEmpty()
+        eksisterendeBehandlingsresultat.avklartefakta.shouldNotBeEmpty()
 
         // PK/behandling-referanse er bevart (samme rad)
-        tømtMål.id shouldBe behandling.id
-        tømtMål.hentBehandling() shouldBe behandling
+        eksisterendeBehandlingsresultat.id shouldBe behandling.id
+        eksisterendeBehandlingsresultat.hentBehandling() shouldBe behandling
     }
 
     @Test
@@ -1641,11 +1641,11 @@ class ReplikerBehandlingsresultatServiceTest {
             id = 300L
             type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         }
-        val mål = Behandlingsresultat.forTest {
+        val eksisterendeBehandlingsresultat = Behandlingsresultat.forTest {
             id = behandling.id
             this.behandling = behandling
         }
-        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns mål
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns eksisterendeBehandlingsresultat
 
         shouldThrow<no.nav.melosys.exception.TekniskException> {
             replikerBehandlingsresultatService.gjenopprettBehandlingsresultatTilUtgangspunkt(behandling.id)
