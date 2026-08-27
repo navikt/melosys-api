@@ -165,7 +165,9 @@ class FtrlVedtakService(
     }
 
     private fun Behandlingsresultat.harFullstendigManglendeInnbetaling(): Boolean =
-        avklartefakta.any { it.type == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING }
+        avklartefakta.any {
+            it.type == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING && it.fakta?.toBoolean() == true
+        }
 
     private fun utledBehandlingsresultatType(
         behandlingsresultat: Behandlingsresultat,
