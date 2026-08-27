@@ -252,15 +252,17 @@ Selen sammenligner **kun** mot datoer som kan stamme fra et vedtak. Radene deles
 
 | Kategori | Kjennetegn | Teller i selen? |
 |---|---|---|
-| `ekteDatoer` | `registrert_av` er ikke markøren — raden ble ikke laget av fiksen | Ja |
+| `ekteDatoer` | `registrert_av` er ikke markøren — raden ble ikke laget av *denne* fiksen | Ja |
 | `usikreDatoer` | Laget av fiksen, men skrevet til siden (`endret_av` er flyttet) | Ja — konservativt |
 | `patchedeDatoer` | Laget av fiksen og urørt siden | **Nei** — beviselig vår egen proxy |
 
+> **`ekteDatoer` betyr «ikke laget av denne fiksen», ikke «garantert ekte vedtaksdato».** Flyway-patchen `V7.6_04__patch_vedtak_metadata_endret_periode` skrev `vedtak_dato = behandlingsresultat.endret_dato` — nøyaktig samme proxy som vi bruker — men satte `registrert_av` til saksbehandlerens ident i stedet for en markør. Rader derfra (`ENDRET_PERIODE` + `FASTSATT_LOVVALGSLAND`) havner i `ekteDatoer` og ser ekte ut. Vi kan ikke skille dem, og prøver ikke: å telle dem med er den konservative retningen for selen. Men på en slik rad er «sett ekte vedtaksdato manuelt» fortsatt ugjort.
+
 `endret_av` er `@LastModifiedBy` og flyttes av *enhver* skriving, ikke bare av at noen setter en ekte vedtaksdato. Vi kan derfor skille «beviselig vår proxy» fra «noen har rørt den siden», men ikke avgjøre om det som ble skrevet var datoen. Den upresisheten er ufarlig fordi den ikke styrer om prod endres: usikre rader regnes med i seleunderlaget, og rapporteres for seg.
 
-Har saken ingen dato i noen av de to første kategoriene, er `nyesteSammenlignbareId` null og kjøringen slipper gjennom: det finnes ikke noe vedtak å fortrenge, alle datoene kommer fra samme klokke, og den interne rekkefølgen blir konsistent. Rader uten `vedtak_dato` teller ikke som sammenligningsgrunnlag i noen kategori — `ÅrsavregningService` sorterer dem først, altså som de eldste, så de vinner aldri.
+Har saken ingen dato i noen av de to første kategoriene, er `nyesteSammenlignbareId` null og kjøringen slipper gjennom: det finnes ikke noe vedtak å fortrenge, alle datoene kommer fra samme klokke, og den interne rekkefølgen blir konsistent. Rader uten `vedtak_dato` teller ikke som sammenligningsgrunnlag i noen kategori — `ÅrsavregningService` sorterer dem først, altså som de eldste, så de vinner aldri. De har heller ingen dato å liste, og telles derfor i `antallUdaterteRader`: uten det feltet leses «tre tomme lister» som «saken har ingen vedtaksmetadata», når den kan ha flere.
 
-Kjøringen logger uansett hver sak der patchen blir nyeste rad (`patchenBlirNyesteIHeleSaken`), også når selen slipper den gjennom, slik at en kjøring kan rekonstrueres i ettertid.
+Loggen skiller de to tilfellene: **WARN** når selen slo ut og operatøren kvitterte den ut — den ene linja du trenger for å forklare hvorfor en behandling byttet plass som nyeste — og **INFO** når patchen blir nyeste rad uten å fortrenge noe som kan være ekte. En sak helt uten vedtaksmetadata treffer den siste grenen hver eneste gang, og hører derfor ikke hjemme på WARN.
 
 To ting å merke seg om selen:
 
@@ -271,7 +273,8 @@ To ting å merke seg om selen:
 - `patchenVinnerNyeste: false` er **ikke** et frikjenn. Sammenligningen er global maks mot
   global maks, mens den ekte utvelgelsen først filtrerer på år og periodeoverlapp. Taper
   patchen mot en rad som årsfilteret luker bort, kan den fortsatt vinne der det teller. Derfor
-  listes alle ekte-daterte rader i `ekteDatoer`, så operatøren kan se hva patchen faktisk slår.
+  listes alle datoene, fordelt på de tre kategoriene over, så operatøren kan se hva patchen
+  faktisk slår.
 
 Klagefrist (+42 dager) og vedtakstype er også rekonstruert, etter mønsteret fra `V7.6_04`.
 Ingen av dem påvirker årsavregningen; de finnes for at raden skal være komplett.
