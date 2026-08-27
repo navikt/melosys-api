@@ -89,8 +89,8 @@ public class UtenlandskMyndighetService {
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
     }
 
-    public UtenlandskMyndighet hentUtenlandskMyndighetForInstitusjonID(String institusjonID) {
-        return hentUtenlandskMyndighet(UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonID));
+    public UtenlandskMyndighet hentUtenlandskMyndighetForInstitusjonID(String institusjonID, Produserbaredokumenter produserbaredokumenter) {
+        return hentUtenlandskMyndighet(UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonID), produserbaredokumenter);
     }
 
     public Map<UtenlandskMyndighet, Mottaker> lagUtenlandskeMyndigheterFraBehandling(Behandling behandling) {
