@@ -74,11 +74,23 @@ class ReplikerBehandlingsresultatService(
      * primærnøkkel med behandlingen (@MapsId), så raden gjenbrukes og kun barne-samlingene byttes ut.
      *
      * Må kalles rett etter tømBehandlingsresultat, i samme transaksjon.
+     *
+     * Støtter ikke EØS-pensjonist. tømBehandlingsresultat gjør to bevisste unntak for den gruppen —
+     * den beholder avklartefakta og helseutgiftperioder — mens gjenopprettingen her erstatter begge.
+     * Se guarden først i metoden.
      */
     @Transactional(rollbackFor = [Exception::class])
     fun gjenopprettBehandlingsresultatTilUtgangspunkt(behandlingID: Long) {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         val behandling = behandlingsresultat.hentBehandling()
+
+        if (behandling.erEøsPensjonist()) {
+            throw TekniskException(
+                "Gjenoppretting av behandlingsresultat er ikke implementert for EØS-pensjonist " +
+                    "(behandling $behandlingID). tømBehandlingsresultat beholder avklartefakta og " +
+                    "helseutgiftperioder for denne gruppen, mens gjenopprettingen erstatter dem."
+            )
+        }
 
         val opprinneligBehandling = behandling.opprinneligBehandling
             ?: throw TekniskException(
@@ -96,6 +108,8 @@ class ReplikerBehandlingsresultatService(
             replikerVilkaarsresultat(behandlingsresultatOriginal, behandlingsresultatReplika)
 
             when {
+                // Aldri nådd, jf. guarden først i metoden. Beholdt som utgangspunkt for den dagen
+                // MANGLENDE_INNBETALING_TRYGDEAVGIFT åpnes for EØS-pensjonist.
                 behandling.erEøsPensjonist() -> {
                     replikerHelseutgiftDekkesPerioder(behandlingsresultatOriginal, behandlingsresultatReplika)
                     replikerTrygdeavgiftForPensjonist(behandlingsresultatOriginal, behandlingsresultatReplika)
