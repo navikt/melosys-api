@@ -33,6 +33,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.featuretoggle.ToggleName
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -1647,7 +1648,7 @@ class ReplikerBehandlingsresultatServiceTest {
         }
         every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns eksisterendeBehandlingsresultat
 
-        shouldThrow<no.nav.melosys.exception.TekniskException> {
+        shouldThrow<TekniskException> {
             replikerBehandlingsresultatService.gjenopprettBehandlingsresultatTilUtgangspunkt(behandling.id)
         }.message shouldContain "opprinneligBehandling mangler"
     }
