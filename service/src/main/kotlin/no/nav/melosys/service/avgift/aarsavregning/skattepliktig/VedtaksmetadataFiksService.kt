@@ -28,6 +28,10 @@ class VedtaksmetadataFiksAvvist(melding: String) : RuntimeException(melding)
  *    `Behandlingsresultat.settVedtakMetadata` bruker.
  *
  * Innsettingen er idempotent (`NOT EXISTS`), så en utilsiktet ny kjøring gir null nye rader.
+ *
+ * Q-numrene i denne fila (Q4a, Q4b, Q6a) kommer fra arbeidsøkta med fag, der fiksen først ble
+ * kjørt som løse SQL-spørringer mot prod. Se `vedtaksmetadata_fiksplan.md` i samme pakke for hva
+ * numrene betyr, spørringene slik de ble kjørt for hånd, og forbeholdene rundt proxy-datoen.
  */
 @Component
 class VedtaksmetadataFiksService {
