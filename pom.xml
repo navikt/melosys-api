@@ -41,7 +41,7 @@
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.340</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.341-6c91538</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.154-midlertidig</melosys.brev.version>
         <melosys-skjema-api-types.version>2026.07.27-5ebbe9e2e4ae</melosys-skjema-api-types.version>
 
@@ -62,7 +62,7 @@
         <commons-lang3.version>3.20.0</commons-lang3.version>
         <commons-text.version>1.15.0</commons-text.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
-        <guava.version>33.6.0-jre</guava.version>
+        <guava.version>33.7.1-jre</guava.version>
         <graphql-java.version>21.5</graphql-java.version>
         <logback.version>1.5.32</logback.version>
         <logstash.version>8.1</logstash.version>
@@ -77,13 +77,13 @@
         <micrometer-jvm-extras.version>0.3.0</micrometer-jvm-extras.version>
         <networknt.json-schema-validator.version>3.0.6</networknt.json-schema-validator.version>
         <ojdbc.version>23.26.3.0.0</ojdbc.version>
-        <okhttp.version>5.4.0</okhttp.version>
+        <okhttp.version>5.5.0</okhttp.version>
         <oracle.version>18</oracle.version>
         <oxmlparserv2.version>11.2.0.1.nojaxpservice</oxmlparserv2.version>
         <papertrailapp-syslog.version>1.0.0</papertrailapp-syslog.version> <!-- Fra august 2014, men er den som brukes hos NAV -->
         <easy-random.version>5.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
-        <shedlock.version>7.7.0</shedlock.version>
+        <shedlock.version>7.9.0</shedlock.version>
         <slf4j.version>2.0.17</slf4j.version>
         <spring-retry.version>2.0.13</spring-retry.version>
         <unleash.version>12.2.3</unleash.version>
