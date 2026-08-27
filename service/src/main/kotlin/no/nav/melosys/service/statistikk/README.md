@@ -37,24 +37,36 @@ Fram til august 2026 var `prosessinstans.data` eneste lagringssted, og uttrekket
 `V161__prosessinstans_prioritet.sql` kaller **kortlevd**. Det virket utelukkende fordi ingen
 slettejobb var implementert ennå. `V170` flyttet kilden og backfillet historikken fra de radene.
 
-## Midlertidig fallback i sendeveien
+## Fallback og reparasjon i sendeveien
 
 `SendAnmodningOmUnntak.hentErFjernarbeidTWFA` leser kolonnen, men faller tilbake til prosessdataen
-når den er null — og **skriver verdien tilbake til kolonnen**. Fallbacken alene ville reddet A001-en,
-men latt raden stå null og saken forsvinne ut av rapporteringstallene; ingen jobb backfiller på nytt
-etter at V170 har kjørt.
+når den er null — og **fyller kolonnen tilbake** via
+`AnmodningsperiodeService.reparerManglendeErFjernarbeidTWFA`. Fallbacken alene redder bare A001-en;
+kolonnen ville blitt stående null og saken forsvunnet ut av rapporteringstallene. `V170` kjører ikke
+på nytt.
 
-To tilfeller treffer den:
+**Hva som gjør kolonnen null selv om saksbehandler svarte:** periodene redigeres mellom anmodning og
+sending. `lagreAnmodningsperioder` sletter og gjenoppretter radene, og
+`AnmodningsperiodeSkrivDto.til()` bygger dem kun fra DTO-feltene — `er_fjernarbeid_twfa` følger ikke
+med (og heller ikke `anmodet_av` eller `medlperiode_id`, som er egne, eldre feil).
 
-- anmodninger opprettet av en pod med forrige versjon i deploy-vinduet, og
-- anmodningsperioder som ble slettet og gjenopprettet av `lagreAnmodningsperioder` mellom anmodning
-  og sending. Den metoden sperrer kun på registrert svar og `sendt_utland`, og ingen av delene er
-  satt i det vinduet — så en saksbehandler som redigerer perioden etter å ha anmodet nuller både
-  `er_fjernarbeid_twfa` og `anmodet_av`. Tilbakeskrivingen reparerer flagget ved sending.
+Ingenting sperrer for redigeringen i det vinduet: `lagreAnmodningsperioder` garderer på registrert
+svar og `sendt_utland`, og `Behandling.erRedigerbar()` på `ANMODNING_UNNTAK_SENDT` — men **begge
+settes inne i saga-steget**, altså etter vinduet. På lykkelig sti er vinduet sekunder (tre saga-steg
+foran, to med ekstern I/O). Feiler et av dem, går prosessinstansen `FEILET`, behandlingen forblir
+redigerbar, og vinduet er timer eller dager til noen restarter den.
 
-Fallbacken (og `ProsessDataKey.ER_FJERNARBEID_TWFA` + skrivingen i `ProsessinstansBuilder`) kan
-fjernes når INFO-loggen «leser … fra prosessdataen og skriver den tilbake» har vært borte fra prod
-gjennom en hel anmodningssyklus.
+> **Rullerende deploy dekkes _ikke_ av dette.** Dispatch er in-process
+> (`ProsessinstansDispatcher` → `saksflytThreadPoolTaskExecutor`), så podden som oppretter
+> prosessinstansen kjører også steget. En pod med forrige versjon leser prosessdataen direkte og
+> sender riktig A001, men rører aldri kolonnen — og en ny pod overtar ikke steget. En anmodning
+> opprettet av en gammel pod etter at `V170` har kjørt blir derfor stående med null kolonne og
+> mangler i statistikken. Volumet er titalls saker i året, så sannsynligheten for å treffe et
+> deploy-vindu på minutter er lav — men gapet er reelt og stille. Prosessinstans-radene slettes
+> ikke, så backfill-en i `V170` kan kjøres på nytt hvis det noen gang trengs.
+
+Fallbacken kan fjernes sammen med `ProsessDataKey.ER_FJERNARBEID_TWFA` og skrivingen i
+`ProsessinstansBuilder` når `lagreAnmodningsperioder` slutter å nulle feltet — det er rotårsaken.
 
 Merk at avlesningen ligger i `SendAnmodningOmUnntak`, ikke i `AbstraktSendUtland`. Basisklassens
 `hentErFjernarbeidTWFA` returnerer null med vilje: `SendVedtakUtland` og `VideresendSoknad` deler
@@ -62,6 +74,7 @@ Merk at avlesningen ligger i `SendAnmodningOmUnntak`, ikke i `AbstraktSendUtland
 har en anmodningsperiode. Det er ikke hypotetisk — en artikkel 16-sak som har fått svar får
 lovvalgsperiode på samme behandlingsresultat som anmodningsperioden og havner i `SendVedtakUtland`.
 Pinnet av tester i både `VideresendSoknadTest` og `SendVedtakUtlandTest`.
+
 
 ## Replikering nuller flagget
 

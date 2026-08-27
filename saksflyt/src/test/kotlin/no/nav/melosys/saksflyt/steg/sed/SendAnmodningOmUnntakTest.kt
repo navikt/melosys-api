@@ -171,8 +171,8 @@ class SendAnmodningOmUnntakTest {
 
     @Test
     fun `utfør faller tilbake til prosessdata naar kolonnen er null - erFjernarbeidTWFA true`() {
-        // Anmodninger opprettet av en pod med forrige versjon i deploy-vinduet har flagget kun i prosessdataen.
-        // Uten fallbacken ville A001 blitt sendt til utlandet uten rammeavtale-flagget
+        // Periodene er redigert mellom anmodning og sending: lagreAnmodningsperioder slettet og gjenopprettet
+        // raden uten flagget, men prosessdataen overlevde. Uten fallbacken ville A001 blitt sendt uten flagget
         val prosessinstans = lagProsessinstans {
             medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
             medData(ProsessDataKey.ER_FJERNARBEID_TWFA, true)

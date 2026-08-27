@@ -98,15 +98,19 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
             return fraAnmodningsperiode;
         }
 
-        // Fallback til prosessdataen, som var eneste lagringssted før MELOSYS-8150. Dekker to tilfeller der
-        // kolonnen er null selv om saksbehandler svarte: anmodninger opprettet av en pod med forrige versjon i
-        // deploy-vinduet, og anmodningsperioder som ble slettet og gjenopprettet av lagreAnmodningsperioder
-        // mellom anmodning og sending. Uten fallbacken ville A001 blitt sendt til utlandet uten flagget.
+        // Kolonnen er null selv om saksbehandler svarte. Det skjer når periodene er redigert mellom anmodning og
+        // sending: lagreAnmodningsperioder sletter og gjenoppretter radene, og AnmodningsperiodeSkrivDto.til()
+        // bygger dem kun fra DTO-feltene — er_fjernarbeid_twfa følger ikke med. Ingenting sperrer for det i dette
+        // vinduet: både sendt_utland og Behandlingsstatus.ANMODNING_UNNTAK_SENDT settes lenger opp i utfør(), altså
+        // etter at vinduet er over. Feiler et tidligere steg, er vinduet timer eller dager til noen restarter.
+        //
+        // Prosessdataen overlever redigeringen, så den brukes som kilde. Uten dette ville A001 blitt sendt til
+        // utlandet uten rammeavtale-flagget.
         Boolean fraProsessdata = prosessinstans.getData(ProsessDataKey.ER_FJERNARBEID_TWFA, Boolean.class);
         if (fraProsessdata != null) {
-            // Reparer raden. Fallbacken redder SED-en, men uten dette ville kolonnen blitt stående null og saken
-            // forsvunnet ut av rapporteringstallene — som er hele grunnen til at kolonnen finnes. Ingen jobb
-            // backfiller på nytt etter at V170 har kjørt.
+            // Fyll kolonnen tilbake. Fallbacken alene redder bare SED-en; kolonnen ville blitt stående null og saken
+            // forsvunnet ut av rapporteringstallene — som er hele grunnen til at kolonnen finnes. V170 kjører ikke
+            // på nytt.
             log.info("Behandling {}: er_fjernarbeid_twfa var ikke satt på anmodningsperioden, leser {} fra "
                 + "prosessdataen og reparerer raden", behandlingsresultat.getId(), fraProsessdata);
             anmodningsperiodeService.reparerManglendeErFjernarbeidTWFA(behandlingsresultat.getId(), fraProsessdata);
