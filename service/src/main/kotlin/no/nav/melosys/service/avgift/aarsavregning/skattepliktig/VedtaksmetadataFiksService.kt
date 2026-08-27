@@ -52,7 +52,7 @@ class VedtaksmetadataFiksService {
             utenMetadataPerSak = tellUtenMetadata(saksnummer),
             ukjentBehType = kandidater.filterNot { it.behType in KJENTE_BEH_TYPER }.map { it.behandlingsresultatId },
             sorteringspåvirkning = sorteringspåvirkning(saksnummer),
-            saksnummerUtenKandidater = utenKandidater(saksnummer, kandidater),
+            saksnummerUtenKandidater = finnSaksnummerUtenKandidater(saksnummer, kandidater),
         )
     }
 
@@ -168,7 +168,7 @@ class VedtaksmetadataFiksService {
             utenMetadataPerSak = tellUtenMetadata(saksnummer),
             avvik = avvik,
             sorteringspåvirkning = påvirkning,
-            saksnummerUtenKandidater = utenKandidater(saksnummer, kandidater),
+            saksnummerUtenKandidater = finnSaksnummerUtenKandidater(saksnummer, kandidater),
         )
     }
 
@@ -241,7 +241,7 @@ class VedtaksmetadataFiksService {
      * mellom «saken finnes ikke» og «saken har ingen defekte rader» — begge deler er verdt et blikk
      * når du trodde saken skulle fikses.
      */
-    private fun utenKandidater(saksnummer: List<String>, kandidater: List<VedtaksmetadataFiksRad>): List<String> {
+    private fun finnSaksnummerUtenKandidater(saksnummer: List<String>, kandidater: List<VedtaksmetadataFiksRad>): List<String> {
         val truffet = kandidater.map { it.saksnummer }.toSet()
         return saksnummer.filterNot { it in truffet }
     }
@@ -250,7 +250,7 @@ class VedtaksmetadataFiksService {
     private fun hentKandidater(saksnummer: List<String>): List<VedtaksmetadataFiksRad> {
         if (saksnummer.isEmpty()) return emptyList()
 
-        val rader = entityManager.createNativeQuery(PREVIEW_SQL)
+        val rader = entityManager.createNativeQuery(KANDIDAT_SQL)
             .setParameter("resultattyper", RESULTATTYPER)
             .setParameter("saksnummer", saksnummer)
             .resultList as List<Array<Any?>>
@@ -364,7 +364,7 @@ class VedtaksmetadataFiksService {
     )
 
     private fun hentAngreKandidater(saksnummer: List<String>): List<VedtaksmetadataAngreRad> {
-        val sql = if (saksnummer.isEmpty()) ANGRE_PREVIEW_SQL else ANGRE_PREVIEW_SQL + ANGRE_PREVIEW_SAKSFILTER
+        val sql = if (saksnummer.isEmpty()) ANGRE_KANDIDAT_SQL else ANGRE_KANDIDAT_SQL + ANGRE_KANDIDAT_SAKSFILTER
         val query = entityManager.createNativeQuery(sql).setParameter("markoer", PATCH_MARKØR)
         if (saksnummer.isNotEmpty()) query.setParameter("saksnummer", saksnummer)
 
@@ -379,7 +379,7 @@ class VedtaksmetadataFiksService {
     }
 
     private fun tellEndretEtterpå(saksnummer: List<String>): Int {
-        val sql = if (saksnummer.isEmpty()) ENDRET_ETTERPÅ_SQL else ENDRET_ETTERPÅ_SQL + ANGRE_PREVIEW_SAKSFILTER
+        val sql = if (saksnummer.isEmpty()) ENDRET_ETTERPÅ_SQL else ENDRET_ETTERPÅ_SQL + ANGRE_KANDIDAT_SAKSFILTER
         val query = entityManager.createNativeQuery(sql).setParameter("markoer", PATCH_MARKØR)
         if (saksnummer.isNotEmpty()) query.setParameter("saksnummer", saksnummer)
         return (query.singleResult as Number).toInt()
@@ -432,7 +432,7 @@ class VedtaksmetadataFiksService {
         const val MAKS_UTTRYKK_I_IN = 1000
 
         /** Default tak på antall rader en skarp kjøring får sette inn. Kan heves eksplisitt i requesten. */
-        const val DEFAULT_MAKS_ANTALL_RADER = 10
+        const val STANDARD_MAKS_ANTALL_RADER = 10
 
         /**
          * Behandlingstyper vi trygt kan utlede vedtakstype for: FØRSTEGANG gir FØRSTEGANGSVEDTAK,
@@ -444,7 +444,7 @@ class VedtaksmetadataFiksService {
         /** Resultattypene ÅrsavregningService slår opp på — det er kun disse som kan velte en sak. */
         private val RESULTATTYPER = listOf("FASTSATT_TRYGDEAVGIFT", "FASTSATT_LOVVALGSLAND", "MEDLEM_I_FOLKETRYGDEN")
 
-        /** Delt av preview og insert, slik at forhåndsvisningen treffer nøyaktig de samme radene. */
+        /** Delt av [KANDIDAT_SQL] og [INSERT_SQL], slik at forhåndsvisningen treffer nøyaktig de samme radene. */
         private const val KANDIDAT_WHERE = """
             WHERE b.status = 'AVSLUTTET'
               AND br.resultat_type IN (:resultattyper)
@@ -472,7 +472,7 @@ class VedtaksmetadataFiksService {
          * behandlingsresultat.endret_dato. Klagefrist +42 dager følger Flyway-patchen V7.6_04.
          * Datoene formateres i SQL for å slippe JDBC-typemapping i rapporten.
          */
-        private const val PREVIEW_SQL = """
+        private const val KANDIDAT_SQL = """
             SELECT b.saksnummer,
                    br.behandling_id,
                    b.beh_type,
@@ -556,7 +556,7 @@ class VedtaksmetadataFiksService {
         """
 
         /** Kun rader som fortsatt er urørte: endret_av flyttes av enhver senere skriving (@LastModifiedBy). */
-        private const val ANGRE_PREVIEW_SQL = """
+        private const val ANGRE_KANDIDAT_SQL = """
             SELECT b.saksnummer,
                    vm.behandlingsresultat_id,
                    TO_CHAR(vm.vedtak_dato, 'YYYY-MM-DD HH24:MI:SS'),
@@ -566,7 +566,7 @@ class VedtaksmetadataFiksService {
             WHERE vm.registrert_av = :markoer
               AND vm.endret_av = :markoer
         """
-        private const val ANGRE_PREVIEW_SAKSFILTER = " AND b.saksnummer IN (:saksnummer)"
+        private const val ANGRE_KANDIDAT_SAKSFILTER = " AND b.saksnummer IN (:saksnummer)"
 
         /**
          * Patch-rader som ikke lenger er urørte, og som [ANGRE_SQL] derfor lar stå.

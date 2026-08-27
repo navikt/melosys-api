@@ -147,7 +147,7 @@ data class VedtaksmetadataFiksRequest(
     val saksnummer: List<String> = emptyList(),
     val skarp: Boolean = false,
     /** Sikkerhetssele: skarp kjøring avvises hvis den ville satt inn flere rader enn dette. */
-    val maksAntallRader: Int = VedtaksmetadataFiksService.DEFAULT_MAKS_ANTALL_RADER,
+    val maksAntallRader: Int = VedtaksmetadataFiksService.STANDARD_MAKS_ANTALL_RADER,
     /**
      * Saksnummer der det er vurdert og ønsket at patchen tar nyeste-plassen i vedtaksdato-sorteringen.
      * Saker som kaprer uten å stå her avvises, fordi de bytter hvilken behandling avgiftsgrunnlaget

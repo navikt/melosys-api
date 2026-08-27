@@ -78,13 +78,13 @@ koden. De står i fullversjonen i wikien.
 
 | Kall | Q | Metode | SQL-konstant |
 |---|---|---|---|
-| `POST …/vedtaksmetadata-fiks` med `skarp=false` (default) | Q4a | `forhåndsvis()` | `PREVIEW_SQL` |
+| `POST …/vedtaksmetadata-fiks` med `skarp=false` (default) | Q4a | `forhåndsvis()` | `KANDIDAT_SQL` |
 | `POST …/vedtaksmetadata-fiks` med `skarp=true` | Q4b | `utfør()` | `INSERT_SQL` |
 | `utenMetadataPerSak` i svaret på begge | Q6a | `tellUtenMetadata()` | `ETTERKONTROLL_SQL` |
 | `POST …/vedtaksmetadata-fiks/angre` | — | `angre()` | `ANGRE_SQL` |
 | `sorteringspåvirkning` i svaret på begge | — | `sorteringspåvirkning()` | `EKSISTERENDE_NYESTE_SQL`, `PATCH_NYESTE_SQL` |
 
-`PREVIEW_SQL` og `INSERT_SQL` deler `KANDIDAT_WHERE` i koden, nettopp for at forhåndsvisningen
+`KANDIDAT_SQL` og `INSERT_SQL` deler `KANDIDAT_WHERE` i koden, nettopp for at forhåndsvisningen
 skal treffe nøyaktig de samme radene som innsettingen. Sorteringsrapporten er ikke en del av
 den opprinnelige Q-serien — den automatiserer krysssjekken fag gjorde for hånd (seksjon 4).
 
