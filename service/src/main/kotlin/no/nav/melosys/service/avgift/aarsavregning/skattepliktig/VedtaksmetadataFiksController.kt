@@ -45,8 +45,10 @@ class VedtaksmetadataFiksController(
             "VIKTIG: vedtak_dato settes til proxyen behandlingsresultat.endret_dato, og den datoen " +
             "styrer hvilken behandling ÅrsavregningService regner som nyest — altså hvor " +
             "avgiftsgrunnlaget hentes fra. Les sorteringspaavirkning i svaret: er patchenVinnerNyeste " +
-            "true for en sak, avvises skarp kjøring: sett ekte vedtaksdato manuelt, eller send " +
-            "tillatSorteringsendring=true hvis endringen er vurdert. Merk at false ikke er et " +
+            "true for en sak, avvises skarp kjøring: sett ekte vedtaksdato manuelt, eller list " +
+            "saksnummeret i tillatSorteringsendring hvis endringen er vurdert — det kvitterer ut " +
+            "saken, ikke selen, så de øvrige sakene i kallet er fortsatt beskyttet. " +
+            "Merk at false ikke er et " +
             "frikjenn — sammenligningen er global maks mot global maks, mens den ekte utvelgelsen " +
             "først filtrerer på år og periodeoverlapp. Se ekteDatoer for hva patchen faktisk slår."
     )
@@ -85,8 +87,11 @@ class VedtaksmetadataFiksController(
         summary = "Angre datafiksen: slett rader merket MELOSYS-8174-PATCH",
         description = "Med skarp=false (default) vises kun hva som ville blitt slettet. " +
             "Tom saksnummer-liste betyr alle markerte rader; angi saksnummer for å angre én sak om gangen. " +
+            "Skarp kjøring uten saksnummer krever bekreftAlle=true, fordi den ellers ruller tilbake " +
+            "alle patch-rader i basen — også fikser fra tidligere kjøringer. " +
             "Rader der markøren er overskrevet av en senere endring (endret_av != MELOSYS-8174-PATCH) " +
-            "røres aldri — de telles i antallEndretEtterpaa."
+            "røres aldri — de telles i antallEndretEtterpaa. Det gjelder også rader der endret_av er " +
+            "tømt: de kan ikke rulles tilbake automatisk, og telles i samme felt."
     )
     @PostMapping("/vedtaksmetadata-fiks/angre")
     fun angreVedtaksmetadataFiks(
@@ -103,7 +108,18 @@ class VedtaksmetadataFiksController(
                 "scope=${angreRequest.saksnummer.ifEmpty { listOf("ALLE") }}"
         }
 
-        return ResponseEntity.ok(vedtaksmetadataFiksService.angre(angreRequest.saksnummer, angreRequest.skarp))
+        return try {
+            ResponseEntity.ok(
+                vedtaksmetadataFiksService.angre(
+                    angreRequest.saksnummer,
+                    angreRequest.skarp,
+                    angreRequest.bekreftAlle,
+                )
+            )
+        } catch (e: VedtaksmetadataFiksAvvist) {
+            log.warn { "Angre datafiks vedtaksmetadata avvist: ${e.message}" }
+            ResponseEntity.badRequest().body(mapOf("feil" to e.message))
+        }
     }
 
     private fun valider(saksnummer: List<String>): ResponseEntity<Any>? {
@@ -133,14 +149,21 @@ data class VedtaksmetadataFiksRequest(
     /** Sikkerhetssele: skarp kjøring avvises hvis den ville satt inn flere rader enn dette. */
     val maksAntallRader: Int = VedtaksmetadataFiksService.DEFAULT_MAKS_ANTALL_RADER,
     /**
-     * Kvitterer ut sakene der patchen tar nyeste-plassen i vedtaksdato-sorteringen. Uten denne
-     * avvises slike saker, fordi de bytter hvilken behandling avgiftsgrunnlaget hentes fra.
+     * Saksnummer der det er vurdert og ønsket at patchen tar nyeste-plassen i vedtaksdato-sorteringen.
+     * Saker som kaprer uten å stå her avvises, fordi de bytter hvilken behandling avgiftsgrunnlaget
+     * hentes fra. Liste og ikke flagg: ett kapret saksnummer skal ikke tvinge deg til å slå av selen
+     * for de øvrige sakene i kallet.
      */
-    val tillatSorteringsendring: Boolean = false,
+    val tillatSorteringsendring: List<String> = emptyList(),
 )
 
 data class VedtaksmetadataAngreRequest(
-    /** Tom liste = alle rader merket MELOSYS-8174-PATCH, uansett sak. */
+    /** Tom liste = alle rader merket MELOSYS-8174-PATCH, uansett sak. Krever [bekreftAlle] ved skarp. */
     val saksnummer: List<String> = emptyList(),
     val skarp: Boolean = false,
+    /**
+     * Kvitterer ut en skarp kjøring uten scope. Uten denne avvises tomt scope, fordi et glemt
+     * `saksnummer` ellers ruller tilbake alle patch-rader i basen — også fra tidligere kjøringer.
+     */
+    val bekreftAlle: Boolean = false,
 )

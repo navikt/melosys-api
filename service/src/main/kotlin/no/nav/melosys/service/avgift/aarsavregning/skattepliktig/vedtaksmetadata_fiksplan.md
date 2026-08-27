@@ -111,7 +111,18 @@ curl -s -X POST "$MELOSYS_API/admin/aarsavregninger/saker/skattepliktige/vedtaks
   -H "X-MELOSYS-ADMIN-APIKEY: $MELOSYS_ADMIN_APIKEY" \
   -H "Content-Type: application/json" \
   -d '{ "saksnummer": ["MEL-000000"], "skarp": true }'
+
+# Nødbryter: rull tilbake ALT som er merket, uansett sak. Krever bekreftAlle, fordi et glemt
+# "saksnummer" ellers ville slettet fikser fra tidligere kjøringer også.
+curl -s -X POST "$MELOSYS_API/admin/aarsavregninger/saker/skattepliktige/vedtaksmetadata-fiks/angre" \
+  -H "Authorization: Bearer $MELOSYS_TOKEN" \
+  -H "X-MELOSYS-ADMIN-APIKEY: $MELOSYS_ADMIN_APIKEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "skarp": true, "bekreftAlle": true }'
 ```
+
+`tillatSorteringsendring` er en **liste med saksnummer**, ikke et av/på-flagg: kaprer én sak i et
+kall med flere, skal ikke selen slås av for de øvrige.
 
 ### Feltene i svaret
 
@@ -122,7 +133,8 @@ curl -s -X POST "$MELOSYS_API/admin/aarsavregninger/saker/skattepliktige/vedtaks
 | `rader` | Samme kolonner som Q4a ga: behandlingsresultat-id, `beh_type`, resultattype, kommende vedtaksdato, klagefrist og vedtakstype. |
 | `utenMetadataPerSak` | Q6a-etterkontrollen per sak, slik det står *nå*. I preview er den lik antall funne rader; etter en vellykket skarp kjøring skal den være tom. |
 | `ukjentBehType` | Kandidater der vedtakstypen ikke kan utledes trygt. Er den ikke tom, avvises skarp kjøring. |
-| `sorteringspaavirkning` | Per sak: bytter patchen ut hvilken behandling som er nyest i vedtaksdato-sorteringen. Se seksjon 4. |
+| `sorteringspaavirkning` | Per sak: bytter patchen ut hvilken behandling som er nyest i vedtaksdato-sorteringen. Se seksjon 5. Feltet `nyesteFoerErPatchet` sier om raden vi sammenligner mot selv ble satt inn av en tidligere kjøring — da er sammenligningen proxy mot proxy, og `patchenVinnerNyeste: false` er ikke et frikjenn. `ekteDatoer` inneholder kun datoer som faktisk stammer fra et vedtak. |
+| `saksnummerUtenKandidater` | Saksnummer fra requesten som ikke ga én eneste kandidatrad — skrivefeil, eller sak uten defekte rader. Blokkerer ikke, men skal ses på når du trodde saken skulle fikses. |
 | `avvik` | True hvis antall innsatte rader ikke stemmer med forhåndsvisningen — da beskriver `rader` kandidatene, ikke det som faktisk ble skrevet. |
 
 ---
@@ -207,6 +219,15 @@ Begge kolonnene, ikke bare `registrert_av`: den er `@CreatedBy` og settes kun ve
 patch-rad som senere har fått en ekte vedtaksdato skrevet av en saksbehandler ville blitt
 slettet med saksbehandlerens data. Slike rader telles i `antallEndretEtterpaa` og røres aldri.
 
+`endret_av` er nullbar, og i Oracle er både `= 'MELOSYS-8174-PATCH'` og `<> 'MELOSYS-8174-PATCH'`
+UNKNOWN mot NULL. Tellingen av rader som ikke kan rulles tilbake bruker derfor
+`(endret_av IS NULL OR endret_av <> …)` — ellers ville en patch-rad med tømt `endret_av` falt ut
+av både slettingen og tellingen, og svaret ville sett ut som «ingenting å angre».
+
+Uskopet skarp angre krever `bekreftAlle=true`. Uten den selen ruller et `{"skarp": true}` der
+`saksnummer` er glemt tilbake alle patch-rader i basen — også fra tidligere kjøringer — og hver
+slettet rad gjeninnfører nøyaktig 8174-krasjen på saken den fikset.
+
 ---
 
 ## 5 · `vedtak_dato` er en proxy — og det er den viktigste forbeholden
@@ -284,8 +305,8 @@ Sikkerhetsselene, alle lagt til etter kodereview:
 - Maks 25 saksnummer per kall, og skarp avvises hvis den ville satt inn flere rader enn
   `maksAntallRader` (default 10).
 - Ukjent `beh_type` blokkerer.
-- Sorteringsselen (seksjon 5).
-- Angre rører kun rader som fortsatt er urørt patch.
+- Sorteringsselen (seksjon 5), kvittert ut per saksnummer og ikke som av/på.
+- Angre rører kun rader som fortsatt er urørt patch, og uskopet skarp angre krever `bekreftAlle`.
 - Saksnummer valideres mot `MEL-<tall>` **og** bindes som JDBC-parameter.
 
 Garantiene er pinnet i `integrasjonstest/…/VedtaksmetadataFiksIT.kt`, som kjører mot ekte

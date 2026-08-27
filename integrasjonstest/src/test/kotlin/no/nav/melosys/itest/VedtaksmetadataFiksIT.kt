@@ -1,6 +1,7 @@
 package no.nav.melosys.itest
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import no.nav.melosys.Application
 import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.VedtaksmetadataFiksService.Companion.PATCH_MARKOER
@@ -27,10 +28,14 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
  * `VedtaksmetadataFiksService`. Endepunktet skriver rett i `vedtak_metadata` i prod, så garantiene
  * her er de som avgjør om en feilkjøring kan gjøre skade.
  *
- * Testene fastholder særlig funnene fra kodereviewen 20.08:
+ * Testene fastholder særlig funnene fra kodereviewene:
  *  - skarp kjøring kan ikke skje uten eksplisitt scope, over taket, eller på en behandlingstype
  *    vi ikke kan utlede vedtakstype for,
- *  - angre rører kun rader som fortsatt er urørt patch (markør i BÅDE registrert_av og endret_av).
+ *  - angre rører kun rader som fortsatt er urørt patch (markør i BÅDE registrert_av og endret_av),
+ *    og skarp angre uten scope krever egen bekreftelse,
+ *  - en patch-rad med tømt `endret_av` forsvinner ikke i stillhet, men telles som urullbar,
+ *  - sorteringsselen sier fra når den måler mot en dato fiksen selv har satt inn,
+ *  - en kapret sak kvitteres ut per saksnummer, ikke ved å slå av selen for hele kallet.
  */
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -192,6 +197,147 @@ class VedtaksmetadataFiksIT(
     }
 
     @Test
+    fun `skarp angre uten saksnummer avvises, og krever bekreftAlle for å slette alt`() {
+        // Den mest destruktive stien: uten scope treffer DELETE alle patch-rader i basen, også
+        // fikser fra tidligere kjøringer — og hver slettet rad gjeninnfører 8174-krasjen.
+        val gammelFiks = seedDefektBehandling("MEL-930", "NY_VURDERING", "2024-01-15 10:00:00")
+        val nyFiks = seedDefektBehandling("MEL-931", "NY_VURDERING", "2024-06-15 10:00:00")
+        kall(fiksUrl, """{"saksnummer":["MEL-930","MEL-931"],"skarp":true}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.antallRaderInnsatt").value(2))
+
+        // Glemt scope skal ikke slette begge
+        kall(angreUrl, """{"skarp":true}""")
+            .andExpect(status().isBadRequest)
+        patchedeIder() shouldContainExactly listOf(gammelFiks, nyFiks)
+
+        // Preview uten scope er derimot ufarlig, og viser hele omfanget
+        kall(angreUrl, """{}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.antallRaderFunnet").value(2))
+            .andExpect(jsonPath("$.antallSlettet").value(0))
+        patchedeIder() shouldContainExactly listOf(gammelFiks, nyFiks)
+
+        // Nødbryteren finnes fortsatt, men må kvitteres ut
+        kall(angreUrl, """{"skarp":true,"bekreftAlle":true}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.antallSlettet").value(2))
+        antallMetadata() shouldBe 0
+    }
+
+    @Test
+    fun `angre uten body er en preview, ikke en sletting`() {
+        seedDefektBehandling("MEL-932", "NY_VURDERING", "2024-01-15 10:00:00")
+        kall(fiksUrl, """{"saksnummer":["MEL-932"],"skarp":true}""").andExpect(status().isOk)
+
+        mockMvc.perform(
+            post(angreUrl)
+                .header(AdminControllerApiKeyIT.API_KEY_HEADER, AdminControllerApiKeyIT.GYLDIG_API_NOKKEL)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.skarp").value(false))
+            .andExpect(jsonPath("$.antallSlettet").value(0))
+
+        antallMetadata() shouldBe 1
+    }
+
+    @Test
+    fun `patch-rad med tømt endret_av kan ikke rulles tilbake, og telles i antallEndretEtterpaa`() {
+        // endret_av er nullbar, og i Oracle er både = og <> UNKNOWN mot NULL. Uten NULL-grenen i
+        // ENDRET_ETTERPAA_SQL faller raden ut av BÅDE angre-kandidatene og tellingen, og svaret
+        // ser ut som «ingenting å angre» i stedet for «én rad kunne ikke rulles tilbake».
+        val rad = seedDefektBehandling("MEL-933", "NY_VURDERING", "2024-01-15 10:00:00")
+        kall(fiksUrl, """{"saksnummer":["MEL-933"],"skarp":true}""").andExpect(status().isOk)
+        jdbcTemplate.update("UPDATE vedtak_metadata SET endret_av = NULL WHERE behandlingsresultat_id = ?", rad)
+
+        kall(angreUrl, """{"saksnummer":["MEL-933"],"skarp":true}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.antallRaderFunnet").value(0))
+            .andExpect(jsonPath("$.antallSlettet").value(0))
+            .andExpect(jsonPath("$.antallEndretEtterpaa").value(1))
+
+        antallMetadata() shouldBe 1
+    }
+
+    @Test
+    fun `en tidligere patchet rad rapporteres som proxy, ikke som ekte sammenligningsgrunnlag`() {
+        // Runde 1 patcher saken. Runde 2 måler mot den raden — som er vår egen proxy-dato, ikke et
+        // vedtak. Sammenligningen er da proxy mot proxy, og «patchen vinner ikke» er ikke et
+        // frikjenn. Operatøren skal se det på nyesteFoerErPatchet og på tom ekteDatoer.
+        seedDefektBehandling("MEL-934", "NY_VURDERING", "2026-01-01 10:00:00")
+        kall(fiksUrl, """{"saksnummer":["MEL-934"],"skarp":true}""").andExpect(status().isOk)
+
+        seedDefektBehandling("MEL-934", "NY_VURDERING", "2025-06-01 10:00:00")
+
+        kall(fiksUrl, """{"saksnummer":["MEL-934"]}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerErPatchet").value(true))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerDato").value("2026-01-01 10:00:00"))
+            // ekteDatoer skal kun inneholde datoer som faktisk stammer fra et vedtak
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].ekteDatoer").isEmpty)
+    }
+
+    @Test
+    fun `ekte vedtaksdato skilles fra patchet når begge finnes`() {
+        val ekte = seedIntaktBehandling("MEL-935", "FØRSTEGANG", "2023-01-01 10:00:00")
+        seedDefektBehandling("MEL-935", "NY_VURDERING", "2026-01-01 10:00:00")
+        kall(fiksUrl, """{"saksnummer":["MEL-935"],"skarp":true,"tillatSorteringsendring":["MEL-935"]}""")
+            .andExpect(status().isOk)
+
+        seedDefektBehandling("MEL-935", "NY_VURDERING", "2025-06-01 10:00:00")
+
+        kall(fiksUrl, """{"saksnummer":["MEL-935"]}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerErPatchet").value(true))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].ekteDatoer[0]").value("2023-01-01 10:00:00"))
+            .andExpect(jsonPath("$.sorteringspaavirkning[0].ekteDatoer.length()").value(1))
+
+        vedtaksdato(ekte) shouldBe "2023-01-01 10:00:00"
+    }
+
+    @Test
+    fun `én kapret sak blokkerer ikke de øvrige når den kvitteres ut per saksnummer`() {
+        // Formen prod-dataene har: én av flere saker i samme kall kaprer nyeste-plassen. Et av-på-flagg
+        // ville tvunget operatøren til å slå av selen for alle tre.
+        seedIntaktBehandling("MEL-936", "FØRSTEGANG", "2024-08-16 09:51:06")
+        seedDefektBehandling("MEL-936", "NY_VURDERING", "2024-08-16 09:54:28")   // kaprer
+        seedIntaktBehandling("MEL-937", "FØRSTEGANG", "2025-01-06 10:15:04")
+        seedDefektBehandling("MEL-937", "NY_VURDERING", "2024-10-23 09:02:15")   // kaprer ikke
+
+        kall(fiksUrl, """{"saksnummer":["MEL-936","MEL-937"],"skarp":true}""")
+            .andExpect(status().isBadRequest)
+        patchedeIder().shouldBeEmpty()
+
+        kall(fiksUrl, """{"saksnummer":["MEL-936","MEL-937"],"skarp":true,"tillatSorteringsendring":["MEL-936"]}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.antallRaderInnsatt").value(2))
+    }
+
+    @Test
+    fun `kvittering for feil sak hjelper ikke — selen gjelder fortsatt den som kaprer`() {
+        seedIntaktBehandling("MEL-938", "FØRSTEGANG", "2024-08-16 09:51:06")
+        seedDefektBehandling("MEL-938", "NY_VURDERING", "2024-08-16 09:54:28")
+
+        kall(fiksUrl, """{"saksnummer":["MEL-938"],"skarp":true,"tillatSorteringsendring":["MEL-999"]}""")
+            .andExpect(status().isBadRequest)
+
+        antallMetadata() shouldBe 1
+    }
+
+    @Test
+    fun `saksnummer uten kandidater listes, slik at en skrivefeil ikke forsvinner i tallene`() {
+        seedDefektBehandling("MEL-939", "NY_VURDERING", "2024-01-15 10:00:00")
+
+        kall(fiksUrl, """{"saksnummer":["MEL-939","MEL-940"],"skarp":true}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.antallRaderInnsatt").value(1))
+            .andExpect(jsonPath("$.saksnummerUtenKandidater[0]").value("MEL-940"))
+            .andExpect(jsonPath("$.saksnummerUtenKandidater.length()").value(1))
+    }
+
+    @Test
     fun `endepunktene krever både admin-API-nøkkel og bearer token`() {
         // Endepunktet skriver rett i vedtak_metadata i prod, så transporten pinnes her og ikke bare
         // i AdminControllerApiKeyIT — den går på GET-endepunkter, og disse to er POST.
@@ -200,14 +346,14 @@ class VedtaksmetadataFiksIT(
                 post(url)
                     .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
-                    .content("""{"saksnummer":["MEL-930"]}""")
+                    .content("""{"saksnummer":["MEL-950"]}""")
             ).andExpect(status().isForbidden)
 
             mockMvc.perform(
                 post(url)
                     .header(AdminControllerApiKeyIT.API_KEY_HEADER, AdminControllerApiKeyIT.GYLDIG_API_NOKKEL)
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
-                    .content("""{"saksnummer":["MEL-930"]}""")
+                    .content("""{"saksnummer":["MEL-950"]}""")
             ).andExpect(status().isUnauthorized)
         }
 
@@ -386,7 +532,7 @@ class VedtaksmetadataFiksIT(
             .andExpect(status().isBadRequest)
         antallMetadata() shouldBe 1
 
-        kall(fiksUrl, """{"saksnummer":["MEL-925"],"skarp":true,"tillatSorteringsendring":true}""")
+        kall(fiksUrl, """{"saksnummer":["MEL-925"],"skarp":true,"tillatSorteringsendring":["MEL-925"]}""")
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.antallRaderInnsatt").value(1))
         antallMetadata() shouldBe 2
