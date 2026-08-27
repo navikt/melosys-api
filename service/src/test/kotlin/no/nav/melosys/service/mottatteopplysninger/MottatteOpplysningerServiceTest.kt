@@ -280,7 +280,7 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    fun oppdaterMottatteOpplysningerFraSøknad_erstatterSidemenyfelterOgBeholderOevrige() {
+    fun oppdaterMottatteOpplysningerFraSøknad_erstatterSidemenyfelterOgBeholderTypeOgOevrige() {
         val opprinneligLoenn = no.nav.melosys.domain.mottatteopplysninger.data.LoennOgGodtgjoerelse(
             norskArbgUtbetalerLoenn = true
         )
@@ -291,7 +291,7 @@ internal class MottatteOpplysningerServiceTest {
         }
         val mottatteOpplysninger = MottatteOpplysninger().apply {
             mottatteOpplysningerData = eksisterende
-            type = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
+            type = Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS
         }
 
         val nySoeknad = no.nav.melosys.domain.mottatteopplysninger.Soeknad().apply {
@@ -320,7 +320,7 @@ internal class MottatteOpplysningerServiceTest {
         val slot = slot<MottatteOpplysninger>()
         verify { mottatteOpplysningerRepositoryMock.saveAndFlush(capture(slot)) }
         val oppdatert = slot.captured.mottatteOpplysningerData as no.nav.melosys.domain.mottatteopplysninger.Soeknad
-        slot.captured.type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS)
+        slot.captured.type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS)
         oppdatert.periode.fom.shouldBe(LocalDate.of(2025, 1, 1))
         oppdatert.soeknadsland.landkoder.shouldBe(listOf("DE"))
         oppdatert.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.shouldBe(listOf("111111111"))
