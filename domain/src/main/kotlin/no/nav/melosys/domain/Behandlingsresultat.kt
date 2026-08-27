@@ -263,6 +263,16 @@ open class Behandlingsresultat : RegistreringsInfo() {
 
     fun erOpphørt(): Boolean = type == Behandlingsresultattyper.OPPHØRT
 
+    fun finnFullstendigManglendeInnbetaling(): Avklartefakta? =
+        avklartefakta.firstOrNull { it.type == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING }
+
+    /**
+     * Merk at raden kan ligge igjen med fakta=FALSE etter at saksbehandler har vært innom "hele perioden"
+     * og deretter gått til "deler av perioden". Verdien må derfor sjekkes, ikke bare at raden finnes.
+     */
+    fun harFullstendigManglendeInnbetaling(): Boolean =
+        finnFullstendigManglendeInnbetaling()?.fakta.equals(Avklartefakta.VALGT_FAKTA, ignoreCase = true)
+
     fun erInnvilgelse(): Boolean {
         if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND ||
             type == Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
