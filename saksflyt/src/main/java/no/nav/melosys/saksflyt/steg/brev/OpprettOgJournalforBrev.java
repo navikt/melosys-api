@@ -103,7 +103,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
             .medTittel(journalføringTittel)
             .medBrevkode(dokumentproduksjonsInfo.dokgenMalnavn())
             .medDokumentKategori(dokumentproduksjonsInfo.dokumentKategoriKode())
-            .medMottakerNavn(utledNavn(mottakerID, mottakerType))
+            .medMottakerNavn(utledNavn(mottakerID, mottakerType, produserbartDokument))
             .medMottakerId(mottakerType == MottakerType.PERSON_MED_AKTØR_ID ? persondataFasade.hentFolkeregisterident(mottakerID) : mottakerID)
             .medMottakerIdType(utledMottakerIdType(mottakerType))
             .medSaksnummer(fagsak.getSaksnummer())
@@ -152,11 +152,11 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         return mottaker;
     }
 
-    private String utledNavn(String mottakerID, MottakerType mottakerType) {
+    private String utledNavn(String mottakerID, MottakerType mottakerType, Produserbaredokumenter produserbaredokumenter) {
         return switch (mottakerType) {
             case PERSON_MED_AKTØR_ID, PERSON_MED_FNR -> persondataFasade.hentSammensattNavn(mottakerID);
             case ORGANISASJON -> eregFasade.hentOrganisasjonNavn(mottakerID);
-            case INSTITUSJON -> utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(mottakerID).getNavn();
+            case INSTITUSJON -> utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(mottakerID, produserbaredokumenter).getNavn();
         };
     }
 
