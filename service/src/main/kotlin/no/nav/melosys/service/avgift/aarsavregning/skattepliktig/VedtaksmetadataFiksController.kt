@@ -67,7 +67,7 @@ class VedtaksmetadataFiksController(
         valider(saksnummer)?.let { return it }
         // Kvitteringene er saksnummer og skal gjennom samme formatsele. Uten dette ble søppel ekkoet
         // rett tilbake i kvitteringerUtenTreff.
-        valider(request.tillatSorteringsendring)?.let { return it }
+        valider(request.tillatSorteringsendring.distinct())?.let { return it }
 
         log.info {
             "Datafiks vedtaksmetadata (${if (request.skarp) "SKARP" else "PREVIEW"}) for saker $saksnummer"

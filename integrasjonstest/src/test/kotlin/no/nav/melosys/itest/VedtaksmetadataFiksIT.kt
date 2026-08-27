@@ -473,8 +473,11 @@ class VedtaksmetadataFiksIT(
     fun `de tre datokategoriene holdes fra hverandre i samme sak`() {
         // Én ekte rad, én urørt patch og én patch som er skrevet til. Selen måler mot de to første
         // kategoriene, ikke mot den urørte patchen — og rapporten viser hvilken som er hvilken.
+        // Den urørte patchen er den NYESTE av de tre. Var fixturen motsatt, ville assertionen under
+        // holdt også under en modell som feilaktig regnet urørte patch-rader med — samme felle som
+        // gjorde en tidligere test vakuøs.
         seedIntaktBehandling("MEL-982", "FØRSTEGANG", "2020-01-01 10:00:00")
-        seedDefektBehandling("MEL-982", "NY_VURDERING", "2021-01-01 10:00:00")
+        seedDefektBehandling("MEL-982", "NY_VURDERING", "2024-01-01 10:00:00")
         val skrevetTil = seedDefektBehandling("MEL-982", "NY_VURDERING", "2022-01-01 10:00:00")
         kall(fiksUrl, """{"saksnummer":["MEL-982"],"skarp":true,"tillatSorteringsendring":["MEL-982"]}""")
             .andExpect(status().isOk)
@@ -490,9 +493,11 @@ class VedtaksmetadataFiksIT(
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer[0]").value("2020-01-01 10:00:00"))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].usikreDatoer[0]").value("2022-01-01 10:00:00"))
-            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchedeDatoer[0]").value("2021-01-01 10:00:00"))
-            // Nyeste som KAN være ekte er den skrevet-til raden fra 2022, ikke den urørte fra 2021
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchedeDatoer[0]").value("2024-01-01 10:00:00"))
+            // Nyeste som KAN være ekte er den skrevet-til raden fra 2022 — IKKE den urørte fra 2024,
+            // selv om den er nyere. Det er nettopp det skillet restruktureringen handler om.
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareId").value(skrevetTil))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareDato").value("2022-01-01 10:00:00"))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(true))
     }
 
@@ -567,9 +572,9 @@ class VedtaksmetadataFiksIT(
         kall(fiksUrl, """{"saksnummer":["MEL-912"]}""")
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareId").doesNotExist())
-            .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareId").doesNotExist())
             .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(false))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer").isEmpty)
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].antallUdaterteRader").value(0))
     }
 
     @Test
@@ -679,7 +684,31 @@ class VedtaksmetadataFiksIT(
         kall(fiksUrl, """{"saksnummer":["MEL-924"]}""")
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareId").doesNotExist())
+            // Raden på den åpne behandlingen skal ikke dukke opp i rapporten i det hele tatt —
+            // avgrensningen er den samme som ÅrsavregningService bruker
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer").isEmpty)
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].antallUdaterteRader").value(0))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(false))
+    }
+
+    @Test
+    fun `rad med vedtaksmetadata uten dato skilles fra sak helt uten vedtaksmetadata`() {
+        // Begge gir nyesteSammenlignbareId null og tre tomme datolister. Uten antallUdaterteRader
+        // leses de identisk, og operatøren konkluderer «saken har ingen vedtaksmetadata» når den
+        // kan ha flere.
+        seedBehandlingUtenVedtaksdato("MEL-983", "FØRSTEGANG", "2024-01-01 08:00:00")
+        seedDefektBehandling("MEL-983", "NY_VURDERING", "2024-06-01 12:00:00")
+
+        kall(fiksUrl, """{"saksnummer":["MEL-983"]}""")
+            .andExpect(status().isOk)
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareId").doesNotExist())
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].antallUdaterteRader").value(1))
+
+        seedDefektBehandling("MEL-984", "NY_VURDERING", "2024-06-01 12:00:00")
+        kall(fiksUrl, """{"saksnummer":["MEL-984"]}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareId").doesNotExist())
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].antallUdaterteRader").value(0))
     }
 
     @Test
