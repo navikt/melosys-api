@@ -320,7 +320,7 @@ internal class MottatteOpplysningerServiceTest {
         val slot = slot<MottatteOpplysninger>()
         verify { mottatteOpplysningerRepositoryMock.saveAndFlush(capture(slot)) }
         val oppdatert = slot.captured.mottatteOpplysningerData as no.nav.melosys.domain.mottatteopplysninger.Soeknad
-        slot.captured.type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS)
+        slot.captured.type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS)
         oppdatert.periode.fom.shouldBe(LocalDate.of(2025, 1, 1))
         oppdatert.soeknadsland.landkoder.shouldBe(listOf("DE"))
         oppdatert.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.shouldBe(listOf("111111111"))
@@ -453,7 +453,7 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    fun opprettSøknadDigital_setterTypeUtsendteArbeidstakereEøs() {
+    fun opprettSøknadDigital_setterTypeYrkesaktiveEøs() {
         val behandling = setupMock(
             Sakstyper.EU_EOS,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
@@ -468,7 +468,7 @@ internal class MottatteOpplysningerServiceTest {
             mottatteOpplysningerRepositoryMock.save(capture(slot))
         }
         slot.captured.apply {
-            type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS)
+            type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS)
             this.behandling.shouldBe(behandling)
             eksternReferanseID.shouldBe("ref-123")
             mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()

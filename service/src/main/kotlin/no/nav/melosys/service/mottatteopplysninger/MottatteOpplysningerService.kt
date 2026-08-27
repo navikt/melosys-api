@@ -102,7 +102,7 @@ class MottatteOpplysningerService(
         behandlingID,
         originalData,
         soeknad,
-        Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS,
+        Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS,
         VERSJON_SOEKNAD_GRUNNLAG,
         eksternReferanseID
     )
@@ -250,10 +250,7 @@ class MottatteOpplysningerService(
     /**
      * Oppdaterer sidemeny-feltene fra en ny digital søknad på en åpen behandling.
      * Den nyeste søknaden erstatter tidligere verdier for feltene som mappes, mens øvrige felt
-     * beholdes urørt.
-     *
-     * Typen settes til utsendte arbeidstakere slik at weben viser de relevante søknadsfeltene,
-     * også når behandlingen opprinnelig ble opprettet av en saksbehandler med en annen type.
+     * beholdes urørt. Mottatteopplysningertypen på behandlingen beholdes uendret.
      *
      * @param oppdaterArbeidssteder om arbeidsstedene skal erstattes med verdiene fra søknaden.
      * Er flagget `false`, beholdes eksisterende arbeidssteder.
@@ -265,7 +262,6 @@ class MottatteOpplysningerService(
         oppdaterArbeidssteder: Boolean = true
     ) {
         val mottatteOpplysninger = hentMottatteOpplysninger(behandlingID).apply {
-            type = Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS
             mottatteOpplysningerData.periode = nySoeknad.periode
             mottatteOpplysningerData.soeknadsland = nySoeknad.soeknadsland
             mottatteOpplysningerData.juridiskArbeidsgiverNorge = nySoeknad.juridiskArbeidsgiverNorge
