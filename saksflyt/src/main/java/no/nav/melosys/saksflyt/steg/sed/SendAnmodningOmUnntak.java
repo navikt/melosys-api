@@ -26,16 +26,12 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.unntak.AnmodningUnntakKonstanter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.YTTERLIGERE_INFO_SED;
 
 @Component
 public class SendAnmodningOmUnntak extends AbstraktSendUtland {
-    private static final Logger log = LoggerFactory.getLogger(SendAnmodningOmUnntak.class);
-
     private final BrevBestiller brevBestiller;
     private final BehandlingService behandlingService;
     private final AnmodningsperiodeService anmodningsperiodeService;
@@ -92,30 +88,8 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
     }
 
     @Override
-    protected Boolean hentErFjernarbeidTWFA(Behandlingsresultat behandlingsresultat, Prosessinstans prosessinstans) {
-        Boolean fraAnmodningsperiode = behandlingsresultat.hentAnmodningsperiode().getErFjernarbeidTWFA();
-        if (fraAnmodningsperiode != null) {
-            return fraAnmodningsperiode;
-        }
-
-        // Kolonnen er null selv om saksbehandler svarte. Det skjer når periodene er redigert mellom anmodning og
-        // sending: lagreAnmodningsperioder sletter og gjenoppretter radene, og AnmodningsperiodeSkrivDto.til()
-        // bygger dem kun fra DTO-feltene — er_fjernarbeid_twfa følger ikke med. Ingenting sperrer for det i dette
-        // vinduet: både sendt_utland og Behandlingsstatus.ANMODNING_UNNTAK_SENDT settes lenger opp i utfør(), altså
-        // etter at vinduet er over. Feiler et tidligere steg, er vinduet timer eller dager til noen restarter.
-        //
-        // Prosessdataen overlever redigeringen, så den brukes som kilde. Uten dette ville A001 blitt sendt til
-        // utlandet uten rammeavtale-flagget.
-        Boolean fraProsessdata = prosessinstans.getData(ProsessDataKey.ER_FJERNARBEID_TWFA, Boolean.class);
-        if (fraProsessdata != null) {
-            // Fyll kolonnen tilbake. Fallbacken alene redder bare SED-en; kolonnen ville blitt stående null og saken
-            // forsvunnet ut av rapporteringstallene — som er hele grunnen til at kolonnen finnes. V170 kjører ikke
-            // på nytt.
-            log.info("Behandling {}: er_fjernarbeid_twfa var ikke satt på anmodningsperioden, leser {} fra "
-                + "prosessdataen og reparerer raden", behandlingsresultat.getId(), fraProsessdata);
-            anmodningsperiodeService.reparerManglendeErFjernarbeidTWFA(behandlingsresultat.getId(), fraProsessdata);
-        }
-        return fraProsessdata;
+    protected Boolean hentErFjernarbeidTWFA(Behandlingsresultat behandlingsresultat) {
+        return behandlingsresultat.hentAnmodningsperiode().getErFjernarbeidTWFA();
     }
 
     @Override

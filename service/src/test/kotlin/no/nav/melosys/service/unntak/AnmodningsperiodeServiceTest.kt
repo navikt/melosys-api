@@ -281,48 +281,41 @@ class AnmodningsperiodeServiceTest {
     }
 
     @Test
-    fun `reparerManglendeErFjernarbeidTWFA - kolonnen er null - settes og lagres`() {
-        // Reparasjonsstien fra SendAnmodningOmUnntak: uten denne blir raden stående null etter at
-        // fallbacken har reddet SED-en, og saken forsvinner ut av rapporteringstallene
-        val anmodningsperiode = anmodningsperiodeForTest { }
-        every { anmodningsperiodeRepository.findByBehandlingsresultatId(any<Long>()) } returns listOf(anmodningsperiode)
-        every { anmodningsperiodeRepository.save(anmodningsperiode) } returns anmodningsperiode
+    fun `lagreAnmodningsperioder - bevarer erFjernarbeidTWFA over slett og gjenopprett`() {
+        // Flagget settes ved anmodning, ikke i saksbehandlerens periodeskjema, og AnmodningsperiodeSkrivDto.til()
+        // kjenner kun skjemafeltene. Uten bevaringen ville en redigering mellom anmodning og sending nullet
+        // flagget, og saken forsvunnet ut av uttrekket for rammeavtale om fjernarbeid (MELOSYS-8150)
+        val behandlingsresultat = Behandlingsresultat.forTest { }
+        val eksisterende = anmodningsperiodeForTest { erFjernarbeidTWFA = true }
+        val innsendt = anmodningsperiodeForTest { fom = LocalDate.of(2024, 3, 1) }
+        every { anmodningsperiodeRepository.findByBehandlingsresultatId(any<Long>()) } returns listOf(eksisterende)
+        every { behandlingsresultatService.hentBehandlingsresultat(any<Long>()) } returns behandlingsresultat
+        every { anmodningsperiodeRepository.deleteByBehandlingsresultat(any()) } returns emptyList()
+        every { anmodningsperiodeRepository.flush() } returns Unit
+        every { anmodningsperiodeRepository.saveAll(any<Collection<Anmodningsperiode>>()) } returns listOf(innsendt)
 
 
-        anmodningsperiodeService.reparerManglendeErFjernarbeidTWFA(1L, true)
+        anmodningsperiodeService.lagreAnmodningsperioder(1L, listOf(innsendt))
 
 
-        anmodningsperiode.erFjernarbeidTWFA shouldBe true
-        verify { anmodningsperiodeRepository.save(anmodningsperiode) }
+        innsendt.erFjernarbeidTWFA shouldBe true
     }
 
     @Test
-    fun `reparerManglendeErFjernarbeidTWFA - kolonnen er allerede satt - no-op uten lagring`() {
-        // Reparasjon skal aldri overskrive saksbehandlerens svar, og skal ikke kaste — den kalles midt i
-        // sending av A001, og en exception her ville veltet hele sendingen i stedet for bare reparasjonen
-        val anmodningsperiode = anmodningsperiodeForTest { erFjernarbeidTWFA = false }
-        every { anmodningsperiodeRepository.findByBehandlingsresultatId(any<Long>()) } returns listOf(anmodningsperiode)
-
-
-        anmodningsperiodeService.reparerManglendeErFjernarbeidTWFA(1L, true)
-
-
-        anmodningsperiode.erFjernarbeidTWFA shouldBe false
-        verify(exactly = 0) { anmodningsperiodeRepository.save(any()) }
-    }
-
-    @Test
-    fun `reparerManglendeErFjernarbeidTWFA - ikke noeyaktig en anmodningsperiode - kaster`() {
+    fun `lagreAnmodningsperioder - ingen eksisterende perioder - erFjernarbeidTWFA forblir null`() {
+        val behandlingsresultat = Behandlingsresultat.forTest { }
+        val innsendt = anmodningsperiodeForTest { }
         every { anmodningsperiodeRepository.findByBehandlingsresultatId(any<Long>()) } returns emptyList()
+        every { behandlingsresultatService.hentBehandlingsresultat(any<Long>()) } returns behandlingsresultat
+        every { anmodningsperiodeRepository.deleteByBehandlingsresultat(any()) } returns emptyList()
+        every { anmodningsperiodeRepository.flush() } returns Unit
+        every { anmodningsperiodeRepository.saveAll(any<Collection<Anmodningsperiode>>()) } returns listOf(innsendt)
 
 
-        val exception = shouldThrow<FunksjonellException> {
-            anmodningsperiodeService.reparerManglendeErFjernarbeidTWFA(1L, true)
-        }
+        anmodningsperiodeService.lagreAnmodningsperioder(1L, listOf(innsendt))
 
 
-        exception.message shouldBe "Forventet én anmodningsperiode på behandling1, fant 0"
-        verify(exactly = 0) { anmodningsperiodeRepository.save(any()) }
+        innsendt.erFjernarbeidTWFA.shouldBeNull()
     }
 
     private fun lagAnmodningsperiode(

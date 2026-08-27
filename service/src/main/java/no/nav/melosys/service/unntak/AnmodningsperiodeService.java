@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Anmodningsperiode;
@@ -19,8 +20,6 @@ import no.nav.melosys.repository.AnmodningsperiodeSvarRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,8 +27,6 @@ import static org.springframework.util.StringUtils.hasText;
 
 @Service
 public class AnmodningsperiodeService {
-    private static final Logger log = LoggerFactory.getLogger(AnmodningsperiodeService.class);
-
     private final AnmodningsperiodeRepository anmodningsperiodeRepository;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final AnmodningsperiodeSvarRepository anmodningsperiodeSvarRepository;
@@ -82,10 +79,24 @@ public class AnmodningsperiodeService {
             }
         }
 
+        // Periodene slettes og gjenopprettes fra saksbehandlerens skjema, og AnmodningsperiodeSkrivDto.til() kjenner
+        // kun skjemafeltene. er_fjernarbeid_twfa settes derimot ved anmodning (registrerAnmodning), så uten dette
+        // ville en redigering mellom anmodning og sending nullet flagget — og saken forsvunnet ut av uttrekket for
+        // rammeavtale om fjernarbeid (MELOSYS-8150). Verken sperren over eller Behandling.erRedigerbar() dekker det
+        // vinduet: begge slår først inn inne i SendAnmodningOmUnntak.
+        Boolean erFjernarbeidTWFA = eksisterende.stream()
+            .map(Anmodningsperiode::getErFjernarbeidTWFA)
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElse(null);
+
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         anmodningsperiodeRepository.deleteByBehandlingsresultat(behandlingsresultat);
         anmodningsperiodeRepository.flush();
-        anmodningsperioder.forEach(a -> a.setBehandlingsresultat(behandlingsresultat));
+        anmodningsperioder.forEach(a -> {
+            a.setBehandlingsresultat(behandlingsresultat);
+            a.setErFjernarbeidTWFA(erFjernarbeidTWFA);
+        });
         return anmodningsperiodeRepository.saveAll(anmodningsperioder);
     }
 
@@ -115,29 +126,6 @@ public class AnmodningsperiodeService {
         }
 
         return anmodningsperioder.iterator().next();
-    }
-
-    /**
-     * Reparerer et manglende TWFA-flagg på anmodningsperioden. Kalles fra sendeveien når kolonnen er null, men
-     * prosessdataen har verdien — se {@code SendAnmodningOmUnntak.hentErFjernarbeidTWFA}.
-     * <p>
-     * No-op hvis flagget allerede er satt: dette er en reparasjonssti under SED-sending, og den skal verken kunne
-     * overskrive saksbehandlerens svar eller velte en A001 ved å kaste.
-     * <p>
-     * Eksplisitt {@code @Transactional} fordi kalleren er et saga-steg, der transaksjonen kommer fra
-     * {@code @Transactional(REQUIRES_NEW)} på {@code StegBehandler}-grensesnittet i en annen modul.
-     */
-    @Transactional
-    public void reparerManglendeErFjernarbeidTWFA(long behandlingID, boolean erFjernarbeidTWFA) {
-        var anmodningsperiode = hentFørsteAnmodningsperiode(behandlingID);
-        if (anmodningsperiode.getErFjernarbeidTWFA() != null) {
-            log.warn("Behandling {}: er_fjernarbeid_twfa er allerede satt til {}, reparerer ikke",
-                behandlingID, anmodningsperiode.getErFjernarbeidTWFA());
-            return;
-        }
-
-        anmodningsperiode.setErFjernarbeidTWFA(erFjernarbeidTWFA);
-        anmodningsperiodeRepository.save(anmodningsperiode);
     }
 
     private AnmodningsperiodeSvar lagreAnmodningsperiodeSvarMedLovvalgsperiode(Anmodningsperiode anmodningsperiode, AnmodningsperiodeSvar anmodningsperiodeSvar) {

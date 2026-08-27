@@ -56,7 +56,6 @@ class SendAnmodningOmUnntakTest {
         every { behandlingService.lagre(any()) } returns mockk()
         every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns mockk()
         every { anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(any()) } returns Unit
-        every { anmodningsperiodeService.reparerManglendeErFjernarbeidTWFA(any(), any()) } returns Unit
         every { eessiService.opprettOgSendSed(any<Long>(), any(), any(), any(), any(), any(), any()) } returns Unit
         every { brevBestiller.bestill(any()) } returns Unit
     }
@@ -150,29 +149,10 @@ class SendAnmodningOmUnntakTest {
     }
 
     @Test
-    fun `utfør lar anmodningsperioden vinne over prosessdataen`() {
-        // Kolonnen er kilden etter MELOSYS-8150. Prosessdataen skal kun brukes når kolonnen er null,
-        // ellers ville en utdatert prosessinstans kunne overstyre det saksbehandler faktisk huket av
-        val prosessinstans = lagProsessinstans {
-            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
-            medData(ProsessDataKey.ER_FJERNARBEID_TWFA, true)
-        }
-        val behandlingsresultat = lagBehandlingsresultatMedAnmodningsperiode { erFjernarbeidTWFA = false }
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
-
-        sendAnmodningOmUnntak.utfør(prosessinstans)
-
-        verify {
-            eessiService.opprettOgSendSed(
-                BEHANDLING_ID, listOf(MOTTAKER_INSTITSJON), BucType.LA_BUC_01, any(), null, null, false
-            )
-        }
-    }
-
-    @Test
-    fun `utfør faller tilbake til prosessdata naar kolonnen er null - erFjernarbeidTWFA true`() {
-        // Periodene er redigert mellom anmodning og sending: lagreAnmodningsperioder slettet og gjenopprettet
-        // raden uten flagget, men prosessdataen overlevde. Uten fallbacken ville A001 blitt sendt uten flagget
+    fun `utfør leser ikke erFjernarbeidTWFA fra prosessdataen`() {
+        // Kolonnen er eneste kilde etter MELOSYS-8150. lagreAnmodningsperioder bevarer flagget over
+        // slett-og-gjenopprett, så en null kolonne betyr at saksbehandler ikke svarte — da skal det heller ikke
+        // sendes en verdi til utlandet, selv om en gammel prosessinstans skulle ha nøkkelen liggende
         val prosessinstans = lagProsessinstans {
             medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
             medData(ProsessDataKey.ER_FJERNARBEID_TWFA, true)
@@ -184,68 +164,9 @@ class SendAnmodningOmUnntakTest {
 
         verify {
             eessiService.opprettOgSendSed(
-                BEHANDLING_ID,
-                listOf(MOTTAKER_INSTITSJON),
-                BucType.LA_BUC_01,
-                any(),
-                null,
-                null,
-                true
+                BEHANDLING_ID, listOf(MOTTAKER_INSTITSJON), BucType.LA_BUC_01, any(), null, null, null
             )
         }
-    }
-
-    @Test
-    fun `utfør faller tilbake til prosessdata naar kolonnen er null - erFjernarbeidTWFA false`() {
-        val prosessinstans = lagProsessinstans {
-            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
-            medData(ProsessDataKey.ER_FJERNARBEID_TWFA, false)
-        }
-        val behandlingsresultat = lagBehandlingsresultat()
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
-
-        sendAnmodningOmUnntak.utfør(prosessinstans)
-
-        verify {
-            eessiService.opprettOgSendSed(
-                BEHANDLING_ID,
-                listOf(MOTTAKER_INSTITSJON),
-                BucType.LA_BUC_01,
-                any(),
-                null,
-                null,
-                false
-            )
-        }
-    }
-
-    @Test
-    fun `utfør reparerer anmodningsperioden med fallback-verdien`() {
-        // Fallbacken redder SED-en, men uten tilbakeskrivingen ville raden blitt stående null og saken forsvunnet
-        // ut av rapporteringstallene. Ingen jobb backfiller på nytt etter at V170 har kjørt
-        val prosessinstans = lagProsessinstans {
-            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
-            medData(ProsessDataKey.ER_FJERNARBEID_TWFA, true)
-        }
-        val behandlingsresultat = lagBehandlingsresultat()
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
-
-        sendAnmodningOmUnntak.utfør(prosessinstans)
-
-        verify { anmodningsperiodeService.reparerManglendeErFjernarbeidTWFA(BEHANDLING_ID, true) }
-    }
-
-    @Test
-    fun `utfør reparerer ikke naar kolonnen allerede er satt`() {
-        val prosessinstans = lagProsessinstans {
-            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
-        }
-        val behandlingsresultat = lagBehandlingsresultatMedAnmodningsperiode { erFjernarbeidTWFA = false }
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
-
-        sendAnmodningOmUnntak.utfør(prosessinstans)
-
-        verify(exactly = 0) { anmodningsperiodeService.reparerManglendeErFjernarbeidTWFA(any(), any()) }
     }
 
     @Test
