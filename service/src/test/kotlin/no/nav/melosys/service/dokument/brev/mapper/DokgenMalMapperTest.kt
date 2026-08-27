@@ -443,6 +443,41 @@ internal class DokgenMalMapperTest {
     }
 
     @Test
+    fun skalMappeUkjentLandForVedtakOpphørtMedlemskap() {
+        val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true)).apply {
+            mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland.apply {
+                landkoder = emptyList()
+                isFlereLandUkjentHvilke = true
+            }
+        }
+
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata()
+        every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
+        every { mockDokgenMapperDatahenter.hentNorskPoststed(any()) } returns "Andeby"
+        every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.NO.kode) } returns Landkoder.NO.beskrivelse
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns Behandlingsresultat.forTest {
+            this.behandling = behandling
+            medlemskapsperiode { medlemskapstype = Medlemskapstyper.FRIVILLIG }
+        }
+
+        val brevbestilling = VedtakOpphoertMedlemskapBrevbestilling.Builder()
+            .medProduserbartdokument(Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP)
+            .medBehandling(behandling)
+            .medOrg(DokgenTestData.lagOrg())
+            .medKontaktopplysning(DokgenTestData.lagKontaktOpplysning())
+            .medForsendelseMottatt(Instant.now())
+            .medOpphørtBegrunnelseFritekst("Dummy")
+            .medOpphørtDato(LocalDate.now())
+            .build()
+
+        dokgenMalMapper.mapBehandling(
+            brevbestilling,
+            DokgenTestData.lagMottaker(Mottakerroller.BRUKER)
+        ).shouldBeInstanceOf<VedtakOpphoertMedlemskap>()
+            .land.shouldBe(listOf("UKJENT"))
+    }
+
+    @Test
     fun skalMappeVarselManglendeOpplysningerTilBrukerMedRiktigMedlemskapstype() {
         every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata()
         every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()

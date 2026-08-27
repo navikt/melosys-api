@@ -83,7 +83,13 @@ class DokgenMalMapper(
 
     private fun hentLandForVedtakOpphoertMedlemskap(behandlingsresultat: Behandlingsresultat): List<String> {
         val mottatteOpplysningerData = behandlingsresultat.hentBehandling().mottatteOpplysninger?.mottatteOpplysningerData
-        return mottatteOpplysningerData?.soeknadsland?.landkoder?.map(dokgenMapperDatahenter::hentLandnavnFraLandkode) ?: emptyList()
+        val soeknadsland = mottatteOpplysningerData?.soeknadsland ?: return emptyList()
+
+        return if (soeknadsland.isFlereLandUkjentHvilke) {
+            listOf("UKJENT")
+        } else {
+            soeknadsland.landkoder.map(dokgenMapperDatahenter::hentLandnavnFraLandkode)
+        }
     }
 
     internal fun lagIkkeYrkesaktivVedtaksbrev(brevbestilling: IkkeYrkesaktivBrevbestilling): IkkeYrkesaktivVedtaksbrev {
