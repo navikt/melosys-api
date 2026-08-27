@@ -133,7 +133,7 @@ kall med flere, skal ikke selen slås av for de øvrige.
 | `rader` | Samme kolonner som Q4a ga: behandlingsresultat-id, `beh_type`, resultattype, kommende vedtaksdato, klagefrist og vedtakstype. |
 | `utenMetadataPerSak` | Q6a-etterkontrollen per sak, slik det står *nå*. I preview er den lik antall funne rader; etter en vellykket skarp kjøring skal den være tom. |
 | `ukjentBehType` | Kandidater der vedtakstypen ikke kan utledes trygt. Er den ikke tom, avvises skarp kjøring. |
-| `sorteringspåvirkning` | Per sak: bytter patchen ut hvilken behandling som er nyest i vedtaksdato-sorteringen. Se seksjon 5. Feltet `nyesteFørErPatchet` sier om raden vi sammenligner mot selv ble satt inn av en tidligere kjøring — da er sammenligningen proxy mot proxy, og `patchenVinnerNyeste: false` er ikke et frikjenn. `ekteDatoer` inneholder kun datoer som faktisk stammer fra et vedtak. |
+| `sorteringspåvirkning` | Per sak: bytter patchen ut hvilken behandling som er nyest i vedtaksdato-sorteringen. Se seksjon 5. `patchenVinnerNyeste` er det eneste feltet som avgjør om skarp kjøring blokkeres; de tre datolistene (`ekteDatoer`, `usikreDatoer`, `patchedeDatoer`) er rapport. `patchenBlirNyesteIHeleSaken` sier om kjøringen endrer hvilken behandling som er nyest i det hele tatt — den blokkerer ikke, men logges alltid. |
 | `saksnummerUtenKandidater` | Saksnummer fra requesten som ikke ga én eneste kandidatrad — skrivefeil, eller sak uten defekte rader. Blokkerer ikke, men skal ses på når du trodde saken skulle fikses. |
 | `kvitteringerUtenTreff` | Saksnummer sendt i `tillatSorteringsendring` som ikke tilsvarer noen sak der patchen faktisk kaprer — typisk en skrivefeil i kvitteringen. Nevnes også i avvisningsmeldingen. |
 | `avvik` | True hvis antall innsatte rader ikke stemmer med forhåndsvisningen — da beskriver `rader` kandidatene, ikke det som faktisk ble skrevet. |
@@ -246,9 +246,21 @@ Derfor rapporterer endepunktet `sorteringspåvirkning` per sak og **avviser skar
 patchen ville tatt nyeste-plassen, med mindre saksnummeret listes i `tillatSorteringsendring`.
 I arbeidsøkta ble dette gjort for hånd, sak for sak; selen automatiserer den kontrollen.
 
-Har saken **ingen** ekte vedtaksdato i det hele tatt (`ingenSammenligningsgrunnlag: true`, `ekteDatoer` tom), blokkerer selen ikke: da kommer alle datoene fra samme klokke, den interne rekkefølgen er konsistent, og det finnes ikke noe ekte vedtak å fortrenge. Det gjelder også etter en tidligere kjøring, der radene den satte inn bærer proxy-datoer.
+### Én mengde styrer én beslutning
 
-Motsatt vei: skriver noen en ekte vedtaksdato oppå en patch-rad — som er nettopp remedien selen anbefaler — regnes raden som ekte igjen. Flagget bruker samme definisjon av «fortsatt urørt patch» som angreknappen (markør i **både** `registrert_av` og `endret_av`), ellers ville remedien vært uten virkning.
+Selen sammenligner **kun** mot datoer som kan stamme fra et vedtak. Radene deles i tre etter hva auditfeltene faktisk kan fortelle:
+
+| Kategori | Kjennetegn | Teller i selen? |
+|---|---|---|
+| `ekteDatoer` | `registrert_av` er ikke markøren — raden ble ikke laget av fiksen | Ja |
+| `usikreDatoer` | Laget av fiksen, men skrevet til siden (`endret_av` er flyttet) | Ja — konservativt |
+| `patchedeDatoer` | Laget av fiksen og urørt siden | **Nei** — beviselig vår egen proxy |
+
+`endret_av` er `@LastModifiedBy` og flyttes av *enhver* skriving, ikke bare av at noen setter en ekte vedtaksdato. Vi kan derfor skille «beviselig vår proxy» fra «noen har rørt den siden», men ikke avgjøre om det som ble skrevet var datoen. Den upresisheten er ufarlig fordi den ikke styrer om prod endres: usikre rader regnes med i seleunderlaget, og rapporteres for seg.
+
+Har saken ingen dato i noen av de to første kategoriene, er `nyesteSammenlignbareId` null og kjøringen slipper gjennom: det finnes ikke noe vedtak å fortrenge, alle datoene kommer fra samme klokke, og den interne rekkefølgen blir konsistent. Rader uten `vedtak_dato` teller ikke som sammenligningsgrunnlag i noen kategori — `ÅrsavregningService` sorterer dem først, altså som de eldste, så de vinner aldri.
+
+Kjøringen logger uansett hver sak der patchen blir nyeste rad (`patchenBlirNyesteIHeleSaken`), også når selen slipper den gjennom, slik at en kjøring kan rekonstrueres i ettertid.
 
 To ting å merke seg om selen:
 

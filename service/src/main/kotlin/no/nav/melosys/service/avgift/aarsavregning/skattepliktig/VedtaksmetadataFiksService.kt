@@ -41,8 +41,12 @@ class VedtaksmetadataFiksService {
 
     /** Q4a — read-only preview av nøyaktig hvilke rader [utfør] vil sette inn. */
     @Transactional(readOnly = true)
-    fun forhåndsvis(saksnummer: List<String>): VedtaksmetadataFiksResultat {
+    fun forhåndsvis(
+        saksnummer: List<String>,
+        tillatSorteringsendring: List<String> = emptyList(),
+    ): VedtaksmetadataFiksResultat {
         val kandidater = hentKandidater(saksnummer)
+        val påvirkning = sorteringspåvirkning(saksnummer)
         return VedtaksmetadataFiksResultat(
             skarp = false,
             saksnummer = saksnummer,
@@ -51,8 +55,9 @@ class VedtaksmetadataFiksService {
             rader = kandidater,
             utenMetadataPerSak = tellUtenMetadata(saksnummer),
             ukjentBehType = kandidater.filterNot { it.behType in KJENTE_BEH_TYPER }.map { it.behandlingsresultatId },
-            sorteringspåvirkning = sorteringspåvirkning(saksnummer),
+            sorteringspåvirkning = påvirkning,
             saksnummerUtenKandidater = finnSaksnummerUtenKandidater(saksnummer, kandidater),
+            kvitteringerUtenTreff = finnKvitteringerUtenTreff(tillatSorteringsendring, påvirkning),
         )
     }
 
@@ -109,33 +114,34 @@ class VedtaksmetadataFiksService {
         // Måles her: etter de andre selene (ingen bortkastede spørringer på en kjøring som avvises),
         // men før INSERT-en — etterpå er patch-radene ekte rader, og «før»-bildet kan ikke gjenskapes.
         val påvirkning = sorteringspåvirkning(saksnummer)
-        // Selen finnes for å hindre at en oppdiktet dato fortrenger et ekte vedtak. Har saken ingen
-        // ekte vedtaksdato i det hele tatt, er det ingenting å fortrenge: alle datoene kommer fra
-        // samme klokke, den interne rekkefølgen er konsistent, og å tvinge operatøren til å kvittere
-        // ut det tilfellet ville lært dem opp i å kvittere ut selen generelt.
-        val kaprer = påvirkning.filter { it.patchenVinnerNyeste && !it.ingenSammenligningsgrunnlag }
+        // Ett felt avgjør. patchenVinnerNyeste er sant hvis og bare hvis patchen legger seg på eller
+        // over den nyeste datoen som kan være et ekte vedtak — se sorteringspåvirkning for hvorfor
+        // det underlaget er det eneste selen måler mot.
+        val kaprer = påvirkning.filter { it.patchenVinnerNyeste }
         val ikkeKvittert = kaprer.filterNot { it.saksnummer in tillatSorteringsendring }
-        // En kvittering som ikke traff noen kapret sak er nesten alltid en skrivefeil, og uten dette
-        // feltet er den usynlig: operatøren ser bare at kjøringen ble avvist, og kan ikke lese ut av
-        // svaret hvilken oppføring som var feil. Blokkerer ikke — ikkeKvittert gjør allerede det.
-        val kvitteringerUtenTreff = tillatSorteringsendring.filterNot { sak -> kaprer.any { it.saksnummer == sak } }
+        val kvitteringerUtenTreff = finnKvitteringerUtenTreff(tillatSorteringsendring, påvirkning)
         if (ikkeKvittert.isNotEmpty()) {
             throw VedtaksmetadataFiksAvvist(
                 "Patchen ville tatt nyeste-plassen i vedtaksdato-sorteringen for " +
-                    ikkeKvittert.joinToString { "${it.saksnummer} (${it.nyestePatchetDato} mot ${it.nyesteFørDato})" } +
+                    ikkeKvittert.joinToString { "${it.saksnummer} (${it.nyesteKandidatDato} mot ${it.nyesteSammenlignbareDato})" } +
                     ". Da bytter ÅrsavregningService hvilken behandling avgiftsgrunnlaget hentes fra. " +
                     "Sett ekte vedtaksdato manuelt, eller list saksnummeret i tillatSorteringsendring " +
                     "hvis endringen er vurdert og ønsket." +
                     if (kvitteringerUtenTreff.isEmpty()) "" else
-                        " Merk at disse kvitteringene ikke traff noen kapret sak: $kvitteringerUtenTreff."
+                        " Merk at disse kvitteringene ikke traff noen sak som kaprer: $kvitteringerUtenTreff."
             )
         }
 
-        kaprer.forEach {
+        // Logges uavhengig av selen. Fortrenger patchen kun en tidligere patch, slipper den gjennom —
+        // men den endrer fortsatt hvilken behandling som er nyest, og det er nettopp det man vil finne
+        // igjen i loggen når en kjøring skal rekonstrueres.
+        påvirkning.filter { it.patchenBlirNyesteIHeleSaken }.forEach {
             log.warn {
-                "Datafiks $PATCH_MARKØR: sak ${it.saksnummer} patches selv om en patchet rad " +
-                    "(behandlingsresultat ${it.nyestePatchetId}, ${it.nyestePatchetDato}) tar nyeste-plassen " +
-                    "fra ${it.nyesteFørId} (${it.nyesteFørDato}) — kvittert ut i tillatSorteringsendring."
+                "Datafiks $PATCH_MARKØR: sak ${it.saksnummer} — behandlingsresultat ${it.nyesteKandidatId} " +
+                    "(${it.nyesteKandidatDato}) blir nyeste rad i saken. Nyeste mulig ekte dato før: " +
+                    "${it.nyesteSammenlignbareDato ?: "ingen"} (${it.nyesteSammenlignbareId ?: "-"}). " +
+                    if (it.patchenVinnerNyeste) "Kvittert ut i tillatSorteringsendring."
+                    else "Fortrenger ingen dato som kan være ekte."
             }
         }
 
@@ -257,6 +263,21 @@ class VedtaksmetadataFiksService {
         return saksnummer.filterNot { it in truffet }
     }
 
+    /**
+     * Kvitteringer i `tillatSorteringsendring` som ikke tilsvarer noen sak der selen faktisk slår ut.
+     *
+     * Nesten alltid en skrivefeil, og ellers usynlig: operatøren ser bare at kjøringen ble avvist, og
+     * kan ikke lese ut av svaret hvilken oppføring som var feil. Beregnes også i forhåndsvisningen —
+     * en skrivefeil-detektor som først fyrer på kjøringen som endrer prod er lite verdt.
+     */
+    private fun finnKvitteringerUtenTreff(
+        tillatSorteringsendring: List<String>,
+        påvirkning: List<SorteringspåvirkningRad>,
+    ): List<String> {
+        val kaprer = påvirkning.filter { it.patchenVinnerNyeste }.map { it.saksnummer }.toSet()
+        return tillatSorteringsendring.distinct().filterNot { it in kaprer }
+    }
+
     @Suppress("UNCHECKED_CAST")
     private fun hentKandidater(saksnummer: List<String>): List<VedtaksmetadataFiksRad> {
         if (saksnummer.isEmpty()) return emptyList()
@@ -279,23 +300,28 @@ class VedtaksmetadataFiksService {
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
     /**
      * Viser hva patchen gjør med vedtaksdato-sorteringen, per sak.
      *
      * `vedtak_dato` er ikke dekorasjon: `ÅrsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning`
      * sorterer på den og plukker den siste som `sisteBehandlingsresultatMedAvgift` — altså behandlingen
      * avgiftsgrunnlaget hentes fra. Fiksen bruker `endret_dato` som proxy, og den er `@LastModifiedDate`:
-     * alltid ≥ ekte vedtaksdato, og den driver videre for hver senere skriving på raden. Patchede rader
-     * ser derfor systematisk nyere ut enn de er, mens radene som ikke patches beholder ekte dato —
-     * sorteringen sammenligner to ulike klokker.
+     * alltid ≥ ekte vedtaksdato. Patchede rader ser derfor systematisk nyere ut enn de er.
+     *
+     * **Én mengde styrer én beslutning.** Selen finnes for å hindre at en oppdiktet dato fortrenger et
+     * vedtak som kan være ekte, og sammenligner derfor kun mot [Datoopphav.EKTE] og
+     * [Datoopphav.PATCHET_ENDRET] — datoene som *kan* stamme fra et vedtak. Rader vi selv satte inn og
+     * som ingen har rørt siden er beviselig vår egen proxy; de rapporteres, men styrer ingenting.
+     *
+     * Det var nettopp blandingen som gjorde de tre foregående rundene med fikser til nye feil: ett felt
+     * målte over alle rader, et annet over bare de ekte, og selen var en `&&` av begge. Nå er
+     * [SorteringspåvirkningRad.patchenVinnerNyeste] alene nok til å avgjøre, og de øvrige feltene er
+     * rapport.
      *
      * Merk hva dette *ikke* er: ingen simulering av avgiftsgrunnlaget. Den faktiske utvelgelsen filtrerer
-     * også på år, periodeoverlapp og trygdeavgiftsperioder, og sammenligningen her er global maks mot
-     * global maks. [SorteringspåvirkningRad.patchenVinnerNyeste] `true` er derfor en pålitelig grunn
-     * til å stoppe, mens `false` ikke er et frikjenn: taper patchen mot en rad som årsfilteret luker
-     * bort, kan den fortsatt vinne der det teller. Derfor listes alle ekte-daterte rader i
-     * [SorteringspåvirkningRad.ekteDatoer], slik at operatøren kan se hva patchen faktisk slår.
+     * også på år og periodeoverlapp, og sammenligningen her er global maks mot global maks. `true` er
+     * derfor en pålitelig grunn til å stoppe, mens `false` ikke er et frikjenn: taper patchen mot en rad
+     * som årsfilteret luker bort, kan den fortsatt vinne der det teller. Derfor listes alle datoene.
      *
      * Saker uten kandidater er ikke med i lista — send N saksnummer og du kan få M ≤ N rader. Bruk
      * [VedtaksmetadataFiksResultat.utenMetadataPerSak] for å krysskontrollere.
@@ -303,46 +329,49 @@ class VedtaksmetadataFiksService {
     private fun sorteringspåvirkning(saksnummer: List<String>): List<SorteringspåvirkningRad> {
         if (saksnummer.isEmpty()) return emptyList()
 
-        val før = raderPerSak(EKSISTERENDE_NYESTE_SQL, saksnummer, medMarkoer = true)
-        val patchet = raderPerSak(PATCH_NYESTE_SQL, saksnummer, medMarkoer = false)
+        val eksisterendePerSak = raderPerSak(EKSISTERENDE_NYESTE_SQL, saksnummer, medMarkoer = true)
+        val kandidaterPerSak = raderPerSak(PATCH_NYESTE_SQL, saksnummer, medMarkoer = false)
 
-        return patchet.keys.sorted().map { sak ->
-            val eksisterende = før[sak].orEmpty()
-            // Rader uten vedtaksdato: ÅrsavregningService sorterer dem først i stigende rekkefølge,
-            // altså som de eldste — de vinner aldri .lastOrNull(). De er derfor ikke noe
-            // sammenligningsgrunnlag, og skal ikke telle som «nyeste før».
-            val nyesteFør = eksisterende.firstOrNull { it.sortering != null }
-            val nyestePatchet = patchet.getValue(sak).first()
-            // Kun datoer som faktisk stammer fra et vedtak. En rad en tidligere kjøring patchet
-            // bærer vår egen proxy-dato, og hører ikke hjemme her.
-            val ekteDatoer = eksisterende.filterNot { it.erPatchet }.mapNotNull { it.visning }
+        return kandidaterPerSak.keys.sorted().map { sak ->
+            val eksisterende = eksisterendePerSak[sak].orEmpty()
+            val nyesteKandidat = kandidaterPerSak.getValue(sak).first()
+
+            fun datoer(opphav: Datoopphav) =
+                eksisterende.filter { it.opphav == opphav }.mapNotNull { it.visning }
+
+            // Grunnlaget selen måler mot: alt som kan være en ekte vedtaksdato. Rader uten dato er
+            // ikke med — ÅrsavregningService sorterer dem først i stigende rekkefølge, altså som de
+            // eldste, så de vinner aldri .lastOrNull() og er ikke noe sammenligningsgrunnlag.
+            val nyesteSammenlignbare = eksisterende
+                .filter { it.opphav != Datoopphav.PATCHET_URØRT && it.sortering != null }
+                .maxByOrNull { it.sortering!! }
 
             SorteringspåvirkningRad(
                 saksnummer = sak,
-                nyesteFørId = nyesteFør?.behandlingsresultatId,
-                nyesteFørDato = nyesteFør?.visning,
-                // Rader en tidligere kjøring patchet er ekte rader i tabellen og teller i
-                // sorteringen, men datoen deres er vår egen proxy. Da sammenlignes proxy mot proxy,
-                // og operatøren skal se det — ellers leses svaret som en frikjennelse.
-                nyesteFørErPatchet = nyesteFør?.erPatchet == true,
-                nyestePatchetId = nyestePatchet.behandlingsresultatId,
-                nyestePatchetDato = nyestePatchet.visning,
+                nyesteKandidatId = nyesteKandidat.behandlingsresultatId,
+                nyesteKandidatDato = nyesteKandidat.visning,
+                nyesteSammenlignbareId = nyesteSammenlignbare?.behandlingsresultatId,
+                nyesteSammenlignbareDato = nyesteSammenlignbare?.visning,
                 // >= og ikke >: ved eksakt likt tidsstempel er utfallet i den ekte sorteringen
                 // vilkårlig (stabil sortering på behandlingsrekkefølgen), og et myntkast skal
                 // flagges, ikke rapporteres som «patchen taper».
-                patchenVinnerNyeste = nyesteFør != null &&
-                    requireNotNull(nyestePatchet.sortering) >= nyesteFør.sortering!!,
-                // Måles på ekteDatoer, ikke på `nyesteFør == null`: etter at nyesteFør begynte å
-                // inkludere patch-rader ville den gamle definisjonen rapportert «det finnes et
-                // sammenligningsgrunnlag» i nettopp den saken der alle datoene er vår egen proxy —
-                // altså det tilfellet feltet er laget for å peke ut som det tryggeste.
-                ingenSammenligningsgrunnlag = ekteDatoer.isEmpty(),
-                ekteDatoer = ekteDatoer,
+                patchenVinnerNyeste = nyesteSammenlignbare != null &&
+                    requireNotNull(nyesteKandidat.sortering) >= nyesteSammenlignbare.sortering!!,
+                // Uavhengig av selen: havner patchen øverst blant ALLE rader, endrer kjøringen
+                // hvilken behandling som er nyest — også når den kun fortrenger en tidligere patch.
+                // Logges alltid, slik at en kjøring kan rekonstrueres i ettertid.
+                patchenBlirNyesteIHeleSaken = eksisterende
+                    .mapNotNull { it.sortering }
+                    .maxOrNull()
+                    ?.let { requireNotNull(nyesteKandidat.sortering) >= it } ?: true,
+                ekteDatoer = datoer(Datoopphav.EKTE),
+                usikreDatoer = datoer(Datoopphav.PATCHET_ENDRET),
+                patchedeDatoer = datoer(Datoopphav.PATCHET_URØRT),
             )
         }
     }
 
-    /** Alle rader per sak, nyest først. */
+    /** Alle rader per sak. */
     @Suppress("UNCHECKED_CAST")
     private fun raderPerSak(sql: String, saksnummer: List<String>, medMarkoer: Boolean): Map<String, List<SortertRad>> {
         val query = entityManager.createNativeQuery(sql)
@@ -357,26 +386,55 @@ class VedtaksmetadataFiksService {
                     behandlingsresultatId = (rad[1] as Number).toLong(),
                     visning = rad[2] as String?,
                     sortering = rad[3] as String?,
-                    erPatchet = (rad[4] as Number).toInt() == 1,
+                    opphav = Datoopphav.av((rad[4] as Number).toInt()),
                 )
             }
             .groupBy { it.saksnummer }
     }
 
     /**
+     * Hvor datoen på en `vedtak_metadata`-rad kommer fra — det eneste vi kan lese ut av auditfeltene.
+     *
+     * `registrert_av` er `@CreatedBy` og settes kun ved insert, så den forteller pålitelig om raden ble
+     * laget av denne fiksen. `endret_av` er `@LastModifiedBy` og flyttes av *enhver* senere skriving —
+     * ikke bare av at noen setter en ekte vedtaksdato. Derfor kan vi skille «beviselig vår proxy» fra
+     * «noen har rørt den siden», men ikke avgjøre om det som ble skrevet faktisk var vedtaksdatoen.
+     *
+     * Den upresisheten er ufarlig så lenge den ikke styrer om prod endres: [PATCHET_ENDRET] regnes med i
+     * seleunderlaget, altså konservativt, og rapporteres for seg slik at operatøren ser forskjellen.
+     */
+    private enum class Datoopphav {
+        /** Raden ble ikke laget av fiksen. Datoen er en ekte vedtaksdato. */
+        EKTE,
+
+        /** Laget av fiksen og urørt siden. Datoen er beviselig vår egen proxy. */
+        PATCHET_URØRT,
+
+        /** Laget av fiksen, men skrevet til siden. Kan være korrigert til en ekte dato — vi vet ikke. */
+        PATCHET_ENDRET,
+        ;
+
+        companion object {
+            fun av(kode: Int) = when (kode) {
+                0 -> EKTE
+                1 -> PATCHET_URØRT
+                else -> PATCHET_ENDRET
+            }
+        }
+    }
+
+    /**
      * [visning] er lesbar for operatøren; [sortering] har mikrosekunder og er den som sammenlignes.
      * Begge er null når raden ikke har vedtaksdato — kolonnen er nullbar.
-     *
-     * [erPatchet] er true når raden ble satt inn av en tidligere kjøring av denne fiksen, altså når
-     * datoen er vår egen proxy og ikke en ekte vedtaksdato.
      */
     private data class SortertRad(
         val saksnummer: String,
         val behandlingsresultatId: Long,
         val visning: String?,
         val sortering: String?,
-        val erPatchet: Boolean,
+        val opphav: Datoopphav,
     )
+
 
     private fun hentAngreKandidater(saksnummer: List<String>): List<VedtaksmetadataAngreRad> {
         val sql = if (saksnummer.isEmpty()) ANGRE_KANDIDAT_SQL else ANGRE_KANDIDAT_SQL + ANGRE_KANDIDAT_SAKSFILTER
@@ -539,7 +597,11 @@ class VedtaksmetadataFiksService {
                    br.behandling_id,
                    TO_CHAR(vm.vedtak_dato, 'YYYY-MM-DD HH24:MI:SS'),
                    TO_CHAR(vm.vedtak_dato, 'YYYY-MM-DD HH24:MI:SS.FF6'),
-                   CASE WHEN vm.registrert_av = :markoer AND vm.endret_av = :markoer THEN 1 ELSE 0 END
+                   CASE
+                       WHEN vm.registrert_av IS NULL OR vm.registrert_av <> :markoer THEN 0
+                       WHEN vm.endret_av = :markoer THEN 1
+                       ELSE 2
+                   END
             FROM behandling b
             JOIN behandlingsresultat br ON br.behandling_id = b.id
             JOIN vedtak_metadata vm ON vm.behandlingsresultat_id = br.behandling_id
@@ -629,47 +691,46 @@ data class VedtaksmetadataFiksRad(
 /**
  * Hva patchen gjør med vedtaksdato-sorteringen for én sak.
  *
- * [patchenVinnerNyeste] = true betyr at en oppdiktet dato legger seg øverst i sorteringen og bytter
- * hvilken behandling `ÅrsavregningService` regner som nyest. Da skal saken ha ekte vedtaksdato satt
- * manuelt før den patches — ikke kjøres skarpt.
+ * Feltene er bevisst uten overlapp: [patchenVinnerNyeste] er den ENESTE som avgjør om skarp kjøring
+ * blokkeres. De tre datolistene er rapport, og summen av dem er alle daterte rader saken har. At to
+ * felt målte over hvert sitt underlag og ble kombinert i selen er nøyaktig det som gjorde tre runder
+ * med fikser til nye feil.
  */
 data class SorteringspåvirkningRad(
     val saksnummer: String,
-    /** Null når saken ikke har én eneste datert rad å sammenligne mot. */
-    val nyesteFørId: Long?,
-    val nyesteFørDato: String?,
+    /** Raden patchen vil skrive — den nyeste av kandidatene i saken, med datoen den får. */
+    val nyesteKandidatId: Long,
+    val nyesteKandidatDato: String?,
     /**
-     * Raden vi sammenligner mot ble selv satt inn av en tidligere kjøring av denne fiksen og er
-     * fortsatt urørt, så [nyesteFørDato] er en proxy og ikke en ekte vedtaksdato. Sammenligningen er
-     * da proxy mot proxy: [patchenVinnerNyeste] `false` betyr bare at den nye patchen taper mot en
-     * dato vi selv fant på.
-     *
-     * Skriver noen en ekte vedtaksdato på raden, blir den regnet som ekte igjen — flagget bruker
-     * samme definisjon av «fortsatt urørt patch» som angreknappen (markør i BÅDE `registrert_av` og
-     * `endret_av`). Uten det ville remedien selen selv anbefaler — sett ekte vedtaksdato manuelt —
-     * aldri kunne fjerne flagget.
+     * Nyeste daterte rad som *kan* være et ekte vedtak ([ekteDatoer] og [usikreDatoer] under).
+     * Null betyr at saken ikke har noen slik rad — da er det ingenting å fortrenge, og selen slipper
+     * kjøringen gjennom. Det er det tryggeste tilfellet, ikke det farligste: alle datoene i saken
+     * kommer da fra samme klokke, så den interne rekkefølgen er konsistent.
      */
-    val nyesteFørErPatchet: Boolean = false,
-    val nyestePatchetId: Long,
-    val nyestePatchetDato: String?,
-    /** True også ved eksakt likt tidsstempel — da er utfallet vilkårlig, og det skal flagges. */
+    val nyesteSammenlignbareId: Long?,
+    val nyesteSammenlignbareDato: String?,
+    /**
+     * Patchen legger seg på eller over [nyesteSammenlignbareDato], altså kan den fortrenge et vedtak
+     * som er ekte. True også ved eksakt likt tidsstempel — da er utfallet vilkårlig, og det skal
+     * flagges. **Blokkerer skarp kjøring med mindre saksnummeret er kvittert ut.**
+     */
     val patchenVinnerNyeste: Boolean,
     /**
-     * Saken har ingen rad med ekte vedtaksdato — [ekteDatoer] er tom. Da er ikke dette det farlige
-     * tilfellet, men det tryggeste: alle datoene kommer fra samme klokke etter patchen, så den
-     * interne rekkefølgen er konsistent. Skarp kjøring blokkeres derfor ikke av sorteringsselen i
-     * dette tilfellet, selv om [patchenVinnerNyeste] er `true` — det er ingen ekte vedtaksdato å
-     * fortrenge. Eget felt nettopp for at det ikke skal forveksles med [patchenVinnerNyeste].
+     * Patchen blir nyeste rad i saken sett mot ALLE rader, også de vi selv satte inn tidligere.
+     * Blokkerer ikke — fortrenger den bare en tidligere patch, er det ingen ekte dato som ryker — men
+     * kjøringen endrer likevel hvilken behandling `ÅrsavregningService` regner som nyest, så den logges.
      */
-    val ingenSammenligningsgrunnlag: Boolean = false,
-    /**
-     * Vedtaksdatoene i saken som faktisk stammer fra et vedtak, nyest først — rader fra tidligere
-     * kjøringer av denne fiksen er holdt utenfor. [patchenVinnerNyeste] sammenligner mot den nyeste
-     * daterte raden (patchet eller ikke, jf. [nyesteFørErPatchet]), mens den ekte utvelgelsen først
-     * filtrerer på år og periodeoverlapp — taper patchen mot en rad som blir luket bort, kan den
-     * likevel vinne der det teller. Disse datoene er materialet for å se det.
-     */
+    val patchenBlirNyesteIHeleSaken: Boolean,
+    /** Datoer fra rader fiksen ikke har laget. Disse er ekte vedtaksdatoer. */
     val ekteDatoer: List<String> = emptyList(),
+    /**
+     * Datoer fra rader fiksen laget, men som noen har skrevet til siden. Kan være korrigert til en
+     * ekte vedtaksdato — `endret_av` er `@LastModifiedBy` og flyttes av enhver skriving, så vi kan
+     * ikke vite det. Regnes med i seleunderlaget, altså konservativt.
+     */
+    val usikreDatoer: List<String> = emptyList(),
+    /** Datoer fra rader fiksen laget og ingen har rørt. Beviselig vår egen proxy — styrer ingenting. */
+    val patchedeDatoer: List<String> = emptyList(),
 )
 
 data class VedtaksmetadataFiksResultat(

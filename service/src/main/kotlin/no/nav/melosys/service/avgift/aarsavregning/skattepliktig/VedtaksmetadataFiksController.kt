@@ -48,9 +48,13 @@ class VedtaksmetadataFiksController(
             "true for en sak, avvises skarp kjøring: sett ekte vedtaksdato manuelt, eller list " +
             "saksnummeret i tillatSorteringsendring hvis endringen er vurdert — det kvitterer ut " +
             "saken, ikke selen, så de øvrige sakene i kallet er fortsatt beskyttet. " +
-            "Merk at false ikke er et " +
+            "Selen måler kun mot datoer som kan være ekte vedtak (ekteDatoer og usikreDatoer); rader " +
+            "en tidligere kjøring satte inn og ingen har rørt siden (patchedeDatoer) er beviselig vår " +
+            "egen proxy og styrer ingenting. Har saken ingen dato som kan være ekte, er " +
+            "nyesteSammenlignbareId null og kjøringen slipper gjennom — da er det ingenting å " +
+            "fortrenge. Merk at false ikke er et " +
             "frikjenn — sammenligningen er global maks mot global maks, mens den ekte utvelgelsen " +
-            "først filtrerer på år og periodeoverlapp. Se ekteDatoer for hva patchen faktisk slår."
+            "først filtrerer på år og periodeoverlapp. Se datolistene for hva patchen faktisk slår."
     )
     @PostMapping("/vedtaksmetadata-fiks")
     fun vedtaksmetadataFiks(
@@ -61,6 +65,9 @@ class VedtaksmetadataFiksController(
         val saksnummer = if (request.skarp) request.saksnummer else request.saksnummer.ifEmpty { VedtaksmetadataFiksService.STANDARD_SAKER }
 
         valider(saksnummer)?.let { return it }
+        // Kvitteringene er saksnummer og skal gjennom samme formatsele. Uten dette ble søppel ekkoet
+        // rett tilbake i kvitteringerUtenTreff.
+        valider(request.tillatSorteringsendring)?.let { return it }
 
         log.info {
             "Datafiks vedtaksmetadata (${if (request.skarp) "SKARP" else "PREVIEW"}) for saker $saksnummer"
@@ -74,7 +81,7 @@ class VedtaksmetadataFiksController(
                     request.tillatSorteringsendring,
                 )
             } else {
-                vedtaksmetadataFiksService.forhåndsvis(saksnummer)
+                vedtaksmetadataFiksService.forhåndsvis(saksnummer, request.tillatSorteringsendring)
             }
             ResponseEntity.ok(resultat)
         } catch (e: VedtaksmetadataFiksAvvist) {
