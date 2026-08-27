@@ -2,6 +2,7 @@ package no.nav.melosys.itest
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.collections.shouldBeEmpty
+import org.hamcrest.Matchers.containsString
 import io.kotest.matchers.collections.shouldContainExactly
 import no.nav.melosys.Application
 import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.VedtaksmetadataFiksService.Companion.PATCH_MARKØR
@@ -170,12 +171,12 @@ class VedtaksmetadataFiksIT(
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.antallRaderFunnet").value(1))
             .andExpect(jsonPath("$.antallSlettet").value(0))
-            .andExpect(jsonPath("$.antallEndretEtterpå").value(1))
+            .andExpect(jsonPath("$.antallSomIkkeKanAngres").value(1))
 
         kall(angreUrl, """{"saksnummer":["MEL-907"],"skarp":true}""")
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.antallSlettet").value(1))
-            .andExpect(jsonPath("$.antallEndretEtterpå").value(1))
+            .andExpect(jsonPath("$.antallSomIkkeKanAngres").value(1))
 
         patchedeIder() shouldContainExactly listOf(endretEtterpå)
         antallMetadata() shouldBe 1
@@ -243,7 +244,7 @@ class VedtaksmetadataFiksIT(
     }
 
     @Test
-    fun `patch-rad med tømt endret_av kan ikke rulles tilbake, og telles i antallEndretEtterpå`() {
+    fun `patch-rad med tømt endret_av kan ikke rulles tilbake, og telles i antallSomIkkeKanAngres`() {
         // endret_av er nullbar, og i Oracle er både = og <> UNKNOWN mot NULL. Uten NULL-grenen i
         // ENDRET_ETTERPÅ_SQL faller raden ut av BÅDE angre-kandidatene og tellingen, og svaret
         // ser ut som «ingenting å angre» i stedet for «én rad kunne ikke rulles tilbake».
@@ -255,7 +256,7 @@ class VedtaksmetadataFiksIT(
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.antallRaderFunnet").value(0))
             .andExpect(jsonPath("$.antallSlettet").value(0))
-            .andExpect(jsonPath("$.antallEndretEtterpå").value(1))
+            .andExpect(jsonPath("$.antallSomIkkeKanAngres").value(1))
 
         antallMetadata() shouldBe 1
     }
@@ -347,6 +348,9 @@ class VedtaksmetadataFiksIT(
 
         kall(fiksUrl, """{"saksnummer":["MEL-941"],"skarp":true,"maksAntallRader":2000}""")
             .andExpect(status().isBadRequest)
+            // Tre ulike seler gir 400 for denne request-formen. Uten å pinne meldingen ville testen
+            // fortsatt vært grønn om IN-selen ble fjernet og maksAntallRader-selen fanget den i stedet.
+            .andExpect(jsonPath("$.feil").value(containsString("ORA-01795")))
 
         antallMetadata() shouldBe 0
 
@@ -354,6 +358,76 @@ class VedtaksmetadataFiksIT(
         kall(fiksUrl, """{"saksnummer":["MEL-941"]}""")
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.antallRaderFunnet").value(1001))
+    }
+
+    @Test
+    fun `ekte vedtaksdato skrevet oppå en patch-rad gjør den ekte igjen`() {
+        // Selen ber operatøren «sette ekte vedtaksdato manuelt». Regnes raden fortsatt som patchet
+        // etterpå, er den remedien uten virkning: ekteDatoer forblir tom uansett hvor mange ekte
+        // datoer som skrives. Flagget må derfor bruke samme definisjon som angreknappen — markør i
+        // BÅDE registrert_av og endret_av.
+        val patchet = seedDefektBehandling("MEL-960", "NY_VURDERING", "2026-01-01 10:00:00")
+        kall(fiksUrl, """{"saksnummer":["MEL-960"],"skarp":true}""").andExpect(status().isOk)
+
+        kall(fiksUrl, """{"saksnummer":["MEL-960"]}""")
+            .andExpect(jsonPath("$.sorteringspåvirkning").isEmpty)
+
+        // Saksbehandler skriver ekte vedtaksdato: registrert_av beholder markøren, endret_av flyttes
+        jdbcTemplate.update(
+            """UPDATE vedtak_metadata SET vedtak_dato = TIMESTAMP '2023-05-05 08:00:00',
+               endret_av = 'Z994321' WHERE behandlingsresultat_id = ?""",
+            patchet
+        )
+        seedDefektBehandling("MEL-960", "NY_VURDERING", "2025-06-01 10:00:00")
+
+        kall(fiksUrl, """{"saksnummer":["MEL-960"]}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteFørErPatchet").value(false))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer[0]").value("2023-05-05 08:00:00"))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].ingenSammenligningsgrunnlag").value(false))
+            // Nå fortrenger patchen en ekte dato, og da SKAL selen blokkere
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(true))
+
+        kall(fiksUrl, """{"saksnummer":["MEL-960"],"skarp":true}""")
+            .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `sak der alle datoer er våre egne proxyer blokkeres ikke av sorteringsselen`() {
+        // Runde 1 patcher den ene raden, runde 2 den andre. Begge datoene er endret_dato-proxyen
+        // vår, så det finnes ingen ekte vedtaksdato å fortrenge — det er tilfellet KDoc-en kaller
+        // det tryggeste. Å tvinge operatøren til å kvittere ut det ville lært dem opp i å kvittere
+        // ut selen generelt.
+        seedDefektBehandling("MEL-961", "NY_VURDERING", "2024-01-01 10:00:00")
+        kall(fiksUrl, """{"saksnummer":["MEL-961"],"skarp":true}""").andExpect(status().isOk)
+
+        seedDefektBehandling("MEL-961", "NY_VURDERING", "2025-01-01 10:00:00")
+
+        kall(fiksUrl, """{"saksnummer":["MEL-961"]}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(true))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].ingenSammenligningsgrunnlag").value(true))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer").isEmpty)
+
+        kall(fiksUrl, """{"saksnummer":["MEL-961"],"skarp":true}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.antallRaderInnsatt").value(1))
+
+        antallMetadata() shouldBe 2
+    }
+
+    @Test
+    fun `kvittering som ikke traff noen kapret sak nevnes i avvisningen`() {
+        // En skrivefeil i tillatSorteringsendring er ellers usynlig: operatøren ser bare at
+        // kjøringen ble avvist, og kan ikke lese ut av svaret hvilken oppføring som var feil.
+        seedIntaktBehandling("MEL-962", "FØRSTEGANG", "2024-08-16 09:51:06")
+        seedDefektBehandling("MEL-962", "NY_VURDERING", "2024-08-16 09:54:28")
+
+        kall(fiksUrl, """{"saksnummer":["MEL-962"],"skarp":true,"tillatSorteringsendring":["MEL-96"]}""")
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.feil").value(containsString("MEL-96")))
+
+        antallMetadata() shouldBe 1
     }
 
     @Test

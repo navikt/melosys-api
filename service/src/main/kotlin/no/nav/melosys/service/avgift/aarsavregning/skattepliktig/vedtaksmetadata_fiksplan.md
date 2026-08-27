@@ -135,6 +135,7 @@ kall med flere, skal ikke selen slås av for de øvrige.
 | `ukjentBehType` | Kandidater der vedtakstypen ikke kan utledes trygt. Er den ikke tom, avvises skarp kjøring. |
 | `sorteringspåvirkning` | Per sak: bytter patchen ut hvilken behandling som er nyest i vedtaksdato-sorteringen. Se seksjon 5. Feltet `nyesteFørErPatchet` sier om raden vi sammenligner mot selv ble satt inn av en tidligere kjøring — da er sammenligningen proxy mot proxy, og `patchenVinnerNyeste: false` er ikke et frikjenn. `ekteDatoer` inneholder kun datoer som faktisk stammer fra et vedtak. |
 | `saksnummerUtenKandidater` | Saksnummer fra requesten som ikke ga én eneste kandidatrad — skrivefeil, eller sak uten defekte rader. Blokkerer ikke, men skal ses på når du trodde saken skulle fikses. |
+| `kvitteringerUtenTreff` | Saksnummer sendt i `tillatSorteringsendring` som ikke tilsvarer noen sak der patchen faktisk kaprer — typisk en skrivefeil i kvitteringen. Nevnes også i avvisningsmeldingen. |
 | `avvik` | True hvis antall innsatte rader ikke stemmer med forhåndsvisningen — da beskriver `rader` kandidatene, ikke det som faktisk ble skrevet. |
 
 ---
@@ -217,7 +218,7 @@ WHERE registrert_av = 'MELOSYS-8174-PATCH'
 
 Begge kolonnene, ikke bare `registrert_av`: den er `@CreatedBy` og settes kun ved insert, så en
 patch-rad som senere har fått en ekte vedtaksdato skrevet av en saksbehandler ville blitt
-slettet med saksbehandlerens data. Slike rader telles i `antallEndretEtterpå` og røres aldri.
+slettet med saksbehandlerens data. Slike rader telles i `antallSomIkkeKanAngres` og røres aldri.
 
 `endret_av` er nullbar, og i Oracle er både `= 'MELOSYS-8174-PATCH'` og `<> 'MELOSYS-8174-PATCH'`
 UNKNOWN mot NULL. Tellingen av rader som ikke kan rulles tilbake bruker derfor
@@ -242,8 +243,12 @@ videre for hver senere skriving på raden. Patchede rader ser derfor systematisk
 er, mens radene som ikke patches beholder ekte dato — sorteringen sammenligner to ulike klokker.
 
 Derfor rapporterer endepunktet `sorteringspåvirkning` per sak og **avviser skarp kjøring** når
-patchen ville tatt nyeste-plassen, med mindre `tillatSorteringsendring=true` sendes bevisst.
+patchen ville tatt nyeste-plassen, med mindre saksnummeret listes i `tillatSorteringsendring`.
 I arbeidsøkta ble dette gjort for hånd, sak for sak; selen automatiserer den kontrollen.
+
+Har saken **ingen** ekte vedtaksdato i det hele tatt (`ingenSammenligningsgrunnlag: true`, `ekteDatoer` tom), blokkerer selen ikke: da kommer alle datoene fra samme klokke, den interne rekkefølgen er konsistent, og det finnes ikke noe ekte vedtak å fortrenge. Det gjelder også etter en tidligere kjøring, der radene den satte inn bærer proxy-datoer.
+
+Motsatt vei: skriver noen en ekte vedtaksdato oppå en patch-rad — som er nettopp remedien selen anbefaler — regnes raden som ekte igjen. Flagget bruker samme definisjon av «fortsatt urørt patch» som angreknappen (markør i **både** `registrert_av` og `endret_av`), ellers ville remedien vært uten virkning.
 
 To ting å merke seg om selen:
 

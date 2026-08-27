@@ -90,7 +90,7 @@ class VedtaksmetadataFiksController(
             "Skarp kjøring uten saksnummer krever bekreftAlle=true, fordi den ellers ruller tilbake " +
             "alle patch-rader i basen — også fikser fra tidligere kjøringer. " +
             "Rader der markøren er overskrevet av en senere endring (endret_av != MELOSYS-8174-PATCH) " +
-            "røres aldri — de telles i antallEndretEtterpå. Det gjelder også rader der endret_av er " +
+            "røres aldri — de telles i antallSomIkkeKanAngres. Det gjelder også rader der endret_av er " +
             "tømt: de kan ikke rulles tilbake automatisk, og telles i samme felt."
     )
     @PostMapping("/vedtaksmetadata-fiks/angre")
