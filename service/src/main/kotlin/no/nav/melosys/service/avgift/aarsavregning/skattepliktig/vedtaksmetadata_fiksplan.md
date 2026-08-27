@@ -62,8 +62,8 @@ kan ikke rekonstrueres i etterkant; se seksjon 5.
 | **Q1** | Rotårsak per behandling for hele feilpopulasjonen — hvilke behandlingsresultat mangler raden. | Nei | Nei (analyse) |
 | **Q2** | Én rad per sak: har saken i det hele tatt trygdeavgift for året? Viste at flertallet av feilene er ren støy. | Nei | Nei (analyse) |
 | **Q3** | Avgiftsbildet per kandidatsak: skattepliktstype, inntektskilde og `aga_betales_til_skatt`. Brukes til å forutsi `skalBetalesTilNav`. | Nei | Nei (analyse) |
-| **Q4a** | **Preview** — nøyaktig hvilke rader Q4b vil sette inn. | Nei | ✅ `forhaandsvis()` |
-| **Q4b** | **Datafiksen** — setter inn de manglende radene. | **Ja** | ✅ `utfoer()` |
+| **Q4a** | **Preview** — nøyaktig hvilke rader Q4b vil sette inn. | Nei | ✅ `forhåndsvis()` |
+| **Q4b** | **Datafiksen** — setter inn de manglende radene. | **Ja** | ✅ `utfør()` |
 | **Q5** | Pre-sjekk av en enkeltsak med år-løs årsavregning. | Nei | Nei (analyse) |
 | **Q6a** | Etterkontroll: hvor mange defekte rader står igjen per sak. Skal være tom etter en vellykket Q4b. | Nei | ✅ `utenMetadataPerSak` i svaret |
 | **Q6b** | Etterkontroll: ble årsavregningene faktisk opprettet etterpå. | Nei | Nei (analyse) |
@@ -78,11 +78,11 @@ koden. De står i fullversjonen i wikien.
 
 | Kall | Q | Metode | SQL-konstant |
 |---|---|---|---|
-| `POST …/vedtaksmetadata-fiks` med `skarp=false` (default) | Q4a | `forhaandsvis()` | `PREVIEW_SQL` |
-| `POST …/vedtaksmetadata-fiks` med `skarp=true` | Q4b | `utfoer()` | `INSERT_SQL` |
+| `POST …/vedtaksmetadata-fiks` med `skarp=false` (default) | Q4a | `forhåndsvis()` | `PREVIEW_SQL` |
+| `POST …/vedtaksmetadata-fiks` med `skarp=true` | Q4b | `utfør()` | `INSERT_SQL` |
 | `utenMetadataPerSak` i svaret på begge | Q6a | `tellUtenMetadata()` | `ETTERKONTROLL_SQL` |
 | `POST …/vedtaksmetadata-fiks/angre` | — | `angre()` | `ANGRE_SQL` |
-| `sorteringspaavirkning` i svaret på begge | — | `sorteringspaavirkning()` | `EKSISTERENDE_NYESTE_SQL`, `PATCH_NYESTE_SQL` |
+| `sorteringspåvirkning` i svaret på begge | — | `sorteringspåvirkning()` | `EKSISTERENDE_NYESTE_SQL`, `PATCH_NYESTE_SQL` |
 
 `PREVIEW_SQL` og `INSERT_SQL` deler `KANDIDAT_WHERE` i koden, nettopp for at forhåndsvisningen
 skal treffe nøyaktig de samme radene som innsettingen. Sorteringsrapporten er ikke en del av
@@ -133,7 +133,7 @@ kall med flere, skal ikke selen slås av for de øvrige.
 | `rader` | Samme kolonner som Q4a ga: behandlingsresultat-id, `beh_type`, resultattype, kommende vedtaksdato, klagefrist og vedtakstype. |
 | `utenMetadataPerSak` | Q6a-etterkontrollen per sak, slik det står *nå*. I preview er den lik antall funne rader; etter en vellykket skarp kjøring skal den være tom. |
 | `ukjentBehType` | Kandidater der vedtakstypen ikke kan utledes trygt. Er den ikke tom, avvises skarp kjøring. |
-| `sorteringspaavirkning` | Per sak: bytter patchen ut hvilken behandling som er nyest i vedtaksdato-sorteringen. Se seksjon 5. Feltet `nyesteFoerErPatchet` sier om raden vi sammenligner mot selv ble satt inn av en tidligere kjøring — da er sammenligningen proxy mot proxy, og `patchenVinnerNyeste: false` er ikke et frikjenn. `ekteDatoer` inneholder kun datoer som faktisk stammer fra et vedtak. |
+| `sorteringspåvirkning` | Per sak: bytter patchen ut hvilken behandling som er nyest i vedtaksdato-sorteringen. Se seksjon 5. Feltet `nyesteFørErPatchet` sier om raden vi sammenligner mot selv ble satt inn av en tidligere kjøring — da er sammenligningen proxy mot proxy, og `patchenVinnerNyeste: false` er ikke et frikjenn. `ekteDatoer` inneholder kun datoer som faktisk stammer fra et vedtak. |
 | `saksnummerUtenKandidater` | Saksnummer fra requesten som ikke ga én eneste kandidatrad — skrivefeil, eller sak uten defekte rader. Blokkerer ikke, men skal ses på når du trodde saken skulle fikses. |
 | `avvik` | True hvis antall innsatte rader ikke stemmer med forhåndsvisningen — da beskriver `rader` kandidatene, ikke det som faktisk ble skrevet. |
 
@@ -217,7 +217,7 @@ WHERE registrert_av = 'MELOSYS-8174-PATCH'
 
 Begge kolonnene, ikke bare `registrert_av`: den er `@CreatedBy` og settes kun ved insert, så en
 patch-rad som senere har fått en ekte vedtaksdato skrevet av en saksbehandler ville blitt
-slettet med saksbehandlerens data. Slike rader telles i `antallEndretEtterpaa` og røres aldri.
+slettet med saksbehandlerens data. Slike rader telles i `antallEndretEtterpå` og røres aldri.
 
 `endret_av` er nullbar, og i Oracle er både `= 'MELOSYS-8174-PATCH'` og `<> 'MELOSYS-8174-PATCH'`
 UNKNOWN mot NULL. Tellingen av rader som ikke kan rulles tilbake bruker derfor
@@ -241,7 +241,7 @@ fra. `endret_dato` er `@LastModifiedDate` og dermed alltid ≥ ekte vedtaksdato,
 videre for hver senere skriving på raden. Patchede rader ser derfor systematisk nyere ut enn de
 er, mens radene som ikke patches beholder ekte dato — sorteringen sammenligner to ulike klokker.
 
-Derfor rapporterer endepunktet `sorteringspaavirkning` per sak og **avviser skarp kjøring** når
+Derfor rapporterer endepunktet `sorteringspåvirkning` per sak og **avviser skarp kjøring** når
 patchen ville tatt nyeste-plassen, med mindre `tillatSorteringsendring=true` sendes bevisst.
 I arbeidsøkta ble dette gjort for hånd, sak for sak; selen automatiserer den kontrollen.
 

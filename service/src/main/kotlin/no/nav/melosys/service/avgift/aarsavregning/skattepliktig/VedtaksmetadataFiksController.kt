@@ -44,7 +44,7 @@ class VedtaksmetadataFiksController(
             "MELOSYS-8174-PATCH slik at de kan rulles tilbake med /vedtaksmetadata-fiks/angre. " +
             "VIKTIG: vedtak_dato settes til proxyen behandlingsresultat.endret_dato, og den datoen " +
             "styrer hvilken behandling ÅrsavregningService regner som nyest — altså hvor " +
-            "avgiftsgrunnlaget hentes fra. Les sorteringspaavirkning i svaret: er patchenVinnerNyeste " +
+            "avgiftsgrunnlaget hentes fra. Les sorteringspåvirkning i svaret: er patchenVinnerNyeste " +
             "true for en sak, avvises skarp kjøring: sett ekte vedtaksdato manuelt, eller list " +
             "saksnummeret i tillatSorteringsendring hvis endringen er vurdert — det kvitterer ut " +
             "saken, ikke selen, så de øvrige sakene i kallet er fortsatt beskyttet. " +
@@ -68,13 +68,13 @@ class VedtaksmetadataFiksController(
 
         return try {
             val resultat = if (request.skarp) {
-                vedtaksmetadataFiksService.utfoer(
+                vedtaksmetadataFiksService.utfør(
                     saksnummer,
                     request.maksAntallRader,
                     request.tillatSorteringsendring,
                 )
             } else {
-                vedtaksmetadataFiksService.forhaandsvis(saksnummer)
+                vedtaksmetadataFiksService.forhåndsvis(saksnummer)
             }
             ResponseEntity.ok(resultat)
         } catch (e: VedtaksmetadataFiksAvvist) {
@@ -90,7 +90,7 @@ class VedtaksmetadataFiksController(
             "Skarp kjøring uten saksnummer krever bekreftAlle=true, fordi den ellers ruller tilbake " +
             "alle patch-rader i basen — også fikser fra tidligere kjøringer. " +
             "Rader der markøren er overskrevet av en senere endring (endret_av != MELOSYS-8174-PATCH) " +
-            "røres aldri — de telles i antallEndretEtterpaa. Det gjelder også rader der endret_av er " +
+            "røres aldri — de telles i antallEndretEtterpå. Det gjelder også rader der endret_av er " +
             "tømt: de kan ikke rulles tilbake automatisk, og telles i samme felt."
     )
     @PostMapping("/vedtaksmetadata-fiks/angre")

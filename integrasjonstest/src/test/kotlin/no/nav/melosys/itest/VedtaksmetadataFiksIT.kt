@@ -4,7 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import no.nav.melosys.Application
-import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.VedtaksmetadataFiksService.Companion.PATCH_MARKOER
+import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.VedtaksmetadataFiksService.Companion.PATCH_MARKØR
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Test
@@ -89,7 +89,7 @@ class VedtaksmetadataFiksIT(
         vedtakstype(nyVurdering) shouldBe "ENDRINGSVEDTAK"
         // vedtak_dato er proxyen behandlingsresultat.endret_dato, ikke tidspunktet fiksen kjørte
         vedtaksdato(nyVurdering) shouldBe "2024-10-23 09:54:00"
-        registrertAv(nyVurdering) shouldBe PATCH_MARKOER
+        registrertAv(nyVurdering) shouldBe PATCH_MARKØR
 
         kall(fiksUrl, """{"saksnummer":["MEL-902"],"skarp":true}""")
             .andExpect(status().isOk)
@@ -156,28 +156,28 @@ class VedtaksmetadataFiksIT(
     @Test
     fun `angre lar rader som er endret etterpå stå, og rører ikke ekte vedtaksmetadata`() {
         val urørt = seedDefektBehandling("MEL-907", "NY_VURDERING", "2024-10-23 09:54:00")
-        val endretEtterpaa = seedDefektBehandling("MEL-907", "FØRSTEGANG", "2023-11-23 08:00:00")
+        val endretEtterpå = seedDefektBehandling("MEL-907", "FØRSTEGANG", "2023-11-23 08:00:00")
         kall(fiksUrl, """{"saksnummer":["MEL-907"],"skarp":true}""").andExpect(status().isOk)
 
         // Slik ser raden ut hvis noe senere skriver en ekte vedtaksdato: registrert_av beholder
         // markøren (@CreatedBy settes kun ved insert), mens endret_av flyttes (@LastModifiedBy).
         jdbcTemplate.update(
             "UPDATE vedtak_metadata SET vedtak_dato = SYSTIMESTAMP, endret_av = 'Z994321' WHERE behandlingsresultat_id = ?",
-            endretEtterpaa
+            endretEtterpå
         )
 
         kall(angreUrl, """{"saksnummer":["MEL-907"]}""")
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.antallRaderFunnet").value(1))
             .andExpect(jsonPath("$.antallSlettet").value(0))
-            .andExpect(jsonPath("$.antallEndretEtterpaa").value(1))
+            .andExpect(jsonPath("$.antallEndretEtterpå").value(1))
 
         kall(angreUrl, """{"saksnummer":["MEL-907"],"skarp":true}""")
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.antallSlettet").value(1))
-            .andExpect(jsonPath("$.antallEndretEtterpaa").value(1))
+            .andExpect(jsonPath("$.antallEndretEtterpå").value(1))
 
-        patchedeIder() shouldContainExactly listOf(endretEtterpaa)
+        patchedeIder() shouldContainExactly listOf(endretEtterpå)
         antallMetadata() shouldBe 1
     }
 
@@ -243,9 +243,9 @@ class VedtaksmetadataFiksIT(
     }
 
     @Test
-    fun `patch-rad med tømt endret_av kan ikke rulles tilbake, og telles i antallEndretEtterpaa`() {
+    fun `patch-rad med tømt endret_av kan ikke rulles tilbake, og telles i antallEndretEtterpå`() {
         // endret_av er nullbar, og i Oracle er både = og <> UNKNOWN mot NULL. Uten NULL-grenen i
-        // ENDRET_ETTERPAA_SQL faller raden ut av BÅDE angre-kandidatene og tellingen, og svaret
+        // ENDRET_ETTERPÅ_SQL faller raden ut av BÅDE angre-kandidatene og tellingen, og svaret
         // ser ut som «ingenting å angre» i stedet for «én rad kunne ikke rulles tilbake».
         val rad = seedDefektBehandling("MEL-933", "NY_VURDERING", "2024-01-15 10:00:00")
         kall(fiksUrl, """{"saksnummer":["MEL-933"],"skarp":true}""").andExpect(status().isOk)
@@ -255,7 +255,7 @@ class VedtaksmetadataFiksIT(
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.antallRaderFunnet").value(0))
             .andExpect(jsonPath("$.antallSlettet").value(0))
-            .andExpect(jsonPath("$.antallEndretEtterpaa").value(1))
+            .andExpect(jsonPath("$.antallEndretEtterpå").value(1))
 
         antallMetadata() shouldBe 1
     }
@@ -264,7 +264,7 @@ class VedtaksmetadataFiksIT(
     fun `en tidligere patchet rad rapporteres som proxy, ikke som ekte sammenligningsgrunnlag`() {
         // Runde 1 patcher saken. Runde 2 måler mot den raden — som er vår egen proxy-dato, ikke et
         // vedtak. Sammenligningen er da proxy mot proxy, og «patchen vinner ikke» er ikke et
-        // frikjenn. Operatøren skal se det på nyesteFoerErPatchet og på tom ekteDatoer.
+        // frikjenn. Operatøren skal se det på nyesteFørErPatchet og på tom ekteDatoer.
         seedDefektBehandling("MEL-934", "NY_VURDERING", "2026-01-01 10:00:00")
         kall(fiksUrl, """{"saksnummer":["MEL-934"],"skarp":true}""").andExpect(status().isOk)
 
@@ -272,11 +272,11 @@ class VedtaksmetadataFiksIT(
 
         kall(fiksUrl, """{"saksnummer":["MEL-934"]}""")
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(false))
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerErPatchet").value(true))
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerDato").value("2026-01-01 10:00:00"))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteFørErPatchet").value(true))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteFørDato").value("2026-01-01 10:00:00"))
             // ekteDatoer skal kun inneholde datoer som faktisk stammer fra et vedtak
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].ekteDatoer").isEmpty)
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer").isEmpty)
     }
 
     @Test
@@ -290,9 +290,9 @@ class VedtaksmetadataFiksIT(
 
         kall(fiksUrl, """{"saksnummer":["MEL-935"]}""")
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerErPatchet").value(true))
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].ekteDatoer[0]").value("2023-01-01 10:00:00"))
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].ekteDatoer.length()").value(1))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteFørErPatchet").value(true))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer[0]").value("2023-01-01 10:00:00"))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer.length()").value(1))
 
         vedtaksdato(ekte) shouldBe "2023-01-01 10:00:00"
     }
@@ -398,12 +398,12 @@ class VedtaksmetadataFiksIT(
 
         kall(fiksUrl, """{"saksnummer":["MEL-910"]}""")
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].saksnummer").value("MEL-910"))
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(true))
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerId").value(ekteNyeste))
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerDato").value("2023-03-01 10:00:00"))
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyestePatchetId").value(defekt))
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyestePatchetDato").value("2024-05-10 12:00:00"))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].saksnummer").value("MEL-910"))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(true))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteFørId").value(ekteNyeste))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteFørDato").value("2023-03-01 10:00:00"))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].nyestePatchetId").value(defekt))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].nyestePatchetDato").value("2024-05-10 12:00:00"))
 
         antallMetadata() shouldBe 1
     }
@@ -415,7 +415,7 @@ class VedtaksmetadataFiksIT(
 
         kall(fiksUrl, """{"saksnummer":["MEL-911"]}""")
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(false))
     }
 
     @Test
@@ -426,10 +426,10 @@ class VedtaksmetadataFiksIT(
 
         kall(fiksUrl, """{"saksnummer":["MEL-912"]}""")
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerId").doesNotExist())
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].ingenSammenligningsgrunnlag").value(true))
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(false))
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].ekteDatoer").isEmpty)
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteFørId").doesNotExist())
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].ingenSammenligningsgrunnlag").value(true))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer").isEmpty)
     }
 
     @Test
@@ -452,17 +452,17 @@ class VedtaksmetadataFiksIT(
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.antallRaderFunnet").value(3))
             // Patchen havner mellom to ekte vedtak — nyeste-plassen står
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].saksnummer").value("MEL-448193"))
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(false))
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerDato").value("2025-01-06 10:15:04"))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].saksnummer").value("MEL-448193"))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteFørDato").value("2025-01-06 10:15:04"))
             // Eneste sak der patchen kaprer nyeste-plassen: NY_VURDERING drøye tre minutter
             // etter førstegangsvedtaket, så her avgjør ekte vedtaksdato utfallet
-            .andExpect(jsonPath("$.sorteringspaavirkning[1].saksnummer").value("MEL-545776"))
-            .andExpect(jsonPath("$.sorteringspaavirkning[1].patchenVinnerNyeste").value(true))
-            .andExpect(jsonPath("$.sorteringspaavirkning[1].nyesteFoerDato").value("2024-08-16 09:51:06"))
-            .andExpect(jsonPath("$.sorteringspaavirkning[1].nyestePatchetDato").value("2024-08-16 09:54:28"))
-            .andExpect(jsonPath("$.sorteringspaavirkning[2].saksnummer").value("MEL-632908"))
-            .andExpect(jsonPath("$.sorteringspaavirkning[2].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspåvirkning[1].saksnummer").value("MEL-545776"))
+            .andExpect(jsonPath("$.sorteringspåvirkning[1].patchenVinnerNyeste").value(true))
+            .andExpect(jsonPath("$.sorteringspåvirkning[1].nyesteFørDato").value("2024-08-16 09:51:06"))
+            .andExpect(jsonPath("$.sorteringspåvirkning[1].nyestePatchetDato").value("2024-08-16 09:54:28"))
+            .andExpect(jsonPath("$.sorteringspåvirkning[2].saksnummer").value("MEL-632908"))
+            .andExpect(jsonPath("$.sorteringspåvirkning[2].patchenVinnerNyeste").value(false))
 
         antallMetadata() shouldBe 5
     }
@@ -477,10 +477,10 @@ class VedtaksmetadataFiksIT(
 
         kall(fiksUrl, """{"saksnummer":["MEL-920"]}""")
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerId").value(ekte))
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerDato").value("2025-05-05 10:00:00"))
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(false))
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].ingenSammenligningsgrunnlag").value(false))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteFørId").value(ekte))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteFørDato").value("2025-05-05 10:00:00"))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].ingenSammenligningsgrunnlag").value(false))
     }
 
     @Test
@@ -491,7 +491,7 @@ class VedtaksmetadataFiksIT(
         kall(fiksUrl, """{"saksnummer":["MEL-921"]}""")
             .andExpect(status().isOk)
             // Samme sekund, men patchen er 500 ms nyere og ville tatt plassen i den ekte sorteringen
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(true))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(true))
     }
 
     @Test
@@ -503,7 +503,7 @@ class VedtaksmetadataFiksIT(
 
         kall(fiksUrl, """{"saksnummer":["MEL-926"]}""")
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(false))
     }
 
     @Test
@@ -513,7 +513,7 @@ class VedtaksmetadataFiksIT(
 
         kall(fiksUrl, """{"saksnummer":["MEL-922"]}""")
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(true))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(true))
     }
 
     @Test
@@ -525,8 +525,8 @@ class VedtaksmetadataFiksIT(
         kall(fiksUrl, """{"saksnummer":["MEL-923"]}""")
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.antallRaderFunnet").value(2))
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyestePatchetId").value(nyesteKandidat))
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].patchenVinnerNyeste").value(true))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].nyestePatchetId").value(nyesteKandidat))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(true))
     }
 
     @Test
@@ -538,8 +538,8 @@ class VedtaksmetadataFiksIT(
 
         kall(fiksUrl, """{"saksnummer":["MEL-924"]}""")
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].ingenSammenligningsgrunnlag").value(true))
-            .andExpect(jsonPath("$.sorteringspaavirkning[0].nyesteFoerId").doesNotExist())
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].ingenSammenligningsgrunnlag").value(true))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteFørId").doesNotExist())
     }
 
     @Test
@@ -676,7 +676,7 @@ class VedtaksmetadataFiksIT(
 
     private fun patchedeIder(): List<Long> = jdbcTemplate.queryForList(
         "SELECT behandlingsresultat_id FROM vedtak_metadata WHERE registrert_av = ? ORDER BY behandlingsresultat_id",
-        Long::class.java, PATCH_MARKOER
+        Long::class.java, PATCH_MARKØR
     ).filterNotNull()
 
     private fun vedtakstype(behandlingsresultatId: Long): String? = jdbcTemplate.queryForObject(
