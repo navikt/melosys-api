@@ -266,7 +266,7 @@ open class Behandlingsresultat : RegistreringsInfo() {
     fun finnFullstendigManglendeInnbetalingAvklarteFakta(): Avklartefakta? =
         avklartefakta.firstOrNull { it.type == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING }
 
-    fun harFullstendigManglendeInnbetalingAvklarteFakta() =
+    fun harValgtFullstendigManglendeInnbetaling() =
         finnFullstendigManglendeInnbetalingAvklarteFakta()?.fakta.equals(Avklartefakta.VALGT_FAKTA, ignoreCase = true)
 
     fun erInnvilgelse(): Boolean {
