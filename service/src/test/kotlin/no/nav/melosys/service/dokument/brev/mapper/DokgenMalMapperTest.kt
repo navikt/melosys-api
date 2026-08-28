@@ -478,10 +478,11 @@ internal class DokgenMalMapperTest {
 
         vedtakOpphoertMedlemskap.land.shouldBe(emptyList())
         val objectMapper = JsonMapper.builder().build()
-        objectMapper
+        val land = objectMapper
             .readTree(objectMapper.writeValueAsString(vedtakOpphoertMedlemskap))
             .get("land")
-            .isEmpty.shouldBeTrue()
+        land.isArray.shouldBeTrue()
+        land.isEmpty.shouldBeTrue()
     }
 
     @Test
