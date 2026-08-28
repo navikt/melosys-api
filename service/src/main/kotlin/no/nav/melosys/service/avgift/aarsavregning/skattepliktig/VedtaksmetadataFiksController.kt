@@ -62,12 +62,17 @@ class VedtaksmetadataFiksController(
         @Parameter(description = "Saksnummer, skarp-flagg og valgfritt maksAntallRader")
         request: VedtaksmetadataFiksRequest
     ): ResponseEntity<Any> {
-        val saksnummer = if (request.skarp) request.saksnummer else request.saksnummer.ifEmpty { VedtaksmetadataFiksService.STANDARD_SAKER }
+        // Normaliseres én gang her, og det er den normaliserte lista som valideres, logges, sendes
+        // videre og ekkoes i svaret. SQL-en bruker IN (:saksnummer), så duplikater er semantisk
+        // irrelevante — men mot MAKS_ANTALL_SAKER teller de, og «for mange saksnummer i ett kall» er
+        // en misvisende avvisning av en liste som er innenfor taket når den telles riktig.
+        val saksnummer = (if (request.skarp) request.saksnummer else request.saksnummer.ifEmpty { VedtaksmetadataFiksService.STANDARD_SAKER })
+            .distinct()
+        // Kvitteringene er saksnummer og skal gjennom samme formatsele og samme normalisering.
+        val tillatSorteringsendring = request.tillatSorteringsendring.distinct()
 
         valider(saksnummer)?.let { return it }
-        // Kvitteringene er saksnummer og skal gjennom samme formatsele. Uten dette ble søppel ekkoet
-        // rett tilbake i kvitteringerUtenTreff.
-        valider(request.tillatSorteringsendring.distinct())?.let { return it }
+        valider(tillatSorteringsendring)?.let { return it }
 
         log.info {
             "Datafiks vedtaksmetadata (${if (request.skarp) "SKARP" else "PREVIEW"}) for saker $saksnummer"
@@ -78,10 +83,10 @@ class VedtaksmetadataFiksController(
                 vedtaksmetadataFiksService.utfør(
                     saksnummer,
                     request.maksAntallRader,
-                    request.tillatSorteringsendring,
+                    tillatSorteringsendring,
                 )
             } else {
-                vedtaksmetadataFiksService.forhåndsvis(saksnummer, request.tillatSorteringsendring)
+                vedtaksmetadataFiksService.forhåndsvis(saksnummer, tillatSorteringsendring)
             }
             ResponseEntity.ok(resultat)
         } catch (e: VedtaksmetadataFiksAvvist) {
@@ -107,18 +112,19 @@ class VedtaksmetadataFiksController(
         request: VedtaksmetadataAngreRequest?
     ): ResponseEntity<Any> {
         val angreRequest = request ?: VedtaksmetadataAngreRequest()
+        val saksnummer = angreRequest.saksnummer.distinct()
 
-        valider(angreRequest.saksnummer)?.let { return it }
+        valider(saksnummer)?.let { return it }
 
         log.info {
             "Angre datafiks vedtaksmetadata (${if (angreRequest.skarp) "SKARP" else "PREVIEW"}), " +
-                "scope=${angreRequest.saksnummer.ifEmpty { listOf("ALLE") }}"
+                "scope=${saksnummer.ifEmpty { listOf("ALLE") }}"
         }
 
         return try {
             ResponseEntity.ok(
                 vedtaksmetadataFiksService.angre(
-                    angreRequest.saksnummer,
+                    saksnummer,
                     angreRequest.skarp,
                     angreRequest.bekreftAlle,
                 )

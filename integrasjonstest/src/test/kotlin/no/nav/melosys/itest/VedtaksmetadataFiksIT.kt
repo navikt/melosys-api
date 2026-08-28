@@ -502,6 +502,24 @@ class VedtaksmetadataFiksIT(
     }
 
     @Test
+    fun `duplikate saksnummer innenfor taket avvises ikke, og ekkoes ikke tilbake`() {
+        // 26 oppføringer, 13 unike — taket er 25. SQL-en bruker IN (:saksnummer), så duplikater er
+        // semantisk irrelevante; å avvise dem med «for mange saksnummer» er misvisende.
+        seedDefektBehandling("MEL-990", "NY_VURDERING", "2024-01-15 10:00:00")
+        val duplikater = (1..13).joinToString(",") { "\"MEL-99$it\",\"MEL-99$it\"" }
+
+        kall(fiksUrl, """{"saksnummer":[$duplikater]}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.saksnummer.length()").value(13))
+
+        kall(fiksUrl, """{"saksnummer":["MEL-990","MEL-990"],"skarp":true}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.antallRaderInnsatt").value(1))
+            .andExpect(jsonPath("$.saksnummer.length()").value(1))
+            .andExpect(jsonPath("$.saksnummerUtenKandidater").isEmpty)
+    }
+
+    @Test
     fun `endepunktene krever både admin-API-nøkkel og bearer token`() {
         // Endepunktet skriver rett i vedtak_metadata i prod, så transporten pinnes her og ikke bare
         // i AdminControllerApiKeyIT — den går på GET-endepunkter, og disse to er POST.
