@@ -18,11 +18,8 @@ private val SAKSNUMMER_FORMAT = Regex("^MEL-\\d+$")
  * Admin-endepunktene for datafiksen i MELOSYS-8174 — se [VedtaksmetadataFiksService] for hva feilen
  * er og hvorfor fiksen ser ut som den gjør.
  *
- * Endepunktene ligger permanent på master, ikke på en ops-branch: fiksen er idempotent, read-only
- * som default, og hardt selet (eksplisitt saksnummer, tak på antall rader, avvisning av ukjent
- * `beh_type`, sorteringssele, scoped angre). Samme feilklasse har dukket opp før — Flyway-patchen
- * `V7.6_04` var forrige runde av nøyaktig dette — og alternativet, å re-implementere fiksen hver
- * gang, er dyrere og farligere enn å la den stå ferdig reviewet.
+ * Endepunktene ligger permanent på master, ikke på en ops-branch: samme feilklasse har dukket opp
+ * før (Flyway-patchen `V7.6_04`), og fiksen er idempotent, read-only som default og hardt selet.
  *
  * Basestien er årsavregningens skattepliktige admin-flate; kjøringsverktøyet (MELOSYS-8045) legger
  * seg på samme base med egne underliggende stier.
@@ -35,26 +32,21 @@ class VedtaksmetadataFiksController(
 ) {
 
     @Operation(
-        summary = "Datafiks: sett inn manglende vedtaksmetadata (MELOSYS-8174, Q4a/Q4b)",
-        description = "Med skarp=false (default) er dette Q4a — en read-only forhåndsvisning av nøyaktig " +
+        summary = "Datafiks: sett inn manglende vedtaksmetadata (MELOSYS-8174)",
+        description = "Med skarp=false (default) er dette en read-only forhåndsvisning av nøyaktig " +
             "hvilke rader som ville blitt satt inn, med de tre sakene i fiksplanen som default. " +
-            "Med skarp=true er det Q4b, som endrer data: da må saksnummer angis eksplisitt, " +
-            "antall rader må ligge innenfor maksAntallRader (default 10), og alle kandidater må ha en " +
-            "beh_type vi kan utlede vedtakstype fra. Innsettingen er idempotent, og alle rader merkes " +
+            "Med skarp=true endres data: da må saksnummer angis eksplisitt, antall rader må ligge " +
+            "innenfor maksAntallRader (default 10), og alle kandidater må ha en beh_type vi kan " +
+            "utlede vedtakstype fra. Innsettingen er idempotent, og alle rader merkes " +
             "MELOSYS-8174-PATCH slik at de kan rulles tilbake med /vedtaksmetadata-fiks/angre. " +
             "VIKTIG: vedtak_dato settes til proxyen behandlingsresultat.endret_dato, og den datoen " +
             "styrer hvilken behandling ÅrsavregningService regner som nyest — altså hvor " +
-            "avgiftsgrunnlaget hentes fra. Les sorteringspåvirkning i svaret: er patchenVinnerNyeste " +
-            "true for en sak, avvises skarp kjøring: sett ekte vedtaksdato manuelt, eller list " +
+            "avgiftsgrunnlaget hentes fra. Er patchenVinnerNyeste true for en sak i " +
+            "sorteringspåvirkning, avvises skarp kjøring: sett ekte vedtaksdato manuelt, eller list " +
             "saksnummeret i tillatSorteringsendring hvis endringen er vurdert — det kvitterer ut " +
-            "saken, ikke selen, så de øvrige sakene i kallet er fortsatt beskyttet. " +
-            "Selen måler kun mot datoer som kan være ekte vedtak (ekteDatoer og usikreDatoer); rader " +
-            "en tidligere kjøring satte inn og ingen har rørt siden (patchedeDatoer) er beviselig vår " +
-            "egen proxy og styrer ingenting. Har saken ingen dato som kan være ekte, er " +
-            "nyesteSammenlignbareId null og kjøringen slipper gjennom — da er det ingenting å " +
-            "fortrenge. Merk at false ikke er et " +
-            "frikjenn — sammenligningen er global maks mot global maks, mens den ekte utvelgelsen " +
-            "først filtrerer på år og periodeoverlapp. Se datolistene for hva patchen faktisk slår."
+            "saken, ikke selen. Merk at false ikke er et frikjenn: sammenligningen er global maks " +
+            "mot global maks, mens den ekte utvelgelsen også filtrerer på år og periodeoverlapp. " +
+            "Se feltdokumentasjonen på svaret for detaljene."
     )
     @PostMapping("/vedtaksmetadata-fiks")
     fun vedtaksmetadataFiks(
@@ -62,13 +54,10 @@ class VedtaksmetadataFiksController(
         @Parameter(description = "Saksnummer, skarp-flagg og valgfritt maksAntallRader")
         request: VedtaksmetadataFiksRequest
     ): ResponseEntity<Any> {
-        // Normaliseres én gang her, og det er den normaliserte lista som valideres, logges, sendes
-        // videre og ekkoes i svaret. SQL-en bruker IN (:saksnummer), så duplikater er semantisk
-        // irrelevante — men mot MAKS_ANTALL_SAKER teller de, og «for mange saksnummer i ett kall» er
-        // en misvisende avvisning av en liste som er innenfor taket når den telles riktig.
+        // Normaliseres én gang her: duplikater er semantisk irrelevante i IN (:saksnummer), men
+        // teller mot MAKS_ANTALL_SAKER og ville gitt en misvisende avvisning.
         val saksnummer = (if (request.skarp) request.saksnummer else request.saksnummer.ifEmpty { VedtaksmetadataFiksService.STANDARD_SAKER })
             .distinct()
-        // Kvitteringene er saksnummer og skal gjennom samme formatsele og samme normalisering.
         val tillatSorteringsendring = request.tillatSorteringsendring.distinct()
 
         valider(saksnummer)?.let { return it }

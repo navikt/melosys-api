@@ -25,18 +25,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPat
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 /**
- * Dekker datafiksen i MELOSYS-8174 (Q4a/Q4b) — `VedtaksmetadataFiksController` og
- * `VedtaksmetadataFiksService`. Endepunktet skriver rett i `vedtak_metadata` i prod, så garantiene
- * her er de som avgjør om en feilkjøring kan gjøre skade.
- *
- * Testene fastholder særlig funnene fra kodereviewene:
- *  - skarp kjøring kan ikke skje uten eksplisitt scope, over taket, eller på en behandlingstype
- *    vi ikke kan utlede vedtakstype for,
- *  - angre rører kun rader som fortsatt er urørt patch (markør i BÅDE registrert_av og endret_av),
- *    og skarp angre uten scope krever egen bekreftelse,
- *  - en patch-rad med tømt `endret_av` forsvinner ikke i stillhet, men telles som urullbar,
- *  - sorteringsselen sier fra når den måler mot en dato fiksen selv har satt inn,
- *  - en kapret sak kvitteres ut per saksnummer, ikke ved å slå av selen for hele kallet.
+ * Dekker datafiksen i MELOSYS-8174 — `VedtaksmetadataFiksController` og `VedtaksmetadataFiksService`.
+ * Endepunktet skriver rett i `vedtak_metadata` i prod, så garantiene her — sikkerhetsselene, angre-
+ * semantikken og sorteringsrapporten — er de som avgjør om en feilkjøring kan gjøre skade.
  */
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -264,8 +255,7 @@ class VedtaksmetadataFiksIT(
     @Test
     fun `en urørt patch-rad er ikke sammenligningsgrunnlag, og rapporteres for seg`() {
         // Runde 1 patcher saken. Raden er beviselig vår egen proxy, så runde 2 skal ikke måle mot
-        // den: den havner i patchedeDatoer og styrer ingenting. Tidligere ble den brukt som
-        // «nyeste før», og svaret leste da som et frikjenn mot et vedtak som ikke fantes.
+        // den: den havner i patchedeDatoer og styrer ingenting.
         seedDefektBehandling("MEL-934", "NY_VURDERING", "2026-01-01 10:00:00")
         kall(fiksUrl, """{"saksnummer":["MEL-934"],"skarp":true}""").andExpect(status().isOk)
 
@@ -348,8 +338,7 @@ class VedtaksmetadataFiksIT(
     fun `over tusen kandidater avvises kontrollert i stedet for å sprekke på Oracles IN-grense`() {
         // INSERT_SQL binder kandidat-IDene i IN (:ider). Oracle tar maks 1000 uttrykk i en IN-liste,
         // så en kjøring der maksAntallRader er hevet over det ville gitt ORA-01795 og 500 — midt i
-        // det skrittet som endrer prod. MAKS_ANTALL_SAKER har allerede en kommentar om nøyaktig
-        // denne grensen; :ider-lista manglet den.
+        // det skrittet som endrer prod.
         seedDefekteBehandlingerIBulk("MEL-941", 1001)
 
         kall(fiksUrl, """{"saksnummer":["MEL-941"],"skarp":true,"maksAntallRader":2000}""")
@@ -389,8 +378,8 @@ class VedtaksmetadataFiksIT(
         kall(fiksUrl, """{"saksnummer":["MEL-960"]}""")
             .andExpect(status().isOk)
             // endret_av er @LastModifiedBy og flyttes av ENHVER skriving, så vi kan ikke vite om det
-            // som ble skrevet var vedtaksdatoen. Raden rapporteres derfor som usikker — ikke som
-            // ekte, slik den ble før — men regnes med i seleunderlaget, altså konservativt.
+            // som ble skrevet var vedtaksdatoen. Raden rapporteres derfor som usikker, men regnes
+            // med i seleunderlaget — altså konservativt.
             .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer").isEmpty)
             .andExpect(jsonPath("$.sorteringspåvirkning[0].usikreDatoer[0]").value("2023-05-05 08:00:00"))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareDato").value("2023-05-05 08:00:00"))
@@ -446,8 +435,8 @@ class VedtaksmetadataFiksIT(
 
     @Test
     fun `kvittering med ugyldig saksnummerformat avvises som saksnummer ellers ville blitt`() {
-        // tillatSorteringsendring er saksnummer, og gikk tidligere utenom formatselen — søppel ble
-        // ekkoet rett tilbake i kvitteringerUtenTreff.
+        // tillatSorteringsendring er saksnummer og skal gjennom samme formatsele — ellers ville
+        // søppel blitt ekkoet rett tilbake i kvitteringerUtenTreff.
         seedDefektBehandling("MEL-980", "NY_VURDERING", "2024-01-15 10:00:00")
 
         kall(fiksUrl, """{"saksnummer":["MEL-980"],"skarp":true,"tillatSorteringsendring":["MEL-1' OR 1=1--"]}""")
@@ -472,10 +461,9 @@ class VedtaksmetadataFiksIT(
     @Test
     fun `de tre datokategoriene holdes fra hverandre i samme sak`() {
         // Én ekte rad, én urørt patch og én patch som er skrevet til. Selen måler mot de to første
-        // kategoriene, ikke mot den urørte patchen — og rapporten viser hvilken som er hvilken.
-        // Den urørte patchen er den NYESTE av de tre. Var fixturen motsatt, ville assertionen under
-        // holdt også under en modell som feilaktig regnet urørte patch-rader med — samme felle som
-        // gjorde en tidligere test vakuøs.
+        // kategoriene, ikke mot den urørte patchen. Den urørte patchen må være den NYESTE av de tre:
+        // var fixturen motsatt, ville assertionen under holdt også under en modell som feilaktig
+        // regnet urørte patch-rader med.
         seedIntaktBehandling("MEL-982", "FØRSTEGANG", "2020-01-01 10:00:00")
         seedDefektBehandling("MEL-982", "NY_VURDERING", "2024-01-01 10:00:00")
         val skrevetTil = seedDefektBehandling("MEL-982", "NY_VURDERING", "2022-01-01 10:00:00")
@@ -495,7 +483,7 @@ class VedtaksmetadataFiksIT(
             .andExpect(jsonPath("$.sorteringspåvirkning[0].usikreDatoer[0]").value("2022-01-01 10:00:00"))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].patchedeDatoer[0]").value("2024-01-01 10:00:00"))
             // Nyeste som KAN være ekte er den skrevet-til raden fra 2022 — IKKE den urørte fra 2024,
-            // selv om den er nyere. Det er nettopp det skillet restruktureringen handler om.
+            // selv om den er nyere.
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareId").value(skrevetTil))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareDato").value("2022-01-01 10:00:00"))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(true))
