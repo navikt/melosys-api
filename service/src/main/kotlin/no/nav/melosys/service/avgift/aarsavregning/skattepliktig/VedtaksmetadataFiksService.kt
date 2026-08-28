@@ -58,9 +58,8 @@ class VedtaksmetadataFiksService {
     }
 
     /**
-     * Datafiksen — endrer prod. Avvises hvis scope er tomt, kandidatantallet overstiger
-     * [maksAntallRader], en kandidat har ukjent `beh_type`, eller patchen tar nyeste-plassen i
-     * vedtaksdato-sorteringen (se [sorteringspåvirkning]) for en sak som ikke er kvittert ut.
+     * Datafiksen — endrer prod, etter sikkerhetsselene under (hver avvisning forklarer seg selv i
+     * feilmeldingen).
      *
      * [tillatSorteringsendring] er en liste med saksnummer, ikke et av/på-flagg: den vurderte saken
      * kvitteres ut uten at selen slås av for de øvrige sakene i samme kall.
@@ -122,8 +121,6 @@ class VedtaksmetadataFiksService {
             }
         }
 
-        // Patchen kan bli nyeste rad uten at selen slo ut — typisk fordi den kun fortrenger en
-        // tidligere patch. Logges på INFO slik at kjøringen kan rekonstrueres i ettertid.
         påvirkning.filter { it.patchenBlirNyesteIHeleSaken && !it.patchenVinnerNyeste }.forEach {
             log.info {
                 "Datafiks $PATCH_MARKØR: sak ${it.saksnummer} — behandlingsresultat ${it.nyesteKandidatId} " +
@@ -227,16 +224,11 @@ class VedtaksmetadataFiksService {
         )
     }
 
-    /** Saksnummer i requesten som ikke ga én eneste kandidatrad — typisk en skrivefeil, ellers usynlig i svaret. */
     private fun finnSaksnummerUtenKandidater(saksnummer: List<String>, kandidater: List<VedtaksmetadataFiksRad>): List<String> {
         val truffet = kandidater.map { it.saksnummer }.toSet()
         return saksnummer.filterNot { it in truffet }
     }
 
-    /**
-     * Kvitteringer i `tillatSorteringsendring` som ikke traff noen sak der selen slår ut — typisk en
-     * skrivefeil. Beregnes også i forhåndsvisningen, så feilen oppdages før kjøringen som endrer prod.
-     */
     private fun finnKvitteringerUtenTreff(
         tillatSorteringsendring: List<String>,
         påvirkning: List<SorteringspåvirkningRad>,
@@ -284,8 +276,7 @@ class VedtaksmetadataFiksService {
      * periodeoverlapp, mens sammenligningen her er global maks mot global maks. `true` er en pålitelig
      * grunn til å stoppe; `false` er ikke et frikjenn. Derfor listes alle datoene.
      *
-     * Saker uten kandidater er ikke med i lista — send N saksnummer og du kan få M ≤ N rader. Bruk
-     * [VedtaksmetadataFiksResultat.utenMetadataPerSak] for å krysskontrollere.
+     * Saker uten kandidater er ikke med i lista.
      */
     private fun sorteringspåvirkning(saksnummer: List<String>): List<SorteringspåvirkningRad> {
         if (saksnummer.isEmpty()) return emptyList()
@@ -412,7 +403,6 @@ class VedtaksmetadataFiksService {
         return (query.singleResult as Number).toInt()
     }
 
-    /** Etterkontroll: hvor mange defekte rader står igjen per sak. Tom etter en vellykket skarp kjøring. */
     @Suppress("UNCHECKED_CAST")
     private fun tellUtenMetadata(saksnummer: List<String>): Map<String, Int> {
         if (saksnummer.isEmpty()) return emptyMap()
@@ -451,7 +441,6 @@ class VedtaksmetadataFiksService {
          */
         const val MAKS_UTTRYKK_I_IN = 1000
 
-        /** Default tak på antall rader en skarp kjøring får sette inn. Kan heves eksplisitt i requesten. */
         const val STANDARD_MAKS_ANTALL_RADER = 10
 
         /**

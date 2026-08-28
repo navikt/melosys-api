@@ -190,8 +190,6 @@ class VedtaksmetadataFiksIT(
 
     @Test
     fun `skarp angre uten saksnummer avvises, og krever bekreftAlle for å slette alt`() {
-        // Den mest destruktive stien: uten scope treffer DELETE alle patch-rader i basen, også
-        // fikser fra tidligere kjøringer — og hver slettet rad gjeninnfører 8174-krasjen.
         val gammelFiks = seedDefektBehandling("MEL-930", "NY_VURDERING", "2024-01-15 10:00:00")
         val nyFiks = seedDefektBehandling("MEL-931", "NY_VURDERING", "2024-06-15 10:00:00")
         kall(fiksUrl, """{"saksnummer":["MEL-930","MEL-931"],"skarp":true}""")
@@ -296,8 +294,7 @@ class VedtaksmetadataFiksIT(
 
     @Test
     fun `én kapret sak blokkerer ikke de øvrige når den kvitteres ut per saksnummer`() {
-        // Formen prod-dataene har: én av flere saker i samme kall kaprer nyeste-plassen. Et av-på-flagg
-        // ville tvunget operatøren til å slå av selen for alle tre.
+        // Formen prod-dataene har: én av flere saker i samme kall kaprer nyeste-plassen.
         seedIntaktBehandling("MEL-936", "FØRSTEGANG", "2024-08-16 09:51:06")
         seedDefektBehandling("MEL-936", "NY_VURDERING", "2024-08-16 09:54:28")   // kaprer
         seedIntaktBehandling("MEL-937", "FØRSTEGANG", "2025-01-06 10:15:04")
@@ -571,8 +568,6 @@ class VedtaksmetadataFiksIT(
 
     @Test
     fun `sak uten en eneste ekte vedtaksdato skilles ut som eget tilfelle`() {
-        // Ikke det farlige tilfellet, men det tryggeste: etter patchen kommer alle datoene i saken
-        // fra samme klokke, så den interne rekkefølgen er konsistent. Eget felt, ikke «patchen vinner».
         seedDefektBehandling("MEL-912", "NY_VURDERING", "2024-05-10 12:00:00")
 
         kall(fiksUrl, """{"saksnummer":["MEL-912"]}""")
@@ -690,8 +685,6 @@ class VedtaksmetadataFiksIT(
         kall(fiksUrl, """{"saksnummer":["MEL-924"]}""")
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareId").doesNotExist())
-            // Raden på den åpne behandlingen skal ikke dukke opp i rapporten i det hele tatt —
-            // avgrensningen er den samme som ÅrsavregningService bruker
             .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer").isEmpty)
             .andExpect(jsonPath("$.sorteringspåvirkning[0].antallUdaterteRader").value(0))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(false))
@@ -699,9 +692,6 @@ class VedtaksmetadataFiksIT(
 
     @Test
     fun `rad med vedtaksmetadata uten dato skilles fra sak helt uten vedtaksmetadata`() {
-        // Begge gir nyesteSammenlignbareId null og tre tomme datolister. Uten antallUdaterteRader
-        // leses de identisk, og operatøren konkluderer «saken har ingen vedtaksmetadata» når den
-        // kan ha flere.
         seedBehandlingUtenVedtaksdato("MEL-983", "FØRSTEGANG", "2024-01-01 08:00:00")
         seedDefektBehandling("MEL-983", "NY_VURDERING", "2024-06-01 12:00:00")
 
