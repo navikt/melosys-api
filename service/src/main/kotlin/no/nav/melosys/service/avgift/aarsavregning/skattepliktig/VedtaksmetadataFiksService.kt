@@ -300,8 +300,8 @@ class VedtaksmetadataFiksService {
             fun datoer(opphav: Datoopphav) =
                 eksisterende.filter { it.opphav == opphav }.mapNotNull { it.visning }
 
-            // Rader uten dato er ikke sammenligningsgrunnlag: ÅrsavregningService sorterer null
-            // først i stigende rekkefølge — altså som de eldste — så de vinner aldri .lastOrNull().
+            // Rader uten dato holdes utenfor sammenligningen: ÅrsavregningService sorterer dem
+            // som de eldste, så de kan aldri være den nyeste behandlingen patchen konkurrerer mot.
             val nyesteSammenlignbare = eksisterende
                 .filter { it.opphav != Datoopphav.PATCHET_URØRT && it.sortering != null }
                 .maxByOrNull { it.sortering!! }
