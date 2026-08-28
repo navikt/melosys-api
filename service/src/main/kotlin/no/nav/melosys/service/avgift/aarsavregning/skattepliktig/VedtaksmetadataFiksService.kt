@@ -53,7 +53,7 @@ class VedtaksmetadataFiksService {
             ukjentBehType = kandidater.filterNot { it.behType in KJENTE_BEH_TYPER }.map { it.behandlingsresultatId },
             sorteringspåvirkning = påvirkning,
             saksnummerUtenKandidater = finnSaksnummerUtenKandidater(saksnummer, kandidater),
-            kvitteringerUtenTreff = finnKvitteringerUtenTreff(tillatSorteringsendring, påvirkning),
+            godkjenningerUtenTreff = finnGodkjenningerUtenTreff(tillatSorteringsendring, påvirkning),
         )
     }
 
@@ -97,9 +97,9 @@ class VedtaksmetadataFiksService {
 
         // Må måles før INSERT-en — etterpå er patch-radene ekte rader, og «før»-bildet kan ikke gjenskapes.
         val påvirkning = sorteringspåvirkning(saksnummer)
-        val blirNyeste = påvirkning.filter { it.patchenVinnerNyeste }
+        val blirNyeste = påvirkning.filter { it.trengerGodkjenning }
         val ikkeGodkjent = blirNyeste.filterNot { it.saksnummer in tillatSorteringsendring }
-        val kvitteringerUtenTreff = finnKvitteringerUtenTreff(tillatSorteringsendring, påvirkning)
+        val godkjenningerUtenTreff = finnGodkjenningerUtenTreff(tillatSorteringsendring, påvirkning)
         if (ikkeGodkjent.isNotEmpty()) {
             throw VedtaksmetadataFiksAvvist(
                 "Den tilnærmede vedtaksdatoen ville blitt den nyeste i saken for " +
@@ -107,8 +107,8 @@ class VedtaksmetadataFiksService {
                     ". Da endres hvilken behandling årsavregningen henter avgiftsgrunnlaget fra. " +
                     "Sett riktig vedtaksdato manuelt, eller legg saksnummeret i tillatSorteringsendring " +
                     "hvis endringen er vurdert og ønsket." +
-                    if (kvitteringerUtenTreff.isEmpty()) "" else
-                        " Merk: disse oppføringene i tillatSorteringsendring traff ingen sak som trengte godkjenning: $kvitteringerUtenTreff."
+                    if (godkjenningerUtenTreff.isEmpty()) "" else
+                        " Merk: disse oppføringene i tillatSorteringsendring traff ingen sak som trengte godkjenning: $godkjenningerUtenTreff."
             )
         }
 
@@ -121,7 +121,7 @@ class VedtaksmetadataFiksService {
             }
         }
 
-        påvirkning.filter { it.patchenBlirNyesteIHeleSaken && !it.patchenVinnerNyeste }.forEach {
+        påvirkning.filter { it.patchenBlirNyesteIHeleSaken && !it.trengerGodkjenning }.forEach {
             log.info {
                 "Datafiks $PATCH_MARKØR: sak ${it.saksnummer} — behandlingsresultat ${it.nyesteKandidatId} " +
                     "(${it.nyesteKandidatDato}) blir nyeste rad i saken, men fortrenger ingen dato som " +
@@ -164,7 +164,7 @@ class VedtaksmetadataFiksService {
             avvik = avvik,
             sorteringspåvirkning = påvirkning,
             saksnummerUtenKandidater = finnSaksnummerUtenKandidater(saksnummer, kandidater),
-            kvitteringerUtenTreff = kvitteringerUtenTreff,
+            godkjenningerUtenTreff = godkjenningerUtenTreff,
         )
     }
 
@@ -229,11 +229,11 @@ class VedtaksmetadataFiksService {
         return saksnummer.filterNot { it in truffet }
     }
 
-    private fun finnKvitteringerUtenTreff(
+    private fun finnGodkjenningerUtenTreff(
         tillatSorteringsendring: List<String>,
         påvirkning: List<SorteringspåvirkningRad>,
     ): List<String> {
-        val trengerGodkjenning = påvirkning.filter { it.patchenVinnerNyeste }.map { it.saksnummer }.toSet()
+        val trengerGodkjenning = påvirkning.filter { it.trengerGodkjenning }.map { it.saksnummer }.toSet()
         return tillatSorteringsendring.distinct().filterNot { it in trengerGodkjenning }
     }
 
@@ -270,7 +270,7 @@ class VedtaksmetadataFiksService {
      * Kontrollen skal hindre at en tilnærmet dato fortrenger et vedtak som kan være ekte, og
      * sammenligner derfor kun mot [Datoopphav.EKTE] og [Datoopphav.PATCHET_ENDRET]. Rader vi selv
      * satte inn og som ingen har rørt siden er beviselig vår egen tilnærming; de rapporteres, men
-     * styrer ingenting. [SorteringspåvirkningRad.patchenVinnerNyeste] er alene nok til å avgjøre.
+     * styrer ingenting. [SorteringspåvirkningRad.trengerGodkjenning] er alene nok til å avgjøre.
      *
      * Dette er ingen simulering av avgiftsgrunnlaget: den faktiske utvelgelsen filtrerer også på år og
      * periodeoverlapp, mens sammenligningen her er global maks mot global maks. `true` er en pålitelig
@@ -304,7 +304,7 @@ class VedtaksmetadataFiksService {
                 // >= og ikke >: ved eksakt likt tidsstempel er utfallet i den ekte sorteringen
                 // vilkårlig (stabil sortering på behandlingsrekkefølgen), og et vilkårlig utfall
                 // skal flagges, ikke rapporteres som om patchen taper.
-                patchenVinnerNyeste = nyesteSammenlignbare != null &&
+                trengerGodkjenning = nyesteSammenlignbare != null &&
                     requireNotNull(nyesteKandidat.sortering) >= nyesteSammenlignbare.sortering!!,
                 patchenBlirNyesteIHeleSaken = eksisterende
                     .mapNotNull { it.sortering }
@@ -605,7 +605,7 @@ data class VedtaksmetadataFiksRad(
 )
 
 /**
- * Hva patchen gjør med vedtaksdato-sorteringen for én sak. [patchenVinnerNyeste] er det eneste
+ * Hva patchen gjør med vedtaksdato-sorteringen for én sak. [trengerGodkjenning] er det eneste
  * feltet som blokkerer skarp kjøring; resten er rapport. Summen av de tre datolistene er alle
  * daterte rader `ÅrsavregningService` ser i saken — samme avgrensning som
  * `hentGjeldendeBehandlingsresultaterForÅrsavregning` (rader på åpne behandlinger er derfor ikke med).
@@ -627,7 +627,7 @@ data class SorteringspåvirkningRad(
      * som er ekte. True også ved eksakt likt tidsstempel — da er utfallet vilkårlig, og det skal
      * flagges. **Blokkerer skarp kjøring med mindre saksnummeret er godkjent i `tillatSorteringsendring`.**
      */
-    val patchenVinnerNyeste: Boolean,
+    val trengerGodkjenning: Boolean,
     /**
      * Patchen blir nyeste rad i saken sett mot ALLE rader, også de vi selv satte inn tidligere.
      * Blokkerer ikke — fortrenger den bare en tidligere patch, er det ingen ekte dato som ryker — men
@@ -669,7 +669,7 @@ data class VedtaksmetadataFiksResultat(
     /** Saksnummer fra requesten uten kandidatrader — skrivefeil, eller sak uten defekte rader. Blokkerer ikke. */
     val saksnummerUtenKandidater: List<String> = emptyList(),
     /** Oppføringer i `tillatSorteringsendring` som ikke traff noen sak som trengte godkjenning — typisk en skrivefeil. Blokkerer ikke. */
-    val kvitteringerUtenTreff: List<String> = emptyList(),
+    val godkjenningerUtenTreff: List<String> = emptyList(),
     /** True hvis antall innsatte rader ikke stemmer med forhåndsvisningen. */
     val avvik: Boolean = false,
     /** Per sak: bytter patchen ut hvilken behandling som er nyest i vedtaksdato-sorteringen? */

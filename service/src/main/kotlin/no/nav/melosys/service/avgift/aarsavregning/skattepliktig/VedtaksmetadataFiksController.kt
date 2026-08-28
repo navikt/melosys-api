@@ -37,7 +37,7 @@ class VedtaksmetadataFiksController(
             "med /vedtaksmetadata-fiks/angre. " +
             "Vedtaksdatoen som settes er en tilnærming (behandlingsresultatets endret_dato). Blir " +
             "den tilnærmede datoen den nyeste i saken, kan den endre hvilken behandling " +
-            "årsavregningen henter avgiftsgrunnlaget fra — da avvises kjøringen (patchenVinnerNyeste " +
+            "årsavregningen henter avgiftsgrunnlaget fra — da avvises kjøringen (trengerGodkjenning " +
             "i svaret er true). Sett i så fall riktig vedtaksdato manuelt, eller legg saksnummeret i " +
             "tillatSorteringsendring for å godkjenne endringen for akkurat den saken."
     )

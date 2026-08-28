@@ -261,7 +261,7 @@ class VedtaksmetadataFiksIT(
 
         kall(fiksUrl, """{"saksnummer":["MEL-934"]}""")
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].trengerGodkjenning").value(false))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareId").doesNotExist())
             .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer").isEmpty)
             .andExpect(jsonPath("$.sorteringspåvirkning[0].usikreDatoer").isEmpty)
@@ -287,7 +287,7 @@ class VedtaksmetadataFiksIT(
             .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer.length()").value(1))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].patchedeDatoer[0]").value("2026-01-01 10:00:00"))
             // 2025-kandidaten legger seg over det ekte vedtaket fra 2023 — kontrollen skal slå ut
-            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(true))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].trengerGodkjenning").value(true))
 
         vedtaksdato(ekte) shouldBe "2023-01-01 10:00:00"
     }
@@ -380,7 +380,7 @@ class VedtaksmetadataFiksIT(
             .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer").isEmpty)
             .andExpect(jsonPath("$.sorteringspåvirkning[0].usikreDatoer[0]").value("2023-05-05 08:00:00"))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareDato").value("2023-05-05 08:00:00"))
-            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(true))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].trengerGodkjenning").value(true))
 
         kall(fiksUrl, """{"saksnummer":["MEL-960"],"skarp":true}""")
             .andExpect(status().isBadRequest)
@@ -398,7 +398,7 @@ class VedtaksmetadataFiksIT(
 
         kall(fiksUrl, """{"saksnummer":["MEL-961"]}""")
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].trengerGodkjenning").value(false))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareId").doesNotExist())
             .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer").isEmpty)
             .andExpect(jsonPath("$.sorteringspåvirkning[0].patchedeDatoer[0]").value("2024-01-01 10:00:00"))
@@ -432,7 +432,7 @@ class VedtaksmetadataFiksIT(
     @Test
     fun `godkjenning med ugyldig saksnummerformat avvises på samme måte som saksnummer`() {
         // tillatSorteringsendring er saksnummer og skal gjennom samme formatkontroll — ellers ville
-        // søppel blitt ekkoet rett tilbake i kvitteringerUtenTreff.
+        // søppel blitt ekkoet rett tilbake i godkjenningerUtenTreff.
         seedDefektBehandling("MEL-980", "NY_VURDERING", "2024-01-15 10:00:00")
 
         kall(fiksUrl, """{"saksnummer":["MEL-980"],"skarp":true,"tillatSorteringsendring":["MEL-1' OR 1=1--"]}""")
@@ -450,8 +450,8 @@ class VedtaksmetadataFiksIT(
 
         kall(fiksUrl, """{"saksnummer":["MEL-981"],"tillatSorteringsendring":["MEL-8888"]}""")
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.kvitteringerUtenTreff[0]").value("MEL-8888"))
-            .andExpect(jsonPath("$.kvitteringerUtenTreff.length()").value(1))
+            .andExpect(jsonPath("$.godkjenningerUtenTreff[0]").value("MEL-8888"))
+            .andExpect(jsonPath("$.godkjenningerUtenTreff.length()").value(1))
     }
 
     @Test
@@ -482,7 +482,7 @@ class VedtaksmetadataFiksIT(
             // selv om den er nyere.
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareId").value(skrevetTil))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareDato").value("2022-01-01 10:00:00"))
-            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(true))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].trengerGodkjenning").value(true))
     }
 
     @Test
@@ -546,7 +546,7 @@ class VedtaksmetadataFiksIT(
         kall(fiksUrl, """{"saksnummer":["MEL-910"]}""")
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.sorteringspåvirkning[0].saksnummer").value("MEL-910"))
-            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(true))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].trengerGodkjenning").value(true))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareId").value(ekteNyeste))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareDato").value("2023-03-01 10:00:00"))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteKandidatId").value(defekt))
@@ -562,7 +562,7 @@ class VedtaksmetadataFiksIT(
 
         kall(fiksUrl, """{"saksnummer":["MEL-911"]}""")
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].trengerGodkjenning").value(false))
     }
 
     @Test
@@ -572,7 +572,7 @@ class VedtaksmetadataFiksIT(
         kall(fiksUrl, """{"saksnummer":["MEL-912"]}""")
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareId").doesNotExist())
-            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].trengerGodkjenning").value(false))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer").isEmpty)
             .andExpect(jsonPath("$.sorteringspåvirkning[0].antallUdaterteRader").value(0))
     }
@@ -598,16 +598,16 @@ class VedtaksmetadataFiksIT(
             .andExpect(jsonPath("$.antallRaderFunnet").value(3))
             // Patchen havner mellom to ekte vedtak — det nyeste vedtaket er fortsatt nyest
             .andExpect(jsonPath("$.sorteringspåvirkning[0].saksnummer").value("MEL-448193"))
-            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].trengerGodkjenning").value(false))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareDato").value("2025-01-06 10:15:04"))
             // Eneste sak der patchen blir nyeste: NY_VURDERING drøye tre minutter
             // etter førstegangsvedtaket, så her avgjør ekte vedtaksdato utfallet
             .andExpect(jsonPath("$.sorteringspåvirkning[1].saksnummer").value("MEL-545776"))
-            .andExpect(jsonPath("$.sorteringspåvirkning[1].patchenVinnerNyeste").value(true))
+            .andExpect(jsonPath("$.sorteringspåvirkning[1].trengerGodkjenning").value(true))
             .andExpect(jsonPath("$.sorteringspåvirkning[1].nyesteSammenlignbareDato").value("2024-08-16 09:51:06"))
             .andExpect(jsonPath("$.sorteringspåvirkning[1].nyesteKandidatDato").value("2024-08-16 09:54:28"))
             .andExpect(jsonPath("$.sorteringspåvirkning[2].saksnummer").value("MEL-632908"))
-            .andExpect(jsonPath("$.sorteringspåvirkning[2].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspåvirkning[2].trengerGodkjenning").value(false))
 
         antallMetadata() shouldBe 5
     }
@@ -624,7 +624,7 @@ class VedtaksmetadataFiksIT(
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareId").value(ekte))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareDato").value("2025-05-05 10:00:00"))
-            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].trengerGodkjenning").value(false))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareId").exists())
     }
 
@@ -636,7 +636,7 @@ class VedtaksmetadataFiksIT(
         kall(fiksUrl, """{"saksnummer":["MEL-921"]}""")
             .andExpect(status().isOk)
             // Samme sekund, men patchen er 500 ms nyere og ville tatt plassen i den ekte sorteringen
-            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(true))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].trengerGodkjenning").value(true))
     }
 
     @Test
@@ -648,7 +648,7 @@ class VedtaksmetadataFiksIT(
 
         kall(fiksUrl, """{"saksnummer":["MEL-926"]}""")
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].trengerGodkjenning").value(false))
     }
 
     @Test
@@ -658,7 +658,7 @@ class VedtaksmetadataFiksIT(
 
         kall(fiksUrl, """{"saksnummer":["MEL-922"]}""")
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(true))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].trengerGodkjenning").value(true))
     }
 
     @Test
@@ -671,7 +671,7 @@ class VedtaksmetadataFiksIT(
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.antallRaderFunnet").value(2))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteKandidatId").value(nyesteKandidat))
-            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(true))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].trengerGodkjenning").value(true))
     }
 
     @Test
@@ -686,7 +686,7 @@ class VedtaksmetadataFiksIT(
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareId").doesNotExist())
             .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer").isEmpty)
             .andExpect(jsonPath("$.sorteringspåvirkning[0].antallUdaterteRader").value(0))
-            .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(false))
+            .andExpect(jsonPath("$.sorteringspåvirkning[0].trengerGodkjenning").value(false))
     }
 
     @Test
