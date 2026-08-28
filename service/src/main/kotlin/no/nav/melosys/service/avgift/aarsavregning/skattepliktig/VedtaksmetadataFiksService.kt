@@ -176,7 +176,7 @@ class VedtaksmetadataFiksService {
      * Tom `saksnummer`-liste betyr «alle markerte rader»; `skarp = false` viser hva som ville blitt
      * slettet. Skarp kjøring uten scope krever [bekreftAlle]: et glemt `saksnummer` ville ellers
      * rullet tilbake alle patch-rader i basen — også fra tidligere kjøringer — og hver slettet rad
-     * gjeninnfører 8174-krasjen på saken den fikset.
+     * gjeninnfører feilen fiksen rettet på den saken.
      */
     @Transactional
     fun angre(saksnummer: List<String>, skarp: Boolean, bekreftAlle: Boolean = false): VedtaksmetadataAngreResultat {
@@ -424,9 +424,9 @@ class VedtaksmetadataFiksService {
         const val PATCH_MARKØR = "MELOSYS-8174-PATCH"
 
         /**
-         * Sakene fra fiksplanen som fag har bekreftet har trygdeavgift til Nav for 2024. Brukes kun
-         * som default i preview — skarp kjøring krever eksplisitt liste. MEL-409394 er bevisst
-         * utelatt: avklart separat (år-løs årsavregning, ikke manglende vedtaksmetadata).
+         * Saker fag har bekreftet har trygdeavgift til Nav for 2024. Brukes kun som default i
+         * preview — skarp kjøring krever eksplisitt liste. MEL-409394 er bevisst utelatt: avklart
+         * separat (år-løs årsavregning, ikke manglende vedtaksmetadata).
          */
         val STANDARD_SAKER = listOf("MEL-448193", "MEL-545776", "MEL-632908")
 

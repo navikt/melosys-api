@@ -15,14 +15,9 @@ private val log = KotlinLogging.logger { }
 private val SAKSNUMMER_FORMAT = Regex("^MEL-\\d+$")
 
 /**
- * Admin-endepunktene for datafiksen i MELOSYS-8174 — se [VedtaksmetadataFiksService] for hva feilen
- * er og hvorfor fiksen ser ut som den gjør.
- *
- * Endepunktene ligger permanent på master, ikke på en ops-branch: samme feilklasse har dukket opp
- * før (Flyway-patchen `V7.6_04`), og fiksen er idempotent, read-only som default og hardt selet.
- *
- * Basestien er årsavregningens skattepliktige admin-flate; kjøringsverktøyet (MELOSYS-8045) legger
- * seg på samme base med egne underliggende stier.
+ * Admin-endepunkter for å rette avsluttede behandlinger som mangler rad i `vedtak_metadata` — en
+ * datafeil som gjør at årsavregningen feiler for hele saken. Se [VedtaksmetadataFiksService] for
+ * hva feilen er og hvorfor fiksen ser ut som den gjør.
  */
 @Protected
 @RestController
@@ -32,21 +27,19 @@ class VedtaksmetadataFiksController(
 ) {
 
     @Operation(
-        summary = "Datafiks: sett inn manglende vedtaksmetadata (MELOSYS-8174)",
-        description = "Med skarp=false (default) er dette en read-only forhåndsvisning av nøyaktig " +
-            "hvilke rader som ville blitt satt inn, med de tre sakene i fiksplanen som default. " +
-            "Med skarp=true endres data: da må saksnummer angis eksplisitt, antall rader må ligge " +
-            "innenfor maksAntallRader (default 10), og alle kandidater må ha en beh_type vi kan " +
-            "utlede vedtakstype fra. Innsettingen er idempotent, og alle rader merkes " +
-            "MELOSYS-8174-PATCH slik at de kan rulles tilbake med /vedtaksmetadata-fiks/angre. " +
-            "VIKTIG: vedtak_dato settes til proxyen behandlingsresultat.endret_dato, og den datoen " +
-            "styrer hvilken behandling ÅrsavregningService regner som nyest — altså hvor " +
-            "avgiftsgrunnlaget hentes fra. Er patchenVinnerNyeste true for en sak i " +
-            "sorteringspåvirkning, avvises skarp kjøring: sett ekte vedtaksdato manuelt, eller list " +
-            "saksnummeret i tillatSorteringsendring hvis endringen er vurdert — det kvitterer ut " +
-            "saken, ikke selen. Merk at false ikke er et frikjenn: sammenligningen er global maks " +
-            "mot global maks, mens den ekte utvelgelsen også filtrerer på år og periodeoverlapp. " +
-            "Se feltdokumentasjonen på svaret for detaljene."
+        summary = "Sett inn manglende vedtaksmetadata for oppgitte saker (datafiks)",
+        description = "Enkelte avsluttede behandlinger mangler rad i vedtak_metadata, og da feiler " +
+            "årsavregningen for hele saken. Dette endepunktet setter inn de manglende radene. " +
+            "Med skarp=false (default) endres ingenting — svaret viser hvilke rader som ville blitt " +
+            "satt inn. Med skarp=true settes radene inn: da må saksnummer angis, og antall rader kan " +
+            "ikke overstige maksAntallRader (default 10). Kjøringen kan trygt gjentas (allerede " +
+            "fiksede rader settes ikke inn på nytt), og radene merkes slik at de kan slettes igjen " +
+            "med /vedtaksmetadata-fiks/angre. " +
+            "Vedtaksdatoen som settes er en tilnærming (behandlingsresultatets endret_dato). Blir " +
+            "den tilnærmede datoen den nyeste i saken, kan den endre hvilken behandling " +
+            "årsavregningen henter avgiftsgrunnlaget fra — da avvises kjøringen (patchenVinnerNyeste " +
+            "i svaret er true). Sett i så fall riktig vedtaksdato manuelt, eller legg saksnummeret i " +
+            "tillatSorteringsendring for å godkjenne endringen for akkurat den saken."
     )
     @PostMapping("/vedtaksmetadata-fiks")
     fun vedtaksmetadataFiks(
@@ -85,14 +78,11 @@ class VedtaksmetadataFiksController(
     }
 
     @Operation(
-        summary = "Angre datafiksen: slett rader merket MELOSYS-8174-PATCH",
-        description = "Med skarp=false (default) vises kun hva som ville blitt slettet. " +
-            "Tom saksnummer-liste betyr alle markerte rader; angi saksnummer for å angre én sak om gangen. " +
-            "Skarp kjøring uten saksnummer krever bekreftAlle=true, fordi den ellers ruller tilbake " +
-            "alle patch-rader i basen — også fikser fra tidligere kjøringer. " +
-            "Rader der markøren er overskrevet av en senere endring (endret_av != MELOSYS-8174-PATCH) " +
-            "røres aldri — de telles i antallSomIkkeKanAngres. Det gjelder også rader der endret_av er " +
-            "tømt: de kan ikke rulles tilbake automatisk, og telles i samme felt."
+        summary = "Slett rader som datafiksen har satt inn",
+        description = "Med skarp=false (default) endres ingenting — svaret viser hva som ville blitt " +
+            "slettet. Tom saksnummer-liste betyr alle rader fiksen har satt inn, uansett sak; skarp " +
+            "sletting uten saksnummer krever derfor også bekreftAlle=true. " +
+            "Rader som er endret etter innsettingen slettes aldri — de telles i antallSomIkkeKanAngres."
     )
     @PostMapping("/vedtaksmetadata-fiks/angre")
     fun angreVedtaksmetadataFiks(
@@ -145,27 +135,26 @@ class VedtaksmetadataFiksController(
 }
 
 data class VedtaksmetadataFiksRequest(
-    /** Påkrevd ved skarp = true. I preview brukes de tre sakene fra fiksplanen hvis lista er tom. */
+    /** Påkrevd ved skarp = true. Tom liste i forhåndsvisning bruker [VedtaksmetadataFiksService.STANDARD_SAKER]. */
     val saksnummer: List<String> = emptyList(),
     val skarp: Boolean = false,
-    /** Sikkerhetssele: skarp kjøring avvises hvis den ville satt inn flere rader enn dette. */
+    /** Skarp kjøring avvises hvis den ville satt inn flere rader enn dette. */
     val maksAntallRader: Int = VedtaksmetadataFiksService.STANDARD_MAKS_ANTALL_RADER,
     /**
-     * Saksnummer der det er vurdert og ønsket at patchen tar nyeste-plassen i vedtaksdato-sorteringen.
-     * Saker som kaprer uten å stå her avvises, fordi de bytter hvilken behandling avgiftsgrunnlaget
-     * hentes fra. Liste og ikke flagg: ett kapret saksnummer skal ikke tvinge deg til å slå av selen
-     * for de øvrige sakene i kallet.
+     * Saksnummer der det er vurdert og godkjent at den tilnærmede vedtaksdatoen blir den nyeste i
+     * saken (se beskrivelsen av endepunktet). Liste og ikke flagg, slik at godkjenningen kun
+     * gjelder de oppgitte sakene.
      */
     val tillatSorteringsendring: List<String> = emptyList(),
 )
 
 data class VedtaksmetadataAngreRequest(
-    /** Tom liste = alle rader merket MELOSYS-8174-PATCH, uansett sak. Krever [bekreftAlle] ved skarp. */
+    /** Tom liste = alle rader fiksen har satt inn, uansett sak. Krever [bekreftAlle] ved skarp. */
     val saksnummer: List<String> = emptyList(),
     val skarp: Boolean = false,
     /**
-     * Kvitterer ut en skarp kjøring uten scope. Uten denne avvises tomt scope, fordi et glemt
-     * `saksnummer` ellers ruller tilbake alle patch-rader i basen — også fra tidligere kjøringer.
+     * Påkrevd ved skarp sletting uten saksnummer, slik at et glemt `saksnummer`-felt ikke sletter
+     * alle radene fiksen noen gang har satt inn.
      */
     val bekreftAlle: Boolean = false,
 )
