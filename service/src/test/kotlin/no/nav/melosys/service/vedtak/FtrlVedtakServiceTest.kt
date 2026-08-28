@@ -13,9 +13,6 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avklartefakta
-import no.nav.melosys.domain.medlemskapsperiode
-import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -38,7 +35,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
-import no.nav.melosys.domain.Fagsak
 
 @ExtendWith(MockKExtension::class)
 class FtrlVedtakServiceTest {
@@ -337,7 +333,7 @@ class FtrlVedtakServiceTest {
 
     @Test
     fun `delvis opphør med FULLSTENDIG_MANGLENDE_INNBETALING satt til false behandles ikke som fullstendig opphør`() {
-        // Regresjonstest for 8028: harFullstendigManglendeInnbetaling må sjekke fakta-verdien (TRUE/FALSE),
+        // Regresjonstest for 8028: harFullstendigManglendeInnbetalingAvklarteFakta må sjekke fakta-verdien (TRUE/FALSE),
         // ikke bare at avklartefakta-raden finnes. Hvis saksbehandler har vært innom "hele perioden" og
         // deretter går til "deler av perioden", står avklartefakta-raden igjen med fakta=FALSE. Da skal
         // opphørt-flyten IKKE trigges, og opphørsdato skal utledes fra den faktisk opphørte perioden.

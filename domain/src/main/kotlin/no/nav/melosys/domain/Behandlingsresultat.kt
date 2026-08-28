@@ -1,7 +1,6 @@
 package no.nav.melosys.domain
 
 import jakarta.persistence.*
-import org.hibernate.annotations.DynamicUpdate
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
@@ -12,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_k
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_konv_efta_storbritannia
 import no.nav.melosys.exception.FunksjonellException
+import org.hibernate.annotations.DynamicUpdate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.Instant
 import java.time.LocalDate
@@ -262,6 +262,12 @@ open class Behandlingsresultat : RegistreringsInfo() {
     fun erAnmodningOmUnntak(): Boolean = type == Behandlingsresultattyper.ANMODNING_OM_UNNTAK
 
     fun erOpphørt(): Boolean = type == Behandlingsresultattyper.OPPHØRT
+
+    fun finnFullstendigManglendeInnbetalingAvklarteFakta(): Avklartefakta? =
+        avklartefakta.firstOrNull { it.type == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING }
+
+    fun harFullstendigManglendeInnbetalingAvklarteFakta() =
+        finnFullstendigManglendeInnbetalingAvklarteFakta()?.fakta.equals(Avklartefakta.VALGT_FAKTA, ignoreCase = true)
 
     fun erInnvilgelse(): Boolean {
         if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND ||
