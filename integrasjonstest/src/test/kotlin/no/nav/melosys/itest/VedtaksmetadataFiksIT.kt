@@ -26,7 +26,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 /**
  * Dekker datafiksen i MELOSYS-8174 — `VedtaksmetadataFiksController` og `VedtaksmetadataFiksService`.
- * Endepunktet skriver rett i `vedtak_metadata` i prod, så garantiene her — sikkerhetsselene, angre-
+ * Endepunktet skriver rett i `vedtak_metadata` i prod, så garantiene her — kontrollene, angre-
  * semantikken og sorteringsrapporten — er de som avgjør om en feilkjøring kan gjøre skade.
  */
 @ActiveProfiles("test")
@@ -67,7 +67,7 @@ class VedtaksmetadataFiksIT(
     }
 
     @Test
-    fun `skarp setter inn radene med markør og proxy-dato, og er idempotent`() {
+    fun `skarp setter inn radene med markør og tilnærmet dato, og er idempotent`() {
         val foerstegang = seedDefektBehandling("MEL-902", "FØRSTEGANG", "2023-11-23 08:00:00")
         val nyVurdering = seedDefektBehandling("MEL-902", "NY_VURDERING", "2024-10-23 09:54:00")
 
@@ -79,7 +79,7 @@ class VedtaksmetadataFiksIT(
 
         vedtakstype(foerstegang) shouldBe "FØRSTEGANGSVEDTAK"
         vedtakstype(nyVurdering) shouldBe "ENDRINGSVEDTAK"
-        // vedtak_dato er proxyen behandlingsresultat.endret_dato, ikke tidspunktet fiksen kjørte
+        // vedtak_dato er den tilnærmede datoen behandlingsresultat.endret_dato, ikke tidspunktet fiksen kjørte
         vedtaksdato(nyVurdering) shouldBe "2024-10-23 09:54:00"
         registrertAv(nyVurdering) shouldBe PATCH_MARKØR
 
@@ -208,7 +208,7 @@ class VedtaksmetadataFiksIT(
             .andExpect(jsonPath("$.antallSlettet").value(0))
         patchedeIder() shouldContainExactly listOf(gammelFiks, nyFiks)
 
-        // Nødbryteren finnes fortsatt, men må kvitteres ut
+        // Nødbryteren finnes fortsatt, men må bekreftes eksplisitt
         kall(angreUrl, """{"skarp":true,"bekreftAlle":true}""")
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.antallSlettet").value(2))
@@ -252,8 +252,8 @@ class VedtaksmetadataFiksIT(
 
     @Test
     fun `en urørt patch-rad er ikke sammenligningsgrunnlag, og rapporteres for seg`() {
-        // Runde 1 patcher saken. Raden er beviselig vår egen proxy, så runde 2 skal ikke måle mot
-        // den: den havner i patchedeDatoer og styrer ingenting.
+        // Runde 1 patcher saken. Radens dato er beviselig vår egen tilnærming, så runde 2 skal ikke
+        // måle mot den: den havner i patchedeDatoer og styrer ingenting.
         seedDefektBehandling("MEL-934", "NY_VURDERING", "2026-01-01 10:00:00")
         kall(fiksUrl, """{"saksnummer":["MEL-934"],"skarp":true}""").andExpect(status().isOk)
 
@@ -281,24 +281,24 @@ class VedtaksmetadataFiksIT(
 
         kall(fiksUrl, """{"saksnummer":["MEL-935"]}""")
             .andExpect(status().isOk)
-            // Selen måler mot den ekte raden, ikke mot patch-raden fra 2026
+            // Kontrollen måler mot den ekte raden, ikke mot patch-raden fra 2026
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareDato").value("2023-01-01 10:00:00"))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer[0]").value("2023-01-01 10:00:00"))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer.length()").value(1))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].patchedeDatoer[0]").value("2026-01-01 10:00:00"))
-            // 2025-kandidaten legger seg over det ekte vedtaket fra 2023 — selen skal slå ut
+            // 2025-kandidaten legger seg over det ekte vedtaket fra 2023 — kontrollen skal slå ut
             .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(true))
 
         vedtaksdato(ekte) shouldBe "2023-01-01 10:00:00"
     }
 
     @Test
-    fun `én kapret sak blokkerer ikke de øvrige når den kvitteres ut per saksnummer`() {
-        // Formen prod-dataene har: én av flere saker i samme kall kaprer nyeste-plassen.
+    fun `godkjenning av én sak blokkerer ikke de øvrige sakene i kallet`() {
+        // Formen prod-dataene har: i én av flere saker i samme kall blir den tilnærmede datoen nyeste.
         seedIntaktBehandling("MEL-936", "FØRSTEGANG", "2024-08-16 09:51:06")
-        seedDefektBehandling("MEL-936", "NY_VURDERING", "2024-08-16 09:54:28")   // kaprer
+        seedDefektBehandling("MEL-936", "NY_VURDERING", "2024-08-16 09:54:28")   // blir nyeste
         seedIntaktBehandling("MEL-937", "FØRSTEGANG", "2025-01-06 10:15:04")
-        seedDefektBehandling("MEL-937", "NY_VURDERING", "2024-10-23 09:02:15")   // kaprer ikke
+        seedDefektBehandling("MEL-937", "NY_VURDERING", "2024-10-23 09:02:15")   // blir ikke nyeste
 
         kall(fiksUrl, """{"saksnummer":["MEL-936","MEL-937"],"skarp":true}""")
             .andExpect(status().isBadRequest)
@@ -310,7 +310,7 @@ class VedtaksmetadataFiksIT(
     }
 
     @Test
-    fun `kvittering for feil sak hjelper ikke — selen gjelder fortsatt den som kaprer`() {
+    fun `godkjenning av feil sak hjelper ikke — kontrollen gjelder fortsatt saken som trenger den`() {
         seedIntaktBehandling("MEL-938", "FØRSTEGANG", "2024-08-16 09:51:06")
         seedDefektBehandling("MEL-938", "NY_VURDERING", "2024-08-16 09:54:28")
 
@@ -340,8 +340,8 @@ class VedtaksmetadataFiksIT(
 
         kall(fiksUrl, """{"saksnummer":["MEL-941"],"skarp":true,"maksAntallRader":2000}""")
             .andExpect(status().isBadRequest)
-            // Tre ulike seler gir 400 for denne request-formen. Uten å pinne meldingen ville testen
-            // fortsatt vært grønn om IN-selen ble fjernet og maksAntallRader-selen fanget den i stedet.
+            // Tre ulike kontroller gir 400 for denne request-formen. Uten å pinne meldingen ville testen
+            // fortsatt vært grønn om IN-kontrollen ble fjernet og maksAntallRader-kontrollen fanget den i stedet.
             .andExpect(jsonPath("$.feil").value(containsString("ORA-01795")))
 
         antallMetadata() shouldBe 0
@@ -354,7 +354,7 @@ class VedtaksmetadataFiksIT(
 
     @Test
     fun `ekte vedtaksdato skrevet oppå en patch-rad gjør den ekte igjen`() {
-        // Selen ber operatøren «sette ekte vedtaksdato manuelt». Regnes raden fortsatt som patchet
+        // Avvisningen ber operatøren «sette riktig vedtaksdato manuelt». Regnes raden fortsatt som patchet
         // etterpå, er den remedien uten virkning: ekteDatoer forblir tom uansett hvor mange ekte
         // datoer som skrives. Flagget må derfor bruke samme definisjon som angreknappen — markør i
         // BÅDE registrert_av og endret_av.
@@ -376,7 +376,7 @@ class VedtaksmetadataFiksIT(
             .andExpect(status().isOk)
             // endret_av er @LastModifiedBy og flyttes av ENHVER skriving, så vi kan ikke vite om det
             // som ble skrevet var vedtaksdatoen. Raden rapporteres derfor som usikker, men regnes
-            // med i seleunderlaget — altså konservativt.
+            // med i sammenligningsgrunnlaget — altså konservativt.
             .andExpect(jsonPath("$.sorteringspåvirkning[0].ekteDatoer").isEmpty)
             .andExpect(jsonPath("$.sorteringspåvirkning[0].usikreDatoer[0]").value("2023-05-05 08:00:00"))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareDato").value("2023-05-05 08:00:00"))
@@ -387,11 +387,10 @@ class VedtaksmetadataFiksIT(
     }
 
     @Test
-    fun `sak der alle datoer er våre egne proxyer blokkeres ikke av sorteringsselen`() {
-        // Runde 1 patcher den ene raden, runde 2 den andre. Begge datoene er endret_dato-proxyen
-        // vår, så det finnes ingen ekte vedtaksdato å fortrenge — det er tilfellet KDoc-en kaller
-        // det tryggeste. Å tvinge operatøren til å kvittere ut det ville lært dem opp i å kvittere
-        // ut selen generelt.
+    fun `sak der alle datoer stammer fra fiksen selv blokkeres ikke`() {
+        // Runde 1 patcher den ene raden, runde 2 den andre. Begge datoene er våre egne tilnærmede
+        // datoer, så det finnes ingen ekte vedtaksdato å fortrenge. Å kreve godkjenning her ville
+        // lært operatøren opp til å godkjenne rutinemessig.
         seedDefektBehandling("MEL-961", "NY_VURDERING", "2024-01-01 10:00:00")
         kall(fiksUrl, """{"saksnummer":["MEL-961"],"skarp":true}""").andExpect(status().isOk)
 
@@ -414,25 +413,25 @@ class VedtaksmetadataFiksIT(
     }
 
     @Test
-    fun `kvittering som ikke traff noen kapret sak nevnes i avvisningen`() {
+    fun `godkjenning som ikke traff noen sak nevnes i avvisningen`() {
         // En skrivefeil i tillatSorteringsendring er ellers usynlig: operatøren ser bare at
         // kjøringen ble avvist, og kan ikke lese ut av svaret hvilken oppføring som var feil.
         seedIntaktBehandling("MEL-962", "FØRSTEGANG", "2024-08-16 09:51:06")
         seedDefektBehandling("MEL-962", "NY_VURDERING", "2024-08-16 09:54:28")
 
-        // Kvitteringen må ikke være prefiks av saksnummeret: "MEL-96" ville truffet containsString
+        // Godkjenningen må ikke være prefiks av saksnummeret: "MEL-96" ville truffet containsString
         // via "MEL-962" i avvisningslista, og testen ville bestått uten at feltet fantes.
         kall(fiksUrl, """{"saksnummer":["MEL-962"],"skarp":true,"tillatSorteringsendring":["MEL-8888"]}""")
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.feil").value(containsString("ikke traff noen sak som kaprer")))
+            .andExpect(jsonPath("$.feil").value(containsString("traff ingen sak som trengte godkjenning")))
             .andExpect(jsonPath("$.feil").value(containsString("MEL-8888")))
 
         antallMetadata() shouldBe 1
     }
 
     @Test
-    fun `kvittering med ugyldig saksnummerformat avvises som saksnummer ellers ville blitt`() {
-        // tillatSorteringsendring er saksnummer og skal gjennom samme formatsele — ellers ville
+    fun `godkjenning med ugyldig saksnummerformat avvises på samme måte som saksnummer`() {
+        // tillatSorteringsendring er saksnummer og skal gjennom samme formatkontroll — ellers ville
         // søppel blitt ekkoet rett tilbake i kvitteringerUtenTreff.
         seedDefektBehandling("MEL-980", "NY_VURDERING", "2024-01-15 10:00:00")
 
@@ -444,7 +443,7 @@ class VedtaksmetadataFiksIT(
     }
 
     @Test
-    fun `forhåndsvisningen melder også fra om kvitteringer uten treff`() {
+    fun `forhåndsvisningen melder også fra om godkjenninger uten treff`() {
         // En skrivefeil-detektor som først fyrer på kjøringen som endrer prod er lite verdt —
         // poenget med tørrkjøringen er å oppdage feilen før den.
         seedDefektBehandling("MEL-981", "NY_VURDERING", "2024-01-15 10:00:00")
@@ -457,7 +456,7 @@ class VedtaksmetadataFiksIT(
 
     @Test
     fun `de tre datokategoriene holdes fra hverandre i samme sak`() {
-        // Én ekte rad, én urørt patch og én patch som er skrevet til. Selen måler mot de to første
+        // Én ekte rad, én urørt patch og én patch som er skrevet til. Kontrollen måler mot de to første
         // kategoriene, ikke mot den urørte patchen. Den urørte patchen må være den NYESTE av de tre:
         // var fixturen motsatt, ville assertionen under holdt også under en modell som feilaktig
         // regnet urørte patch-rader med.
@@ -538,9 +537,9 @@ class VedtaksmetadataFiksIT(
     }
 
     @Test
-    fun `preview varsler når patchen kaprer nyeste-plassen i vedtaksdato-sorteringen`() {
-        // Ekte nyeste vedtak er fra 2023. Den defekte raden er sist rørt i 2024, så proxy-datoen
-        // ville lagt seg øverst og byttet hvilken behandling avgiftsgrunnlaget hentes fra.
+    fun `preview varsler når den tilnærmede datoen blir nyeste i saken`() {
+        // Ekte nyeste vedtak er fra 2023. Den defekte raden er sist rørt i 2024, så den tilnærmede
+        // datoen ville lagt seg øverst og byttet hvilken behandling avgiftsgrunnlaget hentes fra.
         val ekteNyeste = seedIntaktBehandling("MEL-910", "FØRSTEGANG", "2023-03-01 10:00:00")
         val defekt = seedDefektBehandling("MEL-910", "NY_VURDERING", "2024-05-10 12:00:00")
 
@@ -557,7 +556,7 @@ class VedtaksmetadataFiksIT(
     }
 
     @Test
-    fun `preview melder fra når patchen ikke rører nyeste-plassen`() {
+    fun `preview melder fra når patchen ikke blir nyeste i saken`() {
         seedIntaktBehandling("MEL-911", "FØRSTEGANG", "2025-01-01 10:00:00")
         seedDefektBehandling("MEL-911", "NY_VURDERING", "2024-05-10 12:00:00")
 
@@ -582,7 +581,7 @@ class VedtaksmetadataFiksIT(
     fun `preview mot formen på de faktiske prod-sakene i MELOSYS-8174`() {
         // Tidsstemplene er hentet fra prod (vedtaksdato.csv, uttrekk 2026-08-24). Poenget er ikke
         // at akkurat disse sakene finnes, men at rapporten svarer riktig på den formen dataene har:
-        // to saker der patchen legger seg midt i sorteringen, og én der den kaprer nyeste-plassen.
+        // to saker der patchen legger seg midt i sorteringen, og én der den blir nyeste.
         seedIntaktBehandling("MEL-448193", "FØRSTEGANG", "2024-04-30 15:33:55")
         seedIntaktBehandling("MEL-448193", "NY_VURDERING", "2025-01-06 10:15:04")
         seedDefektBehandling("MEL-448193", "NY_VURDERING", "2024-10-23 09:02:15")
@@ -597,11 +596,11 @@ class VedtaksmetadataFiksIT(
         kall(fiksUrl, """{"saksnummer":["MEL-448193","MEL-545776","MEL-632908"]}""")
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.antallRaderFunnet").value(3))
-            // Patchen havner mellom to ekte vedtak — nyeste-plassen står
+            // Patchen havner mellom to ekte vedtak — det nyeste vedtaket er fortsatt nyest
             .andExpect(jsonPath("$.sorteringspåvirkning[0].saksnummer").value("MEL-448193"))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].patchenVinnerNyeste").value(false))
             .andExpect(jsonPath("$.sorteringspåvirkning[0].nyesteSammenlignbareDato").value("2025-01-06 10:15:04"))
-            // Eneste sak der patchen kaprer nyeste-plassen: NY_VURDERING drøye tre minutter
+            // Eneste sak der patchen blir nyeste: NY_VURDERING drøye tre minutter
             // etter førstegangsvedtaket, så her avgjør ekte vedtaksdato utfallet
             .andExpect(jsonPath("$.sorteringspåvirkning[1].saksnummer").value("MEL-545776"))
             .andExpect(jsonPath("$.sorteringspåvirkning[1].patchenVinnerNyeste").value(true))
@@ -616,7 +615,7 @@ class VedtaksmetadataFiksIT(
     @Test
     fun `rad uten vedtaksdato velter ikke rapporten, og teller ikke som nyeste`() {
         // vedtak_dato er nullbar, og Oracle sorterer NULL først i DESC. Uten NULLS LAST ville en
-        // udatert rad kapret nyeste-plassen — og castet til String hadde gitt 500.
+        // udatert rad blitt sortert som nyeste — og castet til String hadde gitt 500.
         seedBehandlingUtenVedtaksdato("MEL-920", "FØRSTEGANG", "2024-01-01 08:00:00")
         val ekte = seedIntaktBehandling("MEL-920", "NY_VURDERING", "2025-05-05 10:00:00")
         seedDefektBehandling("MEL-920", "NY_VURDERING", "2024-06-01 12:00:00")
@@ -708,7 +707,7 @@ class VedtaksmetadataFiksIT(
     }
 
     @Test
-    fun `skarp avvises når patchen tar nyeste-plassen, og slipper gjennom når det kvitteres ut`() {
+    fun `skarp avvises når den tilnærmede datoen blir nyeste, og slipper gjennom med godkjenning`() {
         seedIntaktBehandling("MEL-925", "FØRSTEGANG", "2024-08-16 09:51:06")
         seedDefektBehandling("MEL-925", "NY_VURDERING", "2024-08-16 09:54:28")
 
