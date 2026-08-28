@@ -11,6 +11,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import tools.jackson.databind.json.JsonMapper
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.brev.*
 import no.nav.melosys.domain.forTest
@@ -443,7 +444,7 @@ internal class DokgenMalMapperTest {
     }
 
     @Test
-    fun skalMappeUkjentLandForVedtakOpphørtMedlemskap() {
+    fun skalSendeTomLandlisteForVedtakOpphørtMedlemskapMedUkjenteLand() {
         val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true)).apply {
             mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland.apply {
                 landkoder = emptyList()
@@ -470,11 +471,17 @@ internal class DokgenMalMapperTest {
             .medOpphørtDato(LocalDate.now())
             .build()
 
-        dokgenMalMapper.mapBehandling(
+        val vedtakOpphoertMedlemskap = dokgenMalMapper.mapBehandling(
             brevbestilling,
             DokgenTestData.lagMottaker(Mottakerroller.BRUKER)
         ).shouldBeInstanceOf<VedtakOpphoertMedlemskap>()
-            .land.shouldBe(listOf("UKJENT"))
+
+        vedtakOpphoertMedlemskap.land.shouldBe(emptyList())
+        val objectMapper = JsonMapper.builder().build()
+        objectMapper
+            .readTree(objectMapper.writeValueAsString(vedtakOpphoertMedlemskap))
+            .get("land")
+            .isEmpty.shouldBeTrue()
     }
 
     @Test
