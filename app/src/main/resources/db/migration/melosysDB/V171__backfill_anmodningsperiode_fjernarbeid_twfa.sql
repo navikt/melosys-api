@@ -2,21 +2,27 @@
 -- Radene i prosessinstans finnes fortsatt fordi ingen slettejobb er implementert (verifisert august 2026),
 -- men de er eneste kilde til historikken.
 --
--- Skilt fra V170 med vilje: ALTER-en er ren metadataendring, mens denne skanner prosessinstans.data.
--- Blir kjoeretiden et problem, kan setningene kjoeres manuelt i en kontrollert SQL-sesjon uten
--- oppstartstimeout -- IS NULL-vakten under gjoer at Flyway-kjoeringen etterpaa finner null rader.
+-- Skilt fra V170 med vilje. ALTER-en er en dictionary-oppdatering; denne skanner prosessinstans.data.
+-- Oracle stoetter ikke DDL i transaksjon, saa Flyway skriver en success=0-rad hvis denne kaster, og
+-- appen starter ikke igjen foer noen kjoerer flyway repair. Splitten fjerner altsaa IKKE den fastlaaste
+-- utrullingen -- den gjoer opprydningen enkel: kolonnen er allerede paa plass og registrert, saa
+-- gjenopprettingen er aa kjoere setningene under manuelt i en kontrollert sesjon og deretter repare.
+-- Uten splitten ville en re-kjoering ogsaa truffet ALTER-en paa nytt (ORA-01430).
 --
 -- Joinen p.behandling_id = ap.beh_resultat_id ser ut som en nokkelforveksling, men er riktig:
 -- behandlingsresultat har behandling_id som PK (V1.0_06, @MapsId i Behandlingsresultat.kt), og
 -- anmodningsperiode.beh_resultat_id peker paa den (fk_anmodning_beh_resultat i V4.3_02).
 --
 -- De to setningene er bevisst gjensidig utelukkende slik at resultatet er uavhengig av rekkefoelgen,
--- og slik at true vinner over false. I praksis kan en behandling knapt ha to anmodningsprosesser med
--- ulikt flagg -- registrerAnmodning kaster naar anmodet_av allerede er satt -- saa vaktet er defensivt
--- og treffer i hovedsak rader fra foer V7.6_07 innfoerte anmodet_av.
+-- og slik at true vinner over false. Det defensive vaktet er ikke for gamle rader: flagget kunne foerst
+-- settes 2026-02-22 (#3231), saa hver rad backfillen kan treffe er nyere enn anmodet_av (2021). Veien
+-- til to anmodningsprosesser med ulikt flagg gaar i stedet gjennom at lagreAnmodningsperioder sletter og
+-- gjenoppretter radene og mister anmodet_av underveis, slik at sperren i registrerAnmodning kan omgaas.
 --
 -- er_fjernarbeid_twfa IS NULL gjoer kjoeringen strengt additiv: rader som ny kode allerede har fylt
--- roeres ikke, saa setningene kan kjoeres om igjen uten aa overskrive noe med en eldre prosessinstans-verdi.
+-- roeres ikke. Vakten filtrerer ingenting ved foerstegangskjoeringen -- kolonnen er tom da -- men gjoer
+-- at setningene kan kjoeres om igjen etter utrullingen (deploy-gapet) og etter en repair, uten aa
+-- overskrive en riktig verdi med en eldre prosessinstans-verdi.
 UPDATE anmodningsperiode ap
 SET er_fjernarbeid_twfa = 0
 WHERE ap.er_fjernarbeid_twfa IS NULL

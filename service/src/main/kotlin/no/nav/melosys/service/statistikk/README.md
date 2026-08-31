@@ -38,12 +38,19 @@ Fram til august 2026 var `prosessinstans.data` eneste lagringssted, og uttrekket
 `V161__prosessinstans_prioritet.sql` kaller **kortlevd**. Det virket utelukkende fordi ingen
 slettejobb var implementert ennå. `V170` flyttet kilden, og `V171` backfillet historikken fra de radene.
 
-Migreringene er bevisst delt i to: `V170` er en nullbar kolonne uten default, altså ren
-metadataendring på Oracle 11g+, mens `V171` skanner `prosessinstans.data`. Splitten gjør at en treg
-eller feilende backfill ikke kan holde oppstarten lenge nok til at liveness-proben dreper podden før
-kolonnen finnes — feiler `V171`, virker koden, bare historikken mangler. `V171` har
-`er_fjernarbeid_twfa IS NULL` i begge setningene, så den kan også kjøres manuelt i en kontrollert
-SQL-sesjon; Flyway-kjøringen etterpå finner da null rader.
+Migreringene er bevisst delt i to: `V170` er en nullbar kolonne uten default, altså en ren
+dictionary-oppdatering, mens `V171` skanner `prosessinstans.data`. Splitten handler om hva som skjer
+hvis liveness-proben dreper podden midt i migreringen. Samlet ville Flyway mangle historikkraden mens
+`ALTER`-en allerede var auto-committet av Oracle, og neste oppstart ville feilet på `ORA-01430`.
+Delt kan `V171` trygt kjøres om igjen.
+
+**Splitten fjerner ikke en fastlåst utrulling.** Oracle støtter ikke DDL i transaksjon, så en `V171`
+som kaster gir en `success=0`-rad i `flyway_schema_history`, og appen starter ikke igjen før noen
+kjører `flyway repair`. Det splitten gir, er en enkel opprydding: kolonnen er på plass og registrert,
+så gjenopprettingen er å kjøre backfillen manuelt og deretter reparere. `V171` har
+`er_fjernarbeid_twfa IS NULL` i begge setningene, så en slik manuell kjøring er trygg. Merk at
+vakten ikke filtrerer noe ved førstegangskjøringen — kolonnen er tom da, og `V170` og `V171` kjører i
+samme Flyway-run. Verdien ligger i re-kjøringer.
 
 ## Hvorfor `lagreAnmodningsperioder` bevarer flagget
 
@@ -73,7 +80,9 @@ Pinnet av tester i både `VideresendSoknadTest` og `SendVedtakUtlandTest`.
 > kolonnen. Saken mangler da i statistikken. Vinduet er minutter og volumet titalls saker i året, så
 > sannsynligheten er lav, men gapet er reelt og stille. Prosessinstans-radene slettes ikke, så
 > `V171`s to UPDATE-setninger kan kjøres på nytt etter at utrullingen er ferdig hvis det trengs —
-> `IS NULL`-vakten gjør en slik kjøring strengt additiv.
+> `IS NULL`-vakten gjør en slik kjøring strengt additiv. Merk at `V171` **ikke** lukker dette gapet
+> selv: den kjører i samme utrulling som `V170`, altså før en gammel pod rekker å lage en gap-rad.
+> Skal gapet lukkes, må kjøringen gjøres manuelt etterpå eller legges i en senere release.
 > `ProsessDataKey.ER_FJERNARBEID_TWFA` og skrivingen i `ProsessinstansBuilder` beholdes inntil
 > videre nettopp som kilde for en slik ny kjøring.
 

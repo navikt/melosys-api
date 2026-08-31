@@ -7,9 +7,13 @@
 -- Bevisst UTEN DEFAULT, i motsetning til sendt_utland NUMBER(1) DEFAULT 0 i V4.4_03 paa samme tabell:
 -- en DEFAULT 0 ville lest alle historiske rader som et registrert nei og oedelagt tri-staten som baade
 -- uttrekket (WHERE = 1) og EessiService sin null-sjekk bygger paa. Presedens for nullbar form: V122.
+-- Pinnet av RammeavtaleBackfillIT, som leser nullable/data_default fra user_tab_columns -- entiteten
+-- skriver kolonnen eksplisitt i hver INSERT, saa en DEFAULT ville vaert usynlig for vanlige testdata.
 --
--- Backfillen av historikken ligger bevisst i V171, ikke her: en nullbar kolonne uten default er ren
--- metadataendring paa Oracle 11g+ og tar millisekunder, mens backfillen skanner prosessinstans.data.
--- Splittet gjoer at en treg eller feilende backfill ikke kan holde oppstarten lenge nok til at
--- liveness-proben dreper podden foer kolonnen finnes -- feiler V171, virker koden, bare historikken mangler.
+-- Backfillen av historikken ligger bevisst i V171, ikke her. En nullbar kolonne uten default er en ren
+-- dictionary-oppdatering i Oracle og tar millisekunder, mens backfillen skanner prosessinstans.data.
+-- Splittet handler om hva som skjer naar liveness-proben dreper podden midt i migreringen: samlet ville
+-- Flyway mangle historikkraden mens ALTER-en allerede var auto-committet av Oracle, og neste oppstart
+-- ville feilet paa ORA-01430 (kolonnen finnes allerede) -- en fastlaast utrulling som krever manuell DDL.
+-- Delt kan V171 trygt kjoeres om igjen, og skjemaet er konsistent uansett hvor det stoppet.
 ALTER TABLE anmodningsperiode ADD er_fjernarbeid_twfa NUMBER(1);
