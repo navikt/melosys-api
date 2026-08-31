@@ -8,9 +8,6 @@ import org.springframework.transaction.annotation.Transactional
 
 private val log = KotlinLogging.logger { }
 
-/**
- * Kastes når en kjøring avvises av en av kontrollene i servicen. Controlleren gjør dette om til 400.
- */
 class VedtaksmetadataFiksAvvist(melding: String) : RuntimeException(melding)
 
 /**
@@ -21,13 +18,9 @@ class VedtaksmetadataFiksAvvist(melding: String) : RuntimeException(melding)
  * `hentVedtakMetadata()` ubetinget i filter/sortering, så én rad uten vedtaksmetadata velter hele
  * saken med «vedtakMetadata er påkrevd for Behandlingsresultat» før den blir faglig vurdert.
  *
- * Fiksen kjøres med native SQL, ikke via JPA, av to grunner:
- *  - `registrert_av`/`endret_av` må bli [PATCH_MARKØR] slik at fiksen kan rulles tilbake ([angre]).
- *    JPA-auditing ville satt saksbehandler/«MELOSYS» i stedet.
- *  - `vedtak_dato` skal være den tilnærmede datoen `behandlingsresultat.endret_dato`, ikke `Instant.now()` som
- *    `Behandlingsresultat.settVedtakMetadata` bruker.
- *
- * Innsettingen er idempotent (`NOT EXISTS`), så en utilsiktet ny kjøring gir null nye rader.
+ * Native SQL, ikke JPA: `registrert_av`/`endret_av` må bli [PATCH_MARKØR] (JPA-auditing ville satt
+ * saksbehandler/«MELOSYS»), og `vedtak_dato` skal være `behandlingsresultat.endret_dato` som
+ * tilnærming, ikke `Instant.now()` slik `Behandlingsresultat.settVedtakMetadata` gjør.
  */
 @Component
 class VedtaksmetadataFiksService {
@@ -35,7 +28,6 @@ class VedtaksmetadataFiksService {
     @PersistenceContext
     private lateinit var entityManager: EntityManager
 
-    /** Read-only preview av nøyaktig hvilke rader [utfør] vil sette inn. */
     @Transactional(readOnly = true)
     fun forhåndsvis(
         saksnummer: List<String>,
@@ -57,13 +49,6 @@ class VedtaksmetadataFiksService {
         )
     }
 
-    /**
-     * Datafiksen — endrer prod, etter kontrollene under (hver avvisning forklarer seg selv i
-     * feilmeldingen).
-     *
-     * [tillatSorteringsendring] er en liste med saksnummer, ikke et av/på-flagg: godkjenningen
-     * gjelder kun de oppgitte sakene, og de øvrige sakene i kallet er fortsatt beskyttet.
-     */
     @Transactional
     fun utfør(
         saksnummer: List<String>,
@@ -134,9 +119,8 @@ class VedtaksmetadataFiksService {
                 "(behandlingsresultat ${kandidater.map { it.behandlingsresultatId }})"
         }
 
-        // INSERT-en bindes til ID-ene kontrollene er evaluert på, ikke til kandidatfilteret på nytt:
-        // Oracle er READ COMMITTED, så en re-evaluering kunne skrevet en kandidat som dukket opp
-        // etter kontrollene. Bindingen gjør også `antallInnsatt != kandidater.size` til en eksakt avvikssjekk.
+        // Bundet til ID-ene kontrollene så, ikke til kandidatfilteret på nytt: READ COMMITTED kunne
+        // ellers sluppet inn en kandidat som dukket opp etter kontrollene.
         val antallInnsatt = entityManager.createNativeQuery(INSERT_SQL)
             .setParameter("resultattyper", RESULTATTYPER)
             .setParameter("saksnummer", saksnummer)
@@ -168,16 +152,6 @@ class VedtaksmetadataFiksService {
         )
     }
 
-    /**
-     * Angreknappen. Sletter kun rader der BÅDE `registrert_av` og `endret_av` er [PATCH_MARKØR]:
-     * `registrert_av` (`@CreatedBy`) settes kun ved insert, så en rad som senere har fått en ekte
-     * vedtaksdato skrevet av en saksbehandler røres ikke — den telles i `antallSomIkkeKanAngres`.
-     *
-     * Tom `saksnummer`-liste betyr «alle markerte rader»; `skarp = false` viser hva som ville blitt
-     * slettet. Skarp kjøring uten scope krever [bekreftAlle]: et glemt `saksnummer` ville ellers
-     * rullet tilbake alle patch-rader i basen — også fra tidligere kjøringer — og hver slettet rad
-     * gjeninnfører feilen fiksen rettet på den saken.
-     */
     @Transactional
     fun angre(saksnummer: List<String>, skarp: Boolean, bekreftAlle: Boolean = false): VedtaksmetadataAngreResultat {
         if (skarp && saksnummer.isEmpty() && !bekreftAlle) {
@@ -260,23 +234,16 @@ class VedtaksmetadataFiksService {
     }
 
     /**
-     * Viser hva patchen gjør med vedtaksdato-sorteringen, per sak.
+     * `ÅrsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning` sorterer på `vedtak_dato`
+     * og henter avgiftsgrunnlaget fra den siste. `endret_dato` er `@LastModifiedDate` og alltid ≥ den
+     * ekte vedtaksdatoen, så patchede rader ser systematisk nyere ut enn de er.
      *
-     * `vedtak_dato` er ikke dekorasjon: `ÅrsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning`
-     * sorterer på den og plukker den siste som `sisteBehandlingsresultatMedAvgift` — altså behandlingen
-     * avgiftsgrunnlaget hentes fra. Den tilnærmede datoen `endret_dato` er `@LastModifiedDate` og
-     * alltid ≥ den ekte vedtaksdatoen, så patchede rader ser systematisk nyere ut enn de er.
+     * Kontrollen sammenligner derfor kun mot datoer som kan være ekte ([Datoopphav.EKTE] og
+     * [Datoopphav.PATCHET_ENDRET]); våre egne urørte rader rapporteres, men styrer ingenting.
      *
-     * Kontrollen skal hindre at en tilnærmet dato fortrenger et vedtak som kan være ekte, og
-     * sammenligner derfor kun mot [Datoopphav.EKTE] og [Datoopphav.PATCHET_ENDRET]. Rader vi selv
-     * satte inn og som ingen har rørt siden er beviselig vår egen tilnærming; de rapporteres, men
-     * styrer ingenting. [SorteringspåvirkningRad.trengerGodkjenning] er alene nok til å avgjøre.
-     *
-     * Dette er ingen simulering av avgiftsgrunnlaget: den faktiske utvelgelsen filtrerer også på år og
-     * periodeoverlapp, mens sammenligningen her er global maks mot global maks. `true` er en pålitelig
-     * grunn til å stoppe; `false` er ingen garanti for at kjøringen er trygg. Derfor listes alle datoene.
-     *
-     * Saker uten kandidater er ikke med i lista.
+     * Ingen simulering av avgiftsgrunnlaget: den faktiske utvelgelsen filtrerer også på år og
+     * periodeoverlapp, mens dette er global maks mot global maks. `true` er en pålitelig grunn til å
+     * stoppe; `false` er ingen garanti. Derfor listes alle datoene.
      */
     private fun sorteringspåvirkning(saksnummer: List<String>): List<SorteringspåvirkningRad> {
         if (saksnummer.isEmpty()) return emptyList()
@@ -301,9 +268,7 @@ class VedtaksmetadataFiksService {
                 nyesteKandidatDato = nyesteKandidat.visning,
                 nyesteSammenlignbareId = nyesteSammenlignbare?.behandlingsresultatId,
                 nyesteSammenlignbareDato = nyesteSammenlignbare?.visning,
-                // >= og ikke >: ved eksakt likt tidsstempel er utfallet i den ekte sorteringen
-                // vilkårlig (stabil sortering på behandlingsrekkefølgen), og et vilkårlig utfall
-                // skal flagges, ikke rapporteres som om patchen taper.
+                // >= og ikke >: ved likt tidsstempel er utfallet i den ekte sorteringen vilkårlig, og det skal flagges.
                 trengerGodkjenning = nyesteSammenlignbare != null &&
                     requireNotNull(nyesteKandidat.sortering) >= nyesteSammenlignbare.sortering!!,
                 patchenBlirNyesteIHeleSaken = eksisterende
@@ -318,10 +283,7 @@ class VedtaksmetadataFiksService {
         }
     }
 
-    /**
-     * Alle rader per sak, nyest først. Kandidatspørringen tar `.first()` for å finne raden patchen
-     * skriver, og datolistene i rapporten arver rekkefølgen — begge avhenger av `ORDER BY` i SQL-ene.
-     */
+    /** Nyest først — `.first()` i [sorteringspåvirkning] og datolistene i rapporten avhenger av `ORDER BY` i SQL-ene. */
     @Suppress("UNCHECKED_CAST")
     private fun raderPerSak(sql: String, saksnummer: List<String>, medMarkoer: Boolean): Map<String, List<SortertRad>> {
         val query = entityManager.createNativeQuery(sql)
@@ -343,20 +305,13 @@ class VedtaksmetadataFiksService {
     }
 
     /**
-     * Hvor datoen på en `vedtak_metadata`-rad kommer fra, utledet av auditfeltene: `registrert_av`
-     * er `@CreatedBy` og settes kun ved insert, så den forteller pålitelig om raden ble laget av
-     * fiksen. `endret_av` er `@LastModifiedBy` og flyttes av *enhver* senere skriving, så «rørt
-     * siden» betyr ikke nødvendigvis «korrigert til ekte vedtaksdato» — derfor regnes
-     * [PATCHET_ENDRET] konservativt med i sammenligningsgrunnlaget til kontrollen.
+     * Utledet av auditfeltene: `registrert_av` (`@CreatedBy`) sier pålitelig om fiksen laget raden;
+     * `endret_av` (`@LastModifiedBy`) flyttes av *enhver* senere skriving, så [PATCHET_ENDRET] kan,
+     * men må ikke, være korrigert til en ekte dato — og regnes derfor konservativt som mulig ekte.
      */
     private enum class Datoopphav {
-        /** Raden ble ikke laget av fiksen. Datoen er en ekte vedtaksdato. */
         EKTE,
-
-        /** Laget av fiksen og urørt siden. Datoen er beviselig vår egen tilnærming. */
         PATCHET_URØRT,
-
-        /** Laget av fiksen, men skrevet til siden. Kan være korrigert til en ekte dato — vi vet ikke. */
         PATCHET_ENDRET,
         ;
 
@@ -369,10 +324,7 @@ class VedtaksmetadataFiksService {
         }
     }
 
-    /**
-     * [visning] er lesbar for operatøren; [sortering] har mikrosekunder og er den som sammenlignes.
-     * Begge er null når raden ikke har vedtaksdato — kolonnen er nullbar.
-     */
+    /** [visning] er lesbar for operatøren; [sortering] har mikrosekunder og er den som sammenlignes. */
     private data class SortertRad(
         val saksnummer: String,
         val behandlingsresultatId: Long,
@@ -416,29 +368,18 @@ class VedtaksmetadataFiksService {
     }
 
     companion object {
-        /**
-         * Skrives i registrert_av/endret_av og er nøkkelen angreknappen sletter på. Verdien er en
-         * del av datakontrakten mot prod — den står i rader fiksen allerede har satt inn — og kan
-         * ikke endres.
-         */
+        /** Står i rader som allerede er satt inn i prod — verdien kan ikke endres. */
         const val PATCH_MARKØR = "MELOSYS-8174-PATCH"
 
         /**
-         * Saker fag har bekreftet har trygdeavgift til Nav for 2024. Brukes kun som default i
-         * preview — skarp kjøring krever eksplisitt liste. MEL-409394 er bevisst utelatt: avklart
-         * separat (år-løs årsavregning, ikke manglende vedtaksmetadata).
+         * Saker fag har bekreftet har trygdeavgift til Nav for 2024. MEL-409394 er bevisst utelatt:
+         * avklart separat (år-løs årsavregning, ikke manglende vedtaksmetadata).
          */
         val STANDARD_SAKER = listOf("MEL-448193", "MEL-545776", "MEL-632908")
 
-        /** Maks antall saksnummer per kall. Holder oss også godt unna [MAKS_UTTRYKK_I_IN]. */
         const val MAKS_ANTALL_SAKER = 25
 
-        /**
-         * Oracles tak på antall uttrykk i en IN-liste (ORA-01795). `INSERT_SQL` binder kandidat-IDene
-         * i `IN (:ider)`, og den lista er like lang som antall kandidatrader — ikke antall saker.
-         * Uten kontrollen ville en stor kjøring feilet med 500 midt i skrittet som endrer prod, i stedet
-         * for en 400 operatøren kan handle på.
-         */
+        /** Oracles tak i en IN-liste (ORA-01795). `IN (:ider)` i INSERT_SQL er like lang som antall kandidatrader, ikke saker. */
         const val MAKS_UTTRYKK_I_IN = 1000
 
         const val STANDARD_MAKS_ANTALL_RADER = 10
@@ -453,7 +394,6 @@ class VedtaksmetadataFiksService {
         /** Resultattypene ÅrsavregningService slår opp på — det er kun disse som kan velte en sak. */
         private val RESULTATTYPER = listOf("FASTSATT_TRYGDEAVGIFT", "FASTSATT_LOVVALGSLAND", "MEDLEM_I_FOLKETRYGDEN")
 
-        /** Delt av [KANDIDAT_SQL] og [INSERT_SQL], slik at forhåndsvisningen treffer nøyaktig de samme radene. */
         private const val KANDIDAT_WHERE = """
             WHERE b.status = 'AVSLUTTET'
               AND br.resultat_type IN (:resultattyper)
@@ -462,20 +402,14 @@ class VedtaksmetadataFiksService {
         """
 
         /**
-         * vedtak_type utledes av beh_type (kodeverkskoden er FØRSTEGANG, ikke FØRSTEGANGSBEHANDLING) —
-         * samme utledning som Flyway-patchen V7.6_04. beh_type *bestemmer* strengt tatt ikke
-         * vedtakstypen (den sendes separat i FattVedtakRequest), men feltet leses ikke av
-         * ÅrsavregningService, og alternativet NULL er verre: A1TypeUtstedelse.av() switcher på
-         * enumen uten null-gren.
+         * Samme utledning som Flyway-patchen V7.6_04. beh_type bestemmer strengt tatt ikke vedtakstypen
+         * (den sendes separat i FattVedtakRequest), men feltet leses ikke av ÅrsavregningService, og NULL
+         * er verre: A1TypeUtstedelse.av() switcher på enumen uten null-gren.
          */
         private const val VEDTAK_TYPE_CASE =
             "CASE WHEN b.beh_type = 'FØRSTEGANG' THEN 'FØRSTEGANGSVEDTAK' ELSE 'ENDRINGSVEDTAK' END"
 
-        /**
-         * vedtak_dato er en tilnærming: den ekte vedtaksdatoen finnes ikke lenger, så vi bruker
-         * behandlingsresultat.endret_dato. Klagefrist +42 dager følger Flyway-patchen V7.6_04.
-         * Datoene formateres i SQL for å slippe JDBC-typemapping i rapporten.
-         */
+        /** Klagefrist +42 dager følger Flyway-patchen V7.6_04. Datoene formateres i SQL for å slippe JDBC-typemapping. */
         private const val KANDIDAT_SQL = """
             SELECT b.saksnummer,
                    br.behandling_id,
@@ -506,14 +440,8 @@ class VedtaksmetadataFiksService {
         """
 
         /**
-         * Radene som allerede har vedtaksmetadata — det patch-radene sammenlignes mot. Nyest først;
-         * `behandling_id` som sekundærnøkkel gjør rekkefølgen deterministisk, og `NULLS LAST` fordi
-         * Oracle ellers sorterer NULL først i `DESC` (udaterte rader lukes uansett ut i
-         * [sorteringspåvirkning]). Siste kolonne er opphavskoden i [Datoopphav].
-         *
-         * To datokolonner: en lesbar til rapporten, og en med mikrosekunder til sammenligningen —
-         * vedtak_dato er en TIMESTAMP som ÅrsavregningService sammenligner i full oppløsning, og
-         * uten mikrosekundene ser «samme sekund» ut som «patchen vinner ikke».
+         * Siste kolonne er koden [Datoopphav.av] leser. Mikrosekund-kolonnen trengs fordi ÅrsavregningService
+         * sammenligner TIMESTAMP i full oppløsning. `NULLS LAST` fordi Oracle ellers legger NULL først i DESC.
          */
         private const val EKSISTERENDE_NYESTE_SQL = """
             SELECT b.saksnummer,
@@ -534,7 +462,6 @@ class VedtaksmetadataFiksService {
             ORDER BY b.saksnummer, vm.vedtak_dato DESC NULLS LAST, br.behandling_id DESC
         """
 
-        /** Kandidatene, med datoen patchen faktisk ville skrevet. Nyest først. */
         private const val PATCH_NYESTE_SQL = """
             SELECT b.saksnummer,
                    br.behandling_id,
@@ -555,7 +482,6 @@ class VedtaksmetadataFiksService {
             GROUP BY b.saksnummer
         """
 
-        /** Kun rader som fortsatt er urørte: endret_av flyttes av enhver senere skriving (@LastModifiedBy). */
         private const val ANGRE_KANDIDAT_SQL = """
             SELECT b.saksnummer,
                    vm.behandlingsresultat_id,
@@ -569,11 +495,8 @@ class VedtaksmetadataFiksService {
         private const val ANGRE_KANDIDAT_SAKSFILTER = " AND b.saksnummer IN (:saksnummer)"
 
         /**
-         * Patch-rader som ikke lenger er urørte og som [ANGRE_SQL] derfor lar stå — enten er ekte
-         * data skrevet oppå, eller markøren er tømt. `endret_av` er nullbar, og i Oracle er både
-         * `= :markoer` og `<> :markoer` UNKNOWN mot NULL: uten NULL-grenen faller en slik rad ut av
-         * BÅDE angre-kandidatene og denne tellingen, og svaret ser ut som «ingenting å angre» i
-         * stedet for «én rad kunne ikke rulles tilbake».
+         * `IS NULL`-grenen er nødvendig: både `=` og `<>` er UNKNOWN mot NULL i Oracle, så en rad med tømt
+         * endret_av ville ellers falt ut av både angre-kandidatene og denne tellingen.
          */
         private const val KAN_IKKE_ANGRES_SQL = """
             SELECT COUNT(*)
@@ -605,53 +528,35 @@ data class VedtaksmetadataFiksRad(
 )
 
 /**
- * Hva patchen gjør med vedtaksdato-sorteringen for én sak. [trengerGodkjenning] er det eneste
- * feltet som blokkerer skarp kjøring; resten er rapport. Summen av de tre datolistene er alle
- * daterte rader `ÅrsavregningService` ser i saken — samme avgrensning som
- * `hentGjeldendeBehandlingsresultaterForÅrsavregning` (rader på åpne behandlinger er derfor ikke med).
+ * Hva patchen gjør med vedtaksdato-sorteringen i én sak. [trengerGodkjenning] er det eneste feltet
+ * som blokkerer skarp kjøring; resten er rapport. Datolistene dekker de radene ÅrsavregningService
+ * faktisk ser (avsluttede behandlinger med resultattype i RESULTATTYPER).
  */
 data class SorteringspåvirkningRad(
     val saksnummer: String,
-    /** Raden patchen vil skrive — den nyeste av kandidatene i saken, med datoen den får. */
+    /** Nyeste kandidat i saken, med datoen patchen gir den. */
     val nyesteKandidatId: Long,
     val nyesteKandidatDato: String?,
-    /**
-     * Nyeste daterte rad som *kan* være et ekte vedtak ([ekteDatoer] og [usikreDatoer]). Null betyr
-     * at saken ikke har noen slik rad — da er det ingenting å fortrenge, og kontrollen slipper kjøringen
-     * gjennom.
-     */
+    /** Nyeste rad som *kan* være et ekte vedtak ([ekteDatoer] + [usikreDatoer]). Null = ingenting å fortrenge. */
     val nyesteSammenlignbareId: Long?,
     val nyesteSammenlignbareDato: String?,
     /**
-     * Patchen legger seg på eller over [nyesteSammenlignbareDato], altså kan den fortrenge et vedtak
-     * som er ekte. True også ved eksakt likt tidsstempel — da er utfallet vilkårlig, og det skal
-     * flagges. **Blokkerer skarp kjøring med mindre saksnummeret er godkjent i `tillatSorteringsendring`.**
+     * Patchen legger seg på eller over [nyesteSammenlignbareDato] og kan fortrenge et ekte vedtak.
+     * Blokkerer skarp kjøring med mindre saksnummeret står i `tillatSorteringsendring`.
      */
     val trengerGodkjenning: Boolean,
-    /**
-     * Patchen blir nyeste rad i saken sett mot ALLE rader, også de vi selv satte inn tidligere.
-     * Blokkerer ikke — fortrenger den bare en tidligere patch, er det ingen ekte dato som ryker — men
-     * kjøringen endrer likevel hvilken behandling `ÅrsavregningService` regner som nyest, så den logges.
-     */
+    /** Patchen blir nyeste rad mot ALLE rader, også våre egne tidligere. Blokkerer ikke, men logges. */
     val patchenBlirNyesteIHeleSaken: Boolean,
     /**
-     * Datoer fra rader denne fiksen ikke har laget. Ikke en garanti for ekthet: Flyway-patchen
-     * `V7.6_04__patch_vedtak_metadata_endret_periode` skrev samme tilnærmede dato (endret_dato) uten
-     * markør, så rader derfra havner her og ser ekte ut. Å telle dem med er den konservative retningen.
+     * Rader fiksen ikke har laget. Ingen garanti for ekthet: Flyway-patchen V7.6_04 skrev samme
+     * tilnærmede dato uten markør, så rader derfra havner her. Å telle dem med er den konservative retningen.
      */
     val ekteDatoer: List<String> = emptyList(),
-    /**
-     * Datoer fra rader fiksen laget, men som noen har skrevet til siden. Kan være korrigert til en
-     * ekte vedtaksdato — vi kan ikke vite. Regnes med i sammenligningsgrunnlaget, altså konservativt.
-     */
+    /** Rader fiksen laget som noen har skrevet til siden — kan være korrigert, vi vet ikke. Regnes som mulig ekte. */
     val usikreDatoer: List<String> = emptyList(),
-    /** Datoer fra rader fiksen laget og ingen har rørt. Beviselig vår egen tilnærming — styrer ingenting. */
+    /** Rader fiksen laget og ingen har rørt. Styrer ingenting. */
     val patchedeDatoer: List<String> = emptyList(),
-    /**
-     * Rader med vedtaksmetadata men uten `vedtak_dato`. De sorterer eldst og teller ikke som
-     * sammenligningsgrunnlag, men uten feltet leses tre tomme datolister som «saken har ingen
-     * vedtaksmetadata» når den kan ha flere.
-     */
+    /** Rader uten `vedtak_dato`. Skiller «saken har udaterte rader» fra «saken har ingen vedtaksmetadata». */
     val antallUdaterteRader: Int = 0,
 )
 
@@ -660,19 +565,18 @@ data class VedtaksmetadataFiksResultat(
     val saksnummer: List<String>,
     val antallRaderFunnet: Int,
     val antallRaderInnsatt: Int,
-    /** Kandidatene fra preview-spørringen. Ved `avvik = true` er dette ikke det samme som det som ble skrevet. */
+    /** Kandidatene før innsetting. Ved `avvik = true` er dette ikke det som ble skrevet. */
     val rader: List<VedtaksmetadataFiksRad>,
-    /** Etterkontroll, per sak: rader uten vedtaksmetadata slik det står nå. Tom = ingen igjen. */
+    /** Rader uten vedtaksmetadata per sak, etter kjøringen. Tom = ingen igjen. */
     val utenMetadataPerSak: Map<String, Int>,
-    /** Kandidater der vedtakstypen ikke kan utledes trygt. Blokkerer skarp kjøring. */
+    /** Blokkerer skarp kjøring. */
     val ukjentBehType: List<Long> = emptyList(),
-    /** Saksnummer fra requesten uten kandidatrader — skrivefeil, eller sak uten defekte rader. Blokkerer ikke. */
+    /** Skrivefeil, eller sak uten defekte rader. Blokkerer ikke. */
     val saksnummerUtenKandidater: List<String> = emptyList(),
-    /** Oppføringer i `tillatSorteringsendring` som ikke traff noen sak som trengte godkjenning — typisk en skrivefeil. Blokkerer ikke. */
+    /** Oppføringer i `tillatSorteringsendring` uten sak som trengte godkjenning — typisk skrivefeil. Blokkerer ikke. */
     val godkjenningerUtenTreff: List<String> = emptyList(),
-    /** True hvis antall innsatte rader ikke stemmer med forhåndsvisningen. */
+    /** Antall innsatte rader stemmer ikke med forhåndsvisningen. */
     val avvik: Boolean = false,
-    /** Per sak: bytter patchen ut hvilken behandling som er nyest i vedtaksdato-sorteringen? */
     val sorteringspåvirkning: List<SorteringspåvirkningRad> = emptyList(),
     val markoer: String = VedtaksmetadataFiksService.PATCH_MARKØR,
     val angreEndepunkt: String = "POST /admin/aarsavregninger/saker/skattepliktige/vedtaksmetadata-fiks/angre",
@@ -692,7 +596,7 @@ data class VedtaksmetadataAngreResultat(
     val antallRaderFunnet: Int,
     val antallSlettet: Int,
     val rader: List<VedtaksmetadataAngreRad>,
-    /** Patch-rader som er endret etterpå (ekte data skrevet oppå) — disse røres aldri. */
+    /** Patch-rader som er endret etterpå — røres aldri. */
     val antallSomIkkeKanAngres: Int,
     val avvik: Boolean = false,
     val markoer: String = VedtaksmetadataFiksService.PATCH_MARKØR,

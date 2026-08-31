@@ -14,11 +14,6 @@ private val log = KotlinLogging.logger { }
 
 private val SAKSNUMMER_FORMAT = Regex("^MEL-\\d+$")
 
-/**
- * Admin-endepunkter for å rette avsluttede behandlinger som mangler rad i `vedtak_metadata` — en
- * datafeil som gjør at årsavregningen feiler for hele saken. Se [VedtaksmetadataFiksService] for
- * hva feilen er og hvorfor fiksen ser ut som den gjør.
- */
 @Protected
 @RestController
 @RequestMapping("/admin/aarsavregninger/saker/skattepliktige")
@@ -47,8 +42,7 @@ class VedtaksmetadataFiksController(
         @Parameter(description = "Saksnummer, skarp-flagg og valgfritt maksAntallRader")
         request: VedtaksmetadataFiksRequest
     ): ResponseEntity<Any> {
-        // Normaliseres én gang her: duplikater er semantisk irrelevante i IN (:saksnummer), men
-        // teller mot MAKS_ANTALL_SAKER og ville gitt en misvisende avvisning.
+        // distinct() før valider(): duplikater skal ikke telle mot MAKS_ANTALL_SAKER
         val saksnummer = (if (request.skarp) request.saksnummer else request.saksnummer.ifEmpty { VedtaksmetadataFiksService.STANDARD_SAKER })
             .distinct()
         val tillatSorteringsendring = request.tillatSorteringsendring.distinct()
@@ -138,13 +132,8 @@ data class VedtaksmetadataFiksRequest(
     /** Påkrevd ved skarp = true. Tom liste i forhåndsvisning bruker [VedtaksmetadataFiksService.STANDARD_SAKER]. */
     val saksnummer: List<String> = emptyList(),
     val skarp: Boolean = false,
-    /** Skarp kjøring avvises hvis den ville satt inn flere rader enn dette. */
     val maksAntallRader: Int = VedtaksmetadataFiksService.STANDARD_MAKS_ANTALL_RADER,
-    /**
-     * Saksnummer der det er vurdert og godkjent at den tilnærmede vedtaksdatoen blir den nyeste i
-     * saken (se beskrivelsen av endepunktet). Liste og ikke flagg, slik at godkjenningen kun
-     * gjelder de oppgitte sakene.
-     */
+    /** Saker der det er godkjent at den tilnærmede vedtaksdatoen blir nyeste i saken. Liste, ikke flagg: gjelder kun disse. */
     val tillatSorteringsendring: List<String> = emptyList(),
 )
 
@@ -152,9 +141,6 @@ data class VedtaksmetadataAngreRequest(
     /** Tom liste = alle rader fiksen har satt inn, uansett sak. Krever [bekreftAlle] ved skarp. */
     val saksnummer: List<String> = emptyList(),
     val skarp: Boolean = false,
-    /**
-     * Påkrevd ved skarp sletting uten saksnummer, slik at et glemt `saksnummer`-felt ikke sletter
-     * alle radene fiksen noen gang har satt inn.
-     */
+    /** Påkrevd ved skarp sletting uten saksnummer — et glemt felt skal ikke slette alt. */
     val bekreftAlle: Boolean = false,
 )
