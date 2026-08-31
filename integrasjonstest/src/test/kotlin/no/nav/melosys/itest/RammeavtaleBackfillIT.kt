@@ -150,11 +150,16 @@ class RammeavtaleBackfillIT(
         // liveness-proben dreper podden, og da re-kjører Flyway ALTER-en også — ORA-01430.
         //
         // Assertene er bevisst *hvitelister*, ikke svartelister. En tidligere variant spurte «inneholder V170
-        // ingen UPDATE?», og et slikt fravær kan bare måles med en SQL-lekser. Tre runder med review fant tre
-        // ulike leksikalske hull i den lekseren — semikolon i kommentar, blokkkommentar, sitert identifikator —
-        // og hvert hull gjorde assertet stille grønt mens migreringen inneholdt backfillen. En hviteliste snur
-        // feilretningen: enhver parse-overraskelse gjør at innholdet ikke matcher lenger, og testen ryker
-        // høylytt. Flyway-filer er dessuten checksum-frosne etter release, så eksakt innhold er ikke sprøtt.
+        // ingen UPDATE?», og et slikt fravær kan bare måles med en SQL-lekser. Fire runder med review fant fire
+        // ulike leksikalske hull i den lekseren — semikolon i kommentar, blokkkommentar, sitert identifikator og
+        // q-quoting — og hvert hull gjorde assertet stille grønt mens migreringen inneholdt backfillen. En
+        // hviteliste snur feilretningen. Flyway-filer er dessuten checksum-frosne etter release, så eksakt
+        // innhold er ikke sprøtt.
+        //
+        // Hvitelisten er likevel ikke nok alene, og [enLinjeErEnLinje] er den andre halvdelen — les den først.
+        enLinjeErEnLinje(MIGRERING_KOLONNE)
+        enLinjeErEnLinje(MIGRERING_BACKFILL)
+
         withClue("$MIGRERING_KOLONNE skal inneholde nøyaktig én setning: ALTER-en") {
             kjørbareLinjer(MIGRERING_KOLONNE) shouldBe listOf(
                 "ALTER TABLE anmodningsperiode ADD er_fjernarbeid_twfa NUMBER(1);",
@@ -219,6 +224,32 @@ class RammeavtaleBackfillIT(
             .split(";")
             .map { it.trim() }
             .filter { it.isNotEmpty() }
+
+    /**
+     * Krever at ingen konstruksjon i migreringsfila kan spenne over et linjeskift.
+     *
+     * [kjørbareLinjer] kaster linjer som *starter* med `--`. Oracle gjør ikke det hvis en streng-literal eller
+     * blokkkommentar aapnet paa en tidligere linje fortsatt staar aapen: da kan den forkastede linja lukke
+     * literalen og deretter kjøre vilkaarlig SQL, usynlig for hvitelistene under. Verifisert — en `ALTER TABLE`
+     * gjemt slik ble faktisk kjørt av Flyway mens splitt-testen var grønn.
+     *
+     * Svaret er ikke å parse slike konstruksjoner riktig; det var lekseren, og den tok fire runder uten å bli
+     * ferdig. Svaret er å *forby forutsetningen*: er apostrofene balansert linje for linje, og finnes verken
+     * doble anførselstegn eller blokkkommentarer, kan ingen konstruksjon krysse et linjeskift, og den naive
+     * linjebaserte lesingen er da beviselig enig med Oracle. Begge filene overholder dette i dag. Trenger en
+     * framtidig migrering noe av det, ryker denne — og da må testen leses på nytt, ikke lempes på.
+     */
+    private fun enLinjeErEnLinje(migrering: String) {
+        kjørbareLinjer(migrering).forAll { linje ->
+            withClue("$migrering: apostrofene må være balansert på hver linje — «$linje»") {
+                linje.count { it == '\'' } % 2 shouldBe 0
+            }
+            withClue("$migrering: doble anførselstegn og blokkkommentarer er ikke støttet her — «$linje»") {
+                linje.contains('"') shouldBe false
+                linje.contains("/*") shouldBe false
+            }
+        }
+    }
 
     /** Linjene i en migreringsfil, uten linjekommentarer og tomme linjer. */
     private fun kjørbareLinjer(migrering: String): List<String> =
