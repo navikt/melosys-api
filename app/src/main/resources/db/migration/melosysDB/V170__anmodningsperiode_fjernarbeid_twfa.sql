@@ -1,20 +1,11 @@
--- MELOSYS-8150: flytt TWFA-flagget (rammeavtale om fjernarbeid) fra prosessinstans.data til en durabel kolonne.
--- prosessinstans er en arbeidstabell som er ment aa slettes loepende (V161__prosessinstans_prioritet.sql),
--- og var frem til naa eneste lagringssted for saksbehandlerens avhuking. Presedens for kolonnen:
--- V7.6_07__saksbehandler_anmodet_om_unntak.sql la til anmodet_av paa samme tabell for tilsvarende formaal.
+-- MELOSYS-8150: flytt TWFA-flagget (rammeavtale om fjernarbeid) fra prosessinstans.data til en varig kolonne.
+-- Presedens: V7.6_07__saksbehandler_anmodet_om_unntak.sql la til anmodet_av paa samme tabell.
 --
--- Tri-state bevares: NULL = ikke besvart (flagget kunne foerst settes 2026-02-22), 0 = nei, 1 = ja.
 -- Bevisst UTEN DEFAULT, i motsetning til sendt_utland NUMBER(1) DEFAULT 0 i V4.4_03 paa samme tabell:
--- en DEFAULT 0 ville lest alle historiske rader som et registrert nei og oedelagt tri-staten som baade
--- uttrekket (WHERE = 1) og EessiService sin null-sjekk bygger paa. Presedens for nullbar form: V122.
--- Pinnet av RammeavtaleBackfillIT, som leser nullable/data_default fra user_tab_columns -- entiteten
--- skriver kolonnen eksplisitt i hver INSERT, saa en DEFAULT ville vaert usynlig for vanlige testdata.
+-- en DEFAULT 0 ville lest alle historiske rader som et registrert nei og oedelagt tri-staten (NULL = ikke
+-- besvart) som baade uttrekket (WHERE = 1) og EessiService sin null-sjekk bygger paa. Nullbar form: V122.
 --
--- Backfillen av historikken ligger bevisst i V171, ikke her. En nullbar kolonne uten default er en ren
--- dictionary-oppdatering i Oracle og tar millisekunder, mens backfillen skanner prosessinstans.data.
--- Splittet handler om hva som skjer naar liveness-proben dreper podden midt i migreringen: samlet ville
--- Flyway mangle historikkraden mens ALTER-en allerede var auto-committet av Oracle, og neste oppstart
--- ville feilet paa ORA-01430 (kolonnen finnes allerede) -- en fastlaast utrulling som krever manuell DDL.
--- Delt krymper vinduet fra backfillens varighet til millisekundene mellom auto-commiten og historikkraden.
--- Det fjerner ikke ORA-01430-muligheten, men gjoer den usannsynlig, og V171 kan trygt kjoeres om igjen.
+-- Backfillen ligger i V171, ikke her: en nullbar kolonne uten default er en dictionary-oppdatering og tar
+-- millisekunder, mens backfillen skanner prosessinstans.data. Hvorfor det skillet betyr noe ved en avbrutt
+-- oppstart: README.md i service/.../statistikk.
 ALTER TABLE anmodningsperiode ADD er_fjernarbeid_twfa NUMBER(1);

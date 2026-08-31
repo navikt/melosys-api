@@ -34,15 +34,13 @@ import java.time.LocalDate
 
 /**
  * Verifiserer backfill-en i `V171__backfill_anmodningsperiode_fjernarbeid_twfa.sql` mot ekte Oracle.
- * Kolonnen selv legges til av `V170`; de to migreringene er skilt fordi backfillen er den dyre halvdelen.
  *
- * Migreringen kjøres av Flyway ved oppstart av containeren, altså før noen testdata finnes — den kan derfor ikke
- * observeres direkte. Testen leser i stedet UPDATE-setningene ut av selve migreringsfila og kjører dem mot seedet
- * data. Det gjør at testen ikke kan komme i utakt med SQL-en som faktisk deployes: endres migreringen, endres
- * det som testes.
+ * Flyway kjører migreringen ved oppstart av containeren, altså før noen testdata finnes, så den kan ikke
+ * observeres direkte. Testen leser i stedet UPDATE-setningene ut av selve migreringsfila og kjører dem mot
+ * seedet data — endres migreringen, endres det som testes.
  *
- * Prosessinstans-radene er eneste kilde til historikken (RINA duger ikke, jf. pakke-README-en i
- * `service/.../statistikk`), så en backfill som treffer feil er ikke reversibel.
+ * Prosessinstans-radene er eneste kilde til historikken, så en backfill som treffer feil er ikke reversibel.
+ * Bakgrunn og deploy-forbehold: `README.md` i `service/.../statistikk`.
  */
 class RammeavtaleBackfillIT(
     @Autowired private val fagsakRepository: FagsakRepository,
@@ -59,12 +57,10 @@ class RammeavtaleBackfillIT(
         val medFalse = lagSakMedAnmodningsperiode("MEL-BF-B")
         lagProsessinstans(medFalse, erFjernarbeid = false)
 
-        // Prosessinstans finnes, men flagget ble aldri satt (anmodning fra før feltet fantes).
-        // ProsessinstansBuilder utelater nøkkelen helt når verdien er null
+        // Prosessinstans finnes, men flagget ble aldri satt — anmodning fra før feltet fantes
         val utenFlagg = lagSakMedAnmodningsperiode("MEL-BF-C")
         lagProsessinstans(utenFlagg, erFjernarbeid = null)
 
-        // Ingen prosessinstans i det hele tatt
         val utenProsess = lagSakMedAnmodningsperiode("MEL-BF-D")
 
         kjørBackfillFraMigreringsfil()
@@ -79,8 +75,8 @@ class RammeavtaleBackfillIT(
 
     @Test
     fun `backfill treffer ikke flagg satt paa en annen prosesstype`() {
-        // Kun ANMODNING_OM_UNNTAK-prosessen bærer saksbehandlerens avhuking. Uten prosesstype-filteret i
-        // migreringen ville flagget kunne plukkes opp fra en vilkårlig annen saga på samme behandling
+        // Uten prosesstype-filteret i migreringen ville flagget kunne plukkes opp fra en vilkårlig annen
+        // saga på samme behandling
         val behandlingId = lagSakMedAnmodningsperiode("MEL-BF-E")
         lagProsessinstans(behandlingId, erFjernarbeid = true, prosessType = ProsessType.SEND_BREV)
 
@@ -91,8 +87,8 @@ class RammeavtaleBackfillIT(
 
     @Test
     fun `backfill lar true vinne naar samme behandling har baade true og false`() {
-        // Anmodning kan ha blitt forsøkt sendt flere ganger. Rekkefølgen mellom de to UPDATE-ene skal ikke avgjøre
-        // resultatet, og en sak som faktisk er behandlet etter rammeavtalen skal ikke falle ut av rapporteringen
+        // Anmodning kan ha blitt forsøkt sendt flere ganger. Rekkefølgen mellom de to UPDATE-ene skal ikke
+        // avgjøre resultatet
         val behandlingId = lagSakMedAnmodningsperiode("MEL-BF-F")
         lagProsessinstans(behandlingId, erFjernarbeid = false)
         lagProsessinstans(behandlingId, erFjernarbeid = true)
@@ -120,11 +116,8 @@ class RammeavtaleBackfillIT(
 
     @Test
     fun `backfill roerer ikke en rad som allerede har en verdi`() {
-        // IS NULL-vakten gjør kjøringen strengt additiv. Uten den ville en ny kjøring av backfillen overskrive
-        // verdien ny kode har skrevet, med det prosessinstansen sier — og prosessinstansen kan være utdatert,
-        // f.eks. etter at saksbehandleren endret avhukingen. Vakten filtrerer ingenting ved førstegangskjøringen
-        // (kolonnen er tom da, og V170 og V171 kjører i samme Flyway-run); verdien ligger i re-kjøringer, enten
-        // etter utrullingen for å ta deploy-gapet, eller manuelt etter en feilet V171.
+        // IS NULL-vakten gjør kjøringen strengt additiv. Den filtrerer ingenting ved førstegangskjøringen —
+        // verdien ligger i re-kjøringer, der prosessinstansen kan være eldre enn det ny kode har skrevet
         val alleredeNei = lagSakMedAnmodningsperiode("MEL-BF-H")
         lagProsessinstans(alleredeNei, erFjernarbeid = true)
         settFlagg(alleredeNei, 0)
@@ -145,18 +138,13 @@ class RammeavtaleBackfillIT(
 
     @Test
     fun `V170 legger kun til kolonnen, og V171 inneholder kun backfill`() {
-        // Splitten er selve poenget: ALTER-en er en dictionary-oppdatering, mens backfillen skanner
-        // prosessinstans.data. Slås de sammen igjen, kan en treg backfill holde oppstarten så lenge at
-        // liveness-proben dreper podden, og da re-kjører Flyway ALTER-en også — ORA-01430.
+        // Slås migreringene sammen igjen, kan en treg backfill holde oppstarten så lenge at liveness-proben
+        // dreper podden, og da re-kjører Flyway ALTER-en også — ORA-01430. Se pakke-README-en.
         //
-        // Assertene er bevisst *hvitelister*, ikke svartelister. En tidligere variant spurte «inneholder V170
-        // ingen UPDATE?», og et slikt fravær kan bare måles med en SQL-lekser. Fire runder med review fant fire
-        // ulike leksikalske hull i den lekseren — semikolon i kommentar, blokkkommentar, sitert identifikator og
-        // q-quoting — og hvert hull gjorde assertet stille grønt mens migreringen inneholdt backfillen. En
-        // hviteliste snur feilretningen. Flyway-filer er dessuten checksum-frosne etter release, så eksakt
-        // innhold er ikke sprøtt.
-        //
-        // Hvitelisten er likevel ikke nok alene, og [enLinjeErEnLinje] er den andre halvdelen — les den først.
+        // Assertene er bevisst positivlister, ikke forbudslister: å spørre «inneholder V170 ingen UPDATE?»
+        // krever en SQL-lekser, og et hull i lekseren gjør assertet stille grønt. En positivliste snur
+        // feilretningen. Flyway-filer er checksum-frosne etter release, så eksakt innhold er ikke sprøtt.
+        // Positivlisten er likevel ikke nok alene — [enLinjeErEnLinje] er den andre halvdelen, les den først.
         enLinjeErEnLinje(MIGRERING_KOLONNE)
         enLinjeErEnLinje(MIGRERING_BACKFILL)
 
@@ -177,10 +165,9 @@ class RammeavtaleBackfillIT(
 
     @Test
     fun `kolonnen er nullbar og uten default, slik tri-staten krever`() {
-        // NULL = ikke besvart, 0 = nei, 1 = ja. En DEFAULT 0 ville lest alle historiske rader som et registrert
-        // nei og ødelagt både uttrekket (WHERE = 1) og EessiService sin null-sjekk. Dette må sjekkes mot skjemaet,
-        // ikke mot teksten i migreringsfila: en assert på antall ALTER-setninger ser ikke forskjell på med og uten
-        // DEFAULT, og entiteten skriver kolonnen eksplisitt i hver INSERT, så testdata avslører den heller ikke.
+        // Sjekkes mot skjemaet, ikke mot teksten i migreringsfila: en assert på antall ALTER-setninger ser
+        // ikke forskjell på med og uten DEFAULT, og entiteten skriver kolonnen eksplisitt i hver INSERT, så
+        // testdata avslører den heller ikke.
         val kolonne = jdbcTemplate.queryForMap(
             """
             SELECT nullable, data_default
@@ -197,10 +184,7 @@ class RammeavtaleBackfillIT(
         }
     }
 
-    /**
-     * Kjører UPDATE-setningene fra backfill-migreringen. Kolonnen finnes allerede fordi Flyway kjørte `V170` ved
-     * oppstart. `IS NULL`-vakten gjør kjøringen strengt additiv, så en ekstra kjøring er ufarlig.
-     */
+    /** Kolonnen finnes allerede: Flyway kjørte `V170` ved oppstart. */
     private fun kjørBackfillFraMigreringsfil() {
         val oppdateringer = backfillSetninger()
 
@@ -213,11 +197,9 @@ class RammeavtaleBackfillIT(
     /**
      * Setningene i backfill-migreringen, delt på semikolon.
      *
-     * Splittingen er med vilje naiv. Den trenger ikke være korrekt for vilkårlig SQL, fordi alt den brukes til er
-     * hvitelister: setningene sammenlignes mot en forventet form, og de kjøres mot Oracle. Skulle et semikolon i
-     * en streng-literal noen gang dele feil, ryker enten formkravet eller `jdbcTemplate` — begge høylytt. Den
-     * strengbevisste lekseren som stod her før forsøkte i stedet å bevise et *fravær*, og der er en parse-feil
-     * stille. Det er skillet som gjorde tre runder med lekserfunn mulige.
+     * Splittingen er med vilje naiv. Den trenger ikke være korrekt for vilkårlig SQL, fordi alt den brukes til
+     * er positivlister: setningene sammenlignes mot en forventet form, og de kjøres mot Oracle. Skulle et
+     * semikolon i en streng-literal dele feil, ryker enten formkravet eller `jdbcTemplate` — begge høylytt.
      */
     private fun backfillSetninger(): List<String> =
         kjørbareLinjer(MIGRERING_BACKFILL).joinToString("\n")
@@ -229,15 +211,15 @@ class RammeavtaleBackfillIT(
      * Krever at ingen konstruksjon i migreringsfila kan spenne over et linjeskift.
      *
      * [kjørbareLinjer] kaster linjer som *starter* med `--`. Oracle gjør ikke det hvis en streng-literal eller
-     * blokkkommentar aapnet paa en tidligere linje fortsatt staar aapen: da kan den forkastede linja lukke
-     * literalen og deretter kjøre vilkaarlig SQL, usynlig for hvitelistene under. Verifisert — en `ALTER TABLE`
+     * blokkkommentar åpnet på en tidligere linje fortsatt står åpen: da kan den forkastede linja lukke
+     * literalen og deretter kjøre vilkårlig SQL, usynlig for positivlistene over. Verifisert — en `ALTER TABLE`
      * gjemt slik ble faktisk kjørt av Flyway mens splitt-testen var grønn.
      *
-     * Svaret er ikke å parse slike konstruksjoner riktig; det var lekseren, og den tok fire runder uten å bli
-     * ferdig. Svaret er å *forby forutsetningen*: er apostrofene balansert linje for linje, og finnes verken
-     * doble anførselstegn eller blokkkommentarer, kan ingen konstruksjon krysse et linjeskift, og den naive
-     * linjebaserte lesingen er da beviselig enig med Oracle. Begge filene overholder dette i dag. Trenger en
-     * framtidig migrering noe av det, ryker denne — og da må testen leses på nytt, ikke lempes på.
+     * Svaret er ikke å parse slike konstruksjoner riktig, men å forby forutsetningen: er apostrofene balansert
+     * linje for linje, og finnes verken doble anførselstegn eller blokkkommentarer, kan ingen konstruksjon
+     * krysse et linjeskift, og den naive linjebaserte lesingen er da beviselig enig med Oracle. Begge filene
+     * overholder dette i dag. Trenger en framtidig migrering noe av det, ryker denne — og da må testen leses
+     * på nytt, ikke lempes på.
      */
     private fun enLinjeErEnLinje(migrering: String) {
         kjørbareLinjer(migrering).forAll { linje ->
@@ -251,7 +233,6 @@ class RammeavtaleBackfillIT(
         }
     }
 
-    /** Linjene i en migreringsfil, uten linjekommentarer og tomme linjer. */
     private fun kjørbareLinjer(migrering: String): List<String> =
         checkNotNull(
             javaClass.getResource("/db/migration/melosysDB/$migrering")?.readText(),
