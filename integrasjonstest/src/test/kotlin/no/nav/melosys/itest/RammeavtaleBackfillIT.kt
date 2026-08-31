@@ -1,6 +1,7 @@
 package no.nav.melosys.itest
 
 import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -31,7 +32,8 @@ import org.springframework.jdbc.core.JdbcTemplate
 import java.time.LocalDate
 
 /**
- * Verifiserer backfill-en i `V170__anmodningsperiode_fjernarbeid_twfa.sql` mot ekte Oracle.
+ * Verifiserer backfill-en i `V171__backfill_anmodningsperiode_fjernarbeid_twfa.sql` mot ekte Oracle.
+ * Kolonnen selv legges til av `V170`; de to migreringene er skilt fordi backfillen er den dyre halvdelen.
  *
  * Migreringen kjøres av Flyway ved oppstart av containeren, altså før noen testdata finnes — den kan derfor ikke
  * observeres direkte. Testen leser i stedet UPDATE-setningene ut av selve migreringsfila og kjører dem mot seedet
@@ -115,23 +117,74 @@ class RammeavtaleBackfillIT(
         verdier.toSet() shouldBe setOf(1)
     }
 
+    @Test
+    fun `backfill roerer ikke en rad som allerede har en verdi`() {
+        // IS NULL-vakten gjør kjøringen strengt additiv. Uten den ville en ny kjøring av backfillen overskrive
+        // verdien ny kode har skrevet, med det prosessinstansen sier — og prosessinstansen kan være utdatert,
+        // f.eks. etter at saksbehandleren endret avhukingen. Vakten er også det som gjør at V171 kan kjøres
+        // manuelt før deploy uten at Flyway-kjøringen etterpå ødelegger noe.
+        val alleredeNei = lagSakMedAnmodningsperiode("MEL-BF-H")
+        lagProsessinstans(alleredeNei, erFjernarbeid = true)
+        settFlagg(alleredeNei, 0)
+
+        val alleredeJa = lagSakMedAnmodningsperiode("MEL-BF-I")
+        lagProsessinstans(alleredeJa, erFjernarbeid = false)
+        settFlagg(alleredeJa, 1)
+
+        kjørBackfillFraMigreringsfil()
+
+        withClue("true-setningen skal ikke overskrive et registrert nei") {
+            flagget(alleredeNei) shouldBe 0
+        }
+        withClue("false-setningen skal ikke overskrive et registrert ja") {
+            flagget(alleredeJa) shouldBe 1
+        }
+    }
+
+    @Test
+    fun `kolonnen legges til i V170 og backfillen ligger i V171`() {
+        // Splitten er selve poenget: ALTER-en er ren metadataendring, mens backfillen skanner prosessinstans.data.
+        // Slås de sammen igjen, kan en treg backfill holde oppstarten så lenge at liveness-proben dreper podden
+        // før kolonnen finnes. Testen over ville da fortsatt vært grønn — den leser bare V171 — så splitten
+        // trenger sin egen assert.
+        withClue("$MIGRERING_KOLONNE skal legge til kolonnen") {
+            setningerSomStarterMed(MIGRERING_KOLONNE, "ALTER") shouldHaveSize 1
+        }
+        withClue("$MIGRERING_KOLONNE skal ikke inneholde backfill — den hører hjemme i $MIGRERING_BACKFILL") {
+            setningerSomStarterMed(MIGRERING_KOLONNE, "UPDATE").shouldBeEmpty()
+        }
+        withClue("$MIGRERING_BACKFILL skal ikke endre skjemaet") {
+            setningerSomStarterMed(MIGRERING_BACKFILL, "ALTER").shouldBeEmpty()
+        }
+        withClue("$MIGRERING_BACKFILL skal inneholde backfillen") {
+            setningerSomStarterMed(MIGRERING_BACKFILL, "UPDATE") shouldHaveSize ANTALL_BACKFILL_UPDATES
+        }
+    }
+
     /**
-     * Kjører UPDATE-setningene fra migreringsfila. ALTER TABLE hoppes over — kolonnen finnes allerede fordi
-     * Flyway kjørte migreringen ved oppstart. Backfill-en er idempotent, så en ekstra kjøring er ufarlig.
+     * Kjører UPDATE-setningene fra backfill-migreringen. Kolonnen finnes allerede fordi Flyway kjørte `V170` ved
+     * oppstart. `IS NULL`-vakten gjør kjøringen strengt additiv, så en ekstra kjøring er ufarlig.
      */
     private fun kjørBackfillFraMigreringsfil() {
-        val sql = checkNotNull(
-            javaClass.getResource("/db/migration/melosysDB/$MIGRERING")?.readText(),
-        ) { "Fant ikke $MIGRERING på classpath — er migreringen fjernet eller omdøpt?" }
+        val oppdateringer = setningerSomStarterMed(MIGRERING_BACKFILL, "UPDATE")
 
-        val oppdateringer = sql.split(";")
-            .map { it.lines().filterNot { linje -> linje.trimStart().startsWith("--") }.joinToString("\n").trim() }
-            .filter { it.startsWith("UPDATE", ignoreCase = true) }
-
-        withClue("Migreringen skal inneholde to UPDATE-setninger (false og true); endres den, må denne testen leses på nytt") {
-            oppdateringer shouldHaveSize 2
+        withClue("$MIGRERING_BACKFILL skal inneholde $ANTALL_BACKFILL_UPDATES UPDATE-setninger (false og true); endres den, må denne testen leses på nytt") {
+            oppdateringer shouldHaveSize ANTALL_BACKFILL_UPDATES
         }
         oppdateringer.forEach { jdbcTemplate.execute(it) }
+    }
+
+    /**
+     * Leser setningene ut av en migreringsfil på classpath, uten kommentarlinjer.
+     */
+    private fun setningerSomStarterMed(migrering: String, nøkkelord: String): List<String> {
+        val sql = checkNotNull(
+            javaClass.getResource("/db/migration/melosysDB/$migrering")?.readText(),
+        ) { "Fant ikke $migrering på classpath — er migreringen fjernet eller omdøpt?" }
+
+        return sql.split(";")
+            .map { it.lines().filterNot { linje -> linje.trimStart().startsWith("--") }.joinToString("\n").trim() }
+            .filter { it.startsWith(nøkkelord, ignoreCase = true) }
     }
 
     private fun flagget(behandlingId: Long): Int? = jdbcTemplate.queryForObject(
@@ -140,6 +193,15 @@ class RammeavtaleBackfillIT(
         behandlingId,
         java.sql.Date.valueOf(FØRSTE_FOM),
     )
+
+    /** Speiler det ny kode gjør ved anmodning: kolonnen er allerede fylt når backfillen kjører. */
+    private fun settFlagg(behandlingId: Long, verdi: Int) {
+        jdbcTemplate.update(
+            "UPDATE anmodningsperiode SET er_fjernarbeid_twfa = ? WHERE beh_resultat_id = ?",
+            verdi,
+            behandlingId,
+        )
+    }
 
     private fun lagSakMedAnmodningsperiode(saksnummer: String, ekstraPeriodeFom: LocalDate? = null): Long {
         val fagsak = fagsakRepository.save(
@@ -194,7 +256,9 @@ class RammeavtaleBackfillIT(
     }
 
     companion object {
-        private const val MIGRERING = "V170__anmodningsperiode_fjernarbeid_twfa.sql"
+        private const val MIGRERING_KOLONNE = "V170__anmodningsperiode_fjernarbeid_twfa.sql"
+        private const val MIGRERING_BACKFILL = "V171__backfill_anmodningsperiode_fjernarbeid_twfa.sql"
+        private const val ANTALL_BACKFILL_UPDATES = 2
         private val FØRSTE_FOM: LocalDate = LocalDate.of(2023, 1, 1)
     }
 }

@@ -6,7 +6,8 @@ Uttrekk til Medlemskap og avgift over saker behandlet etter rammeavtalen for fje
 ## Hvor flagget kommer fra
 
 Saksbehandlerens avhuking for «rammeavtale om fjernarbeid» lagres på kolonnen
-`anmodningsperiode.er_fjernarbeid_twfa` (`V170__anmodningsperiode_fjernarbeid_twfa.sql`):
+`anmodningsperiode.er_fjernarbeid_twfa` (`V170__anmodningsperiode_fjernarbeid_twfa.sql`, backfill av
+historikken i `V171__backfill_anmodningsperiode_fjernarbeid_twfa.sql`):
 
 ```
 melosys-web (checkbox)
@@ -35,7 +36,14 @@ Fram til august 2026 var `prosessinstans.data` eneste lagringssted, og uttrekket
 `p.data LIKE '%erFjernarbeidTWFA=true%'` mot en CLOB på en tabell både entiteten
 (`Prosessinstans.kt`) og `V3.0_01__PROSESSINSTANS.sql` kaller «Arbeidstabell for saksflyt», og som
 `V161__prosessinstans_prioritet.sql` kaller **kortlevd**. Det virket utelukkende fordi ingen
-slettejobb var implementert ennå. `V170` flyttet kilden og backfillet historikken fra de radene.
+slettejobb var implementert ennå. `V170` flyttet kilden, og `V171` backfillet historikken fra de radene.
+
+Migreringene er bevisst delt i to: `V170` er en nullbar kolonne uten default, altså ren
+metadataendring på Oracle 11g+, mens `V171` skanner `prosessinstans.data`. Splitten gjør at en treg
+eller feilende backfill ikke kan holde oppstarten lenge nok til at liveness-proben dreper podden før
+kolonnen finnes — feiler `V171`, virker koden, bare historikken mangler. `V171` har
+`er_fjernarbeid_twfa IS NULL` i begge setningene, så den kan også kjøres manuelt i en kontrollert
+SQL-sesjon; Flyway-kjøringen etterpå finner da null rader.
 
 ## Hvorfor `lagreAnmodningsperioder` bevarer flagget
 
@@ -64,7 +72,8 @@ Pinnet av tester i både `VideresendSoknadTest` og `SendVedtakUtlandTest`.
 > kolonnen — den gamle podden leser prosessdataen direkte, sender riktig A001, og rører ikke
 > kolonnen. Saken mangler da i statistikken. Vinduet er minutter og volumet titalls saker i året, så
 > sannsynligheten er lav, men gapet er reelt og stille. Prosessinstans-radene slettes ikke, så
-> `V170`s to UPDATE-setninger kan kjøres på nytt etter at utrullingen er ferdig hvis det trengs.
+> `V171`s to UPDATE-setninger kan kjøres på nytt etter at utrullingen er ferdig hvis det trengs —
+> `IS NULL`-vakten gjør en slik kjøring strengt additiv.
 > `ProsessDataKey.ER_FJERNARBEID_TWFA` og skrivingen i `ProsessinstansBuilder` beholdes inntil
 > videre nettopp som kilde for en slik ny kjøring.
 
@@ -98,5 +107,6 @@ slike saker overhodet skal telles.
 ## Tester
 
 - `RammeavtaleStatistikkIT` — uttrekket mot ekte Oracle (tri-state, DISTINCT, vedtaksår, tidssone)
-- `RammeavtaleBackfillIT` — kjører UPDATE-setningene fra `V170` mot seedet data. Leser SQL-en ut av
-  migreringsfila, så testen ikke kan komme i utakt med det som deployes
+- `RammeavtaleBackfillIT` — kjører UPDATE-setningene fra `V171` mot seedet data, og pinner at `V170`
+  kun legger til kolonnen. Leser SQL-en ut av migreringsfilene, så testen ikke kan komme i utakt med
+  det som deployes
