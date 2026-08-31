@@ -55,7 +55,7 @@ class OpprettFakturaserie(
 
         val saksbehandlerIdent = prosessinstans.hentData(ProsessDataKey.SAKSBEHANDLER)
 
-        if (behandlingsresultat.erOpphørt() || andregangsvurderingHarFjernetFakturerbarTrygdeavgift(behandling, behandlingsresultat)) {
+        if (behandlingsresultat.erOpphørt() || andregangsvurderingHarTrygdeavgiftUtenBeløp(behandling, behandlingsresultat)) {
             val opprinneligFakturaserieReferanse =
                 behandlingsresultatService.hentBehandlingsresultat(behandling.hentOpprinneligBehandling().id).hentFakturaserieReferanse()
             if (behandlingsresultat.fakturaserieReferanse == null || behandlingsresultat.fakturaserieReferanse == opprinneligFakturaserieReferanse) {
@@ -81,6 +81,19 @@ class OpprettFakturaserie(
         behandling.erAndregangsbehandling()
             && harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling)
             && !trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
+
+    /**
+     * Andregangsbehandling der trygdeavgiften fortsatt er beregnet, men uten beløp – typisk ved overgang fra
+     * ikke skattepliktig til skattepliktig. NAV skal da ikke kreve inn avgift, og tidligere fakturaer skal
+     * kanselleres og innbetalte beløp krediteres (MELOSYS-8220).
+     *
+     * Tilfeller uten trygdeavgiftsperioder i det hele tatt håndteres fortsatt som avregning i grenen under,
+     * der tidligere år skal forbli fakturert.
+     */
+    private fun andregangsvurderingHarTrygdeavgiftUtenBeløp(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean =
+        andregangsvurderingHarFjernetFakturerbarTrygdeavgift(behandling, behandlingsresultat)
+            && behandlingsresultat.trygdeavgiftsperioder.isNotEmpty()
+            && behandlingsresultat.trygdeavgiftsperioder.none { it.harAvgift() }
 
     private fun kansellerFakturaserieOgLagreReferanse(
         behandlingsresultat: Behandlingsresultat,
