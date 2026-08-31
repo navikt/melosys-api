@@ -31,6 +31,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import java.time.LocalDate
 
 /**
+
  * Verifiserer backfill-en i `V171__backfill_anmodningsperiode_fjernarbeid_twfa.sql` mot ekte Oracle.
  * Kolonnen selv legges til av `V170`; de to migreringene er skilt fordi backfillen er den dyre halvdelen.
  *
@@ -120,8 +121,9 @@ class RammeavtaleBackfillIT(
     fun `backfill roerer ikke en rad som allerede har en verdi`() {
         // IS NULL-vakten gjør kjøringen strengt additiv. Uten den ville en ny kjøring av backfillen overskrive
         // verdien ny kode har skrevet, med det prosessinstansen sier — og prosessinstansen kan være utdatert,
-        // f.eks. etter at saksbehandleren endret avhukingen. Vakten er også det som gjør at V171 kan kjøres
-        // manuelt før deploy uten at Flyway-kjøringen etterpå ødelegger noe.
+        // f.eks. etter at saksbehandleren endret avhukingen. Vakten filtrerer ingenting ved førstegangskjøringen
+        // (kolonnen er tom da, og V170 og V171 kjører i samme Flyway-run); verdien ligger i re-kjøringer, enten
+        // etter utrullingen for å ta deploy-gapet, eller manuelt etter en feilet V171.
         val alleredeNei = lagSakMedAnmodningsperiode("MEL-BF-H")
         lagProsessinstans(alleredeNei, erFjernarbeid = true)
         settFlagg(alleredeNei, 0)
@@ -182,6 +184,30 @@ class RammeavtaleBackfillIT(
         }
     }
 
+    @Test
+    fun `SQL-parsingen kutter ikke setninger paa semikolon inne i en streng-literal`() {
+        // Scanneren fjerner kommentarer strengbevisst, og må kutte på semikolon i samme gjennomgang. En
+        // `split(";")` etterpå ville kappet en LIKE-maske som inneholder semikolon, og den avkortede setningen
+        // ville telt som en gyldig UPDATE — feilen dukker først opp som ORA-01756 fra jdbcTemplate, altså på feil
+        // sted. Dette er den ene inputen migreringsfilene ikke selv inneholder, så den må mates inn direkte.
+        val setninger = setninger(
+            """
+            -- kommentar med semikolon; og apostrof i Nav's prosa
+            UPDATE t SET c = 0 WHERE d LIKE '%a;b%';
+            /* blokkkommentar; med semikolon */
+            UPDATE t SET c = 1;
+            """.trimIndent(),
+        )
+
+        setninger shouldHaveSize 2
+        withClue("literalen skal være intakt, ikke kappet ved semikolonet inni den") {
+            setninger[0] shouldBe "UPDATE t SET c = 0 WHERE d LIKE '%a;b%'"
+        }
+        withClue("kommentarer skal ikke etterlate rester som gjør at setningen mister prefikset sitt") {
+            setninger[1] shouldBe "UPDATE t SET c = 1"
+        }
+    }
+
     /**
      * Kjører UPDATE-setningene fra backfill-migreringen. Kolonnen finnes allerede fordi Flyway kjørte `V170` ved
      * oppstart. `IS NULL`-vakten gjør kjøringen strengt additiv, så en ekstra kjøring er ufarlig.
@@ -196,12 +222,10 @@ class RammeavtaleBackfillIT(
     }
 
     /**
-     * Leser setningene ut av en migreringsfil på classpath, med kommentarene fjernet først.
+     * Setningene i en migreringsfil på classpath, med kommentarene fjernet.
      */
     private fun setningerSomStarterMed(migrering: String, nøkkelord: String): List<String> =
-        utenKommentarer(migrering).split(";")
-            .map { it.trim() }
-            .filter { it.startsWith(nøkkelord, ignoreCase = true) }
+        setningerFra(migrering).filter { it.startsWith(nøkkelord, ignoreCase = true) }
 
     /**
      * Teller nøkkelordet hvor som helst i den kommentarfrie SQL-en, ikke bare først i en setning.
@@ -209,12 +233,25 @@ class RammeavtaleBackfillIT(
      * De negative assertene («V170 skal ikke inneholde backfill») kan ikke bygge på et prefiks-filter: en UPDATE
      * pakket i `BEGIN … END;` eller `EXECUTE IMMEDIATE '…'` starter ikke med nøkkelordet, og et prefiks-filter
      * ville blitt stille grønt mens setningen kjøres av Flyway. Et fravær må måles på hele teksten.
+     *
+     * Streng-literaler telles med. Det gir en teoretisk falsk positiv for en LIKE-maske som inneholder ordet
+     * ALTER, men det er riktig pris: nettopp fordi literalene beholdes, fanges DDL smuglet inn via
+     * `EXECUTE IMMEDIATE`. En falsk positiv er dessuten høylytt, mens en falsk negativ ville vært stille.
      */
     private fun forekomsterAv(migrering: String, nøkkelord: String): Int =
-        Regex("\\b$nøkkelord\\b", RegexOption.IGNORE_CASE).findAll(utenKommentarer(migrering)).count()
+        Regex("\\b$nøkkelord\\b", RegexOption.IGNORE_CASE)
+            .findAll(setningerFra(migrering).joinToString(" "))
+            .count()
+
+    private fun setningerFra(migrering: String): List<String> = setninger(
+        checkNotNull(
+            javaClass.getResource("/db/migration/melosysDB/$migrering")?.readText(),
+        ) { "Fant ikke $migrering på classpath — er migreringen fjernet eller omdøpt?" },
+    )
 
     /**
-     * Fjerner linje- og blokkkommentarer, men lar innhold i streng-literaler stå.
+     * Deler SQL i setninger: fjerner linje- og blokkkommentarer, og kutter på semikolon — begge deler kun
+     * utenfor streng-literaler.
      *
      * Å bare droppe linjer som starter med `--` holder ikke: et semikolon i en kommentar splitter setningen slik
      * at neste bit starter med kommentarrestene i stedet for nøkkelordet, og en blokkkommentar foran en UPDATE gjør
@@ -222,29 +259,36 @@ class RammeavtaleBackfillIT(
      * negative assertene. Migreringsfilene her er fulle av norsk kommentarprosa, så semikolon i en kommentar er
      * ikke et hypotetisk tilfelle.
      *
+     * Kuttingen må skje i samme gjennomgang, ikke som en `split(";")` etterpå: et semikolon inne i en LIKE-maske
+     * ville ellers kappet setningen midt i literalen. Det er høylytt (Oracle svarer ORA-01756), men feilen dukker
+     * opp på feil sted.
+     *
      * Streng-tilstanden må spores fordi kommentartegn inne i en LIKE-maske ikke er kommentarer. Oracle sin
      * doblede apostrof (`''`) faller ut riktig av seg selv: den forlater og gjeninntrer strengen.
      */
-    private fun utenKommentarer(migrering: String): String {
-        val sql = checkNotNull(
-            javaClass.getResource("/db/migration/melosysDB/$migrering")?.readText(),
-        ) { "Fant ikke $migrering på classpath — er migreringen fjernet eller omdøpt?" }
-
-        val ut = StringBuilder()
+    private fun setninger(sql: String): List<String> {
+        val setninger = mutableListOf<String>()
+        val gjeldende = StringBuilder()
         var i = 0
         var iStreng = false
+
+        fun avslutt() {
+            gjeldende.toString().trim().takeIf { it.isNotEmpty() }?.let { setninger += it }
+            gjeldende.clear()
+        }
+
         while (i < sql.length) {
             val tegn = sql[i]
             when {
                 iStreng -> {
                     if (tegn == '\'') iStreng = false
-                    ut.append(tegn)
+                    gjeldende.append(tegn)
                     i++
                 }
 
                 tegn == '\'' -> {
                     iStreng = true
-                    ut.append(tegn)
+                    gjeldende.append(tegn)
                     i++
                 }
 
@@ -255,17 +299,23 @@ class RammeavtaleBackfillIT(
 
                 sql.startsWith("/*", i) -> {
                     val blokkslutt = sql.indexOf("*/", i + 2)
-                    ut.append(' ')
+                    gjeldende.append(' ')
                     i = if (blokkslutt < 0) sql.length else blokkslutt + 2
                 }
 
+                tegn == ';' -> {
+                    avslutt()
+                    i++
+                }
+
                 else -> {
-                    ut.append(tegn)
+                    gjeldende.append(tegn)
                     i++
                 }
             }
         }
-        return ut.toString()
+        avslutt()
+        return setninger
     }
 
     private fun flagget(behandlingId: Long): Int? = jdbcTemplate.queryForObject(

@@ -15,5 +15,6 @@
 -- Splittet handler om hva som skjer naar liveness-proben dreper podden midt i migreringen: samlet ville
 -- Flyway mangle historikkraden mens ALTER-en allerede var auto-committet av Oracle, og neste oppstart
 -- ville feilet paa ORA-01430 (kolonnen finnes allerede) -- en fastlaast utrulling som krever manuell DDL.
--- Delt kan V171 trygt kjoeres om igjen, og skjemaet er konsistent uansett hvor det stoppet.
+-- Delt krymper vinduet fra backfillens varighet til millisekundene mellom auto-commiten og historikkraden.
+-- Det fjerner ikke ORA-01430-muligheten, men gjoer den usannsynlig, og V171 kan trygt kjoeres om igjen.
 ALTER TABLE anmodningsperiode ADD er_fjernarbeid_twfa NUMBER(1);

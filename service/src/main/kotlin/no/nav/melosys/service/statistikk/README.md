@@ -42,13 +42,15 @@ Migreringene er bevisst delt i to: `V170` er en nullbar kolonne uten default, al
 dictionary-oppdatering, mens `V171` skanner `prosessinstans.data`. Splitten handler om hva som skjer
 hvis liveness-proben dreper podden midt i migreringen. Samlet ville Flyway mangle historikkraden mens
 `ALTER`-en allerede var auto-committet av Oracle, og neste oppstart ville feilet på `ORA-01430`.
-Delt kan `V171` trygt kjøres om igjen.
+Delt krymper vinduet fra backfillens varighet til millisekundene mellom auto-commiten og
+historikkraden, og `V171` kan trygt kjøres om igjen.
 
-**Splitten fjerner ikke en fastlåst utrulling.** Oracle støtter ikke DDL i transaksjon, så en `V171`
-som kaster gir en `success=0`-rad i `flyway_schema_history`, og appen starter ikke igjen før noen
-kjører `flyway repair`. Det splitten gir, er en enkel opprydding: kolonnen er på plass og registrert,
-så gjenopprettingen er å kjøre backfillen manuelt og deretter reparere. `V171` har
-`er_fjernarbeid_twfa IS NULL` i begge setningene, så en slik manuell kjøring er trygg. Merk at
+**Splitten fjerner ikke en fastlåst utrulling.** Flyways Oracle-dialekt melder
+`supportsDdlTransactions() = false` for hele databasen, ikke per migrering, så en `V171` som kaster
+gir en `success=0`-rad i `flyway_schema_history` selv om den bare inneholder DML — og appen starter
+ikke igjen før noen kjører `flyway repair`. Det splitten gir, er en enkel opprydding: kolonnen er på
+plass og registrert, så gjenopprettingen er å kjøre backfillen manuelt og deretter reparere. `V171`
+har `er_fjernarbeid_twfa IS NULL` i begge setningene, så en slik manuell kjøring er trygg. Merk at
 vakten ikke filtrerer noe ved førstegangskjøringen — kolonnen er tom da, og `V170` og `V171` kjører i
 samme Flyway-run. Verdien ligger i re-kjøringer.
 

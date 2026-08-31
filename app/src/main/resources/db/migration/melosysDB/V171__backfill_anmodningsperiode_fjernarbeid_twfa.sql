@@ -3,11 +3,12 @@
 -- men de er eneste kilde til historikken.
 --
 -- Skilt fra V170 med vilje. ALTER-en er en dictionary-oppdatering; denne skanner prosessinstans.data.
--- Oracle stoetter ikke DDL i transaksjon, saa Flyway skriver en success=0-rad hvis denne kaster, og
--- appen starter ikke igjen foer noen kjoerer flyway repair. Splitten fjerner altsaa IKKE den fastlaaste
--- utrullingen -- den gjoer opprydningen enkel: kolonnen er allerede paa plass og registrert, saa
--- gjenopprettingen er aa kjoere setningene under manuelt i en kontrollert sesjon og deretter repare.
--- Uten splitten ville en re-kjoering ogsaa truffet ALTER-en paa nytt (ORA-01430).
+-- Flyway sin Oracle-dialekt melder supportsDdlTransactions() = false for HELE databasen, ikke per
+-- migrering, saa en migrering som kaster -- ogsaa en ren DML-migrering som denne -- faar en success=0-rad
+-- i flyway_schema_history, og appen starter ikke igjen foer noen kjoerer flyway repair. Splitten fjerner
+-- altsaa IKKE den fastlaaste utrullingen; den gjoer opprydningen enkel: kolonnen er allerede paa plass og
+-- registrert, saa gjenopprettingen er aa kjoere setningene under manuelt og deretter repare. Uten splitten
+-- ville en re-kjoering ogsaa truffet ALTER-en paa nytt (ORA-01430).
 --
 -- Joinen p.behandling_id = ap.beh_resultat_id ser ut som en nokkelforveksling, men er riktig:
 -- behandlingsresultat har behandling_id som PK (V1.0_06, @MapsId i Behandlingsresultat.kt), og
