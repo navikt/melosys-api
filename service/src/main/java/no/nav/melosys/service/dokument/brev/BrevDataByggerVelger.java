@@ -1,8 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
-import io.getunleash.Unleash;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -28,7 +26,6 @@ public class BrevDataByggerVelger {
     private final VilkaarsresultatService vilkaarsresultatService;
     private final PersondataFasade persondataFasade;
     private final MottatteOpplysningerService mottatteOpplysningerService;
-    private final Unleash unleash;
 
     public BrevDataByggerVelger(AnmodningsperiodeService anmodningsperiodeService,
                                 AvklartefaktaService avklartefaktaService,
@@ -39,8 +36,7 @@ public class BrevDataByggerVelger {
                                 UtpekingService utpekingService,
                                 VilkaarsresultatService vilkaarsresultatService,
                                 PersondataFasade persondataFasade,
-                                MottatteOpplysningerService mottatteOpplysningerService,
-                                Unleash unleash) {
+                                MottatteOpplysningerService mottatteOpplysningerService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.avklartefaktaService = avklartefaktaService;
         this.landvelgerService = landvelgerService;
@@ -51,7 +47,6 @@ public class BrevDataByggerVelger {
         this.vilkaarsresultatService = vilkaarsresultatService;
         this.persondataFasade = persondataFasade;
         this.mottatteOpplysningerService = mottatteOpplysningerService;
-        this.unleash = unleash;
     }
 
     public BrevDataBygger hent(Produserbaredokumenter produserbartDokument, BrevbestillingDto brevbestillingDto) {
@@ -78,7 +73,7 @@ public class BrevDataByggerVelger {
 
     private BrevDataBygger lagBrevDataByggerA1(BrevbestillingDto brevbestillingDto) {
         BrevDataByggerA1 a1Bygger =
-            new BrevDataByggerA1(avklartefaktaService, landvelgerService, unleash.isEnabled(ToggleName.MELOSYS_CDM_4_4));
+            new BrevDataByggerA1(avklartefaktaService, landvelgerService);
         return new BrevDataByggerVedlegg(a1Bygger, brevbestillingDto);
     }
 
@@ -93,7 +88,7 @@ public class BrevDataByggerVelger {
 
     private BrevDataBygger lagBrevDataByggerInnvilgelse(BrevbestillingDto brevbestillingDto) {
         BrevDataByggerA1 brevbyggerA1 =
-            new BrevDataByggerA1(avklartefaktaService, landvelgerService, unleash.isEnabled(ToggleName.MELOSYS_CDM_4_4));
+            new BrevDataByggerA1(avklartefaktaService, landvelgerService);
         return new BrevDataByggerInnvilgelse(avklartefaktaService,
             landvelgerService,
             lovvalgsperiodeService,
@@ -107,7 +102,7 @@ public class BrevDataByggerVelger {
 
     private BrevDataBygger lagBrevDataByggerInnvilgelseFlereLand(BrevbestillingDto brevbestillingDto) {
         BrevDataByggerA1 brevbyggerA1 =
-            new BrevDataByggerA1(avklartefaktaService, landvelgerService, unleash.isEnabled(ToggleName.MELOSYS_CDM_4_4));
+            new BrevDataByggerA1(avklartefaktaService, landvelgerService);
 
         return new BrevDataByggerInnvilgelseFlereLand(avklartefaktaService,
             landvelgerService,

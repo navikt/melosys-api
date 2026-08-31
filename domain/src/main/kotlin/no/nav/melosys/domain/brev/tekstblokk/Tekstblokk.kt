@@ -17,10 +17,19 @@ import jakarta.persistence.Table
 import java.time.Instant
 
 import no.nav.melosys.domain.RegistreringsInfo
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import org.hibernate.envers.AuditOverride
+import org.hibernate.envers.Audited
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
 @Entity
 @Table(name = "TEKSTBLOKK")
+// Envers gir versjonshistorikk uten skriveside-kode – alle mutasjoner går gjennom
+// TekstblokkService. AuditOverride tar med registreringsfeltene fra superklassen.
+@Audited
+@AuditOverride(forClass = RegistreringsInfo::class)
 @EntityListeners(AuditingEntityListener::class)
 class Tekstblokk(
     @Id
@@ -30,8 +39,11 @@ class Tekstblokk(
     @Column(name = "tittel", nullable = false)
     var tittel: String = "",
 
+    // columnDefinition i tillegg til @Lob: Envers viderefører den eksplisitte typen til
+    // tekstblokk_aud, mens @Lob alene bare traff hovedtabellen (audit-kolonnen ble validert
+    // som varchar2 og veltet oppstarten).
     @Lob
-    @Column(name = "innhold", nullable = false)
+    @Column(name = "innhold", nullable = false, columnDefinition = "clob")
     var innhold: String = "",
 
     @Enumerated(EnumType.STRING)
@@ -46,8 +58,37 @@ class Tekstblokk(
     @Column(name = "slettet_dato")
     var slettetDato: Instant? = null,
 
+    // Utkast er ukvalitetssikret vedtakstekst og vises kun for administratorer. Se V167.
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    var status: TekstblokkStatus = TekstblokkStatus.PUBLISERT,
+
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "TEKSTBLOKK_TAG", joinColumns = [JoinColumn(name = "tekstblokk_id")])
     @Column(name = "tag", nullable = false)
     val tags: MutableSet<String> = mutableSetOf(),
+
+    // De tre avgrensningene er uavhengige mengder som AND-es, ikke et hierarki: en blokk
+    // kan si "EU_EOS og FTRL" + "UNNTAK", men ikke "UNNTAK bare under EU_EOS". Bevisst
+    // forenkling – avgrensningen er støyreduksjon i et søk, ikke en tilgangsregel.
+    // Tom = gjelder alle sakstyper. Se V165.
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "TEKSTBLOKK_SAKSTYPE", joinColumns = [JoinColumn(name = "tekstblokk_id")])
+    @Enumerated(EnumType.STRING)
+    @Column(name = "sakstype", nullable = false)
+    val sakstyper: MutableSet<Sakstyper> = mutableSetOf(),
+
+    // Tom = gjelder alle sakstemaer. Se V168.
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "TEKSTBLOKK_SAKSTEMA", joinColumns = [JoinColumn(name = "tekstblokk_id")])
+    @Enumerated(EnumType.STRING)
+    @Column(name = "sakstema", nullable = false)
+    val sakstemaer: MutableSet<Sakstemaer> = mutableSetOf(),
+
+    // Tom = gjelder alle behandlingstemaer. Se V165.
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "TEKSTBLOKK_BEHANDLINGSTEMA", joinColumns = [JoinColumn(name = "tekstblokk_id")])
+    @Enumerated(EnumType.STRING)
+    @Column(name = "behandlingstema", nullable = false)
+    val behandlingstemaer: MutableSet<Behandlingstema> = mutableSetOf(),
 ) : RegistreringsInfo()

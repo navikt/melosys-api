@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.brev
 
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -51,13 +50,11 @@ class SendVedtaksbrevInnlandTest {
     @MockK
     private lateinit var avklarteVirksomheterService: AvklarteVirksomheterService
 
-    private val fakeUnleash = FakeUnleash()
     private lateinit var sendVedtaksbrevInnland: SendVedtaksbrevInnland
     private val doksysBrevbestillingSlot = slot<DoksysBrevbestilling>()
 
     @BeforeEach
     fun setUp() {
-        fakeUnleash.resetAll()
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGID) } returns lagBehandling()
         every { avklarteVirksomheterService.hentNorskeSelvstendigeForetak(any()) } returns emptyList()
         every { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), any()) } just Runs
@@ -69,8 +66,7 @@ class SendVedtaksbrevInnlandTest {
             behandlingsresultatService,
             prosessinstansService,
             saksbehandlingRegler,
-            avklarteVirksomheterService,
-            fakeUnleash
+            avklarteVirksomheterService
         )
     }
 
@@ -163,6 +159,22 @@ class SendVedtaksbrevInnlandTest {
 
 
         verify(exactly = 2) { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), any()) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), match { it.produserbartdokument == INNVILGELSE_EFTA_STORBRITANNIA }, any()) }
+        verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), match { it.produserbartdokument == ATTEST_A1 }, any()) }
+    }
+
+    @Test
+    fun `utfør innvilgelse 11_3_a med tema BESLUTNING_LOVVALG_NORGE sender EFTA-brev og attest A1`() {
+        val behandling = lagBehandling { tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGID) } returns behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID) } returns
+            lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART11_3A))
+        every { prosessinstansService.opprettProsessinstanserSendBrev(any(), any(), any()) } just Runs
+
+
+        sendVedtaksbrevInnland.utfør(lagProsessinstans())
+
+
         verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), match { it.produserbartdokument == INNVILGELSE_EFTA_STORBRITANNIA }, any()) }
         verify { prosessinstansService.opprettProsessinstanserSendBrev(any(), match { it.produserbartdokument == ATTEST_A1 }, any()) }
     }

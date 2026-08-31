@@ -149,7 +149,7 @@ class FtrlVedtakService(
     private fun oppdaterBehandlingsresultat(behandling: Behandling, fattVedtakRequest: FattVedtakRequest): Behandlingsresultat {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
-        if (behandlingsresultat.harFullstendigManglendeInnbetaling()) {
+        if (behandlingsresultat.harValgtFullstendigManglendeInnbetaling()) {
             return oppdaterBehandlingsresultatForOpphørt(behandling.id, fattVedtakRequest)
         }
 
@@ -164,9 +164,6 @@ class FtrlVedtakService(
         }.let { behandlingsresultatService.lagreOgFlush(it) }
     }
 
-    private fun Behandlingsresultat.harFullstendigManglendeInnbetaling(): Boolean =
-        avklartefakta.any { it.type == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING }
-
     private fun utledBehandlingsresultatType(
         behandlingsresultat: Behandlingsresultat,
         fattVedtakRequest: FattVedtakRequest
@@ -179,7 +176,7 @@ class FtrlVedtakService(
         val opphørtePerioder = behandlingsresultat.medlemskapsperioder.filter { it.erOpphørt() }
 
         if (opphørtePerioder.isNotEmpty()) {
-            // Hvis alle perioder er opphørt, burde dette vært fanget av harFullstendigManglendeInnbetaling()
+            // Hvis alle perioder er opphørt, burde dette vært fanget av harFullstendigManglendeInnbetalingAvklarteFakta()
             if (opphørtePerioder.size == behandlingsresultat.medlemskapsperioder.size) {
                 throw FunksjonellException(
                     "Alle medlemskapsperioder er opphørt, men FULLSTENDIG_MANGLENDE_INNBETALING mangler. " +
@@ -195,8 +192,7 @@ class FtrlVedtakService(
     private fun oppdaterBehandlingsresultatForOpphørt(behandlingID: Long, fattVedtakRequest: FattVedtakRequest): Behandlingsresultat {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
-        val fullstendigManglendeInnbetaling = behandlingsresultat.avklartefakta
-            .firstOrNull { it.type == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING }
+        val fullstendigManglendeInnbetaling = behandlingsresultat.finnFullstendigManglendeInnbetalingAvklarteFakta()
             ?: throw FunksjonellException("Forventer at fullstendigManglendeInnbetaling er satt ved fatting av vedtak for behandlingstype OPPHØRT")
 
         val opphørteMedlemskapsperioder = behandlingsresultat.medlemskapsperioder

@@ -2,8 +2,10 @@ package no.nav.melosys.integrasjon.dokgen.dto
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
 import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -25,7 +27,16 @@ class ÅrsavregningVedtaksbrev(
     val eøsEllerTrygdeavtale: Boolean,
     val fullmektigTrygdeavgift: String?,
     val harSkjoennsfastsattInntektsgrunnlag: Boolean,
-    val erNyÅrsavregning: Boolean
+    val erNyÅrsavregning: Boolean,
+    val harMisjonaerInntekt: Boolean = false,
+    val minstebelopVerdi: BigDecimal? = null,
+    val minstebelopAar: Int? = null,
+    val harMinstebelopEndelig: Boolean = false,
+    val har25ProsentRegelEndelig: Boolean = false,
+    val harMinstebelopForskuddsvis: Boolean = false,
+    val har25ProsentRegelForskuddsvis: Boolean = false,
+    val erPensjonist: Boolean? = false,
+    val sakstype: Sakstyper? = null
 ) : DokgenDto(brevBestilling, Mottakerroller.BRUKER) {
     constructor(
         brevBestilling: ÅrsavregningVedtakBrevBestilling,
@@ -41,7 +52,9 @@ class ÅrsavregningVedtaksbrev(
         eøsEllerTrygdeavtale: Boolean,
         fullmektigTrygdeavgift: String?,
         harSkjoennsfastsattInntektsgrunnlag: Boolean,
-        erNyÅrsavregning: Boolean = false
+        erNyÅrsavregning: Boolean = false,
+        erPensjonist: Boolean = false,
+        sakstype: Sakstyper? = null
     ) : this(
         brevBestilling = brevBestilling,
         årsavregningsår = årsavregningsår,
@@ -58,7 +71,9 @@ class ÅrsavregningVedtaksbrev(
         eøsEllerTrygdeavtale = eøsEllerTrygdeavtale,
         fullmektigTrygdeavgift = fullmektigTrygdeavgift,
         harSkjoennsfastsattInntektsgrunnlag = harSkjoennsfastsattInntektsgrunnlag,
-        erNyÅrsavregning = erNyÅrsavregning
+        erNyÅrsavregning = erNyÅrsavregning,
+        erPensjonist = erPensjonist,
+        sakstype = sakstype
     )
 }
 
@@ -71,7 +86,8 @@ data class Avgiftsperiode(
     val inntektskilde: String,
     val trygdedekning: String,
     val arbeidsgiveravgiftBetalt: SvarAlternativ,
-    val skatteplikt: Boolean
+    val skatteplikt: Boolean,
+    val beregningsregel: Avgiftsberegningsregel
 )
 
 

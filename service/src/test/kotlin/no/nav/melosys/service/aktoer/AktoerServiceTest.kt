@@ -17,7 +17,14 @@ import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.integrasjon.joark.HentJournalposterTilknyttetSakRequest
+import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.repository.AktoerRepository
+import no.nav.melosys.repository.FagsakRepository
+import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.service.tilgang.Aksesskontroll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -28,13 +35,26 @@ internal class AktoerServiceTest {
     @MockK(relaxed = true)
     private lateinit var aktoerRepository: AktoerRepository
 
+    @MockK(relaxed = true)
+    private lateinit var fagsakRepository: FagsakRepository
+
+    @MockK(relaxed = true)
+    private lateinit var aksesskontroll: Aksesskontroll
+
+    @MockK(relaxed = true)
+    private lateinit var joarkFasade: JoarkFasade
+
+    @MockK(relaxed = true)
+    private lateinit var persondataFasade: PersondataFasade
+
     private lateinit var aktoerService: AktoerService
 
     private val aktoerSlot = slot<Aktoer>()
 
     @BeforeEach
     fun setUp() {
-        aktoerService = AktoerService(aktoerRepository)
+        aktoerService = AktoerService(aktoerRepository, fagsakRepository, aksesskontroll, joarkFasade, persondataFasade)
+        every { fagsakRepository.save(any<Fagsak>()) } answers { firstArg() }
     }
 
     @Test
@@ -170,6 +190,183 @@ internal class AktoerServiceTest {
 
         verify { aktoerRepository.deleteAllByFagsakAndRolle(fagsak, Aktoersroller.ARBEIDSGIVER) }
         verify(exactly = 0) { aktoerRepository.save(any()) }
+    }
+
+    @Test
+    fun `endreAktørIdForBruker avviser aktørId som ikke er 13 siffer`() {
+        val saksnummer = "MEL-201"
+        every { fagsakRepository.findById(saksnummer) } returns Optional.of(lagFagsakMedBruker(saksnummer, "1111111111111"))
+
+        val exception = shouldThrow<FunksjonellException> {
+            aktoerService.endreAktørIdForBruker(saksnummer, "22222222222x")
+        }
+
+        exception.message shouldContain "13 siffer"
+        verify(exactly = 0) { persondataFasade.hentAktørIdForIdent(any()) }
+        verify(exactly = 0) { joarkFasade.oppdaterJournalposterMedNyAktørId(any(), any(), any()) }
+        verify(exactly = 0) { fagsakRepository.save(any<Fagsak>()) }
+    }
+
+    @Test
+    fun `endreAktørIdForBruker flytter ingenting når ny aktørId er ukjent i PDL`() {
+        val saksnummer = "MEL-202"
+        val nyAktørId = "2222222222222"
+        val fagsak = lagFagsakMedBruker(saksnummer, "1111111111111")
+        every { fagsakRepository.findById(saksnummer) } returns Optional.of(fagsak)
+        every { persondataFasade.hentAktørIdForIdent(nyAktørId) } throws IkkeFunnetException("Finner ikke aktørID!")
+
+        shouldThrow<IkkeFunnetException> { aktoerService.endreAktørIdForBruker(saksnummer, nyAktørId) }
+
+        verify(exactly = 0) { joarkFasade.oppdaterJournalposterMedNyAktørId(any(), any(), any()) }
+        verify(exactly = 0) { fagsakRepository.save(any<Fagsak>()) }
+    }
+
+    @Test
+    fun `endreAktørIdForBruker lar aktøren stå urørt når flytting av journalposter feiler`() {
+        val saksnummer = "MEL-203"
+        val gammelAktørId = "1111111111111"
+        val nyAktørId = "2222222222222"
+        val fagsak = lagFagsakMedBruker(saksnummer, gammelAktørId)
+        every { fagsakRepository.findById(saksnummer) } returns Optional.of(fagsak)
+        every {
+            joarkFasade.oppdaterJournalposterMedNyAktørId(any(), any(), any())
+        } throws TekniskException("Joark er nede")
+
+        shouldThrow<TekniskException> { aktoerService.endreAktørIdForBruker(saksnummer, nyAktørId) }
+
+        fagsak.hentBruker()!!.aktørId shouldBe gammelAktørId
+        verify(exactly = 0) { fagsakRepository.save(any<Fagsak>()) }
+    }
+
+    private fun lagFagsakMedBruker(saksnummer: String, aktørId: String): Fagsak {
+        val fagsak = Fagsak.forTest {
+            this.saksnummer = saksnummer
+            gsakSaksnummer = 123L
+        }
+        fagsak.aktører.add(
+            Aktoer().apply {
+                rolle = Aktoersroller.BRUKER
+                this.aktørId = aktørId
+                this.fagsak = fagsak
+            }
+        )
+        return fagsak
+    }
+
+    @Test
+    fun `endreAktørIdForBruker med saksnummer auditerer, oppdaterer journalposter og aktør`() {
+        val saksnummer = "MEL-123"
+        val gammelAktørId = "1111111111111"
+        val nyAktørId = "2222222222222"
+        val fagsak = Fagsak.forTest {
+            this.saksnummer = saksnummer
+            gsakSaksnummer = 123L
+        }
+        val brukerAktør = Aktoer().apply {
+            rolle = Aktoersroller.BRUKER
+            aktørId = gammelAktørId
+            this.fagsak = fagsak
+        }
+        fagsak.aktører.add(brukerAktør)
+        every { fagsakRepository.findById(saksnummer) } returns Optional.of(fagsak)
+
+        aktoerService.endreAktørIdForBruker(saksnummer, nyAktørId)
+
+        verify(exactly = 1) {
+            aksesskontroll.auditEndringFraAdminConsole(
+                nyAktørId,
+                "Endring av aktør ID for sak $saksnummer fra $gammelAktørId til $nyAktørId"
+            )
+        }
+        verify(exactly = 1) {
+            joarkFasade.oppdaterJournalposterMedNyAktørId(
+                HentJournalposterTilknyttetSakRequest(fagsak.gsakSaksnummer, saksnummer),
+                gammelAktørId,
+                nyAktørId
+            )
+        }
+        brukerAktør.aktørId shouldBe nyAktørId
+        verify(exactly = 1) { fagsakRepository.save(fagsak) }
+    }
+
+    @Test
+    fun `endreAktørIdForBruker med saksnummer skriver nye journalpostIder til berørte behandlinger`() {
+        val saksnummer = "MEL-123"
+        val gammelAktørId = "1111111111111"
+        val nyAktørId = "2222222222222"
+        val fagsak = Fagsak.forTest {
+            this.saksnummer = saksnummer
+            gsakSaksnummer = 123L
+            behandling { }
+            behandling { }
+        }
+        val brukerAktør = Aktoer().apply {
+            rolle = Aktoersroller.BRUKER
+            aktørId = gammelAktørId
+            this.fagsak = fagsak
+        }
+        fagsak.aktører.add(brukerAktør)
+        val flyttetBehandling = fagsak.behandlinger[0].apply { initierendeJournalpostId = "111" }
+        val urørtBehandling = fagsak.behandlinger[1].apply { initierendeJournalpostId = "222" }
+
+        every { fagsakRepository.findById(saksnummer) } returns Optional.of(fagsak)
+        every { joarkFasade.oppdaterJournalposterMedNyAktørId(any(), any(), any()) } returns mapOf("111" to "999")
+
+        aktoerService.endreAktørIdForBruker(saksnummer, nyAktørId)
+
+        flyttetBehandling.initierendeJournalpostId shouldBe "999"
+        urørtBehandling.initierendeJournalpostId shouldBe "222"
+        verify(exactly = 1) { fagsakRepository.save(fagsak) }
+    }
+
+    @Test
+    fun `endreAktørIdForBruker med saksnummer lagrer ingen behandlinger når ingen journalposter ble flyttet`() {
+        val saksnummer = "MEL-123"
+        val fagsak = Fagsak.forTest {
+            this.saksnummer = saksnummer
+            gsakSaksnummer = 123L
+            behandling { }
+        }
+        val brukerAktør = Aktoer().apply {
+            rolle = Aktoersroller.BRUKER
+            aktørId = "1111111111111"
+            this.fagsak = fagsak
+        }
+        fagsak.aktører.add(brukerAktør)
+        fagsak.behandlinger[0].initierendeJournalpostId = "111"
+
+        every { fagsakRepository.findById(saksnummer) } returns Optional.of(fagsak)
+        every { joarkFasade.oppdaterJournalposterMedNyAktørId(any(), any(), any()) } returns emptyMap()
+
+        aktoerService.endreAktørIdForBruker(saksnummer, "2222222222222")
+
+        fagsak.behandlinger[0].initierendeJournalpostId shouldBe "111"
+        brukerAktør.aktørId shouldBe "2222222222222"
+    }
+
+    @Test
+    fun `endreAktørIdForBruker med saksnummer feiler når bruker allerede har ny aktørId`() {
+        val saksnummer = "MEL-123"
+        val aktørId = "1111111111111"
+        val fagsak = Fagsak.forTest {
+            this.saksnummer = saksnummer
+            gsakSaksnummer = 123L
+        }
+        fagsak.aktører.add(
+            Aktoer().apply {
+                rolle = Aktoersroller.BRUKER
+                this.aktørId = aktørId
+                this.fagsak = fagsak
+            }
+        )
+        every { fagsakRepository.findById(saksnummer) } returns Optional.of(fagsak)
+
+        shouldThrow<FunksjonellException> {
+            aktoerService.endreAktørIdForBruker(saksnummer, aktørId)
+        }
+
+        verify(exactly = 0) { joarkFasade.oppdaterJournalposterMedNyAktørId(any(), any(), any()) }
+        verify(exactly = 0) { fagsakRepository.save(any<Fagsak>()) }
     }
 
     private fun lagAktoer(): Aktoer = Aktoer().apply {

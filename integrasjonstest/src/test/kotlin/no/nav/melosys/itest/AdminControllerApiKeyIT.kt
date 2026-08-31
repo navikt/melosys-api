@@ -160,7 +160,12 @@ class AdminControllerApiKeyIT(
 
     @Test
     fun `skal kreve konsistent autentisering på tvers av admin-kontrollere`() {
-        val endepunkter = listOf("/admin/kafka/errors", "/admin/prosessinstanser/feilede")
+        val endepunkter = listOf(
+            "/admin/kafka/errors",
+            "/admin/prosessinstanser/feilede",
+            // Uttrekket lister Melosys saksnummer, så det er verdt å pinne at transporten faktisk er autentisert
+            "/admin/statistikk/rammeavtale-fjernarbeid",
+        )
 
         endepunkter.forEach { endepunkt ->
             // Test manglende API-nøkkel

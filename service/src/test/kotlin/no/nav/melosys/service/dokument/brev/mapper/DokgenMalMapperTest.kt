@@ -11,6 +11,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import tools.jackson.databind.json.JsonMapper
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.brev.*
 import no.nav.melosys.domain.forTest
@@ -440,6 +441,48 @@ internal class DokgenMalMapperTest {
             DokgenTestData.lagMottaker(Mottakerroller.BRUKER)
         ).shouldBeInstanceOf<VedtakOpphoertMedlemskap>()
             .opphoertDato.shouldBe(LocalDate.now())
+    }
+
+    @Test
+    fun skalSendeTomLandlisteForVedtakOpphørtMedlemskapMedUkjenteLand() {
+        val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true)).apply {
+            mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland.apply {
+                landkoder = emptyList()
+                isFlereLandUkjentHvilke = true
+            }
+        }
+
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata()
+        every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
+        every { mockDokgenMapperDatahenter.hentNorskPoststed(any()) } returns "Andeby"
+        every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.NO.kode) } returns Landkoder.NO.beskrivelse
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns Behandlingsresultat.forTest {
+            this.behandling = behandling
+            medlemskapsperiode { medlemskapstype = Medlemskapstyper.FRIVILLIG }
+        }
+
+        val brevbestilling = VedtakOpphoertMedlemskapBrevbestilling.Builder()
+            .medProduserbartdokument(Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP)
+            .medBehandling(behandling)
+            .medOrg(DokgenTestData.lagOrg())
+            .medKontaktopplysning(DokgenTestData.lagKontaktOpplysning())
+            .medForsendelseMottatt(Instant.now())
+            .medOpphørtBegrunnelseFritekst("Dummy")
+            .medOpphørtDato(LocalDate.now())
+            .build()
+
+        val vedtakOpphoertMedlemskap = dokgenMalMapper.mapBehandling(
+            brevbestilling,
+            DokgenTestData.lagMottaker(Mottakerroller.BRUKER)
+        ).shouldBeInstanceOf<VedtakOpphoertMedlemskap>()
+
+        vedtakOpphoertMedlemskap.land.shouldBe(emptyList())
+        val objectMapper = JsonMapper.builder().build()
+        val land = objectMapper
+            .readTree(objectMapper.writeValueAsString(vedtakOpphoertMedlemskap))
+            .get("land")
+        land.isArray.shouldBeTrue()
+        land.isEmpty.shouldBeTrue()
     }
 
     @Test

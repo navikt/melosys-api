@@ -46,6 +46,10 @@ object DigitalSøknadMapper {
         val periodeOgLand = arbeidstakersDel?.utsendingsperiodeOgLand ?: arbeidsgiversDel?.utsendingsperiodeOgLand
         søknad.periode = mapPeriode(periodeOgLand?.utsendelsePeriode)
         søknad.soeknadsland = mapSoeknadsland(periodeOgLand?.utsendelseLand)
+        søknad.arbeidsgiverOgArbeidstakerHarUlikPeriode = harUlikPeriode(
+            arbeidstakersDel?.utsendingsperiodeOgLand,
+            arbeidsgiversDel?.utsendingsperiodeOgLand
+        )
 
         // Arbeidssted kommer kun fra arbeidsgivers del
         mapArbeidssteder(søknad, arbeidsgiversDel?.arbeidsstedIUtlandet, periodeOgLand?.utsendelseLand)
@@ -60,6 +64,9 @@ object DigitalSøknadMapper {
             arbeidstakersDel?.arbeidssituasjon
         )
     }
+
+    fun harArbeidsgiverdel(dto: UtsendtArbeidstakerSkjemaM2MDto): Boolean =
+        hentArbeidsgiversData(dto) != null
 
     private fun hentArbeidstakersData(dto: UtsendtArbeidstakerSkjemaM2MDto): ArbeidstakersDataLook? {
         return when (val data = dto.skjema.data) {
@@ -120,6 +127,15 @@ object DigitalSøknadMapper {
         val arbeidstakerensLonn: ArbeidstakerensLonnDto?,
         val arbeidsstedIUtlandet: ArbeidsstedIUtlandetDto?
     )
+
+    private fun harUlikPeriode(
+        arbeidstakersPeriodeOgLand: UtsendingsperiodeOgLandDto?,
+        arbeidsgiversPeriodeOgLand: UtsendingsperiodeOgLandDto?
+    ): Boolean {
+        val arbeidstakersPeriode = arbeidstakersPeriodeOgLand?.utsendelsePeriode ?: return false
+        val arbeidsgiversPeriode = arbeidsgiversPeriodeOgLand?.utsendelsePeriode ?: return false
+        return arbeidstakersPeriode != arbeidsgiversPeriode
+    }
 
     private fun mapJuridiskArbeidsgiverNorge(
         dto: UtsendtArbeidstakerSkjemaM2MDto,
@@ -186,6 +202,9 @@ object DigitalSøknadMapper {
 
     private fun mapArbeidssteder(søknad: Soeknad, arbeidssted: ArbeidsstedIUtlandetDto?, utsendelseLand: LandKode?) {
         if (arbeidssted == null) return
+        søknad.arbeidPaaLand = ArbeidPaaLand()
+        søknad.maritimtArbeid = mutableListOf()
+        søknad.luftfartBaser = mutableListOf()
         when (arbeidssted.arbeidsstedType) {
             ArbeidsstedType.PA_LAND -> søknad.arbeidPaaLand = mapArbeidPaaLand(arbeidssted, utsendelseLand)
             ArbeidsstedType.OFFSHORE -> søknad.maritimtArbeid = mapOffshore(arbeidssted)
@@ -219,8 +238,8 @@ object DigitalSøknadMapper {
     }
 
     private fun mapOffshore(arbeidssted: ArbeidsstedIUtlandetDto): List<MaritimtArbeid> {
-        val offshore = arbeidssted.offshore ?: return emptyList()
-        return listOf(
+        val offshore = arbeidssted.offshore ?: return mutableListOf()
+        return mutableListOf(
             MaritimtArbeid().apply {
                 enhetNavn = offshore.navnPaInnretning
                 innretningstype = mapTypeInnretning(offshore.typeInnretning)
@@ -235,8 +254,8 @@ object DigitalSøknadMapper {
     }
 
     private fun mapPaaSkip(arbeidssted: ArbeidsstedIUtlandetDto): List<MaritimtArbeid> {
-        val paSkip = arbeidssted.paSkip ?: return emptyList()
-        return listOf(
+        val paSkip = arbeidssted.paSkip ?: return mutableListOf()
+        return mutableListOf(
             MaritimtArbeid().apply {
                 enhetNavn = paSkip.navnPaSkip
                 fartsomradeKode = mapFarvann(paSkip.seilerI)
@@ -253,8 +272,8 @@ object DigitalSøknadMapper {
     }
 
     private fun mapLuftfart(arbeidssted: ArbeidsstedIUtlandetDto): List<LuftfartBase> {
-        val omBordPaFly = arbeidssted.omBordPaFly ?: return emptyList()
-        return listOf(
+        val omBordPaFly = arbeidssted.omBordPaFly ?: return mutableListOf()
+        return mutableListOf(
             LuftfartBase(
                 hjemmebaseNavn = omBordPaFly.hjemmebaseNavn,
                 hjemmebaseLand = omBordPaFly.hjemmebaseLand.name,

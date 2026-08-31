@@ -55,6 +55,60 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
+    fun `kombinasjonstreet inneholder alle sakstyper`() {
+        val tre = lovligeKombinasjonerSaksbehandlingService.hentKombinasjonstre()
+
+        tre.map { it.sakstype } shouldContainExactlyInAnyOrder listOf(Sakstyper.EU_EOS, Sakstyper.FTRL, Sakstyper.TRYGDEAVTALE)
+    }
+
+    // Hardkodede forventninger med vilje: en test som speiler hentKombinasjonstre ved å
+    // kalle de samme oppslagene kan per konstruksjon ikke feile på annet enn en
+    // signaturendring, og sier ingenting om hva treet faktisk inneholder.
+    @Test
+    fun `sakstemaer unioneres ikke paa tvers av sakstyper`() {
+        val tre = lovligeKombinasjonerSaksbehandlingService.hentKombinasjonstre()
+
+        sakstemaerFor(tre, Sakstyper.FTRL) shouldContainExactlyInAnyOrder
+            listOf(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstemaer.TRYGDEAVGIFT)
+        sakstemaerFor(tre, Sakstyper.EU_EOS) shouldContain Sakstemaer.UNNTAK
+        sakstemaerFor(tre, Sakstyper.FTRL) shouldNotContain Sakstemaer.UNNTAK
+    }
+
+    // SED-temaene kommer kun fra hentMuligeBehandlingstemaerSED, som faller bort så snart
+    // en hovedpart sendes med. De ville forsvunnet stille fra treet uten denne.
+    @Test
+    fun `kombinasjonstreet tar med SED-behandlingstemaene for EU_EOS`() {
+        val tre = lovligeKombinasjonerSaksbehandlingService.hentKombinasjonstre()
+
+        behandlingstemaerFor(tre, Sakstyper.EU_EOS, Sakstemaer.UNNTAK) shouldContain
+            Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+    }
+
+    // Treet skal dekke begge hovedparter, ikke bare den ene grenen av rekursjonen.
+    @Test
+    fun `kombinasjonstreet er unionen over bruker og virksomhet`() {
+        val tre = lovligeKombinasjonerSaksbehandlingService.hentKombinasjonstre()
+        val fraTreet = behandlingstemaerFor(tre, Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG)
+
+        listOf(Aktoersroller.BRUKER, Aktoersroller.VIRKSOMHET).forEach { hovedpart ->
+            fraTreet shouldContainAll lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(
+                hovedpart, Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, null, null,
+            )
+        }
+    }
+
+    // Treet skal kunne brukes til å kaskadere nedtrekk, så hver gren må faktisk ha innhold.
+    @Test
+    fun `ingen gren i kombinasjonstreet er tom`() {
+        val tre = lovligeKombinasjonerSaksbehandlingService.hentKombinasjonstre()
+
+        tre.forEach { sakstypeNode ->
+            sakstypeNode.sakstemaer.shouldNotBeEmpty()
+            sakstypeNode.sakstemaer.forEach { it.behandlingstemaer.shouldNotBeEmpty() }
+        }
+    }
+
+    @Test
     fun hentMuligeSakstyper_saksnummerErNull_returnererAlleSakstyper() {
         val muligeSakstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstyper(null)
 
@@ -1502,6 +1556,12 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             init()
         }
     }
+
+    private fun sakstemaerFor(tre: List<SakstypeKombinasjoner>, sakstype: Sakstyper) =
+        tre.single { it.sakstype == sakstype }.sakstemaer.map { it.sakstema }
+
+    private fun behandlingstemaerFor(tre: List<SakstypeKombinasjoner>, sakstype: Sakstyper, sakstema: Sakstemaer) =
+        tre.single { it.sakstype == sakstype }.sakstemaer.single { it.sakstema == sakstema }.behandlingstemaer
 
     /**
      * Creates a behandling with specified tema and type.

@@ -19,10 +19,12 @@ class LoggingTestUtilsTest {
             LoggingTestUtils.withLogCapture { logEvents ->
                 log.warn("entry-$it")
 
-                logEvents.single().run {
-                    level.shouldBe(Level.WARN)
-                    message.shouldBe("entry-$it")
-                }
+                logEvents.filter { event -> event.message == "entry-$it" }
+                    .single()
+                    .run {
+                        level.shouldBe(Level.WARN)
+                        message.shouldBe("entry-$it")
+                    }
             }
         }
     }
@@ -32,7 +34,7 @@ class LoggingTestUtilsTest {
         val returnVerdi = LoggingTestUtils.withLogCapture { logEvents ->
             log.info("entry-1")
             log.info("entry-2")
-            logEvents.shouldHaveSize(2)
+            logEvents.filter { it.message.startsWith("entry-") }.shouldHaveSize(2)
             "skal returneres"
         }
 

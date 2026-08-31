@@ -102,6 +102,23 @@ internal class DigitalSøknadMapperTest {
             søknad.periode.fom shouldBe atFom
             søknad.periode.tom shouldBe atTom
             søknad.soeknadsland.landkoder shouldBe listOf("DE")
+            søknad.arbeidsgiverOgArbeidstakerHarUlikPeriode.shouldBeTrue()
+        }
+
+        @Test
+        fun `like perioder fra arbeidstaker og arbeidsgiver gir ikke avviksvarsel`() {
+            val fom = LocalDate.of(2025, 1, 1)
+            val tom = LocalDate.of(2025, 6, 30)
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                data = arbeidstakerData(utsendingsperiodeOgLand = landOgPeriode(LandKode.DE, fom, tom))
+                medKobletArbeidsgiverSkjema {
+                    data = arbeidsgiverData(utsendingsperiodeOgLand = landOgPeriode(LandKode.DE, fom, tom))
+                }
+            }
+
+            val søknad = DigitalSøknadMapper.tilSoeknad(dto)
+
+            søknad.arbeidsgiverOgArbeidstakerHarUlikPeriode.shouldBeFalse()
         }
 
         @Test
@@ -735,6 +752,90 @@ internal class DigitalSøknadMapperTest {
         }
     }
 
+    @Nested
+    inner class Arbeidsstedvarianter {
+
+        @Test
+        fun `offshore gir kun maritimt arbeid`() {
+            val søknadMedOffshore = DigitalSøknadMapper.tilSoeknad(arbeidsgiverSøknadMed(offshorePaaTrollA()))
+
+            søknadMedOffshore.maritimtArbeid shouldHaveSize 1
+            val arbeidssted = søknadMedOffshore.maritimtArbeid.first()
+            arbeidssted.enhetNavn shouldBe "Troll A"
+            arbeidssted.innretningLandkode shouldBe "GB"
+            arbeidssted.flaggLandkode.shouldBeNull()
+            arbeidssted.fartsomradeKode.shouldBeNull()
+            søknadMedOffshore.arbeidPaaLand.fysiskeArbeidssteder.shouldBeEmpty()
+            søknadMedOffshore.luftfartBaser.shouldBeEmpty()
+        }
+
+        @Test
+        fun `fly gir kun luftfartbase`() {
+            val søknad = DigitalSøknadMapper.tilSoeknad(
+                arbeidsgiverSøknadMed(
+                    ArbeidsstedIUtlandetDto(
+                        arbeidsstedType = ArbeidsstedType.OM_BORD_PA_FLY,
+                        omBordPaFly = OmBordPaFlyDto(
+                            navnPaVirksomhet = "SAS",
+                            hjemmebaseLand = LandKode.SE,
+                            hjemmebaseNavn = "Arlanda",
+                            erVanligHjemmebase = true,
+                            vanligHjemmebaseLand = null,
+                            vanligHjemmebaseNavn = null
+                        )
+                    )
+                )
+            )
+
+            søknad.luftfartBaser shouldHaveSize 1
+            søknad.maritimtArbeid.shouldBeEmpty()
+            søknad.arbeidPaaLand.fysiskeArbeidssteder.shouldBeEmpty()
+            søknad.arbeidPaaLand.erHjemmekontor.shouldBeNull()
+            søknad.arbeidPaaLand.erFastArbeidssted.shouldBeNull()
+        }
+    }
+
+    @Nested
+    inner class HarArbeidsgiverdel {
+
+        @Test
+        fun `innsending med koblet arbeidsgiverdel har arbeidsgiverdel`() {
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                medKobletArbeidsgiverSkjema {
+                    data = arbeidsgiverData(arbeidssted = offshorePaaTrollA())
+                }
+            }
+
+            DigitalSøknadMapper.harArbeidsgiverdel(dto).shouldBeTrue()
+        }
+
+        @Test
+        fun `innsending med arbeidsgiverdel uten arbeidssted har arbeidsgiverdel`() {
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+                data = arbeidsgiverData()
+            }
+
+            DigitalSøknadMapper.harArbeidsgiverdel(dto).shouldBeTrue()
+        }
+
+        @Test
+        fun `innsending uten arbeidsgiverdel har ikke arbeidsgiverdel`() {
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
+                data = arbeidstakerData(
+                    utsendingsperiodeOgLand = landOgPeriode(
+                        LandKode.FI,
+                        LocalDate.of(2025, 6, 1),
+                        LocalDate.of(2025, 12, 31)
+                    )
+                )
+            }
+
+            DigitalSøknadMapper.harArbeidsgiverdel(dto).shouldBeFalse()
+        }
+    }
+
     // --- Testdata-hjelpere ---
 
     private fun landOgPeriode(land: LandKode, fom: LocalDate, tom: LocalDate) =
@@ -772,6 +873,22 @@ internal class DigitalSøknadMapperTest {
         arbeidsgiverensVirksomhetINorge = virksomhetINorge,
         arbeidstakerensLonn = lonn,
         arbeidsstedIUtlandet = arbeidssted
+    )
+
+    private fun arbeidsgiverSøknadMed(arbeidssted: ArbeidsstedIUtlandetDto) =
+        lagUtsendtArbeidstakerSkjemaM2MDto {
+            skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+            data = arbeidsgiverData(arbeidssted = arbeidssted)
+        }
+
+    private fun offshorePaaTrollA() = ArbeidsstedIUtlandetDto(
+        arbeidsstedType = ArbeidsstedType.OFFSHORE,
+        offshore = OffshoreDto(
+            navnPaVirksomhet = "Equinor",
+            navnPaInnretning = "Troll A",
+            typeInnretning = TypeInnretning.PLATTFORM_ELLER_ANNEN_FAST_INNRETNING,
+            sokkelLand = LandKode.GB
+        )
     )
 
     private fun kombinertData(

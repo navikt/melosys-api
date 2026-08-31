@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.brev;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.getunleash.Unleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -21,7 +20,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
@@ -53,20 +51,16 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     private final SaksbehandlingRegler saksbehandlingRegler;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
 
-    private final Unleash unleash;
-
     public SendVedtaksbrevInnland(BehandlingService behandlingService,
                                   BehandlingsresultatService behandlingsresultatService,
                                   ProsessinstansService prosessinstansService,
                                   SaksbehandlingRegler saksbehandlingRegler,
-                                  AvklarteVirksomheterService avklarteVirksomheterService,
-                                  Unleash unleash) {
+                                  AvklarteVirksomheterService avklarteVirksomheterService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.prosessinstansService = prosessinstansService;
         this.saksbehandlingRegler = saksbehandlingRegler;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
-        this.unleash = unleash;
     }
 
     @Override
@@ -109,11 +103,11 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         } else if (resultat.erInnvilgelse()) {
             boolean erUtsendtArbeidstakerEllerSelvstendig = behandling.getTema() == Behandlingstema.UTSENDT_ARBEIDSTAKER || behandling.getTema() == Behandlingstema.UTSENDT_SELVSTENDIG || behandling.getTema() == Behandlingstema.ARBEID_KUN_NORGE;
             boolean erStorbritanniaBestemmelse = lovvalgsperiode.erEftaStorbritannia() && erUtsendtArbeidstakerEllerSelvstendig;
-            boolean erBeslutningOmNorskLovvalgOgBestemmelse11_3aOgToggleAktivert = behandling.getTema() == Behandlingstema.BESLUTNING_LOVVALG_NORGE && lovvalgsperiode.erArtikkel11_3_a() && unleash.isEnabled(ToggleName.MELOSYS_11_3_A_NORGE_ER_UTPEKT);
+            boolean erBeslutningOmNorskLovvalgOgBestemmelse11_3a = behandling.getTema() == Behandlingstema.BESLUTNING_LOVVALG_NORGE && lovvalgsperiode.erArtikkel11_3_a();
             boolean erArbeidKunNorge = erUtsendtArbeidstakerEllerSelvstendig && lovvalgsperiode.erArbeidKunNorge() && resultat.getAvklartefakta().stream().anyMatch(fakta -> fakta.getType() == Avklartefaktatyper.YRKESGRUPPE && fakta.getFakta().equals(AvklartYrkesgruppeType.ORDINAER.name()));
 
-            sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst, erStorbritanniaBestemmelse || erArbeidKunNorge || erBeslutningOmNorskLovvalgOgBestemmelse11_3aOgToggleAktivert);
-            if ((erStorbritanniaBestemmelse || erArbeidKunNorge || erBeslutningOmNorskLovvalgOgBestemmelse11_3aOgToggleAktivert)) {
+            sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst, erStorbritanniaBestemmelse || erArbeidKunNorge || erBeslutningOmNorskLovvalgOgBestemmelse11_3a);
+            if ((erStorbritanniaBestemmelse || erArbeidKunNorge || erBeslutningOmNorskLovvalgOgBestemmelse11_3a)) {
                 sendAttestA1(behandling, resultat, saksbehandler, begrunnelseKode, fritekst);
             }
             log.info("Sendt innvilgelsesbrev for behandling {}", behandling.getId());
