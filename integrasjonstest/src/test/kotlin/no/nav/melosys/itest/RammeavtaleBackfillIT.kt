@@ -1,9 +1,11 @@
 package no.nav.melosys.itest
 
 import io.kotest.assertions.withClue
+import io.kotest.inspectors.forAll
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldStartWith
 import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
@@ -31,7 +33,6 @@ import org.springframework.jdbc.core.JdbcTemplate
 import java.time.LocalDate
 
 /**
-
  * Verifiserer backfill-en i `V171__backfill_anmodningsperiode_fjernarbeid_twfa.sql` mot ekte Oracle.
  * Kolonnen selv legges til av `V170`; de to migreringene er skilt fordi backfillen er den dyre halvdelen.
  *
@@ -143,22 +144,29 @@ class RammeavtaleBackfillIT(
     }
 
     @Test
-    fun `kolonnen legges til i V170 og backfillen ligger i V171`() {
-        // Splitten er selve poenget: ALTER-en er ren metadataendring, mens backfillen skanner prosessinstans.data.
-        // Slås de sammen igjen, kan en treg backfill holde oppstarten så lenge at liveness-proben dreper podden,
-        // og da re-kjører Flyway ALTER-en også — ORA-01430. Testen over ville fortsatt vært grønn, den leser bare
-        // V171, så splitten trenger sin egen assert.
-        withClue("$MIGRERING_KOLONNE skal legge til kolonnen") {
-            setningerSomStarterMed(MIGRERING_KOLONNE, "ALTER") shouldHaveSize 1
+    fun `V170 legger kun til kolonnen, og V171 inneholder kun backfill`() {
+        // Splitten er selve poenget: ALTER-en er en dictionary-oppdatering, mens backfillen skanner
+        // prosessinstans.data. Slås de sammen igjen, kan en treg backfill holde oppstarten så lenge at
+        // liveness-proben dreper podden, og da re-kjører Flyway ALTER-en også — ORA-01430.
+        //
+        // Assertene er bevisst *hvitelister*, ikke svartelister. En tidligere variant spurte «inneholder V170
+        // ingen UPDATE?», og et slikt fravær kan bare måles med en SQL-lekser. Tre runder med review fant tre
+        // ulike leksikalske hull i den lekseren — semikolon i kommentar, blokkkommentar, sitert identifikator —
+        // og hvert hull gjorde assertet stille grønt mens migreringen inneholdt backfillen. En hviteliste snur
+        // feilretningen: enhver parse-overraskelse gjør at innholdet ikke matcher lenger, og testen ryker
+        // høylytt. Flyway-filer er dessuten checksum-frosne etter release, så eksakt innhold er ikke sprøtt.
+        withClue("$MIGRERING_KOLONNE skal inneholde nøyaktig én setning: ALTER-en") {
+            kjørbareLinjer(MIGRERING_KOLONNE) shouldBe listOf(
+                "ALTER TABLE anmodningsperiode ADD er_fjernarbeid_twfa NUMBER(1);",
+            )
         }
-        withClue("$MIGRERING_KOLONNE skal ikke inneholde backfill — den hører hjemme i $MIGRERING_BACKFILL") {
-            forekomsterAv(MIGRERING_KOLONNE, "UPDATE") shouldBe 0
+
+        val backfill = backfillSetninger()
+        withClue("$MIGRERING_BACKFILL skal inneholde $ANTALL_BACKFILL_UPDATES setninger") {
+            backfill shouldHaveSize ANTALL_BACKFILL_UPDATES
         }
-        withClue("$MIGRERING_BACKFILL skal ikke endre skjemaet") {
-            forekomsterAv(MIGRERING_BACKFILL, "ALTER") shouldBe 0
-        }
-        withClue("$MIGRERING_BACKFILL skal inneholde backfillen") {
-            setningerSomStarterMed(MIGRERING_BACKFILL, "UPDATE") shouldHaveSize ANTALL_BACKFILL_UPDATES
+        withClue("hver setning i $MIGRERING_BACKFILL skal være en UPDATE — DDL, PL/SQL-blokker og EXECUTE IMMEDIATE hører ikke hjemme her") {
+            backfill.forAll { it shouldStartWith "UPDATE" }
         }
     }
 
@@ -184,55 +192,12 @@ class RammeavtaleBackfillIT(
         }
     }
 
-    @Test
-    fun `SQL-parsingen kutter ikke setninger paa semikolon inne i en streng-literal`() {
-        // Scanneren fjerner kommentarer strengbevisst, og må kutte på semikolon i samme gjennomgang. En
-        // `split(";")` etterpå ville kappet en LIKE-maske som inneholder semikolon, og den avkortede setningen
-        // ville telt som en gyldig UPDATE — feilen dukker først opp som ORA-01756 fra jdbcTemplate, altså på feil
-        // sted. Dette er den ene inputen migreringsfilene ikke selv inneholder, så den må mates inn direkte.
-        val setninger = setninger(
-            """
-            -- kommentar med semikolon; og apostrof i Nav's prosa
-            UPDATE t SET c = 0 WHERE d LIKE '%a;b%';
-            /* blokkkommentar; med semikolon */
-            UPDATE t SET c = 1;
-            """.trimIndent(),
-        )
-
-        setninger shouldHaveSize 2
-        withClue("literalen skal være intakt, ikke kappet ved semikolonet inni den") {
-            setninger[0] shouldBe "UPDATE t SET c = 0 WHERE d LIKE '%a;b%'"
-        }
-        withClue("kommentarer skal ikke etterlate rester som gjør at setningen mister prefikset sitt") {
-            setninger[1] shouldBe "UPDATE t SET c = 1"
-        }
-    }
-
-    @Test
-    fun `SQL-parsingen tolker ikke kommentartegn inne i en sitert identifikator`() {
-        // Oracle leser ikke -- eller ; inne i "..." som kommentar eller setningsslutt — verifisert mot 19c:
-        // SELECT 1 AS "X--Y" gir kolonnen X--Y. Uten at scanneren sporer doble anførselstegn spiste den resten av
-        // linja, og en ekte UPDATE på samme linje ble usynlig for de negative assertene. Det er stille grønt,
-        // altså nøyaktig klassen splitt-testen finnes for å hindre.
-        val setninger = setninger(
-            """
-            COMMENT ON COLUMN t."X--Y;Z" IS 'x';
-            UPDATE t SET c = 1;
-            """.trimIndent(),
-        )
-
-        setninger shouldHaveSize 2
-        withClue("kommentartegn i identifikatoren skal ikke sluke UPDATE-en som følger") {
-            setninger[1] shouldBe "UPDATE t SET c = 1"
-        }
-    }
-
     /**
      * Kjører UPDATE-setningene fra backfill-migreringen. Kolonnen finnes allerede fordi Flyway kjørte `V170` ved
      * oppstart. `IS NULL`-vakten gjør kjøringen strengt additiv, så en ekstra kjøring er ufarlig.
      */
     private fun kjørBackfillFraMigreringsfil() {
-        val oppdateringer = setningerSomStarterMed(MIGRERING_BACKFILL, "UPDATE")
+        val oppdateringer = backfillSetninger()
 
         withClue("$MIGRERING_BACKFILL skal inneholde $ANTALL_BACKFILL_UPDATES UPDATE-setninger (false og true); endres den, må denne testen leses på nytt") {
             oppdateringer shouldHaveSize ANTALL_BACKFILL_UPDATES
@@ -241,126 +206,28 @@ class RammeavtaleBackfillIT(
     }
 
     /**
-     * Setningene i en migreringsfil på classpath, med kommentarene fjernet.
-     */
-    private fun setningerSomStarterMed(migrering: String, nøkkelord: String): List<String> =
-        setningerFra(migrering).filter { it.startsWith(nøkkelord, ignoreCase = true) }
-
-    /**
-     * Teller nøkkelordet hvor som helst i den kommentarfrie SQL-en, ikke bare først i en setning.
+     * Setningene i backfill-migreringen, delt på semikolon.
      *
-     * De negative assertene («V170 skal ikke inneholde backfill») kan ikke bygge på et prefiks-filter: en UPDATE
-     * pakket i `BEGIN … END;` eller `EXECUTE IMMEDIATE '…'` starter ikke med nøkkelordet, og et prefiks-filter
-     * ville blitt stille grønt mens setningen kjøres av Flyway. Et fravær må måles på hele teksten.
-     *
-     * Streng-literaler telles med. Det gir en teoretisk falsk positiv for en LIKE-maske som inneholder ordet
-     * ALTER, men det er riktig pris: nettopp fordi literalene beholdes, fanges DDL smuglet inn via
-     * `EXECUTE IMMEDIATE`. Avveiningen gjelder bare literal-bevaringen: den innfører ingen stille falsk
-     * negativ. Det gjelder ikke telleren som helhet — se den kjente resten i [setninger].
+     * Splittingen er med vilje naiv. Den trenger ikke være korrekt for vilkårlig SQL, fordi alt den brukes til er
+     * hvitelister: setningene sammenlignes mot en forventet form, og de kjøres mot Oracle. Skulle et semikolon i
+     * en streng-literal noen gang dele feil, ryker enten formkravet eller `jdbcTemplate` — begge høylytt. Den
+     * strengbevisste lekseren som stod her før forsøkte i stedet å bevise et *fravær*, og der er en parse-feil
+     * stille. Det er skillet som gjorde tre runder med lekserfunn mulige.
      */
-    private fun forekomsterAv(migrering: String, nøkkelord: String): Int =
-        Regex("\\b$nøkkelord\\b", RegexOption.IGNORE_CASE)
-            .findAll(setningerFra(migrering).joinToString(" "))
-            .count()
+    private fun backfillSetninger(): List<String> =
+        kjørbareLinjer(MIGRERING_BACKFILL).joinToString("\n")
+            .split(";")
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
 
-    private fun setningerFra(migrering: String): List<String> = setninger(
+    /** Linjene i en migreringsfil, uten linjekommentarer og tomme linjer. */
+    private fun kjørbareLinjer(migrering: String): List<String> =
         checkNotNull(
             javaClass.getResource("/db/migration/melosysDB/$migrering")?.readText(),
-        ) { "Fant ikke $migrering på classpath — er migreringen fjernet eller omdøpt?" },
-    )
-
-    /**
-     * Deler SQL i setninger: fjerner linje- og blokkkommentarer, og kutter på semikolon — begge deler kun
-     * utenfor streng-literaler.
-     *
-     * Å bare droppe linjer som starter med `--` holder ikke: et semikolon i en kommentar splitter setningen slik
-     * at neste bit starter med kommentarrestene i stedet for nøkkelordet, og en blokkkommentar foran en UPDATE gjør
-     * det samme. Begge hullene er verifisert — en ekte backfill smuglet inn i V170 på den måten passerte de
-     * negative assertene. Migreringsfilene her er fulle av norsk kommentarprosa, så semikolon i en kommentar er
-     * ikke et hypotetisk tilfelle.
-     *
-     * Kuttingen må skje i samme gjennomgang, ikke som en `split(";")` etterpå: et semikolon inne i en LIKE-maske
-     * ville ellers kappet setningen midt i literalen. Det er høylytt (Oracle svarer ORA-01756), men feilen dukker
-     * opp på feil sted.
-     *
-     * Tredje runde med funn på denne parseren, så modusene er talt opp i stedet for lappet én om gangen. Oracle
-     * har fem regioner der `--`, blokkkommentartegn og `;` ikke betyr det de ser ut som:
-     *
-     *  1. `'…'` streng-literal — sporet. Doblet apostrof (`''`) faller ut riktig av seg selv: den forlater og
-     *     gjeninntrer strengen.
-     *  2. `--` linjekommentar — hoppes over.
-     *  3. blokkkommentar — hoppes over.
-     *  4. `"…"` sitert identifikator — sporet. Verifisert mot Oracle 19c: `SELECT 1 AS "X--Y"` gir kolonnen
-     *     `X--Y`, altså er `--` der ikke en kommentar. Uten sporing spiste den resten av linja, og en UPDATE
-     *     på samme linje ble usynlig for de negative assertene — stille grønt.
-     *  5. `q'[…]'` alternativ quoting — **ikke** sporet. Kjent rest. Den skjuler både apostrof og semikolon
-     *     (`SELECT q'[a'b;c]'` gir `a'b;c`), så scanneren ville desynke. Ingen migrering i repoet bruker
-     *     formen, og den er utelatt bevisst framfor å utvide en lekser i testkode enda en gang.
-     */
-    private fun setninger(sql: String): List<String> {
-        val setninger = mutableListOf<String>()
-        val gjeldende = StringBuilder()
-        var i = 0
-        var iStreng = false
-        var iIdentifikator = false
-
-        fun avslutt() {
-            gjeldende.toString().trim().takeIf { it.isNotEmpty() }?.let { setninger += it }
-            gjeldende.clear()
-        }
-
-        while (i < sql.length) {
-            val tegn = sql[i]
-            when {
-                iStreng -> {
-                    if (tegn == '\'') iStreng = false
-                    gjeldende.append(tegn)
-                    i++
-                }
-
-                iIdentifikator -> {
-                    if (tegn == '"') iIdentifikator = false
-                    gjeldende.append(tegn)
-                    i++
-                }
-
-                tegn == '\'' -> {
-                    iStreng = true
-                    gjeldende.append(tegn)
-                    i++
-                }
-
-                tegn == '"' -> {
-                    iIdentifikator = true
-                    gjeldende.append(tegn)
-                    i++
-                }
-
-                sql.startsWith("--", i) -> {
-                    val linjeslutt = sql.indexOf('\n', i)
-                    i = if (linjeslutt < 0) sql.length else linjeslutt
-                }
-
-                sql.startsWith("/*", i) -> {
-                    val blokkslutt = sql.indexOf("*/", i + 2)
-                    gjeldende.append(' ')
-                    i = if (blokkslutt < 0) sql.length else blokkslutt + 2
-                }
-
-                tegn == ';' -> {
-                    avslutt()
-                    i++
-                }
-
-                else -> {
-                    gjeldende.append(tegn)
-                    i++
-                }
-            }
-        }
-        avslutt()
-        return setninger
-    }
+        ) { "Fant ikke $migrering på classpath — er migreringen fjernet eller omdøpt?" }
+            .lines()
+            .map { it.trimEnd() }
+            .filterNot { it.isBlank() || it.trimStart().startsWith("--") }
 
     private fun flagget(behandlingId: Long): Int? = jdbcTemplate.queryForObject(
         "SELECT er_fjernarbeid_twfa FROM anmodningsperiode WHERE beh_resultat_id = ? AND fom_dato = ?",
