@@ -208,6 +208,25 @@ class RammeavtaleBackfillIT(
         }
     }
 
+    @Test
+    fun `SQL-parsingen tolker ikke kommentartegn inne i en sitert identifikator`() {
+        // Oracle leser ikke -- eller ; inne i "..." som kommentar eller setningsslutt — verifisert mot 19c:
+        // SELECT 1 AS "X--Y" gir kolonnen X--Y. Uten at scanneren sporer doble anførselstegn spiste den resten av
+        // linja, og en ekte UPDATE på samme linje ble usynlig for de negative assertene. Det er stille grønt,
+        // altså nøyaktig klassen splitt-testen finnes for å hindre.
+        val setninger = setninger(
+            """
+            COMMENT ON COLUMN t."X--Y;Z" IS 'x';
+            UPDATE t SET c = 1;
+            """.trimIndent(),
+        )
+
+        setninger shouldHaveSize 2
+        withClue("kommentartegn i identifikatoren skal ikke sluke UPDATE-en som følger") {
+            setninger[1] shouldBe "UPDATE t SET c = 1"
+        }
+    }
+
     /**
      * Kjører UPDATE-setningene fra backfill-migreringen. Kolonnen finnes allerede fordi Flyway kjørte `V170` ved
      * oppstart. `IS NULL`-vakten gjør kjøringen strengt additiv, så en ekstra kjøring er ufarlig.
@@ -236,7 +255,8 @@ class RammeavtaleBackfillIT(
      *
      * Streng-literaler telles med. Det gir en teoretisk falsk positiv for en LIKE-maske som inneholder ordet
      * ALTER, men det er riktig pris: nettopp fordi literalene beholdes, fanges DDL smuglet inn via
-     * `EXECUTE IMMEDIATE`. En falsk positiv er dessuten høylytt, mens en falsk negativ ville vært stille.
+     * `EXECUTE IMMEDIATE`. Avveiningen gjelder bare literal-bevaringen: den innfører ingen stille falsk
+     * negativ. Det gjelder ikke telleren som helhet — se den kjente resten i [setninger].
      */
     private fun forekomsterAv(migrering: String, nøkkelord: String): Int =
         Regex("\\b$nøkkelord\\b", RegexOption.IGNORE_CASE)
@@ -263,14 +283,26 @@ class RammeavtaleBackfillIT(
      * ville ellers kappet setningen midt i literalen. Det er høylytt (Oracle svarer ORA-01756), men feilen dukker
      * opp på feil sted.
      *
-     * Streng-tilstanden må spores fordi kommentartegn inne i en LIKE-maske ikke er kommentarer. Oracle sin
-     * doblede apostrof (`''`) faller ut riktig av seg selv: den forlater og gjeninntrer strengen.
+     * Tredje runde med funn på denne parseren, så modusene er talt opp i stedet for lappet én om gangen. Oracle
+     * har fem regioner der `--`, blokkkommentartegn og `;` ikke betyr det de ser ut som:
+     *
+     *  1. `'…'` streng-literal — sporet. Doblet apostrof (`''`) faller ut riktig av seg selv: den forlater og
+     *     gjeninntrer strengen.
+     *  2. `--` linjekommentar — hoppes over.
+     *  3. blokkkommentar — hoppes over.
+     *  4. `"…"` sitert identifikator — sporet. Verifisert mot Oracle 19c: `SELECT 1 AS "X--Y"` gir kolonnen
+     *     `X--Y`, altså er `--` der ikke en kommentar. Uten sporing spiste den resten av linja, og en UPDATE
+     *     på samme linje ble usynlig for de negative assertene — stille grønt.
+     *  5. `q'[…]'` alternativ quoting — **ikke** sporet. Kjent rest. Den skjuler både apostrof og semikolon
+     *     (`SELECT q'[a'b;c]'` gir `a'b;c`), så scanneren ville desynke. Ingen migrering i repoet bruker
+     *     formen, og den er utelatt bevisst framfor å utvide en lekser i testkode enda en gang.
      */
     private fun setninger(sql: String): List<String> {
         val setninger = mutableListOf<String>()
         val gjeldende = StringBuilder()
         var i = 0
         var iStreng = false
+        var iIdentifikator = false
 
         fun avslutt() {
             gjeldende.toString().trim().takeIf { it.isNotEmpty() }?.let { setninger += it }
@@ -286,8 +318,20 @@ class RammeavtaleBackfillIT(
                     i++
                 }
 
+                iIdentifikator -> {
+                    if (tegn == '"') iIdentifikator = false
+                    gjeldende.append(tegn)
+                    i++
+                }
+
                 tegn == '\'' -> {
                     iStreng = true
+                    gjeldende.append(tegn)
+                    i++
+                }
+
+                tegn == '"' -> {
+                    iIdentifikator = true
                     gjeldende.append(tegn)
                     i++
                 }
