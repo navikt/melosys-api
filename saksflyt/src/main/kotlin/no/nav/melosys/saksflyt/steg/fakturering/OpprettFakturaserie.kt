@@ -55,7 +55,7 @@ class OpprettFakturaserie(
 
         val saksbehandlerIdent = prosessinstans.hentData(ProsessDataKey.SAKSBEHANDLER)
 
-        if (behandlingsresultat.erOpphørt()) {
+        if (behandlingsresultat.erOpphørt() || andregangsvurderingHarFjernetFakturerbarTrygdeavgift(behandling, behandlingsresultat)) {
             val opprinneligFakturaserieReferanse =
                 behandlingsresultatService.hentBehandlingsresultat(behandling.hentOpprinneligBehandling().id).hentFakturaserieReferanse()
             if (behandlingsresultat.fakturaserieReferanse == null || behandlingsresultat.fakturaserieReferanse == opprinneligFakturaserieReferanse) {
