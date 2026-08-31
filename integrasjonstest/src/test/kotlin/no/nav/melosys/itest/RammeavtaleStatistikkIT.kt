@@ -47,7 +47,7 @@ class RammeavtaleStatistikkIT(
 ) : ComponentTestBase() {
 
     @Test
-    fun `teller kun ferdigbehandlede saker med fjernarbeid, gruppert paa vedtaksaar`() {
+    fun `teller kun ferdigbehandlede saker med fjernarbeid, gruppert på vedtaksår`() {
         lagSak("MEL-8150-A", erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2025, 3, 1))
         lagSak("MEL-8150-B", erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2024, 6, 1))
         // Anmodning sendt, men svar ikke mottatt
@@ -82,7 +82,7 @@ class RammeavtaleStatistikkIT(
     }
 
     @Test
-    fun `fom og tom filtrerer paa vedtaksdato og tom er inklusiv`() {
+    fun `fom og tom filtrerer på vedtaksdato og tom er inklusiv`() {
         lagSak("MEL-8150-F", erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2024, 12, 31))
         lagSak("MEL-8150-G", erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2025, 1, 1))
         lagSak("MEL-8150-H", erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2025, 12, 31))
@@ -101,7 +101,7 @@ class RammeavtaleStatistikkIT(
     }
 
     @Test
-    fun `flere anmodningsperioder med flagget paa samme behandling telles kun en gang`() {
+    fun `flere anmodningsperioder med flagget på samme behandling telles kun én gang`() {
         // Saksflyten tillater i praksis kun én anmodningsperiode per behandling, men skjemaet gjør det ikke
         val behandlingId = lagSak(
             "MEL-8150-J",
@@ -120,7 +120,7 @@ class RammeavtaleStatistikkIT(
     }
 
     @Test
-    fun `to behandlinger paa samme sak gir to rader med samme saksnummer`() {
+    fun `to behandlinger på samme sak gir to rader med samme saksnummer`() {
         val fagsak = opprettFagsak("MEL-8150-M")
         // De to første deler vedtaksdato: uten br.behandling_id i select-lista ville SELECT DISTINCT slått dem
         // sammen til én rad, og antallet ville blitt 3 i stedet for 4
@@ -145,7 +145,7 @@ class RammeavtaleStatistikkIT(
     }
 
     @Test
-    fun `vedtaksaaret foelger JVM-tidssonen, som i prod er Europe-Oslo`() {
+    fun `vedtaksåret følger JVM-tidssonen, som i prod er Europe-Oslo`() {
         // Sonen pinnes fordi byggene kjører i UTC og ellers ville testet noe annet enn prod. Hvorfor
         // vedtaksåret følger JVM-tidssonen i det hele tatt: KDoc-en på RammeavtaleStatistikkRepository.
         medTidssone("Europe/Oslo") {

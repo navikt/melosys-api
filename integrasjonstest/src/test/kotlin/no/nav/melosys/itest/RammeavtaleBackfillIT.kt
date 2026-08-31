@@ -50,7 +50,7 @@ class RammeavtaleBackfillIT(
 ) : ComponentTestBase() {
 
     @Test
-    fun `backfill setter 1 for true, 0 for eksplisitt false og lar ubesvarte staa som null`() {
+    fun `backfill setter 1 for true, 0 for eksplisitt false og lar ubesvarte stå som null`() {
         val medTrue = lagSakMedAnmodningsperiode("MEL-BF-A")
         lagProsessinstans(medTrue, erFjernarbeid = true)
 
@@ -74,7 +74,7 @@ class RammeavtaleBackfillIT(
     }
 
     @Test
-    fun `backfill treffer ikke flagg satt paa en annen prosesstype`() {
+    fun `backfill treffer ikke flagg satt på en annen prosesstype`() {
         // Uten prosesstype-filteret i migreringen ville flagget kunne plukkes opp fra en vilkårlig annen
         // saga på samme behandling
         val behandlingId = lagSakMedAnmodningsperiode("MEL-BF-E")
@@ -86,7 +86,7 @@ class RammeavtaleBackfillIT(
     }
 
     @Test
-    fun `backfill lar true vinne naar samme behandling har baade true og false`() {
+    fun `backfill lar true vinne når samme behandling har både true og false`() {
         // Anmodning kan ha blitt forsøkt sendt flere ganger. Rekkefølgen mellom de to UPDATE-ene skal ikke
         // avgjøre resultatet
         val behandlingId = lagSakMedAnmodningsperiode("MEL-BF-F")
@@ -99,7 +99,7 @@ class RammeavtaleBackfillIT(
     }
 
     @Test
-    fun `backfill setter flagget paa alle anmodningsperioder paa behandlingen`() {
+    fun `backfill setter flagget på alle anmodningsperioder på behandlingen`() {
         val behandlingId = lagSakMedAnmodningsperiode("MEL-BF-G", ekstraPeriodeFom = LocalDate.of(2022, 1, 1))
         lagProsessinstans(behandlingId, erFjernarbeid = true)
 
@@ -115,7 +115,7 @@ class RammeavtaleBackfillIT(
     }
 
     @Test
-    fun `backfill roerer ikke en rad som allerede har en verdi`() {
+    fun `backfill rører ikke en rad som allerede har en verdi`() {
         // IS NULL-vakten gjør kjøringen strengt additiv. Den filtrerer ingenting ved førstegangskjøringen —
         // verdien ligger i re-kjøringer, der prosessinstansen kan være eldre enn det ny kode har skrevet
         val alleredeNei = lagSakMedAnmodningsperiode("MEL-BF-H")

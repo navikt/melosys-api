@@ -1,9 +1,9 @@
 -- MELOSYS-8150: flytt TWFA-flagget (rammeavtale om fjernarbeid) fra prosessinstans.data til en varig kolonne.
--- Presedens: V7.6_07__saksbehandler_anmodet_om_unntak.sql la til anmodet_av paa samme tabell.
+-- Presedens: V7.6_07__saksbehandler_anmodet_om_unntak.sql la til anmodet_av på samme tabell.
 --
--- Bevisst UTEN DEFAULT, i motsetning til sendt_utland NUMBER(1) DEFAULT 0 i V4.4_03 paa samme tabell:
--- en DEFAULT 0 ville lest alle historiske rader som et registrert nei og oedelagt tri-staten (NULL = ikke
--- besvart) som baade uttrekket (WHERE = 1) og EessiService sin null-sjekk bygger paa. Nullbar form: V122.
+-- Bevisst UTEN DEFAULT, i motsetning til sendt_utland NUMBER(1) DEFAULT 0 i V4.4_03 på samme tabell:
+-- en DEFAULT 0 ville lest alle historiske rader som et registrert nei og ødelagt tri-staten (NULL = ikke
+-- besvart) som både uttrekket (WHERE = 1) og EessiService sin null-sjekk bygger på. Nullbar form: V122.
 --
 -- Backfillen ligger i V171, ikke her: en nullbar kolonne uten default er en dictionary-oppdatering og tar
 -- millisekunder, mens backfillen skanner prosessinstans.data. Hvorfor det skillet betyr noe ved en avbrutt
