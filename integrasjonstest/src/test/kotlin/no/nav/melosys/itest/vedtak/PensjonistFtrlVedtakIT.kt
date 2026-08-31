@@ -42,6 +42,7 @@ import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -77,6 +78,12 @@ class PensjonistFtrlVedtakIT(
     }
 
     @Test
+    @Disabled(
+        "MELOSYS-8220: testen forventer at ny vurdering fra ikke skattepliktig til skattepliktig sender en " +
+            "andre POST /fakturaserier med tom periodeliste. Faktureringskomponenten avviser det med 400 " +
+            "\"Du må oppgi minst én periode\", og steget kansellerer nå i stedet. Testen er grønn kun fordi " +
+            "WireMock-stubben returnerer 200 uansett innhold. Må oppdateres når adferden er avklart."
+    )
     fun `Pensjonist vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og send tomme perioder (avregn mot 0) i ny vurdering`() {
         val saksnummer = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
