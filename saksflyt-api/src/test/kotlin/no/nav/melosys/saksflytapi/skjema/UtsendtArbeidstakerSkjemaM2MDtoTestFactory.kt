@@ -32,6 +32,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
         var arbeidsgiverNavn: String = "Test AS"
         var arbeidstakerNavn: String = "Test Arbeidstaker"
         var skjemadel: Skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
+        var skjemaDefinisjonVersjon: String = "1"
         var metadata: UtsendtArbeidstakerMetadata? = null
         var data: no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaData =
             UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
@@ -55,7 +56,12 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
 
         fun build(): UtsendtArbeidstakerSkjemaM2MDto {
             val effektivSkjemadel = metadata?.skjemadel ?: skjemadel
-            val skjema = lagSkjemaDto(effektivSkjemadel, data, metadataOverride = metadata)
+            val skjema = lagSkjemaDto(
+                effektivSkjemadel,
+                data,
+                metadataOverride = metadata,
+                skjemaDefinisjonVersjon = skjemaDefinisjonVersjon
+            )
             val kobletSkjema = kobletSkjemaBuilder?.let {
                 lagSkjemaDto(
                     Skjemadel.ARBEIDSGIVERS_DEL,
@@ -64,7 +70,9 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
                     it.orgnr,
                     it.juridiskEnhetOrgnr,
                     it.arbeidsgiverNavn,
-                    it.arbeidstakerNavn
+                    it.arbeidstakerNavn,
+                    skjemaDefinisjonVersjon = it.skjemaDefinisjonVersjon,
+                    erOffentligArbeidsgiver = it.erOffentligArbeidsgiver
                 )
             }
 
@@ -106,7 +114,9 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
             juridiskEnhetOrgnr: String = this.juridiskEnhetOrgnr,
             arbeidsgiverNavn: String = this.arbeidsgiverNavn,
             arbeidstakerNavn: String = this.arbeidstakerNavn,
-            metadataOverride: UtsendtArbeidstakerMetadata? = null
+            metadataOverride: UtsendtArbeidstakerMetadata? = null,
+            skjemaDefinisjonVersjon: String = "1",
+            erOffentligArbeidsgiver: Boolean? = null
         ) = UtsendtArbeidstakerSkjemaDto(
             id = UUID.randomUUID(),
             status = SkjemaStatus.SENDT,
@@ -119,22 +129,26 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
                     skjemadel = skjemadel,
                     arbeidsgiverNavn = arbeidsgiverNavn,
                     juridiskEnhetOrgnr = juridiskEnhetOrgnr,
-                    arbeidstakerNavn = arbeidstakerNavn
+                    arbeidstakerNavn = arbeidstakerNavn,
+                    erOffentligArbeidsgiver = erOffentligArbeidsgiver
                 )
                 Skjemadel.ARBEIDSGIVERS_DEL -> ArbeidsgiverMetadata(
                     skjemadel = skjemadel,
                     arbeidsgiverNavn = arbeidsgiverNavn,
                     juridiskEnhetOrgnr = juridiskEnhetOrgnr,
-                    arbeidstakerNavn = arbeidstakerNavn
+                    arbeidstakerNavn = arbeidstakerNavn,
+                    erOffentligArbeidsgiver = erOffentligArbeidsgiver
                 )
                 Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL -> DegSelvMetadata(
                     skjemadel = skjemadel,
                     arbeidsgiverNavn = arbeidsgiverNavn,
                     juridiskEnhetOrgnr = juridiskEnhetOrgnr,
-                    arbeidstakerNavn = arbeidstakerNavn
+                    arbeidstakerNavn = arbeidstakerNavn,
+                    erOffentligArbeidsgiver = erOffentligArbeidsgiver
                 )
             },
-            data = data
+            data = data,
+            skjemaDefinisjonVersjon = skjemaDefinisjonVersjon
         )
     }
 
@@ -145,6 +159,8 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
         var juridiskEnhetOrgnr: String = "987654321",
         var arbeidsgiverNavn: String = "Test AS",
         var arbeidstakerNavn: String = "Test Arbeidstaker",
+        var skjemaDefinisjonVersjon: String = "1",
+        var erOffentligArbeidsgiver: Boolean? = null,
         var data: UtsendtArbeidstakerArbeidsgiversSkjemaDataDto = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
     )
 }
