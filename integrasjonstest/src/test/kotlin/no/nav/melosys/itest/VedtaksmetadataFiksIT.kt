@@ -530,7 +530,7 @@ class VedtaksmetadataFiksIT(
     }
 
     @Test
-    fun `preview mot formen på de faktiske prod-sakene i MELOSYS-8174`() {
+    fun `preview mot formen på de faktiske prod-sakene`() {
         // Tidsstempler fra prod-uttrekket 2026-08-24
         seedIntaktBehandling("MEL-448193", "FØRSTEGANG", "2024-04-30 15:33:55")
         seedIntaktBehandling("MEL-448193", "NY_VURDERING", "2025-01-06 10:15:04")
