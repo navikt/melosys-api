@@ -35,12 +35,9 @@ import java.time.ZoneId
 import java.util.TimeZone
 
 /**
- * Verifiserer mot ekte Oracle at uttrekket for rammeavtale om fjernarbeid (TWFA, MELOSYS-8150) kun teller
- * ferdigbehandlede saker (fastsatt lovvalg med vedtaksdato), at året som telles er vedtaksåret, og at
- * saksnummeret (MEL-nr) bak hver behandling blir med i responsen.
- *
- * Kilden er kolonnen `anmodningsperiode.er_fjernarbeid_twfa` (V170). Fram til august 2026 lå flagget kun i
- * CLOB-en `prosessinstans.data`; backfill-en fra den er dekket av [RammeavtaleBackfillIT].
+ * Verifiserer mot ekte Oracle at uttrekket for rammeavtale om fjernarbeid (TWFA) kun teller ferdigbehandlede
+ * saker (fastsatt lovvalg med vedtaksdato), at året som telles er vedtaksåret, og at saksnummeret (MEL-nr) bak
+ * hver behandling blir med i responsen. Backfillen av historikken er dekket av [RammeavtaleBackfillIT].
  */
 class RammeavtaleStatistikkIT(
     @Autowired private val rammeavtaleStatistikkService: RammeavtaleStatistikkService,
@@ -53,17 +50,15 @@ class RammeavtaleStatistikkIT(
     fun `teller kun ferdigbehandlede saker med fjernarbeid, gruppert paa vedtaksaar`() {
         lagSak("MEL-8150-A", erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2025, 3, 1))
         lagSak("MEL-8150-B", erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2024, 6, 1))
-        // Anmodning sendt, men svar ikke mottatt/lovvalg ikke fastsatt -> ingen vedtaksdato, skal ikke telles
+        // Anmodning sendt, men svar ikke mottatt
         lagSak("MEL-8150-C", erFjernarbeid = true, resultattype = Behandlingsresultattyper.ANMODNING_OM_UNNTAK, vedtaksdato = null)
-        // Ferdigbehandlet, men eksplisitt ikke huket av for rammeavtale (kolonnen er 0) -> skal ikke telles
         lagSak("MEL-8150-D", erFjernarbeid = false, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2025, 5, 1))
-        // Fastsatt lovvalg, men uten vedtaksdato -> skal ikke telles
         lagSak("MEL-8150-E", erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = null)
-        // Annullert i ettertid (vedtaksdatoen består) -> skal ikke telles
+        // Annullert i ettertid: vedtaksdatoen består
         lagSak("MEL-8150-K", erFjernarbeid = true, resultattype = Behandlingsresultattyper.ANNULLERT, vedtaksdato = dato(2025, 6, 1))
-        // Anmodning fra før flagget fantes: kolonnen er NULL, ikke 0. Tri-state skal ikke telles som ja
+        // Ubesvart, ikke et registrert nei — NULL skal ikke telles som ja
         lagSak("MEL-8150-L", erFjernarbeid = null, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2025, 7, 1))
-        // Behandling uten anmodningsperiode i det hele tatt (ikke artikkel 16) -> skal ikke telles
+        // Ikke artikkel 16, altså ingen anmodningsperiode å joine mot
         lagSak(
             "MEL-8150-O",
             erFjernarbeid = null,
@@ -107,9 +102,7 @@ class RammeavtaleStatistikkIT(
 
     @Test
     fun `flere anmodningsperioder med flagget paa samme behandling telles kun en gang`() {
-        // Saksflyten tillater i praksis kun én anmodningsperiode per behandling
-        // (AnmodningsperiodeService.hentFørsteAnmodningsperiode kaster ved != 1), men skjemaet gjør det ikke.
-        // Blir en rad liggende igjen, skal uttrekket ikke dobbelttelle behandlingen
+        // Saksflyten tillater i praksis kun én anmodningsperiode per behandling, men skjemaet gjør det ikke
         val behandlingId = lagSak(
             "MEL-8150-J",
             erFjernarbeid = true,
@@ -153,10 +146,8 @@ class RammeavtaleStatistikkIT(
 
     @Test
     fun `vedtaksaaret foelger JVM-tidssonen, som i prod er Europe-Oslo`() {
-        // hibernate.timezone.default_storage=NORMALIZE lagrer Instant som veggklokke i JVM-tidssonen, og
-        // TO_CHAR leser den rå. Vedtaksåret følger derfor sonen JVM-en kjører i — Europe/Oslo i prod, satt via
-        // JAVA_TOOL_OPTIONS i Dockerfile. Sonen pinnes her fordi byggene kjører i UTC og ellers ville testet
-        // noe annet enn det som skjer i prod.
+        // Sonen pinnes fordi byggene kjører i UTC og ellers ville testet noe annet enn prod. Hvorfor
+        // vedtaksåret følger JVM-tidssonen i det hele tatt: KDoc-en på RammeavtaleStatistikkRepository.
         medTidssone("Europe/Oslo") {
             lagSak(
                 "MEL-8150-TZ",

@@ -8,11 +8,7 @@ import java.time.LocalDateTime
 
 /**
  * Uttrekk over behandlinger der rammeavtale om fjernarbeid i EØS (TWFA) er huket av, til Medlemskap og avgift.
- *
- * Kilden er kolonnen `anmodningsperiode.er_fjernarbeid_twfa` (V170), som henger på `behandlingsresultat` — den
- * durable saksmodellen. Frem til august 2026 ble tallene hentet ut av CLOB-en `prosessinstans.data` med `LIKE`;
- * `prosessinstans` er en arbeidstabell som er ment å være kortlevd, og tallene ville forsvunnet stille den dagen
- * en slettejobb ble implementert. Se `README.md` i denne pakken.
+ * Hvor flagget kommer fra og hvorfor det ligger på `anmodningsperiode`: `README.md` i denne pakken.
  */
 interface RammeavtaleStatistikkRepository : Repository<Anmodningsperiode, Long> {
 
@@ -20,37 +16,27 @@ interface RammeavtaleStatistikkRepository : Repository<Anmodningsperiode, Long> 
      * Henter én rad per ferdigbehandlet behandling der rammeavtale om fjernarbeid er huket av på anmodningen,
      * med saksnummer (MEL-nr) og vedtaksdato. Brukes både til tellingen per vedtaksår og til listen over saker.
      *
-     * `er_fjernarbeid_twfa` er tri-state: 1 = ja, 0 = nei, NULL = ikke besvart (anmodninger fra før flagget fantes,
-     * og anmodninger der saksbehandler lot avhukingen stå tom). Kun 1 telles.
+     * `er_fjernarbeid_twfa` er tri-state: 1 = ja, 0 = nei, NULL = ikke besvart. Kun 1 telles.
      *
-     * Behandlingen regnes som ferdigbehandlet når lovvalget er fastsatt, dvs. `resultat_type = :resultatType`
-     * (FASTSATT_LOVVALGSLAND) og det finnes en vedtaksdato. Både innvilgelse og avslag på anmodningen får denne
-     * resultattypen — utfallet ligger på lovvalgsperioden — så begge telles med. Vi filtrerer bevisst ikke på
-     * `behandling.status = 'AVSLUTTET'`, fordi artikkel 13-saker ender i `MIDLERTIDIG_LOVVALGSBESLUTNING`
-     * selv om vedtak er fattet.
+     * Ferdigbehandlet betyr fastsatt lovvalg med vedtaksdato. Både innvilgelse og avslag på anmodningen får
+     * `FASTSATT_LOVVALGSLAND` — utfallet ligger på lovvalgsperioden — så begge telles med. Vi filtrerer bevisst
+     * ikke på `behandling.status = 'AVSLUTTET'`, fordi artikkel 13-saker ender i `MIDLERTIDIG_LOVVALGSBESLUTNING`
+     * selv om vedtak er fattet. Datoen som gjelder er vedtaksdatoen, ikke da anmodningen ble registrert.
      *
-     * NB: `resultat_type` kan endres i ettertid (ANNULLERT via AnnullerSakService, HENLEGGELSE via
-     * HenleggelseService) uten at vedtaksdatoen fjernes. Tallene er derfor ikke stabile over tid — en behandling
-     * som annulleres senere forsvinner fra vedtaksåret sitt. Det løses ikke av kildebyttet; det krever DVH-strøm
-     * med `funksjonell_tid` eller en snapshot-tabell.
+     * NB: `resultat_type` kan endres i ettertid (ANNULLERT, HENLEGGELSE) uten at vedtaksdatoen fjernes, så en
+     * behandling som annulleres senere forsvinner fra vedtaksåret sitt. Tallene er ikke stabile over tid; se
+     * pakke-README-en for hva som skal til.
      *
-     * Datoen som gjelder er vedtaksdatoen (`vedtak_metadata.vedtak_dato`), ikke da anmodningen ble registrert.
-     * Vedtaksåret utledes av kaller fra denne datoen.
-     *
-     * `DISTINCT` gjør at flere anmodningsperioder på samme behandling kun gir én rad. Saksflyten tillater i praksis
-     * kun én (`AnmodningsperiodeService.hentFørsteAnmodningsperiode` kaster ved != 1), men skjemaet gjør det ikke,
-     * og et uttrekk til offisiell rapportering skal ikke dobbelttelle om en rad blir liggende igjen.
-     * `br.behandling_id` **må** stå i select-lista: uten den ville to ulike behandlinger på samme sak med samme
-     * vedtaksdato blitt slått sammen til én rad, og antallet ville endret seg. Motsatt vei gir én fagsak med to
-     * TWFA-behandlinger to rader med samme saksnummer, hvilket er tilsiktet — antallet teller behandlinger, ikke saker.
+     * `DISTINCT` gjør at flere anmodningsperioder på samme behandling kun gir én rad. `br.behandling_id` **må**
+     * likevel stå i select-lista: uten den ville to ulike behandlinger på samme sak med samme vedtaksdato blitt
+     * slått sammen til én rad, og antallet endret seg. Motsatt vei gir én fagsak med to TWFA-behandlinger to
+     * rader med samme saksnummer — tilsiktet, antallet teller behandlinger, ikke saker.
      *
      * Hver rad er `[saksnummer (String), behandlingId (Number), vedtaksdato (String, ISO-8601)]`. Datoen
      * formateres i databasen så lesingen ikke konverterer den. NB: skrivingen normaliserer `Instant` til
      * JVM-tidssonen (`hibernate.timezone.default_storage=NORMALIZE`), som i prod pinnes til Europe/Oslo via
      * `JAVA_TOOL_OPTIONS` i Dockerfile. Vedtaksåret følger derfor norsk lokaltid — et vedtak fattet
      * 2024-12-31T23:00Z ligger i 2025. Det har vært slik siden første versjon av uttrekket.
-     *
-     * `fom`/`tom` er valgfrie (null = ingen grense) og gjelder vedtaksdatoen.
      */
     @NativeQuery(
         """

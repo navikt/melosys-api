@@ -80,10 +80,9 @@ public class AnmodningsperiodeService {
         }
 
         // Periodene slettes og gjenopprettes fra saksbehandlerens skjema, og AnmodningsperiodeSkrivDto.til() kjenner
-        // kun skjemafeltene. er_fjernarbeid_twfa settes derimot ved anmodning (registrerAnmodning), så uten dette
-        // ville en redigering mellom anmodning og sending nullet flagget — og saken forsvunnet ut av uttrekket for
-        // rammeavtale om fjernarbeid (MELOSYS-8150). Verken sperren over eller Behandling.erRedigerbar() dekker det
-        // vinduet: begge slår først inn inne i SendAnmodningOmUnntak.
+        // kun skjemafeltene. er_fjernarbeid_twfa settes derimot ved anmodning, så uten dette ville en redigering
+        // mellom anmodning og sending nullet flagget. Verken sperren over eller Behandling.erRedigerbar() dekker
+        // det vinduet: begge slår først inn inne i SendAnmodningOmUnntak.
         Boolean erFjernarbeidTWFA = eksisterende.stream()
             .map(Anmodningsperiode::getErFjernarbeidTWFA)
             .filter(Objects::nonNull)
@@ -178,11 +177,8 @@ public class AnmodningsperiodeService {
     }
 
     /**
-     * Registrerer at anmodning om unntak er sendt: hvem som anmodet, og om saken behandles etter rammeavtalen om
-     * fjernarbeid (TWFA).
-     * <p>
-     * De to feltene settes i samme operasjon med vilje. TWFA-flagget er kilde for offisiell rapportering
-     * (MELOSYS-8150), og en egen metode ville kunne kalles uten sperren mot dobbel anmodning under.
+     * De to feltene settes i samme operasjon med vilje: en egen metode for TWFA-flagget ville kunne kalles uten
+     * sperren mot dobbel anmodning under.
      *
      * @param erFjernarbeidTWFA null når spørsmålet ikke er besvart; skilles fra et eksplisitt nei.
      */

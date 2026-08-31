@@ -13,19 +13,15 @@ class RammeavtaleStatistikkService(
      * Henter ferdigbehandlede behandlinger der rammeavtale om fjernarbeid (TWFA) er huket av, som antall totalt,
      * antall fordelt på vedtaksår og (valgfritt) saksnummeret bak hver behandling.
      *
-     * Flagget settes av saksbehandler ved anmodning om unntak og lagres på `anmodningsperiode.er_fjernarbeid_twfa`
-     * (se `AnmodningsperiodeService.registrerAnmodning`). Kjent avgrensning: kun saker Norge selv har sendt telles,
-     * ikke innkommende A001 (MELOSYS-8252).
-     *
-     * Kun saker som er ferdigbehandlet etter at svar på anmodningen er mottatt telles med, dvs. behandlinger med
-     * [Behandlingsresultattyper.FASTSATT_LOVVALGSLAND] og en vedtaksdato. Året er året vedtaket ble fattet.
+     * Kjent avgrensning: kun saker Norge selv har sendt telles, ikke innkommende A001 (MELOSYS-8252).
+     * Hva som regnes som ferdigbehandlet, og hvorfor, står i KDoc-en på
+     * [RammeavtaleStatistikkRepository.finnFerdigbehandledeMedFjernarbeid].
      *
      * Både antallene og saksnummerlisten kommer fra samme spørring, slik at de ikke kan komme i utakt.
      * [inkluderSaksnummer] styrer kun hva som tas med i responsen.
      *
-     * @param fom valgfri fra-og-med-dato (vedtaksdato), null = ingen nedre grense
-     * @param tom valgfri til-og-med-dato (vedtaksdato, inklusiv), null = ingen øvre grense
-     * @param inkluderSaksnummer ta med saksnummer (MEL-nr) per behandling i responsen
+     * @param fom fra-og-med vedtaksdato, null = ingen nedre grense
+     * @param tom til-og-med vedtaksdato (inklusiv), null = ingen øvre grense
      */
     fun hentRammeavtaleFjernarbeidStatistikk(
         fom: LocalDate?,

@@ -184,8 +184,7 @@ class AnmodningUnntakServiceTest {
 
     @Test
     fun `anmodningOmUnntak med rammeavtale om fjernarbeid huket av lagrer flagget paa anmodningsperioden`() {
-        // Flagget er kilden til uttrekket Medlemskap og avgift bruker i offisiell rapportering (MELOSYS-8150).
-        // Faller det på gulvet mellom controller og anmodningsperiode, blir saken usynlig i tallene.
+        // Faller flagget på gulvet mellom controller og anmodningsperiode, blir saken usynlig i uttrekket
         val fagsak = FagsakTestFactory.lagFagsak()
         val behandling = Behandling.forTest {
             this.fagsak = fagsak

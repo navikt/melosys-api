@@ -59,10 +59,8 @@ public abstract class AbstraktSendUtland implements StegBehandler {
 
     /**
      * Rammeavtale om fjernarbeid i EØS (TWFA) gjelder kun anmodning om unntak etter artikkel 16 (A001, LA_BUC_01).
-     * <p>
-     * Default null er dagens oppførsel for de øvrige stegene: {@link ProsessDataKey#ER_FJERNARBEID_TWFA} ble kun satt
-     * på prosessinstanser av type ANMODNING_OM_UNNTAK, så SendVedtakUtland og VideresendSoknad har alltid lest null
-     * her. Flagget må ikke lekke over på vedtaks-SED-en bare fordi behandlingen har en anmodningsperiode.
+     * Default null holder dagens oppførsel for SendVedtakUtland og VideresendSoknad, som deler denne basisklassen:
+     * flagget skal ikke lekke over på vedtaks-SED-en eller A008 bare fordi behandlingen har en anmodningsperiode.
      */
     protected Boolean hentErFjernarbeidTWFA(Behandlingsresultat behandlingsresultat) {
         return null;

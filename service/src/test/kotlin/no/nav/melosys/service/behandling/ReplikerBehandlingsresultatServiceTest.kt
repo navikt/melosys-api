@@ -168,8 +168,6 @@ class ReplikerBehandlingsresultatServiceTest {
             medlPeriodeID shouldBe null
             erSendtUtland() shouldBe false
             anmodningsperiodeSvar shouldBe null
-            // Replikaen har ingen sendt anmodning. Blir flagget med, telles revurderingen som en ekstra sak
-            // i uttrekket for rammeavtale om fjernarbeid (MELOSYS-8150)
             erFjernarbeidTWFA shouldBe null
             fom shouldBe anmodningsperiodeOriginal.fom
             tom shouldBe anmodningsperiodeOriginal.tom
@@ -367,8 +365,6 @@ class ReplikerBehandlingsresultatServiceTest {
             medlPeriodeID shouldBe null
             erSendtUtland() shouldBe false
             anmodningsperiodeSvar shouldBe null
-            // Replikaen har ingen sendt anmodning. Blir flagget med, telles revurderingen som en ekstra sak
-            // i uttrekket for rammeavtale om fjernarbeid (MELOSYS-8150)
             erFjernarbeidTWFA shouldBe null
             fom shouldBe anmodningsperiodeOriginal.fom
             tom shouldBe anmodningsperiodeOriginal.tom

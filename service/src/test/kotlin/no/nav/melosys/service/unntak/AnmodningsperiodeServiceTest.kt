@@ -235,8 +235,6 @@ class AnmodningsperiodeServiceTest {
 
     @Test
     fun `registrerAnmodning - fjernarbeid ikke besvart - lagres som null og ikke som nei`() {
-        // Tri-state: uttrekket til Medlemskap og avgift teller kun 1, og et ubesvart spørsmål skal ikke
-        // bli til et registrert nei
         val anmodningsperiode = anmodningsperiodeForTest { }
         every { anmodningsperiodeRepository.findByBehandlingsresultatId(any<Long>()) } returns listOf(anmodningsperiode)
         every { anmodningsperiodeRepository.save(anmodningsperiode) } returns anmodningsperiode
@@ -282,9 +280,8 @@ class AnmodningsperiodeServiceTest {
 
     @Test
     fun `lagreAnmodningsperioder - bevarer erFjernarbeidTWFA over slett og gjenopprett`() {
-        // Flagget settes ved anmodning, ikke i saksbehandlerens periodeskjema, og AnmodningsperiodeSkrivDto.til()
-        // kjenner kun skjemafeltene. Uten bevaringen ville en redigering mellom anmodning og sending nullet
-        // flagget, og saken forsvunnet ut av uttrekket for rammeavtale om fjernarbeid (MELOSYS-8150)
+        // Flagget settes ved anmodning, ikke i saksbehandlerens periodeskjema, så uten bevaringen ville en
+        // redigering mellom anmodning og sending nullet det
         val behandlingsresultat = Behandlingsresultat.forTest { }
         val eksisterende = anmodningsperiodeForTest { erFjernarbeidTWFA = true }
         val innsendt = anmodningsperiodeForTest { fom = LocalDate.of(2024, 3, 1) }

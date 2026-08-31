@@ -180,8 +180,7 @@ internal class VideresendSoknadTest {
     @Test
     fun `utfør skal ikke sende TWFA-flagget selv om behandlingen har en anmodningsperiode med flagget satt`() {
         // Rammeavtale om fjernarbeid hører til anmodningen om unntak (A001/LA_BUC_01) og skal ikke lekke over
-        // på A008 i LA_BUC_03. Før flagget lå på anmodningsperioden var dette umulig, fordi prosessdataen kun
-        // ble satt på ANMODNING_OM_UNNTAK-prosessen — det er den egenskapen denne testen holder fast
+        // på A008 i LA_BUC_03, som deler basisklasse med den
         var prosessinstans = opprettProsessinstans().toBuilder()
             .medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITUSJON))
             .build()

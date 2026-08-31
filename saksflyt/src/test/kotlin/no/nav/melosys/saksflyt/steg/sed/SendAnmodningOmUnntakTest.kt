@@ -150,9 +150,9 @@ class SendAnmodningOmUnntakTest {
 
     @Test
     fun `utfør leser ikke erFjernarbeidTWFA fra prosessdataen`() {
-        // Kolonnen er eneste kilde etter MELOSYS-8150. lagreAnmodningsperioder bevarer flagget over
-        // slett-og-gjenopprett, så en null kolonne betyr at saksbehandler ikke svarte — da skal det heller ikke
-        // sendes en verdi til utlandet, selv om en gammel prosessinstans skulle ha nøkkelen liggende
+        // Kolonnen er eneste kilde. lagreAnmodningsperioder bevarer flagget over slett-og-gjenopprett, så en
+        // null kolonne betyr at saksbehandler ikke svarte — da skal det heller ikke sendes en verdi til
+        // utlandet, selv om en gammel prosessinstans skulle ha nøkkelen liggende
         val prosessinstans = lagProsessinstans {
             medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITSJON))
             medData(ProsessDataKey.ER_FJERNARBEID_TWFA, true)

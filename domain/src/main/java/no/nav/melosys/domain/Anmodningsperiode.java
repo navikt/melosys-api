@@ -67,7 +67,7 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
 
     /**
      * Rammeavtale om fjernarbeid i EØS (Telework Framework Agreement), avhuket av saksbehandler ved anmodning om unntak.
-     * Nullable med vilje: null betyr at spørsmålet ikke er besvart, og skilles fra et eksplisitt nei.
+     * Nullbar med vilje: null betyr at spørsmålet ikke er besvart, og skilles fra et eksplisitt nei.
      */
     @Column(name = "er_fjernarbeid_twfa")
     private Boolean erFjernarbeidTWFA;
