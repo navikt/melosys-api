@@ -275,7 +275,7 @@ class ÅrsavregningService(
         gjelderÅr: Int
     ) {
         for (medlemskapsperiodeOriginal in tidligereBehandlingsresultat.medlemskapsperioder) {
-            if (medlemskapsperiodeOriginal.overlapperMedÅr(gjelderÅr)) {
+            if (medlemskapsperiodeOriginal.erInnvilget() && medlemskapsperiodeOriginal.overlapperMedÅr(gjelderÅr)) {
                 val medlemskapsperiodeReplika = BeanUtils.cloneBean(medlemskapsperiodeOriginal) as Medlemskapsperiode
                 medlemskapsperiodeReplika.behandlingsresultat = behandlingsresultat
                 medlemskapsperiodeReplika.trygdeavgiftsperioder = HashSet()
@@ -388,7 +388,8 @@ class ÅrsavregningService(
         val behandlingsresultattyper = listOf(
             Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT,
             Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
-            Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+            Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
+            Behandlingsresultattyper.DELVIS_OPPHØRT
         )
 
         // Alle relevante avsluttede behandlinger, uten periodekrav
