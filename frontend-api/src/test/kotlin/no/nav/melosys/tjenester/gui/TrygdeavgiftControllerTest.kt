@@ -192,7 +192,7 @@ class TrygdeavgiftControllerTest(
     }
 
     @Test
-    fun `eos-pensjonist-responsen sorterer trygdeavgiftsperioder paa fom`() {
+    fun `eos-pensjonist-responsen sorterer trygdeavgiftsperioder på fom`() {
         every { aksesskontroll.autoriserSkrivOgTilordnet(any()) } returns Unit
 
         val tidligste = LocalDate.now()

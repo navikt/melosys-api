@@ -293,7 +293,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     }
 
     @Test
-    fun `beregnTrygdeavgift - EØS pensjonist - beregningsforklaring fra beregningsmotoren foeres gjennom`() {
+    fun `beregnTrygdeavgift - EØS pensjonist - beregningsforklaring fra beregningsmotoren føres gjennom`() {
         val behandling = lagBehandling {
             fagsak {
                 medBruker()
@@ -375,7 +375,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     }
 
     @Test
-    fun `beregnTrygdeavgift - EØS pensjonist - flere helseutgiftperioder i samme aar gir ingen forklaring`() {
+    fun `beregnTrygdeavgift - EØS pensjonist - flere helseutgiftperioder i samme år gir ingen forklaring`() {
         unleash.disableAll()
         val aar = LocalDate.now().year - 1
         val foersteFom = LocalDate.of(aar, 1, 1)
@@ -411,7 +411,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     }
 
     @Test
-    fun `beregnTrygdeavgift - EØS pensjonist - forklaringer fra flere aar sorteres paa aar`() {
+    fun `beregnTrygdeavgift - EØS pensjonist - forklaringer fra flere år sorteres på år`() {
         unleash.disableAll()
         val nyesteAar = LocalDate.now().year - 1
         val eldsteAar = nyesteAar - 1
