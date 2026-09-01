@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
+import io.kotest.matchers.types.shouldNotBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -64,7 +65,26 @@ class SkattepliktigAarsavregningOpprettelseServiceTest {
         // Handlingsanvisningen, ikke bare ordet «årløs»: uten den er meldingen en diagnose
         // operatøren ikke kan gjøre noe med.
         feil.message!! shouldContain "lukk den årløse behandlingen"
-        feil.cause.shouldBeInstanceOf<IllegalStateException>()
+    }
+
+    /**
+     * Bare manglende aarsavregning-rad er det årløse tilfellet. Enhver annen IllegalStateException
+     * fra oppslaget — en lukket EntityManager, en tilstandssjekk lenger nede — skal ikke merkes som
+     * årløs, for da sendes den som rydder til å lukke en behandling som ikke er problemet.
+     */
+    @Test
+    fun `annen tilstandsfeil enn manglende årsavregning merkes ikke som årløs`() {
+        val fagsak = lagFagsakMedÅrsavregning()
+
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } throws
+            IllegalStateException("EntityManager is closed")
+
+        val feil = shouldThrow<IllegalStateException> {
+            service.finnAktivÅrsavregningBehandling(fagsak, GJELDER_ÅR)
+        }
+
+        feil.message!! shouldContain "EntityManager is closed"
+        feil.shouldNotBeInstanceOf<TekniskException>()
     }
 
     /**

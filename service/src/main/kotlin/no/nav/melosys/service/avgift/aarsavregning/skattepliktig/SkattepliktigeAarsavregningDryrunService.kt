@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import tools.jackson.databind.JsonNode
 import tools.jackson.module.kotlin.jacksonObjectMapper
-import java.time.LocalDateTime
 import java.util.Collections
 import java.util.UUID
 
@@ -66,19 +65,21 @@ class SkattepliktigeAarsavregningDryrunService(
     // selvkall fra metoden over, så denne annotasjonen gjelder kun direkte kallere (tester).
     // Garantien for controller-stien ligger på den ytre metoden og er pinnet av
     // SkattepliktigeAarsavregningSkarpIT.
-    @Synchronized
     @Transactional(readOnly = true)
     fun prosesserSkattehendelser(
         skattehendelser: List<SkattehendelseDryrunItem>,
         skarp: Boolean = false,
         maksAntall: Int? = null,
     ) = runAsSystem {
-        resultater.clear()
-
         val modus = if (skarp) "SKARP" else "DRYRUN"
         log.info { "Starter $modus for ${skattehendelser.size} skattehendelser, maksAntall=$maksAntall" }
 
+        // Vakten mot to samtidige kjøringer er jobMonitor.isRunning, som avviser den andre i stedet
+        // for å køe den. En @Synchronized her ville i stedet holdt den andre kjøringen ventende og så
+        // kjørt den skarpt etterpå, mot en base den første nettopp endret.
         jobMonitor.execute(maxErrorsBeforeStop = 100) {
+            // Etter execute: en avvist kjøring skal ikke slette rapporten fra den som kjører.
+            resultater.clear()
             antallInputHendelser = skattehendelser.size
             this.skarp = skarp
             this.maksAntall = maksAntall
@@ -96,173 +97,209 @@ class SkattepliktigeAarsavregningDryrunService(
             // håndteres i prosedyren: vent til de køede instansene er ferdige, og hold
             // canary-sakene utenfor neste kjøring. Kafka-flyten har nøyaktig samme hull; den varige
             // fiksen hører hjemme i saga-steget og er egen oppgave.
-            val unikeHendelser = skattehendelser.distinctBy { it.identifikator to it.gjelderPeriode }
-            antallDuplikaterFjernet = skattehendelser.size - unikeHendelser.size
+            // Året parses før dedupliseringen: input bygges for hånd fra en SQL-dump, så «2023» og
+            // «02023» forekommer om hverandre og er samme år. Dedupliserer vi på den rå strengen,
+            // slipper de gjennom som to hendelser.
+            val (gyldige, ugyldige) = skattehendelser
+                .map { it to it.gjelderPeriode.toIntOrNull() }
+                .partition { (_, år) -> år != null }
+            antallUgyldigInput = ugyldige.size
+            ugyldige.forEach { (hendelse, _) ->
+                log.warn { "Ugyldig gjelderPeriode: ${hendelse.gjelderPeriode} for identifikator ${hendelse.identifikator}" }
+            }
+
+            val unikeHendelser = gyldige.map { (hendelse, år) -> NormalisertHendelse(hendelse.identifikator, år!!) }.distinct()
+            antallDuplikaterFjernet = gyldige.size - unikeHendelser.size
             if (antallDuplikaterFjernet > 0) {
                 log.warn {
                     "Fjernet $antallDuplikaterFjernet duplikate hendelser (samme identifikator og år) " +
-                        "av ${skattehendelser.size} — de ville gitt doble årsavregninger og doble brev"
+                        "av ${gyldige.size} gyldige — de ville gitt doble årsavregninger og doble brev"
                 }
             }
 
-            unikeHendelser.forEach hendelseLoop@{ hendelse ->
-                if (jobMonitor.shouldStop) return@execute
-                if (maksAntall != null &&
-                    (antallVilleOpprettetProsessinstans + antallVilleOppdatertStatus) >= maksAntall
-                ) {
-                    log.info { "Nådde maksAntall=$maksAntall side-effekter, stopper" }
-                    return@execute
-                }
+            fun taketErFylt() = maksAntall != null &&
+                (antallVilleOpprettetProsessinstans + antallVilleOppdatertStatus) >= maksAntall
 
-                try {
-                    val år = hendelse.gjelderPeriode.toIntOrNull()
-                    if (år == null) {
-                        log.warn { "Ugyldig gjelderPeriode: ${hendelse.gjelderPeriode} for identifikator ${hendelse.identifikator}" }
-                        antallUgyldigInput++
-                        return@hendelseLoop
+            // Egen blokk rundt løkka slik at et avbrudd forlater løkka, ikke hele jobben:
+            // oppsummeringen under skal bygges også når kjøringen stoppes halvveis.
+            run hendelser@{
+                unikeHendelser.forEach hendelseLoop@{ hendelse ->
+                    if (jobMonitor.shouldStop) return@hendelser
+                    if (taketErFylt()) {
+                        log.info { "Nådde maksAntall=$maksAntall side-effekter, stopper" }
+                        stoppetPgaTak = true
+                        return@hendelser
                     }
+                    antallHendelserProsessert++
 
-                    val sakerMedTrygdeavgift =
-                        opprettelseService.finnSakerMedTrygdeavgift(hendelse.identifikator, år) { fagsak, e ->
-                            antallSakerIkkeVurdert++
-                            log.warn(e) { "Oppslag-feil i filter for sak ${fagsak.saksnummer}, år $år" }
-                            resultater.add(
-                                SakDryrunResultat(
-                                    saksnummer = fagsak.saksnummer,
-                                    gjelderAr = år,
-                                    identifikator = hendelse.identifikator,
-                                    harAktivAarsavregning = null,
-                                    aarsavregningBehandlingStatus = null,
-                                    trygdeavgiftMottaker = null,
-                                    villeOpprettetProsessinstans = null,
-                                    villeOppdatertStatus = null,
-                                    behandlingId = null,
-                                    feilmelding = e.message,
+                    val år = hendelse.år
+                    try {
+                        var sakerFeiletIFilter = 0
+                        val sakerMedTrygdeavgift =
+                            opprettelseService.finnSakerMedTrygdeavgift(hendelse.identifikator, år) { fagsak, e ->
+                                sakerFeiletIFilter++
+                                antallSakerIkkeVurdert++
+                                log.warn(e) { "Oppslag-feil i filter for sak ${fagsak.saksnummer}, år $år" }
+                                resultater.add(
+                                    SakDryrunResultat(
+                                        saksnummer = fagsak.saksnummer,
+                                        gjelderAr = år,
+                                        identifikator = hendelse.identifikator,
+                                        harAktivAarsavregning = null,
+                                        aarsavregningBehandlingStatus = null,
+                                        trygdeavgiftMottaker = null,
+                                        villeOpprettetProsessinstans = null,
+                                        villeOppdatertStatus = null,
+                                        behandlingId = null,
+                                        feilmelding = e.message,
+                                    )
                                 )
-                            )
-                            jobMonitor.registerException(e)
+                                jobMonitor.registerException(e)
+                            }
+
+                        if (sakerMedTrygdeavgift.isEmpty()) {
+                            // Bare når alle sakene faktisk ble vurdert. Feilet noen, vet vi ikke om
+                            // aktøren har en sak med trygdeavgift, og «uten treff» ville sagt at
+                            // aktøren er avklart.
+                            if (sakerFeiletIFilter == 0) {
+                                log.debug { "Fant ingen sak med trygdeavgift for aktør: ${hendelse.identifikator}" }
+                                antallUtenTreff++
+                            }
+                            return@hendelseLoop
                         }
 
-                    if (sakerMedTrygdeavgift.isEmpty()) {
-                        log.debug { "Fant ingen sak med trygdeavgift for aktør: ${hendelse.identifikator}" }
-                        antallUtenTreff++
-                        return@hendelseLoop
-                    }
+                        sakerMedTrygdeavgift.forEach sakLoop@{ fagsak ->
+                            if (jobMonitor.shouldStop) return@hendelser
+                            antallSakerFunnet++
+                            try {
+                                val aktivÅrsavregning = opprettelseService.finnAktivÅrsavregningBehandling(fagsak, år)
+                                val villeOpprettetProsessinstans = aktivÅrsavregning == null
+                                val villeOppdatertStatus = aktivÅrsavregning != null &&
+                                    aktivÅrsavregning.status != Behandlingsstatus.OPPRETTET
+                                val villeHattSideEffekt = villeOpprettetProsessinstans || villeOppdatertStatus
 
-                    sakerMedTrygdeavgift.forEach sakLoop@{ fagsak ->
-                        antallSakerFunnet++
-                        try {
-                            val aktivÅrsavregning = opprettelseService.finnAktivÅrsavregningBehandling(fagsak, år)
-                            val villeOpprettetProsessinstans = aktivÅrsavregning == null
-                            val villeOppdatertStatus = aktivÅrsavregning != null &&
-                                aktivÅrsavregning.status != Behandlingsstatus.OPPRETTET
-                            val villeHattSideEffekt = villeOpprettetProsessinstans || villeOppdatertStatus
-
-                            if (villeHattSideEffekt &&
-                                maksAntall != null &&
-                                (antallVilleOpprettetProsessinstans + antallVilleOppdatertStatus) >= maksAntall
-                            ) {
-                                return@sakLoop
-                            }
-
-                            if (villeOpprettetProsessinstans) {
-                                antallVilleOpprettetProsessinstans++
-                            } else {
-                                antallMedEksisterendeAarsavregning++
-                            }
-                            if (villeOppdatertStatus) antallVilleOppdatertStatus++
-
-                            var prosessinstansOpprettet: Boolean? = null
-                            var statusOppdatert: Boolean? = null
-                            var hoppetOverAarsak: String? = null
-                            var skarpFeilmelding: String? = null
-                            if (skarp && villeOpprettetProsessinstans) {
-                                try {
-                                    skarpUtfoerer.opprettProsessinstans(
-                                        fagsak.saksnummer,
-                                        hendelse.gjelderPeriode,
+                                if (villeHattSideEffekt && taketErFylt()) {
+                                    // Saken er talt i antallSakerFunnet, så den må også havne i en
+                                    // kategori og i rapporten — ellers finnes den ingen steder for
+                                    // den som kjører canary med et lavt tak.
+                                    antallSakerHoppetOverPgaTak++
+                                    stoppetPgaTak = true
+                                    resultater.add(
+                                        SakDryrunResultat(
+                                            saksnummer = fagsak.saksnummer,
+                                            gjelderAr = år,
+                                            identifikator = hendelse.identifikator,
+                                            harAktivAarsavregning = aktivÅrsavregning != null,
+                                            aarsavregningBehandlingStatus = aktivÅrsavregning?.status?.name,
+                                            trygdeavgiftMottaker = null,
+                                            villeOpprettetProsessinstans = null,
+                                            villeOppdatertStatus = null,
+                                            behandlingId = aktivÅrsavregning?.id,
+                                            hoppetOverAarsak = "nådde maksAntall=$maksAntall før saken ble vurdert",
+                                        )
                                     )
-                                    antallOpprettet++
-                                    prosessinstansOpprettet = true
-                                    log.info { "SKARP: opprettet årsavregning-prosessinstans for sak ${fagsak.saksnummer}, år $år" }
-                                } catch (e: Exception) {
-                                    antallSkarpFeilet++
-                                    prosessinstansOpprettet = false
-                                    skarpFeilmelding = e.message
-                                    log.warn(e) { "SKARP: feilet ved opprettelse for sak ${fagsak.saksnummer}, år $år" }
-                                    jobMonitor.registerException(e)
+                                    return@sakLoop
                                 }
-                            } else if (skarp && villeOppdatertStatus && aktivÅrsavregning != null) {
-                                try {
-                                    val bump = skarpUtfoerer.settStatusVurderDokument(
-                                        aktivÅrsavregning.id,
-                                        aktivÅrsavregning.status,
-                                    )
-                                    statusOppdatert = bump.oppdatert
-                                    if (bump.oppdatert) {
-                                        antallStatusOppdatert++
-                                    } else {
-                                        antallStatusHoppetOver++
-                                        hoppetOverAarsak = "status var ${bump.faktiskStatus} ved skriving, " +
-                                            "løkka observerte ${aktivÅrsavregning.status}"
+
+                                if (villeOpprettetProsessinstans) {
+                                    antallVilleOpprettetProsessinstans++
+                                } else {
+                                    antallMedEksisterendeAarsavregning++
+                                }
+                                if (villeOppdatertStatus) antallVilleOppdatertStatus++
+
+                                var prosessinstansOpprettet: Boolean? = null
+                                var statusOppdatert: Boolean? = null
+                                var hoppetOverAarsak: String? = null
+                                var skarpFeilmelding: String? = null
+                                if (skarp && villeOpprettetProsessinstans) {
+                                    try {
+                                        skarpUtfoerer.opprettProsessinstans(
+                                            fagsak.saksnummer,
+                                            år.toString(),
+                                        )
+                                        antallOpprettet++
+                                        prosessinstansOpprettet = true
+                                        log.info { "SKARP: opprettet årsavregning-prosessinstans for sak ${fagsak.saksnummer}, år $år" }
+                                    } catch (e: Exception) {
+                                        antallSkarpFeilet++
+                                        prosessinstansOpprettet = false
+                                        skarpFeilmelding = e.message
+                                        log.warn(e) { "SKARP: feilet ved opprettelse for sak ${fagsak.saksnummer}, år $år" }
+                                        jobMonitor.registerException(e)
                                     }
-                                } catch (e: Exception) {
-                                    antallSkarpFeilet++
-                                    statusOppdatert = false
-                                    skarpFeilmelding = e.message
-                                    log.warn(e) { "SKARP: feilet ved status-oppdatering for sak ${fagsak.saksnummer}, år $år" }
-                                    jobMonitor.registerException(e)
+                                } else if (skarp && villeOppdatertStatus && aktivÅrsavregning != null) {
+                                    try {
+                                        val bump = skarpUtfoerer.settStatusVurderDokument(
+                                            aktivÅrsavregning.id,
+                                            aktivÅrsavregning.status,
+                                        )
+                                        statusOppdatert = bump.oppdatert
+                                        if (bump.oppdatert) {
+                                            antallStatusOppdatert++
+                                        } else {
+                                            antallStatusHoppetOver++
+                                            hoppetOverAarsak = "status var ${bump.faktiskStatus} ved skriving, " +
+                                                "løkka observerte ${aktivÅrsavregning.status}"
+                                        }
+                                    } catch (e: Exception) {
+                                        antallSkarpFeilet++
+                                        statusOppdatert = false
+                                        skarpFeilmelding = e.message
+                                        log.warn(e) { "SKARP: feilet ved status-oppdatering for sak ${fagsak.saksnummer}, år $år" }
+                                        jobMonitor.registerException(e)
+                                    }
                                 }
-                            }
 
-                            val behandlingsresultat = årsavregningService
-                                .hentGjeldendeBehandlingsresultaterForÅrsavregning(fagsak.saksnummer, år)
-                                ?.sisteBehandlingsresultatMedAvgift
+                                val behandlingsresultat = årsavregningService
+                                    .hentGjeldendeBehandlingsresultaterForÅrsavregning(fagsak.saksnummer, år)
+                                    ?.sisteBehandlingsresultatMedAvgift
 
-                            val trygdeavgiftMottaker = behandlingsresultat?.let {
-                                trygdeavgiftMottakerService.getTrygdeavgiftMottaker(it)
-                            }
+                                val trygdeavgiftMottaker = behandlingsresultat?.let {
+                                    trygdeavgiftMottakerService.getTrygdeavgiftMottaker(it)
+                                }
 
-                            resultater.add(
-                                SakDryrunResultat(
-                                    saksnummer = fagsak.saksnummer,
-                                    gjelderAr = år,
-                                    identifikator = hendelse.identifikator,
-                                    harAktivAarsavregning = aktivÅrsavregning != null,
-                                    aarsavregningBehandlingStatus = aktivÅrsavregning?.status?.name,
-                                    trygdeavgiftMottaker = trygdeavgiftMottaker?.name,
-                                    villeOpprettetProsessinstans = villeOpprettetProsessinstans,
-                                    villeOppdatertStatus = villeOppdatertStatus,
-                                    behandlingId = aktivÅrsavregning?.id,
-                                    prosessinstansOpprettet = prosessinstansOpprettet,
-                                    statusOppdatert = statusOppdatert,
-                                    hoppetOverAarsak = hoppetOverAarsak,
-                                    feilmelding = skarpFeilmelding,
+                                resultater.add(
+                                    SakDryrunResultat(
+                                        saksnummer = fagsak.saksnummer,
+                                        gjelderAr = år,
+                                        identifikator = hendelse.identifikator,
+                                        harAktivAarsavregning = aktivÅrsavregning != null,
+                                        aarsavregningBehandlingStatus = aktivÅrsavregning?.status?.name,
+                                        trygdeavgiftMottaker = trygdeavgiftMottaker?.name,
+                                        villeOpprettetProsessinstans = villeOpprettetProsessinstans,
+                                        villeOppdatertStatus = villeOppdatertStatus,
+                                        behandlingId = aktivÅrsavregning?.id,
+                                        prosessinstansOpprettet = prosessinstansOpprettet,
+                                        statusOppdatert = statusOppdatert,
+                                        hoppetOverAarsak = hoppetOverAarsak,
+                                        feilmelding = skarpFeilmelding,
+                                    )
                                 )
-                            )
-                        } catch (e: Exception) {
-                            antallSakerFeilet++
-                            log.warn(e) { "Oppslag-feil for sak ${fagsak.saksnummer}, år $år" }
-                            resultater.add(
-                                SakDryrunResultat(
-                                    saksnummer = fagsak.saksnummer,
-                                    gjelderAr = år,
-                                    identifikator = hendelse.identifikator,
-                                    harAktivAarsavregning = null,
-                                    aarsavregningBehandlingStatus = null,
-                                    trygdeavgiftMottaker = null,
-                                    villeOpprettetProsessinstans = null,
-                                    villeOppdatertStatus = null,
-                                    behandlingId = null,
-                                    feilmelding = e.message,
+                            } catch (e: Exception) {
+                                antallSakerFeilet++
+                                log.warn(e) { "Oppslag-feil for sak ${fagsak.saksnummer}, år $år" }
+                                resultater.add(
+                                    SakDryrunResultat(
+                                        saksnummer = fagsak.saksnummer,
+                                        gjelderAr = år,
+                                        identifikator = hendelse.identifikator,
+                                        harAktivAarsavregning = null,
+                                        aarsavregningBehandlingStatus = null,
+                                        trygdeavgiftMottaker = null,
+                                        villeOpprettetProsessinstans = null,
+                                        villeOppdatertStatus = null,
+                                        behandlingId = null,
+                                        feilmelding = e.message,
+                                    )
                                 )
-                            )
-                            jobMonitor.registerException(e)
+                                jobMonitor.registerException(e)
+                            }
                         }
+                    } catch (e: Exception) {
+                        log.warn(e) { "Feil ved prosessering av hendelse for identifikator ${hendelse.identifikator}" }
+                        jobMonitor.registerException(e)
                     }
-                } catch (e: Exception) {
-                    log.warn(e) { "Feil ved prosessering av hendelse for identifikator ${hendelse.identifikator}" }
-                    jobMonitor.registerException(e)
                 }
             }
 
@@ -283,6 +320,9 @@ class SkattepliktigeAarsavregningDryrunService(
                 "antallStatusHoppetOver" to antallStatusHoppetOver,
                 "antallSakerIkkeVurdert" to antallSakerIkkeVurdert,
                 "antallSakerFeilet" to antallSakerFeilet,
+                "antallSakerHoppetOverPgaTak" to antallSakerHoppetOverPgaTak,
+                "antallHendelserProsessert" to antallHendelserProsessert,
+                "stoppetPgaTak" to stoppetPgaTak,
                 "antallSkarpFeilet" to antallSkarpFeilet,
             )
         }
@@ -313,9 +353,20 @@ class SkattepliktigeAarsavregningDryrunService(
         @Volatile var antallInputHendelser: Int = 0,
         @Volatile var antallDuplikaterFjernet: Int = 0,
         @Volatile var antallUgyldigInput: Int = 0,
+        /**
+         * Saker som passerte filteret. Deles mellom [antallVilleOpprettetProsessinstans],
+         * [antallMedEksisterendeAarsavregning], [antallSakerFeilet] og
+         * [antallSakerHoppetOverPgaTak] — de fire summerer til denne.
+         */
         @Volatile var antallSakerFunnet: Int = 0,
+        /** Saker uten aktiv årsavregning for året. */
         @Volatile var antallVilleOpprettetProsessinstans: Int = 0,
+        /** Saker med aktiv årsavregning for året. */
         @Volatile var antallMedEksisterendeAarsavregning: Int = 0,
+        /**
+         * Delmengde av [antallMedEksisterendeAarsavregning]: de der statusen ikke er OPPRETTET og
+         * derfor skal oppdateres. Ikke en egen kategori — ikke legg den til de andre.
+         */
         @Volatile var antallVilleOppdatertStatus: Int = 0,
         @Volatile var antallUtenTreff: Int = 0,
         @Volatile var antallOpprettet: Int = 0,
@@ -325,9 +376,14 @@ class SkattepliktigeAarsavregningDryrunService(
         @Volatile var antallSakerIkkeVurdert: Int = 0,
         /** Saker som feilet under vurderingen — de er med i [antallSakerFunnet]. */
         @Volatile var antallSakerFeilet: Int = 0,
+        /** Saker som ble nådd etter at taket var fylt, og derfor ikke vurdert — med i [antallSakerFunnet]. */
+        @Volatile var antallSakerHoppetOverPgaTak: Int = 0,
+        /** Hvor mange av hendelsene som faktisk ble kjørt. Lavere enn [antallInputHendelser] hvis kjøringen ble avbrutt. */
+        @Volatile var antallHendelserProsessert: Int = 0,
+        /** Satt når taket avbrøt kjøringen, så resten av lista ikke er gjort. */
+        @Volatile var stoppetPgaTak: Boolean = false,
         @Volatile var antallSkarpFeilet: Int = 0,
         @Volatile var result: Map<String, Any?> = emptyMap(),
-        @Volatile var dbQueryStoppedAt: LocalDateTime? = null,
     ) : JobMonitor.Stats {
         override fun reset() {
             skarp = false
@@ -345,15 +401,16 @@ class SkattepliktigeAarsavregningDryrunService(
             antallStatusHoppetOver = 0
             antallSakerIkkeVurdert = 0
             antallSakerFeilet = 0
+            antallSakerHoppetOverPgaTak = 0
+            antallHendelserProsessert = 0
+            stoppetPgaTak = false
             antallSkarpFeilet = 0
-            dbQueryStoppedAt = null
             result = emptyMap()
         }
 
         override fun asMap(): Map<String, Any?> = mapOf(
             "skarp" to skarp,
             "maksAntall" to maksAntall,
-            "dbQueryRuntime" to jobMonitor.durationUntil(dbQueryStoppedAt),
             "antallInputHendelser" to antallInputHendelser,
             "antallDuplikaterFjernet" to antallDuplikaterFjernet,
             "antallUgyldigInput" to antallUgyldigInput,
@@ -367,6 +424,9 @@ class SkattepliktigeAarsavregningDryrunService(
             "antallStatusHoppetOver" to antallStatusHoppetOver,
             "antallSakerIkkeVurdert" to antallSakerIkkeVurdert,
             "antallSakerFeilet" to antallSakerFeilet,
+            "antallSakerHoppetOverPgaTak" to antallSakerHoppetOverPgaTak,
+            "antallHendelserProsessert" to antallHendelserProsessert,
+            "stoppetPgaTak" to stoppetPgaTak,
             "antallSkarpFeilet" to antallSkarpFeilet,
             "result" to result,
         )
@@ -390,6 +450,9 @@ class SkattepliktigeAarsavregningDryrunService(
         val feilmelding: String? = null,
     )
 }
+
+/** Hendelsen etter at året er parset, slik at «2023» og «02023» er samme nøkkel. */
+private data class NormalisertHendelse(val identifikator: String, val år: Int)
 
 data class SkattehendelseDryrunItem(
     val gjelderPeriode: String,

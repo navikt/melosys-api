@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.Application
 import io.mockk.every
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.saksflyt.ProsessinstansDispatcher
 import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.SkattehendelseDryrunItem
 import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.SkattepliktigeAarsavregningDryrunService
@@ -65,15 +66,38 @@ class SkattepliktigeAarsavregningSkarpIT(
     private val ytreLesetransaksjon: TransactionTemplate
         get() = TransactionTemplate(transactionManager).apply { isReadOnly = true }
 
+    /**
+     * Den ytre transaksjonen ryker etter at to saker er skrevet. Med REQUIRED ville de vært
+     * deltakere i den, og rullet tilbake sammen med den — mens rapporten fortsatt påsto at to
+     * prosessinstanser var opprettet.
+     */
     @Test
-    fun `en sak som feiler ruller ikke tilbake sakene som allerede er kjørt`() {
+    fun `rollback av den ytre transaksjonen tar ikke med sakene som allerede er kjørt`() {
         ytreLesetransaksjon.execute { ytre ->
             skarpUtfoerer.opprettProsessinstans("MEL-901", "2023")
-            runCatching { error("sak MEL-902 feilet") }
             skarpUtfoerer.opprettProsessinstans("MEL-903", "2023")
 
-            // Ytre transaksjon ryker — før fiksen tok den med seg alt arbeidet i batchen.
             ytre.setRollbackOnly()
+            null
+        }
+
+        antallÅrsavregningsprosesser() shouldBe 2
+    }
+
+    /**
+     * Den andre halvdelen av samme garanti: en sak som *kaster* skal ikke markere den ytre
+     * transaksjonen rollback-only. Med REQUIRED ville kastet fra den indre gjort det, og de to
+     * sakene rundt hadde forsvunnet ved commit selv om løkka fanget feilen og gikk videre.
+     */
+    @Test
+    fun `en sak som kaster river ikke med seg sakene rundt`() {
+        ytreLesetransaksjon.execute {
+            skarpUtfoerer.opprettProsessinstans("MEL-901", "2023")
+            // Behandlingen finnes ikke, så statusoppdateringen kaster inne i sin egen transaksjon.
+            runCatching {
+                skarpUtfoerer.settStatusVurderDokument(BEHANDLING_SOM_IKKE_FINNES, Behandlingsstatus.VURDER_DOKUMENT)
+            }.isFailure shouldBe true
+            skarpUtfoerer.opprettProsessinstans("MEL-903", "2023")
             null
         }
 
@@ -123,6 +147,10 @@ class SkattepliktigeAarsavregningSkarpIT(
         transaksjonstilstandLest.await(10, TimeUnit.SECONDS) shouldBe true
         aktivTransaksjon shouldBe true
         readOnly shouldBe true
+    }
+
+    companion object {
+        const val BEHANDLING_SOM_IKKE_FINNES = -1L
     }
 
     private fun antallÅrsavregningsprosesser(): Int = jdbcTemplate.queryForObject(

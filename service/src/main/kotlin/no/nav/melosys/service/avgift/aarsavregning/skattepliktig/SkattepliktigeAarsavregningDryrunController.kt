@@ -30,14 +30,19 @@ class SkattepliktigeAarsavregningDryrunController(
             "status til VURDER_DOKUMENT på saker som allerede har en åpen årsavregning. " +
             "Statusen leses på nytt rett før skriving og settes bare hvis behandlingen fortsatt står " +
             "der kjøringen så den; har en saksbehandler flyttet den siden, hoppes saken over og " +
-            "telles i antallStatusHoppetOver, med årsak per sak i rapporten. Slike saker er trygge å " +
-            "kjøre om igjen. Ekte kjøring krever et positivt maksAntall — uten tak avvises kallet. " +
+            "telles i antallStatusHoppetOver, med årsak per sak i rapporten. Slike saker må vurderes " +
+            "manuelt — de skal IKKE bare kjøres om igjen, for neste kjøring observerer den nye " +
+            "statusen, og da slår sjekken ikke inn og saken settes tilbake til VURDER_DOKUMENT. " +
+            "Ekte kjøring krever et positivt maksAntall — uten tak avvises kallet. " +
             "Hendelser med samme identifikator og år slås sammen før kjøring (antallDuplikaterFjernet), " +
             "fordi to hendelser for samme sak og år ellers gir to årsavregninger og to brev. " +
             "Overlappende kjøringer har samme svakhet: vent til køen er tømt før neste kjøring. " +
+            "Stopper taket kjøringen, sier stoppetPgaTak fra, og antallHendelserProsessert viser hvor " +
+            "langt den kom — resten av lista er da ikke kjørt. " +
             "Bruk /status for fremdrift og /rapport for resultat per sak. NB: appen kjører to podder, " +
             "og jobbtilstanden ligger i minnet på den poden som tok imot /run — kjør derfor mot én pod " +
-            "(port-forward), og kryssjekk pod-feltet i /status."
+            "(port-forward), og kryssjekk pod-feltet i /status. Hele kjøringen holder én lesetransaksjon " +
+            "og én persistence-kontekst, så kjør i porsjoner på noen tusen hendelser."
     )
     @PostMapping("/run")
     fun run(

@@ -37,7 +37,7 @@ class SkattehendelserConsumer(
                 val sakerMedTrygdeavgift =
                     opprettelseService.finnSakerMedTrygdeavgift(skattehendelse.identifikator, skattehendelse.gjelderPeriode.toInt())
                 if (sakerMedTrygdeavgift.isEmpty()) {
-                    log.warn { "Fant ingen sak med trygdeavgift for aktør: $skattehendelse.identifikator" }
+                    log.warn { "Fant ingen sak med trygdeavgift for aktør: ${skattehendelse.identifikator}" }
                 }
                 for (fagsak in sakerMedTrygdeavgift) {
                     if (skalOpprettArsavregningsBehandlingProsessflyt(fagsak, skattehendelse.gjelderPeriode.toInt())) {

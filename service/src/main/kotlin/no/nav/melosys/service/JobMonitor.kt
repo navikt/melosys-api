@@ -4,7 +4,7 @@ import tools.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
 import java.time.Duration
 import java.time.LocalDateTime
-import java.util.concurrent.ConcurrentHashMap
+import java.util.Collections
 import java.util.concurrent.atomic.AtomicBoolean
 
 private val log = KotlinLogging.logger {}
@@ -37,11 +37,14 @@ class JobMonitor<T : JobMonitor.Stats>(
     /**
      * Skrives fra jobbtråden mens `/status` kan serialisere samtidig fra en HTTP-tråd. En vanlig
      * HashMap kan da kaste ConcurrentModificationException eller gi en halvlest respons midt under
-     * rehashing — nøyaktig når kartet er interessant, altså mens feil registreres. ConcurrentHashMap
-     * gir svakt konsistent traversering; [status] tar i tillegg en kopi så én respons er ett bilde.
+     * rehashing — nøyaktig når kartet er interessant, altså mens feil registreres.
+     *
+     * En synkronisert LinkedHashMap og ikke en ConcurrentHashMap: rapportene leses med den første
+     * feilen først, og CHM har ingen rekkefølge. [status] kopierer under samme lås, så én respons er
+     * ett bilde.
      */
     @Volatile
-    var exceptions: MutableMap<String, Int> = ConcurrentHashMap()
+    var exceptions: MutableMap<String, Int> = Collections.synchronizedMap(LinkedHashMap())
 
     fun execute(maxErrorsBeforeStop: Int = 0, block: T.() -> Unit) {
         this.maxErrorsBeforeStop = maxErrorsBeforeStop
@@ -93,7 +96,7 @@ class JobMonitor<T : JobMonitor.Stats>(
             "runtime" to startedAt.durationUntil(stoppedAt),
         ) + stats.asMap() + mapOf(
             "errorCount" to errorCount,
-            "exceptions" to LinkedHashMap(exceptions)
+            "exceptions" to synchronized(exceptions) { LinkedHashMap(exceptions) }
         )
 
     private fun Any.toJson() = jacksonObjectMapper()
