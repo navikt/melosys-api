@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui
+package no.nav.melosys.tjenester.gui.fagsaker.notater
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -8,13 +8,12 @@ import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.service.BehandlingsnotatService
 import no.nav.melosys.service.bruker.SaksbehandlerService
 import no.nav.melosys.service.tilgang.Aksesskontroll
-import no.nav.melosys.tjenester.gui.dto.BehandlingsnotatGetDto
-import no.nav.melosys.tjenester.gui.dto.BehandlingsnotatPostDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.context.annotation.Scope
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.context.WebApplicationContext
+import java.time.Instant
 import kotlin.jvm.optionals.getOrNull
 
 @Protected
@@ -76,4 +75,19 @@ class BehandlingsnotatController(
         log.warn(e) { "Feil ved henting av navn for ident" }
         ident
     }
+}
+
+data class BehandlingsnotatPostDto(val tekst: String)
+
+class BehandlingsnotatGetDto(
+    behandlingsnotat: Behandlingsnotat,
+    val redigerbar: Boolean,
+    val registrertAvNavn: String,
+) {
+    val notatId: Long = behandlingsnotat.id
+    val tekst: String? = behandlingsnotat.tekst
+    val endretDato: Instant? = behandlingsnotat.endretDato
+    val registrertDato: Instant? = behandlingsnotat.registrertDato
+    val behandlingstypeKode: String = behandlingsnotat.behandling.type.kode
+    val behandlingstemaKode: String = behandlingsnotat.behandling.tema.kode
 }
