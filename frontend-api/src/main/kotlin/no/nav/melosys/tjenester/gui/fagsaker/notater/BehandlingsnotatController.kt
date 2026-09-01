@@ -62,6 +62,12 @@ class BehandlingsnotatController(
         @RequestBody behandlingsnotatPostDto: BehandlingsnotatPostDto,
     ): ResponseEntity<BehandlingsnotatGetDto> {
         aksesskontroll.autoriserSakstilgang(saksnummer)
+
+        val finnesPåFagsak = behandlingsnotatService.hentNotatForFagsak(saksnummer).any { it.id == notatID }
+        if (!finnesPåFagsak) {
+            throw no.nav.melosys.exception.IkkeFunnetException("Finner ikke notat med id $notatID på fagsak $saksnummer")
+        }
+
         return ResponseEntity.ok(
             lagBehandlingsnotatGetDto(behandlingsnotatService.oppdaterNotat(notatID, behandlingsnotatPostDto.tekst))
         )
