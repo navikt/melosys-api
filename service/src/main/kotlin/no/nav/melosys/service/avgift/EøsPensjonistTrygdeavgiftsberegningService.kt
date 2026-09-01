@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
+import no.nav.melosys.integrasjon.trygdeavgift.dto.BeregningsforklaringDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.EøsPensjonistTrygdeavgiftsberegningRequest
 import no.nav.melosys.integrasjon.trygdeavgift.dto.EøsPensjonistTrygdeavgiftsberegningResponse
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
@@ -42,7 +43,22 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         skatteforholdsperioder: List<SkatteforholdTilNorge> = emptyList(),
         inntektsperioder: List<Inntektsperiode> = emptyList(),
         dagensDato: LocalDate = LocalDate.now()
-    ): Set<Trygdeavgiftsperiode> {
+    ): Set<Trygdeavgiftsperiode> =
+        beregnOgLagreTrygdeavgiftMedForklaring(behandlingID, skatteforholdsperioder, inntektsperioder, dagensDato)
+            .trygdeavgiftsperioder
+
+    /**
+     * Som [beregnOgLagreTrygdeavgift], men returnerer i tillegg de distinkte
+     * beregningsforklaringene fra beregningsmotoren. Forklaringene persisteres ikke –
+     * de føres kun gjennom på PUT-veien (beregning) til frontend.
+     */
+    @Transactional
+    fun beregnOgLagreTrygdeavgiftMedForklaring(
+        behandlingID: Long,
+        skatteforholdsperioder: List<SkatteforholdTilNorge> = emptyList(),
+        inntektsperioder: List<Inntektsperiode> = emptyList(),
+        dagensDato: LocalDate = LocalDate.now()
+    ): BeregnetTrygdeavgiftMedForklaring {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         val helseutgiftDekkesPerioder = behandlingsresultat.helseutgiftDekkesPerioder
 
@@ -57,8 +73,9 @@ class EøsPensjonistTrygdeavgiftsberegningService(
             dagensDato
         )
 
-        val nyeTrygdeavgiftsperioder =
-            lagNyeTrygdeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
+        val resultat =
+            lagNyeTrygdeavgiftsperioderMedForklaring(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
+        val nyeTrygdeavgiftsperioder = resultat.trygdeavgiftsperioder
 
         trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
 
@@ -74,7 +91,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
             }
         }
 
-        return nyeTrygdeavgiftsperioder.toSet()
+        return BeregnetTrygdeavgiftMedForklaring(nyeTrygdeavgiftsperioder.toSet(), resultat.beregningsforklaringer)
     }
 
     @Transactional(readOnly = true, noRollbackFor = [Throwable::class])
@@ -83,14 +100,30 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsperioder: List<Inntektsperiode>,
         dagensDato: LocalDate = LocalDate.now()
-    ): List<Trygdeavgiftsperiode> {
+    ): List<Trygdeavgiftsperiode> =
+        beregnTrygdeavgiftMedForklaring(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
+            .trygdeavgiftsperioder
+
+    private fun beregnTrygdeavgiftMedForklaring(
+        behandlingsresultat: Behandlingsresultat,
+        skatteforholdsperioder: List<SkatteforholdTilNorge>,
+        inntektsperioder: List<Inntektsperiode>,
+        dagensDato: LocalDate = LocalDate.now()
+    ): EøsPensjonistBeregningsresultat {
         val helseutgiftDekkesPerioder = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(behandlingsresultat.hentBehandling().id)
         require(helseutgiftDekkesPerioder.isNotEmpty()) { "Ingen helseutgift dekkes perioder funnet" }
 
-        return helseutgiftDekkesPerioder.flatMap { helseutgiftDekkesPeriode ->
+        val resultaterPerPeriode = helseutgiftDekkesPerioder.map { helseutgiftDekkesPeriode ->
             beregnTrygdeavgiftForEnkeltPeriode(behandlingsresultat, helseutgiftDekkesPeriode, skatteforholdsperioder, inntektsperioder, dagensDato)
-                .onEach { it.grunnlagHelseutgiftDekkesPeriode = helseutgiftDekkesPeriode }
+                .also { resultat ->
+                    resultat.trygdeavgiftsperioder.forEach { it.grunnlagHelseutgiftDekkesPeriode = helseutgiftDekkesPeriode }
+                }
         }
+
+        return EøsPensjonistBeregningsresultat(
+            resultaterPerPeriode.flatMap { it.trygdeavgiftsperioder },
+            resultaterPerPeriode.flatMap { it.beregningsforklaringer }.distinct()
+        )
     }
 
     private fun beregnTrygdeavgiftForEnkeltPeriode(
@@ -99,7 +132,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsperioder: List<Inntektsperiode>,
         dagensDato: LocalDate
-    ): List<Trygdeavgiftsperiode> {
+    ): EøsPensjonistBeregningsresultat {
         // UUID brukes til å identifisere periodene som danner grunnlag for trygdeavgiftsberegningen
         val helseutgiftDekkesPeriodeDto = helseutgiftDekkesPeriode.tilHelseutgiftDekkesPeriodeDto()
         val filtrerteInntektsperioder = inntektsperioder.filter { inntektsperiode ->
@@ -123,19 +156,23 @@ class EøsPensjonistTrygdeavgiftsberegningService(
             )
         )
 
-        return beregnetTrygdeavgiftList
+        val relevanteResponser = beregnetTrygdeavgiftList
             .filter { response ->
                 !response.beregnetPeriode.periode.fom.isAfter(helseutgiftDekkesPeriode.tomDato) &&
                     !response.beregnetPeriode.periode.tom.isBefore(helseutgiftDekkesPeriode.fomDato)
             }
-            .map { beregnetAvgiftPerPeriode ->
-            lagTrygdeavgiftsperiode(
-                beregnetAvgiftPerPeriode,
-                skatteforholdsperioderMedUUID,
-                inntektsperioderMedUUID,
-                helseutgiftDekkesPeriode
-            )
-        }
+
+        return EøsPensjonistBeregningsresultat(
+            relevanteResponser.map { beregnetAvgiftPerPeriode ->
+                lagTrygdeavgiftsperiode(
+                    beregnetAvgiftPerPeriode,
+                    skatteforholdsperioderMedUUID,
+                    inntektsperioderMedUUID,
+                    helseutgiftDekkesPeriode
+                )
+            },
+            relevanteResponser.mapNotNull { it.beregningsforklaring }.distinct()
+        )
     }
 
     private fun lagTrygdeavgiftsperiode(
@@ -178,22 +215,25 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         return trygdeavgiftsperiode
     }
 
-    @Suppress("SpringTransactionalMethodCallsInspection") // warning på beregnTrygdeavgift ignoreres pga eksisterende transaksjon
-    private fun lagNyeTrygdeavgiftsperioder(
+    private fun lagNyeTrygdeavgiftsperioderMedForklaring(
         behandlingsresultat: Behandlingsresultat,
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsperioder: List<Inntektsperiode>,
         dagensDato: LocalDate = LocalDate.now()
-    ): List<Trygdeavgiftsperiode> {
+    ): EøsPensjonistBeregningsresultat {
 
         if (erSkattepliktig(skatteforholdsperioder, inntektsperioder) && skatteforholdsperioder.size == 1) {
-            return skattepliktigTrygdeavgiftsperioderAvAvgiftspliktigperioder(behandlingsresultat.finnAvgiftspliktigPerioder(), dagensDato)
+            // Skattepliktig-snarveien kaller ikke beregningsmotoren, og har derfor ingen forklaring.
+            return EøsPensjonistBeregningsresultat(
+                skattepliktigTrygdeavgiftsperioderAvAvgiftspliktigperioder(behandlingsresultat.finnAvgiftspliktigPerioder(), dagensDato),
+                emptyList()
+            )
         }
 
-        val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
-        sjekkTrygdeavgiftSkalBetalesTilNav(nyeTrygdeavgiftsperioder)
+        val resultat = beregnTrygdeavgiftMedForklaring(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
+        sjekkTrygdeavgiftSkalBetalesTilNav(resultat.trygdeavgiftsperioder)
 
-        return nyeTrygdeavgiftsperioder
+        return resultat
     }
 
     private fun erSkattepliktig(
@@ -247,3 +287,8 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         return avgiftspliktigperioder.flatMap { SkattepliktigTrygdeavgiftsperiodeSplitter.splittPåÅr(it, fraOgMedÅr) }
     }
 }
+
+private data class EøsPensjonistBeregningsresultat(
+    val trygdeavgiftsperioder: List<Trygdeavgiftsperiode>,
+    val beregningsforklaringer: List<BeregningsforklaringDto>,
+)

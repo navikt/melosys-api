@@ -136,12 +136,12 @@ class TrygdeavgiftControllerTest(
         val trygdeavgiftsgrunnlagDto = lagTrygdeavgiftsgrunnlagDto()
 
         every {
-            eøsPensjonistTrygdeavgiftsBeregningService.beregnOgLagreTrygdeavgift(
+            eøsPensjonistTrygdeavgiftsBeregningService.beregnOgLagreTrygdeavgiftMedForklaring(
                 any(),
                 any<List<SkatteforholdTilNorge>>(),
                 any<List<Inntektsperiode>>()
             )
-        } returns trygdeavgiftsperioder
+        } returns BeregnetTrygdeavgiftMedForklaring(trygdeavgiftsperioder, emptyList())
 
         mockMvc.perform(
             put("$BASE_URL/eos-pensjonist/beregning", 1L)
@@ -149,7 +149,33 @@ class TrygdeavgiftControllerTest(
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk)
-            .andExpectResponseBody(forventetBeregnetTrygdeavgiftDto())
+            .andExpectResponseBody(forventetEøsPensjonistBeregnetTrygdeavgiftDto())
+    }
+
+    @Test
+    fun `skal beregne trygdeavgift for eos-pensjonist og inkludere beregningsforklaringer i responsen`() {
+        every { aksesskontroll.autoriserSkrivOgTilordnet(any()) } returns Unit
+
+        val trygdeavgiftsgrunnlagDto = lagTrygdeavgiftsgrunnlagDto()
+        val forklaring = lagBeregningsforklaringDto()
+
+        every {
+            eøsPensjonistTrygdeavgiftsBeregningService.beregnOgLagreTrygdeavgiftMedForklaring(
+                any(),
+                any<List<SkatteforholdTilNorge>>(),
+                any<List<Inntektsperiode>>()
+            )
+        } returns BeregnetTrygdeavgiftMedForklaring(trygdeavgiftsperioder, listOf(forklaring))
+
+        mockMvc.perform(
+            put("$BASE_URL/eos-pensjonist/beregning", 1L)
+                .content(objectMapper.writeValueAsString(trygdeavgiftsgrunnlagDto))
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpectResponseBody(
+                forventetEøsPensjonistBeregnetTrygdeavgiftDto(beregningsforklaringer = listOf(forklaring))
+            )
     }
 
     @Test
@@ -241,6 +267,16 @@ class TrygdeavgiftControllerTest(
     ): BeregnetTrygdeavgiftDto {
         return BeregnetTrygdeavgiftDto(
             trygdeavgiftsperioder.map { TrygdeavgiftsperiodeDto(it) },
+            lagTrygdeavgiftsgrunnlagDto(),
+            beregningsforklaringer,
+        )
+    }
+
+    private fun forventetEøsPensjonistBeregnetTrygdeavgiftDto(
+        beregningsforklaringer: List<BeregningsforklaringDto> = emptyList(),
+    ): EøsPensjonistBeregnetTrygdeavgiftDto {
+        return EøsPensjonistBeregnetTrygdeavgiftDto(
+            trygdeavgiftsperioder.map { EøsPensjonistTrygdeavgiftsperiodeDto(it) },
             lagTrygdeavgiftsgrunnlagDto(),
             beregningsforklaringer,
         )
@@ -344,7 +380,5 @@ class TrygdeavgiftControllerTest(
     }
 
     private inline fun <reified T> ResultActions.andExpectResponseBody(expectedObject: T): ResultActions =
-        this.apply {
-            responseBody(objectMapper).containsObjectAsJson(expectedObject, T::class.java)
-        }
+        andExpect(responseBody(objectMapper).containsObjectAsJson(expectedObject, T::class.java))
 }

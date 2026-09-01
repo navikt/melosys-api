@@ -293,6 +293,88 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     }
 
     @Test
+    fun `beregnTrygdeavgift - EØS pensjonist - beregningsforklaring fra beregningsmotoren foeres gjennom`() {
+        val behandling = lagBehandling {
+            fagsak {
+                medBruker()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+        }
+        val behandlingsresultat = lagBehandlingsresultat(behandling)
+        setupMocksForBehandling(behandling, behandlingsresultat)
+
+        val skatteforholdsperiode = skatteforholdForTest {
+            fomDato = FOM
+            tomDato = TOM
+            skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+        }
+
+        val inntektsperiode = inntektForTest {
+            fomDato = FOM
+            tomDato = TOM
+            type = Inntektskildetype.PENSJON
+            arbeidsgiversavgiftBetalesTilSkatt = false
+            avgiftspliktigMndInntekt = Penger(BigDecimal(10000.0))
+        }
+
+        val notSoRandomUuid = UUID.randomUUID()
+        val datoPeriodeDto = DatoPeriodeDto(FOM, TOM)
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID() } returns notSoRandomUuid
+
+        val forklaring = BeregningsforklaringDto(
+            aar = FOM.year,
+            inntektsgruppe = Inntektsgruppe.SAMLET,
+            valgtRegel = Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL,
+            aarsak = Beregningsaarsak.BEREGNET,
+            inntektsgrunnlag = emptyList(),
+            ekskluderteInntekter = emptyList(),
+            sumAarligInntekt = 600000,
+            minstebeloep = 99650,
+            inntektOverMinstebeloep = 500350,
+            maksimalAvgift25Prosent = 125087,
+            ordinaerAvgift = 46200,
+            fastsattAvgift = 46200,
+        )
+
+        every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
+        every { mockTrygdeavgiftClient.beregnTrygdeavgiftEosPensjonist(ofType(EøsPensjonistTrygdeavgiftsberegningRequest::class)) }.returns(
+            listOf(
+                EøsPensjonistTrygdeavgiftsberegningResponse(
+                    TrygdeavgiftsperiodeDto(
+                        DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
+                    ),
+                    EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                        datoPeriodeDto,
+                        notSoRandomUuid,
+                        notSoRandomUuid
+                    ),
+                    grunnlagListe = listOf(
+                        EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                            datoPeriodeDto,
+                            notSoRandomUuid,
+                            notSoRandomUuid
+                        )
+                    ),
+                    beregningsregel = Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL,
+                    beregningsforklaring = forklaring,
+                )
+            )
+        )
+        every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
+
+        val resultat = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgiftMedForklaring(
+            BEHANDLING_ID,
+            listOf(skatteforholdsperiode),
+            listOf(inntektsperiode)
+        )
+
+        resultat.trygdeavgiftsperioder.shouldHaveSize(1)
+        resultat.beregningsforklaringer shouldBe listOf(forklaring)
+    }
+
+    @Test
     fun `beregnTrygdeavgift - EØS pensjonist skal betale Trygdeavgift - tidligere kalenderår skal forskuddsfaktureres - toggleAv`() {
         unleash.disableAll()
         val fomIFjor = FOM.minusYears(1)
