@@ -41,11 +41,11 @@ class SkattepliktigeAarsavregningDryrunController(
             "antallHendelserProsessert mot antallUnikeHendelser viser hvor langt den kom. Merk at " +
             "antallHendelserProsessert kan være lavere enn antallInputHendelser også i en fullført " +
             "kjøring, fordi duplikater og ugyldig input er fjernet først. " +
-            "Kallet svarer alltid 200 og starter jobben asynkront. Pågår det allerede en kjøring, " +
-            "avvises den nye stille av jobben selv, og /status viser da fortsatt den som pågår — så " +
-            "sjekk /status før du starter, og vent til isRunning er false. Er alle jobbtrådene opptatt, " +
-            "kan en ny kjøring bli liggende i kø og starte når den forrige er ferdig, altså kjøre hele " +
-            "lista om igjen; send derfor ikke /run på nytt uten å ha sett på /status. " +
+            "Merk at et tak som kapper saker i den siste hendelsen ikke synes på hendelsestellingen — " +
+            "les antallSakerHoppetOverPgaTak, som er der uansett om kjøringen ble avbrutt eller ikke. " +
+            "Pågår det allerede en kjøring, avvises den nye med 409. To kall i samme øyeblikk kan " +
+            "likevel begge få 200; det andre avvises da stille av jobben, så sjekk /status og vent til " +
+            "isRunning er false før du sender /run på nytt. " +
             "Bruk /status for fremdrift og /rapport for resultat per sak. NB: appen kjører to podder, " +
             "og jobbtilstanden ligger i minnet på den poden som tok imot /run — kjør derfor mot én pod " +
             "(port-forward), og kryssjekk pod-feltet i /status. Hele kjøringen holder én lesetransaksjon " +
@@ -66,6 +66,21 @@ class SkattepliktigeAarsavregningDryrunController(
                     "feil" to "Ekte kjøring krever et positivt maksAntall — taket avgjør hvor mange saker som kan endres",
                     "maksAntall" to request.maksAntall
                 )
+            )
+        }
+
+        // Stopper det vanlige tilfellet: en kjøring har pågått en stund, og noen sender /run på nytt.
+        // Uten denne submitteres en ny task, og er alle jobbtrådene opptatt, legger den seg i kø og
+        // kjører hele lista skarpt om igjen når den første er ferdig — nye årsavregninger og nye brev
+        // til de samme borgerne, siden dedupliseringen bare virker innenfor én kjøring.
+        //
+        // Den dekker ikke to kall i samme øyeblikk: isRunning blir først true når den asynkrone
+        // tasken har begynt å kjøre. Da avvises den andre stille av compareAndSet inne i jobben, og
+        // svaret her sier «startet» selv om ingenting startet. Vakten i jobben er den harde; denne er
+        // for at den som kjører skal få vite det i det tilfellet som faktisk oppstår.
+        if (skattepliktigeAarsavregningDryrunService.status()["isRunning"] == true) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                mapOf("feil" to "En kjøring pågår allerede — se /status, og vent til isRunning er false")
             )
         }
 

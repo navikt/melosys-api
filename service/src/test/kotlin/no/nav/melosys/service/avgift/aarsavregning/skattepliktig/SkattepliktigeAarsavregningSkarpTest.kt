@@ -247,6 +247,25 @@ class SkattepliktigeAarsavregningSkarpTest {
         verify(exactly = 0) { dryrunService.prosesserSkattehendelserAsynkront(any(), any(), any()) }
     }
 
+    /**
+     * Det vanlige tilfellet: en kjøring har pågått en stund, og noen sender /run på nytt. Uten
+     * avvisningen submitteres en ny task som kan bli liggende i kø og kjøre hele lista skarpt om
+     * igjen når den første er ferdig.
+     */
+    @Test
+    fun `kjøring som startes mens en annen pågår avvises med 409`() {
+        val dryrunService = mockk<SkattepliktigeAarsavregningDryrunService>(relaxed = true)
+        every { dryrunService.status() } returns mapOf("isRunning" to true)
+        val controller = SkattepliktigeAarsavregningDryrunController(dryrunService)
+
+        val svar = controller.run(
+            SkattehendelseRunRequest(listOf(SkattehendelseDryrunItem("2024", AKTØR_ID)), skarp = true, maksAntall = 1)
+        )
+
+        svar.statusCode shouldBe HttpStatus.CONFLICT
+        verify(exactly = 0) { dryrunService.prosesserSkattehendelserAsynkront(any(), any(), any()) }
+    }
+
     @Test
     fun `simulering uten maksAntall slipper gjennom, og ekte kjøring med tak starter jobben`() {
         val dryrunService = mockk<SkattepliktigeAarsavregningDryrunService>(relaxed = true)
@@ -423,9 +442,8 @@ class SkattepliktigeAarsavregningSkarpTest {
             this["antallVilleOpprettetProsessinstans"] shouldBe 1
             this["antallSakerHoppetOverPgaTak"] shouldBe 1
             summerSakstellere() shouldBe this["antallSakerFunnet"]
-            // Lista ble gjennomgått helt — taket kappet en sak, men kjøringen ble ikke avbrutt.
-            // At noe ble kappet står i antallSakerHoppetOverPgaTak, ikke i avbruttAarsak.
-            this["antallHendelserProsessert"] shouldBe this["antallUnikeHendelser"]
+            // Taket kappet en sak i den ENESTE hendelsen, så lista ble gjennomgått helt. At noe ble
+            // kappet står i antallSakerHoppetOverPgaTak, ikke i avbruttAarsak.
             this["avbruttAarsak"] shouldBe null
         }
         // Saken som ble kappet må være synlig, ellers vet ikke den som kjører at den finnes.
@@ -567,26 +585,44 @@ class SkattepliktigeAarsavregningSkarpTest {
      * saker ut som fullført.
      */
     @Test
-    fun `nødbremsen midt i en aktørs saker merker også kjøringen som avbrutt`() {
-        // Én aktør, mange saker, alle feiler under vurderingen — nødbremsen går ved 100 feil.
+    fun `nødbremsen midt i en aktørs saker stopper hele kjøringen, ikke bare den ene saken`() {
+        // Første aktør har mange saker som alle feiler under vurderingen — nødbremsen går ved 100
+        // feil, altså midt inne i sakLoop. Da skal HELE kjøringen stoppe: bryter den bare ut av den
+        // ene saken, blir aktør nummer to prosessert som om ingenting hadde skjedd.
         val fagsaker = (1..150).map { lagFagsakMedÅrsavregning(Behandlingsstatus.VURDER_DOKUMENT, it.toLong(), "MEL-$it") }
-        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns fagsaker
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, "aktoer-1") } returns fagsaker
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, "aktoer-2") } returns listOf(lagFagsak("MEL-900"))
 
         val behandlingsresultat = Behandlingsresultat.forTest { }
-        stubTrygdeavgift(behandlingsresultat)
+        every { årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(any(), any()) } returns
+            GjeldendeBehandlingsresultaterForÅrsavregning(
+                behandlingsresultat,
+                sisteBehandlingsresultatMedAvgift = behandlingsresultat,
+                sisteÅrsavregning = behandlingsresultat,
+            )
+        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
+        every { trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) } returns
+            Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
         // Årløs behandling for hver sak: feiler under vurderingen, ikke i filteret.
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+        every { skarpUtfoerer.opprettProsessinstans(any(), any()) } returns UUID.randomUUID()
 
         service.prosesserSkattehendelser(
-            listOf(SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
+            listOf(
+                SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = "aktoer-1"),
+                SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = "aktoer-2"),
+            ),
             skarp = true,
             maksAntall = 500,
         )
 
         with(service.status()) {
             this["avbruttAarsak"] shouldBe "for mange feil"
+            // Aktør nummer to ble aldri rørt — kjøringen stoppet, den hoppet ikke bare over en sak.
+            this["antallHendelserProsessert"] shouldBe 1
             (this["antallSakerFunnet"] as Int) shouldBeLessThan 150
         }
+        verify(exactly = 0) { skarpUtfoerer.opprettProsessinstans("MEL-900", any()) }
     }
 
     /**
@@ -755,6 +791,24 @@ class SkattepliktigeAarsavregningSkarpTest {
 
         andreErFerdig.countDown()
         første.join(5000)
+    }
+
+    /**
+     * Nøyaktig hvor nødbremsen går. Med terskel 2 skal den tredje feilen stoppe jobben, ikke den
+     * andre — en ett-tegns endring i tellingen flytter grensen uten at noen løsere test merker det.
+     */
+    @Test
+    fun `nødbremsen går på feilen etter terskelen, ikke på terskelen`() {
+        val monitor = JobMonitor(jobName = "test", stats = TomStats())
+
+        monitor.execute(maxErrorsBeforeStop = 2) {
+            monitor.registerException(IllegalStateException("1"))
+            monitor.shouldStop shouldBe false
+            monitor.registerException(IllegalStateException("2"))
+            monitor.shouldStop shouldBe false
+            monitor.registerException(IllegalStateException("3"))
+            monitor.shouldStop shouldBe true
+        }
     }
 
     private class TomStats : JobMonitor.Stats {

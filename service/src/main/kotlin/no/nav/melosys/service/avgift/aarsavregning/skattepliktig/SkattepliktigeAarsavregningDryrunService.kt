@@ -342,7 +342,6 @@ class SkattepliktigeAarsavregningDryrunService(
                 "antallStatusHoppetOver" to antallStatusHoppetOver,
                 "antallSakerIkkeVurdert" to antallSakerIkkeVurdert,
                 "antallSakerFeilet" to antallSakerFeilet,
-            "antallBerikelseFeilet" to antallBerikelseFeilet,
                 "antallBerikelseFeilet" to antallBerikelseFeilet,
                 "antallSakerHoppetOverPgaTak" to antallSakerHoppetOverPgaTak,
                 "antallHendelserProsessert" to antallHendelserProsessert,
