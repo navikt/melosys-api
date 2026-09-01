@@ -121,8 +121,13 @@ class EøsPensjonistTrygdeavgiftsberegningService(
      * den perioden. En behandling med flere perioder i samme år får derfor flere forklaringer for
      * det året. Web nøkler både kortet og koblingen fra satsen på (aar, inntektsgruppe), og ville
      * vist den første forklaringen for alle periodene i året – altså tall som ikke hører til
-     * perioden. Slike år utelates heller helt: da vises ingen forklaring, slik det var før.
+     * perioden. Slike (år, inntektsgruppe) utelates heller helt: da vises ingen forklaring,
+     * slik det var før. (EØS-motoren gir i dag kun SAMLET, så det er i praksis hele året.)
      * Sorteringen gjør rekkefølgen stabil; periodene kommer uordnet fra repoet.
+     *
+     * Merk at likhet er BigDecimal-likhet, som er skala-sensitiv (7.9 != 7.90). To kall som gir
+     * samme tall med ulik skala vil derfor telle som tvetydige og skjule forklaringen. Motoren
+     * regner likt for like input, så det krever at kallene faktisk får ulikt grunnlag.
      */
     private fun slåSammenForklaringer(forklaringer: List<BeregningsforklaringDto>): List<BeregningsforklaringDto> =
         forklaringer.distinct()

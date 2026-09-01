@@ -193,6 +193,38 @@ class TrygdeavgiftControllerTest(
     }
 
     @Test
+    fun `eos-pensjonist-responsen sorterer trygdeavgiftsperioder paa fom`() {
+        every { aksesskontroll.autoriserSkrivOgTilordnet(any()) } returns Unit
+
+        val tidligste = LocalDate.now()
+        val senere = LocalDate.now().plusMonths(6)
+        // Innsettingsrekkefølge omvendt av forventet responsrekkefølge.
+        val usorterte = linkedSetOf(lagTrygdeavgiftsperiodeFra(senere), lagTrygdeavgiftsperiodeFra(tidligste))
+
+        every {
+            eøsPensjonistTrygdeavgiftsBeregningService.beregnOgLagreTrygdeavgiftMedForklaring(
+                any(),
+                any<List<SkatteforholdTilNorge>>(),
+                any<List<Inntektsperiode>>()
+            )
+        } returns BeregnetTrygdeavgiftMedForklaring(usorterte, emptyList())
+
+        mockMvc.perform(
+            put("$BASE_URL/eos-pensjonist/beregning", 1L)
+                .content(objectMapper.writeValueAsString(lagTrygdeavgiftsgrunnlagDto()))
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpect { result ->
+                val perioder = objectMapper.readTree(result.response.contentAsString)["trygdeavgiftsperioder"]
+                val fomListe = perioder.values().map { it["fom"].asString() }
+                assert(fomListe == listOf(tidligste.toString(), senere.toString())) {
+                    "Forventet perioder sortert på fom, fikk: $fomListe"
+                }
+            }
+    }
+
+    @Test
     fun `skal finne fakturamottaker`() {
         val MOTTAKER_NAVN = "Fornavn Etternavn"
         every { trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLINGSRESULTAT_ID) } returns MOTTAKER_NAVN
@@ -331,6 +363,27 @@ class TrygdeavgiftControllerTest(
         }
 
         return setOf(trygdeavgift)
+    }
+
+    private fun lagTrygdeavgiftsperiodeFra(fom: LocalDate): Trygdeavgiftsperiode = Trygdeavgiftsperiode.forTest {
+        periodeFra = fom
+        periodeTil = fom.plusDays(10)
+        trygdesats = BigDecimal.valueOf(7.9)
+        trygdeavgiftsbeløpMd = BigDecimal.valueOf(10000.0)
+        medlemskapsperiode = medlemskapsperiodeForTest {
+            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+        }
+        grunnlagInntekstperiode {
+            fomDato = fom
+            tomDato = fom
+            type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+            avgiftspliktigTotalinntekt = Penger(5000.0)
+        }
+        grunnlagSkatteforholdTilNorge {
+            fomDato = fom
+            tomDato = fom
+            skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+        }
     }
 
     fun lagTrygdeavgiftsperiodeMedBeregningsregel(): Trygdeavgiftsperiode {

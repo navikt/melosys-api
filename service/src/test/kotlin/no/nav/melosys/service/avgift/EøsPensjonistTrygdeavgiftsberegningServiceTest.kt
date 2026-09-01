@@ -397,6 +397,23 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     }
 
     @Test
+    fun `beregnTrygdeavgift - EØS pensjonist - flere helseutgiftperioder med lik forklaring gir én forklaring`() {
+        unleash.disableAll()
+        val aar = LocalDate.now().year - 1
+        val forklaring = lagForklaring(aar, sumAarligInntekt = 100000)
+
+        val resultat = beregnMedToHelseutgiftperioder(
+            foerstePeriode = LocalDate.of(aar, 1, 1) to LocalDate.of(aar, 5, 31),
+            andrePeriode = LocalDate.of(aar, 7, 1) to LocalDate.of(aar, 12, 31),
+            foersteForklaring = forklaring,
+            andreForklaring = forklaring,
+        )
+
+        // Samme forklaring fra begge kallene er ikke tvetydig, og skal fortsatt vises.
+        resultat.beregningsforklaringer shouldBe listOf(forklaring)
+    }
+
+    @Test
     fun `beregnTrygdeavgift - EØS pensjonist - forklaringer fra flere aar sorteres paa aar`() {
         unleash.disableAll()
         val nyesteAar = LocalDate.now().year - 1
