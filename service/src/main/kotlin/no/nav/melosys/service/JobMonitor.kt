@@ -4,6 +4,7 @@ import tools.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
 import java.time.Duration
 import java.time.LocalDateTime
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
 private val log = KotlinLogging.logger {}
@@ -33,8 +34,14 @@ class JobMonitor<T : JobMonitor.Stats>(
     @Volatile
     var maxErrorsBeforeStop: Int = 0
 
+    /**
+     * Skrives fra jobbtråden mens `/status` kan serialisere samtidig fra en HTTP-tråd. En vanlig
+     * HashMap kan da kaste ConcurrentModificationException eller gi en halvlest respons midt under
+     * rehashing — nøyaktig når kartet er interessant, altså mens feil registreres. ConcurrentHashMap
+     * gir svakt konsistent traversering; [status] tar i tillegg en kopi så én respons er ett bilde.
+     */
     @Volatile
-    var exceptions: MutableMap<String, Int> = mutableMapOf()
+    var exceptions: MutableMap<String, Int> = ConcurrentHashMap()
 
     fun execute(maxErrorsBeforeStop: Int = 0, block: T.() -> Unit) {
         this.maxErrorsBeforeStop = maxErrorsBeforeStop
@@ -86,7 +93,7 @@ class JobMonitor<T : JobMonitor.Stats>(
             "runtime" to startedAt.durationUntil(stoppedAt),
         ) + stats.asMap() + mapOf(
             "errorCount" to errorCount,
-            "exceptions" to exceptions
+            "exceptions" to LinkedHashMap(exceptions)
         )
 
     private fun Any.toJson() = jacksonObjectMapper()
