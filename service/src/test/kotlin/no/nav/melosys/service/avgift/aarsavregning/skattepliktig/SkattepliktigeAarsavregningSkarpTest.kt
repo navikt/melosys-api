@@ -211,7 +211,7 @@ class SkattepliktigeAarsavregningSkarpTest {
         verify(exactly = 0) { skarpUtfoerer.settStatusVurderDokument(any(), any()) }
         verify(exactly = 0) { skarpUtfoerer.opprettProsessinstans(any(), any()) }
         service.resultater.single().feilmelding shouldNotBe null
-        service.status()["antallOppslagFeilet"] shouldBe 1
+        service.status()["antallSakerFeilet"] shouldBe 1
     }
 
     /**
@@ -286,7 +286,7 @@ class SkattepliktigeAarsavregningSkarpTest {
         feil!! shouldContain BEHANDLING_ID.toString()
         feil shouldContain "MEL-1"
         feil shouldContain "lukk den årløse behandlingen"
-        service.status()["antallOppslagFeilet"] shouldBe 1
+        service.status()["antallSakerFeilet"] shouldBe 1
     }
 
     /**
@@ -352,6 +352,47 @@ class SkattepliktigeAarsavregningSkarpTest {
     }
 
     /**
+     * De to feilene i kjøringen har hvert sitt underlag: en sak kan feile før vi vet om den har
+     * trygdeavgift (da er den ikke med i antallSakerFunnet), eller etter at den er med (da er den
+     * det). Ett felles felt for begge gjør at antallSakerFunnet minus feiltallet ikke er antall
+     * saker som gikk bra — her ville det gitt null, og det er feil svar på et tall den som kjører
+     * bruker til å avgjøre om kjøringen kan gjentas.
+     */
+    @Test
+    fun `feil før og etter at saken er vurdert telles hver for seg`() {
+        val feilerIFilteret = lagFagsak("MEL-1")
+        val feilerUnderVurdering =
+            lagFagsakMedÅrsavregning(Behandlingsstatus.VURDER_DOKUMENT, BEHANDLING_ID, saksnummer = "MEL-2")
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns
+            listOf(feilerIFilteret, feilerUnderVurdering)
+
+        val behandlingsresultat = Behandlingsresultat.forTest { }
+        every { årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("MEL-1", GJELDER_ÅR) } throws
+            RuntimeException("oppslag feilet for MEL-1")
+        every { årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("MEL-2", GJELDER_ÅR) } returns
+            GjeldendeBehandlingsresultaterForÅrsavregning(
+                behandlingsresultat,
+                sisteBehandlingsresultatMedAvgift = behandlingsresultat,
+                sisteÅrsavregning = behandlingsresultat,
+            )
+        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
+        // Årløs behandling: saken er med i antallSakerFunnet, men feiler under vurderingen.
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
+        service.prosesserSkattehendelser(
+            listOf(SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
+            skarp = true,
+            maksAntall = 5,
+        )
+
+        with(service.status()) {
+            this["antallSakerFunnet"] shouldBe 1
+            this["antallSakerFeilet"] shouldBe 1
+            this["antallSakerIkkeVurdert"] shouldBe 1
+        }
+    }
+
+    /**
      * `/status` serialiserte den levende exceptions-mappen mens den asynkrone jobben skrev til den
      * — og `/status` er nettopp det som polles mens feil registreres.
      */
@@ -396,9 +437,13 @@ class SkattepliktigeAarsavregningSkarpTest {
         behandling { status = Behandlingsstatus.AVSLUTTET }
     }
 
-    private fun lagFagsakMedÅrsavregning(behandlingsstatus: Behandlingsstatus, behandlingId: Long? = null) =
+    private fun lagFagsakMedÅrsavregning(
+        behandlingsstatus: Behandlingsstatus,
+        behandlingId: Long? = null,
+        saksnummer: String = "MEL-1",
+    ) =
         Fagsak.forTest {
-            saksnummer = "MEL-1"
+            this.saksnummer = saksnummer
             type = Sakstyper.EU_EOS
             tema = Sakstemaer.MEDLEMSKAP_LOVVALG
             status(Saksstatuser.OPPRETTET)

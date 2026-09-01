@@ -124,7 +124,7 @@ class SkattepliktigeAarsavregningDryrunService(
 
                     val sakerMedTrygdeavgift =
                         opprettelseService.finnSakerMedTrygdeavgift(hendelse.identifikator, år) { fagsak, e ->
-                            antallOppslagFeilet++
+                            antallSakerIkkeVurdert++
                             log.warn(e) { "Oppslag-feil i filter for sak ${fagsak.saksnummer}, år $år" }
                             resultater.add(
                                 SakDryrunResultat(
@@ -241,7 +241,7 @@ class SkattepliktigeAarsavregningDryrunService(
                                 )
                             )
                         } catch (e: Exception) {
-                            antallOppslagFeilet++
+                            antallSakerFeilet++
                             log.warn(e) { "Oppslag-feil for sak ${fagsak.saksnummer}, år $år" }
                             resultater.add(
                                 SakDryrunResultat(
@@ -281,7 +281,8 @@ class SkattepliktigeAarsavregningDryrunService(
                 "antallOpprettet" to antallOpprettet,
                 "antallStatusOppdatert" to antallStatusOppdatert,
                 "antallStatusHoppetOver" to antallStatusHoppetOver,
-                "antallOppslagFeilet" to antallOppslagFeilet,
+                "antallSakerIkkeVurdert" to antallSakerIkkeVurdert,
+                "antallSakerFeilet" to antallSakerFeilet,
                 "antallSkarpFeilet" to antallSkarpFeilet,
             )
         }
@@ -320,7 +321,10 @@ class SkattepliktigeAarsavregningDryrunService(
         @Volatile var antallOpprettet: Int = 0,
         @Volatile var antallStatusOppdatert: Int = 0,
         @Volatile var antallStatusHoppetOver: Int = 0,
-        @Volatile var antallOppslagFeilet: Int = 0,
+        /** Saker som feilet før vi visste om de har trygdeavgift — de er ikke med i [antallSakerFunnet]. */
+        @Volatile var antallSakerIkkeVurdert: Int = 0,
+        /** Saker som feilet under vurderingen — de er med i [antallSakerFunnet]. */
+        @Volatile var antallSakerFeilet: Int = 0,
         @Volatile var antallSkarpFeilet: Int = 0,
         @Volatile var result: Map<String, Any?> = emptyMap(),
         @Volatile var dbQueryStoppedAt: LocalDateTime? = null,
@@ -339,7 +343,8 @@ class SkattepliktigeAarsavregningDryrunService(
             antallOpprettet = 0
             antallStatusOppdatert = 0
             antallStatusHoppetOver = 0
-            antallOppslagFeilet = 0
+            antallSakerIkkeVurdert = 0
+            antallSakerFeilet = 0
             antallSkarpFeilet = 0
             dbQueryStoppedAt = null
             result = emptyMap()
@@ -360,7 +365,8 @@ class SkattepliktigeAarsavregningDryrunService(
             "antallOpprettet" to antallOpprettet,
             "antallStatusOppdatert" to antallStatusOppdatert,
             "antallStatusHoppetOver" to antallStatusHoppetOver,
-            "antallOppslagFeilet" to antallOppslagFeilet,
+            "antallSakerIkkeVurdert" to antallSakerIkkeVurdert,
+            "antallSakerFeilet" to antallSakerFeilet,
             "antallSkarpFeilet" to antallSkarpFeilet,
             "result" to result,
         )
