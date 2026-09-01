@@ -15,9 +15,8 @@ import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeid
 class BehandlingstemaUtlederTest {
 
     @Test
-    fun `v2 ren arbeidstakerdel bruker offentlig-status fra metadata`() {
+    fun `ren arbeidstakerdel bruker offentlig-status fra metadata`() {
         val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
-            skjemaDefinisjonVersjon = "2"
             skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
             data = UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
             metadata = DegSelvMetadata(
@@ -35,9 +34,8 @@ class BehandlingstemaUtlederTest {
     }
 
     @Test
-    fun `v2 metadata overstyrer gammelt manuelt svar`() {
+    fun `metadata overstyrer gammelt manuelt svar`() {
         val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
-            skjemaDefinisjonVersjon = "2"
             skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
             data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto(
                 arbeidsgiverensVirksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(
@@ -58,9 +56,8 @@ class BehandlingstemaUtlederTest {
     }
 
     @Test
-    fun `v1 beholder manuelt svar selv om metadata har annen verdi`() {
+    fun `eldre skjema uten registerklassifisering bruker manuelt svar`() {
         val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
-            skjemaDefinisjonVersjon = "1"
             skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
             data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto(
                 arbeidsgiverensVirksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(
@@ -74,7 +71,7 @@ class BehandlingstemaUtlederTest {
                 arbeidsgiverNavn = arbeidsgiverNavn,
                 juridiskEnhetOrgnr = juridiskEnhetOrgnr,
                 arbeidstakerNavn = arbeidstakerNavn,
-                erOffentligArbeidsgiver = true
+                erOffentligArbeidsgiver = null
             )
         }
 
@@ -128,14 +125,4 @@ class BehandlingstemaUtlederTest {
             .hasMessageContaining("motstridende registerklassifisering")
     }
 
-    @Test
-    fun `ukjent skjemaversjon feiler uten fallback`() {
-        val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
-            skjemaDefinisjonVersjon = "ukjent"
-        }
-
-        assertThatThrownBy { dto.erOffentligArbeidsgiver() }
-            .isInstanceOf(IllegalArgumentException::class.java)
-            .hasMessageContaining("Ukjent skjemadefinisjonsversjon")
-    }
 }
