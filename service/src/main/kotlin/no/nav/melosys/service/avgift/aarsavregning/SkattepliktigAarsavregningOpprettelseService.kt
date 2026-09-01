@@ -129,12 +129,45 @@ class SkattepliktigAarsavregningOpprettelseService(
         )
 
     /**
+     * Setter behandlingen til VURDER_DOKUMENT, men bare hvis den fortsatt står i [forventetStatus]
+     * — statusen kalleren observerte da den bestemte seg for å oppdatere.
+     *
+     * Uten sjekken ville en behandling en saksbehandler har flyttet videre i mellomtiden — for
+     * eksempel til IVERKSETTER_VEDTAK — blitt kastet tilbake til VURDER_DOKUMENT. Å gjenta
+     * inngangsbetingelsen (aktiv, ikke OPPRETTET) er ikke nok: den er sann for nettopp de statusene
+     * saksbehandleren flytter til.
+     *
+     * Hvor mye sjekken er verdt avhenger av kalleren, og det er verdt å være presis om:
+     *
+     *  - Verktøyet skiller observasjon og skriving med `REQUIRES_NEW`, så oppslaget her treffer en
+     *    ny persistence-kontekst og leser raden på nytt. Der er dette en ekte re-lesing, og vinduet
+     *    den lukker er minuttene en batch bruker på å komme fra oppslaget til skrivingen.
+     *  - Consumeren observerer og skriver i samme transaksjon, så oppslaget vil normalt gi samme
+     *    entitet kalleren allerede holder, og sammenligningen kan ikke slå ut. Vinduet den ville
+     *    lukket er uansett bare lengden av én kort transaksjon.
+     *
+     * Dette er ingen atomisk compare-and-set: Behandling har ingen `@Version`, og UPDATE-en er ikke
+     * betinget på status i SQL-en. Et vindu på lengden av kallerens transaksjon består i begge
+     * tilfeller.
+     *
      * Rå `status`-setting framfor `endreStatus` er bevisst: en ny skattemelding på en åpen
      * årsavregning skal ikke trigge svarfrist- eller oppgavelogikk.
      */
-    fun settStatusVurderDokument(behandling: Behandling) {
-        log.info { "Oppdaterer status fra ${behandling.status} til VURDER_DOKUMENT for behandling ${behandling.id}" }
+    fun settStatusVurderDokument(behandlingId: Long, forventetStatus: Behandlingsstatus): StatusBumpResultat {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        if (behandling.status != forventetStatus) {
+            log.info {
+                "Hopper over statusoppdatering for behandling $behandlingId — status er nå " +
+                    "${behandling.status}, den observerte var $forventetStatus"
+            }
+            return StatusBumpResultat(oppdatert = false, faktiskStatus = behandling.status)
+        }
+        log.info { "Oppdaterer status fra ${behandling.status} til VURDER_DOKUMENT for behandling $behandlingId" }
         behandling.status = Behandlingsstatus.VURDER_DOKUMENT
         behandlingService.lagre(behandling)
+        return StatusBumpResultat(oppdatert = true, faktiskStatus = Behandlingsstatus.VURDER_DOKUMENT)
     }
+
+    /** @property faktiskStatus statusen behandlingen hadde da den ble lest på nytt. */
+    data class StatusBumpResultat(val oppdatert: Boolean, val faktiskStatus: Behandlingsstatus)
 }

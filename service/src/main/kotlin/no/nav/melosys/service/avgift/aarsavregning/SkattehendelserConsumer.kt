@@ -55,7 +55,7 @@ class SkattehendelserConsumer(
 
         log.info { "Årsavregning behandling(${behandling.id}) for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderÅr er allerede opprettet" }
         if (behandling.status != Behandlingsstatus.OPPRETTET) {
-            opprettelseService.settStatusVurderDokument(behandling)
+            opprettelseService.settStatusVurderDokument(behandling.id, behandling.status)
         }
         return false
     }

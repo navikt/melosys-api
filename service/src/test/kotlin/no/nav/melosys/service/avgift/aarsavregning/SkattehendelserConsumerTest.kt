@@ -140,6 +140,9 @@ class SkattehendelserConsumerTest {
 
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(behandling.fagsak)
         every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
+        // Statusen leses på nytt før skriving. Consumeren gjør det i samme transaksjon, så
+        // oppslaget gir samme entitet — slik det gjør i drift.
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
 
         val behandlingSlot = slot<Behandling>()
         every { behandlingService.lagre(capture(behandlingSlot)) } returns Unit
@@ -170,6 +173,62 @@ class SkattehendelserConsumerTest {
         verify { prosessinstansService wasNot Called }
         verify { behandlingService.lagre(behandling) }
         behandlingSlot.captured.status shouldBe Behandlingsstatus.VURDER_DOKUMENT
+    }
+
+    /**
+     * Pinner at consumeren sender statusen den faktisk observerte, ikke en hardkodet verdi: her
+     * har behandlingen endret seg mellom oppslaget og skrivingen, og da skal den stå urørt.
+     */
+    @Test
+    fun `status oppdateres ikke når behandlingen er flyttet videre etter oppslaget`() {
+        val fagsak = lagFagsak {
+            behandling {
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.UNDER_BEHANDLING
+            }
+        }
+        val behandling = fagsak.behandlinger.first()
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            this.behandling { id = behandling.id }
+            id = 2
+            type = Behandlingsresultattyper.IKKE_FASTSATT
+            årsavregning {
+                aar = GJELDER_ÅR
+            }
+        }
+
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
+        every {
+            årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(
+                FagsakTestFactory.SAKSNUMMER,
+                GJELDER_ÅR
+            )
+        } returns GjeldendeBehandlingsresultaterForÅrsavregning(
+            behandlingsresultat,
+            sisteBehandlingsresultatMedAvgift = behandlingsresultat,
+            sisteÅrsavregning = behandlingsresultat
+        )
+        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
+        // Saksbehandler har flyttet behandlingen videre siden oppslaget.
+        val flyttetBehandling = Behandling.forTest { status = Behandlingsstatus.IVERKSETTER_VEDTAK }
+        every { behandlingService.hentBehandling(behandling.id) } returns flyttetBehandling
+
+
+        skattehendelserConsumer.lesSkattehendelser(
+            ConsumerRecord(
+                "topic", 1, 1, "key", Skattehendelse(
+                    gjelderPeriode = GJELDER_ÅR.toString(),
+                    identifikator = AKTØR_ID,
+                    hendelsetype = "ny"
+                )
+            )
+        )
+
+
+        verify { prosessinstansService wasNot Called }
+        verify(exactly = 0) { behandlingService.lagre(any()) }
+        flyttetBehandling.status shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
     }
 
     @Test

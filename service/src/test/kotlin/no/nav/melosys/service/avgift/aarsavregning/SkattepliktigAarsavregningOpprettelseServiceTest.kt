@@ -1,10 +1,13 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.behandling
@@ -62,6 +65,41 @@ class SkattepliktigAarsavregningOpprettelseServiceTest {
         // operatøren ikke kan gjøre noe med.
         feil.message!! shouldContain "lukk den årløse behandlingen"
         feil.cause.shouldBeInstanceOf<IllegalStateException>()
+    }
+
+    /**
+     * Statusen som ble observert da det ble bestemt at behandlingen skulle bumpes, kan ha endret
+     * seg før skrivingen. IVERKSETTER_VEDTAK er både aktiv og ulik OPPRETTET, så bare en
+     * sammenligning mot den observerte statusen fanger at en saksbehandler har flyttet
+     * behandlingen videre i mellomtiden — å kaste den tilbake til VURDER_DOKUMENT ville tatt
+     * saksbehandleren med seg.
+     */
+    @Test
+    fun `status-bump hopper over behandling som er flyttet videre i mellomtiden`() {
+        val behandling = Behandling.forTest { status = Behandlingsstatus.IVERKSETTER_VEDTAK }
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+
+        val bump = service.settStatusVurderDokument(BEHANDLING_ID, Behandlingsstatus.VURDER_DOKUMENT)
+
+        bump.oppdatert shouldBe false
+        bump.faktiskStatus shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
+        behandling.status shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
+        verify(exactly = 0) { behandlingService.lagre(any()) }
+    }
+
+    @Test
+    fun `status-bump skjer når behandlingen fortsatt står der den ble observert`() {
+        // Startstatusen er ulik målstatusen, ellers ville testen overlevd at selve tilordningen forsvant.
+        val behandling = Behandling.forTest { status = Behandlingsstatus.AVVENT_DOK_PART }
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingService.lagre(behandling) } returns Unit
+
+        val bump = service.settStatusVurderDokument(BEHANDLING_ID, Behandlingsstatus.AVVENT_DOK_PART)
+
+        bump.oppdatert shouldBe true
+        bump.faktiskStatus shouldBe Behandlingsstatus.VURDER_DOKUMENT
+        behandling.status shouldBe Behandlingsstatus.VURDER_DOKUMENT
+        verify { behandlingService.lagre(behandling) }
     }
 
     private fun lagFagsakMedÅrsavregning() = Fagsak.forTest {
