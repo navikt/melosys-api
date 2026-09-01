@@ -69,7 +69,7 @@ class BehandlingsnotatControllerTest {
         val saksnummer = "MEL-222"
         val dto = BehandlingsnotatPostDto("teteteksssst")
         val behandlingsnotat = lagBehandlingsnotat()
-        every { behandlingsnotatService.oppdaterNotat(behandlingsnotat.id, any()) } returns behandlingsnotat
+        every { behandlingsnotatService.oppdaterNotat(saksnummer, behandlingsnotat.id, any()) } returns behandlingsnotat
         every { behandlingsnotatService.kanRedigereNotat(any()) } returns true
         every { saksbehandlerService.finnNavnForIdent(SAKSBEHANDLER) } returns java.util.Optional.of(SAKSBEHANDLER)
         every { aksesskontroll.autoriserSakstilgang(saksnummer) } returns Unit

@@ -69,9 +69,17 @@ class BehandlingsnotatService(
         }
     }
 
+    /**
+     * [saksnummer] er fagsaken det er gjort tilgangskontroll på. Verifiseres mot notatets egen fagsak
+     * slik at et notat på en annen fagsak ikke kan endres via et saksnummer man har tilgang til.
+     */
     @Transactional
-    fun oppdaterNotat(notatID: Long, tekst: String): Behandlingsnotat {
+    fun oppdaterNotat(saksnummer: String, notatID: Long, tekst: String): Behandlingsnotat {
         val behandlingsnotat = hentNotat(notatID)
+
+        if (behandlingsnotat.behandling.fagsak.saksnummer != saksnummer) {
+            throw IkkeFunnetException("Finner ikke notat med id $notatID på fagsak $saksnummer")
+        }
 
         if (!behandlingsnotat.erRedigerbar()) {
             throw FunksjonellException("Notat med id $notatID kan ikke oppdateres, da den tilhører en behandling som er avsluttet")
