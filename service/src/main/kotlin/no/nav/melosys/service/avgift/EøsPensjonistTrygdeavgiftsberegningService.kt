@@ -94,16 +94,6 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         return BeregnetTrygdeavgiftMedForklaring(nyeTrygdeavgiftsperioder.toSet(), resultat.beregningsforklaringer)
     }
 
-    @Transactional(readOnly = true, noRollbackFor = [Throwable::class])
-    fun beregnTrygdeavgift(
-        behandlingsresultat: Behandlingsresultat,
-        skatteforholdsperioder: List<SkatteforholdTilNorge>,
-        inntektsperioder: List<Inntektsperiode>,
-        dagensDato: LocalDate = LocalDate.now()
-    ): List<Trygdeavgiftsperiode> =
-        beregnTrygdeavgiftMedForklaring(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
-            .trygdeavgiftsperioder
-
     private fun beregnTrygdeavgiftMedForklaring(
         behandlingsresultat: Behandlingsresultat,
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
@@ -122,9 +112,25 @@ class EøsPensjonistTrygdeavgiftsberegningService(
 
         return EøsPensjonistBeregningsresultat(
             resultaterPerPeriode.flatMap { it.trygdeavgiftsperioder },
-            resultaterPerPeriode.flatMap { it.beregningsforklaringer }.distinct()
+            slåSammenForklaringer(resultaterPerPeriode.flatMap { it.beregningsforklaringer })
         )
     }
+
+    /**
+     * Beregningsmotoren kalles én gang per helseutgiftDekkesPeriode, med inntektene filtrert til
+     * den perioden. En behandling med flere perioder i samme år får derfor flere forklaringer for
+     * det året. Web nøkler både kortet og koblingen fra satsen på (aar, inntektsgruppe), og ville
+     * vist den første forklaringen for alle periodene i året – altså tall som ikke hører til
+     * perioden. Slike år utelates heller helt: da vises ingen forklaring, slik det var før.
+     * Sorteringen gjør rekkefølgen stabil; periodene kommer uordnet fra repoet.
+     */
+    private fun slåSammenForklaringer(forklaringer: List<BeregningsforklaringDto>): List<BeregningsforklaringDto> =
+        forklaringer.distinct()
+            .groupBy { it.aar to it.inntektsgruppe }
+            .filterValues { it.size == 1 }
+            .values
+            .flatten()
+            .sortedWith(compareBy({ it.aar }, { it.inntektsgruppe }))
 
     private fun beregnTrygdeavgiftForEnkeltPeriode(
         behandlingsresultat: Behandlingsresultat,

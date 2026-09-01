@@ -153,6 +153,20 @@ class TrygdeavgiftControllerTest(
     }
 
     @Test
+    fun `skal hente beregnet trygdeavgift for eos-pensjonist uten beregningsforklaringer`() {
+        every { aksesskontroll.autoriser(any()) } returns Unit
+        every { trygdeavgiftService.hentTrygdeavgiftsperioderForEosPensjonist(BEHANDLINGSRESULTAT_ID) } returns trygdeavgiftsperioder
+
+        mockMvc.perform(
+            get("$BASE_URL/eos-pensjonist/beregning", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            // Forklaringen persisteres ikke, så GET gir alltid tom liste.
+            .andExpectResponseBody(forventetEøsPensjonistBeregnetTrygdeavgiftDto())
+    }
+
+    @Test
     fun `skal beregne trygdeavgift for eos-pensjonist og inkludere beregningsforklaringer i responsen`() {
         every { aksesskontroll.autoriserSkrivOgTilordnet(any()) } returns Unit
 
@@ -276,7 +290,7 @@ class TrygdeavgiftControllerTest(
         beregningsforklaringer: List<BeregningsforklaringDto> = emptyList(),
     ): EøsPensjonistBeregnetTrygdeavgiftDto {
         return EøsPensjonistBeregnetTrygdeavgiftDto(
-            trygdeavgiftsperioder.map { EøsPensjonistTrygdeavgiftsperiodeDto(it) },
+            trygdeavgiftsperioder.map { EøsPensjonistTrygdeavgiftsperiodeDto(it) }.sortedWith(compareBy { it.fom }),
             lagTrygdeavgiftsgrunnlagDto(),
             beregningsforklaringer,
         )
