@@ -29,9 +29,8 @@ class SkattepliktigeAarsavregningSkarpUtfoerer(
         opprettelseService.opprettProsessinstans(saksnummer, gjelderPeriode)
 
     /**
-     * Her er re-lesingen i [SkattepliktigAarsavregningOpprettelseService.settStatusVurderDokument]
-     * ekte: REQUIRES_NEW gir en ny persistence-kontekst, så behandlingen hentes fra basen og ikke
-     * fra konteksten løkka leste den i.
+     * REQUIRES_NEW gir ny persistence-kontekst, så re-lesingen i
+     * [SkattepliktigAarsavregningOpprettelseService.settStatusVurderDokument] treffer basen her.
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun settStatusVurderDokument(

@@ -24,9 +24,7 @@ private val log = KotlinLogging.logger { }
  * og kjøringsverktøyet i `skattepliktig`, som kjører de samme vurderingene i batch mot en liste
  * med hendelser. Logikken ligger her for at de to skal svare likt på samme sak.
  *
- * Klassen har ingen egen transaksjonshåndtering — den deltar i kallerens. Consumeren kjører én
- * hendelse i én transaksjon, mens verktøyet kjører hver skriving i sin egen (`REQUIRES_NEW`) for
- * at én feilet sak ikke skal rulle tilbake dem som allerede er kjørt.
+ * Klassen deltar i kallerens transaksjon og har ingen egen.
  */
 @Service
 class SkattepliktigAarsavregningOpprettelseService(
@@ -42,8 +40,7 @@ class SkattepliktigAarsavregningOpprettelseService(
      * Sakene på aktøren der trygdeavgiften for [år] skal betales til Nav.
      *
      * @param onSakFeilet kalles når oppslaget på én sak kaster, og saken utelates i stedet for at
-     *   hele kallet ryker. Uten callback propagerer kastet — det er consumerens feilhåndtering, der
-     *   Kafka forsøker meldingen på nytt.
+     *   hele kallet ryker. Uten callback propagerer kastet.
      */
     fun finnSakerMedTrygdeavgift(
         aktørId: String,
@@ -73,9 +70,8 @@ class SkattepliktigAarsavregningOpprettelseService(
     /**
      * Den aktive årsavregningsbehandlingen for [gjelderÅr], eller null hvis saken ikke har noen.
      *
-     * Kaster hvis saken har flere enn én: å bumpe en vilkårlig av dem og ignorere resten ville
-     * gjort feil på en sak ingen har sett på. Kaster også hvis en av de aktive behandlingene er
-     * årløs — se [årFor].
+     * Kaster hvis saken har flere enn én — å velge en vilkårlig av dem ville gjort feil på en sak
+     * ingen har sett på — og hvis en av dem er årløs, se [årFor].
      */
     fun finnAktivÅrsavregningBehandling(fagsak: Fagsak, gjelderÅr: Int): Behandling? {
         val årsavregninger = fagsak.hentAktiveÅrsavregninger()
@@ -98,11 +94,9 @@ class SkattepliktigAarsavregningOpprettelseService(
     }
 
     /**
-     * Året behandlingen gjelder.
-     *
-     * Mangler behandlingen rad i `aarsavregning`, stoppes saken her. Begge flytene gjør det — å
+     * Året behandlingen gjelder. Mangler behandlingen rad i `aarsavregning`, stoppes saken — å
      * opprette en ny årsavregning ved siden av den årløse ville sendt innhentingsbrev til en borger
-     * på en sak ingen har sett på — og da må meldingen navngi behandlingen som må lukkes først.
+     * på en sak ingen har sett på. Meldingen navngir behandlingen som må lukkes først.
      */
     private fun årFor(årsavregningsbehandling: Behandling, fagsak: Fagsak): Int {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(årsavregningsbehandling.id)
@@ -130,25 +124,15 @@ class SkattepliktigAarsavregningOpprettelseService(
 
     /**
      * Setter behandlingen til VURDER_DOKUMENT, men bare hvis den fortsatt står i [forventetStatus]
-     * — statusen kalleren observerte da den bestemte seg for å oppdatere.
+     * — statusen kalleren observerte. Uten sjekken kastes en behandling en saksbehandler har
+     * flyttet videre, for eksempel til IVERKSETTER_VEDTAK, tilbake til VURDER_DOKUMENT. Å gjenta
+     * inngangsbetingelsen (aktiv, ikke OPPRETTET) hjelper ikke: den er sann for nettopp de
+     * statusene saksbehandleren flytter til.
      *
-     * Uten sjekken ville en behandling en saksbehandler har flyttet videre i mellomtiden — for
-     * eksempel til IVERKSETTER_VEDTAK — blitt kastet tilbake til VURDER_DOKUMENT. Å gjenta
-     * inngangsbetingelsen (aktiv, ikke OPPRETTET) er ikke nok: den er sann for nettopp de statusene
-     * saksbehandleren flytter til.
-     *
-     * Hvor mye sjekken er verdt avhenger av kalleren, og det er verdt å være presis om:
-     *
-     *  - Verktøyet skiller observasjon og skriving med `REQUIRES_NEW`, så oppslaget her treffer en
-     *    ny persistence-kontekst og leser raden på nytt. Der er dette en ekte re-lesing, og vinduet
-     *    den lukker er minuttene en batch bruker på å komme fra oppslaget til skrivingen.
-     *  - Consumeren observerer og skriver i samme transaksjon, så oppslaget vil normalt gi samme
-     *    entitet kalleren allerede holder, og sammenligningen kan ikke slå ut. Vinduet den ville
-     *    lukket er uansett bare lengden av én kort transaksjon.
-     *
-     * Dette er ingen atomisk compare-and-set: Behandling har ingen `@Version`, og UPDATE-en er ikke
-     * betinget på status i SQL-en. Et vindu på lengden av kallerens transaksjon består i begge
-     * tilfeller.
+     * Sjekken er bare en ekte re-lesing for kallere som skriver i en egen transaksjon
+     * (`REQUIRES_NEW`); leser og skriver kalleren i samme transaksjon, gir oppslaget normalt samme
+     * entitet, og sammenligningen kan ikke slå ut. Den er uansett ikke atomisk — Behandling har
+     * ingen `@Version`, og UPDATE-en er ikke betinget på status i SQL-en.
      *
      * Rå `status`-setting framfor `endreStatus` er bevisst: en ny skattemelding på en åpen
      * årsavregning skal ikke trigge svarfrist- eller oppgavelogikk.

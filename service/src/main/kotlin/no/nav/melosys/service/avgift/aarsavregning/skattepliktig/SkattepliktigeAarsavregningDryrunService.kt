@@ -42,10 +42,8 @@ class SkattepliktigeAarsavregningDryrunService(
     )
 
     fun rapportJsonString(): String {
-        // synchronizedList synkroniserer enkeltoperasjoner, ikke traversering. Jackson indekserer
-        // seg gjennom lista, så et samtidig resultater.clear() — som skjer når en ny kjøring startes
-        // mens rapporten hentes — gir IndexOutOfBoundsException midt i serialiseringen. Derfor
-        // snapshot under låsen; monitoren er wrapper-objektet selv, jf. Javadoc for synchronizedList.
+        // synchronizedList synkroniserer enkeltoperasjoner, ikke traversering: Jackson indekserer seg
+        // gjennom lista, og et samtidig clear() gir IndexOutOfBoundsException midt i serialiseringen.
         val snapshot = synchronized(resultater) { ArrayList(resultater) }
         return jacksonObjectMapper().valueToTree<JsonNode>(snapshot).toPrettyString()
     }
@@ -60,11 +58,9 @@ class SkattepliktigeAarsavregningDryrunService(
         prosesserSkattehendelser(skattehendelser, skarp, maksAntall)
     }
 
-    // readOnly: alle skrivninger går gjennom skarpUtfoerer i egne transaksjoner, så denne stien skal
-    // være garantert bivirkningsfri — readOnly gir FlushMode.MANUAL og er garantien. NB: kalles som
-    // selvkall fra metoden over, så denne annotasjonen gjelder kun direkte kallere (tester).
-    // Garantien for controller-stien ligger på den ytre metoden og er pinnet av
-    // SkattepliktigeAarsavregningSkarpIT.
+    // readOnly gir FlushMode.MANUAL, og er garantien for at simuleringen ikke skriver: alle
+    // skrivninger går gjennom skarpUtfoerer i egne transaksjoner. Metoden over kaller denne som
+    // selvkall, så det er annotasjonen der som gjelder for controller-stien.
     @Transactional(readOnly = true)
     fun prosesserSkattehendelser(
         skattehendelser: List<SkattehendelseDryrunItem>,
@@ -74,9 +70,8 @@ class SkattepliktigeAarsavregningDryrunService(
         val modus = if (skarp) "SKARP" else "DRYRUN"
         log.info { "Starter $modus for ${skattehendelser.size} skattehendelser, maksAntall=$maksAntall" }
 
-        // Vakten mot to samtidige kjøringer ligger i execute, som avviser den andre i stedet for å
-        // køe den. En lås her ville i stedet holdt den andre kjøringen ventende og så kjørt den
-        // skarpt etterpå, mot en base den første nettopp endret.
+        // execute avviser en andre kjøring framfor å køe den — en køet kjøring ville startet skarpt
+        // mot en base den første nettopp endret.
         jobMonitor.execute(maxErrorsBeforeStop = 100) {
             // Etter execute: en avvist kjøring skal ikke slette rapporten fra den som kjører.
             resultater.clear()
@@ -84,22 +79,14 @@ class SkattepliktigeAarsavregningDryrunService(
             this.skarp = skarp
             this.maksAntall = maksAntall
 
-            // To hendelser for samme person og år ville gitt to prosessinstanser: opprettelsen er
-            // ikke idempotent på sak/år — saga-steget revaliderer ikke før det oppretter
-            // behandlingen, og en prosessinstans som bare ligger i kø er usynlig for
-            // finnAktivÅrsavregningBehandling. Resultatet er to årsavregninger og to
-            // innhentingsbrev til samme borger. Input er ekte skattehendelser, og en korrigert
-            // skattemelding gir en ny hendelse for et år vi allerede har sett, så duplikater er
-            // forventet.
+            // Opprettelsen er ikke idempotent på sak og år: saga-steget revaliderer ikke, og en
+            // prosessinstans som bare ligger i kø er usynlig for finnAktivÅrsavregningBehandling.
+            // To hendelser for samme person og år gir da to årsavregninger og to brev til samme
+            // borger. Dedupliseringen lukker det innenfor én kjøring; overlappende kjøringer har
+            // samme hull og må håndteres i prosedyren.
             //
-            // Dette lukker duplikater innenfor én kjøring. Overlappende kjøringer — typisk en
-            // canary etterfulgt av full kjøring før køen er tømt — er det samme hullet og må
-            // håndteres i prosedyren: vent til de køede instansene er ferdige, og hold
-            // canary-sakene utenfor neste kjøring. Kafka-flyten har nøyaktig samme hull; den varige
-            // fiksen hører hjemme i saga-steget og er egen oppgave.
-            // Året parses før dedupliseringen: input bygges for hånd fra en SQL-dump, så «2023» og
-            // «02023» forekommer om hverandre og er samme år. Dedupliserer vi på den rå strengen,
-            // slipper de gjennom som to hendelser.
+            // Året parses først: input bygges for hånd fra en SQL-dump, så «2023» og «02023»
+            // forekommer om hverandre og er samme år.
             val (gyldige, ugyldige) = skattehendelser
                 .map { it to it.gjelderPeriode.toIntOrNull() }
                 .partition { (_, år) -> år != null }
@@ -162,9 +149,8 @@ class SkattepliktigeAarsavregningDryrunService(
                             }
 
                         if (sakerMedTrygdeavgift.isEmpty()) {
-                            // Bare når alle sakene faktisk ble vurdert. Feilet noen, vet vi ikke om
-                            // aktøren har en sak med trygdeavgift, og «uten treff» ville sagt at
-                            // aktøren er avklart.
+                            // Bare når alle sakene ble vurdert: feilet noen, vet vi ikke om aktøren
+                            // har en sak med trygdeavgift, og «uten treff» ville sagt at den er avklart.
                             if (sakerFeiletIFilter == 0) {
                                 log.debug { "Fant ingen sak med trygdeavgift for aktør: ${hendelse.identifikator}" }
                                 antallUtenTreff++
@@ -187,8 +173,7 @@ class SkattepliktigeAarsavregningDryrunService(
 
                                 if (villeHattSideEffekt && taketErFylt()) {
                                     // Saken er talt i antallSakerFunnet, så den må også havne i en
-                                    // kategori og i rapporten — ellers finnes den ingen steder for
-                                    // den som kjører canary med et lavt tak.
+                                    // kategori og i rapporten — ellers finnes den ingen steder.
                                     antallSakerHoppetOverPgaTak++
                                     resultater.add(
                                         SakDryrunResultat(
@@ -257,15 +242,10 @@ class SkattepliktigeAarsavregningDryrunService(
                                     }
                                 }
 
-                                // Egen fangst: dette oppslaget beriker bare rapporten, og skjer etter
-                                // at saken er kategorisert og en eventuell skriving har funnet sted.
-                                // Uten den ville en feil her telt saken i antallSakerFeilet i tillegg
-                                // til kategorien sin — summen ble større enn antallSakerFunnet, og en
-                                // sak som ER opprettet sto som en feil.
-                                //
-                                // Men feilen skal fortsatt være synlig og telle mot nødbremsen: feiler
-                                // oppslaget systemisk, ville kjøringen ellers fortsatt å opprette
-                                // årsavregninger mens rapporten så ren ut med bare tomme mottakerfelt.
+                                // Egen fangst fordi dette oppslaget bare beriker rapporten, og skjer
+                                // etter at saken er kategorisert og eventuelt skrevet: en feil her
+                                // skal ikke gjøre saken til en feilet sak i tillegg. Den telles og
+                                // registreres likevel, ellers blir en systemisk feil usynlig.
                                 var berikelseFeilmelding: String? = null
                                 val trygdeavgiftMottaker = try {
                                     årsavregningService
@@ -363,11 +343,9 @@ class SkattepliktigeAarsavregningDryrunService(
     }
 
     /**
-     * Jobbtilstanden lever i minnet på én pod, og appen kjører to replikaer. Går /run til pod A og
-     * /status til pod B, ser den siste en tom kjøring — og vakten mot to samtidige kjøringer er
-     * også per pod, så den hindrer ikke to skarpe kjøringer på hver sin pod. Riktig medisin er å
-     * kjøre mot én pod (port-forward); `pod` er her for at den som kjører skal kunne se hvilken pod
-     * svaret kommer fra.
+     * Jobbtilstanden lever i minnet på én pod, og appen kjører to replikaer: går /run til pod A og
+     * /status til pod B, ser den siste en tom kjøring, og vakten mot samtidige kjøringer gjelder
+     * bare per pod. `pod` er her for at den som kjører skal se hvilken pod svaret kommer fra.
      */
     fun status() = jobMonitor.status() + mapOf("pod" to (System.getenv("HOSTNAME") ?: "ukjent"))
 
@@ -385,7 +363,6 @@ class SkattepliktigeAarsavregningDryrunService(
         @Volatile var antallSakerFunnet: Int = 0,
         /** Saker uten aktiv årsavregning for året. */
         @Volatile var antallVilleOpprettetProsessinstans: Int = 0,
-        /** Saker med aktiv årsavregning for året. */
         @Volatile var antallMedEksisterendeAarsavregning: Int = 0,
         /**
          * Delmengde av [antallMedEksisterendeAarsavregning]: de der statusen ikke er OPPRETTET og
@@ -402,11 +379,11 @@ class SkattepliktigeAarsavregningDryrunService(
         @Volatile var antallSakerFeilet: Int = 0,
         /** Saker der bare rapportoppslaget feilet. Ikke en kategori — saken er talt i en av de fire. */
         @Volatile var antallBerikelseFeilet: Int = 0,
-        /** Saker som ble nådd etter at taket var fylt, og derfor ikke vurdert — med i [antallSakerFunnet]. */
+        /** Nådd etter at taket var fylt, derfor ikke vurdert — med i [antallSakerFunnet]. */
         @Volatile var antallSakerHoppetOverPgaTak: Int = 0,
         /** Hvor mange av [antallUnikeHendelser] som ble kjørt. Lavere betyr avbrudd, se [avbruttAarsak]. */
         @Volatile var antallHendelserProsessert: Int = 0,
-        /** Hendelsene igjen etter at duplikater og ugyldig input er fjernet — det [antallHendelserProsessert] skal måles mot. */
+        /** Det [antallHendelserProsessert] skal måles mot — ikke [antallInputHendelser]. */
         @Volatile var antallUnikeHendelser: Int = 0,
         /** Satt når kjøringen ble avbrutt før lista var gjennomgått, med årsaken. Null betyr fullført. */
         @Volatile var avbruttAarsak: String? = null,
@@ -485,7 +462,7 @@ class SkattepliktigeAarsavregningDryrunService(
     )
 }
 
-/** Hendelsen etter at året er parset, slik at «2023» og «02023» er samme nøkkel. */
+/** Hendelsen med året parset, så det er nøkkelen dedupliseringen bruker. */
 private data class NormalisertHendelse(val identifikator: String, val år: Int)
 
 data class SkattehendelseDryrunItem(

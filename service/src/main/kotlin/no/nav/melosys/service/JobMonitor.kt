@@ -41,21 +41,18 @@ class JobMonitor<T : JobMonitor.Stats>(
     var maxErrorsBeforeStop: Int = 0
 
     /**
-     * Skrives fra jobbtråden mens `/status` kan serialisere samtidig fra en HTTP-tråd. En vanlig
-     * HashMap kan da kaste ConcurrentModificationException eller gi en halvlest respons midt under
-     * rehashing — nøyaktig når kartet er interessant, altså mens feil registreres.
+     * Skrives fra jobbtråden mens `/status` kan serialisere samtidig fra en HTTP-tråd — en vanlig
+     * HashMap kan da kaste ConcurrentModificationException midt under rehashing.
      *
-     * En synkronisert LinkedHashMap og ikke en ConcurrentHashMap: rapportene leses med den første
-     * feilen først, og CHM har ingen rekkefølge. [status] kopierer under samme lås, så én respons er
-     * ett bilde.
+     * LinkedHashMap og ikke ConcurrentHashMap: rapportene leses med første feil først, og CHM har
+     * ingen rekkefølge. [status] kopierer under samme lås, så én respons er ett bilde.
      */
     @Volatile
     var exceptions: MutableMap<String, Int> = Collections.synchronizedMap(LinkedHashMap())
 
     /**
-     * Vakten mot to samtidige kjøringer. compareAndSet og ikke les-så-skriv: to kall som kommer inn
-     * i samme øyeblikk — et dobbeltklikk eller en retry i et skript — ville ellers begge kunnet
-     * passere, og for jobber som skriver betyr det at arbeidet gjøres to ganger.
+     * Vakten mot to samtidige kjøringer. compareAndSet og ikke les-så-skriv: to kall i samme
+     * øyeblikk ville ellers begge kunnet passere, og for jobber som skriver gjøres arbeidet to ganger.
      */
     fun execute(maxErrorsBeforeStop: Int = 0, block: T.() -> Unit) {
         if (!isRunningAtomic.compareAndSet(false, true)) {
@@ -88,8 +85,6 @@ class JobMonitor<T : JobMonitor.Stats>(
     fun registerException(e: Throwable) {
         val msg = e.message ?: e::class.simpleName ?: "Unknown error"
         synchronized(exceptions) { exceptions[msg] = exceptions.getOrDefault(msg, 0) + 1 }
-        // Atomisk: terskelen her er nødbremsen, og en tapt økning under samtidighet ville latt en
-        // kjøring som skriver fortsette forbi grensen.
         if (errorCountAtomic.getAndIncrement() >= maxErrorsBeforeStop) {
             stop()
             log.error { "Stopping processing due to too many ($maxErrorsBeforeStop) errors" }
