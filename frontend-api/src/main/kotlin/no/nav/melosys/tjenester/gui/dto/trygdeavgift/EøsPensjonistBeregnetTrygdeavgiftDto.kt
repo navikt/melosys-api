@@ -6,8 +6,7 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.BeregningsforklaringDto
 data class EøsPensjonistBeregnetTrygdeavgiftDto(
     val trygdeavgiftsperioder: List<EøsPensjonistTrygdeavgiftsperiodeDto>,
     val trygdeavgiftsgrunnlag: TrygdeavgiftsgrunnlagDto,
-    // Føres kun gjennom på PUT-veien (beregning). GET gir alltid tom liste siden
-    // forklaringen ikke persisteres.
+    // Føres kun gjennom på PUT; GET gir tom liste fordi forklaringen ikke persisteres.
     val beregningsforklaringer: List<BeregningsforklaringDto> = emptyList(),
 ) {
     companion object {

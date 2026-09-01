@@ -391,8 +391,6 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         )
 
         resultat.trygdeavgiftsperioder.shouldHaveSize(2)
-        // Forklaringene gjelder hver sin periode, men web nøkler på (aar, inntektsgruppe) og ville
-        // vist den første for begge. Da vises heller ingen.
         resultat.beregningsforklaringer.shouldBeEmpty()
     }
 
@@ -409,7 +407,6 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             andreForklaring = forklaring,
         )
 
-        // Samme forklaring fra begge kallene er ikke tvetydig, og skal fortsatt vises.
         resultat.beregningsforklaringer shouldBe listOf(forklaring)
     }
 
@@ -444,10 +441,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         fastsattAvgift = 46200,
     )
 
-    /**
-     * Kjører en beregning der behandlingen har to helseutgiftDekkesPerioder, og beregningsmotoren
-     * svarer med én forklaring per periode (den kalles én gang per periode).
-     */
+    // Motoren kalles én gang per helseutgiftDekkesPeriode, så returnsMany under følger periodene.
     private fun beregnMedToHelseutgiftperioder(
         foerstePeriode: Pair<LocalDate, LocalDate>,
         andrePeriode: Pair<LocalDate, LocalDate>,

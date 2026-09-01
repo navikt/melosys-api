@@ -162,7 +162,6 @@ class TrygdeavgiftControllerTest(
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk)
-            // Forklaringen persisteres ikke, så GET gir alltid tom liste.
             .andExpectResponseBody(forventetEøsPensjonistBeregnetTrygdeavgiftDto())
     }
 
@@ -198,7 +197,7 @@ class TrygdeavgiftControllerTest(
 
         val tidligste = LocalDate.now()
         val senere = LocalDate.now().plusMonths(6)
-        // Innsettingsrekkefølge omvendt av forventet responsrekkefølge.
+        // Omvendt rekkefølge inn — ellers ville testen passert uten sortering.
         val usorterte = linkedSetOf(lagTrygdeavgiftsperiodeFra(senere), lagTrygdeavgiftsperiodeFra(tidligste))
 
         every {
