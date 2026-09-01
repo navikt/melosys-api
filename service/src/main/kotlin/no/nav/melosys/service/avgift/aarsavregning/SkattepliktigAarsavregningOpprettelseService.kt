@@ -74,11 +74,12 @@ class SkattepliktigAarsavregningOpprettelseService(
      * Den aktive årsavregningsbehandlingen for [gjelderÅr], eller null hvis saken ikke har noen.
      *
      * Kaster hvis saken har flere enn én: å bumpe en vilkårlig av dem og ignorere resten ville
-     * gjort feil på en sak ingen har sett på.
+     * gjort feil på en sak ingen har sett på. Kaster også hvis en av de aktive behandlingene er
+     * årløs — se [årFor].
      */
     fun finnAktivÅrsavregningBehandling(fagsak: Fagsak, gjelderÅr: Int): Behandling? {
         val årsavregninger = fagsak.hentAktiveÅrsavregninger()
-            .filter { behandlingsresultatService.hentBehandlingsresultat(it.id).hentÅrsavregning().aar == gjelderÅr }
+            .filter { årFor(it, fagsak) == gjelderÅr }
 
         return when {
             årsavregninger.isEmpty() -> {
@@ -95,6 +96,26 @@ class SkattepliktigAarsavregningOpprettelseService(
             }
         }
     }
+
+    /**
+     * Året behandlingen gjelder.
+     *
+     * Mangler behandlingen rad i `aarsavregning`, kaster `hentÅrsavregning()` med en melding som
+     * ikke sier hvilken behandling det gjelder. Begge flytene stopper saken her — å opprette en ny
+     * årsavregning ved siden av den årløse ville sendt innhentingsbrev til en borger på en sak
+     * ingen har sett på — og da må meldingen navngi behandlingen som må lukkes først.
+     */
+    private fun årFor(årsavregningsbehandling: Behandling, fagsak: Fagsak): Int =
+        try {
+            behandlingsresultatService.hentBehandlingsresultat(årsavregningsbehandling.id).hentÅrsavregning().aar
+        } catch (e: IllegalStateException) {
+            throw TekniskException(
+                "Aktiv ÅRSAVREGNING-behandling ${årsavregningsbehandling.id} på sak ${fagsak.saksnummer} " +
+                    "mangler aarsavregning-rad (årløs). Saken stoppes i stedet for å få en ny årsavregning " +
+                    "ved siden av — lukk den årløse behandlingen først, og kjør saken om igjen.",
+                e
+            )
+        }
 
     /**
      * `sendInnhentingsbrev = true`: saken skal ha brevet «Innhenting av inntektsopplysninger».
