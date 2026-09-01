@@ -74,9 +74,9 @@ class SkattepliktigeAarsavregningDryrunService(
         val modus = if (skarp) "SKARP" else "DRYRUN"
         log.info { "Starter $modus for ${skattehendelser.size} skattehendelser, maksAntall=$maksAntall" }
 
-        // Vakten mot to samtidige kjøringer er jobMonitor.isRunning, som avviser den andre i stedet
-        // for å køe den. En @Synchronized her ville i stedet holdt den andre kjøringen ventende og så
-        // kjørt den skarpt etterpå, mot en base den første nettopp endret.
+        // Vakten mot to samtidige kjøringer ligger i execute, som avviser den andre i stedet for å
+        // køe den. En lås her ville i stedet holdt den andre kjøringen ventende og så kjørt den
+        // skarpt etterpå, mot en base den første nettopp endret.
         jobMonitor.execute(maxErrorsBeforeStop = 100) {
             // Etter execute: en avvist kjøring skal ikke slette rapporten fra den som kjører.
             resultater.clear()
@@ -109,6 +109,7 @@ class SkattepliktigeAarsavregningDryrunService(
             }
 
             val unikeHendelser = gyldige.map { (hendelse, år) -> NormalisertHendelse(hendelse.identifikator, år!!) }.distinct()
+            antallUnikeHendelser = unikeHendelser.size
             antallDuplikaterFjernet = gyldige.size - unikeHendelser.size
             if (antallDuplikaterFjernet > 0) {
                 log.warn {
@@ -124,10 +125,13 @@ class SkattepliktigeAarsavregningDryrunService(
             // oppsummeringen under skal bygges også når kjøringen stoppes halvveis.
             run hendelser@{
                 unikeHendelser.forEach hendelseLoop@{ hendelse ->
-                    if (jobMonitor.shouldStop) return@hendelser
+                    if (jobMonitor.shouldStop) {
+                        avbruttAarsak = "for mange feil"
+                        return@hendelser
+                    }
                     if (taketErFylt()) {
                         log.info { "Nådde maksAntall=$maksAntall side-effekter, stopper" }
-                        stoppetPgaTak = true
+                        avbruttAarsak = "nådde maksAntall=$maksAntall"
                         return@hendelser
                     }
                     antallHendelserProsessert++
@@ -169,7 +173,10 @@ class SkattepliktigeAarsavregningDryrunService(
                         }
 
                         sakerMedTrygdeavgift.forEach sakLoop@{ fagsak ->
-                            if (jobMonitor.shouldStop) return@hendelser
+                            if (jobMonitor.shouldStop) {
+                                avbruttAarsak = "for mange feil"
+                                return@hendelser
+                            }
                             antallSakerFunnet++
                             try {
                                 val aktivÅrsavregning = opprettelseService.finnAktivÅrsavregningBehandling(fagsak, år)
@@ -183,7 +190,7 @@ class SkattepliktigeAarsavregningDryrunService(
                                     // kategori og i rapporten — ellers finnes den ingen steder for
                                     // den som kjører canary med et lavt tak.
                                     antallSakerHoppetOverPgaTak++
-                                    stoppetPgaTak = true
+                                    avbruttAarsak = "nådde maksAntall=$maksAntall"
                                     resultater.add(
                                         SakDryrunResultat(
                                             saksnummer = fagsak.saksnummer,
@@ -251,12 +258,19 @@ class SkattepliktigeAarsavregningDryrunService(
                                     }
                                 }
 
-                                val behandlingsresultat = årsavregningService
-                                    .hentGjeldendeBehandlingsresultaterForÅrsavregning(fagsak.saksnummer, år)
-                                    ?.sisteBehandlingsresultatMedAvgift
-
-                                val trygdeavgiftMottaker = behandlingsresultat?.let {
-                                    trygdeavgiftMottakerService.getTrygdeavgiftMottaker(it)
+                                // Egen fangst: dette oppslaget beriker bare rapporten, og skjer etter
+                                // at saken er kategorisert og en eventuell skriving har funnet sted.
+                                // Uten den ville en feil her telt saken i antallSakerFeilet i tillegg
+                                // til kategorien sin — summen ble større enn antallSakerFunnet, og en
+                                // sak som ER opprettet sto som en feil.
+                                val trygdeavgiftMottaker = try {
+                                    årsavregningService
+                                        .hentGjeldendeBehandlingsresultaterForÅrsavregning(fagsak.saksnummer, år)
+                                        ?.sisteBehandlingsresultatMedAvgift
+                                        ?.let { trygdeavgiftMottakerService.getTrygdeavgiftMottaker(it) }
+                                } catch (e: Exception) {
+                                    log.warn(e) { "Kunne ikke hente trygdeavgiftmottaker for sak ${fagsak.saksnummer}, år $år" }
+                                    null
                                 }
 
                                 resultater.add(
@@ -322,7 +336,8 @@ class SkattepliktigeAarsavregningDryrunService(
                 "antallSakerFeilet" to antallSakerFeilet,
                 "antallSakerHoppetOverPgaTak" to antallSakerHoppetOverPgaTak,
                 "antallHendelserProsessert" to antallHendelserProsessert,
-                "stoppetPgaTak" to stoppetPgaTak,
+                "antallUnikeHendelser" to antallUnikeHendelser,
+            "avbruttAarsak" to avbruttAarsak,
                 "antallSkarpFeilet" to antallSkarpFeilet,
             )
         }
@@ -340,10 +355,10 @@ class SkattepliktigeAarsavregningDryrunService(
 
     /**
      * Jobbtilstanden lever i minnet på én pod, og appen kjører to replikaer. Går /run til pod A og
-     * /status til pod B, ser den siste en tom kjøring — og `@Synchronized` på
-     * [prosesserSkattehendelser] er per pod, så den hindrer heller ikke to samtidige skarpe
-     * kjøringer. Riktig medisin er å kjøre mot én pod (port-forward); `pod` er her for at den som
-     * kjører skal kunne se hvilken pod svaret kommer fra.
+     * /status til pod B, ser den siste en tom kjøring — og vakten mot to samtidige kjøringer er
+     * også per pod, så den hindrer ikke to skarpe kjøringer på hver sin pod. Riktig medisin er å
+     * kjøre mot én pod (port-forward); `pod` er her for at den som kjører skal kunne se hvilken pod
+     * svaret kommer fra.
      */
     fun status() = jobMonitor.status() + mapOf("pod" to (System.getenv("HOSTNAME") ?: "ukjent"))
 
@@ -378,10 +393,12 @@ class SkattepliktigeAarsavregningDryrunService(
         @Volatile var antallSakerFeilet: Int = 0,
         /** Saker som ble nådd etter at taket var fylt, og derfor ikke vurdert — med i [antallSakerFunnet]. */
         @Volatile var antallSakerHoppetOverPgaTak: Int = 0,
-        /** Hvor mange av hendelsene som faktisk ble kjørt. Lavere enn [antallInputHendelser] hvis kjøringen ble avbrutt. */
+        /** Hvor mange av [antallUnikeHendelser] som ble kjørt. Lavere betyr avbrudd, se [avbruttAarsak]. */
         @Volatile var antallHendelserProsessert: Int = 0,
-        /** Satt når taket avbrøt kjøringen, så resten av lista ikke er gjort. */
-        @Volatile var stoppetPgaTak: Boolean = false,
+        /** Hendelsene igjen etter at duplikater og ugyldig input er fjernet — det [antallHendelserProsessert] skal måles mot. */
+        @Volatile var antallUnikeHendelser: Int = 0,
+        /** Satt når kjøringen ble avbrutt før lista var gjennomgått, med årsaken. Null betyr fullført. */
+        @Volatile var avbruttAarsak: String? = null,
         @Volatile var antallSkarpFeilet: Int = 0,
         @Volatile var result: Map<String, Any?> = emptyMap(),
     ) : JobMonitor.Stats {
@@ -403,7 +420,8 @@ class SkattepliktigeAarsavregningDryrunService(
             antallSakerFeilet = 0
             antallSakerHoppetOverPgaTak = 0
             antallHendelserProsessert = 0
-            stoppetPgaTak = false
+            antallUnikeHendelser = 0
+            avbruttAarsak = null
             antallSkarpFeilet = 0
             result = emptyMap()
         }
@@ -425,8 +443,9 @@ class SkattepliktigeAarsavregningDryrunService(
             "antallSakerIkkeVurdert" to antallSakerIkkeVurdert,
             "antallSakerFeilet" to antallSakerFeilet,
             "antallSakerHoppetOverPgaTak" to antallSakerHoppetOverPgaTak,
+            "antallUnikeHendelser" to antallUnikeHendelser,
             "antallHendelserProsessert" to antallHendelserProsessert,
-            "stoppetPgaTak" to stoppetPgaTak,
+            "avbruttAarsak" to avbruttAarsak,
             "antallSkarpFeilet" to antallSkarpFeilet,
             "result" to result,
         )

@@ -100,14 +100,13 @@ class SkattepliktigAarsavregningOpprettelseService(
     /**
      * Året behandlingen gjelder.
      *
-     * Mangler behandlingen rad i `aarsavregning`, kaster `hentÅrsavregning()` med en melding som
-     * ikke sier hvilken behandling det gjelder. Begge flytene stopper saken her — å opprette en ny
-     * årsavregning ved siden av den årløse ville sendt innhentingsbrev til en borger på en sak
-     * ingen har sett på — og da må meldingen navngi behandlingen som må lukkes først.
+     * Mangler behandlingen rad i `aarsavregning`, stoppes saken her. Begge flytene gjør det — å
+     * opprette en ny årsavregning ved siden av den årløse ville sendt innhentingsbrev til en borger
+     * på en sak ingen har sett på — og da må meldingen navngi behandlingen som må lukkes først.
      */
     private fun årFor(årsavregningsbehandling: Behandling, fagsak: Fagsak): Int {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(årsavregningsbehandling.id)
-        // Sjekker feltet framfor å fange IllegalStateException fra hentÅrsavregning(): den fangsten
+        // Sjekker feltet framfor å kalle hentÅrsavregning() og fange kastet derfra: den fangsten
         // ville også tatt enhver annen tilstandsfeil fra oppslaget over — en lukket EntityManager,
         // for eksempel — og sendt den som rydder til å lukke en behandling som ikke er problemet.
         return behandlingsresultat.årsavregning?.aar

@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avgift.aarsavregning.skattepliktig
 
+import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
@@ -33,6 +34,9 @@ import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import java.util.UUID
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Dekker kjøringsverktøyets eget lag: rapporten, taket, dedupliseringen og at løkka går videre
@@ -243,6 +247,25 @@ class SkattepliktigeAarsavregningSkarpTest {
         verify(exactly = 0) { dryrunService.prosesserSkattehendelserAsynkront(any(), any(), any()) }
     }
 
+    /**
+     * Kjøringen er asynkron, så uten denne sjekken svarer endepunktet «startet» også når jobben
+     * avviser fordi en annen pågår — og /status viser da den forrige kjøringens tall, så det ser ut
+     * som om den nye kjøringen er i gang.
+     */
+    @Test
+    fun `kjøring som startes mens en annen pågår avvises med 409`() {
+        val dryrunService = mockk<SkattepliktigeAarsavregningDryrunService>(relaxed = true)
+        every { dryrunService.status() } returns mapOf("isRunning" to true)
+        val controller = SkattepliktigeAarsavregningDryrunController(dryrunService)
+
+        val svar = controller.run(
+            SkattehendelseRunRequest(listOf(SkattehendelseDryrunItem("2024", AKTØR_ID)), skarp = true, maksAntall = 1)
+        )
+
+        svar.statusCode shouldBe HttpStatus.CONFLICT
+        verify(exactly = 0) { dryrunService.prosesserSkattehendelserAsynkront(any(), any(), any()) }
+    }
+
     @Test
     fun `simulering uten maksAntall slipper gjennom, og ekte kjøring med tak starter jobben`() {
         val dryrunService = mockk<SkattepliktigeAarsavregningDryrunService>(relaxed = true)
@@ -425,6 +448,48 @@ class SkattepliktigeAarsavregningSkarpTest {
     }
 
     /**
+     * Oppslagene som bare beriker rapporten skjer etter at saken er kategorisert — og etter at en
+     * eventuell opprettelse faktisk har skjedd. Feiler et av dem, skal saken ikke i tillegg telles
+     * som feilet: da er summen større enn totalen, og en sak som ER opprettet står som en feil.
+     */
+    @Test
+    fun `feil i rapportoppslagene gjør ikke en kategorisert sak til en feilet sak`() {
+        val fagsak = lagFagsak("MEL-1")
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
+
+        val behandlingsresultat = Behandlingsresultat.forTest { }
+        every { årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(any(), GJELDER_ÅR) } returns
+            GjeldendeBehandlingsresultaterForÅrsavregning(
+                behandlingsresultat,
+                sisteBehandlingsresultatMedAvgift = behandlingsresultat,
+                sisteÅrsavregning = behandlingsresultat,
+            )
+        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
+        // Berikelsen feiler, men opprettelsen har allerede skjedd.
+        every { trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) } throws
+            RuntimeException("mottaker-oppslag feilet")
+        every { skarpUtfoerer.opprettProsessinstans("MEL-1", "2023") } returns UUID.randomUUID()
+
+        service.prosesserSkattehendelser(
+            listOf(SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
+            skarp = true,
+            maksAntall = 5,
+        )
+
+        with(service.status()) {
+            this["antallSakerFunnet"] shouldBe 1
+            this["antallOpprettet"] shouldBe 1
+            this["antallSakerFeilet"] shouldBe 0
+            summerSakstellere() shouldBe this["antallSakerFunnet"]
+        }
+        // Saken er opprettet, og det skal stå i rapporten — mottakerfeltet er bare ukjent.
+        with(service.resultater.single()) {
+            prosessinstansOpprettet shouldBe true
+            trygdeavgiftMottaker shouldBe null
+        }
+    }
+
+    /**
      * En kjøring som stopper på taket har ikke gjort resten av lista. Uten en markør leser den som
      * kjører antallInputHendelser og tror hele lista er kjørt.
      */
@@ -456,10 +521,74 @@ class SkattepliktigeAarsavregningSkarpTest {
 
         with(service.status()) {
             this["antallHendelserProsessert"] shouldBe 1
-            this["stoppetPgaTak"] shouldBe true
+            this["antallUnikeHendelser"] shouldBe 2
+            this["avbruttAarsak"] shouldBe "nådde maksAntall=1"
             // Oppsummeringen skal finnes selv om kjøringen ble avbrutt.
             @Suppress("UNCHECKED_CAST")
             (this["result"] as Map<String, Any?>)["antallInputHendelser"] shouldBe 2
+        }
+    }
+
+    /**
+     * Duplikater og ugyldig input fjernes før løkka, så antallHendelserProsessert er lavere enn
+     * antallInputHendelser også i en kjøring som gikk helt til ende. Det er antallUnikeHendelser
+     * den skal sammenlignes med — ellers leser den som kjører differansen som et avbrudd og kjører
+     * de «manglende» hendelsene om igjen.
+     */
+    @Test
+    fun `en fullført kjøring med duplikater er ikke merket som avbrutt`() {
+        val fagsak = lagFagsak("MEL-1")
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, any()) } returns listOf(fagsak)
+
+        val behandlingsresultat = Behandlingsresultat.forTest { }
+        every { årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(any(), any()) } returns
+            GjeldendeBehandlingsresultaterForÅrsavregning(
+                behandlingsresultat,
+                sisteBehandlingsresultatMedAvgift = behandlingsresultat,
+                sisteÅrsavregning = behandlingsresultat,
+            )
+        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
+        every { trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) } returns
+            Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
+        every { skarpUtfoerer.opprettProsessinstans(any(), any()) } returns UUID.randomUUID()
+
+        service.prosesserSkattehendelser(
+            listOf(
+                SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID),
+                SkattehendelseDryrunItem(gjelderPeriode = "02023", identifikator = AKTØR_ID),
+                SkattehendelseDryrunItem(gjelderPeriode = "tull", identifikator = AKTØR_ID),
+            ),
+            skarp = true,
+            maksAntall = 50,
+        )
+
+        with(service.status()) {
+            this["antallInputHendelser"] shouldBe 3
+            this["antallUnikeHendelser"] shouldBe 1
+            this["antallHendelserProsessert"] shouldBe 1
+            this["avbruttAarsak"] shouldBe null
+        }
+    }
+
+    /**
+     * Nødbremsen på antall feil er den andre måten en kjøring kan bli avbrutt på. Den må gi samme
+     * markør som taket — ellers ser et avbrudd ut som en helt vanlig kjøring.
+     */
+    @Test
+    fun `kjøring som stoppes av for mange feil sier også fra at den ble avbrutt`() {
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, any()) } returns
+            listOf(lagFagsak("MEL-1"))
+        every { årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(any(), any()) } throws
+            RuntimeException("oppslag feilet")
+
+        val hendelser = (1..150).map {
+            SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = "aktoer-$it")
+        }
+        service.prosesserSkattehendelser(hendelser, skarp = true, maksAntall = 500)
+
+        with(service.status()) {
+            this["avbruttAarsak"] shouldBe "for mange feil"
+            (this["antallHendelserProsessert"] as Int) shouldBeLessThan 150
         }
     }
 
@@ -549,6 +678,38 @@ class SkattepliktigeAarsavregningSkarpTest {
         @Suppress("UNCHECKED_CAST")
         val exceptions = monitor.status()["exceptions"] as Map<String, Int>
         exceptions.keys.toList() shouldBe listOf("aaa siste", "zzz først", "mmm midt")
+    }
+
+    /**
+     * To POST /run mens den første fortsatt kjører — et dobbeltklikk eller en retry i et skript —
+     * skal gi én kjøring, ikke to. Slipper begge gjennom, oppretter de årsavregninger mot samme
+     * grunnlag, og dedupliseringen fanger ingenting siden den bare virker innenfor én kjøring.
+     *
+     * Testen holder den første kjøringen åpen mens den andre forsøker seg, så den pinner at vakten
+     * avviser. Selve kappløpet mellom lesing og skriving av vakten er et vindu på nanosekunder som
+     * ikke kan treffes deterministisk; det lukkes av at vakten er en compareAndSet.
+     */
+    @Test
+    fun `en kjøring som starter mens en annen pågår blir avvist`() {
+        val monitor = JobMonitor(jobName = "test", stats = TomStats())
+        val antallSomKomInn = AtomicInteger(0)
+        val førsteErInne = CountDownLatch(1)
+        val andreErFerdig = CountDownLatch(1)
+
+        val første = Thread {
+            monitor.execute {
+                antallSomKomInn.incrementAndGet()
+                førsteErInne.countDown()
+                andreErFerdig.await(5, TimeUnit.SECONDS)
+            }
+        }.apply { start() }
+
+        førsteErInne.await(5, TimeUnit.SECONDS) shouldBe true
+        monitor.execute { antallSomKomInn.incrementAndGet() }
+        andreErFerdig.countDown()
+        første.join(5000)
+
+        antallSomKomInn.get() shouldBe 1
     }
 
     private class TomStats : JobMonitor.Stats {

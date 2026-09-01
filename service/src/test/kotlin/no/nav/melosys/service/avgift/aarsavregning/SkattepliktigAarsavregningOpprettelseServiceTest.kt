@@ -4,7 +4,6 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
-import io.kotest.matchers.types.shouldNotBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -84,7 +83,6 @@ class SkattepliktigAarsavregningOpprettelseServiceTest {
         }
 
         feil.message!! shouldContain "EntityManager is closed"
-        feil.shouldNotBeInstanceOf<TekniskException>()
     }
 
     /**

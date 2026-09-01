@@ -37,8 +37,11 @@ class SkattepliktigeAarsavregningDryrunController(
             "Hendelser med samme identifikator og år slås sammen før kjøring (antallDuplikaterFjernet), " +
             "fordi to hendelser for samme sak og år ellers gir to årsavregninger og to brev. " +
             "Overlappende kjøringer har samme svakhet: vent til køen er tømt før neste kjøring. " +
-            "Stopper taket kjøringen, sier stoppetPgaTak fra, og antallHendelserProsessert viser hvor " +
-            "langt den kom — resten av lista er da ikke kjørt. " +
+            "Ble kjøringen avbrutt — av taket eller av for mange feil — sier avbruttAarsak hvorfor, og " +
+            "antallHendelserProsessert mot antallUnikeHendelser viser hvor langt den kom. Merk at " +
+            "antallHendelserProsessert er lavere enn antallInputHendelser også i en fullført kjøring, " +
+            "fordi duplikater og ugyldig input er fjernet først. " +
+            "Starter du en kjøring mens en annen pågår, avvises den med 409 — den forrige fortsetter. " +
             "Bruk /status for fremdrift og /rapport for resultat per sak. NB: appen kjører to podder, " +
             "og jobbtilstanden ligger i minnet på den poden som tok imot /run — kjør derfor mot én pod " +
             "(port-forward), og kryssjekk pod-feltet i /status. Hele kjøringen holder én lesetransaksjon " +
@@ -59,6 +62,15 @@ class SkattepliktigeAarsavregningDryrunController(
                     "feil" to "Ekte kjøring krever et positivt maksAntall — taket avgjør hvor mange saker som kan endres",
                     "maksAntall" to request.maksAntall
                 )
+            )
+        }
+
+        // Kjøringen er asynkron, så et 200-svar her ville ellers sagt «startet» også når jobben
+        // avviser fordi en annen kjøring pågår — og /status ville vist den forrige kjøringens tall.
+        // Den harde vakten ligger i jobben selv; dette er for at den som kjører skal få vite det.
+        if (skattepliktigeAarsavregningDryrunService.status()["isRunning"] == true) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                mapOf("feil" to "En kjøring pågår allerede — se /status, og vent til den er ferdig")
             )
         }
 

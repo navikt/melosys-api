@@ -19,8 +19,10 @@ class JobMonitor<T : JobMonitor.Stats>(
         get() = shouldStopAtomic.get()
         set(value) = shouldStopAtomic.set(value)
 
-    @Volatile
-    private var isRunning: Boolean = false
+    private val isRunningAtomic = AtomicBoolean(false)
+
+    private val isRunning: Boolean
+        get() = isRunningAtomic.get()
 
     @Volatile
     private var startedAt: LocalDateTime? = null
@@ -46,13 +48,17 @@ class JobMonitor<T : JobMonitor.Stats>(
     @Volatile
     var exceptions: MutableMap<String, Int> = Collections.synchronizedMap(LinkedHashMap())
 
+    /**
+     * Vakten mot to samtidige kjøringer. compareAndSet og ikke les-så-skriv: to kall som kommer inn
+     * i samme øyeblikk — et dobbeltklikk eller en retry i et skript — ville ellers begge kunnet
+     * passere, og for jobber som skriver betyr det at arbeidet gjøres to ganger.
+     */
     fun execute(maxErrorsBeforeStop: Int = 0, block: T.() -> Unit) {
         this.maxErrorsBeforeStop = maxErrorsBeforeStop
-        if (isRunning) {
+        if (!isRunningAtomic.compareAndSet(false, true)) {
             log.warn("Job '$jobName' is already running.")
             return
         }
-        isRunning = true
         startedAt = LocalDateTime.now()
         stoppedAt = null
         errorCount = 0
@@ -64,7 +70,7 @@ class JobMonitor<T : JobMonitor.Stats>(
             log.error(ex) { "Job '$jobName' failed" }
             throw ex
         } finally {
-            isRunning = false
+            isRunningAtomic.set(false)
             shouldStop = false
             stoppedAt = LocalDateTime.now()
             log.info(
@@ -76,7 +82,7 @@ class JobMonitor<T : JobMonitor.Stats>(
 
     fun registerException(e: Throwable) {
         val msg = e.message ?: e::class.simpleName ?: "Unknown error"
-        exceptions[msg] = exceptions.getOrDefault(msg, 0) + 1
+        synchronized(exceptions) { exceptions[msg] = exceptions.getOrDefault(msg, 0) + 1 }
         if (errorCount++ >= maxErrorsBeforeStop) {
             stop()
             log.error { "Stopping processing due to too many ($maxErrorsBeforeStop) errors" }
