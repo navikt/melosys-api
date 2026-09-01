@@ -34,8 +34,12 @@ class TekstblokkHistorikkService(
             ?.takeIf { it.endringstype != Endringstype.SLETTET }
 
     private fun lagVersjoner(revisjoner: List<EntityRevision<Tekstblokk>>): List<TekstblokkVersjon> {
-        // Revisjonsnummeret er monotont; timestamp har millisekundoppløsning og kan kollidere
-        val kronologisk = revisjoner.sortedBy { it.revisionInfo.id }
+        // Tidsstempelet er kronologien. Revisjonsnummeret er IKKE monotont i tid i drift:
+        // historikk fra prod viser «Opprettet» midt i lista og tidsrom som løper bakover,
+        // fordi revinfo-numrene kommer ut av rekkefølge. Nummeret beholdes kun som
+        // tiebreaker: timestamp har millisekundoppløsning, og to lagringer rett etter
+        // hverandre lander gjerne på samme millisekund.
+        val kronologisk = revisjoner.sortedWith(compareBy({ it.revisionInfo.timestamp }, { it.revisionInfo.id }))
         return kronologisk.mapIndexed { indeks, revisjon ->
             val blokk = revisjon.entity
             // Nullbar her, men ikke på entiteten: aud-rader fra før V167 mangler status
