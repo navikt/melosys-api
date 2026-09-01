@@ -247,25 +247,6 @@ class SkattepliktigeAarsavregningSkarpTest {
         verify(exactly = 0) { dryrunService.prosesserSkattehendelserAsynkront(any(), any(), any()) }
     }
 
-    /**
-     * Kjøringen er asynkron, så uten denne sjekken svarer endepunktet «startet» også når jobben
-     * avviser fordi en annen pågår — og /status viser da den forrige kjøringens tall, så det ser ut
-     * som om den nye kjøringen er i gang.
-     */
-    @Test
-    fun `kjøring som startes mens en annen pågår avvises med 409`() {
-        val dryrunService = mockk<SkattepliktigeAarsavregningDryrunService>(relaxed = true)
-        every { dryrunService.status() } returns mapOf("isRunning" to true)
-        val controller = SkattepliktigeAarsavregningDryrunController(dryrunService)
-
-        val svar = controller.run(
-            SkattehendelseRunRequest(listOf(SkattehendelseDryrunItem("2024", AKTØR_ID)), skarp = true, maksAntall = 1)
-        )
-
-        svar.statusCode shouldBe HttpStatus.CONFLICT
-        verify(exactly = 0) { dryrunService.prosesserSkattehendelserAsynkront(any(), any(), any()) }
-    }
-
     @Test
     fun `simulering uten maksAntall slipper gjennom, og ekte kjøring med tak starter jobben`() {
         val dryrunService = mockk<SkattepliktigeAarsavregningDryrunService>(relaxed = true)
@@ -442,6 +423,10 @@ class SkattepliktigeAarsavregningSkarpTest {
             this["antallVilleOpprettetProsessinstans"] shouldBe 1
             this["antallSakerHoppetOverPgaTak"] shouldBe 1
             summerSakstellere() shouldBe this["antallSakerFunnet"]
+            // Lista ble gjennomgått helt — taket kappet en sak, men kjøringen ble ikke avbrutt.
+            // At noe ble kappet står i antallSakerHoppetOverPgaTak, ikke i avbruttAarsak.
+            this["antallHendelserProsessert"] shouldBe this["antallUnikeHendelser"]
+            this["avbruttAarsak"] shouldBe null
         }
         // Saken som ble kappet må være synlig, ellers vet ikke den som kjører at den finnes.
         service.resultater.map { it.saksnummer } shouldBe listOf("MEL-1", "MEL-2")
@@ -486,7 +471,13 @@ class SkattepliktigeAarsavregningSkarpTest {
         with(service.resultater.single()) {
             prosessinstansOpprettet shouldBe true
             trygdeavgiftMottaker shouldBe null
+            // Feilen skal være synlig, ellers ser en systemisk feil ut som tomme felt.
+            berikelseFeilmelding shouldNotBe null
         }
+        // Og den skal telle mot nødbremsen: feiler oppslaget for alle saker, skal kjøringen stoppe,
+        // ikke fortsette å opprette årsavregninger med en rapport som ser ren ut.
+        service.status()["antallBerikelseFeilet"] shouldBe 1
+        (service.status()["errorCount"] as Int) shouldBe 1
     }
 
     /**
@@ -567,6 +558,34 @@ class SkattepliktigeAarsavregningSkarpTest {
             this["antallUnikeHendelser"] shouldBe 1
             this["antallHendelserProsessert"] shouldBe 1
             this["avbruttAarsak"] shouldBe null
+        }
+    }
+
+    /**
+     * Nødbremsen kan også slå inn midt inne i én aktørs saker, ikke bare mellom hendelser. Da må
+     * avbruddet merkes der også — ellers ser en kjøring som stoppet halvveis i en aktør med mange
+     * saker ut som fullført.
+     */
+    @Test
+    fun `nødbremsen midt i en aktørs saker merker også kjøringen som avbrutt`() {
+        // Én aktør, mange saker, alle feiler under vurderingen — nødbremsen går ved 100 feil.
+        val fagsaker = (1..150).map { lagFagsakMedÅrsavregning(Behandlingsstatus.VURDER_DOKUMENT, it.toLong(), "MEL-$it") }
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns fagsaker
+
+        val behandlingsresultat = Behandlingsresultat.forTest { }
+        stubTrygdeavgift(behandlingsresultat)
+        // Årløs behandling for hver sak: feiler under vurderingen, ikke i filteret.
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+
+        service.prosesserSkattehendelser(
+            listOf(SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
+            skarp = true,
+            maksAntall = 500,
+        )
+
+        with(service.status()) {
+            this["avbruttAarsak"] shouldBe "for mange feil"
+            (this["antallSakerFunnet"] as Int) shouldBeLessThan 150
         }
     }
 
@@ -710,6 +729,32 @@ class SkattepliktigeAarsavregningSkarpTest {
         første.join(5000)
 
         antallSomKomInn.get() shouldBe 1
+    }
+
+    /**
+     * En avvist kjøring skal ikke røre tilstanden til den som pågår. Terskelen for nødbremsen ble
+     * satt før vakten, så en avvist kjøring med en annen terskel endret nødbremsen til den som
+     * faktisk kjørte.
+     */
+    @Test
+    fun `en avvist kjøring endrer ikke nødbremsen til den som pågår`() {
+        val monitor = JobMonitor(jobName = "test", stats = TomStats())
+        val førsteErInne = CountDownLatch(1)
+        val andreErFerdig = CountDownLatch(1)
+
+        val første = Thread {
+            monitor.execute(maxErrorsBeforeStop = 100) {
+                førsteErInne.countDown()
+                andreErFerdig.await(5, TimeUnit.SECONDS)
+            }
+        }.apply { start() }
+
+        førsteErInne.await(5, TimeUnit.SECONDS) shouldBe true
+        monitor.execute(maxErrorsBeforeStop = 1) { }
+        monitor.maxErrorsBeforeStop shouldBe 100
+
+        andreErFerdig.countDown()
+        første.join(5000)
     }
 
     private class TomStats : JobMonitor.Stats {

@@ -39,9 +39,13 @@ class SkattepliktigeAarsavregningDryrunController(
             "Overlappende kjøringer har samme svakhet: vent til køen er tømt før neste kjøring. " +
             "Ble kjøringen avbrutt — av taket eller av for mange feil — sier avbruttAarsak hvorfor, og " +
             "antallHendelserProsessert mot antallUnikeHendelser viser hvor langt den kom. Merk at " +
-            "antallHendelserProsessert er lavere enn antallInputHendelser også i en fullført kjøring, " +
-            "fordi duplikater og ugyldig input er fjernet først. " +
-            "Starter du en kjøring mens en annen pågår, avvises den med 409 — den forrige fortsetter. " +
+            "antallHendelserProsessert kan være lavere enn antallInputHendelser også i en fullført " +
+            "kjøring, fordi duplikater og ugyldig input er fjernet først. " +
+            "Kallet svarer alltid 200 og starter jobben asynkront. Pågår det allerede en kjøring, " +
+            "avvises den nye stille av jobben selv, og /status viser da fortsatt den som pågår — så " +
+            "sjekk /status før du starter, og vent til isRunning er false. Er alle jobbtrådene opptatt, " +
+            "kan en ny kjøring bli liggende i kø og starte når den forrige er ferdig, altså kjøre hele " +
+            "lista om igjen; send derfor ikke /run på nytt uten å ha sett på /status. " +
             "Bruk /status for fremdrift og /rapport for resultat per sak. NB: appen kjører to podder, " +
             "og jobbtilstanden ligger i minnet på den poden som tok imot /run — kjør derfor mot én pod " +
             "(port-forward), og kryssjekk pod-feltet i /status. Hele kjøringen holder én lesetransaksjon " +
@@ -62,15 +66,6 @@ class SkattepliktigeAarsavregningDryrunController(
                     "feil" to "Ekte kjøring krever et positivt maksAntall — taket avgjør hvor mange saker som kan endres",
                     "maksAntall" to request.maksAntall
                 )
-            )
-        }
-
-        // Kjøringen er asynkron, så et 200-svar her ville ellers sagt «startet» også når jobben
-        // avviser fordi en annen kjøring pågår — og /status ville vist den forrige kjøringens tall.
-        // Den harde vakten ligger i jobben selv; dette er for at den som kjører skal få vite det.
-        if (skattepliktigeAarsavregningDryrunService.status()["isRunning"] == true) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(
-                mapOf("feil" to "En kjøring pågår allerede — se /status, og vent til den er ferdig")
             )
         }
 

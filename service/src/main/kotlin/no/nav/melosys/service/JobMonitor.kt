@@ -6,6 +6,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.util.Collections
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 private val log = KotlinLogging.logger {}
 
@@ -30,8 +31,11 @@ class JobMonitor<T : JobMonitor.Stats>(
     @Volatile
     private var stoppedAt: LocalDateTime? = null
 
-    @Volatile
-    var errorCount: Int = 0
+    private val errorCountAtomic = AtomicInteger(0)
+
+    var errorCount: Int
+        get() = errorCountAtomic.get()
+        set(value) = errorCountAtomic.set(value)
 
     @Volatile
     var maxErrorsBeforeStop: Int = 0
@@ -54,14 +58,15 @@ class JobMonitor<T : JobMonitor.Stats>(
      * passere, og for jobber som skriver betyr det at arbeidet gjøres to ganger.
      */
     fun execute(maxErrorsBeforeStop: Int = 0, block: T.() -> Unit) {
-        this.maxErrorsBeforeStop = maxErrorsBeforeStop
         if (!isRunningAtomic.compareAndSet(false, true)) {
             log.warn("Job '$jobName' is already running.")
             return
         }
+        // Etter vakten: en avvist kjøring skal ikke endre terskelen til den som pågår.
+        this.maxErrorsBeforeStop = maxErrorsBeforeStop
         startedAt = LocalDateTime.now()
         stoppedAt = null
-        errorCount = 0
+        errorCountAtomic.set(0)
         exceptions.clear()
         stats.reset()
         return try {
@@ -83,7 +88,9 @@ class JobMonitor<T : JobMonitor.Stats>(
     fun registerException(e: Throwable) {
         val msg = e.message ?: e::class.simpleName ?: "Unknown error"
         synchronized(exceptions) { exceptions[msg] = exceptions.getOrDefault(msg, 0) + 1 }
-        if (errorCount++ >= maxErrorsBeforeStop) {
+        // Atomisk: terskelen her er nødbremsen, og en tapt økning under samtidighet ville latt en
+        // kjøring som skriver fortsette forbi grensen.
+        if (errorCountAtomic.getAndIncrement() >= maxErrorsBeforeStop) {
             stop()
             log.error { "Stopping processing due to too many ($maxErrorsBeforeStop) errors" }
         }

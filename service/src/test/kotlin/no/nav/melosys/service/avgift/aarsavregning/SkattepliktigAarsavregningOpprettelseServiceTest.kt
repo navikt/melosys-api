@@ -44,9 +44,8 @@ class SkattepliktigAarsavregningOpprettelseServiceTest {
     )
 
     /**
-     * En aktiv ÅRSAVREGNING-behandling uten rad i `aarsavregning` får `hentÅrsavregning()` til å
-     * kaste. Den rå meldingen sier ikke hvilken behandling det gjelder, og begge flytene som treffer
-     * dette må stoppes av et menneske — kastet skal derfor navngi behandlingen som må lukkes.
+     * En aktiv ÅRSAVREGNING-behandling uten rad i `aarsavregning` stopper saken. Begge flytene som
+     * treffer dette må håndteres av et menneske, så kastet skal navngi behandlingen som må lukkes.
      */
     @Test
     fun `årløs aktiv årsavregning gir en feilmelding som navngir behandlingen`() {

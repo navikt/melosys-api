@@ -190,7 +190,6 @@ class SkattepliktigeAarsavregningDryrunService(
                                     // kategori og i rapporten — ellers finnes den ingen steder for
                                     // den som kjører canary med et lavt tak.
                                     antallSakerHoppetOverPgaTak++
-                                    avbruttAarsak = "nådde maksAntall=$maksAntall"
                                     resultater.add(
                                         SakDryrunResultat(
                                             saksnummer = fagsak.saksnummer,
@@ -263,13 +262,21 @@ class SkattepliktigeAarsavregningDryrunService(
                                 // Uten den ville en feil her telt saken i antallSakerFeilet i tillegg
                                 // til kategorien sin — summen ble større enn antallSakerFunnet, og en
                                 // sak som ER opprettet sto som en feil.
+                                //
+                                // Men feilen skal fortsatt være synlig og telle mot nødbremsen: feiler
+                                // oppslaget systemisk, ville kjøringen ellers fortsatt å opprette
+                                // årsavregninger mens rapporten så ren ut med bare tomme mottakerfelt.
+                                var berikelseFeilmelding: String? = null
                                 val trygdeavgiftMottaker = try {
                                     årsavregningService
                                         .hentGjeldendeBehandlingsresultaterForÅrsavregning(fagsak.saksnummer, år)
                                         ?.sisteBehandlingsresultatMedAvgift
                                         ?.let { trygdeavgiftMottakerService.getTrygdeavgiftMottaker(it) }
                                 } catch (e: Exception) {
+                                    antallBerikelseFeilet++
+                                    berikelseFeilmelding = e.message
                                     log.warn(e) { "Kunne ikke hente trygdeavgiftmottaker for sak ${fagsak.saksnummer}, år $år" }
+                                    jobMonitor.registerException(e)
                                     null
                                 }
 
@@ -288,6 +295,7 @@ class SkattepliktigeAarsavregningDryrunService(
                                         statusOppdatert = statusOppdatert,
                                         hoppetOverAarsak = hoppetOverAarsak,
                                         feilmelding = skarpFeilmelding,
+                                        berikelseFeilmelding = berikelseFeilmelding,
                                     )
                                 )
                             } catch (e: Exception) {
@@ -334,10 +342,12 @@ class SkattepliktigeAarsavregningDryrunService(
                 "antallStatusHoppetOver" to antallStatusHoppetOver,
                 "antallSakerIkkeVurdert" to antallSakerIkkeVurdert,
                 "antallSakerFeilet" to antallSakerFeilet,
+            "antallBerikelseFeilet" to antallBerikelseFeilet,
+                "antallBerikelseFeilet" to antallBerikelseFeilet,
                 "antallSakerHoppetOverPgaTak" to antallSakerHoppetOverPgaTak,
                 "antallHendelserProsessert" to antallHendelserProsessert,
                 "antallUnikeHendelser" to antallUnikeHendelser,
-            "avbruttAarsak" to avbruttAarsak,
+                "avbruttAarsak" to avbruttAarsak,
                 "antallSkarpFeilet" to antallSkarpFeilet,
             )
         }
@@ -391,6 +401,8 @@ class SkattepliktigeAarsavregningDryrunService(
         @Volatile var antallSakerIkkeVurdert: Int = 0,
         /** Saker som feilet under vurderingen — de er med i [antallSakerFunnet]. */
         @Volatile var antallSakerFeilet: Int = 0,
+        /** Saker der bare rapportoppslaget feilet. Ikke en kategori — saken er talt i en av de fire. */
+        @Volatile var antallBerikelseFeilet: Int = 0,
         /** Saker som ble nådd etter at taket var fylt, og derfor ikke vurdert — med i [antallSakerFunnet]. */
         @Volatile var antallSakerHoppetOverPgaTak: Int = 0,
         /** Hvor mange av [antallUnikeHendelser] som ble kjørt. Lavere betyr avbrudd, se [avbruttAarsak]. */
@@ -418,6 +430,7 @@ class SkattepliktigeAarsavregningDryrunService(
             antallStatusHoppetOver = 0
             antallSakerIkkeVurdert = 0
             antallSakerFeilet = 0
+            antallBerikelseFeilet = 0
             antallSakerHoppetOverPgaTak = 0
             antallHendelserProsessert = 0
             antallUnikeHendelser = 0
@@ -442,6 +455,7 @@ class SkattepliktigeAarsavregningDryrunService(
             "antallStatusHoppetOver" to antallStatusHoppetOver,
             "antallSakerIkkeVurdert" to antallSakerIkkeVurdert,
             "antallSakerFeilet" to antallSakerFeilet,
+            "antallBerikelseFeilet" to antallBerikelseFeilet,
             "antallSakerHoppetOverPgaTak" to antallSakerHoppetOverPgaTak,
             "antallUnikeHendelser" to antallUnikeHendelser,
             "antallHendelserProsessert" to antallHendelserProsessert,
@@ -466,6 +480,8 @@ class SkattepliktigeAarsavregningDryrunService(
         val statusOppdatert: Boolean? = null,
         /** Satt når statusoppdateringen ble hoppet over fordi raden hadde endret seg — skiller det fra [feilmelding]. */
         val hoppetOverAarsak: String? = null,
+        /** Satt når oppslaget som fyller [trygdeavgiftMottaker] feilet. Saken selv er vurdert og eventuelt endret. */
+        val berikelseFeilmelding: String? = null,
         val feilmelding: String? = null,
     )
 }
