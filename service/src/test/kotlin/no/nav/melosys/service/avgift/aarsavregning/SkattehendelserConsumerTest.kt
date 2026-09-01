@@ -56,14 +56,18 @@ class SkattehendelserConsumerTest {
 
     @BeforeEach
     fun setUp() {
+        // Den delte servicen bygges ekte, ikke mocket: testene under er skrevet mot consumerens
+        // opprinnelige oppførsel, og de holder derfor bare hvis flyttingen dit var tapsfri.
         skattehendelserConsumer = SkattehendelserConsumer(
-            prosessinstansService,
             unleash,
-            fagsakService,
-            behandlingService,
-            behandlingsresultatService,
-            årsavregningService,
-            trygdeavgiftMottakerService
+            SkattepliktigAarsavregningOpprettelseService(
+                prosessinstansService,
+                fagsakService,
+                behandlingService,
+                behandlingsresultatService,
+                årsavregningService,
+                trygdeavgiftMottakerService
+            )
         )
     }
 
