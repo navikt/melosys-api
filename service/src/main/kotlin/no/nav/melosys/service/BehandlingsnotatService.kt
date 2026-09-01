@@ -2,6 +2,7 @@ package no.nav.melosys.service
 
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsnotat
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.BehandlingsnotatRepository
@@ -21,15 +22,51 @@ class BehandlingsnotatService(
         fagsakService.hentFagsak(saksnummer).behandlinger.flatMap { it.behandlingsnotater }
 
     @Transactional
-    fun opprettNotat(saksnummer: String, tekst: String): Behandlingsnotat {
-        val behandling: Behandling = fagsakService.hentFagsak(saksnummer).finnAktivBehandlingIkkeÅrsavregning()
-            ?: throw FunksjonellException("Fagsak $saksnummer har ingen aktive behandlinger")
+    fun opprettNotat(saksnummer: String, tekst: String, behandlingId: Long? = null): Behandlingsnotat {
+        val fagsak = fagsakService.hentFagsak(saksnummer)
+        val behandling = behandlingId
+            ?.let { finnBehandlingPåFagsak(fagsak, it) }
+            ?: finnBehandlingUtenEksplisittValg(fagsak)
 
         val behandlingsnotat = Behandlingsnotat().apply {
             this.behandling = behandling
             this.tekst = tekst
         }
         return behandlingsnotatRepository.save(behandlingsnotat)
+    }
+
+    /**
+     * Slår opp behandlingen i fagsakens egen samling. Det sikrer samtidig at behandlingen faktisk
+     * tilhører fagsaken det er gjort tilgangskontroll på.
+     */
+    private fun finnBehandlingPåFagsak(fagsak: Fagsak, behandlingId: Long): Behandling {
+        val behandling = fagsak.behandlinger.firstOrNull { it.id == behandlingId }
+            ?: throw IkkeFunnetException("Finner ikke behandling med id $behandlingId på fagsak ${fagsak.saksnummer}")
+
+        if (!behandling.erAktiv()) {
+            throw FunksjonellException(
+                "Behandling med id $behandlingId på fagsak ${fagsak.saksnummer} er ikke aktiv, og kan ikke få nye notater"
+            )
+        }
+        return behandling
+    }
+
+    /**
+     * Bakoverkompatibel utledning for klienter som ikke sender behandlingId. Prioriterer aktiv
+     * ikke-årsavregning slik det alltid har vært gjort, men faller tilbake til en entydig aktiv
+     * årsavregning. Er det flere aktive årsavregninger er forespørselen tvetydig, og vi gjetter ikke.
+     */
+    private fun finnBehandlingUtenEksplisittValg(fagsak: Fagsak): Behandling {
+        fagsak.finnAktivBehandlingIkkeÅrsavregning()?.let { return it }
+
+        val aktiveÅrsavregninger = fagsak.hentAktiveÅrsavregninger()
+        return when (aktiveÅrsavregninger.size) {
+            0 -> throw FunksjonellException("Fagsak ${fagsak.saksnummer} har ingen aktive behandlinger")
+            1 -> aktiveÅrsavregninger.single()
+            else -> throw FunksjonellException(
+                "Fagsak ${fagsak.saksnummer} har flere aktive årsavregninger. behandlingId må oppgis for å angi hvilken behandling notatet gjelder"
+            )
+        }
     }
 
     @Transactional

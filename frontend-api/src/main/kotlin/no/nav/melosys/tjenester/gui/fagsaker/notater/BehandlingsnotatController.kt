@@ -40,13 +40,17 @@ class BehandlingsnotatController(
     }
 
     @PostMapping("/{saksnummer}/notater")
-    @Operation(summary = "Oppretter et nytt notat på fagsaken sin aktive behandling")
+    @Operation(summary = "Oppretter et nytt notat på behandlingen angitt av behandlingId, eller på fagsaken sin aktive behandling om behandlingId ikke er oppgitt")
     fun opprettBehandlingsnotatForFagsak(
         @PathVariable("saksnummer") saksnummer: String,
         @RequestBody behandlingsnotatPostDto: BehandlingsnotatPostDto,
     ): ResponseEntity<BehandlingsnotatGetDto> {
         aksesskontroll.autoriserSakstilgang(saksnummer)
-        val behandlingsnotat = behandlingsnotatService.opprettNotat(saksnummer, behandlingsnotatPostDto.tekst)
+        val behandlingsnotat = behandlingsnotatService.opprettNotat(
+            saksnummer,
+            behandlingsnotatPostDto.tekst,
+            behandlingsnotatPostDto.behandlingId,
+        )
         return ResponseEntity.ok(lagBehandlingsnotatGetDto(behandlingsnotat))
     }
 
@@ -77,7 +81,14 @@ class BehandlingsnotatController(
     }
 }
 
-data class BehandlingsnotatPostDto(val tekst: String)
+/**
+ * [behandlingId] er valgfri av hensyn til bakoverkompatibilitet. Utelates den, utleder backend
+ * behandlingen fra fagsaken slik den alltid har gjort.
+ */
+data class BehandlingsnotatPostDto(
+    val tekst: String,
+    val behandlingId: Long? = null,
+)
 
 class BehandlingsnotatGetDto(
     behandlingsnotat: Behandlingsnotat,
@@ -88,6 +99,7 @@ class BehandlingsnotatGetDto(
     val tekst: String? = behandlingsnotat.tekst
     val endretDato: Instant? = behandlingsnotat.endretDato
     val registrertDato: Instant? = behandlingsnotat.registrertDato
+    val behandlingId: Long = behandlingsnotat.behandling.id
     val behandlingstypeKode: String = behandlingsnotat.behandling.type.kode
     val behandlingstemaKode: String = behandlingsnotat.behandling.tema.kode
 }
