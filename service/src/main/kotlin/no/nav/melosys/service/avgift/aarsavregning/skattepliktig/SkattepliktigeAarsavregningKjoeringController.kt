@@ -18,8 +18,8 @@ private val log = KotlinLogging.logger { }
 @Protected
 @RestController
 @RequestMapping("/admin/aarsavregninger/saker/skattepliktige")
-class SkattepliktigeAarsavregningDryrunController(
-    private val skattepliktigeAarsavregningDryrunService: SkattepliktigeAarsavregningDryrunService,
+class SkattepliktigeAarsavregningKjoeringController(
+    private val kjoering: SkattepliktigeAarsavregningKjoering,
 ) {
 
     @Operation(
@@ -78,7 +78,7 @@ class SkattepliktigeAarsavregningDryrunController(
         // tasken har begynt å kjøre. Da avvises den andre stille av compareAndSet inne i jobben, og
         // svaret her sier «startet» selv om ingenting startet. Vakten i jobben er den harde; denne er
         // for at den som kjører skal få vite det i det tilfellet som faktisk oppstår.
-        if (skattepliktigeAarsavregningDryrunService.status()["isRunning"] == true) {
+        if (kjoering.status()["isRunning"] == true) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(
                 mapOf("feil" to "En kjøring pågår allerede — se /status, og vent til isRunning er false")
             )
@@ -89,7 +89,7 @@ class SkattepliktigeAarsavregningDryrunController(
             "Starter $modus for ${request.skattehendelser.size} skattehendelser, maksAntall=${request.maksAntall}"
         }
 
-        skattepliktigeAarsavregningDryrunService.prosesserSkattehendelserAsynkront(
+        kjoering.prosesserSkattehendelserAsynkront(
             request.skattehendelser,
             request.skarp,
             request.maksAntall,
@@ -110,16 +110,16 @@ class SkattepliktigeAarsavregningDryrunController(
     @Operation(summary = "Hent status for pågående eller siste kjøring")
     @GetMapping("/status")
     fun status(): ResponseEntity<Map<String, Any?>> =
-        ResponseEntity(skattepliktigeAarsavregningDryrunService.status(), HttpStatus.OK)
+        ResponseEntity(kjoering.status(), HttpStatus.OK)
 
     @Operation(summary = "Hent rapport med alle sakene fra siste kjøring")
     @GetMapping("/rapport", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun rapport(): ResponseEntity<String> =
-        ResponseEntity(skattepliktigeAarsavregningDryrunService.rapportJsonString(), HttpStatus.OK)
+        ResponseEntity(kjoering.rapportJsonString(), HttpStatus.OK)
 }
 
 data class SkattehendelseRunRequest(
-    val skattehendelser: List<SkattehendelseDryrunItem>,
+    val skattehendelser: List<SkattehendelseItem>,
     val skarp: Boolean = false,
     /** Tak på antall saker som kan endres. Påkrevd og positiv når [skarp] er true; teller også forsøk som feiler eller hoppes over. */
     val maksAntall: Int? = null,

@@ -27,17 +27,17 @@ private val log = KotlinLogging.logger { }
  * propagere til Kafka-retry, mens en batch må notere feilen og gå videre.
  */
 @Component
-class SkattepliktigeAarsavregningDryrunService(
+class SkattepliktigeAarsavregningKjoering(
     private val opprettelseService: SkattepliktigAarsavregningOpprettelseService,
     private val årsavregningService: ÅrsavregningService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
-    private val skarpUtfoerer: SkattepliktigeAarsavregningSkarpUtfoerer,
+    private val utfoerer: SkattepliktigeAarsavregningUtfoerer,
 ) {
     // Skrives fra @Async-tråden mens /rapport kan lese samtidig.
-    val resultater: MutableList<SakDryrunResultat> = Collections.synchronizedList(mutableListOf())
+    val resultater: MutableList<SakResultat> = Collections.synchronizedList(mutableListOf())
 
     private val jobMonitor = JobMonitor(
-        jobName = "SkattepliktigeAarsavregningDryrun",
+        jobName = "SkattepliktigeAarsavregningKjoering",
         stats = JobStatus()
     )
 
@@ -51,7 +51,7 @@ class SkattepliktigeAarsavregningDryrunService(
     @Async("taskExecutor")
     @Transactional(readOnly = true)
     fun prosesserSkattehendelserAsynkront(
-        skattehendelser: List<SkattehendelseDryrunItem>,
+        skattehendelser: List<SkattehendelseItem>,
         skarp: Boolean = false,
         maksAntall: Int? = null,
     ) {
@@ -59,11 +59,11 @@ class SkattepliktigeAarsavregningDryrunService(
     }
 
     // readOnly gir FlushMode.MANUAL, og er garantien for at simuleringen ikke skriver: alle
-    // skrivninger går gjennom skarpUtfoerer i egne transaksjoner. Metoden over kaller denne som
+    // skrivninger går gjennom utfoerer i egne transaksjoner. Metoden over kaller denne som
     // selvkall, så det er annotasjonen der som gjelder for controller-stien.
     @Transactional(readOnly = true)
     fun prosesserSkattehendelser(
-        skattehendelser: List<SkattehendelseDryrunItem>,
+        skattehendelser: List<SkattehendelseItem>,
         skarp: Boolean = false,
         maksAntall: Int? = null,
     ) = runAsSystem {
@@ -132,7 +132,7 @@ class SkattepliktigeAarsavregningDryrunService(
                                 antallSakerIkkeVurdert++
                                 log.warn(e) { "Oppslag-feil i filter for sak ${fagsak.saksnummer}, år $år" }
                                 resultater.add(
-                                    SakDryrunResultat(
+                                    SakResultat(
                                         saksnummer = fagsak.saksnummer,
                                         gjelderAr = år,
                                         identifikator = hendelse.identifikator,
@@ -176,7 +176,7 @@ class SkattepliktigeAarsavregningDryrunService(
                                     // kategori og i rapporten — ellers finnes den ingen steder.
                                     antallSakerHoppetOverPgaTak++
                                     resultater.add(
-                                        SakDryrunResultat(
+                                        SakResultat(
                                             saksnummer = fagsak.saksnummer,
                                             gjelderAr = år,
                                             identifikator = hendelse.identifikator,
@@ -205,7 +205,7 @@ class SkattepliktigeAarsavregningDryrunService(
                                 var skarpFeilmelding: String? = null
                                 if (skarp && villeOpprettetProsessinstans) {
                                     try {
-                                        skarpUtfoerer.opprettProsessinstans(
+                                        utfoerer.opprettProsessinstans(
                                             fagsak.saksnummer,
                                             år.toString(),
                                         )
@@ -221,7 +221,7 @@ class SkattepliktigeAarsavregningDryrunService(
                                     }
                                 } else if (skarp && villeOppdatertStatus && aktivÅrsavregning != null) {
                                     try {
-                                        val bump = skarpUtfoerer.settStatusVurderDokument(
+                                        val bump = utfoerer.settStatusVurderDokument(
                                             aktivÅrsavregning.id,
                                             aktivÅrsavregning.status,
                                         )
@@ -261,7 +261,7 @@ class SkattepliktigeAarsavregningDryrunService(
                                 }
 
                                 resultater.add(
-                                    SakDryrunResultat(
+                                    SakResultat(
                                         saksnummer = fagsak.saksnummer,
                                         gjelderAr = år,
                                         identifikator = hendelse.identifikator,
@@ -282,7 +282,7 @@ class SkattepliktigeAarsavregningDryrunService(
                                 antallSakerFeilet++
                                 log.warn(e) { "Oppslag-feil for sak ${fagsak.saksnummer}, år $år" }
                                 resultater.add(
-                                    SakDryrunResultat(
+                                    SakResultat(
                                         saksnummer = fagsak.saksnummer,
                                         gjelderAr = år,
                                         identifikator = hendelse.identifikator,
@@ -332,7 +332,7 @@ class SkattepliktigeAarsavregningDryrunService(
         }
     }
 
-    private fun <T> runAsSystem(prosessSteg: String = "skattepliktigeAarsavregningDryrun", block: () -> T): T {
+    private fun <T> runAsSystem(prosessSteg: String = "skattepliktigeAarsavregningKjoering", block: () -> T): T {
         val processId = UUID.randomUUID()
         ThreadLocalAccessInfo.beforeExecuteProcess(processId, prosessSteg)
         return try {
@@ -441,7 +441,7 @@ class SkattepliktigeAarsavregningDryrunService(
         )
     }
 
-    data class SakDryrunResultat(
+    data class SakResultat(
         val saksnummer: String,
         val gjelderAr: Int,
         val identifikator: String,
@@ -465,7 +465,7 @@ class SkattepliktigeAarsavregningDryrunService(
 /** Hendelsen med året parset, så det er nøkkelen dedupliseringen bruker. */
 private data class NormalisertHendelse(val identifikator: String, val år: Int)
 
-data class SkattehendelseDryrunItem(
+data class SkattehendelseItem(
     val gjelderPeriode: String,
     val identifikator: String
 )

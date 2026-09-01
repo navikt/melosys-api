@@ -20,7 +20,7 @@ import java.util.UUID
  * her legges bare transaksjonsgrensen på.
  */
 @Component
-class SkattepliktigeAarsavregningSkarpUtfoerer(
+class SkattepliktigeAarsavregningUtfoerer(
     private val opprettelseService: SkattepliktigAarsavregningOpprettelseService,
 ) {
 

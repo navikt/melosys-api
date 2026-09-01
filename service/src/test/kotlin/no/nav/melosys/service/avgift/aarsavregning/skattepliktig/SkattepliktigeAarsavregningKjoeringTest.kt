@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * etter en feilet sak. [SkattepliktigAarsavregningOpprettelseService] bygges ekte, så testene også
  * viser hva verktøyet får ut av den.
  */
-class SkattepliktigeAarsavregningSkarpTest {
+class SkattepliktigeAarsavregningKjoeringTest {
 
     private val prosessinstansService = mockk<ProsessinstansService>()
     private val behandlingService = mockk<BehandlingService>()
@@ -51,7 +51,7 @@ class SkattepliktigeAarsavregningSkarpTest {
     private val årsavregningService = mockk<ÅrsavregningService>()
     private val trygdeavgiftMottakerService = mockk<TrygdeavgiftMottakerService>()
     private val behandlingsresultatService = mockk<BehandlingsresultatService>()
-    private val skarpUtfoerer = mockk<SkattepliktigeAarsavregningSkarpUtfoerer>()
+    private val utfoerer = mockk<SkattepliktigeAarsavregningUtfoerer>()
 
     private val opprettelseService = SkattepliktigAarsavregningOpprettelseService(
         prosessinstansService,
@@ -62,18 +62,18 @@ class SkattepliktigeAarsavregningSkarpTest {
         trygdeavgiftMottakerService,
     )
 
-    private val service = SkattepliktigeAarsavregningDryrunService(
+    private val service = SkattepliktigeAarsavregningKjoering(
         opprettelseService,
         årsavregningService,
         trygdeavgiftMottakerService,
-        skarpUtfoerer,
+        utfoerer,
     )
 
     @Test
     fun `skarp opprettelse ber om innhentingsbrev, som Kafka-flyten`() {
         every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any(), any()) } returns UUID.randomUUID()
 
-        utfoerer().opprettProsessinstans("MEL-1", "2023")
+        ekteUtfoerer().opprettProsessinstans("MEL-1", "2023")
 
         verify {
             prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
@@ -90,7 +90,7 @@ class SkattepliktigeAarsavregningSkarpTest {
         val behandling = Behandling.forTest { status = Behandlingsstatus.IVERKSETTER_VEDTAK }
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
 
-        val bump = utfoerer().settStatusVurderDokument(BEHANDLING_ID, Behandlingsstatus.VURDER_DOKUMENT)
+        val bump = ekteUtfoerer().settStatusVurderDokument(BEHANDLING_ID, Behandlingsstatus.VURDER_DOKUMENT)
 
         bump.oppdatert shouldBe false
         bump.faktiskStatus shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
@@ -115,15 +115,15 @@ class SkattepliktigeAarsavregningSkarpTest {
         every { trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) } returns
             Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
 
-        every { skarpUtfoerer.opprettProsessinstans("MEL-1", "2023") } throws RuntimeException("oppslag feilet")
-        every { skarpUtfoerer.opprettProsessinstans("MEL-2", "2023") } returns UUID.randomUUID()
+        every { utfoerer.opprettProsessinstans("MEL-1", "2023") } throws RuntimeException("oppslag feilet")
+        every { utfoerer.opprettProsessinstans("MEL-2", "2023") } returns UUID.randomUUID()
 
         service.prosesserSkattehendelser(
-            listOf(SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
+            listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
             skarp = true,
         )
 
-        verify { skarpUtfoerer.opprettProsessinstans("MEL-2", "2023") }
+        verify { utfoerer.opprettProsessinstans("MEL-2", "2023") }
         with(service.status()) {
             this["antallSakerFunnet"] shouldBe 2
             this["antallOpprettet"] shouldBe 1
@@ -146,19 +146,19 @@ class SkattepliktigeAarsavregningSkarpTest {
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { behandlingsresultatService.hentBehandlingsresultat(årsavregningBehandling.id) } returns behandlingsresultat
         stubTrygdeavgift(behandlingsresultat)
-        every { skarpUtfoerer.settStatusVurderDokument(any(), any()) } returns
+        every { utfoerer.settStatusVurderDokument(any(), any()) } returns
             SkattepliktigAarsavregningOpprettelseService.StatusBumpResultat(
                 oppdatert = false,
                 faktiskStatus = Behandlingsstatus.IVERKSETTER_VEDTAK,
             )
 
         service.prosesserSkattehendelser(
-            listOf(SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
+            listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
             skarp = true,
         )
 
         verify {
-            skarpUtfoerer.settStatusVurderDokument(årsavregningBehandling.id, Behandlingsstatus.AVVENT_DOK_PART)
+            utfoerer.settStatusVurderDokument(årsavregningBehandling.id, Behandlingsstatus.AVVENT_DOK_PART)
         }
         with(service.resultater.single()) {
             statusOppdatert shouldBe false
@@ -203,12 +203,12 @@ class SkattepliktigeAarsavregningSkarpTest {
         every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
 
         service.prosesserSkattehendelser(
-            listOf(SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
+            listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
             skarp = true,
         )
 
-        verify(exactly = 0) { skarpUtfoerer.settStatusVurderDokument(any(), any()) }
-        verify(exactly = 0) { skarpUtfoerer.opprettProsessinstans(any(), any()) }
+        verify(exactly = 0) { utfoerer.settStatusVurderDokument(any(), any()) }
+        verify(exactly = 0) { utfoerer.opprettProsessinstans(any(), any()) }
         service.resultater.single().feilmelding shouldNotBe null
         service.status()["antallSakerFeilet"] shouldBe 1
     }
@@ -216,18 +216,18 @@ class SkattepliktigeAarsavregningSkarpTest {
     /** maksAntall er nullbar, og løkka håndhever taket kun når den ikke er null. */
     @Test
     fun `ekte kjøring uten maksAntall avvises uten å starte jobben`() {
-        val dryrunService = mockk<SkattepliktigeAarsavregningDryrunService>(relaxed = true)
-        val controller = SkattepliktigeAarsavregningDryrunController(dryrunService)
+        val kjoering = mockk<SkattepliktigeAarsavregningKjoering>(relaxed = true)
+        val controller = SkattepliktigeAarsavregningKjoeringController(kjoering)
 
         val utenTak = controller.run(
             SkattehendelseRunRequest(
-                skattehendelser = listOf(SkattehendelseDryrunItem("2024", AKTØR_ID)),
+                skattehendelser = listOf(SkattehendelseItem("2024", AKTØR_ID)),
                 skarp = true,
             )
         )
         val nullTak = controller.run(
             SkattehendelseRunRequest(
-                skattehendelser = listOf(SkattehendelseDryrunItem("2024", AKTØR_ID)),
+                skattehendelser = listOf(SkattehendelseItem("2024", AKTØR_ID)),
                 skarp = true,
                 maksAntall = 0,
             )
@@ -235,7 +235,7 @@ class SkattepliktigeAarsavregningSkarpTest {
 
         utenTak.statusCode shouldBe HttpStatus.BAD_REQUEST
         nullTak.statusCode shouldBe HttpStatus.BAD_REQUEST
-        verify(exactly = 0) { dryrunService.prosesserSkattehendelserAsynkront(any(), any(), any()) }
+        verify(exactly = 0) { kjoering.prosesserSkattehendelserAsynkront(any(), any(), any()) }
     }
 
     /**
@@ -244,29 +244,29 @@ class SkattepliktigeAarsavregningSkarpTest {
      */
     @Test
     fun `kjøring som startes mens en annen pågår avvises med 409`() {
-        val dryrunService = mockk<SkattepliktigeAarsavregningDryrunService>(relaxed = true)
-        every { dryrunService.status() } returns mapOf("isRunning" to true)
-        val controller = SkattepliktigeAarsavregningDryrunController(dryrunService)
+        val kjoering = mockk<SkattepliktigeAarsavregningKjoering>(relaxed = true)
+        every { kjoering.status() } returns mapOf("isRunning" to true)
+        val controller = SkattepliktigeAarsavregningKjoeringController(kjoering)
 
         val svar = controller.run(
-            SkattehendelseRunRequest(listOf(SkattehendelseDryrunItem("2024", AKTØR_ID)), skarp = true, maksAntall = 1)
+            SkattehendelseRunRequest(listOf(SkattehendelseItem("2024", AKTØR_ID)), skarp = true, maksAntall = 1)
         )
 
         svar.statusCode shouldBe HttpStatus.CONFLICT
-        verify(exactly = 0) { dryrunService.prosesserSkattehendelserAsynkront(any(), any(), any()) }
+        verify(exactly = 0) { kjoering.prosesserSkattehendelserAsynkront(any(), any(), any()) }
     }
 
     @Test
     fun `simulering uten maksAntall slipper gjennom, og ekte kjøring med tak starter jobben`() {
-        val dryrunService = mockk<SkattepliktigeAarsavregningDryrunService>(relaxed = true)
-        val controller = SkattepliktigeAarsavregningDryrunController(dryrunService)
-        val hendelser = listOf(SkattehendelseDryrunItem("2024", AKTØR_ID))
+        val kjoering = mockk<SkattepliktigeAarsavregningKjoering>(relaxed = true)
+        val controller = SkattepliktigeAarsavregningKjoeringController(kjoering)
+        val hendelser = listOf(SkattehendelseItem("2024", AKTØR_ID))
 
         controller.run(SkattehendelseRunRequest(hendelser, skarp = false)).statusCode shouldBe HttpStatus.OK
         controller.run(SkattehendelseRunRequest(hendelser, skarp = true, maksAntall = 1)).statusCode shouldBe HttpStatus.OK
 
-        verify(exactly = 1) { dryrunService.prosesserSkattehendelserAsynkront(hendelser, false, null) }
-        verify(exactly = 1) { dryrunService.prosesserSkattehendelserAsynkront(hendelser, true, 1) }
+        verify(exactly = 1) { kjoering.prosesserSkattehendelserAsynkront(hendelser, false, null) }
+        verify(exactly = 1) { kjoering.prosesserSkattehendelserAsynkront(hendelser, true, 1) }
     }
 
     /** Uten behandlings-id-en i rapporten er stoppen usynlig i en batch som fortsetter. */
@@ -281,13 +281,13 @@ class SkattepliktigeAarsavregningSkarpTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         service.prosesserSkattehendelser(
-            listOf(SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
+            listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
             skarp = true,
             maksAntall = 5,
         )
 
-        verify(exactly = 0) { skarpUtfoerer.opprettProsessinstans(any(), any()) }
-        verify(exactly = 0) { skarpUtfoerer.settStatusVurderDokument(any(), any()) }
+        verify(exactly = 0) { utfoerer.opprettProsessinstans(any(), any()) }
+        verify(exactly = 0) { utfoerer.settStatusVurderDokument(any(), any()) }
 
         val feil = service.resultater.single().feilmelding
         feil shouldNotBe null
@@ -308,18 +308,18 @@ class SkattepliktigeAarsavregningSkarpTest {
 
         val behandlingsresultat = Behandlingsresultat.forTest { }
         stubTrygdeavgift(behandlingsresultat)
-        every { skarpUtfoerer.opprettProsessinstans("MEL-1", "2023") } returns UUID.randomUUID()
+        every { utfoerer.opprettProsessinstans("MEL-1", "2023") } returns UUID.randomUUID()
 
         service.prosesserSkattehendelser(
             listOf(
-                SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID),
-                SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID),
+                SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID),
+                SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID),
             ),
             skarp = true,
             maksAntall = 5,
         )
 
-        verify(exactly = 1) { skarpUtfoerer.opprettProsessinstans("MEL-1", "2023") }
+        verify(exactly = 1) { utfoerer.opprettProsessinstans("MEL-1", "2023") }
         with(service.status()) {
             this["antallInputHendelser"] shouldBe 2
             this["antallDuplikaterFjernet"] shouldBe 1
@@ -342,19 +342,19 @@ class SkattepliktigeAarsavregningSkarpTest {
         every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
         every { trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) } returns
             Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
-        every { skarpUtfoerer.opprettProsessinstans(any(), any()) } returns UUID.randomUUID()
+        every { utfoerer.opprettProsessinstans(any(), any()) } returns UUID.randomUUID()
 
         service.prosesserSkattehendelser(
             listOf(
-                SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID),
-                SkattehendelseDryrunItem(gjelderPeriode = "2024", identifikator = AKTØR_ID),
+                SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID),
+                SkattehendelseItem(gjelderPeriode = "2024", identifikator = AKTØR_ID),
             ),
             skarp = true,
             maksAntall = 5,
         )
 
-        verify(exactly = 1) { skarpUtfoerer.opprettProsessinstans("MEL-1", "2023") }
-        verify(exactly = 1) { skarpUtfoerer.opprettProsessinstans("MEL-1", "2024") }
+        verify(exactly = 1) { utfoerer.opprettProsessinstans("MEL-1", "2023") }
+        verify(exactly = 1) { utfoerer.opprettProsessinstans("MEL-1", "2024") }
         service.status()["antallDuplikaterFjernet"] shouldBe 0
     }
 
@@ -385,7 +385,7 @@ class SkattepliktigeAarsavregningSkarpTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         service.prosesserSkattehendelser(
-            listOf(SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
+            listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
             skarp = true,
             maksAntall = 5,
         )
@@ -408,10 +408,10 @@ class SkattepliktigeAarsavregningSkarpTest {
 
         val behandlingsresultat = Behandlingsresultat.forTest { }
         stubTrygdeavgift(behandlingsresultat)
-        every { skarpUtfoerer.opprettProsessinstans(any(), any()) } returns UUID.randomUUID()
+        every { utfoerer.opprettProsessinstans(any(), any()) } returns UUID.randomUUID()
 
         service.prosesserSkattehendelser(
-            listOf(SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
+            listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
             skarp = true,
             maksAntall = 1,
         )
@@ -449,10 +449,10 @@ class SkattepliktigeAarsavregningSkarpTest {
         // Berikelsen feiler, men opprettelsen har allerede skjedd.
         every { trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) } throws
             RuntimeException("mottaker-oppslag feilet")
-        every { skarpUtfoerer.opprettProsessinstans("MEL-1", "2023") } returns UUID.randomUUID()
+        every { utfoerer.opprettProsessinstans("MEL-1", "2023") } returns UUID.randomUUID()
 
         service.prosesserSkattehendelser(
-            listOf(SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
+            listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
             skarp = true,
             maksAntall = 5,
         )
@@ -488,12 +488,12 @@ class SkattepliktigeAarsavregningSkarpTest {
         every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
         every { trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) } returns
             Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
-        every { skarpUtfoerer.opprettProsessinstans(any(), any()) } returns UUID.randomUUID()
+        every { utfoerer.opprettProsessinstans(any(), any()) } returns UUID.randomUUID()
 
         service.prosesserSkattehendelser(
             listOf(
-                SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = "111"),
-                SkattehendelseDryrunItem(gjelderPeriode = "2024", identifikator = "222"),
+                SkattehendelseItem(gjelderPeriode = "2023", identifikator = "111"),
+                SkattehendelseItem(gjelderPeriode = "2024", identifikator = "222"),
             ),
             skarp = true,
             maksAntall = 1,
@@ -527,13 +527,13 @@ class SkattepliktigeAarsavregningSkarpTest {
         every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
         every { trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) } returns
             Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
-        every { skarpUtfoerer.opprettProsessinstans(any(), any()) } returns UUID.randomUUID()
+        every { utfoerer.opprettProsessinstans(any(), any()) } returns UUID.randomUUID()
 
         service.prosesserSkattehendelser(
             listOf(
-                SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID),
-                SkattehendelseDryrunItem(gjelderPeriode = "02023", identifikator = AKTØR_ID),
-                SkattehendelseDryrunItem(gjelderPeriode = "tull", identifikator = AKTØR_ID),
+                SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID),
+                SkattehendelseItem(gjelderPeriode = "02023", identifikator = AKTØR_ID),
+                SkattehendelseItem(gjelderPeriode = "tull", identifikator = AKTØR_ID),
             ),
             skarp = true,
             maksAntall = 50,
@@ -569,12 +569,12 @@ class SkattepliktigeAarsavregningSkarpTest {
             Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
         // Årløs behandling for hver sak: feiler under vurderingen, ikke i filteret.
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
-        every { skarpUtfoerer.opprettProsessinstans(any(), any()) } returns UUID.randomUUID()
+        every { utfoerer.opprettProsessinstans(any(), any()) } returns UUID.randomUUID()
 
         service.prosesserSkattehendelser(
             listOf(
-                SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = "aktoer-1"),
-                SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = "aktoer-2"),
+                SkattehendelseItem(gjelderPeriode = "2023", identifikator = "aktoer-1"),
+                SkattehendelseItem(gjelderPeriode = "2023", identifikator = "aktoer-2"),
             ),
             skarp = true,
             maksAntall = 500,
@@ -585,7 +585,7 @@ class SkattepliktigeAarsavregningSkarpTest {
             this["antallHendelserProsessert"] shouldBe 1
             (this["antallSakerFunnet"] as Int) shouldBeLessThan 150
         }
-        verify(exactly = 0) { skarpUtfoerer.opprettProsessinstans("MEL-900", any()) }
+        verify(exactly = 0) { utfoerer.opprettProsessinstans("MEL-900", any()) }
     }
 
     /** Den andre avbruddsårsaken må gi samme markør som taket. */
@@ -597,7 +597,7 @@ class SkattepliktigeAarsavregningSkarpTest {
             RuntimeException("oppslag feilet")
 
         val hendelser = (1..150).map {
-            SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = "aktoer-$it")
+            SkattehendelseItem(gjelderPeriode = "2023", identifikator = "aktoer-$it")
         }
         service.prosesserSkattehendelser(hendelser, skarp = true, maksAntall = 500)
 
@@ -619,7 +619,7 @@ class SkattepliktigeAarsavregningSkarpTest {
             RuntimeException("oppslag feilet")
 
         service.prosesserSkattehendelser(
-            listOf(SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
+            listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
             skarp = true,
             maksAntall = 5,
         )
@@ -641,20 +641,20 @@ class SkattepliktigeAarsavregningSkarpTest {
 
         val behandlingsresultat = Behandlingsresultat.forTest { }
         stubTrygdeavgift(behandlingsresultat)
-        every { skarpUtfoerer.opprettProsessinstans(any(), any()) } returns UUID.randomUUID()
+        every { utfoerer.opprettProsessinstans(any(), any()) } returns UUID.randomUUID()
 
         service.prosesserSkattehendelser(
             listOf(
-                SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = AKTØR_ID),
-                SkattehendelseDryrunItem(gjelderPeriode = "02023", identifikator = AKTØR_ID),
+                SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID),
+                SkattehendelseItem(gjelderPeriode = "02023", identifikator = AKTØR_ID),
             ),
             skarp = true,
             maksAntall = 5,
         )
 
         service.status()["antallDuplikaterFjernet"] shouldBe 1
-        verify(exactly = 1) { skarpUtfoerer.opprettProsessinstans("MEL-1", "2023") }
-        verify(exactly = 0) { skarpUtfoerer.opprettProsessinstans("MEL-1", "02023") }
+        verify(exactly = 1) { utfoerer.opprettProsessinstans("MEL-1", "2023") }
+        verify(exactly = 0) { utfoerer.opprettProsessinstans("MEL-1", "02023") }
     }
 
     /** `/status` polles nettopp mens den asynkrone jobben skriver til exceptions-mappen. */
@@ -761,7 +761,7 @@ class SkattepliktigeAarsavregningSkarpTest {
         override fun asMap(): Map<String, Any?> = emptyMap()
     }
 
-    private fun utfoerer() = SkattepliktigeAarsavregningSkarpUtfoerer(opprettelseService)
+    private fun ekteUtfoerer() = SkattepliktigeAarsavregningUtfoerer(opprettelseService)
 
     /** De fire tellerne som deler sakene mellom seg; antallVilleOppdatertStatus er en delmengde. */
     private fun Map<String, Any?>.summerSakstellere(): Int =

@@ -7,9 +7,9 @@ import no.nav.melosys.Application
 import io.mockk.every
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.saksflyt.ProsessinstansDispatcher
-import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.SkattehendelseDryrunItem
-import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.SkattepliktigeAarsavregningDryrunService
-import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.SkattepliktigeAarsavregningSkarpUtfoerer
+import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.SkattehendelseItem
+import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.SkattepliktigeAarsavregningKjoering
+import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.SkattepliktigeAarsavregningUtfoerer
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Test
@@ -40,9 +40,9 @@ import java.util.concurrent.TimeUnit
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext
 @EnableMockOAuth2Server
-class SkattepliktigeAarsavregningSkarpIT(
-    @Autowired val skarpUtfoerer: SkattepliktigeAarsavregningSkarpUtfoerer,
-    @Autowired val dryrunService: SkattepliktigeAarsavregningDryrunService,
+class SkattepliktigeAarsavregningKjoeringIT(
+    @Autowired val utfoerer: SkattepliktigeAarsavregningUtfoerer,
+    @Autowired val kjoering: SkattepliktigeAarsavregningKjoering,
     @Autowired val transactionManager: PlatformTransactionManager,
     @Autowired val jdbcTemplate: JdbcTemplate
 ) : OracleTestContainerBase() {
@@ -66,8 +66,8 @@ class SkattepliktigeAarsavregningSkarpIT(
     @Test
     fun `rollback av den ytre transaksjonen tar ikke med sakene som allerede er kjørt`() {
         ytreLesetransaksjon.execute { ytre ->
-            skarpUtfoerer.opprettProsessinstans("MEL-901", "2023")
-            skarpUtfoerer.opprettProsessinstans("MEL-903", "2023")
+            utfoerer.opprettProsessinstans("MEL-901", "2023")
+            utfoerer.opprettProsessinstans("MEL-903", "2023")
 
             ytre.setRollbackOnly()
             null
@@ -83,12 +83,12 @@ class SkattepliktigeAarsavregningSkarpIT(
     @Test
     fun `en sak som kaster river ikke med seg sakene rundt`() {
         ytreLesetransaksjon.execute {
-            skarpUtfoerer.opprettProsessinstans("MEL-901", "2023")
+            utfoerer.opprettProsessinstans("MEL-901", "2023")
             // Behandlingen finnes ikke, så statusoppdateringen kaster inne i sin egen transaksjon.
             runCatching {
-                skarpUtfoerer.settStatusVurderDokument(BEHANDLING_SOM_IKKE_FINNES, Behandlingsstatus.VURDER_DOKUMENT)
+                utfoerer.settStatusVurderDokument(BEHANDLING_SOM_IKKE_FINNES, Behandlingsstatus.VURDER_DOKUMENT)
             }.isFailure shouldBe true
-            skarpUtfoerer.opprettProsessinstans("MEL-903", "2023")
+            utfoerer.opprettProsessinstans("MEL-903", "2023")
             null
         }
 
@@ -98,7 +98,7 @@ class SkattepliktigeAarsavregningSkarpIT(
     @Test
     fun `opprettelsen ber om innhentingsbrev helt ned i prosessinstansens data`() {
         ytreLesetransaksjon.execute {
-            skarpUtfoerer.opprettProsessinstans("MEL-901", "2023")
+            utfoerer.opprettProsessinstans("MEL-901", "2023")
             null
         }
 
@@ -125,8 +125,8 @@ class SkattepliktigeAarsavregningSkarpIT(
             emptyList()
         }
 
-        dryrunService.prosesserSkattehendelserAsynkront(
-            listOf(SkattehendelseDryrunItem(gjelderPeriode = "2023", identifikator = "12345678901")),
+        kjoering.prosesserSkattehendelserAsynkront(
+            listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = "12345678901")),
             false,
             null,
         )
