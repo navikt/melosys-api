@@ -13,6 +13,8 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.melosys.domain.readResourceAsString
 import no.nav.melosys.integrasjon.MetricsTestConfig
+import no.nav.melosys.integrasjon.trygdeavgift.dto.Inntektsgruppe
+import no.nav.melosys.integrasjon.trygdeavgift.dto.OrdinaerAvgiftPerDelDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.PengerDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningRequest
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
@@ -125,6 +127,26 @@ class TrygdeavgiftClientTest(
             beregnetPeriode.månedsavgift shouldBe PengerDto(BigDecimal.valueOf(21800))
             component2() shouldNotBe null
         }
+    }
+
+    @Test
+    fun `ordinaer avgift per avgiftsdel overlever deserialiseringen av beregningsforklaringen`() {
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(readResourceAsString("mock/trygdeavgift/trygdeavgift_med_forklaring_per_del.json"))
+            )
+        )
+
+        val forklaring = trygdeavgiftClient.beregnTrygdeavgift(lagTrygdeavgiftsberegningRequest())[0].beregningsforklaring
+
+        forklaring shouldNotBe null
+        forklaring!!.ordinaerAvgiftPerDel shouldBe listOf(
+            OrdinaerAvgiftPerDelDto(Inntektsgruppe.HELSEDEL, 81600),
+            OrdinaerAvgiftPerDelDto(Inntektsgruppe.PENSJONSDEL, 258000),
+        )
     }
 
     private fun lagTrygdeavgiftsberegningRequest() = TrygdeavgiftsberegningRequest(

@@ -13,6 +13,10 @@ import java.time.LocalDate
  * (melosys-trygdeavgift-beregning → melosys-api → melosys-web).
  * Alle beløp er hele kroner (Int). Forklaringen persisteres ikke i melosys-api
  * og føres kun gjennom til frontend på PUT-veien (beregning).
+ *
+ * NB: [ordinaerAvgift] kan være større enn [maksimalAvgift25Prosent] selv når [valgtRegel]
+ * er ORDINÆR. For frivillig medlemskap vurderes taket pr. avgiftsdel, så summen av delene
+ * ble aldri sammenlignet med taket. [ordinaerAvgiftPerDel] viser da hva som ble sammenlignet.
  */
 data class BeregningsforklaringDto(
     val aar: Int,
@@ -27,6 +31,7 @@ data class BeregningsforklaringDto(
     val maksimalAvgift25Prosent: Int?,
     val ordinaerAvgift: Int,
     val ordinaerAvgiftPoster: List<OrdinaerAvgiftspostDto> = emptyList(),
+    val ordinaerAvgiftPerDel: List<OrdinaerAvgiftPerDelDto> = emptyList(),
     val fastsattAvgift: Int,
     val fastsattAvgiftPerMaaned: Int = 0,
 )
@@ -49,6 +54,19 @@ data class OrdinaerAvgiftspostDto(
     val grunnlag: Int,
     val sats: BigDecimal,
     val beloep: Int,
+)
+
+/**
+ * Ordinær avgift for én avgiftsdel — beløpet som faktisk ble sammenlignet med
+ * [BeregningsforklaringDto.maksimalAvgift25Prosent].
+ *
+ * Fylles ut kun for frivillig medlemskap når ingen del overstiger taket. Deler uten avgift
+ * utelates, så lista kan ha to, én eller ingen elementer. Er den utfylt, er
+ * [BeregningsforklaringDto.ordinaerAvgift] summen av delene.
+ */
+data class OrdinaerAvgiftPerDelDto(
+    val inntektsgruppe: Inntektsgruppe,
+    val ordinaerAvgift: Int,
 )
 
 data class EkskludertInntektspostDto(

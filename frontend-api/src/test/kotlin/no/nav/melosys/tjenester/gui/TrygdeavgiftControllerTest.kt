@@ -21,6 +21,7 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.Beregningsaarsak
 import no.nav.melosys.integrasjon.trygdeavgift.dto.EkskludertInntektspostDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.Ekskluderingsaarsak
 import no.nav.melosys.integrasjon.trygdeavgift.dto.InntektspostDto
+import no.nav.melosys.integrasjon.trygdeavgift.dto.OrdinaerAvgiftPerDelDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.OrdinaerAvgiftspostDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.Inntektsgruppe
 import no.nav.melosys.service.avgift.BeregnetTrygdeavgiftMedForklaring
@@ -127,6 +128,42 @@ class TrygdeavgiftControllerTest(
             .andExpectResponseBody(
                 forventetBeregnetTrygdeavgiftDto(beregningsforklaringer = listOf(forklaring))
             )
+    }
+
+    @Test
+    fun `ordinaer avgift per avgiftsdel serialiseres ut til frontend`() {
+        every { aksesskontroll.autoriserSkrivOgTilordnet(any()) } returns Unit
+
+        val forklaring = lagBeregningsforklaringDto().copy(
+            valgtRegel = Avgiftsberegningsregel.ORDINÆR,
+            ordinaerAvgift = 339600,
+            ordinaerAvgiftPerDel = listOf(
+                OrdinaerAvgiftPerDelDto(Inntektsgruppe.HELSEDEL, 81600),
+                OrdinaerAvgiftPerDelDto(Inntektsgruppe.PENSJONSDEL, 258000),
+            ),
+        )
+
+        every {
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgiftMedForklaring(
+                any(),
+                any<List<SkatteforholdTilNorge>>(),
+                any<List<Inntektsperiode>>()
+            )
+        } returns BeregnetTrygdeavgiftMedForklaring(trygdeavgiftsperioder, listOf(forklaring))
+
+        mockMvc.perform(
+            put("$BASE_URL/beregning", 1L)
+                .content(objectMapper.writeValueAsString(lagTrygdeavgiftsgrunnlagDto()))
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpect { result ->
+                val deler = objectMapper.readTree(result.response.contentAsString)
+                    .path("beregningsforklaringer")[0].path("ordinaerAvgiftPerDel")
+                assert(deler.size() == 2 && deler[0].path("inntektsgruppe").asText() == "HELSEDEL") {
+                    "Forventet ordinaerAvgiftPerDel i responsen, men fikk: ${result.response.contentAsString}"
+                }
+            }
     }
 
     @Test
