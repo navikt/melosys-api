@@ -140,8 +140,7 @@ class SkattehendelserConsumerTest {
 
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(behandling.fagsak)
         every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
-        // Statusen leses på nytt før skriving. Consumeren gjør det i samme transaksjon, så
-        // oppslaget gir samme entitet — slik det gjør i drift.
+        // Consumeren leser på nytt i samme transaksjon, så oppslaget gir samme entitet.
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
 
         val behandlingSlot = slot<Behandling>()
@@ -175,10 +174,7 @@ class SkattehendelserConsumerTest {
         behandlingSlot.captured.status shouldBe Behandlingsstatus.VURDER_DOKUMENT
     }
 
-    /**
-     * Pinner at consumeren sender statusen den faktisk observerte, ikke en hardkodet verdi: her
-     * har behandlingen endret seg mellom oppslaget og skrivingen, og da skal den stå urørt.
-     */
+    /** Consumeren skal sende statusen den observerte, ikke en hardkodet verdi. */
     @Test
     fun `status oppdateres ikke når behandlingen er flyttet videre etter oppslaget`() {
         val fagsak = lagFagsak {

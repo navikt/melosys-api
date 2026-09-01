@@ -43,10 +43,7 @@ class SkattepliktigAarsavregningOpprettelseServiceTest {
         trygdeavgiftMottakerService,
     )
 
-    /**
-     * En aktiv ÅRSAVREGNING-behandling uten rad i `aarsavregning` stopper saken. Begge flytene som
-     * treffer dette må håndteres av et menneske, så kastet skal navngi behandlingen som må lukkes.
-     */
+    /** Begge flytene stopper saken her, så kastet må navngi behandlingen som skal lukkes. */
     @Test
     fun `årløs aktiv årsavregning gir en feilmelding som navngir behandlingen`() {
         val fagsak = lagFagsakMedÅrsavregning()
@@ -66,9 +63,8 @@ class SkattepliktigAarsavregningOpprettelseServiceTest {
     }
 
     /**
-     * Bare manglende aarsavregning-rad er det årløse tilfellet. Enhver annen IllegalStateException
-     * fra oppslaget — en lukket EntityManager, en tilstandssjekk lenger nede — skal ikke merkes som
-     * årløs, for da sendes den som rydder til å lukke en behandling som ikke er problemet.
+     * Bare manglende aarsavregning-rad er det årløse tilfellet. Merkes en annen tilstandsfeil som
+     * årløs, sendes den som rydder til å lukke en behandling som ikke er problemet.
      */
     @Test
     fun `annen tilstandsfeil enn manglende årsavregning merkes ikke som årløs`() {
@@ -85,11 +81,8 @@ class SkattepliktigAarsavregningOpprettelseServiceTest {
     }
 
     /**
-     * Statusen som ble observert da det ble bestemt at behandlingen skulle bumpes, kan ha endret
-     * seg før skrivingen. IVERKSETTER_VEDTAK er både aktiv og ulik OPPRETTET, så bare en
-     * sammenligning mot den observerte statusen fanger at en saksbehandler har flyttet
-     * behandlingen videre i mellomtiden — å kaste den tilbake til VURDER_DOKUMENT ville tatt
-     * saksbehandleren med seg.
+     * IVERKSETTER_VEDTAK er både aktiv og ulik OPPRETTET, så bare en sammenligning mot den
+     * observerte statusen fanger at en saksbehandler har flyttet behandlingen videre.
      */
     @Test
     fun `status-bump hopper over behandling som er flyttet videre i mellomtiden`() {

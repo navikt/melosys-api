@@ -27,12 +27,9 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 /**
- * Dekker transaksjonsgarantiene i skarp modus. De kan ikke bevises med mocks: de handler om hva som
- * faktisk står igjen i databasen når den ytre transaksjonen ryker.
- *
- * Den ytre kjøringen (`SkattepliktigeAarsavregningDryrunService`) er `@Transactional(readOnly = true)`
- * og spenner hele batchen, mens hver skriving kjører i `REQUIRES_NEW`. Testene her simulerer den
- * ytre transaksjonen med en read-only `TransactionTemplate` og ruller den tilbake til slutt.
+ * Transaksjonsgarantiene i skarp modus — de handler om hva som står igjen i databasen når den ytre
+ * transaksjonen ryker, og kan ikke bevises med mocks. Den ytre kjøringen simuleres med en read-only
+ * `TransactionTemplate`.
  */
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -51,10 +48,9 @@ class SkattepliktigeAarsavregningSkarpIT(
 ) : OracleTestContainerBase() {
 
     /**
-     * Testen bryr seg om radene, ikke om at saksflyten kjører dem. Uten denne ville
-     * ProsessinstansOpprettetListener (AFTER_COMMIT) sendt instansene til executoren, som ville
-     * feilet på saker vi aldri seeder — ERROR-støy i CI, og en åpen DML som kan gi ORA-00054 mot
-     * TRUNCATE i neste tests truncateAllTables() (som svelger feilen med kun log.warn).
+     * Uten denne sender ProsessinstansOpprettetListener (AFTER_COMMIT) instansene til executoren,
+     * som feiler på saker vi aldri seeder: ERROR-støy i CI, og en åpen DML som kan gi ORA-00054 mot
+     * TRUNCATE i neste tests truncateAllTables().
      */
     @MockkBean(relaxed = true)
     private lateinit var prosessinstansDispatcher: ProsessinstansDispatcher
@@ -66,11 +62,7 @@ class SkattepliktigeAarsavregningSkarpIT(
     private val ytreLesetransaksjon: TransactionTemplate
         get() = TransactionTemplate(transactionManager).apply { isReadOnly = true }
 
-    /**
-     * Den ytre transaksjonen ryker etter at to saker er skrevet. Med REQUIRED ville de vært
-     * deltakere i den, og rullet tilbake sammen med den — mens rapporten fortsatt påsto at to
-     * prosessinstanser var opprettet.
-     */
+    /** Med REQUIRED ville de to rullet tilbake, mens rapporten påsto at de var opprettet. */
     @Test
     fun `rollback av den ytre transaksjonen tar ikke med sakene som allerede er kjørt`() {
         ytreLesetransaksjon.execute { ytre ->
@@ -85,9 +77,8 @@ class SkattepliktigeAarsavregningSkarpIT(
     }
 
     /**
-     * Den andre halvdelen av samme garanti: en sak som *kaster* skal ikke markere den ytre
-     * transaksjonen rollback-only. Med REQUIRED ville kastet fra den indre gjort det, og de to
-     * sakene rundt hadde forsvunnet ved commit selv om løkka fanget feilen og gikk videre.
+     * Andre halvdel: med REQUIRED ville kastet markert den ytre transaksjonen rollback-only, og de
+     * to sakene rundt forsvunnet ved commit selv om løkka fanget feilen og gikk videre.
      */
     @Test
     fun `en sak som kaster river ikke med seg sakene rundt`() {
@@ -115,15 +106,11 @@ class SkattepliktigeAarsavregningSkarpIT(
     }
 
     /**
-     * Pinner read-only-garantien på stien controlleren faktisk bruker.
-     *
-     * `prosesserSkattehendelserAsynkront` kaller `prosesserSkattehendelser` som selvkall, så
-     * annotasjonen på den indre metoden er død config — hele garantien hviler på den ytre. I tillegg
-     * har @Async- og @Transactional-advisorene begge LOWEST_PRECEDENCE; at async havner ytterst
-     * skyldes at AsyncAnnotationBeanPostProcessor setter beforeExistingAdvisors=true, ikke en
-     * ordning vi selv pinner. Resolves den motsatt vei, ville transaksjonen committet på
-     * kalltråden og batchen kjørt helt uten transaksjon — da feiler denne testen på
-     * `aktivTransaksjon`, ikke stille i prod.
+     * Read-only-garantien på stien controlleren bruker. Selvkallet gjør annotasjonen på den indre
+     * metoden til død config, så hele garantien hviler på den ytre. @Async- og
+     * @Transactional-advisorene har begge LOWEST_PRECEDENCE; at async havner ytterst skyldes at
+     * AsyncAnnotationBeanPostProcessor setter beforeExistingAdvisors=true. Resolves den motsatt
+     * vei, kjører batchen helt uten transaksjon — og da feiler denne testen, ikke prod.
      */
     @Test
     fun `batchen kjører i en aktiv read-only-transaksjon også gjennom Async-proxyen`() {

@@ -40,12 +40,8 @@ import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Dekker kjøringsverktøyets eget lag: rapporten, taket, dedupliseringen og at løkka går videre
- * etter en feilet sak.
- *
- * Selve vurderingene ligger i [SkattepliktigAarsavregningOpprettelseService] og er dekket av
- * `SkattepliktigAarsavregningOpprettelseServiceTest`; her bygges den ekte, slik at testene også
- * viser hva verktøyet får ut av den. Transaksjonsgarantiene kan ikke bevises med mocks og ligger i
- * `SkattepliktigeAarsavregningSkarpIT`.
+ * etter en feilet sak. [SkattepliktigAarsavregningOpprettelseService] bygges ekte, så testene også
+ * viser hva verktøyet får ut av den.
  */
 class SkattepliktigeAarsavregningSkarpTest {
 
@@ -161,7 +157,6 @@ class SkattepliktigeAarsavregningSkarpTest {
             skarp = true,
         )
 
-        // Statusen løkka observerte skal sendes med — det er hele poenget med re-lesingen.
         verify {
             skarpUtfoerer.settStatusVurderDokument(årsavregningBehandling.id, Behandlingsstatus.AVVENT_DOK_PART)
         }
@@ -218,11 +213,7 @@ class SkattepliktigeAarsavregningSkarpTest {
         service.status()["antallSakerFeilet"] shouldBe 1
     }
 
-    /**
-     * maksAntall er nullbar, og løkka håndhever taket kun når den ikke er null. `{"skarp": true}`
-     * uten feltet startet dermed en kjøring helt uten tak. Asserten er at kallet avvises før jobben
-     * startes.
-     */
+    /** maksAntall er nullbar, og løkka håndhever taket kun når den ikke er null. */
     @Test
     fun `ekte kjøring uten maksAntall avvises uten å starte jobben`() {
         val dryrunService = mockk<SkattepliktigeAarsavregningDryrunService>(relaxed = true)
@@ -248,9 +239,8 @@ class SkattepliktigeAarsavregningSkarpTest {
     }
 
     /**
-     * Det vanlige tilfellet: en kjøring har pågått en stund, og noen sender /run på nytt. Uten
-     * avvisningen submitteres en ny task som kan bli liggende i kø og kjøre hele lista skarpt om
-     * igjen når den første er ferdig.
+     * Uten avvisningen submitteres en ny task som kan bli liggende i kø og kjøre hele lista skarpt
+     * om igjen når den første er ferdig.
      */
     @Test
     fun `kjøring som startes mens en annen pågår avvises med 409`() {
@@ -279,11 +269,7 @@ class SkattepliktigeAarsavregningSkarpTest {
         verify(exactly = 1) { dryrunService.prosesserSkattehendelserAsynkront(hendelser, true, 1) }
     }
 
-    /**
-     * En aktiv ÅRSAVREGNING-behandling uten rad i aarsavregning stopper saken. Her pinnes at stoppen
-     * havner i rapporten med behandlings-id-en, slik at den som kjører finner behandlingen som må
-     * lukkes — feilen er ellers usynlig i en batch som fortsetter.
-     */
+    /** Uten behandlings-id-en i rapporten er stoppen usynlig i en batch som fortsetter. */
     @Test
     fun `årløs aktiv årsavregning havner i rapporten med behandlings-id`() {
         val fagsak = lagFagsakMedÅrsavregning(Behandlingsstatus.VURDER_DOKUMENT, BEHANDLING_ID)
@@ -300,7 +286,6 @@ class SkattepliktigeAarsavregningSkarpTest {
             maksAntall = 5,
         )
 
-        // Ingen ny årsavregning ved siden av den årløse, og ingen brev til borgeren.
         verify(exactly = 0) { skarpUtfoerer.opprettProsessinstans(any(), any()) }
         verify(exactly = 0) { skarpUtfoerer.settStatusVurderDokument(any(), any()) }
 
@@ -313,9 +298,8 @@ class SkattepliktigeAarsavregningSkarpTest {
     }
 
     /**
-     * Opprettelsen er ikke idempotent på sak og år, så to hendelser for samme person og år ga to
-     * årsavregninger og to innhentingsbrev til samme borger. En korrigert skattemelding gir nettopp
-     * en ny hendelse for et år vi allerede har sett.
+     * Opprettelsen er ikke idempotent på sak og år, og en korrigert skattemelding gir nettopp en ny
+     * hendelse for et år vi allerede har sett.
      */
     @Test
     fun `duplikate hendelser for samme person og år gir kun én opprettelse`() {
@@ -375,11 +359,9 @@ class SkattepliktigeAarsavregningSkarpTest {
     }
 
     /**
-     * De to feilene i kjøringen har hvert sitt underlag: en sak kan feile før vi vet om den har
-     * trygdeavgift (da er den ikke med i antallSakerFunnet), eller etter at den er med (da er den
-     * det). Ett felles felt for begge gjør at antallSakerFunnet minus feiltallet ikke er antall
-     * saker som gikk bra — her ville det gitt null, og det er feil svar på et tall den som kjører
-     * bruker til å avgjøre om kjøringen kan gjentas.
+     * De to feilene har hvert sitt underlag: en sak kan feile før vi vet om den har trygdeavgift
+     * (ikke med i antallSakerFunnet) eller etter (med). Ett felles felt gjør at antallSakerFunnet
+     * minus feiltallet ikke er antall saker som gikk bra.
      */
     @Test
     fun `feil før og etter at saken er vurdert telles hver for seg`() {
@@ -416,11 +398,8 @@ class SkattepliktigeAarsavregningSkarpTest {
     }
 
     /**
-     * Tellerne over sakene skal partisjonere [antallSakerFunnet]: hver sak som passerte filteret
-     * havner i nøyaktig én av dem. Uten det er ikke summen sammenlignbar med totalen, og den som
-     * kjører kan ikke se om alle sakene er gjort rede for.
-     *
-     * Her nås taket midt i en aktør med to saker, som er tilfellet under en canary.
+     * Tellerne skal partisjonere antallSakerFunnet — hver sak i nøyaktig én av dem. Her nås taket
+     * midt i en aktør med to saker, som under en canary.
      */
     @Test
     fun `sakstellerne går opp mot antall saker funnet også når taket kapper`() {
@@ -451,9 +430,8 @@ class SkattepliktigeAarsavregningSkarpTest {
     }
 
     /**
-     * Oppslagene som bare beriker rapporten skjer etter at saken er kategorisert — og etter at en
-     * eventuell opprettelse faktisk har skjedd. Feiler et av dem, skal saken ikke i tillegg telles
-     * som feilet: da er summen større enn totalen, og en sak som ER opprettet står som en feil.
+     * Berikelsen skjer etter at saken er kategorisert og eventuelt opprettet. Feiler den, skal
+     * saken ikke i tillegg telles som feilet — da blir summen større enn totalen.
      */
     @Test
     fun `feil i rapportoppslagene gjør ikke en kategorisert sak til en feilet sak`() {
@@ -485,23 +463,16 @@ class SkattepliktigeAarsavregningSkarpTest {
             this["antallSakerFeilet"] shouldBe 0
             summerSakstellere() shouldBe this["antallSakerFunnet"]
         }
-        // Saken er opprettet, og det skal stå i rapporten — mottakerfeltet er bare ukjent.
         with(service.resultater.single()) {
             prosessinstansOpprettet shouldBe true
             trygdeavgiftMottaker shouldBe null
-            // Feilen skal være synlig, ellers ser en systemisk feil ut som tomme felt.
             berikelseFeilmelding shouldNotBe null
         }
-        // Og den skal telle mot nødbremsen: feiler oppslaget for alle saker, skal kjøringen stoppe,
-        // ikke fortsette å opprette årsavregninger med en rapport som ser ren ut.
         service.status()["antallBerikelseFeilet"] shouldBe 1
         (service.status()["errorCount"] as Int) shouldBe 1
     }
 
-    /**
-     * En kjøring som stopper på taket har ikke gjort resten av lista. Uten en markør leser den som
-     * kjører antallInputHendelser og tror hele lista er kjørt.
-     */
+    /** Uten markøren leser den som kjører antallInputHendelser og tror hele lista er kjørt. */
     @Test
     fun `kjøring som stoppes av taket sier fra at den ble avbrutt`() {
         val fagsak = lagFagsak("MEL-1")
@@ -532,7 +503,6 @@ class SkattepliktigeAarsavregningSkarpTest {
             this["antallHendelserProsessert"] shouldBe 1
             this["antallUnikeHendelser"] shouldBe 2
             this["avbruttAarsak"] shouldBe "nådde maksAntall=1"
-            // Oppsummeringen skal finnes selv om kjøringen ble avbrutt.
             @Suppress("UNCHECKED_CAST")
             (this["result"] as Map<String, Any?>)["antallInputHendelser"] shouldBe 2
         }
@@ -540,9 +510,7 @@ class SkattepliktigeAarsavregningSkarpTest {
 
     /**
      * Duplikater og ugyldig input fjernes før løkka, så antallHendelserProsessert er lavere enn
-     * antallInputHendelser også i en kjøring som gikk helt til ende. Det er antallUnikeHendelser
-     * den skal sammenlignes med — ellers leser den som kjører differansen som et avbrudd og kjører
-     * de «manglende» hendelsene om igjen.
+     * antallInputHendelser også i en fullført kjøring. antallUnikeHendelser er sammenligningen.
      */
     @Test
     fun `en fullført kjøring med duplikater er ikke merket som avbrutt`() {
@@ -579,11 +547,7 @@ class SkattepliktigeAarsavregningSkarpTest {
         }
     }
 
-    /**
-     * Nødbremsen kan også slå inn midt inne i én aktørs saker, ikke bare mellom hendelser. Da må
-     * avbruddet merkes der også — ellers ser en kjøring som stoppet halvveis i en aktør med mange
-     * saker ut som fullført.
-     */
+    /** Nødbremsen kan slå inn midt inne i én aktørs saker, ikke bare mellom hendelser. */
     @Test
     fun `nødbremsen midt i en aktørs saker stopper hele kjøringen, ikke bare den ene saken`() {
         // Første aktør har mange saker som alle feiler under vurderingen — nødbremsen går ved 100
@@ -618,17 +582,13 @@ class SkattepliktigeAarsavregningSkarpTest {
 
         with(service.status()) {
             this["avbruttAarsak"] shouldBe "for mange feil"
-            // Aktør nummer to ble aldri rørt — kjøringen stoppet, den hoppet ikke bare over en sak.
             this["antallHendelserProsessert"] shouldBe 1
             (this["antallSakerFunnet"] as Int) shouldBeLessThan 150
         }
         verify(exactly = 0) { skarpUtfoerer.opprettProsessinstans("MEL-900", any()) }
     }
 
-    /**
-     * Nødbremsen på antall feil er den andre måten en kjøring kan bli avbrutt på. Den må gi samme
-     * markør som taket — ellers ser et avbrudd ut som en helt vanlig kjøring.
-     */
+    /** Den andre avbruddsårsaken må gi samme markør som taket. */
     @Test
     fun `kjøring som stoppes av for mange feil sier også fra at den ble avbrutt`() {
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, any()) } returns
@@ -648,9 +608,8 @@ class SkattepliktigeAarsavregningSkarpTest {
     }
 
     /**
-     * En aktør der alle sakene feilet i filteret har ikke «ingen sak med trygdeavgift» — vi vet
-     * ikke. Å telle den som uten treff sier at aktøren er avklart, og de sakene blir usynlige for
-     * den som skal rydde opp.
+     * En aktør der alle sakene feilet i filteret er ikke avklart — vi vet ikke om hun har en sak
+     * med trygdeavgift. Telles hun som «uten treff», blir sakene usynlige for den som rydder opp.
      */
     @Test
     fun `aktør der alle saker feilet i filteret telles ikke som uten treff`() {
@@ -672,9 +631,8 @@ class SkattepliktigeAarsavregningSkarpTest {
     }
 
     /**
-     * Input er håndbygd fra en SQL-dump, så formatvariasjon på året er reell. «02023» og «2023» er
-     * samme år, og skal ikke gi to årsavregninger og to innhentingsbrev til samme borger. Året som
-     * sendes videre til opprettelsen skal være det parsede, ikke den rå strengen.
+     * Input er håndbygd fra en SQL-dump, så formatvariasjon på året er reell. Året som sendes
+     * videre til opprettelsen skal være det parsede, ikke den rå strengen.
      */
     @Test
     fun `samme år skrevet ulikt er duplikater, og året normaliseres før opprettelse`() {
@@ -699,10 +657,7 @@ class SkattepliktigeAarsavregningSkarpTest {
         verify(exactly = 0) { skarpUtfoerer.opprettProsessinstans("MEL-1", "02023") }
     }
 
-    /**
-     * `/status` serialiserte den levende exceptions-mappen mens den asynkrone jobben skrev til den
-     * — og `/status` er nettopp det som polles mens feil registreres.
-     */
+    /** `/status` polles nettopp mens den asynkrone jobben skriver til exceptions-mappen. */
     @Test
     fun `status returnerer et øyeblikksbilde av exceptions, ikke den levende mappen`() {
         val monitor = JobMonitor(jobName = "test", stats = TomStats())
@@ -718,9 +673,8 @@ class SkattepliktigeAarsavregningSkarpTest {
     }
 
     /**
-     * JobMonitor er felles for flere jobber, og /status-rapportene deres leses med den første feilen
-     * først. Rekkefølgen er en del av avlesningen, ikke en tilfeldighet ved implementasjonen —
-     * `toList()` her, ikke `setOf`, nettopp fordi det er rekkefølgen som testes.
+     * JobMonitor er felles for flere jobber, og rapportene deres leses med første feil først.
+     * `toList()` og ikke `setOf`, nettopp fordi det er rekkefølgen som testes.
      */
     @Test
     fun `exceptions beholder rekkefølgen de ble registrert i`() {
@@ -736,13 +690,11 @@ class SkattepliktigeAarsavregningSkarpTest {
     }
 
     /**
-     * To POST /run mens den første fortsatt kjører — et dobbeltklikk eller en retry i et skript —
-     * skal gi én kjøring, ikke to. Slipper begge gjennom, oppretter de årsavregninger mot samme
-     * grunnlag, og dedupliseringen fanger ingenting siden den bare virker innenfor én kjøring.
+     * Slipper begge gjennom, oppretter de årsavregninger mot samme grunnlag, og dedupliseringen
+     * fanger ingenting siden den bare virker innenfor én kjøring.
      *
-     * Testen holder den første kjøringen åpen mens den andre forsøker seg, så den pinner at vakten
-     * avviser. Selve kappløpet mellom lesing og skriving av vakten er et vindu på nanosekunder som
-     * ikke kan treffes deterministisk; det lukkes av at vakten er en compareAndSet.
+     * Testen pinner at vakten avviser, ikke at den er atomisk: kappløpet mellom lesing og skriving
+     * er et vindu på nanosekunder som ikke kan treffes deterministisk.
      */
     @Test
     fun `en kjøring som starter mens en annen pågår blir avvist`() {
@@ -767,11 +719,7 @@ class SkattepliktigeAarsavregningSkarpTest {
         antallSomKomInn.get() shouldBe 1
     }
 
-    /**
-     * En avvist kjøring skal ikke røre tilstanden til den som pågår. Terskelen for nødbremsen ble
-     * satt før vakten, så en avvist kjøring med en annen terskel endret nødbremsen til den som
-     * faktisk kjørte.
-     */
+    /** En avvist kjøring med annen terskel skal ikke endre nødbremsen til den som pågår. */
     @Test
     fun `en avvist kjøring endrer ikke nødbremsen til den som pågår`() {
         val monitor = JobMonitor(jobName = "test", stats = TomStats())
@@ -793,10 +741,7 @@ class SkattepliktigeAarsavregningSkarpTest {
         første.join(5000)
     }
 
-    /**
-     * Nøyaktig hvor nødbremsen går. Med terskel 2 skal den tredje feilen stoppe jobben, ikke den
-     * andre — en ett-tegns endring i tellingen flytter grensen uten at noen løsere test merker det.
-     */
+    /** Med terskel 2 skal den tredje feilen stoppe jobben, ikke den andre. */
     @Test
     fun `nødbremsen går på feilen etter terskelen, ikke på terskelen`() {
         val monitor = JobMonitor(jobName = "test", stats = TomStats())
@@ -818,11 +763,7 @@ class SkattepliktigeAarsavregningSkarpTest {
 
     private fun utfoerer() = SkattepliktigeAarsavregningSkarpUtfoerer(opprettelseService)
 
-    /**
-     * De fire tellerne som skal dele sakene som passerte filteret mellom seg. Summen er
-     * antallSakerFunnet; antallVilleOppdatertStatus er ikke med, den er en delmengde av
-     * antallMedEksisterendeAarsavregning.
-     */
+    /** De fire tellerne som deler sakene mellom seg; antallVilleOppdatertStatus er en delmengde. */
     private fun Map<String, Any?>.summerSakstellere(): Int =
         listOf(
             "antallVilleOpprettetProsessinstans",
