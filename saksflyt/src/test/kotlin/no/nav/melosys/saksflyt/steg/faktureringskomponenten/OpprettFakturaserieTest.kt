@@ -15,6 +15,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
 import no.nav.melosys.domain.avgift.Penger
@@ -1885,6 +1886,201 @@ class OpprettFakturaserieTest {
 
         verify { faktureringskomponentenClient wasNot Called }
     }
+
+    // ---- MELOSYS-8220: ny vurdering der fakturerbar trygdeavgift bortfaller (f.eks. ikke skattepliktig -> skattepliktig) ----
+
+    private fun opprinneligBehandlingsresultatMedFakturaserie(medÅrsavregning: Boolean, fakturaserieReferanse: String? = FAKTURASERIE_REFERANSE) =
+        Behandlingsresultat.forTest {
+            id = OPPRINNELIG_BEHANDLING_ID
+            this.fakturaserieReferanse = fakturaserieReferanse
+            behandling {
+                id = OPPRINNELIG_BEHANDLING_ID
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak {
+                    type = Sakstyper.FTRL
+                    betalingsvalg = Betalingstype.FAKTURA
+                    medBruker()
+                    if (medÅrsavregning) {
+                        behandling {
+                            id = BEHANDLING_ID_ÅRSAVREGNING
+                            type = Behandlingstyper.ÅRSAVREGNING
+                        }
+                    }
+                }
+            }
+            medlemskapsperiode {
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                fom = LocalDate.of(inneværendeÅr, 1, 1)
+                tom = LocalDate.of(inneværendeÅr, 12, 31)
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+                trygdeavgiftsperiode {
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    periodeFra = LocalDate.of(inneværendeÅr, 1, 1)
+                    periodeTil = LocalDate.of(inneværendeÅr, 12, 31)
+                    grunnlagInntekstperiode {
+                        arbeidsgiversavgiftBetalesTilSkatt = true
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                        type = Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+        }
+
+    /**
+     * Ny vurdering som arver fakturaseriereferansen fra opprinnelig behandling (replikering).
+     * [medPerioderUtenBeløp] = true gir skattepliktig-snarveien: perioder finnes, men alle har beløp null.
+     */
+    private fun nyVurderingUtenFakturerbarTrygdeavgift(
+        opprinneligBehandlingsresultat: Behandlingsresultat,
+        medPerioderUtenBeløp: Boolean,
+        arvetFakturaserieReferanse: String? = FAKTURASERIE_REFERANSE
+    ) = Behandlingsresultat.forTest {
+        id = BEHANDLING_ID
+        type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+        fakturaserieReferanse = arvetFakturaserieReferanse
+        medlemskapsperiode {
+            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.FRIVILLIG
+            fom = LocalDate.of(inneværendeÅr, 1, 1)
+            tom = LocalDate.of(inneværendeÅr, 12, 31)
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+            if (medPerioderUtenBeløp) {
+                trygdeavgiftsperiode {
+                    trygdeavgiftsbeløpMd = BigDecimal.ZERO
+                    trygdesats = BigDecimal.ZERO
+                    periodeFra = LocalDate.of(inneværendeÅr, 1, 1)
+                    periodeTil = LocalDate.of(inneværendeÅr, 12, 31)
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    }
+                }
+            }
+        }
+        vedtakMetadata {
+            vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
+            vedtaksdato = Instant.now().minus(3, ChronoUnit.DAYS)
+        }
+        behandling {
+            id = BEHANDLING_ID
+            opprinneligBehandling = opprinneligBehandlingsresultat.behandling
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            type = Behandlingstyper.NY_VURDERING
+            status = Behandlingsstatus.AVSLUTTET
+            fagsak = opprinneligBehandlingsresultat.behandling!!.fagsak
+        }
+    }
+
+    private fun prosessinstansFor(behandlingsresultat: Behandlingsresultat) = Prosessinstans.forTest {
+        medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
+        medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
+        medBehandling(behandlingsresultat.hentBehandling())
+    }
+
+    private fun mockBortfaltTrygdeavgift(opprinneligBehandlingsresultat: Behandlingsresultat, behandlingsresultat: Behandlingsresultat) {
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(opprinneligBehandlingsresultat) } returns true
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns false
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandlingsresultat.behandling
+        every { pdlService.finnFolkeregisterident(BRUKER_AKTØR_ID) } returns Optional.of(BRUKER_AKTØRID)
+        every { faktureringskomponentenClient.kansellerFakturaserie(any(), any(), any()) } returns NyFakturaserieResponseDto(NY_FAKTURASERIE_REFERANSE)
+    }
+
+    @Test
+    fun `Toggle av - kanseller fakturaserie og årsavregning når ny vurdering blir skattepliktig og trygdeavgiften får beløp null`() {
+        unleash.enableAllExcept(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+        val opprinneligBehandlingsresultat = opprinneligBehandlingsresultatMedFakturaserie(medÅrsavregning = true)
+        val behandlingsresultat = nyVurderingUtenFakturerbarTrygdeavgift(opprinneligBehandlingsresultat, medPerioderUtenBeløp = true)
+        behandlingsresultat.trygdeavgiftsperioder.shouldHaveSize(1)
+        mockBortfaltTrygdeavgift(opprinneligBehandlingsresultat, behandlingsresultat)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_ÅRSAVREGNING) } returns Behandlingsresultat.forTest {
+            id = BEHANDLING_ID_ÅRSAVREGNING
+            fakturaserieReferanse = FAKTURASERIE_REFERANSE_ÅRSAVREGNING
+        }
+
+        opprettFakturaserie.utfør(prosessinstansFor(behandlingsresultat))
+
+        verify(exactly = 1) {
+            faktureringskomponentenClient.kansellerFakturaserie(FAKTURASERIE_REFERANSE, SAKSBEHANDLER_IDENT, listOf(FAKTURASERIE_REFERANSE_ÅRSAVREGNING))
+        }
+        verify(exactly = 0) { faktureringskomponentenClient.lagFakturaserie(any(), any()) }
+        verify { behandlingsresultatService.lagre(match { it.fakturaserieReferanse == NY_FAKTURASERIE_REFERANSE }) }
+        verify(exactly = 1) { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID_ÅRSAVREGNING) }
+        verify(exactly = 1) { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID_ÅRSAVREGNING, Behandlingsresultattyper.FERDIGBEHANDLET) }
+        verify(exactly = 1) { behandlingService.avsluttBehandling(BEHANDLING_ID_ÅRSAVREGNING) }
+    }
+
+    @Test
+    fun `Toggle av - kanseller fakturaserie når ny vurdering ikke har trygdeavgiftsperioder i det hele tatt`() {
+        unleash.enableAllExcept(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+        val opprinneligBehandlingsresultat = opprinneligBehandlingsresultatMedFakturaserie(medÅrsavregning = false)
+        val behandlingsresultat = nyVurderingUtenFakturerbarTrygdeavgift(opprinneligBehandlingsresultat, medPerioderUtenBeløp = false)
+        behandlingsresultat.trygdeavgiftsperioder.shouldBeEmpty()
+        mockBortfaltTrygdeavgift(opprinneligBehandlingsresultat, behandlingsresultat)
+
+        opprettFakturaserie.utfør(prosessinstansFor(behandlingsresultat))
+
+        verify(exactly = 1) { faktureringskomponentenClient.kansellerFakturaserie(FAKTURASERIE_REFERANSE, SAKSBEHANDLER_IDENT, emptyList()) }
+        verify(exactly = 0) { faktureringskomponentenClient.lagFakturaserie(any(), any()) }
+        verify(exactly = 0) { behandlingService.avsluttBehandling(any()) }
+    }
+
+    @Test
+    fun `Toggle av - hopp over kansellering når opprinnelig behandling ikke har fakturaserie`() {
+        unleash.enableAllExcept(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+        val opprinneligBehandlingsresultat = opprinneligBehandlingsresultatMedFakturaserie(medÅrsavregning = false, fakturaserieReferanse = null)
+        val behandlingsresultat =
+            nyVurderingUtenFakturerbarTrygdeavgift(opprinneligBehandlingsresultat, medPerioderUtenBeløp = true, arvetFakturaserieReferanse = null)
+        mockBortfaltTrygdeavgift(opprinneligBehandlingsresultat, behandlingsresultat)
+
+        opprettFakturaserie.utfør(prosessinstansFor(behandlingsresultat))
+
+        verify(exactly = 0) { faktureringskomponentenClient.kansellerFakturaserie(any(), any(), any()) }
+        verify(exactly = 0) { faktureringskomponentenClient.lagFakturaserie(any(), any()) }
+        verify(exactly = 0) { behandlingsresultatService.lagre(any()) }
+    }
+
+    @Test
+    fun `Toggle av - rekjøring hopper over kansellering når fakturaseriereferansen allerede er byttet ut`() {
+        unleash.enableAllExcept(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+        val opprinneligBehandlingsresultat = opprinneligBehandlingsresultatMedFakturaserie(medÅrsavregning = false)
+        val behandlingsresultat = nyVurderingUtenFakturerbarTrygdeavgift(
+            opprinneligBehandlingsresultat,
+            medPerioderUtenBeløp = true,
+            arvetFakturaserieReferanse = NY_FAKTURASERIE_REFERANSE
+        )
+        mockBortfaltTrygdeavgift(opprinneligBehandlingsresultat, behandlingsresultat)
+
+        opprettFakturaserie.utfør(prosessinstansFor(behandlingsresultat))
+
+        verify(exactly = 0) { faktureringskomponentenClient.kansellerFakturaserie(any(), any(), any()) }
+        verify(exactly = 0) { faktureringskomponentenClient.lagFakturaserie(any(), any()) }
+    }
+
+    @Test
+    fun `Toggle på - send tomme perioder med forrige referanse når ny vurdering blir skattepliktig og trygdeavgiften får beløp null`() {
+        unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+        val opprinneligBehandlingsresultat = opprinneligBehandlingsresultatMedFakturaserie(medÅrsavregning = true)
+        val behandlingsresultat = nyVurderingUtenFakturerbarTrygdeavgift(opprinneligBehandlingsresultat, medPerioderUtenBeløp = true)
+        behandlingsresultat.trygdeavgiftsperioder.shouldHaveSize(1)
+        mockBortfaltTrygdeavgift(opprinneligBehandlingsresultat, behandlingsresultat)
+
+        opprettFakturaserie.utfør(prosessinstansFor(behandlingsresultat))
+
+        verify(exactly = 1) { faktureringskomponentenClient.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 0) { faktureringskomponentenClient.kansellerFakturaserie(any(), any(), any()) }
+        verify(exactly = 0) { behandlingService.avsluttBehandling(any()) }
+        slotFakturaserieDto.captured.fakturaserieReferanse.shouldBe(FAKTURASERIE_REFERANSE)
+        slotFakturaserieDto.captured.perioder.shouldBeEmpty()
+    }
+
 
     companion object {
         const val SAKSBEHANDLER_IDENT = "S123456"

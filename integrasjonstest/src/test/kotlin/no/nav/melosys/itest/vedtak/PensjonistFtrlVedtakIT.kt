@@ -19,6 +19,7 @@ import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
 import no.nav.melosys.itest.AvgiftFaktureringTestBase
@@ -42,7 +43,6 @@ import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -78,13 +78,34 @@ class PensjonistFtrlVedtakIT(
     }
 
     @Test
-    @Disabled(
-        "MELOSYS-8220: testen forventer at ny vurdering fra ikke skattepliktig til skattepliktig sender en " +
-            "andre POST /fakturaserier med tom periodeliste. Faktureringskomponenten avviser det med 400 " +
-            "\"Du må oppgi minst én periode\", og steget kansellerer nå i stedet. Testen er grønn kun fordi " +
-            "WireMock-stubben returnerer 200 uansett innhold. Må oppdateres når adferden er avklart."
-    )
-    fun `Pensjonist vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og send tomme perioder (avregn mot 0) i ny vurdering`() {
+    fun `Ny vurdering fra ikke skattepliktig til skattepliktig - toggle på - sender tomme perioder med forrige referanse (avregning fra i år)`() {
+        kjørNyVurderingFraIkkeSkattepliktigTilSkattepliktig()
+
+        mockServer.verify(2, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
+        mockServer.verify(
+            1,
+            WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier"))
+                .withRequestBody(WireMock.equalToJson("""{"fakturaserieReferanse": "$fakturaserieReferanse", "perioder": []}""", true, true))
+        )
+        mockServer.verify(0, WireMock.postRequestedFor(WireMock.urlMatching("/fakturaserier/.*/kanseller")))
+    }
+
+    @Test
+    fun `Ny vurdering fra ikke skattepliktig til skattepliktig - toggle av - kansellerer fakturaserien`() {
+        fakeUnleash.enableAllExcept(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+
+        kjørNyVurderingFraIkkeSkattepliktigTilSkattepliktig()
+
+        mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
+        mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier/$fakturaserieReferanse/kanseller")))
+    }
+
+    /**
+     * Førstegangsbehandling som ikke skattepliktig (fakturaserie opprettes), deretter ny vurdering som skattepliktig
+     * der trygdeavgiften beregnes med beløp null. Hva som skal skje mot faktureringskomponenten avhenger av togglen
+     * MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER, og verifiseres i testene som kaller denne (MELOSYS-8220).
+     */
+    private fun kjørNyVurderingFraIkkeSkattepliktigTilSkattepliktig() {
         val saksnummer = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
         val behandlingsId = executeAndWait(
@@ -183,8 +204,6 @@ class PensjonistFtrlVedtakIT(
                     lovvalgsperioder = listOf()
                 )
             )
-
-        mockServer.verify(2, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
     }
 
     @Test
