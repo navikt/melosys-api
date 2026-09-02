@@ -76,10 +76,11 @@ ENCODING="${ENTRY%%$'\t'*}"
 VALUE="${ENTRY#*$'\t'}"
 
 if [ "$ENCODING" = "base64" ]; then
-    if ! VALUE=$(printf '%s' "$VALUE" | base64 -d 2>/dev/null); then
+    VALUE_DECODED=$(printf '%s' "$VALUE" | base64 -d 2>/dev/null || printf '%s' "$VALUE" | base64 -D 2>/dev/null) || {
         echo "Base64-dekoding feilet for $ENV_VAR_NAME i secret $SECRET_NAME." >&2
         exit 1
-    fi
+    }
+    VALUE="$VALUE_DECODED"
     if [ -z "$VALUE" ]; then
         echo "Base64-dekoding ga tom verdi for $ENV_VAR_NAME i secret $SECRET_NAME." >&2
         exit 1
