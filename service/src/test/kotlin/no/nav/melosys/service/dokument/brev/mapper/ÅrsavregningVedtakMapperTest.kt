@@ -16,6 +16,7 @@ import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
 import no.nav.melosys.domain.dokument.personDokumentForTest
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.exception.FunksjonellException
@@ -127,6 +128,8 @@ class ÅrsavregningVedtakMapperTest {
         result.minimumsbeløpForFakturering shouldBe BigDecimal(100)
         result.pliktigMedlemskap shouldBe false
         result.eøsEllerTrygdeavtale shouldBe true
+        result.erPensjonist shouldBe false
+        result.sakstype shouldBe Sakstyper.EU_EOS
     }
 
     @Test
@@ -233,6 +236,24 @@ class ÅrsavregningVedtakMapperTest {
         result.erNyÅrsavregning shouldBe false
     }
 
+
+    @Test
+    fun `mapÅrsavregning setter erPensjonist true og sakstype når behandlingen gjelder en pensjonist`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata {
+            behandling {
+                tema = Behandlingstema.PENSJONIST
+                fagsak { type = Sakstyper.EU_EOS }
+            }
+        }
+        val årsavregningModel = lagÅrsavregningModel(BigDecimal(2000), BigDecimal(1000))
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.shouldNotBeNull()
+        result.erPensjonist shouldBe true
+        result.sakstype shouldBe Sakstyper.EU_EOS
+    }
 
     @Test
     fun `mapÅrsavregningVedtak setter korrekt arbeidsgiveravgiftBetalt verdi`() {

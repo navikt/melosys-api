@@ -1,12 +1,14 @@
 package no.nav.melosys.itest
 
 import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.maps.shouldBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.behandling
-import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -21,7 +23,8 @@ import no.nav.melosys.domain.vedtakMetadata
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflyt.ProsessinstansRepository
-import no.nav.melosys.saksflyt.statistikk.RammeavtaleStatistikkService
+import no.nav.melosys.service.statistikk.RammeavtaleSak
+import no.nav.melosys.service.statistikk.RammeavtaleStatistikkService
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -31,10 +34,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.util.TimeZone
 
 /**
  * Verifiserer mot ekte Oracle at uttrekket for rammeavtale om fjernarbeid (TWA, MELOSYS-8150) kun teller
- * ferdigbehandlede saker (fastsatt lovvalg med vedtaksdato), og at året som telles er vedtaksåret.
+ * ferdigbehandlede saker (fastsatt lovvalg med vedtaksdato), at året som telles er vedtaksåret, og at
+ * saksnummeret (MEL-nr) bak hver behandling blir med i responsen.
  */
 class RammeavtaleStatistikkIT(
     @Autowired private val rammeavtaleStatistikkService: RammeavtaleStatistikkService,
@@ -70,6 +75,12 @@ class RammeavtaleStatistikkIT(
             statistikk.antallPerVedtaksaar shouldBe mapOf("2024" to 1L, "2025" to 1L)
             statistikk.antall shouldBe 2
         }
+        withClue("Saksnummer følger med, sortert på vedtaksdato") {
+            statistikk.saker shouldBe listOf(
+                RammeavtaleSak("MEL-8150-B", "2024", LocalDate.of(2024, 6, 1)),
+                RammeavtaleSak("MEL-8150-A", "2025", LocalDate.of(2025, 3, 1)),
+            )
+        }
     }
 
     @Test
@@ -87,6 +98,7 @@ class RammeavtaleStatistikkIT(
         withClue("Både 1. januar og 31. desember skal være med, men ikke dagene utenfor") {
             statistikk.antallPerVedtaksaar shouldBe mapOf("2025" to 2L)
             statistikk.antall shouldBe 2
+            statistikk.saker!!.map { it.saksnummer } shouldBe listOf("MEL-8150-G", "MEL-8150-H")
         }
     }
 
@@ -103,6 +115,72 @@ class RammeavtaleStatistikkIT(
         val statistikk = rammeavtaleStatistikkService.hentRammeavtaleFjernarbeidStatistikk(null, null)
 
         statistikk.antallPerVedtaksaar shouldBe mapOf("2025" to 1L)
+        withClue("DISTINCT skal fjerne duplikatraden fra den andre anmodningen") {
+            statistikk.saker shouldBe listOf(RammeavtaleSak("MEL-8150-J", "2025", LocalDate.of(2025, 2, 1)))
+        }
+    }
+
+    @Test
+    fun `to behandlinger paa samme sak gir to rader med samme saksnummer`() {
+        val fagsak = opprettFagsak("MEL-8150-M")
+        // De to første deler vedtaksdato: uten br.behandling_id i select-lista ville SELECT DISTINCT slått dem
+        // sammen til én rad, og antallet ville blitt 3 i stedet for 4
+        lagBehandling(fagsak, erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2025, 4, 1))
+        lagBehandling(fagsak, erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2025, 4, 1))
+        lagBehandling(fagsak, erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2025, 8, 1))
+        // Annen sak samme dato: uten saksnummer i ORDER BY er rekkefølgen mellom denne og MEL-8150-M vilkårlig
+        lagSak("MEL-8150-A2", erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2025, 4, 1))
+
+        val statistikk = rammeavtaleStatistikkService.hentRammeavtaleFjernarbeidStatistikk(null, null)
+
+        withClue("Statistikken teller behandlinger, ikke saker, så MEL-nummeret gjentas") {
+            statistikk.antall shouldBe 4
+            statistikk.antallPerVedtaksaar shouldBe mapOf("2025" to 4L)
+            statistikk.saker shouldBe listOf(
+                RammeavtaleSak("MEL-8150-A2", "2025", LocalDate.of(2025, 4, 1)),
+                RammeavtaleSak("MEL-8150-M", "2025", LocalDate.of(2025, 4, 1)),
+                RammeavtaleSak("MEL-8150-M", "2025", LocalDate.of(2025, 4, 1)),
+                RammeavtaleSak("MEL-8150-M", "2025", LocalDate.of(2025, 8, 1)),
+            )
+        }
+    }
+
+    @Test
+    fun `vedtaksaaret foelger JVM-tidssonen, som i prod er Europe-Oslo`() {
+        // hibernate.timezone.default_storage=NORMALIZE lagrer Instant som veggklokke i JVM-tidssonen, og
+        // TO_CHAR leser den rå. Vedtaksåret følger derfor sonen JVM-en kjører i — Europe/Oslo i prod, satt via
+        // JAVA_TOOL_OPTIONS i Dockerfile. Sonen pinnes her fordi byggene kjører i UTC og ellers ville testet
+        // noe annet enn det som skjer i prod.
+        medTidssone("Europe/Oslo") {
+            lagSak(
+                "MEL-8150-TZ",
+                erFjernarbeid = true,
+                resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+                vedtaksdato = Instant.parse("2024-12-31T23:00:00Z"),
+            )
+
+            val statistikk = rammeavtaleStatistikkService.hentRammeavtaleFjernarbeidStatistikk(null, null)
+
+            withClue("23:00Z 31. desember er 00:00 1. januar i Norge, og skal telles i 2025") {
+                statistikk.antallPerVedtaksaar shouldBe mapOf("2025" to 1L)
+                statistikk.saker shouldBe listOf(RammeavtaleSak("MEL-8150-TZ", "2025", LocalDate.of(2025, 1, 1)))
+            }
+        }
+    }
+
+    @Test
+    fun `inkluderSaksnummer false gir tallene uten saksnummerlisten`() {
+        lagSak("MEL-8150-N", erFjernarbeid = true, resultattype = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, vedtaksdato = dato(2025, 3, 1))
+
+        val statistikk = rammeavtaleStatistikkService.hentRammeavtaleFjernarbeidStatistikk(
+            null,
+            null,
+            inkluderSaksnummer = false,
+        )
+
+        statistikk.saker.shouldBeNull()
+        statistikk.antall shouldBe 1
+        statistikk.antallPerVedtaksaar shouldBe mapOf("2025" to 1L)
     }
 
     @Test
@@ -111,11 +189,30 @@ class RammeavtaleStatistikkIT(
 
         statistikk.antall shouldBe 0
         statistikk.antallPerVedtaksaar.shouldBeEmpty()
+        statistikk.saker!!.shouldBeEmpty()
     }
 
-    /** Persisterer en EU/EØS-sak med behandlingsresultat, evt. vedtaksdato og en anmodning-om-unntak-prosess. */
+    /** Persisterer en EU/EØS-sak med én behandling, behandlingsresultat, evt. vedtaksdato og en anmodningsprosess. */
     private fun lagSak(
         saksnummer: String,
+        erFjernarbeid: Boolean,
+        resultattype: Behandlingsresultattyper,
+        vedtaksdato: Instant?,
+    ): Long = lagBehandling(opprettFagsak(saksnummer), erFjernarbeid, resultattype, vedtaksdato)
+
+    private fun opprettFagsak(saksnummer: String): Fagsak = fagsakRepository.save(
+        Fagsak.forTest {
+            this.saksnummer = saksnummer
+            type = Sakstyper.EU_EOS
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            status = Saksstatuser.LOVVALG_AVKLART
+            medBruker()
+        },
+    )
+
+    /** Legger en behandling med behandlingsresultat og anmodningsprosess på en allerede lagret fagsak. */
+    private fun lagBehandling(
+        fagsak: Fagsak,
         erFjernarbeid: Boolean,
         resultattype: Behandlingsresultattyper,
         vedtaksdato: Instant?,
@@ -129,23 +226,15 @@ class RammeavtaleStatistikkIT(
                 this.vedtaksdato = vedtaksdato
             }
             behandling {
+                medFagsak(fagsak)
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
-                fagsak {
-                    this.saksnummer = saksnummer
-                    type = Sakstyper.EU_EOS
-                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                    status = Saksstatuser.LOVVALG_AVKLART
-                    medBruker()
-                }
             }
         }
 
-        val fagsak = behandlingsresultat.hentBehandling().fagsak
-        // Rydder den toveis relasjonen slik at Fagsak og Behandlingsresultat kan lagres hver for seg
-        fagsak.behandlinger.clear()
-        fagsakRepository.save(fagsak)
+        // Fagsaken er allerede lagret og lagres ikke på nytt, så behandlingen persisteres kun via
+        // behandlingsresultatet. Fagsak.behandlinger er inverssiden uten orphanRemoval og trenger ingen opprydding
         val lagret = behandlingsresultatRepository.saveAndFlush(behandlingsresultat)
 
         val behandlingId = lagret.hentBehandling().id
@@ -170,4 +259,15 @@ class RammeavtaleStatistikkIT(
 
     private fun dato(år: Int, måned: Int, dag: Int): Instant =
         LocalDate.of(år, måned, dag).atStartOfDay(ZoneId.systemDefault()).toInstant()
+
+    /** Kjører blokka med en gitt JVM-tidssone og setter den forrige tilbake etterpå. */
+    private fun medTidssone(sone: String, blokk: () -> Unit) {
+        val opprinnelig = TimeZone.getDefault()
+        TimeZone.setDefault(TimeZone.getTimeZone(sone))
+        try {
+            blokk()
+        } finally {
+            TimeZone.setDefault(opprinnelig)
+        }
+    }
 }

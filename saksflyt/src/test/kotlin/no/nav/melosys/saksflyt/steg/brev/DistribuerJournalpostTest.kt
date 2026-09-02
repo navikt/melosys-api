@@ -13,6 +13,7 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.doksys.DoksysFasade
 import no.nav.melosys.integrasjon.ereg.EregFasade
@@ -207,7 +208,7 @@ class DistribuerJournalpostTest {
             landkode = Land_iso2.GB
         }
 
-        every { mockUtenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_iso2.GB)) } returns utenlandskMyndighet
+        every { mockUtenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_iso2.GB), any()) } returns utenlandskMyndighet
 
 
         distribuerJournalpost.utfør(prosessinstans)
@@ -225,6 +226,7 @@ class DistribuerJournalpostTest {
     private fun setupHappypath(journalpostId: String, rolle: Mottakerroller, distribusjonstype: Distribusjonstype): Prosessinstans {
         val brevbestilling = MangelbrevBrevbestilling.Builder()
             .medDistribusjonstype(distribusjonstype)
+            .medProduserbartdokument(Produserbaredokumenter.MANGELBREV_BRUKER)
             .build()
 
         every { mockBehandlingService.hentBehandlingMedSaksopplysninger(any()) } returns TestdataFactory.lagBehandling()

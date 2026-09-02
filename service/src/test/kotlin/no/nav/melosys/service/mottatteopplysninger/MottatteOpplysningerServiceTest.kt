@@ -280,7 +280,7 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    fun oppdaterMottatteOpplysningerFraSøknad_erstatterSidemenyfelterOgBeholderOevrige() {
+    fun oppdaterMottatteOpplysningerFraSøknad_erstatterSidemenyfelterOgBeholderTypeOgOevrige() {
         val opprinneligLoenn = no.nav.melosys.domain.mottatteopplysninger.data.LoennOgGodtgjoerelse(
             norskArbgUtbetalerLoenn = true
         )
@@ -291,7 +291,7 @@ internal class MottatteOpplysningerServiceTest {
         }
         val mottatteOpplysninger = MottatteOpplysninger().apply {
             mottatteOpplysningerData = eksisterende
-            type = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
+            type = Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS
         }
 
         val nySoeknad = no.nav.melosys.domain.mottatteopplysninger.Soeknad().apply {
@@ -309,6 +309,7 @@ internal class MottatteOpplysningerServiceTest {
             arbeidPaaLand = no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.ArbeidPaaLand().apply {
                 erFastArbeidssted = true
             }
+            arbeidsgiverOgArbeidstakerHarUlikPeriode = true
         }
 
         every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.of(mottatteOpplysninger)
@@ -326,6 +327,7 @@ internal class MottatteOpplysningerServiceTest {
         oppdatert.foretakUtland.shouldHaveSize(1)
         oppdatert.foretakUtland.first().navn.shouldBe("Berlin GmbH")
         oppdatert.arbeidPaaLand.erFastArbeidssted.shouldBe(true)
+        oppdatert.arbeidsgiverOgArbeidstakerHarUlikPeriode.shouldBe(true)
         // Soeknad-spesifikke felter som ikke mappes fra søknad skal beholdes
         oppdatert.loennOgGodtgjoerelse.shouldBe(opprinneligLoenn)
     }
@@ -451,7 +453,7 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    fun opprettSøknadDigital_setterTypeUtsendteArbeidstakereEøs() {
+    fun opprettSøknadDigital_setterTypeYrkesaktiveEøs() {
         val behandling = setupMock(
             Sakstyper.EU_EOS,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
@@ -466,7 +468,7 @@ internal class MottatteOpplysningerServiceTest {
             mottatteOpplysningerRepositoryMock.save(capture(slot))
         }
         slot.captured.apply {
-            type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS)
+            type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS)
             this.behandling.shouldBe(behandling)
             eksternReferanseID.shouldBe("ref-123")
             mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()

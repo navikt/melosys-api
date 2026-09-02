@@ -12,6 +12,7 @@ import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.UtenlandskMyndighetRepository
@@ -133,6 +134,47 @@ class UtenlandskMyndighetServiceTest {
 
 
         exception.message shouldContain "Finner ikke utenlandskMyndighet for SE."
+    }
+
+    @Test
+    fun hentUtenlandskMyndighet_girEgenAdresse_forFritekstbrevTilAmerikanskTrygdemyndighet() {
+        val myndighet = utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(
+            "US:USA00000",
+            Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV
+        )
+
+
+        myndighet.navn shouldBe "Social Security Administration"
+        myndighet.gateadresseAsList shouldBe listOf(
+            "Compliance and Agreement Branch",
+            "International Support Branch, NT 03-A-09",
+            "6100 Wabash Avenue"
+        )
+        myndighet.poststed shouldBe "Baltimore MD 21215"
+        myndighet.landkode shouldBe Land_iso2.US
+        verify(exactly = 0) { utenlandskMyndighetRepositoryMock.findByLandkode(any()) }
+    }
+
+    @Test
+    fun hentUtenlandskMyndighet_henterUSAFraDatabasen_forAlleAndreProduserbaredokumenter() {
+        val fraDatabasen = UtenlandskMyndighet().apply { landkode = Land_iso2.US }
+        every { utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.US) } returns Optional.of(fraDatabasen)
+
+
+        utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.US, Produserbaredokumenter.FRITEKSTBREV) shouldBe fraDatabasen
+        utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.US) shouldBe fraDatabasen
+    }
+
+    @Test
+    fun hentUtenlandskMyndighet_henterAndreLandFraDatabasen_ogsåForFritekstbrev() {
+        val fraDatabasen = UtenlandskMyndighet().apply { landkode = Land_iso2.GB }
+        every { utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.GB) } returns Optional.of(fraDatabasen)
+
+
+        utenlandskMyndighetService.hentUtenlandskMyndighet(
+            Land_iso2.GB,
+            Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV
+        ) shouldBe fraDatabasen
     }
 
     @Test

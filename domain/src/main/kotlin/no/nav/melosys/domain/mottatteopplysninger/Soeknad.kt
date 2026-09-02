@@ -11,4 +11,5 @@ class Soeknad : MottatteOpplysningerData() {
     var arbeidsgiversBekreftelse = ArbeidsgiversBekreftelse()
     var utenlandsoppdraget = Utenlandsoppdraget()
     var arbeidssituasjonOgOevrig = ArbeidssituasjonOgOevrig()
+    var arbeidsgiverOgArbeidstakerHarUlikPeriode = false
 }

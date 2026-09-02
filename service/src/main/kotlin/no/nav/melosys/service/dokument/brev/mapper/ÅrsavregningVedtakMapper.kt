@@ -42,8 +42,10 @@ class ÅrsavregningVedtakMapper(
             return mapManueltBeregnetÅrsavregning(brevbestilling, behandlingsresultat.hentBehandling(), årsavregningModel)
         }
 
-        val fagsak = behandlingsresultat.hentBehandling().fagsak
-
+        val behandling = behandlingsresultat.hentBehandling()
+        val fagsak = behandling.fagsak
+        val erPensjonist = behandling.erPensjonist()
+        val sakstype = fagsak.type
         val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.avgiftspliktigperioder)
         val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttTrygdeavgiftsGrunnlag?.avgiftspliktigperioder)
         val erNyÅrsavregning =
@@ -74,6 +76,8 @@ class ÅrsavregningVedtakMapper(
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.hentBehandling()),
             harSkjoennsfastsattInntektsgrunnlag = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag,
             erNyÅrsavregning = erNyÅrsavregning,
+            erPensjonist = erPensjonist,
+            sakstype = sakstype,
             harMisjonaerInntekt = harMisjonaerInntekt(årsavregningModel.endeligAvgift, årsavregningModel.tidligereAvgift),
             minstebelopVerdi = minstebelop?.beloep,
             minstebelopAar = minstebelop?.aar,
@@ -94,7 +98,8 @@ class ÅrsavregningVedtakMapper(
         val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.avgiftspliktigperioder)
         val erNyÅrsavregning = årsavregningModel.tidligereÅrsavregningmanueltAvgiftBeloep != null
         val minstebelop = minstebeløpService.finnMinstebeløp(årsavregningModel.tidligereAvgift)
-
+        val erPensjonist = behandling.erPensjonist()
+        val sakstype = behandling.fagsak.type
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
             årsavregningsår = årsavregningModel.år,
@@ -117,7 +122,9 @@ class ÅrsavregningVedtakMapper(
             minstebelopVerdi = minstebelop?.beloep,
             minstebelopAar = minstebelop?.aar,
             harMinstebelopForskuddsvis = årsavregningModel.tidligereAvgift.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
-            har25ProsentRegelForskuddsvis = årsavregningModel.tidligereAvgift.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+            har25ProsentRegelForskuddsvis = årsavregningModel.tidligereAvgift.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL),
+            erPensjonist = erPensjonist,
+            sakstype = sakstype
         )
     }
 
