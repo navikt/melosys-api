@@ -133,7 +133,7 @@ microsoft:
 spring:
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
-    password: ${melosysDB.password}
+    password: ${MELOSYSDB_PASSWORD}
     url: jdbc:oracle:thin:@10.51.9.59:1521/MELOSYS_Q1
     username: MELOSYS_Q1
   flyway:
@@ -156,8 +156,8 @@ spring:
 stsPolicy:
   url: classpath:stsPolicy.xml
 systemuser:
-  password: ${systemuser.password}
-  username: srvmelosys
+  password: ${SRV_PASSWORD}
+  username: ${SRV_USERNAME:srvmelosys}
 tilgangsmaskinen:
   url: https://tilgangsmaskin.intern.dev.nav.no
 unleash:

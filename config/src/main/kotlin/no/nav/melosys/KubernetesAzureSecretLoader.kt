@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 /**
- * Laster Azure client secret fra nais (plattform-styrt secret) når applikasjonen
+ * Laster hemmeligheter fra nais (plattform-styrte secrets) når applikasjonen
  * kjører med local-q1 eller local-q2 profil.
  *
  * Se https://doc.nais.io/services/secrets/how-to/get-platform-secret/
@@ -22,10 +22,52 @@ class KubernetesAzureSecretLoader : EnvironmentPostProcessor {
         private val LOCAL_Q_PROFILE = arrayOf("local-q2", "local-q1")
         private const val DEFAULT_SCRIPT_PATH = "scripts/get-azure-secrets.sh"
         private const val DEFAULT_ENVIRONMENT = "dev-fss"
-        private const val DEFAULT_REASON = "Lokal utvikling av melosys-api"
+        private const val DEFAULT_TEAM = "teammelosys"
         private val TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
+        private val REASON_TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
         private const val CLASS_NAME = "no.nav.melosys.KubernetesAzureSecretLoader"
         private val IS_WINDOWS = System.getProperty("os.name").lowercase().contains("win")
+
+        private const val CLIENT_ID = "AZURE_APP_CLIENT_ID"
+        private const val CLIENT_SECRET = "AZURE_APP_CLIENT_SECRET"
+        private const val DB_PASSWORD = "MELOSYSDB_PASSWORD"
+        private const val SRV_USERNAME = "SRV_USERNAME"
+        private const val SRV_PASSWORD = "SRV_PASSWORD"
+
+        private val REQUESTED_VARIABLES = listOf(
+            CLIENT_ID,
+            CLIENT_SECRET,
+            DB_PASSWORD,
+            SRV_USERNAME,
+            SRV_PASSWORD
+        )
+
+        /**
+         * Ekstra property-navn som skal peke på samme verdi som miljøvariabelen.
+         * AZURE_APP_*-variablene refereres direkte ved env-navn i application.yml
+         * og trenger derfor ingen alias.
+         *
+         * MELOSYSDB_URL og MELOSYSDB_USERNAME hentes bevisst ikke. URL-en på nais
+         * peker på en intern adresse som ikke er tilgjengelig lokalt, og brukernavnet
+         * er ikke hemmelig. Begge er derfor hardkodet per profil i
+         * application-local-q1/q2.yml.
+         */
+        private val PROPERTY_ALIASES = mapOf(
+            DB_PASSWORD to listOf("melosysDB.password"),
+            SRV_USERNAME to listOf("systemuser.username"),
+            SRV_PASSWORD to listOf("systemuser.password")
+        )
+
+        /**
+         * Begrunnelsen havner i nais sin audit-logg. Den skal gjøre det tydelig for
+         * den som leser loggen hvorfor hemmeligheten ble lest ut, og hvor den tok veien.
+         */
+        private fun buildReason(profile: String, variables: List<String>): String {
+            val tidspunkt = LocalDateTime.now().format(REASON_TIMESTAMP_FORMATTER)
+            return "Lokal utvikling av melosys-api med profil $profile, startet $tidspunkt. " +
+                "Verdiene (${variables.joinToString(", ")}) settes kun som miljøvariabler " +
+                "i den lokale applikasjonsprosessen og lagres ikke på disk."
+        }
     }
 
     private var applicationName = "melosys"
@@ -53,7 +95,8 @@ class KubernetesAzureSecretLoader : EnvironmentPostProcessor {
         val scriptPath = environment.getProperty("nais.azure.script.path")
             ?: environment.getProperty("kubernetes.azure.script.path", DEFAULT_SCRIPT_PATH)
         val naisEnvironment = environment.getProperty("nais.azure.environment", DEFAULT_ENVIRONMENT)
-        val reason = environment.getProperty("nais.azure.reason", DEFAULT_REASON)
+        val team = environment.getProperty("nais.azure.team", DEFAULT_TEAM)
+        val debug = environment.getProperty("nais.azure.debug", "false").toBoolean()
         val extraPaths = listOfNotNull(
             environment.getProperty("nais.cli.path"),
             environment.getProperty("nais.jq.path")
@@ -61,39 +104,68 @@ class KubernetesAzureSecretLoader : EnvironmentPostProcessor {
 
         applicationName = environment.getProperty("nais.azure.app-name", applicationName)
 
-        try {
-            logInfo("Henter AZURE_APP_CLIENT_SECRET for $applicationName i $naisEnvironment via nais CLI...")
-            val clientSecret = executeShellScript(scriptPath, naisEnvironment, reason, extraPaths).trim()
+        // Variabler som allerede er satt i miljøet skal ikke overstyres
+        val missing = REQUESTED_VARIABLES.filter { environment.getProperty(it).isNullOrBlank() }
 
-            if (clientSecret.isNotBlank()) {
-                applyClientSecret(environment, clientSecret)
-                logInfo("Lastet inn AZURE_APP_CLIENT_SECRET")
-            } else {
-                logWarn("Tom AZURE_APP_CLIENT_SECRET returnert fra script")
+        if (missing.isEmpty()) {
+            logInfo("Alle nais-variabler er allerede satt, hopper over oppslag mot nais")
+            return
+        }
+
+        try {
+            val profile = LOCAL_Q_PROFILE.firstOrNull { it in environment.activeProfiles } ?: "local-q"
+            val reason = environment.getProperty("nais.azure.reason") ?: buildReason(profile, missing)
+
+            logInfo("Henter ${missing.joinToString(", ")} for $applicationName i $naisEnvironment via nais CLI...")
+            val output = executeShellScript(scriptPath, naisEnvironment, team, reason, debug, missing, extraPaths)
+            val values = parseOutput(output)
+
+            if (values.isEmpty()) {
+                logWarn("Ingen verdier returnert fra script")
+                return
+            }
+
+            applyValues(environment, values)
+
+            val notFound = missing - values.keys
+            if (notFound.isNotEmpty()) {
+                logWarn("Fant ikke: ${notFound.joinToString(", ")}. Kjør scriptet med --list for å se tilgjengelige variabler.")
             }
         } catch (e: Exception) {
-            logError("Feilet med å hente AZURE_APP_CLIENT_SECRET: ${e.message}")
+            logError("Feilet med å hente hemmeligheter fra nais: ${e.message}")
             logError("Sjekk at 'nais' og 'jq' er installert og at du er innlogget med 'nais login'.")
         }
     }
 
-    private fun applyClientSecret(environment: ConfigurableEnvironment, clientSecret: String) {
-        val properties = mapOf(
-            "AZURE_APP_CLIENT_SECRET" to clientSecret,
-            "azure.client.secret" to clientSecret,
-            "spring.security.oauth2.client.registration.azure.client-secret" to clientSecret
-        )
+    /** Scriptet skriver én "NAVN=verdi" per linje når flere variabler etterspørres. */
+    private fun parseOutput(output: String): Map<String, String> =
+        output.lineSequence()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() && it.contains('=') }
+            .map { line -> line.substringBefore('=') to line.substringAfter('=') }
+            .filter { (name, value) -> name.isNotBlank() && value.isNotBlank() }
+            .toMap()
 
-        val propertySource = MapPropertySource("azure-client-secret", properties)
-        environment.propertySources.addFirst(propertySource)
-        System.setProperty("AZURE_APP_CLIENT_SECRET", clientSecret)
-        logInfo("Client secret er satt")
+    private fun applyValues(environment: ConfigurableEnvironment, values: Map<String, String>) {
+        val properties = mutableMapOf<String, Any>()
+
+        values.forEach { (name, value) ->
+            properties[name] = value
+            PROPERTY_ALIASES[name]?.forEach { alias -> properties[alias] = value }
+            System.setProperty(name, value)
+        }
+
+        environment.propertySources.addFirst(MapPropertySource("nais-secrets", properties))
+        logInfo("Lastet inn: ${values.keys.joinToString(", ")}")
     }
 
     private fun executeShellScript(
         scriptPath: String,
         naisEnvironment: String,
+        team: String,
         reason: String,
+        debug: Boolean,
+        variables: List<String>,
         extraPaths: List<String>
     ): String {
         val scriptFile = File(System.getProperty("user.dir"), scriptPath)
@@ -115,11 +187,20 @@ class KubernetesAzureSecretLoader : EnvironmentPostProcessor {
             logInfo("La til ${extraPaths.joinToString(", ")} i PATH")
         }
 
+        val arguments = buildList {
+            add("--app"); add(applicationName)
+            add("--environment"); add(naisEnvironment)
+            add("--team"); add(team)
+            if (debug) add("--debug")
+            add("--")
+            addAll(variables)
+        }
+
         // Kjør scriptet direkte med argumenter, ikke via `shell -c` med innlimt streng.
         val command = if (IS_WINDOWS) {
-            arrayOf("cmd.exe", "/c", scriptFile.absolutePath, applicationName, naisEnvironment)
+            arrayOf("cmd.exe", "/c", scriptFile.absolutePath) + arguments
         } else {
-            arrayOf(scriptFile.absolutePath, applicationName, naisEnvironment)
+            arrayOf(scriptFile.absolutePath) + arguments
         }
 
         val errorFile = File.createTempFile("azure-secret-", ".err").apply { deleteOnExit() }
@@ -138,15 +219,27 @@ class KubernetesAzureSecretLoader : EnvironmentPostProcessor {
         val errorOutput = runCatching { errorFile.readText().trim() }.getOrDefault("")
         errorFile.delete()
 
+        // stdout inneholder hemmelighetene og må ALDRI logges eller pakkes inn i en exception.
+        // Kun stderr fra scriptet er trygt å vise; det inneholder bare navn og feilmeldinger.
+        val result = output.toString().trim()
+
         if (exitCode != 0) {
-            val details = errorOutput.ifBlank { output.toString().trim().ifBlank { "(ingen output)" } }
-            throw RuntimeException("Script feilet med exit code $exitCode:\n$details")
+            if (errorOutput.isNotBlank()) {
+                logWarn(errorOutput)
+            }
+            // Scriptet returnerer exit 1 også ved delvis suksess. Har vi fått noe brukbart,
+            // bruker vi det og lar kallende kode rapportere hva som manglet.
+            if (result.isBlank()) {
+                throw RuntimeException("Script feilet med exit code $exitCode. Se meldingene over.")
+            }
+            logWarn("Script feilet med exit code $exitCode, men noen verdier ble hentet")
+            return result
         }
 
         if (errorOutput.isNotBlank()) {
             logWarn(errorOutput)
         }
 
-        return output.toString().trim()
+        return result
     }
 }
