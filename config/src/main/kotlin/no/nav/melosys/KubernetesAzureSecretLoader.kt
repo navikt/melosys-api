@@ -87,7 +87,7 @@ class KubernetesAzureSecretLoader : EnvironmentPostProcessor {
         val propertySource = MapPropertySource("azure-client-secret", properties)
         environment.propertySources.addFirst(propertySource)
         System.setProperty("AZURE_APP_CLIENT_SECRET", clientSecret)
-        logInfo("Setter client secret: ${clientSecret.take(3)}...${clientSecret.takeLast(3)}")
+        logInfo("Client secret er satt")
     }
 
     private fun executeShellScript(
@@ -115,11 +115,11 @@ class KubernetesAzureSecretLoader : EnvironmentPostProcessor {
             logInfo("La til ${extraPaths.joinToString(", ")} i PATH")
         }
 
+        // Kjør scriptet direkte med argumenter, ikke via `shell -c` med innlimt streng.
         val command = if (IS_WINDOWS) {
             arrayOf("cmd.exe", "/c", scriptFile.absolutePath, applicationName, naisEnvironment)
         } else {
-            val shell = System.getenv("SHELL") ?: "/bin/bash"
-            arrayOf(shell, "-c", "\"${scriptFile.absolutePath}\" \"$applicationName\" \"$naisEnvironment\"")
+            arrayOf(scriptFile.absolutePath, applicationName, naisEnvironment)
         }
 
         val errorFile = File.createTempFile("azure-secret-", ".err").apply { deleteOnExit() }
