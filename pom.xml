@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.0</version>
+        <version>4.1.1</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -102,7 +102,6 @@
         <mockito.inline.version>5.2.0</mockito.inline.version>
         <jacoco.version>0.8.15</jacoco.version>
         <springmockk.version>5.0.1</springmockk.version>
-        <httpclient5.version>5.5.2</httpclient5.version>
         <commons.beanutils.version>1.11.0</commons.beanutils.version>
         <commons-cli.version>1.11.0</commons-cli.version>
         <graphql-spring-boot-starter.version>15.1.0</graphql-spring-boot-starter.version>
@@ -126,7 +125,7 @@
         <xmlsec.version>4.0.4</xmlsec.version>
         <wiremock-standalone.version>3.13.2</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
-        <springboot.version>4.1.0</springboot.version>
+        <springboot.version>4.1.1</springboot.version>
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det
