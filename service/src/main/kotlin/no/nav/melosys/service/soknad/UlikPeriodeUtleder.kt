@@ -7,7 +7,6 @@ import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import tools.jackson.databind.json.JsonMapper
-import tools.jackson.module.kotlin.KotlinModule
 import tools.jackson.module.kotlin.readValue
 
 private val log = KotlinLogging.logger { }
@@ -17,10 +16,9 @@ private val log = KotlinLogging.logger { }
  */
 @Service
 class UlikPeriodeUtleder(
-    private val skjemaSakMappingRepository: SkjemaSakMappingRepository
+    private val skjemaSakMappingRepository: SkjemaSakMappingRepository,
+    private val jsonMapper: JsonMapper
 ) {
-    private val jsonMapper = JsonMapper.builder().addModule(KotlinModule.Builder().build()).build()
-
     @Transactional(readOnly = true)
     fun harUlikPeriode(mottatteOpplysninger: MottatteOpplysninger?): Boolean {
         val mottatteOpplysningerId = mottatteOpplysninger?.id ?: return false

@@ -271,8 +271,6 @@ class MottatteOpplysningerService(
                 mottatteOpplysningerData.maritimtArbeid = nySoeknad.maritimtArbeid
                 mottatteOpplysningerData.luftfartBaser = nySoeknad.luftfartBaser
             }
-            (mottatteOpplysningerData as? Soeknad)?.arbeidsgiverOgArbeidstakerHarUlikPeriode =
-                nySoeknad.arbeidsgiverOgArbeidstakerHarUlikPeriode
         }
         MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger)
         mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger)

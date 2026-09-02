@@ -23,8 +23,8 @@ import java.time.LocalDate
 internal class UlikPeriodeUtlederTest {
 
     private val repository = mockk<SkjemaSakMappingRepository>()
-    private val utleder = UlikPeriodeUtleder(repository)
     private val jsonMapper = JsonMapper.builder().addModule(KotlinModule.Builder().build()).build()
+    private val utleder = UlikPeriodeUtleder(repository, jsonMapper)
 
     @Test
     fun `ulike perioder fra partene gir avvik`() {
