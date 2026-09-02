@@ -90,12 +90,15 @@ kafka:
     skjema-mottatt:
       groupid: teammelosys-skjema-mottatt-consumer
       topic: teammelosys.skjema.innsendt.v1-q2
-kubernetes:
+nais:
+  cli:
+    path: ${NAIS_PATH:/usr/bin}
+  jq:
+    path: ${JQ_PATH:/usr/bin}
   azure:
-    kubectl:
-      path: ${KUBECTL_PATH:/usr/local/bin}
-    kubelogin:
-      path: ${KUBELOGIN_PATH:/home/linuxbrew/.linuxbrew/bin}
+    app-name: melosys
+    environment: ${NAIS_CLUSTER_NAME:dev-fss}
+    reason: ${NAIS_SECRET_REASON:Lokal utvikling av melosys-api}
 logging:
   level:
     org:

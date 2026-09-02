@@ -9,37 +9,37 @@ import java.io.File
 import java.io.InputStreamReader
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import kotlin.text.contains
 
 /**
- * Laster Azure client secret fra Kubernetes når applikasjonen kjører med local-q1 eller local-q2 profil.
+ * Laster Azure client secret fra nais (plattform-styrt secret) når applikasjonen
+ * kjører med local-q1 eller local-q2 profil.
+ *
+ * Se https://doc.nais.io/services/secrets/how-to/get-platform-secret/
  */
 class KubernetesAzureSecretLoader : EnvironmentPostProcessor {
 
     companion object {
         private val LOCAL_Q_PROFILE = arrayOf("local-q2", "local-q1")
         private const val DEFAULT_SCRIPT_PATH = "scripts/get-azure-secrets.sh"
+        private const val DEFAULT_ENVIRONMENT = "dev-fss"
+        private const val DEFAULT_REASON = "Lokal utvikling av melosys-api"
         private val TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
         private const val CLASS_NAME = "no.nav.melosys.KubernetesAzureSecretLoader"
+        private val IS_WINDOWS = System.getProperty("os.name").lowercase().contains("win")
     }
 
     private var applicationName = "melosys"
 
-    private fun logInfo(message: String) {
+    private fun log(level: String, message: String) {
         val timestamp = LocalDateTime.now().format(TIMESTAMP_FORMATTER)
-        println("$timestamp |  | $CLASS_NAME | INFO | $message")
+        println("$timestamp |  | $CLASS_NAME | $level | $message")
     }
 
-    @Suppress("SameParameterValue")
-    private fun logWarn(message: String) {
-        val timestamp = LocalDateTime.now().format(TIMESTAMP_FORMATTER)
-        println("$timestamp |  | $CLASS_NAME | WARN | $message")
-    }
+    private fun logInfo(message: String) = log("INFO", message)
 
-    private fun logError(message: String) {
-        val timestamp = LocalDateTime.now().format(TIMESTAMP_FORMATTER)
-        println("$timestamp |  | $CLASS_NAME | ERROR | $message")
-    }
+    private fun logWarn(message: String) = log("WARN", message)
+
+    private fun logError(message: String) = log("ERROR", message)
 
     override fun postProcessEnvironment(environment: ConfigurableEnvironment, application: SpringApplication) {
         if (LOCAL_Q_PROFILE.none { profile -> profile in environment.activeProfiles }) {
@@ -50,13 +50,20 @@ class KubernetesAzureSecretLoader : EnvironmentPostProcessor {
             applicationName = "melosys-q1"
         }
 
-        val scriptPath = environment.getProperty("kubernetes.azure.script.path", DEFAULT_SCRIPT_PATH)
-        val kubeloginPath = environment.getProperty("kubernetes.azure.kubelogin.path")
-        val kubectlPath = environment.getProperty("kubernetes.azure.kubectl.path")
+        val scriptPath = environment.getProperty("nais.azure.script.path")
+            ?: environment.getProperty("kubernetes.azure.script.path", DEFAULT_SCRIPT_PATH)
+        val naisEnvironment = environment.getProperty("nais.azure.environment", DEFAULT_ENVIRONMENT)
+        val reason = environment.getProperty("nais.azure.reason", DEFAULT_REASON)
+        val extraPaths = listOfNotNull(
+            environment.getProperty("nais.cli.path"),
+            environment.getProperty("nais.jq.path")
+        ).filter { it.isNotBlank() }.distinct()
+
+        applicationName = environment.getProperty("nais.azure.app-name", applicationName)
 
         try {
-            logInfo("Laster AZURE_APP_CLIENT_SECRET fra script...")
-            val clientSecret = executeShellScript(scriptPath, kubeloginPath, kubectlPath).trim()
+            logInfo("Henter AZURE_APP_CLIENT_SECRET for $applicationName i $naisEnvironment via nais CLI...")
+            val clientSecret = executeShellScript(scriptPath, naisEnvironment, reason, extraPaths).trim()
 
             if (clientSecret.isNotBlank()) {
                 applyClientSecret(environment, clientSecret)
@@ -66,7 +73,7 @@ class KubernetesAzureSecretLoader : EnvironmentPostProcessor {
             }
         } catch (e: Exception) {
             logError("Feilet med å hente AZURE_APP_CLIENT_SECRET: ${e.message}")
-            logError("Sjekk din kubectl og kubelogin config.")
+            logError("Sjekk at 'nais' og 'jq' er installert og at du er innlogget med 'nais login'.")
         }
     }
 
@@ -83,7 +90,12 @@ class KubernetesAzureSecretLoader : EnvironmentPostProcessor {
         logInfo("Setter client secret: ${clientSecret.take(3)}...${clientSecret.takeLast(3)}")
     }
 
-    private fun executeShellScript(scriptPath: String, kubeloginPath: String?, kubectlPath: String?): String {
+    private fun executeShellScript(
+        scriptPath: String,
+        naisEnvironment: String,
+        reason: String,
+        extraPaths: List<String>
+    ): String {
         val scriptFile = File(System.getProperty("user.dir"), scriptPath)
 
         if (!scriptFile.exists()) {
@@ -94,61 +106,45 @@ class KubernetesAzureSecretLoader : EnvironmentPostProcessor {
             scriptFile.setExecutable(true)
         }
 
-        val shell = when {
-            System.getProperty("os.name").lowercase().contains("win") -> "cmd.exe"
-            else -> System.getenv("SHELL") ?: "/bin/bash"
-        }
-
         val env = HashMap<String, String>(System.getenv())
-        val pathSeparator = if (System.getProperty("os.name").lowercase().contains("win")) ";" else ":"
-        val pathAdditions = StringBuilder()
+        env["NAIS_SECRET_REASON"] = reason
 
-        if (!kubeloginPath.isNullOrBlank()) {
-            pathAdditions.append(kubeloginPath).append(pathSeparator)
-            logInfo("La til kubelogin path til PATH: $kubeloginPath")
+        if (extraPaths.isNotEmpty()) {
+            val pathSeparator = if (IS_WINDOWS) ";" else ":"
+            env["PATH"] = extraPaths.joinToString(pathSeparator) + pathSeparator + (env["PATH"] ?: "")
+            logInfo("La til ${extraPaths.joinToString(", ")} i PATH")
         }
 
-        if (!kubectlPath.isNullOrBlank()) {
-            pathAdditions.append(kubectlPath).append(pathSeparator)
-            logInfo("La til kubectl path til PATH: $kubectlPath")
-        }
-
-        if (pathAdditions.isNotEmpty()) {
-            val currentPath = env["PATH"] ?: ""
-            env["PATH"] = pathAdditions.toString() + currentPath
-            logInfo("Oppdatert path til PATH: ${env["PATH"]}")
-        }
-
-        val command = if (System.getProperty("os.name").lowercase().contains("win")) {
-            arrayOf("cmd.exe", "/c", scriptFile.absolutePath, applicationName)
+        val command = if (IS_WINDOWS) {
+            arrayOf("cmd.exe", "/c", scriptFile.absolutePath, applicationName, naisEnvironment)
         } else {
-            val pathEnvUpdate = if (pathAdditions.isNotEmpty()) {
-                "export PATH=\"${pathAdditions}$\${PATH}\";"
-            } else ""
-
-            arrayOf(shell, "-c", "$pathEnvUpdate ${scriptFile.absolutePath} $applicationName")
+            val shell = System.getenv("SHELL") ?: "/bin/bash"
+            arrayOf(shell, "-c", "\"${scriptFile.absolutePath}\" \"$applicationName\" \"$naisEnvironment\"")
         }
+
+        val errorFile = File.createTempFile("azure-secret-", ".err").apply { deleteOnExit() }
 
         val processBuilder = ProcessBuilder(*command)
         processBuilder.environment().putAll(env)
+        processBuilder.redirectError(errorFile)
 
         val process = processBuilder.start()
-        val reader = BufferedReader(InputStreamReader(process.inputStream))
         val output = StringBuilder()
-        var line: String?
-
-        while (reader.readLine().also { line = it } != null) {
-            line?.let { output.append(it).append("\n") }
+        BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
+            reader.forEachLine { output.append(it).append("\n") }
         }
 
         val exitCode = process.waitFor()
+        val errorOutput = runCatching { errorFile.readText().trim() }.getOrDefault("")
+        errorFile.delete()
+
         if (exitCode != 0) {
-            val errorReader = BufferedReader(InputStreamReader(process.errorStream))
-            val errorOutput = StringBuilder()
-            while (errorReader.readLine().also { line = it } != null) {
-                line?.let { errorOutput.append(it).append("\n") }
-            }
-            throw RuntimeException("Script execution failed with exit code: $exitCode. Error: ${errorOutput.toString().trim()}")
+            val details = errorOutput.ifBlank { output.toString().trim().ifBlank { "(ingen output)" } }
+            throw RuntimeException("Script feilet med exit code $exitCode:\n$details")
+        }
+
+        if (errorOutput.isNotBlank()) {
+            logWarn(errorOutput)
         }
 
         return output.toString().trim()

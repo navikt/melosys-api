@@ -104,6 +104,15 @@ management:
 medlemskap:
   rest:
     url: https://medlemskap-medl-api-q1.dev.intern.nav.no
+nais:
+  cli:
+    path: ${NAIS_PATH:/usr/bin}
+  jq:
+    path: ${JQ_PATH:/usr/bin}
+  azure:
+    app-name: melosys-q1
+    environment: ${NAIS_CLUSTER_NAME:dev-fss}
+    reason: ${NAIS_SECRET_REASON:Lokal utvikling av melosys-api}
 melosysdokgen:
   v1:
     url: https://melosys-dokgen.intern.dev.nav.no/api/v1
