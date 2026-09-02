@@ -13,9 +13,6 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avklartefakta
-import no.nav.melosys.domain.medlemskapsperiode
-import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -38,7 +35,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
-import no.nav.melosys.domain.Fagsak
 
 @ExtendWith(MockKExtension::class)
 class FtrlVedtakServiceTest {
@@ -336,6 +332,48 @@ class FtrlVedtakServiceTest {
     }
 
     @Test
+    fun `delvis opphør med FULLSTENDIG_MANGLENDE_INNBETALING satt til false behandles ikke som fullstendig opphør`() {
+        // Regresjonstest for 8028: harFullstendigManglendeInnbetalingAvklarteFakta må sjekke fakta-verdien (TRUE/FALSE),
+        // ikke bare at avklartefakta-raden finnes. Hvis saksbehandler har vært innom "hele perioden" og
+        // deretter går til "deler av perioden", står avklartefakta-raden igjen med fakta=FALSE. Da skal
+        // opphørt-flyten IKKE trigges, og opphørsdato skal utledes fra den faktisk opphørte perioden.
+        every { behandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
+        val opphørtFom = LocalDate.now().plusMonths(6)
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            avklartefakta {
+                type = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
+                referanse = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode
+                fakta = "FALSE"
+            }
+            medlemskapsperiode {
+                id = 1
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                fom = LocalDate.now()
+            }
+            medlemskapsperiode {
+                id = 2
+                innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                fom = opphørtFom
+            }
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
+        val request = lagFattVedtakRequest(
+            type = Behandlingsresultattyper.DELVIS_OPPHØRT,
+            begrunnelseFritekst = "fritekst for begrunnelse",
+            opphørtDato = opphørtFom
+        )
+
+        ftrlVedtakService.fattVedtak(lagBehandling(), request)
+
+        verify { behandlingsresultatService.lagreOgFlush(capture(behandlingsresultatSlot)) }
+        behandlingsresultatSlot.captured.shouldNotBeNull().run {
+            type.shouldBe(Behandlingsresultattyper.DELVIS_OPPHØRT)
+            // Den innvilgede perioden skal fortsatt være innvilget (ikke mutert til OPPHØRT)
+            medlemskapsperioder.single { it.id == 1L }.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+        }
+    }
+
+    @Test
     fun fattVedtak_opphørt_fatterVedtak() {
         every { behandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
         val behandlingsresultat = lagOpphørtBehandlingsresultat()
@@ -414,6 +452,7 @@ class FtrlVedtakServiceTest {
             avklartefakta {
                 type = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
                 referanse = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode
+                fakta = "TRUE"
             }
         }
         val utenAvklartefakta = Behandlingsresultat.forTest {
@@ -469,6 +508,7 @@ class FtrlVedtakServiceTest {
             avklartefakta {
                 type = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
                 referanse = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode
+                fakta = "TRUE"
             }
             medlemskapsperiode {
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
@@ -545,6 +585,7 @@ class FtrlVedtakServiceTest {
         avklartefakta {
             type = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
             referanse = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode
+            fakta = "TRUE"
         }
         medlemskapsperiode {
             id = 1

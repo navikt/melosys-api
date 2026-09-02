@@ -12,6 +12,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.featuretoggle.ToggleName
 import org.apache.commons.beanutils.BeanUtils
 import org.hibernate.Hibernate
@@ -28,11 +29,7 @@ class ReplikerBehandlingsresultatService(
 
     @Transactional(rollbackFor = [Exception::class])
     fun replikerBehandlingsresultat(tidligsteInaktiveBehandling: Behandling, behandlingReplika: Behandling) {
-        val behandlingsresultatOriginal: Behandlingsresultat =
-            Hibernate.unproxy(
-                behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id),
-                Behandlingsresultat::class.java
-            )
+        val behandlingsresultatOriginal = hentUnproxiet(tidligsteInaktiveBehandling.id)
 
         val behandlingsresultatReplika = BeanUtils.cloneBean(behandlingsresultatOriginal) as Behandlingsresultat
 
@@ -68,6 +65,101 @@ class ReplikerBehandlingsresultatService(
 
         behandlingsresultatService.lagre(behandlingsresultatReplika)
     }
+
+    /**
+     * Bygger opp igjen innholdet som [BehandlingsresultatService.tømBehandlingsresultat] nettopp fjernet,
+     * ved å replikere på nytt fra behandlingens opprinneligBehandling.
+     *
+     * I motsetning til [replikerBehandlingsresultat] lages det ingen ny rad: behandlingsresultatet deler
+     * primærnøkkel med behandlingen (@MapsId), så raden gjenbrukes og kun barne-samlingene byttes ut.
+     *
+     * Må kalles rett etter tømBehandlingsresultat, i samme transaksjon.
+     *
+     * Støtter ikke EØS-pensjonist. tømBehandlingsresultat gjør to bevisste unntak for den gruppen —
+     * den beholder avklartefakta og helseutgiftperioder — mens gjenopprettingen her erstatter begge.
+     * Se guarden først i metoden.
+     */
+    @Transactional(rollbackFor = [Exception::class])
+    fun gjenopprettBehandlingsresultatTilUtgangspunkt(behandlingID: Long) {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        val behandling = behandlingsresultat.hentBehandling()
+
+        if (behandling.erEøsPensjonist()) {
+            throw TekniskException(
+                "Gjenoppretting av behandlingsresultat er ikke implementert for EØS-pensjonist " +
+                    "(behandling $behandlingID). tømBehandlingsresultat beholder avklartefakta og " +
+                    "helseutgiftperioder for denne gruppen, mens gjenopprettingen erstatter dem."
+            )
+        }
+
+        val opprinneligBehandling = behandling.opprinneligBehandling
+            ?: throw TekniskException(
+                "Kan ikke gjenopprette behandlingsresultat for behandling $behandlingID: opprinneligBehandling mangler"
+            )
+
+        val behandlingsresultatOriginal = hentUnproxiet(opprinneligBehandling.id)
+
+        // Bygges på et frittstående objekt fordi repliker*-metodene bytter ut selve collection-instansene,
+        // noe som ville brutt orphanRemoval på den managed entiteten.
+        val behandlingsresultatReplika = Behandlingsresultat().apply { this.behandling = behandling }
+
+        try {
+            replikerAvklartefakta(behandlingsresultatOriginal, behandlingsresultatReplika)
+            replikerVilkaarsresultat(behandlingsresultatOriginal, behandlingsresultatReplika)
+
+            when {
+                // Aldri nådd, jf. guarden først i metoden. Beholdt som utgangspunkt for den dagen
+                // MANGLENDE_INNBETALING_TRYGDEAVGIFT åpnes for EØS-pensjonist.
+                behandling.erEøsPensjonist() -> {
+                    replikerHelseutgiftDekkesPerioder(behandlingsresultatOriginal, behandlingsresultatReplika)
+                    replikerTrygdeavgiftForPensjonist(behandlingsresultatOriginal, behandlingsresultatReplika)
+                    behandlingsresultatReplika.helseutgiftDekkesPerioder.forEach { it.id = null }
+                }
+
+                behandling.fagsak.erLovvalg() && behandlingsresultatOriginal.trygdeavgiftsperioder.isNotEmpty() -> {
+                    replikerLovvalgsperioder(behandlingsresultatOriginal, behandlingsresultatReplika, behandling.type)
+                    replikerTrygdeavgift(behandlingsresultatOriginal, behandlingsresultatReplika)
+                    behandlingsresultatReplika.lovvalgsperioder.onEach { it.id = null }
+                }
+
+                else -> {
+                    replikerLovvalgsperioder(behandlingsresultatOriginal, behandlingsresultatReplika, behandling.type)
+                    replikerMedlemAvFolketrygden(behandlingsresultatOriginal, behandlingsresultatReplika, behandling.type)
+                }
+            }
+        } catch (e: ReflectiveOperationException) {
+            throw TekniskException(
+                "Klarte ikke gjenopprette behandlingsresultat for behandling $behandlingID " +
+                    "fra opprinnelig behandling ${opprinneligBehandling.id}",
+                e
+            )
+        }
+
+        // Slettingene fra tømBehandlingsresultat må nå databasen før de nye radene settes inn, ellers
+        // kolliderer replikerte avklartefakta med de gamle på unique(beh_resultat_id, referanse, subjekt).
+        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+
+        behandlingsresultat.overtaInnholdFra(behandlingsresultatReplika)
+
+        behandlingsresultatService.lagre(behandlingsresultat)
+    }
+
+    /**
+     * Flytter samlingene fra [replika] inn i dette behandlingsresultatet, og setter eierreferansen på
+     * hvert element. Samlingsinstansene beholdes, jf. orphanRemoval.
+     */
+    private fun Behandlingsresultat.overtaInnholdFra(replika: Behandlingsresultat) {
+        avklartefakta.erstattMed(replika.avklartefakta) { it.behandlingsresultat = this }
+        vilkaarsresultater.erstattMed(replika.vilkaarsresultater) { it.behandlingsresultat = this }
+        lovvalgsperioder.erstattMed(replika.lovvalgsperioder) { it.behandlingsresultat = this }
+        medlemskapsperioder.erstattMed(replika.medlemskapsperioder) { it.behandlingsresultat = this }
+        helseutgiftDekkesPerioder.erstattMed(replika.helseutgiftDekkesPerioder) { it.behandlingsresultat = this }
+    }
+
+    private fun hentUnproxiet(behandlingID: Long): Behandlingsresultat = Hibernate.unproxy(
+        behandlingsresultatService.hentBehandlingsresultat(behandlingID),
+        Behandlingsresultat::class.java
+    )
 
     @Throws(
         InvocationTargetException::class,
@@ -343,6 +435,16 @@ class ReplikerBehandlingsresultatService(
             }
         }
     }
+}
+
+/**
+ * Bytter ut innholdet i en managed JPA-samling uten å bytte ut selve samlingsinstansen (som ville brutt
+ * orphanRemoval). [settEier] settes før elementene legges inn, siden eier inngår i entitetenes hashCode.
+ */
+private fun <T> MutableCollection<T>.erstattMed(nyeElementer: Collection<T>, settEier: (T) -> Unit) {
+    val elementer = nyeElementer.toList().onEach(settEier)
+    clear()
+    addAll(elementer)
 }
 
 private fun replikerUtpekingsperioder(

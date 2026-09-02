@@ -139,6 +139,53 @@ class TekstblokkHistorikkServiceIT(
             listOf(TekstblokkStatus.UTKAST, TekstblokkStatus.PUBLISERT)
     }
 
+    /**
+     * Reproduserer historikken fra produksjon: revisjonsnummeret følger ikke tiden, og da
+     * havnet «Opprettet» midt i lista mens tidsrommene løp bakover (v2: 10:09 – 09:51).
+     *
+     * Tilstanden lages ved å skrive om revtstmp, slik at revisjonsrekkefølgen og den
+     * kronologiske rekkefølgen er uenige. Det er nøyaktig den uenigheten historikken må
+     * tåle. Testen sier ikke noe om *hvorfor* numrene kommer ut av rekkefølge i drift –
+     * bare at lesningen skal følge tiden når de gjør det.
+     */
+    @Test
+    fun `historikken folger tiden selv naar revisjonsnummeret sier noe annet`() {
+        val lagret = tekstblokkRepository.save(nyTekstblokk("A"))
+        val id = requireNotNull(lagret.id)
+        lagret.tittel = "B"
+        tekstblokkRepository.save(lagret)
+        lagret.tittel = "C"
+        tekstblokkRepository.save(lagret)
+
+        val revisjoner: List<Long> = jdbcTemplate.queryForList(
+            "select rev from tekstblokk_aud where id = ? order by rev",
+            Long::class.javaObjectType,
+            id,
+        ).filterNotNull()
+        revisjoner shouldHaveSize 3
+
+        // C ble skrevet sist, men får det tidligste tidsstempelet; A er opprettelsen og
+        // ligger nå midt i tidslinja. Rev-rekkefølgen er A, B, C – tida sier C, A, B.
+        val basis = Instant.now().minusSeconds(3600).toEpochMilli()
+        settRevisjonstidspunkt(revisjoner[0], basis + 60_000)
+        settRevisjonstidspunkt(revisjoner[1], basis + 120_000)
+        settRevisjonstidspunkt(revisjoner[2], basis)
+
+        val historikk = tekstblokkHistorikkService.hentHistorikk(id)
+
+        historikk.map { it.tittel } shouldContainExactly listOf("C", "A", "B")
+        historikk.map { it.versjon } shouldContainExactly listOf(1, 2, 3)
+        // Tidsrommene henger sammen og løper framover – ingen «10:09 – 09:51»
+        historikk[0].gyldigTil shouldBe historikk[1].gyldigFra
+        historikk[1].gyldigTil shouldBe historikk[2].gyldigFra
+        historikk.last().gyldigTil.shouldBeNull()
+        historikk.map { it.gyldigFra } shouldBe historikk.map { it.gyldigFra }.sorted()
+    }
+
+    private fun settRevisjonstidspunkt(rev: Long, epochMilli: Long) {
+        jdbcTemplate.update("update revinfo set revtstmp = ? where rev = ?", epochMilli, rev)
+    }
+
     private fun nyTekstblokk(tittel: String) = Tekstblokk(
         tittel = tittel,
         innhold = "<p>$tittel</p>",
