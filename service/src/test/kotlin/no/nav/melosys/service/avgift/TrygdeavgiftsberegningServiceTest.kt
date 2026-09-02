@@ -2431,7 +2431,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         }
 
         @Test
-        fun `skal feile når behandlingstype ikke er NY_VURDERING`() {
+        fun `skal feile når behandlingstypen ikke støtter opprinnelig trygdeavgiftsgrunnlag`() {
             val behandling = Behandling.forTest {
                 tema = Behandlingstema.YRKESAKTIV
                 type = Behandlingstyper.FØRSTEGANG
@@ -2441,7 +2441,22 @@ internal class TrygdeavgiftsberegningServiceTest {
 
             shouldThrow<IllegalStateException> {
                 trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(BEHANDLING_ID)
-            }.message.shouldContain("Behandling med id 1 er ikke av type NY_VURDERING")
+            }.message.shouldContain("Behandling med id 1 har ikke en behandlingstype som støtter opprinnelig trygdeavgiftsgrunnlag")
+        }
+
+        @Test
+        fun `manglende innbetaling uten opprinnelig behandling skal returnere tomt grunnlag`() {
+            val behandling = Behandling.forTest {
+                tema = Behandlingstema.YRKESAKTIV
+                type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            }
+
+            every { mockBehandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+
+            val result = trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(BEHANDLING_ID)
+
+            result.skatteforholdsperioder.shouldBeEmpty()
+            result.inntektsperioder.shouldBeEmpty()
         }
 
         @Test

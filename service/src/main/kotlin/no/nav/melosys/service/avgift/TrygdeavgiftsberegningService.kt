@@ -280,8 +280,8 @@ class TrygdeavgiftsberegningService(
     fun hentOpprinneligTrygdeavgiftsperioder(behandlingID: Long): TrygdeavgiftsgrunnlagModel {
         val behandling = behandlingService.hentBehandling(behandlingID)
 
-        if (behandling.type != Behandlingstyper.NY_VURDERING) {
-            throw IllegalStateException("Behandling med id $behandlingID er ikke av type ${Behandlingstyper.NY_VURDERING}")
+        if (behandling.type !in setOf(Behandlingstyper.NY_VURDERING, Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)) {
+            throw IllegalStateException("Behandling med id $behandlingID har ikke en behandlingstype som støtter opprinnelig trygdeavgiftsgrunnlag")
         }
 
 
