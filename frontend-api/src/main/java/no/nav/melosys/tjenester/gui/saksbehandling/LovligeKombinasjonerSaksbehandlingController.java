@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
+import no.nav.melosys.tjenester.gui.dto.saksbehandling.KombinasjonstreNodeDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +47,19 @@ public class LovligeKombinasjonerSaksbehandlingController {
         @RequestParam(value = "saksnummer", required = false) String saksnummer
     ) {
         return ResponseEntity.ok(lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstemaer(hovedpart, sakstype, saksnummer));
+    }
+
+    @GetMapping("/kombinasjoner/tre")
+    @Operation(
+        summary = "Henter hele kombinasjonstreet sakstype -> sakstema -> behandlingstema",
+        description = "Saksuavhengig union over alle hovedparter og SED, levert som rene koder. Ett kall i stedet for "
+            + "ett per kombinasjon, for klienter som skal kaskadere over flere valg samtidig. Innholdet endrer seg kun ved "
+            + "deploy og kan caches deretter. Ikke ment for å avgjøre hva som er lovlig i én konkret sak."
+    )
+    public ResponseEntity<List<KombinasjonstreNodeDto>> hentKombinasjonstre() {
+        return ResponseEntity.ok(
+            lovligeKombinasjonerSaksbehandlingService.hentKombinasjonstre().stream().map(KombinasjonstreNodeDto::av).toList()
+        );
     }
 
     @GetMapping("/behandlingstemaer/hent-lovlige-kombinasjoner")

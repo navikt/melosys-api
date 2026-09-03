@@ -248,22 +248,29 @@ class MottatteOpplysningerService(
     }
 
     /**
-     * Oppdaterer sidemeny-feltene på eksisterende MottatteOpplysninger fra en ny Soeknad.
-     * Brukes når ny digital søknad mottas på åpen behandling (siste-vinner-regel).
+     * Oppdaterer sidemeny-feltene fra en ny digital søknad på en åpen behandling.
+     * Den nyeste søknaden erstatter tidligere verdier for feltene som mappes, mens øvrige felt
+     * beholdes urørt. Mottatteopplysningertypen på behandlingen beholdes uendret.
      *
-     * Felter som ikke mappes fra søknaden (f.eks. loennOgGodtgjoerelse, utenlandsoppdraget)
-     * beholdes urørt.
+     * @param oppdaterArbeidssteder om arbeidsstedene skal erstattes med verdiene fra søknaden.
+     * Er flagget `false`, beholdes eksisterende arbeidssteder.
      */
     @Transactional
-    fun oppdaterMottatteOpplysningerFraSøknad(behandlingID: Long, nySoeknad: Soeknad) {
+    fun oppdaterMottatteOpplysningerFraSøknad(
+        behandlingID: Long,
+        nySoeknad: Soeknad,
+        oppdaterArbeidssteder: Boolean = true
+    ) {
         val mottatteOpplysninger = hentMottatteOpplysninger(behandlingID).apply {
             mottatteOpplysningerData.periode = nySoeknad.periode
             mottatteOpplysningerData.soeknadsland = nySoeknad.soeknadsland
             mottatteOpplysningerData.juridiskArbeidsgiverNorge = nySoeknad.juridiskArbeidsgiverNorge
             mottatteOpplysningerData.foretakUtland = nySoeknad.foretakUtland
-            mottatteOpplysningerData.arbeidPaaLand = nySoeknad.arbeidPaaLand
-            mottatteOpplysningerData.maritimtArbeid = nySoeknad.maritimtArbeid
-            mottatteOpplysningerData.luftfartBaser = nySoeknad.luftfartBaser
+            if (oppdaterArbeidssteder) {
+                mottatteOpplysningerData.arbeidPaaLand = nySoeknad.arbeidPaaLand
+                mottatteOpplysningerData.maritimtArbeid = nySoeknad.maritimtArbeid
+                mottatteOpplysningerData.luftfartBaser = nySoeknad.luftfartBaser
+            }
         }
         MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger)
         mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger)

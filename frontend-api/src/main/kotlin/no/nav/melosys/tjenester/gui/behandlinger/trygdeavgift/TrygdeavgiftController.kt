@@ -108,14 +108,14 @@ class TrygdeavgiftController(
         val skatteforholdsperioder = trygdeavgiftsgrunnlagDto.skatteforholdsperioder.tilSkatteforholdsPerioder()
         val inntektsperioder = trygdeavgiftsgrunnlagDto.inntektskilder.tilInntektsPerioder()
 
-        val trygdeavgiftsperiodeSet = eøsPensjonistTrygdeavgiftsBeregningService.beregnOgLagreTrygdeavgift(
+        val resultat = eøsPensjonistTrygdeavgiftsBeregningService.beregnOgLagreTrygdeavgiftMedForklaring(
             behandlingID,
             skatteforholdsperioder,
             inntektsperioder
         )
 
         return ResponseEntity.ok(
-            EøsPensjonistBeregnetTrygdeavgiftDto.av(trygdeavgiftsperiodeSet)
+            EøsPensjonistBeregnetTrygdeavgiftDto.av(resultat.trygdeavgiftsperioder, resultat.beregningsforklaringer)
         )
     }
 

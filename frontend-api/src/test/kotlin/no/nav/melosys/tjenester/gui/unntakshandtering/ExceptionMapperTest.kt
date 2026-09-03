@@ -1,5 +1,9 @@
 package no.nav.melosys.tjenester.gui.unntakshandtering
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -14,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.core.MethodParameter
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -78,6 +83,18 @@ class ExceptionMapperTest {
         val melding = "Teknisk feil"
         val ikkeFunnetException = IkkeFunnetException(melding)
         assertResponse(exceptionMapper.håndter(ikkeFunnetException, request), HttpStatus.NOT_FOUND, melding)
+    }
+
+    @Test
+    fun `skal håndtere ulesbar JSON med status bad request og info-logg uten stacktrace`() {
+        val exception = HttpMessageNotReadableException("JSON parse error", MockHttpInputMessage(ByteArray(0)))
+
+        val loggede = medLoggfanger {
+            assertResponse(exceptionMapper.håndter(exception, request), HttpStatus.BAD_REQUEST, UGYLDIG_FORESPØRSEL)
+        }
+
+        assertEquals(listOf(Level.INFO), loggede.map { it.level })
+        assertNull(loggede.single().throwableProxy)
     }
 
     @Test
@@ -209,6 +226,20 @@ class ExceptionMapperTest {
 
     private fun dummyMetodeParameter() =
         MethodParameter(ExceptionMapperTest::class.java.getDeclaredMethod("dummyMetodeForBinding", String::class.java), 0)
+
+    // Fanger loggen fra ExceptionMapper.kt sin fil-logger, så vi kan slå fast at klientfeil ikke havner på ERROR
+    private fun medLoggfanger(block: () -> Unit): List<ILoggingEvent> {
+        val logger = LoggerFactory.getLogger(ExceptionMapper::class.java) as Logger
+        val appender = ListAppender<ILoggingEvent>().apply { context = logger.loggerContext }
+        appender.start()
+        logger.addAppender(appender)
+        try {
+            block()
+        } finally {
+            logger.detachAppender(appender)
+        }
+        return appender.list
+    }
 
     private fun assertResponse(
         responseEntity: ResponseEntity<Map<String, Any>>,

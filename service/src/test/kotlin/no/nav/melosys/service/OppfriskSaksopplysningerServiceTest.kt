@@ -23,6 +23,7 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.behandling.ReplikerBehandlingsresultatService
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService
 import no.nav.melosys.service.persondata.PersondataFasade
@@ -71,6 +72,9 @@ class OppfriskSaksopplysningerServiceTest {
     @RelaxedMockK
     lateinit var helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService
 
+    @RelaxedMockK
+    lateinit var replikerBehandlingsresultatService: ReplikerBehandlingsresultatService
+
     private lateinit var oppfriskSaksopplysningerService: OppfriskSaksopplysningerService
     private lateinit var fakeUnleash: FakeUnleash
 
@@ -88,7 +92,8 @@ class OppfriskSaksopplysningerServiceTest {
             persondataFasade,
             registeropplysningerFactory,
             årsavregningService,
-            helseutgiftDekkesPeriodeService
+            helseutgiftDekkesPeriodeService,
+            replikerBehandlingsresultatService
         )
     }
 

@@ -61,6 +61,9 @@ object DigitalSøknadMapper {
         )
     }
 
+    fun harArbeidsgiverdel(dto: UtsendtArbeidstakerSkjemaM2MDto): Boolean =
+        hentArbeidsgiversData(dto) != null
+
     private fun hentArbeidstakersData(dto: UtsendtArbeidstakerSkjemaM2MDto): ArbeidstakersDataLook? {
         return when (val data = dto.skjema.data) {
             is UtsendtArbeidstakerArbeidstakersSkjemaDataDto -> ArbeidstakersDataLook(
@@ -186,6 +189,9 @@ object DigitalSøknadMapper {
 
     private fun mapArbeidssteder(søknad: Soeknad, arbeidssted: ArbeidsstedIUtlandetDto?, utsendelseLand: LandKode?) {
         if (arbeidssted == null) return
+        søknad.arbeidPaaLand = ArbeidPaaLand()
+        søknad.maritimtArbeid = mutableListOf()
+        søknad.luftfartBaser = mutableListOf()
         when (arbeidssted.arbeidsstedType) {
             ArbeidsstedType.PA_LAND -> søknad.arbeidPaaLand = mapArbeidPaaLand(arbeidssted, utsendelseLand)
             ArbeidsstedType.OFFSHORE -> søknad.maritimtArbeid = mapOffshore(arbeidssted)
@@ -219,8 +225,8 @@ object DigitalSøknadMapper {
     }
 
     private fun mapOffshore(arbeidssted: ArbeidsstedIUtlandetDto): List<MaritimtArbeid> {
-        val offshore = arbeidssted.offshore ?: return emptyList()
-        return listOf(
+        val offshore = arbeidssted.offshore ?: return mutableListOf()
+        return mutableListOf(
             MaritimtArbeid().apply {
                 enhetNavn = offshore.navnPaInnretning
                 innretningstype = mapTypeInnretning(offshore.typeInnretning)
@@ -235,8 +241,8 @@ object DigitalSøknadMapper {
     }
 
     private fun mapPaaSkip(arbeidssted: ArbeidsstedIUtlandetDto): List<MaritimtArbeid> {
-        val paSkip = arbeidssted.paSkip ?: return emptyList()
-        return listOf(
+        val paSkip = arbeidssted.paSkip ?: return mutableListOf()
+        return mutableListOf(
             MaritimtArbeid().apply {
                 enhetNavn = paSkip.navnPaSkip
                 fartsomradeKode = mapFarvann(paSkip.seilerI)
@@ -253,8 +259,8 @@ object DigitalSøknadMapper {
     }
 
     private fun mapLuftfart(arbeidssted: ArbeidsstedIUtlandetDto): List<LuftfartBase> {
-        val omBordPaFly = arbeidssted.omBordPaFly ?: return emptyList()
-        return listOf(
+        val omBordPaFly = arbeidssted.omBordPaFly ?: return mutableListOf()
+        return mutableListOf(
             LuftfartBase(
                 hjemmebaseNavn = omBordPaFly.hjemmebaseNavn,
                 hjemmebaseLand = omBordPaFly.hjemmebaseLand.name,
