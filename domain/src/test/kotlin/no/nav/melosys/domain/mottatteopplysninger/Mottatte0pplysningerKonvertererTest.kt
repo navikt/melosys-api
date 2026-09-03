@@ -46,10 +46,7 @@ class MottatteOpplysningerKonvertererTest {
             mottatteOpplysninger.jsonData = null
 
             MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger)
-            val forventetJson = JsonMapper.builder().build().readTree(json).also {
-                (it as ObjectNode).put("arbeidsgiverOgArbeidstakerHarUlikPeriode", false)
-            }
-            mottatteOpplysninger.jsonData shouldEqualJson forventetJson.toString()
+            mottatteOpplysninger.jsonData shouldEqualJson json
         }
     }
 

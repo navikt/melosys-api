@@ -45,10 +45,6 @@ object DigitalSøknadMapper {
         val periodeOgLand = arbeidstakersDel?.utsendingsperiodeOgLand ?: arbeidsgiversDel?.utsendingsperiodeOgLand
         søknad.periode = mapPeriode(periodeOgLand?.utsendelsePeriode)
         søknad.soeknadsland = mapSoeknadsland(periodeOgLand?.utsendelseLand)
-        søknad.arbeidsgiverOgArbeidstakerHarUlikPeriode = harUlikPeriode(
-            arbeidstakersDel?.utsendingsperiodeOgLand,
-            arbeidsgiversDel?.utsendingsperiodeOgLand
-        )
 
         // Arbeidssted kommer kun fra arbeidsgivers del
         mapArbeidssteder(søknad, arbeidsgiversDel?.arbeidsstedIUtlandet, periodeOgLand?.utsendelseLand)
@@ -136,8 +132,11 @@ object DigitalSøknadMapper {
         return arbeidstakersPeriode != arbeidsgiversPeriode
     }
 
-    private fun mapJuridiskArbeidsgiverNorge(dto: UtsendtArbeidstakerSkjemaM2MDto): JuridiskArbeidsgiverNorge = JuridiskArbeidsgiverNorge().apply {
-        erOffentligVirksomhet = dto.erOffentligArbeidsgiver()
+    private fun mapJuridiskArbeidsgiverNorge(
+        dto: UtsendtArbeidstakerSkjemaM2MDto,
+        virksomhetINorge: ArbeidsgiverensVirksomhetINorgeDto?
+    ): JuridiskArbeidsgiverNorge = JuridiskArbeidsgiverNorge().apply {
+        erOffentligVirksomhet = virksomhetINorge?.erArbeidsgiverenOffentligVirksomhet
         ekstraArbeidsgivere = listOfNotNull(hentHovedarbeidsgiversOrgnr(dto))
     }
 

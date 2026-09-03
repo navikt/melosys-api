@@ -41,7 +41,7 @@ public class LovligeBehandlingsKombinasjoner {
     // FOLKETRYGDLOVEN
     private static final Set<Behandlingstema> FTRL_LOVVALG_MEDLEMSKAP_BEHANDLINGSTEMA = new LinkedHashSet<>(List.of(YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST, UNNTAK_MEDLEMSKAP));
     private static final Set<Behandlingstema> FTRL_TRYGDEAVGIFT_BEHANDLINGSTEMA = new LinkedHashSet<>(List.of(YRKESAKTIV, PENSJONIST));
-    private static final Set<Behandlingstema> FTRL_ÅRSAVREGNING_BEHANDLINGSTEMA = new LinkedHashSet<>(List.of(YRKESAKTIV));
+    private static final Set<Behandlingstema> FTRL_ÅRSAVREGNING_BEHANDLINGSTEMA = new LinkedHashSet<>(List.of(YRKESAKTIV, PENSJONIST));
 
     private static final Set<Behandlingstyper> FTRL_LOVVALG_MEDLEMSKAP_BEHANDLINGSTYPE = new LinkedHashSet<>(List.of(FØRSTEGANG, NY_VURDERING, KLAGE, HENVENDELSE, MANGLENDE_INNBETALING_TRYGDEAVGIFT));
     private static final Set<Behandlingstyper> FTRL_TRYGDEAVGIFT_BEHANDLINGSTYPE = new LinkedHashSet<>(List.of(FØRSTEGANG, NY_VURDERING, KLAGE, HENVENDELSE));
