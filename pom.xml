@@ -41,7 +41,7 @@
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.341-6c91538</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.342</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.154-midlertidig</melosys.brev.version>
         <melosys-skjema-api-types.version>2026.07.27-5ebbe9e2e4ae</melosys-skjema-api-types.version>
 
@@ -54,7 +54,7 @@
 
         <!-- Versjoner av eksterne biblioteker -->
         <archunit.version>1.5.0</archunit.version>
-        <jsoup.version>1.23.1</jsoup.version>
+        <jsoup.version>1.23.2</jsoup.version>
         <apache-httpclients.version>4.5.13</apache-httpclients.version>
         <caffeine.version>3.2.3</caffeine.version>
         <cxf.version>4.2.3</cxf.version>
@@ -75,7 +75,7 @@
         <mockito-kotlin.version>6.3.0</mockito-kotlin.version>
         <mockk.version>1.14.11</mockk.version>
         <micrometer-jvm-extras.version>0.3.0</micrometer-jvm-extras.version>
-        <networknt.json-schema-validator.version>3.0.6</networknt.json-schema-validator.version>
+        <networknt.json-schema-validator.version>3.0.7</networknt.json-schema-validator.version>
         <ojdbc.version>23.26.3.0.0</ojdbc.version>
         <okhttp.version>5.5.0</okhttp.version>
         <oracle.version>18</oracle.version>
@@ -86,7 +86,7 @@
         <shedlock.version>7.9.0</shedlock.version>
         <slf4j.version>2.0.17</slf4j.version>
         <spring-retry.version>2.0.13</spring-retry.version>
-        <unleash.version>12.2.3</unleash.version>
+        <unleash.version>12.3.0</unleash.version>
         <bcpkix-jdk15on.version>1.85</bcpkix-jdk15on.version>
         <bouncycastle-jdk18on.version>1.85</bouncycastle-jdk18on.version>
         <nimbus-jose-jwt.version>10.9.1</nimbus-jose-jwt.version>
