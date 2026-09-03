@@ -356,42 +356,17 @@ class EessiServiceTest {
     }
 
     @Test
-    fun `opprettBucOgSed verifiserKorrektSedType`() {
-        val opprettSedDto = OpprettSedDto().apply {
-            rinaUrl = "localhost:3000"
-        }
-        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns lagBehandling()
-        every { eessiClient.opprettBucOgSedV2(any()) } returns opprettSedDto
-        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
-        every { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
-        every { joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(any(), any()) } returns Unit
-        mockBehandlingsresultat()
-
-        eessiService.opprettBucOgSed(BEHANDLING_ID, BucType.LA_BUC_01, listOf(mottakerBelgia1), emptyList())
-
-        verify {
-            eessiClient.opprettBucOgSedV2(match {
-                it.bucType == BucType.LA_BUC_01 &&
-                    it.vedlegg.isEmpty() && !it.sendAutomatisk && !it.oppdaterEksisterende
-            })
-        }
-    }
-
-    @Test
-    fun `opprettBucOgSed medFeatureToggle MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2 på kallerOpprettBucOgSedV2`() {
-
+    fun `opprettBucOgSed mapper dokumentreferanser til vedleggsreferanser`() {
         val opprettSedDto = OpprettSedDto().apply {
             rinaUrl = "localhost:3000"
         }
         val behandling = lagBehandling()
         val sedDataDto = SedDataDto()
-
         val journalpost = lagJournalpost(listOf(
             lagArkivDokument("hoved"),
             lagArkivDokument("dok1"),
             lagArkivDokument("dok2"))
         )
-
         val dokumentReferanser = journalpost.vedleggListe.map {
             DokumentReferanse(journalpost.journalpostId, it.dokumentId ?: error("dokumentId burde ikke være null her"))
         }
@@ -420,50 +395,6 @@ class EessiServiceTest {
             },
             sendAutomatisk = false,
             oppdaterEksisterende = false
-        )
-        verify(exactly = 1) { eessiClient.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) }
-        opprettBucOgSedDtoV2Slot.captured shouldBe forventetOpprettBucOgSedDtoV2
-    }
-
-    @Test
-    fun `opprettOgSendSed medFeatureToggle MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2 på kallerOpprettBucOgSedV2`() {
-
-        val behandling = lagBehandling()
-        val sedDataDto = SedDataDto()
-
-        val journalpost = lagJournalpost(listOf(
-            lagArkivDokument("hoved"),
-            lagArkivDokument("dok1"),
-            lagArkivDokument("dok2"))
-        )
-
-        val dokumentReferanser = journalpost.vedleggListe.map {
-            DokumentReferanse(journalpost.journalpostId, it.dokumentId ?: error("dokumentId burde ikke være null her"))
-        }
-
-        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
-        every { eessiClient.opprettBucOgSedV2(any()) } returns OpprettSedDto()
-        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
-        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns sedDataDto
-        every { joarkFasade.hentJournalposterTilknyttetSak(any()) } returns listOf(journalpost)
-        mockBehandlingsresultat()
-
-        val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
-
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf(mottakerBelgia1), BucType.LA_BUC_01, dokumentReferanser, null, null, null)
-
-        val forventetOpprettBucOgSedDtoV2 = OpprettBucOgSedDtoV2(
-            bucType = BucType.LA_BUC_01,
-            sedDataDto = sedDataDto,
-            vedlegg = journalpost.vedleggListe.map{
-                VedleggReferanse(
-                    journalpost.journalpostId,
-                    it.dokumentId ?: error("dokumentId burde ikke være null her"),
-                    it.tittel
-                )
-            },
-            sendAutomatisk = true,
-            oppdaterEksisterende = true
         )
         verify(exactly = 1) { eessiClient.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) }
         opprettBucOgSedDtoV2Slot.captured shouldBe forventetOpprettBucOgSedDtoV2
