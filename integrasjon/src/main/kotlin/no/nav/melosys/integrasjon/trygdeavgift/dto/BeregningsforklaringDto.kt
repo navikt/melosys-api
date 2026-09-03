@@ -8,15 +8,11 @@ import java.time.LocalDate
  * Forklaring på hvordan trygdeavgiften ble beregnet for et gitt år/inntektsgruppe.
  *
  * Speiler eksakt kontrakten fra melosys-trygdeavgift-beregning sin
- * [BeregnetTrygdeavgiftResponse]. Feltnavn/casing er ASCII og endres kun ved en
+ * BeregnetTrygdeavgiftResponse. Feltnavn/casing er ASCII og endres kun ved en
  * koordinert kontraktendring på tvers av alle tre repoer
  * (melosys-trygdeavgift-beregning → melosys-api → melosys-web).
  * Alle beløp er hele kroner (Int). Forklaringen persisteres ikke i melosys-api
  * og føres kun gjennom til frontend på PUT-veien (beregning).
- *
- * NB: [ordinaerAvgift] kan være større enn [maksimalAvgift25Prosent] selv når [valgtRegel]
- * er ORDINÆR. For frivillig medlemskap vurderes taket pr. avgiftsdel, så summen av delene
- * ble aldri sammenlignet med taket. [ordinaerAvgiftPerDel] viser da hva som ble sammenlignet.
  */
 data class BeregningsforklaringDto(
     val aar: Int,
@@ -58,11 +54,12 @@ data class OrdinaerAvgiftspostDto(
 
 /**
  * Ordinær avgift for én avgiftsdel — beløpet som faktisk ble sammenlignet med
- * [BeregningsforklaringDto.maksimalAvgift25Prosent].
+ * [BeregningsforklaringDto.maksimalAvgift25Prosent]. Ved frivillig medlemskap måles helse- og
+ * pensjonsdelen hver for seg mot taket, aldri summen, så
+ * [BeregningsforklaringDto.ordinaerAvgift] kan være større enn taket uten at taket slo inn.
  *
- * Fylles ut kun for frivillig medlemskap når ingen del overstiger taket. Deler uten avgift
- * utelates, så lista kan ha to, én eller ingen elementer. Er den utfylt, er
- * [BeregningsforklaringDto.ordinaerAvgift] summen av delene.
+ * Lista fylles kun når ingen del overstiger taket, og deler uten avgift utelates. Er den utfylt,
+ * er [BeregningsforklaringDto.ordinaerAvgift] summen av delene.
  */
 data class OrdinaerAvgiftPerDelDto(
     val inntektsgruppe: Inntektsgruppe,
