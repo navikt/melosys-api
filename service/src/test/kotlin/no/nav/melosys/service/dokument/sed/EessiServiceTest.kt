@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.sed
 
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
@@ -92,7 +91,6 @@ class EessiServiceTest {
     private lateinit var eessiService: EessiService
 
     private val easyRandom = EasyRandom()
-    private val unleash = FakeUnleash()
     private val mottakerBelgia1 = "BE:12222"
     private val mottakerBelgia2 = "BE:9999"
     private val mottakerBelgia3 = "BE:123131"
@@ -114,8 +112,7 @@ class EessiServiceTest {
             eessiClient,
             joarkFasade,
             sedDataBygger,
-            dokumentdataGrunnlagFactory,
-            unleash
+            dokumentdataGrunnlagFactory
         )
     }
 
@@ -147,27 +144,6 @@ class EessiServiceTest {
     }
 
     @Test
-    fun `lagEessiVedlegg should create vedlegg from journalpost`() {
-        val journalpost = lagJournalpost(listOf(lagArkivDokument("1"), lagArkivDokument("2")))
-        val journalpostID = journalpost.journalpostId
-        val dokumentReferanse = DokumentReferanse(journalpostID, "2")
-
-        every { joarkFasade.hentJournalposterTilknyttetSak(any()) } returns listOf(journalpost)
-        every { joarkFasade.hentDokument(any(), any()) } returns ByteArray(8)
-
-        val fagsak = Fagsak.forTest {
-            medGsakSaksnummer()
-        }
-
-        val vedlegg = eessiService.lagEessiVedlegg(fagsak, setOf(dokumentReferanse))
-
-        vedlegg.first().run {
-            hentInnhold.size shouldBe 8
-            tittel shouldBe "Tittel 2"
-        }
-    }
-
-    @Test
     fun `opprettOgSendSed buc03 ingenMedlemsperiodeType`() {
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
         every { eessiClient.opprettBucOgSedV2(any()) } returns OpprettSedDto()
@@ -179,7 +155,7 @@ class EessiServiceTest {
 
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), "fritekst", null, null)
 
-        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.INGEN)) }
+        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), eq(PeriodeType.INGEN)) }
         verify { eessiClient.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) }
         opprettBucOgSedDtoV2Slot.captured.run {
             bucType shouldBe BucType.LA_BUC_03
@@ -200,7 +176,7 @@ class EessiServiceTest {
 
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, emptyList(), null, null, null)
 
-        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.ANMODNINGSPERIODE)) }
+        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), eq(PeriodeType.ANMODNINGSPERIODE)) }
         verify {
             eessiClient.opprettBucOgSedV2(match {
                 it.bucType == BucType.LA_BUC_01 &&
@@ -223,7 +199,7 @@ class EessiServiceTest {
 
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, emptyList(), "fritekst", null, null)
 
-        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.ANMODNINGSPERIODE)) }
+        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(behandlingsresultat), eq(PeriodeType.ANMODNINGSPERIODE)) }
         verify { eessiClient.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) }
         opprettBucOgSedDtoV2Slot.captured.run {
             bucType shouldBe BucType.LA_BUC_01
@@ -261,7 +237,7 @@ class EessiServiceTest {
 
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_04, emptyList(), "fritekst", null, null)
 
-        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE)) }
+        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(behandlingsresultat), eq(PeriodeType.LOVVALGSPERIODE)) }
         verify { eessiClient.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) }
         opprettBucOgSedDtoV2Slot.captured.run {
             bucType shouldBe BucType.LA_BUC_04
@@ -294,7 +270,7 @@ class EessiServiceTest {
 
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_02, emptyList(), null, null, null)
 
-        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE)) }
+        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), eq(PeriodeType.LOVVALGSPERIODE)) }
         verify {
             eessiClient.opprettBucOgSedV2(match {
                 it.bucType == BucType.LA_BUC_02 &&
@@ -346,7 +322,7 @@ class EessiServiceTest {
 
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_04, emptyList(), null, null, null)
 
-        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE)) }
+        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), eq(PeriodeType.LOVVALGSPERIODE)) }
         verify {
             eessiClient.opprettBucOgSedV2(match {
                 it.bucType == BucType.LA_BUC_04 &&
