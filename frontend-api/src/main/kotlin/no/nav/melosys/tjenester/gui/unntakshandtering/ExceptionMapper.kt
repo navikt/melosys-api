@@ -59,11 +59,8 @@ class ExceptionMapper {
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun håndter(e: MethodArgumentNotValidException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {
-        // Både felt-constraints (@NotNull på et felt) og klasse-constraints (globalErrors) må med,
-        // ellers ville en klasse-constraint gitt 400 helt uten informasjon til klienten.
         val feilmeldinger = e.bindingResult.fieldErrors.map { "${it.field}: ${it.defaultMessage}" } +
             e.bindingResult.globalErrors.map { "${it.objectName}: ${it.defaultMessage}" }
-        // Meldingen fra Spring inneholder full metodesignatur og klassesti - kun feilkodene er trygge å eksponere
         return håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, feilmeldinger, UGYLDIG_FORESPØRSEL, loggStacktrace = false)
     }
 
@@ -98,8 +95,7 @@ class ExceptionMapper {
 
     @ExceptionHandler(Exception::class)
     fun håndter(e: Exception, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {
-        // Spring-exceptions som implementerer ErrorResponse bærer sin egen HTTP-status (415, 405, 400 osv.).
-        // Uten dette ville denne catch-allen gjort alle rene klientfeil om til 500.
+        // Spring-exceptions som implementerer ErrorResponse (415, 405, 400 ...) beholder egen status, melding og headere
         val errorResponse = e as? ErrorResponse
         val status: HttpStatusCode = errorResponse?.statusCode ?: HttpStatus.INTERNAL_SERVER_ERROR
         val erKlientfeil = status.is4xxClientError
@@ -108,13 +104,8 @@ class ExceptionMapper {
             request,
             status,
             if (erKlientfeil) Level.WARN else Level.ERROR,
-            // e.message kan inneholde klassesti og metodesignatur, men ProblemDetail-teksten fra Spring er laget
-            // for å vises til klienten ("Required parameter 'x' is not present."). Den er både trygg og mer
-            // presis enn en fast melding, så vi bruker den når den finnes.
             responsMelding = if (erKlientfeil) errorResponse?.body?.detail ?: statustekst(status) else null,
             loggStacktrace = !erKlientfeil,
-            // 405 og 415 er ikke gyldige uten Allow/Accept (RFC 9110). Headerne ligger på ErrorResponse,
-            // og forsvant tidligere fordi vi bare plukket status derfra.
             headere = errorResponse?.headers ?: HttpHeaders.EMPTY
         )
     }
@@ -136,8 +127,6 @@ class ExceptionMapper {
             append("requestURI: ${request.requestURI}")
         }
 
-        // Klientfeil (ugyldig JSON, feil datoformat) skjer per tastetrykk fra frontend. Stacktrace der er ren
-        // logstøy uten diagnostisk verdi - selve meldingen sier alt vi trenger.
         if (loggStacktrace) {
             when (loggnivå) {
                 Level.ERROR -> log.error(errorMessage, e)
@@ -163,8 +152,6 @@ class ExceptionMapper {
         return ResponseEntity(body, headere, httpStatus)
     }
 
-    // HttpStatus dekker kun standardkodene. Et ukjent statusnummer skal fortsatt beholde sin egen status
-    // i stedet for å degraderes til 500, men error-feltet må gi en lesbar tekst og ikke et tall.
     private fun statustekst(status: HttpStatusCode): String =
         HttpStatus.resolve(status.value())?.reasonPhrase
             ?: if (status.is4xxClientError) "Client Error" else "Server Error"

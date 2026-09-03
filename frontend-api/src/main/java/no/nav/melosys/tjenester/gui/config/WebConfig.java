@@ -49,23 +49,9 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     /**
-     * Jackson tolker tall som epoch-day: {@code {"periodeFom": 12345}} ble stille til 2003-10-20.
-     * Vi avviser heller tall som dato, slik at klienten får 400 i stedet for en feil dato.
-     * <p>
-     * Gjelder bevisst kun LocalDate/LocalDateTime. For Instant og OffsetDateTime er et tall epoch-tid, altså
-     * en veldefinert og vanlig representasjon - der ville en avvisning brutt gyldige requester i stedet for
-     * å fange en feil. (De går uansett utenom coercion-mekanismen, verifisert.)
-     * <p>
-     * Konfigurasjonen ligger bevisst på HTTP-converteren og ikke på {@code JsonMapperBuilderCustomizer}:
-     * den customizeren bygger Boots delte ObjectMapper, som også brukes av Kafka-consumerne (se KafkaConfig).
-     * Der ville en deserialiseringsfeil stoppet containeren via SkippableKafkaErrorHandler og krevd manuell
-     * opprydding. Problemet vi løser er rent frontend-vendt, så rekkevidden holdes til MVC.
-     * <p>
-     * Mapperen bygges videre fra den delte, slik at moduler og features ikke kan drifte fra hverandre.
-     * <p>
-     * Vi fjerner samtidig de øvrige Jackson-formatene (YAML, XML, Smile, CBOR). De har egne mappere uten
-     * coercion-reglene, så {@code Content-Type: application/yaml} kunne ellers levere {@code periodeFom: 12345}
-     * rett forbi vernet. Frontend sender kun JSON, så alternativene er ren angrepsflate.
+     * Avviser tall som LocalDate/LocalDateTime i request-body (Jackson tolker ellers 12345 som epoch-day).
+     * Settes på MVC-converteren, ikke den delte ObjectMapper, så Kafka-consumerne ikke påvirkes.
+     * Øvrige Jackson-formater (YAML, XML, ...) fjernes fordi de ville omgått regelen; frontend sender kun JSON.
      */
     @Override
     public void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
