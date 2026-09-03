@@ -148,15 +148,13 @@ public class EessiService {
 
         log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
 
-        OpprettSedDto opprettSedDto = featureToggledOpprettBucOgSed(
-            behandling,
-            dokumentReferanser,
-            sedData,
+        OpprettSedDto opprettSedDto = eessiClient.opprettBucOgSedV2(new OpprettBucOgSedDtoV2(
             bucType,
+            sedData,
+            lagVedleggReferanser(behandling.getFagsak(), dokumentReferanser),
             true,
             true
-        );
-
+        ));
         log.info("Buc opprettet med id {} for behandling {}", opprettSedDto.getRinaSaksnummer(), behandling.getId());
     }
 
@@ -181,34 +179,13 @@ public class EessiService {
 
 
         log.info("Oppretter buc og sed for behandling {} med bucType {}", behandling.getId(), bucType);
-        return featureToggledOpprettBucOgSed(
-            behandling,
-            dokumentReferanser,
-            sedDataDto,
-            bucType,
-            false,
-            false
-        ).getRinaUrl();
-    }
-
-    // Blir litt mange metodeparametere her, men heldigvis er denne bare midlertidig inntil feature-togglingen er fjernet
-    private OpprettSedDto featureToggledOpprettBucOgSed(
-        Behandling behandling,
-        Collection<DokumentReferanse> dokumentReferanser,
-        SedDataDto sedDataDto,
-        BucType bucType,
-        Boolean sendAutomatisk,
-        Boolean oppdaterEksisterende
-    ) {
-
-        log.info("Oppretter buc og sed med v2-endepunkt");
         return eessiClient.opprettBucOgSedV2(new OpprettBucOgSedDtoV2(
             bucType,
             sedDataDto,
             lagVedleggReferanser(behandling.getFagsak(), dokumentReferanser),
-            sendAutomatisk,
-            oppdaterEksisterende
-        ));
+            false,
+            false
+        )).getRinaUrl();
     }
 
     public List<Institusjon> hentEessiMottakerinstitusjoner(String bucType, Collection<String> landkoder) {
