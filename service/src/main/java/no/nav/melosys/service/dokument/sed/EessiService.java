@@ -200,19 +200,15 @@ public class EessiService {
         Boolean sendAutomatisk,
         Boolean oppdaterEksisterende
     ) {
-        if (unleash.isEnabled(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)) {
-            log.info("Oppretter buc og sed med v2-endepunkt");
-            return eessiClient.opprettBucOgSedV2(new OpprettBucOgSedDtoV2(
-                bucType,
-                sedDataDto,
-                lagVedleggReferanser(behandling.getFagsak(), dokumentReferanser),
-                sendAutomatisk,
-                oppdaterEksisterende
-            ));
-        }
 
-        final var vedlegg = lagEessiVedlegg(behandling.getFagsak(), dokumentReferanser);
-        return eessiClient.opprettBucOgSed(sedDataDto, vedlegg, bucType, sendAutomatisk, oppdaterEksisterende);
+        log.info("Oppretter buc og sed med v2-endepunkt");
+        return eessiClient.opprettBucOgSedV2(new OpprettBucOgSedDtoV2(
+            bucType,
+            sedDataDto,
+            lagVedleggReferanser(behandling.getFagsak(), dokumentReferanser),
+            sendAutomatisk,
+            oppdaterEksisterende
+        ));
     }
 
     public List<Institusjon> hentEessiMottakerinstitusjoner(String bucType, Collection<String> landkoder) {

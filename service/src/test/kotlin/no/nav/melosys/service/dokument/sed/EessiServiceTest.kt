@@ -90,7 +90,6 @@ class EessiServiceTest {
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
-        unleash.disable(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)
         eessiService = EessiService(
             behandlingService,
             behandlingsresultatService,
@@ -322,7 +321,6 @@ class EessiServiceTest {
 
     @Test
     fun `opprettBucOgSed medFeatureToggle MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2 på kallerOpprettBucOgSedV2`() {
-        unleash.enable(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)
 
         val opprettSedDto = OpprettSedDto().apply {
             rinaUrl = "localhost:3000"
@@ -372,7 +370,6 @@ class EessiServiceTest {
 
     @Test
     fun `opprettOgSendSed medFeatureToggle MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2 på kallerOpprettBucOgSedV2`() {
-        unleash.enable(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)
 
         val behandling = lagBehandling()
         val sedDataDto = SedDataDto()
