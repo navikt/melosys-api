@@ -41,6 +41,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -67,6 +68,7 @@ class TrygdeavgiftControllerTest(
     private lateinit var eøsPensjonistTrygdeavgiftsBeregningService: EøsPensjonistTrygdeavgiftsberegningService
 
     private val BASE_URL = "/api/behandlinger/{behandlingID}/trygdeavgift"
+    private val PER_DEL = "$.beregningsforklaringer[0].ordinaerAvgiftPerDel"
     private val BEHANDLINGSRESULTAT_ID = 1L
     private val trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
 
@@ -157,13 +159,11 @@ class TrygdeavgiftControllerTest(
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk)
-            .andExpect { result ->
-                val deler = objectMapper.readTree(result.response.contentAsString)
-                    .path("beregningsforklaringer")[0].path("ordinaerAvgiftPerDel")
-                assert(deler.size() == 2 && deler[0].path("inntektsgruppe").asText() == "HELSEDEL") {
-                    "Forventet ordinaerAvgiftPerDel i responsen, men fikk: ${result.response.contentAsString}"
-                }
-            }
+            .andExpect(jsonPath("${PER_DEL}.length()").value(2))
+            .andExpect(jsonPath("${PER_DEL}[0].inntektsgruppe").value("HELSEDEL"))
+            .andExpect(jsonPath("${PER_DEL}[0].ordinaerAvgift").value(81600))
+            .andExpect(jsonPath("${PER_DEL}[1].inntektsgruppe").value("PENSJONSDEL"))
+            .andExpect(jsonPath("${PER_DEL}[1].ordinaerAvgift").value(258000))
     }
 
     @Test
