@@ -122,9 +122,8 @@ class ValideringUnntaksperiodeControllerTest {
     }
 
     @Test
-    fun `skal ikke kunne omgå datovernet ved å sende YAML i stedet for JSON`() {
-        // YAML-converteren har egen mapper uten coercion-reglene. Uten at den er fjernet ville dette gitt 204
-        // og kalt tjenesten med den stille feiltolkede datoen 2003-10-20.
+    fun `skal avvise YAML med 415 slik at tall som dato ikke slipper forbi via annet format`() {
+        // Med YAML-converteren på plass ga dette 204 og datoen 2003-10-20
         mockMvc.perform(post("$BASE_URL/{behandlingID}/unntaksperiode", 22L)
                 .contentType(MediaType.parseMediaType("application/yaml"))
                 .content("periodeFom: 12345\nperiodeTom: 2021-05-15\n"))
@@ -139,7 +138,7 @@ class ValideringUnntaksperiodeControllerTest {
                 .contentType(MediaType.TEXT_PLAIN)
                 .content("""{"periodeFom": "2020-01-01", "periodeTom": "2021-05-15"}"""))
             .andExpect(status().isUnsupportedMediaType())
-            // RFC 9110: 415 skal si hvilke formater som støttes. Headeren kommer fra ErrorResponse
+            // RFC 9110: 415 skal oppgi støttede formater
             .andExpect(header().string(HttpHeaders.ACCEPT, containsString(MediaType.APPLICATION_JSON_VALUE)))
             .also { assertIngenInterneDetaljer(it) }
 
