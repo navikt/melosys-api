@@ -35,18 +35,13 @@ class WebConfigObjectMapperTest {
         builder.build()
     }
 
-    /** Converterne configureMessageConverters faktisk setter opp, bygget med Springs ekte builder. */
     private val mvcConvertere: List<HttpMessageConverter<*>> = run {
         val builder = HttpMessageConverters.forServer().registerDefaults()
         webConfig.configureMessageConverters(builder)
         builder.build().toList()
     }
 
-    /**
-     * Mapperen configureMessageConverters bygger. NB: basen her er bygget kun av vår egen customizer, ikke av
-     * Boot, så denne verifiserer coercion-reglene og at rebuild() bevarer basen - ikke hele produksjonskjeden.
-     * Den ekte kjeden er dekket ende-til-ende av @WebMvcTest-en i ValideringUnntaksperiodeControllerTest.
-     */
+    // Basen er bygget av vår customizer alene, ikke av Boot. Hele kjeden dekkes av ValideringUnntaksperiodeControllerTest.
     private val mvcMapper: JsonMapper =
         mvcConvertere.filterIsInstance<JacksonJsonHttpMessageConverter>().single().mapper
 
@@ -146,32 +141,26 @@ class WebConfigObjectMapperTest {
 
     @Test
     fun `configureMessageConverters skal fjerne Jackson-convertere for andre formater enn JSON`() {
-        // De har egne mappere uten coercion-reglene, og ville dermed vært en vei rundt datovernet
         mvcConvertere.filterIsInstance<AbstractJacksonHttpMessageConverter<*>>()
             .map { it::class.java } shouldBe listOf(JacksonJsonHttpMessageConverter::class.java)
-        // Ikke-Jackson-converterne (String, Resource, ByteArray) skal fortsatt være der - PDF-nedlasting
-        // og lignende avhenger av dem
+        // Ikke-Jackson-converterne må bestå; PDF-nedlasting avhenger av dem
         mvcConvertere.any { it is StringHttpMessageConverter } shouldBe true
     }
 
     @Test
     fun `mvcMapper skal fortsatt godta tall som Instant, siden epoch-tid er en gyldig representasjon der`() {
-        // Til forskjell fra epoch-day for LocalDate er et tall for Instant veldefinert. Å avvise det ville
-        // brutt gyldige requester i stedet for å fange en feil.
         mvcMapper.readValue("""{"tidspunkt": 12345}""", InstantDto::class.java).tidspunkt shouldNotBe null
     }
 
     @Test
     fun `mvcMapper skal beholde konfigurasjonen fra mapperen den bygges videre fra`() {
-        // rebuild() skal bevare moduler og features, slik at MVC ikke drifter fra resten av appen
         mvcMapper.isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION) shouldBe true
         mvcMapper.writeValueAsString(InnvilgelsesResultat.INNVILGET) shouldBe "\"${InnvilgelsesResultat.INNVILGET.kode}\""
     }
 
     @Test
     fun `coercion-reglene skal IKKE gjelde den delte mapperen som Kafka og WebClient bruker`() {
-        // Kafka-consumerne deler denne mapperen, og en deserialiseringsfeil der stopper containeren.
-        // Coercion-reglene hører derfor kun hjemme på MVC-mapperen.
+        // En deserialiseringsfeil i Kafka-consumerne stopper containeren
         objectMapper.readValue("""{"dato": 12345}""", DatoDto::class.java).dato shouldNotBe null
     }
 

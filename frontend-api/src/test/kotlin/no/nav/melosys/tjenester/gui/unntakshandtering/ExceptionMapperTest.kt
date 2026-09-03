@@ -179,8 +179,7 @@ class ExceptionMapperTest {
             MediaType.TEXT_PLAIN,
             listOf(MediaType.APPLICATION_JSON)
         )
-        // ProblemDetail-teksten fra Spring er laget for klienten og sier noe konkret, i motsetning til
-        // statusteksten "Unsupported Media Type"
+        // ProblemDetail-teksten er mer konkret enn statusteksten "Unsupported Media Type"
         assertResponse(
             exceptionMapper.håndter(exception as Exception, request),
             HttpStatus.UNSUPPORTED_MEDIA_TYPE,
@@ -195,7 +194,7 @@ class ExceptionMapperTest {
         val responseEntity = exceptionMapper.håndter(exception as Exception, request)
 
         assertEquals(HttpStatus.METHOD_NOT_ALLOWED, responseEntity.statusCode)
-        // RFC 9110 krever Allow på 405. Headerne ligger på ErrorResponse, ikke bare statuskoden.
+        // RFC 9110 krever Allow på 405
         assertEquals("GET, POST", responseEntity.headers.getFirst(HttpHeaders.ALLOW))
     }
 
