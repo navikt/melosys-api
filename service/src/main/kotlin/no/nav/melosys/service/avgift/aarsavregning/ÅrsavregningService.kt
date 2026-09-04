@@ -190,7 +190,49 @@ class ÅrsavregningService(
             behandlingsresultatService.lagre(årsavregning.hentBehandlingsresultat).hentÅrsavregning()
         }
 
+        settEndeligAvgiftTilNullDersomIngenAvgiftspliktigPeriode(behandlingsresultat, årsavregning)
+
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
+    }
+
+    /**
+     * Når behandlingen ikke lenger har avgiftspliktige perioder som overlapper med årsavregningsåret
+     * (f.eks. en ny vurdering som avkorter medlemskapsperioden slik at hele året faller bort),
+     * er endelig trygdeavgift 0. Saksbehandler kan ikke kjøre beregnTrygdeavgift i dette tilfellet
+     * (validatoren blokkerer beregning uten avgiftspliktige perioder), så vi setter beløpet her.
+     * Da blir differansen en full kreditering av tidligere fakturert beløp, og vedtaksbrev/faktura
+     * kan produseres uten manuelle steg.
+     *
+     * Er året fjernet av en senere vurdering (tidligereBehandlingsresultat er en vurdering, ikke en årsavregning),
+     * overstyres også valg og manuelt beløp arvet fra en tidligere årsavregning for samme år: det som ble fastsatt
+     * sist gjelder ikke lenger når NAV ikke har noe krav for året (MELOSYS-8006). Finnes ingen slik vurdering
+     * (f.eks. sak med grunnlag kun fra Avgiftssystemet), beholdes et arvet manuelt beløp.
+     */
+    private fun settEndeligAvgiftTilNullDersomIngenAvgiftspliktigPeriode(
+        behandlingsresultat: Behandlingsresultat,
+        årsavregning: Årsavregning
+    ) {
+        if (behandlingsresultat.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(årsavregning.aar)) return
+
+        if (erÅretFjernetAvSenereVurdering(årsavregning)) {
+            årsavregning.endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
+            årsavregning.manueltAvgiftBeloep = null
+        } else if (årsavregning.manueltAvgiftBeloep != null) {
+            return
+        }
+
+        årsavregning.beregnetAvgiftBelop = BigDecimal.ZERO
+        årsavregning.beregnTilFaktureringsBeloep()
+    }
+
+    /**
+     * Året er fjernet når siste vurdering med avgiftspliktige perioder er en vanlig vurdering (ikke en årsavregning)
+     * og den ikke lenger dekker året. Skiller «ny vurdering avkortet bort året» fra «saken har aldri hatt grunnlag i Melosys».
+     */
+    private fun erÅretFjernetAvSenereVurdering(årsavregning: Årsavregning): Boolean {
+        val sisteVurdering = årsavregning.tidligereBehandlingsresultat ?: return false
+        return sisteVurdering.behandling?.erÅrsavregning() == false
+            && !sisteVurdering.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(årsavregning.aar)
     }
 
     fun hentSisteÅrsavregning(saksnummer: String, år: Int, førVedtaksdato: Instant? = null): Årsavregning? {
@@ -263,6 +305,11 @@ class ÅrsavregningService(
                     else -> {}
                 }
             }
+        }
+
+        // Året kan være fjernet av en senere vurdering; da skal endelig avgift fortsatt være 0 etter nullstillingen over
+        if (erÅretFjernetAvSenereVurdering(årsavregning)) {
+            settEndeligAvgiftTilNullDersomIngenAvgiftspliktigPeriode(behandlingsresultat, årsavregning)
         }
 
         behandlingsresultatService.lagreOgFlush(behandlingsresultat)
