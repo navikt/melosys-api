@@ -172,6 +172,68 @@ class ÅrsavregningVedEndringIT(
         fattÅrsavregningsvedtakOgVerifiserKreditnota(andreÅrsavregning.id, forventetKreditering = manueltFastsattForFjoråret)
     }
 
+    @Test
+    fun `ny vurdering som fjerner et årsavregnet år med innbetalt fra Avgiftssystemet krediterer netto betalt, ikke innbetalt en gang til`() {
+        // ---- 1. Førstegangsbehandling over to år med toggle AV ----
+        fakeUnleash.enableAllExcept(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+
+        val saksnummer = lagFørstegangsbehandling()
+
+        // ---- 2. Årsavregning for fjoråret: 300 innbetalt i Avgiftssystemet, fastsatt manuelt til 1500 ----
+        //         (1500 - 1000 - 300 = 200 faktureres; netto betalt for året er da 1500)
+        val manueltFastsattForFjoråret = BigDecimal(1500)
+        val innbetaltIAvgiftssystemet = BigDecimal(300)
+        val førsteÅrsavregningId = executeAndWait(
+            mapOf(ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK to 1)
+        ) {
+            opprettBehandlingForSak.opprettBehandling(saksnummer, lagOpprettManuellÅrsavregningDto())
+        }.hentBehandling.id
+
+        val førsteÅrsavregning = årsavregningService.opprettÅrsavregning(førsteÅrsavregningId, fjoråret)
+        årsavregningService.oppdaterHarInnbetaltTrygdeavgift(førsteÅrsavregningId, true)
+        årsavregningService.oppdater(
+            førsteÅrsavregningId,
+            førsteÅrsavregning.årsavregningID,
+            beregnetAvgiftBelop = null,
+            innbetaltTrygdeavgift = innbetaltIAvgiftssystemet,
+            endeligAvgift = EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT,
+            manueltAvgiftBeloep = manueltFastsattForFjoråret
+        )
+
+        executeAndWait(
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
+        ) {
+            vedtaksfattingFasade.fattVedtak(førsteÅrsavregningId, lagÅrsavregningsvedtak())
+        }
+        val fakturertAvFørsteÅrsavregning = manueltFastsattForFjoråret - fakturertForFjoråret - innbetaltIAvgiftssystemet
+        behandlingsresultatService.hentBehandlingsresultat(førsteÅrsavregningId).hentÅrsavregning().run {
+            innbetaltTrygdeavgift.shouldNotBeNull() shouldBeEqualComparingTo innbetaltIAvgiftssystemet
+            tilFaktureringBeloep.shouldNotBeNull() shouldBeEqualComparingTo fakturertAvFørsteÅrsavregning
+        }
+        sisteFakturaKall().let { body ->
+            body["belop"].decimalValue() shouldBeEqualComparingTo fakturertAvFørsteÅrsavregning
+        }
+
+        // ---- 3. Toggle PÅ, ny vurdering avkorter til inneværende år, endringsvedtak ----
+        fakeUnleash.enableAll()
+        lagNyVurderingSomAvkorterTilInneværendeÅrOgFattVedtak(saksnummer)
+
+        // ---- 4. Ny årsavregning for fjoråret: innbetalt arves ikke, ellers ville de 300 blitt trukket fra to ganger ----
+        val andreÅrsavregning = hentAutomatiskOpprettetÅrsavregning(saksnummer)
+        andreÅrsavregning.id shouldNotBe førsteÅrsavregningId
+        verifiserÅrsavregningMedEndeligAvgiftNull(andreÅrsavregning.id, forventetKreditering = manueltFastsattForFjoråret)
+        behandlingsresultatService.hentBehandlingsresultat(andreÅrsavregning.id).hentÅrsavregning().run {
+            innbetaltTrygdeavgift.shouldBeNull()
+            harInnbetaltTrygdeavgift shouldBe false
+        }
+
+        // ---- 5. Vedtak: kreditnota for netto betalt, 1500, ikke 1800 ----
+        fattÅrsavregningsvedtakOgVerifiserKreditnota(andreÅrsavregning.id, forventetKreditering = manueltFastsattForFjoråret)
+    }
+
     private fun lagNyVurderingSomAvkorterTilInneværendeÅrOgFattVedtak(saksnummer: String) {
         val nyVurderingId = executeAndWait(
             mapOf(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1)

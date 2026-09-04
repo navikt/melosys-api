@@ -192,9 +192,27 @@ class ÅrsavregningService(
             behandlingsresultatService.lagre(årsavregning.hentBehandlingsresultat).hentÅrsavregning()
         }
 
+        nullstillArvetInnbetaltDersomÅretErFjernet(behandlingsresultat, årsavregning)
         settEndeligAvgiftTilNullDersomIngenAvgiftspliktigPeriode(behandlingsresultat, årsavregning)
 
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
+    }
+
+    /**
+     * Innbetalt beløp fra Avgiftssystemet arves fra forrige årsavregning for samme år. Når året er fjernet av en senere
+     * vurdering, er «tidligere fakturert» det som sist ble fastsatt i den årsavregningen, og innbetalingen inngår
+     * allerede der. Beholdes den, trekkes den fra en gang til i [Årsavregning.beregnTilFaktureringsBeloep]: leddet som
+     * legger tilbake forrige årsavregnings innbetaling slår bare inn når tidligereBehandlingsresultat er den
+     * årsavregningen, ikke vurderingen som fjernet året.
+     *
+     * Kalles kun ved opprettelse. Svarer saksbehandler selv på innbetalt-spørsmålet etterpå, respekteres det.
+     */
+    private fun nullstillArvetInnbetaltDersomÅretErFjernet(behandlingsresultat: Behandlingsresultat, årsavregning: Årsavregning) {
+        if (behandlingsresultat.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(årsavregning.aar)) return
+        if (!erÅretFjernetAvSenereVurdering(årsavregning)) return
+
+        årsavregning.innbetaltTrygdeavgift = null
+        årsavregning.harInnbetaltTrygdeavgift = false
     }
 
     /**
