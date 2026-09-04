@@ -89,7 +89,7 @@ public class AnmodningUnntakService {
         joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(), fagsak.getSaksnummer()), vedleggReferanser);
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
-        anmodningsperiodeService.oppdaterAnmodetAvForBehandling(behandlingID, SubjectHandler.getInstance().getUserID());
+        anmodningsperiodeService.registrerAnmodning(behandlingID, SubjectHandler.getInstance().getUserID(), erFjernarbeidTWFA);
         prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerinstitusjoner,
             vedleggReferanser, ytterligereInformasjonSed, begrunnelseFritekst, erFjernarbeidTWFA);
         oppgaveService.leggTilbakeBehandlingsoppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());

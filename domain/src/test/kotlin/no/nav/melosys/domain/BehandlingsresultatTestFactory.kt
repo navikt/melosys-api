@@ -217,6 +217,7 @@ object AnmodningsperiodeTestFactory {
         var dekning: Trygdedekninger? = null
         var sendtUtland: Boolean = false
         var anmodetAv: String? = null
+        var erFjernarbeidTWFA: Boolean? = null
         var medlPeriodeID: Long? = null
         var behandlingsresultat: Behandlingsresultat? = null
         private var anmodningsperiodeSvarBuilder: AnmodningsperiodeSvarBuilder? = null
@@ -239,6 +240,7 @@ object AnmodningsperiodeTestFactory {
                 this@apply.id = this@Builder.id
                 this@apply.setSendtUtland(this@Builder.sendtUtland)
                 this@apply.anmodetAv = this@Builder.anmodetAv
+                this@apply.erFjernarbeidTWFA = this@Builder.erFjernarbeidTWFA
                 this@apply.medlPeriodeID = this@Builder.medlPeriodeID
                 this@apply.behandlingsresultat = this@Builder.behandlingsresultat
             }

@@ -47,7 +47,7 @@ public abstract class AbstraktSendUtland implements StegBehandler {
                 eessiService.opprettOgSendSed(behandlingID, new ArrayList<>(mottakerinstitusjoner), bucType, dokumentReferanser,
                     prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED),
                     prosessinstans.getData(ProsessDataKey.A008_FORMAAL),
-                    prosessinstans.getData(ProsessDataKey.ER_FJERNARBEID_TWFA, Boolean.class));
+                    hentErFjernarbeidTWFA(behandlingsresultat));
                 return SendUtlandStatus.SED_SENDT;
             } else {
                 sendBrev(prosessinstans);
@@ -55,6 +55,15 @@ public abstract class AbstraktSendUtland implements StegBehandler {
             }
         }
         return SendUtlandStatus.IKKE_SENDT;
+    }
+
+    /**
+     * Rammeavtale om fjernarbeid i EØS (TWFA) gjelder kun anmodning om unntak etter artikkel 16 (A001, LA_BUC_01).
+     * Default null holder dagens oppførsel for SendVedtakUtland og VideresendSoknad, som deler denne basisklassen:
+     * flagget skal ikke lekke over på vedtaks-SED-en eller A008 bare fordi behandlingen har en anmodningsperiode.
+     */
+    protected Boolean hentErFjernarbeidTWFA(Behandlingsresultat behandlingsresultat) {
+        return null;
     }
 
     protected abstract void sendBrev(Prosessinstans prosessinstans);
