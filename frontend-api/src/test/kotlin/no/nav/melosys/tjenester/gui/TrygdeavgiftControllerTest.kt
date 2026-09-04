@@ -21,6 +21,7 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.Beregningsaarsak
 import no.nav.melosys.integrasjon.trygdeavgift.dto.EkskludertInntektspostDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.Ekskluderingsaarsak
 import no.nav.melosys.integrasjon.trygdeavgift.dto.InntektspostDto
+import no.nav.melosys.integrasjon.trygdeavgift.dto.OrdinaerAvgiftPerDelDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.OrdinaerAvgiftspostDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.Inntektsgruppe
 import no.nav.melosys.service.avgift.BeregnetTrygdeavgiftMedForklaring
@@ -40,6 +41,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -66,6 +68,7 @@ class TrygdeavgiftControllerTest(
     private lateinit var eøsPensjonistTrygdeavgiftsBeregningService: EøsPensjonistTrygdeavgiftsberegningService
 
     private val BASE_URL = "/api/behandlinger/{behandlingID}/trygdeavgift"
+    private val PER_DEL = "$.beregningsforklaringer[0].ordinaerAvgiftPerDel"
     private val BEHANDLINGSRESULTAT_ID = 1L
     private val trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
 
@@ -127,6 +130,40 @@ class TrygdeavgiftControllerTest(
             .andExpectResponseBody(
                 forventetBeregnetTrygdeavgiftDto(beregningsforklaringer = listOf(forklaring))
             )
+    }
+
+    @Test
+    fun `ordinaer avgift per avgiftsdel serialiseres ut til frontend`() {
+        every { aksesskontroll.autoriserSkrivOgTilordnet(any()) } returns Unit
+
+        val forklaring = lagBeregningsforklaringDto().copy(
+            valgtRegel = Avgiftsberegningsregel.ORDINÆR,
+            ordinaerAvgift = 339600,
+            ordinaerAvgiftPerDel = listOf(
+                OrdinaerAvgiftPerDelDto(Inntektsgruppe.HELSEDEL, 81600),
+                OrdinaerAvgiftPerDelDto(Inntektsgruppe.PENSJONSDEL, 258000),
+            ),
+        )
+
+        every {
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgiftMedForklaring(
+                any(),
+                any<List<SkatteforholdTilNorge>>(),
+                any<List<Inntektsperiode>>()
+            )
+        } returns BeregnetTrygdeavgiftMedForklaring(trygdeavgiftsperioder, listOf(forklaring))
+
+        mockMvc.perform(
+            put("$BASE_URL/beregning", 1L)
+                .content(objectMapper.writeValueAsString(lagTrygdeavgiftsgrunnlagDto()))
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("${PER_DEL}.length()").value(2))
+            .andExpect(jsonPath("${PER_DEL}[0].inntektsgruppe").value("HELSEDEL"))
+            .andExpect(jsonPath("${PER_DEL}[0].ordinaerAvgift").value(81600))
+            .andExpect(jsonPath("${PER_DEL}[1].inntektsgruppe").value("PENSJONSDEL"))
+            .andExpect(jsonPath("${PER_DEL}[1].ordinaerAvgift").value(258000))
     }
 
     @Test

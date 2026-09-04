@@ -8,7 +8,7 @@ import java.time.LocalDate
  * Forklaring på hvordan trygdeavgiften ble beregnet for et gitt år/inntektsgruppe.
  *
  * Speiler eksakt kontrakten fra melosys-trygdeavgift-beregning sin
- * [BeregnetTrygdeavgiftResponse]. Feltnavn/casing er ASCII og endres kun ved en
+ * BeregnetTrygdeavgiftResponse. Feltnavn/casing er ASCII og endres kun ved en
  * koordinert kontraktendring på tvers av alle tre repoer
  * (melosys-trygdeavgift-beregning → melosys-api → melosys-web).
  * Alle beløp er hele kroner (Int). Forklaringen persisteres ikke i melosys-api
@@ -27,6 +27,7 @@ data class BeregningsforklaringDto(
     val maksimalAvgift25Prosent: Int?,
     val ordinaerAvgift: Int,
     val ordinaerAvgiftPoster: List<OrdinaerAvgiftspostDto> = emptyList(),
+    val ordinaerAvgiftPerDel: List<OrdinaerAvgiftPerDelDto> = emptyList(),
     val fastsattAvgift: Int,
     val fastsattAvgiftPerMaaned: Int = 0,
 )
@@ -49,6 +50,17 @@ data class OrdinaerAvgiftspostDto(
     val grunnlag: Int,
     val sats: BigDecimal,
     val beloep: Int,
+)
+
+/**
+ * Ordinær avgift for én avgiftsdel — beløpet som faktisk ble sammenlignet med
+ * [BeregningsforklaringDto.maksimalAvgift25Prosent]. Ved frivillig medlemskap måles helse- og
+ * pensjonsdelen hver for seg mot taket, aldri summen, så
+ * [BeregningsforklaringDto.ordinaerAvgift] kan være større enn taket.
+ */
+data class OrdinaerAvgiftPerDelDto(
+    val inntektsgruppe: Inntektsgruppe,
+    val ordinaerAvgift: Int,
 )
 
 data class EkskludertInntektspostDto(
