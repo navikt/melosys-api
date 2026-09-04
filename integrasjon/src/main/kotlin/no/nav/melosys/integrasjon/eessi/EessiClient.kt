@@ -1,14 +1,15 @@
 package no.nav.melosys.integrasjon.eessi
 
-import no.nav.melosys.domain.arkiv.Vedlegg
-import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Institusjon
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.eessi.sed.OpprettBucOgSedDtoV2
 import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
-import no.nav.melosys.integrasjon.eessi.dto.*
+import no.nav.melosys.integrasjon.eessi.dto.BucinfoDto
+import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto
+import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto
+import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto
 import no.nav.melosys.integrasjon.felles.JsonRestIntegrasjon
 import org.springframework.retry.annotation.Retryable
 import org.springframework.web.reactive.function.client.WebClient
@@ -18,23 +19,6 @@ import org.springframework.web.reactive.function.client.bodyToMono
 // https://github.com/spring-projects/spring-framework/issues/26729
 @Retryable
 open class EessiClient(private val webClient: WebClient) : JsonRestIntegrasjon {
-
-    open fun opprettBucOgSed(
-        sedDataDto: SedDataDto,
-        vedlegg: Collection<Vedlegg>,
-        bucType: BucType,
-        sendAutomatisk: Boolean,
-        oppdaterEksisterendeOmFinnes: Boolean
-    ) =
-        webClient.post()
-            .uri(
-                "/buc/{bucType}?sendAutomatisk={sendAutomatisk}&oppdaterEksisterende={oppdaterEksisterendeOmFinnes}",
-                bucType, sendAutomatisk, oppdaterEksisterendeOmFinnes
-            )
-            .bodyValue(OpprettBucOgSedDto(sedDataDto, vedlegg))
-            .retrieve()
-            .bodyToMono<OpprettSedDto>()
-            .block()!!
 
     open fun opprettBucOgSedV2(opprettBucOgSedDtoV2: OpprettBucOgSedDtoV2) =
         webClient.post()

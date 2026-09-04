@@ -1,35 +1,56 @@
 package no.nav.melosys.service.dokument.sed
 
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.nulls.shouldBeNull
-import io.kotest.matchers.nulls.shouldNotBeNull
-import io.kotest.matchers.shouldBe
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
-import io.mockk.*
+import io.mockk.MockKAnnotations
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import no.nav.melosys.domain.*
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import java.time.LocalDate
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.PeriodeType
+import no.nav.melosys.domain.SaksopplysningType
+import no.nav.melosys.domain.anmodningsperiode
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.arkiv.DokumentReferanse
 import no.nav.melosys.domain.arkiv.Journalpost
-import no.nav.melosys.domain.eessi.*
 import no.nav.melosys.domain.eessi.A008Formaal
+import no.nav.melosys.domain.eessi.BucInformasjon
+import no.nav.melosys.domain.eessi.BucType
+import no.nav.melosys.domain.eessi.Institusjon
+import no.nav.melosys.domain.eessi.SedInformasjon
+import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis
+import no.nav.melosys.domain.eessi.sed.Arbeidsland
+import no.nav.melosys.domain.eessi.sed.Arbeidssted
 import no.nav.melosys.domain.eessi.sed.OpprettBucOgSedDtoV2
 import no.nav.melosys.domain.eessi.sed.SedDataDto
-import no.nav.melosys.featuretoggle.ToggleName
+import no.nav.melosys.domain.eessi.sed.VedleggReferanse
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
+import no.nav.melosys.domain.lovvalgsperiode
+import no.nav.melosys.domain.saksopplysning
+import no.nav.melosys.domain.sedDokument
+import no.nav.melosys.domain.utpekingsperiode
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IntegrasjonException
 import no.nav.melosys.integrasjon.eessi.EessiClient
@@ -46,10 +67,6 @@ import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSokna
 import org.jeasy.random.EasyRandom
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import no.nav.melosys.domain.eessi.sed.VedleggReferanse
-import no.nav.melosys.domain.eessi.sed.Arbeidsland
-import no.nav.melosys.domain.eessi.sed.Arbeidssted
 
 class EessiServiceTest {
 
@@ -74,7 +91,6 @@ class EessiServiceTest {
     private lateinit var eessiService: EessiService
 
     private val easyRandom = EasyRandom()
-    private val unleash = FakeUnleash()
     private val mottakerBelgia1 = "BE:12222"
     private val mottakerBelgia2 = "BE:9999"
     private val mottakerBelgia3 = "BE:123131"
@@ -90,15 +106,13 @@ class EessiServiceTest {
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
-        unleash.disable(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)
         eessiService = EessiService(
             behandlingService,
             behandlingsresultatService,
             eessiClient,
             joarkFasade,
             sedDataBygger,
-            dokumentdataGrunnlagFactory,
-            unleash
+            dokumentdataGrunnlagFactory
         )
     }
 
@@ -130,76 +144,70 @@ class EessiServiceTest {
     }
 
     @Test
-    fun `lagEessiVedlegg should create vedlegg from journalpost`() {
-        val journalpost = lagJournalpost(listOf(lagArkivDokument("1"), lagArkivDokument("2")))
-        val journalpostID = journalpost.journalpostId
-        val dokumentReferanse = DokumentReferanse(journalpostID, "2")
-
-        every { joarkFasade.hentJournalposterTilknyttetSak(any()) } returns listOf(journalpost)
-        every { joarkFasade.hentDokument(any(), any()) } returns ByteArray(8)
-
-        val fagsak = Fagsak.forTest {
-            medGsakSaksnummer()
-        }
-
-        val vedlegg = eessiService.lagEessiVedlegg(fagsak, setOf(dokumentReferanse))
-
-        vedlegg.first().run {
-            hentInnhold.size shouldBe 8
-            tittel shouldBe "Tittel 2"
-        }
-    }
-
-    @Test
     fun `opprettOgSendSed buc03 ingenMedlemsperiodeType`() {
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
-        every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { eessiClient.opprettBucOgSedV2(any()) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
         mockBehandlingsresultat()
 
-        val sedDataDtoSlot = slot<SedDataDto>()
-        every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
+        val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
 
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), "fritekst", null, null)
 
-        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.INGEN)) }
-        verify { eessiClient.opprettBucOgSed(any(), any(), eq(BucType.LA_BUC_03), eq(true), eq(true)) }
-        sedDataDtoSlot.captured.ytterligereInformasjon shouldBe "fritekst"
+        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), eq(PeriodeType.INGEN)) }
+        verify { eessiClient.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) }
+        opprettBucOgSedDtoV2Slot.captured.run {
+            bucType shouldBe BucType.LA_BUC_03
+            vedlegg.shouldBeEmpty()
+            sendAutomatisk shouldBe true
+            oppdaterEksisterende shouldBe true
+            sedDataDto.ytterligereInformasjon shouldBe "fritekst"
+        }
     }
 
     @Test
     fun `opprettOgSendSed buc01 medlemsperiodeTypeAnmodningsperiode`() {
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
-        every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { eessiClient.opprettBucOgSedV2(any()) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
         mockBehandlingsresultat()
 
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, emptyList(), null, null, null)
 
-        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.ANMODNINGSPERIODE)) }
-        verify { eessiClient.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_01), eq(true), eq(true)) }
+        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), eq(PeriodeType.ANMODNINGSPERIODE)) }
+        verify {
+            eessiClient.opprettBucOgSedV2(match {
+                it.bucType == BucType.LA_BUC_01 &&
+                    it.vedlegg.isEmpty() && it.sendAutomatisk && it.oppdaterEksisterende
+            })
+        }
     }
 
     @Test
     fun `opprettOgSendSed a001MedStorbritanniaKonv mapperKorrektYtterligereInformasjon`() {
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
-        every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { eessiClient.opprettBucOgSedV2(any()) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
 
         val behandlingsresultat = lagBehandlingsresultatMedStorbritanniaAnmodning()
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
-        val sedDataDtoSlot = slot<SedDataDto>()
-        every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
+        val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
 
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, emptyList(), "fritekst", null, null)
 
-        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.ANMODNINGSPERIODE)) }
-        verify { eessiClient.opprettBucOgSed(any(), any(), eq(BucType.LA_BUC_01), eq(true), eq(true)) }
-        sedDataDtoSlot.captured.ytterligereInformasjon shouldBe "Issued under the EEA EFTA Convention. fritekst"
+        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(behandlingsresultat), eq(PeriodeType.ANMODNINGSPERIODE)) }
+        verify { eessiClient.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) }
+        opprettBucOgSedDtoV2Slot.captured.run {
+            bucType shouldBe BucType.LA_BUC_01
+            vedlegg.shouldBeEmpty()
+            sendAutomatisk shouldBe true
+            oppdaterEksisterende shouldBe true
+            sedDataDto.ytterligereInformasjon shouldBe "Issued under the EEA EFTA Convention. fritekst"
+        }
     }
 
     private fun lagBehandlingsresultatMedStorbritanniaAnmodning() = Behandlingsresultat.forTest {
@@ -218,21 +226,26 @@ class EessiServiceTest {
     @Test
     fun `opprettOgSendSed a009MedStorbritanniaKonv mapperKorrektYtterligereInformasjon`() {
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
-        every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { eessiClient.opprettBucOgSedV2(any()) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
 
         val behandlingsresultat = lagBehandlingsresultatMedStorbritanniaLovvalg()
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
-        val sedDataDtoSlot = slot<SedDataDto>()
-        every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
+        val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
 
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_04, emptyList(), "fritekst", null, null)
 
-        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE)) }
-        verify { eessiClient.opprettBucOgSed(any(), any(), eq(BucType.LA_BUC_04), eq(true), eq(true)) }
-        sedDataDtoSlot.captured.ytterligereInformasjon shouldBe "Issued under the EEA EFTA Convention. fritekst"
+        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(behandlingsresultat), eq(PeriodeType.LOVVALGSPERIODE)) }
+        verify { eessiClient.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) }
+        opprettBucOgSedDtoV2Slot.captured.run {
+            bucType shouldBe BucType.LA_BUC_04
+            vedlegg.shouldBeEmpty()
+            sendAutomatisk shouldBe true
+            oppdaterEksisterende shouldBe true
+            sedDataDto.ytterligereInformasjon shouldBe "Issued under the EEA EFTA Convention. fritekst"
+        }
     }
 
     private fun lagBehandlingsresultatMedStorbritanniaLovvalg() = Behandlingsresultat.forTest {
@@ -250,15 +263,20 @@ class EessiServiceTest {
     @Test
     fun `opprettOgSendSed buc02IngenUtpekingsperiode medlemsperiodeTypeLovvalgsperiode`() {
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
-        every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { eessiClient.opprettBucOgSedV2(any()) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
         mockBehandlingsresultat()
 
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_02, emptyList(), null, null, null)
 
-        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE)) }
-        verify { eessiClient.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_02), eq(true), eq(true)) }
+        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), eq(PeriodeType.LOVVALGSPERIODE)) }
+        verify {
+            eessiClient.opprettBucOgSedV2(match {
+                it.bucType == BucType.LA_BUC_02 &&
+                    it.vedlegg.isEmpty() && it.sendAutomatisk && it.oppdaterEksisterende
+            })
+        }
     }
 
     @Test
@@ -266,14 +284,19 @@ class EessiServiceTest {
         val behandlingsresultat = lagBehandlingsresultatMedUtpekingsperiode()
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
-        every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { eessiClient.opprettBucOgSedV2(any()) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
 
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_02, emptyList(), null, null, null)
 
         verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(behandlingsresultat), eq(PeriodeType.UTPEKINGSPERIODE)) }
-        verify { eessiClient.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_02), eq(true), eq(true)) }
+        verify {
+            eessiClient.opprettBucOgSedV2(match {
+                it.bucType == BucType.LA_BUC_02 &&
+                    it.vedlegg.isEmpty() && it.sendAutomatisk && it.oppdaterEksisterende
+            })
+        }
     }
 
     private fun lagBehandlingsresultatMedUtpekingsperiode() = Behandlingsresultat.forTest {
@@ -292,67 +315,49 @@ class EessiServiceTest {
     @Test
     fun `opprettOgSendSed buc04 medlemsperiodeTypeLovvalgsperiode`() {
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
-        every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { eessiClient.opprettBucOgSedV2(any()) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
         mockBehandlingsresultat()
 
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_04, emptyList(), null, null, null)
 
-        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE)) }
-        verify { eessiClient.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_04), eq(true), eq(true)) }
-    }
-
-    @Test
-    fun `opprettBucOgSed verifiserKorrektSedType`() {
-        val opprettSedDto = OpprettSedDto().apply {
-            rinaUrl = "localhost:3000"
+        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), eq(PeriodeType.LOVVALGSPERIODE)) }
+        verify {
+            eessiClient.opprettBucOgSedV2(match {
+                it.bucType == BucType.LA_BUC_04 &&
+                    it.vedlegg.isEmpty() && it.sendAutomatisk && it.oppdaterEksisterende
+            })
         }
-        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns lagBehandling()
-        every { eessiClient.opprettBucOgSed(any<SedDataDto>(), any(), any<BucType>(), any(), any()) } returns opprettSedDto
-        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
-        every { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
-        every { joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(any(), any()) } returns Unit
-        mockBehandlingsresultat()
-
-        eessiService.opprettBucOgSed(BEHANDLING_ID, BucType.LA_BUC_01, listOf(mottakerBelgia1), emptyList())
-
-        verify { eessiClient.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_01), eq(false), eq(false)) }
     }
 
     @Test
-    fun `opprettBucOgSed medFeatureToggle MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2 på kallerOpprettBucOgSedV2`() {
-        unleash.enable(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)
-
+    fun `opprettBucOgSed mapper dokumentreferanser til vedleggsreferanser`() {
         val opprettSedDto = OpprettSedDto().apply {
             rinaUrl = "localhost:3000"
         }
         val behandling = lagBehandling()
         val sedDataDto = SedDataDto()
-
         val journalpost = lagJournalpost(listOf(
             lagArkivDokument("hoved"),
             lagArkivDokument("dok1"),
             lagArkivDokument("dok2"))
         )
-
         val dokumentReferanser = journalpost.vedleggListe.map {
             DokumentReferanse(journalpost.journalpostId, it.dokumentId ?: error("dokumentId burde ikke være null her"))
         }
 
-        val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
-        every { eessiClient.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) } returns opprettSedDto
+        every { eessiClient.opprettBucOgSedV2(any()) } returns opprettSedDto
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         every { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns sedDataDto
         every { joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(any(), any()) } returns Unit
         every { joarkFasade.hentJournalposterTilknyttetSak(any()) } returns listOf(journalpost)
         mockBehandlingsresultat()
 
-        eessiService.opprettBucOgSed(BEHANDLING_ID, BucType.LA_BUC_01, listOf(mottakerBelgia1), dokumentReferanser)
+        val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
 
-        verify(exactly = 1) { eessiClient.opprettBucOgSedV2(any<OpprettBucOgSedDtoV2>()) }
-        verify(exactly = 0) { eessiClient.opprettBucOgSed(any<SedDataDto>(), any(), any<BucType>(), any(), any()) }
+        eessiService.opprettBucOgSed(BEHANDLING_ID, BucType.LA_BUC_01, listOf(mottakerBelgia1), dokumentReferanser)
 
         val forventetOpprettBucOgSedDtoV2 = OpprettBucOgSedDtoV2(
             bucType = BucType.LA_BUC_01,
@@ -367,52 +372,7 @@ class EessiServiceTest {
             sendAutomatisk = false,
             oppdaterEksisterende = false
         )
-        opprettBucOgSedDtoV2Slot.captured shouldBe forventetOpprettBucOgSedDtoV2
-    }
-
-    @Test
-    fun `opprettOgSendSed medFeatureToggle MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2 på kallerOpprettBucOgSedV2`() {
-        unleash.enable(ToggleName.MELOSYS_BRUK_OPPRETT_BUC_OG_SED_V2)
-
-        val behandling = lagBehandling()
-        val sedDataDto = SedDataDto()
-
-        val journalpost = lagJournalpost(listOf(
-            lagArkivDokument("hoved"),
-            lagArkivDokument("dok1"),
-            lagArkivDokument("dok2"))
-        )
-
-        val dokumentReferanser = journalpost.vedleggListe.map {
-            DokumentReferanse(journalpost.journalpostId, it.dokumentId ?: error("dokumentId burde ikke være null her"))
-        }
-
-        val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
-        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
-        every { eessiClient.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) } returns OpprettSedDto()
-        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
-        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns sedDataDto
-        every { joarkFasade.hentJournalposterTilknyttetSak(any()) } returns listOf(journalpost)
-        mockBehandlingsresultat()
-
-        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf(mottakerBelgia1), BucType.LA_BUC_01, dokumentReferanser, null, null, null)
-
-        verify(exactly = 1) { eessiClient.opprettBucOgSedV2(any<OpprettBucOgSedDtoV2>()) }
-        verify(exactly = 0) { eessiClient.opprettBucOgSed(any<SedDataDto>(), any(), any<BucType>(), any(), any()) }
-
-        val forventetOpprettBucOgSedDtoV2 = OpprettBucOgSedDtoV2(
-            bucType = BucType.LA_BUC_01,
-            sedDataDto = sedDataDto,
-            vedlegg = journalpost.vedleggListe.map{
-                VedleggReferanse(
-                    journalpost.journalpostId,
-                    it.dokumentId ?: error("dokumentId burde ikke være null her"),
-                    it.tittel
-                )
-            },
-            sendAutomatisk = true,
-            oppdaterEksisterende = true
-        )
+        verify(exactly = 1) { eessiClient.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) }
         opprettBucOgSedDtoV2Slot.captured shouldBe forventetOpprettBucOgSedDtoV2
     }
 
@@ -969,100 +929,100 @@ class EessiServiceTest {
     @Test
     fun `opprettOgSendSed setter a008Formaal på sedData`() {
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
-        every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { eessiClient.opprettBucOgSedV2(any()) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
         mockBehandlingsresultat()
 
-        val sedDataDtoSlot = slot<SedDataDto>()
-        every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
+        val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
 
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "arbeid_flere_land", null)
 
-        sedDataDtoSlot.captured.a008Formaal shouldBe A008Formaal.ARBEID_FLERE_LAND
+        verify { eessiClient.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) }
+        opprettBucOgSedDtoV2Slot.captured.sedDataDto.a008Formaal shouldBe A008Formaal.ARBEID_FLERE_LAND
     }
 
     @Test
     fun `opprettOgSendSed med gyldig a008Formaal endringsmelding setter enum`() {
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
-        every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { eessiClient.opprettBucOgSedV2(any()) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
         mockBehandlingsresultat()
 
-        val sedDataDtoSlot = slot<SedDataDto>()
-        every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
+        val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
 
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "endringsmelding", null)
 
-        sedDataDtoSlot.captured.a008Formaal shouldBe A008Formaal.ENDRINGSMELDING
+        verify { eessiClient.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) }
+        opprettBucOgSedDtoV2Slot.captured.sedDataDto.a008Formaal shouldBe A008Formaal.ENDRINGSMELDING
     }
 
     @Test
     fun `opprettOgSendSed med null a008Formaal bruker default ARBEID_FLERE_LAND`() {
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
-        every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { eessiClient.opprettBucOgSedV2(any()) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
         mockBehandlingsresultat()
 
-        val sedDataDtoSlot = slot<SedDataDto>()
-        every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
+        val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
 
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, null, null)
 
         // null bruker default ARBEID_FLERE_LAND
-        sedDataDtoSlot.captured.a008Formaal shouldBe A008Formaal.ARBEID_FLERE_LAND
+        verify { eessiClient.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) }
+        opprettBucOgSedDtoV2Slot.captured.sedDataDto.a008Formaal shouldBe A008Formaal.ARBEID_FLERE_LAND
     }
 
     @Test
     fun `opprettOgSendSed med ugyldig a008Formaal bruker default ARBEID_FLERE_LAND`() {
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
-        every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { eessiClient.opprettBucOgSedV2(any()) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
         mockBehandlingsresultat()
 
-        val sedDataDtoSlot = slot<SedDataDto>()
-        every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
+        val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
 
         // Ugyldig verdi faller tilbake til default
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "ugyldig_formaal", null)
 
-        sedDataDtoSlot.captured.a008Formaal shouldBe A008Formaal.ARBEID_FLERE_LAND
+        verify { eessiClient.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) }
+        opprettBucOgSedDtoV2Slot.captured.sedDataDto.a008Formaal shouldBe A008Formaal.ARBEID_FLERE_LAND
     }
 
     @Test
     fun `opprettOgSendSed med case-sensitiv feil a008Formaal bruker default ARBEID_FLERE_LAND`() {
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
-        every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { eessiClient.opprettBucOgSedV2(any()) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
         mockBehandlingsresultat()
 
-        val sedDataDtoSlot = slot<SedDataDto>()
-        every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
+        val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
 
         // Store bokstaver er ugyldig, faller tilbake til default
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, emptyList(), null, "ARBEID_FLERE_LAND", null)
 
-        sedDataDtoSlot.captured.a008Formaal shouldBe A008Formaal.ARBEID_FLERE_LAND
+        verify { eessiClient.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) }
+        opprettBucOgSedDtoV2Slot.captured.sedDataDto.a008Formaal shouldBe A008Formaal.ARBEID_FLERE_LAND
     }
 
     @Test
     fun `opprettOgSendSed setter erFjernarbeidTWFA på sedData`() {
         every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
-        every { eessiClient.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { eessiClient.opprettBucOgSedV2(any()) } returns OpprettSedDto()
         every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
         mockBehandling()
         mockBehandlingsresultat()
 
-        val sedDataDtoSlot = slot<SedDataDto>()
-        every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
+        val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
 
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, emptyList(), null, null, true)
 
-        sedDataDtoSlot.captured.erFjernarbeidTWFA shouldBe true
+        verify { eessiClient.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) }
+        opprettBucOgSedDtoV2Slot.captured.sedDataDto.erFjernarbeidTWFA shouldBe true
     }
 
     private fun lagJournalpost(dokumenter: List<ArkivDokument>) = Journalpost("jpID").apply {
@@ -1096,12 +1056,14 @@ class EessiServiceTest {
         mockBehandling()
         mockBehandlingsresultat()
 
-        val sedDataDtoSlot = slot<SedDataDto>()
-        every { eessiClient.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
+        every { eessiClient.opprettBucOgSedV2(any()) } returns OpprettSedDto()
+
+        val opprettBucOgSedDtoV2Slot = slot<OpprettBucOgSedDtoV2>()
 
         eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("DK:ADTEST", "BE:0208044709"), BucType.LA_BUC_03, emptyList(), null, null, null)
 
-        val sendt = sedDataDtoSlot.captured
+        verify { eessiClient.opprettBucOgSedV2(capture(opprettBucOgSedDtoV2Slot)) }
+        val sendt = opprettBucOgSedDtoV2Slot.captured.sedDataDto
         sendt.arbeidsland.map { it.land } shouldContainExactlyInAnyOrder listOf("DK", "BE")
         sendt.arbeidssteder.map { it.adresse?.land } shouldContainExactly listOf("DK")
     }
