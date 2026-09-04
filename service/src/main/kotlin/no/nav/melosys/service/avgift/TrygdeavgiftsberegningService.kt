@@ -280,11 +280,6 @@ class TrygdeavgiftsberegningService(
     fun hentOpprinneligTrygdeavgiftsperioder(behandlingID: Long): TrygdeavgiftsgrunnlagModel {
         val behandling = behandlingService.hentBehandling(behandlingID)
 
-        if (behandling.type !in setOf(Behandlingstyper.NY_VURDERING, Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)) {
-            throw IllegalStateException("Behandling med id $behandlingID har ikke en behandlingstype som støtter opprinnelig trygdeavgiftsgrunnlag")
-        }
-
-
         if (unleash.isEnabled(MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER) && behandlingsresultatService.hentBehandlingsresultat(
                 behandlingID
             ).finnAvgiftspliktigPerioder().all { it.tom.year < LocalDate.now().year }
