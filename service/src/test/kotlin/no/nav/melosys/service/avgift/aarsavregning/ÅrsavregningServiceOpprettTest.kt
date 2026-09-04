@@ -137,6 +137,67 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
     }
 
     @Test
+    fun `opprettÅrsavregning etter delvis opphør replikerer kun innvilget medlemskapsperiode`() {
+        val fagsak = Fagsak.forTest {
+            saksnummer = "123456"
+            behandling {
+                id = 1L
+                type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+                status = Behandlingsstatus.AVSLUTTET
+            }
+            behandling {
+                id = 2L
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.OPPRETTET
+            }
+            tema = Sakstemaer.UNNTAK
+        }
+
+        val delvisOpphørtBehandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            type = Behandlingsresultattyper.DELVIS_OPPHØRT
+            registrertDato = LocalDate.now().minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            vedtakMetadata {
+                vedtaksdato = LocalDate.now().minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            behandling = fagsak.behandlinger[0]
+
+            medlemskapsperiode("2023-01-01", "2023-10-31")
+            medlemskapsperiode("2023-11-01", "2023-12-31", InnvilgelsesResultat.OPPHØRT) {
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
+            }
+        }
+        val årsavregningBehandlingsresultat = Behandlingsresultat.forTest {
+            id = 2L
+            registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+            behandling = fagsak.behandlinger[1]
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns delvisOpphørtBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns årsavregningBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(2L) } returns årsavregningBehandlingsresultat
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+        every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(2L, 2023) } returns 0
+        every { behandlingsresultatService.lagreOgFlush(any()) } answers { firstArg() }
+        every { behandlingsresultatService.lagre(any()) } answers {
+            firstArg<Behandlingsresultat>().apply { årsavregning?.id = 50L }
+        }
+
+        val resultat = årsavregningService.opprettÅrsavregning(2L, 2023)
+
+        resultat.sisteGjeldendeAvgiftspliktigPerioder.shouldHaveSize(1).single().run {
+            fom shouldBe LocalDate.of(2023, 1, 1)
+            tom shouldBe LocalDate.of(2023, 10, 31)
+        }
+        årsavregningBehandlingsresultat.medlemskapsperioder.shouldHaveSize(1).single().run {
+            fom shouldBe LocalDate.of(2023, 1, 1)
+            tom shouldBe LocalDate.of(2023, 10, 31)
+            innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
+        }
+        årsavregningBehandlingsresultat.årsavregning.shouldNotBeNull().tidligereBehandlingsresultat shouldBe delvisOpphørtBehandlingsresultat
+    }
+
+    @Test
     fun `Ny årsavregning med tidligere årsavregning og påfølgende ny vurdering - skal hente noe data fra tidligere årsavregning`() {
         val fagsak = Fagsak.forTest {
             behandling {
