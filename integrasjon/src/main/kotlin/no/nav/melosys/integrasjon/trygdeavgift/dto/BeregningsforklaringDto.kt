@@ -56,10 +56,7 @@ data class OrdinaerAvgiftspostDto(
  * Ordinær avgift for én avgiftsdel — beløpet som faktisk ble sammenlignet med
  * [BeregningsforklaringDto.maksimalAvgift25Prosent]. Ved frivillig medlemskap måles helse- og
  * pensjonsdelen hver for seg mot taket, aldri summen, så
- * [BeregningsforklaringDto.ordinaerAvgift] kan være større enn taket uten at taket slo inn.
- *
- * Lista fylles kun når ingen del overstiger taket, og deler uten avgift utelates. Er den utfylt,
- * er [BeregningsforklaringDto.ordinaerAvgift] summen av delene.
+ * [BeregningsforklaringDto.ordinaerAvgift] kan være større enn taket.
  */
 data class OrdinaerAvgiftPerDelDto(
     val inntektsgruppe: Inntektsgruppe,
