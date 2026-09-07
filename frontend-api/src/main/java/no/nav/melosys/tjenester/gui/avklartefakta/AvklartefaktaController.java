@@ -82,6 +82,17 @@ public class AvklartefaktaController {
         return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
 
+    @PostMapping("{behandlingID}/manglende-innbetaling-vurdering")
+    @Operation(summary = "Lagre vurdering av manglende innbetaling som avklartfakta")
+    public AvklartefaktaOppsummeringDto lagreManglendeInnbetalingVurderingSomAvklartFakta(@PathVariable("behandlingID") long behandlingID,
+                                                                                          @RequestBody ManglendeInnbetalingVurdering manglendeInnbetalingVurdering) {
+        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
+
+        avklartManglendeInnbetalingService.lagreManglendeInnbetalingVurderingSomAvklartFakta(behandlingID, manglendeInnbetalingVurdering);
+
+        return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+    }
+
     @PostMapping("{behandlingID}/arbeidsland")
     @Operation(summary = "Lagre arbeidsland som avklartefakta")
     public AvklartefaktaOppsummeringDto lagreArbeidslandSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,

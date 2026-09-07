@@ -429,6 +429,83 @@ class FtrlVedtakServiceTest {
     }
 
     @Test
+    fun `fattVedtak_opphørt_fatterVedtak med kun MANGLENDE_INNBETALING_VURDERING satt (hybrid støtte for ny frontend, MELOSYS-8257)`() {
+        every { behandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            avklartefakta {
+                type = Avklartefaktatyper.MANGLENDE_INNBETALING_VURDERING
+                referanse = Avklartefaktatyper.MANGLENDE_INNBETALING_VURDERING.kode
+                fakta = ManglendeInnbetalingVurdering.HELE_PERIODEN_OPPHØRES.kode
+            }
+            medlemskapsperiode {
+                id = 1
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                fom = LocalDate.now()
+            }
+            medlemskapsperiode {
+                id = 2
+                innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                fom = LocalDate.now()
+            }
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
+        val request = lagFattVedtakRequest(
+            type = Behandlingsresultattyper.OPPHØRT,
+            begrunnelseFritekst = "fritekst for begrunnelse",
+            opphørtDato = LocalDate.now()
+        )
+
+        ftrlVedtakService.fattVedtak(lagBehandling(), request)
+
+        verify { behandlingsresultatService.lagreOgFlush(capture(behandlingsresultatSlot)) }
+        behandlingsresultatSlot.captured.shouldNotBeNull().run {
+            type.shouldBe(Behandlingsresultattyper.OPPHØRT)
+            medlemskapsperioder.shouldHaveSize(2)
+            avklartefakta.shouldHaveSize(1)
+            avklartefakta.single().type.shouldBe(Avklartefaktatyper.MANGLENDE_INNBETALING_VURDERING)
+        }
+    }
+
+    @Test
+    fun `delvis opphør med MANGLENDE_INNBETALING_VURDERING lik DELER_AV_PERIODEN_OPPHØRES behandles ikke som fullstendig opphør`() {
+        // Analog til regresjonstesten for sak 8028, men for den nye enum-baserte fakta-typen:
+        // kun HELE_PERIODEN_OPPHØRES skal trigge den korte opphørsflyten.
+        every { behandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
+        val opphørtFom = LocalDate.now().plusMonths(6)
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            avklartefakta {
+                type = Avklartefaktatyper.MANGLENDE_INNBETALING_VURDERING
+                referanse = Avklartefaktatyper.MANGLENDE_INNBETALING_VURDERING.kode
+                fakta = ManglendeInnbetalingVurdering.DELER_AV_PERIODEN_OPPHØRES.kode
+            }
+            medlemskapsperiode {
+                id = 1
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                fom = LocalDate.now()
+            }
+            medlemskapsperiode {
+                id = 2
+                innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                fom = opphørtFom
+            }
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
+        val request = lagFattVedtakRequest(
+            type = Behandlingsresultattyper.DELVIS_OPPHØRT,
+            begrunnelseFritekst = "fritekst for begrunnelse",
+            opphørtDato = opphørtFom
+        )
+
+        ftrlVedtakService.fattVedtak(lagBehandling(), request)
+
+        verify { behandlingsresultatService.lagreOgFlush(capture(behandlingsresultatSlot)) }
+        behandlingsresultatSlot.captured.shouldNotBeNull().run {
+            type.shouldBe(Behandlingsresultattyper.DELVIS_OPPHØRT)
+            medlemskapsperioder.single { it.id == 1L }.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+        }
+    }
+
+    @Test
     fun `fattVedtak uten avklartefakta eller opphørte perioder gir MEDLEM_I_FOLKETRYGDEN`() {
         val behandlingsresultat = lagBehandlingsresultatMedMedlemskap {
             medlemskapstype = Medlemskapstyper.PLIKTIG

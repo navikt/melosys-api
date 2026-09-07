@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.avklartefakta
 
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
+import no.nav.melosys.domain.kodeverk.ManglendeInnbetalingVurdering
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.ArbeidslandDto
 import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.VirksomheterDto
@@ -9,6 +10,7 @@ data class AvklartefaktaOppsummeringDto(
     val virksomheter: VirksomheterDto,
     val arbeidsland: ArbeidslandDto,
     val fullstendigManglendeInnbetaling: Boolean?,
+    val manglendeInnbetalingVurdering: ManglendeInnbetalingVurdering?,
     val ikkeYrkesaktivFamilieRelasjonstype: String?,
     val ikkeYrkesaktivOppholdstype: String?,
     val arbeidssituasjonType: String?,
@@ -18,6 +20,7 @@ data class AvklartefaktaOppsummeringDto(
         virksomheter = VirksomheterDto.av(avklartefakta),
         arbeidsland = ArbeidslandDto.av(avklartefakta),
         fullstendigManglendeInnbetaling = hentFullstendigManglendeInnbetaling(avklartefakta),
+        manglendeInnbetalingVurdering = hentManglendeInnbetalingVurdering(avklartefakta),
         ikkeYrkesaktivFamilieRelasjonstype = hentFamileRelasjonType(avklartefakta),
         ikkeYrkesaktivOppholdstype = hentOppholdType(avklartefakta),
         arbeidssituasjonType = hentArbeidssituasjonType(avklartefakta),
@@ -36,6 +39,10 @@ data class AvklartefaktaOppsummeringDto(
         private fun hentFullstendigManglendeInnbetaling(avklartefakta: Set<AvklartefaktaDto>): Boolean = avklartefakta.firstOrNull {
             it.avklartefaktaType == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
         }?.fakta?.single().toBoolean()
+
+        private fun hentManglendeInnbetalingVurdering(avklartefakta: Set<AvklartefaktaDto>): ManglendeInnbetalingVurdering? = avklartefakta.firstOrNull {
+            it.avklartefaktaType == Avklartefaktatyper.MANGLENDE_INNBETALING_VURDERING
+        }?.fakta?.single()?.let { ManglendeInnbetalingVurdering.valueOf(it) }
 
         private fun hentOppholdType(avklartefakta: Set<AvklartefaktaDto>): String? = avklartefakta.firstOrNull {
             it.avklartefaktaType == Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD

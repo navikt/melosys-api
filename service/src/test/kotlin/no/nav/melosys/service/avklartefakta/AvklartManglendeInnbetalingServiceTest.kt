@@ -12,6 +12,7 @@ import io.mockk.slot
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
+import no.nav.melosys.domain.kodeverk.ManglendeInnbetalingVurdering
 import no.nav.melosys.repository.AvklarteFaktaRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.junit.jupiter.api.BeforeEach
@@ -82,6 +83,33 @@ class AvklartManglendeInnbetalingServiceTest {
             referanse.shouldBe(Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode)
             subjekt.shouldBeNull()
             fakta.shouldBe(false.toString().uppercase())
+        }
+    }
+
+    @Test
+    fun hentManglendeInnbetalingVurdering_avklartFaktaFinnesIkke_returnererNull() {
+        avklartManglendeInnbetalingService.hentManglendeInnbetalingVurdering(1L).shouldBeNull()
+    }
+
+    @Test
+    fun lagreOgHent_manglendeInnbetalingVurdering_returnererLagretVerdi() {
+        every { behandlingsresultatRepository.findById(1L) } returns Optional.of(Behandlingsresultat())
+        every { avklarteFaktaRepository.save(capture(slotAvklartefakta)) } returnsArgument 0
+
+        avklartManglendeInnbetalingService.hentManglendeInnbetalingVurdering(1L).shouldBeNull()
+
+        avklartManglendeInnbetalingService.lagreManglendeInnbetalingVurderingSomAvklartFakta(
+            1L, ManglendeInnbetalingVurdering.DELER_AV_PERIODEN_OPPHØRES
+        )
+        every { avklarteFaktaRepository.findByBehandlingsresultatId(1L) } returns setOf(slotAvklartefakta.captured)
+
+        avklartManglendeInnbetalingService.hentManglendeInnbetalingVurdering(1L)
+            .shouldBe(ManglendeInnbetalingVurdering.DELER_AV_PERIODEN_OPPHØRES)
+        slotAvklartefakta.captured.shouldNotBeNull().run {
+            type.shouldBe(Avklartefaktatyper.MANGLENDE_INNBETALING_VURDERING)
+            referanse.shouldBe(Avklartefaktatyper.MANGLENDE_INNBETALING_VURDERING.kode)
+            subjekt.shouldBeNull()
+            fakta.shouldBe(ManglendeInnbetalingVurdering.DELER_AV_PERIODEN_OPPHØRES.kode)
         }
     }
 }

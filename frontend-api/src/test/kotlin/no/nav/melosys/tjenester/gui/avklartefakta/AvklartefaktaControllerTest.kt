@@ -6,6 +6,7 @@ import io.mockk.every
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
+import no.nav.melosys.domain.kodeverk.ManglendeInnbetalingVurdering
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.SAMBOER_UTEN_FELLES_BARN
 import no.nav.melosys.service.avklartefakta.*
@@ -114,6 +115,27 @@ class AvklartefaktaControllerTest {
             post("$BASE_URL/{behandlingID}/arbeidsland", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(arbeidslandDto))
+        )
+            .andExpect(status().isOk())
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(AvklartefaktaOppsummeringDto(dtos), AvklartefaktaOppsummeringDto::class.java))
+    }
+
+    @Test
+    fun `skal lagre manglende innbetaling vurdering som avklarte fakta`() {
+        val dtos = lagAvklarteFaktaDtoSet()
+        every { avklartefaktaService.hentAlleAvklarteFakta(1L) } returns dtos
+        every { aksesskontroll.autoriser(1L) } returns Unit
+        every { aksesskontroll.autoriserSkrivTilRessurs(1L, Ressurs.AVKLARTE_FAKTA) } returns Unit
+        every {
+            avklartManglendeInnbetalingService.lagreManglendeInnbetalingVurderingSomAvklartFakta(
+                1L, ManglendeInnbetalingVurdering.DELER_AV_PERIODEN_OPPHØRES
+            )
+        } returns Unit
+
+        mockMvc.perform(
+            post("$BASE_URL/{behandlingID}/manglende-innbetaling-vurdering", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(ManglendeInnbetalingVurdering.DELER_AV_PERIODEN_OPPHØRES.name))
         )
             .andExpect(status().isOk())
             .andExpect(responseBody(objectMapper).containsObjectAsJson(AvklartefaktaOppsummeringDto(dtos), AvklartefaktaOppsummeringDto::class.java))
