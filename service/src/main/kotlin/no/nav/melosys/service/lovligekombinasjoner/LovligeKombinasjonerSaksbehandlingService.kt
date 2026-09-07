@@ -494,6 +494,7 @@ class LovligeKombinasjonerSaksbehandlingService(
 
         private val ÅRSAVREGNING_TILLATTE_BEHANDLINGSTEMA = setOf(
             Behandlingstema.YRKESAKTIV,
+            Behandlingstema.PENSJONIST,
             Behandlingstema.UTSENDT_ARBEIDSTAKER,
             Behandlingstema.UTSENDT_SELVSTENDIG,
             Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY,

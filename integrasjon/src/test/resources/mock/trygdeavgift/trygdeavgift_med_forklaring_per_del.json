@@ -1,0 +1,57 @@
+[
+  {
+    "beregnetPeriode": {
+      "sats": 21.8,
+      "månedsavgift": {
+        "verdi": 28300,
+        "valuta": {
+          "kode": "NOK",
+          "desimaler": 2
+        }
+      },
+      "periode": {
+        "fom": "2025-01-01",
+        "tom": "2025-12-31"
+      }
+    },
+    "grunnlag": {
+      "medlemskapsperiodeId": "da5ee48c-9d31-4f27-9254-46b1d3959330",
+      "skatteforholdsperiodeId": "da5ee48c-9d31-4f27-9254-46b1d3959330",
+      "inntektsperiodeId": "da5ee48c-9d31-4f27-9254-46b1d3959330"
+    },
+    "grunnlagListe": [
+      {
+        "medlemskapsperiodeId": "da5ee48c-9d31-4f27-9254-46b1d3959330",
+        "skatteforholdsperiodeId": "da5ee48c-9d31-4f27-9254-46b1d3959330",
+        "inntektsperiodeId": "da5ee48c-9d31-4f27-9254-46b1d3959330"
+      }
+    ],
+    "beregningsregel": "ORDINÆR",
+    "beregningsforklaring": {
+      "aar": 2025,
+      "inntektsgruppe": "SAMLET",
+      "valgtRegel": "ORDINÆR",
+      "aarsak": "BEREGNET",
+      "inntektsgrunnlag": [],
+      "ekskluderteInntekter": [],
+      "sumAarligInntekt": 1200000,
+      "minstebeloep": 99650,
+      "inntektOverMinstebeloep": 1100350,
+      "maksimalAvgift25Prosent": 275087,
+      "ordinaerAvgift": 339600,
+      "ordinaerAvgiftPoster": [],
+      "ordinaerAvgiftPerDel": [
+        {
+          "inntektsgruppe": "HELSEDEL",
+          "ordinaerAvgift": 81600
+        },
+        {
+          "inntektsgruppe": "PENSJONSDEL",
+          "ordinaerAvgift": 258000
+        }
+      ],
+      "fastsattAvgift": 339600,
+      "fastsattAvgiftPerMaaned": 28300
+    }
+  }
+]
