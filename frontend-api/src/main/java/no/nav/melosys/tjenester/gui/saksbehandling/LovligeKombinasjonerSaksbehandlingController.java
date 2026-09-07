@@ -1,7 +1,9 @@
 package no.nav.melosys.tjenester.gui.saksbehandling;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -85,7 +87,10 @@ public class LovligeKombinasjonerSaksbehandlingController {
         @RequestParam("sakstema") Sakstemaer sakstema,
         @RequestParam(value = "behandlingstema", required = false) Behandlingstema behandlingstema
     ) {
-        return ResponseEntity.ok(lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema));
+        return ResponseEntity.ok(lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema)
+            .stream()
+            .filter(behandlingstype -> behandlingstype != Behandlingstyper.NY_VURDERING)
+            .collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 
     @GetMapping("/{saksnummer}/behandlingstyper/kombinasjoner-for-endring")

@@ -2,9 +2,11 @@ package no.nav.melosys.tjenester.gui.saksbehandling
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService
 import no.nav.melosys.service.lovligekombinasjoner.SakstemaKombinasjoner
 import no.nav.melosys.service.lovligekombinasjoner.SakstypeKombinasjoner
@@ -65,5 +67,29 @@ class LovligeKombinasjonerSaksbehandlingControllerTest(
         mockMvc.perform(get(URL).contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.length()").value(0))
+    }
+
+    @Test
+    fun `behandlingstyper for ny sak inneholder ikke NY_VURDERING og beholder rekkefoelgen`() {
+        every {
+            lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+                Aktoersroller.BRUKER, Sakstyper.FTRL, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV
+            )
+        } returns linkedSetOf(
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.HENVENDELSE
+        )
+
+        mockMvc.perform(
+            get("/api/saksbehandling/behandlingstyper/kombinasjoner")
+                .param("hovedpart", "BRUKER")
+                .param("sakstype", "FTRL")
+                .param("sakstema", "MEDLEMSKAP_LOVVALG")
+                .param("behandlingstema", "YRKESAKTIV")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$[*].kode", contains("FØRSTEGANG", "HENVENDELSE")))
     }
 }
