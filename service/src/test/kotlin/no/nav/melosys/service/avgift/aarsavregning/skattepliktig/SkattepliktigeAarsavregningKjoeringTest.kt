@@ -239,13 +239,36 @@ class SkattepliktigeAarsavregningKjoeringTest {
     }
 
     /**
-     * Uten avvisningen submitteres en ny task som kan bli liggende i kø og kjøre hele lista skarpt
-     * om igjen når den første er ferdig.
+     * Reservasjonen mot den ekte servicen: én slipper inn, neste avvises, og plassen frigis når
+     * kjøringen er ferdig — ellers er verktøyet låst til poden startes på nytt.
      */
     @Test
-    fun `kjøring som startes mens en annen pågår avvises med 409`() {
+    fun `bare én kjøring reserveres om gangen, og plassen frigis når den er ferdig`() {
+        service.reserverKjoering() shouldBe true
+        service.reserverKjoering() shouldBe false
+
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns emptyList()
+        service.prosesserSkattehendelserAsynkront(
+            listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
+            false,
+            null,
+        )
+
+        service.status()["koetEllerKjorer"] shouldBe false
+        service.reserverKjoering() shouldBe true
+    }
+
+    /**
+     * Jobbtråden er delt med fire andre jobber (core-size 1, ubegrenset kø), så en ny kjøring kan
+     * ligge i kø uten å ha startet. isRunning er false så lenge den ligger der, og et andre /run
+     * ville da sluppet gjennom og kjørt hele lista skarpt en gang til. Reservasjonen tas derfor
+     * synkront, før tasken legges i kø.
+     */
+    @Test
+    fun `kjøring som ligger i kø avvises, selv om jobben ikke har startet`() {
         val kjoering = mockk<SkattepliktigeAarsavregningKjoering>(relaxed = true)
-        every { kjoering.status() } returns mapOf("isRunning" to true)
+        every { kjoering.status() } returns mapOf("isRunning" to false)
+        every { kjoering.reserverKjoering() } returns false
         val controller = SkattepliktigeAarsavregningKjoeringController(kjoering)
 
         val svar = controller.run(
@@ -256,9 +279,29 @@ class SkattepliktigeAarsavregningKjoeringTest {
         verify(exactly = 0) { kjoering.prosesserSkattehendelserAsynkront(any(), any(), any()) }
     }
 
+    /** Feiler selve innleggingen i kø, må reservasjonen slippes — ellers er verktøyet låst til omstart. */
+    @Test
+    fun `reservasjonen slippes når jobben ikke lot seg starte`() {
+        val kjoering = mockk<SkattepliktigeAarsavregningKjoering>(relaxed = true)
+        every { kjoering.status() } returns mapOf("isRunning" to false)
+        every { kjoering.reserverKjoering() } returns true
+        every { kjoering.prosesserSkattehendelserAsynkront(any(), any(), any()) } throws
+            RuntimeException("kunne ikke legges i kø")
+        val controller = SkattepliktigeAarsavregningKjoeringController(kjoering)
+
+        runCatching {
+            controller.run(
+                SkattehendelseRunRequest(listOf(SkattehendelseItem("2024", AKTØR_ID)), skarp = true, maksAntall = 1)
+            )
+        }
+
+        verify { kjoering.frigiKjoering() }
+    }
+
     @Test
     fun `simulering uten maksAntall slipper gjennom, og ekte kjøring med tak starter jobben`() {
         val kjoering = mockk<SkattepliktigeAarsavregningKjoering>(relaxed = true)
+        every { kjoering.reserverKjoering() } returns true
         val controller = SkattepliktigeAarsavregningKjoeringController(kjoering)
         val hendelser = listOf(SkattehendelseItem("2024", AKTØR_ID))
 
@@ -550,9 +593,9 @@ class SkattepliktigeAarsavregningKjoeringTest {
     /** Nødbremsen kan slå inn midt inne i én aktørs saker, ikke bare mellom hendelser. */
     @Test
     fun `nødbremsen midt i en aktørs saker stopper hele kjøringen, ikke bare den ene saken`() {
-        // Første aktør har mange saker som alle feiler under vurderingen — nødbremsen går ved 100
-        // feil, altså midt inne i sakLoop. Da skal HELE kjøringen stoppe: bryter den bare ut av den
-        // ene saken, blir aktør nummer to prosessert som om ingenting hadde skjedd.
+        // Første aktør har mange saker som alle feiler under vurderingen, så nødbremsen slår inn
+        // midt i sakLoop (terskel 100, altså på feil 101). Da skal HELE kjøringen stoppe: bryter
+        // den bare ut av den ene saken, blir aktør nummer to prosessert som om ingenting skjedde.
         val fagsaker = (1..150).map { lagFagsakMedÅrsavregning(Behandlingsstatus.VURDER_DOKUMENT, it.toLong(), "MEL-$it") }
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, "aktoer-1") } returns fagsaker
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, "aktoer-2") } returns listOf(lagFagsak("MEL-900"))

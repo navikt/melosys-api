@@ -14,6 +14,7 @@ import tools.jackson.databind.JsonNode
 import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.Collections
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 
 private val log = KotlinLogging.logger { }
 
@@ -36,6 +37,15 @@ class SkattepliktigeAarsavregningKjoering(
     // Skrives fra @Async-tråden mens /rapport kan lese samtidig.
     val resultater: MutableList<SakResultat> = Collections.synchronizedList(mutableListOf())
 
+    /**
+     * Reservasjonen tas synkront av kalleren, før den asynkrone tasken legges i kø. Vakten i
+     * [JobMonitor.execute] rekker ikke: jobbtråden deles med fire andre jobber (core-size 1,
+     * ubegrenset kø), så en ny kjøring kan bli liggende i kø uten å ha startet — og da er isRunning
+     * fortsatt false. Uten denne slipper et andre /run gjennom og kjører hele lista skarpt en gang
+     * til, med nye årsavregninger og nye brev til de samme borgerne.
+     */
+    private val reservert = AtomicBoolean(false)
+
     private val jobMonitor = JobMonitor(
         jobName = "SkattepliktigeAarsavregningKjoering",
         stats = JobStatus()
@@ -48,6 +58,13 @@ class SkattepliktigeAarsavregningKjoering(
         return jacksonObjectMapper().valueToTree<JsonNode>(snapshot).toPrettyString()
     }
 
+    /** @return false hvis en kjøring allerede er reservert, køet eller i gang. */
+    fun reserverKjoering(): Boolean = reservert.compareAndSet(false, true)
+
+    fun frigiKjoering() {
+        reservert.set(false)
+    }
+
     @Async("taskExecutor")
     @Transactional(readOnly = true)
     fun prosesserSkattehendelserAsynkront(
@@ -55,7 +72,11 @@ class SkattepliktigeAarsavregningKjoering(
         skarp: Boolean = false,
         maksAntall: Int? = null,
     ) {
-        prosesserSkattehendelser(skattehendelser, skarp, maksAntall)
+        try {
+            prosesserSkattehendelser(skattehendelser, skarp, maksAntall)
+        } finally {
+            frigiKjoering()
+        }
     }
 
     // readOnly gir FlushMode.MANUAL, og er garantien for at simuleringen ikke skriver: alle
@@ -347,7 +368,11 @@ class SkattepliktigeAarsavregningKjoering(
      * /status til pod B, ser den siste en tom kjøring, og vakten mot samtidige kjøringer gjelder
      * bare per pod. `pod` er her for at den som kjører skal se hvilken pod svaret kommer fra.
      */
-    fun status() = jobMonitor.status() + mapOf("pod" to (System.getenv("HOSTNAME") ?: "ukjent"))
+    fun status() = jobMonitor.status() + mapOf(
+        "pod" to (System.getenv("HOSTNAME") ?: "ukjent"),
+        // isRunning er false mens tasken ligger i kø; denne er true fra /run til kjøringen er ferdig.
+        "koetEllerKjorer" to reservert.get(),
+    )
 
     inner class JobStatus(
         @Volatile var skarp: Boolean = false,
