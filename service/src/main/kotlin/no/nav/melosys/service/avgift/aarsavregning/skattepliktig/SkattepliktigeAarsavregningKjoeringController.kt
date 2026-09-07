@@ -36,17 +36,21 @@ class SkattepliktigeAarsavregningKjoeringController(
             "Ekte kjøring krever et positivt maksAntall — uten tak avvises kallet. " +
             "Hendelser med samme identifikator og år slås sammen før kjøring (antallDuplikaterFjernet), " +
             "fordi to hendelser for samme sak og år ellers gir to årsavregninger og to brev. " +
-            "Overlappende kjøringer har samme svakhet: vent til køen er tømt før neste kjøring. " +
+            "Overlappende kjøringer har samme svakhet: vent til prosessinstansene fra forrige kjøring " +
+            "er ferdige før du starter en ny. " +
             "Ble kjøringen avbrutt — av taket eller av for mange feil — sier avbruttAarsak hvorfor, og " +
             "antallHendelserProsessert mot antallUnikeHendelser viser hvor langt den kom. Merk at " +
             "antallHendelserProsessert kan være lavere enn antallInputHendelser også i en fullført " +
             "kjøring, fordi duplikater og ugyldig input er fjernet først. " +
             "Merk at et tak som kapper saker i den siste hendelsen ikke synes på hendelsestellingen — " +
             "les antallSakerHoppetOverPgaTak, som er der uansett om kjøringen ble avbrutt eller ikke. " +
-            "Er en kjøring allerede startet eller lagt i kø, avvises den nye med 409. Jobbtråden deles " +
-            "med fire andre jobber og har bare én tråd, så en kjøring kan ligge i kø en god stund før " +
-            "den starter: isRunning er false hele den tiden, mens koetEllerKjorer er true fra /run til " +
-            "kjøringen er ferdig. Det er koetEllerKjorer du skal se på før du sender /run igjen. " +
+            "VIKTIG om å starte to kjøringer: pågår en kjøring allerede, avvises den nye med 409. Men " +
+            "jobbtråden er delt av ni @Async-metoder og har bare én tråd, så en kjøring kan bli liggende " +
+            "i kø uten å ha startet — også bak vanlig saksbehandling, ikke bare bak andre adminjobber. " +
+            "isRunning er false hele den tiden, og 409-vakten ser derfor ingenting å avvise. Sender du " +
+            "/run på nytt i det vinduet, kjøres hele lista skarpt to ganger, med nye årsavregninger og " +
+            "nye innhentingsbrev til de samme borgerne. Send derfor /run ÉN gang, og bruk /rapport til å " +
+            "se om kjøringen faktisk startet — ikke isRunning. " +
             "Bruk /status for fremdrift og /rapport for resultat per sak. NB: appen kjører to podder, " +
             "og jobbtilstanden ligger i minnet på den poden som tok imot /run — kjør derfor mot én pod " +
             "(port-forward), og kryssjekk pod-feltet i /status. Hele kjøringen holder én lesetransaksjon " +
@@ -70,12 +74,18 @@ class SkattepliktigeAarsavregningKjoeringController(
             )
         }
 
-        // Reservasjonen tas her, synkront, og ikke inne i jobben: jobbtråden deles med fire andre
-        // jobber (core-size 1, ubegrenset kø), så en ny kjøring kan ligge i kø uten å ha startet.
-        // Vakten inne i jobben ser da ingenting å avvise, og hele lista kjøres skarpt en gang til.
-        if (!kjoering.reserverKjoering()) {
+        // Stopper det vanlige tilfellet: en kjøring har pågått en stund, og noen sender /run på nytt.
+        // Uten denne submitteres en ny task, og er alle jobbtrådene opptatt, legger den seg i kø og
+        // kjører hele lista skarpt om igjen når den første er ferdig — nye årsavregninger og nye brev
+        // til de samme borgerne, siden dedupliseringen bare virker innenfor én kjøring.
+        //
+        // Den dekker ikke to kall i samme øyeblikk: isRunning blir først true når den asynkrone
+        // tasken har begynt å kjøre. Da avvises den andre stille av compareAndSet inne i jobben, og
+        // svaret her sier «startet» selv om ingenting startet. Vakten i jobben er den harde; denne er
+        // for at den som kjører skal få vite det i det tilfellet som faktisk oppstår.
+        if (kjoering.status()["isRunning"] == true) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(
-                mapOf("feil" to "En kjøring er allerede startet eller ligger i kø — se koetEllerKjorer i /status")
+                mapOf("feil" to "En kjøring pågår allerede — se /status, og vent til isRunning er false")
             )
         }
 
@@ -84,17 +94,11 @@ class SkattepliktigeAarsavregningKjoeringController(
             "Starter $modus for ${request.skattehendelser.size} skattehendelser, maksAntall=${request.maksAntall}"
         }
 
-        try {
-            kjoering.prosesserSkattehendelserAsynkront(
-                request.skattehendelser,
-                request.skarp,
-                request.maksAntall,
-            )
-        } catch (e: Exception) {
-            // Kom tasken aldri i kø, må reservasjonen slippes — ellers er verktøyet låst til omstart.
-            kjoering.frigiKjoering()
-            throw e
-        }
+        kjoering.prosesserSkattehendelserAsynkront(
+            request.skattehendelser,
+            request.skarp,
+            request.maksAntall,
+        )
 
         return ResponseEntity.ok(
             mapOf(
