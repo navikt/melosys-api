@@ -81,7 +81,7 @@ class LovligeKombinasjonerSaksbehandlingControllerTest(
         )
 
         mockMvc.perform(
-            get("/api/saksbehandling/behandlingstyper/kombinasjoner")
+            get("/api/saksbehandling/behandlingstyper/kombinasjoner-for-ny-sak")
                 .param("hovedpart", "BRUKER")
                 .param("sakstype", "FTRL")
                 .param("sakstema", "MEDLEMSKAP_LOVVALG")
