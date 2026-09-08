@@ -74,20 +74,6 @@ public class LovligeKombinasjonerSaksbehandlingController {
         return ResponseEntity.ok(lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, aktivBehandlingID, sistBehandlingstema));
     }
 
-    @GetMapping("/behandlingstyper/kombinasjoner")
-    @Operation(
-        summary = "Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema",
-        description = ("Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema")
-    )
-    public ResponseEntity<Set<Behandlingstyper>> hentAlleMuligeBehandlingstyper(
-        @RequestParam("hovedpart") Aktoersroller hovedpart,
-        @RequestParam("sakstype") Sakstyper sakstype,
-        @RequestParam("sakstema") Sakstemaer sakstema,
-        @RequestParam(value = "behandlingstema", required = false) Behandlingstema behandlingstema
-    ) {
-        return ResponseEntity.ok(lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema));
-    }
-
     @GetMapping("/behandlingstyper/kombinasjoner-for-ny-sak")
     @Operation(
         summary = "Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema for ny sak",
