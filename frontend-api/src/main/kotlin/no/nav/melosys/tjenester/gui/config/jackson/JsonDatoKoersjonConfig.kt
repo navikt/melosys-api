@@ -13,28 +13,16 @@ import tools.jackson.databind.json.JsonMapper
 import java.time.LocalDate
 
 /**
- * Avviser tall som `LocalDate` i HTTP request-body. Uten denne regelen tolker Jackson
- * `{"periodeFom": 12345}` som epoch-day (2003-10-20) i stedet for å avvise verdien.
- *
- * Regelen settes kun på MVC sin JSON-converter, ikke på den delte `JsonMapper`-beanen. Den delte
- * mapperen brukes også av Kafka-consumerne via `KafkaConfig.LoggingDeserializer`, og
- * `SkippableKafkaErrorHandler` arver `CommonContainerStoppingErrorHandler` – en deserialiseringsfeil
- * der stopper containeren til meldingen manuelt merkes for skipping. Problemet er rent
- * frontend-vendt, så rekkevidden holdes til HTTP.
- *
- * `rebuild()` kopierer konfigurasjonen fra den delte mapperen uten å endre den, slik at moduler
- * (`KotlinModule`, [MelosysModule]) og features er identiske bortsett fra denne ene regelen.
- *
- * Gjelder kun `LocalDate`. Jackson avviser selv tall for `LocalDateTime` (ingen tidssone å tolke
- * tallet inn i), og for `Instant`/`OffsetDateTime` er tall en gyldig epoch-representasjon.
+ * Avviser tall som `LocalDate` i request-body. Jackson tolker ellers `12345` som epoch-day.
+ * Regelen settes på MVC-converteren, ikke på den delte `JsonMapper`-beanen, så Kafka-consumerne
+ * er upåvirket.
  */
 @Configuration
 class JsonDatoKoersjonConfig(private val jsonMapper: ObjectFactory<JsonMapper>) : WebMvcConfigurer {
 
     override fun configureMessageConverters(builder: HttpMessageConverters.ServerBuilder) {
         builder.withJsonConverter(JacksonJsonHttpMessageConverter(mvcJsonMapper()))
-        // Uten dette kan samme request sendes som YAML/XML og treffe en mapper uten regelen over.
-        // Frontend sender kun JSON. Dekket av ValideringUnntaksperiodeControllerTest.
+        // Ellers kan samme request sendes som YAML eller XML og treffe en mapper uten regelen.
         builder.configureMessageConvertersList { it.removeIf(::erAlternativtJacksonFormat) }
     }
 
