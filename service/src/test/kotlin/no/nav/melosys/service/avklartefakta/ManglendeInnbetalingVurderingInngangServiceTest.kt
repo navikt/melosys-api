@@ -18,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
 import no.nav.melosys.domain.kodeverk.ManglendeInnbetalingVurdering
 import no.nav.melosys.repository.AvklarteFaktaRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
-import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.ReplikerBehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -38,9 +37,6 @@ class ManglendeInnbetalingVurderingInngangServiceTest {
     private lateinit var avklartefaktaDtoKonverterer: AvklartefaktaDtoKonverterer
 
     @MockK(relaxed = true)
-    private lateinit var behandlingsresultatService: BehandlingsresultatService
-
-    @MockK(relaxed = true)
     private lateinit var replikerBehandlingsresultatService: ReplikerBehandlingsresultatService
 
     private val slotAvklartefakta = slot<Avklartefakta>()
@@ -52,7 +48,7 @@ class ManglendeInnbetalingVurderingInngangServiceTest {
     fun setUp() {
         avklartefaktaService = AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, avklartefaktaDtoKonverterer)
         manglendeInnbetalingVurderingInngangService = ManglendeInnbetalingVurderingInngangService(
-            avklartefaktaService, behandlingsresultatService, replikerBehandlingsresultatService
+            avklartefaktaService, replikerBehandlingsresultatService
         )
     }
 
@@ -109,7 +105,6 @@ class ManglendeInnbetalingVurderingInngangServiceTest {
         val behandling = mockk<Behandling>(relaxed = true)
         val behandlingsresultat = Behandlingsresultat().apply { this.behandling = behandling }
         every { behandlingsresultatRepository.findById(1L) } returns Optional.of(behandlingsresultat)
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { avklarteFaktaRepository.save(capture(slotAvklartefakta)) } returnsArgument 0
 
         manglendeInnbetalingVurderingInngangService.hentManglendeInnbetalingVurdering(1L).shouldBeNull()
@@ -130,39 +125,15 @@ class ManglendeInnbetalingVurderingInngangServiceTest {
     }
 
     @Test
-    fun lagreManglendeInnbetalingVurderingSomAvklartFakta_erManglendeInnbetalingTrygdeavgift_tilbakestillerBehandlingsresultat() {
-        val behandling = mockk<Behandling>(relaxed = true) {
-            every { erManglendeInnbetalingTrygdeavgift() } returns true
-        }
-        val behandlingsresultat = Behandlingsresultat().apply { this.behandling = behandling }
-        every { behandlingsresultatRepository.findById(1L) } returns Optional.of(behandlingsresultat)
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+    fun lagreManglendeInnbetalingVurderingSomAvklartFakta_tilbakestillerBehandlingsresultat() {
+        every { behandlingsresultatRepository.findById(1L) } returns Optional.of(Behandlingsresultat())
         every { avklarteFaktaRepository.save(any()) } returnsArgument 0
 
         manglendeInnbetalingVurderingInngangService.lagreManglendeInnbetalingVurderingSomAvklartFakta(
             1L, ManglendeInnbetalingVurdering.HELE_PERIODEN_OPPHØRES
         )
 
-        verify(exactly = 1) { behandlingsresultatService.tømBehandlingsresultat(1L) }
-        verify(exactly = 1) { replikerBehandlingsresultatService.gjenopprettBehandlingsresultatTilUtgangspunkt(1L) }
-    }
-
-    @Test
-    fun lagreManglendeInnbetalingVurderingSomAvklartFakta_erIkkeManglendeInnbetalingTrygdeavgift_gjenoppretterIkke() {
-        val behandling = mockk<Behandling>(relaxed = true) {
-            every { erManglendeInnbetalingTrygdeavgift() } returns false
-        }
-        val behandlingsresultat = Behandlingsresultat().apply { this.behandling = behandling }
-        every { behandlingsresultatRepository.findById(1L) } returns Optional.of(behandlingsresultat)
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
-        every { avklarteFaktaRepository.save(any()) } returnsArgument 0
-
-        manglendeInnbetalingVurderingInngangService.lagreManglendeInnbetalingVurderingSomAvklartFakta(
-            1L, ManglendeInnbetalingVurdering.HELE_PERIODEN_OPPHØRES
-        )
-
-        verify(exactly = 1) { behandlingsresultatService.tømBehandlingsresultat(1L) }
-        verify(exactly = 0) { replikerBehandlingsresultatService.gjenopprettBehandlingsresultatTilUtgangspunkt(any()) }
+        verify(exactly = 1) { replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(1L) }
     }
 
     @Test
@@ -178,9 +149,7 @@ class ManglendeInnbetalingVurderingInngangServiceTest {
             1L, ManglendeInnbetalingVurdering.HELE_PERIODEN_OPPHØRES
         )
 
-        verify(exactly = 0) { behandlingsresultatService.hentBehandlingsresultat(any()) }
-        verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any()) }
-        verify(exactly = 0) { replikerBehandlingsresultatService.gjenopprettBehandlingsresultatTilUtgangspunkt(any()) }
+        verify(exactly = 0) { replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(any()) }
         verify(exactly = 0) { avklarteFaktaRepository.save(any()) }
     }
 }
