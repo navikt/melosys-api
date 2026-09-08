@@ -14,6 +14,7 @@ import io.mockk.mockk
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.service.kodeverk.KodeverkService
+import no.nav.melosys.tjenester.gui.config.jackson.JsonDatoKoersjonConfig
 import no.nav.melosys.tjenester.gui.dto.BehandlingOppsummeringDto
 import org.junit.jupiter.api.Test
 import org.springframework.http.converter.AbstractJacksonHttpMessageConverter
@@ -28,7 +29,7 @@ import java.time.LocalDateTime
 class WebConfigObjectMapperTest {
 
     private val kodeverkService = mockk<KodeverkService>(relaxed = true)
-    private val webConfig = WebConfig(mockk()) { objectMapper }
+    private val webConfig = WebConfig(mockk())
     private val objectMapper: JsonMapper = run {
         val builder = JsonMapper.builder()
         webConfig.melosysJsonMapperCustomizer(kodeverkService).customize(builder)
@@ -37,7 +38,7 @@ class WebConfigObjectMapperTest {
 
     private val mvcConvertere: List<HttpMessageConverter<*>> = run {
         val builder = HttpMessageConverters.forServer().registerDefaults()
-        webConfig.configureMessageConverters(builder)
+        JsonDatoKoersjonConfig { objectMapper }.configureMessageConverters(builder)
         builder.build().toList()
     }
 
