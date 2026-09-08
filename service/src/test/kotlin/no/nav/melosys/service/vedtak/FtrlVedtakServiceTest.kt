@@ -551,7 +551,7 @@ class FtrlVedtakServiceTest {
 
         shouldThrow<FunksjonellException> {
             ftrlVedtakService.fattVedtak(lagBehandling(), request)
-        }.shouldHaveMessage("Forventer at fullstendigManglendeInnbetaling er satt ved fatting av vedtak for behandlingstype OPPHØRT")
+        }.shouldHaveMessage("Forventer at enten fullstendigManglendeInnbetaling eller manglendeInnbetalingVurdering er satt ved fatting av vedtak for behandlingstype OPPHØRT")
     }
 
     @Test
