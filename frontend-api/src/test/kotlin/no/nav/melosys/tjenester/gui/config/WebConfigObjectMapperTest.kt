@@ -127,7 +127,13 @@ class WebConfigObjectMapperTest {
     }
 
     @Test
-    fun `Jackson avviser selv tall som LocalDateTime, uten at vi konfigurerer det`() {
+    fun `Jackson avviser selv tall som LocalDateTime, derfor trengs ingen regel for den`() {
+        // Den delte mapperen har ingen koersjonsregel. Den godtar tall som LocalDate (se testen
+        // lenger ned), men avviser tall som LocalDateTime. Kontrasten viser at avvisningen kommer
+        // fra Jackson, ikke fra oss.
+        shouldThrow<DatabindException> {
+            objectMapper.readValue("""{"tidspunkt": 12345}""", TidspunktDto::class.java)
+        }
         shouldThrow<DatabindException> {
             mvcMapper.readValue("""{"tidspunkt": 12345}""", TidspunktDto::class.java)
         }

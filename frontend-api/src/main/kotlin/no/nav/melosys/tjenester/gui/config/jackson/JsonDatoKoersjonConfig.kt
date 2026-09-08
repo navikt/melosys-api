@@ -15,7 +15,7 @@ import java.time.LocalDate
 /**
  * Avviser tall som `LocalDate` i request-body. Jackson tolker ellers `12345` som epoch-day.
  * Regelen settes på MVC-converteren, ikke på den delte `JsonMapper`-beanen, så Kafka-consumerne
- * er upåvirket.
+ * er upåvirket. `LocalDateTime` trenger ingen regel — Jackson avviser tall selv.
  */
 @Configuration
 class JsonDatoKoersjonConfig(private val jsonMapper: ObjectFactory<JsonMapper>) : WebMvcConfigurer {
