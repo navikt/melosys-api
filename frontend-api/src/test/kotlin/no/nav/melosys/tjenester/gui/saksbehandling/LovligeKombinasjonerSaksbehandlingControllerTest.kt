@@ -70,14 +70,13 @@ class LovligeKombinasjonerSaksbehandlingControllerTest(
     }
 
     @Test
-    fun `behandlingstyper for ny sak inneholder ikke NY_VURDERING og beholder rekkefoelgen`() {
+    fun `behandlingstyper for ny sak returneres fra service og beholder rekkefoelgen`() {
         every {
-            lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+            lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForNySak(
                 Aktoersroller.BRUKER, Sakstyper.FTRL, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV
             )
         } returns linkedSetOf(
             Behandlingstyper.FØRSTEGANG,
-            Behandlingstyper.NY_VURDERING,
             Behandlingstyper.HENVENDELSE
         )
 
