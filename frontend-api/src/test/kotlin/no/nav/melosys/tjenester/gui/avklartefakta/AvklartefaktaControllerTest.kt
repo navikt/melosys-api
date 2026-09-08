@@ -46,7 +46,7 @@ class AvklartefaktaControllerTest {
     private lateinit var aksesskontroll: Aksesskontroll
 
     @MockkBean
-    private lateinit var avklartManglendeInnbetalingService: AvklartManglendeInnbetalingService
+    private lateinit var manglendeInnbetalingVurderingInngangService: ManglendeInnbetalingVurderingInngangService
 
     @MockkBean
     private lateinit var avklartFamilieRelasjonTypeService: AvklartFamilieRelasjonTypeService
@@ -127,7 +127,7 @@ class AvklartefaktaControllerTest {
         every { aksesskontroll.autoriser(1L) } returns Unit
         every { aksesskontroll.autoriserSkrivTilRessurs(1L, Ressurs.AVKLARTE_FAKTA) } returns Unit
         every {
-            avklartManglendeInnbetalingService.lagreManglendeInnbetalingVurderingSomAvklartFakta(
+            manglendeInnbetalingVurderingInngangService.lagreManglendeInnbetalingVurderingSomAvklartFakta(
                 1L, ManglendeInnbetalingVurdering.DELER_AV_PERIODEN_OPPHØRES
             )
         } returns Unit

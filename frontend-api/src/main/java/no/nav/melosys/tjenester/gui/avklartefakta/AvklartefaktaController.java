@@ -23,7 +23,7 @@ public class AvklartefaktaController {
     private final AvklartefaktaService avklartefaktaService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService;
-    private final AvklartManglendeInnbetalingService avklartManglendeInnbetalingService;
+    private final ManglendeInnbetalingVurderingInngangService manglendeInnbetalingVurderingInngangService;
     private final AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService;
     private final AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService;
     private final AvklartOppholdTypeService avklartOppholdTypeService;
@@ -36,7 +36,7 @@ public class AvklartefaktaController {
                                    AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService,
                                    AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService,
                                    Aksesskontroll aksesskontroll,
-                                   AvklartManglendeInnbetalingService avklartManglendeInnbetalingService,
+                                   ManglendeInnbetalingVurderingInngangService manglendeInnbetalingVurderingInngangService,
                                    AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService,
                                    AvklartOppholdTypeService avklartOppholdTypeService,
                                    AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService) {
@@ -45,7 +45,7 @@ public class AvklartefaktaController {
         this.avklarteFaktaArbeidslandService = avklarteFaktaArbeidslandService;
         this.avklartArbeidssituasjonTypeService = avklartArbeidssituasjonTypeService;
         this.aksesskontroll = aksesskontroll;
-        this.avklartManglendeInnbetalingService = avklartManglendeInnbetalingService;
+        this.manglendeInnbetalingVurderingInngangService = manglendeInnbetalingVurderingInngangService;
         this.avklartFamilieRelasjonTypeService = avklartFamilieRelasjonTypeService;
         this.avklartOppholdTypeService = avklartOppholdTypeService;
         this.avklartUkjentSluttdatoMedlemskapsperiodeService = avklartUkjentSluttdatoMedlemskapsperiodeService;
@@ -76,7 +76,7 @@ public class AvklartefaktaController {
                                                                                             @RequestBody Boolean fullstendigManglendeInnbetaling) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
-        avklartManglendeInnbetalingService.lagreFullstendigManglendeInnbetalingSomAvklartFakta(behandlingID,
+        manglendeInnbetalingVurderingInngangService.lagreFullstendigManglendeInnbetalingSomAvklartFakta(behandlingID,
             fullstendigManglendeInnbetaling);
 
         return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
@@ -88,7 +88,7 @@ public class AvklartefaktaController {
                                                                                           @RequestBody ManglendeInnbetalingVurdering manglendeInnbetalingVurdering) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
-        avklartManglendeInnbetalingService.lagreManglendeInnbetalingVurderingSomAvklartFakta(behandlingID, manglendeInnbetalingVurdering);
+        manglendeInnbetalingVurderingInngangService.lagreManglendeInnbetalingVurderingSomAvklartFakta(behandlingID, manglendeInnbetalingVurdering);
 
         return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }

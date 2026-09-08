@@ -3,10 +3,17 @@ package no.nav.melosys.service.avklartefakta
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper.MANGLENDE_INNBETALING_VURDERING
 import no.nav.melosys.domain.kodeverk.ManglendeInnbetalingVurdering
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.behandling.ReplikerBehandlingsresultatService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
-class AvklartManglendeInnbetalingService(private val avklartefaktaService: AvklartefaktaService) {
+class ManglendeInnbetalingVurderingInngangService(
+    private val avklartefaktaService: AvklartefaktaService,
+    private val behandlingsresultatService: BehandlingsresultatService,
+    private val replikerBehandlingsresultatService: ReplikerBehandlingsresultatService,
+) {
 
     fun hentFullstendigManglendeInnbetaling(behandlingID: Long): Boolean? {
         return avklartefaktaService.hentAlleAvklarteFakta(behandlingID)
@@ -31,12 +38,29 @@ class AvklartManglendeInnbetalingService(private val avklartefaktaService: Avkla
             .firstOrNull()
     }
 
+    @Transactional
     fun lagreManglendeInnbetalingVurderingSomAvklartFakta(behandlingID: Long, manglendeInnbetalingVurdering: ManglendeInnbetalingVurdering) {
+        if (hentManglendeInnbetalingVurdering(behandlingID) == manglendeInnbetalingVurdering) return
+
+        tilbakestillBehandlingsresultat(behandlingID)
+
         avklartefaktaService.slettAvklarteFakta(behandlingID, MANGLENDE_INNBETALING_VURDERING)
 
         avklartefaktaService.leggTilAvklarteFakta(
             behandlingID, MANGLENDE_INNBETALING_VURDERING, MANGLENDE_INNBETALING_VURDERING.kode,
             null, manglendeInnbetalingVurdering.kode
         )
+    }
+
+    // Sørger for at behandlingsresultatet ikke inneholder stale data fra et tidligere valgt inngangsvurdering-alternativ
+    // (f.eks. medlemskapsperioder satt som opphørt) når inngangsvurderingen endres.
+    private fun tilbakestillBehandlingsresultat(behandlingID: Long) {
+        val behandling = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentBehandling()
+
+        behandlingsresultatService.tømBehandlingsresultat(behandlingID)
+
+        if (behandling.erManglendeInnbetalingTrygdeavgift()) {
+            replikerBehandlingsresultatService.gjenopprettBehandlingsresultatTilUtgangspunkt(behandlingID)
+        }
     }
 }
