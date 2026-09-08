@@ -11,10 +11,9 @@ import tools.jackson.databind.cfg.CoercionAction
 import tools.jackson.databind.cfg.CoercionInputShape
 import tools.jackson.databind.json.JsonMapper
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 /**
- * Avviser tall som `LocalDate`/`LocalDateTime` i HTTP request-body. Uten denne regelen tolker Jackson
+ * Avviser tall som `LocalDate` i HTTP request-body. Uten denne regelen tolker Jackson
  * `{"periodeFom": 12345}` som epoch-day (2003-10-20) i stedet for å avvise verdien.
  *
  * Regelen settes kun på MVC sin JSON-converter, ikke på den delte `JsonMapper`-beanen. Den delte
@@ -26,8 +25,8 @@ import java.time.LocalDateTime
  * `rebuild()` kopierer konfigurasjonen fra den delte mapperen uten å endre den, slik at moduler
  * (`KotlinModule`, [MelosysModule]) og features er identiske bortsett fra denne ene regelen.
  *
- * Gjelder kun `LocalDate`/`LocalDateTime`. For `Instant`/`OffsetDateTime` er tall en gyldig
- * epoch-representasjon.
+ * Gjelder kun `LocalDate`. Jackson avviser selv tall for `LocalDateTime` (ingen tidssone å tolke
+ * tallet inn i), og for `Instant`/`OffsetDateTime` er tall en gyldig epoch-representasjon.
  */
 @Configuration
 class JsonDatoKoersjonConfig(private val jsonMapper: ObjectFactory<JsonMapper>) : WebMvcConfigurer {
@@ -45,6 +44,5 @@ class JsonDatoKoersjonConfig(private val jsonMapper: ObjectFactory<JsonMapper>) 
     private fun mvcJsonMapper(): JsonMapper =
         jsonMapper.getObject().rebuild()
             .withCoercionConfig(LocalDate::class.java) { it.setCoercion(CoercionInputShape.Integer, CoercionAction.Fail) }
-            .withCoercionConfig(LocalDateTime::class.java) { it.setCoercion(CoercionInputShape.Integer, CoercionAction.Fail) }
             .build()
 }

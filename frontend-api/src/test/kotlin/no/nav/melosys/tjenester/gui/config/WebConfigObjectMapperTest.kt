@@ -127,7 +127,7 @@ class WebConfigObjectMapperTest {
     }
 
     @Test
-    fun `mvcMapper skal avvise tall som LocalDateTime i stedet for å tolke det som timestamp`() {
+    fun `Jackson avviser selv tall som LocalDateTime, uten at vi konfigurerer det`() {
         shouldThrow<DatabindException> {
             mvcMapper.readValue("""{"tidspunkt": 12345}""", TidspunktDto::class.java)
         }
