@@ -210,8 +210,41 @@ class FaktureringskomponentenClientTest(
         )
     }
 
-    private fun lagFakturaserieDto(
-        fakturaserieReferanse: String? = null,
+    @Test
+    fun `kanseller fakturaserie med beskrivelse`() {
+        val referanse = "test-fakturaserie-referanse"
+
+        mockServer.stubFor(
+            any(anyUrl())
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("{ \"fakturaserieReferanse\": \"5689\" }")
+                )
+        )
+
+        val nyFakturaserieResponseDto =
+            faktureringskomponentenClient.kansellerFakturaserie(referanse, "", emptyList(), "Annullering av fakturert trygdeavgift")
+        nyFakturaserieResponseDto.fakturaserieReferanse.shouldBe("5689")
+
+        serviceUnderTestMockServer.verify(
+            postRequestedFor(urlEqualTo("/fakturaserier/$referanse/kanseller"))
+                .withRequestBody(
+                    equalToJson(
+                        """
+                        {
+                          "årsavregningRef": [],
+                          "beskrivelse": "Annullering av fakturert trygdeavgift"
+                        }
+                        """,
+                        true, false
+                    )
+                )
+        )
+    }
+
+    private fun lagFakturaserieDto(        fakturaserieReferanse: String? = null,
         fodselsnummer: String = "12345678911",
         fullmektig: FullmektigDto = FullmektigDto("11987654321", "123456789"),
         referanseBruker: String = "Nasse Nøff",
