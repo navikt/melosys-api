@@ -193,9 +193,9 @@ class FtrlVedtakService(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
         val fullstendigManglendeInnbetaling = behandlingsresultat.finnFullstendigManglendeInnbetalingAvklarteFakta()
-            ?: behandlingsresultat.finnManglendeInnbetalingVurderingAvklarteFakta()
+            ?: behandlingsresultat.finnManglendeInnbetalingHandlingsvalgAvklarteFakta()
             ?: throw FunksjonellException(
-                "Forventer at enten fullstendigManglendeInnbetaling eller manglendeInnbetalingVurdering er satt ved fatting av vedtak for behandlingstype OPPHØRT"
+                "Forventer at enten fullstendigManglendeInnbetaling eller manglendeInnbetalingHandlingsvalg er satt ved fatting av vedtak for behandlingstype OPPHØRT"
             )
 
         val opphørteMedlemskapsperioder = behandlingsresultat.medlemskapsperioder

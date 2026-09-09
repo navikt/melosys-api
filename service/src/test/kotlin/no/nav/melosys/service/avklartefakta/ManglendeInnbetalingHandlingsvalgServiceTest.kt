@@ -15,7 +15,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
-import no.nav.melosys.domain.kodeverk.ManglendeInnbetalingVurdering
+import no.nav.melosys.domain.kodeverk.ManglendeInnbetalingHandlingsvalg
 import no.nav.melosys.repository.AvklarteFaktaRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.service.behandling.ReplikerBehandlingsresultatService
@@ -25,7 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.util.*
 
 @ExtendWith(MockKExtension::class)
-class ManglendeInnbetalingVurderingInngangServiceTest {
+class ManglendeInnbetalingHandlingsvalgServiceTest {
 
     @MockK(relaxed = true)
     private lateinit var avklarteFaktaRepository: AvklarteFaktaRepository
@@ -42,19 +42,19 @@ class ManglendeInnbetalingVurderingInngangServiceTest {
     private val slotAvklartefakta = slot<Avklartefakta>()
 
     private lateinit var avklartefaktaService: AvklartefaktaService
-    private lateinit var manglendeInnbetalingVurderingInngangService: ManglendeInnbetalingVurderingInngangService
+    private lateinit var manglendeInnbetalingHandlingsvalgService: ManglendeInnbetalingHandlingsvalgService
 
     @BeforeEach
     fun setUp() {
         avklartefaktaService = AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, avklartefaktaDtoKonverterer)
-        manglendeInnbetalingVurderingInngangService = ManglendeInnbetalingVurderingInngangService(
+        manglendeInnbetalingHandlingsvalgService = ManglendeInnbetalingHandlingsvalgService(
             avklartefaktaService, replikerBehandlingsresultatService
         )
     }
 
     @Test
     fun hentFullstendigMandlendeInnbetaling_avklartFaktaFinnesIkke_returnererNull() {
-        manglendeInnbetalingVurderingInngangService.hentFullstendigManglendeInnbetaling(1L).shouldBeNull()
+        manglendeInnbetalingHandlingsvalgService.hentFullstendigManglendeInnbetaling(1L).shouldBeNull()
     }
 
     @Test
@@ -63,11 +63,11 @@ class ManglendeInnbetalingVurderingInngangServiceTest {
         every { avklarteFaktaRepository.save(capture(slotAvklartefakta)) } returnsArgument 0
 
 
-        manglendeInnbetalingVurderingInngangService.hentFullstendigManglendeInnbetaling(1L).shouldBeNull()
+        manglendeInnbetalingHandlingsvalgService.hentFullstendigManglendeInnbetaling(1L).shouldBeNull()
 
-        manglendeInnbetalingVurderingInngangService.lagreFullstendigManglendeInnbetalingSomAvklartFakta(1L, true)
+        manglendeInnbetalingHandlingsvalgService.lagreFullstendigManglendeInnbetalingSomAvklartFakta(1L, true)
 
-        manglendeInnbetalingVurderingInngangService.hentFullstendigManglendeInnbetaling(1L)?.shouldBeTrue()
+        manglendeInnbetalingHandlingsvalgService.hentFullstendigManglendeInnbetaling(1L)?.shouldBeTrue()
         slotAvklartefakta.captured.shouldNotBeNull().run {
             type.shouldBe(Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING)
             referanse.shouldBe(Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode)
@@ -82,11 +82,11 @@ class ManglendeInnbetalingVurderingInngangServiceTest {
         every { avklarteFaktaRepository.save(capture(slotAvklartefakta)) } returnsArgument 0
 
 
-        manglendeInnbetalingVurderingInngangService.hentFullstendigManglendeInnbetaling(1L).shouldBeNull()
+        manglendeInnbetalingHandlingsvalgService.hentFullstendigManglendeInnbetaling(1L).shouldBeNull()
 
-        manglendeInnbetalingVurderingInngangService.lagreFullstendigManglendeInnbetalingSomAvklartFakta(1L, false)
+        manglendeInnbetalingHandlingsvalgService.lagreFullstendigManglendeInnbetalingSomAvklartFakta(1L, false)
 
-        manglendeInnbetalingVurderingInngangService.hentFullstendigManglendeInnbetaling(1L)?.shouldBeFalse()
+        manglendeInnbetalingHandlingsvalgService.hentFullstendigManglendeInnbetaling(1L)?.shouldBeFalse()
         slotAvklartefakta.captured.shouldNotBeNull().run {
             type.shouldBe(Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING)
             referanse.shouldBe(Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode)
@@ -96,57 +96,57 @@ class ManglendeInnbetalingVurderingInngangServiceTest {
     }
 
     @Test
-    fun hentManglendeInnbetalingVurdering_avklartFaktaFinnesIkke_returnererNull() {
-        manglendeInnbetalingVurderingInngangService.hentManglendeInnbetalingVurdering(1L).shouldBeNull()
+    fun hentManglendeInnbetalingHandlingsvalg_avklartFaktaFinnesIkke_returnererNull() {
+        manglendeInnbetalingHandlingsvalgService.hentManglendeInnbetalingHandlingsvalg(1L).shouldBeNull()
     }
 
     @Test
-    fun lagreOgHent_manglendeInnbetalingVurdering_returnererLagretVerdi() {
+    fun lagreOgHent_manglendeInnbetalingHandlingsvalg_returnererLagretVerdi() {
         val behandling = mockk<Behandling>(relaxed = true)
         val behandlingsresultat = Behandlingsresultat().apply { this.behandling = behandling }
         every { behandlingsresultatRepository.findById(1L) } returns Optional.of(behandlingsresultat)
         every { avklarteFaktaRepository.save(capture(slotAvklartefakta)) } returnsArgument 0
 
-        manglendeInnbetalingVurderingInngangService.hentManglendeInnbetalingVurdering(1L).shouldBeNull()
+        manglendeInnbetalingHandlingsvalgService.hentManglendeInnbetalingHandlingsvalg(1L).shouldBeNull()
 
-        manglendeInnbetalingVurderingInngangService.lagreManglendeInnbetalingVurderingSomAvklartFakta(
-            1L, ManglendeInnbetalingVurdering.DELER_AV_PERIODEN_OPPHØRES
+        manglendeInnbetalingHandlingsvalgService.lagreManglendeInnbetalingHandlingsvalgSomAvklartFakta(
+            1L, ManglendeInnbetalingHandlingsvalg.DELER_AV_PERIODEN_OPPHØRES
         )
         every { avklarteFaktaRepository.findByBehandlingsresultatId(1L) } returns setOf(slotAvklartefakta.captured)
 
-        manglendeInnbetalingVurderingInngangService.hentManglendeInnbetalingVurdering(1L)
-            .shouldBe(ManglendeInnbetalingVurdering.DELER_AV_PERIODEN_OPPHØRES)
+        manglendeInnbetalingHandlingsvalgService.hentManglendeInnbetalingHandlingsvalg(1L)
+            .shouldBe(ManglendeInnbetalingHandlingsvalg.DELER_AV_PERIODEN_OPPHØRES)
         slotAvklartefakta.captured.shouldNotBeNull().run {
-            type.shouldBe(Avklartefaktatyper.MANGLENDE_INNBETALING_VURDERING)
-            referanse.shouldBe(Avklartefaktatyper.MANGLENDE_INNBETALING_VURDERING.kode)
+            type.shouldBe(Avklartefaktatyper.MANGLENDE_INNBETALING_HANDLINGSVALG)
+            referanse.shouldBe(Avklartefaktatyper.MANGLENDE_INNBETALING_HANDLINGSVALG.kode)
             subjekt.shouldBeNull()
-            fakta.shouldBe(ManglendeInnbetalingVurdering.DELER_AV_PERIODEN_OPPHØRES.kode)
+            fakta.shouldBe(ManglendeInnbetalingHandlingsvalg.DELER_AV_PERIODEN_OPPHØRES.kode)
         }
     }
 
     @Test
-    fun lagreManglendeInnbetalingVurderingSomAvklartFakta_tilbakestillerBehandlingsresultat() {
+    fun lagreManglendeInnbetalingHandlingsvalgSomAvklartFakta_tilbakestillerBehandlingsresultat() {
         every { behandlingsresultatRepository.findById(1L) } returns Optional.of(Behandlingsresultat())
         every { avklarteFaktaRepository.save(any()) } returnsArgument 0
 
-        manglendeInnbetalingVurderingInngangService.lagreManglendeInnbetalingVurderingSomAvklartFakta(
-            1L, ManglendeInnbetalingVurdering.HELE_PERIODEN_OPPHØRES
+        manglendeInnbetalingHandlingsvalgService.lagreManglendeInnbetalingHandlingsvalgSomAvklartFakta(
+            1L, ManglendeInnbetalingHandlingsvalg.HELE_PERIODEN_OPPHØRES
         )
 
         verify(exactly = 1) { replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(1L) }
     }
 
     @Test
-    fun lagreManglendeInnbetalingVurderingSomAvklartFakta_uendretVerdi_tidligReturUtenTilbakestilling() {
+    fun lagreManglendeInnbetalingHandlingsvalgSomAvklartFakta_uendretVerdi_tidligReturUtenTilbakestilling() {
         val eksisterendeAvklartefakta = Avklartefakta().apply {
-            type = Avklartefaktatyper.MANGLENDE_INNBETALING_VURDERING
-            referanse = Avklartefaktatyper.MANGLENDE_INNBETALING_VURDERING.kode
-            fakta = ManglendeInnbetalingVurdering.HELE_PERIODEN_OPPHØRES.kode
+            type = Avklartefaktatyper.MANGLENDE_INNBETALING_HANDLINGSVALG
+            referanse = Avklartefaktatyper.MANGLENDE_INNBETALING_HANDLINGSVALG.kode
+            fakta = ManglendeInnbetalingHandlingsvalg.HELE_PERIODEN_OPPHØRES.kode
         }
         every { avklarteFaktaRepository.findByBehandlingsresultatId(1L) } returns setOf(eksisterendeAvklartefakta)
 
-        manglendeInnbetalingVurderingInngangService.lagreManglendeInnbetalingVurderingSomAvklartFakta(
-            1L, ManglendeInnbetalingVurdering.HELE_PERIODEN_OPPHØRES
+        manglendeInnbetalingHandlingsvalgService.lagreManglendeInnbetalingHandlingsvalgSomAvklartFakta(
+            1L, ManglendeInnbetalingHandlingsvalg.HELE_PERIODEN_OPPHØRES
         )
 
         verify(exactly = 0) { replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(any()) }

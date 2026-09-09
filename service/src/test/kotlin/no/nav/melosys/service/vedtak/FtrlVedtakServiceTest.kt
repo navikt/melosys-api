@@ -429,13 +429,13 @@ class FtrlVedtakServiceTest {
     }
 
     @Test
-    fun `fattVedtak_opphørt_fatterVedtak med kun MANGLENDE_INNBETALING_VURDERING satt (hybrid støtte for ny frontend, MELOSYS-8257)`() {
+    fun `fattVedtak_opphørt_fatterVedtak med kun MANGLENDE_INNBETALING_HANDLINGSVALG satt (hybrid støtte for ny frontend, MELOSYS-8257)`() {
         every { behandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
         val behandlingsresultat = Behandlingsresultat.forTest {
             avklartefakta {
-                type = Avklartefaktatyper.MANGLENDE_INNBETALING_VURDERING
-                referanse = Avklartefaktatyper.MANGLENDE_INNBETALING_VURDERING.kode
-                fakta = ManglendeInnbetalingVurdering.HELE_PERIODEN_OPPHØRES.kode
+                type = Avklartefaktatyper.MANGLENDE_INNBETALING_HANDLINGSVALG
+                referanse = Avklartefaktatyper.MANGLENDE_INNBETALING_HANDLINGSVALG.kode
+                fakta = ManglendeInnbetalingHandlingsvalg.HELE_PERIODEN_OPPHØRES.kode
             }
             medlemskapsperiode {
                 id = 1
@@ -462,21 +462,21 @@ class FtrlVedtakServiceTest {
             type.shouldBe(Behandlingsresultattyper.OPPHØRT)
             medlemskapsperioder.shouldHaveSize(2)
             avklartefakta.shouldHaveSize(1)
-            avklartefakta.single().type.shouldBe(Avklartefaktatyper.MANGLENDE_INNBETALING_VURDERING)
+            avklartefakta.single().type.shouldBe(Avklartefaktatyper.MANGLENDE_INNBETALING_HANDLINGSVALG)
         }
     }
 
     @Test
-    fun `delvis opphør med MANGLENDE_INNBETALING_VURDERING lik DELER_AV_PERIODEN_OPPHØRES behandles ikke som fullstendig opphør`() {
+    fun `delvis opphør med MANGLENDE_INNBETALING_HANDLINGSVALG lik DELER_AV_PERIODEN_OPPHØRES behandles ikke som fullstendig opphør`() {
         // Analog til regresjonstesten for sak 8028, men for den nye enum-baserte fakta-typen:
         // kun HELE_PERIODEN_OPPHØRES skal trigge den korte opphørsflyten.
         every { behandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
         val opphørtFom = LocalDate.now().plusMonths(6)
         val behandlingsresultat = Behandlingsresultat.forTest {
             avklartefakta {
-                type = Avklartefaktatyper.MANGLENDE_INNBETALING_VURDERING
-                referanse = Avklartefaktatyper.MANGLENDE_INNBETALING_VURDERING.kode
-                fakta = ManglendeInnbetalingVurdering.DELER_AV_PERIODEN_OPPHØRES.kode
+                type = Avklartefaktatyper.MANGLENDE_INNBETALING_HANDLINGSVALG
+                referanse = Avklartefaktatyper.MANGLENDE_INNBETALING_HANDLINGSVALG.kode
+                fakta = ManglendeInnbetalingHandlingsvalg.DELER_AV_PERIODEN_OPPHØRES.kode
             }
             medlemskapsperiode {
                 id = 1
@@ -551,7 +551,7 @@ class FtrlVedtakServiceTest {
 
         shouldThrow<FunksjonellException> {
             ftrlVedtakService.fattVedtak(lagBehandling(), request)
-        }.shouldHaveMessage("Forventer at enten fullstendigManglendeInnbetaling eller manglendeInnbetalingVurdering er satt ved fatting av vedtak for behandlingstype OPPHØRT")
+        }.shouldHaveMessage("Forventer at enten fullstendigManglendeInnbetaling eller manglendeInnbetalingHandlingsvalg er satt ved fatting av vedtak for behandlingstype OPPHØRT")
     }
 
     @Test

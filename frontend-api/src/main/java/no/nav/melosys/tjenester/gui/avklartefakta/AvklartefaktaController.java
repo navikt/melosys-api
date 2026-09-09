@@ -23,7 +23,7 @@ public class AvklartefaktaController {
     private final AvklartefaktaService avklartefaktaService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService;
-    private final ManglendeInnbetalingVurderingInngangService manglendeInnbetalingVurderingInngangService;
+    private final ManglendeInnbetalingHandlingsvalgService manglendeInnbetalingHandlingsvalgService;
     private final AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService;
     private final AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService;
     private final AvklartOppholdTypeService avklartOppholdTypeService;
@@ -36,7 +36,7 @@ public class AvklartefaktaController {
                                    AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService,
                                    AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService,
                                    Aksesskontroll aksesskontroll,
-                                   ManglendeInnbetalingVurderingInngangService manglendeInnbetalingVurderingInngangService,
+                                   ManglendeInnbetalingHandlingsvalgService manglendeInnbetalingHandlingsvalgService,
                                    AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService,
                                    AvklartOppholdTypeService avklartOppholdTypeService,
                                    AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService) {
@@ -45,7 +45,7 @@ public class AvklartefaktaController {
         this.avklarteFaktaArbeidslandService = avklarteFaktaArbeidslandService;
         this.avklartArbeidssituasjonTypeService = avklartArbeidssituasjonTypeService;
         this.aksesskontroll = aksesskontroll;
-        this.manglendeInnbetalingVurderingInngangService = manglendeInnbetalingVurderingInngangService;
+        this.manglendeInnbetalingHandlingsvalgService = manglendeInnbetalingHandlingsvalgService;
         this.avklartFamilieRelasjonTypeService = avklartFamilieRelasjonTypeService;
         this.avklartOppholdTypeService = avklartOppholdTypeService;
         this.avklartUkjentSluttdatoMedlemskapsperiodeService = avklartUkjentSluttdatoMedlemskapsperiodeService;
@@ -76,19 +76,19 @@ public class AvklartefaktaController {
                                                                                             @RequestBody Boolean fullstendigManglendeInnbetaling) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
-        manglendeInnbetalingVurderingInngangService.lagreFullstendigManglendeInnbetalingSomAvklartFakta(behandlingID,
+        manglendeInnbetalingHandlingsvalgService.lagreFullstendigManglendeInnbetalingSomAvklartFakta(behandlingID,
             fullstendigManglendeInnbetaling);
 
         return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
 
-    @PostMapping("{behandlingID}/manglende-innbetaling-vurdering")
-    @Operation(summary = "Lagre vurdering av manglende innbetaling som avklartfakta")
-    public AvklartefaktaOppsummeringDto lagreManglendeInnbetalingVurderingSomAvklartFakta(@PathVariable("behandlingID") long behandlingID,
-                                                                                          @RequestBody ManglendeInnbetalingVurdering manglendeInnbetalingVurdering) {
+    @PostMapping("{behandlingID}/manglende-innbetaling-handlingsvalg")
+    @Operation(summary = "Lagre handlingsvalg for manglende innbetaling som avklartfakta")
+    public AvklartefaktaOppsummeringDto lagreManglendeInnbetalingHandlingsvalgSomAvklartFakta(@PathVariable("behandlingID") long behandlingID,
+                                                                                          @RequestBody ManglendeInnbetalingHandlingsvalg manglendeInnbetalingHandlingsvalg) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
-        manglendeInnbetalingVurderingInngangService.lagreManglendeInnbetalingVurderingSomAvklartFakta(behandlingID, manglendeInnbetalingVurdering);
+        manglendeInnbetalingHandlingsvalgService.lagreManglendeInnbetalingHandlingsvalgSomAvklartFakta(behandlingID, manglendeInnbetalingHandlingsvalg);
 
         return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
