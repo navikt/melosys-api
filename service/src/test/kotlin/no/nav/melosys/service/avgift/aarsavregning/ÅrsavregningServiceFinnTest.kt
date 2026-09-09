@@ -169,7 +169,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
                     dekning = Trygdedekninger.FULL_DEKNING,
                     bestemmelse = no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A,
                     medlemskapstyper = Medlemskapstyper.PLIKTIG,
-                    InnvilgelsesResultat.INNVILGET
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 )
             }
         }

@@ -84,7 +84,8 @@ class ÅrsavregningService(
      * Resetter eksisterende årsavregning dersom behandlingsresultatet er IKKE_FASTSATT.
      * Dette resetter all data saksbehandler har lagt inn på årsavregningen, og henter grunnlaget på
      * nytt fra siste avsluttede behandling med avgiftspliktige perioder for året. Finnes ingen slik
-     * behandling, beholdes grunnlaget uendret.
+     * behandling, står medlemskaps- og helseutgiftperiodene igjen tomme, mens lovvalgsperiodene
+     * beholdes uendret.
      */
     @Transactional
     fun resetEksisterendeÅrsavregning(behandlingID: Long): ÅrsavregningModel? {
