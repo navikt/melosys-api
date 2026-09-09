@@ -128,10 +128,6 @@ class A1Mapper {
             .sorted(Comparator.comparing(Land::getKode))
             .filter(land -> !land.equals(Land.av(Land.UNKNOWN)));
 
-        if (!brevData.getErCdm44()) {
-            stream = stream.filter(land -> !land.equals(Land.av(Land.KOSOVO)));
-        }
-
         List<String> gyldigeStatsborgerskap = stream
             .map(land -> IsoLandkodeKonverterer.tilIso2(land.getKode())).toList();
         if (gyldigeStatsborgerskap.isEmpty()) {

@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
-import io.getunleash.FakeUnleash
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
@@ -26,7 +25,6 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
@@ -50,21 +48,14 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
     @MockK
     private lateinit var mockLandvelgerService: LandvelgerService
 
-    private val unleash = FakeUnleash()
     private val innvilgelseEftaStorbritanniaMapper by lazy {
         InnvilgelseEftaStorbritanniaMapper(
             mockVilkaarsresultatService,
             mockDokgenMapperDatahenter,
             mockVirksomheterService,
             mockAvklartefaktaService,
-            mockLandvelgerService,
-            unleash
+            mockLandvelgerService
         )
-    }
-
-    @BeforeEach
-    fun setup() {
-        unleash.enableAll()
     }
 
     @Test

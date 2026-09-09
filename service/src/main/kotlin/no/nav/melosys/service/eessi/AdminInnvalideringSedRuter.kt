@@ -67,7 +67,7 @@ class AdminInnvalideringSedRuter(
                 val aktivBehandlingErInvalidert = erAktivBehandlingInvalidert(sedDokument, arkivsakID)
 
                 if (aktivBehandlingErInvalidert && (sistAktiveBehandling.erRegisteringAvUnntak() || sistAktiveBehandling.erAnmodningOmUnntak())) {
-                    annullerSakOgBehandling(sistAktiveBehandling)
+                    annullerSakOgBehandling(prosessinstans, sistAktiveBehandling)
                     behandlingsresultatService.oppdaterBehandlingsresultattype(sistAktiveBehandling.id, Behandlingsresultattyper.HENLEGGELSE)
                     oppgaveService.ferdigstillOppgaveMedBehandlingID(sistAktiveBehandling.id)
                 } else {

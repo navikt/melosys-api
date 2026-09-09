@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.joark;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -41,6 +42,18 @@ public interface JoarkFasade {
      * Oppdaterer en journalpost og forsøker å ferdigstille
      */
     void oppdaterOgFerdigstillJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering);
+
+    /**
+     * Oppdaterer journalposter knyttet til en sak fra gammel aktørId til ny aktørId.
+     * <p>
+     * Journalposter i arkivet er uforanderlige, så hver journalpost erstattes av en kopi med ny
+     * aktørId og ny journalpostId. Journalposter som ikke lot seg flytte logges og hoppes over.
+     *
+     * @return gammel journalpostId mot ny journalpostId for journalpostene som ble flyttet
+     */
+    Map<String, String> oppdaterJournalposterMedNyAktørId(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
+                                                          String gammelAktørId,
+                                                          String nyAktørId);
 
     void validerDokumenterTilhørerSakOgHarTilgang(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
                                                   Collection<DokumentReferanse> dokumentReferanser);

@@ -1,19 +1,28 @@
 package no.nav.melosys.saksflyt.steg.sed
 
-import io.getunleash.FakeUnleash
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.melosys.domain.*
+import java.time.LocalDate
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Saksopplysning
+import no.nav.melosys.domain.SaksopplysningType
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis
 import no.nav.melosys.domain.eessi.sed.SedDataDto
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.integrasjon.eessi.EessiClient
 import no.nav.melosys.integrasjon.joark.JoarkFasade
-import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.ProsessStatus
+import no.nav.melosys.saksflytapi.domain.ProsessType
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.sed.EessiService
@@ -22,7 +31,6 @@ import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 class SendAvslagUtpekingTest {
@@ -48,13 +56,11 @@ class SendAvslagUtpekingTest {
     private lateinit var eessiService: EessiService
     private lateinit var behandling: Behandling
 
-    private val fakeUnleash = FakeUnleash()
-
     @BeforeEach
     fun settOpp() {
         eessiService = EessiService(
             behandlingService, behandlingsresultatService, eessiClient, joarkFasade,
-            sedDataBygger, sedDataGrunnlagFactory, fakeUnleash
+            sedDataBygger, sedDataGrunnlagFactory
         )
         sendAvslagUtpeking = SendAvslagUtpeking(eessiService)
 

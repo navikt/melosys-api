@@ -6,6 +6,7 @@ import org.springframework.retry.annotation.Retryable
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.util.UriBuilder
+import java.time.Duration
 
 @Retryable
 open class AzureAdClient(
@@ -23,12 +24,15 @@ open class AzureAdClient(
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .bodyToMono<AzureAdGraphResponseDTO>()
-            .mapNotNull {
-                if (!it.value.isEmpty()) {
-                    val azureUser = it.value[0]
-                    "${azureUser.givenName} ${azureUser.surname}"
-                } else null
+            .mapNotNull { response ->
+                response.value.firstOrNull()
+                    ?.let { listOfNotNull(it.givenName, it.surname).joinToString(" ") }
+                    ?.ifBlank { null }
             }
-            .block()
+            .block(TIMEOUT)
+    }
+
+    private companion object {
+        private val TIMEOUT: Duration = Duration.ofSeconds(5)
     }
 }

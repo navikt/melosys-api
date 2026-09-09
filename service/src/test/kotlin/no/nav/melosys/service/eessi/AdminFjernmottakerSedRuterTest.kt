@@ -21,6 +21,7 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.eessi.ruting.AdminFjernmottakerSedRuter
 import no.nav.melosys.service.medl.MedlPeriodeService
+import no.nav.melosys.service.sak.SkjemaSaksstatusSynk
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.BeforeEach
@@ -147,7 +148,7 @@ class AdminFjernmottakerSedRuterTest {
 
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID)
 
-        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.ANNULLERT) }
+        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.ANNULLERT, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT) }
         verify { medlPeriodeService.avvisPeriodeOpphørt(20L) }
         verify { prosessinstansService.opprettProsessinstansSedJournalføring(sistAktiveBehandling, melding) }
     }
@@ -165,7 +166,7 @@ class AdminFjernmottakerSedRuterTest {
 
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID)
 
-        verify { fagsakService.oppdaterStatus(fagsak, Saksstatuser.ANNULLERT) }
+        verify { fagsakService.oppdaterStatus(fagsak, Saksstatuser.ANNULLERT, SkjemaSaksstatusSynk.HÅNDTERES_AV_PROSESSFLYT) }
         verify { medlPeriodeService.avvisPeriodeOpphørt(20L) }
         verify { prosessinstansService.opprettProsessinstansSedJournalføring(sistAktiveBehandling, melding) }
     }

@@ -8,4 +8,5 @@ data class TrygdeavgiftsberegningResponse(
     val grunnlagListe: List<TrygdeavgiftsgrunnlagDto>,
     val beregningsregel: Avgiftsberegningsregel,
     val avgiftsdel: String? = null,
+    val beregningsforklaring: BeregningsforklaringDto? = null,
 )

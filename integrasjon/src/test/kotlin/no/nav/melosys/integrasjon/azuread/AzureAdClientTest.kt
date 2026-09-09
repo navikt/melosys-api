@@ -120,6 +120,56 @@ class AzureAdClientTest(
         saksbehandlerNavnResponse.shouldBe(null)
     }
 
+    @Test
+    fun `hent saksbehandler navn naar etternavn mangler i graph`() {
+        val ident = "Z123456"
+        val graphUsersResponse = """
+        {
+            "value" : [ {
+                "givenName" : "Lokal",
+                "surname" : null
+            } ]
+        }"""
+        serviceUnderTestMockServer.stubFor(
+            get("/graph/v1.0/users?\$filter=onPremisesSamAccountName%20eq%20'Z123456'&\$count=true&\$select=givenName,surname")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withBody(graphUsersResponse)
+                        .withHeader("Content-Type", "application/json")
+                )
+        )
+
+        val saksbehandlerNavnResponse = azureAdClient.hentSaksbehandlerNavn(ident)
+
+        saksbehandlerNavnResponse.shouldBe("Lokal")
+    }
+
+    @Test
+    fun `hent saksbehandler navn naar begge navnefelt mangler i graph`() {
+        val ident = "Z123456"
+        val graphUsersResponse = """
+        {
+            "value" : [ {
+                "givenName" : null,
+                "surname" : null
+            } ]
+        }"""
+        serviceUnderTestMockServer.stubFor(
+            get("/graph/v1.0/users?\$filter=onPremisesSamAccountName%20eq%20'Z123456'&\$count=true&\$select=givenName,surname")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withBody(graphUsersResponse)
+                        .withHeader("Content-Type", "application/json")
+                )
+        )
+
+        val saksbehandlerNavnResponse = azureAdClient.hentSaksbehandlerNavn(ident)
+
+        saksbehandlerNavnResponse.shouldBe(null)
+    }
+
     fun get(url: String): MappingBuilder =
         WireMock.get(url)
             .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))

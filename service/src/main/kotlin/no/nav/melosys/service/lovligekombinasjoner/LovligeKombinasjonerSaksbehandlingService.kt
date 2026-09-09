@@ -149,6 +149,30 @@ class LovligeKombinasjonerSaksbehandlingService(
 
 
     /**
+     * Hele kombinasjonstreet sakstype -> sakstema -> behandlingstema i ett kall.
+     *
+     * Finnes for klienter som skal kaskadere over flere valg samtidig (avgrensning av
+     * tekstblokker i admin); ett kall per kombinasjon ville der blitt N*M kall per valg.
+     *
+     * Treet er saksuavhengig: uten hovedpart, saksnummer og behandling blir resultatet
+     * unionen over BRUKER, VIRKSOMHET og SED – alt som er lovlig et eller annet sted.
+     * Det skal derfor ikke brukes til å avgjøre hva som er lovlig i én konkret sak; til
+     * det finnes hent-lovlige-kombinasjoner-endepunktene.
+     */
+    fun hentKombinasjonstre(): List<SakstypeKombinasjoner> =
+        hentMuligeSakstyper(null).map { sakstype ->
+            SakstypeKombinasjoner(
+                sakstype = sakstype,
+                sakstemaer = hentMuligeSakstemaer(null, sakstype, null).map { sakstema ->
+                    SakstemaKombinasjoner(
+                        sakstema = sakstema,
+                        behandlingstemaer = hentMuligeBehandlingstemaer(null, sakstype, sakstema, null, null),
+                    )
+                },
+            )
+        }
+
+    /**
      * Henter mulige behandlingstyper for knytting til eksisterende sak
      *
      * @param hovedpart         Den valgte hovedpart knyttet til fagsaken.
@@ -210,6 +234,14 @@ class LovligeKombinasjonerSaksbehandlingService(
 
         return behandlingstyper
     }
+
+    fun hentMuligeBehandlingstyperForNySak(
+        hovedpart: Aktoersroller,
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema?,
+    ): Set<Behandlingstyper> = hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema)
+        .filterNot { it == Behandlingstyper.NY_VURDERING }.toSet()
 
     /**
      * Henter mulige behandlingstyper for opprettelse av ny behandling og sak
@@ -478,6 +510,7 @@ class LovligeKombinasjonerSaksbehandlingService(
 
         private val ÅRSAVREGNING_TILLATTE_BEHANDLINGSTEMA = setOf(
             Behandlingstema.YRKESAKTIV,
+            Behandlingstema.PENSJONIST,
             Behandlingstema.UTSENDT_ARBEIDSTAKER,
             Behandlingstema.UTSENDT_SELVSTENDIG,
             Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY,
@@ -486,3 +519,14 @@ class LovligeKombinasjonerSaksbehandlingService(
         )
     }
 }
+
+/** En sakstype med alle sakstemaene den kan kombineres med. Wire-formen eies av KombinasjonstreDto. */
+data class SakstypeKombinasjoner(
+    val sakstype: Sakstyper,
+    val sakstemaer: List<SakstemaKombinasjoner>,
+)
+
+data class SakstemaKombinasjoner(
+    val sakstema: Sakstemaer,
+    val behandlingstemaer: Set<Behandlingstema>,
+)

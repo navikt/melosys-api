@@ -105,7 +105,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
     private fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate): List<SakMedBehandlinger> =
         årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(fomDato = fomDato, tomDato = tomDato)
 
-    // SkattehendelserConsumer.finnAktivÅrsavregningBehandling kaster TekniskException
+    // SkattepliktigAarsavregningOpprettelseService.finnAktivÅrsavregningBehandling kaster TekniskException
     // hvis det finnes flere aktive ÅRSAVREGNING-behandlinger for samme år. Her hopper
     // vi bare over i stedet — målet er kun å unngå duplikat-opprettelse, ikke å feile.
     private fun skalOppretteForSak(fagsak: Fagsak, gjelderÅr: Int): Boolean =
@@ -120,10 +120,10 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
      * blir synlig.
      */
     private fun hentÅrFraBehandlingDefensivt(behandling: Behandling): Int? =
-        runCatching {
+        try {
             behandlingsresultatService.hentBehandlingsresultat(behandling.id)
                 .hentÅrsavregning().aar
-        }.getOrElse { e ->
+        } catch (e: IllegalStateException) {
             log.warn(e) {
                 "Kunne ikke hente år fra åpen ÅRSAVREGNING-behandling ${behandling.id} " +
                     "(sak ${behandling.fagsak.saksnummer}) — antar ikke duplikat, ny ÅRSAVREGNING vil opprettes"

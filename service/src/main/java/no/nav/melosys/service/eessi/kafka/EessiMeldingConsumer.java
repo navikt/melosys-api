@@ -34,10 +34,13 @@ public class EessiMeldingConsumer {
     public void mottaMeldingAiven(ConsumerRecord<String, MelosysEessiMelding> consumerRecord, @Headers Map<String, byte[]> header) {
         putToMDC(CORRELATION_ID, getCorrelationId(header));
         MelosysEessiMelding melding = consumerRecord.value();
-        log.info("Mottatt ny melding fra eessi(aiven): {}", melding);
-
-        try {
-            prosessinstansService.opprettProsessinstansSedMottak(melding);
+try {
+    if (melding == null) {
+        log.warn("Mottatt null melding fra eessi(aiven). ConsumerRecord.offset: {}", consumerRecord.offset());
+        return;
+    }
+    log.info("Mottatt ny melding fra eessi(aiven): {}", melding.getSedId());
+    prosessinstansService.opprettProsessinstansSedMottak(melding);
         } catch (Exception e) {
             log.error("Feil ved mottak av SED! ConsumerRecord.offset: {}", consumerRecord.offset());
             throw e;

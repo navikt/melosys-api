@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.dokgen.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonInclude
 import tools.jackson.databind.annotation.JsonSerialize
 import tools.jackson.databind.ext.javatime.ser.LocalDateSerializer
 import no.nav.melosys.domain.brev.VedtakOpphoertMedlemskapBrevbestilling
@@ -20,7 +21,8 @@ class VedtakOpphoertMedlemskap(
 
     val fritekst: String?,
     val behandlingstema: String?,
-    val land: List<String>?
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    val land: List<String>
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     companion object {
@@ -35,6 +37,6 @@ class VedtakOpphoertMedlemskap(
         opphoertDato = brevbestilling.opphørtDato,
         fritekst = brevbestilling.opphørtBegrunnelseFritekst,
         behandlingstema = brevbestilling.behandlingstema,
-        land = brevbestilling.land,
+        land = brevbestilling.land.orEmpty(),
     )
 }

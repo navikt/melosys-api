@@ -5,6 +5,7 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
+import no.nav.melosys.service.soknad.UlikPeriodeUtleder;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.mottatteopplysninger.MottatteOpplysningerGetDto;
 import no.nav.melosys.tjenester.gui.dto.mottatteopplysninger.MottatteOpplysningerPostDto;
@@ -20,11 +21,14 @@ import org.springframework.web.bind.annotation.*;
 public class MottatteOpplysningerController {
 
     private final MottatteOpplysningerService mottatteOpplysningerService;
+    private final UlikPeriodeUtleder ulikPeriodeUtleder;
     private final Aksesskontroll aksesskontroll;
 
     public MottatteOpplysningerController(MottatteOpplysningerService mottatteOpplysningerService,
+                                       UlikPeriodeUtleder ulikPeriodeUtleder,
                                        Aksesskontroll aksesskontroll) {
         this.mottatteOpplysningerService = mottatteOpplysningerService;
+        this.ulikPeriodeUtleder = ulikPeriodeUtleder;
         this.aksesskontroll = aksesskontroll;
     }
 
@@ -36,7 +40,7 @@ public class MottatteOpplysningerController {
 
         boolean behandlingKanRedigeresAvSaksbehandler = aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandlingID);
         MottatteOpplysninger mottatteOpplysninger = mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(behandlingID, behandlingKanRedigeresAvSaksbehandler);
-        return ResponseEntity.ok(new MottatteOpplysningerGetDto(mottatteOpplysninger));
+        return ResponseEntity.ok(new MottatteOpplysningerGetDto(mottatteOpplysninger, ulikPeriodeUtleder.harUlikPeriode(mottatteOpplysninger)));
     }
 
     @PostMapping("/{behandlingID}")
@@ -47,7 +51,7 @@ public class MottatteOpplysningerController {
 
         aksesskontroll.autoriserSkriv(behandlingID);
         MottatteOpplysninger mottatteOpplysninger = mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandlingID, mottatteOpplysningerPostDto.getData());
-        return ResponseEntity.ok(new MottatteOpplysningerGetDto(mottatteOpplysninger));
+        return ResponseEntity.ok(new MottatteOpplysningerGetDto(mottatteOpplysninger, ulikPeriodeUtleder.harUlikPeriode(mottatteOpplysninger)));
     }
 
     @PostMapping("/{behandlingID}/periodeOgLand")

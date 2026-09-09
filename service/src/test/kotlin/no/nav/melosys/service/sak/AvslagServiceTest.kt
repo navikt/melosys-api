@@ -68,7 +68,7 @@ class AvslagServiceTest {
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(Behandlingsresultat())
         every { behandlingsresultatService.lagre(any()) } returnsArgument 0
         every { dokgenService.produserOgDistribuerBrev(any(), any()) }.returns(Unit)
-        every { fagsakService.avsluttFagsakOgBehandling(any(), any()) }.returns(Unit)
+        every { fagsakService.avsluttFagsakOgBehandling(any(), any(), any()) }.returns(Unit)
         every { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) }.returns(Unit)
 
 
@@ -77,7 +77,7 @@ class AvslagServiceTest {
 
         verify(exactly = 1) { behandlingsresultatService.lagre(capture(slotBehandlingsresultat)) }
         verify(exactly = 1) { dokgenService.produserOgDistribuerBrev(eq(1L), capture(slotBrevbestillingDto)) }
-        verify(exactly = 1) { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
+        verify(exactly = 1) { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, Saksstatuser.LOVVALG_AVKLART, SkjemaSaksstatusSynk.SYNKRONISER) }
         verify(exactly = 1) { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id) }
 
         slotBehandlingsresultat.captured.run {

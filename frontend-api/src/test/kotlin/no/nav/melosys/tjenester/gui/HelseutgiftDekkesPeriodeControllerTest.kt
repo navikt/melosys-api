@@ -157,7 +157,5 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
     }
 
     private inline fun <reified T> ResultActions.andExpectResponseBody(expectedObject: T): ResultActions =
-        this.apply {
-            responseBody(objectMapper).containsObjectAsJson(expectedObject, T::class.java)
-        }
+        andExpect(responseBody(objectMapper).containsObjectAsJson(expectedObject, T::class.java))
 }

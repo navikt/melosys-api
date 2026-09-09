@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
+import no.nav.melosys.tjenester.gui.dto.saksbehandling.KombinasjonstreNodeDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +49,19 @@ public class LovligeKombinasjonerSaksbehandlingController {
         return ResponseEntity.ok(lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstemaer(hovedpart, sakstype, saksnummer));
     }
 
+    @GetMapping("/kombinasjoner/tre")
+    @Operation(
+        summary = "Henter hele kombinasjonstreet sakstype -> sakstema -> behandlingstema",
+        description = "Saksuavhengig union over alle hovedparter og SED, levert som rene koder. Ett kall i stedet for "
+            + "ett per kombinasjon, for klienter som skal kaskadere over flere valg samtidig. Innholdet endrer seg kun ved "
+            + "deploy og kan caches deretter. Ikke ment for å avgjøre hva som er lovlig i én konkret sak."
+    )
+    public ResponseEntity<List<KombinasjonstreNodeDto>> hentKombinasjonstre() {
+        return ResponseEntity.ok(
+            lovligeKombinasjonerSaksbehandlingService.hentKombinasjonstre().stream().map(KombinasjonstreNodeDto::av).toList()
+        );
+    }
+
     @GetMapping("/behandlingstemaer/hent-lovlige-kombinasjoner")
     @Operation(summary = "Henter alle mulige behandlingstemaer basert på sakstype og sakstema", description = ("Henter alle mulige behandlingstemaer basert på sakstype og sakstema"))
     public ResponseEntity<Set<Behandlingstema>> hentAlleMuligeBehandlingstemaer(
@@ -60,18 +74,18 @@ public class LovligeKombinasjonerSaksbehandlingController {
         return ResponseEntity.ok(lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, aktivBehandlingID, sistBehandlingstema));
     }
 
-    @GetMapping("/behandlingstyper/kombinasjoner")
+    @GetMapping("/behandlingstyper/kombinasjoner-for-ny-sak")
     @Operation(
-        summary = "Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema",
-        description = ("Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema")
+        summary = "Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema for ny sak",
+        description = ("Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema for ny sak")
     )
-    public ResponseEntity<Set<Behandlingstyper>> hentAlleMuligeBehandlingstyper(
+    public ResponseEntity<Set<Behandlingstyper>> hentAlleMuligeBehandlingstyperForNySak(
         @RequestParam("hovedpart") Aktoersroller hovedpart,
         @RequestParam("sakstype") Sakstyper sakstype,
         @RequestParam("sakstema") Sakstemaer sakstema,
         @RequestParam(value = "behandlingstema", required = false) Behandlingstema behandlingstema
     ) {
-        return ResponseEntity.ok(lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema));
+        return ResponseEntity.ok(lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForNySak(hovedpart, sakstype, sakstema, behandlingstema));
     }
 
     @GetMapping("/{saksnummer}/behandlingstyper/kombinasjoner-for-endring")

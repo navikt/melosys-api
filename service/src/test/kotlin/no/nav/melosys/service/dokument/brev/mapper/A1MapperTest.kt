@@ -298,18 +298,6 @@ internal class A1MapperTest {
         }
 
         @Test
-        fun `CDM 4_3 - bruker med Kosovo som statsborgerskap skal vise tekst UNKNOWN`() {
-            val behandling = lagDefaultBehandling()
-            val behandlingsresultat = lagDefaultBehandlingsresultat()
-            val brevData = lagDefaultBrevData {
-                person = lagPersonopplysningerMedStatsborgerskap(listOf(Land.KOSOVO))
-            }
-            val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
-
-            a1.person.statsborgerskap shouldBe A1Mapper.UNKNOWN_TEKST
-        }
-
-        @Test
         fun `bruker med ukjent som statsborgerskap skal vise tekst UNKNOWN`() {
             val behandling = lagDefaultBehandling()
             val behandlingsresultat = lagDefaultBehandlingsresultat()
@@ -322,23 +310,10 @@ internal class A1MapperTest {
         }
 
         @Test
-        fun `CDM 4_3 - bruker med Kosovo og Norge som statsborgerskap skal fjerne Kosovo`() {
-            val behandling = lagDefaultBehandling()
-            val behandlingsresultat = lagDefaultBehandlingsresultat()
-            val brevData = lagDefaultBrevData {
-                person = lagPersonopplysningerMedStatsborgerskap(listOf(Land.KOSOVO, Land.NORGE))
-            }
-            val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
-
-            a1.person.statsborgerskap shouldBe "NO"
-        }
-
-        @Test
         fun `CDM 4_4 - bruker med kun Kosovo som statsborgerskap skal vise Kosovo-landkode`() {
             val behandling = lagDefaultBehandling()
             val behandlingsresultat = lagDefaultBehandlingsresultat()
             val brevData = lagDefaultBrevData {
-                erCdm44 = true
                 person = lagPersonopplysningerMedStatsborgerskap(listOf(Land.KOSOVO))
             }
             val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
@@ -351,7 +326,6 @@ internal class A1MapperTest {
             val behandling = lagDefaultBehandling()
             val behandlingsresultat = lagDefaultBehandlingsresultat()
             val brevData = lagDefaultBrevData {
-                erCdm44 = true
                 person = lagPersonopplysningerMedStatsborgerskap(listOf(Land.KOSOVO, Land.NORGE))
             }
             val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
@@ -364,7 +338,6 @@ internal class A1MapperTest {
             val behandling = lagDefaultBehandling()
             val behandlingsresultat = lagDefaultBehandlingsresultat()
             val brevData = lagDefaultBrevData {
-                erCdm44 = true
                 person = lagPersonopplysningerMedStatsborgerskap(listOf(Land.KOSOVO))
             }
             mapTilBrevXML(brevData, behandling, behandlingsresultat).shouldNotBeNull()

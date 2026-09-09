@@ -71,7 +71,7 @@ public class VideresendSoknadService {
         valider(behandling, bostedsland);
         validerDokumenterTilhørerSakOgTilgang(vedleggReferanser, fagsak);
 
-        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.VIDERESENDT);
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.VIDERESENDT, SkjemaSaksstatusSynk.SYNKRONISER);
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
 
         final Set<String> avklarteEessiMottakere = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(

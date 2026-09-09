@@ -577,12 +577,23 @@ class HentMuligeBrevmottakereServiceTest {
             navn = "PT Operations"
             postnummer = "123"
         }
-        every { utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID("GB:UK010") } returns utenlandskMyndighetGB
+        every {
+            utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(
+                "GB:UK010",
+                UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV
+            )
+        } returns utenlandskMyndighetGB
 
         val request = HentMuligeBrevmottakereService.RequestDto(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV, 123L, null, "GB:UK010")
 
         val muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(request)
 
+        verify {
+            utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(
+                "GB:UK010",
+                UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV
+            )
+        }
         verify(exactly = 0) { brevmottakerService.avklarMottaker(any(), any(), any()) }
         muligeMottakere.hovedMottaker().run {
             dokumentNavn shouldBe "Fritekstbrev"

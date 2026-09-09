@@ -66,6 +66,7 @@ public enum ProsessSteg {
     SOB_BEHANDLING_AVSLUTTET("SOB_BEHANDLING_AVSLUTTET", "Oppdaterer SOB (Sak Og Behandling) om avsluttet behandling"),
     @Deprecated
     SOB_BEHANDLING_OPPRETTET("SOB_BEHANDLING_OPPRETTET", "Oppdaterer SOB (Sak Og Behandling) om opprettet behandling"),
+    SYNK_SKJEMA_SAKSSTATUS("SYNK_SKJEMA_SAKSSTATUS", "Synkroniserer saksstatus til melosys-skjema-api"),
     @Deprecated
     UKJENT("UKJENT", "Ukjent steg"),
     UTPEKING_SEND_AVSLAG("UTPEKING_SEND_AVSLAG", "Send SED A004 til alle arbeidsland"),

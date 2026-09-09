@@ -1,10 +1,8 @@
 package no.nav.melosys.service.dokument.brev;
 
-import io.getunleash.Unleash;
 import no.nav.melosys.domain.eessi.A008Formaal;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.eessi.sed.UtpekingAvvisDto;
-import no.nav.melosys.featuretoggle.ToggleName;
 import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +69,7 @@ public class SedPdfData {
     }
 
     // Utfyller SedDataDto med fritekst og annen informasjon som ikke lagres strukturert i Melosys
-    public void utfyllSedDataDto(Unleash unleash, SedDataDto sedDataDto) {
+    public void utfyllSedDataDto(SedDataDto sedDataDto) {
 
         //OK å alltid sette denne. Blir ikke brukt med mindre A004-pdf skal produseres
         sedDataDto.setUtpekingAvvis(new UtpekingAvvisDto(
@@ -79,11 +77,9 @@ public class SedPdfData {
         ));
 
         sedDataDto.setYtterligereInformasjon(fritekst);
-        if (unleash.isEnabled(ToggleName.MELOSYS_CDM_4_4)) {
-            sedDataDto.setA008Formaal(a008Formaal);
-            if (erFjernarbeidTWFA != null) {
-                sedDataDto.setErFjernarbeidTWFA(erFjernarbeidTWFA);
-            }
+        sedDataDto.setA008Formaal(a008Formaal);
+        if (erFjernarbeidTWFA != null) {
+            sedDataDto.setErFjernarbeidTWFA(erFjernarbeidTWFA);
         }
     }
 }

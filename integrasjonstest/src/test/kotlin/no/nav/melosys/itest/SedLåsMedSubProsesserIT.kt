@@ -120,6 +120,7 @@ class SedLåsMedSubProsesserIT(
                     next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <a009Prosess>" }
                     next { it shouldBe "Melosys har opprettet prosessinstans <sub-prosess-1 av a009Prosess> av type MOTTAK_SED_JOURNALFØRING." }
                     next { it shouldBe "Melosys har opprettet prosessinstans <sub-prosess-2 av a009Prosess> av type MOTTAK_SED_JOURNALFØRING." }
+                    next { it shouldBe "Utfører steg SYNK_SKJEMA_SAKSSTATUS for prosessinstans <a009Prosess>" }
                     next { it shouldBe "Prosessinstans <a009Prosess> ferdig, sjekker om neste med låsreferanse:<a009Lås> kan startes" }
                     next { it shouldBe "Prosessinstans(er) på vent med samme gruppe-prefiks: [<sub-prosess-1 av a009Prosess>, <sub-prosess-2 av a009Prosess>, <x008Prosess>]" }
                     next { it shouldBe "Prosessinstans <sub-prosess-1 av a009Prosess> med låsreferanse <a009Lås> startes opp etter å ha vært på vent" }
@@ -133,6 +134,7 @@ class SedLåsMedSubProsesserIT(
                     next { it shouldBe "Prosessinstans <x008Prosess> med låsreferanse <x0008Lås> startes opp etter å ha vært på vent" }
                     next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <x008Prosess>" }
                     next { it shouldBe "Melosys har opprettet prosessinstans <sub-prosess av x008Prosess> av type REGISTRERING_UNNTAK_NY_SAK." }
+                    next { it shouldBe "Utfører steg SYNK_SKJEMA_SAKSSTATUS for prosessinstans <x008Prosess>" }
                     next { it shouldBe "Prosessinstans <x008Prosess> ferdig, sjekker om neste med låsreferanse:<x0008Lås> kan startes" }
                     next { it shouldBe "Prosessinstans(er) på vent med samme gruppe-prefiks: [<sub-prosess av x008Prosess>]" }
                     next { it shouldBe "Prosessinstans <sub-prosess av x008Prosess> med låsreferanse <x0008Lås> startes opp etter å ha vært på vent" }
@@ -186,6 +188,7 @@ class SedLåsMedSubProsesserIT(
                     next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <førsteProsess>" }
                     next { it shouldBe "Melosys har opprettet prosessinstans <sub-prosess-1 av førsteProsess> av type MOTTAK_SED_JOURNALFØRING." }
                     next { it shouldBe "Melosys har opprettet prosessinstans <sub-prosess-2 av førsteProsess> av type MOTTAK_SED_JOURNALFØRING." }
+                    next { it shouldBe "Utfører steg SYNK_SKJEMA_SAKSSTATUS for prosessinstans <førsteProsess>" }
                     next { it shouldBe "Prosessinstans <førsteProsess> ferdig, sjekker om neste med låsreferanse:<a009Lås> kan startes" }
                     next { it shouldBe "Prosessinstans(er) på vent med samme gruppe-prefiks: [<duplikatProsess>, <sub-prosess-1 av førsteProsess>, <sub-prosess-2 av førsteProsess>]" }
                     next { it shouldBe "Prosessinstans <sub-prosess-1 av førsteProsess> med låsreferanse <a009Lås> startes opp etter å ha vært på vent" }
@@ -200,6 +203,7 @@ class SedLåsMedSubProsesserIT(
                     next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <duplikatProsess>" }
                     next { it shouldBe "Melosys har opprettet prosessinstans <sub-prosess-1 av duplikatProsess> av type MOTTAK_SED_JOURNALFØRING." }
                     next { it shouldBe "Melosys har opprettet prosessinstans <sub-prosess-2 av duplikatProsess> av type MOTTAK_SED_JOURNALFØRING." }
+                    next { it shouldBe "Utfører steg SYNK_SKJEMA_SAKSSTATUS for prosessinstans <duplikatProsess>" }
                     next { it shouldBe "Prosessinstans <duplikatProsess> ferdig, sjekker om neste med låsreferanse:<a009Lås> kan startes" }
                     next { it shouldBe "Prosessinstans(er) på vent med samme gruppe-prefiks: [<sub-prosess-1 av duplikatProsess>, <sub-prosess-2 av duplikatProsess>]" }
                     next { it shouldBe "Prosessinstans <sub-prosess-1 av duplikatProsess> med låsreferanse <a009Lås> startes opp etter å ha vært på vent" }

@@ -14,8 +14,13 @@ data class TekstblokkOversiktDto(
     val innhold: String,
     val type: TekstblokkType,
     val tags: List<String>,
+    val sakstyper: List<String>,
+    val sakstemaer: List<String>,
+    val behandlingstemaer: List<String>,
+    val status: String,
     val endretDato: Instant,
     val endretAv: String,
+    val endretAvNavn: String?,
 ) {
     companion object {
         fun av(o: TekstblokkOversikt): TekstblokkOversiktDto = TekstblokkOversiktDto(
@@ -24,8 +29,13 @@ data class TekstblokkOversiktDto(
             innhold = o.innhold,
             type = o.type,
             tags = o.tags.sorted(),
+            sakstyper = o.sakstyper.map { it.kode }.sorted(),
+            sakstemaer = o.sakstemaer.map { it.kode }.sorted(),
+            behandlingstemaer = o.behandlingstemaer.map { it.kode }.sorted(),
+            status = o.status.name,
             endretDato = o.endretDato,
             endretAv = o.endretAv,
+            endretAvNavn = o.endretAvNavn,
         )
     }
 }

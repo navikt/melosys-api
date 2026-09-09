@@ -34,6 +34,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             }
         }
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(1L) } returns behandlingsresultat
 
 
         val result = årsavregningService.finnÅrsavregningForBehandling(1)
@@ -95,6 +96,8 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
         }
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(99L) } returns tidligereBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(1L) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(99L) } returns tidligereBehandlingsresultat
         every { fagsakService.hentFagsak("123456") } returns fagsak
 
         // Test expectations should match what lagTidligereBehandlingsresultat() creates
@@ -262,6 +265,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultatÅrsavregning1
         every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultatÅrsavregning2
         every { behandlingsresultatService.hentBehandlingsresultat(3L) } returns behandlingsresultatÅrsavregning3
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(2L) } returns behandlingsresultatÅrsavregning2
         every { fagsakService.hentFagsak("12345678") } returns fagsak
 
         // Hent årsavregning nr 2
@@ -320,6 +324,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
         val fagsak = behandlingsresultat.hentBehandling().fagsak
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(1L) } returns behandlingsresultat
         every { fagsakService.hentFagsak("12345678") } returns fagsak
 
 
@@ -406,6 +411,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(50L) } returns behandlingsresultatTidligereÅrsavregning
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(1L) } returns behandlingsresultat
         every { fagsakService.hentFagsak("12345678") } returns fagsak
 
         val result = årsavregningService.finnÅrsavregningForBehandling(1)
@@ -490,6 +496,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
         every { behandlingsresultatService.hentBehandlingsresultat(10L) } returns tidligBehandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(20L) } returns senBehandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(30L) } returns årsavregningBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(30L) } returns årsavregningBehandlingsresultat
         every { fagsakService.hentFagsak("123456") } returns fagsak
 
         val result = årsavregningService.finnÅrsavregningForBehandling(30L)

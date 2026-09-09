@@ -39,7 +39,7 @@ class AvslagService(
         behandlingsresultatService.lagre(behandlingsresultat)
 
         dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestillingDto(fritekst, bestillersId))
-        fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, Saksstatuser.LOVVALG_AVKLART)
+        fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, Saksstatuser.LOVVALG_AVKLART, SkjemaSaksstatusSynk.SYNKRONISER)
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id)
     }
 

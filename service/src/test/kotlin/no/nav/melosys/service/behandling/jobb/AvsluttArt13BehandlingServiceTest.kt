@@ -21,6 +21,7 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.medl.MedlPeriodeService
 import no.nav.melosys.service.sak.FagsakService
+import no.nav.melosys.service.sak.SkjemaSaksstatusSynk
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -58,7 +59,7 @@ class AvsluttArt13BehandlingServiceTest {
             behandlingsresultatService, medlPeriodeService, lovvalgsperiodeService
         )
 
-        every { fagsakService.avsluttFagsakOgBehandling(any(), any(), any()) } returns Unit
+        every { fagsakService.avsluttFagsakOgBehandling(any(), any<Behandling>(), any(), any()) } returns Unit
         every { medlPeriodeService.oppdaterPeriodeEndelig(any()) } returns Unit
     }
 
@@ -142,7 +143,7 @@ class AvsluttArt13BehandlingServiceTest {
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
 
 
-        verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any(), any()) }
+        verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any<Behandling>(), any(), any()) }
     }
 
     @Test
@@ -160,7 +161,7 @@ class AvsluttArt13BehandlingServiceTest {
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART, SkjemaSaksstatusSynk.SYNKRONISER) }
         verify { medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode) }
     }
 
@@ -201,7 +202,7 @@ class AvsluttArt13BehandlingServiceTest {
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART, SkjemaSaksstatusSynk.SYNKRONISER) }
         verify { medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode) }
     }
 
@@ -231,7 +232,7 @@ class AvsluttArt13BehandlingServiceTest {
 
 
         verify { lovvalgsperiodeService.lagreLovvalgsperioder(eq(behandlingID), any()) }
-        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART, SkjemaSaksstatusSynk.SYNKRONISER) }
         verify { medlPeriodeService.oppdaterPeriodeEndelig(any()) }
     }
 
@@ -252,7 +253,7 @@ class AvsluttArt13BehandlingServiceTest {
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
 
 
-        verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any(), any()) }
+        verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any<Behandling>(), any(), any()) }
         verify(exactly = 0) { medlPeriodeService.oppdaterPeriodeEndelig(any()) }
     }
 
@@ -273,7 +274,7 @@ class AvsluttArt13BehandlingServiceTest {
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART, SkjemaSaksstatusSynk.SYNKRONISER) }
         verify { medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode) }
     }
 
@@ -311,7 +312,7 @@ class AvsluttArt13BehandlingServiceTest {
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
 
 
-        verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any(), any()) }
+        verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any<Behandling>(), any(), any()) }
         verify(exactly = 0) { medlPeriodeService.oppdaterPeriodeEndelig(any()) }
     }
 
@@ -340,7 +341,7 @@ class AvsluttArt13BehandlingServiceTest {
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART, SkjemaSaksstatusSynk.SYNKRONISER) }
         verify { medlPeriodeService.oppdaterPeriodeEndelig(any()) }
     }
 
@@ -376,7 +377,7 @@ class AvsluttArt13BehandlingServiceTest {
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
 
 
-        verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any(), any()) }
+        verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any<Behandling>(), any(), any()) }
         verify(exactly = 0) { medlPeriodeService.oppdaterPeriodeEndelig(any()) }
     }
 
@@ -412,7 +413,7 @@ class AvsluttArt13BehandlingServiceTest {
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.LOVVALG_AVKLART, SkjemaSaksstatusSynk.SYNKRONISER) }
         verify { medlPeriodeService.oppdaterPeriodeEndelig(any()) }
     }
 

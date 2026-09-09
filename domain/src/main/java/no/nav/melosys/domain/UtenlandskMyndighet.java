@@ -24,6 +24,9 @@ public class UtenlandskMyndighet {
     @Column(name="gateadresse_2")
     private String gateadresse2;
 
+    @Column(name="gateadresse_3")
+    private String gateadresse3;
+
     private String postnummer;
 
     private String poststed;
@@ -67,7 +70,10 @@ public class UtenlandskMyndighet {
         if (gateadresse2 == null || gateadresse2.isEmpty()) {
             return gateadresse1;
         }
-        return "%s, %s".formatted(gateadresse1, gateadresse2);
+        if (gateadresse3 == null || gateadresse3.isEmpty()) {
+            return "%s, %s".formatted(gateadresse1, gateadresse2);
+        }
+        return "%s, %s, %s".formatted(gateadresse1, gateadresse2, gateadresse3);
     }
 
     public List<String> getGateadresseAsList() {
@@ -77,6 +83,9 @@ public class UtenlandskMyndighet {
         }
         if (gateadresse2 != null) {
             gateadresse.add(gateadresse2);
+        }
+        if (gateadresse3 != null) {
+            gateadresse.add(gateadresse3);
         }
         return gateadresse;
     }
@@ -119,6 +128,14 @@ public class UtenlandskMyndighet {
 
     public void setGateadresse2(String gateadresse2) {
         this.gateadresse2 = gateadresse2;
+    }
+
+    public String getGateadresse3() {
+        return gateadresse3;
+    }
+
+    public void setGateadresse3(String gateadresse3) {
+        this.gateadresse3 = gateadresse3;
     }
 
     public String getPostnummer() {

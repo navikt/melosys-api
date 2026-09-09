@@ -1,6 +1,7 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
 import mu.KotlinLogging
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
@@ -45,6 +46,25 @@ class ÅrsavregningService(
             .mapNotNull { it.årsavregning }
             .filter { aar == null || it.aar == aar }
     }
+
+    /** Sjekker om saken har en aktiv ÅRSAVREGNING-behandling for [år]. Behandlinger uten aarsavregning-rad telles ikke. */
+    @Transactional(readOnly = true)
+    fun harAktivÅrsavregningForÅr(saksnummer: String, år: Int): Boolean =
+        fagsakService.hentFagsak(saksnummer)
+            .hentAktiveÅrsavregninger()
+            .any { hentÅrFraÅrsavregningDefensivt(it) == år }
+
+    /** Returnerer null hvis behandlingen mangler aarsavregning-rad. Ekte feil propageres. */
+    private fun hentÅrFraÅrsavregningDefensivt(behandling: Behandling): Int? =
+        try {
+            behandlingsresultatService.hentBehandlingsresultat(behandling.id).hentÅrsavregning().aar
+        } catch (e: IllegalStateException) {
+            log.warn(e) {
+                "Kunne ikke hente år fra åpen ÅRSAVREGNING-behandling ${behandling.id} " +
+                    "(sak ${behandling.fagsak.saksnummer}) — antar ikke duplikat, ny ÅRSAVREGNING vil opprettes"
+            }
+            null
+        }
 
     @Transactional(readOnly = true)
     fun finnÅrsavregningForBehandling(behandlingID: Long): ÅrsavregningModel? {
@@ -170,7 +190,49 @@ class ÅrsavregningService(
             behandlingsresultatService.lagre(årsavregning.hentBehandlingsresultat).hentÅrsavregning()
         }
 
+        settEndeligAvgiftTilNullDersomIngenAvgiftspliktigPeriode(behandlingsresultat, årsavregning)
+
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
+    }
+
+    /**
+     * Når behandlingen ikke lenger har avgiftspliktige perioder som overlapper med årsavregningsåret
+     * (f.eks. en ny vurdering som avkorter medlemskapsperioden slik at hele året faller bort),
+     * er endelig trygdeavgift 0. Saksbehandler kan ikke kjøre beregnTrygdeavgift i dette tilfellet
+     * (validatoren blokkerer beregning uten avgiftspliktige perioder), så vi setter beløpet her.
+     * Da blir differansen en full kreditering av tidligere fakturert beløp, og vedtaksbrev/faktura
+     * kan produseres uten manuelle steg.
+     *
+     * Er året fjernet av en senere vurdering (tidligereBehandlingsresultat er en vurdering, ikke en årsavregning),
+     * overstyres også valg og manuelt beløp arvet fra en tidligere årsavregning for samme år: det som ble fastsatt
+     * sist gjelder ikke lenger når NAV ikke har noe krav for året (MELOSYS-8006). Finnes ingen slik vurdering
+     * (f.eks. sak med grunnlag kun fra Avgiftssystemet), beholdes et arvet manuelt beløp.
+     */
+    private fun settEndeligAvgiftTilNullDersomIngenAvgiftspliktigPeriode(
+        behandlingsresultat: Behandlingsresultat,
+        årsavregning: Årsavregning
+    ) {
+        if (behandlingsresultat.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(årsavregning.aar)) return
+
+        if (erÅretFjernetAvSenereVurdering(årsavregning)) {
+            årsavregning.endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
+            årsavregning.manueltAvgiftBeloep = null
+        } else if (årsavregning.manueltAvgiftBeloep != null) {
+            return
+        }
+
+        årsavregning.beregnetAvgiftBelop = BigDecimal.ZERO
+        årsavregning.beregnTilFaktureringsBeloep()
+    }
+
+    /**
+     * Året er fjernet når siste vurdering med avgiftspliktige perioder er en vanlig vurdering (ikke en årsavregning)
+     * og den ikke lenger dekker året. Skiller «ny vurdering avkortet bort året» fra «saken har aldri hatt grunnlag i Melosys».
+     */
+    private fun erÅretFjernetAvSenereVurdering(årsavregning: Årsavregning): Boolean {
+        val sisteVurdering = årsavregning.tidligereBehandlingsresultat ?: return false
+        return sisteVurdering.behandling?.erÅrsavregning() == false
+            && !sisteVurdering.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(årsavregning.aar)
     }
 
     fun hentSisteÅrsavregning(saksnummer: String, år: Int, førVedtaksdato: Instant? = null): Årsavregning? {
@@ -252,6 +314,11 @@ class ÅrsavregningService(
             }
         }
 
+        // Året kan være fjernet av en senere vurdering; da skal endelig avgift fortsatt være 0 etter nullstillingen over
+        if (erÅretFjernetAvSenereVurdering(årsavregning)) {
+            settEndeligAvgiftTilNullDersomIngenAvgiftspliktigPeriode(behandlingsresultat, årsavregning)
+        }
+
         behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
     }
@@ -262,7 +329,7 @@ class ÅrsavregningService(
         gjelderÅr: Int
     ) {
         for (medlemskapsperiodeOriginal in tidligereBehandlingsresultat.medlemskapsperioder) {
-            if (medlemskapsperiodeOriginal.overlapperMedÅr(gjelderÅr)) {
+            if (medlemskapsperiodeOriginal.erInnvilget() && medlemskapsperiodeOriginal.overlapperMedÅr(gjelderÅr)) {
                 val medlemskapsperiodeReplika = BeanUtils.cloneBean(medlemskapsperiodeOriginal) as Medlemskapsperiode
                 medlemskapsperiodeReplika.behandlingsresultat = behandlingsresultat
                 medlemskapsperiodeReplika.trygdeavgiftsperioder = HashSet()
@@ -311,26 +378,29 @@ class ÅrsavregningService(
     private fun lagÅrsavregningModelFraÅrsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
         val år = årsavregning.aar
 
-        val vedtaksDato = årsavregning.behandlingsresultat?.vedtakMetadata?.vedtaksdato
+        // Laster med EntityGraph for å inkludere grunnlagListe på trygdeavgiftsperiodene.
+        val behandlingsresultatMedGrunnlag = behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(årsavregning.hentBehandlingsresultat.hentBehandling().id)
+        val saksnummer = behandlingsresultatMedGrunnlag.hentBehandling().fagsak.saksnummer
+        val vedtaksDato = behandlingsresultatMedGrunnlag.vedtakMetadata?.vedtaksdato
 
-        val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.hentBehandlingsresultat.hentBehandling().fagsak.saksnummer, år, vedtaksDato)
+        val sisteÅrsavregning = hentSisteÅrsavregning(saksnummer, år, vedtaksDato)
 
         return ÅrsavregningModel(
             årsavregningID = årsavregning.id,
             år = år,
             tidligereTrygdeavgiftsGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(
                 år,
-                årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer,
+                saksnummer,
                 vedtaksDato
             ),
             sisteGjeldendeAvgiftspliktigPerioder = hentSisteGjeldendeAvgiftspliktigePerioder(
                 år,
-                årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer,
+                saksnummer,
                 vedtaksDato
             ),
-            tidligereAvgift = hentTidligereAvgift(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer, vedtaksDato),
+            tidligereAvgift = hentTidligereAvgift(år, saksnummer, vedtaksDato),
             nyttTrygdeavgiftsGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
-            endeligAvgift = årsavregning.hentBehandlingsresultat.trygdeavgiftsperioder.toList(),
+            endeligAvgift = behandlingsresultatMedGrunnlag.trygdeavgiftsperioder.toList(),
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
             beregnetAvgiftBelop = årsavregning.beregnetAvgiftBelop,
             tilFaktureringBeloep = årsavregning.tilFaktureringBeloep,
@@ -372,7 +442,8 @@ class ÅrsavregningService(
         val behandlingsresultattyper = listOf(
             Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT,
             Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
-            Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+            Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
+            Behandlingsresultattyper.DELVIS_OPPHØRT
         )
 
         // Alle relevante avsluttede behandlinger, uten periodekrav
@@ -488,8 +559,10 @@ class ÅrsavregningService(
 
         val sisteRelevanteBehandlinger = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år, førVedtaksdato)
 
-        val behandlingsresultat = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
+        val behandlingsresultatId = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift?.id
             ?: return emptyList()
+
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(behandlingsresultatId)
 
         return behandlingsresultat.trygdeavgiftsperioder.filter { it.overlapperMedÅr(år) }
     }

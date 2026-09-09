@@ -37,9 +37,6 @@ import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments.argumentSet
-import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.core.KafkaTemplate
@@ -462,11 +459,8 @@ class SedMottakTestIT(
             )
     }
 
-    @ParameterizedTest(name = "{argumentSetName} - {0}")
-    @MethodSource("toggleMedForventetdResultatForA003SendBrev")
-    fun `Motta A003, godkjenne med A012, ugyldiggjøre godkjenning A012 med X008 for så å sende en A004`(forventedeProsessTyper: Pair<Boolean, Map<ProsessType, Int>>) {
-        if (forventedeProsessTyper.first) fakeUnleash.enableAll() else fakeUnleash.disableAll()
-
+    @Test
+    fun `Motta A003, godkjenne med A012, ugyldiggjøre godkjenning A012 med X008 for så å sende en A004`() {
         val utstedtA1MeldingCapturingSlot = slot<UtstedtA1Melding>()
         every { utstedtA1AivenProducer.produserMelding(capture(utstedtA1MeldingCapturingSlot)) } returns mockk<UtstedtA1Melding>()
 
@@ -548,7 +542,11 @@ class SedMottakTestIT(
         )
 
         val vedtaksProsessInstans = prosessinstansTestManager.executeAndWait(
-            forventedeProsessTyper.second
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_EOS to 1,
+                ProsessType.SEND_BREV to 3,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 2
+            )
         ) {
             vedtaksfattingFasade.fattVedtak(
                 prosessinstanserSortert.get(1).hentBehandling.id, FattVedtakRequest.Builder()
@@ -604,11 +602,8 @@ class SedMottakTestIT(
         )
     }
 
-    @ParameterizedTest
-    @MethodSource("toggleMedForventetdResultatForA003SendBrev")
-    fun `Motta A003, avvise med A004, ugyldiggjøre avvisning A004 med X008 for så å sende en A012`(forventedeProsessTyper: Pair<Boolean, Map<ProsessType, Int>>) {
-        if (forventedeProsessTyper.first) fakeUnleash.enableAll() else fakeUnleash.disableAll()
-
+    @Test
+    fun `Motta A003, avvise med A004, ugyldiggjøre avvisning A004 med X008 for så å sende en A012`() {
         val utstedtA1MeldingCapturingSlot = slot<UtstedtA1Melding>()
         every { utstedtA1AivenProducer.produserMelding(capture(utstedtA1MeldingCapturingSlot)) } returns mockk<UtstedtA1Melding>()
 
@@ -718,7 +713,11 @@ class SedMottakTestIT(
         )
 
         val vedtaksProsessInstans = prosessinstansTestManager.executeAndWait(
-            forventedeProsessTyper.second
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_EOS to 1,
+                ProsessType.SEND_BREV to 3,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 2
+            )
         ) {
             vedtaksfattingFasade.fattVedtak(
                 opprettNyVurderingProsessinstans.hentBehandling.id, FattVedtakRequest.Builder()
@@ -818,26 +817,5 @@ class SedMottakTestIT(
                     .type shouldBe Behandlingsresultattyper.IKKE_FASTSATT
             }
 
-    }
-
-    companion object {
-        @JvmStatic
-        fun toggleMedForventetdResultatForA003SendBrev() = listOf(
-            argumentSet(
-                "toggle på", true to mapOf(
-                    ProsessType.IVERKSETT_VEDTAK_EOS to 1,
-                    ProsessType.SEND_BREV to 3,
-                    ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 2
-                )
-            ),
-            argumentSet(
-                "toggle av",
-                false to mapOf(
-                    ProsessType.IVERKSETT_VEDTAK_EOS to 1,
-                    ProsessType.SEND_BREV to 2,
-                    ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
-                )
-            )
-        )
     }
 }

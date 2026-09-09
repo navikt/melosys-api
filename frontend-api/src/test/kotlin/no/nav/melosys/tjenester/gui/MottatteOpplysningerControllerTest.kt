@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
+import no.nav.melosys.service.soknad.UlikPeriodeUtleder
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.mottatteopplysninger.PeriodeOgLandPostDto
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer
@@ -40,6 +41,9 @@ class MottatteOpplysningerControllerTest {
     @MockkBean
     private lateinit var aksesskontroll: Aksesskontroll
 
+    @MockkBean
+    private lateinit var ulikPeriodeUtleder: UlikPeriodeUtleder
+
     @Autowired
     private lateinit var mockMvc: MockMvc
 
@@ -61,6 +65,7 @@ class MottatteOpplysningerControllerTest {
             .randomize(named("typeFlyvninger")) { EnumRandomizer(Flyvningstyper::class.java).randomValue }
             .randomize(named("uuid")) { UUID.randomUUID().toString() }
         )
+        every { ulikPeriodeUtleder.harUlikPeriode(any()) } returns false
     }
 
     @Test

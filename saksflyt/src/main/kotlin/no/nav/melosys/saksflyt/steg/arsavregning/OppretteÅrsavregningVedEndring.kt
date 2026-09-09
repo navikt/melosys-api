@@ -8,7 +8,6 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.featuretoggle.ToggleName
@@ -146,12 +145,7 @@ class OppretteÅrsavregningVedEndring(
     ) {
         potensielleÅrsavregningÅr.forEach { potensieltÅr ->
             val harAktivÅrsavregningforÅr =
-                årsavregningService.finnÅrsavregningerPåFagsak(
-                    behandling.fagsak.saksnummer,
-                    potensieltÅr,
-                    Behandlingsresultattyper.IKKE_FASTSATT
-                )
-                    .isNotEmpty()
+                årsavregningService.harAktivÅrsavregningForÅr(behandling.fagsak.saksnummer, potensieltÅr)
             if (!harAktivÅrsavregningforÅr) {
                 log.info("Oppretter årsavregningsbehandling for år $potensieltÅr på saksnummer ${behandling.fagsak.saksnummer} basert på behandling ${behandling.id}")
                 prosessInstansService.opprettArsavregningsBehandlingProsessflyt(
