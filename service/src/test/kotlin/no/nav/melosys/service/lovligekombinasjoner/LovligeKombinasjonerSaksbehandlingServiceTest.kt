@@ -964,6 +964,30 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak EU_EØS MEDLEMSKAP_LOVVALG returnerer IKKE Årsavregning når saken ikke har en tjenesteperson-behandling`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_TJENESTEPERSON)
+
+        val behandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG) {
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            fagsak {
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+        }
+        every { fagsakService.hentFagsak(behandling.fagsak.saksnummer) } returns behandling.fagsak
+
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            behandling.fagsak.saksnummer,
+            Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+        )
+
+
+        muligeTyper shouldNotContain Behandlingstyper.ÅRSAVREGNING
+    }
+
+    @Test
     fun hentMuligeBehandlingstemaer_hovedpartVIRKSOMHETIkkeTrygdeavgift_skalReturnereBehandlingsTemaVIRKSOMHET() {
         val behandlingstemas = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(
             Aktoersroller.VIRKSOMHET,

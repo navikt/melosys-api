@@ -364,7 +364,7 @@ class ÅrsavregningService(
         gjelderÅr: Int
     ) {
         tidligereBehandlingsresultat.lovvalgsperioder
-            .filter { it.overlapperMedÅr(gjelderÅr) }
+            .filter { it.erInnvilget() && it.overlapperMedÅr(gjelderÅr) }
             .forEach { originalPeriode ->
                 val replika = BeanUtils.cloneBean(originalPeriode) as Lovvalgsperiode
                 replika.id = null
@@ -574,15 +574,18 @@ class ÅrsavregningService(
         ) {
             return null
         }
+        val år = årsavregning.aar
         return Trygdeavgiftsgrunnlag(
-            avgiftspliktigperioder = behandlingsresultat.finnAvgiftspliktigPerioder().map {
-                when (it) {
-                    is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(it)
-                    is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(it)
-                    is Lovvalgsperiode -> LovvalgsperiodeForAvgift(it)
-                    else -> throw FunksjonellException("Ukjent periodetype: ${it.javaClass.simpleName}")
-                }
-            },
+            avgiftspliktigperioder = behandlingsresultat.finnAvgiftspliktigPerioder()
+                .filter { it.erInnvilget() && it.overlapperMedÅr(år) }
+                .map {
+                    when (it) {
+                        is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(it)
+                        is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(it)
+                        is Lovvalgsperiode -> LovvalgsperiodeForAvgift(år, it)
+                        else -> throw FunksjonellException("Ukjent periodetype: ${it.javaClass.simpleName}")
+                    }
+                },
             skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().map(::SkatteforholdTilNorgeForAvgift),
             innteksperioder = behandlingsresultat.hentInntektsperioder().map(::InntektsperioderForAvgift)
         )
@@ -657,8 +660,10 @@ private fun avkortFraOgMedDatoForÅr(gjelderÅr: Int, fom: LocalDate): LocalDate
 } else fom
 
 private fun avkortTilOgMedDatoForÅr(gjelderÅr: Int, tom: LocalDate): LocalDate = if (tom.year > gjelderÅr) {
-    LocalDate.of(gjelderÅr, 12, 31)
+    sisteDagIÅret(gjelderÅr)
 } else tom
+
+private fun sisteDagIÅret(år: Int): LocalDate = LocalDate.of(år, 12, 31)
 
 data class MedlemskapsperiodeForAvgift(
     override val fom: LocalDate,
@@ -709,7 +714,8 @@ data class LovvalgsperiodeForAvgift(
 
     constructor(gjeldendeÅr: Int, lovvalgsperiode: Lovvalgsperiode) : this(
         fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, lovvalgsperiode.hentFom()),
-        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, lovvalgsperiode.hentTom()),
+        // En løpende lovvalgsperiode varer ut årsavregningsåret.
+        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, lovvalgsperiode.getTom() ?: sisteDagIÅret(gjeldendeÅr)),
         dekning = lovvalgsperiode.hentTrygdedekning(),
         bestemmelse = lovvalgsperiode.hentBestemmelse(),
         medlemskapstyper = lovvalgsperiode.hentMedlemskapstype(),

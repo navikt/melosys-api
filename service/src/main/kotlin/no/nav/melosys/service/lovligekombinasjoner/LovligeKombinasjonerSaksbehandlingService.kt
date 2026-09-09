@@ -228,6 +228,7 @@ class LovligeKombinasjonerSaksbehandlingService(
             && fagsak.type == Sakstyper.EU_EOS
             && fagsak.tema == Sakstemaer.MEDLEMSKAP_LOVVALG
             && behandlingstema == Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+            && fagsak.behandlinger.any { it.tema == Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY }
         ) {
             behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
         }

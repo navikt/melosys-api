@@ -197,7 +197,6 @@ class ÅrsavregningVedtakMapper(
                 is MedlemskapsperiodeForAvgift -> it.medlemskapstyper == Medlemskapstyper.PLIKTIG
                 is HelseutgiftDekkesPeriodeForAvgift -> it.medlemskapstype == Medlemskapstyper.PLIKTIG
                 is LovvalgsperiodeForAvgift -> it.medlemskapstyper == Medlemskapstyper.PLIKTIG
-                else -> throw FunksjonellException("Ukjent periodetype: ${it.javaClass.simpleName}")
             } } == true
     }
 }

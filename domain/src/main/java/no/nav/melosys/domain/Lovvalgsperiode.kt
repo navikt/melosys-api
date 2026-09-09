@@ -198,7 +198,8 @@ class Lovvalgsperiode : PeriodeOmLovvalg, AvgiftspliktigPeriode {
 
 
     fun avkortTomDato(gjelderÅr: Int) {
-        if (this.overlapperMedÅr(gjelderÅr) && this.hentTom().year > gjelderÅr) {
+        val tomDato = this.tom
+        if (this.overlapperMedÅr(gjelderÅr) && (tomDato == null || tomDato.year > gjelderÅr)) {
             this.tom = LocalDate.of(gjelderÅr, 12, 31)
         }
     }

@@ -244,8 +244,6 @@ class ÅrsavregningController(
                 medlemskapstype = periode.medlemskapstyper,
                 type = periode.type
             )
-
-            else -> throw IllegalArgumentException("Ukjent type for siste gjeldende avgiftspliktig periode")
         }
 
     private fun mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag?) =
