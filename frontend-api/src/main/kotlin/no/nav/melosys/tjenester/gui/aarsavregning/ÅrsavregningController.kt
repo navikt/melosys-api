@@ -212,7 +212,7 @@ class ÅrsavregningController(
 
     private fun mapTilAvgiftspliktigPeriodeDto(periode: AvgiftsperiodeForAvgift): AvgiftspliktigPeriodeDto =
         when (periode) {
-            is MedlemskapsperiodeForAvgift -> AvgiftspliktigPeriodeDto(
+            is AvgiftsperiodeMedBestemmelse -> AvgiftspliktigPeriodeDto(
                 id = 0,
                 fomDato = periode.fom,
                 tomDato = periode.tom,
@@ -231,17 +231,6 @@ class ÅrsavregningController(
                 innvilgelsesResultat = null,
                 trygdedekning = null,
                 medlemskapstype = null,
-                type = periode.type
-            )
-
-            is LovvalgsperiodeForAvgift -> AvgiftspliktigPeriodeDto(
-                id = 0,
-                fomDato = periode.fom,
-                tomDato = periode.tom,
-                bestemmelse = periode.bestemmelse,
-                innvilgelsesResultat = periode.innvilgelsesresultat,
-                trygdedekning = periode.dekning,
-                medlemskapstype = periode.medlemskapstyper,
                 type = periode.type
             )
         }

@@ -194,9 +194,8 @@ class ÅrsavregningVedtakMapper(
     private fun harPliktigMedlemskap(avgiftspliktigPerioder: List<AvgiftsperiodeForAvgift>?): Boolean {
         return avgiftspliktigPerioder?.takeIf { it.isNotEmpty() }
             ?.all { when (it) {
-                is MedlemskapsperiodeForAvgift -> it.medlemskapstyper == Medlemskapstyper.PLIKTIG
+                is AvgiftsperiodeMedBestemmelse -> it.medlemskapstyper == Medlemskapstyper.PLIKTIG
                 is HelseutgiftDekkesPeriodeForAvgift -> it.medlemskapstype == Medlemskapstyper.PLIKTIG
-                is LovvalgsperiodeForAvgift -> it.medlemskapstyper == Medlemskapstyper.PLIKTIG
             } } == true
     }
 }

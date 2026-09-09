@@ -676,11 +676,11 @@ data class MedlemskapsperiodeForAvgift(
     override val fom: LocalDate,
     override val tom: LocalDate,
     override val dekning: Trygdedekninger,
-    val bestemmelse: Bestemmelse,
-    val medlemskapstyper: Medlemskapstyper,
-    val innvilgelsesresultat: InnvilgelsesResultat,
+    override val bestemmelse: Bestemmelse,
+    override val medlemskapstyper: Medlemskapstyper,
+    override val innvilgelsesresultat: InnvilgelsesResultat,
     override val type: AvgiftsperiodeForAvgiftType = AvgiftsperiodeForAvgiftType.MEDLEMSKAPSPERIODE,
-) : AvgiftsperiodeForAvgift {
+) : AvgiftsperiodeMedBestemmelse {
     constructor(medlemskapsperiode: Medlemskapsperiode) : this(
         fom = medlemskapsperiode.hentFom(),
         tom = medlemskapsperiode.hentTom(),
@@ -705,11 +705,11 @@ data class LovvalgsperiodeForAvgift(
     override val fom: LocalDate,
     override val tom: LocalDate,
     override val dekning: Trygdedekninger,
-    val bestemmelse: Bestemmelse,
-    val medlemskapstyper: Medlemskapstyper,
-    val innvilgelsesresultat: InnvilgelsesResultat,
+    override val bestemmelse: Bestemmelse,
+    override val medlemskapstyper: Medlemskapstyper,
+    override val innvilgelsesresultat: InnvilgelsesResultat,
     override val type: AvgiftsperiodeForAvgiftType = AvgiftsperiodeForAvgiftType.LOVVALGSPERIODE,
-) : AvgiftsperiodeForAvgift {
+) : AvgiftsperiodeMedBestemmelse {
     constructor(lovvalgsperiode: Lovvalgsperiode) : this(
         fom = lovvalgsperiode.hentFom(),
         tom = lovvalgsperiode.hentTom(),
@@ -742,6 +742,13 @@ sealed interface AvgiftsperiodeForAvgift {
     val tom: LocalDate?
     val dekning: Trygdedekninger?
     val type: AvgiftsperiodeForAvgiftType
+}
+
+// Medlemskaps- og lovvalgsperioder er vurdert etter en bestemmelse; helseutgiftperioder er ikke det.
+sealed interface AvgiftsperiodeMedBestemmelse : AvgiftsperiodeForAvgift {
+    val bestemmelse: Bestemmelse
+    val medlemskapstyper: Medlemskapstyper
+    val innvilgelsesresultat: InnvilgelsesResultat
 }
 
 data class HelseutgiftDekkesPeriodeForAvgift(
