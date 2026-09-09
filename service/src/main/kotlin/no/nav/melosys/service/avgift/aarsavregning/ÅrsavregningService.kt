@@ -82,9 +82,9 @@ class ÅrsavregningService(
 
     /**
      * Resetter eksisterende årsavregning dersom behandlingsresultatet er IKKE_FASTSATT.
-     * Dette resetter all data saksbehandler har lagt inn på årsavregningen, og oppdaterer grunnlag
-     * til siste innvilgede avgiftspliktige periode (medlemskap, helseutgift eller lovvalg) med
-     * avgiftsgrunnlag for det aktuelle året.
+     * Dette resetter all data saksbehandler har lagt inn på årsavregningen, og henter grunnlaget på
+     * nytt fra siste avsluttede behandling med avgiftspliktige perioder for året. Finnes ingen slik
+     * behandling, beholdes grunnlaget uendret.
      */
     @Transactional
     fun resetEksisterendeÅrsavregning(behandlingID: Long): ÅrsavregningModel? {
@@ -159,7 +159,7 @@ class ÅrsavregningService(
 
                 is Lovvalgsperiode -> {
                     // Ryddes her, ikke sammen med de andre periodetypene over: uten en kilde å replikere
-                    // fra ville en tømt liste gitt full kreditering i stedet for uendret grunnlag.
+                    // fra ville en tømt liste satt endelig avgift til 0.
                     behandlingsresultat.clearLovvalgsperioder()
                     replikerLovvalgsPeriode(
                         behandlingsresultat,
