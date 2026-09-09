@@ -145,11 +145,11 @@ class ReplikerBehandlingsresultatService(
     }
 
     /**
-     * Tømmer behandlingsresultatet og gjenoppretter det til utgangspunktet fra opprinnelig behandling,
-     * for å unngå at det blir stående med stale data fra en tidligere tilstand (f.eks. medlemskapsperioder
-     * satt av et tidligere valg). Gjenoppretting fra opprinnelig behandling gjøres kun for
-     * MANGLENDE_INNBETALING_TRYGDEAVGIFT-behandlinger, jf. [gjenopprettBehandlingsresultatTilUtgangspunkt];
-     * for andre behandlingstyper tømmes behandlingsresultatet uten videre gjenoppretting.
+     * Tømmer behandlingsresultatet, og gjenoppretter det deretter fra opprinnelig behandling
+     * dersom behandlingen er av type MANGLENDE_INNBETALING_TRYGDEAVGIFT.
+     *
+     * Tømmingen skal hindre at resultatet blir stående med utdaterte data fra en tidligere
+     * tilstand (for eksempel medlemskapsperioder satt av et tidligere valg).
      */
     @Transactional(rollbackFor = [Exception::class])
     fun tilbakestillBehandlingsresultat(behandlingID: Long) {

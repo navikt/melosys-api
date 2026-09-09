@@ -3,6 +3,8 @@ package no.nav.melosys.service.avklartefakta
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper.MANGLENDE_INNBETALING_HANDLINGSVALG
 import no.nav.melosys.domain.kodeverk.ManglendeInnbetalingHandlingsvalg
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.ReplikerBehandlingsresultatService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -11,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 class ManglendeInnbetalingHandlingsvalgService(
     private val avklartefaktaService: AvklartefaktaService,
     private val replikerBehandlingsresultatService: ReplikerBehandlingsresultatService,
+    private val behandlingsresultatService: BehandlingsresultatService,
 ) {
 
     fun hentFullstendigManglendeInnbetaling(behandlingID: Long): Boolean? {
@@ -38,6 +41,14 @@ class ManglendeInnbetalingHandlingsvalgService(
 
     @Transactional
     fun lagreManglendeInnbetalingHandlingsvalgSomAvklartFakta(behandlingID: Long, manglendeInnbetalingHandlingsvalg: ManglendeInnbetalingHandlingsvalg) {
+        val behandling = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentBehandling()
+        if (!behandling.erManglendeInnbetalingTrygdeavgift()) {
+            throw FunksjonellException(
+                "Kan ikke lagre manglende innbetaling handlingsvalg for behandling $behandlingID, " +
+                    "da behandlingen ikke er av type MANGLENDE_INNBETALING_TRYGDEAVGIFT"
+            )
+        }
+
         if (hentManglendeInnbetalingHandlingsvalg(behandlingID) == manglendeInnbetalingHandlingsvalg) return
 
         replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(behandlingID)

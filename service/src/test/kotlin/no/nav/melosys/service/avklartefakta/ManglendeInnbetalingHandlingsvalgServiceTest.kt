@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avklartefakta
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.nulls.shouldBeNull
@@ -16,8 +17,10 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
 import no.nav.melosys.domain.kodeverk.ManglendeInnbetalingHandlingsvalg
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.AvklarteFaktaRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.ReplikerBehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -39,6 +42,9 @@ class ManglendeInnbetalingHandlingsvalgServiceTest {
     @MockK(relaxed = true)
     private lateinit var replikerBehandlingsresultatService: ReplikerBehandlingsresultatService
 
+    @MockK(relaxed = true)
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
+
     private val slotAvklartefakta = slot<Avklartefakta>()
 
     private lateinit var avklartefaktaService: AvklartefaktaService
@@ -48,8 +54,13 @@ class ManglendeInnbetalingHandlingsvalgServiceTest {
     fun setUp() {
         avklartefaktaService = AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, avklartefaktaDtoKonverterer)
         manglendeInnbetalingHandlingsvalgService = ManglendeInnbetalingHandlingsvalgService(
-            avklartefaktaService, replikerBehandlingsresultatService
+            avklartefaktaService, replikerBehandlingsresultatService, behandlingsresultatService
         )
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns Behandlingsresultat().apply {
+            behandling = mockk<Behandling>(relaxed = true) {
+                every { erManglendeInnbetalingTrygdeavgift() } returns true
+            }
+        }
     }
 
     @Test
@@ -148,6 +159,24 @@ class ManglendeInnbetalingHandlingsvalgServiceTest {
         manglendeInnbetalingHandlingsvalgService.lagreManglendeInnbetalingHandlingsvalgSomAvklartFakta(
             1L, ManglendeInnbetalingHandlingsvalg.HELE_PERIODEN_OPPHØRES
         )
+
+        verify(exactly = 0) { replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(any()) }
+        verify(exactly = 0) { avklarteFaktaRepository.save(any()) }
+    }
+
+    @Test
+    fun lagreManglendeInnbetalingHandlingsvalgSomAvklartFakta_feilBehandlingstype_kasterFunksjonellException() {
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat().apply {
+            behandling = mockk<Behandling>(relaxed = true) {
+                every { erManglendeInnbetalingTrygdeavgift() } returns false
+            }
+        }
+
+        shouldThrow<FunksjonellException> {
+            manglendeInnbetalingHandlingsvalgService.lagreManglendeInnbetalingHandlingsvalgSomAvklartFakta(
+                1L, ManglendeInnbetalingHandlingsvalg.HELE_PERIODEN_OPPHØRES
+            )
+        }
 
         verify(exactly = 0) { replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(any()) }
         verify(exactly = 0) { avklarteFaktaRepository.save(any()) }
