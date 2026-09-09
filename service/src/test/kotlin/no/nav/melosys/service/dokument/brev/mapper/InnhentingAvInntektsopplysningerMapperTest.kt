@@ -100,6 +100,49 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
     }
 
     @Test
+    fun `hent inntektsopplysninger for årsavregning bruker seneste sluttdato når periodene overlapper`() {
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns Behandlingsresultat.forTest {
+            behandling {
+                id = 1L
+                fagsak {
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                }
+                tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+            }
+            årsavregning { aar = 2023 }
+            lovvalgsperiode {
+                fom = LocalDate.of(2023, 1, 1)
+                tom = null
+                dekning = Trygdedekninger.FULL_DEKNING
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B
+            }
+            lovvalgsperiode {
+                fom = LocalDate.of(2023, 3, 1)
+                tom = LocalDate.of(2023, 6, 30)
+                dekning = Trygdedekninger.FULL_DEKNING
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B
+            }
+        }
+
+        val personDokument = personDokumentForTest { sammensattNavn = "Hei Test" }
+
+        val brevbestilling =
+            InnhentingAvInntektsopplysningerBrevbestilling.Builder()
+                .medBehandling(lagBehandlingEøsTjenesteperson())
+                .medPersonDokument(personDokument)
+                .medPersonMottaker(personDokument)
+                .build()
+
+        innhentingAvInntektsopplysningerMapper.map(brevbestilling).run {
+            medlemskapsperiodeFom.shouldBe(LocalDate.of(2023, 1, 1))
+            medlemskapsperiodeTom.shouldBe(LocalDate.of(2023, 12, 31))
+        }
+    }
+
+    @Test
     fun `hent inntektsopplysninger for årsavregning skal kaste feil når årsavregning er null`() {
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns Behandlingsresultat.forTest { }
 

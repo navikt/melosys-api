@@ -130,6 +130,7 @@ class ÅrsavregningService(
             behandlingsresultat.årsavregning = null
             behandlingsresultat.medlemskapsperioder.clear()
             behandlingsresultat.clearHelseutgiftDekkesPerioder()
+            behandlingsresultat.clearLovvalgsperioder()
             behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         }
 

@@ -251,6 +251,45 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
     }
 
     @Test
+    fun `finnÅrsavregning for EØS tjenesteperson tar med kun perioder i årsavregningsåret og avkorter dem`() {
+        val fagsak = Fagsak.forTest {
+            saksnummer = "123456"
+            type = Sakstyper.EU_EOS
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        }
+
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            behandling {
+                id = 1L
+                type = Behandlingstyper.ÅRSAVREGNING
+                tema = no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+                this.fagsak = fagsak
+            }
+            årsavregning {
+                id = 112
+                aar = 2023
+            }
+            lovvalgsperiode("2021-01-01", "2021-12-31")
+            lovvalgsperiode("2022-05-01", "2024-08-31")
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+        every { fagsakService.hentFagsak("123456") } returns fagsak
+
+
+        val resultat = årsavregningService.finnÅrsavregningForBehandling(1)
+
+
+        resultat.shouldNotBeNull().nyttTrygdeavgiftsGrunnlag.shouldNotBeNull().run {
+            avgiftspliktigperioder.shouldHaveSize(1)
+            avgiftspliktigperioder.single().run {
+                fom shouldBe LocalDate.of(2023, 1, 1)
+                tom shouldBe LocalDate.of(2023, 12, 31)
+            }
+        }
+    }
+
+    @Test
     fun `finnÅrsavregning nr 2 av 3 årsavregninger på samme år - skal hente data fra nr 1 basert på vedtaksdato`() {
         // Årsavregning nr 1 - vedtatt først (10 dager siden)
         val behandlingsresultatÅrsavregning1 = Behandlingsresultat.forTest {
