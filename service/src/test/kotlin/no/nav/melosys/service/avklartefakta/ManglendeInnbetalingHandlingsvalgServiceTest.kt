@@ -20,7 +20,7 @@ import no.nav.melosys.domain.kodeverk.ManglendeInnbetalingHandlingsvalg
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.AvklarteFaktaRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
-import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.ReplikerBehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -43,7 +43,7 @@ class ManglendeInnbetalingHandlingsvalgServiceTest {
     private lateinit var replikerBehandlingsresultatService: ReplikerBehandlingsresultatService
 
     @MockK(relaxed = true)
-    private lateinit var behandlingsresultatService: BehandlingsresultatService
+    private lateinit var behandlingService: BehandlingService
 
     private val slotAvklartefakta = slot<Avklartefakta>()
 
@@ -54,12 +54,10 @@ class ManglendeInnbetalingHandlingsvalgServiceTest {
     fun setUp() {
         avklartefaktaService = AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, avklartefaktaDtoKonverterer)
         manglendeInnbetalingHandlingsvalgService = ManglendeInnbetalingHandlingsvalgService(
-            avklartefaktaService, replikerBehandlingsresultatService, behandlingsresultatService
+            avklartefaktaService, replikerBehandlingsresultatService, behandlingService
         )
-        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns Behandlingsresultat().apply {
-            behandling = mockk<Behandling>(relaxed = true) {
-                every { erManglendeInnbetalingTrygdeavgift() } returns true
-            }
+        every { behandlingService.hentBehandling(any()) } returns mockk<Behandling>(relaxed = true) {
+            every { erManglendeInnbetalingTrygdeavgift() } returns true
         }
     }
 
@@ -166,10 +164,8 @@ class ManglendeInnbetalingHandlingsvalgServiceTest {
 
     @Test
     fun lagreManglendeInnbetalingHandlingsvalgSomAvklartFakta_feilBehandlingstype_kasterFunksjonellException() {
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat().apply {
-            behandling = mockk<Behandling>(relaxed = true) {
-                every { erManglendeInnbetalingTrygdeavgift() } returns false
-            }
+        every { behandlingService.hentBehandling(1L) } returns mockk<Behandling>(relaxed = true) {
+            every { erManglendeInnbetalingTrygdeavgift() } returns false
         }
 
         shouldThrow<FunksjonellException> {
