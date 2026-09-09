@@ -964,7 +964,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyperForKnyttTilSak EU_EØS MEDLEMSKAP_LOVVALG returnerer IKKE Årsavregning når saken ikke har en tjenesteperson-behandling`() {
+    fun `hentMuligeBehandlingstyperForKnyttTilSak EU_EØS MEDLEMSKAP_LOVVALG tilbyr ikke Årsavregning når saken mangler en tjenesteperson-behandling`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_TJENESTEPERSON)
 
         val behandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG) {

@@ -43,8 +43,7 @@ class InnhentingAvInntektsopplysningerMapper(
         if (relevantePerioder.isEmpty()) return null
 
         val fom = checkNotNull(relevantePerioder.first().getFom()) { "fom er påkrevd for avgiftspliktig periode" }
-        // Periodene er sortert på fom, så seneste sluttdato må hentes med maxOf.
-        // En løpende periode varer ut årsavregningsåret.
+        // Sortert på fom, så seneste sluttdato hentes med maxOf; en løpende periode varer ut årsavregningsåret.
         val tom = relevantePerioder.maxOf { it.getTom() ?: LocalDate.of(årsavregningsår, 12, 31) }
         return fom.tilDatoInnenforÅrsavregningsåret(årsavregningsår) to tom.tilDatoInnenforÅrsavregningsåret(årsavregningsår)
     }
