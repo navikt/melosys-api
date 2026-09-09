@@ -201,4 +201,59 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
         verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(any()) }
         verify(exactly = 1) { behandlingsresultatService.lagre(any()) }
     }
+
+    @Test
+    fun `reset uten avsluttet kildebehandling beholder lovvalgsperiodene i stedet for å nulle avgiften`() {
+        val fagsak = Fagsak.forTest {
+            saksnummer = "123456"
+            type = Sakstyper.EU_EOS
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        }
+
+        val førstegangsbehandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            behandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.UNDER_BEHANDLING
+                tema = no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+                this.fagsak = fagsak
+            }
+            lovvalgsperiode("2023-01-01", "2023-12-31")
+        }
+
+        val årsavregningsbehandlingsresultat = Behandlingsresultat.forTest {
+            id = 2L
+            type = Behandlingsresultattyper.IKKE_FASTSATT
+            behandling {
+                id = 2L
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.UNDER_BEHANDLING
+                this.fagsak = fagsak
+            }
+            lovvalgsperiode("2023-01-01", "2023-12-31", medTrygdeavgift = false)
+            årsavregning {
+                id = 112
+                aar = 2023
+            }
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns førstegangsbehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns årsavregningsbehandlingsresultat
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+        every { behandlingsresultatService.lagreOgFlush(any()) } answers { firstArg() }
+        every { behandlingsresultatService.lagre(any()) } answers {
+            firstArg<Behandlingsresultat>().apply { årsavregning?.id = 113L }
+        }
+
+
+        årsavregningService.resetEksisterendeÅrsavregning(2L).shouldNotBeNull()
+
+
+        årsavregningsbehandlingsresultat.lovvalgsperioder shouldHaveSize 1
+        årsavregningsbehandlingsresultat.hentÅrsavregning().beregnetAvgiftBelop shouldBe null
+    }
+
+
 }

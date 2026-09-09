@@ -83,7 +83,8 @@ class ÅrsavregningService(
     /**
      * Resetter eksisterende årsavregning dersom behandlingsresultatet er IKKE_FASTSATT.
      * Dette resetter all data saksbehandler har lagt inn på årsavregningen, og oppdaterer grunnlag
-     * til siste innvilgede medlemskapsperiode (med avgiftsgrunnlag) for det aktuelle året.
+     * til siste innvilgede avgiftspliktige periode (medlemskap, helseutgift eller lovvalg) med
+     * avgiftsgrunnlag for det aktuelle året.
      */
     @Transactional
     fun resetEksisterendeÅrsavregning(behandlingID: Long): ÅrsavregningModel? {
@@ -130,7 +131,6 @@ class ÅrsavregningService(
             behandlingsresultat.årsavregning = null
             behandlingsresultat.medlemskapsperioder.clear()
             behandlingsresultat.clearHelseutgiftDekkesPerioder()
-            behandlingsresultat.clearLovvalgsperioder()
             behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         }
 
@@ -157,11 +157,16 @@ class ÅrsavregningService(
                     gjelderÅr
                 )
 
-                is Lovvalgsperiode -> replikerLovvalgsPeriode(
-                    behandlingsresultat,
-                    sisteBehandlingsresultatMedAvgiftspliktigPeriode,
-                    gjelderÅr
-                )
+                is Lovvalgsperiode -> {
+                    // Ryddes her, ikke sammen med de andre periodetypene over: uten en kilde å replikere
+                    // fra ville en tømt liste gitt full kreditering i stedet for uendret grunnlag.
+                    behandlingsresultat.clearLovvalgsperioder()
+                    replikerLovvalgsPeriode(
+                        behandlingsresultat,
+                        sisteBehandlingsresultatMedAvgiftspliktigPeriode,
+                        gjelderÅr
+                    )
+                }
 
                 else -> throw FunksjonellException("Ukjent type avgiftspliktigPeriode: ${sisteBehandlingsresultatMedAvgiftspliktigPeriode.finnAvgiftspliktigPerioder().first()}")
             }
