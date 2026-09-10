@@ -1,15 +1,18 @@
 package no.nav.melosys.domain
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class ErPeriodeTest {
 
-    private fun periode(fom: LocalDate?, tom: LocalDate?) = object : ErPeriode {
+    private class TestPeriode(private val fom: LocalDate?, private val tom: LocalDate?) : ErPeriode {
         override fun getFom() = fom
         override fun getTom() = tom
     }
+
+    private fun periode(fom: LocalDate?, tom: LocalDate?) = TestPeriode(fom, tom)
 
     @Test
     fun `løpende periode overlapper året den starter i og alle år etter`() {
@@ -21,12 +24,12 @@ internal class ErPeriodeTest {
     }
 
     @Test
-    fun `periode uten startdato overlapper året den slutter i og alle år før`() {
+    fun `periode uten startdato er en ødelagt rad og skal feile`() {
         val utenFom = periode(null, LocalDate.of(2023, 6, 1))
 
-        utenFom.overlapperMedÅr(2022) shouldBe true
-        utenFom.overlapperMedÅr(2023) shouldBe true
-        utenFom.overlapperMedÅr(2024) shouldBe false
+        shouldThrow<NullPointerException> {
+            utenFom.overlapperMedÅr(2023)
+        }.message shouldBe "fom er påkrevd for TestPeriode"
     }
 
     @Test
