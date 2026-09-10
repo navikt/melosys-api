@@ -13,6 +13,8 @@ import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto
 import no.nav.melosys.service.oppgave.dto.JournalfoeringsoppgaveDto
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto
+import no.nav.melosys.service.oppgave.dto.TildelOppgaveDto
+import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.tjenester.gui.dto.OppgaveSokDto
 import no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto
@@ -33,7 +35,8 @@ import org.springframework.web.context.WebApplicationContext
 class OppgaveController(
     private val oppgaveplukker: Oppgaveplukker,
     private val oppgaveService: OppgaveService,
-    private val oppgaveSoekFilter: OppgaveSoekFilter
+    private val oppgaveSoekFilter: OppgaveSoekFilter,
+    private val aksesskontroll: Aksesskontroll
 ) {
     private val log = KotlinLogging.logger { }
 
@@ -70,6 +73,19 @@ class OppgaveController(
     fun leggTilbakeOppgave(@RequestBody tilbakelegging: TilbakeleggingDto): ResponseEntity<Void> {
         val ident = SubjectHandler.getInstance().getUserID()
         oppgaveplukker.leggTilbakeOppgave(ident, tilbakelegging)
+        return ResponseEntity.noContent().build()
+    }
+
+    @PostMapping("/tildel")
+    @Operation(
+        summary = "Tildeler behandlingsoppgaven på en gitt behandling til innlogget saksbehandler.",
+        description = "Overtar oppgaven også når den er tildelt en annen saksbehandler. " +
+            "Frontend advarer om overtakelsen i bekreftelsesdialogen."
+    )
+    fun tildelOppgaveTilMeg(@RequestBody tildeling: TildelOppgaveDto): ResponseEntity<Void> {
+        val ident = SubjectHandler.getInstance().getUserID()
+        aksesskontroll.autoriserSkriv(tildeling.behandlingID)
+        oppgaveplukker.tildelOppgaveTilSaksbehandler(ident, tildeling.behandlingID)
         return ResponseEntity.noContent().build()
     }
 

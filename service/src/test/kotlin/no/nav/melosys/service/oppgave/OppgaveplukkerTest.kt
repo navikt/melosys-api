@@ -221,6 +221,55 @@ internal class OppgaveplukkerTest {
         verify(exactly = 0) { oppgaveTilbakkeleggingRepo.save(any<OppgaveTilbakelegging>()) }
     }
 
+    private fun riggTildeling(tilordnetRessurs: String?): String {
+        val fagsak = opprettFagsak(SAKSNUMMER_1) {
+            gsakSaksnummer = GSAK_SAKSNUMMER
+            behandling {
+                tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.OPPRETTET
+            }
+        }
+        val oppgaveId = GSAK_SAKSNUMMER.toString()
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns fagsak.behandlinger.first()
+        every { fagsakService.hentFagsak(SAKSNUMMER_1) } returns fagsak
+        every { behandlingService.lagre(any<Behandling>()) } returns Unit
+        every { oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER_1) } returns
+            Oppgave.Builder().setOppgaveId(oppgaveId).setTilordnetRessurs(tilordnetRessurs).build()
+        every { oppgaveService.tildelOppgave(any<String>(), any<String>()) } returns Unit
+        return oppgaveId
+    }
+
+    @Test
+    fun `tildelOppgaveTilSaksbehandler tildeler utildelt oppgave og returnerer ingen forrige eier`() {
+        val oppgaveId = riggTildeling(tilordnetRessurs = null)
+
+        val forrigeEier = oppgaveplukker.tildelOppgaveTilSaksbehandler("Z999999", BEHANDLING_ID)
+
+        forrigeEier.shouldBeNull()
+        verify { oppgaveService.tildelOppgave(oppgaveId, "Z999999") }
+    }
+
+    @Test
+    fun `tildelOppgaveTilSaksbehandler overtar oppgave fra annen saksbehandler`() {
+        val oppgaveId = riggTildeling(tilordnetRessurs = "Z111111")
+
+        val forrigeEier = oppgaveplukker.tildelOppgaveTilSaksbehandler("Z999999", BEHANDLING_ID)
+
+        forrigeEier shouldBe "Z111111"
+        verify { oppgaveService.tildelOppgave(oppgaveId, "Z999999") }
+    }
+
+    @Test
+    fun `tildelOppgaveTilSaksbehandler gjor ingenting nar oppgaven allerede er min`() {
+        riggTildeling(tilordnetRessurs = "Z999999")
+
+        val forrigeEier = oppgaveplukker.tildelOppgaveTilSaksbehandler("Z999999", BEHANDLING_ID)
+
+        forrigeEier shouldBe "Z999999"
+        verify(exactly = 0) { oppgaveService.tildelOppgave(any<String>(), any<String>()) }
+    }
+
     @Test
     fun plukkOppgave_behandlingSomVenterHarSvarfristSomikkeHarGåttUt_plukkerIkkeBehandlingen() {
         val oppgaver = listOf(

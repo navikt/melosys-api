@@ -19,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.bruker.SaksbehandlerService
+import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto
 import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto
@@ -59,6 +60,9 @@ class BehandlingControllerTest {
 
     @MockkBean
     private lateinit var aksesskontroll: Aksesskontroll
+
+    @MockkBean
+    private lateinit var oppgaveService: OppgaveService
 
     @Autowired
     private lateinit var mockMvc: MockMvc
@@ -143,12 +147,79 @@ class BehandlingControllerTest {
         every { aksesskontroll.behandlingKanRedigeresAvSaksbehandler(any(), any()) } returns true
         every { behandlingService.oppdaterBehandlingsstatusHvisTilhørendeSaksbehandler(any(), any()) } returns Unit
         every { saksbehandlerService.finnNavnForIdent(any()) } returns java.util.Optional.of("Test User")
+        every { oppgaveService.finnBehandlingsoppgaveForBehandlingID(BEHANDLING_ID) } returns null
 
 
         mockMvc.perform(
             get("$BASE_URL/{behandlingID}", BEHANDLING_ID)
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk())
+            .andExpect(jsonPath("$.tilordnetIdent").doesNotExist())
+            .andExpect(jsonPath("$.tilordnetNavn").doesNotExist())
+    }
+
+    @Test
+    fun `skal returnere tilordnet saksbehandler med navn naar oppgaven er tildelt`() {
+        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns opprettTomBehandlingMedId()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns BEHANDLINGSRESULTAT
+        every { saksopplysningerTilDto.getSaksopplysningerDto(any()) } returns SaksopplysningerDto()
+        every { aksesskontroll.autoriser(BEHANDLING_ID) } returns Unit
+        every { aksesskontroll.autoriserSkriv(BEHANDLING_ID) } returns Unit
+        every { aksesskontroll.auditAutoriserSkriv(any(), any()) } returns Unit
+        every { aksesskontroll.behandlingKanRedigeresAvSaksbehandler(any(), any()) } returns true
+        every { behandlingService.oppdaterBehandlingsstatusHvisTilhørendeSaksbehandler(any(), any()) } returns Unit
+        every { saksbehandlerService.finnNavnForIdent(any()) } returns java.util.Optional.of("Test User")
+        every { saksbehandlerService.finnNavnForIdent("Z111111") } returns java.util.Optional.of("Ola Nordmann")
+        every { oppgaveService.finnBehandlingsoppgaveForBehandlingID(BEHANDLING_ID) } returns
+            no.nav.melosys.domain.oppgave.Oppgave.Builder().setOppgaveId("1").setTilordnetRessurs("Z111111").build()
+
+        mockMvc.perform(
+            get("$BASE_URL/{behandlingID}", BEHANDLING_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk())
+            .andExpect(jsonPath("$.tilordnetIdent", equalTo("Z111111")))
+            .andExpect(jsonPath("$.tilordnetNavn", equalTo("Ola Nordmann")))
+    }
+
+    @Test
+    fun `skal falle tilbake til ident naar navneoppslaget ikke gir treff`() {
+        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns opprettTomBehandlingMedId()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns BEHANDLINGSRESULTAT
+        every { saksopplysningerTilDto.getSaksopplysningerDto(any()) } returns SaksopplysningerDto()
+        every { aksesskontroll.autoriser(BEHANDLING_ID) } returns Unit
+        every { aksesskontroll.autoriserSkriv(BEHANDLING_ID) } returns Unit
+        every { aksesskontroll.auditAutoriserSkriv(any(), any()) } returns Unit
+        every { aksesskontroll.behandlingKanRedigeresAvSaksbehandler(any(), any()) } returns true
+        every { behandlingService.oppdaterBehandlingsstatusHvisTilhørendeSaksbehandler(any(), any()) } returns Unit
+        every { saksbehandlerService.finnNavnForIdent(any()) } returns java.util.Optional.empty()
+        every { oppgaveService.finnBehandlingsoppgaveForBehandlingID(BEHANDLING_ID) } returns
+            no.nav.melosys.domain.oppgave.Oppgave.Builder().setOppgaveId("1").setTilordnetRessurs("Z222222").build()
+
+        mockMvc.perform(
+            get("$BASE_URL/{behandlingID}", BEHANDLING_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk())
+            .andExpect(jsonPath("$.tilordnetNavn", equalTo("Z222222")))
+    }
+
+    @Test
+    fun `skal vise saken selv om oppgave-api feiler`() {
+        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns opprettTomBehandlingMedId()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns BEHANDLINGSRESULTAT
+        every { saksopplysningerTilDto.getSaksopplysningerDto(any()) } returns SaksopplysningerDto()
+        every { aksesskontroll.autoriser(BEHANDLING_ID) } returns Unit
+        every { aksesskontroll.autoriserSkriv(BEHANDLING_ID) } returns Unit
+        every { aksesskontroll.auditAutoriserSkriv(any(), any()) } returns Unit
+        every { aksesskontroll.behandlingKanRedigeresAvSaksbehandler(any(), any()) } returns true
+        every { behandlingService.oppdaterBehandlingsstatusHvisTilhørendeSaksbehandler(any(), any()) } returns Unit
+        every { saksbehandlerService.finnNavnForIdent(any()) } returns java.util.Optional.of("Test User")
+        every { oppgaveService.finnBehandlingsoppgaveForBehandlingID(BEHANDLING_ID) } throws RuntimeException("Oppgave nede")
+
+        mockMvc.perform(
+            get("$BASE_URL/{behandlingID}", BEHANDLING_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk())
+            .andExpect(jsonPath("$.tilordnetIdent").doesNotExist())
     }
 
     @Test

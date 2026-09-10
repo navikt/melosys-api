@@ -9,9 +9,11 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.bruker.SaksbehandlerService;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
@@ -19,6 +21,7 @@ import no.nav.melosys.tjenester.gui.dto.BehandlingOppsummeringDto;
 import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
 import no.nav.melosys.tjenester.gui.dto.saksopplysninger.SaksopplysningerTilDto;
 import no.nav.security.token.support.core.api.Protected;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -39,17 +42,20 @@ public class BehandlingController {
     private final SaksbehandlerService saksbehandlerService;
     private final Aksesskontroll aksesskontroll;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final OppgaveService oppgaveService;
 
     public BehandlingController(BehandlingService behandlingService,
                                 SaksopplysningerTilDto saksopplysningerTilDto,
                                 SaksbehandlerService saksbehandlerService,
                                 Aksesskontroll aksesskontroll,
-                                BehandlingsresultatService behandlingsresultatService) {
+                                BehandlingsresultatService behandlingsresultatService,
+                                OppgaveService oppgaveService) {
         this.behandlingService = behandlingService;
         this.saksopplysningerTilDto = saksopplysningerTilDto;
         this.saksbehandlerService = saksbehandlerService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.oppgaveService = oppgaveService;
     }
 
     @PostMapping("{behandlingID}/tidligere-medlemsperioder")
@@ -105,12 +111,29 @@ public class BehandlingController {
     }
 
     private BehandlingDto tilBehandlingDto(Behandling behandling, String saksbehandler) {
+        String tilordnetIdent = finnTilordnetIdent(behandling.getId());
         return new BehandlingDto(
             behandling.getId(),
             tilOppsummeringDto(behandling),
             saksopplysningerTilDto.getSaksopplysningerDto(behandling.getSaksopplysninger()),
-            aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler)
+            aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler),
+            tilordnetIdent,
+            tilordnetIdent == null ? null : saksbehandlerService.finnNavnForIdent(tilordnetIdent).orElse(tilordnetIdent)
         );
+    }
+
+    /**
+     * Hvem som eier den åpne behandlingsoppgaven. Feil mot Oppgave-API skal ikke hindre visning av
+     * saken, så da returneres null og frontend viser «Ikke tildelt».
+     */
+    private String finnTilordnetIdent(long behandlingID) {
+        try {
+            Oppgave oppgave = oppgaveService.finnBehandlingsoppgaveForBehandlingID(behandlingID);
+            return oppgave == null ? null : StringUtils.trimToNull(oppgave.getTilordnetRessurs());
+        } catch (RuntimeException e) {
+            log.warn("Klarte ikke hente tilordnet saksbehandler for behandling {}.", behandlingID, e);
+            return null;
+        }
     }
 
     private BehandlingOppsummeringDto tilOppsummeringDto(Behandling behandling) {
