@@ -59,7 +59,7 @@ class TrygdeavgiftClient(
 
     // Hentes per kall, før WebClient bytter tråd. Sagaer bruker lagret saksbehandler.
     private fun leggTilBrukerId(headers: HttpHeaders) {
-        val brukerId = SubjectHandler.getInstance().userID
+        val brukerId = SubjectHandler.getInstance()?.userID
             ?: ThreadLocalAccessInfo.getSaksbehandler()
         if (!brukerId.isNullOrBlank()) {
             headers.set("Nav-User-Id", brukerId)
