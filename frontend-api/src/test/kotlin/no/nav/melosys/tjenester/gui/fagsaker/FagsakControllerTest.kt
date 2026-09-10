@@ -48,7 +48,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import org.junit.jupiter.params.provider.NullSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.boot.test.context.TestConfiguration
@@ -961,10 +960,8 @@ internal class FagsakControllerTest {
                 .andExpect(jsonPath("$[0].periode.tom").value(equalTo(null)))
         }
 
-        @ParameterizedTest
-        @NullSource
-        @EnumSource(value = Landkoder::class, names = ["SE"])
-        fun `hentFagsaker returnerer unntakssak med SED med og uten avsenderland`(avsenderland: Landkoder?) {
+        @Test
+        fun `hentFagsaker returnerer unntakssak med SED med avsenderland`() {
             val testFagsak = Fagsak.forTest {
                 medBruker()
                 tema = Sakstemaer.UNNTAK
@@ -975,7 +972,7 @@ internal class FagsakControllerTest {
                 }
             }
             val sedDokument = SedDokumentBuilder().apply {
-                avsenderLandkode = avsenderland
+                avsenderLandkode = Landkoder.SE
                 lovvalgsperiode(FOM, TOM)
             }.build()
 
@@ -988,7 +985,37 @@ internal class FagsakControllerTest {
 
             performSokAndExpectOk(fagsakSokDto)
                 .andExpect(jsonPath("$[0].saksnummer", equalTo(testFagsak.saksnummer)))
-                .andExpect(jsonPath("$[0].land.landkoder", equalTo(listOfNotNull(avsenderland?.kode))))
+                .andExpect(jsonPath("$[0].land.landkoder", equalTo(listOf(Landkoder.SE.kode))))
+                .andExpect(jsonPath("$[0].periode.fom", equalTo(FOM.toString())))
+                .andExpect(jsonPath("$[0].periode.tom", equalTo(TOM.toString())))
+        }
+
+        @Test
+        fun `hentFagsaker returnerer unntakssak med SED uten avsenderland`() {
+            val testFagsak = Fagsak.forTest {
+                medBruker()
+                tema = Sakstemaer.UNNTAK
+                type = Sakstyper.EU_EOS
+                behandling {
+                    id = BEHANDLING_ID
+                    status = Behandlingsstatus.AVSLUTTET
+                }
+            }
+            val sedDokument = SedDokumentBuilder().apply {
+                avsenderLandkode = null
+                lovvalgsperiode(FOM, TOM)
+            }.build()
+
+            mockFagsakController(testFagsak)
+            mockBehandlingsresultat(lagDefaultBehandlingResultat())
+            every { saksopplysningerService.finnSedOpplysninger(BEHANDLING_ID) } returns Optional.of(sedDokument)
+            every { mottatteOpplysningerService.finnMottatteOpplysninger(BEHANDLING_ID) } returns Optional.empty()
+
+            val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
+
+            performSokAndExpectOk(fagsakSokDto)
+                .andExpect(jsonPath("$[0].saksnummer", equalTo(testFagsak.saksnummer)))
+                .andExpect(jsonPath("$[0].land.landkoder", equalTo(emptyList<String>())))
                 .andExpect(jsonPath("$[0].periode.fom", equalTo(FOM.toString())))
                 .andExpect(jsonPath("$[0].periode.tom", equalTo(TOM.toString())))
         }
