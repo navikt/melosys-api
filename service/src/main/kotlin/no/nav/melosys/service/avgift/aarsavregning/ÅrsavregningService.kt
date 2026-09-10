@@ -541,7 +541,7 @@ class ÅrsavregningService(
         )
     }
 
-    private fun hentSisteGjeldendeAvgiftspliktigePerioder(år: Int, saksnummer: String?, førVedtaksdato: Instant? = null): List<AvgiftsperiodeForAvgift> {
+    private fun hentSisteGjeldendeAvgiftspliktigePerioder(år: Int, saksnummer: String?, førVedtaksdato: Instant? = null): List<Avgiftsperiode> {
         if (saksnummer == null) return emptyList()
 
         val gjeldendeBehandlingsresultater = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år, førVedtaksdato)
@@ -640,7 +640,7 @@ data class ÅrsavregningModel(
     val årsavregningID: Long,
     val år: Int,
     val tidligereTrygdeavgiftsGrunnlag: Trygdeavgiftsgrunnlag? = null,
-    val sisteGjeldendeAvgiftspliktigPerioder: List<AvgiftsperiodeForAvgift> = emptyList(),
+    val sisteGjeldendeAvgiftspliktigPerioder: List<Avgiftsperiode> = emptyList(),
     val tidligereAvgift: List<Trygdeavgiftsperiode>,
     val nyttTrygdeavgiftsGrunnlag: Trygdeavgiftsgrunnlag? = null,
     val endeligAvgift: List<Trygdeavgiftsperiode>,
@@ -657,7 +657,7 @@ data class ÅrsavregningModel(
 )
 
 data class Trygdeavgiftsgrunnlag(
-    val avgiftspliktigperioder: List<AvgiftsperiodeForAvgift>,
+    val avgiftspliktigperioder: List<Avgiftsperiode>,
     val skatteforholdsperioder: List<SkatteforholdTilNorgeForAvgift>,
     val innteksperioder: List<InntektsperioderForAvgift>
 )
@@ -679,8 +679,8 @@ data class MedlemskapsperiodeForAvgift(
     override val bestemmelse: Bestemmelse,
     override val medlemskapstyper: Medlemskapstyper,
     override val innvilgelsesresultat: InnvilgelsesResultat,
-    override val type: AvgiftsperiodeForAvgiftType = AvgiftsperiodeForAvgiftType.MEDLEMSKAPSPERIODE,
-) : AvgiftsperiodeForAvgiftMedBestemmelse {
+    override val type: AvgiftsperiodeType = AvgiftsperiodeType.MEDLEMSKAPSPERIODE,
+) : AvgiftsperiodeMedBestemmelse {
     constructor(medlemskapsperiode: Medlemskapsperiode) : this(
         fom = medlemskapsperiode.hentFom(),
         tom = medlemskapsperiode.hentTom(),
@@ -708,8 +708,8 @@ data class LovvalgsperiodeForAvgift(
     override val bestemmelse: Bestemmelse,
     override val medlemskapstyper: Medlemskapstyper,
     override val innvilgelsesresultat: InnvilgelsesResultat,
-    override val type: AvgiftsperiodeForAvgiftType = AvgiftsperiodeForAvgiftType.LOVVALGSPERIODE,
-) : AvgiftsperiodeForAvgiftMedBestemmelse {
+    override val type: AvgiftsperiodeType = AvgiftsperiodeType.LOVVALGSPERIODE,
+) : AvgiftsperiodeMedBestemmelse {
     constructor(lovvalgsperiode: Lovvalgsperiode) : this(
         fom = lovvalgsperiode.hentFom(),
         tom = lovvalgsperiode.hentTom(),
@@ -731,21 +731,21 @@ data class LovvalgsperiodeForAvgift(
 }
 
 
-enum class AvgiftsperiodeForAvgiftType {
+enum class AvgiftsperiodeType {
     MEDLEMSKAPSPERIODE,
     HELSEUTGIFTDEKKESPERIODE,
     LOVVALGSPERIODE
 }
 
-sealed interface AvgiftsperiodeForAvgift {
+sealed interface Avgiftsperiode {
     val fom: LocalDate
     val tom: LocalDate?
     val dekning: Trygdedekninger?
-    val type: AvgiftsperiodeForAvgiftType
+    val type: AvgiftsperiodeType
 }
 
 // Medlemskaps- og lovvalgsperioder er vurdert etter en bestemmelse; helseutgiftperioder er ikke det.
-sealed interface AvgiftsperiodeForAvgiftMedBestemmelse : AvgiftsperiodeForAvgift {
+sealed interface AvgiftsperiodeMedBestemmelse : Avgiftsperiode {
     val bestemmelse: Bestemmelse
     val medlemskapstyper: Medlemskapstyper
     val innvilgelsesresultat: InnvilgelsesResultat
@@ -755,10 +755,10 @@ data class HelseutgiftDekkesPeriodeForAvgift(
     override val fom: LocalDate,
     override val tom: LocalDate,
     override val dekning: Trygdedekninger,
-    override val type: AvgiftsperiodeForAvgiftType = AvgiftsperiodeForAvgiftType.HELSEUTGIFTDEKKESPERIODE,
+    override val type: AvgiftsperiodeType = AvgiftsperiodeType.HELSEUTGIFTDEKKESPERIODE,
     val medlemskapstype: Medlemskapstyper,
     val id: Long = 0,
-) : AvgiftsperiodeForAvgift {
+) : Avgiftsperiode {
     constructor(helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode) : this(
         fom = helseutgiftDekkesPeriode.fomDato,
         tom = helseutgiftDekkesPeriode.tomDato,

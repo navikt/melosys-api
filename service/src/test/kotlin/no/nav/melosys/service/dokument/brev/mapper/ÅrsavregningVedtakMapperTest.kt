@@ -20,8 +20,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
+import no.nav.melosys.integrasjon.dokgen.dto.ÅrsavregningVedtaksbrev
 import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebeløpResponse
 import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling
@@ -97,7 +97,7 @@ class ÅrsavregningVedtakMapperTest {
         result.shouldNotBeNull()
         behandlingsresultat.hentÅrsavregning().aar shouldBe result.årsavregningsår
 
-        result.endeligTrygdeavgift[0] shouldBe Avgiftsperiode(
+        result.endeligTrygdeavgift[0] shouldBe ÅrsavregningVedtaksbrev.Avgiftsperiode(
             fom = LocalDate.of(2023, 1, 1),
             tom = LocalDate.of(2023, 12, 31),
             avgiftssats = BigDecimal(1000),
@@ -109,7 +109,7 @@ class ÅrsavregningVedtakMapperTest {
             skatteplikt = true,
             beregningsregel = Avgiftsberegningsregel.ORDINÆR
         )
-        result.forskuddsvisFakturertTrygdeavgift[0] shouldBe Avgiftsperiode(
+        result.forskuddsvisFakturertTrygdeavgift[0] shouldBe ÅrsavregningVedtaksbrev.Avgiftsperiode(
             fom = LocalDate.of(2023, 1, 1),
             tom = LocalDate.of(2023, 12, 31),
             avgiftssats = BigDecimal(900),

@@ -75,19 +75,17 @@ class ÅrsavregningVedtaksbrev(
         erPensjonist = erPensjonist,
         sakstype = sakstype
     )
+
+    data class Avgiftsperiode(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val avgiftssats: BigDecimal?,
+        val avgiftPerMd: BigDecimal,
+        val avgiftspliktigInntektPerMd: BigDecimal,
+        val inntektskilde: String,
+        val trygdedekning: String,
+        val arbeidsgiveravgiftBetalt: SvarAlternativ,
+        val skatteplikt: Boolean,
+        val beregningsregel: Avgiftsberegningsregel
+    )
 }
-
-data class Avgiftsperiode(
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val avgiftssats: BigDecimal?,
-    val avgiftPerMd: BigDecimal,
-    val avgiftspliktigInntektPerMd: BigDecimal,
-    val inntektskilde: String,
-    val trygdedekning: String,
-    val arbeidsgiveravgiftBetalt: SvarAlternativ,
-    val skatteplikt: Boolean,
-    val beregningsregel: Avgiftsberegningsregel
-)
-
-
