@@ -17,13 +17,24 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.core.MethodParameter
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.mock.http.MockHttpInputMessage
+import org.springframework.validation.BeanPropertyBindingResult
+import org.springframework.validation.FieldError
+import org.springframework.validation.ObjectError
+import org.springframework.web.HttpMediaTypeNotSupportedException
+import org.springframework.web.HttpRequestMethodNotSupportedException
+import org.springframework.web.bind.MethodArgumentNotValidException
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.reactive.function.client.WebClientResponseException
+
+private const val UGYLDIG_FORESPØRSEL = "Ugyldig format på forespørselen"
 
 @ExtendWith(MockKExtension::class)
 class ExceptionMapperTest {
@@ -75,15 +86,15 @@ class ExceptionMapperTest {
     }
 
     @Test
-    fun `skal håndtere ulesbar JSON med status bad request og warn-logg`() {
-        val melding = "JSON parse error"
-        val exception = HttpMessageNotReadableException(melding, MockHttpInputMessage(ByteArray(0)))
+    fun `skal håndtere ulesbar JSON med status bad request og info-logg uten stacktrace`() {
+        val exception = HttpMessageNotReadableException("JSON parse error", MockHttpInputMessage(ByteArray(0)))
 
         val loggede = medLoggfanger {
-            assertResponse(exceptionMapper.håndter(exception, request), HttpStatus.BAD_REQUEST, melding)
+            assertResponse(exceptionMapper.håndter(exception, request), HttpStatus.BAD_REQUEST, UGYLDIG_FORESPØRSEL)
         }
 
-        assertEquals(listOf(Level.WARN), loggede.map { it.level })
+        assertEquals(listOf(Level.INFO), loggede.map { it.level })
+        assertNull(loggede.single().throwableProxy)
     }
 
     @Test
@@ -136,8 +147,87 @@ class ExceptionMapperTest {
         assertResponse(responseEntity, HttpStatus.INTERNAL_SERVER_ERROR, "Client error")
     }
 
-    // Fanger loggen fra ExceptionMapper.kt sin fil-logger, så vi kan slå fast at
-    // klientfeil havner på WARN og ikke drukner ekte serverfeil på ERROR.
+    @Test
+    fun `skal håndtere HttpMessageNotReadableException med sanert melding`() {
+        val exception = HttpMessageNotReadableException(
+            "JSON parse error: Cannot deserialize value of type `java.time.LocalDate` from String \"Invalid date\"",
+            MockHttpInputMessage(ByteArray(0))
+        )
+        assertResponse(exceptionMapper.håndter(exception, request), HttpStatus.BAD_REQUEST, UGYLDIG_FORESPØRSEL)
+    }
+
+    @Test
+    fun `skal håndtere MethodArgumentTypeMismatchException med sanert melding`() {
+        val exception = MethodArgumentTypeMismatchException("abc", Long::class.java, "behandlingID", dummyMetodeParameter(), null)
+        assertResponse(exceptionMapper.håndter(exception, request), HttpStatus.BAD_REQUEST, UGYLDIG_FORESPØRSEL)
+    }
+
+    @Test
+    fun `skal håndtere MethodArgumentNotValidException med sanert melding og bevarte feilkoder`() {
+        val bindingResult = BeanPropertyBindingResult(Any(), "unntaksperiodeRequestDto")
+        bindingResult.addError(FieldError("unntaksperiodeRequestDto", "periodeFom", "must not be null"))
+        val exception = MethodArgumentNotValidException(dummyMetodeParameter(), bindingResult)
+
+        assertResponse(
+            exceptionMapper.håndter(exception, request),
+            HttpStatus.BAD_REQUEST,
+            UGYLDIG_FORESPØRSEL,
+            listOf("periodeFom: must not be null")
+        )
+    }
+
+    @Test
+    fun `skal ta med klasse-constraints fra globalErrors i feilkoder`() {
+        val bindingResult = BeanPropertyBindingResult(Any(), "unntaksperiodeRequestDto")
+        bindingResult.addError(ObjectError("unntaksperiodeRequestDto", "periodeFom må være før periodeTom"))
+        val exception = MethodArgumentNotValidException(dummyMetodeParameter(), bindingResult)
+
+        assertResponse(
+            exceptionMapper.håndter(exception, request),
+            HttpStatus.BAD_REQUEST,
+            UGYLDIG_FORESPØRSEL,
+            listOf("unntaksperiodeRequestDto: periodeFom må være før periodeTom")
+        )
+    }
+
+    @Test
+    fun `skal utlede status og klientvennlig melding fra ErrorResponse i catch-all`() {
+        val exception = HttpMediaTypeNotSupportedException(
+            MediaType.TEXT_PLAIN,
+            listOf(MediaType.APPLICATION_JSON)
+        )
+        // ProblemDetail-teksten er mer konkret enn statusteksten "Unsupported Media Type"
+        assertResponse(
+            exceptionMapper.håndter(exception as Exception, request),
+            HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+            exception.body.detail!!
+        )
+    }
+
+    @Test
+    fun `skal videreføre headere fra ErrorResponse slik at 405 får Allow`() {
+        val exception = HttpRequestMethodNotSupportedException("DELETE", listOf("GET", "POST"))
+
+        val responseEntity = exceptionMapper.håndter(exception as Exception, request)
+
+        assertEquals(HttpStatus.METHOD_NOT_ALLOWED, responseEntity.statusCode)
+        // RFC 9110 krever Allow på 405
+        assertEquals("GET, POST", responseEntity.headers.getFirst(HttpHeaders.ALLOW))
+    }
+
+    @Test
+    fun `catch-all gir fortsatt 500 for exceptions uten ErrorResponse`() {
+        val melding = "Noe gikk galt"
+        assertResponse(exceptionMapper.håndter(RuntimeException(melding) as Exception, request), HttpStatus.INTERNAL_SERVER_ERROR, melding)
+    }
+
+    @Suppress("unused", "UNUSED_PARAMETER")
+    private fun dummyMetodeForBinding(argument: String) = Unit
+
+    private fun dummyMetodeParameter() =
+        MethodParameter(ExceptionMapperTest::class.java.getDeclaredMethod("dummyMetodeForBinding", String::class.java), 0)
+
+    // Fanger loggen fra ExceptionMapper.kt sin fil-logger, så vi kan slå fast at klientfeil ikke havner på ERROR
     private fun medLoggfanger(block: () -> Unit): List<ILoggingEvent> {
         val logger = LoggerFactory.getLogger(ExceptionMapper::class.java) as Logger
         val appender = ListAppender<ILoggingEvent>().apply { context = logger.loggerContext }

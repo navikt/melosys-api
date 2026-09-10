@@ -1,8 +1,10 @@
 package no.nav.melosys.tjenester.gui.config
 
+import tools.jackson.databind.DatabindException
 import tools.jackson.databind.DeserializationFeature
 import tools.jackson.databind.MapperFeature
 import tools.jackson.databind.json.JsonMapper
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldMatch
@@ -12,10 +14,17 @@ import io.mockk.mockk
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.service.kodeverk.KodeverkService
+import no.nav.melosys.tjenester.gui.config.jackson.JsonDatoKoersjonConfig
 import no.nav.melosys.tjenester.gui.dto.BehandlingOppsummeringDto
 import org.junit.jupiter.api.Test
+import org.springframework.http.converter.AbstractJacksonHttpMessageConverter
+import org.springframework.http.converter.HttpMessageConverter
+import org.springframework.http.converter.HttpMessageConverters
+import org.springframework.http.converter.StringHttpMessageConverter
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class WebConfigObjectMapperTest {
 
@@ -26,6 +35,16 @@ class WebConfigObjectMapperTest {
         webConfig.melosysJsonMapperCustomizer(kodeverkService).customize(builder)
         builder.build()
     }
+
+    private val mvcConvertere: List<HttpMessageConverter<*>> = run {
+        val builder = HttpMessageConverters.forServer().registerDefaults()
+        JsonDatoKoersjonConfig { objectMapper }.configureMessageConverters(builder)
+        builder.build().toList()
+    }
+
+    // Basen er bygget av vår customizer alene, ikke av Boot. Hele kjeden dekkes av ValideringUnntaksperiodeControllerTest.
+    private val mvcMapper: JsonMapper =
+        mvcConvertere.filterIsInstance<JacksonJsonHttpMessageConverter>().single().mapper
 
     @Test
     fun `objectMapper should be a JsonMapper instance`() {
@@ -99,4 +118,62 @@ class WebConfigObjectMapperTest {
         node["term"] shouldNotBe null
         node["kode"].asText() shouldBe Sakstyper.EU_EOS.kode
     }
+
+    @Test
+    fun `mvcMapper skal avvise tall som LocalDate i stedet for å tolke det som epoch-day`() {
+        shouldThrow<DatabindException> {
+            mvcMapper.readValue("""{"dato": 12345}""", DatoDto::class.java)
+        }
+    }
+
+    @Test
+    fun `Jackson avviser selv tall som LocalDateTime, derfor trengs ingen regel for den`() {
+        // Den delte mapperen har ingen koersjonsregel. Den godtar tall som LocalDate (se testen
+        // lenger ned), men avviser tall som LocalDateTime. Kontrasten viser at avvisningen kommer
+        // fra Jackson, ikke fra oss.
+        shouldThrow<DatabindException> {
+            objectMapper.readValue("""{"tidspunkt": 12345}""", TidspunktDto::class.java)
+        }
+        shouldThrow<DatabindException> {
+            mvcMapper.readValue("""{"tidspunkt": 12345}""", TidspunktDto::class.java)
+        }
+    }
+
+    @Test
+    fun `mvcMapper skal fortsatt lese datoer på ISO-format`() {
+        mvcMapper.readValue("""{"dato": "2025-01-15"}""", DatoDto::class.java).dato shouldBe LocalDate.of(2025, 1, 15)
+        mvcMapper.readValue("""{"tidspunkt": "2025-01-15T10:30:00"}""", TidspunktDto::class.java)
+            .tidspunkt shouldBe LocalDateTime.of(2025, 1, 15, 10, 30, 0)
+    }
+
+    @Test
+    fun `configureMessageConverters skal fjerne Jackson-convertere for andre formater enn JSON`() {
+        mvcConvertere.filterIsInstance<AbstractJacksonHttpMessageConverter<*>>()
+            .map { it::class.java } shouldBe listOf(JacksonJsonHttpMessageConverter::class.java)
+        // Ikke-Jackson-converterne må bestå; PDF-nedlasting avhenger av dem
+        mvcConvertere.any { it is StringHttpMessageConverter } shouldBe true
+    }
+
+    @Test
+    fun `mvcMapper skal fortsatt godta tall som Instant, siden epoch-tid er en gyldig representasjon der`() {
+        mvcMapper.readValue("""{"tidspunkt": 12345}""", InstantDto::class.java).tidspunkt shouldNotBe null
+    }
+
+    @Test
+    fun `mvcMapper skal beholde konfigurasjonen fra mapperen den bygges videre fra`() {
+        mvcMapper.isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION) shouldBe true
+        mvcMapper.writeValueAsString(InnvilgelsesResultat.INNVILGET) shouldBe "\"${InnvilgelsesResultat.INNVILGET.kode}\""
+    }
+
+    @Test
+    fun `coercion-reglene skal IKKE gjelde den delte mapperen som Kafka og WebClient bruker`() {
+        // En deserialiseringsfeil i Kafka-consumerne stopper containeren
+        objectMapper.readValue("""{"dato": 12345}""", DatoDto::class.java).dato shouldNotBe null
+    }
+
+    data class DatoDto(val dato: LocalDate?)
+
+    data class InstantDto(val tidspunkt: Instant?)
+
+    data class TidspunktDto(val tidspunkt: LocalDateTime?)
 }

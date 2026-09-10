@@ -55,6 +55,22 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
+    fun `behandlingstyper for ny sak inneholder ikke NY_VURDERING og beholder rekkefoelgen`() {
+        val behandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForNySak(
+            Aktoersroller.BRUKER,
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.YRKESAKTIV
+        )
+
+        behandlingstyper shouldContainExactly listOf(
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.HENVENDELSE
+        )
+    }
+
+    @Test
     fun `kombinasjonstreet inneholder alle sakstyper`() {
         val tre = lovligeKombinasjonerSaksbehandlingService.hentKombinasjonstre()
 
