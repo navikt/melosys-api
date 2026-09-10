@@ -1,6 +1,8 @@
 package no.nav.melosys.integrasjon.trygdeavgift
 
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
+import no.nav.melosys.sikkerhet.context.SubjectHandler
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
@@ -40,6 +42,7 @@ class TrygdeavgiftClient(
     fun beregnTrygdeavgift(trygdeavgiftsberegningRequest: TrygdeavgiftsberegningRequest): List<TrygdeavgiftsberegningResponse> =
         webClient.post()
             .uri("/v2/beregn")
+            .headers { leggTilBrukerId(it) }
             .bodyValue(trygdeavgiftsberegningRequest)
             .retrieve()
             .bodyToMono<List<TrygdeavgiftsberegningResponse>>()
@@ -48,10 +51,20 @@ class TrygdeavgiftClient(
     fun beregnTrygdeavgiftEosPensjonist(eøsPensjonistTrygdeavgiftsberegningRequest: EøsPensjonistTrygdeavgiftsberegningRequest): List<EøsPensjonistTrygdeavgiftsberegningResponse> =
         webClient.post()
             .uri("/v2/eos-pensjonist/beregn")
+            .headers { leggTilBrukerId(it) }
             .bodyValue(eøsPensjonistTrygdeavgiftsberegningRequest)
             .retrieve()
             .bodyToMono<List<EøsPensjonistTrygdeavgiftsberegningResponse>>()
             .block() ?: throw IllegalStateException("Ingen body fra /v2/eos-pensjonist/beregn")
+
+    // Hentes per kall, før WebClient bytter tråd. Sagaer bruker lagret saksbehandler.
+    private fun leggTilBrukerId(headers: HttpHeaders) {
+        val brukerId = SubjectHandler.getInstance().userID
+            ?: ThreadLocalAccessInfo.getSaksbehandler()
+        if (!brukerId.isNullOrBlank()) {
+            headers.set("Nav-User-Id", brukerId)
+        }
+    }
 
     @Cacheable("minstebeloep")
     fun hentMinstebeløp(år: Int): MinstebeløpResponse =
