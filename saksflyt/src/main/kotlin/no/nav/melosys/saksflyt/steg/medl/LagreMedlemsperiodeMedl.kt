@@ -21,8 +21,9 @@ class LagreMedlemsperiodeMedl(
         val behandling = prosessinstans.hentBehandling
         val behandlingID = prosessinstans.hentBehandling.id
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        val erÅpenSluttdato = behandlingsresultat.medlemskapsperioder.any { it.erInnvilget() && it.tom == null }
 
-        if (behandling.erEøsPensjonist() || behandling.fagsak.erLovvalg()) {
+        if (behandling.erEøsPensjonist() || behandling.fagsak.erLovvalg() || erÅpenSluttdato) {
             return
         }
 
