@@ -4,7 +4,7 @@ import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.service.avgift.aarsavregning.AvgiftsperiodeForAvgiftType
+import no.nav.melosys.service.avgift.aarsavregning.AvgiftsperiodeType
 import java.time.LocalDate
 
 data class AvgiftspliktigPeriodeDto(
@@ -15,5 +15,5 @@ data class AvgiftspliktigPeriodeDto(
     val innvilgelsesResultat: InnvilgelsesResultat?,
     val trygdedekning: Trygdedekninger?,
     val medlemskapstype: Medlemskapstyper?,
-    val type: AvgiftsperiodeForAvgiftType
+    val type: AvgiftsperiodeType
 )

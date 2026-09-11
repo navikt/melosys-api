@@ -82,8 +82,9 @@ class ÅrsavregningService(
 
     /**
      * Resetter eksisterende årsavregning dersom behandlingsresultatet er IKKE_FASTSATT.
-     * Dette resetter all data saksbehandler har lagt inn på årsavregningen, og oppdaterer grunnlag
-     * til siste innvilgede medlemskapsperiode (med avgiftsgrunnlag) for det aktuelle året.
+     * Dette resetter all data saksbehandler har lagt inn på årsavregningen, og henter grunnlaget på
+     * nytt fra siste avsluttede behandling med avgiftspliktige perioder. Finnes ingen slik behandling,
+     * eller dekker den ikke året, står periodene igjen tomme.
      */
     @Transactional
     fun resetEksisterendeÅrsavregning(behandlingID: Long): ÅrsavregningModel? {
@@ -130,6 +131,7 @@ class ÅrsavregningService(
             behandlingsresultat.årsavregning = null
             behandlingsresultat.medlemskapsperioder.clear()
             behandlingsresultat.clearHelseutgiftDekkesPerioder()
+            behandlingsresultat.clearLovvalgsperioder()
             behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         }
 
@@ -286,6 +288,7 @@ class ÅrsavregningService(
         if (!harInnbetaltTrygdeavgift) {
             behandlingsresultat.clearMedlemskapsperioder()
             behandlingsresultat.clearHelseutgiftDekkesPerioder()
+            behandlingsresultat.clearLovvalgsperioder()
 
             if (årsavregning.tidligereBehandlingsresultat != null) {
                 val tidligereResult = årsavregning.hentTidligereBehandlingsresultat
@@ -297,6 +300,12 @@ class ÅrsavregningService(
                     )
 
                     is HelseutgiftDekkesPeriode -> replikerHelseutgiftDekkesPeriode(
+                        behandlingsresultat,
+                        tidligereResult,
+                        årsavregning.aar
+                    )
+
+                    is Lovvalgsperiode -> replikerLovvalgsPeriode(
                         behandlingsresultat,
                         tidligereResult,
                         årsavregning.aar
@@ -357,7 +366,7 @@ class ÅrsavregningService(
         gjelderÅr: Int
     ) {
         tidligereBehandlingsresultat.lovvalgsperioder
-            .filter { it.overlapperMedÅr(gjelderÅr) }
+            .filter { it.erInnvilget() && it.overlapperMedÅr(gjelderÅr) }
             .forEach { originalPeriode ->
                 val replika = BeanUtils.cloneBean(originalPeriode) as Lovvalgsperiode
                 replika.id = null
@@ -527,7 +536,7 @@ class ÅrsavregningService(
         )
     }
 
-    private fun hentSisteGjeldendeAvgiftspliktigePerioder(år: Int, saksnummer: String?, førVedtaksdato: Instant? = null): List<AvgiftsperiodeForAvgift> {
+    private fun hentSisteGjeldendeAvgiftspliktigePerioder(år: Int, saksnummer: String?, førVedtaksdato: Instant? = null): List<Avgiftsperiode> {
         if (saksnummer == null) return emptyList()
 
         val gjeldendeBehandlingsresultater = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år, førVedtaksdato)
@@ -567,14 +576,18 @@ class ÅrsavregningService(
         ) {
             return null
         }
+        val år = årsavregning.aar
         return Trygdeavgiftsgrunnlag(
-            avgiftspliktigperioder = behandlingsresultat.finnAvgiftspliktigPerioder().map {
-                when (it) {
-                    is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(it)
-                    is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(it)
-                    else -> throw FunksjonellException("Ukjent periodetype: ${it.javaClass.simpleName}")
-                }
-            },
+            avgiftspliktigperioder = behandlingsresultat.finnAvgiftspliktigPerioder()
+                .filter { it.erInnvilget() && it.overlapperMedÅr(år) }
+                .map {
+                    when (it) {
+                        is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(it)
+                        is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(it)
+                        is Lovvalgsperiode -> LovvalgsperiodeForAvgift(år, it)
+                        else -> throw FunksjonellException("Ukjent periodetype: ${it.javaClass.simpleName}")
+                    }
+                },
             skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().map(::SkatteforholdTilNorgeForAvgift),
             innteksperioder = behandlingsresultat.hentInntektsperioder().map(::InntektsperioderForAvgift)
         )
@@ -622,7 +635,7 @@ data class ÅrsavregningModel(
     val årsavregningID: Long,
     val år: Int,
     val tidligereTrygdeavgiftsGrunnlag: Trygdeavgiftsgrunnlag? = null,
-    val sisteGjeldendeAvgiftspliktigPerioder: List<AvgiftsperiodeForAvgift> = emptyList(),
+    val sisteGjeldendeAvgiftspliktigPerioder: List<Avgiftsperiode> = emptyList(),
     val tidligereAvgift: List<Trygdeavgiftsperiode>,
     val nyttTrygdeavgiftsGrunnlag: Trygdeavgiftsgrunnlag? = null,
     val endeligAvgift: List<Trygdeavgiftsperiode>,
@@ -639,7 +652,7 @@ data class ÅrsavregningModel(
 )
 
 data class Trygdeavgiftsgrunnlag(
-    val avgiftspliktigperioder: List<AvgiftsperiodeForAvgift>,
+    val avgiftspliktigperioder: List<Avgiftsperiode>,
     val skatteforholdsperioder: List<SkatteforholdTilNorgeForAvgift>,
     val innteksperioder: List<InntektsperioderForAvgift>
 )
@@ -649,18 +662,20 @@ private fun avkortFraOgMedDatoForÅr(gjelderÅr: Int, fom: LocalDate): LocalDate
 } else fom
 
 private fun avkortTilOgMedDatoForÅr(gjelderÅr: Int, tom: LocalDate): LocalDate = if (tom.year > gjelderÅr) {
-    LocalDate.of(gjelderÅr, 12, 31)
+    sisteDagIÅret(gjelderÅr)
 } else tom
+
+private fun sisteDagIÅret(år: Int): LocalDate = LocalDate.of(år, 12, 31)
 
 data class MedlemskapsperiodeForAvgift(
     override val fom: LocalDate,
     override val tom: LocalDate,
     override val dekning: Trygdedekninger,
-    val bestemmelse: Bestemmelse,
-    val medlemskapstyper: Medlemskapstyper,
-    val innvilgelsesresultat: InnvilgelsesResultat,
-    override val type: AvgiftsperiodeForAvgiftType = AvgiftsperiodeForAvgiftType.MEDLEMSKAPSPERIODE,
-) : AvgiftsperiodeForAvgift {
+    override val bestemmelse: Bestemmelse,
+    override val medlemskapstyper: Medlemskapstyper,
+    override val innvilgelsesresultat: InnvilgelsesResultat,
+    override val type: AvgiftsperiodeType = AvgiftsperiodeType.MEDLEMSKAPSPERIODE,
+) : AvgiftsperiodeMedBestemmelse {
     constructor(medlemskapsperiode: Medlemskapsperiode) : this(
         fom = medlemskapsperiode.hentFom(),
         tom = medlemskapsperiode.hentTom(),
@@ -685,11 +700,11 @@ data class LovvalgsperiodeForAvgift(
     override val fom: LocalDate,
     override val tom: LocalDate,
     override val dekning: Trygdedekninger,
-    val bestemmelse: Bestemmelse,
-    val medlemskapstyper: Medlemskapstyper,
-    val innvilgelsesresultat: InnvilgelsesResultat,
-    override val type: AvgiftsperiodeForAvgiftType = AvgiftsperiodeForAvgiftType.LOVVALGSPERIODE,
-) : AvgiftsperiodeForAvgift {
+    override val bestemmelse: Bestemmelse,
+    override val medlemskapstyper: Medlemskapstyper,
+    override val innvilgelsesresultat: InnvilgelsesResultat,
+    override val type: AvgiftsperiodeType = AvgiftsperiodeType.LOVVALGSPERIODE,
+) : AvgiftsperiodeMedBestemmelse {
     constructor(lovvalgsperiode: Lovvalgsperiode) : this(
         fom = lovvalgsperiode.hentFom(),
         tom = lovvalgsperiode.hentTom(),
@@ -701,7 +716,8 @@ data class LovvalgsperiodeForAvgift(
 
     constructor(gjeldendeÅr: Int, lovvalgsperiode: Lovvalgsperiode) : this(
         fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, lovvalgsperiode.hentFom()),
-        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, lovvalgsperiode.hentTom()),
+        // En løpende lovvalgsperiode varer ut årsavregningsåret.
+        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, lovvalgsperiode.getTom() ?: sisteDagIÅret(gjeldendeÅr)),
         dekning = lovvalgsperiode.hentTrygdedekning(),
         bestemmelse = lovvalgsperiode.hentBestemmelse(),
         medlemskapstyper = lovvalgsperiode.hentMedlemskapstype(),
@@ -710,27 +726,34 @@ data class LovvalgsperiodeForAvgift(
 }
 
 
-enum class AvgiftsperiodeForAvgiftType {
+enum class AvgiftsperiodeType {
     MEDLEMSKAPSPERIODE,
     HELSEUTGIFTDEKKESPERIODE,
     LOVVALGSPERIODE
 }
 
-interface AvgiftsperiodeForAvgift {
+sealed interface Avgiftsperiode {
     val fom: LocalDate
     val tom: LocalDate?
     val dekning: Trygdedekninger?
-    val type: AvgiftsperiodeForAvgiftType
+    val type: AvgiftsperiodeType
+}
+
+// Medlemskaps- og lovvalgsperioder er vurdert etter en bestemmelse; helseutgiftperioder er ikke det.
+sealed interface AvgiftsperiodeMedBestemmelse : Avgiftsperiode {
+    val bestemmelse: Bestemmelse
+    val medlemskapstyper: Medlemskapstyper
+    val innvilgelsesresultat: InnvilgelsesResultat
 }
 
 data class HelseutgiftDekkesPeriodeForAvgift(
     override val fom: LocalDate,
     override val tom: LocalDate,
     override val dekning: Trygdedekninger,
-    override val type: AvgiftsperiodeForAvgiftType = AvgiftsperiodeForAvgiftType.HELSEUTGIFTDEKKESPERIODE,
+    override val type: AvgiftsperiodeType = AvgiftsperiodeType.HELSEUTGIFTDEKKESPERIODE,
     val medlemskapstype: Medlemskapstyper,
     val id: Long = 0,
-) : AvgiftsperiodeForAvgift {
+) : Avgiftsperiode {
     constructor(helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode) : this(
         fom = helseutgiftDekkesPeriode.fomDato,
         tom = helseutgiftDekkesPeriode.tomDato,
