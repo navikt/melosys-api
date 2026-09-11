@@ -88,6 +88,11 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
     }
 
     @Override
+    protected Boolean hentErFjernarbeidTWFA(Behandlingsresultat behandlingsresultat) {
+        return behandlingsresultat.hentAnmodningsperiode().getErFjernarbeidTWFA();
+    }
+
+    @Override
     protected boolean skalSendesUtland(Behandlingsresultat behandlingsresultat) {
         Anmodningsperiode anmodningsperiode = behandlingsresultat.hentAnmodningsperiode();
         return behandlingsresultat.erAnmodningOmUnntak()

@@ -2,6 +2,7 @@ package no.nav.melosys.service.unntak
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -217,32 +218,101 @@ class AnmodningsperiodeServiceTest {
     }
 
     @Test
-    fun `oppdaterAnmodetAvForBehandling - er ikke satt fra før - oppdateres`() {
+    fun `registrerAnmodning - er ikke satt fra før - anmodetAv og fjernarbeid oppdateres`() {
         val anmodetAv = "MEG"
         val anmodningsperiode = anmodningsperiodeForTest { }
         every { anmodningsperiodeRepository.findByBehandlingsresultatId(any<Long>()) } returns listOf(anmodningsperiode)
         every { anmodningsperiodeRepository.save(anmodningsperiode) } returns anmodningsperiode
 
 
-        anmodningsperiodeService.oppdaterAnmodetAvForBehandling(1L, anmodetAv)
+        anmodningsperiodeService.registrerAnmodning(1L, anmodetAv, true)
 
 
         anmodningsperiode.anmodetAv shouldBe anmodetAv
+        anmodningsperiode.erFjernarbeidTWFA shouldBe true
         verify { anmodningsperiodeRepository.save(anmodningsperiode) }
     }
 
     @Test
-    fun `oppdaterAnmodetAvForBehandling - er satt fra før - kaster exception`() {
-        val anmodningsperiode = anmodningsperiodeForTest { anmodetAv = "DEG" }
+    fun `registrerAnmodning - fjernarbeid ikke besvart - lagres som null og ikke som nei`() {
+        val anmodningsperiode = anmodningsperiodeForTest { }
+        every { anmodningsperiodeRepository.findByBehandlingsresultatId(any<Long>()) } returns listOf(anmodningsperiode)
+        every { anmodningsperiodeRepository.save(anmodningsperiode) } returns anmodningsperiode
+
+
+        anmodningsperiodeService.registrerAnmodning(1L, "MEG", null)
+
+
+        anmodningsperiode.erFjernarbeidTWFA.shouldBeNull()
+    }
+
+    @Test
+    fun `registrerAnmodning - fjernarbeid besvart med nei - lagres som false`() {
+        val anmodningsperiode = anmodningsperiodeForTest { }
+        every { anmodningsperiodeRepository.findByBehandlingsresultatId(any<Long>()) } returns listOf(anmodningsperiode)
+        every { anmodningsperiodeRepository.save(anmodningsperiode) } returns anmodningsperiode
+
+
+        anmodningsperiodeService.registrerAnmodning(1L, "MEG", false)
+
+
+        anmodningsperiode.erFjernarbeidTWFA shouldBe false
+    }
+
+    @Test
+    fun `registrerAnmodning - er satt fra før - kaster exception og lar fjernarbeid staa urort`() {
+        val anmodningsperiode = anmodningsperiodeForTest {
+            anmodetAv = "DEG"
+            erFjernarbeidTWFA = true
+        }
         every { anmodningsperiodeRepository.findByBehandlingsresultatId(any<Long>()) } returns listOf(anmodningsperiode)
 
 
         val exception = shouldThrow<FunksjonellException> {
-            anmodningsperiodeService.oppdaterAnmodetAvForBehandling(1L, "MEG")
+            anmodningsperiodeService.registrerAnmodning(1L, "MEG", false)
         }
 
 
         exception.message shouldBe "Anmodningsperiode for behandling 1 er allerede anmodet av DEG"
+        anmodningsperiode.erFjernarbeidTWFA shouldBe true
+        verify(exactly = 0) { anmodningsperiodeRepository.save(any()) }
+    }
+
+    @Test
+    fun `lagreAnmodningsperioder - bevarer erFjernarbeidTWFA over slett og gjenopprett`() {
+        // Flagget settes ved anmodning, ikke i saksbehandlerens periodeskjema, så uten bevaringen ville en
+        // redigering mellom anmodning og sending nullet det
+        val behandlingsresultat = Behandlingsresultat.forTest { }
+        val eksisterende = anmodningsperiodeForTest { erFjernarbeidTWFA = true }
+        val innsendt = anmodningsperiodeForTest { fom = LocalDate.of(2024, 3, 1) }
+        every { anmodningsperiodeRepository.findByBehandlingsresultatId(any<Long>()) } returns listOf(eksisterende)
+        every { behandlingsresultatService.hentBehandlingsresultat(any<Long>()) } returns behandlingsresultat
+        every { anmodningsperiodeRepository.deleteByBehandlingsresultat(any()) } returns emptyList()
+        every { anmodningsperiodeRepository.flush() } returns Unit
+        every { anmodningsperiodeRepository.saveAll(any<Collection<Anmodningsperiode>>()) } returns listOf(innsendt)
+
+
+        anmodningsperiodeService.lagreAnmodningsperioder(1L, listOf(innsendt))
+
+
+        innsendt.erFjernarbeidTWFA shouldBe true
+    }
+
+    @Test
+    fun `lagreAnmodningsperioder - ingen eksisterende perioder - erFjernarbeidTWFA forblir null`() {
+        val behandlingsresultat = Behandlingsresultat.forTest { }
+        val innsendt = anmodningsperiodeForTest { }
+        every { anmodningsperiodeRepository.findByBehandlingsresultatId(any<Long>()) } returns emptyList()
+        every { behandlingsresultatService.hentBehandlingsresultat(any<Long>()) } returns behandlingsresultat
+        every { anmodningsperiodeRepository.deleteByBehandlingsresultat(any()) } returns emptyList()
+        every { anmodningsperiodeRepository.flush() } returns Unit
+        every { anmodningsperiodeRepository.saveAll(any<Collection<Anmodningsperiode>>()) } returns listOf(innsendt)
+
+
+        anmodningsperiodeService.lagreAnmodningsperioder(1L, listOf(innsendt))
+
+
+        innsendt.erFjernarbeidTWFA.shouldBeNull()
     }
 
     private fun lagAnmodningsperiode(

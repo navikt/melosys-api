@@ -9,8 +9,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey
-import no.nav.melosys.saksflytapi.domain.ProsessType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -32,14 +30,10 @@ class RammeavtaleStatistikkServiceTest {
     }
 
     @Test
-    fun `summerer per vedtaksaar og bygger riktig prosesstype, data-monster og resultattype`() {
-        val prosessTypeSlot = slot<String>()
-        val dataLikePatternSlot = slot<String>()
+    fun `summerer per vedtaksaar og sender riktig resultattype til spoerringen`() {
         val resultatTypeSlot = slot<String>()
         every {
-            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike(
-                capture(prosessTypeSlot),
-                capture(dataLikePatternSlot),
+            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedFjernarbeid(
                 capture(resultatTypeSlot),
                 any(),
                 any(),
@@ -54,15 +48,13 @@ class RammeavtaleStatistikkServiceTest {
 
         statistikk.antall shouldBe 3
         statistikk.antallPerVedtaksaar shouldBe mapOf("2024" to 2L, "2025" to 1L)
-        prosessTypeSlot.captured shouldBe ProsessType.ANMODNING_OM_UNNTAK.kode
-        dataLikePatternSlot.captured shouldBe "%${ProsessDataKey.ER_FJERNARBEID_TWFA.kode}=true%"
         resultatTypeSlot.captured shouldBe Behandlingsresultattyper.FASTSATT_LOVVALGSLAND.name
     }
 
     @Test
     fun `sorterer aarene stigende uavhengig av radrekkefolgen fra spoerringen`() {
         every {
-            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike(any(), any(), any(), any(), any())
+            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedFjernarbeid(any(), any(), any())
         } returns listOf(
             rad("MEL-1", 1, "2026-01-01"),
             rad("MEL-2", 2, "2024-01-01"),
@@ -78,7 +70,7 @@ class RammeavtaleStatistikkServiceTest {
     @Test
     fun `tar med saksnummer og vedtaksdato per behandling som standard`() {
         every {
-            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike(any(), any(), any(), any(), any())
+            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedFjernarbeid(any(), any(), any())
         } returns listOf(
             rad("MEL-1", 1, "2025-03-04"),
             rad("MEL-2", 2, "2025-06-01"),
@@ -95,7 +87,7 @@ class RammeavtaleStatistikkServiceTest {
     @Test
     fun `samme sak med to behandlinger telles to ganger og listes to ganger`() {
         every {
-            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike(any(), any(), any(), any(), any())
+            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedFjernarbeid(any(), any(), any())
         } returns listOf(
             rad("MEL-1", 1, "2025-03-04"),
             rad("MEL-1", 2, "2025-09-09"),
@@ -111,7 +103,7 @@ class RammeavtaleStatistikkServiceTest {
     @Test
     fun `utelater saksnummerlisten men beholder tallene naar inkluderSaksnummer er false`() {
         every {
-            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike(any(), any(), any(), any(), any())
+            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedFjernarbeid(any(), any(), any())
         } returns listOf(
             rad("MEL-1", 1, "2025-03-04"),
             rad("MEL-2", 2, "2025-06-01"),
@@ -130,7 +122,7 @@ class RammeavtaleStatistikkServiceTest {
         // spørringen eller skjemaet endres skal vi ikke underrapportere et tall brukt i offisiell rapportering
         listOf(radMedNull("MEL-2", null), radMedNull(null, "2025-01-01")).forEach { ugyldigRad ->
             every {
-                rammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike(any(), any(), any(), any(), any())
+                rammeavtaleStatistikkRepository.finnFerdigbehandledeMedFjernarbeid(any(), any(), any())
             } returns listOf(rad("MEL-1", 1, "2025-01-01"), ugyldigRad)
 
             shouldThrow<IllegalStateException> {
@@ -144,9 +136,7 @@ class RammeavtaleStatistikkServiceTest {
         val fomSlot = slot<LocalDateTime?>()
         val tomSlot = slot<LocalDateTime?>()
         every {
-            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike(
-                any(),
-                any(),
+            rammeavtaleStatistikkRepository.finnFerdigbehandledeMedFjernarbeid(
                 any(),
                 captureNullable(fomSlot),
                 captureNullable(tomSlot),

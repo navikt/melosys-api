@@ -90,7 +90,8 @@ CREATE TABLE anmodningsperiode (
     trygde_dekning          VARCHAR2(99),
     medlperiode_id          NUMBER,
     sendt_utland            NUMBER,                 -- 1 = sent to foreign authority
-    anmodet_av              VARCHAR2(30)            -- Who requested (NO/foreign country)
+    anmodet_av              VARCHAR2(30),           -- Who requested (NO/foreign country)
+    er_fjernarbeid_twfa     NUMBER(1)               -- EEA Telework Framework Agreement: 1 = yes, 0 = no, NULL = unanswered
 );
 ```
 

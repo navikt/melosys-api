@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Anmodningsperiode;
@@ -78,10 +79,23 @@ public class AnmodningsperiodeService {
             }
         }
 
+        // Periodene slettes og gjenopprettes fra saksbehandlerens skjema, og AnmodningsperiodeSkrivDto.til() kjenner
+        // kun skjemafeltene. er_fjernarbeid_twfa settes derimot ved anmodning, så uten dette ville en redigering
+        // mellom anmodning og sending nullet flagget. Verken sperren over eller Behandling.erRedigerbar() dekker
+        // det vinduet: begge slår først inn inne i SendAnmodningOmUnntak.
+        Boolean erFjernarbeidTWFA = eksisterende.stream()
+            .map(Anmodningsperiode::getErFjernarbeidTWFA)
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElse(null);
+
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         anmodningsperiodeRepository.deleteByBehandlingsresultat(behandlingsresultat);
         anmodningsperiodeRepository.flush();
-        anmodningsperioder.forEach(a -> a.setBehandlingsresultat(behandlingsresultat));
+        anmodningsperioder.forEach(a -> {
+            a.setBehandlingsresultat(behandlingsresultat);
+            a.setErFjernarbeidTWFA(erFjernarbeidTWFA);
+        });
         return anmodningsperiodeRepository.saveAll(anmodningsperioder);
     }
 
@@ -162,7 +176,13 @@ public class AnmodningsperiodeService {
         }
     }
 
-    public void oppdaterAnmodetAvForBehandling(long behandlingID, String subjekt) {
+    /**
+     * De to feltene settes i samme operasjon med vilje: en egen metode for TWFA-flagget ville kunne kalles uten
+     * sperren mot dobbel anmodning under.
+     *
+     * @param erFjernarbeidTWFA null når spørsmålet ikke er besvart; skilles fra et eksplisitt nei.
+     */
+    public void registrerAnmodning(long behandlingID, String subjekt, Boolean erFjernarbeidTWFA) {
         var anmodningsperiode = hentFørsteAnmodningsperiode(behandlingID);
         if (hasText(anmodningsperiode.getAnmodetAv())) {
             throw new FunksjonellException(
@@ -171,6 +191,7 @@ public class AnmodningsperiodeService {
         }
 
         anmodningsperiode.setAnmodetAv(subjekt);
+        anmodningsperiode.setErFjernarbeidTWFA(erFjernarbeidTWFA);
         anmodningsperiodeRepository.save(anmodningsperiode);
     }
 }

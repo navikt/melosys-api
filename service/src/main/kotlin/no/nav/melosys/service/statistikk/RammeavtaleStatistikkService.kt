@@ -1,8 +1,6 @@
 package no.nav.melosys.service.statistikk
 
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey
-import no.nav.melosys.saksflytapi.domain.ProsessType
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -15,35 +13,22 @@ class RammeavtaleStatistikkService(
      * Henter ferdigbehandlede behandlinger der rammeavtale om fjernarbeid (TWFA) er huket av, som antall totalt,
      * antall fordelt på vedtaksår og (valgfritt) saksnummeret bak hver behandling.
      *
-     * Verdien settes kun på [ProsessType.ANMODNING_OM_UNNTAK] og lagres i prosessinstansens prosessdata
-     * (java.util.Properties-tekst i CLOB), ikke som egen kolonne. Vi teller derfor behandlinger der prosessdataen
-     * inneholder `<kode>=true` for [ProsessDataKey.ER_FJERNARBEID_TWFA].
-     *
-     * ⚠️ Det er midlertidig: prosessinstans er en arbeidstabell, og flagget skal flyttes til en egen kolonne på
-     * `anmodningsperiode`. Se `README.md` i denne pakken. Følgen av å lese fra prosesstypen er også en kjent
-     * avgrensning — kun saker Norge selv har sendt telles, ikke innkommende A001 (MELOSYS-8252).
-     *
-     * Kun saker som er ferdigbehandlet etter at svar på anmodningen er mottatt telles med, dvs. behandlinger med
-     * [Behandlingsresultattyper.FASTSATT_LOVVALGSLAND] og en vedtaksdato. Året er året vedtaket ble fattet.
+     * Kjent avgrensning: kun saker Norge selv har sendt telles, ikke innkommende A001 (MELOSYS-8252).
+     * Hva som regnes som ferdigbehandlet, og hvorfor, står i KDoc-en på
+     * [RammeavtaleStatistikkRepository.finnFerdigbehandledeMedFjernarbeid].
      *
      * Både antallene og saksnummerlisten kommer fra samme spørring, slik at de ikke kan komme i utakt.
      * [inkluderSaksnummer] styrer kun hva som tas med i responsen.
      *
-     * @param fom valgfri fra-og-med-dato (vedtaksdato), null = ingen nedre grense
-     * @param tom valgfri til-og-med-dato (vedtaksdato, inklusiv), null = ingen øvre grense
-     * @param inkluderSaksnummer ta med saksnummer (MEL-nr) per behandling i responsen
+     * @param fom fra-og-med vedtaksdato, null = ingen nedre grense
+     * @param tom til-og-med vedtaksdato (inklusiv), null = ingen øvre grense
      */
     fun hentRammeavtaleFjernarbeidStatistikk(
         fom: LocalDate?,
         tom: LocalDate?,
         inkluderSaksnummer: Boolean = true,
     ): RammeavtaleFjernarbeidStatistikk {
-        val prosessType = ProsessType.ANMODNING_OM_UNNTAK.kode
-        val fjernarbeidDataMønster = "%${ProsessDataKey.ER_FJERNARBEID_TWFA.kode}=true%"
-
-        val saker = rammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike(
-            prosessType,
-            fjernarbeidDataMønster,
+        val saker = rammeavtaleStatistikkRepository.finnFerdigbehandledeMedFjernarbeid(
             Behandlingsresultattyper.FASTSATT_LOVVALGSLAND.name,
             fom?.atStartOfDay(),
             tom?.plusDays(1)?.atStartOfDay(),
@@ -64,7 +49,7 @@ class RammeavtaleStatistikkService(
     }
 
     /**
-     * Rad fra [RammeavtaleStatistikkRepository.finnFerdigbehandledeMedDataLike]: `[saksnummer, behandlingId, vedtaksdato]`.
+     * Rad fra [RammeavtaleStatistikkRepository.finnFerdigbehandledeMedFjernarbeid]: `[saksnummer, behandlingId, vedtaksdato]`.
      *
      * `saksnummer` og `vedtaksdato` er non-null ved konstruksjon — `behandling.saksnummer` er NOT NULL i skjemaet og
      * spørringen krever `vm.vedtak_dato IS NOT NULL`. Vi feiler derfor heller enn å hoppe over raden: å slippe en rad
