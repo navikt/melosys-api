@@ -83,9 +83,8 @@ class ÅrsavregningService(
     /**
      * Resetter eksisterende årsavregning dersom behandlingsresultatet er IKKE_FASTSATT.
      * Dette resetter all data saksbehandler har lagt inn på årsavregningen, og henter grunnlaget på
-     * nytt fra siste avsluttede behandling med avgiftspliktige perioder for året. Finnes ingen slik
-     * behandling, står medlemskaps- og helseutgiftperiodene igjen tomme, mens lovvalgsperiodene
-     * beholdes uendret.
+     * nytt fra siste avsluttede behandling med avgiftspliktige perioder. Finnes ingen slik behandling,
+     * eller dekker den ikke året, står periodene igjen tomme.
      */
     @Transactional
     fun resetEksisterendeÅrsavregning(behandlingID: Long): ÅrsavregningModel? {
@@ -132,6 +131,7 @@ class ÅrsavregningService(
             behandlingsresultat.årsavregning = null
             behandlingsresultat.medlemskapsperioder.clear()
             behandlingsresultat.clearHelseutgiftDekkesPerioder()
+            behandlingsresultat.clearLovvalgsperioder()
             behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         }
 
@@ -158,16 +158,11 @@ class ÅrsavregningService(
                     gjelderÅr
                 )
 
-                is Lovvalgsperiode -> {
-                    // Lovvalgsperioder ryddes bare når det faktisk replikeres. Medlemskaps- og
-                    // helseutgiftperioder ryddes ubetinget over, med samme hull; ikke rørt her.
-                    behandlingsresultat.clearLovvalgsperioder()
-                    replikerLovvalgsPeriode(
-                        behandlingsresultat,
-                        sisteBehandlingsresultatMedAvgiftspliktigPeriode,
-                        gjelderÅr
-                    )
-                }
+                is Lovvalgsperiode -> replikerLovvalgsPeriode(
+                    behandlingsresultat,
+                    sisteBehandlingsresultatMedAvgiftspliktigPeriode,
+                    gjelderÅr
+                )
 
                 else -> throw FunksjonellException("Ukjent type avgiftspliktigPeriode: ${sisteBehandlingsresultatMedAvgiftspliktigPeriode.finnAvgiftspliktigPerioder().first()}")
             }

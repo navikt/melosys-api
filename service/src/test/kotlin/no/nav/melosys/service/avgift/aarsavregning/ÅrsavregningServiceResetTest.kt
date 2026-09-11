@@ -203,7 +203,7 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
     }
 
     @Test
-    fun `reset uten avsluttet kildebehandling beholder lovvalgsperiodene i stedet for å nulle avgiften`() {
+    fun `reset uten avsluttet kildebehandling tømmer lovvalgsperiodene som de andre periodetypene`() {
         val fagsak = Fagsak.forTest {
             saksnummer = "123456"
             type = Sakstyper.EU_EOS
@@ -251,8 +251,8 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
         årsavregningService.resetEksisterendeÅrsavregning(2L).shouldNotBeNull()
 
 
-        årsavregningsbehandlingsresultat.lovvalgsperioder shouldHaveSize 1
-        årsavregningsbehandlingsresultat.hentÅrsavregning().beregnetAvgiftBelop shouldBe null
+        årsavregningsbehandlingsresultat.lovvalgsperioder shouldHaveSize 0
+        årsavregningsbehandlingsresultat.hentÅrsavregning().beregnetAvgiftBelop shouldBe BigDecimal.ZERO
     }
 
 
