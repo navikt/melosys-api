@@ -24,7 +24,7 @@ internal class ErPeriodeTest {
     }
 
     @Test
-    fun `periode uten startdato er en ødelagt rad og skal feile`() {
+    fun `periode uten startdato skal feile`() {
         val utenFom = periode(null, LocalDate.of(2023, 6, 1))
 
         shouldThrow<NullPointerException> {
