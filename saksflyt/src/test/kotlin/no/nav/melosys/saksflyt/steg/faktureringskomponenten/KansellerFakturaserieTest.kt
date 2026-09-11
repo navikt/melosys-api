@@ -6,6 +6,9 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenClient
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
@@ -67,7 +70,8 @@ class KansellerFakturaserieTest {
             faktureringskomponentenClient.kansellerFakturaserie(
                 fakturaReferanse,
                 SAKSBEHANDLER_IDENT,
-                emptyList()
+                emptyList(),
+                "Opphør av medlemskap"
             )
         } returns nyFakturaserieResponseDto
 
@@ -75,7 +79,7 @@ class KansellerFakturaserieTest {
         kansellerFakturaserie.utfør(prosessinstans)
 
         verify { behandlingsresultatService.lagre(behandlingsresultatOpprinneligBehandling) }
-        verify { faktureringskomponentenClient.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT, emptyList()) }
+        verify { faktureringskomponentenClient.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT, emptyList(), "Opphør av medlemskap") }
     }
 
     @Test
@@ -125,7 +129,8 @@ class KansellerFakturaserieTest {
             faktureringskomponentenClient.kansellerFakturaserie(
                 fakturaReferanse,
                 SAKSBEHANDLER_IDENT,
-                listOf(fakturaReferanseÅrsavregning)
+                listOf(fakturaReferanseÅrsavregning),
+                "Opphør av medlemskap"
             )
         } returns nyFakturaserieResponseDto
 
@@ -140,7 +145,7 @@ class KansellerFakturaserieTest {
             )
         }
 
-        verify { faktureringskomponentenClient.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT, listOf(fakturaReferanseÅrsavregning)) }
+        verify { faktureringskomponentenClient.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT, listOf(fakturaReferanseÅrsavregning), "Opphør av medlemskap") }
     }
 
 
@@ -192,14 +197,65 @@ class KansellerFakturaserieTest {
             faktureringskomponentenClient.kansellerFakturaserie(
                 fakturaReferanse,
                 SAKSBEHANDLER_IDENT,
-                emptyList()
+                emptyList(),
+                "Opphør av medlemskap"
             )
         } returns nyFakturaserieResponseDto
 
         kansellerFakturaserie.utfør(prosessinstans)
 
         verify { behandlingsresultatService.lagre(behandlingsresultatOpprinneligBehandling) }
-        verify { faktureringskomponentenClient.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT, emptyList()) }
+        verify { faktureringskomponentenClient.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT, emptyList(), "Opphør av medlemskap") }
+    }
+
+    @Test
+    fun `kanseller fakturaserie for EØS-pensjonist gir beskrivelse om annullering av fakturert trygdeavgift`() {
+        val behandlingId = 123L
+        val opprinneligBehandlingId = 456L
+        val fakturaReferanse = "FADKFOGMV123"
+        val saksbehandlerIdent = "S123456"
+
+        val opprinneligBehandling = Behandling.forTest {
+            id = opprinneligBehandlingId
+            registrertDato = Instant.now().minusSeconds(1333337)
+        }
+
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = behandlingId
+                this.opprinneligBehandling = opprinneligBehandling
+                registrertDato = Instant.now()
+                tema = Behandlingstema.PENSJONIST
+                fagsak {
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    leggTilBehandling(opprinneligBehandling)
+                }
+            }
+            medData(ProsessDataKey.SAKSBEHANDLER, saksbehandlerIdent)
+        }
+
+        val behandlingsresultatOpprinneligBehandling = Behandlingsresultat.forTest {
+            id = opprinneligBehandlingId
+            fakturaserieReferanse = fakturaReferanse
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns Behandlingsresultat.forTest { id = behandlingId }
+        every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns behandlingsresultatOpprinneligBehandling
+        every {
+            faktureringskomponentenClient.kansellerFakturaserie(any(), any(), any(), any())
+        } returns NyFakturaserieResponseDto("kanselleringsRef")
+
+        kansellerFakturaserie.utfør(prosessinstans)
+
+        verify {
+            faktureringskomponentenClient.kansellerFakturaserie(
+                fakturaReferanse,
+                saksbehandlerIdent,
+                emptyList(),
+                "Annullering av fakturert trygdeavgift"
+            )
+        }
     }
 
 }
