@@ -55,27 +55,75 @@ class OpprettFakturaserie(
 
         val saksbehandlerIdent = prosessinstans.hentData(ProsessDataKey.SAKSBEHANDLER)
 
-        if (behandlingsresultat.erOpphørt()) {
-            val opprinneligFakturaserieReferanse =
-                behandlingsresultatService.hentBehandlingsresultat(behandling.hentOpprinneligBehandling().id).hentFakturaserieReferanse()
-            if (behandlingsresultat.fakturaserieReferanse == null || behandlingsresultat.fakturaserieReferanse == opprinneligFakturaserieReferanse) {
-                log.info("Kansellerer fakturaserie for behandling: $behandlingID med fakturaseriereferanse: $opprinneligFakturaserieReferanse")
-                kansellerFakturaserieOgLagreReferanse(behandlingsresultat, opprinneligFakturaserieReferanse, saksbehandlerIdent)
-            } else {
-                log.info("Fakturaserie allerede kansellert for behandling: $behandlingID, hopper over kansellering")
+        val fjernetFakturerbarTrygdeavgift = andregangsvurderingHarFjernetFakturerbarTrygdeavgift(behandling, behandlingsresultat)
+
+        when {
+            behandlingsresultat.erOpphørt() ->
+                kansellerVedOpphør(behandling, behandlingsresultat, saksbehandlerIdent)
+
+            fjernetFakturerbarTrygdeavgift && !erIkkeTidligerePerioderAktiv() ->
+                kansellerVedBortfaltTrygdeavgift(behandling, behandlingsresultat, saksbehandlerIdent)
+
+            skalOppretteFakturaserie(behandlingsresultat)
+                || fjernetFakturerbarTrygdeavgift
+                || skalAvregneInneværendeOgFremtidigePerioderTilNull(behandlingsresultat) -> {
+                log.info("Oppretter fakturaserie for behandling: $behandlingID")
+                opprettFakturaserieOgLagreReferanse(behandlingsresultat, mapFakturaserieDto(behandlingsresultat, prosessinstans), saksbehandlerIdent)
             }
-            avsluttAktiveÅrsavregninger(behandling.fagsak)
-        } else if (skalOppretteFakturaserie(behandlingsresultat) || andregangsvurderingHarFjernetFakturerbarTrygdeavgift(
-                behandling,
-                behandlingsresultat
-            ) || skalAvregneInneværendeOgFremtidigePerioderTilNull(behandlingsresultat)
-        ) {
-            log.info("Oppretter fakturaserie for behandling: $behandlingID")
-            opprettFakturaserieOgLagreReferanse(behandlingsresultat, mapFakturaserieDto(behandlingsresultat, prosessinstans), saksbehandlerIdent)
-        } else {
-            log.info("Ingen fakturaserie opprettet for behandling: $behandlingID")
+
+            else -> log.info("Ingen fakturaserie opprettet for behandling: $behandlingID")
         }
     }
+
+    private fun kansellerVedOpphør(behandling: Behandling, behandlingsresultat: Behandlingsresultat, saksbehandlerIdent: String) {
+        val behandlingID = behandling.id
+        val opprinneligFakturaserieReferanse =
+            behandlingsresultatService.hentBehandlingsresultat(behandling.hentOpprinneligBehandling().id).hentFakturaserieReferanse()
+        if (erAlleredeKansellert(behandlingsresultat, opprinneligFakturaserieReferanse)) {
+            log.info("Fakturaserie allerede kansellert for behandling: $behandlingID, hopper over kansellering")
+        } else {
+            log.info("Kansellerer fakturaserie ved opphør for behandling: $behandlingID med fakturaseriereferanse: $opprinneligFakturaserieReferanse")
+            kansellerFakturaserieOgLagreReferanse(behandlingsresultat, opprinneligFakturaserieReferanse, saksbehandlerIdent)
+        }
+        avsluttAktiveÅrsavregninger(behandling.fagsak)
+    }
+
+    /**
+     * Andregangsbehandling der forrige behandling hadde fakturerbar trygdeavgift, men den nye vurderingen ikke har det.
+     * Typisk ved overgang fra ikke skattepliktig til skattepliktig: trygdeavgiften beregnes fortsatt, men med beløp null,
+     * og NAV skal ikke lenger kreve inn avgift (MELOSYS-8220).
+     *
+     * Brukes kun når [ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER] er av. Da kjenner Melosys alle år
+     * i medlemskapet, og faktureringskomponenten avviser tom periodeliste. Kansellering krediterer alt som er fakturert,
+     * inkludert årsavregninger. Med togglen på sendes i stedet tom periodeliste med forrige referanse (grenen for
+     * opprettelse), og faktureringskomponenten avregner kun inneværende år og fremover.
+     */
+    private fun kansellerVedBortfaltTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat, saksbehandlerIdent: String) {
+        val behandlingID = behandling.id
+        val opprinneligFakturaserieReferanse =
+            behandlingsresultatService.hentBehandlingsresultat(behandling.hentOpprinneligBehandling().id).fakturaserieReferanse
+        if (opprinneligFakturaserieReferanse == null) {
+            log.info("Trygdeavgift bortfalt for behandling: $behandlingID, men opprinnelig behandling har ingen fakturaserie. Ingen kansellering")
+            return
+        }
+        if (erAlleredeKansellert(behandlingsresultat, opprinneligFakturaserieReferanse)) {
+            log.info("Fakturaserie allerede kansellert for behandling: $behandlingID, hopper over kansellering")
+        } else {
+            log.info("Trygdeavgift bortfalt for behandling: $behandlingID, kansellerer fakturaserie med fakturaseriereferanse: $opprinneligFakturaserieReferanse")
+            kansellerFakturaserieOgLagreReferanse(behandlingsresultat, opprinneligFakturaserieReferanse, saksbehandlerIdent)
+        }
+        avsluttAktiveÅrsavregninger(behandling.fagsak)
+    }
+
+    /**
+     * Ved rekjøring av steget er referansen allerede byttet ut med referansen fra kanselleringen.
+     * Ny vurdering arver referansen fra opprinnelig behandling ved replikering, så lik referanse betyr «ikke kansellert ennå».
+     */
+    private fun erAlleredeKansellert(behandlingsresultat: Behandlingsresultat, opprinneligFakturaserieReferanse: String): Boolean =
+        behandlingsresultat.fakturaserieReferanse != null && behandlingsresultat.fakturaserieReferanse != opprinneligFakturaserieReferanse
+
+    private fun erIkkeTidligerePerioderAktiv(): Boolean =
+        unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
 
     private fun andregangsvurderingHarFjernetFakturerbarTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean =
         behandling.erAndregangsbehandling()
@@ -98,7 +146,7 @@ class OpprettFakturaserie(
 
     private fun avsluttAktiveÅrsavregninger(fagsak: Fagsak) {
         fagsak.hentAktiveÅrsavregninger().forEach {
-            log.info("Avslutter årsavregning ved opphør, behandlingId: ${it.id}")
+            log.info("Avslutter aktiv årsavregning fordi trygdeavgift til NAV bortfaller, behandlingId: ${it.id}")
             oppgaveService.ferdigstillOppgaveMedBehandlingID(it.id)
             behandlingsresultatService.oppdaterBehandlingsresultattype(it.id, Behandlingsresultattyper.FERDIGBEHANDLET)
             behandlingService.avsluttBehandling(it.id)
@@ -114,7 +162,7 @@ class OpprettFakturaserie(
      * til kun tidligere år. Vi trenger da å avregne i faktureringskomponenten med tidligere fakturaserieref og tom periode.
      */
     private fun skalAvregneInneværendeOgFremtidigePerioderTilNull(behandlingsresultat: Behandlingsresultat): Boolean {
-        if (!unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
+        if (!erIkkeTidligerePerioderAktiv()) {
             return false
         }
 
