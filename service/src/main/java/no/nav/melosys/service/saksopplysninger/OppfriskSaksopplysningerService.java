@@ -12,7 +12,6 @@ import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandling.ReplikerBehandlingsresultatService;
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService;
 import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService;
@@ -33,7 +32,6 @@ public class OppfriskSaksopplysningerService {
 
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final BehandlingService behandlingService;
-    private final BehandlingsresultatService behandlingsresultatService;
     private final UfmKontrollService ufmKontrollService;
     private final InngangsvilkaarService inngangsvilkaarService;
     private final RegisteropplysningerService registeropplysningerService;
@@ -45,7 +43,6 @@ public class OppfriskSaksopplysningerService {
 
     public OppfriskSaksopplysningerService(AnmodningsperiodeService anmodningsperiodeService,
                                            BehandlingService behandlingService,
-                                           BehandlingsresultatService behandlingsresultatService,
                                            UfmKontrollService ufmKontrollService,
                                            InngangsvilkaarService inngangsvilkaarService,
                                            RegisteropplysningerService registeropplysningerService,
@@ -56,7 +53,6 @@ public class OppfriskSaksopplysningerService {
                                            ReplikerBehandlingsresultatService replikerBehandlingsresultatService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.behandlingService = behandlingService;
-        this.behandlingsresultatService = behandlingsresultatService;
         this.ufmKontrollService = ufmKontrollService;
         this.inngangsvilkaarService = inngangsvilkaarService;
         this.registeropplysningerService = registeropplysningerService;
@@ -79,11 +75,7 @@ public class OppfriskSaksopplysningerService {
 
         log.info("Starter oppdatering av registeropplysninger og tilbakestilling av behandlingsresultat for behandlingID: {} ", behandlingID);
         oppdaterRegisteropplysninger(behandlingID, periodeOver5aar, behandling);
-        behandlingsresultatService.tømBehandlingsresultat(behandlingID);
-
-        if (behandling.erManglendeInnbetalingTrygdeavgift()) {
-            replikerBehandlingsresultatService.gjenopprettBehandlingsresultatTilUtgangspunkt(behandlingID);
-        }
+        replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(behandlingID);
 
         if (behandling.erBehandlingAvSed()) {
             ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingID);

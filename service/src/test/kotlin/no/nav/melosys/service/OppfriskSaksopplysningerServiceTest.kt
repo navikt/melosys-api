@@ -22,7 +22,6 @@ import no.nav.melosys.domain.mottatteopplysninger.soeknad
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
-import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.ReplikerBehandlingsresultatService
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService
@@ -47,9 +46,6 @@ class OppfriskSaksopplysningerServiceTest {
 
     @RelaxedMockK
     lateinit var behandlingService: BehandlingService
-
-    @RelaxedMockK
-    lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @RelaxedMockK
     lateinit var ufmKontrollService: UfmKontrollService
@@ -85,7 +81,6 @@ class OppfriskSaksopplysningerServiceTest {
         oppfriskSaksopplysningerService = OppfriskSaksopplysningerService(
             anmodningsperiodeService,
             behandlingService,
-            behandlingsresultatService,
             ufmKontrollService,
             inngangsvilkaarService,
             registeropplysningerService,
@@ -104,7 +99,7 @@ class OppfriskSaksopplysningerServiceTest {
 
         oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false)
 
-        verify { behandlingsresultatService.tømBehandlingsresultat(any()) }
+        verify { replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(any()) }
         verify { registeropplysningerService.slettRegisterOpplysninger(BEHANDLING_ID) }
         verify { registeropplysningerService.hentOgLagreOpplysninger(any<RegisteropplysningerRequest>()) }
     }
@@ -118,7 +113,7 @@ class OppfriskSaksopplysningerServiceTest {
 
         oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false)
 
-        verify { behandlingsresultatService.tømBehandlingsresultat(any()) }
+        verify { replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(any()) }
         verify { registeropplysningerService.slettRegisterOpplysninger(BEHANDLING_ID) }
         verify(exactly = 0) { inngangsvilkaarService.vurderOgLagreInngangsvilkår(any(), any(), any(), any()) }
     }

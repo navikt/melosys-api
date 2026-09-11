@@ -145,6 +145,25 @@ class ReplikerBehandlingsresultatService(
     }
 
     /**
+     * Tømmer behandlingsresultatet, og gjenoppretter det deretter fra opprinnelig behandling
+     * dersom behandlingen er av type MANGLENDE_INNBETALING_TRYGDEAVGIFT.
+     *
+     * Tømmingen skal hindre at resultatet blir stående med utdaterte data fra en tidligere
+     * tilstand (for eksempel medlemskapsperioder satt av et tidligere valg).
+     */
+    @Transactional(rollbackFor = [Exception::class])
+    fun tilbakestillBehandlingsresultat(behandlingID: Long) {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        val behandling = behandlingsresultat.hentBehandling()
+
+        behandlingsresultatService.tømBehandlingsresultat(behandlingID)
+
+        if (behandling.erManglendeInnbetalingTrygdeavgift()) {
+            gjenopprettBehandlingsresultatTilUtgangspunkt(behandlingID)
+        }
+    }
+
+    /**
      * Flytter samlingene fra [replika] inn i dette behandlingsresultatet, og setter eierreferansen på
      * hvert element. Samlingsinstansene beholdes, jf. orphanRemoval.
      */

@@ -266,8 +266,19 @@ open class Behandlingsresultat : RegistreringsInfo() {
     fun finnFullstendigManglendeInnbetalingAvklarteFakta(): Avklartefakta? =
         avklartefakta.firstOrNull { it.type == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING }
 
-    fun harValgtFullstendigManglendeInnbetaling() =
-        finnFullstendigManglendeInnbetalingAvklarteFakta()?.fakta.equals(Avklartefakta.VALGT_FAKTA, ignoreCase = true)
+    fun finnManglendeInnbetalingHandlingsvalgAvklarteFakta(): Avklartefakta? =
+        avklartefakta.firstOrNull { it.type == Avklartefaktatyper.MANGLENDE_INNBETALING_HANDLINGSVALG }
+
+    // Støtter både eldre frontend (kun boolsk FULLSTENDIG_MANGLENDE_INNBETALING) og nyere frontend
+    // (MANGLENDE_INNBETALING_HANDLINGSVALG) i en overgangsperiode, jf. MELOSYS-8257.
+    // Den nye enumen vinner dersom begge er satt.
+    fun harValgtFullstendigManglendeInnbetaling(): Boolean {
+        val handlingsvalg = finnManglendeInnbetalingHandlingsvalgAvklarteFakta()?.fakta
+        if (handlingsvalg != null) {
+            return handlingsvalg.equals(ManglendeInnbetalingHandlingsvalg.HELE_PERIODEN_OPPHØRES.kode, ignoreCase = true)
+        }
+        return finnFullstendigManglendeInnbetalingAvklarteFakta()?.fakta.equals(Avklartefakta.VALGT_FAKTA, ignoreCase = true)
+    }
 
     fun erInnvilgelse(): Boolean {
         if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND ||
