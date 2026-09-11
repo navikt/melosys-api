@@ -28,6 +28,10 @@ import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
+import no.nav.melosys.service.avgift.aarsavregning.SkattehendelserConsumer
+import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.SkattehendelseItem
+import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.SkattepliktigeAarsavregningKjoering
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -45,8 +49,12 @@ import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.jdbc.core.JdbcTemplate
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -68,11 +76,77 @@ class ÅrsavregningIT(
     @Autowired private val årsavregningService: ÅrsavregningService,
     @Autowired private val opprettSak: OpprettSak,
     @Autowired private val pensjonsopptjeningHendelseKafkaConsumer: PensjonsopptjeningHendelseKafkaConsumer,
+    @Autowired private val skattehendelserConsumer: SkattehendelserConsumer,
+    @Autowired private val skattepliktigeKjøring: SkattepliktigeAarsavregningKjoering,
+    @Autowired private val jdbcTemplate: JdbcTemplate,
 ) : AvgiftFaktureringTestBase(
     TrygdeavgiftsberegningTransformer()
 ) {
 
     override val fakturaserieReferanse: String = "AAJ17B5NTTDYKFB5DZTSSQEHZZ"
+
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `årløs behandling tillater årsavregning fra Kafka og batch uten duplikat ved gjentatt hendelse`(batch: Boolean) {
+        val år = inneværendeÅr
+        val saksnummer = lagFørstegangsbehandling(
+            Skatteplikttype.IKKE_SKATTEPLIKTIG, false, LocalDate.of(år, 1, 1), LocalDate.of(år, 2, 1)
+        )
+        val årløsId = executeAndWait(mapOf(ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK to 1)) {
+            opprettBehandlingForSak.opprettBehandling(saksnummer, lagOpprettSakDtoÅrsavregning())
+        }.hentBehandling.id
+        val opprinneligStatus = behandlingRepository.findById(årløsId).shouldBePresent().status
+        behandlingsresultatRepository.findById(årløsId).shouldBePresent().årsavregning shouldBe null
+        val hendelse = Skattehendelse(år.toString(), TEST_FNR, "ny")
+        val batchHendelser = listOf(SkattehendelseItem(år.toString(), TEST_FNR))
+
+        ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
+        try {
+            if (batch) {
+                val prosesserFørDryrun = antallProsesser()
+                skattepliktigeKjøring.prosesserSkattehendelser(batchHendelser, skarp = false)
+                skattepliktigeKjøring.resultater.single().villeOpprettetProsessinstans shouldBe true
+                fagsakRepository.findBySaksnummer(saksnummer).shouldBePresent().behandlinger.shouldHaveSize(2)
+                antallProsesser() shouldBe prosesserFørDryrun
+            }
+
+            executeAndWait(
+                mapOf(
+                    ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING to 1,
+                    ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+                )
+            ) {
+                if (batch) {
+                    skattepliktigeKjøring.prosesserSkattehendelser(batchHendelser, skarp = true, maksAntall = 1)
+                } else {
+                    skatteHendelseMeldingKafkaTemplate.send("teammelosys.skattehendelser.v1-local", hendelse).get()
+                }
+            }
+
+            val behandlinger = fagsakRepository.findBySaksnummer(saksnummer).shouldBePresent().behandlinger
+            behandlinger.shouldHaveSize(3)
+            val årssatt = behandlinger.single { it.type == Behandlingstyper.ÅRSAVREGNING && it.id != årløsId }
+            årssatt.status shouldBe Behandlingsstatus.OPPRETTET
+            behandlingsresultatRepository.findById(årssatt.id).shouldBePresent().hentÅrsavregning().aar shouldBe år
+
+            val prosesserFørGjentakelse = antallProsesser()
+            if (batch) {
+                skattepliktigeKjøring.prosesserSkattehendelser(batchHendelser, skarp = true, maksAntall = 1)
+                skattepliktigeKjøring.resultater.single().villeOpprettetProsessinstans shouldBe false
+            } else {
+                skattehendelserConsumer.lesSkattehendelser(ConsumerRecord("topic", 0, 1, "gjentatt", hendelse))
+            }
+            antallProsesser() shouldBe prosesserFørGjentakelse
+            behandlingRepository.findById(årssatt.id).shouldBePresent().status shouldBe Behandlingsstatus.OPPRETTET
+            fagsakRepository.findBySaksnummer(saksnummer).shouldBePresent().behandlinger.shouldHaveSize(3)
+            behandlingRepository.findById(årløsId).shouldBePresent().status shouldBe opprinneligStatus
+            behandlingsresultatRepository.findById(årløsId).shouldBePresent().årsavregning shouldBe null
+        } finally {
+            ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
+        }
+    }
+
+    private fun antallProsesser(): Int = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM prosessinstans", Int::class.java)!!
 
     @Test
     fun `oppretter prosess og påfølgende årsavregningsbehandling for alle saker knyttet til en skattehendelse `() {

@@ -25,6 +25,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.util.*
 
 
@@ -302,6 +304,51 @@ class SkattehendelserConsumerTest {
         verify { behandlingService wasNot Called }
     }
 
+
+    @ParameterizedTest
+    @EnumSource(Behandlingsstatus::class, names = ["OPPRETTET", "AVVENT_DOK_PART"])
+    fun `årløs behandling tillater opprettelse og gjentatt hendelse bruker årssatt behandling`(status: Behandlingsstatus) {
+        val fagsak = lagFagsak {
+            behandling {
+                id = 41
+                type = Behandlingstyper.ÅRSAVREGNING
+                this.status = Behandlingsstatus.UNDER_BEHANDLING
+            }
+        }
+        val årløs = fagsak.behandlinger.single()
+        val grunnlag = Behandlingsresultat.forTest { }
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
+        every { årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(fagsak.saksnummer, GJELDER_ÅR) } returns
+            GjeldendeBehandlingsresultaterForÅrsavregning(grunnlag, sisteBehandlingsresultatMedAvgift = grunnlag)
+        every { trygdeavgiftMottakerService.skalBetalesTilNav(grunnlag) } returns true
+        every { behandlingsresultatService.hentBehandlingsresultat(årløs.id) } returns Behandlingsresultat.forTest { }
+        every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any(), any()) } returns UUID.randomUUID()
+        val hendelse = ConsumerRecord("topic", 1, 1, "key", Skattehendelse(GJELDER_ÅR.toString(), AKTØR_ID, "ny"))
+
+        skattehendelserConsumer.lesSkattehendelser(hendelse)
+
+        val årssatt = Behandling.forTest {
+            id = 42
+            type = Behandlingstyper.ÅRSAVREGNING
+            this.status = status
+        }
+        fagsak.behandlinger.add(årssatt)
+        every { behandlingsresultatService.hentBehandlingsresultat(årssatt.id) } returns
+            Behandlingsresultat.forTest { årsavregning { aar = GJELDER_ÅR } }
+        every { behandlingService.hentBehandling(årssatt.id) } returns årssatt
+        every { behandlingService.lagre(årssatt) } just Runs
+
+        skattehendelserConsumer.lesSkattehendelser(hendelse)
+
+        verify(exactly = 1) {
+            prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
+                fagsak.saksnummer, GJELDER_ÅR.toString(), Behandlingsaarsaktyper.MELDING_FRA_SKATT, true
+            )
+        }
+        verify(exactly = if (status == Behandlingsstatus.OPPRETTET) 0 else 1) { behandlingService.lagre(årssatt) }
+        årssatt.status shouldBe if (status == Behandlingsstatus.OPPRETTET) status else Behandlingsstatus.VURDER_DOKUMENT
+        årløs.status shouldBe Behandlingsstatus.UNDER_BEHANDLING
+    }
 
     private fun lagFagsak(init: FagsakTestFactory.Builder.() -> Unit = {}) = Fagsak.forTest {
         type = Sakstyper.EU_EOS
