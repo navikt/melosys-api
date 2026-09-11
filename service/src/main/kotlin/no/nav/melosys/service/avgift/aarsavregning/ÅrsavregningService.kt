@@ -159,8 +159,8 @@ class ÅrsavregningService(
                 )
 
                 is Lovvalgsperiode -> {
-                    // Ryddes her, ikke sammen med de andre periodetypene over: uten en kilde å replikere
-                    // fra ville en tømt liste satt endelig avgift til 0.
+                    // Lovvalgsperioder ryddes bare når det faktisk replikeres. Medlemskaps- og
+                    // helseutgiftperioder ryddes ubetinget over, med samme hull; ikke rørt her.
                     behandlingsresultat.clearLovvalgsperioder()
                     replikerLovvalgsPeriode(
                         behandlingsresultat,
