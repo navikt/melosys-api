@@ -16,6 +16,8 @@ import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.oppgave.OppgaveSoekFilter
 import no.nav.melosys.service.oppgave.Oppgaveplukker
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto
+import no.nav.melosys.service.oppgave.dto.TildelOppgaveDto
+import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import no.nav.melosys.tjenester.gui.dto.OppgaveSokDto
@@ -40,6 +42,9 @@ internal class OppgaveControllerTest {
 
     @MockkBean
     private lateinit var oppgaveSoekFilter: OppgaveSoekFilter
+
+    @MockkBean
+    private lateinit var aksesskontroll: Aksesskontroll
 
     @Autowired
     private lateinit var mockMvc: MockMvc
@@ -89,6 +94,37 @@ internal class OppgaveControllerTest {
                 responseBody(objectMapper)
                     .containsObjectAsJson(expectedResponse, PlukketOppgaveDto::class.java)
             )
+    }
+
+    @Test
+    fun `skal tildele oppgave til innlogget saksbehandler`() {
+        every { aksesskontroll.autoriserSkriv(any<Long>()) } returns Unit
+        every { oppgaveplukker.tildelOppgaveTilSaksbehandler(any<String>(), any<Long>()) } returns null
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("$BASE_URL/tildel")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(TildelOppgaveDto(behandlingID = 42L)))
+        )
+            .andExpect(status().isNoContent())
+
+        verify { aksesskontroll.autoriserSkriv(42L) }
+        verify { oppgaveplukker.tildelOppgaveTilSaksbehandler(any<String>(), 42L) }
+    }
+
+    @Test
+    fun `skal tildele oppgave selv om den er tildelt en annen saksbehandler`() {
+        every { aksesskontroll.autoriserSkriv(any<Long>()) } returns Unit
+        every { oppgaveplukker.tildelOppgaveTilSaksbehandler(any<String>(), any<Long>()) } returns "Z111111"
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("$BASE_URL/tildel")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(TildelOppgaveDto(behandlingID = 7L)))
+        )
+            .andExpect(status().isNoContent())
+
+        verify { oppgaveplukker.tildelOppgaveTilSaksbehandler(any<String>(), 7L) }
     }
 
     @Test

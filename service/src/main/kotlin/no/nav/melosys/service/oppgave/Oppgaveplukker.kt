@@ -155,4 +155,34 @@ class Oppgaveplukker(
         oppgaveFasade.leggTilbakeOppgave(oppgaveID)
         log.info("Oppgave med oppgaveId $oppgaveID er lagt tilbake. ")
     }
+
+    /**
+     * Tildeler den åpne behandlingsoppgaven på en bestemt behandling til [saksbehandlerID].
+     * I motsetning til [plukkOppgave] velger saksbehandleren saken selv.
+     *
+     * Overtakelse fra en annen saksbehandler er tillatt; frontend advarer om det i bekreftelsesdialogen.
+     * Er oppgaven allerede tildelt [saksbehandlerID] gjøres ingenting.
+     *
+     * @return identen oppgaven var tildelt før kallet, eller null hvis den var utildelt.
+     */
+    @Transactional
+    @Synchronized
+    fun tildelOppgaveTilSaksbehandler(saksbehandlerID: String, behandlingID: Long): String? {
+        val behandling = behandlingService.hentBehandling(behandlingID)
+        val oppgave = oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.fagsak.saksnummer)
+        val forrigeEier = oppgave.tilordnetRessurs?.takeIf { it.isNotBlank() }
+
+        if (forrigeEier == saksbehandlerID) {
+            log.info("Oppgave ${oppgave.oppgaveId} er allerede tildelt $saksbehandlerID. Ingen endring.")
+            return forrigeEier
+        }
+
+        oppdaterBehandlingsstatus(behandling.fagsak.saksnummer)
+        oppgaveService.tildelOppgave(oppgave.oppgaveId, saksbehandlerID)
+        log.info(
+            "Oppgave ${oppgave.oppgaveId} på behandling $behandlingID ble tildelt $saksbehandlerID " +
+                "(tidligere tildelt: ${forrigeEier ?: "ingen"})."
+        )
+        return forrigeEier
+    }
 }
