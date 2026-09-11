@@ -26,7 +26,7 @@ public interface ErPeriode {
     }
 
     // En løpende periode (tom = null) er åpen, ikke ugyldig, jf. inkluderer() over.
-    // Fom er derimot påkrevd i alle periodetabellene, så null der er en ødelagt rad og skal si fra.
+    // Fom er derimot påkrevd i alle perioder.
     default boolean overlapperMedÅr(int år) {
         var fom = Objects.requireNonNull(getFom(), () -> "fom er påkrevd for " + getClass().getSimpleName());
         var tom = getTom() != null ? getTom() : LocalDate.MAX;
