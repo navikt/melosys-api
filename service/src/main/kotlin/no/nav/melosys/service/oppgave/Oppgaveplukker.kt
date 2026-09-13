@@ -1,6 +1,7 @@
 package no.nav.melosys.service.oppgave
 
 import mu.KotlinLogging
+import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -154,5 +155,36 @@ class Oppgaveplukker(
         }
         oppgaveFasade.leggTilbakeOppgave(oppgaveID)
         log.info("Oppgave med oppgaveId $oppgaveID er lagt tilbake. ")
+    }
+
+    /**
+     * I motsetning til [plukkOppgave] velger saksbehandleren saken selv. Overtakelse fra en annen
+     * saksbehandler er tillatt.
+     *
+     * @return identen oppgaven var tildelt før kallet, eller null hvis den var utildelt.
+     */
+    @Transactional
+    @Synchronized
+    fun tildelOppgaveTilSaksbehandler(saksbehandlerID: String, behandlingID: Long): String? {
+        val behandling = behandlingService.hentBehandling(behandlingID)
+        val oppgave = oppgaveService.finnBehandlingsoppgaveForBehandlingID(behandlingID)
+            ?: throw IkkeFunnetException("Finner ingen åpen oppgave for behandling $behandlingID")
+        val forrigeEier = oppgave.tilordnetRessurs?.takeIf { it.isNotBlank() }
+
+        if (forrigeEier == saksbehandlerID) {
+            log.info("Oppgave ${oppgave.oppgaveId} er allerede tildelt $saksbehandlerID. Ingen endring.")
+            return forrigeEier
+        }
+
+        if (behandling.status == Behandlingsstatus.SVAR_ANMODNING_MOTTATT || behandling.status == Behandlingsstatus.OPPRETTET) {
+            behandling.status = Behandlingsstatus.UNDER_BEHANDLING
+            behandlingService.lagre(behandling)
+        }
+        oppgaveService.tildelOppgave(oppgave.oppgaveId, saksbehandlerID)
+        log.info(
+            "Oppgave ${oppgave.oppgaveId} på behandling $behandlingID ble tildelt $saksbehandlerID " +
+                "(tidligere tildelt: ${forrigeEier ?: "ingen"})."
+        )
+        return forrigeEier
     }
 }
