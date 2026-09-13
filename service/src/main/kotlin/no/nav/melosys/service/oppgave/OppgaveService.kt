@@ -219,6 +219,9 @@ class OppgaveService(
     fun tildelOppgave(oppgaveID: String, saksbehandler: String?) =
         oppgaveFasade.oppdaterOppgave(oppgaveID, OppgaveOppdatering.builder().tilordnetRessurs(saksbehandler).build())
 
+    fun tildelOppgaveHvisEierEr(oppgaveID: String, saksbehandler: String, forventetEier: String?): String? =
+        oppgaveFasade.tildelOppgaveHvisEierEr(oppgaveID, saksbehandler, forventetEier)
+
     fun opprettOppgaveForSak(saksnummer: String) {
         log.info("Oppretter ny oppgave for saksnummer {}", saksnummer)
         val fagsak = fagsakService.hentFagsak(saksnummer)
@@ -470,4 +473,3 @@ class OppgaveService(
         }
     }
 }
-
