@@ -132,11 +132,8 @@ object DigitalSøknadMapper {
         return arbeidstakersPeriode != arbeidsgiversPeriode
     }
 
-    private fun mapJuridiskArbeidsgiverNorge(
-        dto: UtsendtArbeidstakerSkjemaM2MDto,
-        virksomhetINorge: ArbeidsgiverensVirksomhetINorgeDto?
-    ): JuridiskArbeidsgiverNorge = JuridiskArbeidsgiverNorge().apply {
-        erOffentligVirksomhet = virksomhetINorge?.erArbeidsgiverenOffentligVirksomhet
+    private fun mapJuridiskArbeidsgiverNorge(dto: UtsendtArbeidstakerSkjemaM2MDto): JuridiskArbeidsgiverNorge = JuridiskArbeidsgiverNorge().apply {
+        erOffentligVirksomhet = dto.erOffentligArbeidsgiver()
         ekstraArbeidsgivere = listOfNotNull(hentHovedarbeidsgiversOrgnr(dto))
     }
 
