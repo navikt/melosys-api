@@ -1011,8 +1011,8 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             årsavregningID shouldBe 51L
             år shouldBe 2024
 
-            årsavregningBehandlingsresultat.lovvalgsperioder.shouldNotBeEmpty()
-            årsavregningBehandlingsresultat.lovvalgsperioder.last().let { periode ->
+            årsavregningBehandlingsresultat.lovvalgsperioder shouldHaveSize 1
+            årsavregningBehandlingsresultat.lovvalgsperioder.single().let { periode ->
                 periode.hentFom() shouldBe LocalDate.of(2024, 1, 1)
                 periode.hentTom() shouldBe LocalDate.of(2024, 12, 31)
                 periode.behandlingsresultat shouldBe årsavregningBehandlingsresultat
@@ -1020,4 +1020,6 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             }
         }
     }
+
+
 }

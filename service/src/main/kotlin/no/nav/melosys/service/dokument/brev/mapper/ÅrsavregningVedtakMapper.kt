@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype.MISJONÆR
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
 import no.nav.melosys.integrasjon.dokgen.dto.ÅrsavregningVedtaksbrev
 import no.nav.melosys.service.avgift.MinstebeløpService
@@ -131,12 +130,12 @@ class ÅrsavregningVedtakMapper(
     private fun avgiftsPeriodeMapper(
         medlemskapsTypePliktig: Boolean,
         trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
-    ): List<Avgiftsperiode> {
+    ): List<ÅrsavregningVedtaksbrev.Avgiftsperiode> {
         return trygdeavgiftsperioder.map { trygdeavgiftsperiode ->
             val grunnlagsInntektsperiode = trygdeavgiftsperiode.grunnlagInntekstperiode
                 ?: throw IllegalStateException("trygdeavgiftsperioden må ha en inntektsperiode")
 
-            Avgiftsperiode(
+            ÅrsavregningVedtaksbrev.Avgiftsperiode(
                 fom = trygdeavgiftsperiode.fom,
                 tom = trygdeavgiftsperiode.tom,
                 avgiftssats = trygdeavgiftsperiode.trygdesats,
@@ -191,12 +190,11 @@ class ÅrsavregningVedtakMapper(
     private fun List<Trygdeavgiftsperiode>.harPeriodeMedBeregningsregel(regel: Avgiftsberegningsregel): Boolean =
         any { it.beregningsregel == regel }
 
-    private fun harPliktigMedlemskap(avgiftspliktigPerioder: List<AvgiftsperiodeForAvgift>?): Boolean {
+    private fun harPliktigMedlemskap(avgiftspliktigPerioder: List<Avgiftsperiode>?): Boolean {
         return avgiftspliktigPerioder?.takeIf { it.isNotEmpty() }
             ?.all { when (it) {
-                is MedlemskapsperiodeForAvgift -> it.medlemskapstyper == Medlemskapstyper.PLIKTIG
+                is AvgiftsperiodeMedBestemmelse -> it.medlemskapstyper == Medlemskapstyper.PLIKTIG
                 is HelseutgiftDekkesPeriodeForAvgift -> it.medlemskapstype == Medlemskapstyper.PLIKTIG
-                else -> throw FunksjonellException("Ukjent periodetype: ${it.javaClass.simpleName}")
             } } == true
     }
 }
