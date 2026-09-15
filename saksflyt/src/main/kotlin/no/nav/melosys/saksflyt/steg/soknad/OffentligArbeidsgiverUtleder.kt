@@ -10,12 +10,12 @@ internal fun UtsendtArbeidstakerSkjemaM2MDto.erOffentligArbeidsgiver(): Boolean?
     val registerverdier = skjemaer
         .mapNotNull { it.metadata.erOffentligArbeidsgiver }
         .distinct()
-    check(registerverdier.size <= 1) { "Koblede skjemaer har motstridende registerklassifisering" }
+    check(registerverdier.size <= 1) { "Koblede skjemaer har motstridende klassifisering i EREG" }
     return registerverdier.singleOrNull()
-        ?: skjemaer.firstNotNullOfOrNull { it.manueltSvarOmOffentligArbeidsgiver() }
+        ?: skjemaer.firstNotNullOfOrNull { it.brukerSvarOmOffentligArbeidsgiver() }
 }
 
-private fun UtsendtArbeidstakerSkjemaDto.manueltSvarOmOffentligArbeidsgiver(): Boolean? =
+private fun UtsendtArbeidstakerSkjemaDto.brukerSvarOmOffentligArbeidsgiver(): Boolean? =
     when (val skjemaData = data) {
         is UtsendtArbeidstakerArbeidsgiversSkjemaDataDto ->
             skjemaData.arbeidsgiverensVirksomhetINorge?.erArbeidsgiverenOffentligVirksomhet

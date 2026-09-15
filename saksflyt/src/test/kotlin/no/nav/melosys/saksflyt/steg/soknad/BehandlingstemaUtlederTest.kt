@@ -34,7 +34,7 @@ class BehandlingstemaUtlederTest {
     }
 
     @Test
-    fun `metadata overstyrer gammelt manuelt svar`() {
+    fun `metadata overstyrer gammelt brukersvar`() {
         val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
             skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
             data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto(
@@ -56,7 +56,7 @@ class BehandlingstemaUtlederTest {
     }
 
     @Test
-    fun `eldre skjema uten registerklassifisering bruker manuelt svar`() {
+    fun `eldre skjema uten registerklassifisering bruker brukersvaret`() {
         val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
             skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
             data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto(
@@ -122,7 +122,7 @@ class BehandlingstemaUtlederTest {
 
         assertThatThrownBy { dto.erOffentligArbeidsgiver() }
             .isInstanceOf(IllegalStateException::class.java)
-            .hasMessageContaining("motstridende registerklassifisering")
+            .hasMessageContaining("motstridende klassifisering i EREG")
     }
 
 }
