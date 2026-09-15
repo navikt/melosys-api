@@ -111,7 +111,7 @@ class TekstblokkHistorikkServiceTest {
         service.hentVersjonPaaTidspunkt(1L, dato(3)).shouldBeNull()
     }
 
-    // To lagringer rett etter hverandre havner gjerne på samme millisekund; revisjonsnummeret er monotont
+    // To lagringer rett etter hverandre havner gjerne på samme millisekund; da avgjør revisjonsnummeret
     @Test
     fun `rekkefolgen folger revisjonsnummeret naar tidsstemplene er like`() {
         every { auditRepository.getRevisions(Tekstblokk::class.java, mapOf("id" to 1L)) } returns listOf(
@@ -120,6 +120,40 @@ class TekstblokkHistorikkServiceTest {
         )
 
         service.hentHistorikk(1L).map { it.tittel } shouldContainExactly listOf("Første utgave", "Andre utgave")
+    }
+
+    /**
+     * Fra produksjon: revisjonsnummeret fulgte ikke tiden, og da havnet «Opprettet» midt i
+     * historikken, versjonsnumrene stemte ikke med tidspunktene, og tidsrommene løp bakover
+     * (v2: 10:09 – 09:51). Her har opprettelsen det høyeste revisjonsnummeret, men det
+     * tidligste tidsstempelet.
+     */
+    @Test
+    fun `tidsstempelet avgjor rekkefolgen selv naar revisjonsnummeret sier noe annet`() {
+        every { auditRepository.getRevisions(Tekstblokk::class.java, mapOf("id" to 1L)) } returns listOf(
+            revisjon(5, tekstblokk("Tredje utgave"), RevisionType.MOD, dato(3)),
+            revisjon(51, tekstblokk("Første utgave"), RevisionType.ADD, dato(1)),
+            revisjon(52, tekstblokk("Andre utgave"), RevisionType.MOD, dato(2)),
+        )
+
+        val historikk = service.hentHistorikk(1L)
+
+        historikk.map { it.tittel } shouldContainExactly listOf("Første utgave", "Andre utgave", "Tredje utgave")
+        historikk.map { it.versjon } shouldContainExactly listOf(1, 2, 3)
+        historikk.first().endringstype shouldBe Endringstype.OPPRETTET
+        historikk[0].gyldigTil shouldBe historikk[1].gyldigFra
+        historikk[1].gyldigTil shouldBe historikk[2].gyldigFra
+        historikk.last().gyldigTil.shouldBeNull()
+    }
+
+    @Test
+    fun `versjon paa tidspunkt velger siste i tid, ikke hoyeste revisjonsnummer`() {
+        every { auditRepository.getRevisionsBeforeOrAtDate(Tekstblokk::class.java, mapOf("id" to 1L), dato(3)) } returns listOf(
+            revisjon(51, tekstblokk("Første utgave"), RevisionType.ADD, dato(1)),
+            revisjon(5, tekstblokk("Andre utgave"), RevisionType.MOD, dato(2)),
+        )
+
+        service.hentVersjonPaaTidspunkt(1L, dato(3)).shouldNotBeNull().tittel shouldBe "Andre utgave"
     }
 
     @Test

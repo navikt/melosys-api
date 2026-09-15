@@ -227,6 +227,14 @@ class LovligeKombinasjonerSaksbehandlingService(
         return behandlingstyper
     }
 
+    fun hentMuligeBehandlingstyperForNySak(
+        hovedpart: Aktoersroller,
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema?,
+    ): Set<Behandlingstyper> = hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema)
+        .filterNot { it == Behandlingstyper.NY_VURDERING }.toSet()
+
     /**
      * Henter mulige behandlingstyper for opprettelse av ny behandling og sak
      *
@@ -494,6 +502,7 @@ class LovligeKombinasjonerSaksbehandlingService(
 
         private val ÅRSAVREGNING_TILLATTE_BEHANDLINGSTEMA = setOf(
             Behandlingstema.YRKESAKTIV,
+            Behandlingstema.PENSJONIST,
             Behandlingstema.UTSENDT_ARBEIDSTAKER,
             Behandlingstema.UTSENDT_SELVSTENDIG,
             Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY,

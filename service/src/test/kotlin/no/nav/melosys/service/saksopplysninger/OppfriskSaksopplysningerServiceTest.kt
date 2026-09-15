@@ -15,7 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
-import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.behandling.ReplikerBehandlingsresultatService
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService
 import no.nav.melosys.service.persondata.PersondataFasade
@@ -31,7 +31,6 @@ class OppfriskSaksopplysningerServiceTest {
 
     private val anmodningsperiodeService = mockk<AnmodningsperiodeService>()
     private val behandlingService = mockk<BehandlingService>()
-    private val behandlingsresultatService = mockk<BehandlingsresultatService>()
     private val ufmKontrollService = mockk<UfmKontrollService>()
     private val inngangsvilkaarService = mockk<InngangsvilkaarService>()
     private val registeropplysningerService = mockk<RegisteropplysningerService>()
@@ -39,6 +38,7 @@ class OppfriskSaksopplysningerServiceTest {
     private val registeropplysningerFactory = mockk<RegisteropplysningerFactory>()
     private val årsavregningService = mockk<ÅrsavregningService>()
     private val helseutgiftDekkesPeriodeService = mockk<HelseutgiftDekkesPeriodeService>()
+    private val replikerBehandlingsresultatService = mockk<ReplikerBehandlingsresultatService>()
 
     private lateinit var oppfriskSaksopplysningerService: OppfriskSaksopplysningerService
 
@@ -75,14 +75,14 @@ class OppfriskSaksopplysningerServiceTest {
         oppfriskSaksopplysningerService = OppfriskSaksopplysningerService(
             anmodningsperiodeService,
             behandlingService,
-            behandlingsresultatService,
             ufmKontrollService,
             inngangsvilkaarService,
             registeropplysningerService,
             persondataFasade,
             registeropplysningerFactory,
             årsavregningService,
-            helseutgiftDekkesPeriodeService
+            helseutgiftDekkesPeriodeService,
+            replikerBehandlingsresultatService
         )
 
         every { behandlingService.hentBehandling(behandlingId) } returns this.behandling
@@ -118,15 +118,39 @@ class OppfriskSaksopplysningerServiceTest {
 
         every { registeropplysningerService.slettRegisterOpplysninger(behandlingId) } just runs
         every { registeropplysningerService.hentOgLagreOpplysninger(any()) } just runs
-        every { behandlingsresultatService.tømBehandlingsresultat(behandlingId) } just runs
+        every { replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(behandlingId) } just runs
 
         oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandlingId, false)
 
         verify { registeropplysningerService.slettRegisterOpplysninger(behandlingId) }
         verify { registeropplysningerService.hentOgLagreOpplysninger(any()) }
-        verify { behandlingsresultatService.tømBehandlingsresultat(behandlingId) }
+        verify { replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(behandlingId) }
         verify(exactly = 0) { ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingId) }
         verify(exactly = 0) { inngangsvilkaarService.vurderOgLagreInngangsvilkår(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `skal gjenopprette behandlingsresultat til utgangspunkt for manglende innbetaling etter tømming`() {
+        every { behandling.erUtsending() } returns false
+        every { behandling.erBehandlingAvSed() } returns false
+        every { behandling.erÅrsavregning() } returns false
+        every { behandling.erManglendeInnbetalingTrygdeavgift() } returns true
+        every { behandling.finnPeriode() } returns Optional.of(Periode())
+        every { fagsak.finnBrukersAktørID() } returns aktørId
+
+        every { inngangsvilkaarService.skalVurdereInngangsvilkår(behandling) } returns false
+
+        every {
+            registeropplysningerFactory.utledSaksopplysningTyper(any(), any(), any(), any())
+        } returns mockk(relaxed = true)
+
+        every { registeropplysningerService.slettRegisterOpplysninger(behandlingId) } just runs
+        every { registeropplysningerService.hentOgLagreOpplysninger(any()) } just runs
+        every { replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(behandlingId) } just runs
+
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandlingId, false)
+
+        verify { replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(behandlingId) }
     }
 
     @Test
@@ -146,6 +170,6 @@ class OppfriskSaksopplysningerServiceTest {
 
         verify { registeropplysningerService.slettRegisterOpplysninger(behandlingId) }
         verify { registeropplysningerService.hentOgLagreOpplysninger(any()) }
-        verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any()) }
+        verify(exactly = 0) { replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(any()) }
     }
 }

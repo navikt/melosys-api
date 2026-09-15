@@ -86,6 +86,45 @@ internal class LagreMedlemsperiodeMedlTest {
     }
 
     @Test
+    fun `oppretter ikke MEDL-periode ved åpen sluttdato`() {
+        val medlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET).also { it.tom = null }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns
+            lagBehandlingsresultat(listOf(medlemskapsperiode))
+
+        lagreMedlemsperiodeMedl.utfør(prosessinstans)
+
+        verify { medlemskapsperiodeService wasNot called }
+    }
+
+    @Test
+    fun `erstatter ikke MEDL-perioder ved ny vurdering med åpen sluttdato`() {
+        val medlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET).also { it.tom = null }
+        prosessinstans.hentBehandling.type = Behandlingstyper.NY_VURDERING
+        prosessinstans.hentBehandling.opprinneligBehandling = Behandling.forTest { id = 1L }
+        val behandlingsresultat = lagBehandlingsresultat(listOf(medlemskapsperiode)).also {
+            it.behandling = prosessinstans.behandling
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
+        lagreMedlemsperiodeMedl.utfør(prosessinstans)
+
+        verify { medlemskapsperiodeService wasNot called }
+    }
+
+    @Test
+    fun `hopper over MEDL-lagring når én innvilget periode har åpen sluttdato`() {
+        val medlemskapsperioder = listOf(
+            lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET, 1),
+            lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET, 2).also { it.tom = null }
+        )
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns lagBehandlingsresultat(medlemskapsperioder)
+
+        lagreMedlemsperiodeMedl.utfør(prosessinstans)
+
+        verify { medlemskapsperiodeService wasNot called }
+    }
+
+    @Test
     fun utfør_avslutterMedlemskapsperioder_nårDetErNyVurderingOgInnvilgelse() {
         val innvilgetMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET)
         val medlemskapsperioder =

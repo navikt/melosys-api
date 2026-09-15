@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.eessi
 
-import tools.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.any
@@ -21,7 +20,8 @@ import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
-import no.nav.melosys.domain.arkiv.Vedlegg
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
@@ -33,22 +33,25 @@ import no.nav.melosys.domain.eessi.sed.VedleggReferanse
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
-import no.nav.melosys.integrasjon.eessi.dto.OpprettBucOgSedDto
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.webclient.test.autoconfigure.AutoConfigureWebClient
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webclient.test.autoconfigure.AutoConfigureWebClient
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
-import java.time.LocalDate
-import java.util.*
+import tools.jackson.databind.ObjectMapper
 
 @SpringBootTest
 @ActiveProfiles("wiremock-test")
@@ -96,66 +99,6 @@ class EessiClientTest(
     @AfterEach
     fun after() {
         MetricsTestConfig.clearMeterRegistry()
-    }
-
-
-    @Test
-    fun opprettBucOgSed() {
-        val sedDataDto = SedDataDto()
-        val vedlegg = setOf(Vedlegg("pdf".toByteArray(), "tittel"))
-
-        serviceUnderTestMockServer.stubFor(
-            any(anyUrl())
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("{\"rinaSaksnummer\":\"12345\",\"rinaUrl\":\"localhost:3000\"}")
-                )
-        )
-
-        val opprettSedDto = eessiClient.opprettBucOgSed(
-            sedDataDto,
-            vedlegg,
-            BucType.LA_BUC_01,
-            true,
-            true
-        )
-
-        MetricsTestConfig.checkMetricsUri("/api/buc/{bucType}?sendAutomatisk={sendAutomatisk}&oppdaterEksisterende={oppdaterEksisterendeOmFinnes}")
-        opprettSedDto.rinaSaksnummer.shouldBe("12345")
-
-        serviceUnderTestMockServer.verify(
-            postRequestedFor(urlPathEqualTo("/api/buc/LA_BUC_01"))
-                .withQueryParam("sendAutomatisk", WireMock.equalTo("true"))
-                .withQueryParam("oppdaterEksisterende", WireMock.equalTo("true"))
-                .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
-                .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
-                .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
-                .withRequestBody(
-                    equalToJson(
-                        """{"sedDataDto":{"sedType":null,"utenlandskIdent":[],"bostedsadresse":null,"arbeidsgivendeVirksomheter":[],"selvstendigeVirksomheter":[],"arbeidssteder":[],"arbeidsland":[],"harFastArbeidssted":null,"lovvalgsperioder":[],"ytterligereInformasjon":null,"bruker":null,"kontaktadresse":null,"oppholdsadresse":null,"familieMedlem":[],"søknadsperiode":null,"avklartBostedsland":null,"gsakSaksnummer":null,"tidligereLovvalgsperioder":[],"mottakerIder":null,"svarAnmodningUnntak":null,"utpekingAvvis":null,"vedtakDto":null,"invalideringSedDto":null,"a008Formaal":null,"erFjernarbeidTWFA":null},"vedlegg":[{"innhold":"cGRm","tittel":"tittel","hentInnhold":"cGRm"}]}""",
-                        true, false
-                    )
-                )
-        )
-    }
-
-    @Test
-    fun opprettBucOgSed_forventException() {
-        serviceUnderTestMockServer.stubFor(
-            any(anyUrl())
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(500)
-                )
-        )
-
-        shouldThrow<TekniskException> {
-            eessiClient.opprettBucOgSed(
-                SedDataDto(), listOf(), BucType.LA_BUC_01, true, true
-            )
-        }.message.shouldContain("Kall mot eessi feilet")
     }
 
     @Test

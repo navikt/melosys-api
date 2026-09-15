@@ -138,8 +138,8 @@ class UtenlandskMyndighetServiceTest {
 
     @Test
     fun hentUtenlandskMyndighet_girEgenAdresse_forFritekstbrevTilAmerikanskTrygdemyndighet() {
-        val myndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(
-            Land_iso2.US,
+        val myndighet = utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(
+            "US:USA00000",
             Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV
         )
 

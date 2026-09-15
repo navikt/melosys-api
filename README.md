@@ -16,18 +16,46 @@ Som database, kafka, oauth-server samt eksterne integrasjoner. Trenger også [na
 for å koble til enkelte eksterne tjenester.<br>
 Bruk profil `local-mock`
 
-### Lokal utvikling mot q1 cluster
-Man må ha melosys-web kjørende lokalt først<br>
-Bruk profil `local-q1`<br>
-Men trenger å sette følgende env variabler
-* AZURE_APP_CLIENT_ID
-* AZURE_APP_CLIENT_SECRET
-* melosysDB.password
-* systemuser.password
+### Lokal utvikling mot dev-cluster
+Man må ha melosys-web kjørende lokalt først, og være innlogget med `nais login`.<br>
+Bruk profil `local-q1` eller `local-q2` avhengig av hvilket miljø du kjører mot.
 
-Man henter ut disse verdiene fra melosys-api-q1 poden på dev-fss ved å kjøre:<br>
-`env | grep AZURE_APP_CLIENT_ID` og `env | grep AZURE_APP_CLIENT_SECRET`<br>
-`melosysDB.password` og `systemuser.password` finner man i [vault](https://vault.adeo.no/ui/vault/secrets/kv%2Fpreprod%2Ffss/show/melosys-q1/teammelosys)
+Ved oppstart med profil `local-q1`/`local-q2` henter applikasjonen selv
+`AZURE_APP_CLIENT_ID`, `AZURE_APP_CLIENT_SECRET`, `MELOSYSDB_PASSWORD` og
+`SRV_USERNAME`/`SRV_PASSWORD` fra nais via `scripts/get-azure-secrets.sh`. Du
+trenger derfor ingen hemmeligheter i env-filer — det holder å være innlogget med
+`nais login`. Variabler som allerede finnes i miljøet blir ikke overstyrt.
+
+Databaseadresse og -brukernavn er hardkodet per profil. `MELOSYSDB_URL` på nais
+peker på en intern adresse som ikke er tilgjengelig fra egen maskin, og
+brukernavnet er ikke hemmelig og hører derfor hjemme i konfigurasjonen.
+
+Scriptet kan også kjøres manuelt:
+
+```bash
+# Én variabel -> verdien printes rått
+scripts/get-azure-secrets.sh AZURE_APP_CLIENT_SECRET
+
+# Flere variabler -> NAVN=verdi-linjer
+scripts/get-azure-secrets.sh AZURE_APP_CLIENT_ID MELOSYSDB_PASSWORD
+
+# Rett inn i eget shell, uten å lagre til disk
+eval "$(scripts/get-azure-secrets.sh --export AZURE_APP_CLIENT_ID MELOSYSDB_PASSWORD)"
+```
+
+Vet du ikke hva variabelen heter, list opp alle tilgjengelige nøkler
+(henter ingen verdier, og gir derfor ingen audit-oppføring på secrets):
+
+```bash
+scripts/get-azure-secrets.sh --list
+```
+
+Se `scripts/get-azure-secrets.sh --help` for flagg som `--app`, `--environment`,
+`--team` og `--debug`. `--debug` skriver kun navn og nøkler til stderr, aldri verdier.
+
+> Unngå å skrive hemmelighetene til fil. Bruker du likevel `> .env.local`, ligger
+> de ukryptert på disk (filen er dekket av `*.local` i `.gitignore`, så den
+> committes ikke, men slett den når du er ferdig).
 
 ### Lokale endringer i `melosys-skjema-api-types`
 

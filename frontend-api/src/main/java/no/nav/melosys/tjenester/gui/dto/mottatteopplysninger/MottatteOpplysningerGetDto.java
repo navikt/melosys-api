@@ -11,11 +11,13 @@ public class MottatteOpplysningerGetDto {
     private final MottatteOpplysningerData data;
     private final Mottatteopplysningertyper type;
     private final LocalDate mottaksdato;
+    private final boolean arbeidsgiverOgArbeidstakerHarUlikPeriode;
 
-    public MottatteOpplysningerGetDto(MottatteOpplysninger mottatteOpplysninger) {
+    public MottatteOpplysningerGetDto(MottatteOpplysninger mottatteOpplysninger, boolean arbeidsgiverOgArbeidstakerHarUlikPeriode) {
         this.data = mottatteOpplysninger.getMottatteOpplysningerData();
         this.type = mottatteOpplysninger.getType();
         this.mottaksdato = mottatteOpplysninger.getMottaksdato();
+        this.arbeidsgiverOgArbeidstakerHarUlikPeriode = arbeidsgiverOgArbeidstakerHarUlikPeriode;
     }
 
     public MottatteOpplysningerData getData() {
@@ -28,5 +30,9 @@ public class MottatteOpplysningerGetDto {
 
     public LocalDate getMottaksdato() {
         return mottaksdato;
+    }
+
+    public boolean isArbeidsgiverOgArbeidstakerHarUlikPeriode() {
+        return arbeidsgiverOgArbeidstakerHarUlikPeriode;
     }
 }

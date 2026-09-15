@@ -55,6 +55,22 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
+    fun `behandlingstyper for ny sak inneholder ikke NY_VURDERING og beholder rekkefoelgen`() {
+        val behandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForNySak(
+            Aktoersroller.BRUKER,
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.YRKESAKTIV
+        )
+
+        behandlingstyper shouldContainExactly listOf(
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.HENVENDELSE
+        )
+    }
+
+    @Test
     fun `kombinasjonstreet inneholder alle sakstyper`() {
         val tre = lovligeKombinasjonerSaksbehandlingService.hentKombinasjonstre()
 
@@ -553,6 +569,48 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Sakstyper.FTRL,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstema.YRKESAKTIV
+        )
+
+
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.ÅRSAVREGNING
+        )
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaPensjonist_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+            Aktoersroller.BRUKER,
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.PENSJONIST
+        )
+
+
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.ÅRSAVREGNING
+        )
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaPensjonist_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+            Aktoersroller.BRUKER,
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.PENSJONIST
         )
 
 
@@ -1098,6 +1156,30 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
         muligeBehandlingstyper shouldHaveSize 1
         muligeBehandlingstyper shouldContainExactly listOf(Behandlingstyper.ÅRSAVREGNING)
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak returnerer ÅRSAVREGNING for FTRL MEDLEMSKAP_LOVVALG med behandlingstema PENSJONIST`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+
+        val behandling = Behandling.forTest {
+            id = 1L
+            tema = Behandlingstema.PENSJONIST
+            type = Behandlingstyper.FØRSTEGANG
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            fagsak { type = Sakstyper.FTRL }
+        }
+        every { fagsakService.hentFagsak(behandling.fagsak.saksnummer) } returns behandling.fagsak
+
+
+        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            behandling.fagsak.saksnummer,
+            Behandlingstema.PENSJONIST,
+        )
+
+
+        muligeBehandlingstyper shouldContain Behandlingstyper.ÅRSAVREGNING
     }
 
 

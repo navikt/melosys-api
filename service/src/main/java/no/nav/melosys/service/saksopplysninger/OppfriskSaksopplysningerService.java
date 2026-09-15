@@ -12,7 +12,7 @@ import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.behandling.ReplikerBehandlingsresultatService;
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService;
 import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -32,7 +32,6 @@ public class OppfriskSaksopplysningerService {
 
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final BehandlingService behandlingService;
-    private final BehandlingsresultatService behandlingsresultatService;
     private final UfmKontrollService ufmKontrollService;
     private final InngangsvilkaarService inngangsvilkaarService;
     private final RegisteropplysningerService registeropplysningerService;
@@ -40,20 +39,20 @@ public class OppfriskSaksopplysningerService {
     private final RegisteropplysningerFactory registeropplysningerFactory;
     private final ÅrsavregningService årsavregningService;
     private final HelseutgiftDekkesPeriodeService helseutgiftDekkesPeriodeService;
+    private final ReplikerBehandlingsresultatService replikerBehandlingsresultatService;
 
     public OppfriskSaksopplysningerService(AnmodningsperiodeService anmodningsperiodeService,
                                            BehandlingService behandlingService,
-                                           BehandlingsresultatService behandlingsresultatService,
                                            UfmKontrollService ufmKontrollService,
                                            InngangsvilkaarService inngangsvilkaarService,
                                            RegisteropplysningerService registeropplysningerService,
                                            PersondataFasade persondataFasade,
                                            RegisteropplysningerFactory registeropplysningerFactory,
                                            ÅrsavregningService årsavregningService,
-                                           HelseutgiftDekkesPeriodeService helseutgiftDekkesPeriodeService) {
+                                           HelseutgiftDekkesPeriodeService helseutgiftDekkesPeriodeService,
+                                           ReplikerBehandlingsresultatService replikerBehandlingsresultatService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.behandlingService = behandlingService;
-        this.behandlingsresultatService = behandlingsresultatService;
         this.ufmKontrollService = ufmKontrollService;
         this.inngangsvilkaarService = inngangsvilkaarService;
         this.registeropplysningerService = registeropplysningerService;
@@ -61,6 +60,7 @@ public class OppfriskSaksopplysningerService {
         this.registeropplysningerFactory = registeropplysningerFactory;
         this.årsavregningService = årsavregningService;
         this.helseutgiftDekkesPeriodeService = helseutgiftDekkesPeriodeService;
+        this.replikerBehandlingsresultatService = replikerBehandlingsresultatService;
     }
 
     @Transactional
@@ -75,7 +75,7 @@ public class OppfriskSaksopplysningerService {
 
         log.info("Starter oppdatering av registeropplysninger og tilbakestilling av behandlingsresultat for behandlingID: {} ", behandlingID);
         oppdaterRegisteropplysninger(behandlingID, periodeOver5aar, behandling);
-        behandlingsresultatService.tømBehandlingsresultat(behandlingID);
+        replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(behandlingID);
 
         if (behandling.erBehandlingAvSed()) {
             ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingID);

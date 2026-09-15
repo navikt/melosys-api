@@ -10,12 +10,16 @@ import no.nav.melosys.exception.ValideringException
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
 import org.slf4j.MDC
 import org.slf4j.event.Level
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.web.ErrorResponse
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException
@@ -23,6 +27,8 @@ import org.springframework.web.servlet.resource.NoResourceFoundException
 import java.io.IOException
 
 private val log = KotlinLogging.logger { }
+
+private const val UGYLDIG_FORESPØRSEL = "Ugyldig format på forespørselen"
 
 @ControllerAdvice
 class ExceptionMapper {
@@ -53,15 +59,18 @@ class ExceptionMapper {
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun håndter(e: MethodArgumentNotValidException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {
-        val feilmeldinger = e.bindingResult.fieldErrors.map { "${it.field}: ${it.defaultMessage}" }
-        return håndter(e, request, HttpStatus.BAD_REQUEST, Level.WARN, feilmeldinger)
+        val feilmeldinger = e.bindingResult.fieldErrors.map { "${it.field}: ${it.defaultMessage}" } +
+            e.bindingResult.globalErrors.map { "${it.objectName}: ${it.defaultMessage}" }
+        return håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, feilmeldinger, UGYLDIG_FORESPØRSEL, loggStacktrace = false)
     }
 
-    // Uten denne fanges ulesbar JSON (f.eks. ukjent kodeverkverdi) av Exception-handleren
-    // under og blir 500 + ERROR-logg, selv om feilen ligger hos klienten.
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun håndter(e: HttpMessageNotReadableException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> =
-        håndter(e, request, HttpStatus.BAD_REQUEST, Level.WARN)
+        håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, responsMelding = UGYLDIG_FORESPØRSEL, loggStacktrace = false)
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException::class)
+    fun håndter(e: MethodArgumentTypeMismatchException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> =
+        håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, responsMelding = UGYLDIG_FORESPØRSEL, loggStacktrace = false)
 
     @ExceptionHandler(WebClientResponseException::class)
     fun håndter(e: WebClientResponseException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {
@@ -85,15 +94,31 @@ class ExceptionMapper {
     }
 
     @ExceptionHandler(Exception::class)
-    fun håndter(e: Exception, request: HttpServletRequest): ResponseEntity<Map<String, Any>> =
-        håndter(e, request, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR)
+    fun håndter(e: Exception, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {
+        // Spring-exceptions som implementerer ErrorResponse (415, 405, 400 ...) beholder egen status, melding og headere
+        val errorResponse = e as? ErrorResponse
+        val status: HttpStatusCode = errorResponse?.statusCode ?: HttpStatus.INTERNAL_SERVER_ERROR
+        val erKlientfeil = status.is4xxClientError
+        return håndter(
+            e,
+            request,
+            status,
+            if (erKlientfeil) Level.WARN else Level.ERROR,
+            responsMelding = if (erKlientfeil) errorResponse?.body?.detail ?: statustekst(status) else null,
+            loggStacktrace = !erKlientfeil,
+            headere = errorResponse?.headers ?: HttpHeaders.EMPTY
+        )
+    }
 
     private fun håndter(
         e: Exception,
         request: HttpServletRequest,
-        httpStatus: HttpStatus,
+        httpStatus: HttpStatusCode,
         loggnivå: Level,
-        begrunnelser: Collection<*>? = emptyList<Any>()
+        begrunnelser: Collection<*>? = emptyList<Any>(),
+        responsMelding: String? = null,
+        loggStacktrace: Boolean = true,
+        headere: HttpHeaders = HttpHeaders.EMPTY
     ): ResponseEntity<Map<String, Any>> {
         val message = e.message ?: e.javaClass.simpleName
         val errorMessage = buildString {
@@ -102,21 +127,34 @@ class ExceptionMapper {
             append("requestURI: ${request.requestURI}")
         }
 
-        when (loggnivå) {
-            Level.ERROR -> log.error(errorMessage, e)
-            Level.WARN -> log.warn(errorMessage, e)
-            else -> log.info(errorMessage, e)
+        if (loggStacktrace) {
+            when (loggnivå) {
+                Level.ERROR -> log.error(errorMessage, e)
+                Level.WARN -> log.warn(errorMessage, e)
+                else -> log.info(errorMessage, e)
+            }
+        } else {
+            val utenStacktrace = "$errorMessage${System.lineSeparator()}exception: ${e.javaClass.simpleName}"
+            when (loggnivå) {
+                Level.ERROR -> log.error { utenStacktrace }
+                Level.WARN -> log.warn { utenStacktrace }
+                else -> log.info { utenStacktrace }
+            }
         }
 
         val body = mapOf(
             "status" to httpStatus.value(),
-            "error" to httpStatus.reasonPhrase,
-            "message" to message,
+            "error" to statustekst(httpStatus),
+            "message" to (responsMelding ?: message),
             "correlationId" to MDC.get(MDCOperations.CORRELATION_ID)
         ) + if (!begrunnelser.isNullOrEmpty()) mapOf("feilkoder" to begrunnelser) else emptyMap<String, Any>()
 
-        return ResponseEntity(body, httpStatus)
+        return ResponseEntity(body, headere, httpStatus)
     }
+
+    private fun statustekst(status: HttpStatusCode): String =
+        HttpStatus.resolve(status.value())?.reasonPhrase
+            ?: if (status.is4xxClientError) "Client Error" else "Server Error"
 
     private fun hentMessageFraJsonStreng(jsonString: String): String? =
         runCatching {

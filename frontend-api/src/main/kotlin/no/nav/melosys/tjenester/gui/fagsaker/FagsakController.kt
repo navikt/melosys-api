@@ -290,7 +290,7 @@ class FagsakController(
 
             UNNTAK -> {
                 saksOpplysninger.sedDokument?.let { sedDokument ->
-                    return SoeknadslandDto(listOf(sedDokument.hentAvsenderLandkode().kode))
+                    return SoeknadslandDto.av(sedDokument.avsenderLandkode)
                 }
 
                 saksOpplysninger.mottatteOpplysninger?.mottatteOpplysningerData?.let { mottatteOpplysningerData ->

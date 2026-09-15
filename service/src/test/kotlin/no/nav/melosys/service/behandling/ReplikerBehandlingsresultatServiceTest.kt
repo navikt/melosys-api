@@ -15,8 +15,11 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.slot
+import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
@@ -33,6 +36,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.featuretoggle.ToggleName
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -1571,6 +1575,155 @@ class ReplikerBehandlingsresultatServiceTest {
         replikerteStatuser shouldContain InnvilgelsesResultat.INNVILGET
         replikerteStatuser shouldContain InnvilgelsesResultat.OPPHØRT
         replikerteStatuser shouldNotContain InnvilgelsesResultat.AVSLAATT
+    }
+
+    @Test
+    fun `gjenopprettBehandlingsresultatTilUtgangspunkt gjenoppretter perioder og avklartefakta fra opprinnelig behandling`() {
+        val inneværendeÅr = LocalDate.now().year
+
+        val opprinneligBehandling = Behandling.forTest {
+            id = 100L
+            type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+        }
+        val behandlingsresultatOriginal = lagBehandlingsresultatMedData(opprinneligBehandling).apply {
+            id = opprinneligBehandling.id
+            medlemskapsperioder.addAll(
+                setOf(
+                    medlemskapsperiodeForTest {
+                        id = 1L
+                        fom = LocalDate.of(inneværendeÅr, 1, 1)
+                        tom = LocalDate.of(inneværendeÅr, 6, 30)
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    },
+                    medlemskapsperiodeForTest {
+                        id = 2L
+                        fom = LocalDate.of(inneværendeÅr, 7, 1)
+                        tom = LocalDate.of(inneværendeÅr, 12, 31)
+                        innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                    }
+                )
+            )
+            avklartefakta.add(lagAvklartefakta())
+        }
+
+        val behandling = Behandling.forTest {
+            id = 200L
+            type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+        }
+        behandling.opprinneligBehandling = opprinneligBehandling
+
+        // Det eksisterende (allerede tømte) behandlingsresultatet på den gjeldende behandlingen
+        val eksisterendeBehandlingsresultat = Behandlingsresultat.forTest {
+            id = behandling.id
+            this.behandling = behandling
+            behandlingsmåte = Behandlingsmaate.MANUELT
+            type = Behandlingsresultattyper.IKKE_FASTSATT
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns eksisterendeBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id) } returns behandlingsresultatOriginal
+        every { behandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
+        every { behandlingsresultatService.lagre(any()) } returnsArgument 0
+
+        replikerBehandlingsresultatService.gjenopprettBehandlingsresultatTilUtgangspunkt(behandling.id)
+
+        // Perioder gjenopprettet (innvilget + opphørt)
+        eksisterendeBehandlingsresultat.medlemskapsperioder shouldHaveSize 2
+        val statuser = eksisterendeBehandlingsresultat.medlemskapsperioder.map { it.innvilgelsesresultat }.toSet()
+        statuser shouldContain InnvilgelsesResultat.INNVILGET
+        statuser shouldContain InnvilgelsesResultat.OPPHØRT
+        eksisterendeBehandlingsresultat.medlemskapsperioder.forAll { it.id.shouldBeNull() }
+
+        // Avklartefakta gjenopprettet
+        eksisterendeBehandlingsresultat.avklartefakta.shouldNotBeEmpty()
+
+        // PK/behandling-referanse er bevart (samme rad)
+        eksisterendeBehandlingsresultat.id shouldBe behandling.id
+        eksisterendeBehandlingsresultat.hentBehandling() shouldBe behandling
+    }
+
+    @Test
+    fun `gjenopprettBehandlingsresultatTilUtgangspunkt kaster når opprinneligBehandling mangler`() {
+        val behandling = Behandling.forTest {
+            id = 300L
+            type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+        }
+        val eksisterendeBehandlingsresultat = Behandlingsresultat.forTest {
+            id = behandling.id
+            this.behandling = behandling
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns eksisterendeBehandlingsresultat
+
+        shouldThrow<TekniskException> {
+            replikerBehandlingsresultatService.gjenopprettBehandlingsresultatTilUtgangspunkt(behandling.id)
+        }.message shouldContain "opprinneligBehandling mangler"
+    }
+
+    @Test
+    fun `tilbakestillBehandlingsresultat tømmer og gjenoppretter for manglende innbetaling trygdeavgift`() {
+        val inneværendeÅr = LocalDate.now().year
+
+        val opprinneligBehandling = Behandling.forTest {
+            id = 400L
+            type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+        }
+        val behandlingsresultatOriginal = lagBehandlingsresultatMedData(opprinneligBehandling).apply {
+            id = opprinneligBehandling.id
+            medlemskapsperioder.add(
+                medlemskapsperiodeForTest {
+                    id = 1L
+                    fom = LocalDate.of(inneværendeÅr, 1, 1)
+                    tom = LocalDate.of(inneværendeÅr, 6, 30)
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                }
+            )
+        }
+
+        val behandling = Behandling.forTest {
+            id = 500L
+            type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+        }
+        behandling.opprinneligBehandling = opprinneligBehandling
+
+        val eksisterendeBehandlingsresultat = Behandlingsresultat.forTest {
+            id = behandling.id
+            this.behandling = behandling
+            behandlingsmåte = Behandlingsmaate.MANUELT
+            type = Behandlingsresultattyper.IKKE_FASTSATT
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns eksisterendeBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id) } returns behandlingsresultatOriginal
+        every { behandlingsresultatService.tømBehandlingsresultat(behandling.id) } just runs
+        every { behandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
+        every { behandlingsresultatService.lagre(any()) } returnsArgument 0
+
+        replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(behandling.id)
+
+        verify(exactly = 1) { behandlingsresultatService.tømBehandlingsresultat(behandling.id) }
+        eksisterendeBehandlingsresultat.medlemskapsperioder shouldHaveSize 1
+        eksisterendeBehandlingsresultat.medlemskapsperioder.single().innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
+    }
+
+    @Test
+    fun `tilbakestillBehandlingsresultat tømmer uten å gjenopprette når ikke manglende innbetaling trygdeavgift`() {
+        val behandling = Behandling.forTest {
+            id = 600L
+            type = Behandlingstyper.FØRSTEGANG
+        }
+        val eksisterendeBehandlingsresultat = Behandlingsresultat.forTest {
+            id = behandling.id
+            this.behandling = behandling
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns eksisterendeBehandlingsresultat
+        every { behandlingsresultatService.tømBehandlingsresultat(behandling.id) } just runs
+
+        replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(behandling.id)
+
+        verify(exactly = 1) { behandlingsresultatService.tømBehandlingsresultat(behandling.id) }
+        verify(exactly = 0) { behandlingsresultatService.lagre(any()) }
+        verify(exactly = 0) { behandlingsresultatService.lagreOgFlush(any()) }
     }
 
     private fun Trygdeavgiftsperiode.erReplikaAv(original: Trygdeavgiftsperiode): Boolean =

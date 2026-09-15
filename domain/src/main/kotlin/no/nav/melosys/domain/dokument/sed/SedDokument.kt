@@ -28,7 +28,6 @@ class SedDokument : SaksopplysningDokument {
     var erEndring: Boolean = false
 
     fun hentLovvalgsperiode() = lovvalgsperiode ?: error("lovvalgsperiode er påkrevd for SedDokument")
-    fun hentAvsenderLandkode() = avsenderLandkode ?: error("avsenderLandkode er påkrevd for SedDokument")
 
     fun opprettInnvilgetLovvalgsperiode(): Lovvalgsperiode {
         val periode = requireNotNull(lovvalgsperiode) {
