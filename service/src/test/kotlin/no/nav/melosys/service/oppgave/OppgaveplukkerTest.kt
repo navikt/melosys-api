@@ -1,5 +1,6 @@
 package no.nav.melosys.service.oppgave
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -8,6 +9,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
@@ -219,6 +221,83 @@ internal class OppgaveplukkerTest {
 
         verify { oppgaveFasade.leggTilbakeOppgave(oppgaveId) }
         verify(exactly = 0) { oppgaveTilbakkeleggingRepo.save(any<OppgaveTilbakelegging>()) }
+    }
+
+    private fun riggTildeling(tilordnetRessurs: String?): String {
+        val fagsak = opprettFagsak(SAKSNUMMER_1) {
+            gsakSaksnummer = GSAK_SAKSNUMMER
+            behandling {
+                tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.OPPRETTET
+            }
+        }
+        val oppgaveId = GSAK_SAKSNUMMER.toString()
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns fagsak.behandlinger.first()
+        every { fagsakService.hentFagsak(SAKSNUMMER_1) } returns fagsak
+        every { behandlingService.lagre(any<Behandling>()) } returns Unit
+        every { oppgaveService.finnBehandlingsoppgaveForBehandlingID(BEHANDLING_ID) } returns
+            Oppgave.Builder().setOppgaveId(oppgaveId).setTilordnetRessurs(tilordnetRessurs).build()
+        every { oppgaveService.tildelOppgave(any<String>(), any<String>()) } returns Unit
+        return oppgaveId
+    }
+
+    @Test
+    fun `tildelOppgaveTilSaksbehandler tildeler utildelt oppgave og returnerer ingen forrige eier`() {
+        val oppgaveId = riggTildeling(tilordnetRessurs = null)
+
+        val forrigeEier = oppgaveplukker.tildelOppgaveTilSaksbehandler("Z999999", BEHANDLING_ID)
+
+        forrigeEier.shouldBeNull()
+        verify { oppgaveService.tildelOppgave(oppgaveId, "Z999999") }
+    }
+
+    @Test
+    fun `tildelOppgaveTilSaksbehandler overtar oppgave fra annen saksbehandler`() {
+        val oppgaveId = riggTildeling(tilordnetRessurs = "Z111111")
+
+        val forrigeEier = oppgaveplukker.tildelOppgaveTilSaksbehandler("Z999999", BEHANDLING_ID)
+
+        forrigeEier shouldBe "Z111111"
+        verify { oppgaveService.tildelOppgave(oppgaveId, "Z999999") }
+    }
+
+    @Test
+    fun `tildelOppgaveTilSaksbehandler gjor ingenting nar oppgaven allerede er min`() {
+        riggTildeling(tilordnetRessurs = "Z999999")
+
+        val forrigeEier = oppgaveplukker.tildelOppgaveTilSaksbehandler("Z999999", BEHANDLING_ID)
+
+        forrigeEier shouldBe "Z999999"
+        verify(exactly = 0) { oppgaveService.tildelOppgave(any<String>(), any<String>()) }
+    }
+
+    @Test
+    fun `tildeling av årsavregning oppdaterer valgt behandling og bruker dens oppgave`() {
+        val oppgaveId = riggTildeling(null)
+        val behandling = behandlingService.hentBehandling(BEHANDLING_ID)
+        behandling.type = Behandlingstyper.ÅRSAVREGNING
+
+        oppgaveplukker.tildelOppgaveTilSaksbehandler("Z999999", BEHANDLING_ID)
+
+        behandling.status shouldBe Behandlingsstatus.UNDER_BEHANDLING
+        verify { behandlingService.lagre(behandling) }
+        verify { oppgaveService.tildelOppgave(oppgaveId, "Z999999") }
+        verify(exactly = 0) { oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(any()) }
+        verify(exactly = 0) { fagsakService.hentFagsak(any()) }
+    }
+
+    @Test
+    fun `manglende oppgave for behandlingen tildeler ikke en annen oppgave på saken`() {
+        riggTildeling(null)
+        every { oppgaveService.finnBehandlingsoppgaveForBehandlingID(BEHANDLING_ID) } returns null
+
+        shouldThrow<IkkeFunnetException> {
+            oppgaveplukker.tildelOppgaveTilSaksbehandler("Z999999", BEHANDLING_ID)
+        }
+
+        verify(exactly = 0) { oppgaveService.tildelOppgave(any(), any()) }
+        verify(exactly = 0) { behandlingService.lagre(any<Behandling>()) }
     }
 
     @Test
