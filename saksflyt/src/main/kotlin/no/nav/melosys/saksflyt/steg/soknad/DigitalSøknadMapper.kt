@@ -123,15 +123,6 @@ object DigitalSøknadMapper {
         val arbeidsstedIUtlandet: ArbeidsstedIUtlandetDto?
     )
 
-    private fun harUlikPeriode(
-        arbeidstakersPeriodeOgLand: UtsendingsperiodeOgLandDto?,
-        arbeidsgiversPeriodeOgLand: UtsendingsperiodeOgLandDto?
-    ): Boolean {
-        val arbeidstakersPeriode = arbeidstakersPeriodeOgLand?.utsendelsePeriode ?: return false
-        val arbeidsgiversPeriode = arbeidsgiversPeriodeOgLand?.utsendelsePeriode ?: return false
-        return arbeidstakersPeriode != arbeidsgiversPeriode
-    }
-
     private fun mapJuridiskArbeidsgiverNorge(dto: UtsendtArbeidstakerSkjemaM2MDto): JuridiskArbeidsgiverNorge = JuridiskArbeidsgiverNorge().apply {
         erOffentligVirksomhet = dto.erOffentligArbeidsgiver()
         ekstraArbeidsgivere = listOfNotNull(hentHovedarbeidsgiversOrgnr(dto))
