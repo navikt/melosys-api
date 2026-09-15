@@ -3,7 +3,6 @@ package no.nav.melosys.service.avgift.aarsavregning.skattepliktig
 import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -32,6 +31,8 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.http.HttpStatus
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
@@ -269,9 +270,9 @@ class SkattepliktigeAarsavregningKjoeringTest {
         verify(exactly = 1) { kjoering.prosesserSkattehendelserAsynkront(hendelser, true, 1) }
     }
 
-    /** Uten behandlings-id-en i rapporten er stoppen usynlig i en batch som fortsetter. */
-    @Test
-    fun `årløs aktiv årsavregning havner i rapporten med behandlings-id`() {
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `årløs aktiv årsavregning tillater opprettelse i dryrun og skarp kjøring`(skarp: Boolean) {
         val fagsak = lagFagsakMedÅrsavregning(Behandlingsstatus.VURDER_DOKUMENT, BEHANDLING_ID)
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
 
@@ -279,22 +280,23 @@ class SkattepliktigeAarsavregningKjoeringTest {
         stubTrygdeavgift(behandlingsresultat)
         // Årløs: behandlingsresultatet finnes, men har ingen aarsavregning-rad.
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { utfoerer.opprettProsessinstans("MEL-1", "2023") } returns UUID.randomUUID()
 
         service.prosesserSkattehendelser(
             listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
-            skarp = true,
+            skarp = skarp,
             maksAntall = 5,
         )
 
-        verify(exactly = 0) { utfoerer.opprettProsessinstans(any(), any()) }
+        verify(exactly = if (skarp) 1 else 0) { utfoerer.opprettProsessinstans("MEL-1", "2023") }
         verify(exactly = 0) { utfoerer.settStatusVurderDokument(any(), any()) }
 
-        val feil = service.resultater.single().feilmelding
-        feil shouldNotBe null
-        feil!! shouldContain BEHANDLING_ID.toString()
-        feil shouldContain "MEL-1"
-        feil shouldContain "lukk den årløse behandlingen"
-        service.status()["antallSakerFeilet"] shouldBe 1
+        with(service.resultater.single()) {
+            villeOpprettetProsessinstans shouldBe true
+            prosessinstansOpprettet shouldBe if (skarp) true else null
+            feilmelding shouldBe null
+        }
+        fagsak.behandlinger.single().status shouldBe Behandlingsstatus.VURDER_DOKUMENT
     }
 
     /**
@@ -381,8 +383,8 @@ class SkattepliktigeAarsavregningKjoeringTest {
                 sisteÅrsavregning = behandlingsresultat,
             )
         every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
-        // Årløs behandling: saken er med i antallSakerFunnet, men feiler under vurderingen.
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } throws
+            IllegalStateException("EntityManager is closed")
 
         service.prosesserSkattehendelser(
             listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
@@ -567,8 +569,8 @@ class SkattepliktigeAarsavregningKjoeringTest {
         every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
         every { trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) } returns
             Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
-        // Årløs behandling for hver sak: feiler under vurderingen, ikke i filteret.
-        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } throws
+            IllegalStateException("EntityManager is closed")
         every { utfoerer.opprettProsessinstans(any(), any()) } returns UUID.randomUUID()
 
         service.prosesserSkattehendelser(
