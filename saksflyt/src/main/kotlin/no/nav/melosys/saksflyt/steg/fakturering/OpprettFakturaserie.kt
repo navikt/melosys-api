@@ -60,7 +60,12 @@ class OpprettFakturaserie(
                 behandlingsresultatService.hentBehandlingsresultat(behandling.hentOpprinneligBehandling().id).hentFakturaserieReferanse()
             if (behandlingsresultat.fakturaserieReferanse == null || behandlingsresultat.fakturaserieReferanse == opprinneligFakturaserieReferanse) {
                 log.info("Kansellerer fakturaserie for behandling: $behandlingID med fakturaseriereferanse: $opprinneligFakturaserieReferanse")
-                kansellerFakturaserieOgLagreReferanse(behandlingsresultat, opprinneligFakturaserieReferanse, saksbehandlerIdent)
+                kansellerFakturaserieOgLagreReferanse(
+                    behandlingsresultat,
+                    opprinneligFakturaserieReferanse,
+                    saksbehandlerIdent,
+                    utledKanselleringsbeskrivelse(behandling)
+                )
             } else {
                 log.info("Fakturaserie allerede kansellert for behandling: $behandlingID, hopper over kansellering")
             }
@@ -85,13 +90,19 @@ class OpprettFakturaserie(
     private fun kansellerFakturaserieOgLagreReferanse(
         behandlingsresultat: Behandlingsresultat,
         opprinneligFakturaserieReferanse: String,
-        saksbehandlerIdent: String
+        saksbehandlerIdent: String,
+        beskrivelse: String
     ) {
         val alleÅrsavregningBehandlinger = behandlingsresultat.behandling?.fagsak?.hentAlleÅrsavregninger().orEmpty()
         val årsavregningRefs = alleÅrsavregningBehandlinger
             .mapNotNull { behandlingsresultatService.hentBehandlingsresultat(it.id).fakturaserieReferanse }
         val fakturaserieResponse =
-            faktureringskomponentenClient.kansellerFakturaserie(opprinneligFakturaserieReferanse, saksbehandlerIdent, årsavregningRefs)
+            faktureringskomponentenClient.kansellerFakturaserie(
+                opprinneligFakturaserieReferanse,
+                saksbehandlerIdent,
+                årsavregningRefs,
+                beskrivelse
+            )
         behandlingsresultat.fakturaserieReferanse = fakturaserieResponse.fakturaserieReferanse
         behandlingsresultatService.lagre(behandlingsresultat)
     }

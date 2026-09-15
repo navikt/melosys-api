@@ -40,7 +40,8 @@ class KansellerFakturaserie(
                 faktureringskomponentenClient.kansellerFakturaserie(
                     behandlingsresultat.fakturaserieReferanse!!,
                     saksbehandlerIdent,
-                    årsavregningRefs
+                    årsavregningRefs,
+                    utledKanselleringsbeskrivelse(behandling)
                 )
             behandlingsresultat.fakturaserieReferanse = fakturaserieResponse.fakturaserieReferanse
             behandlingsresultatService.lagre(behandlingsresultat)
