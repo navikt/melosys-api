@@ -1,17 +1,22 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
 import io.getunleash.FakeUnleash
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebeløpResponse
+import no.nav.melosys.service.avgift.MinstebeløpService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.dokument.DokgenTestData
@@ -39,17 +44,22 @@ internal class InformasjonTrygdeavgiftMapperTest {
     @MockK
     private lateinit var mockTrygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
+    @MockK
+    private lateinit var mockMinstebeløpService: MinstebeløpService
+
     private lateinit var informasjonTrygdeavgiftMapper: InformasjonTrygdeavgiftMapper
     private val unleash = FakeUnleash()
 
     @BeforeEach
     fun setup() {
         unleash.disableAll()
+        every { mockMinstebeløpService.finnMinstebeløp(any()) } returns MinstebeløpResponse(2024, BigDecimal(7000))
         informasjonTrygdeavgiftMapper = InformasjonTrygdeavgiftMapper(
             mockDokgenMapperDatahenter,
             mockHelseutgiftDekkesPeriodeService,
             mockTrygdeavgiftMottakerService,
             mockTrygdeavgiftsberegningService,
+            mockMinstebeløpService,
             unleash
         )
     }
@@ -69,30 +79,30 @@ internal class InformasjonTrygdeavgiftMapperTest {
                 }
             }
             helseutgiftDekkesPeriode {
-                fomDato = LocalDate.now().withMonth(1)
-                tomDato = LocalDate.now().withMonth(4)
+                fomDato = nå.withMonth(1)
+                tomDato = nå.withMonth(4)
                 bostedLandkode = Land_iso2.DK
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().withMonth(1)
-                    periodeTil = LocalDate.now().withMonth(4)
+                    periodeFra = nå.withMonth(1)
+                    periodeTil = nå.withMonth(4)
                     trygdesats = BigDecimal.ZERO
                     trygdeavgiftsbeløpMd = BigDecimal(0.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     }
                 }
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().withMonth(5)
-                    periodeTil = LocalDate.now().withMonth(8)
+                    periodeFra = nå.withMonth(5)
+                    periodeTil = nå.withMonth(8)
                     trygdesats = BigDecimal(0.05)
                     trygdeavgiftsbeløpMd = BigDecimal(500.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
@@ -135,30 +145,30 @@ internal class InformasjonTrygdeavgiftMapperTest {
                 }
             }
             helseutgiftDekkesPeriode {
-                fomDato = LocalDate.now().minusYears(1).withMonth(1).minusYears(1)
-                tomDato = LocalDate.now().withMonth(4)
+                fomDato = nå.minusYears(1).withMonth(1).minusYears(1)
+                tomDato = nå.withMonth(4)
                 bostedLandkode = Land_iso2.DK
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().minusYears(1).withMonth(1)
-                    periodeTil = LocalDate.now().withMonth(4)
+                    periodeFra = nå.minusYears(1).withMonth(1)
+                    periodeTil = nå.withMonth(4)
                     trygdesats = BigDecimal.ZERO
                     trygdeavgiftsbeløpMd = BigDecimal(0.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.minusYears(1).withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     }
                 }
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().minusYears(1).withMonth(5)
-                    periodeTil = LocalDate.now().withMonth(8)
+                    periodeFra = nå.minusYears(1).withMonth(5)
+                    periodeTil = nå.withMonth(8)
                     trygdesats = BigDecimal(0.05)
                     trygdeavgiftsbeløpMd = BigDecimal(500.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.minusYears(1).withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
@@ -201,30 +211,30 @@ internal class InformasjonTrygdeavgiftMapperTest {
                 }
             }
             helseutgiftDekkesPeriode {
-                fomDato = LocalDate.now().minusYears(1).withMonth(1).minusYears(1)
-                tomDato = LocalDate.now().withMonth(4)
+                fomDato = nå.minusYears(1).withMonth(1).minusYears(1)
+                tomDato = nå.withMonth(4)
                 bostedLandkode = Land_iso2.DK
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().minusYears(1).withMonth(1)
-                    periodeTil = LocalDate.now().withMonth(4)
+                    periodeFra = nå.minusYears(1).withMonth(1)
+                    periodeTil = nå.withMonth(4)
                     trygdesats = BigDecimal.ZERO
                     trygdeavgiftsbeløpMd = BigDecimal(0.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.minusYears(1).withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     }
                 }
                 trygdeavgiftsperiode {
-                    periodeFra = LocalDate.now().minusYears(1).withMonth(5)
-                    periodeTil = LocalDate.now().withMonth(8)
+                    periodeFra = nå.minusYears(1).withMonth(5)
+                    periodeTil = nå.withMonth(8)
                     trygdesats = BigDecimal(0.05)
                     trygdeavgiftsbeløpMd = BigDecimal(500.0)
                     grunnlagInntekstperiode {
-                        fomDato = LocalDate.now().minusYears(1).withMonth(1)
-                        tomDato = LocalDate.now().withMonth(4)
+                        fomDato = nå.minusYears(1).withMonth(1)
+                        tomDato = nå.withMonth(4)
                     }
                     grunnlagSkatteforholdTilNorge {
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
@@ -267,8 +277,8 @@ internal class InformasjonTrygdeavgiftMapperTest {
                 }
             }
             helseutgiftDekkesPeriode {
-                fomDato = LocalDate.now().withMonth(1)
-                tomDato = LocalDate.now().withMonth(4)
+                fomDato = nå.withMonth(1)
+                tomDato = nå.withMonth(4)
                 bostedLandkode = Land_iso2.DK
             }
         }
@@ -295,7 +305,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
     @Test
     fun `erSkattemessigEmigrert er true når en periode har IKKE_SKATTEPLIKTIG`() {
         unleash.enableAll()
-        val år = LocalDate.now().year
+        val år = nå.year
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
             behandling {
@@ -353,7 +363,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
     @Test
     fun `erSkattemessigEmigrert sjekker alle år ikke bare valgt år`() {
         unleash.enableAll()
-        val inneværendeÅr = LocalDate.now().year
+        val inneværendeÅr = nå.year
         val nesteÅr = inneværendeÅr + 1
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
@@ -413,7 +423,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
     @Test
     fun `flerårige perioder velger år med avgift og ignorerer år med kun avgift 0`() {
         unleash.enableAll()
-        val inneværendeÅr = LocalDate.now().year
+        val inneværendeÅr = nå.year
         val nesteÅr = inneværendeÅr + 1
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
@@ -473,7 +483,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
     @Test
     fun `avgiftsperioder er tom når alle perioder har avgift 0 og sats 0`() {
         unleash.enableAll()
-        val år = LocalDate.now().year
+        val år = nå.year
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
             behandling {
@@ -531,7 +541,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
     @Test
     fun `år med null sats og beløp 0 regnes ikke som år med avgift ved valg av brevår`() {
         unleash.enableAll()
-        val inneværendeÅr = LocalDate.now().year
+        val inneværendeÅr = nå.year
         val forrigeÅr = inneværendeÅr - 1
         val forforrigeÅr = inneværendeÅr - 2
         val behandlingsresultat = Behandlingsresultat.forTest {
@@ -588,6 +598,80 @@ internal class InformasjonTrygdeavgiftMapperTest {
         }
     }
 
+    @Test
+    fun `mapInformasjonTrygdeavgift med MINSTEBELØP beregningsregel mapper beregningsregel til DTO`() {
+        val behandlingsresultat = lagBehandlingsresultatMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP)
+        mockHappyCase(behandlingsresultat)
+
+        informasjonTrygdeavgiftMapper.mapInformasjonTrygdeavgift(lagBrevbestilling()).shouldNotBeNull().apply {
+            avgiftsperioder.shouldNotBeEmpty()
+            avgiftsperioder.any { it.beregningsregel == Avgiftsberegningsregel.MINSTEBELØP }.shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun `mapInformasjonTrygdeavgift med TJUEFEM_PROSENT_REGEL beregningsregel mapper beregningsregel til DTO`() {
+        val behandlingsresultat = lagBehandlingsresultatMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+        mockHappyCase(behandlingsresultat)
+
+        informasjonTrygdeavgiftMapper.mapInformasjonTrygdeavgift(lagBrevbestilling()).shouldNotBeNull().apply {
+            avgiftsperioder.shouldNotBeEmpty()
+            avgiftsperioder.any { it.beregningsregel == Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL }.shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun `mapInformasjonTrygdeavgift med ORDINÆR beregningsregel mapper ORDINÆR som beregningsregel`() {
+        val behandlingsresultat = lagBehandlingsresultatMedBeregningsregel(Avgiftsberegningsregel.ORDINÆR)
+        mockHappyCase(behandlingsresultat)
+
+        informasjonTrygdeavgiftMapper.mapInformasjonTrygdeavgift(lagBrevbestilling()).shouldNotBeNull().apply {
+            avgiftsperioder.shouldNotBeEmpty()
+            avgiftsperioder.all { it.beregningsregel == Avgiftsberegningsregel.ORDINÆR }.shouldBeTrue()
+        }
+    }
+
+    private fun lagBehandlingsresultatMedBeregningsregel(regel: Avgiftsberegningsregel): Behandlingsresultat {
+        val år = nå.year
+        return Behandlingsresultat.forTest {
+            id = 1L
+            behandling {
+                id = 1L
+                tema = Behandlingstema.PENSJONIST
+                fagsak {
+                    saksnummer = "MEL-123"
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.EU_EOS
+                }
+            }
+            helseutgiftDekkesPeriode {
+                fomDato = LocalDate.of(år, 1, 1)
+                tomDato = LocalDate.of(år, 12, 1)
+                bostedLandkode = Land_iso2.DK
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.of(år, 1, 1)
+                    periodeTil = LocalDate.of(år, 12, 1)
+                    trygdesats = BigDecimal(0.05)
+                    trygdeavgiftsbeløpMd = BigDecimal(500.0)
+                    beregningsregel = regel
+                    grunnlagInntekstperiode {
+                        fomDato = LocalDate.of(år, 1, 1)
+                        tomDato = LocalDate.of(år, 12, 1)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    }
+                }
+            }
+        }
+    }
+
+    private fun mockHappyCase(behandlingsresultat: Behandlingsresultat) {
+        every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPerioder(any()) } returns behandlingsresultat.helseutgiftDekkesPerioder.toList()
+        every { mockTrygdeavgiftMottakerService.getTrygdeavgiftMottaker(any<List<Trygdeavgiftsperiode>>()) } returns Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
+    }
+
     private fun lagBrevbestilling(): DokgenBrevbestilling {
         return DokgenBrevbestilling.Builder()
             .medBehandling(DokgenTestData.lagBehandling())
@@ -598,4 +682,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
             .build()
     }
 
+    companion object {
+        private val nå: LocalDate = LocalDate.now()
+    }
 }
