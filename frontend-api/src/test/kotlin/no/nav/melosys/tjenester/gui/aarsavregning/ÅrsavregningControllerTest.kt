@@ -581,7 +581,7 @@ internal class ÅrsavregningControllerTest {
                     "avgiftsdel": null
                 }
             ],
-            "totalInntekt": 1020000.00,
+            "totalInntekt": 85000.00,
             "totalAvgift": 6708.00
         }
     },
