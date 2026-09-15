@@ -88,8 +88,6 @@ Pinnet av tester i både `VideresendSoknadTest` og `SendVedtakUtlandTest`.
 > `ProsessDataKey.ER_FJERNARBEID_TWFA` og skrivingen i `ProsessinstansBuilder` beholdes inntil
 > videre nettopp som kilde for en slik ny kjøring.
 
-
-
 ## Replikering nuller flagget
 
 `ReplikerBehandlingsresultatService.replikerAnmodningsperioder` bruker `BeanUtils.cloneBean`, som
@@ -97,7 +95,6 @@ kopierer alt. `er_fjernarbeid_twfa` nulles der eksplisitt, på linje med `sendtU
 `anmodningsperiodeSvar`. Uten det ville en revurdering fått sin egen `behandling_id` og sitt eget
 vedtak, og blitt telt som en ekstra sak — den gamle spørringen var immun mot dette fordi replikaen
 aldri har en `ANMODNING_OM_UNNTAK`-prosessinstans.
-
 
 ## Kjent svakhet som ikke løses av kolonnen
 

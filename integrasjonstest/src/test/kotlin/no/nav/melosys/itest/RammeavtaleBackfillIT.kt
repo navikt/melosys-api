@@ -144,7 +144,7 @@ class RammeavtaleBackfillIT(
         // Assertene er bevisst positivlister, ikke forbudslister: å spørre «inneholder V170 ingen UPDATE?»
         // krever en SQL-lekser, og et hull i lekseren gjør assertet stille grønt. En positivliste snur
         // feilretningen. Flyway-filer er checksum-frosne etter release, så eksakt innhold er ikke sprøtt.
-        // Positivlisten er likevel ikke nok alene — [enLinjeErEnLinje] er den andre halvdelen, les den først.
+        // Positivlisten er likevel ikke nok alene — [enLinjeErEnLinje] er den andre halvdelen.
         enLinjeErEnLinje(MIGRERING_KOLONNE)
         enLinjeErEnLinje(MIGRERING_BACKFILL)
 
@@ -212,14 +212,12 @@ class RammeavtaleBackfillIT(
      *
      * [kjørbareLinjer] kaster linjer som *starter* med `--`. Oracle gjør ikke det hvis en streng-literal eller
      * blokkkommentar åpnet på en tidligere linje fortsatt står åpen: da kan den forkastede linja lukke
-     * literalen og deretter kjøre vilkårlig SQL, usynlig for positivlistene over. Verifisert — en `ALTER TABLE`
-     * gjemt slik ble faktisk kjørt av Flyway mens splitt-testen var grønn.
+     * literalen og deretter kjøre vilkårlig SQL, usynlig for positivlistene over.
      *
-     * Svaret er ikke å parse slike konstruksjoner riktig, men å forby forutsetningen: er apostrofene balansert
-     * linje for linje, og finnes verken doble anførselstegn eller blokkkommentarer, kan ingen konstruksjon
-     * krysse et linjeskift, og den naive linjebaserte lesingen er da beviselig enig med Oracle. Begge filene
-     * overholder dette i dag. Trenger en framtidig migrering noe av det, ryker denne — og da må testen leses
-     * på nytt, ikke lempes på.
+     * Svaret er ikke å parse slike konstruksjoner riktig, men å forby forutsetningen: balanserte apostrofer
+     * linje for linje, ingen doble anførselstegn, ingen blokkkommentarer og ingen `q'`-literaler, som lukkes
+     * på et valgfritt tegn og ikke på `'`. Begge filene overholder dette i dag. Trenger en framtidig migrering
+     * noe av det, ryker denne — og da må testen leses på nytt, ikke lempes på.
      */
     private fun enLinjeErEnLinje(migrering: String) {
         kjørbareLinjer(migrering).forAll { linje ->
@@ -229,6 +227,9 @@ class RammeavtaleBackfillIT(
             withClue("$migrering: doble anførselstegn og blokkkommentarer er ikke støttet her — «$linje»") {
                 linje.contains('"') shouldBe false
                 linje.contains("/*") shouldBe false
+            }
+            withClue("$migrering: q'-literaler er ikke støttet her — «$linje»") {
+                Q_LITERAL.containsMatchIn(linje) shouldBe false
             }
         }
     }
@@ -313,6 +314,7 @@ class RammeavtaleBackfillIT(
         private const val MIGRERING_KOLONNE = "V170__anmodningsperiode_fjernarbeid_twfa.sql"
         private const val MIGRERING_BACKFILL = "V171__backfill_anmodningsperiode_fjernarbeid_twfa.sql"
         private const val ANTALL_BACKFILL_UPDATES = 2
+        private val Q_LITERAL = Regex("""(?i)(?<![A-Za-z0-9_$#])n?q'""")
         private val FØRSTE_FOM: LocalDate = LocalDate.of(2023, 1, 1)
     }
 }
