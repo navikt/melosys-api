@@ -11,6 +11,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.anmodningsperiode
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.arkiv.DokumentReferanse
 import no.nav.melosys.domain.arkiv.Journalpost
@@ -174,6 +175,39 @@ internal class VideresendSoknadTest {
         }
         prosessinstans.getData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID) shouldBe opprettetJournalpostID
         prosessinstans.getData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, Landkoder::class.java) shouldBe Landkoder.SE
+    }
+
+    @Test
+    fun `utfør skal ikke sende TWFA-flagget selv om behandlingen har en anmodningsperiode med flagget satt`() {
+        // Rammeavtale om fjernarbeid hører til anmodningen om unntak (A001/LA_BUC_01) og skal ikke lekke over
+        // på A008 i LA_BUC_03, som deler basisklasse med den
+        var prosessinstans = opprettProsessinstans().toBuilder()
+            .medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITUSJON))
+            .build()
+        val behandling = prosessinstans.behandling!!
+        val dokumentReferanser = setOf(
+            DokumentReferanse(behandling.initierendeJournalpostId!!, journalpost.hoveddokument.dokumentId!!)
+        )
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.VEDLEGG_SED, dokumentReferanser)
+            .build()
+
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            anmodningsperiode { erFjernarbeidTWFA = true }
+        }.apply { this.behandling = behandling }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+
+
+        videresendSoknad.utfør(prosessinstans)
+
+
+        verify {
+            eessiService.opprettOgSendSed(
+                1L, listOf(MOTTAKER_INSTITUSJON), BucType.LA_BUC_03, dokumentReferanser, null, null, null
+            )
+        }
     }
 
     private fun opprettProsessinstans() = Prosessinstans.forTest {
