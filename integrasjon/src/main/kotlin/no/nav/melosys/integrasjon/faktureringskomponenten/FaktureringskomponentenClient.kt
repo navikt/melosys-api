@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.faktureringskomponenten
 
-import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaDto
@@ -30,7 +29,7 @@ open class FaktureringskomponentenClient(private val webClient: WebClient) : Jso
         referanse: String,
         saksbehandlerIdent: String,
         årsavregningRef: List<String> = emptyList(),
-        beskrivelse: String? = null
+        beskrivelse: String
     ) = webClient.post()
         .uri("/fakturaserier/{referanse}/kanseller", referanse)
         .header("Nav-User-Id", saksbehandlerIdent)
@@ -39,11 +38,10 @@ open class FaktureringskomponentenClient(private val webClient: WebClient) : Jso
         .bodyToMono<NyFakturaserieResponseDto>()
         .block()!!
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     data class KanselleringRequestDto(
         @JsonProperty("årsavregningRef")
         val årsavregningRef: List<String> = emptyList(),
-        val beskrivelse: String? = null
+        val beskrivelse: String
     )
 
     fun oppdaterFakturaMottaker(referanse: String, fakturaMottakerDto: FakturaMottakerDto, saksbehandlerIdent: String? = null) =

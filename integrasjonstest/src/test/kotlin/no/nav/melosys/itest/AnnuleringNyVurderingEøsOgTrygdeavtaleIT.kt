@@ -22,6 +22,7 @@ import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.AnnullerSakService
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -146,6 +147,64 @@ class AnnuleringNyVurderingEøsOgTrygdeavtaleIT(
         mockServer.verify(
             1,
             WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier/$fakturaserieReferanse/kanseller"))
+                .withRequestBody(
+                    WireMock.equalToJson(
+                        """
+                        {
+                          "årsavregningRef": [],
+                          "beskrivelse": "Opphør av medlemskap"
+                        }
+                        """
+                    )
+                )
+        )
+    }
+
+    @Test
+    fun `annullering av EØS-pensjonist skal kansellere faktura med beskrivelse om trygdeavgift`() {
+        val fagsak = fagsakRepository.save(Fagsak.forTest {
+            saksnummer = "MEL-${UUID.randomUUID().toString().take(8)}"
+            type = Sakstyper.EU_EOS
+            tema = Sakstemaer.TRYGDEAVGIFT
+            status = Saksstatuser.OPPRETTET
+            medBruker { aktørId = "1111111111111" }
+        })
+        val behandling = behandlingService.nyBehandling(
+            fagsak,
+            Behandlingsstatus.UNDER_BEHANDLING,
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstema.PENSJONIST,
+            "system",
+            "system",
+            LocalDate.now(),
+            Behandlingsaarsaktyper.SØKNAD,
+            "Årsakfritekst"
+        )
+        behandlingsresultatService.hentBehandlingsresultat(behandling.id)
+            .apply {
+                fakturaserieReferanse = this@AnnuleringNyVurderingEøsOgTrygdeavtaleIT.fakturaserieReferanse
+            }
+            .also(behandlingsresultatRepository::saveAndFlush)
+
+
+        executeAndWait(mapOf(ProsessType.ANNULLER_SAK to 1)) {
+            annullerSakService.annullerSak(fagsak.saksnummer)
+        }
+
+
+        mockServer.verify(
+            1,
+            WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier/$fakturaserieReferanse/kanseller"))
+                .withRequestBody(
+                    WireMock.equalToJson(
+                        """
+                        {
+                          "årsavregningRef": [],
+                          "beskrivelse": "Annullering av fakturert trygdeavgift"
+                        }
+                        """
+                    )
+                )
         )
     }
 

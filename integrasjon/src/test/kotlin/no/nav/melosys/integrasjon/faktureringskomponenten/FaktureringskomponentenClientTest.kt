@@ -186,7 +186,12 @@ class FaktureringskomponentenClientTest(
         )
 
         val nyFakturaserieResponseDto =
-            faktureringskomponentenClient.kansellerFakturaserie(referanse, "", listOf("ÅRSAVREGNING-2024-ABC123", "ÅRSAVREGNING-2023-XYZ789"))
+            faktureringskomponentenClient.kansellerFakturaserie(
+                referanse,
+                "",
+                listOf("ÅRSAVREGNING-2024-ABC123", "ÅRSAVREGNING-2023-XYZ789"),
+                "Opphør av medlemskap"
+            )
         nyFakturaserieResponseDto.fakturaserieReferanse.shouldBe("5689")
 
         serviceUnderTestMockServer.verify(
@@ -201,7 +206,8 @@ class FaktureringskomponentenClientTest(
                           "årsavregningRef": [
                             "ÅRSAVREGNING-2024-ABC123",
                             "ÅRSAVREGNING-2023-XYZ789"
-                          ]
+                          ],
+                          "beskrivelse": "Opphør av medlemskap"
                         }
                         """,
                         true, false
