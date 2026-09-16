@@ -70,12 +70,11 @@ class SkattepliktigAarsavregningOpprettelseService(
     /**
      * Den aktive årsavregningsbehandlingen for [gjelderÅr], eller null hvis saken ikke har noen.
      *
-     * Kaster hvis saken har flere enn én — å velge en vilkårlig av dem ville gjort feil på en sak
-     * ingen har sett på — og hvis en av dem er årløs, se [årFor].
+     * Behandlinger uten årsavregningsrad gir ingen årsmatch. Kaster ved flere aktive treff for året.
      */
     fun finnAktivÅrsavregningBehandling(fagsak: Fagsak, gjelderÅr: Int): Behandling? {
         val årsavregninger = fagsak.hentAktiveÅrsavregninger()
-            .filter { årFor(it, fagsak) == gjelderÅr }
+            .filter { årFor(it) == gjelderÅr }
 
         return when {
             årsavregninger.isEmpty() -> {
@@ -93,22 +92,9 @@ class SkattepliktigAarsavregningOpprettelseService(
         }
     }
 
-    /**
-     * Året behandlingen gjelder. Mangler behandlingen rad i `aarsavregning`, stoppes saken — å
-     * opprette en ny årsavregning ved siden av den årløse ville sendt innhentingsbrev til en borger
-     * på en sak ingen har sett på. Meldingen navngir behandlingen som må lukkes først.
-     */
-    private fun årFor(årsavregningsbehandling: Behandling, fagsak: Fagsak): Int {
+    private fun årFor(årsavregningsbehandling: Behandling): Int? {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(årsavregningsbehandling.id)
-        // Sjekker feltet framfor å kalle hentÅrsavregning() og fange kastet derfra: den fangsten
-        // ville også tatt enhver annen tilstandsfeil fra oppslaget over — en lukket EntityManager,
-        // for eksempel — og sendt den som rydder til å lukke en behandling som ikke er problemet.
         return behandlingsresultat.årsavregning?.aar
-            ?: throw TekniskException(
-                "Aktiv ÅRSAVREGNING-behandling ${årsavregningsbehandling.id} på sak ${fagsak.saksnummer} " +
-                    "mangler aarsavregning-rad (årløs). Saken stoppes i stedet for å få en ny årsavregning " +
-                    "ved siden av — lukk den årløse behandlingen først, og kjør saken om igjen."
-            )
     }
 
     /**
