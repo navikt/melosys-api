@@ -3,7 +3,6 @@ package no.nav.melosys.service.avgift.aarsavregning
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -12,18 +11,22 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.behandling
 import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.årsavregning
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 
 class SkattepliktigAarsavregningOpprettelseServiceTest {
 
@@ -43,31 +46,82 @@ class SkattepliktigAarsavregningOpprettelseServiceTest {
         trygdeavgiftMottakerService,
     )
 
-    /** Begge flytene stopper saken her, så kastet må navngi behandlingen som skal lukkes. */
     @Test
-    fun `årløs aktiv årsavregning gir en feilmelding som navngir behandlingen`() {
+    fun `aktiv årsavregning uten år gir ingen årsmatch`() {
         val fagsak = lagFagsakMedÅrsavregning()
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns
             Behandlingsresultat.forTest { }
 
-        val feil = shouldThrow<TekniskException> {
-            service.finnAktivÅrsavregningBehandling(fagsak, GJELDER_ÅR)
-        }
-
-        feil.message!! shouldContain BEHANDLING_ID.toString()
-        feil.message!! shouldContain SAKSNUMMER
-        // Handlingsanvisningen, ikke bare ordet «årløs»: uten den er meldingen en diagnose
-        // operatøren ikke kan gjøre noe med.
-        feil.message!! shouldContain "lukk den årløse behandlingen"
+        service.finnAktivÅrsavregningBehandling(fagsak, GJELDER_ÅR) shouldBe null
     }
 
-    /**
-     * Bare manglende aarsavregning-rad er det årløse tilfellet. Merkes en annen tilstandsfeil som
-     * årløs, sendes den som rydder til å lukke en behandling som ikke er problemet.
-     */
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `finner behandling med år selv om en behandling uten år finnes`(behandlingUtenÅrFørst: Boolean) {
+        val fagsak = lagFagsakMedÅrsavregning()
+        val behandlingUtenÅr = fagsak.behandlinger.single()
+        val behandlingMedÅr = Behandling.forTest {
+            id = BEHANDLING_ID + 1
+            type = Behandlingstyper.ÅRSAVREGNING
+            status = Behandlingsstatus.OPPRETTET
+        }
+        fagsak.behandlinger.clear()
+        fagsak.behandlinger.addAll(
+            if (behandlingUtenÅrFørst) listOf(behandlingUtenÅr, behandlingMedÅr)
+            else listOf(behandlingMedÅr, behandlingUtenÅr)
+        )
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingUtenÅr.id) } returns Behandlingsresultat.forTest { }
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingMedÅr.id) } returns
+            Behandlingsresultat.forTest { årsavregning { aar = GJELDER_ÅR } }
+
+        service.finnAktivÅrsavregningBehandling(fagsak, GJELDER_ÅR) shouldBe behandlingMedÅr
+    }
+
     @Test
-    fun `annen tilstandsfeil enn manglende årsavregning merkes ikke som årløs`() {
+    fun `behandling uten år skjuler ikke flere aktive årsmatcher`() {
+        val fagsak = lagFagsakMedÅrsavregning()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns Behandlingsresultat.forTest { }
+        (1L..2L).forEach { tillegg ->
+            val behandling = Behandling.forTest {
+                id = BEHANDLING_ID + tillegg
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.OPPRETTET
+            }
+            fagsak.behandlinger.add(behandling)
+            every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns
+                Behandlingsresultat.forTest { årsavregning { aar = GJELDER_ÅR } }
+        }
+
+        shouldThrow<TekniskException> {
+            service.finnAktivÅrsavregningBehandling(fagsak, GJELDER_ÅR)
+        }.message shouldBe "Flere aktive årsavregninger funnet for sak: $SAKSNUMMER og år: $GJELDER_ÅR"
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `annet år eller avsluttet behandling gir ingen årsmatch`(avsluttet: Boolean) {
+        val fagsak = lagFagsakMedÅrsavregning()
+        if (avsluttet) fagsak.behandlinger.single().status = Behandlingsstatus.AVSLUTTET
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns
+            Behandlingsresultat.forTest { årsavregning { aar = if (avsluttet) GJELDER_ÅR else GJELDER_ÅR - 1 } }
+
+        service.finnAktivÅrsavregningBehandling(fagsak, GJELDER_ÅR) shouldBe null
+    }
+
+    @Test
+    fun `manglende behandlingsresultat videreføres som oppslagsfeil`() {
+        val fagsak = lagFagsakMedÅrsavregning()
+        val feil = IkkeFunnetException("Fant ikke behandlingsresultat for $BEHANDLING_ID")
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } throws feil
+
+        shouldThrow<IkkeFunnetException> {
+            service.finnAktivÅrsavregningBehandling(fagsak, GJELDER_ÅR)
+        } shouldBe feil
+    }
+
+    @Test
+    fun `feil ved henting av behandlingsresultat videreføres`() {
         val fagsak = lagFagsakMedÅrsavregning()
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } throws
