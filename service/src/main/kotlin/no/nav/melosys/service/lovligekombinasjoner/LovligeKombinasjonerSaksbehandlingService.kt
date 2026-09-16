@@ -188,8 +188,16 @@ class LovligeKombinasjonerSaksbehandlingService(
     ): Set<Behandlingstyper> {
         val fagsak = fagsakService.hentFagsak(saksnummer)
 
-        if ((fagsak.type == Sakstyper.FTRL || fagsak.type == Sakstyper.EU_EOS) && fagsak.harKunÅrsavregningsBehandlinger()) {
-            return setOf(Behandlingstyper.ÅRSAVREGNING)
+        if (fagsak.harKunÅrsavregningsBehandlinger()) {
+            if (fagsak.type == Sakstyper.FTRL) {
+                return setOf(Behandlingstyper.ÅRSAVREGNING)
+            }
+            return hentMuligeBehandlingstyper(
+                hovedpart,
+                fagsak.type,
+                fagsak.tema,
+                behandlingstema ?: fagsak.hentSistRegistrertBehandling().tema
+            ).intersect(setOf(Behandlingstyper.ÅRSAVREGNING))
         }
 
         val sisteRegistrertBehandlingIkkeÅrsavregning = fagsak.hentSistRegistrertBehandlingIkkeÅrsavregning()
@@ -212,14 +220,6 @@ class LovligeKombinasjonerSaksbehandlingService(
 
         if ((unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) || (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT))) && fagsak.type == Sakstyper.FTRL && fagsak.tema == Sakstemaer.MEDLEMSKAP_LOVVALG &&
             fagsak.behandlinger.any { it.tema in ÅRSAVREGNING_TILLATTE_BEHANDLINGSTEMA }
-        ) {
-            behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
-        }
-
-        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST)
-            && fagsak.type == Sakstyper.EU_EOS
-            && fagsak.tema == Sakstemaer.TRYGDEAVGIFT
-            && behandlingstema == Behandlingstema.PENSJONIST
         ) {
             behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
         }
@@ -347,6 +347,14 @@ class LovligeKombinasjonerSaksbehandlingService(
             .filter { behandlingstema in it.behandlingsTemaer }
             .flatMap { it.behandlingsTyper }
             .toMutableSet()
+
+        if ((sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE)
+            && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG
+            && behandlingstema != Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET
+            && behandlingstyper.isNotEmpty()
+        ) {
+            behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
+        }
 
         if (sistBehandlingstema in BEHANDLINGSTEMA_FOR_ANNENGANGS_BEHANDLING) {
             behandlingstyper = mutableSetOf(
