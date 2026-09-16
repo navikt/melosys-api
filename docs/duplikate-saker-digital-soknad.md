@@ -98,7 +98,7 @@ Da unngår man duplikatsakene. Innebygd i
 Tre lag som utfyller hverandre (defense-in-depth):
 
 1. **Atomisk sak-resolusjon (melosys-api).** Ny cross-instance DB-lås `DIGITAL_SOKNAD_SAK_LOCK(aktoer_id)`
-   (`DigitalSøknadSakLockRepository` + `DigitalSøknadSakLås`, Flyway `V169`). NY-steget
+   (`DigitalSøknadSakLockRepository` + `DigitalSøknadSakLås`, Flyway `V172`). NY-steget
    `OpprettSakOgBehandlingDigitalSøknad` tar låsen på aktørId, re-sjekker
    `finnGyldigSaksnummerForSkjemaIder(...)` under låsen, og fester på eksisterende sak hvis den
    finnes (delt `DigitalSøknadEksisterendeSakHåndterer`) — ellers oppretter sak. Markøren
@@ -132,7 +132,11 @@ noen i gruppen — også på et utkast — gjenbrukes den; ellers tildeles tidli
 skjema-ID som deterministisk tie-break.
 
 Restrisiko: to deler som sendes helt samtidig og ikke ser hverandre kan tildele hver sin gruppe-ID.
-Da faller vi tilbake til dagens oppførsel (ingen kryss-serialisering), og lag 1 fanger duplikatsaken.
+Da faller vi tilbake til dagens oppførsel (ingen kryss-serialisering). Lag 1 serialiserer dem på
+aktørId, men oppdager bare en eksisterende sak via relaterte skjemaId-er; ser delene ikke hverandre,
+er relasjonslista tom på begge sider, og de får hver sin sak etter hverandre. Denne restrisikoen er
+altså **ikke** lukket av lag 1. Et sikkerhetsnett ville være en DB-constraint mot to åpne
+digital-søknad-saker for samme aktør og virksomhet; det er ikke implementert.
 
 ### Kompatibilitet og utrulling
 

@@ -216,11 +216,17 @@ public class ProsessinstansBehandler {
         prosessinstans.setStatus(ProsessStatus.FEILET);
         try {
             lagreProsessinstans(prosessinstans);
-            // Slipp fram eventuelle prosessinstanser som står på vent bak denne. Uten dette ville
-            // resten av søknadsgruppen blitt stående til neste oppstart (MELOSYS-8151).
-            applicationEventPublisher.publishEvent(new ProsessinstansFeiletEvent(prosessinstans));
         } catch (ObjectOptimisticLockingFailureException ex) {
             log.info("Prosessinstans {} ble slettet under feilhåndtering", prosessinstans.getId());
+            return;
+        }
+        // Slipp fram eventuelle prosessinstanser som står på vent bak denne. Uten dette ville
+        // resten av søknadsgruppen blitt stående til neste oppstart (MELOSYS-8151).
+        // Feilhåndteringen skal aldri selv kaste: lytteren parser låsreferanser på alle PÅ_VENT-rader.
+        try {
+            applicationEventPublisher.publishEvent(new ProsessinstansFeiletEvent(prosessinstans));
+        } catch (RuntimeException ex) {
+            log.warn("Kunne ikke slippe fram ventende prosessinstanser etter feil i {}", prosessinstans.getId(), ex);
         }
     }
 
