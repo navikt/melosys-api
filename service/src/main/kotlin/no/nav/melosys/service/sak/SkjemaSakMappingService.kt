@@ -66,6 +66,22 @@ class SkjemaSakMappingService(
         originalData: String,
         innsendtDato: Instant
     ) {
+        val eksisterende = skjemaSakMappingRepository.findBySkjemaId(skjemaId).orElse(null)
+        if (eksisterende != null && eksisterende.saksnummer != fagsak.saksnummer) {
+            if (eksisterende.originalData == null) {
+                // Claim-rad (MELOSYS-8151) som peker på en annen sak enn den delen faktisk landet på,
+                // typisk fordi den claimede saken ikke lenger var gyldig da delen kom. saksnummer er
+                // updatable = false, så en merge ville beholdt det gamle saksnummeret; raden må erstattes.
+                skjemaSakMappingRepository.delete(eksisterende)
+                skjemaSakMappingRepository.flush()
+                log.info { "Erstatter claim-rad for skjemaId=$skjemaId: ${eksisterende.saksnummer} → ${fagsak.saksnummer}" }
+            } else {
+                log.warn {
+                    "Mapping for skjemaId=$skjemaId finnes allerede mot sak ${eksisterende.saksnummer}; " +
+                        "beholder saksnummer og oppdaterer data (ny innsending landet på ${fagsak.saksnummer})"
+                }
+            }
+        }
         skjemaSakMappingRepository.save(
             SkjemaSakMapping(
                 skjemaId = skjemaId,

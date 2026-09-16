@@ -33,7 +33,7 @@ Status: ✅ dekket · 🟡 delvis · ⬜ gjenstår
 | 2.2 | Allerede mappede skjemaId-er overskrives ikke | Enhet | ✅ | `SkjemaSakMappingServiceTest` |
 | 2.3 | Tom liste er en no-op | Enhet | ✅ | `SkjemaSakMappingServiceTest` |
 | 2.4 | Rot-innsending som prosesseres sist finner saken via claim-raden | IT | ✅ | `DigitalSøknadDuplikatSakIT` |
-| 2.5 | Claim-rad fylles med ekte data når delen faktisk mottas (`lagreMapping` oppdaterer, lager ikke duplikat rad) | Enhet/IT | ⬜ | Viktig: `skjemaId` er PK, så `save` skal bli en oppdatering |
+| 2.5 | Claim-rad fylles med ekte data når delen faktisk mottas; peker claim-raden på en annen sak, erstattes den (saksnummer er `updatable = false`) | Enhet/IT | ✅ | `SkjemaSakMappingServiceTest`, `SkjemaSakMappingClaimIT` |
 | 2.6 | Claim-rader ekskluderes fra saksstatus-synken (`finnAlleSaksstatusSynkRader`) | IT | ✅ | `SaksstatusSynkProjeksjonIT` |
 | 2.7 | Claim-rader ekskluderes fra `finnSaksstatusSynkRaderForSaksnummer` | IT | ✅ | `SaksstatusSynkProjeksjonIT` |
 | 2.8 | Claim-rad blokkerer ikke sletting av mottatte opplysninger (FK-en fra MELOSYS-8135) | IT | ⬜ | |
