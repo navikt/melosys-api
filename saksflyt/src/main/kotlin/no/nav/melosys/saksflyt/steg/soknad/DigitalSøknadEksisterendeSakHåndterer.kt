@@ -138,7 +138,11 @@ class DigitalSøknadEksisterendeSakHåndterer(
         }
 
         val nySoeknad = DigitalSøknadMapper.tilSoeknad(søknadsdata)
-        mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandling.id, nySoeknad)
+        mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(
+            behandling.id,
+            nySoeknad,
+            oppdaterArbeidssteder = DigitalSøknadMapper.harArbeidsgiverdel(søknadsdata)
+        )
 
         val mottatteOpplysninger = mottatteOpplysningerService.hentMottatteOpplysninger(behandling.id)
         return behandling to mottatteOpplysninger
