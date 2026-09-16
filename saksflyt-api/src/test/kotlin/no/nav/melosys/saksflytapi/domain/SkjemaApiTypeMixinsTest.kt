@@ -2,10 +2,14 @@ package no.nav.melosys.saksflytapi.domain
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
+import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.DegSelvMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import java.util.UUID
 
 /**
@@ -55,5 +59,24 @@ class SkjemaApiTypeMixinsTest {
         hentet.arbeidsgiverNavn shouldBe "Testbedrift AS"
         hentet.juridiskEnhetOrgnr shouldBe "123456789"
         hentet.arbeidstakerNavn shouldBe "Test Arbeidstaker"
+    }
+
+    @Test
+    fun `eldre lagret skjema uten nye felt bruker bakoverkompatible standardverdier`() {
+        val dto = lagUtsendtArbeidstakerSkjemaM2MDto()
+        val json = Prosessinstans.dataMapper.valueToTree<JsonNode>(dto)
+        fjernFelterRekursivt(json, "skjemaDefinisjonVersjon", "erOffentligArbeidsgiver")
+
+        val hentet = Prosessinstans.dataMapper.treeToValue(json, UtsendtArbeidstakerSkjemaM2MDto::class.java)
+
+        hentet.skjema.skjemaDefinisjonVersjon shouldBe "1"
+        hentet.skjema.metadata.erOffentligArbeidsgiver shouldBe null
+    }
+
+    private fun fjernFelterRekursivt(node: JsonNode, vararg feltnavn: String) {
+        if (node is ObjectNode) {
+            feltnavn.forEach { node.remove(it) }
+        }
+        node.forEach { fjernFelterRekursivt(it, *feltnavn) }
     }
 }
