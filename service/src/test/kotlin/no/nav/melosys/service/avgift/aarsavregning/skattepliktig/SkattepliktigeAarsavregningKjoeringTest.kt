@@ -384,7 +384,7 @@ class SkattepliktigeAarsavregningKjoeringTest {
             )
         every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } throws
-            IllegalStateException("EntityManager is closed")
+            RuntimeException("oppslag feilet for MEL-2")
 
         service.prosesserSkattehendelser(
             listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
@@ -570,7 +570,7 @@ class SkattepliktigeAarsavregningKjoeringTest {
         every { trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) } returns
             Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } throws
-            IllegalStateException("EntityManager is closed")
+            RuntimeException("oppslag feilet")
         every { utfoerer.opprettProsessinstans(any(), any()) } returns UUID.randomUUID()
 
         service.prosesserSkattehendelser(
