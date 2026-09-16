@@ -47,7 +47,7 @@ class SkattepliktigAarsavregningOpprettelseServiceTest {
     )
 
     @Test
-    fun `årløs aktiv årsavregning gir ingen årsmatch`() {
+    fun `aktiv årsavregning uten år gir ingen årsmatch`() {
         val fagsak = lagFagsakMedÅrsavregning()
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns
@@ -58,25 +58,28 @@ class SkattepliktigAarsavregningOpprettelseServiceTest {
 
     @ParameterizedTest
     @ValueSource(booleans = [true, false])
-    fun `finner årssatt behandling selv om en årløs behandling finnes`(årløsFørst: Boolean) {
+    fun `finner behandling med år selv om en behandling uten år finnes`(behandlingUtenÅrFørst: Boolean) {
         val fagsak = lagFagsakMedÅrsavregning()
-        val årløs = fagsak.behandlinger.single()
-        val årssatt = Behandling.forTest {
+        val behandlingUtenÅr = fagsak.behandlinger.single()
+        val behandlingMedÅr = Behandling.forTest {
             id = BEHANDLING_ID + 1
             type = Behandlingstyper.ÅRSAVREGNING
             status = Behandlingsstatus.OPPRETTET
         }
         fagsak.behandlinger.clear()
-        fagsak.behandlinger.addAll(if (årløsFørst) listOf(årløs, årssatt) else listOf(årssatt, årløs))
-        every { behandlingsresultatService.hentBehandlingsresultat(årløs.id) } returns Behandlingsresultat.forTest { }
-        every { behandlingsresultatService.hentBehandlingsresultat(årssatt.id) } returns
+        fagsak.behandlinger.addAll(
+            if (behandlingUtenÅrFørst) listOf(behandlingUtenÅr, behandlingMedÅr)
+            else listOf(behandlingMedÅr, behandlingUtenÅr)
+        )
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingUtenÅr.id) } returns Behandlingsresultat.forTest { }
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingMedÅr.id) } returns
             Behandlingsresultat.forTest { årsavregning { aar = GJELDER_ÅR } }
 
-        service.finnAktivÅrsavregningBehandling(fagsak, GJELDER_ÅR) shouldBe årssatt
+        service.finnAktivÅrsavregningBehandling(fagsak, GJELDER_ÅR) shouldBe behandlingMedÅr
     }
 
     @Test
-    fun `årløs behandling skjuler ikke flere aktive årsmatcher`() {
+    fun `behandling uten år skjuler ikke flere aktive årsmatcher`() {
         val fagsak = lagFagsakMedÅrsavregning()
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns Behandlingsresultat.forTest { }
         (1L..2L).forEach { tillegg ->

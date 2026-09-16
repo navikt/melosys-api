@@ -272,13 +272,13 @@ class SkattepliktigeAarsavregningKjoeringTest {
 
     @ParameterizedTest
     @ValueSource(booleans = [false, true])
-    fun `årløs aktiv årsavregning tillater opprettelse i dryrun og skarp kjøring`(skarp: Boolean) {
+    fun `aktiv årsavregning uten år tillater opprettelse i dryrun og skarp kjøring`(skarp: Boolean) {
         val fagsak = lagFagsakMedÅrsavregning(Behandlingsstatus.VURDER_DOKUMENT, BEHANDLING_ID)
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
 
         val behandlingsresultat = Behandlingsresultat.forTest { }
         stubTrygdeavgift(behandlingsresultat)
-        // Årløs: behandlingsresultatet finnes, men har ingen aarsavregning-rad.
+        // Uten år: behandlingsresultatet finnes, men har ingen aarsavregning-rad.
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { utfoerer.opprettProsessinstans("MEL-1", "2023") } returns UUID.randomUUID()
 

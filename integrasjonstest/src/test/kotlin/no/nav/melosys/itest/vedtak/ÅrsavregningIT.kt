@@ -87,16 +87,16 @@ class ÅrsavregningIT(
 
     @ParameterizedTest
     @ValueSource(booleans = [false, true])
-    fun `årløs behandling tillater årsavregning fra Kafka og batch uten duplikat ved gjentatt hendelse`(batch: Boolean) {
+    fun `behandling uten år tillater årsavregning fra Kafka og batch uten duplikat ved gjentatt hendelse`(batch: Boolean) {
         val år = inneværendeÅr
         val saksnummer = lagFørstegangsbehandling(
             Skatteplikttype.IKKE_SKATTEPLIKTIG, false, LocalDate.of(år, 1, 1), LocalDate.of(år, 2, 1)
         )
-        val årløsId = executeAndWait(mapOf(ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK to 1)) {
+        val behandlingUtenÅrId = executeAndWait(mapOf(ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK to 1)) {
             opprettBehandlingForSak.opprettBehandling(saksnummer, lagOpprettSakDtoÅrsavregning())
         }.hentBehandling.id
-        val opprinneligStatus = behandlingRepository.findById(årløsId).shouldBePresent().status
-        behandlingsresultatRepository.findById(årløsId).shouldBePresent().årsavregning shouldBe null
+        val opprinneligStatus = behandlingRepository.findById(behandlingUtenÅrId).shouldBePresent().status
+        behandlingsresultatRepository.findById(behandlingUtenÅrId).shouldBePresent().årsavregning shouldBe null
         val hendelse = Skattehendelse(år.toString(), TEST_FNR, "ny")
         val batchHendelser = listOf(SkattehendelseItem(år.toString(), TEST_FNR))
 
@@ -125,9 +125,9 @@ class ÅrsavregningIT(
 
             val behandlinger = fagsakRepository.findBySaksnummer(saksnummer).shouldBePresent().behandlinger
             behandlinger.shouldHaveSize(3)
-            val årssatt = behandlinger.single { it.type == Behandlingstyper.ÅRSAVREGNING && it.id != årløsId }
-            årssatt.status shouldBe Behandlingsstatus.OPPRETTET
-            behandlingsresultatRepository.findById(årssatt.id).shouldBePresent().hentÅrsavregning().aar shouldBe år
+            val behandlingMedÅr = behandlinger.single { it.type == Behandlingstyper.ÅRSAVREGNING && it.id != behandlingUtenÅrId }
+            behandlingMedÅr.status shouldBe Behandlingsstatus.OPPRETTET
+            behandlingsresultatRepository.findById(behandlingMedÅr.id).shouldBePresent().hentÅrsavregning().aar shouldBe år
 
             val prosesserFørGjentakelse = antallProsesser()
             if (batch) {
@@ -137,10 +137,10 @@ class ÅrsavregningIT(
                 skattehendelserConsumer.lesSkattehendelser(ConsumerRecord("topic", 0, 1, "gjentatt", hendelse))
             }
             antallProsesser() shouldBe prosesserFørGjentakelse
-            behandlingRepository.findById(årssatt.id).shouldBePresent().status shouldBe Behandlingsstatus.OPPRETTET
+            behandlingRepository.findById(behandlingMedÅr.id).shouldBePresent().status shouldBe Behandlingsstatus.OPPRETTET
             fagsakRepository.findBySaksnummer(saksnummer).shouldBePresent().behandlinger.shouldHaveSize(3)
-            behandlingRepository.findById(årløsId).shouldBePresent().status shouldBe opprinneligStatus
-            behandlingsresultatRepository.findById(årløsId).shouldBePresent().årsavregning shouldBe null
+            behandlingRepository.findById(behandlingUtenÅrId).shouldBePresent().status shouldBe opprinneligStatus
+            behandlingsresultatRepository.findById(behandlingUtenÅrId).shouldBePresent().årsavregning shouldBe null
         } finally {
             ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
         }
