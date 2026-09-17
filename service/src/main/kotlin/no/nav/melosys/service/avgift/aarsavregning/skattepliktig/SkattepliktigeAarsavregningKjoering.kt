@@ -2,6 +2,8 @@ package no.nav.melosys.service.avgift.aarsavregning.skattepliktig
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.integrasjon.skattehendelser.SkattehendelserClient
+import no.nav.melosys.integrasjon.skattehendelser.ÅrFilter
 import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.aarsavregning.SkattepliktigAarsavregningOpprettelseService
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import tools.jackson.databind.JsonNode
 import tools.jackson.module.kotlin.jacksonObjectMapper
+import java.time.LocalDateTime
 import java.util.Collections
 import java.util.UUID
 
@@ -32,6 +35,7 @@ class SkattepliktigeAarsavregningKjoering(
     private val årsavregningService: ÅrsavregningService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val utfoerer: SkattepliktigeAarsavregningUtfoerer,
+    private val skattehendelserClient: SkattehendelserClient,
 ) {
     // Skrives fra @Async-tråden mens /rapport kan lese samtidig.
     val resultater: MutableList<SakResultat> = Collections.synchronizedList(mutableListOf())
@@ -57,6 +61,27 @@ class SkattepliktigeAarsavregningKjoering(
     ) {
         prosesserSkattehendelser(skattehendelser, skarp, maksAntall)
     }
+
+    /**
+     * Som [prosesserSkattehendelserAsynkront], men henter hendelsene fra melosys-skattehendelser.
+     * Feiler hentingen, starter ikke kjøringen, og rapporten fra forrige kjøring står urørt.
+     */
+    @Async("taskExecutor")
+    @Transactional(readOnly = true)
+    fun prosesserSkattepliktigeFraSkattehendelserAsynkront(
+        gjelderÅr: Int,
+        årFilter: ÅrFilter,
+        publisertEtter: LocalDateTime?,
+        skarp: Boolean = false,
+        maksAntall: Int? = null,
+    ) {
+        prosesserSkattehendelser(hentSkattehendelser(gjelderÅr, årFilter, publisertEtter), skarp, maksAntall)
+    }
+
+    fun hentSkattehendelser(gjelderÅr: Int, årFilter: ÅrFilter, publisertEtter: LocalDateTime?): List<SkattehendelseItem> =
+        runAsSystem("hentSkattepliktigeFraSkattehendelser") {
+            skattehendelserClient.hentSkattepliktige(gjelderÅr, årFilter, publisertEtter)
+        }.skattepliktige.map { SkattehendelseItem(gjelderPeriode = it.gjelderPeriode, identifikator = it.identifikator) }
 
     // readOnly gir FlushMode.MANUAL, og er garantien for at simuleringen ikke skriver: alle
     // skrivninger går gjennom utfoerer i egne transaksjoner. Metoden over kaller denne som

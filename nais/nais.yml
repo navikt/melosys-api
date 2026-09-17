@@ -63,6 +63,9 @@ spec:
         - application: {{APP_NAME_DOKARKIV}}
         - application: {{APP_NAME_DOKDISTFORDELING}}
         - application: {{APP_NAME_MELOSYS_SKJEMA_API}}
+        - application: {{APP_NAME_SKATTEHENDELSER}}
+          namespace: teammelosys
+          cluster: {{NAIS_CLUSTER_NAME_GCP}}
         - application: {{APP_NAME_POPP}}
         - application: logging
           namespace: nais-system
@@ -121,6 +124,10 @@ spec:
     value: {{APP_NAME_DOKDISTFORDELING}}
   - name: APP_NAME_MELOSYS_SKJEMA_API
     value: {{APP_NAME_MELOSYS_SKJEMA_API}}
+  - name: APP_NAME_SKATTEHENDELSER
+    value: {{APP_NAME_SKATTEHENDELSER}}
+  - name: MELOSYS_SKATTEHENDELSER_URL
+    value: {{MELOSYS_SKATTEHENDELSER_URL}}
   - name: APP_NAME_POPP
     value: {{APP_NAME_POPP}}
   - name: APP_NAME

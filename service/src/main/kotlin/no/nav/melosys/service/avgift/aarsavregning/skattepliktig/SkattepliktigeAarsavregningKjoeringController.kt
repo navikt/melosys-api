@@ -3,6 +3,7 @@ package no.nav.melosys.service.avgift.aarsavregning.skattepliktig
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import mu.KotlinLogging
+import no.nav.melosys.integrasjon.skattehendelser.ÅrFilter
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDateTime
 
 private val log = KotlinLogging.logger { }
 
@@ -51,6 +53,10 @@ class SkattepliktigeAarsavregningKjoeringController(
             "/run på nytt i det vinduet, kjøres hele lista skarpt to ganger, med nye årsavregninger og " +
             "nye innhentingsbrev til de samme borgerne. Send derfor /run ÉN gang, og bruk /rapport til å " +
             "se om kjøringen faktisk startet — ikke isRunning. " +
+            "I stedet for en liste kan du sende gjelderAar: da hentes hendelsene fra melosys-skattehendelser " +
+            "når kjøringen starter, og antallInputHendelser i /status viser hvor mange som ble hentet. " +
+            "aarFilter velger FOM_AAR (året perioden starter i, standard) eller INNTEKTSAAR. Ekte kjøring " +
+            "med gjelderAar krever publisertEtter, slik at personer fra tidligere kjøringer ikke tas med på nytt. " +
             "Bruk /status for fremdrift og /rapport for resultat per sak. NB: appen kjører to podder, " +
             "og jobbtilstanden ligger i minnet på den poden som tok imot /run — kjør derfor mot én pod " +
             "(port-forward), og kryssjekk pod-feltet i /status. Hele kjøringen holder én lesetransaksjon " +
@@ -59,9 +65,20 @@ class SkattepliktigeAarsavregningKjoeringController(
     @PostMapping("/run")
     fun run(
         @RequestBody
-        @Parameter(description = "Liste med skattehendelser, skarp-flagg, og valgfritt maksAntall")
+        @Parameter(description = "Liste med skattehendelser eller gjelderAar med filtre, skarp-flagg, og valgfritt maksAntall")
         request: SkattehendelseRunRequest
     ): ResponseEntity<Map<String, Any?>> {
+        if (request.skattehendelser.isEmpty() == (request.gjelderAar == null)) {
+            return ResponseEntity.badRequest().body(
+                mapOf("feil" to "Send enten skattehendelser eller gjelderAar, ikke begge og ikke ingen av dem")
+            )
+        }
+        if (request.skarp && request.gjelderAar != null && request.publisertEtter == null) {
+            return ResponseEntity.badRequest().body(
+                mapOf("feil" to "Ekte kjøring med gjelderAar krever publisertEtter")
+            )
+        }
+
         // Uten denne starter {"skarp": true} en kjøring helt uten tak, fordi løkka bare håndhever
         // taket når verdien ikke er null. En full kjøring sender bare et høyt tall — poenget er at
         // taket skal være et valg, ikke en default.
@@ -90,22 +107,39 @@ class SkattepliktigeAarsavregningKjoeringController(
         }
 
         val modus = if (request.skarp) "SKARP" else "DRYRUN"
-        log.info {
-            "Starter $modus for ${request.skattehendelser.size} skattehendelser, maksAntall=${request.maksAntall}"
+        val gjelderÅr = request.gjelderAar
+        if (gjelderÅr != null) {
+            log.info {
+                "Starter $modus for skattehendelser fra melosys-skattehendelser: gjelderÅr=$gjelderÅr, " +
+                    "årFilter=${request.aarFilter}, publisertEtter=${request.publisertEtter}, maksAntall=${request.maksAntall}"
+            }
+            kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(
+                gjelderÅr,
+                request.aarFilter,
+                request.publisertEtter,
+                request.skarp,
+                request.maksAntall,
+            )
+        } else {
+            log.info {
+                "Starter $modus for ${request.skattehendelser.size} skattehendelser, maksAntall=${request.maksAntall}"
+            }
+            kjoering.prosesserSkattehendelserAsynkront(
+                request.skattehendelser,
+                request.skarp,
+                request.maksAntall,
+            )
         }
-
-        kjoering.prosesserSkattehendelserAsynkront(
-            request.skattehendelser,
-            request.skarp,
-            request.maksAntall,
-        )
 
         return ResponseEntity.ok(
             mapOf(
                 "melding" to "$modus startet",
                 "skarp" to request.skarp,
                 "maksAntall" to request.maksAntall,
-                "antallHendelser" to request.skattehendelser.size,
+                "antallHendelser" to if (gjelderÅr != null) null else request.skattehendelser.size,
+                "gjelderAar" to gjelderÅr,
+                "aarFilter" to if (gjelderÅr != null) request.aarFilter else null,
+                "publisertEtter" to request.publisertEtter,
                 "statusEndpoint" to "/admin/aarsavregninger/saker/skattepliktige/status",
                 "rapportEndpoint" to "/admin/aarsavregninger/saker/skattepliktige/rapport"
             )
@@ -124,7 +158,12 @@ class SkattepliktigeAarsavregningKjoeringController(
 }
 
 data class SkattehendelseRunRequest(
-    val skattehendelser: List<SkattehendelseItem>,
+    val skattehendelser: List<SkattehendelseItem> = emptyList(),
+    /** Hent hendelsene for dette året fra melosys-skattehendelser i stedet for å sende [skattehendelser]. */
+    val gjelderAar: Int? = null,
+    val aarFilter: ÅrFilter = ÅrFilter.FOM_AAR,
+    /** Ta bare med personer med siste publisering etter dette tidspunktet. Påkrevd ved ekte kjøring med [gjelderAar]. */
+    val publisertEtter: LocalDateTime? = null,
     val skarp: Boolean = false,
     /** Tak på antall saker som kan endres. Påkrevd og positiv når [skarp] er true; teller også forsøk som feiler eller hoppes over. */
     val maksAntall: Int? = null,

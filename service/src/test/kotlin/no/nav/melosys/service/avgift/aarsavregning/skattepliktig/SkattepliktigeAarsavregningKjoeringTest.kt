@@ -21,6 +21,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.årsavregning
+import no.nav.melosys.integrasjon.skattehendelser.SkattehendelserClient
+import no.nav.melosys.integrasjon.skattehendelser.Skattepliktig
+import no.nav.melosys.integrasjon.skattehendelser.SkattepliktigeRespons
+import no.nav.melosys.integrasjon.skattehendelser.ÅrFilter
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
@@ -30,10 +34,12 @@ import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.http.HttpStatus
+import java.time.LocalDateTime
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -53,6 +59,7 @@ class SkattepliktigeAarsavregningKjoeringTest {
     private val trygdeavgiftMottakerService = mockk<TrygdeavgiftMottakerService>()
     private val behandlingsresultatService = mockk<BehandlingsresultatService>()
     private val utfoerer = mockk<SkattepliktigeAarsavregningUtfoerer>()
+    private val skattehendelserClient = mockk<SkattehendelserClient>()
 
     private val opprettelseService = SkattepliktigAarsavregningOpprettelseService(
         prosessinstansService,
@@ -68,6 +75,7 @@ class SkattepliktigeAarsavregningKjoeringTest {
         årsavregningService,
         trygdeavgiftMottakerService,
         utfoerer,
+        skattehendelserClient,
     )
 
     @Test
@@ -268,6 +276,88 @@ class SkattepliktigeAarsavregningKjoeringTest {
 
         verify(exactly = 1) { kjoering.prosesserSkattehendelserAsynkront(hendelser, false, null) }
         verify(exactly = 1) { kjoering.prosesserSkattehendelserAsynkront(hendelser, true, 1) }
+    }
+
+    @Test
+    fun `gjelderAar starter kjøringen med hendelser fra melosys-skattehendelser`() {
+        val kjoering = mockk<SkattepliktigeAarsavregningKjoering>(relaxed = true)
+        val controller = SkattepliktigeAarsavregningKjoeringController(kjoering)
+        val publisertEtter = LocalDateTime.of(2026, 9, 8, 0, 0)
+
+        val svar = controller.run(
+            SkattehendelseRunRequest(
+                gjelderAar = 2025,
+                aarFilter = ÅrFilter.INNTEKTSAAR,
+                publisertEtter = publisertEtter,
+                skarp = true,
+                maksAntall = 2,
+            )
+        )
+
+        svar.statusCode shouldBe HttpStatus.OK
+        verify(exactly = 1) {
+            kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(2025, ÅrFilter.INNTEKTSAAR, publisertEtter, true, 2)
+        }
+        verify(exactly = 0) { kjoering.prosesserSkattehendelserAsynkront(any(), any(), any()) }
+    }
+
+    @Test
+    fun `run avvises når både liste og gjelderAar mangler eller begge er sendt`() {
+        val kjoering = mockk<SkattepliktigeAarsavregningKjoering>(relaxed = true)
+        val controller = SkattepliktigeAarsavregningKjoeringController(kjoering)
+
+        controller.run(SkattehendelseRunRequest()).statusCode shouldBe HttpStatus.BAD_REQUEST
+        controller.run(
+            SkattehendelseRunRequest(skattehendelser = listOf(SkattehendelseItem("2025", AKTØR_ID)), gjelderAar = 2025)
+        ).statusCode shouldBe HttpStatus.BAD_REQUEST
+
+        verify(exactly = 0) { kjoering.prosesserSkattehendelserAsynkront(any(), any(), any()) }
+        verify(exactly = 0) { kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `ekte kjøring med gjelderAar uten publisertEtter avvises, simulering slipper gjennom`() {
+        val kjoering = mockk<SkattepliktigeAarsavregningKjoering>(relaxed = true)
+        val controller = SkattepliktigeAarsavregningKjoeringController(kjoering)
+
+        controller.run(SkattehendelseRunRequest(gjelderAar = 2025, skarp = true, maksAntall = 10))
+            .statusCode shouldBe HttpStatus.BAD_REQUEST
+        controller.run(SkattehendelseRunRequest(gjelderAar = 2025)).statusCode shouldBe HttpStatus.OK
+
+        verify(exactly = 1) {
+            kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(2025, ÅrFilter.FOM_AAR, null, false, null)
+        }
+    }
+
+    @Test
+    fun `hendelser fra melosys-skattehendelser hentes med systemtoken og blir input til kjøringen`() {
+        var brukteSystemtoken = false
+        every { skattehendelserClient.hentSkattepliktige(2025, ÅrFilter.FOM_AAR, null) } answers {
+            brukteSystemtoken = ThreadLocalAccessInfo.shouldUseSystemToken()
+            SkattepliktigeRespons(
+            gjelderAar = 2025,
+            antall = 1,
+            skattepliktige = listOf(
+                Skattepliktig(
+                    gjelderPeriode = "2025",
+                    identifikator = AKTØR_ID,
+                    sisteHendelseTid = LocalDateTime.of(2026, 9, 10, 2, 0),
+                    inntektsaar = listOf("2025"),
+                    antallPubliseringer = 1,
+                )
+            ),
+            )
+        }
+
+        // Uten kontekst svarer shouldUseSystemToken true uansett; en vanlig web-kontekst gir false.
+        ThreadLocalAccessInfo.beforeControllerRequest("/test", false)
+        try {
+            service.hentSkattehendelser(2025, ÅrFilter.FOM_AAR, null) shouldBe
+                listOf(SkattehendelseItem(gjelderPeriode = "2025", identifikator = AKTØR_ID))
+        } finally {
+            runCatching { ThreadLocalAccessInfo.afterControllerRequest("/test") }
+        }
+        brukteSystemtoken shouldBe true
     }
 
     @ParameterizedTest
