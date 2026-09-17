@@ -81,7 +81,13 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     @ParameterizedTest
     @CsvSource(
         "EU_EOS, UTSENDT_ARBEIDSTAKER",
-        "EU_EOS, TRYGDETID",
+        "EU_EOS, UTSENDT_SELVSTENDIG",
+        "EU_EOS, ARBEID_FLERE_LAND",
+        "EU_EOS, ARBEID_TJENESTEPERSON_ELLER_FLY",
+        "EU_EOS, ARBEID_KUN_NORGE",
+        "EU_EOS, IKKE_YRKESAKTIV",
+        "EU_EOS, PENSJONIST",
+        "TRYGDEAVTALE, YRKESAKTIV",
         "TRYGDEAVTALE, IKKE_YRKESAKTIV",
         "TRYGDEAVTALE, PENSJONIST"
     )
@@ -90,6 +96,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         behandlingstema: Behandlingstema
     ) {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST)
 
 
         val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForNySak(
@@ -102,6 +109,32 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
         muligeTyper shouldContain Behandlingstyper.ÅRSAVREGNING
     }
+
+    @ParameterizedTest
+    @CsvSource(
+        "EU_EOS, TRYGDETID",
+        "EU_EOS, FORESPØRSEL_TRYGDEMYNDIGHET",
+        "TRYGDEAVTALE, FORESPØRSEL_TRYGDEMYNDIGHET"
+    )
+    fun `årsavregning tilbys ikke for trygdetid eller forespørsel fra trygdemyndighet`(
+        sakstype: Sakstyper,
+        behandlingstema: Behandlingstema
+    ) {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST)
+
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForNySak(
+            Aktoersroller.BRUKER,
+            sakstype,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            behandlingstema
+        )
+
+
+        muligeTyper shouldContainExactlyInAnyOrder listOf(Behandlingstyper.HENVENDELSE)
+    }
+
     // Hardkodede forventninger med vilje: en test som speiler hentKombinasjonstre ved å
     // kalle de samme oppslagene kan per konstruksjon ikke feile på annet enn en
     // signaturendring, og sier ingenting om hva treet faktisk inneholder.

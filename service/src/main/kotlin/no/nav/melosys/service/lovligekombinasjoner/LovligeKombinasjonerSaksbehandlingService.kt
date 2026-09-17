@@ -359,6 +359,7 @@ class LovligeKombinasjonerSaksbehandlingService(
         if ((sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE)
             && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG
             && behandlingstema != Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET
+            && behandlingstema != Behandlingstema.TRYGDETID
             && behandlingstyper.isNotEmpty()
         ) {
             behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
