@@ -32,7 +32,6 @@ import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.OpprettSakRequest
 import no.nav.melosys.service.sak.SkjemaSakMappingService
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverensVirksomhetINorgeDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidsgiversSkjemaDataDto
 import org.junit.jupiter.api.BeforeEach
@@ -151,11 +150,8 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
     fun `utfør setter behandlingstema ARBEID_TJENESTEPERSON_ELLER_FLY for offentlig virksomhet`() {
         val offentligSøknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
             skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
-            data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto(
-                arbeidsgiverensVirksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(
-                    erArbeidsgiverenOffentligVirksomhet = true
-                )
-            )
+            erOffentligArbeidsgiver = true
+            data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
             fnr = this@OpprettSakOgBehandlingDigitalSøknadTest.fnr
             referanseId = this@OpprettSakOgBehandlingDigitalSøknadTest.referanseId
         }

@@ -15,6 +15,8 @@ import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import java.util.UUID
 
 @ExtendWith(MockKExtension::class)
@@ -56,5 +58,43 @@ internal class HentDigitalSøknadsdataTest {
 
         val lagretData = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.DIGITAL_SØKNADSDATA)
         lagretData shouldBe søknadsdata
+    }
+
+    @ParameterizedTest
+    @CsvSource("1,2", "2,1")
+    fun `lagrer blandede versjoner når en del har registerklassifisering`(hovedversjon: String, kobletVersjon: String) {
+        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            skjemaDefinisjonVersjon = hovedversjon
+            erOffentligArbeidsgiver = false.takeIf { hovedversjon == "2" }
+            medKobletArbeidsgiverSkjema {
+                skjemaDefinisjonVersjon = kobletVersjon
+                erOffentligArbeidsgiver = false.takeIf { kobletVersjon == "2" }
+            }
+        }
+        every { melosysSkjemaApiClient.hentUtsendtArbeidstakerSkjema(skjemaId) } returns søknadsdata
+
+        hentDigitalSøknadsdata.utfør(prosessinstans)
+
+        prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.DIGITAL_SØKNADSDATA) shouldBe søknadsdata
+    }
+
+    @ParameterizedTest
+    @CsvSource("1,false", "1,true", "2,false")
+    fun `lagrer søknadsdata uten å validere registerklassifisering`(versjon: String, harKobletSkjema: Boolean) {
+        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
+            skjemaDefinisjonVersjon = versjon
+            erOffentligArbeidsgiver = null
+            if (harKobletSkjema) {
+                medKobletArbeidsgiverSkjema {
+                    skjemaDefinisjonVersjon = versjon
+                    erOffentligArbeidsgiver = null
+                }
+            }
+        }
+        every { melosysSkjemaApiClient.hentUtsendtArbeidstakerSkjema(skjemaId) } returns søknadsdata
+
+        hentDigitalSøknadsdata.utfør(prosessinstans)
+
+        prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.DIGITAL_SØKNADSDATA) shouldBe søknadsdata
     }
 }

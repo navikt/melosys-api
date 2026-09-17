@@ -3,6 +3,8 @@ package no.nav.melosys.saksflyt.steg.soknad
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMetadata
@@ -56,8 +58,9 @@ class BehandlingstemaUtlederTest {
     }
 
     @Test
-    fun `eldre skjema uten registerklassifisering bruker brukersvaret`() {
+    fun `manglende registerklassifisering stopper behandlingen uten fallback til gammelt brukersvar`() {
         val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+            skjemaDefinisjonVersjon = "1"
             skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
             data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto(
                 arbeidsgiverensVirksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(
@@ -75,23 +78,33 @@ class BehandlingstemaUtlederTest {
             )
         }
 
-        assertThat(BehandlingstemaUtleder.utled(dto)).isEqualTo(Behandlingstema.UTSENDT_ARBEIDSTAKER)
-        assertThat(DigitalSøknadMapper.tilSoeknad(dto).juridiskArbeidsgiverNorge.erOffentligVirksomhet).isFalse()
+        assertThatThrownBy { BehandlingstemaUtleder.utled(dto) }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessageContaining("Mangler registerklassifisering fra EREG")
+            .hasMessageContaining("V1")
+        assertThatThrownBy { DigitalSøknadMapper.tilSoeknad(dto) }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessageContaining("Mangler registerklassifisering fra EREG")
     }
 
-    @Test
-    fun `koblede parter kan ha ulike versjoner og registerklassifisering er autoritativ`() {
+    @ParameterizedTest
+    @CsvSource("1,2", "2,1")
+    fun `koblede parter på ulike versjoner bruker registermetadata uten V1-fallback`(
+        arbeidstakerVersjon: String,
+        arbeidsgiverVersjon: String
+    ) {
         val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
-            skjemaDefinisjonVersjon = "2"
+            skjemaDefinisjonVersjon = arbeidstakerVersjon
             metadata = DegSelvMetadata(
                 skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
                 arbeidsgiverNavn = arbeidsgiverNavn,
                 juridiskEnhetOrgnr = juridiskEnhetOrgnr,
                 arbeidstakerNavn = arbeidstakerNavn,
-                erOffentligArbeidsgiver = true
+                erOffentligArbeidsgiver = true.takeIf { arbeidstakerVersjon == "2" }
             )
             medKobletArbeidsgiverSkjema {
-                skjemaDefinisjonVersjon = "1"
+                skjemaDefinisjonVersjon = arbeidsgiverVersjon
+                erOffentligArbeidsgiver = true.takeIf { arbeidsgiverVersjon == "2" }
                 data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto(
                     arbeidsgiverensVirksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(
                         erArbeidsgiverenOffentligVirksomhet = false
@@ -101,6 +114,14 @@ class BehandlingstemaUtlederTest {
         }
 
         assertThat(dto.erOffentligArbeidsgiver()).isTrue()
+        assertThat(BehandlingstemaUtleder.utled(dto)).isEqualTo(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)
+        assertThat(DigitalSøknadMapper.tilSoeknad(dto).juridiskArbeidsgiverNorge.erOffentligVirksomhet).isTrue()
+
+        val medArbeidsgiverSomHovedskjema = dto.copy(skjema = requireNotNull(dto.kobletSkjema), kobletSkjema = dto.skjema)
+        assertThat(BehandlingstemaUtleder.utled(medArbeidsgiverSomHovedskjema))
+            .isEqualTo(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)
+        assertThat(DigitalSøknadMapper.tilSoeknad(medArbeidsgiverSomHovedskjema).juridiskArbeidsgiverNorge.erOffentligVirksomhet)
+            .isTrue()
     }
 
     @Test

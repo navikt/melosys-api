@@ -32,7 +32,8 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
         var arbeidsgiverNavn: String = "Test AS"
         var arbeidstakerNavn: String = "Test Arbeidstaker"
         var skjemadel: Skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
-        var skjemaDefinisjonVersjon: String = "1"
+        var skjemaDefinisjonVersjon: String = "2"
+        var erOffentligArbeidsgiver: Boolean? = false
         var metadata: UtsendtArbeidstakerMetadata? = null
         var data: no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaData =
             UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
@@ -60,7 +61,8 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
                 effektivSkjemadel,
                 data,
                 metadataOverride = metadata,
-                skjemaDefinisjonVersjon = skjemaDefinisjonVersjon
+                skjemaDefinisjonVersjon = skjemaDefinisjonVersjon,
+                erOffentligArbeidsgiver = erOffentligArbeidsgiver
             )
             val kobletSkjema = kobletSkjemaBuilder?.let {
                 lagSkjemaDto(
@@ -115,8 +117,8 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
             arbeidsgiverNavn: String = this.arbeidsgiverNavn,
             arbeidstakerNavn: String = this.arbeidstakerNavn,
             metadataOverride: UtsendtArbeidstakerMetadata? = null,
-            skjemaDefinisjonVersjon: String = "1",
-            erOffentligArbeidsgiver: Boolean? = null
+            skjemaDefinisjonVersjon: String = "2",
+            erOffentligArbeidsgiver: Boolean? = false
         ) = UtsendtArbeidstakerSkjemaDto(
             id = UUID.randomUUID(),
             status = SkjemaStatus.SENDT,
@@ -159,8 +161,8 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
         var juridiskEnhetOrgnr: String = "987654321",
         var arbeidsgiverNavn: String = "Test AS",
         var arbeidstakerNavn: String = "Test Arbeidstaker",
-        var skjemaDefinisjonVersjon: String = "1",
-        var erOffentligArbeidsgiver: Boolean? = null,
+        var skjemaDefinisjonVersjon: String = "2",
+        var erOffentligArbeidsgiver: Boolean? = false,
         var data: UtsendtArbeidstakerArbeidsgiversSkjemaDataDto = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
     )
 }
