@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.dokgen.dto
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
+import no.nav.melosys.domain.avgift.Avgiftsdel
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -113,6 +114,7 @@ data class AvgiftsperiodePensjonist(
     val avgiftspliktigInntektPerMd: BigDecimal,
     val inntektskildetype: String,
     val trygdedekning: String,
+    val avgiftsdel: Avgiftsdel? = null,
     val arbeidsgiveravgiftBetalt: SvarAlternativ,
     val skatteplikt: Boolean,
     val beregningsregel: Avgiftsberegningsregel

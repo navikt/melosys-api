@@ -14,6 +14,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
+import no.nav.melosys.domain.avgift.Avgiftsdel
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
@@ -573,6 +574,85 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
         innvilgelseFtrlMapper.mapPensjonistPliktig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldNotBeEmpty()
             avgiftsperioder.all { it.beregningsregel == Avgiftsberegningsregel.ORDINÆR }.shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun `mapPensjonistPliktig sender avgiftsdel og enum-navn på trygdedekning når kombinert dekning er splittet på avgiftsdel`() {
+        val helseAvgiftPerMd = BigDecimal(300)
+        val pensjonAvgiftPerMd = BigDecimal(200)
+
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            behandling {
+                id = 1L
+                tema = Behandlingstema.PENSJONIST
+                fagsak {
+                    saksnummer = SAKSNUMMER
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.FTRL
+                }
+                mottatteOpplysninger {
+                    mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
+                        soeknadsland = Soeknadsland(listOf("AT"), false)
+                        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
+                    }
+                }
+            }
+            medlemskapsperiode {
+                fom = nå.minusYears(1).withMonth(1)
+                tom = nå.withMonth(4)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.PLIKTIG
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                trygdeavgiftsperiode {
+                    periodeFra = nå.minusYears(1).withMonth(1)
+                    periodeTil = nå.withMonth(4)
+                    trygdesats = BigDecimal(0.05)
+                    trygdeavgiftsbeløpMd = helseAvgiftPerMd
+                    avgiftsdel = Avgiftsdel.HELSE
+                    grunnlagInntekstperiode {
+                        fomDato = nå.minusYears(1).withMonth(1)
+                        tomDato = nå.withMonth(4)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    }
+                }
+                trygdeavgiftsperiode {
+                    periodeFra = nå.minusYears(1).withMonth(1)
+                    periodeTil = nå.withMonth(4)
+                    trygdesats = BigDecimal(0.05)
+                    trygdeavgiftsbeløpMd = pensjonAvgiftPerMd
+                    avgiftsdel = Avgiftsdel.PENSJON
+                    grunnlagInntekstperiode {
+                        fomDato = nå.minusYears(1).withMonth(1)
+                        tomDato = nå.withMonth(4)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    }
+                }
+            }
+            innledningFritekst = INNLEDNING_FRITEKST
+            begrunnelseFritekst = BEGRUNNELSE_FRITEKST
+            trygdeavgiftFritekst = TRYGDEAVGIFT_FRITEKST
+        }
+
+        mockHappyCase(behandlingsresultat)
+
+        innvilgelseFtrlMapper.mapPensjonistPliktig(lagBrevbestilling()).apply {
+            avgiftsperioder.shouldHaveSize(2)
+            avgiftsperioder.forEach {
+                it.trygdedekning shouldBe Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON.name
+            }
+
+            val avgiftPerMdPerAvgiftsdel = avgiftsperioder.associate { it.avgiftsdel to it.avgiftPerMd }
+            avgiftPerMdPerAvgiftsdel shouldBe mapOf(
+                Avgiftsdel.HELSE to helseAvgiftPerMd,
+                Avgiftsdel.PENSJON to pensjonAvgiftPerMd,
+            )
         }
     }
 
