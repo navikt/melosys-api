@@ -10,6 +10,7 @@ import io.mockk.junit5.MockKExtension
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.exception.KonfliktException
 import no.nav.melosys.exception.SikkerhetsbegrensningException
 import no.nav.melosys.exception.TekniskException
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
@@ -56,6 +57,12 @@ class ExceptionMapperTest {
         val melding = "Funksjonell feil"
         val funksjonellException = FunksjonellException(melding)
         assertResponse(exceptionMapper.håndter(funksjonellException, request), HttpStatus.BAD_REQUEST, melding)
+    }
+
+    @Test
+    fun `skal håndtere konflikt med status conflict`() {
+        val melding = "Oppgaven har skiftet saksbehandler"
+        assertResponse(exceptionMapper.håndter(KonfliktException(melding), request), HttpStatus.CONFLICT, melding)
     }
 
     @Test
