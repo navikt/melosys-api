@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.dokgen.dto
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
+import no.nav.melosys.domain.avgift.Avgiftsdel
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -84,6 +85,7 @@ class ÅrsavregningVedtaksbrev(
         val avgiftspliktigInntektPerMd: BigDecimal,
         val inntektskilde: String,
         val trygdedekning: String,
+        val avgiftsdel: Avgiftsdel? = null,
         val arbeidsgiveravgiftBetalt: SvarAlternativ,
         val skatteplikt: Boolean,
         val beregningsregel: Avgiftsberegningsregel

@@ -104,7 +104,7 @@ class ÅrsavregningVedtakMapperTest {
             avgiftPerMd = BigDecimal(500),
             avgiftspliktigInntektPerMd = BigDecimal(2800),
             inntektskilde = Inntektskildetype.INNTEKT_FRA_UTLANDET.beskrivelse,
-            trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
+            trygdedekning = Trygdedekninger.FULL_DEKNING.name,
             arbeidsgiveravgiftBetalt = SvarAlternativ.JA,
             skatteplikt = true,
             beregningsregel = Avgiftsberegningsregel.ORDINÆR
@@ -116,7 +116,7 @@ class ÅrsavregningVedtakMapperTest {
             avgiftPerMd = BigDecimal(450),
             avgiftspliktigInntektPerMd = BigDecimal(2800),
             inntektskilde = Inntektskildetype.INNTEKT_FRA_UTLANDET.beskrivelse,
-            trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
+            trygdedekning = Trygdedekninger.FULL_DEKNING.name,
             arbeidsgiveravgiftBetalt = SvarAlternativ.NEI,
             skatteplikt = false,
             beregningsregel = Avgiftsberegningsregel.ORDINÆR
@@ -388,8 +388,8 @@ class ÅrsavregningVedtakMapperTest {
         val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
 
         result.shouldNotBeNull()
-        result.endeligTrygdeavgift[0].trygdedekning shouldBe Trygdedekninger.FULL_DEKNING_EOSFO.beskrivelse.orEmpty()
-        result.forskuddsvisFakturertTrygdeavgift[0].trygdedekning shouldBe Trygdedekninger.FULL_DEKNING_EOSFO.beskrivelse.orEmpty()
+        result.endeligTrygdeavgift[0].trygdedekning shouldBe Trygdedekninger.FULL_DEKNING_EOSFO.name
+        result.forskuddsvisFakturertTrygdeavgift[0].trygdedekning shouldBe Trygdedekninger.FULL_DEKNING_EOSFO.name
         result.pliktigMedlemskap shouldBe true
     }
 
