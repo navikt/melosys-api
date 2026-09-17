@@ -118,12 +118,13 @@ class SkattehendelserClientTest(
     }
 
     @Test
-    fun `hentSkattepliktige sender FOM_AAR og token, og utelater publisertEtter når den ikke er satt`() {
+    fun `hentSkattepliktige sender FOM_AAR og systemtoken, og utelater publisertEtter når den ikke er satt`() {
         wireMockServer.stubFor(
             WireMock.get(WireMock.urlPathEqualTo("/api/admin/skattepliktige"))
                 .withQueryParam("aarFilter", WireMock.equalTo("FOM_AAR"))
                 .withQueryParam("publisertEtter", WireMock.absent())
-                .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .+"))
+                // Kjøringen har ingen innlogget bruker: et brukertoken her ville gitt 401 i drift.
+                .withHeader(HttpHeaders.AUTHORIZATION, WireMock.equalTo("Bearer --azure-token-from-system--"))
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)

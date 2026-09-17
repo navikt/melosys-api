@@ -303,6 +303,27 @@ class SkattepliktigeAarsavregningKjoeringTest {
         verify(exactly = 0) { kjoering.prosesserSkattehendelserAsynkront(any(), any(), any(), any()) }
     }
 
+    /**
+     * Ignorerte filtre er verre enn avviste: svaret ville bekreftet et filter som ikke ble brukt, og
+     * den som kjører ville trodd lista var avgrenset.
+     */
+    @Test
+    fun `liste med aarFilter eller publisertEtter avvises`() {
+        val kjoering = mockk<SkattepliktigeAarsavregningKjoering>(relaxed = true)
+        val controller = SkattepliktigeAarsavregningKjoeringController(kjoering)
+        val hendelser = listOf(SkattehendelseItem("2025", AKTØR_ID))
+
+        controller.run(
+            SkattehendelseRunRequest(skattehendelser = hendelser, aarFilter = ÅrFilter.INNTEKTSAAR)
+        ).statusCode shouldBe HttpStatus.BAD_REQUEST
+        controller.run(
+            SkattehendelseRunRequest(skattehendelser = hendelser, publisertEtter = LocalDateTime.of(2026, 9, 8, 0, 0))
+        ).statusCode shouldBe HttpStatus.BAD_REQUEST
+        controller.run(SkattehendelseRunRequest(skattehendelser = hendelser)).statusCode shouldBe HttpStatus.OK
+
+        verify(exactly = 1) { kjoering.prosesserSkattehendelserAsynkront(hendelser, false, null, false) }
+    }
+
     @Test
     fun `run avvises når både liste og gjelderAar mangler eller begge er sendt`() {
         val kjoering = mockk<SkattepliktigeAarsavregningKjoering>(relaxed = true)
@@ -371,8 +392,11 @@ class SkattepliktigeAarsavregningKjoeringTest {
 
         verify(exactly = 0) { utfoerer.opprettProsessinstans(any(), any()) }
         verify(exactly = 0) { utfoerer.settStatusVurderDokument(any(), any()) }
-        service.status()["antallHoppetOverHarAarsavregning"] shouldBe 1
-        service.status()["antallSakerFunnet"] shouldBe 1
+        with(service.status()) {
+            this["antallHoppetOverHarAarsavregning"] shouldBe 1
+            this["antallSakerFunnet"] shouldBe 1
+            summerSakstellere() shouldBe this["antallSakerFunnet"]
+        }
         service.resultater.single().hoppetOverAarsak shouldBe "har årsavregning for $GJELDER_ÅR"
     }
 
@@ -978,13 +1002,14 @@ class SkattepliktigeAarsavregningKjoeringTest {
 
     private fun ekteUtfoerer() = SkattepliktigeAarsavregningUtfoerer(opprettelseService)
 
-    /** De fire tellerne som deler sakene mellom seg; antallVilleOppdatertStatus er en delmengde. */
+    /** De fem tellerne som deler sakene mellom seg; antallVilleOppdatertStatus er en delmengde. */
     private fun Map<String, Any?>.summerSakstellere(): Int =
         listOf(
             "antallVilleOpprettetProsessinstans",
             "antallMedEksisterendeAarsavregning",
             "antallSakerFeilet",
             "antallSakerHoppetOverPgaTak",
+            "antallHoppetOverHarAarsavregning",
         ).sumOf { this[it] as? Int ?: 0 }
 
     private fun stubTrygdeavgift(behandlingsresultat: Behandlingsresultat) {

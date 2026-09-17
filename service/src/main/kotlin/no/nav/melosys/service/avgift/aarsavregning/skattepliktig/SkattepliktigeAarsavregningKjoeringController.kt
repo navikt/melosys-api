@@ -56,11 +56,14 @@ class SkattepliktigeAarsavregningKjoeringController(
             "I stedet for en liste kan du sende gjelderAar: da hentes hendelsene fra melosys-skattehendelser " +
             "inne i jobben: isRunning er true mens det hentes, antallInputHendelser viser hvor mange som ble " +
             "hentet, og feiler hentingen, står feilen i feilVedHenting. " +
-            "aarFilter velger FOM_AAR (året perioden starter i, standard) eller INNTEKTSAAR. Ekte kjøring " +
+            "aarFilter velger FOM_AAR (året perioden starter i, standard) eller INNTEKTSAAR. aarFilter og " +
+            "publisertEtter avgrenser bare denne hentingen — sendt sammen med en liste avvises de. Ekte kjøring " +
             "med gjelderAar krever hoppOverSakerMedAarsavregning, slik at saker fra tidligere kjøringer ikke " +
             "får ny årsavregning eller ny status; publisertEtter avgrenser bare hvem som hentes. " +
             "hoppOverSakerMedAarsavregning=true hopper over saker som har en årsavregning for året, aktiv " +
-            "eller avsluttet, og teller dem i antallHoppetOverHarAarsavregning. " +
+            "eller avsluttet, og teller dem i antallHoppetOverHarAarsavregning. De endres ikke og teller " +
+            "derfor ikke mot maksAntall — ellers ville en ny kjøring brukt opp taket på saker forrige " +
+            "kjøring alt hadde tatt. " +
             "Bruk /status for fremdrift og /rapport for resultat per sak. NB: appen kjører to podder, " +
             "og jobbtilstanden ligger i minnet på den poden som tok imot /run — kjør derfor mot én pod " +
             "(port-forward), og kryssjekk pod-feltet i /status. Hele kjøringen holder én lesetransaksjon " +
@@ -75,6 +78,14 @@ class SkattepliktigeAarsavregningKjoeringController(
         if (request.skattehendelser.isEmpty() == (request.gjelderAar == null)) {
             return ResponseEntity.badRequest().body(
                 mapOf("feil" to "Send enten skattehendelser eller gjelderAar, ikke begge og ikke ingen av dem")
+            )
+        }
+        // aarFilter og publisertEtter avgrenser hentingen fra melosys-skattehendelser. Sammen med en
+        // liste ville de blitt ignorert mens svaret bekreftet dem, og den som kjører ville trodd at
+        // lista var avgrenset.
+        if (request.gjelderAar == null && (request.aarFilter != null || request.publisertEtter != null)) {
+            return ResponseEntity.badRequest().body(
+                mapOf("feil" to "aarFilter og publisertEtter gjelder bare sammen med gjelderAar")
             )
         }
         if (request.skarp && request.gjelderAar != null && !request.hoppOverSakerMedAarsavregning) {
@@ -112,15 +123,16 @@ class SkattepliktigeAarsavregningKjoeringController(
 
         val modus = if (request.skarp) "SKARP" else "DRYRUN"
         val gjelderÅr = request.gjelderAar
+        val årFilter = request.aarFilter ?: ÅrFilter.FOM_AAR
         if (gjelderÅr != null) {
             log.info {
                 "Starter $modus for skattehendelser fra melosys-skattehendelser: gjelderÅr=$gjelderÅr, " +
-                    "årFilter=${request.aarFilter}, publisertEtter=${request.publisertEtter}, maksAntall=${request.maksAntall}, " +
+                    "årFilter=$årFilter, publisertEtter=${request.publisertEtter}, maksAntall=${request.maksAntall}, " +
                     "hoppOverSakerMedAarsavregning=${request.hoppOverSakerMedAarsavregning}"
             }
             kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(
                 gjelderÅr,
-                request.aarFilter,
+                årFilter,
                 request.publisertEtter,
                 request.skarp,
                 request.maksAntall,
@@ -147,7 +159,7 @@ class SkattepliktigeAarsavregningKjoeringController(
                 "hoppOverSakerMedAarsavregning" to request.hoppOverSakerMedAarsavregning,
                 "antallHendelser" to if (gjelderÅr != null) null else request.skattehendelser.size,
                 "gjelderAar" to gjelderÅr,
-                "aarFilter" to if (gjelderÅr != null) request.aarFilter else null,
+                "aarFilter" to if (gjelderÅr != null) årFilter else null,
                 "publisertEtter" to request.publisertEtter,
                 "statusEndpoint" to "/admin/aarsavregninger/saker/skattepliktige/status",
                 "rapportEndpoint" to "/admin/aarsavregninger/saker/skattepliktige/rapport"
@@ -170,11 +182,17 @@ data class SkattehendelseRunRequest(
     val skattehendelser: List<SkattehendelseItem> = emptyList(),
     /** Hent hendelsene for dette året fra melosys-skattehendelser i stedet for å sende [skattehendelser]. */
     val gjelderAar: Int? = null,
-    val aarFilter: ÅrFilter = ÅrFilter.FOM_AAR,
-    /** Ta bare med personer med siste publisering etter dette tidspunktet (norsk tid). */
+    /** Avgrenser hentingen; bare sammen med [gjelderAar]. Utelatt betyr FOM_AAR. */
+    val aarFilter: ÅrFilter? = null,
+    /** Ta bare med personer med siste publisering etter dette tidspunktet (norsk tid); bare sammen med [gjelderAar]. */
     val publisertEtter: LocalDateTime? = null,
     val skarp: Boolean = false,
-    /** Tak på antall saker som kan endres. Påkrevd og positiv når [skarp] er true; teller også forsøk som feiler eller hoppes over. */
+    /**
+     * Tak på antall saker som kan endres. Påkrevd og positiv når [skarp] er true. Et forsøk teller
+     * selv om det feiler eller blir hoppet over ved skriving. Saker [hoppOverSakerMedAarsavregning]
+     * luker bort er ikke forsøk og teller ikke — ellers ville en ny kjøring brukt opp taket på saker
+     * forrige kjøring alt hadde tatt, uten å komme til de nye.
+     */
     val maksAntall: Int? = null,
     /** Hopp over saker som har en årsavregning for året, aktiv eller avsluttet. */
     val hoppOverSakerMedAarsavregning: Boolean = false,
