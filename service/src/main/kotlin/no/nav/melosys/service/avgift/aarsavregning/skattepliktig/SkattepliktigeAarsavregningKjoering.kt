@@ -58,8 +58,9 @@ class SkattepliktigeAarsavregningKjoering(
         skattehendelser: List<SkattehendelseItem>,
         skarp: Boolean = false,
         maksAntall: Int? = null,
+        hoppOverSakerMedAarsavregning: Boolean = false,
     ) {
-        prosesserSkattehendelser(skattehendelser, skarp, maksAntall)
+        prosesserSkattehendelser(skattehendelser, skarp, maksAntall, hoppOverSakerMedAarsavregning)
     }
 
     /**
@@ -74,8 +75,14 @@ class SkattepliktigeAarsavregningKjoering(
         publisertEtter: LocalDateTime?,
         skarp: Boolean = false,
         maksAntall: Int? = null,
+        hoppOverSakerMedAarsavregning: Boolean = false,
     ) {
-        prosesserSkattehendelser(hentSkattehendelser(gjelderÅr, årFilter, publisertEtter), skarp, maksAntall)
+        prosesserSkattehendelser(
+            hentSkattehendelser(gjelderÅr, årFilter, publisertEtter),
+            skarp,
+            maksAntall,
+            hoppOverSakerMedAarsavregning,
+        )
     }
 
     fun hentSkattehendelser(gjelderÅr: Int, årFilter: ÅrFilter, publisertEtter: LocalDateTime?): List<SkattehendelseItem> =
@@ -91,9 +98,18 @@ class SkattepliktigeAarsavregningKjoering(
         skattehendelser: List<SkattehendelseItem>,
         skarp: Boolean = false,
         maksAntall: Int? = null,
+        /**
+         * Hopper over saker som har en årsavregning for året, aktiv eller avsluttet. Uten dette får en
+         * sak med avsluttet årsavregning en ny årsavregning og et nytt innhentingsbrev, og en aktiv
+         * behandling settes til VURDER_DOKUMENT.
+         */
+        hoppOverSakerMedAarsavregning: Boolean = false,
     ) = runAsSystem {
         val modus = if (skarp) "SKARP" else "DRYRUN"
-        log.info { "Starter $modus for ${skattehendelser.size} skattehendelser, maksAntall=$maksAntall" }
+        log.info {
+            "Starter $modus for ${skattehendelser.size} skattehendelser, maksAntall=$maksAntall, " +
+                "hoppOverSakerMedAarsavregning=$hoppOverSakerMedAarsavregning"
+        }
 
         // execute avviser en andre kjøring framfor å køe den — en køet kjøring ville startet skarpt
         // mot en base den første nettopp endret.
@@ -103,6 +119,7 @@ class SkattepliktigeAarsavregningKjoering(
             antallInputHendelser = skattehendelser.size
             this.skarp = skarp
             this.maksAntall = maksAntall
+            this.hoppOverSakerMedAarsavregning = hoppOverSakerMedAarsavregning
 
             // Opprettelsen er ikke idempotent på sak og år: saga-steget revaliderer ikke, og en
             // prosessinstans som bare ligger i kø er usynlig for finnAktivÅrsavregningBehandling.
@@ -190,6 +207,24 @@ class SkattepliktigeAarsavregningKjoering(
                             }
                             antallSakerFunnet++
                             try {
+                                if (hoppOverSakerMedAarsavregning && opprettelseService.harÅrsavregningForÅr(fagsak, år)) {
+                                    antallHoppetOverHarAarsavregning++
+                                    resultater.add(
+                                        SakResultat(
+                                            saksnummer = fagsak.saksnummer,
+                                            gjelderAr = år,
+                                            identifikator = hendelse.identifikator,
+                                            harAktivAarsavregning = null,
+                                            aarsavregningBehandlingStatus = null,
+                                            trygdeavgiftMottaker = null,
+                                            villeOpprettetProsessinstans = null,
+                                            villeOppdatertStatus = null,
+                                            behandlingId = null,
+                                            hoppetOverAarsak = "har årsavregning for $år",
+                                        )
+                                    )
+                                    return@sakLoop
+                                }
                                 val aktivÅrsavregning = opprettelseService.finnAktivÅrsavregningBehandling(fagsak, år)
                                 val villeOpprettetProsessinstans = aktivÅrsavregning == null
                                 val villeOppdatertStatus = aktivÅrsavregning != null &&
@@ -334,6 +369,7 @@ class SkattepliktigeAarsavregningKjoering(
                 "modus" to modus,
                 "skarp" to skarp,
                 "maksAntall" to maksAntall,
+                "hoppOverSakerMedAarsavregning" to hoppOverSakerMedAarsavregning,
                 "antallInputHendelser" to antallInputHendelser,
                 "antallDuplikaterFjernet" to antallDuplikaterFjernet,
                 "antallUgyldigInput" to antallUgyldigInput,
@@ -349,6 +385,7 @@ class SkattepliktigeAarsavregningKjoering(
                 "antallSakerFeilet" to antallSakerFeilet,
                 "antallBerikelseFeilet" to antallBerikelseFeilet,
                 "antallSakerHoppetOverPgaTak" to antallSakerHoppetOverPgaTak,
+                "antallHoppetOverHarAarsavregning" to antallHoppetOverHarAarsavregning,
                 "antallHendelserProsessert" to antallHendelserProsessert,
                 "antallUnikeHendelser" to antallUnikeHendelser,
                 "avbruttAarsak" to avbruttAarsak,
@@ -383,13 +420,14 @@ class SkattepliktigeAarsavregningKjoering(
     inner class JobStatus(
         @Volatile var skarp: Boolean = false,
         @Volatile var maksAntall: Int? = null,
+        @Volatile var hoppOverSakerMedAarsavregning: Boolean = false,
         @Volatile var antallInputHendelser: Int = 0,
         @Volatile var antallDuplikaterFjernet: Int = 0,
         @Volatile var antallUgyldigInput: Int = 0,
         /**
          * Saker som passerte filteret. Deles mellom [antallVilleOpprettetProsessinstans],
-         * [antallMedEksisterendeAarsavregning], [antallSakerFeilet] og
-         * [antallSakerHoppetOverPgaTak] — de fire summerer til denne.
+         * [antallMedEksisterendeAarsavregning], [antallSakerFeilet], [antallSakerHoppetOverPgaTak] og
+         * [antallHoppetOverHarAarsavregning] — de fem summerer til denne.
          */
         @Volatile var antallSakerFunnet: Int = 0,
         /** Saker uten aktiv årsavregning for året. */
@@ -412,6 +450,8 @@ class SkattepliktigeAarsavregningKjoering(
         @Volatile var antallBerikelseFeilet: Int = 0,
         /** Nådd etter at taket var fylt, derfor ikke vurdert — med i [antallSakerFunnet]. */
         @Volatile var antallSakerHoppetOverPgaTak: Int = 0,
+        /** Saker med årsavregning for året, hoppet over fordi hoppOverSakerMedAarsavregning var satt. */
+        @Volatile var antallHoppetOverHarAarsavregning: Int = 0,
         /** Hvor mange av [antallUnikeHendelser] som ble kjørt. Lavere betyr avbrudd, se [avbruttAarsak]. */
         @Volatile var antallHendelserProsessert: Int = 0,
         /** Det [antallHendelserProsessert] skal måles mot — ikke [antallInputHendelser]. */
@@ -424,6 +464,7 @@ class SkattepliktigeAarsavregningKjoering(
         override fun reset() {
             skarp = false
             maksAntall = null
+            hoppOverSakerMedAarsavregning = false
             antallInputHendelser = 0
             antallDuplikaterFjernet = 0
             antallUgyldigInput = 0
@@ -439,6 +480,7 @@ class SkattepliktigeAarsavregningKjoering(
             antallSakerFeilet = 0
             antallBerikelseFeilet = 0
             antallSakerHoppetOverPgaTak = 0
+            antallHoppetOverHarAarsavregning = 0
             antallHendelserProsessert = 0
             antallUnikeHendelser = 0
             avbruttAarsak = null
@@ -449,6 +491,7 @@ class SkattepliktigeAarsavregningKjoering(
         override fun asMap(): Map<String, Any?> = mapOf(
             "skarp" to skarp,
             "maksAntall" to maksAntall,
+            "hoppOverSakerMedAarsavregning" to hoppOverSakerMedAarsavregning,
             "antallInputHendelser" to antallInputHendelser,
             "antallDuplikaterFjernet" to antallDuplikaterFjernet,
             "antallUgyldigInput" to antallUgyldigInput,
@@ -464,6 +507,7 @@ class SkattepliktigeAarsavregningKjoering(
             "antallSakerFeilet" to antallSakerFeilet,
             "antallBerikelseFeilet" to antallBerikelseFeilet,
             "antallSakerHoppetOverPgaTak" to antallSakerHoppetOverPgaTak,
+            "antallHoppetOverHarAarsavregning" to antallHoppetOverHarAarsavregning,
             "antallUnikeHendelser" to antallUnikeHendelser,
             "antallHendelserProsessert" to antallHendelserProsessert,
             "avbruttAarsak" to avbruttAarsak,

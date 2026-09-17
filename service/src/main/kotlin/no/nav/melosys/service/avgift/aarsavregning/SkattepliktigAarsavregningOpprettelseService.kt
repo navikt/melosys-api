@@ -92,6 +92,10 @@ class SkattepliktigAarsavregningOpprettelseService(
         }
     }
 
+    /** Om saken har en årsavregningsbehandling for [gjelderÅr], uansett status. Behandlinger uten år teller ikke. */
+    fun harÅrsavregningForÅr(fagsak: Fagsak, gjelderÅr: Int): Boolean =
+        fagsak.hentAlleÅrsavregninger().any { årFor(it) == gjelderÅr }
+
     private fun årFor(årsavregningsbehandling: Behandling): Int? {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(årsavregningsbehandling.id)
         return behandlingsresultat.årsavregning?.aar

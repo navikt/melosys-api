@@ -56,7 +56,10 @@ class SkattepliktigeAarsavregningKjoeringController(
             "I stedet for en liste kan du sende gjelderAar: da hentes hendelsene fra melosys-skattehendelser " +
             "når kjøringen starter, og antallInputHendelser i /status viser hvor mange som ble hentet. " +
             "aarFilter velger FOM_AAR (året perioden starter i, standard) eller INNTEKTSAAR. Ekte kjøring " +
-            "med gjelderAar krever publisertEtter, slik at personer fra tidligere kjøringer ikke tas med på nytt. " +
+            "med gjelderAar krever publisertEtter eller hoppOverSakerMedAarsavregning, slik at saker fra " +
+            "tidligere kjøringer ikke får ny årsavregning eller ny status. " +
+            "hoppOverSakerMedAarsavregning=true hopper over saker som har en årsavregning for året, aktiv " +
+            "eller avsluttet, og teller dem i antallHoppetOverHarAarsavregning. " +
             "Bruk /status for fremdrift og /rapport for resultat per sak. NB: appen kjører to podder, " +
             "og jobbtilstanden ligger i minnet på den poden som tok imot /run — kjør derfor mot én pod " +
             "(port-forward), og kryssjekk pod-feltet i /status. Hele kjøringen holder én lesetransaksjon " +
@@ -73,9 +76,9 @@ class SkattepliktigeAarsavregningKjoeringController(
                 mapOf("feil" to "Send enten skattehendelser eller gjelderAar, ikke begge og ikke ingen av dem")
             )
         }
-        if (request.skarp && request.gjelderAar != null && request.publisertEtter == null) {
+        if (request.skarp && request.gjelderAar != null && request.publisertEtter == null && !request.hoppOverSakerMedAarsavregning) {
             return ResponseEntity.badRequest().body(
-                mapOf("feil" to "Ekte kjøring med gjelderAar krever publisertEtter")
+                mapOf("feil" to "Ekte kjøring med gjelderAar krever publisertEtter eller hoppOverSakerMedAarsavregning")
             )
         }
 
@@ -111,7 +114,8 @@ class SkattepliktigeAarsavregningKjoeringController(
         if (gjelderÅr != null) {
             log.info {
                 "Starter $modus for skattehendelser fra melosys-skattehendelser: gjelderÅr=$gjelderÅr, " +
-                    "årFilter=${request.aarFilter}, publisertEtter=${request.publisertEtter}, maksAntall=${request.maksAntall}"
+                    "årFilter=${request.aarFilter}, publisertEtter=${request.publisertEtter}, maksAntall=${request.maksAntall}, " +
+                    "hoppOverSakerMedAarsavregning=${request.hoppOverSakerMedAarsavregning}"
             }
             kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(
                 gjelderÅr,
@@ -119,15 +123,18 @@ class SkattepliktigeAarsavregningKjoeringController(
                 request.publisertEtter,
                 request.skarp,
                 request.maksAntall,
+                request.hoppOverSakerMedAarsavregning,
             )
         } else {
             log.info {
-                "Starter $modus for ${request.skattehendelser.size} skattehendelser, maksAntall=${request.maksAntall}"
+                "Starter $modus for ${request.skattehendelser.size} skattehendelser, maksAntall=${request.maksAntall}, " +
+                    "hoppOverSakerMedAarsavregning=${request.hoppOverSakerMedAarsavregning}"
             }
             kjoering.prosesserSkattehendelserAsynkront(
                 request.skattehendelser,
                 request.skarp,
                 request.maksAntall,
+                request.hoppOverSakerMedAarsavregning,
             )
         }
 
@@ -136,6 +143,7 @@ class SkattepliktigeAarsavregningKjoeringController(
                 "melding" to "$modus startet",
                 "skarp" to request.skarp,
                 "maksAntall" to request.maksAntall,
+                "hoppOverSakerMedAarsavregning" to request.hoppOverSakerMedAarsavregning,
                 "antallHendelser" to if (gjelderÅr != null) null else request.skattehendelser.size,
                 "gjelderAar" to gjelderÅr,
                 "aarFilter" to if (gjelderÅr != null) request.aarFilter else null,
@@ -167,4 +175,6 @@ data class SkattehendelseRunRequest(
     val skarp: Boolean = false,
     /** Tak på antall saker som kan endres. Påkrevd og positiv når [skarp] er true; teller også forsøk som feiler eller hoppes over. */
     val maksAntall: Int? = null,
+    /** Hopp over saker som har en årsavregning for året, aktiv eller avsluttet. */
+    val hoppOverSakerMedAarsavregning: Boolean = false,
 )
