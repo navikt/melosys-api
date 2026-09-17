@@ -9,6 +9,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
+import no.nav.melosys.domain.avgift.Avgiftsdel
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.forTest
@@ -394,6 +395,48 @@ class ÅrsavregningVedtakMapperTest {
     }
 
     @Test
+    fun `mapÅrsavregning sender avgiftsdel og enum-navn på trygdedekning når kombinert dekning er splittet på avgiftsdel`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
+
+        val helseAvgiftPerMd = BigDecimal(300)
+        val pensjonAvgiftPerMd = BigDecimal(200)
+        val helseperiode = lagSplittetHelseEllerPensjonsdelTrygdeavgiftsperiode(
+            avgiftsdel = Avgiftsdel.HELSE,
+            trygdeavgiftsbeløpMd = helseAvgiftPerMd
+        )
+        val pensjonsperiode = lagSplittetHelseEllerPensjonsdelTrygdeavgiftsperiode(
+            avgiftsdel = Avgiftsdel.PENSJON,
+            trygdeavgiftsbeløpMd = pensjonAvgiftPerMd
+        )
+        val grunnlag = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
+
+        val årsavregningModel = lagÅrsavregningModel(
+            beregnetAvgiftBelop = BigDecimal(500),
+            tidligereFakturertBeloep = BigDecimal(0),
+            endeligAvgift = listOf(helseperiode, pensjonsperiode),
+            tidligereAvgift = emptyList(),
+            tidligereGrunnlag = grunnlag,
+            nyttGrunnlag = grunnlag,
+        )
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.shouldNotBeNull()
+        result.endeligTrygdeavgift.shouldHaveSize(2)
+        result.endeligTrygdeavgift.forEach {
+            it.trygdedekning shouldBe Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON.name
+        }
+
+        val avgiftPerMdPerAvgiftsdel = result.endeligTrygdeavgift.associate { it.avgiftsdel to it.avgiftPerMd }
+        avgiftPerMdPerAvgiftsdel shouldBe mapOf(
+            Avgiftsdel.HELSE to helseAvgiftPerMd,
+            Avgiftsdel.PENSJON to pensjonAvgiftPerMd,
+        )
+    }
+
+    @Test
+
     fun `mapÅrsavregning skal mappe pliktigMedlemskap fra lovvalgsperiode uten å kaste feil (EØS tjenesteperson)`() {
         val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
 
@@ -792,6 +835,36 @@ class ÅrsavregningVedtakMapperTest {
             medlemskapstype = Medlemskapstyper.PLIKTIG,
         )
         return Trygdeavgiftsgrunnlag(listOf(helseutgiftPeriode), emptyList(), emptyList())
+    }
+
+    private fun lagSplittetHelseEllerPensjonsdelTrygdeavgiftsperiode(
+        avgiftsdel: Avgiftsdel,
+        trygdeavgiftsbeløpMd: BigDecimal,
+    ): Trygdeavgiftsperiode {
+        val medlemskapsperiode = medlemskapsperiodeForTest {
+            fom = LocalDate.of(2023, 1, 1)
+            tom = LocalDate.of(2023, 12, 31)
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
+            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
+
+        return Trygdeavgiftsperiode.forTest {
+            periodeFra = LocalDate.of(2023, 1, 1)
+            periodeTil = LocalDate.of(2023, 12, 31)
+            this.trygdeavgiftsbeløpMd = trygdeavgiftsbeløpMd
+            trygdesats = BigDecimal(1000)
+            this.medlemskapsperiode = medlemskapsperiode
+            this.avgiftsdel = avgiftsdel
+            grunnlagInntekstperiode {
+                avgiftspliktigMndInntekt = Penger(BigDecimal(2800), NOK.kode)
+                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                arbeidsgiversavgiftBetalesTilSkatt = true
+            }
+            grunnlagSkatteforholdTilNorge {
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
+        }
     }
 
     private fun lagEndeligTrygdeavgiftsperiode(): Trygdeavgiftsperiode {

@@ -579,6 +579,9 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
 
     @Test
     fun `mapPensjonistPliktig sender avgiftsdel og enum-navn på trygdedekning når kombinert dekning er splittet på avgiftsdel`() {
+        val helseAvgiftPerMd = BigDecimal(300)
+        val pensjonAvgiftPerMd = BigDecimal(200)
+
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
             behandling {
@@ -607,7 +610,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
                     periodeFra = nå.minusYears(1).withMonth(1)
                     periodeTil = nå.withMonth(4)
                     trygdesats = BigDecimal(0.05)
-                    trygdeavgiftsbeløpMd = BigDecimal(300.0)
+                    trygdeavgiftsbeløpMd = helseAvgiftPerMd
                     avgiftsdel = Avgiftsdel.HELSE
                     grunnlagInntekstperiode {
                         fomDato = nå.minusYears(1).withMonth(1)
@@ -621,7 +624,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
                     periodeFra = nå.minusYears(1).withMonth(1)
                     periodeTil = nå.withMonth(4)
                     trygdesats = BigDecimal(0.05)
-                    trygdeavgiftsbeløpMd = BigDecimal(200.0)
+                    trygdeavgiftsbeløpMd = pensjonAvgiftPerMd
                     avgiftsdel = Avgiftsdel.PENSJON
                     grunnlagInntekstperiode {
                         fomDato = nå.minusYears(1).withMonth(1)
@@ -641,9 +644,15 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
 
         innvilgelseFtrlMapper.mapPensjonistPliktig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldHaveSize(2)
-            avgiftsperioder.map { it.trygdedekning }
-                .shouldContainOnly(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON.name)
-            avgiftsperioder.map { it.avgiftsdel }.shouldContainOnly(Avgiftsdel.HELSE, Avgiftsdel.PENSJON)
+            avgiftsperioder.forEach {
+                it.trygdedekning shouldBe Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON.name
+            }
+
+            val avgiftPerMdPerAvgiftsdel = avgiftsperioder.associate { it.avgiftsdel to it.avgiftPerMd }
+            avgiftPerMdPerAvgiftsdel shouldBe mapOf(
+                Avgiftsdel.HELSE to helseAvgiftPerMd,
+                Avgiftsdel.PENSJON to pensjonAvgiftPerMd,
+            )
         }
     }
 
