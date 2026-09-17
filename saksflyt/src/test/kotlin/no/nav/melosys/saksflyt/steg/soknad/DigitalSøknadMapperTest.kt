@@ -195,12 +195,13 @@ internal class DigitalSøknadMapperTest {
         fun `erOffentligVirksomhet hentes fra arbeidstakers metadata når arbeidsgiver-del mangler`() {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
+                erOffentligArbeidsgiver = true
                 data = arbeidstakerData()
             }
 
             val søknad = DigitalSøknadMapper.tilSoeknad(dto)
 
-            søknad.juridiskArbeidsgiverNorge.erOffentligVirksomhet shouldBe false
+            søknad.juridiskArbeidsgiverNorge.erOffentligVirksomhet shouldBe true
         }
     }
 

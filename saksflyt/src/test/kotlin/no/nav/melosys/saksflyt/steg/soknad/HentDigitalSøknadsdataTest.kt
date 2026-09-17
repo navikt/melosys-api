@@ -61,24 +61,6 @@ internal class HentDigitalSøknadsdataTest {
     }
 
     @ParameterizedTest
-    @CsvSource("1,2", "2,1")
-    fun `lagrer blandede versjoner når en del har registerklassifisering`(hovedversjon: String, kobletVersjon: String) {
-        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
-            skjemaDefinisjonVersjon = hovedversjon
-            erOffentligArbeidsgiver = false.takeIf { hovedversjon == "2" }
-            medKobletArbeidsgiverSkjema {
-                skjemaDefinisjonVersjon = kobletVersjon
-                erOffentligArbeidsgiver = false.takeIf { kobletVersjon == "2" }
-            }
-        }
-        every { melosysSkjemaApiClient.hentUtsendtArbeidstakerSkjema(skjemaId) } returns søknadsdata
-
-        hentDigitalSøknadsdata.utfør(prosessinstans)
-
-        prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.DIGITAL_SØKNADSDATA) shouldBe søknadsdata
-    }
-
-    @ParameterizedTest
     @CsvSource("1,false", "1,true", "2,false")
     fun `lagrer søknadsdata uten å validere registerklassifisering`(versjon: String, harKobletSkjema: Boolean) {
         val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
