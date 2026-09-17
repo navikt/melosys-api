@@ -616,15 +616,15 @@ public class ProsessinstansService {
 
     @Transactional
     public void opprettProsessinstansMelosysDigitalSøknadMottatt(SkjemaMottattMelding melding) {
-        opprettSøknadProsessinstans(melding, ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD, null);
+        opprettSøknadProsessinstans(melding, ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD);
     }
 
     @Transactional
-    public void opprettProsessinstansEksisterendeDigitalSøknad(SkjemaMottattMelding melding, String saksnummer) {
-        opprettSøknadProsessinstans(melding, ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD, saksnummer);
+    public void opprettProsessinstansEksisterendeDigitalSøknad(SkjemaMottattMelding melding) {
+        opprettSøknadProsessinstans(melding, ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD);
     }
 
-    private void opprettSøknadProsessinstans(SkjemaMottattMelding melding, ProsessType prosessType, String saksnummer) {
+    private void opprettSøknadProsessinstans(SkjemaMottattMelding melding, ProsessType prosessType) {
         String låsReferanse = melding.getSkjemaId().toString();
 
         // Redelivery av samme skjema kan rutes til en annen prosesstype (NY → EKSISTERENDE etter at saken er opprettet),
@@ -641,7 +641,7 @@ public class ProsessinstansService {
             .build();
 
         prosessinstans.setData(DIGITAL_SØKNAD_SKJEMA_ID, melding.getSkjemaId());
-        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
+        prosessinstans.setData(DIGITAL_SØKNAD_RELATERTE_SKJEMA_IDER, melding.getRelaterteSkjemaIder());
 
         lagre(prosessinstans);
     }

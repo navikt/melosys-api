@@ -1,10 +1,12 @@
 package no.nav.melosys.saksflyt.steg.soknad
 
 import tools.jackson.databind.json.JsonMapper
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import java.util.UUID
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.forTest
@@ -54,11 +56,13 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
     private val saksnummer = "MEL-1234"
     private val behandlingId = 42L
     private val mottatteOpplysningerId = 99L
+    private val relaterteSkjemaIder = listOf(UUID.randomUUID(), UUID.randomUUID())
 
     private val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto()
 
     @BeforeEach
     fun setup() {
+        ProsessDataKey.DIGITAL_SØKNAD_RELATERTE_SKJEMA_IDER
         steg = HåndterEksisterendeSakDigitalSøknad(
             fagsakService, behandlingService, behandlingsresultatService,
             mottatteOpplysningerService, oppgaveService, skjemaSakMappingService, jsonMapper,
@@ -67,6 +71,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
 
         every { jsonMapper.writeValueAsString(søknadsdata) } returns """{"referanseId":"test"}"""
         every { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) } just Runs
+        every { skjemaSakMappingService.finnMappetSaksnummerForSkjemaIder(any()) } returns saksnummer
     }
 
     @Test
@@ -211,6 +216,21 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
 
             verify { behandlingService.nyBehandling(fagsak, any(), eq(Behandlingstyper.NY_VURDERING), any(), any(), any(), any(), any(), any()) }
             prosessinstans.behandling shouldBe nyBehandling
+        }
+    }
+
+    @Nested
+    inner class FlereGyldigeSaker {
+
+        @Test
+        fun `kaster IllegalStateException når mapping-tjenesten finner flere gyldige saksnumre`() {
+            val prosessinstans = lagProsessinstans()
+            every { skjemaSakMappingService.finnMappetSaksnummerForSkjemaIder(any()) } throws
+                IllegalStateException("Fant 2 åpne saker for relaterte skjemaIder — forventet maks 1")
+
+            shouldThrow<IllegalStateException> { steg.utfør(prosessinstans) }
+
+            verify(exactly = 0) { fagsakService.hentFagsak(any()) }
         }
     }
 
@@ -371,7 +391,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             }
             val prosessinstans = Prosessinstans.forTest {
                 medData(ProsessDataKey.DIGITAL_SØKNADSDATA, arbeidsgiverSøknadsdata)
-                medData(ProsessDataKey.SAKSNUMMER, saksnummer)
+                medData(ProsessDataKey.DIGITAL_SØKNAD_RELATERTE_SKJEMA_IDER, relaterteSkjemaIder)
             }
 
             every { jsonMapper.writeValueAsString(arbeidsgiverSøknadsdata) } returns """{"referanseId":"test"}"""
@@ -389,7 +409,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
 
     private fun lagProsessinstans(): Prosessinstans = Prosessinstans.forTest {
         medData(ProsessDataKey.DIGITAL_SØKNADSDATA, søknadsdata)
-        medData(ProsessDataKey.SAKSNUMMER, saksnummer)
+        medData(ProsessDataKey.DIGITAL_SØKNAD_RELATERTE_SKJEMA_IDER, relaterteSkjemaIder)
     }
 
     private fun mockFagsakService(fagsak: Fagsak) {
@@ -459,7 +479,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
         }
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.DIGITAL_SØKNADSDATA, offentligSøknadsdata)
-            medData(ProsessDataKey.SAKSNUMMER, saksnummer)
+            medData(ProsessDataKey.DIGITAL_SØKNAD_RELATERTE_SKJEMA_IDER, relaterteSkjemaIder)
         }
         return offentligSøknadsdata to prosessinstans
     }

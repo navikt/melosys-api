@@ -46,7 +46,7 @@ internal class SkjemaSakMappingServiceTest {
 
         @Test
         fun `tom skjemaIder returnerer null`() {
-            service.finnGyldigSaksnummerForSkjemaIder(emptyList()).shouldBeNull()
+            service.finnMappetSaksnummerForSkjemaIder(emptyList()).shouldBeNull()
         }
 
         @Test
@@ -54,7 +54,7 @@ internal class SkjemaSakMappingServiceTest {
             val skjemaIder = listOf(UUID.randomUUID())
             every { skjemaSakMappingRepository.findBySkjemaIdIn(skjemaIder) } returns emptyList()
 
-            service.finnGyldigSaksnummerForSkjemaIder(skjemaIder).shouldBeNull()
+            service.finnMappetSaksnummerForSkjemaIder(skjemaIder).shouldBeNull()
         }
 
         @Test
@@ -67,7 +67,7 @@ internal class SkjemaSakMappingServiceTest {
             every { skjemaSakMappingRepository.findBySkjemaIdIn(listOf(skjemaId)) } returns listOf(mapping)
             every { fagsakRepository.findAllBySaksnummerIn(listOf(saksnummer)) } returns listOf(fagsak)
 
-            service.finnGyldigSaksnummerForSkjemaIder(listOf(skjemaId)) shouldBe saksnummer
+            service.finnMappetSaksnummerForSkjemaIder(listOf(skjemaId)) shouldBe saksnummer
         }
 
         @Test
@@ -80,7 +80,7 @@ internal class SkjemaSakMappingServiceTest {
             every { skjemaSakMappingRepository.findBySkjemaIdIn(listOf(skjemaId)) } returns listOf(mapping)
             every { fagsakRepository.findAllBySaksnummerIn(listOf(saksnummer)) } returns listOf(fagsak)
 
-            service.finnGyldigSaksnummerForSkjemaIder(listOf(skjemaId)) shouldBe saksnummer
+            service.finnMappetSaksnummerForSkjemaIder(listOf(skjemaId)) shouldBe saksnummer
         }
 
         @Test
@@ -93,7 +93,7 @@ internal class SkjemaSakMappingServiceTest {
             every { skjemaSakMappingRepository.findBySkjemaIdIn(listOf(skjemaId)) } returns listOf(mapping)
             every { fagsakRepository.findAllBySaksnummerIn(listOf(saksnummer)) } returns listOf(fagsak)
 
-            service.finnGyldigSaksnummerForSkjemaIder(listOf(skjemaId)).shouldBeNull()
+            service.finnMappetSaksnummerForSkjemaIder(listOf(skjemaId)).shouldBeNull()
         }
 
         @Test
@@ -111,7 +111,7 @@ internal class SkjemaSakMappingServiceTest {
             every { skjemaSakMappingRepository.findBySkjemaIdIn(listOf(skjemaId1, skjemaId2)) } returns listOf(mapping1, mapping2)
             every { fagsakRepository.findAllBySaksnummerIn(listOf(saksnummer1, saksnummer2)) } returns listOf(fagsakOpprettet, fagsakAvsluttet)
 
-            service.finnGyldigSaksnummerForSkjemaIder(listOf(skjemaId1, skjemaId2)) shouldBe saksnummer1
+            service.finnMappetSaksnummerForSkjemaIder(listOf(skjemaId1, skjemaId2)) shouldBe saksnummer1
         }
 
         @Test
@@ -130,8 +130,69 @@ internal class SkjemaSakMappingServiceTest {
             every { fagsakRepository.findAllBySaksnummerIn(listOf(saksnummer1, saksnummer2)) } returns listOf(fagsak1, fagsak2)
 
             shouldThrow<IllegalStateException> {
-                service.finnGyldigSaksnummerForSkjemaIder(listOf(skjemaId1, skjemaId2))
+                service.finnMappetSaksnummerForSkjemaIder(listOf(skjemaId1, skjemaId2))
             }
+        }
+    }
+
+    @Nested
+    inner class HarMappingMedGyldigSaksnummerForSkjemaId {
+
+        @Test
+        fun `tom skjemaIder returnerer false`() {
+            service.harMappingMedGyldigSaksnummerForSkjemaId(emptyList()) shouldBe false
+        }
+
+        @Test
+        fun `ingen mappinger funnet returnerer false`() {
+            val skjemaIder = listOf(UUID.randomUUID())
+            every { skjemaSakMappingRepository.findBySkjemaIdIn(skjemaIder) } returns emptyList()
+
+            service.harMappingMedGyldigSaksnummerForSkjemaId(skjemaIder) shouldBe false
+        }
+
+        @Test
+        fun `en mapping med sak OPPRETTET returnerer true`() {
+            val skjemaId = UUID.randomUUID()
+            val saksnummer = "MEL-100"
+            val mapping = lagSkjemaSakMapping(skjemaId = skjemaId, saksnummer = saksnummer)
+            val fagsak = Fagsak.forTest { this.saksnummer = saksnummer; status = Saksstatuser.OPPRETTET }
+
+            every { skjemaSakMappingRepository.findBySkjemaIdIn(listOf(skjemaId)) } returns listOf(mapping)
+            every { fagsakRepository.findAllBySaksnummerIn(listOf(saksnummer)) } returns listOf(fagsak)
+
+            service.harMappingMedGyldigSaksnummerForSkjemaId(listOf(skjemaId)) shouldBe true
+        }
+
+        @Test
+        fun `en mapping med sak AVSLUTTET returnerer false`() {
+            val skjemaId = UUID.randomUUID()
+            val saksnummer = "MEL-300"
+            val mapping = lagSkjemaSakMapping(skjemaId = skjemaId, saksnummer = saksnummer)
+            val fagsak = Fagsak.forTest { this.saksnummer = saksnummer; status = Saksstatuser.AVSLUTTET }
+
+            every { skjemaSakMappingRepository.findBySkjemaIdIn(listOf(skjemaId)) } returns listOf(mapping)
+            every { fagsakRepository.findAllBySaksnummerIn(listOf(saksnummer)) } returns listOf(fagsak)
+
+            service.harMappingMedGyldigSaksnummerForSkjemaId(listOf(skjemaId)) shouldBe false
+        }
+
+        @Test
+        fun `flere gyldige saker returnerer true uten aa kaste`() {
+            val skjemaId1 = UUID.randomUUID()
+            val skjemaId2 = UUID.randomUUID()
+            val saksnummer1 = "MEL-600"
+            val saksnummer2 = "MEL-700"
+            val mapping1 = lagSkjemaSakMapping(skjemaId = skjemaId1, saksnummer = saksnummer1)
+            val mapping2 = lagSkjemaSakMapping(skjemaId = skjemaId2, saksnummer = saksnummer2)
+
+            val fagsak1 = Fagsak.forTest { this.saksnummer = saksnummer1; status = Saksstatuser.OPPRETTET }
+            val fagsak2 = Fagsak.forTest { this.saksnummer = saksnummer2; status = Saksstatuser.LOVVALG_AVKLART }
+
+            every { skjemaSakMappingRepository.findBySkjemaIdIn(listOf(skjemaId1, skjemaId2)) } returns listOf(mapping1, mapping2)
+            every { fagsakRepository.findAllBySaksnummerIn(listOf(saksnummer1, saksnummer2)) } returns listOf(fagsak1, fagsak2)
+
+            service.harMappingMedGyldigSaksnummerForSkjemaId(listOf(skjemaId1, skjemaId2)) shouldBe true
         }
     }
 
