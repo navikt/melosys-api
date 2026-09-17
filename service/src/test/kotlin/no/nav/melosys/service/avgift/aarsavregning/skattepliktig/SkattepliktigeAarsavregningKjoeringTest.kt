@@ -301,6 +301,11 @@ class SkattepliktigeAarsavregningKjoeringTest {
             kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(2025, ÅrFilter.INNTEKTSAAR, publisertEtter, true, 2, true)
         }
         verify(exactly = 0) { kjoering.prosesserSkattehendelserAsynkront(any(), any(), any(), any()) }
+        // Svaret er kvitteringen på hva kjøringen ble startet med, så det må vise filtrene den fikk.
+        with(svar.body!!) {
+            this["aarFilter"] shouldBe ÅrFilter.INNTEKTSAAR
+            this["publisertEtter"] shouldBe publisertEtter
+        }
     }
 
     /**
@@ -319,9 +324,13 @@ class SkattepliktigeAarsavregningKjoeringTest {
         controller.run(
             SkattehendelseRunRequest(skattehendelser = hendelser, publisertEtter = LocalDateTime.of(2026, 9, 8, 0, 0))
         ).statusCode shouldBe HttpStatus.BAD_REQUEST
-        controller.run(SkattehendelseRunRequest(skattehendelser = hendelser)).statusCode shouldBe HttpStatus.OK
+        val svar = controller.run(SkattehendelseRunRequest(skattehendelser = hendelser))
 
+        svar.statusCode shouldBe HttpStatus.OK
         verify(exactly = 1) { kjoering.prosesserSkattehendelserAsynkront(hendelser, false, null, false) }
+        // Listemodus har ingen henting å avgrense, så svaret skal ikke vise noe filter.
+        svar.body!!["aarFilter"] shouldBe null
+        svar.body!!["publisertEtter"] shouldBe null
     }
 
     @Test
@@ -365,13 +374,16 @@ class SkattepliktigeAarsavregningKjoeringTest {
         val kjoering = mockk<SkattepliktigeAarsavregningKjoering>(relaxed = true)
         val controller = SkattepliktigeAarsavregningKjoeringController(kjoering)
 
-        controller.run(
+        val svar = controller.run(
             SkattehendelseRunRequest(gjelderAar = 2025, skarp = true, maksAntall = 10, hoppOverSakerMedAarsavregning = true)
-        ).statusCode shouldBe HttpStatus.OK
+        )
 
+        svar.statusCode shouldBe HttpStatus.OK
         verify(exactly = 1) {
             kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(2025, ÅrFilter.FOM_AAR, null, true, 10, true)
         }
+        // Svaret må vise filteret kjøringen faktisk fikk, ikke det tomme feltet kallet kom inn med.
+        svar.body!!["aarFilter"] shouldBe ÅrFilter.FOM_AAR
     }
 
     @ParameterizedTest

@@ -59,7 +59,7 @@ class SkattepliktigeAarsavregningKjoeringController(
             "aarFilter velger FOM_AAR (året perioden starter i, standard) eller INNTEKTSAAR. aarFilter og " +
             "publisertEtter avgrenser bare denne hentingen — sendt sammen med en liste avvises de. Ekte kjøring " +
             "med gjelderAar krever hoppOverSakerMedAarsavregning, slik at saker fra tidligere kjøringer ikke " +
-            "får ny årsavregning eller ny status; publisertEtter avgrenser bare hvem som hentes. " +
+            "får ny årsavregning eller ny status. " +
             "hoppOverSakerMedAarsavregning=true hopper over saker som har en årsavregning for året, aktiv " +
             "eller avsluttet, og teller dem i antallHoppetOverHarAarsavregning. De endres ikke og teller " +
             "derfor ikke mot maksAntall — ellers ville en ny kjøring brukt opp taket på saker forrige " +
@@ -188,10 +188,11 @@ data class SkattehendelseRunRequest(
     val publisertEtter: LocalDateTime? = null,
     val skarp: Boolean = false,
     /**
-     * Tak på antall saker som kan endres. Påkrevd og positiv når [skarp] er true. Et forsøk teller
-     * selv om det feiler eller blir hoppet over ved skriving. Saker [hoppOverSakerMedAarsavregning]
-     * luker bort er ikke forsøk og teller ikke — ellers ville en ny kjøring brukt opp taket på saker
-     * forrige kjøring alt hadde tatt, uten å komme til de nye.
+     * Tak på antall saker som kan endres. Påkrevd og positiv når [skarp] er true. Taket brukes opp av
+     * saker som er vurdert til å skulle endres, også når selve skrivingen feiler eller hoppes over.
+     * To grupper bruker det ikke: saker som feiler før de er vurdert (antallSakerIkkeVurdert,
+     * antallSakerFeilet), og saker [hoppOverSakerMedAarsavregning] luker bort — ellers ville en ny
+     * kjøring brukt opp taket på saker forrige kjøring alt hadde tatt, uten å komme til de nye.
      */
     val maksAntall: Int? = null,
     /** Hopp over saker som har en årsavregning for året, aktiv eller avsluttet. */
