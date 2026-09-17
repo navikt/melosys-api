@@ -12,6 +12,7 @@ import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.behandling
 import no.nav.melosys.saksflytapi.domain.forTest
@@ -169,5 +170,26 @@ class OpprettArkivsakTest {
 
 
         exception.message shouldContain "Finner verken bruker eller virksomhet tilknyttet fagsak MEL-test"
+    }
+
+    @Test
+    fun `hopper over arkivsak når digital søknad ble festet på eksisterende sak`() {
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+                type = Behandlingstyper.FØRSTEGANG
+                fagsak {
+                    // saken har allerede arkivsak fordi vi festet på en eksisterende sak
+                    gsakSaksnummer = 1234432L
+                }
+            }
+            medData(ProsessDataKey.DIGITAL_SØKNAD_ATTACHED_EKSISTERENDE, true)
+        }
+
+        // Skal ikke kaste selv om gsakSaksnummer != null — markøren får steget til å hoppe over.
+        opprettArkivsak.utfør(prosessinstans)
+
+        verify(exactly = 0) { fagsakService.lagre(any()) }
+        verify(exactly = 0) { arkivsakService.opprettSakForBruker(any(), any(), any()) }
     }
 }

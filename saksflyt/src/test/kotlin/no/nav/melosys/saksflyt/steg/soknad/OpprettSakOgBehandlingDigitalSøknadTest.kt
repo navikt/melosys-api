@@ -11,6 +11,8 @@ import io.mockk.Runs
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import io.mockk.verifyOrder
+import io.kotest.matchers.booleans.shouldBeTrue
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -21,6 +23,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.repository.DigitalSøknadSakLås
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
@@ -49,6 +52,8 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
     @MockK lateinit var skjemaSakMappingService: SkjemaSakMappingService
     @MockK lateinit var behandlingService: BehandlingService
     @MockK(relaxed = true) lateinit var aktørSynkronisering: DigitalSøknadAktørSynkronisering
+    @MockK(relaxed = true) lateinit var sakLås: DigitalSøknadSakLås
+    @MockK(relaxed = true) lateinit var eksisterendeSakHåndterer: DigitalSøknadEksisterendeSakHåndterer
 
     private lateinit var opprettSakOgBehandlingDigitalSøknad: OpprettSakOgBehandlingDigitalSøknad
     private lateinit var prosessinstans: Prosessinstans
@@ -71,7 +76,8 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
     fun setup() {
         opprettSakOgBehandlingDigitalSøknad = OpprettSakOgBehandlingDigitalSøknad(
             fagsakService, persondataFasade, mottatteOpplysningerService, jsonMapper,
-            skjemaSakMappingService, behandlingService, aktørSynkronisering
+            skjemaSakMappingService, behandlingService, aktørSynkronisering,
+            sakLås, eksisterendeSakHåndterer
         )
 
         prosessinstans = Prosessinstans.forTest {
@@ -79,7 +85,10 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         }
 
         every { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) } just Runs
+        every { skjemaSakMappingService.claimRelaterteSkjemaIder(any(), any()) } just Runs
         every { behandlingService.lagre(any()) } just Runs
+        // Standard: ingen eksisterende sak (kappløp vunnet) → opprett-vei.
+        every { skjemaSakMappingService.finnGyldigSaksnummerForSkjemaIder(any()) } returns null
     }
 
     private fun mockFagsakOgBehandling(): Behandling {
@@ -294,5 +303,36 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         opprettSakOgBehandlingDigitalSøknad.utfør(kobletProsessinstans)
 
         verify(exactly = 0) { behandlingService.lagre(any()) }
+    }
+
+    @Test
+    fun `utfør fester på eksisterende sak når re-sjekk under lås finner sak`() {
+        val behandling = mockk<Behandling>(relaxed = true)
+        every { persondataFasade.hentAktørIdForIdent(fnr) } returns aktørId
+        every { skjemaSakMappingService.finnGyldigSaksnummerForSkjemaIder(any()) } returns "MEL-EKSISTERENDE"
+        every {
+            eksisterendeSakHåndterer.håndter("MEL-EKSISTERENDE", søknadsdata, opprettOppgave = false)
+        } returns behandling
+
+        opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
+
+        // Oppgaven skal IKKE opprettes under DB-låsen; OPPRETT_OPPGAVE-steget tar den etterpå.
+        verify { eksisterendeSakHåndterer.håndter("MEL-EKSISTERENDE", søknadsdata, opprettOppgave = false) }
+        verify(exactly = 0) { fagsakService.nyFagsakOgBehandling(any()) }
+        prosessinstans.behandling shouldBe behandling
+        prosessinstans.finnData(ProsessDataKey.DIGITAL_SØKNAD_ATTACHED_EKSISTERENDE, false).shouldBeTrue()
+    }
+
+    @Test
+    fun `utfør tar lås på aktørId før re-sjekk av eksisterende sak`() {
+        mockFagsakOgBehandling()
+        mockMottatteOpplysninger()
+
+        opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
+
+        verifyOrder {
+            sakLås.lås(aktørId)
+            skjemaSakMappingService.finnGyldigSaksnummerForSkjemaIder(any())
+        }
     }
 }

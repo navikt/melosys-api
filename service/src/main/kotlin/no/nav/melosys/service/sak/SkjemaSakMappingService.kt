@@ -66,6 +66,22 @@ class SkjemaSakMappingService(
         originalData: String,
         innsendtDato: Instant
     ) {
+        val eksisterende = skjemaSakMappingRepository.findBySkjemaId(skjemaId).orElse(null)
+        if (eksisterende != null && eksisterende.saksnummer != fagsak.saksnummer) {
+            if (eksisterende.originalData == null) {
+                // Claim-rad (MELOSYS-8151) som peker på en annen sak enn den delen faktisk landet på,
+                // typisk fordi den claimede saken ikke lenger var gyldig da delen kom. saksnummer er
+                // updatable = false, så en merge ville beholdt det gamle saksnummeret; raden må erstattes.
+                skjemaSakMappingRepository.delete(eksisterende)
+                skjemaSakMappingRepository.flush()
+                log.info { "Erstatter claim-rad for skjemaId=$skjemaId: ${eksisterende.saksnummer} → ${fagsak.saksnummer}" }
+            } else {
+                log.warn {
+                    "Mapping for skjemaId=$skjemaId finnes allerede mot sak ${eksisterende.saksnummer}; " +
+                        "beholder saksnummer og oppdaterer data (ny innsending landet på ${fagsak.saksnummer})"
+                }
+            }
+        }
         skjemaSakMappingRepository.save(
             SkjemaSakMapping(
                 skjemaId = skjemaId,
@@ -109,6 +125,23 @@ class SkjemaSakMappingService(
         mappinger.forEach { it.mottatteOpplysninger = mottatteOpplysninger }
         skjemaSakMappingRepository.saveAll(mappinger)
         log.info { "Re-pekte ${mappinger.size} skjema-sak-mapping(er) til mottatteOpplysninger=${mottatteOpplysninger.id}" }
+    }
+
+    /**
+     * Reserverer («claimer») relaterte skjemaId-er mot [fagsak] (MELOSYS-8151). Når en relatert
+     * innsending oppretter saken, skrives det tomme mapping-rader for de øvrige relaterte id-ene som
+     * ennå ikke er mappet, slik at en senere prosessert del finner saken uavhengig av rekkefølgen
+     * meldingene konsumeres i (også på tvers av instanser). En claim-rad fylles med ekte data når den
+     * tilhørende delen senere prosesseres og kaller [lagreMapping].
+     */
+    @Transactional
+    fun claimRelaterteSkjemaIder(relaterteSkjemaIder: Collection<UUID>, fagsak: Fagsak) {
+        relaterteSkjemaIder.forEach { skjemaId ->
+            if (skjemaSakMappingRepository.findBySkjemaId(skjemaId).isEmpty) {
+                skjemaSakMappingRepository.save(SkjemaSakMapping(skjemaId = skjemaId, fagsak = fagsak))
+                log.info { "Reserverte (claim) relatert skjemaId=$skjemaId mot sak ${fagsak.saksnummer}" }
+            }
+        }
     }
 
     @Transactional

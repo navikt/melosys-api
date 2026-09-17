@@ -145,6 +145,7 @@ internal class SkjemaSakMappingServiceTest {
             val mottatteOpplysninger = mockk<MottatteOpplysninger>()
             val mappingSlot = slot<SkjemaSakMapping>()
 
+            every { skjemaSakMappingRepository.findBySkjemaId(skjemaId) } returns Optional.empty()
             every { skjemaSakMappingRepository.save(capture(mappingSlot)) } answers { mappingSlot.captured }
 
             service.lagreMapping(
@@ -160,8 +161,64 @@ internal class SkjemaSakMappingServiceTest {
             saved.saksnummer shouldBe "MEL-100"
             saved.mottatteOpplysninger shouldBe mottatteOpplysninger
             saved.originalData shouldBe "{}"
+            verify(exactly = 0) { skjemaSakMappingRepository.delete(any()) }
         }
 
+        @Test
+        fun `claim-rad mot annen sak erstattes slik at saksnummer flyttes`() {
+            // saksnummer er updatable = false på SkjemaSakMapping. En merge over claim-raden ville
+            // derfor beholdt den gamle saken — raden må slettes og skrives på nytt.
+            val skjemaId = UUID.randomUUID()
+            val claimRad = SkjemaSakMapping(skjemaId = skjemaId, fagsak = Fagsak.forTest { saksnummer = "MEL-100" })
+            val nySak = Fagsak.forTest { saksnummer = "MEL-200" }
+            val mappingSlot = slot<SkjemaSakMapping>()
+
+            every { skjemaSakMappingRepository.findBySkjemaId(skjemaId) } returns Optional.of(claimRad)
+            every { skjemaSakMappingRepository.delete(claimRad) } just Runs
+            every { skjemaSakMappingRepository.flush() } just Runs
+            every { skjemaSakMappingRepository.save(capture(mappingSlot)) } answers { mappingSlot.captured }
+
+            service.lagreMapping(skjemaId, nySak, mockk(), "{}", Instant.parse("2026-01-01T00:00:00Z"))
+
+            verifyOrder {
+                skjemaSakMappingRepository.delete(claimRad)
+                skjemaSakMappingRepository.flush()
+                skjemaSakMappingRepository.save(any())
+            }
+            mappingSlot.captured.saksnummer shouldBe "MEL-200"
+            mappingSlot.captured.originalData shouldBe "{}"
+        }
+
+        @Test
+        fun `claim-rad mot samme sak fylles uten sletting`() {
+            val skjemaId = UUID.randomUUID()
+            val sak = Fagsak.forTest { saksnummer = "MEL-100" }
+            val claimRad = SkjemaSakMapping(skjemaId = skjemaId, fagsak = sak)
+
+            every { skjemaSakMappingRepository.findBySkjemaId(skjemaId) } returns Optional.of(claimRad)
+            every { skjemaSakMappingRepository.save(any()) } answers { firstArg() }
+
+            service.lagreMapping(skjemaId, sak, mockk(), "{}", Instant.parse("2026-01-01T00:00:00Z"))
+
+            verify(exactly = 0) { skjemaSakMappingRepository.delete(any()) }
+            verify { skjemaSakMappingRepository.save(match { it.saksnummer == "MEL-100" && it.originalData == "{}" }) }
+        }
+
+        @Test
+        fun `ekte mapping mot annen sak slettes ikke`() {
+            // En rad med data er en faktisk innsending; den skal ikke fjernes stille selv om en ny
+            // innsending av samme skjemaId lander på en annen sak (redelivery-tilfellet).
+            val skjemaId = UUID.randomUUID()
+            val ekteRad = lagSkjemaSakMapping(skjemaId, "MEL-100")
+
+            every { skjemaSakMappingRepository.findBySkjemaId(skjemaId) } returns Optional.of(ekteRad)
+            every { skjemaSakMappingRepository.save(any()) } answers { firstArg() }
+
+            service.lagreMapping(skjemaId, Fagsak.forTest { saksnummer = "MEL-200" }, mockk(), "{}", Instant.parse("2026-01-01T00:00:00Z"))
+
+            verify(exactly = 0) { skjemaSakMappingRepository.delete(any()) }
+            verify(exactly = 1) { skjemaSakMappingRepository.save(any()) }
+        }
     }
 
     @Nested
@@ -253,6 +310,56 @@ internal class SkjemaSakMappingServiceTest {
 
             verify(exactly = 0) { skjemaSakMappingRepository.findBySkjemaIdIn(any()) }
             verify(exactly = 0) { skjemaSakMappingRepository.saveAll(any<List<SkjemaSakMapping>>()) }
+        }
+    }
+
+    @Nested
+    inner class ClaimRelaterteSkjemaIder {
+
+        @Test
+        fun `skriver claim-rad for skjemaIder uten mapping`() {
+            val skjemaId1 = UUID.randomUUID()
+            val skjemaId2 = UUID.randomUUID()
+            val fagsak = Fagsak.forTest { saksnummer = "MEL-800" }
+            val lagrede = mutableListOf<SkjemaSakMapping>()
+
+            every { skjemaSakMappingRepository.findBySkjemaId(any()) } returns Optional.empty()
+            every { skjemaSakMappingRepository.save(capture(lagrede)) } answers { firstArg() }
+
+            service.claimRelaterteSkjemaIder(listOf(skjemaId1, skjemaId2), fagsak)
+
+            lagrede.map { it.skjemaId } shouldBe listOf(skjemaId1, skjemaId2)
+            // Claim-rader er tomme reservasjoner: originalData settes først når innsendingen kommer,
+            // og det er nettopp originalData som holder dem utenfor saksstatus-synken.
+            lagrede.all { it.originalData == null } shouldBe true
+            lagrede.all { it.saksnummer == "MEL-800" } shouldBe true
+        }
+
+        @Test
+        fun `hopper over skjemaIder som allerede er mappet`() {
+            // En eksisterende mapping peker allerede på riktig sak (eller er en ekte innsending).
+            // Den skal ikke overskrives — claim er kun en reservasjon av ledige skjemaId-er.
+            val alleredeMappet = UUID.randomUUID()
+            val ledig = UUID.randomUUID()
+            val fagsak = Fagsak.forTest { saksnummer = "MEL-900" }
+            val lagrede = mutableListOf<SkjemaSakMapping>()
+
+            every { skjemaSakMappingRepository.findBySkjemaId(alleredeMappet) } returns
+                Optional.of(lagSkjemaSakMapping(skjemaId = alleredeMappet, saksnummer = "MEL-111"))
+            every { skjemaSakMappingRepository.findBySkjemaId(ledig) } returns Optional.empty()
+            every { skjemaSakMappingRepository.save(capture(lagrede)) } answers { firstArg() }
+
+            service.claimRelaterteSkjemaIder(listOf(alleredeMappet, ledig), fagsak)
+
+            lagrede.map { it.skjemaId } shouldBe listOf(ledig)
+            verify(exactly = 1) { skjemaSakMappingRepository.save(any()) }
+        }
+
+        @Test
+        fun `tom liste lagrer ingenting`() {
+            service.claimRelaterteSkjemaIder(emptyList(), Fagsak.forTest { saksnummer = "MEL-1000" })
+
+            verify(exactly = 0) { skjemaSakMappingRepository.save(any()) }
         }
     }
 }
