@@ -919,8 +919,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `EØS pensjonist får ikke årsavregning ved aktiv behandling selv med begge toggler på`() {
-        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+    fun `hentMuligeBehandlingstyperForKnyttTilSak EU_EØS TRYGDEAVGIFT tema Pensjonist returnerer Årsavregning TOGGLE ÅRSAVREGNING_EØS_PENSJONIST`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST)
 
         val behandling = behandlingMedTemaOgType(Behandlingstema.PENSJONIST, Behandlingstyper.FØRSTEGANG) {
@@ -939,7 +938,9 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         )
 
 
-        muligeTyper.shouldBeEmpty()
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
+            Behandlingstyper.ÅRSAVREGNING,
+        )
     }
 
     @Test
