@@ -404,8 +404,11 @@ class SkattepliktigeAarsavregningKjoeringTest {
     fun `år-modus henter med filtrene og systemtoken, og hopper over sak med årsavregning for året`() {
         val publisertEtter = LocalDateTime.of(2026, 9, 8, 0, 0)
         var brukteSystemtoken = false
+        var kjørteMensDetBleHentet = false
         every { skattehendelserClient.hentSkattepliktige(GJELDER_ÅR, ÅrFilter.INNTEKTSAAR, publisertEtter) } answers {
             brukteSystemtoken = ThreadLocalAccessInfo.shouldUseSystemToken()
+            // Hentes det før jobben starter, er isRunning false, og 409-vakten slipper gjennom en ny /run.
+            kjørteMensDetBleHentet = service.status()["isRunning"] == true
             skattepliktigeRespons(AKTØR_ID)
         }
         val fagsak = lagFagsakMedÅrsavregning(Behandlingsstatus.AVSLUTTET, BEHANDLING_ID)
@@ -430,13 +433,14 @@ class SkattepliktigeAarsavregningKjoeringTest {
         }
 
         brukteSystemtoken shouldBe true
+        kjørteMensDetBleHentet shouldBe true
         service.status()["antallInputHendelser"] shouldBe 1
         service.status()["antallHoppetOverHarAarsavregning"] shouldBe 1
         verify(exactly = 0) { utfoerer.opprettProsessinstans(any(), any()) }
     }
 
     @Test
-    fun `feilet henting fra melosys-skattehendelser vises i status og tømmer forrige rapport`() {
+    fun `feilet henting vises i status, tømmer forrige rapport og nullstilles av neste kjøring`() {
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(lagFagsak("MEL-1"))
         val behandlingsresultat = Behandlingsresultat.forTest { }
         stubTrygdeavgift(behandlingsresultat)
@@ -448,8 +452,15 @@ class SkattepliktigeAarsavregningKjoeringTest {
 
         service.resultater.size shouldBe 0
         service.status()["feilVedHenting"] shouldBe "skattehendelser svarte 503"
+        service.status()["errorCount"] shouldBe 1
         service.status()["antallInputHendelser"] shouldBe 0
         service.status()["isRunning"] shouldBe false
+
+        every { skattehendelserClient.hentSkattepliktige(any(), any(), any()) } returns skattepliktigeRespons(AKTØR_ID)
+        service.prosesserSkattepliktigeFraSkattehendelserAsynkront(GJELDER_ÅR, ÅrFilter.FOM_AAR, null)
+
+        service.status()["feilVedHenting"] shouldBe null
+        service.status()["antallInputHendelser"] shouldBe 1
     }
 
     @Test

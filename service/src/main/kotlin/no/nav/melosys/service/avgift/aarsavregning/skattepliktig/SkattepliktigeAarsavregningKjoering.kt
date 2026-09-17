@@ -83,8 +83,8 @@ class SkattepliktigeAarsavregningKjoering(
     }
 
     // readOnly gir FlushMode.MANUAL, og er garantien for at simuleringen ikke skriver: alle
-    // skrivninger går gjennom utfoerer i egne transaksjoner. Metoden over kaller denne som
-    // selvkall, så det er annotasjonen der som gjelder for controller-stien.
+    // skrivninger går gjennom utfoerer i egne transaksjoner. De asynkrone metodene over kaller
+    // kjør som selvkall, så det er annotasjonene der som gjelder for controller-stien.
     @Transactional(readOnly = true)
     fun prosesserSkattehendelser(
         skattehendelser: List<SkattehendelseItem>,
