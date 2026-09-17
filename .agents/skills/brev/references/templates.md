@@ -137,7 +137,6 @@ oversatt/beskrivelse-tekst (`.beskrivelse`). Dokgen skal selv slå opp kodeverk-
 mot `melosys-internt-kodeverk` (samme artefakt som api bruker), og mapper
 api-domene-enumer (f.eks. `Avgiftsdel`) i en dedikert Handlebars-helper i
 dokgen — se f.eks. `AvgiftstabellHelper`/`InntektskildeHelper` og bruken i
-`ÅrsavregningVedtakMapper.avgiftsPeriodeMapper` /
 `InnvilgelseFtrlMapper.mapAvgiftsperioderPensjonist`
 
 Begrunnelse:
