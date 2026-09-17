@@ -22,8 +22,9 @@ private val log = KotlinLogging.logger { }
  * opprettet for relaterte skjemaId-er samtidig. Da konsumenten stoppet opp av dette, hopet det
  * seg opp i størrelsesorden 200 uleste meldinger på topic-et før feilen ble oppdaget og rettet
  * manuelt. Denne pausen gir forrige melding bedre tid til å fullføre sin saga før neste melding
- * slippes gjennom. Dette er en midlertidig mitigering, ikke en fjerning av selve race'en — bør
- * fjernes når en mer robust løsning (f.eks. reell låsing) er på plass.
+ * slippes gjennom. Dette er en midlertidig mitigering, ikke en fjerning av selve race'en.
+ *
+ * TODO: fjern denne pausen når en mer robust løsning (f.eks. reell låsing) er på plass.
  */
 private val KONSUMERING_DELAY: Duration = Duration.ofSeconds(20)
 
