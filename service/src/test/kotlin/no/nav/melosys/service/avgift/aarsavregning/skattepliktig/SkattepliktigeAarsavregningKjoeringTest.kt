@@ -292,12 +292,13 @@ class SkattepliktigeAarsavregningKjoeringTest {
                 publisertEtter = publisertEtter,
                 skarp = true,
                 maksAntall = 2,
+                hoppOverSakerMedAarsavregning = true,
             )
         )
 
         svar.statusCode shouldBe HttpStatus.OK
         verify(exactly = 1) {
-            kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(2025, ÅrFilter.INNTEKTSAAR, publisertEtter, true, 2, false)
+            kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(2025, ÅrFilter.INNTEKTSAAR, publisertEtter, true, 2, true)
         }
         verify(exactly = 0) { kjoering.prosesserSkattehendelserAsynkront(any(), any(), any(), any()) }
     }
@@ -317,12 +318,20 @@ class SkattepliktigeAarsavregningKjoeringTest {
     }
 
     @Test
-    fun `ekte kjøring med gjelderAar uten publisertEtter avvises, simulering slipper gjennom`() {
+    fun `ekte kjøring med gjelderAar uten hoppOverSakerMedAarsavregning avvises også med publisertEtter, simulering slipper gjennom`() {
         val kjoering = mockk<SkattepliktigeAarsavregningKjoering>(relaxed = true)
         val controller = SkattepliktigeAarsavregningKjoeringController(kjoering)
 
         controller.run(SkattehendelseRunRequest(gjelderAar = 2025, skarp = true, maksAntall = 10))
             .statusCode shouldBe HttpStatus.BAD_REQUEST
+        controller.run(
+            SkattehendelseRunRequest(
+                gjelderAar = 2025,
+                publisertEtter = LocalDateTime.of(2026, 9, 8, 0, 0),
+                skarp = true,
+                maksAntall = 10,
+            )
+        ).statusCode shouldBe HttpStatus.BAD_REQUEST
         controller.run(SkattehendelseRunRequest(gjelderAar = 2025)).statusCode shouldBe HttpStatus.OK
 
         verify(exactly = 1) {
@@ -392,34 +401,75 @@ class SkattepliktigeAarsavregningKjoeringTest {
     }
 
     @Test
-    fun `hendelser fra melosys-skattehendelser hentes med systemtoken og blir input til kjøringen`() {
+    fun `år-modus henter med filtrene og systemtoken, og hopper over sak med årsavregning for året`() {
+        val publisertEtter = LocalDateTime.of(2026, 9, 8, 0, 0)
         var brukteSystemtoken = false
-        every { skattehendelserClient.hentSkattepliktige(2025, ÅrFilter.FOM_AAR, null) } answers {
+        every { skattehendelserClient.hentSkattepliktige(GJELDER_ÅR, ÅrFilter.INNTEKTSAAR, publisertEtter) } answers {
             brukteSystemtoken = ThreadLocalAccessInfo.shouldUseSystemToken()
-            SkattepliktigeRespons(
-            gjelderAar = 2025,
-            antall = 1,
-            skattepliktige = listOf(
-                Skattepliktig(
-                    gjelderPeriode = "2025",
-                    identifikator = AKTØR_ID,
-                    sisteHendelseTid = LocalDateTime.of(2026, 9, 10, 2, 0),
-                    inntektsaar = listOf("2025"),
-                    antallPubliseringer = 1,
-                )
-            ),
-            )
+            skattepliktigeRespons(AKTØR_ID)
         }
+        val fagsak = lagFagsakMedÅrsavregning(Behandlingsstatus.AVSLUTTET, BEHANDLING_ID)
+        val behandlingsresultat = Behandlingsresultat.forTest { årsavregning { aar = GJELDER_ÅR } }
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        stubTrygdeavgift(behandlingsresultat)
 
         // Uten kontekst svarer shouldUseSystemToken true uansett; en vanlig web-kontekst gir false.
         ThreadLocalAccessInfo.beforeControllerRequest("/test", false)
         try {
-            service.hentSkattehendelser(2025, ÅrFilter.FOM_AAR, null) shouldBe
-                listOf(SkattehendelseItem(gjelderPeriode = "2025", identifikator = AKTØR_ID))
+            service.prosesserSkattepliktigeFraSkattehendelserAsynkront(
+                GJELDER_ÅR,
+                ÅrFilter.INNTEKTSAAR,
+                publisertEtter,
+                skarp = true,
+                maksAntall = 5,
+                hoppOverSakerMedAarsavregning = true,
+            )
         } finally {
             runCatching { ThreadLocalAccessInfo.afterControllerRequest("/test") }
         }
+
         brukteSystemtoken shouldBe true
+        service.status()["antallInputHendelser"] shouldBe 1
+        service.status()["antallHoppetOverHarAarsavregning"] shouldBe 1
+        verify(exactly = 0) { utfoerer.opprettProsessinstans(any(), any()) }
+    }
+
+    @Test
+    fun `feilet henting fra melosys-skattehendelser vises i status og tømmer forrige rapport`() {
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(lagFagsak("MEL-1"))
+        val behandlingsresultat = Behandlingsresultat.forTest { }
+        stubTrygdeavgift(behandlingsresultat)
+        service.prosesserSkattehendelser(listOf(SkattehendelseItem(GJELDER_ÅR.toString(), AKTØR_ID)))
+        service.resultater.size shouldBe 1
+        every { skattehendelserClient.hentSkattepliktige(any(), any(), any()) } throws IllegalStateException("skattehendelser svarte 503")
+
+        service.prosesserSkattepliktigeFraSkattehendelserAsynkront(GJELDER_ÅR, ÅrFilter.FOM_AAR, null)
+
+        service.resultater.size shouldBe 0
+        service.status()["feilVedHenting"] shouldBe "skattehendelser svarte 503"
+        service.status()["antallInputHendelser"] shouldBe 0
+        service.status()["isRunning"] shouldBe false
+    }
+
+    @Test
+    fun `hoppOverSakerMedAarsavregning hopper ikke over sak der årsavregningen mangler år`() {
+        val fagsak = lagFagsakMedÅrsavregning(Behandlingsstatus.VURDER_DOKUMENT, BEHANDLING_ID)
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
+        val behandlingsresultat = Behandlingsresultat.forTest { }
+        stubTrygdeavgift(behandlingsresultat)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { utfoerer.opprettProsessinstans("MEL-1", GJELDER_ÅR.toString()) } returns UUID.randomUUID()
+
+        service.prosesserSkattehendelser(
+            listOf(SkattehendelseItem(GJELDER_ÅR.toString(), AKTØR_ID)),
+            skarp = true,
+            maksAntall = 5,
+            hoppOverSakerMedAarsavregning = true,
+        )
+
+        verify(exactly = 1) { utfoerer.opprettProsessinstans("MEL-1", GJELDER_ÅR.toString()) }
+        service.status()["antallHoppetOverHarAarsavregning"] shouldBe 0
     }
 
     @ParameterizedTest
@@ -937,6 +987,20 @@ class SkattepliktigeAarsavregningKjoeringTest {
         every { trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) } returns
             Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
     }
+
+    private fun skattepliktigeRespons(identifikator: String) = SkattepliktigeRespons(
+        gjelderAar = GJELDER_ÅR,
+        antall = 1,
+        skattepliktige = listOf(
+            Skattepliktig(
+                gjelderPeriode = GJELDER_ÅR.toString(),
+                identifikator = identifikator,
+                sisteHendelseTid = LocalDateTime.of(2026, 9, 10, 2, 0),
+                inntektsaar = listOf(GJELDER_ÅR.toString()),
+                antallPubliseringer = 1,
+            )
+        ),
+    )
 
     private fun lagFagsak(saksnummer: String) = Fagsak.forTest {
         this.saksnummer = saksnummer

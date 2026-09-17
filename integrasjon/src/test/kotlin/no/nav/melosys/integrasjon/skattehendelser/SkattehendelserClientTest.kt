@@ -118,10 +118,12 @@ class SkattehendelserClientTest(
     }
 
     @Test
-    fun `hentSkattepliktige utelater publisertEtter når den ikke er satt`() {
+    fun `hentSkattepliktige sender FOM_AAR og token, og utelater publisertEtter når den ikke er satt`() {
         wireMockServer.stubFor(
             WireMock.get(WireMock.urlPathEqualTo("/api/admin/skattepliktige"))
+                .withQueryParam("aarFilter", WireMock.equalTo("FOM_AAR"))
                 .withQueryParam("publisertEtter", WireMock.absent())
+                .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .+"))
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)

@@ -65,7 +65,8 @@ class SkattepliktigeAarsavregningKjoering(
 
     /**
      * Som [prosesserSkattehendelserAsynkront], men henter hendelsene fra melosys-skattehendelser.
-     * Feiler hentingen, starter ikke kjøringen, og rapporten fra forrige kjøring står urørt.
+     * Hentingen skjer inne i jobben: /status viser at kjøringen pågår mens den hentes, og feiler
+     * hentingen, står feilen i feilVedHenting og rapporten er tom.
      */
     @Async("taskExecutor")
     @Transactional(readOnly = true)
@@ -76,19 +77,10 @@ class SkattepliktigeAarsavregningKjoering(
         skarp: Boolean = false,
         maksAntall: Int? = null,
         hoppOverSakerMedAarsavregning: Boolean = false,
-    ) {
-        prosesserSkattehendelser(
-            hentSkattehendelser(gjelderÅr, årFilter, publisertEtter),
-            skarp,
-            maksAntall,
-            hoppOverSakerMedAarsavregning,
-        )
+    ) = kjør(skarp, maksAntall, hoppOverSakerMedAarsavregning) {
+        skattehendelserClient.hentSkattepliktige(gjelderÅr, årFilter, publisertEtter)
+            .skattepliktige.map { SkattehendelseItem(gjelderPeriode = it.gjelderPeriode, identifikator = it.identifikator) }
     }
-
-    fun hentSkattehendelser(gjelderÅr: Int, årFilter: ÅrFilter, publisertEtter: LocalDateTime?): List<SkattehendelseItem> =
-        runAsSystem("hentSkattepliktigeFraSkattehendelser") {
-            skattehendelserClient.hentSkattepliktige(gjelderÅr, årFilter, publisertEtter)
-        }.skattepliktige.map { SkattehendelseItem(gjelderPeriode = it.gjelderPeriode, identifikator = it.identifikator) }
 
     // readOnly gir FlushMode.MANUAL, og er garantien for at simuleringen ikke skriver: alle
     // skrivninger går gjennom utfoerer i egne transaksjoner. Metoden over kaller denne som
@@ -104,22 +96,37 @@ class SkattepliktigeAarsavregningKjoering(
          * behandling settes til VURDER_DOKUMENT.
          */
         hoppOverSakerMedAarsavregning: Boolean = false,
+    ) = kjør(skarp, maksAntall, hoppOverSakerMedAarsavregning) { skattehendelser }
+
+    private fun kjør(
+        skarp: Boolean,
+        maksAntall: Int?,
+        hoppOverSakerMedAarsavregning: Boolean,
+        hentSkattehendelser: () -> List<SkattehendelseItem>,
     ) = runAsSystem {
         val modus = if (skarp) "SKARP" else "DRYRUN"
-        log.info {
-            "Starter $modus for ${skattehendelser.size} skattehendelser, maksAntall=$maksAntall, " +
-                "hoppOverSakerMedAarsavregning=$hoppOverSakerMedAarsavregning"
-        }
 
         // execute avviser en andre kjøring framfor å køe den — en køet kjøring ville startet skarpt
         // mot en base den første nettopp endret.
         jobMonitor.execute(maxErrorsBeforeStop = 100) {
             // Etter execute: en avvist kjøring skal ikke slette rapporten fra den som kjører.
             resultater.clear()
-            antallInputHendelser = skattehendelser.size
             this.skarp = skarp
             this.maksAntall = maksAntall
             this.hoppOverSakerMedAarsavregning = hoppOverSakerMedAarsavregning
+            val skattehendelser = try {
+                hentSkattehendelser()
+            } catch (e: Exception) {
+                log.error(e) { "Henting av skattehendelser feilet, $modus ble ikke kjørt" }
+                feilVedHenting = e.message ?: e.javaClass.simpleName
+                jobMonitor.registerException(e)
+                return@execute
+            }
+            log.info {
+                "Starter $modus for ${skattehendelser.size} skattehendelser, maksAntall=$maksAntall, " +
+                    "hoppOverSakerMedAarsavregning=$hoppOverSakerMedAarsavregning"
+            }
+            antallInputHendelser = skattehendelser.size
 
             // Opprettelsen er ikke idempotent på sak og år: saga-steget revaliderer ikke, og en
             // prosessinstans som bare ligger i kø er usynlig for finnAktivÅrsavregningBehandling.
@@ -370,6 +377,7 @@ class SkattepliktigeAarsavregningKjoering(
                 "skarp" to skarp,
                 "maksAntall" to maksAntall,
                 "hoppOverSakerMedAarsavregning" to hoppOverSakerMedAarsavregning,
+                "feilVedHenting" to feilVedHenting,
                 "antallInputHendelser" to antallInputHendelser,
                 "antallDuplikaterFjernet" to antallDuplikaterFjernet,
                 "antallUgyldigInput" to antallUgyldigInput,
@@ -421,6 +429,8 @@ class SkattepliktigeAarsavregningKjoering(
         @Volatile var skarp: Boolean = false,
         @Volatile var maksAntall: Int? = null,
         @Volatile var hoppOverSakerMedAarsavregning: Boolean = false,
+        /** Satt når hentingen fra melosys-skattehendelser feilet; da er ingen saker vurdert. */
+        @Volatile var feilVedHenting: String? = null,
         @Volatile var antallInputHendelser: Int = 0,
         @Volatile var antallDuplikaterFjernet: Int = 0,
         @Volatile var antallUgyldigInput: Int = 0,
@@ -446,7 +456,7 @@ class SkattepliktigeAarsavregningKjoering(
         @Volatile var antallSakerIkkeVurdert: Int = 0,
         /** Saker som feilet under vurderingen — de er med i [antallSakerFunnet]. */
         @Volatile var antallSakerFeilet: Int = 0,
-        /** Saker der bare rapportoppslaget feilet. Ikke en kategori — saken er talt i en av de fire. */
+        /** Saker der bare rapportoppslaget feilet. Ikke en kategori — saken er talt i en av de fem. */
         @Volatile var antallBerikelseFeilet: Int = 0,
         /** Nådd etter at taket var fylt, derfor ikke vurdert — med i [antallSakerFunnet]. */
         @Volatile var antallSakerHoppetOverPgaTak: Int = 0,
@@ -465,6 +475,7 @@ class SkattepliktigeAarsavregningKjoering(
             skarp = false
             maksAntall = null
             hoppOverSakerMedAarsavregning = false
+            feilVedHenting = null
             antallInputHendelser = 0
             antallDuplikaterFjernet = 0
             antallUgyldigInput = 0
@@ -492,6 +503,7 @@ class SkattepliktigeAarsavregningKjoering(
             "skarp" to skarp,
             "maksAntall" to maksAntall,
             "hoppOverSakerMedAarsavregning" to hoppOverSakerMedAarsavregning,
+            "feilVedHenting" to feilVedHenting,
             "antallInputHendelser" to antallInputHendelser,
             "antallDuplikaterFjernet" to antallDuplikaterFjernet,
             "antallUgyldigInput" to antallUgyldigInput,

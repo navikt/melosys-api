@@ -10,9 +10,12 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import java.time.Duration
 import java.time.LocalDateTime
 
 private val log = KotlinLogging.logger { }
+
+private val HENT_TIMEOUT = Duration.ofMinutes(2)
 
 @Configuration
 class SkattehendelserWebClientConfig {
@@ -53,6 +56,8 @@ class SkattehendelserClient(private val skattehendelserWebClient: WebClient) {
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .bodyToMono(SkattepliktigeRespons::class.java)
+            // Jobbtråden er delt med saksbehandlingen; et svar som aldri kommer skal ikke holde den.
+            .timeout(HENT_TIMEOUT)
             .block() ?: error("Tomt svar fra melosys-skattehendelser")
     }
 }

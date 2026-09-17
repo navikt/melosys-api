@@ -54,10 +54,11 @@ class SkattepliktigeAarsavregningKjoeringController(
             "nye innhentingsbrev til de samme borgerne. Send derfor /run ÉN gang, og bruk /rapport til å " +
             "se om kjøringen faktisk startet — ikke isRunning. " +
             "I stedet for en liste kan du sende gjelderAar: da hentes hendelsene fra melosys-skattehendelser " +
-            "når kjøringen starter, og antallInputHendelser i /status viser hvor mange som ble hentet. " +
+            "inne i jobben: isRunning er true mens det hentes, antallInputHendelser viser hvor mange som ble " +
+            "hentet, og feiler hentingen, står feilen i feilVedHenting. " +
             "aarFilter velger FOM_AAR (året perioden starter i, standard) eller INNTEKTSAAR. Ekte kjøring " +
-            "med gjelderAar krever publisertEtter eller hoppOverSakerMedAarsavregning, slik at saker fra " +
-            "tidligere kjøringer ikke får ny årsavregning eller ny status. " +
+            "med gjelderAar krever hoppOverSakerMedAarsavregning, slik at saker fra tidligere kjøringer ikke " +
+            "får ny årsavregning eller ny status; publisertEtter avgrenser bare hvem som hentes. " +
             "hoppOverSakerMedAarsavregning=true hopper over saker som har en årsavregning for året, aktiv " +
             "eller avsluttet, og teller dem i antallHoppetOverHarAarsavregning. " +
             "Bruk /status for fremdrift og /rapport for resultat per sak. NB: appen kjører to podder, " +
@@ -76,9 +77,9 @@ class SkattepliktigeAarsavregningKjoeringController(
                 mapOf("feil" to "Send enten skattehendelser eller gjelderAar, ikke begge og ikke ingen av dem")
             )
         }
-        if (request.skarp && request.gjelderAar != null && request.publisertEtter == null && !request.hoppOverSakerMedAarsavregning) {
+        if (request.skarp && request.gjelderAar != null && !request.hoppOverSakerMedAarsavregning) {
             return ResponseEntity.badRequest().body(
-                mapOf("feil" to "Ekte kjøring med gjelderAar krever publisertEtter eller hoppOverSakerMedAarsavregning")
+                mapOf("feil" to "Ekte kjøring med gjelderAar krever hoppOverSakerMedAarsavregning")
             )
         }
 
@@ -170,7 +171,7 @@ data class SkattehendelseRunRequest(
     /** Hent hendelsene for dette året fra melosys-skattehendelser i stedet for å sende [skattehendelser]. */
     val gjelderAar: Int? = null,
     val aarFilter: ÅrFilter = ÅrFilter.FOM_AAR,
-    /** Ta bare med personer med siste publisering etter dette tidspunktet. Påkrevd ved ekte kjøring med [gjelderAar]. */
+    /** Ta bare med personer med siste publisering etter dette tidspunktet (norsk tid). */
     val publisertEtter: LocalDateTime? = null,
     val skarp: Boolean = false,
     /** Tak på antall saker som kan endres. Påkrevd og positiv når [skarp] er true; teller også forsøk som feiler eller hoppes over. */
