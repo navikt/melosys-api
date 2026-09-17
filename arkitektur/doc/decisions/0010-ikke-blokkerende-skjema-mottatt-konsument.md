@@ -42,13 +42,18 @@ saker samtidig — en datafeil som bør undersøkes), og flytter sistnevnte til 
 sted der den ikke kan blokkere Kafka-konsumeringen.
 
 ### 1. Routing i konsumenten kaster ikke lenger
-`SkjemaSakMappingService.finnMappetSaksnummerForSkjemaIder` slutter å kaste
-`IllegalStateException` ved flere gyldige saker. Den velger i stedet ett
-saksnummer deterministisk (første i den gyldige listen) slik at konsumenten
-alltid kan avgjøre om `MELOSYS_MOTTAK_DIGITAL_SØKNAD` (ny sak) eller
+`SkjemaSakMappingService` får en ny, ikke-kastende metode
+`harMappingMedGyldigSaksnummerForSkjemaId(alleIder): Boolean`, som konsumenten
+bruker til å avgjøre om `MELOSYS_MOTTAK_DIGITAL_SØKNAD` (ny sak) eller
 `MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD` (eksisterende sak) skal opprettes.
+Den svarer kun *om* det finnes minst én gyldig åpen sak — den velger ikke noe
+saksnummer og kaster aldri, uansett hvor mange gyldige saker som finnes.
 Prosessinstansen opprettes dermed **alltid**, uavhengig av om det finnes en
 datainkonsistens i bunnen.
+
+`finnMappetSaksnummerForSkjemaIder` (den opprinnelige metoden) beholdes uendret
+og **kaster fortsatt** `IllegalStateException` ved flere gyldige åpne saker —
+den kalles bare ikke lenger fra konsumenten, kun fra saga-steget under (pkt. 2).
 
 ### 2. Ambiguitets-sjekken flyttes inn i saga-steget
 Selve valideringen — «fantes det egentlig flere gyldige åpne saker?» — gjøres nå
@@ -63,11 +68,11 @@ partisjoner påvirkes.
 
 ### 3. Relaterte skjemaId-er sendes eksplisitt med i prosessinstansen
 For at steget skal kunne gjøre samme oppslag på nytt, legges en ny nøkkel til i
-`ProsessDataKey`: `RELATERTE_SKJEMA_IDER`. Verdien (`melding.relaterteSkjemaIder`,
-et øyeblikksbilde fra selve Kafka-meldingen) settes av `ProsessinstansService`
-ved opprettelse (`opprettSøknadProsessinstans`), og leses ut igjen i
-`HåndterEksisterendeSakDigitalSøknad` via
-`prosessinstans.finnData<List<UUID>>(ProsessDataKey.RELATERTE_SKJEMA_IDER, emptyList())`.
+`ProsessDataKey`: `DIGITAL_SØKNAD_RELATERTE_SKJEMA_IDER`. Verdien
+(`melding.relaterteSkjemaIder`, et øyeblikksbilde fra selve Kafka-meldingen)
+settes av `ProsessinstansService` ved opprettelse (`opprettSøknadProsessinstans`),
+og leses ut igjen i `HåndterEksisterendeSakDigitalSøknad` via
+`prosessinstans.hentData<List<UUID>>(ProsessDataKey.DIGITAL_SØKNAD_RELATERTE_SKJEMA_IDER)`.
 
 Dette er trygt selv om relasjonene mellom skjema endrer seg senere: enhver
 endring i "relatert"-status kommer i så fall som en **ny innsending** (nytt
@@ -107,16 +112,21 @@ blokkerings-scenarioet for skjema-mottatt-konsumenten via `SkjemaSakMappingServi
 ## Filer
 
 - `service/src/main/kotlin/no/nav/melosys/service/sak/SkjemaSakMappingService.kt`
-  — fjerner kasting fra `finnMappetSaksnummerForSkjemaIder`.
+  — ny ikke-kastende `harMappingMedGyldigSaksnummerForSkjemaId` for routing;
+  `finnMappetSaksnummerForSkjemaIder` beholdes uendret (kaster fortsatt ved flere
+  gyldige saker), men kalles nå kun fra saga-steget.
 - `service/src/main/kotlin/no/nav/melosys/service/soknad/DigitalSøknadMottattConsumer.kt`
-  — uendret routing-logikk, men ikke lenger avhengig av at oppslaget kan kaste.
+  — routing bruker nå den ikke-kastende bool-metoden i stedet for det gamle
+  saksnummer-oppslaget.
 - `saksflyt-api/src/main/java/no/nav/melosys/saksflytapi/domain/ProsessDataKey.java`
-  — ny konstant `RELATERTE_SKJEMA_IDER`.
+  — ny konstant `DIGITAL_SØKNAD_RELATERTE_SKJEMA_IDER`.
 - `saksflyt-api/src/main/java/no/nav/melosys/saksflytapi/ProsessinstansService.java`
-  — `opprettSøknadProsessinstans` setter `RELATERTE_SKJEMA_IDER`.
+  — `opprettSøknadProsessinstans` setter `DIGITAL_SØKNAD_RELATERTE_SKJEMA_IDER`
+  i stedet for `SAKSNUMMER`.
 - `saksflyt/src/main/kotlin/no/nav/melosys/saksflyt/steg/soknad/HåndterEksisterendeSakDigitalSøknad.kt`
-  — leser `RELATERTE_SKJEMA_IDER`, gjør ambiguitets-sjekken, kaster ved flere
+  — leser `DIGITAL_SØKNAD_RELATERTE_SKJEMA_IDER`, kaller
+  `finnMappetSaksnummerForSkjemaIder` for å utlede saksnummer, kaster ved flere
   gyldige åpne saker.
 - Berørte tester: `SkjemaSakMappingServiceTest.kt`,
-  `HåndterEksisterendeSakDigitalSøknadTest.kt`, ev.
+  `DigitalSøknadMottattConsumerTest.kt`, `HåndterEksisterendeSakDigitalSøknadTest.kt`,
   `ProsessinstansServiceTest.kt`.
