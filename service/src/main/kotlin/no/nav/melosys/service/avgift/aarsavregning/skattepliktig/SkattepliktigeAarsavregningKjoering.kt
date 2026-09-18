@@ -544,7 +544,7 @@ class SkattepliktigeAarsavregningKjoering(
     data class SakResultat(
         val saksnummer: String,
         val gjelderAr: Int,
-        /** Personens id i melosys-skattehendelser. Null når kjøringen fikk en liste uten id. */
+        /** Personens id i melosys-skattehendelser. Null ved kjøring med manuell liste. */
         val personId: Long?,
         val harAktivAarsavregning: Boolean?,
         /** Status slik den ble observert før en eventuell skarp statusoppdatering; se [statusOppdatert]. */
