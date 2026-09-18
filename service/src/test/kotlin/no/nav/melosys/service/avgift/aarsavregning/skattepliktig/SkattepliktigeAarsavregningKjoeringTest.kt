@@ -371,7 +371,6 @@ class SkattepliktigeAarsavregningKjoeringTest {
         }
     }
 
-    /** Uten lista ville en ekte kjøring også tatt personer publisert etter simuleringen, som ingen har gått gjennom. */
     @Test
     fun `ekte kjøring med gjelderAar krever personIder, og personIder krever gjelderAar og minst én id`() {
         val kjoering = mockk<SkattepliktigeAarsavregningKjoering>(relaxed = true)
@@ -942,7 +941,6 @@ class SkattepliktigeAarsavregningKjoeringTest {
         }
     }
 
-    /** Den ekte kjøringen skal bare ta personene fra simuleringen, ikke personer publisert etterpå. */
     @Test
     fun `år-modus med personIder kjører bare de personene, og viser id-er som ikke ble hentet`() {
         every { skattehendelserClient.hentSkattepliktige(GJELDER_ÅR, ÅrFilter.FOM_AAR, null) } returns
@@ -979,7 +977,7 @@ class SkattepliktigeAarsavregningKjoeringTest {
                 )
 
                 val meldinger = appender.list.map { it.formattedMessage }
-                // Vakt mot en tom test: alle tre linjene som hadde identifikator, må være skrevet.
+                // Alle tre logglinjene må være skrevet, ellers sjekker testen ingenting.
                 listOf("Ugyldig gjelderPeriode", "Feil ved prosessering av hendelse", "Fant ingen sak med trygdeavgift")
                     .forEach { start -> meldinger.count { it.startsWith(start) } shouldBe 1 }
                 meldinger.filter { Regex("\\d{11}") in it } shouldBe emptyList()

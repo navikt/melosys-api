@@ -67,9 +67,6 @@ class SkattepliktigeAarsavregningKjoering(
      * Som [prosesserSkattehendelserAsynkront], men henter hendelsene fra melosys-skattehendelser.
      * Hentingen skjer inne i jobben: /status viser at kjøringen pågår mens den hentes, og feiler
      * hentingen, står feilen i feilVedHenting og rapporten er tom.
-     *
-     * Med [personIder] kjøres bare de personene. Id-er som ikke kom med i hentingen, står i
-     * personIderIkkeFunnet.
      */
     @Async("taskExecutor")
     @Transactional(readOnly = true)
