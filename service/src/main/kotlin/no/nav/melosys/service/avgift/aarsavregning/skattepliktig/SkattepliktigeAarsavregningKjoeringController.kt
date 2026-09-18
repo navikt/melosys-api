@@ -33,7 +33,7 @@ class SkattepliktigeAarsavregningKjoeringController(
             "opprettes årsavregninger, og åpne årsavregninger settes til VURDER_DOKUMENT.\n\n" +
             "Følg kjøringen i `/status`, og se resultatet per sak i `/rapport`. `avbruttAarsak` er satt hvis " +
             "kjøringen stoppet før den var ferdig.\n\n" +
-            "**Felter**\n" +
+            "### Felter\n" +
             "- `skattehendelser` eller `gjelderAar`: send én av dem. Med `gjelderAar` hentes hendelsene fra " +
             "melosys-skattehendelser. Hendelser for samme person og år slås sammen.\n" +
             "- `aarFilter` og `publisertEtter`: avgrenser hentingen, og brukes bare sammen med `gjelderAar`. " +
@@ -44,7 +44,7 @@ class SkattepliktigeAarsavregningKjoeringController(
             "ikke av taket.\n" +
             "- `hoppOverSakerMedAarsavregning`: hopper over saker som har en årsavregning for året, uansett " +
             "status. Standard er `true`, og det kan ikke slås av ved `skarp=true` med `gjelderAar`.\n\n" +
-            "**Før du kjører**\n" +
+            "### Før du kjører\n" +
             "- Send `/run` én gang. Kjøringen kan ligge i kø bak annet arbeid, og da er `isRunning` false. Et " +
             "nytt kall i den tiden kjører alt to ganger og sender brevene på nytt. Sjekk `/rapport` for å se " +
             "om kjøringen har startet.\n" +
