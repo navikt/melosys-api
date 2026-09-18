@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avgift.aarsavregning.skattepliktig
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import mu.KotlinLogging
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.integrasjon.skattehendelser.SkattehendelserClient
@@ -568,5 +569,7 @@ private data class NormalisertHendelse(val identifikator: String, val år: Int, 
 data class SkattehendelseItem(
     val gjelderPeriode: String,
     val identifikator: String,
+    /** Settes bare fra hentingen i melosys-skattehendelser, så /run tar ikke imot den. */
+    @field:JsonIgnore @get:JsonIgnore
     val personId: Long? = null,
 )

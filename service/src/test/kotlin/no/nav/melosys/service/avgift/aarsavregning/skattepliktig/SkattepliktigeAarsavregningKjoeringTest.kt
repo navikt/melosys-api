@@ -352,7 +352,13 @@ class SkattepliktigeAarsavregningKjoeringTest {
         val controller = SkattepliktigeAarsavregningKjoeringController(kjoering)
 
         controller.run(
-            SkattehendelseRunRequest(gjelderAar = 2025, skarp = true, maksAntall = 10, hoppOverSakerMedAarsavregning = false)
+            SkattehendelseRunRequest(
+                gjelderAar = 2025,
+                skarp = true,
+                maksAntall = 10,
+                hoppOverSakerMedAarsavregning = false,
+                personIder = listOf(7),
+            )
         ).statusCode shouldBe HttpStatus.BAD_REQUEST
         controller.run(
             SkattehendelseRunRequest(
@@ -361,6 +367,7 @@ class SkattepliktigeAarsavregningKjoeringTest {
                 skarp = true,
                 maksAntall = 10,
                 hoppOverSakerMedAarsavregning = false,
+                personIder = listOf(7),
             )
         ).statusCode shouldBe HttpStatus.BAD_REQUEST
         controller.run(SkattehendelseRunRequest(gjelderAar = 2025, hoppOverSakerMedAarsavregning = false))
@@ -369,6 +376,17 @@ class SkattepliktigeAarsavregningKjoeringTest {
         verify(exactly = 1) {
             kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(2025, ÅrFilter.FOM_AAR, null, false, null, false)
         }
+    }
+
+    /** personId i rapporten skal komme fra melosys-skattehendelser, ikke fra en håndskrevet liste. */
+    @Test
+    fun `manuell liste på run tar ikke imot personId`() {
+        val request = jacksonObjectMapper().readValue(
+            """{"skattehendelser": [{"gjelderPeriode": "2025", "identifikator": "$AKTØR_ID", "personId": 5}]}""",
+            SkattehendelseRunRequest::class.java,
+        )
+
+        request.skattehendelser.single().personId shouldBe null
     }
 
     @Test
@@ -415,7 +433,7 @@ class SkattepliktigeAarsavregningKjoeringTest {
         stubTrygdeavgift(behandlingsresultat)
 
         service.prosesserSkattehendelser(
-            listOf(SkattehendelseItem(gjelderPeriode = GJELDER_ÅR.toString(), identifikator = AKTØR_ID)),
+            listOf(SkattehendelseItem(gjelderPeriode = GJELDER_ÅR.toString(), identifikator = AKTØR_ID, personId = 7)),
             skarp = true,
             maksAntall = 5,
             hoppOverSakerMedAarsavregning = true,
@@ -429,6 +447,7 @@ class SkattepliktigeAarsavregningKjoeringTest {
             summerSakstellere() shouldBe this["antallSakerFunnet"]
         }
         service.resultater.single().hoppetOverAarsak shouldBe "har årsavregning for $GJELDER_ÅR"
+        service.resultater.single().personId shouldBe 7
     }
 
     /** Talte hoppede saker mot taket, ville en ny kjøring brukt det opp på saker forrige kjøring alt tok. */
@@ -680,7 +699,7 @@ class SkattepliktigeAarsavregningKjoeringTest {
             RuntimeException("oppslag feilet for MEL-2")
 
         service.prosesserSkattehendelser(
-            listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
+            listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID, personId = 7)),
             skarp = true,
             maksAntall = 5,
         )
@@ -690,6 +709,7 @@ class SkattepliktigeAarsavregningKjoeringTest {
             this["antallSakerFeilet"] shouldBe 1
             this["antallSakerIkkeVurdert"] shouldBe 1
         }
+        service.resultater.map { it.saksnummer to it.personId } shouldBe listOf("MEL-1" to 7L, "MEL-2" to 7L)
     }
 
     /**
@@ -706,7 +726,7 @@ class SkattepliktigeAarsavregningKjoeringTest {
         every { utfoerer.opprettProsessinstans(any(), any()) } returns UUID.randomUUID()
 
         service.prosesserSkattehendelser(
-            listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID)),
+            listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID, personId = 7)),
             skarp = true,
             maksAntall = 1,
         )
@@ -721,7 +741,7 @@ class SkattepliktigeAarsavregningKjoeringTest {
             this["avbruttAarsak"] shouldBe null
         }
         // Saken som ble kappet må være synlig, ellers vet ikke den som kjører at den finnes.
-        service.resultater.map { it.saksnummer } shouldBe listOf("MEL-1", "MEL-2")
+        service.resultater.map { it.saksnummer to it.personId } shouldBe listOf("MEL-1" to 7L, "MEL-2" to 7L)
     }
 
     /**
@@ -948,14 +968,18 @@ class SkattepliktigeAarsavregningKjoeringTest {
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(lagFagsak("MEL-1"))
         stubTrygdeavgift(Behandlingsresultat.forTest { })
 
-        service.prosesserSkattepliktigeFraSkattehendelserAsynkront(GJELDER_ÅR, ÅrFilter.FOM_AAR, null, personIder = setOf(1L, 99L))
+        service.prosesserSkattepliktigeFraSkattehendelserAsynkront(GJELDER_ÅR, ÅrFilter.FOM_AAR, null, personIder = setOf(99L, 1L, 98L))
 
         verify(exactly = 0) { fagsakService.hentFagsakerMedAktør(any(), "annen-person") }
         with(service.status()) {
             this["antallInputHendelser"] shouldBe 1
-            this["personIderIkkeFunnet"] shouldBe listOf(99L)
+            this["personIderIkkeFunnet"] shouldBe listOf(98L, 99L)
+            (this["result"] as Map<*, *>)["personIderIkkeFunnet"] shouldBe listOf(98L, 99L)
         }
         service.resultater.single().personId shouldBe 1L
+
+        service.prosesserSkattepliktigeFraSkattehendelserAsynkront(GJELDER_ÅR, ÅrFilter.FOM_AAR, null)
+        service.status()["personIderIkkeFunnet"] shouldBe emptyList<Long>()
     }
 
     @Test
