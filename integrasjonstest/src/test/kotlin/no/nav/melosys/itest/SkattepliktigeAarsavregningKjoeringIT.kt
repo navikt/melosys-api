@@ -16,6 +16,7 @@ import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.SkattepliktigeA
 import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.SkattepliktigeAarsavregningUtfoerer
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -29,6 +30,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate
+import java.time.Duration
 import java.time.LocalDateTime
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -154,14 +156,8 @@ class SkattepliktigeAarsavregningKjoeringIT(
         transaksjonstilstandLest.await(10, TimeUnit.SECONDS) shouldBe true
         aktivTransaksjon shouldBe true
         readOnly shouldBe true
-        // Jobben avviser en ny kjøring mens den forrige pågår; neste parameter må vente til den er ferdig.
-        venterTilJobbenErFerdig()
-    }
-
-    private fun venterTilJobbenErFerdig() {
-        val frist = System.currentTimeMillis() + 10_000
-        while (kjoering.status()["isRunning"] == true && System.currentTimeMillis() < frist) Thread.sleep(20)
-        kjoering.status()["isRunning"] shouldBe false
+        // Neste parameter stubber fagsakService på nytt; kjører denne jobben fortsatt, kan den lese den nye stubben.
+        await.atMost(Duration.ofSeconds(10)).until { kjoering.status()["isRunning"] == false }
     }
 
     companion object {

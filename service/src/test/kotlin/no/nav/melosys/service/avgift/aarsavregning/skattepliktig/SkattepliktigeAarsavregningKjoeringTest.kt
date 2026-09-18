@@ -21,7 +21,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.årsavregning
-import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.skattehendelser.SkattehendelserClient
 import no.nav.melosys.integrasjon.skattehendelser.Skattepliktig
 import no.nav.melosys.integrasjon.skattehendelser.SkattepliktigeRespons
@@ -394,7 +393,6 @@ class SkattepliktigeAarsavregningKjoeringTest {
         val behandlingsresultat = Behandlingsresultat.forTest { årsavregning { aar = GJELDER_ÅR } }
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
-        every { behandlingsresultatService.finnÅrsavregningAar(BEHANDLING_ID) } returns GJELDER_ÅR
         stubTrygdeavgift(behandlingsresultat)
 
         service.prosesserSkattehendelser(
@@ -420,7 +418,8 @@ class SkattepliktigeAarsavregningKjoeringTest {
         val sakMedÅrsavregning = lagFagsakMedÅrsavregning(Behandlingsstatus.AVSLUTTET, BEHANDLING_ID)
         val nySak = lagFagsak("MEL-2")
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(sakMedÅrsavregning, nySak)
-        every { behandlingsresultatService.finnÅrsavregningAar(BEHANDLING_ID) } returns GJELDER_ÅR
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns
+            Behandlingsresultat.forTest { årsavregning { aar = GJELDER_ÅR } }
         stubTrygdeavgift(Behandlingsresultat.forTest { })
         every { utfoerer.opprettProsessinstans("MEL-2", GJELDER_ÅR.toString()) } returns UUID.randomUUID()
 
@@ -448,7 +447,6 @@ class SkattepliktigeAarsavregningKjoeringTest {
         val behandlingsresultat = Behandlingsresultat.forTest { årsavregning { aar = årsavregningsår } }
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
-        every { behandlingsresultatService.finnÅrsavregningAar(BEHANDLING_ID) } returns årsavregningsår
         stubTrygdeavgift(behandlingsresultat)
         every { utfoerer.opprettProsessinstans("MEL-1", GJELDER_ÅR.toString()) } returns UUID.randomUUID()
 
@@ -478,7 +476,6 @@ class SkattepliktigeAarsavregningKjoeringTest {
         val behandlingsresultat = Behandlingsresultat.forTest { årsavregning { aar = GJELDER_ÅR } }
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
-        every { behandlingsresultatService.finnÅrsavregningAar(BEHANDLING_ID) } returns GJELDER_ÅR
         stubTrygdeavgift(behandlingsresultat)
 
         // Uten kontekst svarer shouldUseSystemToken true uansett; en vanlig web-kontekst gir false.
@@ -527,28 +524,6 @@ class SkattepliktigeAarsavregningKjoeringTest {
         service.status()["antallInputHendelser"] shouldBe 1
     }
 
-    /** Gamle avsluttede årsavregninger kan mangle behandlingsresultat. Sjekken skal da gi «ikke for året», ikke kaste. */
-    @Test
-    fun `hoppOverSakerMedAarsavregning tåler avsluttet årsavregning uten behandlingsresultat`() {
-        val fagsak = lagFagsakMedÅrsavregning(Behandlingsstatus.AVSLUTTET, BEHANDLING_ID)
-        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
-        stubTrygdeavgift(Behandlingsresultat.forTest { })
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } throws
-            IkkeFunnetException("Kan ikke finne behandlingsresultat for behandling: $BEHANDLING_ID")
-        every { behandlingsresultatService.finnÅrsavregningAar(BEHANDLING_ID) } returns null
-        every { utfoerer.opprettProsessinstans("MEL-1", GJELDER_ÅR.toString()) } returns UUID.randomUUID()
-
-        service.prosesserSkattehendelser(
-            listOf(SkattehendelseItem(GJELDER_ÅR.toString(), AKTØR_ID)),
-            skarp = true,
-            maksAntall = 5,
-            hoppOverSakerMedAarsavregning = true,
-        )
-
-        service.status()["antallSakerFeilet"] shouldBe 0
-        verify(exactly = 1) { utfoerer.opprettProsessinstans("MEL-1", GJELDER_ÅR.toString()) }
-    }
-
     @Test
     fun `hoppOverSakerMedAarsavregning hopper ikke over sak der årsavregningen mangler år`() {
         val fagsak = lagFagsakMedÅrsavregning(Behandlingsstatus.VURDER_DOKUMENT, BEHANDLING_ID)
@@ -556,7 +531,6 @@ class SkattepliktigeAarsavregningKjoeringTest {
         val behandlingsresultat = Behandlingsresultat.forTest { }
         stubTrygdeavgift(behandlingsresultat)
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
-        every { behandlingsresultatService.finnÅrsavregningAar(BEHANDLING_ID) } returns null
         every { utfoerer.opprettProsessinstans("MEL-1", GJELDER_ÅR.toString()) } returns UUID.randomUUID()
 
         service.prosesserSkattehendelser(
