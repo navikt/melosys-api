@@ -1,4 +1,5 @@
 MELOSYS_SKJEMA_API_URL: http://localhost:${mockserver.port}
+MELOSYS_SKATTEHENDELSER_URL: http://localhost:${mockserver.port}
 DistribuerJournalpost_v1:
   url: http://localhost:${mockserver.port}/rest/v1/distribuerjournalpost
 KodeverkAPI_v1:
@@ -154,6 +155,14 @@ mockserver:
               scope: api://dummy
               token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
             melosys-skjema:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://dummy
+              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
+            melosys-skattehendelser:
               authentication:
                 client-auth-method: client_secret_basic
                 client-id: dummy_client-id

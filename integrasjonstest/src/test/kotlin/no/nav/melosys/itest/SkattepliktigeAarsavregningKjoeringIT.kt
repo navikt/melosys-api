@@ -6,13 +6,20 @@ import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.Application
 import io.mockk.every
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.integrasjon.skattehendelser.SkattehendelserClient
+import no.nav.melosys.integrasjon.skattehendelser.Skattepliktig
+import no.nav.melosys.integrasjon.skattehendelser.SkattepliktigeRespons
+import no.nav.melosys.integrasjon.skattehendelser.ÅrFilter
 import no.nav.melosys.saksflyt.ProsessinstansDispatcher
 import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.SkattehendelseItem
 import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.SkattepliktigeAarsavregningKjoering
 import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.SkattepliktigeAarsavregningUtfoerer
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
@@ -23,6 +30,8 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate
+import java.time.Duration
+import java.time.LocalDateTime
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -58,6 +67,9 @@ class SkattepliktigeAarsavregningKjoeringIT(
     /** Sonde: første oppslag i løkka, brukt til å lese av transaksjonstilstanden inne i kjøringen. */
     @MockkBean(relaxed = true)
     private lateinit var fagsakService: FagsakService
+
+    @MockkBean
+    private lateinit var skattehendelserClient: SkattehendelserClient
 
     private val ytreLesetransaksjon: TransactionTemplate
         get() = TransactionTemplate(transactionManager).apply { isReadOnly = true }
@@ -106,14 +118,15 @@ class SkattepliktigeAarsavregningKjoeringIT(
     }
 
     /**
-     * Read-only-garantien på stien controlleren bruker. Selvkallet gjør annotasjonen på den indre
-     * metoden til død config, så hele garantien hviler på den ytre. @Async- og
+     * Read-only-garantien på stiene controlleren bruker, liste og år. Selvkallet gjør annotasjonen på
+     * den indre metoden til død config, så hele garantien hviler på de ytre. @Async- og
      * @Transactional-advisorene har begge LOWEST_PRECEDENCE; at async havner ytterst skyldes at
      * AsyncAnnotationBeanPostProcessor setter beforeExistingAdvisors=true. Resolves den motsatt
      * vei, kjører batchen helt uten transaksjon — og da feiler denne testen, ikke prod.
      */
-    @Test
-    fun `batchen kjører i en aktiv read-only-transaksjon også gjennom Async-proxyen`() {
+    @ParameterizedTest(name = "årModus={0}")
+    @ValueSource(booleans = [false, true])
+    fun `batchen kjører i en aktiv read-only-transaksjon også gjennom Async-proxyen`(årModus: Boolean) {
         val transaksjonstilstandLest = CountDownLatch(1)
         var readOnly: Boolean? = null
         var aktivTransaksjon: Boolean? = null
@@ -125,15 +138,26 @@ class SkattepliktigeAarsavregningKjoeringIT(
             emptyList()
         }
 
-        kjoering.prosesserSkattehendelserAsynkront(
-            listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = "12345678901")),
-            false,
-            null,
-        )
+        if (årModus) {
+            every { skattehendelserClient.hentSkattepliktige(2023, ÅrFilter.FOM_AAR, null) } returns SkattepliktigeRespons(
+                gjelderAar = 2023,
+                antall = 1,
+                skattepliktige = listOf(Skattepliktig("2023", "12345678901", LocalDateTime.of(2026, 9, 10, 2, 0), listOf("2023"), 1)),
+            )
+            kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(2023, ÅrFilter.FOM_AAR, null)
+        } else {
+            kjoering.prosesserSkattehendelserAsynkront(
+                listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = "12345678901")),
+                false,
+                null,
+            )
+        }
 
         transaksjonstilstandLest.await(10, TimeUnit.SECONDS) shouldBe true
         aktivTransaksjon shouldBe true
         readOnly shouldBe true
+        // Neste parameter stubber fagsakService på nytt; kjører denne jobben fortsatt, kan den lese den nye stubben.
+        await.atMost(Duration.ofSeconds(10)).until { kjoering.status()["isRunning"] == false }
     }
 
     companion object {
