@@ -2,6 +2,7 @@ package no.nav.melosys.service.avgift.aarsavregning.skattepliktig
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.Schema
 import mu.KotlinLogging
 import no.nav.melosys.integrasjon.skattehendelser.ÅrFilter
 import no.nav.security.token.support.core.api.Protected
@@ -39,10 +40,10 @@ class SkattepliktigeAarsavregningKjoeringController(
                 mapOf("feil" to "Send enten skattehendelser eller gjelderAar, ikke begge og ikke ingen av dem")
             )
         }
-        // Sammen med en liste ville filtrene blitt ignorert, mens svaret bekreftet dem.
-        if (request.gjelderAar == null && (request.aarFilter != null || request.publisertEtter != null)) {
+        // Sammen med en liste ville publisertEtter blitt ignorert, mens svaret bekreftet den.
+        if (request.gjelderAar == null && request.publisertEtter != null) {
             return ResponseEntity.badRequest().body(
-                mapOf("feil" to "aarFilter og publisertEtter gjelder bare sammen med gjelderAar")
+                mapOf("feil" to "publisertEtter gjelder bare sammen med gjelderAar")
             )
         }
         if (request.skarp && request.gjelderAar != null && !request.hoppOverSakerMedAarsavregning) {
@@ -71,16 +72,15 @@ class SkattepliktigeAarsavregningKjoeringController(
 
         val modus = if (request.skarp) "SKARP" else "DRYRUN"
         val gjelderÅr = request.gjelderAar
-        val årFilter = request.aarFilter ?: ÅrFilter.FOM_AAR
         if (gjelderÅr != null) {
             log.info {
                 "Starter $modus for skattehendelser fra melosys-skattehendelser: gjelderÅr=$gjelderÅr, " +
-                    "årFilter=$årFilter, publisertEtter=${request.publisertEtter}, maksAntall=${request.maksAntall}, " +
+                    "årFilter=${request.aarFilter}, publisertEtter=${request.publisertEtter}, maksAntall=${request.maksAntall}, " +
                     "hoppOverSakerMedAarsavregning=${request.hoppOverSakerMedAarsavregning}"
             }
             kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(
                 gjelderÅr,
-                årFilter,
+                request.aarFilter,
                 request.publisertEtter,
                 request.skarp,
                 request.maksAntall,
@@ -107,7 +107,7 @@ class SkattepliktigeAarsavregningKjoeringController(
                 "hoppOverSakerMedAarsavregning" to request.hoppOverSakerMedAarsavregning,
                 "antallHendelser" to if (gjelderÅr != null) null else request.skattehendelser.size,
                 "gjelderAar" to gjelderÅr,
-                "aarFilter" to if (gjelderÅr != null) årFilter else null,
+                "aarFilter" to if (gjelderÅr != null) request.aarFilter else null,
                 "publisertEtter" to request.publisertEtter,
                 "statusEndpoint" to "/admin/aarsavregninger/saker/skattepliktige/status",
                 "rapportEndpoint" to "/admin/aarsavregninger/saker/skattepliktige/rapport"
@@ -129,11 +129,14 @@ class SkattepliktigeAarsavregningKjoeringController(
 data class SkattehendelseRunRequest(
     val skattehendelser: List<SkattehendelseItem> = emptyList(),
     val gjelderAar: Int? = null,
-    val aarFilter: ÅrFilter? = null,
+    @field:Schema(defaultValue = "FOM_AAR")
+    val aarFilter: ÅrFilter = ÅrFilter.FOM_AAR,
     val publisertEtter: LocalDateTime? = null,
+    @field:Schema(defaultValue = "false")
     val skarp: Boolean = false,
     val maksAntall: Int? = null,
-    val hoppOverSakerMedAarsavregning: Boolean = false,
+    @field:Schema(defaultValue = "true")
+    val hoppOverSakerMedAarsavregning: Boolean = true,
 )
 
 private const val RUN_BESKRIVELSE = """
@@ -147,14 +150,14 @@ kjøringen stoppet før den var ferdig.
 **Felter**
 - `skattehendelser` eller `gjelderAar`: send én av dem. Med `gjelderAar` hentes hendelsene fra
   melosys-skattehendelser. Hendelser for samme person og år slås sammen.
-- `aarFilter` og `publisertEtter`: avgrenser hentingen, og gjelder bare sammen med `gjelderAar`.
+- `aarFilter` og `publisertEtter`: avgrenser hentingen, og brukes bare sammen med `gjelderAar`.
   `aarFilter` er `FOM_AAR` (året perioden starter i, standard) eller `INNTEKTSAAR`.
-  `publisertEtter` er norsk tid.
+  `publisertEtter` er norsk tid, og avvises sammen med en liste.
 - `maksAntall`: påkrevd med `skarp=true`. Taket på hvor mange saker som kan endres. Saker som
   feiler før de er vurdert, og saker som hoppes over med `hoppOverSakerMedAarsavregning`,
   bruker ikke av taket.
 - `hoppOverSakerMedAarsavregning`: hopper over saker som har en årsavregning for året, uansett
-  status. Påkrevd med `skarp=true` og `gjelderAar`.
+  status. Standard er `true`, og det kan ikke slås av ved `skarp=true` med `gjelderAar`.
 
 **Før du kjører**
 - Send `/run` én gang. Kjøringen kan ligge i kø bak annet arbeid, og da er `isRunning` false.

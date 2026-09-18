@@ -275,8 +275,8 @@ class SkattepliktigeAarsavregningKjoeringTest {
         controller.run(SkattehendelseRunRequest(hendelser, skarp = false)).statusCode shouldBe HttpStatus.OK
         controller.run(SkattehendelseRunRequest(hendelser, skarp = true, maksAntall = 1)).statusCode shouldBe HttpStatus.OK
 
-        verify(exactly = 1) { kjoering.prosesserSkattehendelserAsynkront(hendelser, false, null, false) }
-        verify(exactly = 1) { kjoering.prosesserSkattehendelserAsynkront(hendelser, true, 1, false) }
+        verify(exactly = 1) { kjoering.prosesserSkattehendelserAsynkront(hendelser, false, null, true) }
+        verify(exactly = 1) { kjoering.prosesserSkattehendelserAsynkront(hendelser, true, 1, true) }
     }
 
     @Test
@@ -308,27 +308,20 @@ class SkattepliktigeAarsavregningKjoeringTest {
         }
     }
 
-    /**
-     * Ignorerte filtre er verre enn avviste: svaret ville bekreftet et filter som ikke ble brukt, og
-     * den som kjører ville trodd lista var avgrenset.
-     */
+    /** Svaret skal ikke bekrefte et filter som ikke ble brukt: da ville den som kjører trodd lista var avgrenset. */
     @Test
-    fun `liste med aarFilter eller publisertEtter avvises`() {
+    fun `liste med publisertEtter avvises, og svaret viser ikke aarFilter for en liste`() {
         val kjoering = mockk<SkattepliktigeAarsavregningKjoering>(relaxed = true)
         val controller = SkattepliktigeAarsavregningKjoeringController(kjoering)
         val hendelser = listOf(SkattehendelseItem("2025", AKTØR_ID))
 
         controller.run(
-            SkattehendelseRunRequest(skattehendelser = hendelser, aarFilter = ÅrFilter.INNTEKTSAAR)
-        ).statusCode shouldBe HttpStatus.BAD_REQUEST
-        controller.run(
             SkattehendelseRunRequest(skattehendelser = hendelser, publisertEtter = LocalDateTime.of(2026, 9, 8, 0, 0))
         ).statusCode shouldBe HttpStatus.BAD_REQUEST
-        val svar = controller.run(SkattehendelseRunRequest(skattehendelser = hendelser))
+        val svar = controller.run(SkattehendelseRunRequest(skattehendelser = hendelser, aarFilter = ÅrFilter.INNTEKTSAAR))
 
         svar.statusCode shouldBe HttpStatus.OK
-        verify(exactly = 1) { kjoering.prosesserSkattehendelserAsynkront(hendelser, false, null, false) }
-        // Listemodus har ingen henting å avgrense, så svaret skal ikke vise noe filter.
+        verify(exactly = 1) { kjoering.prosesserSkattehendelserAsynkront(hendelser, false, null, true) }
         svar.body!!["aarFilter"] shouldBe null
         svar.body!!["publisertEtter"] shouldBe null
     }
@@ -348,21 +341,24 @@ class SkattepliktigeAarsavregningKjoeringTest {
     }
 
     @Test
-    fun `ekte kjøring med gjelderAar uten hoppOverSakerMedAarsavregning avvises også med publisertEtter, simulering slipper gjennom`() {
+    fun `ekte kjøring med gjelderAar avvises når hoppOverSakerMedAarsavregning er slått av, simulering slipper gjennom`() {
         val kjoering = mockk<SkattepliktigeAarsavregningKjoering>(relaxed = true)
         val controller = SkattepliktigeAarsavregningKjoeringController(kjoering)
 
-        controller.run(SkattehendelseRunRequest(gjelderAar = 2025, skarp = true, maksAntall = 10))
-            .statusCode shouldBe HttpStatus.BAD_REQUEST
+        controller.run(
+            SkattehendelseRunRequest(gjelderAar = 2025, skarp = true, maksAntall = 10, hoppOverSakerMedAarsavregning = false)
+        ).statusCode shouldBe HttpStatus.BAD_REQUEST
         controller.run(
             SkattehendelseRunRequest(
                 gjelderAar = 2025,
                 publisertEtter = LocalDateTime.of(2026, 9, 8, 0, 0),
                 skarp = true,
                 maksAntall = 10,
+                hoppOverSakerMedAarsavregning = false,
             )
         ).statusCode shouldBe HttpStatus.BAD_REQUEST
-        controller.run(SkattehendelseRunRequest(gjelderAar = 2025)).statusCode shouldBe HttpStatus.OK
+        controller.run(SkattehendelseRunRequest(gjelderAar = 2025, hoppOverSakerMedAarsavregning = false))
+            .statusCode shouldBe HttpStatus.OK
 
         verify(exactly = 1) {
             kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(2025, ÅrFilter.FOM_AAR, null, false, null, false)
@@ -370,19 +366,16 @@ class SkattepliktigeAarsavregningKjoeringTest {
     }
 
     @Test
-    fun `ekte kjøring med gjelderAar og hoppOverSakerMedAarsavregning slipper gjennom uten publisertEtter`() {
+    fun `ekte kjøring med gjelderAar bruker standardverdiene og slipper gjennom uten publisertEtter`() {
         val kjoering = mockk<SkattepliktigeAarsavregningKjoering>(relaxed = true)
         val controller = SkattepliktigeAarsavregningKjoeringController(kjoering)
 
-        val svar = controller.run(
-            SkattehendelseRunRequest(gjelderAar = 2025, skarp = true, maksAntall = 10, hoppOverSakerMedAarsavregning = true)
-        )
+        val svar = controller.run(SkattehendelseRunRequest(gjelderAar = 2025, skarp = true, maksAntall = 10))
 
         svar.statusCode shouldBe HttpStatus.OK
         verify(exactly = 1) {
             kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(2025, ÅrFilter.FOM_AAR, null, true, 10, true)
         }
-        // Svaret må vise filteret kjøringen faktisk fikk, ikke det tomme feltet kallet kom inn med.
         svar.body!!["aarFilter"] shouldBe ÅrFilter.FOM_AAR
     }
 
