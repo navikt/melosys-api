@@ -80,9 +80,7 @@ class SkattepliktigeAarsavregningKjoeringController(
                 mapOf("feil" to "Send enten skattehendelser eller gjelderAar, ikke begge og ikke ingen av dem")
             )
         }
-        // aarFilter og publisertEtter avgrenser hentingen fra melosys-skattehendelser. Sammen med en
-        // liste ville de blitt ignorert mens svaret bekreftet dem, og den som kjører ville trodd at
-        // lista var avgrenset.
+        // Sammen med en liste ville filtrene blitt ignorert, mens svaret bekreftet dem.
         if (request.gjelderAar == null && (request.aarFilter != null || request.publisertEtter != null)) {
             return ResponseEntity.badRequest().body(
                 mapOf("feil" to "aarFilter og publisertEtter gjelder bare sammen med gjelderAar")
@@ -94,9 +92,7 @@ class SkattepliktigeAarsavregningKjoeringController(
             )
         }
 
-        // Uten denne starter {"skarp": true} en kjøring helt uten tak, fordi løkka bare håndhever
-        // taket når verdien ikke er null. En full kjøring sender bare et høyt tall — poenget er at
-        // taket skal være et valg, ikke en default.
+        // Løkka håndhever bare taket når det er satt, så uten denne sjekken kjører {"skarp": true} uten tak.
         if (request.skarp && (request.maksAntall == null || request.maksAntall <= 0)) {
             return ResponseEntity.badRequest().body(
                 mapOf(
@@ -106,15 +102,8 @@ class SkattepliktigeAarsavregningKjoeringController(
             )
         }
 
-        // Stopper det vanlige tilfellet: en kjøring har pågått en stund, og noen sender /run på nytt.
-        // Uten denne submitteres en ny task, og er alle jobbtrådene opptatt, legger den seg i kø og
-        // kjører hele lista skarpt om igjen når den første er ferdig — nye årsavregninger og nye brev
-        // til de samme borgerne, siden dedupliseringen bare virker innenfor én kjøring.
-        //
-        // Den dekker ikke to kall i samme øyeblikk: isRunning blir først true når den asynkrone
-        // tasken har begynt å kjøre. Da avvises den andre stille av compareAndSet inne i jobben, og
-        // svaret her sier «startet» selv om ingenting startet. Vakten i jobben er den harde; denne er
-        // for at den som kjører skal få vite det i det tilfellet som faktisk oppstår.
+        // Fanger bare et nytt kall mens en kjøring pågår. Ligger den første fortsatt i kø, er isRunning
+        // false, og begge kjøres etter hverandre på den ene jobbtråden.
         if (kjoering.status()["isRunning"] == true) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(
                 mapOf("feil" to "En kjøring pågår allerede — se /status, og vent til isRunning er false")
@@ -180,21 +169,10 @@ class SkattepliktigeAarsavregningKjoeringController(
 
 data class SkattehendelseRunRequest(
     val skattehendelser: List<SkattehendelseItem> = emptyList(),
-    /** Hent hendelsene for dette året fra melosys-skattehendelser i stedet for å sende [skattehendelser]. */
     val gjelderAar: Int? = null,
-    /** Avgrenser hentingen; bare sammen med [gjelderAar]. Utelatt betyr FOM_AAR. */
     val aarFilter: ÅrFilter? = null,
-    /** Ta bare med personer med siste publisering etter dette tidspunktet (norsk tid); bare sammen med [gjelderAar]. */
     val publisertEtter: LocalDateTime? = null,
     val skarp: Boolean = false,
-    /**
-     * Tak på antall saker som kan endres. Påkrevd og positiv når [skarp] er true. Taket brukes opp av
-     * saker som er vurdert til å skulle endres, også når selve skrivingen feiler eller hoppes over.
-     * To grupper bruker det ikke: saker som feiler før de er vurdert (antallSakerIkkeVurdert,
-     * antallSakerFeilet), og saker [hoppOverSakerMedAarsavregning] luker bort — ellers ville en ny
-     * kjøring brukt opp taket på saker forrige kjøring alt hadde tatt, uten å komme til de nye.
-     */
     val maksAntall: Int? = null,
-    /** Hopp over saker som har en årsavregning for året, aktiv eller avsluttet. */
     val hoppOverSakerMedAarsavregning: Boolean = false,
 )
