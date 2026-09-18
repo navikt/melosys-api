@@ -76,6 +76,8 @@ data class SkattepliktigeRespons(
 data class Skattepliktig(
     val gjelderPeriode: String,
     val identifikator: String,
+    /** Personens id i melosys-skattehendelser. Slå opp fødselsnummeret med `/admin/person/{id}` der. */
+    val personId: Long,
     val sisteHendelseTid: LocalDateTime,
     val inntektsaar: List<String>,
     val antallPubliseringer: Int,

@@ -89,6 +89,7 @@ class SkattehendelserClientTest(
                                 {
                                   "gjelderPeriode": "2025",
                                   "identifikator": "12345678901",
+                                  "personId": 7,
                                   "sisteHendelseTid": "2026-09-10T02:00:00",
                                   "inntektsaar": ["2024", "2025"],
                                   "antallPubliseringer": 2
@@ -109,6 +110,7 @@ class SkattehendelserClientTest(
                 Skattepliktig(
                     gjelderPeriode = "2025",
                     identifikator = "12345678901",
+                    personId = 7,
                     sisteHendelseTid = LocalDateTime.of(2026, 9, 10, 2, 0),
                     inntektsaar = listOf("2024", "2025"),
                     antallPubliseringer = 2,
