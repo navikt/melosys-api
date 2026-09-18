@@ -179,14 +179,11 @@ internal class DigitalSøknadMapperTest {
         }
 
         @Test
-        fun `erOffentligVirksomhet mappes fra arbeidsgiver-delens virksomhet i Norge`() {
+        fun `erOffentligVirksomhet mappes fra arbeidsgiver-delens registermetadata`() {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
-                data = arbeidsgiverData(
-                    virksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(
-                        erArbeidsgiverenOffentligVirksomhet = true
-                    )
-                )
+                erOffentligArbeidsgiver = true
+                data = arbeidsgiverData()
             }
 
             val søknad = DigitalSøknadMapper.tilSoeknad(dto)
@@ -195,15 +192,16 @@ internal class DigitalSøknadMapperTest {
         }
 
         @Test
-        fun `erOffentligVirksomhet er null når arbeidsgiver-del mangler`() {
+        fun `erOffentligVirksomhet hentes fra arbeidstakers metadata når arbeidsgiver-del mangler`() {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
+                erOffentligArbeidsgiver = true
                 data = arbeidstakerData()
             }
 
             val søknad = DigitalSøknadMapper.tilSoeknad(dto)
 
-            søknad.juridiskArbeidsgiverNorge.erOffentligVirksomhet.shouldBeNull()
+            søknad.juridiskArbeidsgiverNorge.erOffentligVirksomhet shouldBe true
         }
     }
 
@@ -658,12 +656,10 @@ internal class DigitalSøknadMapperTest {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL
                 orgnr = "KOMBI-123"
+                erOffentligArbeidsgiver = false
                 data = kombinertData(
                     utsendingsperiodeOgLand = landOgPeriode(LandKode.DE, fom, tom),
                     arbeidsgiversData = UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto.ArbeidsgiversData(
-                        arbeidsgiverensVirksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(
-                            erArbeidsgiverenOffentligVirksomhet = false
-                        ),
                         arbeidsstedIUtlandet = ArbeidsstedIUtlandetDto(
                             arbeidsstedType = ArbeidsstedType.PA_LAND,
                             paLand = PaLandDto(
