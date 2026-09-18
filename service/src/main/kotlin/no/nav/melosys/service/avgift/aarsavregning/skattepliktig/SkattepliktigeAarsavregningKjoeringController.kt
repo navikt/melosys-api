@@ -25,54 +25,13 @@ class SkattepliktigeAarsavregningKjoeringController(
 ) {
 
     @Operation(
-        summary = "Kjør skattehendelser på nytt (simulering eller ekte kjøring)",
-        description = "Går gjennom skattehendelsene med de samme vurderingene som Kafka-flyten gjør " +
-            "løpende. Med skarp=false (default) endres ingenting — svaret viser hva kjøringen ville " +
-            "gjort. Med skarp=true har den to virkninger: den oppretter årsavregninger, og den setter " +
-            "status til VURDER_DOKUMENT på saker som allerede har en åpen årsavregning. " +
-            "Statusen leses på nytt rett før skriving og settes bare hvis behandlingen fortsatt står " +
-            "der kjøringen så den; har en saksbehandler flyttet den siden, hoppes saken over og " +
-            "telles i antallStatusHoppetOver, med årsak per sak i rapporten. Slike saker må vurderes " +
-            "manuelt — de skal IKKE bare kjøres om igjen, for neste kjøring observerer den nye " +
-            "statusen, og da slår sjekken ikke inn og saken settes tilbake til VURDER_DOKUMENT. " +
-            "Ekte kjøring krever et positivt maksAntall — uten tak avvises kallet. " +
-            "Hendelser med samme identifikator og år slås sammen før kjøring (antallDuplikaterFjernet), " +
-            "fordi to hendelser for samme sak og år ellers gir to årsavregninger og to brev. " +
-            "Overlappende kjøringer har samme svakhet: vent til prosessinstansene fra forrige kjøring " +
-            "er ferdige før du starter en ny. " +
-            "Ble kjøringen avbrutt — av taket eller av for mange feil — sier avbruttAarsak hvorfor, og " +
-            "antallHendelserProsessert mot antallUnikeHendelser viser hvor langt den kom. Merk at " +
-            "antallHendelserProsessert kan være lavere enn antallInputHendelser også i en fullført " +
-            "kjøring, fordi duplikater og ugyldig input er fjernet først. " +
-            "Merk at et tak som kapper saker i den siste hendelsen ikke synes på hendelsestellingen — " +
-            "les antallSakerHoppetOverPgaTak, som er der uansett om kjøringen ble avbrutt eller ikke. " +
-            "VIKTIG om å starte to kjøringer: pågår en kjøring allerede, avvises den nye med 409. Men " +
-            "jobbtråden er delt av ni @Async-metoder og har bare én tråd, så en kjøring kan bli liggende " +
-            "i kø uten å ha startet — også bak vanlig saksbehandling, ikke bare bak andre adminjobber. " +
-            "isRunning er false hele den tiden, og 409-vakten ser derfor ingenting å avvise. Sender du " +
-            "/run på nytt i det vinduet, kjøres hele lista skarpt to ganger, med nye årsavregninger og " +
-            "nye innhentingsbrev til de samme borgerne. Send derfor /run ÉN gang, og bruk /rapport til å " +
-            "se om kjøringen faktisk startet — ikke isRunning. " +
-            "I stedet for en liste kan du sende gjelderAar: da hentes hendelsene fra melosys-skattehendelser " +
-            "inne i jobben: isRunning er true mens det hentes, antallInputHendelser viser hvor mange som ble " +
-            "hentet, og feiler hentingen, står feilen i feilVedHenting. " +
-            "aarFilter velger FOM_AAR (året perioden starter i, standard) eller INNTEKTSAAR. aarFilter og " +
-            "publisertEtter avgrenser bare denne hentingen — sendt sammen med en liste avvises de. Ekte kjøring " +
-            "med gjelderAar krever hoppOverSakerMedAarsavregning, slik at saker fra tidligere kjøringer ikke " +
-            "får ny årsavregning eller ny status. " +
-            "hoppOverSakerMedAarsavregning=true hopper over saker som har en årsavregning for året, aktiv " +
-            "eller avsluttet, og teller dem i antallHoppetOverHarAarsavregning. De endres ikke og teller " +
-            "derfor ikke mot maksAntall — ellers ville en ny kjøring brukt opp taket på saker forrige " +
-            "kjøring alt hadde tatt. " +
-            "Bruk /status for fremdrift og /rapport for resultat per sak. NB: appen kjører to podder, " +
-            "og jobbtilstanden ligger i minnet på den poden som tok imot /run — kjør derfor mot én pod " +
-            "(port-forward), og kryssjekk pod-feltet i /status. Hele kjøringen holder én lesetransaksjon " +
-            "og én persistence-kontekst, så kjør i porsjoner på noen tusen hendelser."
+        summary = "Opprett årsavregninger fra skattehendelser (simulering eller ekte kjøring)",
+        description = RUN_BESKRIVELSE,
     )
     @PostMapping("/run")
     fun run(
         @RequestBody
-        @Parameter(description = "Liste med skattehendelser eller gjelderAar med filtre, skarp-flagg, og valgfritt maksAntall")
+        @Parameter(description = "Enten skattehendelser eller gjelderAar, pluss valgene beskrevet over")
         request: SkattehendelseRunRequest
     ): ResponseEntity<Map<String, Any?>> {
         if (request.skattehendelser.isEmpty() == (request.gjelderAar == null)) {
@@ -176,3 +135,36 @@ data class SkattehendelseRunRequest(
     val maksAntall: Int? = null,
     val hoppOverSakerMedAarsavregning: Boolean = false,
 )
+
+private const val RUN_BESKRIVELSE = """
+Kjører skattehendelser på nytt med de samme vurderingene som Kafka-flyten gjør løpende.
+Uten `skarp` endres ingenting, og rapporten viser hva kjøringen ville gjort. Med `skarp=true`
+opprettes årsavregninger, og åpne årsavregninger settes til VURDER_DOKUMENT.
+
+Følg kjøringen i `/status`, og se resultatet per sak i `/rapport`. `avbruttAarsak` er satt hvis
+kjøringen stoppet før den var ferdig.
+
+**Felter**
+- `skattehendelser` eller `gjelderAar`: send én av dem. Med `gjelderAar` hentes hendelsene fra
+  melosys-skattehendelser. Hendelser for samme person og år slås sammen.
+- `aarFilter` og `publisertEtter`: avgrenser hentingen, og gjelder bare sammen med `gjelderAar`.
+  `aarFilter` er `FOM_AAR` (året perioden starter i, standard) eller `INNTEKTSAAR`.
+  `publisertEtter` er norsk tid.
+- `maksAntall`: påkrevd med `skarp=true`. Taket på hvor mange saker som kan endres. Saker som
+  feiler før de er vurdert, og saker som hoppes over med `hoppOverSakerMedAarsavregning`,
+  bruker ikke av taket.
+- `hoppOverSakerMedAarsavregning`: hopper over saker som har en årsavregning for året, uansett
+  status. Påkrevd med `skarp=true` og `gjelderAar`.
+
+**Før du kjører**
+- Send `/run` én gang. Kjøringen kan ligge i kø bak annet arbeid, og da er `isRunning` false.
+  Et nytt kall i den tiden kjører alt to ganger og sender brevene på nytt. Sjekk `/rapport`
+  for å se om kjøringen har startet.
+- Appen har to podder, og status ligger i minnet på poden som fikk kallet. Kjør mot én pod med
+  port-forward, og sjekk `pod` i `/status`.
+- Vent til prosessinstansene fra forrige kjøring er ferdige før du starter en ny.
+- Saker i `antallStatusHoppetOver` ble flyttet av en saksbehandler under kjøringen. Vurder dem
+  manuelt: en ny kjøring setter dem tilbake til VURDER_DOKUMENT.
+- Hele kjøringen holdes i minnet. Send lister i porsjoner på noen tusen hendelser, og avgrens
+  `gjelderAar` med `publisertEtter`.
+"""

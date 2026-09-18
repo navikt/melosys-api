@@ -418,7 +418,7 @@ class SkattepliktigeAarsavregningKjoering(
      * bare per pod. `pod` er her for at den som kjører skal se hvilken pod svaret kommer fra.
      *
      * `isRunning` er dessuten false så lenge kjøringen ligger i kø. `taskExecutor` har én tråd delt
-     * av ni @Async-metoder, to av dem drevet av løpende saksbehandling, så det vinduet kan være
+     * med andre @Async-metoder, også noen som drives av løpende saksbehandling, så det vinduet kan være
      * langt — og 409-vakten i controlleren ser ingenting å avvise i det. Å reservere plassen
      * synkront ville lukket det, men gjør en feilet transaksjonsstart til en lås som bare en
      * pod-omstart løser; prosedyren er derfor å sende /run én gang og lese /rapport.
