@@ -180,6 +180,30 @@ internal open class OppgaveGosysMapping {
             TableRow(
                 Sakstyper.EU_EOS,
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
+                setOf(Behandlingstyper.ÅRSAVREGNING),
+                setOf(Behandlingstema.PENSJONIST),
+                Oppgave(
+                    OppgaveBehandlingstema.EU_EOS_PENSJONIST_ELLER_UFORETRYGDET,
+                    Tema.TRY,
+                    Oppgavetyper.BEH_ARSAVREG,
+                    Beskrivelsefelt.GJELDER_ÅR
+                )
+            ),
+            TableRow(
+                Sakstyper.EU_EOS,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                setOf(Behandlingstyper.ÅRSAVREGNING),
+                setOf(Behandlingstema.IKKE_YRKESAKTIV),
+                Oppgave(
+                    OppgaveBehandlingstema.EU_EOS_IKKE_YRKESAKTIV,
+                    Tema.TRY,
+                    Oppgavetyper.BEH_ARSAVREG,
+                    Beskrivelsefelt.GJELDER_ÅR
+                )
+            ),
+            TableRow(
+                Sakstyper.EU_EOS,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
                 setOf(
                     Behandlingstyper.FØRSTEGANG,
                     Behandlingstyper.NY_VURDERING,
@@ -334,6 +358,30 @@ internal open class OppgaveGosysMapping {
                     Tema.MED,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
+                )
+            ),
+            TableRow(
+                Sakstyper.TRYGDEAVTALE,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                setOf(Behandlingstyper.ÅRSAVREGNING),
+                setOf(Behandlingstema.IKKE_YRKESAKTIV),
+                Oppgave(
+                    OppgaveBehandlingstema.AVTALAND_IKKE_YRKESAKTIV,
+                    Tema.TRY,
+                    Oppgavetyper.BEH_ARSAVREG,
+                    Beskrivelsefelt.GJELDER_ÅR
+                )
+            ),
+            TableRow(
+                Sakstyper.TRYGDEAVTALE,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                setOf(Behandlingstyper.ÅRSAVREGNING),
+                setOf(Behandlingstema.PENSJONIST),
+                Oppgave(
+                    OppgaveBehandlingstema.AVTALAND_PENSJONIST_ELLER_UFORETRYGDET,
+                    Tema.TRY,
+                    Oppgavetyper.BEH_ARSAVREG,
+                    Beskrivelsefelt.GJELDER_ÅR
                 )
             ),
             TableRow(

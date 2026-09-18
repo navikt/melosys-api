@@ -156,7 +156,7 @@ class OppgaveGosysMappingTest {
     fun `alle rader med behandlingstype ÅRSAVREGNING skal ha beskrivelsefelt GJELDER_ÅR`() {
         oppgaveGosysMapping.rows
             .filter { Behandlingstyper.ÅRSAVREGNING in it.behandlingstype }
-            .shouldHaveSize(5)
+            .shouldHaveSize(9)
             .forEach { it.oppgave.beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.GJELDER_ÅR) }
     }
 
