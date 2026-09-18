@@ -1,5 +1,7 @@
 package no.nav.melosys.service.avgift.aarsavregning.skattepliktig
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.Logger
 import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -27,6 +29,7 @@ import no.nav.melosys.integrasjon.skattehendelser.SkattepliktigeRespons
 import no.nav.melosys.integrasjon.skattehendelser.ÅrFilter
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.JobMonitor
+import no.nav.melosys.service.LoggingTestUtils.withLogAppender
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.aarsavregning.GjeldendeBehandlingsresultaterForÅrsavregning
 import no.nav.melosys.service.avgift.aarsavregning.SkattepliktigAarsavregningOpprettelseService
@@ -39,7 +42,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.ValueSource
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
@@ -293,12 +298,13 @@ class SkattepliktigeAarsavregningKjoeringTest {
                 skarp = true,
                 maksAntall = 2,
                 hoppOverSakerMedAarsavregning = true,
+                personIder = listOf(3, 4),
             )
         )
 
         svar.statusCode shouldBe HttpStatus.OK
         verify(exactly = 1) {
-            kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(2025, ÅrFilter.INNTEKTSAAR, publisertEtter, true, 2, true)
+            kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(2025, ÅrFilter.INNTEKTSAAR, publisertEtter, true, 2, true, setOf(3L, 4L))
         }
         verify(exactly = 0) { kjoering.prosesserSkattehendelserAsynkront(any(), any(), any(), any()) }
         // Svaret er kvitteringen på hva kjøringen ble startet med, så det må vise filtrene den fikk.
@@ -337,7 +343,7 @@ class SkattepliktigeAarsavregningKjoeringTest {
         ).statusCode shouldBe HttpStatus.BAD_REQUEST
 
         verify(exactly = 0) { kjoering.prosesserSkattehendelserAsynkront(any(), any(), any(), any()) }
-        verify(exactly = 0) { kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(any(), any(), any(), any(), any(), any(), any()) }
     }
 
     @Test
@@ -365,16 +371,37 @@ class SkattepliktigeAarsavregningKjoeringTest {
         }
     }
 
+    /** Uten lista ville en ekte kjøring også tatt personer publisert etter simuleringen, som ingen har gått gjennom. */
+    @Test
+    fun `ekte kjøring med gjelderAar krever personIder, og personIder krever gjelderAar og minst én id`() {
+        val kjoering = mockk<SkattepliktigeAarsavregningKjoering>(relaxed = true)
+        val controller = SkattepliktigeAarsavregningKjoeringController(kjoering)
+
+        controller.run(SkattehendelseRunRequest(gjelderAar = 2025, skarp = true, maksAntall = 10))
+            .statusCode shouldBe HttpStatus.BAD_REQUEST
+        controller.run(SkattehendelseRunRequest(gjelderAar = 2025, personIder = emptyList()))
+            .statusCode shouldBe HttpStatus.BAD_REQUEST
+        controller.run(SkattehendelseRunRequest(listOf(SkattehendelseItem("2025", AKTØR_ID)), personIder = listOf(7)))
+            .statusCode shouldBe HttpStatus.BAD_REQUEST
+        verify(exactly = 0) { kjoering.prosesserSkattehendelserAsynkront(any(), any(), any(), any()) }
+        verify(exactly = 0) { kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(any(), any(), any(), any(), any(), any(), any()) }
+
+        controller.run(SkattehendelseRunRequest(gjelderAar = 2025)).statusCode shouldBe HttpStatus.OK
+        verify(exactly = 1) {
+            kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(2025, ÅrFilter.FOM_AAR, null, false, null, true, null)
+        }
+    }
+
     @Test
     fun `ekte kjøring med gjelderAar bruker standardverdiene og slipper gjennom uten publisertEtter`() {
         val kjoering = mockk<SkattepliktigeAarsavregningKjoering>(relaxed = true)
         val controller = SkattepliktigeAarsavregningKjoeringController(kjoering)
 
-        val svar = controller.run(SkattehendelseRunRequest(gjelderAar = 2025, skarp = true, maksAntall = 10))
+        val svar = controller.run(SkattehendelseRunRequest(gjelderAar = 2025, skarp = true, maksAntall = 10, personIder = listOf(7)))
 
         svar.statusCode shouldBe HttpStatus.OK
         verify(exactly = 1) {
-            kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(2025, ÅrFilter.FOM_AAR, null, true, 10, true)
+            kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(2025, ÅrFilter.FOM_AAR, null, true, 10, true, setOf(7L))
         }
         svar.body!!["aarFilter"] shouldBe ÅrFilter.FOM_AAR
     }
@@ -899,6 +926,69 @@ class SkattepliktigeAarsavregningKjoeringTest {
         }
     }
 
+    /** Rapporten lagres lokalt og analyseres, så den skal ha personId og ikke fødselsnummer. */
+    @Test
+    fun `rapporten har personId og ikke identifikator`() {
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(lagFagsak("MEL-1"))
+        stubTrygdeavgift(Behandlingsresultat.forTest { })
+        service.prosesserSkattehendelser(
+            listOf(SkattehendelseItem(gjelderPeriode = "2023", identifikator = AKTØR_ID, personId = 7))
+        )
+
+        with(jacksonObjectMapper().readTree(SkattepliktigeAarsavregningKjoeringController(service).rapport().body!!).single()) {
+            this["saksnummer"].asString() shouldBe "MEL-1"
+            this["personId"].asLong() shouldBe 7
+            has("identifikator") shouldBe false
+        }
+    }
+
+    /** Den ekte kjøringen skal bare ta personene fra simuleringen, ikke personer publisert etterpå. */
+    @Test
+    fun `år-modus med personIder kjører bare de personene, og viser id-er som ikke ble hentet`() {
+        every { skattehendelserClient.hentSkattepliktige(GJELDER_ÅR, ÅrFilter.FOM_AAR, null) } returns
+            skattepliktigeRespons(AKTØR_ID to 1L, "annen-person" to 2L)
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(lagFagsak("MEL-1"))
+        stubTrygdeavgift(Behandlingsresultat.forTest { })
+
+        service.prosesserSkattepliktigeFraSkattehendelserAsynkront(GJELDER_ÅR, ÅrFilter.FOM_AAR, null, personIder = setOf(1L, 99L))
+
+        verify(exactly = 0) { fagsakService.hentFagsakerMedAktør(any(), "annen-person") }
+        with(service.status()) {
+            this["antallInputHendelser"] shouldBe 1
+            this["personIderIkkeFunnet"] shouldBe listOf(99L)
+        }
+        service.resultater.single().personId shouldBe 1L
+    }
+
+    @Test
+    fun `logglinjene inneholder ikke identifikator`() {
+        val logger = LoggerFactory.getLogger(SkattepliktigeAarsavregningKjoering::class.java) as Logger
+        val forrigeNivå = logger.level
+        logger.level = Level.DEBUG
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, "22222222222") } throws RuntimeException("oppslag feilet")
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, "33333333333") } returns emptyList()
+
+        try {
+            withLogAppender<SkattepliktigeAarsavregningKjoering> { appender ->
+                service.prosesserSkattehendelser(
+                    listOf(
+                        SkattehendelseItem(gjelderPeriode = "tull", identifikator = "11111111111"),
+                        SkattehendelseItem(gjelderPeriode = "2023", identifikator = "22222222222"),
+                        SkattehendelseItem(gjelderPeriode = "2023", identifikator = "33333333333"),
+                    )
+                )
+
+                val meldinger = appender.list.map { it.formattedMessage }
+                // Vakt mot en tom test: alle tre linjene som hadde identifikator, må være skrevet.
+                listOf("Ugyldig gjelderPeriode", "Feil ved prosessering av hendelse", "Fant ingen sak med trygdeavgift")
+                    .forEach { start -> meldinger.count { it.startsWith(start) } shouldBe 1 }
+                meldinger.filter { Regex("\\d{11}") in it } shouldBe emptyList()
+            }
+        } finally {
+            logger.level = forrigeNivå
+        }
+    }
+
     /**
      * Input er håndbygd fra en SQL-dump, så formatvariasjon på året er reell. Året som sendes
      * videre til opprettelsen skal være det parsede, ikke den rå strengen.
@@ -1054,18 +1144,21 @@ class SkattepliktigeAarsavregningKjoeringTest {
             Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
     }
 
-    private fun skattepliktigeRespons(identifikator: String) = SkattepliktigeRespons(
+    private fun skattepliktigeRespons(identifikator: String) = skattepliktigeRespons(identifikator to 1L)
+
+    private fun skattepliktigeRespons(vararg personer: Pair<String, Long>) = SkattepliktigeRespons(
         gjelderAar = GJELDER_ÅR,
-        antall = 1,
-        skattepliktige = listOf(
+        antall = personer.size,
+        skattepliktige = personer.map { (identifikator, personId) ->
             Skattepliktig(
                 gjelderPeriode = GJELDER_ÅR.toString(),
                 identifikator = identifikator,
+                personId = personId,
                 sisteHendelseTid = LocalDateTime.of(2026, 9, 10, 2, 0),
                 inntektsaar = listOf(GJELDER_ÅR.toString()),
                 antallPubliseringer = 1,
             )
-        ),
+        },
     )
 
     private fun lagFagsak(saksnummer: String) = Fagsak.forTest {

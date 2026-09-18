@@ -142,7 +142,7 @@ class SkattepliktigeAarsavregningKjoeringIT(
             every { skattehendelserClient.hentSkattepliktige(2023, ÅrFilter.FOM_AAR, null) } returns SkattepliktigeRespons(
                 gjelderAar = 2023,
                 antall = 1,
-                skattepliktige = listOf(Skattepliktig("2023", "12345678901", LocalDateTime.of(2026, 9, 10, 2, 0), listOf("2023"), 1)),
+                skattepliktige = listOf(Skattepliktig("2023", "12345678901", 1L, LocalDateTime.of(2026, 9, 10, 2, 0), listOf("2023"), 1)),
             )
             kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(2023, ÅrFilter.FOM_AAR, null)
         } else {

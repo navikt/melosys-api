@@ -43,7 +43,10 @@ class SkattepliktigeAarsavregningKjoeringController(
             "feiler før de er vurdert, og saker som hoppes over med `hoppOverSakerMedAarsavregning`, bruker " +
             "ikke av taket.\n" +
             "- `hoppOverSakerMedAarsavregning`: hopper over saker som har en årsavregning for året, uansett " +
-            "status. Standard er `true`, og det kan ikke slås av ved `skarp=true` med `gjelderAar`.\n\n" +
+            "status. Standard er `true`, og det kan ikke slås av ved `skarp=true` med `gjelderAar`.\n" +
+            "- `personIder`: kjører bare disse personene fra hentingen, og brukes bare sammen med `gjelderAar`. " +
+            "Påkrevd med `skarp=true` og `gjelderAar`: send `personId`-ene fra simuleringen du har gått gjennom. " +
+            "Id-er som ikke kom med i hentingen, står i `personIderIkkeFunnet` i `/status`.\n\n" +
             "### Før du kjører\n" +
             "- Send `/run` én gang. Kjøringen kan ligge i kø bak annet arbeid, og da er `isRunning` false. Et " +
             "nytt kall i den tiden kjører alt to ganger og sender brevene på nytt. Sjekk `/rapport` for å se " +
@@ -71,6 +74,17 @@ class SkattepliktigeAarsavregningKjoeringController(
         if (request.gjelderAar == null && request.publisertEtter != null) {
             return ResponseEntity.badRequest().body(
                 mapOf("feil" to "publisertEtter gjelder bare sammen med gjelderAar")
+            )
+        }
+        if (request.personIder != null && (request.gjelderAar == null || request.personIder.isEmpty())) {
+            return ResponseEntity.badRequest().body(
+                mapOf("feil" to "personIder gjelder bare sammen med gjelderAar, og må ha minst én id")
+            )
+        }
+        // Uten lista ville en ekte kjøring også tatt personer publisert etter simuleringen.
+        if (request.skarp && request.gjelderAar != null && request.personIder == null) {
+            return ResponseEntity.badRequest().body(
+                mapOf("feil" to "Ekte kjøring med gjelderAar krever personIder fra simuleringen")
             )
         }
         if (request.skarp && request.gjelderAar != null && !request.hoppOverSakerMedAarsavregning) {
@@ -103,7 +117,8 @@ class SkattepliktigeAarsavregningKjoeringController(
             log.info {
                 "Starter $modus for skattehendelser fra melosys-skattehendelser: gjelderÅr=$gjelderÅr, " +
                     "årFilter=${request.aarFilter}, publisertEtter=${request.publisertEtter}, maksAntall=${request.maksAntall}, " +
-                    "hoppOverSakerMedAarsavregning=${request.hoppOverSakerMedAarsavregning}"
+                    "hoppOverSakerMedAarsavregning=${request.hoppOverSakerMedAarsavregning}, " +
+                    "antallPersonIder=${request.personIder?.size}"
             }
             kjoering.prosesserSkattepliktigeFraSkattehendelserAsynkront(
                 gjelderÅr,
@@ -112,6 +127,7 @@ class SkattepliktigeAarsavregningKjoeringController(
                 request.skarp,
                 request.maksAntall,
                 request.hoppOverSakerMedAarsavregning,
+                request.personIder?.toSet(),
             )
         } else {
             log.info {
@@ -136,6 +152,7 @@ class SkattepliktigeAarsavregningKjoeringController(
                 "gjelderAar" to gjelderÅr,
                 "aarFilter" to if (gjelderÅr != null) request.aarFilter else null,
                 "publisertEtter" to request.publisertEtter,
+                "antallPersonIder" to request.personIder?.size,
                 "statusEndpoint" to "/admin/aarsavregninger/saker/skattepliktige/status",
                 "rapportEndpoint" to "/admin/aarsavregninger/saker/skattepliktige/rapport"
             )
@@ -147,7 +164,11 @@ class SkattepliktigeAarsavregningKjoeringController(
     fun status(): ResponseEntity<Map<String, Any?>> =
         ResponseEntity(kjoering.status(), HttpStatus.OK)
 
-    @Operation(summary = "Hent rapport med alle sakene fra siste kjøring")
+    @Operation(
+        summary = "Hent rapport med alle sakene fra siste kjøring",
+        description = "Rapporten har `personId` fra melosys-skattehendelser, ikke fødselsnummer. Slå opp personen " +
+            "med `/admin/person/{id}` i melosys-skattehendelser.",
+    )
     @GetMapping("/rapport", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun rapport(): ResponseEntity<String> =
         ResponseEntity(kjoering.rapportJsonString(), HttpStatus.OK)
@@ -164,4 +185,5 @@ data class SkattehendelseRunRequest(
     val maksAntall: Int? = null,
     @field:Schema(defaultValue = "true")
     val hoppOverSakerMedAarsavregning: Boolean = true,
+    val personIder: List<Long>? = null,
 )
