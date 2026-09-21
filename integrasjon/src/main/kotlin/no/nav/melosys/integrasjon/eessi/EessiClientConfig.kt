@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 
@@ -27,7 +28,12 @@ class EessiClientConfig(
             .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot eessi feilet") { feilmelding, statusCode, errorBody ->
-                if (statusCode.is4xxClientError)
+                val ikkeRetrybareStatuser = setOf(
+                    HttpStatus.UNAUTHORIZED.value(),
+                    HttpStatus.FORBIDDEN.value(),
+                    HttpStatus.UNPROCESSABLE_ENTITY.value()
+                )
+                if (statusCode.is4xxClientError && statusCode.value() in ikkeRetrybareStatuser)
                     IkkeRetrybarIntegrasjonException("$feilmelding $statusCode - $errorBody")
                 else
                     lagException(feilmelding, statusCode, errorBody)
