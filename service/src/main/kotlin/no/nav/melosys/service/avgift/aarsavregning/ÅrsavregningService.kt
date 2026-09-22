@@ -251,8 +251,8 @@ class ÅrsavregningService(
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.type == Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT }
             .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
-            .filter { førVedtaksdato == null || it.hentVedtakMetadata().vedtaksdato < førVedtaksdato }
-            .sortedBy { it.hentVedtakMetadata().vedtaksdato }
+            .filter { førVedtaksdato == null || vedtaksdato(it)?.isBefore(førVedtaksdato) == true }
+            .sortedWith(eldsteVedtakFørst)
             .lastOrNull()
 
         return behandlingsresultat?.årsavregning
@@ -453,11 +453,12 @@ class ÅrsavregningService(
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.type in behandlingsresultattyper }
-            .filter { førVedtaksdato == null || it.hentVedtakMetadata().vedtaksdato < førVedtaksdato }
-            .sortedBy { it.hentVedtakMetadata().vedtaksdato }
+            .loggBehandlingerUtenVedtaksdato(saksnummer)
+            .filter { førVedtaksdato == null || vedtaksdato(it)?.isBefore(førVedtaksdato) == true }
+            .sortedWith(eldsteVedtakFørst)
 
 
-        // Behandlinger med periodeoverlapp for året, brukes til avgiftsgrunnlag og årsavregning
+        // Behandlinger med periodeoverlapp for året, brukes til avgiftsgrunnlag og årsavregning. Arver sorteringen.
         val behandlingsresultaterMedOverlapp = alleRelevanteBehandlinger
             .filter { it.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
 
@@ -472,14 +473,11 @@ class ÅrsavregningService(
         // Finner siste behandling med trygdeavgiftsperioder (brukes for avgiftsgrunnlag)
         val sisteBehandlingsresultatMedAvgiftsgrunnlag = behandlingsresultaterMedOverlapp
             .filter { it.harTrygdeavgiftsperioderSomOverlapperMedÅr(år) }
-            .sortedBy {
-                it.hentVedtakMetadata().vedtaksdato
-            }
 
         val sisteÅrsavregning = behandlingsresultaterMedOverlapp
             .filter { it.type == Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT }
             .filter { it.årsavregning != null && it.hentÅrsavregning().aar == år }
-            .maxByOrNull { it.hentVedtakMetadata().vedtaksdato }
+            .lastOrNull()
 
         if (sisteBehandlingsresultatMedAvgiftspliktigPeriode == null
             && sisteBehandlingsresultatMedAvgiftsgrunnlag.isEmpty()
@@ -494,6 +492,20 @@ class ÅrsavregningService(
             sisteÅrsavregning = sisteÅrsavregning
         )
     }
+
+    private fun List<Behandlingsresultat>.loggBehandlingerUtenVedtaksdato(saksnummer: String): List<Behandlingsresultat> = also {
+        val antall = count { vedtaksdato(it) == null }
+        if (antall > 0) {
+            log.info { "$antall behandling(er) uten vedtaksdato i sak $saksnummer ved oppslag for årsavregning" }
+        }
+    }
+
+    // En avsluttet behandling kan mangle vedtak, f.eks. når den er avsluttet fra behandlingsmenyen.
+    private fun vedtaksdato(behandlingsresultat: Behandlingsresultat): Instant? =
+        behandlingsresultat.vedtakMetadata?.vedtaksdato
+
+    // Uten vedtaksdato sorteres som eldst; registrertDato gir fast rekkefølge mellom dem.
+    private val eldsteVedtakFørst = compareBy<Behandlingsresultat>({ vedtaksdato(it) }, { it.registrertDato })
 
     private fun harManueltSattAvgift(it: Behandlingsresultat, år: Int) =
         it.årsavregning != null && it.hentÅrsavregning().manueltAvgiftBeloep != null && it.hentÅrsavregning().aar == år

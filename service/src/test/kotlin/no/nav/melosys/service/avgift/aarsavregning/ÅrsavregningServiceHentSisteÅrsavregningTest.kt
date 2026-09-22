@@ -10,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import org.junit.jupiter.api.Test
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 
@@ -115,5 +116,66 @@ internal class ÅrsavregningServiceHentSisteÅrsavregningTest : ÅrsavregningSer
             id shouldBe 20L
             aar shouldBe år
         }
+    }
+
+    @Test
+    fun `hentSisteÅrsavregning sorterer årsavregning uten vedtaksdato som eldst`() {
+        val fagsak = Fagsak.forTest {
+            saksnummer = "123456"
+            status = Saksstatuser.OPPRETTET
+            behandling {
+                id = 1L
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.AVSLUTTET
+            }
+            behandling {
+                id = 2L
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.AVSLUTTET
+            }
+        }
+        val år = 2023
+
+        val medVedtak = Behandlingsresultat.forTest {
+            id = 1L
+            type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
+            behandling = fagsak.behandlinger[0]
+            registrertDato = LocalDate.of(2024, 1, 15).atStartOfDay().toInstant(ZoneOffset.UTC)
+            vedtakMetadata {
+                vedtaksdato = LocalDate.of(2024, 1, 15).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            årsavregning {
+                id = 10L
+                aar = år
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2023, 1, 1)
+                tom = LocalDate.of(2023, 12, 31)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            }
+        }
+
+        val utenVedtak = Behandlingsresultat.forTest {
+            id = 2L
+            type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
+            behandling = fagsak.behandlinger[1]
+            registrertDato = LocalDate.of(2024, 6, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            årsavregning {
+                id = 20L
+                aar = år
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2023, 1, 1)
+                tom = LocalDate.of(2023, 12, 31)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            }
+        }
+
+        every { fagsakService.hentFagsak("123456") } returns fagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns medVedtak
+        every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns utenVedtak
+
+        årsavregningService.hentSisteÅrsavregning("123456", år).shouldNotBeNull().id shouldBe 10L
+        årsavregningService.hentSisteÅrsavregning("123456", år, førVedtaksdato = Instant.parse("2024-01-01T00:00:00Z")) shouldBe null
     }
 }
