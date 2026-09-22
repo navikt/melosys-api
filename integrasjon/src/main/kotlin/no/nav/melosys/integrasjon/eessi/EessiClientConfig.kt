@@ -28,12 +28,12 @@ class EessiClientConfig(
             .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot eessi feilet") { feilmelding, statusCode, errorBody ->
-                val ikkeRetrybareStatuser = setOf(
+                val retrybareStatuser = setOf(
                     HttpStatus.UNAUTHORIZED.value(),
                     HttpStatus.FORBIDDEN.value(),
-                    HttpStatus.UNPROCESSABLE_ENTITY.value()
+                    HttpStatus.REQUEST_TIMEOUT.value()
                 )
-                if (statusCode.is4xxClientError && statusCode.value() in ikkeRetrybareStatuser)
+                if (statusCode.is4xxClientError && statusCode.value() !in retrybareStatuser)
                     IkkeRetrybarIntegrasjonException("$feilmelding $statusCode - $errorBody")
                 else
                     lagException(feilmelding, statusCode, errorBody)
