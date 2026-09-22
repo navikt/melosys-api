@@ -56,7 +56,7 @@ class SkattehendelserClient(private val skattehendelserWebClient: WebClient) {
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .bodyToMono(SkattepliktigeRespons::class.java)
-            // Jobbtråden er delt med saksbehandlingen; et svar som aldri kommer skal ikke holde den.
+            // Jobbtråden er delt med saksbehandlingen; et svar som aldri kommer skal ikke blokkere den.
             .timeout(HENT_TIMEOUT)
             .block() ?: error("Tomt svar fra melosys-skattehendelser")
     }

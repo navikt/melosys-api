@@ -92,7 +92,7 @@ class SkattepliktigAarsavregningOpprettelseService(
         }
     }
 
-    /** Om saken har en årsavregningsbehandling for [gjelderÅr], uansett status. Behandlinger uten år teller ikke. */
+    /** Teller med alle statuser, også avsluttet. Behandlinger uten år teller ikke. */
     fun harÅrsavregningForÅr(fagsak: Fagsak, gjelderÅr: Int): Boolean =
         fagsak.hentAlleÅrsavregninger().any { årFor(it) == gjelderÅr }
 

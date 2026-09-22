@@ -118,11 +118,11 @@ class SkattepliktigeAarsavregningKjoeringIT(
     }
 
     /**
-     * Read-only-garantien på stiene controlleren bruker, liste og år. Selvkallet gjør annotasjonen på
-     * den indre metoden til død config, så hele garantien hviler på de ytre. @Async- og
-     * @Transactional-advisorene har begge LOWEST_PRECEDENCE; at async havner ytterst skyldes at
-     * AsyncAnnotationBeanPostProcessor setter beforeExistingAdvisors=true. Resolves den motsatt
-     * vei, kjører batchen helt uten transaksjon — og da feiler denne testen, ikke prod.
+     * Sjekker at batchen kjører i en read-only-transaksjon, både med liste og med år.
+     * Transaksjonen kommer fra de asynkrone metodene, fordi @Transactional på
+     * prosesserSkattehendelser ikke virker ved kall fra samme klasse. @Async legger seg utenfor
+     * transaksjonen fordi AsyncAnnotationBeanPostProcessor setter beforeExistingAdvisors=true.
+     * Hvis Spring endrer rekkefølgen, kjører batchen uten transaksjon.
      */
     @ParameterizedTest(name = "årModus={0}")
     @ValueSource(booleans = [false, true])
@@ -156,7 +156,7 @@ class SkattepliktigeAarsavregningKjoeringIT(
         transaksjonstilstandLest.await(10, TimeUnit.SECONDS) shouldBe true
         aktivTransaksjon shouldBe true
         readOnly shouldBe true
-        // Neste parameter stubber fagsakService på nytt; kjører denne jobben fortsatt, kan den lese den nye stubben.
+        // Neste parameter stubber fagsakService på nytt. Hvis denne jobben fortsatt kjører, kan den lese den nye stubben.
         await.atMost(Duration.ofSeconds(10)).until { kjoering.status()["isRunning"] == false }
     }
 

@@ -30,20 +30,22 @@ class SkattepliktigeAarsavregningKjoeringController(
         description =
             "Kjører skattehendelser på nytt med de samme vurderingene som Kafka-flyten gjør løpende. Uten " +
             "`skarp` endres ingenting, og rapporten viser hva kjøringen ville gjort. Med `skarp=true` " +
-            "opprettes årsavregninger, og åpne årsavregninger settes til VURDER_DOKUMENT.\n\n" +
+            "opprettes årsavregninger. Åpne årsavregninger settes til VURDER_DOKUMENT bare når " +
+            "`hoppOverSakerMedAarsavregning=false`.\n\n" +
             "Følg kjøringen i `/status`, og se resultatet per sak i `/rapport`. `avbruttAarsak` er satt hvis " +
             "kjøringen stoppet før den var ferdig.\n\n" +
             "### Felter\n" +
             "- `skattehendelser` eller `gjelderAar`: send én av dem. Med `gjelderAar` hentes hendelsene fra " +
-            "melosys-skattehendelser. Hendelser for samme person og år slås sammen.\n" +
+            "melosys-skattehendelser. Hendelser for samme person og år slås sammen, og hver sak vurderes bare " +
+            "én gang per år.\n" +
             "- `aarFilter` og `publisertEtter`: avgrenser hentingen, og brukes bare sammen med `gjelderAar`. " +
             "`aarFilter` er `FOM_AAR` (året perioden starter i, standard) eller `INNTEKTSAAR`. " +
             "`publisertEtter` er norsk tid, og avvises sammen med en liste.\n" +
             "- `maksAntall`: påkrevd med `skarp=true`. Taket på hvor mange saker som kan endres. Saker som " +
             "feiler før de er vurdert, og saker som hoppes over med `hoppOverSakerMedAarsavregning`, bruker " +
             "ikke av taket.\n" +
-            "- `hoppOverSakerMedAarsavregning`: hopper over saker som har en årsavregning for året, uansett " +
-            "status. Standard er `true`, og det kan ikke slås av ved `skarp=true` med `gjelderAar`.\n" +
+            "- `hoppOverSakerMedAarsavregning`: hopper over saker som har en årsavregning for året, også åpne " +
+            "og avsluttede. Standard er `true`, og det kan ikke slås av ved `skarp=true` med `gjelderAar`.\n" +
             "- `personIder`: kjører bare disse personene fra hentingen, og brukes bare sammen med `gjelderAar`. " +
             "Påkrevd med `skarp=true` og `gjelderAar`: send `personId`-ene fra simuleringen du har gått gjennom. " +
             "Id-er som ikke kom med i hentingen, står i `personIderIkkeFunnet` i `/status`.\n\n" +
@@ -103,8 +105,8 @@ class SkattepliktigeAarsavregningKjoeringController(
             )
         }
 
-        // Fanger bare et nytt kall mens en kjøring pågår. Ligger den første fortsatt i kø, er isRunning
-        // false, og begge kjøres etter hverandre på den ene jobbtråden.
+        // Fanger bare et nytt kall mens en kjøring pågår. Hvis den første fortsatt ligger i kø, er
+        // isRunning false, og begge kjøres etter hverandre på den ene jobbtråden.
         if (kjoering.status()["isRunning"] == true) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(
                 mapOf("feil" to "En kjøring pågår allerede — se /status, og vent til isRunning er false")
