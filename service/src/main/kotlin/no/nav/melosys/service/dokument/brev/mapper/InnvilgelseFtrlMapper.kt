@@ -320,6 +320,12 @@ class InnvilgelseFtrlMapper(
 
 
     private fun mapAvgiftsPerioder(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodeDto> {
+        if (behandlingsresultat.trygdeavgiftsperioder.all {
+                !it.harAvgift()
+            }) {
+            return emptyList()
+        }
+        
         val perioder = if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
             val gruppertePerioder = behandlingsresultat.trygdeavgiftsperioder.groupBy { it.periodeTil.year }
             val valgtÅr = velgRelevantÅr(gruppertePerioder.keys, LocalDate.now().year)
