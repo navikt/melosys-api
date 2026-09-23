@@ -121,7 +121,7 @@ public class UtpekingService {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
         Utpekingsperiode utpekingsperiode = behandlingsresultat.hentValidertUtpekingsperiode();
-        validerUtpekingsperiode(behandlingID, utpekingsperiode);
+        validerUtpekingsperiode(utpekingsperiode);
 
         opprettLovvalgsperiode(behandlingID, utpekingsperiode);
 
@@ -196,15 +196,9 @@ public class UtpekingService {
         }
     }
 
-    private void validerUtpekingsperiode(long behandlingID, Utpekingsperiode utpekingsperiode) {
+    private void validerUtpekingsperiode(Utpekingsperiode utpekingsperiode) {
         if (utpekingsperiode.getTom() == null) {
             throw new FunksjonellException("Utpekingsperioden mangler sluttdato");
-        }
-
-        if (landvelgerService.isFlereLandUkjentHvilke(behandlingID)
-            && landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(behandlingID).size() < 2) {
-            throw new FunksjonellException(
-                "Arbeidsland er obligatorisk i A003. Oppgi minst to land under 'periode og land'.");
         }
     }
 

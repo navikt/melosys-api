@@ -112,7 +112,6 @@ class UtpekingServiceTest {
         } returns listOf(Lovvalgsperiode())
 
         every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns setOf(Land_iso2.SE)
-        every { landvelgerService.isFlereLandUkjentHvilke(BEHANDLING_ID) } returns false
         every { ferdigbehandlingKontrollFacade.kontroller(BEHANDLING_ID, any(), null) } returns emptyList()
         every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
         every { melosysEventMulticaster.multicastEvent(any()) } just Runs
@@ -184,80 +183,6 @@ class UtpekingServiceTest {
     }
 
     @Test
-    fun `utpekLovvalgsland skal kaste FunksjonellException når flere land ikke kjent hvilke og færre enn to arbeidsland er registrert`() {
-        behandling.tema = Behandlingstema.ARBEID_FLERE_LAND
-        val utpekingsperiode = Utpekingsperiode(
-            LocalDate.MIN, LocalDate.MAX, Land_iso2.SE,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null
-        ).apply {
-            id = 1111L
-        }
-        behandlingsresultat.utpekingsperioder.add(utpekingsperiode)
-
-        val mottakerInstitusjoner = setOf("SE:123")
-        every {
-            eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
-                mottakerInstitusjoner,
-                setOf(Land_iso2.SE),
-                BucType.LA_BUC_02
-            )
-        } returns mottakerInstitusjoner
-        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns setOf(Land_iso2.SE)
-        every { landvelgerService.isFlereLandUkjentHvilke(BEHANDLING_ID) } returns true
-        every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(BEHANDLING_ID) } returns emptyList()
-
-        val exception = shouldThrow<FunksjonellException> {
-            utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null)
-        }
-        exception.message shouldBe "Arbeidsland er obligatorisk i A003. Oppgi minst to land under 'periode og land'."
-
-        verify(exactly = 0) { lovvalgsperiodeService.lagreLovvalgsperioder(any(), any()) }
-        verify(exactly = 0) { prosessinstansService.opprettProsessinstansUtpekAnnetLand(any(), any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun `utpekLovvalgsland skal fullføre når flere land ikke kjent hvilke men minst to arbeidsland er registrert`() {
-        behandling.tema = Behandlingstema.ARBEID_FLERE_LAND
-        val utpekingsperiode = Utpekingsperiode(
-            LocalDate.MIN, LocalDate.MAX, Land_iso2.SE,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null
-        ).apply {
-            id = 1111L
-        }
-        behandlingsresultat.utpekingsperioder.add(utpekingsperiode)
-
-        val mottakerInstitusjoner = setOf("SE:123")
-        every {
-            eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
-                mottakerInstitusjoner,
-                setOf(Land_iso2.SE),
-                BucType.LA_BUC_02
-            )
-        } returns mottakerInstitusjoner
-        every {
-            lovvalgsperiodeService.lagreLovvalgsperioder(BEHANDLING_ID, any())
-        } returns listOf(Lovvalgsperiode())
-        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns setOf(Land_iso2.SE)
-        every { landvelgerService.isFlereLandUkjentHvilke(BEHANDLING_ID) } returns true
-        every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(BEHANDLING_ID) } returns listOf(
-            Land_iso2.SE,
-            Land_iso2.DK
-        )
-        every { ferdigbehandlingKontrollFacade.kontroller(BEHANDLING_ID, any(), null) } returns emptyList()
-        every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
-        every { melosysEventMulticaster.multicastEvent(any()) } just Runs
-        every {
-            prosessinstansService.opprettProsessinstansUtpekAnnetLand(any(), any(), any(), any(), any())
-        } just Runs
-        every { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) } just Runs
-
-        utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null)
-
-        verify { lovvalgsperiodeService.lagreLovvalgsperioder(BEHANDLING_ID, any()) }
-        verify { prosessinstansService.opprettProsessinstansUtpekAnnetLand(any(), any(), any(), any(), any()) }
-    }
-
-    @Test
     fun `utpekLovvalgsland lovvalgslandValideres`() {
         behandling.tema = Behandlingstema.ARBEID_FLERE_LAND
         val utpekingsperiode = Utpekingsperiode(
@@ -286,7 +211,6 @@ class UtpekingServiceTest {
             Land_iso2.DK,
             Land_iso2.FI
         )
-        every { landvelgerService.isFlereLandUkjentHvilke(BEHANDLING_ID) } returns false
         every { ferdigbehandlingKontrollFacade.kontroller(BEHANDLING_ID, any(), null) } returns emptyList()
         every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
         every { melosysEventMulticaster.multicastEvent(any()) } just Runs
