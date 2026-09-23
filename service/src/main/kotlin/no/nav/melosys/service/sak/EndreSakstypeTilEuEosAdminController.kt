@@ -7,7 +7,6 @@ import mu.KotlinLogging
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -27,17 +26,16 @@ class EndreSakstypeTilEuEosAdminController(
 
     @PostMapping("/endre-sakstype-til-eu-eos")
     @Operation(
-        summary = "Endre sakstype til EU/EØS for saker med ugyldig kombinasjon (MELOSYS-8309)",
-        description = "Tar en liste med saksnumre. Endrer bare saker med sakstype TRYGDEAVTALE/FTRL der " +
-            "behandlingstemaet på aktiv behandling ikke er gyldig for sakstypen. Endringen går via samme tjeneste " +
-            "som «Endre sak» i GUI, og behandlingstema, -type og -status beholdes. " +
+        summary = "Endre sakstype til EU/EØS for saker med ugyldig behandlingstema (MELOSYS-8309)",
+        description = "Finner selv saker fra digital søknad med sakstype TRYGDEAVTALE/FTRL der behandlingstemaet på " +
+            "aktiv behandling ikke er gyldig for sakstypen, og endrer sakstype til EU/EØS. Endringen går via samme " +
+            "tjeneste som «Endre sak» i GUI, og behandlingstema, -type og -status beholdes. " +
             "Med dryRun=true (default) vises bare hva som ville blitt endret."
     )
     fun endreSakstypeTilEuEøs(
-        @RequestBody saksnumre: List<String>,
         @RequestParam(defaultValue = "true") dryRun: Boolean
     ): ResponseEntity<List<EndreSakstypeResultat>> {
-        log.info { "Admin endrer sakstype til EU/EØS for ${saksnumre.size} saker (dryRun=$dryRun)" }
-        return ResponseEntity.ok(endreSakstypeTilEuEosAdminService.endreTilEuEøs(saksnumre, dryRun))
+        log.info { "Admin endrer sakstype til EU/EØS for saker med ugyldig behandlingstema (dryRun=$dryRun)" }
+        return ResponseEntity.ok(endreSakstypeTilEuEosAdminService.endreTilEuEøs(dryRun))
     }
 }

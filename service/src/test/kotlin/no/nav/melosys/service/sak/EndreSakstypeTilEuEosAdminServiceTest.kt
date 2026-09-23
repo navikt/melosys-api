@@ -1,5 +1,6 @@
 package no.nav.melosys.service.sak
 
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -16,10 +17,12 @@ import no.nav.melosys.domain.kodeverk.Sakstyper.FTRL
 import no.nav.melosys.domain.kodeverk.Sakstyper.TRYGDEAVTALE
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.UNDER_BEHANDLING
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.PENSJONIST
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.UTSENDT_ARBEIDSTAKER
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.YRKESAKTIV
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -29,6 +32,9 @@ import org.junit.jupiter.params.provider.EnumSource
 
 @ExtendWith(MockKExtension::class)
 class EndreSakstypeTilEuEosAdminServiceTest {
+
+    @MockK
+    private lateinit var fagsakRepository: FagsakRepository
 
     @MockK
     private lateinit var fagsakService: FagsakService
@@ -43,28 +49,32 @@ class EndreSakstypeTilEuEosAdminServiceTest {
 
     @BeforeEach
     fun setUp() {
-        service = EndreSakstypeTilEuEosAdminService(fagsakService, endreSakService, lovligeKombinasjonerSaksbehandlingService)
+        service = EndreSakstypeTilEuEosAdminService(
+            fagsakRepository, fagsakService, endreSakService, lovligeKombinasjonerSaksbehandlingService
+        )
+        every { lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(null, any(), any(), null, null) } returns emptySet()
         every {
             lovligeKombinasjonerSaksbehandlingService.validerOpprettelseOgEndring(any(), any(), any(), any(), any(), any())
         } throws FunksjonellException("ugyldig")
+        every { fagsakRepository.finnDigitalSoknadSaksnumreMedAktivBehandlingUtenforTemaer(any(), any(), any()) } returns emptyList()
     }
 
     @Test
-    fun `dryRun endrer ikke saken`() {
-        lagSak(SAKSNUMMER, TRYGDEAVTALE, UTSENDT_ARBEIDSTAKER)
+    fun `dryRun lister kandidater uten å endre`() {
+        lagKandidat(SAKSNUMMER, TRYGDEAVTALE, UTSENDT_ARBEIDSTAKER)
 
-        val resultat = service.endreTilEuEøs(listOf(SAKSNUMMER), dryRun = true)
+        val resultat = service.endreTilEuEøs(dryRun = true)
 
-        resultat.map { it.status } shouldContainExactly listOf(EndreSakstypeStatus.VIL_ENDRES)
+        resultat.map { it.saksnummer to it.status } shouldContainExactly listOf(SAKSNUMMER to EndreSakstypeStatus.VIL_ENDRES)
         verify(exactly = 0) { endreSakService.endre(any(), any(), any(), any(), any(), any(), any()) }
     }
 
     @ParameterizedTest
     @EnumSource(value = Sakstyper::class, names = ["TRYGDEAVTALE", "FTRL"])
     fun `endrer sakstype til EU_EOS og beholder behandlingen uendret`(sakstype: Sakstyper) {
-        lagSak(SAKSNUMMER, sakstype, UTSENDT_ARBEIDSTAKER)
+        lagKandidat(SAKSNUMMER, sakstype, UTSENDT_ARBEIDSTAKER)
 
-        val resultat = service.endreTilEuEøs(listOf(SAKSNUMMER), dryRun = false)
+        val resultat = service.endreTilEuEøs(dryRun = false)
 
         resultat.map { it.status } shouldContainExactly listOf(EndreSakstypeStatus.ENDRET)
         verify(exactly = 1) {
@@ -73,40 +83,46 @@ class EndreSakstypeTilEuEosAdminServiceTest {
     }
 
     @Test
-    fun `hopper over sak med gyldig kombinasjon`() {
-        lagSak(SAKSNUMMER, TRYGDEAVTALE, YRKESAKTIV)
+    fun `søker med temaene som er gyldige for sakstypen`() {
+        every {
+            lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(null, TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, null, null)
+        } returns setOf(YRKESAKTIV, PENSJONIST)
+
+        service.endreTilEuEøs(dryRun = true)
+
+        verify { fagsakRepository.finnDigitalSoknadSaksnumreMedAktivBehandlingUtenforTemaer(TRYGDEAVTALE, any(), setOf(YRKESAKTIV, PENSJONIST)) }
+    }
+
+    @Test
+    fun `endrer ikke kandidat der kombinasjonen likevel er gyldig`() {
+        lagKandidat(SAKSNUMMER, TRYGDEAVTALE, YRKESAKTIV)
         every {
             lovligeKombinasjonerSaksbehandlingService.validerOpprettelseOgEndring(any(), any(), TRYGDEAVTALE, any(), YRKESAKTIV, any())
         } returns Unit
 
-        val resultat = service.endreTilEuEøs(listOf(SAKSNUMMER), dryRun = false)
+        val resultat = service.endreTilEuEøs(dryRun = false)
 
-        resultat.map { it.status } shouldContainExactly listOf(EndreSakstypeStatus.HOPPET_OVER)
-        verify(exactly = 0) { endreSakService.endre(any(), any(), any(), any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun `hopper over sak som allerede er EU_EOS`() {
-        lagSak(SAKSNUMMER, EU_EOS, UTSENDT_ARBEIDSTAKER)
-
-        val resultat = service.endreTilEuEøs(listOf(SAKSNUMMER), dryRun = false)
-
-        resultat.map { it.status } shouldContainExactly listOf(EndreSakstypeStatus.HOPPET_OVER)
+        resultat.shouldBeEmpty()
         verify(exactly = 0) { endreSakService.endre(any(), any(), any(), any(), any(), any(), any()) }
     }
 
     @Test
     fun `feil i en sak stopper ikke de andre`() {
-        lagSak(SAKSNUMMER, TRYGDEAVTALE, UTSENDT_ARBEIDSTAKER)
-        lagSak(ANNET_SAKSNUMMER, FTRL, UTSENDT_ARBEIDSTAKER)
+        lagKandidat(SAKSNUMMER, TRYGDEAVTALE, UTSENDT_ARBEIDSTAKER)
+        lagKandidat(ANNET_SAKSNUMMER, FTRL, UTSENDT_ARBEIDSTAKER)
         every { endreSakService.endre(SAKSNUMMER, any(), any(), any(), any(), any(), any()) } throws FunksjonellException("kan ikke endres")
 
-        val resultat = service.endreTilEuEøs(listOf(SAKSNUMMER, ANNET_SAKSNUMMER), dryRun = false)
+        val resultat = service.endreTilEuEøs(dryRun = false)
 
-        resultat.map { it.status } shouldContainExactly listOf(EndreSakstypeStatus.FEILET, EndreSakstypeStatus.ENDRET)
+        resultat.map { it.saksnummer to it.status } shouldContainExactly listOf(
+            SAKSNUMMER to EndreSakstypeStatus.FEILET,
+            ANNET_SAKSNUMMER to EndreSakstypeStatus.ENDRET
+        )
     }
 
-    private fun lagSak(saksnummer: String, sakstype: Sakstyper, behandlingstema: Behandlingstema) {
+    private val kandidater = mutableMapOf<Sakstyper, MutableList<String>>()
+
+    private fun lagKandidat(saksnummer: String, sakstype: Sakstyper, behandlingstema: Behandlingstema) {
         val behandling = Behandling.forTest {
             id = 1L
             tema = behandlingstema
@@ -120,6 +136,9 @@ class EndreSakstypeTilEuEosAdminServiceTest {
             tema = MEDLEMSKAP_LOVVALG
         }.apply { leggTilBehandling(behandling) }
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
+
+        val saksnumre = kandidater.getOrPut(sakstype) { mutableListOf() }.apply { add(saksnummer) }
+        every { fagsakRepository.finnDigitalSoknadSaksnumreMedAktivBehandlingUtenforTemaer(sakstype, any(), any()) } returns saksnumre
     }
 
     companion object {
