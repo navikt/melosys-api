@@ -8,7 +8,6 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto
-import java.math.BigDecimal
 import java.time.LocalDate
 
 class InnvilgelsePensjonistPliktigFtrl(
@@ -37,11 +36,7 @@ class InnvilgelsePensjonistPliktigFtrl(
     val ikkeYrkesaktivOppholdType: String?,
     val ikkeYrkesaktivRelasjonType: String?,
     val betalingsvalg: Betalingstype,
-    val harMedlemskapsperioderIForegåendeÅr: Boolean,
-    val minstebelopVerdi: BigDecimal? = null,
-    val minstebelopAar: Int? = null,
-    val harMinstebelopPeriode: Boolean = false,
-    val har25ProsentRegelPeriode: Boolean = false
+    val harMedlemskapsperioderIForegåendeÅr: Boolean
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
@@ -64,11 +59,7 @@ class InnvilgelsePensjonistPliktigFtrl(
         ikkeYrkesaktivOppholdType: String?,
         ikkeYrkesaktivRelasjonType: String?,
         betalingsvalg: Betalingstype,
-        harMedlemskapsperioderIForegåendeÅr: Boolean,
-        minstebelopVerdi: BigDecimal? = null,
-        minstebelopAar: Int? = null,
-        harMinstebelopPeriode: Boolean = false,
-        har25ProsentRegelPeriode: Boolean = false
+        harMedlemskapsperioderIForegåendeÅr: Boolean
     ) : this(
         brevbestilling,
         behandlingstype,
@@ -90,10 +81,6 @@ class InnvilgelsePensjonistPliktigFtrl(
         ikkeYrkesaktivOppholdType,
         ikkeYrkesaktivRelasjonType,
         betalingsvalg,
-        harMedlemskapsperioderIForegåendeÅr,
-        minstebelopVerdi,
-        minstebelopAar,
-        harMinstebelopPeriode,
-        har25ProsentRegelPeriode
+        harMedlemskapsperioderIForegåendeÅr
     )
 }
