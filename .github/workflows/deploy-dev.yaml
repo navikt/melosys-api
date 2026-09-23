@@ -146,7 +146,6 @@ jobs:
     name: Trigger E2E tests
     runs-on: ubuntu-latest
     needs: [ build, deploy ]
-    if: always() && (needs.deploy.result == 'success' || needs.deploy.result == 'skipped')
     steps:
         -   name: Checkout latest code
             uses: actions/checkout@v7.0.1
@@ -163,6 +162,6 @@ jobs:
                       "repository": "melosys-api",
                       "image_tag": "${{ github.sha }}",
                       "commit_sha": "${{ github.sha }}",
-                      "commit_message": "${{ env.COMMIT_MSG }}",
+                      "commit_message": ${{ toJSON(env.COMMIT_MSG) }},
                       "actor": "${{ github.actor }}"
                     }
