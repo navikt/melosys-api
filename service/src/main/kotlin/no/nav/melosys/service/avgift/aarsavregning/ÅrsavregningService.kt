@@ -19,6 +19,7 @@ import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.FagsakService.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT
 import org.apache.commons.beanutils.BeanUtils
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.Instant
@@ -192,27 +193,9 @@ class ÅrsavregningService(
             behandlingsresultatService.lagre(årsavregning.hentBehandlingsresultat).hentÅrsavregning()
         }
 
-        nullstillArvetInnbetaltDersomÅretErFjernet(behandlingsresultat, årsavregning)
         settEndeligAvgiftTilNullDersomIngenAvgiftspliktigPeriode(behandlingsresultat, årsavregning)
 
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
-    }
-
-    /**
-     * Innbetalt beløp fra Avgiftssystemet arves fra forrige årsavregning for samme år. Når året er fjernet av en senere
-     * vurdering, er «tidligere fakturert» det som sist ble fastsatt i den årsavregningen, og innbetalingen inngår
-     * allerede der. Beholdes den, trekkes den fra en gang til i [Årsavregning.beregnTilFaktureringsBeloep]: leddet som
-     * legger tilbake forrige årsavregnings innbetaling slår bare inn når tidligereBehandlingsresultat er den
-     * årsavregningen, ikke vurderingen som fjernet året.
-     *
-     * Kalles kun ved opprettelse. Svarer saksbehandler selv på innbetalt-spørsmålet etterpå, respekteres det.
-     */
-    private fun nullstillArvetInnbetaltDersomÅretErFjernet(behandlingsresultat: Behandlingsresultat, årsavregning: Årsavregning) {
-        if (behandlingsresultat.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(årsavregning.aar)) return
-        if (!erÅretFjernetAvSenereVurdering(årsavregning)) return
-
-        årsavregning.innbetaltTrygdeavgift = null
-        årsavregning.harInnbetaltTrygdeavgift = false
     }
 
     /**
@@ -242,7 +225,7 @@ class ÅrsavregningService(
         }
 
         årsavregning.beregnetAvgiftBelop = BigDecimal.ZERO
-        årsavregning.beregnTilFaktureringsBeloep()
+        beregnTilFaktureringsBeloep(årsavregning)
     }
 
     /**
@@ -253,6 +236,22 @@ class ÅrsavregningService(
         val sisteVurdering = årsavregning.tidligereBehandlingsresultat ?: return false
         return sisteVurdering.behandling?.erÅrsavregning() == false
             && !sisteVurdering.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(årsavregning.aar)
+    }
+
+    /**
+     * Setter beregnet avgift etter en ny trygdeavgiftsberegning og regner ut beløp til fakturering.
+     * Manuelt fastsatt endelig avgift røres ikke. Endrer en entitet kalleren eier, så kalleren må ha en aktiv transaksjon.
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    fun oppdaterBeregnetAvgift(årsavregning: Årsavregning, totalAvgift: BigDecimal?) {
+        if (årsavregning.endeligAvgiftValg == EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT) return
+
+        årsavregning.beregnetAvgiftBelop = totalAvgift
+        if (totalAvgift != null) {
+            beregnTilFaktureringsBeloep(årsavregning)
+        } else {
+            årsavregning.tilFaktureringBeloep = null
+        }
     }
 
     fun hentSisteÅrsavregning(saksnummer: String, år: Int, førVedtaksdato: Instant? = null): Årsavregning? {
@@ -341,6 +340,21 @@ class ÅrsavregningService(
 
         behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
+    }
+
+    /**
+     * Beregner beløp til fakturering med innbetalt beløp fra siste vedtatte årsavregning for året. Oppslaget er det samme
+     * som [opprettEllerOppdaterÅrsavregning] arver innbetalt og tidligere fakturert fra, slik at det som legges tilbake
+     * alltid er det som ble arvet, uansett sakstype og om en senere vurdering står mellom årsavregningene.
+     */
+    internal fun beregnTilFaktureringsBeloep(årsavregning: Årsavregning) {
+        val behandlingsresultat = årsavregning.hentBehandlingsresultat
+        val sisteÅrsavregning = hentGjeldendeBehandlingsresultaterForÅrsavregning(
+            behandlingsresultat.hentBehandling().fagsak.saksnummer,
+            årsavregning.aar,
+            behandlingsresultat.vedtakMetadata?.vedtaksdato
+        )?.sisteÅrsavregning?.årsavregning
+        årsavregning.beregnTilFaktureringsBeloep(sisteÅrsavregning?.innbetaltTrygdeavgift)
     }
 
     private fun replikerMedlemskapsperioder(
@@ -651,7 +665,7 @@ class ÅrsavregningService(
             }
         }
 
-        årsavregning.beregnTilFaktureringsBeloep()
+        beregnTilFaktureringsBeloep(årsavregning)
 
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
     }
