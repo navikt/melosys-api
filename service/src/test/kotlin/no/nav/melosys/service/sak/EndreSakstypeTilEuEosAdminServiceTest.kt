@@ -47,6 +47,8 @@ class EndreSakstypeTilEuEosAdminServiceTest {
 
     private lateinit var service: EndreSakstypeTilEuEosAdminService
 
+    private val kandidater = mutableMapOf<Sakstyper, MutableList<String>>()
+
     @BeforeEach
     fun setUp() {
         service = EndreSakstypeTilEuEosAdminService(
@@ -119,8 +121,6 @@ class EndreSakstypeTilEuEosAdminServiceTest {
             ANNET_SAKSNUMMER to EndreSakstypeStatus.ENDRET
         )
     }
-
-    private val kandidater = mutableMapOf<Sakstyper, MutableList<String>>()
 
     private fun lagKandidat(saksnummer: String, sakstype: Sakstyper, behandlingstema: Behandlingstema) {
         val behandling = Behandling.forTest {

@@ -47,6 +47,30 @@ import java.time.LocalDate
 internal class DigitalSøknadMapperTest {
 
     @Nested
+    inner class SøknadUtenforEøs {
+
+        @Test
+        fun `tilSøknadUtenforEøs mapper samme felt som tilSoeknad`() {
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
+                data = arbeidstakerData(
+                    utsendingsperiodeOgLand = landOgPeriode(LandKode.GB, LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31)),
+                    skatteforholdOgInntekt = skatteforholdOgInntekt()
+                )
+            }
+
+            val eøs = DigitalSøknadMapper.tilSoeknad(dto)
+            val utenforEøs = DigitalSøknadMapper.tilSøknadUtenforEøs(dto)
+
+            utenforEøs.periode.fom shouldBe eøs.periode.fom
+            utenforEøs.periode.tom shouldBe eøs.periode.tom
+            utenforEøs.soeknadsland.landkoder shouldBe listOf("GB")
+            utenforEøs.juridiskArbeidsgiverNorge.ekstraArbeidsgivere shouldBe eøs.juridiskArbeidsgiverNorge.ekstraArbeidsgivere
+            utenforEøs.foretakUtland.size shouldBe eøs.foretakUtland.size
+        }
+    }
+
+    @Nested
     inner class PeriodeOgLand {
 
         @Test

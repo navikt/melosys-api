@@ -49,7 +49,8 @@ private val SØKNADSBEHANDLING_TYPER = setOf(
  *     - OPPRETTET/VURDER_DOKUMENT → kun oppdater mottatte opplysninger
  * 3b. Ingen åpen behandling:
  *     - Opprett ny behandling (NY_VURDERING) + mottatte opplysninger + oppgave
- *     Behandlingstema utledes fra søknaden bare på EU/EØS-saker; ellers beholdes temaet saken allerede har.
+ *    Behandlingstema utledes fra søknaden bare på EU/EØS-saker. På andre saker beholder åpen behandling
+ *    temaet sitt, og ny vurdering arver temaet fra siste behandling.
  * 4. Lagre mapping (skjemaId, originalData, innsendtDato)
  * 5. Sett behandling på prosessinstansen
  */
@@ -175,10 +176,16 @@ class HåndterEksisterendeSakDigitalSøknad(
         fagsak.leggTilBehandling(nyBehandling)
         log.info { "Opprettet behandling ${nyBehandling.id} (NY_VURDERING) på sak $saksnummer" }
 
-        val søknad = DigitalSøknadMapper.tilSoeknad(søknadsdata)
-        val mottatteOpplysninger = mottatteOpplysningerService.opprettSøknadDigital(
-            nyBehandling.id, null, søknad, referanseId
-        )
+        // Trygdeavtale- og FTRL-behandlinger bruker SøknadNorgeEllerUtenforEØS; kontroll, brev og medlemskapsperioder caster til den.
+        val mottatteOpplysninger = if (fagsak.type == Sakstyper.EU_EOS) {
+            mottatteOpplysningerService.opprettSøknadDigital(
+                nyBehandling.id, null, DigitalSøknadMapper.tilSoeknad(søknadsdata), referanseId
+            )
+        } else {
+            mottatteOpplysningerService.opprettSøknadDigitalUtenforEøs(
+                nyBehandling.id, null, DigitalSøknadMapper.tilSøknadUtenforEøs(søknadsdata), referanseId
+            )
+        }
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
             nyBehandling,
@@ -202,7 +209,7 @@ class HåndterEksisterendeSakDigitalSøknad(
         // Utlederen kjenner bare EØS-temaer. Er saken endret til trygdeavtale/FTRL etter første innsending,
         // ville et EØS-tema gi en kombinasjon som ikke har noen flyt i saksbehandlingen.
         val tema = temaFraSaken()
-        log.warn { "Digital søknad mottatt på ${fagsak.type}-sak ${fagsak.saksnummer}, beholder behandlingstema $tema" }
+        log.warn { "Digital søknad mottatt på ${fagsak.type}-sak ${fagsak.saksnummer}, bruker behandlingstema $tema fra saken" }
         return tema
     }
 }

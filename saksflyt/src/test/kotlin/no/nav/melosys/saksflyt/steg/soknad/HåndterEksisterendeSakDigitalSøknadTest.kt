@@ -356,12 +356,13 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             prosessinstans.behandling shouldBe behandling
         }
 
-        @Test
-        fun `ny vurdering arver behandlingstema fra siste behandling på saken`() {
+        @ParameterizedTest
+        @EnumSource(value = Sakstyper::class, names = ["TRYGDEAVTALE", "FTRL"])
+        fun `ny vurdering arver behandlingstema og får søknad for sakstypen`(sakstype: Sakstyper) {
             val avsluttetBehandling = lagBehandling(
                 Behandlingsstatus.AVSLUTTET,
                 behandlingstema = Behandlingstema.YRKESAKTIV,
-                sakstype = Sakstyper.TRYGDEAVTALE
+                sakstype = sakstype
             )
             val fagsak = lagFagsakMedBehandling(avsluttetBehandling)
             val nyBehandling = mockk<Behandling>(relaxed = true)
@@ -369,7 +370,9 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
 
             mockFagsakService(fagsak)
             mockNyVurderingOpprettelse(fagsak, nyBehandling, Behandlingstema.YRKESAKTIV)
-            mockOpprettMottatteOpplysningerForNyBehandling()
+            every {
+                mottatteOpplysningerService.opprettSøknadDigitalUtenforEøs(eq(99L), any(), any(), any())
+            } returns mockk<MottatteOpplysninger> { every { id } returns mottatteOpplysningerId }
             mockOppgaveOpprettelse()
 
             steg.utfør(prosessinstans)
@@ -380,6 +383,8 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
                     Behandlingstema.YRKESAKTIV, null, null, any(), any(), null
                 )
             }
+            verify { mottatteOpplysningerService.opprettSøknadDigitalUtenforEøs(99L, null, any(), søknadsdata.referanseId) }
+            verify(exactly = 0) { mottatteOpplysningerService.opprettSøknadDigital(any(), any(), any(), any()) }
             prosessinstans.behandling shouldBe nyBehandling
         }
     }
