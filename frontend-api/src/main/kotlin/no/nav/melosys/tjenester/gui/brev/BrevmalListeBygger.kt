@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui.brev
 
+import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
@@ -35,6 +36,8 @@ class BrevmalListeBygger(
     private val saksbehandlingRegler: SaksbehandlingRegler,
     private val utenlandskMyndighetService: UtenlandskMyndighetService
 ) {
+    private val log = KotlinLogging.logger { }
+
     fun byggBrevmalDtoListe(behandlingId: Long): List<BrevmalResponse> =
         hentTilgjengeligeMottakere(behandlingId).map { mottakerTilBrevmalDto(behandlingId, it) }
 
@@ -210,7 +213,10 @@ class BrevmalListeBygger(
             } else if (rolle == Mottakerroller.ARBEIDSGIVER) {
                 mottakerDto.feilmelding = FeilmeldingDto(ARBEIDSGIVER_MANGLER_ADRESSE)
             } else {
-                mottakerDto.feilmelding = FeilmeldingDto(e.message)
+                log.error(e) {
+                    "Kunne ikke hente mottakeropplysninger for behandling $behandlingId og rolle $rolle"
+                }
+                mottakerDto.feilmelding = FeilmeldingDto(KUNNE_IKKE_HENTE_MOTTAKEROPPLYSNINGER)
             }
         }
     }
@@ -383,6 +389,8 @@ class BrevmalListeBygger(
     companion object {
         private const val ARBEIDSGIVER_MANGLER_ADRESSE =
             "Finner ikke gyldig adresse til arbeidsgiver(e). Kontroller at arbeidsgiver(e) er lagt inn korrekt i sidemenyen"
+        private const val KUNNE_IKKE_HENTE_MOTTAKEROPPLYSNINGER =
+            "Kunne ikke hente opplysninger om mottakeren. Prøv igjen senere."
         private const val UTENLANDSK_TRYGDEMYNDIGHET_BEHANDLING_MANGLER_LAND =
             "Du må velge land på inngangssteget for å kunne sende brev til utenlandsk trygdemyndighet."
 
