@@ -1,16 +1,12 @@
 package no.nav.melosys.service.dokument.brev
 
-import io.getunleash.FakeUnleash
 import io.kotest.matchers.nulls.shouldBeNull
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.eessi.A008Formaal
 import no.nav.melosys.domain.eessi.sed.SedDataDto
 import org.junit.jupiter.api.Test
 
 class SedPdfDataTest {
-
-    val unleash = FakeUnleash().apply { enableAll() }
 
     @Test
     fun `utfyllSedDataDto setter a008Formaal på sedDataDto`() {
@@ -19,7 +15,7 @@ class SedPdfDataTest {
         }
         val sedDataDto = SedDataDto()
 
-        sedPdfData.utfyllSedDataDto(unleash, sedDataDto)
+        sedPdfData.utfyllSedDataDto(sedDataDto)
 
         sedDataDto.a008Formaal shouldBe A008Formaal.ARBEID_FLERE_LAND
     }
@@ -29,7 +25,7 @@ class SedPdfDataTest {
         val sedPdfData = SedPdfData()
         val sedDataDto = SedDataDto()
 
-        sedPdfData.utfyllSedDataDto(unleash, sedDataDto)
+        sedPdfData.utfyllSedDataDto(sedDataDto)
 
         sedDataDto.a008Formaal.shouldBeNull()
     }
@@ -41,7 +37,7 @@ class SedPdfDataTest {
         }
         val sedDataDto = SedDataDto()
 
-        sedPdfData.utfyllSedDataDto(unleash, sedDataDto)
+        sedPdfData.utfyllSedDataDto(sedDataDto)
 
         sedDataDto.ytterligereInformasjon shouldBe "Tilleggsinformasjon"
     }
@@ -55,7 +51,7 @@ class SedPdfDataTest {
         }
         val sedDataDto = SedDataDto()
 
-        sedPdfData.utfyllSedDataDto(unleash, sedDataDto)
+        sedPdfData.utfyllSedDataDto(sedDataDto)
 
         sedDataDto.utpekingAvvis!!.nyttLovvalgsland shouldBe "SE"
         sedDataDto.utpekingAvvis!!.begrunnelseUtenlandskMyndighet shouldBe "Begrunnelse"
@@ -67,7 +63,7 @@ class SedPdfDataTest {
         val sedPdfData = SedPdfData()
         val sedDataDto = SedDataDto()
 
-        sedPdfData.utfyllSedDataDto(unleash, sedDataDto)
+        sedPdfData.utfyllSedDataDto(sedDataDto)
 
         sedDataDto.utpekingAvvis!!.vilSendeAnmodningOmMerInformasjon shouldBe false
     }
@@ -79,7 +75,7 @@ class SedPdfDataTest {
         }
         val sedDataDto = SedDataDto()
 
-        sedPdfData.utfyllSedDataDto(unleash, sedDataDto)
+        sedPdfData.utfyllSedDataDto(sedDataDto)
 
         sedDataDto.erFjernarbeidTWFA shouldBe true
     }
@@ -89,7 +85,7 @@ class SedPdfDataTest {
         val sedPdfData = SedPdfData()
         val sedDataDto = SedDataDto()
 
-        sedPdfData.utfyllSedDataDto(unleash, sedDataDto)
+        sedPdfData.utfyllSedDataDto(sedDataDto)
 
         sedDataDto.erFjernarbeidTWFA.shouldBeNull()
     }
@@ -101,21 +97,8 @@ class SedPdfDataTest {
         }
         val sedDataDto = SedDataDto()
 
-        sedPdfData.utfyllSedDataDto(unleash, sedDataDto)
+        sedPdfData.utfyllSedDataDto(sedDataDto)
 
         sedDataDto.erFjernarbeidTWFA shouldBe false
-    }
-
-    @Test
-    fun `utfyllSedDataDto setter ikke erFjernarbeidTWFA når CDM 4_4 toggle er av`() {
-        val unleashMedToggleAv = FakeUnleash()
-        val sedPdfData = SedPdfData().apply {
-            erFjernarbeidTWFA = true
-        }
-        val sedDataDto = SedDataDto()
-
-        sedPdfData.utfyllSedDataDto(unleashMedToggleAv, sedDataDto)
-
-        sedDataDto.erFjernarbeidTWFA.shouldBeNull()
     }
 }

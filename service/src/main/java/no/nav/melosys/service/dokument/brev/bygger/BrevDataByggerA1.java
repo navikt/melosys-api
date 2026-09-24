@@ -15,12 +15,10 @@ import org.apache.commons.lang3.StringUtils;
 public class BrevDataByggerA1 implements BrevDataBygger {
     private final AvklartefaktaService avklartefaktaService;
     private final LandvelgerService landvelgerService;
-    private final boolean erCdm44;
 
-    public BrevDataByggerA1(AvklartefaktaService avklartefaktaService, LandvelgerService landvelgerService, boolean erCdm44) {
+    public BrevDataByggerA1(AvklartefaktaService avklartefaktaService, LandvelgerService landvelgerService) {
         this.avklartefaktaService = avklartefaktaService;
         this.landvelgerService = landvelgerService;
-        this.erCdm44 = erCdm44;
     }
 
     @Override
@@ -30,7 +28,6 @@ public class BrevDataByggerA1 implements BrevDataBygger {
         }
 
         BrevDataA1 brevData = new BrevDataA1();
-        brevData.setErCdm44(erCdm44);
         brevData.setPerson(dataGrunnlag.getPerson());
         brevData.setYrkesgruppe(avklartefaktaService.finnYrkesGruppe(dataGrunnlag.getBehandling().getId()).orElse(null));
         brevData.setBostedsadresse(dataGrunnlag.getBostedGrunnlag().finnBostedsadresse().orElse(null));

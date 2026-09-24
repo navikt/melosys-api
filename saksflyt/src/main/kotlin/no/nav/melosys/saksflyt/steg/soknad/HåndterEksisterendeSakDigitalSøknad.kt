@@ -22,6 +22,7 @@ import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.ZoneId
+import java.util.UUID
 
 private val log = KotlinLogging.logger { }
 
@@ -65,7 +66,9 @@ class HåndterEksisterendeSakDigitalSøknad(
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val søknadsdata = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.DIGITAL_SØKNADSDATA)
-        val saksnummer = prosessinstans.hentData(ProsessDataKey.SAKSNUMMER)
+        val relaterteIder = prosessinstans.hentData<List<UUID>>(ProsessDataKey.DIGITAL_SØKNAD_RELATERTE_SKJEMA_IDER)
+        val skjemaIder = relaterteIder + søknadsdata.skjema.id
+        val saksnummer = skjemaSakMappingService.finnMappetSaksnummerForSkjemaIder(skjemaIder)
         val referanseId = søknadsdata.referanseId
 
         val fagsak = fagsakService.hentFagsak(saksnummer)
@@ -134,7 +137,11 @@ class HåndterEksisterendeSakDigitalSøknad(
         }
 
         val nySoeknad = DigitalSøknadMapper.tilSoeknad(søknadsdata)
-        mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandling.id, nySoeknad)
+        mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(
+            behandling.id,
+            nySoeknad,
+            oppdaterArbeidssteder = DigitalSøknadMapper.harArbeidsgiverdel(søknadsdata)
+        )
 
         val mottatteOpplysninger = mottatteOpplysningerService.hentMottatteOpplysninger(behandling.id)
         return behandling to mottatteOpplysninger

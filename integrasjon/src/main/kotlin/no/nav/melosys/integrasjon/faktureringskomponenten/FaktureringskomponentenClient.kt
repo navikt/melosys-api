@@ -28,18 +28,20 @@ open class FaktureringskomponentenClient(private val webClient: WebClient) : Jso
     fun kansellerFakturaserie(
         referanse: String,
         saksbehandlerIdent: String,
-        årsavregningRef: List<String> = emptyList()
+        årsavregningRef: List<String> = emptyList(),
+        beskrivelse: String
     ) = webClient.post()
         .uri("/fakturaserier/{referanse}/kanseller", referanse)
         .header("Nav-User-Id", saksbehandlerIdent)
-        .bodyValue(KanselleringRequestDto(årsavregningRef))
+        .bodyValue(KanselleringRequestDto(årsavregningRef, beskrivelse))
         .retrieve()
         .bodyToMono<NyFakturaserieResponseDto>()
         .block()!!
 
     data class KanselleringRequestDto(
         @JsonProperty("årsavregningRef")
-        val årsavregningRef: List<String> = emptyList()
+        val årsavregningRef: List<String> = emptyList(),
+        val beskrivelse: String
     )
 
     fun oppdaterFakturaMottaker(referanse: String, fakturaMottakerDto: FakturaMottakerDto, saksbehandlerIdent: String? = null) =

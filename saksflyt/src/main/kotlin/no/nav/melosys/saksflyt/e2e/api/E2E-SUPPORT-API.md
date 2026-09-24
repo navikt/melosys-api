@@ -38,27 +38,104 @@ curl -X POST http://localhost:8080/internal/e2e/caches/clear
 
 ---
 
-### 2. Await Process Instances
+### 2. Process Instance Marker
 
-Waits for all saga process instances to complete, with failure detection.
+Returns a server timestamp to use as the `after` parameter on `/await`. Take it **before** the
+action that starts a process.
+
+**Endpoint:** `GET /internal/e2e/process-instances/marker`
+
+```bash
+curl http://localhost:8080/internal/e2e/process-instances/marker
+# {"marker":"2026-07-31T14:35:19.249748"}
+```
+
+The value is truncated to microseconds to match the precision of the `REGISTRERT_DATO` column
+(Oracle `TIMESTAMP(6)`), so an instance saved just after the marker can never round below it.
+
+---
+
+### 3. Await Process Instances
+
+Waits for saga process instances to complete, with failure detection.
 
 **Endpoint:** `GET /internal/e2e/process-instances/await`
 
 **Parameters:**
-- `timeoutSeconds` (optional, default: 30) - Maximum time to wait
-- `expectedInstances` (optional) - Minimum number of process instances expected. Useful for explicit coordination when you know exactly how many instances will be created.
+- `timeoutSeconds` (optional, default: 30) - Maximum time to wait. Also bounds the server-side wait.
+  Must be between 1 and 300; anything else is rejected with 400 rather than producing a nonsense
+  wait. Note that Playwright's own test timeout still applies on top: a call asking for 60 s inside
+  a test with the default 60 s budget gets killed before the server can report *why* it waited.
+- `after` (optional) - A marker from `/process-instances/marker`, taken **before** the action.
+  Only instances registered strictly after it count as the caller's own work.
+- `expectedNew` (optional, default: 1 when `after` is given) - How many post-marker instances must
+  exist. `0` means "drain": everything registered after the marker must be finished, but nothing new
+  is required.
+There is no longer an `expectedInstances` parameter. It counted instances in the whole 60-second
+window, which a previous test step satisfies just as well as the caller's own work — so it never
+coordinated on the action you had just triggered. Its last caller (`tests/core/sed-mottak.spec.ts`)
+moved to `after`, and the parameter was removed. A stale caller still sending it is **rejected with
+400** — the parameter is still declared for exactly that purpose, because Spring ignores unknown
+query parameters and the wait would otherwise degrade to the legacy contract without a sound.
+
+**Two contracts:**
+
+| | Without `after` (legacy) | With `after` (recommended) |
+|---|---|---|
+| What is waited for | everything registered in the last 60 s | only instances registered after the marker |
+| Can the previous step's work satisfy it? | **yes — this is the race** | no |
+| Initial settling delay | 200 ms (see config below) | skipped when `expectedNew > 0` |
+| Poll cadence | fixed 500 ms | 25 ms, backing off to 500 ms |
 
 **Usage:**
 ```bash
-# Wait up to 30 seconds (default)
+# Legacy: wait up to 30 seconds (default)
 curl http://localhost:8080/internal/e2e/process-instances/await
 
-# Wait up to 60 seconds
-curl http://localhost:8080/internal/e2e/process-instances/await?timeoutSeconds=60
+# Legacy: wait up to 60 seconds
+curl "http://localhost:8080/internal/e2e/process-instances/await?timeoutSeconds=60"
 
-# Wait for at least 2 specific instances to be created and completed
-curl http://localhost:8080/internal/e2e/process-instances/await?expectedInstances=2&timeoutSeconds=60
+# Race-free: marker BEFORE the action, then wait for what the action started
+MARKER=$(curl -s http://localhost:8080/internal/e2e/process-instances/marker | jq -r .marker)
+# ... trigger the action ...
+curl "http://localhost:8080/internal/e2e/process-instances/await?after=$MARKER&expectedNew=1"
+
+# Drain between tests: everything since the marker must be finished, nothing new required
+curl "http://localhost:8080/internal/e2e/process-instances/await?after=$MARKER&expectedNew=0"
 ```
+
+**Known limitations of the marker contract:**
+- Unfinished work registered *before* the marker is not waited for at all.
+- `expectedNew` is a minimum (`>=`). An action that fans out to N instances needs `expectedNew=N`;
+  there is no way to say "and nothing more will arrive".
+- A restarted instance (`ProsessStatus.RESTARTET`) reuses its row, and `REGISTRERT_DATO` is
+  `updatable = false`, so a restart is invisible to the marker and will time out with
+  "only 0 of 1 expected new process instance(s)".
+- The marker excludes the *previous step's* work, not any unrelated instance registered after it.
+  That is exact only because melosys-e2e-tests runs `workers: 1`.
+- **A reused marker is not rejected, only warned about.** A marker older than 60 s combined with
+  `expectedNew > 0` usually means it was hoisted out of a loop or reused for a second action — and
+  then instances from *before* the action satisfy the wait, which is the original race restored.
+  It cannot be a hard 400, because a slow action (a full UI flow) legitimately leaves the marker
+  more than 60 s old by the time `/await` is called. The response therefore carries a `warning`
+  field in addition to the server log, so it shows up in the test output where the author can see
+  it. Drains (`expectedNew=0`) never warn — their marker is old by design.
+- **The 60-second window does not apply in marker mode.** Legacy waits only on instances from the
+  last 60 s; with a marker, everything after the marker is watched no matter how old the test gets.
+  An instance that never reaches `FERDIG` therefore blocks the drain for the rest of the test
+  instead of ageing out of the window. That is deliberate — ageing out is how a stuck process used
+  to pass unnoticed — but it means a long test with a genuinely stuck process now fails in teardown.
+- The marker is a `LocalDateTime` in the **JVM's own zone**. That is normally harmless — the marker
+  and `REGISTRERT_DATO` come from the same JVM — except during the autumn DST fallback, where local
+  time steps backwards from 02:59 to 02:00. An instance registered *after* the marker then compares
+  as *before* it, and every wait in that hour times out.
+  Whether that hour is live depends on the zone, and the answer is not the obvious one: the
+  Dockerfile sets `-Duser.timezone=Europe/Oslo`, but melosys-docker-compose overwrites the whole
+  variable (`JAVA_TOOL_OPTIONS: ${JACOCO_AGENT_OPTS:-}`, docker-compose.yml), so the local stack
+  actually runs UTC and is safe. Verified 2026-08-18: host 21:06 CEST, marker `19:06`.
+  An api started directly on a developer machine (`mvn spring-boot:run`) runs Europe/Oslo and is
+  exposed. Don't rely on the compose override staying in place — if a wait times out inexplicably
+  on the night of the change, this is why.
 
 #### Response Scenarios
 
@@ -69,9 +146,15 @@ All process instances completed successfully:
   "status": "COMPLETED",
   "message": "All process instances completed successfully",
   "totalInstances": 10,
+  "newInstances": 1,
   "elapsedSeconds": 5
 }
 ```
+`newInstances` is the number of instances registered after `after`; it is `0` on the legacy contract.
+
+A `warning` field is added (on both `COMPLETED` and `TIMEOUT`) when the marker was more than 60 s
+old and `expectedNew > 0` — see "reused marker" above. Callers should surface it; the e2e helper
+prints it.
 
 ##### ❌ Failure (HTTP 500)
 One or more process instances failed:
@@ -106,11 +189,34 @@ Timeout reached before completion:
   "activeThreads": 2,
   "queueSize": 5,
   "totalInstances": 20,
+  "newInstances": 0,
   "notFinished": 7,
   "notFinishedIds": ["uuid1", "uuid2", ...],
   "elapsedSeconds": 30
 }
 ```
+With `after`, a timeout caused by too few new instances says so instead:
+`"Timeout after 30s: only 0 of 1 expected new process instance(s) were registered after <marker>"`.
+
+##### 🚫 Bad request (HTTP 400)
+Invalid parameter combinations are rejected rather than silently falling back to the racy path:
+blank `after`, `expectedNew` without `after`, negative `expectedNew`, a marker carrying a timezone
+or offset (the container clock is not the caller's), a marker in the future, and any `after` that is
+not the exact format handed out by `/process-instances/marker`.
+```json
+{
+  "status": "BAD_REQUEST",
+  "message": "'expectedNew' requires 'after' — without a marker there is nothing to count new instances from"
+}
+```
+
+---
+
+## Configuration
+
+| Property | Default | Purpose |
+|---|---|---|
+| `melosys.e2e.initial-settling-delay-ms` | `200` | How long `/await` waits before its first look on the legacy contract (and on `expectedNew=0` drains). Setting it to `0` makes the race the marker contract fixes reproducible on demand. |
 
 ---
 
@@ -118,7 +224,7 @@ Timeout reached before completion:
 
 ### Location
 ```
-saksflyt/src/main/kotlin/no/nav/melosys/saksflyt/e2esupport/E2ESupportController.kt
+saksflyt/src/main/kotlin/no/nav/melosys/saksflyt/e2e/api/E2ESupportController.kt
 ```
 
 ### Security
@@ -134,11 +240,29 @@ The endpoint monitors:
 4. **Event History**: `ProsessinstansHendelse` records for failure details
 
 ### Race Condition Protection
-The endpoint includes multiple safeguards to prevent false-positives:
-1. **Initial settling delay** (200ms) - allows database transactions to commit and tasks to be submitted to thread pool
+
+**With a marker (`after`)** — the marker *is* the coordination. Instances registered before the
+caller's action cannot satisfy the wait, and neither can an empty database, so `expectedNew`
+subsumes the safeguards below.
+
+**Without a marker (legacy)** the endpoint falls back to heuristics, and they are heuristics:
+1. **Initial settling delay** (200 ms) - allows database transactions to commit and tasks to be submitted to the thread pool
 2. **Recent instance filtering** - only monitors instances created within the last 60 seconds, ignoring stale test data
-3. **Active instance tracking** - must observe at least one active instance before claiming completion (unless `expectedInstances` is specified)
-4. **Expected count verification** - when `expectedInstances` is specified, ensures at least that many instances were created
+3. **Active instance tracking** - must observe at least one active instance, or at least one recent
+   instance, before claiming completion
+
+All three are what the marker replaces: the settling delay was in practice the only thing
+separating the caller's own work from the previous step's, and in a multi-step e2e test the
+60-second window is never empty, so 3 is trivially satisfied.
+
+The legacy contract is still sound for one job — draining trailing work (oppgave, brev) before an
+assertion, where there is no single action to take a marker around. It must not be used to wait on
+a specific action.
+
+**Sampling order matters:** `checkProcessStatus` reads the thread pool *before* the database.
+The reverse order can miss work entirely — a task that is running at the database read, then
+registers a child instance and finishes before the thread count is read, yields "nothing pending
+in the database" and "executor idle" at the same time.
 
 ---
 
@@ -240,8 +364,13 @@ curl "http://localhost:8080/internal/e2e/process-instances/await?timeoutSeconds=
 ## Implementation Notes
 
 ### Polling Configuration
-- **Polling interval**: 500ms - balances responsiveness with system load
-- **Initial settling delay**: 200ms - allows transactions to commit before first check
+- **Polling interval, legacy contract**: fixed 500 ms. Deliberately *not* faster: polling the legacy
+  path more often makes its race worse, since it more often samples the short window where the
+  previous step's work looks finished.
+- **Polling interval, marker contract**: 25 ms, doubling up to 500 ms. The marker wait starts before
+  the instance is even registered and usually resolves in tens of milliseconds.
+- **Initial settling delay**: 200 ms, configurable — skipped when `expectedNew > 0`, since demanding
+  new instances subsumes it
 - **Recent instance cutoff**: 60 seconds - only monitors recently created instances
 
 ### Error Message Truncation

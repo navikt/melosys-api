@@ -22,6 +22,7 @@ import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.AnnullerSakService
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -146,6 +147,16 @@ class AnnuleringNyVurderingEøsOgTrygdeavtaleIT(
         mockServer.verify(
             1,
             WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier/$fakturaserieReferanse/kanseller"))
+                .withRequestBody(
+                    WireMock.equalToJson(
+                        """
+                        {
+                          "årsavregningRef": [],
+                          "beskrivelse": "Opphør av medlemskap"
+                        }
+                        """
+                    )
+                )
         )
     }
 

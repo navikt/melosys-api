@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -19,6 +20,7 @@ import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.util.KodeverkUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.KonfliktException;
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveClient;
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveV2Client;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
@@ -195,6 +197,24 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         }
 
         oppgaveClient.oppdaterOppgave(oppgaveDto);
+    }
+
+    @Override
+    public String tildelOppgaveHvisEierEr(String oppgaveID, String saksbehandler, String forventetEier) {
+        OppgaveDto oppgaveDto = hentOppgaveDto(oppgaveID);
+        String faktiskEier = StringUtils.trimToNull(oppgaveDto.getTilordnetRessurs());
+        String normalisertForventetEier = StringUtils.trimToNull(forventetEier);
+
+        if (!Objects.equals(faktiskEier, normalisertForventetEier)) {
+            throw new KonfliktException(
+                "Oppgaven har skiftet saksbehandler siden siden ble lastet. Oppdater siden og prøv igjen."
+            );
+        }
+        if (!Objects.equals(faktiskEier, saksbehandler)) {
+            oppgaveDto.setTilordnetRessurs(saksbehandler);
+            oppgaveClient.oppdaterOppgave(oppgaveDto);
+        }
+        return faktiskEier;
     }
 
     @Override

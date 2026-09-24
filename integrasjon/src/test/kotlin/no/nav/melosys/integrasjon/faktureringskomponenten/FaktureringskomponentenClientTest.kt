@@ -186,7 +186,12 @@ class FaktureringskomponentenClientTest(
         )
 
         val nyFakturaserieResponseDto =
-            faktureringskomponentenClient.kansellerFakturaserie(referanse, "", listOf("ÅRSAVREGNING-2024-ABC123", "ÅRSAVREGNING-2023-XYZ789"))
+            faktureringskomponentenClient.kansellerFakturaserie(
+                referanse,
+                "",
+                listOf("ÅRSAVREGNING-2024-ABC123", "ÅRSAVREGNING-2023-XYZ789"),
+                "Opphør av medlemskap"
+            )
         nyFakturaserieResponseDto.fakturaserieReferanse.shouldBe("5689")
 
         serviceUnderTestMockServer.verify(
@@ -201,7 +206,42 @@ class FaktureringskomponentenClientTest(
                           "årsavregningRef": [
                             "ÅRSAVREGNING-2024-ABC123",
                             "ÅRSAVREGNING-2023-XYZ789"
-                          ]
+                          ],
+                          "beskrivelse": "Opphør av medlemskap"
+                        }
+                        """,
+                        true, false
+                    )
+                )
+        )
+    }
+
+    @Test
+    fun `kanseller fakturaserie med beskrivelse`() {
+        val referanse = "test-fakturaserie-referanse"
+
+        mockServer.stubFor(
+            any(anyUrl())
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("{ \"fakturaserieReferanse\": \"5689\" }")
+                )
+        )
+
+        val nyFakturaserieResponseDto =
+            faktureringskomponentenClient.kansellerFakturaserie(referanse, "", emptyList(), "Annullering av fakturert trygdeavgift")
+        nyFakturaserieResponseDto.fakturaserieReferanse.shouldBe("5689")
+
+        serviceUnderTestMockServer.verify(
+            postRequestedFor(urlEqualTo("/fakturaserier/$referanse/kanseller"))
+                .withRequestBody(
+                    equalToJson(
+                        """
+                        {
+                          "årsavregningRef": [],
+                          "beskrivelse": "Annullering av fakturert trygdeavgift"
                         }
                         """,
                         true, false

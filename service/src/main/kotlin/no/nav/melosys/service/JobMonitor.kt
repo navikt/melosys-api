@@ -4,7 +4,9 @@ import tools.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
 import java.time.Duration
 import java.time.LocalDateTime
+import java.util.Collections
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 private val log = KotlinLogging.logger {}
 
@@ -18,8 +20,10 @@ class JobMonitor<T : JobMonitor.Stats>(
         get() = shouldStopAtomic.get()
         set(value) = shouldStopAtomic.set(value)
 
-    @Volatile
-    private var isRunning: Boolean = false
+    private val isRunningAtomic = AtomicBoolean(false)
+
+    private val isRunning: Boolean
+        get() = isRunningAtomic.get()
 
     @Volatile
     private var startedAt: LocalDateTime? = null
@@ -27,25 +31,39 @@ class JobMonitor<T : JobMonitor.Stats>(
     @Volatile
     private var stoppedAt: LocalDateTime? = null
 
-    @Volatile
-    var errorCount: Int = 0
+    private val errorCountAtomic = AtomicInteger(0)
+
+    var errorCount: Int
+        get() = errorCountAtomic.get()
+        set(value) = errorCountAtomic.set(value)
 
     @Volatile
     var maxErrorsBeforeStop: Int = 0
 
+    /**
+     * Skrives fra jobbtråden mens `/status` kan serialisere samtidig fra en HTTP-tråd — en vanlig
+     * HashMap kan da kaste ConcurrentModificationException midt under rehashing.
+     *
+     * LinkedHashMap og ikke ConcurrentHashMap: rapportene leses med første feil først, og CHM har
+     * ingen rekkefølge. [status] kopierer under samme lås, så én respons er ett bilde.
+     */
     @Volatile
-    var exceptions: MutableMap<String, Int> = mutableMapOf()
+    var exceptions: MutableMap<String, Int> = Collections.synchronizedMap(LinkedHashMap())
 
+    /**
+     * Vakten mot to samtidige kjøringer. compareAndSet og ikke les-så-skriv: to kall i samme
+     * øyeblikk ville ellers begge kunnet passere, og for jobber som skriver gjøres arbeidet to ganger.
+     */
     fun execute(maxErrorsBeforeStop: Int = 0, block: T.() -> Unit) {
-        this.maxErrorsBeforeStop = maxErrorsBeforeStop
-        if (isRunning) {
+        if (!isRunningAtomic.compareAndSet(false, true)) {
             log.warn("Job '$jobName' is already running.")
             return
         }
-        isRunning = true
+        // Etter vakten: en avvist kjøring skal ikke endre terskelen til den som pågår.
+        this.maxErrorsBeforeStop = maxErrorsBeforeStop
         startedAt = LocalDateTime.now()
         stoppedAt = null
-        errorCount = 0
+        errorCountAtomic.set(0)
         exceptions.clear()
         stats.reset()
         return try {
@@ -54,7 +72,7 @@ class JobMonitor<T : JobMonitor.Stats>(
             log.error(ex) { "Job '$jobName' failed" }
             throw ex
         } finally {
-            isRunning = false
+            isRunningAtomic.set(false)
             shouldStop = false
             stoppedAt = LocalDateTime.now()
             log.info(
@@ -66,8 +84,8 @@ class JobMonitor<T : JobMonitor.Stats>(
 
     fun registerException(e: Throwable) {
         val msg = e.message ?: e::class.simpleName ?: "Unknown error"
-        exceptions[msg] = exceptions.getOrDefault(msg, 0) + 1
-        if (errorCount++ >= maxErrorsBeforeStop) {
+        synchronized(exceptions) { exceptions[msg] = exceptions.getOrDefault(msg, 0) + 1 }
+        if (errorCountAtomic.getAndIncrement() >= maxErrorsBeforeStop) {
             stop()
             log.error { "Stopping processing due to too many ($maxErrorsBeforeStop) errors" }
         }
@@ -86,7 +104,7 @@ class JobMonitor<T : JobMonitor.Stats>(
             "runtime" to startedAt.durationUntil(stoppedAt),
         ) + stats.asMap() + mapOf(
             "errorCount" to errorCount,
-            "exceptions" to exceptions
+            "exceptions" to synchronized(exceptions) { LinkedHashMap(exceptions) }
         )
 
     private fun Any.toJson() = jacksonObjectMapper()

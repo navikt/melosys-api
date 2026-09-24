@@ -22,7 +22,7 @@ import no.nav.melosys.domain.mottatteopplysninger.soeknad
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
-import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.behandling.ReplikerBehandlingsresultatService
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService
 import no.nav.melosys.service.persondata.PersondataFasade
@@ -48,9 +48,6 @@ class OppfriskSaksopplysningerServiceTest {
     lateinit var behandlingService: BehandlingService
 
     @RelaxedMockK
-    lateinit var behandlingsresultatService: BehandlingsresultatService
-
-    @RelaxedMockK
     lateinit var ufmKontrollService: UfmKontrollService
 
     @RelaxedMockK
@@ -71,6 +68,9 @@ class OppfriskSaksopplysningerServiceTest {
     @RelaxedMockK
     lateinit var helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService
 
+    @RelaxedMockK
+    lateinit var replikerBehandlingsresultatService: ReplikerBehandlingsresultatService
+
     private lateinit var oppfriskSaksopplysningerService: OppfriskSaksopplysningerService
     private lateinit var fakeUnleash: FakeUnleash
 
@@ -81,14 +81,14 @@ class OppfriskSaksopplysningerServiceTest {
         oppfriskSaksopplysningerService = OppfriskSaksopplysningerService(
             anmodningsperiodeService,
             behandlingService,
-            behandlingsresultatService,
             ufmKontrollService,
             inngangsvilkaarService,
             registeropplysningerService,
             persondataFasade,
             registeropplysningerFactory,
             årsavregningService,
-            helseutgiftDekkesPeriodeService
+            helseutgiftDekkesPeriodeService,
+            replikerBehandlingsresultatService
         )
     }
 
@@ -99,7 +99,7 @@ class OppfriskSaksopplysningerServiceTest {
 
         oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false)
 
-        verify { behandlingsresultatService.tømBehandlingsresultat(any()) }
+        verify { replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(any()) }
         verify { registeropplysningerService.slettRegisterOpplysninger(BEHANDLING_ID) }
         verify { registeropplysningerService.hentOgLagreOpplysninger(any<RegisteropplysningerRequest>()) }
     }
@@ -113,7 +113,7 @@ class OppfriskSaksopplysningerServiceTest {
 
         oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false)
 
-        verify { behandlingsresultatService.tømBehandlingsresultat(any()) }
+        verify { replikerBehandlingsresultatService.tilbakestillBehandlingsresultat(any()) }
         verify { registeropplysningerService.slettRegisterOpplysninger(BEHANDLING_ID) }
         verify(exactly = 0) { inngangsvilkaarService.vurderOgLagreInngangsvilkår(any(), any(), any(), any()) }
     }

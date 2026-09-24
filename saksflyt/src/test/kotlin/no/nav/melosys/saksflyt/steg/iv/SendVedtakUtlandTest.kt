@@ -72,6 +72,27 @@ class SendVedtakUtlandTest {
             SendVedtakUtland(eessiService, behandlingsresultatService, sedSomBrevService, utpekingService, prosessinstansService, landvelgerService, fakeUnleash)
     }
 
+    @Test
+    fun `utfør skal ikke sende TWFA-flagget selv om behandlingen har en anmodningsperiode med flagget satt`() {
+        // Ikke hypotetisk: en artikkel 16-sak som har fått svar får lovvalgsperiode på SAMME behandlingsresultat
+        // som anmodningsperioden, og havner her. De øvrige fiksturene i fila har ingen anmodningsperiode og
+        // ville passert uansett implementasjon, så uten anmodningsperioden under er testen vakuøs.
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns lagBehandlingsresultat {
+            anmodningsperiode { erFjernarbeidTWFA = true }
+        }
+        val prosessinstans = lagProsessinstans {
+            medData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITUSJON))
+        }
+
+
+        sendVedtakUtland.utfør(prosessinstans)
+
+
+        verify {
+            eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_04), eq(emptySet()), null, null, null)
+        }
+    }
+
     private fun lagBehandlingsresultat(
         init: BehandlingsresultatTestFactory.Builder.() -> Unit = {}
     ) = Behandlingsresultat.forTest {

@@ -21,6 +21,7 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.Beregningsaarsak
 import no.nav.melosys.integrasjon.trygdeavgift.dto.EkskludertInntektspostDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.Ekskluderingsaarsak
 import no.nav.melosys.integrasjon.trygdeavgift.dto.InntektspostDto
+import no.nav.melosys.integrasjon.trygdeavgift.dto.OrdinaerAvgiftPerDelDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.OrdinaerAvgiftspostDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.Inntektsgruppe
 import no.nav.melosys.service.avgift.BeregnetTrygdeavgiftMedForklaring
@@ -40,6 +41,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -66,6 +68,7 @@ class TrygdeavgiftControllerTest(
     private lateinit var eøsPensjonistTrygdeavgiftsBeregningService: EøsPensjonistTrygdeavgiftsberegningService
 
     private val BASE_URL = "/api/behandlinger/{behandlingID}/trygdeavgift"
+    private val PER_DEL = "$.beregningsforklaringer[0].ordinaerAvgiftPerDel"
     private val BEHANDLINGSRESULTAT_ID = 1L
     private val trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
 
@@ -130,18 +133,52 @@ class TrygdeavgiftControllerTest(
     }
 
     @Test
+    fun `ordinaer avgift per avgiftsdel serialiseres ut til frontend`() {
+        every { aksesskontroll.autoriserSkrivOgTilordnet(any()) } returns Unit
+
+        val forklaring = lagBeregningsforklaringDto().copy(
+            valgtRegel = Avgiftsberegningsregel.ORDINÆR,
+            ordinaerAvgift = 339600,
+            ordinaerAvgiftPerDel = listOf(
+                OrdinaerAvgiftPerDelDto(Inntektsgruppe.HELSEDEL, 81600),
+                OrdinaerAvgiftPerDelDto(Inntektsgruppe.PENSJONSDEL, 258000),
+            ),
+        )
+
+        every {
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgiftMedForklaring(
+                any(),
+                any<List<SkatteforholdTilNorge>>(),
+                any<List<Inntektsperiode>>()
+            )
+        } returns BeregnetTrygdeavgiftMedForklaring(trygdeavgiftsperioder, listOf(forklaring))
+
+        mockMvc.perform(
+            put("$BASE_URL/beregning", 1L)
+                .content(objectMapper.writeValueAsString(lagTrygdeavgiftsgrunnlagDto()))
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("${PER_DEL}.length()").value(2))
+            .andExpect(jsonPath("${PER_DEL}[0].inntektsgruppe").value("HELSEDEL"))
+            .andExpect(jsonPath("${PER_DEL}[0].ordinaerAvgift").value(81600))
+            .andExpect(jsonPath("${PER_DEL}[1].inntektsgruppe").value("PENSJONSDEL"))
+            .andExpect(jsonPath("${PER_DEL}[1].ordinaerAvgift").value(258000))
+    }
+
+    @Test
     fun beregnEøsPensjonistTrygdeavgift() {
         every { aksesskontroll.autoriserSkrivOgTilordnet(any()) } returns Unit
 
         val trygdeavgiftsgrunnlagDto = lagTrygdeavgiftsgrunnlagDto()
 
         every {
-            eøsPensjonistTrygdeavgiftsBeregningService.beregnOgLagreTrygdeavgift(
+            eøsPensjonistTrygdeavgiftsBeregningService.beregnOgLagreTrygdeavgiftMedForklaring(
                 any(),
                 any<List<SkatteforholdTilNorge>>(),
                 any<List<Inntektsperiode>>()
             )
-        } returns trygdeavgiftsperioder
+        } returns BeregnetTrygdeavgiftMedForklaring(trygdeavgiftsperioder, emptyList())
 
         mockMvc.perform(
             put("$BASE_URL/eos-pensjonist/beregning", 1L)
@@ -149,7 +186,78 @@ class TrygdeavgiftControllerTest(
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk)
-            .andExpectResponseBody(forventetBeregnetTrygdeavgiftDto())
+            .andExpectResponseBody(forventetEøsPensjonistBeregnetTrygdeavgiftDto())
+    }
+
+    @Test
+    fun `skal hente beregnet trygdeavgift for eos-pensjonist uten beregningsforklaringer`() {
+        every { aksesskontroll.autoriser(any()) } returns Unit
+        every { trygdeavgiftService.hentTrygdeavgiftsperioderForEosPensjonist(BEHANDLINGSRESULTAT_ID) } returns trygdeavgiftsperioder
+
+        mockMvc.perform(
+            get("$BASE_URL/eos-pensjonist/beregning", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpectResponseBody(forventetEøsPensjonistBeregnetTrygdeavgiftDto())
+    }
+
+    @Test
+    fun `skal beregne trygdeavgift for eos-pensjonist og inkludere beregningsforklaringer i responsen`() {
+        every { aksesskontroll.autoriserSkrivOgTilordnet(any()) } returns Unit
+
+        val trygdeavgiftsgrunnlagDto = lagTrygdeavgiftsgrunnlagDto()
+        val forklaring = lagBeregningsforklaringDto()
+
+        every {
+            eøsPensjonistTrygdeavgiftsBeregningService.beregnOgLagreTrygdeavgiftMedForklaring(
+                any(),
+                any<List<SkatteforholdTilNorge>>(),
+                any<List<Inntektsperiode>>()
+            )
+        } returns BeregnetTrygdeavgiftMedForklaring(trygdeavgiftsperioder, listOf(forklaring))
+
+        mockMvc.perform(
+            put("$BASE_URL/eos-pensjonist/beregning", 1L)
+                .content(objectMapper.writeValueAsString(trygdeavgiftsgrunnlagDto))
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpectResponseBody(
+                forventetEøsPensjonistBeregnetTrygdeavgiftDto(beregningsforklaringer = listOf(forklaring))
+            )
+    }
+
+    @Test
+    fun `eos-pensjonist-responsen sorterer trygdeavgiftsperioder på fom`() {
+        every { aksesskontroll.autoriserSkrivOgTilordnet(any()) } returns Unit
+
+        val tidligste = LocalDate.now()
+        val senere = LocalDate.now().plusMonths(6)
+        // Omvendt rekkefølge inn — ellers ville testen passert uten sortering.
+        val usorterte = linkedSetOf(lagTrygdeavgiftsperiodeFra(senere), lagTrygdeavgiftsperiodeFra(tidligste))
+
+        every {
+            eøsPensjonistTrygdeavgiftsBeregningService.beregnOgLagreTrygdeavgiftMedForklaring(
+                any(),
+                any<List<SkatteforholdTilNorge>>(),
+                any<List<Inntektsperiode>>()
+            )
+        } returns BeregnetTrygdeavgiftMedForklaring(usorterte, emptyList())
+
+        mockMvc.perform(
+            put("$BASE_URL/eos-pensjonist/beregning", 1L)
+                .content(objectMapper.writeValueAsString(lagTrygdeavgiftsgrunnlagDto()))
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpect { result ->
+                val perioder = objectMapper.readTree(result.response.contentAsString)["trygdeavgiftsperioder"]
+                val fomListe = perioder.values().map { it["fom"].asString() }
+                assert(fomListe == listOf(tidligste.toString(), senere.toString())) {
+                    "Forventet perioder sortert på fom, fikk: $fomListe"
+                }
+            }
     }
 
     @Test
@@ -246,6 +354,16 @@ class TrygdeavgiftControllerTest(
         )
     }
 
+    private fun forventetEøsPensjonistBeregnetTrygdeavgiftDto(
+        beregningsforklaringer: List<BeregningsforklaringDto> = emptyList(),
+    ): EøsPensjonistBeregnetTrygdeavgiftDto {
+        return EøsPensjonistBeregnetTrygdeavgiftDto(
+            trygdeavgiftsperioder.map { EøsPensjonistTrygdeavgiftsperiodeDto(it) }.sortedWith(compareBy { it.fom }),
+            lagTrygdeavgiftsgrunnlagDto(),
+            beregningsforklaringer,
+        )
+    }
+
     private fun lagTrygdeavgiftsgrunnlagDto(): TrygdeavgiftsgrunnlagDto {
         val skatteforholdTilNorgeDtos = trygdeavgiftsperioder
             .map { it.grunnlagSkatteforholdTilNorge }
@@ -281,6 +399,27 @@ class TrygdeavgiftControllerTest(
         }
 
         return setOf(trygdeavgift)
+    }
+
+    private fun lagTrygdeavgiftsperiodeFra(fom: LocalDate): Trygdeavgiftsperiode = Trygdeavgiftsperiode.forTest {
+        periodeFra = fom
+        periodeTil = fom.plusDays(10)
+        trygdesats = BigDecimal.valueOf(7.9)
+        trygdeavgiftsbeløpMd = BigDecimal.valueOf(10000.0)
+        medlemskapsperiode = medlemskapsperiodeForTest {
+            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+        }
+        grunnlagInntekstperiode {
+            fomDato = fom
+            tomDato = fom
+            type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+            avgiftspliktigTotalinntekt = Penger(5000.0)
+        }
+        grunnlagSkatteforholdTilNorge {
+            fomDato = fom
+            tomDato = fom
+            skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+        }
     }
 
     fun lagTrygdeavgiftsperiodeMedBeregningsregel(): Trygdeavgiftsperiode {
@@ -344,7 +483,5 @@ class TrygdeavgiftControllerTest(
     }
 
     private inline fun <reified T> ResultActions.andExpectResponseBody(expectedObject: T): ResultActions =
-        this.apply {
-            responseBody(objectMapper).containsObjectAsJson(expectedObject, T::class.java)
-        }
+        andExpect(responseBody(objectMapper).containsObjectAsJson(expectedObject, T::class.java))
 }

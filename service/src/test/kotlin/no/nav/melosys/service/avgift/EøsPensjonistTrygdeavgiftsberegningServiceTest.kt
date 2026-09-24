@@ -293,6 +293,234 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     }
 
     @Test
+    fun `beregnTrygdeavgift - EØS pensjonist - beregningsforklaring fra beregningsmotoren føres gjennom`() {
+        val behandling = lagBehandling {
+            fagsak {
+                medBruker()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+        }
+        val behandlingsresultat = lagBehandlingsresultat(behandling)
+        setupMocksForBehandling(behandling, behandlingsresultat)
+
+        val skatteforholdsperiode = skatteforholdForTest {
+            fomDato = FOM
+            tomDato = TOM
+            skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+        }
+
+        val inntektsperiode = inntektForTest {
+            fomDato = FOM
+            tomDato = TOM
+            type = Inntektskildetype.PENSJON
+            arbeidsgiversavgiftBetalesTilSkatt = false
+            avgiftspliktigMndInntekt = Penger(BigDecimal(10000.0))
+        }
+
+        val notSoRandomUuid = UUID.randomUUID()
+        val datoPeriodeDto = DatoPeriodeDto(FOM, TOM)
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID() } returns notSoRandomUuid
+
+        val forklaring = BeregningsforklaringDto(
+            aar = FOM.year,
+            inntektsgruppe = Inntektsgruppe.SAMLET,
+            valgtRegel = Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL,
+            aarsak = Beregningsaarsak.BEREGNET,
+            inntektsgrunnlag = emptyList(),
+            ekskluderteInntekter = emptyList(),
+            sumAarligInntekt = 600000,
+            minstebeloep = 99650,
+            inntektOverMinstebeloep = 500350,
+            maksimalAvgift25Prosent = 125087,
+            ordinaerAvgift = 46200,
+            fastsattAvgift = 46200,
+        )
+
+        every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
+        every { mockTrygdeavgiftClient.beregnTrygdeavgiftEosPensjonist(ofType(EøsPensjonistTrygdeavgiftsberegningRequest::class)) }.returns(
+            listOf(
+                EøsPensjonistTrygdeavgiftsberegningResponse(
+                    TrygdeavgiftsperiodeDto(
+                        DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
+                    ),
+                    EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                        datoPeriodeDto,
+                        notSoRandomUuid,
+                        notSoRandomUuid
+                    ),
+                    grunnlagListe = listOf(
+                        EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                            datoPeriodeDto,
+                            notSoRandomUuid,
+                            notSoRandomUuid
+                        )
+                    ),
+                    beregningsregel = Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL,
+                    beregningsforklaring = forklaring,
+                )
+            )
+        )
+        every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
+
+        val resultat = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgiftMedForklaring(
+            BEHANDLING_ID,
+            listOf(skatteforholdsperiode),
+            listOf(inntektsperiode)
+        )
+
+        resultat.trygdeavgiftsperioder.shouldHaveSize(1)
+        resultat.beregningsforklaringer shouldBe listOf(forklaring)
+    }
+
+    @Test
+    fun `beregnTrygdeavgift - EØS pensjonist - flere helseutgiftperioder i samme år gir ingen forklaring`() {
+        unleash.disableAll()
+        val aar = LocalDate.now().year - 1
+        val foersteFom = LocalDate.of(aar, 1, 1)
+        val foersteTom = LocalDate.of(aar, 5, 31)
+        val andreFom = LocalDate.of(aar, 7, 1)
+        val andreTom = LocalDate.of(aar, 12, 31)
+
+        val resultat = beregnMedToHelseutgiftperioder(
+            foerstePeriode = foersteFom to foersteTom,
+            andrePeriode = andreFom to andreTom,
+            foersteForklaring = lagForklaring(aar, sumAarligInntekt = 100000),
+            andreForklaring = lagForklaring(aar, sumAarligInntekt = 200000),
+        )
+
+        resultat.trygdeavgiftsperioder.shouldHaveSize(2)
+        resultat.beregningsforklaringer.shouldBeEmpty()
+    }
+
+    @Test
+    fun `beregnTrygdeavgift - EØS pensjonist - flere helseutgiftperioder med lik forklaring gir én forklaring`() {
+        unleash.disableAll()
+        val aar = LocalDate.now().year - 1
+        val forklaring = lagForklaring(aar, sumAarligInntekt = 100000)
+
+        val resultat = beregnMedToHelseutgiftperioder(
+            foerstePeriode = LocalDate.of(aar, 1, 1) to LocalDate.of(aar, 5, 31),
+            andrePeriode = LocalDate.of(aar, 7, 1) to LocalDate.of(aar, 12, 31),
+            foersteForklaring = forklaring,
+            andreForklaring = forklaring,
+        )
+
+        resultat.beregningsforklaringer shouldBe listOf(forklaring)
+    }
+
+    @Test
+    fun `beregnTrygdeavgift - EØS pensjonist - forklaringer fra flere år sorteres på år`() {
+        unleash.disableAll()
+        val nyesteAar = LocalDate.now().year - 1
+        val eldsteAar = nyesteAar - 1
+
+        val resultat = beregnMedToHelseutgiftperioder(
+            foerstePeriode = LocalDate.of(nyesteAar, 1, 1) to LocalDate.of(nyesteAar, 12, 31),
+            andrePeriode = LocalDate.of(eldsteAar, 1, 1) to LocalDate.of(eldsteAar, 12, 31),
+            foersteForklaring = lagForklaring(nyesteAar, sumAarligInntekt = 100000),
+            andreForklaring = lagForklaring(eldsteAar, sumAarligInntekt = 200000),
+        )
+
+        resultat.beregningsforklaringer.map { it.aar } shouldBe listOf(eldsteAar, nyesteAar)
+    }
+
+    private fun lagForklaring(aar: Int, sumAarligInntekt: Int) = BeregningsforklaringDto(
+        aar = aar,
+        inntektsgruppe = Inntektsgruppe.SAMLET,
+        valgtRegel = Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL,
+        aarsak = Beregningsaarsak.BEREGNET,
+        inntektsgrunnlag = emptyList(),
+        ekskluderteInntekter = emptyList(),
+        sumAarligInntekt = sumAarligInntekt,
+        minstebeloep = 99650,
+        inntektOverMinstebeloep = sumAarligInntekt - 99650,
+        maksimalAvgift25Prosent = 125087,
+        ordinaerAvgift = 46200,
+        fastsattAvgift = 46200,
+    )
+
+    // Motoren kalles én gang per helseutgiftDekkesPeriode, så returnsMany under følger periodene.
+    private fun beregnMedToHelseutgiftperioder(
+        foerstePeriode: Pair<LocalDate, LocalDate>,
+        andrePeriode: Pair<LocalDate, LocalDate>,
+        foersteForklaring: BeregningsforklaringDto,
+        andreForklaring: BeregningsforklaringDto,
+    ): BeregnetTrygdeavgiftMedForklaring {
+        val samletFom = minOf(foerstePeriode.first, andrePeriode.first)
+        val samletTom = maxOf(foerstePeriode.second, andrePeriode.second)
+
+        val behandling = lagBehandling {
+            fagsak {
+                medBruker()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+        }
+        val behandlingsresultat = lagBehandlingsresultat(
+            behandling,
+            fom = foerstePeriode.first,
+            tom = foerstePeriode.second,
+        ) {
+            helseutgiftDekkesPeriode {
+                id = 101L
+                fomDato = andrePeriode.first
+                tomDato = andrePeriode.second
+                bostedLandkode = Land_iso2.DK
+            }
+        }
+        setupMocksForBehandling(behandling, behandlingsresultat)
+
+        val skatteforholdsperiode = skatteforholdForTest {
+            fomDato = samletFom
+            tomDato = samletTom
+            skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+        }
+
+        val inntektsperiode = inntektForTest {
+            fomDato = samletFom
+            tomDato = samletTom
+            type = Inntektskildetype.PENSJON
+            arbeidsgiversavgiftBetalesTilSkatt = false
+            avgiftspliktigMndInntekt = Penger(BigDecimal(10000.0))
+        }
+
+        val notSoRandomUuid = UUID.randomUUID()
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID() } returns notSoRandomUuid
+
+        every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
+        every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
+        every { mockTrygdeavgiftClient.beregnTrygdeavgiftEosPensjonist(ofType(EøsPensjonistTrygdeavgiftsberegningRequest::class)) }
+            .returnsMany(
+                listOf(svarFraMotoren(foerstePeriode, notSoRandomUuid, foersteForklaring)),
+                listOf(svarFraMotoren(andrePeriode, notSoRandomUuid, andreForklaring)),
+            )
+
+        return trygdeavgiftsberegningService.beregnOgLagreTrygdeavgiftMedForklaring(
+            BEHANDLING_ID,
+            listOf(skatteforholdsperiode),
+            listOf(inntektsperiode)
+        )
+    }
+
+    private fun svarFraMotoren(
+        periode: Pair<LocalDate, LocalDate>,
+        grunnlagUuid: UUID,
+        forklaring: BeregningsforklaringDto,
+    ): EøsPensjonistTrygdeavgiftsberegningResponse {
+        val datoPeriodeDto = DatoPeriodeDto(periode.first, periode.second)
+        return EøsPensjonistTrygdeavgiftsberegningResponse(
+            TrygdeavgiftsperiodeDto(datoPeriodeDto, BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)),
+            EøsPensjonistTrygdeavgiftsgrunnlagDto(datoPeriodeDto, grunnlagUuid, grunnlagUuid),
+            grunnlagListe = listOf(EøsPensjonistTrygdeavgiftsgrunnlagDto(datoPeriodeDto, grunnlagUuid, grunnlagUuid)),
+            beregningsregel = Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL,
+            beregningsforklaring = forklaring,
+        )
+    }
+
+    @Test
     fun `beregnTrygdeavgift - EØS pensjonist skal betale Trygdeavgift - tidligere kalenderår skal forskuddsfaktureres - toggleAv`() {
         unleash.disableAll()
         val fomIFjor = FOM.minusYears(1)

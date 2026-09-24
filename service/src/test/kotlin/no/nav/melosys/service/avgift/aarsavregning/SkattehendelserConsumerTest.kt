@@ -25,6 +25,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.util.*
 
 
@@ -56,14 +58,18 @@ class SkattehendelserConsumerTest {
 
     @BeforeEach
     fun setUp() {
+        // Den delte servicen bygges ekte, ikke mocket: testene under er skrevet mot consumerens
+        // opprinnelige oppførsel, og de holder derfor bare hvis flyttingen dit var tapsfri.
         skattehendelserConsumer = SkattehendelserConsumer(
-            prosessinstansService,
             unleash,
-            fagsakService,
-            behandlingService,
-            behandlingsresultatService,
-            årsavregningService,
-            trygdeavgiftMottakerService
+            SkattepliktigAarsavregningOpprettelseService(
+                prosessinstansService,
+                fagsakService,
+                behandlingService,
+                behandlingsresultatService,
+                årsavregningService,
+                trygdeavgiftMottakerService
+            )
         )
     }
 
@@ -136,6 +142,8 @@ class SkattehendelserConsumerTest {
 
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(behandling.fagsak)
         every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
+        // Consumeren leser på nytt i samme transaksjon, så oppslaget gir samme entitet.
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
 
         val behandlingSlot = slot<Behandling>()
         every { behandlingService.lagre(capture(behandlingSlot)) } returns Unit
@@ -166,6 +174,59 @@ class SkattehendelserConsumerTest {
         verify { prosessinstansService wasNot Called }
         verify { behandlingService.lagre(behandling) }
         behandlingSlot.captured.status shouldBe Behandlingsstatus.VURDER_DOKUMENT
+    }
+
+    /** Consumeren skal sende statusen den observerte, ikke en hardkodet verdi. */
+    @Test
+    fun `status oppdateres ikke når behandlingen er flyttet videre etter oppslaget`() {
+        val fagsak = lagFagsak {
+            behandling {
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.UNDER_BEHANDLING
+            }
+        }
+        val behandling = fagsak.behandlinger.first()
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            this.behandling { id = behandling.id }
+            id = 2
+            type = Behandlingsresultattyper.IKKE_FASTSATT
+            årsavregning {
+                aar = GJELDER_ÅR
+            }
+        }
+
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
+        every {
+            årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(
+                FagsakTestFactory.SAKSNUMMER,
+                GJELDER_ÅR
+            )
+        } returns GjeldendeBehandlingsresultaterForÅrsavregning(
+            behandlingsresultat,
+            sisteBehandlingsresultatMedAvgift = behandlingsresultat,
+            sisteÅrsavregning = behandlingsresultat
+        )
+        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
+        // Saksbehandler har flyttet behandlingen videre siden oppslaget.
+        val flyttetBehandling = Behandling.forTest { status = Behandlingsstatus.IVERKSETTER_VEDTAK }
+        every { behandlingService.hentBehandling(behandling.id) } returns flyttetBehandling
+
+
+        skattehendelserConsumer.lesSkattehendelser(
+            ConsumerRecord(
+                "topic", 1, 1, "key", Skattehendelse(
+                    gjelderPeriode = GJELDER_ÅR.toString(),
+                    identifikator = AKTØR_ID,
+                    hendelsetype = "ny"
+                )
+            )
+        )
+
+
+        verify { prosessinstansService wasNot Called }
+        verify(exactly = 0) { behandlingService.lagre(any()) }
+        flyttetBehandling.status shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
     }
 
     @Test
@@ -243,6 +304,51 @@ class SkattehendelserConsumerTest {
         verify { behandlingService wasNot Called }
     }
 
+
+    @ParameterizedTest
+    @EnumSource(Behandlingsstatus::class, names = ["OPPRETTET", "AVVENT_DOK_PART"])
+    fun `behandling uten år tillater opprettelse og gjentatt hendelse bruker behandling med år`(status: Behandlingsstatus) {
+        val fagsak = lagFagsak {
+            behandling {
+                id = 41
+                type = Behandlingstyper.ÅRSAVREGNING
+                this.status = Behandlingsstatus.UNDER_BEHANDLING
+            }
+        }
+        val behandlingUtenÅr = fagsak.behandlinger.single()
+        val grunnlag = Behandlingsresultat.forTest { }
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
+        every { årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(fagsak.saksnummer, GJELDER_ÅR) } returns
+            GjeldendeBehandlingsresultaterForÅrsavregning(grunnlag, sisteBehandlingsresultatMedAvgift = grunnlag)
+        every { trygdeavgiftMottakerService.skalBetalesTilNav(grunnlag) } returns true
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingUtenÅr.id) } returns Behandlingsresultat.forTest { }
+        every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any(), any()) } returns UUID.randomUUID()
+        val hendelse = ConsumerRecord("topic", 1, 1, "key", Skattehendelse(GJELDER_ÅR.toString(), AKTØR_ID, "ny"))
+
+        skattehendelserConsumer.lesSkattehendelser(hendelse)
+
+        val behandlingMedÅr = Behandling.forTest {
+            id = 42
+            type = Behandlingstyper.ÅRSAVREGNING
+            this.status = status
+        }
+        fagsak.behandlinger.add(behandlingMedÅr)
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingMedÅr.id) } returns
+            Behandlingsresultat.forTest { årsavregning { aar = GJELDER_ÅR } }
+        every { behandlingService.hentBehandling(behandlingMedÅr.id) } returns behandlingMedÅr
+        every { behandlingService.lagre(behandlingMedÅr) } just Runs
+
+        skattehendelserConsumer.lesSkattehendelser(hendelse)
+
+        verify(exactly = 1) {
+            prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
+                fagsak.saksnummer, GJELDER_ÅR.toString(), Behandlingsaarsaktyper.MELDING_FRA_SKATT, true
+            )
+        }
+        verify(exactly = if (status == Behandlingsstatus.OPPRETTET) 0 else 1) { behandlingService.lagre(behandlingMedÅr) }
+        behandlingMedÅr.status shouldBe if (status == Behandlingsstatus.OPPRETTET) status else Behandlingsstatus.VURDER_DOKUMENT
+        behandlingUtenÅr.status shouldBe Behandlingsstatus.UNDER_BEHANDLING
+    }
 
     private fun lagFagsak(init: FagsakTestFactory.Builder.() -> Unit = {}) = Fagsak.forTest {
         type = Sakstyper.EU_EOS

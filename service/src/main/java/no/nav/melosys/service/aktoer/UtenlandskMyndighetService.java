@@ -33,8 +33,9 @@ public class UtenlandskMyndighetService {
     static {
         var utenlandskMyndighet = new UtenlandskMyndighet();
         utenlandskMyndighet.setNavn("Social Security Administration");
-        utenlandskMyndighet.setGateadresse1("Division of Training and Program Support");
-        utenlandskMyndighet.setGateadresse2("International Support Branch, NT 03-A-09 6100 Wabash Avenue");
+        utenlandskMyndighet.setGateadresse1("Compliance and Agreement Branch");
+        utenlandskMyndighet.setGateadresse2("International Support Branch, NT 03-A-09");
+        utenlandskMyndighet.setGateadresse3("6100 Wabash Avenue");
         utenlandskMyndighet.setPoststed("Baltimore MD 21215");
         utenlandskMyndighet.setLand("USA");
         utenlandskMyndighet.setLandkode(Land_iso2.US);
@@ -88,8 +89,8 @@ public class UtenlandskMyndighetService {
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
     }
 
-    public UtenlandskMyndighet hentUtenlandskMyndighetForInstitusjonID(String institusjonID) {
-        return hentUtenlandskMyndighet(UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonID));
+    public UtenlandskMyndighet hentUtenlandskMyndighetForInstitusjonID(String institusjonID, Produserbaredokumenter produserbaredokumenter) {
+        return hentUtenlandskMyndighet(UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonID), produserbaredokumenter);
     }
 
     public Map<UtenlandskMyndighet, Mottaker> lagUtenlandskeMyndigheterFraBehandling(Behandling behandling) {

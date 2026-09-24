@@ -27,17 +27,85 @@ frontend-api/src/main/kotlin/no/nav/melosys/tjenester/gui/
 
 ### Package Structure
 
+**Convention: the package path mirrors the API path.** A controller mapped to
+`/fagsaker/{saksnummer}/notater` belongs in `gui/fagsaker/notater/`. Its DTOs are placed
+alongside it in the same package, not in a shared DTO package.
+
+```
+/fagsaker/{saksnummer}/trygdeavgift        ->  gui/fagsaker/trygdeavgift/
+/behandlinger/{behandlingID}/trygdeavgift  ->  gui/behandlinger/trygdeavgift/
+/fagsaker/{saksnummer}/notater             ->  gui/fagsaker/notater/
+```
+
+Rationale: most DTOs serve exactly one controller, so a shared DTO package provides little reuse
+while inviting accidental coupling between unrelated endpoints. Keeping an endpoint's controller,
+DTOs and tests in one package means everything that changes together lives together.
+
+Note this is **not** package-by-feature. The packages follow the REST resource hierarchy, not the
+domain concept. Where the two disagree, the path wins: annual reconciliation is one domain feature
+but two resources, so it belongs in `gui/behandlinger/aarsavregninger/` and
+`gui/fagsaker/aarsavregninger/` rather than a single `gui/aarsavregning/`.
+
+### DTOs in the controller file
+
+Declare a controller's DTOs as top-level types **below the controller class in the same file**,
+as long as the file stays readable. A request DTO with two fields does not earn its own file.
+
+```kotlin
+@RestController
+@RequestMapping("/fagsaker")
+class BehandlingsnotatController(/* ... */) {
+    // endpoints
+}
+
+data class BehandlingsnotatPostDto(
+    val tekst: String,
+    val behandlingId: Long? = null,
+)
+```
+
+Existing examples: `BehandlingsnotatController.kt` (105 lines, 2 DTOs) and
+`PensjonsopptjeningController.kt` (60 lines, 2 DTOs).
+
+**Split the DTOs into their own files once the controller file grows past roughly 150 lines, or
+holds more than a handful of DTOs.** `aarsavregning/ÅrsavregningController.kt` shows the failure
+mode: 368 lines where the controller ends around line 290 and the rest is 11 data classes. At that
+point the DTOs should move to a `dto/` subpackage next to the controller, as
+`ftrl/medlemskapsperiode/dto/` does. Keep them in the controller's own package either way — the
+choice is file granularity, not package.
+
 | Package | Purpose |
 |---------|---------|
-| `gui/` | Root controllers |
-| `gui/dto/` | Request/response DTOs |
-| `gui/fagsaker/` | Case-related endpoints |
-| `gui/behandlinger/` | Treatment endpoints |
+| `gui/fagsaker/` | Case endpoints (`/fagsaker/**`) |
+| `gui/behandlinger/` | Treatment endpoints (`/behandlinger/**`) |
 | `gui/ftrl/` | FTRL (folketrygdloven) endpoints |
 | `gui/brev/` | Letter endpoints |
 | `gui/saksflyt/` | Process flow endpoints |
-| `gui/aarsavregning/` | Annual reconciliation endpoints |
-| `gui/unntakshandtering/` | Exception handling |
+| `gui/kodeverk/` | Code registry endpoints |
+| `gui/kontroll/` | Validation endpoints |
+| `gui/saksbehandling/` | Case processing endpoints |
+| `gui/avklartefakta/` | Clarified facts endpoints |
+| `gui/graphql/` | GraphQL endpoints, DTOs and mappers |
+| `gui/unntakshandtering/` | Exception handling (`ExceptionMapper`) |
+| `gui/config/` | Module configuration (OpenAPI, Jackson) |
+
+Known deviations, listed so they are not copied:
+
+| Package | Actual path | Where the rule would put it |
+|---------|-------------|------------------------------|
+| `gui/aarsavregning/` | `/behandlinger/{id}/aarsavregninger`, `/fagsaker/{saksnummer}/aarsavregninger` | `gui/behandlinger/aarsavregninger/`, `gui/fagsaker/aarsavregninger/` |
+| `gui/pensjonsopptjening/` | `/behandlinger/{id}/pensjonsopptjening` | `gui/behandlinger/pensjonsopptjening/` |
+| `gui/helseutgiftdekkesperiode/` | `/behandlinger/{id}/helseutgift-dekkes-perioder` | `gui/behandlinger/helseutgiftdekkesperioder/` |
+
+These are named after the domain concept rather than the resource — the package-by-feature instinct.
+
+Two legacy placements exist and should **not** be treated as patterns to follow:
+
+- `gui/` root holds 23 older controllers (mostly Java) that predate the convention.
+- `gui/dto/` holds ~105 DTOs from the same era. Do not add new DTOs here.
+
+When you touch code in either location, moving it to the path-mirroring package is a welcome
+cleanup — but keep it in a separate commit from any behavioural change.
 
 ## Controller Pattern
 

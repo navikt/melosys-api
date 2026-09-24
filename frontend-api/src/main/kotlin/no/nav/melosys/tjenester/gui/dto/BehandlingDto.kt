@@ -6,5 +6,10 @@ data class BehandlingDto(
     val oppsummering: BehandlingOppsummeringDto,
     val saksopplysninger: SaksopplysningerDto,
     val redigerbart: Boolean = false,
+    val tilordnetIdent: String? = null,
+    val tilordnetNavn: String? = null,
+    val tilordnetMeg: Boolean = false,
+    val kanTildeles: Boolean = false,
+    val tildelingTilgjengelig: Boolean = false,
 )
 

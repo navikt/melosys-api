@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.brev.bygger
 
-import io.getunleash.Unleash
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -36,12 +35,11 @@ class BrevDataByggerVelgerTest {
         val vilkaarsresultatService = mockk<VilkaarsresultatService>()
         val persondataFasade = mockk<PersondataFasade>()
         val mottatteOpplysningerService = mockk<MottatteOpplysningerService>()
-        val unleash = mockk<Unleash> { every { isEnabled(any<String>()) } returns false }
 
         brevDataByggerVelger = BrevDataByggerVelger(
             anmodningsperiodeService, avklartefaktaService,
             landvelgerService, lovvalgsperiodeService, saksopplysningerService, utenlandskMyndighetService,
-            utpekingService, vilkaarsresultatService, persondataFasade, mottatteOpplysningerService, unleash
+            utpekingService, vilkaarsresultatService, persondataFasade, mottatteOpplysningerService
         )
     }
 

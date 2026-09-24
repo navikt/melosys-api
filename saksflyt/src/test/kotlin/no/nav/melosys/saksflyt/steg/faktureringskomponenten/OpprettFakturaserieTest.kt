@@ -583,7 +583,8 @@ class OpprettFakturaserieTest {
             faktureringskomponentenClient.kansellerFakturaserie(
                 FAKTURASERIE_REFERANSE,
                 SAKSBEHANDLER_IDENT,
-                listOf(FAKTURASERIE_REFERANSE_ÅRSAVREGNING)
+                listOf(FAKTURASERIE_REFERANSE_ÅRSAVREGNING),
+                "Opphør av medlemskap"
             )
         } returns NyFakturaserieResponseDto(
             NY_FAKTURASERIE_REFERANSE
@@ -597,7 +598,8 @@ class OpprettFakturaserieTest {
             faktureringskomponentenClient.kansellerFakturaserie(
                 FAKTURASERIE_REFERANSE,
                 SAKSBEHANDLER_IDENT,
-                listOf(FAKTURASERIE_REFERANSE_ÅRSAVREGNING)
+                listOf(FAKTURASERIE_REFERANSE_ÅRSAVREGNING),
+                "Opphør av medlemskap"
             )
         }
         verify {
@@ -671,7 +673,8 @@ class OpprettFakturaserieTest {
             faktureringskomponentenClient.kansellerFakturaserie(
                 FAKTURASERIE_REFERANSE,
                 SAKSBEHANDLER_IDENT,
-                emptyList()
+                emptyList(),
+                "Opphør av medlemskap"
             )
         } returns NyFakturaserieResponseDto(NY_FAKTURASERIE_REFERANSE)
 
@@ -683,7 +686,8 @@ class OpprettFakturaserieTest {
             faktureringskomponentenClient.kansellerFakturaserie(
                 FAKTURASERIE_REFERANSE,
                 SAKSBEHANDLER_IDENT,
-                emptyList()
+                emptyList(),
+                "Opphør av medlemskap"
             )
         }
         verify(exactly = 0) { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) }
@@ -760,7 +764,8 @@ class OpprettFakturaserieTest {
             faktureringskomponentenClient.kansellerFakturaserie(
                 FAKTURASERIE_REFERANSE,
                 SAKSBEHANDLER_IDENT,
-                listOf(FAKTURASERIE_REFERANSE_ÅRSAVREGNING)
+                listOf(FAKTURASERIE_REFERANSE_ÅRSAVREGNING),
+                "Opphør av medlemskap"
             )
         } returns NyFakturaserieResponseDto(NY_FAKTURASERIE_REFERANSE)
 
@@ -772,7 +777,8 @@ class OpprettFakturaserieTest {
             faktureringskomponentenClient.kansellerFakturaserie(
                 FAKTURASERIE_REFERANSE,
                 SAKSBEHANDLER_IDENT,
-                listOf(FAKTURASERIE_REFERANSE_ÅRSAVREGNING)
+                listOf(FAKTURASERIE_REFERANSE_ÅRSAVREGNING),
+                "Opphør av medlemskap"
             )
         }
         verify {
@@ -847,7 +853,7 @@ class OpprettFakturaserieTest {
         opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 0) { faktureringskomponentenClient.kansellerFakturaserie(any(), any(), any()) }
+        verify(exactly = 0) { faktureringskomponentenClient.kansellerFakturaserie(any(), any(), any(), any()) }
         verify(exactly = 0) { behandlingsresultatService.lagre(any()) }
         verify(exactly = 1) { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID_ÅRSAVREGNING) }
         verify(exactly = 1) { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID_ÅRSAVREGNING, Behandlingsresultattyper.FERDIGBEHANDLET) }
@@ -1134,7 +1140,7 @@ class OpprettFakturaserieTest {
         opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 0) { faktureringskomponentenClient.kansellerFakturaserie(FAKTURASERIE_REFERANSE, SAKSBEHANDLER_IDENT, emptyList()) }
+        verify(exactly = 0) { faktureringskomponentenClient.kansellerFakturaserie(FAKTURASERIE_REFERANSE, SAKSBEHANDLER_IDENT, emptyList(), "Opphør av medlemskap") }
     }
 
     @Test

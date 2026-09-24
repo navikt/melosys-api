@@ -199,6 +199,48 @@ class OpprettOgJournalforBrevTest {
     }
 
     @Test
+    fun `utfør skal bruke særskilt mottakernavn for fritekstbrev til amerikansk trygdemyndighet`() {
+        val behandling = TestdataFactory.lagBehandling()
+        val institusjonID = "US:USA00000"
+        val utenlandskMyndighet = UtenlandskMyndighet().apply {
+            navn = "Social Security Administration"
+            landkode = no.nav.melosys.domain.kodeverk.Land_iso2.US
+        }
+        every { mockBehandlingService.hentBehandling(any()) } returns behandling
+        every { mockJoarkFasade.opprettJournalpost(capture(opprettJournalpostCaptor), any()) } returns "12234"
+        every { mockDokgenService.hentDokumentInfo(any()) } returns TestdataFactory.lagDokumentInfo()
+        every {
+            mockUtenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(
+                institusjonID,
+                UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV
+            )
+        } returns utenlandskMyndighet
+
+        val brevbestilling = FritekstbrevBrevbestilling.Builder()
+            .medProduserbartdokument(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV)
+            .medFritekstTittel("Request to remain subject to Norwegian legislation")
+            .build()
+        val mottaker = Mottaker(
+            rolle = Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET,
+            institusjonID = institusjonID
+        )
+        val prosessinstans = lagProsessinstansMedMottaker(behandling, mottaker, brevbestilling)
+
+        opprettJournalforBrev.utfør(prosessinstans)
+
+        verify {
+            mockUtenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(
+                institusjonID,
+                UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV
+            )
+        }
+        opprettJournalpostCaptor.captured.run {
+            korrespondansepartId shouldBe institusjonID
+            korrespondansepartNavn shouldBe "Social Security Administration"
+        }
+    }
+
+    @Test
     fun `utfør skal opprette og journalføre brev til fullmektig`() {
         val behandling = TestdataFactory.lagBehandling()
         every { mockBehandlingService.hentBehandling(any()) } returns behandling
