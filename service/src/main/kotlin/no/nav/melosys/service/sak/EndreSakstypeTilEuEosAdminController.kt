@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 
 private val log = KotlinLogging.logger { }
 
+// TODO MELOSYS-8309: Engangsretting. Fjern når sakene er rettet i prod.
 @Protected
 @RestController
 @Tags(

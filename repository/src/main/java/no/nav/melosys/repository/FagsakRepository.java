@@ -29,6 +29,7 @@ public interface FagsakRepository extends CrudRepository<Fagsak, String> {
     @Query("select f from Fagsak f, Aktoer a where a.fagsak = f and a.rolle = :rolle  and a.orgnr = :id")
     List<Fagsak> findByRolleAndOrgnr(@Param("rolle") Aktoersroller rolle, @Param("id") String orgnr);
 
+    // TODO MELOSYS-8309: Engangsretting. Fjern når sakene er rettet i prod.
     /** Saker fra digital søknad med sakstype {@code sakstype} og en aktiv behandling med tema utenfor {@code gyldigeTemaer}. */
     @Query("select distinct f.saksnummer from Fagsak f join f.behandlinger b " +
         "where f.type = :sakstype and b.status not in :inaktiveStatuser and b.tema not in :gyldigeTemaer " +

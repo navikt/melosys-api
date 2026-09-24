@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service
 
 private val log = KotlinLogging.logger { }
 
+// TODO MELOSYS-8309: Engangsretting. Fjern når sakene er rettet i prod.
 /**
  * Engangsretting for MELOSYS-8309: saker fra digital søknad som har fått sakstype TRYGDEAVTALE/FTRL med et
  * behandlingstema som ikke er gyldig for sakstypen, har ingen flyt og kan ikke åpnes. Finner slike saker selv og

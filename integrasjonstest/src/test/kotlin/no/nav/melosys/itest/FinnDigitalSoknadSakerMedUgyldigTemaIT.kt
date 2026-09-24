@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 
+// TODO MELOSYS-8309: Engangsretting. Fjern når sakene er rettet i prod.
 class FinnDigitalSoknadSakerMedUgyldigTemaIT(
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,

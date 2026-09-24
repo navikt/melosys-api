@@ -30,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 
+// TODO MELOSYS-8309: Engangsretting. Fjern når sakene er rettet i prod.
 @ExtendWith(MockKExtension::class)
 class EndreSakstypeTilEuEosAdminServiceTest {
 
