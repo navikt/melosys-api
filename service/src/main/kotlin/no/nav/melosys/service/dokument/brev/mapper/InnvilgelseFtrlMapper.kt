@@ -333,8 +333,8 @@ class InnvilgelseFtrlMapper(
     }
 
     /**
-     * Trygdeavgiftsperioder uten inntektsgrunnlag opprettes av skattepliktig-snarveien
-     * (pliktig medlem, skattepliktig, ingen inntekt – se SkattepliktigTrygdeavgiftsperiodeSplitter).
+     * Trygdeavgiftsperioder uten inntektsgrunnlag kan oppstå fordi bruker er skattepliktig
+     * (pliktig medlem, skattepliktig, ingen inntekt – se SkattepliktigTrygdeavgiftsperiodeSplitter.kt).
      * De har ingen avgift og ingen inntektskilde å vise i beregningstabellen, og kan ikke mappes
      * til avgiftsperiode-DTO-ene som krever inntektskildetype.
      */
@@ -392,7 +392,7 @@ class InnvilgelseFtrlMapper(
         if (trygdeavgiftmottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT) {
             return true
         }
-        return behandlingsresultat.trygdeavgiftsperioder.any { it.hentGrunnlagInntekstperiode().isArbeidsgiversavgiftBetalesTilSkatt }
+        return behandlingsresultat.trygdeavgiftsperioderMedInntektsgrunnlag().any { it.hentGrunnlagInntekstperiode().isArbeidsgiversavgiftBetalesTilSkatt }
     }
 
     private fun finnFullmektigTrygdeavgift(behandling: Behandling): String? {
