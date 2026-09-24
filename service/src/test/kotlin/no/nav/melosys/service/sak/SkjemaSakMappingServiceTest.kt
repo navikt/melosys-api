@@ -1,6 +1,5 @@
 package no.nav.melosys.service.sak
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.*
@@ -115,23 +114,83 @@ internal class SkjemaSakMappingServiceTest {
         }
 
         @Test
-        fun `flere mappinger med to gyldige saker kaster IllegalStateException`() {
+        fun `flere gyldige saker returnerer sist opprettede sak`() {
             val skjemaId1 = UUID.randomUUID()
             val skjemaId2 = UUID.randomUUID()
-            val saksnummer1 = "MEL-600"
-            val saksnummer2 = "MEL-700"
-            val mapping1 = lagSkjemaSakMapping(skjemaId = skjemaId1, saksnummer = saksnummer1)
-            val mapping2 = lagSkjemaSakMapping(skjemaId = skjemaId2, saksnummer = saksnummer2)
+            val skjemaId3 = UUID.randomUUID()
+            val saksnummerEldst = "MEL-600"
+            val saksnummerNyest = "MEL-700"
+            val saksnummerMidt = "MEL-800"
+            val mappinger = listOf(
+                lagSkjemaSakMapping(skjemaId = skjemaId1, saksnummer = saksnummerEldst),
+                lagSkjemaSakMapping(skjemaId = skjemaId2, saksnummer = saksnummerNyest),
+                lagSkjemaSakMapping(skjemaId = skjemaId3, saksnummer = saksnummerMidt),
+            )
+            val skjemaIder = listOf(skjemaId1, skjemaId2, skjemaId3)
 
-            val fagsak1 = Fagsak.forTest { this.saksnummer = saksnummer1; status = Saksstatuser.OPPRETTET }
-            val fagsak2 = Fagsak.forTest { this.saksnummer = saksnummer2; status = Saksstatuser.LOVVALG_AVKLART }
-
-            every { skjemaSakMappingRepository.findBySkjemaIdIn(listOf(skjemaId1, skjemaId2)) } returns listOf(mapping1, mapping2)
-            every { fagsakRepository.findAllBySaksnummerIn(listOf(saksnummer1, saksnummer2)) } returns listOf(fagsak1, fagsak2)
-
-            shouldThrow<IllegalStateException> {
-                service.finnMappetSaksnummerForSkjemaIder(listOf(skjemaId1, skjemaId2))
+            val fagsakEldst = Fagsak.forTest {
+                saksnummer = saksnummerEldst
+                status = Saksstatuser.LOVVALG_AVKLART
+                registrertDato = Instant.parse("2026-06-01T10:00:00Z")
             }
+            val fagsakNyest = Fagsak.forTest {
+                saksnummer = saksnummerNyest
+                status = Saksstatuser.OPPRETTET
+                registrertDato = Instant.parse("2026-09-01T10:00:00Z")
+            }
+            val fagsakMidt = Fagsak.forTest {
+                saksnummer = saksnummerMidt
+                status = Saksstatuser.OPPRETTET
+                registrertDato = Instant.parse("2026-08-01T10:00:00Z")
+            }
+
+            every { skjemaSakMappingRepository.findBySkjemaIdIn(skjemaIder) } returns mappinger
+            every {
+                fagsakRepository.findAllBySaksnummerIn(listOf(saksnummerEldst, saksnummerNyest, saksnummerMidt))
+            } returns listOf(fagsakEldst, fagsakNyest, fagsakMidt)
+
+            service.finnMappetSaksnummerForSkjemaIder(skjemaIder) shouldBe saksnummerNyest
+        }
+
+        @Test
+        fun `flere gyldige saker ignorerer nyere avsluttet sak`() {
+            val skjemaId1 = UUID.randomUUID()
+            val skjemaId2 = UUID.randomUUID()
+            val skjemaId3 = UUID.randomUUID()
+            val saksnummerGyldigEldst = "MEL-900"
+            val saksnummerGyldigNyest = "MEL-901"
+            val saksnummerAvsluttet = "MEL-902"
+            val mappinger = listOf(
+                lagSkjemaSakMapping(skjemaId = skjemaId1, saksnummer = saksnummerGyldigEldst),
+                lagSkjemaSakMapping(skjemaId = skjemaId2, saksnummer = saksnummerGyldigNyest),
+                lagSkjemaSakMapping(skjemaId = skjemaId3, saksnummer = saksnummerAvsluttet),
+            )
+            val skjemaIder = listOf(skjemaId1, skjemaId2, skjemaId3)
+
+            val fagsaker = listOf(
+                Fagsak.forTest {
+                    saksnummer = saksnummerGyldigEldst
+                    status = Saksstatuser.LOVVALG_AVKLART
+                    registrertDato = Instant.parse("2026-06-01T10:00:00Z")
+                },
+                Fagsak.forTest {
+                    saksnummer = saksnummerGyldigNyest
+                    status = Saksstatuser.OPPRETTET
+                    registrertDato = Instant.parse("2026-08-01T10:00:00Z")
+                },
+                Fagsak.forTest {
+                    saksnummer = saksnummerAvsluttet
+                    status = Saksstatuser.AVSLUTTET
+                    registrertDato = Instant.parse("2026-09-01T10:00:00Z")
+                },
+            )
+
+            every { skjemaSakMappingRepository.findBySkjemaIdIn(skjemaIder) } returns mappinger
+            every {
+                fagsakRepository.findAllBySaksnummerIn(listOf(saksnummerGyldigEldst, saksnummerGyldigNyest, saksnummerAvsluttet))
+            } returns fagsaker
+
+            service.finnMappetSaksnummerForSkjemaIder(skjemaIder) shouldBe saksnummerGyldigNyest
         }
     }
 

@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.soknad
 
 import tools.jackson.databind.json.JsonMapper
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
@@ -216,21 +215,6 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
 
             verify { behandlingService.nyBehandling(fagsak, any(), eq(Behandlingstyper.NY_VURDERING), any(), any(), any(), any(), any(), any()) }
             prosessinstans.behandling shouldBe nyBehandling
-        }
-    }
-
-    @Nested
-    inner class FlereGyldigeSaker {
-
-        @Test
-        fun `kaster IllegalStateException når mapping-tjenesten finner flere gyldige saksnumre`() {
-            val prosessinstans = lagProsessinstans()
-            every { skjemaSakMappingService.finnMappetSaksnummerForSkjemaIder(any()) } throws
-                IllegalStateException("Fant 2 åpne saker for relaterte skjemaIder — forventet maks 1")
-
-            shouldThrow<IllegalStateException> { steg.utfør(prosessinstans) }
-
-            verify(exactly = 0) { fagsakService.hentFagsak(any()) }
         }
     }
 

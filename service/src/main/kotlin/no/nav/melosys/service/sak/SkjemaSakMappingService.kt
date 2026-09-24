@@ -24,17 +24,18 @@ class SkjemaSakMappingService(
     private val gyldigeSaksstatuser = setOf(Saksstatuser.OPPRETTET, Saksstatuser.LOVVALG_AVKLART)
 
     @Transactional(readOnly = true)
-    fun harMappingMedGyldigSaksnummerForSkjemaId(skjemaIder: Collection<UUID>): Boolean = finnGyldigeSaksnummerForSkjemaIder(skjemaIder).isNotEmpty()
+    fun harMappingMedGyldigSaksnummerForSkjemaId(skjemaIder: Collection<UUID>): Boolean = finnGyldigeSakerForSkjemaIder(skjemaIder).isNotEmpty()
 
     /**
      * Finner saksnummer for relaterte skjemaId-er, men kun hvis saken har gyldig status
      * (OPPRETTET eller LOVVALG_AVKLART).
      *
-     * Kaster exception hvis flere åpne saker finnes — det indikerer datainkonsistens.
+     * Hvis flere åpne saker finnes (f.eks. når en innsendt del overlapper med perioder fra flere
+     * saker), velges den sist opprettede saken og det logges en warning.
      */
     @Transactional(readOnly = true)
     fun finnMappetSaksnummerForSkjemaIder(skjemaIder: Collection<UUID>): String? {
-        val gyldige = finnGyldigeSaksnummerForSkjemaIder(skjemaIder)
+        val gyldige = finnGyldigeSakerForSkjemaIder(skjemaIder)
 
         return when {
             gyldige.isEmpty() -> {
@@ -42,16 +43,21 @@ class SkjemaSakMappingService(
                 null
             }
             gyldige.size == 1 -> {
-                log.info { "Fant gyldig sak ${gyldige.first()} for skjemaIder" }
-                gyldige.first()
+                log.info { "Fant gyldig sak ${gyldige.first().saksnummer} for skjemaIder" }
+                gyldige.first().saksnummer
             }
-            else -> throw IllegalStateException(
-                "Fant ${gyldige.size} åpne saker (${gyldige.joinToString()}) for relaterte skjemaIder — forventet maks 1"
-            )
+            else -> {
+                val sistOpprettet = gyldige.maxBy { it.registrertDato }
+                log.warn {
+                    "Fant ${gyldige.size} åpne saker (${gyldige.joinToString { it.saksnummer }}) for relaterte skjemaIder " +
+                        "$skjemaIder — velger sist opprettede sak ${sistOpprettet.saksnummer}"
+                }
+                sistOpprettet.saksnummer
+            }
         }
     }
 
-    private fun finnGyldigeSaksnummerForSkjemaIder(skjemaIder: Collection<UUID>): List<String> {
+    private fun finnGyldigeSakerForSkjemaIder(skjemaIder: Collection<UUID>): List<Fagsak> {
         if (skjemaIder.isEmpty()) return emptyList()
 
         val mappinger = skjemaSakMappingRepository.findBySkjemaIdIn(skjemaIder)
@@ -61,7 +67,6 @@ class SkjemaSakMappingService(
 
         return fagsakRepository.findAllBySaksnummerIn(saksnumre)
             .filter { it.status in gyldigeSaksstatuser }
-            .map { it.saksnummer }
     }
 
     @Transactional
