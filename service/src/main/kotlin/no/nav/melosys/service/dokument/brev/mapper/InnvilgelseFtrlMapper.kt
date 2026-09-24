@@ -320,16 +320,26 @@ class InnvilgelseFtrlMapper(
 
 
     private fun mapAvgiftsPerioder(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodeDto> {
+        val perioderMedInntekt = behandlingsresultat.trygdeavgiftsperioderMedInntektsgrunnlag()
         val perioder = if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
-            val gruppertePerioder = behandlingsresultat.trygdeavgiftsperioder.groupBy { it.periodeTil.year }
+            val gruppertePerioder = perioderMedInntekt.groupBy { it.periodeTil.year }
             val valgtÅr = velgRelevantÅr(gruppertePerioder.keys, LocalDate.now().year)
             gruppertePerioder[valgtÅr] ?: emptyList()
         } else {
-            behandlingsresultat.trygdeavgiftsperioder.toList()
+            perioderMedInntekt
         }
 
         return perioder.map { it.toAvgiftsperiodeDto() }.sortedByDescending { it.fom }
     }
+
+    /**
+     * Trygdeavgiftsperioder uten inntektsgrunnlag opprettes av skattepliktig-snarveien
+     * (pliktig medlem, skattepliktig, ingen inntekt – se SkattepliktigTrygdeavgiftsperiodeSplitter).
+     * De har ingen avgift og ingen inntektskilde å vise i beregningstabellen, og kan ikke mappes
+     * til avgiftsperiode-DTO-ene som krever inntektskildetype.
+     */
+    private fun Behandlingsresultat.trygdeavgiftsperioderMedInntektsgrunnlag(): List<Trygdeavgiftsperiode> =
+        trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }
 
     private fun velgRelevantÅr(tilgjengeligeÅr: Set<Int>, inneværendeÅr: Int): Int = when {
         inneværendeÅr in tilgjengeligeÅr -> inneværendeÅr
@@ -352,7 +362,7 @@ class InnvilgelseFtrlMapper(
     }
 
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodePensjonist> {
-        val gruppertePerioder = behandlingsresultat.trygdeavgiftsperioder.groupBy { it.periodeTil.year }
+        val gruppertePerioder = behandlingsresultat.trygdeavgiftsperioderMedInntektsgrunnlag().groupBy { it.periodeTil.year }
         val valgtÅr = velgRelevantÅr(gruppertePerioder.keys, LocalDate.now().year)
 
         return gruppertePerioder[valgtÅr]
