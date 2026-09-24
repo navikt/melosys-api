@@ -59,9 +59,9 @@ class SkattepliktigeAarsavregningKjoering(
         skattehendelser: List<SkattehendelseItem>,
         skarp: Boolean = false,
         maksAntall: Int? = null,
-        hoppOverSakerMedAarsavregning: Boolean = false,
+        hoppOverSakerMedÅrsavregning: Boolean = false,
     ) {
-        prosesserSkattehendelser(skattehendelser, skarp, maksAntall, hoppOverSakerMedAarsavregning)
+        prosesserSkattehendelser(skattehendelser, skarp, maksAntall, hoppOverSakerMedÅrsavregning)
     }
 
     /**
@@ -77,9 +77,9 @@ class SkattepliktigeAarsavregningKjoering(
         publisertEtter: LocalDateTime?,
         skarp: Boolean = false,
         maksAntall: Int? = null,
-        hoppOverSakerMedAarsavregning: Boolean = false,
+        hoppOverSakerMedÅrsavregning: Boolean = false,
         personIder: Set<Long>? = null,
-    ) = kjør(skarp, maksAntall, hoppOverSakerMedAarsavregning) {
+    ) = kjør(skarp, maksAntall, hoppOverSakerMedÅrsavregning) {
         val hentet = skattehendelserClient.hentSkattepliktige(gjelderÅr, årFilter, publisertEtter).skattepliktige
         val valgte = if (personIder == null) hentet else hentet.filter { it.personId in personIder }
         if (personIder != null) {
@@ -101,13 +101,13 @@ class SkattepliktigeAarsavregningKjoering(
          * sak med avsluttet årsavregning en ny årsavregning og et nytt innhentingsbrev, og en aktiv
          * behandling settes til VURDER_DOKUMENT.
          */
-        hoppOverSakerMedAarsavregning: Boolean = false,
-    ) = kjør(skarp, maksAntall, hoppOverSakerMedAarsavregning) { skattehendelser }
+        hoppOverSakerMedÅrsavregning: Boolean = false,
+    ) = kjør(skarp, maksAntall, hoppOverSakerMedÅrsavregning) { skattehendelser }
 
     private fun kjør(
         skarp: Boolean,
         maksAntall: Int?,
-        hoppOverSakerMedAarsavregning: Boolean,
+        hoppOverSakerMedÅrsavregning: Boolean,
         hentSkattehendelser: JobStatus.() -> List<SkattehendelseItem>,
     ) = runAsSystem {
         val modus = if (skarp) "SKARP" else "DRYRUN"
@@ -119,7 +119,7 @@ class SkattepliktigeAarsavregningKjoering(
             resultater.clear()
             this.skarp = skarp
             this.maksAntall = maksAntall
-            this.hoppOverSakerMedAarsavregning = hoppOverSakerMedAarsavregning
+            this.hoppOverSakerMedAarsavregning = hoppOverSakerMedÅrsavregning
             val skattehendelser = try {
                 hentSkattehendelser()
             } catch (e: Exception) {
@@ -130,7 +130,7 @@ class SkattepliktigeAarsavregningKjoering(
             }
             log.info {
                 "Starter $modus for ${skattehendelser.size} skattehendelser, maksAntall=$maksAntall, " +
-                    "hoppOverSakerMedAarsavregning=$hoppOverSakerMedAarsavregning"
+                    "hoppOverSakerMedAarsavregning=$hoppOverSakerMedÅrsavregning"
             }
             antallInputHendelser = skattehendelser.size
 
@@ -230,7 +230,7 @@ class SkattepliktigeAarsavregningKjoering(
                             }
                             antallSakerFunnet++
                             try {
-                                if (hoppOverSakerMedAarsavregning && opprettelseService.harÅrsavregningForÅr(fagsak, år)) {
+                                if (hoppOverSakerMedÅrsavregning && opprettelseService.harÅrsavregningForÅr(fagsak, år)) {
                                     antallSakerHoppetOverPgaAarsavregning++
                                     resultater.add(
                                         SakResultat(
@@ -392,7 +392,7 @@ class SkattepliktigeAarsavregningKjoering(
                 "modus" to modus,
                 "skarp" to skarp,
                 "maksAntall" to maksAntall,
-                "hoppOverSakerMedAarsavregning" to hoppOverSakerMedAarsavregning,
+                "hoppOverSakerMedAarsavregning" to hoppOverSakerMedÅrsavregning,
                 "feilVedHenting" to feilVedHenting,
                 "personIderIkkeFunnet" to personIderIkkeFunnet,
                 "antallInputHendelser" to antallInputHendelser,

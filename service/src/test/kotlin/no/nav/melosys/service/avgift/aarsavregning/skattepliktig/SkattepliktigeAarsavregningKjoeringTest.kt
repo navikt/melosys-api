@@ -437,7 +437,7 @@ class SkattepliktigeAarsavregningKjoeringTest {
             listOf(SkattehendelseItem(gjelderPeriode = GJELDER_ÅR.toString(), identifikator = AKTØR_ID, personId = 7)),
             skarp = true,
             maksAntall = 5,
-            hoppOverSakerMedAarsavregning = true,
+            hoppOverSakerMedÅrsavregning = true,
         )
 
         verify(exactly = 0) { utfoerer.opprettProsessinstans(any(), any()) }
@@ -466,7 +466,7 @@ class SkattepliktigeAarsavregningKjoeringTest {
             listOf(SkattehendelseItem(GJELDER_ÅR.toString(), AKTØR_ID)),
             skarp = true,
             maksAntall = 1,
-            hoppOverSakerMedAarsavregning = true,
+            hoppOverSakerMedÅrsavregning = true,
         )
 
         verify(exactly = 1) { utfoerer.opprettProsessinstans("MEL-2", GJELDER_ÅR.toString()) }
@@ -493,7 +493,7 @@ class SkattepliktigeAarsavregningKjoeringTest {
                 ),
                 skarp = true,
                 maksAntall = 5,
-                hoppOverSakerMedAarsavregning = true,
+                hoppOverSakerMedÅrsavregning = true,
             )
 
             appender.list.map { it.formattedMessage }.filter { "er allerede tatt i denne kjøringen" in it }
@@ -512,10 +512,10 @@ class SkattepliktigeAarsavregningKjoeringTest {
     @ParameterizedTest(name = "hoppOverSakerMedAarsavregning={0}")
     @ValueSource(booleans = [false, true])
     fun `avsluttet årsavregning gir ny opprettelse når den gjelder et annet år, eller når hoppOverSakerMedAarsavregning er av`(
-        hoppOverSakerMedAarsavregning: Boolean,
+        hoppOverSakerMedÅrsavregning: Boolean,
     ) {
         val fagsak = lagFagsakMedÅrsavregning(Behandlingsstatus.AVSLUTTET, BEHANDLING_ID)
-        val årsavregningsår = if (hoppOverSakerMedAarsavregning) GJELDER_ÅR - 1 else GJELDER_ÅR
+        val årsavregningsår = if (hoppOverSakerMedÅrsavregning) GJELDER_ÅR - 1 else GJELDER_ÅR
         val behandlingsresultat = Behandlingsresultat.forTest { årsavregning { aar = årsavregningsår } }
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
@@ -526,7 +526,7 @@ class SkattepliktigeAarsavregningKjoeringTest {
             listOf(SkattehendelseItem(gjelderPeriode = GJELDER_ÅR.toString(), identifikator = AKTØR_ID)),
             skarp = true,
             maksAntall = 5,
-            hoppOverSakerMedAarsavregning = hoppOverSakerMedAarsavregning,
+            hoppOverSakerMedÅrsavregning = hoppOverSakerMedÅrsavregning,
         )
 
         verify(exactly = 1) { utfoerer.opprettProsessinstans("MEL-1", GJELDER_ÅR.toString()) }
@@ -559,7 +559,7 @@ class SkattepliktigeAarsavregningKjoeringTest {
                 publisertEtter,
                 skarp = true,
                 maksAntall = 5,
-                hoppOverSakerMedAarsavregning = true,
+                hoppOverSakerMedÅrsavregning = true,
             )
         } finally {
             runCatching { ThreadLocalAccessInfo.afterControllerRequest("/test") }
@@ -609,7 +609,7 @@ class SkattepliktigeAarsavregningKjoeringTest {
             listOf(SkattehendelseItem(GJELDER_ÅR.toString(), AKTØR_ID)),
             skarp = true,
             maksAntall = 5,
-            hoppOverSakerMedAarsavregning = true,
+            hoppOverSakerMedÅrsavregning = true,
         )
 
         verify(exactly = 1) { utfoerer.opprettProsessinstans("MEL-1", GJELDER_ÅR.toString()) }

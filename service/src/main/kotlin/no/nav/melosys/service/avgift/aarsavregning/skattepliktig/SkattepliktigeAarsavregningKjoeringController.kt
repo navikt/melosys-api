@@ -35,20 +35,17 @@ class SkattepliktigeAarsavregningKjoeringController(
             "Følg kjøringen i `/status`, og se resultatet per sak i `/rapport`. `avbruttAarsak` er satt hvis " +
             "kjøringen stoppet før den var ferdig.\n\n" +
             "### Felter\n" +
-            "- `skattehendelser` eller `gjelderAar`: send én av dem. Med `gjelderAar` hentes hendelsene fra " +
-            "melosys-skattehendelser. Hendelser for samme person og år slås sammen, og hver sak vurderes bare " +
-            "én gang per år.\n" +
-            "- `aarFilter` og `publisertEtter`: avgrenser hentingen, og brukes bare sammen med `gjelderAar`. " +
-            "`aarFilter` er `FOM_AAR` (året perioden starter i, standard) eller `INNTEKTSAAR`. " +
-            "`publisertEtter` er norsk tid, og avvises sammen med en liste.\n" +
-            "- `maksAntall`: påkrevd med `skarp=true`. Taket på hvor mange saker som kan endres. Saker som " +
-            "feiler før de er vurdert, og saker som hoppes over med `hoppOverSakerMedAarsavregning`, bruker " +
-            "ikke av taket.\n" +
-            "- `hoppOverSakerMedAarsavregning`: hopper over saker som har en årsavregning for året, også åpne " +
-            "og avsluttede. Standard er `true`, og det kan ikke slås av ved `skarp=true` med `gjelderAar`.\n" +
-            "- `personIder`: kjører bare disse personene fra hentingen, og brukes bare sammen med `gjelderAar`. " +
-            "Påkrevd med `skarp=true` og `gjelderAar`: send `personId`-ene fra simuleringen du har gått gjennom. " +
-            "Id-er som ikke kom med i hentingen, står i `personIderIkkeFunnet` i `/status`.\n\n" +
+            "Ugyldige kombinasjoner avvises med 400 og en melding om hva som mangler.\n" +
+            "- `skattehendelser` eller `gjelderAar`: med `gjelderAar` hentes hendelsene fra " +
+            "melosys-skattehendelser. Hver sak vurderes bare én gang per år.\n" +
+            "- `aarFilter`: `FOM_AAR` (året perioden starter i, standard) eller `INNTEKTSAAR`. " +
+            "`publisertEtter` er norsk tid.\n" +
+            "- `maksAntall`: taket på hvor mange saker som kan endres. Saker som hoppes over, eller feiler " +
+            "før de er vurdert, teller ikke.\n" +
+            "- `hoppOverSakerMedAarsavregning`: hopper over saker som har en årsavregning for året, også " +
+            "avsluttede. Standard er `true`.\n" +
+            "- `personIder`: `personId`-ene fra simuleringen du har gått gjennom. Id-er som ikke kom med i " +
+            "hentingen, står i `personIderIkkeFunnet` i `/status`.\n\n" +
             "### Før du kjører\n" +
             "- Send `/run` én gang. Kjøringen kan ligge i kø bak annet arbeid, og da er `isRunning` false. Et " +
             "nytt kall i den tiden kjører alt to ganger og sender brevene på nytt. Sjekk `/rapport` for å se " +
@@ -117,8 +114,8 @@ class SkattepliktigeAarsavregningKjoeringController(
         val gjelderÅr = request.gjelderAar
         if (gjelderÅr != null) {
             log.info {
-                "Starter $modus for skattehendelser fra melosys-skattehendelser: gjelderÅr=$gjelderÅr, " +
-                    "årFilter=${request.aarFilter}, publisertEtter=${request.publisertEtter}, maksAntall=${request.maksAntall}, " +
+                "Starter $modus for skattehendelser fra melosys-skattehendelser: gjelderAar=$gjelderÅr, " +
+                    "aarFilter=${request.aarFilter}, publisertEtter=${request.publisertEtter}, maksAntall=${request.maksAntall}, " +
                     "hoppOverSakerMedAarsavregning=${request.hoppOverSakerMedAarsavregning}, " +
                     "antallPersonIder=${request.personIder?.size}"
             }
