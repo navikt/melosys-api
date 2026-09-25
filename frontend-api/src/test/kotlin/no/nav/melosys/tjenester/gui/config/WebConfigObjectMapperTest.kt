@@ -29,7 +29,7 @@ import java.time.LocalDateTime
 class WebConfigObjectMapperTest {
 
     private val kodeverkService = mockk<KodeverkService>(relaxed = true)
-    private val webConfig = WebConfig(mockk())
+    private val webConfig = WebConfig(mockk(), mockk())
     private val objectMapper: JsonMapper = run {
         val builder = JsonMapper.builder()
         webConfig.melosysJsonMapperCustomizer(kodeverkService).customize(builder)

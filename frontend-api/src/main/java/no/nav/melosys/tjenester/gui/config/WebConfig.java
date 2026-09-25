@@ -22,9 +22,11 @@ public class WebConfig implements WebMvcConfigurer {
     private static final String API_PREFIX = "/api";
     private static final String FRONTEND_API_TJENESTER = "no.nav.melosys.tjenester.gui";
     private final ApiKeyInterceptor apiKeyInterceptor;
+    private final AdminTilgangInterceptor adminTilgangInterceptor;
 
-    public WebConfig(ApiKeyInterceptor apiKeyInterceptor) {
+    public WebConfig(ApiKeyInterceptor apiKeyInterceptor, AdminTilgangInterceptor adminTilgangInterceptor) {
         this.apiKeyInterceptor = apiKeyInterceptor;
+        this.adminTilgangInterceptor = adminTilgangInterceptor;
     }
 
     @Bean
@@ -61,6 +63,7 @@ public class WebConfig implements WebMvcConfigurer {
 
         // test dette kun for ftrl admin så kan vi bytte fjerne AdminController for resten om det funker fint
         registry.addInterceptor(apiKeyInterceptor).addPathPatterns("/admin/**");
+        registry.addInterceptor(adminTilgangInterceptor).addPathPatterns("/admin/**");
     }
 
 }
