@@ -1,7 +1,6 @@
 package no.nav.melosys.itest
 
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import no.nav.melosys.Application
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
@@ -48,6 +47,9 @@ class AdminControllerApiKeyIT(
         // Samme verdi som Melosys-admin.driftsgruppe i application-test.yml
         const val DRIFTSGRUPPE_ID = "00000000-0000-0000-0000-000000000001"
         const val ANNEN_GRUPPE_ID = "00000000-0000-0000-0000-000000000002"
+
+        // Svaret fra AdminTilgangInterceptor når personkall mangler driftsgruppe
+        const val MANGLER_DRIFTSGRUPPE = "Mangler tilgang til admin-endepunkter"
     }
 
     private fun hentBearerToken(grupper: List<String> = listOf(DRIFTSGRUPPE_ID)): String {
@@ -230,8 +232,8 @@ class AdminControllerApiKeyIT(
                 .accept(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isForbidden)
-            // Avvisningen skal komme fra gruppesjekken, ikke fra nøkkelsjekken
-            .andReturn().response.contentAsString shouldNotBe "Invalid API key"
+            // Nøyaktig svar fra AdminTilgangInterceptor, så testen feiler hvis et annet lag avviser kallet
+            .andReturn().response.contentAsString shouldBe MANGLER_DRIFTSGRUPPE
     }
 
     @Test
@@ -243,7 +245,7 @@ class AdminControllerApiKeyIT(
                 .accept(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isForbidden)
-            .andReturn().response.contentAsString shouldNotBe "Invalid API key"
+            .andReturn().response.contentAsString shouldBe MANGLER_DRIFTSGRUPPE
     }
 
     @Test
@@ -295,7 +297,7 @@ class AdminControllerApiKeyIT(
                     .accept(MediaType.APPLICATION_JSON_VALUE)
             )
                 .andExpect(status().isForbidden)
-                .andReturn().response.contentAsString shouldNotBe "Invalid API key"
+                .andReturn().response.contentAsString shouldBe MANGLER_DRIFTSGRUPPE
         }
     }
 }
