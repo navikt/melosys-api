@@ -1,7 +1,9 @@
 package no.nav.melosys.service.vedtak
 
 import io.getunleash.FakeUnleash
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -17,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser.MEDLEMSKAP_AVKLART
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Vedtakstyper
 import no.nav.melosys.domain.kodeverk.Vedtakstyper.*
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL
@@ -26,6 +29,7 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.AVSLAG_MANGLEN
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.TRYGDEAVTALE_GB
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
+import no.nav.melosys.exception.ValideringException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -37,6 +41,7 @@ import no.nav.melosys.service.kontroll.feature.ferdigbehandling.Ferdigbehandling
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import no.nav.melosys.service.validering.Kontrollfeil
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
@@ -340,6 +345,22 @@ class TrygdeavtaleVedtakServiceTest {
             get(0).rolle() shouldBe ARBEIDSGIVER
             get(1).rolle() shouldBe UTENLANDSK_TRYGDEMYNDIGHET
         }
+    }
+
+    @Test
+    fun `fattVedtak - kontrollfeil - etterlater ikke resultattypen`() {
+        val behandlingsresultat = lagBehandlingsresultat().apply { type = Behandlingsresultattyper.IKKE_FASTSATT }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every {
+            ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(any(), any(), any(), any())
+        } returns listOf(Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER))
+
+        shouldThrow<ValideringException> {
+            trygdeavtaleVedtakService.fattVedtak(lagBehandling(), lagFattVedtakRequest(FØRSTEGANGSVEDTAK, null))
+        }.message shouldBe "Feil i validering. Kan ikke fatte vedtak."
+
+        behandlingsresultat.type shouldBe Behandlingsresultattyper.IKKE_FASTSATT
+        behandlingsresultat.vedtakMetadata.shouldBeNull()
     }
 
     @Test
