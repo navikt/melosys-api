@@ -12,7 +12,7 @@ class ÅrsavregningTest {
             beregnetAvgiftBelop = BigDecimal(1000)
         }
 
-        årsavregning.beregnTilFaktureringsBeloep()
+        årsavregning.beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt = null)
 
         årsavregning.tilFaktureringBeloep shouldBe BigDecimal(1000)
     }
@@ -25,7 +25,7 @@ class ÅrsavregningTest {
             innbetaltTrygdeavgift = BigDecimal(200)
         }
 
-        årsavregning.beregnTilFaktureringsBeloep()
+        årsavregning.beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt = null)
 
         årsavregning.tilFaktureringBeloep shouldBe BigDecimal(800)
     }
@@ -37,7 +37,7 @@ class ÅrsavregningTest {
             tidligereFakturertBeloep = BigDecimal(200)
         }
 
-        årsavregning.beregnTilFaktureringsBeloep()
+        årsavregning.beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt = null)
 
         årsavregning.tilFaktureringBeloep shouldBe BigDecimal(800)
     }
@@ -51,8 +51,22 @@ class ÅrsavregningTest {
             tidligereFakturertBeloep = BigDecimal(200)
         }
 
-        årsavregning.beregnTilFaktureringsBeloep()
+        årsavregning.beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt = null)
 
         årsavregning.tilFaktureringBeloep shouldBe BigDecimal(600)
+    }
+
+    @Test
+    fun `beregnTilFaktureringsBeloep legger tilbake innbetalt fra tidligere årsavregning`() {
+        val årsavregning = Årsavregning.forTest {
+            beregnetAvgiftBelop = BigDecimal(1000)
+            harInnbetaltTrygdeavgift = true
+            innbetaltTrygdeavgift = BigDecimal(300)
+            tidligereFakturertBeloep = BigDecimal(1500)
+        }
+
+        årsavregning.beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt = BigDecimal(300))
+
+        årsavregning.tilFaktureringBeloep shouldBe BigDecimal(-500)
     }
 }

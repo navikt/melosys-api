@@ -14,11 +14,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
-import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
-import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.avgift.inntektForTest
-import no.nav.melosys.domain.avgift.skatteforholdForTest
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -26,6 +22,7 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
@@ -79,6 +76,8 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     private val FØDSELSDATO: LocalDate = LocalDate.of(2020, 1, 1)
 
 
+    private val mockÅrsavregningService = mockk<ÅrsavregningService>(relaxed = true)
+
     @BeforeEach
     fun setup() {
         unleash.enableAll()
@@ -93,7 +92,8 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             helseutgiftDekkesPeriodeService,
             mockPersondataService,
             mockTrygdeavgiftClient,
-            unleash
+            unleash,
+            mockÅrsavregningService
         )
 
         every { mockEregFasade.hentOrganisasjonNavn(FULLMEKTIG_ORGNR) }.returns(FULLMEKTIG_ORG_NAVN)

@@ -65,21 +65,19 @@ class Årsavregning(
 
     override fun hashCode(): Int = id.hashCode()
 
-    fun beregnTilFaktureringsBeloep() {
+    /**
+     * [tidligereÅrsavregningInnbetalt] er innbetalt beløp fra Avgiftssystemet i siste vedtatte årsavregning for samme år.
+     * Det inngår allerede i [tidligereFakturertBeloep] når det er hentet fra den årsavregningen, og legges derfor tilbake
+     * slik at bare ny innbetaling trekkes fra. Må komme fra samme årsavregning som [tidligereFakturertBeloep], ikke fra
+     * [tidligereBehandlingsresultat], som kan være en senere vurdering.
+     */
+    fun beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt: BigDecimal?) {
         if (beregnetAvgiftBelop == null && manueltAvgiftBeloep == null) return
 
         tilFaktureringBeloep = (manueltAvgiftBeloep ?: beregnetAvgiftBelop)!!
             .subtract(tidligereFakturertBeloep ?: BigDecimal.ZERO)
             .subtract(innbetaltTrygdeavgift ?: BigDecimal.ZERO)
-            .add(hentTidligereInnbetaltTrygdeavgift())
-    }
-
-    private fun hentTidligereInnbetaltTrygdeavgift(): BigDecimal {
-        if (tidligereBehandlingsresultat?.årsavregning == null) {
-            return BigDecimal.ZERO
-        }
-
-        return tidligereBehandlingsresultat!!.årsavregning!!.innbetaltTrygdeavgift ?: BigDecimal.ZERO
+            .add(tidligereÅrsavregningInnbetalt ?: BigDecimal.ZERO)
     }
 
     companion object // for å kunne legge på test forTest DSL

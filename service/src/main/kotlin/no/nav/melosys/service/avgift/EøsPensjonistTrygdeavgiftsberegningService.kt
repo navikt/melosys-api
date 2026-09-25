@@ -4,7 +4,6 @@ import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
-import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
@@ -15,6 +14,7 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.BeregningsforklaringDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.EøsPensjonistTrygdeavgiftsberegningRequest
 import no.nav.melosys.integrasjon.trygdeavgift.dto.EøsPensjonistTrygdeavgiftsberegningResponse
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
@@ -35,7 +35,8 @@ class EøsPensjonistTrygdeavgiftsberegningService(
     private val helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService,
     private val persondataService: PersondataService,
     private val trygdeavgiftClient: TrygdeavgiftClient,
-    private val unleash: Unleash
+    private val unleash: Unleash,
+    private val årsavregningService: ÅrsavregningService,
 ) {
     @Transactional
     fun beregnOgLagreTrygdeavgift(
@@ -74,16 +75,8 @@ class EøsPensjonistTrygdeavgiftsberegningService(
 
         trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
 
-        behandlingsresultat.årsavregning?.let { årsavregning ->
-            if (årsavregning.endeligAvgiftValg != EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT) {
-                val totalAvgift = TotalbeløpBeregner.hentTotalavgift(nyeTrygdeavgiftsperioder)
-                årsavregning.beregnetAvgiftBelop = totalAvgift
-                if (totalAvgift != null) {
-                    årsavregning.beregnTilFaktureringsBeloep()
-                } else {
-                    årsavregning.tilFaktureringBeloep = null
-                }
-            }
+        behandlingsresultat.årsavregning?.let {
+            årsavregningService.oppdaterBeregnetAvgift(it, TotalbeløpBeregner.hentTotalavgift(nyeTrygdeavgiftsperioder))
         }
 
         return BeregnetTrygdeavgiftMedForklaring(nyeTrygdeavgiftsperioder.toSet(), resultat.beregningsforklaringer)

@@ -61,9 +61,9 @@ import java.time.LocalDate
  * Med transformeren [ÅrsdeltTrygdeavgiftsberegningTransformer] er avgiften 1000 kr/md, så desember i fjor
  * gir 1000 kr fakturert, og krediteringen skal være -1000 kr.
  *
- * Scenario 2 (akseptansekriterium 2): fjoråret er allerede årsavregnet og fastsatt manuelt før den nye
- * vurderingen. Den nye, automatisk opprettede årsavregningen skal ikke arve det manuelle beløpet, men
- * settes til 0 og kreditere det som sist ble fastsatt for året.
+ * Scenario 2 (akseptansekriterium 2): fjoråret er allerede årsavregnet og fastsatt manuelt, med 300 kr registrert
+ * betalt i Avgiftssystemet. Den nye, automatisk opprettede årsavregningen skal ikke arve det manuelle beløpet, men
+ * settes til 0 og kreditere netto betalt for året, uten å trekke fra innbetalingen en gang til.
  */
 class ÅrsavregningVedEndringIT(
     @Autowired private val avklartefaktaService: AvklartefaktaService,
@@ -120,14 +120,16 @@ class ÅrsavregningVedEndringIT(
     }
 
     @Test
-    fun `ny vurdering som fjerner et allerede årsavregnet år overstyrer manuelt fastsatt avgift med 0 og krediterer`() {
+    fun `ny vurdering som fjerner et allerede årsavregnet år overstyrer manuelt beløp med 0 og krediterer netto betalt`() {
         // ---- 1. Førstegangsbehandling over to år med toggle AV ----
         fakeUnleash.enableAllExcept(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
 
         val saksnummer = lagFørstegangsbehandling()
 
-        // ---- 2. Årsavregning for fjoråret fastsettes manuelt til 1500 og vedtas (1500 - 1000 = 500 faktureres) ----
+        // ---- 2. Årsavregning for fjoråret: 300 innbetalt i Avgiftssystemet, fastsatt manuelt til 1500 ----
+        //         (1500 - 1000 - 300 = 200 faktureres; netto betalt for året er da 1500)
         val manueltFastsattForFjoråret = BigDecimal(1500)
+        val innbetaltIAvgiftssystemet = BigDecimal(300)
         val førsteÅrsavregningId = executeAndWait(
             mapOf(ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK to 1)
         ) {
@@ -135,10 +137,12 @@ class ÅrsavregningVedEndringIT(
         }.hentBehandling.id
 
         val førsteÅrsavregning = årsavregningService.opprettÅrsavregning(førsteÅrsavregningId, fjoråret)
+        årsavregningService.oppdaterHarInnbetaltTrygdeavgift(førsteÅrsavregningId, true)
         årsavregningService.oppdater(
             førsteÅrsavregningId,
             førsteÅrsavregning.årsavregningID,
             beregnetAvgiftBelop = null,
+            innbetaltTrygdeavgift = innbetaltIAvgiftssystemet,
             endeligAvgift = EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT,
             manueltAvgiftBeloep = manueltFastsattForFjoråret
         )
@@ -151,24 +155,29 @@ class ÅrsavregningVedEndringIT(
         ) {
             vedtaksfattingFasade.fattVedtak(førsteÅrsavregningId, lagÅrsavregningsvedtak())
         }
+        val fakturertAvFørsteÅrsavregning = manueltFastsattForFjoråret - fakturertForFjoråret - innbetaltIAvgiftssystemet
         behandlingsresultatService.hentBehandlingsresultat(førsteÅrsavregningId).hentÅrsavregning().run {
-            manueltAvgiftBeloep.shouldNotBeNull() shouldBeEqualComparingTo manueltFastsattForFjoråret
-            tilFaktureringBeloep.shouldNotBeNull() shouldBeEqualComparingTo manueltFastsattForFjoråret - fakturertForFjoråret
+            innbetaltTrygdeavgift.shouldNotBeNull() shouldBeEqualComparingTo innbetaltIAvgiftssystemet
+            tilFaktureringBeloep.shouldNotBeNull() shouldBeEqualComparingTo fakturertAvFørsteÅrsavregning
         }
         sisteFakturaKall().let { body ->
-            body["belop"].decimalValue() shouldBeEqualComparingTo manueltFastsattForFjoråret - fakturertForFjoråret
+            body["belop"].decimalValue() shouldBeEqualComparingTo fakturertAvFørsteÅrsavregning
         }
 
         // ---- 3. Toggle PÅ, ny vurdering avkorter til inneværende år, endringsvedtak ----
         fakeUnleash.enableAll()
         lagNyVurderingSomAvkorterTilInneværendeÅrOgFattVedtak(saksnummer)
 
-        // ---- 4. Ny årsavregning for fjoråret: det manuelle beløpet arves ikke, endelig avgift er 0 ----
+        // ---- 4. Ny årsavregning for fjoråret: manuelt beløp arves ikke, endelig avgift er 0. Innbetalt 300 arves, men
+        //         legges tilbake fra forrige årsavregning, så den trekkes bare fra én gang ----
         val andreÅrsavregning = hentAutomatiskOpprettetÅrsavregning(saksnummer)
         andreÅrsavregning.id shouldNotBe førsteÅrsavregningId
         verifiserÅrsavregningMedEndeligAvgiftNull(andreÅrsavregning.id, forventetKreditering = manueltFastsattForFjoråret)
+        behandlingsresultatService.hentBehandlingsresultat(andreÅrsavregning.id).hentÅrsavregning().run {
+            innbetaltTrygdeavgift.shouldNotBeNull() shouldBeEqualComparingTo innbetaltIAvgiftssystemet
+        }
 
-        // ---- 5. Vedtak: kreditnota for hele det sist fastsatte beløpet ----
+        // ---- 5. Vedtak: kreditnota for netto betalt, 1500, ikke 1800 ----
         fattÅrsavregningsvedtakOgVerifiserKreditnota(andreÅrsavregning.id, forventetKreditering = manueltFastsattForFjoråret)
     }
 
