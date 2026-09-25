@@ -109,14 +109,14 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
             }
             medlemskapsperiode {
                 fom = nå.minusYears(1).withMonth(1)
-                tom = nå.withMonth(4)
+                tom = nå.minusYears(1).withMonth(8)
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 medlemskapstype = Medlemskapstyper.FRIVILLIG
                 trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                 trygdeavgiftsperiode {
                     periodeFra = nå.minusYears(1).withMonth(1)
-                    periodeTil = nå.withMonth(4)
+                    periodeTil = nå.minusYears(1).withMonth(4)
                     trygdesats = BigDecimal.ZERO
                     trygdeavgiftsbeløpMd = BigDecimal(0.0)
                     grunnlagInntekstperiode {
@@ -176,7 +176,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
                 innledningFritekst.shouldBe(INNLEDNING_FRITEKST)
                 begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
                 trygdeavgiftFritekst.shouldBe(TRYGDEAVGIFT_FRITEKST)
-                avgiftsperioder.shouldHaveSize(2)
+                avgiftsperioder.shouldHaveSize(1)
                 medlemskapsperiode.shouldNotBeNull().apply {
                     innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
                 }
@@ -185,6 +185,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
                 land.shouldContainOnly(Landkoder.AT.beskrivelse)
                 ukjentSluttdatoMedlemskapsperiode.shouldBeTrue()
                 harMedlemskapsperioderIForegåendeÅr.shouldBeTrue()
+                harKunMedlemskapsperioderIForegåendeÅr.shouldBeTrue()
             }
     }
 
