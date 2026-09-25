@@ -673,7 +673,12 @@ class VedtaksmetadataFiksIT(
         issuerId = "issuer1",
         subject = "testbruker",
         audience = "dumbdumb",
-        claims = mapOf("oid" to "test-oid", "azp" to "test-azp", "NAVident" to "test123")
+        claims = mapOf(
+            "oid" to "test-oid",
+            "azp" to "test-azp",
+            "NAVident" to "test123",
+            "groups" to listOf(AdminControllerApiKeyIT.DRIFTSGRUPPE_ID)
+        )
     ).serialize()
 
     private fun seedDefektBehandling(

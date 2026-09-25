@@ -270,7 +270,8 @@ melosystrygdeavgift:
               scope: api:///dummy
               token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
         issuer:
-          isso:
+          # Samme navn som i Nais (aad), slik at SpringSubjectHandler finner tokenet i testene
+          aad:
             accepted-audience: dumbdumb
             discovery-url: http://localhost:${mock-oauth2-server.port}/issuer1/.well-known/openid-configuration
 persist:
