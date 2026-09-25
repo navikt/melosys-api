@@ -101,7 +101,7 @@ class EndreAktoerIdIT(
         // AdminTilgangInterceptor leser SubjectHandler: personkall med driftsgruppe
         every { subjectHandler.oidcTokenString } returns "mock-token"
         every { subjectHandler.tokenIdType } returns null
-        every { subjectHandler.groups } returns listOf(AdminControllerApiKeyIT.DRIFTSGRUPPE_ID)
+        every { subjectHandler.groups } returns listOf(AdminControllerTilgangsstyringIT.DRIFTSGRUPPE_ID)
 
         val saksnummer = "MEL-123"
         val gammelAktoerid = "1111111111111"

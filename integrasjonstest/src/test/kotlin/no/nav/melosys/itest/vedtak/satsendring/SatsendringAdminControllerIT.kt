@@ -15,7 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.itest.AdminControllerApiKeyIT
+import no.nav.melosys.itest.AdminControllerTilgangsstyringIT
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -72,7 +72,7 @@ class SatsendringAdminControllerIT @Autowired constructor(
         val subjectHandler = SubjectHandler.getInstance()
         every { subjectHandler.oidcTokenString } returns "mock-token"
         every { subjectHandler.tokenIdType } returns null
-        every { subjectHandler.groups } returns listOf(AdminControllerApiKeyIT.DRIFTSGRUPPE_ID)
+        every { subjectHandler.groups } returns listOf(AdminControllerTilgangsstyringIT.DRIFTSGRUPPE_ID)
     }
 
     private fun hentBearerToken(): String {
