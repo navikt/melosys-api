@@ -11,6 +11,7 @@ KodeverkAPI_v1:
   url: ${KODEVERK_REST_API_URL}
 Melosys-admin:
   apikey: ${MELOSYS_ADMIN_API_KEY}
+  driftsgruppe: ${GROUP_MELOSYS_INNLOGGING_VAKT}
 MelosysEessi:
   url: ${MELOSYS_EESSI_URL}
 MelosysSoknadMottak:

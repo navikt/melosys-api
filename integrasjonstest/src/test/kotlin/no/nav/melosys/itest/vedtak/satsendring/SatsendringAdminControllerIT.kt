@@ -5,6 +5,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.every
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
@@ -14,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.itest.AdminControllerTilgangsstyringIT
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -27,9 +29,11 @@ import no.nav.melosys.service.sak.OpprettSakDto
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
+import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.melosys.tjenester.gui.config.ApiKeyInterceptor
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
@@ -60,6 +64,16 @@ class SatsendringAdminControllerIT @Autowired constructor(
     vilkaarsresultatService
 ) {
     private val satsendringÅr = TrygdeavgiftsberegningMedSatsendring.satsendringÅr
+
+    // SatsendringTestBase setter en streng mock av SubjectHandler. AdminTilgangInterceptor leser den,
+    // så testen må svare som et personkall med driftsgruppe. Kjøres etter setupBase() i basen.
+    @BeforeEach
+    fun mockDriftsgruppe() {
+        val subjectHandler = SubjectHandler.getInstance()
+        every { subjectHandler.oidcTokenString } returns "mock-token"
+        every { subjectHandler.tokenIdType } returns null
+        every { subjectHandler.groups } returns listOf(AdminControllerTilgangsstyringIT.DRIFTSGRUPPE_ID)
+    }
 
     private fun hentBearerToken(): String {
         return mockOAuth2Server.issueToken(

@@ -31,6 +31,9 @@ KodeverkAPI_v1:
   url: http://localhost:8050/api
 Melosys-admin:
   apikey: dummy
+  # Samme gruppe som lokale mock-tokens og e2e-tokenet har (groups: ["0000-GA-MELOSYS"]),
+  # slik at admin via Console lokalt og e2e-testene fungerer. I Nais: melosys-innlogging-vakt.
+  driftsgruppe: 0000-GA-MELOSYS
 MelosysEessi:
   url: http://localhost:8081/api
 MelosysSoknadMottak:
