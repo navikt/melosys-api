@@ -29,6 +29,7 @@ KodeverkAPI_v1:
   url: http://localhost:8050/api
 Melosys-admin:
   apikey: dummy
+  driftsgruppe: 00000000-0000-0000-0000-000000000001
 MelosysEessi:
   url: http://localhost:8081/api
 MelosysSoknadMottak:

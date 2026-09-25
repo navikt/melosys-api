@@ -65,6 +65,7 @@ melosys:
 
 Melosys-admin:
   apikey: dummy
+  driftsgruppe: 00000000-0000-0000-0000-000000000001
 MelosysSoknadMottak:
   url: dummy
 MELOSYS_SKJEMA_API_URL: http://localhost:8094

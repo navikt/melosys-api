@@ -89,6 +89,8 @@ spec:
     value: nais
   - name: GROUP_MELOSYS_INNLOGGING
     value: {{GROUP_MELOSYS_INNLOGGING}}
+  - name: GROUP_MELOSYS_INNLOGGING_VAKT
+    value: {{GROUP_MELOSYS_INNLOGGING_VAKT}}
   - name: NAIS_CLUSTER_NAME_GCP
     value: {{NAIS_CLUSTER_NAME_GCP}}
   - name: APP_NAME_OPPGAVE
