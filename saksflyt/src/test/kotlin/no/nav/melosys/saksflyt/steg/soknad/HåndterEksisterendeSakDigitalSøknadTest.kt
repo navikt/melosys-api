@@ -9,6 +9,7 @@ import java.util.UUID
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -37,6 +38,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 @ExtendWith(MockKExtension::class)
 internal class HåndterEksisterendeSakDigitalSøknadTest {
@@ -197,6 +200,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             val eksisterendeBehandling = lagBehandling(Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.HENVENDELSE)
             val fagsak = mockk<Fagsak>(relaxed = true)
             every { fagsak.saksnummer } returns saksnummer
+            every { fagsak.type } returns Sakstyper.EU_EOS
             every { fagsak.finnAktivBehandlingIkkeÅrsavregning() } returns eksisterendeBehandling
             every { fagsak.finnBrukersAktørID() } returns "1234567890123"
             every { fagsak.finnVirksomhetsOrgnr() } returns "123456789"
@@ -307,19 +311,85 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
         }
     }
 
+    @Nested
+    inner class SakSomIkkeErEøs {
+
+        @ParameterizedTest
+        @EnumSource(value = Sakstyper::class, names = ["TRYGDEAVTALE", "FTRL"])
+        fun `åpen behandling beholder behandlingstema saken har`(sakstype: Sakstyper) {
+            val behandling = lagBehandling(
+                Behandlingsstatus.UNDER_BEHANDLING,
+                behandlingstema = Behandlingstema.YRKESAKTIV,
+                sakstype = sakstype
+            )
+            val fagsak = lagFagsakMedBehandling(behandling)
+            val prosessinstans = lagProsessinstans()
+
+            mockFagsakService(fagsak)
+            mockEndreStatus()
+            mockTømBehandlingsresultat()
+            mockOppdaterMottatteOpplysninger()
+            mockHentMottatteOpplysninger(behandlingId)
+
+            steg.utfør(prosessinstans)
+
+            verify(exactly = 0) { behandlingService.endreTema(any<Behandling>(), any()) }
+            behandling.tema shouldBe Behandlingstema.YRKESAKTIV
+            verify { behandlingService.endreStatus(behandling, Behandlingsstatus.VURDER_DOKUMENT) }
+            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any(), any()) }
+            prosessinstans.behandling shouldBe behandling
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = Sakstyper::class, names = ["TRYGDEAVTALE", "FTRL"])
+        fun `ny vurdering arver behandlingstema og får søknad for sakstypen`(sakstype: Sakstyper) {
+            val avsluttetBehandling = lagBehandling(
+                Behandlingsstatus.AVSLUTTET,
+                behandlingstema = Behandlingstema.YRKESAKTIV,
+                sakstype = sakstype
+            )
+            val fagsak = lagFagsakMedBehandling(avsluttetBehandling)
+            val nyBehandling = mockk<Behandling>(relaxed = true)
+            val prosessinstans = lagProsessinstans()
+
+            mockFagsakService(fagsak)
+            mockNyVurderingOpprettelse(fagsak, nyBehandling, Behandlingstema.YRKESAKTIV)
+            every {
+                mottatteOpplysningerService.opprettSøknadDigitalUtenforEøs(eq(99L), any(), any(), any())
+            } returns mockk<MottatteOpplysninger> { every { id } returns mottatteOpplysningerId }
+            mockOppgaveOpprettelse()
+
+            steg.utfør(prosessinstans)
+
+            verify {
+                behandlingService.nyBehandling(
+                    fagsak, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING,
+                    Behandlingstema.YRKESAKTIV, null, null, any(), any(), null
+                )
+            }
+            verify { mottatteOpplysningerService.opprettSøknadDigitalUtenforEøs(99L, null, any(), søknadsdata.referanseId) }
+            verify(exactly = 0) { mottatteOpplysningerService.opprettSøknadDigital(any(), any(), any(), any()) }
+            prosessinstans.behandling shouldBe nyBehandling
+        }
+    }
+
     // --- Helpers ---
 
     private fun lagBehandling(
         status: Behandlingsstatus,
         behandlingstype: Behandlingstyper = Behandlingstyper.FØRSTEGANG,
-        behandlingstema: Behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+        behandlingstema: Behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER,
+        sakstype: Sakstyper = Sakstyper.EU_EOS
     ): Behandling {
         return Behandling.forTest {
             id = this@HåndterEksisterendeSakDigitalSøknadTest.behandlingId
             this.status = status
             type = behandlingstype
             tema = behandlingstema
-            this.fagsak = Fagsak.forTest { this.saksnummer = this@HåndterEksisterendeSakDigitalSøknadTest.saksnummer }
+            this.fagsak = Fagsak.forTest {
+                this.saksnummer = this@HåndterEksisterendeSakDigitalSøknadTest.saksnummer
+                type = sakstype
+            }
         }
     }
 
@@ -328,6 +398,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
     private fun lagFagsakUtenAktivBehandling(): Fagsak {
         val fagsak = mockk<Fagsak>(relaxed = true)
         every { fagsak.saksnummer } returns saksnummer
+        every { fagsak.type } returns Sakstyper.EU_EOS
         every { fagsak.finnAktivBehandlingIkkeÅrsavregning() } returns null
         every { fagsak.finnBrukersAktørID() } returns "1234567890123"
         every { fagsak.finnVirksomhetsOrgnr() } returns "123456789"

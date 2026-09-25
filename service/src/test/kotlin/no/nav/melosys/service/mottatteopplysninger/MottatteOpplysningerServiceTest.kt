@@ -474,6 +474,29 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
+    fun opprettSøknadDigitalUtenforEøs_setterTypeYrkesaktiveNorgeEllerUtenforEøs() {
+        val behandling = setupMock(
+            Sakstyper.TRYGDEAVTALE,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.YRKESAKTIV
+        )
+        every { mottatteOpplysningerRepositoryMock.findByEksternReferanseID(any()) } returns emptyList()
+
+        mottatteOpplysningerServiceSpy.opprettSøknadDigitalUtenforEøs(behandlingID, null, SøknadNorgeEllerUtenforEØS(), "ref-123")
+
+        val slot = slot<MottatteOpplysninger>()
+        verify {
+            mottatteOpplysningerRepositoryMock.save(capture(slot))
+        }
+        slot.captured.apply {
+            type.shouldBe(Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS)
+            this.behandling.shouldBe(behandling)
+            eksternReferanseID.shouldBe("ref-123")
+            mottatteOpplysningerData.shouldBeInstanceOf<SøknadNorgeEllerUtenforEØS>()
+        }
+    }
+
+    @Test
     fun opprettSøknadFolketrygden_harPeriodeOgLand_setterPeriodeOgLandOgHarRettType() {
         val behandling = setupMock(
             Sakstyper.FTRL,
