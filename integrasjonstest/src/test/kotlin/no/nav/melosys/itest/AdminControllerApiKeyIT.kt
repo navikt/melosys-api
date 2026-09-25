@@ -2,6 +2,7 @@ package no.nav.melosys.itest
 
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.Application
+import no.nav.melosys.tjenester.gui.config.AdminTilgangInterceptor.Companion.MANGLER_DRIFTSGRUPPE
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Test
@@ -47,9 +48,6 @@ class AdminControllerApiKeyIT(
         // Samme verdi som Melosys-admin.driftsgruppe i application-test.yml
         const val DRIFTSGRUPPE_ID = "00000000-0000-0000-0000-000000000001"
         const val ANNEN_GRUPPE_ID = "00000000-0000-0000-0000-000000000002"
-
-        // Svaret fra AdminTilgangInterceptor når personkall mangler driftsgruppe
-        const val MANGLER_DRIFTSGRUPPE = "Mangler tilgang til admin-endepunkter"
     }
 
     private fun hentBearerToken(grupper: List<String> = listOf(DRIFTSGRUPPE_ID)): String {
@@ -232,7 +230,6 @@ class AdminControllerApiKeyIT(
                 .accept(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isForbidden)
-            // Nøyaktig svar fra AdminTilgangInterceptor, så testen feiler hvis et annet lag avviser kallet
             .andReturn().response.contentAsString shouldBe MANGLER_DRIFTSGRUPPE
     }
 

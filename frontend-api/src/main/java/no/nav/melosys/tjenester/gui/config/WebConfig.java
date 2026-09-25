@@ -61,7 +61,6 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new CorrelationIdInterceptor());
 
-        // test dette kun for ftrl admin så kan vi bytte fjerne AdminController for resten om det funker fint
         registry.addInterceptor(apiKeyInterceptor).addPathPatterns("/admin/**");
         registry.addInterceptor(adminTilgangInterceptor).addPathPatterns("/admin/**");
     }

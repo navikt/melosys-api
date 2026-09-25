@@ -28,11 +28,6 @@ public abstract class SubjectHandler {
 
     public abstract List<String> getGroups();
 
-    /**
-     * Verdien av {@code idtyp} i innkommende token, eller {@code null} hvis den mangler.
-     * {@code "app"} betyr maskin-til-maskin-token.
-     * Ikke abstrakt, slik at eksisterende subklasser (blant annet i tester) ikke må endres.
-     */
     public String getTokenIdType() {
         return null;
     }

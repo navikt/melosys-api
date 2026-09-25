@@ -7,33 +7,36 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.HandlerInterceptor
-import org.springframework.web.servlet.HandlerMapping
 
 private val log = KotlinLogging.logger { }
+
 @Component
-class AdminTilgangInterceptor (
-    @Value("\${Melosys-admin.driftsgruppe}") private val driftsgruppe: String
-): HandlerInterceptor {
+class AdminTilgangInterceptor(
+    @Value("\${Melosys-admin.driftsgruppe}") private val driftsgruppeId: String
+) : HandlerInterceptor {
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-        //Lar @Protected håndtere tilfeller hvor det ikke finnes token, eller token er ugyldig.
-        //@Protected vil returnere 401 dersom token ikke finnes eller er ugyldig.
-        SubjectHandler.getInstance().oidcTokenString?: return true
+        val subjectHandler = SubjectHandler.getInstance()
 
-        if (SubjectHandler.getInstance().tokenIdType == "app") return true
+        if (manglerGyldigToken(subjectHandler)) return true   // @Protected svarer 401
+        if (erMaskinkall(subjectHandler)) return true
+        if (erMedlemAvDriftsgruppe(subjectHandler)) return true
 
-        if (!hasAccessGroup()) {
-            // Rutemønster ({saksnummer} osv.), ikke requestURI, så ID-er ikke havner i loggen
-            val rute = request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)
-            log.warn { "Admin-kall avvist: personkall uten driftsgruppe (${request.method} $rute)" }
-            response.status = 403
-            response.writer.write("Mangler tilgang til admin-endepunkter")
-            return false
-        }
-        return true
+        log.warn { "Admin-kall avvist: personkall uten driftsgruppe (${request.method})" }
+        response.status = 403
+        response.writer.write(MANGLER_DRIFTSGRUPPE)
+        return false
     }
 
-    private fun hasAccessGroup() : Boolean{
-        return SubjectHandler.getInstance().groups.contains(driftsgruppe)
+    // Gjelder alle tokens: OBO-token (personkall via Console) og M2M-token (maskinkall, idtyp = "app")
+    private fun manglerGyldigToken(subjectHandler: SubjectHandler) = subjectHandler.oidcTokenString == null
+
+    private fun erMaskinkall(subjectHandler: SubjectHandler) = subjectHandler.tokenIdType == IDTYP_MASKIN
+
+    private fun erMedlemAvDriftsgruppe(subjectHandler: SubjectHandler) = driftsgruppeId in subjectHandler.groups
+
+    companion object {
+        const val MANGLER_DRIFTSGRUPPE = "Mangler tilgang til admin-endepunkter"
+        private const val IDTYP_MASKIN = "app"
     }
 }
