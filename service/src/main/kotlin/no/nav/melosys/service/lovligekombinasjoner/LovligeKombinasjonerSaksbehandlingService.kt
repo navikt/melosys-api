@@ -188,8 +188,16 @@ class LovligeKombinasjonerSaksbehandlingService(
     ): Set<Behandlingstyper> {
         val fagsak = fagsakService.hentFagsak(saksnummer)
 
-        if ((fagsak.type == Sakstyper.FTRL || fagsak.type == Sakstyper.EU_EOS) && fagsak.harKunÅrsavregningsBehandlinger()) {
-            return setOf(Behandlingstyper.ÅRSAVREGNING)
+        if (fagsak.harKunÅrsavregningsBehandlinger()) {
+            if (fagsak.type == Sakstyper.FTRL) {
+                return setOf(Behandlingstyper.ÅRSAVREGNING)
+            }
+            return hentMuligeBehandlingstyper(
+                hovedpart,
+                fagsak.type,
+                fagsak.tema,
+                behandlingstema ?: fagsak.hentSistRegistrertBehandling().tema
+            ).intersect(setOf(Behandlingstyper.ÅRSAVREGNING))
         }
 
         val sisteRegistrertBehandlingIkkeÅrsavregning = fagsak.hentSistRegistrertBehandlingIkkeÅrsavregning()
@@ -347,6 +355,15 @@ class LovligeKombinasjonerSaksbehandlingService(
             .filter { behandlingstema in it.behandlingsTemaer }
             .flatMap { it.behandlingsTyper }
             .toMutableSet()
+
+        if ((sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE)
+            && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG
+            && behandlingstema != Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET
+            && behandlingstema != Behandlingstema.TRYGDETID
+            && behandlingstyper.isNotEmpty()
+        ) {
+            behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
+        }
 
         if (sistBehandlingstema in BEHANDLINGSTEMA_FOR_ANNENGANGS_BEHANDLING) {
             behandlingstyper = mutableSetOf(
