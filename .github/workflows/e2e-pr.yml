@@ -1,0 +1,119 @@
+name: E2E på PR
+
+# Sett labelen `e2e` på en PR for å kjøre hele e2e-suiten mot PR-en flettet inn i
+# master. For en ny kjøring fjerner du labelen og setter den på nytt; «Re-run jobs»
+# gjenbruker den gamle merge-commiten. Er nøyaktig samme kode testet grønt før
+# (markøren e2e-ok-<tree> i GAR), kjører ingenting.
+# Gaten: navikt/melosys-e2e-tests/.github/workflows/e2e-gate.yml
+
+on:
+  pull_request:
+    types: [labeled, unlabeled]
+    branches: [master]
+
+# Bare hendelser for labelen e2e deler gruppe: fjernes e2e, avbrytes kjøringen som
+# går. Andre labeler får hver sin gruppe og avbryter ingenting.
+concurrency:
+  group: e2e-pr-${{ github.event.pull_request.number }}-${{ github.event.label.name == 'e2e' && 'e2e' || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  IMAGE: europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-api
+
+jobs:
+  e2e-marker:
+    name: Slå opp markør
+    # Fork-PR-er har verken secrets eller OIDC.
+    if: >-
+      github.event.action == 'labeled'
+      && github.event.label.name == 'e2e'
+      && github.event.pull_request.user.login != 'dependabot[bot]'
+      && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    outputs:
+      hit: ${{ steps.marker.outputs.hit }}
+    steps:
+      # Feiler innloggingen, feiler også oppslaget, og det regnes som bom.
+      - name: Login to NAIS registry
+        uses: nais/login@v0
+        continue-on-error: true
+        with:
+          team: teammelosys
+
+      # github.sha er merge-commiten (refs/pull/<n>/merge). Payloaden har ikke treet.
+      - name: Finnes e2e-ok-<tree>?
+        id: marker
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
+        run: |
+          TREE=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA" --jq .commit.tree.sha 2>/dev/null || true)
+          if [[ "$TREE" =~ ^[0-9a-f]{40}$ ]] && docker manifest inspect "$IMAGE:e2e-ok-$TREE" > /dev/null 2>&1; then
+            hit=true
+          else
+            hit=false
+          fi
+          echo "hit=$hit" >> "$GITHUB_OUTPUT"
+          echo "e2e-marker: hit=$hit (sha $SHA, tree ${TREE:-ukjent})" | tee -a "$GITHUB_STEP_SUMMARY"
+
+  build:
+    name: Bygg image
+    needs: e2e-marker
+    if: needs.e2e-marker.outputs.hit != 'true'
+    runs-on: ubuntu-latest-8-cores
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PASSWORD: ${{ secrets.READER_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+      - name: Setup Maven
+        uses: actions/cache@v6
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6.0.1
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Log in to the Container registry
+        uses: docker/login-action@v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.READER_TOKEN }}
+      # Maven Test kjører testene på PR-en.
+      - name: Build
+        run: mvn clean package --threads=8 -DskipTests -B -e -U --settings .github/settings.xml
+      # Bare <merge-sha>, aldri latest: da ville PR-koden gått til alle andre
+      # repoers e2e-kjøringer. nais/docker-build-push legger i tillegg på en dato-tag.
+      - name: Build and push Docker image
+        uses: nais/docker-build-push@v0
+        with:
+          team: teammelosys
+          tag: |
+            type=raw,value=${{ github.sha }},priority=9000
+          platforms: linux/amd64
+          salsa: false
+
+  gate:
+    name: E2E
+    needs: [e2e-marker, build]
+    if: needs.e2e-marker.outputs.hit != 'true'
+    permissions:
+      id-token: write
+      contents: read
+    uses: navikt/melosys-e2e-tests/.github/workflows/e2e-gate.yml@e2e-gate
+    with:
+      service: melosys-api
+      image: europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-api
+      tag: ${{ github.sha }}
+    secrets:
+      E2E_TRIGGER_PAT: ${{ secrets.E2E_TRIGGER_PAT }}
