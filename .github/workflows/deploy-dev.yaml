@@ -148,6 +148,8 @@ jobs:
   e2e-marker:
     name: Slå opp e2e-markør
     runs-on: ubuntu-latest
+    # En timeout gir tom hit, og da kjører e2e som før.
+    timeout-minutes: 5
     permissions:
       id-token: write
       contents: read

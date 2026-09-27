@@ -1,9 +1,10 @@
 name: E2E på PR
 
 # Sett labelen `e2e` på en PR for å kjøre hele e2e-suiten mot PR-en flettet inn i
-# master. For en ny kjøring fjerner du labelen og setter den på nytt; «Re-run jobs»
-# gjenbruker den gamle merge-commiten. Er nøyaktig samme kode testet grønt før
-# (markøren e2e-ok-<tree> i GAR), kjører ingenting.
+# master. Er nøyaktig samme kode testet grønt før (markøren e2e-ok-<tree> i GAR),
+# kjører ingenting. For en ny kjøring fjerner du labelen og setter den på nytt.
+# Ikke bruk «Re-run jobs»: den gjenbruker den gamle merge-commiten, og en gammel
+# kjøring i samme concurrency-gruppe avbryter den som går.
 # Gaten: navikt/melosys-e2e-tests/.github/workflows/e2e-gate.yml
 
 on:
@@ -31,9 +32,12 @@ jobs:
     if: >-
       github.event.action == 'labeled'
       && github.event.label.name == 'e2e'
+      && github.event.pull_request.state == 'open'
       && github.event.pull_request.user.login != 'dependabot[bot]'
       && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    # Ved timeout blir jobben rød og ingenting kjører; sett labelen på nytt.
+    timeout-minutes: 5
     outputs:
       hit: ${{ steps.marker.outputs.hit }}
     steps:
