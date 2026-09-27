@@ -637,11 +637,40 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
         }
     }
 
+    @Test
+    fun `beregnTilFaktureringsBeloep - tidligere fakturert fra ny vurdering med avgift legger ikke tilbake innbetalt`() {
+        val (nyÅrsavregning, nyVurdering) = opprettÅrsavregningEtterNyVurdering(
+            nyVurderingDekkerÅret = true,
+            tidligereManuelt = null,
+            nyVurderingMedTrygdeavgift = true,
+        )
+
+        nyÅrsavregning.årsavregning.shouldNotBeNull().run {
+            tidligereBehandlingsresultat shouldBe nyVurdering
+            innbetaltTrygdeavgift shouldBe BigDecimal("300")
+            // Tidligere fakturert er det vurderingen fakturerte, som ikke inneholder innbetalingen i Avgiftssystemet
+            val tidligereFakturert = tidligereFakturertBeloep.shouldNotBeNull()
+
+            beregnetAvgiftBelop = BigDecimal("6000")
+            årsavregningService.beregnTilFaktureringsBeloep(this)
+
+            // 6000 - tidligere fakturert - 300, uten tilbakelegging
+            tilFaktureringBeloep.shouldNotBeNull() shouldBeEqualComparingTo
+                BigDecimal("6000") - tidligereFakturert - BigDecimal("300")
+        }
+    }
+
     /**
-     * Årsavregning for 2025 fastsatt manuelt til 7000 med 300 innbetalt i Avgiftssystemet, deretter en ny vurdering,
-     * deretter ny årsavregning for 2025. Den nye vurderingen blir «tidligere behandling» i begge varianter.
+     * Årsavregning for 2025 med 300 innbetalt i Avgiftssystemet, fastsatt manuelt til [tidligereManuelt] (eller beregnet
+     * når null), deretter en ny vurdering, deretter ny årsavregning for 2025. Den nye vurderingen blir «tidligere
+     * behandling». Med [nyVurderingMedTrygdeavgift] har vurderingen egne avgiftsperioder for året, og tidligere
+     * fakturert hentes da fra den i stedet for fra årsavregningen.
      */
-    private fun opprettÅrsavregningEtterNyVurdering(nyVurderingDekkerÅret: Boolean): Pair<Behandlingsresultat, Behandlingsresultat> {
+    private fun opprettÅrsavregningEtterNyVurdering(
+        nyVurderingDekkerÅret: Boolean,
+        tidligereManuelt: BigDecimal? = BigDecimal("7000"),
+        nyVurderingMedTrygdeavgift: Boolean = false,
+    ): Pair<Behandlingsresultat, Behandlingsresultat> {
         val fagsak = Fagsak.forTest {
             saksnummer = "123456"
             behandling {
@@ -673,8 +702,8 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                 aar = 2025
                 harInnbetaltTrygdeavgift = true
                 innbetaltTrygdeavgift = BigDecimal("300")
-                manueltAvgiftBeloep = BigDecimal("7000")
-                endeligAvgiftValg = EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT
+                manueltAvgiftBeloep = tidligereManuelt
+                endeligAvgiftValg = if (tidligereManuelt != null) EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT else EndeligAvgiftValg.OPPLYSNINGER_ENDRET
             }
             registrertDato = LocalDate.of(2025, 3, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
             vedtakMetadata {
@@ -695,7 +724,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             behandling = fagsak.behandlinger[1]
 
             if (nyVurderingDekkerÅret) {
-                medlemskapsperiode("2025-01-01", "2026-12-31", medTrygdeavgift = false)
+                medlemskapsperiode("2025-01-01", "2026-12-31", medTrygdeavgift = nyVurderingMedTrygdeavgift)
             } else {
                 medlemskapsperiode("2026-01-01", "2026-12-31", medTrygdeavgift = false)
             }

@@ -343,18 +343,27 @@ class ÅrsavregningService(
     }
 
     /**
-     * Beregner beløp til fakturering med innbetalt beløp fra siste vedtatte årsavregning for året. Oppslaget er det samme
-     * som [opprettEllerOppdaterÅrsavregning] arver innbetalt og tidligere fakturert fra, slik at det som legges tilbake
-     * alltid er det som ble arvet, uansett sakstype og om en senere vurdering står mellom årsavregningene.
+     * Beregner beløp til fakturering. Innbetalt fra siste vedtatte årsavregning for året legges tilbake bare når
+     * tidligere fakturert beløp kom fra den årsavregningen (manuelt beløp eller dens trygdeavgiftsperioder), fordi
+     * innbetalingen da allerede inngår i det beløpet. Kommer tidligere fakturert fra en senere vurdering med egne
+     * avgiftsperioder, dekker det bare det Melosys fakturerte, og innbetalingen skal trekkes fra uten tilbakelegging.
+     * Oppslaget er det samme som [opprettEllerOppdaterÅrsavregning] arver fra.
      */
     internal fun beregnTilFaktureringsBeloep(årsavregning: Årsavregning) {
         val behandlingsresultat = årsavregning.hentBehandlingsresultat
-        val sisteÅrsavregning = hentGjeldendeBehandlingsresultaterForÅrsavregning(
+        val gjeldende = hentGjeldendeBehandlingsresultaterForÅrsavregning(
             behandlingsresultat.hentBehandling().fagsak.saksnummer,
             årsavregning.aar,
             behandlingsresultat.vedtakMetadata?.vedtaksdato
-        )?.sisteÅrsavregning?.årsavregning
-        årsavregning.beregnTilFaktureringsBeloep(sisteÅrsavregning?.innbetaltTrygdeavgift)
+        )
+        val sisteÅrsavregning = gjeldende?.sisteÅrsavregning
+        val tidligereFakturertFraSisteÅrsavregning = sisteÅrsavregning != null && (
+            sisteÅrsavregning.hentÅrsavregning().manueltAvgiftBeloep != null
+                || gjeldende.sisteBehandlingsresultatMedAvgift?.id == sisteÅrsavregning.id
+            )
+        årsavregning.beregnTilFaktureringsBeloep(
+            if (tidligereFakturertFraSisteÅrsavregning) sisteÅrsavregning!!.hentÅrsavregning().innbetaltTrygdeavgift else null
+        )
     }
 
     private fun replikerMedlemskapsperioder(

@@ -66,10 +66,9 @@ class Årsavregning(
     override fun hashCode(): Int = id.hashCode()
 
     /**
-     * [tidligereÅrsavregningInnbetalt] er innbetalt beløp fra Avgiftssystemet i siste vedtatte årsavregning for samme år.
-     * Det inngår allerede i [tidligereFakturertBeloep] når det er hentet fra den årsavregningen, og legges derfor tilbake
-     * slik at bare ny innbetaling trekkes fra. Må komme fra samme årsavregning som [tidligereFakturertBeloep], ikke fra
-     * [tidligereBehandlingsresultat], som kan være en senere vurdering.
+     * [tidligereÅrsavregningInnbetalt] er innbetalt beløp fra Avgiftssystemet i siste vedtatte årsavregning for samme år,
+     * og skal bare oppgis når [tidligereFakturertBeloep] er hentet fra den samme årsavregningen. Da inngår innbetalingen
+     * allerede i tidligere fakturert, og legges tilbake slik at bare ny innbetaling trekkes fra. Ellers null.
      */
     fun beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt: BigDecimal?) {
         if (beregnetAvgiftBelop == null && manueltAvgiftBeloep == null) return
