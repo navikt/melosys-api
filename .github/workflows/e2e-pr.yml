@@ -114,7 +114,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    uses: navikt/melosys-e2e-tests/.github/workflows/e2e-gate.yml@e2e-gate
+    uses: navikt/melosys-e2e-tests/.github/workflows/e2e-gate.yml@main
     with:
       service: melosys-api
       image: europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-api
