@@ -93,7 +93,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.READER_TOKEN }}
-      # Maven Test kjører testene på PR-en.
+      # Bare bygg; testene kjører i pull-request.yml («Maven Test»).
       - name: Build
         run: mvn clean package --threads=8 -DskipTests -B -e -U --settings .github/settings.xml
       # Bare <merge-sha>, aldri latest: da ville PR-koden gått til alle andre
