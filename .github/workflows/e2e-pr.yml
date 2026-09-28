@@ -3,7 +3,8 @@ name: E2E på PR
 # Sett labelen `e2e` på en PR for å kjøre hele e2e-suiten mot PR-en flettet inn i
 # master. Er nøyaktig samme kode testet grønt før (markøren e2e-ok-<tree> i GAR),
 # kjører ingenting. For en ny kjøring fjerner du labelen og setter den på nytt.
-# Resultatet kommer som en kommentar i PR-en, også når PR-en har fått nye commits.
+# Resultatet kommer som en kommentar i PR-en (jobben rapport), også når PR-en har
+# fått nye commits.
 # Ikke bruk «Re-run jobs»: den gjenbruker den gamle merge-commiten, og en gammel
 # kjøring i samme concurrency-gruppe avbryter den som går.
 # Gaten: navikt/melosys-e2e-tests/.github/workflows/e2e-gate.yml
