@@ -69,6 +69,12 @@ jobs:
     needs: e2e-marker
     if: needs.e2e-marker.outputs.hit != 'true'
     runs-on: ubuntu-latest-8-cores
+    # packages: read fordi Maven henter fra github-package-registry-navikt med
+    # GITHUB_TOKEN (.github/settings.xml), som pull-request.yml.
+    permissions:
+      contents: read
+      id-token: write
+      packages: read
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       PASSWORD: ${{ secrets.READER_TOKEN }}
